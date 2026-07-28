@@ -9,7 +9,10 @@ points, this checker:
 * compares reported k=2 triangles with the exhaustive exact Gabriel catalog;
 * compares the exact Gabriel partial filtration with exhaustive Gamma;
 * replays the permanent five-point Gabriel counterexample and the independent
-  ``overlap-k2`` contract fixture on every exact threshold.
+  ``overlap-k2`` contract fixture on every exact threshold;
+* recertifies the ordinary-Delaunay tetrahedra of the permanent six-, eight-
+  and nine-point fixtures, then proves the expected two-edge and local
+  candidate failures plus one non-trivial positive one-edge reduction.
 
 The k=2 universe is the set of two-point facets.  A point-MST surrogate does
 not live on that universe and is therefore never assigned a Morse/Gamma
@@ -19,6 +22,7 @@ quality score by this tool.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import struct
@@ -39,6 +43,16 @@ from reference.morsehgp3d_oracle.gamma import (  # noqa: E402
     GammaCut,
     GammaFiltration,
     build_gamma_filtration,
+)
+from reference.morsehgp3d_oracle.exact import (  # noqa: E402
+    affine_dimension,
+    squared_distance,
+)
+from reference.morsehgp3d_oracle.geometry import (  # noqa: E402
+    AffineDependenceError,
+    BallRelation,
+    circumball,
+    classify,
 )
 from reference.morsehgp3d_oracle.hierarchy import (  # noqa: E402
     build_gabriel_partial_forest,
@@ -66,6 +80,9 @@ Entity: TypeAlias = int | tuple[int, ...]
 Component: TypeAlias = tuple[Entity, ...]
 Point3: TypeAlias = tuple[Fraction, Fraction, Fraction]
 CutProvider: TypeAlias = Callable[[Fraction, bool], "CutState"]
+FacetRelation: TypeAlias = tuple[
+    tuple[int, ...], tuple[tuple[int, ...], ...], Fraction
+]
 
 
 class DiagnosticInputError(ValueError):
@@ -433,7 +450,7 @@ def _emst_cut(result: object, level: Fraction, closed: bool) -> CutState:
 
 
 def _relation_cut(
-    relations: Sequence[tuple[tuple[int, ...], tuple[tuple[int, ...], ...], Fraction]],
+    relations: Sequence[FacetRelation],
     level: Fraction,
     closed: bool,
 ) -> CutState:
@@ -463,6 +480,163 @@ def _relation_cut(
         for component in components
     )
     return CutState(tuple(sorted(active_facets)), components, covers)
+
+
+def _gabriel_fusion_deadline_coverage(
+    *,
+    variant_name: str,
+    source_relations: Sequence[FacetRelation],
+    candidate_relations: Sequence[FacetRelation],
+) -> dict[str, object]:
+    """Check the closed, one-sided Gabriel fusion deadline on k=2 facets.
+
+    This deliberately does not compare complete cuts.  Each source triangle is
+    queried only after every candidate relation on a plateau has been united;
+    an earlier or equal-level connection succeeds, while a later or absent
+    connection fails.
+    """
+
+    if not variant_name:
+        raise DiagnosticInputError("a Gabriel deadline variant name is required")
+
+    def validate_relation(
+        relation: FacetRelation, *, path: str
+    ) -> FacetRelation:
+        point_ids, facets, level = relation
+        if len(point_ids) != 3 or tuple(sorted(point_ids)) != point_ids:
+            raise DiagnosticInputError(
+                f"{path} must identify one sorted three-point triangle"
+            )
+        expected_facets = tuple(sorted(combinations(point_ids, 2)))
+        if tuple(sorted(facets)) != expected_facets:
+            raise DiagnosticInputError(
+                f"{path} must contain exactly the three triangle facets"
+            )
+        if level < 0:
+            raise DiagnosticInputError(f"{path} has a negative squared level")
+        return point_ids, expected_facets, level
+
+    sources = tuple(
+        validate_relation(relation, path=f"source_relations[{index}]")
+        for index, relation in enumerate(source_relations)
+    )
+    candidates = tuple(
+        sorted(
+            (
+                validate_relation(
+                    relation, path=f"candidate_relations[{index}]"
+                )
+                for index, relation in enumerate(candidate_relations)
+            ),
+            key=lambda relation: (relation[2], relation[0]),
+        )
+    )
+    source_ids = [relation[0] for relation in sources]
+    if len(set(source_ids)) != len(source_ids):
+        raise DiagnosticInputError(
+            "source_relations contains duplicate Gabriel triangle identities"
+        )
+    candidate_ids = [relation[0] for relation in candidates]
+    if len(set(candidate_ids)) != len(candidate_ids):
+        raise DiagnosticInputError(
+            "candidate_relations contains duplicate triangle identities"
+        )
+
+    all_facets = {
+        facet
+        for _, facets, _ in (*sources, *candidates)
+        for facet in facets
+    }
+    decisions: list[dict[str, object]] = []
+    for source_point_ids, source_facets, source_level in sorted(
+        sources, key=lambda relation: (relation[2], relation[0])
+    ):
+        disjoint_set = _DisjointSet(all_facets)
+        connection_level: Fraction | None = None
+        plateau_begin = 0
+        while plateau_begin < len(candidates):
+            plateau_level = candidates[plateau_begin][2]
+            plateau_end = plateau_begin + 1
+            while (
+                plateau_end < len(candidates)
+                and candidates[plateau_end][2] == plateau_level
+            ):
+                plateau_end += 1
+            for _, facets, _ in candidates[plateau_begin:plateau_end]:
+                for facet in facets[1:]:
+                    disjoint_set.union(facets[0], facet)
+            if len({disjoint_set.find(facet) for facet in source_facets}) == 1:
+                connection_level = plateau_level
+                break
+            plateau_begin = plateau_end
+
+        if connection_level is None:
+            decision = "never"
+        elif connection_level < source_level:
+            decision = "before"
+        elif connection_level == source_level:
+            decision = "at"
+        else:
+            decision = "late"
+        decisions.append(
+            {
+                "source_point_ids": list(source_point_ids),
+                "source_squared_level": _fraction_json(source_level),
+                "connection_squared_level": (
+                    None
+                    if connection_level is None
+                    else _fraction_json(connection_level)
+                ),
+                "decision": decision,
+            }
+        )
+
+    counts = Counter(str(decision["decision"]) for decision in decisions)
+    decision_builder = hashlib.sha256(
+        b"MorseHGP3D/gabriel-fusion-deadline/bounded-exact/v1/sha256/"
+    )
+    decision_builder.update(variant_name.encode("utf-8"))
+    for decision in decisions:
+        decision_builder.update(
+            json.dumps(
+                decision, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")
+        )
+        decision_builder.update(b"\n")
+
+    late_or_never = tuple(
+        decision
+        for decision in decisions
+        if decision["decision"] in {"late", "never"}
+    )
+    return {
+        "criterion": "gabriel_fusion_deadline_v1",
+        "variant": variant_name,
+        "representation": "k2_facets",
+        "adapter": "identity_k2_facets_v1",
+        "level_convention": "exact_squared_cech_radius",
+        "boundary": "closed_post_plateau",
+        "early_connection_allowed": True,
+        "source_count": len(decisions),
+        "connected_before_count": counts["before"],
+        "connected_at_count": counts["at"],
+        "late_count": counts["late"],
+        "never_connected_count": counts["never"],
+        "unsupported_degeneracy_count": 0,
+        "counter_partition_closed": (
+            len(decisions)
+            == counts["before"]
+            + counts["at"]
+            + counts["late"]
+            + counts["never"]
+        ),
+        "passed": not late_or_never,
+        "decision_sha256": decision_builder.hexdigest(),
+        "first_failure": late_or_never[0] if late_or_never else None,
+        "decisions": decisions,
+        "exact_Gamma2_claimed": False,
+        "public_status_claimed": False,
+    }
 
 
 def _gamma_cut_state(cut: GammaCut) -> CutState:
@@ -737,6 +911,19 @@ def _compare_cuts(
         "root_multiplicity_max": multiplicity_max,
         "states": states,
     }
+
+
+def _first_divergence_signature(
+    metrics: Mapping[str, object],
+) -> tuple[str, str] | None:
+    divergence = metrics.get("first_divergence")
+    if not isinstance(divergence, Mapping):
+        return None
+    squared_level = divergence.get("squared_level")
+    boundary = divergence.get("boundary")
+    if not isinstance(squared_level, str) or not isinstance(boundary, str):
+        return None
+    return squared_level, boundary
 
 
 def _tree_shape(point_count: int, edges: Sequence[ReportedEdge]) -> dict[str, object]:
@@ -1264,6 +1451,225 @@ def _exact_gabriel_gamma_fixture_metrics(
     return filtration, metrics
 
 
+def _enumerate_exact_ordinary_delaunay(
+    points: tuple[Point3, ...],
+    *,
+    path: str,
+) -> tuple[tuple[tuple[int, int, int, int], ...], dict[str, object]]:
+    """Enumerate the exact ordinary-Delaunay tetrahedra in general position."""
+
+    if affine_dimension(points) != 3:
+        raise DiagnosticInputError(f"{path} points must have affine dimension three")
+    exact_tetrahedra: list[tuple[int, int, int, int]] = []
+    minimum_external_power_delta: Fraction | None = None
+    four_point_subset_count = 0
+    cospherical_incidence_count = 0
+    for tetrahedron in combinations(range(len(points)), 4):
+        four_point_subset_count += 1
+        try:
+            ball = circumball(points, tetrahedron)
+        except AffineDependenceError as error:
+            raise DiagnosticInputError(
+                f"{path} contains a coplanar four-point subset {tetrahedron}"
+            ) from error
+        external_relations = tuple(
+            (point_id, classify(points[point_id], ball))
+            for point_id in range(len(points))
+            if point_id not in tetrahedron
+        )
+        cospherical_incidence_count += sum(
+            relation is BallRelation.SHELL for _, relation in external_relations
+        )
+        if all(
+            relation is BallRelation.EXTERIOR
+            for _, relation in external_relations
+        ):
+            exact_tetrahedra.append(tetrahedron)
+            for point_id, _ in external_relations:
+                delta = (
+                    squared_distance(points[point_id], ball.center)
+                    - ball.squared_radius
+                )
+                if delta <= 0:
+                    raise AssertionError(
+                        "an exactly exterior Delaunay site has non-positive power"
+                    )
+                if (
+                    minimum_external_power_delta is None
+                    or delta < minimum_external_power_delta
+                ):
+                    minimum_external_power_delta = delta
+    exact = tuple(exact_tetrahedra)
+    if cospherical_incidence_count:
+        raise DiagnosticInputError(
+            f"{path} contains {cospherical_incidence_count} cospherical incidences"
+        )
+    return exact, {
+        "performed": True,
+        "method": "exhaustive exact rational circumspheres over all four-point subsets",
+        "affine_dimension": 3,
+        "four_point_subset_count": four_point_subset_count,
+        "cospherical_incidence_count": cospherical_incidence_count,
+        "exact_empty_sphere_tetrahedron_count": len(exact),
+        "minimum_external_power_delta": (
+            _fraction_json(minimum_external_power_delta)
+            if minimum_external_power_delta is not None
+            else None
+        ),
+    }
+
+
+def _recertify_exact_ordinary_delaunay(
+    points: tuple[Point3, ...],
+    reported_tetrahedra: Iterable[tuple[int, ...]],
+    *,
+    path: str,
+) -> dict[str, object]:
+    """Enumerate every exact empty circumsphere and match stored tetrahedra."""
+
+    reported = tuple(sorted(reported_tetrahedra))
+    if len(set(reported)) != len(reported):
+        raise DiagnosticInputError(f"{path} tetrahedra must not contain duplicates")
+    exact, audit = _enumerate_exact_ordinary_delaunay(points, path=path)
+    if reported != exact:
+        raise DiagnosticInputError(
+            f"{path} stored tetrahedra do not equal the exact empty-sphere catalog"
+        )
+    return {
+        **audit,
+        "stored_topology_matches_exact_catalog": True,
+    }
+
+
+def _delaunay_endpoint_neighbor_first_incidence_audit(
+    points: tuple[Point3, ...],
+    delaunay_edges: set[tuple[int, int]],
+    filtration: GammaFiltration,
+    *,
+    path: str,
+) -> dict[str, object]:
+    """Check the radial exact first-incidence reduction for every pair.
+
+    This is deliberately a bounded exhaustive falsifier.  The proposed side
+    evaluates only third points adjacent in the ordinary-Delaunay graph to at
+    least one endpoint; the reference side evaluates every possible third
+    point.  No pair or coface catalog produced here is a product structure.
+    """
+
+    if filtration.order != 2 or filtration.point_count != len(points):
+        raise DiagnosticInputError(f"{path} requires the matching Gamma2 filtration")
+    canonical_edges = {
+        tuple(sorted(edge))
+        for edge in delaunay_edges
+        if len(edge) == 2 and edge[0] != edge[1]
+    }
+    if canonical_edges != delaunay_edges:
+        raise DiagnosticInputError(f"{path} Delaunay edges must be canonical")
+    if any(
+        point_id < 0 or point_id >= len(points)
+        for edge in canonical_edges
+        for point_id in edge
+    ):
+        raise DiagnosticInputError(f"{path} Delaunay edge lies outside the point cloud")
+    coface_by_ids = {
+        coface.point_ids: coface for coface in filtration.cofaces
+    }
+    full_evaluation_count = 0
+    endpoint_neighbor_evaluation_count = 0
+    pair_count = 0
+    pair_with_pruning_count = 0
+    global_cominimizer_count = 0
+    retained_global_cominimizer_count = 0
+    level_witnesses: list[dict[str, object]] = []
+    for left, right in combinations(range(len(points)), 2):
+        pair_count += 1
+        third_points = tuple(
+            point_id
+            for point_id in range(len(points))
+            if point_id not in {left, right}
+        )
+        endpoint_neighbors = tuple(
+            point_id
+            for point_id in third_points
+            if tuple(sorted((left, point_id))) in canonical_edges
+            or tuple(sorted((right, point_id))) in canonical_edges
+        )
+        if not endpoint_neighbors:
+            raise DiagnosticInputError(
+                f"{path} pair {(left, right)!r} has no endpoint-neighbor candidate"
+            )
+        levels = {
+            point_id: coface_by_ids[
+                tuple(sorted((left, right, point_id)))
+            ].squared_level
+            for point_id in third_points
+        }
+        full_level = min(levels.values())
+        endpoint_neighbor_level = min(levels[point_id] for point_id in endpoint_neighbors)
+        if endpoint_neighbor_level != full_level:
+            raise DiagnosticInputError(
+                f"{path} endpoint-neighbor first incidence mismatch for pair "
+                f"{(left, right)!r}: {_fraction_json(endpoint_neighbor_level)} != "
+                f"{_fraction_json(full_level)}"
+            )
+        full_minimizers = tuple(
+            point_id for point_id in third_points if levels[point_id] == full_level
+        )
+        retained_minimizers = tuple(
+            point_id
+            for point_id in endpoint_neighbors
+            if levels[point_id] == endpoint_neighbor_level
+        )
+        full_evaluation_count += len(third_points)
+        endpoint_neighbor_evaluation_count += len(endpoint_neighbors)
+        pair_with_pruning_count += len(endpoint_neighbors) < len(third_points)
+        global_cominimizer_count += len(full_minimizers)
+        retained_global_cominimizer_count += len(
+            set(full_minimizers) & set(retained_minimizers)
+        )
+        level_witnesses.append(
+            {
+                "facet_point_ids": [left, right],
+                "squared_level": _fraction_json(full_level),
+                "canonical_endpoint_neighbor_minimizer": min(retained_minimizers),
+                "global_cominimizer_count": len(full_minimizers),
+                "retained_global_cominimizer_count": len(
+                    set(full_minimizers) & set(retained_minimizers)
+                ),
+            }
+        )
+    critical_levels = filtration.critical_levels
+    strict_closed_activation_decision_count = 2 * pair_count * len(critical_levels)
+    return {
+        "performed": True,
+        "scope": "bounded_exact_Gamma2_first_incidence_level_only",
+        "proof_basis": "ordinary_Delaunay_radial_connectivity_in_each_miniball",
+        "point_count": len(points),
+        "facet_pair_count": pair_count,
+        "ordinary_delaunay_edge_count": len(canonical_edges),
+        "full_third_point_evaluation_count": full_evaluation_count,
+        "endpoint_neighbor_evaluation_count": endpoint_neighbor_evaluation_count,
+        "avoided_third_point_evaluation_count": (
+            full_evaluation_count - endpoint_neighbor_evaluation_count
+        ),
+        "pair_with_strict_candidate_reduction_count": pair_with_pruning_count,
+        "every_first_incidence_level_exact": True,
+        "strict_and_closed_activation_decisions_exact": True,
+        "strict_closed_activation_decision_count": (
+            strict_closed_activation_decision_count
+        ),
+        "global_cominimizer_count": global_cominimizer_count,
+        "retained_global_cominimizer_count": retained_global_cominimizer_count,
+        "all_global_cominimizers_retained_on_this_fixture": (
+            retained_global_cominimizer_count == global_cominimizer_count
+        ),
+        "level_witnesses": level_witnesses,
+        "global_pair_or_coface_catalog_product_claimed": False,
+        "terminal_Morse_hierarchy_claimed": False,
+        "public_status_claimed": False,
+    }
+
+
 @lru_cache(maxsize=1)
 def _fixture_audits() -> dict[str, object]:
     e5_path = (
@@ -1274,9 +1680,37 @@ def _fixture_audits() -> dict[str, object]:
         / "gabriel_point_set_counterexample.json"
     )
     overlap_path = ROOT / "tests" / "fixtures" / "contracts" / "overlap-k2.json"
+    two_edge_path = (
+        ROOT
+        / "tests"
+        / "fixtures"
+        / "regressions"
+        / "delaunay_two_edge_gamma2_counterexample.json"
+    )
+    local_delaunay_path = (
+        ROOT
+        / "tests"
+        / "fixtures"
+        / "regressions"
+        / "delaunay_local_gamma2_counterexample_n8.json"
+    )
+    one_edge_positive_path = (
+        ROOT
+        / "tests"
+        / "fixtures"
+        / "regressions"
+        / "delaunay_one_edge_gamma2_positive_n9.json"
+    )
     try:
         e5 = json.loads(e5_path.read_text(encoding="utf-8"))
         overlap = json.loads(overlap_path.read_text(encoding="utf-8"))
+        two_edge = json.loads(two_edge_path.read_text(encoding="utf-8"))
+        local_delaunay = json.loads(
+            local_delaunay_path.read_text(encoding="utf-8")
+        )
+        one_edge_positive = json.loads(
+            one_edge_positive_path.read_text(encoding="utf-8")
+        )
     except (OSError, json.JSONDecodeError) as error:
         raise DiagnosticInputError(f"cannot read mandatory fixture: {error}") from error
     e5_record = _require_mapping(e5, path="E5 fixture")
@@ -1328,6 +1762,584 @@ def _fixture_audits() -> dict[str, object]:
         and bool(overlap_witness["covered_point_collections_exact"])
         and not bool(overlap_metrics["all_states_exact"])
     )
+
+    two_edge_record = _require_mapping(two_edge, path="Delaunay two-edge fixture")
+    two_edge_points = tuple(
+        _point(point, path=f"Delaunay-two-edge.points[{index}]")
+        for index, point in enumerate(
+            _require_list(two_edge_record.get("points"), path="Delaunay-two-edge.points")
+        )
+    )
+    ordinary_delaunay = _require_mapping(
+        two_edge_record.get("ordinary_delaunay"),
+        path="Delaunay-two-edge.ordinary_delaunay",
+    )
+    tetrahedra = tuple(
+        tuple(
+            _point_id(
+                point_id,
+                path=f"Delaunay-two-edge.tetrahedra[{tetrahedron_index}]",
+                point_count=len(two_edge_points),
+            )
+            for point_id in _require_list(
+                raw_tetrahedron,
+                path=f"Delaunay-two-edge.tetrahedra[{tetrahedron_index}]",
+            )
+        )
+        for tetrahedron_index, raw_tetrahedron in enumerate(
+            _require_list(
+                ordinary_delaunay.get("tetrahedra"),
+                path="Delaunay-two-edge.ordinary_delaunay.tetrahedra",
+            )
+        )
+    )
+    if any(len(tetrahedron) != 4 or len(set(tetrahedron)) != 4 for tetrahedron in tetrahedra):
+        raise DiagnosticInputError(
+            "Delaunay-two-edge tetrahedra must contain four distinct point ids"
+        )
+    two_edge_delaunay_audit = _recertify_exact_ordinary_delaunay(
+        two_edge_points,
+        tetrahedra,
+        path="Delaunay-two-edge.ordinary_delaunay",
+    )
+    delaunay_edges = {
+        tuple(sorted(edge))
+        for tetrahedron in tetrahedra
+        for edge in combinations(tetrahedron, 2)
+    }
+    two_edge_filtration = build_gamma_filtration(two_edge_points, 2)
+    two_edge_first_incidence = _delaunay_endpoint_neighbor_first_incidence_audit(
+        two_edge_points,
+        delaunay_edges,
+        two_edge_filtration,
+        path="Delaunay-two-edge.first-incidence",
+    )
+
+    def candidate_relations(minimum_delaunay_edge_count: int) -> tuple[
+        tuple[tuple[int, ...], tuple[tuple[int, ...], ...], Fraction], ...
+    ]:
+        return tuple(
+            (
+                coface.point_ids,
+                coface.facet_point_ids,
+                coface.squared_level,
+            )
+            for coface in two_edge_filtration.cofaces
+            if sum(facet in delaunay_edges for facet in coface.facet_point_ids)
+            >= minimum_delaunay_edge_count
+        )
+
+    two_edge_relations = candidate_relations(2)
+    one_edge_relations = candidate_relations(1)
+    two_edge_gabriel_sources: tuple[FacetRelation, ...] = tuple(
+        (
+            hyperedge.simplex_point_ids,
+            hyperedge.facet_point_ids,
+            hyperedge.squared_level,
+        )
+        for hyperedge in two_edge_filtration.gabriel_hyperedges
+    )
+    two_edge_gabriel_deadline = {
+        "two_edge": _gabriel_fusion_deadline_coverage(
+            variant_name="two_edge",
+            source_relations=two_edge_gabriel_sources,
+            candidate_relations=two_edge_relations,
+        ),
+        "one_edge": _gabriel_fusion_deadline_coverage(
+            variant_name="one_edge",
+            source_relations=two_edge_gabriel_sources,
+            candidate_relations=one_edge_relations,
+        ),
+    }
+    exact_two_edge_coface_ids = {
+        coface.point_ids for coface in two_edge_filtration.cofaces
+    }
+    two_edge_omitted_cofaces = tuple(
+        sorted(
+            exact_two_edge_coface_ids
+            - {point_ids for point_ids, _, _ in two_edge_relations}
+        )
+    )
+    two_edge_levels = set(two_edge_filtration.critical_levels)
+    two_edge_universe = tuple(combinations(range(len(two_edge_points)), 2))
+    two_edge_metrics = _compare_cuts(
+        predicted_name="Gamma2_restricted_to_at_least_two_ordinary_Delaunay_edges",
+        reference_name="exhaustive_exact_Gamma2_hgp_reduced",
+        levels=two_edge_levels,
+        predicted_provider=lambda level, closed: _relation_cut(
+            two_edge_relations, level, closed
+        ),
+        reference_provider=_gamma_provider(two_edge_filtration, "gamma"),
+        universe=two_edge_universe,
+        point_count=len(two_edge_points),
+    )
+    one_edge_metrics = _compare_cuts(
+        predicted_name="Gamma2_restricted_to_at_least_one_ordinary_Delaunay_edge",
+        reference_name="exhaustive_exact_Gamma2_hgp_reduced",
+        levels=two_edge_levels,
+        predicted_provider=lambda level, closed: _relation_cut(
+            one_edge_relations, level, closed
+        ),
+        reference_provider=_gamma_provider(two_edge_filtration, "gamma"),
+        universe=two_edge_universe,
+        point_count=len(two_edge_points),
+    )
+    first_divergence = _require_mapping(
+        two_edge_record.get("first_divergence"),
+        path="Delaunay-two-edge.first_divergence",
+    )
+    two_edge_level = _fraction_from_record(
+        first_divergence.get("squared_level"),
+        path="Delaunay-two-edge.first_divergence.squared_level",
+    )
+    two_edge_cut = _relation_cut(two_edge_relations, two_edge_level, True)
+    two_edge_gamma_cut = _gamma_provider(two_edge_filtration, "gamma")(
+        two_edge_level, True
+    )
+    missing_active_facets = tuple(
+        sorted(
+            set(two_edge_gamma_cut.active_entities)
+            - set(two_edge_cut.active_entities)
+        )
+    )
+    two_edge_witness = _state_metrics(
+        two_edge_cut,
+        two_edge_gamma_cut,
+        two_edge_universe,
+        len(two_edge_points),
+    )
+    two_edge_ok = (
+        len(two_edge_filtration.cofaces) == 20
+        and len(two_edge_relations) == 18
+        and len(one_edge_relations) == 20
+        and two_edge_omitted_cofaces == ((1, 2, 4), (2, 4, 5))
+        and _first_divergence_signature(two_edge_metrics)
+        == ("281/4", "closed")
+        and missing_active_facets == ((2, 4),)
+        and not bool(two_edge_witness["active_entities_exact"])
+        and not bool(two_edge_witness["component_partition_exact"])
+        and bool(two_edge_witness["covered_point_collections_exact"])
+        and not bool(two_edge_metrics["all_states_exact"])
+        and bool(one_edge_metrics["all_states_exact"])
+        and all(
+            audit["passed"]
+            and audit["source_count"] == 9
+            and audit["connected_before_count"] == 0
+            and audit["connected_at_count"] == 9
+            for audit in two_edge_gabriel_deadline.values()
+        )
+        and bool(two_edge_first_incidence["every_first_incidence_level_exact"])
+    )
+
+    local_record = _require_mapping(
+        local_delaunay, path="Delaunay local fixture"
+    )
+    local_points = tuple(
+        _point(point, path=f"Delaunay-local.points[{index}]")
+        for index, point in enumerate(
+            _require_list(local_record.get("points"), path="Delaunay-local.points")
+        )
+    )
+    local_delaunay_record = _require_mapping(
+        local_record.get("ordinary_delaunay"),
+        path="Delaunay-local.ordinary_delaunay",
+    )
+    local_tetrahedra = tuple(
+        tuple(
+            _point_id(
+                point_id,
+                path=f"Delaunay-local.tetrahedra[{tetrahedron_index}]",
+                point_count=len(local_points),
+            )
+            for point_id in _require_list(
+                raw_tetrahedron,
+                path=f"Delaunay-local.tetrahedra[{tetrahedron_index}]",
+            )
+        )
+        for tetrahedron_index, raw_tetrahedron in enumerate(
+            _require_list(
+                local_delaunay_record.get("tetrahedra"),
+                path="Delaunay-local.ordinary_delaunay.tetrahedra",
+            )
+        )
+    )
+    if any(
+        len(tetrahedron) != 4 or len(set(tetrahedron)) != 4
+        for tetrahedron in local_tetrahedra
+    ):
+        raise DiagnosticInputError(
+            "Delaunay-local tetrahedra must contain four distinct point ids"
+        )
+    local_delaunay_audit = _recertify_exact_ordinary_delaunay(
+        local_points,
+        local_tetrahedra,
+        path="Delaunay-local.ordinary_delaunay",
+    )
+    local_edges = {
+        tuple(sorted(edge))
+        for tetrahedron in local_tetrahedra
+        for edge in combinations(tetrahedron, 2)
+    }
+    reported_local_edges = {
+        tuple(
+            sorted(
+                _point_id(
+                    point_id,
+                    path=f"Delaunay-local.edges[{edge_index}]",
+                    point_count=len(local_points),
+                )
+                for point_id in _require_list(
+                    raw_edge, path=f"Delaunay-local.edges[{edge_index}]"
+                )
+            )
+        )
+        for edge_index, raw_edge in enumerate(
+            _require_list(
+                local_delaunay_record.get("edges"),
+                path="Delaunay-local.ordinary_delaunay.edges",
+            )
+        )
+    }
+    if any(len(edge) != 2 or len(set(edge)) != 2 for edge in reported_local_edges):
+        raise DiagnosticInputError(
+            "Delaunay-local edges must contain two distinct point ids"
+        )
+    if reported_local_edges != local_edges:
+        raise DiagnosticInputError(
+            "Delaunay-local stored edges do not match its tetrahedral 1-skeleton"
+        )
+    local_faces = {
+        tuple(sorted(face))
+        for tetrahedron in local_tetrahedra
+        for face in combinations(tetrahedron, 3)
+    }
+    local_neighbors = [set((point_id,)) for point_id in range(len(local_points))]
+    for left, right in local_edges:
+        local_neighbors[left].add(right)
+        local_neighbors[right].add(left)
+    local_square_neighbors = [set(neighbors) for neighbors in local_neighbors]
+    for point_id, neighbors in enumerate(local_neighbors):
+        for neighbor in neighbors:
+            local_square_neighbors[point_id].update(local_neighbors[neighbor])
+
+    local_filtration = build_gamma_filtration(local_points, 2)
+    local_first_incidence = _delaunay_endpoint_neighbor_first_incidence_audit(
+        local_points,
+        local_edges,
+        local_filtration,
+        path="Delaunay-local.first-incidence",
+    )
+    local_by_id = {coface.point_ids: coface for coface in local_filtration.cofaces}
+    local_two_edge_ids = {
+        point_ids
+        for point_ids, coface in local_by_id.items()
+        if sum(facet in local_edges for facet in coface.facet_point_ids) >= 2
+    }
+    local_one_edge_ids = {
+        point_ids
+        for point_ids, coface in local_by_id.items()
+        if any(facet in local_edges for facet in coface.facet_point_ids)
+    }
+    local_star_ids = {
+        point_ids
+        for point_ids in local_by_id
+        if any(set(point_ids) <= neighbors for neighbors in local_neighbors)
+    }
+    local_square_ids = {
+        point_ids
+        for point_ids in local_by_id
+        if all(
+            right in local_square_neighbors[left]
+            for left, right in combinations(point_ids, 2)
+        )
+    }
+    local_fan_ids = set(local_two_edge_ids)
+    for center, neighbors in enumerate(local_neighbors):
+        link_edges = {
+            tuple(point_id for point_id in face if point_id != center)
+            for face in local_faces
+            if center in face
+        }
+        for left, right in link_edges:
+            for third in neighbors - {center, left, right}:
+                local_fan_ids.add(tuple(sorted((left, right, third))))
+
+    def local_relations(
+        point_ids: set[tuple[int, ...]],
+    ) -> tuple[
+        tuple[tuple[int, ...], tuple[tuple[int, ...], ...], Fraction], ...
+    ]:
+        return tuple(
+            (
+                local_by_id[simplex].point_ids,
+                local_by_id[simplex].facet_point_ids,
+                local_by_id[simplex].squared_level,
+            )
+            for simplex in sorted(point_ids)
+        )
+
+    local_candidate_ids = {
+        "two_edge": local_two_edge_ids,
+        "closed_star": local_star_ids,
+        "square_clique": local_square_ids,
+        "link_face_fan": local_fan_ids,
+        "one_edge": local_one_edge_ids,
+    }
+    local_relation_sets = {
+        name: local_relations(point_ids)
+        for name, point_ids in local_candidate_ids.items()
+    }
+    local_gabriel_sources: tuple[FacetRelation, ...] = tuple(
+        (
+            hyperedge.simplex_point_ids,
+            hyperedge.facet_point_ids,
+            hyperedge.squared_level,
+        )
+        for hyperedge in local_filtration.gabriel_hyperedges
+    )
+    local_gabriel_deadline = {
+        name: _gabriel_fusion_deadline_coverage(
+            variant_name=name,
+            source_relations=local_gabriel_sources,
+            candidate_relations=relations,
+        )
+        for name, relations in local_relation_sets.items()
+    }
+    local_universe = tuple(combinations(range(len(local_points)), 2))
+    local_levels = set(local_filtration.critical_levels)
+    local_metrics = {
+        name: _compare_cuts(
+            predicted_name=f"Gamma2_restricted_to_{name}",
+            reference_name="exhaustive_exact_Gamma2_hgp_reduced",
+            levels=local_levels,
+            predicted_provider=lambda level, closed, relations=relations: _relation_cut(
+                relations, level, closed
+            ),
+            reference_provider=_gamma_provider(local_filtration, "gamma"),
+            universe=local_universe,
+            point_count=len(local_points),
+        )
+        for name, relations in local_relation_sets.items()
+    }
+    local_divergence = _require_mapping(
+        local_record.get("first_divergence"),
+        path="Delaunay-local.first_divergence",
+    )
+    local_level = _fraction_from_record(
+        local_divergence.get("squared_level"),
+        path="Delaunay-local.first_divergence.squared_level",
+    )
+    local_reference_cut = _gamma_provider(local_filtration, "gamma")(
+        local_level, True
+    )
+    local_missing_facets = {
+        name: tuple(
+            sorted(
+                set(local_reference_cut.active_entities)
+                - set(_relation_cut(relations, local_level, True).active_entities)
+            )
+        )
+        for name, relations in local_relation_sets.items()
+    }
+    local_witness_metrics = {
+        name: _state_metrics(
+            _relation_cut(relations, local_level, True),
+            local_reference_cut,
+            local_universe,
+            len(local_points),
+        )
+        for name, relations in local_relation_sets.items()
+    }
+    local_causal_omitted_cofaces = {
+        name: tuple(
+            sorted(
+                simplex
+                for simplex, coface in local_by_id.items()
+                if simplex not in local_candidate_ids[name]
+                and coface.squared_level == local_level
+                and any(
+                    facet in local_missing_facets[name]
+                    for facet in coface.facet_point_ids
+                )
+            )
+        )
+        for name in local_candidate_ids
+    }
+    false_local_candidates = (
+        "two_edge",
+        "closed_star",
+        "square_clique",
+        "link_face_fan",
+    )
+    expected_local_causal_omissions = ((0, 1, 4), (0, 1, 6), (0, 1, 7))
+    local_ok = (
+        len(local_filtration.cofaces) == 56
+        and {name: len(ids) for name, ids in local_candidate_ids.items()}
+        == {
+            "two_edge": 42,
+            "closed_star": 50,
+            "square_clique": 50,
+            "link_face_fan": 50,
+            "one_edge": 56,
+        }
+        and all(
+            not bool(local_metrics[name]["all_states_exact"])
+            and _first_divergence_signature(local_metrics[name])
+            == ("13956479554", "closed")
+            and local_missing_facets[name] == ((0, 1),)
+            and bool(
+                local_witness_metrics[name]["covered_point_collections_exact"]
+            )
+            and local_causal_omitted_cofaces[name]
+            == expected_local_causal_omissions
+            for name in false_local_candidates
+        )
+        and bool(local_metrics["one_edge"]["all_states_exact"])
+        and local_missing_facets["one_edge"] == ()
+        and local_causal_omitted_cofaces["one_edge"] == ()
+        and all(
+            audit["passed"]
+            and audit["source_count"] == 17
+            and audit["connected_before_count"] == 2
+            and audit["connected_at_count"] == 15
+            for audit in local_gabriel_deadline.values()
+        )
+        and bool(local_first_incidence["every_first_incidence_level_exact"])
+    )
+
+    positive_record = _require_mapping(
+        one_edge_positive, path="Delaunay one-edge positive fixture"
+    )
+    positive_points = tuple(
+        _point(point, path=f"Delaunay-one-edge-positive.points[{index}]")
+        for index, point in enumerate(
+            _require_list(
+                positive_record.get("points"),
+                path="Delaunay-one-edge-positive.points",
+            )
+        )
+    )
+    positive_delaunay_record = _require_mapping(
+        positive_record.get("ordinary_delaunay"),
+        path="Delaunay-one-edge-positive.ordinary_delaunay",
+    )
+    positive_tetrahedra = tuple(
+        tuple(
+            _point_id(
+                point_id,
+                path=(
+                    "Delaunay-one-edge-positive."
+                    f"tetrahedra[{tetrahedron_index}]"
+                ),
+                point_count=len(positive_points),
+            )
+            for point_id in _require_list(
+                raw_tetrahedron,
+                path=(
+                    "Delaunay-one-edge-positive."
+                    f"tetrahedra[{tetrahedron_index}]"
+                ),
+            )
+        )
+        for tetrahedron_index, raw_tetrahedron in enumerate(
+            _require_list(
+                positive_delaunay_record.get("tetrahedra"),
+                path=(
+                    "Delaunay-one-edge-positive."
+                    "ordinary_delaunay.tetrahedra"
+                ),
+            )
+        )
+    )
+    if any(
+        len(tetrahedron) != 4 or len(set(tetrahedron)) != 4
+        for tetrahedron in positive_tetrahedra
+    ):
+        raise DiagnosticInputError(
+            "Delaunay-one-edge-positive tetrahedra must contain four distinct ids"
+        )
+    positive_delaunay_audit = _recertify_exact_ordinary_delaunay(
+        positive_points,
+        positive_tetrahedra,
+        path="Delaunay-one-edge-positive.ordinary_delaunay",
+    )
+    positive_edges = {
+        tuple(sorted(edge))
+        for tetrahedron in positive_tetrahedra
+        for edge in combinations(tetrahedron, 2)
+    }
+    positive_filtration = build_gamma_filtration(positive_points, 2)
+    positive_first_incidence = _delaunay_endpoint_neighbor_first_incidence_audit(
+        positive_points,
+        positive_edges,
+        positive_filtration,
+        path="Delaunay-one-edge-positive.first-incidence",
+    )
+    positive_one_edge_cofaces = tuple(
+        coface
+        for coface in positive_filtration.cofaces
+        if any(facet in positive_edges for facet in coface.facet_point_ids)
+    )
+    positive_missing_cofaces = tuple(
+        coface
+        for coface in positive_filtration.cofaces
+        if not any(facet in positive_edges for facet in coface.facet_point_ids)
+    )
+    positive_relations = tuple(
+        (coface.point_ids, coface.facet_point_ids, coface.squared_level)
+        for coface in positive_one_edge_cofaces
+    )
+    positive_gabriel_sources: tuple[FacetRelation, ...] = tuple(
+        (
+            hyperedge.simplex_point_ids,
+            hyperedge.facet_point_ids,
+            hyperedge.squared_level,
+        )
+        for hyperedge in positive_filtration.gabriel_hyperedges
+    )
+    positive_gabriel_deadline = _gabriel_fusion_deadline_coverage(
+        variant_name="one_edge",
+        source_relations=positive_gabriel_sources,
+        candidate_relations=positive_relations,
+    )
+    positive_metrics = _compare_cuts(
+        predicted_name="Gamma2_restricted_to_at_least_one_ordinary_Delaunay_edge",
+        reference_name="exhaustive_exact_Gamma2_hgp_reduced",
+        levels=positive_filtration.critical_levels,
+        predicted_provider=lambda level, closed: _relation_cut(
+            positive_relations, level, closed
+        ),
+        reference_provider=_gamma_provider(positive_filtration, "gamma"),
+        universe=tuple(combinations(range(len(positive_points)), 2)),
+        point_count=len(positive_points),
+    )
+    positive_expected_omissions = {
+        (0, 1, 4): Fraction(
+            6533652824060214379979565721490,
+            616187158871335654299,
+        ),
+        (5, 6, 8): Fraction(
+            196666935109083477399056026226,
+            13800525515901360121,
+        ),
+    }
+    positive_observed_omissions = {
+        coface.point_ids: coface.squared_level
+        for coface in positive_missing_cofaces
+    }
+    positive_ok = (
+        len(positive_edges) == 26
+        and len(positive_filtration.cofaces) == 84
+        and len(positive_one_edge_cofaces) == 82
+        and positive_observed_omissions == positive_expected_omissions
+        and bool(positive_metrics["all_states_exact"])
+        and positive_metrics["state_count"] == 168
+        and positive_gabriel_deadline["passed"]
+        and positive_gabriel_deadline["source_count"] == 19
+        and positive_gabriel_deadline["connected_before_count"] == 2
+        and positive_gabriel_deadline["connected_at_count"] == 17
+        and bool(positive_first_incidence["every_first_incidence_level_exact"])
+    )
     return {
         "gabriel_e5_counterexample": {
             "fixture_id": e5_record.get("fixture_id"),
@@ -1345,7 +2357,77 @@ def _fixture_audits() -> dict[str, object]:
             "all_threshold_metrics": overlap_metrics,
             "expected_invariants_satisfied": overlap_ok,
         },
-        "all_expected_invariants_satisfied": e5_ok and overlap_ok,
+        "delaunay_two_edge_gamma2_counterexample": {
+            "fixture_id": two_edge_record.get("fixture_id"),
+            "ordinary_delaunay_exact_recertification": two_edge_delaunay_audit,
+            "witness_squared_level": _fraction_json(two_edge_level),
+            "witness_boundary": "closed",
+            "exact_gamma_coface_count": len(two_edge_filtration.cofaces),
+            "two_edge_candidate_count": len(two_edge_relations),
+            "one_edge_candidate_count": len(one_edge_relations),
+            "two_edge_coface_recall": _ratio(
+                len(two_edge_relations), len(two_edge_filtration.cofaces)
+            ),
+            "missing_active_facets": [
+                list(facet) for facet in missing_active_facets
+            ],
+            "omitted_cofaces": [
+                list(coface) for coface in two_edge_omitted_cofaces
+            ],
+            "witness_state_metrics": two_edge_witness,
+            "two_edge_cut_metrics": two_edge_metrics,
+            "one_edge_cut_metrics": one_edge_metrics,
+            "gabriel_fusion_deadline": two_edge_gabriel_deadline,
+            "delaunay_endpoint_neighbor_first_incidence": (
+                two_edge_first_incidence
+            ),
+            "expected_invariants_satisfied": two_edge_ok,
+        },
+        "delaunay_local_gamma2_counterexample": {
+            "fixture_id": local_record.get("fixture_id"),
+            "ordinary_delaunay_exact_recertification": local_delaunay_audit,
+            "witness_squared_level": _fraction_json(local_level),
+            "witness_boundary": "closed",
+            "exact_gamma_coface_count": len(local_filtration.cofaces),
+            "candidate_counts": {
+                name: len(ids) for name, ids in local_candidate_ids.items()
+            },
+            "missing_active_facets": {
+                name: [list(facet) for facet in facets]
+                for name, facets in local_missing_facets.items()
+            },
+            "causal_omitted_cofaces": {
+                name: [list(coface) for coface in cofaces]
+                for name, cofaces in local_causal_omitted_cofaces.items()
+            },
+            "witness_state_metrics": local_witness_metrics,
+            "cut_metrics": local_metrics,
+            "gabriel_fusion_deadline": local_gabriel_deadline,
+            "delaunay_endpoint_neighbor_first_incidence": local_first_incidence,
+            "expected_invariants_satisfied": local_ok,
+        },
+        "delaunay_one_edge_gamma2_positive": {
+            "fixture_id": positive_record.get("fixture_id"),
+            "ordinary_delaunay_exact_recertification": positive_delaunay_audit,
+            "exact_gamma_coface_count": len(positive_filtration.cofaces),
+            "one_edge_candidate_count": len(positive_one_edge_cofaces),
+            "omitted_zero_edge_cofaces": [
+                {
+                    "simplex_point_ids": list(coface.point_ids),
+                    "squared_level": _fraction_json(coface.squared_level),
+                }
+                for coface in positive_missing_cofaces
+            ],
+            "cut_metrics": positive_metrics,
+            "gabriel_fusion_deadline": positive_gabriel_deadline,
+            "delaunay_endpoint_neighbor_first_incidence": (
+                positive_first_incidence
+            ),
+            "expected_invariants_satisfied": positive_ok,
+        },
+        "all_expected_invariants_satisfied": (
+            e5_ok and overlap_ok and two_edge_ok and local_ok and positive_ok
+        ),
     }
 
 

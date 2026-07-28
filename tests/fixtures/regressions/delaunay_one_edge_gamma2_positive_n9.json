@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d-delaunay-one-edge-gamma2-positive-v1",
+  "fixture_id": "delaunay-one-edge-gamma2-positive-9-points-v1",
+  "description": "The one-edge restriction omits two genuine zero-Delaunay-edge cofaces while preserving every exact hgp_reduced Gamma2 cut.",
+  "generator": {
+    "library": "numpy",
+    "api": "numpy.random.default_rng(seed).integers(low, high, size, endpoint=True)",
+    "seed": 9000005,
+    "low": -100000,
+    "high": 100000,
+    "shape": [9, 3],
+    "endpoint": true
+  },
+  "points": [[-67589, -83482, 23272], [70343, 29093, -48517], [16896, 17097, 22552], [-98876, 72168, -53138], [58162, 46459, 88406], [97220, 46143, -17522], [6849, -57111, 79101], [85900, -45178, -3020], [-76199, -95056, -92210]],
+  "ordinary_delaunay": {
+    "tetrahedra": [[0, 2, 3, 6], [0, 2, 3, 8], [0, 2, 6, 7], [0, 2, 7, 8], [1, 2, 3, 5], [1, 2, 3, 8], [1, 2, 5, 7], [1, 2, 7, 8], [2, 3, 4, 5], [2, 3, 4, 6], [2, 4, 5, 7], [2, 4, 6, 7]],
+    "edge_count": 26
+  },
+  "candidate_counts": {
+    "all_gamma2_cofaces": 84,
+    "one_edge_candidates": 82,
+    "zero_edge_cofaces": 2
+  },
+  "omitted_zero_edge_cofaces": [
+    {
+      "simplex_point_ids": [0, 1, 4],
+      "support_point_ids": [0, 1, 4],
+      "squared_level": {"numerator": 6533652824060214379979565721490, "denominator": 616187158871335654299}
+    },
+    {
+      "simplex_point_ids": [5, 6, 8],
+      "support_point_ids": [5, 6, 8],
+      "squared_level": {"numerator": 196666935109083477399056026226, "denominator": 13800525515901360121}
+    }
+  ],
+  "expected_result": {
+    "critical_level_count_including_zero": 84,
+    "strict_and_closed_state_count": 168,
+    "all_states_exact": true,
+    "coface_catalogs_equal": false
+  }
+}

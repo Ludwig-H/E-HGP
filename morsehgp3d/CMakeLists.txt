@@ -2961,6 +2961,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
         morsehgp3d_gpu_geogram_low_order_diagnostic
         PRIVATE
           "${_morsehgp3d_geogram_target}"
+          morsehgp3d::contract
           Threads::Threads
       )
       target_compile_definitions(

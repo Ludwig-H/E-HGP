@@ -1,5 +1,7 @@
 # Phase 14 — diagnostic Geogram/CUDA aux ordres 1 et 2
 
+> **Addendum Phase 15.** La restriction aux wedges ayant au moins deux arêtes de Delaunay a depuis été réfutée exactement sur une fixture générique à six points. Les fermetures par étoile, carré du graphe et fan de faces sont aussi réfutées à huit points. Ce document conserve la mesure historique; son prochain jalon « radix sort des wedges » est annulé. Voir [PHASE15_DELAUNAY_GAMMA2_FALSIFICATION.md](PHASE15_DELAUNAY_GAMMA2_FALSIFICATION.md) et [DELAUNAY_ORDINAIRE_GAMMA2.md](../math/DELAUNAY_ORDINAIRE_GAMMA2.md).
+
 ## Verdict
 
 Le diagnostic `geogram_ordinary_delaunay_plus_cuda_g4_aabb_grid / hgp_reduced / proposal_only_then_bounded_exact_replay` traite bien sur GPU tous les triangles canoniques possédant au moins deux arêtes de la triangulation de Delaunay ordinaire fournie par Geogram. Il ne construit ni mosaïque de Delaunay d'ordre supérieur, ni univers global des $\binom{n}{3}$ triplets, ni six ordres Morton. L'ordre 1 est réduit par Kruskal sur les arêtes de Delaunay. Pour l'ordre 2, la sortie de Gabriel historique reste séparée du nouveau flux `restricted_Delaunay_wedge_Gamma2`, qui conserve tout wedge valide à son niveau de miniboule calculé sur GPU.
@@ -28,6 +30,6 @@ Sur le même nuage de 50 000 points, le surrogate rapide produit dès l'ordre 1 
 
 ## Provenance et fermeture GCP
 
-Le code est au commit `16d8308a53c03cc54a8c75e7093595c402b6da44`. Le build incrémental n'ayant pas relancé CMake, le champ SHA embarqué du binaire est resté `9547ab8c21a1a8753931b1acf5c5a926a25a49cf`; cette différence est enregistrée au lieu d'être masquée. Une seconde génération gardée a été ouverte pour corriger la provenance, mais le redémarrage avait nettoyé le cache Geogram sous `/tmp`; aucun benchmark n'a alors été lancé et la cible a été arrêtée immédiatement.
+Le code est au commit `16d83082a09979796d62ca4d0e9b9e30731b022d`. Le build incrémental n'ayant pas relancé CMake, le champ SHA embarqué du binaire est resté `9547ab8c21a1a8753931b1acf5c5a926a25a49cf`; cette différence est enregistrée au lieu d'être masquée. Une seconde génération gardée a été ouverte pour corriger la provenance, mais le redémarrage avait nettoyé le cache Geogram sous `/tmp`; aucun benchmark n'a alors été lancé et la cible a été arrêtée immédiatement.
 
 Les deux générations `SPOT` utilisaient `instanceTerminationAction=STOP`, `maxRunDuration=3600` et un arrêt invité vérifié. La cible exacte `devpod-gpu-exploration / europe-west4-ai1a / ehgp-blackwell-spot-ai1a` est finalement certifiée `TERMINATED` au `lastStartTimestamp=2026-07-27T10:38:18.453-07:00`; aucune autre VM `project=e-hgp` n'est active et les clés OS Login temporaires ont été révoquées. Les métriques structurées sont dans [phase14_geogram_low_order_g4_16d8308.json](phase14_geogram_low_order_g4_16d8308.json).

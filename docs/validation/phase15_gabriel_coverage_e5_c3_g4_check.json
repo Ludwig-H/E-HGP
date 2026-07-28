@@ -1,0 +1,66 @@
+{
+  "architecture_invariants": {
+    "edge_times_point_product_absent": true,
+    "higher_order_delaunay_absent": true,
+    "same_level_certification_forbidden": true
+  },
+  "backend": "python_bounded_structural_replay",
+  "chunk_count": 2,
+  "counter_invariants": {
+    "accepted_partition_closed": true,
+    "safety_partition_closed": true,
+    "status_partition_closed": true,
+    "support_partition_closed": true
+  },
+  "diagnostic_completed": true,
+  "digest_validation": {
+    "all_seven_sha256_match": true,
+    "all_seven_sha256_recomputed": true,
+    "mode": "recomputed_from_emitted_fixture",
+    "producer_commitments_not_recomputable_without_records": false
+  },
+  "emitted_fixture_point_cap": 14,
+  "fixture_replay": {
+    "accepted_source_count": 5,
+    "all_seven_sha256_recomputed": true,
+    "ambiguous_records_match": true,
+    "ambiguous_source_count": 0,
+    "canonical_candidate_count": 10,
+    "every_accepted_source_is_necessary_or_strictly_lower_connected": true,
+    "every_exact_gabriel_triangle_emitted": true,
+    "every_exact_gabriel_triangle_has_two_declared_delaunay_edges": true,
+    "every_source_is_a_delaunay_wedge": true,
+    "exact_gabriel_oracle_performed": true,
+    "exact_gabriel_support_cardinalities_match": true,
+    "exact_gabriel_support_three_count": 3,
+    "exact_gabriel_support_two_count": 2,
+    "exact_gabriel_triangle_count": 5,
+    "necessary_records_match": true,
+    "ordinary_delaunay_edge_count": 10,
+    "ordinary_delaunay_exact_recertification": {
+      "affine_dimension": 3,
+      "cospherical_incidence_count": 0,
+      "declared_one_skeleton_matches_exact_catalog": true,
+      "exact_empty_sphere_tetrahedron_count": 3,
+      "four_point_subset_count": 5,
+      "method": "exhaustive exact rational circumspheres over all four-point subsets",
+      "minimum_external_power_delta": "12",
+      "performed": true
+    },
+    "raw_wedge_count": 30,
+    "replayed_necessary_count": 5,
+    "replayed_strictly_lower_connected_count": 0,
+    "source_record_count": 5,
+    "support_three_count": 3,
+    "support_two_count": 2
+  },
+  "phase": "15",
+  "point_count": 5,
+  "profile": "hgp_reduced",
+  "public_status": "not_claimed",
+  "schema_version": "morsehgp3d.phase15_delaunay_gabriel_coverage_check.v2",
+  "source_artifact": {
+    "byte_count": 4645,
+    "sha256": "8af88fea9478b0d2055a39ec232a734ed42b467176b1d809dd4aa65b5628b45d"
+  }
+}

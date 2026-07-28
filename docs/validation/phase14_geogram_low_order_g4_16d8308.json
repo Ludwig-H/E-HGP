@@ -7,7 +7,7 @@
   "mode": "proposal_only_then_bounded_exact_replay",
   "deployment_status": "diagnostic_only",
   "public_status": "not_claimed",
-  "source_commit": "16d8308a53c03cc54a8c75e7093595c402b6da44",
+  "source_commit": "16d83082a09979796d62ca4d0e9b9e30731b022d",
   "binary_embedded_cmake_git_sha": "9547ab8c21a1a8753931b1acf5c5a926a25a49cf",
   "provenance_note": "the executable was recompiled from source_commit without rerunning CMake, so its configure-time embedded SHA remained the preceding commit; a guarded rerun was abandoned before any benchmark when the VM restart was found to have cleared the Geogram build cache",
   "geogram": {

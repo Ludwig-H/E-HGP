@@ -94,6 +94,8 @@ enum class ExactDirectSparseFirstIncidenceScope : std::uint8_t {
 
 struct ExactDirectSparseFirstIncidenceAudit {
   std::size_t eligible_coface_point_count{};
+  std::size_t supplied_incumbent_seed_point_count{};
+  std::size_t exact_incumbent_seed_evaluation_count{};
   std::size_t source_support_enumeration_count{};
   std::size_t node_visit_count{};
   std::size_t internal_node_expansion_count{};
@@ -210,11 +212,39 @@ build_exact_direct_sparse_first_incidence(
     spatial::LbvhTraversalOrder traversal_order =
         spatial::LbvhTraversalOrder::near_first);
 
+// Optional seeds are exact incumbent proposals only.  They must be unique,
+// sorted, in-range and outside the source facet.  Every seed is evaluated
+// exactly before the LBVH traversal, but it grants no pruning authority by
+// itself: the same strict AABB proof still evaluates or strictly prunes every
+// other eligible point, and equality still descends to retain all global
+// co-minimizers.  In particular, callers may supply the union of the ordinary-
+// Delaunay neighbor lists of a two-point source facet without making the
+// result depend on the completeness of that graph.
+[[nodiscard]] ExactDirectSparseFirstIncidenceResult
+build_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetKey& source_facet_key,
+    std::span<const spatial::PointId> incumbent_seed_point_ids,
+    const ExactDirectSparseFirstIncidenceBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order =
+        spatial::LbvhTraversalOrder::near_first);
+
 [[nodiscard]] ExactDirectSparseFirstIncidenceVerification
 verify_exact_direct_sparse_first_incidence(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     const ExactDirectSparseFacetKey& source_facet_key,
+    const ExactDirectSparseFirstIncidenceBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactDirectSparseFirstIncidenceResult& observed);
+
+[[nodiscard]] ExactDirectSparseFirstIncidenceVerification
+verify_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetKey& source_facet_key,
+    std::span<const spatial::PointId> incumbent_seed_point_ids,
     const ExactDirectSparseFirstIncidenceBudget& budget,
     spatial::LbvhTraversalOrder traversal_order,
     const ExactDirectSparseFirstIncidenceResult& observed);

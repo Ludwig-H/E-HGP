@@ -1,0 +1,33 @@
+{
+  "architecture_invariants": {
+    "edge_times_point_product_absent": true,
+    "higher_order_delaunay_absent": true,
+    "same_level_certification_forbidden": true
+  },
+  "backend": "python_bounded_structural_replay",
+  "chunk_count": 201,
+  "counter_invariants": {
+    "accepted_partition_closed": true,
+    "safety_partition_closed": true,
+    "status_partition_closed": true,
+    "support_partition_closed": true
+  },
+  "diagnostic_completed": true,
+  "digest_validation": {
+    "all_seven_sha256_match": null,
+    "all_seven_sha256_recomputed": false,
+    "mode": "producer_commitments_only",
+    "producer_commitments_not_recomputable_without_records": true
+  },
+  "emitted_fixture_point_cap": 14,
+  "fixture_replay": null,
+  "phase": "15",
+  "point_count": 30000001,
+  "profile": "hgp_reduced",
+  "public_status": "not_claimed",
+  "schema_version": "morsehgp3d.phase15_delaunay_gabriel_coverage_check.v2",
+  "source_artifact": {
+    "byte_count": 3603,
+    "sha256": "b5f21526a3c3a5d17e1c03262965d4459e999f07604a17baf997f9f885859946"
+  }
+}

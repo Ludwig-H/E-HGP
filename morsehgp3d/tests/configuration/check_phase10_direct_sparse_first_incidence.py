@@ -426,10 +426,13 @@ def validate_fresh_replay(header: str, code: str) -> None:
         "the verifier must reject hostile storage before any scientific replay",
     )
     replay_calls = balanced_calls(
-        compact[replay:], "build_exact_direct_sparse_first_incidence("
+        compact[replay:],
+        "build_exact_direct_sparse_first_incidence_with_incumbent_seeds(",
     )
     require(
-        len(replay_calls) == 1 and "observed" not in replay_calls[0],
+        len(replay_calls) == 1
+        and "incumbent_seed_point_ids" in replay_calls[0]
+        and "observed" not in replay_calls[0],
         "fresh replay must rebuild once from trusted inputs, never observed science",
     )
     require_all(

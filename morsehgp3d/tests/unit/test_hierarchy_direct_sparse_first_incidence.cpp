@@ -44,6 +44,16 @@ template <typename Function>
   return false;
 }
 
+template <typename Function>
+[[nodiscard]] bool throws_out_of_range(Function&& function) {
+  try {
+    std::forward<Function>(function)();
+  } catch (const std::out_of_range&) {
+    return true;
+  }
+  return false;
+}
+
 [[nodiscard]] CertifiedPoint3 point(
     double x,
     double y = 0.0,
@@ -156,6 +166,81 @@ template <std::size_t Size>
       fresh_verification_closes(verification),
       context + " closes under a fresh exact replay");
   return result;
+}
+
+[[nodiscard]] ExactDirectSparseFirstIncidenceResult
+build_seeded_and_verify(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetKey& source_key,
+    std::span<const PointId> incumbent_seed_point_ids,
+    const ExactDirectSparseFirstIncidenceBudget& budget,
+    LbvhTraversalOrder traversal_order,
+    const std::string& context) {
+  const ExactDirectSparseFirstIncidenceResult result =
+      build_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+          index,
+          cloud,
+          source_key,
+          incumbent_seed_point_ids,
+          budget,
+          traversal_order);
+  const ExactDirectSparseFirstIncidenceVerification verification =
+      verify_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+          index,
+          cloud,
+          source_key,
+          incumbent_seed_point_ids,
+          budget,
+          traversal_order,
+          result);
+  check(
+      fresh_verification_closes(verification),
+      context + " closes under a fresh seeded exact replay");
+  return result;
+}
+
+[[nodiscard]] bool same_scientific_first_incidence(
+    const ExactDirectSparseFirstIncidenceResult& left,
+    const ExactDirectSparseFirstIncidenceResult& right) {
+  return left.source_facet_key == right.source_facet_key &&
+         left.source_facet_miniball == right.source_facet_miniball &&
+         left.first_incidence_squared_level ==
+             right.first_incidence_squared_level &&
+         left.cominimizers == right.cominimizers &&
+         left.stop_reason == right.stop_reason &&
+         left.decision == right.decision && left.scope == right.scope &&
+         left.source_facet_miniball_freshly_certified ==
+             right.source_facet_miniball_freshly_certified &&
+         left.every_nonexcluded_point_evaluated_or_strictly_pruned ==
+             right.every_nonexcluded_point_evaluated_or_strictly_pruned &&
+         left.aabb_lower_bounds_exact_and_valid ==
+             right.aabb_lower_bounds_exact_and_valid &&
+         left.equality_bounds_always_descended ==
+             right.equality_bounds_always_descended &&
+         left.every_strict_outside_coface_support_contains_added_point ==
+             right.every_strict_outside_coface_support_contains_added_point &&
+         left.all_cominimizers_retained_atomically ==
+             right.all_cominimizers_retained_atomically;
+}
+
+[[nodiscard]] bool seeded_work_never_exceeds_unseeded(
+    const ExactDirectSparseFirstIncidenceResult& seeded,
+    const ExactDirectSparseFirstIncidenceResult& unseeded) {
+  return seeded.audit.source_support_enumeration_count <=
+             unseeded.audit.source_support_enumeration_count &&
+         seeded.audit.node_visit_count <=
+             unseeded.audit.node_visit_count &&
+         seeded.audit.internal_node_expansion_count <=
+             unseeded.audit.internal_node_expansion_count &&
+         seeded.audit.exact_aabb_bound_evaluation_count <=
+             unseeded.audit.exact_aabb_bound_evaluation_count &&
+         seeded.audit.exact_point_evaluation_count <=
+             unseeded.audit.exact_point_evaluation_count &&
+         seeded.audit.coface_support_enumeration_count <=
+             unseeded.audit.coface_support_enumeration_count &&
+         seeded.audit.candidate_point_classification_count <=
+             unseeded.audit.candidate_point_classification_count;
 }
 
 [[nodiscard]] ExactDirectSparseFirstIncidenceBudget exact_budget_for(
@@ -461,6 +546,169 @@ void test_equal_cominimizers_strict_pruning_and_traversal_invariance() {
           far.every_nonexcluded_point_evaluated_or_strictly_pruned &&
           far.equality_bounds_always_descended,
       "near-first and far-first preserve the exact level and complete canonical co-minimizer set");
+}
+
+void test_incumbent_seeds_preserve_science_and_never_increase_work() {
+  EqualityFixture fixture;
+  const ExactDirectSparseFirstIncidenceBudget budget = generous_budget();
+  const std::vector<PointId> seeds{fixture.positive_minimizer};
+
+  const auto unseeded_near = build_and_verify(
+      fixture.index,
+      fixture.cloud,
+      fixture.source,
+      budget,
+      LbvhTraversalOrder::near_first,
+      "the unseeded near-first incumbent comparison");
+  const auto seeded_near = build_seeded_and_verify(
+      fixture.index,
+      fixture.cloud,
+      fixture.source,
+      std::span<const PointId>{seeds},
+      budget,
+      LbvhTraversalOrder::near_first,
+      "the seeded near-first incumbent comparison");
+  const auto unseeded_far = build_and_verify(
+      fixture.index,
+      fixture.cloud,
+      fixture.source,
+      budget,
+      LbvhTraversalOrder::far_first,
+      "the unseeded far-first incumbent comparison");
+  const auto seeded_far = build_seeded_and_verify(
+      fixture.index,
+      fixture.cloud,
+      fixture.source,
+      std::span<const PointId>{seeds},
+      budget,
+      LbvhTraversalOrder::far_first,
+      "the seeded far-first incumbent comparison");
+
+  check(
+      unseeded_near.audit.supplied_incumbent_seed_point_count == 0U &&
+          unseeded_near.audit.exact_incumbent_seed_evaluation_count == 0U &&
+          unseeded_far.audit.supplied_incumbent_seed_point_count == 0U &&
+          unseeded_far.audit.exact_incumbent_seed_evaluation_count == 0U &&
+          seeded_near.audit.supplied_incumbent_seed_point_count ==
+              seeds.size() &&
+          seeded_near.audit.exact_incumbent_seed_evaluation_count ==
+              seeds.size() &&
+          seeded_far.audit.supplied_incumbent_seed_point_count ==
+              seeds.size() &&
+          seeded_far.audit.exact_incumbent_seed_evaluation_count ==
+              seeds.size(),
+      "each supplied incumbent is counted once and exactly recertified once");
+  check(
+      same_scientific_first_incidence(seeded_near, unseeded_near) &&
+          same_scientific_first_incidence(seeded_far, unseeded_far) &&
+          same_scientific_first_incidence(seeded_near, seeded_far) &&
+          seeded_near.certified_complete_first_incidence() &&
+          seeded_far.certified_complete_first_incidence() &&
+          seeded_near.cominimizers.size() == 2U &&
+          seeded_near.equality_bounds_always_descended &&
+          seeded_far.equality_bounds_always_descended,
+      "a recertified incumbent preserves the canonical level and full equality shell in both traversal orders");
+  check(
+      seeded_work_never_exceeds_unseeded(seeded_near, unseeded_near) &&
+          seeded_work_never_exceeds_unseeded(seeded_far, unseeded_far),
+      "a useful exact incumbent never increases any principal first-incidence work counter");
+}
+
+void test_incumbent_seed_authority_and_budget_fail_closed() {
+  EqualityFixture fixture;
+  const ExactDirectSparseFirstIncidenceBudget budget = generous_budget();
+  const auto observed = build_and_verify(
+      fixture.index,
+      fixture.cloud,
+      fixture.source,
+      budget,
+      LbvhTraversalOrder::near_first,
+      "the hostile incumbent-seed authority baseline");
+
+  std::vector<PointId> sorted{
+      fixture.negative_minimizer, fixture.positive_minimizer};
+  std::sort(sorted.begin(), sorted.end());
+  std::vector<PointId> unsorted = sorted;
+  std::reverse(unsorted.begin(), unsorted.end());
+  const std::vector<PointId> duplicated{sorted[0U], sorted[0U]};
+  const std::vector<PointId> outside_cloud{
+      static_cast<PointId>(fixture.cloud.size())};
+  const std::vector<PointId> inside_facet{
+      fixture.source.point_ids[0U]};
+
+  const auto build_with = [&](std::span<const PointId> seeds) {
+    static_cast<void>(
+        build_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+            fixture.index,
+            fixture.cloud,
+            fixture.source,
+            seeds,
+            budget,
+            LbvhTraversalOrder::near_first));
+  };
+  const auto verify_with = [&](std::span<const PointId> seeds) {
+    static_cast<void>(
+        verify_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+            fixture.index,
+            fixture.cloud,
+            fixture.source,
+            seeds,
+            budget,
+            LbvhTraversalOrder::near_first,
+            observed));
+  };
+  check(
+      throws_invalid_argument([&] {
+        build_with(std::span<const PointId>{unsorted});
+      }) &&
+          throws_invalid_argument([&] {
+            build_with(std::span<const PointId>{duplicated});
+          }) &&
+          throws_invalid_argument([&] {
+            build_with(std::span<const PointId>{inside_facet});
+          }) &&
+          throws_out_of_range([&] {
+            build_with(std::span<const PointId>{outside_cloud});
+          }),
+      "the seeded builder rejects unsorted, duplicated, in-facet and out-of-cloud authorities");
+  check(
+      throws_invalid_argument([&] {
+        verify_with(std::span<const PointId>{unsorted});
+      }) &&
+          throws_invalid_argument([&] {
+            verify_with(std::span<const PointId>{duplicated});
+          }) &&
+          throws_invalid_argument([&] {
+            verify_with(std::span<const PointId>{inside_facet});
+          }) &&
+          throws_out_of_range([&] {
+            verify_with(std::span<const PointId>{outside_cloud});
+          }),
+      "the seeded verifier rejects the same malformed seed authorities before replay");
+
+  ExactDirectSparseFirstIncidenceBudget insufficient = generous_budget();
+  insufficient.maximum_exact_point_evaluation_count = 1U;
+  const auto exhausted = build_seeded_and_verify(
+      fixture.index,
+      fixture.cloud,
+      fixture.source,
+      std::span<const PointId>{sorted},
+      insufficient,
+      LbvhTraversalOrder::near_first,
+      "the one-short incumbent recertification budget");
+  check(
+      exhausted.certified_budget_exhaustion() &&
+          exhausted.stop_reason ==
+              ExactDirectSparseFirstIncidenceStopReason::
+                  exact_point_evaluation_limit &&
+          exhausted.audit.supplied_incumbent_seed_point_count == 2U &&
+          exhausted.audit.exact_incumbent_seed_evaluation_count == 1U &&
+          exhausted.audit.exact_point_evaluation_count == 1U &&
+          exhausted.audit.node_visit_count == 0U &&
+          !exhausted.first_incidence_squared_level.has_value() &&
+          exhausted.cominimizers.empty() &&
+          exhausted.no_partial_first_incidence_payload_published,
+      "an exhausted incumbent budget erases the provisional seed level and equality shell before traversal");
 }
 
 void test_new_support_uses_a_point_outside_the_old_support() {
@@ -1175,6 +1423,8 @@ int main() {
   test_unique_minimizer_and_exact_positive_support();
   test_inside_boundary_and_selected_support_semantics();
   test_equal_cominimizers_strict_pruning_and_traversal_invariance();
+  test_incumbent_seeds_preserve_science_and_never_increase_work();
+  test_incumbent_seed_authority_and_budget_fail_closed();
   test_new_support_uses_a_point_outside_the_old_support();
   test_k10_avoids_an_eleven_point_key_and_uses_176_supports();
   test_ac_silent_equal_first_incidence();

@@ -109,6 +109,7 @@ fi
 cmake -S "$source_dir" -B "$build_dir" \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$install_prefix" \
+  -DCMAKE_CXX_STANDARD_LIBRARIES="$tbb_library" \
   -DVORPALINE_PLATFORM=Linux64-gcc-dynamic \
   -DGEOGRAM_LIB_ONLY=ON \
   -DGEOGRAM_WITH_GRAPHICS=OFF \

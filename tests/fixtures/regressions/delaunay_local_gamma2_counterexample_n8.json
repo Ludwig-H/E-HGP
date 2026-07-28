@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d-delaunay-local-gamma2-counterexample-v1",
+  "fixture_id": "delaunay-local-gamma2-counterexample-8-points-v1",
+  "description": "Closed ordinary-Delaunay stars, graph-square cliques and link-face fans can miss the first Gamma2 activation of a facet at graph distance three.",
+  "points": [[76336, -97070, -37549], [-2006, 88444, 86035], [52015, 94002, -64071], [-31808, 49071, -74800], [23857, 4162, 91839], [-56363, 89341, -15294], [48338, -49815, 72270], [86570, -52580, -60092]],
+  "domain_checks": {
+    "point_count": 8,
+    "affine_dimension": 3,
+    "general_position": true,
+    "orientation_subsets_checked": 70,
+    "cospherical_subsets_checked": 56,
+    "minimum_absolute_orientation_determinant": 9458343083458,
+    "minimum_absolute_cospherical_determinant": 165012084380600358629352
+  },
+  "ordinary_delaunay": {
+    "tetrahedra": [[0, 3, 6, 7], [1, 2, 4, 5], [2, 3, 4, 5], [2, 3, 4, 7], [2, 4, 6, 7], [3, 4, 5, 6], [3, 4, 6, 7]],
+    "edges": [[0, 3], [0, 6], [0, 7], [1, 2], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 5], [3, 6], [3, 7], [4, 5], [4, 6], [4, 7], [5, 6], [6, 7]],
+    "missing_edges": [[0, 1], [0, 2], [0, 4], [0, 5], [1, 3], [1, 6], [1, 7], [5, 7]],
+    "all_reported_tetrahedron_spheres_exactly_empty": true,
+    "minimum_external_power_delta_by_tetrahedron": [
+      {"tetrahedron": [0, 3, 6, 7], "point_id": 4, "delta": "1247442225279809699496143/390000656290001"},
+      {"tetrahedron": [1, 2, 4, 5], "point_id": 3, "delta": "203055813576902457737336/193013748329785"},
+      {"tetrahedron": [2, 3, 4, 5], "point_id": 1, "delta": "203055813576902457737336/184493903017987"},
+      {"tetrahedron": [2, 3, 4, 7], "point_id": 6, "delta": "322859700076375343993978/552595529549549"},
+      {"tetrahedron": [2, 4, 6, 7], "point_id": 1, "delta": "178794609768159388038159/28089993031033"},
+      {"tetrahedron": [3, 4, 5, 6], "point_id": 0, "delta": "132511258341700754914020/12305651678983"},
+      {"tetrahedron": [3, 4, 6, 7], "point_id": 2, "delta": "161429850038187671996989/76921195665465"}
+    ]
+  },
+  "candidate_universes": {
+    "all_gamma2_cofaces": 56,
+    "at_least_two_delaunay_edges": {"candidate_count": 42, "exact_on_fixture": false},
+    "closed_delaunay_vertex_star": {"candidate_count": 50, "exact_on_fixture": false},
+    "delaunay_graph_square_clique": {"candidate_count": 50, "exact_on_fixture": false},
+    "delaunay_link_face_fan": {"candidate_count": 50, "exact_on_fixture": false},
+    "at_least_one_delaunay_edge": {"candidate_count": 56, "exact_on_fixture": true, "exhaustive_on_fixture": true}
+  },
+  "first_divergence": {
+    "order": 2,
+    "profile": "hgp_reduced",
+    "closed": true,
+    "squared_level": {"numerator": 13956479554, "denominator": 1},
+    "minimal_support_point_ids": [0, 1],
+    "support_squared_distance": 55825918216,
+    "simultaneous_omitted_cofaces": [
+      {"simplex_point_ids": [0, 1, 4], "present_delaunay_edges": [[1, 4]]},
+      {"simplex_point_ids": [0, 1, 6], "present_delaunay_edges": [[0, 6]]},
+      {"simplex_point_ids": [0, 1, 7], "present_delaunay_edges": [[0, 7]]}
+    ],
+    "missing_active_facet_point_ids": [[0, 1]],
+    "exact_gamma_active_facet_count": 28,
+    "local_candidate_active_facet_count": 27,
+    "exact_gamma_component_count": 1,
+    "local_candidate_component_count": 1,
+    "covered_point_ids_equal": true,
+    "covered_point_ids": [0, 1, 2, 3, 4, 5, 6, 7],
+    "delaunay_graph_distance_between_support_endpoints": 3,
+    "common_closed_star_center_exists": false
+  },
+  "minimality": {
+    "all_subsets_of_cardinality_5_6_7_checked": true,
+    "proper_subsets_checked": 92,
+    "failing_proper_subset_count": 0,
+    "minimal_by_point_deletion_for_closed_star": true
+  }
+}

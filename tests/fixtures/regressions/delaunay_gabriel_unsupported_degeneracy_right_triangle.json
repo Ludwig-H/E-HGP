@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d-delaunay-gabriel-unsupported-degeneracy-v1",
+  "fixture_id": "delaunay-gabriel-right-triangle-shell-degeneracy-4-points-v1",
+  "description": "A right Gabriel triangle has a third simplex point on the diameter-ball shell outside the canonical two-point minimal support and must fail closed.",
+  "points": [[0, 0, 0], [2, 0, 0], [0, 2, 0], [0, 0, 10]],
+  "witness": {
+    "simplex_point_ids": [0, 1, 2],
+    "squared_level": {"numerator": 2, "denominator": 1},
+    "minimal_support_point_ids": [1, 2],
+    "exact_shell_point_ids": [0, 1, 2],
+    "nonminimal_simplex_shell_point_ids": [0]
+  },
+  "expected_result": {
+    "status": "unsupported_degeneracy",
+    "public_status_exact_allowed": false
+  }
+}

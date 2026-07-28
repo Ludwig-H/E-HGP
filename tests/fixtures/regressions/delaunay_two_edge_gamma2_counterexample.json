@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d-delaunay-two-edge-gamma2-counterexample-v1",
+  "fixture_id": "delaunay-two-edge-gamma2-counterexample-6-points-v1",
+  "description": "Triangles having at least two ordinary-Delaunay edges do not preserve every hgp_reduced Gamma2 cut.",
+  "points": [[-4, 3, -6], [-2, 6, 5], [7, 6, 5], [1, -7, 2], [-7, 0, -2], [-6, 3, 3]],
+  "domain_checks": {
+    "point_count": 6,
+    "affine_dimension": 3,
+    "general_position": true,
+    "minimum_absolute_orientation_determinant": 63,
+    "minimum_absolute_cospherical_determinant": 972
+  },
+  "ordinary_delaunay": {
+    "tetrahedra": [[0, 1, 2, 3], [0, 1, 3, 5], [0, 3, 4, 5]],
+    "missing_edges": [[1, 4], [2, 4], [2, 5]],
+    "exact_empty_sphere_external_power_deltas": [
+      {"tetrahedron": [0, 1, 2, 3], "deltas": [[4, "1237/67"], [5, "903/67"]]},
+      {"tetrahedron": [0, 1, 3, 5], "deltas": [[2, "16254/583"], [4, "1882/583"]]},
+      {"tetrahedron": [0, 3, 4, 5], "deltas": [[1, "1882/373"], [2, "14896/373"]]}
+    ]
+  },
+  "restricted_candidate_rule": "at_least_two_ordinary_delaunay_edges",
+  "candidate_counts": {
+    "all_gamma2_cofaces": 20,
+    "restricted_candidates": 18,
+    "coface_recall": "9/10"
+  },
+  "omitted_cofaces": [
+    {
+      "simplex_point_ids": [1, 2, 4],
+      "present_delaunay_edges": [[1, 2]],
+      "minimal_support_point_ids": [2, 4],
+      "squared_level": {"numerator": 281, "denominator": 4}
+    },
+    {
+      "simplex_point_ids": [2, 4, 5],
+      "present_delaunay_edges": [[4, 5]],
+      "minimal_support_point_ids": [2, 4],
+      "squared_level": {"numerator": 281, "denominator": 4}
+    }
+  ],
+  "first_divergence": {
+    "order": 2,
+    "profile": "hgp_reduced",
+    "closed": true,
+    "squared_level": {"numerator": 281, "denominator": 4},
+    "missing_active_facet_point_ids": [[2, 4]],
+    "restricted_active_facet_point_ids": [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 5], [3, 4], [3, 5], [4, 5]],
+    "exact_gamma_active_facet_point_ids": [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5]],
+    "restricted_component_count": 1,
+    "exact_gamma_component_count": 1,
+    "covered_point_ids_equal": true,
+    "covered_point_ids": [0, 1, 2, 3, 4, 5]
+  },
+  "broader_candidate_observation": {
+    "at_least_one_ordinary_delaunay_edge_includes_both_omitted_cofaces": true,
+    "restores_this_fixture": true
+  }
+}

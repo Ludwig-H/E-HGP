@@ -203,6 +203,31 @@ void require_valid_source_key(
   }
 }
 
+void require_valid_incumbent_seeds(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetKey& source_key,
+    std::span<const PointId> incumbent_seed_point_ids) {
+  const std::span<const PointId> source_point_ids =
+      used_point_ids(source_key);
+  PointId previous_point_id = 0U;
+  bool first = true;
+  for (const PointId point_id : incumbent_seed_point_ids) {
+    if (static_cast<std::size_t>(point_id) >= cloud.size()) {
+      throw std::out_of_range(
+          "a direct sparse first-incidence incumbent seed is outside the cloud");
+    }
+    if ((!first && point_id <= previous_point_id) ||
+        std::binary_search(
+            source_point_ids.begin(), source_point_ids.end(), point_id)) {
+      throw std::invalid_argument(
+          "direct sparse first-incidence incumbent seeds must be unique, "
+          "sorted and outside the source facet");
+    }
+    previous_point_id = point_id;
+    first = false;
+  }
+}
+
 [[nodiscard]] bool support_less(
     const OutsideCofaceCandidate& left,
     const OutsideCofaceCandidate& right) noexcept {
@@ -335,6 +360,12 @@ void require_valid_source_key(
              single_supplied_facet_all_one_point_cofaces_only &&
          result.audit.excluded_facet_point_count ==
              result.source_facet_key.point_count &&
+         result.audit.supplied_incumbent_seed_point_count <=
+             result.audit.eligible_coface_point_count &&
+         result.audit.exact_incumbent_seed_evaluation_count <=
+             result.audit.supplied_incumbent_seed_point_count &&
+         result.audit.exact_incumbent_seed_evaluation_count <=
+             result.audit.exact_point_evaluation_count &&
          result.audit.inside_or_boundary_source_ball_point_count <=
              result.audit.exact_point_evaluation_count &&
          result.audit.outside_source_ball_point_count ==
@@ -393,12 +424,14 @@ class ExactDirectSparseFirstIncidenceBuilder {
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
       const ExactDirectSparseFacetKey& source_facet_key,
+      std::span<const PointId> incumbent_seed_point_ids,
       const ExactDirectSparseFirstIncidenceBudget& budget,
       spatial::LbvhTraversalOrder traversal_order)
       : index_(index),
         cloud_(cloud),
         source_facet_key_(source_facet_key),
         source_point_ids_(used_point_ids(source_facet_key_)),
+        incumbent_seed_point_ids_(incumbent_seed_point_ids),
         budget_(budget),
         traversal_order_(traversal_order) {
     result_.source_facet_key = source_facet_key_;
@@ -416,6 +449,8 @@ class ExactDirectSparseFirstIncidenceBuilder {
     result_.partial_refinement_only = true;
     result_.audit.eligible_coface_point_count =
         cloud_.size() - source_point_ids_.size();
+    result_.audit.supplied_incumbent_seed_point_count =
+        incumbent_seed_point_ids_.size();
     result_.audit.excluded_facet_point_count = source_point_ids_.size();
   }
 
@@ -462,6 +497,22 @@ class ExactDirectSparseFirstIncidenceBuilder {
       return std::move(result_);
     }
 
+    result_.cominimizers.reserve(std::min({
+        budget_.maximum_cominimizer_count,
+        result_.audit.eligible_coface_point_count,
+        std::size_t{64U}}));
+    for (const PointId seed_point_id : incumbent_seed_point_ids_) {
+      const std::size_t evaluations_before =
+          result_.audit.exact_point_evaluation_count;
+      const auto stop = evaluate_candidate_point(seed_point_id);
+      if (result_.audit.exact_point_evaluation_count > evaluations_before) {
+        ++result_.audit.exact_incumbent_seed_evaluation_count;
+      }
+      if (stop.has_value()) {
+        return exhausted(*stop);
+      }
+    }
+
     if (budget_.maximum_frontier_entry_count == 0U) {
       return exhausted(
           ExactDirectSparseFirstIncidenceStopReason::frontier_entry_limit);
@@ -487,11 +538,6 @@ class ExactDirectSparseFirstIncidenceBuilder {
         frontier{
             FirstIncidenceNodeQueueCompare{traversal_order_},
             std::move(frontier_storage)};
-    result_.cominimizers.reserve(std::min({
-        budget_.maximum_cominimizer_count,
-        result_.audit.eligible_coface_point_count,
-        std::size_t{64U}}));
-
     frontier.push(FirstIncidenceNodeQueueEntry{
         node_lower_bound(index_.root_index_), index_.root_index_});
     result_.audit.peak_frontier_entry_count = 1U;
@@ -521,61 +567,14 @@ class ExactDirectSparseFirstIncidenceBuilder {
       if (node.is_leaf()) {
         const PointId added_point_id =
             index_.leaves_[node.leaf_begin].point_id;
-        if (source_contains(added_point_id)) {
+        if (source_contains(added_point_id) ||
+            incumbent_seed_contains(added_point_id)) {
           continue;
         }
-        if (result_.audit.exact_point_evaluation_count >=
-            budget_.maximum_exact_point_evaluation_count) {
-          return exhausted(
-              ExactDirectSparseFirstIncidenceStopReason::
-                  exact_point_evaluation_limit);
+        if (const auto stop = evaluate_candidate_point(added_point_id);
+            stop.has_value()) {
+          return exhausted(*stop);
         }
-        const exact::SpherePointLocation source_location =
-            exact::classify_sphere_point(
-                result_.source_facet_miniball->center,
-                result_.source_facet_miniball->squared_radius,
-                cloud_.point(added_point_id))
-                .location();
-        ++result_.audit.exact_point_evaluation_count;
-
-        ExactDirectSparseFirstIncidenceMinimizer candidate;
-        candidate.added_point_id = added_point_id;
-        if (source_location != exact::SpherePointLocation::outside) {
-          ++result_.audit.inside_or_boundary_source_ball_point_count;
-          candidate.support_point_count =
-              result_.source_facet_miniball->support_point_ids.size();
-          std::copy(
-              result_.source_facet_miniball->support_point_ids.begin(),
-              result_.source_facet_miniball->support_point_ids.end(),
-              candidate.support_point_ids.begin());
-          candidate.center = result_.source_facet_miniball->center;
-          candidate.squared_level =
-              result_.source_facet_miniball->squared_radius;
-          candidate.added_point_in_source_closed_ball = true;
-          candidate.added_point_in_selected_positive_support = false;
-        } else {
-          ++result_.audit.outside_source_ball_point_count;
-          OutsideCofaceBuildResult outside =
-              build_outside_coface(added_point_id);
-          if (outside.stop_reason !=
-              ExactDirectSparseFirstIncidenceStopReason::none) {
-            return exhausted(outside.stop_reason);
-          }
-          if (!outside.candidate.has_value()) {
-            throw std::logic_error(
-                "an outside one-point coface has no positive support containing its added point");
-          }
-          candidate.added_point_id = added_point_id;
-          candidate.support_point_ids =
-              outside.candidate->support_point_ids;
-          candidate.support_point_count =
-              outside.candidate->support_point_count;
-          candidate.center = outside.candidate->center;
-          candidate.squared_level = outside.candidate->squared_level;
-          candidate.added_point_in_source_closed_ball = false;
-          candidate.added_point_in_selected_positive_support = true;
-        }
-        observe_candidate(std::move(candidate));
         continue;
       }
 
@@ -677,6 +676,66 @@ class ExactDirectSparseFirstIncidenceBuilder {
         source_point_ids_.begin(), source_point_ids_.end(), point_id);
   }
 
+  [[nodiscard]] bool incumbent_seed_contains(PointId point_id) const noexcept {
+    return std::binary_search(
+        incumbent_seed_point_ids_.begin(),
+        incumbent_seed_point_ids_.end(),
+        point_id);
+  }
+
+  [[nodiscard]] std::optional<ExactDirectSparseFirstIncidenceStopReason>
+  evaluate_candidate_point(PointId added_point_id) {
+    if (result_.audit.exact_point_evaluation_count >=
+        budget_.maximum_exact_point_evaluation_count) {
+      return ExactDirectSparseFirstIncidenceStopReason::
+          exact_point_evaluation_limit;
+    }
+    const exact::SpherePointLocation source_location =
+        exact::classify_sphere_point(
+            result_.source_facet_miniball->center,
+            result_.source_facet_miniball->squared_radius,
+            cloud_.point(added_point_id))
+            .location();
+    ++result_.audit.exact_point_evaluation_count;
+
+    ExactDirectSparseFirstIncidenceMinimizer candidate;
+    candidate.added_point_id = added_point_id;
+    if (source_location != exact::SpherePointLocation::outside) {
+      ++result_.audit.inside_or_boundary_source_ball_point_count;
+      candidate.support_point_count =
+          result_.source_facet_miniball->support_point_ids.size();
+      std::copy(
+          result_.source_facet_miniball->support_point_ids.begin(),
+          result_.source_facet_miniball->support_point_ids.end(),
+          candidate.support_point_ids.begin());
+      candidate.center = result_.source_facet_miniball->center;
+      candidate.squared_level =
+          result_.source_facet_miniball->squared_radius;
+      candidate.added_point_in_source_closed_ball = true;
+      candidate.added_point_in_selected_positive_support = false;
+    } else {
+      ++result_.audit.outside_source_ball_point_count;
+      OutsideCofaceBuildResult outside =
+          build_outside_coface(added_point_id);
+      if (outside.stop_reason !=
+          ExactDirectSparseFirstIncidenceStopReason::none) {
+        return outside.stop_reason;
+      }
+      if (!outside.candidate.has_value()) {
+        throw std::logic_error(
+            "an outside one-point coface has no positive support containing its added point");
+      }
+      candidate.support_point_ids = outside.candidate->support_point_ids;
+      candidate.support_point_count = outside.candidate->support_point_count;
+      candidate.center = outside.candidate->center;
+      candidate.squared_level = outside.candidate->squared_level;
+      candidate.added_point_in_source_closed_ball = false;
+      candidate.added_point_in_selected_positive_support = true;
+    }
+    observe_candidate(std::move(candidate));
+    return std::nullopt;
+  }
+
   [[nodiscard]] std::size_t eligible_count_in_node(
       std::size_t node_index) const {
     if (node_index >= index_.nodes_.size()) {
@@ -684,20 +743,27 @@ class ExactDirectSparseFirstIncidenceBuilder {
           "a first-incidence prune references an invalid LBVH node");
     }
     const spatial::MortonLbvhIndex::Node& node = index_.nodes_[node_index];
-    std::size_t excluded_count = 0U;
-    for (const PointId point_id : source_point_ids_) {
+    std::size_t preaccounted_count = 0U;
+    const auto count_if_inside = [this, &node, &preaccounted_count](
+                                     PointId point_id) {
       const std::size_t position =
           index_.leaf_position_by_point_id_[point_id];
       if (position >= node.leaf_begin && position < node.leaf_end) {
-        ++excluded_count;
+        ++preaccounted_count;
       }
+    };
+    for (const PointId point_id : source_point_ids_) {
+      count_if_inside(point_id);
+    }
+    for (const PointId point_id : incumbent_seed_point_ids_) {
+      count_if_inside(point_id);
     }
     const std::size_t node_point_count = node.leaf_end - node.leaf_begin;
-    if (excluded_count > node_point_count) {
+    if (preaccounted_count > node_point_count) {
       throw std::logic_error(
-          "a first-incidence node contains too many excluded points");
+          "a first-incidence node contains too many preaccounted points");
     }
-    return node_point_count - excluded_count;
+    return node_point_count - preaccounted_count;
   }
 
   [[nodiscard]] exact::ExactLevel coface_lower_bound(
@@ -989,6 +1055,7 @@ class ExactDirectSparseFirstIncidenceBuilder {
   const spatial::CanonicalPointCloud& cloud_;
   ExactDirectSparseFacetKey source_facet_key_{};
   std::span<const PointId> source_point_ids_;
+  std::span<const PointId> incumbent_seed_point_ids_;
   ExactDirectSparseFirstIncidenceBudget budget_{};
   spatial::LbvhTraversalOrder traversal_order_;
   ExactDirectSparseFirstIncidenceResult result_{};
@@ -1004,6 +1071,8 @@ bool ExactDirectSparseFirstIncidenceResult::
       !first_incidence_squared_level.has_value() ||
       cominimizers.empty() || !audit.traversal_complete ||
       !audit_covers_eligible_points(audit) ||
+      audit.exact_incumbent_seed_evaluation_count !=
+          audit.supplied_incumbent_seed_point_count ||
       audit.excluded_facet_point_count != source_facet_key.point_count ||
       !every_nonexcluded_point_evaluated_or_strictly_pruned ||
       !all_cominimizers_retained_atomically ||
@@ -1035,6 +1104,8 @@ bool ExactDirectSparseFirstIncidenceResult::certified_complete_no_coface()
          source_facet_miniball.has_value() &&
          source_facet_miniball_freshly_certified &&
          audit.eligible_coface_point_count == 0U &&
+         audit.exact_incumbent_seed_evaluation_count ==
+             audit.supplied_incumbent_seed_point_count &&
          audit.traversal_complete &&
          audit_covers_eligible_points(audit) &&
          audit.excluded_facet_point_count == source_facet_key.point_count &&
@@ -1064,14 +1135,38 @@ build_exact_direct_sparse_first_incidence(
     const ExactDirectSparseFacetKey& source_facet_key,
     const ExactDirectSparseFirstIncidenceBudget& budget,
     spatial::LbvhTraversalOrder traversal_order) {
+  return build_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+      index,
+      cloud,
+      source_facet_key,
+      std::span<const PointId>{},
+      budget,
+      traversal_order);
+}
+
+ExactDirectSparseFirstIncidenceResult
+build_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetKey& source_facet_key,
+    std::span<const PointId> incumbent_seed_point_ids,
+    const ExactDirectSparseFirstIncidenceBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
         "the Morton LBVH belongs to a different canonical point namespace");
   }
   require_valid_traversal_order(traversal_order);
   require_valid_source_key(cloud, source_facet_key);
+  require_valid_incumbent_seeds(
+      cloud, source_facet_key, incumbent_seed_point_ids);
   ExactDirectSparseFirstIncidenceBuilder builder{
-      index, cloud, source_facet_key, budget, traversal_order};
+      index,
+      cloud,
+      source_facet_key,
+      incumbent_seed_point_ids,
+      budget,
+      traversal_order};
   ExactDirectSparseFirstIncidenceResult result = builder.run();
   if (!result.certified_complete_first_incidence() &&
       !result.certified_complete_no_coface() &&
@@ -1090,12 +1185,33 @@ verify_exact_direct_sparse_first_incidence(
     const ExactDirectSparseFirstIncidenceBudget& budget,
     spatial::LbvhTraversalOrder traversal_order,
     const ExactDirectSparseFirstIncidenceResult& observed) {
+  return verify_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+      index,
+      cloud,
+      source_facet_key,
+      std::span<const PointId>{},
+      budget,
+      traversal_order,
+      observed);
+}
+
+ExactDirectSparseFirstIncidenceVerification
+verify_exact_direct_sparse_first_incidence_with_incumbent_seeds(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetKey& source_facet_key,
+    std::span<const PointId> incumbent_seed_point_ids,
+    const ExactDirectSparseFirstIncidenceBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactDirectSparseFirstIncidenceResult& observed) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
         "the Morton LBVH belongs to a different canonical point namespace");
   }
   require_valid_traversal_order(traversal_order);
   require_valid_source_key(cloud, source_facet_key);
+  require_valid_incumbent_seeds(
+      cloud, source_facet_key, incumbent_seed_point_ids);
 
   ExactDirectSparseFirstIncidenceVerification verification;
   verification.trusted_inputs_certified = true;
@@ -1109,10 +1225,11 @@ verify_exact_direct_sparse_first_incidence(
   }
 
   const ExactDirectSparseFirstIncidenceResult expected =
-      build_exact_direct_sparse_first_incidence(
+      build_exact_direct_sparse_first_incidence_with_incumbent_seeds(
           index,
           cloud,
           source_facet_key,
+          incumbent_seed_point_ids,
           budget,
           traversal_order);
   verification.source_miniball_freshly_replayed =

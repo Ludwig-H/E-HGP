@@ -17,6 +17,8 @@
 #include <geogram/basic/process.h>
 #include <geogram/delaunay/delaunay.h>
 
+#include "morsehgp3d/contract/canonical_id.hpp"
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -118,6 +120,7 @@ struct Options {
   std::optional<std::string> input_xyz;
   bool fixture_e5{};
   bool emit_records{};
+  bool gabriel_coverage_only{};
 };
 
 struct Timings {
@@ -166,6 +169,27 @@ struct K2Summary {
   double first_squared_level{};
   double root_squared_level{};
   std::uint64_t accepted_triangle_digest{};
+  std::size_t support_two_count{};
+  std::size_t support_three_count{};
+  std::size_t necessary_triangle_count{};
+  std::size_t strictly_lower_connected_triangle_count{};
+  std::size_t coverage_violation_count{};
+  std::string accepted_triangle_sha256;
+  std::string necessary_triangle_sha256;
+  std::vector<ClassifiedTriangle> emitted_necessary_records;
+};
+
+struct ReconstructibleInputDigests {
+  std::string point_cloud_sha256;
+  std::string ordinary_delaunay_edges_sha256;
+  std::string canonical_wedge_universe_sha256;
+};
+
+struct GabrielSafetyBatchManifest {
+  std::size_t ambiguous_triangle_count{};
+  std::size_t total_explicit_triangle_count{};
+  std::string ambiguous_triangle_sha256;
+  std::string composite_batch_sha256;
 };
 
 template <typename Duration>
@@ -244,16 +268,25 @@ template <typename Duration>
       options.fixture_e5 = true;
     } else if (argument == "--emit-records") {
       options.emit_records = true;
+    } else if (argument == "--gabriel-coverage-only") {
+      options.gabriel_coverage_only = true;
     } else {
       throw std::invalid_argument(
           "usage: gpu_geogram_low_order_diagnostic "
           "[--point-count N] [--seed N] [--cpu-workers N] "
           "[--grid-resolution R] [--triangle-chunk-vertices N] "
-          "[--input-xyz PATH|--fixture-e5] [--emit-records]");
+          "[--input-xyz PATH|--fixture-e5] [--emit-records] "
+          "[--gabriel-coverage-only]");
     }
   }
   if (options.fixture_e5 && options.input_xyz.has_value()) {
     throw std::invalid_argument("--fixture-e5 and --input-xyz are exclusive");
+  }
+  if (options.gabriel_coverage_only &&
+      options.triangle_chunk_vertices == 0U) {
+    throw std::invalid_argument(
+        "--gabriel-coverage-only requires --triangle-chunk-vertices N so "
+        "the GPU candidate arena is explicitly bounded");
   }
   return options;
 }
@@ -1406,12 +1439,13 @@ struct DevicePipelineResult {
         nanoseconds(Clock::now() - audit_begin),
         "triangle audit time overflows uint64");
 
-    const std::size_t restricted_gamma_count =
-        candidate_count - static_cast<std::size_t>(invalid);
+    const std::size_t restricted_gamma_count = options.gabriel_coverage_only
+        ? 0U
+        : candidate_count - static_cast<std::size_t>(invalid);
     const auto restricted_gamma_compaction_begin = Clock::now();
     thrust::device_vector<ClassifiedTriangle> restricted_gamma_device_records(
         restricted_gamma_count);
-    if (restricted_gamma_count != 0U) {
+    if (!options.gabriel_coverage_only && restricted_gamma_count != 0U) {
       const auto restricted_gamma_end = thrust::copy_if(
           thrust::device,
           classified.begin(),
@@ -1437,9 +1471,12 @@ struct DevicePipelineResult {
         "restricted Gamma compaction time overflows uint64");
 
     const auto gabriel_compaction_begin = Clock::now();
+    const std::size_t retained_invalid_count = options.gabriel_coverage_only
+        ? 0U
+        : static_cast<std::size_t>(invalid);
     thrust::device_vector<ClassifiedTriangle> invalid_device_records(
-        static_cast<std::size_t>(invalid));
-    if (invalid != 0U) {
+        retained_invalid_count);
+    if (retained_invalid_count != 0U) {
       const auto invalid_end = thrust::copy_if(
           thrust::device,
           classified.begin(),
@@ -1473,7 +1510,7 @@ struct DevicePipelineResult {
         device_vector_bytes(
             restricted_gamma_count, sizeof(ClassifiedTriangle)) +
         device_vector_bytes(
-            static_cast<std::size_t>(invalid), sizeof(ClassifiedTriangle)) +
+            retained_invalid_count, sizeof(ClassifiedTriangle)) +
         device_vector_bytes(center_count + 1U, 2U * sizeof(std::uint64_t));
     result.audit.maximum_chunk_device_bytes = std::max(
         result.audit.maximum_chunk_device_bytes, chunk_bytes);
@@ -1482,15 +1519,18 @@ struct DevicePipelineResult {
         result.persistent_device_bytes + chunk_bytes);
 
     const auto restricted_gamma_copy_begin = Clock::now();
-    std::vector<ClassifiedTriangle> host_restricted_gamma_chunk(
-        restricted_gamma_device_records.size());
-    thrust::copy(
-        restricted_gamma_device_records.begin(),
-        restricted_gamma_device_records.end(),
-        host_restricted_gamma_chunk.begin());
-    check_cuda(
-        cudaDeviceSynchronize(),
-        "restricted Gamma triangle output synchronization");
+    std::vector<ClassifiedTriangle> host_restricted_gamma_chunk;
+    if (!options.gabriel_coverage_only) {
+      host_restricted_gamma_chunk.resize(
+          restricted_gamma_device_records.size());
+      thrust::copy(
+          restricted_gamma_device_records.begin(),
+          restricted_gamma_device_records.end(),
+          host_restricted_gamma_chunk.begin());
+      check_cuda(
+          cudaDeviceSynchronize(),
+          "restricted Gamma triangle output synchronization");
+    }
     result.restricted_gamma_device_to_host_nanoseconds = checked_add_u64(
         result.restricted_gamma_device_to_host_nanoseconds,
         nanoseconds(Clock::now() - restricted_gamma_copy_begin),
@@ -1508,12 +1548,14 @@ struct DevicePipelineResult {
     const auto copy_begin = Clock::now();
     std::vector<ClassifiedTriangle> host_chunk(classified.size());
     thrust::copy(classified.begin(), classified.end(), host_chunk.begin());
-    std::vector<ClassifiedTriangle> host_invalid_chunk(
-        invalid_device_records.size());
-    thrust::copy(
-        invalid_device_records.begin(),
-        invalid_device_records.end(),
-        host_invalid_chunk.begin());
+    std::vector<ClassifiedTriangle> host_invalid_chunk;
+    if (!options.gabriel_coverage_only) {
+      host_invalid_chunk.resize(invalid_device_records.size());
+      thrust::copy(
+          invalid_device_records.begin(),
+          invalid_device_records.end(),
+          host_invalid_chunk.begin());
+    }
     check_cuda(cudaDeviceSynchronize(), "triangle output synchronization");
     result.device_to_host_nanoseconds = checked_add_u64(
         result.device_to_host_nanoseconds,
@@ -1619,6 +1661,73 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
   }
 }
 
+void sha256_word(
+    morsehgp3d::contract::CanonicalSha256Builder& builder,
+    std::uint64_t word) {
+  std::array<std::uint8_t, 8U> bytes{};
+  for (std::size_t index = 0U; index < bytes.size(); ++index) {
+    bytes[index] = static_cast<std::uint8_t>(
+        word >> ((bytes.size() - 1U - index) * 8U));
+  }
+  builder.update(std::span<const std::uint8_t>{bytes});
+}
+
+void sha256_triangle(
+    morsehgp3d::contract::CanonicalSha256Builder& builder,
+    const ClassifiedTriangle& record) {
+  sha256_word(builder, std::bit_cast<std::uint64_t>(record.squared_level));
+  sha256_word(builder, record.triangle.a);
+  sha256_word(builder, record.triangle.b);
+  sha256_word(builder, record.triangle.c);
+  sha256_word(builder, record.support_cardinality);
+}
+
+[[nodiscard]] ReconstructibleInputDigests make_reconstructible_input_digests(
+    std::span<const Point3> points,
+    std::span<const Edge> edges,
+    std::uint64_t raw_wedge_count,
+    std::uint64_t canonical_candidate_count) {
+  using morsehgp3d::contract::CanonicalId;
+  using morsehgp3d::contract::CanonicalSha256Builder;
+
+  CanonicalSha256Builder point_builder;
+  point_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/point-cloud/v1/sha256/");
+  sha256_word(point_builder, static_cast<std::uint64_t>(points.size()));
+  for (std::size_t index = 0U; index < points.size(); ++index) {
+    sha256_word(point_builder, static_cast<std::uint64_t>(index));
+    sha256_word(point_builder, std::bit_cast<std::uint64_t>(points[index].x));
+    sha256_word(point_builder, std::bit_cast<std::uint64_t>(points[index].y));
+    sha256_word(point_builder, std::bit_cast<std::uint64_t>(points[index].z));
+  }
+  const CanonicalId point_id = point_builder.finalize();
+
+  CanonicalSha256Builder edge_builder;
+  edge_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/delaunay-edges/v1/sha256/");
+  sha256_word(edge_builder, static_cast<std::uint64_t>(edges.size()));
+  for (const Edge& edge : edges) {
+    sha256_word(edge_builder, edge.u);
+    sha256_word(edge_builder, edge.v);
+  }
+  const CanonicalId edge_id = edge_builder.finalize();
+
+  CanonicalSha256Builder wedge_builder;
+  wedge_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/canonical-wedges/v1/sha256/");
+  wedge_builder.update(std::span<const std::uint8_t>{point_id.bytes()});
+  wedge_builder.update(std::span<const std::uint8_t>{edge_id.bytes()});
+  wedge_builder.update("owns_triangle_smallest_Delaunay_center_v1");
+  sha256_word(wedge_builder, raw_wedge_count);
+  sha256_word(wedge_builder, canonical_candidate_count);
+  const CanonicalId wedge_id = wedge_builder.finalize();
+
+  return ReconstructibleInputDigests{
+      point_id.to_lower_hex(),
+      edge_id.to_lower_hex(),
+      wedge_id.to_lower_hex()};
+}
+
 [[nodiscard]] K1Summary reduce_k1(
     std::span<const Point3> points,
     std::span<const Edge> edges) {
@@ -1675,10 +1784,13 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
 
 [[nodiscard]] K2Summary reduce_k2(
     std::span<const ClassifiedTriangle> records,
-    bool gabriel_only) {
+    bool gabriel_only,
+    bool emit_necessary_records = false) {
   std::vector<const ClassifiedTriangle*> accepted;
   accepted.reserve(records.size());
   std::vector<Edge> facets;
+  facets.reserve(checked_product(
+      records.size(), 3U, "k=2 facet arena reserve overflows size_t"));
   for (const ClassifiedTriangle& triangle : records) {
     if (gabriel_only &&
         triangle.status != TriangleStatus::gabriel_binary64) {
@@ -1696,28 +1808,32 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
   K2Summary summary;
   summary.accepted_triangle_digest = UINT64_C(1469598103934665603);
   digest_word(summary.accepted_triangle_digest, UINT64_C(2));
+  morsehgp3d::contract::CanonicalSha256Builder accepted_builder;
+  accepted_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/accepted/v1/sha256/");
+  sha256_word(accepted_builder, static_cast<std::uint64_t>(accepted.size()));
+  morsehgp3d::contract::CanonicalSha256Builder necessary_builder;
+  necessary_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/necessary/v1/sha256/");
   if (accepted.empty()) {
+    summary.accepted_triangle_sha256 =
+        accepted_builder.finalize().to_lower_hex();
+    necessary_builder.update("/count/");
+    sha256_word(necessary_builder, UINT64_C(0));
+    summary.necessary_triangle_sha256 =
+        necessary_builder.finalize().to_lower_hex();
     return summary;
+  }
+  for (std::size_t index = 1U; index < accepted.size(); ++index) {
+    if (ClassifiedTriangleLess{}(*accepted[index], *accepted[index - 1U])) {
+      throw std::logic_error("the k=2 input records are not globally sorted");
+    }
   }
   std::sort(facets.begin(), facets.end(), edge_less);
   facets.erase(std::unique(facets.begin(), facets.end()), facets.end());
   summary.facet_count = facets.size();
   DisjointSet components(facets.size());
-  bool has_previous = false;
-  std::uint64_t previous_bits{};
-  for (const ClassifiedTriangle* record : accepted) {
-    const Triangle triangle = record->triangle;
-    const std::uint64_t bits =
-        std::bit_cast<std::uint64_t>(record->squared_level);
-    if (!has_previous || bits != previous_bits) {
-      ++summary.distinct_level_count;
-      has_previous = true;
-      previous_bits = bits;
-    }
-    digest_word(summary.accepted_triangle_digest, bits);
-    digest_word(summary.accepted_triangle_digest, triangle.a);
-    digest_word(summary.accepted_triangle_digest, triangle.b);
-    digest_word(summary.accepted_triangle_digest, triangle.c);
+  const auto facet_ids = [&](const Triangle& triangle) {
     const std::array<Edge, 3U> triangle_facets{
         facet(triangle.a, triangle.b),
         facet(triangle.a, triangle.c),
@@ -1731,18 +1847,140 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
       }
       ids[index] = static_cast<std::size_t>(found - facets.begin());
     }
-    for (std::size_t index = 1U; index < ids.size(); ++index) {
-      if (components.unite(ids[0], ids[index])) {
-        ++summary.useful_union_count;
-      } else {
-        ++summary.redundant_union_count;
+    return ids;
+  };
+
+  std::size_t plateau_begin = 0U;
+  while (plateau_begin < accepted.size()) {
+    const double plateau_level = accepted[plateau_begin]->squared_level;
+    if (!std::isfinite(plateau_level) || plateau_level < 0.0) {
+      throw std::logic_error("a retained k=2 record has an invalid level");
+    }
+    std::size_t plateau_end = plateau_begin + 1U;
+    while (plateau_end < accepted.size() &&
+           accepted[plateau_end]->squared_level == plateau_level) {
+      ++plateau_end;
+    }
+    ++summary.distinct_level_count;
+    std::vector<std::array<std::size_t, 3U>> plateau_facet_ids;
+    plateau_facet_ids.reserve(plateau_end - plateau_begin);
+    for (std::size_t index = plateau_begin; index < plateau_end; ++index) {
+      const ClassifiedTriangle& record = *accepted[index];
+      const Triangle triangle = record.triangle;
+      const std::uint64_t bits =
+          std::bit_cast<std::uint64_t>(record.squared_level);
+      digest_word(summary.accepted_triangle_digest, bits);
+      digest_word(summary.accepted_triangle_digest, triangle.a);
+      digest_word(summary.accepted_triangle_digest, triangle.b);
+      digest_word(summary.accepted_triangle_digest, triangle.c);
+      sha256_triangle(accepted_builder, record);
+      const std::array<std::size_t, 3U> ids = facet_ids(triangle);
+      plateau_facet_ids.push_back(ids);
+
+      if (gabriel_only) {
+        if (record.support_cardinality == 2U) {
+          ++summary.support_two_count;
+        } else if (record.support_cardinality == 3U) {
+          ++summary.support_three_count;
+        } else {
+          throw std::logic_error(
+              "an accepted Gabriel triangle has invalid support cardinality");
+        }
+        const std::size_t root = components.find(ids[0]);
+        const bool strictly_lower_connected =
+            components.find(ids[1]) == root &&
+            components.find(ids[2]) == root;
+        if (strictly_lower_connected) {
+          ++summary.strictly_lower_connected_triangle_count;
+        } else {
+          ++summary.necessary_triangle_count;
+          sha256_triangle(necessary_builder, record);
+          if (emit_necessary_records) {
+            summary.emitted_necessary_records.push_back(record);
+          }
+        }
       }
     }
+
+    // The plateau is deliberately inserted only after every strict-lower test.
+    // Equal-level triangles can therefore never certify one another.
+    for (const std::array<std::size_t, 3U>& ids : plateau_facet_ids) {
+      for (std::size_t index = 1U; index < ids.size(); ++index) {
+        if (components.unite(ids[0], ids[index])) {
+          ++summary.useful_union_count;
+        } else {
+          ++summary.redundant_union_count;
+        }
+      }
+    }
+    plateau_begin = plateau_end;
+  }
+  if (gabriel_only &&
+      summary.necessary_triangle_count +
+              summary.strictly_lower_connected_triangle_count !=
+          accepted.size()) {
+    summary.coverage_violation_count = 1U;
   }
   summary.final_component_count = components.component_count();
   summary.first_squared_level = accepted.front()->squared_level;
   summary.root_squared_level = accepted.back()->squared_level;
+  summary.accepted_triangle_sha256 =
+      accepted_builder.finalize().to_lower_hex();
+  necessary_builder.update("/count/");
+  sha256_word(
+      necessary_builder,
+      static_cast<std::uint64_t>(summary.necessary_triangle_count));
+  summary.necessary_triangle_sha256 =
+      necessary_builder.finalize().to_lower_hex();
   return summary;
+}
+
+[[nodiscard]] GabrielSafetyBatchManifest make_gabriel_safety_batch_manifest(
+    std::span<const ClassifiedTriangle> retained_records,
+    const K2Summary& accepted_coverage) {
+  using morsehgp3d::contract::CanonicalId;
+  using morsehgp3d::contract::CanonicalSha256Builder;
+
+  CanonicalSha256Builder ambiguous_builder;
+  ambiguous_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/ambiguous-safety/v1/sha256/");
+  std::size_t ambiguous_count{};
+  for (const ClassifiedTriangle& record : retained_records) {
+    if (record.status == TriangleStatus::ambiguous) {
+      sha256_triangle(ambiguous_builder, record);
+      ++ambiguous_count;
+    }
+  }
+  ambiguous_builder.update("/count/");
+  sha256_word(ambiguous_builder, static_cast<std::uint64_t>(ambiguous_count));
+  const CanonicalId ambiguous_id = ambiguous_builder.finalize();
+  const CanonicalId necessary_id = CanonicalId::from_lower_hex(
+      accepted_coverage.necessary_triangle_sha256);
+
+  CanonicalSha256Builder composite_builder;
+  composite_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/composite-safety-batch/v1/sha256/");
+  composite_builder.update(
+      std::span<const std::uint8_t>{necessary_id.bytes()});
+  sha256_word(
+      composite_builder,
+      static_cast<std::uint64_t>(
+          accepted_coverage.necessary_triangle_count));
+  composite_builder.update(
+      std::span<const std::uint8_t>{ambiguous_id.bytes()});
+  sha256_word(composite_builder, static_cast<std::uint64_t>(ambiguous_count));
+  const CanonicalId composite_id = composite_builder.finalize();
+
+  if (ambiguous_count >
+      std::numeric_limits<std::size_t>::max() -
+          accepted_coverage.necessary_triangle_count) {
+    throw std::length_error("Gabriel safety batch count overflows size_t");
+  }
+  return GabrielSafetyBatchManifest{
+      ambiguous_count,
+      accepted_coverage.necessary_triangle_count + ambiguous_count,
+      ambiguous_id.to_lower_hex(),
+      composite_id.to_lower_hex()};
 }
 
 void write_point_json(const Point3& point) {
@@ -1816,10 +2054,6 @@ int main(int argc, char** argv) {
         build_csr(points.size(), geogram.edges, cpu_workers);
     timings.csr_nanoseconds = nanoseconds(Clock::now() - csr_begin);
 
-    const auto k1_begin = Clock::now();
-    K1Summary k1 = reduce_k1(points, geogram.edges);
-    timings.k1_reduction_nanoseconds = nanoseconds(Clock::now() - k1_begin);
-
     DevicePipelineResult gpu = run_triangle_pipeline(points, graph, options);
     timings.grid_nanoseconds = gpu.grid_nanoseconds;
     timings.triangle_enumeration_nanoseconds = gpu.enumeration_nanoseconds;
@@ -1828,6 +2062,225 @@ int main(int argc, char** argv) {
         gpu.compaction_sort_nanoseconds;
     timings.triangle_device_to_host_nanoseconds =
         gpu.device_to_host_nanoseconds;
+
+    if (options.gabriel_coverage_only) {
+      const auto k2_begin = Clock::now();
+      K2Summary coverage =
+          reduce_k2(gpu.retained_records, true, options.emit_records);
+      timings.k2_reduction_nanoseconds = nanoseconds(Clock::now() - k2_begin);
+      const ReconstructibleInputDigests input_digests =
+          make_reconstructible_input_digests(
+              points,
+              geogram.edges,
+              gpu.audit.raw_wedge_count,
+              gpu.audit.canonical_candidate_count);
+      const GabrielSafetyBatchManifest safety_batch =
+          make_gabriel_safety_batch_manifest(
+              gpu.retained_records, coverage);
+      const bool accepted_partition_closed =
+          coverage.necessary_triangle_count +
+                  coverage.strictly_lower_connected_triangle_count ==
+              gpu.audit.accepted_count &&
+          coverage.support_two_count + coverage.support_three_count ==
+              gpu.audit.accepted_count &&
+          coverage.coverage_violation_count == 0U;
+      const bool status_partition_closed =
+          gpu.audit.blocked_count + gpu.audit.accepted_count +
+                  gpu.audit.ambiguous_count + gpu.audit.invalid_count ==
+              gpu.audit.canonical_candidate_count;
+      const bool binary64_gate_passed =
+          accepted_partition_closed && status_partition_closed &&
+          safety_batch.ambiguous_triangle_count ==
+              gpu.audit.ambiguous_count &&
+          gpu.audit.invalid_count == 0U;
+      timings.total_nanoseconds = nanoseconds(Clock::now() - total_begin);
+
+      std::cout
+          << "{\"schema\":\"morsehgp3d.phase15_delaunay_gabriel_coverage.v1\""
+          << ",\"git_sha\":\"" << MORSEHGP3D_GIT_SHA << "\""
+          << ",\"phase\":\"15\""
+          << ",\"backend\":\"ordinary_delaunay_wedge_plus_cuda_g4_aabb_grid\""
+          << ",\"profile\":\"hgp_reduced\""
+          << ",\"mode\":\"gabriel_necessary_batch\""
+          << ",\"deployment_status\":\"diagnostic_sidecar\""
+          << ",\"public_status\":\"not_claimed\""
+          << ",\"criterion\":\"triangle_explicit_or_three_facets_connected_at_strictly_lower_level\""
+          << ",\"proof_scope\":{"
+             "\"general_position_required\":true,"
+             "\"complete_Voronoi_nerve_one_skeleton_required\":true,"
+             "\"Geogram_SoS_topology_exactly_recertified\":false,"
+             "\"every_regular_Gabriel_triangle_has_at_least_two_Delaunay_edges\":true,"
+             "\"support_cardinality_two_and_three_covered\":true,"
+             "\"exact_Gamma2_claimed\":false,"
+             "\"exact_Gabriel_classification_claimed\":false}"
+          << ",\"architecture\":{"
+             "\"edge_times_point_product_enumerated\":false,"
+             "\"higher_order_Delaunay_mosaic_materialized\":false,"
+             "\"ordinary_Delaunay_edges_only\":true,"
+             "\"canonical_wedges_enumerated_in_bounded_GPU_chunks\":true,"
+             "\"global_restricted_Gamma2_arena_materialized\":false,"
+             "\"global_Gabriel_proposal_arena_materialized_for_level_sort\":true,"
+             "\"same_level_candidates_can_certify_each_other\":false}"
+          << ",\"input\":{\"point_count\":" << points.size()
+          << ",\"seed\":" << options.seed
+          << ",\"cpu_workers_requested\":" << options.cpu_workers
+          << ",\"cpu_workers_used\":" << cpu_workers
+          << ",\"point_cloud_sha256\":\""
+          << input_digests.point_cloud_sha256 << "\"}"
+          << ",\"delaunay\":{\"engine\":\"PDEL\",\"cell_count\":"
+          << geogram.cell_count
+          << ",\"ordinary_edge_count\":" << geogram.edges.size()
+          << ",\"maximum_vertex_degree\":" << graph.maximum_degree
+          << ",\"ordinary_edges_sha256\":\""
+          << input_digests.ordinary_delaunay_edges_sha256 << "\"}"
+          << ",\"candidate_universe\":{\"generator\":\"canonical_Delaunay_CSR_wedges\""
+          << ",\"raw_wedge_count\":" << gpu.audit.raw_wedge_count
+          << ",\"canonical_candidate_count\":"
+          << gpu.audit.canonical_candidate_count
+          << ",\"canonical_wedge_universe_sha256\":\""
+          << input_digests.canonical_wedge_universe_sha256 << "\""
+          << ",\"chunk_count\":" << gpu.audit.chunk_count
+          << ",\"triangle_chunk_vertices\":"
+          << options.triangle_chunk_vertices
+          << ",\"maximum_chunk_candidate_count\":"
+          << gpu.audit.maximum_chunk_candidate_count << "}"
+          << ",\"classification\":{\"blocked_count\":"
+          << gpu.audit.blocked_count
+          << ",\"gabriel_binary64_count\":" << gpu.audit.accepted_count
+          << ",\"ambiguous_safety_count\":" << gpu.audit.ambiguous_count
+          << ",\"invalid_count\":" << gpu.audit.invalid_count
+          << ",\"status_partition_closed\":"
+          << (status_partition_closed ? "true" : "false")
+          << ",\"visited_cell_count\":" << gpu.audit.visited_cell_count
+          << ",\"tested_point_count\":" << gpu.audit.tested_point_count
+          << "}"
+          << ",\"coverage\":{\"source_triangle_count\":"
+          << gpu.audit.accepted_count
+          << ",\"support_two_count\":" << coverage.support_two_count
+          << ",\"support_three_count\":" << coverage.support_three_count
+          << ",\"explicit_necessary_accepted_count\":"
+          << coverage.necessary_triangle_count
+          << ",\"strictly_lower_connected_count\":"
+          << coverage.strictly_lower_connected_triangle_count
+          << ",\"coverage_violation_count\":"
+          << coverage.coverage_violation_count
+          << ",\"accepted_partition_closed\":"
+          << (accepted_partition_closed ? "true" : "false")
+          << ",\"binary64_gate_passed\":"
+          << (binary64_gate_passed ? "true" : "false")
+          << ",\"accepted_source_sha256\":\""
+          << coverage.accepted_triangle_sha256
+          << "\",\"necessary_accepted_sha256\":\""
+          << coverage.necessary_triangle_sha256
+          << "\",\"ambiguous_safety_sha256\":\""
+          << safety_batch.ambiguous_triangle_sha256
+          << "\",\"explicit_safety_batch_count\":"
+          << safety_batch.total_explicit_triangle_count
+          << ",\"explicit_safety_batch_sha256\":\""
+          << safety_batch.composite_batch_sha256
+          << "\",\"explicit_safety_batch_semantics\":\"necessary_accepted_plus_all_ambiguous\""
+          << ",\"necessary_records\":";
+      if (options.emit_records) {
+        std::cout << '[';
+        bool first_record = true;
+        for (const ClassifiedTriangle& record :
+             coverage.emitted_necessary_records) {
+          if (!first_record) {
+            std::cout << ',';
+          }
+          first_record = false;
+          write_triangle_json(record);
+        }
+        std::cout << ']';
+      } else {
+        std::cout << "null";
+      }
+      std::cout
+          << ",\"ambiguous_safety_records\":";
+      if (options.emit_records) {
+        std::cout << '[';
+        bool first_record = true;
+        for (const ClassifiedTriangle& record : gpu.retained_records) {
+          if (record.status != TriangleStatus::ambiguous) {
+            continue;
+          }
+          if (!first_record) {
+            std::cout << ',';
+          }
+          first_record = false;
+          write_triangle_json(record);
+        }
+        std::cout << ']';
+      } else {
+        std::cout << "null";
+      }
+      std::cout << "}"
+                << ",\"emitted_fixture\":";
+      if (options.emit_records) {
+        std::cout << "{\"points\":[";
+        for (std::size_t index = 0U; index < points.size(); ++index) {
+          if (index != 0U) {
+            std::cout << ',';
+          }
+          write_point_json(points[index]);
+        }
+        std::cout << "],\"ordinary_delaunay_edges\":[";
+        for (std::size_t index = 0U; index < geogram.edges.size(); ++index) {
+          if (index != 0U) {
+            std::cout << ',';
+          }
+          std::cout << "{\"u\":" << geogram.edges[index].u
+                    << ",\"v\":" << geogram.edges[index].v << '}';
+        }
+        std::cout << "],\"source_records\":[";
+        for (std::size_t index = 0U;
+             index < gpu.retained_records.size();
+             ++index) {
+          if (index != 0U) {
+            std::cout << ',';
+          }
+          write_triangle_json(gpu.retained_records[index]);
+        }
+        std::cout << "]}";
+      } else {
+        std::cout << "null";
+      }
+      std::cout
+          << ",\"gpu\":{\"device_name\":" << std::quoted(gpu.cuda_device_name)
+          << ",\"multiprocessor_count\":" << gpu.cuda_multiprocessor_count
+          << ",\"grid_resolution\":" << gpu.grid_resolution
+          << ",\"maximum_cell_occupancy\":"
+          << gpu.maximum_cell_occupancy
+          << ",\"persistent_device_bytes\":" << gpu.persistent_device_bytes
+          << ",\"maximum_chunk_device_bytes\":"
+          << gpu.audit.maximum_chunk_device_bytes
+          << ",\"maximum_accounted_live_device_bytes\":"
+          << gpu.maximum_accounted_live_device_bytes << "}"
+          << ",\"timings_nanoseconds\":{\"input\":"
+          << timings.input_nanoseconds
+          << ",\"geogram_delaunay\":" << timings.geogram_nanoseconds
+          << ",\"geogram_edge_extraction\":"
+          << timings.edge_extraction_nanoseconds
+          << ",\"csr\":" << timings.csr_nanoseconds
+          << ",\"gpu_grid\":" << timings.grid_nanoseconds
+          << ",\"gpu_triangle_enumeration\":"
+          << timings.triangle_enumeration_nanoseconds
+          << ",\"gpu_triangle_classification\":"
+          << timings.triangle_classification_nanoseconds
+          << ",\"gpu_triangle_compaction_sort\":"
+          << timings.triangle_compaction_sort_nanoseconds
+          << ",\"host_global_Gabriel_record_sort\":"
+          << gpu.host_sort_nanoseconds
+          << ",\"triangle_device_to_host\":"
+          << timings.triangle_device_to_host_nanoseconds
+          << ",\"coverage_reduction\":" << timings.k2_reduction_nanoseconds
+          << ",\"cold_e2e\":" << timings.total_nanoseconds << "}}\n";
+      return binary64_gate_passed ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+
+    const auto k1_begin = Clock::now();
+    K1Summary k1 = reduce_k1(points, geogram.edges);
+    timings.k1_reduction_nanoseconds = nanoseconds(Clock::now() - k1_begin);
 
     const auto k2_begin = Clock::now();
     K2Summary k2 = reduce_k2(gpu.retained_records, true);
