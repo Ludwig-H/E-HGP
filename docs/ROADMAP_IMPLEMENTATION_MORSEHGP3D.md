@@ -1601,7 +1601,17 @@ La mémoire device vaut $192n-80$ octets persistants et, pour $K=10$, $200n$ oct
 
 ### Diagnostic transversal Geogram/CUDA — oracle hors ligne et pivot produit
 
-#### Verdict natif du sidecar
+#### Verdict actuel — voisinage compact puis frontière GPU exacte
+
+Le diagnostic le plus récent au SHA `509a9c6f0e41fb4ae37975b2e8f10f87bc0101f6` mesure directement le rang des arêtes incidentes à chaque triangle `gabriel_binary64` accepté par PDEL. Il effectue un parcours LBVH complet par source, jamais par arc; la fenêtre Morton initialise seulement les incumbents. Le résultat conserve deux octets par arc dirigé du CSR PDEL, aucune table $n\times M$ et aucun triangle supplémentaire. Les rangs sont exacts pour la clé binary64 déclarée jusqu'à $M$; `M+1` signifie seulement un rang strictement supérieur.
+
+Sur la graine canonique, les 417 839, 8 665 509, 87 631 258 et 263 693 761 triangles acceptés à 50 000, 1 000 001, 10 000 001 et 30 000 001 points possèdent tous une racine témoin PDEL mesurable, y compris 66 367, 1 388 480, 14 089 614 et 42 444 874 triangles évalués avec seulement deux paires PDEL. Les maxima \`directed / symmetric union / mutual\` valent respectivement \`77 / 77 / 84\`, \`111 / 107 / 111\`, \`120 / 117 / 132\` et \`142 / 137 / 146\`. La politique $M=\lceil4k\ln n\rceil$ couvre \`symmetric_union_star\` sur les quatre tailles; elle manque 2 triangles dirigés et 4 mutuels à 30 M. La politique $M=\lceil5k\ln n\rceil$ couvre les trois variantes avec marge sur tous les runs. Ces taux règlent une passe de proposition; ils ne prouvent aucune borne universelle.
+
+À 50 000 points, $M=128$ et $M=256$ donnent exactement les mêmes seuils de triangles; le noyau de rang vaut respectivement 28,391 ms et 66,686 ms. À $M=128$, le composant tient donc sous 100 ms, mais le pipeline produit $K=10$ complet n'est pas encore qualifié. À 1 M, 10 M et 30 M avec $M=256$, le noyau vaut 1,361 s, 15,948 s et 52,637 s; Geogram et le reste du sidecar portent les temps froids à 14,796 s, 156,870 s et 481,542 s. PDEL reste donc un oracle massif hors ligne, jamais une dépendance produit. Le rapport récent, les contrôles différentiels, le memcheck et les artefacts sont dans [PHASE15_GABRIEL_NEIGHBOR_RANK_G4.md](validation/PHASE15_GABRIEL_NEIGHBOR_RANK_G4.md).
+
+La direction retenue n'ajoute pas une nouvelle variante. Elle combine le préfixe adaptatif de voisinage avec une frontière bloc--bloc plate, résidente sur le LBVH commun et exécutée par vagues device `count -> scan -> emit`. Le préfixe propose; seule la recertification exacte et `frontier_empty=true` autorisent le commit. La première lane ferme l'EMST à $k=1$; la seconde émet `pair`, `higher` et `extra_shell` à $k=2$. Aucun callback par produit, transfert de terminaux par vague, Delaunay, table $n\times M$ ou catalogue global de triangles n'est admis. Le premier gate est un différentiel exact sur petits nuages, puis 12 500 et 50 000/$K=10$; le SLO reste strictement ouvert tant que le vrai `warm_e2e` ne passe pas sous 100 ms.
+
+#### Contexte minimal — erreurs du surrogate et oracle PDEL
 
 Au SHA `c56f8022f3ee7e27a296dcb04337047c2e548fab`, Geogram PDEL scelle les deux fixtures et confirme les retards du surrogate brut. À $k=1$, $(2,3,7)$ est une source Gabriel binary64 de niveau $149/4$, ses trois arêtes appartiennent au 1-squelette PDEL et sa première connexion brute arrive au niveau adapté $225/4$. À $k=2$, le même verdict vaut pour $(0,1,3)$, de $345/4$ à $457/4$. Ces deux candidats deviennent donc des erreurs permanentes confirmées. L'overlay glouton canonique les reconnecte sur leur plateau source et les checkers avec records rejouent indépendamment les sources, l'arbre brut, l'overlay et l'arbre corrigé.
 

@@ -1699,6 +1699,29 @@ Le memcheck séparé $n=4\,096$, $K=2$ doit publier zéro erreur et zéro fuite;
 
 Avant le benchmark produit, le test `legacy_oracle_cleanup_complete` exige que les anciennes cibles, configurations et campagnes de performance ne soient plus joignables depuis le build produit; seuls les fixtures, checkers et petits runners explicitement marqués oracle peuvent rester. Le prochain gate exécute alors les différentiels bornés $k=1$ et $k=2$, puis le vrai `warm_e2e` $n=50\,000$, $K=10$ sur au moins trente nuages neufs. Ce chrono inclut LBVH, Borůvka, flux `pair` et `higher`, certificats `frontier_empty`, merge, réduction et sortie, mais exclut explicitement PDEL, l'overlay et toutes les anciennes variantes hors ligne. Seul un p95 strictement inférieur à 100 ms avec toutes les décisions exactes fermées satisfait le SLO. Le contexte administratif reste `reference_cpu / hgp_reduced / budgeted`, `deployment_status=architecture_only` et `public_status=not_claimed` jusqu'à ce gate.
 
+### 14.18g Diagnostic de rang des témoins Gabriel PDEL
+
+Ce lot hors ligne mesure le plus petit préfixe de voisinage suffisant pour chaque triangle `gabriel_binary64` accepté; il ne qualifie ni un catalogue Gabriel produit, ni Gamma$_2$, ni la hiérarchie Morse. Le kernel doit effectuer une traversée LBVH complète par source et non par arc, utiliser $W$ comme amorce seulement, calculer la borne AABB avec arrondi dirigé vers le bas, pruner seulement sous inégalité stricte et descendre sur égalité. Il est interdit de matérialiser une table $n\times M$, une matrice de paires ou une mosaïque de Delaunay d'ordre supérieur. Le transcript autorisé contient deux octets par arc dirigé du CSR PDEL; `M+1` censure exactement les rangs strictement supérieurs à $M$.
+
+Le test borné exécute automatiquement un tri CPU exhaustif pour chaque arc CSR lorsque $n\leq4\,096$. Il exige zéro désaccord, une permutation canonique--source valide et une structure CSR recertifiée. La fixture E5 doit observer à la fois une permutation non identitaire et une égalité de distance binary64, puis comparer exactement ses 20 arcs. Le smoke 257 points doit comparer 3 598 arcs, observer la censure à $M=128$, la fermer à $M=256$ et conserver les mêmes seuils déjà capturés.
+
+Les résultats scientifiques doivent être invariants entre $(M,W,B)=(128,128,17)$ et $(128,256,257)$, où $B$ est la taille de lot de requêtes. Pour tout rang cumulé, le checker impose `symmetric_union_star >= directed_root_star >= mutual_star`. Il exige aussi `accepted = complete_three_pair + partial_two_pair`, autorise les triangles support 2, refuse tout témoin insuffisant et garde le seuil partiel comme borne supérieure sûre du minimum sur les trois racines, jamais comme minimum absolu revendiqué.
+
+La qualification CUDA exige le binaire AOT `sm_120` sans PTX, le stockage local déclaré par kernel, la couverture complète des sources, zéro requête échouée, $W\geq M$, le transcript hôte validé et Compute Sanitizer sans erreur ni fuite. Le checker doit muter chacun de ces champs, ainsi que permutation, CSR, batching, partition support 2/3, claims exacts/publics, table globale interdite et statut scientifique.
+
+La campagne canonique exige les comptes suivants :
+
+| Points | Acceptés | 3 / 2 paires PDEL | Maximum `directed / union / mutual` | p99 `directed / union / mutual` | Noyau rang $M=256$ |
+|---:|---:|---:|---:|---:|---:|
+| 50 000 | 417 839 | 351 472 / 66 367 | 77 / 77 / 84 | 31 / 28 / 34 | 66,686 ms |
+| 1 000 001 | 8 665 509 | 7 277 029 / 1 388 480 | 111 / 107 / 111 | 32 / 29 / 35 | 1,361 s |
+| 10 000 001 | 87 631 258 | 73 541 644 / 14 089 614 | 120 / 117 / 132 | 32 / 30 / 35 | 15,948 s |
+| 30 000 001 | 263 693 761 | 221 248 887 / 42 444 874 | 142 / 137 / 146 | 32 / 30 / 35 | 52,637 s |
+
+À 50 k, un second artefact $M=128$ doit conserver les mêmes trois maxima, zéro triangle censuré et un noyau de 28,391 ms. Les échantillons de politique vérifient que $M=\lceil4k\ln n\rceil$ couvre `symmetric_union_star` aux quatre tailles, mais manque 2 triangles dirigés et 4 mutuels à 30 M, puis que $M=\lceil5k\ln n\rceil$ excède les trois maxima observés. Cette dernière observation règle une passe propositionnelle; tout test qui la convertit en preuve universelle ou en `public_status=exact` doit échouer.
+
+Les artefacts scellés sont `docs/validation/phase15_gabriel_neighbor_rank_*_g4_509a9c6.{json,txt}` et leur synthèse est [PHASE15_GABRIEL_NEIGHBOR_RANK_G4.md](validation/PHASE15_GABRIEL_NEIGHBOR_RANK_G4.md). Le test produit correspondant reste distinct : le préfixe adaptatif peut initialiser la frontière GPU plate, mais seuls la recertification exacte et `frontier_empty=true` autorisent une sortie sans Delaunay.
+
 ### 14.19 Échelle conditionnelle au-delà de 10 M
 
 Avant toute qualification massive, le vrai pipeline certifié doit d'abord réussir à 50 000 points avec sa sortie matérialisée et son checkpoint vérifiable. La première qualification massive porte ensuite sur 10 000 001 points et traverse ce même pipeline complet. Un smoke de constructeur Morton/LBVH, une mesure de composant ou un préfixe scientifique n'est pas un succès de ce jalon.
