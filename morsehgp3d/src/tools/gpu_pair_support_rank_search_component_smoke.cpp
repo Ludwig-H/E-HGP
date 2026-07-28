@@ -68,7 +68,7 @@ constexpr std::size_t kMaximumEmittedRecordCount = 2'048U;
 constexpr std::size_t kMaximumEmittedPointIdReferenceCount = 32'768U;
 constexpr std::size_t kMaximumClosedBallQueryCount = 2'048U;
 constexpr std::size_t kLegacyP1QueryCapacity = 1U;
-constexpr std::size_t kRequestedMaximumOrder = 10U;
+constexpr std::size_t kDefaultRequestedMaximumOrder = 10U;
 constexpr std::size_t kResidentLbvhNodeByteCount =
     10U * sizeof(std::uint64_t);
 constexpr std::uint64_t kFnvOffsetBasis =
@@ -79,6 +79,7 @@ static_assert(kResidentLbvhNodeByteCount == 80U);
 struct Options {
   std::string family;
   std::size_t point_count{};
+  std::size_t requested_maximum_order{kDefaultRequestedMaximumOrder};
   std::size_t work_unit_budget{};
   PairSupportRankPruneCapacity capacity{};
   PairSupportRankPruneBudget epoch_budget{};
@@ -183,6 +184,7 @@ void require(bool condition, std::string_view message) {
   Options options;
   bool family_seen = false;
   bool point_count_seen = false;
+  bool requested_maximum_order_seen = false;
   bool work_budget_seen = false;
   bool product_capacity_seen = false;
   bool work_item_capacity_seen = false;
@@ -196,6 +198,7 @@ void require(bool condition, std::string_view message) {
           << "Usage: "
              "morsehgp3d_gpu_pair_support_rank_search_component_smoke "
              "--family uniform_latin|eight_clusters --point-count N "
+             "[--requested-maximum-order K] "
              "--work-unit-budget W --product-capacity P "
              "--work-item-capacity F --receipt-capacity R "
              "--epoch-budget E --resident-replays Q\n";
@@ -215,6 +218,13 @@ void require(bool condition, std::string_view message) {
           "--point-count may be supplied only once");
       options.point_count = parse_size(value, "--point-count");
       point_count_seen = true;
+    } else if (option == "--requested-maximum-order") {
+      require(
+          !requested_maximum_order_seen,
+          "--requested-maximum-order may be supplied only once");
+      options.requested_maximum_order =
+          parse_size(value, "--requested-maximum-order");
+      requested_maximum_order_seen = true;
     } else if (option == "--work-unit-budget") {
       require(
           !work_budget_seen,
@@ -275,6 +285,11 @@ void require(bool condition, std::string_view message) {
       options.point_count >= 2U &&
           options.point_count <= kMaximumRunnerPointCount,
       "--point-count is outside the bounded range 2..50000");
+  require(
+      options.requested_maximum_order >= 1U &&
+          options.requested_maximum_order <= 10U &&
+          options.requested_maximum_order < options.point_count,
+      "--requested-maximum-order is outside the bounded range 1..10 or is not below n");
   require(
       options.work_unit_budget > 0U &&
           options.work_unit_budget <= kMaximumRunnerWorkUnitBudget,
@@ -1453,7 +1468,7 @@ int main(int argument_count, char** argument_values) {
 
     const Clock::time_point authority_start = Clock::now();
     const ExactPairSupportAuthorityContext authority{
-        index, cloud, kRequestedMaximumOrder};
+        index, cloud, options.requested_maximum_order};
     const ExactPairSupportCheckpoint source_checkpoint =
         morsehgp3d::hierarchy::
             make_initial_exact_pair_support_checkpoint(authority);
@@ -1619,7 +1634,7 @@ int main(int argument_count, char** argument_values) {
         << "\"public_status\":null,"
         << "\"qualification_claimed\":false,"
         << "\"requested_maximum_order\":"
-        << kRequestedMaximumOrder << ','
+        << options.requested_maximum_order << ','
         << "\"resident_replay_count\":"
         << options.resident_replay_count << ','
         << "\"result_materialized\":false,"
