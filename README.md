@@ -37,7 +37,7 @@ Le nombre de résultats, et donc le pire cas de travail, peut lui-même être qu
 
 La cible principale est un p95 `warm_e2e` strictement inférieur à 100 ms pour 50 000 points et $K_{\max}=10$ sur des familles enregistrées : nouveau nuage, index, calcul, validation et matérialisation bornée inclus. Le passage à l'échelle est vérifié séquentiellement à 1 M, 10 M puis 30 M de points, avec flux reprenable et caps de mémoire/sortie.
 
-Le protocole G4 ne démarre qu'après l'existence d'un vrai noyau résident : différentiel borné, Compute Sanitizer, falsificateur de croissance à 12 500 points, puis trente nuages frais à 50 000 points. Les benchmarks utilisent uniquement les VM G4 `SPOT` et les coupe-circuits du dépôt.
+Le gate G4 du catalogue exact ne démarre qu'après l'existence d'un vrai noyau résident : différentiel borné, Compute Sanitizer, falsificateur de croissance à 12 500 points, puis trente nuages frais à 50 000 points. Un profil d'infrastructure antérieur peut mesurer séparément build, graine et mémoire sous `benchmark_only`, mais il ne qualifie ni la frontière, ni la scalabilité, ni le SLO. Les benchmarks utilisent uniquement les VM G4 `SPOT` et les coupe-circuits du dépôt; le premier [profil Morton--Yao48 borné](docs/validation/PHASE15_PROGRESS.md) illustre cette séparation.
 
 ## Lire le dépôt
 

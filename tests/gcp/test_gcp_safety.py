@@ -2705,6 +2705,59 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
                 self.assertEqual(self.gcloud_commands(), "")
 
 
+class MortonYao48WorkProfileRegressionTests(unittest.TestCase):
+    def test_build_publication_and_terminated_artifact_contract(self) -> None:
+        presets = json.loads(
+            (ROOT / "morsehgp3d" / "CMakePresets.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        builds = {entry["name"]: entry for entry in presets["buildPresets"]}
+        target = "morsehgp3d_gpu_morton_yao48_seed_work_profile"
+        for preset_name in ("cuda-release", "cuda-audit"):
+            self.assertIn(target, builds[preset_name]["targets"])
+
+        remote = (
+            ROOT / "gcp-migration" / "phase3_remote_qualification.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            '"status": "worker_passed_pending_shutdown"', remote
+        )
+        self.assertIn(
+            '"environment_artifact_schema": '
+            '"morsehgp3d.phase3.qualification.v1"',
+            remote,
+        )
+
+        artifact = json.loads(
+            (
+                ROOT
+                / "docs"
+                / "validation"
+                / "phase15_morton_yao48_seed_work_profile_g4_bd79461.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            artifact["schema"],
+            "morsehgp3d.phase15.morton_yao48_seed_work_profile_artifact.v1",
+        )
+        self.assertEqual(artifact["status"], "passed")
+        self.assertEqual(
+            artifact["expected_point_counts"],
+            [50_000, 1_000_000, 10_000_000, 30_000_000],
+        )
+        self.assertTrue(artifact["vm_lifecycle"]["targeted_stop_verified"])
+        self.assertEqual(
+            artifact["vm_lifecycle"]["final_status"], "TERMINATED"
+        )
+        for measurement in artifact["measurements"]:
+            claims = measurement["claims"]
+            self.assertFalse(claims["dense_pair_fallback_performed"])
+            self.assertFalse(claims["delaunay_materialized"])
+            self.assertFalse(claims["emst_or_boruvka_invoked"])
+            self.assertFalse(claims["exact_pair_frontier_claimed"])
+
+
 class WorkflowPolicyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

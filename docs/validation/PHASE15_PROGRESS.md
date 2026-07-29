@@ -22,6 +22,23 @@ Deux briques exécutables précisent maintenant ce contrat sans le promouvoir. `
 
 Ces briques restent `architecture_only`. Le prédicat ponctuel effectue encore un H2D des neuf coordonnées, un D2H de chaque record et une synchronisation par lot; la frontière fusionnée reste host/fake. Elles ne publient ni catalogue complet, ni fermeture `RelevantGP`, ni mesure de scalabilité. Le pire cas peut rester quadratique, notamment lorsque la sortie l'est; les caps doivent alors produire `budget_exhausted`. Le prochain verrou est leur composition dans un parcours de régions entièrement résident, suivi de `count + scan`, payload fermé, falsificateur de croissance 12 500 et reçu de masse complet.
 
+### Profil G4 préliminaire de la graine Morton--Yao48
+
+Le SHA propre `bd79461ecd774ca0f3b599783113335183f69b65` ajoute un profil strictement `benchmark_only`, `backend=cuda_g4_plus_host_binary64`, `profile=hgp_reduced`, `mode=bounded_morton_window_yao48_seed_proxy`. Il mesure un travail borné en `O(nW)` avec `W=64` : génération du nuage affine, canonicalisation, construction CUDA Morton/LBVH, dix voisins proposés par point dans la fenêtre, classification binary64 dans les 48 chambres et agrégation hôte. Il ne lance ni EMST/Borůvka, ni Geogram/PDEL/Delaunay, ne certifie aucun rappel et conserve toute omission dans `unresolved`.
+
+| Points | proxy froid complet (ms) | build Morton/LBVH, premier appel (ms) | kernel de graine (ms) | graine + agrégation chaude (ms) | pic device (Gio) | pic RSS hôte (Gio) |
+|---:|---:|---:|---:|---:|---:|---:|
+| 50 000 | 1 331,317 | 1 242,938 | 0,463 | 6,458 | 0,018 | 0,142 |
+| 1 000 000 | 3 618,464 | 1 785,915 | 4,758 | 82,045 | 0,358 | 0,810 |
+| 10 000 000 | 25 835,611 | 7 343,429 | 43,464 | 821,864 | 3,576 | 6,968 |
+| 30 000 000 | 75 509,441 | 20 147,071 | 127,835 | 2 439,270 | 10,729 | 20,696 |
+
+Les deux colonnes chaudes couvrent seulement la graine et son agrégation, pas un nouveau nuage, sa canonicalisation ni son nouvel index. Le p95 `warm_e2e` produit à 50 000 points reste donc ouvert : 6,458 ms ne peut pas être présenté comme le SLO complet, tandis que 1 331,317 ms est un premier appel froid qui inclut l'initialisation CUDA. Au-delà de cette constante de démarrage, temps et mémoire observés restent approximativement linéaires jusqu'à 30 M sur cette famille; ce résultat qualifie une enveloppe d'infrastructure, pas la scalabilité du catalogue exact.
+
+Le résultat scientifique important est négatif et constructif. Avec seulement dix voisins totaux par point répartis entre 48 chambres, `cutoff_ready_count=0` et `certified_pruned=0` aux quatre tailles; 249 801, 5 000 902, 49 992 912 et 149 994 780 paires sont seulement proposées, puis presque tout l'univers reste `unresolved`. Grossir une fenêtre Morton ne ferme donc pas la frontière. Le prochain kernel doit remplir les banques par tuile d'ancres pendant le parcours LBVH, conserver leur mémoire en `O(B*48*Kmax)` et remplacer chaque région lointaine par un reçu exact; il ne doit surtout pas matérialiser `48*Kmax` voisins pour chacun des dizaines de millions de points.
+
+L'[artefact de profil](phase15_morton_yao48_seed_work_profile_g4_bd79461.json), SHA-256 `d63d91057ebe5a6926d3f4d95b8ee9185c3cd354195a6187b6a608ff9ac86cd0`, et son [artefact d'environnement](phase3_g4_morton_yao48_seed_bd79461.json), SHA-256 `15e1b4c4c5e295307d820d7766ef16ebd410435483a9879d00d47160b0e1c7b8`, sont liés au même SHA Git. La session `SPOT` ciblait `devpod-gpu-exploration / europe-west4-ai1a / ehgp-blackwell-spot-ai1a`; les deux coupe-circuits ont été vérifiés et la cible exacte a été relue `TERMINATED` le 29 juillet 2026 à 17:14:42 UTC. Aucune autre VM `project=e-hgp` active n'était visible.
+
 ## Synthèse historique — échéances PDEL, rangs de voisinage et direction produit
 
 Le sidecar historique décrit ci-dessous ne compare pas des catalogues. Geogram/PDEL reste un oracle massif hors ligne qui fournit uniquement une échéance de fusion : pour chaque triangle `gabriel_binary64` présent dans PDEL et accepté par le sidecar, la composante proposée doit être fusionnée au niveau source ou avant. Il n'est demandé ni égalité du catalogue de triangles, ni égalité du premier niveau de connexion, ni présence de PDEL dans le produit. Les variantes directes possèdent seulement un certificat d'inclusion `no-later-than`; seul le surrogate et son overlay ont un rejeu complet des plateaux fermés.
