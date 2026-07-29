@@ -700,6 +700,12 @@ def main() -> int:
         "mode": "certified",
         "phase": "4",
         "profile": "hgp_reduced",
+        "provenance": {
+            "environment_artifact_schema": PHASE3_SCHEMA,
+            "environment_artifact_sha256": sha256_file(
+                args.environment_artifact, "Phase 3 environment artifact"
+            ),
+        },
         "schema": SCHEMA,
         "scientific_public_status": None,
         "scientific_result_claimed": False,

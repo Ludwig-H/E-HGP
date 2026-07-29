@@ -257,6 +257,19 @@ class Phase15GabrielCoverageCheckerTests(unittest.TestCase):
         self.assertEqual(replay["replayed_necessary_count"], 4)
         self.assertEqual(replay["replayed_strictly_lower_connected_count"], 0)
 
+        unsafe_equal_level_omission = copy.deepcopy(payload)
+        unsafe_coverage = unsafe_equal_level_omission["coverage"]
+        assert isinstance(unsafe_coverage, dict)
+        unsafe_coverage["necessary_records"] = sources[:3]
+        unsafe_coverage["explicit_necessary_accepted_count"] = 3
+        unsafe_coverage["strictly_lower_connected_count"] = 1
+        unsafe_coverage["explicit_safety_batch_count"] = 3
+        _seal(unsafe_equal_level_omission)
+        with self.assertRaisesRegex(
+            CoverageInputError, "strict-lower DSU replay"
+        ):
+            analyze_coverage(unsafe_equal_level_omission)
+
     def test_strictly_lower_connectivity_uses_only_earlier_plateaus(self) -> None:
         payload = _payload()
         fixture = payload["emitted_fixture"]

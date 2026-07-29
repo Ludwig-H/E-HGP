@@ -2,7 +2,7 @@
 
 Ce corpus est organisé autour d'une seule voie active : catalogue exact et multi-ordre des paires diamétrales, frontière indépendante des triangles aigus, puis tétraèdres bien centrés, enfin réduction hiérarchique sparse. Il sépare les preuves, les oracles bornés, les replis de recherche et les pistes abandonnées.
 
-Contexte courant : Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, porte d'entrée satisfaite et porte de sortie ouverte. Le contrat GPU est documenté; seuls les deux oracles CPU bornés du catalogue de paires sont implémentés à ce stade. `public_status=not_claimed`.
+Contexte courant : Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, porte d'entrée satisfaite et porte de sortie ouverte. Deux oracles CPU bornés, le contrat hôte du catalogue, la spécification exécutable de la frontière fusionnée Morton--Yao48 et le prédicat ponctuel exact CUDA de première qualification sont intégrés; le catalogue résident complet ne l'est pas. `public_status=not_claimed`.
 
 ## Parcours actif
 
@@ -28,6 +28,9 @@ Contexte courant : Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mo
 
 - aucune mosaïque de Delaunay d'ordre supérieur, population globale de cellules, cofaces ou incidences;
 - aucune fenêtre Morton, liste Yao48 finie, ANN ou triangulation ordinaire utilisée comme autorité de complétude;
+- aucun parcours, buffer ou fallback qui matérialise ou visite inconditionnellement les $n(n-1)/2$ paires dans le chemin produit;
+- Morton fixe l'index et l'ownership, les banques Yao48 certifient les prunes, et le classifieur exact ne reçoit que les survivants;
+- toute exécution ferme `candidate + certified_pruned + unresolved = n(n-1)/2`; `unresolved` doit être nul pour une publication exhaustive;
 - une passe $K_{\max}$, puis routage des rangs vers tous les ordres;
 - proposition flottante, décision certifiée, réduction hiérarchique et statut public toujours distincts;
 - tout arrêt de capacité produit un état borné ou un échec fermé, jamais une absence déclarée exacte;
@@ -44,7 +47,7 @@ Contexte courant : Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mo
 | `budget_exhausted` | cap de temps, mémoire, travail ou sortie atteint avant fermeture |
 | objectif | hypothèse expérimentale réfutable, jamais garantie universelle |
 
-Le p95 `warm_e2e` sous 100 ms à 50 000 points et $K_{\max}=10$ reste un objectif sensible à la sortie. Le passage à 10 M–30 M impose un flux segmenté et reprenable. Les deux propriétés ne sont pas déduites d'un temps de noyau isolé.
+La convention publique est `requested_order=K`, donc rang fermé utile au plus $K+1$ et $K$ témoins supplémentaires pour certifier l'exclusion. Une demande formulée comme « au plus $K_{\mathrm{total}}$ points au total dans la boule » utilise au contraire $K_{\mathrm{total}}-1$ témoins. Le p95 `warm_e2e` sous 100 ms à 50 000 points et $K_{\max}=10$ reste un objectif sensible au profil et à la sortie. Le passage à 10 M–30 M impose un flux segmenté et reprenable. Les deux propriétés ne sont pas déduites d'un temps de noyau isolé.
 
 ## Sources et contrats sérialisés
 

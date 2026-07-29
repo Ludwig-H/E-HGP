@@ -2,6 +2,7 @@
 
 #include "morsehgp3d/exact/rational.hpp"
 #include "morsehgp3d/hierarchy/yao48_emst.hpp"
+#include "morsehgp3d/hierarchy/yao48_rank_cutoff.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
 #include <array>
@@ -38,11 +39,6 @@ inline constexpr std::string_view
     exact_yao48_ranked_pair_candidate_proof_basis =
         "yao48_closed_cone_extreme_ray_Kth_radius_directional_projection_"
         "witness_closed_diametral_rank_cutoff_strict_candidate_region_v2";
-
-enum class ExactYao48DirectionalCutoffSemantics : std::uint8_t {
-  closed_ball,
-  strict_interior,
-};
 
 // One receipt owns the exact K nearest witnesses of one half-open Yao48
 // chamber, ordered by (squared distance, PointId).  When the chamber contains
@@ -131,28 +127,6 @@ struct ExactYao48RankedPairCandidateResult {
       const ExactYao48RankedPairCandidateResult&,
       const ExactYao48RankedPairCandidateResult&) = default;
 };
-
-// Exact one-direction decision used by both the bounded oracle and the future
-// LBVH range reporter.  witness_squared_radius_upper_bound may be any positive
-// upper bound for K distinct certified witnesses in the target's half-open
-// chamber; the witnesses need not be the K nearest.  A looser bound only loses
-// prunes.  closed_ball uses three non-strict comparisons.  strict_interior
-// uses three strict comparisons and can therefore credit the RelevantGP lane.
-// The caller remains responsible for the witness count, identities, chamber
-// membership and distance bounds.  No floating square root or trigonometric
-// value is evaluated.
-[[nodiscard]] bool exact_yao48_directional_witness_radius_cutoff_certifies(
-    const exact::CertifiedPoint3& anchor,
-    const exact::CertifiedPoint3& target,
-    const exact::ExactLevel& witness_squared_radius_upper_bound,
-    ExactYao48DirectionalCutoffSemantics semantics);
-
-// Compatibility spelling for the exact-nearest bounded oracle.  Equality is
-// a rejection because that oracle classifies the closed diametral rank.
-[[nodiscard]] bool exact_yao48_directional_rank_cutoff_certifies_above(
-    const exact::CertifiedPoint3& anchor,
-    const exact::CertifiedPoint3& target,
-    const exact::ExactLevel& kth_squared_distance);
 
 [[nodiscard]] ExactYao48RankedPairCandidateResult
 build_exact_yao48_ranked_pair_candidate_reference(

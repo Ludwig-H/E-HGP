@@ -18,6 +18,7 @@ class ExactAnchoredPairCandidateRecertifier;
 class K1BoruvkaCandidateContext;
 class PairSupportPhiContext;
 class SpatialLbvhContext;
+class MortonYao48PairFrontierContext;
 }
 
 namespace morsehgp3d::spatial {
@@ -450,6 +451,7 @@ class MortonLbvhIndex {
   friend class gpu::ExactAnchoredPairCandidateRecertifier;
   friend class gpu::PairSupportPhiContext;
   friend class gpu::SpatialLbvhContext;
+  friend class gpu::MortonYao48PairFrontierContext;
 };
 
 [[nodiscard]] TopKPartition lbvh_top_k(

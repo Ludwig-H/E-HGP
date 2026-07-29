@@ -208,6 +208,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
 endif()
 
 find_package(Boost 1.74 REQUIRED CONFIG COMPONENTS headers)
+find_package(Threads REQUIRED)
 
 add_library(
   morsehgp3d_contract
@@ -2028,6 +2029,7 @@ add_library(
     src/cpu/hierarchy/critical_event_gamma_overlay.cpp
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/yao48_emst.cpp
+    src/cpu/hierarchy/yao48_rank_cutoff.cpp
     src/cpu/hierarchy/exact_lbvh_yao48_emst.cpp
     src/cpu/hierarchy/gamma.cpp
     src/cpu/hierarchy/gamma_transition.cpp
@@ -2192,8 +2194,187 @@ else()
   )
 endif()
 
+# Exact host/fake executable specification for the fused Morton/Yao48 pair
+# frontier.  It emits only leaf survivors or exact prune regions; owned LBVH
+# subtrees are never forwarded as unfiltered pair work.
+add_library(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
+  STATIC
+    src/gpu/morton_yao48_pair_frontier.cpp
+)
+add_library(
+  morsehgp3d::gpu_morton_yao48_pair_frontier_host_reference
+  ALIAS morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
+  PUBLIC
+    morsehgp3d::spatial
+    morsehgp3d::hierarchy
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+# Benchmark-only host aggregation for bounded Morton-window Yao48 seed
+# transcripts.  It preserves unresolved mass and never promotes a heuristic
+# omission to an exact pair-frontier prune.
+add_library(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_support
+  STATIC
+    src/gpu/morton_yao48_seed_work_profile.cpp
+)
+add_library(
+  morsehgp3d::gpu_morton_yao48_seed_work_profile_support
+  ALIAS morsehgp3d_gpu_morton_yao48_seed_work_profile_support
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_support
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_support
+  PUBLIC morsehgp3d::spatial
+  PRIVATE Threads::Threads morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_support PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_seed_work_profile_support PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_seed_work_profile_support
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+# Host/fake contract for the exact point predicate used by Phase 15. The
+# launcher symbol is intentionally supplied by a unit-test fake in CPU builds;
+# this target exercises validation, exact BigInt replay, fallback closure and
+# publication poisoning without claiming CUDA execution.
+add_library(
+  morsehgp3d_gpu_exact_diametral_phi_host_contract
+  STATIC
+    src/cuda/phase15_exact_diametral_phi_fixed.cuh
+    src/cuda/phase15_exact_diametral_phi_internal.hpp
+    src/gpu/exact_diametral_phi.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_diametral_phi_host_contract
+  ALIAS morsehgp3d_gpu_exact_diametral_phi_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_diametral_phi_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_diametral_phi_host_contract
+  PUBLIC morsehgp3d::exact
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_diametral_phi_host_contract PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_diametral_phi_host_contract PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_diametral_phi_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 if(MORSEHGP3D_ENABLE_CUDA)
   find_package(Threads REQUIRED)
+  add_library(
+    morsehgp3d_gpu_exact_diametral_phi
+    STATIC
+      src/cuda/phase15_exact_diametral_phi_fixed.cuh
+      src/cuda/phase15_exact_diametral_phi_internal.hpp
+      src/cuda/phase15_exact_diametral_phi.cu
+      src/gpu/exact_diametral_phi.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_exact_diametral_phi
+    ALIAS morsehgp3d_gpu_exact_diametral_phi
+  )
+  target_include_directories(
+    morsehgp3d_gpu_exact_diametral_phi
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_diametral_phi
+    PUBLIC morsehgp3d::exact
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_diametral_phi PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(morsehgp3d_gpu_exact_diametral_phi)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_diametral_phi
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/W4> $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_diametral_phi
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_exact_diametral_phi_qualification
+    src/tools/gpu_exact_diametral_phi_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_diametral_phi_qualification
+    PRIVATE morsehgp3d::gpu_exact_diametral_phi
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_diametral_phi_qualification PRIVATE cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_diametral_phi_qualification PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_diametral_phi_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
   add_library(
     morsehgp3d_gpu_predicates
     STATIC
@@ -2977,6 +3158,47 @@ if(MORSEHGP3D_ENABLE_CUDA)
   endif()
 
   if(MORSEHGP3D_BUILD_TOOLS)
+    add_executable(
+      morsehgp3d_gpu_morton_yao48_seed_work_profile
+      src/cuda/phase14_morton_window_knn_internal.hpp
+      src/cuda/phase14_morton_window_knn.cu
+      src/tools/gpu_morton_yao48_seed_work_profile.cpp
+    )
+    target_include_directories(
+      morsehgp3d_gpu_morton_yao48_seed_work_profile
+      PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+    )
+    target_link_libraries(
+      morsehgp3d_gpu_morton_yao48_seed_work_profile
+      PRIVATE
+        morsehgp3d::gpu_morton_lbvh_build
+        morsehgp3d::gpu_morton_yao48_seed_work_profile_support
+        Threads::Threads
+    )
+    target_compile_definitions(
+      morsehgp3d_gpu_morton_yao48_seed_work_profile
+      PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+    )
+    morsehgp3d_configure_cuda_target(
+      morsehgp3d_gpu_morton_yao48_seed_work_profile
+    )
+    if(MSVC)
+      target_compile_options(
+        morsehgp3d_gpu_morton_yao48_seed_work_profile PRIVATE /W4 /WX
+      )
+    else()
+      target_compile_options(
+        morsehgp3d_gpu_morton_yao48_seed_work_profile
+        PRIVATE
+          $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+          $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+      )
+    endif()
+
     add_executable(
       morsehgp3d_gpu_morton_window_h0_surrogate
       src/cuda/phase14_morton_window_knn_internal.hpp

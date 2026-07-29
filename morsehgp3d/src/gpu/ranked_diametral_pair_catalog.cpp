@@ -115,14 +115,14 @@ struct CombinedCatalogOwner {
   return left * right;
 }
 
-[[nodiscard]] std::uint64_t directed_pair_universe(
+[[nodiscard]] std::uint64_t twice_unordered_pair_universe(
     std::size_t point_count) {
   const std::uint64_t count = checked_u64(
       point_count, "the ranked-pair point count does not fit uint64");
   return checked_mul_u64(
       count,
       count - UINT64_C(1),
-      "the directed pair universe overflows uint64");
+      "twice the unordered pair universe overflows uint64");
 }
 
 void validate_fixed_budget(
@@ -131,15 +131,16 @@ void validate_fixed_budget(
       budget.maximum_anchor_tile_size >
           ranked_diametral_pair_catalog_maximum_anchor_tile_size ||
       budget.maximum_work_item_count == 0U ||
-      budget.maximum_directed_candidate_count == 0U ||
-      budget.maximum_pair_candidate_count == 0U ||
+      budget.maximum_yao48_survivor_occurrence_count == 0U ||
+      budget.maximum_canonical_candidate_pair_count == 0U ||
       budget.maximum_catalog_record_count == 0U ||
       budget.maximum_payload_point_id_count == 0U ||
       budget.maximum_catalog_record_count >
-          budget.maximum_pair_candidate_count) {
+          budget.maximum_canonical_candidate_pair_count) {
     throw std::invalid_argument(
         "the ranked-pair catalog requires nonzero fixed capacities, a tile "
-        "of at most 4096 anchors and no more records than pair candidates");
+        "of at most 4096 anchors and no more records than canonical "
+        "candidates");
   }
   static_cast<void>(checked_product(
       checked_product(
@@ -149,13 +150,13 @@ void validate_fixed_budget(
       ranked_diametral_pair_catalog_maximum_level,
       "the ranked-pair witness tile overflows size_t"));
   static_cast<void>(checked_product(
-      budget.maximum_directed_candidate_count,
+      budget.maximum_yao48_survivor_occurrence_count,
       2U * sizeof(std::uint64_t),
-      "the ranked-pair directed candidate arena overflows size_t"));
+      "the ranked-pair Yao48 survivor arena overflows size_t"));
   static_cast<void>(checked_product(
-      budget.maximum_pair_candidate_count,
+      budget.maximum_canonical_candidate_pair_count,
       2U * sizeof(std::uint64_t),
-      "the ranked-pair candidate arena overflows size_t"));
+      "the ranked-pair canonical candidate arena overflows size_t"));
   static_cast<void>(checked_product(
       budget.maximum_catalog_record_count,
       3U * sizeof(std::uint64_t),
@@ -192,13 +193,14 @@ void validate_fixed_budget(
       return RankedDiametralPairCatalogStopReason::work_item_capacity;
     case static_cast<std::uint64_t>(
         RankedDiametralPairCatalogStopReason::
-            directed_candidate_capacity):
+            yao48_survivor_occurrence_capacity):
       return RankedDiametralPairCatalogStopReason::
-          directed_candidate_capacity;
+          yao48_survivor_occurrence_capacity;
     case static_cast<std::uint64_t>(
-        RankedDiametralPairCatalogStopReason::pair_candidate_capacity):
+        RankedDiametralPairCatalogStopReason::
+            canonical_candidate_pair_capacity):
       return RankedDiametralPairCatalogStopReason::
-          pair_candidate_capacity;
+          canonical_candidate_pair_capacity;
     case static_cast<std::uint64_t>(
         RankedDiametralPairCatalogStopReason::catalog_record_capacity):
       return RankedDiametralPairCatalogStopReason::
@@ -220,37 +222,48 @@ void validate_fixed_budget(
 void validate_closed_rank_closure(
     const ClosedRankCatalogClosure& closure,
     std::uint64_t expected_owned_universe) {
-  if (closure.orientation_policy !=
-          RankedPairOrientationPolicy::morton_high_owner_prefix &&
-      closure.orientation_policy !=
-          RankedPairOrientationPolicy::bidirectional_intersection) {
+  if (closure.yao48_filter_policy !=
+          RankedPairYao48FilterPolicy::owner_unilateral &&
+      closure.yao48_filter_policy !=
+          RankedPairYao48FilterPolicy::bidirectional_intersection) {
     throw std::runtime_error(
-        "the ranked-pair receipt names an invalid orientation policy");
+        "the ranked-pair receipt names an invalid Yao48 filter policy");
+  }
+  if (closure.yao48_filter_policy ==
+          RankedPairYao48FilterPolicy::owner_unilateral &&
+      closure.yao48_inverse_pruned_pair_count != 0U) {
+    throw std::runtime_error(
+        "a unilateral Yao48 receipt reports an inverse-filter prune");
   }
   if (closure.owned_pair_universe_count != expected_owned_universe) {
     throw std::runtime_error(
         "the ranked-pair closed receipt names the wrong owned-pair universe");
   }
-  const std::uint64_t accounted_after_prunes = checked_add_u64(
-      closure.closed_pruned_owned_pair_count,
-      closure.emitted_owned_pair_count,
+  const std::uint64_t all_yao48_prunes = checked_add_u64(
+      closure.yao48_owner_pruned_pair_count,
+      closure.yao48_inverse_pruned_pair_count,
+      "the ranked-pair closed owned mass overflows");
+  const std::uint64_t decided_owned = checked_add_u64(
+      all_yao48_prunes,
+      closure.canonical_candidate_pair_count,
       "the ranked-pair closed owned mass overflows");
   const std::uint64_t accounted_owned = checked_add_u64(
-      accounted_after_prunes,
+      decided_owned,
       closure.unresolved_owned_pair_count,
       "the ranked-pair closed owned mass overflows");
   if (accounted_owned != expected_owned_universe) {
     throw std::runtime_error(
-        "the ranked-pair closed owned prune/emission/frontier mass does not "
-        "close");
+        "the ranked-pair Yao48 prune/canonical-survivor/frontier mass does "
+        "not close");
   }
   if (checked_add_u64(
-          closure.candidate_pair_count,
-          closure.inverse_filter_rejected_pair_count,
-          "the ranked-pair orientation mass overflows") !=
-      closure.emitted_owned_pair_count) {
+          closure.canonical_candidate_pair_count,
+          closure.duplicate_survivor_occurrence_count,
+          "the ranked-pair survivor occurrence mass overflows") !=
+      closure.yao48_survivor_occurrence_count) {
     throw std::runtime_error(
-        "the ranked-pair owned/inverse-filter mass is inconsistent");
+        "the ranked-pair Yao48 survivor canonicalization/deduplication mass "
+        "is inconsistent");
   }
   const std::uint64_t classified = checked_add_u64(
       closure.above_window_pair_count,
@@ -260,7 +273,7 @@ void validate_closed_rank_closure(
           classified,
           closure.unresolved_candidate_pair_count,
           "the ranked-pair classification mass overflows") !=
-      closure.candidate_pair_count) {
+      closure.canonical_candidate_pair_count) {
     throw std::runtime_error(
         "the ranked-pair multi-order classification mass is inconsistent");
   }
@@ -366,6 +379,8 @@ struct ValidatedReceipt {
         "the ranked-pair launcher receipt digest is invalid");
   }
   if (receipt.source_snapshot_epoch != host.source_snapshot_epoch ||
+      receipt.contract_schema_version !=
+          ranked_diametral_pair_catalog_contract_schema_version ||
       receipt.buffer_epoch == 0U ||
       receipt.buffer_epoch <= last_buffer_epoch ||
       receipt.point_count != host.point_count ||
@@ -384,15 +399,22 @@ struct ValidatedReceipt {
       receipt.synchronization_count != 0U ||
       receipt.intermediate_candidate_device_to_host_count != 0U ||
       receipt.legacy_host_callback_count != 0U ||
+      !receipt.morton_ownership_partition_validated ||
+      !receipt.yao48_filter_policy_validated ||
+      !receipt.candidate_point_id_canonicalization_validated ||
+      !receipt
+           .candidate_deduplication_before_exact_classification_validated ||
       receipt.exact_gpu_predicates_implemented ||
       receipt.scientific_decision_published ||
       receipt.global_relevant_gp_complete_published ||
       receipt.hierarchy_reduction_or_attachment_published ||
+      receipt.morton_scientific_authority_claimed ||
+      receipt.raw_morton_pair_stream_materialized ||
       receipt.forbidden_global_pair_matrix_materialized ||
       receipt.public_status_claimed) {
     throw std::runtime_error(
-        "the host-only ranked-pair scaffold forged CUDA or scientific "
-        "authority");
+        "the host-only ranked-pair scaffold violates its execution-only "
+        "Morton, Yao48 or canonical-candidate contract");
   }
   if (receipt.closed_prune_mass_reused_for_relevant_gp) {
     throw std::runtime_error(
@@ -417,14 +439,28 @@ struct ValidatedReceipt {
         "the ranked-pair status, stop reason and failure code disagree");
   }
 
-  const std::uint64_t directed_universe =
-      directed_pair_universe(host.point_count);
+  const std::uint64_t twice_unordered_universe =
+      twice_unordered_pair_universe(host.point_count);
   validate_closed_rank_closure(
-      receipt.closed_rank_closure, directed_universe / UINT64_C(2));
+      receipt.closed_rank_closure,
+      twice_unordered_universe / UINT64_C(2));
   validate_pair_support_relevant_gp_closure(
       receipt.pair_support_relevant_gp_closure,
       host.point_count,
-      directed_universe / UINT64_C(2));
+      twice_unordered_universe / UINT64_C(2));
+  if (receipt.closed_rank_closure.yao48_survivor_occurrence_count >
+          checked_u64(
+              fixed_budget.maximum_yao48_survivor_occurrence_count,
+              "the ranked-pair Yao48 survivor capacity does not fit uint64") ||
+      receipt.closed_rank_closure.canonical_candidate_pair_count >
+          checked_u64(
+              fixed_budget.maximum_canonical_candidate_pair_count,
+              "the ranked-pair canonical candidate capacity does not fit "
+              "uint64")) {
+    throw std::runtime_error(
+        "the ranked-pair receipt exceeds a fixed Yao48 survivor or canonical "
+        "candidate capacity");
+  }
 
   const detail::Phase15RankedPairCatalogDeviceOutput& output =
       receipt.output;
@@ -485,6 +521,7 @@ struct ValidatedReceipt {
   }
 
   RankedDiametralPairCatalogBuildAudit audit;
+  audit.contract_schema_version = receipt.contract_schema_version;
   audit.point_count = host.point_count;
   audit.certified_node_count = host.node_count;
   audit.maximum_level = maximum_level;
@@ -510,7 +547,15 @@ struct ValidatedReceipt {
   audit.fixed_capacity_echo_validated = true;
   audit.one_multi_order_launch_validated = true;
   audit.closed_rank_mass_validated = true;
-  audit.exact_once_orientation_validated = true;
+  audit.morton_ownership_partition_validated =
+      receipt.morton_ownership_partition_validated;
+  audit.yao48_filter_policy_validated =
+      receipt.yao48_filter_policy_validated;
+  audit.candidate_point_id_canonicalization_validated =
+      receipt.candidate_point_id_canonicalization_validated;
+  audit.candidate_deduplication_before_exact_classification_validated =
+      receipt
+          .candidate_deduplication_before_exact_classification_validated;
   audit.rank_bucket_layout_validated = true;
   audit.output_layout_validated = true;
   audit.payload_partition_validated = true;
@@ -518,6 +563,10 @@ struct ValidatedReceipt {
   audit.closed_and_relevant_gp_proofs_separated = true;
   audit.receipt_digest_validated = true;
   audit.host_fake_launcher_exercised = true;
+  audit.morton_scientific_authority_claimed =
+      receipt.morton_scientific_authority_claimed;
+  audit.raw_morton_pair_stream_materialized =
+      receipt.raw_morton_pair_stream_materialized;
   return ValidatedReceipt{status, stop_reason, audit};
 }
 
@@ -551,9 +600,16 @@ RankedDiametralPairCatalogDeviceLease::
       host_fake_(host_fake) {}
 
 bool RankedDiametralPairCatalogDeviceLease::ready() const noexcept {
-  return retained_resources_ != nullptr &&
+  return audit_.contract_schema_version ==
+             ranked_diametral_pair_catalog_contract_schema_version &&
+         retained_resources_ != nullptr &&
          audit_.closed_rank_catalog_complete &&
          audit_.traversal_owner_retained && audit_.catalog_owner_retained &&
+         audit_.morton_ownership_partition_validated &&
+         audit_.yao48_filter_policy_validated &&
+         audit_.candidate_point_id_canonicalization_validated &&
+         audit_
+             .candidate_deduplication_before_exact_classification_validated &&
          device_rank_offsets_ != nullptr &&
          device_strict_offsets_ != nullptr &&
          device_shell_offsets_ != nullptr &&
@@ -565,6 +621,8 @@ bool RankedDiametralPairCatalogDeviceLease::ready() const noexcept {
          (audit_.extra_shell_point_id_count == 0U ||
           device_shell_point_ids_ != nullptr) &&
          !audit_.global_relevant_gp_complete_published &&
+         !audit_.morton_scientific_authority_claimed &&
+         !audit_.raw_morton_pair_stream_materialized &&
          !audit_.public_status_claimed &&
          ((host_fake_ && cuda_device_ == -1 &&
            audit_.host_fake_lifecycle_exercised &&
@@ -603,14 +661,20 @@ bool RankedDiametralPairCatalogBuildAttempt::
     validated_contract_attempt() const noexcept {
   const bool complete =
       status_ == RankedDiametralPairCatalogBuildStatus::complete;
-  return audit_.launcher_call_count == 1U &&
+  return audit_.contract_schema_version ==
+             ranked_diametral_pair_catalog_contract_schema_version &&
+         audit_.launcher_call_count == 1U &&
          audit_.traversal_lease_owner_retained &&
          audit_.traversal_lease_extents_validated &&
          audit_.fixed_capacity_preflight_satisfied &&
          audit_.fixed_capacity_echo_validated &&
          audit_.one_multi_order_launch_validated &&
          audit_.closed_rank_mass_validated &&
-         audit_.exact_once_orientation_validated &&
+         audit_.morton_ownership_partition_validated &&
+         audit_.yao48_filter_policy_validated &&
+         audit_.candidate_point_id_canonicalization_validated &&
+         audit_
+             .candidate_deduplication_before_exact_classification_validated &&
          audit_.rank_bucket_layout_validated && audit_.output_layout_validated &&
          audit_.payload_partition_validated &&
          audit_.pair_support_relevant_gp_mass_validated &&
@@ -622,6 +686,8 @@ bool RankedDiametralPairCatalogBuildAttempt::
          !audit_.scientific_decision_published &&
          !audit_.global_relevant_gp_complete_published &&
          !audit_.hierarchy_reduction_or_attachment_published &&
+         !audit_.morton_scientific_authority_claimed &&
+         !audit_.raw_morton_pair_stream_materialized &&
          !audit_.forbidden_global_pair_matrix_materialized &&
          !audit_.public_status_claimed &&
          ((complete &&
@@ -796,6 +862,7 @@ RankedDiametralPairCatalogContext::build(std::size_t maximum_level) {
       combined_owner->source_cloud_identity = host_->source_cloud_identity;
 
       RankedDiametralPairCatalogDeviceLeaseAudit lease_audit;
+      lease_audit.contract_schema_version = receipt.contract_schema_version;
       lease_audit.point_count = host_->point_count;
       lease_audit.certified_node_count = host_->node_count;
       lease_audit.maximum_level = maximum_level;
@@ -816,6 +883,20 @@ RankedDiametralPairCatalogContext::build(std::size_t maximum_level) {
       lease_audit.catalog_owner_retained =
           combined_owner->catalog_owner != nullptr;
       lease_audit.host_fake_lifecycle_exercised = true;
+      lease_audit.morton_ownership_partition_validated =
+          receipt.morton_ownership_partition_validated;
+      lease_audit.yao48_filter_policy_validated =
+          receipt.yao48_filter_policy_validated;
+      lease_audit.candidate_point_id_canonicalization_validated =
+          receipt.candidate_point_id_canonicalization_validated;
+      lease_audit
+          .candidate_deduplication_before_exact_classification_validated =
+          receipt
+              .candidate_deduplication_before_exact_classification_validated;
+      lease_audit.morton_scientific_authority_claimed =
+          receipt.morton_scientific_authority_claimed;
+      lease_audit.raw_morton_pair_stream_materialized =
+          receipt.raw_morton_pair_stream_materialized;
 
       RankedDiametralPairCatalogDeviceLease lease{
           lease_audit,

@@ -895,7 +895,7 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
-  PRIVATE morsehgp3d::direct_k1_forest_journal
+  PRIVATE morsehgp3d::direct_k1_forest_journal morsehgp3d::hierarchy
 )
 if(MSVC)
   target_compile_options(
@@ -1539,6 +1539,113 @@ else()
       -Werror
   )
 endif()
+add_executable(
+  morsehgp3d_gpu_exact_diametral_phi_context_tests
+  test_gpu_exact_diametral_phi_context.cpp
+  fake_gpu_exact_diametral_phi_launchers.cpp
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_diametral_phi_context_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_diametral_phi_context_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_diametral_phi_host_contract
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_diametral_phi_context_tests PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_diametral_phi_context_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_diametral_phi_context_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_diametral_phi_context_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+add_executable(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+  test_gpu_morton_yao48_pair_frontier.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+  PRIVATE
+    morsehgp3d::gpu_morton_yao48_pair_frontier_host_reference
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_pair_frontier_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+add_executable(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
+  test_gpu_morton_yao48_seed_work_profile.cpp
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
+  PRIVATE morsehgp3d::gpu_morton_yao48_seed_work_profile_support
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_tests PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_seed_work_profile_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
 target_include_directories(
   morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
   PRIVATE
@@ -1901,6 +2008,8 @@ set(
   morsehgp3d_anchored_pair_candidate_recertifier_tests
   morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
   morsehgp3d_gpu_ranked_diametral_pair_catalog_contract_tests
+  morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+  morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
   morsehgp3d_gpu_morton_lbvh_build_context_tests
 )
 if(UNIX)
@@ -2927,6 +3036,24 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_ranked_diametral_pair_catalog_contract
   COMMAND morsehgp3d_gpu_ranked_diametral_pair_catalog_contract_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_exact_diametral_phi_context
+  COMMAND morsehgp3d_gpu_exact_diametral_phi_context_tests
+)
+if(MORSEHGP3D_ENABLE_CUDA)
+  add_test(
+    NAME morsehgp3d.gpu_exact_diametral_phi_qualification
+    COMMAND morsehgp3d_gpu_exact_diametral_phi_qualification
+  )
+endif()
+add_test(
+  NAME morsehgp3d.gpu_morton_yao48_pair_frontier
+  COMMAND morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_morton_yao48_seed_work_profile
+  COMMAND morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
 )
 add_test(
   NAME morsehgp3d.anchored_pair_candidate_recertifier

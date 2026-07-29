@@ -360,6 +360,17 @@ class Phase4SpatialQualificationAssemblerTests(unittest.TestCase):
             hashlib.sha256(self.lbvh_checker.read_bytes()).hexdigest(),
             artifact["binary"]["lbvh_checker_sha256"],
         )
+        self.assertEqual(
+            {
+                "environment_artifact_schema": (
+                    "morsehgp3d.phase3.qualification.v1"
+                ),
+                "environment_artifact_sha256": hashlib.sha256(
+                    self.environment.read_bytes()
+                ).hexdigest(),
+            },
+            artifact["provenance"],
+        )
         self.assertEqual(1013, artifact["checks"]["differential"]["case_count"])
         self.assertEqual(
             20,

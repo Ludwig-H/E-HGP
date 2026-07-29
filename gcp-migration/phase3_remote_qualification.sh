@@ -14,6 +14,7 @@ readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER_RELATIVE="morsehg
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE="morsehgp3d/tests/configuration/check_phase5_k1_boruvka_exact_search_work_profile.py"
 readonly PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase7_h_polytope_qualification.py"
 readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase9_pair_support_phi_qualification.py"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_exact_diametral_phi_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -37,7 +38,11 @@ readonly PHASE7_H_POLYTOPE_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morseh
 readonly PHASE7_H_POLYTOPE_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE7_H_POLYTOPE_BINARY_RELATIVE}"
 readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_pair_support_phi_qualification"
 readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE}"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_diametral_phi_qualification"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE}"
+readonly MORTON_YAO48_SEED_WORK_PROFILE_BINARY_PATH="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
+readonly AUDIT_MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-audit"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
 readonly WORK_RESERVE_SECONDS=1800
@@ -102,6 +107,11 @@ PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW=""
 PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH=""
 PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT=""
 PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE=""
+PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW=""
+PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH=""
+PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT=""
+PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE=""
+MORTON_YAO48_SEED_WORK_PROFILE=0
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
 WORK_DEADLINE_EPOCH=0
@@ -115,6 +125,7 @@ PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
+PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -190,7 +201,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -219,6 +230,10 @@ audite son ELF AOT sm_120 sans PTX, le passe sous memcheck et racecheck, puis
 exige une proposition stricte et une descente aux epochs 1 et 2. La décision
 stricte est recertifiée exactement sur CPU; le compagnon reste non scientifique,
 sans statut public ni publication d'un produit global de supports.
+L'option exact diametral-Phi Phase 15 qualifie seulement le prédicat ponctuel
+exact : intervalle dirigé, limbs dyadiques 128/256 et lot BigInt de repli. Elle
+audite les builds Release et audit, l'ELF AOT sm_120 sans PTX, memcheck et
+racecheck. Le compagnon ne revendique ni catalogue, ni SLO, ni statut public.
 EOF
 }
 
@@ -256,6 +271,15 @@ while (($# > 0)); do
             PHASE5_WORK_PROFILE_OUTPUT_RAW="$2"
             shift 2
             ;;
+        --morton-yao48-seed-work-profile-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --morton-yao48-seed-work-profile-output."
+            [[ -z "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" ]] || \
+                die "Les sorties de profils Morton sont mutuellement exclusives."
+            MORTON_YAO48_SEED_WORK_PROFILE=1
+            PHASE5_WORK_PROFILE_OUTPUT_RAW="$2"
+            shift 2
+            ;;
         --phase5-k1-boruvka-exact-search-work-profile-output)
             (($# >= 2)) || \
                 die "Valeur manquante après --phase5-k1-boruvka-exact-search-work-profile-output."
@@ -278,6 +302,14 @@ while (($# > 0)); do
             [[ -z "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]] || \
                 die "--phase9-pair-support-phi-output ne peut être fourni qu'une fois."
             PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase15-exact-diametral-phi-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase15-exact-diametral-phi-output."
+            [[ -z "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]] || \
+                die "--phase15-exact-diametral-phi-output ne peut être fourni qu'une fois."
+            PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -374,6 +406,32 @@ if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]]; then
         "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" != \
             "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]] || \
         die "La sortie pair-support Phi Phase 9 doit être distincte de toutes les autres sorties."
+fi
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]]; then
+    case "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase15-exact-diametral-phi-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" != "${OUTPUT_RAW}" && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" != "${PHASE4_OUTPUT_RAW}" && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" != "${PHASE5_OUTPUT_RAW}" && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" != \
+            "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" != \
+            "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" != \
+            "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" != \
+            "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]] || \
+        die "La sortie exact diametral-Phi Phase 15 doit être distincte de toutes les autres sorties."
+fi
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]] && \
+    [[ -n "${PHASE4_OUTPUT_RAW}" || -n "${PHASE5_OUTPUT_RAW}" || \
+       -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" || \
+       -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
+       -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
+       -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]]; then
+    die "--phase15-exact-diametral-phi-output est exclusive des autres compagnons."
 fi
 certify_fixed_timeout || \
     die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
@@ -588,6 +646,41 @@ if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]] || \
         die "La sortie pair-support Phi Phase 9 doit être inexistante : ${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]]; then
+    PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}")"
+    PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE="$(basename -- \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}")"
+    [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE}" && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE}" != "." && \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact exact diametral-Phi Phase 15 invalide."
+    [[ -d "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT}" ]] || \
+        die "Le répertoire parent de --phase15-exact-diametral-phi-output doit déjà exister."
+    PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT="$(cd -- \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie exact diametral-Phi Phase 15 illisible."
+    PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH="${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT}/${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE}"
+    [[ "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT}" == "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    for existing_output in \
+        "${OUTPUT_PATH}" "${PHASE4_OUTPUT_PATH}" "${PHASE5_OUTPUT_PATH}" \
+        "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}"; do
+        [[ -z "${existing_output}" || \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" != "${existing_output}" ]] || \
+            die "La sortie exact diametral-Phi Phase 15 doit être distincte de toutes les autres sorties."
+    done
+    case "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase15-exact-diametral-phi-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" && \
+        ! -L "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]] || \
+        die "La sortie exact diametral-Phi Phase 15 doit être inexistante : ${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -610,6 +703,7 @@ readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER="${REPOSITORY_ROO
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE}"
 readonly PHASE7_H_POLYTOPE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE}"
 readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE}"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -629,7 +723,8 @@ if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
         ! -L "${PHASE5_K1_BORUVKA_ASSEMBLER}" ]] || \
         die "Assembleur Phase 5 absent ou symbolique : ${PHASE5_K1_BORUVKA_ASSEMBLER}."
 fi
-if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]] && \
+    ((MORTON_YAO48_SEED_WORK_PROFILE == 0)); then
     [[ -f "${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER}" && \
         ! -L "${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER}" ]] || \
         die "Assembleur du profil de travail Phase 5 absent ou symbolique : ${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER}."
@@ -651,6 +746,11 @@ if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}" && \
         ! -L "${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}" ]] || \
         die "Assembleur pair-support Phi Phase 9 absent ou symbolique : ${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}."
+fi
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}" && \
+        ! -L "${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}" ]] || \
+        die "Assembleur exact diametral-Phi Phase 15 absent ou symbolique : ${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}."
 fi
 
 remove_container_from_cidfile() {
@@ -822,6 +922,10 @@ cleanup() {
         -f "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" && \
+        -f "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -924,6 +1028,16 @@ if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
         ! -L "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" ]] || \
         die "Le nom temporaire pair-support Phi Phase 9 reste occupé."
 fi
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
+    PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP="$(mktemp \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT}/.${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire exact diametral-Phi Phase 15."
+    rm -f -- "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" || \
+        die "Impossible de libérer le nom temporaire exact diametral-Phi Phase 15."
+    [[ ! -e "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" && \
+        ! -L "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" ]] || \
+        die "Le nom temporaire exact diametral-Phi Phase 15 reste occupé."
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -982,6 +1096,15 @@ readonly PHASE9_PAIR_SUPPORT_PHI_PTX_LOG="${LOG_DIR}/phase9-pair-support-phi-cuo
 readonly PHASE9_PAIR_SUPPORT_PHI_PTX_STDERR_LOG="${LOG_DIR}/phase9-pair-support-phi-cuobjdump-ptx.stderr.log"
 readonly PHASE9_PAIR_SUPPORT_PHI_MEMCHECK_LOG="${LOG_DIR}/phase9-pair-support-phi-memcheck.log"
 readonly PHASE9_PAIR_SUPPORT_PHI_RACECHECK_LOG="${LOG_DIR}/phase9-pair-support-phi-racecheck.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_LOG="${RESULT_DIR}/phase15-exact-diametral-phi-qualification.json"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_STDERR_LOG="${LOG_DIR}/phase15-exact-diametral-phi-qualification.stderr.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_RELEASE_BUILD_LOG="${LOG_DIR}/phase15-exact-diametral-phi-release-build.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_AUDIT_BUILD_LOG="${LOG_DIR}/phase15-exact-diametral-phi-audit-build.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_ELF_LOG="${LOG_DIR}/phase15-exact-diametral-phi-cuobjdump-elf.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_PTX_LOG="${LOG_DIR}/phase15-exact-diametral-phi-cuobjdump-ptx.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_PTX_STDERR_LOG="${LOG_DIR}/phase15-exact-diametral-phi-cuobjdump-ptx.stderr.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_MEMCHECK_LOG="${LOG_DIR}/phase15-exact-diametral-phi-memcheck.log"
+readonly PHASE15_EXACT_DIAMETRAL_PHI_RACECHECK_LOG="${LOG_DIR}/phase15-exact-diametral-phi-racecheck.log"
 declare -a PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS=()
 declare -a PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS=()
 
@@ -1925,6 +2048,135 @@ PY
     fi
 fi
 
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
+    begin_unit "phase15-exact-diametral-phi-release-build"
+    if ! run_container "phase15-exact-diametral-phi-release-build" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_RELEASE_BUILD_LOG}" \
+        cmake --build "${MODULE_DIR}" \
+        --target morsehgp3d_gpu_exact_diametral_phi_qualification \
+        --parallel 4; then
+        report_failure_log "phase15-exact-diametral-phi-release-build" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_RELEASE_BUILD_LOG}"
+        die "La cible CUDA exact diametral-Phi Phase 15 n'a pas pu être construite en Release."
+    fi
+
+    begin_unit "phase15-exact-diametral-phi-audit-build"
+    if ! run_container "phase15-exact-diametral-phi-audit-build" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_AUDIT_BUILD_LOG}" \
+        cmake --build "${AUDIT_MODULE_DIR}" \
+        --target morsehgp3d_gpu_exact_diametral_phi_qualification \
+        --parallel 4; then
+        report_failure_log "phase15-exact-diametral-phi-audit-build" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_AUDIT_BUILD_LOG}"
+        die "La cible CUDA exact diametral-Phi Phase 15 n'a pas pu être construite sous le preset audit."
+    fi
+    [[ -f "${BUILD_DIR}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire CUDA exact diametral-Phi Phase 15 n'a pas été construit sûrement."
+
+    begin_unit "phase15-exact-diametral-phi-qualification"
+    if ! run_container_split_output "phase15-exact-diametral-phi-qualification" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_LOG}" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_STDERR_LOG}" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-diametral-phi-qualification" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_LOG}"
+        report_failure_log "phase15-exact-diametral-phi-qualification-stderr" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_STDERR_LOG}"
+        die "La qualification CUDA exact diametral-Phi Phase 15 a échoué."
+    fi
+    if ! python3 -B - "${PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_LOG}" \
+        "$(dirname -- "${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}")" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+sys.path.insert(0, sys.argv[2])
+import assemble_phase15_exact_diametral_phi_qualification as assembler
+
+raw = path.read_text(encoding="utf-8")
+lines = raw.splitlines()
+if len(lines) != 1 or not lines[0]:
+    raise SystemExit("qualification stdout must contain exactly one JSON line")
+value = json.loads(lines[0])
+assembler.validate_qualification(value)
+canonical = json.dumps(
+    value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+) + "\n"
+if raw != canonical:
+    raise SystemExit("qualification stdout must be canonical JSON")
+PY
+    then
+        report_failure_log "phase15-exact-diametral-phi-qualification" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_LOG}"
+        die "La sortie exact diametral-Phi Phase 15 ne ferme pas son schéma exact component-only."
+    fi
+
+    begin_unit "phase15-exact-diametral-phi-cuobjdump-elf"
+    if ! run_container "phase15-exact-diametral-phi-cuobjdump-elf" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_ELF_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lelf \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-diametral-phi-cuobjdump-elf" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister les ELF exact diametral-Phi Phase 15."
+    fi
+    phase15_exact_diametral_phi_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_ELF_LOG}" | sort -u || true)"
+    if [[ "${phase15_exact_diametral_phi_architectures}" != "sm_120" ]]; then
+        report_failure_log "phase15-exact-diametral-phi-cuobjdump-elf" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_ELF_LOG}"
+        die "Le binaire exact diametral-Phi Phase 15 doit contenir uniquement un ELF sm_120; observé : ${phase15_exact_diametral_phi_architectures:-aucun}."
+    fi
+
+    begin_unit "phase15-exact-diametral-phi-cuobjdump-ptx"
+    if ! run_container_split_output "phase15-exact-diametral-phi-cuobjdump-ptx" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_PTX_LOG}" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-diametral-phi-cuobjdump-ptx-stderr" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX exact diametral-Phi Phase 15."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE15_EXACT_DIAMETRAL_PHI_PTX_LOG}"; then
+        report_failure_log "phase15-exact-diametral-phi-cuobjdump-ptx" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le binaire exact diametral-Phi Phase 15."
+    fi
+
+    begin_unit "phase15-exact-diametral-phi-memcheck"
+    if ! run_container "phase15-exact-diametral-phi-memcheck" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_MEMCHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool memcheck \
+        --leak-check full \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-diametral-phi-memcheck" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_MEMCHECK_LOG}"
+        die "Le memcheck exact diametral-Phi Phase 15 a échoué."
+    fi
+
+    begin_unit "phase15-exact-diametral-phi-racecheck"
+    if ! run_container "phase15-exact-diametral-phi-racecheck" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_RACECHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool racecheck \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-diametral-phi-racecheck" \
+            "${PHASE15_EXACT_DIAMETRAL_PHI_RACECHECK_LOG}"
+        die "Le racecheck exact diametral-Phi Phase 15 a échoué."
+    fi
+fi
+
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     begin_unit "phase4-spatial-differential"
     if ! run_container "phase4-spatial-differential" \
@@ -2200,6 +2452,67 @@ if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
 fi
 
 if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        [[ -f "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile" && \
+            ! -L "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile" && \
+            -x "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile" ]] || \
+            die "Le binaire CUDA du profil Morton/LBVH/Yao48 n'a pas été construit sûrement."
+        for point_count in 50000 1000000 10000000 30000000; do
+            work_profile_label="phase15-morton-yao48-seed-${point_count}"
+            work_profile_log="${RESULT_DIR}/${work_profile_label}.json"
+            work_profile_stderr_log="${LOG_DIR}/${work_profile_label}.stderr.log"
+            PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS+=("${work_profile_log}")
+            begin_unit "${work_profile_label}"
+            if ! run_container_split_output "${work_profile_label}" \
+                "${work_profile_log}" "${work_profile_stderr_log}" \
+                "${MORTON_YAO48_SEED_WORK_PROFILE_BINARY_PATH}" \
+                --point-count "${point_count}" \
+                --max-order 10 \
+                --morton-window 64 \
+                --warm-repetitions 1 \
+                --maximum-directed-pair-checks 4000000000 \
+                --maximum-neighbor-records 300000000 \
+                --seed 1; then
+                report_failure_log "${work_profile_label}" "${work_profile_log}"
+                report_failure_log "${work_profile_label}-stderr" \
+                    "${work_profile_stderr_log}"
+                die "Le profil Morton/LBVH/Yao48 a échoué pour n=${point_count}."
+            fi
+            python3 -B - "${work_profile_log}" "${HEAD_SHA}" \
+                "${point_count}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+raw = path.read_text(encoding="utf-8")
+lines = raw.splitlines()
+if len(lines) != 1 or raw != lines[0] + "\n":
+    raise SystemExit("le profil Morton/Yao48 n'est pas un JSON mono-ligne terminé par LF")
+value = json.loads(raw)
+if value.get("schema") != "morsehgp3d.phase15.morton_yao48_seed_work_profile.v1":
+    raise SystemExit("schéma du profil Morton/Yao48 invalide")
+if value.get("artifact_role") != "benchmark_only":
+    raise SystemExit("le profil Morton/Yao48 doit rester benchmark_only")
+if value.get("git_sha") != sys.argv[2] or value.get("point_count") != int(sys.argv[3]):
+    raise SystemExit("identité du profil Morton/Yao48 invalide")
+mass = value.get("pair_mass", {})
+if mass.get("survivors", -1) + mass.get("certified_pruned", -1) + mass.get("unresolved", -1) != mass.get("universe"):
+    raise SystemExit("la partition de masse Morton/Yao48 ne ferme pas")
+claims = value.get("claims", {})
+for key in (
+    "dense_pair_fallback_performed", "global_pair_matrix_materialized",
+    "delaunay_materialized", "geogram_invoked", "pdel_invoked",
+    "emst_or_boruvka_invoked", "exact_pair_frontier_claimed",
+    "scientific_exactness_claimed", "public_status_claimed",
+):
+    if claims.get(key) is not False:
+        raise SystemExit(f"revendication interdite dans le profil Morton/Yao48: {key}")
+PY
+        done
+        [[ "${#PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS[@]}" -eq 4 ]] || \
+            die "La matrice Morton/LBVH/Yao48 doit contenir quatre tailles."
+    else
     [[ -f "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_morton_work_profile" && \
         ! -L "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_morton_work_profile" && \
         -x "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_morton_work_profile" ]] || \
@@ -2232,6 +2545,7 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
     done
     [[ "${#PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS[@]}" -eq 9 ]] || \
         die "La matrice du profil de travail Morton Phase 5 doit contenir exactement neuf mesures."
+    fi
 fi
 
 [[ -s "${RUNTIME_JSONL}" ]] || die "Le runtime n'a pas produit son JSONL."
@@ -2303,6 +2617,66 @@ if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
 fi
 
 if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        python3 -B - "${HEAD_SHA}" "${PUBLISH_TEMP}" \
+            "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile" \
+            "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}" \
+            "${PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS[@]}" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+git_sha = sys.argv[1]
+environment_path = Path(sys.argv[2])
+binary_path = Path(sys.argv[3])
+output_path = Path(sys.argv[4])
+log_paths = [Path(value) for value in sys.argv[5:]]
+expected_sizes = [50000, 1000000, 10000000, 30000000]
+if len(log_paths) != len(expected_sizes):
+    raise SystemExit("quatre mesures Morton/Yao48 sont obligatoires")
+measurements = []
+for path, expected_size in zip(log_paths, expected_sizes, strict=True):
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if value.get("point_count") != expected_size:
+        raise SystemExit("ordre des tailles Morton/Yao48 invalide")
+    measurements.append(value)
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+artifact = {
+    "artifact_role": "benchmark_only",
+    "backend": "cuda_g4_plus_host_binary64",
+    "binary_sha256": digest(binary_path),
+    "environment_artifact_sha256": digest(environment_path),
+    "expected_point_counts": expected_sizes,
+    "git": {"clean": True, "sha": git_sha},
+    "measurements": measurements,
+    "mode": "bounded_morton_window_yao48_seed_proxy",
+    "phase": "15",
+    "profile": "hgp_reduced",
+    "schema": "morsehgp3d.phase15.morton_yao48_seed_work_profile_artifact.v1",
+    "scientific_exactness_claimed": False,
+    "scalability_claimed": False,
+    "public_status_claimed": False,
+    "delaunay_materialized": False,
+    "geogram_invoked": False,
+    "pdel_invoked": False,
+    "emst_or_boruvka_invoked": False,
+    "vm_lifecycle": {
+        "guest_shutdown_guard_verified": True,
+        "stop_responsibility": "external_orchestrator",
+        "worker_mutates_gcp": False,
+    },
+}
+output_path.write_text(
+    json.dumps(artifact, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    + "\n",
+    encoding="utf-8",
+)
+PY
+    else
     declare -a phase5_work_profile_assembler_arguments=(
         --git-sha "${HEAD_SHA}"
         --base-image-ref "${BASE_IMAGE_REF}"
@@ -2321,6 +2695,7 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
     )
     python3 -B "${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER}" \
         "${phase5_work_profile_assembler_arguments[@]}"
+    fi
 fi
 
 if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
@@ -2379,6 +2754,25 @@ if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
         --output "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}"
 fi
 
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --qualification-log "${PHASE15_EXACT_DIAMETRAL_PHI_QUALIFICATION_LOG}" \
+        --elf-log "${PHASE15_EXACT_DIAMETRAL_PHI_ELF_LOG}" \
+        --ptx-log "${PHASE15_EXACT_DIAMETRAL_PHI_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE15_EXACT_DIAMETRAL_PHI_PTX_STDERR_LOG}" \
+        --memcheck-log "${PHASE15_EXACT_DIAMETRAL_PHI_MEMCHECK_LOG}" \
+        --racecheck-log "${PHASE15_EXACT_DIAMETRAL_PHI_RACECHECK_LOG}" \
+        --release-build-log "${PHASE15_EXACT_DIAMETRAL_PHI_RELEASE_BUILD_LOG}" \
+        --audit-build-log "${PHASE15_EXACT_DIAMETRAL_PHI_AUDIT_BUILD_LOG}" \
+        --binary "${BUILD_DIR}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE#build/}" \
+        --output "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}"
+fi
+
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
     "${PHASE5_PUBLISH_TEMP}" "${PHASE5_OUTPUT_PATH}" \
@@ -2389,7 +2783,9 @@ python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" \
     "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" \
     "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" \
-    "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" <<'PY'
+    "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" \
+    "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" \
+    "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -2428,6 +2824,12 @@ if sys.argv[13] or sys.argv[14]:
         raise SystemExit("incomplete Phase 9 pair-support Phi publication pair")
     pairs.append(
         (Path(sys.argv[13]), Path(sys.argv[14]), "Phase 9 pair-support Phi")
+    )
+if sys.argv[15] or sys.argv[16]:
+    if not sys.argv[15] or not sys.argv[16]:
+        raise SystemExit("incomplete Phase 15 exact diametral-Phi publication pair")
+    pairs.append(
+        (Path(sys.argv[15]), Path(sys.argv[16]), "Phase 15 exact diametral-Phi")
     )
 for temporary, _, label in pairs:
     with temporary.open(encoding="utf-8") as stream:
@@ -2489,6 +2891,9 @@ fi
 if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
@@ -2496,6 +2901,7 @@ PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
+PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
@@ -2522,5 +2928,9 @@ fi
 if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon pair-support Phi Phase 9 provisoire publié sans remplacement : %s\n' \
         "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon exact diametral-Phi Phase 15 provisoire publié sans remplacement : %s\n' \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'

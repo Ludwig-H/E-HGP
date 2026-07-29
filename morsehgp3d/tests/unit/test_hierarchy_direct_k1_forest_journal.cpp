@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/direct_k1_forest_journal.hpp"
+#include "morsehgp3d/hierarchy/emst.hpp"
 
 #include <algorithm>
 #include <array>
@@ -27,6 +28,7 @@ using morsehgp3d::hierarchy::ExactDirectSupportTerminalBudget;
 using morsehgp3d::hierarchy::ExactDirectSupportTerminalFacade;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
+using morsehgp3d::hierarchy::K1EmstResult;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
@@ -112,6 +114,95 @@ struct DirectPipeline {
   ExactDirectK1ForestBudget k1_budget;
   ExactDirectK1ForestJournalResult forest;
 };
+
+struct K1FusionSignature {
+  ExactLevel squared_level{};
+  std::vector<std::vector<PointId>> child_components;
+  std::vector<PointId> merged_component;
+
+  friend bool operator==(const K1FusionSignature&, const K1FusionSignature&) =
+      default;
+};
+
+[[nodiscard]] bool fusion_signature_less(
+    const K1FusionSignature& left,
+    const K1FusionSignature& right) {
+  if (left.squared_level != right.squared_level) {
+    return left.squared_level < right.squared_level;
+  }
+  if (left.child_components != right.child_components) {
+    return left.child_components < right.child_components;
+  }
+  return left.merged_component < right.merged_component;
+}
+
+[[nodiscard]] std::vector<K1FusionSignature> direct_fusion_signatures(
+    const ExactDirectK1ForestJournalResult& forest) {
+  std::vector<std::vector<PointId>> node_components(forest.node_count);
+  for (std::size_t point_index = 0U; point_index < forest.point_count;
+       ++point_index) {
+    node_components[point_index] = {
+        static_cast<PointId>(point_index)};
+  }
+
+  std::vector<K1FusionSignature> result;
+  for (const auto& batch : forest.batches) {
+    const std::size_t group_end =
+        batch.atomic_group_offset + batch.atomic_group_count;
+    if (group_end > forest.atomic_groups.size()) {
+      throw std::logic_error("a direct K1 batch has an invalid group slice");
+    }
+    for (std::size_t group_index = batch.atomic_group_offset;
+         group_index < group_end;
+         ++group_index) {
+      const auto& group = forest.atomic_groups[group_index];
+      if (!group.created_node_id.has_value()) {
+        continue;
+      }
+      const std::size_t child_end = group.child_offset + group.child_count;
+      if (child_end > forest.child_node_ids.size() ||
+          *group.created_node_id >= node_components.size()) {
+        throw std::logic_error("a direct K1 fusion has an invalid node slice");
+      }
+      K1FusionSignature signature;
+      signature.squared_level = batch.squared_level;
+      for (std::size_t child_index = group.child_offset;
+           child_index < child_end;
+           ++child_index) {
+        const auto child_node_id = forest.child_node_ids[child_index];
+        if (child_node_id >= node_components.size()) {
+          throw std::logic_error("a direct K1 fusion references an invalid child");
+        }
+        const auto& child = node_components[child_node_id];
+        signature.child_components.push_back(child);
+        signature.merged_component.insert(
+            signature.merged_component.end(), child.begin(), child.end());
+      }
+      std::sort(
+          signature.child_components.begin(),
+          signature.child_components.end());
+      std::sort(
+          signature.merged_component.begin(), signature.merged_component.end());
+      node_components[*group.created_node_id] = signature.merged_component;
+      result.push_back(std::move(signature));
+    }
+  }
+  std::sort(result.begin(), result.end(), fusion_signature_less);
+  return result;
+}
+
+[[nodiscard]] std::vector<K1FusionSignature> emst_fusion_signatures(
+    const K1EmstResult& reference) {
+  std::vector<K1FusionSignature> result;
+  for (const auto& batch : reference.equal_level_batches) {
+    for (const auto& fusion : batch.multifusions) {
+      result.push_back(K1FusionSignature{
+          batch.level, fusion.child_components, fusion.merged_component});
+    }
+  }
+  std::sort(result.begin(), result.end(), fusion_signature_less);
+  return result;
+}
 
 [[nodiscard]] DirectPipeline direct_pipeline(
     const CanonicalPointCloud& cloud) {
@@ -469,12 +560,41 @@ void test_q1_continuation_preserves_the_prior_root() {
   check_streaming_replay(cloud, pipeline, "q=1 continuation fixture");
 }
 
+void test_pair_frontier_reduction_matches_independent_emst_oracle() {
+  const std::array<CertifiedPoint3, 4U> points{
+      point(0.0), point(2.0), point(8.0), point(10.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(points);
+
+  // The path under test is completed before the independent oracle is built.
+  // None of its builders accepts or constructs an EMST.
+  const DirectPipeline pipeline = direct_pipeline(cloud);
+  const auto actual = direct_fusion_signatures(pipeline.forest);
+  const K1EmstResult reference =
+      morsehgp3d::hierarchy::build_exact_complete_graph_emst(cloud);
+  const auto expected = emst_fusion_signatures(reference);
+
+  check(
+      pipeline.forest.certified_order_one_forest() &&
+          pipeline.forest.no_forbidden_global_structure_materialized &&
+          !pipeline.forest.forbidden_global_geometry_computed,
+      "the pair/frontier reduction closes without constructing an EMST or global geometry");
+  check(
+      actual == expected,
+      "the pair/frontier reduction reproduces every exact EMST fusion level and component group");
+  check(
+      actual.size() == 3U && actual[0].squared_level == level(1) &&
+          actual[1].squared_level == level(1) &&
+          actual[2].squared_level == level(9),
+      "the differential covers two disjoint equal-level fusions followed by their exact merge");
+}
+
 }  // namespace
 
 int main() {
   test_two_points_freeze_two_roots();
   test_e3_equal_level_is_one_ternary_multifusion();
   test_q1_continuation_preserves_the_prior_root();
+  test_pair_frontier_reduction_matches_independent_emst_oracle();
   if (failures != 0) {
     std::cerr << failures << " direct K1 forest journal check(s) failed\n";
     return 1;

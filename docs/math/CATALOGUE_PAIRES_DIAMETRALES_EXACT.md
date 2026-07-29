@@ -1,8 +1,8 @@
-# Catalogue exact des paires diamétrales de rang $K+1$
+# Catalogue exact des paires diamétrales jusqu'au rang $K+1$
 
-Contexte de phase : Phase 15, porte d'entrée satisfaite, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Les deux composants livrés portent des modes bornés `bounded_exact_yao48_rank_cutoff_oracle` et `bounded_yao48_candidate_exact_rank_catalog_oracle`. Cette note n'ouvre ni ne ferme la phase et ne qualifie pas encore le SLO.
+Contexte de phase : Phase 15, porte d'entrée satisfaite, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Les deux oracles bornés portent les modes `bounded_exact_yao48_rank_cutoff_oracle` et `bounded_yao48_candidate_exact_rank_catalog_oracle`; `morton_yao48_pair_frontier` spécifie le parcours fusionné host/fake et le prédicat ponctuel exact possède son composant CUDA séparé. Cette note n'ouvre ni ne ferme la phase et ne qualifie pas encore le SLO.
 
-Ce catalogue est le premier objet scientifique et logiciel à stabiliser. Il doit énumérer toutes les paires non ordonnées dont la boule diamétrale fermée contient exactement $K+1$ points, puis restituer la liste complète de ces points. Il ne matérialise ni matrice globale de distances, ni cellules, cofaces ou incidences de Delaunay d'ordre supérieur.
+Ce catalogue est le premier objet scientifique et logiciel à stabiliser. Une passe `requested_order=K` doit énumérer toutes les paires non ordonnées dont la boule diamétrale fermée contient au plus $K+1$ points, les router vers leur rang exact, puis restituer la liste complète de ces points. Elle ne matérialise ni matrice globale de distances, ni cellules, cofaces ou incidences de Delaunay d'ordre supérieur et ne visite pas inconditionnellement toutes les paires.
 
 ## 1. Contrat exact
 
@@ -20,7 +20,22 @@ $$P^{=}_{K+1}=\left\lbrace (u,v,C(u,v),\beta(u,v)):u<v,\ r(u,v)=K+1\right\rbrace
 
 Chaque record contient les identifiants canoniques `u`, `v`, le rang fermé exact, le niveau exact, tous les identifiants strictement intérieurs et tout le shell fermé, extrémités comprises. Une exécution multi-ordre peut router une paire vers son unique bucket de rang, mais elle ne relance pas la recherche complète pour chaque ordre.
 
+La convention est explicite : `requested_order=K` cible l'union des buckets $2\leq R\leq K+1$ et utilise $K$ témoins supplémentaires pour prouver qu'une paire a rang au moins $K+2$. Une demande littérale « la boule contient au plus $K_{\mathrm{total}}$ points au total » cible $R\leq K_{\mathrm{total}}$ et utilise $K_{\mathrm{total}}-1$ témoins pour prouver $R\geq K_{\mathrm{total}}+1$. Confondre ces deux paramètres crée une erreur d'une unité.
+
 La proposition flottante, la décision certifiée, la réduction hiérarchique et le statut public restent séparés. Morton, Yao48, un rang k-NN ou l'ordre de parcours ne remplacent jamais le signe exact de $\Phi$.
+
+### Théorème de trichotomie ponctuelle filtrée
+
+Pour des coordonnées binary64 finies interprétées comme dyadiques exactes, le pipeline suivant retourne toujours le signe exact de $\Phi_{u,v}(x)$ :
+
+1. un intervalle CUDA à arrondis dirigés $[L,U]$ contenant $\Phi_{u,v}(x)$ publie `positive` seulement si $L>0$ et `negative` seulement si $U<0$;
+2. toute autre lane décode exactement les neuf coordonnées en entiers signés multipliés par des puissances de deux, forme les différences sur 128 bits et les produits puis la somme sur 256 bits, avec contrôle de chaque shift, retenue et débordement;
+3. une opération qui ne tient pas dans cette enveloppe ne tronque rien et ne publie aucun signe : elle rejoint une file bornée, traitée en un lot par l'oracle multiprécision CPU;
+4. `zero` ne peut provenir que d'une décision dyadique exacte à limbs fixes ou de l'oracle multiprécision.
+
+**Preuve.** Les primitives à arrondi vers $-\infty$ et $+\infty$ conservent l'inclusion de l'exact dans l'intervalle après chaque soustraction, produit et somme; une séparation stricte de zéro décide donc correctement. Dans la deuxième lane, chaque binary64 fini est exactement un entier signé fois une puissance de deux. Lorsque tous les contrôles passent, les alignements et opérations entières représentent donc exactement les trois termes et leur somme. Tout cas non représentable prend la troisième lane avant publication. Enfin, l'oracle multiprécision évalue la même identité dyadique sans borne de limbs. Les trois ensembles de lanes forment une partition de la requête et chacun publie le même signe mathématique. Fin de la preuve.
+
+Une enveloppe suffisante, non nécessaire, est la suivante : si les neuf coordonnées s'alignent globalement sur des magnitudes d'au plus 126 bits, chaque différence vérifie $\lvert d\rvert<2^{127}$, chaque produit $\lvert pq\rvert<2^{254}$, et la somme des trois modules est strictement inférieure à $3\mathbin{\cdot}2^{254}<2^{256}$. Le taux de repli reste toutefois sans borne universelle; ce théorème prouve l'exactitude des signes retournés, pas un temps GPU garanti.
 
 ## 2. Coupe Yao48 adaptative exacte
 
@@ -46,7 +61,9 @@ Le facteur $3$ est optimal si l'on ne conserve que $D$ et l'identité de la cham
 
 ### Exhaustivité du sur-ensemble
 
-Une paire n'est supprimée que si l'orientation effectivement visitée possède ce certificat. Toute paire de rang au plus $K+1$ survit donc à n'importe quelle politique d'ownership exacte une fois; intersecter les survivants des deux orientations est une optimisation supplémentaire, pas une prémisse de complétude. Dans une chambre non certifiée, tous les points survivent. Une fenêtre Morton fixe peut fournir les témoins sans aucun contrat de rappel : chaque témoin retenu est recertifié, et un manque désactive seulement le cutoff. Ce fait ne doit pas être confondu avec une fenêtre utilisée comme autorité d'exclusion.
+Une paire n'est supprimée que si l'orientation effectivement visitée possède ce certificat. Toute paire de rang au plus $K+1$ survit donc à n'importe quelle politique d'ownership exacte une fois; un filtre supplémentaire dans l'autre orientation est possible, mais n'est pas une prémisse de complétude. Dans une chambre non certifiée, tous les points survivent. Une fenêtre Morton fixe peut fournir des témoins sans aucun contrat de rappel : chaque témoin retenu est recertifié, et un manque désactive seulement le cutoff. Ce fait ne doit pas être confondu avec une fenêtre utilisée comme autorité d'exclusion.
+
+Le certificat n'est pas un critère nécessaire. Son échec ne démontre ni $r(p,q)\leq K+1$, ni même l'appartenance au bucket demandé : il conserve seulement la paire dans un sur-ensemble exhaustif. Le test permanent `test_directional_cutoff_is_not_a_rank_characterization`, avec $p=(0,0,0)$, $q=(2,0,0)$ et $w=(1,1,0)$, verrouille ce non-converse.
 
 L'oracle borné [`yao48_ranked_pair_candidates.cpp`](../../morsehgp3d/src/cpu/hierarchy/yao48_ranked_pair_candidates.cpp) construit ce sur-ensemble pour $n\leq512$. Son test différentiel recalcule le rang fermé de chaque paire pour tous les ordres $1\leq K\leq10$, vérifie les égalités de shell, les chambres sous-pleines et un cas où la coupe directionnelle est strictement meilleure que le rayon uniforme.
 
@@ -64,10 +81,10 @@ Ces types restent une API `architecture_only` sans stabilité binaire promise : 
 
 Le futur producteur GPU devra porter une autorité terminale qui ferme simultanément :
 
-1. la masse du sur-ensemble Yao et des rejets certifiés;
+1. l'identité `candidate_pair_mass + certified_pruned_pair_mass + unresolved_pair_mass = n(n-1)/2`, avec résidu nul pour une publication exhaustive;
 2. la partition `below + exact + above` de tous les candidats;
 3. la liste complète des points de chaque record exact;
-4. le compte de toutes les paires non ordonnées, égal à $n(n-1)/2$;
+4. l'unicité canonique de chaque survivant et le fait qu'aucune paire prunée n'a été classifiée;
 5. l'identité du nuage, du LBVH, du rang demandé et du prédicat exact.
 
 Ces cinq engagements ne sont pas encore sérialisés par l'oracle borné. Dans le futur producteur, une sortie partielle, une frontière résiduelle ou un budget dépassé devra recevoir `budget_exhausted`; elle ne sera jamais publiée comme exhaustive.
@@ -76,17 +93,17 @@ Ces cinq engagements ne sont pas encore sérialisés par l'oracle borné. Dans l
 
 Le chemin produit visé traite des tuiles d'ancres et partage un LBVH Morton résident :
 
-1. une fenêtre Morton symétrique propose des témoins, puis chambre, identité et borne de distance sont certifiées; une recherche LBVH peut resserrer les rayons sans être obligatoire;
-2. les 48 banques restent en mémoire bornée, soit $B\times48\times K$ identifiants pour une tuile de $B$ ancres;
-3. un parcours de régions rapporte seulement les cibles qui ne sont pas exclues par les trois bornes directionnelles;
-4. l'ordre `(clé Morton, PointId)` oriente les feuilles pour émettre chaque paire une seule fois;
-5. le classifieur exact route les survivants vers `below`, `exact` ou `above`;
+1. l'ordre `(clé Morton, PointId)` indexe les feuilles, fixe l'ownership exact une fois et guide un parcours proche-en-premier;
+2. ce même parcours recertifie les témoins rencontrés et remplit les 48 banques en mémoire $O(B\mathbin{\cdot}48\mathbin{\cdot}K)$ pour une tuile de $B$ ancres;
+3. dès qu'une banque est pleine, les trois bornes directionnelles rapportent des régions prunées avec leur masse, sans développer leurs feuilles;
+4. les feuilles non prunées sont émises comme survivantes canoniques; la frontière interrompue reste `unresolved`, jamais implicitement candidate ou absente;
+5. le classifieur exact route uniquement les survivants vers `below`, `exact` ou `above`;
 6. un couple `count + exclusive scan` réserve les records et leurs listes de points avant l'écriture compacte;
 7. les ambiguïtés binary64 passent à l'exact dyadique, puis à une file multiprécision rare si nécessaire.
 
-Pour les positions Morton $i<j$, l'extrémité de position haute $j$ possède la paire et ne traverse que le préfixe $[0,j)$. Le postordre inverse `root-right-left` existant visite alors d'abord $j-1,j-2,\ldots$ et saute en bloc tout nœud dont `leaf_begin>=j`. Cette orientation couvre exactement $\sum_{j=0}^{n-1}j=n(n-1)/2$ feuilles terminales avant prune. L'orientation inverse reste un filtre optionnel; elle n'est jamais exigée pour l'exhaustivité.
+Pour les positions Morton $i<j$, l'extrémité de position haute $j$ possède opérationnellement la paire. Cette règle décrit un univers comptable de masse $\sum_{j=0}^{n-1}j=n(n-1)/2$; elle n'autorise pas à l'énumérer. Le parcours fusionné saute le suffixe hors ownership, descend seulement les régions non encore décidées et remplace chaque région Yao-prunable par un reçu de cardinalité. Les candidats et prunes forment avec le résidu une partition de cet univers. L'orientation inverse reste un filtre optionnel; elle n'est jamais exigée pour l'exhaustivité.
 
-La résidence GPU est une obligation, pas une optimisation facultative. Construction Morton/LBVH, banques certifiées des 48 chambres, prunes de régions, émission exacte une fois, classification filtrée, `count + scan`, écriture des payloads, tri et déduplication restent sur le device. Le premier niveau exact emploie des intervalles binary64 dirigés, le deuxième des expansions ou entiers de taille fixe sur GPU; seuls les cas qui dépassent cette enveloppe rejoignent une file compacte de limbs variables. Aucun callback hôte par paire, aucune copie D2H par vague et aucune liste intermédiaire de candidats sur l'hôte ne sont admis. Le retour normal est un transcript terminal et des chunks de sortie déjà compactés.
+La résidence GPU est une obligation, pas une optimisation facultative. Construction Morton/LBVH, banques certifiées des 48 chambres, prunes de régions, émission exacte une fois, classification filtrée des seuls survivants, `count + scan`, écriture des payloads, tri et déduplication restent sur le device. Le premier niveau exact emploie des intervalles binary64 dirigés, le deuxième des expansions ou entiers de taille fixe sur GPU; seuls les cas qui dépassent cette enveloppe rejoignent une file compacte de limbs variables. Aucun callback hôte par paire, aucune copie D2H par vague, aucune liste intermédiaire de candidats sur l'hôte et aucun fallback dense ne sont admis. Le retour normal est un transcript terminal et des chunks de sortie déjà compactés.
 
 ### Une seule passe pour tous les ordres
 
@@ -146,18 +163,18 @@ Un oracle GPU dense et borné devra énumérer les univers complets de paires, t
 
 ## 7. Coût de sortie et SLO
 
-Le pire cas reste quadratique dès les paires. En dimension trois, le graphe de Gabriel, c'est-à-dire le bucket de rang deux en position générale, peut avoir $\Omega(n^2)$ arêtes; [Chazelle et al., lemme 5.1](https://www.cs.princeton.edu/~chazelle/pubs/SelectHeavyCoveredPts.pdf) donnent une construction explicite. À 50 000 points, les univers bruts contiennent 1 249 975 000 paires, 20 832 083 350 000 triplets et 260 385 417 812 487 500 quadruplets. Huit octets par paire demanderaient déjà près de 10 Go avant les listes de points. Aucun algorithme ne peut énumérer une telle sortie en moins de 100 ms; a fortiori, aucun scan dense des triplets ou quadruplets n'est admissible dans le produit.
+Le pire cas reste quadratique dès les paires. En dimension trois, le graphe de Gabriel, c'est-à-dire le bucket de rang deux en position générale, peut avoir $\Omega(n^2)$ arêtes; [Chazelle et al., lemme 5.1](https://www.cs.princeton.edu/~chazelle/pubs/SelectHeavyCoveredPts.pdf) donnent une construction explicite. À 50 000 points, les univers bruts contiennent 1 249 975 000 paires, 20 832 083 350 000 triplets et 260 385 417 812 487 500 quadruplets. Huit octets par paire demanderaient déjà près de 10 Go avant les listes de points. Aucun algorithme ne peut énumérer une telle sortie en moins de 100 ms; cette borne de pire cas est censurée par `budget_exhausted`, jamais anticipée par un scan dense.
 
 Sous un modèle de Poisson homogène sans frontière, la seule coupe radiale uniforme laisse grossièrement $48\times3\sqrt{3}\,K\simeq249{,}4K$ candidats dirigés par point en espérance. Cette estimation n'est ni une garantie ni un objectif; elle motive les trois projections, les boîtes du LBVH et les témoins en blocs. Un filtre à l'orientation inverse ne sera ajouté que si son gain mesuré dépasse son coût; l'ownership Morton haute suffit déjà à la couverture exacte une fois.
 
-Le SLO produit doit être output-sensitive et annoncer des caps sur le nombre de records, les références de points, les candidats classifiés, le travail de frontière et les octets de sortie. Pour $n=50\,000$, $K=10$, le benchmark publie p50 et p95 sur un nouveau nuage à chaque répétition, avec temps séparés pour Morton/LBVH, amorçage des banques Yao48, rapport de candidats, classification exacte, compactage et persistance. Le chemin à dizaines de millions de points utilise les mêmes certificats par chunks; il ne promet pas que la sortie elle-même tient en mémoire.
+Le SLO produit doit être sensible au profil et à la sortie et annoncer des caps sur le nombre de records, les références de points, les candidats classifiés, le travail de frontière et les octets de sortie. Pour $n=50\,000$, $K=10$, le benchmark publie p50 et p95 sur un nouveau nuage à chaque répétition, avec temps séparés pour Morton/LBVH, remplissage des banques Yao48, masse prunée, survivants, classification exacte, compactage et persistance. Le falsificateur 12 500 doit rejeter une croissance pratiquement quadratique avant tout gate 50 000. Le chemin à dizaines de millions de points utilise les mêmes certificats par chunks; il ne promet pas que la sortie elle-même tient en mémoire.
 
 ## 8. Gates immédiats
 
 1. conserver l'oracle bout en bout exact et ses tests différentiels comme autorité bornée;
-2. porter les banques de $K$ témoins certifiés quelconques par chambre et le rapport directionnel sur le LBVH GPU partagé, puis ne resserrer vers le top-$K$ que si le profil le justifie;
+2. porter `morton_yao48_pair_frontier` : ownership Morton, remplissage des banques de $K$ témoins certifiés quelconques et rapport directionnel dans le même parcours LBVH GPU, puis ne resserrer vers le top-$K$ que si le profil le justifie;
 3. garder classification, compactage, tri et payload sur GPU, avec seulement une file rare multiprécision et un transcript terminal vers l'hôte;
-4. certifier les prunes de boîtes, les témoins distincts, les chambres sous-pleines et la masse exacte des paires;
+4. certifier les prunes de boîtes, les témoins distincts, les chambres sous-pleines et l'identité `candidate + certified_pruned + unresolved = n(n-1)/2`, sans fallback dense;
 5. mesurer le taux de survivants après chaque prune avant toute promesse de 100 ms;
 6. publier le catalogue multi-ordre seulement avec listes fermées complètes et frontière vide;
 7. ouvrir ensuite la frontière indépendante des triangles aigus, éliminer immédiatement droits, obtus et dégénérés, puis ouvrir les seuls tétraèdres bien centrés après fermeture des triangles.

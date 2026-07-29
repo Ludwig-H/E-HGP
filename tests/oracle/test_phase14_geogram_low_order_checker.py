@@ -306,7 +306,20 @@ class Phase14GeogramLowOrderCheckerTests(unittest.TestCase):
             candidate_relations=tuple(reversed(same_plateau)),
         )
         self.assertTrue(at["passed"])
+        self.assertEqual(at["criterion"], "gabriel_fusion_deadline_v1")
+        self.assertEqual(at["boundary"], "closed_post_plateau")
         self.assertEqual(at["connected_at_count"], 1)
+        self.assertEqual(
+            at["decisions"],
+            [
+                {
+                    "source_point_ids": [0, 1, 2],
+                    "source_squared_level": "2",
+                    "connection_squared_level": "2",
+                    "decision": "at",
+                }
+            ],
+        )
         self.assertEqual(at["decision_sha256"], at_permuted["decision_sha256"])
 
         before = _gabriel_fusion_deadline_coverage(
@@ -316,6 +329,7 @@ class Phase14GeogramLowOrderCheckerTests(unittest.TestCase):
         )
         self.assertTrue(before["passed"])
         self.assertEqual(before["connected_before_count"], 1)
+        self.assertEqual(before["decisions"][0]["connection_squared_level"], "1")
 
         late = _gabriel_fusion_deadline_coverage(
             variant_name="late",

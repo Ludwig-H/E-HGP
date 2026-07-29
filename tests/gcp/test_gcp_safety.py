@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import os
@@ -17,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 FAKE_GCLOUD = r"""#!/usr/bin/env python3
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -463,6 +465,7 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
         print("missing fake scp paths", file=sys.stderr)
         sys.exit(94)
     head = os.environ.get("FAKE_GIT_HEAD", "a" * 40)
+    phase3_cache = Path(os.environ["TMPDIR"]) / "fake-phase3-artifact.json"
     if "phase4-spatial-result.json" in args[2]:
         def summary(scope, sizes):
             count = 6 + len(sizes) + 7
@@ -623,6 +626,14 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
             "mode": "certified",
             "phase": "4",
             "profile": "hgp_reduced",
+            "provenance": {
+                "environment_artifact_schema": (
+                    "morsehgp3d.phase3.qualification.v1"
+                ),
+                "environment_artifact_sha256": hashlib.sha256(
+                    phase3_cache.read_bytes()
+                ).hexdigest(),
+            },
             "schema": (
                 "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v3"
             ),
@@ -660,7 +671,10 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
         }
     if scenario == "qualification-invalid-artifact":
         artifact["git"]["sha"] = "c" * 40
-    Path(args[3]).write_text(json.dumps(artifact) + "\n", encoding="utf-8")
+    encoded_artifact = json.dumps(artifact) + "\n"
+    Path(args[3]).write_text(encoded_artifact, encoding="utf-8")
+    if artifact["phase"] == "3":
+        phase3_cache.write_text(encoded_artifact, encoding="utf-8")
 else:
     print("unsupported fake gcloud command: " + " ".join(args), file=sys.stderr)
     sys.exit(96)
@@ -2212,6 +2226,17 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertEqual(
             2019,
             phase4["checks"]["lbvh_differential"]["gpu_launch_count"],
+        )
+        self.assertEqual(
+            {
+                "environment_artifact_schema": (
+                    "morsehgp3d.phase3.qualification.v1"
+                ),
+                "environment_artifact_sha256": hashlib.sha256(
+                    phase3_path.read_bytes()
+                ).hexdigest(),
+            },
+            phase4["provenance"],
         )
         self.assertEqual(
             20,

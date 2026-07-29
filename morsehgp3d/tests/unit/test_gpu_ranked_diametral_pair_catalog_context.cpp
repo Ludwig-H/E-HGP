@@ -32,10 +32,12 @@ enum class FakeRankedPairCatalogBehavior : std::uint8_t {
 enum class FakeRankedPairCatalogCorruption : std::uint8_t {
   none,
   wrong_digest,
+  wrong_contract_schema,
   wrong_source_epoch,
   wrong_capacity_echo,
   broken_closed_mass,
-  broken_owned_filter_mass,
+  broken_survivor_occurrence_mass,
+  inverse_prune_under_unilateral,
   broken_classification_mass,
   broken_gp_mass,
   gp_reuses_closed_prune,
@@ -44,7 +46,13 @@ enum class FakeRankedPairCatalogCorruption : std::uint8_t {
   global_gp_claim,
   output_without_closed_authority,
   missing_output_owner,
-  invalid_orientation_policy,
+  morton_partition_not_validated,
+  yao48_policy_not_validated,
+  candidates_not_point_id_canonicalized,
+  candidates_not_deduplicated,
+  morton_scientific_authority_claim,
+  raw_morton_pair_stream,
+  invalid_yao48_filter_policy,
 };
 
 struct FakeRankedPairCatalogConfiguration {
@@ -52,8 +60,8 @@ struct FakeRankedPairCatalogConfiguration {
       FakeRankedPairCatalogBehavior::closed_complete_gp_unknown};
   FakeRankedPairCatalogCorruption corruption{
       FakeRankedPairCatalogCorruption::none};
-  RankedPairOrientationPolicy orientation_policy{
-      RankedPairOrientationPolicy::morton_high_owner_prefix};
+  RankedPairYao48FilterPolicy yao48_filter_policy{
+      RankedPairYao48FilterPolicy::owner_unilateral};
 };
 
 namespace {
@@ -118,16 +126,25 @@ struct FakeResidentRankedPairCatalog {
 
 void configure_closed_complete(
     Phase15RankedPairCatalogDeviceReceipt& receipt,
-    RankedPairOrientationPolicy orientation_policy,
+    RankedPairYao48FilterPolicy yao48_filter_policy,
     std::uint64_t universe) {
   ClosedRankCatalogClosure& closed = receipt.closed_rank_closure;
-  closed.orientation_policy = orientation_policy;
+  closed.yao48_filter_policy = yao48_filter_policy;
   closed.owned_pair_universe_count = universe;
-  closed.closed_pruned_owned_pair_count = universe - UINT64_C(5);
-  closed.emitted_owned_pair_count = UINT64_C(5);
-  closed.inverse_filter_rejected_pair_count = UINT64_C(2);
-  closed.candidate_pair_count = UINT64_C(3);
-  closed.above_window_pair_count = UINT64_C(2);
+  closed.yao48_owner_pruned_pair_count = universe - UINT64_C(5);
+  closed.yao48_inverse_pruned_pair_count =
+      yao48_filter_policy ==
+              RankedPairYao48FilterPolicy::bidirectional_intersection
+          ? UINT64_C(2)
+          : UINT64_C(0);
+  closed.canonical_candidate_pair_count =
+      UINT64_C(5) - closed.yao48_inverse_pruned_pair_count;
+  closed.duplicate_survivor_occurrence_count = UINT64_C(2);
+  closed.yao48_survivor_occurrence_count =
+      closed.canonical_candidate_pair_count +
+      closed.duplicate_survivor_occurrence_count;
+  closed.above_window_pair_count =
+      closed.canonical_candidate_pair_count - UINT64_C(1);
   closed.ranked_record_count = UINT64_C(1);
   closed.closed_rank_catalog_complete = true;
 }
@@ -210,6 +227,11 @@ build_phase15_ranked_diametral_pair_catalog_on_device(
   receipt.cuda_device = -1;
   receipt.execution_kind =
       Phase15RankedPairCatalogExecutionKind::host_fake;
+  receipt.morton_ownership_partition_validated = true;
+  receipt.yao48_filter_policy_validated = true;
+  receipt.candidate_point_id_canonicalization_validated = true;
+  receipt.candidate_deduplication_before_exact_classification_validated =
+      true;
   const std::uint64_t universe = unordered_pair_count(traversal.point_count);
 
   switch (config.behavior) {
@@ -226,7 +248,7 @@ build_phase15_ranked_diametral_pair_catalog_on_device(
       receipt.failure_code = static_cast<std::uint64_t>(
           Phase15RankedPairCatalogFailureCode::none);
       configure_closed_complete(
-          receipt, config.orientation_policy, universe);
+          receipt, config.yao48_filter_policy, universe);
       configure_gp_unknown(receipt, universe);
       configure_complete_output(receipt, maximum_level, fixed_budget);
       if (config.behavior ==
@@ -261,12 +283,21 @@ build_phase15_ranked_diametral_pair_catalog_on_device(
       receipt.failure_code = static_cast<std::uint64_t>(
           Phase15RankedPairCatalogFailureCode::capacity_exhausted);
       ClosedRankCatalogClosure& closed = receipt.closed_rank_closure;
-      closed.orientation_policy = config.orientation_policy;
+      closed.yao48_filter_policy = config.yao48_filter_policy;
       closed.owned_pair_universe_count = universe;
-      closed.closed_pruned_owned_pair_count = UINT64_C(2);
-      closed.emitted_owned_pair_count = UINT64_C(2);
-      closed.candidate_pair_count = UINT64_C(2);
-      closed.unresolved_owned_pair_count = universe - UINT64_C(4);
+      closed.yao48_owner_pruned_pair_count = UINT64_C(2);
+      closed.yao48_inverse_pruned_pair_count =
+          config.yao48_filter_policy ==
+                  RankedPairYao48FilterPolicy::bidirectional_intersection
+              ? UINT64_C(1)
+              : UINT64_C(0);
+      closed.canonical_candidate_pair_count = UINT64_C(2);
+      closed.duplicate_survivor_occurrence_count = UINT64_C(1);
+      closed.yao48_survivor_occurrence_count = UINT64_C(3);
+      closed.unresolved_owned_pair_count =
+          universe - closed.yao48_owner_pruned_pair_count -
+          closed.yao48_inverse_pruned_pair_count -
+          closed.canonical_candidate_pair_count;
       closed.unresolved_candidate_pair_count = UINT64_C(2);
       configure_gp_unknown(receipt, universe);
       receipt.pair_support_relevant_gp_closure.strict_interior_pruned_pair_count =
@@ -282,6 +313,10 @@ build_phase15_ranked_diametral_pair_catalog_on_device(
     case test_support::FakeRankedPairCatalogCorruption::none:
     case test_support::FakeRankedPairCatalogCorruption::wrong_digest:
       break;
+    case test_support::FakeRankedPairCatalogCorruption::
+        wrong_contract_schema:
+      ++receipt.contract_schema_version;
+      break;
     case test_support::FakeRankedPairCatalogCorruption::wrong_source_epoch:
       ++receipt.source_snapshot_epoch;
       break;
@@ -289,11 +324,16 @@ build_phase15_ranked_diametral_pair_catalog_on_device(
       ++receipt.output.catalog_record_capacity;
       break;
     case test_support::FakeRankedPairCatalogCorruption::broken_closed_mass:
-      ++receipt.closed_rank_closure.closed_pruned_owned_pair_count;
+      ++receipt.closed_rank_closure.yao48_owner_pruned_pair_count;
       break;
     case test_support::FakeRankedPairCatalogCorruption::
-        broken_owned_filter_mass:
-      ++receipt.closed_rank_closure.inverse_filter_rejected_pair_count;
+        broken_survivor_occurrence_mass:
+      ++receipt.closed_rank_closure.duplicate_survivor_occurrence_count;
+      break;
+    case test_support::FakeRankedPairCatalogCorruption::
+        inverse_prune_under_unilateral:
+      --receipt.closed_rank_closure.yao48_owner_pruned_pair_count;
+      ++receipt.closed_rank_closure.yao48_inverse_pruned_pair_count;
       break;
     case test_support::FakeRankedPairCatalogCorruption::
         broken_classification_mass:
@@ -332,9 +372,34 @@ build_phase15_ranked_diametral_pair_catalog_on_device(
       receipt.output.owner.reset();
       break;
     case test_support::FakeRankedPairCatalogCorruption::
-        invalid_orientation_policy:
-      receipt.closed_rank_closure.orientation_policy =
-          static_cast<RankedPairOrientationPolicy>(UINT8_C(255));
+        morton_partition_not_validated:
+      receipt.morton_ownership_partition_validated = false;
+      break;
+    case test_support::FakeRankedPairCatalogCorruption::
+        yao48_policy_not_validated:
+      receipt.yao48_filter_policy_validated = false;
+      break;
+    case test_support::FakeRankedPairCatalogCorruption::
+        candidates_not_point_id_canonicalized:
+      receipt.candidate_point_id_canonicalization_validated = false;
+      break;
+    case test_support::FakeRankedPairCatalogCorruption::
+        candidates_not_deduplicated:
+      receipt
+          .candidate_deduplication_before_exact_classification_validated =
+          false;
+      break;
+    case test_support::FakeRankedPairCatalogCorruption::
+        morton_scientific_authority_claim:
+      receipt.morton_scientific_authority_claimed = true;
+      break;
+    case test_support::FakeRankedPairCatalogCorruption::raw_morton_pair_stream:
+      receipt.raw_morton_pair_stream_materialized = true;
+      break;
+    case test_support::FakeRankedPairCatalogCorruption::
+        invalid_yao48_filter_policy:
+      receipt.closed_rank_closure.yao48_filter_policy =
+          static_cast<RankedPairYao48FilterPolicy>(UINT8_C(255));
       break;
   }
   receipt.receipt_digest_fnv1a =
@@ -360,7 +425,7 @@ using morsehgp3d::gpu::RankedDiametralPairCatalogBuildStatus;
 using morsehgp3d::gpu::RankedDiametralPairCatalogContext;
 using morsehgp3d::gpu::RankedDiametralPairCatalogDeviceLease;
 using morsehgp3d::gpu::RankedDiametralPairCatalogStopReason;
-using morsehgp3d::gpu::RankedPairOrientationPolicy;
+using morsehgp3d::gpu::RankedPairYao48FilterPolicy;
 using morsehgp3d::gpu::test_support::FakeRankedPairCatalogBehavior;
 using morsehgp3d::gpu::test_support::FakeRankedPairCatalogConfiguration;
 using morsehgp3d::gpu::test_support::FakeRankedPairCatalogCorruption;
@@ -378,6 +443,9 @@ static_assert(
     std::is_nothrow_move_assignable_v<RankedDiametralPairCatalogContext>);
 static_assert(
     !std::is_copy_constructible_v<RankedDiametralPairCatalogDeviceLease>);
+static_assert(
+    morsehgp3d::gpu::ranked_diametral_pair_catalog_contract_schema_version ==
+    2U);
 
 int failures = 0;
 
@@ -448,15 +516,26 @@ void check_scaffold_only(
       label + " validates only the host/fake contract");
   const auto& audit = attempt.audit();
   check(
-      audit.host_fake_launcher_exercised &&
+      audit.contract_schema_version ==
+              morsehgp3d::gpu::
+                  ranked_diametral_pair_catalog_contract_schema_version &&
+          audit.host_fake_launcher_exercised &&
           !audit.cuda_execution_performed &&
           !audit.exact_gpu_predicates_implemented &&
+          audit.morton_ownership_partition_validated &&
+          audit.yao48_filter_policy_validated &&
+          audit.candidate_point_id_canonicalization_validated &&
+          audit
+              .candidate_deduplication_before_exact_classification_validated &&
           !audit.scientific_decision_published &&
           !audit.global_relevant_gp_complete_published &&
           !audit.hierarchy_reduction_or_attachment_published &&
+          !audit.morton_scientific_authority_claimed &&
+          !audit.raw_morton_pair_stream_materialized &&
           !audit.forbidden_global_pair_matrix_materialized &&
           !audit.public_status_claimed,
-      label + " cannot claim CUDA, global GP or public authority");
+      label + " keeps Morton execution-only and classifies only canonical "
+              "deduplicated Yao48 survivors");
 }
 
 void test_complete_closed_catalog_gp_unknown_and_single_build() {
@@ -475,12 +554,17 @@ void test_complete_closed_catalog_gp_unknown_and_single_build() {
       "a closed receipt publishes one fake resident catalog lease");
   const ClosedRankCatalogClosure& closed = attempt.closed_rank_closure();
   check(
-      closed.orientation_policy ==
-              RankedPairOrientationPolicy::morton_high_owner_prefix &&
+      closed.yao48_filter_policy ==
+              RankedPairYao48FilterPolicy::owner_unilateral &&
           closed.owned_pair_universe_count == 15U &&
+          closed.yao48_owner_pruned_pair_count == 10U &&
+          closed.yao48_inverse_pruned_pair_count == 0U &&
+          closed.yao48_survivor_occurrence_count == 7U &&
+          closed.duplicate_survivor_occurrence_count == 2U &&
+          closed.canonical_candidate_pair_count == 5U &&
           closed.closed_rank_catalog_complete,
-      "the active exact-once policy is Morton-high ownership, not a forced "
-      "two-direction intersection");
+      "the default report is unilateral Yao48 and its PointId-canonical "
+      "deduplication mass closes before exact classification");
   check(
       !attempt.pair_support_relevant_gp_closure().relevant_gp_complete &&
           attempt.pair_support_relevant_gp_closure().decision ==
@@ -489,6 +573,15 @@ void test_complete_closed_catalog_gp_unknown_and_single_build() {
   check(
       attempt.catalog().ready() && attempt.catalog().host_fake() &&
           !attempt.catalog().cuda_resident() &&
+          attempt.catalog().audit().contract_schema_version == 2U &&
+          attempt.catalog()
+              .audit()
+              .candidate_point_id_canonicalization_validated &&
+          attempt.catalog()
+              .audit()
+              .candidate_deduplication_before_exact_classification_validated &&
+          !attempt.catalog().audit().morton_scientific_authority_claimed &&
+          !attempt.catalog().audit().raw_morton_pair_stream_materialized &&
           attempt.catalog().audit().catalog_record_count == 1U &&
           attempt.catalog().audit().strict_interior_point_id_count == 1U &&
           !attempt.catalog().audit().global_relevant_gp_complete_published,
@@ -510,7 +603,7 @@ void test_complete_closed_catalog_gp_unknown_and_single_build() {
       "the complete catalog lease transfers move-only ownership");
 }
 
-void test_gp_scope_is_independent_and_orientation_is_a_policy() {
+void test_gp_scope_is_independent_and_inverse_yao48_is_optional() {
   const CanonicalPointCloud cloud = catalog_cloud();
 
   reset_fake_gpu_phase14_morton_lbvh_build();
@@ -518,13 +611,16 @@ void test_gp_scope_is_independent_and_orientation_is_a_policy() {
   configure_fake_ranked_pair_catalog({
       FakeRankedPairCatalogBehavior::closed_complete_gp_complete,
       FakeRankedPairCatalogCorruption::none,
-      RankedPairOrientationPolicy::bidirectional_intersection});
+      RankedPairYao48FilterPolicy::bidirectional_intersection});
   RankedDiametralPairCatalogContext complete_gp = make_context(cloud);
   auto complete = complete_gp.build(3U);
   check_scaffold_only(complete, "the pair-support GP-complete receipt");
   check(
-      complete.closed_rank_closure().orientation_policy ==
-              RankedPairOrientationPolicy::bidirectional_intersection &&
+      complete.closed_rank_closure().yao48_filter_policy ==
+              RankedPairYao48FilterPolicy::bidirectional_intersection &&
+          complete.closed_rank_closure().yao48_owner_pruned_pair_count == 10U &&
+          complete.closed_rank_closure().yao48_inverse_pruned_pair_count == 2U &&
+          complete.closed_rank_closure().canonical_candidate_pair_count == 3U &&
           complete.pair_support_relevant_gp_closure().relevant_gp_complete &&
           complete.pair_support_relevant_gp_closure().decision ==
               PairSupportRelevantGpDecision::satisfied &&
@@ -538,7 +634,7 @@ void test_gp_scope_is_independent_and_orientation_is_a_policy() {
   configure_fake_ranked_pair_catalog({
       FakeRankedPairCatalogBehavior::closed_complete_gp_violated,
       FakeRankedPairCatalogCorruption::none,
-      RankedPairOrientationPolicy::morton_high_owner_prefix});
+      RankedPairYao48FilterPolicy::owner_unilateral});
   RankedDiametralPairCatalogContext violated_gp = make_context(cloud);
   auto violated = violated_gp.build(3U);
   const auto& gp = violated.pair_support_relevant_gp_closure();
@@ -559,7 +655,7 @@ void test_budget_exhaustion_is_fail_closed() {
   configure_fake_ranked_pair_catalog({
       FakeRankedPairCatalogBehavior::budget_exhausted,
       FakeRankedPairCatalogCorruption::none,
-      RankedPairOrientationPolicy::morton_high_owner_prefix});
+      RankedPairYao48FilterPolicy::owner_unilateral});
   const CanonicalPointCloud cloud = catalog_cloud();
   RankedDiametralPairCatalogContext context = make_context(cloud);
   auto attempt = context.build(3U);
@@ -625,14 +721,45 @@ void test_preflight_level_and_move_guards() {
   check_scaffold_only(valid, "the moved-to ranked-pair context");
 }
 
+void test_yao48_survivor_and_canonical_candidate_caps_are_enforced() {
+  const CanonicalPointCloud cloud = catalog_cloud();
+
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_fake_ranked_pair_catalog();
+  RankedDiametralPairCatalogBudget survivor_limited = standard_budget();
+  survivor_limited.maximum_yao48_survivor_occurrence_count = 6U;
+  RankedDiametralPairCatalogContext survivor_context =
+      make_context(cloud, survivor_limited);
+  check_throws<std::runtime_error>(
+      [&survivor_context]() {
+        static_cast<void>(survivor_context.build(3U));
+      },
+      "the receipt cannot exceed its Yao48 survivor occurrence capacity");
+
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_fake_ranked_pair_catalog();
+  RankedDiametralPairCatalogBudget canonical_limited = standard_budget();
+  canonical_limited.maximum_canonical_candidate_pair_count = 4U;
+  canonical_limited.maximum_catalog_record_count = 4U;
+  RankedDiametralPairCatalogContext canonical_context =
+      make_context(cloud, canonical_limited);
+  check_throws<std::runtime_error>(
+      [&canonical_context]() {
+        static_cast<void>(canonical_context.build(3U));
+      },
+      "the receipt cannot exceed its PointId-canonical candidate capacity");
+}
+
 void test_hostile_receipts_poison_contexts() {
   const CanonicalPointCloud cloud = catalog_cloud();
-  const std::array<FakeRankedPairCatalogCorruption, 14U> corruptions{
+  const std::array<FakeRankedPairCatalogCorruption, 22U> corruptions{
       FakeRankedPairCatalogCorruption::wrong_digest,
+      FakeRankedPairCatalogCorruption::wrong_contract_schema,
       FakeRankedPairCatalogCorruption::wrong_source_epoch,
       FakeRankedPairCatalogCorruption::wrong_capacity_echo,
       FakeRankedPairCatalogCorruption::broken_closed_mass,
-      FakeRankedPairCatalogCorruption::broken_owned_filter_mass,
+      FakeRankedPairCatalogCorruption::broken_survivor_occurrence_mass,
+      FakeRankedPairCatalogCorruption::inverse_prune_under_unilateral,
       FakeRankedPairCatalogCorruption::broken_classification_mass,
       FakeRankedPairCatalogCorruption::broken_gp_mass,
       FakeRankedPairCatalogCorruption::gp_reuses_closed_prune,
@@ -641,7 +768,14 @@ void test_hostile_receipts_poison_contexts() {
       FakeRankedPairCatalogCorruption::global_gp_claim,
       FakeRankedPairCatalogCorruption::output_without_closed_authority,
       FakeRankedPairCatalogCorruption::missing_output_owner,
-      FakeRankedPairCatalogCorruption::invalid_orientation_policy};
+      FakeRankedPairCatalogCorruption::morton_partition_not_validated,
+      FakeRankedPairCatalogCorruption::yao48_policy_not_validated,
+      FakeRankedPairCatalogCorruption::
+          candidates_not_point_id_canonicalized,
+      FakeRankedPairCatalogCorruption::candidates_not_deduplicated,
+      FakeRankedPairCatalogCorruption::morton_scientific_authority_claim,
+      FakeRankedPairCatalogCorruption::raw_morton_pair_stream,
+      FakeRankedPairCatalogCorruption::invalid_yao48_filter_policy};
   for (const FakeRankedPairCatalogCorruption corruption : corruptions) {
     reset_fake_gpu_phase14_morton_lbvh_build();
     reset_fake_ranked_pair_catalog();
@@ -649,7 +783,7 @@ void test_hostile_receipts_poison_contexts() {
     configure_fake_ranked_pair_catalog({
         FakeRankedPairCatalogBehavior::closed_complete_gp_unknown,
         corruption,
-        RankedPairOrientationPolicy::morton_high_owner_prefix});
+        RankedPairYao48FilterPolicy::owner_unilateral});
     check_throws<std::runtime_error>(
         [&context]() { static_cast<void>(context.build(3U)); },
         "host validation rejects a forged ranked-pair receipt");
@@ -664,9 +798,10 @@ void test_hostile_receipts_poison_contexts() {
 
 int main() {
   test_complete_closed_catalog_gp_unknown_and_single_build();
-  test_gp_scope_is_independent_and_orientation_is_a_policy();
+  test_gp_scope_is_independent_and_inverse_yao48_is_optional();
   test_budget_exhaustion_is_fail_closed();
   test_preflight_level_and_move_guards();
+  test_yao48_survivor_and_canonical_candidate_caps_are_enforced();
   test_hostile_receipts_poison_contexts();
   if (failures != 0) {
     std::cerr << failures

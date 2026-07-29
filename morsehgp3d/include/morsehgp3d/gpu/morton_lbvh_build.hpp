@@ -14,6 +14,7 @@ namespace morsehgp3d::gpu {
 
 class DirectSparseFacetTopKProposalContext;
 class AnchoredPairCandidateProposalContext;
+class MortonYao48PairFrontierContext;
 
 namespace detail {
 class Phase14MortonLbvhBuildContextState;
@@ -329,6 +330,7 @@ class MortonLbvhDeviceTraversalLease final {
   friend class AnchoredPairCandidateProposalContext;
   friend class Binary64LbvhTopKContext;
   friend class MortonLbvhBuildContext;
+  friend class MortonYao48PairFrontierContext;
   friend class RankedDiametralPairCatalogContext;
 };
 

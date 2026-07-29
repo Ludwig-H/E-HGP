@@ -39,6 +39,8 @@ PHASE5_K1_BORUVKA_WORK_PROFILE=0
 PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE=0
 PHASE7_H_POLYTOPE=0
 PHASE9_PAIR_SUPPORT_PHI=0
+PHASE15_EXACT_DIAMETRAL_PHI=0
+MORTON_YAO48_SEED_WORK_PROFILE=0
 
 SESSION_CERTIFIED=0
 TARGET_STOP_CERTIFIED=0
@@ -57,6 +59,8 @@ LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
 LOCAL_PHASE7_H_POLYTOPE_RESULT=""
 LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT=""
 LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT=""
+LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT=""
+LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -78,7 +82,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -118,6 +122,11 @@ exclusive de tous les autres compagnons. Son artefact benchmark-only reste
 provisoire jusqu'à la même certification ciblée TERMINATED et ne publie aucun
 statut scientifique.
 
+--morton-yao48-seed-work-profile exécute le profil borné strictement
+Morton/LBVH/Yao48 aux tailles 50k, 1M, 10M et 30M. Ce compagnon est
+benchmark-only, ne lance ni EMST/Boruvka, ni Geogram/PDEL/Delaunay, et conserve
+toute omission heuristique dans la masse unresolved.
+
 --phase7-h-polytope ajoute la qualification CUDA G4 de la proposition
 H-polytope de Phase 7.8. Son artefact compagnon reste provisoire jusqu'à la
 même certification ciblée TERMINATED; il reste en mode benchmark_only et
@@ -129,6 +138,14 @@ descente aux epochs 1 et 2, avec recertification exacte CPU de la décision
 stricte, audit AOT sm_120 sans PTX, memcheck et racecheck. Son artefact reste
 provisoire jusqu'à la certification ciblée TERMINATED, non scientifique et
 sans statut public.
+
+--phase15-exact-diametral-phi ajoute la qualification CUDA G4 isolée du
+prédicat ponctuel exact Phi diamétral. Elle vérifie le filtre intervalle, le
+chemin dyadique à limbs fixes et le lot de repli multiprécision contre l'oracle
+BigInt, puis audite AOT sm_120 sans PTX, memcheck et racecheck. Cette option est
+exclusive des autres compagnons; son artefact reste provisoire jusqu'à la
+certification ciblée TERMINATED et ne revendique ni catalogue, ni SLO, ni
+statut scientifique ou public.
 
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
@@ -157,6 +174,15 @@ while (($# > 0)); do
             shift
             ;;
         --phase5-k1-boruvka-work-profile)
+            ((MORTON_YAO48_SEED_WORK_PROFILE == 0)) || \
+                die "Les profils Morton Phase 5 et Morton/Yao48 sont mutuellement exclusifs."
+            PHASE5_K1_BORUVKA_WORK_PROFILE=1
+            shift
+            ;;
+        --morton-yao48-seed-work-profile)
+            ((PHASE5_K1_BORUVKA_WORK_PROFILE == 0)) || \
+                die "Les profils Morton Phase 5 et Morton/Yao48 sont mutuellement exclusifs."
+            MORTON_YAO48_SEED_WORK_PROFILE=1
             PHASE5_K1_BORUVKA_WORK_PROFILE=1
             shift
             ;;
@@ -170,6 +196,10 @@ while (($# > 0)); do
             ;;
         --phase9-pair-support-phi)
             PHASE9_PAIR_SUPPORT_PHI=1
+            shift
+            ;;
+        --phase15-exact-diametral-phi)
+            PHASE15_EXACT_DIAMETRAL_PHI=1
             shift
             ;;
         --result-dir)
@@ -187,6 +217,11 @@ while (($# > 0)); do
     esac
 done
 
+if ((MORTON_YAO48_SEED_WORK_PROFILE == 1 && \
+    PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    die "Les deux profils de travail sont mutuellement exclusifs."
+fi
+
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1 && PHASE4_SPATIAL_REFERENCE == 1)); then
     die "--phase5-k1-boruvka-work-profile est mutuellement exclusive de --phase4-spatial-reference."
 fi
@@ -198,6 +233,13 @@ if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 && \
      PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || PHASE7_H_POLYTOPE == 1 || \
      PHASE9_PAIR_SUPPORT_PHI == 1))); then
     die "--phase5-k1-boruvka-exact-search-work-profile est mutuellement exclusive de tous les autres compagnons."
+fi
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1 && \
+    (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || \
+     PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
+     PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1))); then
+    die "--phase15-exact-diametral-phi est mutuellement exclusive de tous les autres compagnons."
 fi
 
 ((ASSUME_YES == 1)) || \
@@ -306,7 +348,11 @@ if ((PHASE5_K1_BORUVKA == 1)); then
         die "L'artefact ${LOCAL_PHASE5_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
-    LOCAL_PHASE5_WORK_PROFILE_RESULT="${RESULT_DIR}/phase5-k1-boruvka-work-profile-${HEAD_SHA}.json"
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        LOCAL_PHASE5_WORK_PROFILE_RESULT="${RESULT_DIR}/phase15-morton-yao48-seed-work-profile-${HEAD_SHA}.json"
+    else
+        LOCAL_PHASE5_WORK_PROFILE_RESULT="${RESULT_DIR}/phase5-k1-boruvka-work-profile-${HEAD_SHA}.json"
+    fi
     [[ ! -e "${LOCAL_PHASE5_WORK_PROFILE_RESULT}" && \
         ! -L "${LOCAL_PHASE5_WORK_PROFILE_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE5_WORK_PROFILE_RESULT} existe déjà; utilisez un répertoire distinct."
@@ -328,6 +374,12 @@ if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
     [[ ! -e "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}" && \
         ! -L "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
+    LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT="${RESULT_DIR}/phase15-exact-diametral-phi-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}" && \
+        ! -L "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
@@ -352,8 +404,12 @@ if ((PHASE5_K1_BORUVKA == 1)); then
     fi
 fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
+    profile_temp_prefix="phase5-k1-boruvka-work-profile"
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        profile_temp_prefix="phase15-morton-yao48-seed-work-profile"
+    fi
     if ! LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT="$(mktemp \
-        "${RESULT_DIR}/.phase5-k1-boruvka-work-profile-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        "${RESULT_DIR}/.${profile_temp_prefix}-${HEAD_SHA}.XXXXXXXX.partial")"; then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact work-profile Morton Phase 5 temporaire local."
@@ -417,6 +473,14 @@ if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
             LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
         fi
         die "Impossible de créer l'artefact pair-support Phi Phase 9 temporaire local."
+    fi
+fi
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
+    if ! LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase15-exact-diametral-phi-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact exact diametral-Phi Phase 15 temporaire local."
     fi
 fi
 
@@ -905,6 +969,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -989,6 +1057,7 @@ printf '%s\n' \
     "  profil exact-1NN: $([[ ${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE} == 1 ]] && printf 'campagne work-profile activée' || printf 'désactivé')" \
     "  replay H-polytope: $([[ ${PHASE7_H_POLYTOPE} == 1 ]] && printf 'qualification CUDA G4 Phase 7.8 activée' || printf 'désactivé')" \
     "  replay Phi Phase 9: $([[ ${PHASE9_PAIR_SUPPORT_PHI} == 1 ]] && printf 'qualification CUDA G4 + recertification CPU activée' || printf 'désactivé')" \
+    "  replay Phi Phase 15: $([[ ${PHASE15_EXACT_DIAMETRAL_PHI} == 1 ]] && printf 'prédicat ponctuel exact CUDA G4 activé' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -1017,6 +1086,7 @@ remote_phase5_work_profile_artifact=""
 remote_phase5_exact_search_work_profile_artifact=""
 remote_phase7_h_polytope_artifact=""
 remote_phase9_pair_support_phi_artifact=""
+remote_phase15_exact_diametral_phi_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -1027,12 +1097,14 @@ quoted_phase5_work_profile_artifact=""
 quoted_phase5_exact_search_work_profile_artifact=""
 quoted_phase7_h_polytope_artifact=""
 quoted_phase9_pair_support_phi_artifact=""
+quoted_phase15_exact_diametral_phi_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
 phase5_exact_search_work_profile_worker_option=""
 phase7_h_polytope_worker_option=""
 phase9_pair_support_phi_worker_option=""
+phase15_exact_diametral_phi_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
@@ -1044,9 +1116,17 @@ if ((PHASE5_K1_BORUVKA == 1)); then
     phase5_worker_option=" --phase5-k1-boruvka-output ${quoted_phase5_artifact}"
 fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
-    remote_phase5_work_profile_artifact="${REMOTE_WORKDIR}/phase5-k1-boruvka-work-profile-result.json"
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        remote_phase5_work_profile_artifact="${REMOTE_WORKDIR}/phase15-morton-yao48-seed-work-profile-result.json"
+    else
+        remote_phase5_work_profile_artifact="${REMOTE_WORKDIR}/phase5-k1-boruvka-work-profile-result.json"
+    fi
     quoted_phase5_work_profile_artifact="$(shell_quote "${remote_phase5_work_profile_artifact}")"
-    phase5_work_profile_worker_option=" --phase5-k1-boruvka-work-profile-output ${quoted_phase5_work_profile_artifact}"
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        phase5_work_profile_worker_option=" --morton-yao48-seed-work-profile-output ${quoted_phase5_work_profile_artifact}"
+    else
+        phase5_work_profile_worker_option=" --phase5-k1-boruvka-work-profile-output ${quoted_phase5_work_profile_artifact}"
+    fi
 fi
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
     remote_phase5_exact_search_work_profile_artifact="${REMOTE_WORKDIR}/phase5-k1-boruvka-exact-search-work-profile-result.json"
@@ -1062,6 +1142,11 @@ if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
     remote_phase9_pair_support_phi_artifact="${REMOTE_WORKDIR}/phase9-pair-support-phi-result.json"
     quoted_phase9_pair_support_phi_artifact="$(shell_quote "${remote_phase9_pair_support_phi_artifact}")"
     phase9_pair_support_phi_worker_option=" --phase9-pair-support-phi-output ${quoted_phase9_pair_support_phi_artifact}"
+fi
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
+    remote_phase15_exact_diametral_phi_artifact="${REMOTE_WORKDIR}/phase15-exact-diametral-phi-result.json"
+    quoted_phase15_exact_diametral_phi_artifact="$(shell_quote "${remote_phase15_exact_diametral_phi_artifact}")"
+    phase15_exact_diametral_phi_worker_option=" --phase15-exact-diametral-phi-output ${quoted_phase15_exact_diametral_phi_artifact}"
 fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
@@ -1079,7 +1164,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1171,6 +1256,19 @@ if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
         --scp-flag='-o ConnectTimeout=15' \
         --scp-flag='-o BatchMode=yes'
 fi
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase15_exact_diametral_phi_artifact}" \
+        "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
 
 [[ -s "${LOCAL_TEMP_RESULT}" ]] || die "Artefact distant récupéré mais vide."
 python3 - "${LOCAL_TEMP_RESULT}" "${HEAD_SHA}" <<'PY'
@@ -1229,6 +1327,7 @@ if ((PHASE4_SPATIAL_REFERENCE == 1)); then
         die "Artefact Phase 4 distant récupéré mais vide."
     python3 - "${LOCAL_PHASE4_TEMP_RESULT}" "${HEAD_SHA}" \
         "${LOCAL_TEMP_RESULT}" <<'PY'
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -1273,6 +1372,14 @@ if image != {
     raise SystemExit("identité d'image spatiale incohérente")
 if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
     raise SystemExit("digest d'image spatial non canonique")
+expected_provenance = {
+    "environment_artifact_schema": "morsehgp3d.phase3.qualification.v1",
+    "environment_artifact_sha256": hashlib.sha256(
+        Path(sys.argv[3]).read_bytes()
+    ).hexdigest(),
+}
+if value.get("provenance") != expected_provenance:
+    raise SystemExit("provenance Phase 3 de la qualification spatiale incohérente")
 binary = value.get("binary")
 if not isinstance(binary, dict) or any(
     re.fullmatch(r"[0-9a-f]{64}", str(binary.get(field))) is None
@@ -2260,7 +2367,54 @@ fi
 
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
     [[ -s "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" ]] || \
-        die "Artefact du profil de travail Morton Phase 5 distant récupéré mais vide."
+        die "Artefact du profil Morton distant récupéré mais vide."
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        python3 -B - "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" \
+            "${HEAD_SHA}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+raw = Path(sys.argv[1]).read_text(encoding="utf-8")
+lines = raw.splitlines()
+if len(lines) != 1 or raw != lines[0] + "\n":
+    raise SystemExit("l'artefact Morton/Yao48 doit être un JSON canonique sur une ligne")
+value = json.loads(raw)
+if value.get("schema") != "morsehgp3d.phase15.morton_yao48_seed_work_profile_artifact.v1":
+    raise SystemExit("schéma d'artefact Morton/Yao48 invalide")
+if value.get("artifact_role") != "benchmark_only":
+    raise SystemExit("l'artefact Morton/Yao48 doit rester benchmark_only")
+if value.get("git") != {"clean": True, "sha": sys.argv[2]}:
+    raise SystemExit("identité Git Morton/Yao48 invalide")
+if value.get("expected_point_counts") != [50000, 1000000, 10000000, 30000000]:
+    raise SystemExit("jalons Morton/Yao48 incomplets")
+measurements = value.get("measurements")
+if not isinstance(measurements, list) or [item.get("point_count") for item in measurements] != value["expected_point_counts"]:
+    raise SystemExit("mesures Morton/Yao48 incomplètes ou désordonnées")
+for measurement in measurements:
+    if measurement.get("artifact_role") != "benchmark_only":
+        raise SystemExit("une mesure Morton/Yao48 revendique un rôle interdit")
+    mass = measurement.get("pair_mass", {})
+    if mass.get("survivors", -1) + mass.get("certified_pruned", -1) + mass.get("unresolved", -1) != mass.get("universe"):
+        raise SystemExit("une partition de masse Morton/Yao48 ne ferme pas")
+    claims = measurement.get("claims", {})
+    for key in (
+        "dense_pair_fallback_performed", "global_pair_matrix_materialized",
+        "delaunay_materialized", "geogram_invoked", "pdel_invoked",
+        "emst_or_boruvka_invoked", "scientific_exactness_claimed",
+        "public_status_claimed",
+    ):
+        if claims.get(key) is not False:
+            raise SystemExit(f"revendication Morton/Yao48 interdite: {key}")
+for key in (
+    "delaunay_materialized", "geogram_invoked", "pdel_invoked",
+    "emst_or_boruvka_invoked", "scientific_exactness_claimed",
+    "scalability_claimed", "public_status_claimed",
+):
+    if value.get(key) is not False:
+        raise SystemExit(f"revendication d'artefact Morton/Yao48 interdite: {key}")
+PY
+    else
     python3 -B - "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" "${HEAD_SHA}" \
         "${LOCAL_TEMP_RESULT}" "${REPOSITORY_ROOT}" <<'PY'
 import hashlib
@@ -2468,6 +2622,7 @@ if value.get("provenance") != expected_provenance:
 if value.get("vm_lifecycle") != assembler.WORKER_LIFECYCLE:
     fail("contrat de cycle de vie du work-profile Morton Phase 5 absent")
 PY
+    fi
 fi
 
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
@@ -3098,6 +3253,30 @@ if logs["qualification"] != qualification_raw:
 PY
 fi
 
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
+    [[ -s "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" ]] || \
+        die "Artefact exact diametral-Phi Phase 15 distant récupéré mais vide."
+    python3 -B - "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+from pathlib import Path
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+environment_artifact_path = Path(sys.argv[3])
+sys.path.insert(0, sys.argv[4])
+
+import assemble_phase15_exact_diametral_phi_qualification as assembler
+
+assembler.validate_artifact_file(
+    artifact_path,
+    git_sha=git_sha,
+    environment_artifact_path=environment_artifact_path,
+)
+PY
+fi
+
 if certify_target_stopped; then
     stop_status=0
 else
@@ -3114,6 +3293,7 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}" \
     "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" "${LOCAL_PHASE7_H_POLYTOPE_RESULT}" \
     "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}" \
+    "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}" \
     "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
@@ -3149,6 +3329,10 @@ if sys.argv[13] or sys.argv[14]:
     if not sys.argv[13] or not sys.argv[14]:
         raise SystemExit("paire de publication pair-support Phi Phase 9 incomplète")
     pairs.append((Path(sys.argv[13]), Path(sys.argv[14])))
+if sys.argv[15] or sys.argv[16]:
+    if not sys.argv[15] or not sys.argv[16]:
+        raise SystemExit("paire de publication exact diametral-Phi Phase 15 incomplète")
+    pairs.append((Path(sys.argv[15]), Path(sys.argv[16])))
 
 documents = []
 for temporary, _ in pairs:
@@ -3158,18 +3342,18 @@ for temporary, _ in pairs:
     lifecycle["worker_status_before_targeted_stop"] = value["status"]
     lifecycle.update(
         {
-            "final_status": sys.argv[19],
+            "final_status": sys.argv[21],
             "final_status_readback": "gcloud_compute_instances_describe",
-            "final_status_verified_at_utc": sys.argv[20],
-            "guest_shutdown_minutes": int(sys.argv[18]),
+            "final_status_verified_at_utc": sys.argv[22],
+            "guest_shutdown_minutes": int(sys.argv[20]),
             "initial_status": "TERMINATED",
             "initial_status_basis": "start_and_verify_precondition",
-            "instance": sys.argv[17],
-            "last_start_timestamp": sys.argv[21],
-            "project": sys.argv[15],
+            "instance": sys.argv[19],
+            "last_start_timestamp": sys.argv[23],
+            "project": sys.argv[17],
             "start_handoff_schema": "e-hgp.start-handoff.v3",
             "targeted_stop_verified": True,
-            "zone": sys.argv[16],
+            "zone": sys.argv[18],
         }
     )
     value["status"] = "passed"
@@ -3259,6 +3443,9 @@ fi
 if [[ -n "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
@@ -3266,6 +3453,7 @@ LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
 LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT=""
+LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -3278,8 +3466,13 @@ if ((PHASE5_K1_BORUVKA == 1)); then
         "${LOCAL_PHASE5_RESULT}"
 fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
-    printf '[ARTEFACT] Work-profile Morton Phase 5 publié après certification TERMINATED : %s\n' \
-        "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        printf '[ARTEFACT] Profil Morton/LBVH/Yao48 publié après certification TERMINATED : %s\n' \
+            "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+    else
+        printf '[ARTEFACT] Work-profile Morton Phase 5 publié après certification TERMINATED : %s\n' \
+            "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+    fi
 fi
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
     printf '[ARTEFACT] Work-profile exact-search Phase 5 publié après certification TERMINATED : %s\n' \
@@ -3292,6 +3485,10 @@ fi
 if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
     printf '[ARTEFACT] Qualification pair-support Phi Phase 9 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}"
+fi
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
+    printf '[ARTEFACT] Qualification exact diametral-Phi Phase 15 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -3311,8 +3508,13 @@ if ((PHASE5_K1_BORUVKA == 1)); then
         "${LOCAL_PHASE5_RESULT}"
 fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
-    printf '[SUCCÈS] Work-profile Morton Phase 5 compagnon conservé : %s\n' \
-        "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+    if ((MORTON_YAO48_SEED_WORK_PROFILE == 1)); then
+        printf '[SUCCÈS] Profil Morton/LBVH/Yao48 compagnon conservé : %s\n' \
+            "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+    else
+        printf '[SUCCÈS] Work-profile Morton Phase 5 compagnon conservé : %s\n' \
+            "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+    fi
 fi
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
     printf '[SUCCÈS] Work-profile exact-search Phase 5 compagnon conservé : %s\n' \
@@ -3325,4 +3527,8 @@ fi
 if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
     printf '[SUCCÈS] Qualification pair-support Phi Phase 9 compagnon conservée : %s\n' \
         "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}"
+fi
+if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
+    printf '[SUCCÈS] Qualification exact diametral-Phi Phase 15 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}"
 fi

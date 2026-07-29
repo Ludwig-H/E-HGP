@@ -565,23 +565,16 @@ rmdir -- "${GCP_SSH_KEY_DIR}"
 unset GCP_SSH_KEY_FILE GCP_SSH_KEY_DIR GCP_SSH_KEY_EXPIRATION_UTC
 ```
 
-La vérification manuelle équivalente est :
+Une relecture manuelle en lecture seule peut confirmer l'état publié par le script :
 
 ```bash
-INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
-ZONE="${GCP_ZONE:-europe-west4-a}"
-
-gcloud compute instances stop "${INSTANCE_NAME}" \
+gcloud compute instances describe "${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}" \
   --project="${GCP_PROJECT_ID}" \
-  --zone="${ZONE}"
-
-gcloud compute instances describe "${INSTANCE_NAME}" \
-  --project="${GCP_PROJECT_ID}" \
-  --zone="${ZONE}" \
+  --zone="${GCP_ZONE:-europe-west4-a}" \
   --format='value(status)'
 ```
 
-La dernière commande doit afficher `TERMINATED`. Si l'état de la cible est
+Cette commande ne remplace pas `stop_and_verify.sh` et ne mute rien. Elle doit afficher `TERMINATED`. Si l'état de la cible est
 illisible, sa fermeture n'est pas certifiée : contrôlez immédiatement le
 projet, la zone et l'instance dans la console GCP. Un inventaire global
 illisible est signalé, mais n'autorise aucune mutation des autres ressources.

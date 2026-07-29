@@ -22,12 +22,14 @@ Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$ et $s_{\max}=\min(K_{\mathrm{eff}}+1,
 2. exécuter une passe exacte multi-ordre des paires jusqu'au rang $s_{\max}$;
 3. fermer directement tous les candidats dont le support minimal est une paire;
 4. rechercher indépendamment les triangles affinement indépendants et aigus, en rejetant les cas de support deux;
-5. émettre depuis chaque triangle les tétraèdres qu'il supporte, puis rechercher indépendamment les tétraèdres affinement indépendants dont le centre circonscrit est strictement intérieur;
+5. fermer séparément les tétraèdres portés par des supports inférieurs, puis rechercher indépendamment les quadruplets affinement indépendants dont le centre circonscrit est strictement intérieur;
 6. classer le rang fermé et le shell complet de chaque support survivant;
 7. réduire les événements par lots de niveau exact, avec incidences silencieuses et attaches requises par le profil;
 8. publier seulement après fermeture des frontières et rejeu des certificats.
 
-Les paires n'épuisent pas les triangles aigus : la fixture Hartigan permanente donne un support trois de rang trois dont tous les côtés ont rang quatre. Les triangles droits, obtus ou dégénérés se réduisent en revanche à un support de taille deux. La même dichotomie ramène tout tétraèdre non bien centré à un support de taille deux ou trois.
+La passe de paires n'est pas un scan de $n(n-1)/2$ feuilles. Morton fournit l'index et l'ownership, un parcours proche-en-premier remplit 48 banques Yao par ancre active, les certificats ferment la masse de régions éloignées et seuls les survivants atteignent le classifieur exact. La mémoire de banques est $O(B\mathbin{\cdot}48\mathbin{\cdot}K_{\max})$ pour une tuile de $B$ ancres. La comptabilité `candidate + certified_pruned + unresolved = n(n-1)/2` remplace l'énumération; un résidu ou un cap donne `budget_exhausted`, sans fallback dense.
+
+Les paires n'épuisent pas les triangles aigus : la fixture Hartigan permanente donne un support trois de rang trois dont tous les côtés ont rang quatre. Les triangles droits, obtus ou dégénérés se réduisent en revanche à un support de taille deux. Tout tétraèdre non bien centré se réduit à un support de taille deux ou trois, mais l'acuité de ses faces n'est pas un critère héréditaire : la fixture `tetrahedron_face_filter_counterexamples.json` montre exactement qu'elle n'est ni nécessaire ni suffisante au support quatre.
 
 ## Replis et oracles
 
@@ -35,6 +37,6 @@ La [tour globale de boules saturées](TOUR_BOULES_SATUREES.md) et [Gamma exhaust
 
 ## Conventions
 
-Les niveaux sont des rayons carrés. Un rang est le nombre de points dans la boule fermée. Un support est un sous-ensemble minimal de points frontière dont l'enveloppe convexe relative contient le centre. Un lot regroupe tous les événements d'un même niveau exact.
+Les niveaux sont des rayons carrés. Un rang est le nombre de points dans la boule fermée. `requested_order=K` cible le rang fermé au plus $K+1$ et requiert $K$ témoins de rejet; « au plus $K_{\mathrm{total}}$ points au total » cible le rang au plus $K_{\mathrm{total}}$ et en requiert $K_{\mathrm{total}}-1$. Un support est un sous-ensemble minimal de points frontière dont l'enveloppe convexe relative contient le centre. Un lot regroupe tous les événements d'un même niveau exact.
 
 Les propositions flottantes ne décident jamais seules une inclusion fermée ou une égalité de coque. Toute égalité descend vers une décision exacte; une frontière inachevée reste explicitement budgétée.

@@ -17,7 +17,7 @@ class Phase15RankedDiametralPairCatalogHostState;
 }  // namespace detail
 
 inline constexpr std::uint32_t
-    ranked_diametral_pair_catalog_contract_schema_version = 1U;
+    ranked_diametral_pair_catalog_contract_schema_version = 2U;
 inline constexpr std::size_t
     ranked_diametral_pair_catalog_maximum_level = 10U;
 inline constexpr std::size_t
@@ -46,8 +46,8 @@ enum class RankedDiametralPairCatalogBuildStatus : std::uint8_t {
 enum class RankedDiametralPairCatalogStopReason : std::uint8_t {
   none,
   work_item_capacity,
-  directed_candidate_capacity,
-  pair_candidate_capacity,
+  yao48_survivor_occurrence_capacity,
+  canonical_candidate_pair_capacity,
   catalog_record_capacity,
   payload_point_id_capacity,
   exact_fallback_capacity,
@@ -56,8 +56,11 @@ enum class RankedDiametralPairCatalogStopReason : std::uint8_t {
 struct RankedDiametralPairCatalogBudget {
   std::size_t maximum_anchor_tile_size{};
   std::size_t maximum_work_item_count{};
-  std::size_t maximum_directed_candidate_count{};
-  std::size_t maximum_pair_candidate_count{};
+  // This arena receives only certified Yao48 survivors.  The Morton ownership
+  // universe is traversed in fused form and is never written as a pair stream.
+  std::size_t maximum_yao48_survivor_occurrence_count{};
+  // Canonical PointId pairs after on-device sort/dedup and before exact rank.
+  std::size_t maximum_canonical_candidate_pair_count{};
   std::size_t maximum_catalog_record_count{};
   std::size_t maximum_payload_point_id_count{};
   std::size_t maximum_exact_fallback_count{};
@@ -67,33 +70,44 @@ struct RankedDiametralPairCatalogBudget {
       const RankedDiametralPairCatalogBudget&) = default;
 };
 
-enum class RankedPairOrientationPolicy : std::uint8_t {
-  // The endpoint at the greater Morton position owns the unordered pair and
-  // traverses only its strict Morton prefix.  PointId breaks Morton ties.
-  morton_high_owner_prefix,
-  // A future optional strengthening may intersect two directed filters, but
-  // this is not required by the catalog contract.
+enum class RankedPairYao48FilterPolicy : std::uint8_t {
+  // One certified Yao48 report, anchored at the execution owner, is sufficient
+  // for exhaustive closed-rank enumeration.  Morton chooses that owner only
+  // to partition work; it never certifies a geometric decision.
+  owner_unilateral,
+  // An optional inverse Yao48 report may reject more owner-side survivors.
+  // It is a performance strengthening, never an exhaustiveness requirement.
   bidirectional_intersection,
 };
 
 // This closure concerns only exhaustive closed-rank enumeration.  Its Yao
 // witnesses may lie on the diametral shell, so none of its pruned mass is an
-// authority for RelevantGP.  The ownership policy covers every unordered pair
-// exactly once before any optional inverse filter.
+// authority for RelevantGP.  Morton/LBVH supplies only an exact-once execution
+// partition of the unordered universe; no raw Morton pair stream is a
+// scientific input.  Every Yao48 survivor is canonicalized as
+// (min(PointId), max(PointId)) and deduplicated before exact classification.
 struct ClosedRankCatalogClosure {
-  RankedPairOrientationPolicy orientation_policy{
-      RankedPairOrientationPolicy::morton_high_owner_prefix};
+  RankedPairYao48FilterPolicy yao48_filter_policy{
+      RankedPairYao48FilterPolicy::owner_unilateral};
   std::uint64_t owned_pair_universe_count{};
-  std::uint64_t closed_pruned_owned_pair_count{};
-  std::uint64_t emitted_owned_pair_count{};
-  std::uint64_t inverse_filter_rejected_pair_count{};
-  std::uint64_t candidate_pair_count{};
+  std::uint64_t yao48_owner_pruned_pair_count{};
+  std::uint64_t yao48_inverse_pruned_pair_count{};
+  std::uint64_t yao48_survivor_occurrence_count{};
+  std::uint64_t duplicate_survivor_occurrence_count{};
+  std::uint64_t canonical_candidate_pair_count{};
   std::uint64_t above_window_pair_count{};
   std::uint64_t ranked_record_count{};
   std::uint64_t unresolved_owned_pair_count{};
   std::uint64_t unresolved_candidate_pair_count{};
   std::uint64_t unresolved_exact_predicate_count{};
   bool closed_rank_catalog_complete{false};
+
+  // Receipt identities:
+  //   owner_pruned + inverse_pruned + canonical_candidate + unresolved_owned
+  //     == owned_pair_universe;
+  //   canonical_candidate + duplicate_occurrence == survivor_occurrence;
+  //   above_window + ranked_record + unresolved_candidate
+  //     == canonical_candidate.
 
   friend bool operator==(
       const ClosedRankCatalogClosure&,
@@ -129,6 +143,8 @@ struct PairSupportRelevantGpClosure {
 };
 
 struct RankedDiametralPairCatalogDeviceLeaseAudit {
+  std::uint32_t contract_schema_version{
+      ranked_diametral_pair_catalog_contract_schema_version};
   std::size_t point_count{};
   std::size_t certified_node_count{};
   std::size_t maximum_level{};
@@ -144,6 +160,12 @@ struct RankedDiametralPairCatalogDeviceLeaseAudit {
   bool catalog_owner_retained{false};
   bool host_fake_lifecycle_exercised{false};
   bool cuda_device_storage_retained{false};
+  bool morton_ownership_partition_validated{false};
+  bool yao48_filter_policy_validated{false};
+  bool candidate_point_id_canonicalization_validated{false};
+  bool candidate_deduplication_before_exact_classification_validated{false};
+  bool morton_scientific_authority_claimed{false};
+  bool raw_morton_pair_stream_materialized{false};
   bool global_relevant_gp_complete_published{false};
   bool public_status_claimed{false};
 
@@ -207,6 +229,8 @@ class RankedDiametralPairCatalogDeviceLease final {
 };
 
 struct RankedDiametralPairCatalogBuildAudit {
+  std::uint32_t contract_schema_version{
+      ranked_diametral_pair_catalog_contract_schema_version};
   std::size_t point_count{};
   std::size_t certified_node_count{};
   std::size_t maximum_level{};
@@ -230,7 +254,10 @@ struct RankedDiametralPairCatalogBuildAudit {
   bool fixed_capacity_echo_validated{false};
   bool one_multi_order_launch_validated{false};
   bool closed_rank_mass_validated{false};
-  bool exact_once_orientation_validated{false};
+  bool morton_ownership_partition_validated{false};
+  bool yao48_filter_policy_validated{false};
+  bool candidate_point_id_canonicalization_validated{false};
+  bool candidate_deduplication_before_exact_classification_validated{false};
   bool rank_bucket_layout_validated{false};
   bool output_layout_validated{false};
   bool payload_partition_validated{false};
@@ -243,6 +270,8 @@ struct RankedDiametralPairCatalogBuildAudit {
   bool scientific_decision_published{false};
   bool global_relevant_gp_complete_published{false};
   bool hierarchy_reduction_or_attachment_published{false};
+  bool morton_scientific_authority_claimed{false};
+  bool raw_morton_pair_stream_materialized{false};
   bool forbidden_global_pair_matrix_materialized{false};
   bool public_status_claimed{false};
 

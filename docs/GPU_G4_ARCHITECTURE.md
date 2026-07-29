@@ -2,13 +2,15 @@
 
 > **Statut.** Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, porte d’entrée satisfaite, porte de sortie non satisfaite, `deployment_status=architecture_only`, `public_status=not_claimed`. Le présent document fixe la cible CUDA; il ne prétend pas qu’elle est déjà implémentée ou qualifiée.
 
-> **Priorité.** Une passe multi-ordre résidente construit d’abord toutes les paires diamétrales de rang fermé au plus $K_{\max}+1$ avec leur payload complet. Une frontière indépendante ne cherche ensuite que les supports propres de taille trois, puis une autre les supports propres de taille quatre. Aucune mosaïque de Delaunay d’ordre supérieur, cellule top-$m$, coface ou incidence globale n’est construite.
+> **Priorité.** Une passe multi-ordre résidente construit d’abord toutes les paires diamétrales de rang fermé au plus $K_{\max}+1$ avec leur payload complet. Elle doit obtenir ce résultat par une frontière fusionnée Morton--Yao48 et ne peut ni parcourir inconditionnellement toutes les paires, ni posséder un fallback dense. Une frontière indépendante ne cherche ensuite que les supports propres de taille trois, puis une autre les supports propres de taille quatre. Aucune mosaïque de Delaunay d’ordre supérieur, cellule top-$m$, coface ou incidence globale n’est construite.
 
 Les résultats des anciennes voies synchronisées, PDEL, Geogram et `prune-only` sont conservés dans les [archives](archive/abandoned/README.md) et dans le [journal de Phase 14](validation/PHASE14_PROGRESS.md). Ils sont des preuves négatives ou des oracles, pas des composants à renommer dans la voie active.
 
 ## 1. Deux sorties scientifiques distinctes
 
 Pour $u\neq v$, on pose $\Phi_{u,v}(x)=(x-u)\mathbin{\cdot}(x-v)$, $C_X(u,v)=\left\lbrace x\in X:\Phi_{u,v}(x)\leq0\right\rbrace$ et $r(u,v)=\lvert C_X(u,v)\rvert$. Avec $K_{\mathrm{eff}}=\min(K_{\max},n-1)$, la fenêtre fermée vaut $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$. Le rang $R$ détermine le bucket de stockage de la boule. Un simplexe Gabriel porté $Q$ de cardinal $q$ alimente $\Gamma_{q-1}$; seulement sous `RelevantGP`, où le shell supplémentaire utile est vide et $q=R$, ce routage devient $k=R-1$.
+
+La convention d'API ne doit jamais être implicite : `requested_order=K` demande les rangs fermés $R\leq K+1$ et un prune de cette fenêtre requiert $K$ témoins supplémentaires aux deux supports. Une demande littérale « la boule contient au plus $K_{\mathrm{total}}$ points au total » demande $R\leq K_{\mathrm{total}}$ et requiert $K_{\mathrm{total}}-1$ témoins. Les compteurs, reçus et artefacts sérialisent la convention utilisée.
 
 Le producteur doit fermer séparément :
 
@@ -19,15 +21,15 @@ Pour un support utile de taille $m\leq s_{\max}$, l'extra-shell est pertinent ta
 
 La fixture `morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json` interdit toute confusion entre ces deux masses.
 
-## 2. Morton choisit le travail, jamais la vérité
+## 2. Morton indexe et possède; Yao48 élimine
 
-Les points sont ordonnés par `(MortonCode, PointId)`. Pour deux positions $i<j$, la paire appartient à l’ancre $j$. L’ordre total suffit à prouver l’émission exacte une fois; il n’exclut géométriquement aucune paire.
+Les points sont ordonnés par `(MortonCode, PointId)`. Pour deux positions $i<j$, la paire appartient opérationnellement à l’ancre $j$; la sortie scientifique reste canonicalisée par `(min(PointId), max(PointId))`. Cet ordre total empêche les doublons, mais ne certifie jamais une exclusion géométrique.
 
-Ce sens est adapté au LBVH postordre existant : l’ancre de position $j$ ne visite que le préfixe de feuilles $[0,j)$ et le parcours inverse `root-right-left` rencontre d’abord les positions proches $j-1,j-2,\ldots$. Un nœud dont `leaf_begin>=j` est sauté en bloc. L’ordre historique par `PointId` ne permettait pas ce skip de plage.
+Le target ne développe pas ce préfixe feuille par feuille. Pour une tuile de $B$ ancres, un parcours LBVH proche-en-premier fusionne trois opérations : il saute le suffixe hors ownership, alimente les banques Yao48 depuis les feuilles effectivement rencontrées, puis prouve en bloc que les régions suffisamment lointaines sont au-dessus de la fenêtre de rang. Une feuille non prunée devient candidate; aucune étape intermédiaire n'émet le préfixe brut.
 
-Pour amorcer les témoins d’une ancre, le noyau parcourt une fenêtre Morton symétrique `+1,-1,+2,-2,...`. Cette fenêtre n’a aucun contrat de rappel. Un témoin proposé est utilisé seulement après certification de sa chambre, de son identité et de sa borne de distance; une chambre insuffisante désactive son cutoff et laisse le LBVH descendre.
+L'ordre proche-en-premier est seulement opérationnel. Chaque témoin est recertifié quant à son identité, sa chambre semi-ouverte et sa distance; une chambre insuffisante laisse le parcours descendre. Une fenêtre Morton optionnelle peut accélérer l'amorçage, sans aucun contrat de rappel et sans pouvoir d'exclusion.
 
-Le chemin massif ne stocke jamais une table $n\times48\times K_{\max}$. Il traite une tuile de $B$ ancres, puis réutilise le même espace. Tant que $n<2^{32}$, les banques internes stockent des positions Morton 32 bits et ne convertissent en `PointId` canonique qu'à l'émission : pour $B=4096$ et $K_{\max}=10$, $B\times48\times K_{\max}$ occupe exactement 7,5 Mio, contre 15 Mio avec des identifiants 64 bits.
+Le chemin massif ne stocke jamais une table $n\times48\times K_{\max}$. Il traite une tuile de $B$ ancres et borne les banques actives par $O(B\mathbin{\cdot}48\mathbin{\cdot}K_{\max})$, puis réutilise cet espace. Tant que $n<2^{32}$, les banques internes stockent des positions Morton 32 bits et ne convertissent en `PointId` canonique qu'à l'émission : pour $B=4096$ et $K_{\max}=10$, $B\times48\times K_{\max}$ occupe exactement 7,5 Mio, contre 15 Mio avec des identifiants 64 bits.
 
 ## 3. Yao48 sans top-$K$ exact obligatoire
 
@@ -47,6 +49,8 @@ Prendre les vrais $t_2$ plus proches dans cette même chambre ne fait que diminu
 
 Pour un nœud cible entièrement certifié dans une chambre, les minima de $x$, $x+y$ et $x+y+z$ sur son AABB appliquent les trois comparaisons à toutes ses feuilles. Un nœud qui traverse une frontière de chambre descend ou passe au certificat individuel suivant.
 
+Ce certificat est unilatéral. Son succès prouve que la cible est hors fenêtre; son échec ne caractérise ni le rang, ni l'appartenance au catalogue. La paire reste seulement dans le sur-ensemble candidat jusqu'à la classification exacte. La fixture unitaire `test_directional_cutoff_is_not_a_rank_characterization` verrouille ce non-converse.
+
 ## 4. Réservoir individuel complémentaire
 
 Une banque courte $W_p$, typiquement 64 témoins Morton proches, est construite et consommée par tuile et couvre les directions que le cutoff compressé n’a pas remplies. À 4096 ancres, 64 positions 32 bits par ancre occupent 1 Mio; une banque globale à plusieurs dizaines de millions de points est interdite. Pour un témoin $w$ et un nœud cible $Q$, on calcule une borne inférieure de
@@ -62,14 +66,14 @@ L’ordre de test d’un nœud est : cutoff Yao48 à trois comparaisons, premiè
 Le premier target résident consomme une `MortonLbvhDeviceTraversalLease` et enchaîne sans callback par paire :
 
 1. valider l’identité du nuage, l’epoch, les capacités 64 bits et $K_{\max}$;
-2. préparer une tuile d’ancres, son ownership Morton, ses témoins et ses cutoffs certifiés;
-3. parcourir le préfixe LBVH de chaque ancre et fermer la masse des nœuds strictement prunés, sautés par ownership ou ouverts en feuilles candidates;
+2. préparer une tuile d’ancres et son ownership Morton, puis remplir ses 48 banques pendant le même parcours proche-en-premier;
+3. rapporter seulement des prunes Yao48 certifiés avec leur masse ou des feuilles candidates; une interruption laisse le reste dans `unresolved_pair_mass`;
 4. appliquer à chaque feuille candidate les cutoffs disponibles à l’autre extrémité lorsqu’ils sont déjà résidents, sans en faire une condition de complétude;
-5. classifier chaque paire survivante contre le LBVH global en une seule fois pour tous les ordres;
+5. dédupliquer canoniquement les survivants et classifier exactement ceux-là, une seule fois pour tous les ordres;
 6. compacter les records, leurs intérieurs stricts et leurs extra-shells dans des tableaux CSR;
 7. radix-trier les records par `(closed_rank,u,v)`, vérifier l’unicité et publier une lease seulement lorsque la frontière et les files exactes requises sont vides.
 
-Le parcours d'émission de l'étape 3 est unique : il écrit une file device bornée avec un curseur reprenable par ancre. Les `count + scan` des étapes 6 et 7 dimensionnent uniquement records et payloads; ils ne rejouent jamais le parcours géométrique. Une saturation conserve le curseur exact et retourne `budget_exhausted`.
+Le reçu ferme sur des entiers 64 bits contrôlés ou multiprécision l'identité `candidate_pair_mass + certified_pruned_pair_mass + unresolved_pair_mass = n(n-1)/2`. Les prunes comptent la cardinalité des régions sans développer leurs feuilles; les candidats comptent uniquement les paires effectivement remises au classifieur. Une publication exhaustive exige `unresolved_pair_mass=0`. Les `count + scan` des étapes 6 et 7 dimensionnent uniquement records et payloads; ils ne rejouent jamais le parcours géométrique. Une saturation conserve le curseur exact et retourne `budget_exhausted`; elle ne déclenche jamais une boucle dense de rattrapage.
 
 La classification d'une paire suit deux compteurs. Le catalogue fermé peut conclure `above_window` dès que le rang dépasse $s_{\max}$. La lane `RelevantGP` ne conclut tôt qu'après $t_2$ points strictement intérieurs; une masse de shell ne suffit pas. Si le parcours finit avec moins de $t_2$ intérieurs et un point de shell hors support, il publie `unsupported_degeneracy`, y compris lorsque le rang fermé est énorme.
 
@@ -94,7 +98,7 @@ Les décisions utilisent trois étages séparés :
 2. expansions de taille fixe pour les cas bien échelonnés;
 3. accumulateur dyadique à nombre de limbs borné par le domaine binary64, traité coopérativement par un warp pour les rares cas extrêmes.
 
-Le signe de $\Phi$ est une somme de trois produits de différences binary64. Sa taille arithmétique est bornée a priori; il n’exige donc pas une file CPU de taille variable pour décider le signe. Le kernel exact correspondant est néanmoins un verrou non implémenté à ce jour. Tant qu’il manque, un résultat GPU reste une proposition et le scaffold ne peut pas annoncer `closed_rank_catalog_complete`.
+Le signe de $\Phi$ est une somme de trois produits de différences binary64. Le composant de qualification applique maintenant intervalle dirigé, limbs fixes 128/256 bits, puis un lot multiprécision CPU pour tout dépassement conservatif. Il reste séparé du parcours résident : sa qualification locale ne suffit pas à annoncer `closed_rank_catalog_complete`, et le raccord doit conserver la classification des seuls survivants.
 
 Les supports de tailles trois et quatre emploient les déterminants homogènes de Gram–Cramer et le polynôme de puissance. Leurs caps de limbs sont distincts de celui de $\Phi$. La canonicalisation finale de centres et niveaux rationnels peut rester sur CPU pour un flux de sortie borné; aucune décision de présence, de rang ou de prune ne doit en dépendre.
 
@@ -132,11 +136,11 @@ Même exhaustif, ce flot de Gabriel brut ne remplace pas à lui seul Gamma exhau
 
 ## 9. Mémoire et passage à l’échelle
 
-À 50 000 points, coordonnées, permutation Morton et nœuds LBVH restent résidents avec les deux tuiles de travail, les files exactes et une sortie explicitement capée. Le target n’alloue ni matrice de paires, ni table globale de témoins, ni univers de triplets ou quadruplets.
+À 50 000 points, coordonnées, permutation Morton et nœuds LBVH restent résidents avec les tuiles de travail, les banques $O(B\mathbin{\cdot}48\mathbin{\cdot}K_{\max})$, les files exactes et une sortie explicitement capée. Le target n’alloue ni matrice de paires, ni table globale de témoins, ni univers de triplets ou quadruplets.
 
 À 10 M–30 M, le nuage et le LBVH restent résidents seulement si le préflight le démontre. Les ancres, frontières de supports, candidats et sorties sont streamés par plages Morton. Un chunk n’est libéré qu’après publication atomique de l’une de ces issues : prune exact avec masse, records exacts compactés, ou frontière reprenable. Un halo ou une fenêtre locale ne clôt jamais un chunk.
 
-Le coût de sortie peut être quadratique dès les paires. Le contrat de temps porte donc sur des familles enregistrées et output-bornées, avec caps séparés pour :
+Le coût de sortie et le pire cas du parcours peuvent être quadratiques dès les paires. Cette possibilité ne justifie aucun travail quadratique anticipé : sur les profils favorables, la masse doit être fermée principalement par des prunes de régions, et la croissance à 12 500 points doit falsifier toute ordonnance pratiquement dense avant le gate 50 000. Le contrat de temps porte donc sur des familles enregistrées et output-bornées, avec caps séparés pour :
 
 - nœuds visités et tests de témoins;
 - candidats paires, triangles et tétraèdres;
@@ -144,7 +148,7 @@ Le coût de sortie peut être quadratique dès les paires. Le contrat de temps p
 - octets de tri, de frontière et de sortie;
 - prédicats exacts rares.
 
-Dépasser un cap produit `budget_exhausted`; aucune lease n'est alors publiée comme exhaustive, et le producteur conserve une frontière reprenable ou un résultat partiel explicitement non exact.
+Dépasser un cap produit `budget_exhausted`; aucune lease n'est alors publiée comme exhaustive, et le producteur conserve une frontière reprenable ou un résultat partiel explicitement non exact. Il n'existe aucun fallback qui classifie les paires restantes une par une.
 
 ## 10. Gate de 100 ms
 
@@ -168,9 +172,9 @@ Le premier benchmark GCP n’est justifié qu’après existence du kernel rési
 1. poser le contrat `RankedDiametralPairCatalogContext`, sa lease SoA et un fake-launcher hostile;
 2. généraliser la preuve Yao48 à des témoins quelconques et ajouter la variante stricte;
 3. implémenter le signe exact GPU de $\Phi$;
-4. porter l’amorçage Morton et le parcours exact-once par préfixe, puis remplacer avant le gate le builder LBVH multi-lancements par une construction en quelques kernels;
+4. porter la frontière fusionnée `morton_yao48_pair_frontier`, où l'ownership Morton, le remplissage des 48 banques et les prunes de régions partagent un parcours; interdire toute émission préalable du préfixe brut;
 5. raccorder classification, CSR, reçus closed/GP et différentiels $n\leq512$;
-6. mesurer localement les masses et seulement alors lancer un gate G4 gardé;
+6. fermer `candidate + certified_pruned + unresolved = n(n-1)/2`, montrer un résidu nul, mesurer la croissance et seulement alors lancer un gate G4 gardé;
 7. implémenter la frontière indépendante des triangles aigus;
 8. réutiliser son flux pour réduire les tétraèdres support-3, puis ouvrir les seuls support-4 bien centrés;
 9. générer et certifier exhaustivement les incidences silencieuses et non-Gabriel nécessaires, puis fermer l'obligation M.1;

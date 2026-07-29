@@ -66,6 +66,8 @@ struct Phase15RankedPairCatalogDeviceReceipt {
   ClosedRankCatalogClosure closed_rank_closure;
   PairSupportRelevantGpClosure pair_support_relevant_gp_closure;
   RankedDiametralPairCatalogBudget fixed_budget;
+  std::uint32_t contract_schema_version{
+      ranked_diametral_pair_catalog_contract_schema_version};
   std::size_t point_count{};
   std::size_t node_count{};
   std::size_t maximum_level{};
@@ -88,11 +90,17 @@ struct Phase15RankedPairCatalogDeviceReceipt {
   bool device_rank_offsets_validated{false};
   bool device_records_sorted_unique{false};
   bool device_payload_partition_validated{false};
+  bool morton_ownership_partition_validated{false};
+  bool yao48_filter_policy_validated{false};
+  bool candidate_point_id_canonicalization_validated{false};
+  bool candidate_deduplication_before_exact_classification_validated{false};
   bool closed_prune_mass_reused_for_relevant_gp{false};
   bool exact_gpu_predicates_implemented{false};
   bool scientific_decision_published{false};
   bool global_relevant_gp_complete_published{false};
   bool hierarchy_reduction_or_attachment_published{false};
+  bool morton_scientific_authority_claimed{false};
+  bool raw_morton_pair_stream_materialized{false};
   bool forbidden_global_pair_matrix_materialized{false};
   bool public_status_claimed{false};
 };
@@ -116,7 +124,8 @@ phase15_ranked_pair_catalog_receipt_digest(
   const auto add = [&digest](std::uint64_t word) {
     digest = phase15_ranked_pair_catalog_digest_word(digest, word);
   };
-  add(UINT64_C(0x5031355041495231));
+  add(UINT64_C(0x5031355041495232));
+  add(static_cast<std::uint64_t>(receipt.contract_schema_version));
   add(receipt.source_snapshot_epoch);
   add(receipt.buffer_epoch);
   add(static_cast<std::uint64_t>(receipt.point_count));
@@ -138,9 +147,9 @@ phase15_ranked_pair_catalog_receipt_digest(
   add(static_cast<std::uint64_t>(
       receipt.fixed_budget.maximum_work_item_count));
   add(static_cast<std::uint64_t>(
-      receipt.fixed_budget.maximum_directed_candidate_count));
+      receipt.fixed_budget.maximum_yao48_survivor_occurrence_count));
   add(static_cast<std::uint64_t>(
-      receipt.fixed_budget.maximum_pair_candidate_count));
+      receipt.fixed_budget.maximum_canonical_candidate_pair_count));
   add(static_cast<std::uint64_t>(
       receipt.fixed_budget.maximum_catalog_record_count));
   add(static_cast<std::uint64_t>(
@@ -164,12 +173,13 @@ phase15_ranked_pair_catalog_receipt_digest(
   add(receipt.output.shell_point_ids != nullptr ? UINT64_C(1) : UINT64_C(0));
 
   const ClosedRankCatalogClosure& closed = receipt.closed_rank_closure;
-  add(static_cast<std::uint64_t>(closed.orientation_policy));
+  add(static_cast<std::uint64_t>(closed.yao48_filter_policy));
   add(closed.owned_pair_universe_count);
-  add(closed.closed_pruned_owned_pair_count);
-  add(closed.emitted_owned_pair_count);
-  add(closed.inverse_filter_rejected_pair_count);
-  add(closed.candidate_pair_count);
+  add(closed.yao48_owner_pruned_pair_count);
+  add(closed.yao48_inverse_pruned_pair_count);
+  add(closed.yao48_survivor_occurrence_count);
+  add(closed.duplicate_survivor_occurrence_count);
+  add(closed.canonical_candidate_pair_count);
   add(closed.above_window_pair_count);
   add(closed.ranked_record_count);
   add(closed.unresolved_owned_pair_count);
@@ -196,6 +206,16 @@ phase15_ranked_pair_catalog_receipt_digest(
   add(receipt.device_rank_offsets_validated ? UINT64_C(1) : UINT64_C(0));
   add(receipt.device_records_sorted_unique ? UINT64_C(1) : UINT64_C(0));
   add(receipt.device_payload_partition_validated ? UINT64_C(1) : UINT64_C(0));
+  add(receipt.morton_ownership_partition_validated
+          ? UINT64_C(1)
+          : UINT64_C(0));
+  add(receipt.yao48_filter_policy_validated ? UINT64_C(1) : UINT64_C(0));
+  add(receipt.candidate_point_id_canonicalization_validated
+          ? UINT64_C(1)
+          : UINT64_C(0));
+  add(receipt.candidate_deduplication_before_exact_classification_validated
+          ? UINT64_C(1)
+          : UINT64_C(0));
   add(receipt.closed_prune_mass_reused_for_relevant_gp
           ? UINT64_C(1)
           : UINT64_C(0));
@@ -205,6 +225,12 @@ phase15_ranked_pair_catalog_receipt_digest(
           ? UINT64_C(1)
           : UINT64_C(0));
   add(receipt.hierarchy_reduction_or_attachment_published
+          ? UINT64_C(1)
+          : UINT64_C(0));
+  add(receipt.morton_scientific_authority_claimed
+          ? UINT64_C(1)
+          : UINT64_C(0));
+  add(receipt.raw_morton_pair_stream_materialized
           ? UINT64_C(1)
           : UINT64_C(0));
   add(receipt.forbidden_global_pair_matrix_materialized

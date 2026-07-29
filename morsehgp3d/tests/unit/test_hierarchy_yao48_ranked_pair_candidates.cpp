@@ -322,6 +322,36 @@ void test_directional_projection_strictly_tightens_uniform_radius() {
       "the audit distinguishes projection-only prunes from uniform radial prunes");
 }
 
+void test_directional_cutoff_is_not_a_rank_characterization() {
+  const CanonicalPointCloud cloud = canonical_cloud({
+      point(0.0, 0.0, 0.0),
+      point(2.0, 0.0, 0.0),
+      point(1.0, 1.0, 0.0),
+  });
+  const PointId anchor = canonical_id_from_source(cloud, 0U);
+  const PointId target = canonical_id_from_source(cloud, 1U);
+  const PointId shell_witness = canonical_id_from_source(cloud, 2U);
+  const ExactLevel witness_radius =
+      squared_distance(cloud, anchor, shell_witness);
+
+  check(
+      closed_rank(cloud, anchor, target) == 3U &&
+          point_in_closed_diametral_ball(
+              cloud, anchor, target, shell_witness),
+      "the non-converse fixture has one extra closed-ball witness");
+  check(
+      !exact_yao48_directional_rank_cutoff_certifies_above(
+          cloud.point(anchor), cloud.point(target), witness_radius),
+      "a rank-above-window pair may legitimately survive the sufficient Yao48 cutoff");
+
+  const ExactYao48RankedPairCandidateResult result =
+      build_exact_yao48_ranked_pair_candidate_reference(cloud, 1U);
+  check(
+      candidate_keys(result).contains(std::array<PointId, 2>{
+          std::min(anchor, target), std::max(anchor, target)}),
+      "Yao48 survivors are an exhaustive superset, not an exact rank characterization");
+}
+
 void test_fixed_prefix_counterexample_survives_adaptive_cutoff() {
   const CanonicalPointCloud cloud = canonical_cloud({
       point(-120.0, 121.0, -104.0),
@@ -653,6 +683,7 @@ int main() {
   test_directional_cutoff_respects_signed_permutations();
   test_many_deterministic_clouds_preserve_every_low_rank_pair();
   test_directional_projection_strictly_tightens_uniform_radius();
+  test_directional_cutoff_is_not_a_rank_characterization();
   test_fixed_prefix_counterexample_survives_adaptive_cutoff();
   test_reference_guards();
 

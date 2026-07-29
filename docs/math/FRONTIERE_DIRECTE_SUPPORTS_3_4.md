@@ -6,6 +6,12 @@ Pour une taille $m\in\left\lbrace 3,4\right\rbrace$, le but est d'énumérer exa
 
 L'oracle exhaustif $n\leq14$ reste la source différentielle. Il ne devient ni une dépendance du producteur, ni un index de candidats.
 
+### 1.1 Indépendance réelle des trois frontières
+
+La cascade porte sur la taille du support minimal, pas sur des cliques d'objets déjà acceptés. L'absence d'une arête dans le bucket utile ne permet pas d'exclure un triangle aigu : la fixture [`hartigan_triangle_all_side_ranks_above_k.json`](../../tests/fixtures/regressions/hartigan_triangle_all_side_ranks_above_k.json) possède un support trois de rang fermé trois dont les trois côtés ont rang quatre. En plaçant des points rationnels dans les calottes des boules diamétrales situées hors de la miniboule du triangle, on peut rendre ces trois rangs arbitrairement grands sans changer le rang trois du support.
+
+La même non-hérédité vaut entre supports trois et quatre. La fixture [`tetrahedron_face_filter_counterexamples.json`](../../tests/fixtures/regressions/tetrahedron_face_filter_counterexamples.json) recertifie d'une part un tétraèdre de barycentriques $(1/8,3/8,3/8,1/8)$ dont deux faces sont obtuses, d'autre part un tétraèdre à quatre faces aiguës dont une barycentrique vaut $-1/12$. Exiger des faces aiguës perd donc un support quatre valide, tandis qu'accepter leurs cliques introduit un faux support quatre. La frontière des quadruplets applique directement l'indépendance affine et les quatre signes barycentriques; les fermetures issues des supports deux et trois sont fusionnées en parallèle, jamais utilisées comme autorité d'exclusion.
+
 ## 2. Partition canonique des sous-ensembles
 
 Une entrée de frontière est une suite de groupes $(N_i,r_i)$, où les plages Morton des nœuds $N_i$ sont deux à deux disjointes et strictement ordonnées, $r_i\geq1$ et $\sum_i r_i=m$. Elle représente les supports prenant exactement $r_i$ feuilles distinctes dans $N_i$.
