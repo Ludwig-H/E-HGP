@@ -7,6 +7,7 @@
 #include <array>
 #include <cstddef>
 #include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <vector>
 
@@ -31,12 +32,104 @@ struct ExactRankedDiametralPairRecord {
       const ExactRankedDiametralPairRecord&) = default;
 };
 
+// Number of abstract Gabriel subsets of target_cardinality carried by one
+// exact ball record and one fixed minimal support.  A carried subset must
+// contain the complete minimal support and every strict-interior point; any
+// extra-shell point is optional.  Callers that aggregate multiple minimal
+// supports for the same ball must union and deduplicate their PointId subsets.
+// Hence the count is
+//
+//   choose(extra_shell_count,
+//          target_cardinality - support_size - strict_interior_count).
+//
+// This is an abstract-simplex count.  Affine independence is a separate,
+// optional filter for geometric triangle/tetrahedron catalogues and must not
+// remove an abstract Gabriel simplex from the HGP stream.
+[[nodiscard]] inline std::size_t exact_ball_supported_gabriel_subset_count(
+    std::size_t support_size,
+    std::size_t strict_interior_count,
+    std::size_t extra_shell_count,
+    std::size_t target_cardinality) {
+  if (support_size == 0U) {
+    throw std::invalid_argument(
+        "a Gabriel ball record requires a nonempty support");
+  }
+  if (strict_interior_count >
+      std::numeric_limits<std::size_t>::max() - support_size) {
+    throw std::overflow_error(
+        "the mandatory Gabriel subset cardinality overflows size_t");
+  }
+  const std::size_t mandatory_cardinality =
+      support_size + strict_interior_count;
+  if (target_cardinality < mandatory_cardinality) {
+    return 0U;
+  }
+  const std::size_t selected_shell_count =
+      target_cardinality - mandatory_cardinality;
+  if (selected_shell_count > extra_shell_count) {
+    return 0U;
+  }
+
+  const std::size_t reduced_shell_count =
+      std::min(selected_shell_count,
+               extra_shell_count - selected_shell_count);
+  std::size_t result = 1U;
+  for (std::size_t factor = 1U;
+       factor <= reduced_shell_count;
+       ++factor) {
+    std::size_t numerator =
+        extra_shell_count - reduced_shell_count + factor;
+    std::size_t denominator = factor;
+    const std::size_t numerator_divisor =
+        std::gcd(numerator, denominator);
+    numerator /= numerator_divisor;
+    denominator /= numerator_divisor;
+    const std::size_t result_divisor = std::gcd(result, denominator);
+    result /= result_divisor;
+    denominator /= result_divisor;
+    if (denominator != 1U) {
+      throw std::logic_error(
+          "the Gabriel subset binomial recurrence did not divide exactly");
+    }
+    if (numerator != 0U &&
+        result > std::numeric_limits<std::size_t>::max() / numerator) {
+      throw std::overflow_error(
+          "the Gabriel subset count overflows size_t");
+    }
+    result *= numerator;
+  }
+  return result;
+}
+
+[[nodiscard]] inline std::size_t
+exact_ranked_diametral_pair_gabriel_subset_count(
+    const ExactRankedDiametralPairRecord& record,
+    std::size_t target_cardinality) {
+  if (record.strict_interior_ids.size() >
+      std::numeric_limits<std::size_t>::max() - 2U ||
+      record.extra_shell_ids.size() >
+          std::numeric_limits<std::size_t>::max() - 2U -
+              record.strict_interior_ids.size() ||
+      record.closed_rank !=
+          2U + record.strict_interior_ids.size() +
+              record.extra_shell_ids.size()) {
+    throw std::logic_error(
+        "a ranked diametral pair record has inconsistent cardinalities");
+  }
+  return exact_ball_supported_gabriel_subset_count(
+      2U,
+      record.strict_interior_ids.size(),
+      record.extra_shell_ids.size(),
+      target_cardinality);
+}
+
 // Candidate output sizes for a structurally validated support-2 record.  Every
-// subset keeps the record's diametral miniball, exact level, closed rank, and
-// saturation, but it is a geometric simplex only after an exact affine-
-// independence filter.  The GPU implementation can therefore reserve both
-// candidate streams with one count and one exclusive scan, without another
-// diametral query.
+// candidate keeps the record's diametral miniball, exact level, closed rank,
+// and saturation.  These two helpers deliberately count all same-miniball
+// candidates, not Gabriel subsets: Gabriel membership additionally requires
+// every strict-interior point to belong to the subset.  The GPU implementation
+// can reserve both candidate streams with one count and one exclusive scan,
+// without another diametral query.
 [[nodiscard]] inline std::size_t exact_pair_supported_triplet_candidate_count(
     const ExactRankedDiametralPairRecord& record) {
   if (record.closed_rank < 2U) {

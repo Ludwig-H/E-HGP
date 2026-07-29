@@ -1,6 +1,6 @@
 # Replis de recherche maintenus
 
-La voie privilégiée reste unique : une passe multi-ordre résidente GPU construit les top-$K_{\max}$ exacts dans les 48 chambres, utilise Morton/LBVH pour ordonner et élaguer, émet exactement une fois chaque paire survivante, décide son rang fermé et restitue son payload complet. Les triangles aigus puis les tétraèdres bien centrés ont ensuite leurs frontières indépendantes.
+La voie privilégiée reste unique : une passe multi-ordre résidente GPU construit des banques certifiées de $K_{\max}$ témoins dans les 48 chambres, utilise Morton/LBVH pour ordonner et élaguer, émet exactement une fois chaque paire survivante, décide son rang fermé et restitue son payload complet. Les témoins n'ont pas besoin d'être les plus proches; une fenêtre Morton peut les proposer sans rappel et toute insuffisance reste fail-open. Les triangles aigus puis les tétraèdres bien centrés ont ensuite leurs frontières indépendantes.
 
 Trois replis seulement restent maintenus :
 

@@ -22,8 +22,11 @@ using morsehgp3d::hierarchy::ExactRankedDiametralPairCatalogReferenceResult;
 using morsehgp3d::hierarchy::ExactRankedDiametralPairRecord;
 using morsehgp3d::hierarchy::
     build_exact_ranked_diametral_pair_catalog_reference;
+using morsehgp3d::hierarchy::exact_ball_supported_gabriel_subset_count;
 using morsehgp3d::hierarchy::
     exact_ranked_diametral_pair_closed_point_ids;
+using morsehgp3d::hierarchy::
+    exact_ranked_diametral_pair_gabriel_subset_count;
 using morsehgp3d::hierarchy::
     exact_pair_supported_quadruplet_candidate_count;
 using morsehgp3d::hierarchy::exact_pair_supported_triplet_candidate_count;
@@ -229,7 +232,71 @@ void test_cosphere_payload_is_complete() {
         exact_pair_supported_triplet_candidate_count(*record) == 3U &&
             exact_pair_supported_quadruplet_candidate_count(*record) == 3U,
         "a rank-five pair record reserves exactly three triplet and three quadruplet candidates");
+    check(
+        exact_ranked_diametral_pair_gabriel_subset_count(*record, 2U) ==
+                0U &&
+            exact_ranked_diametral_pair_gabriel_subset_count(*record, 3U) ==
+                1U &&
+            exact_ranked_diametral_pair_gabriel_subset_count(*record, 4U) ==
+                2U &&
+            exact_ranked_diametral_pair_gabriel_subset_count(*record, 5U) ==
+                1U &&
+            exact_ranked_diametral_pair_gabriel_subset_count(*record, 6U) ==
+                0U,
+        "strict interiors are mandatory and extra-shell points are optional in Gabriel subsets");
   }
+}
+
+void test_generic_gabriel_subset_count() {
+  check(
+      exact_ball_supported_gabriel_subset_count(2U, 0U, 3U, 2U) == 1U &&
+          exact_ball_supported_gabriel_subset_count(2U, 0U, 3U, 3U) == 3U &&
+          exact_ball_supported_gabriel_subset_count(2U, 0U, 3U, 4U) == 3U &&
+          exact_ball_supported_gabriel_subset_count(2U, 0U, 3U, 5U) == 1U,
+      "a shell-only pair record contributes the expected binomial row");
+  check(
+      exact_ball_supported_gabriel_subset_count(3U, 2U, 4U, 4U) == 0U &&
+          exact_ball_supported_gabriel_subset_count(3U, 2U, 4U, 5U) == 1U &&
+          exact_ball_supported_gabriel_subset_count(3U, 2U, 4U, 7U) == 6U &&
+          exact_ball_supported_gabriel_subset_count(3U, 2U, 4U, 9U) == 1U &&
+          exact_ball_supported_gabriel_subset_count(3U, 2U, 4U, 10U) == 0U,
+      "a generic support record includes every strict interior before choosing shell points");
+
+  bool empty_support_rejected = false;
+  try {
+    static_cast<void>(
+        exact_ball_supported_gabriel_subset_count(0U, 0U, 0U, 0U));
+  } catch (const std::invalid_argument&) {
+    empty_support_rejected = true;
+  }
+  check(empty_support_rejected, "an empty ball support is rejected");
+
+  bool overflowing_count_rejected = false;
+  try {
+    static_cast<void>(
+        exact_ball_supported_gabriel_subset_count(1U, 0U, 68U, 35U));
+  } catch (const std::overflow_error&) {
+    overflowing_count_rejected = true;
+  }
+  check(
+      overflowing_count_rejected,
+      "a Gabriel subset count that exceeds size_t fails explicitly");
+
+  ExactRankedDiametralPairRecord inconsistent;
+  inconsistent.support_ids = {0U, 1U};
+  inconsistent.squared_level = ExactLevel{1};
+  inconsistent.strict_interior_ids = {2U};
+  inconsistent.closed_rank = 2U;
+  bool inconsistent_record_rejected = false;
+  try {
+    static_cast<void>(
+        exact_ranked_diametral_pair_gabriel_subset_count(inconsistent, 3U));
+  } catch (const std::logic_error&) {
+    inconsistent_record_rejected = true;
+  }
+  check(
+      inconsistent_record_rejected,
+      "the pair-record overload rejects inconsistent closed cardinalities");
 }
 
 void test_local_validator_rejects_forged_mass_and_non_candidate_record() {
@@ -313,6 +380,7 @@ void test_local_validator_rejects_forged_mass_and_non_candidate_record() {
 int main() {
   test_every_rank_bucket_matches_all_pairs();
   test_cosphere_payload_is_complete();
+  test_generic_gabriel_subset_count();
   test_local_validator_rejects_forged_mass_and_non_candidate_record();
   if (failures != 0) {
     std::cerr << failures

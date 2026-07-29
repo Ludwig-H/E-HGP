@@ -216,13 +216,14 @@ bool ExactYao48RankedPairCandidateResult::locally_structurally_valid() const {
   return true;
 }
 
-bool exact_yao48_directional_rank_cutoff_certifies_above(
+bool exact_yao48_directional_witness_radius_cutoff_certifies(
     const exact::CertifiedPoint3& anchor,
     const exact::CertifiedPoint3& target,
-    const exact::ExactLevel& kth_squared_distance) {
-  if (!(kth_squared_distance > exact::ExactLevel{})) {
+    const exact::ExactLevel& witness_squared_radius_upper_bound,
+    ExactYao48DirectionalCutoffSemantics semantics) {
+  if (!(witness_squared_radius_upper_bound > exact::ExactLevel{})) {
     throw std::invalid_argument(
-        "a Yao48 rank cutoff requires a positive Kth squared distance");
+        "a Yao48 rank cutoff requires a positive witness radius bound");
   }
   const ExactYao48ConeKey key = classify_exact_yao48_cone(anchor, target);
   std::array<exact::ExactRational, 3> oriented_deltas{};
@@ -240,11 +241,34 @@ bool exact_yao48_directional_rank_cutoff_certifies_above(
   const exact::ExactRational first_two = first + oriented_deltas[1];
   const exact::ExactRational all_three =
       first_two + oriented_deltas[2];
-  return squared_level(first) >= kth_squared_distance &&
-      squared_level(first_two) >= exact::ExactLevel{
-          exact::BigInt{2} * kth_squared_distance.numerator(),
-          kth_squared_distance.denominator()} &&
-      squared_level(all_three) >= triple_level(kth_squared_distance);
+  const exact::ExactLevel twice_radius{
+      exact::BigInt{2} * witness_squared_radius_upper_bound.numerator(),
+      witness_squared_radius_upper_bound.denominator()};
+  const exact::ExactLevel three_times_radius =
+      triple_level(witness_squared_radius_upper_bound);
+  switch (semantics) {
+    case ExactYao48DirectionalCutoffSemantics::closed_ball:
+      return squared_level(first) >= witness_squared_radius_upper_bound &&
+          squared_level(first_two) >= twice_radius &&
+          squared_level(all_three) >= three_times_radius;
+    case ExactYao48DirectionalCutoffSemantics::strict_interior:
+      return squared_level(first) > witness_squared_radius_upper_bound &&
+          squared_level(first_two) > twice_radius &&
+          squared_level(all_three) > three_times_radius;
+  }
+  throw std::invalid_argument(
+      "a Yao48 rank cutoff has an invalid semantic mode");
+}
+
+bool exact_yao48_directional_rank_cutoff_certifies_above(
+    const exact::CertifiedPoint3& anchor,
+    const exact::CertifiedPoint3& target,
+    const exact::ExactLevel& kth_squared_distance) {
+  return exact_yao48_directional_witness_radius_cutoff_certifies(
+      anchor,
+      target,
+      kth_squared_distance,
+      ExactYao48DirectionalCutoffSemantics::closed_ball);
 }
 
 ExactYao48RankedPairCandidateResult

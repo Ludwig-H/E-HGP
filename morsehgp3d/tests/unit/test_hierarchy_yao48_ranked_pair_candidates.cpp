@@ -20,11 +20,14 @@ using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::exact::ExactRational;
 using morsehgp3d::hierarchy::ExactYao48RankCutoffReceipt;
 using morsehgp3d::hierarchy::ExactYao48RankedPairCandidateResult;
+using morsehgp3d::hierarchy::ExactYao48DirectionalCutoffSemantics;
 using morsehgp3d::hierarchy::build_exact_yao48_ranked_pair_candidate_reference;
 using morsehgp3d::hierarchy::classify_exact_yao48_cone;
 using morsehgp3d::hierarchy::exact_yao48_cone_count;
 using morsehgp3d::hierarchy::
     exact_yao48_directional_rank_cutoff_certifies_above;
+using morsehgp3d::hierarchy::
+    exact_yao48_directional_witness_radius_cutoff_certifies;
 using morsehgp3d::hierarchy::
     exact_yao48_ranked_pair_candidate_reference_max_point_count;
 using morsehgp3d::spatial::CanonicalPointCloud;
@@ -362,6 +365,75 @@ void test_closed_equality_is_pruned() {
   check(
       closed_rank(cloud, 0U, 2U) == 3U,
       "the equality witness lies on the closed diametral shell");
+
+  const PointId anchor = canonical_id_from_source(cloud, 0U);
+  const PointId witness = canonical_id_from_source(cloud, 1U);
+  const PointId target = canonical_id_from_source(cloud, 2U);
+  const ExactLevel witness_radius =
+      squared_distance(cloud, anchor, witness);
+  check(
+      exact_yao48_directional_witness_radius_cutoff_certifies(
+          cloud.point(anchor),
+          cloud.point(target),
+          witness_radius,
+          ExactYao48DirectionalCutoffSemantics::closed_ball) &&
+          !exact_yao48_directional_witness_radius_cutoff_certifies(
+              cloud.point(anchor),
+              cloud.point(target),
+              witness_radius,
+              ExactYao48DirectionalCutoffSemantics::strict_interior),
+      "a shell equality credits the closed catalogue but not RelevantGP");
+}
+
+void test_arbitrary_same_chamber_witnesses_need_not_be_nearest() {
+  const CanonicalPointCloud cloud = canonical_cloud({
+      point(0.0, 0.0, 0.0),
+      point(0.25, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(1.0, 1.0, 0.0),
+      point(3.0, 2.0, 1.0),
+  });
+  const PointId anchor = canonical_id_from_source(cloud, 0U);
+  const PointId omitted_nearest = canonical_id_from_source(cloud, 1U);
+  const PointId first_witness = canonical_id_from_source(cloud, 2U);
+  const PointId second_witness = canonical_id_from_source(cloud, 3U);
+  const PointId target = canonical_id_from_source(cloud, 4U);
+  const std::size_t target_cone =
+      classify_exact_yao48_cone(
+          cloud.point(anchor), cloud.point(target))
+          .cone_index;
+  check(
+      classify_exact_yao48_cone(
+          cloud.point(anchor), cloud.point(omitted_nearest))
+                  .cone_index == target_cone &&
+          classify_exact_yao48_cone(
+              cloud.point(anchor), cloud.point(first_witness))
+                  .cone_index == target_cone &&
+          classify_exact_yao48_cone(
+              cloud.point(anchor), cloud.point(second_witness))
+                  .cone_index == target_cone,
+      "the arbitrary-witness fixture stays in one half-open chamber");
+  const ExactLevel radius_bound =
+      squared_distance(cloud, anchor, second_witness);
+  check(
+      squared_distance(cloud, anchor, omitted_nearest) <
+              squared_distance(cloud, anchor, first_witness) &&
+          radius_bound >
+              squared_distance(cloud, anchor, first_witness),
+      "the selected pair of witnesses is deliberately not the chamber top-2");
+  check(
+      exact_yao48_directional_witness_radius_cutoff_certifies(
+          cloud.point(anchor),
+          cloud.point(target),
+          radius_bound,
+          ExactYao48DirectionalCutoffSemantics::strict_interior),
+      "an arbitrary certified witness radius enables the strict cutoff");
+  check(
+      point_in_closed_diametral_ball(
+          cloud, anchor, target, first_witness) &&
+          point_in_closed_diametral_ball(
+              cloud, anchor, target, second_witness),
+      "both non-nearest witnesses lie in the target diametral ball");
 }
 
 void test_target_inside_top_k_is_not_counted_as_a_witness() {
@@ -575,6 +647,7 @@ void test_reference_guards() {
 int main() {
   test_exhaustive_rank_cutoff_differential();
   test_closed_equality_is_pruned();
+  test_arbitrary_same_chamber_witnesses_need_not_be_nearest();
   test_target_inside_top_k_is_not_counted_as_a_witness();
   test_distance_tie_excluded_by_point_id_does_not_prune();
   test_directional_cutoff_respects_signed_permutations();

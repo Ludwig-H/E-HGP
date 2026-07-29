@@ -329,6 +329,7 @@ class MortonLbvhDeviceTraversalLease final {
   friend class AnchoredPairCandidateProposalContext;
   friend class Binary64LbvhTopKContext;
   friend class MortonLbvhBuildContext;
+  friend class RankedDiametralPairCatalogContext;
 };
 
 class MortonLbvhDeviceBuildResult final {

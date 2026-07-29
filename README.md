@@ -3,7 +3,7 @@
 MorseHGP3D calcule la hiérarchie 3D des amas discrets de forte densité K-NN sans matérialiser la mosaïque de Delaunay d'ordre supérieur. La priorité actuelle est étroite : énumérer exactement toutes les paires dont la boule diamétrale fermée contient au plus $K_{\max}+1$ points, avec leur rang et la liste complète des points contenus.
 
 > [!IMPORTANT]
-> État courant : Phase 15, porte d'entrée satisfaite, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Deux oracles CPU bornés et leurs différentiels sont intégrés. Le pipeline GPU résident n'est pas encore implémenté et aucun SLO n'est revendiqué.
+> État courant : Phase 15, porte d'entrée satisfaite, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Deux oracles CPU bornés, leurs différentiels et le contrat hôte/fake du futur catalogue GPU sont intégrés. Aucun kernel du catalogue résident ni SLO n'est encore revendiqué.
 
 ## Voie privilégiée
 
@@ -14,13 +14,15 @@ MorseHGP3D calcule la hiérarchie 3D des amas discrets de forte densité K-NN sa
 | tétraèdres | candidats issus des triangles, puis frontière indépendante des supports minimaux de taille quatre | dépendance affine et centre circonscrit hors de l'intérieur strict |
 | hiérarchie | lots de niveaux exacts, incidences utiles et réduction Morse sparse | aucune cellule, coface ou mosaïque globale |
 
-Une seule passe paramétrée par $K_{\max}$ alimente tous les ordres $1\leq k\leq K_{\max}$ : une paire de rang fermé $R$ est routée vers le niveau $k=R-1$. Morton ordonne les données et les parcours; il ne sert jamais de certificat de voisinage. Dans chaque chambre Yao48 suffisamment remplie, le $K_{\max}$-ième témoin fournit un cutoff directionnel démontré. Une chambre sous-remplie ne prune pas.
+Les réductions vers un support inférieur sont exhaustives dans la fenêtre certifiée sous `RelevantGP`. Hors de ce domaine, une grande cosphère peut porter un petit simplexe Gabriel; elle déclenche `unsupported_degeneracy` au lieu d'être omise silencieusement.
 
-Le chemin commun doit rester sur le GPU : construction Morton/LBVH, top-$K_{\max}$ par chambre, rapports de régions, émission exacte une fois, trichotomie de rang, `count/scan`, payload, tri, déduplication et découpage en chunks. Le CPU reçoit seulement une file rare de cas multiprécision et le transcript terminal; aucun callback par paire et aucun transfert de candidats par vague ne sont admis.
+Une seule passe paramétrée par $K_{\max}$ construit les buckets de rang fermé $R\leq K_{\max}+1$. Un simplexe Gabriel de cardinal $q$ alimente le niveau $q-1$; sous `RelevantGP`, son shell supplémentaire utile est vide, donc $q=R$ et ce routage se réduit à $k=R-1$. Morton ordonne les données et les parcours; il ne sert jamais de certificat de voisinage. Dans chaque chambre Yao48, le nombre requis de témoins distincts quelconques et une borne certifiée de leurs rayons suffisent au cutoff directionnel. Les plus proches ne font que le resserrer; une fenêtre Morton sans rappel peut donc amorcer la banque, et toute chambre non certifiée reste fail-open.
+
+Le chemin commun doit rester sur le GPU : construction Morton/LBVH, banques par chambre, rapports de régions, ownership exact une fois par ordre Morton, trichotomie de rang, `count/scan`, payload, tri, déduplication et découpage en chunks. Le CPU reçoit seulement la canonicalisation finale et les replis numériques qui ne sont pas encore qualifiés sur GPU; aucun callback par paire et aucun transfert de candidats par vague ne sont admis.
 
 ## Faits mathématiques qui structurent le code
 
-- Une paire exacte $(u,v)$ et son saturé $S=X\cap B_{uv}$ ferment tous les sous-ensembles contenant $u$ et $v$ : leur miniboule est $B_{uv}$. Le record fournit donc immédiatement les candidats intérieurs supportés par cette paire.
+- Une paire exacte $(u,v)$ et son saturé $S=X\cap B_{uv}$ ferment tous les sous-ensembles contenant $u$ et $v$ : leur miniboule est $B_{uv}$. Un tel sous-ensemble est Gabriel exactement lorsqu'il contient tous les points strictement intérieurs; les points supplémentaires du shell sont optionnels.
 - Cette fermeture ne suffit pas pour les triangles aigus. Une fixture rationnelle permanente donne un triangle aigu de rang trois dont les trois côtés ont rang quatre et qui n'est récupéré par aucun sous-graphe des paires de rang au plus trois.
 - Un triangle non dégénéré droit ou obtus a un support minimal de taille deux. La frontière de taille trois ne garde donc que les triangles aigus.
 - Un tétraèdre dont le centre circonscrit n'est pas strictement intérieur se réduit à un support de taille deux ou trois. La frontière indépendante de taille quatre ne garde que les tétraèdres bien centrés.

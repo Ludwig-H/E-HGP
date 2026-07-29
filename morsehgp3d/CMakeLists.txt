@@ -2152,6 +2152,46 @@ else()
   )
 endif()
 
+# Host/fake-only Phase 15 contract.  The archive intentionally leaves its
+# device launcher unresolved; unit tests provide a hostile fake and the future
+# CUDA target will provide the sole production definition.  This target makes
+# no CUDA or scientific implementation claim.
+add_library(
+  morsehgp3d_gpu_ranked_diametral_pair_catalog_host_contract
+  STATIC
+    src/cuda/phase15_ranked_diametral_pair_catalog_internal.hpp
+    src/gpu/ranked_diametral_pair_catalog.cpp
+)
+add_library(
+  morsehgp3d::gpu_ranked_diametral_pair_catalog_host_contract
+  ALIAS morsehgp3d_gpu_ranked_diametral_pair_catalog_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_ranked_diametral_pair_catalog_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_ranked_diametral_pair_catalog_host_contract
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_ranked_diametral_pair_catalog_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_ranked_diametral_pair_catalog_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_ranked_diametral_pair_catalog_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 if(MORSEHGP3D_ENABLE_CUDA)
   find_package(Threads REQUIRED)
   add_library(
