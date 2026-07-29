@@ -2384,8 +2384,13 @@ if value.get("schema") != "morsehgp3d.phase15.morton_yao48_seed_work_profile_art
     raise SystemExit("schéma d'artefact Morton/Yao48 invalide")
 if value.get("artifact_role") != "benchmark_only":
     raise SystemExit("l'artefact Morton/Yao48 doit rester benchmark_only")
+if value.get("status") != "worker_passed_pending_shutdown":
+    raise SystemExit("statut worker Morton/Yao48 invalide avant l'arrêt ciblé")
 if value.get("git") != {"clean": True, "sha": sys.argv[2]}:
     raise SystemExit("identité Git Morton/Yao48 invalide")
+provenance = value.get("provenance")
+if not isinstance(provenance, dict) or provenance.get("environment_artifact_schema") != "morsehgp3d.phase3.qualification.v1":
+    raise SystemExit("provenance Phase 3 Morton/Yao48 absente")
 if value.get("expected_point_counts") != [50000, 1000000, 10000000, 30000000]:
     raise SystemExit("jalons Morton/Yao48 incomplets")
 measurements = value.get("measurements")

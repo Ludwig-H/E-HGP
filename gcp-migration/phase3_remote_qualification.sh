@@ -2656,7 +2656,12 @@ artifact = {
     "mode": "bounded_morton_window_yao48_seed_proxy",
     "phase": "15",
     "profile": "hgp_reduced",
+    "provenance": {
+        "environment_artifact_schema": "morsehgp3d.phase3.qualification.v1",
+        "environment_artifact_sha256": digest(environment_path),
+    },
     "schema": "morsehgp3d.phase15.morton_yao48_seed_work_profile_artifact.v1",
+    "status": "worker_passed_pending_shutdown",
     "scientific_exactness_claimed": False,
     "scalability_claimed": False,
     "public_status_claimed": False,
