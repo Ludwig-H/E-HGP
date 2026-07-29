@@ -1,0 +1,54 @@
+{
+  "backend": "cuda_g4_plus_reference_cpu",
+  "deployment_status": "architecture_only",
+  "git": {
+    "clean": true,
+    "on_origin_main": true,
+    "sha": "8e23ff995d355649952e76d21bc4f1e425697034"
+  },
+  "mode": "directed_binary64_radial_subtree_proposal_exact_cpu_replay",
+  "profile": "hgp_reduced",
+  "public_status": "not_claimed",
+  "qualification": {
+    "aot_elf_architectures": [
+      "sm_120"
+    ],
+    "aot_ptx_entry_count": 0,
+    "component_marker": "Morton/Yao48 CUDA radial-subtree qualification passed",
+    "component_marker_count": 1,
+    "component_native_runtime": "passed",
+    "cuda_audit_workflow": "passed",
+    "cuda_release_workflow": "passed",
+    "environment_compute_sanitizer": "passed_zero_errors_zero_leaks_not_component_specific",
+    "nvcc": "12.9.86"
+  },
+  "schema": "morsehgp3d.phase15.morton_yao48_radial_subtree_filter.g4_summary.v1",
+  "scientific_result_claimed": false,
+  "source_environment_artifact": {
+    "byte_count": 102534,
+    "name": "phase3-8e23ff995d355649952e76d21bc4f1e425697034.json",
+    "sha256": "a35e5ca60cff10e8062ea8e3e06cd768d28142cb1f220fde209e5183d1c98dbe"
+  },
+  "unclosed_gates": {
+    "complete_pair_frontier": false,
+    "component_specific_memcheck_and_racecheck": false,
+    "device_resident_tiled_compositor": false,
+    "scalability_claimed": false,
+    "slo_50000_claimed": false
+  },
+  "vm_lifecycle": {
+    "final_status": "TERMINATED",
+    "final_status_verified_at_utc": "2026-07-29T19:06:41Z",
+    "gce_max_run_duration_seconds": 3600,
+    "guest_shutdown_minutes": 45,
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "instance_termination_action": "STOP",
+    "last_start_timestamp": "2026-07-29T12:01:48.882-07:00",
+    "no_other_active_project_e_hgp_vm_at_final_readback": true,
+    "project": "devpod-gpu-exploration",
+    "provisioning_model": "SPOT",
+    "session_ssh_key_revoked": true,
+    "targeted_stop_verified": true,
+    "zone": "europe-west4-ai1a"
+  }
+}
