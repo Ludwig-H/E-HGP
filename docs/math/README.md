@@ -1,47 +1,40 @@
 # Noyau mathématique de MorseHGP3D
 
-Les six documents de ce dossier forment un ensemble normatif.
+Le parcours normatif est volontairement court. Les notes de jalons antérieurs restent dans ce dossier comme bases de preuve liées par le registre, mais ne constituent plus des architectures concurrentes.
+
+## Parcours normatif
 
 | document | question résolue |
 |---|---|
-| [Définition HGP 3D](DEFINITION_HGP_3D.md) | quelle hiérarchie doit être calculée et quelle partie Gabriel garantit-elle directement ? |
-| [Catalogue critique 3D](CATALOGUE_CRITIQUE_3D.md) | quels événements suffisent jusqu'à $K_{\max}=10$ et comment les énumérer sans mosaïque globale ? |
+| [Définition HGP 3D](DEFINITION_HGP_3D.md) | quelle hiérarchie doit être calculée ? |
+| [Catalogue critique 3D](CATALOGUE_CRITIQUE_3D.md) | quels événements de Morse de support au plus quatre peuvent modifier $H_0$ ? |
+| [Catalogue exact des paires diamétrales](CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) | comment énumérer les rangs fermés deux à $K_{\max}+1$ avec payload complet et cutoff Yao48 exact ? |
+| [Frontière directe des supports trois et quatre](FRONTIERE_DIRECTE_SUPPORTS_3_4.md) | pourquoi les triangles aigus gardent-ils une frontière indépendante et quels tétraèdres restent ensuite ? |
+| [Incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) | pourquoi le flot Gabriel brut peut-il manquer une liaison hiérarchique ? |
 | [Attaches par miniball](ATTACHES_DESCENTE_MINIBALL.md) | comment rattacher un bras connu à sa composante globale ? |
-| [Incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) | pourquoi les cinq points réfutent-ils le flot brut et quelle complétion rétablit-elle Gamma ? |
-| [Tour globale de boules saturées](TOUR_BOULES_SATUREES.md) | comment représenter exactement toutes les incidences par saturés, et pourquoi la voie brute reste-t-elle non scalable ? |
-| [Preuves et heuristiques](STATUT_PREUVES_ET_HEURISTIQUES.md) | quelles affirmations sont démontrées, conditionnelles, ouvertes ou fausses en général ? |
+| [Preuves et heuristiques](STATUT_PREUVES_ET_HEURISTIQUES.md) | quelles affirmations sont démontrées, conditionnelles, ouvertes ou fausses ? |
 
-La note de déploiement [Premières incidences des facettes directes réutilisées](PREMIERES_INCIDENCES_FACETTES_DIRECTES_PHASE10.md) fixe le contrat borné 10.7-RCPU. Elle complète les notes de Phase 10 sans rejoindre le noyau normatif ci-dessus et sans prétendre que les seules facettes issues des selles directes forment un ensemble globalement complet de gateways.
+## Cascade active
 
-Le [différentiel borné des gateways directs](DIFFERENTIEL_GATEWAYS_DIRECTS_PHASE10.md) valide le falsificateur 10.8-ORACLE sous statut `open_bounded_evidence_only` : Gamma y reste transitoire, limité à $n\leq14$ et totalement exclu du chemin produit.
+Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$ et $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$. Alors :
 
-La [localisation sparse des candidats de gateways](LOCALISATION_CANDIDATS_GATEWAYS_PHASE10.md) fixe le contrat produit 10.9-RCPU : suppressions transitoires factorisées, déduplication par clé complète, hits relatifs ou misses latents dans un locator gelé, sans prétention d'alignement avec les états pré-lot.
+1. injecter les événements ponctuels de rang un;
+2. exécuter une passe exacte multi-ordre des paires jusqu'au rang $s_{\max}$;
+3. fermer directement tous les candidats dont le support minimal est une paire;
+4. rechercher indépendamment les triangles affinement indépendants et aigus, en rejetant les cas de support deux;
+5. émettre depuis chaque triangle les tétraèdres qu'il supporte, puis rechercher indépendamment les tétraèdres affinement indépendants dont le centre circonscrit est strictement intérieur;
+6. classer le rang fermé et le shell complet de chaque support survivant;
+7. réduire les événements par lots de niveau exact, avec incidences silencieuses et attaches requises par le profil;
+8. publier seulement après fermeture des frontières et rejeu des certificats.
 
-La [sonde par préfixes du locator positif](SONDE_PREFIXE_LOCATOR_POSITIF_PHASE10.md) fixe le contrat 10.10-RCPU : rejeu monotone de l'horloge interne des commits 10.5a, recherche historique exacte dans la table finale et racines DSU historiques, sans confondre cette horloge avec les lots sources 10.7.
+Les paires n'épuisent pas les triangles aigus : la fixture Hartigan permanente donne un support trois de rang trois dont tous les côtés ont rang quatre. Les triangles droits, obtus ou dégénérés se réduisent en revanche à un support de taille deux. La même dichotomie ramène tout tétraèdre non bien centré à un support de taille deux ou trois.
 
-Le [raccord des horloges sparse](RACCORD_HORLOGES_SPARSE_PHASE10.md) isole le sous-jalon 10.11-PSTAMP : une API strictement en lecture seule reconstruit les stamps des préfixes historiques du locator avec la transition canonique de chaîne 10.5a partagée. Ces identités internes préparent un futur certificat temporel, mais ne prouvent aucun alignement entre un lot source 10.7 et un préfixe du locator.
+## Replis et oracles
 
-## Résumé de la construction
+La [tour globale de boules saturées](TOUR_BOULES_SATUREES.md) et [Gamma exhaustif](../../reference/README.md) sont des oracles de preuve bornés. La [réduction Delaunay ordinaire à une arête](DELAUNAY_ORDINAIRE_GAMMA2.md) est un théorème et un falsificateur utiles, mais son univers explicite est interdit dans le produit. Les quelques replis encore maintenus sont inventoriés dans [`docs/research`](../research/README.md); les voies réfutées sont dans les [archives](../archive/abandoned/README.md).
 
-Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$ et, si $s_{\max}\geq2$, $m_{\star}=s_{\max}-2$. Alors :
+## Conventions
 
-1. injecter directement les événements ponctuels de rang un; si $s_{\max}=1$, arrêter la cascade géométrique;
-2. parcourir directement les supports de tailles deux à quatre par produits de nœuds LBVH, bornes exactes et frontières budgetées, sans fermer les parents top-$m$;
-3. terminer exactement le shell et le rang fermé global des supports feuilles survivants; garder le raffinement cellulaire seulement comme oracle borné;
-4. réutiliser chaque sphère de rang $s$ comme minimum de $D_s$ et point d'indice un de $D_{s-1}$, avec multiplicité locale $\binom{\lvert U\rvert-1}{\mu}$;
-5. convertir les événements de rang $k+1$ en hyperarêtes multifurquées du K-graphe de Gabriel, utilisables comme sous-flot positif;
-6. pour `hgp_reduced`, réduire le flux en journal Morse par lots de niveau exact, conserver les gateways silencieux et garder les feuilles singleton explicites à $k=1$; Gamma exhaustif reste l'oracle de petits nuages;
-7. pour `full_pi0`, attacher tous les bras par descentes certifiées; cette reconstruction reste l'obligation de preuve M.1 et ne publie pas encore le statut `exact`;
-8. construire les morphismes réduits par `locate_reduced_root`, utiliser les ancres naissance–selle seulement pour $2\leq s\leq K_{\mathrm{eff}}$ dans `full_pi0` ou comme contrôle lorsqu'une source réduite existe, puis vérifier toute la naturalité ordre–échelle.
+Les niveaux sont des rayons carrés. Un rang est le nombre de points dans la boule fermée. Un support est un sous-ensemble minimal de points frontière dont l'enveloppe convexe relative contient le centre. Un lot regroupe tous les événements d'un même niveau exact.
 
-## Frontière exacte
-
-Le flot de Gabriel brut ne préserve pas toujours les K-polyèdres non triviaux : une coface non-Gabriel peut attacher silencieusement une facette réutilisée plus tard. Le chemin exact v2 réduit Gamma exhaustif; la [complétion en incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) explique le défaut et prouve une correction combinatoire lorsque toutes les cofaces sont connues. Le profil complet exige en plus un argument de Morse et des attaches globales.
-
-Le flux direct LBVH est la primitive produit GPU. Sa complétude vient de la partition exacte des produits de supports, des prunes rejoués, des classifications feuilles globales et des frontières vides. Voronoï et puissance servent aux propositions ou aux tests; Geogram est préféré lorsqu'une baseline CPU suffit. DTM, entropie et ANN sont des propositions seulement.
-
-## Convention de lecture
-
-Les équations utilisent des rayons carrés. Un « rang » est le nombre de points dans la boule fermée. Un « support » est le sous-ensemble minimal de points frontière dont l'enveloppe convexe relative contient le centre. Un « lot » regroupe tous les événements d'un même niveau exact.
-
-Le [manuscrit](../references/MANUSCRIT_THESE_HAUSEUX.pdf) et le [corpus bibliographique](../references/README.md) restent les sources primaires. La [spécification générale](../SPECIFICATION_MORSEHGP3D.md) fixe les schémas publics et les statuts d'exécution.
+Les propositions flottantes ne décident jamais seules une inclusion fermée ou une égalité de coque. Toute égalité descend vers une décision exacte; une frontière inachevée reste explicitement budgétée.

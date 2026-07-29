@@ -19,7 +19,9 @@ $$\text{oracle de supports}\longrightarrow\text{catalogue critique}\longrightarr
 
 Cette chaîne définit et falsifie l'objet mathématique; elle n'est pas le chemin produit. Les supports et `Gamma` exhaustifs sont plafonnés au domaine de référence $n\leq14$; l'atlas cellulaire qui ferme les parents top-$m$ reste séparément gelé à $n\leq8$. Le chemin produit ciblé est
 
-$$\text{LBVH}\longrightarrow\text{branch-and-bound des supports }2\text{--}4\longrightarrow\text{flux d'événements}\longrightarrow\text{attaches de Morse}\longrightarrow\text{lots atomiques}.$$
+$$\text{Morton/LBVH et Yao48}\longrightarrow\text{paires exactes multi-ordre}\longrightarrow\text{triangles aigus}\longrightarrow\text{tétraèdres bien centrés}\longrightarrow\text{flux Morse sparse}.$$
+
+Le [contrat des paires diamétrales](math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) est la première porte transversale. Il restitue le payload fermé complet et ferme tous les événements dont le support minimal est une paire. La [frontière des supports trois et quatre](math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md) reste indépendante : la complétude des triangles aigus ne découle pas des seules paires de rang utile.
 
 Il est interdit d'y allouer un tableau indexé par $\binom{n}{k}$, de conserver toutes les cellules top-$m$, de construire toutes les cofaces de Gamma ou de persister une mosaïque d'ordre supérieur. Les seuls états durables autorisés sont les points et leur index spatial, une frontière de travail explicitement budgetée, les événements et attaches effectivement produits, les lots triés et les sorties demandées. Une cellule ou un polytope local est un témoin temporaire évincé après certification.
 

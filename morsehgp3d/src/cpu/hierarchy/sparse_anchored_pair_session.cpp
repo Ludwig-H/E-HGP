@@ -885,6 +885,10 @@ ExactSparseAnchoredPairSession::advance_active_classifier(
       step.support_ids_ = support_ids;
       return step;
     }
+    case ExactAnchoredPairCandidateClassificationStepKind::below_rank:
+      poison();
+      throw std::logic_error(
+          "a legacy sparse pair session received an exact-bucket below-rank terminal");
     case ExactAnchoredPairCandidateClassificationStepKind::record_ready: {
       if (!active_classifier_->record_ready()) {
         poison();

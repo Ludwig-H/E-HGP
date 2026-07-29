@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the closed, compile-only Phase 3.1 build envelope without CUDA."""
+"""Validate the guarded compile-only build envelope without executing CUDA."""
 
 from __future__ import annotations
 
@@ -33,11 +33,17 @@ CUDA_TARGETS = [
     "morsehgp3d_gpu_spatial_bounds",
     "morsehgp3d_gpu_spatial_bounds_replay",
     "morsehgp3d_gpu_spatial_lbvh_replay",
+    "morsehgp3d_gpu_h_polytope_proposal",
+    "morsehgp3d_gpu_h_polytope_proposal_qualification",
     "morsehgp3d_gpu_k1_boruvka",
     "morsehgp3d_gpu_k1_boruvka_replay",
     "morsehgp3d_gpu_k1_boruvka_full_replay",
     "morsehgp3d_gpu_k1_boruvka_morton_work_profile",
     "morsehgp3d_gpu_k1_boruvka_exact_search_work_profile",
+    "morsehgp3d_gpu_anchored_pair_candidate_proposal",
+    "morsehgp3d_gpu_anchored_pair_candidate_proposal_component_smoke",
+    "morsehgp3d_gpu_morton_window_h0_surrogate",
+    "morsehgp3d_massive_sparse_pair_prefix_smoke",
 ]
 CUDA_BUILD_JOBS = 8
 
@@ -194,7 +200,7 @@ def validate_build_presets(presets: dict[str, dict[str, Any]]) -> None:
         require(preset["configurePreset"] == name, f"{name} build/configure mismatch")
         require(
             preset["targets"] == CUDA_TARGETS,
-            f"{name} does not compile the frozen Phase 3 target catalog",
+            f"{name} does not compile the guarded CUDA target catalog",
         )
         require(
             type(preset["jobs"]) is int and preset["jobs"] == CUDA_BUILD_JOBS,
@@ -521,52 +527,32 @@ def validate_sources(project: Path, repository: Path) -> None:
         "../configuration/check_phase3_build.py" in unit_cmake,
         "the Phase 3.1 static check is not registered in CTest",
     )
-    sanitizer_targets = {
-        "morsehgp3d_exact_types_tests",
-        "morsehgp3d_exact_types_dump",
-        "morsehgp3d_predicates_tests",
-        "morsehgp3d_affine_tests",
-        "morsehgp3d_centers_tests",
-        "morsehgp3d_support_tests",
-        "morsehgp3d_level_order_tests",
-        "morsehgp3d_expansion_tests",
-        "morsehgp3d_spatial_tests",
-        "morsehgp3d_spatial_query_dump",
-        "morsehgp3d_spatial_lbvh_tests",
-        "morsehgp3d_spatial_lbvh_query_dump",
-        "morsehgp3d_hierarchy_emst_tests",
-        "morsehgp3d_hierarchy_k1_forest_tests",
-        "morsehgp3d_hierarchy_miniball_tests",
-        "morsehgp3d_hierarchy_boruvka_tests",
-        "morsehgp3d_hierarchy_gabriel_tests",
-        "morsehgp3d_hierarchy_k1_dump",
-        "morsehgp3d_predicate_filter_context_tests",
-        "morsehgp3d_warm_context_benchmark_host_test",
-        "morsehgp3d_gpu_spatial_reference_context_tests",
-        "morsehgp3d_gpu_spatial_reference_replay_host",
-        "morsehgp3d_gpu_spatial_bounds_context_tests",
-        "morsehgp3d_gpu_spatial_bounds_replay_host",
-        "morsehgp3d_gpu_spatial_lbvh_context_tests",
-        "morsehgp3d_gpu_spatial_lbvh_replay_host",
-        "morsehgp3d_gpu_k1_boruvka_context_tests",
-        "morsehgp3d_gpu_k1_boruvka_exact_search_tests",
-        "morsehgp3d_gpu_k1_boruvka_seeded_chain_tests",
-        "morsehgp3d_gpu_k1_boruvka_hierarchy_tests",
-        "morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host",
-        "morsehgp3d_gpu_k1_boruvka_replay_host",
-        "morsehgp3d_gpu_k1_boruvka_full_replay_host",
-        "morsehgp3d_gpu_k1_boruvka_morton_work_profile_host",
-    }
-    sanitizer_block_match = re.search(
-        r"set\(\s*_morsehgp3d_cpu_test_targets(?P<targets>.*?)\)\s*foreach",
-        unit_cmake,
-        re.DOTALL,
+    declared_cpu_test_targets = set(
+        re.findall(
+            r"add_executable\s*\(\s*(morsehgp3d_[A-Za-z0-9_]+)",
+            unit_cmake,
+            re.I,
+        )
     )
-    require(sanitizer_block_match is not None, "the sanitizer target catalog is absent")
-    actual_sanitizer_targets = set(sanitizer_block_match.group("targets").split())
+    sanitizer_set_match = re.search(
+        r"set\(\s*_morsehgp3d_cpu_test_targets(?P<targets>.*?)^\s*\)",
+        unit_cmake,
+        re.DOTALL | re.MULTILINE,
+    )
+    require(sanitizer_set_match is not None, "the sanitizer target catalog is absent")
+    actual_sanitizer_targets = set(sanitizer_set_match.group("targets").split())
+    sanitizer_append_matches = re.findall(
+        r"list\(\s*APPEND\s+_morsehgp3d_cpu_test_targets(?P<targets>.*?)^\s*\)",
+        unit_cmake,
+        re.DOTALL | re.MULTILINE,
+    )
+    for appended_targets in sanitizer_append_matches:
+        actual_sanitizer_targets.update(appended_targets.split())
     require(
-        actual_sanitizer_targets == sanitizer_targets,
-        "the sanitizer target catalog is not closed",
+        actual_sanitizer_targets == declared_cpu_test_targets,
+        "the sanitizer target catalog is not closed: missing="
+        f"{sorted(declared_cpu_test_targets - actual_sanitizer_targets)}, extra="
+        f"{sorted(actual_sanitizer_targets - declared_cpu_test_targets)}",
     )
     require(
         'morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")' in unit_cmake,

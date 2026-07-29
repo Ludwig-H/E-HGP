@@ -79,4 +79,4 @@ Le prochain chemin autorisé est implicite et sensible à la sortie : utiliser l
 
 Le préflight a consulté en lecture seule la cible `devpod-gpu-exploration / europe-west4-ai1a / ehgp-blackwell-spot-ai1a`. Elle est restée `TERMINATED`, `g4-standard-48`, `SPOT`, avec `instanceTerminationAction=STOP` et `maxRunDuration=3600`. Aucune VM n'a été créée, démarrée, arrêtée ou modifiée pendant cette tranche.
 
-Un suivi ultérieur et séparé a exécuté sur cette classe de cible le gate conditionnel de couverture Gabriel, sans réhabiliter la restriction Gamma$_2$ réfutée. Ses runs jusqu'à 30 000 001 points, ses garde-fous et son arrêt ciblé sont documentés dans [PHASE15_GABRIEL_COVERAGE_G4.md](PHASE15_GABRIEL_COVERAGE_G4.md).
+Un suivi ultérieur et séparé a exécuté sur cette classe de cible le gate conditionnel de couverture Gabriel, sans réhabiliter la restriction Gamma$_2$ réfutée. Ses runs jusqu'à 30 000 001 points, ses garde-fous et son arrêt ciblé sont documentés dans le [rapport archivé](../archive/abandoned/phase15/PHASE15_GABRIEL_COVERAGE_G4.md).

@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d_exact_hartigan_side_rank_counterexample",
+  "fixture_id": "hartigan-triangle-all-side-ranks-above-k-gamma2-merge-v1",
+  "description": "A strictly well-centred rank-three triangle performs an exact closed Gamma_2 fusion although every side has closed rank four and no pair ball of rank at most three contains even one target side as an internal subedge.",
+  "order": 2,
+  "target_closed_rank": 3,
+  "point_labels": ["A", "B", "C", "u1", "u2", "v1", "v2", "w1", "w2"],
+  "points": [
+    [10, 10, 10],
+    [10, -10, -10],
+    [-10, 10, -10],
+    [17, 9, 5],
+    [18, 8, 5],
+    [3, 18, 5],
+    [3, 19, 6],
+    [-6, -8, -15],
+    [-7, -9, -14]
+  ],
+  "target_support_point_ids": [0, 1, 2],
+  "target_miniball": {
+    "center": [
+      {"numerator": 10, "denominator": 3},
+      {"numerator": 10, "denominator": 3},
+      {"numerator": -10, "denominator": 3}
+    ],
+    "squared_level": {"numerator": 800, "denominator": 3},
+    "barycentric_coordinates": [
+      {"numerator": 1, "denominator": 3},
+      {"numerator": 1, "denominator": 3},
+      {"numerator": 1, "denominator": 3}
+    ],
+    "closed_rank": 3,
+    "shell_point_ids": [0, 1, 2],
+    "interior_point_ids": [],
+    "exterior_squared_powers": [
+      {"point_id": 3, "value": {"numerator": 65, "denominator": 3}},
+      {"point_id": 4, "value": {"numerator": 119, "denominator": 3}},
+      {"point_id": 5, "value": 18},
+      {"point_id": 6, "value": 66},
+      {"point_id": 7, "value": 85},
+      {"point_id": 8, "value": 106}
+    ]
+  },
+  "side_audit": [
+    {
+      "point_ids": [0, 1],
+      "squared_level": 200,
+      "closed_rank": 4,
+      "shell_point_ids": [0, 1],
+      "interior_point_ids": [3, 4],
+      "interior_diameter_sphere_powers": [
+        {"point_id": 3, "value": -45},
+        {"point_id": 4, "value": -47}
+      ]
+    },
+    {
+      "point_ids": [0, 2],
+      "squared_level": 200,
+      "closed_rank": 4,
+      "shell_point_ids": [0, 2],
+      "interior_point_ids": [5, 6],
+      "interior_diameter_sphere_powers": [
+        {"point_id": 5, "value": -102},
+        {"point_id": 6, "value": -74}
+      ]
+    },
+    {
+      "point_ids": [1, 2],
+      "squared_level": 200,
+      "closed_rank": 4,
+      "shell_point_ids": [1, 2],
+      "interior_point_ids": [7, 8],
+      "interior_diameter_sphere_powers": [
+        {"point_id": 7, "value": -75},
+        {"point_id": 8, "value": -54}
+      ]
+    }
+  ],
+  "admissible_side_count_at_target_rank": 0,
+  "pair_subedge_closure_audit": {
+    "maximum_closed_rank": 3,
+    "pair_rank_histogram": {"2": 9, "3": 9, "4": 10, "5": 6, "6": 2},
+    "admitted_pair_count": 18,
+    "target_side_carrier_counts": [
+      {"point_ids": [0, 1], "carrier_pair_count": 0},
+      {"point_ids": [0, 2], "carrier_pair_count": 0},
+      {"point_ids": [1, 2], "carrier_pair_count": 0}
+    ],
+    "target_triangle_generated": false
+  },
+  "catalog_audit": {
+    "k_max": 3,
+    "relevant_gp_complete": true,
+    "degenerate_candidate_count": 0,
+    "critical_event_count": 43,
+    "target_event_closed_rank": 3,
+    "target_event_birth_order": 3,
+    "target_event_saddle_order": 2
+  },
+  "gamma2_transition": {
+    "unique_equal_coface_point_ids": [0, 1, 2],
+    "exact_gabriel": true,
+    "strict_cut": {
+      "active_facet_count": 25,
+      "components": [
+        {
+          "facet_point_ids": [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [2, 6], [3, 4], [3, 5], [3, 6], [4, 5], [4, 6], [5, 6]],
+          "covered_point_ids": [0, 1, 2, 3, 4, 5, 6]
+        },
+        {
+          "facet_point_ids": [[1, 2], [1, 7], [1, 8], [2, 7], [2, 8], [7, 8]],
+          "covered_point_ids": [1, 2, 7, 8]
+        }
+      ]
+    },
+    "closed_cut": {
+      "active_facet_count": 25,
+      "components": [
+        {
+          "facet_point_ids": [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [1, 2], [1, 3], [1, 4], [1, 5], [1, 7], [1, 8], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8], [3, 4], [3, 5], [3, 6], [4, 5], [4, 6], [5, 6], [7, 8]],
+          "covered_point_ids": [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        }
+      ]
+    },
+    "strict_component_count_coalesced_by_target": 2
+  },
+  "contradicted_claims": [
+    "Every exact rank-K critical triangle has at least one side whose diametral ball has closed rank at most K.",
+    "A spanning tree, or even one edge, of rank-admissible sides is a complete proposer for exact order-two Hartigan fusions.",
+    "Closing triangles from every internal subedge of every diametral pair ball of closed rank at most K is exhaustive for exact order-two Hartigan fusions."
+  ],
+  "scope_note": "This fixture is an exact Gamma_2 and discrete-Hartigan counterexample at target closed rank three. It does not rule out an independently certified adaptive frontier, and it makes no Delaunay or mutual-reachability claim. Open caps of diametral side balls outside a support miniball separately show that proper-support ranks have no bound depending only on the target rank at catalogue level."
+}

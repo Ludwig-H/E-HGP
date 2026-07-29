@@ -251,20 +251,20 @@ void test_source_authority_and_payload_fail_closed() {
   auto inconsistent = facade;
   inconsistent.events.front().birth_order.reset();
   check(
-      inconsistent.terminal_catalog_certified(),
-      "the source terminal type alone intentionally does not replay its event payload");
+      !inconsistent.terminal_catalog_certified(),
+      "the source terminal rejects a mutated normalized event payload before journaling");
   const auto rejected_payload =
       morsehgp3d::hierarchy::build_exact_direct_morse_event_journal(
           cloud, inconsistent);
   check(
       rejected_payload.decision ==
               ExactDirectMorseEventJournalDecision::
-                  no_journal_source_facade_payload_inconsistent &&
+                  no_journal_source_facade_not_terminal &&
           rejected_payload
               .materialized_direct_event_projections.empty() &&
           rejected_payload.materialized_direct_role_records.empty() &&
           rejected_payload.batches.empty(),
-      "a locally inconsistent terminal facade produces no Phase-10 payload");
+      "a locally inconsistent nonterminal facade produces no Phase-10 payload");
 }
 
 void test_nonterminal_and_extra_shell_sources_fail_closed() {

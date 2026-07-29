@@ -203,6 +203,51 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
+  test_hierarchy_yao48_ranked_pair_candidates.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
+  PRIVATE morsehgp3d::yao48_ranked_pair_candidates_reference
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
+  test_hierarchy_exact_ranked_diametral_pair_catalog_reference.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
+  PRIVATE morsehgp3d::exact_ranked_diametral_pair_catalog_reference
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_k1_forest_tests
   test_hierarchy_k1_forest.cpp
 )
@@ -1730,6 +1775,10 @@ set(
   morsehgp3d_spatial_lbvh_tests
   morsehgp3d_spatial_lbvh_query_dump
   morsehgp3d_hierarchy_emst_tests
+  morsehgp3d_hierarchy_yao48_emst_tests
+  morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
+  morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
+  morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
   morsehgp3d_hierarchy_k1_forest_tests
   morsehgp3d_hierarchy_miniball_tests
   morsehgp3d_hierarchy_gamma_tests
@@ -1799,6 +1848,7 @@ set(
   morsehgp3d_gpu_spatial_bounds_replay_host
   morsehgp3d_gpu_spatial_lbvh_context_tests
   morsehgp3d_gpu_spatial_lbvh_replay_host
+  morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_context_tests
   morsehgp3d_gpu_k1_boruvka_context_tests
   morsehgp3d_gpu_k1_boruvka_exact_search_tests
   morsehgp3d_gpu_k1_boruvka_seeded_chain_tests
@@ -2494,6 +2544,15 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_exact_lbvh_yao48_emst
   COMMAND morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_yao48_ranked_pair_candidates
+  COMMAND morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_exact_ranked_diametral_pair_catalog_reference
+  COMMAND
+    morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_k1_forest

@@ -214,7 +214,11 @@ def validate_main_cmake(cmake: str) -> None:
 
 def validate_test_wiring(unit_cmake: str) -> None:
     test_target = "morsehgp3d_hierarchy_direct_sparse_gateway_clock_tests"
-    public_target = "morsehgp3d::direct_sparse_gateway_clock"
+    # This regression grew with slices 10.12--10.14 and now exercises the
+    # complete public chain through the historical quotient.  The isolated
+    # CLOCK archive itself is still audited above through its own target and
+    # symbol table.
+    public_target = "morsehgp3d::direct_sparse_gateway_historical_quotient"
 
     executable = unique_target_block(unit_cmake, "add_executable", test_target)
     require(
@@ -236,7 +240,7 @@ def validate_test_wiring(unit_cmake: str) -> None:
             re.I,
         )
         is not None,
-        "the CLOCK test must link only through the isolated public target",
+        "the combined CLOCK regression must link through the terminal 10.14 public target",
     )
 
     cpu_targets = unique_target_block(unit_cmake, "set", "_morsehgp3d_cpu_test_targets")

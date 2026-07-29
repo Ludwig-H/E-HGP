@@ -1,6 +1,9 @@
 # Phase 15 — rangs de voisinage des témoins Gabriel PDEL
 
-## Verdict récent
+> [!NOTE]
+> Rapport historique scellé. Depuis le pivot consigné dans [PHASE15_PROGRESS.md](../../../validation/PHASE15_PROGRESS.md), la priorité scientifique transversale est le catalogue exact des paires de rang fermé $K+1$. Ce sidecar PDEL reste un diagnostic hors ligne; ses décisions d'architecture ci-dessous ne définissent plus le prochain gate global.
+
+## Verdict historique
 
 Contexte administratif inchangé : Phase `15`, `backend=reference_cpu/cuda_proposal`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=diagnostic_sidecar`, `public_status=not_claimed`. La porte d'entrée de Phase 15 reste satisfaite; ce diagnostic n'ouvre ni ne ferme une phase.
 
@@ -53,11 +56,11 @@ Il n'existe aucun triangle sans racine témoin PDEL dans ces runs. Les rangs max
 
 Le binaire qualifié a le SHA-256 `66e58085c73a34f07f4531a391299e1a9391e6044e8886f7e4a88fe6651c49d7`. La G4 était une RTX PRO 6000 Blackwell Server Edition, compute capability 12.0, pilote 580.173.02 et CUDA 12.9.
 
-## Décision produit sans Delaunay
+## Décision historique sans Delaunay
 
 Geogram PDEL demeure uniquement l'oracle massif hors ligne. Le produit ne doit ni le lier, ni l'appeler, ni relire ses résultats. Les seuils observés sélectionnent une première passe rapide : `symmetric_union_star` avec $M=\lceil4k\ln n\rceil$, ou $M=\lceil5k\ln n\rceil$ si le même budget doit couvrir aussi les variantes dirigée et mutuelle. Toute frontière résiduelle est ensuite traitée exactement; elle ne peut jamais être assimilée à un succès statistique.
 
-La structure retenue est un LBVH partagé et résident, puis une frontière bloc--bloc plate entièrement GPU par vagues `count -> scan -> emit`. Les propositions binary64 ne deviennent décisions qu'après recertification; un cap dépassé ou un reçu refusé échoue fermé. À $k=1$, la spécialisation doit terminer l'EMST exact et chaque ronde Borůvka avec `frontier_empty=true`. À $k=2$, elle doit émettre les événements `pair`, `higher` et `extra_shell`, fermer égalités de coque, triangles droits et cosphères, puis fusionner les plateaux avant le reducer sparse. Aucun callback par produit, transfert de terminaux par vague, tableau $n\times M$, catalogue global de triangles ou Delaunay n'appartient à cette route.
+La structure alors retenue était un LBVH partagé et résident, puis une frontière bloc--bloc plate entièrement GPU par vagues `count -> scan -> emit`. Les propositions binary64 ne deviennent décisions qu'après recertification; un cap dépassé ou un reçu refusé échoue fermé. À $k=1$, la spécialisation doit toujours terminer l'EMST exact et chaque ronde Borůvka avec `frontier_empty=true`. À $k=2$, elle doit toujours émettre les événements `pair`, `higher` et `extra_shell`, fermer égalités de coque, triangles droits et cosphères, puis fusionner les plateaux avant le reducer sparse. Le nouveau gate prioritaire réemploie d'abord le LBVH pour le catalogue exact des paires. Aucun callback par produit, transfert de terminaux par vague, tableau $n\times M$, catalogue global de triangles ou Delaunay n'appartient à cette route.
 
 ## Artefacts scellés
 

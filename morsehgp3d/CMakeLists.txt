@@ -2061,6 +2061,88 @@ target_link_libraries(
     morsehgp3d::spatial
   PRIVATE morsehgp3d::sanitizers
 )
+
+add_library(
+  morsehgp3d_yao48_ranked_pair_candidates_reference
+  STATIC
+    src/cpu/hierarchy/yao48_ranked_pair_candidates.cpp
+)
+add_library(
+  morsehgp3d::yao48_ranked_pair_candidates_reference
+  ALIAS morsehgp3d_yao48_ranked_pair_candidates_reference
+)
+set_target_properties(
+  morsehgp3d_yao48_ranked_pair_candidates_reference
+  PROPERTIES
+    EXPORT_NAME yao48_ranked_pair_candidates_reference
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_yao48_ranked_pair_candidates_reference PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_yao48_ranked_pair_candidates_reference
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_yao48_ranked_pair_candidates_reference
+  PUBLIC morsehgp3d::hierarchy
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_yao48_ranked_pair_candidates_reference PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_yao48_ranked_pair_candidates_reference
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_exact_ranked_diametral_pair_catalog_reference
+  STATIC
+    src/cpu/hierarchy/exact_ranked_diametral_pair_catalog_reference.cpp
+)
+add_library(
+  morsehgp3d::exact_ranked_diametral_pair_catalog_reference
+  ALIAS morsehgp3d_exact_ranked_diametral_pair_catalog_reference
+)
+set_target_properties(
+  morsehgp3d_exact_ranked_diametral_pair_catalog_reference
+  PROPERTIES
+    EXPORT_NAME exact_ranked_diametral_pair_catalog_reference
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_exact_ranked_diametral_pair_catalog_reference PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_exact_ranked_diametral_pair_catalog_reference
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_exact_ranked_diametral_pair_catalog_reference
+  PUBLIC
+    morsehgp3d::anchored_pair_candidate_classifier
+    morsehgp3d::yao48_ranked_pair_candidates_reference
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_exact_ranked_diametral_pair_catalog_reference PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_exact_ranked_diametral_pair_catalog_reference
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
 if(MSVC)
   target_compile_options(morsehgp3d_hierarchy PRIVATE /W4 /WX)
 else()
@@ -3202,6 +3284,8 @@ install(
     morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
     morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
+    morsehgp3d_yao48_ranked_pair_candidates_reference
+    morsehgp3d_exact_ranked_diametral_pair_catalog_reference
     morsehgp3d_sanitizers
   EXPORT MorseHGP3DTargets
 )

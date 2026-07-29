@@ -1,4 +1,7 @@
-# Phase 15 — gate massif de couverture Gabriel sur Delaunay ordinaire
+# Phase 15 — gate massif de couverture Gabriel sur Delaunay ordinaire (archive)
+
+> [!NOTE]
+> Rapport historique scellé. Cette voie PDEL/Gabriel reste un oracle hors ligne; elle n'est ni une dépendance, ni un repli, ni une correction du pipeline produit centré sur le catalogue exact des paires diamétrales.
 
 ## Verdict
 

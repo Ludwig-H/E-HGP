@@ -2,6 +2,9 @@
 
 > **Objet.** Ce document traduit la spécification mathématique en architecture de calcul. Il ne remplace ni les preuves, ni les benchmarks. Les cibles de latence sont des portes expérimentales.
 
+> [!IMPORTANT]
+> Priorité Phase 15 : une passe résidente à $K_{\max}$ construit d'abord le catalogue exact des paires diamétrales et leur payload fermé complet. La frontière indépendante des triangles aigus vient ensuite, puis celle des tétraèdres bien centrés. Les descriptions génériques de produits de supports ci-dessous doivent être lues dans cet ordre; elles n'autorisent ni un lancement combinatoire commun, ni un aller-retour hôte par candidat.
+
 ## 1. Machine de référence
 
 La cible initiale est `g4-standard-48` : un GPU NVIDIA RTX PRO 6000 Blackwell Server Edition avec 96 Go de GDDR7, 48 vCPU et 180 Go de mémoire hôte. La configuration et les zones doivent être revérifiées avant chaque campagne dans la [documentation G4 de Google Cloud](https://cloud.google.com/compute/docs/accelerator-optimized-machines). Les caractéristiques du GPU sont publiées par [NVIDIA](https://www.nvidia.com/en-us/data-center/rtx-pro-6000-blackwell-server-edition/).
@@ -27,7 +30,7 @@ C++20 orchestration
     états, budgets, checkpoints, files CPU de fallback
 
 CUDA core
-    LBVH, branch-and-bound supports 2/3/4, rangs, tris, lots DSU
+    Morton/LBVH, top-Kmax Yao48, paires exactes, puis supports 3/4, tris, lots DSU
 
 Exact predicates
     filtres FP64, expansions GPU, multiprécision CPU

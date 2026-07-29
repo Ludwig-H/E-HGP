@@ -1,5 +1,8 @@
 # Phase 15 — falsification G4 de la frontière `prune-only`
 
+> [!NOTE]
+> Rapport historique scellé. Le prototype reste rejeté et son code reste retiré. Depuis le pivot consigné dans [PHASE15_PROGRESS.md](../../../validation/PHASE15_PROGRESS.md), le prochain gate global est le catalogue GPU exact des paires de rang fermé $K+1$; les recommandations ci-dessous ne sont que des contraintes héritées pour une éventuelle frontière ultérieure.
+
 ## Verdict
 
 Le prototype compact du commit `c047e2f79343b5ad4e6a1168a4d859fc99661857` est correct comme falsificateur de partition, mais rejeté comme structure industrielle. Il ferme exactement la partition des paires non ordonnées sur tous les runs conclusifs et chaque prune GPU est rejoué par le prédicat exact CPU. Malgré un taux de prune de 99,634 % à 3 125 points et $K=2$, le rejeu résident prend 3 228,989 ms. La règle d'arrêt interdit donc les profils 6 250, 12 500 et 50 000 sur ce chemin.
@@ -34,13 +37,13 @@ Le run 3 125/$K=2$ traite 281 131 produits, rapatrie 11 245 240 octets de contr�
 
 Compute Sanitizer sur `uniform_latin`, 257 points et $K=2$ reproduit exactement les 31 918 paires prunées et les 978 feuilles non classées, avec zéro erreur et zéro fuite. Le test fake séparé du commit expérimental couvre un produit pruné et un non-pruné, zéro `keep`, uniquement des reçus stricts et le rejet déterministe d'une capacité inférieure à $P K$.
 
-## Conséquence pour la structure produit
+## Conséquence historique pour la structure produit
 
 Le surrogate brut reste exclu comme autorité : les campagnes PDEL massives ont déjà montré 122 188 retards à $k=1$ et 39 441 à $k=2$ sur 50 000 points, puis 74 289 378 et 22 560 254 sur 30 000 001 points. La règle empirique $M=\lceil5k\ln n\rceil$ couvre les trois rangs de voisinage observés sur cette unique famille, mais reste seulement une graine de propositions.
 
 Pour l'échéance de composantes comparée à PDEL, la voie la plus simple est l'EMST exact : son théorème de bottleneck connecte les trois sommets de tout triangle Gabriel au niveau source ou avant. Elle répond donc au critère unilatéral `gabriel_fusion_deadline_v1` sans Delaunay, y compris pour les sources testées à $k=2$. Elle ne remplace toutefois pas le catalogue Gabriel demandé par la sortie $k=2$.
 
-La structure retenue reste donc séparée par certificat : Borůvka dual-tree entièrement résident sur le LBVH partagé pour l'EMST exact $k=1$; préfixe voisin local propositionnel puis flux exacts `pair`, `higher` et `extra_shell` pour le catalogue $k=2$. Le prochain essai ne doit pas répéter cette boucle de subdivision hôte. Il doit emprunter l'autorité hôte et l'arène device déjà certifiées, maintenir la frontière et ses vagues sur le GPU, ne rapatrier qu'un transcript final borné et conserver `frontier_empty` comme unique fermeture exacte. Aucune seconde copie des nœuds, table $n\times M$, triangulation de Delaunay ou catalogue global de toutes les paires n'est admissible.
+La séparation par certificat reste une contrainte : Borůvka dual-tree entièrement résident sur le LBVH partagé pour l'EMST exact $k=1$; préfixe voisin local propositionnel puis flux exacts `pair`, `higher` et `extra_shell` pour le catalogue $k=2$. Un éventuel successeur de cette expérience ne doit pas répéter la boucle de subdivision hôte. Il doit emprunter l'autorité hôte et l'arène device déjà certifiées, maintenir la frontière et ses vagues sur le GPU, ne rapatrier qu'un transcript final borné et conserver `frontier_empty` comme unique fermeture exacte. Le gate actuel du catalogue de paires peut réutiliser ces contraintes, mais pas cette ordonnance rejetée. Aucune seconde copie des nœuds, table $n\times M$, triangulation de Delaunay ou matrice globale de toutes les paires n'est admissible.
 
 ## Session GCP et artefacts
 

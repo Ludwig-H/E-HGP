@@ -35,11 +35,18 @@ using morsehgp3d::hierarchy::
     ExactAnchoredPairCandidateClassificationStepKind;
 using morsehgp3d::hierarchy::
     ExactAnchoredPairCandidateClassificationStatus;
+using morsehgp3d::hierarchy::ExactAnchoredPairCandidateTraversalOrder;
+using morsehgp3d::hierarchy::ExactAnchoredPairPendingRecordKind;
 using morsehgp3d::hierarchy::ExactPairSupportEvent;
 using morsehgp3d::hierarchy::ExactPairSupportExtraShellDiagnostic;
+using morsehgp3d::hierarchy::ExactRankedDiametralPairRecord;
 using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
 using morsehgp3d::hierarchy::build_exact_pair_support_stream;
 using morsehgp3d::hierarchy::classify_exact_anchored_pair_candidate;
+using morsehgp3d::hierarchy::
+    classify_exact_ranked_diametral_pair_candidate;
+using morsehgp3d::hierarchy::
+    exact_ranked_diametral_pair_closed_point_ids;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
@@ -178,6 +185,62 @@ brute_classify(
   return result;
 }
 
+[[nodiscard]] ExactAnchoredPairCandidateClassificationResult
+brute_classify_exact_rank(
+    const CanonicalPointCloud& cloud,
+    std::array<PointId, 2> support_ids,
+    std::size_t target_closed_rank) {
+  if (support_ids[1] < support_ids[0]) {
+    std::swap(support_ids[0], support_ids[1]);
+  }
+  std::size_t observed_closed_rank = 0U;
+  std::size_t exterior_count = 0U;
+  std::vector<PointId> interior_ids;
+  std::vector<PointId> extra_shell_ids;
+  for (std::size_t index = 0U; index < cloud.size(); ++index) {
+    const PointId point_id = static_cast<PointId>(index);
+    const int sign = phi(cloud, point_id, support_ids).sign();
+    if (sign <= 0) {
+      ++observed_closed_rank;
+    }
+    if (sign < 0) {
+      interior_ids.push_back(point_id);
+    } else if (
+        sign == 0 && point_id != support_ids[0] &&
+        point_id != support_ids[1]) {
+      extra_shell_ids.push_back(point_id);
+    } else if (sign > 0) {
+      ++exterior_count;
+    }
+  }
+  if (observed_closed_rank == target_closed_rank) {
+    const morsehgp3d::exact::CircumcenterResult sphere =
+        morsehgp3d::exact::circumcenter(
+            cloud.point(support_ids[0]), cloud.point(support_ids[1]));
+    ExactAnchoredPairCandidateClassificationResult result;
+    result.status =
+        ExactAnchoredPairCandidateClassificationStatus::complete;
+    result.support_ids = support_ids;
+    result.maximum_closed_rank = target_closed_rank;
+    result.ranked_pair_record = ExactRankedDiametralPairRecord{
+        support_ids,
+        *sphere.squared_level(),
+        std::move(interior_ids),
+        std::move(extra_shell_ids),
+        observed_closed_rank,
+        exterior_count};
+    return result;
+  }
+
+  ExactAnchoredPairCandidateClassificationResult result;
+  result.status = observed_closed_rank < target_closed_rank
+      ? ExactAnchoredPairCandidateClassificationStatus::below_rank
+      : ExactAnchoredPairCandidateClassificationStatus::above_rank;
+  result.support_ids = support_ids;
+  result.maximum_closed_rank = target_closed_rank;
+  return result;
+}
+
 [[nodiscard]] bool same_scientific_result(
     const ExactAnchoredPairCandidateClassificationResult& left,
     const ExactAnchoredPairCandidateClassificationResult& right) {
@@ -186,7 +249,8 @@ brute_classify(
       left.maximum_closed_rank == right.maximum_closed_rank &&
       left.event == right.event &&
       left.relevant_extra_shell_diagnostic ==
-          right.relevant_extra_shell_diagnostic;
+          right.relevant_extra_shell_diagnostic &&
+      left.ranked_pair_record == right.ranked_pair_record;
 }
 
 [[nodiscard]] bool same_classification_work(
@@ -200,14 +264,98 @@ brute_classify(
 }
 
 [[nodiscard]] ExactAnchoredPairCandidateClassificationResult
+classify_unlimited_with_traversal_order(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::array<PointId, 2> support_ids,
+    std::size_t maximum_closed_rank,
+    ExactAnchoredPairCandidateTraversalOrder traversal_order) {
+  const ExactAnchoredPairCandidateClassificationBudget unlimited{
+      std::numeric_limits<std::size_t>::max()};
+  ExactAnchoredPairCandidateClassificationContext context =
+      ExactAnchoredPairCandidateClassificationContext::start(
+          index,
+          cloud,
+          support_ids,
+          maximum_closed_rank,
+          traversal_order);
+  const auto step = context.advance(index, cloud, unlimited);
+  if (step.kind ==
+      ExactAnchoredPairCandidateClassificationStepKind::record_ready) {
+    return context.take_result(index, cloud);
+  }
+  if (step.kind !=
+      ExactAnchoredPairCandidateClassificationStepKind::above_rank) {
+    throw std::logic_error(
+        "an unlimited ordered traversal missed its legacy terminal");
+  }
+
+  ExactAnchoredPairCandidateClassificationResult result;
+  result.status =
+      ExactAnchoredPairCandidateClassificationStatus::above_rank;
+  result.support_ids = context.support_ids();
+  result.maximum_closed_rank = context.maximum_closed_rank();
+  result.requested_budget = unlimited;
+  result.audit = context.audit();
+  return result;
+}
+
+[[nodiscard]] ExactAnchoredPairCandidateClassificationResult
+classify_exact_rank_unlimited_with_traversal_order(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::array<PointId, 2> support_ids,
+    std::size_t target_closed_rank,
+    ExactAnchoredPairCandidateTraversalOrder traversal_order) {
+  const ExactAnchoredPairCandidateClassificationBudget unlimited{
+      std::numeric_limits<std::size_t>::max()};
+  ExactAnchoredPairCandidateClassificationContext context =
+      ExactAnchoredPairCandidateClassificationContext::start_exact_rank(
+          index,
+          cloud,
+          support_ids,
+          target_closed_rank,
+          traversal_order);
+  const auto step = context.advance(index, cloud, unlimited);
+  if (step.kind ==
+      ExactAnchoredPairCandidateClassificationStepKind::record_ready) {
+    return context.take_result(index, cloud);
+  }
+  if (step.kind !=
+          ExactAnchoredPairCandidateClassificationStepKind::below_rank &&
+      step.kind !=
+          ExactAnchoredPairCandidateClassificationStepKind::above_rank) {
+    throw std::logic_error(
+        "an unlimited ordered exact-rank traversal missed its terminal");
+  }
+
+  ExactAnchoredPairCandidateClassificationResult result;
+  result.status = step.kind ==
+          ExactAnchoredPairCandidateClassificationStepKind::below_rank
+      ? ExactAnchoredPairCandidateClassificationStatus::below_rank
+      : ExactAnchoredPairCandidateClassificationStatus::above_rank;
+  result.support_ids = context.support_ids();
+  result.maximum_closed_rank = context.maximum_closed_rank();
+  result.requested_budget = unlimited;
+  result.audit = context.audit();
+  return result;
+}
+
+[[nodiscard]] ExactAnchoredPairCandidateClassificationResult
 classify_resumably_one_node_at_a_time(
     const MortonLbvhIndex& index,
     const CanonicalPointCloud& cloud,
     std::array<PointId, 2> support_ids,
-    std::size_t maximum_closed_rank) {
+    std::size_t maximum_closed_rank,
+    ExactAnchoredPairCandidateTraversalOrder traversal_order =
+        ExactAnchoredPairCandidateTraversalOrder::canonical_left_first) {
   ExactAnchoredPairCandidateClassificationContext context =
       ExactAnchoredPairCandidateClassificationContext::start(
-          index, cloud, support_ids, maximum_closed_rank);
+          index,
+          cloud,
+          support_ids,
+          maximum_closed_rank,
+          traversal_order);
   std::size_t summed_step_node_visits = 0U;
   for (std::size_t advance = 0U; advance < 1024U; ++advance) {
     const auto step = context.advance(index, cloud, {1U});
@@ -281,6 +429,95 @@ classify_resumably_one_node_at_a_time(
       "the one-node anchored classifier exceeded its progress bound");
 }
 
+[[nodiscard]] ExactAnchoredPairCandidateClassificationResult
+classify_exact_rank_resumably_one_node_at_a_time(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::array<PointId, 2> support_ids,
+    std::size_t target_closed_rank) {
+  ExactAnchoredPairCandidateClassificationContext context =
+      ExactAnchoredPairCandidateClassificationContext::start_exact_rank(
+          index, cloud, support_ids, target_closed_rank);
+  std::size_t summed_step_node_visits = 0U;
+  for (std::size_t advance = 0U; advance < 1024U; ++advance) {
+    const auto step = context.advance(index, cloud, {1U});
+    summed_step_node_visits += step.work.node_visit_count;
+    if (step.kind ==
+        ExactAnchoredPairCandidateClassificationStepKind::budget_exhausted) {
+      check(
+          step.stop_reason ==
+                  morsehgp3d::hierarchy::
+                      ExactAnchoredPairCandidateClassificationStopReason::
+                          node_visit_limit &&
+              step.work.node_visit_count == 1U &&
+              !step.terminal_after_step,
+          "a one-node exact-rank stop must preserve a nonterminal cursor");
+      continue;
+    }
+
+    check(
+        summed_step_node_visits == context.audit().node_visit_count,
+        "segmented exact-rank work must equal committed physical visits");
+    if (step.kind ==
+            ExactAnchoredPairCandidateClassificationStepKind::below_rank ||
+        step.kind ==
+            ExactAnchoredPairCandidateClassificationStepKind::above_rank) {
+      const bool below = step.kind ==
+          ExactAnchoredPairCandidateClassificationStepKind::below_rank;
+      check(
+          context.complete() && step.terminal_after_step &&
+              (below ? context.below_rank() : context.above_rank()),
+          "an exact-rank inequality terminal must close without a record");
+      const auto completed = context.advance(index, cloud, {0U});
+      check(
+          completed.kind ==
+                  ExactAnchoredPairCandidateClassificationStepKind::complete &&
+              completed.work.node_visit_count == 0U,
+          "an exact-rank inequality context must remain terminal");
+      ExactAnchoredPairCandidateClassificationResult result;
+      result.status = below
+          ? ExactAnchoredPairCandidateClassificationStatus::below_rank
+          : ExactAnchoredPairCandidateClassificationStatus::above_rank;
+      result.support_ids = context.support_ids();
+      result.maximum_closed_rank = context.maximum_closed_rank();
+      result.requested_budget = step.requested_budget;
+      result.audit = context.audit();
+      return result;
+    }
+
+    check(
+        step.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::record_ready &&
+            context.record_ready() && !context.complete() &&
+            step.terminal_after_step,
+        "an exact-rank equality terminal must await record consumption");
+    const std::size_t visits_before_repeated_ready =
+        context.audit().node_visit_count;
+    const auto repeated_ready = context.advance(index, cloud, {0U});
+    check(
+        repeated_ready.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::record_ready &&
+            repeated_ready.work.node_visit_count == 0U &&
+            context.audit().node_visit_count == visits_before_repeated_ready,
+        "an exact-rank record must survive a zero-budget retry without replay");
+    ExactAnchoredPairCandidateClassificationResult result =
+        context.take_result(index, cloud);
+    check(
+        context.complete() && result.ranked_pair_record.has_value() &&
+            result.ranked_pair_record->closed_rank == target_closed_rank,
+        "taking an exact-rank equality must emit its requested bucket once");
+    const auto completed = context.advance(index, cloud, {0U});
+    check(
+        completed.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::complete &&
+            completed.work.node_visit_count == 0U,
+        "a consumed exact-rank classifier must remain complete");
+    return result;
+  }
+  throw std::logic_error(
+      "the one-node exact-rank classifier exceeded its progress bound");
+}
+
 void check_filter_audit(
     const ExactAnchoredPairCandidateClassificationResult& result,
     const std::string& message) {
@@ -329,11 +566,27 @@ void test_small_differential() {
             support_ids,
             maximum_closed_rank,
             unlimited);
+        const auto interior_first = classify_unlimited_with_traversal_order(
+            lbvh,
+            cloud,
+            support_ids,
+            maximum_closed_rank,
+            ExactAnchoredPairCandidateTraversalOrder::
+                diametral_interior_first);
         const auto expected = brute_classify(
             cloud, support_ids, maximum_closed_rank);
         check(
             same_scientific_result(observed, expected),
             "small exact LBVH classification must match brute force");
+        check(
+            same_scientific_result(observed, interior_first) &&
+                !observed.audit.interior_first_child_order_enabled &&
+                interior_first.audit.interior_first_child_order_enabled &&
+                observed.audit
+                        .interior_first_child_order_evaluation_count ==
+                    0U &&
+                observed.audit.interior_first_child_reordering_count == 0U,
+            "the canonical default and experimental interior-first traversal must have identical scientific results");
         check(
             !observed.audit.center_and_level_constructed ||
                 observed.complete(),
@@ -347,6 +600,142 @@ void test_small_differential() {
       }
     }
   }
+}
+
+void test_exact_rank_bucket_exhaustive_differential_and_segmentation() {
+  const CanonicalPointCloud cloud = cloud_from({
+      point(-3.0, 0.0, 0.0),
+      point(3.0, 0.0, 0.0),
+      point(0.0, 3.0, 0.0),
+      point(0.0, -3.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(-2.0, 1.0, 1.0),
+      point(2.0, -1.0, 1.0),
+      point(-1.0, -2.0, -1.0),
+      point(1.0, 2.0, -1.0),
+      point(4.0, 4.0, 2.0),
+      point(-5.0, 3.0, -2.0),
+  });
+  const MortonLbvhIndex lbvh = MortonLbvhIndex::build(cloud);
+  const ExactAnchoredPairCandidateClassificationBudget unlimited{
+      std::numeric_limits<std::size_t>::max()};
+  const std::size_t maximum_tested_rank =
+      std::min<std::size_t>(11U, cloud.size());
+  std::size_t exact_count = 0U;
+  std::size_t below_count = 0U;
+  std::size_t above_count = 0U;
+
+  for (std::size_t first = 0U; first < cloud.size(); ++first) {
+    for (std::size_t second = first + 1U;
+         second < cloud.size();
+         ++second) {
+      for (std::size_t target_closed_rank = 2U;
+           target_closed_rank <= maximum_tested_rank;
+           ++target_closed_rank) {
+        const std::array<PointId, 2> reversed_support_ids{
+            static_cast<PointId>(second),
+            static_cast<PointId>(first)};
+        const std::string case_name =
+            "exact-rank pair (" + std::to_string(first) + ", " +
+            std::to_string(second) + ") bucket " +
+            std::to_string(target_closed_rank);
+        const auto expected = brute_classify_exact_rank(
+            cloud, reversed_support_ids, target_closed_rank);
+        const auto roomy = classify_exact_ranked_diametral_pair_candidate(
+            lbvh,
+            cloud,
+            reversed_support_ids,
+            target_closed_rank,
+            unlimited);
+        const auto interior_first =
+            classify_exact_rank_unlimited_with_traversal_order(
+                lbvh,
+                cloud,
+                reversed_support_ids,
+                target_closed_rank,
+                ExactAnchoredPairCandidateTraversalOrder::
+                    diametral_interior_first);
+        check(
+            same_scientific_result(roomy, expected),
+            case_name + " must match the exhaustive exact phi oracle");
+        check(
+            same_scientific_result(roomy, interior_first) &&
+                !roomy.audit.interior_first_child_order_enabled &&
+                interior_first.audit.interior_first_child_order_enabled &&
+                roomy.audit
+                        .interior_first_child_order_evaluation_count ==
+                    0U,
+            case_name +
+                " must preserve its exact-rank trichotomy under experimental scheduling");
+        check(
+            roomy.audit.exact_rank_selection_mode &&
+                roomy.status !=
+                    ExactAnchoredPairCandidateClassificationStatus::
+                        budget_exhausted,
+            case_name + " must execute the exact bucket contract");
+
+        if (expected.status ==
+            ExactAnchoredPairCandidateClassificationStatus::complete) {
+          ++exact_count;
+          check(
+              roomy.complete() && roomy.ranked_pair_record.has_value() &&
+                  roomy.ranked_pair_record->closed_rank ==
+                  target_closed_rank &&
+                  roomy.audit.complete_partition_certified &&
+                  roomy.audit.center_and_level_constructed &&
+                  !roomy.event.has_value() &&
+                  !roomy.relevant_extra_shell_diagnostic.has_value(),
+              case_name +
+                  " must emit exactly one exhaustive closed-ball record");
+        } else {
+          const bool below = expected.status ==
+              ExactAnchoredPairCandidateClassificationStatus::below_rank;
+          below_count += below ? 1U : 0U;
+          above_count += below ? 0U : 1U;
+          check(
+              !roomy.ranked_pair_record.has_value() &&
+                  !roomy.event.has_value() &&
+                  !roomy.relevant_extra_shell_diagnostic.has_value() &&
+                  !roomy.audit.center_and_level_constructed &&
+                  (below
+                       ? roomy.audit.below_rank_certificate
+                       : roomy.audit.early_above_rank_certificate),
+              case_name +
+                  " must reject its inequality without publishing a record");
+        }
+        check_filter_audit(roomy, case_name + " roomy audit");
+
+        const auto segmented =
+            classify_exact_rank_resumably_one_node_at_a_time(
+                lbvh,
+                cloud,
+                reversed_support_ids,
+                target_closed_rank);
+        check(
+            same_scientific_result(roomy, segmented),
+            case_name +
+                " must preserve its result under one-visit segmentation");
+        check(
+            same_classification_work(roomy.audit, segmented.audit),
+            case_name +
+                " must preserve its certified work under segmentation");
+        check_filter_audit(segmented, case_name + " segmented audit");
+      }
+    }
+  }
+
+  const std::size_t pair_count = cloud.size() * (cloud.size() - 1U) / 2U;
+  const std::size_t tested_bucket_count = maximum_tested_rank - 1U;
+  check(
+      exact_count == pair_count,
+      "every pair must occur in exactly one exact closed-rank bucket");
+  check(
+      exact_count + below_count + above_count ==
+          pair_count * tested_bucket_count,
+      "every exhaustive pair-bucket query must have one trichotomy outcome");
+  check(
+      below_count > 0U && above_count > 0U,
+      "the exhaustive fixture must exercise both strict rank inequalities");
 }
 
 void test_resumable_segmentation_and_p7b_identity() {
@@ -601,6 +990,9 @@ void test_complete_cosphere_shell() {
   check(
       result.relevant_extra_shell_diagnostic.has_value(),
       "a complete cosphere must produce its sparse diagnostic");
+  check(
+      !result.ranked_pair_record.has_value(),
+      "a cosphere above the requested closed-rank window is not a ranked pair record");
   if (result.relevant_extra_shell_diagnostic.has_value()) {
     const auto& diagnostic =
         *result.relevant_extra_shell_diagnostic;
@@ -626,6 +1018,110 @@ void test_complete_cosphere_shell() {
       result.audit.exact_node_fallback_count > 0U,
       "a cospherical equality must remain on the exact fail-open path");
   check_filter_audit(result, "cospherical equality audit");
+
+  const auto admitted = classify_exact_anchored_pair_candidate(
+      lbvh,
+      cloud,
+      {first_support_id, second_support_id},
+      5U,
+      {std::numeric_limits<std::size_t>::max()});
+  check(
+      admitted.complete() &&
+          admitted.relevant_extra_shell_diagnostic.has_value() &&
+          !admitted.ranked_pair_record.has_value(),
+      "the legacy in-window cosphere remains a diagnostic without catalogue allocation");
+
+  const ExactAnchoredPairCandidateClassificationBudget unlimited{
+      std::numeric_limits<std::size_t>::max()};
+  auto exact_context =
+      ExactAnchoredPairCandidateClassificationContext::start_exact_rank(
+          lbvh,
+          cloud,
+          {first_support_id, second_support_id},
+          5U);
+  const auto exact_ready = exact_context.advance(lbvh, cloud, unlimited);
+  const auto exact_requirements =
+      exact_context.pending_record_requirements();
+  check(
+      exact_ready.kind ==
+              ExactAnchoredPairCandidateClassificationStepKind::record_ready &&
+          exact_requirements.has_value() &&
+          exact_requirements->kind ==
+              ExactAnchoredPairPendingRecordKind::ranked_pair_record &&
+          exact_requirements->point_id_reference_count == 5U,
+      "the exact bucket preflights its complete closed-point payload");
+  const auto context_bucket = exact_context.take_result(lbvh, cloud);
+  const auto exact_bucket =
+      classify_exact_ranked_diametral_pair_candidate(
+          lbvh,
+          cloud,
+          {first_support_id, second_support_id},
+          5U,
+          unlimited);
+  check(
+      exact_bucket.complete() && exact_bucket.ranked_pair_record.has_value() &&
+          exact_bucket.ranked_pair_record ==
+              context_bucket.ranked_pair_record &&
+          !exact_bucket.event.has_value() &&
+          !exact_bucket.relevant_extra_shell_diagnostic.has_value() &&
+          exact_bucket.audit.exact_rank_selection_mode &&
+          exact_bucket.audit.complete_partition_certified,
+      "the exact-rank selector alone emits the complete cosphere in bucket five");
+  if (exact_bucket.ranked_pair_record.has_value()) {
+    const ExactRankedDiametralPairRecord& record =
+        *exact_bucket.ranked_pair_record;
+    std::vector<PointId> expected_closed{
+        first_support_id,
+        second_support_id,
+        first_extra_shell_id,
+        second_extra_shell_id,
+        interior_id};
+    std::sort(expected_closed.begin(), expected_closed.end());
+    check(
+        record.closed_rank == 5U &&
+            record.strict_interior_ids == std::vector<PointId>{interior_id} &&
+            record.extra_shell_ids ==
+                std::vector<PointId>{
+                    std::min(first_extra_shell_id, second_extra_shell_id),
+                    std::max(first_extra_shell_id, second_extra_shell_id)} &&
+            exact_ranked_diametral_pair_closed_point_ids(record) ==
+                expected_closed,
+        "the ranked pair record reconstructs every point of the exact closed ball");
+  }
+
+  const auto below_bucket =
+      classify_exact_ranked_diametral_pair_candidate(
+          lbvh,
+          cloud,
+          {first_support_id, second_support_id},
+          6U,
+          unlimited);
+  check(
+      below_bucket.status ==
+              ExactAnchoredPairCandidateClassificationStatus::below_rank &&
+          below_bucket.audit.below_rank_certificate &&
+          below_bucket.audit.exact_rank_selection_mode &&
+          !below_bucket.ranked_pair_record.has_value() &&
+          !below_bucket.event.has_value() &&
+          !below_bucket.relevant_extra_shell_diagnostic.has_value(),
+      "the exact-rank selector rejects below bucket six from its certified upper bound");
+
+  const auto above_bucket =
+      classify_exact_ranked_diametral_pair_candidate(
+          lbvh,
+          cloud,
+          {first_support_id, second_support_id},
+          4U,
+          unlimited);
+  check(
+      above_bucket.status ==
+              ExactAnchoredPairCandidateClassificationStatus::above_rank &&
+          above_bucket.audit.early_above_rank_certificate &&
+          above_bucket.audit.exact_rank_selection_mode &&
+          !above_bucket.ranked_pair_record.has_value() &&
+          !above_bucket.event.has_value() &&
+          !above_bucket.relevant_extra_shell_diagnostic.has_value(),
+      "the exact-rank selector rejects bucket four when a shell equality raises the lower bound");
 }
 
 void test_interval_filter_strict_decisions() {
@@ -794,6 +1290,108 @@ void test_node_budget_and_early_rank_rejection() {
   check_filter_audit(rejected, "early rank audit");
 }
 
+void test_interior_first_morton_direction_rejects_no_later() {
+  // Morton order places the negative exterior block before the [0, 10]
+  // diametral interval.  Canonical DFS therefore visits that exterior block
+  // first, whereas the scheduling-only score selects the right child that
+  // contains all strict interior witnesses.
+  const CanonicalPointCloud cloud = cloud_from({
+      point(0.0),
+      point(10.0),
+      point(2.0),
+      point(4.0),
+      point(6.0),
+      point(8.0),
+      point(-100.0),
+      point(-90.0),
+      point(-80.0),
+      point(-70.0),
+      point(-60.0),
+      point(-50.0),
+  });
+  const MortonLbvhIndex lbvh = MortonLbvhIndex::build(cloud);
+  const PointId first_support_id = canonical_id_from_source(cloud, 0U);
+  const PointId second_support_id = canonical_id_from_source(cloud, 1U);
+  const auto interior_first = classify_unlimited_with_traversal_order(
+      lbvh,
+      cloud,
+      {first_support_id, second_support_id},
+      3U,
+      ExactAnchoredPairCandidateTraversalOrder::diametral_interior_first);
+  const auto canonical = classify_unlimited_with_traversal_order(
+      lbvh,
+      cloud,
+      {first_support_id, second_support_id},
+      3U,
+      ExactAnchoredPairCandidateTraversalOrder::canonical_left_first);
+
+  check(
+      interior_first.above_rank() && canonical.above_rank() &&
+          same_scientific_result(interior_first, canonical),
+      "both Morton directions must produce the same exact above-rank decision");
+  check(
+      interior_first.audit.interior_first_child_reordering_count >
+              0U &&
+          interior_first.audit.interior_first_child_order_enabled &&
+          !canonical.audit.interior_first_child_order_enabled,
+      "the high-rank fixture must exercise an audited right-before-left reordering");
+  check(
+      interior_first.audit.node_visit_count < canonical.audit.node_visit_count,
+      "interior-first Morton scheduling must certify above-rank earlier than canonical left-first on the directed fixture");
+
+  const auto interior_first_segmented =
+      classify_resumably_one_node_at_a_time(
+          lbvh,
+          cloud,
+          {first_support_id, second_support_id},
+          3U,
+          ExactAnchoredPairCandidateTraversalOrder::
+              diametral_interior_first);
+  const auto canonical_segmented = classify_resumably_one_node_at_a_time(
+      lbvh,
+      cloud,
+      {first_support_id, second_support_id},
+      3U,
+      ExactAnchoredPairCandidateTraversalOrder::canonical_left_first);
+  check(
+      interior_first_segmented.above_rank() &&
+          canonical_segmented.above_rank() &&
+          same_classification_work(
+              interior_first_segmented.audit,
+              interior_first.audit) &&
+          same_classification_work(
+              canonical_segmented.audit,
+              canonical.audit),
+      "both Morton directions must preserve their exact work under one-node resumes");
+}
+
+void test_interior_first_score_uses_canonical_fallback() {
+  const CanonicalPointCloud cloud = cloud_from({
+      point(-2.0), point(-1.0), point(1.0), point(2.0)});
+  const MortonLbvhIndex lbvh = MortonLbvhIndex::build(cloud);
+  const PointId first_support_id = canonical_id_from_source(cloud, 1U);
+  const PointId second_support_id = canonical_id_from_source(cloud, 2U);
+  const auto interior_first = classify_unlimited_with_traversal_order(
+      lbvh,
+      cloud,
+      {first_support_id, second_support_id},
+      2U,
+      ExactAnchoredPairCandidateTraversalOrder::diametral_interior_first);
+  const auto canonical = classify_unlimited_with_traversal_order(
+      lbvh,
+      cloud,
+      {first_support_id, second_support_id},
+      2U,
+      ExactAnchoredPairCandidateTraversalOrder::canonical_left_first);
+  check(
+      interior_first.complete() &&
+          same_scientific_result(interior_first, canonical) &&
+          interior_first.audit
+                  .interior_first_child_order_fallback_count >
+              0U,
+      "equal symmetric child scores must fall back to canonical Morton order without changing the result");
+}
+
 void test_k10_exact_interior_boundary() {
   const CanonicalPointCloud nine_interior_cloud = cloud_from({
       point(-100.0),
@@ -898,6 +1496,18 @@ void test_contract_rejections() {
             lbvh, cloud, {0U, 1U}, 12U, {1U}));
       },
       "a rank beyond the pair contract must be rejected");
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            ExactAnchoredPairCandidateClassificationContext::start(
+                lbvh,
+                cloud,
+                {0U, 1U},
+                2U,
+                static_cast<ExactAnchoredPairCandidateTraversalOrder>(
+                    255U)));
+      },
+      "an unknown child traversal order must be rejected");
 }
 
 }  // namespace
@@ -917,12 +1527,15 @@ int main() {
           ExactAnchoredPairCandidateClassificationContext>);
 
   test_small_differential();
+  test_exact_rank_bucket_exhaustive_differential_and_segmentation();
   test_resumable_segmentation_and_p7b_identity();
   test_resumable_zero_move_and_foreign_authority();
   test_complete_cosphere_shell();
   test_interval_filter_strict_decisions();
   test_centered_interval_resolves_natural_dependency();
   test_node_budget_and_early_rank_rejection();
+  test_interior_first_morton_direction_rejects_no_later();
+  test_interior_first_score_uses_canonical_fallback();
   test_k10_exact_interior_boundary();
   test_contract_rejections();
   if (failures != 0) {

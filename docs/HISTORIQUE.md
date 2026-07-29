@@ -20,6 +20,10 @@ La piste grande dimension, anciennement nommée `HomogeneousLensTower`, n'est pa
 
 ## Décision actuelle
 
+Le pivot du 29 juillet 2026 concentre le travail transversal sur le catalogue exact des paires diamétrales de rang fermé au plus $K_{\max}+1$, calculé en une seule passe multi-ordre et accompagné du payload fermé complet. Morton reste l'ordre spatial; les 48 chambres fournissent des cutoffs exacts seulement lorsqu'elles sont suffisamment remplies. Les candidats supportés par une paire sont dérivés immédiatement, mais une fixture rationnelle a réfuté leur complétude pour les triangles aigus. La cascade active est donc : paires, frontière indépendante des triangles aigus, puis tétraèdres bien centrés.
+
+Ce pivot a séparé les [replis encore maintenus](research/README.md) des [pistes abandonnées](archive/abandoned/README.md). Les rapports PDEL/Gabriel, Geogram et `prune-only` ont quitté le parcours de validation actif; leurs artefacts et checkers restent conservés pour empêcher les régressions ou la réintroduction silencieuse d'une voie réfutée.
+
 La relecture intégrale, le 21 juillet 2026, des Parties I et II du manuscrit a recentré l'architecture sur son idée la plus importante : comme Single-Linkage n'a besoin que d'un MST et non de tout le graphe géométrique, MorseHGP3D doit calculer le certificat hiérarchique utile sans construire l'objet ambiant beaucoup plus gros de `HGP-old`.
 
 La voie de vérité bornée reste :
