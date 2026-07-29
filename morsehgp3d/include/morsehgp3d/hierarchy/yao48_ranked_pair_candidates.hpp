@@ -1,7 +1,7 @@
 #pragma once
 
 #include "morsehgp3d/exact/rational.hpp"
-#include "morsehgp3d/hierarchy/yao48_emst.hpp"
+#include "morsehgp3d/hierarchy/yao48_cone.hpp"
 #include "morsehgp3d/hierarchy/yao48_rank_cutoff.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 

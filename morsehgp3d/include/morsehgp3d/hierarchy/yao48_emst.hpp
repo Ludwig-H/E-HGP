@@ -1,8 +1,8 @@
 #pragma once
 
 #include "morsehgp3d/hierarchy/emst.hpp"
+#include "morsehgp3d/hierarchy/yao48_cone.hpp"
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
@@ -11,7 +11,6 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t exact_yao48_emst_schema_version = 1U;
-inline constexpr std::size_t exact_yao48_cone_count = 48U;
 // The exhaustive pair scan is a design oracle, never a production path.
 // Keeping the guard in the API prevents an accidental quadratic deployment.
 inline constexpr std::size_t exact_yao48_emst_reference_max_point_count =
@@ -29,25 +28,6 @@ inline constexpr std::string_view exact_yao48_emst_proof_basis =
     "canonical_48_signed_absolute_coordinate_order_cones_"
     "angular_diameter_arccos_one_over_sqrt_three_strictly_below_pi_over_"
     "three_exact_nearest_edge_per_point_cone_canonical_kruskal_v1";
-
-// The 48 half-open chambers are the eight sign choices times the six strict
-// total orders of |dx|, |dy| and |dz|.  Zero is assigned the positive sign and
-// equal absolute deltas are ordered by increasing axis.  The resulting key is
-// therefore a partition, not an overlapping proposal convention.
-struct ExactYao48ConeKey {
-  std::uint8_t negative_axis_mask{};
-  std::array<std::uint8_t, 3> axes_by_descending_absolute_delta{};
-  std::size_t cone_index{};
-
-  friend bool operator==(const ExactYao48ConeKey&, const ExactYao48ConeKey&) =
-      default;
-};
-
-// Exact classification of target-source.  Equal points are rejected because
-// the zero vector has no direction and canonical point clouds disallow them.
-[[nodiscard]] ExactYao48ConeKey classify_exact_yao48_cone(
-    const exact::CertifiedPoint3& source,
-    const exact::CertifiedPoint3& target);
 
 struct ExactYao48DirectedCandidate {
   spatial::PointId source_point_id{};

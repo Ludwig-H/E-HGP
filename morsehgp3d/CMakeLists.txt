@@ -2012,6 +2012,40 @@ if(UNIX)
 endif()
 
 add_library(
+  morsehgp3d_yao48_geometry
+  STATIC
+    src/cpu/hierarchy/yao48_cone.cpp
+    src/cpu/hierarchy/yao48_rank_cutoff.cpp
+)
+add_library(morsehgp3d::yao48_geometry ALIAS morsehgp3d_yao48_geometry)
+set_target_properties(
+  morsehgp3d_yao48_geometry
+  PROPERTIES
+    EXPORT_NAME yao48_geometry
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_yao48_geometry PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_yao48_geometry
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_yao48_geometry
+  PUBLIC morsehgp3d::exact
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_yao48_geometry PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_yao48_geometry
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_hierarchy
   STATIC
     src/cpu/hierarchy/boruvka.cpp
@@ -2029,7 +2063,6 @@ add_library(
     src/cpu/hierarchy/critical_event_gamma_overlay.cpp
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/yao48_emst.cpp
-    src/cpu/hierarchy/yao48_rank_cutoff.cpp
     src/cpu/hierarchy/exact_lbvh_yao48_emst.cpp
     src/cpu/hierarchy/gamma.cpp
     src/cpu/hierarchy/gamma_transition.cpp
@@ -2061,6 +2094,7 @@ target_link_libraries(
     morsehgp3d::contract
     morsehgp3d::facet_miniball
     morsehgp3d::spatial
+    morsehgp3d::yao48_geometry
   PRIVATE morsehgp3d::sanitizers
 )
 
@@ -2090,7 +2124,9 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_yao48_ranked_pair_candidates_reference
-  PUBLIC morsehgp3d::hierarchy
+  PUBLIC
+    morsehgp3d::spatial
+    morsehgp3d::yao48_geometry
   PRIVATE morsehgp3d::sanitizers
 )
 if(MSVC)
@@ -2214,7 +2250,7 @@ target_link_libraries(
   morsehgp3d_gpu_morton_yao48_pair_frontier_host_reference
   PUBLIC
     morsehgp3d::spatial
-    morsehgp3d::hierarchy
+    morsehgp3d::yao48_geometry
   PRIVATE morsehgp3d::sanitizers
 )
 target_compile_features(
@@ -3545,6 +3581,7 @@ install(
     morsehgp3d_direct_sparse_facet_descent_batch_executor
     morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
     morsehgp3d_pair_support_codec
+    morsehgp3d_yao48_geometry
     morsehgp3d_hierarchy
     morsehgp3d_yao48_ranked_pair_candidates_reference
     morsehgp3d_exact_ranked_diametral_pair_catalog_reference
