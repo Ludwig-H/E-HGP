@@ -19,6 +19,7 @@ class K1BoruvkaCandidateContext;
 class PairSupportPhiContext;
 class SpatialLbvhContext;
 class MortonYao48PairFrontierContext;
+class MortonYao48RadialSubtreeFilterContext;
 }
 
 namespace morsehgp3d::spatial {
@@ -452,6 +453,7 @@ class MortonLbvhIndex {
   friend class gpu::PairSupportPhiContext;
   friend class gpu::SpatialLbvhContext;
   friend class gpu::MortonYao48PairFrontierContext;
+  friend class gpu::MortonYao48RadialSubtreeFilterContext;
 };
 
 [[nodiscard]] TopKPartition lbvh_top_k(

@@ -2269,6 +2269,47 @@ else()
   )
 endif()
 
+# Standalone Phase 15 radial-subtree filter contract.  It is intentionally
+# not wired into the product frontier: CUDA proposes only the conservative
+# minDist_down >= max(3*D_up) range cut and exact CPU replay is mandatory.
+add_library(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_host_contract
+  STATIC
+    src/cuda/phase15_morton_yao48_radial_subtree_filter_internal.hpp
+    src/gpu/morton_yao48_radial_subtree_filter.cpp
+)
+add_library(
+  morsehgp3d::gpu_morton_yao48_radial_subtree_filter_host_contract
+  ALIAS morsehgp3d_gpu_morton_yao48_radial_subtree_filter_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_host_contract
+  PUBLIC
+    morsehgp3d::spatial
+    morsehgp3d::yao48_geometry
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Benchmark-only host aggregation for bounded Morton-window Yao48 seed
 # transcripts.  It preserves unresolved mass and never promotes a heuristic
 # omission to an exact pair-frontier prune.
@@ -2956,6 +2997,79 @@ if(MORSEHGP3D_ENABLE_CUDA)
         $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_library(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter
+    STATIC
+      src/cuda/phase15_morton_yao48_radial_subtree_filter_internal.hpp
+      src/cuda/phase15_morton_yao48_radial_subtree_filter.cu
+      src/gpu/morton_yao48_radial_subtree_filter.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_morton_yao48_radial_subtree_filter
+    ALIAS morsehgp3d_gpu_morton_yao48_radial_subtree_filter
+  )
+  target_include_directories(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter
+    PUBLIC
+      morsehgp3d::gpu_morton_lbvh_build
+      morsehgp3d::spatial
+      morsehgp3d::yao48_geometry
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_radial_subtree_filter
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_radial_subtree_filter
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification
+    src/tools/gpu_morton_yao48_radial_subtree_filter_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification
+    PRIVATE morsehgp3d::gpu_morton_yao48_radial_subtree_filter
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification
+    PRIVATE cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
 

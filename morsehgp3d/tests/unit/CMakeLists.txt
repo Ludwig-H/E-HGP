@@ -1617,6 +1617,47 @@ else()
   )
 endif()
 add_executable(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
+  test_gpu_morton_yao48_radial_subtree_filter.cpp
+  fake_gpu_morton_yao48_radial_subtree_filter_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
+  PRIVATE
+    morsehgp3d::gpu_morton_yao48_radial_subtree_filter_host_contract
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+add_executable(
   morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
   test_gpu_morton_yao48_seed_work_profile.cpp
 )
@@ -2009,6 +2050,7 @@ set(
   morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
   morsehgp3d_gpu_ranked_diametral_pair_catalog_contract_tests
   morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+  morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
   morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
   morsehgp3d_gpu_morton_lbvh_build_context_tests
 )
@@ -3051,6 +3093,16 @@ add_test(
   NAME morsehgp3d.gpu_morton_yao48_pair_frontier
   COMMAND morsehgp3d_gpu_morton_yao48_pair_frontier_tests
 )
+add_test(
+  NAME morsehgp3d.gpu_morton_yao48_radial_subtree_filter
+  COMMAND morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
+)
+if(MORSEHGP3D_ENABLE_CUDA)
+  add_test(
+    NAME morsehgp3d.gpu_morton_yao48_radial_subtree_filter_qualification
+    COMMAND morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification
+  )
+endif()
 add_test(
   NAME morsehgp3d.gpu_morton_yao48_seed_work_profile
   COMMAND morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
