@@ -2032,6 +2032,7 @@ set(
   morsehgp3d_gpu_spatial_reference_context_tests
   morsehgp3d_gpu_h_polytope_proposal_context_tests
   morsehgp3d_gpu_pair_support_phi_context_tests
+  morsehgp3d_gpu_exact_diametral_phi_context_tests
   morsehgp3d_gpu_spatial_reference_replay_host
   morsehgp3d_gpu_spatial_bounds_context_tests
   morsehgp3d_gpu_spatial_bounds_replay_host

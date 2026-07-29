@@ -695,6 +695,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--build-log", type=Path, required=True)
     parser.add_argument("--release-log", type=Path, required=True)
     parser.add_argument("--audit-log", type=Path, required=True)
+    parser.add_argument("--radial-subtree-log", type=Path, required=True)
     parser.add_argument("--binding-log", type=Path, required=True)
     parser.add_argument("--elf-log", type=Path, required=True)
     parser.add_argument("--ptx-log", type=Path, required=True)
@@ -745,6 +746,9 @@ def main() -> int:
         "docker_build": read_text(args.build_log),
         "cuda_release": read_text(args.release_log),
         "cuda_audit": read_text(args.audit_log),
+        "morton_yao48_radial_subtree_filter": read_text(
+            args.radial_subtree_log
+        ),
         "python_binding": read_text(args.binding_log),
         "cuobjdump_elf": read_text(args.elf_log),
         "cuobjdump_ptx": read_text(args.ptx_log, allow_empty=True),
@@ -756,6 +760,9 @@ def main() -> int:
         fail("cuobjdump ELF evidence must be non-empty and contain only sm_120")
     if logs["cuobjdump_ptx"].strip():
         fail("cuobjdump PTX evidence must contain zero entries")
+    radial_success = "Morton/Yao48 CUDA radial-subtree qualification passed"
+    if logs["morton_yao48_radial_subtree_filter"].count(radial_success) != 1:
+        fail("radial-subtree evidence must contain exactly one success marker")
 
     artifact = {
         "backend": "cuda_g4",
@@ -769,6 +776,7 @@ def main() -> int:
             "guest_shutdown_guard": "verified_before_heavy_work",
             "manifest_complete_for_every_result": True,
             "memory_live_bytes_final": 0,
+            "morton_yao48_radial_subtree_filter": "passed",
             "preflight": "passed",
             "warm_and_resident_present": True,
         },

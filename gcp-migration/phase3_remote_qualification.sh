@@ -40,6 +40,8 @@ readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE="build/morsehgp3d-cuda-release/
 readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE}"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_diametral_phi_qualification"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE}"
+readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification"
+readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_PATH="${CONTAINER_REPOSITORY}/${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE}"
 readonly MORTON_YAO48_SEED_WORK_PROFILE_BINARY_PATH="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly AUDIT_MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-audit"
@@ -1050,6 +1052,7 @@ readonly DOCKER_LOG="${LOG_DIR}/docker-info.log"
 readonly BUILD_LOG="${LOG_DIR}/docker-build.log"
 readonly RELEASE_LOG="${LOG_DIR}/cuda-release.log"
 readonly AUDIT_LOG="${LOG_DIR}/cuda-audit.log"
+readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_LOG="${LOG_DIR}/morton-yao48-radial-subtree-filter.log"
 readonly RUNTIME_LOG="${LOG_DIR}/runtime.log"
 readonly BINDING_LOG="${LOG_DIR}/binding.log"
 readonly ELF_LOG="${LOG_DIR}/cuobjdump-elf.log"
@@ -1762,6 +1765,22 @@ if ! run_container "cuda-release" "${RELEASE_LOG}" cmake --workflow --preset cud
     report_failure_log "cuda-release" "${RELEASE_LOG}"
     die "Le workflow cuda-release a échoué; voir ${RELEASE_LOG}."
 fi
+[[ -f "${BUILD_DIR}/${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE#build/}" && \
+    ! -L "${BUILD_DIR}/${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE#build/}" && \
+    -x "${BUILD_DIR}/${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE#build/}" ]] || \
+    die "Le binaire radial Morton/Yao48 n'a pas été produit par cuda-release."
+begin_unit "morton-yao48-radial-subtree-filter"
+if ! run_container "morton-yao48-radial-subtree-filter" \
+    "${MORTON_YAO48_RADIAL_SUBTREE_FILTER_LOG}" \
+    "${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_PATH}"; then
+    report_failure_log "morton-yao48-radial-subtree-filter" \
+        "${MORTON_YAO48_RADIAL_SUBTREE_FILTER_LOG}"
+    die "La qualification radiale Morton/Yao48 a échoué; voir ${MORTON_YAO48_RADIAL_SUBTREE_FILTER_LOG}."
+fi
+[[ "$(grep -Fc 'Morton/Yao48 CUDA radial-subtree qualification passed' \
+    "${MORTON_YAO48_RADIAL_SUBTREE_FILTER_LOG}" || true)" == "1" ]] || \
+    die "Le journal radial Morton/Yao48 ne contient pas son unique témoin de succès."
+printf '[QUALIFICATION] Filtre radial Morton/Yao48 CUDA exécuté avec succès.\n'
 begin_unit "cuda-audit"
 if ! run_container "cuda-audit" "${AUDIT_LOG}" cmake --workflow --preset cuda-audit; then
     report_failure_log "cuda-audit" "${AUDIT_LOG}"
@@ -2563,6 +2582,7 @@ python3 -B "${ASSEMBLER}" \
     --build-log "${BUILD_LOG}" \
     --release-log "${RELEASE_LOG}" \
     --audit-log "${AUDIT_LOG}" \
+    --radial-subtree-log "${MORTON_YAO48_RADIAL_SUBTREE_FILTER_LOG}" \
     --binding-log "${BINDING_LOG}" \
     --elf-log "${ELF_LOG}" \
     --ptx-log "${PTX_LOG}" \

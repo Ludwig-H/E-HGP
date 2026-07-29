@@ -985,6 +985,12 @@ if command[:3] == ["cmake", "--workflow", "--preset"]:
         )
         phase7_binary.write_bytes(b"fake Phase 7 H-polytope qualification")
         phase7_binary.chmod(0o755)
+        radial_binary = (
+            build
+            / "morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification"
+        )
+        radial_binary.write_bytes(b"fake Morton/Yao48 radial qualification")
+        radial_binary.chmod(0o755)
     print(f"fake {preset} workflow passed")
     raise SystemExit(0)
 
@@ -995,6 +1001,14 @@ if command[0].endswith("/morsehgp3d_phase3_runtime"):
     ceiling = int(command[command.index("--allocation-bytes") + 1])
     write_runtime_jsonl(result_path(output), ceiling)
     print("fake Phase 3 runtime passed")
+    raise SystemExit(0)
+
+if command[0].endswith(
+    "/morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification"
+):
+    if failure == "radial":
+        raise SystemExit(44)
+    print("Morton/Yao48 CUDA radial-subtree qualification passed")
     raise SystemExit(0)
 
 if command[0].endswith("/morsehgp3d_gpu_h_polytope_proposal_qualification"):
@@ -1898,6 +1912,13 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertIn("No PTX file found", value["logs"]["cuobjdump_ptx_stderr"])
         self.assertIn("ERROR SUMMARY: 0 errors", value["logs"]["compute_sanitizer"])
         self.assertEqual(
+            "passed", value["checks"]["morton_yao48_radial_subtree_filter"]
+        )
+        self.assertIn(
+            "Morton/Yao48 CUDA radial-subtree qualification passed",
+            value["logs"]["morton_yao48_radial_subtree_filter"],
+        )
+        self.assertEqual(
             {"resident", "warm"},
             {
                 record["protocol"]
@@ -1920,6 +1941,10 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertIn("--tag morsehgp3d-phase3:" + FAKE_SHA, log)
         self.assertIn("cmake --workflow --preset cuda-release", log)
         self.assertIn("cmake --workflow --preset cuda-audit", log)
+        self.assertIn(
+            "morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification",
+            log,
+        )
         self.assertIn("--allocation-bytes 67108864", log)
         self.assertIn("tests/cuda/check_phase3_binding.py", log)
         self.assertIn("cuobjdump -lelf", log)
@@ -1942,12 +1967,12 @@ printf 'fake Blackwell preflight passed\\n'
         docker_run_lines = [
             line for line in log.splitlines() if line.startswith("DOCKER run ")
         ]
-        self.assertEqual(7, len(docker_run_lines))
+        self.assertEqual(8, len(docker_run_lines))
         for line in docker_run_lines:
             self.assertIn("--name morsehgp3d-phase3-", line)
             self.assertIn("--label morsehgp3d.phase3.session=", line)
             self.assertIn("--cidfile ", line)
-        self.assertEqual(7, log.count("DOCKER rm -f " + "c" * 64))
+        self.assertEqual(8, log.count("DOCKER rm -f " + "c" * 64))
         self.assertNotIn("PATH-DOCKER", log)
         self.assertFalse((self.repository / "build").exists())
 
@@ -2457,7 +2482,7 @@ printf 'fake Blackwell preflight passed\\n'
         self.assert_no_partial_artifact()
 
     def test_failures_publish_no_artifact(self) -> None:
-        for failure in ("build", "runtime", "audit", "sanitizer"):
+        for failure in ("build", "radial", "runtime", "audit", "sanitizer"):
             with self.subTest(failure=failure):
                 artifact = self.output_dir / f"{failure}.json"
                 result, _ = self.run_worker(failure=failure, output=artifact)
@@ -2585,8 +2610,8 @@ printf 'fake Blackwell preflight passed\\n'
         log = self.command_log_text()
         self.assertIn(f"SUDO -n -- {self.fixed_docker} info", log)
         self.assertIn(f"SUDO -n -- {self.fixed_docker} image inspect", log)
-        self.assertEqual(7, log.count(f"SUDO -n -- {self.fixed_docker} run"))
-        self.assertEqual(7, log.count(f"SUDO -n -- {self.fixed_docker} rm -f"))
+        self.assertEqual(8, log.count(f"SUDO -n -- {self.fixed_docker} run"))
+        self.assertEqual(8, log.count(f"SUDO -n -- {self.fixed_docker} rm -f"))
         self.assertIn(
             "SUDO -n --preserve-env=BUILDX_CONFIG -- "
             + str(self.buildx_plugin)
