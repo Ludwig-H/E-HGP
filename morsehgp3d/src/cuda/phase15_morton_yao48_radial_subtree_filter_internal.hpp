@@ -2,7 +2,6 @@
 
 #include "morsehgp3d/gpu/morton_yao48_radial_subtree_filter.hpp"
 
-#include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -28,12 +27,11 @@ enum class Phase15MortonYao48RadialProposal : std::uint8_t {
 
 struct Phase15MortonYao48RadialDeviceInput {
   std::uint64_t replay_id{};
-  std::array<std::uint64_t, 3U> anchor_bits{};
-  std::array<std::uint64_t, 3U> lower_bits{};
-  std::array<std::uint64_t, 3U> upper_bits{};
-  std::array<std::uint64_t,
-             morton_yao48_radial_subtree_filter_cone_count>
-      bank_radius_upper_bits{};
+  std::uint64_t anchor_bits[3U]{};
+  std::uint64_t lower_bits[3U]{};
+  std::uint64_t upper_bits[3U]{};
+  std::uint64_t
+      bank_radius_upper_bits[morton_yao48_radial_subtree_filter_cone_count]{};
   std::uint64_t full_bank_mask{};
   std::uint8_t device_eligible{};
   std::uint8_t reserved[7]{};
@@ -43,6 +41,17 @@ static_assert(
     std::is_trivially_copyable_v<Phase15MortonYao48RadialDeviceInput> &&
     sizeof(Phase15MortonYao48RadialDeviceInput) ==
         60U * sizeof(std::uint64_t));
+static_assert(offsetof(Phase15MortonYao48RadialDeviceInput, replay_id) == 0U);
+static_assert(offsetof(Phase15MortonYao48RadialDeviceInput, anchor_bits) == 8U);
+static_assert(offsetof(Phase15MortonYao48RadialDeviceInput, lower_bits) == 32U);
+static_assert(offsetof(Phase15MortonYao48RadialDeviceInput, upper_bits) == 56U);
+static_assert(
+    offsetof(Phase15MortonYao48RadialDeviceInput, bank_radius_upper_bits) ==
+    80U);
+static_assert(
+    offsetof(Phase15MortonYao48RadialDeviceInput, full_bank_mask) == 464U);
+static_assert(
+    offsetof(Phase15MortonYao48RadialDeviceInput, device_eligible) == 472U);
 
 struct Phase15MortonYao48RadialDeviceRecord {
   std::uint64_t replay_id{};
