@@ -1,0 +1,2768 @@
+#include "../cuda/phase15_morton_yao48_device_tiled_pair_frontier_internal.hpp"
+
+#include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/gpu/morton_lbvh_build.hpp"
+#include "morsehgp3d/spatial/lbvh.hpp"
+#include "morsehgp3d/spatial/point_cloud.hpp"
+
+#include <cuda_runtime_api.h>
+
+#include <algorithm>
+#include <array>
+#include <bit>
+#include <charconv>
+#include <chrono>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <exception>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <numeric>
+#include <optional>
+#include <set>
+#include <span>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <system_error>
+#include <utility>
+#include <vector>
+
+#if defined(__linux__)
+#include <sys/resource.h>
+#endif
+
+namespace {
+
+using Clock = std::chrono::steady_clock;
+using morsehgp3d::exact::CertifiedPoint3;
+using morsehgp3d::gpu::MortonLbvhBuildContext;
+using morsehgp3d::gpu::MortonLbvhDeviceBuildResult;
+using morsehgp3d::gpu::MortonLbvhDeviceTraversalLease;
+using morsehgp3d::gpu::MortonYao48DeviceCandidateTileLeaseAudit;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierAdvance;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierAudit;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierConfig;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierContext;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStatus;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStopReason;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledAdoptedTraversal;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledAnchorControl;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledAnchorStatus;
+using morsehgp3d::gpu::detail::Phase15MortonYao48DeviceTiledBatch;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledCandidateRecord;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledExecutionKind;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledFailureCode;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledPairFrontierContextState;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledPruneRegionRecord;
+using morsehgp3d::gpu::detail::Phase15MortonYao48DeviceTiledRequest;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledWitnessBankSlot;
+using morsehgp3d::spatial::CanonicalPointCloud;
+using morsehgp3d::spatial::MortonLbvhSnapshotNode;
+using morsehgp3d::spatial::MortonLeafRecord;
+using morsehgp3d::spatial::PointId;
+
+inline constexpr std::string_view kSchema =
+    "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
+    "qualification.v1";
+inline constexpr std::string_view kScalingSmokeSchema =
+    "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
+    "scaling_smoke.v1";
+inline constexpr std::string_view kBackend = "cuda_g4";
+inline constexpr std::string_view kProfile = "hgp_reduced";
+inline constexpr std::string_view kMode =
+    "offline_device_tiled_pair_frontier_qualification";
+inline constexpr std::string_view kDeploymentStatus = "component_only";
+inline constexpr std::string_view kPublicStatus = "not_claimed";
+
+#if defined(MORSEHGP3D_GIT_SHA)
+inline constexpr std::string_view kGitSha = MORSEHGP3D_GIT_SHA;
+#else
+inline constexpr std::string_view kGitSha = "unavailable";
+#endif
+
+inline constexpr std::uint64_t kInvalid = UINT64_MAX;
+inline constexpr std::uint64_t kCandidateFlagAmbiguousCone =
+    UINT64_C(1) << 0U;
+inline constexpr std::uint64_t kCandidateFlagCertifiedCone =
+    UINT64_C(1) << 1U;
+inline constexpr std::uint64_t kCandidateFlagBankInserted =
+    UINT64_C(1) << 2U;
+inline constexpr std::uint64_t kCandidateFlagBankReplaced =
+    UINT64_C(1) << 3U;
+inline constexpr std::uint64_t kCandidateKnownFlags =
+    kCandidateFlagAmbiguousCone | kCandidateFlagCertifiedCone |
+    kCandidateFlagBankInserted | kCandidateFlagBankReplaced;
+inline constexpr std::uint64_t kPruneFlagClosedNonnegativeInterval =
+    UINT64_C(1) << 0U;
+inline constexpr std::int64_t kCoordinateDenominator =
+    INT64_C(1) << 20U;
+inline constexpr std::int64_t kMaximumAbsoluteScaledCoordinate =
+    INT64_C(64) * kCoordinateDenominator;
+inline constexpr std::uint64_t kFnvOffsetBasis =
+    UINT64_C(14695981039346656037);
+inline constexpr std::uint64_t kFnvPrime = UINT64_C(1099511628211);
+
+static_assert(std::numeric_limits<long double>::digits >= 64);
+static_assert(kMaximumAbsoluteScaledCoordinate < INT64_C(100000000));
+
+struct Options {
+  std::size_t point_count{257U};
+  std::string family{"adversarial_mixed_dyadic"};
+  std::optional<std::size_t> maximum_closed_rank;
+  bool all_ranks{false};
+  bool scaling_smoke{false};
+  bool point_count_explicit{false};
+  bool family_explicit{false};
+  std::size_t anchor_tile_capacity{
+      morsehgp3d::gpu::
+          morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity};
+  std::size_t sampled_prune_limit{4096U};
+  std::size_t exact_prune_target_check_limit{1'000'000U};
+  std::uint64_t seed{UINT64_C(0x15a048d1e7c93b25)};
+};
+
+struct ScaledPoint {
+  std::array<std::int64_t, 3U> coordinate{};
+};
+
+struct CloudFeatures {
+  std::size_t equality_shell_point_count{};
+  std::size_t permutation_sign_point_count{};
+  std::size_t jitter_grid_point_count{};
+  std::size_t clustered_point_count{};
+  std::size_t deterministic_fill_point_count{};
+};
+
+struct GeneratedCloud {
+  std::vector<CertifiedPoint3> points;
+  std::vector<ScaledPoint> scaled_points;
+  CloudFeatures features{};
+};
+
+struct AnchorPartition {
+  std::vector<std::uint64_t> candidate_positions;
+  std::vector<std::pair<std::uint64_t, std::uint64_t>> prune_intervals;
+};
+
+struct RankMetrics {
+  std::size_t maximum_closed_rank{};
+  std::size_t tile_count{};
+  std::size_t complete_anchor_count{};
+  std::size_t censored_anchor_count{};
+  std::size_t candidate_record_count{};
+  std::size_t prune_region_count{};
+  std::size_t bank_entry_count{};
+  std::size_t ambiguous_candidate_count{};
+  std::size_t unbanked_candidate_count{};
+  std::size_t fully_recertified_prune_count{};
+  std::size_t sampled_recertified_prune_count{};
+  std::uint64_t candidate_pair_mass{};
+  std::uint64_t certified_pruned_pair_mass{};
+  std::uint64_t unresolved_pair_mass{};
+  std::uint64_t unordered_pair_universe_count{};
+  std::uint64_t physical_node_visit_count{};
+  std::uint64_t prune_witness_target_check_count{};
+  std::uint64_t bounded_exact_pair_count{};
+  std::uint64_t bounded_admitted_pair_count{};
+  std::uint64_t bounded_candidate_admitted_pair_count{};
+  std::uint64_t bounded_candidate_rejected_pair_count{};
+  std::uint64_t bounded_non_support_shell_equality_count{};
+  std::uint64_t output_digest{kFnvOffsetBasis};
+  std::uint64_t build_ns{};
+  std::uint64_t lease_release_ns{};
+  std::uint64_t adoption_ns{};
+  std::uint64_t node_copy_ns{};
+  std::uint64_t launcher_ns{};
+  std::uint64_t qualification_output_copy_ns{};
+  std::uint64_t cpu_recertification_ns{};
+  std::uint64_t bounded_bruteforce_ns{};
+  std::uint64_t qualification_device_to_host_bytes{};
+  std::uint64_t traversal_device_capacity_bytes{};
+  std::uint64_t peak_tile_output_device_capacity_bytes{};
+  std::uint64_t device_total_bytes{};
+  std::uint64_t minimum_device_free_bytes{};
+  bool bounded_bruteforce_performed{false};
+  bool every_prune_fully_recertified{false};
+  bool coverage_partition_complete{false};
+  bool component_contract_validated{false};
+};
+
+struct ScalingSmokeMetrics {
+  std::size_t maximum_closed_rank{};
+  std::size_t advance_count{};
+  std::size_t candidate_tile_lease_count{};
+  std::size_t candidate_tile_release_count{};
+  std::size_t completed_anchor_count{};
+  std::size_t certified_prune_region_count{};
+  std::size_t launcher_call_count{};
+  std::size_t kernel_launch_count{};
+  std::size_t synchronization_count{};
+  std::size_t anchor_control_device_to_host_count{};
+  std::size_t anchor_control_device_to_host_byte_count{};
+  std::uint64_t candidate_pair_mass{};
+  std::uint64_t certified_pruned_pair_mass{};
+  std::uint64_t unresolved_pair_mass{};
+  std::uint64_t unordered_pair_universe_count{};
+  std::uint64_t physical_node_visit_count{};
+  std::uint64_t traversal_device_capacity_bytes{};
+  std::uint64_t peak_candidate_device_capacity_bytes{};
+  std::uint64_t peak_control_device_capacity_bytes{};
+  std::uint64_t peak_prune_device_capacity_bytes{};
+  std::uint64_t peak_tile_output_device_capacity_bytes{};
+  std::uint64_t peak_witness_bank_device_capacity_bytes{};
+  std::uint64_t generation_ns{};
+  std::uint64_t canonicalization_ns{};
+  std::uint64_t build_ns{};
+  std::uint64_t lease_release_ns{};
+  std::uint64_t host_release_ns{};
+  std::uint64_t context_creation_ns{};
+  std::uint64_t context_release_ns{};
+  std::uint64_t frontier_ns{};
+  std::uint64_t total_ns{};
+  MortonYao48DeviceTiledPairFrontierStopReason stop_reason{
+      MortonYao48DeviceTiledPairFrontierStopReason::none};
+  bool censored{false};
+  bool coverage_complete{false};
+  bool backpressure_validated{false};
+  bool execution_success{false};
+};
+
+class QualificationMismatch final : public std::runtime_error {
+ public:
+  explicit QualificationMismatch(const std::string& message)
+      : std::runtime_error(message) {}
+};
+
+[[noreturn]] void mismatch(const std::string& message) {
+  throw QualificationMismatch(message);
+}
+
+void require(bool condition, const std::string& message) {
+  if (!condition) {
+    mismatch(message);
+  }
+}
+
+[[nodiscard]] std::size_t parse_size(
+    std::string_view text,
+    const char* role) {
+  std::size_t value = 0U;
+  const char* const begin = text.data();
+  const char* const end = text.data() + text.size();
+  const auto result = std::from_chars(begin, end, value);
+  if (result.ec != std::errc{} || result.ptr != end) {
+    throw std::invalid_argument(role);
+  }
+  return value;
+}
+
+[[nodiscard]] std::uint64_t parse_u64(
+    std::string_view text,
+    const char* role) {
+  std::uint64_t value = 0U;
+  const char* const begin = text.data();
+  const char* const end = text.data() + text.size();
+  const auto result = std::from_chars(begin, end, value);
+  if (result.ec != std::errc{} || result.ptr != end) {
+    throw std::invalid_argument(role);
+  }
+  return value;
+}
+
+[[nodiscard]] Options parse_options(int argc, char** argv) {
+  Options options;
+  for (int index = 1; index < argc; ++index) {
+    const std::string_view argument{argv[index]};
+    if (argument == "--point-count" && index + 1 < argc) {
+      options.point_count =
+          parse_size(argv[++index], "invalid --point-count");
+      options.point_count_explicit = true;
+    } else if (argument == "--family" && index + 1 < argc) {
+      options.family = argv[++index];
+      options.family_explicit = true;
+    } else if (
+        argument == "--maximum-closed-rank" && index + 1 < argc) {
+      options.maximum_closed_rank =
+          parse_size(argv[++index], "invalid --maximum-closed-rank");
+    } else if (argument == "--all-ranks") {
+      options.all_ranks = true;
+    } else if (argument == "--scaling-smoke") {
+      options.scaling_smoke = true;
+    } else if (argument == "--anchor-tile-capacity" && index + 1 < argc) {
+      options.anchor_tile_capacity =
+          parse_size(argv[++index], "invalid --anchor-tile-capacity");
+    } else if (argument == "--sampled-prune-limit" && index + 1 < argc) {
+      options.sampled_prune_limit =
+          parse_size(argv[++index], "invalid --sampled-prune-limit");
+    } else if (
+        argument == "--exact-prune-target-check-limit" &&
+        index + 1 < argc) {
+      options.exact_prune_target_check_limit = parse_size(
+          argv[++index], "invalid --exact-prune-target-check-limit");
+    } else if (argument == "--seed" && index + 1 < argc) {
+      options.seed = parse_u64(argv[++index], "invalid --seed");
+    } else {
+      throw std::invalid_argument(
+          "usage: gpu_morton_yao48_device_tiled_pair_frontier_qualification "
+          "[--point-count N] [--family adversarial_mixed_dyadic|"
+          "shell_permutation_dyadic|jitter_grid_dyadic|clusters_dyadic|"
+          "affine_uniform_binary64] "
+          "[--maximum-closed-rank R|--all-ranks] "
+          "[--scaling-smoke] "
+          "[--anchor-tile-capacity N] [--sampled-prune-limit N] "
+          "[--exact-prune-target-check-limit N] [--seed N]");
+    }
+  }
+  if (options.scaling_smoke && !options.point_count_explicit) {
+    options.point_count = 1'000'000U;
+  }
+  const std::size_t maximum_point_count =
+      options.scaling_smoke ? 30'000'000U : 50'000U;
+  if (options.point_count < 2U ||
+      options.point_count > maximum_point_count) {
+    throw std::length_error(
+        options.scaling_smoke
+            ? "scaling --point-count must lie in [2,30000000]"
+            : "qualification --point-count must lie in [2,50000]");
+  }
+  if (options.maximum_closed_rank.has_value() && options.all_ranks) {
+    throw std::invalid_argument(
+        "--maximum-closed-rank and --all-ranks are mutually exclusive");
+  }
+  if (options.scaling_smoke && options.all_ranks) {
+    throw std::invalid_argument(
+        "--scaling-smoke accepts one --maximum-closed-rank only");
+  }
+  if (options.maximum_closed_rank.has_value() &&
+      (*options.maximum_closed_rank < 2U ||
+       *options.maximum_closed_rank >
+           morsehgp3d::gpu::
+               morton_yao48_device_tiled_pair_frontier_maximum_closed_rank)) {
+    throw std::invalid_argument("--maximum-closed-rank must lie in [2,11]");
+  }
+  if (options.anchor_tile_capacity == 0U ||
+      options.anchor_tile_capacity >
+          morsehgp3d::gpu::
+              morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity) {
+    throw std::invalid_argument("--anchor-tile-capacity must lie in [1,4096]");
+  }
+  if (options.sampled_prune_limit == 0U ||
+      options.exact_prune_target_check_limit == 0U) {
+    throw std::invalid_argument(
+        "qualification sampling limits must be strictly positive");
+  }
+  const bool known_family =
+      options.family == "adversarial_mixed_dyadic" ||
+      options.family == "shell_permutation_dyadic" ||
+      options.family == "jitter_grid_dyadic" ||
+      options.family == "clusters_dyadic";
+  if (!options.scaling_smoke && !known_family) {
+    throw std::invalid_argument("unknown --family");
+  }
+  if (options.scaling_smoke) {
+    if (options.family_explicit &&
+        options.family != "affine_uniform_binary64") {
+      throw std::invalid_argument(
+          "--scaling-smoke only accepts --family affine_uniform_binary64");
+    }
+    options.family = "affine_uniform_binary64";
+  }
+  return options;
+}
+
+[[nodiscard]] std::vector<std::size_t> requested_ranks(
+    const Options& options) {
+  if (options.maximum_closed_rank.has_value()) {
+    return {*options.maximum_closed_rank};
+  }
+  if (options.all_ranks || options.point_count <= 257U) {
+    return {2U, 3U, 11U};
+  }
+  return {11U};
+}
+
+[[nodiscard]] std::uint64_t splitmix64(std::uint64_t value) noexcept {
+  value += UINT64_C(0x9e3779b97f4a7c15);
+  value =
+      (value ^ (value >> 30U)) * UINT64_C(0xbf58476d1ce4e5b9);
+  value =
+      (value ^ (value >> 27U)) * UINT64_C(0x94d049bb133111eb);
+  return value ^ (value >> 31U);
+}
+
+[[nodiscard]] std::size_t scaling_permutation_multiplier(
+    std::size_t point_count) {
+  std::size_t multiplier = static_cast<std::size_t>(
+      UINT64_C(2654435761) % static_cast<std::uint64_t>(point_count));
+  multiplier = std::max(multiplier, std::size_t{1U});
+  while (std::gcd(multiplier, point_count) != 1U) {
+    ++multiplier;
+  }
+  return multiplier;
+}
+
+[[nodiscard]] std::vector<CertifiedPoint3> generate_scaling_points(
+    const Options& options) {
+  constexpr std::uint64_t mantissa_mask =
+      (UINT64_C(1) << 52U) - UINT64_C(1);
+  constexpr std::uint64_t one_exponent = UINT64_C(0x3ff0000000000000);
+  const std::uint64_t point_count = static_cast<std::uint64_t>(
+      options.point_count);
+  const std::uint64_t x_step = std::max(
+      UINT64_C(1), mantissa_mask / point_count);
+  const std::size_t multiplier =
+      scaling_permutation_multiplier(options.point_count);
+  const std::size_t offset = static_cast<std::size_t>(
+      options.seed % point_count);
+
+  std::vector<CertifiedPoint3> points;
+  points.reserve(options.point_count);
+  for (std::size_t source_index = 0U;
+       source_index < options.point_count;
+       ++source_index) {
+    const std::size_t logical_index = static_cast<std::size_t>(
+        (static_cast<std::uint64_t>(source_index) *
+             static_cast<std::uint64_t>(multiplier) +
+         static_cast<std::uint64_t>(offset)) %
+        point_count);
+    const std::uint64_t identity =
+        static_cast<std::uint64_t>(logical_index);
+    const std::uint64_t x_mantissa = identity * x_step;
+    const std::uint64_t y_mantissa =
+        splitmix64(identity ^ options.seed) & mantissa_mask;
+    const std::uint64_t z_mantissa =
+        splitmix64(identity ^ std::rotl(options.seed, 23)) & mantissa_mask;
+    points.push_back(CertifiedPoint3::from_binary64_bits(
+        {one_exponent | x_mantissa,
+         one_exponent | y_mantissa,
+         one_exponent | z_mantissa}));
+  }
+  return points;
+}
+
+void append_scaled_point(
+    GeneratedCloud& generated,
+    std::set<std::array<std::int64_t, 3U>>& used,
+    std::array<std::int64_t, 3U> coordinate,
+    std::size_t& feature_counter,
+    std::size_t point_count) {
+  if (generated.points.size() >= point_count || !used.insert(coordinate).second) {
+    return;
+  }
+  for (const std::int64_t value : coordinate) {
+    if (value < -kMaximumAbsoluteScaledCoordinate ||
+        value > kMaximumAbsoluteScaledCoordinate) {
+      throw std::overflow_error(
+          "a qualification coordinate escaped its exact int64 envelope");
+    }
+  }
+  const auto decode = [](std::int64_t value) {
+    return std::ldexp(static_cast<double>(value), -20);
+  };
+  const double x = decode(coordinate[0U]);
+  const double y = decode(coordinate[1U]);
+  const double z = decode(coordinate[2U]);
+  if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z) ||
+      std::ldexp(x, 20) != static_cast<double>(coordinate[0U]) ||
+      std::ldexp(y, 20) != static_cast<double>(coordinate[1U]) ||
+      std::ldexp(z, 20) != static_cast<double>(coordinate[2U])) {
+    throw std::logic_error(
+        "the qualification generator lost an exact binary64 dyadic");
+  }
+  generated.points.push_back(CertifiedPoint3::from_binary64(x, y, z));
+  generated.scaled_points.push_back(ScaledPoint{coordinate});
+  ++feature_counter;
+}
+
+void append_shell_and_permutations(
+    GeneratedCloud& generated,
+    std::set<std::array<std::int64_t, 3U>>& used,
+    std::size_t point_count) {
+  constexpr std::int64_t unit = kCoordinateDenominator;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    for (const std::int64_t sign : {INT64_C(-1), INT64_C(1)}) {
+      std::array<std::int64_t, 3U> coordinate{};
+      coordinate[axis] = sign * INT64_C(5) * unit;
+      append_scaled_point(
+          generated,
+          used,
+          coordinate,
+          generated.features.equality_shell_point_count,
+          point_count);
+    }
+  }
+  append_scaled_point(
+      generated,
+      used,
+      {0, 0, 0},
+      generated.features.equality_shell_point_count,
+      point_count);
+  constexpr std::array<std::array<std::uint8_t, 3U>, 6U> permutations{{
+      {{0U, 1U, 2U}},
+      {{0U, 2U, 1U}},
+      {{1U, 0U, 2U}},
+      {{1U, 2U, 0U}},
+      {{2U, 0U, 1U}},
+      {{2U, 1U, 0U}},
+  }};
+  for (const auto& permutation : permutations) {
+    for (std::uint8_t sign_mask = 0U; sign_mask < 8U; ++sign_mask) {
+      constexpr std::array<std::int64_t, 3U> shell_source{
+          0, INT64_C(3) * unit, INT64_C(4) * unit};
+      std::array<std::int64_t, 3U> shell{};
+      for (std::size_t position = 0U; position < 3U; ++position) {
+        const std::size_t axis = permutation[position];
+        const std::int64_t sign =
+            (sign_mask & static_cast<std::uint8_t>(1U << axis)) == 0U
+                ? INT64_C(1)
+                : INT64_C(-1);
+        shell[axis] = sign * shell_source[position];
+      }
+      append_scaled_point(
+          generated,
+          used,
+          shell,
+          generated.features.equality_shell_point_count,
+          point_count);
+
+      constexpr std::array<std::int64_t, 3U> direction_source{
+          INT64_C(7) * unit,
+          INT64_C(3) * unit,
+          INT64_C(1) * unit};
+      std::array<std::int64_t, 3U> direction{};
+      for (std::size_t position = 0U; position < 3U; ++position) {
+        const std::size_t axis = permutation[position];
+        const std::int64_t sign =
+            (sign_mask & static_cast<std::uint8_t>(1U << axis)) == 0U
+                ? INT64_C(1)
+                : INT64_C(-1);
+        direction[axis] = sign * direction_source[position];
+      }
+      append_scaled_point(
+          generated,
+          used,
+          direction,
+          generated.features.permutation_sign_point_count,
+          point_count);
+    }
+  }
+}
+
+void append_jitter_grid(
+    GeneratedCloud& generated,
+    std::set<std::array<std::int64_t, 3U>>& used,
+    std::size_t point_count,
+    std::uint64_t seed) {
+  constexpr std::int64_t unit = kCoordinateDenominator;
+  std::size_t logical_index = 0U;
+  for (std::int64_t ix = -2; ix <= 2; ++ix) {
+    for (std::int64_t iy = -2; iy <= 2; ++iy) {
+      for (std::int64_t iz = -2; iz <= 2; ++iz) {
+        const std::uint64_t random = splitmix64(
+            seed ^ static_cast<std::uint64_t>(logical_index));
+        const std::int64_t jitter_x =
+            static_cast<std::int64_t>(random & UINT64_C(0x1ff)) - 256;
+        const std::int64_t jitter_y =
+            static_cast<std::int64_t>((random >> 9U) & UINT64_C(0x1ff)) -
+            256;
+        const std::int64_t jitter_z =
+            static_cast<std::int64_t>((random >> 18U) & UINT64_C(0x1ff)) -
+            256;
+        append_scaled_point(
+            generated,
+            used,
+            {(INT64_C(12) * unit) + ix * (unit / 2) + jitter_x,
+             (-INT64_C(9) * unit) + iy * (unit / 2) + jitter_y,
+             (INT64_C(7) * unit) + iz * (unit / 2) + jitter_z},
+            generated.features.jitter_grid_point_count,
+            point_count);
+        ++logical_index;
+      }
+    }
+  }
+}
+
+void append_clusters(
+    GeneratedCloud& generated,
+    std::set<std::array<std::int64_t, 3U>>& used,
+    std::size_t point_count,
+    std::uint64_t seed) {
+  constexpr std::int64_t unit = kCoordinateDenominator;
+  constexpr std::array<std::array<std::int64_t, 3U>, 4U> centers{{
+      {{-INT64_C(24) * unit, -INT64_C(18) * unit, INT64_C(20) * unit}},
+      {{INT64_C(22) * unit, -INT64_C(21) * unit, -INT64_C(17) * unit}},
+      {{-INT64_C(19) * unit, INT64_C(23) * unit, -INT64_C(22) * unit}},
+      {{INT64_C(25) * unit, INT64_C(19) * unit, INT64_C(18) * unit}},
+  }};
+  for (std::size_t cluster = 0U; cluster < centers.size(); ++cluster) {
+    for (std::size_t member = 0U; member < 32U; ++member) {
+      const std::uint64_t random = splitmix64(
+          seed ^ (static_cast<std::uint64_t>(cluster) << 32U) ^
+          static_cast<std::uint64_t>(member));
+      const auto perturb = [random](unsigned int shift) {
+        return static_cast<std::int64_t>(
+                   (random >> shift) & UINT64_C(0xffff)) -
+               INT64_C(32768);
+      };
+      append_scaled_point(
+          generated,
+          used,
+          {centers[cluster][0U] + perturb(0U),
+           centers[cluster][1U] + perturb(16U),
+           centers[cluster][2U] + perturb(32U)},
+          generated.features.clustered_point_count,
+          point_count);
+    }
+  }
+}
+
+void append_deterministic_fill(
+    GeneratedCloud& generated,
+    std::set<std::array<std::int64_t, 3U>>& used,
+    std::size_t point_count,
+    std::uint64_t seed) {
+  constexpr std::int64_t unit = kCoordinateDenominator;
+  std::uint64_t logical_index = 0U;
+  while (generated.points.size() < point_count) {
+    const std::uint64_t random_x = splitmix64(seed ^ logical_index);
+    const std::uint64_t random_y =
+        splitmix64(std::rotl(seed, 19) ^ logical_index);
+    const std::uint64_t random_z =
+        splitmix64(std::rotl(seed, 41) ^ logical_index);
+    const std::int64_t x =
+        INT64_C(36) * unit +
+        static_cast<std::int64_t>(logical_index * UINT64_C(257)) +
+        static_cast<std::int64_t>(random_x & UINT64_C(0xff));
+    const std::int64_t y =
+        static_cast<std::int64_t>(random_y %
+                                  static_cast<std::uint64_t>(32 * unit)) -
+        INT64_C(16) * unit;
+    const std::int64_t z =
+        static_cast<std::int64_t>(random_z %
+                                  static_cast<std::uint64_t>(32 * unit)) -
+        INT64_C(16) * unit;
+    append_scaled_point(
+        generated,
+        used,
+        {x, y, z},
+        generated.features.deterministic_fill_point_count,
+        point_count);
+    ++logical_index;
+  }
+}
+
+[[nodiscard]] GeneratedCloud generate_cloud(const Options& options) {
+  GeneratedCloud generated;
+  generated.points.reserve(options.point_count);
+  generated.scaled_points.reserve(options.point_count);
+  std::set<std::array<std::int64_t, 3U>> used;
+  if (options.family == "adversarial_mixed_dyadic" ||
+      options.family == "shell_permutation_dyadic") {
+    append_shell_and_permutations(generated, used, options.point_count);
+  }
+  if (options.family == "adversarial_mixed_dyadic" ||
+      options.family == "jitter_grid_dyadic") {
+    append_jitter_grid(generated, used, options.point_count, options.seed);
+  }
+  if (options.family == "adversarial_mixed_dyadic" ||
+      options.family == "clusters_dyadic") {
+    append_clusters(
+        generated,
+        used,
+        options.point_count,
+        std::rotl(options.seed, 7));
+  }
+  append_deterministic_fill(
+      generated, used, options.point_count, std::rotl(options.seed, 29));
+  require(
+      generated.points.size() == options.point_count &&
+          generated.scaled_points.size() == options.point_count,
+      "the deterministic qualification cloud has the wrong cardinality");
+  if (options.family == "adversarial_mixed_dyadic" &&
+      options.point_count >= 257U) {
+    require(
+        generated.features.equality_shell_point_count != 0U &&
+            generated.features.permutation_sign_point_count != 0U &&
+            generated.features.jitter_grid_point_count != 0U &&
+            generated.features.clustered_point_count != 0U,
+        "the mixed qualification cloud omitted an adversarial family");
+  }
+  return generated;
+}
+
+template <typename Duration>
+[[nodiscard]] std::uint64_t nanoseconds(Duration duration) {
+  const auto value =
+      std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+  if (value < 0) {
+    throw std::runtime_error(
+        "the monotonic qualification clock moved backwards");
+  }
+  return static_cast<std::uint64_t>(value);
+}
+
+[[nodiscard]] std::uint64_t checked_u64(
+    std::size_t value,
+    const char* message) {
+  if (!std::in_range<std::uint64_t>(value)) {
+    throw std::overflow_error(message);
+  }
+  return static_cast<std::uint64_t>(value);
+}
+
+[[nodiscard]] std::size_t checked_product(
+    std::size_t left,
+    std::size_t right,
+    const char* message) {
+  if (left != 0U &&
+      right > std::numeric_limits<std::size_t>::max() / left) {
+    throw std::overflow_error(message);
+  }
+  return left * right;
+}
+
+[[nodiscard]] std::uint64_t unordered_pair_count(std::size_t point_count) {
+  const std::uint64_t count = checked_u64(
+      point_count, "the qualification point count does not fit uint64");
+  return count * (count - UINT64_C(1)) / UINT64_C(2);
+}
+
+[[nodiscard]] std::uint64_t triangular_offset(
+    std::uint64_t anchor_position,
+    std::uint64_t partner_position) {
+  return anchor_position * (anchor_position - UINT64_C(1)) /
+             UINT64_C(2) +
+         partner_position;
+}
+
+[[nodiscard]] std::uint64_t hash_word(
+    std::uint64_t digest,
+    std::uint64_t word) noexcept {
+  for (unsigned int shift = 0U; shift < 64U; shift += 8U) {
+    digest ^= (word >> shift) & UINT64_C(0xff);
+    digest *= kFnvPrime;
+  }
+  return digest;
+}
+
+[[nodiscard]] std::uint64_t scaled_cloud_digest(
+    std::span<const ScaledPoint> points) noexcept {
+  std::uint64_t digest = hash_word(
+      kFnvOffsetBasis, static_cast<std::uint64_t>(points.size()));
+  for (const ScaledPoint& point : points) {
+    for (const std::int64_t coordinate : point.coordinate) {
+      digest = hash_word(digest, std::bit_cast<std::uint64_t>(coordinate));
+    }
+  }
+  return digest;
+}
+
+void hash_candidate(
+    std::uint64_t& digest,
+    const Phase15MortonYao48DeviceTiledCandidateRecord& record) noexcept {
+  for (const std::uint64_t word : {
+           record.support_u,
+           record.support_v,
+           record.anchor_morton_position,
+           record.partner_morton_position,
+           record.owner_cone_index,
+           record.flags}) {
+    digest = hash_word(digest, word);
+  }
+}
+
+void hash_prune(
+    std::uint64_t& digest,
+    const Phase15MortonYao48DeviceTiledPruneRegionRecord& record) noexcept {
+  for (const std::uint64_t word : {
+           record.anchor_morton_position,
+           record.node_index,
+           record.certified_pair_mass,
+           record.retained_witness_count,
+           record.retained_witness_bank_mask,
+           record.flags}) {
+    digest = hash_word(digest, word);
+  }
+  for (const std::uint64_t witness : record.witness_point_ids) {
+    digest = hash_word(digest, witness);
+  }
+}
+
+void hash_bank_slot(
+    std::uint64_t& digest,
+    std::uint64_t anchor,
+    std::uint64_t cone,
+    const Phase15MortonYao48DeviceTiledWitnessBankSlot& slot) noexcept {
+  digest = hash_word(digest, anchor);
+  digest = hash_word(digest, cone);
+  digest = hash_word(digest, slot.witness_point_id);
+  digest = hash_word(digest, slot.witness_morton_position);
+  digest = hash_word(digest, slot.squared_distance_lower_bits);
+  digest = hash_word(digest, slot.squared_distance_upper_bits);
+}
+
+void hash_anchor_control(
+    std::uint64_t& digest,
+    const Phase15MortonYao48DeviceTiledAnchorControl& control) noexcept {
+  for (const std::uint64_t word : {
+           control.anchor_morton_position,
+           control.candidate_count,
+           control.prune_region_count,
+           control.certified_pruned_pair_mass,
+           control.node_visit_count,
+           control.status,
+           control.stop_reason,
+           control.failure_code,
+           control.ambiguous_cone_candidate_count,
+           control.unbanked_candidate_count,
+           control.unresolved_pair_mass,
+           control.reserved_zero}) {
+    digest = hash_word(digest, word);
+  }
+}
+
+[[nodiscard]] int exact_phi_sign(
+    const ScaledPoint& witness,
+    const ScaledPoint& first,
+    const ScaledPoint& second) {
+  std::int64_t sum = 0;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const std::int64_t left =
+        witness.coordinate[axis] - first.coordinate[axis];
+    const std::int64_t right =
+        witness.coordinate[axis] - second.coordinate[axis];
+    const std::int64_t product = left * right;
+    if ((product > 0 &&
+         sum > std::numeric_limits<std::int64_t>::max() - product) ||
+        (product < 0 &&
+         sum < std::numeric_limits<std::int64_t>::min() - product)) {
+      throw std::overflow_error(
+          "the exact dyadic qualification phi accumulator overflowed");
+    }
+    sum += product;
+  }
+  return sum < 0 ? -1 : (sum == 0 ? 0 : 1);
+}
+
+[[nodiscard]] std::int64_t exact_squared_distance_numerator(
+    const ScaledPoint& first,
+    const ScaledPoint& second) {
+  std::int64_t sum = 0;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const std::int64_t delta =
+        first.coordinate[axis] - second.coordinate[axis];
+    const std::int64_t square = delta * delta;
+    if (sum > std::numeric_limits<std::int64_t>::max() - square) {
+      throw std::overflow_error(
+          "the exact dyadic qualification distance accumulator overflowed");
+    }
+    sum += square;
+  }
+  return sum;
+}
+
+[[nodiscard]] std::size_t exact_cone_index(
+    const ScaledPoint& source,
+    const ScaledPoint& target) {
+  std::array<std::uint64_t, 3U> absolute_delta{};
+  std::array<std::uint8_t, 3U> axes{{0U, 1U, 2U}};
+  std::uint8_t negative_mask = 0U;
+  bool nonzero = false;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const std::int64_t delta =
+        target.coordinate[axis] - source.coordinate[axis];
+    nonzero = nonzero || delta != 0;
+    if (delta < 0) {
+      negative_mask = static_cast<std::uint8_t>(
+          negative_mask |
+          static_cast<std::uint8_t>(std::uint8_t{1U} << axis));
+    }
+    absolute_delta[axis] = static_cast<std::uint64_t>(
+        delta < 0 ? -delta : delta);
+  }
+  require(nonzero, "an exact cone qualification received duplicate points");
+  std::sort(
+      axes.begin(),
+      axes.end(),
+      [&absolute_delta](std::uint8_t left, std::uint8_t right) {
+        const std::size_t left_axis = left;
+        const std::size_t right_axis = right;
+        if (absolute_delta[left_axis] != absolute_delta[right_axis]) {
+          return absolute_delta[left_axis] > absolute_delta[right_axis];
+        }
+        return left < right;
+      });
+  constexpr std::array<std::array<std::uint8_t, 3U>, 6U> permutations{{
+      {{0U, 1U, 2U}},
+      {{0U, 2U, 1U}},
+      {{1U, 0U, 2U}},
+      {{1U, 2U, 0U}},
+      {{2U, 0U, 1U}},
+      {{2U, 1U, 0U}},
+  }};
+  const auto found = std::find(permutations.begin(), permutations.end(), axes);
+  require(found != permutations.end(), "the exact cone order is invalid");
+  const std::size_t order = static_cast<std::size_t>(
+      std::distance(permutations.begin(), found));
+  return static_cast<std::size_t>(negative_mask) * 6U + order;
+}
+
+[[nodiscard]] bool invalid_candidate_record(
+    const Phase15MortonYao48DeviceTiledCandidateRecord& record) noexcept {
+  return record.support_u == kInvalid && record.support_v == kInvalid &&
+         record.anchor_morton_position == kInvalid &&
+         record.partner_morton_position == kInvalid &&
+         record.owner_cone_index == kInvalid && record.flags == kInvalid;
+}
+
+[[nodiscard]] bool invalid_prune_record(
+    const Phase15MortonYao48DeviceTiledPruneRegionRecord& record) noexcept {
+  bool witnesses_invalid = true;
+  for (const std::uint64_t value : record.witness_point_ids) {
+    witnesses_invalid = witnesses_invalid && value == kInvalid;
+  }
+  return record.anchor_morton_position == kInvalid &&
+         record.node_index == kInvalid &&
+         record.certified_pair_mass == kInvalid &&
+         record.retained_witness_count == kInvalid &&
+         record.retained_witness_bank_mask == kInvalid &&
+         record.flags == kInvalid && witnesses_invalid;
+}
+
+[[nodiscard]] bool invalid_bank_slot(
+    const Phase15MortonYao48DeviceTiledWitnessBankSlot& slot) noexcept {
+  return slot.witness_point_id == kInvalid &&
+         slot.witness_morton_position == kInvalid &&
+         slot.squared_distance_lower_bits == kInvalid &&
+         slot.squared_distance_upper_bits == kInvalid;
+}
+
+class CudaDeviceGuard final {
+ public:
+  explicit CudaDeviceGuard(int target_device) {
+    check(cudaGetDevice(&original_device_), "cudaGetDevice");
+    if (original_device_ != target_device) {
+      check(cudaSetDevice(target_device), "cudaSetDevice qualification target");
+      changed_ = true;
+    }
+  }
+
+  ~CudaDeviceGuard() noexcept {
+    if (changed_) {
+      static_cast<void>(cudaSetDevice(original_device_));
+    }
+  }
+
+  CudaDeviceGuard(const CudaDeviceGuard&) = delete;
+  CudaDeviceGuard& operator=(const CudaDeviceGuard&) = delete;
+
+  static void check(cudaError_t status, const char* operation) {
+    if (status != cudaSuccess) {
+      const char* description = cudaGetErrorString(status);
+      throw std::runtime_error(
+          std::string{operation} + " failed: " +
+          (description == nullptr ? "unknown CUDA error" : description));
+    }
+  }
+
+ private:
+  int original_device_{-1};
+  bool changed_{false};
+};
+
+template <typename Record>
+[[nodiscard]] std::vector<Record> copy_device_records(
+    const Record* device_records,
+    std::size_t count,
+    RankMetrics& metrics) {
+  require(device_records != nullptr, "a qualification device view is null");
+  std::vector<Record> host_records(count);
+  const std::size_t bytes = checked_product(
+      count, sizeof(Record), "a qualification D2H copy overflows size_t");
+  const auto start = Clock::now();
+  CudaDeviceGuard::check(
+      cudaMemcpy(
+          host_records.data(),
+          device_records,
+          bytes,
+          cudaMemcpyDeviceToHost),
+      "cudaMemcpy qualification output D2H");
+  const auto end = Clock::now();
+  metrics.qualification_output_copy_ns += nanoseconds(end - start);
+  metrics.qualification_device_to_host_bytes += checked_u64(
+      bytes, "the qualification D2H byte count does not fit uint64");
+  return host_records;
+}
+
+void validate_device_nodes(
+    std::span<const MortonLbvhSnapshotNode> nodes,
+    std::size_t point_count) {
+  require(
+      nodes.size() == 2U * point_count - 1U,
+      "the copied traversal-node extent is invalid");
+  for (std::size_t index = 0U; index < nodes.size(); ++index) {
+    const MortonLbvhSnapshotNode& node = nodes[index];
+    require(
+        node.leaf_begin < node.leaf_end && node.leaf_end <= point_count,
+        "a copied traversal node has an invalid leaf interval");
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      require(
+          node.lower_point_ids[axis] < point_count &&
+              node.upper_point_ids[axis] < point_count,
+          "a copied traversal node has an invalid AABB witness");
+    }
+    const std::uint64_t width = node.leaf_end - node.leaf_begin;
+    if (width == UINT64_C(1)) {
+      require(
+          node.is_leaf(), "a copied unit-width traversal node is not a leaf");
+    } else {
+      require(
+          node.left_child < index && node.right_child < index &&
+              node.right_child + UINT64_C(1) == index,
+          "a copied traversal internal node violates strict postorder");
+      const MortonLbvhSnapshotNode& left =
+          nodes[static_cast<std::size_t>(node.left_child)];
+      const MortonLbvhSnapshotNode& right =
+          nodes[static_cast<std::size_t>(node.right_child)];
+      require(
+          left.leaf_begin == node.leaf_begin &&
+              left.leaf_end == right.leaf_begin &&
+              right.leaf_end == node.leaf_end,
+          "a copied traversal internal node has inconsistent child ranges");
+    }
+  }
+  const MortonLbvhSnapshotNode& root = nodes.back();
+  require(
+      root.leaf_begin == 0U && root.leaf_end == point_count,
+      "the copied traversal root does not cover the cloud");
+}
+
+void validate_batch_contract(
+    const Phase15MortonYao48DeviceTiledBatch& batch,
+    const Phase15MortonYao48DeviceTiledRequest& request,
+    int cuda_device) {
+  const std::size_t expected_candidates = checked_product(
+      request.anchor_count,
+      request.candidate_capacity_per_anchor,
+      "the expected candidate capacity overflows size_t");
+  const std::size_t expected_prunes = checked_product(
+      request.anchor_count,
+      request.prune_region_capacity_per_anchor,
+      "the expected prune capacity overflows size_t");
+  const std::size_t expected_banks = checked_product(
+      checked_product(
+          request.anchor_count,
+          request.witness_bank_count_per_anchor,
+          "the expected bank count overflows size_t"),
+      request.witness_slot_count_per_bank,
+      "the expected bank-slot capacity overflows size_t");
+  require(
+      batch.retained_output_owner != nullptr &&
+          batch.device_candidate_records != nullptr &&
+          batch.device_prune_regions != nullptr &&
+          batch.device_witness_bank_slots != nullptr &&
+          batch.device_anchor_controls != nullptr &&
+          batch.host_anchor_controls.size() == request.anchor_count &&
+          batch.physical_candidate_capacity == expected_candidates &&
+          batch.physical_prune_region_capacity == expected_prunes &&
+          batch.physical_witness_bank_slot_capacity == expected_banks &&
+          batch.physical_anchor_control_capacity == request.anchor_count,
+      "the CUDA tile batch has inconsistent physical extents");
+  require(
+      batch.anchor_control_device_to_host_count == request.anchor_count &&
+          batch.anchor_control_device_to_host_byte_count ==
+              request.anchor_count *
+                  sizeof(Phase15MortonYao48DeviceTiledAnchorControl) &&
+          batch.candidate_device_to_host_count == 0U &&
+          batch.certified_prune_device_to_host_count == 0U &&
+          batch.kernel_launch_count == 1U &&
+          batch.synchronization_count == 1U,
+      "the production launcher performed a forbidden output D2H copy");
+  require(
+      batch.source_snapshot_epoch == request.source_snapshot_epoch &&
+          batch.output_buffer_epoch == request.output_buffer_epoch &&
+          batch.cuda_device == cuda_device &&
+          batch.execution_kind ==
+              Phase15MortonYao48DeviceTiledExecutionKind::cuda &&
+          batch.metadata_digest ==
+              morsehgp3d::gpu::detail::
+                  phase15_morton_yao48_device_tiled_metadata_digest(batch),
+      "the CUDA tile batch identity or digest is invalid");
+  require(
+      batch.fixed_anchor_segments_allocated &&
+          batch.output_owner_detached_for_tile_lifetime &&
+          batch.interval_cone_classification_requested &&
+          batch.ambiguous_cone_to_unbanked_candidate_requested &&
+          batch.target_tested_before_bank_insert_requested &&
+          batch.retained_witnesses_outside_pruned_subtree_requested &&
+          batch.nonnegative_diametral_witness_interval_lower_bound_requested &&
+          batch.censored_anchor_outputs_invalidated &&
+          batch.cuda_execution_contract_satisfied,
+      "the CUDA tile batch omitted a required fail-open contract flag");
+  require(
+      !batch.exact_diametral_rank_evaluated &&
+          !batch.scientific_pair_catalog_published &&
+          !batch.dense_pair_fallback_performed &&
+          !batch.global_pair_matrix_materialized &&
+          !batch.higher_order_structure_materialized,
+      "the CUDA tile batch made a forbidden product or scientific claim");
+}
+
+void validate_candidate_record(
+    const Phase15MortonYao48DeviceTiledCandidateRecord& record,
+    std::uint64_t anchor_position,
+    std::span<const MortonLeafRecord> leaves,
+    std::span<const ScaledPoint> scaled_points,
+    RankMetrics& metrics) {
+  require(
+      record.anchor_morton_position == anchor_position &&
+          record.partner_morton_position < anchor_position,
+      "a candidate record violates Morton pair ownership");
+  const PointId anchor_id =
+      leaves[static_cast<std::size_t>(anchor_position)].point_id;
+  const PointId partner_id =
+      leaves[static_cast<std::size_t>(record.partner_morton_position)].point_id;
+  require(
+      record.support_u == std::min(anchor_id, partner_id) &&
+          record.support_v == std::max(anchor_id, partner_id) &&
+          record.support_u < record.support_v,
+      "a candidate record has inconsistent canonical supports");
+  require(
+      (record.flags & ~kCandidateKnownFlags) == 0U,
+      "a candidate record contains an unknown flag");
+  const bool ambiguous =
+      (record.flags & kCandidateFlagAmbiguousCone) != 0U;
+  const bool certified =
+      (record.flags & kCandidateFlagCertifiedCone) != 0U;
+  const bool inserted =
+      (record.flags & kCandidateFlagBankInserted) != 0U;
+  const bool replaced =
+      (record.flags & kCandidateFlagBankReplaced) != 0U;
+  require(
+      ambiguous != certified && (!replaced || inserted),
+      "a candidate record has inconsistent cone/bank flags");
+  if (ambiguous) {
+    require(
+        record.owner_cone_index == UINT64_C(48) && !inserted && !replaced,
+        "an ambiguous candidate was assigned to a witness bank");
+  } else {
+    const std::size_t exact_cone = exact_cone_index(
+        scaled_points[static_cast<std::size_t>(anchor_id)],
+        scaled_points[static_cast<std::size_t>(partner_id)]);
+    require(
+        record.owner_cone_index == exact_cone && exact_cone < 48U,
+        "a certified device cone disagrees with exact dyadic replay");
+  }
+  ++metrics.candidate_record_count;
+  metrics.candidate_pair_mass += UINT64_C(1);
+  hash_candidate(metrics.output_digest, record);
+}
+
+[[nodiscard]] std::vector<std::uint64_t> sampled_target_positions(
+    std::uint64_t begin,
+    std::uint64_t end,
+    std::size_t maximum_count) {
+  const std::uint64_t width = end - begin;
+  const std::size_t count = std::min(
+      maximum_count,
+      static_cast<std::size_t>(width));
+  std::vector<std::uint64_t> positions;
+  positions.reserve(count);
+  for (std::size_t index = 0U; index < count; ++index) {
+    const std::uint64_t numerator =
+        static_cast<std::uint64_t>(index) * width;
+    const std::uint64_t position =
+        begin + numerator / static_cast<std::uint64_t>(count);
+    if (positions.empty() || positions.back() != position) {
+      positions.push_back(position);
+    }
+  }
+  if (positions.empty() || positions.back() != end - UINT64_C(1)) {
+    positions.push_back(end - UINT64_C(1));
+  }
+  return positions;
+}
+
+void recertify_prune_targets(
+    const Phase15MortonYao48DeviceTiledPruneRegionRecord& record,
+    const MortonLbvhSnapshotNode& node,
+    std::span<const MortonLeafRecord> leaves,
+    std::span<const ScaledPoint> scaled_points,
+    std::span<const std::uint64_t> target_positions,
+    RankMetrics& metrics) {
+  const PointId anchor_id =
+      leaves[static_cast<std::size_t>(record.anchor_morton_position)].point_id;
+  for (const std::uint64_t target_position : target_positions) {
+    require(
+        target_position >= node.leaf_begin &&
+            target_position < node.leaf_end,
+        "a sampled prune target lies outside its node");
+    const PointId target_id =
+        leaves[static_cast<std::size_t>(target_position)].point_id;
+    for (std::size_t witness_index = 0U;
+         witness_index < record.retained_witness_count;
+         ++witness_index) {
+      const PointId witness_id = record.witness_point_ids[witness_index];
+      require(
+          exact_phi_sign(
+              scaled_points[static_cast<std::size_t>(witness_id)],
+              scaled_points[static_cast<std::size_t>(anchor_id)],
+              scaled_points[static_cast<std::size_t>(target_id)]) <= 0,
+          "a device prune witness fails exact closed-diametral replay");
+      ++metrics.prune_witness_target_check_count;
+    }
+  }
+}
+
+void validate_prune_record(
+    const Phase15MortonYao48DeviceTiledPruneRegionRecord& record,
+    std::uint64_t anchor_position,
+    std::size_t maximum_closed_rank,
+    std::span<const MortonLbvhSnapshotNode> nodes,
+    std::span<const MortonLeafRecord> leaves,
+    std::span<const ScaledPoint> scaled_points,
+    std::span<const std::uint64_t> position_by_point_id,
+    const Options& options,
+    RankMetrics& metrics) {
+  require(
+      record.anchor_morton_position == anchor_position &&
+          record.node_index < nodes.size() &&
+          record.flags == kPruneFlagClosedNonnegativeInterval,
+      "a prune record has invalid ownership, node, or flags");
+  const MortonLbvhSnapshotNode& node =
+      nodes[static_cast<std::size_t>(record.node_index)];
+  const std::uint64_t width = node.leaf_end - node.leaf_begin;
+  require(
+      node.leaf_end <= anchor_position &&
+          record.certified_pair_mass == width &&
+          record.retained_witness_count == maximum_closed_rank - 1U &&
+          record.retained_witness_count <= 10U &&
+          (record.retained_witness_bank_mask >> 48U) == 0U &&
+          record.retained_witness_bank_mask != 0U,
+      "a prune record has invalid mass or witness cardinality");
+  const PointId anchor_id =
+      leaves[static_cast<std::size_t>(anchor_position)].point_id;
+  std::vector<PointId> witnesses;
+  witnesses.reserve(record.retained_witness_count);
+  std::uint64_t exact_bank_mask = 0U;
+  for (std::size_t witness_index = 0U;
+       witness_index < 10U;
+       ++witness_index) {
+    const PointId witness_id = record.witness_point_ids[witness_index];
+    if (witness_index >= record.retained_witness_count) {
+      require(
+          witness_id == 0U,
+          "an unused prune witness slot is not canonical zero");
+      continue;
+    }
+    require(
+        witness_id < scaled_points.size() && witness_id != anchor_id,
+        "a prune record contains an invalid witness PointId");
+    const std::uint64_t witness_position =
+        position_by_point_id[static_cast<std::size_t>(witness_id)];
+    require(
+        witness_position >= node.leaf_end &&
+            witness_position < anchor_position,
+        "a prune witness is not outside the pruned subtree and before anchor");
+    const std::size_t cone = exact_cone_index(
+        scaled_points[static_cast<std::size_t>(anchor_id)],
+        scaled_points[static_cast<std::size_t>(witness_id)]);
+    exact_bank_mask |= UINT64_C(1) << cone;
+    witnesses.push_back(witness_id);
+  }
+  std::sort(witnesses.begin(), witnesses.end());
+  require(
+      std::adjacent_find(witnesses.begin(), witnesses.end()) ==
+              witnesses.end() &&
+          exact_bank_mask == record.retained_witness_bank_mask,
+      "a prune record has duplicate witnesses or an invalid bank mask");
+
+  const std::uint64_t full_check_work =
+      width * static_cast<std::uint64_t>(record.retained_witness_count);
+  const bool bounded_cloud = scaled_points.size() <= 257U;
+  const bool affordable_full_check =
+      metrics.prune_witness_target_check_count <=
+          options.exact_prune_target_check_limit &&
+      full_check_work <=
+          options.exact_prune_target_check_limit -
+              metrics.prune_witness_target_check_count;
+  if (bounded_cloud || affordable_full_check) {
+    std::vector<std::uint64_t> targets;
+    targets.reserve(static_cast<std::size_t>(width));
+    for (std::uint64_t position = node.leaf_begin;
+         position < node.leaf_end;
+         ++position) {
+      targets.push_back(position);
+    }
+    recertify_prune_targets(
+        record, node, leaves, scaled_points, targets, metrics);
+    ++metrics.fully_recertified_prune_count;
+  } else if (
+      metrics.sampled_recertified_prune_count <
+      options.sampled_prune_limit) {
+    const std::vector<std::uint64_t> targets =
+        sampled_target_positions(node.leaf_begin, node.leaf_end, 8U);
+    recertify_prune_targets(
+        record, node, leaves, scaled_points, targets, metrics);
+    ++metrics.sampled_recertified_prune_count;
+  }
+
+  ++metrics.prune_region_count;
+  metrics.certified_pruned_pair_mass += width;
+  hash_prune(metrics.output_digest, record);
+}
+
+void validate_bank_slot(
+    const Phase15MortonYao48DeviceTiledWitnessBankSlot& slot,
+    std::uint64_t anchor_position,
+    std::size_t cone,
+    std::span<const MortonLeafRecord> leaves,
+    std::span<const ScaledPoint> scaled_points,
+    std::span<const std::uint64_t> position_by_point_id,
+    std::span<const std::uint64_t> candidate_positions,
+    RankMetrics& metrics) {
+  require(
+      slot.witness_point_id < scaled_points.size() &&
+          slot.witness_morton_position < anchor_position &&
+          position_by_point_id[static_cast<std::size_t>(slot.witness_point_id)] ==
+              slot.witness_morton_position &&
+          std::binary_search(
+              candidate_positions.begin(),
+              candidate_positions.end(),
+              slot.witness_morton_position),
+      "a retained bank slot is not an emitted earlier candidate");
+  const PointId anchor_id =
+      leaves[static_cast<std::size_t>(anchor_position)].point_id;
+  require(
+      exact_cone_index(
+          scaled_points[static_cast<std::size_t>(anchor_id)],
+          scaled_points[static_cast<std::size_t>(slot.witness_point_id)]) ==
+          cone,
+      "a retained bank slot is stored in the wrong exact cone");
+  require(
+      slot.squared_distance_lower_bits != kInvalid &&
+          slot.squared_distance_upper_bits != kInvalid,
+      "a retained bank slot has no finite distance interval");
+  const double lower =
+      std::bit_cast<double>(slot.squared_distance_lower_bits);
+  const double upper =
+      std::bit_cast<double>(slot.squared_distance_upper_bits);
+  require(
+      std::isfinite(lower) && std::isfinite(upper) && lower >= 0.0 &&
+          lower <= upper,
+      "a retained bank slot has an invalid distance interval");
+  const std::int64_t exact_numerator = exact_squared_distance_numerator(
+      scaled_points[static_cast<std::size_t>(anchor_id)],
+      scaled_points[static_cast<std::size_t>(slot.witness_point_id)]);
+  const long double exact_distance = std::ldexp(
+      static_cast<long double>(exact_numerator), -40);
+  require(
+      static_cast<long double>(lower) <= exact_distance &&
+          exact_distance <= static_cast<long double>(upper),
+      "a retained bank interval excludes the exact dyadic distance");
+  ++metrics.bank_entry_count;
+  hash_bank_slot(
+      metrics.output_digest,
+      anchor_position,
+      static_cast<std::uint64_t>(cone),
+      slot);
+}
+
+void validate_anchor_partition(
+    AnchorPartition& partition,
+    std::uint64_t anchor_position) {
+  std::sort(
+      partition.candidate_positions.begin(),
+      partition.candidate_positions.end());
+  require(
+      std::adjacent_find(
+          partition.candidate_positions.begin(),
+          partition.candidate_positions.end()) ==
+          partition.candidate_positions.end(),
+      "an anchor emitted a duplicate candidate partner");
+  std::sort(partition.prune_intervals.begin(), partition.prune_intervals.end());
+  std::uint64_t covered_mass = static_cast<std::uint64_t>(
+      partition.candidate_positions.size());
+  std::uint64_t prior_end = 0U;
+  bool first = true;
+  for (const auto& [begin, end] : partition.prune_intervals) {
+    require(
+        begin < end && end <= anchor_position &&
+            (first || begin >= prior_end),
+        "an anchor emitted overlapping or out-of-domain prune regions");
+    const auto candidate = std::lower_bound(
+        partition.candidate_positions.begin(),
+        partition.candidate_positions.end(),
+        begin);
+    require(
+        candidate == partition.candidate_positions.end() || *candidate >= end,
+        "an anchor candidate overlaps a certified prune region");
+    covered_mass += end - begin;
+    prior_end = end;
+    first = false;
+  }
+  require(
+      covered_mass == anchor_position,
+      "an anchor candidate/prune partition does not cover its strict prefix");
+}
+
+void bounded_bruteforce_replay(
+    std::span<const MortonLeafRecord> leaves,
+    std::span<const ScaledPoint> scaled_points,
+    std::size_t maximum_closed_rank,
+    std::span<const std::uint8_t> pair_classification,
+    bool require_non_support_shell_equality,
+    RankMetrics& metrics) {
+  const auto start = Clock::now();
+  require(
+      scaled_points.size() <= 257U &&
+          pair_classification.size() ==
+              unordered_pair_count(scaled_points.size()),
+      "the bounded brute-force replay has an invalid extent");
+  for (std::uint64_t anchor_position = 1U;
+       anchor_position < leaves.size();
+       ++anchor_position) {
+    const PointId anchor_id =
+        leaves[static_cast<std::size_t>(anchor_position)].point_id;
+    for (std::uint64_t partner_position = 0U;
+         partner_position < anchor_position;
+         ++partner_position) {
+      const PointId partner_id =
+          leaves[static_cast<std::size_t>(partner_position)].point_id;
+      std::size_t closed_rank = 0U;
+      for (PointId witness_id = 0U;
+           witness_id < static_cast<PointId>(scaled_points.size());
+           ++witness_id) {
+        const int sign = exact_phi_sign(
+            scaled_points[static_cast<std::size_t>(witness_id)],
+            scaled_points[static_cast<std::size_t>(anchor_id)],
+            scaled_points[static_cast<std::size_t>(partner_id)]);
+        if (sign <= 0) {
+          ++closed_rank;
+        }
+        if (sign == 0 && witness_id != anchor_id &&
+            witness_id != partner_id) {
+          ++metrics.bounded_non_support_shell_equality_count;
+        }
+      }
+      require(
+          closed_rank >= 2U,
+          "an exact diametral closed rank omitted a support");
+      const std::size_t pair_index = static_cast<std::size_t>(
+          triangular_offset(anchor_position, partner_position));
+      const std::uint8_t classification = pair_classification[pair_index];
+      require(
+          classification == 1U || classification == 2U,
+          "the bounded device frontier left an unordered pair uncovered");
+      ++metrics.bounded_exact_pair_count;
+      const bool admitted = closed_rank <= maximum_closed_rank;
+      if (admitted) {
+        ++metrics.bounded_admitted_pair_count;
+        require(
+            classification == 1U,
+            "the device frontier pruned a bounded exact admissible pair");
+      }
+      if (classification == 1U) {
+        if (admitted) {
+          ++metrics.bounded_candidate_admitted_pair_count;
+        } else {
+          ++metrics.bounded_candidate_rejected_pair_count;
+        }
+      }
+    }
+  }
+  require(
+      metrics.bounded_exact_pair_count == metrics.unordered_pair_universe_count,
+      "the bounded brute-force replay did not visit every unordered pair");
+  if (require_non_support_shell_equality) {
+    require(
+        metrics.bounded_non_support_shell_equality_count != 0U,
+        "the bounded qualification did not exercise a non-support shell equality");
+  }
+  metrics.bounded_bruteforce_ns = nanoseconds(Clock::now() - start);
+  metrics.bounded_bruteforce_performed = true;
+}
+
+[[nodiscard]] std::uint64_t peak_host_rss_bytes() {
+#if defined(__linux__)
+  rusage usage{};
+  if (getrusage(RUSAGE_SELF, &usage) != 0 || usage.ru_maxrss < 0) {
+    throw std::runtime_error("getrusage could not read peak host RSS");
+  }
+  const std::uint64_t kibibytes =
+      static_cast<std::uint64_t>(usage.ru_maxrss);
+  if (kibibytes >
+      std::numeric_limits<std::uint64_t>::max() / UINT64_C(1024)) {
+    throw std::overflow_error("the peak host RSS byte count overflows uint64");
+  }
+  return kibibytes * UINT64_C(1024);
+#else
+  return 0U;
+#endif
+}
+
+void validate_scaling_tile_lease(
+    const MortonYao48DeviceCandidateTileLeaseAudit& audit,
+    const Options& options,
+    std::size_t expected_anchor_begin,
+    std::size_t expected_anchor_end) {
+  require(
+      audit.schema_version ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_schema_version &&
+          audit.point_count == options.point_count &&
+          audit.certified_node_count == 2U * options.point_count - 1U &&
+          audit.maximum_closed_rank ==
+              options.maximum_closed_rank.value_or(11U) &&
+          audit.anchor_begin == expected_anchor_begin &&
+          audit.anchor_end == expected_anchor_end &&
+          audit.fixed_candidate_capacity_per_anchor ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_candidates_per_anchor &&
+          audit.fixed_prune_region_capacity_per_anchor ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor &&
+          audit.fixed_witness_bank_count_per_anchor ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_witness_bank_count,
+      "the scaling-smoke tile lease has inconsistent extents");
+  require(
+      audit.traversal_owner_retained &&
+          audit.source_cloud_identity_retained &&
+          audit.source_device_views_retained &&
+          audit.source_device_extents_retained &&
+          audit.source_views_bound_to_snapshot_identity &&
+          audit.output_owner_retained &&
+          audit.output_buffers_detached_for_tile_lifetime &&
+          audit.cuda_device_storage_retained &&
+          !audit.host_fake_lifecycle_exercised,
+      "the scaling-smoke tile lease lost a CUDA authority");
+  require(
+      !audit.candidate_device_to_host_performed &&
+          !audit.certified_prune_device_to_host_performed &&
+          !audit.exact_diametral_rank_evaluated &&
+          !audit.scientific_pair_catalog_published &&
+          !audit.dense_pair_fallback_performed &&
+          !audit.global_pair_matrix_materialized &&
+          !audit.higher_order_structure_materialized &&
+          !audit.public_status_claimed,
+      "the scaling-smoke tile lease made a forbidden scientific claim");
+}
+
+void validate_scaling_advance(
+    const MortonYao48DeviceTiledPairFrontierAdvance& advance,
+    const Options& options,
+    std::size_t expected_advance_sequence,
+    std::size_t expected_anchor_begin) {
+  const MortonYao48DeviceTiledPairFrontierAudit& audit = advance.audit;
+  const std::size_t maximum_closed_rank =
+      options.maximum_closed_rank.value_or(11U);
+  require(
+      audit.schema_version ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_schema_version &&
+          audit.advance_sequence == expected_advance_sequence &&
+          audit.point_count == options.point_count &&
+          audit.certified_node_count == 2U * options.point_count - 1U &&
+          audit.maximum_closed_rank == maximum_closed_rank &&
+          audit.anchor_tile_capacity == options.anchor_tile_capacity &&
+          audit.fixed_node_visit_capacity_per_anchor ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor &&
+          audit.fixed_candidate_capacity_per_anchor ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_candidates_per_anchor &&
+          audit.fixed_prune_region_capacity_per_anchor ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor &&
+          audit.fixed_witness_bank_count_per_anchor ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_witness_bank_count,
+      "the scaling-smoke public audit has inconsistent fixed metadata");
+  require(
+      audit.transaction_anchor_begin == expected_anchor_begin &&
+          audit.transaction_anchor_end > audit.transaction_anchor_begin &&
+          audit.transaction_anchor_end <= options.point_count &&
+          audit.transaction_committed_anchor_count <=
+              audit.transaction_anchor_end - audit.transaction_anchor_begin &&
+          audit.next_anchor_position ==
+              audit.transaction_anchor_begin +
+                  audit.transaction_committed_anchor_count &&
+          audit.completed_anchor_count + 1U == audit.next_anchor_position,
+      "the scaling-smoke public audit has an invalid committed prefix");
+  require(
+      audit.cumulative_candidate_pair_mass +
+                  audit.cumulative_certified_pruned_pair_mass +
+              audit.unresolved_pair_mass ==
+          audit.unordered_pair_universe_count &&
+          audit.unordered_pair_universe_count ==
+              unordered_pair_count(options.point_count),
+      "the scaling-smoke public audit does not close its global mass identity");
+  require(
+      audit.source_traversal_lease_authenticated &&
+          audit.fixed_per_anchor_caps_enforced &&
+          audit.atomic_completed_anchor_prefix_validated &&
+          audit.candidate_pruned_unresolved_partition_validated &&
+          audit.traversal_lease_owner_retained &&
+          audit.source_cloud_identity_retained &&
+          audit.candidate_tile_lease_backpressure_bounded_to_one &&
+          audit.cuda_execution_performed &&
+          !audit.host_fake_launcher_exercised,
+      "the scaling-smoke public audit did not authenticate its CUDA path");
+  require(
+      !audit.candidate_device_to_host_performed &&
+          !audit.certified_prune_device_to_host_performed &&
+          audit.candidate_device_to_host_count == 0U &&
+          audit.certified_prune_device_to_host_count == 0U &&
+          !audit.exact_diametral_rank_evaluated &&
+          !audit.scientific_pair_catalog_published &&
+          !audit.scientific_decision_published &&
+          !audit.dense_pair_fallback_performed &&
+          !audit.global_pair_matrix_materialized &&
+          !audit.ordinary_delaunay_materialized &&
+          !audit.higher_order_delaunay_mosaic_materialized &&
+          !audit.global_cell_or_coface_arena_materialized &&
+          !audit.public_status_claimed,
+      "the scaling-smoke public path performed a forbidden operation");
+  require(
+      audit.interval_cone_classification_required &&
+          audit.ambiguous_cone_routed_to_unbanked_candidate &&
+          audit.target_tested_before_witness_bank_insert &&
+          audit.retained_witnesses_outside_pruned_subtree_required &&
+          audit.nonnegative_diametral_witness_interval_lower_bound_required,
+      "the scaling-smoke public audit omitted a proof obligation");
+  const bool has_tile = advance.candidate_tile.has_value();
+  require(
+      audit.candidate_tile_lease_published == has_tile &&
+          audit.candidate_tile_lease_outstanding == has_tile &&
+          has_tile == (audit.transaction_committed_anchor_count != 0U),
+      "the scaling-smoke public audit violates single-tile backpressure");
+  if (advance.status ==
+      MortonYao48DeviceTiledPairFrontierStatus::frontier_complete) {
+    require(
+        advance.stop_reason ==
+                MortonYao48DeviceTiledPairFrontierStopReason::none &&
+            audit.pair_coverage_partition_complete &&
+            !audit.terminally_censored &&
+            audit.next_anchor_position == options.point_count &&
+            audit.unresolved_pair_mass == 0U,
+        "the scaling-smoke public frontier completion is inconsistent");
+  } else if (
+      advance.status ==
+      MortonYao48DeviceTiledPairFrontierStatus::tile_complete) {
+    require(
+        advance.stop_reason ==
+                MortonYao48DeviceTiledPairFrontierStopReason::none &&
+            !audit.pair_coverage_partition_complete &&
+            !audit.terminally_censored &&
+            audit.transaction_committed_anchor_count ==
+                audit.transaction_anchor_end -
+                    audit.transaction_anchor_begin,
+        "the scaling-smoke public tile completion is inconsistent");
+  } else {
+    require(
+        advance.status == MortonYao48DeviceTiledPairFrontierStatus::censored &&
+            advance.stop_reason !=
+                MortonYao48DeviceTiledPairFrontierStopReason::none &&
+            audit.terminally_censored &&
+            audit.censored_anchor_outputs_withheld &&
+            !audit.pair_coverage_partition_complete,
+        "the scaling-smoke public censure is not fail-stop");
+  }
+}
+
+[[nodiscard]] ScalingSmokeMetrics run_scaling_smoke(
+    const Options& options,
+    std::vector<CertifiedPoint3> input_points,
+    std::uint64_t generation_ns,
+    Clock::time_point total_start) {
+  ScalingSmokeMetrics metrics;
+  metrics.maximum_closed_rank =
+      options.maximum_closed_rank.value_or(11U);
+  metrics.generation_ns = generation_ns;
+  metrics.unordered_pair_universe_count =
+      unordered_pair_count(options.point_count);
+
+  const auto canonicalization_start = Clock::now();
+  std::optional<CanonicalPointCloud> cloud;
+  cloud.emplace(CanonicalPointCloud::rejecting_duplicates(input_points));
+  metrics.canonicalization_ns =
+      nanoseconds(Clock::now() - canonicalization_start);
+  input_points.clear();
+  input_points.shrink_to_fit();
+
+  std::optional<MortonLbvhDeviceTraversalLease> traversal_lease;
+  Clock::time_point host_release_start{};
+  {
+    MortonLbvhBuildContext builder{options.point_count};
+    const auto build_start = Clock::now();
+    MortonLbvhDeviceBuildResult build = builder.build(*cloud);
+    metrics.build_ns = nanoseconds(Clock::now() - build_start);
+    require(
+        build.complete_certified_build() && build.cuda_qualified_build() &&
+            build.certified_index().validated_for(*cloud) &&
+            build.audit().point_count == options.point_count &&
+            build.audit().required_node_count ==
+                2U * options.point_count - 1U &&
+            !build.audit().higher_order_delaunay_mosaic_materialized &&
+            !build.audit().global_cell_or_coface_arena_materialized &&
+            !build.audit().public_status_claimed,
+        "the scaling-smoke LBVH build is not a certified CUDA build");
+    const auto lease_start = Clock::now();
+    traversal_lease.emplace(
+        builder.release_device_traversal_lease(build));
+    metrics.lease_release_ns = nanoseconds(Clock::now() - lease_start);
+    const auto& lease_audit = traversal_lease->audit();
+    require(
+        traversal_lease->ready() && traversal_lease->cuda_resident() &&
+            lease_audit.point_count == options.point_count &&
+            lease_audit.certified_node_count ==
+                2U * options.point_count - 1U &&
+            lease_audit.canonical_coordinate_words_retained &&
+            lease_audit.active_morton_point_ids_retained &&
+            lease_audit.certified_device_nodes_retained &&
+            lease_audit.cuda_device_storage_retained &&
+            !lease_audit.host_fake_lifecycle_exercised &&
+            !lease_audit.second_host_snapshot_retained &&
+            !lease_audit.higher_order_delaunay_mosaic_materialized &&
+            !lease_audit.global_cell_or_coface_arena_materialized &&
+            !lease_audit.public_status_claimed,
+        "the scaling-smoke traversal lease is not CUDA-resident");
+    metrics.traversal_device_capacity_bytes = checked_u64(
+        lease_audit.persistent_device_byte_capacity,
+        "the scaling traversal capacity does not fit uint64");
+    host_release_start = Clock::now();
+  }
+  cloud.reset();
+  metrics.host_release_ns =
+      nanoseconds(Clock::now() - host_release_start);
+
+  const MortonYao48DeviceTiledPairFrontierConfig config{
+      metrics.maximum_closed_rank,
+      options.anchor_tile_capacity};
+  const auto context_start = Clock::now();
+  std::optional<MortonYao48DeviceTiledPairFrontierContext> context;
+  context.emplace(std::move(*traversal_lease), config);
+  traversal_lease.reset();
+  metrics.context_creation_ns = nanoseconds(Clock::now() - context_start);
+  require(
+      context->ready() && !context->poisoned() &&
+          context->config() == config,
+      "the scaling-smoke public context is not ready");
+
+  std::size_t expected_anchor_begin = 1U;
+  const auto frontier_start = Clock::now();
+  while (true) {
+    MortonYao48DeviceTiledPairFrontierAdvance advance = context->advance();
+    ++metrics.advance_count;
+    validate_scaling_advance(
+        advance, options, metrics.advance_count, expected_anchor_begin);
+    const MortonYao48DeviceTiledPairFrontierAudit audit = advance.audit;
+    metrics.completed_anchor_count = audit.completed_anchor_count;
+    metrics.certified_prune_region_count +=
+        audit.transaction_certified_prune_region_count;
+    metrics.candidate_pair_mass = audit.cumulative_candidate_pair_mass;
+    metrics.certified_pruned_pair_mass =
+        audit.cumulative_certified_pruned_pair_mass;
+    metrics.unresolved_pair_mass = audit.unresolved_pair_mass;
+    metrics.physical_node_visit_count =
+        audit.cumulative_physical_node_visit_count;
+    metrics.launcher_call_count = audit.launcher_call_count;
+    metrics.kernel_launch_count += audit.cuda_kernel_launch_count;
+    metrics.synchronization_count += audit.cuda_synchronization_count;
+    metrics.anchor_control_device_to_host_count +=
+        audit.anchor_control_device_to_host_count;
+    metrics.anchor_control_device_to_host_byte_count +=
+        audit.anchor_control_device_to_host_byte_count;
+    expected_anchor_begin = audit.next_anchor_position;
+
+    const std::size_t requested_anchor_count =
+        audit.transaction_anchor_end - audit.transaction_anchor_begin;
+    const std::uint64_t candidate_bytes = checked_u64(
+        checked_product(
+            checked_product(
+                requested_anchor_count,
+                morsehgp3d::gpu::
+                    morton_yao48_device_tiled_pair_frontier_candidates_per_anchor,
+                "the scaling candidate record capacity overflows size_t"),
+            sizeof(Phase15MortonYao48DeviceTiledCandidateRecord),
+            "the scaling candidate byte capacity overflows size_t"),
+        "the scaling candidate byte capacity does not fit uint64");
+    const std::uint64_t prune_bytes = checked_u64(
+        checked_product(
+            checked_product(
+                requested_anchor_count,
+                morsehgp3d::gpu::
+                    morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor,
+                "the scaling prune record capacity overflows size_t"),
+            sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord),
+            "the scaling prune byte capacity overflows size_t"),
+        "the scaling prune byte capacity does not fit uint64");
+    const std::uint64_t witness_bytes = checked_u64(
+        checked_product(
+            checked_product(
+                checked_product(
+                    requested_anchor_count,
+                    morsehgp3d::gpu::
+                        morton_yao48_device_tiled_pair_frontier_witness_bank_count,
+                    "the scaling witness bank capacity overflows size_t"),
+                metrics.maximum_closed_rank - 1U,
+                "the scaling witness slot capacity overflows size_t"),
+            sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
+            "the scaling witness byte capacity overflows size_t"),
+        "the scaling witness byte capacity does not fit uint64");
+    const std::uint64_t control_bytes = checked_u64(
+        checked_product(
+            requested_anchor_count,
+            sizeof(Phase15MortonYao48DeviceTiledAnchorControl),
+            "the scaling control byte capacity overflows size_t"),
+        "the scaling control byte capacity does not fit uint64");
+    metrics.peak_candidate_device_capacity_bytes = std::max(
+        metrics.peak_candidate_device_capacity_bytes, candidate_bytes);
+    metrics.peak_prune_device_capacity_bytes = std::max(
+        metrics.peak_prune_device_capacity_bytes, prune_bytes);
+    metrics.peak_witness_bank_device_capacity_bytes = std::max(
+        metrics.peak_witness_bank_device_capacity_bytes, witness_bytes);
+    metrics.peak_control_device_capacity_bytes = std::max(
+        metrics.peak_control_device_capacity_bytes, control_bytes);
+    metrics.peak_tile_output_device_capacity_bytes = std::max(
+        metrics.peak_tile_output_device_capacity_bytes,
+        candidate_bytes + prune_bytes + witness_bytes + control_bytes);
+
+    if (advance.candidate_tile.has_value()) {
+      require(
+          advance.candidate_tile->ready() &&
+              advance.candidate_tile->cuda_resident() &&
+              !advance.candidate_tile->host_fake(),
+          "the scaling-smoke public candidate tile is not CUDA-resident");
+      const MortonYao48DeviceCandidateTileLeaseAudit lease_audit =
+          advance.candidate_tile->audit();
+      validate_scaling_tile_lease(
+          lease_audit,
+          options,
+          audit.transaction_anchor_begin,
+          audit.next_anchor_position);
+      metrics.peak_candidate_device_capacity_bytes = std::max(
+          metrics.peak_candidate_device_capacity_bytes,
+          checked_u64(
+              checked_product(
+                  lease_audit.physical_candidate_capacity,
+                  sizeof(Phase15MortonYao48DeviceTiledCandidateRecord),
+                  "the scaling candidate capacity overflows size_t"),
+              "the scaling candidate bytes do not fit uint64"));
+      metrics.peak_prune_device_capacity_bytes = std::max(
+          metrics.peak_prune_device_capacity_bytes,
+          checked_u64(
+              checked_product(
+                  lease_audit.physical_prune_region_capacity,
+                  sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord),
+                  "the scaling prune capacity overflows size_t"),
+              "the scaling prune bytes do not fit uint64"));
+      ++metrics.candidate_tile_lease_count;
+      advance.candidate_tile.reset();
+      ++metrics.candidate_tile_release_count;
+    }
+
+    if (advance.status ==
+        MortonYao48DeviceTiledPairFrontierStatus::frontier_complete) {
+      metrics.coverage_complete = true;
+      metrics.stop_reason = MortonYao48DeviceTiledPairFrontierStopReason::none;
+      break;
+    }
+    if (advance.status ==
+        MortonYao48DeviceTiledPairFrontierStatus::censored) {
+      metrics.censored = true;
+      metrics.stop_reason = advance.stop_reason;
+      break;
+    }
+  }
+  metrics.frontier_ns = nanoseconds(Clock::now() - frontier_start);
+  require(
+      metrics.candidate_tile_lease_count ==
+              metrics.candidate_tile_release_count &&
+          !context->poisoned() &&
+          context->terminally_censored() == metrics.censored,
+      "the scaling-smoke did not release exactly one tile before advancing");
+  metrics.backpressure_validated = true;
+  metrics.execution_success = true;
+  const auto context_release_start = Clock::now();
+  context.reset();
+  metrics.context_release_ns =
+      nanoseconds(Clock::now() - context_release_start);
+  metrics.total_ns = nanoseconds(Clock::now() - total_start);
+  return metrics;
+}
+
+[[nodiscard]] std::vector<ScaledPoint> canonical_scaled_points(
+    const CanonicalPointCloud& cloud,
+    std::span<const ScaledPoint> source_scaled_points) {
+  std::vector<ScaledPoint> canonical(cloud.size());
+  for (PointId point_id = 0U;
+       point_id < static_cast<PointId>(cloud.size());
+       ++point_id) {
+    const std::size_t source_index = cloud.source_index(point_id);
+    require(
+        source_index < source_scaled_points.size(),
+        "a canonical point has an invalid qualification source index");
+    canonical[static_cast<std::size_t>(point_id)] =
+        source_scaled_points[source_index];
+  }
+  return canonical;
+}
+
+[[nodiscard]] RankMetrics qualify_rank(
+    const Options& options,
+    const CanonicalPointCloud& cloud,
+    std::span<const ScaledPoint> scaled_points,
+    std::size_t maximum_closed_rank) {
+  RankMetrics metrics;
+  metrics.maximum_closed_rank = maximum_closed_rank;
+  metrics.unordered_pair_universe_count = unordered_pair_count(cloud.size());
+  metrics.output_digest = hash_word(
+      metrics.output_digest, static_cast<std::uint64_t>(maximum_closed_rank));
+
+  const std::size_t node_count = 2U * cloud.size() - 1U;
+  MortonLbvhBuildContext builder{cloud.size()};
+  const auto build_start = Clock::now();
+  MortonLbvhDeviceBuildResult build = builder.build(cloud);
+  metrics.build_ns = nanoseconds(Clock::now() - build_start);
+  require(
+      build.complete_certified_build() && build.cuda_qualified_build() &&
+          build.certified_index().validated_for(cloud) &&
+          build.audit().point_count == cloud.size() &&
+          build.audit().required_node_count == node_count &&
+          !build.audit().higher_order_delaunay_mosaic_materialized &&
+          !build.audit().global_cell_or_coface_arena_materialized &&
+          !build.audit().public_status_claimed,
+      "the qualification LBVH build is not CUDA-qualified and certified");
+
+  const auto lease_start = Clock::now();
+  MortonLbvhDeviceTraversalLease lease =
+      builder.release_device_traversal_lease(build);
+  metrics.lease_release_ns = nanoseconds(Clock::now() - lease_start);
+  const auto lease_audit = lease.audit();
+  require(
+      lease.ready() && lease.cuda_resident() &&
+          lease_audit.point_count == cloud.size() &&
+          lease_audit.certified_node_count == node_count &&
+          lease_audit.canonical_coordinate_words_retained &&
+          lease_audit.active_morton_point_ids_retained &&
+          lease_audit.certified_device_nodes_retained &&
+          lease_audit.cuda_device_storage_retained &&
+          !lease_audit.host_fake_lifecycle_exercised &&
+          !lease_audit.second_host_snapshot_retained &&
+          !lease_audit.higher_order_delaunay_mosaic_materialized &&
+          !lease_audit.global_cell_or_coface_arena_materialized &&
+          !lease_audit.public_status_claimed,
+      "the qualification traversal lease is not a certified CUDA authority");
+  metrics.traversal_device_capacity_bytes = checked_u64(
+      lease_audit.persistent_device_byte_capacity,
+      "the traversal device byte capacity does not fit uint64");
+
+  const std::span<const MortonLeafRecord> leaves =
+      build.certified_index().leaves();
+  require(
+      leaves.size() == cloud.size(),
+      "the certified LBVH leaf count does not match the cloud");
+  std::vector<std::uint64_t> position_by_point_id(cloud.size(), kInvalid);
+  for (std::size_t position = 0U; position < leaves.size(); ++position) {
+    const PointId point_id = leaves[position].point_id;
+    require(
+        point_id < cloud.size() &&
+            position_by_point_id[static_cast<std::size_t>(point_id)] == kInvalid,
+        "the certified Morton leaf order is not a PointId permutation");
+    position_by_point_id[static_cast<std::size_t>(point_id)] = position;
+  }
+
+  const auto adoption_start = Clock::now();
+  Phase15MortonYao48DeviceTiledAdoptedTraversal adopted =
+      morsehgp3d::gpu::detail::
+          adopt_phase15_morton_yao48_device_tiled_traversal(
+              std::move(lease));
+  metrics.adoption_ns = nanoseconds(Clock::now() - adoption_start);
+  require(
+      !lease.ready() && adopted.retained_owner != nullptr &&
+          adopted.source_cloud_identity != nullptr &&
+          adopted.device_coordinate_bits != nullptr &&
+          adopted.device_morton_point_ids != nullptr &&
+          adopted.device_nodes != nullptr && adopted.point_count == cloud.size() &&
+          adopted.certified_node_count == node_count &&
+          adopted.execution_kind ==
+              Phase15MortonYao48DeviceTiledExecutionKind::cuda &&
+          adopted.canonical_coordinate_words_retained &&
+          adopted.active_morton_point_ids_retained &&
+          adopted.certified_device_nodes_retained &&
+          adopted.cuda_device_storage_retained &&
+          !adopted.host_fake_lifecycle_exercised,
+      "the Phase 15 qualification could not authenticate traversal adoption");
+
+  CudaDeviceGuard device_guard{adopted.cuda_device};
+  std::size_t free_bytes = 0U;
+  std::size_t total_bytes = 0U;
+  CudaDeviceGuard::check(
+      cudaMemGetInfo(&free_bytes, &total_bytes),
+      "cudaMemGetInfo before Phase 15 qualification");
+  metrics.device_total_bytes = checked_u64(
+      total_bytes, "the CUDA total byte count does not fit uint64");
+  metrics.minimum_device_free_bytes = checked_u64(
+      free_bytes, "the CUDA free byte count does not fit uint64");
+
+  const auto node_copy_start = Clock::now();
+  std::vector<MortonLbvhSnapshotNode> nodes(node_count);
+  const std::size_t node_bytes = checked_product(
+      node_count,
+      sizeof(MortonLbvhSnapshotNode),
+      "the qualification node-copy bytes overflow size_t");
+  CudaDeviceGuard::check(
+      cudaMemcpy(
+          nodes.data(),
+          adopted.device_nodes,
+          node_bytes,
+          cudaMemcpyDeviceToHost),
+      "cudaMemcpy qualification traversal nodes D2H");
+  metrics.node_copy_ns = nanoseconds(Clock::now() - node_copy_start);
+  metrics.qualification_device_to_host_bytes += checked_u64(
+      node_bytes, "the qualification node-copy count does not fit uint64");
+  validate_device_nodes(nodes, cloud.size());
+
+  std::vector<std::uint8_t> pair_classification;
+  if (cloud.size() <= 257U) {
+    pair_classification.resize(
+        static_cast<std::size_t>(metrics.unordered_pair_universe_count), 0U);
+  }
+
+  Phase15MortonYao48DeviceTiledPairFrontierContextState launcher_state;
+  for (std::size_t anchor_begin = 0U;
+       anchor_begin < cloud.size();
+       anchor_begin += options.anchor_tile_capacity) {
+    const std::size_t anchor_count = std::min(
+        options.anchor_tile_capacity, cloud.size() - anchor_begin);
+    Phase15MortonYao48DeviceTiledRequest request;
+    request.source_snapshot_epoch = adopted.source_snapshot_epoch;
+    request.output_buffer_epoch = launcher_state.advance_epoch();
+    request.point_count = cloud.size();
+    request.certified_node_count = node_count;
+    request.anchor_begin = anchor_begin;
+    request.anchor_count = anchor_count;
+    request.maximum_closed_rank = maximum_closed_rank;
+    request.node_visit_capacity_per_anchor =
+        morsehgp3d::gpu::
+            morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
+    request.candidate_capacity_per_anchor =
+        morsehgp3d::gpu::
+            morton_yao48_device_tiled_pair_frontier_candidates_per_anchor;
+    request.prune_region_capacity_per_anchor =
+        morsehgp3d::gpu::
+            morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor;
+    request.witness_bank_count_per_anchor =
+        morsehgp3d::gpu::
+            morton_yao48_device_tiled_pair_frontier_witness_bank_count;
+    request.witness_slot_count_per_bank = maximum_closed_rank - 1U;
+
+    const auto launch_start = Clock::now();
+    Phase15MortonYao48DeviceTiledBatch batch =
+        morsehgp3d::gpu::detail::
+            build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
+                launcher_state, adopted, request);
+    metrics.launcher_ns += nanoseconds(Clock::now() - launch_start);
+    ++metrics.tile_count;
+    validate_batch_contract(batch, request, adopted.cuda_device);
+
+    std::size_t tile_free_bytes = 0U;
+    std::size_t tile_total_bytes = 0U;
+    CudaDeviceGuard::check(
+        cudaMemGetInfo(&tile_free_bytes, &tile_total_bytes),
+        "cudaMemGetInfo during Phase 15 qualification");
+    require(
+        tile_total_bytes == total_bytes,
+        "the CUDA total memory changed during qualification");
+    metrics.minimum_device_free_bytes = std::min(
+        metrics.minimum_device_free_bytes,
+        checked_u64(
+            tile_free_bytes,
+            "the CUDA tile free byte count does not fit uint64"));
+    const std::uint64_t tile_output_bytes =
+        checked_u64(
+            checked_product(
+                batch.physical_candidate_capacity,
+                sizeof(Phase15MortonYao48DeviceTiledCandidateRecord),
+                "the candidate output byte count overflows size_t"),
+            "the candidate output bytes do not fit uint64") +
+        checked_u64(
+            checked_product(
+                batch.physical_prune_region_capacity,
+                sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord),
+                "the prune output byte count overflows size_t"),
+            "the prune output bytes do not fit uint64") +
+        checked_u64(
+            checked_product(
+                batch.physical_witness_bank_slot_capacity,
+                sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
+                "the bank output byte count overflows size_t"),
+            "the bank output bytes do not fit uint64") +
+        checked_u64(
+            checked_product(
+                batch.physical_anchor_control_capacity,
+                sizeof(Phase15MortonYao48DeviceTiledAnchorControl),
+                "the control output byte count overflows size_t"),
+            "the control output bytes do not fit uint64");
+    metrics.peak_tile_output_device_capacity_bytes = std::max(
+        metrics.peak_tile_output_device_capacity_bytes, tile_output_bytes);
+
+    std::vector<bool> complete(anchor_count, false);
+    std::vector<AnchorPartition> partitions(anchor_count);
+    for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+      const Phase15MortonYao48DeviceTiledAnchorControl& control =
+          batch.host_anchor_controls[slot];
+      hash_anchor_control(metrics.output_digest, control);
+      const std::uint64_t expected_anchor =
+          static_cast<std::uint64_t>(anchor_begin + slot);
+      require(
+          control.anchor_morton_position == expected_anchor &&
+              control.candidate_count <=
+                  request.candidate_capacity_per_anchor &&
+              control.prune_region_count <=
+                  request.prune_region_capacity_per_anchor &&
+              control.node_visit_count <=
+                  request.node_visit_capacity_per_anchor &&
+              control.ambiguous_cone_candidate_count <=
+                  control.candidate_count &&
+              control.unbanked_candidate_count ==
+                  control.ambiguous_cone_candidate_count &&
+              control.stop_reason <= 3U &&
+              control.failure_code <= static_cast<std::uint64_t>(
+                                          Phase15MortonYao48DeviceTiledFailureCode::
+                                              internal_invariant) &&
+              control.reserved_zero == 0U &&
+              control.candidate_count + control.certified_pruned_pair_mass +
+                      control.unresolved_pair_mass ==
+                  expected_anchor,
+          "an anchor control violates its fixed-cap or mass contract");
+      metrics.physical_node_visit_count += control.node_visit_count;
+      metrics.ambiguous_candidate_count += static_cast<std::size_t>(
+          control.ambiguous_cone_candidate_count);
+      metrics.unbanked_candidate_count +=
+          static_cast<std::size_t>(control.unbanked_candidate_count);
+      const bool anchor_complete =
+          control.status == static_cast<std::uint64_t>(
+                                Phase15MortonYao48DeviceTiledAnchorStatus::
+                                    complete);
+      const bool anchor_censored =
+          control.status == static_cast<std::uint64_t>(
+                                Phase15MortonYao48DeviceTiledAnchorStatus::
+                                    censored);
+      require(
+          anchor_complete != anchor_censored,
+          "an anchor control has an unknown status");
+      if (anchor_complete) {
+        require(
+            control.stop_reason == 0U &&
+                control.failure_code == static_cast<std::uint64_t>(
+                                            Phase15MortonYao48DeviceTiledFailureCode::
+                                                none) &&
+                control.unresolved_pair_mass == 0U,
+            "a complete anchor control reports a stop or unresolved mass");
+        complete[slot] = true;
+        ++metrics.complete_anchor_count;
+      } else {
+        require(
+            control.stop_reason != 0U ||
+                control.failure_code != static_cast<std::uint64_t>(
+                                            Phase15MortonYao48DeviceTiledFailureCode::
+                                                none),
+            "a censored anchor control has no fail-stop reason");
+        ++metrics.censored_anchor_count;
+        metrics.unresolved_pair_mass += expected_anchor;
+      }
+    }
+
+    const auto recertification_start = Clock::now();
+    const std::uint64_t copy_ns_before =
+        metrics.qualification_output_copy_ns;
+    {
+      const std::vector<Phase15MortonYao48DeviceTiledCandidateRecord>
+          candidates = copy_device_records(
+              batch.device_candidate_records,
+              batch.physical_candidate_capacity,
+              metrics);
+      for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+        const auto& control = batch.host_anchor_controls[slot];
+        const std::size_t segment_begin = checked_product(
+            slot,
+            request.candidate_capacity_per_anchor,
+            "a candidate segment offset overflows size_t");
+        for (std::size_t index = 0U;
+             index < request.candidate_capacity_per_anchor;
+             ++index) {
+          const auto& record = candidates[segment_begin + index];
+          const bool active =
+              complete[slot] && index < control.candidate_count;
+          if (!active) {
+            require(
+                invalid_candidate_record(record),
+                "a withheld or unused candidate slot was not invalidated");
+            continue;
+          }
+          const std::uint64_t anchor_position =
+              static_cast<std::uint64_t>(anchor_begin + slot);
+          validate_candidate_record(
+              record, anchor_position, leaves, scaled_points, metrics);
+          partitions[slot].candidate_positions.push_back(
+              record.partner_morton_position);
+          if (!pair_classification.empty()) {
+            const std::size_t pair_index = static_cast<std::size_t>(
+                triangular_offset(
+                    anchor_position, record.partner_morton_position));
+            require(
+                pair_classification[pair_index] == 0U,
+                "the bounded qualification emitted a duplicate pair");
+            pair_classification[pair_index] = 1U;
+          }
+        }
+      }
+    }
+    {
+      const std::vector<Phase15MortonYao48DeviceTiledPruneRegionRecord>
+          prunes = copy_device_records(
+              batch.device_prune_regions,
+              batch.physical_prune_region_capacity,
+              metrics);
+      for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+        const auto& control = batch.host_anchor_controls[slot];
+        const std::size_t segment_begin = checked_product(
+            slot,
+            request.prune_region_capacity_per_anchor,
+            "a prune segment offset overflows size_t");
+        for (std::size_t index = 0U;
+             index < request.prune_region_capacity_per_anchor;
+             ++index) {
+          const auto& record = prunes[segment_begin + index];
+          const bool active =
+              complete[slot] && index < control.prune_region_count;
+          if (!active) {
+            require(
+                invalid_prune_record(record),
+                "a withheld or unused prune slot was not invalidated");
+            continue;
+          }
+          const std::uint64_t anchor_position =
+              static_cast<std::uint64_t>(anchor_begin + slot);
+          validate_prune_record(
+              record,
+              anchor_position,
+              maximum_closed_rank,
+              nodes,
+              leaves,
+              scaled_points,
+              position_by_point_id,
+              options,
+              metrics);
+          const MortonLbvhSnapshotNode& node =
+              nodes[static_cast<std::size_t>(record.node_index)];
+          partitions[slot].prune_intervals.emplace_back(
+              node.leaf_begin, node.leaf_end);
+          if (!pair_classification.empty()) {
+            for (std::uint64_t partner_position = node.leaf_begin;
+                 partner_position < node.leaf_end;
+                 ++partner_position) {
+              const std::size_t pair_index = static_cast<std::size_t>(
+                  triangular_offset(anchor_position, partner_position));
+              require(
+                  pair_classification[pair_index] == 0U,
+                  "bounded candidate/prune regions overlap");
+              pair_classification[pair_index] = 2U;
+            }
+          }
+        }
+      }
+    }
+    for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+      if (complete[slot]) {
+        validate_anchor_partition(
+            partitions[slot],
+            static_cast<std::uint64_t>(anchor_begin + slot));
+      }
+    }
+    {
+      const std::vector<Phase15MortonYao48DeviceTiledWitnessBankSlot> banks =
+          copy_device_records(
+              batch.device_witness_bank_slots,
+              batch.physical_witness_bank_slot_capacity,
+              metrics);
+      const std::size_t slots_per_anchor = checked_product(
+          request.witness_bank_count_per_anchor,
+          request.witness_slot_count_per_bank,
+          "the bank slots per anchor overflow size_t");
+      for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+        if (!complete[slot]) {
+          continue;
+        }
+        std::vector<PointId> retained_ids;
+        retained_ids.reserve(slots_per_anchor);
+        for (std::size_t cone = 0U;
+             cone < request.witness_bank_count_per_anchor;
+             ++cone) {
+          bool empty_seen = false;
+          for (std::size_t bank_slot = 0U;
+               bank_slot < request.witness_slot_count_per_bank;
+               ++bank_slot) {
+            const std::size_t index =
+                slot * slots_per_anchor +
+                cone * request.witness_slot_count_per_bank + bank_slot;
+            const auto& retained = banks[index];
+            if (invalid_bank_slot(retained)) {
+              empty_seen = true;
+              continue;
+            }
+            require(
+                !empty_seen,
+                "a witness bank contains a nonempty slot after a sentinel");
+            validate_bank_slot(
+                retained,
+                static_cast<std::uint64_t>(anchor_begin + slot),
+                cone,
+                leaves,
+                scaled_points,
+                position_by_point_id,
+                partitions[slot].candidate_positions,
+                metrics);
+            retained_ids.push_back(retained.witness_point_id);
+          }
+        }
+        std::sort(retained_ids.begin(), retained_ids.end());
+        require(
+            std::adjacent_find(retained_ids.begin(), retained_ids.end()) ==
+                retained_ids.end(),
+            "an anchor retained the same witness in multiple bank slots");
+      }
+    }
+    const std::uint64_t tile_recertification_ns =
+        nanoseconds(Clock::now() - recertification_start);
+    const std::uint64_t tile_copy_ns =
+        metrics.qualification_output_copy_ns - copy_ns_before;
+    require(
+        tile_recertification_ns >= tile_copy_ns,
+        "qualification copy timing exceeds enclosing recertification timing");
+    metrics.cpu_recertification_ns +=
+        tile_recertification_ns - tile_copy_ns;
+  }
+
+  require(
+      metrics.candidate_pair_mass + metrics.certified_pruned_pair_mass +
+              metrics.unresolved_pair_mass ==
+          metrics.unordered_pair_universe_count,
+      "the global candidate/pruned/unresolved mass identity does not close");
+  if (metrics.censored_anchor_count == 0U) {
+    require(
+        metrics.complete_anchor_count == cloud.size() &&
+            metrics.unresolved_pair_mass == 0U,
+        "an uncensored qualification did not complete every anchor");
+    metrics.coverage_partition_complete = true;
+    if (cloud.size() <= 257U) {
+      bounded_bruteforce_replay(
+          leaves,
+          scaled_points,
+          maximum_closed_rank,
+          pair_classification,
+          options.family == "adversarial_mixed_dyadic" ||
+              options.family == "shell_permutation_dyadic",
+          metrics);
+    }
+  }
+  metrics.every_prune_fully_recertified =
+      metrics.fully_recertified_prune_count == metrics.prune_region_count;
+  metrics.component_contract_validated = true;
+  return metrics;
+}
+
+[[nodiscard]] std::string json_escape(std::string_view text) {
+  std::ostringstream output;
+  for (const char raw_character : text) {
+    const unsigned char character =
+        static_cast<unsigned char>(raw_character);
+    switch (character) {
+      case '"':
+        output << "\\\"";
+        break;
+      case '\\':
+        output << "\\\\";
+        break;
+      case '\b':
+        output << "\\b";
+        break;
+      case '\f':
+        output << "\\f";
+        break;
+      case '\n':
+        output << "\\n";
+        break;
+      case '\r':
+        output << "\\r";
+        break;
+      case '\t':
+        output << "\\t";
+        break;
+      default:
+        if (character < 0x20U) {
+          output << "\\u" << std::hex << std::setw(4) << std::setfill('0')
+                 << static_cast<unsigned int>(character) << std::dec;
+        } else {
+          output << static_cast<char>(character);
+        }
+    }
+  }
+  return output.str();
+}
+
+void print_rank_metrics(const RankMetrics& metrics) {
+  std::cout
+      << '{'
+      << "\"bank_entry_count\":" << metrics.bank_entry_count << ','
+      << "\"bounded_admitted_pair_count\":"
+      << metrics.bounded_admitted_pair_count << ','
+      << "\"bounded_bruteforce_ns\":" << metrics.bounded_bruteforce_ns
+      << ','
+      << "\"bounded_bruteforce_performed\":"
+      << (metrics.bounded_bruteforce_performed ? "true" : "false") << ','
+      << "\"bounded_candidate_admitted_pair_count\":"
+      << metrics.bounded_candidate_admitted_pair_count << ','
+      << "\"bounded_candidate_rejected_pair_count\":"
+      << metrics.bounded_candidate_rejected_pair_count << ','
+      << "\"bounded_exact_pair_count\":" << metrics.bounded_exact_pair_count
+      << ','
+      << "\"bounded_non_support_shell_equality_count\":"
+      << metrics.bounded_non_support_shell_equality_count << ','
+      << "\"build_ns\":" << metrics.build_ns << ','
+      << "\"candidate_pair_mass\":" << metrics.candidate_pair_mass << ','
+      << "\"candidate_record_count\":" << metrics.candidate_record_count
+      << ','
+      << "\"censored_anchor_count\":" << metrics.censored_anchor_count
+      << ','
+      << "\"certified_pruned_pair_mass\":"
+      << metrics.certified_pruned_pair_mass << ','
+      << "\"complete_anchor_count\":" << metrics.complete_anchor_count
+      << ','
+      << "\"component_contract_validated\":"
+      << (metrics.component_contract_validated ? "true" : "false") << ','
+      << "\"coverage_partition_complete\":"
+      << (metrics.coverage_partition_complete ? "true" : "false") << ','
+      << "\"cpu_recertification_ns\":" << metrics.cpu_recertification_ns
+      << ','
+      << "\"device_total_bytes\":" << metrics.device_total_bytes << ','
+      << "\"every_prune_fully_recertified\":"
+      << (metrics.every_prune_fully_recertified ? "true" : "false") << ','
+      << "\"fully_recertified_prune_count\":"
+      << metrics.fully_recertified_prune_count << ','
+      << "\"launcher_ns\":" << metrics.launcher_ns << ','
+      << "\"lease_release_ns\":" << metrics.lease_release_ns << ','
+      << "\"maximum_closed_rank\":" << metrics.maximum_closed_rank << ','
+      << "\"minimum_device_free_bytes\":" << metrics.minimum_device_free_bytes
+      << ','
+      << "\"node_copy_ns\":" << metrics.node_copy_ns << ','
+      << "\"output_digest_fnv1a\":" << metrics.output_digest << ','
+      << "\"peak_tile_output_device_capacity_bytes\":"
+      << metrics.peak_tile_output_device_capacity_bytes << ','
+      << "\"physical_node_visit_count\":"
+      << metrics.physical_node_visit_count << ','
+      << "\"prune_region_count\":" << metrics.prune_region_count << ','
+      << "\"prune_witness_target_check_count\":"
+      << metrics.prune_witness_target_check_count << ','
+      << "\"qualification_device_to_host_bytes\":"
+      << metrics.qualification_device_to_host_bytes << ','
+      << "\"qualification_output_copy_ns\":"
+      << metrics.qualification_output_copy_ns << ','
+      << "\"sampled_recertified_prune_count\":"
+      << metrics.sampled_recertified_prune_count << ','
+      << "\"tile_count\":" << metrics.tile_count << ','
+      << "\"traversal_adoption_ns\":" << metrics.adoption_ns << ','
+      << "\"traversal_device_capacity_bytes\":"
+      << metrics.traversal_device_capacity_bytes << ','
+      << "\"unbanked_candidate_count\":"
+      << metrics.unbanked_candidate_count << ','
+      << "\"unordered_pair_universe_count\":"
+      << metrics.unordered_pair_universe_count << ','
+      << "\"unresolved_pair_mass\":" << metrics.unresolved_pair_mass
+      << '}';
+}
+
+[[nodiscard]] std::string_view stop_reason_name(
+    MortonYao48DeviceTiledPairFrontierStopReason reason) noexcept {
+  switch (reason) {
+    case MortonYao48DeviceTiledPairFrontierStopReason::none:
+      return "none";
+    case MortonYao48DeviceTiledPairFrontierStopReason::node_visit_capacity:
+      return "node_visit_capacity";
+    case MortonYao48DeviceTiledPairFrontierStopReason::candidate_capacity:
+      return "candidate_capacity";
+    case MortonYao48DeviceTiledPairFrontierStopReason::prune_region_capacity:
+      return "prune_region_capacity";
+  }
+  return "invalid";
+}
+
+void print_scaling_smoke_json(
+    const Options& options,
+    const ScalingSmokeMetrics& metrics) {
+  std::cout
+      << "{\"advance_count\":" << metrics.advance_count << ','
+      << "\"anchor_control_device_to_host_byte_count\":"
+      << metrics.anchor_control_device_to_host_byte_count << ','
+      << "\"anchor_control_device_to_host_count\":"
+      << metrics.anchor_control_device_to_host_count << ','
+      << "\"anchor_tile_capacity\":" << options.anchor_tile_capacity << ','
+      << "\"backend\":\"" << kBackend << "\","
+      << "\"backpressure_validated\":"
+      << (metrics.backpressure_validated ? "true" : "false") << ','
+      << "\"build_ns\":" << metrics.build_ns << ','
+      << "\"candidate_device_to_host_count\":0,"
+      << "\"candidate_pair_mass\":" << metrics.candidate_pair_mass << ','
+      << "\"candidate_tile_lease_count\":"
+      << metrics.candidate_tile_lease_count << ','
+      << "\"candidate_tile_release_count\":"
+      << metrics.candidate_tile_release_count << ','
+      << "\"canonicalization_ns\":" << metrics.canonicalization_ns << ','
+      << "\"censored\":" << (metrics.censored ? "true" : "false") << ','
+      << "\"certified_prune_region_count\":"
+      << metrics.certified_prune_region_count << ','
+      << "\"certified_pruned_pair_mass\":"
+      << metrics.certified_pruned_pair_mass << ','
+      << "\"completed_anchor_count\":" << metrics.completed_anchor_count
+      << ','
+      << "\"component_only\":true,"
+      << "\"context_creation_ns\":" << metrics.context_creation_ns << ','
+      << "\"context_release_ns\":" << metrics.context_release_ns << ','
+      << "\"coverage_complete\":"
+      << (metrics.coverage_complete ? "true" : "false") << ','
+      << "\"coverage_success\":"
+      << (metrics.coverage_complete ? "true" : "false") << ','
+      << "\"dense_pair_fallback_performed\":false,"
+      << "\"deployment_status\":\"profile_only\","
+      << "\"exact_diametral_rank_evaluated\":false,"
+      << "\"exactness_claimed\":false,"
+      << "\"execution_success\":"
+      << (metrics.execution_success ? "true" : "false") << ','
+      << "\"family\":\"affine_uniform_binary64\","
+      << "\"frontier_ns\":" << metrics.frontier_ns << ','
+      << "\"generation_ns\":" << metrics.generation_ns << ','
+      << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
+      << "\"global_pair_matrix_materialized\":false,"
+      << "\"higher_order_structure_materialized\":false,"
+      << "\"host_release_ns\":" << metrics.host_release_ns << ','
+      << "\"kernel_launch_count\":" << metrics.kernel_launch_count << ','
+      << "\"launcher_call_count\":" << metrics.launcher_call_count << ','
+      << "\"lease_release_ns\":" << metrics.lease_release_ns << ','
+      << "\"maximum_closed_rank\":" << metrics.maximum_closed_rank << ','
+      << "\"mode\":\"device_resident_budgeted_morton_yao48_anchor_tiles_"
+         "scaling_smoke\","
+      << "\"ordinary_delaunay_materialized\":false,"
+      << "\"ordinary_emst_computed\":false,"
+      << "\"peak_candidate_device_capacity_bytes\":"
+      << metrics.peak_candidate_device_capacity_bytes << ','
+      << "\"peak_control_device_capacity_bytes\":"
+      << metrics.peak_control_device_capacity_bytes << ','
+      << "\"peak_host_rss_bytes\":" << peak_host_rss_bytes() << ','
+      << "\"peak_prune_device_capacity_bytes\":"
+      << metrics.peak_prune_device_capacity_bytes << ','
+      << "\"peak_tile_output_device_capacity_bytes\":"
+      << metrics.peak_tile_output_device_capacity_bytes << ','
+      << "\"peak_witness_bank_device_capacity_bytes\":"
+      << metrics.peak_witness_bank_device_capacity_bytes << ','
+      << "\"point_count\":" << options.point_count << ','
+      << "\"product_claimed\":false,"
+      << "\"profile\":\"" << kProfile << "\","
+      << "\"profile_only\":true,"
+      << "\"public_status\":\"" << kPublicStatus << "\","
+      << "\"qualification_claimed\":false,"
+      << "\"raw_candidate_or_prune_view_accessed\":false,"
+      << "\"scalability_claimed\":false,"
+      << "\"schema\":\"" << kScalingSmokeSchema << "\","
+      << "\"scientific_claimed\":false,"
+      << "\"scientific_pair_catalog_published\":false,"
+      << "\"seed\":" << options.seed << ','
+      << "\"stop_reason\":\"" << stop_reason_name(metrics.stop_reason)
+      << "\","
+      << "\"synchronization_count\":" << metrics.synchronization_count
+      << ','
+      << "\"total_ns\":" << metrics.total_ns << ','
+      << "\"traversal_device_capacity_bytes\":"
+      << metrics.traversal_device_capacity_bytes << ','
+      << "\"unordered_pair_universe_count\":"
+      << metrics.unordered_pair_universe_count << ','
+      << "\"unresolved_pair_mass\":" << metrics.unresolved_pair_mass << ','
+      << "\"warm_e2e_slo_claimed\":false}\n";
+}
+
+void print_scaling_failure_json(std::string_view message) {
+  std::cout
+      << "{\"backend\":\"" << kBackend << "\","
+      << "\"component_only\":true,"
+      << "\"deployment_status\":\"profile_only\","
+      << "\"error\":\"" << json_escape(message) << "\","
+      << "\"exactness_claimed\":false,"
+      << "\"execution_success\":false,"
+      << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
+      << "\"product_claimed\":false,"
+      << "\"profile\":\"" << kProfile << "\","
+      << "\"profile_only\":true,"
+      << "\"public_status\":\"" << kPublicStatus << "\","
+      << "\"qualification_claimed\":false,"
+      << "\"scalability_claimed\":false,"
+      << "\"schema\":\"" << kScalingSmokeSchema << "\","
+      << "\"scientific_claimed\":false}\n";
+}
+
+void print_failure_json(std::string_view message) {
+  std::cout
+      << "{\"backend\":\"" << kBackend << "\","
+      << "\"deployment_status\":\"" << kDeploymentStatus << "\","
+      << "\"error\":\"" << json_escape(message) << "\","
+      << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
+      << "\"mode\":\"" << kMode << "\","
+      << "\"profile\":\"" << kProfile << "\","
+      << "\"public_status\":\"" << kPublicStatus << "\","
+      << "\"schema\":\"" << kSchema << "\","
+      << "\"success\":false}\n";
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  bool scaling_smoke_requested = false;
+  for (int index = 1; index < argc; ++index) {
+    scaling_smoke_requested =
+        scaling_smoke_requested ||
+        std::string_view{argv[index]} == "--scaling-smoke";
+  }
+  try {
+    const Options options = parse_options(argc, argv);
+    const auto total_start = Clock::now();
+    if (options.scaling_smoke) {
+      const auto generation_start = Clock::now();
+      std::vector<CertifiedPoint3> scaling_points =
+          generate_scaling_points(options);
+      const std::uint64_t generation_ns =
+          nanoseconds(Clock::now() - generation_start);
+      const ScalingSmokeMetrics scaling_metrics = run_scaling_smoke(
+          options,
+          std::move(scaling_points),
+          generation_ns,
+          total_start);
+      print_scaling_smoke_json(options, scaling_metrics);
+      return EXIT_SUCCESS;
+    }
+    const auto generation_start = Clock::now();
+    GeneratedCloud generated = generate_cloud(options);
+    const std::uint64_t generation_ns =
+        nanoseconds(Clock::now() - generation_start);
+
+    const auto canonicalization_start = Clock::now();
+    CanonicalPointCloud cloud =
+        CanonicalPointCloud::rejecting_duplicates(generated.points);
+    std::vector<ScaledPoint> scaled_points =
+        canonical_scaled_points(cloud, generated.scaled_points);
+    const std::uint64_t cloud_digest = scaled_cloud_digest(scaled_points);
+    const std::uint64_t canonicalization_ns =
+        nanoseconds(Clock::now() - canonicalization_start);
+    generated.points.clear();
+    generated.points.shrink_to_fit();
+    generated.scaled_points.clear();
+    generated.scaled_points.shrink_to_fit();
+
+    const std::vector<std::size_t> ranks = requested_ranks(options);
+    std::vector<RankMetrics> results;
+    results.reserve(ranks.size());
+    bool any_censure = false;
+    bool all_coverage_complete = true;
+    for (const std::size_t rank : ranks) {
+      results.push_back(
+          qualify_rank(options, cloud, scaled_points, rank));
+      any_censure = any_censure || results.back().censored_anchor_count != 0U;
+      all_coverage_complete =
+          all_coverage_complete && results.back().coverage_partition_complete;
+    }
+    const bool coverage_success = !any_censure;
+    const bool exit_success = coverage_success;
+    const bool rank_triplet_exercised =
+        ranks == std::vector<std::size_t>{2U, 3U, 11U};
+    const std::uint64_t total_ns = nanoseconds(Clock::now() - total_start);
+
+    std::cout
+        << "{\"anchor_tile_capacity\":" << options.anchor_tile_capacity
+        << ','
+        << "\"backend\":\"" << kBackend << "\","
+        << "\"canonicalization_ns\":" << canonicalization_ns << ','
+        << "\"cloud_digest_fnv1a\":" << cloud_digest << ','
+        << "\"component_only\":true,"
+        << "\"coverage_partition_complete\":"
+        << (all_coverage_complete ? "true" : "false") << ','
+        << "\"delaunay_materialized\":false,"
+        << "\"dense_pair_fallback_performed\":false,"
+        << "\"deployment_status\":\"" << kDeploymentStatus << "\","
+        << "\"equality_shell_point_count\":"
+        << generated.features.equality_shell_point_count << ','
+        << "\"exact_prune_target_check_limit\":"
+        << options.exact_prune_target_check_limit << ','
+        << "\"family\":\"" << json_escape(options.family) << "\","
+        << "\"generation_ns\":" << generation_ns << ','
+        << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
+        << "\"global_pair_matrix_materialized\":false,"
+        << "\"guard_size_at_most_50000\":true,"
+        << "\"guard_size_passed\":"
+        << (coverage_success ? "true" : "false")
+        << ','
+        << "\"higher_order_structure_materialized\":false,"
+        << "\"jitter_grid_point_count\":"
+        << generated.features.jitter_grid_point_count << ','
+        << "\"mode\":\"" << kMode << "\","
+        << "\"ordinary_delaunay_materialized\":false,"
+        << "\"ordinary_emst_computed\":false,"
+        << "\"peak_host_rss_bytes\":" << peak_host_rss_bytes() << ','
+        << "\"permutation_sign_point_count\":"
+        << generated.features.permutation_sign_point_count << ','
+        << "\"point_count\":" << options.point_count << ','
+        << "\"profile\":\"" << kProfile << "\","
+        << "\"profile_exit_success\":"
+        << (exit_success ? "true" : "false") << ','
+        << "\"public_status\":\"" << kPublicStatus << "\","
+        << "\"rank_results\":[";
+    for (std::size_t index = 0U; index < results.size(); ++index) {
+      if (index != 0U) {
+        std::cout << ',';
+      }
+      print_rank_metrics(results[index]);
+    }
+    std::cout
+        << "],\"required_rank_triplet_exercised\":"
+        << (rank_triplet_exercised ? "true" : "false") << ','
+        << "\"sampled_prune_limit\":" << options.sampled_prune_limit << ','
+        << "\"schema\":\"" << kSchema << "\","
+        << "\"scientific_pair_catalog_published\":false,"
+        << "\"seed\":" << options.seed << ','
+        << "\"success\":" << (coverage_success ? "true" : "false") << ','
+        << "\"tight_cluster_point_count\":"
+        << generated.features.clustered_point_count << ','
+        << "\"total_ns\":" << total_ns << "}\n";
+    return exit_success ? EXIT_SUCCESS : EXIT_FAILURE;
+  } catch (const std::exception& error) {
+    if (scaling_smoke_requested) {
+      print_scaling_failure_json(error.what());
+    } else {
+      print_failure_json(error.what());
+    }
+    return EXIT_FAILURE;
+  }
+}

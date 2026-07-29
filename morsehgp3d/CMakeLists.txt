@@ -86,6 +86,7 @@ endfunction()
 
 if(MORSEHGP3D_ENABLE_CUDA)
   include(cmake/MorseHGP3DCuda.cmake)
+  find_package(CUDAToolkit REQUIRED)
 
   find_package(Git REQUIRED)
   file(
@@ -2306,6 +2307,47 @@ else()
   )
 endif()
 
+# Device-resident Phase 15 Morton/Yao48 anchor-tile contract.  The host-only
+# archive intentionally leaves traversal adoption and the launcher unresolved;
+# unit tests provide hostile fakes, while the CUDA target below provides the
+# only production definitions.  Candidate and prune payloads remain resident.
+add_library(
+  morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+  STATIC
+    src/cuda/phase15_morton_yao48_device_tiled_pair_frontier_internal.hpp
+    src/gpu/morton_yao48_device_tiled_pair_frontier.cpp
+)
+add_library(
+  morsehgp3d::gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+  ALIAS
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Standalone Phase 15 radial-subtree filter contract.  It is intentionally
 # not wired into the product frontier: CUDA proposes only the conservative
 # minDist_down >= max(3*D_up) range cut and exact CPU replay is mandatory.
@@ -3083,6 +3125,86 @@ if(MORSEHGP3D_ENABLE_CUDA)
         $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_library(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+    STATIC
+      include/morsehgp3d/gpu/morton_yao48_device_tiled_pair_frontier.hpp
+      src/cuda/phase15_morton_yao48_device_tiled_pair_frontier_internal.hpp
+      src/cuda/phase15_morton_yao48_device_tiled_pair_frontier.cu
+      src/gpu/morton_yao48_device_tiled_pair_frontier.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_morton_yao48_device_tiled_pair_frontier
+    ALIAS morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+  )
+  target_include_directories(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+    PUBLIC
+      morsehgp3d::gpu_morton_lbvh_build
+      morsehgp3d::spatial
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification
+    src/tools/gpu_morton_yao48_device_tiled_pair_frontier_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification
+    PRIVATE
+      morsehgp3d::gpu_morton_yao48_device_tiled_pair_frontier
+      CUDA::cudart
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification
+    PRIVATE cxx_std_20
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification
+    PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
 

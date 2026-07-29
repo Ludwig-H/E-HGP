@@ -14,10 +14,15 @@ namespace morsehgp3d::gpu {
 
 class DirectSparseFacetTopKProposalContext;
 class AnchoredPairCandidateProposalContext;
+class MortonLbvhDeviceTraversalLease;
 class MortonYao48PairFrontierContext;
 
 namespace detail {
 class Phase14MortonLbvhBuildContextState;
+struct Phase15MortonYao48DeviceTiledAdoptedTraversal;
+[[nodiscard]] Phase15MortonYao48DeviceTiledAdoptedTraversal
+adopt_phase15_morton_yao48_device_tiled_traversal(
+    MortonLbvhDeviceTraversalLease&& traversal_lease);
 }
 
 inline constexpr std::uint32_t morton_lbvh_device_build_schema_version = 1U;
@@ -332,6 +337,9 @@ class MortonLbvhDeviceTraversalLease final {
   friend class MortonLbvhBuildContext;
   friend class MortonYao48PairFrontierContext;
   friend class RankedDiametralPairCatalogContext;
+  friend detail::Phase15MortonYao48DeviceTiledAdoptedTraversal
+  detail::adopt_phase15_morton_yao48_device_tiled_traversal(
+      MortonLbvhDeviceTraversalLease&& traversal_lease);
 };
 
 class MortonLbvhDeviceBuildResult final {
