@@ -17,7 +17,7 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
-    morton_yao48_pair_frontier_schema_version = 1U;
+    morton_yao48_pair_frontier_schema_version = 2U;
 inline constexpr std::size_t
     morton_yao48_pair_frontier_maximum_closed_rank = 11U;
 inline constexpr std::size_t
@@ -52,11 +52,12 @@ enum class MortonYao48PairFrontierStatus : std::uint8_t {
 };
 
 enum class MortonYao48PairFrontierStopReason : std::uint8_t {
-  none,
-  node_visit_capacity,
-  candidate_capacity,
-  witness_bank_receipt_capacity,
-  certified_prune_region_capacity,
+  none = 0U,
+  node_visit_capacity = 1U,
+  candidate_capacity = 2U,
+  witness_bank_receipt_capacity = 3U,
+  certified_prune_region_capacity = 4U,
+  anchor_completion_capacity = 5U,
 };
 
 enum class MortonYao48CertifiedPruneKind : std::uint8_t {
@@ -83,6 +84,10 @@ struct MortonYao48PairFrontierAdvanceBudget {
   std::size_t maximum_candidate_count{};
   std::size_t maximum_witness_bank_receipt_count{};
   std::size_t maximum_certified_prune_region_count{};
+  // A finite value closes a deterministic Morton-anchor tile.  The default
+  // preserves the original all-anchors cursor contract.
+  std::size_t maximum_anchor_completion_count{
+      std::numeric_limits<std::size_t>::max()};
 
   friend bool operator==(
       const MortonYao48PairFrontierAdvanceBudget&,

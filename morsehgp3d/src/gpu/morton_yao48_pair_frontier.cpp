@@ -627,6 +627,8 @@ MortonYao48PairFrontierContext::advance(
       certified_build.certified_index();
   MortonYao48PairFrontierAdvance result;
   std::size_t advance_node_visit_count = 0U;
+  const std::size_t advance_completed_anchor_begin =
+      completed_anchor_count_;
   const std::size_t required_witness_count =
       config_.maximum_closed_rank - 1U;
 
@@ -653,6 +655,12 @@ MortonYao48PairFrontierContext::advance(
   };
 
   while (next_anchor_position_ < point_count_) {
+    if (completed_anchor_count_ - advance_completed_anchor_begin ==
+        budget.maximum_anchor_completion_count) {
+      exhausted(MortonYao48PairFrontierStopReason::
+                    anchor_completion_capacity);
+      return result;
+    }
     if (advance_node_visit_count ==
         budget.maximum_node_visit_count) {
       exhausted(

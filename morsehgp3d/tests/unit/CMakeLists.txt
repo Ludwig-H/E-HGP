@@ -1617,6 +1617,46 @@ else()
   )
 endif()
 add_executable(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
+  test_gpu_morton_yao48_tiled_pair_frontier.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
+  PRIVATE
+    morsehgp3d::gpu_morton_yao48_tiled_pair_frontier_host_reference
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+add_executable(
   morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
   test_gpu_morton_yao48_radial_subtree_filter.cpp
   fake_gpu_morton_yao48_radial_subtree_filter_launchers.cpp
@@ -2051,6 +2091,7 @@ set(
   morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
   morsehgp3d_gpu_ranked_diametral_pair_catalog_contract_tests
   morsehgp3d_gpu_morton_yao48_pair_frontier_tests
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
   morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
   morsehgp3d_gpu_morton_yao48_seed_work_profile_tests
   morsehgp3d_gpu_morton_lbvh_build_context_tests
@@ -3095,6 +3136,10 @@ add_test(
   COMMAND morsehgp3d_gpu_morton_yao48_pair_frontier_tests
 )
 add_test(
+  NAME morsehgp3d.gpu_morton_yao48_tiled_pair_frontier
+  COMMAND morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
+)
+add_test(
   NAME morsehgp3d.gpu_morton_yao48_radial_subtree_filter
   COMMAND morsehgp3d_gpu_morton_yao48_radial_subtree_filter_tests
 )
@@ -3132,6 +3177,20 @@ add_test(
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_test(
+  NAME morsehgp3d.phase15_pair_first_scale_campaign_contract
+  COMMAND
+    "${CMAKE_COMMAND}"
+    -E env
+    "PYTHONDONTWRITEBYTECODE=1"
+    "${Python3_EXECUTABLE}"
+    -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/../profiling/test_phase15_pair_first_scale_campaign.py"
+)
+set_tests_properties(
+  morsehgp3d.phase15_pair_first_scale_campaign_contract
+  PROPERTIES TIMEOUT 60
+)
 add_test(
   NAME morsehgp3d.ordinary_diagram_closure_differential
   COMMAND

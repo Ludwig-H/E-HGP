@@ -43,6 +43,26 @@ using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLeafRecord;
 using morsehgp3d::spatial::PointId;
 
+static_assert(
+    morsehgp3d::gpu::morton_yao48_pair_frontier_schema_version == 2U);
+static_assert(static_cast<std::uint8_t>(
+                  MortonYao48PairFrontierStopReason::none) == 0U);
+static_assert(static_cast<std::uint8_t>(
+                  MortonYao48PairFrontierStopReason::
+                      node_visit_capacity) == 1U);
+static_assert(static_cast<std::uint8_t>(
+                  MortonYao48PairFrontierStopReason::candidate_capacity) ==
+              2U);
+static_assert(static_cast<std::uint8_t>(
+                  MortonYao48PairFrontierStopReason::
+                      witness_bank_receipt_capacity) == 3U);
+static_assert(static_cast<std::uint8_t>(
+                  MortonYao48PairFrontierStopReason::
+                      certified_prune_region_capacity) == 4U);
+static_assert(static_cast<std::uint8_t>(
+                  MortonYao48PairFrontierStopReason::
+                      anchor_completion_capacity) == 5U);
+
 static_assert(!std::is_copy_constructible_v<
               MortonYao48PairFrontierContext>);
 static_assert(!std::is_copy_assignable_v<
@@ -132,6 +152,7 @@ struct Enumeration {
   std::vector<MortonYao48CertifiedPruneRegion> prunes;
   MortonYao48PairFrontierAudit final_audit{};
   std::size_t exhausted_step_count{};
+  std::size_t anchor_stop_count{};
   std::size_t node_stop_count{};
   std::size_t candidate_stop_count{};
   std::size_t receipt_stop_count{};
@@ -202,6 +223,10 @@ struct Enumeration {
                 step.audit.unordered_pair_universe_count,
         "budget exhaustion preserves the exact unresolved pair mass");
     switch (step.stop_reason) {
+      case MortonYao48PairFrontierStopReason::
+          anchor_completion_capacity:
+        ++enumeration.anchor_stop_count;
+        break;
       case MortonYao48PairFrontierStopReason::node_visit_capacity:
         ++enumeration.node_stop_count;
         break;

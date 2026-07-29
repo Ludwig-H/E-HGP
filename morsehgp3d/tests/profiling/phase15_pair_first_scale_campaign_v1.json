@@ -1,0 +1,124 @@
+{
+  "algorithm_scope": "complete_certified_morton_yao48_ranked_pair_catalog",
+  "artifact_role": "future_complete_pair_first_product_gate",
+  "backend": "cuda_g4",
+  "benchmark_claim_policy": {
+    "component_measurements_are_results": false,
+    "dense_oracle_measurements_are_results": false,
+    "proxy_measurements_are_results": false,
+    "requires_complete_binary_capability_handshake": true
+  },
+  "binary_protocol": {
+    "capability_argument": "--phase15-pair-first-capabilities-json",
+    "capability_schema": "morsehgp3d.phase15.pair_first_binary_capabilities.v1",
+    "run_argument": "--phase15-pair-first-scale-run-json",
+    "run_schema": "morsehgp3d.phase15.pair_first_scale_run.v1"
+  },
+  "closure_contract": {
+    "complete_requires_checkpoint_closed": true,
+    "complete_requires_exact_replay_closed": true,
+    "complete_requires_frontier_empty": true,
+    "complete_requires_payload_closed": true,
+    "complete_requires_unresolved_pair_mass_zero": true,
+    "dense_fallback_allowed": false,
+    "mass_identity": "candidate_pair_mass+certified_pruned_pair_mass+unresolved_pair_mass=total_unordered_pair_mass",
+    "offline_oracle_in_timed_path_allowed": false
+  },
+  "execution_status": "blocked_until_complete_pair_first_binary",
+  "families": [
+    {
+      "generator": "deterministic_affine_uniform_binary64_v1",
+      "id": "affine_uniform_binary64",
+      "parameters": {
+        "affine_condition_bound": 16,
+        "coordinate_mantissa_bits": 53
+      }
+    },
+    {
+      "generator": "deterministic_jittered_dyadic_grid3d_v1",
+      "id": "jittered_dyadic_grid3d",
+      "parameters": {
+        "dyadic_denominator_exponent": 30,
+        "jitter_numerator_bound": 3
+      }
+    },
+    {
+      "generator": "deterministic_balanced_multiscale_clusters_v1",
+      "id": "balanced_multiscale_clusters",
+      "parameters": {
+        "cluster_count": 64,
+        "scale_level_count": 8
+      }
+    }
+  ],
+  "linear_caps": {
+    "anchor_tile_size": 4096,
+    "bank_updates_per_point": 960,
+    "classified_pairs_per_point": 640,
+    "device_memory_fraction_ppm": 700000,
+    "frontier_records_per_anchor_in_tile": 640,
+    "host_memory_fraction_ppm": 700000,
+    "node_visits_per_point": 2048,
+    "output_pairs_per_point": 32,
+    "radial_receipts_per_point": 64
+  },
+  "mode": "certified_budgeted",
+  "phase": "15",
+  "preflight_gates": [
+    "bounded_cpu_differential_k1_k2_k10",
+    "offline_k1_direct_pair_reduction_equals_emst_fusion_times",
+    "offline_k2_fusions_no_later_than_two_delaunay_edge_triangle_deadlines",
+    "tile_schedule_resume_equivalence",
+    "compute_sanitizer_memcheck_racecheck",
+    "n12500_growth_falsifier"
+  ],
+  "profile": "hgp_reduced",
+  "requested_order_max": 10,
+  "scales": [
+    {
+      "point_count": 50000,
+      "required_previous_point_count": null,
+      "seeds": [1, 2, 3, 5, 8, 13, 21, 34, 55, 89],
+      "slo_p95_warm_e2e_ns": 100000000,
+      "wall_time_cap_ms": 30000
+    },
+    {
+      "point_count": 1000000,
+      "required_previous_point_count": 50000,
+      "seeds": [1, 2, 3],
+      "slo_p95_warm_e2e_ns": null,
+      "wall_time_cap_ms": 180000
+    },
+    {
+      "point_count": 10000000,
+      "required_previous_point_count": 1000000,
+      "seeds": [1, 2],
+      "slo_p95_warm_e2e_ns": null,
+      "wall_time_cap_ms": 900000
+    },
+    {
+      "point_count": 30000000,
+      "required_previous_point_count": 10000000,
+      "seeds": [1],
+      "slo_p95_warm_e2e_ns": null,
+      "wall_time_cap_ms": 1800000
+    }
+  ],
+  "schema": "morsehgp3d.phase15.pair_first_scale_campaign_plan.v1",
+  "timing_contract": {
+    "cold_e2e_is_diagnostic_only": true,
+    "cloud_generation_is_timed": false,
+    "fresh_cloud_per_measured_run": true,
+    "p50_p95_rule": "nearest_rank",
+    "resident_replay_is_diagnostic_only": true,
+    "timed_stages": [
+      "morton_lbvh",
+      "yao48_bank_fill",
+      "certified_frontier",
+      "exact_pair_classification",
+      "compaction",
+      "persistence"
+    ],
+    "warm_e2e_includes_all_timed_stages": true
+  }
+}

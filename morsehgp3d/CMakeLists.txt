@@ -2269,6 +2269,43 @@ else()
   )
 endif()
 
+# Bounded anchor-tile compositor for the exact host/fake Morton/Yao48
+# frontier.  Fixed per-point caps make hostile work terminally censored with
+# an explicit unresolved mass; this target contains no dense fallback.
+add_library(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_host_reference
+  STATIC
+    src/gpu/morton_yao48_tiled_pair_frontier.cpp
+)
+add_library(
+  morsehgp3d::gpu_morton_yao48_tiled_pair_frontier_host_reference
+  ALIAS morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_host_reference
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_host_reference
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_host_reference
+  PUBLIC morsehgp3d::gpu_morton_yao48_pair_frontier_host_reference
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_host_reference
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_host_reference
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_host_reference
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Standalone Phase 15 radial-subtree filter contract.  It is intentionally
 # not wired into the product frontier: CUDA proposes only the conservative
 # minDist_down >= max(3*D_up) range cut and exact CPU replay is mandatory.
