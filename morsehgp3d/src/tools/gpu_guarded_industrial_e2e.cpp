@@ -45,6 +45,13 @@ using PointId = morsehgp3d::spatial::PointId;
 constexpr std::size_t kMaximumOrder = 10U;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::uint64_t kSloNanoseconds = UINT64_C(100000000);
+// The offline k=2 guard compares a direct binary64 core distance with the
+// same support-two diameter reconstructed by the historical triangle
+// polarization recipe.  Lowering only core contributions preserves the exact
+// k=1 edge weights, the edge-distance floor and monotonicity in k, while
+// covering the bounded roundoff envelope of that 3-D recipe.  This remains a
+// guarded candidate convention, not an exact Morse-level claim.
+constexpr std::uint64_t kCoreDeadlineLowerEnvelopeUlps = 64U;
 
 enum class Family : std::uint8_t {
   affine_uniform_binary64,
@@ -454,6 +461,20 @@ make_balanced_multiscale_cloud(std::size_t count, std::uint64_t seed) {
   return static_cast<PointId>(pair_key & UINT64_C(0xffffffff));
 }
 
+[[nodiscard]] double lower_positive_binary64_by_ulps(
+    double value,
+    std::uint64_t ulps) {
+  if (!std::isfinite(value) || value < 0.0) {
+    throw std::runtime_error("cannot lower an invalid binary64 core distance");
+  }
+  if (value == 0.0 || ulps == 0U) {
+    return value;
+  }
+  const std::uint64_t bits = std::bit_cast<std::uint64_t>(value);
+  const std::uint64_t lowered_bits = bits > ulps ? bits - ulps : 0U;
+  return std::bit_cast<double>(lowered_bits);
+}
+
 [[nodiscard]] Topology build_topology(
     const morsehgp3d::spatial::CanonicalPointCloud& cloud,
     const morsehgp3d::gpu::Binary64LbvhTopKResult& top_k,
@@ -558,13 +579,19 @@ class DisjointSet {
   for (const BaseEdge& edge : topology.edges) {
     const PointId first = pair_first(edge.pair_key);
     const PointId second = pair_second(edge.pair_key);
+    double first_core = topology.core_squared_distances[
+        core_offset + static_cast<std::size_t>(first)];
+    double second_core = topology.core_squared_distances[
+        core_offset + static_cast<std::size_t>(second)];
+    if (order_index != 0U) {
+      first_core = lower_positive_binary64_by_ulps(
+          first_core, kCoreDeadlineLowerEnvelopeUlps);
+      second_core = lower_positive_binary64_by_ulps(
+          second_core, kCoreDeadlineLowerEnvelopeUlps);
+    }
     const double weight = std::max(
         edge.squared_distance,
-        std::max(
-            topology.core_squared_distances[
-                core_offset + static_cast<std::size_t>(first)],
-            topology.core_squared_distances[
-                core_offset + static_cast<std::size_t>(second)]));
+        std::max(first_core, second_core));
     weighted.push_back(WeightedEdge{weight, edge.pair_key});
   }
   std::sort(
@@ -687,14 +714,13 @@ void materialize_output(std::vector<OrderReduction>& reductions) {
     std::uint64_t seed,
     std::size_t run_index,
     bool warmup,
-    std::optional<std::size_t> measured_index) {
+    std::optional<std::size_t> measured_index,
+    Clock::time_point e2e_start) {
   RunMetrics metrics;
   metrics.run_index = run_index;
   metrics.measured_index = measured_index;
   metrics.warmup = warmup;
   metrics.seed = seed;
-  const auto e2e_start = Clock::now();
-
   const auto lbvh_start = Clock::now();
   std::optional<morsehgp3d::gpu::MortonLbvhDeviceTraversalLease> lease;
   {
@@ -875,7 +901,7 @@ void write_result_json(
     std::uint64_t p99,
     bool slo_passed) {
   std::cout << std::setprecision(17);
-  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v1\""
+  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v2\""
             << ",\"result_kind\":\"guarded_industrial_candidate\""
             << ",\"phase\":15,\"backend\":\"cuda_g4_plus_host_binary64\""
             << ",\"profile\":\"hgp_reduced\""
@@ -891,10 +917,13 @@ void write_result_json(
             << ",\"maximum_order\":" << options.maximum_order
             << ",\"seed_window\":" << options.seed_window
             << ",\"cloud_generation_timed\":false"
+            << ",\"canonicalization_timed\":true"
             << ",\"fresh_cloud_per_run\":true"
             << ",\"full_pipeline\":true"
             << ",\"ten_hierarchies_materialized\":true"
-            << ",\"weight_representation\":\"squared_binary64_mutual_reachability\""
+            << ",\"weight_representation\":\"squared_binary64_mutual_reachability_with_k2plus_core_lower_envelope\""
+            << ",\"core_deadline_lower_envelope_ulps\":"
+            << kCoreDeadlineLowerEnvelopeUlps
             << ",\"ordinary_delaunay_materialized\":false"
             << ",\"higher_order_delaunay_mosaic_materialized\":false"
             << ",\"global_pair_matrix_materialized\":false"
@@ -1021,7 +1050,8 @@ int main(int argc, char** argv) {
           make_cloud(options.family, options.point_count, seeds[index]);
       const std::uint64_t generation_ns =
           nanoseconds(Clock::now() - generation_start);
-      const auto canonicalization_start = Clock::now();
+      const auto e2e_start = Clock::now();
+      const auto canonicalization_start = e2e_start;
       morsehgp3d::spatial::CanonicalPointCloud cloud =
           morsehgp3d::spatial::CanonicalPointCloud::rejecting_duplicates(input);
       const std::uint64_t canonicalization_ns =
@@ -1029,7 +1059,8 @@ int main(int argc, char** argv) {
       input.clear();
       input.shrink_to_fit();
       RunMetrics run = run_pipeline(
-          cloud, builder, options, seeds[index], index, warmup, measured_index);
+          cloud, builder, options, seeds[index], index, warmup, measured_index,
+          e2e_start);
       run.generation_ns = generation_ns;
       run.canonicalization_ns = canonicalization_ns;
       if (!warmup) {
