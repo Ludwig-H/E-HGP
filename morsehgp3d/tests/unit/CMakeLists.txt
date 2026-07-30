@@ -895,7 +895,7 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
-  PRIVATE morsehgp3d::direct_k1_forest_journal morsehgp3d::hierarchy
+  PRIVATE morsehgp3d::direct_k1_forest_journal
 )
 if(MSVC)
   target_compile_options(
@@ -1272,6 +1272,25 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_hartigan_all_orders_tests
+  test_hierarchy_hartigan_all_orders.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_hartigan_all_orders_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_hartigan_all_orders_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_hartigan_all_orders_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -2106,6 +2125,7 @@ set(
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_arm_root_path_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_durable_arm_key_catalog_tests
   morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
+  morsehgp3d_hierarchy_hartigan_all_orders_tests
   morsehgp3d_hierarchy_gamma_dump
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
   morsehgp3d_hierarchy_boruvka_tests
@@ -3099,6 +3119,14 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_morse_gamma_partition_sweep
   COMMAND morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_hartigan_all_orders
+  COMMAND morsehgp3d_hierarchy_hartigan_all_orders_tests
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_hartigan_all_orders
+  PROPERTIES TIMEOUT 180
 )
 add_test(
   NAME morsehgp3d.hierarchy_boruvka

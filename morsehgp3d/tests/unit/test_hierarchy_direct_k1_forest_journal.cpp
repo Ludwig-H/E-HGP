@@ -1,5 +1,4 @@
 #include "morsehgp3d/hierarchy/direct_k1_forest_journal.hpp"
-#include "morsehgp3d/hierarchy/emst.hpp"
 
 #include <algorithm>
 #include <array>
@@ -28,7 +27,6 @@ using morsehgp3d::hierarchy::ExactDirectSupportTerminalBudget;
 using morsehgp3d::hierarchy::ExactDirectSupportTerminalFacade;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
-using morsehgp3d::hierarchy::K1EmstResult;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
@@ -185,19 +183,6 @@ struct K1FusionSignature {
           signature.merged_component.begin(), signature.merged_component.end());
       node_components[*group.created_node_id] = signature.merged_component;
       result.push_back(std::move(signature));
-    }
-  }
-  std::sort(result.begin(), result.end(), fusion_signature_less);
-  return result;
-}
-
-[[nodiscard]] std::vector<K1FusionSignature> emst_fusion_signatures(
-    const K1EmstResult& reference) {
-  std::vector<K1FusionSignature> result;
-  for (const auto& batch : reference.equal_level_batches) {
-    for (const auto& fusion : batch.multifusions) {
-      result.push_back(K1FusionSignature{
-          batch.level, fusion.child_components, fusion.merged_component});
     }
   }
   std::sort(result.begin(), result.end(), fusion_signature_less);
@@ -560,18 +545,28 @@ void test_q1_continuation_preserves_the_prior_root() {
   check_streaming_replay(cloud, pipeline, "q=1 continuation fixture");
 }
 
-void test_pair_frontier_reduction_matches_independent_emst_oracle() {
+void test_pair_frontier_reduction_matches_sealed_emst_fixture() {
   const std::array<CertifiedPoint3, 4U> points{
       point(0.0), point(2.0), point(8.0), point(10.0)};
   const CanonicalPointCloud cloud = canonical_cloud(points);
 
-  // The path under test is completed before the independent oracle is built.
-  // None of its builders accepts or constructs an EMST.
+  // These signatures were sealed from the independent EMST oracle. Keeping
+  // them as fixture data prevents that oracle from entering this direct binary.
   const DirectPipeline pipeline = direct_pipeline(cloud);
   const auto actual = direct_fusion_signatures(pipeline.forest);
-  const K1EmstResult reference =
-      morsehgp3d::hierarchy::build_exact_complete_graph_emst(cloud);
-  const auto expected = emst_fusion_signatures(reference);
+  const std::vector<K1FusionSignature> expected{
+      K1FusionSignature{
+          level(1),
+          {{PointId{0U}}, {PointId{1U}}},
+          {PointId{0U}, PointId{1U}}},
+      K1FusionSignature{
+          level(1),
+          {{PointId{2U}}, {PointId{3U}}},
+          {PointId{2U}, PointId{3U}}},
+      K1FusionSignature{
+          level(9),
+          {{PointId{0U}, PointId{1U}}, {PointId{2U}, PointId{3U}}},
+          {PointId{0U}, PointId{1U}, PointId{2U}, PointId{3U}}}};
 
   check(
       pipeline.forest.certified_order_one_forest() &&
@@ -580,7 +575,7 @@ void test_pair_frontier_reduction_matches_independent_emst_oracle() {
       "the pair/frontier reduction closes without constructing an EMST or global geometry");
   check(
       actual == expected,
-      "the pair/frontier reduction reproduces every exact EMST fusion level and component group");
+      "the pair/frontier reduction reproduces the sealed independent EMST fixture");
   check(
       actual.size() == 3U && actual[0].squared_level == level(1) &&
           actual[1].squared_level == level(1) &&
@@ -594,7 +589,7 @@ int main() {
   test_two_points_freeze_two_roots();
   test_e3_equal_level_is_one_ternary_multifusion();
   test_q1_continuation_preserves_the_prior_root();
-  test_pair_frontier_reduction_matches_independent_emst_oracle();
+  test_pair_frontier_reduction_matches_sealed_emst_fixture();
   if (failures != 0) {
     std::cerr << failures << " direct K1 forest journal check(s) failed\n";
     return 1;
