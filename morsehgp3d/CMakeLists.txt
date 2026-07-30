@@ -2334,6 +2334,49 @@ else()
   )
 endif()
 
+# Resident exact multi-order consumer for the device-tiled frontier.  The
+# host-only target intentionally leaves the classifier launcher unresolved:
+# unit tests provide the hostile fake below, while the CUDA target provides
+# the sole production definition.  Candidate, prune and payload arrays never
+# cross this contract to the host.
+add_library(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+  STATIC
+    src/cuda/phase15_morton_yao48_ranked_pair_tile_classifier_internal.hpp
+    src/gpu/morton_yao48_ranked_pair_tile_classifier.cpp
+)
+add_library(
+  morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+  ALIAS
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+  PUBLIC
+    morsehgp3d::gpu_morton_yao48_device_tiled_pair_frontier_host_contract
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Standalone Phase 15 radial-subtree filter contract.  It is intentionally
 # not wired into the product frontier: CUDA proposes only the conservative
 # minDist_down >= max(3*D_up) range cut and exact CPU replay is mandatory.
@@ -3154,6 +3197,56 @@ if(MORSEHGP3D_ENABLE_CUDA)
   else()
     target_compile_options(
       morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_library(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+    STATIC
+      include/morsehgp3d/gpu/morton_yao48_ranked_pair_tile_classifier.hpp
+      src/cuda/phase15_morton_yao48_ranked_pair_tile_classifier_internal.hpp
+      src/cuda/phase15_morton_yao48_ranked_pair_tile_classifier.cu
+      src/gpu/morton_yao48_ranked_pair_tile_classifier.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier
+    ALIAS morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+  )
+  target_include_directories(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+    PUBLIC
+      morsehgp3d::gpu_morton_yao48_device_tiled_pair_frontier
+      morsehgp3d::spatial
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
       PRIVATE
         $<$<COMPILE_LANGUAGE:CXX>:-Wall>
         $<$<COMPILE_LANGUAGE:CXX>:-Wextra>

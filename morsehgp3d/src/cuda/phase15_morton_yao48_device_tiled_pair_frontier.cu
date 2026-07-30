@@ -106,6 +106,19 @@ struct Phase15MortonYao48DeviceTiledNode {
   std::uint64_t leaf_end;
 };
 
+// Register-resident view of one node from the already-certified traversal
+// lease.  Bounds are resolved from their extremum PointIds exactly once per
+// warp and per visited node; witness tests therefore never repeat the six
+// indirect coordinate loads.  Structural certification belongs to the LBVH
+// lease and is deliberately not replayed for every (anchor, node) pair.
+struct Phase15MortonYao48DeviceTiledHotNode {
+  std::uint64_t lower_bits[3];
+  std::uint64_t upper_bits[3];
+  std::uint64_t right_child;
+  std::uint64_t leaf_begin;
+  std::uint64_t leaf_end;
+};
+
 static_assert(std::is_standard_layout_v<Phase15MortonYao48DeviceTiledNode>);
 static_assert(
     std::is_trivially_copyable_v<Phase15MortonYao48DeviceTiledNode>);
@@ -789,85 +802,50 @@ classify_yao48_cone_by_intervals(
   return result;
 }
 
-[[nodiscard]] __device__ bool validate_node_warp(
+[[nodiscard]] __device__ Phase15MortonYao48DeviceTiledHotNode
+load_certified_hot_node_warp(
     const Phase15MortonYao48DeviceTiledNode* nodes,
     std::uint64_t node_index,
-    std::uint64_t node_count,
     const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
     unsigned int lane) noexcept {
-  if (node_index >= node_count) {
-    return false;
-  }
-  const Phase15MortonYao48DeviceTiledNode& node = nodes[node_index];
-  bool invalid = false;
+  Phase15MortonYao48DeviceTiledHotNode hot{};
   if (lane == 0U) {
-    invalid = node.leaf_begin >= node.leaf_end ||
-              node.leaf_end > point_count;
-    if (!invalid) {
-      const std::uint64_t width = node.leaf_end - node.leaf_begin;
-      invalid =
-          width > UINT64_MAX / UINT64_C(2) + UINT64_C(1) ||
-          width > node_index / UINT64_C(2) + UINT64_C(1);
-      if (!invalid && width == UINT64_C(1)) {
-        invalid = node.left_child != kInvalid ||
-                  node.right_child != kInvalid;
-      } else if (!invalid) {
-        invalid = node_index == 0U ||
-                  node.right_child != node_index - UINT64_C(1) ||
-                  node.right_child >= node_count ||
-                  node.left_child >= node.right_child;
-        if (!invalid) {
-          const Phase15MortonYao48DeviceTiledNode& left =
-              nodes[node.left_child];
-          const Phase15MortonYao48DeviceTiledNode& right =
-              nodes[node.right_child];
-          invalid = left.leaf_begin != node.leaf_begin ||
-                    right.leaf_end != node.leaf_end ||
-                    left.leaf_end != right.leaf_begin ||
-                    left.leaf_begin >= left.leaf_end ||
-                    right.leaf_begin >= right.leaf_end;
-          if (!invalid) {
-            const std::uint64_t right_width =
-                right.leaf_end - right.leaf_begin;
-            invalid = right_width > node_index / UINT64_C(2) ||
-                      node.left_child !=
-                          node_index - UINT64_C(2) * right_width;
-          }
-        }
-      }
-    }
+    const Phase15MortonYao48DeviceTiledNode& source = nodes[node_index];
+    hot.right_child = source.right_child;
+    hot.leaf_begin = source.leaf_begin;
+    hot.leaf_end = source.leaf_end;
   }
+  hot.right_child = warp_broadcast_u64(hot.right_child, 0);
+  hot.leaf_begin = warp_broadcast_u64(hot.leaf_begin, 0);
+  hot.leaf_end = warp_broadcast_u64(hot.leaf_end, 0);
+
   if (lane < kAxisCount) {
-    const std::uint64_t lower_id = node.lower_point_ids[lane];
-    const std::uint64_t upper_id = node.upper_point_ids[lane];
-    if (lower_id >= point_count || upper_id >= point_count) {
-      invalid = true;
-    } else {
-      const device::DeviceInterval lower = device::point_interval(
-          coordinate_bits[static_cast<std::uint64_t>(lane) * point_count +
-                          lower_id]);
-      const device::DeviceInterval upper = device::point_interval(
-          coordinate_bits[static_cast<std::uint64_t>(lane) * point_count +
-                          upper_id]);
-      invalid = !lower.valid || !upper.valid || lower.lower > upper.lower;
-    }
+    const Phase15MortonYao48DeviceTiledNode& source = nodes[node_index];
+    hot.lower_bits[lane] =
+        coordinate_bits[static_cast<std::uint64_t>(lane) * point_count +
+                        source.lower_point_ids[lane]];
+    hot.upper_bits[lane] =
+        coordinate_bits[static_cast<std::uint64_t>(lane) * point_count +
+                        source.upper_point_ids[lane]];
   }
-  return !__any_sync(kFullWarpMask, invalid);
+  for (unsigned int axis = 0U; axis < kAxisCount; ++axis) {
+    hot.lower_bits[axis] =
+        warp_broadcast_u64(hot.lower_bits[axis], static_cast<int>(axis));
+    hot.upper_bits[axis] =
+        warp_broadcast_u64(hot.upper_bits[axis], static_cast<int>(axis));
+  }
+  return hot;
 }
 
-[[nodiscard]] __device__ bool witness_certifies_node(
-    const Phase15MortonYao48DeviceTiledWitnessBankSlot& witness,
-    const Phase15MortonYao48DeviceTiledNode& node,
+[[nodiscard]] __device__ bool witness_point_certifies_node(
+    std::uint64_t witness_point_id,
+    const Phase15MortonYao48DeviceTiledHotNode& node,
     const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
-    std::uint64_t anchor_point_id,
-    std::uint64_t anchor_morton_position) noexcept {
-  if (witness.witness_point_id == kInvalid ||
-      witness.witness_point_id >= point_count ||
-      witness.witness_point_id == anchor_point_id ||
-      witness.witness_morton_position < node.leaf_end ||
-      witness.witness_morton_position >= anchor_morton_position) {
+    std::uint64_t anchor_point_id) noexcept {
+  if (witness_point_id == kInvalid || witness_point_id >= point_count ||
+      witness_point_id == anchor_point_id) {
     return false;
   }
 
@@ -878,7 +856,7 @@ classify_yao48_cone_by_intervals(
                         anchor_point_id];
     const std::uint64_t witness_bits =
         coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
-                        witness.witness_point_id];
+                        witness_point_id];
     device::DeviceInterval direction;
     const int sign = certified_difference_sign(
         witness_bits, anchor_bits, direction);
@@ -888,15 +866,8 @@ classify_yao48_cone_by_intervals(
     if (sign == 0) {
       continue;
     }
-    const std::uint64_t bound_point_id =
-        sign > 0 ? node.lower_point_ids[axis]
-                 : node.upper_point_ids[axis];
-    if (bound_point_id >= point_count) {
-      return false;
-    }
     const std::uint64_t bound_bits =
-        coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
-                        bound_point_id];
+        sign > 0 ? node.lower_bits[axis] : node.upper_bits[axis];
     const device::DeviceInterval delta = device::subtract_intervals(
         device::point_interval(bound_bits),
         device::point_interval(witness_bits));
@@ -912,29 +883,95 @@ classify_yao48_cone_by_intervals(
   return sum.valid && sum.lower >= 0.0;
 }
 
+[[nodiscard]] __device__ bool witness_certifies_node(
+    const Phase15MortonYao48DeviceTiledWitnessBankSlot& witness,
+    const Phase15MortonYao48DeviceTiledHotNode& node,
+    const std::uint64_t* coordinate_bits,
+    std::uint64_t point_count,
+    std::uint64_t anchor_point_id,
+    std::uint64_t anchor_morton_position) noexcept {
+  return witness.witness_morton_position >= node.leaf_end &&
+         witness.witness_morton_position < anchor_morton_position &&
+         witness_point_certifies_node(
+             witness.witness_point_id,
+             node,
+             coordinate_bits,
+             point_count,
+             anchor_point_id);
+}
+
 struct Phase15MortonYao48DeviceTiledSelectedWitnesses {
-  std::uint64_t point_ids[10];
   std::uint64_t bank_mask{};
   std::uint64_t count{};
 };
+
+// A certified prune is followed only by nodes whose Morton leaf interval is
+// strictly earlier in the same reverse-postorder traversal.  Its ten witness
+// PointIds therefore remain outside every subsequently visited node.  Trying
+// that immutable receipt first is an exact cache: failure merely falls back
+// to an exhaustive scan of all bank slots.
+[[nodiscard]] __device__ Phase15MortonYao48DeviceTiledSelectedWitnesses
+try_cached_certifying_witnesses_warp(
+    const Phase15MortonYao48DeviceTiledPruneRegionRecord* cached,
+    Phase15MortonYao48DeviceTiledPruneRegionRecord* output,
+    const Phase15MortonYao48DeviceTiledHotNode& node,
+    const std::uint64_t* coordinate_bits,
+    std::uint64_t point_count,
+    std::uint64_t anchor_point_id,
+    std::uint64_t required_witness_count,
+    unsigned int lane) noexcept {
+  Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
+  if (cached == nullptr || required_witness_count == 0U ||
+      required_witness_count > 10U) {
+    return selected;
+  }
+  std::uint64_t point_id = kInvalid;
+  bool certifies = false;
+  if (lane < required_witness_count) {
+    point_id = cached->witness_point_ids[lane];
+    certifies = witness_point_certifies_node(
+        point_id,
+        node,
+        coordinate_bits,
+        point_count,
+        anchor_point_id);
+  }
+  const unsigned int required_mask =
+      required_witness_count == kWarpSize
+          ? kFullWarpMask
+          : ((1U << static_cast<unsigned int>(required_witness_count)) - 1U);
+  const unsigned int certified_mask =
+      __ballot_sync(kFullWarpMask, certifies) & required_mask;
+  if (certified_mask != required_mask) {
+    return selected;
+  }
+  if (lane < required_witness_count) {
+    output->witness_point_ids[lane] = point_id;
+  }
+  if (lane == 0U) {
+    for (std::uint64_t index = required_witness_count; index < 10U; ++index) {
+      output->witness_point_ids[index] = UINT64_C(0);
+    }
+  }
+  selected.bank_mask = cached->retained_witness_bank_mask;
+  selected.count = required_witness_count;
+  return selected;
+}
 
 [[nodiscard]] __device__ Phase15MortonYao48DeviceTiledSelectedWitnesses
 select_certifying_witnesses_warp(
     const Phase15MortonYao48DeviceTiledWitnessBankSlot* witnesses,
     std::uint64_t witness_count,
     std::uint64_t witness_slots_per_bank,
-    const Phase15MortonYao48DeviceTiledNode& node,
+    const Phase15MortonYao48DeviceTiledHotNode& node,
     const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
     std::uint64_t anchor_point_id,
     std::uint64_t anchor_morton_position,
     std::uint64_t required_witness_count,
+    Phase15MortonYao48DeviceTiledPruneRegionRecord* output,
     unsigned int lane) noexcept {
   Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
-#pragma unroll
-  for (unsigned int index = 0U; index < 10U; ++index) {
-    selected.point_ids[index] = kInvalid;
-  }
 
   for (std::uint64_t base = 0U;
        base < witness_count && selected.count < required_witness_count;
@@ -963,19 +1000,21 @@ select_certifying_witnesses_warp(
           warp_broadcast_u64(candidate_point_id, owner_lane);
       const std::uint64_t bank =
           warp_broadcast_u64(candidate_bank, owner_lane);
-      bool duplicate = false;
-#pragma unroll
-      for (unsigned int prior = 0U; prior < 10U; ++prior) {
-        duplicate = duplicate ||
-                    (prior < selected.count &&
-                     selected.point_ids[prior] == point_id);
-      }
-      if (!duplicate && point_id != kInvalid && bank < kConeCount) {
-        selected.point_ids[selected.count] = point_id;
+      // Every target leaf is encountered once and has one unique certified
+      // cone.  Consequently active bank slots cannot duplicate a PointId.
+      if (point_id != kInvalid && bank < kConeCount) {
+        if (lane == 0U) {
+          output->witness_point_ids[selected.count] = point_id;
+        }
         selected.bank_mask |= UINT64_C(1) << bank;
         ++selected.count;
       }
       mask &= mask - 1U;
+    }
+  }
+  if (selected.count == required_witness_count && lane == 0U) {
+    for (std::uint64_t index = required_witness_count; index < 10U; ++index) {
+      output->witness_point_ids[index] = UINT64_C(0);
     }
   }
   return selected;
@@ -1349,17 +1388,13 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
       fatal = true;
     }
 
+    bool malformed_initial_root = false;
+    if (!fatal && !complete && !load_checkpoint && lane == 0U) {
+      malformed_initial_root = nodes[cursor].leaf_begin != 0U ||
+                               nodes[cursor].leaf_end != point_count;
+    }
     if (!fatal && !complete &&
-        (!validate_node_warp(
-             nodes,
-             cursor,
-             node_count,
-             coordinate_bits,
-             point_count,
-             lane) ||
-         (!load_checkpoint &&
-          (nodes[cursor].leaf_begin != 0U ||
-           nodes[cursor].leaf_end != point_count)))) {
+        __any_sync(kFullWarpMask, malformed_initial_root)) {
       failure_code = kFailureMalformed;
       fatal = true;
     }
@@ -1379,23 +1414,21 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
         }
         break;
       }
-      if (!validate_node_warp(
-              nodes,
-              cursor,
-              node_count,
-              coordinate_bits,
-              point_count,
-              lane)) {
-        failure_code = kFailureMalformed;
-        fatal = true;
-        break;
-      }
-      if (cumulative_node_visit_count >= node_count) {
+      if (cursor >= node_count ||
+          cumulative_node_visit_count >= node_count) {
         stop_reason = kStopNodes;
         fatal = true;
         break;
       }
-      const Phase15MortonYao48DeviceTiledNode node = nodes[cursor];
+      const Phase15MortonYao48DeviceTiledHotNode node =
+          load_certified_hot_node_warp(
+              nodes, cursor, coordinate_bits, point_count, lane);
+      if (node.leaf_begin >= node.leaf_end ||
+          node.leaf_end > point_count) {
+        failure_code = kFailureMalformed;
+        fatal = true;
+        break;
+      }
       ++node_visit_count;
       ++cumulative_node_visit_count;
       ++subdivision_node_visit_count;
@@ -1428,21 +1461,46 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
 
       Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
       if (retained_witness_count >= maximum_closed_rank - UINT64_C(1)) {
-        selected = select_certifying_witnesses_warp(
-            anchor_witnesses,
-            witness_capacity,
-            witness_slots_per_bank,
+        if (prune_count >= prune_capacity) {
+          failure_code = kFailureInvariant;
+          fatal = true;
+          break;
+        }
+        Phase15MortonYao48DeviceTiledPruneRegionRecord* output_prune =
+            anchor_prunes + prune_count;
+        const Phase15MortonYao48DeviceTiledPruneRegionRecord* cached_prune =
+            prune_count == 0U ? nullptr : output_prune - 1U;
+        selected = try_cached_certifying_witnesses_warp(
+            cached_prune,
+            output_prune,
             node,
             coordinate_bits,
             point_count,
             anchor_point_id,
-            anchor_morton_position,
             maximum_closed_rank - UINT64_C(1),
             lane);
+        if (selected.count != maximum_closed_rank - UINT64_C(1)) {
+          selected = select_certifying_witnesses_warp(
+              anchor_witnesses,
+              witness_capacity,
+              witness_slots_per_bank,
+              node,
+              coordinate_bits,
+              point_count,
+              anchor_point_id,
+              anchor_morton_position,
+              maximum_closed_rank - UINT64_C(1),
+              output_prune,
+              lane);
+        }
       }
       const bool can_prune =
           selected.count == maximum_closed_rank - UINT64_C(1);
       if (can_prune) {
+        // Cached witnesses are written cooperatively by lanes 0..9.  Publish
+        // the complete receipt before lane 0 commits its metadata and before
+        // the next reverse-postorder node can reuse it as an exact cache.
+        __syncwarp(kFullWarpMask);
         if (prune_count >= prune_capacity ||
             cumulative_prune_count == UINT64_MAX) {
           failure_code = kFailureInvariant;
@@ -1450,19 +1508,14 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
           break;
         }
         if (lane == 0U) {
-          Phase15MortonYao48DeviceTiledPruneRegionRecord record{};
+          Phase15MortonYao48DeviceTiledPruneRegionRecord& record =
+              anchor_prunes[prune_count];
           record.anchor_morton_position = anchor_morton_position;
           record.node_index = cursor;
           record.certified_pair_mass = width;
           record.retained_witness_count = selected.count;
           record.retained_witness_bank_mask = selected.bank_mask;
           record.flags = kPruneFlagClosedNonnegativeInterval;
-          for (std::size_t index = 0U; index < 10U; ++index) {
-            record.witness_point_ids[index] =
-                index < selected.count ? selected.point_ids[index]
-                                       : UINT64_C(0);
-          }
-          anchor_prunes[prune_count] = record;
         }
         ++prune_count;
         ++cumulative_prune_count;
