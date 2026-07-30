@@ -48,6 +48,17 @@ constexpr std::size_t kMaximumOrder = 10U;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::size_t kComponentBridgeNeighborCount = 6U;
 constexpr std::size_t kComponentBridgeProjectionSupportCount = 8U;
+constexpr std::size_t kComponentBridgeMaximumComponentCount = 256U;
+constexpr std::size_t kComponentBridgeMemberProjectionBudgetFactor = 16U;
+constexpr std::size_t kComponentBridgeMaximumPairCount =
+    kComponentBridgeMaximumComponentCount * kComponentBridgeNeighborCount;
+constexpr std::size_t kComponentBridgeMaximumCrossDistanceEvaluationCount =
+    kComponentBridgeProjectionSupportCount *
+    kComponentBridgeProjectionSupportCount *
+    kComponentBridgeMaximumPairCount;
+constexpr std::size_t kComponentBridgeMaximumCentroidDistanceEvaluationCount =
+    kComponentBridgeMaximumComponentCount *
+    (kComponentBridgeMaximumComponentCount - 1U);
 constexpr std::uint64_t kSloNanoseconds = UINT64_C(100000000);
 // The offline k=2 guard compares a direct binary64 core distance with the
 // same support-two diameter reconstructed by the historical triangle
@@ -72,6 +83,7 @@ struct Options {
   std::uint64_t seed_base{1U};
   std::size_t maximum_order{kMaximumOrder};
   std::size_t seed_window{32U};
+  std::size_t export_maximum_order{kMaximumOrder};
   std::optional<std::filesystem::path> emit_tree_path;
 };
 
@@ -99,6 +111,7 @@ struct MergeRecord {
 struct OrderReduction {
   std::size_t order{};
   std::vector<MergeRecord> merges;
+  std::size_t merge_record_count{};
   std::uint64_t digest{};
   double root_squared_level{};
 };
@@ -109,6 +122,14 @@ struct Topology {
   std::size_t top_k_component_count{};
   std::size_t component_bridge_pair_count{};
   std::size_t component_bridge_support_evaluation_count{};
+  std::size_t component_bridge_centroid_distance_evaluation_count{};
+  std::size_t component_bridge_member_projection_evaluation_budget{};
+  std::size_t component_bridge_member_projection_evaluation_count{};
+  std::size_t component_bridge_cross_distance_evaluation_budget{
+      kComponentBridgeMaximumCrossDistanceEvaluationCount};
+  std::size_t component_bridge_cross_distance_evaluation_count{};
+  bool component_bridge_budget_satisfied{};
+  std::string component_bridge_budget_stop_reason{"not_evaluated"};
 };
 
 struct RunMetrics {
@@ -130,11 +151,24 @@ struct RunMetrics {
   std::size_t top_k_component_count{};
   std::size_t component_bridge_pair_count{};
   std::size_t component_bridge_support_evaluation_count{};
+  std::size_t component_bridge_centroid_distance_evaluation_count{};
+  std::size_t component_bridge_member_projection_evaluation_budget{};
+  std::size_t component_bridge_member_projection_evaluation_count{};
+  std::size_t component_bridge_cross_distance_evaluation_budget{};
+  std::size_t component_bridge_cross_distance_evaluation_count{};
+  bool component_bridge_budget_satisfied{};
+  std::string component_bridge_budget_stop_reason;
   std::size_t neighbor_record_count{};
   std::size_t lbvh_kernel_launch_count{};
   std::size_t top_k_node_visit_count{};
   std::size_t top_k_strict_prune_count{};
   std::string device_name;
+  std::size_t materialized_merge_record_count{};
+  std::size_t released_merge_record_count{};
+  std::size_t retained_merge_record_count{};
+  bool merge_records_released_after_digest_and_export{};
+  std::size_t exported_order_count{};
+  std::size_t exported_merge_record_count{};
   std::vector<OrderReduction> reductions;
 };
 
@@ -283,6 +317,9 @@ struct RunMetrics {
     } else if (argument == "--seed-window" && index + 1 < argc) {
       options.seed_window =
           parse_positive_size(argv[++index], "invalid --seed-window");
+    } else if (argument == "--export-max-order" && index + 1 < argc) {
+      options.export_maximum_order =
+          parse_positive_size(argv[++index], "invalid --export-max-order");
     } else if (argument == "--emit-tree-path" && index + 1 < argc) {
       const std::string value{argv[++index]};
       if (value.empty()) {
@@ -295,7 +332,8 @@ struct RunMetrics {
           "[--repetitions N] [--warmups N] "
           "[--family affine_uniform_binary64|jittered_dyadic_grid3d|"
           "balanced_multiscale_clusters] [--seed-base N] "
-          "[--max-order 10] [--seed-window W] [--emit-tree-path PATH]");
+          "[--max-order 10] [--seed-window W] [--export-max-order N] "
+          "[--emit-tree-path PATH]");
     }
   }
   if (options.point_count <= kMaximumOrder ||
@@ -308,6 +346,10 @@ struct RunMetrics {
   }
   if (options.seed_window < options.maximum_order) {
     throw std::invalid_argument("--seed-window must be at least --max-order");
+  }
+  if (options.export_maximum_order > options.maximum_order) {
+    throw std::invalid_argument(
+        "--export-max-order must lie in 1..--max-order");
   }
   if (options.warmups > 1'000U || options.repetitions > 1'000U) {
     throw std::invalid_argument("warmup and repetition counts are bounded at 1000");
@@ -548,6 +590,41 @@ make_balanced_multiscale_cloud(std::size_t count, std::uint64_t seed) {
   return std::bit_cast<double>(lowered_bits);
 }
 
+[[noreturn]] void throw_component_bridge_budget_exhausted(
+    std::string_view stop_reason,
+    std::size_t actual,
+    std::size_t budget) {
+  std::ostringstream message;
+  message << "component bridge budget exhausted: stop_reason=" << stop_reason
+          << " actual=" << actual << " budget=" << budget;
+  throw std::runtime_error(message.str());
+}
+
+[[nodiscard]] std::size_t checked_component_bridge_sum(
+    std::size_t left,
+    std::size_t right,
+    std::string_view role) {
+  if (right > std::numeric_limits<std::size_t>::max() - left) {
+    throw_component_bridge_budget_exhausted(
+        role, std::numeric_limits<std::size_t>::max(),
+        std::numeric_limits<std::size_t>::max());
+  }
+  return left + right;
+}
+
+[[nodiscard]] std::size_t checked_component_bridge_product(
+    std::size_t left,
+    std::size_t right,
+    std::string_view role) {
+  if (left != 0U &&
+      right > std::numeric_limits<std::size_t>::max() / left) {
+    throw_component_bridge_budget_exhausted(
+        role, std::numeric_limits<std::size_t>::max(),
+        std::numeric_limits<std::size_t>::max());
+  }
+  return left * right;
+}
+
 class DisjointSet {
  public:
   explicit DisjointSet(std::size_t count)
@@ -648,6 +725,12 @@ void append_component_bridge_edges(
     std::span<const BaseEdge> top_k_edges,
     Topology& topology) {
   const std::size_t point_count = cloud.size();
+  topology.component_bridge_member_projection_evaluation_budget =
+      checked_component_bridge_product(
+          point_count, kComponentBridgeMemberProjectionBudgetFactor,
+          "member_projection_budget_overflow");
+  topology.component_bridge_cross_distance_evaluation_budget =
+      kComponentBridgeMaximumCrossDistanceEvaluationCount;
   DisjointSet point_components{point_count};
   for (const BaseEdge& edge : top_k_edges) {
     static_cast<void>(point_components.unite(
@@ -675,18 +758,32 @@ void append_component_bridge_edges(
     }
   }
   topology.top_k_component_count = components.size();
+  if (components.size() > kComponentBridgeMaximumComponentCount) {
+    throw_component_bridge_budget_exhausted(
+        "component_count_limit", components.size(),
+        kComponentBridgeMaximumComponentCount);
+  }
   for (TopKComponent& component : components) {
     const double denominator = static_cast<double>(component.members.size());
     for (double& coordinate : component.center) {
       coordinate /= denominator;
+      if (!std::isfinite(coordinate)) {
+        throw_component_bridge_budget_exhausted(
+            "non_finite_component_centroid", components.size(),
+            kComponentBridgeMaximumComponentCount);
+      }
     }
   }
   if (components.size() <= 1U) {
+    topology.component_bridge_budget_satisfied = true;
+    topology.component_bridge_budget_stop_reason = "none";
     return;
   }
 
   std::vector<ComponentPair> pairs;
-  pairs.reserve(components.size() * kComponentBridgeNeighborCount);
+  pairs.reserve(checked_component_bridge_product(
+      components.size(), kComponentBridgeNeighborCount,
+      "component_pair_capacity_overflow"));
   for (std::size_t source = 0U; source < components.size(); ++source) {
     std::vector<std::pair<double, std::size_t>> neighbors;
     neighbors.reserve(components.size() - 1U);
@@ -699,6 +796,16 @@ void append_component_bridge_edges(
         const double delta =
             components[source].center[axis] - components[target].center[axis];
         distance += delta * delta;
+      }
+      topology.component_bridge_centroid_distance_evaluation_count =
+          checked_component_bridge_sum(
+              topology.component_bridge_centroid_distance_evaluation_count,
+              1U, "centroid_distance_evaluation_count_overflow");
+      if (!std::isfinite(distance) || distance < 0.0) {
+        throw_component_bridge_budget_exhausted(
+            "non_finite_centroid_distance",
+            topology.component_bridge_centroid_distance_evaluation_count,
+            kComponentBridgeMaximumCentroidDistanceEvaluationCount);
       }
       neighbors.emplace_back(distance, target);
     }
@@ -722,17 +829,67 @@ void append_component_bridge_edges(
   std::sort(pairs.begin(), pairs.end(), component_pair_less);
   pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
   topology.component_bridge_pair_count = pairs.size();
+  if (topology.component_bridge_centroid_distance_evaluation_count >
+      kComponentBridgeMaximumCentroidDistanceEvaluationCount) {
+    throw_component_bridge_budget_exhausted(
+        "centroid_distance_evaluation_limit",
+        topology.component_bridge_centroid_distance_evaluation_count,
+        kComponentBridgeMaximumCentroidDistanceEvaluationCount);
+  }
+  if (pairs.size() > kComponentBridgeMaximumPairCount) {
+    throw_component_bridge_budget_exhausted(
+        "component_pair_count_limit", pairs.size(),
+        kComponentBridgeMaximumPairCount);
+  }
+
+  std::size_t member_projection_evaluation_count{};
+  std::size_t cross_distance_evaluation_count{};
+  for (const ComponentPair& pair : pairs) {
+    const std::size_t pair_member_count = checked_component_bridge_sum(
+        components[pair.first].members.size(),
+        components[pair.second].members.size(),
+        "member_projection_pair_count_overflow");
+    member_projection_evaluation_count = checked_component_bridge_sum(
+        member_projection_evaluation_count, pair_member_count,
+        "member_projection_evaluation_count_overflow");
+    const std::size_t pair_cross_count = checked_component_bridge_product(
+        std::min(kComponentBridgeProjectionSupportCount,
+                 components[pair.first].members.size()),
+        std::min(kComponentBridgeProjectionSupportCount,
+                 components[pair.second].members.size()),
+        "cross_distance_pair_count_overflow");
+    cross_distance_evaluation_count = checked_component_bridge_sum(
+        cross_distance_evaluation_count, pair_cross_count,
+        "cross_distance_evaluation_count_overflow");
+  }
+  topology.component_bridge_member_projection_evaluation_count =
+      member_projection_evaluation_count;
+  topology.component_bridge_cross_distance_evaluation_count =
+      cross_distance_evaluation_count;
+  topology.component_bridge_support_evaluation_count =
+      checked_component_bridge_sum(
+          member_projection_evaluation_count,
+          cross_distance_evaluation_count,
+          "support_evaluation_count_overflow");
+  if (member_projection_evaluation_count >
+      topology.component_bridge_member_projection_evaluation_budget) {
+    throw_component_bridge_budget_exhausted(
+        "member_projection_evaluation_limit",
+        member_projection_evaluation_count,
+        topology.component_bridge_member_projection_evaluation_budget);
+  }
+  if (cross_distance_evaluation_count >
+      topology.component_bridge_cross_distance_evaluation_budget) {
+    throw_component_bridge_budget_exhausted(
+        "cross_distance_evaluation_limit", cross_distance_evaluation_count,
+        topology.component_bridge_cross_distance_evaluation_budget);
+  }
+  topology.component_bridge_budget_satisfied = true;
+  topology.component_bridge_budget_stop_reason = "none";
 
   DisjointSet component_graph{components.size()};
   for (const ComponentPair& pair : pairs) {
     static_cast<void>(component_graph.unite(pair.first, pair.second));
-    topology.component_bridge_support_evaluation_count +=
-        components[pair.first].members.size() +
-        components[pair.second].members.size() +
-        std::min(kComponentBridgeProjectionSupportCount,
-                 components[pair.first].members.size()) *
-            std::min(kComponentBridgeProjectionSupportCount,
-                     components[pair.second].members.size());
   }
   const std::size_t component_root = component_graph.find(0U);
   for (std::size_t component = 1U; component < components.size(); ++component) {
@@ -827,6 +984,9 @@ void append_component_bridge_edges(
         bridges[index] = best_bridge;
       }
     });
+  }
+  for (std::jthread& worker : workers) {
+    worker.join();
   }
   topology.edges.insert(topology.edges.end(), bridges.begin(), bridges.end());
 }
@@ -943,6 +1103,7 @@ void append_component_bridge_edges(
   if (reduction.merges.size() != point_count - 1U) {
     throw std::runtime_error("Kruskal did not materialize a spanning tree");
   }
+  reduction.merge_record_count = reduction.merges.size();
   return reduction;
 }
 
@@ -997,6 +1158,13 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
 }
 
 void materialize_output(std::vector<OrderReduction>& reductions) {
+  for (const OrderReduction& reduction : reductions) {
+    if (reduction.merge_record_count == 0U ||
+        reduction.merge_record_count != reduction.merges.size()) {
+      throw std::logic_error(
+          "an order reduction lost its materialized merge count");
+    }
+  }
   std::atomic<std::size_t> next_order{0U};
   const unsigned int hardware = std::thread::hardware_concurrency();
   const std::size_t worker_count = std::min(
@@ -1080,6 +1248,20 @@ void materialize_output(std::vector<OrderReduction>& reductions) {
   metrics.component_bridge_pair_count = topology.component_bridge_pair_count;
   metrics.component_bridge_support_evaluation_count =
       topology.component_bridge_support_evaluation_count;
+  metrics.component_bridge_centroid_distance_evaluation_count =
+      topology.component_bridge_centroid_distance_evaluation_count;
+  metrics.component_bridge_member_projection_evaluation_budget =
+      topology.component_bridge_member_projection_evaluation_budget;
+  metrics.component_bridge_member_projection_evaluation_count =
+      topology.component_bridge_member_projection_evaluation_count;
+  metrics.component_bridge_cross_distance_evaluation_budget =
+      topology.component_bridge_cross_distance_evaluation_budget;
+  metrics.component_bridge_cross_distance_evaluation_count =
+      topology.component_bridge_cross_distance_evaluation_count;
+  metrics.component_bridge_budget_satisfied =
+      topology.component_bridge_budget_satisfied;
+  metrics.component_bridge_budget_stop_reason =
+      topology.component_bridge_budget_stop_reason;
   metrics.topology_ns = nanoseconds(Clock::now() - topology_start);
 
   const auto reductions_start = Clock::now();
@@ -1089,6 +1271,17 @@ void materialize_output(std::vector<OrderReduction>& reductions) {
 
   const auto materialization_start = Clock::now();
   materialize_output(metrics.reductions);
+  for (const OrderReduction& reduction : metrics.reductions) {
+    if (reduction.merge_record_count >
+        std::numeric_limits<std::size_t>::max() -
+            metrics.materialized_merge_record_count) {
+      throw std::length_error(
+          "the materialized merge record count overflows size_t");
+    }
+    metrics.materialized_merge_record_count += reduction.merge_record_count;
+  }
+  metrics.retained_merge_record_count =
+      metrics.materialized_merge_record_count;
   metrics.output_materialization_ns =
       nanoseconds(Clock::now() - materialization_start);
   metrics.warm_e2e_ns = nanoseconds(Clock::now() - e2e_start);
@@ -1130,7 +1323,13 @@ void export_trees(
     const std::filesystem::path& path,
     std::size_t point_count,
     std::uint64_t seed,
+    std::size_t maximum_export_order,
     const std::vector<OrderReduction>& reductions) {
+  if (maximum_export_order == 0U ||
+      maximum_export_order > reductions.size()) {
+    throw std::invalid_argument(
+        "the tree export order interval must be a nonempty prefix");
+  }
   std::ofstream output{path, std::ios::binary | std::ios::trunc};
   if (!output) {
     throw std::runtime_error("cannot open --emit-tree-path");
@@ -1140,15 +1339,23 @@ void export_trees(
   write_u32_le(output, UINT32_C(0x01020304));
   write_u64_le(output, static_cast<std::uint64_t>(point_count));
   write_u64_le(output, seed);
-  write_u64_le(output, static_cast<std::uint64_t>(reductions.size()));
-  for (const OrderReduction& reduction : reductions) {
+  write_u64_le(output, static_cast<std::uint64_t>(maximum_export_order));
+  for (std::size_t order_index = 0U;
+       order_index < maximum_export_order; ++order_index) {
+    const OrderReduction& reduction = reductions[order_index];
+    if (reduction.order != order_index + 1U ||
+        reduction.merge_record_count != reduction.merges.size()) {
+      throw std::logic_error(
+          "the tree export is not a complete order prefix");
+    }
     write_bytes(output, "H0TREE01");
     write_u32_le(output, 1U);
     write_u32_le(output, 0U);
     write_u64_le(output, static_cast<std::uint64_t>(point_count));
     write_u64_le(output, static_cast<std::uint64_t>(reduction.order));
     write_u64_le(output, seed);
-    write_u64_le(output, static_cast<std::uint64_t>(reduction.merges.size()));
+    write_u64_le(
+        output, static_cast<std::uint64_t>(reduction.merge_record_count));
     for (const MergeRecord& merge : reduction.merges) {
       write_u64_le(output, merge.first);
       write_u64_le(output, merge.second);
@@ -1159,6 +1366,50 @@ void export_trees(
   if (!output) {
     throw std::runtime_error("the canonical tree export failed");
   }
+}
+
+[[nodiscard]] std::size_t prefix_merge_record_count(
+    const std::vector<OrderReduction>& reductions,
+    std::size_t maximum_order) {
+  if (maximum_order > reductions.size()) {
+    throw std::invalid_argument(
+        "the merge count prefix exceeds the materialized orders");
+  }
+  std::size_t count{};
+  for (std::size_t order = 0U; order < maximum_order; ++order) {
+    if (reductions[order].order != order + 1U ||
+        reductions[order].merge_record_count >
+            std::numeric_limits<std::size_t>::max() - count) {
+      throw std::length_error(
+          "the merge count prefix is invalid or overflows size_t");
+    }
+    count += reductions[order].merge_record_count;
+  }
+  return count;
+}
+
+void release_merge_records(RunMetrics& run) {
+  std::size_t released{};
+  for (OrderReduction& reduction : run.reductions) {
+    if (reduction.merge_record_count != reduction.merges.size() ||
+        reduction.merge_record_count >
+            std::numeric_limits<std::size_t>::max() - released) {
+      throw std::logic_error(
+          "merge records changed before their guarded release");
+    }
+    released += reduction.merge_record_count;
+  }
+  if (released != run.materialized_merge_record_count ||
+      released != run.retained_merge_record_count) {
+    throw std::logic_error(
+        "the guarded merge release disagrees with materialization");
+  }
+  for (OrderReduction& reduction : run.reductions) {
+    std::vector<MergeRecord>{}.swap(reduction.merges);
+  }
+  run.released_merge_record_count = released;
+  run.retained_merge_record_count = 0U;
+  run.merge_records_released_after_digest_and_export = true;
 }
 
 [[nodiscard]] std::string hex64(std::uint64_t value) {
@@ -1227,11 +1478,11 @@ void write_result_json(
     std::uint64_t p99,
     bool slo_passed) {
   std::cout << std::setprecision(17);
-  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v4\""
+  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v5\""
             << ",\"result_kind\":\"guarded_industrial_candidate\""
             << ",\"phase\":15,\"backend\":\"cuda_g4_plus_host_binary64\""
             << ",\"profile\":\"hgp_reduced\""
-            << ",\"mode\":\"warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0\""
+            << ",\"mode\":\"warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_h0\""
             << ",\"deployment_status\":\"architecture_only\""
             << ",\"public_status\":\"not_claimed\",\"git_sha\":";
   write_json_string(std::cout, MORSEHGP3D_GIT_SHA);
@@ -1245,6 +1496,8 @@ void write_result_json(
             << ",\"warmups\":" << options.warmups
             << ",\"maximum_order\":" << options.maximum_order
             << ",\"seed_window\":" << options.seed_window
+            << ",\"export_maximum_order\":"
+            << options.export_maximum_order
             << ",\"cloud_generation_timed\":false"
             << ",\"canonicalization_timed\":true"
             << ",\"fresh_cloud_per_run\":true"
@@ -1255,7 +1508,17 @@ void write_result_json(
             << kCoreDeadlineLowerEnvelopeUlps
             << ",\"component_bridge_neighbor_count\":"
             << kComponentBridgeNeighborCount
-            << ",\"component_bridge_policy\":\"top10_components_centroid_knn_top8_projection_cross_min\""
+            << ",\"component_bridge_maximum_component_count\":"
+            << kComponentBridgeMaximumComponentCount
+            << ",\"component_bridge_maximum_centroid_distance_evaluation_count\":"
+            << kComponentBridgeMaximumCentroidDistanceEvaluationCount
+            << ",\"component_bridge_member_projection_budget_factor\":"
+            << kComponentBridgeMemberProjectionBudgetFactor
+            << ",\"component_bridge_maximum_pair_count\":"
+            << kComponentBridgeMaximumPairCount
+            << ",\"component_bridge_maximum_cross_distance_evaluation_count\":"
+            << kComponentBridgeMaximumCrossDistanceEvaluationCount
+            << ",\"component_bridge_policy\":\"top10_components_capped_centroid_knn_top8_projection_cross_min\""
             << ",\"ordinary_delaunay_materialized\":false"
             << ",\"higher_order_delaunay_mosaic_materialized\":false"
             << ",\"global_pair_matrix_materialized\":false"
@@ -1294,6 +1557,34 @@ void write_result_json(
               << run.component_bridge_pair_count
               << ",\"component_bridge_support_evaluation_count\":"
               << run.component_bridge_support_evaluation_count
+              << ",\"component_bridge_centroid_distance_evaluation_count\":"
+              << run.component_bridge_centroid_distance_evaluation_count
+              << ",\"component_bridge_member_projection_evaluation_budget\":"
+              << run.component_bridge_member_projection_evaluation_budget
+              << ",\"component_bridge_member_projection_evaluation_count\":"
+              << run.component_bridge_member_projection_evaluation_count
+              << ",\"component_bridge_cross_distance_evaluation_budget\":"
+              << run.component_bridge_cross_distance_evaluation_budget
+              << ",\"component_bridge_cross_distance_evaluation_count\":"
+              << run.component_bridge_cross_distance_evaluation_count
+              << ",\"component_bridge_budget_satisfied\":"
+              << (run.component_bridge_budget_satisfied ? "true" : "false")
+              << ",\"component_bridge_budget_stop_reason\":";
+    write_json_string(std::cout, run.component_bridge_budget_stop_reason);
+    std::cout << ",\"materialized_merge_record_count\":"
+              << run.materialized_merge_record_count
+              << ",\"released_merge_record_count\":"
+              << run.released_merge_record_count
+              << ",\"retained_merge_record_count\":"
+              << run.retained_merge_record_count
+              << ",\"merge_records_released_after_digest_and_export\":"
+              << (run.merge_records_released_after_digest_and_export
+                      ? "true"
+                      : "false")
+              << ",\"exported_order_count\":"
+              << run.exported_order_count
+              << ",\"exported_merge_record_count\":"
+              << run.exported_merge_record_count
               << ",\"neighbor_record_count\":"
               << run.neighbor_record_count
               << ",\"lbvh_kernel_launch_count\":"
@@ -1318,7 +1609,8 @@ void write_result_json(
       }
       const OrderReduction& reduction = run.reductions[order];
       std::cout << "{\"order\":" << reduction.order
-                << ",\"merge_record_count\":" << reduction.merges.size()
+                << ",\"merge_record_count\":"
+                << reduction.merge_record_count
                 << ",\"digest\":";
       write_json_string(std::cout, hex64(reduction.digest));
       std::cout << ",\"root_squared_level\":"
@@ -1336,7 +1628,9 @@ void write_result_json(
             << (options.point_count == 50'000U ? "true" : "false")
             << ",\"passed\":" << (slo_passed ? "true" : "false")
             << "},\"result\":\""
-            << (slo_passed ? "slo_satisfied" : "slo_missed")
+            << (options.point_count == 50'000U
+                    ? (slo_passed ? "slo_satisfied" : "slo_missed")
+                    : "completed")
             << "\"}\n";
 }
 
@@ -1409,11 +1703,17 @@ int main(int argc, char** argv) {
           const std::filesystem::path path = export_path_for(
               options, *measured_index, seeds[index]);
           const auto export_start = Clock::now();
-          export_trees(path, options.point_count, seeds[index], run.reductions);
+          export_trees(
+              path, options.point_count, seeds[index],
+              options.export_maximum_order, run.reductions);
           run.oracle_export_ns = nanoseconds(Clock::now() - export_start);
           run.oracle_export_path = path.string();
+          run.exported_order_count = options.export_maximum_order;
+          run.exported_merge_record_count = prefix_merge_record_count(
+              run.reductions, options.export_maximum_order);
         }
       }
+      release_merge_records(run);
       runs.push_back(std::move(run));
     }
     const std::uint64_t p50 = nearest_rank(measured_e2e, 50U);

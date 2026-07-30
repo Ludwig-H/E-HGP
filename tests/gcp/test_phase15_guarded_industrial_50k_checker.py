@@ -158,6 +158,52 @@ def report(
     }
 
 
+def report_v5(
+    family: str,
+    seed_base: int,
+    measured_e2e: list[int],
+) -> dict[str, object]:
+    value = report(family, seed_base, measured_e2e)
+    value.update(
+        {
+            "schema": "morsehgp3d.phase15.guarded_industrial_candidate.v5",
+            "mode": (
+                "warm_fresh_cloud_lbvh_top10_capped_"
+                "component_bridges_parallel_h0"
+            ),
+            "export_maximum_order": 2,
+            "component_bridge_maximum_component_count": 256,
+            "component_bridge_maximum_centroid_distance_evaluation_count": 65_280,
+            "component_bridge_member_projection_budget_factor": 16,
+            "component_bridge_maximum_pair_count": 1_536,
+            "component_bridge_maximum_cross_distance_evaluation_count": 98_304,
+            "component_bridge_policy": (
+                "top10_components_capped_centroid_knn_top8_"
+                "projection_cross_min"
+            ),
+        }
+    )
+    for raw_run in value["runs"]:
+        raw_run.update(
+            {
+                "component_bridge_centroid_distance_evaluation_count": 12,
+                "component_bridge_member_projection_evaluation_budget": 800_000,
+                "component_bridge_member_projection_evaluation_count": 50_000,
+                "component_bridge_cross_distance_evaluation_budget": 98_304,
+                "component_bridge_cross_distance_evaluation_count": 192,
+                "component_bridge_budget_satisfied": True,
+                "component_bridge_budget_stop_reason": "none",
+                "materialized_merge_record_count": 499_990,
+                "released_merge_record_count": 499_990,
+                "retained_merge_record_count": 0,
+                "merge_records_released_after_digest_and_export": True,
+                "exported_order_count": 0,
+                "exported_merge_record_count": 0,
+            }
+        )
+    return value
+
+
 def campaign() -> list[dict[str, object]]:
     return [
         report(
@@ -167,6 +213,20 @@ def campaign() -> list[dict[str, object]]:
             EXPECTED_FAMILIES[1], 200, list(range(75_000_000, 85_000_000, 1_000_000))
         ),
         report(
+            EXPECTED_FAMILIES[2], 300, list(range(85_000_000, 95_000_000, 1_000_000))
+        ),
+    ]
+
+
+def campaign_v5() -> list[dict[str, object]]:
+    return [
+        report_v5(
+            EXPECTED_FAMILIES[0], 100, list(range(65_000_000, 75_000_000, 1_000_000))
+        ),
+        report_v5(
+            EXPECTED_FAMILIES[1], 200, list(range(75_000_000, 85_000_000, 1_000_000))
+        ),
+        report_v5(
             EXPECTED_FAMILIES[2], 300, list(range(85_000_000, 95_000_000, 1_000_000))
         ),
     ]
@@ -258,8 +318,123 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
             summary["provenance"]["runner_binary_size_bytes"],
             RUNNER_BINARY_SIZE_BYTES,
         )
+        self.assertEqual(
+            summary["schema"], "morsehgp3d.phase15.guarded_industrial_50k_check.v4"
+        )
+        self.assertNotIn("export_maximum_order", summary["runner_contract"])
+        self.assertNotIn(
+            "merge_records_released_after_digest_and_export",
+            summary["content_evidence"],
+        )
         self.assertEqual(summary["scope"]["public_status"], "not_claimed")
         self.assertIs(summary["scope"]["exact_morse_hierarchy_claimed"], False)
+
+    def test_valid_v5_campaign_binds_bounded_telemetry_and_release(self) -> None:
+        summary = validate(campaign_v5())
+        self.assertEqual(
+            summary["schema"], "morsehgp3d.phase15.guarded_industrial_50k_check.v5"
+        )
+        contract = summary["runner_contract"]
+        self.assertEqual(
+            contract["schema"],
+            "morsehgp3d.phase15.guarded_industrial_candidate.v5",
+        )
+        self.assertEqual(contract["export_maximum_order"], 2)
+        self.assertEqual(contract["component_bridge_maximum_component_count"], 256)
+        self.assertEqual(
+            contract["component_bridge_member_projection_budget_factor"], 16
+        )
+        self.assertEqual(
+            contract["component_bridge_maximum_cross_distance_evaluation_count"],
+            98_304,
+        )
+        self.assertIs(
+            summary["content_evidence"][
+                "merge_records_released_after_digest_and_export"
+            ],
+            True,
+        )
+
+    def test_v5_bounded_telemetry_and_release_fail_closed(self) -> None:
+        mutations = (
+            ("component cap", {"top_k_component_count": 257}, "at most 256"),
+            (
+                "centroid distances",
+                {"component_bridge_centroid_distance_evaluation_count": 11},
+                r"C\(C-1\)",
+            ),
+            (
+                "projection budget",
+                {"component_bridge_member_projection_evaluation_budget": 799_999},
+                "16n",
+            ),
+            (
+                "projection count",
+                {"component_bridge_member_projection_evaluation_count": 800_001},
+                "at most 800000",
+            ),
+            (
+                "cross budget",
+                {"component_bridge_cross_distance_evaluation_budget": 98_303},
+                r"64\*1536",
+            ),
+            (
+                "cross count",
+                {"component_bridge_cross_distance_evaluation_count": 98_305},
+                "at most 98304",
+            ),
+            ("pair cap", {"component_bridge_pair_count": 1_537}, "at most 1536"),
+            (
+                "support split",
+                {"component_bridge_support_evaluation_count": 50_191},
+                "projection plus cross-distance",
+            ),
+            (
+                "budget outcome",
+                {"component_bridge_budget_satisfied": False},
+                "component_bridge_budget_satisfied",
+            ),
+            (
+                "materialized count",
+                {"materialized_merge_record_count": 499_989},
+                r"10\(n-1\)",
+            ),
+            (
+                "released count",
+                {"released_merge_record_count": 499_989},
+                "released_merge_record_count",
+            ),
+            (
+                "retained records",
+                {"retained_merge_record_count": 1},
+                "retained_merge_record_count",
+            ),
+            (
+                "release claim",
+                {"merge_records_released_after_digest_and_export": False},
+                "merge_records_released_after_digest_and_export",
+            ),
+            (
+                "unexpected export",
+                {"exported_order_count": 1},
+                "exported_order_count",
+            ),
+        )
+        baseline = campaign_v5()[0]
+        for label, mutation, message in mutations:
+            with self.subTest(label=label):
+                changed = copy.deepcopy(baseline)
+                changed["runs"][2].update(mutation)
+                with self.assertRaisesRegex(IndustrialCampaignError, message):
+                    validate_report(changed)
+
+    def test_campaign_rejects_mixed_v4_and_v5_reports(self) -> None:
+        changed = campaign_v5()
+        changed[0] = campaign()[0]
+        with self.assertRaisesRegex(
+            IndustrialCampaignError, "share one runner report schema"
+        ):
+            validate(changed)
 
     def test_synthetic_generation_is_excluded_from_raw_input_timing(self) -> None:
         baseline = validate(campaign())

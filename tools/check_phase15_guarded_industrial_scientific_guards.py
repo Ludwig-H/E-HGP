@@ -42,7 +42,16 @@ import numpy as np
 
 
 SCHEMA = "morsehgp3d.phase15_guarded_industrial_scientific_guards.v5"
-RUNNER_SCHEMA = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
+RUNNER_SCHEMA_V4 = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
+RUNNER_SCHEMA_V5 = "morsehgp3d.phase15.guarded_industrial_candidate.v5"
+# Historical imports keep naming the v4 contract explicitly.
+RUNNER_SCHEMA = RUNNER_SCHEMA_V4
+RUNNER_MAXIMUM_ORDER = 10
+COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT = 256
+COMPONENT_BRIDGE_MAXIMUM_CENTROID_DISTANCE_EVALUATION_COUNT = 256 * 255
+COMPONENT_BRIDGE_MEMBER_PROJECTION_BUDGET_FACTOR = 16
+COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT = 256 * 6
+COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT = 64 * 1536
 EXPORT_MAGIC = b"MHGPIE2E"
 TREE_MAGIC = b"H0TREE01"
 EXPORT_VERSION = 1
@@ -463,9 +472,10 @@ def _bind_runner_report(
             "runner binary bytes disagree with the expected SHA-256 commitment"
         )
     report, report_sha256 = _load_runner_report(runner_report_path)
-    if report.get("schema") != RUNNER_SCHEMA:
+    runner_schema = report.get("schema")
+    if runner_schema not in (RUNNER_SCHEMA_V4, RUNNER_SCHEMA_V5):
         raise ScientificGuardError(
-            f"runner report schema must be {RUNNER_SCHEMA!r}"
+            "runner report schema must be one supported guarded industrial schema"
         )
     reported_binary_sha256 = report.get("runner_binary_sha256")
     if (
@@ -494,11 +504,58 @@ def _bind_runner_report(
         or report["point_count"] != exported.point_count
     ):
         raise ScientificGuardError("runner report point_count disagrees with the export")
-    if (
-        type(report.get("maximum_order")) is not int
-        or report["maximum_order"] != exported.tree_count
-    ):
-        raise ScientificGuardError("runner report tree_count disagrees with the export")
+    maximum_order = report.get("maximum_order")
+    if runner_schema == RUNNER_SCHEMA_V4:
+        if type(maximum_order) is not int or maximum_order != exported.tree_count:
+            raise ScientificGuardError(
+                "runner report tree_count disagrees with the export"
+            )
+        reported_hierarchy_count = exported.tree_count
+    else:
+        if type(maximum_order) is not int or maximum_order != RUNNER_MAXIMUM_ORDER:
+            raise ScientificGuardError(
+                "v5 runner report maximum_order must equal 10"
+            )
+        if (
+            type(report.get("export_maximum_order")) is not int
+            or report["export_maximum_order"] != exported.tree_count
+        ):
+            raise ScientificGuardError(
+                "v5 runner report export_maximum_order disagrees with the export"
+            )
+        if exported.tree_count < 2 or exported.tree_count > RUNNER_MAXIMUM_ORDER:
+            raise ScientificGuardError(
+                "v5 runner export must contain contiguous orders 1 and 2"
+            )
+        reported_hierarchy_count = RUNNER_MAXIMUM_ORDER
+        expected_report_literals = {
+            "mode": (
+                "warm_fresh_cloud_lbvh_top10_capped_"
+                "component_bridges_parallel_h0"
+            ),
+            "component_bridge_policy": (
+                "top10_components_capped_centroid_knn_top8_"
+                "projection_cross_min"
+            ),
+            "component_bridge_maximum_component_count": (
+                COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT
+            ),
+            "component_bridge_maximum_centroid_distance_evaluation_count": (
+                COMPONENT_BRIDGE_MAXIMUM_CENTROID_DISTANCE_EVALUATION_COUNT
+            ),
+            "component_bridge_member_projection_budget_factor": (
+                COMPONENT_BRIDGE_MEMBER_PROJECTION_BUDGET_FACTOR
+            ),
+            "component_bridge_maximum_pair_count": COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT,
+            "component_bridge_maximum_cross_distance_evaluation_count": (
+                COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT
+            ),
+        }
+        for key, expected in expected_report_literals.items():
+            if report.get(key) != expected or type(report.get(key)) is not type(expected):
+                raise ScientificGuardError(
+                    f"v5 runner report {key} disagrees with the bounded contract"
+                )
     if report.get("git_sha") != expected_git_sha:
         raise ScientificGuardError(
             "runner report Git SHA disagrees with --expected-git-sha"
@@ -539,8 +596,126 @@ def _bind_runner_report(
     if type(run.get("seed")) is not int or run["seed"] != exported.seed:
         raise ScientificGuardError("runner report seed disagrees with the export")
 
+    if runner_schema == RUNNER_SCHEMA_V5:
+        component_count = run.get("top_k_component_count")
+        if (
+            type(component_count) is not int
+            or component_count < 1
+            or component_count > COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT
+        ):
+            raise ScientificGuardError(
+                "v5 exported run top_k_component_count must lie in 1..256"
+            )
+        centroid_count = run.get(
+            "component_bridge_centroid_distance_evaluation_count"
+        )
+        if (
+            type(centroid_count) is not int
+            or centroid_count != component_count * (component_count - 1)
+        ):
+            raise ScientificGuardError(
+                "v5 exported run centroid distance count must equal C(C-1)"
+            )
+        projection_budget = run.get(
+            "component_bridge_member_projection_evaluation_budget"
+        )
+        expected_projection_budget = (
+            COMPONENT_BRIDGE_MEMBER_PROJECTION_BUDGET_FACTOR * exported.point_count
+        )
+        if (
+            type(projection_budget) is not int
+            or projection_budget != expected_projection_budget
+        ):
+            raise ScientificGuardError(
+                "v5 exported run projection budget must equal 16n"
+            )
+        projection_count = run.get(
+            "component_bridge_member_projection_evaluation_count"
+        )
+        if (
+            type(projection_count) is not int
+            or projection_count < 0
+            or projection_count > projection_budget
+        ):
+            raise ScientificGuardError(
+                "v5 exported run projection count exceeds its budget"
+            )
+        cross_budget = run.get("component_bridge_cross_distance_evaluation_budget")
+        if (
+            type(cross_budget) is not int
+            or cross_budget
+            != COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT
+        ):
+            raise ScientificGuardError(
+                "v5 exported run cross-distance budget must equal 64*1536"
+            )
+        cross_count = run.get("component_bridge_cross_distance_evaluation_count")
+        if (
+            type(cross_count) is not int
+            or cross_count < 0
+            or cross_count > cross_budget
+        ):
+            raise ScientificGuardError(
+                "v5 exported run cross-distance count exceeds its budget"
+            )
+        bridge_pair_count = run.get("component_bridge_pair_count")
+        if (
+            type(bridge_pair_count) is not int
+            or bridge_pair_count < 0
+            or bridge_pair_count > COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT
+        ):
+            raise ScientificGuardError(
+                "v5 exported run bridge pair count exceeds 1536"
+            )
+        support_count = run.get("component_bridge_support_evaluation_count")
+        if (
+            type(support_count) is not int
+            or support_count != projection_count + cross_count
+        ):
+            raise ScientificGuardError(
+                "v5 exported run support count must equal projection plus cross"
+            )
+        if (
+            run.get("component_bridge_budget_satisfied") is not True
+            or run.get("component_bridge_budget_stop_reason") != "none"
+        ):
+            raise ScientificGuardError(
+                "v5 exported run must satisfy the component bridge budget"
+            )
+        if component_count == 1 and any(
+            count != 0
+            for count in (
+                bridge_pair_count,
+                support_count,
+                projection_count,
+                cross_count,
+            )
+        ):
+            raise ScientificGuardError(
+                "v5 connected exported run must report zero component bridge work"
+            )
+        materialized_count = RUNNER_MAXIMUM_ORDER * (exported.point_count - 1)
+        for key, expected in (
+            ("materialized_merge_record_count", materialized_count),
+            ("released_merge_record_count", materialized_count),
+            ("retained_merge_record_count", 0),
+            ("exported_order_count", exported.tree_count),
+            (
+                "exported_merge_record_count",
+                exported.tree_count * (exported.point_count - 1),
+            ),
+        ):
+            if run.get(key) != expected or type(run.get(key)) is not int:
+                raise ScientificGuardError(
+                    f"v5 exported run {key} disagrees with the export/release contract"
+                )
+        if run.get("merge_records_released_after_digest_and_export") is not True:
+            raise ScientificGuardError(
+                "v5 exported run did not release merge records after digest/export"
+            )
+
     hierarchies = run.get("hierarchies")
-    if type(hierarchies) is not list or len(hierarchies) != exported.tree_count:
+    if type(hierarchies) is not list or len(hierarchies) != reported_hierarchy_count:
         raise ScientificGuardError(
             "the exported runner run has a wrong hierarchy count"
         )
@@ -566,16 +741,18 @@ def _bind_runner_report(
             or _RUNNER_DIGEST.fullmatch(reported_digest) is None
         ):
             raise ScientificGuardError(f"{role}.digest is not canonical")
+        reported_root = raw_hierarchy.get("root_squared_level")
+        reported_root_bits = _binary64_bits(
+            reported_root, role=f"{role}.root_squared_level"
+        )
+        if order > exported.tree_count:
+            continue
         tree = exported.trees[order]
         replayed_digest = runner_hierarchy_digest(tree)
         if reported_digest != replayed_digest:
             raise ScientificGuardError(
                 f"{role}.digest disagrees with the exported merge records"
             )
-        reported_root = raw_hierarchy.get("root_squared_level")
-        reported_root_bits = _binary64_bits(
-            reported_root, role=f"{role}.root_squared_level"
-        )
         exported_root_bits = int(tree.squared_level_bits[-1])
         if reported_root_bits != exported_root_bits:
             raise ScientificGuardError(
@@ -593,7 +770,7 @@ def _bind_runner_report(
     return {
         "runner_report_path": str(runner_report_path),
         "runner_report_sha256": report_sha256,
-        "runner_schema": RUNNER_SCHEMA,
+        "runner_schema": runner_schema,
         "git_sha": expected_git_sha,
         "local_commit_object_verified": True,
         "runner_binary_path": str(runner_binary_path),
@@ -605,6 +782,14 @@ def _bind_runner_report(
         "exported_measured_run_index": run["run_index"],
         "exported_measured_index": run["measured_index"],
         "exported_run_seed": run["seed"],
+        **(
+            {
+                "reported_hierarchy_metadata_count": reported_hierarchy_count,
+                "exported_hierarchy_count": exported.tree_count,
+            }
+            if runner_schema == RUNNER_SCHEMA_V5
+            else {}
+        ),
         "hierarchies": replayed,
         "all_hierarchy_digests_match_export": True,
         "all_root_squared_levels_match_export": True,
@@ -2084,7 +2269,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--runner-report",
         required=True,
         type=Path,
-        help="paired v4 runner report containing the uniquely exported measured run",
+        help="paired v4/v5 runner report containing the uniquely exported measured run",
     )
     parser.add_argument(
         "--expected-git-sha",

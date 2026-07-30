@@ -1707,6 +1707,14 @@ La provenance lie les reçus au commit complet `d69539a18adc1e5815bd354f70e773a4
 
 Ce résultat demeure `architecture_only` avec `public_status=not_claimed`. L'enveloppe inférieure empirique de 64 ULP appliquée aux niveaux de core pour $k\geq2$ peut avancer une fusion, et le choix top-8 n'est qu'une observation sur les fixtures enregistrées : aucun des deux n'est une preuve Morse. La recherche des six centroïdes voisins reste en $O(C^2)$, sans cap explicite sur le nombre $C$ de composantes, et la construction échoue si ce graphe reste déconnecté. La prochaine porte doit borner ou remplacer cette couture, puis rejouer le même contrat temporel et les mêmes gardes; `d69539a` ne prouve ni l'exactitude MorseHGP3D, ni M.1, ni une portée publique.
 
+### Durcissement borné du runner v5
+
+Le runner v5 implémente sur hôte la porte structurelle laissée ouverte par `d69539a`, sans ouvrir la Phase 16. Le mode devient `warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_h0` et l'état transversal est `implemented_host_pending_full_50k_replay`. Le préflight refuse plus de 256 composantes, plus de 1 536 paires, plus de `16*n` projections de membres ou plus de 98 304 distances croisées. Ces comptes exacts sont calculés avant les workers et publiés avec leur budget et leur raison d'arrêt. Le chemin $O(C^2)$ subsiste sous le cap constant; il n'est ni présenté comme subquadratique, ni autorisé à poursuivre au-delà du cap.
+
+Tous les workers `std::jthread` sont maintenant joints avant lecture et insertion des ponts. Les arbres demandés sont matérialisés et digérés, l'export devient un préfixe strict et `--export-max-order 2` suffit aux oracles $k=1$ et $k=2$; les vecteurs de merges sont ensuite libérés tout en conservant comptes, digests et niveaux racines. Le runner continue d'éviter toute Delaunay, EMST/Borůvka, matrice globale de paires, facette, coface, incidence, cellule ou mosaïque de Delaunay d'ordre supérieur. Ces objets restent exclusivement des oracles postérieurs.
+
+La porte suivante est indivisible : replay G4 complet, non-smoke, des trois familles à 50 000 points, contrat p95 strictement inférieur à 100 ms, budgets v5 fermés, identité EMST à $k=1$ et absence de fusion tardive pour les triangles faits de deux arêtes de Delaunay à $k=2$. Aucun résultat v4 ne peut être réutilisé pour qualifier le binaire v5. Après succès seulement, la matrice `1M / 10M / 30M` est exécutée séquentiellement avec les mêmes gardes de budget, de déterminisme, de libération mémoire et de science. Un échec à une taille interdit la suivante jusqu'à correction et replay depuis 50 k. GCP n'a pas encore été utilisé pour v5; `deployment_status=architecture_only` et `public_status=not_claimed` restent normatifs.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

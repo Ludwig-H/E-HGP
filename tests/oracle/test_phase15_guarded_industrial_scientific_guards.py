@@ -155,6 +155,74 @@ def _runner_report(
     }
 
 
+def _runner_report_v5(
+    *,
+    family: str,
+    point_count: int,
+    seed: int,
+    trees: list[checker.ExportedTree],
+    git_sha: str = GIT_SHA,
+    runner_binary_sha256: str = RUNNER_BINARY_SHA256,
+    runner_binary_size_bytes: int = len(RUNNER_BINARY_BYTES),
+) -> dict[str, object]:
+    metadata_trees = [
+        *trees,
+        *[_tree(order, trees[-1]) for order in range(len(trees) + 1, 11)],
+    ]
+    value = _runner_report(
+        family=family,
+        point_count=point_count,
+        seed=seed,
+        trees=metadata_trees,
+        git_sha=git_sha,
+        runner_binary_sha256=runner_binary_sha256,
+        runner_binary_size_bytes=runner_binary_size_bytes,
+    )
+    value.update(
+        {
+            "schema": checker.RUNNER_SCHEMA_V5,
+            "maximum_order": 10,
+            "export_maximum_order": len(trees),
+            "mode": (
+                "warm_fresh_cloud_lbvh_top10_capped_"
+                "component_bridges_parallel_h0"
+            ),
+            "component_bridge_policy": (
+                "top10_components_capped_centroid_knn_top8_"
+                "projection_cross_min"
+            ),
+            "component_bridge_maximum_component_count": 256,
+            "component_bridge_maximum_centroid_distance_evaluation_count": 65_280,
+            "component_bridge_member_projection_budget_factor": 16,
+            "component_bridge_maximum_pair_count": 1_536,
+            "component_bridge_maximum_cross_distance_evaluation_count": 98_304,
+        }
+    )
+    run = value["runs"][0]
+    run.update(
+        {
+            "top_k_component_count": 1,
+            "component_bridge_pair_count": 0,
+            "component_bridge_support_evaluation_count": 0,
+            "component_bridge_centroid_distance_evaluation_count": 0,
+            "component_bridge_member_projection_evaluation_budget": 16
+            * point_count,
+            "component_bridge_member_projection_evaluation_count": 0,
+            "component_bridge_cross_distance_evaluation_budget": 98_304,
+            "component_bridge_cross_distance_evaluation_count": 0,
+            "component_bridge_budget_satisfied": True,
+            "component_bridge_budget_stop_reason": "none",
+            "materialized_merge_record_count": 10 * (point_count - 1),
+            "released_merge_record_count": 10 * (point_count - 1),
+            "retained_merge_record_count": 0,
+            "merge_records_released_after_digest_and_export": True,
+            "exported_order_count": len(trees),
+            "exported_merge_record_count": len(trees) * (point_count - 1),
+        }
+    )
+    return value
+
+
 def _write_runner_report(
     path: Path, report: dict[str, object], *, cuda_banner: bool = False
 ) -> None:
@@ -723,6 +791,154 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
             exact_ball.support_cardinality,
             recertification["support_cardinality"],
         )
+
+    def test_v5_runner_binding_accepts_partial_order12_export_and_ten_metadata(
+        self,
+    ) -> None:
+        family = "affine_uniform_binary64"
+        point_count = 5
+        seed = 7
+        trees = _star_trees(point_count)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            export = root / "trees.bin"
+            runner_report = root / "runner.json"
+            runner_binary = root / "runner"
+            _write_export(export, point_count, seed, trees)
+            runner_binary.write_bytes(RUNNER_BINARY_BYTES)
+            parsed = checker.read_industrial_export(
+                export,
+                expected_point_count=point_count,
+                expected_tree_count=2,
+            )
+            valid = _runner_report_v5(
+                family=family,
+                point_count=point_count,
+                seed=seed,
+                trees=trees,
+            )
+            _write_runner_report(runner_report, valid)
+            binding = checker._bind_runner_report(
+                parsed,
+                runner_report_path=runner_report,
+                family=family,
+                expected_git_sha=GIT_SHA,
+                runner_binary_path=runner_binary,
+                expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+            )
+            self.assertEqual(binding["runner_schema"], checker.RUNNER_SCHEMA_V5)
+            self.assertEqual(binding["reported_hierarchy_metadata_count"], 10)
+            self.assertEqual(binding["exported_hierarchy_count"], 2)
+            self.assertEqual([item["order"] for item in binding["hierarchies"]], [1, 2])
+
+            mutations = (
+                ("export order", ("report", "export_maximum_order", 3), "export_maximum_order"),
+                ("bounded mode", ("report", "mode", "forged"), "mode"),
+                (
+                    "bounded policy",
+                    ("report", "component_bridge_policy", "forged"),
+                    "component_bridge_policy",
+                ),
+                (
+                    "top component cap",
+                    ("run", "top_k_component_count", 257),
+                    "1..256",
+                ),
+                (
+                    "centroid count",
+                    (
+                        "run",
+                        "component_bridge_centroid_distance_evaluation_count",
+                        1,
+                    ),
+                    r"C\(C-1\)",
+                ),
+                (
+                    "projection budget",
+                    (
+                        "run",
+                        "component_bridge_member_projection_evaluation_budget",
+                        79,
+                    ),
+                    "16n",
+                ),
+                (
+                    "cross budget",
+                    (
+                        "run",
+                        "component_bridge_cross_distance_evaluation_budget",
+                        98_303,
+                    ),
+                    r"64\*1536",
+                ),
+                (
+                    "pair cap",
+                    ("run", "component_bridge_pair_count", 1_537),
+                    "1536",
+                ),
+                (
+                    "support split",
+                    ("run", "component_bridge_support_evaluation_count", 1),
+                    "projection plus cross",
+                ),
+                (
+                    "budget result",
+                    ("run", "component_bridge_budget_satisfied", False),
+                    "satisfy the component bridge budget",
+                ),
+                (
+                    "materialized count",
+                    ("run", "materialized_merge_record_count", 39),
+                    "materialized_merge_record_count",
+                ),
+                (
+                    "retained count",
+                    ("run", "retained_merge_record_count", 1),
+                    "retained_merge_record_count",
+                ),
+                (
+                    "exported record count",
+                    ("run", "exported_merge_record_count", 7),
+                    "exported_merge_record_count",
+                ),
+                (
+                    "release claim",
+                    (
+                        "run",
+                        "merge_records_released_after_digest_and_export",
+                        False,
+                    ),
+                    "did not release",
+                ),
+                (
+                    "unexported metadata digest",
+                    ("hierarchy", 2, "digest", "forged"),
+                    "digest is not canonical",
+                ),
+            )
+            for label, mutation, message in mutations:
+                with self.subTest(label=label):
+                    changed = copy.deepcopy(valid)
+                    if mutation[0] == "report":
+                        changed[mutation[1]] = mutation[2]
+                    elif mutation[0] == "run":
+                        changed["runs"][0][mutation[1]] = mutation[2]
+                    else:
+                        changed["runs"][0]["hierarchies"][mutation[1]][
+                            mutation[2]
+                        ] = mutation[3]
+                    _write_runner_report(runner_report, changed)
+                    with self.assertRaisesRegex(
+                        checker.ScientificGuardError, message
+                    ):
+                        checker._bind_runner_report(
+                            parsed,
+                            runner_report_path=runner_report,
+                            family=family,
+                            expected_git_sha=GIT_SHA,
+                            runner_binary_path=runner_binary,
+                            expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+                        )
 
     def test_runner_binding_rejects_forged_report_digest_git_and_binary_sha(
         self,

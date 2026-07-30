@@ -23,8 +23,13 @@ import sys
 import tempfile
 from typing import Any, Iterable, NoReturn, Sequence
 
-REPORT_SCHEMA = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
-CHECK_SCHEMA = "morsehgp3d.phase15.guarded_industrial_50k_check.v4"
+REPORT_SCHEMA_V4 = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
+REPORT_SCHEMA_V5 = "morsehgp3d.phase15.guarded_industrial_candidate.v5"
+# Historical imports keep naming the v4 contract explicitly.
+REPORT_SCHEMA = REPORT_SCHEMA_V4
+CHECK_SCHEMA_V4 = "morsehgp3d.phase15.guarded_industrial_50k_check.v4"
+CHECK_SCHEMA_V5 = "morsehgp3d.phase15.guarded_industrial_50k_check.v5"
+CHECK_SCHEMA = CHECK_SCHEMA_V4
 EXPECTED_FAMILIES = (
     "affine_uniform_binary64",
     "jittered_dyadic_grid3d",
@@ -43,9 +48,20 @@ WEIGHT_REPRESENTATION = (
 )
 CORE_DEADLINE_LOWER_ENVELOPE_ULPS = 64
 COMPONENT_BRIDGE_NEIGHBOR_COUNT = 6
-COMPONENT_BRIDGE_POLICY = (
+COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT = 256
+COMPONENT_BRIDGE_MAXIMUM_CENTROID_DISTANCE_EVALUATION_COUNT = 256 * 255
+COMPONENT_BRIDGE_MEMBER_PROJECTION_BUDGET_FACTOR = 16
+COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT = 256 * 6
+COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT = 64 * 1536
+MODE_V4 = "warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0"
+MODE_V5 = "warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_h0"
+COMPONENT_BRIDGE_POLICY_V4 = (
     "top10_components_centroid_knn_top8_projection_cross_min"
 )
+COMPONENT_BRIDGE_POLICY_V5 = (
+    "top10_components_capped_centroid_knn_top8_projection_cross_min"
+)
+COMPONENT_BRIDGE_POLICY = COMPONENT_BRIDGE_POLICY_V4
 
 _GIT_SHA = re.compile(r"[0-9a-f]{40}")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -65,7 +81,7 @@ _CUDA_BANNER_FIXED_LINES = (
     "A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.",
 )
 
-_REPORT_KEYS = frozenset(
+_REPORT_KEYS_V4 = frozenset(
     {
         "schema",
         "result_kind",
@@ -104,7 +120,18 @@ _REPORT_KEYS = frozenset(
         "result",
     }
 )
-_RUN_KEYS = frozenset(
+_REPORT_KEYS_V5 = _REPORT_KEYS_V4 | frozenset(
+    {
+        "export_maximum_order",
+        "component_bridge_maximum_component_count",
+        "component_bridge_maximum_centroid_distance_evaluation_count",
+        "component_bridge_member_projection_budget_factor",
+        "component_bridge_maximum_pair_count",
+        "component_bridge_maximum_cross_distance_evaluation_count",
+    }
+)
+_REPORT_KEYS = _REPORT_KEYS_V4
+_RUN_KEYS_V4 = frozenset(
     {
         "run_index",
         "measured_index",
@@ -128,6 +155,24 @@ _RUN_KEYS = frozenset(
         "hierarchies",
     }
 )
+_RUN_KEYS_V5 = _RUN_KEYS_V4 | frozenset(
+    {
+        "component_bridge_centroid_distance_evaluation_count",
+        "component_bridge_member_projection_evaluation_budget",
+        "component_bridge_member_projection_evaluation_count",
+        "component_bridge_cross_distance_evaluation_budget",
+        "component_bridge_cross_distance_evaluation_count",
+        "component_bridge_budget_satisfied",
+        "component_bridge_budget_stop_reason",
+        "materialized_merge_record_count",
+        "released_merge_record_count",
+        "retained_merge_record_count",
+        "merge_records_released_after_digest_and_export",
+        "exported_order_count",
+        "exported_merge_record_count",
+    }
+)
+_RUN_KEYS = _RUN_KEYS_V4
 _TIMING_KEYS = frozenset(
     {"lbvh", "topk", "topology", "reductions", "output_materialization", "warm_e2e"}
 )
@@ -325,10 +370,12 @@ def _validate_run(
     *,
     report_path: str,
     run_index: int,
+    report_schema: str = REPORT_SCHEMA_V4,
 ) -> _RunEvidence:
     path = f"{report_path}.runs[{run_index}]"
     run = _mapping(raw_run, path=path)
-    _exact_keys(run, _RUN_KEYS, path=path)
+    run_keys = _RUN_KEYS_V5 if report_schema == REPORT_SCHEMA_V5 else _RUN_KEYS_V4
+    _exact_keys(run, run_keys, path=path)
     _literal(run, "run_index", run_index, path=path)
     warmup = run_index < WARMUPS
     _literal(run, "warmup", warmup, path=path)
@@ -378,7 +425,11 @@ def _validate_run(
         run.get("top_k_component_count"),
         path=f"{path}.top_k_component_count",
         minimum=1,
-        maximum=POINT_COUNT,
+        maximum=(
+            COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT
+            if report_schema == REPORT_SCHEMA_V5
+            else POINT_COUNT
+        ),
     )
     bridge_pair_count = _integer(
         run.get("component_bridge_pair_count"),
@@ -388,11 +439,74 @@ def _validate_run(
         run.get("component_bridge_support_evaluation_count"),
         path=f"{path}.component_bridge_support_evaluation_count",
     )
+    if report_schema == REPORT_SCHEMA_V5:
+        centroid_distance_count = _integer(
+            run.get("component_bridge_centroid_distance_evaluation_count"),
+            path=(
+                f"{path}.component_bridge_centroid_distance_evaluation_count"
+            ),
+            maximum=(
+                COMPONENT_BRIDGE_MAXIMUM_CENTROID_DISTANCE_EVALUATION_COUNT
+            ),
+        )
+        require(
+            centroid_distance_count == component_count * (component_count - 1),
+            f"{path}.component_bridge_centroid_distance_evaluation_count "
+            "must equal C(C-1)",
+        )
+        projection_budget = _integer(
+            run.get("component_bridge_member_projection_evaluation_budget"),
+            path=f"{path}.component_bridge_member_projection_evaluation_budget",
+        )
+        expected_projection_budget = (
+            COMPONENT_BRIDGE_MEMBER_PROJECTION_BUDGET_FACTOR * POINT_COUNT
+        )
+        require(
+            projection_budget == expected_projection_budget,
+            f"{path}.component_bridge_member_projection_evaluation_budget "
+            f"must equal 16n={expected_projection_budget}",
+        )
+        projection_count = _integer(
+            run.get("component_bridge_member_projection_evaluation_count"),
+            path=f"{path}.component_bridge_member_projection_evaluation_count",
+            maximum=projection_budget,
+        )
+        cross_budget = _integer(
+            run.get("component_bridge_cross_distance_evaluation_budget"),
+            path=f"{path}.component_bridge_cross_distance_evaluation_budget",
+        )
+        require(
+            cross_budget
+            == COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT,
+            f"{path}.component_bridge_cross_distance_evaluation_budget "
+            "must equal 64*1536",
+        )
+        cross_count = _integer(
+            run.get("component_bridge_cross_distance_evaluation_count"),
+            path=f"{path}.component_bridge_cross_distance_evaluation_count",
+            maximum=cross_budget,
+        )
+        require(
+            bridge_pair_count <= COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT,
+            f"{path}.component_bridge_pair_count must be at most 1536",
+        )
+        require(
+            support_evaluation_count == projection_count + cross_count,
+            f"{path}.component_bridge_support_evaluation_count must equal "
+            "projection plus cross-distance evaluations",
+        )
+        _literal(run, "component_bridge_budget_satisfied", True, path=path)
+        _literal(run, "component_bridge_budget_stop_reason", "none", path=path)
     if component_count == 1:
         require(
             bridge_pair_count == 0 and support_evaluation_count == 0,
             f"{path}: a connected top10 graph must not evaluate component bridges",
         )
+        if report_schema == REPORT_SCHEMA_V5:
+            require(
+                projection_count == 0 and cross_count == 0,
+                f"{path}: a connected top10 graph must have zero split bridge work",
+            )
     else:
         require(
             bridge_pair_count >= component_count - 1,
@@ -403,6 +517,32 @@ def _validate_run(
             f"{path}.component_bridge_support_evaluation_count must cover both "
             "projection scans and at least one cross-distance per bridge pair",
         )
+    if report_schema == REPORT_SCHEMA_V5:
+        materialized_count = _integer(
+            run.get("materialized_merge_record_count"),
+            path=f"{path}.materialized_merge_record_count",
+        )
+        expected_materialized_count = MAXIMUM_ORDER * MERGE_RECORD_COUNT
+        require(
+            materialized_count == expected_materialized_count,
+            f"{path}.materialized_merge_record_count must equal "
+            f"10(n-1)={expected_materialized_count}",
+        )
+        _literal(
+            run,
+            "released_merge_record_count",
+            expected_materialized_count,
+            path=path,
+        )
+        _literal(run, "retained_merge_record_count", 0, path=path)
+        _literal(
+            run,
+            "merge_records_released_after_digest_and_export",
+            True,
+            path=path,
+        )
+        _literal(run, "exported_order_count", 0, path=path)
+        _literal(run, "exported_merge_record_count", 0, path=path)
     _literal(
         run,
         "neighbor_record_count",
@@ -433,16 +573,25 @@ def _validate_run(
 def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str, Any]:
     """Validate one family report and return its replayed measured values."""
 
-    _exact_keys(report, _REPORT_KEYS, path=path)
+    report_schema = report.get("schema")
+    require(
+        type(report_schema) is str
+        and report_schema in (REPORT_SCHEMA_V4, REPORT_SCHEMA_V5),
+        f"{path}.schema must be a supported guarded industrial schema",
+    )
+    report_keys = (
+        _REPORT_KEYS_V5 if report_schema == REPORT_SCHEMA_V5 else _REPORT_KEYS_V4
+    )
+    _exact_keys(report, report_keys, path=path)
     for key, expected in (
-        ("schema", REPORT_SCHEMA),
+        ("schema", report_schema),
         ("result_kind", "guarded_industrial_candidate"),
         ("phase", 15),
         ("backend", "cuda_g4_plus_host_binary64"),
         ("profile", "hgp_reduced"),
         (
             "mode",
-            "warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0",
+            MODE_V5 if report_schema == REPORT_SCHEMA_V5 else MODE_V4,
         ),
         ("deployment_status", "architecture_only"),
         ("public_status", "not_claimed"),
@@ -465,7 +614,12 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
             CORE_DEADLINE_LOWER_ENVELOPE_ULPS,
         ),
         ("component_bridge_neighbor_count", COMPONENT_BRIDGE_NEIGHBOR_COUNT),
-        ("component_bridge_policy", COMPONENT_BRIDGE_POLICY),
+        (
+            "component_bridge_policy",
+            COMPONENT_BRIDGE_POLICY_V5
+            if report_schema == REPORT_SCHEMA_V5
+            else COMPONENT_BRIDGE_POLICY_V4,
+        ),
         ("ordinary_delaunay_materialized", False),
         ("higher_order_delaunay_mosaic_materialized", False),
         ("global_pair_matrix_materialized", False),
@@ -474,6 +628,38 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
         ("result", "slo_satisfied"),
     ):
         _literal(report, key, expected, path=path)
+
+    export_maximum_order = MAXIMUM_ORDER
+    if report_schema == REPORT_SCHEMA_V5:
+        export_maximum_order = _integer(
+            report.get("export_maximum_order"),
+            path=f"{path}.export_maximum_order",
+            minimum=1,
+            maximum=MAXIMUM_ORDER,
+        )
+        for key, expected in (
+            (
+                "component_bridge_maximum_component_count",
+                COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT,
+            ),
+            (
+                "component_bridge_maximum_centroid_distance_evaluation_count",
+                COMPONENT_BRIDGE_MAXIMUM_CENTROID_DISTANCE_EVALUATION_COUNT,
+            ),
+            (
+                "component_bridge_member_projection_budget_factor",
+                COMPONENT_BRIDGE_MEMBER_PROJECTION_BUDGET_FACTOR,
+            ),
+            (
+                "component_bridge_maximum_pair_count",
+                COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT,
+            ),
+            (
+                "component_bridge_maximum_cross_distance_evaluation_count",
+                COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT,
+            ),
+        ):
+            _literal(report, key, expected, path=path)
 
     git_sha = report.get("git_sha")
     require(
@@ -511,6 +697,7 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
             run,
             report_path=path,
             run_index=run_index,
+            report_schema=report_schema,
         )
         run_record = _mapping(run, path=f"{path}.runs[{run_index}]")
         all_seeds.append(run_record["seed"])
@@ -569,6 +756,8 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
     )
     return {
         "family": family,
+        "report_schema": report_schema,
+        "export_maximum_order": export_maximum_order,
         "git_sha": git_sha,
         "runner_binary_sha256": runner_binary_sha256,
         "runner_binary_size_bytes": runner_binary_size_bytes,
@@ -613,6 +802,20 @@ def validate_campaign(
         validate_report(report, path=f"reports[{index}]")
         for index, report in enumerate(reports)
     ]
+    report_schemas = {entry["report_schema"] for entry in validated}
+    require(
+        len(report_schemas) == 1,
+        "campaign reports must share one runner report schema",
+    )
+    report_schema = next(iter(report_schemas))
+    export_maximum_orders = {
+        entry["export_maximum_order"] for entry in validated
+    }
+    require(
+        len(export_maximum_orders) == 1,
+        "campaign reports must share one export maximum order",
+    )
+    export_maximum_order = next(iter(export_maximum_orders))
     for index, entry in enumerate(validated):
         entry["input_artifact_sha256"] = input_artifact_sha256[index]
     by_family = {entry["family"]: entry for entry in validated}
@@ -675,7 +878,11 @@ def validate_campaign(
         "campaign must contain 360 globally distinct order/run hierarchy digests",
     )
     return {
-        "schema": CHECK_SCHEMA,
+        "schema": (
+            CHECK_SCHEMA_V5
+            if report_schema == REPORT_SCHEMA_V5
+            else CHECK_SCHEMA_V4
+        ),
         "git_sha": expected_git_sha,
         "provenance": {
             "expected_git_sha": expected_git_sha,
@@ -718,15 +925,35 @@ def validate_campaign(
             "synthetic_cloud_generation_excluded": True,
         },
         "runner_contract": {
-            "schema": REPORT_SCHEMA,
+            "schema": report_schema,
             "runner_binary_sha256": runner_binary_sha256,
             "runner_binary_size_bytes": runner_binary_size_bytes,
-            "mode": "warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0",
+            "mode": MODE_V5 if report_schema == REPORT_SCHEMA_V5 else MODE_V4,
             "canonicalization_timed": True,
             "weight_representation": WEIGHT_REPRESENTATION,
             "core_deadline_lower_envelope_ulps": CORE_DEADLINE_LOWER_ENVELOPE_ULPS,
             "component_bridge_neighbor_count": COMPONENT_BRIDGE_NEIGHBOR_COUNT,
-            "component_bridge_policy": COMPONENT_BRIDGE_POLICY,
+            "component_bridge_policy": (
+                COMPONENT_BRIDGE_POLICY_V5
+                if report_schema == REPORT_SCHEMA_V5
+                else COMPONENT_BRIDGE_POLICY_V4
+            ),
+            **(
+                {
+                    "export_maximum_order": export_maximum_order,
+                    "component_bridge_maximum_component_count": (
+                        COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT
+                    ),
+                    "component_bridge_member_projection_budget_factor": (
+                        COMPONENT_BRIDGE_MEMBER_PROJECTION_BUDGET_FACTOR
+                    ),
+                    "component_bridge_maximum_cross_distance_evaluation_count": (
+                        COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT
+                    ),
+                }
+                if report_schema == REPORT_SCHEMA_V5
+                else {}
+            ),
         },
         "content_evidence": {
             "reported_hierarchy_count_per_run": MAXIMUM_ORDER,
@@ -734,6 +961,11 @@ def validate_campaign(
             "globally_distinct_hierarchy_digest_count": len(hierarchy_digests),
             "merge_records_embedded": False,
             "merge_records_replayed": False,
+            **(
+                {"merge_records_released_after_digest_and_export": True}
+                if report_schema == REPORT_SCHEMA_V5
+                else {}
+            ),
         },
         "scope": {
             "deployment_status": "architecture_only",
