@@ -2,6 +2,7 @@
 
 #include "phase15_morton_yao48_device_tiled_pair_frontier_internal.hpp"
 
+#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -15,9 +16,25 @@
 namespace morsehgp3d::gpu::test_support {
 namespace {
 
+struct FakeCumulativeAnchor final {
+  std::uint64_t candidate_count{};
+  std::uint64_t prune_region_count{};
+  std::uint64_t certified_pruned_pair_mass{};
+  std::uint64_t node_visit_count{};
+  std::uint64_t ambiguous_cone_candidate_count{};
+  std::uint64_t unbanked_candidate_count{};
+  bool complete{false};
+};
+
 std::mutex fake_mutex;
 FakeMortonYao48DeviceTiledPairFrontierConfiguration fake_configuration;
 std::shared_ptr<void> held_shared_output_owner;
+std::vector<FakeCumulativeAnchor> fake_cumulative_anchors;
+std::size_t fake_next_transcript{};
+std::size_t fake_anchor_begin{};
+std::size_t fake_anchor_count{};
+std::uint64_t fake_tile_epoch{};
+std::uint64_t fake_chunk_sequence{};
 std::atomic<std::size_t> fake_launch_count{0U};
 
 }  // namespace
@@ -27,12 +44,24 @@ void configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
   std::lock_guard<std::mutex> lock{fake_mutex};
   fake_configuration = std::move(configuration);
   held_shared_output_owner.reset();
+  fake_cumulative_anchors.clear();
+  fake_next_transcript = 0U;
+  fake_anchor_begin = 0U;
+  fake_anchor_count = 0U;
+  fake_tile_epoch = 0U;
+  fake_chunk_sequence = 0U;
 }
 
 void reset_fake_gpu_morton_yao48_device_tiled_pair_frontier() noexcept {
   std::lock_guard<std::mutex> lock{fake_mutex};
   fake_configuration = {};
   held_shared_output_owner.reset();
+  fake_cumulative_anchors.clear();
+  fake_next_transcript = 0U;
+  fake_anchor_begin = 0U;
+  fake_anchor_count = 0U;
+  fake_tile_epoch = 0U;
+  fake_chunk_sequence = 0U;
   fake_launch_count.store(0U, std::memory_order_relaxed);
 }
 
@@ -49,8 +78,13 @@ namespace {
 using Corruption = test_support::
     FakeMortonYao48DeviceTiledPairFrontierCorruption;
 using FakeAnchor = test_support::FakeMortonYao48DeviceTiledAnchor;
+using FakeAnchorStatus = test_support::
+    FakeMortonYao48DeviceTiledAnchorStatus;
 using FakeConfiguration = test_support::
     FakeMortonYao48DeviceTiledPairFrontierConfiguration;
+using FakeLaunch = test_support::
+    FakeMortonYao48DeviceTiledPairFrontierLaunch;
+using FakeProgress = test_support::FakeCumulativeAnchor;
 
 [[nodiscard]] std::size_t checked_product(
     std::size_t left,
@@ -63,14 +97,112 @@ using FakeConfiguration = test_support::
   return left * right;
 }
 
-[[nodiscard]] FakeConfiguration current_configuration() {
+[[nodiscard]] std::uint64_t checked_sum(
+    std::uint64_t left,
+    std::uint64_t right,
+    const char* message) {
+  if (right > std::numeric_limits<std::uint64_t>::max() - left) {
+    throw std::length_error(message);
+  }
+  return left + right;
+}
+
+[[nodiscard]] std::size_t checked_size_sum(
+    std::size_t left,
+    std::size_t right,
+    const char* message) {
+  if (right > std::numeric_limits<std::size_t>::max() - left) {
+    throw std::length_error(message);
+  }
+  return left + right;
+}
+
+[[nodiscard]] FakeLaunch next_launch() {
   std::lock_guard<std::mutex> lock{test_support::fake_mutex};
-  return test_support::fake_configuration;
+  const FakeConfiguration& configuration =
+      test_support::fake_configuration;
+  if (configuration.launches.empty()) {
+    return FakeLaunch{configuration.anchors, configuration.corruption};
+  }
+  if (test_support::fake_next_transcript >=
+      configuration.launches.size()) {
+    throw std::runtime_error(
+        "the fake Phase 15 launcher transcript is exhausted");
+  }
+  return configuration.launches[test_support::fake_next_transcript++];
+}
+
+[[nodiscard]] std::vector<FakeProgress> begin_continuation(
+    const Phase15MortonYao48DeviceTiledRequest& request) {
+  std::lock_guard<std::mutex> lock{test_support::fake_mutex};
+  if (!request.resume_same_tile) {
+    if (request.chunk_sequence != 1U) {
+      throw std::invalid_argument(
+          "a new fake Phase 15 tile did not start at chunk one");
+    }
+    test_support::fake_anchor_begin = request.anchor_begin;
+    test_support::fake_anchor_count = request.anchor_count;
+    test_support::fake_tile_epoch = request.tile_epoch;
+    test_support::fake_chunk_sequence = request.chunk_sequence;
+    test_support::fake_cumulative_anchors.assign(
+        request.anchor_count, FakeProgress{});
+  } else if (
+      request.anchor_begin != test_support::fake_anchor_begin ||
+      request.anchor_count != test_support::fake_anchor_count ||
+      request.tile_epoch != test_support::fake_tile_epoch ||
+      request.chunk_sequence != test_support::fake_chunk_sequence + 1U ||
+      test_support::fake_cumulative_anchors.size() != request.anchor_count) {
+    throw std::invalid_argument(
+        "a resumed fake Phase 15 tile changed its identity or sequence");
+  } else {
+    test_support::fake_chunk_sequence = request.chunk_sequence;
+  }
+  return test_support::fake_cumulative_anchors;
+}
+
+void commit_continuation(std::vector<FakeProgress> progress) {
+  std::lock_guard<std::mutex> lock{test_support::fake_mutex};
+  test_support::fake_cumulative_anchors = std::move(progress);
 }
 
 void retain_shared_output_owner(const std::shared_ptr<void>& owner) {
   std::lock_guard<std::mutex> lock{test_support::fake_mutex};
   test_support::held_shared_output_owner = owner;
+}
+
+[[nodiscard]] Phase15MortonYao48DeviceTiledAnchorStatus anchor_status(
+    FakeAnchorStatus status) {
+  switch (status) {
+    case FakeAnchorStatus::active:
+      return Phase15MortonYao48DeviceTiledAnchorStatus::active;
+    case FakeAnchorStatus::chunk_ready:
+      return Phase15MortonYao48DeviceTiledAnchorStatus::chunk_ready;
+    case FakeAnchorStatus::complete:
+      return Phase15MortonYao48DeviceTiledAnchorStatus::complete;
+    case FakeAnchorStatus::fatal:
+      return Phase15MortonYao48DeviceTiledAnchorStatus::fatal;
+  }
+  throw std::invalid_argument("unknown fake Phase 15 anchor status");
+}
+
+[[nodiscard]] Phase15MortonYao48DeviceTiledYieldReason yield_reason(
+    MortonYao48DeviceTiledPairFrontierYieldReason reason) {
+  switch (reason) {
+    case MortonYao48DeviceTiledPairFrontierYieldReason::none:
+      return Phase15MortonYao48DeviceTiledYieldReason::none;
+    case MortonYao48DeviceTiledPairFrontierYieldReason::
+        candidate_segment_full:
+      return Phase15MortonYao48DeviceTiledYieldReason::
+          candidate_segment_full;
+    case MortonYao48DeviceTiledPairFrontierYieldReason::
+        prune_segment_full:
+      return Phase15MortonYao48DeviceTiledYieldReason::prune_segment_full;
+    case MortonYao48DeviceTiledPairFrontierYieldReason::
+        mixed_segments_full:
+      break;
+  }
+  throw std::invalid_argument(
+      "a per-anchor fake Phase 15 yield cannot be mixed");
 }
 
 }  // namespace
@@ -84,8 +216,7 @@ adopt_phase15_morton_yao48_device_tiled_traversal(
         "the fake Phase 15 adoption requires a ready host-fake traversal "
         "lease");
   }
-  const MortonLbvhDeviceTraversalLeaseAudit audit =
-      traversal_lease.audit();
+  const MortonLbvhDeviceTraversalLeaseAudit audit = traversal_lease.audit();
   auto owner = std::make_shared<MortonLbvhDeviceTraversalLease>(
       std::move(traversal_lease));
 
@@ -118,10 +249,9 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     const Phase15MortonYao48DeviceTiledAdoptedTraversal& traversal,
     const Phase15MortonYao48DeviceTiledRequest& request) {
   (void)context;
-  test_support::fake_launch_count.fetch_add(
-      1U, std::memory_order_relaxed);
-  const FakeConfiguration configuration = current_configuration();
-  if (configuration.corruption == Corruption::simulated_launcher_failure) {
+  test_support::fake_launch_count.fetch_add(1U, std::memory_order_relaxed);
+  const FakeLaunch launch = next_launch();
+  if (launch.corruption == Corruption::simulated_launcher_failure) {
     throw std::runtime_error(
         "simulated Phase 15 device tiled launcher failure");
   }
@@ -151,39 +281,65 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           morton_yao48_device_tiled_pair_frontier_witness_bank_count ||
       request.witness_slot_count_per_bank !=
           request.maximum_closed_rank - 1U ||
-      request.output_buffer_epoch == 0U ||
-      (!configuration.anchors.empty() &&
-       configuration.anchors.size() != request.anchor_count)) {
+      request.output_buffer_epoch == 0U || request.tile_epoch == 0U ||
+      request.chunk_sequence == 0U ||
+      (!launch.anchors.empty() &&
+       launch.anchors.size() != request.anchor_count)) {
     throw std::invalid_argument(
         "the fake Phase 15 device tiled launcher received an invalid "
         "request or traversal authority");
   }
 
+  std::vector<FakeProgress> progress = begin_continuation(request);
   Phase15MortonYao48DeviceTiledBatch batch;
   batch.retained_output_owner = std::make_shared<std::uint64_t>(
       request.output_buffer_epoch);
-  batch.source_cloud_identity_authority =
-      traversal.source_cloud_identity;
+  batch.source_cloud_identity_authority = traversal.source_cloud_identity;
   batch.host_anchor_controls.reserve(request.anchor_count);
+  std::size_t traversal_subdivision_count = 1U;
+  bool any_chunk_ready = false;
   for (std::size_t control_index = 0U;
        control_index < request.anchor_count;
        ++control_index) {
-    const std::size_t anchor_position =
-        request.anchor_begin + control_index;
+    const std::size_t anchor_position = request.anchor_begin + control_index;
     FakeAnchor script;
-    if (configuration.anchors.empty()) {
-      script.candidate_count =
-          static_cast<std::uint64_t>(anchor_position);
-      script.node_visit_count =
-          static_cast<std::uint64_t>(anchor_position);
+    if (launch.anchors.empty()) {
+      script.candidate_count = static_cast<std::uint64_t>(anchor_position);
+      script.node_visit_count = static_cast<std::uint64_t>(anchor_position);
     } else {
-      script = configuration.anchors[control_index];
+      script = launch.anchors[control_index];
     }
-    if (script.candidate_count + script.certified_pruned_pair_mass >
+    FakeProgress& prior = progress[control_index];
+    const std::uint64_t cumulative_candidate_count = checked_sum(
+        prior.candidate_count,
+        script.candidate_count,
+        "the fake Phase 15 candidate cumulative overflowed");
+    const std::uint64_t cumulative_prune_region_count = checked_sum(
+        prior.prune_region_count,
+        script.prune_region_count,
+        "the fake Phase 15 prune cumulative overflowed");
+    const std::uint64_t cumulative_pruned_mass = checked_sum(
+        prior.certified_pruned_pair_mass,
+        script.certified_pruned_pair_mass,
+        "the fake Phase 15 pruned mass cumulative overflowed");
+    const std::uint64_t cumulative_node_visit_count = checked_sum(
+        prior.node_visit_count,
+        script.node_visit_count,
+        "the fake Phase 15 visit cumulative overflowed");
+    const std::uint64_t cumulative_ambiguous_count = checked_sum(
+        prior.ambiguous_cone_candidate_count,
+        script.ambiguous_cone_candidate_count,
+        "the fake Phase 15 ambiguity cumulative overflowed");
+    const std::uint64_t cumulative_unbanked_count = checked_sum(
+        prior.unbanked_candidate_count,
+        script.unbanked_candidate_count,
+        "the fake Phase 15 unbanked cumulative overflowed");
+    if (cumulative_candidate_count + cumulative_pruned_mass >
         static_cast<std::uint64_t>(anchor_position)) {
       throw std::invalid_argument(
           "the fake Phase 15 anchor script exceeds its local pair mass");
     }
+
     Phase15MortonYao48DeviceTiledAnchorControl control;
     control.anchor_morton_position =
         static_cast<std::uint64_t>(anchor_position);
@@ -192,23 +348,50 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     control.certified_pruned_pair_mass =
         script.certified_pruned_pair_mass;
     control.node_visit_count = script.node_visit_count;
-    control.status = static_cast<std::uint64_t>(
-        script.complete
-            ? Phase15MortonYao48DeviceTiledAnchorStatus::complete
-            : Phase15MortonYao48DeviceTiledAnchorStatus::censored);
-    control.stop_reason =
-        static_cast<std::uint64_t>(script.stop_reason);
+    control.cumulative_candidate_count = cumulative_candidate_count;
+    control.cumulative_prune_region_count = cumulative_prune_region_count;
+    control.cumulative_certified_pruned_pair_mass = cumulative_pruned_mass;
+    control.cumulative_node_visit_count = cumulative_node_visit_count;
+    control.status = static_cast<std::uint64_t>(anchor_status(script.status));
+    control.yield_reason =
+        static_cast<std::uint64_t>(yield_reason(script.yield_reason));
+    control.stop_reason = static_cast<std::uint64_t>(script.stop_reason);
     control.failure_code = static_cast<std::uint64_t>(
         Phase15MortonYao48DeviceTiledFailureCode::none);
     control.ambiguous_cone_candidate_count =
         script.ambiguous_cone_candidate_count;
-    control.unbanked_candidate_count =
-        script.unbanked_candidate_count;
+    control.unbanked_candidate_count = script.unbanked_candidate_count;
+    control.cumulative_ambiguous_cone_candidate_count =
+        cumulative_ambiguous_count;
+    control.cumulative_unbanked_candidate_count =
+        cumulative_unbanked_count;
     control.unresolved_pair_mass =
         static_cast<std::uint64_t>(anchor_position) -
-        script.candidate_count - script.certified_pruned_pair_mass;
+        cumulative_candidate_count - cumulative_pruned_mass;
+    control.tile_epoch = request.tile_epoch;
+    control.chunk_sequence = request.chunk_sequence;
     batch.host_anchor_controls.push_back(control);
+
+    prior = FakeProgress{
+        cumulative_candidate_count,
+        cumulative_prune_region_count,
+        cumulative_pruned_mass,
+        cumulative_node_visit_count,
+        cumulative_ambiguous_count,
+        cumulative_unbanked_count,
+        script.status == FakeAnchorStatus::complete};
+    any_chunk_ready =
+        any_chunk_ready || script.status == FakeAnchorStatus::chunk_ready;
+    const std::uint64_t quantum = static_cast<std::uint64_t>(
+        request.node_visit_capacity_per_anchor);
+    const std::uint64_t subdivisions =
+        script.node_visit_count / quantum +
+        (script.node_visit_count % quantum == 0U ? 0U : 1U);
+    traversal_subdivision_count = std::max(
+        traversal_subdivision_count,
+        static_cast<std::size_t>(subdivisions));
   }
+  commit_continuation(std::move(progress));
 
   batch.physical_candidate_capacity = checked_product(
       request.anchor_count,
@@ -226,8 +409,57 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       request.witness_slot_count_per_bank,
       "the fake Phase 15 bank slot capacity overflows size_t");
   batch.physical_anchor_control_capacity = request.anchor_count;
+  batch.physical_anchor_checkpoint_capacity = request.anchor_count;
+  batch.physical_pending_anchor_count_capacity = 1U;
+  std::size_t arena_bytes = checked_product(
+      batch.physical_candidate_capacity,
+      sizeof(Phase15MortonYao48DeviceTiledCandidateRecord),
+      "the fake Phase 15 candidate arena bytes overflow size_t");
+  arena_bytes = checked_size_sum(
+      arena_bytes,
+      checked_product(
+          batch.physical_prune_region_capacity,
+          sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord),
+          "the fake Phase 15 prune arena bytes overflow size_t"),
+      "the fake Phase 15 arena bytes overflow size_t");
+  arena_bytes = checked_size_sum(
+      arena_bytes,
+      checked_product(
+          batch.physical_witness_bank_slot_capacity,
+          sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
+          "the fake Phase 15 witness arena bytes overflow size_t"),
+      "the fake Phase 15 arena bytes overflow size_t");
+  arena_bytes = checked_size_sum(
+      arena_bytes,
+      checked_product(
+          batch.physical_anchor_control_capacity,
+          sizeof(Phase15MortonYao48DeviceTiledAnchorControl),
+          "the fake Phase 15 control arena bytes overflow size_t"),
+      "the fake Phase 15 arena bytes overflow size_t");
+  arena_bytes = checked_size_sum(
+      arena_bytes,
+      checked_product(
+          batch.physical_anchor_checkpoint_capacity,
+          sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint),
+          "the fake Phase 15 checkpoint arena bytes overflow size_t"),
+      "the fake Phase 15 arena bytes overflow size_t");
+  batch.physical_device_arena_capacity_bytes = checked_size_sum(
+      arena_bytes,
+      sizeof(std::uint64_t),
+      "the fake Phase 15 pending-anchor arena bytes overflow size_t");
+  batch.traversal_subdivision_count = traversal_subdivision_count;
+  batch.maximum_traversal_subdivision_count_per_anchor =
+      request.certified_node_count /
+          request.node_visit_capacity_per_anchor +
+      (request.certified_node_count %
+                   request.node_visit_capacity_per_anchor ==
+               0U
+           ? 0U
+           : 1U);
   batch.source_snapshot_epoch = request.source_snapshot_epoch;
   batch.output_buffer_epoch = request.output_buffer_epoch;
+  batch.tile_epoch = request.tile_epoch;
+  batch.chunk_sequence = request.chunk_sequence;
   batch.execution_kind =
       Phase15MortonYao48DeviceTiledExecutionKind::host_fake;
   batch.fixed_anchor_segments_allocated = true;
@@ -238,7 +470,11 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
   batch.retained_witnesses_outside_pruned_subtree_requested = true;
   batch.nonnegative_diametral_witness_interval_lower_bound_requested = true;
   batch.censored_anchor_outputs_invalidated = true;
-  switch (configuration.corruption) {
+  batch.resume_same_tile = request.resume_same_tile;
+  batch.capacity_yield_resumable = any_chunk_ready;
+  batch.process_restart_resumable = false;
+
+  switch (launch.corruption) {
     case Corruption::none:
       break;
     case Corruption::stale_output_epoch:
@@ -248,8 +484,7 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       batch.candidate_device_to_host_count = 1U;
       break;
     case Corruption::forged_cuda_execution:
-      batch.execution_kind =
-          Phase15MortonYao48DeviceTiledExecutionKind::cuda;
+      batch.execution_kind = Phase15MortonYao48DeviceTiledExecutionKind::cuda;
       batch.cuda_execution_contract_satisfied = true;
       batch.cuda_device = 0;
       break;
@@ -258,14 +493,14 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       break;
     case Corruption::shared_output_owner:
       retain_shared_output_owner(batch.retained_output_owner);
+      batch.output_owner_detached_for_tile_lifetime = false;
       break;
     case Corruption::corrupt_metadata_digest:
       break;
     case Corruption::nonzero_failure_code:
       batch.host_anchor_controls.front().failure_code =
           static_cast<std::uint64_t>(
-              Phase15MortonYao48DeviceTiledFailureCode::
-                  malformed_traversal);
+              Phase15MortonYao48DeviceTiledFailureCode::malformed_traversal);
       break;
     case Corruption::wrong_anchor_position:
       ++batch.host_anchor_controls.front().anchor_morton_position;
@@ -278,24 +513,48 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       batch.host_anchor_controls.front().candidate_count = 0U;
       batch.host_anchor_controls.front().certified_pruned_pair_mass = 1U;
       batch.host_anchor_controls.front().prune_region_count = 0U;
-      batch.host_anchor_controls.front().unresolved_pair_mass = 0U;
       break;
     case Corruption::too_many_regions_for_pruned_mass:
       batch.host_anchor_controls.front().candidate_count = 0U;
       batch.host_anchor_controls.front().certified_pruned_pair_mass = 1U;
       batch.host_anchor_controls.front().prune_region_count = 2U;
       batch.host_anchor_controls.front().node_visit_count = 2U;
-      batch.host_anchor_controls.front().unresolved_pair_mass = 0U;
       break;
     case Corruption::outputs_exceed_node_visits:
       batch.host_anchor_controls.front().node_visit_count = 0U;
+      break;
+    case Corruption::stale_tile_epoch:
+      --batch.host_anchor_controls.front().tile_epoch;
+      break;
+    case Corruption::stale_chunk_sequence:
+      --batch.host_anchor_controls.front().chunk_sequence;
+      break;
+    case Corruption::cumulative_candidate_rollback:
+      if (batch.host_anchor_controls.front().cumulative_candidate_count == 0U) {
+        ++batch.host_anchor_controls.front().cumulative_candidate_count;
+      } else {
+        --batch.host_anchor_controls.front().cumulative_candidate_count;
+      }
+      break;
+    case Corruption::cumulative_prune_rollback:
+      if (batch.host_anchor_controls.front()
+              .cumulative_certified_pruned_pair_mass == 0U) {
+        ++batch.host_anchor_controls.front()
+              .cumulative_certified_pruned_pair_mass;
+      } else {
+        --batch.host_anchor_controls.front()
+              .cumulative_certified_pruned_pair_mass;
+      }
+      break;
+    case Corruption::process_restart_claimed:
+      batch.process_restart_resumable = true;
       break;
     case Corruption::simulated_launcher_failure:
       break;
   }
   batch.metadata_digest =
       phase15_morton_yao48_device_tiled_metadata_digest(batch);
-  if (configuration.corruption == Corruption::corrupt_metadata_digest) {
+  if (launch.corruption == Corruption::corrupt_metadata_digest) {
     batch.metadata_digest ^= UINT64_C(1);
   }
   return batch;

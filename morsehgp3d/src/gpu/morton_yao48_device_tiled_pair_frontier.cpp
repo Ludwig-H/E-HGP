@@ -8,9 +8,21 @@
 #include <limits>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace morsehgp3d::gpu::detail {
+
+struct Phase15MortonYao48DeviceTiledAnchorProgress final {
+  std::uint64_t candidate_count{};
+  std::uint64_t prune_region_count{};
+  std::uint64_t certified_pruned_pair_mass{};
+  std::uint64_t node_visit_count{};
+  std::uint64_t ambiguous_cone_candidate_count{};
+  std::uint64_t unbanked_candidate_count{};
+  bool complete{false};
+};
 
 class Phase15MortonYao48DeviceTiledPairFrontierHostState final {
  public:
@@ -19,6 +31,12 @@ class Phase15MortonYao48DeviceTiledPairFrontierHostState final {
       : traversal(std::move(adopted)) {}
 
   Phase15MortonYao48DeviceTiledAdoptedTraversal traversal;
+  bool active_tile{false};
+  std::size_t active_tile_anchor_begin{};
+  std::size_t active_tile_anchor_count{};
+  std::uint64_t active_tile_epoch{};
+  std::uint64_t next_chunk_sequence{};
+  std::vector<Phase15MortonYao48DeviceTiledAnchorProgress> anchor_progress;
 };
 
 }  // namespace morsehgp3d::gpu::detail
@@ -32,11 +50,15 @@ using AnchorControl =
     detail::Phase15MortonYao48DeviceTiledAnchorControl;
 using AnchorStatus =
     detail::Phase15MortonYao48DeviceTiledAnchorStatus;
+using AnchorProgress =
+    detail::Phase15MortonYao48DeviceTiledAnchorProgress;
 using DeviceBatch = detail::Phase15MortonYao48DeviceTiledBatch;
 using ExecutionKind =
     detail::Phase15MortonYao48DeviceTiledExecutionKind;
 using FailureCode =
     detail::Phase15MortonYao48DeviceTiledFailureCode;
+using InternalYieldReason =
+    detail::Phase15MortonYao48DeviceTiledYieldReason;
 using Request = detail::Phase15MortonYao48DeviceTiledRequest;
 
 struct DetachedTileAuthority final {
@@ -46,14 +68,20 @@ struct DetachedTileAuthority final {
 };
 
 struct ValidatedBatch final {
-  std::size_t committed_anchor_count{};
+  std::size_t authorized_anchor_count{};
+  std::size_t completed_anchor_count{};
   std::size_t certified_prune_region_count{};
   std::uint64_t candidate_pair_mass{};
   std::uint64_t certified_pruned_pair_mass{};
   std::uint64_t physical_node_visit_count{};
   std::uint64_t ambiguous_cone_candidate_count{};
   std::uint64_t unbanked_candidate_count{};
-  bool censored{false};
+  std::vector<AnchorProgress> next_progress;
+  bool tile_complete{false};
+  bool capacity_yield{false};
+  bool fatal{false};
+  MortonYao48DeviceTiledPairFrontierYieldReason yield_reason{
+      MortonYao48DeviceTiledPairFrontierYieldReason::none};
   MortonYao48DeviceTiledPairFrontierStopReason stop_reason{
       MortonYao48DeviceTiledPairFrontierStopReason::none};
 };
@@ -111,6 +139,73 @@ struct ValidatedBatch final {
     throw std::length_error(message);
   }
   return point_count * 2U - 1U;
+}
+
+[[nodiscard]] std::size_t maximum_traversal_subdivision_count(
+    std::size_t certified_node_count) {
+  constexpr std::size_t quantum =
+      morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
+  if (certified_node_count == 0U) {
+    throw std::length_error(
+        "the Phase 15 traversal subdivision ceiling requires nodes");
+  }
+  return certified_node_count / quantum +
+      (certified_node_count % quantum == 0U ? 0U : 1U);
+}
+
+[[nodiscard]] std::size_t checked_device_arena_capacity_bytes(
+    const Request& request) {
+  const std::size_t candidate_count = checked_size_product(
+      request.anchor_count,
+      request.candidate_capacity_per_anchor,
+      "the Phase 15 candidate arena extent overflows size_t");
+  const std::size_t prune_count = checked_size_product(
+      request.anchor_count,
+      request.prune_region_capacity_per_anchor,
+      "the Phase 15 prune arena extent overflows size_t");
+  const std::size_t witness_count = checked_size_product(
+      checked_size_product(
+          request.anchor_count,
+          request.witness_bank_count_per_anchor,
+          "the Phase 15 witness-bank arena extent overflows size_t"),
+      request.witness_slot_count_per_bank,
+      "the Phase 15 witness-slot arena extent overflows size_t");
+  std::size_t bytes = checked_size_product(
+      candidate_count,
+      sizeof(detail::Phase15MortonYao48DeviceTiledCandidateRecord),
+      "the Phase 15 candidate arena bytes overflow size_t");
+  bytes = checked_size_sum(
+      bytes,
+      checked_size_product(
+          prune_count,
+          sizeof(detail::Phase15MortonYao48DeviceTiledPruneRegionRecord),
+          "the Phase 15 prune arena bytes overflow size_t"),
+      "the Phase 15 output arena bytes overflow size_t");
+  bytes = checked_size_sum(
+      bytes,
+      checked_size_product(
+          witness_count,
+          sizeof(detail::Phase15MortonYao48DeviceTiledWitnessBankSlot),
+          "the Phase 15 witness arena bytes overflow size_t"),
+      "the Phase 15 output arena bytes overflow size_t");
+  bytes = checked_size_sum(
+      bytes,
+      checked_size_product(
+          request.anchor_count,
+          sizeof(AnchorControl),
+          "the Phase 15 control arena bytes overflow size_t"),
+      "the Phase 15 output arena bytes overflow size_t");
+  bytes = checked_size_sum(
+      bytes,
+      checked_size_product(
+          request.anchor_count,
+          sizeof(detail::Phase15MortonYao48DeviceTiledAnchorCheckpoint),
+          "the Phase 15 checkpoint arena bytes overflow size_t"),
+      "the Phase 15 output arena bytes overflow size_t");
+  return checked_size_sum(
+      bytes,
+      sizeof(std::uint64_t),
+      "the Phase 15 pending-anchor arena bytes overflow size_t");
 }
 
 [[nodiscard]] std::uint64_t checked_pair_universe(
@@ -220,17 +315,31 @@ validate_stop_reason(std::uint64_t raw) {
       return MortonYao48DeviceTiledPairFrontierStopReason::
           node_visit_capacity;
     case static_cast<std::uint64_t>(
-        MortonYao48DeviceTiledPairFrontierStopReason::candidate_capacity):
-      return MortonYao48DeviceTiledPairFrontierStopReason::
-          candidate_capacity;
-    case static_cast<std::uint64_t>(
-        MortonYao48DeviceTiledPairFrontierStopReason::
-            prune_region_capacity):
-      return MortonYao48DeviceTiledPairFrontierStopReason::
-          prune_region_capacity;
+        MortonYao48DeviceTiledPairFrontierStopReason::fatal_failure):
+      return MortonYao48DeviceTiledPairFrontierStopReason::fatal_failure;
     default:
       throw std::runtime_error(
           "a Phase 15 anchor control returned an unknown stop reason");
+  }
+}
+
+[[nodiscard]] MortonYao48DeviceTiledPairFrontierYieldReason
+validate_yield_reason(std::uint64_t raw) {
+  switch (raw) {
+    case static_cast<std::uint64_t>(
+        InternalYieldReason::none):
+      return MortonYao48DeviceTiledPairFrontierYieldReason::none;
+    case static_cast<std::uint64_t>(
+        InternalYieldReason::candidate_segment_full):
+      return MortonYao48DeviceTiledPairFrontierYieldReason::
+          candidate_segment_full;
+    case static_cast<std::uint64_t>(
+        InternalYieldReason::prune_segment_full):
+      return MortonYao48DeviceTiledPairFrontierYieldReason::
+          prune_segment_full;
+    default:
+      throw std::runtime_error(
+          "a Phase 15 anchor control returned an unknown yield reason");
   }
 }
 
@@ -254,8 +363,11 @@ void validate_batch_envelope(
       bank_count,
       request.witness_slot_count_per_bank,
       "the Phase 15 witness bank slot capacity overflows size_t");
+  const std::size_t expected_device_arena_capacity_bytes =
+      checked_device_arena_capacity_bytes(request);
+  const std::size_t expected_maximum_subdivision_count =
+      maximum_traversal_subdivision_count(request.certified_node_count);
   if (!batch.retained_output_owner ||
-      batch.retained_output_owner.use_count() != 1L ||
       !batch.source_cloud_identity_authority ||
       batch.source_cloud_identity_authority.get() !=
           traversal.source_cloud_identity.get() ||
@@ -264,8 +376,21 @@ void validate_batch_envelope(
       batch.physical_prune_region_capacity != expected_prune_capacity ||
       batch.physical_witness_bank_slot_capacity != expected_bank_capacity ||
       batch.physical_anchor_control_capacity != request.anchor_count ||
+      batch.physical_anchor_checkpoint_capacity != request.anchor_count ||
+      batch.physical_pending_anchor_count_capacity != 1U ||
+      batch.physical_device_arena_capacity_bytes !=
+          expected_device_arena_capacity_bytes ||
+      batch.traversal_subdivision_count == 0U ||
+      batch.traversal_subdivision_count >
+          expected_maximum_subdivision_count ||
+      batch.maximum_traversal_subdivision_count_per_anchor !=
+          expected_maximum_subdivision_count ||
       batch.source_snapshot_epoch != request.source_snapshot_epoch ||
       batch.output_buffer_epoch != request.output_buffer_epoch ||
+      batch.tile_epoch != request.tile_epoch ||
+      batch.chunk_sequence != request.chunk_sequence ||
+      batch.resume_same_tile != request.resume_same_tile ||
+      batch.process_restart_resumable ||
       batch.execution_kind != traversal.execution_kind ||
       batch.candidate_device_to_host_count != 0U ||
       batch.certified_prune_device_to_host_count != 0U ||
@@ -298,6 +423,8 @@ void validate_batch_envelope(
           batch.device_anchor_controls != nullptr ||
           batch.anchor_control_device_to_host_count != 0U ||
           batch.anchor_control_device_to_host_byte_count != 0U ||
+          batch.resume_control_device_to_host_count != 0U ||
+          batch.resume_control_device_to_host_byte_count != 0U ||
           batch.kernel_launch_count != 0U ||
           batch.synchronization_count != 0U ||
           batch.cuda_device != -1 ||
@@ -311,6 +438,10 @@ void validate_batch_envelope(
           request.anchor_count,
           sizeof(AnchorControl),
           "the Phase 15 anchor-control transfer extent overflows size_t");
+      const std::size_t expected_resume_bytes = checked_size_product(
+          batch.traversal_subdivision_count,
+          sizeof(std::uint64_t),
+          "the Phase 15 resume-control transfer extent overflows size_t");
       if (batch.device_candidate_records == nullptr ||
           batch.device_prune_regions == nullptr ||
           batch.device_witness_bank_slots == nullptr ||
@@ -318,8 +449,14 @@ void validate_batch_envelope(
           batch.anchor_control_device_to_host_count != request.anchor_count ||
           batch.anchor_control_device_to_host_byte_count !=
               expected_control_bytes ||
-          batch.kernel_launch_count == 0U ||
-          batch.synchronization_count == 0U ||
+          batch.kernel_launch_count !=
+              batch.traversal_subdivision_count ||
+          batch.synchronization_count !=
+              batch.traversal_subdivision_count + 1U ||
+          batch.resume_control_device_to_host_count !=
+              batch.traversal_subdivision_count ||
+          batch.resume_control_device_to_host_byte_count !=
+              expected_resume_bytes ||
           batch.cuda_device != traversal.cuda_device ||
           !batch.cuda_execution_contract_satisfied) {
         throw std::runtime_error(
@@ -335,9 +472,22 @@ void validate_batch_envelope(
 
 [[nodiscard]] ValidatedBatch validate_anchor_controls(
     const DeviceBatch& batch,
-    const Request& request) {
+    const Request& request,
+    const std::vector<AnchorProgress>& previous_progress) {
   ValidatedBatch validated;
-  bool prefix_open = true;
+  if (previous_progress.size() != request.anchor_count) {
+    throw std::logic_error(
+        "the Phase 15 host continuation has a foreign anchor extent");
+  }
+  validated.authorized_anchor_count = request.anchor_count;
+  validated.next_progress = previous_progress;
+  const std::size_t launched_node_visit_count = checked_size_product(
+      batch.traversal_subdivision_count,
+      request.node_visit_capacity_per_anchor,
+      "the Phase 15 launched resumed node-visit count overflows size_t");
+  bool all_complete = true;
+  bool any_chunk_ready = false;
+  bool any_fatal = false;
   for (std::size_t control_index = 0U;
        control_index < batch.host_anchor_controls.size();
        ++control_index) {
@@ -347,23 +497,69 @@ void validate_batch_envelope(
         request.anchor_begin,
         control_index,
         "the Phase 15 anchor position overflows size_t");
+    const AnchorProgress& previous = previous_progress[control_index];
+    if (control.failure_code !=
+        static_cast<std::uint64_t>(FailureCode::none)) {
+      throw std::runtime_error(
+          "a Phase 15 CUDA anchor reported an internal failure code; the "
+          "context is poisoned and no terminal frontier is published");
+    }
+    const std::uint64_t expected_candidate_count = checked_u64_sum(
+        previous.candidate_count,
+        control.candidate_count,
+        "the Phase 15 cumulative candidate count overflowed uint64_t");
+    const std::uint64_t expected_prune_region_count = checked_u64_sum(
+        previous.prune_region_count,
+        control.prune_region_count,
+        "the Phase 15 cumulative prune-region count overflowed uint64_t");
+    const std::uint64_t expected_pruned_mass = checked_u64_sum(
+        previous.certified_pruned_pair_mass,
+        control.certified_pruned_pair_mass,
+        "the Phase 15 cumulative pruned mass overflowed uint64_t");
+    const std::uint64_t expected_node_visit_count = checked_u64_sum(
+        previous.node_visit_count,
+        control.node_visit_count,
+        "the Phase 15 cumulative node-visit count overflowed uint64_t");
+    const std::uint64_t expected_ambiguous_count = checked_u64_sum(
+        previous.ambiguous_cone_candidate_count,
+        control.ambiguous_cone_candidate_count,
+        "the Phase 15 cumulative ambiguity count overflowed uint64_t");
+    const std::uint64_t expected_unbanked_count = checked_u64_sum(
+        previous.unbanked_candidate_count,
+        control.unbanked_candidate_count,
+        "the Phase 15 cumulative unbanked count overflowed uint64_t");
     if (control.anchor_morton_position !=
             static_cast<std::uint64_t>(anchor_position) ||
+        control.tile_epoch != request.tile_epoch ||
+        control.chunk_sequence != request.chunk_sequence ||
         control.reserved_zero != 0U ||
-        control.failure_code !=
-            static_cast<std::uint64_t>(FailureCode::none) ||
         control.candidate_count > request.candidate_capacity_per_anchor ||
         control.prune_region_count >
             request.prune_region_capacity_per_anchor ||
-        control.node_visit_count > request.node_visit_capacity_per_anchor ||
+        control.node_visit_count > launched_node_visit_count ||
+        control.cumulative_candidate_count != expected_candidate_count ||
+        control.cumulative_prune_region_count !=
+            expected_prune_region_count ||
+        control.cumulative_certified_pruned_pair_mass !=
+            expected_pruned_mass ||
+        control.cumulative_node_visit_count != expected_node_visit_count ||
+        control.cumulative_ambiguous_cone_candidate_count !=
+            expected_ambiguous_count ||
+        control.cumulative_unbanked_candidate_count !=
+            expected_unbanked_count ||
+        control.cumulative_node_visit_count > request.certified_node_count ||
         control.ambiguous_cone_candidate_count >
             control.unbanked_candidate_count ||
         control.unbanked_candidate_count > control.candidate_count ||
-        control.certified_pruned_pair_mass >
+        control.cumulative_ambiguous_cone_candidate_count >
+            control.cumulative_unbanked_candidate_count ||
+        control.cumulative_unbanked_candidate_count >
+            control.cumulative_candidate_count ||
+        control.cumulative_certified_pruned_pair_mass >
             static_cast<std::uint64_t>(anchor_position)) {
       throw std::runtime_error(
-          "a Phase 15 anchor control violated its fixed segment or "
-          "fail-stop contract");
+          "a Phase 15 anchor control violated its chunk delta, cumulative, "
+          "sequence, or fixed-segment contract");
     }
     if ((control.prune_region_count == 0U) !=
             (control.certified_pruned_pair_mass == 0U) ||
@@ -377,8 +573,8 @@ void validate_batch_envelope(
           "mass without the required physical node visits");
     }
     const std::uint64_t classified_mass = checked_u64_sum(
-        control.candidate_count,
-        control.certified_pruned_pair_mass,
+        control.cumulative_candidate_count,
+        control.cumulative_certified_pruned_pair_mass,
         "a Phase 15 anchor classified mass overflowed uint64_t");
     if (classified_mass > static_cast<std::uint64_t>(anchor_position) ||
         control.unresolved_pair_mass !=
@@ -393,43 +589,78 @@ void validate_batch_envelope(
         static_cast<AnchorStatus>(control.status);
     const MortonYao48DeviceTiledPairFrontierStopReason stop_reason =
         validate_stop_reason(control.stop_reason);
+    const MortonYao48DeviceTiledPairFrontierYieldReason yield_reason =
+        validate_yield_reason(control.yield_reason);
     bool complete = false;
     switch (status) {
+      case AnchorStatus::active:
+        throw std::runtime_error(
+            "a Phase 15 launcher returned an active anchor instead of "
+            "continuing its bounded node quantum");
+      case AnchorStatus::chunk_ready:
+        if (stop_reason !=
+                MortonYao48DeviceTiledPairFrontierStopReason::none ||
+            control.unresolved_pair_mass == 0U || previous.complete ||
+            (yield_reason ==
+                     MortonYao48DeviceTiledPairFrontierYieldReason::
+                         candidate_segment_full &&
+                 control.candidate_count !=
+                     request.candidate_capacity_per_anchor) ||
+            (yield_reason ==
+                     MortonYao48DeviceTiledPairFrontierYieldReason::
+                         prune_segment_full &&
+                 control.prune_region_count !=
+                     request.prune_region_capacity_per_anchor) ||
+            yield_reason ==
+                MortonYao48DeviceTiledPairFrontierYieldReason::none) {
+          throw std::runtime_error(
+              "a Phase 15 chunk-ready anchor did not exhaust its reported "
+              "output segment");
+        }
+        any_chunk_ready = true;
+        if (validated.yield_reason ==
+            MortonYao48DeviceTiledPairFrontierYieldReason::none) {
+          validated.yield_reason = yield_reason;
+        } else if (validated.yield_reason != yield_reason) {
+          validated.yield_reason =
+              MortonYao48DeviceTiledPairFrontierYieldReason::
+                  mixed_segments_full;
+        }
+        break;
       case AnchorStatus::complete:
         complete = true;
         if (stop_reason !=
                 MortonYao48DeviceTiledPairFrontierStopReason::none ||
-            control.unresolved_pair_mass != 0U) {
+            yield_reason !=
+                MortonYao48DeviceTiledPairFrontierYieldReason::none ||
+            control.unresolved_pair_mass != 0U ||
+            (previous.complete &&
+             (control.candidate_count != 0U ||
+              control.prune_region_count != 0U ||
+              control.certified_pruned_pair_mass != 0U ||
+              control.node_visit_count != 0U ||
+              control.ambiguous_cone_candidate_count != 0U ||
+              control.unbanked_candidate_count != 0U))) {
           throw std::runtime_error(
               "a Phase 15 complete anchor did not close its local pair "
               "partition");
         }
         break;
-      case AnchorStatus::censored:
-        if (stop_reason ==
-            MortonYao48DeviceTiledPairFrontierStopReason::none) {
+      case AnchorStatus::fatal:
+        if (stop_reason !=
+                MortonYao48DeviceTiledPairFrontierStopReason::
+                    node_visit_capacity ||
+            yield_reason !=
+                MortonYao48DeviceTiledPairFrontierYieldReason::none ||
+            previous.complete ||
+            control.cumulative_node_visit_count !=
+                request.certified_node_count) {
           throw std::runtime_error(
-              "a Phase 15 censored anchor omitted its capacity reason");
+              "a Phase 15 fatal anchor omitted its certified node-capacity "
+              "proof");
         }
-        if ((stop_reason ==
-                 MortonYao48DeviceTiledPairFrontierStopReason::
-                     node_visit_capacity &&
-             control.node_visit_count !=
-                 request.node_visit_capacity_per_anchor) ||
-            (stop_reason ==
-                 MortonYao48DeviceTiledPairFrontierStopReason::
-                     candidate_capacity &&
-             control.candidate_count !=
-                 request.candidate_capacity_per_anchor) ||
-            (stop_reason ==
-                 MortonYao48DeviceTiledPairFrontierStopReason::
-                     prune_region_capacity &&
-             control.prune_region_count !=
-                 request.prune_region_capacity_per_anchor)) {
-          throw std::runtime_error(
-              "a Phase 15 censored anchor did not exhaust its reported "
-              "fixed capacity");
-        }
+        any_fatal = true;
+        validated.stop_reason = stop_reason;
         break;
       default:
         throw std::runtime_error(
@@ -440,47 +671,70 @@ void validate_batch_envelope(
         validated.physical_node_visit_count,
         control.node_visit_count,
         "the Phase 15 physical node-visit count overflowed uint64_t");
-    if (prefix_open && complete) {
-      ++validated.committed_anchor_count;
-      validated.certified_prune_region_count = checked_size_sum(
-          validated.certified_prune_region_count,
-          checked_size(
-              control.prune_region_count,
-              "a Phase 15 prune count does not fit size_t"),
-          "the Phase 15 committed prune count overflows size_t");
-      validated.candidate_pair_mass = checked_u64_sum(
-          validated.candidate_pair_mass,
-          control.candidate_count,
-          "the Phase 15 committed candidate mass overflowed uint64_t");
-      validated.certified_pruned_pair_mass = checked_u64_sum(
-          validated.certified_pruned_pair_mass,
-          control.certified_pruned_pair_mass,
-          "the Phase 15 committed prune mass overflowed uint64_t");
-      validated.ambiguous_cone_candidate_count = checked_u64_sum(
-          validated.ambiguous_cone_candidate_count,
-          control.ambiguous_cone_candidate_count,
-          "the Phase 15 ambiguity count overflowed uint64_t");
-      validated.unbanked_candidate_count = checked_u64_sum(
-          validated.unbanked_candidate_count,
-          control.unbanked_candidate_count,
-          "the Phase 15 unbanked count overflowed uint64_t");
-      continue;
-    }
-    if (prefix_open) {
-      prefix_open = false;
-      validated.censored = true;
-      validated.stop_reason = stop_reason;
-    }
+    validated.certified_prune_region_count = checked_size_sum(
+        validated.certified_prune_region_count,
+        checked_size(control.prune_region_count,
+                     "a Phase 15 prune count does not fit size_t"),
+        "the Phase 15 chunk prune count overflows size_t");
+    validated.candidate_pair_mass = checked_u64_sum(
+        validated.candidate_pair_mass,
+        control.candidate_count,
+        "the Phase 15 chunk candidate mass overflowed uint64_t");
+    validated.certified_pruned_pair_mass = checked_u64_sum(
+        validated.certified_pruned_pair_mass,
+        control.certified_pruned_pair_mass,
+        "the Phase 15 chunk prune mass overflowed uint64_t");
+    validated.ambiguous_cone_candidate_count = checked_u64_sum(
+        validated.ambiguous_cone_candidate_count,
+        control.ambiguous_cone_candidate_count,
+        "the Phase 15 chunk ambiguity count overflowed uint64_t");
+    validated.unbanked_candidate_count = checked_u64_sum(
+        validated.unbanked_candidate_count,
+        control.unbanked_candidate_count,
+        "the Phase 15 chunk unbanked count overflowed uint64_t");
+    validated.next_progress[control_index] = AnchorProgress{
+        control.cumulative_candidate_count,
+        control.cumulative_prune_region_count,
+        control.cumulative_certified_pruned_pair_mass,
+        control.cumulative_node_visit_count,
+        control.cumulative_ambiguous_cone_candidate_count,
+        control.cumulative_unbanked_candidate_count,
+        complete};
+    all_complete = all_complete && complete;
   }
+  if (any_fatal && any_chunk_ready) {
+    throw std::runtime_error(
+        "a Phase 15 batch mixed terminal failure with resumable output");
+  }
+  if (any_fatal &&
+      (validated.candidate_pair_mass != 0U ||
+       validated.certified_prune_region_count != 0U ||
+       validated.certified_pruned_pair_mass != 0U)) {
+    throw std::runtime_error(
+        "a Phase 15 fatal batch attempted to publish partial outputs");
+  }
+  if (!all_complete && !any_chunk_ready && !any_fatal) {
+    throw std::runtime_error(
+        "a Phase 15 launcher returned without a yield, completion, or fatal stop");
+  }
+  if (batch.capacity_yield_resumable != any_chunk_ready) {
+    throw std::runtime_error(
+        "a Phase 15 batch forged its resumable-capacity flag");
+  }
+  validated.tile_complete = all_complete;
+  validated.capacity_yield = any_chunk_ready;
+  validated.fatal = any_fatal;
+  validated.completed_anchor_count = all_complete ? request.anchor_count : 0U;
   return validated;
 }
 
 [[nodiscard]] ValidatedBatch validate_batch(
     const DeviceBatch& batch,
     const AdoptedTraversal& traversal,
-    const Request& request) {
+    const Request& request,
+    const std::vector<AnchorProgress>& previous_progress) {
   validate_batch_envelope(batch, traversal, request);
-  return validate_anchor_controls(batch, request);
+  return validate_anchor_controls(batch, request, previous_progress);
 }
 
 }  // namespace
@@ -496,10 +750,13 @@ MortonYao48DeviceCandidateTileLease::
         const void* device_nodes,
         const void* device_candidate_records,
         const void* device_certified_prune_regions,
+        const void* device_anchor_controls,
         std::size_t certified_node_count,
         std::size_t retained_coordinate_word_capacity,
         std::size_t retained_morton_point_id_capacity,
         std::size_t retained_node_capacity,
+        std::size_t physical_anchor_control_capacity,
+        std::size_t authorized_anchor_control_extent,
         int cuda_device,
         bool host_fake)
     : audit_(std::move(audit)),
@@ -512,20 +769,54 @@ MortonYao48DeviceCandidateTileLease::
       device_nodes_(device_nodes),
       device_candidate_records_(device_candidate_records),
       device_certified_prune_regions_(device_certified_prune_regions),
+      device_anchor_controls_(device_anchor_controls),
       certified_node_count_(certified_node_count),
       retained_coordinate_word_capacity_(
           retained_coordinate_word_capacity),
       retained_morton_point_id_capacity_(
           retained_morton_point_id_capacity),
       retained_node_capacity_(retained_node_capacity),
+      physical_anchor_control_capacity_(
+          physical_anchor_control_capacity),
+      authorized_anchor_control_extent_(
+          authorized_anchor_control_extent),
       cuda_device_(cuda_device),
       host_fake_(host_fake) {}
 
 bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
-  const std::size_t committed_anchor_count =
+  const std::size_t authorized_anchor_count =
       audit_.anchor_end >= audit_.anchor_begin
           ? audit_.anchor_end - audit_.anchor_begin
           : 0U;
+  if (audit_.maximum_closed_rank < 2U ||
+      audit_.maximum_closed_rank >
+          morton_yao48_device_tiled_pair_frontier_maximum_closed_rank ||
+      physical_anchor_control_capacity_ == 0U ||
+      physical_anchor_control_capacity_ >
+          morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity) {
+    return false;
+  }
+  const std::size_t expected_witness_capacity =
+      physical_anchor_control_capacity_ *
+      morton_yao48_device_tiled_pair_frontier_witness_bank_count *
+      (audit_.maximum_closed_rank - 1U);
+  const std::size_t expected_candidate_capacity =
+      physical_anchor_control_capacity_ *
+      morton_yao48_device_tiled_pair_frontier_candidates_per_anchor;
+  const std::size_t expected_prune_capacity =
+      physical_anchor_control_capacity_ *
+      morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor;
+  const std::size_t expected_device_arena_capacity_bytes =
+      expected_candidate_capacity *
+          sizeof(detail::Phase15MortonYao48DeviceTiledCandidateRecord) +
+      expected_prune_capacity *
+          sizeof(detail::Phase15MortonYao48DeviceTiledPruneRegionRecord) +
+      expected_witness_capacity *
+          sizeof(detail::Phase15MortonYao48DeviceTiledWitnessBankSlot) +
+      physical_anchor_control_capacity_ * sizeof(AnchorControl) +
+      physical_anchor_control_capacity_ *
+          sizeof(detail::Phase15MortonYao48DeviceTiledAnchorCheckpoint) +
+      sizeof(std::uint64_t);
   if (audit_.schema_version !=
           morton_yao48_device_tiled_pair_frontier_schema_version ||
       !retained_owner_ || !source_owner_authority_ ||
@@ -550,6 +841,7 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
       audit_.retained_node_capacity != retained_node_capacity_ ||
       audit_.maximum_closed_rank >
           morton_yao48_device_tiled_pair_frontier_maximum_closed_rank ||
+      audit_.tile_epoch == 0U || audit_.chunk_sequence == 0U ||
       audit_.anchor_begin == 0U ||
       audit_.anchor_end <= audit_.anchor_begin ||
       audit_.anchor_end > audit_.point_count ||
@@ -559,18 +851,46 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
           morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor ||
       audit_.fixed_witness_bank_count_per_anchor !=
           morton_yao48_device_tiled_pair_frontier_witness_bank_count ||
+      authorized_anchor_control_extent_ != authorized_anchor_count ||
+      physical_anchor_control_capacity_ <
+          authorized_anchor_control_extent_ ||
+      physical_anchor_control_capacity_ >
+          std::numeric_limits<std::size_t>::max() /
+              morton_yao48_device_tiled_pair_frontier_candidates_per_anchor ||
+      audit_.physical_candidate_capacity !=
+          physical_anchor_control_capacity_ *
+              morton_yao48_device_tiled_pair_frontier_candidates_per_anchor ||
+      physical_anchor_control_capacity_ >
+          std::numeric_limits<std::size_t>::max() /
+              morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor ||
+      audit_.physical_prune_region_capacity !=
+          physical_anchor_control_capacity_ *
+              morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor ||
+      audit_.physical_witness_bank_slot_capacity !=
+          expected_witness_capacity ||
+      audit_.physical_anchor_control_capacity !=
+          physical_anchor_control_capacity_ ||
+      audit_.physical_anchor_checkpoint_capacity !=
+          physical_anchor_control_capacity_ ||
+      audit_.physical_pending_anchor_count_capacity != 1U ||
+      audit_.physical_device_arena_capacity_bytes !=
+          expected_device_arena_capacity_bytes ||
       audit_.candidate_count >
-          committed_anchor_count *
+          authorized_anchor_count *
               morton_yao48_device_tiled_pair_frontier_candidates_per_anchor ||
       audit_.certified_prune_region_count >
-          committed_anchor_count *
+          authorized_anchor_count *
               morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor ||
       audit_.physical_candidate_capacity <
-          committed_anchor_count *
+          authorized_anchor_count *
               morton_yao48_device_tiled_pair_frontier_candidates_per_anchor ||
       audit_.physical_prune_region_capacity <
-          committed_anchor_count *
+          authorized_anchor_count *
               morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor ||
+      audit_.process_restart_resumable ||
+      (audit_.yield_reason ==
+           MortonYao48DeviceTiledPairFrontierYieldReason::none) !=
+          !audit_.resumable_after_lease_release ||
       !audit_.traversal_owner_retained ||
       !audit_.source_cloud_identity_retained ||
       audit_.source_device_views_retained !=
@@ -599,6 +919,7 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
            device_nodes_ == nullptr &&
            device_candidate_records_ == nullptr &&
            device_certified_prune_regions_ == nullptr &&
+           device_anchor_controls_ == nullptr &&
            cuda_device_ == -1;
   }
   return !audit_.host_fake_lifecycle_exercised &&
@@ -608,6 +929,7 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
          device_nodes_ != nullptr &&
          device_candidate_records_ != nullptr &&
          device_certified_prune_regions_ != nullptr &&
+         device_anchor_controls_ != nullptr &&
          cuda_device_ >= 0;
 }
 
@@ -623,6 +945,9 @@ detail::Phase15MortonYao48DeviceCandidateTilePrivateViews
 detail::Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
     const MortonYao48DeviceCandidateTileLease& lease) noexcept {
   Phase15MortonYao48DeviceCandidateTilePrivateViews views;
+  if (!lease.ready()) {
+    return views;
+  }
   views.retained_authority_identity = lease.retained_owner_.get();
   views.source_owner_identity = lease.source_owner_authority_.get();
   views.source_cloud_identity =
@@ -636,6 +961,9 @@ detail::Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
   views.device_prune_regions =
       static_cast<const Phase15MortonYao48DeviceTiledPruneRegionRecord*>(
           lease.device_certified_prune_regions_);
+  views.device_anchor_controls =
+      static_cast<const Phase15MortonYao48DeviceTiledAnchorControl*>(
+          lease.device_anchor_controls_);
   views.source_snapshot_epoch = lease.audit_.source_snapshot_epoch;
   views.candidate_buffer_epoch = lease.audit_.candidate_buffer_epoch;
   views.point_count = lease.audit_.point_count;
@@ -645,6 +973,18 @@ detail::Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
   views.retained_morton_point_id_capacity =
       lease.retained_morton_point_id_capacity_;
   views.retained_node_capacity = lease.retained_node_capacity_;
+  views.physical_candidate_record_capacity =
+      lease.audit_.physical_candidate_capacity;
+  views.candidate_segment_stride_records =
+      lease.audit_.fixed_candidate_capacity_per_anchor;
+  views.physical_anchor_control_capacity =
+      lease.physical_anchor_control_capacity_;
+  views.authorized_anchor_control_extent =
+      lease.authorized_anchor_control_extent_;
+  views.anchor_control_stride_bytes =
+      sizeof(Phase15MortonYao48DeviceTiledAnchorControl);
+  views.physical_device_arena_capacity_bytes =
+      lease.audit_.physical_device_arena_capacity_bytes;
   views.anchor_begin = lease.audit_.anchor_begin;
   views.anchor_end = lease.audit_.anchor_end;
   views.cuda_device = lease.cuda_device_;
@@ -719,12 +1059,21 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
     std::uint64_t transaction_candidate_pair_mass,
     std::uint64_t transaction_certified_pruned_pair_mass,
     std::uint64_t transaction_physical_node_visit_count,
+    std::size_t transaction_traversal_subdivision_count,
+    std::size_t transaction_physical_device_arena_capacity_bytes,
+    std::uint64_t tile_epoch,
+    std::uint64_t chunk_sequence,
+    MortonYao48DeviceTiledPairFrontierYieldReason yield_reason,
+    bool resumes_same_tile,
+    bool resumable_capacity_yield,
     std::uint64_t candidate_buffer_epoch,
     std::size_t launcher_call_count,
     std::size_t cuda_kernel_launch_count,
     std::size_t cuda_synchronization_count,
     std::size_t anchor_control_device_to_host_count,
     std::size_t anchor_control_device_to_host_byte_count,
+    std::size_t resume_control_device_to_host_count,
+    std::size_t resume_control_device_to_host_byte_count,
     int cuda_device,
     bool candidate_tile_lease_published,
     bool censored_anchor_outputs_withheld) const noexcept {
@@ -739,12 +1088,28 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
   audit.anchor_tile_capacity = config_.anchor_tile_capacity;
   audit.fixed_node_visit_capacity_per_anchor =
       morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
+  audit.maximum_traversal_subdivision_count_per_anchor =
+      certified_node_count_ == 0U
+          ? 0U
+          : certified_node_count_ /
+                    morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor +
+                (certified_node_count_ %
+                             morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor ==
+                         0U
+                     ? 0U
+                     : 1U);
   audit.fixed_candidate_capacity_per_anchor =
       morton_yao48_device_tiled_pair_frontier_candidates_per_anchor;
   audit.fixed_prune_region_capacity_per_anchor =
       morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor;
   audit.fixed_witness_bank_count_per_anchor =
       morton_yao48_device_tiled_pair_frontier_witness_bank_count;
+  audit.tile_epoch = tile_epoch;
+  audit.chunk_sequence = chunk_sequence;
+  audit.yield_reason = yield_reason;
+  audit.resumes_same_tile = resumes_same_tile;
+  audit.resumable_capacity_yield = resumable_capacity_yield;
+  audit.process_restart_resumable = false;
   audit.transaction_anchor_begin = transaction_anchor_begin;
   audit.transaction_anchor_end = transaction_anchor_end;
   audit.transaction_committed_anchor_count =
@@ -761,6 +1126,10 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
       transaction_certified_pruned_pair_mass;
   audit.transaction_physical_node_visit_count =
       transaction_physical_node_visit_count;
+  audit.transaction_traversal_subdivision_count =
+      transaction_traversal_subdivision_count;
+  audit.transaction_physical_device_arena_capacity_bytes =
+      transaction_physical_device_arena_capacity_bytes;
   audit.completed_anchor_count = completed_anchor_count_;
   audit.next_anchor_position = next_anchor_position_;
   audit.unordered_pair_universe_count = unordered_pair_universe_count_;
@@ -773,6 +1142,8 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
   audit.unresolved_pair_mass = unordered_pair_universe_count_ - classified;
   audit.cumulative_physical_node_visit_count =
       cumulative_physical_node_visit_count_;
+  audit.cumulative_traversal_subdivision_count =
+      cumulative_traversal_subdivision_count_;
   audit.launcher_call_count = launcher_call_count;
   audit.cuda_kernel_launch_count = cuda_kernel_launch_count;
   audit.cuda_synchronization_count = cuda_synchronization_count;
@@ -780,6 +1151,10 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
       anchor_control_device_to_host_count;
   audit.anchor_control_device_to_host_byte_count =
       anchor_control_device_to_host_byte_count;
+  audit.resume_control_device_to_host_count =
+      resume_control_device_to_host_count;
+  audit.resume_control_device_to_host_byte_count =
+      resume_control_device_to_host_byte_count;
   audit.candidate_device_to_host_count = 0U;
   audit.certified_prune_device_to_host_count = 0U;
   audit.cuda_device = cuda_device;
@@ -823,54 +1198,72 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
         "a moved-from Phase 15 device tiled Morton/Yao48 context cannot "
         "advance");
   }
-  if (state_->poisoned()) {
-    throw std::runtime_error(
-        "the Phase 15 device tiled Morton/Yao48 context is poisoned by a "
-        "prior launcher or validation failure");
-  }
-  if (!active_candidate_tile_authority_.expired()) {
-    throw std::logic_error(
-        "the Phase 15 device tiled Morton/Yao48 context cannot launch "
-        "while its preceding detached candidate tile is still alive");
-  }
+  return state_->with_launcher_section(
+      [this]() {
+        if (!active_candidate_tile_authority_.expired()) {
+          throw std::logic_error(
+              "the Phase 15 device tiled Morton/Yao48 context cannot launch "
+              "while its preceding detached candidate tile is still alive");
+        }
+      },
+      [this]() {
+    if (terminally_censored_ || next_anchor_position_ >= point_count_) {
+      ++advance_sequence_;
+      MortonYao48DeviceTiledPairFrontierAdvance result;
+      result.status = terminally_censored_
+                          ? MortonYao48DeviceTiledPairFrontierStatus::censored
+                          : MortonYao48DeviceTiledPairFrontierStatus::
+                                frontier_complete;
+      result.stop_reason = terminally_censored_
+                               ? terminal_stop_reason_
+                               : MortonYao48DeviceTiledPairFrontierStopReason::
+                                     none;
+      result.audit = make_audit(
+          next_anchor_position_,
+          next_anchor_position_,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          MortonYao48DeviceTiledPairFrontierYieldReason::none,
+          false,
+          false,
+          0U,
+          launcher_call_count_,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          0U,
+          host_->traversal.cuda_device,
+          false,
+          terminally_censored_);
+      return result;
+    }
 
-  if (terminally_censored_ || next_anchor_position_ >= point_count_) {
-    ++advance_sequence_;
-    MortonYao48DeviceTiledPairFrontierAdvance result;
-    result.status = terminally_censored_
-                        ? MortonYao48DeviceTiledPairFrontierStatus::censored
-                        : MortonYao48DeviceTiledPairFrontierStatus::
-                              frontier_complete;
-    result.stop_reason = terminally_censored_
-                             ? terminal_stop_reason_
-                             : MortonYao48DeviceTiledPairFrontierStopReason::
-                                   none;
-    result.audit = make_audit(
-        next_anchor_position_,
-        next_anchor_position_,
-        0U,
-        0U,
-        0U,
-        0U,
-        0U,
-        0U,
-        0U,
-        0U,
-        launcher_call_count_,
-        0U,
-        0U,
-        0U,
-        0U,
-        host_->traversal.cuda_device,
-        false,
-        terminally_censored_);
-    return result;
-  }
-
-  return state_->with_launcher_section([this]() {
-    const std::size_t anchor_begin = next_anchor_position_;
-    const std::size_t anchor_count = std::min(
-        config_.anchor_tile_capacity, point_count_ - anchor_begin);
+    const bool resume_same_tile = host_->active_tile;
+    const std::uint64_t output_buffer_epoch = state_->advance_epoch();
+    if (!host_->active_tile) {
+      host_->active_tile = true;
+      host_->active_tile_anchor_begin = next_anchor_position_;
+      host_->active_tile_anchor_count = std::min(
+          config_.anchor_tile_capacity,
+          point_count_ - next_anchor_position_);
+      host_->active_tile_epoch = output_buffer_epoch;
+      host_->next_chunk_sequence = 1U;
+      host_->anchor_progress.assign(
+          host_->active_tile_anchor_count, AnchorProgress{});
+    }
+    const std::size_t anchor_begin = host_->active_tile_anchor_begin;
+    const std::size_t anchor_count = host_->active_tile_anchor_count;
     const std::size_t anchor_end = checked_size_sum(
         anchor_begin,
         anchor_count,
@@ -878,7 +1271,9 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
     Request request;
     request.source_snapshot_epoch =
         host_->traversal.source_snapshot_epoch;
-    request.output_buffer_epoch = state_->advance_epoch();
+    request.output_buffer_epoch = output_buffer_epoch;
+    request.tile_epoch = host_->active_tile_epoch;
+    request.chunk_sequence = host_->next_chunk_sequence;
     request.point_count = point_count_;
     request.certified_node_count = certified_node_count_;
     request.anchor_begin = anchor_begin;
@@ -894,12 +1289,17 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
         morton_yao48_device_tiled_pair_frontier_witness_bank_count;
     request.witness_slot_count_per_bank =
         config_.maximum_closed_rank - 1U;
+    request.resume_same_tile = resume_same_tile;
 
     DeviceBatch batch = detail::
         build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
             *state_, host_->traversal, request);
     const ValidatedBatch validated =
-        validate_batch(batch, host_->traversal, request);
+        validate_batch(
+            batch,
+            host_->traversal,
+            request,
+            host_->anchor_progress);
 
     const std::uint64_t new_candidate_mass = checked_u64_sum(
         cumulative_candidate_pair_mass_,
@@ -922,13 +1322,10 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
         cumulative_physical_node_visit_count_,
         validated.physical_node_visit_count,
         "the Phase 15 cumulative node-visit count overflowed uint64_t");
-    const std::size_t committed_anchor_end = checked_size_sum(
-        anchor_begin,
-        validated.committed_anchor_count,
-        "the Phase 15 committed anchor prefix overflows size_t");
-
     std::optional<MortonYao48DeviceCandidateTileLease> candidate_tile;
-    if (validated.committed_anchor_count != 0U) {
+    if (!validated.fatal &&
+        (validated.candidate_pair_mass != 0U ||
+         validated.certified_prune_region_count != 0U)) {
       const bool host_fake =
           batch.execution_kind == ExecutionKind::host_fake;
       auto detached_authority = std::make_shared<DetachedTileAuthority>();
@@ -952,8 +1349,10 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
       lease_audit.retained_node_capacity =
           host_->traversal.retained_node_capacity;
       lease_audit.maximum_closed_rank = config_.maximum_closed_rank;
+      lease_audit.tile_epoch = request.tile_epoch;
+      lease_audit.chunk_sequence = request.chunk_sequence;
       lease_audit.anchor_begin = anchor_begin;
-      lease_audit.anchor_end = committed_anchor_end;
+      lease_audit.anchor_end = anchor_end;
       lease_audit.candidate_count = checked_size(
           validated.candidate_pair_mass,
           "the Phase 15 committed candidate count does not fit size_t");
@@ -963,12 +1362,27 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
           batch.physical_candidate_capacity;
       lease_audit.physical_prune_region_capacity =
           batch.physical_prune_region_capacity;
+      lease_audit.physical_witness_bank_slot_capacity =
+          batch.physical_witness_bank_slot_capacity;
+      lease_audit.physical_anchor_control_capacity =
+          batch.physical_anchor_control_capacity;
+      lease_audit.physical_anchor_checkpoint_capacity =
+          batch.physical_anchor_checkpoint_capacity;
+      lease_audit.physical_pending_anchor_count_capacity =
+          batch.physical_pending_anchor_count_capacity;
+      lease_audit.physical_device_arena_capacity_bytes =
+          batch.physical_device_arena_capacity_bytes;
       lease_audit.fixed_candidate_capacity_per_anchor =
           request.candidate_capacity_per_anchor;
       lease_audit.fixed_prune_region_capacity_per_anchor =
           request.prune_region_capacity_per_anchor;
       lease_audit.fixed_witness_bank_count_per_anchor =
           request.witness_bank_count_per_anchor;
+      lease_audit.yield_reason = validated.yield_reason;
+      lease_audit.resumes_same_tile = request.resume_same_tile;
+      lease_audit.resumable_after_lease_release =
+          validated.capacity_yield;
+      lease_audit.process_restart_resumable = false;
       lease_audit.traversal_owner_retained = true;
       lease_audit.source_cloud_identity_retained = true;
       lease_audit.source_device_views_retained = !host_fake;
@@ -978,7 +1392,7 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
       lease_audit.output_buffers_detached_for_tile_lifetime = true;
       lease_audit.host_fake_lifecycle_exercised = host_fake;
       lease_audit.cuda_device_storage_retained = !host_fake;
-      lease_audit.censored_anchor_outputs_withheld = validated.censored;
+      lease_audit.censored_anchor_outputs_withheld = validated.fatal;
 
       MortonYao48DeviceCandidateTileLease detached_tile{
           std::move(lease_audit),
@@ -990,16 +1404,19 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
           host_->traversal.device_nodes,
           batch.device_candidate_records,
           batch.device_prune_regions,
+          batch.device_anchor_controls,
           host_->traversal.certified_node_count,
           host_->traversal.retained_coordinate_word_capacity,
           host_->traversal.retained_morton_point_id_capacity,
           host_->traversal.retained_node_capacity,
+          batch.physical_anchor_control_capacity,
+          validated.authorized_anchor_count,
           batch.cuda_device,
           host_fake};
       candidate_tile.emplace(std::move(detached_tile));
       if (!candidate_tile->ready()) {
         throw std::runtime_error(
-            "the Phase 15 committed prefix did not form a valid detached "
+            "the Phase 15 output chunk did not form a valid detached "
             "device tile lease");
       }
       active_candidate_tile_authority_ = detached_authority;
@@ -1009,12 +1426,31 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
     cumulative_certified_pruned_pair_mass_ = new_pruned_mass;
     cumulative_physical_node_visit_count_ =
         new_physical_node_visit_count;
-    completed_anchor_count_ = checked_size_sum(
-        completed_anchor_count_,
-        validated.committed_anchor_count,
-        "the Phase 15 completed anchor count overflows size_t");
-    next_anchor_position_ = committed_anchor_end;
-    terminally_censored_ = validated.censored;
+    cumulative_traversal_subdivision_count_ = checked_size_sum(
+        cumulative_traversal_subdivision_count_,
+        batch.traversal_subdivision_count,
+        "the Phase 15 cumulative traversal subdivision count overflows size_t");
+    host_->anchor_progress = validated.next_progress;
+    if (validated.tile_complete) {
+      completed_anchor_count_ = checked_size_sum(
+          completed_anchor_count_,
+          validated.completed_anchor_count,
+          "the Phase 15 completed anchor count overflows size_t");
+      next_anchor_position_ = anchor_end;
+      host_->active_tile = false;
+      host_->anchor_progress.clear();
+    } else if (validated.capacity_yield) {
+      if (host_->next_chunk_sequence ==
+          std::numeric_limits<std::uint64_t>::max()) {
+        throw std::overflow_error(
+            "the Phase 15 tile chunk sequence overflowed uint64_t");
+      }
+      ++host_->next_chunk_sequence;
+    } else if (validated.fatal) {
+      host_->active_tile = false;
+      host_->anchor_progress.clear();
+    }
+    terminally_censored_ = validated.fatal;
     terminal_stop_reason_ = validated.stop_reason;
     ++launcher_call_count_;
     ++advance_sequence_;
@@ -1026,9 +1462,15 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
         batch.execution_kind == ExecutionKind::cuda;
 
     MortonYao48DeviceTiledPairFrontierAdvance result;
-    if (validated.censored) {
+    if (validated.fatal) {
       result.status = MortonYao48DeviceTiledPairFrontierStatus::censored;
       result.stop_reason = validated.stop_reason;
+    } else if (validated.capacity_yield) {
+      result.status =
+          MortonYao48DeviceTiledPairFrontierStatus::chunk_ready;
+      result.stop_reason =
+          MortonYao48DeviceTiledPairFrontierStopReason::none;
+      result.yield_reason = validated.yield_reason;
     } else if (next_anchor_position_ >= point_count_) {
       result.status =
           MortonYao48DeviceTiledPairFrontierStatus::frontier_complete;
@@ -1044,22 +1486,31 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
     result.audit = make_audit(
         anchor_begin,
         anchor_end,
-        validated.committed_anchor_count,
+        validated.completed_anchor_count,
         validated.certified_prune_region_count,
         validated.ambiguous_cone_candidate_count,
         validated.unbanked_candidate_count,
         validated.candidate_pair_mass,
         validated.certified_pruned_pair_mass,
         validated.physical_node_visit_count,
+        batch.traversal_subdivision_count,
+        batch.physical_device_arena_capacity_bytes,
+        request.tile_epoch,
+        request.chunk_sequence,
+        validated.yield_reason,
+        request.resume_same_tile,
+        validated.capacity_yield,
         request.output_buffer_epoch,
         launcher_call_count_,
         batch.kernel_launch_count,
         batch.synchronization_count,
         batch.anchor_control_device_to_host_count,
         batch.anchor_control_device_to_host_byte_count,
+        batch.resume_control_device_to_host_count,
+        batch.resume_control_device_to_host_byte_count,
         batch.cuda_device,
         result.candidate_tile.has_value(),
-        validated.censored);
+        validated.fatal);
     return result;
   });
 }

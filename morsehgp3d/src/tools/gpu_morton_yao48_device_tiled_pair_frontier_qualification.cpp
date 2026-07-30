@@ -50,12 +50,15 @@ using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierConfig;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierContext;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStatus;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStopReason;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierYieldReason;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledAdoptedTraversal;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledAnchorControl;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledAnchorStatus;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledYieldReason;
 using morsehgp3d::gpu::detail::Phase15MortonYao48DeviceTiledBatch;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledCandidateRecord;
@@ -81,6 +84,9 @@ inline constexpr std::string_view kSchema =
 inline constexpr std::string_view kScalingSmokeSchema =
     "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
     "scaling_smoke.v1";
+inline constexpr std::string_view kDirectScaleSchema =
+    "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
+    "direct_scale.v1";
 inline constexpr std::string_view kBackend = "cuda_g4";
 inline constexpr std::string_view kProfile = "hgp_reduced";
 inline constexpr std::string_view kMode =
@@ -125,6 +131,7 @@ struct Options {
   std::optional<std::size_t> maximum_closed_rank;
   bool all_ranks{false};
   bool scaling_smoke{false};
+  bool direct_scale{false};
   bool point_count_explicit{false};
   bool family_explicit{false};
   std::size_t anchor_tile_capacity{
@@ -158,9 +165,23 @@ struct AnchorPartition {
   std::vector<std::pair<std::uint64_t, std::uint64_t>> prune_intervals;
 };
 
+struct QualificationAnchorProgress {
+  std::uint64_t candidate_count{};
+  std::uint64_t prune_region_count{};
+  std::uint64_t certified_pruned_pair_mass{};
+  std::uint64_t node_visit_count{};
+  std::uint64_t ambiguous_cone_candidate_count{};
+  std::uint64_t unbanked_candidate_count{};
+  bool complete{false};
+};
+
 struct RankMetrics {
   std::size_t maximum_closed_rank{};
   std::size_t tile_count{};
+  std::size_t chunk_count{};
+  std::size_t resumed_chunk_count{};
+  std::size_t candidate_yield_anchor_count{};
+  std::size_t prune_yield_anchor_count{};
   std::size_t complete_anchor_count{};
   std::size_t censored_anchor_count{};
   std::size_t candidate_record_count{};
@@ -204,6 +225,11 @@ struct RankMetrics {
 struct ScalingSmokeMetrics {
   std::size_t maximum_closed_rank{};
   std::size_t advance_count{};
+  std::size_t chunk_ready_advance_count{};
+  std::size_t resumed_advance_count{};
+  std::size_t candidate_yield_count{};
+  std::size_t prune_yield_count{};
+  std::size_t mixed_yield_count{};
   std::size_t candidate_tile_lease_count{};
   std::size_t candidate_tile_release_count{};
   std::size_t completed_anchor_count{};
@@ -211,6 +237,10 @@ struct ScalingSmokeMetrics {
   std::size_t launcher_call_count{};
   std::size_t kernel_launch_count{};
   std::size_t synchronization_count{};
+  std::size_t traversal_subdivision_count{};
+  std::size_t maximum_traversal_subdivision_count_per_anchor{};
+  std::size_t resume_control_device_to_host_count{};
+  std::size_t resume_control_device_to_host_byte_count{};
   std::size_t anchor_control_device_to_host_count{};
   std::size_t anchor_control_device_to_host_byte_count{};
   std::uint64_t candidate_pair_mass{};
@@ -224,6 +254,11 @@ struct ScalingSmokeMetrics {
   std::uint64_t peak_prune_device_capacity_bytes{};
   std::uint64_t peak_tile_output_device_capacity_bytes{};
   std::uint64_t peak_witness_bank_device_capacity_bytes{};
+  std::uint64_t device_total_bytes{};
+  std::uint64_t initial_device_free_bytes{};
+  std::uint64_t minimum_device_free_bytes{};
+  std::uint64_t final_device_free_bytes{};
+  std::size_t device_memory_observation_count{};
   std::uint64_t generation_ns{};
   std::uint64_t canonicalization_ns{};
   std::uint64_t build_ns{};
@@ -302,6 +337,8 @@ void require(bool condition, const std::string& message) {
       options.all_ranks = true;
     } else if (argument == "--scaling-smoke") {
       options.scaling_smoke = true;
+    } else if (argument == "--direct-scale") {
+      options.direct_scale = true;
     } else if (argument == "--anchor-tile-capacity" && index + 1 < argc) {
       options.anchor_tile_capacity =
           parse_size(argv[++index], "invalid --anchor-tile-capacity");
@@ -322,30 +359,44 @@ void require(bool condition, const std::string& message) {
           "shell_permutation_dyadic|jitter_grid_dyadic|clusters_dyadic|"
           "affine_uniform_binary64] "
           "[--maximum-closed-rank R|--all-ranks] "
-          "[--scaling-smoke] "
+          "[--scaling-smoke|--direct-scale] "
           "[--anchor-tile-capacity N] [--sampled-prune-limit N] "
           "[--exact-prune-target-check-limit N] [--seed N]");
     }
   }
+  if (options.scaling_smoke && options.direct_scale) {
+    throw std::invalid_argument(
+        "--scaling-smoke and --direct-scale are mutually exclusive");
+  }
   if (options.scaling_smoke && !options.point_count_explicit) {
     options.point_count = 1'000'000U;
   }
+  if (options.direct_scale && !options.point_count_explicit) {
+    throw std::invalid_argument(
+        "--direct-scale requires --point-count 10000000 or 30000000");
+  }
+  const bool large_scale = options.scaling_smoke || options.direct_scale;
   const std::size_t maximum_point_count =
-      options.scaling_smoke ? 30'000'000U : 50'000U;
+      large_scale ? 30'000'000U : 50'000U;
   if (options.point_count < 2U ||
       options.point_count > maximum_point_count) {
     throw std::length_error(
-        options.scaling_smoke
+        large_scale
             ? "scaling --point-count must lie in [2,30000000]"
             : "qualification --point-count must lie in [2,50000]");
+  }
+  if (options.direct_scale && options.point_count != 10'000'000U &&
+      options.point_count != 30'000'000U) {
+    throw std::invalid_argument(
+        "--direct-scale only accepts --point-count 10000000 or 30000000");
   }
   if (options.maximum_closed_rank.has_value() && options.all_ranks) {
     throw std::invalid_argument(
         "--maximum-closed-rank and --all-ranks are mutually exclusive");
   }
-  if (options.scaling_smoke && options.all_ranks) {
+  if (large_scale && options.all_ranks) {
     throw std::invalid_argument(
-        "--scaling-smoke accepts one --maximum-closed-rank only");
+        "large-scale modes accept one --maximum-closed-rank only");
   }
   if (options.maximum_closed_rank.has_value() &&
       (*options.maximum_closed_rank < 2U ||
@@ -370,14 +421,14 @@ void require(bool condition, const std::string& message) {
       options.family == "shell_permutation_dyadic" ||
       options.family == "jitter_grid_dyadic" ||
       options.family == "clusters_dyadic";
-  if (!options.scaling_smoke && !known_family) {
+  if (!large_scale && !known_family) {
     throw std::invalid_argument("unknown --family");
   }
-  if (options.scaling_smoke) {
+  if (large_scale) {
     if (options.family_explicit &&
         options.family != "affine_uniform_binary64") {
       throw std::invalid_argument(
-          "--scaling-smoke only accepts --family affine_uniform_binary64");
+          "large-scale modes only accept --family affine_uniform_binary64");
     }
     options.family = "affine_uniform_binary64";
   }
@@ -389,7 +440,10 @@ void require(bool condition, const std::string& message) {
   if (options.maximum_closed_rank.has_value()) {
     return {*options.maximum_closed_rank};
   }
-  if (options.all_ranks || options.point_count <= 257U) {
+  if (options.all_ranks) {
+    return {2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U};
+  }
+  if (options.point_count <= 257U) {
     return {2U, 3U, 11U};
   }
   return {11U};
@@ -724,6 +778,16 @@ template <typename Duration>
   return static_cast<std::uint64_t>(value);
 }
 
+[[nodiscard]] std::uint64_t checked_u64_sum(
+    std::uint64_t left,
+    std::uint64_t right,
+    const char* message) {
+  if (right > std::numeric_limits<std::uint64_t>::max() - left) {
+    throw std::length_error(message);
+  }
+  return left + right;
+}
+
 [[nodiscard]] std::size_t checked_product(
     std::size_t left,
     std::size_t right,
@@ -733,6 +797,26 @@ template <typename Duration>
     throw std::overflow_error(message);
   }
   return left * right;
+}
+
+[[nodiscard]] std::size_t checked_size_sum(
+    std::size_t left,
+    std::size_t right,
+    const char* message) {
+  if (right > std::numeric_limits<std::size_t>::max() - left) {
+    throw std::overflow_error(message);
+  }
+  return left + right;
+}
+
+[[nodiscard]] std::size_t traversal_subdivision_ceiling(
+    std::size_t certified_node_count,
+    std::size_t node_visit_capacity) {
+  require(
+      certified_node_count != 0U && node_visit_capacity != 0U,
+      "a traversal subdivision ceiling requires positive extents");
+  return certified_node_count / node_visit_capacity +
+         (certified_node_count % node_visit_capacity == 0U ? 0U : 1U);
 }
 
 [[nodiscard]] std::uint64_t unordered_pair_count(std::size_t point_count) {
@@ -824,12 +908,21 @@ void hash_anchor_control(
            control.prune_region_count,
            control.certified_pruned_pair_mass,
            control.node_visit_count,
+           control.cumulative_candidate_count,
+           control.cumulative_prune_region_count,
+           control.cumulative_certified_pruned_pair_mass,
+           control.cumulative_node_visit_count,
            control.status,
+           control.yield_reason,
            control.stop_reason,
            control.failure_code,
            control.ambiguous_cone_candidate_count,
            control.unbanked_candidate_count,
+           control.cumulative_ambiguous_cone_candidate_count,
+           control.cumulative_unbanked_candidate_count,
            control.unresolved_pair_mass,
+           control.tile_epoch,
+           control.chunk_sequence,
            control.reserved_zero}) {
     digest = hash_word(digest, word);
   }
@@ -919,28 +1012,6 @@ void hash_anchor_control(
   const std::size_t order = static_cast<std::size_t>(
       std::distance(permutations.begin(), found));
   return static_cast<std::size_t>(negative_mask) * 6U + order;
-}
-
-[[nodiscard]] bool invalid_candidate_record(
-    const Phase15MortonYao48DeviceTiledCandidateRecord& record) noexcept {
-  return record.support_u == kInvalid && record.support_v == kInvalid &&
-         record.anchor_morton_position == kInvalid &&
-         record.partner_morton_position == kInvalid &&
-         record.owner_cone_index == kInvalid && record.flags == kInvalid;
-}
-
-[[nodiscard]] bool invalid_prune_record(
-    const Phase15MortonYao48DeviceTiledPruneRegionRecord& record) noexcept {
-  bool witnesses_invalid = true;
-  for (const std::uint64_t value : record.witness_point_ids) {
-    witnesses_invalid = witnesses_invalid && value == kInvalid;
-  }
-  return record.anchor_morton_position == kInvalid &&
-         record.node_index == kInvalid &&
-         record.certified_pair_mass == kInvalid &&
-         record.retained_witness_count == kInvalid &&
-         record.retained_witness_bank_mask == kInvalid &&
-         record.flags == kInvalid && witnesses_invalid;
 }
 
 [[nodiscard]] bool invalid_bank_slot(
@@ -1070,6 +1141,52 @@ void validate_batch_contract(
           "the expected bank count overflows size_t"),
       request.witness_slot_count_per_bank,
       "the expected bank-slot capacity overflows size_t");
+  std::size_t expected_arena_bytes = checked_product(
+      expected_candidates,
+      sizeof(Phase15MortonYao48DeviceTiledCandidateRecord),
+      "the expected candidate arena bytes overflow size_t");
+  expected_arena_bytes = checked_size_sum(
+      expected_arena_bytes,
+      checked_product(
+          expected_prunes,
+          sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord),
+          "the expected prune arena bytes overflow size_t"),
+      "the expected arena bytes overflow size_t");
+  expected_arena_bytes = checked_size_sum(
+      expected_arena_bytes,
+      checked_product(
+          expected_banks,
+          sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
+          "the expected witness arena bytes overflow size_t"),
+      "the expected arena bytes overflow size_t");
+  expected_arena_bytes = checked_size_sum(
+      expected_arena_bytes,
+      checked_product(
+          request.anchor_count,
+          sizeof(Phase15MortonYao48DeviceTiledAnchorControl),
+          "the expected control arena bytes overflow size_t"),
+      "the expected arena bytes overflow size_t");
+  expected_arena_bytes = checked_size_sum(
+      expected_arena_bytes,
+      checked_product(
+          request.anchor_count,
+          sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint),
+          "the expected checkpoint arena bytes overflow size_t"),
+      "the expected arena bytes overflow size_t");
+  expected_arena_bytes = checked_size_sum(
+      expected_arena_bytes,
+      sizeof(std::uint64_t),
+      "the expected pending-anchor arena bytes overflow size_t");
+  const std::size_t maximum_subdivision_count =
+      traversal_subdivision_ceiling(
+          request.certified_node_count,
+          request.node_visit_capacity_per_anchor);
+  require(
+      request.tile_epoch != 0U && request.chunk_sequence != 0U &&
+          (request.resume_same_tile
+               ? request.chunk_sequence > 1U
+               : request.chunk_sequence == 1U),
+      "the qualification request has an invalid tile/chunk sequence");
   require(
       batch.retained_output_owner != nullptr &&
           batch.device_candidate_records != nullptr &&
@@ -1080,7 +1197,10 @@ void validate_batch_contract(
           batch.physical_candidate_capacity == expected_candidates &&
           batch.physical_prune_region_capacity == expected_prunes &&
           batch.physical_witness_bank_slot_capacity == expected_banks &&
-          batch.physical_anchor_control_capacity == request.anchor_count,
+          batch.physical_anchor_control_capacity == request.anchor_count &&
+          batch.physical_anchor_checkpoint_capacity == request.anchor_count &&
+          batch.physical_pending_anchor_count_capacity == 1U &&
+          batch.physical_device_arena_capacity_bytes == expected_arena_bytes,
       "the CUDA tile batch has inconsistent physical extents");
   require(
       batch.anchor_control_device_to_host_count == request.anchor_count &&
@@ -1089,12 +1209,25 @@ void validate_batch_contract(
                   sizeof(Phase15MortonYao48DeviceTiledAnchorControl) &&
           batch.candidate_device_to_host_count == 0U &&
           batch.certified_prune_device_to_host_count == 0U &&
-          batch.kernel_launch_count == 1U &&
-          batch.synchronization_count == 1U,
+          batch.traversal_subdivision_count != 0U &&
+          batch.traversal_subdivision_count <= maximum_subdivision_count &&
+          batch.maximum_traversal_subdivision_count_per_anchor ==
+              maximum_subdivision_count &&
+          batch.kernel_launch_count == batch.traversal_subdivision_count &&
+          batch.synchronization_count ==
+              batch.traversal_subdivision_count + 1U &&
+          batch.resume_control_device_to_host_count ==
+              batch.traversal_subdivision_count &&
+          batch.resume_control_device_to_host_byte_count ==
+              batch.traversal_subdivision_count * sizeof(std::uint64_t),
       "the production launcher performed a forbidden output D2H copy");
   require(
       batch.source_snapshot_epoch == request.source_snapshot_epoch &&
           batch.output_buffer_epoch == request.output_buffer_epoch &&
+          batch.tile_epoch == request.tile_epoch &&
+          batch.chunk_sequence == request.chunk_sequence &&
+          batch.resume_same_tile == request.resume_same_tile &&
+          !batch.process_restart_resumable &&
           batch.cuda_device == cuda_device &&
           batch.execution_kind ==
               Phase15MortonYao48DeviceTiledExecutionKind::cuda &&
@@ -1120,6 +1253,250 @@ void validate_batch_contract(
           !batch.global_pair_matrix_materialized &&
           !batch.higher_order_structure_materialized,
       "the CUDA tile batch made a forbidden product or scientific claim");
+}
+
+struct QualificationControlSummary {
+  std::uint64_t candidate_count{};
+  std::uint64_t prune_region_count{};
+  std::uint64_t certified_pruned_pair_mass{};
+  bool all_complete{true};
+  bool any_chunk_ready{false};
+  bool any_fatal{false};
+  bool candidate_yield{false};
+  bool prune_yield{false};
+};
+
+[[nodiscard]] QualificationControlSummary validate_qualification_controls(
+    const Phase15MortonYao48DeviceTiledBatch& batch,
+    const Phase15MortonYao48DeviceTiledRequest& request,
+    std::vector<QualificationAnchorProgress>& progress,
+    RankMetrics& metrics) {
+  require(
+      progress.size() == request.anchor_count,
+      "the qualification continuation progress has a foreign extent");
+  QualificationControlSummary summary;
+  const std::uint64_t launched_visit_capacity = checked_u64(
+      checked_product(
+          batch.traversal_subdivision_count,
+          request.node_visit_capacity_per_anchor,
+          "the qualification launched visit capacity overflows size_t"),
+      "the qualification launched visit capacity does not fit uint64");
+  for (std::size_t slot = 0U; slot < request.anchor_count; ++slot) {
+    const Phase15MortonYao48DeviceTiledAnchorControl& control =
+        batch.host_anchor_controls[slot];
+    QualificationAnchorProgress& prior = progress[slot];
+    const std::uint64_t expected_anchor = checked_u64(
+        request.anchor_begin + slot,
+        "the qualification anchor position does not fit uint64");
+    const std::uint64_t expected_candidate_count = checked_u64_sum(
+        prior.candidate_count,
+        control.candidate_count,
+        "the qualification cumulative candidate count overflowed");
+    const std::uint64_t expected_prune_region_count = checked_u64_sum(
+        prior.prune_region_count,
+        control.prune_region_count,
+        "the qualification cumulative prune count overflowed");
+    const std::uint64_t expected_pruned_mass = checked_u64_sum(
+        prior.certified_pruned_pair_mass,
+        control.certified_pruned_pair_mass,
+        "the qualification cumulative prune mass overflowed");
+    const std::uint64_t expected_node_visit_count = checked_u64_sum(
+        prior.node_visit_count,
+        control.node_visit_count,
+        "the qualification cumulative visit count overflowed");
+    const std::uint64_t expected_ambiguous_count = checked_u64_sum(
+        prior.ambiguous_cone_candidate_count,
+        control.ambiguous_cone_candidate_count,
+        "the qualification cumulative ambiguity count overflowed");
+    const std::uint64_t expected_unbanked_count = checked_u64_sum(
+        prior.unbanked_candidate_count,
+        control.unbanked_candidate_count,
+        "the qualification cumulative unbanked count overflowed");
+    require(
+        control.anchor_morton_position == expected_anchor &&
+            control.tile_epoch == request.tile_epoch &&
+            control.chunk_sequence == request.chunk_sequence &&
+            control.reserved_zero == 0U &&
+            control.candidate_count <=
+                request.candidate_capacity_per_anchor &&
+            control.prune_region_count <=
+                request.prune_region_capacity_per_anchor &&
+            control.node_visit_count <= launched_visit_capacity &&
+            control.cumulative_candidate_count ==
+                expected_candidate_count &&
+            control.cumulative_prune_region_count ==
+                expected_prune_region_count &&
+            control.cumulative_certified_pruned_pair_mass ==
+                expected_pruned_mass &&
+            control.cumulative_node_visit_count ==
+                expected_node_visit_count &&
+            control.cumulative_node_visit_count <=
+                request.certified_node_count &&
+            control.cumulative_ambiguous_cone_candidate_count ==
+                expected_ambiguous_count &&
+            control.cumulative_unbanked_candidate_count ==
+                expected_unbanked_count &&
+            control.ambiguous_cone_candidate_count <=
+                control.unbanked_candidate_count &&
+            control.unbanked_candidate_count <= control.candidate_count &&
+            control.cumulative_ambiguous_cone_candidate_count <=
+                control.cumulative_unbanked_candidate_count &&
+            control.cumulative_unbanked_candidate_count <=
+                control.cumulative_candidate_count &&
+            control.yield_reason <= static_cast<std::uint64_t>(
+                                        Phase15MortonYao48DeviceTiledYieldReason::
+                                            prune_segment_full) &&
+            control.stop_reason <= static_cast<std::uint64_t>(
+                                       MortonYao48DeviceTiledPairFrontierStopReason::
+                                           fatal_failure) &&
+            control.failure_code <= static_cast<std::uint64_t>(
+                                         Phase15MortonYao48DeviceTiledFailureCode::
+                                             internal_invariant),
+        "an anchor control violates its v3 delta/cumulative identity");
+    require(
+        (control.prune_region_count == 0U) ==
+                (control.certified_pruned_pair_mass == 0U) &&
+            control.prune_region_count <=
+                control.certified_pruned_pair_mass &&
+            control.prune_region_count <= control.node_visit_count &&
+            control.candidate_count <=
+                control.node_visit_count - control.prune_region_count &&
+            control.cumulative_candidate_count <= expected_anchor &&
+            control.cumulative_certified_pruned_pair_mass <=
+                expected_anchor - control.cumulative_candidate_count &&
+            control.unresolved_pair_mass ==
+                expected_anchor - control.cumulative_candidate_count -
+                    control.cumulative_certified_pruned_pair_mass,
+        "an anchor control violates its v3 pair partition");
+
+    const auto status =
+        static_cast<Phase15MortonYao48DeviceTiledAnchorStatus>(
+            control.status);
+    const auto yield_reason =
+        static_cast<Phase15MortonYao48DeviceTiledYieldReason>(
+            control.yield_reason);
+    bool complete = false;
+    switch (status) {
+      case Phase15MortonYao48DeviceTiledAnchorStatus::active:
+        throw QualificationMismatch(
+            "the CUDA launcher returned an internal active anchor state");
+      case Phase15MortonYao48DeviceTiledAnchorStatus::chunk_ready:
+        require(
+            !prior.complete &&
+                control.stop_reason == static_cast<std::uint64_t>(
+                                           MortonYao48DeviceTiledPairFrontierStopReason::
+                                               none) &&
+                control.failure_code == static_cast<std::uint64_t>(
+                                            Phase15MortonYao48DeviceTiledFailureCode::
+                                                none) &&
+                control.unresolved_pair_mass != 0U &&
+                ((yield_reason ==
+                      Phase15MortonYao48DeviceTiledYieldReason::
+                          candidate_segment_full &&
+                  control.candidate_count ==
+                      request.candidate_capacity_per_anchor) ||
+                 (yield_reason ==
+                      Phase15MortonYao48DeviceTiledYieldReason::
+                          prune_segment_full &&
+                  control.prune_region_count ==
+                      request.prune_region_capacity_per_anchor)),
+            "a chunk-ready anchor did not exhaust its reported segment");
+        summary.any_chunk_ready = true;
+        if (yield_reason ==
+            Phase15MortonYao48DeviceTiledYieldReason::
+                candidate_segment_full) {
+          summary.candidate_yield = true;
+          ++metrics.candidate_yield_anchor_count;
+        } else {
+          summary.prune_yield = true;
+          ++metrics.prune_yield_anchor_count;
+        }
+        break;
+      case Phase15MortonYao48DeviceTiledAnchorStatus::complete:
+        require(
+            yield_reason ==
+                    Phase15MortonYao48DeviceTiledYieldReason::none &&
+                control.stop_reason == static_cast<std::uint64_t>(
+                                           MortonYao48DeviceTiledPairFrontierStopReason::
+                                               none) &&
+                control.failure_code == static_cast<std::uint64_t>(
+                                            Phase15MortonYao48DeviceTiledFailureCode::
+                                                none) &&
+                control.unresolved_pair_mass == 0U &&
+                (!prior.complete ||
+                 (control.candidate_count == 0U &&
+                  control.prune_region_count == 0U &&
+                  control.certified_pruned_pair_mass == 0U &&
+                  control.node_visit_count == 0U &&
+                  control.ambiguous_cone_candidate_count == 0U &&
+                  control.unbanked_candidate_count == 0U)),
+            "a complete anchor reports unresolved or duplicated work");
+        complete = true;
+        if (!prior.complete) {
+          ++metrics.complete_anchor_count;
+        }
+        break;
+      case Phase15MortonYao48DeviceTiledAnchorStatus::fatal:
+        require(
+            !prior.complete &&
+                yield_reason ==
+                    Phase15MortonYao48DeviceTiledYieldReason::none &&
+                control.stop_reason != static_cast<std::uint64_t>(
+                                           MortonYao48DeviceTiledPairFrontierStopReason::
+                                               none) &&
+                control.candidate_count == 0U &&
+                control.prune_region_count == 0U &&
+                control.certified_pruned_pair_mass == 0U &&
+                control.ambiguous_cone_candidate_count == 0U &&
+                control.unbanked_candidate_count == 0U,
+            "a fatal anchor attempted to publish a partial output chunk");
+        summary.any_fatal = true;
+        ++metrics.censored_anchor_count;
+        break;
+      default:
+        throw QualificationMismatch(
+            "an anchor control has an unknown v3 status");
+    }
+
+    hash_anchor_control(metrics.output_digest, control);
+    metrics.physical_node_visit_count = checked_u64_sum(
+        metrics.physical_node_visit_count,
+        control.node_visit_count,
+        "the qualification physical visit count overflowed");
+    metrics.ambiguous_candidate_count += static_cast<std::size_t>(
+        control.ambiguous_cone_candidate_count);
+    metrics.unbanked_candidate_count += static_cast<std::size_t>(
+        control.unbanked_candidate_count);
+    summary.candidate_count = checked_u64_sum(
+        summary.candidate_count,
+        control.candidate_count,
+        "the qualification chunk candidate count overflowed");
+    summary.prune_region_count = checked_u64_sum(
+        summary.prune_region_count,
+        control.prune_region_count,
+        "the qualification chunk prune count overflowed");
+    summary.certified_pruned_pair_mass = checked_u64_sum(
+        summary.certified_pruned_pair_mass,
+        control.certified_pruned_pair_mass,
+        "the qualification chunk prune mass overflowed");
+    prior = QualificationAnchorProgress{
+        control.cumulative_candidate_count,
+        control.cumulative_prune_region_count,
+        control.cumulative_certified_pruned_pair_mass,
+        control.cumulative_node_visit_count,
+        control.cumulative_ambiguous_cone_candidate_count,
+        control.cumulative_unbanked_candidate_count,
+        complete};
+    summary.all_complete = summary.all_complete && complete;
+  }
+  require(
+      batch.capacity_yield_resumable == summary.any_chunk_ready &&
+          !batch.process_restart_resumable &&
+          !(summary.any_chunk_ready && summary.any_fatal) &&
+          (summary.all_complete || summary.any_chunk_ready ||
+           summary.any_fatal),
+      "the CUDA batch has an inconsistent v3 aggregate state");
+  return summary;
 }
 
 void validate_candidate_record(
@@ -1515,6 +1892,41 @@ void bounded_bruteforce_replay(
 #endif
 }
 
+void observe_scaling_device_memory(
+    ScalingSmokeMetrics& metrics,
+    std::string_view role) {
+  std::size_t free_bytes = 0U;
+  std::size_t total_bytes = 0U;
+  const cudaError_t status = cudaMemGetInfo(&free_bytes, &total_bytes);
+  if (status != cudaSuccess) {
+    const char* const description = cudaGetErrorString(status);
+    throw std::runtime_error(
+        std::string{role} + ": " +
+        (description == nullptr ? "unknown CUDA error" : description));
+  }
+  const std::uint64_t free_u64 = checked_u64(
+      free_bytes, "the scaling free-device-memory count does not fit uint64");
+  const std::uint64_t total_u64 = checked_u64(
+      total_bytes,
+      "the scaling total-device-memory count does not fit uint64");
+  require(
+      total_u64 != 0U && free_u64 <= total_u64,
+      "the scaling CUDA memory observation is inconsistent");
+  if (metrics.device_memory_observation_count == 0U) {
+    metrics.device_total_bytes = total_u64;
+    metrics.initial_device_free_bytes = free_u64;
+    metrics.minimum_device_free_bytes = free_u64;
+  } else {
+    require(
+        metrics.device_total_bytes == total_u64,
+        "the scaling CUDA device capacity changed during one process");
+    metrics.minimum_device_free_bytes =
+        std::min(metrics.minimum_device_free_bytes, free_u64);
+  }
+  metrics.final_device_free_bytes = free_u64;
+  ++metrics.device_memory_observation_count;
+}
+
 void validate_scaling_tile_lease(
     const MortonYao48DeviceCandidateTileLeaseAudit& audit,
     const Options& options,
@@ -1538,7 +1950,13 @@ void validate_scaling_tile_lease(
                   morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor &&
           audit.fixed_witness_bank_count_per_anchor ==
               morsehgp3d::gpu::
-                  morton_yao48_device_tiled_pair_frontier_witness_bank_count,
+                  morton_yao48_device_tiled_pair_frontier_witness_bank_count &&
+          audit.tile_epoch != 0U && audit.chunk_sequence != 0U &&
+          audit.resumes_same_tile == (audit.chunk_sequence > 1U) &&
+          !audit.process_restart_resumable &&
+          (audit.yield_reason ==
+               MortonYao48DeviceTiledPairFrontierYieldReason::none) ==
+              !audit.resumable_after_lease_release,
       "the scaling-smoke tile lease has inconsistent extents");
   require(
       audit.traversal_owner_retained &&
@@ -1571,6 +1989,11 @@ void validate_scaling_advance(
   const MortonYao48DeviceTiledPairFrontierAudit& audit = advance.audit;
   const std::size_t maximum_closed_rank =
       options.maximum_closed_rank.value_or(11U);
+  const std::size_t maximum_subdivision_count =
+      traversal_subdivision_ceiling(
+          audit.certified_node_count,
+          morsehgp3d::gpu::
+              morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor);
   require(
       audit.schema_version ==
               morsehgp3d::gpu::
@@ -1583,6 +2006,8 @@ void validate_scaling_advance(
           audit.fixed_node_visit_capacity_per_anchor ==
               morsehgp3d::gpu::
                   morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor &&
+          audit.maximum_traversal_subdivision_count_per_anchor ==
+              maximum_subdivision_count &&
           audit.fixed_candidate_capacity_per_anchor ==
               morsehgp3d::gpu::
                   morton_yao48_device_tiled_pair_frontier_candidates_per_anchor &&
@@ -1591,8 +2016,31 @@ void validate_scaling_advance(
                   morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor &&
           audit.fixed_witness_bank_count_per_anchor ==
               morsehgp3d::gpu::
-                  morton_yao48_device_tiled_pair_frontier_witness_bank_count,
+                  morton_yao48_device_tiled_pair_frontier_witness_bank_count &&
+          audit.tile_epoch != 0U && audit.chunk_sequence != 0U &&
+          audit.resumes_same_tile == (audit.chunk_sequence > 1U) &&
+          !audit.process_restart_resumable &&
+          advance.yield_reason == audit.yield_reason &&
+          (audit.yield_reason ==
+               MortonYao48DeviceTiledPairFrontierYieldReason::none) ==
+              !audit.resumable_capacity_yield,
       "the scaling-smoke public audit has inconsistent fixed metadata");
+  require(
+      audit.transaction_traversal_subdivision_count != 0U &&
+          audit.transaction_traversal_subdivision_count <=
+              maximum_subdivision_count &&
+          audit.cumulative_traversal_subdivision_count >=
+              audit.transaction_traversal_subdivision_count &&
+          audit.cuda_kernel_launch_count ==
+              audit.transaction_traversal_subdivision_count &&
+          audit.cuda_synchronization_count ==
+              audit.transaction_traversal_subdivision_count + 1U &&
+          audit.resume_control_device_to_host_count ==
+              audit.transaction_traversal_subdivision_count &&
+          audit.resume_control_device_to_host_byte_count ==
+              audit.transaction_traversal_subdivision_count *
+                  sizeof(std::uint64_t),
+      "the scaling-smoke public audit has inconsistent resume receipts");
   require(
       audit.transaction_anchor_begin == expected_anchor_begin &&
           audit.transaction_anchor_end > audit.transaction_anchor_begin &&
@@ -1649,13 +2097,18 @@ void validate_scaling_advance(
   require(
       audit.candidate_tile_lease_published == has_tile &&
           audit.candidate_tile_lease_outstanding == has_tile &&
-          has_tile == (audit.transaction_committed_anchor_count != 0U),
+          has_tile ==
+              (audit.transaction_candidate_pair_mass != 0U ||
+               audit.transaction_certified_prune_region_count != 0U),
       "the scaling-smoke public audit violates single-tile backpressure");
   if (advance.status ==
       MortonYao48DeviceTiledPairFrontierStatus::frontier_complete) {
     require(
         advance.stop_reason ==
                 MortonYao48DeviceTiledPairFrontierStopReason::none &&
+            advance.yield_reason ==
+                MortonYao48DeviceTiledPairFrontierYieldReason::none &&
+            !audit.resumable_capacity_yield &&
             audit.pair_coverage_partition_complete &&
             !audit.terminally_censored &&
             audit.next_anchor_position == options.point_count &&
@@ -1667,17 +2120,44 @@ void validate_scaling_advance(
     require(
         advance.stop_reason ==
                 MortonYao48DeviceTiledPairFrontierStopReason::none &&
+            advance.yield_reason ==
+                MortonYao48DeviceTiledPairFrontierYieldReason::none &&
+            !audit.resumable_capacity_yield &&
             !audit.pair_coverage_partition_complete &&
             !audit.terminally_censored &&
             audit.transaction_committed_anchor_count ==
                 audit.transaction_anchor_end -
                     audit.transaction_anchor_begin,
         "the scaling-smoke public tile completion is inconsistent");
+  } else if (
+      advance.status ==
+      MortonYao48DeviceTiledPairFrontierStatus::chunk_ready) {
+    require(
+        advance.stop_reason ==
+                MortonYao48DeviceTiledPairFrontierStopReason::none &&
+            (advance.yield_reason ==
+                 MortonYao48DeviceTiledPairFrontierYieldReason::
+                     candidate_segment_full ||
+             advance.yield_reason ==
+                 MortonYao48DeviceTiledPairFrontierYieldReason::
+                     prune_segment_full ||
+             advance.yield_reason ==
+                 MortonYao48DeviceTiledPairFrontierYieldReason::
+                     mixed_segments_full) &&
+            audit.resumable_capacity_yield &&
+            audit.transaction_committed_anchor_count == 0U &&
+            audit.next_anchor_position == audit.transaction_anchor_begin &&
+            !audit.pair_coverage_partition_complete &&
+            !audit.terminally_censored,
+        "the scaling public chunk-ready continuation is inconsistent");
   } else {
     require(
         advance.status == MortonYao48DeviceTiledPairFrontierStatus::censored &&
             advance.stop_reason !=
                 MortonYao48DeviceTiledPairFrontierStopReason::none &&
+            advance.yield_reason ==
+                MortonYao48DeviceTiledPairFrontierYieldReason::none &&
+            !audit.resumable_capacity_yield &&
             audit.terminally_censored &&
             audit.censored_anchor_outputs_withheld &&
             !audit.pair_coverage_partition_complete,
@@ -1696,6 +2176,8 @@ void validate_scaling_advance(
   metrics.generation_ns = generation_ns;
   metrics.unordered_pair_universe_count =
       unordered_pair_count(options.point_count);
+  observe_scaling_device_memory(
+      metrics, "cudaMemGetInfo before large-scale qualification");
 
   const auto canonicalization_start = Clock::now();
   std::optional<CanonicalPointCloud> cloud;
@@ -1745,6 +2227,8 @@ void validate_scaling_advance(
     metrics.traversal_device_capacity_bytes = checked_u64(
         lease_audit.persistent_device_byte_capacity,
         "the scaling traversal capacity does not fit uint64");
+    observe_scaling_device_memory(
+        metrics, "cudaMemGetInfo after large-scale LBVH build");
     host_release_start = Clock::now();
   }
   cloud.reset();
@@ -1763,8 +2247,12 @@ void validate_scaling_advance(
       context->ready() && !context->poisoned() &&
           context->config() == config,
       "the scaling-smoke public context is not ready");
+  observe_scaling_device_memory(
+      metrics, "cudaMemGetInfo after large-scale frontier allocation");
 
   std::size_t expected_anchor_begin = 1U;
+  std::uint64_t active_tile_epoch = 0U;
+  std::uint64_t expected_chunk_sequence = 1U;
   const auto frontier_start = Clock::now();
   while (true) {
     MortonYao48DeviceTiledPairFrontierAdvance advance = context->advance();
@@ -1772,6 +2260,41 @@ void validate_scaling_advance(
     validate_scaling_advance(
         advance, options, metrics.advance_count, expected_anchor_begin);
     const MortonYao48DeviceTiledPairFrontierAudit audit = advance.audit;
+    if (active_tile_epoch == 0U) {
+      require(
+          audit.chunk_sequence == 1U && !audit.resumes_same_tile,
+          "a scaling tile did not start at chunk one");
+      active_tile_epoch = audit.tile_epoch;
+      expected_chunk_sequence = 1U;
+    }
+    require(
+        audit.tile_epoch == active_tile_epoch &&
+            audit.chunk_sequence == expected_chunk_sequence,
+        "a scaling tile changed epoch or skipped a chunk sequence");
+    if (audit.resumes_same_tile) {
+      ++metrics.resumed_advance_count;
+    }
+    if (advance.status ==
+        MortonYao48DeviceTiledPairFrontierStatus::chunk_ready) {
+      ++metrics.chunk_ready_advance_count;
+      switch (advance.yield_reason) {
+        case MortonYao48DeviceTiledPairFrontierYieldReason::
+            candidate_segment_full:
+          ++metrics.candidate_yield_count;
+          break;
+        case MortonYao48DeviceTiledPairFrontierYieldReason::
+            prune_segment_full:
+          ++metrics.prune_yield_count;
+          break;
+        case MortonYao48DeviceTiledPairFrontierYieldReason::
+            mixed_segments_full:
+          ++metrics.mixed_yield_count;
+          break;
+        case MortonYao48DeviceTiledPairFrontierYieldReason::none:
+          throw QualificationMismatch(
+              "a chunk-ready scaling advance has no yield reason");
+      }
+    }
     metrics.completed_anchor_count = audit.completed_anchor_count;
     metrics.certified_prune_region_count +=
         audit.transaction_certified_prune_region_count;
@@ -1784,6 +2307,14 @@ void validate_scaling_advance(
     metrics.launcher_call_count = audit.launcher_call_count;
     metrics.kernel_launch_count += audit.cuda_kernel_launch_count;
     metrics.synchronization_count += audit.cuda_synchronization_count;
+    metrics.traversal_subdivision_count =
+        audit.cumulative_traversal_subdivision_count;
+    metrics.maximum_traversal_subdivision_count_per_anchor =
+        audit.maximum_traversal_subdivision_count_per_anchor;
+    metrics.resume_control_device_to_host_count +=
+        audit.resume_control_device_to_host_count;
+    metrics.resume_control_device_to_host_byte_count +=
+        audit.resume_control_device_to_host_byte_count;
     metrics.anchor_control_device_to_host_count +=
         audit.anchor_control_device_to_host_count;
     metrics.anchor_control_device_to_host_byte_count +=
@@ -1831,6 +2362,32 @@ void validate_scaling_advance(
             sizeof(Phase15MortonYao48DeviceTiledAnchorControl),
             "the scaling control byte capacity overflows size_t"),
         "the scaling control byte capacity does not fit uint64");
+    const std::uint64_t checkpoint_bytes = checked_u64(
+        checked_product(
+            requested_anchor_count,
+            sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint),
+            "the scaling checkpoint byte capacity overflows size_t"),
+        "the scaling checkpoint byte capacity does not fit uint64");
+    std::uint64_t tile_arena_bytes = checked_u64_sum(
+        candidate_bytes,
+        prune_bytes,
+        "the scaling tile arena bytes overflow uint64");
+    tile_arena_bytes = checked_u64_sum(
+        tile_arena_bytes,
+        witness_bytes,
+        "the scaling tile arena bytes overflow uint64");
+    tile_arena_bytes = checked_u64_sum(
+        tile_arena_bytes,
+        control_bytes,
+        "the scaling tile arena bytes overflow uint64");
+    tile_arena_bytes = checked_u64_sum(
+        tile_arena_bytes,
+        checkpoint_bytes,
+        "the scaling tile arena bytes overflow uint64");
+    tile_arena_bytes = checked_u64_sum(
+        tile_arena_bytes,
+        sizeof(std::uint64_t),
+        "the scaling tile arena bytes overflow uint64");
     metrics.peak_candidate_device_capacity_bytes = std::max(
         metrics.peak_candidate_device_capacity_bytes, candidate_bytes);
     metrics.peak_prune_device_capacity_bytes = std::max(
@@ -1841,7 +2398,9 @@ void validate_scaling_advance(
         metrics.peak_control_device_capacity_bytes, control_bytes);
     metrics.peak_tile_output_device_capacity_bytes = std::max(
         metrics.peak_tile_output_device_capacity_bytes,
-        candidate_bytes + prune_bytes + witness_bytes + control_bytes);
+        tile_arena_bytes);
+    observe_scaling_device_memory(
+        metrics, "cudaMemGetInfo with a large-scale tile resident");
 
     if (advance.candidate_tile.has_value()) {
       require(
@@ -1855,7 +2414,13 @@ void validate_scaling_advance(
           lease_audit,
           options,
           audit.transaction_anchor_begin,
-          audit.next_anchor_position);
+          audit.transaction_anchor_end);
+      require(
+          lease_audit.tile_epoch == audit.tile_epoch &&
+              lease_audit.chunk_sequence == audit.chunk_sequence &&
+              lease_audit.yield_reason == audit.yield_reason &&
+              lease_audit.resumes_same_tile == audit.resumes_same_tile,
+          "the scaling lease does not match its chunk audit");
       metrics.peak_candidate_device_capacity_bytes = std::max(
           metrics.peak_candidate_device_capacity_bytes,
           checked_u64(
@@ -1884,18 +2449,35 @@ void validate_scaling_advance(
       break;
     }
     if (advance.status ==
+        MortonYao48DeviceTiledPairFrontierStatus::chunk_ready) {
+      if (expected_chunk_sequence ==
+          std::numeric_limits<std::uint64_t>::max()) {
+        throw std::overflow_error(
+            "the scaling chunk sequence overflowed uint64_t");
+      }
+      ++expected_chunk_sequence;
+      continue;
+    }
+    if (advance.status ==
         MortonYao48DeviceTiledPairFrontierStatus::censored) {
       metrics.censored = true;
       metrics.stop_reason = advance.stop_reason;
       break;
     }
+    active_tile_epoch = 0U;
+    expected_chunk_sequence = 1U;
   }
   metrics.frontier_ns = nanoseconds(Clock::now() - frontier_start);
   require(
       metrics.candidate_tile_lease_count ==
               metrics.candidate_tile_release_count &&
           !context->poisoned() &&
-          context->terminally_censored() == metrics.censored,
+          context->terminally_censored() == metrics.censored &&
+          metrics.coverage_complete && !metrics.censored &&
+          metrics.unresolved_pair_mass == 0U &&
+          metrics.candidate_pair_mass +
+                  metrics.certified_pruned_pair_mass ==
+              metrics.unordered_pair_universe_count,
       "the scaling-smoke did not release exactly one tile before advancing");
   metrics.backpressure_validated = true;
   metrics.execution_success = true;
@@ -1903,6 +2485,8 @@ void validate_scaling_advance(
   context.reset();
   metrics.context_release_ns =
       nanoseconds(Clock::now() - context_release_start);
+  observe_scaling_device_memory(
+      metrics, "cudaMemGetInfo after large-scale context release");
   metrics.total_ns = nanoseconds(Clock::now() - total_start);
   return metrics;
 }
@@ -2051,172 +2635,100 @@ void validate_scaling_advance(
        anchor_begin += options.anchor_tile_capacity) {
     const std::size_t anchor_count = std::min(
         options.anchor_tile_capacity, cloud.size() - anchor_begin);
-    Phase15MortonYao48DeviceTiledRequest request;
-    request.source_snapshot_epoch = adopted.source_snapshot_epoch;
-    request.output_buffer_epoch = launcher_state.advance_epoch();
-    request.point_count = cloud.size();
-    request.certified_node_count = node_count;
-    request.anchor_begin = anchor_begin;
-    request.anchor_count = anchor_count;
-    request.maximum_closed_rank = maximum_closed_rank;
-    request.node_visit_capacity_per_anchor =
-        morsehgp3d::gpu::
-            morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
-    request.candidate_capacity_per_anchor =
-        morsehgp3d::gpu::
-            morton_yao48_device_tiled_pair_frontier_candidates_per_anchor;
-    request.prune_region_capacity_per_anchor =
-        morsehgp3d::gpu::
-            morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor;
-    request.witness_bank_count_per_anchor =
-        morsehgp3d::gpu::
-            morton_yao48_device_tiled_pair_frontier_witness_bank_count;
-    request.witness_slot_count_per_bank = maximum_closed_rank - 1U;
-
-    const auto launch_start = Clock::now();
-    Phase15MortonYao48DeviceTiledBatch batch =
-        morsehgp3d::gpu::detail::
-            build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
-                launcher_state, adopted, request);
-    metrics.launcher_ns += nanoseconds(Clock::now() - launch_start);
     ++metrics.tile_count;
-    validate_batch_contract(batch, request, adopted.cuda_device);
-
-    std::size_t tile_free_bytes = 0U;
-    std::size_t tile_total_bytes = 0U;
-    CudaDeviceGuard::check(
-        cudaMemGetInfo(&tile_free_bytes, &tile_total_bytes),
-        "cudaMemGetInfo during Phase 15 qualification");
-    require(
-        tile_total_bytes == total_bytes,
-        "the CUDA total memory changed during qualification");
-    metrics.minimum_device_free_bytes = std::min(
-        metrics.minimum_device_free_bytes,
-        checked_u64(
-            tile_free_bytes,
-            "the CUDA tile free byte count does not fit uint64"));
-    const std::uint64_t tile_output_bytes =
-        checked_u64(
-            checked_product(
-                batch.physical_candidate_capacity,
-                sizeof(Phase15MortonYao48DeviceTiledCandidateRecord),
-                "the candidate output byte count overflows size_t"),
-            "the candidate output bytes do not fit uint64") +
-        checked_u64(
-            checked_product(
-                batch.physical_prune_region_capacity,
-                sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord),
-                "the prune output byte count overflows size_t"),
-            "the prune output bytes do not fit uint64") +
-        checked_u64(
-            checked_product(
-                batch.physical_witness_bank_slot_capacity,
-                sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
-                "the bank output byte count overflows size_t"),
-            "the bank output bytes do not fit uint64") +
-        checked_u64(
-            checked_product(
-                batch.physical_anchor_control_capacity,
-                sizeof(Phase15MortonYao48DeviceTiledAnchorControl),
-                "the control output byte count overflows size_t"),
-            "the control output bytes do not fit uint64");
-    metrics.peak_tile_output_device_capacity_bytes = std::max(
-        metrics.peak_tile_output_device_capacity_bytes, tile_output_bytes);
-
-    std::vector<bool> complete(anchor_count, false);
     std::vector<AnchorPartition> partitions(anchor_count);
-    for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
-      const Phase15MortonYao48DeviceTiledAnchorControl& control =
-          batch.host_anchor_controls[slot];
-      hash_anchor_control(metrics.output_digest, control);
-      const std::uint64_t expected_anchor =
-          static_cast<std::uint64_t>(anchor_begin + slot);
-      require(
-          control.anchor_morton_position == expected_anchor &&
-              control.candidate_count <=
-                  request.candidate_capacity_per_anchor &&
-              control.prune_region_count <=
-                  request.prune_region_capacity_per_anchor &&
-              control.node_visit_count <=
-                  request.node_visit_capacity_per_anchor &&
-              control.ambiguous_cone_candidate_count <=
-                  control.candidate_count &&
-              control.unbanked_candidate_count ==
-                  control.ambiguous_cone_candidate_count &&
-              control.stop_reason <= 3U &&
-              control.failure_code <= static_cast<std::uint64_t>(
-                                          Phase15MortonYao48DeviceTiledFailureCode::
-                                              internal_invariant) &&
-              control.reserved_zero == 0U &&
-              control.candidate_count + control.certified_pruned_pair_mass +
-                      control.unresolved_pair_mass ==
-                  expected_anchor,
-          "an anchor control violates its fixed-cap or mass contract");
-      metrics.physical_node_visit_count += control.node_visit_count;
-      metrics.ambiguous_candidate_count += static_cast<std::size_t>(
-          control.ambiguous_cone_candidate_count);
-      metrics.unbanked_candidate_count +=
-          static_cast<std::size_t>(control.unbanked_candidate_count);
-      const bool anchor_complete =
-          control.status == static_cast<std::uint64_t>(
-                                Phase15MortonYao48DeviceTiledAnchorStatus::
-                                    complete);
-      const bool anchor_censored =
-          control.status == static_cast<std::uint64_t>(
-                                Phase15MortonYao48DeviceTiledAnchorStatus::
-                                    censored);
-      require(
-          anchor_complete != anchor_censored,
-          "an anchor control has an unknown status");
-      if (anchor_complete) {
-        require(
-            control.stop_reason == 0U &&
-                control.failure_code == static_cast<std::uint64_t>(
-                                            Phase15MortonYao48DeviceTiledFailureCode::
-                                                none) &&
-                control.unresolved_pair_mass == 0U,
-            "a complete anchor control reports a stop or unresolved mass");
-        complete[slot] = true;
-        ++metrics.complete_anchor_count;
-      } else {
-        require(
-            control.stop_reason != 0U ||
-                control.failure_code != static_cast<std::uint64_t>(
-                                            Phase15MortonYao48DeviceTiledFailureCode::
-                                                none),
-            "a censored anchor control has no fail-stop reason");
-        ++metrics.censored_anchor_count;
-        metrics.unresolved_pair_mass += expected_anchor;
+    std::vector<QualificationAnchorProgress> progress(anchor_count);
+    std::uint64_t tile_epoch = 0U;
+    std::uint64_t chunk_sequence = 1U;
+    bool tile_complete = false;
+    while (!tile_complete) {
+      Phase15MortonYao48DeviceTiledRequest request;
+      request.source_snapshot_epoch = adopted.source_snapshot_epoch;
+      request.output_buffer_epoch = launcher_state.advance_epoch();
+      if (tile_epoch == 0U) {
+        tile_epoch = request.output_buffer_epoch;
       }
-    }
+      request.tile_epoch = tile_epoch;
+      request.chunk_sequence = chunk_sequence;
+      request.point_count = cloud.size();
+      request.certified_node_count = node_count;
+      request.anchor_begin = anchor_begin;
+      request.anchor_count = anchor_count;
+      request.maximum_closed_rank = maximum_closed_rank;
+      request.node_visit_capacity_per_anchor =
+          morsehgp3d::gpu::
+              morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
+      request.candidate_capacity_per_anchor =
+          morsehgp3d::gpu::
+              morton_yao48_device_tiled_pair_frontier_candidates_per_anchor;
+      request.prune_region_capacity_per_anchor =
+          morsehgp3d::gpu::
+              morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor;
+      request.witness_bank_count_per_anchor =
+          morsehgp3d::gpu::
+              morton_yao48_device_tiled_pair_frontier_witness_bank_count;
+      request.witness_slot_count_per_bank = maximum_closed_rank - 1U;
+      request.resume_same_tile = chunk_sequence > 1U;
 
-    const auto recertification_start = Clock::now();
-    const std::uint64_t copy_ns_before =
-        metrics.qualification_output_copy_ns;
-    {
-      const std::vector<Phase15MortonYao48DeviceTiledCandidateRecord>
-          candidates = copy_device_records(
-              batch.device_candidate_records,
-              batch.physical_candidate_capacity,
-              metrics);
+      const auto launch_start = Clock::now();
+      Phase15MortonYao48DeviceTiledBatch batch =
+          morsehgp3d::gpu::detail::
+              build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
+                  launcher_state, adopted, request);
+      metrics.launcher_ns += nanoseconds(Clock::now() - launch_start);
+      ++metrics.chunk_count;
+      if (request.resume_same_tile) {
+        ++metrics.resumed_chunk_count;
+      }
+      validate_batch_contract(batch, request, adopted.cuda_device);
+
+      std::size_t tile_free_bytes = 0U;
+      std::size_t tile_total_bytes = 0U;
+      CudaDeviceGuard::check(
+          cudaMemGetInfo(&tile_free_bytes, &tile_total_bytes),
+          "cudaMemGetInfo during Phase 15 qualification");
+      require(
+          tile_total_bytes == total_bytes,
+          "the CUDA total memory changed during qualification");
+      metrics.minimum_device_free_bytes = std::min(
+          metrics.minimum_device_free_bytes,
+          checked_u64(
+              tile_free_bytes,
+              "the CUDA tile free byte count does not fit uint64"));
+      const std::uint64_t tile_output_bytes = checked_u64(
+          batch.physical_device_arena_capacity_bytes,
+          "the complete tile arena bytes do not fit uint64");
+      metrics.peak_tile_output_device_capacity_bytes = std::max(
+          metrics.peak_tile_output_device_capacity_bytes, tile_output_bytes);
+
+      const QualificationControlSummary control_summary =
+          validate_qualification_controls(
+              batch, request, progress, metrics);
+      require(
+          !control_summary.any_fatal,
+          "the standard qualification encountered a terminal anchor failure");
+
+      const auto recertification_start = Clock::now();
+      const std::uint64_t copy_ns_before =
+          metrics.qualification_output_copy_ns;
+      const std::uint64_t candidate_mass_before = metrics.candidate_pair_mass;
       for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
         const auto& control = batch.host_anchor_controls[slot];
         const std::size_t segment_begin = checked_product(
             slot,
             request.candidate_capacity_per_anchor,
             "a candidate segment offset overflows size_t");
-        for (std::size_t index = 0U;
-             index < request.candidate_capacity_per_anchor;
-             ++index) {
-          const auto& record = candidates[segment_begin + index];
-          const bool active =
-              complete[slot] && index < control.candidate_count;
-          if (!active) {
-            require(
-                invalid_candidate_record(record),
-                "a withheld or unused candidate slot was not invalidated");
-            continue;
-          }
+        const std::size_t authorized_count =
+            static_cast<std::size_t>(control.candidate_count);
+        if (authorized_count == 0U) {
+          continue;
+        }
+        const std::vector<Phase15MortonYao48DeviceTiledCandidateRecord>
+            candidates = copy_device_records(
+                batch.device_candidate_records + segment_begin,
+                authorized_count,
+                metrics);
+        for (const auto& record : candidates) {
           const std::uint64_t anchor_position =
               static_cast<std::uint64_t>(anchor_begin + slot);
           validate_candidate_record(
@@ -2234,31 +2746,30 @@ void validate_scaling_advance(
           }
         }
       }
-    }
-    {
-      const std::vector<Phase15MortonYao48DeviceTiledPruneRegionRecord>
-          prunes = copy_device_records(
-              batch.device_prune_regions,
-              batch.physical_prune_region_capacity,
-              metrics);
+      require(
+          metrics.candidate_pair_mass - candidate_mass_before ==
+              control_summary.candidate_count,
+          "the qualification candidate prefix count disagrees with controls");
+      const std::size_t prune_count_before = metrics.prune_region_count;
+      const std::uint64_t pruned_mass_before =
+          metrics.certified_pruned_pair_mass;
       for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
         const auto& control = batch.host_anchor_controls[slot];
         const std::size_t segment_begin = checked_product(
             slot,
             request.prune_region_capacity_per_anchor,
             "a prune segment offset overflows size_t");
-        for (std::size_t index = 0U;
-             index < request.prune_region_capacity_per_anchor;
-             ++index) {
-          const auto& record = prunes[segment_begin + index];
-          const bool active =
-              complete[slot] && index < control.prune_region_count;
-          if (!active) {
-            require(
-                invalid_prune_record(record),
-                "a withheld or unused prune slot was not invalidated");
-            continue;
-          }
+        const std::size_t authorized_count =
+            static_cast<std::size_t>(control.prune_region_count);
+        if (authorized_count == 0U) {
+          continue;
+        }
+        const std::vector<Phase15MortonYao48DeviceTiledPruneRegionRecord>
+            prunes = copy_device_records(
+                batch.device_prune_regions + segment_begin,
+                authorized_count,
+                metrics);
+        for (const auto& record : prunes) {
           const std::uint64_t anchor_position =
               static_cast<std::uint64_t>(anchor_begin + slot);
           validate_prune_record(
@@ -2289,99 +2800,126 @@ void validate_scaling_advance(
           }
         }
       }
-    }
-    for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
-      if (complete[slot]) {
-        validate_anchor_partition(
-            partitions[slot],
-            static_cast<std::uint64_t>(anchor_begin + slot));
-      }
-    }
-    {
-      const std::vector<Phase15MortonYao48DeviceTiledWitnessBankSlot> banks =
-          copy_device_records(
-              batch.device_witness_bank_slots,
-              batch.physical_witness_bank_slot_capacity,
-              metrics);
-      const std::size_t slots_per_anchor = checked_product(
-          request.witness_bank_count_per_anchor,
-          request.witness_slot_count_per_bank,
-          "the bank slots per anchor overflow size_t");
-      for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
-        if (!complete[slot]) {
-          continue;
+      require(
+          metrics.prune_region_count - prune_count_before ==
+                  control_summary.prune_region_count &&
+              metrics.certified_pruned_pair_mass - pruned_mass_before ==
+                  control_summary.certified_pruned_pair_mass,
+          "the qualification prune prefixes disagree with controls");
+      if (control_summary.all_complete) {
+        for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+          require(
+              partitions[slot].candidate_positions.size() ==
+                      progress[slot].candidate_count &&
+                  partitions[slot].prune_intervals.size() ==
+                      progress[slot].prune_region_count,
+              "a completed anchor cumulative count disagrees with its prefixes");
+          validate_anchor_partition(
+              partitions[slot],
+              static_cast<std::uint64_t>(anchor_begin + slot));
         }
-        std::vector<PointId> retained_ids;
-        retained_ids.reserve(slots_per_anchor);
-        for (std::size_t cone = 0U;
-             cone < request.witness_bank_count_per_anchor;
-             ++cone) {
-          bool empty_seen = false;
-          for (std::size_t bank_slot = 0U;
-               bank_slot < request.witness_slot_count_per_bank;
-               ++bank_slot) {
-            const std::size_t index =
-                slot * slots_per_anchor +
-                cone * request.witness_slot_count_per_bank + bank_slot;
-            const auto& retained = banks[index];
-            if (invalid_bank_slot(retained)) {
-              empty_seen = true;
-              continue;
+        {
+          const std::vector<Phase15MortonYao48DeviceTiledWitnessBankSlot>
+              banks = copy_device_records(
+                  batch.device_witness_bank_slots,
+                  batch.physical_witness_bank_slot_capacity,
+                  metrics);
+          const std::size_t slots_per_anchor = checked_product(
+              request.witness_bank_count_per_anchor,
+              request.witness_slot_count_per_bank,
+              "the bank slots per anchor overflow size_t");
+          for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+            std::vector<PointId> retained_ids;
+            retained_ids.reserve(slots_per_anchor);
+            for (std::size_t cone = 0U;
+                 cone < request.witness_bank_count_per_anchor;
+                 ++cone) {
+              bool empty_seen = false;
+              for (std::size_t bank_slot = 0U;
+                   bank_slot < request.witness_slot_count_per_bank;
+                   ++bank_slot) {
+                const std::size_t index =
+                    slot * slots_per_anchor +
+                    cone * request.witness_slot_count_per_bank + bank_slot;
+                const auto& retained = banks[index];
+                if (invalid_bank_slot(retained)) {
+                  empty_seen = true;
+                  continue;
+                }
+                require(
+                    !empty_seen,
+                    "a witness bank contains a nonempty slot after a sentinel");
+                validate_bank_slot(
+                    retained,
+                    static_cast<std::uint64_t>(anchor_begin + slot),
+                    cone,
+                    leaves,
+                    scaled_points,
+                    position_by_point_id,
+                    partitions[slot].candidate_positions,
+                    metrics);
+                retained_ids.push_back(retained.witness_point_id);
+              }
             }
+            std::sort(retained_ids.begin(), retained_ids.end());
             require(
-                !empty_seen,
-                "a witness bank contains a nonempty slot after a sentinel");
-            validate_bank_slot(
-                retained,
-                static_cast<std::uint64_t>(anchor_begin + slot),
-                cone,
-                leaves,
-                scaled_points,
-                position_by_point_id,
-                partitions[slot].candidate_positions,
-                metrics);
-            retained_ids.push_back(retained.witness_point_id);
+                std::adjacent_find(retained_ids.begin(), retained_ids.end()) ==
+                    retained_ids.end(),
+                "an anchor retained the same witness in multiple bank slots");
           }
         }
-        std::sort(retained_ids.begin(), retained_ids.end());
+      }
+      const std::uint64_t tile_recertification_ns =
+          nanoseconds(Clock::now() - recertification_start);
+      const std::uint64_t tile_copy_ns =
+          metrics.qualification_output_copy_ns - copy_ns_before;
+      require(
+          tile_recertification_ns >= tile_copy_ns,
+          "qualification copy timing exceeds enclosing recertification timing");
+      metrics.cpu_recertification_ns +=
+          tile_recertification_ns - tile_copy_ns;
+      batch.retained_output_owner.reset();
+      tile_complete = control_summary.all_complete;
+      if (!tile_complete) {
         require(
-            std::adjacent_find(retained_ids.begin(), retained_ids.end()) ==
-                retained_ids.end(),
-            "an anchor retained the same witness in multiple bank slots");
+            control_summary.any_chunk_ready,
+            "an incomplete qualification tile has no resumable chunk");
+        if (chunk_sequence == std::numeric_limits<std::uint64_t>::max()) {
+          throw std::overflow_error(
+              "the qualification chunk sequence overflowed uint64_t");
+        }
+        ++chunk_sequence;
       }
     }
-    const std::uint64_t tile_recertification_ns =
-        nanoseconds(Clock::now() - recertification_start);
-    const std::uint64_t tile_copy_ns =
-        metrics.qualification_output_copy_ns - copy_ns_before;
-    require(
-        tile_recertification_ns >= tile_copy_ns,
-        "qualification copy timing exceeds enclosing recertification timing");
-    metrics.cpu_recertification_ns +=
-        tile_recertification_ns - tile_copy_ns;
   }
 
   require(
+      metrics.candidate_pair_mass <= metrics.unordered_pair_universe_count &&
+          metrics.certified_pruned_pair_mass <=
+              metrics.unordered_pair_universe_count -
+                  metrics.candidate_pair_mass,
+      "the qualified output mass exceeds the unordered-pair universe");
+  metrics.unresolved_pair_mass =
+      metrics.unordered_pair_universe_count - metrics.candidate_pair_mass -
+      metrics.certified_pruned_pair_mass;
+  require(
       metrics.candidate_pair_mass + metrics.certified_pruned_pair_mass +
               metrics.unresolved_pair_mass ==
-          metrics.unordered_pair_universe_count,
+              metrics.unordered_pair_universe_count &&
+          metrics.censored_anchor_count == 0U &&
+          metrics.complete_anchor_count == cloud.size() &&
+          metrics.unresolved_pair_mass == 0U,
       "the global candidate/pruned/unresolved mass identity does not close");
-  if (metrics.censored_anchor_count == 0U) {
-    require(
-        metrics.complete_anchor_count == cloud.size() &&
-            metrics.unresolved_pair_mass == 0U,
-        "an uncensored qualification did not complete every anchor");
-    metrics.coverage_partition_complete = true;
-    if (cloud.size() <= 257U) {
-      bounded_bruteforce_replay(
-          leaves,
-          scaled_points,
-          maximum_closed_rank,
-          pair_classification,
-          options.family == "adversarial_mixed_dyadic" ||
-              options.family == "shell_permutation_dyadic",
-          metrics);
-    }
+  metrics.coverage_partition_complete = true;
+  if (cloud.size() <= 257U) {
+    bounded_bruteforce_replay(
+        leaves,
+        scaled_points,
+        maximum_closed_rank,
+        pair_classification,
+        options.family == "adversarial_mixed_dyadic" ||
+            options.family == "shell_permutation_dyadic",
+        metrics);
   }
   metrics.every_prune_fully_recertified =
       metrics.fully_recertified_prune_count == metrics.prune_region_count;
@@ -2450,6 +2988,8 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << "\"candidate_pair_mass\":" << metrics.candidate_pair_mass << ','
       << "\"candidate_record_count\":" << metrics.candidate_record_count
       << ','
+      << "\"candidate_yield_anchor_count\":"
+      << metrics.candidate_yield_anchor_count << ','
       << "\"censored_anchor_count\":" << metrics.censored_anchor_count
       << ','
       << "\"certified_pruned_pair_mass\":"
@@ -2458,6 +2998,7 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << ','
       << "\"component_contract_validated\":"
       << (metrics.component_contract_validated ? "true" : "false") << ','
+      << "\"chunk_count\":" << metrics.chunk_count << ','
       << "\"coverage_partition_complete\":"
       << (metrics.coverage_partition_complete ? "true" : "false") << ','
       << "\"cpu_recertification_ns\":" << metrics.cpu_recertification_ns
@@ -2479,6 +3020,8 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << "\"physical_node_visit_count\":"
       << metrics.physical_node_visit_count << ','
       << "\"prune_region_count\":" << metrics.prune_region_count << ','
+      << "\"prune_yield_anchor_count\":"
+      << metrics.prune_yield_anchor_count << ','
       << "\"prune_witness_target_check_count\":"
       << metrics.prune_witness_target_check_count << ','
       << "\"qualification_device_to_host_bytes\":"
@@ -2487,6 +3030,7 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << metrics.qualification_output_copy_ns << ','
       << "\"sampled_recertified_prune_count\":"
       << metrics.sampled_recertified_prune_count << ','
+      << "\"resumed_chunk_count\":" << metrics.resumed_chunk_count << ','
       << "\"tile_count\":" << metrics.tile_count << ','
       << "\"traversal_adoption_ns\":" << metrics.adoption_ns << ','
       << "\"traversal_device_capacity_bytes\":"
@@ -2506,10 +3050,8 @@ void print_rank_metrics(const RankMetrics& metrics) {
       return "none";
     case MortonYao48DeviceTiledPairFrontierStopReason::node_visit_capacity:
       return "node_visit_capacity";
-    case MortonYao48DeviceTiledPairFrontierStopReason::candidate_capacity:
-      return "candidate_capacity";
-    case MortonYao48DeviceTiledPairFrontierStopReason::prune_region_capacity:
-      return "prune_region_capacity";
+    case MortonYao48DeviceTiledPairFrontierStopReason::fatal_failure:
+      return "fatal_failure";
   }
   return "invalid";
 }
@@ -2517,24 +3059,40 @@ void print_rank_metrics(const RankMetrics& metrics) {
 void print_scaling_smoke_json(
     const Options& options,
     const ScalingSmokeMetrics& metrics) {
+  const bool pair_mass_partition_validated =
+      metrics.candidate_pair_mass + metrics.certified_pruned_pair_mass +
+              metrics.unresolved_pair_mass ==
+          metrics.unordered_pair_universe_count;
+  const bool complete_pair_mass_validated =
+      metrics.coverage_complete && metrics.unresolved_pair_mass == 0U &&
+      metrics.candidate_pair_mass + metrics.certified_pruned_pair_mass ==
+          metrics.unordered_pair_universe_count;
   std::cout
       << "{\"advance_count\":" << metrics.advance_count << ','
       << "\"anchor_control_device_to_host_byte_count\":"
       << metrics.anchor_control_device_to_host_byte_count << ','
       << "\"anchor_control_device_to_host_count\":"
       << metrics.anchor_control_device_to_host_count << ','
+      << "\"anchor_control_record_size_bytes\":"
+      << sizeof(Phase15MortonYao48DeviceTiledAnchorControl) << ','
       << "\"anchor_tile_capacity\":" << options.anchor_tile_capacity << ','
       << "\"backend\":\"" << kBackend << "\","
       << "\"backpressure_validated\":"
       << (metrics.backpressure_validated ? "true" : "false") << ','
       << "\"build_ns\":" << metrics.build_ns << ','
       << "\"candidate_device_to_host_count\":0,"
+      << "\"candidate_yield_count\":" << metrics.candidate_yield_count
+      << ','
+      << "\"candidate_record_size_bytes\":"
+      << sizeof(Phase15MortonYao48DeviceTiledCandidateRecord) << ','
       << "\"candidate_pair_mass\":" << metrics.candidate_pair_mass << ','
       << "\"candidate_tile_lease_count\":"
       << metrics.candidate_tile_lease_count << ','
       << "\"candidate_tile_release_count\":"
       << metrics.candidate_tile_release_count << ','
       << "\"canonicalization_ns\":" << metrics.canonicalization_ns << ','
+      << "\"chunk_ready_advance_count\":"
+      << metrics.chunk_ready_advance_count << ','
       << "\"censored\":" << (metrics.censored ? "true" : "false") << ','
       << "\"certified_prune_region_count\":"
       << metrics.certified_prune_region_count << ','
@@ -2551,23 +3109,56 @@ void print_scaling_smoke_json(
       << (metrics.coverage_complete ? "true" : "false") << ','
       << "\"dense_pair_fallback_performed\":false,"
       << "\"deployment_status\":\"profile_only\","
+      << "\"device_memory_observation_count\":"
+      << metrics.device_memory_observation_count << ','
+      << "\"device_total_bytes\":" << metrics.device_total_bytes << ','
+      << "\"direct_large_scale_guard_passed\":"
+      << (options.direct_scale ? "true" : "false") << ','
       << "\"exact_diametral_rank_evaluated\":false,"
       << "\"exactness_claimed\":false,"
       << "\"execution_success\":"
       << (metrics.execution_success ? "true" : "false") << ','
       << "\"family\":\"affine_uniform_binary64\","
+      << "\"final_device_free_bytes\":"
+      << metrics.final_device_free_bytes << ','
+      << "\"fixed_candidate_capacity_per_anchor\":"
+      << morsehgp3d::gpu::
+             morton_yao48_device_tiled_pair_frontier_candidates_per_anchor
+      << ','
+      << "\"fixed_node_visit_capacity_per_anchor\":"
+      << morsehgp3d::gpu::
+             morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor
+      << ','
+      << "\"fixed_prune_region_capacity_per_anchor\":"
+      << morsehgp3d::gpu::
+             morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor
+      << ','
+      << "\"fixed_witness_bank_count_per_anchor\":"
+      << morsehgp3d::gpu::
+             morton_yao48_device_tiled_pair_frontier_witness_bank_count
+      << ','
       << "\"frontier_ns\":" << metrics.frontier_ns << ','
       << "\"generation_ns\":" << metrics.generation_ns << ','
       << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
       << "\"global_pair_matrix_materialized\":false,"
       << "\"higher_order_structure_materialized\":false,"
       << "\"host_release_ns\":" << metrics.host_release_ns << ','
+      << "\"initial_device_free_bytes\":"
+      << metrics.initial_device_free_bytes << ','
       << "\"kernel_launch_count\":" << metrics.kernel_launch_count << ','
       << "\"launcher_call_count\":" << metrics.launcher_call_count << ','
       << "\"lease_release_ns\":" << metrics.lease_release_ns << ','
       << "\"maximum_closed_rank\":" << metrics.maximum_closed_rank << ','
-      << "\"mode\":\"device_resident_budgeted_morton_yao48_anchor_tiles_"
-         "scaling_smoke\","
+      << "\"maximum_traversal_subdivision_count_per_anchor\":"
+      << metrics.maximum_traversal_subdivision_count_per_anchor << ','
+      << "\"minimum_device_free_bytes\":"
+      << metrics.minimum_device_free_bytes << ','
+      << "\"mixed_yield_count\":" << metrics.mixed_yield_count << ','
+      << "\"mode\":\""
+      << (options.direct_scale
+              ? "device_resident_budgeted_morton_yao48_anchor_tiles_direct_scale"
+              : "device_resident_budgeted_morton_yao48_anchor_tiles_scaling_smoke")
+      << "\","
       << "\"ordinary_delaunay_materialized\":false,"
       << "\"ordinary_emst_computed\":false,"
       << "\"peak_candidate_device_capacity_bytes\":"
@@ -2581,15 +3172,34 @@ void print_scaling_smoke_json(
       << metrics.peak_tile_output_device_capacity_bytes << ','
       << "\"peak_witness_bank_device_capacity_bytes\":"
       << metrics.peak_witness_bank_device_capacity_bytes << ','
+      << "\"pair_mass_partition_validated\":"
+      << (pair_mass_partition_validated ? "true" : "false") << ','
+      << "\"complete_pair_mass_validated\":"
+      << (complete_pair_mass_validated ? "true" : "false") << ','
       << "\"point_count\":" << options.point_count << ','
+      << "\"process_restart_resumable\":false,"
       << "\"product_claimed\":false,"
       << "\"profile\":\"" << kProfile << "\","
       << "\"profile_only\":true,"
+      << "\"prune_region_record_size_bytes\":"
+      << sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord) << ','
+      << "\"prune_yield_count\":" << metrics.prune_yield_count << ','
       << "\"public_status\":\"" << kPublicStatus << "\","
       << "\"qualification_claimed\":false,"
       << "\"raw_candidate_or_prune_view_accessed\":false,"
+      << "\"resume_control_device_to_host_byte_count\":"
+      << metrics.resume_control_device_to_host_byte_count << ','
+      << "\"resume_control_device_to_host_count\":"
+      << metrics.resume_control_device_to_host_count << ','
+      << "\"resumed_advance_count\":" << metrics.resumed_advance_count
+      << ','
+      << "\"run_kind\":\""
+      << (options.direct_scale ? "direct_scale" : "scaling_smoke")
+      << "\","
       << "\"scalability_claimed\":false,"
-      << "\"schema\":\"" << kScalingSmokeSchema << "\","
+      << "\"schema\":\""
+      << (options.direct_scale ? kDirectScaleSchema : kScalingSmokeSchema)
+      << "\","
       << "\"scientific_claimed\":false,"
       << "\"scientific_pair_catalog_published\":false,"
       << "\"seed\":" << options.seed << ','
@@ -2600,13 +3210,19 @@ void print_scaling_smoke_json(
       << "\"total_ns\":" << metrics.total_ns << ','
       << "\"traversal_device_capacity_bytes\":"
       << metrics.traversal_device_capacity_bytes << ','
+      << "\"traversal_subdivision_count\":"
+      << metrics.traversal_subdivision_count << ','
       << "\"unordered_pair_universe_count\":"
       << metrics.unordered_pair_universe_count << ','
       << "\"unresolved_pair_mass\":" << metrics.unresolved_pair_mass << ','
+      << "\"witness_bank_slot_size_bytes\":"
+      << sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) << ','
       << "\"warm_e2e_slo_claimed\":false}\n";
 }
 
-void print_scaling_failure_json(std::string_view message) {
+void print_scaling_failure_json(
+    std::string_view message,
+    bool direct_scale_requested) {
   std::cout
       << "{\"backend\":\"" << kBackend << "\","
       << "\"component_only\":true,"
@@ -2615,13 +3231,23 @@ void print_scaling_failure_json(std::string_view message) {
       << "\"exactness_claimed\":false,"
       << "\"execution_success\":false,"
       << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
+      << "\"mode\":\""
+      << (direct_scale_requested
+              ? "device_resident_budgeted_morton_yao48_anchor_tiles_direct_scale"
+              : "device_resident_budgeted_morton_yao48_anchor_tiles_scaling_smoke")
+      << "\","
       << "\"product_claimed\":false,"
       << "\"profile\":\"" << kProfile << "\","
       << "\"profile_only\":true,"
       << "\"public_status\":\"" << kPublicStatus << "\","
       << "\"qualification_claimed\":false,"
+      << "\"run_kind\":\""
+      << (direct_scale_requested ? "direct_scale" : "scaling_smoke")
+      << "\","
       << "\"scalability_claimed\":false,"
-      << "\"schema\":\"" << kScalingSmokeSchema << "\","
+      << "\"schema\":\""
+      << (direct_scale_requested ? kDirectScaleSchema : kScalingSmokeSchema)
+      << "\","
       << "\"scientific_claimed\":false}\n";
 }
 
@@ -2642,15 +3268,19 @@ void print_failure_json(std::string_view message) {
 
 int main(int argc, char** argv) {
   bool scaling_smoke_requested = false;
+  bool direct_scale_requested = false;
   for (int index = 1; index < argc; ++index) {
     scaling_smoke_requested =
         scaling_smoke_requested ||
         std::string_view{argv[index]} == "--scaling-smoke";
+    direct_scale_requested =
+        direct_scale_requested ||
+        std::string_view{argv[index]} == "--direct-scale";
   }
   try {
     const Options options = parse_options(argc, argv);
     const auto total_start = Clock::now();
-    if (options.scaling_smoke) {
+    if (options.scaling_smoke || options.direct_scale) {
       const auto generation_start = Clock::now();
       std::vector<CertifiedPoint3> scaling_points =
           generate_scaling_points(options);
@@ -2697,7 +3327,12 @@ int main(int argc, char** argv) {
     const bool coverage_success = !any_censure;
     const bool exit_success = coverage_success;
     const bool rank_triplet_exercised =
-        ranks == std::vector<std::size_t>{2U, 3U, 11U};
+        std::find(ranks.begin(), ranks.end(), 2U) != ranks.end() &&
+        std::find(ranks.begin(), ranks.end(), 3U) != ranks.end() &&
+        std::find(ranks.begin(), ranks.end(), 11U) != ranks.end();
+    const bool all_rank_thresholds_exercised =
+        ranks == std::vector<std::size_t>{
+                     2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U};
     const std::uint64_t total_ns = nanoseconds(Clock::now() - total_start);
 
     std::cout
@@ -2746,7 +3381,9 @@ int main(int argc, char** argv) {
       print_rank_metrics(results[index]);
     }
     std::cout
-        << "],\"required_rank_triplet_exercised\":"
+        << "],\"all_rank_thresholds_exercised\":"
+        << (all_rank_thresholds_exercised ? "true" : "false") << ','
+        << "\"required_rank_triplet_exercised\":"
         << (rank_triplet_exercised ? "true" : "false") << ','
         << "\"sampled_prune_limit\":" << options.sampled_prune_limit << ','
         << "\"schema\":\"" << kSchema << "\","
@@ -2758,8 +3395,8 @@ int main(int argc, char** argv) {
         << "\"total_ns\":" << total_ns << "}\n";
     return exit_success ? EXIT_SUCCESS : EXIT_FAILURE;
   } catch (const std::exception& error) {
-    if (scaling_smoke_requested) {
-      print_scaling_failure_json(error.what());
+    if (scaling_smoke_requested || direct_scale_requested) {
+      print_scaling_failure_json(error.what(), direct_scale_requested);
     } else {
       print_failure_json(error.what());
     }

@@ -22,8 +22,16 @@ enum class Phase15MortonYao48DeviceTiledExecutionKind : std::uint64_t {
 };
 
 enum class Phase15MortonYao48DeviceTiledAnchorStatus : std::uint64_t {
-  complete = 0U,
-  censored = 1U,
+  active = 0U,
+  chunk_ready = 1U,
+  complete = 2U,
+  fatal = 3U,
+};
+
+enum class Phase15MortonYao48DeviceTiledYieldReason : std::uint64_t {
+  none = 0U,
+  candidate_segment_full = 1U,
+  prune_segment_full = 2U,
 };
 
 enum class Phase15MortonYao48DeviceTiledFailureCode : std::uint64_t {
@@ -67,20 +75,56 @@ struct Phase15MortonYao48DeviceTiledWitnessBankSlot {
   std::uint64_t squared_distance_upper_bits{};
 };
 
-// This is the only per-anchor payload copied to the host.  A censored control
-// invalidates every candidate/prune slot in that anchor's fixed segments.
+// This is the only per-anchor payload copied to the host.  Counts without a
+// `cumulative_` prefix are deltas for this output chunk.  Cumulative fields
+// authenticate continuation and make rollback/duplication fail closed.
 struct Phase15MortonYao48DeviceTiledAnchorControl {
   std::uint64_t anchor_morton_position{};
   std::uint64_t candidate_count{};
   std::uint64_t prune_region_count{};
   std::uint64_t certified_pruned_pair_mass{};
   std::uint64_t node_visit_count{};
+  std::uint64_t cumulative_candidate_count{};
+  std::uint64_t cumulative_prune_region_count{};
+  std::uint64_t cumulative_certified_pruned_pair_mass{};
+  std::uint64_t cumulative_node_visit_count{};
   std::uint64_t status{};
+  std::uint64_t yield_reason{};
   std::uint64_t stop_reason{};
   std::uint64_t failure_code{};
   std::uint64_t ambiguous_cone_candidate_count{};
   std::uint64_t unbanked_candidate_count{};
+  std::uint64_t cumulative_ambiguous_cone_candidate_count{};
+  std::uint64_t cumulative_unbanked_candidate_count{};
   std::uint64_t unresolved_pair_mass{};
+  std::uint64_t tile_epoch{};
+  std::uint64_t chunk_sequence{};
+  std::uint64_t reserved_zero{};
+};
+
+// Private, device-resident continuation state.  Chunk-ready is exposed by the
+// copied AnchorControl; this checkpoint remains private and preserves both the
+// next chunk's deltas and authenticated cumulative totals between launches.
+struct alignas(16) Phase15MortonYao48DeviceTiledAnchorCheckpoint {
+  std::uint64_t anchor_morton_position{};
+  std::uint64_t cursor{};
+  std::uint64_t candidate_count{};
+  std::uint64_t prune_region_count{};
+  std::uint64_t certified_pruned_pair_mass{};
+  std::uint64_t node_visit_count{};
+  std::uint64_t ambiguous_cone_candidate_count{};
+  std::uint64_t unbanked_candidate_count{};
+  std::uint64_t cumulative_candidate_count{};
+  std::uint64_t cumulative_prune_region_count{};
+  std::uint64_t cumulative_certified_pruned_pair_mass{};
+  std::uint64_t cumulative_node_visit_count{};
+  std::uint64_t cumulative_ambiguous_cone_candidate_count{};
+  std::uint64_t cumulative_unbanked_candidate_count{};
+  std::uint64_t retained_witness_count{};
+  std::uint64_t completed_subdivision_count{};
+  std::uint64_t tile_epoch{};
+  std::uint64_t chunk_sequence{};
+  std::uint64_t state{};
   std::uint64_t reserved_zero{};
 };
 
@@ -91,7 +135,9 @@ static_assert(
 static_assert(
     sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) == 32U);
 static_assert(
-    sizeof(Phase15MortonYao48DeviceTiledAnchorControl) == 96U);
+    sizeof(Phase15MortonYao48DeviceTiledAnchorControl) == 168U);
+static_assert(
+    sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) == 160U);
 static_assert(std::is_trivially_copyable_v<
               Phase15MortonYao48DeviceTiledAnchorControl>);
 static_assert(std::is_standard_layout_v<
@@ -124,6 +170,8 @@ struct Phase15MortonYao48DeviceTiledAdoptedTraversal {
 struct Phase15MortonYao48DeviceTiledRequest {
   std::uint64_t source_snapshot_epoch{};
   std::uint64_t output_buffer_epoch{};
+  std::uint64_t tile_epoch{};
+  std::uint64_t chunk_sequence{};
   std::size_t point_count{};
   std::size_t certified_node_count{};
   std::size_t anchor_begin{};
@@ -134,6 +182,7 @@ struct Phase15MortonYao48DeviceTiledRequest {
   std::size_t prune_region_capacity_per_anchor{};
   std::size_t witness_bank_count_per_anchor{};
   std::size_t witness_slot_count_per_bank{};
+  bool resume_same_tile{false};
 };
 
 struct Phase15MortonYao48DeviceTiledBatch {
@@ -155,14 +204,24 @@ struct Phase15MortonYao48DeviceTiledBatch {
   std::size_t physical_prune_region_capacity{};
   std::size_t physical_witness_bank_slot_capacity{};
   std::size_t physical_anchor_control_capacity{};
+  std::size_t physical_anchor_checkpoint_capacity{};
+  std::size_t physical_pending_anchor_count_capacity{};
+  std::size_t physical_device_arena_capacity_bytes{};
   std::size_t anchor_control_device_to_host_count{};
   std::size_t anchor_control_device_to_host_byte_count{};
   std::size_t candidate_device_to_host_count{};
   std::size_t certified_prune_device_to_host_count{};
   std::size_t kernel_launch_count{};
   std::size_t synchronization_count{};
+  std::size_t traversal_subdivision_count{};
+  std::size_t maximum_traversal_subdivision_count_per_anchor{};
+  // Control-plane D2H only: one uint64 pending count after each subdivision.
+  std::size_t resume_control_device_to_host_count{};
+  std::size_t resume_control_device_to_host_byte_count{};
   std::uint64_t source_snapshot_epoch{};
   std::uint64_t output_buffer_epoch{};
+  std::uint64_t tile_epoch{};
+  std::uint64_t chunk_sequence{};
   std::uint64_t metadata_digest{};
   int cuda_device{-1};
   Phase15MortonYao48DeviceTiledExecutionKind execution_kind{
@@ -181,6 +240,9 @@ struct Phase15MortonYao48DeviceTiledBatch {
   bool global_pair_matrix_materialized{false};
   bool higher_order_structure_materialized{false};
   bool cuda_execution_contract_satisfied{false};
+  bool resume_same_tile{false};
+  bool capacity_yield_resumable{false};
+  bool process_restart_resumable{false};
 };
 
 // Private borrowed capability for the resident exact-classification stage.
@@ -198,6 +260,8 @@ struct Phase15MortonYao48DeviceCandidateTilePrivateViews {
       device_candidate_records{};
   const Phase15MortonYao48DeviceTiledPruneRegionRecord*
       device_prune_regions{};
+  const Phase15MortonYao48DeviceTiledAnchorControl*
+      device_anchor_controls{};
   std::uint64_t source_snapshot_epoch{};
   std::uint64_t candidate_buffer_epoch{};
   std::size_t point_count{};
@@ -205,6 +269,15 @@ struct Phase15MortonYao48DeviceCandidateTilePrivateViews {
   std::size_t retained_coordinate_word_capacity{};
   std::size_t retained_morton_point_id_capacity{};
   std::size_t retained_node_capacity{};
+  // Candidates are laid out in one fixed-stride segment per physical anchor.
+  // Every control in authorized_anchor_control_extent authorizes this chunk's
+  // fixed-stride segment; a chunk-ready control is intentionally publishable.
+  std::size_t physical_candidate_record_capacity{};
+  std::size_t candidate_segment_stride_records{};
+  std::size_t physical_anchor_control_capacity{};
+  std::size_t authorized_anchor_control_extent{};
+  std::size_t anchor_control_stride_bytes{};
+  std::size_t physical_device_arena_capacity_bytes{};
   std::size_t anchor_begin{};
   std::size_t anchor_end{};
   int cuda_device{-1};
@@ -252,16 +325,25 @@ phase15_morton_yao48_device_tiled_metadata_digest(
   hash_size(batch.physical_prune_region_capacity);
   hash_size(batch.physical_witness_bank_slot_capacity);
   hash_size(batch.physical_anchor_control_capacity);
+  hash_size(batch.physical_anchor_checkpoint_capacity);
+  hash_size(batch.physical_pending_anchor_count_capacity);
+  hash_size(batch.physical_device_arena_capacity_bytes);
   hash_size(batch.anchor_control_device_to_host_count);
   hash_size(batch.anchor_control_device_to_host_byte_count);
   hash_size(batch.candidate_device_to_host_count);
   hash_size(batch.certified_prune_device_to_host_count);
   hash_size(batch.kernel_launch_count);
   hash_size(batch.synchronization_count);
+  hash_size(batch.traversal_subdivision_count);
+  hash_size(batch.maximum_traversal_subdivision_count_per_anchor);
+  hash_size(batch.resume_control_device_to_host_count);
+  hash_size(batch.resume_control_device_to_host_byte_count);
   phase15_morton_yao48_device_tiled_hash_word(
       digest, batch.source_snapshot_epoch);
   phase15_morton_yao48_device_tiled_hash_word(
       digest, batch.output_buffer_epoch);
+  phase15_morton_yao48_device_tiled_hash_word(digest, batch.tile_epoch);
+  phase15_morton_yao48_device_tiled_hash_word(digest, batch.chunk_sequence);
   phase15_morton_yao48_device_tiled_hash_word(
       digest, static_cast<std::uint64_t>(batch.cuda_device));
   phase15_morton_yao48_device_tiled_hash_word(
@@ -281,7 +363,10 @@ phase15_morton_yao48_device_tiled_metadata_digest(
            batch.dense_pair_fallback_performed,
            batch.global_pair_matrix_materialized,
            batch.higher_order_structure_materialized,
-           batch.cuda_execution_contract_satisfied}) {
+           batch.cuda_execution_contract_satisfied,
+           batch.resume_same_tile,
+           batch.capacity_yield_resumable,
+           batch.process_restart_resumable}) {
     phase15_morton_yao48_device_tiled_hash_word(
         digest, flag ? UINT64_C(1) : UINT64_C(0));
   }
@@ -293,12 +378,21 @@ phase15_morton_yao48_device_tiled_metadata_digest(
              control.prune_region_count,
              control.certified_pruned_pair_mass,
              control.node_visit_count,
+             control.cumulative_candidate_count,
+             control.cumulative_prune_region_count,
+             control.cumulative_certified_pruned_pair_mass,
+             control.cumulative_node_visit_count,
              control.status,
+             control.yield_reason,
              control.stop_reason,
              control.failure_code,
              control.ambiguous_cone_candidate_count,
              control.unbanked_candidate_count,
+             control.cumulative_ambiguous_cone_candidate_count,
+             control.cumulative_unbanked_candidate_count,
              control.unresolved_pair_mass,
+             control.tile_epoch,
+             control.chunk_sequence,
              control.reserved_zero}) {
       phase15_morton_yao48_device_tiled_hash_word(digest, word);
     }
@@ -316,14 +410,20 @@ class Phase15MortonYao48DeviceTiledPairFrontierContextState final {
   Phase15MortonYao48DeviceTiledPairFrontierContextState& operator=(
       const Phase15MortonYao48DeviceTiledPairFrontierContextState&) = delete;
 
-  template <typename Operation>
-  decltype(auto) with_launcher_section(Operation&& operation) {
+  template <typename Preflight, typename Operation>
+  decltype(auto) with_launcher_section(
+      Preflight&& preflight,
+      Operation&& operation) {
     std::lock_guard<std::mutex> lock{mutex_};
     if (poisoned_.load(std::memory_order_acquire)) {
       throw std::runtime_error(
           "the Phase 15 device tiled Morton/Yao48 context is poisoned by "
           "a prior launcher or validation failure");
     }
+    // Expected caller-side backpressure is checked while holding the same
+    // mutex as the launch, but before the poisoning boundary.  A live lease is
+    // therefore a reversible precondition failure, never a launcher failure.
+    std::forward<Preflight>(preflight)();
     try {
       return std::forward<Operation>(operation)();
     } catch (...) {
@@ -344,10 +444,22 @@ class Phase15MortonYao48DeviceTiledPairFrontierContextState final {
     return poisoned_.load(std::memory_order_acquire);
   }
 
+  // The launcher owns the concrete type.  Access is serialized by
+  // with_launcher_section(), so a resumed tile can retain one device arena
+  // across calls without exposing CUDA types to the host contract.
+  [[nodiscard]] std::shared_ptr<void>& device_resources() noexcept {
+    return device_resources_;
+  }
+
+  [[nodiscard]] const std::shared_ptr<void>& device_resources() const noexcept {
+    return device_resources_;
+  }
+
  private:
   std::mutex mutex_;
   std::atomic<bool> poisoned_{false};
   std::uint64_t epoch_{};
+  std::shared_ptr<void> device_resources_;
 };
 
 [[nodiscard]] Phase15MortonYao48DeviceTiledBatch

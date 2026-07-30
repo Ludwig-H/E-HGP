@@ -31,41 +31,47 @@ using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierConfig;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierContext;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStatus;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStopReason;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierYieldReason;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceCandidateTilePrivateViewAccess;
 using morsehgp3d::gpu::detail::
-    Phase15MortonYao48DeviceCandidateTilePrivateViews;
+    Phase15MortonYao48DeviceTiledAnchorCheckpoint;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledAnchorControl;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledCandidateRecord;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledPruneRegionRecord;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledWitnessBankSlot;
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledAnchor;
+using morsehgp3d::gpu::test_support::
+    FakeMortonYao48DeviceTiledAnchorStatus;
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledPairFrontierConfiguration;
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledPairFrontierCorruption;
+using morsehgp3d::gpu::test_support::
+    FakeMortonYao48DeviceTiledPairFrontierLaunch;
 using morsehgp3d::gpu::test_support::
     configure_fake_gpu_morton_yao48_device_tiled_pair_frontier;
 using morsehgp3d::gpu::test_support::
     fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count;
 using morsehgp3d::gpu::test_support::
     reset_fake_gpu_morton_yao48_device_tiled_pair_frontier;
-using morsehgp3d::gpu::test_support::
-    reset_fake_gpu_phase14_morton_lbvh_build;
+using morsehgp3d::gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build;
 using morsehgp3d::spatial::CanonicalPointCloud;
 
+static_assert(sizeof(Phase15MortonYao48DeviceTiledAnchorControl) == 168U);
+static_assert(sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) == 160U);
 static_assert(!std::is_copy_constructible_v<
-              MortonYao48DeviceCandidateTileLease>);
-static_assert(!std::is_copy_assignable_v<
               MortonYao48DeviceCandidateTileLease>);
 static_assert(std::is_nothrow_move_constructible_v<
               MortonYao48DeviceCandidateTileLease>);
-static_assert(std::is_nothrow_move_assignable_v<
-              MortonYao48DeviceCandidateTileLease>);
 static_assert(!std::is_copy_constructible_v<
               MortonYao48DeviceTiledPairFrontierContext>);
-static_assert(!std::is_copy_assignable_v<
-              MortonYao48DeviceTiledPairFrontierContext>);
 static_assert(std::is_nothrow_move_constructible_v<
-              MortonYao48DeviceTiledPairFrontierContext>);
-static_assert(std::is_nothrow_move_assignable_v<
               MortonYao48DeviceTiledPairFrontierContext>);
 static_assert(!std::is_copy_constructible_v<
               MortonYao48DeviceTiledPairFrontierAdvance>);
@@ -124,307 +130,466 @@ void check_throws(Function&& function, const std::string& message) {
     std::uint64_t candidates,
     std::uint64_t prune_regions,
     std::uint64_t pruned_mass,
-    std::uint64_t ambiguous = 0U,
-    std::uint64_t unbanked = 0U) {
+    std::uint64_t node_visits) {
   FakeMortonYao48DeviceTiledAnchor anchor;
   anchor.candidate_count = candidates;
   anchor.prune_region_count = prune_regions;
   anchor.certified_pruned_pair_mass = pruned_mass;
-  anchor.node_visit_count = candidates + prune_regions;
-  anchor.ambiguous_cone_candidate_count = ambiguous;
-  anchor.unbanked_candidate_count = unbanked;
+  anchor.node_visit_count = node_visits;
   return anchor;
 }
 
-void test_complete_tiles_close_one_coverage_partition() {
-  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
-  auto lease = traversal_lease(6U);
-  MortonYao48DeviceTiledPairFrontierContext context{
-      std::move(lease), MortonYao48DeviceTiledPairFrontierConfig{2U, 2U}};
-  check(
-      context.ready() && !lease.ready(),
-      "the device frontier exclusively adopts the Phase 14 traversal lease");
+[[nodiscard]] FakeMortonYao48DeviceTiledAnchor completed_zero_delta() {
+  return complete_anchor(0U, 0U, 0U, 0U);
+}
 
+[[nodiscard]] FakeMortonYao48DeviceTiledAnchor complete_by_one_prune(
+    std::uint64_t mass) {
+  return complete_anchor(0U, 1U, mass, 1U);
+}
+
+[[nodiscard]] FakeMortonYao48DeviceTiledAnchor candidate_chunk(
+    std::uint64_t count = 640U) {
+  FakeMortonYao48DeviceTiledAnchor anchor =
+      complete_anchor(count, 0U, 0U, count);
+  anchor.status = FakeMortonYao48DeviceTiledAnchorStatus::chunk_ready;
+  anchor.yield_reason =
+      MortonYao48DeviceTiledPairFrontierYieldReason::
+          candidate_segment_full;
+  return anchor;
+}
+
+[[nodiscard]] FakeMortonYao48DeviceTiledAnchor prune_chunk(
+    std::uint64_t mass = 2'048U) {
+  FakeMortonYao48DeviceTiledAnchor anchor =
+      complete_anchor(0U, 2'048U, mass, 2'048U);
+  anchor.status = FakeMortonYao48DeviceTiledAnchorStatus::chunk_ready;
+  anchor.yield_reason =
+      MortonYao48DeviceTiledPairFrontierYieldReason::prune_segment_full;
+  return anchor;
+}
+
+[[nodiscard]] FakeMortonYao48DeviceTiledAnchor node_capacity_fatal(
+    std::uint64_t certified_node_count) {
+  FakeMortonYao48DeviceTiledAnchor anchor;
+  anchor.node_visit_count = certified_node_count;
+  anchor.status = FakeMortonYao48DeviceTiledAnchorStatus::fatal;
+  anchor.stop_reason =
+      MortonYao48DeviceTiledPairFrontierStopReason::node_visit_capacity;
+  return anchor;
+}
+
+[[nodiscard]] std::size_t expected_arena_bytes(
+    std::size_t anchor_count,
+    std::size_t maximum_closed_rank) {
+  return anchor_count * 640U *
+             sizeof(Phase15MortonYao48DeviceTiledCandidateRecord) +
+      anchor_count * 2'048U *
+          sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord) +
+      anchor_count * 48U * (maximum_closed_rank - 1U) *
+          sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) +
+      anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorControl) +
+      anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) +
+      sizeof(std::uint64_t);
+}
+
+[[nodiscard]] std::vector<FakeMortonYao48DeviceTiledAnchor>
+complete_prefix_by_prune(std::size_t count) {
+  std::vector<FakeMortonYao48DeviceTiledAnchor> anchors;
+  anchors.reserve(count);
+  for (std::size_t position = 1U; position <= count; ++position) {
+    anchors.push_back(complete_by_one_prune(position));
+  }
+  return anchors;
+}
+
+[[nodiscard]] std::vector<FakeMortonYao48DeviceTiledAnchor>
+completed_prefix_zero_delta(std::size_t count) {
+  return std::vector<FakeMortonYao48DeviceTiledAnchor>(
+      count, completed_zero_delta());
+}
+
+void configure_transcripts(
+    std::vector<FakeMortonYao48DeviceTiledPairFrontierLaunch> launches) {
+  FakeMortonYao48DeviceTiledPairFrontierConfiguration configuration;
+  configuration.launches = std::move(launches);
   configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
-      FakeMortonYao48DeviceTiledPairFrontierConfiguration{
-          {complete_anchor(1U, 0U, 0U),
-           complete_anchor(1U, 1U, 1U, 1U, 1U)},
-          FakeMortonYao48DeviceTiledPairFrontierCorruption::none});
+      std::move(configuration));
+}
+
+void test_exact_640_closes_without_empty_resume() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  auto traversal = traversal_lease(641U);
+  MortonYao48DeviceTiledPairFrontierContext context{
+      std::move(traversal),
+      MortonYao48DeviceTiledPairFrontierConfig{2U, 640U}};
+  configure_fake_gpu_morton_yao48_device_tiled_pair_frontier({});
+
+  auto closed = context.advance();
+  check(
+      closed.status ==
+              MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
+          closed.yield_reason ==
+              MortonYao48DeviceTiledPairFrontierYieldReason::none &&
+          closed.candidate_tile.has_value() &&
+          closed.candidate_tile->audit().candidate_count ==
+              closed.audit.unordered_pair_universe_count &&
+          closed.audit.cumulative_candidate_pair_mass ==
+              closed.audit.unordered_pair_universe_count &&
+          closed.audit.next_anchor_position == 641U &&
+          closed.audit.completed_anchor_count == 640U &&
+          !closed.audit.resumable_capacity_yield &&
+          !closed.audit.process_restart_resumable &&
+          fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
+              1U,
+      "an exact 640-record closure completes without an empty resume");
+}
+
+void test_candidate_640_plus_one_resumes_same_tile_with_backpressure() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  auto traversal = traversal_lease(642U);
+  MortonYao48DeviceTiledPairFrontierContext context{
+      std::move(traversal),
+      MortonYao48DeviceTiledPairFrontierConfig{2U, 641U}};
+
+  auto first_anchors = complete_prefix_by_prune(640U);
+  first_anchors.push_back(candidate_chunk());
+  auto second_anchors = completed_prefix_zero_delta(640U);
+  second_anchors.push_back(complete_anchor(1U, 0U, 0U, 1U));
+  configure_transcripts({
+      {std::move(first_anchors),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+      {std::move(second_anchors),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
+
   auto first = context.advance();
   check(
-      first.status ==
-              MortonYao48DeviceTiledPairFrontierStatus::tile_complete &&
-          first.stop_reason ==
-              MortonYao48DeviceTiledPairFrontierStopReason::none &&
+      first.status == MortonYao48DeviceTiledPairFrontierStatus::chunk_ready &&
+          first.yield_reason ==
+              MortonYao48DeviceTiledPairFrontierYieldReason::
+                  candidate_segment_full &&
           first.candidate_tile.has_value() &&
-          first.candidate_tile->ready() &&
-          first.candidate_tile->host_fake() &&
-          !first.candidate_tile->cuda_resident(),
-      "the first complete prefix publishes one opaque host-fake tile lease");
-  const auto& first_lease_audit = first.candidate_tile->audit();
-  check(
-      first_lease_audit.anchor_begin == 1U &&
-          first_lease_audit.anchor_end == 3U &&
-          first_lease_audit.candidate_count == 2U &&
-          first_lease_audit.certified_prune_region_count == 1U &&
-          first_lease_audit.traversal_owner_retained &&
-          first_lease_audit.source_cloud_identity_retained &&
-          !first_lease_audit.source_device_views_retained &&
-          first_lease_audit.source_device_extents_retained &&
-          first_lease_audit.source_views_bound_to_snapshot_identity &&
-          first_lease_audit.output_owner_retained &&
-          first_lease_audit.output_buffers_detached_for_tile_lifetime &&
-          !first_lease_audit.candidate_device_to_host_performed &&
-          !first_lease_audit.certified_prune_device_to_host_performed &&
-          !first_lease_audit.exact_diametral_rank_evaluated &&
-          !first_lease_audit.scientific_pair_catalog_published,
-      "the tile lease retains detached device authorities without a product D2H view");
-  check(
-      first.audit.transaction_candidate_pair_mass == 2U &&
-          first.audit.transaction_certified_pruned_pair_mass == 1U &&
-          first.audit.transaction_ambiguous_cone_candidate_count == 1U &&
-          first.audit.transaction_unbanked_candidate_count == 1U &&
-          first.audit.cumulative_candidate_pair_mass == 2U &&
-          first.audit.cumulative_certified_pruned_pair_mass == 1U &&
-          first.audit.unresolved_pair_mass == 12U &&
-          first.audit.atomic_completed_anchor_prefix_validated &&
-          first.audit.candidate_pruned_unresolved_partition_validated &&
-          first.audit.candidate_tile_lease_backpressure_bounded_to_one &&
-          first.audit.candidate_tile_lease_outstanding &&
-          first.audit.output_buffers_detached_for_tile_lifetime &&
-          first.audit.host_fake_launcher_exercised &&
-          !first.audit.cuda_execution_performed &&
-          first.audit.candidate_device_to_host_count == 0U &&
-          first.audit.certified_prune_device_to_host_count == 0U &&
-          first.audit.anchor_control_device_to_host_count == 0U &&
-          !first.audit.pair_coverage_partition_complete,
-      "the first transaction closes only its two-anchor coverage prefix");
-
+          first.audit.tile_epoch != 0U && first.audit.chunk_sequence == 1U &&
+          !first.audit.resumes_same_tile &&
+          first.audit.resumable_capacity_yield &&
+          first.audit.next_anchor_position == 1U &&
+          first.audit.completed_anchor_count == 0U &&
+          first.audit.unresolved_pair_mass == 1U &&
+          first.candidate_tile->audit().resumable_after_lease_release &&
+          !first.candidate_tile->audit().process_restart_resumable,
+      "640+1 yields one resumable candidate chunk without advancing the tile");
+  const std::uint64_t tile_epoch = first.audit.tile_epoch;
   const std::size_t launches_before_backpressure =
       fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count();
   check_throws<std::logic_error>(
       [&context] { (void)context.advance(); },
-      "an outstanding detached tile blocks a second physical allocation");
+      "a live chunk lease applies one-lease backpressure");
   check(
-      context.ready() && !context.poisoned() &&
-          fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
-              launches_before_backpressure,
-      "pre-launch tile backpressure preserves context state and submits no launcher work");
+      fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
+          launches_before_backpressure &&
+          !context.poisoned(),
+      "backpressure launches no work and does not poison the context");
   first.candidate_tile.reset();
 
-  configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
-      FakeMortonYao48DeviceTiledPairFrontierConfiguration{
-          {complete_anchor(2U, 1U, 1U),
-           complete_anchor(1U, 1U, 3U)},
-          FakeMortonYao48DeviceTiledPairFrontierCorruption::none});
   auto second = context.advance();
   check(
       second.status ==
-              MortonYao48DeviceTiledPairFrontierStatus::tile_complete &&
-          second.audit.advance_sequence == 2U &&
+              MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
           second.candidate_tile.has_value() &&
-          second.candidate_tile->audit().candidate_buffer_epoch == 2U &&
-          second.audit.cumulative_candidate_pair_mass == 5U &&
-          second.audit.cumulative_certified_pruned_pair_mass == 5U &&
-          second.audit.unresolved_pair_mass == 5U,
-      "the second detached tile extends the same global pair partition");
-  second.candidate_tile.reset();
+          second.candidate_tile->audit().candidate_count == 1U &&
+          second.audit.tile_epoch == tile_epoch &&
+          second.audit.chunk_sequence == 2U && second.audit.resumes_same_tile &&
+          second.audit.next_anchor_position == 642U &&
+          second.audit.completed_anchor_count == 641U &&
+          second.audit.unresolved_pair_mass == 0U &&
+          second.audit.cumulative_candidate_pair_mass +
+                  second.audit.cumulative_certified_pruned_pair_mass ==
+              second.audit.unordered_pair_universe_count,
+      "the +1 chunk closes the same tile exactly once after lease release");
+}
 
-  configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
-      FakeMortonYao48DeviceTiledPairFrontierConfiguration{
-          {complete_anchor(2U, 1U, 3U)},
-          FakeMortonYao48DeviceTiledPairFrontierCorruption::none});
+void test_prune_2048_resumes_without_duplication() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  auto traversal = traversal_lease(2'050U);
+  MortonYao48DeviceTiledPairFrontierContext context{
+      std::move(traversal),
+      MortonYao48DeviceTiledPairFrontierConfig{2U, 2'049U}};
+
+  auto first_anchors = complete_prefix_by_prune(2'048U);
+  first_anchors.push_back(prune_chunk());
+  auto second_anchors = completed_prefix_zero_delta(2'048U);
+  second_anchors.push_back(complete_anchor(1U, 0U, 0U, 1U));
+  configure_transcripts({
+      {std::move(first_anchors),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+      {std::move(second_anchors),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
+
+  auto first = context.advance();
+  check(
+      first.status == MortonYao48DeviceTiledPairFrontierStatus::chunk_ready &&
+          first.yield_reason ==
+              MortonYao48DeviceTiledPairFrontierYieldReason::
+                  prune_segment_full &&
+          first.candidate_tile.has_value() &&
+          first.audit.transaction_certified_prune_region_count == 4'096U &&
+          first.audit.next_anchor_position == 1U,
+      "a full 2048-region segment is a resumable prune chunk");
+  first.candidate_tile.reset();
+  auto second = context.advance();
+  check(
+      second.status ==
+              MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
+          second.audit.unresolved_pair_mass == 0U &&
+          second.audit.cumulative_candidate_pair_mass == 1U &&
+          second.audit.cumulative_candidate_pair_mass +
+                  second.audit.cumulative_certified_pruned_pair_mass ==
+              second.audit.unordered_pair_universe_count,
+      "the resumed prune tile closes its universe without duplicated mass");
+}
+
+void test_mixed_candidate_and_prune_yields_are_reported_honestly() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  auto traversal = traversal_lease(2'050U);
+  MortonYao48DeviceTiledPairFrontierContext context{
+      std::move(traversal),
+      MortonYao48DeviceTiledPairFrontierConfig{2U, 2'049U}};
+  auto anchors = complete_prefix_by_prune(2'049U);
+  anchors[640U] = candidate_chunk();
+  anchors[2'048U] = prune_chunk();
+  configure_transcripts({
+      {std::move(anchors),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
+
+  auto mixed = context.advance();
+  check(
+      mixed.status ==
+              MortonYao48DeviceTiledPairFrontierStatus::chunk_ready &&
+          mixed.yield_reason ==
+              MortonYao48DeviceTiledPairFrontierYieldReason::
+                  mixed_segments_full &&
+          mixed.audit.yield_reason ==
+              MortonYao48DeviceTiledPairFrontierYieldReason::
+                  mixed_segments_full &&
+          mixed.candidate_tile.has_value() &&
+          mixed.candidate_tile->audit().yield_reason ==
+              MortonYao48DeviceTiledPairFrontierYieldReason::
+                  mixed_segments_full,
+      "simultaneous candidate and prune saturation is reported as mixed");
+}
+
+void test_chunk_subdivisions_are_not_a_global_call_ceiling() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  auto traversal = traversal_lease(1'922U);
+  MortonYao48DeviceTiledPairFrontierContext context{
+      std::move(traversal),
+      MortonYao48DeviceTiledPairFrontierConfig{2U, 1'921U}};
+
+  auto first = complete_prefix_by_prune(1'920U);
+  first.push_back(candidate_chunk());
+  auto second = completed_prefix_zero_delta(1'920U);
+  second.push_back(candidate_chunk());
+  auto third = completed_prefix_zero_delta(1'920U);
+  third.push_back(candidate_chunk());
+  auto fourth = completed_prefix_zero_delta(1'920U);
+  fourth.push_back(complete_anchor(1U, 0U, 0U, 1U));
+  configure_transcripts({
+      {std::move(first),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+      {std::move(second),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+      {std::move(third),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+      {std::move(fourth),
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
+
+  auto one = context.advance();
+  one.candidate_tile.reset();
+  auto two = context.advance();
+  two.candidate_tile.reset();
+  auto three = context.advance();
+  three.candidate_tile.reset();
+  auto four = context.advance();
+  check(
+      four.status ==
+              MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
+          four.audit.cumulative_traversal_subdivision_count == 4U &&
+          four.audit.maximum_traversal_subdivision_count_per_anchor == 2U &&
+          four.audit.cumulative_physical_node_visit_count <=
+              four.audit.certified_node_count *
+                  four.audit.transaction_anchor_end &&
+          four.audit.unresolved_pair_mass == 0U,
+      "inter-chunk launcher calls may exceed the per-call subdivision maximum");
+}
+
+void test_stale_and_rollback_transcripts_poison_fail_stop() {
+  const std::vector<FakeMortonYao48DeviceTiledPairFrontierCorruption>
+      corruptions{
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::stale_tile_epoch,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::
+              stale_chunk_sequence,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::
+              cumulative_candidate_rollback,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::
+              cumulative_prune_rollback,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::
+              process_restart_claimed};
+  for (const auto corruption : corruptions) {
+    reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+    auto traversal = traversal_lease(2'050U);
+    MortonYao48DeviceTiledPairFrontierContext context{
+        std::move(traversal),
+        MortonYao48DeviceTiledPairFrontierConfig{2U, 2'049U}};
+    auto first_anchors = complete_prefix_by_prune(2'048U);
+    first_anchors.push_back(prune_chunk());
+    auto corrupt_anchors = completed_prefix_zero_delta(2'048U);
+    corrupt_anchors.push_back(complete_anchor(1U, 0U, 0U, 1U));
+    configure_transcripts({
+        {std::move(first_anchors),
+         FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+        {std::move(corrupt_anchors), corruption}});
+    auto first = context.advance();
+    first.candidate_tile.reset();
+    check_throws<std::runtime_error>(
+        [&context] { (void)context.advance(); },
+        "a stale or rolled-back continuation transcript is rejected");
+    check(
+        context.poisoned() && !context.ready(),
+        "a rejected continuation transcript poisons the context");
+  }
+}
+
+void test_multiple_tiles_keep_one_exact_arena_account() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  auto traversal = traversal_lease(6U);
+  MortonYao48DeviceTiledPairFrontierContext context{
+      std::move(traversal), MortonYao48DeviceTiledPairFrontierConfig{2U, 2U}};
+  configure_transcripts({
+      {{complete_anchor(1U, 0U, 0U, 1U),
+        complete_anchor(2U, 0U, 0U, 2U)},
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+      {{complete_anchor(3U, 0U, 0U, 3U),
+        complete_anchor(4U, 0U, 0U, 4U)},
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none},
+      {{complete_anchor(5U, 0U, 0U, 5U)},
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
+
+  auto first = context.advance();
+  const std::uint64_t first_tile_epoch = first.audit.tile_epoch;
+  check(
+      first.status == MortonYao48DeviceTiledPairFrontierStatus::tile_complete &&
+          first.candidate_tile.has_value() &&
+          first.audit.transaction_physical_device_arena_capacity_bytes ==
+              expected_arena_bytes(2U, 2U) &&
+          first.candidate_tile->audit().physical_device_arena_capacity_bytes ==
+              expected_arena_bytes(2U, 2U) &&
+          first.candidate_tile->audit()
+                  .physical_anchor_checkpoint_capacity == 2U &&
+          first.candidate_tile->audit()
+                  .physical_pending_anchor_count_capacity == 1U,
+      "the first tile publishes the complete v3 arena account");
+  first.candidate_tile.reset();
+
+  auto second = context.advance();
+  check(
+      second.status == MortonYao48DeviceTiledPairFrontierStatus::tile_complete &&
+          second.audit.tile_epoch != first_tile_epoch &&
+          second.audit.chunk_sequence == 1U &&
+          !second.audit.resumes_same_tile,
+      "a new tile starts a fresh epoch and chunk sequence");
+  second.candidate_tile.reset();
   auto third = context.advance();
   check(
       third.status ==
               MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
-          third.audit.unordered_pair_universe_count == 15U &&
-          third.audit.cumulative_candidate_pair_mass == 7U &&
-          third.audit.cumulative_certified_pruned_pair_mass == 8U &&
+          third.audit.cumulative_candidate_pair_mass == 15U &&
           third.audit.unresolved_pair_mass == 0U &&
-          third.audit.pair_coverage_partition_complete &&
-          !third.audit.exact_diametral_rank_evaluated &&
-          !third.audit.scientific_pair_catalog_published &&
-          !third.audit.scientific_decision_published &&
-          !third.audit.ordinary_delaunay_materialized &&
-          !third.audit.higher_order_delaunay_mosaic_materialized,
-      "only candidate plus certified-prune mass closes the 15-pair universe");
-  third.candidate_tile.reset();
-
-  const std::size_t launches_before_idempotent =
-      fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count();
-  auto stable = context.advance();
-  check(
-      stable.status ==
-              MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
-          !stable.candidate_tile.has_value() &&
-          stable.audit.transaction_candidate_pair_mass == 0U &&
-          stable.audit.transaction_certified_pruned_pair_mass == 0U &&
-          stable.audit.unresolved_pair_mass == 0U &&
-          stable.audit.candidate_tile_lease_backpressure_bounded_to_one &&
-          !stable.audit.candidate_tile_lease_outstanding &&
           fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
-              launches_before_idempotent,
-      "a closed frontier is idempotent and launches no hidden fallback");
+              3U,
+      "three physical tiles close one pair partition exactly once");
 }
 
-void test_detached_tile_retains_private_source_capability() {
+void test_detached_tile_survives_context_destruction() {
   reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
-  std::optional<MortonYao48DeviceCandidateTileLease> detached_tile;
-  Phase15MortonYao48DeviceCandidateTilePrivateViews before_destruction;
+  std::optional<MortonYao48DeviceCandidateTileLease> detached;
+  const void* retained_identity = nullptr;
+  std::size_t arena_bytes = 0U;
   {
     auto traversal = traversal_lease(4U);
     MortonYao48DeviceTiledPairFrontierContext context{
         std::move(traversal),
         MortonYao48DeviceTiledPairFrontierConfig{2U, 2U}};
-    configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
-        FakeMortonYao48DeviceTiledPairFrontierConfiguration{
-            {complete_anchor(1U, 0U, 0U),
-             complete_anchor(2U, 0U, 0U)},
-            FakeMortonYao48DeviceTiledPairFrontierCorruption::none});
+    configure_transcripts({
+        {{complete_anchor(1U, 0U, 0U, 1U),
+          complete_anchor(2U, 0U, 0U, 2U)},
+         FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
     auto advance = context.advance();
     check(
         advance.candidate_tile.has_value(),
-        "a complete prefix provides a detached tile for lifetime testing");
+        "the lifetime fixture publishes a detachable tile");
     if (!advance.candidate_tile.has_value()) {
       return;
     }
-    detached_tile.emplace(std::move(*advance.candidate_tile));
-    before_destruction =
+    detached.emplace(std::move(*advance.candidate_tile));
+    const auto views =
         Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
-            *detached_tile);
-    check(
-        before_destruction.ready && before_destruction.host_fake &&
-            before_destruction.retained_authority_identity != nullptr &&
-            before_destruction.source_owner_identity != nullptr &&
-            before_destruction.source_cloud_identity != nullptr &&
-            before_destruction.point_count == 4U &&
-            before_destruction.certified_node_count == 7U &&
-            before_destruction.retained_coordinate_word_capacity == 18U &&
-            before_destruction.retained_morton_point_id_capacity == 6U &&
-            before_destruction.retained_node_capacity == 11U &&
-            before_destruction.anchor_begin == 1U &&
-            before_destruction.anchor_end == 3U &&
-            before_destruction.device_coordinate_bits == nullptr &&
-            before_destruction.device_morton_point_ids == nullptr &&
-            before_destruction.device_nodes == nullptr &&
-            !before_destruction.source_device_views_retained &&
-            before_destruction.source_views_bound_to_snapshot_identity,
-        "the private fake capability retains authenticated source identity and extents without forging CUDA views");
+            *detached);
+    retained_identity = views.retained_authority_identity;
+    arena_bytes = views.physical_device_arena_capacity_bytes;
   }
-
-  check(
-      detached_tile.has_value() && detached_tile->ready(),
-      "destroying the frontier context leaves the detached tile valid");
-  if (!detached_tile.has_value()) {
+  if (!detached.has_value()) {
     return;
   }
-  const Phase15MortonYao48DeviceCandidateTilePrivateViews
-      after_destruction =
-          Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
-              *detached_tile);
+  const auto views =
+      Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
+          *detached);
   check(
-      after_destruction.ready &&
-          after_destruction.retained_authority_identity ==
-              before_destruction.retained_authority_identity &&
-          after_destruction.source_owner_identity ==
-              before_destruction.source_owner_identity &&
-          after_destruction.source_cloud_identity ==
-              before_destruction.source_cloud_identity &&
-          after_destruction.source_snapshot_epoch ==
-              before_destruction.source_snapshot_epoch &&
-          after_destruction.candidate_buffer_epoch ==
-              before_destruction.candidate_buffer_epoch &&
-          after_destruction.point_count == before_destruction.point_count &&
-          after_destruction.certified_node_count ==
-              before_destruction.certified_node_count &&
-          after_destruction.retained_coordinate_word_capacity ==
-              before_destruction.retained_coordinate_word_capacity &&
-          after_destruction.retained_morton_point_id_capacity ==
-              before_destruction.retained_morton_point_id_capacity &&
-          after_destruction.retained_node_capacity ==
-              before_destruction.retained_node_capacity,
-      "the detached private capability preserves the same source owner, identity, snapshot and extents after context destruction");
+      detached->ready() && views.ready &&
+          views.retained_authority_identity == retained_identity &&
+          arena_bytes == expected_arena_bytes(2U, 2U) &&
+          views.physical_device_arena_capacity_bytes == arena_bytes,
+      "a detached v3 tile retains its authority and exact arena audit after context destruction");
 }
 
-void test_censure_publishes_only_the_maximal_complete_prefix() {
+void test_node_capacity_censure_is_terminal_and_idempotent() {
   reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
-  auto lease = traversal_lease(6U);
+  auto traversal = traversal_lease(3U);
   MortonYao48DeviceTiledPairFrontierContext context{
-      std::move(lease), MortonYao48DeviceTiledPairFrontierConfig{3U, 4U}};
-  FakeMortonYao48DeviceTiledAnchor censored = complete_anchor(1U, 0U, 0U);
-  censored.complete = false;
-  censored.node_visit_count =
-      morsehgp3d::gpu::
-          morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
-  censored.stop_reason =
-      MortonYao48DeviceTiledPairFrontierStopReason::node_visit_capacity;
-  configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
-      FakeMortonYao48DeviceTiledPairFrontierConfiguration{
-          {complete_anchor(1U, 0U, 0U),
-           complete_anchor(1U, 1U, 1U),
-           censored,
-           complete_anchor(4U, 0U, 0U)},
-          FakeMortonYao48DeviceTiledPairFrontierCorruption::none});
-
-  auto advance = context.advance();
-  check(
-      advance.status ==
-              MortonYao48DeviceTiledPairFrontierStatus::censored &&
-          advance.stop_reason ==
-              MortonYao48DeviceTiledPairFrontierStopReason::
-                  node_visit_capacity &&
-          context.terminally_censored() &&
-          advance.candidate_tile.has_value() &&
-          advance.candidate_tile->audit().anchor_begin == 1U &&
-          advance.candidate_tile->audit().anchor_end == 3U &&
-          advance.candidate_tile->audit().candidate_count == 2U &&
-          advance.candidate_tile->audit().certified_prune_region_count ==
-              1U &&
-          advance.candidate_tile->audit().censored_anchor_outputs_withheld,
-      "the censored anchor and every physical suffix output stay unpublished");
-  check(
-      advance.audit.transaction_anchor_begin == 1U &&
-          advance.audit.transaction_anchor_end == 5U &&
-          advance.audit.transaction_committed_anchor_count == 2U &&
-          advance.audit.completed_anchor_count == 2U &&
-          advance.audit.next_anchor_position == 3U &&
-          advance.audit.cumulative_candidate_pair_mass == 2U &&
-          advance.audit.cumulative_certified_pruned_pair_mass == 1U &&
-          advance.audit.unresolved_pair_mass == 12U &&
-          advance.audit.transaction_physical_node_visit_count == 2055U &&
-          advance.audit.censored_anchor_outputs_withheld &&
-          advance.audit.terminally_censored &&
-          !advance.audit.pair_coverage_partition_complete,
-      "censure commits the longest complete prefix but audits all bounded physical work");
-
+      std::move(traversal), MortonYao48DeviceTiledPairFrontierConfig{2U, 2U}};
+  configure_transcripts({
+      {{node_capacity_fatal(5U), node_capacity_fatal(5U)},
+       FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
+  auto censored = context.advance();
   const std::size_t launch_count =
       fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count();
-  advance.candidate_tile.reset();
+  check(
+      censored.status == MortonYao48DeviceTiledPairFrontierStatus::censored &&
+          censored.stop_reason ==
+              MortonYao48DeviceTiledPairFrontierStopReason::
+                  node_visit_capacity &&
+          context.terminally_censored() && !context.poisoned() &&
+          !censored.candidate_tile.has_value() &&
+          censored.audit.censored_anchor_outputs_withheld,
+      "a coherent certified node-capacity stop is published as censure");
   auto stable = context.advance();
   check(
       stable.status == MortonYao48DeviceTiledPairFrontierStatus::censored &&
-          stable.stop_reason == advance.stop_reason &&
-          !stable.candidate_tile.has_value() &&
-          stable.audit.unresolved_pair_mass == 12U &&
           fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
               launch_count,
-      "terminal censure cannot be bypassed by another advance call");
+      "a coherent node-capacity censure is idempotent");
 }
 
-void test_malformed_launcher_outputs_poison_fail_stop() {
+void test_hostile_initial_envelopes_poison_fail_stop() {
   const std::vector<FakeMortonYao48DeviceTiledPairFrontierCorruption>
       corruptions{
-          FakeMortonYao48DeviceTiledPairFrontierCorruption::
-              stale_output_epoch,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::stale_output_epoch,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
               candidate_device_to_host,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
               forged_cuda_execution,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
               missing_output_owner,
-          FakeMortonYao48DeviceTiledPairFrontierCorruption::
-              shared_output_owner,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::shared_output_owner,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
               corrupt_metadata_digest,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
@@ -443,67 +608,59 @@ void test_malformed_launcher_outputs_poison_fail_stop() {
               simulated_launcher_failure};
   for (const auto corruption : corruptions) {
     reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
-    auto lease = traversal_lease(4U);
+    auto traversal = traversal_lease(4U);
     MortonYao48DeviceTiledPairFrontierContext context{
-        std::move(lease), MortonYao48DeviceTiledPairFrontierConfig{2U, 2U}};
+        std::move(traversal),
+        MortonYao48DeviceTiledPairFrontierConfig{2U, 2U}};
     configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
         FakeMortonYao48DeviceTiledPairFrontierConfiguration{
-            {}, corruption});
+            {}, corruption, {}});
     check_throws<std::runtime_error>(
         [&context] { (void)context.advance(); },
-        "a hostile Phase 15 launcher transcript is rejected");
+        "a hostile initial v3 launcher envelope is rejected");
     check(
         context.poisoned() && !context.ready(),
-        "a rejected launcher transcript poisons the context");
-    const std::size_t launch_count =
-        fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count();
-    check_throws<std::runtime_error>(
-        [&context] { (void)context.advance(); },
-        "a poisoned Phase 15 context fails closed on reuse");
-    check(
-        fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
-            launch_count,
-        "poisoned reuse cannot submit another launcher call");
+        "a hostile initial v3 launcher envelope poisons the context");
   }
 }
 
 void test_preflight_and_trivial_frontier() {
   reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
-  auto lease = traversal_lease(3U);
+  auto traversal = traversal_lease(3U);
   check_throws<std::out_of_range>(
-      [&lease] {
+      [&traversal] {
         MortonYao48DeviceTiledPairFrontierContext invalid{
-            std::move(lease),
+            std::move(traversal),
             MortonYao48DeviceTiledPairFrontierConfig{2U, 0U}};
       },
-      "an invalid anchor tile is rejected before lease adoption");
-  check(
-      lease.ready(),
-      "configuration preflight leaves the source traversal lease usable");
+      "an invalid tile capacity is rejected before adoption");
+  check(traversal.ready(), "preflight preserves the source lease");
 
-  auto singleton_lease = traversal_lease(1U);
+  auto singleton_traversal = traversal_lease(1U);
   MortonYao48DeviceTiledPairFrontierContext singleton{
-      std::move(singleton_lease)};
+      std::move(singleton_traversal)};
   auto complete = singleton.advance();
   check(
       complete.status ==
               MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
-          complete.audit.unordered_pair_universe_count == 0U &&
           complete.audit.unresolved_pair_mass == 0U &&
-          complete.audit.pair_coverage_partition_complete &&
-          !complete.candidate_tile.has_value() &&
-          fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
-              0U,
+          !complete.candidate_tile.has_value(),
       "a singleton closes its empty pair universe without a launcher");
 }
 
 }  // namespace
 
 int main() {
-  test_complete_tiles_close_one_coverage_partition();
-  test_detached_tile_retains_private_source_capability();
-  test_censure_publishes_only_the_maximal_complete_prefix();
-  test_malformed_launcher_outputs_poison_fail_stop();
+  test_exact_640_closes_without_empty_resume();
+  test_candidate_640_plus_one_resumes_same_tile_with_backpressure();
+  test_prune_2048_resumes_without_duplication();
+  test_mixed_candidate_and_prune_yields_are_reported_honestly();
+  test_chunk_subdivisions_are_not_a_global_call_ceiling();
+  test_stale_and_rollback_transcripts_poison_fail_stop();
+  test_multiple_tiles_keep_one_exact_arena_account();
+  test_detached_tile_survives_context_destruction();
+  test_node_capacity_censure_is_terminal_and_idempotent();
+  test_hostile_initial_envelopes_poison_fail_stop();
   test_preflight_and_trivial_frontier();
   if (failures != 0) {
     std::cerr << failures

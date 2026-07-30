@@ -15,7 +15,7 @@ class Phase15MortonYao48DeviceCandidateTilePrivateViewAccess;
 }
 
 inline constexpr std::uint32_t
-    morton_yao48_device_tiled_pair_frontier_schema_version = 1U;
+    morton_yao48_device_tiled_pair_frontier_schema_version = 3U;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_maximum_closed_rank = 11U;
 inline constexpr std::size_t
@@ -26,7 +26,8 @@ inline constexpr std::size_t
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_candidates_per_anchor = 640U;
 inline constexpr std::size_t
-    morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor = 256U;
+    morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor =
+        morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_witness_bank_count = 48U;
 inline constexpr std::string_view
@@ -54,14 +55,24 @@ inline constexpr std::string_view
 enum class MortonYao48DeviceTiledPairFrontierStatus : std::uint8_t {
   frontier_complete,
   tile_complete,
+  chunk_ready,
   censored,
 };
 
 enum class MortonYao48DeviceTiledPairFrontierStopReason : std::uint8_t {
   none = 0U,
   node_visit_capacity = 1U,
-  candidate_capacity = 2U,
-  prune_region_capacity = 3U,
+  fatal_failure = 2U,
+};
+
+// Candidate and prune capacities are resumable output-segment boundaries,
+// not terminal stop reasons.  The consumer must release the returned lease
+// before asking the context to resume the same tile.
+enum class MortonYao48DeviceTiledPairFrontierYieldReason : std::uint8_t {
+  none = 0U,
+  candidate_segment_full = 1U,
+  prune_segment_full = 2U,
+  mixed_segments_full = 3U,
 };
 
 struct MortonYao48DeviceTiledPairFrontierConfig {
@@ -84,15 +95,27 @@ struct MortonYao48DeviceCandidateTileLeaseAudit {
   std::size_t retained_morton_point_id_capacity{};
   std::size_t retained_node_capacity{};
   std::size_t maximum_closed_rank{};
+  std::uint64_t tile_epoch{};
+  std::uint64_t chunk_sequence{};
   std::size_t anchor_begin{};
   std::size_t anchor_end{};
   std::size_t candidate_count{};
   std::size_t certified_prune_region_count{};
   std::size_t physical_candidate_capacity{};
   std::size_t physical_prune_region_capacity{};
+  std::size_t physical_witness_bank_slot_capacity{};
+  std::size_t physical_anchor_control_capacity{};
+  std::size_t physical_anchor_checkpoint_capacity{};
+  std::size_t physical_pending_anchor_count_capacity{};
+  std::size_t physical_device_arena_capacity_bytes{};
   std::size_t fixed_candidate_capacity_per_anchor{};
   std::size_t fixed_prune_region_capacity_per_anchor{};
   std::size_t fixed_witness_bank_count_per_anchor{};
+  MortonYao48DeviceTiledPairFrontierYieldReason yield_reason{
+      MortonYao48DeviceTiledPairFrontierYieldReason::none};
+  bool resumes_same_tile{false};
+  bool resumable_after_lease_release{false};
+  bool process_restart_resumable{false};
   bool traversal_owner_retained{false};
   bool source_cloud_identity_retained{false};
   bool source_device_views_retained{false};
@@ -151,10 +174,13 @@ class MortonYao48DeviceCandidateTileLease final {
       const void* device_nodes,
       const void* device_candidate_records,
       const void* device_certified_prune_regions,
+      const void* device_anchor_controls,
       std::size_t certified_node_count,
       std::size_t retained_coordinate_word_capacity,
       std::size_t retained_morton_point_id_capacity,
       std::size_t retained_node_capacity,
+      std::size_t physical_anchor_control_capacity,
+      std::size_t authorized_anchor_control_extent,
       int cuda_device,
       bool host_fake);
 
@@ -167,10 +193,13 @@ class MortonYao48DeviceCandidateTileLease final {
   const void* device_nodes_{};
   const void* device_candidate_records_{};
   const void* device_certified_prune_regions_{};
+  const void* device_anchor_controls_{};
   std::size_t certified_node_count_{};
   std::size_t retained_coordinate_word_capacity_{};
   std::size_t retained_morton_point_id_capacity_{};
   std::size_t retained_node_capacity_{};
+  std::size_t physical_anchor_control_capacity_{};
+  std::size_t authorized_anchor_control_extent_{};
   int cuda_device_{-1};
   bool host_fake_{false};
 
@@ -189,10 +218,21 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   std::size_t certified_node_count{};
   std::size_t maximum_closed_rank{};
   std::size_t anchor_tile_capacity{};
+  // The visit capacity is one canonical traversal subdivision, not a
+  // terminal per-anchor budget.  This maximum bounds a single launcher call;
+  // chunked continuation may accumulate more launcher subdivisions.
   std::size_t fixed_node_visit_capacity_per_anchor{};
+  std::size_t maximum_traversal_subdivision_count_per_anchor{};
   std::size_t fixed_candidate_capacity_per_anchor{};
   std::size_t fixed_prune_region_capacity_per_anchor{};
   std::size_t fixed_witness_bank_count_per_anchor{};
+  std::uint64_t tile_epoch{};
+  std::uint64_t chunk_sequence{};
+  MortonYao48DeviceTiledPairFrontierYieldReason yield_reason{
+      MortonYao48DeviceTiledPairFrontierYieldReason::none};
+  bool resumes_same_tile{false};
+  bool resumable_capacity_yield{false};
+  bool process_restart_resumable{false};
   std::size_t transaction_anchor_begin{};
   std::size_t transaction_anchor_end{};
   std::size_t transaction_committed_anchor_count{};
@@ -202,6 +242,8 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   std::uint64_t transaction_candidate_pair_mass{};
   std::uint64_t transaction_certified_pruned_pair_mass{};
   std::uint64_t transaction_physical_node_visit_count{};
+  std::size_t transaction_traversal_subdivision_count{};
+  std::size_t transaction_physical_device_arena_capacity_bytes{};
   std::size_t completed_anchor_count{};
   std::size_t next_anchor_position{};
   std::uint64_t unordered_pair_universe_count{};
@@ -209,11 +251,17 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   std::uint64_t cumulative_certified_pruned_pair_mass{};
   std::uint64_t unresolved_pair_mass{};
   std::uint64_t cumulative_physical_node_visit_count{};
+  std::size_t cumulative_traversal_subdivision_count{};
   std::size_t launcher_call_count{};
   std::size_t cuda_kernel_launch_count{};
   std::size_t cuda_synchronization_count{};
   std::size_t anchor_control_device_to_host_count{};
   std::size_t anchor_control_device_to_host_byte_count{};
+  // One scalar pending-anchor command per traversal subdivision.  These
+  // counters are separate from candidate/prune output transfers, which stay
+  // forbidden.
+  std::size_t resume_control_device_to_host_count{};
+  std::size_t resume_control_device_to_host_byte_count{};
   std::size_t candidate_device_to_host_count{};
   std::size_t certified_prune_device_to_host_count{};
   int cuda_device{-1};
@@ -261,6 +309,8 @@ struct MortonYao48DeviceTiledPairFrontierAdvance {
       MortonYao48DeviceTiledPairFrontierStatus::censored};
   MortonYao48DeviceTiledPairFrontierStopReason stop_reason{
       MortonYao48DeviceTiledPairFrontierStopReason::node_visit_capacity};
+  MortonYao48DeviceTiledPairFrontierYieldReason yield_reason{
+      MortonYao48DeviceTiledPairFrontierYieldReason::none};
   std::optional<MortonYao48DeviceCandidateTileLease> candidate_tile;
   MortonYao48DeviceTiledPairFrontierAudit audit{};
 
@@ -339,12 +389,21 @@ class MortonYao48DeviceTiledPairFrontierContext final {
       std::uint64_t transaction_candidate_pair_mass,
       std::uint64_t transaction_certified_pruned_pair_mass,
       std::uint64_t transaction_physical_node_visit_count,
+      std::size_t transaction_traversal_subdivision_count,
+      std::size_t transaction_physical_device_arena_capacity_bytes,
+      std::uint64_t tile_epoch,
+      std::uint64_t chunk_sequence,
+      MortonYao48DeviceTiledPairFrontierYieldReason yield_reason,
+      bool resumes_same_tile,
+      bool resumable_capacity_yield,
       std::uint64_t candidate_buffer_epoch,
       std::size_t launcher_call_count,
       std::size_t cuda_kernel_launch_count,
       std::size_t cuda_synchronization_count,
       std::size_t anchor_control_device_to_host_count,
       std::size_t anchor_control_device_to_host_byte_count,
+      std::size_t resume_control_device_to_host_count,
+      std::size_t resume_control_device_to_host_byte_count,
       int cuda_device,
       bool candidate_tile_lease_published,
       bool censored_anchor_outputs_withheld) const noexcept;
@@ -363,6 +422,7 @@ class MortonYao48DeviceTiledPairFrontierContext final {
   std::uint64_t cumulative_candidate_pair_mass_{};
   std::uint64_t cumulative_certified_pruned_pair_mass_{};
   std::uint64_t cumulative_physical_node_visit_count_{};
+  std::size_t cumulative_traversal_subdivision_count_{};
   std::uint64_t advance_sequence_{};
   std::size_t launcher_call_count_{};
   bool terminally_censored_{false};
