@@ -641,16 +641,34 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
 }
 
 void materialize_output(std::vector<OrderReduction>& reductions) {
-  for (OrderReduction& reduction : reductions) {
-    std::uint64_t digest = UINT64_C(1469598103934665603);
-    digest_word(digest, static_cast<std::uint64_t>(reduction.order));
-    for (const MergeRecord& merge : reduction.merges) {
-      digest_word(digest, merge.first);
-      digest_word(digest, merge.second);
-      digest_word(digest, std::bit_cast<std::uint64_t>(merge.squared_level));
-    }
-    reduction.digest = digest;
-    reduction.root_squared_level = reduction.merges.back().squared_level;
+  std::atomic<std::size_t> next_order{0U};
+  const unsigned int hardware = std::thread::hardware_concurrency();
+  const std::size_t worker_count = std::min(
+      reductions.size(),
+      hardware == 0U ? std::size_t{1} : static_cast<std::size_t>(hardware));
+  std::vector<std::jthread> workers;
+  workers.reserve(worker_count);
+  for (std::size_t worker = 0U; worker < worker_count; ++worker) {
+    workers.emplace_back([&] {
+      while (true) {
+        const std::size_t order =
+            next_order.fetch_add(1U, std::memory_order_relaxed);
+        if (order >= reductions.size()) {
+          break;
+        }
+        OrderReduction& reduction = reductions[order];
+        std::uint64_t digest = UINT64_C(1469598103934665603);
+        digest_word(digest, static_cast<std::uint64_t>(reduction.order));
+        for (const MergeRecord& merge : reduction.merges) {
+          digest_word(digest, merge.first);
+          digest_word(digest, merge.second);
+          digest_word(
+              digest, std::bit_cast<std::uint64_t>(merge.squared_level));
+        }
+        reduction.digest = digest;
+        reduction.root_squared_level = reduction.merges.back().squared_level;
+      }
+    });
   }
 }
 
