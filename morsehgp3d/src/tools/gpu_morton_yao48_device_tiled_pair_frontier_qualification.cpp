@@ -56,6 +56,8 @@ using morsehgp3d::gpu::detail::
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledAnchorControl;
 using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledAnchorCheckpoint;
+using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledAnchorStatus;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledYieldReason;
