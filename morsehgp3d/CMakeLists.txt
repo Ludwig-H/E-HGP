@@ -3547,6 +3547,42 @@ if(MORSEHGP3D_ENABLE_CUDA)
 
   if(MORSEHGP3D_BUILD_TOOLS)
     add_executable(
+      morsehgp3d_gpu_guarded_industrial_e2e
+      src/tools/gpu_guarded_industrial_e2e.cpp
+    )
+    target_link_libraries(
+      morsehgp3d_gpu_guarded_industrial_e2e
+      PRIVATE
+        morsehgp3d::gpu_binary64_lbvh_top_k
+        morsehgp3d::gpu_morton_lbvh_build
+        morsehgp3d::spatial
+        Threads::Threads
+    )
+    target_compile_features(
+      morsehgp3d_gpu_guarded_industrial_e2e PRIVATE cxx_std_20
+    )
+    target_compile_definitions(
+      morsehgp3d_gpu_guarded_industrial_e2e
+      PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+    )
+    if(MSVC)
+      target_compile_options(
+        morsehgp3d_gpu_guarded_industrial_e2e PRIVATE /W4 /WX
+      )
+    else()
+      target_compile_options(
+        morsehgp3d_gpu_guarded_industrial_e2e
+        PRIVATE
+          -Wall
+          -Wextra
+          -Wpedantic
+          -Wconversion
+          -Wsign-conversion
+          -Werror
+      )
+    endif()
+
+    add_executable(
       morsehgp3d_gpu_morton_yao48_seed_work_profile
       src/cuda/phase14_morton_window_knn_internal.hpp
       src/cuda/phase14_morton_window_knn.cu
