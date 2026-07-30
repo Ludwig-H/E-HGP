@@ -2057,6 +2057,7 @@ add_library(
     src/cpu/hierarchy/reduced_gamma_batch.cpp
     src/cpu/hierarchy/reduced_gamma_cut.cpp
     src/cpu/hierarchy/reduced_gamma_history.cpp
+    src/cpu/hierarchy/exact_k2_k1_hierarchy.cpp
     src/cpu/hierarchy/size_condensed_hierarchy.cpp
     src/cpu/hierarchy/gabriel.cpp
     src/cpu/hierarchy/k1_forest.cpp
