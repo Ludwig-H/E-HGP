@@ -1,0 +1,240 @@
+{
+  "schema": "morsehgp3d.phase15.guarded_industrial_environment_g4.v1",
+  "result": "environment_gcp_and_artifact_provenance_recorded",
+  "phase": 15,
+  "backend": "cuda_g4_plus_host_binary64",
+  "profile": "hgp_reduced",
+  "mode": "warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0",
+  "deployment_status": "architecture_only",
+  "public_status": "not_claimed",
+  "qualification_claimed": false,
+  "git": {
+    "sha": "d69539a18adc1e5815bd354f70e773a4a8a1d0f6",
+    "source_worktree_clean_when_environment_was_captured": true
+  },
+  "runner_binary": {
+    "sha256": "51bb7d8aa5565ea6c39eebfe77e7a34232e92bcb5c9553807cbaf84b079f726d",
+    "size_bytes": 1883544,
+    "self_attestation_bound_by_campaign_checker": true,
+    "self_attestation_bound_by_all_paired_runner_reports": true,
+    "bytes_rehashed_after_each_scientific_replay": true,
+    "archived_in_git": false
+  },
+  "container_image": {
+    "image_id": "sha256:8ced2cb8edb0c4c99481bedbcaeafa4ded10bbe10c43474e84fe228db9a283a0",
+    "repository_digests": [
+      "morsehgp3d-industrial@sha256:8ced2cb8edb0c4c99481bedbcaeafa4ded10bbe10c43474e84fe228db9a283a0"
+    ]
+  },
+  "hardware": {
+    "gpu": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "compute_capability": "12.0",
+      "visible_memory_mib": 97887,
+      "driver_version": "580.173.02"
+    },
+    "cpu": {
+      "architecture": "x86_64",
+      "logical_cpu_count": 48,
+      "model": "AMD EPYC 9B45",
+      "threads_per_core": 2,
+      "cores_per_socket": 24,
+      "socket_count": 1
+    },
+    "kernel": "Linux ehgp-blackwell-spot-ai1a 6.8.0-1064-gcp #72~22.04.1-Ubuntu SMP Sat Jul 11 00:27:00 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux"
+  },
+  "toolchain": {
+    "cuda_version": "12.9.2",
+    "cuda_compiler_build": "Build cuda_12.9.r12.9/compiler.36037853_0",
+    "cmake_version": "3.28.3",
+    "host_compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  "aot_audit": {
+    "architectures": [
+      "sm_120"
+    ],
+    "cubin_elf_count": 2,
+    "ptx_entry_count": 0,
+    "cuda_payload_sha256": "140dfdb1ff45118c638bb19635cdc93c3b00a160b751824adaa51b96518f5d73"
+  },
+  "environment_source": {
+    "environment_txt_sha256": "7f91852329953df284dcc18874f11330b570862f7e3c991db13a433af01ef720",
+    "environment_txt_size_bytes": 1487,
+    "cuda_payload_txt_size_bytes": 883,
+    "raw_environment_files_archived_in_git": false
+  },
+  "gcp_guardrails": {
+    "start_entrypoint": "./gcp-migration/start_and_verify.sh",
+    "stop_entrypoint": "./gcp-migration/stop_and_verify.sh --yes",
+    "machine_type": "g4-standard-48",
+    "provisioning_model": "SPOT",
+    "instance_termination_action": "STOP",
+    "max_run_duration_seconds": 3600,
+    "guest_shutdown_guard_verified": true,
+    "guest_shutdown_guard_at_most_max_run_duration": true
+  },
+  "gcp_sessions": [
+    {
+      "role": "initial_guarded_development_session",
+      "git_sha": null,
+      "source_revision_not_archived_in_this_final_record": true,
+      "project": "devpod-gpu-exploration",
+      "zone": "europe-west4-ai1a",
+      "instance": "ehgp-blackwell-spot-ai1a",
+      "generation_start_timestamp": "2026-07-30T09:11:35.618-07:00",
+      "targeted_stop_timestamp_available": false,
+      "final_status_control_timestamp": "2026-07-30T16:34:30Z",
+      "final_status": "TERMINATED",
+      "targeted_stop_verified": true,
+      "session_os_login_key_revoked": true,
+      "local_private_key_file_removed": true,
+      "local_key_directory_removed": true,
+      "local_handoff_removed": true
+    },
+    {
+      "role": "rejected_bf5ab48_candidate_session",
+      "git_sha": "bf5ab48edc075f4076d429ad2c9317300517ed5f",
+      "project": "devpod-gpu-exploration",
+      "zone": "europe-west4-ai1a",
+      "instance": "ehgp-blackwell-spot-ai1a",
+      "generation_start_timestamp": "2026-07-30T09:53:03.132-07:00",
+      "targeted_stop_and_final_status_timestamp": "2026-07-30T10:19:07.166-07:00",
+      "final_status": "TERMINATED",
+      "targeted_stop_verified": true,
+      "other_active_project_labeled_instance_count": 0,
+      "session_os_login_key_revoked": true,
+      "local_private_key_file_removed": true,
+      "local_key_directory_removed": true,
+      "local_handoff_removed": true
+    },
+    {
+      "role": "rejected_083c2de_candidate_session",
+      "git_sha": "083c2dee7a7bdb43eecb4cba7d171f28a8795b96",
+      "project": "devpod-gpu-exploration",
+      "zone": "europe-west4-ai1a",
+      "instance": "ehgp-blackwell-spot-ai1a",
+      "generation_start_timestamp": "2026-07-30T11:01:16.207-07:00",
+      "targeted_stop_and_final_status_timestamp": "2026-07-30T11:07:37.602-07:00",
+      "final_status": "TERMINATED",
+      "targeted_stop_verified": true,
+      "other_active_project_labeled_instance_count": 0,
+      "session_os_login_key_revoked": true,
+      "local_private_key_file_removed": true,
+      "local_key_directory_removed": true,
+      "local_handoff_removed": true
+    },
+    {
+      "role": "final_d69539a_campaign_and_export_session",
+      "git_sha": "d69539a18adc1e5815bd354f70e773a4a8a1d0f6",
+      "project": "devpod-gpu-exploration",
+      "zone": "europe-west4-ai1a",
+      "instance": "ehgp-blackwell-spot-ai1a",
+      "generation_start_timestamp": "2026-07-30T11:29:54.838-07:00",
+      "targeted_stop_and_final_status_timestamp": "2026-07-30T11:34:59.543-07:00",
+      "final_status": "TERMINATED",
+      "targeted_stop_verified": true,
+      "other_active_project_labeled_instance_count": 0,
+      "session_os_login_key_revoked": true,
+      "local_private_key_file_removed": true,
+      "local_key_directory_removed": true,
+      "local_handoff_removed": true
+    }
+  ],
+  "final_gcp_inventory": {
+    "active_project_labeled_instance_count": 0,
+    "all_sessions_started_for_this_record_certified_terminated": true,
+    "handoff_read_only_recheck": {
+      "timestamp_recorded": false,
+      "target_status": "TERMINATED",
+      "target_provisioning_model": "SPOT",
+      "target_preemptible": true,
+      "target_instance_termination_action": "STOP",
+      "target_max_run_duration_seconds": 3600,
+      "target_project_label": "e-hgp",
+      "active_project_labeled_instances": []
+    }
+  },
+  "campaign": {
+    "summary_report": "phase15_guarded_industrial_50k_summary_g4_d69539a.json",
+    "summary_sha256": "253fa3da6fa42a10f321e08c07a5b2d759f17c6cbe3807cbf7ca4e121545d72e",
+    "result": "validated",
+    "measurement_count": 30,
+    "distinct_measured_seed_count": 30,
+    "aggregate_p95_nearest_rank_warm_e2e_ns": 95791070,
+    "aggregate_max_warm_e2e_ns": 96045749,
+    "threshold_ns": 100000000,
+    "all_measurements_strictly_below_threshold": true
+  },
+  "archived_artifacts": {
+    "campaign_reports": {
+      "phase15_guarded_industrial_50k_affine_g4_d69539a.json": "6779b1f53b6cec1cdf7e7f9b5eb7672bba8276ab2629f2d55981ec76359c355e",
+      "phase15_guarded_industrial_50k_jittered_g4_d69539a.json": "c17c7c09f08b9ad2a1f45b33de1c59ffffcc40c95be865bbde6d0c5102913ae6",
+      "phase15_guarded_industrial_50k_balanced_g4_d69539a.json": "76570d0e8c49edbdc56bd0ddb6c2fc25a328a110de8ac8fe5684939a07f7105d"
+    },
+    "paired_runner_reports": {
+      "phase15_guarded_industrial_oracle_affine_runner_g4_d69539a.json": "d18115da69fa356f0f7e4ffde9df208ce98b2913a2114e177d56983dac232d01",
+      "phase15_guarded_industrial_oracle_jittered_runner_g4_d69539a.json": "ef3505541617748cf6bcb541cb66bc8c1a827e7b5f031cb993a16c0637b496c6",
+      "phase15_guarded_industrial_oracle_balanced_runner_g4_d69539a.json": "5bbf76e9e78fd9d03a775b12410d69667313a20bad3ddf97da88aef9878042b7"
+    },
+    "scientific_reports": {
+      "phase15_guarded_industrial_scientific_affine_d69539a.json": "ddce8070b485df6403b3922c66626e53ddde83484165e5dcc824474c0ff85a13",
+      "phase15_guarded_industrial_scientific_jittered_d69539a.json": "2843a97266c7722317172bec30247c496379f55682d28864d9164228404ec7be",
+      "phase15_guarded_industrial_scientific_balanced_d69539a.json": "c15ff8fdffe51dca4be1101a0ba36cdebb85bfbf25150f50a7f40841d2667e5f"
+    }
+  },
+  "scientific_guards": {
+    "affine_uniform_binary64": {
+      "result": "scientific_guards_satisfied",
+      "k1_oracle_edge_count": 49999,
+      "k1_candidate_edge_count": 49999,
+      "k1_canonical_overlap_count": 49999,
+      "k1_late_count": 0,
+      "k2_two_edge_triangle_source_count": 4402503,
+      "k2_connected_before_count": 4402503,
+      "k2_late_count": 0,
+      "k2_never_connected_count": 0
+    },
+    "jittered_dyadic_grid3d": {
+      "result": "scientific_guards_satisfied",
+      "k1_oracle_edge_count": 49999,
+      "k1_candidate_edge_count": 49999,
+      "k1_canonical_overlap_count": 49999,
+      "k1_late_count": 0,
+      "k2_two_edge_triangle_source_count": 4517840,
+      "k2_connected_before_count": 4517840,
+      "k2_late_count": 0,
+      "k2_never_connected_count": 0
+    },
+    "balanced_multiscale_clusters": {
+      "result": "scientific_guards_satisfied",
+      "k1_oracle_edge_count": 49999,
+      "k1_candidate_edge_count": 49999,
+      "k1_canonical_overlap_count": 49999,
+      "k1_late_count": 0,
+      "k2_two_edge_triangle_source_count": 4183217,
+      "k2_connected_before_count": 4183217,
+      "k2_late_count": 0,
+      "k2_never_connected_count": 0
+    }
+  },
+  "non_archived_binary_exports": {
+    "affine_uniform_binary64": {
+      "sha256": "49eba006e8da906c0481f0b335c5d7bcdb31f013f15df3968ee98bd554fa675e",
+      "size_bytes": 12000280
+    },
+    "jittered_dyadic_grid3d": {
+      "sha256": "aab161d656a2ef7784d52db76c7592cbfba9d8df869fff897d9f9eeff8082667",
+      "size_bytes": 12000280
+    },
+    "balanced_multiscale_clusters": {
+      "sha256": "ebb8e300b6034cb3d2f2eefd4fec5d05a1db8462fbadad1de8b37a9c67aec853",
+      "size_bytes": 12000280
+    }
+  },
+  "scope": {
+    "ordinary_delaunay_materialized_in_timed_product_path": false,
+    "higher_order_delaunay_mosaic_materialized": false,
+    "exact_gamma2_claimed": false,
+    "exact_morse_hierarchy_claimed": false
+  }
+}
