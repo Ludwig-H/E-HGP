@@ -43,7 +43,9 @@ WEIGHT_REPRESENTATION = (
 )
 CORE_DEADLINE_LOWER_ENVELOPE_ULPS = 64
 COMPONENT_BRIDGE_NEIGHBOR_COUNT = 6
-COMPONENT_BRIDGE_POLICY = "top10_components_centroid_knn_projection_support"
+COMPONENT_BRIDGE_POLICY = (
+    "top10_components_centroid_knn_top8_projection_cross_min"
+)
 
 _GIT_SHA = re.compile(r"[0-9a-f]{40}")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -397,9 +399,9 @@ def _validate_run(
             f"{path}.component_bridge_pair_count must cover at least C-1 pairs",
         )
         require(
-            support_evaluation_count >= 2 * bridge_pair_count,
+            support_evaluation_count >= 3 * bridge_pair_count,
             f"{path}.component_bridge_support_evaluation_count must cover both "
-            "orientations of every bridge pair",
+            "projection scans and at least one cross-distance per bridge pair",
         )
     _literal(
         run,

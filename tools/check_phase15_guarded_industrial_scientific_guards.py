@@ -2084,7 +2084,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--runner-report",
         required=True,
         type=Path,
-        help="paired v3 runner report containing the uniquely exported measured run",
+        help="paired v4 runner report containing the uniquely exported measured run",
     )
     parser.add_argument(
         "--expected-git-sha",

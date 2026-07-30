@@ -97,7 +97,7 @@ def report(
                 "common_topology_edge_count": 300_000,
                 "top_k_component_count": 4,
                 "component_bridge_pair_count": 3,
-                "component_bridge_support_evaluation_count": 6,
+                "component_bridge_support_evaluation_count": 50_192,
                 "neighbor_record_count": 500_000,
                 "lbvh_kernel_launch_count": 42,
                 "top_k_node_visit_count": 4_000_000,
@@ -139,7 +139,7 @@ def report(
         "weight_representation": "squared_binary64_mutual_reachability_with_k2plus_core_lower_envelope",
         "core_deadline_lower_envelope_ulps": 64,
         "component_bridge_neighbor_count": 6,
-        "component_bridge_policy": "top10_components_centroid_knn_projection_support",
+        "component_bridge_policy": "top10_components_centroid_knn_top8_projection_cross_min",
         "ordinary_delaunay_materialized": False,
         "higher_order_delaunay_mosaic_materialized": False,
         "global_pair_matrix_materialized": False,
@@ -235,7 +235,7 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
         )
         self.assertEqual(
             summary["runner_contract"]["component_bridge_policy"],
-            "top10_components_centroid_knn_projection_support",
+            "top10_components_centroid_knn_top8_projection_cross_min",
         )
         self.assertEqual(
             summary["content_evidence"]["globally_distinct_hierarchy_digest_count"],
@@ -422,7 +422,7 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
             (
                 "insufficient support orientations",
                 {"component_bridge_support_evaluation_count": 5},
-                "cover both orientations",
+                "cover both projection scans",
             ),
             (
                 "connected graph with bridge work",

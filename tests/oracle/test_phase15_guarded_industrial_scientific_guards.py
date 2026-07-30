@@ -525,6 +525,133 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
         )
         self.assertEqual(partition["late_support_two_count"], 1)
 
+    def test_permanent_balanced_top1_projection_bridge_regression(self) -> None:
+        fixture = json.loads(
+            (
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "regressions"
+                / "phase15_balanced_50k_projection_top1_emst_deadlines.json"
+            ).read_text(encoding="utf-8")
+        )
+        direction = np.asarray(
+            [int(word, 16) for word in fixture["centroid_direction_bits"]],
+            dtype=np.uint64,
+        ).view(np.float64)
+
+        def decode_supports(
+            records: list[dict[str, object]],
+        ) -> list[tuple[int, np.ndarray]]:
+            return [
+                (
+                    int(record["point_id"]),
+                    np.asarray(
+                        [int(word, 16) for word in record["coordinate_bits"]],
+                        dtype=np.uint64,
+                    ).view(np.float64),
+                )
+                for record in records
+            ]
+
+        left_supports = decode_supports(fixture["left_top8_projected_supports"])
+        right_supports = decode_supports(
+            fixture["right_top8_projected_supports"]
+        )
+
+        def projection(support: tuple[int, np.ndarray]) -> float:
+            coordinate = support[1]
+            return float(
+                (coordinate[0] * direction[0] + coordinate[1] * direction[1])
+                + coordinate[2] * direction[2]
+            )
+
+        self.assertEqual(
+            [support[0] for support in left_supports],
+            [
+                support[0]
+                for support in sorted(
+                    left_supports,
+                    key=lambda value: (-projection(value), value[0]),
+                )
+            ],
+        )
+        self.assertEqual(
+            [support[0] for support in right_supports],
+            [
+                support[0]
+                for support in sorted(
+                    right_supports,
+                    key=lambda value: (projection(value), value[0]),
+                )
+            ],
+        )
+
+        exchange = fixture["emst_exchange_edge"]
+        exchange_ids = [int(exchange["u"]), int(exchange["v"])]
+        self.assertEqual(
+            [
+                next(
+                    index + 1
+                    for index, support in enumerate(left_supports)
+                    if support[0] == exchange_ids[0]
+                ),
+                next(
+                    index + 1
+                    for index, support in enumerate(right_supports)
+                    if support[0] == exchange_ids[1]
+                ),
+            ],
+            fixture["emst_endpoint_projection_ranks"],
+        )
+        top1 = fixture["top1_projection_edge"]
+        self.assertEqual(
+            [left_supports[0][0], right_supports[0][0]],
+            [top1["u"], top1["v"]],
+        )
+
+        def squared_distance(
+            first: tuple[int, np.ndarray], second: tuple[int, np.ndarray]
+        ) -> float:
+            delta = first[1] - second[1]
+            return float(
+                (delta[0] * delta[0] + delta[1] * delta[1])
+                + delta[2] * delta[2]
+            )
+
+        candidates = [
+            (squared_distance(first, second), first[0], second[0])
+            for first in left_supports
+            for second in right_supports
+        ]
+        selected_squared, selected_first, selected_second = min(candidates)
+        top8 = fixture["top8_projection_cross_min_edge"]
+        self.assertEqual(
+            [selected_first, selected_second], [top8["u"], top8["v"]]
+        )
+        self.assertEqual(
+            int(np.float64(selected_squared).view(np.uint64)),
+            int(top8["squared_distance_bits"], 16),
+        )
+        self.assertEqual(
+            [selected_first, selected_second], [exchange["u"], exchange["v"]]
+        )
+        self.assertEqual(
+            int(
+                np.float64(
+                    squared_distance(left_supports[0], right_supports[0])
+                ).view(np.uint64)
+            ),
+            int(top1["squared_distance_bits"], 16),
+        )
+        self.assertLess(selected_squared, float(top1["squared_distance"]))
+        self.assertGreater(
+            int(fixture["candidate_connection_squared_level_bits"], 16),
+            int(exchange["squared_distance_bits"], 16),
+        )
+        self.assertEqual(fixture["observed_k1_late_count"], 37)
+        self.assertEqual(fixture["top8_k1_late_count"], 0)
+
     def test_permanent_balanced_top10_emst_bridge_regression(self) -> None:
         fixture = json.loads(
             (

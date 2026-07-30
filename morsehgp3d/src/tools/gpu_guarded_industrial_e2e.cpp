@@ -47,6 +47,7 @@ using PointId = morsehgp3d::spatial::PointId;
 constexpr std::size_t kMaximumOrder = 10U;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::size_t kComponentBridgeNeighborCount = 6U;
+constexpr std::size_t kComponentBridgeProjectionSupportCount = 8U;
 constexpr std::uint64_t kSloNanoseconds = UINT64_C(100000000);
 // The offline k=2 guard compares a direct binary64 core distance with the
 // same support-two diameter reconstructed by the historical triangle
@@ -600,6 +601,11 @@ struct ComponentPair {
   friend bool operator==(const ComponentPair&, const ComponentPair&) = default;
 };
 
+struct ProjectedSupport {
+  double projection{};
+  PointId point_id{};
+};
+
 [[nodiscard]] bool component_pair_less(
     const ComponentPair& left,
     const ComponentPair& right) noexcept {
@@ -613,6 +619,28 @@ struct ComponentPair {
   const auto& point = cloud.point(point_id);
   return {point.binary64_coordinate(0U), point.binary64_coordinate(1U),
           point.binary64_coordinate(2U)};
+}
+
+template <typename Better>
+void retain_projected_support(
+    std::array<ProjectedSupport, kComponentBridgeProjectionSupportCount>&
+        supports,
+    std::size_t& count,
+    ProjectedSupport candidate,
+    Better better) {
+  if (count == supports.size()) {
+    if (!better(candidate, supports[count - 1U])) {
+      return;
+    }
+  } else {
+    ++count;
+  }
+  std::size_t position = count - 1U;
+  while (position != 0U && better(candidate, supports[position - 1U])) {
+    supports[position] = supports[position - 1U];
+    --position;
+  }
+  supports[position] = candidate;
 }
 
 void append_component_bridge_edges(
@@ -700,7 +728,11 @@ void append_component_bridge_edges(
     static_cast<void>(component_graph.unite(pair.first, pair.second));
     topology.component_bridge_support_evaluation_count +=
         components[pair.first].members.size() +
-        components[pair.second].members.size();
+        components[pair.second].members.size() +
+        std::min(kComponentBridgeProjectionSupportCount,
+                 components[pair.first].members.size()) *
+            std::min(kComponentBridgeProjectionSupportCount,
+                     components[pair.second].members.size());
   }
   const std::size_t component_root = component_graph.find(0U);
   for (std::size_t component = 1U; component < components.size(); ++component) {
@@ -733,37 +765,66 @@ void append_component_bridge_edges(
         for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
           direction[axis] = right.center[axis] - left.center[axis];
         }
-        PointId left_support = left.members.front();
-        double left_projection = -std::numeric_limits<double>::infinity();
+        std::array<ProjectedSupport,
+                   kComponentBridgeProjectionSupportCount>
+            left_supports{};
+        std::size_t left_support_count{};
+        const auto left_better = [](const ProjectedSupport& first,
+                                    const ProjectedSupport& second) {
+          return first.projection > second.projection ||
+                 (first.projection == second.projection &&
+                  first.point_id < second.point_id);
+        };
         for (const PointId point_id : left.members) {
           double projection{};
           for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
             projection += coordinates[static_cast<std::size_t>(point_id)][axis] *
                           direction[axis];
           }
-          if (projection > left_projection ||
-              (projection == left_projection && point_id < left_support)) {
-            left_projection = projection;
-            left_support = point_id;
-          }
+          retain_projected_support(
+              left_supports, left_support_count,
+              ProjectedSupport{projection, point_id}, left_better);
         }
-        PointId right_support = right.members.front();
-        double right_projection = std::numeric_limits<double>::infinity();
+        std::array<ProjectedSupport,
+                   kComponentBridgeProjectionSupportCount>
+            right_supports{};
+        std::size_t right_support_count{};
+        const auto right_better = [](const ProjectedSupport& first,
+                                     const ProjectedSupport& second) {
+          return first.projection < second.projection ||
+                 (first.projection == second.projection &&
+                  first.point_id < second.point_id);
+        };
         for (const PointId point_id : right.members) {
           double projection{};
           for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
             projection += coordinates[static_cast<std::size_t>(point_id)][axis] *
                           direction[axis];
           }
-          if (projection < right_projection ||
-              (projection == right_projection && point_id < right_support)) {
-            right_projection = projection;
-            right_support = point_id;
+          retain_projected_support(
+              right_supports, right_support_count,
+              ProjectedSupport{projection, point_id}, right_better);
+        }
+        BaseEdge best_bridge{
+            std::numeric_limits<std::uint64_t>::max(),
+            std::numeric_limits<double>::infinity()};
+        for (std::size_t left_index = 0U;
+             left_index < left_support_count; ++left_index) {
+          for (std::size_t right_index = 0U;
+               right_index < right_support_count; ++right_index) {
+            const PointId left_support = left_supports[left_index].point_id;
+            const PointId right_support = right_supports[right_index].point_id;
+            const BaseEdge candidate = make_base_edge(
+                left_support, right_support,
+                squared_distance(cloud, left_support, right_support));
+            if (candidate.squared_distance < best_bridge.squared_distance ||
+                (candidate.squared_distance == best_bridge.squared_distance &&
+                 candidate.pair_key < best_bridge.pair_key)) {
+              best_bridge = candidate;
+            }
           }
         }
-        bridges[index] = make_base_edge(
-            left_support, right_support,
-            squared_distance(cloud, left_support, right_support));
+        bridges[index] = best_bridge;
       }
     });
   }
@@ -1194,7 +1255,7 @@ void write_result_json(
             << kCoreDeadlineLowerEnvelopeUlps
             << ",\"component_bridge_neighbor_count\":"
             << kComponentBridgeNeighborCount
-            << ",\"component_bridge_policy\":\"top10_components_centroid_knn_projection_support\""
+            << ",\"component_bridge_policy\":\"top10_components_centroid_knn_top8_projection_cross_min\""
             << ",\"ordinary_delaunay_materialized\":false"
             << ",\"higher_order_delaunay_mosaic_materialized\":false"
             << ",\"global_pair_matrix_materialized\":false"

@@ -1,0 +1,189 @@
+{
+  "candidate_connection_squared_level": 0.012061093513918182,
+  "candidate_connection_squared_level_bits": "0x3f88b37c9191f951",
+  "claim_scope": {
+    "delaunay_or_emst_in_product": false,
+    "permanent_contradiction": "one projected extreme per component pair does not preserve the EMST deadline",
+    "top8_observation_only": true,
+    "universal_emst_claimed": false
+  },
+  "centroid_direction_bits": [
+    "0xbf0b6cb6f2860000",
+    "0xbfbff98666922f10",
+    "0xbf046ea63ac80000"
+  ],
+  "component_bridge_neighbor_count": 6,
+  "component_bridge_pair_count": 220,
+  "emst_endpoint_projection_ranks": [
+    5,
+    1
+  ],
+  "emst_exchange_edge": {
+    "squared_distance": 0.012034377207441375,
+    "squared_distance_bits": "0x3f88a57ac444fe7c",
+    "u": 37741,
+    "v": 38236
+  },
+  "export_sha256": "9194d8d08de5169a71c28becbd6148456b718aa6e57b17a5df2c327bf3778720",
+  "family": "balanced_multiscale_clusters",
+  "geometric_cluster_labels": [
+    39,
+    35
+  ],
+  "observed_k1_late_count": 37,
+  "left_top8_projected_supports": [
+    {
+      "coordinate_bits": [
+        "0x3ff6ef89192c8126",
+        "0x3ff2e070a4a3c169",
+        "0x3ff4fd775ca51df6"
+      ],
+      "point_id": 37917
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff6ec70c2b3cff4",
+        "0x3ff2e088bded45f6",
+        "0x3ff5056340473d01"
+      ],
+      "point_id": 37822
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff706aa0bae3def",
+        "0x3ff2e092ec796a27",
+        "0x3ff514f92092dc69"
+      ],
+      "point_id": 48882
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff719f405bd91fd",
+        "0x3ff2e0bebe7d8daf",
+        "0x3ff51d4788171d1f"
+      ],
+      "point_id": 49873
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff6e989625636fa",
+        "0x3ff2e0d04486adf4",
+        "0x3ff516d4cf72b58e"
+      ],
+      "point_id": 37741
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff71eb57c215e70",
+        "0x3ff2e215546278bb",
+        "0x3ff51a785990edd4"
+      ],
+      "point_id": 49973
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff715ad8c6847b8",
+        "0x3ff2e21b2f21d9ce",
+        "0x3ff51b2e71b92874"
+      ],
+      "point_id": 49785
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff6fc842e3f123b",
+        "0x3ff2e2ae384f32e7",
+        "0x3ff4f4afd8123263"
+      ],
+      "point_id": 39411
+    }
+  ],
+  "point_count": 50000,
+  "runner_component_pair": [
+    54,
+    56
+  ],
+  "schema": "morsehgp3d.phase15.regression.top1_projection_bridge_emst_deadlines.v1",
+  "seed": 4101,
+  "source_git_sha": "083c2dee7a7bdb43eecb4cba7d171f28a8795b96",
+  "right_top8_projected_supports": [
+    {
+      "coordinate_bits": [
+        "0x3ff6f3ee629f0515",
+        "0x3ff11f9eb272d61e",
+        "0x3ff51b586ec09fef"
+      ],
+      "point_id": 38236
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff6fccb8e56f52c",
+        "0x3ff11f4448cb0f17",
+        "0x3ff5079254e3ae0b"
+      ],
+      "point_id": 39515
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff6ecb3ed3b4491",
+        "0x3ff11e17808c2aec",
+        "0x3ff4e84c4ffb92ce"
+      ],
+      "point_id": 37831
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff700f6a841a690",
+        "0x3ff11d374f9d2cfd",
+        "0x3ff51f9ece3716e0"
+      ],
+      "point_id": 46800
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff71dcc01fbefd7",
+        "0x3ff11bdd21c96aeb",
+        "0x3ff4ff819940514d"
+      ],
+      "point_id": 49952
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff6ea66cfe7d769",
+        "0x3ff11acb57f28221",
+        "0x3ff51e74bf229e66"
+      ],
+      "point_id": 37768
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff708eb73d68a07",
+        "0x3ff11aad357a91b4",
+        "0x3ff5074fec0cd71e"
+      ],
+      "point_id": 49151
+    },
+    {
+      "coordinate_bits": [
+        "0x3ff6fe11b2a9a9d4",
+        "0x3ff119d637aed6d6",
+        "0x3ff4f549f22aa9f8"
+      ],
+      "point_id": 40001
+    }
+  ],
+  "top1_canonical_emst_overlap_count": 49962,
+  "top1_projection_edge": {
+    "squared_distance": 0.012061093513918182,
+    "squared_distance_bits": "0x3f88b37c9191f951",
+    "u": 37917,
+    "v": 38236
+  },
+  "top8_canonical_emst_overlap_count": 49999,
+  "top8_k1_late_count": 0,
+  "top8_projection_cross_min_edge": {
+    "squared_distance": 0.012034377207441375,
+    "squared_distance_bits": "0x3f88a57ac444fe7c",
+    "u": 37741,
+    "v": 38236
+  }
+}
