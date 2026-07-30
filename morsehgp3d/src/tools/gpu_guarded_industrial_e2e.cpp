@@ -64,15 +64,13 @@ struct Options {
 };
 
 struct BaseEdge {
-  PointId first{};
-  PointId second{};
+  std::uint64_t pair_key{};
   double squared_distance{};
 };
 
 struct WeightedEdge {
   double squared_weight{};
-  PointId first{};
-  PointId second{};
+  std::uint64_t pair_key{};
 };
 
 struct MergeRecord {
@@ -438,7 +436,22 @@ make_balanced_multiscale_cloud(std::size_t count, std::uint64_t seed) {
   if (first == second || !std::isfinite(distance) || distance < 0.0) {
     throw std::runtime_error("invalid common-topology edge");
   }
-  return BaseEdge{first, second, distance};
+  if (first > std::numeric_limits<std::uint32_t>::max() ||
+      second > std::numeric_limits<std::uint32_t>::max()) {
+    throw std::runtime_error("the industrial pair key exceeds 32-bit PointIds");
+  }
+  const std::uint64_t pair_key =
+      (static_cast<std::uint64_t>(first) << 32U) |
+      static_cast<std::uint64_t>(second);
+  return BaseEdge{pair_key, distance};
+}
+
+[[nodiscard]] PointId pair_first(std::uint64_t pair_key) noexcept {
+  return static_cast<PointId>(pair_key >> 32U);
+}
+
+[[nodiscard]] PointId pair_second(std::uint64_t pair_key) noexcept {
+  return static_cast<PointId>(pair_key & UINT64_C(0xffffffff));
 }
 
 [[nodiscard]] Topology build_topology(
@@ -475,18 +488,12 @@ make_balanced_multiscale_cloud(std::size_t count, std::uint64_t seed) {
   std::sort(
       result.edges.begin(), result.edges.end(),
       [](const BaseEdge& left, const BaseEdge& right) {
-        if (left.first != right.first) {
-          return left.first < right.first;
-        }
-        if (left.second != right.second) {
-          return left.second < right.second;
-        }
-        return left.squared_distance < right.squared_distance;
+        return left.pair_key < right.pair_key;
       });
   std::size_t write{};
   for (const BaseEdge& edge : result.edges) {
-    if (write != 0U && result.edges[write - 1U].first == edge.first &&
-        result.edges[write - 1U].second == edge.second) {
+    if (write != 0U &&
+        result.edges[write - 1U].pair_key == edge.pair_key) {
       result.edges[write - 1U].squared_distance =
           std::min(result.edges[write - 1U].squared_distance,
                    edge.squared_distance);
@@ -549,14 +556,16 @@ class DisjointSet {
   weighted.reserve(topology.edges.size());
   const std::size_t core_offset = order_index * point_count;
   for (const BaseEdge& edge : topology.edges) {
+    const PointId first = pair_first(edge.pair_key);
+    const PointId second = pair_second(edge.pair_key);
     const double weight = std::max(
         edge.squared_distance,
         std::max(
             topology.core_squared_distances[
-                core_offset + static_cast<std::size_t>(edge.first)],
+                core_offset + static_cast<std::size_t>(first)],
             topology.core_squared_distances[
-                core_offset + static_cast<std::size_t>(edge.second)]));
-    weighted.push_back(WeightedEdge{weight, edge.first, edge.second});
+                core_offset + static_cast<std::size_t>(second)]));
+    weighted.push_back(WeightedEdge{weight, edge.pair_key});
   }
   std::sort(
       weighted.begin(), weighted.end(),
@@ -564,21 +573,20 @@ class DisjointSet {
         if (left.squared_weight != right.squared_weight) {
           return left.squared_weight < right.squared_weight;
         }
-        if (left.first != right.first) {
-          return left.first < right.first;
-        }
-        return left.second < right.second;
+        return left.pair_key < right.pair_key;
       });
   OrderReduction reduction;
   reduction.order = order_index + 1U;
   reduction.merges.reserve(point_count - 1U);
   DisjointSet components{point_count};
   for (const WeightedEdge& edge : weighted) {
+    const PointId first = pair_first(edge.pair_key);
+    const PointId second = pair_second(edge.pair_key);
     if (components.unite(
-            static_cast<std::size_t>(edge.first),
-            static_cast<std::size_t>(edge.second))) {
+            static_cast<std::size_t>(first),
+            static_cast<std::size_t>(second))) {
       reduction.merges.push_back(
-          MergeRecord{edge.first, edge.second, edge.squared_weight});
+          MergeRecord{first, second, edge.squared_weight});
       if (reduction.merges.size() == point_count - 1U) {
         break;
       }
