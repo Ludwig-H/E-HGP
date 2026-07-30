@@ -2591,8 +2591,9 @@ import assemble_phase15_ranked_pair_classifier_qualification as assembler
 raw = qualification_path.read_text(encoding="utf-8")
 value = assembler.parse_single_json_line(raw, "rank-2/3 qualification")
 assembler.validate_qualification(value, git_sha=git_sha, single_run=False)
-if stderr_path.read_text(encoding="utf-8"):
-    raise SystemExit("rank-2/3 qualification stderr must be empty")
+assembler.validate_qualification_infrastructure_stderr(
+    stderr_path.read_text(encoding="utf-8")
+)
 PY
     then
         report_failure_log "phase15-ranked-pair-classifier-qualification" \

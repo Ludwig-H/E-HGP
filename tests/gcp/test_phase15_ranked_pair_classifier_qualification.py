@@ -27,6 +27,12 @@ IMAGE_ID = "sha256:" + "b" * 64
 IMAGE_REF = f"morsehgp3d-phase3:{GIT_SHA}"
 BASE_IMAGE_REF = assembler.BASE_IMAGE_REF
 LIFECYCLE = dict(assembler.WORKER_LIFECYCLE)
+QUALIFICATION_INFRASTRUCTURE_STDERR = (
+    "[TIMEOUT] unité=phase15-ranked-pair-classifier-qualification, "
+    "borne douce=1208s, kill-after=5s, réserve post-timeout=60s.\n"
+    + "c" * 64
+    + "\n"
+)
 
 
 def canonical_json(path: Path, value: object) -> None:
@@ -207,7 +213,9 @@ class Phase15RankedPairClassifierAssemblerTests(unittest.TestCase):
 
         canonical_json(self.environment, environment_artifact())
         canonical_json(self.qualification, qualification_result(single_run=False))
-        self.qualification_stderr.write_text("", encoding="utf-8")
+        self.qualification_stderr.write_text(
+            QUALIFICATION_INFRASTRUCTURE_STDERR, encoding="utf-8"
+        )
         self.release_build.write_text(
             "[1/2] Building ranked-pair classifier\n[2/2] Linking qualification\n",
             encoding="utf-8",
@@ -419,9 +427,14 @@ class Phase15RankedPairClassifierAssemblerTests(unittest.TestCase):
         self.assert_rejected()
 
     def test_rejects_stderr_build_ptx_or_duplicate_json(self) -> None:
-        self.qualification_stderr.write_text("CUDA warning\n", encoding="utf-8")
+        self.qualification_stderr.write_text(
+            QUALIFICATION_INFRASTRUCTURE_STDERR + "CUDA warning\n",
+            encoding="utf-8",
+        )
         self.assert_rejected()
-        self.qualification_stderr.write_text("", encoding="utf-8")
+        self.qualification_stderr.write_text(
+            QUALIFICATION_INFRASTRUCTURE_STDERR, encoding="utf-8"
+        )
 
         self.release_build.write_text("FAILED: qualification\n", encoding="utf-8")
         self.assert_rejected()

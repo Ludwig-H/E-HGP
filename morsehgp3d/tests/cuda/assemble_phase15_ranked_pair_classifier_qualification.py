@@ -182,6 +182,12 @@ BUILD_FAILURE_RE = re.compile(
     r"ld(?:\.lld)?: error:))",
     re.IGNORECASE,
 )
+QUALIFICATION_INFRASTRUCTURE_STDERR_RE = re.compile(
+    r"\[TIMEOUT\] unité=phase15-ranked-pair-classifier-qualification, "
+    r"borne douce=[1-9][0-9]*s, kill-after=5s, "
+    r"réserve post-timeout=60s\.\n"
+    r"[0-9a-f]{64}\n\Z"
+)
 
 
 def fail(message: str) -> NoReturn:
@@ -235,6 +241,16 @@ def validate_build_log(value: str, label: str) -> None:
         fail(f"{label} must be non-empty")
     if BUILD_FAILURE_RE.search(value) is not None:
         fail(f"{label} contains an obvious build failure")
+
+
+def validate_qualification_infrastructure_stderr(value: str) -> None:
+    """Accept only the guarded timeout receipt and targeted docker-rm CID."""
+
+    if QUALIFICATION_INFRASTRUCTURE_STDERR_RE.fullmatch(value) is None:
+        fail(
+            "qualification stderr must contain exactly the guarded timeout "
+            "receipt and one canonical removed-container ID"
+        )
 
 
 def validate_qualification(
@@ -487,8 +503,9 @@ def validate_artifact(
             fail(f"log {name} must be text")
         if digests.get(name) != hashlib.sha256(log.encode("utf-8")).hexdigest():
             fail(f"log digest differs for {name}")
-    if logs["qualification_stderr"]:
-        fail("direct qualification stderr must be empty")
+    validate_qualification_infrastructure_stderr(
+        logs["qualification_stderr"]
+    )
     validate_build_log(logs["release_build"], "release build log")
     validate_build_log(logs["audit_build"], "audit build log")
     direct = validate_qualification(
@@ -611,8 +628,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
         logs[name], digests[name] = read_text_evidence(
             path, label, allow_empty=allow_empty
         )
-    if logs["qualification_stderr"]:
-        fail("direct qualification stderr must be empty")
+    validate_qualification_infrastructure_stderr(
+        logs["qualification_stderr"]
+    )
     validate_build_log(logs["release_build"], "release build log")
     validate_build_log(logs["audit_build"], "audit build log")
     direct = validate_qualification(
