@@ -23,6 +23,7 @@
 #include <mutex>
 #include <numeric>
 #include <optional>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -44,13 +45,15 @@ using PointId = morsehgp3d::spatial::PointId;
 
 constexpr std::size_t kMaximumOrder = 10U;
 constexpr std::size_t kAxisCount = 3U;
+constexpr std::size_t kComponentBridgeNeighborCount = 6U;
 constexpr std::uint64_t kSloNanoseconds = UINT64_C(100000000);
 // The offline k=2 guard compares a direct binary64 core distance with the
 // same support-two diameter reconstructed by the historical triangle
 // polarization recipe.  Lowering only core contributions preserves the exact
 // k=1 edge weights, the edge-distance floor and monotonicity in k, while
-// covering the bounded roundoff envelope of that 3-D recipe.  This remains a
-// guarded candidate convention, not an exact Morse-level claim.
+// covering the observed bounded roundoff envelope on the registered 3-D
+// families.  This remains a guarded convention, not an exact Morse-level
+// claim.
 constexpr std::uint64_t kCoreDeadlineLowerEnvelopeUlps = 64U;
 
 enum class Family : std::uint8_t {
@@ -96,6 +99,9 @@ struct OrderReduction {
 struct Topology {
   std::vector<BaseEdge> edges;
   std::vector<double> core_squared_distances;
+  std::size_t top_k_component_count{};
+  std::size_t component_bridge_pair_count{};
+  std::size_t component_bridge_support_evaluation_count{};
 };
 
 struct RunMetrics {
@@ -114,6 +120,9 @@ struct RunMetrics {
   std::uint64_t oracle_export_ns{};
   std::optional<std::string> oracle_export_path;
   std::size_t common_topology_edge_count{};
+  std::size_t top_k_component_count{};
+  std::size_t component_bridge_pair_count{};
+  std::size_t component_bridge_support_evaluation_count{};
   std::size_t neighbor_record_count{};
   std::size_t lbvh_kernel_launch_count{};
   std::size_t top_k_node_visit_count{};
@@ -475,60 +484,6 @@ make_balanced_multiscale_cloud(std::size_t count, std::uint64_t seed) {
   return std::bit_cast<double>(lowered_bits);
 }
 
-[[nodiscard]] Topology build_topology(
-    const morsehgp3d::spatial::CanonicalPointCloud& cloud,
-    const morsehgp3d::gpu::Binary64LbvhTopKResult& top_k,
-    std::size_t maximum_order) {
-  const std::size_t point_count = cloud.size();
-  if (!top_k.validated_complete_binary64_transcript() ||
-      top_k.audit.point_count != point_count ||
-      top_k.audit.maximum_order != maximum_order) {
-    throw std::runtime_error("the top-k transcript is not complete");
-  }
-  Topology result;
-  result.edges.reserve(point_count * maximum_order + point_count - 1U);
-  result.core_squared_distances.resize(point_count * maximum_order);
-  for (std::size_t position = 0U; position < point_count; ++position) {
-    const PointId source = top_k.source_point_ids_by_morton_position[position];
-    const std::size_t source_index = static_cast<std::size_t>(source);
-    const std::size_t row = position * maximum_order;
-    for (std::size_t rank = 0U; rank < maximum_order; ++rank) {
-      const PointId neighbor = top_k.neighbor_point_ids[row + rank];
-      const double distance = top_k.squared_distances[row + rank];
-      result.core_squared_distances[rank * point_count + source_index] =
-          distance;
-      result.edges.push_back(make_base_edge(source, neighbor, distance));
-    }
-    if (position != 0U) {
-      const PointId previous =
-          top_k.source_point_ids_by_morton_position[position - 1U];
-      result.edges.push_back(make_base_edge(
-          previous, source, squared_distance(cloud, previous, source)));
-    }
-  }
-  std::sort(
-      result.edges.begin(), result.edges.end(),
-      [](const BaseEdge& left, const BaseEdge& right) {
-        return left.pair_key < right.pair_key;
-      });
-  std::size_t write{};
-  for (const BaseEdge& edge : result.edges) {
-    if (write != 0U &&
-        result.edges[write - 1U].pair_key == edge.pair_key) {
-      result.edges[write - 1U].squared_distance =
-          std::min(result.edges[write - 1U].squared_distance,
-                   edge.squared_distance);
-    } else {
-      result.edges[write++] = edge;
-    }
-  }
-  result.edges.resize(write);
-  if (result.edges.size() < point_count - 1U) {
-    throw std::runtime_error("the common topology cannot span the cloud");
-  }
-  return result;
-}
-
 class DisjointSet {
  public:
   explicit DisjointSet(std::size_t count)
@@ -568,6 +523,248 @@ class DisjointSet {
   std::vector<std::size_t> parent_;
   std::vector<std::size_t> sizes_;
 };
+
+struct TopKComponent {
+  PointId minimum_point_id{};
+  std::vector<PointId> members;
+  std::array<double, kAxisCount> center{};
+};
+
+struct ComponentPair {
+  std::size_t first{};
+  std::size_t second{};
+
+  friend bool operator==(const ComponentPair&, const ComponentPair&) = default;
+};
+
+[[nodiscard]] bool component_pair_less(
+    const ComponentPair& left,
+    const ComponentPair& right) noexcept {
+  return left.first < right.first ||
+         (left.first == right.first && left.second < right.second);
+}
+
+[[nodiscard]] std::array<double, kAxisCount> point_coordinates(
+    const morsehgp3d::spatial::CanonicalPointCloud& cloud,
+    PointId point_id) {
+  const auto& point = cloud.point(point_id);
+  return {point.binary64_coordinate(0U), point.binary64_coordinate(1U),
+          point.binary64_coordinate(2U)};
+}
+
+void append_component_bridge_edges(
+    const morsehgp3d::spatial::CanonicalPointCloud& cloud,
+    std::span<const BaseEdge> top_k_edges,
+    Topology& topology) {
+  const std::size_t point_count = cloud.size();
+  DisjointSet point_components{point_count};
+  for (const BaseEdge& edge : top_k_edges) {
+    static_cast<void>(point_components.unite(
+        static_cast<std::size_t>(pair_first(edge.pair_key)),
+        static_cast<std::size_t>(pair_second(edge.pair_key))));
+  }
+
+  constexpr std::size_t kMissing = std::numeric_limits<std::size_t>::max();
+  std::vector<std::size_t> root_to_component(point_count, kMissing);
+  std::vector<TopKComponent> components;
+  components.reserve(point_count / (kMaximumOrder + 1U) + 1U);
+  std::vector<std::array<double, kAxisCount>> coordinates(point_count);
+  for (std::size_t point = 0U; point < point_count; ++point) {
+    const PointId point_id = static_cast<PointId>(point);
+    coordinates[point] = point_coordinates(cloud, point_id);
+    const std::size_t root = point_components.find(point);
+    std::size_t& component_index = root_to_component[root];
+    if (component_index == kMissing) {
+      component_index = components.size();
+      components.push_back(TopKComponent{point_id, {}, {}});
+    }
+    components[component_index].members.push_back(point_id);
+    for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+      components[component_index].center[axis] += coordinates[point][axis];
+    }
+  }
+  topology.top_k_component_count = components.size();
+  for (TopKComponent& component : components) {
+    const double denominator = static_cast<double>(component.members.size());
+    for (double& coordinate : component.center) {
+      coordinate /= denominator;
+    }
+  }
+  if (components.size() <= 1U) {
+    return;
+  }
+
+  std::vector<ComponentPair> pairs;
+  pairs.reserve(components.size() * kComponentBridgeNeighborCount);
+  for (std::size_t source = 0U; source < components.size(); ++source) {
+    std::vector<std::pair<double, std::size_t>> neighbors;
+    neighbors.reserve(components.size() - 1U);
+    for (std::size_t target = 0U; target < components.size(); ++target) {
+      if (target == source) {
+        continue;
+      }
+      double distance{};
+      for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+        const double delta =
+            components[source].center[axis] - components[target].center[axis];
+        distance += delta * delta;
+      }
+      neighbors.emplace_back(distance, target);
+    }
+    std::sort(
+        neighbors.begin(), neighbors.end(),
+        [&components](const auto& left, const auto& right) {
+          if (left.first != right.first) {
+            return left.first < right.first;
+          }
+          return components[left.second].minimum_point_id <
+                 components[right.second].minimum_point_id;
+        });
+    const std::size_t retained = std::min(
+        kComponentBridgeNeighborCount, neighbors.size());
+    for (std::size_t index = 0U; index < retained; ++index) {
+      const std::size_t target = neighbors[index].second;
+      pairs.push_back(ComponentPair{
+          std::min(source, target), std::max(source, target)});
+    }
+  }
+  std::sort(pairs.begin(), pairs.end(), component_pair_less);
+  pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
+  topology.component_bridge_pair_count = pairs.size();
+
+  DisjointSet component_graph{components.size()};
+  for (const ComponentPair& pair : pairs) {
+    static_cast<void>(component_graph.unite(pair.first, pair.second));
+    topology.component_bridge_support_evaluation_count +=
+        components[pair.first].members.size() +
+        components[pair.second].members.size();
+  }
+  const std::size_t component_root = component_graph.find(0U);
+  for (std::size_t component = 1U; component < components.size(); ++component) {
+    if (component_graph.find(component) != component_root) {
+      throw std::runtime_error(
+          "the sparse component-bridge candidate graph is disconnected");
+    }
+  }
+
+  std::vector<BaseEdge> bridges(pairs.size());
+  std::atomic<std::size_t> next_pair{0U};
+  const unsigned int hardware = std::thread::hardware_concurrency();
+  const std::size_t worker_count = std::min(
+      pairs.size(),
+      hardware == 0U ? std::size_t{1} : static_cast<std::size_t>(hardware));
+  std::vector<std::jthread> workers;
+  workers.reserve(worker_count);
+  for (std::size_t worker = 0U; worker < worker_count; ++worker) {
+    workers.emplace_back([&] {
+      while (true) {
+        const std::size_t index =
+            next_pair.fetch_add(1U, std::memory_order_relaxed);
+        if (index >= pairs.size()) {
+          break;
+        }
+        const ComponentPair pair = pairs[index];
+        const TopKComponent& left = components[pair.first];
+        const TopKComponent& right = components[pair.second];
+        std::array<double, kAxisCount> direction{};
+        for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+          direction[axis] = right.center[axis] - left.center[axis];
+        }
+        PointId left_support = left.members.front();
+        double left_projection = -std::numeric_limits<double>::infinity();
+        for (const PointId point_id : left.members) {
+          double projection{};
+          for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+            projection += coordinates[static_cast<std::size_t>(point_id)][axis] *
+                          direction[axis];
+          }
+          if (projection > left_projection ||
+              (projection == left_projection && point_id < left_support)) {
+            left_projection = projection;
+            left_support = point_id;
+          }
+        }
+        PointId right_support = right.members.front();
+        double right_projection = std::numeric_limits<double>::infinity();
+        for (const PointId point_id : right.members) {
+          double projection{};
+          for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+            projection += coordinates[static_cast<std::size_t>(point_id)][axis] *
+                          direction[axis];
+          }
+          if (projection < right_projection ||
+              (projection == right_projection && point_id < right_support)) {
+            right_projection = projection;
+            right_support = point_id;
+          }
+        }
+        bridges[index] = make_base_edge(
+            left_support, right_support,
+            squared_distance(cloud, left_support, right_support));
+      }
+    });
+  }
+  topology.edges.insert(topology.edges.end(), bridges.begin(), bridges.end());
+}
+
+[[nodiscard]] Topology build_topology(
+    const morsehgp3d::spatial::CanonicalPointCloud& cloud,
+    const morsehgp3d::gpu::Binary64LbvhTopKResult& top_k,
+    std::size_t maximum_order) {
+  const std::size_t point_count = cloud.size();
+  if (!top_k.validated_complete_binary64_transcript() ||
+      top_k.audit.point_count != point_count ||
+      top_k.audit.maximum_order != maximum_order) {
+    throw std::runtime_error("the top-k transcript is not complete");
+  }
+  Topology result;
+  result.edges.reserve(point_count * maximum_order + point_count - 1U);
+  result.core_squared_distances.resize(point_count * maximum_order);
+  for (std::size_t position = 0U; position < point_count; ++position) {
+    const PointId source = top_k.source_point_ids_by_morton_position[position];
+    const std::size_t source_index = static_cast<std::size_t>(source);
+    const std::size_t row = position * maximum_order;
+    for (std::size_t rank = 0U; rank < maximum_order; ++rank) {
+      const PointId neighbor = top_k.neighbor_point_ids[row + rank];
+      const double distance = top_k.squared_distances[row + rank];
+      result.core_squared_distances[rank * point_count + source_index] =
+          distance;
+      result.edges.push_back(make_base_edge(source, neighbor, distance));
+    }
+  }
+  const std::size_t top_k_edge_count = result.edges.size();
+  append_component_bridge_edges(
+      cloud,
+      std::span<const BaseEdge>{result.edges.data(), top_k_edge_count}, result);
+  for (std::size_t position = 1U; position < point_count; ++position) {
+    const PointId source = top_k.source_point_ids_by_morton_position[position];
+    const PointId previous =
+        top_k.source_point_ids_by_morton_position[position - 1U];
+    result.edges.push_back(make_base_edge(
+        previous, source, squared_distance(cloud, previous, source)));
+  }
+  std::sort(
+      result.edges.begin(), result.edges.end(),
+      [](const BaseEdge& left, const BaseEdge& right) {
+        return left.pair_key < right.pair_key;
+      });
+  std::size_t write{};
+  for (const BaseEdge& edge : result.edges) {
+    if (write != 0U &&
+        result.edges[write - 1U].pair_key == edge.pair_key) {
+      result.edges[write - 1U].squared_distance =
+          std::min(result.edges[write - 1U].squared_distance,
+                   edge.squared_distance);
+    } else {
+      result.edges[write++] = edge;
+    }
+  }
+  result.edges.resize(write);
+  if (result.edges.size() < point_count - 1U) {
+    throw std::runtime_error("the common topology cannot span the cloud");
+  }
+  return result;
+}
 
 [[nodiscard]] OrderReduction reduce_order(
     const Topology& topology,
@@ -755,6 +952,10 @@ void materialize_output(std::vector<OrderReduction>& reductions) {
   const auto topology_start = Clock::now();
   Topology topology = build_topology(cloud, top_k, options.maximum_order);
   metrics.common_topology_edge_count = topology.edges.size();
+  metrics.top_k_component_count = topology.top_k_component_count;
+  metrics.component_bridge_pair_count = topology.component_bridge_pair_count;
+  metrics.component_bridge_support_evaluation_count =
+      topology.component_bridge_support_evaluation_count;
   metrics.topology_ns = nanoseconds(Clock::now() - topology_start);
 
   const auto reductions_start = Clock::now();
@@ -901,11 +1102,11 @@ void write_result_json(
     std::uint64_t p99,
     bool slo_passed) {
   std::cout << std::setprecision(17);
-  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v2\""
+  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v3\""
             << ",\"result_kind\":\"guarded_industrial_candidate\""
             << ",\"phase\":15,\"backend\":\"cuda_g4_plus_host_binary64\""
             << ",\"profile\":\"hgp_reduced\""
-            << ",\"mode\":\"warm_fresh_cloud_lbvh_top10_parallel_h0\""
+            << ",\"mode\":\"warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0\""
             << ",\"deployment_status\":\"architecture_only\""
             << ",\"public_status\":\"not_claimed\",\"git_sha\":";
   write_json_string(std::cout, MORSEHGP3D_GIT_SHA);
@@ -924,6 +1125,9 @@ void write_result_json(
             << ",\"weight_representation\":\"squared_binary64_mutual_reachability_with_k2plus_core_lower_envelope\""
             << ",\"core_deadline_lower_envelope_ulps\":"
             << kCoreDeadlineLowerEnvelopeUlps
+            << ",\"component_bridge_neighbor_count\":"
+            << kComponentBridgeNeighborCount
+            << ",\"component_bridge_policy\":\"top10_components_centroid_knn_projection_support\""
             << ",\"ordinary_delaunay_materialized\":false"
             << ",\"higher_order_delaunay_mosaic_materialized\":false"
             << ",\"global_pair_matrix_materialized\":false"
@@ -956,6 +1160,12 @@ void write_result_json(
               << ",\"warm_e2e\":" << run.warm_e2e_ns << '}'
               << ",\"common_topology_edge_count\":"
               << run.common_topology_edge_count
+              << ",\"top_k_component_count\":"
+              << run.top_k_component_count
+              << ",\"component_bridge_pair_count\":"
+              << run.component_bridge_pair_count
+              << ",\"component_bridge_support_evaluation_count\":"
+              << run.component_bridge_support_evaluation_count
               << ",\"neighbor_record_count\":"
               << run.neighbor_record_count
               << ",\"lbvh_kernel_launch_count\":"
