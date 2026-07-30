@@ -26,6 +26,11 @@ enum class FakeMortonYao48RankedPairTileClassifierCorruption
   missing_source_authentication,
   missing_output_owner,
   malformed_output_layout,
+  invalid_closed_rank,
+  unsorted_record_order,
+  invalid_rank_offsets,
+  invalid_payload_offsets,
+  invalid_payload_point_id,
   simulated_launcher_failure,
 };
 

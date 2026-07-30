@@ -9,8 +9,13 @@
 
 namespace morsehgp3d::gpu {
 
+namespace detail {
+class Phase15MortonYao48RankedPairTileCatalogPrivateViewAccess;
+class Phase15MortonYao48RankedPairTileClassifierContextState;
+}
+
 inline constexpr std::uint32_t
-    morton_yao48_ranked_pair_tile_classifier_schema_version = 1U;
+    morton_yao48_ranked_pair_tile_classifier_schema_version = 2U;
 inline constexpr std::size_t
     morton_yao48_ranked_pair_tile_classifier_minimum_closed_rank = 2U;
 inline constexpr std::size_t
@@ -30,7 +35,7 @@ inline constexpr std::string_view
     morton_yao48_ranked_pair_tile_classifier_public_status = "not_claimed";
 inline constexpr bool
     morton_yao48_ranked_pair_tile_classifier_cuda_implementation_available =
-        false;
+        true;
 
 enum class MortonYao48RankedPairTileClassifierStatus : std::uint8_t {
   chunk_committed,
@@ -169,6 +174,9 @@ struct MortonYao48RankedPairTileCatalogLeaseAudit {
   bool frontier_closed{false};
   bool closed_rank_catalog_complete{false};
   bool source_identity_authenticated{false};
+  bool source_owner_retained{false};
+  bool source_cloud_identity_retained{false};
+  bool source_device_coordinates_retained{false};
   bool monotone_chunk_journal_validated{false};
   bool exact_multiorder_classification_validated{false};
   bool count_scan_payload_layout_validated{false};
@@ -217,6 +225,9 @@ class MortonYao48RankedPairTileCatalogLease final {
   MortonYao48RankedPairTileCatalogLease(
       MortonYao48RankedPairTileCatalogLeaseAudit audit,
       std::shared_ptr<void> retained_owner,
+      std::shared_ptr<void> source_owner_authority,
+      std::shared_ptr<const void> source_cloud_identity_authority,
+      const std::uint64_t* device_coordinate_bits,
       const std::uint64_t* device_support_u,
       const std::uint64_t* device_support_v,
       const std::uint8_t* device_closed_rank,
@@ -230,6 +241,9 @@ class MortonYao48RankedPairTileCatalogLease final {
 
   MortonYao48RankedPairTileCatalogLeaseAudit audit_{};
   std::shared_ptr<void> retained_owner_;
+  std::shared_ptr<void> source_owner_authority_;
+  std::shared_ptr<const void> source_cloud_identity_authority_;
+  const std::uint64_t* device_coordinate_bits_{};
   const std::uint64_t* device_support_u_{};
   const std::uint64_t* device_support_v_{};
   const std::uint8_t* device_closed_rank_{};
@@ -242,11 +256,9 @@ class MortonYao48RankedPairTileCatalogLease final {
   bool host_fake_{false};
 
   friend class MortonYao48RankedPairTileClassifierContext;
+  friend class detail::
+      Phase15MortonYao48RankedPairTileCatalogPrivateViewAccess;
 };
-
-namespace detail {
-class Phase15MortonYao48RankedPairTileClassifierContextState;
-}
 
 class MortonYao48RankedPairTileClassifierContext final {
  public:
@@ -322,6 +334,9 @@ class MortonYao48RankedPairTileClassifierContext final {
   std::size_t cuda_kernel_launch_count_{};
   std::size_t cuda_synchronization_count_{};
   std::shared_ptr<void> output_owner_;
+  std::shared_ptr<void> source_owner_authority_;
+  std::shared_ptr<const void> source_cloud_identity_authority_;
+  const std::uint64_t* device_coordinate_bits_{};
   const std::uint64_t* device_support_u_{};
   const std::uint64_t* device_support_v_{};
   const std::uint8_t* device_closed_rank_{};

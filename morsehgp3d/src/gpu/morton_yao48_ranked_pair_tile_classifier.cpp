@@ -177,6 +177,11 @@ struct FrontierAuthority final {
   if (!views.ready || views.retained_authority_identity == nullptr ||
       views.source_owner_identity == nullptr ||
       views.source_cloud_identity == nullptr ||
+      !views.source_owner_authority ||
+      !views.source_cloud_identity_authority ||
+      views.source_owner_authority.get() != views.source_owner_identity ||
+      views.source_cloud_identity_authority.get() !=
+          views.source_cloud_identity ||
       audit.schema_version !=
           morton_yao48_device_tiled_pair_frontier_schema_version ||
       audit.source_snapshot_epoch == 0U ||
@@ -318,6 +323,102 @@ void validate_sequence(
     const void* pointer,
     std::size_t count) noexcept {
   return count == 0U || pointer != nullptr;
+}
+
+[[nodiscard]] bool host_fake_catalog_is_canonical(
+    const detail::Phase15MortonYao48RankedPairTileClassifierDeviceOutput&
+        output,
+    std::size_t point_count,
+    std::size_t maximum_closed_rank) noexcept {
+  const std::size_t record_count = output.catalog_record_count;
+  if (output.rank_offsets[0U] != 0U ||
+      output.strict_offsets[0U] != 0U ||
+      output.shell_offsets[0U] != 0U ||
+      output.strict_offsets[record_count] !=
+          static_cast<std::uint64_t>(output.strict_point_id_count) ||
+      output.shell_offsets[record_count] !=
+          static_cast<std::uint64_t>(output.shell_point_id_count)) {
+    return false;
+  }
+
+  for (std::size_t index = 0U; index < record_count; ++index) {
+    const std::uint64_t support_u = output.support_u[index];
+    const std::uint64_t support_v = output.support_v[index];
+    const std::size_t closed_rank = output.closed_rank[index];
+    if (support_u >= support_v || support_v >= point_count ||
+        closed_rank <
+            morton_yao48_ranked_pair_tile_classifier_minimum_closed_rank ||
+        closed_rank > maximum_closed_rank) {
+      return false;
+    }
+    if (index != 0U) {
+      const std::size_t prior_rank = output.closed_rank[index - 1U];
+      const std::uint64_t prior_u = output.support_u[index - 1U];
+      const std::uint64_t prior_v = output.support_v[index - 1U];
+      if (closed_rank < prior_rank ||
+          (closed_rank == prior_rank &&
+           (support_u < prior_u ||
+            (support_u == prior_u && support_v <= prior_v)))) {
+        return false;
+      }
+    }
+
+    const std::uint64_t strict_begin = output.strict_offsets[index];
+    const std::uint64_t strict_end = output.strict_offsets[index + 1U];
+    const std::uint64_t shell_begin = output.shell_offsets[index];
+    const std::uint64_t shell_end = output.shell_offsets[index + 1U];
+    if (strict_begin > strict_end ||
+        strict_end > output.strict_point_id_count ||
+        shell_begin > shell_end ||
+        shell_end > output.shell_point_id_count) {
+      return false;
+    }
+    const std::uint64_t strict_count = strict_end - strict_begin;
+    const std::uint64_t shell_count = shell_end - shell_begin;
+    if (strict_count + shell_count != closed_rank - 2U) {
+      return false;
+    }
+
+    for (std::uint64_t payload = strict_begin; payload < strict_end;
+         ++payload) {
+      const std::uint64_t point_id = output.strict_point_ids[payload];
+      if (point_id >= point_count || point_id == support_u ||
+          point_id == support_v ||
+          (payload != strict_begin &&
+           output.strict_point_ids[payload - 1U] >= point_id)) {
+        return false;
+      }
+    }
+    for (std::uint64_t payload = shell_begin; payload < shell_end;
+         ++payload) {
+      const std::uint64_t point_id = output.shell_point_ids[payload];
+      if (point_id >= point_count || point_id == support_u ||
+          point_id == support_v ||
+          (payload != shell_begin &&
+           output.shell_point_ids[payload - 1U] >= point_id)) {
+        return false;
+      }
+      for (std::uint64_t strict_payload = strict_begin;
+           strict_payload < strict_end;
+           ++strict_payload) {
+        if (output.strict_point_ids[strict_payload] == point_id) {
+          return false;
+        }
+      }
+    }
+  }
+
+  std::size_t record_cursor = 0U;
+  for (std::size_t rank = 0U; rank <= maximum_closed_rank + 1U; ++rank) {
+    while (record_cursor < record_count &&
+           output.closed_rank[record_cursor] < rank) {
+      ++record_cursor;
+    }
+    if (output.rank_offsets[rank] != record_cursor) {
+      return false;
+    }
+  }
+  return record_cursor == record_count;
 }
 
 struct ValidatedReceipt final {
@@ -543,6 +644,14 @@ struct ValidatedReceipt final {
           "a successful ranked-pair classifier receipt is not exact, "
           "closed, or layout-complete");
     }
+    if (expected_host_fake &&
+        !host_fake_catalog_is_canonical(
+            output,
+            request.point_count,
+            request.fixed_config.maximum_closed_rank)) {
+      throw std::runtime_error(
+          "a successful host-fake ranked-pair catalog is not canonical");
+    }
   } else if (
       status ==
       MortonYao48RankedPairTileClassifierStatus::capacity_exhausted) {
@@ -575,7 +684,11 @@ struct ValidatedReceipt final {
             receipt.transaction_candidate_count ||
         receipt.transaction_strict_payload_point_id_count != 0U ||
         receipt.transaction_shell_payload_point_id_count != 0U ||
-        receipt.transaction_exact_fallback_count != 0U || output.owner ||
+        ((record_exhausted || payload_exhausted) &&
+         receipt.transaction_exact_fallback_count != 0U) ||
+        (fallback_exhausted &&
+         receipt.transaction_exact_fallback_count == 0U) ||
+        output.owner ||
         output.support_u != nullptr || output.support_v != nullptr ||
         output.closed_rank != nullptr || output.rank_offsets != nullptr ||
         output.strict_offsets != nullptr ||
@@ -608,7 +721,7 @@ struct ValidatedReceipt final {
             receipt.transaction_candidate_count ||
         receipt.transaction_strict_payload_point_id_count != 0U ||
         receipt.transaction_shell_payload_point_id_count != 0U ||
-        receipt.transaction_exact_fallback_count != 0U ||
+        receipt.transaction_exact_fallback_count == 0U ||
         receipt.required_catalog_record_count !=
             request.prior_accepted_record_count ||
         receipt.required_payload_point_id_count != checked_sum(
@@ -616,7 +729,10 @@ struct ValidatedReceipt final {
             request.prior_shell_payload_point_id_count,
             "the prior payload count overflowed") ||
         receipt.required_exact_fallback_count !=
-            request.prior_exact_fallback_count ||
+            checked_sum(
+                request.prior_exact_fallback_count,
+                receipt.transaction_exact_fallback_count,
+                "the failed exact fallback count overflowed") ||
         output.owner || output.support_u != nullptr ||
         output.support_v != nullptr || output.closed_rank != nullptr ||
         output.rank_offsets != nullptr || output.strict_offsets != nullptr ||
@@ -646,6 +762,9 @@ MortonYao48RankedPairTileCatalogLease::
     MortonYao48RankedPairTileCatalogLease(
         MortonYao48RankedPairTileCatalogLeaseAudit audit,
         std::shared_ptr<void> retained_owner,
+        std::shared_ptr<void> source_owner_authority,
+        std::shared_ptr<const void> source_cloud_identity_authority,
+        const std::uint64_t* device_coordinate_bits,
         const std::uint64_t* device_support_u,
         const std::uint64_t* device_support_v,
         const std::uint8_t* device_closed_rank,
@@ -658,6 +777,10 @@ MortonYao48RankedPairTileCatalogLease::
         bool host_fake)
     : audit_(audit),
       retained_owner_(std::move(retained_owner)),
+      source_owner_authority_(std::move(source_owner_authority)),
+      source_cloud_identity_authority_(
+          std::move(source_cloud_identity_authority)),
+      device_coordinate_bits_(device_coordinate_bits),
       device_support_u_(device_support_u),
       device_support_v_(device_support_v),
       device_closed_rank_(device_closed_rank),
@@ -677,7 +800,9 @@ bool MortonYao48RankedPairTileCatalogLease::ready() const noexcept {
       device_rank_offsets_ == nullptr && device_strict_offsets_ == nullptr &&
       device_strict_point_ids_ == nullptr && device_shell_offsets_ == nullptr &&
       device_shell_point_ids_ == nullptr && audit_.rank_offset_count == 0U &&
-      audit_.record_offset_count == 0U && cuda_device_ == -1;
+      audit_.record_offset_count == 0U && !source_owner_authority_ &&
+      !source_cloud_identity_authority_ && device_coordinate_bits_ == nullptr &&
+      cuda_device_ == -1;
   const bool record_views_ready =
       audit_.catalog_record_count == 0U ||
       (device_support_u_ != nullptr && device_support_v_ != nullptr &&
@@ -695,6 +820,10 @@ bool MortonYao48RankedPairTileCatalogLease::ready() const noexcept {
          audit_.closed_rank_catalog_complete &&
          audit_.unresolved_count == 0U &&
          audit_.source_identity_authenticated &&
+         (vacuous_without_storage ||
+          (audit_.source_owner_retained &&
+           audit_.source_cloud_identity_retained &&
+           source_owner_authority_ && source_cloud_identity_authority_)) &&
          audit_.monotone_chunk_journal_validated &&
          audit_.exact_multiorder_classification_validated &&
          audit_.count_scan_payload_layout_validated &&
@@ -718,9 +847,42 @@ bool MortonYao48RankedPairTileCatalogLease::ready() const noexcept {
          !audit_.public_status_claimed &&
          (vacuous_without_storage || (host_fake_
               ? audit_.host_fake_lifecycle_exercised &&
-                    !audit_.cuda_device_storage_retained && cuda_device_ == -1
+                    !audit_.cuda_device_storage_retained &&
+                    !audit_.source_device_coordinates_retained &&
+                    device_coordinate_bits_ == nullptr && cuda_device_ == -1
               : !audit_.host_fake_lifecycle_exercised &&
-                    audit_.cuda_device_storage_retained && cuda_device_ >= 0));
+                    audit_.cuda_device_storage_retained &&
+                    audit_.source_device_coordinates_retained &&
+                    device_coordinate_bits_ != nullptr && cuda_device_ >= 0));
+}
+
+detail::Phase15MortonYao48RankedPairTileCatalogPrivateViews
+detail::Phase15MortonYao48RankedPairTileCatalogPrivateViewAccess::inspect(
+    const MortonYao48RankedPairTileCatalogLease& lease) noexcept {
+  Phase15MortonYao48RankedPairTileCatalogPrivateViews views;
+  views.output_owner = lease.retained_owner_;
+  views.source_owner_authority = lease.source_owner_authority_;
+  views.source_cloud_identity_authority =
+      lease.source_cloud_identity_authority_;
+  views.device_coordinate_bits = lease.device_coordinate_bits_;
+  views.device_support_u = lease.device_support_u_;
+  views.device_support_v = lease.device_support_v_;
+  views.device_closed_rank = lease.device_closed_rank_;
+  views.device_rank_offsets = lease.device_rank_offsets_;
+  views.device_strict_offsets = lease.device_strict_offsets_;
+  views.device_strict_point_ids = lease.device_strict_point_ids_;
+  views.device_shell_offsets = lease.device_shell_offsets_;
+  views.device_shell_point_ids = lease.device_shell_point_ids_;
+  views.point_count = lease.audit_.point_count;
+  views.catalog_record_count = lease.audit_.catalog_record_count;
+  views.strict_point_id_count = lease.audit_.strict_payload_point_id_count;
+  views.shell_point_id_count = lease.audit_.shell_payload_point_id_count;
+  views.rank_offset_count = lease.audit_.rank_offset_count;
+  views.record_offset_count = lease.audit_.record_offset_count;
+  views.cuda_device = lease.cuda_device_;
+  views.host_fake = lease.host_fake_;
+  views.ready = lease.ready();
+  return views;
 }
 
 bool MortonYao48RankedPairTileCatalogLease::cuda_resident() const noexcept {
@@ -897,6 +1059,10 @@ MortonYao48RankedPairTileClassifierContext::commit(
     if (candidate.has_value()) {
       source_owner_identity_ = candidate->views.source_owner_identity;
       source_cloud_identity_ = candidate->views.source_cloud_identity;
+      source_owner_authority_ = candidate->views.source_owner_authority;
+      source_cloud_identity_authority_ =
+          candidate->views.source_cloud_identity_authority;
+      device_coordinate_bits_ = candidate->views.device_coordinate_bits;
     }
     source_snapshot_epoch_ = frontier.audit.source_snapshot_epoch;
     last_candidate_buffer_epoch_ = frontier.audit.candidate_buffer_epoch;
@@ -953,6 +1119,9 @@ MortonYao48RankedPairTileClassifierContext::commit(
 
     if (terminally_censored_) {
       output_owner_.reset();
+      source_owner_authority_.reset();
+      source_cloud_identity_authority_.reset();
+      device_coordinate_bits_ = nullptr;
       device_support_u_ = nullptr;
       device_support_v_ = nullptr;
       device_closed_rank_ = nullptr;
@@ -1143,6 +1312,11 @@ MortonYao48RankedPairTileClassifierContext::finish() {
   audit.frontier_closed = true;
   audit.closed_rank_catalog_complete = true;
   audit.source_identity_authenticated = true;
+  audit.source_owner_retained = static_cast<bool>(source_owner_authority_);
+  audit.source_cloud_identity_retained =
+      static_cast<bool>(source_cloud_identity_authority_);
+  audit.source_device_coordinates_retained =
+      device_coordinate_bits_ != nullptr;
   audit.monotone_chunk_journal_validated = true;
   audit.exact_multiorder_classification_validated = true;
   audit.count_scan_payload_layout_validated = true;
@@ -1155,6 +1329,9 @@ MortonYao48RankedPairTileClassifierContext::finish() {
   MortonYao48RankedPairTileCatalogLease catalog{
       audit,
       std::move(output_owner_),
+      std::move(source_owner_authority_),
+      std::move(source_cloud_identity_authority_),
+      device_coordinate_bits_,
       device_support_u_,
       device_support_v_,
       device_closed_rank_,

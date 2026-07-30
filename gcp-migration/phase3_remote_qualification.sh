@@ -16,6 +16,7 @@ readonly PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_ph
 readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase9_pair_support_phi_qualification.py"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_exact_diametral_phi_qualification.py"
 readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_device_frontier_50k_qualification.py"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_ranked_pair_classifier_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -44,6 +45,8 @@ readonly PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHAS
 readonly PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification"
 readonly PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE}"
 readonly PHASE15_DEVICE_FRONTIER_50K_SEED=1558325537444281125
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE}"
 readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification"
 readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_PATH="${CONTAINER_REPOSITORY}/${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE}"
 readonly MORTON_YAO48_SEED_WORK_PROFILE_BINARY_PATH="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile"
@@ -121,6 +124,10 @@ PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW=""
 PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH=""
 PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT=""
 PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE=""
+PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW=""
+PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH=""
+PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT=""
+PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE=""
 MORTON_YAO48_SEED_WORK_PROFILE=0
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
@@ -137,6 +144,7 @@ PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
 PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
+PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -212,7 +220,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json] [--phase15-ranked-pair-classifier-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -250,6 +258,13 @@ standard non-smoke à 50 000 points, rang fermé 11, tuile 4096, famille
 adversarial_mixed_dyadic et graine enregistrée. Toute censure ou masse non
 résolue échoue fermé; le compagnon reste un résultat de composant sans
 catalogue scientifique, exactitude de hiérarchie, SLO ou statut public.
+L'option ranked-pair-classifier Phase 15 qualifie le chemin CUDA natif borné
+LBVH, frontière tuilée, classification exacte et catalogue final pour les
+rangs fermés 2 et 3 contre l'oracle CPU exact. Elle impose deux capacités de
+tuile pour la qualification directe, puis un passage borné séparé sous
+memcheck et racecheck. Tout repli exact, désaccord, censure ou sortie non
+fermée échoue; ce composant support-2 ne revendique ni Gamma2 complet, ni
+hiérarchie K2, ni échelle industrielle, ni SLO, ni statut public.
 EOF
 }
 
@@ -334,6 +349,14 @@ while (($# > 0)); do
             [[ -z "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]] || \
                 die "--phase15-device-frontier-50k-output ne peut être fourni qu'une fois."
             PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase15-ranked-pair-classifier-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase15-ranked-pair-classifier-output."
+            [[ -z "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]] || \
+                die "--phase15-ranked-pair-classifier-output ne peut être fourni qu'une fois."
+            PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -455,7 +478,8 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]] && \
        -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
        -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
        -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
-       -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
+       -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" || \
+       -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
     die "--phase15-exact-diametral-phi-output est exclusive des autres compagnons."
 fi
 if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
@@ -480,8 +504,26 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
           -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
           -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
           -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
-          -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]]; then
+          -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
         die "--phase15-device-frontier-50k-output est exclusive des autres compagnons."
+    fi
+fi
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
+    case "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase15-ranked-pair-classifier-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" != "${OUTPUT_RAW}" ]] || \
+        die "La sortie ranked-pair-classifier Phase 15 doit être distincte de la sortie Phase 3."
+    if [[ -n "${PHASE4_OUTPUT_RAW}" || -n "${PHASE5_OUTPUT_RAW}" || \
+          -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" || \
+          -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
+          -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
+          -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
+        die "--phase15-ranked-pair-classifier-output est exclusive des autres compagnons."
     fi
 fi
 certify_fixed_timeout || \
@@ -770,6 +812,35 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]] || \
         die "La sortie device-frontier 50k Phase 15 doit être inexistante : ${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
+    PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}")"
+    PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE="$(basename -- \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}")"
+    [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE}" && \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE}" != "." && \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact ranked-pair-classifier Phase 15 invalide."
+    [[ -d "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT}" ]] || \
+        die "Le parent de --phase15-ranked-pair-classifier-output doit déjà exister."
+    PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT="$(cd -- \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie ranked-pair-classifier Phase 15 illisible."
+    PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH="${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT}/${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE}"
+    [[ "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT}" == \
+        "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    [[ "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" != \
+        "${OUTPUT_PATH}" ]] || \
+        die "Les sorties Phase 3 et ranked-pair-classifier doivent être distinctes."
+    case "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase15-ranked-pair-classifier-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" && \
+        ! -L "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]] || \
+        die "La sortie ranked-pair-classifier Phase 15 doit être inexistante : ${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -794,6 +865,7 @@ readonly PHASE7_H_POLYTOPE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE7_H_POLYTOPE_ASS
 readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE}"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER_RELATIVE}"
 readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER_RELATIVE}"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -846,6 +918,11 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}" && \
         ! -L "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}" ]] || \
         die "Assembleur device-frontier 50k Phase 15 absent ou symbolique : ${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}."
+fi
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}" && \
+        ! -L "${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}" ]] || \
+        die "Assembleur ranked-pair-classifier Phase 15 absent ou symbolique : ${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}."
 fi
 
 remove_container_from_cidfile() {
@@ -1025,6 +1102,10 @@ cleanup() {
         -f "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" && \
+        -f "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -1147,6 +1228,16 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
         ! -L "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" ]] || \
         die "Le nom temporaire device-frontier 50k Phase 15 reste occupé."
 fi
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
+    PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP="$(mktemp \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT}/.${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire ranked-pair-classifier Phase 15."
+    rm -f -- "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" || \
+        die "Impossible de libérer le nom temporaire ranked-pair-classifier Phase 15."
+    [[ ! -e "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" && \
+        ! -L "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" ]] || \
+        die "Le nom temporaire ranked-pair-classifier Phase 15 reste occupé."
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -1219,6 +1310,15 @@ readonly PHASE15_DEVICE_FRONTIER_50K_BUILD_LOG="${LOG_DIR}/phase15-device-fronti
 readonly PHASE15_DEVICE_FRONTIER_50K_QUALIFICATION_LOG="${RESULT_DIR}/phase15-device-frontier-50k-qualification.json"
 readonly PHASE15_DEVICE_FRONTIER_50K_STDERR_LOG="${LOG_DIR}/phase15-device-frontier-50k-qualification.stderr.log"
 readonly PHASE15_DEVICE_FRONTIER_50K_TIMING_LOG="${RESULT_DIR}/phase15-device-frontier-50k-timing.json"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_LOG="${RESULT_DIR}/phase15-ranked-pair-classifier-qualification.json"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_STDERR_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-qualification.stderr.log"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_RELEASE_BUILD_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-release-build.log"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_AUDIT_BUILD_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-audit-build.log"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_ELF_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-cuobjdump-elf.log"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_PTX_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-cuobjdump-ptx.log"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_PTX_STDERR_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-cuobjdump-ptx.stderr.log"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_MEMCHECK_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-memcheck.log"
+readonly PHASE15_RANKED_PAIR_CLASSIFIER_RACECHECK_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-racecheck.log"
 declare -a PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS=()
 declare -a PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS=()
 
@@ -2433,6 +2533,140 @@ PY
     fi
 fi
 
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
+    begin_unit "phase15-ranked-pair-classifier-release-build"
+    if ! run_container "phase15-ranked-pair-classifier-release-build" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_RELEASE_BUILD_LOG}" \
+        cmake --build "${MODULE_DIR}" \
+        --target \
+            morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification \
+        --parallel 8; then
+        report_failure_log "phase15-ranked-pair-classifier-release-build" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_RELEASE_BUILD_LOG}"
+        die "La cible CUDA ranked-pair-classifier Phase 15 n'a pas pu être construite en Release."
+    fi
+
+    begin_unit "phase15-ranked-pair-classifier-audit-build"
+    if ! run_container "phase15-ranked-pair-classifier-audit-build" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_AUDIT_BUILD_LOG}" \
+        cmake --build "${AUDIT_MODULE_DIR}" \
+        --target \
+            morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification \
+        --parallel 8; then
+        report_failure_log "phase15-ranked-pair-classifier-audit-build" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_AUDIT_BUILD_LOG}"
+        die "La cible CUDA ranked-pair-classifier Phase 15 n'a pas pu être construite sous le preset audit."
+    fi
+    [[ -f "${BUILD_DIR}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire CUDA ranked-pair-classifier Phase 15 n'a pas été construit sûrement."
+
+    begin_unit "phase15-ranked-pair-classifier-qualification"
+    if ! run_container_split_output "phase15-ranked-pair-classifier-qualification" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_LOG}" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_STDERR_LOG}" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH}"; then
+        report_failure_log "phase15-ranked-pair-classifier-qualification" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_LOG}"
+        report_failure_log "phase15-ranked-pair-classifier-qualification-stderr" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_STDERR_LOG}"
+        die "La qualification CUDA ranked-pair-classifier Phase 15 a échoué."
+    fi
+    if ! python3 -B - \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_LOG}" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_STDERR_LOG}" \
+        "$(dirname -- "${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}")" \
+        "${HEAD_SHA}" <<'PY'
+from pathlib import Path
+import sys
+
+qualification_path = Path(sys.argv[1])
+stderr_path = Path(sys.argv[2])
+sys.path.insert(0, sys.argv[3])
+git_sha = sys.argv[4]
+
+import assemble_phase15_ranked_pair_classifier_qualification as assembler
+
+raw = qualification_path.read_text(encoding="utf-8")
+value = assembler.parse_single_json_line(raw, "rank-2/3 qualification")
+assembler.validate_qualification(value, git_sha=git_sha, single_run=False)
+if stderr_path.read_text(encoding="utf-8"):
+    raise SystemExit("rank-2/3 qualification stderr must be empty")
+PY
+    then
+        report_failure_log "phase15-ranked-pair-classifier-qualification" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_LOG}"
+        report_failure_log "phase15-ranked-pair-classifier-qualification-stderr" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_STDERR_LOG}"
+        die "La sortie ranked-pair-classifier Phase 15 ne ferme pas son contrat exact support-2 rangs 2 et 3."
+    fi
+
+    begin_unit "phase15-ranked-pair-classifier-cuobjdump-elf"
+    if ! run_container "phase15-ranked-pair-classifier-cuobjdump-elf" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_ELF_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lelf \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH}"; then
+        report_failure_log "phase15-ranked-pair-classifier-cuobjdump-elf" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister les ELF ranked-pair-classifier Phase 15."
+    fi
+    phase15_ranked_pair_classifier_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_ELF_LOG}" | sort -u || true)"
+    if [[ "${phase15_ranked_pair_classifier_architectures}" != "sm_120" ]]; then
+        report_failure_log "phase15-ranked-pair-classifier-cuobjdump-elf" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_ELF_LOG}"
+        die "Le binaire ranked-pair-classifier Phase 15 doit contenir uniquement un ELF sm_120; observé : ${phase15_ranked_pair_classifier_architectures:-aucun}."
+    fi
+
+    begin_unit "phase15-ranked-pair-classifier-cuobjdump-ptx"
+    if ! run_container_split_output "phase15-ranked-pair-classifier-cuobjdump-ptx" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_PTX_LOG}" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH}"; then
+        report_failure_log "phase15-ranked-pair-classifier-cuobjdump-ptx-stderr" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX ranked-pair-classifier Phase 15."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE15_RANKED_PAIR_CLASSIFIER_PTX_LOG}"; then
+        report_failure_log "phase15-ranked-pair-classifier-cuobjdump-ptx" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le binaire ranked-pair-classifier Phase 15."
+    fi
+
+    begin_unit "phase15-ranked-pair-classifier-memcheck"
+    if ! run_container "phase15-ranked-pair-classifier-memcheck" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_MEMCHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool memcheck \
+        --leak-check full \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH}" \
+        --single-run; then
+        report_failure_log "phase15-ranked-pair-classifier-memcheck" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_MEMCHECK_LOG}"
+        die "Le memcheck ranked-pair-classifier Phase 15 a échoué."
+    fi
+
+    begin_unit "phase15-ranked-pair-classifier-racecheck"
+    if ! run_container "phase15-ranked-pair-classifier-racecheck" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_RACECHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool racecheck \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH}" \
+        --single-run; then
+        report_failure_log "phase15-ranked-pair-classifier-racecheck" \
+            "${PHASE15_RANKED_PAIR_CLASSIFIER_RACECHECK_LOG}"
+        die "Le racecheck ranked-pair-classifier Phase 15 a échoué."
+    fi
+fi
+
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     begin_unit "phase4-spatial-differential"
     if ! run_container "phase4-spatial-differential" \
@@ -3048,6 +3282,25 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
         --binary "${BUILD_DIR}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE#build/}" \
         --output "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --release-build-log "${PHASE15_RANKED_PAIR_CLASSIFIER_RELEASE_BUILD_LOG}" \
+        --audit-build-log "${PHASE15_RANKED_PAIR_CLASSIFIER_AUDIT_BUILD_LOG}" \
+        --qualification-log "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_LOG}" \
+        --qualification-stderr-log "${PHASE15_RANKED_PAIR_CLASSIFIER_QUALIFICATION_STDERR_LOG}" \
+        --elf-log "${PHASE15_RANKED_PAIR_CLASSIFIER_ELF_LOG}" \
+        --ptx-log "${PHASE15_RANKED_PAIR_CLASSIFIER_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE15_RANKED_PAIR_CLASSIFIER_PTX_STDERR_LOG}" \
+        --memcheck-log "${PHASE15_RANKED_PAIR_CLASSIFIER_MEMCHECK_LOG}" \
+        --racecheck-log "${PHASE15_RANKED_PAIR_CLASSIFIER_RACECHECK_LOG}" \
+        --binary "${BUILD_DIR}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE#build/}" \
+        --output "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}"
+fi
 
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
@@ -3063,7 +3316,9 @@ python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" \
     "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" \
     "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" \
-    "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" <<'PY'
+    "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" \
+    "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" \
+    "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -3114,6 +3369,16 @@ if sys.argv[17] or sys.argv[18]:
         raise SystemExit("incomplete Phase 15 device-frontier 50k publication pair")
     pairs.append(
         (Path(sys.argv[17]), Path(sys.argv[18]), "Phase 15 device-frontier 50k")
+    )
+if sys.argv[19] or sys.argv[20]:
+    if not sys.argv[19] or not sys.argv[20]:
+        raise SystemExit("incomplete Phase 15 ranked-pair-classifier publication pair")
+    pairs.append(
+        (
+            Path(sys.argv[19]),
+            Path(sys.argv[20]),
+            "Phase 15 ranked-pair-classifier",
+        )
     )
 for temporary, _, label in pairs:
     with temporary.open(encoding="utf-8") as stream:
@@ -3181,6 +3446,9 @@ fi
 if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
@@ -3190,6 +3458,7 @@ PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
 PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
+PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
@@ -3224,5 +3493,9 @@ fi
 if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon device-frontier 50k Phase 15 provisoire publié sans remplacement : %s\n' \
         "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon ranked-pair-classifier Phase 15 provisoire publié sans remplacement : %s\n' \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'

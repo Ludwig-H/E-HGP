@@ -2,6 +2,7 @@
 
 #include "phase15_morton_yao48_ranked_pair_tile_classifier_internal.hpp"
 
+#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -115,21 +116,137 @@ make_output(
       strict_count, "the fake strict payload count does not fit size_t");
   const std::size_t shell = checked_size(
       shell_count, "the fake shell payload count does not fit size_t");
-  storage->support_u.resize(records);
-  storage->support_v.resize(records);
-  storage->closed_rank.resize(records, 1U);
+  const std::size_t total_payload = checked_size(
+      checked_sum(
+          strict_count,
+          shell_count,
+          "the fake total payload count overflowed"),
+      "the fake total payload count does not fit size_t");
+  const std::size_t maximum_payload_per_record =
+      request.point_count < 2U
+          ? 0U
+          : std::min(
+                request.fixed_config.maximum_closed_rank - 2U,
+                request.point_count - 2U);
+  const std::size_t maximum_payload =
+      maximum_payload_per_record != 0U &&
+              records > std::numeric_limits<std::size_t>::max() /
+                            maximum_payload_per_record
+          ? std::numeric_limits<std::size_t>::max()
+          : records * maximum_payload_per_record;
+  if (total_payload > maximum_payload) {
+    throw std::invalid_argument(
+        "the fake catalog payload mass cannot match its closed-rank window");
+  }
+
+  struct RecordShape final {
+    std::size_t strict_count{};
+    std::size_t shell_count{};
+  };
+  std::vector<RecordShape> shapes(records);
+  const auto distribute = [&](std::size_t count, bool is_strict) {
+    std::size_t remaining = count;
+    for (auto& shape : shapes) {
+      const std::size_t occupied =
+          shape.strict_count + shape.shell_count;
+      const std::size_t assigned = std::min(
+          remaining, maximum_payload_per_record - occupied);
+      if (is_strict) {
+        shape.strict_count += assigned;
+      } else {
+        shape.shell_count += assigned;
+      }
+      remaining -= assigned;
+    }
+    if (remaining != 0U) {
+      throw std::logic_error(
+          "the fake catalog payload distributor lost capacity");
+    }
+  };
+  distribute(strict, true);
+  distribute(shell, false);
+  std::stable_sort(
+      shapes.begin(),
+      shapes.end(),
+      [](const RecordShape& left, const RecordShape& right) {
+        return left.strict_count + left.shell_count <
+               right.strict_count + right.shell_count;
+      });
+
+  storage->support_u.reserve(records);
+  storage->support_v.reserve(records);
+  storage->closed_rank.reserve(records);
+  storage->strict_offsets.reserve(records + 1U);
+  storage->strict_offsets.push_back(0U);
+  storage->strict_point_ids.reserve(strict);
+  storage->shell_offsets.reserve(records + 1U);
+  storage->shell_offsets.push_back(0U);
+  storage->shell_point_ids.reserve(shell);
+
+  std::size_t support_u = 0U;
+  std::size_t support_v = 1U;
+  for (const auto& shape : shapes) {
+    if (support_u >= request.point_count ||
+        support_v >= request.point_count) {
+      throw std::invalid_argument(
+          "the fake catalog contains more records than support pairs");
+    }
+    storage->support_u.push_back(static_cast<std::uint64_t>(support_u));
+    storage->support_v.push_back(static_cast<std::uint64_t>(support_v));
+    const std::size_t payload_count =
+        shape.strict_count + shape.shell_count;
+    storage->closed_rank.push_back(
+        static_cast<std::uint8_t>(payload_count + 2U));
+
+    std::size_t selected = 0U;
+    for (std::size_t point_id = 0U;
+         point_id < request.point_count && selected < payload_count;
+         ++point_id) {
+      if (point_id == support_u || point_id == support_v) {
+        continue;
+      }
+      if (selected < shape.strict_count) {
+        storage->strict_point_ids.push_back(
+            static_cast<std::uint64_t>(point_id));
+      } else {
+        storage->shell_point_ids.push_back(
+            static_cast<std::uint64_t>(point_id));
+      }
+      ++selected;
+    }
+    if (selected != payload_count) {
+      throw std::logic_error(
+          "the fake catalog could not assign distinct non-support points");
+    }
+    storage->strict_offsets.push_back(
+        static_cast<std::uint64_t>(storage->strict_point_ids.size()));
+    storage->shell_offsets.push_back(
+        static_cast<std::uint64_t>(storage->shell_point_ids.size()));
+
+    ++support_v;
+    if (support_v == request.point_count) {
+      ++support_u;
+      support_v = support_u + 1U;
+    }
+  }
+  if (storage->strict_point_ids.size() != strict ||
+      storage->shell_point_ids.size() != shell) {
+    throw std::logic_error(
+        "the fake catalog payload totals do not match their transcript");
+  }
+
   storage->rank_offsets.resize(
-      request.fixed_config.maximum_closed_rank + 2U,
-      static_cast<std::uint64_t>(records));
-  storage->strict_offsets.resize(records + 1U);
-  storage->strict_point_ids.resize(strict);
-  storage->shell_offsets.resize(records + 1U);
-  storage->shell_point_ids.resize(shell);
-  for (std::size_t index = 0U; index < records; ++index) {
-    storage->support_u[index] = static_cast<std::uint64_t>(index);
-    storage->support_v[index] = static_cast<std::uint64_t>(index + 1U);
-    storage->closed_rank[index] = static_cast<std::uint8_t>(
-        1U + index % request.fixed_config.maximum_closed_rank);
+      request.fixed_config.maximum_closed_rank + 2U);
+  std::size_t rank_cursor = 0U;
+  for (std::size_t rank = 0U;
+       rank <= request.fixed_config.maximum_closed_rank + 1U;
+       ++rank) {
+    while (rank_cursor < records &&
+           storage->closed_rank[rank_cursor] < rank) {
+      ++rank_cursor;
+    }
+    storage->rank_offsets[rank] =
+        static_cast<std::uint64_t>(rank_cursor);
   }
   context.replace_launcher_state(storage);
 
@@ -214,6 +331,38 @@ void apply_corruption(
     case Corruption::malformed_output_layout:
       ++receipt.output.record_offset_count;
       return;
+    case Corruption::invalid_closed_rank:
+      if (receipt.output.catalog_record_count != 0U) {
+        const_cast<std::uint8_t*>(receipt.output.closed_rank)[0U] = 1U;
+      }
+      return;
+    case Corruption::unsorted_record_order:
+      if (receipt.output.catalog_record_count > 1U) {
+        std::swap(
+            const_cast<std::uint64_t*>(receipt.output.support_v)[0U],
+            const_cast<std::uint64_t*>(receipt.output.support_v)[1U]);
+      }
+      return;
+    case Corruption::invalid_rank_offsets:
+      if (receipt.output.rank_offset_count != 0U) {
+        const_cast<std::uint64_t*>(receipt.output.rank_offsets)[0U] = 1U;
+      }
+      return;
+    case Corruption::invalid_payload_offsets:
+      if (receipt.output.record_offset_count != 0U) {
+        ++const_cast<std::uint64_t*>(receipt.output.strict_offsets)
+              [receipt.output.catalog_record_count];
+      }
+      return;
+    case Corruption::invalid_payload_point_id:
+      if (receipt.output.strict_point_id_count != 0U) {
+        const_cast<std::uint64_t*>(receipt.output.strict_point_ids)[0U] =
+            receipt.point_count;
+      } else if (receipt.output.shell_point_id_count != 0U) {
+        const_cast<std::uint64_t*>(receipt.output.shell_point_ids)[0U] =
+            receipt.point_count;
+      }
+      return;
   }
 }
 
@@ -258,9 +407,12 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       request.chunk_sequence == 0U ||
       launch.exact_fallback_count > request.candidate_count ||
       checked_sum(
-          launch.accepted_record_count,
-          launch.above_window_count,
-          "the fake transaction candidate partition overflowed") !=
+          checked_sum(
+              launch.accepted_record_count,
+              launch.above_window_count,
+              "the fake classified candidate partition overflowed"),
+          launch.exact_fallback_count,
+          "the fake fallback candidate partition overflowed") !=
           request.candidate_count) {
     throw std::invalid_argument(
         "the fake resident ranked-pair classifier received malformed "
@@ -336,7 +488,8 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       "the fake required fallback count overflowed");
 
   if (launch.capacity_stop_reason ==
-      MortonYao48RankedPairTileClassifierStopReason::none) {
+          MortonYao48RankedPairTileClassifierStopReason::none &&
+      launch.exact_fallback_count == 0U) {
     receipt.status = static_cast<std::uint64_t>(
         request.frontier_closed_after_chunk
             ? MortonYao48RankedPairTileClassifierStatus::frontier_closed
@@ -381,13 +534,36 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
         receipt.cumulative_strict_payload_point_id_count,
         receipt.cumulative_shell_payload_point_id_count);
   } else {
+    const bool exact_predicate_failure =
+        launch.capacity_stop_reason ==
+            MortonYao48RankedPairTileClassifierStopReason::none &&
+        launch.exact_fallback_count != 0U;
     receipt.status = static_cast<std::uint64_t>(
-        MortonYao48RankedPairTileClassifierStatus::capacity_exhausted);
-    receipt.stop_reason =
-        static_cast<std::uint64_t>(launch.capacity_stop_reason);
+        exact_predicate_failure
+            ? MortonYao48RankedPairTileClassifierStatus::
+                  exact_predicate_failure
+            : MortonYao48RankedPairTileClassifierStatus::capacity_exhausted);
+    receipt.stop_reason = static_cast<std::uint64_t>(
+        exact_predicate_failure
+            ? MortonYao48RankedPairTileClassifierStopReason::
+                  exact_predicate_failure
+            : launch.capacity_stop_reason);
     receipt.failure_code = static_cast<std::uint64_t>(
-        Phase15MortonYao48RankedPairTileClassifierFailureCode::
-            capacity_exhausted);
+        exact_predicate_failure
+            ? Phase15MortonYao48RankedPairTileClassifierFailureCode::
+                  exact_predicate_failure
+            : Phase15MortonYao48RankedPairTileClassifierFailureCode::
+                  capacity_exhausted);
+    receipt.transaction_exact_fallback_count =
+        launch.exact_fallback_count;
+    if (exact_predicate_failure) {
+      receipt.required_catalog_record_count =
+          request.prior_accepted_record_count;
+      receipt.required_payload_point_id_count = checked_sum(
+          request.prior_strict_payload_point_id_count,
+          request.prior_shell_payload_point_id_count,
+          "the fake prior payload count overflowed");
+    }
     receipt.transaction_unresolved_count = request.candidate_count;
     receipt.cumulative_candidate_count = checked_sum(
         request.prior_candidate_count,
@@ -406,7 +582,7 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
     receipt.cumulative_shell_payload_point_id_count =
         request.prior_shell_payload_point_id_count;
     receipt.cumulative_exact_fallback_count =
-        request.prior_exact_fallback_count;
+        receipt.required_exact_fallback_count;
     receipt.output_invalidated = true;
     context.replace_launcher_state({});
   }

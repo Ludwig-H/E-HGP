@@ -253,6 +253,8 @@ struct Phase15MortonYao48DeviceCandidateTilePrivateViews {
   const void* retained_authority_identity{};
   const void* source_owner_identity{};
   const void* source_cloud_identity{};
+  std::shared_ptr<void> source_owner_authority;
+  std::shared_ptr<const void> source_cloud_identity_authority;
   const std::uint64_t* device_coordinate_bits{};
   const std::uint64_t* device_morton_point_ids{};
   const void* device_nodes{};

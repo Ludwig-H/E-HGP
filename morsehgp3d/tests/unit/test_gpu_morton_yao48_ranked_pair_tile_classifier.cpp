@@ -4,6 +4,7 @@
 
 #include "morsehgp3d/gpu/morton_yao48_device_tiled_pair_frontier.hpp"
 #include "morsehgp3d/gpu/morton_yao48_ranked_pair_tile_classifier.hpp"
+#include "phase15_morton_yao48_ranked_pair_tile_classifier_internal.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
@@ -31,6 +32,8 @@ using morsehgp3d::gpu::MortonYao48RankedPairTileCatalogLease;
 using morsehgp3d::gpu::MortonYao48RankedPairTileClassifierConfig;
 using morsehgp3d::gpu::MortonYao48RankedPairTileClassifierContext;
 using morsehgp3d::gpu::MortonYao48RankedPairTileClassifierStatus;
+using morsehgp3d::gpu::detail::
+    Phase15MortonYao48RankedPairTileCatalogPrivateViewAccess;
 using morsehgp3d::gpu::MortonYao48RankedPairTileClassifierStopReason;
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledAnchor;
@@ -189,7 +192,7 @@ void test_two_chunk_exact_closure_and_lease_lifetime() {
   auto traversal = traversal_lease(642U);
   MortonYao48DeviceTiledPairFrontierContext frontier{
       std::move(traversal),
-      MortonYao48DeviceTiledPairFrontierConfig{2U, 641U}};
+      MortonYao48DeviceTiledPairFrontierConfig{3U, 641U}};
   auto first_anchors = complete_prefix_by_prune(640U);
   first_anchors.push_back(candidate_chunk());
   std::vector<FakeMortonYao48DeviceTiledAnchor> second_anchors(
@@ -201,10 +204,10 @@ void test_two_chunk_exact_closure_and_lease_lifetime() {
       {std::move(second_anchors),
        FakeMortonYao48DeviceTiledPairFrontierCorruption::none}});
   configure_classifier_transcripts({
-      exact_launch(400U, 240U, 500U, 200U, 2U),
-      exact_launch(1U, 0U, 1U, 1U)});
+      exact_launch(400U, 240U, 300U, 100U),
+      exact_launch(1U, 0U, 0U, 1U)});
   MortonYao48RankedPairTileClassifierContext classifier{
-      MortonYao48RankedPairTileClassifierConfig{2U, 401U, 702U, 2U}};
+      MortonYao48RankedPairTileClassifierConfig{3U, 401U, 401U, 2U}};
 
   auto first = frontier.advance();
   auto first_commit = classifier.commit(std::move(first));
@@ -240,17 +243,39 @@ void test_two_chunk_exact_closure_and_lease_lifetime() {
           second_commit.audit.unordered_pair_universe_count == 205'761U,
       "the resumed chunk authenticates the exact global closure");
   auto catalog = classifier.finish();
+  const auto private_views =
+      Phase15MortonYao48RankedPairTileCatalogPrivateViewAccess::inspect(
+          catalog);
   check(
       catalog.ready() && catalog.host_fake() &&
           catalog.audit().closed_rank_catalog_complete &&
+          catalog.audit().source_owner_retained &&
+          catalog.audit().source_cloud_identity_retained &&
+          !catalog.audit().source_device_coordinates_retained &&
           catalog.audit().catalog_record_count == 401U &&
           catalog.audit().candidate_count == 641U &&
           catalog.audit().above_window_count == 240U &&
           catalog.audit().certified_pruned_pair_mass == 205'120U &&
           catalog.audit().unordered_pair_universe_count == 205'761U &&
-          catalog.audit().committed_chunk_count == 2U,
+          catalog.audit().committed_chunk_count == 2U &&
+          private_views.ready && private_views.host_fake &&
+          private_views.output_owner &&
+          private_views.source_owner_authority &&
+          private_views.source_cloud_identity_authority &&
+          private_views.device_coordinate_bits == nullptr &&
+          private_views.rank_offset_count == 5U &&
+          private_views.device_rank_offsets[0U] == 0U &&
+          private_views.device_rank_offsets[1U] == 0U &&
+          private_views.device_rank_offsets[2U] == 0U &&
+          private_views.device_rank_offsets[3U] == 0U &&
+          private_views.device_rank_offsets[4U] == 401U &&
+          private_views.device_closed_rank[0U] == 3U &&
+          private_views.device_closed_rank[400U] == 3U &&
+          private_views.device_strict_offsets[401U] == 300U &&
+          private_views.device_shell_offsets[401U] == 101U,
       "finish publishes the resident catalog only after full frontier "
-      "closure");
+      "closure while retaining the source authority needed to derive exact "
+      "levels");
 }
 
 void test_vacuous_frontier_closes_without_candidate_lease() {
@@ -278,6 +303,9 @@ void test_vacuous_frontier_closes_without_candidate_lease() {
   auto catalog = classifier.finish();
   check(
       catalog.ready() && !catalog.host_fake() && !catalog.cuda_resident() &&
+          !catalog.audit().source_owner_retained &&
+          !catalog.audit().source_cloud_identity_retained &&
+          !catalog.audit().source_device_coordinates_retained &&
           catalog.audit().catalog_record_count == 0U &&
           catalog.audit().unordered_pair_universe_count == 0U,
       "the no-lease closure publishes a vacuous catalog authority");
@@ -295,7 +323,11 @@ void test_all_linear_capacities_fail_closed() {
     auto traversal = traversal_lease(3U);
     MortonYao48DeviceTiledPairFrontierContext frontier{
         std::move(traversal)};
-    auto launch = exact_launch(3U, 0U, 2U, 2U, 2U);
+    auto launch =
+        reason == MortonYao48RankedPairTileClassifierStopReason::
+                      exact_fallback_capacity
+            ? exact_launch(0U, 1U, 0U, 0U, 2U)
+            : exact_launch(3U, 0U, 2U, 2U);
     launch.capacity_stop_reason = reason;
     configure_classifier_transcripts({launch});
     MortonYao48RankedPairTileClassifierContext classifier{
@@ -318,6 +350,36 @@ void test_all_linear_capacities_fail_closed() {
   }
 }
 
+void test_unconsumed_exact_fallback_fails_closed_without_poisoning() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  reset_fake_gpu_morton_yao48_ranked_pair_tile_classifier();
+  auto traversal = traversal_lease(3U);
+  MortonYao48DeviceTiledPairFrontierContext frontier{std::move(traversal)};
+  configure_classifier_transcripts({exact_launch(0U, 1U, 0U, 0U, 2U)});
+  MortonYao48RankedPairTileClassifierContext classifier{
+      MortonYao48RankedPairTileClassifierConfig{2U, 3U, 2U, 2U}};
+
+  auto advance = frontier.advance();
+  const auto commit = classifier.commit(std::move(advance));
+  check(
+      commit.status ==
+              MortonYao48RankedPairTileClassifierStatus::
+                  exact_predicate_failure &&
+          commit.stop_reason ==
+              MortonYao48RankedPairTileClassifierStopReason::
+                  exact_predicate_failure &&
+          commit.audit.transaction_exact_fallback_count == 2U &&
+          commit.audit.cumulative_exact_fallback_count == 2U &&
+          commit.audit.transaction_unresolved_count == 3U &&
+          commit.audit.output_withheld && classifier.terminally_censored() &&
+          !classifier.poisoned() && !classifier.ready(),
+      "an exact fixed-limb fallback requirement is authenticated and "
+      "withheld without being misclassified as receipt corruption");
+  check_throws<std::logic_error>(
+      [&classifier] { (void)classifier.finish(); },
+      "an unconsumed exact fallback cannot publish a partial catalog");
+}
+
 void test_corrupt_receipts_poison_without_committing() {
   const std::vector<FakeMortonYao48RankedPairTileClassifierCorruption>
       corruptions{
@@ -337,18 +399,29 @@ void test_corrupt_receipts_poison_without_committing() {
               callback_per_pair,
           FakeMortonYao48RankedPairTileClassifierCorruption::dense_pair_scan,
           FakeMortonYao48RankedPairTileClassifierCorruption::
-              missing_output_owner};
+              missing_output_owner,
+          FakeMortonYao48RankedPairTileClassifierCorruption::
+              invalid_closed_rank,
+          FakeMortonYao48RankedPairTileClassifierCorruption::
+              unsorted_record_order,
+          FakeMortonYao48RankedPairTileClassifierCorruption::
+              invalid_rank_offsets,
+          FakeMortonYao48RankedPairTileClassifierCorruption::
+              invalid_payload_offsets,
+          FakeMortonYao48RankedPairTileClassifierCorruption::
+              invalid_payload_point_id};
   for (const auto corruption : corruptions) {
     reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
     reset_fake_gpu_morton_yao48_ranked_pair_tile_classifier();
     auto traversal = traversal_lease(3U);
     MortonYao48DeviceTiledPairFrontierContext frontier{
-        std::move(traversal)};
-    auto launch = exact_launch(3U, 0U, 0U, 0U);
+        std::move(traversal),
+        MortonYao48DeviceTiledPairFrontierConfig{3U, 4096U}};
+    auto launch = exact_launch(3U, 0U, 1U, 0U);
     launch.corruption = corruption;
     configure_classifier_transcripts({launch});
     MortonYao48RankedPairTileClassifierContext classifier{
-        MortonYao48RankedPairTileClassifierConfig{2U, 3U, 0U, 0U}};
+        MortonYao48RankedPairTileClassifierConfig{3U, 3U, 1U, 0U}};
     auto advance = frontier.advance();
     check_throws<std::runtime_error>(
         [&classifier, &advance] {
@@ -362,6 +435,30 @@ void test_corrupt_receipts_poison_without_committing() {
         "receipt corruption poisons the context without committing "
         "frontier closure");
   }
+}
+
+void test_impossible_host_fake_payload_mass_poisoned() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  reset_fake_gpu_morton_yao48_ranked_pair_tile_classifier();
+  auto traversal = traversal_lease(3U);
+  MortonYao48DeviceTiledPairFrontierContext frontier{
+      std::move(traversal),
+      MortonYao48DeviceTiledPairFrontierConfig{3U, 4096U}};
+  configure_classifier_transcripts({exact_launch(3U, 0U, 2U, 2U)});
+  MortonYao48RankedPairTileClassifierContext classifier{
+      MortonYao48RankedPairTileClassifierConfig{3U, 3U, 4U, 0U}};
+  auto advance = frontier.advance();
+  check_throws<std::invalid_argument>(
+      [&classifier, &advance] {
+        (void)classifier.commit(std::move(advance));
+      },
+      "a host-fake transcript cannot assign more than rank minus two "
+      "non-support points per record");
+  check(
+      classifier.poisoned() && !classifier.ready() &&
+          !classifier.frontier_closed(),
+      "an impossible host-fake payload mass poisons the context before "
+      "authority publication");
 }
 
 void test_rank_window_preflight() {
@@ -385,7 +482,9 @@ int main() {
   test_two_chunk_exact_closure_and_lease_lifetime();
   test_vacuous_frontier_closes_without_candidate_lease();
   test_all_linear_capacities_fail_closed();
+  test_unconsumed_exact_fallback_fails_closed_without_poisoning();
   test_corrupt_receipts_poison_without_committing();
+  test_impossible_host_fake_payload_mass_poisoned();
   test_rank_window_preflight();
   if (failures != 0) {
     std::cerr << failures

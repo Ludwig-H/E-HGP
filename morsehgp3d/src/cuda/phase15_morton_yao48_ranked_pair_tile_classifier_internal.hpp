@@ -15,6 +15,40 @@
 
 namespace morsehgp3d::gpu::detail {
 
+struct Phase15MortonYao48RankedPairTileCatalogPrivateViews {
+  std::shared_ptr<void> output_owner;
+  std::shared_ptr<void> source_owner_authority;
+  std::shared_ptr<const void> source_cloud_identity_authority;
+  const std::uint64_t* device_coordinate_bits{};
+  const std::uint64_t* device_support_u{};
+  const std::uint64_t* device_support_v{};
+  const std::uint8_t* device_closed_rank{};
+  const std::uint64_t* device_rank_offsets{};
+  const std::uint64_t* device_strict_offsets{};
+  const std::uint64_t* device_strict_point_ids{};
+  const std::uint64_t* device_shell_offsets{};
+  const std::uint64_t* device_shell_point_ids{};
+  std::size_t point_count{};
+  std::size_t catalog_record_count{};
+  std::size_t strict_point_id_count{};
+  std::size_t shell_point_id_count{};
+  std::size_t rank_offset_count{};
+  std::size_t record_offset_count{};
+  int cuda_device{-1};
+  bool host_fake{false};
+  bool ready{false};
+};
+
+// Explicit internal capability for a resident downstream stage or a native
+// qualification executable.  The public lease deliberately exposes no raw
+// device address and therefore cannot create an accidental output D2H API.
+class Phase15MortonYao48RankedPairTileCatalogPrivateViewAccess final {
+ public:
+  [[nodiscard]] static
+      Phase15MortonYao48RankedPairTileCatalogPrivateViews inspect(
+          const MortonYao48RankedPairTileCatalogLease& lease) noexcept;
+};
+
 enum class Phase15MortonYao48RankedPairTileClassifierExecutionKind
     : std::uint64_t {
   host_fake = 0U,

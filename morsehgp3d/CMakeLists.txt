@@ -2379,6 +2379,48 @@ else()
   )
 endif()
 
+# Terminal rank-2/3 pair-catalog wrapper.  It owns the full frontier drain and
+# publishes only after closed global mass and zero unresolved/fallback counts.
+# Capacities are fixed factors of the source point count; this target neither
+# materializes a dense pair arena nor claims Gamma_2, K=2, a hierarchy, or an
+# end-to-end latency bound.
+add_library(
+  morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+  STATIC
+    include/morsehgp3d/gpu/exact_closed_rank23_pair_terminal_catalog.hpp
+    src/gpu/exact_closed_rank23_pair_terminal_catalog.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+  ALIAS
+    morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+  PUBLIC
+    morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Standalone Phase 15 radial-subtree filter contract.  It is intentionally
 # not wired into the product frontier: CUDA proposes only the conservative
 # minDist_down >= max(3*D_up) range cut and exact CPU replay is mandatory.
@@ -3256,6 +3298,84 @@ if(MORSEHGP3D_ENABLE_CUDA)
         $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+    src/tools/gpu_morton_yao48_ranked_pair_tile_classifier_qualification.cpp
+  )
+  target_include_directories(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+    PRIVATE
+      morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier
+      morsehgp3d::exact_ranked_diametral_pair_catalog_reference
+      CUDA::cudart
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+    PRIVATE cxx_std_20
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+    PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+      PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Werror
+    )
+  endif()
+
+  add_library(
+    morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog
+    STATIC
+      include/morsehgp3d/gpu/exact_closed_rank23_pair_terminal_catalog.hpp
+      src/gpu/exact_closed_rank23_pair_terminal_catalog.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_exact_closed_rank23_pair_terminal_catalog
+    ALIAS morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog
+  )
+  target_include_directories(
+    morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog
+    PUBLIC morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification
+    PRIVATE morsehgp3d::gpu_exact_closed_rank23_pair_terminal_catalog
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog PUBLIC cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
 

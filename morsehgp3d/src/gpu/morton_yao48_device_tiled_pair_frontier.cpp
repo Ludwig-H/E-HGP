@@ -952,6 +952,9 @@ detail::Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
   views.source_owner_identity = lease.source_owner_authority_.get();
   views.source_cloud_identity =
       lease.source_cloud_identity_authority_.get();
+  views.source_owner_authority = lease.source_owner_authority_;
+  views.source_cloud_identity_authority =
+      lease.source_cloud_identity_authority_;
   views.device_coordinate_bits = lease.device_coordinate_bits_;
   views.device_morton_point_ids = lease.device_morton_point_ids_;
   views.device_nodes = lease.device_nodes_;
