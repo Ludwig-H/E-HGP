@@ -204,7 +204,86 @@ def report_v5(
     return value
 
 
-def campaign() -> list[dict[str, object]]:
+def report_v6(
+    family: str,
+    seed_base: int,
+    measured_e2e: list[int],
+) -> dict[str, object]:
+    value = report_v5(family, seed_base, measured_e2e)
+    value.update(
+        {
+            "schema": (
+                "morsehgp3d.phase15."
+                "point_mst_mutual_reachability_surrogate.v6"
+            ),
+            "result_kind": "point_mst_mutual_reachability_surrogate_benchmark",
+            "profile": "point_mst_mutual_reachability_surrogate",
+            "mode": (
+                "warm_fresh_cloud_lbvh_top10_capped_component_bridges_"
+                "parallel_point_h0_surrogate"
+            ),
+            "deployment_status": "diagnostic_surrogate_only",
+            "public_status": "not_a_morse_hgp_product_result",
+            "surrogate_pipeline_complete": True,
+            "point_vertex_universe_only": True,
+            "ten_point_spanning_tree_surrogates_materialized": True,
+            "morse_hgp_simplex_components_materialized": False,
+            "true_hgp_campaign_eligible": False,
+            "slo": {
+                "point_count": 50_000,
+                "threshold_ns": 100_000_000,
+                "statistic": "true_morse_hgp_p95_end_to_end",
+                "scope": "true_morse_hgp_hierarchy",
+                "applicable": False,
+                "passed": None,
+                "reason": (
+                    "point_tree_surrogate_does_not_materialize_"
+                    "morse_hgp_simplex_components"
+                ),
+            },
+            "result": "surrogate_benchmark_completed",
+        }
+    )
+    value.pop("full_pipeline")
+    value.pop("ten_hierarchies_materialized")
+    for raw_run in value["runs"]:
+        raw_run["point_spanning_tree_surrogates"] = [
+            {
+                "neighbor_rank": tree["order"],
+                "edge_count": tree["merge_record_count"],
+                "digest": tree["digest"],
+                "root_squared_level": tree["root_squared_level"],
+            }
+            for tree in raw_run.pop("hierarchies")
+        ]
+        for legacy, honest in (
+            (
+                "materialized_merge_record_count",
+                "materialized_surrogate_edge_record_count",
+            ),
+            (
+                "released_merge_record_count",
+                "released_surrogate_edge_record_count",
+            ),
+            (
+                "retained_merge_record_count",
+                "retained_surrogate_edge_record_count",
+            ),
+            (
+                "merge_records_released_after_digest_and_export",
+                "surrogate_edge_records_released_after_digest_and_export",
+            ),
+            ("exported_order_count", "exported_surrogate_order_count"),
+            (
+                "exported_merge_record_count",
+                "exported_surrogate_edge_record_count",
+            ),
+        ):
+            raw_run[honest] = raw_run.pop(legacy)
+    return value
+
+
+def legacy_campaign_v4() -> list[dict[str, object]]:
     return [
         report(
             EXPECTED_FAMILIES[0], 100, list(range(65_000_000, 75_000_000, 1_000_000))
@@ -232,6 +311,20 @@ def campaign_v5() -> list[dict[str, object]]:
     ]
 
 
+def campaign() -> list[dict[str, object]]:
+    return [
+        report_v6(
+            EXPECTED_FAMILIES[0], 100, list(range(65_000_000, 75_000_000, 1_000_000))
+        ),
+        report_v6(
+            EXPECTED_FAMILIES[1], 200, list(range(75_000_000, 85_000_000, 1_000_000))
+        ),
+        report_v6(
+            EXPECTED_FAMILIES[2], 300, list(range(85_000_000, 95_000_000, 1_000_000))
+        ),
+    ]
+
+
 def validate(values: list[dict[str, object]]) -> dict[str, object]:
     return validate_campaign(
         values,
@@ -245,8 +338,10 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
         summary = validate(campaign())
         self.assertEqual(summary["measurement_count"], 30)
         self.assertEqual(summary["distinct_measured_seed_count"], 30)
-        self.assertEqual(summary["hierarchy_count_per_measurement"], 10)
-        self.assertEqual(summary["merge_record_count_per_hierarchy"], 49_999)
+        self.assertEqual(
+            summary["point_spanning_tree_surrogate_count_per_measurement"], 10
+        )
+        self.assertEqual(summary["edge_record_count_per_surrogate"], 49_999)
         self.assertEqual(
             summary["aggregate_nearest_rank_warm_e2e_ns"],
             {
@@ -256,7 +351,9 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 "max": 94_000_000,
             },
         )
-        self.assertIs(summary["all_measurements_strictly_below_threshold"], True)
+        self.assertIs(
+            summary["all_measurements_below_historical_100ms_reference"], True
+        )
         self.assertEqual(
             summary["timing_scope"]["input_boundary"],
             "raw_in_memory_coordinates",
@@ -287,7 +384,7 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
         )
         self.assertEqual(
             summary["runner_contract"]["mode"],
-            "warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0",
+            "warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_point_h0_surrogate",
         )
         self.assertEqual(
             summary["runner_contract"]["component_bridge_neighbor_count"],
@@ -295,13 +392,18 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
         )
         self.assertEqual(
             summary["runner_contract"]["component_bridge_policy"],
-            "top10_components_centroid_knn_top8_projection_cross_min",
+            "top10_components_capped_centroid_knn_top8_projection_cross_min",
         )
         self.assertEqual(
-            summary["content_evidence"]["globally_distinct_hierarchy_digest_count"],
+            summary["content_evidence"][
+                "globally_distinct_surrogate_tree_digest_count"
+            ],
             360,
         )
-        self.assertIs(summary["content_evidence"]["merge_records_replayed"], False)
+        self.assertIs(
+            summary["content_evidence"]["surrogate_edge_records_replayed"],
+            False,
+        )
         self.assertEqual(
             summary["input_artifact_sha256"],
             dict(zip(EXPECTED_FAMILIES, INPUT_SHA256, strict=True)),
@@ -319,20 +421,30 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
             RUNNER_BINARY_SIZE_BYTES,
         )
         self.assertEqual(
-            summary["schema"], "morsehgp3d.phase15.guarded_industrial_50k_check.v4"
+            summary["schema"],
+            "morsehgp3d.phase15.point_mst_mutual_reachability_surrogate_50k_audit.v6",
         )
-        self.assertNotIn("export_maximum_order", summary["runner_contract"])
-        self.assertNotIn(
-            "merge_records_released_after_digest_and_export",
-            summary["content_evidence"],
+        self.assertEqual(summary["runner_contract"]["export_maximum_order"], 2)
+        self.assertEqual(
+            summary["scope"]["public_status"],
+            "not_a_morse_hgp_product_result",
         )
-        self.assertEqual(summary["scope"]["public_status"], "not_claimed")
         self.assertIs(summary["scope"]["exact_morse_hierarchy_claimed"], False)
+        self.assertIs(summary["scope"]["true_hgp_campaign_eligible"], False)
+        self.assertIs(summary["slo"]["applicable"], False)
+        self.assertIsNone(summary["slo"]["passed"])
+        self.assertEqual(summary["result"], "surrogate_audit_validated")
 
     def test_valid_v5_campaign_binds_bounded_telemetry_and_release(self) -> None:
-        summary = validate(campaign_v5())
+        summary = validate_campaign(
+            campaign_v5(),
+            expected_git_sha=GIT_SHA,
+            input_artifact_sha256=INPUT_SHA256,
+            legacy_surrogate_audit=True,
+        )
         self.assertEqual(
-            summary["schema"], "morsehgp3d.phase15.guarded_industrial_50k_check.v5"
+            summary["schema"],
+            "morsehgp3d.phase15.legacy_point_tree_surrogate_artifact_audit.v1",
         )
         contract = summary["runner_contract"]
         self.assertEqual(
@@ -350,10 +462,11 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
         )
         self.assertIs(
             summary["content_evidence"][
-                "merge_records_released_after_digest_and_export"
+                "surrogate_edge_records_released_after_digest_and_export"
             ],
             True,
         )
+        self.assertEqual(summary["result"], "legacy_surrogate_artifact_audited")
 
     def test_v5_bounded_telemetry_and_release_fail_closed(self) -> None:
         mutations = (
@@ -426,15 +539,27 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 changed = copy.deepcopy(baseline)
                 changed["runs"][2].update(mutation)
                 with self.assertRaisesRegex(IndustrialCampaignError, message):
-                    validate_report(changed)
+                    validate_report(changed, legacy_surrogate_audit=True)
+
+    def test_legacy_v4_v5_require_explicit_surrogate_audit_mode(self) -> None:
+        with self.assertRaisesRegex(
+            IndustrialCampaignError, "explicit legacy-surrogate audit mode"
+        ):
+            validate_report(campaign_v5()[0])
+        validate_report(campaign_v5()[0], legacy_surrogate_audit=True)
 
     def test_campaign_rejects_mixed_v4_and_v5_reports(self) -> None:
         changed = campaign_v5()
-        changed[0] = campaign()[0]
+        changed[0] = legacy_campaign_v4()[0]
         with self.assertRaisesRegex(
             IndustrialCampaignError, "share one runner report schema"
         ):
-            validate(changed)
+            validate_campaign(
+                changed,
+                expected_git_sha=GIT_SHA,
+                input_artifact_sha256=INPUT_SHA256,
+                legacy_surrogate_audit=True,
+            )
 
     def test_synthetic_generation_is_excluded_from_raw_input_timing(self) -> None:
         baseline = validate(campaign())
@@ -473,6 +598,28 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
     def test_report_fails_closed_on_pipeline_mutations(self) -> None:
         mutations = (
             (
+                "legacy HGP profile",
+                lambda value: value.update({"profile": "hgp_reduced"}),
+                "profile",
+            ),
+            (
+                "exact Morse hierarchy claim",
+                lambda value: value.update({"exact_morse_hierarchy_claimed": True}),
+                "exact_morse_hierarchy_claimed",
+            ),
+            (
+                "true HGP eligibility claim",
+                lambda value: value.update({"true_hgp_campaign_eligible": True}),
+                "true_hgp_campaign_eligible",
+            ),
+            (
+                "true HGP SLO applicability claim",
+                lambda value: value["slo"].update(
+                    {"applicable": True, "passed": True}
+                ),
+                "slo.applicable",
+            ),
+            (
                 "stage sum",
                 lambda value: value["runs"][2]["timings_ns"].update(
                     {"lbvh": 90_000_000}
@@ -480,23 +627,20 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 "timed canonicalization/stage sum",
             ),
             (
-                "strict threshold",
-                lambda value: value["runs"][2]["timings_ns"].update(
-                    {"warm_e2e": 100_000_000}
-                ),
-                "strictly below",
+                "surrogate tree count",
+                lambda value: value["runs"][2][
+                    "point_spanning_tree_surrogates"
+                ].pop(),
+                "exactly 10 point-tree surrogates",
             ),
             (
-                "hierarchy count",
-                lambda value: value["runs"][2]["hierarchies"].pop(),
-                "exactly 10 hierarchies",
-            ),
-            (
-                "merge count",
-                lambda value: value["runs"][2]["hierarchies"][0].update(
-                    {"merge_record_count": 49_998}
+                "surrogate edge count",
+                lambda value: value["runs"][2][
+                    "point_spanning_tree_surrogates"
+                ][0].update(
+                    {"edge_count": 49_998}
                 ),
-                "merge_record_count",
+                "edge_count",
             ),
             (
                 "published p95",
@@ -545,11 +689,17 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 "mode",
             ),
             (
-                "duplicate hierarchy digest",
-                lambda value: value["runs"][2]["hierarchies"][1].update(
-                    {"digest": value["runs"][2]["hierarchies"][0]["digest"]}
+                "duplicate surrogate digest",
+                lambda value: value["runs"][2][
+                    "point_spanning_tree_surrogates"
+                ][1].update(
+                    {
+                        "digest": value["runs"][2][
+                            "point_spanning_tree_surrogates"
+                        ][0]["digest"]
+                    }
                 ),
-                "distinct hierarchy digest",
+                "distinct surrogate digest",
             ),
             (
                 "runner binary SHA",
@@ -575,12 +725,32 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 with self.assertRaisesRegex(IndustrialCampaignError, message):
                     validate_report(changed)
 
+    def test_surrogate_timing_never_qualifies_true_hgp_slo(self) -> None:
+        values = campaign()
+        for offset, value in enumerate(values):
+            measured = [150_000_000 + offset * 10_000_000 + index for index in range(10)]
+            for index, timing in enumerate(measured, start=2):
+                value["runs"][index]["timings_ns"]["warm_e2e"] = timing
+            value["nearest_rank_warm_e2e_ns"] = {
+                "p50": nearest_rank(measured, 50),
+                "p95": nearest_rank(measured, 95),
+                "p99": nearest_rank(measured, 99),
+            }
+        summary = validate(values)
+        self.assertGreater(summary["aggregate_nearest_rank_warm_e2e_ns"]["p95"], 100_000_000)
+        self.assertIs(summary["slo"]["applicable"], False)
+        self.assertIsNone(summary["slo"]["passed"])
+        self.assertIs(summary["scope"]["true_hgp_campaign_eligible"], False)
+
     def test_component_bridge_invariants_fail_closed(self) -> None:
         connected = campaign()[0]
         for run in connected["runs"]:
             run["top_k_component_count"] = 1
             run["component_bridge_pair_count"] = 0
             run["component_bridge_support_evaluation_count"] = 0
+            run["component_bridge_centroid_distance_evaluation_count"] = 0
+            run["component_bridge_member_projection_evaluation_count"] = 0
+            run["component_bridge_cross_distance_evaluation_count"] = 0
         validate_report(connected)
 
         mutations = (
@@ -597,7 +767,7 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
             (
                 "insufficient support orientations",
                 {"component_bridge_support_evaluation_count": 5},
-                "cover both projection scans",
+                "projection plus cross-distance",
             ),
             (
                 "connected graph with bridge work",
@@ -605,6 +775,9 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                     "top_k_component_count": 1,
                     "component_bridge_pair_count": 1,
                     "component_bridge_support_evaluation_count": 2,
+                    "component_bridge_centroid_distance_evaluation_count": 0,
+                    "component_bridge_member_projection_evaluation_count": 1,
+                    "component_bridge_cross_distance_evaluation_count": 1,
                 },
                 "must not evaluate component bridges",
             ),
@@ -675,9 +848,9 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 input_artifact_sha256=("1" * 64, "1" * 64, "3" * 64),
             )
         changed = campaign()
-        changed[2]["runs"][2]["hierarchies"][0]["digest"] = changed[0]["runs"][2][
-            "hierarchies"
-        ][0]["digest"]
+        changed[2]["runs"][2]["point_spanning_tree_surrogates"][0][
+            "digest"
+        ] = changed[0]["runs"][2]["point_spanning_tree_surrogates"][0]["digest"]
         with self.assertRaisesRegex(IndustrialCampaignError, "360 globally distinct"):
             validate(changed)
         with self.assertRaisesRegex(IndustrialCampaignError, "not a commit"):

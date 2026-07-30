@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independently replay the Phase 15 industrial k=1/k=2 guards.
+"""Replay k=1/k=2 guards for the point-tree surrogate, not true Morse-HGP.
 
 The input is the binary ``MHGPIE2E`` export written outside the timed region by
 ``morsehgp3d_gpu_guarded_industrial_e2e``.  This checker deliberately rebuilds
@@ -41,9 +41,12 @@ from typing import Iterator, Mapping, Sequence
 import numpy as np
 
 
-SCHEMA = "morsehgp3d.phase15_guarded_industrial_scientific_guards.v5"
+SCHEMA = "morsehgp3d.phase15_point_tree_surrogate_scientific_guards.v6"
 RUNNER_SCHEMA_V4 = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
 RUNNER_SCHEMA_V5 = "morsehgp3d.phase15.guarded_industrial_candidate.v5"
+RUNNER_SCHEMA_V6 = (
+    "morsehgp3d.phase15.point_mst_mutual_reachability_surrogate.v6"
+)
 # Historical imports keep naming the v4 contract explicitly.
 RUNNER_SCHEMA = RUNNER_SCHEMA_V4
 RUNNER_MAXIMUM_ORDER = 10
@@ -454,6 +457,7 @@ def _bind_runner_report(
     expected_git_sha: str,
     runner_binary_path: Path,
     expected_runner_binary_sha256: str,
+    legacy_surrogate_audit: bool = False,
 ) -> dict[str, object]:
     if _GIT_SHA.fullmatch(expected_git_sha) is None:
         raise ScientificGuardError(
@@ -473,10 +477,57 @@ def _bind_runner_report(
         )
     report, report_sha256 = _load_runner_report(runner_report_path)
     runner_schema = report.get("schema")
-    if runner_schema not in (RUNNER_SCHEMA_V4, RUNNER_SCHEMA_V5):
+    if runner_schema not in (RUNNER_SCHEMA_V4, RUNNER_SCHEMA_V5, RUNNER_SCHEMA_V6):
         raise ScientificGuardError(
-            "runner report schema must be one supported guarded industrial schema"
+            "runner report schema must be one supported point-tree surrogate schema"
         )
+    if (
+        runner_schema in (RUNNER_SCHEMA_V4, RUNNER_SCHEMA_V5)
+        and not legacy_surrogate_audit
+    ):
+        raise ScientificGuardError(
+            "legacy v4/v5 surrogate artifacts require explicit legacy-surrogate "
+            "audit mode"
+        )
+    if runner_schema == RUNNER_SCHEMA_V6:
+        required_scope = {
+            "result_kind": "point_mst_mutual_reachability_surrogate_benchmark",
+            "profile": "point_mst_mutual_reachability_surrogate",
+            "deployment_status": "diagnostic_surrogate_only",
+            "public_status": "not_a_morse_hgp_product_result",
+            "surrogate_pipeline_complete": True,
+            "point_vertex_universe_only": True,
+            "ten_point_spanning_tree_surrogates_materialized": True,
+            "morse_hgp_simplex_components_materialized": False,
+            "exact_morse_hierarchy_claimed": False,
+            "true_hgp_campaign_eligible": False,
+            "result": "surrogate_benchmark_completed",
+        }
+        for key, expected in required_scope.items():
+            if report.get(key) != expected or type(report.get(key)) is not type(expected):
+                raise ScientificGuardError(
+                    f"v6 runner report {key} does not identify an ineligible surrogate"
+                )
+        slo = report.get("slo")
+        if type(slo) is not dict:
+            raise ScientificGuardError("v6 runner report slo must be an object")
+        for key, expected in {
+            "scope": "true_morse_hgp_hierarchy",
+            "applicable": False,
+            "passed": None,
+            "reason": (
+                "point_tree_surrogate_does_not_materialize_"
+                "morse_hgp_simplex_components"
+            ),
+        }.items():
+            if (
+                key not in slo
+                or slo.get(key) != expected
+                or type(slo.get(key)) is not type(expected)
+            ):
+                raise ScientificGuardError(
+                    f"v6 runner report slo.{key} does not fail closed"
+                )
     reported_binary_sha256 = report.get("runner_binary_sha256")
     if (
         type(reported_binary_sha256) is not str
@@ -512,26 +563,29 @@ def _bind_runner_report(
             )
         reported_hierarchy_count = exported.tree_count
     else:
+        schema_label = "v6" if runner_schema == RUNNER_SCHEMA_V6 else "v5"
         if type(maximum_order) is not int or maximum_order != RUNNER_MAXIMUM_ORDER:
             raise ScientificGuardError(
-                "v5 runner report maximum_order must equal 10"
+                f"{schema_label} runner report maximum_order must equal 10"
             )
         if (
             type(report.get("export_maximum_order")) is not int
             or report["export_maximum_order"] != exported.tree_count
         ):
             raise ScientificGuardError(
-                "v5 runner report export_maximum_order disagrees with the export"
+                f"{schema_label} runner report export_maximum_order disagrees with the export"
             )
         if exported.tree_count < 2 or exported.tree_count > RUNNER_MAXIMUM_ORDER:
             raise ScientificGuardError(
-                "v5 runner export must contain contiguous orders 1 and 2"
+                f"{schema_label} runner export must contain contiguous orders 1 and 2"
             )
         reported_hierarchy_count = RUNNER_MAXIMUM_ORDER
         expected_report_literals = {
             "mode": (
-                "warm_fresh_cloud_lbvh_top10_capped_"
-                "component_bridges_parallel_h0"
+                "warm_fresh_cloud_lbvh_top10_capped_component_bridges_"
+                "parallel_point_h0_surrogate"
+                if runner_schema == RUNNER_SCHEMA_V6
+                else "warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_h0"
             ),
             "component_bridge_policy": (
                 "top10_components_capped_centroid_knn_top8_"
@@ -554,7 +608,7 @@ def _bind_runner_report(
         for key, expected in expected_report_literals.items():
             if report.get(key) != expected or type(report.get(key)) is not type(expected):
                 raise ScientificGuardError(
-                    f"v5 runner report {key} disagrees with the bounded contract"
+                    f"{schema_label} runner report {key} disagrees with the bounded contract"
                 )
     if report.get("git_sha") != expected_git_sha:
         raise ScientificGuardError(
@@ -596,7 +650,8 @@ def _bind_runner_report(
     if type(run.get("seed")) is not int or run["seed"] != exported.seed:
         raise ScientificGuardError("runner report seed disagrees with the export")
 
-    if runner_schema == RUNNER_SCHEMA_V5:
+    if runner_schema in (RUNNER_SCHEMA_V5, RUNNER_SCHEMA_V6):
+        schema_label = "v6" if runner_schema == RUNNER_SCHEMA_V6 else "v5"
         component_count = run.get("top_k_component_count")
         if (
             type(component_count) is not int
@@ -604,7 +659,7 @@ def _bind_runner_report(
             or component_count > COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT
         ):
             raise ScientificGuardError(
-                "v5 exported run top_k_component_count must lie in 1..256"
+                f"{schema_label} exported run top_k_component_count must lie in 1..256"
             )
         centroid_count = run.get(
             "component_bridge_centroid_distance_evaluation_count"
@@ -614,7 +669,7 @@ def _bind_runner_report(
             or centroid_count != component_count * (component_count - 1)
         ):
             raise ScientificGuardError(
-                "v5 exported run centroid distance count must equal C(C-1)"
+                f"{schema_label} exported run centroid distance count must equal C(C-1)"
             )
         projection_budget = run.get(
             "component_bridge_member_projection_evaluation_budget"
@@ -627,7 +682,7 @@ def _bind_runner_report(
             or projection_budget != expected_projection_budget
         ):
             raise ScientificGuardError(
-                "v5 exported run projection budget must equal 16n"
+                f"{schema_label} exported run projection budget must equal 16n"
             )
         projection_count = run.get(
             "component_bridge_member_projection_evaluation_count"
@@ -638,7 +693,7 @@ def _bind_runner_report(
             or projection_count > projection_budget
         ):
             raise ScientificGuardError(
-                "v5 exported run projection count exceeds its budget"
+                f"{schema_label} exported run projection count exceeds its budget"
             )
         cross_budget = run.get("component_bridge_cross_distance_evaluation_budget")
         if (
@@ -647,7 +702,7 @@ def _bind_runner_report(
             != COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT
         ):
             raise ScientificGuardError(
-                "v5 exported run cross-distance budget must equal 64*1536"
+                f"{schema_label} exported run cross-distance budget must equal 64*1536"
             )
         cross_count = run.get("component_bridge_cross_distance_evaluation_count")
         if (
@@ -656,7 +711,7 @@ def _bind_runner_report(
             or cross_count > cross_budget
         ):
             raise ScientificGuardError(
-                "v5 exported run cross-distance count exceeds its budget"
+                f"{schema_label} exported run cross-distance count exceeds its budget"
             )
         bridge_pair_count = run.get("component_bridge_pair_count")
         if (
@@ -665,7 +720,7 @@ def _bind_runner_report(
             or bridge_pair_count > COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT
         ):
             raise ScientificGuardError(
-                "v5 exported run bridge pair count exceeds 1536"
+                f"{schema_label} exported run bridge pair count exceeds 1536"
             )
         support_count = run.get("component_bridge_support_evaluation_count")
         if (
@@ -673,14 +728,14 @@ def _bind_runner_report(
             or support_count != projection_count + cross_count
         ):
             raise ScientificGuardError(
-                "v5 exported run support count must equal projection plus cross"
+                f"{schema_label} exported run support count must equal projection plus cross"
             )
         if (
             run.get("component_bridge_budget_satisfied") is not True
             or run.get("component_bridge_budget_stop_reason") != "none"
         ):
             raise ScientificGuardError(
-                "v5 exported run must satisfy the component bridge budget"
+                f"{schema_label} exported run must satisfy the component bridge budget"
             )
         if component_count == 1 and any(
             count != 0
@@ -692,49 +747,85 @@ def _bind_runner_report(
             )
         ):
             raise ScientificGuardError(
-                "v5 connected exported run must report zero component bridge work"
+                f"{schema_label} connected exported run must report zero component bridge work"
             )
         materialized_count = RUNNER_MAXIMUM_ORDER * (exported.point_count - 1)
-        for key, expected in (
-            ("materialized_merge_record_count", materialized_count),
-            ("released_merge_record_count", materialized_count),
-            ("retained_merge_record_count", 0),
-            ("exported_order_count", exported.tree_count),
+        prefix = "surrogate_" if runner_schema == RUNNER_SCHEMA_V6 else ""
+        release_fields = (
             (
-                "exported_merge_record_count",
+                "materialized_surrogate_edge_record_count"
+                if prefix
+                else "materialized_merge_record_count",
+                materialized_count,
+            ),
+            (
+                "released_surrogate_edge_record_count"
+                if prefix
+                else "released_merge_record_count",
+                materialized_count,
+            ),
+            (
+                "retained_surrogate_edge_record_count"
+                if prefix
+                else "retained_merge_record_count",
+                0,
+            ),
+            (
+                "exported_surrogate_order_count"
+                if prefix
+                else "exported_order_count",
+                exported.tree_count,
+            ),
+            (
+                "exported_surrogate_edge_record_count"
+                if prefix
+                else "exported_merge_record_count",
                 exported.tree_count * (exported.point_count - 1),
             ),
-        ):
+        )
+        for key, expected in release_fields:
             if run.get(key) != expected or type(run.get(key)) is not int:
                 raise ScientificGuardError(
-                    f"v5 exported run {key} disagrees with the export/release contract"
+                    f"{schema_label} exported run {key} disagrees with the export/release contract"
                 )
-        if run.get("merge_records_released_after_digest_and_export") is not True:
+        release_claim_key = (
+            "surrogate_edge_records_released_after_digest_and_export"
+            if prefix
+            else "merge_records_released_after_digest_and_export"
+        )
+        if run.get(release_claim_key) is not True:
             raise ScientificGuardError(
-                "v5 exported run did not release merge records after digest/export"
+                f"{schema_label} exported run did not release surrogate records after digest/export"
             )
 
-    hierarchies = run.get("hierarchies")
+    tree_field = (
+        "point_spanning_tree_surrogates"
+        if runner_schema == RUNNER_SCHEMA_V6
+        else "hierarchies"
+    )
+    hierarchies = run.get(tree_field)
     if type(hierarchies) is not list or len(hierarchies) != reported_hierarchy_count:
         raise ScientificGuardError(
-            "the exported runner run has a wrong hierarchy count"
+            "the exported runner run has a wrong point-tree surrogate count"
         )
     replayed: list[dict[str, object]] = []
     for offset, raw_hierarchy in enumerate(hierarchies):
-        role = f"runner report runs[{run_offset}].hierarchies[{offset}]"
+        role = f"runner report runs[{run_offset}].{tree_field}[{offset}]"
         if type(raw_hierarchy) is not dict:
             raise ScientificGuardError(f"{role} must be an object")
         order = offset + 1
+        order_key = "neighbor_rank" if runner_schema == RUNNER_SCHEMA_V6 else "order"
+        count_key = "edge_count" if runner_schema == RUNNER_SCHEMA_V6 else "merge_record_count"
         if (
-            type(raw_hierarchy.get("order")) is not int
-            or raw_hierarchy["order"] != order
+            type(raw_hierarchy.get(order_key)) is not int
+            or raw_hierarchy[order_key] != order
         ):
-            raise ScientificGuardError(f"{role}.order is not canonical")
+            raise ScientificGuardError(f"{role}.{order_key} is not canonical")
         if (
-            type(raw_hierarchy.get("merge_record_count")) is not int
-            or raw_hierarchy["merge_record_count"] != exported.point_count - 1
+            type(raw_hierarchy.get(count_key)) is not int
+            or raw_hierarchy[count_key] != exported.point_count - 1
         ):
-            raise ScientificGuardError(f"{role}.merge_record_count is wrong")
+            raise ScientificGuardError(f"{role}.{count_key} is wrong")
         reported_digest = raw_hierarchy.get("digest")
         if (
             type(reported_digest) is not str
@@ -784,15 +875,23 @@ def _bind_runner_report(
         "exported_run_seed": run["seed"],
         **(
             {
-                "reported_hierarchy_metadata_count": reported_hierarchy_count,
-                "exported_hierarchy_count": exported.tree_count,
+                "reported_point_spanning_tree_surrogate_metadata_count": (
+                    reported_hierarchy_count
+                ),
+                "exported_point_spanning_tree_surrogate_count": exported.tree_count,
             }
-            if runner_schema == RUNNER_SCHEMA_V5
+            if runner_schema in (RUNNER_SCHEMA_V5, RUNNER_SCHEMA_V6)
             else {}
         ),
-        "hierarchies": replayed,
-        "all_hierarchy_digests_match_export": True,
+        "point_spanning_tree_surrogates": replayed,
+        "all_surrogate_tree_digests_match_export": True,
         "all_root_squared_levels_match_export": True,
+        "exact_morse_hierarchy_claimed": False,
+        "true_hgp_campaign_eligible": False,
+        "legacy_surrogate_artifact": runner_schema in (
+            RUNNER_SCHEMA_V4,
+            RUNNER_SCHEMA_V5,
+        ),
     }
 
 
@@ -2161,6 +2260,7 @@ def analyze_export(
     expected_tree_count: int | None = 10,
     triangle_batch_size: int = 250_000,
     workers: int = -1,
+    legacy_surrogate_audit: bool = False,
 ) -> dict[str, object]:
     exported = read_industrial_export(
         path,
@@ -2174,6 +2274,7 @@ def analyze_export(
         expected_git_sha=expected_git_sha,
         runner_binary_path=runner_binary_path,
         expected_runner_binary_sha256=expected_runner_binary_sha256,
+        legacy_surrogate_audit=legacy_surrogate_audit,
     )
     points, point_bits = reconstruct_canonical_cloud(
         family, exported.point_count, exported.seed
@@ -2239,9 +2340,17 @@ def analyze_export(
             "timed_path_modified": False,
             "exact_Morse_hierarchy_claimed": False,
             "exact_Gamma2_claimed": False,
-            "public_status": "not_claimed",
+            "true_hgp_campaign_eligible": False,
+            "point_vertex_universe_only": True,
+            "morse_hgp_simplex_components_materialized": False,
+            "public_status": "not_a_morse_hgp_product_result",
+            "guard_scope": "point_tree_surrogate_only",
         },
-        "result": "scientific_guards_satisfied" if passed else "scientific_guards_failed",
+        "result": (
+            "surrogate_scientific_guards_satisfied"
+            if passed
+            else "surrogate_scientific_guards_failed"
+        ),
     }
 
 
@@ -2269,7 +2378,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--runner-report",
         required=True,
         type=Path,
-        help="paired v4/v5 runner report containing the uniquely exported measured run",
+        help="paired v6 surrogate report containing the uniquely exported measured run",
     )
     parser.add_argument(
         "--expected-git-sha",
@@ -2291,6 +2400,14 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--expected-point-count", type=int, default=50_000)
     parser.add_argument("--expected-tree-count", type=int, default=10)
+    parser.add_argument(
+        "--legacy-surrogate-audit",
+        action="store_true",
+        help=(
+            "explicitly accept a historical v4/v5 mislabeled surrogate; "
+            "never qualifies a true HGP campaign"
+        ),
+    )
     parser.add_argument("--triangle-batch-size", type=int, default=250_000)
     parser.add_argument(
         "--workers",
@@ -2327,6 +2444,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             expected_tree_count=options.expected_tree_count,
             triangle_batch_size=options.triangle_batch_size,
             workers=options.workers,
+            legacy_surrogate_audit=options.legacy_surrogate_audit,
         )
     except ScientificGuardError as error:
         print(f"scientific guard input error: {error}", file=sys.stderr)
@@ -2349,7 +2467,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         except OSError as error:
             print(f"cannot write report: {error}", file=sys.stderr)
             return 2
-    return 0 if report["result"] == "scientific_guards_satisfied" else 1
+    return (
+        0
+        if report["result"] == "surrogate_scientific_guards_satisfied"
+        else 1
+    )
 
 
 if __name__ == "__main__":

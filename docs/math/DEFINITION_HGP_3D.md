@@ -173,6 +173,20 @@ Une hyperarête de taille $k+1$ coûte $k$ unions au lieu de $\binom{k+1}{2}$ ar
 
 La condensation par taille, le choix d'un représentant unique pour une observation ou la conversion en partition sont des transformations aval. Elles doivent publier leurs propres paramètres et ne modifient pas la forêt HGP source.
 
+### 12.1 Vue condensée par `min_cluster_size`
+
+Pour une composante $C$ de $\Gamma_k(a)$, sa couverture en observations et sa cardinalité sont
+
+$$P(C)=\bigcup_{F\in C}F,\qquad s(C)=\lvert P(C)\rvert.$$
+
+Le paramètre aval `min_cluster_size=m` emploie normativement `relation=at_least` : une composante devient visible si et seulement si $s(C)\geq m$. La cardinalité compte les `PointId` distincts de l'union des facettes, jamais le nombre de facettes, de cofaces, d'incidences, de nœuds DSU ou d'occurrences d'un même point.
+
+Le prédicat est évalué après résolution complète de chaque lot de niveau exact, y compris toutes ses cofaces, incidences silencieuses, unions et `coverage_delta`. Une composante sous le seuil reste présente dans la source et continue de recevoir ses incidences et sa couverture; la supprimer avant les lots suivants changerait en général les fusions. La vue condense seulement après coup les portions invisibles de la forêt et du `coverage_log`. Elle ne filtre ni le catalogue, ni Gamma, ni les attaches, ni les applications verticales sources.
+
+La couverture ne peut que croître horizontalement, donc une composante devenue visible le reste. Verticalement, la cible d'une composante $C$ d'ordre $k+1$ contient $P(C)$; sous `relation=at_least`, $s(C)\geq m$ implique ainsi que sa cible d'ordre $k$ est visible. La restriction des morphismes verticaux sources à la vue visible est donc totale. Ce corollaire ne construit toutefois aucun morphisme : si les applications verticales sources sont absentes, partielles ou non certifiées, la vue conserve exactement cette absence, cette partialité ou ce statut.
+
+Pour $K_{\max}=10$ et `min_cluster_size=20`, toute composante visible est non triviale. En effet, une composante isolée de $\Gamma_k(a)$ ne contient qu'une facette $F$ et satisfait $s(C)=\lvert F\rvert=k\leq10<20$. Après suppression des états invisibles, les vues visibles issues de `full_pi0` et de `hgp_reduced` coïncident donc sur les coupes, les nœuds horizontaux, la couverture et les morphismes verticaux qui existent dans la source. Ce théorème de vue n'autorise ni à omettre les facettes isolées de l'état interne avant leur attache, ni à promouvoir une source incomplète au statut exact.
+
 ### Sortie budgétée
 
 Si le catalogue ne contient qu'un sous-flot certifié $E'$ du flot complet $E$, la structure obtenue est une `partial_forest`, pas une forêt HGP. Pour tout niveau $a$ et toute paire de facettes émises,
@@ -200,6 +214,8 @@ La partition partielle est donc un raffinement de la partition exacte. Elle peut
 | catalogue complet et attaches exactes reconstruisent `full_pi0` | `proof_obligation` M.1; aucune revendication exacte avant preuve |
 | le locator non-Gabriel définit la cible verticale réduite exacte dans le DSU brut | `proof_obligation`; le chemin positif ne prouve pas la complétude des incidences |
 | un sous-flot certifié produit un raffinement de connectivité | fait exact unilatéral; ses nœuds ne sont pas une forêt HGP exacte |
+| sous `at_least`, une cible verticale d'une composante visible est visible | `proved_here` par inclusion des couvertures; ne construit pas les morphismes sources |
+| pour $m>K_{\max}$, les vues visibles condensées `full_pi0` et `hgp_reduced` coïncident | `proved_here` depuis Gamma exact; une composante isolée couvre au plus $K_{\max}$ points |
 
 ## Références
 

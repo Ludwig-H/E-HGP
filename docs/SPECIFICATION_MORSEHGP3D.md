@@ -1235,6 +1235,8 @@ Usages interdits pour le statut `exact` : exclure une région sans borne globale
 
 ## 17. Objet de sortie
 
+Pour $k>1$, l'univers horizontal n'est pas l'ensemble des $n$ points mais celui des facettes de cardinal $k$ de $\Gamma_k$, reliées par leurs cofaces de cardinal $k+1$. Conceptuellement, sur 50 000 points, ces univers complets comptent $\binom{50\,000}{k}$ facettes et $\binom{50\,000}{k+1}$ cofaces; le chemin produit doit précisément éviter de les matérialiser globalement. Une sortie qui remplace cet univers par $n$ sommets points et force exactement $n-1$ fusions par ordre est un surrogate de type point-MST, pas une hiérarchie Morse-HGP 3D. La source normative doit restituer, éventuellement sous forme streamée et certifiée plutôt que par arènes globales, les identités de facettes utiles, les cofaces, toutes les incidences y compris silencieuses, les `coverage_delta`, les lots exacts et les applications verticales. Le nombre de records de la hiérarchie condensée dépend du nuage et reste inconnu avant construction de la vraie source; il n'existe aucune borne normative de $n-1$ sur ses naissances et multifusions aux ordres supérieurs. `min_cluster_size=20` borne seulement la vue visible et ne borne jamais le catalogue ou l'état interne requis pour la produire.
+
 ```text
 MorseHGP3DResult
     profile                       # hgp_reduced | full_pi0
@@ -1247,7 +1249,18 @@ MorseHGP3DResult
     gabriel_hyperedges             # sous-flot positif, insuffisant seul aux ordres supérieurs
     coverage_log                  # obligatoire pour rejouer les coupes
     optional_materialized_point_sets
+    optional_condensed_view       # vue aval; ne remplace jamais la source
     run_certificate
+
+CondensedView
+    relation                      # at_least
+    min_cluster_size
+    cardinality_basis             # distinct_PointId_union_of_component_facets
+    evaluation_boundary           # after_complete_equal_level_batch
+    source_result_digest
+    visible_forests
+    visible_coverage_log
+    visible_vertical_maps
 
 RunCertificate
     public_status                 # exact | conditional | ...
@@ -1270,6 +1283,10 @@ RunCertificate
 
 Le `coverage_log` contient les `coverage_delta` de chaque lot et fait partie de la sortie normative. Une matérialisation immédiate des ensembles de points peut être omise, mais une coupe exacte doit pouvoir retourner les composantes et, pour $k\geq2$, leurs ensembles d'observations recouvrants. Toute option de condensation ou de partition est une opération aval, distincte de la sortie HGP normative.
 
+Avec `relation=at_least`, `min_cluster_size=m` rend visible une composante $C$ exactement lorsque l'union des `PointId` de ses facettes contient au moins $m$ observations distinctes. Ce test est appliqué après le lot de niveau exact complet; les composantes encore invisibles restent dans l'état source et peuvent recevoir des cofaces, des incidences silencieuses et de la couverture. Pour $K_{\max}=10$ et $m=20$, une composante visible ne peut pas être une facette isolée, dont la couverture compte au plus dix points. Les vues visibles condensées de `full_pi0` et `hgp_reduced` coïncident donc lorsqu'elles dérivent de la même source Gamma exacte. De plus, la cible verticale d'une composante visible contient sa couverture et reste visible; restreindre des morphismes sources complets donne des morphismes visibles totaux, mais la condensation ne crée jamais des morphismes absents ou non certifiés.
+
+Le composant de référence `ExactSizeCondensedHierarchy` implémente désormais cette transformation aval sur une seule tranche horizontale. Pour $k=1$, son entrée fraîche est limitée à $n\leq64$ et la forêt compacte est comparée à l'EMST exact du graphe complet avant toute condensation. Pour $k\geq2$, il consomme exclusivement un `ExactPersistentReducedGammaOrderHistory` fraîchement revérifié sur le domaine borné $n\leq14$. Il décide après chaque lot complet entre `hidden`, `threshold_entry`, `continuation` et `multifusion`; `threshold_entry` est une entrée dans la vue et jamais une naissance Morse. La relation enregistrée est `at_least` avec valeur par défaut `min_cluster_size=20`. Ce composant n'accepte aucune source industrielle à 50 000 points, ne projette aucun morphisme vertical, ne calcule ni ne revendique l'équivalence `full_pi0`, ne constitue pas un `MorseHGP3DResult` et ne porte aucun statut public.
+
 Les objets `SaturatedGenerator`, forêt d'intersection et certificats de complétude associés sont réservés à une future migration. Ils ne doivent pas être sérialisés sous `critical_catalog`, `gamma_cofaces` ou une base de preuve v2 existante, car leur rang, leur provenance et leurs obligations de complétude diffèrent.
 
 ## 18. Critères de réception mathématiques
@@ -1277,13 +1294,15 @@ Les objets `SaturatedGenerator`, forêt d'intersection et certificats de complé
 La spécification est satisfaite lorsque :
 
 1. l'oracle exhaustif vérifie toutes les tranches et flèches pour les petits nuages;
-2. la tranche $k=1$ coïncide avec l'arbre de fusion de l'EMST, niveaux divisés par quatre en unités carrées;
-3. le profil réduit exact est obtenu depuis les composantes du Gamma exhaustif, et le flot Gabriel brut ne revendique qu'une `partial_refinement`;
-4. le profil complet coïncide avec $\Gamma_k$ à chaque intervalle entre valeurs critiques;
-5. toute permutation des observations ne change que les identifiants canoniques;
-6. tout lot égal produit la même multifurcation quel que soit l'ordonnancement GPU;
-7. chaque carré ordre–échelle commute;
-8. aucun statut `exact` n'est émis lorsqu'un prune, une frontière, une classification feuille, une attache, `relevant_gp_complete` ou une dégénérescence reste indécis; lorsqu'un oracle cellulaire est invoqué, sa propre fermeture doit également être complète;
-9. une sortie budgétée vérifie la propriété de raffinement unilatéral et n'expose jamais sa `partial_forest` comme une forêt HGP exacte.
+2. avant toute condensation, la tranche source $k=1$ coïncide avec l'arbre de fusion de l'EMST, niveaux divisés par quatre en unités carrées;
+3. avant toute condensation, pour tout triplet $T$ possédant au moins deux arêtes de la triangulation de Delaunay ordinaire utilisée comme oracle, les trois facettes-paires de $T$ sont présentes et connectées dans une même composante source de $\Gamma_2$ au plus tard au niveau $\beta(T)$; une simple connexion de ses trois sommets points ne satisfait pas ce test;
+4. le profil réduit exact est obtenu depuis les composantes du Gamma exhaustif, et le flot Gabriel brut ne revendique qu'une `partial_refinement`;
+5. le profil complet coïncide avec $\Gamma_k$ à chaque intervalle entre valeurs critiques;
+6. toute permutation des observations ne change que les identifiants canoniques;
+7. tout lot égal produit la même multifurcation quel que soit l'ordonnancement GPU;
+8. chaque carré ordre–échelle commute;
+9. aucun statut `exact` n'est émis lorsqu'un prune, une frontière, une classification feuille, une attache, `relevant_gp_complete` ou une dégénérescence reste indécis; lorsqu'un oracle cellulaire est invoqué, sa propre fermeture doit également être complète;
+10. une sortie budgétée vérifie la propriété de raffinement unilatéral et n'expose jamais sa `partial_forest` comme une forêt HGP exacte;
+11. `min_cluster_size` est testé comme vue `at_least` après lots sur la cardinalité de l'union des `PointId`; il ne peut filtrer la source ni faire compter la latence d'un surrogate point-MST comme celle de MorseHGP3D.
 
 La [feuille de route](ROADMAP_IMPLEMENTATION_MORSEHGP3D.md) transforme ces conditions en phases d'implémentation; le [plan de tests](TEST_PLAN_MORSEHGP3D.md) les rend falsifiables.

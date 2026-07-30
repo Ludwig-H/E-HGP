@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Validate the three-family Phase 15 guarded industrial 50k campaign.
+"""Audit the three-family Phase 15 50k point-tree surrogate benchmark.
 
-The runner deliberately publishes an ``architecture_only`` candidate rather
-than an exact Morse hierarchy.  This checker preserves that scope while
-independently replaying the structural and latency claims made by its three
-reports.  It accepts either a plain JSON report or the same report preceded by
-the standard NVIDIA CUDA container banner emitted by the pinned G4 image.
+The current runner publishes only point-MST/mutual-reachability spanning-tree
+surrogates.  This checker cannot qualify a true Morse-HGP hierarchy or its
+100 ms product SLO.  Historical v4/v5 artifacts are accepted only when the
+caller explicitly selects legacy-surrogate audit mode.
 """
 
 from __future__ import annotations
@@ -25,10 +24,19 @@ from typing import Any, Iterable, NoReturn, Sequence
 
 REPORT_SCHEMA_V4 = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
 REPORT_SCHEMA_V5 = "morsehgp3d.phase15.guarded_industrial_candidate.v5"
+REPORT_SCHEMA_V6 = (
+    "morsehgp3d.phase15.point_mst_mutual_reachability_surrogate.v6"
+)
 # Historical imports keep naming the v4 contract explicitly.
 REPORT_SCHEMA = REPORT_SCHEMA_V4
 CHECK_SCHEMA_V4 = "morsehgp3d.phase15.guarded_industrial_50k_check.v4"
 CHECK_SCHEMA_V5 = "morsehgp3d.phase15.guarded_industrial_50k_check.v5"
+CHECK_SCHEMA_V6 = (
+    "morsehgp3d.phase15.point_mst_mutual_reachability_surrogate_50k_audit.v6"
+)
+CHECK_SCHEMA_LEGACY = (
+    "morsehgp3d.phase15.legacy_point_tree_surrogate_artifact_audit.v1"
+)
 CHECK_SCHEMA = CHECK_SCHEMA_V4
 EXPECTED_FAMILIES = (
     "affine_uniform_binary64",
@@ -55,6 +63,10 @@ COMPONENT_BRIDGE_MAXIMUM_PAIR_COUNT = 256 * 6
 COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT = 64 * 1536
 MODE_V4 = "warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0"
 MODE_V5 = "warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_h0"
+MODE_V6 = (
+    "warm_fresh_cloud_lbvh_top10_capped_component_bridges_"
+    "parallel_point_h0_surrogate"
+)
 COMPONENT_BRIDGE_POLICY_V4 = (
     "top10_components_centroid_knn_top8_projection_cross_min"
 )
@@ -130,6 +142,15 @@ _REPORT_KEYS_V5 = _REPORT_KEYS_V4 | frozenset(
         "component_bridge_maximum_cross_distance_evaluation_count",
     }
 )
+_REPORT_KEYS_V6 = (_REPORT_KEYS_V5 - {"full_pipeline", "ten_hierarchies_materialized"}) | frozenset(
+    {
+        "surrogate_pipeline_complete",
+        "point_vertex_universe_only",
+        "ten_point_spanning_tree_surrogates_materialized",
+        "morse_hgp_simplex_components_materialized",
+        "true_hgp_campaign_eligible",
+    }
+)
 _REPORT_KEYS = _REPORT_KEYS_V4
 _RUN_KEYS_V4 = frozenset(
     {
@@ -172,6 +193,28 @@ _RUN_KEYS_V5 = _RUN_KEYS_V4 | frozenset(
         "exported_merge_record_count",
     }
 )
+_RUN_KEYS_V6 = (
+    _RUN_KEYS_V5
+    - {
+        "hierarchies",
+        "materialized_merge_record_count",
+        "released_merge_record_count",
+        "retained_merge_record_count",
+        "merge_records_released_after_digest_and_export",
+        "exported_order_count",
+        "exported_merge_record_count",
+    }
+) | frozenset(
+    {
+        "point_spanning_tree_surrogates",
+        "materialized_surrogate_edge_record_count",
+        "released_surrogate_edge_record_count",
+        "retained_surrogate_edge_record_count",
+        "surrogate_edge_records_released_after_digest_and_export",
+        "exported_surrogate_order_count",
+        "exported_surrogate_edge_record_count",
+    }
+)
 _RUN_KEYS = _RUN_KEYS_V4
 _TIMING_KEYS = frozenset(
     {"lbvh", "topk", "topology", "reductions", "output_materialization", "warm_e2e"}
@@ -179,10 +222,14 @@ _TIMING_KEYS = frozenset(
 _HIERARCHY_KEYS = frozenset(
     {"order", "merge_record_count", "digest", "root_squared_level"}
 )
+_SURROGATE_TREE_KEYS = frozenset(
+    {"neighbor_rank", "edge_count", "digest", "root_squared_level"}
+)
 _PERCENTILE_KEYS = frozenset({"p50", "p95", "p99"})
 _SLO_KEYS = frozenset(
     {"point_count", "threshold_ns", "statistic", "applicable", "passed"}
 )
+_SLO_KEYS_V6 = _SLO_KEYS | frozenset({"scope", "reason"})
 _STAGE_NAMES = ("lbvh", "topk", "topology", "reductions", "output_materialization")
 
 
@@ -194,7 +241,7 @@ class IndustrialCampaignError(ValueError):
 class _RunEvidence:
     measured_seed: int | None
     warm_e2e_ns: int | None
-    hierarchy_digests: tuple[str, ...]
+    surrogate_tree_digests: tuple[str, ...]
 
 
 def fail(message: str) -> NoReturn:
@@ -365,6 +412,36 @@ def _validate_hierarchies(value: object, *, path: str) -> tuple[str, ...]:
     return tuple(digests)
 
 
+def _validate_surrogate_trees(value: object, *, path: str) -> tuple[str, ...]:
+    trees = _array(value, path=path)
+    require(
+        len(trees) == MAXIMUM_ORDER,
+        f"{path} must contain exactly {MAXIMUM_ORDER} point-tree surrogates",
+    )
+    digests: list[str] = []
+    for offset, raw_tree in enumerate(trees):
+        tree_path = f"{path}[{offset}]"
+        tree = _mapping(raw_tree, path=tree_path)
+        _exact_keys(tree, _SURROGATE_TREE_KEYS, path=tree_path)
+        _literal(tree, "neighbor_rank", offset + 1, path=tree_path)
+        _literal(tree, "edge_count", MERGE_RECORD_COUNT, path=tree_path)
+        digest = tree.get("digest")
+        require(
+            type(digest) is str and _DIGEST.fullmatch(digest) is not None,
+            f"{tree_path}.digest must be one canonical 64-bit hex digest",
+        )
+        digests.append(digest)
+        _finite_nonnegative(
+            tree.get("root_squared_level"),
+            path=f"{tree_path}.root_squared_level",
+        )
+    require(
+        len(set(digests)) == MAXIMUM_ORDER,
+        f"{path}: every neighbor rank must have a distinct surrogate digest",
+    )
+    return tuple(digests)
+
+
 def _validate_run(
     raw_run: object,
     *,
@@ -374,7 +451,13 @@ def _validate_run(
 ) -> _RunEvidence:
     path = f"{report_path}.runs[{run_index}]"
     run = _mapping(raw_run, path=path)
-    run_keys = _RUN_KEYS_V5 if report_schema == REPORT_SCHEMA_V5 else _RUN_KEYS_V4
+    run_keys = (
+        _RUN_KEYS_V6
+        if report_schema == REPORT_SCHEMA_V6
+        else _RUN_KEYS_V5
+        if report_schema == REPORT_SCHEMA_V5
+        else _RUN_KEYS_V4
+    )
     _exact_keys(run, run_keys, path=path)
     _literal(run, "run_index", run_index, path=path)
     warmup = run_index < WARMUPS
@@ -410,7 +493,7 @@ def _validate_run(
         f"{path}: timed canonicalization/stage sum {stage_sum} exceeds "
         f"warm_e2e {warm_e2e}",
     )
-    if not warmup:
+    if not warmup and report_schema != REPORT_SCHEMA_V6:
         require(
             warm_e2e < SLO_THRESHOLD_NS,
             f"{path}.timings_ns.warm_e2e must be strictly below {SLO_THRESHOLD_NS}",
@@ -427,7 +510,7 @@ def _validate_run(
         minimum=1,
         maximum=(
             COMPONENT_BRIDGE_MAXIMUM_COMPONENT_COUNT
-            if report_schema == REPORT_SCHEMA_V5
+            if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6)
             else POINT_COUNT
         ),
     )
@@ -439,7 +522,7 @@ def _validate_run(
         run.get("component_bridge_support_evaluation_count"),
         path=f"{path}.component_bridge_support_evaluation_count",
     )
-    if report_schema == REPORT_SCHEMA_V5:
+    if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6):
         centroid_distance_count = _integer(
             run.get("component_bridge_centroid_distance_evaluation_count"),
             path=(
@@ -502,7 +585,7 @@ def _validate_run(
             bridge_pair_count == 0 and support_evaluation_count == 0,
             f"{path}: a connected top10 graph must not evaluate component bridges",
         )
-        if report_schema == REPORT_SCHEMA_V5:
+        if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6):
             require(
                 projection_count == 0 and cross_count == 0,
                 f"{path}: a connected top10 graph must have zero split bridge work",
@@ -517,32 +600,62 @@ def _validate_run(
             f"{path}.component_bridge_support_evaluation_count must cover both "
             "projection scans and at least one cross-distance per bridge pair",
         )
-    if report_schema == REPORT_SCHEMA_V5:
+    if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6):
+        materialized_key = (
+            "materialized_surrogate_edge_record_count"
+            if report_schema == REPORT_SCHEMA_V6
+            else "materialized_merge_record_count"
+        )
+        released_key = (
+            "released_surrogate_edge_record_count"
+            if report_schema == REPORT_SCHEMA_V6
+            else "released_merge_record_count"
+        )
+        retained_key = (
+            "retained_surrogate_edge_record_count"
+            if report_schema == REPORT_SCHEMA_V6
+            else "retained_merge_record_count"
+        )
+        release_claim_key = (
+            "surrogate_edge_records_released_after_digest_and_export"
+            if report_schema == REPORT_SCHEMA_V6
+            else "merge_records_released_after_digest_and_export"
+        )
+        exported_order_key = (
+            "exported_surrogate_order_count"
+            if report_schema == REPORT_SCHEMA_V6
+            else "exported_order_count"
+        )
+        exported_record_key = (
+            "exported_surrogate_edge_record_count"
+            if report_schema == REPORT_SCHEMA_V6
+            else "exported_merge_record_count"
+        )
         materialized_count = _integer(
-            run.get("materialized_merge_record_count"),
-            path=f"{path}.materialized_merge_record_count",
+            run.get(materialized_key),
+            path=f"{path}.{materialized_key}",
         )
         expected_materialized_count = MAXIMUM_ORDER * MERGE_RECORD_COUNT
         require(
             materialized_count == expected_materialized_count,
-            f"{path}.materialized_merge_record_count must equal "
+            f"{path}.{materialized_key} must equal "
             f"10(n-1)={expected_materialized_count}",
         )
         _literal(
             run,
-            "released_merge_record_count",
+            released_key,
             expected_materialized_count,
             path=path,
         )
-        _literal(run, "retained_merge_record_count", 0, path=path)
+        _literal(run, retained_key, 0, path=path)
         _literal(
             run,
-            "merge_records_released_after_digest_and_export",
+            release_claim_key,
             True,
             path=path,
         )
-        _literal(run, "exported_order_count", 0, path=path)
-        _literal(run, "exported_merge_record_count", 0, path=path)
+        _literal(run, exported_order_key, 0, path=path)
+        _literal(run, exported_record_key, 0, path=path)
     _literal(
         run,
         "neighbor_record_count",
@@ -558,43 +671,56 @@ def _validate_run(
     _literal(run, "device_name", EXPECTED_DEVICE, path=path)
     _literal(run, "oracle_export_ns", 0, path=path)
     _literal(run, "oracle_export_path", None, path=path)
-    hierarchy_digests = _validate_hierarchies(
-        run.get("hierarchies"), path=f"{path}.hierarchies"
-    )
+    if report_schema == REPORT_SCHEMA_V6:
+        surrogate_tree_digests = _validate_surrogate_trees(
+            run.get("point_spanning_tree_surrogates"),
+            path=f"{path}.point_spanning_tree_surrogates",
+        )
+    else:
+        surrogate_tree_digests = _validate_hierarchies(
+            run.get("hierarchies"), path=f"{path}.hierarchies"
+        )
     if warmup:
-        return _RunEvidence(None, None, hierarchy_digests)
+        return _RunEvidence(None, None, surrogate_tree_digests)
     return _RunEvidence(
         seed,
         warm_e2e,
-        hierarchy_digests,
+        surrogate_tree_digests,
     )
 
 
-def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str, Any]:
-    """Validate one family report and return its replayed measured values."""
+def validate_report(
+    report: dict[str, Any],
+    *,
+    path: str = "report",
+    legacy_surrogate_audit: bool = False,
+) -> dict[str, Any]:
+    """Audit one surrogate report without qualifying a true HGP result."""
 
     report_schema = report.get("schema")
     require(
         type(report_schema) is str
-        and report_schema in (REPORT_SCHEMA_V4, REPORT_SCHEMA_V5),
-        f"{path}.schema must be a supported guarded industrial schema",
+        and report_schema in (REPORT_SCHEMA_V4, REPORT_SCHEMA_V5, REPORT_SCHEMA_V6),
+        f"{path}.schema must be a supported point-tree surrogate schema",
     )
+    if report_schema in (REPORT_SCHEMA_V4, REPORT_SCHEMA_V5):
+        require(
+            legacy_surrogate_audit,
+            f"{path}: legacy v4/v5 surrogate artifacts require explicit "
+            "legacy-surrogate audit mode",
+        )
     report_keys = (
-        _REPORT_KEYS_V5 if report_schema == REPORT_SCHEMA_V5 else _REPORT_KEYS_V4
+        _REPORT_KEYS_V6
+        if report_schema == REPORT_SCHEMA_V6
+        else _REPORT_KEYS_V5
+        if report_schema == REPORT_SCHEMA_V5
+        else _REPORT_KEYS_V4
     )
     _exact_keys(report, report_keys, path=path)
-    for key, expected in (
+    common_literals = (
         ("schema", report_schema),
-        ("result_kind", "guarded_industrial_candidate"),
         ("phase", 15),
         ("backend", "cuda_g4_plus_host_binary64"),
-        ("profile", "hgp_reduced"),
-        (
-            "mode",
-            MODE_V5 if report_schema == REPORT_SCHEMA_V5 else MODE_V4,
-        ),
-        ("deployment_status", "architecture_only"),
-        ("public_status", "not_claimed"),
         ("point_count", POINT_COUNT),
         ("repetitions", REPETITIONS),
         ("warmups", WARMUPS),
@@ -603,8 +729,6 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
         ("cloud_generation_timed", False),
         ("canonicalization_timed", True),
         ("fresh_cloud_per_run", True),
-        ("full_pipeline", True),
-        ("ten_hierarchies_materialized", True),
         (
             "weight_representation",
             WEIGHT_REPRESENTATION,
@@ -617,7 +741,7 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
         (
             "component_bridge_policy",
             COMPONENT_BRIDGE_POLICY_V5
-            if report_schema == REPORT_SCHEMA_V5
+            if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6)
             else COMPONENT_BRIDGE_POLICY_V4,
         ),
         ("ordinary_delaunay_materialized", False),
@@ -625,12 +749,39 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
         ("global_pair_matrix_materialized", False),
         ("exact_morse_hierarchy_claimed", False),
         ("oracle_exports_outside_timed_region", True),
-        ("result", "slo_satisfied"),
-    ):
+    )
+    for key, expected in common_literals:
         _literal(report, key, expected, path=path)
+    if report_schema == REPORT_SCHEMA_V6:
+        for key, expected in (
+            ("result_kind", "point_mst_mutual_reachability_surrogate_benchmark"),
+            ("profile", "point_mst_mutual_reachability_surrogate"),
+            ("mode", MODE_V6),
+            ("deployment_status", "diagnostic_surrogate_only"),
+            ("public_status", "not_a_morse_hgp_product_result"),
+            ("surrogate_pipeline_complete", True),
+            ("point_vertex_universe_only", True),
+            ("ten_point_spanning_tree_surrogates_materialized", True),
+            ("morse_hgp_simplex_components_materialized", False),
+            ("true_hgp_campaign_eligible", False),
+            ("result", "surrogate_benchmark_completed"),
+        ):
+            _literal(report, key, expected, path=path)
+    else:
+        for key, expected in (
+            ("result_kind", "guarded_industrial_candidate"),
+            ("profile", "hgp_reduced"),
+            ("mode", MODE_V5 if report_schema == REPORT_SCHEMA_V5 else MODE_V4),
+            ("deployment_status", "architecture_only"),
+            ("public_status", "not_claimed"),
+            ("full_pipeline", True),
+            ("ten_hierarchies_materialized", True),
+            ("result", "slo_satisfied"),
+        ):
+            _literal(report, key, expected, path=path)
 
     export_maximum_order = MAXIMUM_ORDER
-    if report_schema == REPORT_SCHEMA_V5:
+    if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6):
         export_maximum_order = _integer(
             report.get("export_maximum_order"),
             path=f"{path}.export_maximum_order",
@@ -691,7 +842,7 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
     all_seeds: list[int] = []
     measured_seeds: list[int] = []
     measured_e2e: list[int] = []
-    hierarchy_digests: list[str] = []
+    surrogate_tree_digests: list[str] = []
     for run_index, run in enumerate(runs):
         evidence = _validate_run(
             run,
@@ -701,14 +852,14 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
         )
         run_record = _mapping(run, path=f"{path}.runs[{run_index}]")
         all_seeds.append(run_record["seed"])
-        hierarchy_digests.extend(evidence.hierarchy_digests)
+        surrogate_tree_digests.extend(evidence.surrogate_tree_digests)
         if evidence.measured_seed is not None and evidence.warm_e2e_ns is not None:
             measured_seeds.append(evidence.measured_seed)
             measured_e2e.append(evidence.warm_e2e_ns)
     require(len(set(all_seeds)) == len(all_seeds), f"{path}: run seeds must be unique")
     require(
-        len(set(hierarchy_digests)) == len(hierarchy_digests),
-        f"{path}: every order/run must have a distinct hierarchy digest",
+        len(set(surrogate_tree_digests)) == len(surrogate_tree_digests),
+        f"{path}: every order/run must have a distinct surrogate-tree digest",
     )
     require(
         len(measured_e2e) == REPETITIONS,
@@ -741,19 +892,35 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
     )
 
     slo = _mapping(report.get("slo"), path=f"{path}.slo")
-    _exact_keys(slo, _SLO_KEYS, path=f"{path}.slo")
-    for key, expected in (
-        ("point_count", POINT_COUNT),
-        ("threshold_ns", SLO_THRESHOLD_NS),
-        ("statistic", "p95_nearest_rank_warm_e2e"),
-        ("applicable", True),
-        ("passed", True),
-    ):
+    if report_schema == REPORT_SCHEMA_V6:
+        _exact_keys(slo, _SLO_KEYS_V6, path=f"{path}.slo")
+        slo_literals = (
+            ("point_count", POINT_COUNT),
+            ("threshold_ns", SLO_THRESHOLD_NS),
+            ("statistic", "true_morse_hgp_p95_end_to_end"),
+            ("scope", "true_morse_hgp_hierarchy"),
+            ("applicable", False),
+            ("passed", None),
+            (
+                "reason",
+                "point_tree_surrogate_does_not_materialize_morse_hgp_simplex_components",
+            ),
+        )
+    else:
+        _exact_keys(slo, _SLO_KEYS, path=f"{path}.slo")
+        slo_literals = (
+            ("point_count", POINT_COUNT),
+            ("threshold_ns", SLO_THRESHOLD_NS),
+            ("statistic", "p95_nearest_rank_warm_e2e"),
+            ("applicable", True),
+            ("passed", True),
+        )
+        require(
+            expected_percentiles["p95"] < SLO_THRESHOLD_NS,
+            f"{path}: legacy surrogate p95 misses its historical threshold",
+        )
+    for key, expected in slo_literals:
         _literal(slo, key, expected, path=f"{path}.slo")
-    require(
-        expected_percentiles["p95"] < SLO_THRESHOLD_NS,
-        f"{path}: raw-in-memory warm_e2e family p95 misses the strict SLO",
-    )
     return {
         "family": family,
         "report_schema": report_schema,
@@ -763,7 +930,7 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
         "runner_binary_size_bytes": runner_binary_size_bytes,
         "measured_seeds": measured_seeds,
         "measured_warm_e2e_ns": measured_e2e,
-        "hierarchy_digests": hierarchy_digests,
+        "surrogate_tree_digests": surrogate_tree_digests,
         "nearest_rank_warm_e2e_ns": summary_percentiles,
     }
 
@@ -773,8 +940,9 @@ def validate_campaign(
     *,
     expected_git_sha: str,
     input_artifact_sha256: Sequence[str],
+    legacy_surrogate_audit: bool = False,
 ) -> dict[str, Any]:
-    """Validate all three reports and return an independently replayed summary."""
+    """Audit three surrogate reports; never qualify a true HGP campaign."""
 
     require(
         _GIT_SHA.fullmatch(expected_git_sha) is not None,
@@ -799,7 +967,11 @@ def validate_campaign(
         "campaign input artifacts must have distinct SHA-256 commitments",
     )
     validated = [
-        validate_report(report, path=f"reports[{index}]")
+        validate_report(
+            report,
+            path=f"reports[{index}]",
+            legacy_surrogate_audit=legacy_surrogate_audit,
+        )
         for index, report in enumerate(reports)
     ]
     report_schemas = {entry["report_schema"] for entry in validated}
@@ -863,25 +1035,20 @@ def validate_campaign(
         "p99": _nearest_rank(measured_e2e, 99),
         "max": max(measured_e2e),
     }
-    require(
-        warm_e2e_aggregate["p95"] < SLO_THRESHOLD_NS,
-        "aggregate raw-in-memory warm_e2e p95 misses the strict SLO",
-    )
-    hierarchy_digests = [
+    surrogate_tree_digests = [
         digest
         for family in EXPECTED_FAMILIES
-        for digest in by_family[family]["hierarchy_digests"]
+        for digest in by_family[family]["surrogate_tree_digests"]
     ]
     require(
-        len(hierarchy_digests) == 360
-        and len(set(hierarchy_digests)) == len(hierarchy_digests),
-        "campaign must contain 360 globally distinct order/run hierarchy digests",
+        len(surrogate_tree_digests) == 360
+        and len(set(surrogate_tree_digests)) == len(surrogate_tree_digests),
+        "benchmark must contain 360 globally distinct point-tree surrogate digests",
     )
+    legacy_artifact = report_schema in (REPORT_SCHEMA_V4, REPORT_SCHEMA_V5)
     return {
         "schema": (
-            CHECK_SCHEMA_V5
-            if report_schema == REPORT_SCHEMA_V5
-            else CHECK_SCHEMA_V4
+            CHECK_SCHEMA_LEGACY if legacy_artifact else CHECK_SCHEMA_V6
         ),
         "git_sha": expected_git_sha,
         "provenance": {
@@ -899,9 +1066,9 @@ def validate_campaign(
         "families": list(EXPECTED_FAMILIES),
         "measurement_count": len(measured_e2e),
         "distinct_measured_seed_count": len(set(measured_seeds)),
-        "hierarchy_count_per_measurement": MAXIMUM_ORDER,
-        "merge_record_count_per_hierarchy": MERGE_RECORD_COUNT,
-        "all_measurements_strictly_below_threshold": all(
+        "point_spanning_tree_surrogate_count_per_measurement": MAXIMUM_ORDER,
+        "edge_record_count_per_surrogate": MERGE_RECORD_COUNT,
+        "all_measurements_below_historical_100ms_reference": all(
             value < SLO_THRESHOLD_NS for value in measured_e2e
         ),
         "family_nearest_rank_warm_e2e_ns": {
@@ -912,8 +1079,14 @@ def validate_campaign(
         "slo": {
             "point_count": POINT_COUNT,
             "threshold_ns": SLO_THRESHOLD_NS,
-            "statistic": "aggregate_p95_nearest_rank_warm_e2e",
-            "passed": True,
+            "statistic": "true_morse_hgp_p95_end_to_end",
+            "scope": "true_morse_hgp_hierarchy",
+            "applicable": False,
+            "passed": None,
+            "reason": (
+                "point_tree_surrogate_does_not_materialize_"
+                "morse_hgp_simplex_components"
+            ),
         },
         "timing_scope": {
             "input_boundary": "raw_in_memory_coordinates",
@@ -921,21 +1094,32 @@ def validate_campaign(
             "warm_e2e_clock_contiguous": True,
             "canonicalization_included_in_warm_e2e": True,
             "canonicalization_added_by_checker": False,
-            "output_boundary": "ten_reported_materialized_hierarchies",
+            "output_boundary": "ten_point_spanning_tree_surrogates",
             "synthetic_cloud_generation_excluded": True,
         },
         "runner_contract": {
             "schema": report_schema,
             "runner_binary_sha256": runner_binary_sha256,
             "runner_binary_size_bytes": runner_binary_size_bytes,
-            "mode": MODE_V5 if report_schema == REPORT_SCHEMA_V5 else MODE_V4,
+            "profile": (
+                "hgp_reduced_legacy_mislabel"
+                if legacy_artifact
+                else "point_mst_mutual_reachability_surrogate"
+            ),
+            "mode": (
+                MODE_V6
+                if report_schema == REPORT_SCHEMA_V6
+                else MODE_V5
+                if report_schema == REPORT_SCHEMA_V5
+                else MODE_V4
+            ),
             "canonicalization_timed": True,
             "weight_representation": WEIGHT_REPRESENTATION,
             "core_deadline_lower_envelope_ulps": CORE_DEADLINE_LOWER_ENVELOPE_ULPS,
             "component_bridge_neighbor_count": COMPONENT_BRIDGE_NEIGHBOR_COUNT,
             "component_bridge_policy": (
                 COMPONENT_BRIDGE_POLICY_V5
-                if report_schema == REPORT_SCHEMA_V5
+                if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6)
                 else COMPONENT_BRIDGE_POLICY_V4
             ),
             **(
@@ -951,28 +1135,38 @@ def validate_campaign(
                         COMPONENT_BRIDGE_MAXIMUM_CROSS_DISTANCE_EVALUATION_COUNT
                     ),
                 }
-                if report_schema == REPORT_SCHEMA_V5
+                if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6)
                 else {}
             ),
         },
         "content_evidence": {
-            "reported_hierarchy_count_per_run": MAXIMUM_ORDER,
-            "reported_merge_record_count_per_hierarchy": MERGE_RECORD_COUNT,
-            "globally_distinct_hierarchy_digest_count": len(hierarchy_digests),
-            "merge_records_embedded": False,
-            "merge_records_replayed": False,
+            "reported_point_spanning_tree_surrogate_count_per_run": MAXIMUM_ORDER,
+            "reported_edge_record_count_per_surrogate": MERGE_RECORD_COUNT,
+            "globally_distinct_surrogate_tree_digest_count": len(
+                surrogate_tree_digests
+            ),
+            "surrogate_edge_records_embedded": False,
+            "surrogate_edge_records_replayed": False,
             **(
-                {"merge_records_released_after_digest_and_export": True}
-                if report_schema == REPORT_SCHEMA_V5
+                {"surrogate_edge_records_released_after_digest_and_export": True}
+                if report_schema in (REPORT_SCHEMA_V5, REPORT_SCHEMA_V6)
                 else {}
             ),
         },
         "scope": {
-            "deployment_status": "architecture_only",
-            "public_status": "not_claimed",
+            "deployment_status": "diagnostic_surrogate_only",
+            "public_status": "not_a_morse_hgp_product_result",
             "exact_morse_hierarchy_claimed": False,
+            "true_hgp_campaign_eligible": False,
+            "point_vertex_universe_only": True,
+            "morse_hgp_simplex_components_materialized": False,
+            "legacy_surrogate_artifact": legacy_artifact,
         },
-        "result": "validated",
+        "result": (
+            "legacy_surrogate_artifact_audited"
+            if legacy_artifact
+            else "surrogate_audit_validated"
+        ),
     }
 
 
@@ -1062,6 +1256,14 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         help="full commit SHA from which all three reports were built",
     )
     parser.add_argument(
+        "--legacy-surrogate-audit",
+        action="store_true",
+        help=(
+            "explicitly permit historical v4/v5 reports as mislabeled "
+            "point-tree surrogate artifacts; never qualifies true HGP"
+        ),
+    )
+    parser.add_argument(
         "--summary-output",
         type=Path,
         help="atomically write the canonical validation summary to this path",
@@ -1083,6 +1285,7 @@ def main(argv: Sequence[str]) -> int:
         [report for report, _ in loaded],
         expected_git_sha=args.expected_git_sha,
         input_artifact_sha256=[digest for _, digest in loaded],
+        legacy_surrogate_audit=args.legacy_surrogate_audit,
     )
     if args.summary_output is not None:
         output = args.summary_output.resolve()

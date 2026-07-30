@@ -328,7 +328,7 @@ struct RunMetrics {
       options.emit_tree_path.emplace(value);
     } else {
       throw std::invalid_argument(
-          "usage: gpu_guarded_industrial_e2e [--point-count N] "
+          "usage: gpu_point_mst_mutual_reachability_surrogate [--point-count N] "
           "[--repetitions N] [--warmups N] "
           "[--family affine_uniform_binary64|jittered_dyadic_grid3d|"
           "balanced_multiscale_clusters] [--seed-base N] "
@@ -342,7 +342,7 @@ struct RunMetrics {
         "--point-count must be greater than 10 and fit the CUDA item domain");
   }
   if (options.maximum_order != kMaximumOrder) {
-    throw std::invalid_argument("the industrial contract requires --max-order 10");
+    throw std::invalid_argument("the point-tree surrogate requires --max-order 10");
   }
   if (options.seed_window < options.maximum_order) {
     throw std::invalid_argument("--seed-window must be at least --max-order");
@@ -1475,16 +1475,15 @@ void write_result_json(
     const RunnerBinaryIdentity& runner_binary,
     std::uint64_t p50,
     std::uint64_t p95,
-    std::uint64_t p99,
-    bool slo_passed) {
+    std::uint64_t p99) {
   std::cout << std::setprecision(17);
-  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v5\""
-            << ",\"result_kind\":\"guarded_industrial_candidate\""
+  std::cout << "{\"schema\":\"morsehgp3d.phase15.point_mst_mutual_reachability_surrogate.v6\""
+            << ",\"result_kind\":\"point_mst_mutual_reachability_surrogate_benchmark\""
             << ",\"phase\":15,\"backend\":\"cuda_g4_plus_host_binary64\""
-            << ",\"profile\":\"hgp_reduced\""
-            << ",\"mode\":\"warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_h0\""
-            << ",\"deployment_status\":\"architecture_only\""
-            << ",\"public_status\":\"not_claimed\",\"git_sha\":";
+            << ",\"profile\":\"point_mst_mutual_reachability_surrogate\""
+            << ",\"mode\":\"warm_fresh_cloud_lbvh_top10_capped_component_bridges_parallel_point_h0_surrogate\""
+            << ",\"deployment_status\":\"diagnostic_surrogate_only\""
+            << ",\"public_status\":\"not_a_morse_hgp_product_result\",\"git_sha\":";
   write_json_string(std::cout, MORSEHGP3D_GIT_SHA);
   std::cout << ",\"runner_binary_sha256\":";
   write_json_string(std::cout, runner_binary.sha256);
@@ -1501,8 +1500,10 @@ void write_result_json(
             << ",\"cloud_generation_timed\":false"
             << ",\"canonicalization_timed\":true"
             << ",\"fresh_cloud_per_run\":true"
-            << ",\"full_pipeline\":true"
-            << ",\"ten_hierarchies_materialized\":true"
+            << ",\"surrogate_pipeline_complete\":true"
+            << ",\"point_vertex_universe_only\":true"
+            << ",\"ten_point_spanning_tree_surrogates_materialized\":true"
+            << ",\"morse_hgp_simplex_components_materialized\":false"
             << ",\"weight_representation\":\"squared_binary64_mutual_reachability_with_k2plus_core_lower_envelope\""
             << ",\"core_deadline_lower_envelope_ulps\":"
             << kCoreDeadlineLowerEnvelopeUlps
@@ -1523,6 +1524,7 @@ void write_result_json(
             << ",\"higher_order_delaunay_mosaic_materialized\":false"
             << ",\"global_pair_matrix_materialized\":false"
             << ",\"exact_morse_hierarchy_claimed\":false"
+            << ",\"true_hgp_campaign_eligible\":false"
             << ",\"oracle_exports_outside_timed_region\":true"
             << ",\"runs\":[";
   for (std::size_t index = 0U; index < runs.size(); ++index) {
@@ -1571,19 +1573,19 @@ void write_result_json(
               << (run.component_bridge_budget_satisfied ? "true" : "false")
               << ",\"component_bridge_budget_stop_reason\":";
     write_json_string(std::cout, run.component_bridge_budget_stop_reason);
-    std::cout << ",\"materialized_merge_record_count\":"
+    std::cout << ",\"materialized_surrogate_edge_record_count\":"
               << run.materialized_merge_record_count
-              << ",\"released_merge_record_count\":"
+              << ",\"released_surrogate_edge_record_count\":"
               << run.released_merge_record_count
-              << ",\"retained_merge_record_count\":"
+              << ",\"retained_surrogate_edge_record_count\":"
               << run.retained_merge_record_count
-              << ",\"merge_records_released_after_digest_and_export\":"
+              << ",\"surrogate_edge_records_released_after_digest_and_export\":"
               << (run.merge_records_released_after_digest_and_export
                       ? "true"
                       : "false")
-              << ",\"exported_order_count\":"
+              << ",\"exported_surrogate_order_count\":"
               << run.exported_order_count
-              << ",\"exported_merge_record_count\":"
+              << ",\"exported_surrogate_edge_record_count\":"
               << run.exported_merge_record_count
               << ",\"neighbor_record_count\":"
               << run.neighbor_record_count
@@ -1602,14 +1604,14 @@ void write_result_json(
     } else {
       std::cout << "null";
     }
-    std::cout << ",\"hierarchies\":[";
+    std::cout << ",\"point_spanning_tree_surrogates\":[";
     for (std::size_t order = 0U; order < run.reductions.size(); ++order) {
       if (order != 0U) {
         std::cout.put(',');
       }
       const OrderReduction& reduction = run.reductions[order];
-      std::cout << "{\"order\":" << reduction.order
-                << ",\"merge_record_count\":"
+      std::cout << "{\"neighbor_rank\":" << reduction.order
+                << ",\"edge_count\":"
                 << reduction.merge_record_count
                 << ",\"digest\":";
       write_json_string(std::cout, hex64(reduction.digest));
@@ -1623,15 +1625,11 @@ void write_result_json(
             << ",\"p95\":" << p95 << ",\"p99\":" << p99 << '}'
             << ",\"slo\":{\"point_count\":50000,\"threshold_ns\":"
             << kSloNanoseconds
-            << ",\"statistic\":\"p95_nearest_rank_warm_e2e\""
-            << ",\"applicable\":"
-            << (options.point_count == 50'000U ? "true" : "false")
-            << ",\"passed\":" << (slo_passed ? "true" : "false")
-            << "},\"result\":\""
-            << (options.point_count == 50'000U
-                    ? (slo_passed ? "slo_satisfied" : "slo_missed")
-                    : "completed")
-            << "\"}\n";
+            << ",\"statistic\":\"true_morse_hgp_p95_end_to_end\""
+            << ",\"scope\":\"true_morse_hgp_hierarchy\""
+            << ",\"applicable\":false,\"passed\":null"
+            << ",\"reason\":\"point_tree_surrogate_does_not_materialize_morse_hgp_simplex_components\"}"
+            << ",\"result\":\"surrogate_benchmark_completed\"}\n";
 }
 
 [[nodiscard]] std::vector<std::uint64_t> make_run_seeds(
@@ -1719,14 +1717,11 @@ int main(int argc, char** argv) {
     const std::uint64_t p50 = nearest_rank(measured_e2e, 50U);
     const std::uint64_t p95 = nearest_rank(measured_e2e, 95U);
     const std::uint64_t p99 = nearest_rank(measured_e2e, 99U);
-    const bool slo_passed = p95 < kSloNanoseconds;
-    write_result_json(
-        options, runs, runner_binary, p50, p95, p99, slo_passed);
-    return options.point_count == 50'000U && !slo_passed
-               ? EXIT_FAILURE
-               : EXIT_SUCCESS;
+    write_result_json(options, runs, runner_binary, p50, p95, p99);
+    return EXIT_SUCCESS;
   } catch (const std::exception& error) {
-    std::cerr << "gpu_guarded_industrial_e2e: " << error.what() << '\n';
+    std::cerr << "gpu_point_mst_mutual_reachability_surrogate: "
+              << error.what() << '\n';
     return EXIT_FAILURE;
   }
 }

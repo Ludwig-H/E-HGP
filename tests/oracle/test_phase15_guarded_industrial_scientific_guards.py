@@ -155,7 +155,7 @@ def _runner_report(
     }
 
 
-def _runner_report_v5(
+def _runner_report_v6(
     *,
     family: str,
     point_count: int,
@@ -180,13 +180,33 @@ def _runner_report_v5(
     )
     value.update(
         {
-            "schema": checker.RUNNER_SCHEMA_V5,
+            "schema": checker.RUNNER_SCHEMA_V6,
             "maximum_order": 10,
             "export_maximum_order": len(trees),
             "mode": (
-                "warm_fresh_cloud_lbvh_top10_capped_"
-                "component_bridges_parallel_h0"
+                "warm_fresh_cloud_lbvh_top10_capped_component_bridges_"
+                "parallel_point_h0_surrogate"
             ),
+            "result_kind": "point_mst_mutual_reachability_surrogate_benchmark",
+            "profile": "point_mst_mutual_reachability_surrogate",
+            "deployment_status": "diagnostic_surrogate_only",
+            "public_status": "not_a_morse_hgp_product_result",
+            "surrogate_pipeline_complete": True,
+            "point_vertex_universe_only": True,
+            "ten_point_spanning_tree_surrogates_materialized": True,
+            "morse_hgp_simplex_components_materialized": False,
+            "exact_morse_hierarchy_claimed": False,
+            "true_hgp_campaign_eligible": False,
+            "slo": {
+                "scope": "true_morse_hgp_hierarchy",
+                "applicable": False,
+                "passed": None,
+                "reason": (
+                    "point_tree_surrogate_does_not_materialize_"
+                    "morse_hgp_simplex_components"
+                ),
+            },
+            "result": "surrogate_benchmark_completed",
             "component_bridge_policy": (
                 "top10_components_capped_centroid_knn_top8_"
                 "projection_cross_min"
@@ -199,6 +219,15 @@ def _runner_report_v5(
         }
     )
     run = value["runs"][0]
+    run["point_spanning_tree_surrogates"] = [
+        {
+            "neighbor_rank": tree["order"],
+            "edge_count": tree["merge_record_count"],
+            "digest": tree["digest"],
+            "root_squared_level": tree["root_squared_level"],
+        }
+        for tree in run.pop("hierarchies")
+    ]
     run.update(
         {
             "top_k_component_count": 1,
@@ -212,12 +241,13 @@ def _runner_report_v5(
             "component_bridge_cross_distance_evaluation_count": 0,
             "component_bridge_budget_satisfied": True,
             "component_bridge_budget_stop_reason": "none",
-            "materialized_merge_record_count": 10 * (point_count - 1),
-            "released_merge_record_count": 10 * (point_count - 1),
-            "retained_merge_record_count": 0,
-            "merge_records_released_after_digest_and_export": True,
-            "exported_order_count": len(trees),
-            "exported_merge_record_count": len(trees) * (point_count - 1),
+            "materialized_surrogate_edge_record_count": 10 * (point_count - 1),
+            "released_surrogate_edge_record_count": 10 * (point_count - 1),
+            "retained_surrogate_edge_record_count": 0,
+            "surrogate_edge_records_released_after_digest_and_export": True,
+            "exported_surrogate_order_count": len(trees),
+            "exported_surrogate_edge_record_count": len(trees)
+            * (point_count - 1),
         }
     )
     return value
@@ -792,7 +822,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
             recertification["support_cardinality"],
         )
 
-    def test_v5_runner_binding_accepts_partial_order12_export_and_ten_metadata(
+    def test_v6_surrogate_binding_accepts_partial_order12_export_and_ten_metadata(
         self,
     ) -> None:
         family = "affine_uniform_binary64"
@@ -811,7 +841,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 expected_point_count=point_count,
                 expected_tree_count=2,
             )
-            valid = _runner_report_v5(
+            valid = _runner_report_v6(
                 family=family,
                 point_count=point_count,
                 seed=seed,
@@ -826,12 +856,34 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 runner_binary_path=runner_binary,
                 expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
             )
-            self.assertEqual(binding["runner_schema"], checker.RUNNER_SCHEMA_V5)
-            self.assertEqual(binding["reported_hierarchy_metadata_count"], 10)
-            self.assertEqual(binding["exported_hierarchy_count"], 2)
-            self.assertEqual([item["order"] for item in binding["hierarchies"]], [1, 2])
+            self.assertEqual(binding["runner_schema"], checker.RUNNER_SCHEMA_V6)
+            self.assertEqual(
+                binding["reported_point_spanning_tree_surrogate_metadata_count"],
+                10,
+            )
+            self.assertEqual(
+                binding["exported_point_spanning_tree_surrogate_count"], 2
+            )
+            self.assertEqual(
+                [
+                    item["order"]
+                    for item in binding["point_spanning_tree_surrogates"]
+                ],
+                [1, 2],
+            )
+            self.assertIs(binding["true_hgp_campaign_eligible"], False)
 
             mutations = (
+                (
+                    "true HGP eligibility forgery",
+                    ("report", "true_hgp_campaign_eligible", True),
+                    "true_hgp_campaign_eligible",
+                ),
+                (
+                    "exact hierarchy forgery",
+                    ("report", "exact_morse_hierarchy_claimed", True),
+                    "exact_morse_hierarchy_claimed",
+                ),
                 ("export order", ("report", "export_maximum_order", 3), "export_maximum_order"),
                 ("bounded mode", ("report", "mode", "forged"), "mode"),
                 (
@@ -888,24 +940,24 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 ),
                 (
                     "materialized count",
-                    ("run", "materialized_merge_record_count", 39),
-                    "materialized_merge_record_count",
+                    ("run", "materialized_surrogate_edge_record_count", 39),
+                    "materialized_surrogate_edge_record_count",
                 ),
                 (
                     "retained count",
-                    ("run", "retained_merge_record_count", 1),
-                    "retained_merge_record_count",
+                    ("run", "retained_surrogate_edge_record_count", 1),
+                    "retained_surrogate_edge_record_count",
                 ),
                 (
                     "exported record count",
-                    ("run", "exported_merge_record_count", 7),
-                    "exported_merge_record_count",
+                    ("run", "exported_surrogate_edge_record_count", 7),
+                    "exported_surrogate_edge_record_count",
                 ),
                 (
                     "release claim",
                     (
                         "run",
-                        "merge_records_released_after_digest_and_export",
+                        "surrogate_edge_records_released_after_digest_and_export",
                         False,
                     ),
                     "did not release",
@@ -924,7 +976,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     elif mutation[0] == "run":
                         changed["runs"][0][mutation[1]] = mutation[2]
                     else:
-                        changed["runs"][0]["hierarchies"][mutation[1]][
+                        changed["runs"][0]["point_spanning_tree_surrogates"][mutation[1]][
                             mutation[2]
                         ] = mutation[3]
                     _write_runner_report(runner_report, changed)
@@ -966,6 +1018,20 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 trees=trees,
             )
 
+            _write_runner_report(runner_report, valid)
+            with self.assertRaisesRegex(
+                checker.ScientificGuardError,
+                "explicit legacy-surrogate audit mode",
+            ):
+                checker._bind_runner_report(
+                    parsed,
+                    runner_report_path=runner_report,
+                    family=family,
+                    expected_git_sha=GIT_SHA,
+                    runner_binary_path=runner_binary,
+                    expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+                )
+
             forged_report = copy.deepcopy(valid)
             forged_report["schema"] = "forged.runner.schema"
             _write_runner_report(runner_report, forged_report)
@@ -979,6 +1045,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=runner_binary,
                     expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    legacy_surrogate_audit=True,
                 )
 
             forged_digest = copy.deepcopy(valid)
@@ -996,6 +1063,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=runner_binary,
                     expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    legacy_surrogate_audit=True,
                 )
 
             forged_git = copy.deepcopy(valid)
@@ -1011,6 +1079,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=runner_binary,
                     expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    legacy_surrogate_audit=True,
                 )
 
             _write_runner_report(runner_report, valid)
@@ -1077,6 +1146,22 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
         self.assertEqual(
             options.expected_runner_binary_sha256, RUNNER_BINARY_SHA256
         )
+        self.assertIs(options.legacy_surrogate_audit, False)
+        legacy_options = parser.parse_args(
+            base
+            + [
+                "--runner-report",
+                "runner.json",
+                "--expected-git-sha",
+                GIT_SHA,
+                "--runner-binary",
+                "runner",
+                "--expected-runner-binary-sha256",
+                RUNNER_BINARY_SHA256,
+                "--legacy-surrogate-audit",
+            ]
+        )
+        self.assertIs(legacy_options.legacy_surrogate_audit, True)
 
     def test_runner_binary_binding_hashes_bytes_and_rejects_mutation(self) -> None:
         family = "affine_uniform_binary64"
@@ -1121,6 +1206,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 expected_git_sha=GIT_SHA,
                 runner_binary_path=first_binary,
                 expected_runner_binary_sha256=first_sha256,
+                legacy_surrogate_audit=True,
             )
             self.assertEqual(first_binding["runner_binary_sha256"], first_sha256)
             self.assertEqual(
@@ -1136,6 +1222,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=second_binary,
                     expected_runner_binary_sha256=second_sha256,
+                    legacy_surrogate_audit=True,
                 )
 
             _write_runner_report(
@@ -1156,6 +1243,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 expected_git_sha=GIT_SHA,
                 runner_binary_path=second_binary,
                 expected_runner_binary_sha256=second_sha256,
+                legacy_surrogate_audit=True,
             )
             self.assertEqual(second_binding["runner_binary_sha256"], second_sha256)
 
@@ -1169,6 +1257,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=second_binary,
                     expected_runner_binary_sha256=first_sha256,
+                    legacy_surrogate_audit=True,
                 )
             first_binary.write_bytes(second_bytes)
             with self.assertRaisesRegex(
@@ -1181,6 +1270,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=first_binary,
                     expected_runner_binary_sha256=first_sha256,
+                    legacy_surrogate_audit=True,
                 )
 
     def test_runner_binding_rejects_forged_root_and_nonunique_export(self) -> None:
@@ -1218,6 +1308,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=runner_binary,
                     expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    legacy_surrogate_audit=True,
                 )
 
             report = _runner_report(
@@ -1240,6 +1331,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     expected_git_sha=GIT_SHA,
                     runner_binary_path=runner_binary,
                     expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    legacy_surrogate_audit=True,
                 )
 
     def test_small_end_to_end_independent_oracle(self) -> None:
@@ -1272,6 +1364,7 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 expected_tree_count=2,
                 triangle_batch_size=31,
                 workers=1,
+                legacy_surrogate_audit=True,
             )
             self.assertEqual(
                 report["input"]["export_sha256"],
@@ -1285,7 +1378,9 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 report["provenance"]["runner_binary_sha256"],
                 hashlib.sha256(runner_binary.read_bytes()).hexdigest(),
             )
-        self.assertEqual(report["result"], "scientific_guards_satisfied")
+        self.assertEqual(
+            report["result"], "surrogate_scientific_guards_satisfied"
+        )
         self.assertEqual(report["provenance"]["git_sha"], GIT_SHA)
         self.assertEqual(
             report["provenance"]["runner_binary_sha256"],
@@ -1297,8 +1392,10 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
             ]
         )
         self.assertTrue(
-            report["provenance"]["all_hierarchy_digests_match_export"]
+            report["provenance"]["all_surrogate_tree_digests_match_export"]
         )
+        self.assertIs(report["scope"]["true_hgp_campaign_eligible"], False)
+        self.assertEqual(report["scope"]["guard_scope"], "point_tree_surrogate_only")
         self.assertTrue(
             report["provenance"]["all_root_squared_levels_match_export"]
         )
