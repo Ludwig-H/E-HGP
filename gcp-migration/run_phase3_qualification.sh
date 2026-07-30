@@ -40,6 +40,7 @@ PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE=0
 PHASE7_H_POLYTOPE=0
 PHASE9_PAIR_SUPPORT_PHI=0
 PHASE15_EXACT_DIAMETRAL_PHI=0
+PHASE15_DEVICE_FRONTIER_50K=0
 MORTON_YAO48_SEED_WORK_PROFILE=0
 
 SESSION_CERTIFIED=0
@@ -61,6 +62,8 @@ LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT=""
 LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT=""
 LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT=""
+LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
+LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -82,7 +85,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -147,6 +150,13 @@ exclusive des autres compagnons; son artefact reste provisoire jusqu'à la
 certification ciblée TERMINATED et ne revendique ni catalogue, ni SLO, ni
 statut scientifique ou public.
 
+--phase15-device-frontier-50k ajoute exclusivement la qualification standard
+non-smoke de la frontière tuilée à 50 000 points, rang fermé 11, tuile 4096,
+famille adversarial_mixed_dyadic et graine enregistrée. Elle exige une
+couverture complète et une masse non résolue nulle, mais reste un résultat de
+composant sans catalogue, exactitude de hiérarchie, scalabilité, SLO ou statut
+public revendiqué.
+
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
 dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
@@ -202,6 +212,10 @@ while (($# > 0)); do
             PHASE15_EXACT_DIAMETRAL_PHI=1
             shift
             ;;
+        --phase15-device-frontier-50k)
+            PHASE15_DEVICE_FRONTIER_50K=1
+            shift
+            ;;
         --result-dir)
             (($# >= 2)) || die "Valeur manquante après --result-dir."
             RESULT_DIR="$2"
@@ -238,8 +252,17 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1 && \
     (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
      PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || \
      PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
-     PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1))); then
+     PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
+     PHASE15_DEVICE_FRONTIER_50K == 1))); then
     die "--phase15-exact-diametral-phi est mutuellement exclusive de tous les autres compagnons."
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1 && \
+    (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || \
+     PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
+     PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
+     PHASE15_EXACT_DIAMETRAL_PHI == 1))); then
+    die "--phase15-device-frontier-50k est mutuellement exclusive de tous les autres compagnons."
 fi
 
 ((ASSUME_YES == 1)) || \
@@ -381,6 +404,12 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
         ! -L "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT="${RESULT_DIR}/phase15-device-frontier-50k-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}" && \
+        ! -L "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
@@ -481,6 +510,14 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact exact diametral-Phi Phase 15 temporaire local."
+    fi
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    if ! LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase15-device-frontier-50k-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact device-frontier 50k Phase 15 temporaire local."
     fi
 fi
 
@@ -973,6 +1010,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -1058,6 +1099,7 @@ printf '%s\n' \
     "  replay H-polytope: $([[ ${PHASE7_H_POLYTOPE} == 1 ]] && printf 'qualification CUDA G4 Phase 7.8 activée' || printf 'désactivé')" \
     "  replay Phi Phase 9: $([[ ${PHASE9_PAIR_SUPPORT_PHI} == 1 ]] && printf 'qualification CUDA G4 + recertification CPU activée' || printf 'désactivé')" \
     "  replay Phi Phase 15: $([[ ${PHASE15_EXACT_DIAMETRAL_PHI} == 1 ]] && printf 'prédicat ponctuel exact CUDA G4 activé' || printf 'désactivé')" \
+    "  frontier 50k Phase 15: $([[ ${PHASE15_DEVICE_FRONTIER_50K} == 1 ]] && printf 'qualification standard non-smoke activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -1087,6 +1129,7 @@ remote_phase5_exact_search_work_profile_artifact=""
 remote_phase7_h_polytope_artifact=""
 remote_phase9_pair_support_phi_artifact=""
 remote_phase15_exact_diametral_phi_artifact=""
+remote_phase15_device_frontier_50k_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -1098,6 +1141,7 @@ quoted_phase5_exact_search_work_profile_artifact=""
 quoted_phase7_h_polytope_artifact=""
 quoted_phase9_pair_support_phi_artifact=""
 quoted_phase15_exact_diametral_phi_artifact=""
+quoted_phase15_device_frontier_50k_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
@@ -1105,6 +1149,7 @@ phase5_exact_search_work_profile_worker_option=""
 phase7_h_polytope_worker_option=""
 phase9_pair_support_phi_worker_option=""
 phase15_exact_diametral_phi_worker_option=""
+phase15_device_frontier_50k_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
@@ -1148,6 +1193,11 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
     quoted_phase15_exact_diametral_phi_artifact="$(shell_quote "${remote_phase15_exact_diametral_phi_artifact}")"
     phase15_exact_diametral_phi_worker_option=" --phase15-exact-diametral-phi-output ${quoted_phase15_exact_diametral_phi_artifact}"
 fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    remote_phase15_device_frontier_50k_artifact="${REMOTE_WORKDIR}/phase15-device-frontier-50k-result.json"
+    quoted_phase15_device_frontier_50k_artifact="$(shell_quote "${remote_phase15_device_frontier_50k_artifact}")"
+    phase15_device_frontier_50k_worker_option=" --phase15-device-frontier-50k-output ${quoted_phase15_device_frontier_50k_artifact}"
+fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
@@ -1164,7 +1214,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1261,6 +1311,19 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase15_exact_diametral_phi_artifact}" \
         "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase15_device_frontier_50k_artifact}" \
+        "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -1730,6 +1793,29 @@ if lifecycle != {
     "worker_mutates_gcp": False,
 }:
     raise SystemExit("contrat de cycle de vie spatial absent")
+PY
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    [[ -s "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" ]] || \
+        die "Artefact device-frontier 50k Phase 15 distant récupéré mais vide."
+    python3 -B - "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+from pathlib import Path
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+environment_artifact_path = Path(sys.argv[3])
+sys.path.insert(0, sys.argv[4])
+
+import assemble_phase15_device_frontier_50k_qualification as assembler
+
+assembler.validate_artifact_file(
+    artifact_path,
+    git_sha=git_sha,
+    environment_artifact_path=environment_artifact_path,
+)
 PY
 fi
 
@@ -3299,6 +3385,7 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" "${LOCAL_PHASE7_H_POLYTOPE_RESULT}" \
     "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}" \
     "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}" \
+    "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}" \
     "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
@@ -3338,6 +3425,10 @@ if sys.argv[15] or sys.argv[16]:
     if not sys.argv[15] or not sys.argv[16]:
         raise SystemExit("paire de publication exact diametral-Phi Phase 15 incomplète")
     pairs.append((Path(sys.argv[15]), Path(sys.argv[16])))
+if sys.argv[17] or sys.argv[18]:
+    if not sys.argv[17] or not sys.argv[18]:
+        raise SystemExit("paire de publication device-frontier 50k Phase 15 incomplète")
+    pairs.append((Path(sys.argv[17]), Path(sys.argv[18])))
 
 documents = []
 for temporary, _ in pairs:
@@ -3347,18 +3438,18 @@ for temporary, _ in pairs:
     lifecycle["worker_status_before_targeted_stop"] = value["status"]
     lifecycle.update(
         {
-            "final_status": sys.argv[21],
+            "final_status": sys.argv[23],
             "final_status_readback": "gcloud_compute_instances_describe",
-            "final_status_verified_at_utc": sys.argv[22],
-            "guest_shutdown_minutes": int(sys.argv[20]),
+            "final_status_verified_at_utc": sys.argv[24],
+            "guest_shutdown_minutes": int(sys.argv[22]),
             "initial_status": "TERMINATED",
             "initial_status_basis": "start_and_verify_precondition",
-            "instance": sys.argv[19],
-            "last_start_timestamp": sys.argv[23],
-            "project": sys.argv[17],
+            "instance": sys.argv[21],
+            "last_start_timestamp": sys.argv[25],
+            "project": sys.argv[19],
             "start_handoff_schema": "e-hgp.start-handoff.v3",
             "targeted_stop_verified": True,
-            "zone": sys.argv[18],
+            "zone": sys.argv[20],
         }
     )
     value["status"] = "passed"
@@ -3451,6 +3542,9 @@ fi
 if [[ -n "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
@@ -3459,6 +3553,7 @@ LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
 LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT=""
+LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -3494,6 +3589,10 @@ fi
 if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
     printf '[ARTEFACT] Qualification exact diametral-Phi Phase 15 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}"
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    printf '[ARTEFACT] Qualification device-frontier 50k Phase 15 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -3536,4 +3635,8 @@ fi
 if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
     printf '[SUCCÈS] Qualification exact diametral-Phi Phase 15 compagnon conservée : %s\n' \
         "${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT}"
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    printf '[SUCCÈS] Qualification device-frontier 50k Phase 15 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}"
 fi

@@ -15,6 +15,7 @@ readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE="morsehgp3
 readonly PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase7_h_polytope_qualification.py"
 readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase9_pair_support_phi_qualification.py"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_exact_diametral_phi_qualification.py"
+readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_device_frontier_50k_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -40,6 +41,9 @@ readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE="build/morsehgp3d-cuda-release/
 readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE}"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_diametral_phi_qualification"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE}"
+readonly PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification"
+readonly PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE}"
+readonly PHASE15_DEVICE_FRONTIER_50K_SEED=1558325537444281125
 readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification"
 readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_PATH="${CONTAINER_REPOSITORY}/${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE}"
 readonly MORTON_YAO48_SEED_WORK_PROFILE_BINARY_PATH="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile"
@@ -113,6 +117,10 @@ PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW=""
 PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH=""
 PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PARENT=""
 PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_BASE=""
+PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW=""
+PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH=""
+PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT=""
+PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE=""
 MORTON_YAO48_SEED_WORK_PROFILE=0
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
@@ -128,6 +136,7 @@ PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
 PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
+PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -203,7 +212,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -236,6 +245,11 @@ L'option exact diametral-Phi Phase 15 qualifie seulement le prédicat ponctuel
 exact : intervalle dirigé, limbs dyadiques 128/256 et lot BigInt de repli. Elle
 audite les builds Release et audit, l'ELF AOT sm_120 sans PTX, memcheck et
 racecheck. Le compagnon ne revendique ni catalogue, ni SLO, ni statut public.
+L'option device-frontier 50k Phase 15 exécute exclusivement la qualification
+standard non-smoke à 50 000 points, rang fermé 11, tuile 4096, famille
+adversarial_mixed_dyadic et graine enregistrée. Toute censure ou masse non
+résolue échoue fermé; le compagnon reste un résultat de composant sans
+catalogue scientifique, exactitude de hiérarchie, SLO ou statut public.
 EOF
 }
 
@@ -312,6 +326,14 @@ while (($# > 0)); do
             [[ -z "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]] || \
                 die "--phase15-exact-diametral-phi-output ne peut être fourni qu'une fois."
             PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase15-device-frontier-50k-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase15-device-frontier-50k-output."
+            [[ -z "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]] || \
+                die "--phase15-device-frontier-50k-output ne peut être fourni qu'une fois."
+            PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -432,8 +454,35 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]] && \
        -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" || \
        -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
        -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
-       -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]]; then
+       -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
+       -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
     die "--phase15-exact-diametral-phi-output est exclusive des autres compagnons."
+fi
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
+    case "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase15-device-frontier-50k-output doit être un chemin absolu." ;;
+    esac
+    for existing_output in \
+        "${OUTPUT_RAW}" "${PHASE4_OUTPUT_RAW}" "${PHASE5_OUTPUT_RAW}" \
+        "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}"; do
+        [[ -z "${existing_output}" || \
+            "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" != \
+                "${existing_output}" ]] || \
+            die "La sortie device-frontier 50k Phase 15 doit être distincte de toutes les autres sorties."
+    done
+    if [[ -n "${PHASE4_OUTPUT_RAW}" || -n "${PHASE5_OUTPUT_RAW}" || \
+          -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" || \
+          -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
+          -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
+          -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]]; then
+        die "--phase15-device-frontier-50k-output est exclusive des autres compagnons."
+    fi
 fi
 certify_fixed_timeout || \
     die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
@@ -683,6 +732,44 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]] || \
         die "La sortie exact diametral-Phi Phase 15 doit être inexistante : ${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
+    PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}")"
+    PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE="$(basename -- \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}")"
+    [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE}" && \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE}" != "." && \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact device-frontier 50k Phase 15 invalide."
+    [[ -d "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT}" ]] || \
+        die "Le répertoire parent de --phase15-device-frontier-50k-output doit déjà exister."
+    PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT="$(cd -- \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie device-frontier 50k Phase 15 illisible."
+    PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH="${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT}/${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE}"
+    [[ "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT}" == \
+        "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    for existing_output in \
+        "${OUTPUT_PATH}" "${PHASE4_OUTPUT_PATH}" "${PHASE5_OUTPUT_PATH}" \
+        "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}"; do
+        [[ -z "${existing_output}" || \
+            "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" != \
+                "${existing_output}" ]] || \
+            die "La sortie device-frontier 50k Phase 15 doit être distincte de toutes les autres sorties."
+    done
+    case "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase15-device-frontier-50k-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" && \
+        ! -L "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]] || \
+        die "La sortie device-frontier 50k Phase 15 doit être inexistante : ${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -706,6 +793,7 @@ readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER="${REPOSITORY_ROOT}
 readonly PHASE7_H_POLYTOPE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE}"
 readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE}"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER_RELATIVE}"
+readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -753,6 +841,11 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}" && \
         ! -L "${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}" ]] || \
         die "Assembleur exact diametral-Phi Phase 15 absent ou symbolique : ${PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER}."
+fi
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}" && \
+        ! -L "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}" ]] || \
+        die "Assembleur device-frontier 50k Phase 15 absent ou symbolique : ${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}."
 fi
 
 remove_container_from_cidfile() {
@@ -928,6 +1021,10 @@ cleanup() {
         -f "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" && \
+        -f "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -1040,6 +1137,16 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
         ! -L "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" ]] || \
         die "Le nom temporaire exact diametral-Phi Phase 15 reste occupé."
 fi
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
+    PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP="$(mktemp \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT}/.${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire device-frontier 50k Phase 15."
+    rm -f -- "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" || \
+        die "Impossible de libérer le nom temporaire device-frontier 50k Phase 15."
+    [[ ! -e "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" && \
+        ! -L "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" ]] || \
+        die "Le nom temporaire device-frontier 50k Phase 15 reste occupé."
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -1108,6 +1215,10 @@ readonly PHASE15_EXACT_DIAMETRAL_PHI_PTX_LOG="${LOG_DIR}/phase15-exact-diametral
 readonly PHASE15_EXACT_DIAMETRAL_PHI_PTX_STDERR_LOG="${LOG_DIR}/phase15-exact-diametral-phi-cuobjdump-ptx.stderr.log"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_MEMCHECK_LOG="${LOG_DIR}/phase15-exact-diametral-phi-memcheck.log"
 readonly PHASE15_EXACT_DIAMETRAL_PHI_RACECHECK_LOG="${LOG_DIR}/phase15-exact-diametral-phi-racecheck.log"
+readonly PHASE15_DEVICE_FRONTIER_50K_BUILD_LOG="${LOG_DIR}/phase15-device-frontier-50k-build.log"
+readonly PHASE15_DEVICE_FRONTIER_50K_QUALIFICATION_LOG="${RESULT_DIR}/phase15-device-frontier-50k-qualification.json"
+readonly PHASE15_DEVICE_FRONTIER_50K_STDERR_LOG="${LOG_DIR}/phase15-device-frontier-50k-qualification.stderr.log"
+readonly PHASE15_DEVICE_FRONTIER_50K_TIMING_LOG="${RESULT_DIR}/phase15-device-frontier-50k-timing.json"
 declare -a PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS=()
 declare -a PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS=()
 
@@ -2196,6 +2307,132 @@ PY
     fi
 fi
 
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
+    begin_unit "phase15-device-frontier-50k-build"
+    if ! run_container "phase15-device-frontier-50k-build" \
+        "${PHASE15_DEVICE_FRONTIER_50K_BUILD_LOG}" \
+        cmake --build "${MODULE_DIR}" \
+        --target \
+            morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification \
+        --parallel 8; then
+        report_failure_log "phase15-device-frontier-50k-build" \
+            "${PHASE15_DEVICE_FRONTIER_50K_BUILD_LOG}"
+        die "La construction ciblée device-frontier 50k Phase 15 a échoué."
+    fi
+    [[ -f "${BUILD_DIR}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire CUDA device-frontier 50k Phase 15 n'a pas été construit sûrement."
+
+    begin_unit "phase15-device-frontier-50k-qualification"
+    phase15_device_frontier_50k_started_ns="$("${DATE_BIN}" +%s%N)" || \
+        die "Horloge nanoseconde illisible avant la qualification device-frontier 50k."
+    [[ "${phase15_device_frontier_50k_started_ns}" =~ ^[0-9]{19}$ ]] || \
+        die "Horodatage initial device-frontier 50k invalide."
+    phase15_device_frontier_50k_status=0
+    if run_container_split_output "phase15-device-frontier-50k-qualification" \
+        "${PHASE15_DEVICE_FRONTIER_50K_QUALIFICATION_LOG}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_STDERR_LOG}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH}" \
+        --point-count 50000 \
+        --family adversarial_mixed_dyadic \
+        --maximum-closed-rank 11 \
+        --anchor-tile-capacity 4096 \
+        --seed "${PHASE15_DEVICE_FRONTIER_50K_SEED}"; then
+        phase15_device_frontier_50k_status=0
+    else
+        phase15_device_frontier_50k_status=$?
+    fi
+    phase15_device_frontier_50k_finished_ns="$("${DATE_BIN}" +%s%N)" || \
+        die "Horloge nanoseconde illisible après la qualification device-frontier 50k."
+    [[ "${phase15_device_frontier_50k_finished_ns}" =~ ^[0-9]{19}$ ]] || \
+        die "Horodatage final device-frontier 50k invalide."
+    python3 -B - \
+        "${PHASE15_DEVICE_FRONTIER_50K_TIMING_LOG}" \
+        "${phase15_device_frontier_50k_started_ns}" \
+        "${phase15_device_frontier_50k_finished_ns}" \
+        "${phase15_device_frontier_50k_status}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_SEED}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+started = int(sys.argv[2])
+finished = int(sys.argv[3])
+status = int(sys.argv[4])
+binary = sys.argv[5]
+seed = sys.argv[6]
+if finished <= started:
+    raise SystemExit("qualification device-frontier 50k sans intervalle positif")
+record = {
+    "command": [
+        binary,
+        "--point-count", "50000",
+        "--family", "adversarial_mixed_dyadic",
+        "--maximum-closed-rank", "11",
+        "--anchor-tile-capacity", "4096",
+        "--seed", seed,
+    ],
+    "elapsed_wall_ns": finished - started,
+    "exit_status": status,
+    "finished_epoch_ns": finished,
+    "schema": "morsehgp3d.phase15.device_frontier_50k_timing.v1",
+    "started_epoch_ns": started,
+}
+path.write_text(
+    json.dumps(record, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    + "\n",
+    encoding="utf-8",
+)
+PY
+    if ((phase15_device_frontier_50k_status != 0)); then
+        report_failure_log "phase15-device-frontier-50k-qualification" \
+            "${PHASE15_DEVICE_FRONTIER_50K_QUALIFICATION_LOG}"
+        report_failure_log "phase15-device-frontier-50k-qualification-stderr" \
+            "${PHASE15_DEVICE_FRONTIER_50K_STDERR_LOG}"
+        die "La qualification standard non-smoke device-frontier 50k Phase 15 a échoué."
+    fi
+    if ! python3 -B - \
+        "${PHASE15_DEVICE_FRONTIER_50K_QUALIFICATION_LOG}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_STDERR_LOG}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_TIMING_LOG}" \
+        "$(dirname -- "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}")" \
+        "${HEAD_SHA}" <<'PY'
+from pathlib import Path
+import sys
+
+qualification_path = Path(sys.argv[1])
+stderr_path = Path(sys.argv[2])
+timing_path = Path(sys.argv[3])
+sys.path.insert(0, sys.argv[4])
+git_sha = sys.argv[5]
+
+import assemble_phase15_device_frontier_50k_qualification as assembler
+
+qualification_raw = qualification_path.read_text(encoding="utf-8")
+qualification = assembler.parse_single_line_json(
+    qualification_raw, "qualification device-frontier 50k"
+)
+assembler.validate_qualification(qualification, git_sha=git_sha)
+if stderr_path.read_text(encoding="utf-8") != "":
+    raise SystemExit("stderr non vide pour la qualification device-frontier 50k")
+timing_raw = timing_path.read_text(encoding="utf-8")
+timing = assembler.parse_single_line_json(
+    timing_raw, "temps device-frontier 50k"
+)
+assembler.validate_timing(timing)
+PY
+    then
+        report_failure_log "phase15-device-frontier-50k-qualification" \
+            "${PHASE15_DEVICE_FRONTIER_50K_QUALIFICATION_LOG}"
+        report_failure_log "phase15-device-frontier-50k-qualification-stderr" \
+            "${PHASE15_DEVICE_FRONTIER_50K_STDERR_LOG}"
+        die "Le résultat device-frontier 50k Phase 15 a échoué à sa validation fermée."
+    fi
+fi
+
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     begin_unit "phase4-spatial-differential"
     if ! run_container "phase4-spatial-differential" \
@@ -2797,6 +3034,20 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
         --binary "${BUILD_DIR}/${PHASE15_EXACT_DIAMETRAL_PHI_BINARY_RELATIVE#build/}" \
         --output "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --build-log "${PHASE15_DEVICE_FRONTIER_50K_BUILD_LOG}" \
+        --qualification-log "${PHASE15_DEVICE_FRONTIER_50K_QUALIFICATION_LOG}" \
+        --qualification-stderr-log "${PHASE15_DEVICE_FRONTIER_50K_STDERR_LOG}" \
+        --timing-log "${PHASE15_DEVICE_FRONTIER_50K_TIMING_LOG}" \
+        --binary "${BUILD_DIR}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE#build/}" \
+        --output "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}"
+fi
 
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
@@ -2810,7 +3061,9 @@ python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" \
     "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" \
     "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" \
-    "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" <<'PY'
+    "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" \
+    "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" \
+    "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -2855,6 +3108,12 @@ if sys.argv[15] or sys.argv[16]:
         raise SystemExit("incomplete Phase 15 exact diametral-Phi publication pair")
     pairs.append(
         (Path(sys.argv[15]), Path(sys.argv[16]), "Phase 15 exact diametral-Phi")
+    )
+if sys.argv[17] or sys.argv[18]:
+    if not sys.argv[17] or not sys.argv[18]:
+        raise SystemExit("incomplete Phase 15 device-frontier 50k publication pair")
+    pairs.append(
+        (Path(sys.argv[17]), Path(sys.argv[18]), "Phase 15 device-frontier 50k")
     )
 for temporary, _, label in pairs:
     with temporary.open(encoding="utf-8") as stream:
@@ -2919,6 +3178,9 @@ fi
 if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
@@ -2927,6 +3189,7 @@ PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
 PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
+PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
@@ -2957,5 +3220,9 @@ fi
 if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon exact diametral-Phi Phase 15 provisoire publié sans remplacement : %s\n' \
         "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon device-frontier 50k Phase 15 provisoire publié sans remplacement : %s\n' \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'
