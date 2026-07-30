@@ -1,0 +1,133 @@
+{
+  "backend": "cuda_g4_proposal_plus_reference_cpu_recertification",
+  "artifact_retention": {
+    "autonomous_replay_or_audit_supported": false,
+    "binary_sha256_retained": false,
+    "raw_all_ranks_output_retained": false,
+    "raw_memcheck_output_retained": false,
+    "raw_racecheck_output_retained": false,
+    "remote_snapshot_available_in_repository": false,
+    "role": "non_authoritative_session_summary"
+  },
+  "build": {
+    "cmake_preset": "cuda-release",
+    "cuda_architectures": "120-real",
+    "cuda_runtime": "12.9.2",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpu_memory_mib": 97887,
+    "nvidia_driver": "580.173.02",
+    "nvcc": "12.9.86",
+    "target": "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification"
+  },
+  "claims": {
+    "formal_cuda_component_qualification_retained": false,
+    "complete_hartigan_hierarchy_k1_through_k10_compared": false,
+    "exact_ranked_pair_catalog_qualified": false,
+    "product_slo_qualified": false,
+    "public_status": "not_claimed",
+    "scientific_pair_catalog_published": false
+  },
+  "coverage_session_observation": {
+    "all_rank_thresholds_exercised": true,
+    "all_ranks_bounded_bruteforce_replayed": true,
+    "all_ranks_component_contract_observed": true,
+    "all_ranks_coverage_partition_complete": true,
+    "all_ranks_every_prune_fully_recertified": true,
+    "all_ranks_unresolved_pair_mass": 0,
+    "bounded_exact_pair_count_per_rank": 8128,
+    "closed_rank_thresholds": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "family": "adversarial_mixed_dyadic",
+    "point_count": 128,
+    "requested_orders": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "seed": 5570761781678720848,
+    "status": "observed_pass_not_autonomously_auditable",
+    "unordered_pair_universe_count": 8128
+  },
+  "decision_split": {
+    "candidate_and_prune_proposal_backend": "cuda_g4",
+    "coverage_and_prune_recertification_backend": "reference_cpu"
+  },
+  "gcp": {
+    "final_status": "TERMINATED",
+    "guest_shutdown_minutes": 45,
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "instance_termination_action": "STOP",
+    "last_start_timestamp": "2026-07-30T04:44:27.298-07:00",
+    "last_stop_timestamp": "2026-07-30T04:54:08.893-07:00",
+    "machine_type": "g4-standard-48",
+    "max_run_duration_seconds": 3600,
+    "other_active_project_e_hgp_instances_after_stop": 0,
+    "project": "devpod-gpu-exploration",
+    "provisioning_model": "SPOT",
+    "session_key_revoked": true,
+    "zone": "europe-west4-ai1a"
+  },
+  "k1_gpu_guard": {
+    "case_count": 4,
+    "decision_backend": "reference_cpu",
+    "emst_witness_certified_for_every_case": true,
+    "hierarchy_reduction_status": "not_performed",
+    "proposal_backend": "cuda_g4",
+    "scientific_scope": "local_emst_witness_only",
+    "status": "passed",
+    "target": "morsehgp3d_gpu_k1_boruvka_full_replay"
+  },
+  "limitations": [
+    "The observed CUDA component partitions pair coverage but does not yet compute exact diametral ranks, count/scan, closed payloads, supports of sizes three and four, or hierarchy reduction.",
+    "Raw outputs, the binary digest, and the ephemeral detached source snapshot were not retained; this file is a session summary and cannot by itself qualify the CUDA component.",
+    "The k=2 two-Delaunay-edge deadline guard remains an exact bounded CPU fixture replay because no maintained CUDA producer currently emits those fusion deadlines.",
+    "The repository has no product-or-GPU differential against the complete Hartigan hierarchy for every k from 1 through 10."
+  ],
+  "mode": "offline_device_tiled_pair_frontier_session_observation",
+  "offline_guardrails": {
+    "k1_emst": {
+      "case_count": 50,
+      "dimensions": [1, 2, 3],
+      "maximum_point_count": 14,
+      "multifusions_and_strict_closed_cuts_equal": true,
+      "status": "passed"
+    },
+    "k2_two_delaunay_edge_deadlines": {
+      "checker": "tests/oracle/test_phase14_geogram_low_order_checker.py::Phase14GeogramLowOrderCheckerTests::test_exact_ambiguity_replay_and_mandatory_fixtures",
+      "deadline_comparison_count": 26,
+      "early_count": 2,
+      "equal_count": 24,
+      "fixtures": [
+        "tests/fixtures/regressions/delaunay_two_edge_gamma2_counterexample.json",
+        "tests/fixtures/regressions/delaunay_local_gamma2_counterexample_n8.json"
+      ],
+      "late_or_never_count": 0,
+      "reproducible_from_repository": true,
+      "status": "passed_bounded_cpu_oracle"
+    }
+  },
+  "phase": "15",
+  "profile": "hgp_reduced",
+  "sanitizers": {
+    "closed_rank_thresholds": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "memcheck": {
+      "error_count": 0,
+      "leaked_bytes": 0,
+      "point_count": 32,
+      "status": "passed"
+    },
+    "racecheck": {
+      "error_count": 0,
+      "hazard_count": 0,
+      "point_count": 32,
+      "status": "passed",
+      "warning_count": 0
+    }
+  },
+  "schema": "morsehgp3d.phase15.device_tiled_pair_frontier_g4_session_summary.v1",
+  "source": {
+    "base_repository_head": "6f5f34a22a8182f467d70b50dd5e4c847bfa85b5",
+    "ephemeral_remote_detached_snapshot_sha_unavailable_locally": "f41b59a1ae126e06d3fdeef7693f6e62dffba857",
+    "pre_receipt_worktree_diff_sha256": "abc5a335d034dab2d5c5839ec10d058be547d72403b5a49dab5be8709985fdcc",
+    "qualification_source_sha256": "8a6244ef84e91aac37eee2a78999a54b25106c0bdc8cecd67e0a9c95e528af13",
+    "snapshot_role": "ephemeral_clean_manifest_for_the_current_pre_receipt_worktree",
+    "snapshot_is_retrievable": false,
+    "snapshot_was_pushed": false
+  },
+  "status": "observed_pass_non_authoritative"
+}

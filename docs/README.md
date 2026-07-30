@@ -2,7 +2,7 @@
 
 Ce corpus est organisé autour d'une seule voie active : catalogue exact et multi-ordre des paires diamétrales, frontière indépendante des triangles aigus, puis tétraèdres bien centrés, enfin réduction hiérarchique sparse. Il sépare les preuves, les oracles bornés, les replis de recherche et les pistes abandonnées.
 
-Contexte courant : Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, porte d'entrée satisfaite et porte de sortie ouverte. Deux oracles CPU bornés, le contrat hôte du catalogue, la spécification exécutable de la frontière fusionnée Morton--Yao48 et le prédicat ponctuel exact CUDA de première qualification sont intégrés; le catalogue résident complet ne l'est pas. `public_status=not_claimed`.
+Contexte courant : Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, porte d'entrée satisfaite et porte de sortie ouverte. Deux oracles CPU bornés, le prédicat ponctuel exact CUDA et la première couverture tuilée Morton--Yao48 réellement résidente sont intégrés. Le rejeu G4 run4 conserve patch source, digest du binaire et sorties brutes : chacun des seuils de rang fermé 2 à 11 ferme ses 8 128 paires sur 128 points, avec memcheck/racecheck propres. Le cap de 2 048 visites est maintenant un quantum reprenable dans le même processus; les deux profils directs run5 à 10 M et 30 M atteignent ensuite `candidate_capacity`. Ces profils restent `component_only / profile_only`, censurés, non reprenables après redémarrage et de provenance insuffisante pour une qualification. Le drainage résident, le classifieur exact multi-ordre, `count/scan`, le payload fermé et la réduction Hartigan produit restent absents. `public_status=not_claimed`.
 
 ## Parcours actif
 
