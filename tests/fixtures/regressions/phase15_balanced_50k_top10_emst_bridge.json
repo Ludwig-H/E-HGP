@@ -1,0 +1,37 @@
+{
+  "family": "balanced_multiscale_clusters",
+  "point_count": 50000,
+  "seed": 4101,
+  "source_export_sha256": "de70e36e57b501b8f3eea807d00758e59c574f387cc020e675087797cafe506e",
+  "order_one_tree_digest": "0xc1695f29cc51f5ae",
+  "legacy_point_binary64_bits": {
+    "468": ["0x3ff0fff880000170", "0x3ff7000a34000170", "0x3ff2fff1ac000170"],
+    "5267": ["0x3ff0ffffec000069", "0x3ff6ffffe8000069", "0x3ff2fffff0000069"],
+    "5418": ["0x3ff0ffffec000309", "0x3ff6ffffe8000309", "0x3ff2fffff0000309"],
+    "24862": ["0x3ff3000d20000110", "0x3ff7000e24000110", "0x3ff70008d4000110"],
+    "24978": ["0x3ff3000f70000078", "0x3ff7000668000078", "0x3ff0fffc88000078"],
+    "25027": ["0x3ff4fff0780001c8", "0x3ff0fffa940001c8", "0x3ff0ffff600001c8"],
+    "25164": ["0x3ff4fff3140000b0", "0x3ff6ffffbc0000b0", "0x3ff10000c40000b0"]
+  },
+  "direct_exchange_edge": {
+    "u": 24978,
+    "v": 25164,
+    "squared_distance_bits": "0x3f8ffc749b159c80"
+  },
+  "candidate_tree_path": {
+    "edge_count": 2050,
+    "point_id_path_sha256": "09dfad57543b51d6c155c7fb3aef70cacba7dc7381c6d720b07de4b319c35afb",
+    "bottleneck": {
+      "u": 24862,
+      "v": 25027,
+      "squared_distance_bits": "0x3fd3003a65434b5c"
+    }
+  },
+  "bottleneck_to_direct_ratio": 19.0091158959379,
+  "binary64_miniball_recertification_witness": {
+    "point_ids": [468, 5267, 5418],
+    "support_cardinality": 2,
+    "exact_squared_radius": "6726013493505644013651/81129638414606681695789005144064"
+  },
+  "contradiction": "adding_the_direct_edge_and_removing_the_path_bottleneck_strictly_reduces_the_tree"
+}

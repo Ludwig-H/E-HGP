@@ -1,0 +1,16 @@
+{
+  "family": "affine_uniform_binary64",
+  "point_count": 50000,
+  "seed": 5101,
+  "original_point_ids": [8457, 8574, 8962],
+  "point_binary64_bits": [
+    ["0x3ff2b4cc250712fb", "0x3ffe5fbfbcb4996b", "0x3ff784aa61204747"],
+    ["0x3ff2be61cffea2ba", "0x3ffe65542c5e0dd2", "0x3ff76c198e6fcc22"],
+    ["0x3ff2de2ac3221ac6", "0x3ffea35c8af1064a", "0x3ff7b1681d864244"]
+  ],
+  "support_cardinality": 2,
+  "source_squared_radius_bits": "0x3f22dee3f91f9e94",
+  "raw_connection_squared_weight_bits": "0x3f42dee3f91f9e96",
+  "converted_connection_squared_level_bits": "0x3f22dee3f91f9e96",
+  "lateness_ulps": 2
+}
