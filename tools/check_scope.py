@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep superseded prototypes out of the maintained documentation corpus."""
+"""Keep superseded prototypes out of active documentation and product builds."""
 
 from __future__ import annotations
 
@@ -19,6 +19,30 @@ BANNED = {
 REMOVED_PATHS = (
     ROOT / "perg_hgp",
     ROOT / "experiments" / "powercover3d",
+    ROOT / "morsehgp3d" / "src" / "tools" / "gpu_geogram_low_order_diagnostic.cu",
+    ROOT / "morsehgp3d" / "src" / "tools" / "gpu_morton_window_h0_surrogate.cpp",
+)
+PRODUCT_BUILD_FILES = (
+    ROOT / ".github" / "workflows" / "ci.yml",
+    ROOT / "morsehgp3d" / "CMakeLists.txt",
+    ROOT / "morsehgp3d" / "CMakePresets.json",
+    ROOT / "morsehgp3d" / "tests" / "configuration" / "check_phase3_build.py",
+    ROOT / "morsehgp3d" / "tests" / "unit" / "CMakeLists.txt",
+    ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "profiling"
+    / "phase15_pair_first_scale_campaign.py",
+    ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "profiling"
+    / "phase15_pair_first_scale_campaign_v1.json",
+)
+BANNED_PRODUCT_IDENTIFIERS = (
+    "MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC",
+    "morsehgp3d_gpu_geogram_low_order_diagnostic",
+    "morsehgp3d_gpu_morton_window_h0_surrogate",
 )
 
 
@@ -29,6 +53,20 @@ def main() -> int:
             errors.append(
                 f"{path.relative_to(ROOT)}: superseded path must remain physically absent"
             )
+    for path in PRODUCT_BUILD_FILES:
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(
+                f"{path.relative_to(ROOT)}: unreadable product build file: {exc}"
+            )
+            continue
+        for identifier in BANNED_PRODUCT_IDENTIFIERS:
+            if identifier in content:
+                errors.append(
+                    f"{path.relative_to(ROOT)}: superseded product identifier "
+                    f"{identifier}"
+                )
     for path in active_markdown():
         if not path.is_file() or path.resolve() == HISTORY.resolve():
             continue

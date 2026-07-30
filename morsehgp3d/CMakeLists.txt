@@ -30,11 +30,6 @@ option(
   OFF
 )
 option(
-  MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC
-  "Build the optional Geogram plus CUDA k=1/k=2 diagnostic"
-  OFF
-)
-option(
   MORSEHGP3D_ENABLE_SANITIZERS
   "Instrument project-owned CPU targets with AddressSanitizer and UBSan"
   OFF
@@ -42,15 +37,6 @@ option(
 
 if(MORSEHGP3D_CUDA_AUDIT AND NOT MORSEHGP3D_ENABLE_CUDA)
   message(FATAL_ERROR "MORSEHGP3D_CUDA_AUDIT requires MORSEHGP3D_ENABLE_CUDA=ON")
-endif()
-if(
-  MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC
-  AND (NOT MORSEHGP3D_ENABLE_CUDA OR NOT MORSEHGP3D_BUILD_TOOLS)
-)
-  message(
-    FATAL_ERROR
-    "The Geogram low-order diagnostic requires CUDA and diagnostic tools"
-  )
 endif()
 if(MORSEHGP3D_ENABLE_SANITIZERS AND MORSEHGP3D_ENABLE_CUDA)
   message(FATAL_ERROR "The Phase 3.1 sanitizer profile is CPU-only")
@@ -3506,131 +3492,6 @@ if(MORSEHGP3D_ENABLE_CUDA)
           $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
           $<$<COMPILE_LANGUAGE:CXX>:-Werror>
       )
-    endif()
-
-    add_executable(
-      morsehgp3d_gpu_morton_window_h0_surrogate
-      src/cuda/phase14_morton_window_knn_internal.hpp
-      src/cuda/phase14_morton_window_knn.cu
-      src/tools/gpu_morton_window_h0_surrogate.cpp
-    )
-    target_include_directories(
-      morsehgp3d_gpu_morton_window_h0_surrogate
-      PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
-    )
-    target_link_libraries(
-      morsehgp3d_gpu_morton_window_h0_surrogate
-      PRIVATE
-        morsehgp3d::gpu_binary64_lbvh_top_k
-        morsehgp3d::spatial
-        Threads::Threads
-    )
-    target_compile_definitions(
-      morsehgp3d_gpu_morton_window_h0_surrogate
-      PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
-    )
-    morsehgp3d_configure_cuda_target(
-      morsehgp3d_gpu_morton_window_h0_surrogate
-    )
-    if(MSVC)
-      target_compile_options(
-        morsehgp3d_gpu_morton_window_h0_surrogate
-        PRIVATE
-          $<$<COMPILE_LANGUAGE:CXX>:/W4>
-          $<$<COMPILE_LANGUAGE:CXX>:/WX>
-      )
-    else()
-      target_compile_options(
-        morsehgp3d_gpu_morton_window_h0_surrogate
-        PRIVATE
-          $<$<COMPILE_LANGUAGE:CXX>:-Wall>
-          $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
-          $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
-          $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
-          $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
-          $<$<COMPILE_LANGUAGE:CXX>:-Werror>
-      )
-    endif()
-
-    if(MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC)
-      set(_morsehgp3d_geogram_prefix "")
-      if(
-        DEFINED GEOGRAM_INSTALL_PREFIX
-        AND NOT "${GEOGRAM_INSTALL_PREFIX}" STREQUAL ""
-      )
-        set(_morsehgp3d_geogram_prefix "${GEOGRAM_INSTALL_PREFIX}")
-      elseif(
-        DEFINED ENV{GEOGRAM_INSTALL_PREFIX}
-        AND NOT "$ENV{GEOGRAM_INSTALL_PREFIX}" STREQUAL ""
-      )
-        set(_morsehgp3d_geogram_prefix "$ENV{GEOGRAM_INSTALL_PREFIX}")
-      endif()
-      if(_morsehgp3d_geogram_prefix STREQUAL "")
-        message(
-          FATAL_ERROR
-          "Set GEOGRAM_INSTALL_PREFIX to the pinned Phase 14 Geogram install"
-        )
-      endif()
-      if(NOT IS_DIRECTORY "${_morsehgp3d_geogram_prefix}")
-        message(
-          FATAL_ERROR
-          "GEOGRAM_INSTALL_PREFIX is not a directory: "
-          "${_morsehgp3d_geogram_prefix}"
-        )
-      endif()
-      file(
-        REAL_PATH "${_morsehgp3d_geogram_prefix}"
-        _morsehgp3d_geogram_prefix
-      )
-      set(
-        _morsehgp3d_geogram_module_dir
-        "${_morsehgp3d_geogram_prefix}/lib/cmake/modules"
-      )
-      if(
-        NOT EXISTS
-          "${_morsehgp3d_geogram_module_dir}/FindGeogram.cmake"
-        OR NOT EXISTS
-          "${_morsehgp3d_geogram_prefix}/include/geogram1/geogram/basic/common.h"
-        OR NOT EXISTS "${_morsehgp3d_geogram_prefix}/lib/libgeogram.so"
-      )
-        message(
-          FATAL_ERROR
-          "GEOGRAM_INSTALL_PREFIX is not a complete pinned dynamic Geogram "
-          "installation: ${_morsehgp3d_geogram_prefix}"
-        )
-      endif()
-      list(PREPEND CMAKE_MODULE_PATH "${_morsehgp3d_geogram_module_dir}")
-      set(GEOGRAM_INSTALL_PREFIX "${_morsehgp3d_geogram_prefix}")
-      unset(GEOGRAM_INCLUDE_DIR CACHE)
-      unset(GEOGRAM_LIBRARY CACHE)
-      find_package(Geogram REQUIRED MODULE)
-      if(NOT TARGET Geogram::geogram)
-        message(FATAL_ERROR "Pinned FindGeogram did not define Geogram::geogram")
-      endif()
-      set(_morsehgp3d_geogram_target Geogram::geogram)
-
-      add_executable(
-        morsehgp3d_gpu_geogram_low_order_diagnostic
-        src/tools/gpu_geogram_low_order_diagnostic.cu
-      )
-      target_link_libraries(
-        morsehgp3d_gpu_geogram_low_order_diagnostic
-        PRIVATE
-          "${_morsehgp3d_geogram_target}"
-          morsehgp3d::contract
-          morsehgp3d::gpu_binary64_lbvh_top_k
-          Threads::Threads
-      )
-      target_compile_definitions(
-        morsehgp3d_gpu_geogram_low_order_diagnostic
-        PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
-      )
-      morsehgp3d_configure_cuda_target(
-        morsehgp3d_gpu_geogram_low_order_diagnostic
-      )
-      unset(_morsehgp3d_geogram_module_dir)
-      unset(_morsehgp3d_geogram_prefix)
-      unset(_morsehgp3d_geogram_target)
     endif()
   endif()
 endif()

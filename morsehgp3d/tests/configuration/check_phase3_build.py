@@ -44,8 +44,8 @@ CUDA_TARGETS = [
     "morsehgp3d_gpu_anchored_pair_candidate_proposal_component_smoke",
     "morsehgp3d_gpu_exact_diametral_phi_qualification",
     "morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification",
+    "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
     "morsehgp3d_gpu_morton_yao48_seed_work_profile",
-    "morsehgp3d_gpu_morton_window_h0_surrogate",
     "morsehgp3d_massive_sparse_pair_prefix_smoke",
 ]
 CUDA_BUILD_JOBS = 8

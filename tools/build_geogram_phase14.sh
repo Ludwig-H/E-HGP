@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Reproduction hors ligne de l'oracle archivé Phase 14; jamais un build produit.
 set -euo pipefail
 
 readonly GEOGRAM_TAG="v1.10.0"
