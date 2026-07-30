@@ -23,8 +23,8 @@ import sys
 import tempfile
 from typing import Any, Iterable, NoReturn, Sequence
 
-REPORT_SCHEMA = "morsehgp3d.phase15.guarded_industrial_candidate.v3"
-CHECK_SCHEMA = "morsehgp3d.phase15.guarded_industrial_50k_check.v3"
+REPORT_SCHEMA = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
+CHECK_SCHEMA = "morsehgp3d.phase15.guarded_industrial_50k_check.v4"
 EXPECTED_FAMILIES = (
     "affine_uniform_binary64",
     "jittered_dyadic_grid3d",
@@ -74,6 +74,8 @@ _REPORT_KEYS = frozenset(
         "deployment_status",
         "public_status",
         "git_sha",
+        "runner_binary_sha256",
+        "runner_binary_size_bytes",
         "family",
         "point_count",
         "repetitions",
@@ -476,6 +478,17 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
         type(git_sha) is str and _GIT_SHA.fullmatch(git_sha) is not None,
         f"{path}.git_sha must be one lowercase full Git SHA",
     )
+    runner_binary_sha256 = report.get("runner_binary_sha256")
+    require(
+        type(runner_binary_sha256) is str
+        and _SHA256.fullmatch(runner_binary_sha256) is not None,
+        f"{path}.runner_binary_sha256 must be one lowercase SHA-256",
+    )
+    runner_binary_size_bytes = _integer(
+        report.get("runner_binary_size_bytes"),
+        path=f"{path}.runner_binary_size_bytes",
+        minimum=1,
+    )
     family = report.get("family")
     require(
         type(family) is str and family in EXPECTED_FAMILIES,
@@ -555,6 +568,8 @@ def validate_report(report: dict[str, Any], *, path: str = "report") -> dict[str
     return {
         "family": family,
         "git_sha": git_sha,
+        "runner_binary_sha256": runner_binary_sha256,
+        "runner_binary_size_bytes": runner_binary_size_bytes,
         "measured_seeds": measured_seeds,
         "measured_warm_e2e_ns": measured_e2e,
         "hierarchy_digests": hierarchy_digests,
@@ -610,6 +625,17 @@ def validate_campaign(
         git_shas == {expected_git_sha},
         "campaign report Git SHA does not match --expected-git-sha",
     )
+    runner_binary_identities = {
+        (entry["runner_binary_sha256"], entry["runner_binary_size_bytes"])
+        for entry in validated
+    }
+    require(
+        len(runner_binary_identities) == 1,
+        "campaign reports must share one self-attested runner binary",
+    )
+    runner_binary_sha256, runner_binary_size_bytes = next(
+        iter(runner_binary_identities)
+    )
 
     measured_seeds = [
         seed
@@ -653,6 +679,9 @@ def validate_campaign(
             "expected_git_sha": expected_git_sha,
             "local_commit_object_verified": True,
             "input_artifact_sha256_bound": True,
+            "runner_binary_self_attestation_bound": True,
+            "runner_binary_sha256": runner_binary_sha256,
+            "runner_binary_size_bytes": runner_binary_size_bytes,
         },
         "input_artifact_sha256": {
             family: by_family[family]["input_artifact_sha256"]
@@ -688,6 +717,8 @@ def validate_campaign(
         },
         "runner_contract": {
             "schema": REPORT_SCHEMA,
+            "runner_binary_sha256": runner_binary_sha256,
+            "runner_binary_size_bytes": runner_binary_size_bytes,
             "mode": "warm_fresh_cloud_lbvh_top10_component_bridges_parallel_h0",
             "canonicalization_timed": True,
             "weight_representation": WEIGHT_REPRESENTATION,

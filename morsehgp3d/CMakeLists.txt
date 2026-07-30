@@ -3553,6 +3553,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
     target_link_libraries(
       morsehgp3d_gpu_guarded_industrial_e2e
       PRIVATE
+        morsehgp3d::contract
         morsehgp3d::gpu_binary64_lbvh_top_k
         morsehgp3d::gpu_morton_lbvh_build
         morsehgp3d::spatial

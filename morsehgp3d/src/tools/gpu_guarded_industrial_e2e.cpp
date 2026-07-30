@@ -1,3 +1,4 @@
+#include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/gpu/binary64_lbvh_top_k.hpp"
 #include "morsehgp3d/gpu/morton_lbvh_build.hpp"
@@ -71,6 +72,11 @@ struct Options {
   std::size_t maximum_order{kMaximumOrder};
   std::size_t seed_window{32U};
   std::optional<std::filesystem::path> emit_tree_path;
+};
+
+struct RunnerBinaryIdentity {
+  std::string sha256;
+  std::uint64_t size_bytes{};
 };
 
 struct BaseEdge {
@@ -195,6 +201,62 @@ struct RunMetrics {
       return "balanced_multiscale_clusters";
   }
   return "invalid";
+}
+
+[[nodiscard]] std::filesystem::path running_executable_path(
+    const char* argv0) {
+#if defined(__linux__)
+  static_cast<void>(argv0);
+  return std::filesystem::path{"/proc/self/exe"};
+#else
+  if (argv0 == nullptr || std::string_view{argv0}.empty()) {
+    throw std::runtime_error("argv[0] cannot identify the running executable");
+  }
+  std::error_code error;
+  const std::filesystem::path resolved =
+      std::filesystem::canonical(std::filesystem::path{argv0}, error);
+  if (error) {
+    throw std::runtime_error(
+        "cannot resolve the running executable: " + error.message());
+  }
+  return resolved;
+#endif
+}
+
+[[nodiscard]] RunnerBinaryIdentity hash_running_executable(const char* argv0) {
+  const std::filesystem::path path = running_executable_path(argv0);
+  std::ifstream input{path, std::ios::binary};
+  if (!input) {
+    throw std::runtime_error(
+        "cannot open the running executable for SHA-256: " + path.string());
+  }
+  morsehgp3d::contract::CanonicalSha256Builder builder;
+  std::array<std::uint8_t, 64U * 1024U> buffer{};
+  std::uint64_t size_bytes = 0U;
+  while (input) {
+    input.read(
+        reinterpret_cast<char*>(buffer.data()),
+        static_cast<std::streamsize>(buffer.size()));
+    const std::streamsize extracted = input.gcount();
+    if (extracted <= 0) {
+      continue;
+    }
+    const std::size_t count = static_cast<std::size_t>(extracted);
+    if (static_cast<std::uint64_t>(count) >
+        std::numeric_limits<std::uint64_t>::max() - size_bytes) {
+      throw std::length_error("the running executable size overflows uint64");
+    }
+    builder.update(std::span<const std::uint8_t>{buffer.data(), count});
+    size_bytes += static_cast<std::uint64_t>(count);
+  }
+  if (input.bad()) {
+    throw std::runtime_error(
+        "cannot read the running executable for SHA-256: " + path.string());
+  }
+  if (size_bytes == 0U) {
+    throw std::runtime_error("the running executable is empty");
+  }
+  return RunnerBinaryIdentity{builder.finalize().to_lower_hex(), size_bytes};
 }
 
 [[nodiscard]] Options parse_options(int argc, char** argv) {
@@ -1098,12 +1160,13 @@ void write_json_string(std::ostream& output, std::string_view value) {
 void write_result_json(
     const Options& options,
     const std::vector<RunMetrics>& runs,
+    const RunnerBinaryIdentity& runner_binary,
     std::uint64_t p50,
     std::uint64_t p95,
     std::uint64_t p99,
     bool slo_passed) {
   std::cout << std::setprecision(17);
-  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v3\""
+  std::cout << "{\"schema\":\"morsehgp3d.phase15.guarded_industrial_candidate.v4\""
             << ",\"result_kind\":\"guarded_industrial_candidate\""
             << ",\"phase\":15,\"backend\":\"cuda_g4_plus_host_binary64\""
             << ",\"profile\":\"hgp_reduced\""
@@ -1111,7 +1174,10 @@ void write_result_json(
             << ",\"deployment_status\":\"architecture_only\""
             << ",\"public_status\":\"not_claimed\",\"git_sha\":";
   write_json_string(std::cout, MORSEHGP3D_GIT_SHA);
-  std::cout << ",\"family\":";
+  std::cout << ",\"runner_binary_sha256\":";
+  write_json_string(std::cout, runner_binary.sha256);
+  std::cout << ",\"runner_binary_size_bytes\":"
+            << runner_binary.size_bytes << ",\"family\":";
   write_json_string(std::cout, family_name(options.family));
   std::cout << ",\"point_count\":" << options.point_count
             << ",\"repetitions\":" << options.repetitions
@@ -1244,6 +1310,8 @@ void write_result_json(
 
 int main(int argc, char** argv) {
   try {
+    const RunnerBinaryIdentity runner_binary =
+        hash_running_executable(argc > 0 ? argv[0] : nullptr);
     const Options options = parse_options(argc, argv);
     const std::vector<std::uint64_t> seeds = make_run_seeds(options);
     morsehgp3d::gpu::MortonLbvhBuildContext builder{options.point_count};
@@ -1291,7 +1359,8 @@ int main(int argc, char** argv) {
     const std::uint64_t p95 = nearest_rank(measured_e2e, 95U);
     const std::uint64_t p99 = nearest_rank(measured_e2e, 99U);
     const bool slo_passed = p95 < kSloNanoseconds;
-    write_result_json(options, runs, p50, p95, p99, slo_passed);
+    write_result_json(
+        options, runs, runner_binary, p50, p95, p99, slo_passed);
     return options.point_count == 50'000U && !slo_passed
                ? EXIT_FAILURE
                : EXIT_SUCCESS;

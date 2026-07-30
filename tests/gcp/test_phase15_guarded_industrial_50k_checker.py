@@ -32,6 +32,8 @@ GIT_SHA = subprocess.run(
     check=True,
 ).stdout.strip()
 INPUT_SHA256 = ("1" * 64, "2" * 64, "3" * 64)
+RUNNER_BINARY_SHA256 = "a" * 64
+RUNNER_BINARY_SIZE_BYTES = 12_345_678
 CUDA_BANNER = """
 
 ==========
@@ -112,7 +114,7 @@ def report(
         "p99": nearest_rank(measured_e2e, 99),
     }
     return {
-        "schema": "morsehgp3d.phase15.guarded_industrial_candidate.v3",
+        "schema": "morsehgp3d.phase15.guarded_industrial_candidate.v4",
         "result_kind": "guarded_industrial_candidate",
         "phase": 15,
         "backend": "cuda_g4_plus_host_binary64",
@@ -121,6 +123,8 @@ def report(
         "deployment_status": "architecture_only",
         "public_status": "not_claimed",
         "git_sha": GIT_SHA,
+        "runner_binary_sha256": RUNNER_BINARY_SHA256,
+        "runner_binary_size_bytes": RUNNER_BINARY_SIZE_BYTES,
         "family": family,
         "point_count": 50_000,
         "repetitions": 10,
@@ -243,6 +247,17 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
             dict(zip(EXPECTED_FAMILIES, INPUT_SHA256, strict=True)),
         )
         self.assertIs(summary["provenance"]["local_commit_object_verified"], True)
+        self.assertIs(
+            summary["provenance"]["runner_binary_self_attestation_bound"], True
+        )
+        self.assertEqual(
+            summary["provenance"]["runner_binary_sha256"],
+            RUNNER_BINARY_SHA256,
+        )
+        self.assertEqual(
+            summary["provenance"]["runner_binary_size_bytes"],
+            RUNNER_BINARY_SIZE_BYTES,
+        )
         self.assertEqual(summary["scope"]["public_status"], "not_claimed")
         self.assertIs(summary["scope"]["exact_morse_hierarchy_claimed"], False)
 
@@ -361,6 +376,21 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 ),
                 "distinct hierarchy digest",
             ),
+            (
+                "runner binary SHA",
+                lambda value: value.update({"runner_binary_sha256": "forged"}),
+                "runner_binary_sha256",
+            ),
+            (
+                "runner binary size",
+                lambda value: value.update({"runner_binary_size_bytes": 0}),
+                "runner_binary_size_bytes",
+            ),
+            (
+                "missing runner binary attestation",
+                lambda value: value.pop("runner_binary_sha256"),
+                "keys differ",
+            ),
         )
         baseline = campaign()[0]
         for label, mutate, message in mutations:
@@ -417,9 +447,9 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
                 with self.assertRaisesRegex(IndustrialCampaignError, message):
                     validate_report(changed)
 
-    def test_pre_v3_report_is_rejected(self) -> None:
+    def test_pre_v4_report_is_rejected(self) -> None:
         changed = campaign()[0]
-        changed["schema"] = "morsehgp3d.phase15.guarded_industrial_candidate.v2"
+        changed["schema"] = "morsehgp3d.phase15.guarded_industrial_candidate.v3"
         with self.assertRaisesRegex(IndustrialCampaignError, "schema"):
             validate_report(changed)
 
@@ -432,6 +462,13 @@ class Phase15GuardedIndustrial50kCheckerTests(unittest.TestCase):
         changed = campaign()
         changed[2]["git_sha"] = "b" * 40
         with self.assertRaisesRegex(IndustrialCampaignError, "share one Git SHA"):
+            validate(changed)
+
+        changed = campaign()
+        changed[2]["runner_binary_sha256"] = "b" * 64
+        with self.assertRaisesRegex(
+            IndustrialCampaignError, "share one self-attested runner binary"
+        ):
             validate(changed)
 
         changed = campaign()

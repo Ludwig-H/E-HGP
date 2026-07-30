@@ -20,7 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 GIT_SHA = subprocess.check_output(
     ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
 ).strip()
-RUNNER_BINARY_SHA256 = hashlib.sha256(b"fixture runner binary").hexdigest()
+RUNNER_BINARY_BYTES = b"fixture runner binary"
+RUNNER_BINARY_SHA256 = hashlib.sha256(RUNNER_BINARY_BYTES).hexdigest()
 CUDA_BANNER = """\
 ==========
 == CUDA ==
@@ -121,10 +122,14 @@ def _runner_report(
     seed: int,
     trees: list[checker.ExportedTree],
     git_sha: str = GIT_SHA,
+    runner_binary_sha256: str = RUNNER_BINARY_SHA256,
+    runner_binary_size_bytes: int = len(RUNNER_BINARY_BYTES),
 ) -> dict[str, object]:
     return {
         "schema": checker.RUNNER_SCHEMA,
         "git_sha": git_sha,
+        "runner_binary_sha256": runner_binary_sha256,
+        "runner_binary_size_bytes": runner_binary_size_bytes,
         "family": family,
         "point_count": point_count,
         "maximum_order": len(trees),
@@ -603,7 +608,9 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
             root = Path(directory)
             export = root / "trees.bin"
             runner_report = root / "runner.json"
+            runner_binary = root / "runner"
             _write_export(export, point_count, seed, trees)
+            runner_binary.write_bytes(RUNNER_BINARY_BYTES)
             parsed = checker.read_industrial_export(
                 export,
                 expected_point_count=point_count,
@@ -627,7 +634,8 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     runner_report_path=runner_report,
                     family=family,
                     expected_git_sha=GIT_SHA,
-                    runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    runner_binary_path=runner_binary,
+                    expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
                 )
 
             forged_digest = copy.deepcopy(valid)
@@ -643,7 +651,8 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     runner_report_path=runner_report,
                     family=family,
                     expected_git_sha=GIT_SHA,
-                    runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    runner_binary_path=runner_binary,
+                    expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
                 )
 
             forged_git = copy.deepcopy(valid)
@@ -657,7 +666,8 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     runner_report_path=runner_report,
                     family=family,
                     expected_git_sha=GIT_SHA,
-                    runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    runner_binary_path=runner_binary,
+                    expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
                 )
 
             _write_runner_report(runner_report, valid)
@@ -669,7 +679,8 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     runner_report_path=runner_report,
                     family=family,
                     expected_git_sha=GIT_SHA,
-                    runner_binary_sha256="not-a-sha256",
+                    runner_binary_path=runner_binary,
+                    expected_runner_binary_sha256="not-a-sha256",
                 )
 
     def test_cli_requires_and_validates_all_provenance_commitments(self) -> None:
@@ -685,7 +696,9 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     "runner.json",
                     "--expected-git-sha",
                     "forged",
-                    "--runner-binary-sha256",
+                    "--runner-binary",
+                    "runner",
+                    "--expected-runner-binary-sha256",
                     RUNNER_BINARY_SHA256,
                 ]
             )
@@ -697,7 +710,9 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     "runner.json",
                     "--expected-git-sha",
                     GIT_SHA,
-                    "--runner-binary-sha256",
+                    "--runner-binary",
+                    "runner",
+                    "--expected-runner-binary-sha256",
                     "forged",
                 ]
             )
@@ -708,12 +723,122 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 "runner.json",
                 "--expected-git-sha",
                 GIT_SHA,
-                "--runner-binary-sha256",
+                "--runner-binary",
+                "runner",
+                "--expected-runner-binary-sha256",
                 RUNNER_BINARY_SHA256,
             ]
         )
         self.assertEqual(options.expected_git_sha, GIT_SHA)
-        self.assertEqual(options.runner_binary_sha256, RUNNER_BINARY_SHA256)
+        self.assertEqual(options.runner_binary, Path("runner"))
+        self.assertEqual(
+            options.expected_runner_binary_sha256, RUNNER_BINARY_SHA256
+        )
+
+    def test_runner_binary_binding_hashes_bytes_and_rejects_mutation(self) -> None:
+        family = "affine_uniform_binary64"
+        point_count = 5
+        seed = 7
+        trees = _star_trees(point_count)
+        first_bytes = b"\x7fELF fixture runner A"
+        second_bytes = b"\x7fELF fixture runner B"
+        first_sha256 = hashlib.sha256(first_bytes).hexdigest()
+        second_sha256 = hashlib.sha256(second_bytes).hexdigest()
+        self.assertNotEqual(first_sha256, second_sha256)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            export = root / "trees.bin"
+            runner_report = root / "runner.json"
+            first_binary = root / "runner-a"
+            second_binary = root / "runner-b"
+            _write_export(export, point_count, seed, trees)
+            _write_runner_report(
+                runner_report,
+                _runner_report(
+                    family=family,
+                    point_count=point_count,
+                    seed=seed,
+                    trees=trees,
+                    runner_binary_sha256=first_sha256,
+                    runner_binary_size_bytes=len(first_bytes),
+                ),
+            )
+            first_binary.write_bytes(first_bytes)
+            second_binary.write_bytes(second_bytes)
+            parsed = checker.read_industrial_export(
+                export,
+                expected_point_count=point_count,
+                expected_tree_count=len(trees),
+            )
+
+            first_binding = checker._bind_runner_report(
+                parsed,
+                runner_report_path=runner_report,
+                family=family,
+                expected_git_sha=GIT_SHA,
+                runner_binary_path=first_binary,
+                expected_runner_binary_sha256=first_sha256,
+            )
+            self.assertEqual(first_binding["runner_binary_sha256"], first_sha256)
+            self.assertEqual(
+                first_binding["runner_binary_size_bytes"], len(first_bytes)
+            )
+            with self.assertRaisesRegex(
+                checker.ScientificGuardError, "self-attestation disagrees"
+            ):
+                checker._bind_runner_report(
+                    parsed,
+                    runner_report_path=runner_report,
+                    family=family,
+                    expected_git_sha=GIT_SHA,
+                    runner_binary_path=second_binary,
+                    expected_runner_binary_sha256=second_sha256,
+                )
+
+            _write_runner_report(
+                runner_report,
+                _runner_report(
+                    family=family,
+                    point_count=point_count,
+                    seed=seed,
+                    trees=trees,
+                    runner_binary_sha256=second_sha256,
+                    runner_binary_size_bytes=len(second_bytes),
+                ),
+            )
+            second_binding = checker._bind_runner_report(
+                parsed,
+                runner_report_path=runner_report,
+                family=family,
+                expected_git_sha=GIT_SHA,
+                runner_binary_path=second_binary,
+                expected_runner_binary_sha256=second_sha256,
+            )
+            self.assertEqual(second_binding["runner_binary_sha256"], second_sha256)
+
+            with self.assertRaisesRegex(
+                checker.ScientificGuardError, "binary bytes disagree"
+            ):
+                checker._bind_runner_report(
+                    parsed,
+                    runner_report_path=runner_report,
+                    family=family,
+                    expected_git_sha=GIT_SHA,
+                    runner_binary_path=second_binary,
+                    expected_runner_binary_sha256=first_sha256,
+                )
+            first_binary.write_bytes(second_bytes)
+            with self.assertRaisesRegex(
+                checker.ScientificGuardError, "binary bytes disagree"
+            ):
+                checker._bind_runner_report(
+                    parsed,
+                    runner_report_path=runner_report,
+                    family=family,
+                    expected_git_sha=GIT_SHA,
+                    runner_binary_path=first_binary,
+                    expected_runner_binary_sha256=first_sha256,
+                )
 
     def test_runner_binding_rejects_forged_root_and_nonunique_export(self) -> None:
         family = "affine_uniform_binary64"
@@ -724,7 +849,9 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
             root = Path(directory)
             export = root / "trees.bin"
             runner_report = root / "runner.json"
+            runner_binary = root / "runner"
             _write_export(export, point_count, seed, trees)
+            runner_binary.write_bytes(RUNNER_BINARY_BYTES)
             parsed = checker.read_industrial_export(
                 export,
                 expected_point_count=point_count,
@@ -746,7 +873,8 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     runner_report_path=runner_report,
                     family=family,
                     expected_git_sha=GIT_SHA,
-                    runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    runner_binary_path=runner_binary,
+                    expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
                 )
 
             report = _runner_report(
@@ -767,7 +895,8 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                     runner_report_path=runner_report,
                     family=family,
                     expected_git_sha=GIT_SHA,
-                    runner_binary_sha256=RUNNER_BINARY_SHA256,
+                    runner_binary_path=runner_binary,
+                    expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
                 )
 
     def test_small_end_to_end_independent_oracle(self) -> None:
@@ -779,7 +908,9 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             export = Path(directory) / "small.bin"
             runner_report = Path(directory) / "runner.json"
+            runner_binary = Path(directory) / "runner"
             _write_export(export, point_count, seed, [k1, k2])
+            runner_binary.write_bytes(RUNNER_BINARY_BYTES)
             runner_payload = _runner_report(
                 family=family,
                 point_count=point_count,
@@ -792,7 +923,8 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 family=family,
                 runner_report_path=runner_report,
                 expected_git_sha=GIT_SHA,
-                runner_binary_sha256=RUNNER_BINARY_SHA256,
+                runner_binary_path=runner_binary,
+                expected_runner_binary_sha256=RUNNER_BINARY_SHA256,
                 expected_point_count=point_count,
                 expected_tree_count=2,
                 triangle_batch_size=31,
@@ -806,11 +938,20 @@ class GuardedIndustrialScientificGuardsTests(unittest.TestCase):
                 report["provenance"]["runner_report_sha256"],
                 hashlib.sha256(runner_report.read_bytes()).hexdigest(),
             )
+            self.assertEqual(
+                report["provenance"]["runner_binary_sha256"],
+                hashlib.sha256(runner_binary.read_bytes()).hexdigest(),
+            )
         self.assertEqual(report["result"], "scientific_guards_satisfied")
         self.assertEqual(report["provenance"]["git_sha"], GIT_SHA)
         self.assertEqual(
             report["provenance"]["runner_binary_sha256"],
             RUNNER_BINARY_SHA256,
+        )
+        self.assertTrue(
+            report["provenance"][
+                "runner_binary_reverified_after_scientific_replay"
+            ]
         )
         self.assertTrue(
             report["provenance"]["all_hierarchy_digests_match_export"]

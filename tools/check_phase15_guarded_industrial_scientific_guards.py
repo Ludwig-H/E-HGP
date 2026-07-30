@@ -41,8 +41,8 @@ from typing import Iterator, Mapping, Sequence
 import numpy as np
 
 
-SCHEMA = "morsehgp3d.phase15_guarded_industrial_scientific_guards.v3"
-RUNNER_SCHEMA = "morsehgp3d.phase15.guarded_industrial_candidate.v3"
+SCHEMA = "morsehgp3d.phase15_guarded_industrial_scientific_guards.v5"
+RUNNER_SCHEMA = "morsehgp3d.phase15.guarded_industrial_candidate.v4"
 EXPORT_MAGIC = b"MHGPIE2E"
 TREE_MAGIC = b"H0TREE01"
 EXPORT_VERSION = 1
@@ -422,27 +422,70 @@ def _binary64_bits(value: object, *, role: str) -> int:
     return struct.unpack("<Q", struct.pack("<d", binary64))[0]
 
 
+def _sha256_file(path: Path, *, role: str) -> tuple[str, int]:
+    digest = hashlib.sha256()
+    size = 0
+    try:
+        with path.open("rb") as artifact:
+            while chunk := artifact.read(1024 * 1024):
+                digest.update(chunk)
+                size += len(chunk)
+    except OSError as error:
+        raise ScientificGuardError(f"cannot read {role} {path}: {error}") from error
+    if size == 0:
+        raise ScientificGuardError(f"{role} {path} must not be empty")
+    return digest.hexdigest(), size
+
+
 def _bind_runner_report(
     exported: IndustrialExport,
     *,
     runner_report_path: Path,
     family: str,
     expected_git_sha: str,
-    runner_binary_sha256: str,
+    runner_binary_path: Path,
+    expected_runner_binary_sha256: str,
 ) -> dict[str, object]:
     if _GIT_SHA.fullmatch(expected_git_sha) is None:
         raise ScientificGuardError(
             "expected Git SHA must be one lowercase full 40-hex SHA"
         )
-    if _SHA256.fullmatch(runner_binary_sha256) is None:
+    if _SHA256.fullmatch(expected_runner_binary_sha256) is None:
         raise ScientificGuardError(
-            "runner binary SHA-256 must be one lowercase 64-hex digest"
+            "expected runner binary SHA-256 must be one lowercase 64-hex digest"
         )
     _require_local_commit(expected_git_sha)
+    runner_binary_sha256, runner_binary_size = _sha256_file(
+        runner_binary_path, role="runner binary"
+    )
+    if runner_binary_sha256 != expected_runner_binary_sha256:
+        raise ScientificGuardError(
+            "runner binary bytes disagree with the expected SHA-256 commitment"
+        )
     report, report_sha256 = _load_runner_report(runner_report_path)
     if report.get("schema") != RUNNER_SCHEMA:
         raise ScientificGuardError(
             f"runner report schema must be {RUNNER_SCHEMA!r}"
+        )
+    reported_binary_sha256 = report.get("runner_binary_sha256")
+    if (
+        type(reported_binary_sha256) is not str
+        or _SHA256.fullmatch(reported_binary_sha256) is None
+    ):
+        raise ScientificGuardError(
+            "runner report runner_binary_sha256 is not canonical"
+        )
+    reported_binary_size = report.get("runner_binary_size_bytes")
+    if type(reported_binary_size) is not int or reported_binary_size <= 0:
+        raise ScientificGuardError(
+            "runner report runner_binary_size_bytes must be positive"
+        )
+    if (
+        reported_binary_sha256 != runner_binary_sha256
+        or reported_binary_size != runner_binary_size
+    ):
+        raise ScientificGuardError(
+            "runner report self-attestation disagrees with the runner binary bytes"
         )
     if report.get("family") != family:
         raise ScientificGuardError("runner report family disagrees with --family")
@@ -553,7 +596,12 @@ def _bind_runner_report(
         "runner_schema": RUNNER_SCHEMA,
         "git_sha": expected_git_sha,
         "local_commit_object_verified": True,
+        "runner_binary_path": str(runner_binary_path),
         "runner_binary_sha256": runner_binary_sha256,
+        "expected_runner_binary_sha256": expected_runner_binary_sha256,
+        "runner_binary_size_bytes": runner_binary_size,
+        "runner_binary_bytes_hashed": True,
+        "runner_report_binary_self_attestation_matched": True,
         "exported_measured_run_index": run["run_index"],
         "exported_measured_index": run["measured_index"],
         "exported_run_seed": run["seed"],
@@ -1922,7 +1970,8 @@ def analyze_export(
     family: str,
     runner_report_path: Path,
     expected_git_sha: str,
-    runner_binary_sha256: str,
+    runner_binary_path: Path,
+    expected_runner_binary_sha256: str,
     expected_point_count: int | None = 50_000,
     expected_tree_count: int | None = 10,
     triangle_batch_size: int = 250_000,
@@ -1938,7 +1987,8 @@ def analyze_export(
         runner_report_path=runner_report_path,
         family=family,
         expected_git_sha=expected_git_sha,
-        runner_binary_sha256=runner_binary_sha256,
+        runner_binary_path=runner_binary_path,
+        expected_runner_binary_sha256=expected_runner_binary_sha256,
     )
     points, point_bits = reconstruct_canonical_cloud(
         family, exported.point_count, exported.seed
@@ -1952,6 +2002,18 @@ def analyze_export(
         batch_size=triangle_batch_size,
         workers=workers,
     )
+    final_binary_sha256, final_binary_size = _sha256_file(
+        runner_binary_path, role="runner binary"
+    )
+    if (
+        final_binary_sha256 != runner_binding["runner_binary_sha256"]
+        or final_binary_sha256 != expected_runner_binary_sha256
+        or final_binary_size != runner_binding["runner_binary_size_bytes"]
+    ):
+        raise ScientificGuardError(
+            "runner binary changed during the scientific replay"
+        )
+    runner_binding["runner_binary_reverified_after_scientific_replay"] = True
     passed = bool(k1["guard_passed"] and k2["guard_passed"])
     return {
         "schema": SCHEMA,
@@ -2031,10 +2093,16 @@ def _build_parser() -> argparse.ArgumentParser:
         help="full commit SHA from which the runner report and binary were built",
     )
     parser.add_argument(
-        "--runner-binary-sha256",
+        "--runner-binary",
+        required=True,
+        type=Path,
+        help="runner binary artifact whose bytes produced the paired export",
+    )
+    parser.add_argument(
+        "--expected-runner-binary-sha256",
         required=True,
         type=_sha256_argument,
-        help="SHA-256 commitment of the runner binary used for the export",
+        help="independent SHA-256 commitment expected for --runner-binary",
     )
     parser.add_argument("--expected-point-count", type=int, default=50_000)
     parser.add_argument("--expected-tree-count", type=int, default=10)
@@ -2066,7 +2134,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             family=options.family,
             runner_report_path=options.runner_report,
             expected_git_sha=options.expected_git_sha,
-            runner_binary_sha256=options.runner_binary_sha256,
+            runner_binary_path=options.runner_binary,
+            expected_runner_binary_sha256=(
+                options.expected_runner_binary_sha256
+            ),
             expected_point_count=options.expected_point_count,
             expected_tree_count=options.expected_tree_count,
             triangle_batch_size=options.triangle_batch_size,
