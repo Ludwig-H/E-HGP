@@ -46,7 +46,7 @@ constexpr std::size_t kMaximumClosedRank = 11U;
 constexpr std::size_t kMaximumNonSupportCount = kMaximumClosedRank - 2U;
 constexpr unsigned int kThreadsPerBlock = 128U;
 constexpr std::uint64_t kInvalid = UINT64_MAX;
-constexpr std::uint8_t kSortKeyRejected = UINT8_MAX;
+constexpr std::uint64_t kSortKeyRejected = UINT64_MAX;
 
 constexpr std::uint64_t kAnchorStatusChunkReady = static_cast<std::uint64_t>(
     Phase15MortonYao48DeviceTiledAnchorStatus::chunk_ready);
@@ -117,6 +117,14 @@ static_assert(alignof(Phase15MortonYao48RankedPairNode) == 8U);
 static_assert(std::is_standard_layout_v<Phase15MortonYao48RankedPairNode>);
 static_assert(
     std::is_trivially_copyable_v<Phase15MortonYao48RankedPairNode>);
+static_assert(
+    offsetof(Phase15MortonYao48RankedPairNode, lower_point_ids) == 0U);
+static_assert(
+    offsetof(Phase15MortonYao48RankedPairNode, upper_point_ids) == 24U);
+static_assert(offsetof(Phase15MortonYao48RankedPairNode, left_child) == 48U);
+static_assert(offsetof(Phase15MortonYao48RankedPairNode, right_child) == 56U);
+static_assert(offsetof(Phase15MortonYao48RankedPairNode, leaf_begin) == 64U);
+static_assert(offsetof(Phase15MortonYao48RankedPairNode, leaf_end) == 72U);
 
 struct alignas(16) CandidateClassification {
   std::uint64_t support_u{};
@@ -525,8 +533,11 @@ class RankedPairCudaResources final {
 
   void commit_success(
       const Phase15MortonYao48RankedPairTileClassifierRequest& request,
-      const DeviceReceiptControl& control) noexcept {
-    active_catalog_ = 1U - active_catalog_;
+      const DeviceReceiptControl& control,
+      bool destination_catalog_built) noexcept {
+    if (destination_catalog_built) {
+      active_catalog_ = 1U - active_catalog_;
+    }
     candidate_count_ = control.cumulative_candidate_count;
     record_count_ = control.cumulative_accepted_record_count;
     above_window_count_ = control.cumulative_above_window_count;
@@ -586,8 +597,8 @@ class RankedPairCudaResources final {
   DeviceBuffer<std::uint64_t>& shell_offsets() noexcept {
     return shell_offsets_;
   }
-  DeviceBuffer<std::uint8_t>& sort_keys_a() noexcept { return sort_keys_a_; }
-  DeviceBuffer<std::uint8_t>& sort_keys_b() noexcept { return sort_keys_b_; }
+  DeviceBuffer<std::uint64_t>& sort_keys_a() noexcept { return sort_keys_a_; }
+  DeviceBuffer<std::uint64_t>& sort_keys_b() noexcept { return sort_keys_b_; }
   DeviceBuffer<std::uint64_t>& sort_values_a() noexcept {
     return sort_values_a_;
   }
@@ -702,7 +713,7 @@ class RankedPairCudaResources final {
   }
 
   void size_sort_workspace() {
-    cub::DoubleBuffer<std::uint8_t> keys{
+    cub::DoubleBuffer<std::uint64_t> keys{
         sort_keys_a_.get(), sort_keys_b_.get()};
     cub::DoubleBuffer<std::uint64_t> values{
         sort_values_a_.get(), sort_values_b_.get()};
@@ -717,7 +728,7 @@ class RankedPairCudaResources final {
                 candidate_workspace_capacity_,
                 "a ranked-pair sort extent exceeds the CUB int ABI"),
             0,
-            8,
+            64,
             stream_),
         "CUB ranked-pair sort sizing");
     sort_workspace_bytes_ = std::max<std::size_t>(1U, bytes);
@@ -822,8 +833,8 @@ class RankedPairCudaResources final {
   DeviceBuffer<std::uint64_t> strict_offsets_;
   DeviceBuffer<std::uint64_t> shell_counts_;
   DeviceBuffer<std::uint64_t> shell_offsets_;
-  DeviceBuffer<std::uint8_t> sort_keys_a_;
-  DeviceBuffer<std::uint8_t> sort_keys_b_;
+  DeviceBuffer<std::uint64_t> sort_keys_a_;
+  DeviceBuffer<std::uint64_t> sort_keys_b_;
   DeviceBuffer<std::uint64_t> sort_values_a_;
   DeviceBuffer<std::uint64_t> sort_values_b_;
   DeviceBuffer<std::uint64_t> transaction_rank_counts_;
@@ -1025,7 +1036,7 @@ __global__ void classify_candidates_multiorder_kernel(
     std::uint64_t* accepted_counts,
     std::uint64_t* strict_counts,
     std::uint64_t* shell_counts,
-    std::uint8_t* sort_keys,
+    std::uint64_t* sort_keys,
     std::uint64_t* sort_values,
     std::uint64_t* transaction_rank_counts,
     std::uint64_t* fallback_candidate_indices,
@@ -1378,7 +1389,6 @@ __global__ void prepare_receipt_control_kernel(
     control->failure_code = kFailureExactPredicate;
     control->required_catalog_record_count = prior_record_count;
     control->required_payload_point_id_count = prior_payload;
-    control->required_exact_fallback_count = prior_fallback_count;
   } else if (control->required_catalog_record_count > record_capacity) {
     control->status = kStatusCapacityExhausted;
     control->stop_reason = kStopRecordCapacity;
@@ -1421,12 +1431,149 @@ __global__ void prepare_receipt_control_kernel(
   control->cumulative_above_window_count = prior_above_window_count;
   control->cumulative_strict_payload_count = prior_strict_count;
   control->cumulative_shell_payload_count = prior_shell_count;
-  control->cumulative_exact_fallback_count = prior_fallback_count;
+  control->cumulative_exact_fallback_count =
+      control->required_exact_fallback_count;
   if (!checked_add_u64(
           prior_unresolved_count,
           candidate_count,
           control->cumulative_unresolved_count)) {
     control->failure_code = kFailureInvariant;
+  }
+}
+
+enum class CanonicalSortComponent : std::uint8_t {
+  support_v,
+  support_u,
+  closed_rank,
+};
+
+__global__ void build_canonical_sort_keys_kernel(
+    const CandidateClassification* classifications,
+    const std::uint64_t* ordered_candidate_indices,
+    std::uint64_t candidate_count,
+    CanonicalSortComponent component,
+    std::uint64_t* keys) {
+  const std::uint64_t index =
+      static_cast<std::uint64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (index >= candidate_count) {
+    return;
+  }
+  const std::uint64_t logical_index = ordered_candidate_indices[index];
+  if (logical_index >= candidate_count) {
+    keys[index] = kSortKeyRejected;
+    return;
+  }
+  const CandidateClassification classified = classifications[logical_index];
+  if (classified.outcome !=
+      static_cast<std::uint8_t>(CandidateOutcome::accepted)) {
+    keys[index] = kSortKeyRejected;
+    return;
+  }
+  switch (component) {
+    case CanonicalSortComponent::support_v:
+      keys[index] = classified.support_v;
+      return;
+    case CanonicalSortComponent::support_u:
+      keys[index] = classified.support_u;
+      return;
+    case CanonicalSortComponent::closed_rank:
+      keys[index] = classified.closed_rank;
+      return;
+  }
+  keys[index] = kSortKeyRejected;
+}
+
+[[nodiscard]] __device__ int compare_canonical_key(
+    std::uint64_t left_rank,
+    std::uint64_t left_u,
+    std::uint64_t left_v,
+    std::uint64_t right_rank,
+    std::uint64_t right_u,
+    std::uint64_t right_v) noexcept {
+  if (left_rank != right_rank) {
+    return left_rank < right_rank ? -1 : 1;
+  }
+  if (left_u != right_u) {
+    return left_u < right_u ? -1 : 1;
+  }
+  if (left_v != right_v) {
+    return left_v < right_v ? -1 : 1;
+  }
+  return 0;
+}
+
+__global__ void validate_canonical_inputs_kernel(
+    const CandidateClassification* classifications,
+    const std::uint64_t* sorted_candidate_indices,
+    std::uint64_t candidate_count,
+    const std::uint64_t* current_support_u,
+    const std::uint64_t* current_support_v,
+    const std::uint8_t* current_closed_rank,
+    std::uint64_t prior_record_count,
+    std::uint64_t point_count,
+    std::uint64_t maximum_closed_rank,
+    DeviceReceiptControl* control) {
+  if (control->commit_allowed == 0U) {
+    return;
+  }
+  const std::uint64_t index =
+      static_cast<std::uint64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (index < control->transaction_accepted_record_count) {
+    const std::uint64_t logical_index = sorted_candidate_indices[index];
+    bool invalid = logical_index >= candidate_count;
+    CandidateClassification current{};
+    if (!invalid) {
+      current = classifications[logical_index];
+      invalid =
+          current.outcome !=
+              static_cast<std::uint8_t>(CandidateOutcome::accepted) ||
+          current.closed_rank < 2U ||
+          current.closed_rank > maximum_closed_rank ||
+          current.support_u >= current.support_v ||
+          current.support_v >= point_count;
+    }
+    if (!invalid && index != 0U) {
+      const std::uint64_t prior_logical =
+          sorted_candidate_indices[index - UINT64_C(1)];
+      if (prior_logical >= candidate_count) {
+        invalid = true;
+      } else {
+        const CandidateClassification prior =
+            classifications[prior_logical];
+        invalid = compare_canonical_key(
+                      prior.closed_rank,
+                      prior.support_u,
+                      prior.support_v,
+                      current.closed_rank,
+                      current.support_u,
+                      current.support_v) >= 0;
+      }
+    }
+    if (invalid) {
+      atomicAdd(
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
+          1ULL);
+    }
+  }
+  if (index < prior_record_count) {
+    const std::uint64_t rank = current_closed_rank[index];
+    bool invalid = rank < UINT64_C(2) || rank > maximum_closed_rank ||
+                   current_support_u[index] >= current_support_v[index] ||
+                   current_support_v[index] >= point_count;
+    if (!invalid && index != 0U) {
+      invalid = compare_canonical_key(
+                    current_closed_rank[index - UINT64_C(1)],
+                    current_support_u[index - UINT64_C(1)],
+                    current_support_v[index - UINT64_C(1)],
+                    rank,
+                    current_support_u[index],
+                    current_support_v[index]) >= 0;
+    }
+    if (invalid) {
+      atomicAdd(
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
+          1ULL);
+    }
   }
 }
 
@@ -1438,6 +1585,50 @@ __global__ void prepare_receipt_control_kernel(
     prefix += counts[current];
   }
   return prefix;
+}
+
+[[nodiscard]] __device__ std::uint64_t lower_bound_current_pair(
+    const std::uint64_t* support_u,
+    const std::uint64_t* support_v,
+    std::uint64_t begin,
+    std::uint64_t end,
+    std::uint64_t target_u,
+    std::uint64_t target_v) noexcept {
+  while (begin < end) {
+    const std::uint64_t middle = begin + (end - begin) / UINT64_C(2);
+    const bool less = support_u[middle] < target_u ||
+                      (support_u[middle] == target_u &&
+                       support_v[middle] < target_v);
+    if (less) {
+      begin = middle + UINT64_C(1);
+    } else {
+      end = middle;
+    }
+  }
+  return begin;
+}
+
+[[nodiscard]] __device__ std::uint64_t lower_bound_transaction_pair(
+    const CandidateClassification* classifications,
+    const std::uint64_t* sorted_candidate_indices,
+    std::uint64_t begin,
+    std::uint64_t end,
+    std::uint64_t target_u,
+    std::uint64_t target_v) noexcept {
+  while (begin < end) {
+    const std::uint64_t middle = begin + (end - begin) / UINT64_C(2);
+    const CandidateClassification candidate =
+        classifications[sorted_candidate_indices[middle]];
+    const bool less = candidate.support_u < target_u ||
+                      (candidate.support_u == target_u &&
+                       candidate.support_v < target_v);
+    if (less) {
+      begin = middle + UINT64_C(1);
+    } else {
+      end = middle;
+    }
+  }
+  return begin;
 }
 
 __global__ void prepare_destination_records_kernel(
@@ -1453,7 +1644,10 @@ __global__ void prepare_destination_records_kernel(
     std::uint64_t candidate_count,
     const std::uint64_t* transaction_rank_counts,
     std::uint64_t maximum_closed_rank,
-    const DeviceReceiptControl* control,
+    std::uint64_t destination_record_capacity,
+    std::uint64_t prior_strict_payload_count,
+    std::uint64_t prior_shell_payload_count,
+    DeviceReceiptControl* control,
     std::uint64_t* destination_support_u,
     std::uint64_t* destination_support_v,
     std::uint8_t* destination_closed_rank,
@@ -1466,34 +1660,71 @@ __global__ void prepare_destination_records_kernel(
       static_cast<std::uint64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
   if (index < prior_record_count) {
     const std::uint64_t rank = current_closed_rank[index];
-    if (rank < UINT64_C(2) || rank > maximum_closed_rank ||
-        index < current_rank_offsets[rank] ||
-        index >= current_rank_offsets[rank + UINT64_C(1)]) {
+    bool invalid = rank < UINT64_C(2) || rank > maximum_closed_rank;
+    std::uint64_t rank_begin = 0U;
+    std::uint64_t rank_end = 0U;
+    std::uint64_t transaction_begin = 0U;
+    std::uint64_t transaction_end = 0U;
+    if (!invalid) {
+      rank_begin = current_rank_offsets[rank];
+      rank_end = current_rank_offsets[rank + UINT64_C(1)];
+      transaction_begin =
+          transaction_rank_prefix(transaction_rank_counts, rank);
+      transaction_end = transaction_begin + transaction_rank_counts[rank];
+      invalid = rank_begin > index || index >= rank_end ||
+                rank_end > prior_record_count ||
+                transaction_end >
+                    control->transaction_accepted_record_count;
+    }
+    std::uint64_t transaction_insertion = 0U;
+    if (!invalid) {
+      transaction_insertion = lower_bound_transaction_pair(
+          classifications,
+          sorted_candidate_indices,
+          transaction_begin,
+          transaction_end,
+          current_support_u[index],
+          current_support_v[index]);
+      if (transaction_insertion < transaction_end) {
+        const CandidateClassification other = classifications[
+            sorted_candidate_indices[transaction_insertion]];
+        invalid = other.support_u == current_support_u[index] &&
+                  other.support_v == current_support_v[index];
+      }
+    }
+    const std::uint64_t destination =
+        rank_begin + transaction_begin + (index - rank_begin) +
+        (transaction_insertion - transaction_begin);
+    const std::uint64_t strict_begin = current_strict_offsets[index];
+    const std::uint64_t strict_end = current_strict_offsets[index + 1U];
+    const std::uint64_t shell_begin = current_shell_offsets[index];
+    const std::uint64_t shell_end = current_shell_offsets[index + 1U];
+    invalid = invalid || destination >= destination_record_capacity ||
+              destination >= control->required_catalog_record_count ||
+              strict_begin > strict_end ||
+              strict_end > prior_strict_payload_count ||
+              shell_begin > shell_end ||
+              shell_end > prior_shell_payload_count;
+    if (invalid) {
       atomicAdd(
-          reinterpret_cast<unsigned long long*>(
-              const_cast<std::uint64_t*>(&control->invariant_count)),
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
           1ULL);
       return;
     }
-    const std::uint64_t destination =
-        index + transaction_rank_prefix(transaction_rank_counts, rank);
     destination_support_u[destination] = current_support_u[index];
     destination_support_v[destination] = current_support_v[index];
     destination_closed_rank[destination] = static_cast<std::uint8_t>(rank);
     destination_strict_counts[destination] =
-        current_strict_offsets[index + UINT64_C(1)] -
-        current_strict_offsets[index];
+        strict_end - strict_begin;
     destination_shell_counts[destination] =
-        current_shell_offsets[index + UINT64_C(1)] -
-        current_shell_offsets[index];
+        shell_end - shell_begin;
   }
 
   if (index < control->transaction_accepted_record_count) {
     const std::uint64_t logical_index = sorted_candidate_indices[index];
     if (logical_index >= candidate_count) {
       atomicAdd(
-          reinterpret_cast<unsigned long long*>(
-              const_cast<std::uint64_t*>(&control->invariant_count)),
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
           1ULL);
       return;
     }
@@ -1503,8 +1734,7 @@ __global__ void prepare_destination_records_kernel(
             static_cast<std::uint8_t>(CandidateOutcome::accepted) ||
         rank < UINT64_C(2) || rank > maximum_closed_rank) {
       atomicAdd(
-          reinterpret_cast<unsigned long long*>(
-              const_cast<std::uint64_t*>(&control->invariant_count)),
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
           1ULL);
       return;
     }
@@ -1512,14 +1742,41 @@ __global__ void prepare_destination_records_kernel(
         transaction_rank_prefix(transaction_rank_counts, rank);
     if (index < rank_prefix) {
       atomicAdd(
-          reinterpret_cast<unsigned long long*>(
-              const_cast<std::uint64_t*>(&control->invariant_count)),
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
           1ULL);
       return;
     }
     const std::uint64_t rank_local = index - rank_prefix;
+    const std::uint64_t current_begin = current_rank_offsets[rank];
+    const std::uint64_t current_end = current_rank_offsets[rank + UINT64_C(1)];
+    bool invalid = current_begin > current_end ||
+                   current_end > prior_record_count;
+    std::uint64_t current_insertion = current_begin;
+    if (!invalid) {
+      current_insertion = lower_bound_current_pair(
+          current_support_u,
+          current_support_v,
+          current_begin,
+          current_end,
+          classified.support_u,
+          classified.support_v);
+    }
+    if (!invalid && current_insertion < current_end) {
+      invalid = current_support_u[current_insertion] == classified.support_u &&
+                current_support_v[current_insertion] == classified.support_v;
+    }
     const std::uint64_t destination =
-        current_rank_offsets[rank + UINT64_C(1)] + rank_prefix + rank_local;
+        current_begin + rank_prefix + rank_local +
+        (current_insertion - current_begin);
+    invalid = invalid || destination >= destination_record_capacity ||
+              destination >= control->required_catalog_record_count ||
+              classified.strict_count + classified.shell_count != rank - 2U;
+    if (invalid) {
+      atomicAdd(
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
+          1ULL);
+      return;
+    }
     destination_support_u[destination] = classified.support_u;
     destination_support_v[destination] = classified.support_v;
     destination_closed_rank[destination] = classified.closed_rank;
@@ -1557,7 +1814,45 @@ __global__ void finalize_destination_preparation_kernel(
   }
 }
 
+__global__ void validate_destination_layout_kernel(
+    const std::uint64_t* rank_offsets,
+    const std::uint64_t* strict_offsets,
+    const std::uint64_t* shell_offsets,
+    std::uint64_t maximum_closed_rank,
+    std::uint64_t record_capacity,
+    std::uint64_t payload_capacity,
+    DeviceReceiptControl* control) {
+  if (control->commit_allowed == 0U) {
+    return;
+  }
+  const std::uint64_t index = threadIdx.x;
+  bool invalid = false;
+  if (index <= maximum_closed_rank) {
+    invalid = rank_offsets[index] > rank_offsets[index + UINT64_C(1)] ||
+              rank_offsets[index + UINT64_C(1)] > record_capacity;
+  }
+  if (index == 0U) {
+    const std::uint64_t records = control->required_catalog_record_count;
+    invalid = invalid || rank_offsets[0] != UINT64_C(0) ||
+              rank_offsets[maximum_closed_rank + UINT64_C(1)] != records ||
+              records > record_capacity ||
+              strict_offsets[records] !=
+                  control->cumulative_strict_payload_count ||
+              shell_offsets[records] !=
+                  control->cumulative_shell_payload_count ||
+              control->cumulative_strict_payload_count > payload_capacity ||
+              control->cumulative_shell_payload_count > payload_capacity;
+  }
+  if (invalid) {
+    atomicAdd(
+        reinterpret_cast<unsigned long long*>(&control->invariant_count),
+        1ULL);
+  }
+}
+
 __global__ void emit_destination_payload_kernel(
+    const std::uint64_t* current_support_u,
+    const std::uint64_t* current_support_v,
     const std::uint8_t* current_closed_rank,
     const std::uint64_t* current_strict_offsets,
     const std::uint64_t* current_strict_point_ids,
@@ -1567,9 +1862,13 @@ __global__ void emit_destination_payload_kernel(
     const CandidateClassification* classifications,
     const std::uint64_t* sorted_candidate_indices,
     std::uint64_t candidate_count,
-    const std::uint64_t* transaction_rank_counts,
-    std::uint64_t maximum_closed_rank,
-    const DeviceReceiptControl* control,
+    std::uint64_t prior_strict_payload_count,
+    std::uint64_t prior_shell_payload_count,
+    std::uint64_t destination_payload_capacity,
+    DeviceReceiptControl* control,
+    const std::uint64_t* destination_support_u,
+    const std::uint64_t* destination_support_v,
+    const std::uint64_t* destination_rank_offsets,
     const std::uint64_t* destination_strict_offsets,
     std::uint64_t* destination_strict_point_ids,
     const std::uint64_t* destination_shell_offsets,
@@ -1581,8 +1880,23 @@ __global__ void emit_destination_payload_kernel(
       static_cast<std::uint64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
   if (index < prior_record_count) {
     const std::uint64_t rank = current_closed_rank[index];
-    const std::uint64_t destination =
-        index + transaction_rank_prefix(transaction_rank_counts, rank);
+    const std::uint64_t destination_begin = destination_rank_offsets[rank];
+    const std::uint64_t destination_end =
+        destination_rank_offsets[rank + UINT64_C(1)];
+    const std::uint64_t destination = lower_bound_current_pair(
+        destination_support_u,
+        destination_support_v,
+        destination_begin,
+        destination_end,
+        current_support_u[index],
+        current_support_v[index]);
+    if (destination >= destination_end ||
+        destination >= control->required_catalog_record_count) {
+      atomicAdd(
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
+          1ULL);
+      return;
+    }
     const std::uint64_t strict_begin = current_strict_offsets[index];
     const std::uint64_t strict_count =
         current_strict_offsets[index + UINT64_C(1)] - strict_begin;
@@ -1593,6 +1907,26 @@ __global__ void emit_destination_payload_kernel(
         destination_strict_offsets[destination];
     const std::uint64_t destination_shell =
         destination_shell_offsets[destination];
+    bool invalid = destination_support_u[destination] !=
+                       current_support_u[index] ||
+                   destination_support_v[destination] !=
+                       current_support_v[index] ||
+                   strict_begin > prior_strict_payload_count ||
+                   strict_count > prior_strict_payload_count - strict_begin ||
+                   shell_begin > prior_shell_payload_count ||
+                   shell_count > prior_shell_payload_count - shell_begin ||
+                   destination_strict > destination_payload_capacity ||
+                   strict_count >
+                       destination_payload_capacity - destination_strict ||
+                   destination_shell > destination_payload_capacity ||
+                   shell_count >
+                       destination_payload_capacity - destination_shell;
+    if (invalid) {
+      atomicAdd(
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
+          1ULL);
+      return;
+    }
     for (std::uint64_t payload = 0U; payload < strict_count; ++payload) {
       destination_strict_point_ids[destination_strict + payload] =
           current_strict_point_ids[strict_begin + payload];
@@ -1610,15 +1944,41 @@ __global__ void emit_destination_payload_kernel(
     }
     const CandidateClassification classified = classifications[logical_index];
     const std::uint64_t rank = classified.closed_rank;
-    const std::uint64_t rank_prefix =
-        transaction_rank_prefix(transaction_rank_counts, rank);
-    const std::uint64_t destination =
-        current_rank_offsets[rank + UINT64_C(1)] + rank_prefix +
-        (index - rank_prefix);
+    const std::uint64_t destination_begin = destination_rank_offsets[rank];
+    const std::uint64_t destination_end =
+        destination_rank_offsets[rank + UINT64_C(1)];
+    const std::uint64_t destination = lower_bound_current_pair(
+        destination_support_u,
+        destination_support_v,
+        destination_begin,
+        destination_end,
+        classified.support_u,
+        classified.support_v);
+    if (destination >= destination_end ||
+        destination >= control->required_catalog_record_count) {
+      atomicAdd(
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
+          1ULL);
+      return;
+    }
     const std::uint64_t destination_strict =
         destination_strict_offsets[destination];
     const std::uint64_t destination_shell =
         destination_shell_offsets[destination];
+    bool invalid = destination_support_u[destination] != classified.support_u ||
+                   destination_support_v[destination] != classified.support_v ||
+                   destination_strict > destination_payload_capacity ||
+                   classified.strict_count >
+                       destination_payload_capacity - destination_strict ||
+                   destination_shell > destination_payload_capacity ||
+                   classified.shell_count >
+                       destination_payload_capacity - destination_shell;
+    if (invalid) {
+      atomicAdd(
+          reinterpret_cast<unsigned long long*>(&control->invariant_count),
+          1ULL);
+      return;
+    }
     for (std::uint64_t payload = 0U; payload < classified.strict_count;
          ++payload) {
       destination_strict_point_ids[destination_strict + payload] =
@@ -1699,7 +2059,6 @@ void validate_launch(
       views.candidate_segment_stride_records == 0U ||
       views.physical_candidate_record_capacity !=
           expected_candidate_capacity ||
-      request.candidate_count == 0U ||
       request.candidate_count > expected_candidate_capacity ||
       views.retained_coordinate_word_capacity < coordinate_word_count ||
       views.retained_morton_point_id_capacity < request.point_count ||
@@ -1712,9 +2071,11 @@ void validate_launch(
   static_cast<void>(checked_cub_count(
       anchor_count + 1U,
       "the ranked-pair anchor extent exceeds the CUB int ABI"));
-  static_cast<void>(checked_cub_count(
-      static_cast<std::size_t>(request.candidate_count),
-      "the ranked-pair candidate extent exceeds the CUB int ABI"));
+  if (request.candidate_count != 0U) {
+    static_cast<void>(checked_cub_count(
+        static_cast<std::size_t>(request.candidate_count),
+        "the ranked-pair candidate extent exceeds the CUB int ABI"));
+  }
   static_cast<void>(checked_cub_count(
       request.fixed_config.catalog_record_capacity + 1U,
       "the ranked-pair record extent exceeds the CUB int ABI"));
@@ -1874,10 +2235,12 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
   check_kernel("ranked-pair anchor-control validation launch");
   ++logical_launch_count;
 
+  std::size_t anchor_scan_workspace_bytes =
+      resources->scan_workspace_bytes();
   check_cuda(
       cub::DeviceScan::ExclusiveSum(
           resources->scan_workspace().get(),
-          resources->scan_workspace_bytes(),
+          anchor_scan_workspace_bytes,
           resources->anchor_counts().get(),
           resources->anchor_offsets().get(),
           checked_cub_count(
@@ -1887,48 +2250,51 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       "CUB ranked-pair anchor count scan");
   ++logical_launch_count;
 
-  classify_candidates_multiorder_kernel<<<
-      launch_blocks(candidate_count),
-      kThreadsPerBlock,
-      0,
-      stream>>>(
-      candidate_views.device_coordinate_bits,
-      candidate_views.device_morton_point_ids,
-      static_cast<const Phase15MortonYao48RankedPairNode*>(
-          candidate_views.device_nodes),
-      candidate_views.device_candidate_records,
-      resources->anchor_offsets().get(),
-      resources->last_partner_positions().get(),
-      static_cast<std::uint64_t>(request.point_count),
-      static_cast<std::uint64_t>(request.certified_node_count),
-      static_cast<std::uint64_t>(anchor_count),
-      static_cast<std::uint64_t>(request.anchor_begin),
-      static_cast<std::uint64_t>(
-          candidate_views.candidate_segment_stride_records),
-      request.candidate_count,
-      static_cast<std::uint64_t>(request.fixed_config.maximum_closed_rank),
-      static_cast<std::uint64_t>(
-          request.fixed_config.exact_fallback_capacity),
-      request.same_tile_continuation,
-      resources->classifications().get(),
-      resources->accepted_counts().get(),
-      resources->strict_counts().get(),
-      resources->shell_counts().get(),
-      resources->sort_keys_a().get(),
-      resources->sort_values_a().get(),
-      resources->transaction_rank_counts().get(),
-      resources->fallback_candidate_indices().get(),
-      resources->control().get());
-  check_kernel("ranked-pair exact multiorder classification launch");
-  ++logical_launch_count;
+  if (candidate_count != 0U) {
+    classify_candidates_multiorder_kernel<<<
+        launch_blocks(candidate_count),
+        kThreadsPerBlock,
+        0,
+        stream>>>(
+        candidate_views.device_coordinate_bits,
+        candidate_views.device_morton_point_ids,
+        static_cast<const Phase15MortonYao48RankedPairNode*>(
+            candidate_views.device_nodes),
+        candidate_views.device_candidate_records,
+        resources->anchor_offsets().get(),
+        resources->last_partner_positions().get(),
+        static_cast<std::uint64_t>(request.point_count),
+        static_cast<std::uint64_t>(request.certified_node_count),
+        static_cast<std::uint64_t>(anchor_count),
+        static_cast<std::uint64_t>(request.anchor_begin),
+        static_cast<std::uint64_t>(
+            candidate_views.candidate_segment_stride_records),
+        request.candidate_count,
+        static_cast<std::uint64_t>(request.fixed_config.maximum_closed_rank),
+        static_cast<std::uint64_t>(
+            request.fixed_config.exact_fallback_capacity),
+        request.same_tile_continuation,
+        resources->classifications().get(),
+        resources->accepted_counts().get(),
+        resources->strict_counts().get(),
+        resources->shell_counts().get(),
+        resources->sort_keys_a().get(),
+        resources->sort_values_a().get(),
+        resources->transaction_rank_counts().get(),
+        resources->fallback_candidate_indices().get(),
+        resources->control().get());
+    check_kernel("ranked-pair exact multiorder classification launch");
+    ++logical_launch_count;
+  }
 
   const auto scan_candidate_counts = [&](const std::uint64_t* input,
                                          std::uint64_t* output,
                                          const char* operation) {
+    std::size_t workspace_bytes = resources->scan_workspace_bytes();
     check_cuda(
         cub::DeviceScan::ExclusiveSum(
             resources->scan_workspace().get(),
-            resources->scan_workspace_bytes(),
+            workspace_bytes,
             input,
             output,
             checked_cub_count(
@@ -1951,24 +2317,63 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       resources->shell_offsets().get(),
       "CUB ranked-pair shell payload scan");
 
-  cub::DoubleBuffer<std::uint8_t> sort_keys{
-      resources->sort_keys_a().get(), resources->sort_keys_b().get()};
-  cub::DoubleBuffer<std::uint64_t> sort_values{
-      resources->sort_values_a().get(), resources->sort_values_b().get()};
-  check_cuda(
-      cub::DeviceRadixSort::SortPairs(
-          resources->sort_workspace().get(),
-          resources->sort_workspace_bytes(),
-          sort_keys,
-          sort_values,
-          checked_cub_count(
-              candidate_count,
-              "the ranked-pair transaction sort extent exceeds int"),
+  std::uint64_t* sorted_candidate_indices =
+      resources->sort_values_a().get();
+  std::uint64_t* alternate_candidate_indices =
+      resources->sort_values_b().get();
+  if (candidate_count != 0U) {
+    const auto sort_component = [&](CanonicalSortComponent component,
+                                    const char* key_operation,
+                                    const char* sort_operation) {
+      build_canonical_sort_keys_kernel<<<
+          launch_blocks(candidate_count),
+          kThreadsPerBlock,
           0,
-          8,
-          stream),
-      "CUB ranked-pair stable transaction sort");
-  ++logical_launch_count;
+          stream>>>(
+          resources->classifications().get(),
+          sorted_candidate_indices,
+          request.candidate_count,
+          component,
+          resources->sort_keys_a().get());
+      check_kernel(key_operation);
+      ++logical_launch_count;
+      cub::DoubleBuffer<std::uint64_t> keys{
+          resources->sort_keys_a().get(), resources->sort_keys_b().get()};
+      cub::DoubleBuffer<std::uint64_t> values{
+          sorted_candidate_indices, alternate_candidate_indices};
+      std::size_t workspace_bytes = resources->sort_workspace_bytes();
+      check_cuda(
+          cub::DeviceRadixSort::SortPairs(
+              resources->sort_workspace().get(),
+              workspace_bytes,
+              keys,
+              values,
+              checked_cub_count(
+                  candidate_count,
+                  "the ranked-pair transaction sort extent exceeds int"),
+              0,
+              64,
+              stream),
+          sort_operation);
+      ++logical_launch_count;
+      sorted_candidate_indices = values.Current();
+      alternate_candidate_indices = values.Alternate();
+    };
+    // Stable least-significant-component passes produce the canonical tuple
+    // order (closed_rank, support_u, support_v).
+    sort_component(
+        CanonicalSortComponent::support_v,
+        "ranked-pair support-v key launch",
+        "CUB ranked-pair stable support-v sort");
+    sort_component(
+        CanonicalSortComponent::support_u,
+        "ranked-pair support-u key launch",
+        "CUB ranked-pair stable support-u sort");
+    sort_component(
+        CanonicalSortComponent::closed_rank,
+        "ranked-pair closed-rank key launch",
+        "CUB ranked-pair stable closed-rank sort");
+  }
 
   prepare_receipt_control_kernel<<<1U, 1U, 0U, stream>>>(
       resources->anchor_offsets().get(),
@@ -1997,6 +2402,31 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
 
   CatalogBuffers& current = resources->current_catalog();
   CatalogBuffers& destination = resources->destination_catalog();
+  validate_canonical_inputs_kernel<<<
+      launch_blocks(std::max<std::size_t>(
+          1U, std::max(resources->record_count(), candidate_count))),
+      kThreadsPerBlock,
+      0,
+      stream>>>(
+      resources->classifications().get(),
+      sorted_candidate_indices,
+      request.candidate_count,
+      current.support_u.get(),
+      current.support_v.get(),
+      current.closed_rank.get(),
+      static_cast<std::uint64_t>(resources->record_count()),
+      static_cast<std::uint64_t>(request.point_count),
+      static_cast<std::uint64_t>(request.fixed_config.maximum_closed_rank),
+      resources->control().get());
+  check_kernel("ranked-pair canonical input validation launch");
+  ++logical_launch_count;
+  finalize_destination_preparation_kernel<<<1U, 1U, 0U, stream>>>(
+      resources->control().get());
+  check_kernel("ranked-pair canonical input finalization launch");
+  ++logical_launch_count;
+
+  const bool destination_catalog_built = candidate_count != 0U;
+  if (destination_catalog_built) {
   const std::size_t upper_record_count = std::min(
       request.fixed_config.catalog_record_capacity,
       checked_sum(
@@ -2033,10 +2463,14 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       current.shell_offsets.get(),
       static_cast<std::uint64_t>(resources->record_count()),
       resources->classifications().get(),
-      sort_values.Current(),
+      sorted_candidate_indices,
       request.candidate_count,
       resources->transaction_rank_counts().get(),
       static_cast<std::uint64_t>(request.fixed_config.maximum_closed_rank),
+      static_cast<std::uint64_t>(
+          request.fixed_config.catalog_record_capacity),
+      static_cast<std::uint64_t>(resources->strict_count()),
+      static_cast<std::uint64_t>(resources->shell_count()),
       resources->control().get(),
       destination.support_u.get(),
       destination.support_v.get(),
@@ -2063,10 +2497,11 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
   const auto scan_catalog_counts = [&](const std::uint64_t* input,
                                        std::uint64_t* output,
                                        const char* operation) {
+    std::size_t workspace_bytes = resources->scan_workspace_bytes();
     check_cuda(
         cub::DeviceScan::ExclusiveSum(
             resources->scan_workspace().get(),
-            resources->scan_workspace_bytes(),
+            workspace_bytes,
             input,
             output,
             checked_cub_count(
@@ -2085,11 +2520,30 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       destination.shell_offsets.get(),
       "CUB ranked-pair destination shell scan");
 
+  validate_destination_layout_kernel<<<1U, kThreadsPerBlock, 0U, stream>>>(
+      destination.rank_offsets.get(),
+      destination.strict_offsets.get(),
+      destination.shell_offsets.get(),
+      static_cast<std::uint64_t>(request.fixed_config.maximum_closed_rank),
+      static_cast<std::uint64_t>(
+          request.fixed_config.catalog_record_capacity),
+      static_cast<std::uint64_t>(
+          request.fixed_config.payload_point_id_capacity),
+      resources->control().get());
+  check_kernel("ranked-pair destination layout validation launch");
+  ++logical_launch_count;
+  finalize_destination_preparation_kernel<<<1U, 1U, 0U, stream>>>(
+      resources->control().get());
+  check_kernel("ranked-pair destination layout finalization launch");
+  ++logical_launch_count;
+
   emit_destination_payload_kernel<<<
       launch_blocks(std::max<std::size_t>(1U, record_prepare_extent)),
       kThreadsPerBlock,
       0,
       stream>>>(
+      current.support_u.get(),
+      current.support_v.get(),
       current.closed_rank.get(),
       current.strict_offsets.get(),
       current.strict_point_ids.get(),
@@ -2097,16 +2551,25 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       current.shell_point_ids.get(),
       static_cast<std::uint64_t>(resources->record_count()),
       resources->classifications().get(),
-      sort_values.Current(),
+      sorted_candidate_indices,
       request.candidate_count,
-      resources->transaction_rank_counts().get(),
-      static_cast<std::uint64_t>(request.fixed_config.maximum_closed_rank),
+      static_cast<std::uint64_t>(resources->strict_count()),
+      static_cast<std::uint64_t>(resources->shell_count()),
+      static_cast<std::uint64_t>(
+          request.fixed_config.payload_point_id_capacity),
       resources->control().get(),
+      destination.support_u.get(),
+      destination.support_v.get(),
+      destination.rank_offsets.get(),
       destination.strict_offsets.get(),
       destination.strict_point_ids.get(),
       destination.shell_offsets.get(),
       destination.shell_point_ids.get());
   check_kernel("ranked-pair destination payload emission launch");
+  ++logical_launch_count;
+  finalize_destination_preparation_kernel<<<1U, 1U, 0U, stream>>>(
+      resources->control().get());
+  check_kernel("ranked-pair payload emission finalization launch");
   ++logical_launch_count;
 
   commit_last_partner_positions_kernel<<<
@@ -2123,6 +2586,7 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
       resources->last_partner_positions().get());
   check_kernel("ranked-pair continuation witness commit launch");
   ++logical_launch_count;
+  }
 
   DeviceReceiptControl host_control{};
   check_cuda(
@@ -2156,6 +2620,8 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
   receipt.anchor_begin = request.anchor_begin;
   receipt.anchor_end = request.anchor_end;
   receipt.transaction_candidate_count = request.candidate_count;
+  receipt.transaction_exact_fallback_count =
+      host_control.exact_fallback_count;
   receipt.transaction_certified_pruned_pair_mass =
       request.transaction_certified_pruned_pair_mass;
   receipt.cumulative_certified_pruned_pair_mass =
@@ -2205,7 +2671,7 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
   receipt.exact_multiorder_classification_implemented = true;
   receipt.one_multiorder_launch_used = true;
   receipt.count_scan_payload_layout_validated = true;
-  receipt.output_records_sorted_unique = true;
+  receipt.output_records_sorted_unique = host_control.commit_allowed != 0U;
   receipt.output_rollback_validated = true;
 
   if (host_control.commit_allowed != 0U) {
@@ -2216,7 +2682,8 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
         host_control.transaction_strict_payload_count;
     receipt.transaction_shell_payload_point_id_count =
         host_control.transaction_shell_payload_count;
-    resources->commit_success(request, host_control);
+    resources->commit_success(
+        request, host_control, destination_catalog_built);
     CatalogBuffers& output = resources->current_catalog();
     receipt.output.owner = resources;
     receipt.output.support_u = output.support_u.get();
