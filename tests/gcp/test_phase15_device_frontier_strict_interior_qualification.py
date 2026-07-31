@@ -64,6 +64,15 @@ def case(
         if semantics == "strict_interior_threshold" and cloud == "boundary_shell"
         else 1
     )
+    result = rank_result(
+        semantics=semantics,
+        maximum_closed_rank=maximum_closed_rank,
+        candidate_mass=6 - negative_mass,
+        negative_mass=negative_mass,
+    )
+    tile_count = (4 + tile - 1) // tile
+    result["tile_count"] = tile_count
+    result["fresh_tile_device_arena_reuse_count"] = tile_count - 1
     return {
         "anchor_tile_capacity": tile,
         "cloud": cloud,
@@ -71,12 +80,7 @@ def case(
         "expected_candidate_pair_mass": 6 - negative_mass,
         "expected_certified_pruned_pair_mass": negative_mass,
         "maximum_closed_rank_metadata": maximum_closed_rank,
-        "rank_result": rank_result(
-            semantics=semantics,
-            maximum_closed_rank=maximum_closed_rank,
-            candidate_mass=6 - negative_mass,
-            negative_mass=negative_mass,
-        ),
+        "rank_result": result,
         "target_ax_negative_covered": negative_mass == 1,
     }
 
@@ -186,6 +190,22 @@ class QualificationContractTest(unittest.TestCase):
             value["strict_cases"][0]["rank_result"]["required_witness_count"] = 1
 
         self.assert_rejected(mutate)
+
+    def test_rejects_forged_fresh_tile_arena_lifecycle(self) -> None:
+        for field, replacement in (
+            ("fresh_tile_device_arena_allocation_count", 2),
+            ("fresh_tile_device_arena_reuse_count", 0),
+            ("tile_count", 0),
+        ):
+            with self.subTest(field=field):
+                def mutate(
+                    value: dict[str, object],
+                    field: str = field,
+                    replacement: int = replacement,
+                ) -> None:
+                    value["strict_cases"][0]["rank_result"][field] = replacement
+
+                self.assert_rejected(mutate)
 
     def test_sanitizer_comparison_ignores_timings_only(self) -> None:
         direct = qualification()

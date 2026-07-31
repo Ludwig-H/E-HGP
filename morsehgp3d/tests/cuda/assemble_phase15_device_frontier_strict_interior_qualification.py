@@ -366,16 +366,27 @@ def validate_rank(
         "rank_result.required_witness_count",
         expected=2,
     )
-    require_integer(
+    allocation_count = require_integer(
         value.get("fresh_tile_device_arena_allocation_count"),
         "rank_result.fresh_tile_device_arena_allocation_count",
         expected=1,
     )
-    require_integer(
+    tile_count = require_integer(
+        value.get("tile_count"),
+        "rank_result.tile_count",
+    )
+    if tile_count == 0:
+        fail("rank_result.tile_count must be positive")
+    reuse_count = require_integer(
         value.get("fresh_tile_device_arena_reuse_count"),
         "rank_result.fresh_tile_device_arena_reuse_count",
-        expected=0,
+        expected=tile_count - 1,
     )
+    if allocation_count + reuse_count != tile_count:
+        fail(
+            "rank_result fresh-tile device arena lifecycle does not partition "
+            "tile_count"
+        )
     for field in ("bounded_exact_pair_count", "unordered_pair_universe_count"):
         require_integer(value.get(field), f"rank_result.{field}", expected=6)
     for field in (
