@@ -394,6 +394,7 @@ ExactPairBlockTransactionalFrontierCudaContext::
       lbvh_identity_(std::move(other.lbvh_identity_)),
       pending_unordered_pair_mass_(other.pending_unordered_pair_mass_),
       inflight_unordered_pair_mass_(other.inflight_unordered_pair_mass_),
+      inflight_block_count_(other.inflight_block_count_),
       pruned_unordered_pair_mass_(other.pruned_unordered_pair_mass_),
       terminal_unordered_pair_mass_(other.terminal_unordered_pair_mass_),
       pending_block_capacity_(other.pending_block_capacity_),
@@ -405,6 +406,7 @@ ExactPairBlockTransactionalFrontierCudaContext::
   other.index_ = nullptr;
   other.cloud_ = nullptr;
   other.wave_open_ = false;
+  other.inflight_block_count_ = 0U;
   other.complete_ = false;
   other.sealed_or_moved_ = true;
 }
@@ -420,7 +422,7 @@ bool ExactPairBlockTransactionalFrontierCudaContext::complete()
   return ready() && complete_ && !wave_open_ &&
       block_buffers_[active_buffer_index_].empty() &&
       pending_unordered_pair_mass_ == 0U &&
-      inflight_unordered_pair_mass_ == 0U &&
+      inflight_unordered_pair_mass_ == 0U && inflight_block_count_ == 0U &&
       audit_.global_pair_coverage_closed;
 }
 
@@ -447,6 +449,7 @@ ExactPairBlockTransactionalFrontierCudaContext::inflight_blocks()
   return ready() && wave_open_
       ? std::span<const ExactPairBlockAuthority>{
             block_buffers_[active_buffer_index_]}
+            .first(inflight_block_count_)
       : std::span<const ExactPairBlockAuthority>{};
 }
 
@@ -455,10 +458,10 @@ void ExactPairBlockTransactionalFrontierCudaContext::refresh_audit() {
   audit_.inflight_unordered_pair_mass = inflight_unordered_pair_mass_;
   audit_.pruned_unordered_pair_mass = pruned_unordered_pair_mass_;
   audit_.terminal_unordered_pair_mass = terminal_unordered_pair_mass_;
-  audit_.pending_block_count =
-      wave_open_ ? 0U : block_buffers_[active_buffer_index_].size();
-  audit_.inflight_block_count =
-      wave_open_ ? block_buffers_[active_buffer_index_].size() : 0U;
+  audit_.pending_block_count = wave_open_
+      ? block_buffers_[active_buffer_index_].size() - inflight_block_count_
+      : block_buffers_[active_buffer_index_].size();
+  audit_.inflight_block_count = wave_open_ ? inflight_block_count_ : 0U;
   audit_.prune_receipt_count = prune_receipts_.size();
   audit_.terminal_pair_count = terminal_pairs_.size();
   audit_.maximum_pending_block_count = std::max(
@@ -483,8 +486,225 @@ void ExactPairBlockTransactionalFrontierCudaContext::verify_internal_mass()
   }
 }
 
+ExactPairBlockTransactionalFrontierCudaTransitionPreview
+ExactPairBlockTransactionalFrontierCudaContext::preview_transition(
+    const ExactPairBlockTransactionalFrontierCudaProposal& proposal)
+    const & {
+  ExactPairBlockTransactionalFrontierCudaTransitionPreview preview;
+  if (!ready() || wave_open_ ||
+      proposal.witness_node_count > proposal.witness_node_indices.size()) {
+    return preview;
+  }
+
+  const ExactPairBlockAuthority& source = proposal.source;
+  const auto node_is_current = [this](
+                                   const ExactPairBlockNodeAuthority& node) {
+    if (node.node_index >= index_->nodes_.size()) {
+      return false;
+    }
+    const auto& current = index_->nodes_[node.node_index];
+    return node.leaf_begin < node.leaf_end &&
+        current.leaf_begin == node.leaf_begin &&
+        current.leaf_end == node.leaf_end;
+  };
+  if (!node_is_current(source.first) ||
+      !node_is_current(source.second)) {
+    return preview;
+  }
+  std::size_t expected_source_mass = 0U;
+  if (source.kind == ExactPairBlockAuthorityKind::diagonal) {
+    if (source.first != source.second ||
+        !checked_unordered_pair_count(
+            source.first.leaf_count(), expected_source_mass)) {
+      return preview;
+    }
+  } else if (source.first.leaf_end > source.second.leaf_begin ||
+             !checked_product(
+                 source.first.leaf_count(),
+                 source.second.leaf_count(),
+                 expected_source_mass)) {
+    return preview;
+  }
+  if (expected_source_mass != source.unordered_pair_mass) {
+    return preview;
+  }
+
+  switch (proposal.kind) {
+    case ExactPairBlockTransactionalFrontierCudaProposalKind::open:
+      if (proposal.witness_node_count != 0U) {
+        return preview;
+      }
+      break;
+    case ExactPairBlockTransactionalFrontierCudaProposalKind::
+        try_exact_prune_else_open:
+      if (source.kind != ExactPairBlockAuthorityKind::cross) {
+        return preview;
+      }
+      break;
+    default:
+      return preview;
+  }
+
+  if (proposal.kind ==
+      ExactPairBlockTransactionalFrontierCudaProposalKind::
+          try_exact_prune_else_open) {
+    hierarchy::ExactBlockRankPruneResult prune =
+        hierarchy::certify_exact_block_rank_prune_receipt(
+            *index_,
+            *cloud_,
+            source.first.node_index,
+            source.second.node_index,
+            std::span<const std::size_t>{
+                proposal.witness_node_indices.data(),
+                proposal.witness_node_count},
+            config_.maximum_closed_rank);
+    if (prune.certified() && prune.receipt() != nullptr) {
+      if (prune.receipt()->witness_nodes().empty() ||
+          prune.receipt()->witness_nodes().size() >
+              exact_pair_block_transactional_frontier_cuda_maximum_witness_node_count ||
+          prune.receipt()->unordered_pair_mass() !=
+              source.unordered_pair_mass) {
+        preview.status =
+            ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+                arithmetic_overflow;
+        return preview;
+      }
+      preview.status =
+          ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+              ready;
+      preview.prune_receipt_count = 1U;
+      preview.pruned_unordered_pair_mass = source.unordered_pair_mass;
+      return preview;
+    }
+  }
+
+  if (source.kind == ExactPairBlockAuthorityKind::diagonal) {
+    const auto& parent = index_->nodes_[source.first.node_index];
+    if (parent.is_leaf() || parent.left_child >= index_->nodes_.size() ||
+        parent.right_child >= index_->nodes_.size() ||
+        parent.left_child == parent.right_child) {
+      return preview;
+    }
+    const auto& left = index_->nodes_[parent.left_child];
+    const auto& right = index_->nodes_[parent.right_child];
+    std::size_t left_mass = 0U;
+    std::size_t cross_mass = 0U;
+    std::size_t right_mass = 0U;
+    std::size_t child_mass = 0U;
+    if (!checked_unordered_pair_count(
+            left.leaf_end - left.leaf_begin, left_mass) ||
+        !checked_product(
+            left.leaf_end - left.leaf_begin,
+            right.leaf_end - right.leaf_begin,
+            cross_mass) ||
+        !checked_unordered_pair_count(
+            right.leaf_end - right.leaf_begin, right_mass) ||
+        !checked_add(left_mass, cross_mass, child_mass) ||
+        !checked_add(child_mass, right_mass, child_mass) ||
+        child_mass != source.unordered_pair_mass) {
+      preview.status =
+          ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+              arithmetic_overflow;
+      return preview;
+    }
+    preview.successor_block_count =
+        static_cast<std::size_t>(left_mass != 0U) +
+        static_cast<std::size_t>(cross_mass != 0U) +
+        static_cast<std::size_t>(right_mass != 0U);
+    preview.successor_unordered_pair_mass = source.unordered_pair_mass;
+    preview.status =
+        ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::ready;
+    return preview;
+  }
+
+  const auto& first_node = index_->nodes_[source.first.node_index];
+  const auto& second_node = index_->nodes_[source.second.node_index];
+  if (first_node.is_leaf() && second_node.is_leaf()) {
+    if (source.unordered_pair_mass != 1U) {
+      preview.status =
+          ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+              arithmetic_overflow;
+      return preview;
+    }
+    preview.terminal_pair_count = 1U;
+    preview.terminal_unordered_pair_mass = 1U;
+    preview.status =
+        ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::ready;
+    return preview;
+  }
+
+  const bool split_second =
+      !second_node.is_leaf() &&
+      (first_node.is_leaf() ||
+       source.second.leaf_count() >= source.first.leaf_count());
+  std::size_t first_child_mass = 0U;
+  std::size_t second_child_mass = 0U;
+  if (split_second) {
+    if (second_node.left_child >= index_->nodes_.size() ||
+        second_node.right_child >= index_->nodes_.size()) {
+      return preview;
+    }
+    const auto& left = index_->nodes_[second_node.left_child];
+    const auto& right = index_->nodes_[second_node.right_child];
+    if (!checked_product(
+            source.first.leaf_count(),
+            left.leaf_end - left.leaf_begin,
+            first_child_mass) ||
+        !checked_product(
+            source.first.leaf_count(),
+            right.leaf_end - right.leaf_begin,
+            second_child_mass)) {
+      preview.status =
+          ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+              arithmetic_overflow;
+      return preview;
+    }
+  } else {
+    if (first_node.is_leaf() ||
+        first_node.left_child >= index_->nodes_.size() ||
+        first_node.right_child >= index_->nodes_.size()) {
+      return preview;
+    }
+    const auto& left = index_->nodes_[first_node.left_child];
+    const auto& right = index_->nodes_[first_node.right_child];
+    if (!checked_product(
+            left.leaf_end - left.leaf_begin,
+            source.second.leaf_count(),
+            first_child_mass) ||
+        !checked_product(
+            right.leaf_end - right.leaf_begin,
+            source.second.leaf_count(),
+            second_child_mass)) {
+      preview.status =
+          ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+              arithmetic_overflow;
+      return preview;
+    }
+  }
+  std::size_t child_mass = 0U;
+  if (first_child_mass == 0U || second_child_mass == 0U ||
+      !checked_add(first_child_mass, second_child_mass, child_mass) ||
+      child_mass != source.unordered_pair_mass) {
+    preview.status =
+        ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+            arithmetic_overflow;
+    return preview;
+  }
+  preview.successor_block_count = 2U;
+  preview.successor_unordered_pair_mass = source.unordered_pair_mass;
+  preview.status =
+      ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::ready;
+  return preview;
+}
+
 ExactPairBlockTransactionalFrontierCudaWaveStart
 ExactPairBlockTransactionalFrontierCudaContext::begin_wave() & {
+  return begin_wave(block_buffers_[active_buffer_index_].size());
+}
+
+ExactPairBlockTransactionalFrontierCudaWaveStart
+ExactPairBlockTransactionalFrontierCudaContext::begin_wave(
+    std::size_t maximum_source_count) & {
   if (!ready()) {
     throw std::logic_error(
         "a moved or sealed transactional pair-block frontier cannot begin");
@@ -498,13 +718,33 @@ ExactPairBlockTransactionalFrontierCudaContext::begin_wave() & {
         frontier_complete;
   }
   if (block_buffers_[active_buffer_index_].empty() ||
-      pending_unordered_pair_mass_ == 0U) {
+      pending_unordered_pair_mass_ == 0U || maximum_source_count == 0U) {
     throw std::logic_error(
         "a nonterminal transactional pair-block frontier has no pending "
-        "authority");
+        "authority or page capacity");
   }
-  inflight_unordered_pair_mass_ = pending_unordered_pair_mass_;
-  pending_unordered_pair_mass_ = 0U;
+  inflight_block_count_ = std::min(
+      maximum_source_count,
+      block_buffers_[active_buffer_index_].size());
+  inflight_unordered_pair_mass_ = 0U;
+  for (std::size_t block_index = 0U;
+       block_index < inflight_block_count_;
+       ++block_index) {
+    std::size_t next_mass = 0U;
+    if (!checked_add(
+            inflight_unordered_pair_mass_,
+            block_buffers_[active_buffer_index_][block_index]
+                .unordered_pair_mass,
+            next_mass) ||
+        next_mass > pending_unordered_pair_mass_) {
+      inflight_unordered_pair_mass_ = 0U;
+      inflight_block_count_ = 0U;
+      throw std::overflow_error(
+          "a transactional pair-block page mass is not representable");
+    }
+    inflight_unordered_pair_mass_ = next_mass;
+  }
+  pending_unordered_pair_mass_ -= inflight_unordered_pair_mass_;
   wave_open_ = true;
   ++audit_.wave_begin_count;
   refresh_audit();
@@ -517,8 +757,9 @@ ExactPairBlockTransactionalFrontierCudaContext::rollback_result(
     ExactPairBlockTransactionalFrontierCudaWaveDecision decision,
     std::size_t submitted_block_count) noexcept {
   block_buffers_[1U - active_buffer_index_].clear();
-  pending_unordered_pair_mass_ = inflight_unordered_pair_mass_;
+  pending_unordered_pair_mass_ += inflight_unordered_pair_mass_;
   inflight_unordered_pair_mass_ = 0U;
+  inflight_block_count_ = 0U;
   wave_open_ = false;
   ++audit_.wave_rollback_count;
   audit_.rejected_wave_restored_without_scientific_mutation = true;
@@ -555,7 +796,17 @@ ExactPairBlockTransactionalFrontierCudaContext::commit_wave(
         ExactPairBlockTransactionalFrontierCudaWaveDecision::no_wave_open;
     return result;
   }
-  const auto& source_blocks = block_buffers_[active_buffer_index_];
+  const auto all_source_blocks = std::span<const ExactPairBlockAuthority>{
+      block_buffers_[active_buffer_index_]};
+  if (inflight_block_count_ == 0U ||
+      inflight_block_count_ > all_source_blocks.size()) {
+    return rollback_result(
+        ExactPairBlockTransactionalFrontierCudaWaveDecision::
+            rolled_back_arithmetic_overflow,
+        0U);
+  }
+  const auto source_blocks =
+      all_source_blocks.first(inflight_block_count_);
   const std::size_t submitted_block_count = source_blocks.size();
   if (proposals.size() != source_blocks.size()) {
     return rollback_result(
@@ -567,6 +818,20 @@ ExactPairBlockTransactionalFrontierCudaContext::commit_wave(
   const std::size_t inactive_index = 1U - active_buffer_index_;
   auto& successors = block_buffers_[inactive_index];
   successors.clear();
+  const std::size_t retained_source_count =
+      all_source_blocks.size() - submitted_block_count;
+  try {
+    successors.insert(
+        successors.end(),
+        all_source_blocks.begin() +
+            static_cast<std::ptrdiff_t>(submitted_block_count),
+        all_source_blocks.end());
+  } catch (const std::bad_alloc&) {
+    return rollback_result(
+        ExactPairBlockTransactionalFrontierCudaWaveDecision::
+            rolled_back_operational_allocation_failure,
+        submitted_block_count);
+  }
   std::vector<ExactPairBlockTransactionalFrontierCudaPruneReceipt>
       staged_prune_receipts;
   std::vector<ExactPairBlockTransactionalFrontierCudaTerminalPair>
@@ -956,7 +1221,12 @@ ExactPairBlockTransactionalFrontierCudaContext::commit_wave(
   }
   std::size_t next_pruned_mass = 0U;
   std::size_t next_terminal_mass = 0U;
+  std::size_t next_pending_mass = 0U;
   if (!checked_add(
+          pending_unordered_pair_mass_,
+          staged_pending_mass,
+          next_pending_mass) ||
+      !checked_add(
           pruned_unordered_pair_mass_,
           staged_pruned_mass,
           next_pruned_mass) ||
@@ -978,8 +1248,9 @@ ExactPairBlockTransactionalFrontierCudaContext::commit_wave(
   }
   block_buffers_[active_buffer_index_].clear();
   active_buffer_index_ = inactive_index;
-  pending_unordered_pair_mass_ = staged_pending_mass;
+  pending_unordered_pair_mass_ = next_pending_mass;
   inflight_unordered_pair_mass_ = 0U;
+  inflight_block_count_ = 0U;
   pruned_unordered_pair_mass_ = next_pruned_mass;
   terminal_unordered_pair_mass_ = next_terminal_mass;
   wave_open_ = false;
@@ -1005,7 +1276,8 @@ ExactPairBlockTransactionalFrontierCudaContext::commit_wave(
   result.diagonal_split_count = diagonal_split_count;
   result.cross_split_count = cross_split_count;
   result.terminal_pair_count = staged_terminal_pairs.size();
-  result.successor_block_count = successors.size();
+  result.successor_block_count =
+      successors.size() - retained_source_count;
   result.committed_pruned_unordered_pair_mass = staged_pruned_mass;
   result.committed_terminal_unordered_pair_mass = staged_terminal_mass;
   result.committed_pending_unordered_pair_mass = staged_pending_mass;

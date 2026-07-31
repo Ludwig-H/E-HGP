@@ -307,6 +307,28 @@ bool ExactPairBlockTransactionalFrontierResidentCudaResult::
 bool ExactPairBlockTransactionalFrontierResidentCudaResult::validated_for(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud) const {
+  const bool valid_host_page_shape = audit_.host_fake_lifecycle_exercised
+      ? audit_.bounded_paged_host_scheduler_exercised &&
+          audit_.host_page_storage_independent_of_point_count &&
+          audit_.host_page_mass_closure_validated &&
+          audit_.host_page_submission_count != 0U &&
+          audit_.host_page_publication_count == audit_.wave_commit_count &&
+          audit_.host_page_publication_count <=
+              audit_.host_page_submission_count &&
+          audit_.host_page_suffix_retry_count <=
+              audit_.host_page_submission_count &&
+          audit_.host_page_maximum_published_source_count <=
+              audit_.host_page_maximum_submitted_source_count &&
+          audit_.host_page_working_set_byte_count != 0U
+      : !audit_.bounded_paged_host_scheduler_exercised &&
+          !audit_.host_page_storage_independent_of_point_count &&
+          !audit_.host_page_mass_closure_validated &&
+          audit_.host_page_submission_count == 0U &&
+          audit_.host_page_publication_count == 0U &&
+          audit_.host_page_suffix_retry_count == 0U &&
+          audit_.host_page_maximum_submitted_source_count == 0U &&
+          audit_.host_page_maximum_published_source_count == 0U &&
+          audit_.host_page_working_set_byte_count == 0U;
   if (!complete() || !index.validated_for(cloud) ||
       lbvh_identity_.get() != index.identity_.get() ||
       audit_.point_count != cloud.size() ||
@@ -314,6 +336,7 @@ bool ExactPairBlockTransactionalFrontierResidentCudaResult::validated_for(
       !audit_.transactional_mass_conservation_validated ||
       !audit_.native_split_partition_validated ||
       !audit_.pairwise_disjoint_support_products_validated ||
+      !valid_host_page_shape ||
       audit_.pair_catalog_complete_claimed || audit_.hierarchy_or_tree_claimed ||
       audit_.slo_claimed || audit_.global_pair_matrix_materialized ||
       audit_.ordinary_or_higher_order_delaunay_materialized ||

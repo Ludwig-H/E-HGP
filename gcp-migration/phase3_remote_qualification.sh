@@ -62,9 +62,24 @@ readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_PATH="${CONTAINER_REPOSITORY}
 readonly MORTON_YAO48_SEED_WORK_PROFILE_BINARY_PATH="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly AUDIT_MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-audit"
-readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
-readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
+readonly DEFAULT_GUEST_GUARD_MIN_REMAINING_SECONDS=1800
+readonly DEFAULT_GUEST_GUARD_MAX_REMAINING_SECONDS=2820
+readonly PHASE15_RESIDENT_GUEST_GUARD_MIN_REMAINING_SECONDS=10800
+readonly PHASE15_RESIDENT_GUEST_GUARD_MAX_REMAINING_SECONDS=12900
 readonly WORK_RESERVE_SECONDS=1800
+readonly MAX_GUARDED_SESSION_SECONDS=28800
+readonly PHASE15_RESIDENT_SHORT_TIMEOUT_SECONDS=60
+readonly PHASE15_RESIDENT_REDUCER_TIMEOUT_SECONDS=300
+readonly PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS=600
+readonly PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS=2400
+readonly PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS=5400
+readonly PHASE15_RESIDENT_FIXED_TIMEOUT_TOTAL_SECONDS=$((
+    2 * PHASE15_RESIDENT_SHORT_TIMEOUT_SECONDS +
+    2 * PHASE15_RESIDENT_REDUCER_TIMEOUT_SECONDS +
+    PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS +
+    PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS +
+    PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS
+))
 readonly FAILURE_LOG_MAX_LINES=240
 readonly FAILURE_LOG_MAX_BYTES=65536
 readonly DOCKER_INFO_MAX_ATTEMPTS=6
@@ -150,6 +165,8 @@ PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH=""
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT=""
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE=""
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_RAW=""
+GUEST_GUARD_MIN_REMAINING_SECONDS="${DEFAULT_GUEST_GUARD_MIN_REMAINING_SECONDS}"
+GUEST_GUARD_MAX_REMAINING_SECONDS="${DEFAULT_GUEST_GUARD_MAX_REMAINING_SECONDS}"
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH=""
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PARENT=""
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_BASE=""
@@ -313,10 +330,11 @@ L'option resident-transactional-semantic Phase 15 exécute exclusivement la
 fixture sémantique n=16 pour K=5 puis K=10. Chaque exécution est bornée à
 60 secondes et chronométrée depuis l'hôte invité; masses, transitions,
 recettes de prune et autorité terminale sont validées strictement. L'ELF doit
-être AOT sm_120 sans PTX. Elle enchaîne le full-chain moment_curve_12 vers la
-source du réducteur pour K=5 puis K=10 (60 s chacun), puis une unique build de
-la frontière device suivie de 50k adversarial rang 11 (120 s), 10M affine
-direct-scale rang 11 (180 s) et 30M affine direct-scale rang 11 (240 s). Le
+être AOT sm_120 sans PTX. Elle enchaîne le full-chain eight_clusters_12 jusqu'à
+la forêt H0 conditionnelle et la worklist verticale explicite pour K=5 puis
+K=10 (300 s chacun), puis une unique build de la frontière device suivie de
+50k adversarial rang 11 (600 s), 10M affine
+direct-scale rang 11 (2400 s) et 30M affine direct-scale rang 11 (5400 s). Le
 50k doit fermer son contrat; 10M/30M peuvent rester censurés ou incomplets
 avec JSON valide et code zéro. Pour ces deux seules unités, le code 124 sans
 JSON devient un reçu de timeout canonique non qualifiant seulement si stderr
@@ -725,7 +743,13 @@ if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_RAW}" ]]; then
           -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
         die "--phase15-resident-transactional-semantic-output est exclusive de tous les autres compagnons."
     fi
+    GUEST_GUARD_MIN_REMAINING_SECONDS="${PHASE15_RESIDENT_GUEST_GUARD_MIN_REMAINING_SECONDS}"
+    GUEST_GUARD_MAX_REMAINING_SECONDS="${PHASE15_RESIDENT_GUEST_GUARD_MAX_REMAINING_SECONDS}"
+    ((PHASE15_RESIDENT_FIXED_TIMEOUT_TOTAL_SECONDS < MAX_GUARDED_SESSION_SECONDS)) || \
+        die "La somme contractuelle des unités Phase 15 dépasse le garde-fou absolu de huit heures."
 fi
+readonly GUEST_GUARD_MIN_REMAINING_SECONDS
+readonly GUEST_GUARD_MAX_REMAINING_SECONDS
 certify_fixed_timeout || \
     die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
 certify_fixed_executable_chain \
@@ -3683,10 +3707,14 @@ PY
         local exit_policy="$5"
         local run_status=0
         shift 5
-        case "${fixed_timeout_seconds}" in
-            60|120|180|240) ;;
-            *) die "Borne fixe de campagne resident invalide : ${fixed_timeout_seconds}." ;;
-        esac
+        [[ "${fixed_timeout_seconds}" =~ ^[1-9][0-9]*$ ]] || \
+            die "Borne fixe de campagne resident non canonique : ${fixed_timeout_seconds}."
+        ((fixed_timeout_seconds == PHASE15_RESIDENT_SHORT_TIMEOUT_SECONDS || \
+          fixed_timeout_seconds == PHASE15_RESIDENT_REDUCER_TIMEOUT_SECONDS || \
+          fixed_timeout_seconds == PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS || \
+          fixed_timeout_seconds == PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS || \
+          fixed_timeout_seconds == PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS)) || \
+            die "Borne fixe de campagne resident invalide : ${fixed_timeout_seconds}."
         case "${exit_policy}" in
             strict|canonical-direct-scale-timeout) ;;
             *) die "Politique de sortie de campagne resident invalide : ${exit_policy}." ;;
@@ -3784,56 +3812,100 @@ exact(
         "schema", "backend", "git_sha", "profile", "mode", "public_status", "fixture",
         "point_count", "maximum_order", "maximum_closed_rank",
         "require_complete", "qualified",
+        "recipe_catalog_certified",
         "cut_certified", "pair_authority_certified", "higher_terminal",
-        "bridge_certified", "provider_replay_certified", "pair_cut",
-        "pair_classification", "reducer_source", "digests",
+        "bridge_certified", "provider_replay_certified",
+        "forest_reduction_certified", "vertical_worklist_certified",
+        "automatic_recipe_catalog", "pair_cut", "pair_classification", "reducer_source",
+        "forest_reduction", "vertical_worklist", "digests",
         "timings_nanoseconds", "claims", "qualified_scope",
     },
     "reducer qualification",
 )
 for key, expected in {
-    "schema": "morsehgp3d.phase15.transactional_pair_to_reducer_source_qualification.v1",
+    "schema": "morsehgp3d.phase15.transactional_pair_to_conditional_forest_qualification.v3",
     "backend": "cuda_g4_plus_reference_cpu",
     "git_sha": git_sha,
     "profile": "hgp_reduced",
-    "mode": "complete_direct_terminal_source_chain",
+    "mode": "automatic_exact_prune_recipes_to_complete_direct_terminal_source_to_conditional_forest_and_vertical_worklist",
     "public_status": "not_claimed",
-    "fixture": "moment_curve_12",
+    "fixture": "eight_clusters_12",
     "point_count": 12,
     "maximum_order": maximum_order,
     "maximum_closed_rank": maximum_order + 1,
     "require_complete": True,
     "qualified": True,
+    "recipe_catalog_certified": True,
     "cut_certified": True,
     "pair_authority_certified": True,
     "higher_terminal": True,
     "bridge_certified": True,
     "provider_replay_certified": True,
-    "qualified_scope": "terminal_direct_supports_to_bounded_reducer_source_only",
+    "forest_reduction_certified": True,
+    "vertical_worklist_certified": True,
+    "qualified_scope": "automatic_exact_prune_cut_to_terminal_direct_supports_bounded_conditional_h0_forest_and_explicit_vertical_worklist_only",
 }.items():
     if value.get(key) != expected or type(value.get(key)) is not type(expected):
         fail(f"reducer qualification.{key}: unexpected value")
+catalog = exact(
+    value.get("automatic_recipe_catalog"),
+    {
+        "decision", "product_visits", "maximum_frontier_blocks",
+        "receipt_attempts", "certified_receipts", "inconclusive_receipts",
+        "automatic_search_node_visits",
+        "exact_phi_aabb_maximum_evaluations", "recipes",
+        "terminal_pairs_without_payload", "pruned_mass", "terminal_mass",
+        "mass_closed",
+    },
+    "automatic_recipe_catalog",
+)
+for key in set(catalog) - {"mass_closed"}:
+    integer(catalog[key], f"automatic_recipe_catalog.{key}")
+if (
+    catalog["decision"] != 9
+    or catalog.get("mass_closed") is not True
+    or catalog["recipes"] < 1
+    or catalog["pruned_mass"] < 1
+    or catalog["terminal_mass"] < 1
+    or catalog["recipes"] != catalog["certified_receipts"]
+    or catalog["receipt_attempts"] !=
+        catalog["certified_receipts"] + catalog["inconclusive_receipts"]
+    or catalog["terminal_pairs_without_payload"] != catalog["terminal_mass"]
+):
+    fail("automatic_recipe_catalog: exact recipe catalog did not close")
 pair_cut = exact(
     value.get("pair_cut"),
     {
-        "universe", "pruned", "terminal", "kernel_launches",
+        "universe", "pruned", "terminal", "submitted_recipes",
+        "matched_recipes", "unused_recipes", "certified_prunes", "kernel_launches",
         "synchronizations", "kernel_elapsed_nanoseconds", "cuda_device",
         "serial_device_reference", "scale_eligible",
     },
     "pair_cut",
 )
-for key in ("universe", "pruned", "terminal", "kernel_launches", "synchronizations", "cuda_device"):
+for key in (
+    "universe", "pruned", "terminal", "submitted_recipes",
+    "matched_recipes", "unused_recipes", "certified_prunes",
+    "kernel_launches", "synchronizations", "cuda_device",
+):
     integer(pair_cut.get(key), f"pair_cut.{key}")
 if (
     pair_cut["universe"] != 66
     or pair_cut["pruned"] + pair_cut["terminal"] != 66
+    or catalog["pruned_mass"] + catalog["terminal_mass"] != pair_cut["universe"]
+    or catalog["pruned_mass"] != pair_cut["pruned"]
+    or catalog["terminal_mass"] != pair_cut["terminal"]
+    or pair_cut["submitted_recipes"] != catalog["recipes"]
+    or pair_cut["matched_recipes"] != catalog["recipes"]
+    or pair_cut["unused_recipes"] != 0
+    or pair_cut["certified_prunes"] != catalog["recipes"]
     or pair_cut["terminal"] < 1
     or pair_cut["kernel_launches"] != 1
     or pair_cut["synchronizations"] != 3
     or pair_cut.get("serial_device_reference") is not True
     or pair_cut.get("scale_eligible") is not False
 ):
-    fail("reducer pair cut is not the closed moment-curve partition")
+    fail("reducer pair cut is not the closed eight-clusters partition")
 integer(pair_cut.get("kernel_elapsed_nanoseconds"), "pair_cut.kernel_elapsed_nanoseconds", 1)
 classification = exact(
     value.get("pair_classification"),
@@ -3853,6 +3925,67 @@ for key in source:
     integer(source[key], f"reducer_source.{key}")
 if source["visited_batches"] != source["batches"]:
     fail("reducer source provider replay is incomplete")
+forest = exact(
+    value.get("forest_reduction"),
+    {
+        "decision", "plan_decision", "last_preparation_decision",
+        "last_live_commit_decision", "last_reducer_fold_decision",
+        "plan_lanes", "prepared_tickets", "committed_batches",
+        "resolved_keys", "arm_joins", "maximum_transient_closure_nodes",
+        "birth_records", "saddles", "atomic_groups", "nodes",
+        "final_roots", "logical_output_entries", "conditional_h0_candidate",
+    },
+    "forest_reduction",
+)
+for key in set(forest) - {"conditional_h0_candidate"}:
+    integer(forest[key], f"forest_reduction.{key}")
+for key, expected in {
+    "decision": 9,
+    "plan_decision": 7,
+    "last_preparation_decision": 5,
+    "last_live_commit_decision": 8,
+    "last_reducer_fold_decision": 8,
+}.items():
+    if forest[key] != expected:
+        fail(f"forest_reduction.{key}: incomplete certified reduction")
+if (
+    forest.get("conditional_h0_candidate") is not True
+    or source["batches"] < 1
+    or forest["prepared_tickets"] != source["batches"]
+    or forest["committed_batches"] != source["batches"]
+    or forest["final_roots"] > forest["nodes"]
+    or forest["logical_output_entries"] < forest["final_roots"]
+):
+    fail("forest_reduction: conditional H0 forest did not close")
+vertical = exact(
+    value.get("vertical_worklist"),
+    {
+        "decision", "expected_labels", "missing_labels",
+        "unresolved_labels", "resolved_labels", "partial_groups",
+        "complete_groups", "external_target_authority_replayed",
+        "vertical_maps_complete",
+    },
+    "vertical_worklist",
+)
+for key in {
+    "decision", "expected_labels", "missing_labels", "unresolved_labels",
+    "resolved_labels", "partial_groups", "complete_groups",
+}:
+    integer(vertical[key], f"vertical_worklist.{key}")
+expected_vertical_decision = (
+    10
+    if vertical["expected_labels"] == 0 and vertical["partial_groups"] == 0
+    else 9
+)
+if (
+    vertical["decision"] != expected_vertical_decision
+    or vertical["missing_labels"] != vertical["expected_labels"]
+    or vertical["unresolved_labels"] != 0
+    or vertical["resolved_labels"] != 0
+    or vertical.get("external_target_authority_replayed") is not False
+    or vertical.get("vertical_maps_complete") is not False
+):
+    fail("vertical_worklist: explicit conditional worklist did not close")
 digests = exact(
     value.get("digests"),
     {
@@ -3880,21 +4013,44 @@ timings = exact(
     value.get("timings_nanoseconds"),
     {
         "generation", "canonicalization", "lbvh_build", "scheduler_setup_wall",
-        "scheduler_wall",
+        "automatic_recipe_catalog_wall", "scheduler_wall",
         "cut_validation_wall", "pair_adapter_wall", "higher_support_wall",
         "bridge_wall", "bridge_output_inspection_wall",
-        "provider_replay_wall", "total",
+        "provider_replay_wall", "forest_reduction_wrapper_wall",
+        "forest_plan_wall", "forest_reducer_setup_wall",
+        "forest_reducer_stream_wall", "forest_finish_wall",
+        "forest_reduction_internal_total_wall", "vertical_worklist_wall",
+        "total",
     },
     "reducer timings",
 )
 for key in timings:
     integer(timings[key], f"reducer timings.{key}")
-if timings["total"] < sum(timings[key] for key in timings if key != "total"):
-    fail("reducer total timing is smaller than its components")
+forest_internal_components = {
+    "forest_plan_wall", "forest_reducer_setup_wall",
+    "forest_reducer_stream_wall", "forest_finish_wall",
+}
+if timings["forest_reduction_internal_total_wall"] < sum(
+    timings[key] for key in forest_internal_components
+):
+    fail("forest internal total timing is smaller than its components")
+if (
+    timings["forest_reduction_wrapper_wall"]
+    < timings["forest_reduction_internal_total_wall"]
+):
+    fail("forest wrapper timing is smaller than its nested internal total")
+disjoint_total_components = set(timings) - {
+    "total", "forest_reduction_internal_total_wall", *forest_internal_components,
+}
+if timings["total"] < sum(timings[key] for key in disjoint_total_components):
+    fail("reducer total timing is smaller than its disjoint components")
 if value.get("claims") != {
     "ordinary_or_higher_order_delaunay": False,
     "global_pair_matrix": False,
-    "hierarchy_reduction": False,
+    "hierarchy_reduction": True,
+    "conditional_h0_only": True,
+    "vertical_target_authority": False,
+    "vertical_maps_complete": False,
     "public_exact": False,
 }:
     fail("reducer qualification makes an unexpected claim")
@@ -4025,7 +4181,8 @@ PY
         die "Le binaire pair-block-to-reducer-source Phase 15 n'a pas été construit sûrement."
 
     run_phase15_resident_campaign_unit \
-        "phase15-resident-transactional-semantic-reducer-k5" 60 \
+        "phase15-resident-transactional-semantic-reducer-k5" \
+        "${PHASE15_RESIDENT_REDUCER_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K5_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K5_STDERR_LOG}" \
         strict \
@@ -4037,7 +4194,8 @@ PY
         die "La sortie pair-block-to-reducer-source K=5 viole le contrat JSON strict."
 
     run_phase15_resident_campaign_unit \
-        "phase15-resident-transactional-semantic-reducer-k10" 60 \
+        "phase15-resident-transactional-semantic-reducer-k10" \
+        "${PHASE15_RESIDENT_REDUCER_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K10_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K10_STDERR_LOG}" \
         strict \
@@ -4064,7 +4222,8 @@ PY
         die "Le binaire device-frontier de la campagne resident Phase 15 n'a pas été construit sûrement."
 
     run_phase15_resident_campaign_unit \
-        "phase15-resident-transactional-semantic-frontier-50k" 120 \
+        "phase15-resident-transactional-semantic-frontier-50k" \
+        "${PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_FRONTIER_50K_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_FRONTIER_50K_STDERR_LOG}" \
         strict \
@@ -4095,7 +4254,8 @@ assembler.validate_qualification(
 PY
 
     run_phase15_resident_campaign_unit \
-        "phase15-resident-transactional-semantic-direct-10m" 180 \
+        "phase15-resident-transactional-semantic-direct-10m" \
+        "${PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_10M_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_10M_STDERR_LOG}" \
         canonical-direct-scale-timeout \
@@ -4113,7 +4273,8 @@ PY
     fi
 
     run_phase15_resident_campaign_unit \
-        "phase15-resident-transactional-semantic-direct-30m" 240 \
+        "phase15-resident-transactional-semantic-direct-30m" \
+        "${PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_STDERR_LOG}" \
         canonical-direct-scale-timeout \
@@ -4855,7 +5016,10 @@ if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" ]]; then
         "${phase15_resident_direct_30m_started_ns}" \
         "${phase15_resident_direct_30m_finished_ns}" \
         "${phase15_resident_direct_10m_exit_status}" \
-        "${phase15_resident_direct_30m_exit_status}" <<'PY'
+        "${phase15_resident_direct_30m_exit_status}" \
+        "${PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS}" \
+        "${PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS}" \
+        "${PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS}" <<'PY'
 import hashlib
 import json
 import os
@@ -4916,6 +5080,15 @@ direct_30m_started = int(sys.argv[43])
 direct_30m_finished = int(sys.argv[44])
 direct_10m_exit_status = int(sys.argv[45])
 direct_30m_exit_status = int(sys.argv[46])
+frontier_50k_timeout_seconds = int(sys.argv[47])
+direct_10m_timeout_seconds = int(sys.argv[48])
+direct_30m_timeout_seconds = int(sys.argv[49])
+if (
+    frontier_50k_timeout_seconds,
+    direct_10m_timeout_seconds,
+    direct_30m_timeout_seconds,
+) != (600, 2400, 5400):
+    fail("resident campaign timeout contract drift")
 
 environment = json.loads(environment_path.read_text(encoding="utf-8"))
 if (
@@ -5034,7 +5207,7 @@ def direct_scale_result(
 
 direct_10m_result = direct_scale_result(
     point_count=10_000_000,
-    timeout_seconds=180,
+    timeout_seconds=direct_10m_timeout_seconds,
     exit_status=direct_10m_exit_status,
     stdout_path=direct_10m_path,
     stderr_path=direct_10m_stderr_path,
@@ -5043,7 +5216,7 @@ direct_10m_result = direct_scale_result(
 )
 direct_30m_result = direct_scale_result(
     point_count=30_000_000,
-    timeout_seconds=240,
+    timeout_seconds=direct_30m_timeout_seconds,
     exit_status=direct_30m_exit_status,
     stdout_path=direct_30m_path,
     stderr_path=direct_30m_stderr_path,
@@ -5137,11 +5310,11 @@ artifact = {
         "point_count": 16,
         "run_order": [5, 10],
         "timeouts_seconds": {
-            "direct_scale_10m_rank11": 180,
-            "direct_scale_30m_rank11": 240,
-            "frontier_50k_rank11": 120,
-            "reducer_source_k10": 60,
-            "reducer_source_k5": 60,
+            "direct_scale_10m_rank11": direct_10m_timeout_seconds,
+            "direct_scale_30m_rank11": direct_30m_timeout_seconds,
+            "frontier_50k_rank11": frontier_50k_timeout_seconds,
+            "reducer_source_k10": 300,
+            "reducer_source_k5": 300,
             "resident_scheduler_k10": 60,
             "resident_scheduler_k5": 60,
         },
@@ -5269,7 +5442,8 @@ artifact = {
     "frontier_profile_runs": [
         {
             "command": [
-                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "120s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground",
+                f"{frontier_50k_timeout_seconds}s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
                 "--point-count", "50000", "--family", "adversarial_mixed_dyadic",
                 "--maximum-closed-rank", "11", "--anchor-tile-capacity", "4096",
@@ -5282,10 +5456,12 @@ artifact = {
             "point_count": 50000,
             "result": frontier_50k_result,
             "run_kind": "component_qualification",
-            "timeout_seconds": 120,
+            "timeout_seconds": frontier_50k_timeout_seconds,
         },
         {
-            "command": direct_scale_command(10_000_000, 180),
+            "command": direct_scale_command(
+                10_000_000, direct_10m_timeout_seconds
+            ),
             "external_wall_finished_epoch_nanoseconds": direct_10m_finished,
             "external_wall_nanoseconds": direct_10m_finished - direct_10m_started,
             "external_wall_started_epoch_nanoseconds": direct_10m_started,
@@ -5293,10 +5469,12 @@ artifact = {
             "point_count": 10000000,
             "result": direct_10m_result,
             "run_kind": "profile_only_diagnostic",
-            "timeout_seconds": 180,
+            "timeout_seconds": direct_10m_timeout_seconds,
         },
         {
-            "command": direct_scale_command(30_000_000, 240),
+            "command": direct_scale_command(
+                30_000_000, direct_30m_timeout_seconds
+            ),
             "external_wall_finished_epoch_nanoseconds": direct_30m_finished,
             "external_wall_nanoseconds": direct_30m_finished - direct_30m_started,
             "external_wall_started_epoch_nanoseconds": direct_30m_started,
@@ -5304,7 +5482,7 @@ artifact = {
             "point_count": 30000000,
             "result": direct_30m_result,
             "run_kind": "profile_only_diagnostic",
-            "timeout_seconds": 240,
+            "timeout_seconds": direct_30m_timeout_seconds,
         },
     ],
     "schema": "morsehgp3d.phase15.resident_transactional_semantic_qualification.v2",

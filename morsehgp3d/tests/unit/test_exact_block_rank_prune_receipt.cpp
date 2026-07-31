@@ -27,6 +27,7 @@ using morsehgp3d::hierarchy::ExactBlockRankPruneResult;
 using morsehgp3d::hierarchy::ExactBlockRankPruneStatus;
 using morsehgp3d::hierarchy::certify_exact_block_rank_prune_receipt;
 using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum_sign;
+using morsehgp3d::hierarchy::generate_exact_block_rank_prune_receipt;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -246,12 +247,64 @@ void test_k10_multileaf_success_mass_and_determinism() {
           audit.pair_mass_overflow_checked &&
           audit.witness_mass_overflow_checked &&
           audit.no_pair_catalog_materialized &&
+          audit.no_global_witness_catalog_materialized &&
           audit.no_facet_coface_or_incidence_materialized &&
           audit.no_gamma_or_delaunay_structure_materialized &&
           !audit.global_hierarchy_exactness_claimed &&
           !audit.public_morse_exactness_claimed &&
           ExactBlockRankPruneReceipt::public_status == "not_claimed",
       "the local-only receipt audit claimed excessive authority");
+}
+
+void test_automatic_search_builds_deterministic_multileaf_receipt() {
+  const Fixture fixture;
+  const std::size_t first_support = fixture.node_for_range(0U, 2U);
+  const std::size_t second_support = fixture.node_for_range(12U, 14U);
+
+  const ExactBlockRankPruneResult forward =
+      generate_exact_block_rank_prune_receipt(
+          fixture.index,
+          fixture.cloud,
+          first_support,
+          second_support,
+          11U);
+  const ExactBlockRankPruneResult reverse =
+      generate_exact_block_rank_prune_receipt(
+          fixture.index,
+          fixture.cloud,
+          second_support,
+          first_support,
+          11U);
+  require(
+      forward.certified() && reverse.certified() &&
+          forward.audit() == reverse.audit(),
+      "the automatic K=10 search was not deterministic");
+
+  const ExactBlockRankPruneReceipt* receipt = forward.receipt();
+  require(
+      receipt != nullptr &&
+          receipt->validated_for(fixture.index, fixture.cloud) &&
+          receipt->certified_witness_point_count() >= 10U &&
+          receipt->witness_nodes().size() <= 10U,
+      "the automatic search did not mint a replayable bounded receipt");
+  const auto& audit = forward.audit();
+  require(
+      audit.automatic_witness_search_requested &&
+          audit.automatic_witness_search_frontier_bound_validated &&
+          audit.automatic_witness_search_sufficient_mass_reached &&
+          !audit.automatic_witness_search_exhausted_without_sufficient_mass &&
+          audit.automatic_search_node_visit_count != 0U &&
+          audit.automatic_search_internal_expansion_count != 0U &&
+          audit.automatic_search_support_subtree_skip_count != 0U &&
+          audit.automatic_search_exact_phi_aabb_maximum_evaluation_count >=
+              receipt->witness_nodes().size() &&
+          audit.automatic_search_maximum_frontier_node_count != 0U &&
+          audit.strict_witness_node_count == receipt->witness_nodes().size() &&
+          audit.no_pair_catalog_materialized &&
+          audit.no_global_witness_catalog_materialized &&
+          audit.no_facet_coface_or_incidence_materialized &&
+          audit.no_gamma_or_delaunay_structure_materialized,
+      "the automatic search did not expose its bounded sparse traversal");
 }
 
 void test_insufficient_mass_and_overlaps_are_separate() {
@@ -317,6 +370,65 @@ void test_insufficient_mass_and_overlaps_are_separate() {
       support_overlap.status() ==
           ExactBlockRankPruneStatus::rejected_support_overlap,
       "nested A/B support nodes were not rejected");
+  const ExactBlockRankPruneResult automatic_support_overlap =
+      generate_exact_block_rank_prune_receipt(
+          fixture.index,
+          fixture.cloud,
+          first_support,
+          fixture.leaf_node(0U),
+          11U);
+  require(
+      automatic_support_overlap.status() == support_overlap.status() &&
+          automatic_support_overlap.receipt() == nullptr &&
+          automatic_support_overlap.audit().automatic_witness_search_requested &&
+          !automatic_support_overlap.audit()
+               .automatic_witness_search_frontier_bound_validated &&
+          automatic_support_overlap.audit().automatic_search_node_visit_count ==
+              0U &&
+          automatic_support_overlap.audit()
+                  .automatic_search_exact_phi_aabb_maximum_evaluation_count ==
+              0U &&
+          !automatic_support_overlap.audit()
+               .automatic_witness_search_sufficient_mass_reached &&
+          !automatic_support_overlap.audit()
+               .automatic_witness_search_exhausted_without_sufficient_mass,
+      "the automatic search changed the overlapping-support preflight or "
+      "claimed a traversal");
+
+  const std::size_t foreign_node_index = static_cast<std::size_t>(
+      fixture.index.build_counters().node_count);
+  const ExactBlockRankPruneResult invalid_authority =
+      certify_exact_block_rank_prune_receipt(
+          fixture.index,
+          fixture.cloud,
+          first_support,
+          foreign_node_index,
+          std::span<const std::size_t>{},
+          11U);
+  const ExactBlockRankPruneResult automatic_invalid_authority =
+      generate_exact_block_rank_prune_receipt(
+          fixture.index,
+          fixture.cloud,
+          first_support,
+          foreign_node_index,
+          11U);
+  require(
+      invalid_authority.status() ==
+              ExactBlockRankPruneStatus::rejected_invalid_node_authority &&
+          automatic_invalid_authority.status() == invalid_authority.status() &&
+          automatic_invalid_authority.receipt() == nullptr &&
+          automatic_invalid_authority.audit()
+              .automatic_witness_search_requested &&
+          !automatic_invalid_authority.audit()
+               .automatic_witness_search_frontier_bound_validated &&
+          automatic_invalid_authority.audit()
+                  .automatic_search_node_visit_count ==
+              0U &&
+          automatic_invalid_authority.audit()
+                  .automatic_search_exact_phi_aabb_maximum_evaluation_count ==
+              0U,
+      "the automatic search changed the foreign-authority preflight or "
+      "claimed a traversal");
 
   std::vector<std::size_t> support_witnesses;
   support_witnesses.reserve(10U);
@@ -439,6 +551,32 @@ void test_zero_exact_phi_is_inconclusive() {
           result.audit().nonnegative_witness_node_count == 1U &&
           result.audit().exact_phi_aabb_maximum_evaluation_count == 10U,
       "an exact-zero AABB maximum minted a block receipt");
+
+  const ExactBlockRankPruneResult automatic =
+      generate_exact_block_rank_prune_receipt(
+          index,
+          cloud,
+          first_support,
+          second_support,
+          11U);
+  require(
+      automatic.status() ==
+              ExactBlockRankPruneStatus::insufficient_witness_mass &&
+          automatic.receipt() == nullptr &&
+          automatic.audit().proposed_witness_point_count == 9U &&
+          automatic.audit().automatic_witness_search_requested &&
+          automatic.audit().automatic_witness_search_frontier_bound_validated &&
+          !automatic.audit().automatic_witness_search_sufficient_mass_reached &&
+          automatic.audit()
+              .automatic_witness_search_exhausted_without_sufficient_mass &&
+          automatic.audit().automatic_search_node_visit_count != 0U &&
+          automatic.audit()
+                  .automatic_search_exact_phi_aabb_maximum_evaluation_count !=
+              0U &&
+          automatic.audit().no_pair_catalog_materialized &&
+          automatic.audit().no_global_witness_catalog_materialized,
+      "the automatic search did not fail open after exhausting the exact-zero "
+      "fixture");
 }
 
 }  // namespace
@@ -446,6 +584,7 @@ void test_zero_exact_phi_is_inconclusive() {
 int main() {
   try {
     test_k10_multileaf_success_mass_and_determinism();
+    test_automatic_search_builds_deterministic_multileaf_receipt();
     test_insufficient_mass_and_overlaps_are_separate();
     test_positive_exact_phi_is_inconclusive();
     test_zero_exact_phi_is_inconclusive();

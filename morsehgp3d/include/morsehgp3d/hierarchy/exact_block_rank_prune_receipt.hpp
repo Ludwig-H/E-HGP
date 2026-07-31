@@ -57,6 +57,11 @@ struct ExactBlockRankPruneAudit {
   std::size_t exact_phi_aabb_maximum_evaluation_count{};
   std::size_t unordered_pair_mass{};
   std::size_t directed_pair_mass{};
+  std::size_t automatic_search_node_visit_count{};
+  std::size_t automatic_search_internal_expansion_count{};
+  std::size_t automatic_search_support_subtree_skip_count{};
+  std::size_t automatic_search_exact_phi_aabb_maximum_evaluation_count{};
+  std::size_t automatic_search_maximum_frontier_node_count{};
   bool support_nodes_authenticated{false};
   bool proposal_node_count_limit_checked{false};
   bool support_ranges_disjoint{false};
@@ -68,7 +73,12 @@ struct ExactBlockRankPruneAudit {
   bool pair_mass_overflow_checked{false};
   bool strict_witness_mass_sufficient{false};
   bool process_local_authority_retained{false};
+  bool automatic_witness_search_requested{false};
+  bool automatic_witness_search_frontier_bound_validated{false};
+  bool automatic_witness_search_sufficient_mass_reached{false};
+  bool automatic_witness_search_exhausted_without_sufficient_mass{false};
   bool no_pair_catalog_materialized{true};
+  bool no_global_witness_catalog_materialized{true};
   bool no_facet_coface_or_incidence_materialized{true};
   bool no_gamma_or_delaunay_structure_materialized{true};
   bool global_hierarchy_exactness_claimed{false};
@@ -94,6 +104,19 @@ certify_exact_block_rank_prune_receipt(
     std::size_t first_support_node_index,
     std::size_t second_support_node_index,
     std::span<const std::size_t> witness_node_indices,
+    std::size_t maximum_closed_rank);
+
+// Generates a bounded witness antichain directly from the immutable native
+// LBVH.  Its depth-first frontier is O(LBVH depth), it retains at most
+// maximum_closed_rank - 1 strict nodes, and it never materializes points,
+// pairs or a global witness catalogue.  The generated antichain is replayed
+// through certify_exact_block_rank_prune_receipt before a receipt is minted.
+[[nodiscard]] ExactBlockRankPruneResult
+generate_exact_block_rank_prune_receipt(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t first_support_node_index,
+    std::size_t second_support_node_index,
     std::size_t maximum_closed_rank);
 
 // Move-only, process-local authority.  It proves that every unordered pair in

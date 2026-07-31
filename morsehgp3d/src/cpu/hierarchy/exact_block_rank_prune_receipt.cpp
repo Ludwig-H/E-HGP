@@ -15,6 +15,23 @@ using spatial::CanonicalPointCloud;
 using spatial::ExactDyadicAabb3;
 using spatial::MortonLbvhIndex;
 
+inline constexpr std::size_t exact_block_rank_prune_maximum_lbvh_depth =
+    3U * MortonLbvhIndex::morton_bits_per_axis +
+    std::numeric_limits<std::size_t>::digits;
+inline constexpr std::size_t exact_block_rank_prune_maximum_frontier_size =
+    exact_block_rank_prune_maximum_lbvh_depth + 1U;
+
+struct ExactBlockRankAutomaticSearchAudit {
+  std::size_t node_visit_count{};
+  std::size_t internal_expansion_count{};
+  std::size_t support_subtree_skip_count{};
+  std::size_t exact_phi_aabb_maximum_evaluation_count{};
+  std::size_t maximum_frontier_node_count{};
+  bool frontier_bound_validated{false};
+  bool sufficient_mass_reached{false};
+  bool exhausted_without_sufficient_mass{false};
+};
+
 [[nodiscard]] bool authority_less(
     const ExactBlockRankNodeAuthority& first,
     const ExactBlockRankNodeAuthority& second) noexcept {
@@ -32,6 +49,13 @@ using spatial::MortonLbvhIndex;
     const ExactBlockRankNodeAuthority& second) noexcept {
   return first.leaf_end <= second.leaf_begin ||
       second.leaf_end <= first.leaf_begin;
+}
+
+[[nodiscard]] bool range_is_contained_by(
+    const ExactBlockRankNodeAuthority& candidate,
+    const ExactBlockRankNodeAuthority& container) noexcept {
+  return container.leaf_begin <= candidate.leaf_begin &&
+      candidate.leaf_end <= container.leaf_end;
 }
 
 [[nodiscard]] bool checked_add(
@@ -98,6 +122,31 @@ class ExactBlockRankPruneReceiptCertifier {
       ExactBlockRankPruneStatus status,
       ExactBlockRankPruneAudit audit) {
     return ExactBlockRankPruneResult(status, std::move(audit), std::nullopt);
+  }
+
+  static void apply_automatic_search_audit(
+      ExactBlockRankPruneResult& result,
+      const ExactBlockRankAutomaticSearchAudit& search) {
+    result.audit_.automatic_search_node_visit_count =
+        search.node_visit_count;
+    result.audit_.automatic_search_internal_expansion_count =
+        search.internal_expansion_count;
+    result.audit_.automatic_search_support_subtree_skip_count =
+        search.support_subtree_skip_count;
+    result.audit_.automatic_search_exact_phi_aabb_maximum_evaluation_count =
+        search.exact_phi_aabb_maximum_evaluation_count;
+    result.audit_.automatic_search_maximum_frontier_node_count =
+        search.maximum_frontier_node_count;
+    result.audit_.automatic_witness_search_requested = true;
+    result.audit_.automatic_witness_search_frontier_bound_validated =
+        search.frontier_bound_validated;
+    result.audit_.automatic_witness_search_sufficient_mass_reached =
+        search.sufficient_mass_reached;
+    result.audit_.automatic_witness_search_exhausted_without_sufficient_mass =
+        search.exhausted_without_sufficient_mass;
+    if (result.receipt_.has_value()) {
+      result.receipt_->audit_ = result.audit_;
+    }
   }
 
   [[nodiscard]] static ExactBlockRankPruneResult certify(
@@ -300,6 +349,155 @@ class ExactBlockRankPruneReceiptCertifier {
         audit,
         std::optional<ExactBlockRankPruneReceipt>{std::move(receipt)});
   }
+
+  [[nodiscard]] static ExactBlockRankPruneResult generate(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      std::size_t first_support_node_index,
+      std::size_t second_support_node_index,
+      std::size_t maximum_closed_rank) {
+    ExactBlockRankAutomaticSearchAudit search;
+    ExactBlockRankPruneResult preflight = certify(
+        index,
+        cloud,
+        first_support_node_index,
+        second_support_node_index,
+        std::span<const std::size_t>{},
+        maximum_closed_rank);
+    if (preflight.status() !=
+        ExactBlockRankPruneStatus::insufficient_witness_mass) {
+      apply_automatic_search_audit(preflight, search);
+      return preflight;
+    }
+    if (index.build_counters_.maximum_depth >
+        exact_block_rank_prune_maximum_lbvh_depth) {
+      throw std::logic_error(
+          "an exact block-rank automatic search exceeds its fixed LBVH "
+          "depth bound");
+    }
+    search.frontier_bound_validated = true;
+
+    const std::array<ExactBlockRankNodeAuthority, 2U> support_nodes =
+        preflight.audit().support_nodes;
+    const ExactDyadicAabb3 first_support_bounds =
+        node_bounds(index, cloud, support_nodes[0].node_index);
+    const ExactDyadicAabb3 second_support_bounds =
+        node_bounds(index, cloud, support_nodes[1].node_index);
+    const std::size_t required_witness_point_count =
+        maximum_closed_rank - 1U;
+
+    std::array<std::size_t,
+               exact_block_rank_prune_maximum_witness_node_count>
+        witness_node_indices{};
+    std::size_t witness_node_count = 0U;
+    std::size_t witness_point_count = 0U;
+    std::array<std::size_t, exact_block_rank_prune_maximum_frontier_size>
+        frontier{};
+    std::size_t frontier_node_count = 1U;
+    frontier[0] = index.root_index_;
+    search.maximum_frontier_node_count = frontier_node_count;
+
+    const auto push_children =
+        [&index, &frontier, &frontier_node_count, &search](
+            std::size_t node_index) {
+          const auto& node = index.nodes_[node_index];
+          if (node.is_leaf() || node.left_child >= index.nodes_.size() ||
+              node.right_child >= index.nodes_.size() ||
+              node.left_child == node.right_child) {
+            throw std::logic_error(
+                "an exact block-rank automatic search cannot expand its "
+                "native LBVH node");
+          }
+          if (frontier_node_count > frontier.size() - 2U) {
+            throw std::logic_error(
+                "an exact block-rank automatic search exceeded its fixed "
+                "frontier");
+          }
+          std::size_t first_child = node.left_child;
+          std::size_t second_child = node.right_child;
+          if (index.nodes_[second_child].leaf_begin <
+              index.nodes_[first_child].leaf_begin) {
+            std::swap(first_child, second_child);
+          }
+          frontier[frontier_node_count] = second_child;
+          ++frontier_node_count;
+          frontier[frontier_node_count] = first_child;
+          ++frontier_node_count;
+          ++search.internal_expansion_count;
+          search.maximum_frontier_node_count = std::max(
+              search.maximum_frontier_node_count,
+              frontier_node_count);
+        };
+
+    while (frontier_node_count != 0U &&
+           witness_point_count < required_witness_point_count) {
+      const std::size_t node_index = frontier[frontier_node_count - 1U];
+      --frontier_node_count;
+      ++search.node_visit_count;
+      const ExactBlockRankNodeAuthority candidate =
+          authority(index, node_index);
+      const bool overlaps_first =
+          !ranges_are_disjoint(candidate, support_nodes[0]);
+      const bool overlaps_second =
+          !ranges_are_disjoint(candidate, support_nodes[1]);
+      if (overlaps_first || overlaps_second) {
+        if ((overlaps_first &&
+             range_is_contained_by(candidate, support_nodes[0])) ||
+            (overlaps_second &&
+             range_is_contained_by(candidate, support_nodes[1]))) {
+          ++search.support_subtree_skip_count;
+          continue;
+        }
+        push_children(node_index);
+        continue;
+      }
+
+      ++search.exact_phi_aabb_maximum_evaluation_count;
+      const int maximum_sign = exact_diametral_phi_aabb_maximum_sign(
+          first_support_bounds,
+          second_support_bounds,
+          node_bounds(index, cloud, node_index));
+      if (maximum_sign < 0) {
+        if (witness_node_count >= witness_node_indices.size()) {
+          throw std::logic_error(
+              "an exact block-rank automatic search exceeded its strict "
+              "antichain bound");
+        }
+        witness_node_indices[witness_node_count] = node_index;
+        ++witness_node_count;
+        if (!checked_add(
+                witness_point_count,
+                candidate.leaf_count(),
+                witness_point_count)) {
+          ExactBlockRankPruneAudit audit = preflight.audit();
+          ExactBlockRankPruneResult overflow = result_without_receipt(
+              ExactBlockRankPruneStatus::rejected_arithmetic_overflow,
+              std::move(audit));
+          apply_automatic_search_audit(overflow, search);
+          return overflow;
+        }
+        continue;
+      }
+      if (!index.nodes_[node_index].is_leaf()) {
+        push_children(node_index);
+      }
+    }
+
+    search.sufficient_mass_reached =
+        witness_point_count >= required_witness_point_count;
+    search.exhausted_without_sufficient_mass =
+        !search.sufficient_mass_reached && frontier_node_count == 0U;
+    ExactBlockRankPruneResult result = certify(
+        index,
+        cloud,
+        first_support_node_index,
+        second_support_node_index,
+        std::span<const std::size_t>{
+            witness_node_indices.data(), witness_node_count},
+        maximum_closed_rank);
+    apply_automatic_search_audit(result, search);
+    return result;
+  }
 };
 
 ExactBlockRankPruneReceipt::ExactBlockRankPruneReceipt(
@@ -406,10 +604,19 @@ bool ExactBlockRankPruneReceipt::validated_for(
       audit_.strict_witness_mass_sufficient &&
       audit_.process_local_authority_retained &&
       audit_.no_pair_catalog_materialized &&
+      audit_.no_global_witness_catalog_materialized &&
       audit_.no_facet_coface_or_incidence_materialized &&
       audit_.no_gamma_or_delaunay_structure_materialized &&
       !audit_.global_hierarchy_exactness_claimed &&
-      !audit_.public_morse_exactness_claimed;
+      !audit_.public_morse_exactness_claimed &&
+      (!audit_.automatic_witness_search_requested ||
+       (audit_.automatic_witness_search_frontier_bound_validated &&
+        audit_.automatic_witness_search_sufficient_mass_reached &&
+        !audit_.automatic_witness_search_exhausted_without_sufficient_mass &&
+        audit_.automatic_search_node_visit_count != 0U &&
+        audit_.automatic_search_maximum_frontier_node_count != 0U &&
+        audit_.automatic_search_exact_phi_aabb_maximum_evaluation_count >=
+            witness_node_count_));
 }
 
 bool ExactBlockRankPruneReceipt::certifies(
@@ -454,6 +661,20 @@ ExactBlockRankPruneResult certify_exact_block_rank_prune_receipt(
       first_support_node_index,
       second_support_node_index,
       witness_node_indices,
+      maximum_closed_rank);
+}
+
+ExactBlockRankPruneResult generate_exact_block_rank_prune_receipt(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::size_t first_support_node_index,
+    std::size_t second_support_node_index,
+    std::size_t maximum_closed_rank) {
+  return ExactBlockRankPruneReceiptCertifier::generate(
+      index,
+      cloud,
+      first_support_node_index,
+      second_support_node_index,
       maximum_closed_rank);
 }
 

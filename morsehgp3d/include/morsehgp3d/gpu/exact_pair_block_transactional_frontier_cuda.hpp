@@ -154,6 +154,39 @@ struct ExactPairBlockTransactionalFrontierCudaWaveResult {
       const ExactPairBlockTransactionalFrontierCudaWaveResult&) = default;
 };
 
+enum class ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus :
+    std::uint8_t {
+  ready,
+  invalid_proposal,
+  arithmetic_overflow,
+};
+
+// Exact, non-mutating count/mass classification for one source transition.
+// The resident host/fake launcher uses this as the count stage before its
+// bounded page scan.  The subsequent commit replays the same predicates and
+// remains the only scientific mutation.
+struct ExactPairBlockTransactionalFrontierCudaTransitionPreview {
+  ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus status{
+      ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::
+          invalid_proposal};
+  std::size_t successor_block_count{};
+  std::size_t prune_receipt_count{};
+  std::size_t terminal_pair_count{};
+  std::size_t successor_unordered_pair_mass{};
+  std::size_t pruned_unordered_pair_mass{};
+  std::size_t terminal_unordered_pair_mass{};
+
+  [[nodiscard]] bool ready() const noexcept {
+    return status ==
+        ExactPairBlockTransactionalFrontierCudaTransitionPreviewStatus::ready;
+  }
+
+  friend bool operator==(
+      const ExactPairBlockTransactionalFrontierCudaTransitionPreview&,
+      const ExactPairBlockTransactionalFrontierCudaTransitionPreview&) =
+      default;
+};
+
 struct ExactPairBlockTransactionalFrontierCudaAudit {
   std::uint32_t schema_version{
       exact_pair_block_transactional_frontier_cuda_schema_version};
@@ -281,9 +314,10 @@ class ExactPairBlockTransactionalFrontierCudaTerminalAuthority final {
 };
 
 // Host executable specification of the future resident CUDA scheduler.  A
-// wave treats the complete current buffer as in-flight, stages all outputs in
-// the other buffer, and publishes them together.  Any invalid proposal,
-// arithmetic failure, or capacity shortfall restores the source wave exactly.
+// wave treats either the complete current buffer or one leading page as
+// in-flight, retains an unselected suffix, stages outputs in the other buffer,
+// and publishes them together.  Any invalid proposal, arithmetic failure, or
+// capacity shortfall restores the source wave exactly.
 class ExactPairBlockTransactionalFrontierCudaContext final {
  public:
   static constexpr std::string_view backend =
@@ -377,6 +411,21 @@ class ExactPairBlockTransactionalFrontierCudaContext final {
 
   [[nodiscard]] ExactPairBlockTransactionalFrontierCudaWaveStart begin_wave()
       &;
+  // Opens at most maximum_source_count leading sources.  Unselected sources
+  // stay pending and are copied ahead of emitted successors at commit.  This
+  // is the host-contract injection point for deterministic resident pages.
+  [[nodiscard]] ExactPairBlockTransactionalFrontierCudaWaveStart begin_wave(
+      std::size_t maximum_source_count) &;
+  [[nodiscard]]
+      ExactPairBlockTransactionalFrontierCudaTransitionPreview
+      preview_transition(
+          const ExactPairBlockTransactionalFrontierCudaProposal& proposal)
+          const &;
+  [[nodiscard]]
+      ExactPairBlockTransactionalFrontierCudaTransitionPreview
+      preview_transition(
+          const ExactPairBlockTransactionalFrontierCudaProposal&) const && =
+          delete;
   [[nodiscard]] ExactPairBlockTransactionalFrontierCudaWaveResult commit_wave(
       std::span<const ExactPairBlockTransactionalFrontierCudaProposal>
           proposals) &;
@@ -415,6 +464,7 @@ class ExactPairBlockTransactionalFrontierCudaContext final {
   std::shared_ptr<const void> lbvh_identity_;
   std::size_t pending_unordered_pair_mass_{};
   std::size_t inflight_unordered_pair_mass_{};
+  std::size_t inflight_block_count_{};
   std::size_t pruned_unordered_pair_mass_{};
   std::size_t terminal_unordered_pair_mass_{};
   std::size_t pending_block_capacity_{};

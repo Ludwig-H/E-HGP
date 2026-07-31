@@ -708,6 +708,82 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+  test_gpu_exact_pair_block_transactional_page_plan.cpp
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+  test_gpu_exact_pair_block_transactional_paged_host_scheduler.cpp
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
   test_gpu_exact_pair_block_transactional_frontier_resident_cuda.cpp
   fake_gpu_exact_pair_block_transactional_frontier_resident_cuda_launchers.cpp
@@ -742,6 +818,39 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
+  test_gpu_exact_pair_block_automatic_prune_recipe_catalog.cpp
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
+  PRIVATE morsehgp3d::gpu_exact_pair_block_automatic_prune_recipe_catalog
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
     PRIVATE
       -Wall
       -Wextra
@@ -1297,7 +1406,10 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
-  PRIVATE morsehgp3d::direct_morse_forest_source_authority
+  PRIVATE
+    morsehgp3d::direct_morse_forest_source_authority
+    morsehgp3d::direct_morse_terminal_forest_reduction
+    morsehgp3d::direct_morse_vertical_journal
 )
 if(MSVC)
   target_compile_options(
@@ -3527,8 +3639,20 @@ add_test(
   COMMAND morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
 )
 add_test(
+  NAME morsehgp3d.gpu_exact_pair_block_transactional_page_plan
+  COMMAND morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_exact_pair_block_transactional_paged_host_scheduler
+  COMMAND morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+)
+add_test(
   NAME morsehgp3d.gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
   COMMAND morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_exact_pair_block_automatic_prune_recipe_catalog
+  COMMAND morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
 )
 add_test(
   NAME morsehgp3d.gpu_exact_pair_block_to_direct_pair_terminal

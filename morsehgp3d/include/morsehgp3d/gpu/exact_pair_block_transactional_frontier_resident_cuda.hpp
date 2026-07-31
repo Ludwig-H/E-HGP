@@ -14,7 +14,7 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
-    exact_pair_block_transactional_frontier_resident_cuda_schema_version = 2U;
+    exact_pair_block_transactional_frontier_resident_cuda_schema_version = 3U;
 inline constexpr std::size_t
     exact_pair_block_transactional_frontier_resident_cuda_maximum_closed_rank =
         11U;
@@ -108,6 +108,12 @@ struct ExactPairBlockTransactionalFrontierResidentCudaAudit {
   std::size_t wave_begin_count{};
   std::size_t wave_commit_count{};
   std::size_t wave_rollback_count{};
+  std::size_t host_page_submission_count{};
+  std::size_t host_page_publication_count{};
+  std::size_t host_page_suffix_retry_count{};
+  std::size_t host_page_maximum_submitted_source_count{};
+  std::size_t host_page_maximum_published_source_count{};
+  std::size_t host_page_working_set_byte_count{};
   std::size_t exact_prune_attempt_count{};
   std::size_t certified_prune_count{};
   std::size_t exact_prune_fail_open_count{};
@@ -140,6 +146,9 @@ struct ExactPairBlockTransactionalFrontierResidentCudaAudit {
   bool zero_intermediate_d2h_validated{false};
   bool complete_wave_atomic_commit_validated{false};
   bool capacity_wave_rollback_validated{false};
+  bool bounded_paged_host_scheduler_exercised{false};
+  bool host_page_storage_independent_of_point_count{false};
+  bool host_page_mass_closure_validated{false};
   bool fail_open_native_transition_validated{false};
   bool recipe_catalog_nonempty{false};
   bool recipe_path_exercised{false};

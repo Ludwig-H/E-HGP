@@ -1,5 +1,7 @@
 #include "fake_gpu_phase14_morton_lbvh_build_launchers.hpp"
 
+#include "exact_pair_block_transactional_paged_host_scheduler.hpp"
+
 #include "morsehgp3d/gpu/exact_pair_block_transactional_frontier_resident_cuda.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
@@ -203,6 +205,23 @@ void test_complete_k10_and_atomic_capacity_rollback() {
           !audit.cuda_execution_performed &&
           !audit.serial_device_reference && !audit.scale_eligible,
       "the fake resident ledger must partition every pair exactly once");
+  require(
+      audit.bounded_paged_host_scheduler_exercised &&
+          audit.host_page_storage_independent_of_point_count &&
+          audit.host_page_mass_closure_validated &&
+          audit.host_page_submission_count > 1U &&
+          audit.host_page_publication_count == audit.wave_commit_count &&
+          audit.host_page_submission_count ==
+              audit.host_page_publication_count &&
+          audit.host_page_suffix_retry_count > 0U &&
+          audit.host_page_maximum_submitted_source_count == 2U &&
+          audit.host_page_maximum_published_source_count <= 2U &&
+          audit.host_page_working_set_byte_count ==
+              morsehgp3d::gpu::detail::
+                  ExactPairBlockTransactionalPagedHostScheduler::
+                      bounded_working_set_byte_count(),
+      "the resident host/fake execution must actually drain multiple bounded "
+      "pages and retained suffixes through the n-independent page seam");
   require(
       !audit.recipe_catalog_nonempty && !audit.recipe_path_exercised &&
           !audit.certified_prune_path_exercised &&

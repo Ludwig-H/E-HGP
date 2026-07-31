@@ -660,6 +660,8 @@ add_library(
   morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
   STATIC
     include/morsehgp3d/gpu/exact_pair_block_transactional_frontier_cuda.hpp
+    src/gpu/exact_pair_block_transactional_page_plan.hpp
+    src/gpu/exact_pair_block_transactional_page_plan.cpp
     src/gpu/exact_pair_block_transactional_frontier_cuda.cpp
 )
 add_library(
@@ -701,6 +703,8 @@ add_library(
   STATIC
     include/morsehgp3d/gpu/exact_pair_block_transactional_frontier_resident_cuda.hpp
     src/cuda/phase15_exact_pair_block_transactional_frontier_resident_cuda_internal.hpp
+    src/gpu/exact_pair_block_transactional_paged_host_scheduler.hpp
+    src/gpu/exact_pair_block_transactional_paged_host_scheduler.cpp
     src/gpu/exact_pair_block_transactional_frontier_resident_cuda.cpp
 )
 add_library(
@@ -731,6 +735,45 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
+  STATIC
+    include/morsehgp3d/gpu/exact_pair_block_automatic_prune_recipe_catalog.hpp
+    src/gpu/exact_pair_block_automatic_prune_recipe_catalog.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_pair_block_automatic_prune_recipe_catalog
+  ALIAS morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
+)
+set_target_properties(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
+  PROPERTIES POSITION_INDEPENDENT_CODE ON
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
+  PUBLIC morsehgp3d::pair_support
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -2308,6 +2351,48 @@ else()
   )
 endif()
 
+add_library(
+  morsehgp3d_direct_morse_terminal_forest_reduction
+  STATIC
+    src/cpu/hierarchy/direct_morse_terminal_forest_reduction.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_terminal_forest_reduction
+  ALIAS morsehgp3d_direct_morse_terminal_forest_reduction
+)
+set_target_properties(
+  morsehgp3d_direct_morse_terminal_forest_reduction
+  PROPERTIES
+    EXPORT_NAME direct_morse_terminal_forest_reduction
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_terminal_forest_reduction PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_terminal_forest_reduction
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_terminal_forest_reduction
+  PUBLIC
+    morsehgp3d::direct_morse_forest_reducer
+    morsehgp3d::direct_morse_forest_source_authority
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_terminal_forest_reduction PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_terminal_forest_reduction
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 if(UNIX)
   add_library(
     morsehgp3d_direct_morse_chunk_run
@@ -3795,8 +3880,11 @@ if(MORSEHGP3D_ENABLE_CUDA)
     morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
     PRIVATE
       morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda
+      morsehgp3d::gpu_exact_pair_block_automatic_prune_recipe_catalog
       morsehgp3d::exact_pair_block_to_direct_pair_terminal
       morsehgp3d::direct_morse_forest_source_authority
+      morsehgp3d::direct_morse_terminal_forest_reduction
+      morsehgp3d::direct_morse_vertical_journal
   )
   target_compile_features(
     morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
@@ -4758,6 +4846,7 @@ install(
     morsehgp3d_direct_morse_forest_journal
     morsehgp3d_direct_morse_forest_source_authority
     morsehgp3d_direct_morse_forest_reducer
+    morsehgp3d_direct_morse_terminal_forest_reduction
     morsehgp3d_direct_morse_vertical_journal
     morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_direct_morse_budget

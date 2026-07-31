@@ -1,8 +1,11 @@
 #include "morsehgp3d/gpu/exact_pair_block_to_direct_pair_terminal.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/gpu/exact_pair_block_automatic_prune_recipe_catalog.hpp"
 #include "morsehgp3d/gpu/morton_lbvh_build.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_terminal_forest_reduction.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_terminal_reducer_source_bridge.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
@@ -13,6 +16,7 @@
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -26,6 +30,7 @@ namespace {
 using Clock = std::chrono::steady_clock;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::gpu::ExactPairBlockToDirectPairTerminalBudget;
+using morsehgp3d::gpu::ExactPairBlockAutomaticPruneRecipeCatalogBudget;
 using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaConfig;
 using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaContext;
 using morsehgp3d::gpu::MortonLbvhBuildContext;
@@ -34,6 +39,7 @@ using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
 using morsehgp3d::spatial::CanonicalPointCloud;
+namespace hierarchy = morsehgp3d::hierarchy;
 
 #if defined(MORSEHGP3D_GIT_SHA)
 inline constexpr std::string_view kGitSha = MORSEHGP3D_GIT_SHA;
@@ -86,13 +92,25 @@ struct Options {
   return options;
 }
 
-[[nodiscard]] std::vector<CertifiedPoint3> moment_curve_points() {
+[[nodiscard]] std::vector<CertifiedPoint3> eight_clusters_points() {
+  constexpr double local_scale = 1.0 / 1048576.0;
+  constexpr double transverse_scale = 1.0 / 4194304.0;
   std::vector<CertifiedPoint3> points;
   points.reserve(12U);
   for (std::size_t index = 0U; index < 12U; ++index) {
-    const double value = static_cast<double>(index);
+    const std::size_t cluster = index % 8U;
+    const std::size_t local = index / 8U + 1U;
+    const double center_x = (cluster & 1U) == 0U ? 0.25 : 0.75;
+    const double center_y = (cluster & 2U) == 0U ? 0.25 : 0.75;
+    const double center_z = (cluster & 4U) == 0U ? 0.25 : 0.75;
+    const std::size_t permuted_y =
+        (local * 40503U + cluster * 7919U) % 65536U;
+    const std::size_t permuted_z =
+        (local * 25717U + cluster * 104729U) % 65536U;
     points.push_back(CertifiedPoint3::from_binary64(
-        value, value * value, value * value * value));
+        center_x + static_cast<double>(local) * local_scale,
+        center_y + static_cast<double>(permuted_y) * transverse_scale,
+        center_z + static_cast<double>(permuted_z) * transverse_scale));
   }
   return points;
 }
@@ -110,9 +128,138 @@ struct Options {
       maximum};
 }
 
+[[nodiscard]] ExactPairBlockAutomaticPruneRecipeCatalogBudget
+automatic_recipe_catalog_budget() {
+  constexpr std::size_t capacity = 4096U;
+  return {capacity, capacity, capacity, capacity};
+}
+
 [[nodiscard]] ExactDirectSaddleArmSeedBudget unlimited_seed_budget() {
   const std::size_t maximum = std::numeric_limits<std::size_t>::max();
   return {maximum, maximum, maximum, maximum};
+}
+
+[[nodiscard]] hierarchy::ExactDirectSparseFacetDescentStepBudget
+descent_step_budget() {
+  return {
+      hierarchy::ExactDirectSparsePositiveFacetProbeBudget{65537U, 16384U},
+      morsehgp3d::spatial::ExactLbvhTopKBudget{
+          1000000U,
+          1000000U,
+          1000000U,
+          1000000U,
+          1000000U,
+          16U,
+          16384U},
+      hierarchy::ExactDirectSparsePositiveFacetProbeBudget{65537U, 16384U},
+  };
+}
+
+[[nodiscard]] hierarchy::ExactDirectMorseForestBudget forest_budget() {
+  constexpr std::size_t capacity = 16384U;
+  constexpr std::size_t key_capacity = 262144U;
+  hierarchy::ExactDirectMorseForestBudget budget;
+  budget.maximum_source_role_scan_count = capacity;
+  budget.maximum_source_batch_scan_count = capacity;
+  budget.maximum_source_family_scan_count = capacity;
+  budget.maximum_source_arm_seed_scan_count = capacity;
+  budget.maximum_birth_record_count = capacity;
+  budget.maximum_arm_root_binding_count = capacity;
+  budget.maximum_saddle_record_count = capacity;
+  budget.maximum_atomic_group_count = capacity;
+  budget.maximum_child_reference_count = capacity;
+  budget.maximum_batch_record_count = capacity;
+  budget.maximum_node_count = capacity;
+  budget.maximum_final_root_count = capacity;
+  budget.maximum_batch_distinct_arm_count = 4096U;
+  budget.maximum_logical_output_entry_count = 65536U;
+  budget.maximum_aggregate_closure_node_count = 1000000U;
+  budget.maximum_aggregate_closure_step_call_count = 1000000U;
+  budget.locator_budget = {
+      capacity,
+      capacity,
+      key_capacity,
+      capacity,
+      capacity,
+      65536U,
+      capacity,
+      capacity,
+      key_capacity,
+      65537U,
+      65537U,
+  };
+  budget.closure_budget = {
+      4096U,
+      65536U,
+      65536U,
+      131073U,
+      descent_step_budget(),
+  };
+  budget.quotient_budget = {
+      4096U, capacity, capacity, 4096U, 65536U};
+  return budget;
+}
+
+[[nodiscard]] hierarchy::ExactDirectMorseTerminalForestReductionConfig
+forest_reduction_config() {
+  hierarchy::ExactDirectMorseTerminalForestReductionConfig config;
+  config.industrial_config.policy =
+      hierarchy::ExactDirectMorseIndustrialPolicy::
+          massive_external_streaming;
+  config.industrial_config.memory_model = {
+      64U,
+      16U,
+      16U,
+      8U,
+      16U,
+      16U,
+      16U,
+      4U,
+      16U,
+      8U,
+      16U,
+      2U,
+  };
+  config.industrial_config.chunk_budget = {
+      1'000'000U, 256U, 4096U, 4096U, 4096U, 4096U};
+  config.plan_budget = {
+      4096U,
+      4096U,
+      4096U,
+      16384U,
+      4096U,
+      16384U,
+      1'000'000U,
+      1'000'000U};
+  config.forest_budget = forest_budget();
+  config.execution_budget = {3U, 4096U, 16384U, 262144U, 16384U};
+  config.forest_config.locator_config.external_authority_id =
+      UINT64_C(0x4D485047503344);
+  return config;
+}
+
+[[nodiscard]] hierarchy::ExactDirectMorseVerticalBudget vertical_budget() {
+  constexpr std::size_t capacity = 4096U;
+  return {
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity * capacity,
+      capacity,
+      capacity * capacity,
+      capacity,
+      capacity * capacity,
+  };
 }
 
 [[nodiscard]] std::uint64_t elapsed_nanoseconds(
@@ -125,7 +272,7 @@ struct Options {
 
 int run(const Options& options) {
   const Clock::time_point total_begin = Clock::now();
-  const auto points = moment_curve_points();
+  const auto points = eight_clusters_points();
   const Clock::time_point generation_end = Clock::now();
   const CanonicalPointCloud cloud =
       CanonicalPointCloud::rejecting_duplicates(
@@ -139,8 +286,20 @@ int run(const Options& options) {
     throw std::runtime_error(
         "the full-chain qualification requires a CUDA-certified LBVH");
   }
-  const Clock::time_point scheduler_setup_begin = lbvh_end;
   const auto& index = build.certified_index();
+  const Clock::time_point recipe_catalog_begin = lbvh_end;
+  auto recipe_catalog = morsehgp3d::gpu::
+      build_exact_pair_block_automatic_prune_recipe_catalog(
+          index,
+          cloud,
+          options.maximum_order + 1U,
+          automatic_recipe_catalog_budget());
+  const Clock::time_point recipe_catalog_end = Clock::now();
+  if (!recipe_catalog.complete()) {
+    throw std::runtime_error(
+        "the exact automatic prune-recipe catalog did not close");
+  }
+  const Clock::time_point scheduler_setup_begin = recipe_catalog_end;
   auto traversal = builder.release_device_traversal_lease(build);
   auto scheduler = ExactPairBlockTransactionalFrontierResidentCudaContext::
       start(
@@ -150,7 +309,7 @@ int run(const Options& options) {
           ExactPairBlockTransactionalFrontierResidentCudaConfig{
               options.maximum_order + 1U, 16U, 8U, 16U, 4U});
   const Clock::time_point scheduler_begin = Clock::now();
-  auto cut = scheduler.run({});
+  auto cut = scheduler.run(recipe_catalog.recipes);
   const Clock::time_point scheduler_end = Clock::now();
   const Clock::time_point cut_validation_begin = Clock::now();
   const bool cut_certified =
@@ -158,6 +317,18 @@ int run(const Options& options) {
       cut.validated_for(index, cloud);
   const Clock::time_point cut_validation_end = Clock::now();
   const auto cut_audit = cut.audit();
+  const auto recipe_catalog_audit = recipe_catalog.audit;
+  const bool recipe_catalog_certified =
+      recipe_catalog.complete() && !recipe_catalog.recipes.empty() &&
+      recipe_catalog_audit.pruned_unordered_pair_mass != 0U &&
+      recipe_catalog_audit.terminal_unordered_pair_mass != 0U &&
+      cut_audit.submitted_prune_recipe_count ==
+          recipe_catalog_audit.prune_recipe_count &&
+      cut_audit.matched_prune_recipe_count ==
+          recipe_catalog_audit.prune_recipe_count &&
+      cut_audit.unused_prune_recipe_count == 0U &&
+      cut_audit.certified_prune_count ==
+          recipe_catalog_audit.prune_recipe_count;
 
   const Clock::time_point pair_adapter_begin = Clock::now();
   auto pair_attempt =
@@ -256,19 +427,77 @@ int run(const Options& options) {
   provider_replay_certified = provider_replay_certified &&
       visited_batch_count == source_batch_count;
   const Clock::time_point provider_replay_end = Clock::now();
-  const bool qualified = cut_certified && pair_authority_certified &&
-      higher_terminal && bridge_result.certified() &&
-      provider_replay_certified;
+
+  const Clock::time_point forest_reduction_begin = provider_replay_end;
+  std::optional<hierarchy::ExactDirectMorseTerminalForestReductionResult>
+      forest_reduction;
+  if (bridge_result.bridge != nullptr) {
+    forest_reduction.emplace(
+        hierarchy::reduce_exact_direct_morse_terminal_source_to_forest(
+            index,
+            cloud,
+            *bridge_result.bridge,
+            forest_reduction_config()));
+  }
+  const Clock::time_point forest_reduction_end = Clock::now();
+
+  const Clock::time_point vertical_begin = forest_reduction_end;
+  std::optional<hierarchy::ExactDirectMorseVerticalJournalResult>
+      vertical_journal;
+  if (forest_reduction.has_value() &&
+      forest_reduction->certified_reduction() &&
+      forest_reduction->forest.has_value()) {
+    const std::span<
+        const hierarchy::ExactDirectMorseVerticalTargetProposal>
+        no_target_proposals{};
+    vertical_journal.emplace(
+        hierarchy::build_exact_direct_morse_vertical_journal(
+            *forest_reduction->forest,
+            no_target_proposals,
+            vertical_budget(),
+            hierarchy::ExactDirectMorseVerticalConfig{
+                UINT64_C(0x4D485047563131)}));
+  }
+  const Clock::time_point vertical_end = Clock::now();
+
+  const hierarchy::ExactDirectMorseTerminalForestReductionAudit
+      empty_forest_audit{};
+  const auto& forest_audit = forest_reduction.has_value()
+      ? forest_reduction->audit
+      : empty_forest_audit;
+  const hierarchy::ExactDirectMorseVerticalJournalResult
+      empty_vertical_journal{};
+  const auto& vertical = vertical_journal.has_value()
+      ? *vertical_journal
+      : empty_vertical_journal;
+  const bool forest_reduction_certified =
+      forest_reduction.has_value() &&
+      forest_reduction->certified_reduction();
+  const bool vertical_worklist_certified =
+      vertical_journal.has_value() &&
+      vertical_journal->certified_conditional_vertical_candidate() &&
+      vertical_journal->counters.missing_label_count ==
+          vertical_journal->counters.expected_label_count &&
+      vertical_journal->counters.unresolved_label_count == 0U &&
+      vertical_journal->counters.resolved_label_count == 0U &&
+      !vertical_journal->external_target_authority_replayed &&
+      !vertical_journal->vertical_maps_complete &&
+      !vertical_journal->public_status_claimed;
+  const bool qualified = recipe_catalog_certified && cut_certified &&
+      pair_authority_certified && higher_terminal && bridge_result.certified() &&
+      provider_replay_certified && forest_reduction_certified &&
+      vertical_worklist_certified;
 
   std::cout
       << "{\"schema\":\"morsehgp3d.phase15.transactional_pair_to_"
-         "reducer_source_qualification.v1\","
+         "conditional_forest_qualification.v3\","
       << "\"backend\":\"cuda_g4_plus_reference_cpu\","
       << "\"git_sha\":\"" << kGitSha << "\","
       << "\"profile\":\"hgp_reduced\","
-      << "\"mode\":\"complete_direct_terminal_source_chain\","
+      << "\"mode\":\"automatic_exact_prune_recipes_to_complete_direct_"
+         "terminal_source_to_conditional_forest_and_vertical_worklist\","
       << "\"public_status\":\"not_claimed\","
-      << "\"fixture\":\"moment_curve_12\","
+      << "\"fixture\":\"eight_clusters_12\","
       << "\"point_count\":" << cloud.size() << ','
       << "\"maximum_order\":" << options.maximum_order << ','
       << "\"maximum_closed_rank\":"
@@ -276,6 +505,8 @@ int run(const Options& options) {
       << "\"require_complete\":"
       << (options.require_complete ? "true" : "false") << ','
       << "\"qualified\":" << (qualified ? "true" : "false") << ','
+      << "\"recipe_catalog_certified\":"
+      << (recipe_catalog_certified ? "true" : "false") << ','
       << "\"cut_certified\":"
       << (cut_certified ? "true" : "false") << ','
       << "\"pair_authority_certified\":"
@@ -286,10 +517,50 @@ int run(const Options& options) {
       << (bridge_result.certified() ? "true" : "false") << ','
       << "\"provider_replay_certified\":"
       << (provider_replay_certified ? "true" : "false") << ','
+      << "\"forest_reduction_certified\":"
+      << (forest_reduction_certified ? "true" : "false") << ','
+      << "\"vertical_worklist_certified\":"
+      << (vertical_worklist_certified ? "true" : "false") << ','
+      << "\"automatic_recipe_catalog\":{\"decision\":"
+      << static_cast<unsigned>(recipe_catalog_audit.decision)
+      << ",\"product_visits\":"
+      << recipe_catalog_audit.product_visit_count
+      << ",\"maximum_frontier_blocks\":"
+      << recipe_catalog_audit.maximum_frontier_block_count
+      << ",\"receipt_attempts\":"
+      << recipe_catalog_audit.automatic_receipt_attempt_count
+      << ",\"certified_receipts\":"
+      << recipe_catalog_audit.automatic_receipt_certified_count
+      << ",\"inconclusive_receipts\":"
+      << recipe_catalog_audit.automatic_receipt_inconclusive_count
+      << ",\"automatic_search_node_visits\":"
+      << recipe_catalog_audit.automatic_search_node_visit_count
+      << ",\"exact_phi_aabb_maximum_evaluations\":"
+      << recipe_catalog_audit.exact_phi_aabb_maximum_evaluation_count
+      << ",\"recipes\":" << recipe_catalog_audit.prune_recipe_count
+      << ",\"terminal_pairs_without_payload\":"
+      << recipe_catalog_audit.terminal_pair_count
+      << ",\"pruned_mass\":"
+      << recipe_catalog_audit.pruned_unordered_pair_mass
+      << ",\"terminal_mass\":"
+      << recipe_catalog_audit.terminal_unordered_pair_mass
+      << ",\"mass_closed\":"
+      << (recipe_catalog_audit.product_partition_mass_closed
+              ? "true"
+              : "false")
+      << "},"
       << "\"pair_cut\":{\"universe\":"
       << cut_audit.unordered_pair_universe_mass
       << ",\"pruned\":" << cut_audit.pruned_unordered_pair_mass
       << ",\"terminal\":" << cut_audit.terminal_unordered_pair_mass
+      << ",\"submitted_recipes\":"
+      << cut_audit.submitted_prune_recipe_count
+      << ",\"matched_recipes\":"
+      << cut_audit.matched_prune_recipe_count
+      << ",\"unused_recipes\":"
+      << cut_audit.unused_prune_recipe_count
+      << ",\"certified_prunes\":"
+      << cut_audit.certified_prune_count
       << ",\"kernel_launches\":" << cut_audit.kernel_launch_count
       << ",\"synchronizations\":" << cut_audit.synchronization_count
       << ",\"kernel_elapsed_nanoseconds\":"
@@ -310,6 +581,58 @@ int run(const Options& options) {
       << ",\"seeds\":" << source_seed_count
       << ",\"batches\":" << source_batch_count
       << ",\"visited_batches\":" << visited_batch_count << "},"
+      << "\"forest_reduction\":{\"decision\":"
+      << static_cast<unsigned>(forest_audit.decision)
+      << ",\"plan_decision\":"
+      << static_cast<unsigned>(forest_audit.plan_decision)
+      << ",\"last_preparation_decision\":"
+      << static_cast<unsigned>(forest_audit.last_preparation_decision)
+      << ",\"last_live_commit_decision\":"
+      << static_cast<unsigned>(forest_audit.last_live_commit_decision)
+      << ",\"last_reducer_fold_decision\":"
+      << static_cast<unsigned>(forest_audit.last_reducer_fold_decision)
+      << ",\"plan_lanes\":" << forest_audit.plan_lane_count
+      << ",\"prepared_tickets\":"
+      << forest_audit.prepared_ticket_count
+      << ",\"committed_batches\":"
+      << forest_audit.committed_batch_count
+      << ",\"resolved_keys\":"
+      << forest_audit.aggregate_resolved_key_count
+      << ",\"arm_joins\":" << forest_audit.aggregate_arm_join_count
+      << ",\"maximum_transient_closure_nodes\":"
+      << forest_audit.maximum_transient_closure_node_count
+      << ",\"birth_records\":"
+      << forest_audit.forest_birth_record_count
+      << ",\"saddles\":" << forest_audit.forest_saddle_record_count
+      << ",\"atomic_groups\":"
+      << forest_audit.forest_atomic_group_count
+      << ",\"nodes\":" << forest_audit.forest_node_count
+      << ",\"final_roots\":" << forest_audit.forest_final_root_count
+      << ",\"logical_output_entries\":"
+      << forest_audit.forest_logical_output_entry_count
+      << ",\"conditional_h0_candidate\":"
+      << (forest_audit.forest_conditional_h0_candidate_certified
+              ? "true"
+              : "false")
+      << "},"
+      << "\"vertical_worklist\":{\"decision\":"
+      << static_cast<unsigned>(vertical.decision)
+      << ",\"expected_labels\":"
+      << vertical.counters.expected_label_count
+      << ",\"missing_labels\":"
+      << vertical.counters.missing_label_count
+      << ",\"unresolved_labels\":"
+      << vertical.counters.unresolved_label_count
+      << ",\"resolved_labels\":"
+      << vertical.counters.resolved_label_count
+      << ",\"partial_groups\":"
+      << vertical.counters.partial_group_count
+      << ",\"complete_groups\":"
+      << vertical.counters.complete_group_count
+      << ",\"external_target_authority_replayed\":"
+      << (vertical.external_target_authority_replayed ? "true" : "false")
+      << ",\"vertical_maps_complete\":"
+      << (vertical.vertical_maps_complete ? "true" : "false") << "},"
       << "\"digests\":{\"submitted_recipe_fnv1a\":"
       << cut_audit.submitted_recipe_digest
       << ",\"final_cut_fnv1a\":" << cut_audit.final_cut_digest
@@ -332,6 +655,8 @@ int run(const Options& options) {
       << elapsed_nanoseconds(generation_end, canonical_end)
       << ",\"lbvh_build\":"
       << elapsed_nanoseconds(canonical_end, lbvh_end)
+      << ",\"automatic_recipe_catalog_wall\":"
+      << elapsed_nanoseconds(recipe_catalog_begin, recipe_catalog_end)
       << ",\"scheduler_setup_wall\":"
       << elapsed_nanoseconds(scheduler_setup_begin, scheduler_begin)
       << ",\"scheduler_wall\":"
@@ -348,13 +673,30 @@ int run(const Options& options) {
       << elapsed_nanoseconds(bridge_end, provider_replay_begin)
       << ",\"provider_replay_wall\":"
       << elapsed_nanoseconds(provider_replay_begin, provider_replay_end)
+      << ",\"forest_reduction_wrapper_wall\":"
+      << elapsed_nanoseconds(forest_reduction_begin, forest_reduction_end)
+      << ",\"forest_plan_wall\":"
+      << forest_audit.timings.plan_wall_nanoseconds
+      << ",\"forest_reducer_setup_wall\":"
+      << forest_audit.timings.reducer_setup_wall_nanoseconds
+      << ",\"forest_reducer_stream_wall\":"
+      << forest_audit.timings.reducer_stream_wall_nanoseconds
+      << ",\"forest_finish_wall\":"
+      << forest_audit.timings.forest_finish_wall_nanoseconds
+      << ",\"forest_reduction_internal_total_wall\":"
+      << forest_audit.timings.total_wall_nanoseconds
+      << ",\"vertical_worklist_wall\":"
+      << elapsed_nanoseconds(vertical_begin, vertical_end)
       << ",\"total\":"
-      << elapsed_nanoseconds(total_begin, provider_replay_end) << "},"
+      << elapsed_nanoseconds(total_begin, vertical_end) << "},"
       << "\"claims\":{\"ordinary_or_higher_order_delaunay\":false,"
-         "\"global_pair_matrix\":false,\"hierarchy_reduction\":false,"
-         "\"public_exact\":false},"
-      << "\"qualified_scope\":\"terminal_direct_supports_to_bounded_"
-         "reducer_source_only\"}"
+         "\"global_pair_matrix\":false,\"hierarchy_reduction\":true,"
+         "\"conditional_h0_only\":true,"
+         "\"vertical_target_authority\":false,"
+         "\"vertical_maps_complete\":false,\"public_exact\":false},"
+      << "\"qualified_scope\":\"automatic_exact_prune_cut_to_terminal_"
+         "direct_supports_bounded_conditional_h0_forest_and_explicit_"
+         "vertical_worklist_only\"}"
       << '\n';
   return qualified ? 0 : 2;
 }

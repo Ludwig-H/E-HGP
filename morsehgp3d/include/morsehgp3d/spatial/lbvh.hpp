@@ -15,6 +15,7 @@
 
 namespace morsehgp3d::gpu {
 class ExactAnchoredPairCandidateRecertifier;
+class ExactPairBlockAutomaticPruneRecipeCatalogBuilder;
 class ExactPairBlockFrontierContext;
 class ExactPairBlockTransactionalFrontierCudaContext;
 class ExactPairBlockTransactionalFrontierCudaTerminalAuthority;
@@ -455,6 +456,7 @@ class MortonLbvhIndex {
   friend class ExactBudgetedLbvhTopKResult;
   friend class gpu::K1BoruvkaCandidateContext;
   friend class gpu::ExactAnchoredPairCandidateRecertifier;
+  friend class gpu::ExactPairBlockAutomaticPruneRecipeCatalogBuilder;
   friend class gpu::ExactPairBlockFrontierContext;
   friend class gpu::ExactPairBlockTransactionalFrontierCudaContext;
   friend class gpu::ExactPairBlockTransactionalFrontierCudaTerminalAuthority;
