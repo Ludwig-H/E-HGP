@@ -225,6 +225,30 @@ class Phase15DeviceFrontier50kScriptWiringTests(unittest.TestCase):
         self.assertNotIn("--scaling-smoke", execution)
         self.assertNotIn("--direct-scale", execution)
 
+    def test_split_output_keeps_wrapper_diagnostics_out_of_binary_stderr(
+        self,
+    ) -> None:
+        remote = REMOTE_SCRIPT.read_text(encoding="utf-8")
+        start = remote.index("run_container_split_output() {")
+        finish = remote.index('\nbegin_unit "cuda-release"', start)
+        implementation = remote[start:finish]
+
+        self.assertIn(
+            "run_until_work_deadline_split_output \\\n"
+            '        "${label}" "${stdout_path}" "${stderr_path}"',
+            implementation,
+        )
+        self.assertIn('ACTIVE_CONTAINER_LOG="${DOCKER_LOG}"', implementation)
+        self.assertIn(
+            '"${cidfile}" "${container_name}" "${DOCKER_LOG}"',
+            implementation,
+        )
+        self.assertNotIn('2>>"${stderr_path}"', implementation)
+        self.assertNotIn(
+            '"${IMAGE_REF}" "$@" >"${stdout_path}" 2>"${stderr_path}"',
+            implementation,
+        )
+
     def test_orchestrator_validates_before_stop_and_publishes_after_stop(self) -> None:
         orchestrator = ORCHESTRATOR_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(

@@ -1504,6 +1504,44 @@ run_until_work_deadline() {
         "${soft_timeout}s" "$@"
 }
 
+run_until_work_deadline_split_output() {
+    local label="$1"
+    local stdout_path="$2"
+    local stderr_path="$3"
+    local now=0
+    local remaining=0
+    local soft_timeout=0
+    shift 3
+
+    [[ "${stdout_path}" != "${stderr_path}" ]] || {
+        printf '[ERREUR] stdout et stderr partagent le même chemin pour %s.\n' \
+            "${label}" >&2
+        return 125
+    }
+    now="$("${DATE_BIN}" +%s)" || {
+        printf '[ERREUR] Horloge invitée illisible avant exécution bornée de %s.\n' \
+            "${label}" >&2
+        return 125
+    }
+    [[ "${now}" =~ ^[0-9]+$ ]] || {
+        printf '[ERREUR] Horloge invitée non numérique avant exécution bornée de %s.\n' \
+            "${label}" >&2
+        return 125
+    }
+    remaining=$((WORK_DEADLINE_EPOCH - now))
+    soft_timeout=$((remaining - WORK_UNIT_KILL_AFTER_SECONDS - WORK_UNIT_POST_TIMEOUT_RESERVE_SECONDS))
+    if ((soft_timeout <= 0)); then
+        printf '[ERREUR] Réserve deadline insuffisante; unité %s non lancée.\n' \
+            "${label}" >&2
+        return 124
+    fi
+    printf '[TIMEOUT] unité=%s, borne douce=%ss, kill-after=%ss, réserve post-timeout=%ss.\n' \
+        "${label}" "${soft_timeout}" "${WORK_UNIT_KILL_AFTER_SECONDS}" \
+        "${WORK_UNIT_POST_TIMEOUT_RESERVE_SECONDS}" >&2
+    "${TIMEOUT_BIN}" --kill-after="${WORK_UNIT_KILL_AFTER_SECONDS}s" \
+        "${soft_timeout}s" "$@" >"${stdout_path}" 2>"${stderr_path}"
+}
+
 probe_until_work_deadline() {
     local label="$1"
     local maximum_seconds="$2"
@@ -2031,15 +2069,17 @@ run_container_split_output() {
     if ! collision="$(run_until_work_deadline "${label}-name-check" \
         "${DOCKER[@]}" ps -a --no-trunc \
         --filter "name=^/${container_name}$" --format '{{.Names}}' \
-        2>>"${stderr_path}")"; then
+        2>>"${DOCKER_LOG}")"; then
         return 125
     fi
     [[ -z "${collision}" ]] || \
         die "Collision de nom Docker refusée avant run : ${container_name}."
     ACTIVE_CONTAINER_CIDFILE="${cidfile}"
-    ACTIVE_CONTAINER_LOG="${stderr_path}"
+    ACTIVE_CONTAINER_LOG="${DOCKER_LOG}"
     ACTIVE_CONTAINER_NAME="${container_name}"
-    if run_until_work_deadline "${label}" "${DOCKER[@]}" run \
+    if run_until_work_deadline_split_output \
+        "${label}" "${stdout_path}" "${stderr_path}" \
+        "${DOCKER[@]}" run \
         --name "${container_name}" \
         --label "${CONTAINER_SESSION_LABEL}=${SESSION_TOKEN}" \
         --cidfile "${cidfile}" --gpus all \
@@ -2053,13 +2093,13 @@ run_container_split_output() {
         --env "MORSEHGP3D_CUDA_IMAGE_REF=${IMAGE_REF}" \
         --env "MORSEHGP3D_CUDA_IMAGE_ID=${IMAGE_ID}" \
         --env "MORSEHGP3D_GIT_SHA=${HEAD_SHA}" \
-        "${IMAGE_REF}" "$@" >"${stdout_path}" 2>"${stderr_path}"; then
+        "${IMAGE_REF}" "$@"; then
         run_status=0
     else
         run_status=$?
     fi
     if remove_container_from_cidfile \
-        "${cidfile}" "${container_name}" "${stderr_path}"; then
+        "${cidfile}" "${container_name}" "${DOCKER_LOG}"; then
         cleanup_status=0
     else
         cleanup_status=$?
