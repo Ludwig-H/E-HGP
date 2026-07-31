@@ -1453,6 +1453,18 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
         first_subdivision && resume_same_tile != UINT64_C(0);
     const bool load_checkpoint =
         resumed_first_subdivision || !first_subdivision;
+    if (first_subdivision && !resumed_first_subdivision) {
+      // Only the PointId is the empty-slot authority. The active-slot mask
+      // prevents every other field of an empty slot from being consumed.
+      // Initializing that authority in the owning warp avoids rewriting the
+      // complete 104-byte private slot and the unrelated output arena.
+      for (std::uint64_t slot = lane;
+           slot < witness_capacity;
+           slot += kWarpSize) {
+        anchor_witnesses[slot].witness_point_id = kInvalid;
+      }
+      __syncwarp(kFullWarpMask);
+    }
 
     std::uint64_t cursor = node_count - UINT64_C(1);
     std::uint64_t candidate_count = 0U;
@@ -2404,54 +2416,6 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     }
   }
   try {
-    if (!request.resume_same_tile) {
-      check_cuda(
-          cudaMemsetAsync(
-              resources->candidates(),
-              0xff,
-              candidate_bytes,
-              resources->stream()),
-          "cudaMemsetAsync Phase 15 tiled Morton/Yao48 candidates");
-      check_cuda(
-          cudaMemsetAsync(
-              resources->prunes(),
-              0xff,
-              prune_bytes,
-              resources->stream()),
-          "cudaMemsetAsync Phase 15 tiled Morton/Yao48 prune regions");
-      check_cuda(
-          cudaMemsetAsync(
-              resources->witnesses(),
-              0xff,
-              witness_bytes,
-              resources->stream()),
-          "cudaMemsetAsync Phase 15 tiled Morton/Yao48 witness banks");
-      check_cuda(
-          cudaMemsetAsync(
-              resources->cached_prune_witnesses(),
-              0xff,
-              cached_prune_witness_bytes,
-              resources->stream()),
-          "cudaMemsetAsync Phase 15 tiled Morton/Yao48 cached prune "
-          "witnesses");
-    }
-    check_cuda(
-        cudaMemsetAsync(
-            resources->controls(),
-            0xff,
-            control_bytes,
-            resources->stream()),
-        "cudaMemsetAsync Phase 15 tiled Morton/Yao48 anchor controls");
-    if (!request.resume_same_tile) {
-      check_cuda(
-          cudaMemsetAsync(
-              resources->checkpoints(),
-              0xff,
-              checkpoint_bytes,
-              resources->stream()),
-          "cudaMemsetAsync Phase 15 tiled Morton/Yao48 anchor checkpoints");
-    }
-
     std::size_t subdivision_count = 0U;
     std::uint64_t pending_anchor_count = 0U;
     for (std::size_t subdivision_index = 0U;

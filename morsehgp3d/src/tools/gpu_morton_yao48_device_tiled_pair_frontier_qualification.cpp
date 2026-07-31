@@ -1207,18 +1207,10 @@ void hash_anchor_control(
 
 [[nodiscard]] bool invalid_bank_slot(
     const Phase15MortonYao48DeviceTiledWitnessBankSlot& slot) noexcept {
-  bool cached_fields_invalid = true;
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    cached_fields_invalid =
-        cached_fields_invalid &&
-        slot.witness_coordinate_bits[axis] == kInvalid &&
-        slot.direction_lower_bits[axis] == kInvalid &&
-        slot.direction_upper_bits[axis] == kInvalid;
-  }
-  return cached_fields_invalid && slot.witness_point_id == kInvalid &&
-         slot.witness_morton_position == kInvalid &&
-         slot.squared_distance_lower_bits == kInvalid &&
-         slot.squared_distance_upper_bits == kInvalid;
+  // The PointId is the sole empty-slot authority. Other bytes in an inactive
+  // private slot are deliberately unspecified and are never consumed before
+  // a complete slot assignment publishes a non-sentinel PointId.
+  return slot.witness_point_id == kInvalid;
 }
 
 class CudaDeviceGuard final {
