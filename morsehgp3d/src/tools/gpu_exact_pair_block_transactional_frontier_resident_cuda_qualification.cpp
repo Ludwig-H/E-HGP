@@ -189,7 +189,7 @@ int run(const Options& options) {
       audit.one_persistent_kernel_launch_validated &&
       audit.zero_intermediate_d2h_validated &&
       audit.kernel_launch_count == 1U &&
-      audit.synchronization_count == 1U && mass_conserved &&
+      audit.synchronization_count == 3U && mass_conserved &&
       (complete_replay || rollback_contract);
   const bool qualified = runtime_contract &&
       (!options.require_complete || complete_replay);
