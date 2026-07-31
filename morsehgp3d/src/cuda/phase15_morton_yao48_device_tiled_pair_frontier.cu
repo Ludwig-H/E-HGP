@@ -679,7 +679,8 @@ struct Phase15MortonYao48DeviceTiledLaunchShape {
 
 [[nodiscard]] Phase15MortonYao48DeviceTiledLaunchShape launch_shape(
     std::size_t anchor_count,
-    const cudaDeviceProp& properties) {
+    const cudaDeviceProp& properties,
+    unsigned int warps_per_block) {
   if (properties.major != 12 || properties.minor != 0 ||
       properties.warpSize != static_cast<int>(kWarpSize) ||
       properties.maxGridSize[0] <= 0 || properties.multiProcessorCount <= 0 ||
@@ -689,15 +690,12 @@ struct Phase15MortonYao48DeviceTiledLaunchShape {
         "the Phase 15 tiled Morton/Yao48 frontier requires an sm_120 CUDA "
         "device with 32-lane warps");
   }
-  const std::size_t anchors_per_multiprocessor =
-      anchor_count / static_cast<std::size_t>(properties.multiProcessorCount);
-  unsigned int warps_per_block = 1U;
-  if (anchors_per_multiprocessor >= 8U) {
-    warps_per_block = 8U;
-  } else if (anchors_per_multiprocessor >= 4U) {
-    warps_per_block = 4U;
-  } else if (anchors_per_multiprocessor >= 2U) {
-    warps_per_block = 2U;
+  if (warps_per_block == 0U ||
+      warps_per_block > kMaximumWarpsPerBlock ||
+      (warps_per_block & (warps_per_block - 1U)) != 0U) {
+    throw std::runtime_error(
+        "the Phase 15 tiled Morton/Yao48 occupancy-selected warp count is "
+        "invalid");
   }
   const std::size_t requested =
       anchor_count / warps_per_block +
@@ -2130,6 +2128,43 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
   }
 }
 
+[[nodiscard]] unsigned int occupancy_selected_warps_per_block() {
+  unsigned int selected_warps = 0U;
+  unsigned int selected_active_warps = 0U;
+  for (unsigned int warps = 1U;
+       warps <= kMaximumWarpsPerBlock;
+       warps *= 2U) {
+    int active_blocks = 0;
+    check_cuda(
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+            &active_blocks,
+            build_tiled_morton_yao48_pair_frontier_kernel,
+            static_cast<int>(warps * kWarpSize),
+            0U),
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessor for the Phase 15 "
+        "tiled Morton/Yao48 frontier");
+    if (active_blocks <= 0) {
+      continue;
+    }
+    const auto active_warps =
+        static_cast<unsigned int>(active_blocks) * warps;
+    // Prefer the largest resident-warp population. On a tie, a wider block
+    // amortizes block scheduling without reducing occupancy.
+    if (active_warps > selected_active_warps ||
+        (active_warps == selected_active_warps &&
+         warps > selected_warps)) {
+      selected_warps = warps;
+      selected_active_warps = active_warps;
+    }
+  }
+  if (selected_warps == 0U) {
+    throw std::runtime_error(
+        "the Phase 15 tiled Morton/Yao48 kernel has zero certified CUDA "
+        "occupancy");
+  }
+  return selected_warps;
+}
+
 }  // namespace
 
 Phase15MortonYao48DeviceTiledAdoptedTraversal
@@ -2210,8 +2245,10 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
   check_cuda(
       cudaGetDeviceProperties(&properties, traversal.cuda_device),
       "cudaGetDeviceProperties for Phase 15 tiled Morton/Yao48 frontier");
+  const unsigned int warps_per_block =
+      occupancy_selected_warps_per_block();
   const Phase15MortonYao48DeviceTiledLaunchShape shape =
-      launch_shape(request.anchor_count, properties);
+      launch_shape(request.anchor_count, properties, warps_per_block);
 
   const std::size_t candidate_capacity = checked_product(
       request.anchor_count,
