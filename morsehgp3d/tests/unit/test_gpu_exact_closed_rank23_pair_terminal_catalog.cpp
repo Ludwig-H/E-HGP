@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <iostream>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -23,12 +24,16 @@ using morsehgp3d::gpu::ExactClosedRank23PairTerminalCatalog;
 using morsehgp3d::gpu::ExactClosedRank23PairTerminalCatalogConfig;
 using morsehgp3d::gpu::ExactClosedRank23PairTerminalCatalogResult;
 using morsehgp3d::gpu::ExactClosedRank23PairTerminalCatalogStatus;
+using morsehgp3d::gpu::ExactClosedRankPairTerminalCatalog;
+using morsehgp3d::gpu::ExactClosedRankPairTerminalCatalogConfig;
+using morsehgp3d::gpu::ExactClosedRankPairTerminalCatalogResult;
 using morsehgp3d::gpu::MortonLbvhBuildContext;
 using morsehgp3d::gpu::MortonLbvhDeviceTraversalLease;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStopReason;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierYieldReason;
 using morsehgp3d::gpu::MortonYao48RankedPairTileClassifierStopReason;
 using morsehgp3d::gpu::build_exact_closed_rank23_pair_terminal_catalog;
+using morsehgp3d::gpu::build_exact_closed_rank_pair_terminal_catalog;
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledAnchor;
 using morsehgp3d::gpu::test_support::
@@ -64,6 +69,12 @@ static_assert(std::is_nothrow_move_constructible_v<
 static_assert(
     !std::is_copy_constructible_v<ExactClosedRank23PairTerminalCatalogResult>);
 static_assert(std::is_nothrow_move_constructible_v<
+              ExactClosedRank23PairTerminalCatalogResult>);
+static_assert(std::is_same_v<
+              ExactClosedRankPairTerminalCatalog,
+              ExactClosedRank23PairTerminalCatalog>);
+static_assert(std::is_same_v<
+              ExactClosedRankPairTerminalCatalogResult,
               ExactClosedRank23PairTerminalCatalogResult>);
 
 int failures = 0;
@@ -210,6 +221,8 @@ void test_structurally_complete_host_fake_is_not_scientific_authority() {
   const auto& audit = result.audit;
   check(
       audit.maximum_closed_rank == 3U &&
+          audit.fixed_rank_window_enforced &&
+          audit.fixed_rank23_window_enforced &&
           audit.frontier_advance_count == 2U &&
           audit.classifier_commit_count == 2U &&
           audit.committed_chunk_count == 2U &&
@@ -308,6 +321,77 @@ void test_censored_frontier_never_reaches_classifier() {
       "publishes no candidate-derived catalog");
 }
 
+void test_rank6_parameter_reaches_both_resident_stages_without_claims() {
+  reset_transcripts();
+  auto traversal = traversal_lease(3U);
+  configure_classifier_transcripts({exact_launch(3U, 0U, 0U, 0U)});
+
+  const ExactClosedRankPairTerminalCatalogConfig config{
+      2U, 1U, 0U, 0U, 6U};
+  auto result = build_exact_closed_rank_pair_terminal_catalog(
+      std::move(traversal), config);
+  check(
+      result.status == ExactClosedRank23PairTerminalCatalogStatus::
+                           non_authoritative_host_fake &&
+          !result.complete() && !result.catalog.has_value() &&
+          result.audit.maximum_closed_rank == 6U &&
+          result.audit.fixed_rank_window_enforced &&
+          !result.audit.fixed_rank23_window_enforced &&
+          result.audit.frontier_closed &&
+          result.audit.frontier_mass_reconciled &&
+          result.audit.classifier_mass_reconciled &&
+          result.audit.zero_unresolved_certified &&
+          result.audit.zero_exact_fallback_certified &&
+          !result.audit.closed_rank_pair_catalog_complete &&
+          !result.audit.closed_rank23_pair_catalog_complete &&
+          !result.audit.support3_complete_claimed &&
+          !result.audit.support4_complete_claimed &&
+          !result.audit.gamma2_complete_claimed &&
+          !result.audit.k2_complete_claimed &&
+          !result.audit.hierarchy_complete_claimed &&
+          !result.audit.latency_100ms_claimed &&
+          result.audit.output_withheld,
+      "the parameterized rank-6 pair terminal reaches the closed resident "
+      "pipeline but a host fake remains withheld and claims no higher "
+      "supports, Gamma2, or hierarchy");
+}
+
+void test_rank23_facade_rejects_rank6_configuration() {
+  reset_transcripts();
+  auto traversal = traversal_lease(3U);
+  bool rejected = false;
+  try {
+    static_cast<void>(build_exact_closed_rank23_pair_terminal_catalog(
+        std::move(traversal),
+        ExactClosedRank23PairTerminalCatalogConfig{
+            2U, 1U, 0U, 0U, 6U}));
+  } catch (const std::out_of_range&) {
+    rejected = true;
+  }
+  check(
+      rejected,
+      "the source-compatible rank-2/3 facade must reject a rank-6 request");
+}
+
+void test_parameterized_terminal_rejects_ranks_outside_2_to_6() {
+  for (const std::size_t maximum_closed_rank : {1U, 7U}) {
+    reset_transcripts();
+    auto traversal = traversal_lease(3U);
+    bool rejected = false;
+    try {
+      static_cast<void>(build_exact_closed_rank_pair_terminal_catalog(
+          std::move(traversal),
+          ExactClosedRankPairTerminalCatalogConfig{
+              2U, 1U, 0U, 0U, maximum_closed_rank}));
+    } catch (const std::out_of_range&) {
+      rejected = true;
+    }
+    check(
+        rejected,
+        "the parameterized pair terminal must reject ranks outside [2,6]");
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -315,6 +399,9 @@ int main() {
   test_fake_treated_fallback_is_still_unresolved();
   test_linear_catalog_capacity_exhaustion_withholds_output();
   test_censored_frontier_never_reaches_classifier();
+  test_rank6_parameter_reaches_both_resident_stages_without_claims();
+  test_rank23_facade_rejects_rank6_configuration();
+  test_parameterized_terminal_rejects_ranks_outside_2_to_6();
   if (failures != 0) {
     std::cerr << failures
               << " exact closed-rank 2/3 terminal catalog test(s) failed\n";

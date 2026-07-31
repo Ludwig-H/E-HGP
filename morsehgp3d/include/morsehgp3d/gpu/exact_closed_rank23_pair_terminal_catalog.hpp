@@ -10,7 +10,11 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
-    exact_closed_rank23_pair_terminal_catalog_schema_version = 1U;
+    exact_closed_rank23_pair_terminal_catalog_schema_version = 2U;
+inline constexpr std::size_t
+    exact_closed_rank_pair_terminal_catalog_minimum_closed_rank = 2U;
+inline constexpr std::size_t
+    exact_closed_rank_pair_terminal_catalog_maximum_closed_rank = 6U;
 inline constexpr std::size_t
     exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank = 3U;
 inline constexpr std::size_t
@@ -31,7 +35,8 @@ inline constexpr std::string_view
     exact_closed_rank23_pair_terminal_catalog_public_status = "not_claimed";
 
 enum class ExactClosedRank23PairTerminalCatalogStatus : std::uint8_t {
-  complete_exact_closed_rank23,
+  complete_exact_closed_rank_window,
+  complete_exact_closed_rank23 = complete_exact_closed_rank_window,
   non_authoritative_host_fake,
   frontier_censored,
   capacity_exhausted,
@@ -46,6 +51,10 @@ struct ExactClosedRank23PairTerminalCatalogConfig {
   std::size_t catalog_record_capacity_per_point{8U};
   std::size_t payload_point_id_capacity_per_point{32U};
   std::size_t exact_fallback_capacity_per_point{1U};
+  // Appended for source compatibility with the historical four-field
+  // aggregate. The rank-2/3 facade below accepts only the default value.
+  std::size_t maximum_closed_rank{
+      exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank};
 
   friend bool operator==(
       const ExactClosedRank23PairTerminalCatalogConfig&,
@@ -86,6 +95,7 @@ struct ExactClosedRank23PairTerminalCatalogAudit {
   MortonYao48RankedPairTileClassifierStopReason classifier_stop_reason{
       MortonYao48RankedPairTileClassifierStopReason::none};
   bool fixed_rank23_window_enforced{false};
+  bool fixed_rank_window_enforced{false};
   bool fixed_linear_capacities_validated{false};
   bool frontier_closed{false};
   bool frontier_mass_reconciled{false};
@@ -93,6 +103,7 @@ struct ExactClosedRank23PairTerminalCatalogAudit {
   bool zero_unresolved_certified{false};
   bool zero_exact_fallback_certified{false};
   bool closed_rank23_pair_catalog_complete{false};
+  bool closed_rank_pair_catalog_complete{false};
   bool output_withheld{true};
   bool host_fake_lifecycle_exercised{false};
   bool cuda_execution_performed{false};
@@ -105,6 +116,8 @@ struct ExactClosedRank23PairTerminalCatalogAudit {
   bool higher_order_delaunay_mosaic_materialized{false};
   bool gamma2_complete_claimed{false};
   bool k2_complete_claimed{false};
+  bool support3_complete_claimed{false};
+  bool support4_complete_claimed{false};
   bool hierarchy_complete_claimed{false};
   bool latency_100ms_claimed{false};
   bool public_status_claimed{false};
@@ -116,8 +129,9 @@ struct ExactClosedRank23PairTerminalCatalogAudit {
 
 struct ExactClosedRank23PairTerminalCatalogResult;
 
-// Move-only terminal authority over the resident rank <= 3 pair catalog.
-// This is deliberately not a Gamma_2, K=2, hierarchy, or latency authority.
+// Move-only terminal authority over one resident closed-rank pair window.
+// Its configured maximum is at most six. This is deliberately not a
+// support-3/support-4, Gamma_2, K=2, hierarchy, or latency authority.
 class ExactClosedRank23PairTerminalCatalog final {
  public:
   ~ExactClosedRank23PairTerminalCatalog() noexcept = default;
@@ -156,6 +170,10 @@ class ExactClosedRank23PairTerminalCatalog final {
   build_exact_closed_rank23_pair_terminal_catalog(
       MortonLbvhDeviceTraversalLease&&,
       ExactClosedRank23PairTerminalCatalogConfig);
+  friend ExactClosedRank23PairTerminalCatalogResult
+  build_exact_closed_rank_pair_terminal_catalog(
+      MortonLbvhDeviceTraversalLease&&,
+      ExactClosedRank23PairTerminalCatalogConfig);
 };
 
 struct ExactClosedRank23PairTerminalCatalogResult {
@@ -176,11 +194,31 @@ struct ExactClosedRank23PairTerminalCatalogResult {
 
   [[nodiscard]] bool complete() const noexcept {
     return status == ExactClosedRank23PairTerminalCatalogStatus::
-                         complete_exact_closed_rank23 &&
+                         complete_exact_closed_rank_window &&
            catalog.has_value() && catalog->ready();
   }
 };
 
+// Canonical parameterized API. The historical rank-2/3 names remain aliases
+// over the same move-only authority and audit contract; only their builder
+// fixes the maximum rank to three.
+using ExactClosedRankPairTerminalCatalog =
+    ExactClosedRank23PairTerminalCatalog;
+using ExactClosedRankPairTerminalCatalogConfig =
+    ExactClosedRank23PairTerminalCatalogConfig;
+using ExactClosedRankPairTerminalCatalogAudit =
+    ExactClosedRank23PairTerminalCatalogAudit;
+using ExactClosedRankPairTerminalCatalogResult =
+    ExactClosedRank23PairTerminalCatalogResult;
+using ExactClosedRankPairTerminalCatalogStatus =
+    ExactClosedRank23PairTerminalCatalogStatus;
+
+[[nodiscard]] ExactClosedRankPairTerminalCatalogResult
+build_exact_closed_rank_pair_terminal_catalog(
+    MortonLbvhDeviceTraversalLease&& traversal_lease,
+    ExactClosedRankPairTerminalCatalogConfig config = {});
+
+// Source-compatible rank-2/3 facade. A non-three maximum is rejected.
 [[nodiscard]] ExactClosedRank23PairTerminalCatalogResult
 build_exact_closed_rank23_pair_terminal_catalog(
     MortonLbvhDeviceTraversalLease&& traversal_lease,

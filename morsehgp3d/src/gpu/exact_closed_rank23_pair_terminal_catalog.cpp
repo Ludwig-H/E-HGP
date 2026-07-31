@@ -9,11 +9,19 @@ namespace {
 
 [[nodiscard]] ExactClosedRank23PairTerminalCatalogConfig validate_config(
     ExactClosedRank23PairTerminalCatalogConfig config) {
+  if (config.maximum_closed_rank <
+          exact_closed_rank_pair_terminal_catalog_minimum_closed_rank ||
+      config.maximum_closed_rank >
+          exact_closed_rank_pair_terminal_catalog_maximum_closed_rank) {
+    throw std::out_of_range(
+        "the exact closed-rank pair terminal requires a maximum closed rank "
+        "in [2,6]");
+  }
   if (config.anchor_tile_capacity == 0U ||
       config.anchor_tile_capacity >
           morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity) {
     throw std::out_of_range(
-        "the exact closed-rank 2/3 terminal wrapper requires a nonzero "
+        "the exact closed-rank pair terminal requires a nonzero "
         "supported anchor tile capacity");
   }
   const auto factor_supported = [](std::size_t factor) {
@@ -24,7 +32,7 @@ namespace {
       !factor_supported(config.payload_point_id_capacity_per_point) ||
       !factor_supported(config.exact_fallback_capacity_per_point)) {
     throw std::out_of_range(
-        "an exact closed-rank 2/3 arena factor exceeds the fixed linear "
+        "an exact closed-rank pair arena factor exceeds the fixed linear "
         "capacity ceiling");
   }
   return config;
@@ -62,6 +70,7 @@ namespace {
     ExactClosedRank23PairTerminalCatalogStatus status,
     ExactClosedRank23PairTerminalCatalogAudit audit) {
   audit.closed_rank23_pair_catalog_complete = false;
+  audit.closed_rank_pair_catalog_complete = false;
   audit.output_withheld = true;
   ExactClosedRank23PairTerminalCatalogResult result;
   result.status = status;
@@ -193,19 +202,25 @@ bool ExactClosedRank23PairTerminalCatalog::ready() const noexcept {
   return resident_catalog_.ready() && !resident_catalog_.host_fake() &&
          audit_.schema_version ==
              exact_closed_rank23_pair_terminal_catalog_schema_version &&
-         audit_.maximum_closed_rank ==
-             exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank &&
-         audit_.fixed_rank23_window_enforced &&
+         audit_.maximum_closed_rank >=
+             exact_closed_rank_pair_terminal_catalog_minimum_closed_rank &&
+         audit_.maximum_closed_rank <=
+             exact_closed_rank_pair_terminal_catalog_maximum_closed_rank &&
+         resident_catalog_.audit().maximum_closed_rank ==
+             audit_.maximum_closed_rank &&
+         audit_.fixed_rank_window_enforced &&
          audit_.fixed_linear_capacities_validated && audit_.frontier_closed &&
          audit_.frontier_mass_reconciled &&
          audit_.classifier_mass_reconciled &&
          audit_.zero_unresolved_certified &&
          audit_.zero_exact_fallback_certified &&
-         audit_.closed_rank23_pair_catalog_complete &&
+         audit_.closed_rank_pair_catalog_complete &&
          !audit_.output_withheld &&
          !audit_.host_fake_lifecycle_exercised &&
          !forbidden_work_observed(audit_) &&
          !audit_.gamma2_complete_claimed && !audit_.k2_complete_claimed &&
+         !audit_.support3_complete_claimed &&
+         !audit_.support4_complete_claimed &&
          !audit_.hierarchy_complete_claimed &&
          !audit_.latency_100ms_claimed && !audit_.public_status_claimed;
 }
@@ -219,20 +234,19 @@ bool ExactClosedRank23PairTerminalCatalog::host_fake() const noexcept {
 }
 
 ExactClosedRank23PairTerminalCatalogResult
-build_exact_closed_rank23_pair_terminal_catalog(
+build_exact_closed_rank_pair_terminal_catalog(
     MortonLbvhDeviceTraversalLease&& traversal_lease,
     ExactClosedRank23PairTerminalCatalogConfig config) {
   config = validate_config(config);
   if (!traversal_lease.ready()) {
     throw std::invalid_argument(
-        "the exact closed-rank 2/3 terminal wrapper requires a ready "
+        "the exact closed-rank pair terminal requires a ready "
         "traversal lease");
   }
 
   ExactClosedRank23PairTerminalCatalogAudit audit;
   audit.point_count = traversal_lease.audit().point_count;
-  audit.maximum_closed_rank =
-      exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank;
+  audit.maximum_closed_rank = config.maximum_closed_rank;
   audit.anchor_tile_capacity = config.anchor_tile_capacity;
   audit.catalog_record_capacity_per_point =
       config.catalog_record_capacity_per_point;
@@ -240,7 +254,10 @@ build_exact_closed_rank23_pair_terminal_catalog(
       config.payload_point_id_capacity_per_point;
   audit.exact_fallback_capacity_per_point =
       config.exact_fallback_capacity_per_point;
-  audit.fixed_rank23_window_enforced = true;
+  audit.fixed_rank_window_enforced = true;
+  audit.fixed_rank23_window_enforced =
+      config.maximum_closed_rank ==
+      exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank;
 
   const bool capacities_fit =
       checked_linear_capacity(
@@ -265,11 +282,11 @@ build_exact_closed_rank23_pair_terminal_catalog(
   MortonYao48DeviceTiledPairFrontierContext frontier{
       std::move(traversal_lease),
       MortonYao48DeviceTiledPairFrontierConfig{
-          exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank,
+          config.maximum_closed_rank,
           config.anchor_tile_capacity}};
   MortonYao48RankedPairTileClassifierContext classifier{
       MortonYao48RankedPairTileClassifierConfig{
-          exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank,
+          config.maximum_closed_rank,
           audit.catalog_record_capacity,
           audit.payload_point_id_capacity,
           audit.exact_fallback_capacity}};
@@ -324,7 +341,7 @@ build_exact_closed_rank23_pair_terminal_catalog(
     if (commit.status !=
         MortonYao48RankedPairTileClassifierStatus::chunk_committed) {
       throw std::runtime_error(
-          "the exact closed-rank 2/3 terminal wrapper observed an unknown "
+          "the exact closed-rank pair terminal observed an unknown "
           "classifier status");
     }
   }
@@ -393,8 +410,7 @@ build_exact_closed_rank23_pair_terminal_catalog(
 
   const bool final_exact =
       resident_catalog.ready() &&
-      final.maximum_closed_rank ==
-          exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank &&
+      final.maximum_closed_rank == config.maximum_closed_rank &&
       final.closed_rank_catalog_complete && audit.frontier_closed &&
       audit.frontier_mass_reconciled && audit.classifier_mass_reconciled &&
       audit.zero_unresolved_certified &&
@@ -408,15 +424,31 @@ build_exact_closed_rank23_pair_terminal_catalog(
         std::move(audit));
   }
 
-  audit.closed_rank23_pair_catalog_complete = true;
+  audit.closed_rank_pair_catalog_complete = true;
+  audit.closed_rank23_pair_catalog_complete =
+      config.maximum_closed_rank ==
+      exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank;
   audit.output_withheld = false;
   ExactClosedRank23PairTerminalCatalogResult result;
   result.status = ExactClosedRank23PairTerminalCatalogStatus::
-      complete_exact_closed_rank23;
+      complete_exact_closed_rank_window;
   result.audit = audit;
   result.catalog = ExactClosedRank23PairTerminalCatalog{
       audit, std::move(resident_catalog)};
   return result;
+}
+
+ExactClosedRank23PairTerminalCatalogResult
+build_exact_closed_rank23_pair_terminal_catalog(
+    MortonLbvhDeviceTraversalLease&& traversal_lease,
+    ExactClosedRank23PairTerminalCatalogConfig config) {
+  if (config.maximum_closed_rank !=
+      exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank) {
+    throw std::out_of_range(
+        "the exact closed-rank 2/3 facade fixes maximum_closed_rank to 3");
+  }
+  return build_exact_closed_rank_pair_terminal_catalog(
+      std::move(traversal_lease), config);
 }
 
 }  // namespace morsehgp3d::gpu
