@@ -692,6 +692,49 @@ else()
   )
 endif()
 
+# Host/fake link surface for the bounded resident Phase 15 scheduler.  The
+# implementation consumes one native traversal authority and delegates only
+# the execution primitive, allowing the unit contract to exercise the same
+# preflight, ledger and replay code without pretending that CUDA ran.
+add_library(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+  STATIC
+    include/morsehgp3d/gpu/exact_pair_block_transactional_frontier_resident_cuda.hpp
+    src/cuda/phase15_exact_pair_block_transactional_frontier_resident_cuda_internal.hpp
+    src/gpu/exact_pair_block_transactional_frontier_resident_cuda.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+  ALIAS
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+  PUBLIC
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 add_library(
   morsehgp3d_anchored_pair_witness_bank
   STATIC
@@ -1682,6 +1725,7 @@ add_library(
   STATIC
     src/cpu/hierarchy/direct_morse_forest_source_authority.cpp
     src/cpu/hierarchy/direct_morse_forest_source_wire.cpp
+    src/cpu/hierarchy/direct_morse_terminal_reducer_source_bridge.cpp
 )
 add_library(
   morsehgp3d::direct_morse_forest_source_authority
@@ -1704,7 +1748,9 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_direct_morse_forest_source_authority
-  PUBLIC morsehgp3d::direct_morse_forest_journal
+  PUBLIC
+    morsehgp3d::capped_distinct_point_coverage
+    morsehgp3d::direct_morse_forest_journal
   PRIVATE morsehgp3d::sanitizers
 )
 if(MSVC)
@@ -3565,6 +3611,57 @@ if(MORSEHGP3D_ENABLE_CUDA)
   else()
     target_compile_options(
       morsehgp3d_gpu_exact_pair_block_witness_cuda
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_library(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
+    STATIC
+      include/morsehgp3d/gpu/exact_pair_block_transactional_frontier_resident_cuda.hpp
+      src/cuda/phase15_exact_pair_block_q_fixed.cuh
+      src/cuda/phase15_exact_pair_block_transactional_frontier_resident_cuda_internal.hpp
+      src/cuda/phase15_exact_pair_block_transactional_frontier_resident_cuda.cu
+      src/gpu/exact_pair_block_transactional_frontier_resident_cuda.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda
+    ALIAS morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
+  )
+  target_include_directories(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
+    PUBLIC
+      morsehgp3d::gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+      morsehgp3d::gpu_morton_lbvh_build
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda
       PRIVATE
         $<$<COMPILE_LANGUAGE:CXX>:-Wall>
         $<$<COMPILE_LANGUAGE:CXX>:-Wextra>

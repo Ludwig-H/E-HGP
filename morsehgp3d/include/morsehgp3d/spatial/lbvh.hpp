@@ -18,6 +18,8 @@ class ExactAnchoredPairCandidateRecertifier;
 class ExactPairBlockFrontierContext;
 class ExactPairBlockTransactionalFrontierCudaContext;
 class ExactPairBlockTransactionalFrontierCudaTerminalAuthority;
+class ExactPairBlockTransactionalFrontierResidentCudaContext;
+class ExactPairBlockTransactionalFrontierResidentCudaResult;
 class K1BoruvkaCandidateContext;
 class PairSupportPhiContext;
 class SpatialLbvhContext;
@@ -456,6 +458,8 @@ class MortonLbvhIndex {
   friend class gpu::ExactPairBlockFrontierContext;
   friend class gpu::ExactPairBlockTransactionalFrontierCudaContext;
   friend class gpu::ExactPairBlockTransactionalFrontierCudaTerminalAuthority;
+  friend class gpu::ExactPairBlockTransactionalFrontierResidentCudaContext;
+  friend class gpu::ExactPairBlockTransactionalFrontierResidentCudaResult;
   friend class gpu::PairSupportPhiContext;
   friend class gpu::SpatialLbvhContext;
   friend class gpu::MortonYao48PairFrontierContext;

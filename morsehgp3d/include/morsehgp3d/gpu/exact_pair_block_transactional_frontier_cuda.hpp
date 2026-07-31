@@ -358,6 +358,22 @@ class ExactPairBlockTransactionalFrontierCudaContext final {
       const & noexcept;
   [[nodiscard]] std::span<const ExactPairBlockAuthority> inflight_blocks()
       const && = delete;
+  [[nodiscard]] std::span<
+      const ExactPairBlockTransactionalFrontierCudaPruneReceipt>
+  committed_prune_receipts() const & noexcept {
+    return prune_receipts_;
+  }
+  [[nodiscard]] std::span<
+      const ExactPairBlockTransactionalFrontierCudaPruneReceipt>
+  committed_prune_receipts() const && = delete;
+  [[nodiscard]] std::span<
+      const ExactPairBlockTransactionalFrontierCudaTerminalPair>
+  committed_terminal_pairs() const & noexcept {
+    return terminal_pairs_;
+  }
+  [[nodiscard]] std::span<
+      const ExactPairBlockTransactionalFrontierCudaTerminalPair>
+  committed_terminal_pairs() const && = delete;
 
   [[nodiscard]] ExactPairBlockTransactionalFrontierCudaWaveStart begin_wave()
       &;

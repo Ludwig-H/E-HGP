@@ -708,6 +708,51 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+  test_gpu_exact_pair_block_transactional_frontier_resident_cuda.cpp
+  fake_gpu_exact_pair_block_transactional_frontier_resident_cuda_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_anchored_pair_candidate_classifier_tests
   test_anchored_pair_candidate_classifier.cpp
 )
@@ -1194,6 +1239,26 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
+  test_hierarchy_direct_morse_terminal_reducer_source_bridge.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
+  PRIVATE morsehgp3d::direct_morse_forest_source_authority
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -2526,6 +2591,7 @@ set(
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
+  morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
   morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
   morsehgp3d_hierarchy_direct_morse_budget_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests
@@ -3413,6 +3479,10 @@ add_test(
   COMMAND morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
 )
 add_test(
+  NAME morsehgp3d.gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+  COMMAND morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+)
+add_test(
   NAME morsehgp3d.anchored_pair_candidate_classifier
   COMMAND morsehgp3d_anchored_pair_candidate_classifier_tests
 )
@@ -3505,6 +3575,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_forest_reducer
   COMMAND morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_terminal_reducer_source_bridge
+  COMMAND morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_vertical_journal
