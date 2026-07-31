@@ -533,6 +533,47 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+  STATIC
+    include/morsehgp3d/gpu/exact_pair_block_frontier.hpp
+    src/gpu/exact_pair_block_frontier.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_pair_block_frontier_host_contract
+  ALIAS morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+)
+set_target_properties(
+  morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+  PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+  PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+  PUBLIC morsehgp3d::pair_support
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_frontier_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_anchored_pair_witness_bank
   STATIC
     src/cpu/hierarchy/anchored_pair_witness_bank.cpp
@@ -2546,6 +2587,51 @@ else()
   )
 endif()
 
+# Private resident projection of the exact ranked-pair catalog into regular
+# pair candidates and diagnostic/carrier candidates.  It borrows the source
+# strict/shell payloads, computes exact levels on device, assigns no
+# birth/saddle role and exposes raw views only through an internal friend
+# capability.  The host-only target leaves the launcher unresolved for the
+# hostile unit fake.
+add_library(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+  STATIC
+    include/morsehgp3d/gpu/morton_yao48_ranked_pair_h0_projection.hpp
+    src/cuda/phase15_morton_yao48_ranked_pair_h0_projection_internal.hpp
+    src/gpu/morton_yao48_ranked_pair_h0_projection.cpp
+)
+add_library(
+  morsehgp3d::gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+  ALIAS
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+  PUBLIC
+    morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier_host_contract
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Terminal rank-2/3 pair-catalog wrapper.  It owns the full frontier drain and
 # publishes only after closed global mass and zero unresolved/fallback counts.
 # Capacities are fixed factors of the source point count; this target neither
@@ -3458,6 +3544,54 @@ if(MORSEHGP3D_ENABLE_CUDA)
   else()
     target_compile_options(
       morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_library(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
+    STATIC
+      include/morsehgp3d/gpu/morton_yao48_ranked_pair_h0_projection.hpp
+      src/cuda/phase15_morton_yao48_ranked_pair_h0_projection_internal.hpp
+      src/cuda/phase15_morton_yao48_ranked_pair_h0_projection.cu
+      src/gpu/morton_yao48_ranked_pair_h0_projection.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_morton_yao48_ranked_pair_h0_projection
+    ALIAS morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
+  )
+  target_include_directories(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
+    PUBLIC morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection
       PRIVATE
         $<$<COMPILE_LANGUAGE:CXX>:-Wall>
         $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
