@@ -2304,6 +2304,48 @@ else()
   )
 endif()
 
+add_library(
+  morsehgp3d_silent_pair_gateway_gamma2_differential
+  STATIC
+    src/cpu/hierarchy/silent_pair_gateway_gamma2_differential.cpp
+)
+add_library(
+  morsehgp3d::silent_pair_gateway_gamma2_differential
+  ALIAS morsehgp3d_silent_pair_gateway_gamma2_differential
+)
+set_target_properties(
+  morsehgp3d_silent_pair_gateway_gamma2_differential
+  PROPERTIES
+    EXPORT_NAME silent_pair_gateway_gamma2_differential
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_silent_pair_gateway_gamma2_differential PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_silent_pair_gateway_gamma2_differential
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_silent_pair_gateway_gamma2_differential
+  PUBLIC
+    morsehgp3d::hierarchy
+    morsehgp3d::silent_pair_gateway
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_silent_pair_gateway_gamma2_differential PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_silent_pair_gateway_gamma2_differential
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Host/fake-only Phase 15 contract.  The archive intentionally leaves its
 # device launcher unresolved; unit tests provide a hostile fake and the future
 # CUDA target will provide the sole production definition.  This target makes
@@ -4062,6 +4104,7 @@ install(
     morsehgp3d_capped_distinct_point_coverage
     morsehgp3d_exact_q3_gabriel_triangle_oracle
     morsehgp3d_silent_pair_gateway
+    morsehgp3d_silent_pair_gateway_gamma2_differential
     morsehgp3d_pair_support
     morsehgp3d_anchored_pair_witness_bank
     morsehgp3d_anchored_pair_candidate_classifier

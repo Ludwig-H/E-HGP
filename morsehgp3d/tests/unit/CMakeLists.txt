@@ -305,6 +305,22 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_silent_pair_gateway_gamma2_differential_tests
+  test_hierarchy_silent_pair_gateway_gamma2_differential.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_silent_pair_gateway_gamma2_differential_tests
+  PRIVATE morsehgp3d::silent_pair_gateway_gamma2_differential
+)
+if(MSVC)
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_silent_pair_gateway_gamma2_differential_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_k1_forest_tests
   test_hierarchy_k1_forest.cpp
 )
@@ -2276,6 +2292,7 @@ set(
   morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
   morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
   morsehgp3d_hierarchy_silent_pair_gateway_tests
+  morsehgp3d_hierarchy_silent_pair_gateway_gamma2_differential_tests
   morsehgp3d_hierarchy_k1_forest_tests
   morsehgp3d_hierarchy_miniball_tests
   morsehgp3d_hierarchy_gamma_tests
@@ -2424,6 +2441,10 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_hierarchy_reduced_gamma_history_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_silent_pair_gateway_gamma2_differential_tests
+    PRIVATE /W4 /WX
   )
   target_compile_options(
     morsehgp3d_hierarchy_exact_k2_k1_hierarchy_tests PRIVATE /W4 /WX
@@ -3101,6 +3122,11 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_silent_pair_gateway
   COMMAND morsehgp3d_hierarchy_silent_pair_gateway_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_silent_pair_gateway_gamma2_differential
+  COMMAND
+    morsehgp3d_hierarchy_silent_pair_gateway_gamma2_differential_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_k1_forest
