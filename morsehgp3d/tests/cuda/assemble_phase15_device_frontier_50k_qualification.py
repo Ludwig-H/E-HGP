@@ -119,6 +119,7 @@ RANK_KEYS = {
     "build_ns",
     "candidate_pair_mass",
     "candidate_record_count",
+    "candidate_yield_anchor_count",
     "censored_anchor_count",
     "certified_pruned_pair_mass",
     "complete_anchor_count",
@@ -138,13 +139,16 @@ RANK_KEYS = {
     "output_digest_fnv1a",
     "peak_tile_output_device_capacity_bytes",
     "physical_node_visit_count",
+    "chunk_count",
     "prune_region_count",
     "prune_semantics",
     "prune_witness_target_check_count",
+    "prune_yield_anchor_count",
     "q3_exact_diametral_pair_support_gabriel_negative_only",
     "qualification_device_to_host_bytes",
     "qualification_output_copy_ns",
     "required_witness_count",
+    "resumed_chunk_count",
     "sampled_recertified_prune_count",
     "tile_count",
     "traversal_adoption_ns",
@@ -353,6 +357,17 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
         fail("fully recertified prune count exceeds the prune count")
     if value["sampled_recertified_prune_count"] > value["prune_region_count"]:
         fail("sampled recertified prune count exceeds the prune count")
+    if (
+        value["chunk_count"]
+        != value["tile_count"] + value["resumed_chunk_count"]
+    ):
+        fail("rank chunk count does not close initial tiles plus resumes")
+    if (
+        value["candidate_yield_anchor_count"]
+        + value["prune_yield_anchor_count"]
+        < value["resumed_chunk_count"]
+    ):
+        fail("rank resumed chunks exceed the recorded yielding anchors")
     if not 0 < value["minimum_device_free_bytes"] <= value["device_total_bytes"]:
         fail("rank device memory receipt is invalid")
     return value

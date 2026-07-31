@@ -55,6 +55,7 @@ def rank_result() -> dict[str, object]:
         "build_ns": 10_000,
         "candidate_pair_mass": candidate_mass,
         "candidate_record_count": candidate_mass,
+        "candidate_yield_anchor_count": 813,
         "censored_anchor_count": 0,
         "certified_pruned_pair_mass": (
             assembler.UNORDERED_PAIR_UNIVERSE - candidate_mass
@@ -76,13 +77,16 @@ def rank_result() -> dict[str, object]:
         "output_digest_fnv1a": 14_695_981_039_346_656_037,
         "peak_tile_output_device_capacity_bytes": 256_000_000,
         "physical_node_visit_count": 2_000_000,
+        "chunk_count": 27,
         "prune_region_count": 900_000,
         "prune_semantics": "closed_rank_window",
         "prune_witness_target_check_count": 8_000_000,
+        "prune_yield_anchor_count": 0,
         "q3_exact_diametral_pair_support_gabriel_negative_only": False,
         "qualification_device_to_host_bytes": 32_000_000,
         "qualification_output_copy_ns": 6_000,
         "required_witness_count": assembler.MAXIMUM_CLOSED_RANK - 1,
+        "resumed_chunk_count": 14,
         "sampled_recertified_prune_count": 900_000,
         "tile_count": 13,
         "traversal_adoption_ns": 7_000,
@@ -398,6 +402,14 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
             (
                 "Q3 negative-only scope",
                 {"q3_exact_diametral_pair_support_gabriel_negative_only": True},
+            ),
+            ("chunk closure", {"chunk_count": 26}),
+            (
+                "yield closure",
+                {
+                    "candidate_yield_anchor_count": 0,
+                    "prune_yield_anchor_count": 0,
+                },
             ),
         )
         for label, mutation in mutations:
