@@ -42,6 +42,10 @@ PUBLIC_STATUS = "not_claimed"
 SCIENTIFIC_SCOPE = "complete_50k_rank11_device_frontier_component_coverage_only"
 POINT_COUNT = 50_000
 MAXIMUM_CLOSED_RANK = 11
+KMAX5_MAXIMUM_CLOSED_RANK = 6
+SUPPORTED_MAXIMUM_CLOSED_RANKS = frozenset(
+    {KMAX5_MAXIMUM_CLOSED_RANK, MAXIMUM_CLOSED_RANK}
+)
 ANCHOR_TILE_CAPACITY = 4_096
 SAMPLED_PRUNE_LIMIT = 4_096
 EXACT_PRUNE_TARGET_CHECK_LIMIT = 1_000_000
@@ -53,19 +57,43 @@ BINARY_RELATIVE_PATH = (
     "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification"
 )
 BINARY_CONTAINER_PATH = f"/workspace/repository/{BINARY_RELATIVE_PATH}"
-QUALIFICATION_COMMAND = [
-    BINARY_CONTAINER_PATH,
-    "--point-count",
-    str(POINT_COUNT),
-    "--family",
-    FAMILY,
-    "--maximum-closed-rank",
-    str(MAXIMUM_CLOSED_RANK),
-    "--anchor-tile-capacity",
-    str(ANCHOR_TILE_CAPACITY),
-    "--seed",
-    str(SEED),
-]
+
+
+def require_supported_maximum_closed_rank(maximum_closed_rank: Any) -> int:
+    if (
+        type(maximum_closed_rank) is not int
+        or maximum_closed_rank not in SUPPORTED_MAXIMUM_CLOSED_RANKS
+    ):
+        fail("maximum_closed_rank must be exactly 6 or 11")
+    return maximum_closed_rank
+
+
+def qualification_command(maximum_closed_rank: int) -> list[str]:
+    require_supported_maximum_closed_rank(maximum_closed_rank)
+    return [
+        BINARY_CONTAINER_PATH,
+        "--point-count",
+        str(POINT_COUNT),
+        "--family",
+        FAMILY,
+        "--maximum-closed-rank",
+        str(maximum_closed_rank),
+        "--anchor-tile-capacity",
+        str(ANCHOR_TILE_CAPACITY),
+        "--seed",
+        str(SEED),
+    ]
+
+
+def scientific_scope(maximum_closed_rank: int) -> str:
+    require_supported_maximum_closed_rank(maximum_closed_rank)
+    return (
+        f"complete_50k_rank{maximum_closed_rank}_device_frontier_"
+        "component_coverage_only"
+    )
+
+
+QUALIFICATION_COMMAND = qualification_command(MAXIMUM_CLOSED_RANK)
 
 QUALIFICATION_KEYS = {
     "all_rank_thresholds_exercised",
@@ -277,11 +305,16 @@ def validate_build_log(raw: str) -> None:
         fail("target build log contains an obvious failure")
 
 
-def validate_timing(value: dict[str, Any]) -> dict[str, Any]:
+def validate_timing(
+    value: dict[str, Any], *, maximum_closed_rank: int = MAXIMUM_CLOSED_RANK
+) -> dict[str, Any]:
+    maximum_closed_rank = require_supported_maximum_closed_rank(
+        maximum_closed_rank
+    )
     require_exact_keys(value, TIMING_KEYS, "qualification timing")
     if value.get("schema") != TIMING_SCHEMA:
         fail("qualification timing schema differs")
-    if value.get("command") != QUALIFICATION_COMMAND:
+    if value.get("command") != qualification_command(maximum_closed_rank):
         fail("qualification timing command differs from the guarded command")
     started = require_integer(
         value.get("started_epoch_ns"), "timing started_epoch_ns", minimum=1
@@ -298,8 +331,17 @@ def validate_timing(value: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
-def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
-    require_exact_keys(value, RANK_KEYS, "rank-11 qualification result")
+def validate_rank(
+    value: dict[str, Any], *, maximum_closed_rank: int = MAXIMUM_CLOSED_RANK
+) -> dict[str, Any]:
+    maximum_closed_rank = require_supported_maximum_closed_rank(
+        maximum_closed_rank
+    )
+    require_exact_keys(
+        value,
+        RANK_KEYS,
+        f"rank-{maximum_closed_rank} qualification result",
+    )
     exact_integers = {
         "bounded_admitted_pair_count": 0,
         "bounded_bruteforce_ns": 0,
@@ -309,14 +351,19 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
         "bounded_non_support_shell_equality_count": 0,
         "censored_anchor_count": 0,
         "complete_anchor_count": POINT_COUNT,
-        "fresh_tile_device_arena_allocation_count": 2,
-        "fresh_tile_device_arena_reuse_count": 11,
-        "maximum_closed_rank": MAXIMUM_CLOSED_RANK,
-        "required_witness_count": MAXIMUM_CLOSED_RANK - 1,
+        "maximum_closed_rank": maximum_closed_rank,
+        "required_witness_count": maximum_closed_rank - 1,
         "tile_count": 13,
         "unordered_pair_universe_count": UNORDERED_PAIR_UNIVERSE,
         "unresolved_pair_mass": 0,
     }
+    if maximum_closed_rank == MAXIMUM_CLOSED_RANK:
+        exact_integers.update(
+            {
+                "fresh_tile_device_arena_allocation_count": 2,
+                "fresh_tile_device_arena_reuse_count": 11,
+            }
+        )
     for field, expected in exact_integers.items():
         require_exact_integer(value.get(field), expected, f"rank result.{field}")
     require_boolean(
@@ -372,6 +419,8 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
         != value["tile_count"]
     ):
         fail("rank fresh arena lifecycle does not close the tile count")
+    if value["fresh_tile_device_arena_allocation_count"] < 1:
+        fail("rank fresh arena lifecycle has no initial allocation")
     if (
         value["candidate_yield_anchor_count"]
         + value["prune_yield_anchor_count"]
@@ -384,8 +433,14 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
 
 
 def validate_qualification(
-    value: dict[str, Any], *, git_sha: str
+    value: dict[str, Any],
+    *,
+    git_sha: str,
+    maximum_closed_rank: int = MAXIMUM_CLOSED_RANK,
 ) -> dict[str, Any]:
+    maximum_closed_rank = require_supported_maximum_closed_rank(
+        maximum_closed_rank
+    )
     require_exact_keys(value, QUALIFICATION_KEYS, "50k qualification result")
     expected_scalars = {
         "backend": BACKEND,
@@ -447,8 +502,11 @@ def validate_qualification(
         require_integer(value.get(field), f"qualification {field}", minimum=1)
     ranks = value.get("rank_results")
     if not isinstance(ranks, list) or len(ranks) != 1 or not isinstance(ranks[0], dict):
-        fail("50k qualification must contain exactly the explicit rank-11 result")
-    validate_rank(ranks[0])
+        fail(
+            "50k qualification must contain exactly the explicit "
+            f"rank-{maximum_closed_rank} result"
+        )
+    validate_rank(ranks[0], maximum_closed_rank=maximum_closed_rank)
     return value
 
 
@@ -482,7 +540,11 @@ def validate_artifact(
     *,
     git_sha: str,
     environment_artifact_path: Path,
+    maximum_closed_rank: int = MAXIMUM_CLOSED_RANK,
 ) -> dict[str, Any]:
+    maximum_closed_rank = require_supported_maximum_closed_rank(
+        maximum_closed_rank
+    )
     if SHA_RE.fullmatch(git_sha) is None:
         fail("git_sha must be a canonical lowercase 40-hex commit ID")
     require_exact_keys(value, ARTIFACT_KEYS, "Phase 15 50k artifact")
@@ -496,7 +558,7 @@ def validate_artifact(
         "phase": "15",
         "profile": PROFILE,
         "schema": SCHEMA,
-        "scientific_scope": SCIENTIFIC_SCOPE,
+        "scientific_scope": scientific_scope(maximum_closed_rank),
         "status": "worker_passed_pending_shutdown",
     }
     for field, expected in expected_scalars.items():
@@ -510,7 +572,7 @@ def validate_artifact(
         fail("scientific_public_status must be null")
     if value.get("claims") != NO_CLAIMS:
         fail("Phase 15 50k artifact must not publish product or exactness claims")
-    if value.get("command") != QUALIFICATION_COMMAND:
+    if value.get("command") != qualification_command(maximum_closed_rank):
         fail("Phase 15 50k artifact command differs from the guarded command")
     if value.get("git") != {"clean": True, "sha": git_sha}:
         fail("Phase 15 50k artifact does not bind the clean Git SHA")
@@ -566,9 +628,11 @@ def validate_artifact(
     qualification = validate_qualification(
         parse_single_line_json(logs["qualification"], "50k qualification log"),
         git_sha=git_sha,
+        maximum_closed_rank=maximum_closed_rank,
     )
     timing = validate_timing(
-        parse_single_line_json(logs["timing"], "50k timing log")
+        parse_single_line_json(logs["timing"], "50k timing log"),
+        maximum_closed_rank=maximum_closed_rank,
     )
     if value.get("timing") != timing:
         fail("Phase 15 50k timing summary differs from its log")
@@ -594,6 +658,7 @@ def validate_artifact_file(
     *,
     git_sha: str,
     environment_artifact_path: Path,
+    maximum_closed_rank: int = MAXIMUM_CLOSED_RANK,
 ) -> dict[str, Any]:
     raw, _ = read_text_evidence(artifact_path, "Phase 15 50k artifact")
     value = parse_json_object(raw, "Phase 15 50k artifact")
@@ -602,6 +667,7 @@ def validate_artifact_file(
         raw,
         git_sha=git_sha,
         environment_artifact_path=environment_artifact_path,
+        maximum_closed_rank=maximum_closed_rank,
     )
 
 
@@ -617,6 +683,12 @@ def parse_arguments(arguments: Sequence[str] | None = None) -> argparse.Namespac
     parser.add_argument("--qualification-stderr-log", type=Path, required=True)
     parser.add_argument("--timing-log", type=Path, required=True)
     parser.add_argument("--binary", type=Path, required=True)
+    parser.add_argument(
+        "--maximum-closed-rank",
+        type=int,
+        choices=sorted(SUPPORTED_MAXIMUM_CLOSED_RANKS),
+        default=MAXIMUM_CLOSED_RANK,
+    )
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args(arguments)
 
@@ -660,9 +732,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
     qualification = validate_qualification(
         parse_single_line_json(logs["qualification"], "50k qualification log"),
         git_sha=args.git_sha,
+        maximum_closed_rank=args.maximum_closed_rank,
     )
     timing = validate_timing(
-        parse_single_line_json(logs["timing"], "50k timing log")
+        parse_single_line_json(logs["timing"], "50k timing log"),
+        maximum_closed_rank=args.maximum_closed_rank,
     )
     artifact = {
         "artifact_role": ARTIFACT_ROLE,
@@ -681,7 +755,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "timed_exit_status": 0,
         },
         "claims": dict(NO_CLAIMS),
-        "command": list(QUALIFICATION_COMMAND),
+        "command": qualification_command(args.maximum_closed_rank),
         "component_only": True,
         "deployment_status": DEPLOYMENT_STATUS,
         "git": {"clean": True, "sha": args.git_sha},
@@ -703,7 +777,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "schema": SCHEMA,
         "scientific_public_status": None,
         "scientific_result_claimed": False,
-        "scientific_scope": SCIENTIFIC_SCOPE,
+        "scientific_scope": scientific_scope(args.maximum_closed_rank),
         "status": "worker_passed_pending_shutdown",
         "timing": timing,
         "vm_lifecycle": dict(WORKER_LIFECYCLE),
@@ -713,6 +787,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         canonical_json(artifact),
         git_sha=args.git_sha,
         environment_artifact_path=args.environment_artifact,
+        maximum_closed_rank=args.maximum_closed_rank,
     )
     write_exclusive_atomic(args.output, artifact)
     return 0

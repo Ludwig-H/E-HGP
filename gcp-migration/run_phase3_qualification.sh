@@ -41,6 +41,7 @@ PHASE7_H_POLYTOPE=0
 PHASE9_PAIR_SUPPORT_PHI=0
 PHASE15_EXACT_DIAMETRAL_PHI=0
 PHASE15_DEVICE_FRONTIER_50K=0
+PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=11
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=0
 PHASE15_RANKED_PAIR_CLASSIFIER=0
 MORTON_YAO48_SEED_WORK_PROFILE=0
@@ -91,7 +92,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -162,6 +163,11 @@ famille adversarial_mixed_dyadic et graine enregistrée. Elle exige une
 couverture complète et une masse non résolue nulle, mais reste un résultat de
 composant sans catalogue, exactitude de hiérarchie, scalabilité, SLO ou statut
 public revendiqué.
+
+--phase15-device-frontier-50k-kmax5 sélectionne le même profil de composant
+50k avec K_max=5, donc un unique rang fermé maximal 6 et cinq témoins requis.
+Cette route ne qualifie pas cinq arbres complets et ne revendique ni
+hiérarchie, ni SLO, ni statut scientifique ou public.
 
 --phase15-device-frontier-strict-interior ajoute exclusivement la
 qualification native `q3_gabriel_exact_diametral_pair_support_negative_only` à deux témoins
@@ -234,7 +240,17 @@ while (($# > 0)); do
             shift
             ;;
         --phase15-device-frontier-50k)
+            ((PHASE15_DEVICE_FRONTIER_50K == 0)) || \
+                die "Les options device-frontier 50k Phase 15 sont mutuellement exclusives."
             PHASE15_DEVICE_FRONTIER_50K=1
+            PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=11
+            shift
+            ;;
+        --phase15-device-frontier-50k-kmax5)
+            ((PHASE15_DEVICE_FRONTIER_50K == 0)) || \
+                die "Les options device-frontier 50k Phase 15 sont mutuellement exclusives."
+            PHASE15_DEVICE_FRONTIER_50K=1
+            PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=6
             shift
             ;;
         --phase15-device-frontier-strict-interior)
@@ -458,7 +474,11 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
         die "L'artefact ${LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
-    LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT="${RESULT_DIR}/phase15-device-frontier-50k-${HEAD_SHA}.json"
+    phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k"
+    if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
+        phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k-kmax5"
+    fi
+    LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT="${RESULT_DIR}/${phase15_device_frontier_50k_result_prefix}-${HEAD_SHA}.json"
     [[ ! -e "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}" && \
         ! -L "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT} existe déjà; utilisez un répertoire distinct."
@@ -578,8 +598,12 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
     fi
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
+    phase15_device_frontier_50k_temp_prefix="phase15-device-frontier-50k"
+    if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
+        phase15_device_frontier_50k_temp_prefix="phase15-device-frontier-50k-kmax5"
+    fi
     if ! LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT="$(mktemp \
-        "${RESULT_DIR}/.phase15-device-frontier-50k-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        "${RESULT_DIR}/.${phase15_device_frontier_50k_temp_prefix}-${HEAD_SHA}.XXXXXXXX.partial")"; then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact device-frontier 50k Phase 15 temporaire local."
@@ -1188,7 +1212,7 @@ printf '%s\n' \
     "  replay H-polytope: $([[ ${PHASE7_H_POLYTOPE} == 1 ]] && printf 'qualification CUDA G4 Phase 7.8 activée' || printf 'désactivé')" \
     "  replay Phi Phase 9: $([[ ${PHASE9_PAIR_SUPPORT_PHI} == 1 ]] && printf 'qualification CUDA G4 + recertification CPU activée' || printf 'désactivé')" \
     "  replay Phi Phase 15: $([[ ${PHASE15_EXACT_DIAMETRAL_PHI} == 1 ]] && printf 'prédicat ponctuel exact CUDA G4 activé' || printf 'désactivé')" \
-    "  frontier 50k Phase 15: $([[ ${PHASE15_DEVICE_FRONTIER_50K} == 1 ]] && printf 'qualification standard non-smoke activée' || printf 'désactivé')" \
+    "  frontier 50k Phase 15: $([[ ${PHASE15_DEVICE_FRONTIER_50K} == 1 ]] && printf 'qualification non-smoke rang fermé %s activée' "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" || printf 'désactivé')" \
     "  négatif Gabriel q=3: $([[ ${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR} == 1 ]] && printf 'carrier pair-only; aucune suppression Gamma2 activée' || printf 'désactivé')" \
     "  classifieur rangs 2-3: $([[ ${PHASE15_RANKED_PAIR_CLASSIFIER} == 1 ]] && printf 'qualification CUDA native bornée activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
@@ -1291,9 +1315,16 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1)); then
     phase15_exact_diametral_phi_worker_option=" --phase15-exact-diametral-phi-output ${quoted_phase15_exact_diametral_phi_artifact}"
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
-    remote_phase15_device_frontier_50k_artifact="${REMOTE_WORKDIR}/phase15-device-frontier-50k-result.json"
+    phase15_device_frontier_50k_remote_prefix="phase15-device-frontier-50k"
+    if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
+        phase15_device_frontier_50k_remote_prefix="phase15-device-frontier-50k-kmax5"
+    fi
+    remote_phase15_device_frontier_50k_artifact="${REMOTE_WORKDIR}/${phase15_device_frontier_50k_remote_prefix}-result.json"
     quoted_phase15_device_frontier_50k_artifact="$(shell_quote "${remote_phase15_device_frontier_50k_artifact}")"
     phase15_device_frontier_50k_worker_option=" --phase15-device-frontier-50k-output ${quoted_phase15_device_frontier_50k_artifact}"
+    if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
+        phase15_device_frontier_50k_worker_option+=" --phase15-device-frontier-50k-maximum-closed-rank 6"
+    fi
 fi
 if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
     remote_phase15_device_frontier_strict_interior_artifact="${REMOTE_WORKDIR}/phase15-device-frontier-q3-gabriel-negative-result.json"
@@ -1933,7 +1964,8 @@ if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
         die "Artefact device-frontier 50k Phase 15 distant récupéré mais vide."
     python3 -B - "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" \
         "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
-        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" \
+        "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" <<'PY'
 from pathlib import Path
 import sys
 
@@ -1941,6 +1973,7 @@ artifact_path = Path(sys.argv[1])
 git_sha = sys.argv[2]
 environment_artifact_path = Path(sys.argv[3])
 sys.path.insert(0, sys.argv[4])
+maximum_closed_rank = int(sys.argv[5])
 
 import assemble_phase15_device_frontier_50k_qualification as assembler
 
@@ -1948,6 +1981,7 @@ assembler.validate_artifact_file(
     artifact_path,
     git_sha=git_sha,
     environment_artifact_path=environment_artifact_path,
+    maximum_closed_rank=maximum_closed_rank,
 )
 PY
 fi

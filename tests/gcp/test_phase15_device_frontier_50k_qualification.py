@@ -41,8 +41,13 @@ def write_json(path: Path, value: object, *, sort_keys: bool = True) -> None:
     )
 
 
-def rank_result() -> dict[str, object]:
+def rank_result(
+    maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+) -> dict[str, object]:
     candidate_mass = 750_000
+    arena_allocation_count = (
+        2 if maximum_closed_rank == assembler.MAXIMUM_CLOSED_RANK else 1
+    )
     return {
         "bank_entry_count": 480_000,
         "bounded_admitted_pair_count": 0,
@@ -67,13 +72,13 @@ def rank_result() -> dict[str, object]:
         "device_total_bytes": 48_000_000_000,
         "every_prune_fully_recertified": True,
         "fully_recertified_prune_count": 900_000,
-        "fresh_tile_device_arena_allocation_count": 2,
-        "fresh_tile_device_arena_reuse_count": 11,
+        "fresh_tile_device_arena_allocation_count": arena_allocation_count,
+        "fresh_tile_device_arena_reuse_count": 13 - arena_allocation_count,
         "gamma2_prune_or_discard_authorized": False,
         "gamma2_silent_handoff_required": False,
         "launcher_ns": 30_000,
         "lease_release_ns": 4_000,
-        "maximum_closed_rank": assembler.MAXIMUM_CLOSED_RANK,
+        "maximum_closed_rank": maximum_closed_rank,
         "minimum_device_free_bytes": 40_000_000_000,
         "node_copy_ns": 5_000,
         "output_digest_fnv1a": 14_695_981_039_346_656_037,
@@ -87,7 +92,7 @@ def rank_result() -> dict[str, object]:
         "q3_exact_diametral_pair_support_gabriel_negative_only": False,
         "qualification_device_to_host_bytes": 32_000_000,
         "qualification_output_copy_ns": 6_000,
-        "required_witness_count": assembler.MAXIMUM_CLOSED_RANK - 1,
+        "required_witness_count": maximum_closed_rank - 1,
         "resumed_chunk_count": 14,
         "sampled_recertified_prune_count": 900_000,
         "tile_count": 13,
@@ -99,7 +104,9 @@ def rank_result() -> dict[str, object]:
     }
 
 
-def qualification_result() -> dict[str, object]:
+def qualification_result(
+    maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+) -> dict[str, object]:
     # Keep the producer's actual compact key order. It is deterministic but the
     # two rank-threshold fields are intentionally emitted after rank_results.
     return {
@@ -133,7 +140,7 @@ def qualification_result() -> dict[str, object]:
         "profile": assembler.PROFILE,
         "profile_exit_success": True,
         "public_status": assembler.PUBLIC_STATUS,
-        "rank_results": [rank_result()],
+        "rank_results": [rank_result(maximum_closed_rank)],
         "all_rank_thresholds_exercised": False,
         "required_rank_triplet_exercised": False,
         "sampled_prune_limit": assembler.SAMPLED_PRUNE_LIMIT,
@@ -146,9 +153,11 @@ def qualification_result() -> dict[str, object]:
     }
 
 
-def timing_result() -> dict[str, object]:
+def timing_result(
+    maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+) -> dict[str, object]:
     return {
-        "command": list(assembler.QUALIFICATION_COMMAND),
+        "command": assembler.qualification_command(maximum_closed_rank),
         "elapsed_wall_ns": 2_000_000_000,
         "exit_status": 0,
         "finished_epoch_ns": 1_800_000_002_000_000_000,
@@ -210,7 +219,7 @@ class Phase15DeviceFrontier50kScriptWiringTests(unittest.TestCase):
                 "read_guest_shutdown_guard ||",
                 'begin_unit "phase15-device-frontier-50k-build"',
                 'begin_unit "phase15-device-frontier-50k-qualification"',
-                "assembler.validate_qualification(qualification, git_sha=git_sha)",
+                "assembler.validate_qualification(",
                 'python3 -B "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}"',
                 'rm -f -- "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}"',
             ),
@@ -219,13 +228,83 @@ class Phase15DeviceFrontier50kScriptWiringTests(unittest.TestCase):
             '"${PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH}"',
             "--point-count 50000",
             "--family adversarial_mixed_dyadic",
-            "--maximum-closed-rank 11",
+            '"${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}"',
             "--anchor-tile-capacity 4096",
             '--seed "${PHASE15_DEVICE_FRONTIER_50K_SEED}"',
         ):
             self.assertIn(marker, execution)
+        self.assertIn(
+            "PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=11",
+            remote,
+        )
         self.assertNotIn("--scaling-smoke", execution)
         self.assertNotIn("--direct-scale", execution)
+
+    def test_kmax5_route_is_explicit_and_preserves_rank11_default(self) -> None:
+        remote = REMOTE_SCRIPT.read_text(encoding="utf-8")
+        orchestrator = ORCHESTRATOR_SCRIPT.read_text(encoding="utf-8")
+
+        for marker in (
+            "--phase15-device-frontier-50k-kmax5",
+            "PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=6",
+            'phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k-kmax5"',
+            'phase15_device_frontier_50k_worker_option+=" --phase15-device-frontier-50k-maximum-closed-rank 6"',
+        ):
+            self.assertIn(marker, orchestrator)
+        self.assertIn(
+            "PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=11",
+            orchestrator,
+        )
+        for marker in (
+            "--phase15-device-frontier-50k-maximum-closed-rank",
+            "maximum_closed_rank = sys.argv[7]",
+            "maximum_closed_rank = int(sys.argv[6])",
+            "maximum_closed_rank=maximum_closed_rank",
+            '"${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}"',
+        ):
+            self.assertIn(marker, remote)
+
+    def test_worker_rejects_invalid_or_unscoped_rank_selection(self) -> None:
+        common = [
+            str(REMOTE_SCRIPT),
+            "--yes",
+            "--gce-deadline-epoch",
+            "1800000000",
+            "--output",
+            "/tmp/phase3-kmax5-static-test.json",
+        ]
+        invalid = subprocess.run(
+            [
+                *common,
+                "--phase15-device-frontier-50k-output",
+                "/tmp/phase15-kmax5-static-test.json",
+                "--phase15-device-frontier-50k-maximum-closed-rank",
+                "5",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertNotEqual(invalid.returncode, 0)
+        self.assertIn("doit valoir exactement 6 ou 11", invalid.stderr)
+
+        unscoped = subprocess.run(
+            [
+                *common,
+                "--phase15-device-frontier-50k-maximum-closed-rank",
+                "6",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertNotEqual(unscoped.returncode, 0)
+        self.assertIn(
+            "exige --phase15-device-frontier-50k-output",
+            unscoped.stderr,
+        )
 
     def test_split_output_keeps_wrapper_diagnostics_out_of_binary_stderr(
         self,
@@ -295,52 +374,70 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
         self.binary.write_bytes(b"phase15-device-frontier-50k-qualification")
 
     def run_assembler(
-        self, *, output: Path | None = None
+        self,
+        *,
+        output: Path | None = None,
+        maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
     ) -> subprocess.CompletedProcess[str]:
+        command = [
+            sys.executable,
+            "-B",
+            str(ASSEMBLER),
+            "--git-sha",
+            GIT_SHA,
+            "--base-image-ref",
+            BASE_IMAGE_REF,
+            "--image-ref",
+            IMAGE_REF,
+            "--image-id",
+            IMAGE_ID,
+            "--environment-artifact",
+            str(self.environment),
+            "--build-log",
+            str(self.build),
+            "--qualification-log",
+            str(self.qualification),
+            "--qualification-stderr-log",
+            str(self.stderr),
+            "--timing-log",
+            str(self.timing),
+            "--binary",
+            str(self.binary),
+        ]
+        if maximum_closed_rank != assembler.MAXIMUM_CLOSED_RANK:
+            command.extend(
+                ["--maximum-closed-rank", str(maximum_closed_rank)]
+            )
+        command.extend(["--output", str(output or self.output)])
         return subprocess.run(
-            [
-                sys.executable,
-                "-B",
-                str(ASSEMBLER),
-                "--git-sha",
-                GIT_SHA,
-                "--base-image-ref",
-                BASE_IMAGE_REF,
-                "--image-ref",
-                IMAGE_REF,
-                "--image-id",
-                IMAGE_ID,
-                "--environment-artifact",
-                str(self.environment),
-                "--build-log",
-                str(self.build),
-                "--qualification-log",
-                str(self.qualification),
-                "--qualification-stderr-log",
-                str(self.stderr),
-                "--timing-log",
-                str(self.timing),
-                "--binary",
-                str(self.binary),
-                "--output",
-                str(output or self.output),
-            ],
+            command,
             cwd=ROOT,
             text=True,
             capture_output=True,
             check=False,
         )
 
-    def assert_rejected(self) -> None:
-        completed = self.run_assembler()
+    def assert_rejected(
+        self,
+        *,
+        maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+    ) -> None:
+        completed = self.run_assembler(
+            maximum_closed_rank=maximum_closed_rank
+        )
         self.assertNotEqual(completed.returncode, 0, completed.stdout)
         self.assertFalse(self.output.exists())
 
-    def validate_output(self) -> dict[str, object]:
+    def validate_output(
+        self,
+        *,
+        maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+    ) -> dict[str, object]:
         return assembler.validate_artifact_file(
             self.output,
             git_sha=GIT_SHA,
             environment_artifact_path=self.environment,
+            maximum_closed_rank=maximum_closed_rank,
         )
 
     def test_valid_evidence_is_complete_component_only_pending_shutdown(self) -> None:
@@ -375,6 +472,57 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
                 artifact["log_sha256"][name],
                 hashlib.sha256(raw.encode("utf-8")).hexdigest(),
             )
+
+    def test_valid_kmax5_evidence_remains_component_only_without_slo(self) -> None:
+        maximum_closed_rank = assembler.KMAX5_MAXIMUM_CLOSED_RANK
+        write_json(
+            self.qualification,
+            qualification_result(maximum_closed_rank),
+            sort_keys=False,
+        )
+        write_json(self.timing, timing_result(maximum_closed_rank))
+
+        completed = self.run_assembler(
+            maximum_closed_rank=maximum_closed_rank
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        artifact = self.validate_output(
+            maximum_closed_rank=maximum_closed_rank
+        )
+        rank = artifact["checks"]["qualification"]["rank_results"][0]
+        self.assertEqual(rank["maximum_closed_rank"], 6)
+        self.assertEqual(rank["required_witness_count"], 5)
+        self.assertEqual(
+            artifact["command"],
+            assembler.qualification_command(maximum_closed_rank),
+        )
+        self.assertEqual(
+            artifact["timing"], timing_result(maximum_closed_rank)
+        )
+        self.assertEqual(
+            artifact["scientific_scope"],
+            "complete_50k_rank6_device_frontier_component_coverage_only",
+        )
+        self.assertIs(artifact["component_only"], True)
+        self.assertEqual(artifact["claims"], assembler.NO_CLAIMS)
+        self.assertFalse(artifact["claims"]["exact_hierarchy_claimed"])
+        self.assertFalse(artifact["claims"]["slo_claimed"])
+
+    def test_kmax5_rejects_rank11_qualification_or_timing(self) -> None:
+        maximum_closed_rank = assembler.KMAX5_MAXIMUM_CLOSED_RANK
+        write_json(
+            self.qualification,
+            qualification_result(maximum_closed_rank),
+            sort_keys=False,
+        )
+        write_json(self.timing, timing_result())
+        self.assert_rejected(maximum_closed_rank=maximum_closed_rank)
+
+        write_json(
+            self.qualification, qualification_result(), sort_keys=False
+        )
+        write_json(self.timing, timing_result(maximum_closed_rank))
+        self.assert_rejected(maximum_closed_rank=maximum_closed_rank)
 
     def test_rejects_top_level_failure_claim_or_parameter_mutation(self) -> None:
         mutations = (
