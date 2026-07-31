@@ -37,7 +37,6 @@ namespace morsehgp3d::gpu::detail {
 namespace {
 
 inline constexpr std::uint64_t invalid_node = ~UINT64_C(0);
-inline constexpr std::uint32_t device_status_running = 0U;
 inline constexpr std::uint32_t device_status_complete = 1U;
 inline constexpr std::uint32_t device_status_capacity_rollback = 2U;
 inline constexpr std::uint32_t device_status_invalid_native_authority = 3U;
@@ -144,9 +143,7 @@ static_assert(
     return false;
   }
   const DeviceNode& node = nodes[node_index];
-  if (node.leaf_begin >= node.leaf_end || node.leaf_end > point_count ||
-      node.leaf_begin > std::numeric_limits<std::uint32_t>::max() ||
-      node.leaf_end > std::numeric_limits<std::uint32_t>::max()) {
+  if (node.leaf_begin >= node.leaf_end || node.leaf_end > point_count) {
     return false;
   }
   result.node_index = static_cast<std::uint32_t>(node_index);
