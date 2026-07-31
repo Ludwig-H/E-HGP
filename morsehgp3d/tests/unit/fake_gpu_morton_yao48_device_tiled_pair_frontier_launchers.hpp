@@ -16,6 +16,7 @@ enum class FakeMortonYao48DeviceTiledPairFrontierCorruption : std::uint8_t {
   missing_output_owner,
   shared_output_owner,
   corrupt_metadata_digest,
+  corrupt_prune_semantics,
   nonzero_failure_code,
   wrong_anchor_position,
   foreign_source_cloud_identity,

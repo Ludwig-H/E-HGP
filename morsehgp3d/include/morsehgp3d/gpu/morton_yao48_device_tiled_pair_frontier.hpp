@@ -15,7 +15,7 @@ class Phase15MortonYao48DeviceCandidateTilePrivateViewAccess;
 }
 
 inline constexpr std::uint32_t
-    morton_yao48_device_tiled_pair_frontier_schema_version = 3U;
+    morton_yao48_device_tiled_pair_frontier_schema_version = 4U;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_maximum_closed_rank = 11U;
 inline constexpr std::size_t
@@ -30,6 +30,8 @@ inline constexpr std::size_t
         morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_witness_bank_count = 48U;
+inline constexpr std::size_t
+    morton_yao48_device_tiled_pair_frontier_strict_interior_threshold = 2U;
 inline constexpr std::string_view
     morton_yao48_device_tiled_pair_frontier_backend =
         "cuda_g4_plus_host_fake_contract";
@@ -50,7 +52,47 @@ inline constexpr std::string_view
     morton_yao48_device_tiled_pair_frontier_proof_basis =
         "interval_cone_classification_ambiguity_to_unbanked_candidate_"
         "target_tested_before_bank_insert_retained_witnesses_outside_"
-        "subtree_nonnegative_diametral_witness_interval_lower_bound_v1";
+        "subtree_authenticated_closed_rank_or_strict_interior_"
+        "diametral_witness_interval_lower_bound_v2";
+
+enum class MortonYao48DeviceTiledPairFrontierPruneSemantics : std::uint8_t {
+  closed_rank_window = 0U,
+  // Negative certificate only for q=3 Gabriel triangles whose exact minimal
+  // support is this pair, so their miniball is the pair's diametral ball.  It
+  // says nothing about support-three triangles containing the pair.  A region
+  // carrying two strict-interior witnesses can also contain pair supports
+  // whose non-Gabriel cofaces create silent Gamma_2 incidences.  This tag must
+  // never authorize dropping that region from a Gamma_2 source.
+  strict_interior_threshold = 1U,
+};
+
+[[nodiscard]] constexpr bool
+morton_yao48_device_tiled_pair_frontier_prune_semantics_known(
+    MortonYao48DeviceTiledPairFrontierPruneSemantics semantics) noexcept {
+  switch (semantics) {
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        closed_rank_window:
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        strict_interior_threshold:
+      return true;
+  }
+  return false;
+}
+
+[[nodiscard]] constexpr std::size_t
+morton_yao48_device_tiled_pair_frontier_required_witness_count(
+    MortonYao48DeviceTiledPairFrontierPruneSemantics semantics,
+    std::size_t maximum_closed_rank) noexcept {
+  switch (semantics) {
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        closed_rank_window:
+      return maximum_closed_rank >= 2U ? maximum_closed_rank - 1U : 0U;
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        strict_interior_threshold:
+      return morton_yao48_device_tiled_pair_frontier_strict_interior_threshold;
+  }
+  return 0U;
+}
 
 enum class MortonYao48DeviceTiledPairFrontierStatus : std::uint8_t {
   frontier_complete,
@@ -78,6 +120,8 @@ enum class MortonYao48DeviceTiledPairFrontierYieldReason : std::uint8_t {
 struct MortonYao48DeviceTiledPairFrontierConfig {
   std::size_t maximum_closed_rank{2U};
   std::size_t anchor_tile_capacity{4096U};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
 
   friend bool operator==(
       const MortonYao48DeviceTiledPairFrontierConfig&,
@@ -95,6 +139,9 @@ struct MortonYao48DeviceCandidateTileLeaseAudit {
   std::size_t retained_morton_point_id_capacity{};
   std::size_t retained_node_capacity{};
   std::size_t maximum_closed_rank{};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
+  std::size_t required_witness_count{};
   std::uint64_t tile_epoch{};
   std::uint64_t chunk_sequence{};
   std::size_t anchor_begin{};
@@ -128,6 +175,12 @@ struct MortonYao48DeviceCandidateTileLeaseAudit {
   bool candidate_device_to_host_performed{false};
   bool certified_prune_device_to_host_performed{false};
   bool censored_anchor_outputs_withheld{false};
+  bool nonnegative_diametral_witness_interval_lower_bound_required{false};
+  bool strictly_positive_diametral_witness_interval_lower_bound_required{
+      false};
+  bool q3_exact_diametral_pair_support_gabriel_negative_only{false};
+  bool gamma2_silent_handoff_required{false};
+  bool gamma2_prune_or_discard_authorized{false};
   bool exact_diametral_rank_evaluated{false};
   bool scientific_pair_catalog_published{false};
   bool dense_pair_fallback_performed{false};
@@ -217,6 +270,9 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   std::size_t point_count{};
   std::size_t certified_node_count{};
   std::size_t maximum_closed_rank{};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
+  std::size_t required_witness_count{};
   std::size_t anchor_tile_capacity{};
   // The visit capacity is one canonical traversal subdivision, not a
   // terminal per-anchor budget.  This maximum bounds a single launcher call;
@@ -270,9 +326,15 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   bool atomic_completed_anchor_prefix_validated{false};
   bool censored_anchor_outputs_withheld{false};
   bool candidate_pruned_unresolved_partition_validated{false};
-  // Coverage only: candidates remain proposals until a separate exact-rank
-  // consumer closes them.
+  // Syntactic pair-space accounting only: candidates remain proposals until a
+  // separate exact consumer closes them.  Under strict_interior_threshold,
+  // the negative mass is complete only for the exact-diametral-pair-support
+  // Gabriel lane and remains mandatory input to the Gamma_2 silent lane.
   bool pair_coverage_partition_complete{false};
+  bool q3_exact_diametral_pair_support_gabriel_lane_partition_complete{
+      false};
+  bool gamma2_silent_handoff_required{false};
+  bool gamma2_prune_or_discard_authorized{false};
   bool terminally_censored{false};
   bool traversal_lease_owner_retained{false};
   bool source_cloud_identity_retained{false};
@@ -289,6 +351,8 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   bool target_tested_before_witness_bank_insert{false};
   bool retained_witnesses_outside_pruned_subtree_required{false};
   bool nonnegative_diametral_witness_interval_lower_bound_required{false};
+  bool strictly_positive_diametral_witness_interval_lower_bound_required{
+      false};
   bool exact_diametral_rank_evaluated{false};
   bool scientific_pair_catalog_published{false};
   bool scientific_decision_published{false};

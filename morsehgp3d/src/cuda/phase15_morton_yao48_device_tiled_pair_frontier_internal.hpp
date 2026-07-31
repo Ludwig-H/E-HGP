@@ -41,6 +41,36 @@ enum class Phase15MortonYao48DeviceTiledFailureCode : std::uint64_t {
   internal_invariant = 3U,
 };
 
+inline constexpr std::uint64_t
+    phase15_morton_yao48_device_tiled_prune_flag_closed_nonnegative_interval =
+        UINT64_C(1) << 0U;
+inline constexpr std::uint64_t
+    phase15_morton_yao48_device_tiled_prune_flag_strict_positive_interval =
+        UINT64_C(1) << 1U;
+
+#if defined(__CUDACC__)
+#define MORSEHGP3D_PHASE15_HOST_DEVICE __host__ __device__
+#else
+#define MORSEHGP3D_PHASE15_HOST_DEVICE
+#endif
+
+[[nodiscard]] MORSEHGP3D_PHASE15_HOST_DEVICE constexpr bool
+phase15_morton_yao48_device_tiled_witness_lower_bound_certifies(
+    double interval_lower_bound,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics semantics) noexcept {
+  switch (semantics) {
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        closed_rank_window:
+      return interval_lower_bound >= 0.0;
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        strict_interior_threshold:
+      return interval_lower_bound > 0.0;
+  }
+  return false;
+}
+
+#undef MORSEHGP3D_PHASE15_HOST_DEVICE
+
 // Fixed 48-byte proposal ABI.  Cone 48 is the unbanked ambiguity sentinel;
 // it remains a candidate and can never support a prune certificate.
 struct Phase15MortonYao48DeviceTiledCandidateRecord {
@@ -177,6 +207,9 @@ struct Phase15MortonYao48DeviceTiledRequest {
   std::size_t anchor_begin{};
   std::size_t anchor_count{};
   std::size_t maximum_closed_rank{};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
+  std::size_t required_witness_count{};
   std::size_t node_visit_capacity_per_anchor{};
   std::size_t candidate_capacity_per_anchor{};
   std::size_t prune_region_capacity_per_anchor{};
@@ -226,6 +259,9 @@ struct Phase15MortonYao48DeviceTiledBatch {
   int cuda_device{-1};
   Phase15MortonYao48DeviceTiledExecutionKind execution_kind{
       Phase15MortonYao48DeviceTiledExecutionKind::host_fake};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
+  std::size_t required_witness_count{};
   bool fixed_anchor_segments_allocated{false};
   bool output_owner_detached_for_tile_lifetime{false};
   bool interval_cone_classification_requested{false};
@@ -233,6 +269,8 @@ struct Phase15MortonYao48DeviceTiledBatch {
   bool target_tested_before_bank_insert_requested{false};
   bool retained_witnesses_outside_pruned_subtree_requested{false};
   bool nonnegative_diametral_witness_interval_lower_bound_requested{false};
+  bool strictly_positive_diametral_witness_interval_lower_bound_requested{
+      false};
   bool censored_anchor_outputs_invalidated{false};
   bool exact_diametral_rank_evaluated{false};
   bool scientific_pair_catalog_published{false};
@@ -271,6 +309,9 @@ struct Phase15MortonYao48DeviceCandidateTilePrivateViews {
   std::size_t retained_coordinate_word_capacity{};
   std::size_t retained_morton_point_id_capacity{};
   std::size_t retained_node_capacity{};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
+  std::size_t required_witness_count{};
   // Candidates are laid out in one fixed-stride segment per physical anchor.
   // Every control in authorized_anchor_control_extent authorizes this chunk's
   // fixed-stride segment; a chunk-ready control is intentionally publishable.
@@ -350,6 +391,9 @@ phase15_morton_yao48_device_tiled_metadata_digest(
       digest, static_cast<std::uint64_t>(batch.cuda_device));
   phase15_morton_yao48_device_tiled_hash_word(
       digest, static_cast<std::uint64_t>(batch.execution_kind));
+  phase15_morton_yao48_device_tiled_hash_word(
+      digest, static_cast<std::uint64_t>(batch.prune_semantics));
+  hash_size(batch.required_witness_count);
   for (const bool flag : {
            batch.fixed_anchor_segments_allocated,
            batch.output_owner_detached_for_tile_lifetime,
@@ -359,6 +403,8 @@ phase15_morton_yao48_device_tiled_metadata_digest(
            batch.retained_witnesses_outside_pruned_subtree_requested,
            batch
                .nonnegative_diametral_witness_interval_lower_bound_requested,
+           batch
+               .strictly_positive_diametral_witness_interval_lower_bound_requested,
            batch.censored_anchor_outputs_invalidated,
            batch.exact_diametral_rank_evaluated,
            batch.scientific_pair_catalog_published,

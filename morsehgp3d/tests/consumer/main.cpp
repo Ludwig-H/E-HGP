@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/capped_distinct_point_coverage.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_executor.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
@@ -15,6 +16,7 @@
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_candidate_cursor.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_schedule.hpp"
+#include "morsehgp3d/hierarchy/silent_pair_gateway.hpp"
 #include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -28,6 +30,23 @@
 #include <vector>
 
 int main() {
+  morsehgp3d::hierarchy::CappedDistinctPointCoverage installed_coverage{20U};
+  for (std::uint64_t point_id = 0U; point_id < 19U; ++point_id) {
+    installed_coverage.insert_point_id(point_id);
+  }
+  if (installed_coverage.coverage_size_at_least_threshold()) {
+    std::cerr << "installed capped coverage exposed nineteen points\n";
+    return 1;
+  }
+  installed_coverage.insert_point_id(19U);
+  if (!installed_coverage.coverage_size_at_least_threshold() ||
+      installed_coverage.exact_coverage_size_if_below_threshold().has_value()) {
+    std::cerr << "installed capped coverage missed the at-least-20 crossing\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::silent_pair_gateway_schema_version == 1U);
+
   using GroupedTraversalContext = morsehgp3d::hierarchy::
       ExactGroupedAnchoredPairTraversalContext;
   using GroupedTraversalStep = morsehgp3d::hierarchy::

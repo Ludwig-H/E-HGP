@@ -374,6 +374,131 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_capped_distinct_point_coverage
+  STATIC
+    src/cpu/hierarchy/capped_distinct_point_coverage.cpp
+)
+add_library(
+  morsehgp3d::capped_distinct_point_coverage
+  ALIAS morsehgp3d_capped_distinct_point_coverage
+)
+set_target_properties(
+  morsehgp3d_capped_distinct_point_coverage
+  PROPERTIES
+    EXPORT_NAME capped_distinct_point_coverage
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_capped_distinct_point_coverage PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_capped_distinct_point_coverage
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_capped_distinct_point_coverage
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_capped_distinct_point_coverage PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_capped_distinct_point_coverage
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_exact_q3_gabriel_triangle_oracle
+  STATIC
+    src/cpu/hierarchy/exact_q3_gabriel_triangle_oracle.cpp
+)
+add_library(
+  morsehgp3d::exact_q3_gabriel_triangle_oracle
+  ALIAS morsehgp3d_exact_q3_gabriel_triangle_oracle
+)
+set_target_properties(
+  morsehgp3d_exact_q3_gabriel_triangle_oracle
+  PROPERTIES
+    EXPORT_NAME exact_q3_gabriel_triangle_oracle
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_exact_q3_gabriel_triangle_oracle PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_exact_q3_gabriel_triangle_oracle
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_exact_q3_gabriel_triangle_oracle
+  PUBLIC
+    morsehgp3d::contract
+    morsehgp3d::facet_miniball
+    morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_exact_q3_gabriel_triangle_oracle PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_exact_q3_gabriel_triangle_oracle
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_silent_pair_gateway
+  STATIC
+    src/cpu/hierarchy/silent_pair_gateway.cpp
+)
+add_library(
+  morsehgp3d::silent_pair_gateway
+  ALIAS morsehgp3d_silent_pair_gateway
+)
+set_target_properties(
+  morsehgp3d_silent_pair_gateway
+  PROPERTIES
+    EXPORT_NAME silent_pair_gateway
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_silent_pair_gateway PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_silent_pair_gateway
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_silent_pair_gateway
+  PUBLIC
+    morsehgp3d::contract
+    morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_silent_pair_gateway PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_silent_pair_gateway
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_pair_support
   STATIC
     src/cpu/hierarchy/exact_block_rank_prune_receipt.cpp
@@ -3934,6 +4059,9 @@ install(
     morsehgp3d_spatial
     morsehgp3d_morton_triangular_block_pair_schedule
     morsehgp3d_facet_miniball
+    morsehgp3d_capped_distinct_point_coverage
+    morsehgp3d_exact_q3_gabriel_triangle_oracle
+    morsehgp3d_silent_pair_gateway
     morsehgp3d_pair_support
     morsehgp3d_anchored_pair_witness_bank
     morsehgp3d_anchored_pair_candidate_classifier

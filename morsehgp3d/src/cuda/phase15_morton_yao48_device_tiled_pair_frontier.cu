@@ -50,7 +50,9 @@ constexpr std::uint64_t kCandidateFlagCertifiedCone = UINT64_C(1) << 1U;
 constexpr std::uint64_t kCandidateFlagBankInserted = UINT64_C(1) << 2U;
 constexpr std::uint64_t kCandidateFlagBankReplaced = UINT64_C(1) << 3U;
 constexpr std::uint64_t kPruneFlagClosedNonnegativeInterval =
-    UINT64_C(1) << 0U;
+    phase15_morton_yao48_device_tiled_prune_flag_closed_nonnegative_interval;
+constexpr std::uint64_t kPruneFlagStrictPositiveInterval =
+    phase15_morton_yao48_device_tiled_prune_flag_strict_positive_interval;
 
 constexpr std::uint64_t kStatusActive = static_cast<std::uint64_t>(
     Phase15MortonYao48DeviceTiledAnchorStatus::active);
@@ -344,7 +346,9 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
         chunk_sequence_(request.chunk_sequence),
         anchor_begin_(request.anchor_begin),
         anchor_count_(request.anchor_count),
-        maximum_closed_rank_(request.maximum_closed_rank) {
+        maximum_closed_rank_(request.maximum_closed_rank),
+        prune_semantics_(request.prune_semantics),
+        required_witness_count_(request.required_witness_count) {
     cudaStream_t created_stream = nullptr;
     check_cuda(
         cudaStreamCreateWithFlags(&created_stream, cudaStreamNonBlocking),
@@ -454,6 +458,8 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
            anchor_begin_ == request.anchor_begin &&
            anchor_count_ == request.anchor_count &&
            maximum_closed_rank_ == request.maximum_closed_rank &&
+           prune_semantics_ == request.prune_semantics &&
+           required_witness_count_ == request.required_witness_count &&
            candidates_.count() == candidate_capacity &&
            prunes_.count() == prune_capacity &&
            witnesses_.count() == witness_capacity &&
@@ -510,6 +516,9 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
   std::size_t anchor_begin_{};
   std::size_t anchor_count_{};
   std::size_t maximum_closed_rank_{};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics_{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
+  std::size_t required_witness_count_{};
   DeviceBuffer<Phase15MortonYao48DeviceTiledCandidateRecord> candidates_;
   DeviceBuffer<Phase15MortonYao48DeviceTiledPruneRegionRecord> prunes_;
   DeviceBuffer<Phase15MortonYao48DeviceTiledWitnessBankSlot> witnesses_;
@@ -561,6 +570,11 @@ void validate_launch(
       request.maximum_closed_rank < 2U ||
       request.maximum_closed_rank >
           morton_yao48_device_tiled_pair_frontier_maximum_closed_rank ||
+      !morton_yao48_device_tiled_pair_frontier_prune_semantics_known(
+          request.prune_semantics) ||
+      request.required_witness_count !=
+          morton_yao48_device_tiled_pair_frontier_required_witness_count(
+              request.prune_semantics, request.maximum_closed_rank) ||
       request.node_visit_capacity_per_anchor !=
           morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor ||
       request.candidate_capacity_per_anchor !=
@@ -570,7 +584,7 @@ void validate_launch(
       request.witness_bank_count_per_anchor !=
           morton_yao48_device_tiled_pair_frontier_witness_bank_count ||
       request.witness_slot_count_per_bank !=
-          request.maximum_closed_rank - 1U) {
+          request.required_witness_count) {
     throw std::invalid_argument(
         "the Phase 15 tiled Morton/Yao48 CUDA launch has invalid ownership, "
         "identity, extents or fixed capacities");
@@ -843,7 +857,9 @@ load_certified_hot_node_warp(
     const Phase15MortonYao48DeviceTiledHotNode& node,
     const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
-    std::uint64_t anchor_point_id) noexcept {
+    std::uint64_t anchor_point_id,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics
+        prune_semantics) noexcept {
   if (witness_point_id == kInvalid || witness_point_id >= point_count ||
       witness_point_id == anchor_point_id) {
     return false;
@@ -878,9 +894,12 @@ load_certified_hot_node_warp(
       return false;
     }
   }
-  // S=(w-a).(x-w) is -Phi.  S >= 0 certifies membership in the closed
-  // diametral ball, including its boundary.
-  return sum.valid && sum.lower >= 0.0;
+  // S=(w-a).(x-w) is -Phi.  Closed-rank pruning accepts S >= 0, whereas
+  // carrier pruning requires S > 0: a shell witness must never reject the
+  // q=3 carrier.
+  return sum.valid &&
+         phase15_morton_yao48_device_tiled_witness_lower_bound_certifies(
+             sum.lower, prune_semantics);
 }
 
 [[nodiscard]] __device__ bool witness_certifies_node(
@@ -889,7 +908,9 @@ load_certified_hot_node_warp(
     const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
     std::uint64_t anchor_point_id,
-    std::uint64_t anchor_morton_position) noexcept {
+    std::uint64_t anchor_morton_position,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics
+        prune_semantics) noexcept {
   return witness.witness_morton_position >= node.leaf_end &&
          witness.witness_morton_position < anchor_morton_position &&
          witness_point_certifies_node(
@@ -897,7 +918,8 @@ load_certified_hot_node_warp(
              node,
              coordinate_bits,
              point_count,
-             anchor_point_id);
+             anchor_point_id,
+             prune_semantics);
 }
 
 struct Phase15MortonYao48DeviceTiledSelectedWitnesses {
@@ -919,10 +941,13 @@ try_cached_certifying_witnesses_warp(
     std::uint64_t point_count,
     std::uint64_t anchor_point_id,
     std::uint64_t required_witness_count,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics,
+    std::uint64_t required_prune_flag,
     unsigned int lane) noexcept {
   Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
   if (cached == nullptr || required_witness_count == 0U ||
-      required_witness_count > 10U) {
+      required_witness_count > 10U || cached->flags != required_prune_flag ||
+      cached->retained_witness_count != required_witness_count) {
     return selected;
   }
   std::uint64_t point_id = kInvalid;
@@ -934,7 +959,8 @@ try_cached_certifying_witnesses_warp(
         node,
         coordinate_bits,
         point_count,
-        anchor_point_id);
+        anchor_point_id,
+        prune_semantics);
   }
   const unsigned int required_mask =
       required_witness_count == kWarpSize
@@ -969,6 +995,7 @@ select_certifying_witnesses_warp(
     std::uint64_t anchor_point_id,
     std::uint64_t anchor_morton_position,
     std::uint64_t required_witness_count,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics,
     Phase15MortonYao48DeviceTiledPruneRegionRecord* output,
     unsigned int lane) noexcept {
   Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
@@ -989,7 +1016,8 @@ select_certifying_witnesses_warp(
           coordinate_bits,
           point_count,
           anchor_point_id,
-          anchor_morton_position);
+          anchor_morton_position,
+          prune_semantics);
       candidate_point_id = slot.witness_point_id;
       candidate_bank = slot_index / witness_slots_per_bank;
     }
@@ -1195,6 +1223,8 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
     std::uint64_t anchor_begin,
     std::uint64_t anchor_count,
     std::uint64_t maximum_closed_rank,
+    std::uint64_t prune_semantics_raw,
+    std::uint64_t required_witness_count,
     std::uint64_t node_visit_capacity,
     std::uint64_t candidate_capacity,
     std::uint64_t prune_capacity,
@@ -1302,14 +1332,28 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
         node_count / UINT64_C(2048) +
         (node_count % UINT64_C(2048) == 0U ? UINT64_C(0)
                                            : UINT64_C(1));
+    const bool closed_rank_semantics =
+        prune_semantics_raw == static_cast<std::uint64_t>(
+                                   MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                                       closed_rank_window);
+    const bool strict_interior_semantics =
+        prune_semantics_raw == static_cast<std::uint64_t>(
+                                   MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                                       strict_interior_threshold);
+    const std::uint64_t expected_required_witness_count =
+        closed_rank_semantics
+            ? maximum_closed_rank - UINT64_C(1)
+            : UINT64_C(2);
     const bool fixed_contract_valid =
         maximum_closed_rank >= UINT64_C(2) &&
         maximum_closed_rank <= UINT64_C(11) &&
+        (closed_rank_semantics || strict_interior_semantics) &&
+        required_witness_count == expected_required_witness_count &&
         node_visit_capacity == UINT64_C(2048) &&
         candidate_capacity == UINT64_C(640) &&
         prune_capacity == node_visit_capacity &&
         witness_bank_count == kConeCount &&
-        witness_slots_per_bank == maximum_closed_rank - UINT64_C(1) &&
+        witness_slots_per_bank == required_witness_count &&
         subdivision_index < maximum_subdivision_count &&
         maximum_subdivision_count ==
             expected_maximum_subdivision_count &&
@@ -1323,6 +1367,12 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
       failure_code = kFailureInvariant;
       fatal = true;
     }
+    const auto prune_semantics =
+        static_cast<MortonYao48DeviceTiledPairFrontierPruneSemantics>(
+            prune_semantics_raw);
+    const std::uint64_t required_prune_flag =
+        strict_interior_semantics ? kPruneFlagStrictPositiveInterval
+                                  : kPruneFlagClosedNonnegativeInterval;
 
     if (!fatal && load_checkpoint) {
       const bool state_valid = resumed_first_subdivision
@@ -1460,7 +1510,7 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
       }
 
       Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
-      if (retained_witness_count >= maximum_closed_rank - UINT64_C(1)) {
+      if (retained_witness_count >= required_witness_count) {
         if (prune_count >= prune_capacity) {
           failure_code = kFailureInvariant;
           fatal = true;
@@ -1477,9 +1527,11 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
             coordinate_bits,
             point_count,
             anchor_point_id,
-            maximum_closed_rank - UINT64_C(1),
+            required_witness_count,
+            prune_semantics,
+            required_prune_flag,
             lane);
-        if (selected.count != maximum_closed_rank - UINT64_C(1)) {
+        if (selected.count != required_witness_count) {
           selected = select_certifying_witnesses_warp(
               anchor_witnesses,
               witness_capacity,
@@ -1489,13 +1541,14 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
               point_count,
               anchor_point_id,
               anchor_morton_position,
-              maximum_closed_rank - UINT64_C(1),
+              required_witness_count,
+              prune_semantics,
               output_prune,
               lane);
         }
       }
       const bool can_prune =
-          selected.count == maximum_closed_rank - UINT64_C(1);
+          selected.count == required_witness_count;
       if (can_prune) {
         // Cached witnesses are written cooperatively by lanes 0..9.  Publish
         // the complete receipt before lane 0 commits its metadata and before
@@ -1515,7 +1568,7 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
           record.certified_pair_mass = width;
           record.retained_witness_count = selected.count;
           record.retained_witness_bank_mask = selected.bank_mask;
-          record.flags = kPruneFlagClosedNonnegativeInterval;
+          record.flags = required_prune_flag;
         }
         ++prune_count;
         ++cumulative_prune_count;
@@ -2125,6 +2178,11 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           checked_u64(
               request.maximum_closed_rank,
               "the Phase 15 tiled Morton/Yao48 rank cap does not fit uint64"),
+          static_cast<std::uint64_t>(request.prune_semantics),
+          checked_u64(
+              request.required_witness_count,
+              "the Phase 15 tiled Morton/Yao48 required witness count does "
+              "not fit uint64"),
           checked_u64(
               request.node_visit_capacity_per_anchor,
               "the Phase 15 tiled Morton/Yao48 node cap does not fit uint64"),
@@ -2320,6 +2378,8 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     batch.cuda_device = traversal.cuda_device;
     batch.execution_kind =
         Phase15MortonYao48DeviceTiledExecutionKind::cuda;
+    batch.prune_semantics = request.prune_semantics;
+    batch.required_witness_count = request.required_witness_count;
     batch.fixed_anchor_segments_allocated = true;
     batch.output_owner_detached_for_tile_lifetime = true;
     batch.interval_cone_classification_requested = true;
@@ -2327,7 +2387,12 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     batch.target_tested_before_bank_insert_requested = true;
     batch.retained_witnesses_outside_pruned_subtree_requested = true;
     batch.nonnegative_diametral_witness_interval_lower_bound_requested =
-        true;
+        request.prune_semantics ==
+        MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;
+    batch.strictly_positive_diametral_witness_interval_lower_bound_requested =
+        request.prune_semantics ==
+        MortonYao48DeviceTiledPairFrontierPruneSemantics::
+            strict_interior_threshold;
     batch.censored_anchor_outputs_invalidated = true;
     batch.exact_diametral_rank_evaluated = false;
     batch.scientific_pair_catalog_published = false;

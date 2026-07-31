@@ -248,6 +248,63 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
+  test_hierarchy_capped_distinct_point_coverage.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
+  PRIVATE morsehgp3d::capped_distinct_point_coverage
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_capped_distinct_point_coverage_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
+  test_hierarchy_exact_q3_gabriel_triangle_oracle.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
+  PRIVATE morsehgp3d::exact_q3_gabriel_triangle_oracle
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_silent_pair_gateway_tests
+  test_hierarchy_silent_pair_gateway.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_silent_pair_gateway_tests
+  PRIVATE morsehgp3d::silent_pair_gateway
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_silent_pair_gateway_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_silent_pair_gateway_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_k1_forest_tests
   test_hierarchy_k1_forest.cpp
 )
@@ -2216,6 +2273,9 @@ set(
   morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
   morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
   morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
+  morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
+  morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
+  morsehgp3d_hierarchy_silent_pair_gateway_tests
   morsehgp3d_hierarchy_k1_forest_tests
   morsehgp3d_hierarchy_miniball_tests
   morsehgp3d_hierarchy_gamma_tests
@@ -3029,6 +3089,18 @@ add_test(
   NAME morsehgp3d.hierarchy_exact_ranked_diametral_pair_catalog_reference
   COMMAND
     morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_capped_distinct_point_coverage
+  COMMAND morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_exact_q3_gabriel_triangle_oracle
+  COMMAND morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_silent_pair_gateway
+  COMMAND morsehgp3d_hierarchy_silent_pair_gateway_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_k1_forest

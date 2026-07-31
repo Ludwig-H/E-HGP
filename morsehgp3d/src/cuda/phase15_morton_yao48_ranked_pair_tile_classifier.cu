@@ -2046,6 +2046,11 @@ void validate_launch(
           morton_yao48_ranked_pair_tile_classifier_minimum_closed_rank ||
       request.fixed_config.maximum_closed_rank >
           morton_yao48_ranked_pair_tile_classifier_maximum_closed_rank ||
+      views.prune_semantics !=
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              closed_rank_window ||
+      views.required_witness_count !=
+          request.fixed_config.maximum_closed_rank - 1U ||
       request.source_snapshot_epoch != views.source_snapshot_epoch ||
       request.candidate_buffer_epoch != views.candidate_buffer_epoch ||
       request.point_count != views.point_count ||

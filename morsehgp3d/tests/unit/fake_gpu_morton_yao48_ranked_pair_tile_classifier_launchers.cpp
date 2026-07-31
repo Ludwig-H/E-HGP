@@ -403,6 +403,11 @@ classify_phase15_morton_yao48_ranked_pair_tile_on_device(
           morton_yao48_ranked_pair_tile_classifier_minimum_closed_rank ||
       request.fixed_config.maximum_closed_rank >
           morton_yao48_ranked_pair_tile_classifier_maximum_closed_rank ||
+      candidate_views.prune_semantics !=
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              closed_rank_window ||
+      candidate_views.required_witness_count !=
+          request.fixed_config.maximum_closed_rank - 1U ||
       request.catalog_buffer_epoch == 0U || request.tile_epoch == 0U ||
       request.chunk_sequence == 0U ||
       launch.exact_fallback_count > request.candidate_count ||

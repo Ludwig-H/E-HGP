@@ -231,6 +231,12 @@ struct ValidatedBatch final {
         "a Phase 15 device tiled Morton/Yao48 closed-rank cap must be in "
         "[2, 11]");
   }
+  if (!morton_yao48_device_tiled_pair_frontier_prune_semantics_known(
+          config.prune_semantics)) {
+    throw std::out_of_range(
+        "a Phase 15 device tiled Morton/Yao48 prune semantics tag is "
+        "unknown");
+  }
   if (config.anchor_tile_capacity == 0U ||
       config.anchor_tile_capacity >
           morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity) {
@@ -367,6 +373,16 @@ void validate_batch_envelope(
       checked_device_arena_capacity_bytes(request);
   const std::size_t expected_maximum_subdivision_count =
       maximum_traversal_subdivision_count(request.certified_node_count);
+  const std::size_t expected_required_witness_count =
+      morton_yao48_device_tiled_pair_frontier_required_witness_count(
+          request.prune_semantics, request.maximum_closed_rank);
+  const bool closed_rank_semantics =
+      request.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;
+  const bool strict_interior_semantics =
+      request.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
   if (!batch.retained_output_owner ||
       !batch.source_cloud_identity_authority ||
       batch.source_cloud_identity_authority.get() !=
@@ -390,6 +406,13 @@ void validate_batch_envelope(
       batch.tile_epoch != request.tile_epoch ||
       batch.chunk_sequence != request.chunk_sequence ||
       batch.resume_same_tile != request.resume_same_tile ||
+      !morton_yao48_device_tiled_pair_frontier_prune_semantics_known(
+          request.prune_semantics) ||
+      request.required_witness_count != expected_required_witness_count ||
+      request.witness_slot_count_per_bank !=
+          request.required_witness_count ||
+      batch.prune_semantics != request.prune_semantics ||
+      batch.required_witness_count != request.required_witness_count ||
       batch.process_restart_resumable ||
       batch.execution_kind != traversal.execution_kind ||
       batch.candidate_device_to_host_count != 0U ||
@@ -400,8 +423,11 @@ void validate_batch_envelope(
       !batch.ambiguous_cone_to_unbanked_candidate_requested ||
       !batch.target_tested_before_bank_insert_requested ||
       !batch.retained_witnesses_outside_pruned_subtree_requested ||
-      !batch
-           .nonnegative_diametral_witness_interval_lower_bound_requested ||
+      batch.nonnegative_diametral_witness_interval_lower_bound_requested !=
+          closed_rank_semantics ||
+      batch
+              .strictly_positive_diametral_witness_interval_lower_bound_requested !=
+          strict_interior_semantics ||
       !batch.censored_anchor_outputs_invalidated ||
       batch.exact_diametral_rank_evaluated ||
       batch.scientific_pair_catalog_published ||
@@ -788,9 +814,22 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
       audit_.anchor_end >= audit_.anchor_begin
           ? audit_.anchor_end - audit_.anchor_begin
           : 0U;
+  const std::size_t expected_required_witness_count =
+      morton_yao48_device_tiled_pair_frontier_required_witness_count(
+          audit_.prune_semantics, audit_.maximum_closed_rank);
+  const bool closed_rank_semantics =
+      audit_.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;
+  const bool strict_interior_semantics =
+      audit_.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
   if (audit_.maximum_closed_rank < 2U ||
       audit_.maximum_closed_rank >
           morton_yao48_device_tiled_pair_frontier_maximum_closed_rank ||
+      !morton_yao48_device_tiled_pair_frontier_prune_semantics_known(
+          audit_.prune_semantics) ||
+      audit_.required_witness_count != expected_required_witness_count ||
       physical_anchor_control_capacity_ == 0U ||
       physical_anchor_control_capacity_ >
           morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity) {
@@ -799,7 +838,7 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
   const std::size_t expected_witness_capacity =
       physical_anchor_control_capacity_ *
       morton_yao48_device_tiled_pair_frontier_witness_bank_count *
-      (audit_.maximum_closed_rank - 1U);
+      audit_.required_witness_count;
   const std::size_t expected_candidate_capacity =
       physical_anchor_control_capacity_ *
       morton_yao48_device_tiled_pair_frontier_candidates_per_anchor;
@@ -899,6 +938,17 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
       !audit_.source_views_bound_to_snapshot_identity ||
       !audit_.output_owner_retained ||
       !audit_.output_buffers_detached_for_tile_lifetime ||
+      audit_
+              .nonnegative_diametral_witness_interval_lower_bound_required !=
+          closed_rank_semantics ||
+      audit_
+              .strictly_positive_diametral_witness_interval_lower_bound_required !=
+          strict_interior_semantics ||
+      audit_.q3_exact_diametral_pair_support_gabriel_negative_only !=
+          strict_interior_semantics ||
+      audit_.gamma2_silent_handoff_required !=
+          strict_interior_semantics ||
+      audit_.gamma2_prune_or_discard_authorized ||
       audit_.host_fake_lifecycle_exercised ==
           audit_.cuda_device_storage_retained ||
       audit_.candidate_device_to_host_performed ||
@@ -976,6 +1026,8 @@ detail::Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
   views.retained_morton_point_id_capacity =
       lease.retained_morton_point_id_capacity_;
   views.retained_node_capacity = lease.retained_node_capacity_;
+  views.prune_semantics = lease.audit_.prune_semantics;
+  views.required_witness_count = lease.audit_.required_witness_count;
   views.physical_candidate_record_capacity =
       lease.audit_.physical_candidate_capacity;
   views.candidate_segment_stride_records =
@@ -1088,6 +1140,10 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
   audit.point_count = point_count_;
   audit.certified_node_count = certified_node_count_;
   audit.maximum_closed_rank = config_.maximum_closed_rank;
+  audit.prune_semantics = config_.prune_semantics;
+  audit.required_witness_count =
+      morton_yao48_device_tiled_pair_frontier_required_witness_count(
+          config_.prune_semantics, config_.maximum_closed_rank);
   audit.anchor_tile_capacity = config_.anchor_tile_capacity;
   audit.fixed_node_visit_capacity_per_anchor =
       morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
@@ -1170,6 +1226,16 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
   audit.pair_coverage_partition_complete =
       !terminally_censored_ && next_anchor_position_ >= point_count_ &&
       audit.unresolved_pair_mass == 0U;
+  audit.q3_exact_diametral_pair_support_gabriel_lane_partition_complete =
+      audit.pair_coverage_partition_complete &&
+      config_.prune_semantics ==
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              strict_interior_threshold;
+  audit.gamma2_silent_handoff_required =
+      config_.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
+  audit.gamma2_prune_or_discard_authorized = false;
   audit.terminally_censored = terminally_censored_;
   audit.traversal_lease_owner_retained =
       host_ != nullptr && host_->traversal.retained_owner != nullptr;
@@ -1190,7 +1256,13 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
   audit.ambiguous_cone_routed_to_unbanked_candidate = true;
   audit.target_tested_before_witness_bank_insert = true;
   audit.retained_witnesses_outside_pruned_subtree_required = true;
-  audit.nonnegative_diametral_witness_interval_lower_bound_required = true;
+  audit.nonnegative_diametral_witness_interval_lower_bound_required =
+      config_.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;
+  audit.strictly_positive_diametral_witness_interval_lower_bound_required =
+      config_.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
   return audit;
 }
 
@@ -1282,6 +1354,10 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
     request.anchor_begin = anchor_begin;
     request.anchor_count = anchor_count;
     request.maximum_closed_rank = config_.maximum_closed_rank;
+    request.prune_semantics = config_.prune_semantics;
+    request.required_witness_count =
+        morton_yao48_device_tiled_pair_frontier_required_witness_count(
+            config_.prune_semantics, config_.maximum_closed_rank);
     request.node_visit_capacity_per_anchor =
         morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
     request.candidate_capacity_per_anchor =
@@ -1291,7 +1367,7 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
     request.witness_bank_count_per_anchor =
         morton_yao48_device_tiled_pair_frontier_witness_bank_count;
     request.witness_slot_count_per_bank =
-        config_.maximum_closed_rank - 1U;
+        request.required_witness_count;
     request.resume_same_tile = resume_same_tile;
 
     DeviceBatch batch = detail::
@@ -1352,6 +1428,8 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
       lease_audit.retained_node_capacity =
           host_->traversal.retained_node_capacity;
       lease_audit.maximum_closed_rank = config_.maximum_closed_rank;
+      lease_audit.prune_semantics = request.prune_semantics;
+      lease_audit.required_witness_count = request.required_witness_count;
       lease_audit.tile_epoch = request.tile_epoch;
       lease_audit.chunk_sequence = request.chunk_sequence;
       lease_audit.anchor_begin = anchor_begin;
@@ -1396,6 +1474,24 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
       lease_audit.host_fake_lifecycle_exercised = host_fake;
       lease_audit.cuda_device_storage_retained = !host_fake;
       lease_audit.censored_anchor_outputs_withheld = validated.fatal;
+      lease_audit.nonnegative_diametral_witness_interval_lower_bound_required =
+          request.prune_semantics ==
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              closed_rank_window;
+      lease_audit
+          .strictly_positive_diametral_witness_interval_lower_bound_required =
+          request.prune_semantics ==
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              strict_interior_threshold;
+      lease_audit.q3_exact_diametral_pair_support_gabriel_negative_only =
+          request.prune_semantics ==
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              strict_interior_threshold;
+      lease_audit.gamma2_silent_handoff_required =
+          request.prune_semantics ==
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              strict_interior_threshold;
+      lease_audit.gamma2_prune_or_discard_authorized = false;
 
       MortonYao48DeviceCandidateTileLease detached_tile{
           std::move(lease_audit),

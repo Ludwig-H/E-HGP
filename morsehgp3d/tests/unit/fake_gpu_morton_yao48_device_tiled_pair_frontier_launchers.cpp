@@ -271,6 +271,11 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       request.maximum_closed_rank < 2U ||
       request.maximum_closed_rank >
           morton_yao48_device_tiled_pair_frontier_maximum_closed_rank ||
+      !morton_yao48_device_tiled_pair_frontier_prune_semantics_known(
+          request.prune_semantics) ||
+      request.required_witness_count !=
+          morton_yao48_device_tiled_pair_frontier_required_witness_count(
+              request.prune_semantics, request.maximum_closed_rank) ||
       request.node_visit_capacity_per_anchor !=
           morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor ||
       request.candidate_capacity_per_anchor !=
@@ -280,7 +285,7 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       request.witness_bank_count_per_anchor !=
           morton_yao48_device_tiled_pair_frontier_witness_bank_count ||
       request.witness_slot_count_per_bank !=
-          request.maximum_closed_rank - 1U ||
+          request.required_witness_count ||
       request.output_buffer_epoch == 0U || request.tile_epoch == 0U ||
       request.chunk_sequence == 0U ||
       (!launch.anchors.empty() &&
@@ -462,13 +467,21 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
   batch.chunk_sequence = request.chunk_sequence;
   batch.execution_kind =
       Phase15MortonYao48DeviceTiledExecutionKind::host_fake;
+  batch.prune_semantics = request.prune_semantics;
+  batch.required_witness_count = request.required_witness_count;
   batch.fixed_anchor_segments_allocated = true;
   batch.output_owner_detached_for_tile_lifetime = true;
   batch.interval_cone_classification_requested = true;
   batch.ambiguous_cone_to_unbanked_candidate_requested = true;
   batch.target_tested_before_bank_insert_requested = true;
   batch.retained_witnesses_outside_pruned_subtree_requested = true;
-  batch.nonnegative_diametral_witness_interval_lower_bound_requested = true;
+  batch.nonnegative_diametral_witness_interval_lower_bound_requested =
+      request.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;
+  batch.strictly_positive_diametral_witness_interval_lower_bound_requested =
+      request.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
   batch.censored_anchor_outputs_invalidated = true;
   batch.resume_same_tile = request.resume_same_tile;
   batch.capacity_yield_resumable = any_chunk_ready;
@@ -496,6 +509,16 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       batch.output_owner_detached_for_tile_lifetime = false;
       break;
     case Corruption::corrupt_metadata_digest:
+      break;
+    case Corruption::corrupt_prune_semantics:
+      batch.prune_semantics =
+          batch.prune_semantics ==
+                  MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                      closed_rank_window
+              ? MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                    strict_interior_threshold
+              : MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                    closed_rank_window;
       break;
     case Corruption::nonzero_failure_code:
       batch.host_anchor_controls.front().failure_code =

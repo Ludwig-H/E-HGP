@@ -48,6 +48,7 @@ using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierAdvance;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierAudit;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierConfig;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierContext;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierPruneSemantics;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStatus;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStopReason;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierYieldReason;
@@ -89,10 +90,20 @@ inline constexpr std::string_view kScalingSmokeSchema =
 inline constexpr std::string_view kDirectScaleSchema =
     "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
     "direct_scale.v1";
+inline constexpr std::string_view kStrictInteriorThresholdSchema =
+    "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
+    "strict_interior_threshold_qualification.v1";
 inline constexpr std::string_view kBackend = "cuda_g4";
 inline constexpr std::string_view kProfile = "hgp_reduced";
 inline constexpr std::string_view kMode =
     "offline_device_tiled_pair_frontier_qualification";
+inline constexpr std::string_view kStrictInteriorThresholdMode =
+    "native_bounded_q3_gabriel_exact_diametral_pair_support_negative_only_"
+    "qualification";
+inline constexpr std::string_view kStrictInteriorThresholdScientificScope =
+    "q3_gabriel_exact_diametral_pair_support_negative_only";
+inline constexpr std::string_view kStrictInteriorThresholdFixture =
+    "q3_shell_strict_discriminant";
 inline constexpr std::string_view kDeploymentStatus = "component_only";
 inline constexpr std::string_view kPublicStatus = "not_claimed";
 
@@ -115,7 +126,11 @@ inline constexpr std::uint64_t kCandidateKnownFlags =
     kCandidateFlagAmbiguousCone | kCandidateFlagCertifiedCone |
     kCandidateFlagBankInserted | kCandidateFlagBankReplaced;
 inline constexpr std::uint64_t kPruneFlagClosedNonnegativeInterval =
-    UINT64_C(1) << 0U;
+    morsehgp3d::gpu::detail::
+        phase15_morton_yao48_device_tiled_prune_flag_closed_nonnegative_interval;
+inline constexpr std::uint64_t kPruneFlagStrictPositiveInterval =
+    morsehgp3d::gpu::detail::
+        phase15_morton_yao48_device_tiled_prune_flag_strict_positive_interval;
 inline constexpr std::int64_t kCoordinateDenominator =
     INT64_C(1) << 20U;
 inline constexpr std::int64_t kMaximumAbsoluteScaledCoordinate =
@@ -130,12 +145,19 @@ static_assert(kMaximumAbsoluteScaledCoordinate < INT64_C(100000000));
 struct Options {
   std::size_t point_count{257U};
   std::string family{"adversarial_mixed_dyadic"};
+  std::string fixture;
+  std::string scientific_scope;
   std::optional<std::size_t> maximum_closed_rank;
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
   bool all_ranks{false};
   bool scaling_smoke{false};
   bool direct_scale{false};
   bool point_count_explicit{false};
   bool family_explicit{false};
+  bool fixture_explicit{false};
+  bool scientific_scope_explicit{false};
+  bool anchor_tile_capacity_explicit{false};
   std::size_t anchor_tile_capacity{
       morsehgp3d::gpu::
           morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity};
@@ -179,6 +201,9 @@ struct QualificationAnchorProgress {
 
 struct RankMetrics {
   std::size_t maximum_closed_rank{};
+  MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
+  std::size_t required_witness_count{};
   std::size_t tile_count{};
   std::size_t chunk_count{};
   std::size_t resumed_chunk_count{};
@@ -221,6 +246,9 @@ struct RankMetrics {
   bool bounded_bruteforce_performed{false};
   bool every_prune_fully_recertified{false};
   bool coverage_partition_complete{false};
+  bool q3_exact_diametral_pair_support_gabriel_negative_only{false};
+  bool gamma2_silent_handoff_required{false};
+  bool gamma2_prune_or_discard_authorized{false};
   bool component_contract_validated{false};
 };
 
@@ -284,6 +312,34 @@ class QualificationMismatch final : public std::runtime_error {
       : std::runtime_error(message) {}
 };
 
+[[nodiscard]] constexpr std::string_view prune_semantics_name(
+    MortonYao48DeviceTiledPairFrontierPruneSemantics semantics) noexcept {
+  switch (semantics) {
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        closed_rank_window:
+      return "closed_rank_window";
+    case MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        strict_interior_threshold:
+      return "strict_interior_threshold";
+  }
+  return "invalid";
+}
+
+[[nodiscard]] MortonYao48DeviceTiledPairFrontierPruneSemantics
+parse_prune_semantics(std::string_view text) {
+  if (text == "closed_rank_window") {
+    return MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        closed_rank_window;
+  }
+  if (text == "strict_interior_threshold") {
+    return MortonYao48DeviceTiledPairFrontierPruneSemantics::
+        strict_interior_threshold;
+  }
+  throw std::invalid_argument(
+      "--prune-semantics must be closed_rank_window or "
+      "strict_interior_threshold");
+}
+
 [[noreturn]] void mismatch(const std::string& message) {
   throw QualificationMismatch(message);
 }
@@ -331,6 +387,16 @@ void require(bool condition, const std::string& message) {
     } else if (argument == "--family" && index + 1 < argc) {
       options.family = argv[++index];
       options.family_explicit = true;
+    } else if (argument == "--fixture" && index + 1 < argc) {
+      options.fixture = argv[++index];
+      options.fixture_explicit = true;
+    } else if (
+        argument == "--prune-semantics" && index + 1 < argc) {
+      options.prune_semantics = parse_prune_semantics(argv[++index]);
+    } else if (
+        argument == "--scientific-scope" && index + 1 < argc) {
+      options.scientific_scope = argv[++index];
+      options.scientific_scope_explicit = true;
     } else if (
         argument == "--maximum-closed-rank" && index + 1 < argc) {
       options.maximum_closed_rank =
@@ -344,6 +410,7 @@ void require(bool condition, const std::string& message) {
     } else if (argument == "--anchor-tile-capacity" && index + 1 < argc) {
       options.anchor_tile_capacity =
           parse_size(argv[++index], "invalid --anchor-tile-capacity");
+      options.anchor_tile_capacity_explicit = true;
     } else if (argument == "--sampled-prune-limit" && index + 1 < argc) {
       options.sampled_prune_limit =
           parse_size(argv[++index], "invalid --sampled-prune-limit");
@@ -360,6 +427,11 @@ void require(bool condition, const std::string& message) {
           "[--point-count N] [--family adversarial_mixed_dyadic|"
           "shell_permutation_dyadic|jitter_grid_dyadic|clusters_dyadic|"
           "affine_uniform_binary64] "
+          "[--prune-semantics closed_rank_window|"
+          "strict_interior_threshold] "
+          "[--scientific-scope "
+          "q3_gabriel_exact_diametral_pair_support_negative_only] "
+          "[--fixture q3_shell_strict_discriminant] "
           "[--maximum-closed-rank R|--all-ranks] "
           "[--scaling-smoke|--direct-scale] "
           "[--anchor-tile-capacity N] [--sampled-prune-limit N] "
@@ -369,6 +441,40 @@ void require(bool condition, const std::string& message) {
   if (options.scaling_smoke && options.direct_scale) {
     throw std::invalid_argument(
         "--scaling-smoke and --direct-scale are mutually exclusive");
+  }
+  const bool strict_interior_threshold =
+      options.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
+  if (strict_interior_threshold) {
+    if (!options.fixture_explicit ||
+        options.fixture != kStrictInteriorThresholdFixture) {
+      throw std::invalid_argument(
+          "strict_interior_threshold requires "
+          "--fixture q3_shell_strict_discriminant");
+    }
+    if (!options.scientific_scope_explicit ||
+        options.scientific_scope !=
+            kStrictInteriorThresholdScientificScope) {
+      throw std::invalid_argument(
+          "strict_interior_threshold requires --scientific-scope "
+          "q3_gabriel_exact_diametral_pair_support_negative_only");
+    }
+    if (options.scaling_smoke || options.direct_scale ||
+        options.point_count_explicit || options.family_explicit ||
+        options.maximum_closed_rank.has_value() || options.all_ranks ||
+        options.anchor_tile_capacity_explicit) {
+      throw std::invalid_argument(
+          "the strict_interior_threshold q=3 fixture owns its cloud, rank "
+          "matrix, and tile-capacity matrix");
+    }
+    options.point_count = 4U;
+    options.family = std::string{kStrictInteriorThresholdFixture};
+  } else if (
+      options.fixture_explicit || options.scientific_scope_explicit) {
+    throw std::invalid_argument(
+        "--fixture and --scientific-scope are only valid with "
+        "strict_interior_threshold");
   }
   if (options.scaling_smoke && !options.point_count_explicit) {
     options.point_count = 1'000'000U;
@@ -423,7 +529,7 @@ void require(bool condition, const std::string& message) {
       options.family == "shell_permutation_dyadic" ||
       options.family == "jitter_grid_dyadic" ||
       options.family == "clusters_dyadic";
-  if (!large_scale && !known_family) {
+  if (!large_scale && !strict_interior_threshold && !known_family) {
     throw std::invalid_argument("unknown --family");
   }
   if (large_scale) {
@@ -757,6 +863,64 @@ void append_deterministic_fill(
             generated.features.clustered_point_count != 0U,
         "the mixed qualification cloud omitted an adversarial family");
   }
+  return generated;
+}
+
+enum class StrictInteriorThresholdFixtureCloud : std::uint8_t {
+  boundary_shell,
+  strict_interior,
+};
+
+[[nodiscard]] constexpr std::string_view strict_fixture_cloud_name(
+    StrictInteriorThresholdFixtureCloud cloud) noexcept {
+  switch (cloud) {
+    case StrictInteriorThresholdFixtureCloud::boundary_shell:
+      return "boundary_shell";
+    case StrictInteriorThresholdFixtureCloud::strict_interior:
+      return "strict_interior";
+  }
+  return "invalid";
+}
+
+[[nodiscard]] GeneratedCloud generate_strict_interior_threshold_fixture(
+    StrictInteriorThresholdFixtureCloud fixture_cloud) {
+  constexpr std::int64_t unit = kCoordinateDenominator;
+  GeneratedCloud generated;
+  generated.points.reserve(4U);
+  generated.scaled_points.reserve(4U);
+  std::set<std::array<std::int64_t, 3U>> used;
+  std::size_t fixture_point_count = 0U;
+  const auto append = [&](std::array<std::int64_t, 3U> coordinate) {
+    append_scaled_point(
+        generated, used, coordinate, fixture_point_count, 4U);
+  };
+
+  // A and X are the minimum and maximum Morton leaves.  The two middle
+  // points are either exactly on the diametral shell of AX or strictly
+  // inside it.  All coordinates are exact binary64 dyadics.
+  append({-INT64_C(5) * unit,
+          -INT64_C(5) * unit,
+          -INT64_C(5) * unit});
+  if (fixture_cloud ==
+      StrictInteriorThresholdFixtureCloud::boundary_shell) {
+    append({INT64_C(5) * unit,
+            INT64_C(5) * unit,
+            -INT64_C(5) * unit});
+    append({INT64_C(5) * unit,
+            -INT64_C(5) * unit,
+            INT64_C(5) * unit});
+  } else {
+    append({0, 0, 0});
+    append({unit, unit, unit});
+  }
+  append({INT64_C(5) * unit,
+          INT64_C(5) * unit,
+          INT64_C(5) * unit});
+  require(
+      generated.points.size() == 4U &&
+          generated.scaled_points.size() == 4U &&
+          fixture_point_count == 4U,
+      "the strict-interior discriminant fixture is incomplete");
   return generated;
 }
 
@@ -1233,6 +1397,8 @@ void validate_batch_contract(
           batch.cuda_device == cuda_device &&
           batch.execution_kind ==
               Phase15MortonYao48DeviceTiledExecutionKind::cuda &&
+          batch.prune_semantics == request.prune_semantics &&
+          batch.required_witness_count == request.required_witness_count &&
           batch.metadata_digest ==
               morsehgp3d::gpu::detail::
                   phase15_morton_yao48_device_tiled_metadata_digest(batch),
@@ -1244,7 +1410,17 @@ void validate_batch_contract(
           batch.ambiguous_cone_to_unbanked_candidate_requested &&
           batch.target_tested_before_bank_insert_requested &&
           batch.retained_witnesses_outside_pruned_subtree_requested &&
-          batch.nonnegative_diametral_witness_interval_lower_bound_requested &&
+          (request.prune_semantics ==
+                   MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                       closed_rank_window
+               ? batch
+                         .nonnegative_diametral_witness_interval_lower_bound_requested &&
+                     !batch
+                          .strictly_positive_diametral_witness_interval_lower_bound_requested
+               : !batch
+                          .nonnegative_diametral_witness_interval_lower_bound_requested &&
+                     batch
+                         .strictly_positive_diametral_witness_interval_lower_bound_requested) &&
           batch.censored_anchor_outputs_invalidated &&
           batch.cuda_execution_contract_satisfied,
       "the CUDA tile batch omitted a required fail-open contract flag");
@@ -1354,7 +1530,7 @@ struct QualificationControlSummary {
             control.failure_code <= static_cast<std::uint64_t>(
                                          Phase15MortonYao48DeviceTiledFailureCode::
                                              internal_invariant),
-        "an anchor control violates its v3 delta/cumulative identity");
+        "an anchor control violates its v4 delta/cumulative identity");
     require(
         (control.prune_region_count == 0U) ==
                 (control.certified_pruned_pair_mass == 0U) &&
@@ -1369,7 +1545,7 @@ struct QualificationControlSummary {
             control.unresolved_pair_mass ==
                 expected_anchor - control.cumulative_candidate_count -
                     control.cumulative_certified_pruned_pair_mass,
-        "an anchor control violates its v3 pair partition");
+        "an anchor control violates its v4 pair partition");
 
     const auto status =
         static_cast<Phase15MortonYao48DeviceTiledAnchorStatus>(
@@ -1457,7 +1633,7 @@ struct QualificationControlSummary {
         break;
       default:
         throw QualificationMismatch(
-            "an anchor control has an unknown v3 status");
+            "an anchor control has an unknown v4 status");
     }
 
     hash_anchor_control(metrics.output_digest, control);
@@ -1497,7 +1673,7 @@ struct QualificationControlSummary {
           !(summary.any_chunk_ready && summary.any_fatal) &&
           (summary.all_complete || summary.any_chunk_ready ||
            summary.any_fatal),
-      "the CUDA batch has an inconsistent v3 aggregate state");
+      "the CUDA batch has an inconsistent v4 aggregate state");
   return summary;
 }
 
@@ -1582,6 +1758,7 @@ void recertify_prune_targets(
     std::span<const MortonLeafRecord> leaves,
     std::span<const ScaledPoint> scaled_points,
     std::span<const std::uint64_t> target_positions,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics,
     RankMetrics& metrics) {
   const PointId anchor_id =
       leaves[static_cast<std::size_t>(record.anchor_morton_position)].point_id;
@@ -1596,12 +1773,21 @@ void recertify_prune_targets(
          witness_index < record.retained_witness_count;
          ++witness_index) {
       const PointId witness_id = record.witness_point_ids[witness_index];
+      const int sign = exact_phi_sign(
+          scaled_points[static_cast<std::size_t>(witness_id)],
+          scaled_points[static_cast<std::size_t>(anchor_id)],
+          scaled_points[static_cast<std::size_t>(target_id)]);
       require(
-          exact_phi_sign(
-              scaled_points[static_cast<std::size_t>(witness_id)],
-              scaled_points[static_cast<std::size_t>(anchor_id)],
-              scaled_points[static_cast<std::size_t>(target_id)]) <= 0,
-          "a device prune witness fails exact closed-diametral replay");
+          prune_semantics ==
+                  MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                      closed_rank_window
+              ? sign <= 0
+              : sign < 0,
+          prune_semantics ==
+                  MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                      closed_rank_window
+              ? "a device prune witness fails exact closed-diametral replay"
+              : "a device prune witness is not strictly interior");
       ++metrics.prune_witness_target_check_count;
     }
   }
@@ -1611,6 +1797,8 @@ void validate_prune_record(
     const Phase15MortonYao48DeviceTiledPruneRegionRecord& record,
     std::uint64_t anchor_position,
     std::size_t maximum_closed_rank,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics,
+    std::size_t required_witness_count,
     std::span<const MortonLbvhSnapshotNode> nodes,
     std::span<const MortonLeafRecord> leaves,
     std::span<const ScaledPoint> scaled_points,
@@ -1620,7 +1808,12 @@ void validate_prune_record(
   require(
       record.anchor_morton_position == anchor_position &&
           record.node_index < nodes.size() &&
-          record.flags == kPruneFlagClosedNonnegativeInterval,
+          record.flags ==
+              (prune_semantics ==
+                       MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                           closed_rank_window
+                   ? kPruneFlagClosedNonnegativeInterval
+                   : kPruneFlagStrictPositiveInterval),
       "a prune record has invalid ownership, node, or flags");
   const MortonLbvhSnapshotNode& node =
       nodes[static_cast<std::size_t>(record.node_index)];
@@ -1628,7 +1821,11 @@ void validate_prune_record(
   require(
       node.leaf_end <= anchor_position &&
           record.certified_pair_mass == width &&
-          record.retained_witness_count == maximum_closed_rank - 1U &&
+          record.retained_witness_count == required_witness_count &&
+          required_witness_count ==
+              morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_required_witness_count(
+                      prune_semantics, maximum_closed_rank) &&
           record.retained_witness_count <= 10U &&
           (record.retained_witness_bank_mask >> 48U) == 0U &&
           record.retained_witness_bank_mask != 0U,
@@ -1688,7 +1885,13 @@ void validate_prune_record(
       targets.push_back(position);
     }
     recertify_prune_targets(
-        record, node, leaves, scaled_points, targets, metrics);
+        record,
+        node,
+        leaves,
+        scaled_points,
+        targets,
+        prune_semantics,
+        metrics);
     ++metrics.fully_recertified_prune_count;
   } else if (
       metrics.sampled_recertified_prune_count <
@@ -1696,7 +1899,13 @@ void validate_prune_record(
     const std::vector<std::uint64_t> targets =
         sampled_target_positions(node.leaf_begin, node.leaf_end, 8U);
     recertify_prune_targets(
-        record, node, leaves, scaled_points, targets, metrics);
+        record,
+        node,
+        leaves,
+        scaled_points,
+        targets,
+        prune_semantics,
+        metrics);
     ++metrics.sampled_recertified_prune_count;
   }
 
@@ -1803,6 +2012,7 @@ void bounded_bruteforce_replay(
     std::span<const MortonLeafRecord> leaves,
     std::span<const ScaledPoint> scaled_points,
     std::size_t maximum_closed_rank,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics,
     std::span<const std::uint8_t> pair_classification,
     bool require_non_support_shell_equality,
     RankMetrics& metrics) {
@@ -1823,6 +2033,7 @@ void bounded_bruteforce_replay(
       const PointId partner_id =
           leaves[static_cast<std::size_t>(partner_position)].point_id;
       std::size_t closed_rank = 0U;
+      std::size_t strict_interior_count = 0U;
       for (PointId witness_id = 0U;
            witness_id < static_cast<PointId>(scaled_points.size());
            ++witness_id) {
@@ -1832,6 +2043,9 @@ void bounded_bruteforce_replay(
             scaled_points[static_cast<std::size_t>(partner_id)]);
         if (sign <= 0) {
           ++closed_rank;
+        }
+        if (sign < 0) {
+          ++strict_interior_count;
         }
         if (sign == 0 && witness_id != anchor_id &&
             witness_id != partner_id) {
@@ -1848,13 +2062,29 @@ void bounded_bruteforce_replay(
           classification == 1U || classification == 2U,
           "the bounded device frontier left an unordered pair uncovered");
       ++metrics.bounded_exact_pair_count;
-      const bool admitted = closed_rank <= maximum_closed_rank;
+      const bool admitted =
+          prune_semantics ==
+                  MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                      closed_rank_window
+              ? closed_rank <= maximum_closed_rank
+              : strict_interior_count <
+                    morsehgp3d::gpu::
+                        morton_yao48_device_tiled_pair_frontier_strict_interior_threshold;
       if (admitted) {
         ++metrics.bounded_admitted_pair_count;
         require(
             classification == 1U,
             "the device frontier pruned a bounded exact admissible pair");
       }
+      require(
+          classification != 2U || !admitted,
+          prune_semantics ==
+                  MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                      closed_rank_window
+              ? "the device frontier pruned a bounded pair inside the "
+                "closed-rank window"
+              : "the device frontier pruned a pair with fewer than two "
+                "strictly interior witnesses");
       if (classification == 1U) {
         if (admitted) {
           ++metrics.bounded_candidate_admitted_pair_count;
@@ -1942,6 +2172,10 @@ void validate_scaling_tile_lease(
           audit.certified_node_count == 2U * options.point_count - 1U &&
           audit.maximum_closed_rank ==
               options.maximum_closed_rank.value_or(11U) &&
+          audit.prune_semantics ==
+              MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                  closed_rank_window &&
+          audit.required_witness_count == audit.maximum_closed_rank - 1U &&
           audit.anchor_begin == expected_anchor_begin &&
           audit.anchor_end == expected_anchor_end &&
           audit.fixed_candidate_capacity_per_anchor ==
@@ -1974,6 +2208,9 @@ void validate_scaling_tile_lease(
   require(
       !audit.candidate_device_to_host_performed &&
           !audit.certified_prune_device_to_host_performed &&
+          audit.nonnegative_diametral_witness_interval_lower_bound_required &&
+          !audit
+               .strictly_positive_diametral_witness_interval_lower_bound_required &&
           !audit.exact_diametral_rank_evaluated &&
           !audit.scientific_pair_catalog_published &&
           !audit.dense_pair_fallback_performed &&
@@ -2093,7 +2330,13 @@ void validate_scaling_advance(
           audit.ambiguous_cone_routed_to_unbanked_candidate &&
           audit.target_tested_before_witness_bank_insert &&
           audit.retained_witnesses_outside_pruned_subtree_required &&
-          audit.nonnegative_diametral_witness_interval_lower_bound_required,
+          audit.nonnegative_diametral_witness_interval_lower_bound_required &&
+          !audit
+               .strictly_positive_diametral_witness_interval_lower_bound_required &&
+          audit.prune_semantics ==
+              MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                  closed_rank_window &&
+          audit.required_witness_count == audit.maximum_closed_rank - 1U,
       "the scaling-smoke public audit omitted a proof obligation");
   const bool has_tile = advance.candidate_tile.has_value();
   require(
@@ -2514,12 +2757,36 @@ void validate_scaling_advance(
     const Options& options,
     const CanonicalPointCloud& cloud,
     std::span<const ScaledPoint> scaled_points,
-    std::size_t maximum_closed_rank) {
+    std::size_t maximum_closed_rank,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics,
+    std::vector<std::uint8_t>* point_id_pair_classification = nullptr) {
   RankMetrics metrics;
   metrics.maximum_closed_rank = maximum_closed_rank;
+  metrics.prune_semantics = prune_semantics;
+  const bool strict_interior_semantics =
+      prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
+  metrics.q3_exact_diametral_pair_support_gabriel_negative_only =
+      strict_interior_semantics;
+  metrics.gamma2_silent_handoff_required = strict_interior_semantics;
+  metrics.gamma2_prune_or_discard_authorized = false;
+  metrics.required_witness_count =
+      morsehgp3d::gpu::
+          morton_yao48_device_tiled_pair_frontier_required_witness_count(
+              prune_semantics, maximum_closed_rank);
+  require(
+      metrics.required_witness_count != 0U &&
+          metrics.required_witness_count <= 10U,
+      "the qualification prune semantics has no valid witness threshold");
   metrics.unordered_pair_universe_count = unordered_pair_count(cloud.size());
   metrics.output_digest = hash_word(
       metrics.output_digest, static_cast<std::uint64_t>(maximum_closed_rank));
+  metrics.output_digest = hash_word(
+      metrics.output_digest, static_cast<std::uint64_t>(prune_semantics));
+  metrics.output_digest = hash_word(
+      metrics.output_digest,
+      static_cast<std::uint64_t>(metrics.required_witness_count));
 
   const std::size_t node_count = 2U * cloud.size() - 1U;
   MortonLbvhBuildContext builder{cloud.size()};
@@ -2657,6 +2924,8 @@ void validate_scaling_advance(
       request.anchor_begin = anchor_begin;
       request.anchor_count = anchor_count;
       request.maximum_closed_rank = maximum_closed_rank;
+      request.prune_semantics = prune_semantics;
+      request.required_witness_count = metrics.required_witness_count;
       request.node_visit_capacity_per_anchor =
           morsehgp3d::gpu::
               morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
@@ -2669,7 +2938,7 @@ void validate_scaling_advance(
       request.witness_bank_count_per_anchor =
           morsehgp3d::gpu::
               morton_yao48_device_tiled_pair_frontier_witness_bank_count;
-      request.witness_slot_count_per_bank = maximum_closed_rank - 1U;
+      request.witness_slot_count_per_bank = request.required_witness_count;
       request.resume_same_tile = chunk_sequence > 1U;
 
       const auto launch_start = Clock::now();
@@ -2778,6 +3047,8 @@ void validate_scaling_advance(
               record,
               anchor_position,
               maximum_closed_rank,
+              prune_semantics,
+              metrics.required_witness_count,
               nodes,
               leaves,
               scaled_points,
@@ -2918,15 +3189,390 @@ void validate_scaling_advance(
         leaves,
         scaled_points,
         maximum_closed_rank,
+        prune_semantics,
         pair_classification,
         options.family == "adversarial_mixed_dyadic" ||
-            options.family == "shell_permutation_dyadic",
+            options.family == "shell_permutation_dyadic" ||
+            options.family == "q3_boundary_shell",
         metrics);
+  }
+  if (point_id_pair_classification != nullptr) {
+    require(
+        !pair_classification.empty(),
+        "the requested PointId pair partition is unavailable");
+    point_id_pair_classification->assign(pair_classification.size(), 0U);
+    for (std::uint64_t anchor_position = 1U;
+         anchor_position < leaves.size();
+         ++anchor_position) {
+      const PointId anchor_id =
+          leaves[static_cast<std::size_t>(anchor_position)].point_id;
+      for (std::uint64_t partner_position = 0U;
+           partner_position < anchor_position;
+           ++partner_position) {
+        const PointId partner_id =
+            leaves[static_cast<std::size_t>(partner_position)].point_id;
+        const std::uint64_t point_id_anchor =
+            std::max<std::uint64_t>(anchor_id, partner_id);
+        const std::uint64_t point_id_partner =
+            std::min<std::uint64_t>(anchor_id, partner_id);
+        const std::size_t source_index = static_cast<std::size_t>(
+            triangular_offset(anchor_position, partner_position));
+        const std::size_t target_index = static_cast<std::size_t>(
+            triangular_offset(point_id_anchor, point_id_partner));
+        require(
+            (*point_id_pair_classification)[target_index] == 0U,
+            "the PointId pair partition contains a duplicate");
+        (*point_id_pair_classification)[target_index] =
+            pair_classification[source_index];
+      }
+    }
   }
   metrics.every_prune_fully_recertified =
       metrics.fully_recertified_prune_count == metrics.prune_region_count;
   metrics.component_contract_validated = true;
   return metrics;
+}
+
+struct StrictInteriorThresholdCaseMetrics {
+  StrictInteriorThresholdFixtureCloud fixture_cloud{
+      StrictInteriorThresholdFixtureCloud::boundary_shell};
+  std::size_t maximum_closed_rank_metadata{};
+  std::size_t anchor_tile_capacity{};
+  std::uint64_t cloud_digest{};
+  bool target_ax_pruned{false};
+  RankMetrics rank_metrics;
+  std::vector<std::uint8_t> point_id_pair_classification;
+};
+
+struct StrictInteriorThresholdQualificationMetrics {
+  std::vector<StrictInteriorThresholdCaseMetrics> strict_cases;
+  StrictInteriorThresholdCaseMetrics closed_boundary_control;
+  std::uint64_t total_ns{};
+  bool boundary_shell_preserved{false};
+  bool strict_interior_target_pruned{false};
+  bool maximum_closed_rank_metadata_invariance_qualified{false};
+  bool tile_capacity_invariance_qualified{false};
+  bool exact_all_pair_oracle_replayed{false};
+  bool q3_exact_diametral_pair_support_gabriel_negative_only{false};
+  bool gamma2_silent_handoff_required{false};
+  bool gamma2_prune_or_discard_authorized{false};
+  bool closed_boundary_control_pruned{false};
+  bool success{false};
+};
+
+[[nodiscard]] PointId find_fixture_point_id(
+    std::span<const ScaledPoint> scaled_points,
+    const std::array<std::int64_t, 3U>& coordinate) {
+  std::optional<PointId> found;
+  for (PointId point_id = 0U;
+       point_id < static_cast<PointId>(scaled_points.size());
+       ++point_id) {
+    if (scaled_points[static_cast<std::size_t>(point_id)].coordinate ==
+        coordinate) {
+      require(
+          !found.has_value(),
+          "the strict-interior fixture coordinate is duplicated");
+      found = point_id;
+    }
+  }
+  require(
+      found.has_value(),
+      "the strict-interior fixture coordinate is absent");
+  return *found;
+}
+
+[[nodiscard]] std::size_t strict_interior_pair_count(
+    std::span<const ScaledPoint> scaled_points,
+    PointId support_u,
+    PointId support_v) {
+  std::size_t count = 0U;
+  for (PointId witness = 0U;
+       witness < static_cast<PointId>(scaled_points.size());
+       ++witness) {
+    if (exact_phi_sign(
+            scaled_points[static_cast<std::size_t>(witness)],
+            scaled_points[static_cast<std::size_t>(support_u)],
+            scaled_points[static_cast<std::size_t>(support_v)]) < 0) {
+      ++count;
+    }
+  }
+  return count;
+}
+
+[[nodiscard]] std::size_t closed_rank(
+    std::span<const ScaledPoint> scaled_points,
+    PointId support_u,
+    PointId support_v) {
+  std::size_t count = 0U;
+  for (PointId witness = 0U;
+       witness < static_cast<PointId>(scaled_points.size());
+       ++witness) {
+    if (exact_phi_sign(
+            scaled_points[static_cast<std::size_t>(witness)],
+            scaled_points[static_cast<std::size_t>(support_u)],
+            scaled_points[static_cast<std::size_t>(support_v)]) <= 0) {
+      ++count;
+    }
+  }
+  return count;
+}
+
+[[nodiscard]] StrictInteriorThresholdCaseMetrics
+run_strict_interior_threshold_case(
+    const Options& options,
+    StrictInteriorThresholdFixtureCloud fixture_cloud,
+    std::size_t maximum_closed_rank_metadata,
+    std::size_t anchor_tile_capacity,
+    MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics) {
+  GeneratedCloud generated =
+      generate_strict_interior_threshold_fixture(fixture_cloud);
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(generated.points);
+  std::vector<ScaledPoint> scaled_points =
+      canonical_scaled_points(cloud, generated.scaled_points);
+  require(
+      cloud.size() == 4U && scaled_points.size() == 4U,
+      "the strict-interior fixture canonicalization changed cardinality");
+
+  constexpr std::int64_t unit = kCoordinateDenominator;
+  const PointId point_a = find_fixture_point_id(
+      scaled_points,
+      {-INT64_C(5) * unit,
+       -INT64_C(5) * unit,
+       -INT64_C(5) * unit});
+  const PointId point_x = find_fixture_point_id(
+      scaled_points,
+      {INT64_C(5) * unit,
+       INT64_C(5) * unit,
+       INT64_C(5) * unit});
+  const std::size_t ax_strict_count =
+      strict_interior_pair_count(scaled_points, point_a, point_x);
+  const std::size_t ax_closed_rank =
+      closed_rank(scaled_points, point_a, point_x);
+  require(
+      fixture_cloud ==
+              StrictInteriorThresholdFixtureCloud::boundary_shell
+          ? ax_strict_count == 0U && ax_closed_rank == 4U
+          : ax_strict_count == 2U && ax_closed_rank == 4U,
+      "the A/X discriminant does not have its exact shell/interior geometry");
+
+  std::size_t strict_prune_eligible_pair_count = 0U;
+  std::size_t closed_rank3_prune_eligible_pair_count = 0U;
+  for (PointId upper = 1U;
+       upper < static_cast<PointId>(scaled_points.size());
+       ++upper) {
+    for (PointId lower = 0U; lower < upper; ++lower) {
+      const bool strict_eligible =
+          strict_interior_pair_count(scaled_points, upper, lower) >= 2U;
+      const bool closed_eligible =
+          closed_rank(scaled_points, upper, lower) > 3U;
+      strict_prune_eligible_pair_count += strict_eligible ? 1U : 0U;
+      closed_rank3_prune_eligible_pair_count +=
+          closed_eligible ? 1U : 0U;
+      if (strict_eligible || closed_eligible) {
+        require(
+            upper == std::max(point_a, point_x) &&
+                lower == std::min(point_a, point_x),
+            "the discriminant fixture has an unexpected prune-eligible pair");
+      }
+    }
+  }
+  require(
+      strict_prune_eligible_pair_count ==
+              (fixture_cloud ==
+                       StrictInteriorThresholdFixtureCloud::boundary_shell
+                   ? 0U
+                   : 1U) &&
+          closed_rank3_prune_eligible_pair_count == 1U,
+      "the discriminant fixture does not isolate A/X");
+
+  Options case_options = options;
+  case_options.anchor_tile_capacity = anchor_tile_capacity;
+  case_options.family =
+      fixture_cloud ==
+              StrictInteriorThresholdFixtureCloud::boundary_shell
+          ? "q3_boundary_shell"
+          : "q3_strict_interior";
+  StrictInteriorThresholdCaseMetrics result;
+  result.fixture_cloud = fixture_cloud;
+  result.maximum_closed_rank_metadata = maximum_closed_rank_metadata;
+  result.anchor_tile_capacity = anchor_tile_capacity;
+  result.cloud_digest = scaled_cloud_digest(scaled_points);
+  result.rank_metrics = qualify_rank(
+      case_options,
+      cloud,
+      scaled_points,
+      maximum_closed_rank_metadata,
+      prune_semantics,
+      &result.point_id_pair_classification);
+  const std::size_t ax_pair_index = static_cast<std::size_t>(
+      triangular_offset(
+          std::max<std::uint64_t>(point_a, point_x),
+          std::min<std::uint64_t>(point_a, point_x)));
+  require(
+      ax_pair_index < result.point_id_pair_classification.size(),
+      "the A/X pair index lies outside the qualified partition");
+  result.target_ax_pruned =
+      result.point_id_pair_classification[ax_pair_index] == 2U;
+
+  const bool strict_semantics =
+      prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
+  const std::uint64_t expected_pruned_mass =
+      strict_semantics
+          ? (fixture_cloud ==
+                     StrictInteriorThresholdFixtureCloud::boundary_shell
+                 ? UINT64_C(0)
+                 : UINT64_C(1))
+          : UINT64_C(1);
+  require(
+      result.rank_metrics.bounded_bruteforce_performed &&
+          result.rank_metrics.bounded_exact_pair_count == 6U &&
+          result.rank_metrics.unordered_pair_universe_count == 6U &&
+          result.rank_metrics.required_witness_count == 2U &&
+          result.rank_metrics.prune_semantics == prune_semantics &&
+          result.rank_metrics.certified_pruned_pair_mass ==
+              expected_pruned_mass &&
+          result.rank_metrics.candidate_pair_mass ==
+              UINT64_C(6) - expected_pruned_mass &&
+          result.rank_metrics.unresolved_pair_mass == 0U &&
+          result.rank_metrics.bounded_admitted_pair_count ==
+              UINT64_C(6) - expected_pruned_mass &&
+          result.rank_metrics.bounded_candidate_admitted_pair_count ==
+              UINT64_C(6) - expected_pruned_mass &&
+          result.rank_metrics.bounded_candidate_rejected_pair_count == 0U &&
+          result.rank_metrics.every_prune_fully_recertified &&
+          result.rank_metrics.coverage_partition_complete &&
+          result.rank_metrics
+                  .q3_exact_diametral_pair_support_gabriel_negative_only ==
+              strict_semantics &&
+          result.rank_metrics.gamma2_silent_handoff_required ==
+              strict_semantics &&
+          !result.rank_metrics.gamma2_prune_or_discard_authorized &&
+          result.rank_metrics.component_contract_validated &&
+          result.target_ax_pruned == (expected_pruned_mass == 1U),
+      "the native discriminant run disagrees with its exact all-pair oracle");
+  return result;
+}
+
+[[nodiscard]] StrictInteriorThresholdQualificationMetrics
+run_strict_interior_threshold_qualification(
+    const Options& options,
+    Clock::time_point total_start) {
+  StrictInteriorThresholdQualificationMetrics result;
+  constexpr std::array<StrictInteriorThresholdFixtureCloud, 2U> clouds{
+      StrictInteriorThresholdFixtureCloud::boundary_shell,
+      StrictInteriorThresholdFixtureCloud::strict_interior};
+  constexpr std::array<std::size_t, 2U> rank_metadata{2U, 11U};
+  constexpr std::array<std::size_t, 2U> tile_capacities{1U, 4U};
+  result.strict_cases.reserve(
+      clouds.size() * rank_metadata.size() * tile_capacities.size());
+  for (const auto fixture_cloud : clouds) {
+    for (const std::size_t maximum_closed_rank_metadata : rank_metadata) {
+      for (const std::size_t anchor_tile_capacity : tile_capacities) {
+        result.strict_cases.push_back(run_strict_interior_threshold_case(
+            options,
+            fixture_cloud,
+            maximum_closed_rank_metadata,
+            anchor_tile_capacity,
+            MortonYao48DeviceTiledPairFrontierPruneSemantics::
+                strict_interior_threshold));
+      }
+    }
+  }
+  result.closed_boundary_control = run_strict_interior_threshold_case(
+      options,
+      StrictInteriorThresholdFixtureCloud::boundary_shell,
+      3U,
+      4U,
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          closed_rank_window);
+
+  for (const auto fixture_cloud : clouds) {
+    const std::vector<std::uint8_t>* reference = nullptr;
+    for (const auto& test_case : result.strict_cases) {
+      if (test_case.fixture_cloud != fixture_cloud) {
+        continue;
+      }
+      if (reference == nullptr) {
+        reference = &test_case.point_id_pair_classification;
+      } else {
+        require(
+            test_case.point_id_pair_classification == *reference,
+            "strict-interior pair partitions differ by rank metadata or "
+            "tile capacity");
+      }
+    }
+    require(
+        reference != nullptr,
+        "the strict-interior matrix omitted a fixture cloud");
+  }
+
+  result.boundary_shell_preserved = std::all_of(
+      result.strict_cases.begin(),
+      result.strict_cases.end(),
+      [](const StrictInteriorThresholdCaseMetrics& test_case) {
+        return test_case.fixture_cloud !=
+                   StrictInteriorThresholdFixtureCloud::boundary_shell ||
+               (!test_case.target_ax_pruned &&
+                test_case.rank_metrics.certified_pruned_pair_mass == 0U);
+      });
+  result.strict_interior_target_pruned = std::all_of(
+      result.strict_cases.begin(),
+      result.strict_cases.end(),
+      [](const StrictInteriorThresholdCaseMetrics& test_case) {
+        return test_case.fixture_cloud !=
+                   StrictInteriorThresholdFixtureCloud::strict_interior ||
+               (test_case.target_ax_pruned &&
+                test_case.rank_metrics.certified_pruned_pair_mass == 1U);
+      });
+  result.maximum_closed_rank_metadata_invariance_qualified = true;
+  result.tile_capacity_invariance_qualified = true;
+  result.exact_all_pair_oracle_replayed = std::all_of(
+      result.strict_cases.begin(),
+      result.strict_cases.end(),
+      [](const StrictInteriorThresholdCaseMetrics& test_case) {
+        return test_case.rank_metrics.bounded_bruteforce_performed &&
+               test_case.rank_metrics.bounded_exact_pair_count == 6U;
+      });
+  result.q3_exact_diametral_pair_support_gabriel_negative_only =
+      std::all_of(
+          result.strict_cases.begin(),
+          result.strict_cases.end(),
+          [](const StrictInteriorThresholdCaseMetrics& test_case) {
+            return test_case.rank_metrics
+                .q3_exact_diametral_pair_support_gabriel_negative_only;
+          });
+  result.gamma2_silent_handoff_required = std::all_of(
+      result.strict_cases.begin(),
+      result.strict_cases.end(),
+      [](const StrictInteriorThresholdCaseMetrics& test_case) {
+        return test_case.rank_metrics.gamma2_silent_handoff_required;
+      });
+  result.gamma2_prune_or_discard_authorized = std::any_of(
+      result.strict_cases.begin(),
+      result.strict_cases.end(),
+      [](const StrictInteriorThresholdCaseMetrics& test_case) {
+        return test_case.rank_metrics.gamma2_prune_or_discard_authorized;
+      });
+  result.closed_boundary_control_pruned =
+      result.closed_boundary_control.target_ax_pruned &&
+      result.closed_boundary_control.rank_metrics
+              .certified_pruned_pair_mass == 1U;
+  result.success =
+      result.strict_cases.size() == 8U &&
+      result.boundary_shell_preserved &&
+      result.strict_interior_target_pruned &&
+      result.maximum_closed_rank_metadata_invariance_qualified &&
+      result.tile_capacity_invariance_qualified &&
+      result.exact_all_pair_oracle_replayed &&
+      result.q3_exact_diametral_pair_support_gabriel_negative_only &&
+      result.gamma2_silent_handoff_required &&
+      !result.gamma2_prune_or_discard_authorized &&
+      result.closed_boundary_control_pruned;
+  result.total_ns = nanoseconds(Clock::now() - total_start);
+  return result;
 }
 
 [[nodiscard]] std::string json_escape(std::string_view text) {
@@ -3008,11 +3654,20 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << "\"device_total_bytes\":" << metrics.device_total_bytes << ','
       << "\"every_prune_fully_recertified\":"
       << (metrics.every_prune_fully_recertified ? "true" : "false") << ','
+      << "\"gamma2_prune_or_discard_authorized\":"
+      << (metrics.gamma2_prune_or_discard_authorized ? "true" : "false")
+      << ','
+      << "\"gamma2_silent_handoff_required\":"
+      << (metrics.gamma2_silent_handoff_required ? "true" : "false") << ','
       << "\"fully_recertified_prune_count\":"
       << metrics.fully_recertified_prune_count << ','
       << "\"launcher_ns\":" << metrics.launcher_ns << ','
       << "\"lease_release_ns\":" << metrics.lease_release_ns << ','
       << "\"maximum_closed_rank\":" << metrics.maximum_closed_rank << ','
+      << "\"prune_semantics\":\""
+      << prune_semantics_name(metrics.prune_semantics) << "\","
+      << "\"required_witness_count\":"
+      << metrics.required_witness_count << ','
       << "\"minimum_device_free_bytes\":" << metrics.minimum_device_free_bytes
       << ','
       << "\"node_copy_ns\":" << metrics.node_copy_ns << ','
@@ -3021,6 +3676,11 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << metrics.peak_tile_output_device_capacity_bytes << ','
       << "\"physical_node_visit_count\":"
       << metrics.physical_node_visit_count << ','
+      << "\"q3_exact_diametral_pair_support_gabriel_negative_only\":"
+      << (metrics.q3_exact_diametral_pair_support_gabriel_negative_only
+              ? "true"
+              : "false")
+      << ','
       << "\"prune_region_count\":" << metrics.prune_region_count << ','
       << "\"prune_yield_anchor_count\":"
       << metrics.prune_yield_anchor_count << ','
@@ -3043,6 +3703,113 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << metrics.unordered_pair_universe_count << ','
       << "\"unresolved_pair_mass\":" << metrics.unresolved_pair_mass
       << '}';
+}
+
+void print_strict_interior_threshold_case(
+    const StrictInteriorThresholdCaseMetrics& test_case) {
+  const bool strict_semantics =
+      test_case.rank_metrics.prune_semantics ==
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
+  const std::uint64_t expected_pruned_mass =
+      strict_semantics &&
+              test_case.fixture_cloud ==
+                  StrictInteriorThresholdFixtureCloud::boundary_shell
+          ? UINT64_C(0)
+          : UINT64_C(1);
+  std::cout
+      << "{\"anchor_tile_capacity\":"
+      << test_case.anchor_tile_capacity << ','
+      << "\"cloud\":\""
+      << strict_fixture_cloud_name(test_case.fixture_cloud) << "\","
+      << "\"cloud_digest_fnv1a\":" << test_case.cloud_digest << ','
+      << "\"expected_candidate_pair_mass\":"
+      << UINT64_C(6) - expected_pruned_mass << ','
+      << "\"expected_certified_pruned_pair_mass\":"
+      << expected_pruned_mass << ','
+      << "\"maximum_closed_rank_metadata\":"
+      << test_case.maximum_closed_rank_metadata << ','
+      << "\"rank_result\":";
+  print_rank_metrics(test_case.rank_metrics);
+  std::cout
+      << ",\"target_ax_negative_covered\":"
+      << (test_case.target_ax_pruned ? "true" : "false") << '}';
+}
+
+void print_strict_interior_threshold_json(
+    const StrictInteriorThresholdQualificationMetrics& metrics) {
+  std::cout
+      << "{\"backend\":\"" << kBackend << "\","
+      << "\"boundary_shell_preserved\":"
+      << (metrics.boundary_shell_preserved ? "true" : "false") << ','
+      << "\"closed_boundary_control\":";
+  print_strict_interior_threshold_case(metrics.closed_boundary_control);
+  std::cout
+      << ",\"closed_boundary_control_negative_covered\":"
+      << (metrics.closed_boundary_control_pruned ? "true" : "false")
+      << ','
+      << "\"component_only\":true,"
+      << "\"deployment_status\":\"" << kDeploymentStatus << "\","
+      << "\"exact_all_pair_all_witness_oracle\":"
+      << (metrics.exact_all_pair_oracle_replayed ? "true" : "false")
+      << ','
+      << "\"fixture\":\"" << kStrictInteriorThresholdFixture << "\","
+      << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
+      << "\"global_cell_or_coface_arena_materialized\":false,"
+      << "\"global_pair_matrix_materialized\":false,"
+      << "\"gamma2_catalog_published\":false,"
+      << "\"gamma2_prune_or_discard\":"
+      << (metrics.gamma2_prune_or_discard_authorized ? "true" : "false")
+      << ','
+      << "\"gamma2_silent_handoff_required\":"
+      << (metrics.gamma2_silent_handoff_required ? "true" : "false")
+      << ','
+      << "\"hierarchy_reduction_performed\":false,"
+      << "\"maximum_closed_rank_metadata_invariance_qualified\":"
+      << (metrics.maximum_closed_rank_metadata_invariance_qualified
+              ? "true"
+              : "false")
+      << ','
+      << "\"mode\":\"" << kStrictInteriorThresholdMode << "\","
+      << "\"morse_hgp_hierarchy_claimed\":false,"
+      << "\"negative_region_interpretation\":"
+         "\"no_q3_gabriel_triangle_with_exact_diametral_pair_minimal_"
+         "support_only\","
+      << "\"ordinary_delaunay_materialized\":false,"
+      << "\"pair_frontier_negative_regions_are_gamma2_discard\":false,"
+      << "\"point_count_per_cloud\":4,"
+      << "\"profile\":\"" << kProfile << "\","
+      << "\"public_status\":\"" << kPublicStatus << "\","
+      << "\"q\":3,"
+      << "\"q3_exact_diametral_pair_support_gabriel_negative_only\":"
+      << (metrics.q3_exact_diametral_pair_support_gabriel_negative_only
+              ? "true"
+              : "false")
+      << ','
+      << "\"required_witness_count\":2,"
+      << "\"run_count\":9,"
+      << "\"schema\":\"" << kStrictInteriorThresholdSchema << "\","
+      << "\"scientific_scope\":\""
+      << kStrictInteriorThresholdScientificScope << "\","
+      << "\"scientific_pair_catalog_published\":false,"
+      << "\"strict_cases\":[";
+  for (std::size_t index = 0U;
+       index < metrics.strict_cases.size();
+       ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    print_strict_interior_threshold_case(metrics.strict_cases[index]);
+  }
+  std::cout
+      << "],\"strict_interior_target_negative_covered\":"
+      << (metrics.strict_interior_target_pruned ? "true" : "false")
+      << ','
+      << "\"success\":" << (metrics.success ? "true" : "false") << ','
+      << "\"tile_capacity_invariance_qualified\":"
+      << (metrics.tile_capacity_invariance_qualified ? "true" : "false")
+      << ','
+      << "\"total_ns\":" << metrics.total_ns << "}\n";
 }
 
 [[nodiscard]] std::string_view stop_reason_name(
@@ -3151,6 +3918,9 @@ void print_scaling_smoke_json(
       << "\"launcher_call_count\":" << metrics.launcher_call_count << ','
       << "\"lease_release_ns\":" << metrics.lease_release_ns << ','
       << "\"maximum_closed_rank\":" << metrics.maximum_closed_rank << ','
+      << "\"prune_semantics\":\"closed_rank_window\","
+      << "\"required_witness_count\":"
+      << metrics.maximum_closed_rank - 1U << ','
       << "\"maximum_traversal_subdivision_count_per_anchor\":"
       << metrics.maximum_traversal_subdivision_count_per_anchor << ','
       << "\"minimum_device_free_bytes\":"
@@ -3266,11 +4036,31 @@ void print_failure_json(std::string_view message) {
       << "\"success\":false}\n";
 }
 
+void print_strict_interior_threshold_failure_json(
+    std::string_view message) {
+  std::cout
+      << "{\"backend\":\"" << kBackend << "\","
+      << "\"component_only\":true,"
+      << "\"deployment_status\":\"" << kDeploymentStatus << "\","
+      << "\"error\":\"" << json_escape(message) << "\","
+      << "\"gamma2_prune_or_discard\":false,"
+      << "\"git_sha\":\"" << json_escape(kGitSha) << "\","
+      << "\"hierarchy_reduction_performed\":false,"
+      << "\"mode\":\"" << kStrictInteriorThresholdMode << "\","
+      << "\"profile\":\"" << kProfile << "\","
+      << "\"public_status\":\"" << kPublicStatus << "\","
+      << "\"schema\":\"" << kStrictInteriorThresholdSchema << "\","
+      << "\"scientific_scope\":\""
+      << kStrictInteriorThresholdScientificScope << "\","
+      << "\"success\":false}\n";
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
   bool scaling_smoke_requested = false;
   bool direct_scale_requested = false;
+  bool strict_interior_threshold_requested = false;
   for (int index = 1; index < argc; ++index) {
     scaling_smoke_requested =
         scaling_smoke_requested ||
@@ -3278,10 +4068,22 @@ int main(int argc, char** argv) {
     direct_scale_requested =
         direct_scale_requested ||
         std::string_view{argv[index]} == "--direct-scale";
+    strict_interior_threshold_requested =
+        strict_interior_threshold_requested ||
+        std::string_view{argv[index]} == "strict_interior_threshold";
   }
   try {
     const Options options = parse_options(argc, argv);
     const auto total_start = Clock::now();
+    if (options.prune_semantics ==
+        MortonYao48DeviceTiledPairFrontierPruneSemantics::
+            strict_interior_threshold) {
+      const StrictInteriorThresholdQualificationMetrics strict_metrics =
+          run_strict_interior_threshold_qualification(
+              options, total_start);
+      print_strict_interior_threshold_json(strict_metrics);
+      return strict_metrics.success ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
     if (options.scaling_smoke || options.direct_scale) {
       const auto generation_start = Clock::now();
       std::vector<CertifiedPoint3> scaling_points =
@@ -3321,7 +4123,12 @@ int main(int argc, char** argv) {
     bool all_coverage_complete = true;
     for (const std::size_t rank : ranks) {
       results.push_back(
-          qualify_rank(options, cloud, scaled_points, rank));
+          qualify_rank(
+              options,
+              cloud,
+              scaled_points,
+              rank,
+              options.prune_semantics));
       any_censure = any_censure || results.back().censored_anchor_count != 0U;
       all_coverage_complete =
           all_coverage_complete && results.back().coverage_partition_complete;
@@ -3399,6 +4206,8 @@ int main(int argc, char** argv) {
   } catch (const std::exception& error) {
     if (scaling_smoke_requested || direct_scale_requested) {
       print_scaling_failure_json(error.what(), direct_scale_requested);
+    } else if (strict_interior_threshold_requested) {
+      print_strict_interior_threshold_failure_json(error.what());
     } else {
       print_failure_json(error.what());
     }

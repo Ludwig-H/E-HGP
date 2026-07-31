@@ -128,6 +128,8 @@ RANK_KEYS = {
     "device_total_bytes",
     "every_prune_fully_recertified",
     "fully_recertified_prune_count",
+    "gamma2_prune_or_discard_authorized",
+    "gamma2_silent_handoff_required",
     "launcher_ns",
     "lease_release_ns",
     "maximum_closed_rank",
@@ -137,9 +139,12 @@ RANK_KEYS = {
     "peak_tile_output_device_capacity_bytes",
     "physical_node_visit_count",
     "prune_region_count",
+    "prune_semantics",
     "prune_witness_target_check_count",
+    "q3_exact_diametral_pair_support_gabriel_negative_only",
     "qualification_device_to_host_bytes",
     "qualification_output_copy_ns",
+    "required_witness_count",
     "sampled_recertified_prune_count",
     "tile_count",
     "traversal_adoption_ns",
@@ -299,6 +304,7 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
         "censored_anchor_count": 0,
         "complete_anchor_count": POINT_COUNT,
         "maximum_closed_rank": MAXIMUM_CLOSED_RANK,
+        "required_witness_count": MAXIMUM_CLOSED_RANK - 1,
         "tile_count": 13,
         "unordered_pair_universe_count": UNORDERED_PAIR_UNIVERSE,
         "unresolved_pair_mass": 0,
@@ -317,11 +323,23 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
         value.get("fully_recertified_prune_count") == value.get("prune_region_count"),
         "rank result.every_prune_fully_recertified",
     )
+    for field in (
+        "gamma2_prune_or_discard_authorized",
+        "gamma2_silent_handoff_required",
+        "q3_exact_diametral_pair_support_gabriel_negative_only",
+    ):
+        require_boolean(value.get(field), False, f"rank result.{field}")
+    if value.get("prune_semantics") != "closed_rank_window":
+        fail("rank result.prune_semantics must be closed_rank_window")
     for field in RANK_KEYS - {
         "bounded_bruteforce_performed",
         "component_contract_validated",
         "coverage_partition_complete",
         "every_prune_fully_recertified",
+        "gamma2_prune_or_discard_authorized",
+        "gamma2_silent_handoff_required",
+        "prune_semantics",
+        "q3_exact_diametral_pair_support_gabriel_negative_only",
     }:
         require_integer(value.get(field), f"rank result.{field}")
     if value["candidate_record_count"] != value["candidate_pair_mass"]:

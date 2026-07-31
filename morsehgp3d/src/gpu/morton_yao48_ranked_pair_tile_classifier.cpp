@@ -90,6 +90,15 @@ struct FrontierAuthority final {
           morton_yao48_ranked_pair_tile_classifier_minimum_closed_rank ||
       audit.maximum_closed_rank >
           morton_yao48_ranked_pair_tile_classifier_maximum_closed_rank ||
+      audit.prune_semantics !=
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              closed_rank_window ||
+      audit.required_witness_count != audit.maximum_closed_rank - 1U ||
+      !audit.nonnegative_diametral_witness_interval_lower_bound_required ||
+      audit.strictly_positive_diametral_witness_interval_lower_bound_required ||
+      audit.q3_exact_diametral_pair_support_gabriel_lane_partition_complete ||
+      audit.gamma2_silent_handoff_required ||
+      audit.gamma2_prune_or_discard_authorized ||
       !audit.source_traversal_lease_authenticated ||
       !audit.fixed_per_anchor_caps_enforced ||
       !audit.atomic_completed_anchor_prefix_validated ||
@@ -191,6 +200,15 @@ struct FrontierAuthority final {
       audit.anchor_begin >= audit.anchor_end ||
       audit.anchor_end > audit.point_count ||
       audit.maximum_closed_rank != config.maximum_closed_rank ||
+      audit.prune_semantics !=
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              closed_rank_window ||
+      audit.required_witness_count != config.maximum_closed_rank - 1U ||
+      !audit.nonnegative_diametral_witness_interval_lower_bound_required ||
+      audit.strictly_positive_diametral_witness_interval_lower_bound_required ||
+      audit.q3_exact_diametral_pair_support_gabriel_negative_only ||
+      audit.gamma2_silent_handoff_required ||
+      audit.gamma2_prune_or_discard_authorized ||
       audit.candidate_count > audit.physical_candidate_capacity ||
       audit.fixed_candidate_capacity_per_anchor !=
           morton_yao48_device_tiled_pair_frontier_candidates_per_anchor ||
@@ -218,6 +236,8 @@ struct FrontierAuthority final {
       views.candidate_buffer_epoch != audit.candidate_buffer_epoch ||
       views.point_count != audit.point_count ||
       views.certified_node_count != audit.certified_node_count ||
+      views.prune_semantics != audit.prune_semantics ||
+      views.required_witness_count != audit.required_witness_count ||
       views.anchor_begin != audit.anchor_begin ||
       views.anchor_end != audit.anchor_end ||
       views.physical_candidate_record_capacity !=
@@ -957,6 +977,9 @@ MortonYao48RankedPairTileClassifierContext::commit(
           lease_audit.point_count != frontier_audit.point_count ||
           lease_audit.certified_node_count !=
               frontier_audit.certified_node_count ||
+          lease_audit.prune_semantics != frontier_audit.prune_semantics ||
+          lease_audit.required_witness_count !=
+              frontier_audit.required_witness_count ||
           lease_audit.tile_epoch != frontier_audit.tile_epoch ||
           lease_audit.chunk_sequence != frontier_audit.chunk_sequence ||
           lease_audit.anchor_begin !=

@@ -66,6 +66,8 @@ def rank_result() -> dict[str, object]:
         "device_total_bytes": 48_000_000_000,
         "every_prune_fully_recertified": True,
         "fully_recertified_prune_count": 900_000,
+        "gamma2_prune_or_discard_authorized": False,
+        "gamma2_silent_handoff_required": False,
         "launcher_ns": 30_000,
         "lease_release_ns": 4_000,
         "maximum_closed_rank": assembler.MAXIMUM_CLOSED_RANK,
@@ -75,9 +77,12 @@ def rank_result() -> dict[str, object]:
         "peak_tile_output_device_capacity_bytes": 256_000_000,
         "physical_node_visit_count": 2_000_000,
         "prune_region_count": 900_000,
+        "prune_semantics": "closed_rank_window",
         "prune_witness_target_check_count": 8_000_000,
+        "q3_exact_diametral_pair_support_gabriel_negative_only": False,
         "qualification_device_to_host_bytes": 32_000_000,
         "qualification_output_copy_ns": 6_000,
+        "required_witness_count": assembler.MAXIMUM_CLOSED_RANK - 1,
         "sampled_recertified_prune_count": 900_000,
         "tile_count": 13,
         "traversal_adoption_ns": 7_000,
@@ -380,6 +385,20 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
             ("candidate records", {"candidate_record_count": 749_999}),
             ("pruned mass", {"certified_pruned_pair_mass": 1}),
             ("bounded fallback", {"bounded_bruteforce_performed": True}),
+            (
+                "Gamma2 authorization",
+                {"gamma2_prune_or_discard_authorized": True},
+            ),
+            (
+                "silent handoff",
+                {"gamma2_silent_handoff_required": True},
+            ),
+            ("semantics", {"prune_semantics": "strict_interior_threshold"}),
+            ("witness count", {"required_witness_count": 2}),
+            (
+                "Q3 negative-only scope",
+                {"q3_exact_diametral_pair_support_gabriel_negative_only": True},
+            ),
         )
         for label, mutation in mutations:
             with self.subTest(label=label):

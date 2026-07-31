@@ -27,6 +27,7 @@ using morsehgp3d::gpu::MortonLbvhBuildContext;
 using morsehgp3d::gpu::MortonLbvhDeviceTraversalLease;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierConfig;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierContext;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierPruneSemantics;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierYieldReason;
 using morsehgp3d::gpu::MortonYao48RankedPairTileCatalogLease;
 using morsehgp3d::gpu::MortonYao48RankedPairTileClassifierConfig;
@@ -476,6 +477,35 @@ void test_rank_window_preflight() {
       "closed rank twelve is above the resident classifier contract");
 }
 
+void test_strict_frontier_is_rejected_before_closed_rank_launch() {
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  reset_fake_gpu_morton_yao48_ranked_pair_tile_classifier();
+  auto traversal = traversal_lease(3U);
+  MortonYao48DeviceTiledPairFrontierContext frontier{
+      std::move(traversal),
+      MortonYao48DeviceTiledPairFrontierConfig{
+          2U,
+          2U,
+          MortonYao48DeviceTiledPairFrontierPruneSemantics::
+              strict_interior_threshold}};
+  configure_fake_gpu_morton_yao48_device_tiled_pair_frontier({});
+  auto strict_advance = frontier.advance();
+  check(
+      strict_advance.candidate_tile.has_value(),
+      "the strict-frontier rejection fixture owns a resident tile");
+  MortonYao48RankedPairTileClassifierContext classifier{
+      MortonYao48RankedPairTileClassifierConfig{2U, 3U, 3U, 1U}};
+  check_throws<std::runtime_error>(
+      [&classifier, &strict_advance] {
+        (void)classifier.commit(std::move(strict_advance));
+      },
+      "the closed-rank classifier rejects a strict-interior frontier lease");
+  check(
+      fake_gpu_morton_yao48_ranked_pair_tile_classifier_launch_count() == 0U,
+      "strict-interior authority is rejected before the fake closed-rank "
+      "launcher");
+}
+
 }  // namespace
 
 int main() {
@@ -486,6 +516,7 @@ int main() {
   test_corrupt_receipts_poison_without_committing();
   test_impossible_host_fake_payload_mass_poisoned();
   test_rank_window_preflight();
+  test_strict_frontier_is_rejected_before_closed_rank_launch();
   if (failures != 0) {
     std::cerr << failures
               << " resident ranked-pair tile classifier test(s) failed\n";

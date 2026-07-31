@@ -29,6 +29,7 @@ using morsehgp3d::gpu::MortonYao48DeviceCandidateTileLease;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierAdvance;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierConfig;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierContext;
+using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierPruneSemantics;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStatus;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierStopReason;
 using morsehgp3d::gpu::MortonYao48DeviceTiledPairFrontierYieldReason;
@@ -44,6 +45,8 @@ using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledPruneRegionRecord;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledWitnessBankSlot;
+using morsehgp3d::gpu::detail::
+    phase15_morton_yao48_device_tiled_witness_lower_bound_certifies;
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledAnchor;
 using morsehgp3d::gpu::test_support::
@@ -187,6 +190,20 @@ void check_throws(Function&& function, const std::string& message) {
       anchor_count * 2'048U *
           sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord) +
       anchor_count * 48U * (maximum_closed_rank - 1U) *
+          sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) +
+      anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorControl) +
+      anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) +
+      sizeof(std::uint64_t);
+}
+
+[[nodiscard]] std::size_t expected_arena_bytes_for_witness_count(
+    std::size_t anchor_count,
+    std::size_t required_witness_count) {
+  return anchor_count * 640U *
+             sizeof(Phase15MortonYao48DeviceTiledCandidateRecord) +
+      anchor_count * 2'048U *
+          sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord) +
+      anchor_count * 48U * required_witness_count *
           sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) +
       anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorControl) +
       anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) +
@@ -487,7 +504,7 @@ void test_multiple_tiles_keep_one_exact_arena_account() {
                   .physical_anchor_checkpoint_capacity == 2U &&
           first.candidate_tile->audit()
                   .physical_pending_anchor_count_capacity == 1U,
-      "the first tile publishes the complete v3 arena account");
+      "the first tile publishes the complete v4 arena account");
   first.candidate_tile.reset();
 
   auto second = context.advance();
@@ -548,7 +565,7 @@ void test_detached_tile_survives_context_destruction() {
           views.retained_authority_identity == retained_identity &&
           arena_bytes == expected_arena_bytes(2U, 2U) &&
           views.physical_device_arena_capacity_bytes == arena_bytes,
-      "a detached v3 tile retains its authority and exact arena audit after context destruction");
+      "a detached v4 tile retains its authority and exact arena audit after context destruction");
 }
 
 void test_node_capacity_censure_is_terminal_and_idempotent() {
@@ -593,6 +610,8 @@ void test_hostile_initial_envelopes_poison_fail_stop() {
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
               corrupt_metadata_digest,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
+              corrupt_prune_semantics,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::
               nonzero_failure_code,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
               wrong_anchor_position,
@@ -617,11 +636,81 @@ void test_hostile_initial_envelopes_poison_fail_stop() {
             {}, corruption, {}});
     check_throws<std::runtime_error>(
         [&context] { (void)context.advance(); },
-        "a hostile initial v3 launcher envelope is rejected");
+        "a hostile initial v4 launcher envelope is rejected");
     check(
         context.poisoned() && !context.ready(),
-        "a hostile initial v3 launcher envelope poisons the context");
+        "a hostile initial v4 launcher envelope poisons the context");
   }
+}
+
+void test_strict_interior_threshold_is_authenticated_and_shell_open() {
+  constexpr auto strict =
+      MortonYao48DeviceTiledPairFrontierPruneSemantics::
+          strict_interior_threshold;
+  check(
+      !phase15_morton_yao48_device_tiled_witness_lower_bound_certifies(
+          0.0, strict) &&
+          !phase15_morton_yao48_device_tiled_witness_lower_bound_certifies(
+              -0.0, strict),
+      "two shell witnesses never certify a strict-interior prune");
+  check(
+      phase15_morton_yao48_device_tiled_witness_lower_bound_certifies(
+          0x1p-52, strict) &&
+          phase15_morton_yao48_device_tiled_witness_lower_bound_certifies(
+              0x1p-51, strict) &&
+          morsehgp3d::gpu::
+                  morton_yao48_device_tiled_pair_frontier_required_witness_count(
+                      strict, 2U) ==
+              2U,
+      "two certified strict-interior witnesses can satisfy the q=3 prune "
+      "threshold");
+
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+  auto traversal = traversal_lease(3U);
+  const MortonYao48DeviceTiledPairFrontierConfig config{2U, 2U, strict};
+  MortonYao48DeviceTiledPairFrontierContext context{
+      std::move(traversal), config};
+  configure_fake_gpu_morton_yao48_device_tiled_pair_frontier({});
+  auto advance = context.advance();
+  check(
+      advance.status ==
+              MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
+          advance.audit.prune_semantics == strict &&
+          advance.audit.required_witness_count == 2U &&
+          !advance.audit
+               .nonnegative_diametral_witness_interval_lower_bound_required &&
+          advance.audit
+              .strictly_positive_diametral_witness_interval_lower_bound_required &&
+          advance.audit
+              .q3_exact_diametral_pair_support_gabriel_lane_partition_complete &&
+          advance.audit.gamma2_silent_handoff_required &&
+          !advance.audit.gamma2_prune_or_discard_authorized &&
+          advance.candidate_tile.has_value(),
+      "the strict-interior semantics and threshold are authenticated by the "
+      "frontier audit");
+  if (!advance.candidate_tile.has_value()) {
+    return;
+  }
+  const auto& lease = *advance.candidate_tile;
+  const auto views =
+      Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(lease);
+  check(
+      lease.ready() && lease.audit().prune_semantics == strict &&
+          lease.audit().required_witness_count == 2U &&
+          !lease.audit()
+               .nonnegative_diametral_witness_interval_lower_bound_required &&
+          lease.audit()
+              .strictly_positive_diametral_witness_interval_lower_bound_required &&
+          lease.audit()
+              .q3_exact_diametral_pair_support_gabriel_negative_only &&
+          lease.audit().gamma2_silent_handoff_required &&
+          !lease.audit().gamma2_prune_or_discard_authorized &&
+          views.prune_semantics == strict &&
+          views.required_witness_count == 2U &&
+          lease.audit().physical_device_arena_capacity_bytes ==
+              expected_arena_bytes_for_witness_count(2U, 2U),
+      "the strict-interior tag, threshold, and linear arena extent propagate "
+      "through the detached lease");
 }
 
 void test_preflight_and_trivial_frontier() {
@@ -635,6 +724,22 @@ void test_preflight_and_trivial_frontier() {
       },
       "an invalid tile capacity is rejected before adoption");
   check(traversal.ready(), "preflight preserves the source lease");
+
+  auto unknown_semantics_traversal = traversal_lease(3U);
+  check_throws<std::out_of_range>(
+      [&unknown_semantics_traversal] {
+        MortonYao48DeviceTiledPairFrontierContext invalid{
+            std::move(unknown_semantics_traversal),
+            MortonYao48DeviceTiledPairFrontierConfig{
+                2U,
+                2U,
+                static_cast<
+                    MortonYao48DeviceTiledPairFrontierPruneSemantics>(255U)}};
+      },
+      "an unknown prune-semantics tag is rejected before adoption");
+  check(
+      unknown_semantics_traversal.ready(),
+      "unknown-semantics preflight preserves the source lease");
 
   auto singleton_traversal = traversal_lease(1U);
   MortonYao48DeviceTiledPairFrontierContext singleton{
@@ -661,6 +766,7 @@ int main() {
   test_detached_tile_survives_context_destruction();
   test_node_capacity_censure_is_terminal_and_idempotent();
   test_hostile_initial_envelopes_poison_fail_stop();
+  test_strict_interior_threshold_is_authenticated_and_shell_open();
   test_preflight_and_trivial_frontier();
   if (failures != 0) {
     std::cerr << failures

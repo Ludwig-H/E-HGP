@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d_silent_pair_gateway_contract_regression",
+  "fixture_id": "silent-pair-gateway-zero-strict-coface-level-v1",
+  "ambient_dimension": 3,
+  "point_coordinates": {
+    "2": [0, 0, 0],
+    "3": [1, 0, 0],
+    "4": [5, 0, 0]
+  },
+  "strict_replacement_coface_point_ids": [2, 3, 4],
+  "impossible_claimed_squared_level": {
+    "numerator": 0,
+    "denominator": 1
+  },
+  "exact_squared_level": {
+    "numerator": 25,
+    "denominator": 4
+  },
+  "expected_decision": "rejected_strict_leg_level",
+  "regression_invariant": "A strict coface on three distinct canonical points has a strictly positive exact miniball level."
+}

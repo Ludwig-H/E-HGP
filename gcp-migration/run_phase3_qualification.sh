@@ -41,6 +41,7 @@ PHASE7_H_POLYTOPE=0
 PHASE9_PAIR_SUPPORT_PHI=0
 PHASE15_EXACT_DIAMETRAL_PHI=0
 PHASE15_DEVICE_FRONTIER_50K=0
+PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=0
 PHASE15_RANKED_PAIR_CLASSIFIER=0
 MORTON_YAO48_SEED_WORK_PROFILE=0
 
@@ -65,6 +66,8 @@ LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT=""
+LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT=""
+LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT=""
 START_HANDOFF=""
@@ -88,7 +91,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k] [--phase15-ranked-pair-classifier] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -160,6 +163,13 @@ couverture complète et une masse non résolue nulle, mais reste un résultat de
 composant sans catalogue, exactitude de hiérarchie, scalabilité, SLO ou statut
 public revendiqué.
 
+--phase15-device-frontier-strict-interior ajoute exclusivement la
+qualification native `q3_gabriel_exact_diametral_pair_support_negative_only` à deux témoins
+strictement intérieurs, avec la fixture discriminante A/X shell/strict, rejeu
+exact de toutes les paires, matrice rang-métadonnée/tuile, contrôle fermé,
+memcheck et racecheck. Ce n'est ni un smoke, ni une permission de supprimer
+dans Gamma2, ni une qualification de hiérarchie; le statut public reste absent.
+
 --phase15-ranked-pair-classifier ajoute exclusivement la qualification CUDA
 native et bornée du chemin LBVH, frontière, classifieur puis catalogue final
 support-2 pour les rangs fermés 2 et 3. La sortie est comparée à l'oracle CPU
@@ -227,6 +237,10 @@ while (($# > 0)); do
             PHASE15_DEVICE_FRONTIER_50K=1
             shift
             ;;
+        --phase15-device-frontier-strict-interior)
+            PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=1
+            shift
+            ;;
         --phase15-ranked-pair-classifier)
             PHASE15_RANKED_PAIR_CLASSIFIER=1
             shift
@@ -269,6 +283,7 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1 && \
      PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
      PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
      PHASE15_DEVICE_FRONTIER_50K == 1 || \
+     PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1 || \
      PHASE15_RANKED_PAIR_CLASSIFIER == 1))); then
     die "--phase15-exact-diametral-phi est mutuellement exclusive de tous les autres compagnons."
 fi
@@ -278,8 +293,19 @@ if ((PHASE15_DEVICE_FRONTIER_50K == 1 && \
      PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
      PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
      PHASE15_EXACT_DIAMETRAL_PHI == 1 || \
+     PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1 || \
      PHASE15_RANKED_PAIR_CLASSIFIER == 1))); then
     die "--phase15-device-frontier-50k est mutuellement exclusive de tous les autres compagnons."
+fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1 && \
+    (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || \
+     PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
+     PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
+     PHASE15_EXACT_DIAMETRAL_PHI == 1 || \
+     PHASE15_DEVICE_FRONTIER_50K == 1 || \
+     PHASE15_RANKED_PAIR_CLASSIFIER == 1))); then
+    die "--phase15-device-frontier-strict-interior est mutuellement exclusive de tous les autres compagnons."
 fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1 && \
     (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
@@ -287,7 +313,8 @@ if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1 && \
      PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
      PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
      PHASE15_EXACT_DIAMETRAL_PHI == 1 || \
-     PHASE15_DEVICE_FRONTIER_50K == 1))); then
+     PHASE15_DEVICE_FRONTIER_50K == 1 || \
+     PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1))); then
     die "--phase15-ranked-pair-classifier est mutuellement exclusive de tous les autres compagnons."
 fi
 
@@ -436,6 +463,12 @@ if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
         ! -L "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
+    LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT="${RESULT_DIR}/phase15-device-frontier-q3-gabriel-negative-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}" && \
+        ! -L "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
     LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT="${RESULT_DIR}/phase15-ranked-pair-classifier-${HEAD_SHA}.json"
     [[ ! -e "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT}" && \
@@ -550,6 +583,14 @@ if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact device-frontier 50k Phase 15 temporaire local."
+    fi
+fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
+    if ! LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase15-device-frontier-q3-gabriel-negative-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact q3 Gabriel négatif Phase 15 temporaire local."
     fi
 fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
@@ -1054,6 +1095,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" || true
+    fi
     if [[ -n "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" && \
         -e "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" || true
@@ -1144,6 +1189,7 @@ printf '%s\n' \
     "  replay Phi Phase 9: $([[ ${PHASE9_PAIR_SUPPORT_PHI} == 1 ]] && printf 'qualification CUDA G4 + recertification CPU activée' || printf 'désactivé')" \
     "  replay Phi Phase 15: $([[ ${PHASE15_EXACT_DIAMETRAL_PHI} == 1 ]] && printf 'prédicat ponctuel exact CUDA G4 activé' || printf 'désactivé')" \
     "  frontier 50k Phase 15: $([[ ${PHASE15_DEVICE_FRONTIER_50K} == 1 ]] && printf 'qualification standard non-smoke activée' || printf 'désactivé')" \
+    "  négatif Gabriel q=3: $([[ ${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR} == 1 ]] && printf 'carrier pair-only; aucune suppression Gamma2 activée' || printf 'désactivé')" \
     "  classifieur rangs 2-3: $([[ ${PHASE15_RANKED_PAIR_CLASSIFIER} == 1 ]] && printf 'qualification CUDA native bornée activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
@@ -1175,6 +1221,7 @@ remote_phase7_h_polytope_artifact=""
 remote_phase9_pair_support_phi_artifact=""
 remote_phase15_exact_diametral_phi_artifact=""
 remote_phase15_device_frontier_50k_artifact=""
+remote_phase15_device_frontier_strict_interior_artifact=""
 remote_phase15_ranked_pair_classifier_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
@@ -1188,6 +1235,7 @@ quoted_phase7_h_polytope_artifact=""
 quoted_phase9_pair_support_phi_artifact=""
 quoted_phase15_exact_diametral_phi_artifact=""
 quoted_phase15_device_frontier_50k_artifact=""
+quoted_phase15_device_frontier_strict_interior_artifact=""
 quoted_phase15_ranked_pair_classifier_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
@@ -1197,6 +1245,7 @@ phase7_h_polytope_worker_option=""
 phase9_pair_support_phi_worker_option=""
 phase15_exact_diametral_phi_worker_option=""
 phase15_device_frontier_50k_worker_option=""
+phase15_device_frontier_strict_interior_worker_option=""
 phase15_ranked_pair_classifier_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
@@ -1246,6 +1295,11 @@ if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
     quoted_phase15_device_frontier_50k_artifact="$(shell_quote "${remote_phase15_device_frontier_50k_artifact}")"
     phase15_device_frontier_50k_worker_option=" --phase15-device-frontier-50k-output ${quoted_phase15_device_frontier_50k_artifact}"
 fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
+    remote_phase15_device_frontier_strict_interior_artifact="${REMOTE_WORKDIR}/phase15-device-frontier-q3-gabriel-negative-result.json"
+    quoted_phase15_device_frontier_strict_interior_artifact="$(shell_quote "${remote_phase15_device_frontier_strict_interior_artifact}")"
+    phase15_device_frontier_strict_interior_worker_option=" --phase15-device-frontier-strict-interior-output ${quoted_phase15_device_frontier_strict_interior_artifact}"
+fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
     remote_phase15_ranked_pair_classifier_artifact="${REMOTE_WORKDIR}/phase15-ranked-pair-classifier-result.json"
     quoted_phase15_ranked_pair_classifier_artifact="$(shell_quote "${remote_phase15_ranked_pair_classifier_artifact}")"
@@ -1267,7 +1321,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_ranked_pair_classifier_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1377,6 +1431,19 @@ if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase15_device_frontier_50k_artifact}" \
         "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase15_device_frontier_strict_interior_artifact}" \
+        "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -1876,6 +1943,29 @@ environment_artifact_path = Path(sys.argv[3])
 sys.path.insert(0, sys.argv[4])
 
 import assemble_phase15_device_frontier_50k_qualification as assembler
+
+assembler.validate_artifact_file(
+    artifact_path,
+    git_sha=git_sha,
+    environment_artifact_path=environment_artifact_path,
+)
+PY
+fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
+    [[ -s "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" ]] || \
+        die "Artefact q3 Gabriel négatif Phase 15 distant récupéré mais vide."
+    python3 -B - "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+from pathlib import Path
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+environment_artifact_path = Path(sys.argv[3])
+sys.path.insert(0, sys.argv[4])
+
+import assemble_phase15_device_frontier_strict_interior_qualification as assembler
 
 assembler.validate_artifact_file(
     artifact_path,
@@ -3480,7 +3570,9 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" \
     "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" \
-    "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT}" <<'PY'
+    "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT}" \
+    "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" \
+    "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}" <<'PY'
 import hashlib
 import json
 import os
@@ -3525,6 +3617,12 @@ if sys.argv[26] or sys.argv[27]:
     if not sys.argv[26] or not sys.argv[27]:
         raise SystemExit("paire de publication ranked-pair-classifier Phase 15 incomplète")
     pairs.append((Path(sys.argv[26]), Path(sys.argv[27])))
+if sys.argv[28] or sys.argv[29]:
+    if not sys.argv[28] or not sys.argv[29]:
+        raise SystemExit(
+            "paire de publication q3 Gabriel négatif Phase 15 incomplète"
+        )
+    pairs.append((Path(sys.argv[28]), Path(sys.argv[29])))
 
 documents = []
 for temporary, _ in pairs:
@@ -3641,6 +3739,9 @@ fi
 if [[ -n "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}"
+fi
 if [[ -n "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}"
 fi
@@ -3653,6 +3754,7 @@ LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
 LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
+LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
@@ -3693,6 +3795,10 @@ fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
     printf '[ARTEFACT] Qualification device-frontier 50k Phase 15 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}"
+fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
+    printf '[ARTEFACT] Qualification q3 Gabriel pair-only négative Phase 15 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}"
 fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
     printf '[ARTEFACT] Qualification ranked-pair-classifier Phase 15 publiée après certification TERMINATED : %s\n' \
@@ -3743,6 +3849,10 @@ fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
     printf '[SUCCÈS] Qualification device-frontier 50k Phase 15 compagnon conservée : %s\n' \
         "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}"
+fi
+if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
+    printf '[SUCCÈS] Qualification q3 Gabriel pair-only négative Phase 15 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}"
 fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
     printf '[SUCCÈS] Qualification ranked-pair-classifier Phase 15 compagnon conservée : %s\n' \
