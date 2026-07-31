@@ -9,6 +9,7 @@
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <chrono>
 #include <cmath>
@@ -34,6 +35,7 @@ using morsehgp3d::gpu::ExactPairBlockNodeAuthority;
 using morsehgp3d::gpu::ExactPairBlockOpenKind;
 using morsehgp3d::gpu::ExactPairBlockWitnessCudaConfig;
 using morsehgp3d::gpu::ExactPairBlockWitnessCudaDecision;
+using morsehgp3d::gpu::ExactPairBlockWitnessCudaProposalState;
 using morsehgp3d::gpu::ExactPairBlockWitnessCudaStatus;
 using morsehgp3d::gpu::ExactPairBlockWitnessCudaTask;
 using morsehgp3d::gpu::MortonLbvhBuildContext;
@@ -56,6 +58,12 @@ struct HarvestedAuthorities {
 struct QualifiedTask {
   ExactPairBlockWitnessCudaTask task{};
   int expected_sign{};
+};
+
+struct SubnormalNegativeFixtureReceipt {
+  std::uint64_t submitted_task_digest{};
+  std::uint64_t completed_result_digest{};
+  std::uint64_t kernel_elapsed_nanoseconds{};
 };
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
@@ -270,10 +278,98 @@ struct QualifiedTask {
           first_box, second_box, witness_box)};
 }
 
+[[nodiscard]] SubnormalNegativeFixtureReceipt
+qualify_subnormal_negative_fixture() {
+  const double denormal = std::numeric_limits<double>::denorm_min();
+  const std::vector<CertifiedPoint3> points{
+      point(-denormal, 0.0, 0.0),
+      point(denormal, 0.0, 0.0),
+      point(0.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(
+          std::span<const CertifiedPoint3>{points});
+  MortonLbvhBuildContext builder{cloud.size()};
+  auto build = builder.build(cloud);
+  if (!build.cuda_qualified_build()) {
+    throw std::logic_error(
+        "the subnormal fixture requires a real CUDA-certified LBVH build");
+  }
+  const MortonLbvhIndex& index = build.certified_index();
+  const HarvestedAuthorities authorities =
+      harvest_authorities(index, cloud);
+  if (authorities.singletons.size() != points.size()) {
+    throw std::logic_error(
+        "the subnormal fixture did not harvest three singleton authorities");
+  }
+
+  const auto authority_with_x_bits =
+      [&](std::uint64_t expected_bits) {
+        const auto found = std::find_if(
+            authorities.singletons.begin(),
+            authorities.singletons.end(),
+            [&](const ExactPairBlockNodeAuthority& authority) {
+              const ExactDyadicAabb3 candidate =
+                  authority_box(index, cloud, authority);
+              return candidate.lower_binary64_bits[0] == expected_bits &&
+                  candidate.upper_binary64_bits[0] == expected_bits;
+            });
+        if (found == authorities.singletons.end()) {
+          throw std::logic_error(
+              "the subnormal fixture lost an exact singleton coordinate");
+        }
+        return *found;
+      };
+  QualifiedTask qualified = make_task(
+      index,
+      cloud,
+      authority_with_x_bits(std::bit_cast<std::uint64_t>(-denormal)),
+      authority_with_x_bits(std::bit_cast<std::uint64_t>(denormal)),
+      authority_with_x_bits(std::bit_cast<std::uint64_t>(0.0)));
+  qualified.task.task_id = UINT64_C(0x5355424e4f524d31);
+  if (qualified.expected_sign != -1) {
+    throw std::logic_error(
+        "the subnormal fixture oracle did not certify a negative Q");
+  }
+  const std::array<ExactPairBlockWitnessCudaTask, 1U> tasks{
+      qualified.task};
+  auto result =
+      morsehgp3d::gpu::qualify_exact_pair_block_witnesses_cuda(
+          builder.release_device_traversal_lease(build),
+          tasks,
+          ExactPairBlockWitnessCudaConfig{2U, 1U});
+  if (result.status !=
+          ExactPairBlockWitnessCudaStatus::qualified_component_batch ||
+      !result.qualified_cuda_batch() || result.records.size() != 1U ||
+      result.records.front().decision !=
+          ExactPairBlockWitnessCudaDecision::certified_closed ||
+      result.records.front().proposal_state !=
+          ExactPairBlockWitnessCudaProposalState::directed_ambiguous ||
+      !result.records.front().fixed_limb_evaluation_performed ||
+      result.records.front().exact_sign != -1 ||
+      result.audit.directed_ambiguous_count != 1U ||
+      result.audit.directed_nonnegative_short_circuit_count != 0U ||
+      result.audit.fixed_limb_exact_decision_count != 1U ||
+      result.audit.exact_negative_count != 1U ||
+      result.audit.certified_task_count != 1U ||
+      !result.audit.proposal_partition_validated ||
+      !result.audit.directed_interval_never_closes_or_prunes ||
+      result.audit.global_pair_coverage_closed || result.audit.slo_claimed) {
+    throw std::logic_error(
+        "the directed interval misclassified the negative subnormal "
+        "underflow fixture");
+  }
+  return SubnormalNegativeFixtureReceipt{
+      result.audit.submitted_task_digest,
+      result.audit.completed_result_digest,
+      result.audit.kernel_elapsed_nanoseconds};
+}
+
 }  // namespace
 
 int main() {
   try {
+    const SubnormalNegativeFixtureReceipt subnormal_receipt =
+        qualify_subnormal_negative_fixture();
     CanonicalPointCloud cloud = adversarial_cloud();
     if (cloud.size() != qualification_point_count) {
       throw std::logic_error(
@@ -528,14 +624,22 @@ int main() {
         ++all_multileaf_nonresidual_task_count;
       }
       const int expected = expected_signs[index_value];
-      const bool sign_matches = record.exact_sign == expected;
+      const bool interval_short_circuit =
+          !record.fixed_limb_evaluation_performed &&
+          record.proposal_state ==
+              morsehgp3d::gpu::ExactPairBlockWitnessCudaProposalState::
+                  directed_nonnegative &&
+          record.exact_sign == 0 && expected >= 0;
+      const bool sign_matches =
+          interval_short_circuit || record.exact_sign == expected;
       const bool decision_matches = expected < 0
           ? record.decision ==
                 ExactPairBlockWitnessCudaDecision::certified_closed
           : record.decision == ExactPairBlockWitnessCudaDecision::
                 inconclusive_nonnegative_q;
-      if (!record.fixed_limb_evaluation_performed || !sign_matches ||
-          !decision_matches) {
+      if ((!record.fixed_limb_evaluation_performed &&
+           !interval_short_circuit) ||
+          !sign_matches || !decision_matches) {
         ++mismatch_count;
       }
     }
@@ -550,6 +654,12 @@ int main() {
         result.records.size() == tasks.size() &&
         result.audit.certified_task_count != 0U &&
         result.audit.nonnegative_task_count != 0U &&
+        result.audit.directed_nonnegative_short_circuit_count != 0U &&
+        result.audit.directed_nonnegative_short_circuit_count ==
+            result.audit.directed_nonnegative_count &&
+        result.audit.proposal_partition_validated &&
+        result.audit.directed_nonnegative_short_circuit_validated &&
+        result.audit.directed_interval_never_closes_or_prunes &&
         multileaf_first_support_task_count != 0U &&
         multileaf_second_support_task_count != 0U &&
         multileaf_witness_task_count != 0U &&
@@ -579,8 +689,18 @@ int main() {
         << result.audit.completed_result_digest << ','
         << "\"directed_ambiguous_count\":"
         << result.audit.directed_ambiguous_count << ','
+        << "\"directed_arithmetic_overflow_count\":"
+        << result.audit.directed_arithmetic_overflow_count << ','
         << "\"directed_negative_count\":"
         << result.audit.directed_negative_count << ','
+        << "\"directed_nonnegative_count\":"
+        << result.audit.directed_nonnegative_count << ','
+        << "\"directed_nonnegative_short_circuit_count\":"
+        << result.audit.directed_nonnegative_short_circuit_count << ','
+        << "\"fixed_limb_evaluation_count\":"
+        << result.audit.fixed_limb_exact_decision_count +
+               result.audit.fixed_limb_residual_count
+        << ','
         << "\"fixed_limb_residual_count\":" << residual_count << ','
         << "\"fixture_profile\":\"signed_zero_subnormal_cancellation_"
            "finite_extremes\","
@@ -607,9 +727,17 @@ int main() {
         << rank_sufficient_witness_task_count << ','
         << "\"required_witness_point_count\":" << qualification_k_max
         << ','
-        << "\"schema_version\":1,"
+        << "\"schema_version\":2,"
         << "\"submitted_task_digest\":"
         << result.audit.submitted_task_digest << ','
+        << "\"subnormal_negative_completed_result_digest\":"
+        << subnormal_receipt.completed_result_digest << ','
+        << "\"subnormal_negative_directed_ambiguous\":true,"
+        << "\"subnormal_negative_kernel_elapsed_nanoseconds\":"
+        << subnormal_receipt.kernel_elapsed_nanoseconds << ','
+        << "\"subnormal_negative_qualified\":true,"
+        << "\"subnormal_negative_submitted_task_digest\":"
+        << subnormal_receipt.submitted_task_digest << ','
         << "\"support_mass_gt_one_task_count\":"
         << support_mass_gt_one_task_count << ','
         << "\"task_count\":" << tasks.size() << ','

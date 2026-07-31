@@ -87,7 +87,7 @@ ExactPairBlockFrontierContext::ExactPairBlockFrontierContext(
       config.maximum_closed_rank >
           exact_pair_block_frontier_maximum_closed_rank) {
     throw std::out_of_range(
-        "an exact pair-block frontier maximum closed rank must be in [2, 6]");
+        "an exact pair-block frontier maximum closed rank must be in [2, 11]");
   }
   if (point_count_ == 0U || index.leaves_.size() != point_count_ ||
       index.root_index_ >= index.nodes_.size()) {
@@ -582,7 +582,7 @@ ExactPairBlockFrontierContext::
         return first.witness.node_index <
             second.witness.node_index;
       };
-  // The bound is five.  A direct insertion sort keeps every accessed extent
+  // The bound is ten.  A direct insertion sort keeps every accessed extent
   // visible to strict compiler diagnostics and avoids a general-purpose
   // sorting implementation whose internal pivot arithmetic assumes a much
   // larger random-access range.

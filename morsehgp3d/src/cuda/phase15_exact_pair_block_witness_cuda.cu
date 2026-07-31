@@ -307,21 +307,14 @@ directed_proposal(
   return static_cast<std::uint8_t>(state);
 }
 
-__global__ void morsehgp3d_phase15_exact_pair_block_witness_kernel(
+[[nodiscard]] __device__ Phase15ExactPairBlockWitnessCudaDeviceRecord
+evaluate_task(
     const std::uint64_t* coordinate_bits,
     const DeviceNode* nodes,
     std::size_t point_count,
     std::size_t node_count,
-    const Phase15ExactPairBlockWitnessCudaTask* tasks,
-    Phase15ExactPairBlockWitnessCudaDeviceRecord* records,
-    std::size_t task_count,
+    Phase15ExactPairBlockWitnessCudaTask task,
     std::size_t maximum_closed_rank) {
-  const std::size_t index =
-      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
-  if (index >= task_count) {
-    return;
-  }
-  const Phase15ExactPairBlockWitnessCudaTask task = tasks[index];
   Phase15ExactPairBlockWitnessCudaDeviceRecord record{};
   record.task_id = task.task_id;
   record.unordered_pair_mass = task.unordered_pair_mass;
@@ -351,8 +344,7 @@ __global__ void morsehgp3d_phase15_exact_pair_block_witness_kernel(
            ~std::uint64_t{0} / first_count &&
        first_count * second_count == task.unordered_pair_mass);
   if (!native || !mass_valid) {
-    records[index] = record;
-    return;
+    return record;
   }
   if (task.first_leaf_end > task.second_leaf_begin ||
       intervals_overlap(
@@ -363,8 +355,7 @@ __global__ void morsehgp3d_phase15_exact_pair_block_witness_kernel(
           task.witness_leaf_begin, task.witness_leaf_end)) {
     record.decision = decision_word(
         ExactPairBlockWitnessCudaDecision::residual_support_overlap);
-    records[index] = record;
-    return;
+    return record;
   }
   const std::uint64_t witness_count =
       static_cast<std::uint64_t>(task.witness_leaf_end) -
@@ -372,8 +363,7 @@ __global__ void morsehgp3d_phase15_exact_pair_block_witness_kernel(
   if (witness_count < maximum_closed_rank - 1U) {
     record.decision = decision_word(ExactPairBlockWitnessCudaDecision::
         inconclusive_insufficient_witness_mass);
-    records[index] = record;
-    return;
+    return record;
   }
 
   exact_pair_block_q_fixed::Binary64Aabb3 first{};
@@ -387,14 +377,25 @@ __global__ void morsehgp3d_phase15_exact_pair_block_witness_kernel(
       !load_box(
           nodes[task.witness_node_index], coordinate_bits, point_count,
           witness)) {
-    records[index] = record;
-    return;
+    return record;
   }
-  record.proposal_state = proposal_word(
-      directed_proposal(first, second, witness));
+  const ExactPairBlockWitnessCudaProposalState proposal =
+      directed_proposal(first, second, witness);
+  record.proposal_state = proposal_word(proposal);
 
-  // The interval sign above is proposal-only.  Every possible negative
-  // closure is independently decided again by exact checked limbs.
+  // A directed lower bound at or above zero is enough to reject this
+  // negative-closure certificate conservatively.  It never prunes a product,
+  // so the fixed-limb path remains mandatory only for possible closures and
+  // for all other proposal states.
+  if (proposal ==
+      ExactPairBlockWitnessCudaProposalState::directed_nonnegative) {
+    record.decision = decision_word(
+        ExactPairBlockWitnessCudaDecision::inconclusive_nonnegative_q);
+    return record;
+  }
+
+  // The interval never closes or prunes.  Every possible negative closure is
+  // independently decided again by exact checked limbs.
   record.fixed_limb_evaluation_performed = 1U;
   const exact_phi_fixed::ResultCode exact =
       exact_pair_block_q_fixed::exact_maximum_sign(first, second, witness);
@@ -420,7 +421,114 @@ __global__ void morsehgp3d_phase15_exact_pair_block_witness_kernel(
           residual_fixed_limb_overflow);
       break;
   }
-  records[index] = record;
+  return record;
+}
+
+[[nodiscard]] __device__ std::uint8_t encode_outcome(
+    const Phase15ExactPairBlockWitnessCudaDeviceRecord& record) noexcept {
+  using Outcome = Phase15ExactPairBlockWitnessCudaOutcome;
+  const auto decision =
+      static_cast<ExactPairBlockWitnessCudaDecision>(record.decision);
+  const auto proposal =
+      static_cast<ExactPairBlockWitnessCudaProposalState>(
+          record.proposal_state);
+  switch (decision) {
+    case ExactPairBlockWitnessCudaDecision::residual_invalid_authority:
+      return static_cast<std::uint8_t>(Outcome::invalid_authority);
+    case ExactPairBlockWitnessCudaDecision::residual_support_overlap:
+      return static_cast<std::uint8_t>(Outcome::support_overlap);
+    case ExactPairBlockWitnessCudaDecision::
+        inconclusive_insufficient_witness_mass:
+      return static_cast<std::uint8_t>(Outcome::insufficient_witness);
+    case ExactPairBlockWitnessCudaDecision::inconclusive_nonnegative_q:
+      if (record.fixed_limb_evaluation_performed == 0U &&
+          proposal ==
+              ExactPairBlockWitnessCudaProposalState::directed_nonnegative) {
+        return static_cast<std::uint8_t>(Outcome::directed_nonnegative);
+      }
+      break;
+    case ExactPairBlockWitnessCudaDecision::certified_closed:
+    case ExactPairBlockWitnessCudaDecision::residual_fixed_limb_overflow:
+      break;
+  }
+  std::uint8_t base = 0U;
+  if (proposal == ExactPairBlockWitnessCudaProposalState::directed_negative) {
+    base = static_cast<std::uint8_t>(
+        Outcome::directed_negative_exact_negative);
+  } else if (
+      proposal == ExactPairBlockWitnessCudaProposalState::directed_ambiguous) {
+    base = static_cast<std::uint8_t>(
+        Outcome::directed_ambiguous_exact_negative);
+  } else if (
+      proposal == ExactPairBlockWitnessCudaProposalState::
+          directed_arithmetic_overflow) {
+    base = static_cast<std::uint8_t>(
+        Outcome::directed_overflow_exact_negative);
+  } else {
+    return UINT8_MAX;
+  }
+  if (decision ==
+      ExactPairBlockWitnessCudaDecision::residual_fixed_limb_overflow) {
+    return static_cast<std::uint8_t>(base + 3U);
+  }
+  if (record.exact_sign < 0) {
+    return base;
+  }
+  if (record.exact_sign == 0) {
+    return static_cast<std::uint8_t>(base + 1U);
+  }
+  return static_cast<std::uint8_t>(base + 2U);
+}
+
+__global__ void morsehgp3d_phase15_exact_pair_block_witness_kernel(
+    const std::uint64_t* coordinate_bits,
+    const DeviceNode* nodes,
+    std::size_t point_count,
+    std::size_t node_count,
+    const Phase15ExactPairBlockWitnessCudaTask* tasks,
+    Phase15ExactPairBlockWitnessCudaDeviceRecord* records,
+    std::size_t task_count,
+    std::size_t maximum_closed_rank) {
+  const std::size_t index =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (index >= task_count) {
+    return;
+  }
+  records[index] = evaluate_task(
+      coordinate_bits,
+      nodes,
+      point_count,
+      node_count,
+      tasks[index],
+      maximum_closed_rank);
+}
+
+__global__ void
+morsehgp3d_phase15_repeated_exact_pair_block_witness_kernel(
+    const std::uint64_t* coordinate_bits,
+    const DeviceNode* nodes,
+    std::size_t point_count,
+    std::size_t node_count,
+    const Phase15ExactPairBlockWitnessCudaTask* pattern,
+    std::size_t pattern_count,
+    std::uint8_t* outcomes,
+    std::size_t logical_task_count,
+    std::uint64_t first_task_id,
+    std::size_t maximum_closed_rank) {
+  const std::size_t index =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (index >= logical_task_count) {
+    return;
+  }
+  Phase15ExactPairBlockWitnessCudaTask task = pattern[index % pattern_count];
+  task.task_id = first_task_id + static_cast<std::uint64_t>(index);
+  outcomes[index] = encode_outcome(evaluate_task(
+      coordinate_bits,
+      nodes,
+      point_count,
+      node_count,
+      task,
+      maximum_closed_rank));
 }
 
 [[nodiscard]] ExactPairBlockWitnessCudaDecision decode_decision(
@@ -481,6 +589,13 @@ void accumulate(
         ++audit.exact_positive_count;
       }
     }
+  }
+  if (!record.fixed_limb_evaluation_performed &&
+      record.decision ==
+          ExactPairBlockWitnessCudaDecision::inconclusive_nonnegative_q &&
+      record.proposal_state ==
+          ExactPairBlockWitnessCudaProposalState::directed_nonnegative) {
+    ++audit.directed_nonnegative_short_circuit_count;
   }
   switch (record.decision) {
     case ExactPairBlockWitnessCudaDecision::certified_closed:
@@ -646,6 +761,7 @@ phase15_launch_exact_pair_block_witness_cuda(
   audit.bounded_final_qualification_readback_performed = true;
   audit.compact_batch_abi_validated = true;
   audit.resident_batch_submission_validated = true;
+  audit.directed_interval_never_closes_or_prunes = true;
   audit.fp64_used_as_proposal_only = true;
   audit.negative_closure_requires_fixed_limb_exact_decision = true;
   audit.cuda_execution_performed = true;
@@ -665,6 +781,28 @@ phase15_launch_exact_pair_block_witness_cuda(
     accumulate(record, audit);
     receipt.records.push_back(record);
   }
+  audit.proposal_partition_validated =
+      audit.directed_negative_count + audit.directed_nonnegative_count +
+              audit.directed_ambiguous_count +
+              audit.directed_arithmetic_overflow_count +
+              audit.invalid_authority_task_count +
+              audit.support_overlap_task_count +
+              audit.insufficient_witness_task_count ==
+          audit.completed_task_count;
+  audit.directed_nonnegative_short_circuit_validated =
+      audit.directed_nonnegative_short_circuit_count ==
+              audit.directed_nonnegative_count &&
+      audit.fixed_limb_exact_decision_count +
+              audit.fixed_limb_residual_count ==
+          audit.directed_negative_count + audit.directed_ambiguous_count +
+              audit.directed_arithmetic_overflow_count &&
+      audit.fixed_limb_exact_decision_count ==
+          audit.exact_negative_count + audit.exact_zero_count +
+              audit.exact_positive_count &&
+      audit.certified_task_count == audit.exact_negative_count &&
+      audit.nonnegative_task_count ==
+          audit.directed_nonnegative_short_circuit_count +
+              audit.exact_zero_count + audit.exact_positive_count;
   audit.local_submitted_mass_conservation_validated =
       audit.pruned_unordered_pair_mass +
               audit.residual_unordered_pair_mass ==
@@ -675,6 +813,130 @@ phase15_launch_exact_pair_block_witness_cuda(
   audit.completed_result_digest = receipt.completed_result_digest;
   receipt.source_identity_authenticated = true;
   receipt.every_task_classified_once = true;
+  return receipt;
+}
+
+Phase15ExactPairBlockWitnessCudaRepeatedReceipt
+phase15_launch_repeated_exact_pair_block_witness_cuda(
+    const Phase15ExactPairBlockWitnessCudaRepeatedRequest& request) {
+  if (request.traversal == nullptr || !request.traversal->ready ||
+      request.traversal->host_fake || !request.traversal->retained_owner ||
+      !request.traversal->source_cloud_identity ||
+      request.traversal->device_coordinate_bits == nullptr ||
+      request.traversal->device_nodes == nullptr ||
+      request.traversal->cuda_device < 0 || request.pattern.empty() ||
+      request.repetition_count == 0U ||
+      request.logical_task_count == 0U ||
+      request.logical_task_count > request.task_capacity ||
+      request.logical_task_count / request.pattern.size() !=
+          request.repetition_count ||
+      request.logical_task_count % request.pattern.size() != 0U ||
+      request.repeated_task_recipe_digest == 0U) {
+    throw std::invalid_argument(
+        "the repeated exact pair-block witness CUDA launcher received an "
+        "invalid compact pattern request");
+  }
+  const std::size_t pattern_bytes = request.pattern.size_bytes();
+  const std::size_t outcome_bytes = request.logical_task_count;
+  if (pattern_bytes >
+      std::numeric_limits<std::size_t>::max() - outcome_bytes) {
+    throw std::length_error(
+        "the repeated exact pair-block witness compact arena overflows "
+        "size_t");
+  }
+  const std::size_t arena_bytes = pattern_bytes + outcome_bytes;
+  const std::size_t block_count =
+      (request.logical_task_count - 1U) / threads_per_block + 1U;
+
+  DeviceGuard guard{request.traversal->cuda_device};
+  cudaDeviceProp properties{};
+  check_cuda(
+      cudaGetDeviceProperties(
+          &properties, request.traversal->cuda_device),
+      "cudaGetDeviceProperties repeated exact pair-block witness batch");
+  if (properties.major != 12 || properties.minor != 0 ||
+      properties.maxGridSize[0] <= 0 ||
+      block_count > static_cast<std::size_t>(properties.maxGridSize[0])) {
+    throw std::runtime_error(
+        "the repeated exact pair-block witness batch requires a bounded "
+        "sm_120 grid");
+  }
+
+  Phase15ExactPairBlockWitnessCudaRepeatedReceipt receipt;
+  receipt.outcomes.resize(request.logical_task_count);
+  {
+    Stream stream;
+    BatchArena arena{arena_bytes};
+    Event kernel_begin;
+    Event kernel_end;
+    auto* device_pattern = reinterpret_cast<
+        Phase15ExactPairBlockWitnessCudaTask*>(arena.get());
+    auto* device_outcomes = reinterpret_cast<std::uint8_t*>(
+        arena.get() + pattern_bytes);
+    check_cuda(
+        cudaMemcpyAsync(
+            device_pattern,
+            request.pattern.data(),
+            pattern_bytes,
+            cudaMemcpyHostToDevice,
+            stream.get()),
+        "cudaMemcpyAsync repeated exact pair-block witness pattern");
+    check_cuda(
+        cudaEventRecord(kernel_begin.get(), stream.get()),
+        "cudaEventRecord before repeated exact pair-block witness kernel");
+    morsehgp3d_phase15_repeated_exact_pair_block_witness_kernel
+        <<<static_cast<unsigned int>(block_count), threads_per_block, 0U,
+           stream.get()>>>(
+            request.traversal->device_coordinate_bits,
+            static_cast<const DeviceNode*>(request.traversal->device_nodes),
+            request.traversal->point_count,
+            request.traversal->certified_node_count,
+            device_pattern,
+            request.pattern.size(),
+            device_outcomes,
+            request.logical_task_count,
+            request.first_task_id,
+            request.config.maximum_closed_rank);
+    check_cuda(
+        cudaGetLastError(),
+        "Phase 15 repeated exact pair-block witness compact kernel launch");
+    check_cuda(
+        cudaEventRecord(kernel_end.get(), stream.get()),
+        "cudaEventRecord after repeated exact pair-block witness kernel");
+    check_cuda(
+        cudaMemcpyAsync(
+            receipt.outcomes.data(),
+            device_outcomes,
+            outcome_bytes,
+            cudaMemcpyDeviceToHost,
+            stream.get()),
+        "cudaMemcpyAsync repeated exact pair-block witness outcomes");
+    check_cuda(
+        cudaStreamSynchronize(stream.get()),
+        "cudaStreamSynchronize repeated exact pair-block witness batch");
+    float kernel_elapsed_milliseconds = 0.0F;
+    check_cuda(
+        cudaEventElapsedTime(
+            &kernel_elapsed_milliseconds,
+            kernel_begin.get(),
+            kernel_end.get()),
+        "cudaEventElapsedTime repeated exact pair-block witness kernel");
+    receipt.kernel_elapsed_nanoseconds = static_cast<std::uint64_t>(
+        kernel_elapsed_milliseconds * 1000000.0F);
+  }
+  guard.restore();
+
+  receipt.host_to_device_pattern_byte_count = pattern_bytes;
+  receipt.device_to_host_outcome_byte_count = outcome_bytes;
+  receipt.device_arena_byte_count = arena_bytes;
+  receipt.device_arena_allocation_count = 1U;
+  receipt.kernel_launch_count = 1U;
+  receipt.synchronization_count = 1U;
+  receipt.cuda_device = request.traversal->cuda_device;
+  receipt.source_identity_authenticated = true;
+  receipt.every_logical_task_classified_once = true;
+  receipt.cuda_execution_performed = true;
+  receipt.native_lbvh_nodes_read_on_device = true;
   return receipt;
 }
 

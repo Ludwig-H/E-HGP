@@ -629,6 +629,85 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+  test_gpu_exact_pair_block_antichain_cuda.cpp
+  fake_gpu_exact_pair_block_witness_cuda_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_pair_block_antichain_cuda_host_contract
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+  test_gpu_exact_pair_block_transactional_frontier_cuda.cpp
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_anchored_pair_candidate_classifier_tests
   test_anchored_pair_candidate_classifier.cpp
 )
@@ -3326,6 +3405,14 @@ add_test(
   COMMAND morsehgp3d_gpu_exact_pair_block_witness_cuda_host_contract_tests
 )
 add_test(
+  NAME morsehgp3d.gpu_exact_pair_block_antichain_cuda_host_contract
+  COMMAND morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+  COMMAND morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+)
+add_test(
   NAME morsehgp3d.anchored_pair_candidate_classifier
   COMMAND morsehgp3d_anchored_pair_candidate_classifier_tests
 )
@@ -3609,6 +3696,10 @@ if(MORSEHGP3D_ENABLE_CUDA)
   add_test(
     NAME morsehgp3d.gpu_exact_pair_block_witness_cuda_qualification
     COMMAND morsehgp3d_gpu_exact_pair_block_witness_cuda_qualification
+  )
+  add_test(
+    NAME morsehgp3d.gpu_exact_pair_block_antichain_cuda_qualification
+    COMMAND morsehgp3d_gpu_exact_pair_block_antichain_cuda_qualification
   )
 endif()
 add_test(

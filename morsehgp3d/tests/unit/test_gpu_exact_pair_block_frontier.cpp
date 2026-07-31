@@ -469,10 +469,7 @@ void test_disjoint_witness_antichain_closes_rank_six() {
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
   const OpenHarvest harvest =
       open_entire_partition(index, cloud);
-  std::array<
-      std::size_t,
-      exact_pair_block_frontier_maximum_witness_antichain_node_count>
-      witness_node_indices{};
+  std::array<std::size_t, 5U> witness_node_indices{};
   std::size_t witness_count = 0U;
   std::set<std::size_t> seen_witness_nodes;
   for (const ExactPairBlockNodeAuthority& node :
@@ -884,6 +881,31 @@ void test_capacity_failures_roll_back_authority() {
       "the same cross authority did not resume after a capacity rollback");
 }
 
+void test_rank_eleven_frontier_configuration() {
+  static_assert(
+      exact_pair_block_frontier_maximum_witness_antichain_node_count ==
+      10U);
+  const CanonicalPointCloud cloud = make_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  auto frontier = ExactPairBlockFrontierContext::start(
+      index, cloud, ExactPairBlockFrontierConfig{11U, true});
+  require(
+      frontier.config().maximum_closed_rank == 11U &&
+          frontier.audit().total_unordered_pair_mass == 28U &&
+          frontier.audit().exact_mass_conservation_verified,
+      "the exact pair-block frontier did not admit the K=10 rank bound");
+  bool rejected_rank_twelve = false;
+  try {
+    static_cast<void>(ExactPairBlockFrontierContext::start(
+        index, cloud, ExactPairBlockFrontierConfig{12U, false}));
+  } catch (const std::out_of_range&) {
+    rejected_rank_twelve = true;
+  }
+  require(
+      rejected_rank_twelve,
+      "the exact pair-block frontier accepted rank twelve");
+}
+
 }  // namespace
 
 int main() {
@@ -895,6 +917,7 @@ int main() {
     test_disjoint_witness_antichain_closes_rank_six();
     test_multileaf_block_and_witness_antichain_commit_mass();
     test_capacity_failures_roll_back_authority();
+    test_rank_eleven_frontier_configuration();
   } catch (const std::exception& error) {
     std::cerr << "FAIL: " << error.what() << '\n';
     return 1;

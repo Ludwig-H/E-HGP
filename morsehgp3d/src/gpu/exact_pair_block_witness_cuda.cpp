@@ -123,12 +123,156 @@ namespace {
   return task;
 }
 
+[[nodiscard]] ExactPairBlockWitnessCudaRecord decode_repeated_outcome(
+    std::uint8_t encoded,
+    std::uint64_t task_id,
+    std::size_t unordered_pair_mass) {
+  using Outcome = detail::Phase15ExactPairBlockWitnessCudaOutcome;
+  ExactPairBlockWitnessCudaRecord record;
+  record.task_id = task_id;
+  record.unordered_pair_mass = unordered_pair_mass;
+  const auto outcome = static_cast<Outcome>(encoded);
+  switch (outcome) {
+    case Outcome::invalid_authority:
+      record.decision =
+          ExactPairBlockWitnessCudaDecision::residual_invalid_authority;
+      return record;
+    case Outcome::support_overlap:
+      record.decision =
+          ExactPairBlockWitnessCudaDecision::residual_support_overlap;
+      return record;
+    case Outcome::insufficient_witness:
+      record.decision = ExactPairBlockWitnessCudaDecision::
+          inconclusive_insufficient_witness_mass;
+      return record;
+    case Outcome::directed_nonnegative:
+      record.decision = ExactPairBlockWitnessCudaDecision::
+          inconclusive_nonnegative_q;
+      record.proposal_state =
+          ExactPairBlockWitnessCudaProposalState::directed_nonnegative;
+      return record;
+    case Outcome::directed_negative_exact_negative:
+    case Outcome::directed_negative_exact_zero:
+    case Outcome::directed_negative_exact_positive:
+    case Outcome::directed_negative_fixed_overflow:
+      record.proposal_state =
+          ExactPairBlockWitnessCudaProposalState::directed_negative;
+      break;
+    case Outcome::directed_ambiguous_exact_negative:
+    case Outcome::directed_ambiguous_exact_zero:
+    case Outcome::directed_ambiguous_exact_positive:
+    case Outcome::directed_ambiguous_fixed_overflow:
+      record.proposal_state =
+          ExactPairBlockWitnessCudaProposalState::directed_ambiguous;
+      break;
+    case Outcome::directed_overflow_exact_negative:
+    case Outcome::directed_overflow_exact_zero:
+    case Outcome::directed_overflow_exact_positive:
+    case Outcome::directed_overflow_fixed_overflow:
+      record.proposal_state = ExactPairBlockWitnessCudaProposalState::
+          directed_arithmetic_overflow;
+      break;
+    default:
+      throw std::logic_error(
+          "the repeated exact pair-block witness kernel returned an invalid "
+          "outcome byte");
+  }
+  record.fixed_limb_evaluation_performed = true;
+  switch (outcome) {
+    case Outcome::directed_negative_exact_negative:
+    case Outcome::directed_ambiguous_exact_negative:
+    case Outcome::directed_overflow_exact_negative:
+      record.decision = ExactPairBlockWitnessCudaDecision::certified_closed;
+      record.exact_sign = -1;
+      return record;
+    case Outcome::directed_negative_exact_zero:
+    case Outcome::directed_ambiguous_exact_zero:
+    case Outcome::directed_overflow_exact_zero:
+      record.decision = ExactPairBlockWitnessCudaDecision::
+          inconclusive_nonnegative_q;
+      return record;
+    case Outcome::directed_negative_exact_positive:
+    case Outcome::directed_ambiguous_exact_positive:
+    case Outcome::directed_overflow_exact_positive:
+      record.decision = ExactPairBlockWitnessCudaDecision::
+          inconclusive_nonnegative_q;
+      record.exact_sign = 1;
+      return record;
+    case Outcome::directed_negative_fixed_overflow:
+    case Outcome::directed_ambiguous_fixed_overflow:
+    case Outcome::directed_overflow_fixed_overflow:
+      record.decision = ExactPairBlockWitnessCudaDecision::
+          residual_fixed_limb_overflow;
+      return record;
+    default:
+      throw std::logic_error(
+          "the repeated exact pair-block witness outcome lost its exact "
+          "classification");
+  }
+}
+
+[[nodiscard]] std::uint64_t repeated_task_recipe_digest(
+    std::span<const detail::Phase15ExactPairBlockWitnessCudaTask> pattern,
+    std::size_t repetition_count,
+    std::size_t logical_task_count,
+    std::uint64_t first_task_id) noexcept {
+  std::uint64_t digest =
+      detail::phase15_exact_pair_block_witness_digest_word(
+          detail::phase15_exact_pair_block_witness_digest_offset,
+          UINT64_C(0x5245504541545031));
+  digest = detail::phase15_exact_pair_block_witness_digest_word(
+      digest, first_task_id);
+  digest = detail::phase15_exact_pair_block_witness_digest_word(
+      digest, static_cast<std::uint64_t>(repetition_count));
+  digest = detail::phase15_exact_pair_block_witness_digest_word(
+      digest, static_cast<std::uint64_t>(logical_task_count));
+  digest = detail::phase15_exact_pair_block_witness_digest_word(
+      digest,
+      detail::phase15_exact_pair_block_witness_task_digest(pattern));
+  return digest;
+}
+
+[[nodiscard]] std::uint64_t expanded_outcome_digest(
+    std::span<const std::uint8_t> outcomes) noexcept {
+  std::uint64_t digest =
+      detail::phase15_exact_pair_block_witness_digest_word(
+          detail::phase15_exact_pair_block_witness_digest_offset,
+          UINT64_C(0x5245504f55545031));
+  digest = detail::phase15_exact_pair_block_witness_digest_word(
+      digest, static_cast<std::uint64_t>(outcomes.size()));
+  for (const std::uint8_t outcome : outcomes) {
+    digest ^= outcome;
+    digest *= detail::phase15_exact_pair_block_witness_digest_prime;
+  }
+  return digest;
+}
+
+[[nodiscard]] std::size_t scaled_count(
+    std::size_t pattern_count,
+    std::size_t repetition_count,
+    const char* message) {
+  std::size_t result = 0U;
+  if (!checked_product(pattern_count, repetition_count, result)) {
+    throw std::overflow_error(message);
+  }
+  return result;
+}
+
 void validate_negative_contract(
     const ExactPairBlockWitnessCudaTask& task,
     const ExactPairBlockWitnessCudaRecord& record,
     std::size_t maximum_closed_rank) {
   const bool exact_evaluation =
       record.fixed_limb_evaluation_performed;
+  if (record.proposal_state ==
+          ExactPairBlockWitnessCudaProposalState::directed_nonnegative &&
+      (record.decision !=
+           ExactPairBlockWitnessCudaDecision::inconclusive_nonnegative_q ||
+       exact_evaluation || record.exact_sign != 0)) {
+    throw std::logic_error(
+        "the exact pair-block witness launcher used a directed "
+        "nonnegative interval outside its fail-open shortcut");
+  }
   switch (record.decision) {
     case ExactPairBlockWitnessCudaDecision::certified_closed:
       if (!exact_evaluation || record.exact_sign != -1 ||
@@ -141,10 +285,16 @@ void validate_negative_contract(
       }
       return;
     case ExactPairBlockWitnessCudaDecision::inconclusive_nonnegative_q:
-      if (!exact_evaluation || record.exact_sign < 0) {
+      if ((exact_evaluation && record.exact_sign != 0 &&
+           record.exact_sign != 1) ||
+          (!exact_evaluation &&
+           (record.exact_sign != 0 ||
+            record.proposal_state !=
+                ExactPairBlockWitnessCudaProposalState::
+                    directed_nonnegative))) {
         throw std::logic_error(
-            "the exact pair-block witness launcher mislabeled an exact Q "
-            "decision");
+            "the exact pair-block witness launcher mislabeled a fail-open "
+            "nonnegative Q decision");
       }
       return;
     case ExactPairBlockWitnessCudaDecision::residual_fixed_limb_overflow:
@@ -205,6 +355,13 @@ void accumulate_record(
         ++audit.exact_positive_count;
       }
     }
+  }
+  if (!record.fixed_limb_evaluation_performed &&
+      record.decision ==
+          ExactPairBlockWitnessCudaDecision::inconclusive_nonnegative_q &&
+      record.proposal_state ==
+          ExactPairBlockWitnessCudaProposalState::directed_nonnegative) {
+    ++audit.directed_nonnegative_short_circuit_count;
   }
 
   std::size_t next_mass = 0U;
@@ -270,6 +427,9 @@ void validate_fixed_audit_fields(
       !audit.local_submitted_mass_conservation_validated ||
       !audit.bounded_final_qualification_readback_performed ||
       !audit.compact_batch_abi_validated ||
+      !audit.proposal_partition_validated ||
+      !audit.directed_nonnegative_short_circuit_validated ||
+      !audit.directed_interval_never_closes_or_prunes ||
       !audit.fp64_used_as_proposal_only ||
       !audit.negative_closure_requires_fixed_limb_exact_decision ||
       audit.per_task_allocation_count != 0U ||
@@ -425,11 +585,104 @@ ExactPairBlockWitnessCudaResult qualify_exact_pair_block_witnesses_cuda(
     accumulate_record(record, recomputed);
   }
   std::size_t conserved_mass = 0U;
+  std::size_t proposed_task_count = 0U;
+  std::size_t authority_gate_task_count = 0U;
+  std::size_t partitioned_task_count = 0U;
+  std::size_t fixed_limb_evaluation_count = 0U;
+  std::size_t expected_fixed_limb_evaluation_count = 0U;
+  std::size_t exact_sign_count = 0U;
+  std::size_t expected_nonnegative_count = 0U;
+  std::size_t classified_task_count = 0U;
+  const bool proposal_partition =
+      checked_sum(
+          recomputed.directed_negative_count,
+          recomputed.directed_nonnegative_count,
+          proposed_task_count) &&
+      checked_sum(
+          proposed_task_count,
+          recomputed.directed_ambiguous_count,
+          proposed_task_count) &&
+      checked_sum(
+          proposed_task_count,
+          recomputed.directed_arithmetic_overflow_count,
+          proposed_task_count) &&
+      checked_sum(
+          recomputed.invalid_authority_task_count,
+          recomputed.support_overlap_task_count,
+          authority_gate_task_count) &&
+      checked_sum(
+          authority_gate_task_count,
+          recomputed.insufficient_witness_task_count,
+          authority_gate_task_count) &&
+      checked_sum(
+          proposed_task_count,
+          authority_gate_task_count,
+          partitioned_task_count) &&
+      partitioned_task_count == tasks.size() &&
+      recomputed.directed_nonnegative_short_circuit_count ==
+          recomputed.directed_nonnegative_count &&
+      recomputed.directed_nonnegative_short_circuit_count <=
+          proposed_task_count &&
+      checked_sum(
+          recomputed.fixed_limb_exact_decision_count,
+          recomputed.fixed_limb_residual_count,
+          fixed_limb_evaluation_count) &&
+      checked_sum(
+          recomputed.directed_negative_count,
+          recomputed.directed_ambiguous_count,
+          expected_fixed_limb_evaluation_count) &&
+      checked_sum(
+          expected_fixed_limb_evaluation_count,
+          recomputed.directed_arithmetic_overflow_count,
+          expected_fixed_limb_evaluation_count) &&
+      fixed_limb_evaluation_count ==
+          expected_fixed_limb_evaluation_count &&
+      checked_sum(
+          recomputed.exact_negative_count,
+          recomputed.exact_zero_count,
+          exact_sign_count) &&
+      checked_sum(
+          exact_sign_count,
+          recomputed.exact_positive_count,
+          exact_sign_count) &&
+      recomputed.fixed_limb_exact_decision_count == exact_sign_count &&
+      recomputed.certified_task_count ==
+          recomputed.exact_negative_count &&
+      checked_sum(
+          recomputed.directed_nonnegative_short_circuit_count,
+          recomputed.exact_zero_count,
+          expected_nonnegative_count) &&
+      checked_sum(
+          expected_nonnegative_count,
+          recomputed.exact_positive_count,
+          expected_nonnegative_count) &&
+      recomputed.nonnegative_task_count == expected_nonnegative_count &&
+      checked_sum(
+          recomputed.certified_task_count,
+          recomputed.nonnegative_task_count,
+          classified_task_count) &&
+      checked_sum(
+          classified_task_count,
+          recomputed.insufficient_witness_task_count,
+          classified_task_count) &&
+      checked_sum(
+          classified_task_count,
+          recomputed.invalid_authority_task_count,
+          classified_task_count) &&
+      checked_sum(
+          classified_task_count,
+          recomputed.support_overlap_task_count,
+          classified_task_count) &&
+      checked_sum(
+          classified_task_count,
+          recomputed.fixed_limb_residual_count,
+          classified_task_count) &&
+      classified_task_count == tasks.size();
   if (!checked_sum(
           recomputed.pruned_unordered_pair_mass,
           recomputed.residual_unordered_pair_mass,
           conserved_mass) ||
-      conserved_mass != submitted_mass ||
+      conserved_mass != submitted_mass || !proposal_partition ||
       receipt.audit.submitted_unordered_pair_mass != submitted_mass ||
       receipt.audit.pruned_unordered_pair_mass !=
           recomputed.pruned_unordered_pair_mass ||
@@ -441,6 +694,8 @@ ExactPairBlockWitnessCudaResult qualify_exact_pair_block_witnesses_cuda(
           recomputed.directed_negative_count ||
       receipt.audit.directed_nonnegative_count !=
           recomputed.directed_nonnegative_count ||
+      receipt.audit.directed_nonnegative_short_circuit_count !=
+          recomputed.directed_nonnegative_short_circuit_count ||
       receipt.audit.directed_ambiguous_count !=
           recomputed.directed_ambiguous_count ||
       receipt.audit.directed_arithmetic_overflow_count !=
@@ -475,6 +730,307 @@ ExactPairBlockWitnessCudaResult qualify_exact_pair_block_witnesses_cuda(
       : ExactPairBlockWitnessCudaStatus::qualified_component_batch;
   result.audit = receipt.audit;
   result.records = std::move(receipt.records);
+  return result;
+}
+
+ExactPairBlockWitnessCudaRepeatedResult
+qualify_repeated_exact_pair_block_witness_pattern_cuda(
+    MortonLbvhDeviceTraversalLease&& traversal_lease,
+    std::span<const ExactPairBlockWitnessCudaTask> pattern,
+    std::size_t repetition_count,
+    std::uint64_t first_task_id,
+    ExactPairBlockWitnessCudaConfig config) {
+  if (!traversal_lease.ready()) {
+    throw std::invalid_argument(
+        "a repeated exact pair-block witness batch requires a ready "
+        "traversal lease");
+  }
+  if (config.maximum_closed_rank < 2U ||
+      config.maximum_closed_rank >
+          exact_pair_block_witness_cuda_maximum_closed_rank) {
+    throw std::out_of_range(
+        "a repeated exact pair-block witness maximum closed rank must be in "
+        "[2, 6]");
+  }
+  if (config.task_capacity_per_point == 0U ||
+      config.task_capacity_per_point >
+          exact_pair_block_witness_cuda_maximum_task_capacity_per_point) {
+    throw std::out_of_range(
+        "a repeated exact pair-block witness task factor must be in [1, 64]");
+  }
+  if (pattern.empty() || repetition_count == 0U) {
+    throw std::invalid_argument(
+        "a repeated exact pair-block witness batch requires a nonempty "
+        "pattern and repetition count");
+  }
+
+  const MortonLbvhDeviceTraversalLeaseAudit source_audit =
+      traversal_lease.audit();
+  ExactPairBlockWitnessCudaRepeatedResult refused;
+  ExactPairBlockWitnessCudaRepeatedAudit& refused_audit = refused.audit;
+  refused_audit.point_count = source_audit.point_count;
+  refused_audit.certified_node_count = source_audit.certified_node_count;
+  refused_audit.maximum_closed_rank = config.maximum_closed_rank;
+  refused_audit.task_capacity_per_point = config.task_capacity_per_point;
+  refused_audit.pattern_task_count = pattern.size();
+  refused_audit.repetition_count = repetition_count;
+  refused_audit.first_task_id = first_task_id;
+  refused_audit.source_snapshot_epoch = source_audit.source_snapshot_epoch;
+  std::size_t logical_task_count = 0U;
+  std::size_t task_capacity = 0U;
+  if (!checked_product(
+          pattern.size(), repetition_count, logical_task_count) ||
+      !checked_product(
+          source_audit.point_count,
+          config.task_capacity_per_point,
+          task_capacity)) {
+    return refused;
+  }
+  refused_audit.logical_task_count = logical_task_count;
+  refused_audit.task_capacity = task_capacity;
+  if (logical_task_count > task_capacity ||
+      source_audit.point_count > std::numeric_limits<std::uint32_t>::max() ||
+      source_audit.certified_node_count >
+          std::numeric_limits<std::uint32_t>::max()) {
+    return refused;
+  }
+  if (logical_task_count - 1U >
+      static_cast<std::size_t>(
+          std::numeric_limits<std::uint64_t>::max() - first_task_id)) {
+    throw std::overflow_error(
+        "the repeated exact pair-block witness affine task identities "
+        "overflow uint64");
+  }
+  const std::uint64_t last_task_id = first_task_id +
+      static_cast<std::uint64_t>(logical_task_count - 1U);
+
+  std::vector<detail::Phase15ExactPairBlockWitnessCudaTask> compact_pattern;
+  compact_pattern.reserve(pattern.size());
+  for (const ExactPairBlockWitnessCudaTask& task : pattern) {
+    compact_pattern.push_back(compact_task(task));
+  }
+  const std::uint64_t recipe_digest = repeated_task_recipe_digest(
+      compact_pattern, repetition_count, logical_task_count, first_task_id);
+  const detail::Phase15ExactPairBlockWitnessCudaAdoptedTraversal traversal =
+      detail::Phase15ExactPairBlockWitnessCudaTraversalAccess::consume(
+          std::move(traversal_lease));
+  const detail::Phase15ExactPairBlockWitnessCudaRepeatedRequest request{
+      &traversal,
+      compact_pattern,
+      config,
+      repetition_count,
+      logical_task_count,
+      task_capacity,
+      first_task_id,
+      recipe_digest};
+  detail::Phase15ExactPairBlockWitnessCudaRepeatedReceipt receipt =
+      detail::phase15_launch_repeated_exact_pair_block_witness_cuda(request);
+  const std::size_t expected_pattern_bytes = compact_pattern.size() *
+      sizeof(detail::Phase15ExactPairBlockWitnessCudaTask);
+  if (!receipt.source_identity_authenticated ||
+      !receipt.every_logical_task_classified_once ||
+      receipt.outcomes.size() != logical_task_count ||
+      receipt.host_to_device_pattern_byte_count != expected_pattern_bytes ||
+      receipt.device_to_host_outcome_byte_count != logical_task_count ||
+      receipt.host_fake_lifecycle_exercised != traversal.host_fake ||
+      receipt.cuda_execution_performed == traversal.host_fake ||
+      receipt.native_lbvh_nodes_read_on_device == traversal.host_fake ||
+      (traversal.host_fake &&
+       (receipt.device_arena_byte_count != 0U ||
+        receipt.device_arena_allocation_count != 0U ||
+        receipt.kernel_launch_count != 0U ||
+        receipt.synchronization_count != 0U)) ||
+      (!traversal.host_fake &&
+       (receipt.device_arena_byte_count <
+            expected_pattern_bytes + logical_task_count ||
+        receipt.device_arena_allocation_count != 1U ||
+        receipt.kernel_launch_count != 1U ||
+        receipt.synchronization_count != 1U))) {
+    throw std::logic_error(
+        "the repeated exact pair-block witness launcher returned an "
+        "unauthenticated compact outcome batch");
+  }
+
+  ExactPairBlockWitnessCudaAudit pattern_audit;
+  std::vector<ExactPairBlockWitnessCudaRecord> pattern_records;
+  pattern_records.reserve(pattern.size());
+  for (std::size_t selector = 0U; selector < pattern.size(); ++selector) {
+    const ExactPairBlockWitnessCudaRecord record = decode_repeated_outcome(
+        receipt.outcomes[selector],
+        first_task_id + static_cast<std::uint64_t>(selector),
+        pattern[selector].support_block.unordered_pair_mass);
+    validate_negative_contract(
+        pattern[selector], record, config.maximum_closed_rank);
+    std::size_t submitted_mass = 0U;
+    if (!checked_sum(
+            pattern_audit.submitted_unordered_pair_mass,
+            record.unordered_pair_mass,
+            submitted_mass)) {
+      throw std::overflow_error(
+          "the repeated exact pair-block witness pattern mass overflows");
+    }
+    pattern_audit.submitted_unordered_pair_mass = submitted_mass;
+    accumulate_record(record, pattern_audit);
+    pattern_records.push_back(record);
+  }
+
+  bool pattern_repeated_exactly = true;
+  for (std::size_t logical_index = 0U;
+       logical_index < receipt.outcomes.size();
+       ++logical_index) {
+    if (receipt.outcomes[logical_index] !=
+        receipt.outcomes[logical_index % pattern.size()]) {
+      pattern_repeated_exactly = false;
+      break;
+    }
+  }
+  if (!pattern_repeated_exactly) {
+    throw std::logic_error(
+        "the repeated exact pair-block witness kernel changed a pattern "
+        "classification between repetitions");
+  }
+
+  ExactPairBlockWitnessCudaRepeatedAudit audit;
+  audit.point_count = source_audit.point_count;
+  audit.certified_node_count = source_audit.certified_node_count;
+  audit.maximum_closed_rank = config.maximum_closed_rank;
+  audit.task_capacity_per_point = config.task_capacity_per_point;
+  audit.pattern_task_count = pattern.size();
+  audit.repetition_count = repetition_count;
+  audit.logical_task_count = logical_task_count;
+  audit.task_capacity = task_capacity;
+  audit.directed_negative_count = scaled_count(
+      pattern_audit.directed_negative_count,
+      repetition_count,
+      "the repeated directed-negative count overflows");
+  audit.directed_nonnegative_count = scaled_count(
+      pattern_audit.directed_nonnegative_count,
+      repetition_count,
+      "the repeated directed-nonnegative count overflows");
+  audit.directed_ambiguous_count = scaled_count(
+      pattern_audit.directed_ambiguous_count,
+      repetition_count,
+      "the repeated directed-ambiguous count overflows");
+  audit.directed_arithmetic_overflow_count = scaled_count(
+      pattern_audit.directed_arithmetic_overflow_count,
+      repetition_count,
+      "the repeated directed-overflow count overflows");
+  audit.fixed_limb_exact_decision_count = scaled_count(
+      pattern_audit.fixed_limb_exact_decision_count,
+      repetition_count,
+      "the repeated fixed-limb exact count overflows");
+  audit.exact_negative_count = scaled_count(
+      pattern_audit.exact_negative_count,
+      repetition_count,
+      "the repeated exact-negative count overflows");
+  audit.exact_zero_count = scaled_count(
+      pattern_audit.exact_zero_count,
+      repetition_count,
+      "the repeated exact-zero count overflows");
+  audit.exact_positive_count = scaled_count(
+      pattern_audit.exact_positive_count,
+      repetition_count,
+      "the repeated exact-positive count overflows");
+  audit.fixed_limb_residual_count = scaled_count(
+      pattern_audit.fixed_limb_residual_count,
+      repetition_count,
+      "the repeated fixed-limb residual count overflows");
+  audit.certified_task_count = scaled_count(
+      pattern_audit.certified_task_count,
+      repetition_count,
+      "the repeated certified count overflows");
+  audit.nonnegative_task_count = scaled_count(
+      pattern_audit.nonnegative_task_count,
+      repetition_count,
+      "the repeated nonnegative count overflows");
+  audit.insufficient_witness_task_count = scaled_count(
+      pattern_audit.insufficient_witness_task_count,
+      repetition_count,
+      "the repeated insufficient count overflows");
+  audit.invalid_authority_task_count = scaled_count(
+      pattern_audit.invalid_authority_task_count,
+      repetition_count,
+      "the repeated invalid-authority count overflows");
+  audit.support_overlap_task_count = scaled_count(
+      pattern_audit.support_overlap_task_count,
+      repetition_count,
+      "the repeated overlap count overflows");
+  audit.submitted_unordered_pair_mass = scaled_count(
+      pattern_audit.submitted_unordered_pair_mass,
+      repetition_count,
+      "the repeated submitted mass overflows");
+  audit.pruned_unordered_pair_mass = scaled_count(
+      pattern_audit.pruned_unordered_pair_mass,
+      repetition_count,
+      "the repeated pruned mass overflows");
+  audit.residual_unordered_pair_mass = scaled_count(
+      pattern_audit.residual_unordered_pair_mass,
+      repetition_count,
+      "the repeated residual mass overflows");
+  audit.host_to_device_pattern_byte_count =
+      receipt.host_to_device_pattern_byte_count;
+  audit.device_to_host_outcome_byte_count =
+      receipt.device_to_host_outcome_byte_count;
+  audit.device_arena_byte_count = receipt.device_arena_byte_count;
+  audit.device_arena_allocation_count =
+      receipt.device_arena_allocation_count;
+  audit.kernel_launch_count = receipt.kernel_launch_count;
+  audit.synchronization_count = receipt.synchronization_count;
+  audit.first_task_id = first_task_id;
+  audit.last_task_id = last_task_id;
+  audit.source_snapshot_epoch = source_audit.source_snapshot_epoch;
+  audit.repeated_task_recipe_digest = recipe_digest;
+  audit.expanded_outcome_digest = expanded_outcome_digest(receipt.outcomes);
+  audit.pattern_result_digest =
+      detail::phase15_exact_pair_block_witness_result_digest(pattern_records);
+  audit.kernel_elapsed_nanoseconds = receipt.kernel_elapsed_nanoseconds;
+  audit.cuda_device = receipt.cuda_device;
+  audit.native_lbvh_authority_consumed = true;
+  audit.native_lbvh_nodes_read_on_device =
+      receipt.native_lbvh_nodes_read_on_device;
+  audit.cuda_execution_performed = receipt.cuda_execution_performed;
+  audit.host_fake_lifecycle_exercised =
+      receipt.host_fake_lifecycle_exercised;
+  audit.affine_task_identity_range_validated = true;
+  audit.repeated_pattern_expansion_validated = true;
+  audit.every_logical_task_classified_once = true;
+  audit.pattern_results_repeated_exactly = true;
+  audit.per_logical_task_host_input_materialization_avoided = true;
+  audit.compact_outcome_readback_validated = true;
+  audit.local_submitted_mass_conservation_validated =
+      audit.pruned_unordered_pair_mass <=
+          audit.submitted_unordered_pair_mass &&
+      audit.residual_unordered_pair_mass ==
+          audit.submitted_unordered_pair_mass -
+              audit.pruned_unordered_pair_mass;
+  audit.directed_interval_never_closes_or_prunes = true;
+  audit.negative_closure_requires_fixed_limb_exact_decision = true;
+  if (!audit.local_submitted_mass_conservation_validated ||
+      audit.certified_task_count + audit.nonnegative_task_count +
+              audit.insufficient_witness_task_count +
+              audit.invalid_authority_task_count +
+              audit.support_overlap_task_count +
+              audit.fixed_limb_residual_count !=
+          logical_task_count ||
+      audit.fixed_limb_exact_decision_count !=
+          audit.exact_negative_count + audit.exact_zero_count +
+              audit.exact_positive_count ||
+      audit.certified_task_count != audit.exact_negative_count ||
+      audit.global_pair_coverage_closed || audit.hierarchy_or_tree_claimed ||
+      audit.slo_claimed ||
+      audit.ordinary_or_higher_order_delaunay_materialized ||
+      audit.public_status_claimed) {
+    throw std::logic_error(
+        "the repeated exact pair-block witness receipt violated its compact "
+        "logical-batch contract");
+  }
+
+  ExactPairBlockWitnessCudaRepeatedResult result;
+  result.status = traversal.host_fake
+      ? ExactPairBlockWitnessCudaStatus::non_authoritative_host_fake
+      : ExactPairBlockWitnessCudaStatus::qualified_component_batch;
+  result.audit = audit;
+  result.pattern_records = std::move(pattern_records);
   return result;
 }
 

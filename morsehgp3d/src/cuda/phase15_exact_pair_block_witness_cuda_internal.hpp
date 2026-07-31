@@ -165,8 +165,59 @@ struct Phase15ExactPairBlockWitnessCudaReceipt {
   std::uint64_t completed_result_digest{};
 };
 
+enum class Phase15ExactPairBlockWitnessCudaOutcome : std::uint8_t {
+  invalid_authority = 0U,
+  support_overlap = 1U,
+  insufficient_witness = 2U,
+  directed_nonnegative = 3U,
+  directed_negative_exact_negative = 4U,
+  directed_negative_exact_zero = 5U,
+  directed_negative_exact_positive = 6U,
+  directed_negative_fixed_overflow = 7U,
+  directed_ambiguous_exact_negative = 8U,
+  directed_ambiguous_exact_zero = 9U,
+  directed_ambiguous_exact_positive = 10U,
+  directed_ambiguous_fixed_overflow = 11U,
+  directed_overflow_exact_negative = 12U,
+  directed_overflow_exact_zero = 13U,
+  directed_overflow_exact_positive = 14U,
+  directed_overflow_fixed_overflow = 15U,
+};
+
+struct Phase15ExactPairBlockWitnessCudaRepeatedRequest {
+  const Phase15ExactPairBlockWitnessCudaAdoptedTraversal* traversal{};
+  std::span<const Phase15ExactPairBlockWitnessCudaTask> pattern;
+  ExactPairBlockWitnessCudaConfig config{};
+  std::size_t repetition_count{};
+  std::size_t logical_task_count{};
+  std::size_t task_capacity{};
+  std::uint64_t first_task_id{};
+  std::uint64_t repeated_task_recipe_digest{};
+};
+
+struct Phase15ExactPairBlockWitnessCudaRepeatedReceipt {
+  std::vector<std::uint8_t> outcomes;
+  std::size_t host_to_device_pattern_byte_count{};
+  std::size_t device_to_host_outcome_byte_count{};
+  std::size_t device_arena_byte_count{};
+  std::size_t device_arena_allocation_count{};
+  std::size_t kernel_launch_count{};
+  std::size_t synchronization_count{};
+  std::uint64_t kernel_elapsed_nanoseconds{};
+  int cuda_device{-1};
+  bool source_identity_authenticated{false};
+  bool every_logical_task_classified_once{false};
+  bool host_fake_lifecycle_exercised{false};
+  bool cuda_execution_performed{false};
+  bool native_lbvh_nodes_read_on_device{false};
+};
+
 [[nodiscard]] Phase15ExactPairBlockWitnessCudaReceipt
 phase15_launch_exact_pair_block_witness_cuda(
     const Phase15ExactPairBlockWitnessCudaRequest& request);
+
+[[nodiscard]] Phase15ExactPairBlockWitnessCudaRepeatedReceipt
+phase15_launch_repeated_exact_pair_block_witness_cuda(
+    const Phase15ExactPairBlockWitnessCudaRepeatedRequest& request);
 
 }  // namespace morsehgp3d::gpu::detail

@@ -28,7 +28,7 @@ from assemble_phase7_h_polytope_qualification import (
 )
 
 
-SCHEMA = "morsehgp3d.phase15.exact_pair_block_witness_cuda_g4_qualification.v1"
+SCHEMA = "morsehgp3d.phase15.exact_pair_block_witness_cuda_g4_qualification.v2"
 ARTIFACT_ROLE = "bounded_exact_AxBxW_witness_component_qualification"
 BACKEND = "cuda_g4"
 PROFILE = "hgp_reduced"
@@ -53,9 +53,13 @@ QUALIFICATION_KEYS = {
     "certified_count",
     "completed_result_digest",
     "directed_ambiguous_count",
+    "directed_arithmetic_overflow_count",
     "directed_negative_count",
+    "directed_nonnegative_count",
+    "directed_nonnegative_short_circuit_count",
     "fixture_profile",
     "fixed_limb_residual_count",
+    "fixed_limb_evaluation_count",
     "global_coverage_closed",
     "k_max",
     "kernel_elapsed_nanoseconds",
@@ -73,6 +77,11 @@ QUALIFICATION_KEYS = {
     "required_witness_point_count",
     "schema_version",
     "submitted_task_digest",
+    "subnormal_negative_completed_result_digest",
+    "subnormal_negative_directed_ambiguous",
+    "subnormal_negative_kernel_elapsed_nanoseconds",
+    "subnormal_negative_qualified",
+    "subnormal_negative_submitted_task_digest",
     "support_mass_gt_one_task_count",
     "task_count",
     "wall_nanoseconds",
@@ -173,7 +182,7 @@ def validate_qualification(value: dict[str, Any]) -> dict[str, Any]:
         "point_count": POINT_COUNT,
         "profile": PROFILE,
         "required_witness_point_count": K_MAX,
-        "schema_version": 1,
+        "schema_version": 2,
         "task_count": TASK_COUNT,
     }.items():
         if value.get(field) != expected:
@@ -204,11 +213,39 @@ def validate_qualification(value: dict[str, Any]) -> dict[str, Any]:
     directed_negative = require_int(
         value.get("directed_negative_count"), "directed_negative_count"
     )
+    directed_nonnegative = require_int(
+        value.get("directed_nonnegative_count"),
+        "directed_nonnegative_count",
+        minimum=1,
+    )
     directed_ambiguous = require_int(
         value.get("directed_ambiguous_count"), "directed_ambiguous_count"
     )
-    if directed_negative + directed_ambiguous > TASK_COUNT:
-        fail("directed proposal counters exceed submitted task count")
+    directed_arithmetic_overflow = require_int(
+        value.get("directed_arithmetic_overflow_count"),
+        "directed_arithmetic_overflow_count",
+    )
+    shortcut = require_int(
+        value.get("directed_nonnegative_short_circuit_count"),
+        "directed_nonnegative_short_circuit_count",
+        minimum=1,
+    )
+    fixed_limb_evaluations = require_int(
+        value.get("fixed_limb_evaluation_count"),
+        "fixed_limb_evaluation_count",
+    )
+    if (
+        directed_negative
+        + directed_nonnegative
+        + directed_ambiguous
+        + directed_arithmetic_overflow
+        != TASK_COUNT
+    ):
+        fail("directed proposal counters do not partition submitted tasks")
+    if shortcut != directed_nonnegative:
+        fail("every directed-nonnegative proposal must take the fail-open shortcut")
+    if fixed_limb_evaluations != TASK_COUNT - shortcut:
+        fail("fixed-limb evaluations do not equal non-shortcut tasks")
 
     multileaf_first = require_int(
         value.get("multileaf_first_support_task_count"),
@@ -266,6 +303,26 @@ def validate_qualification(value: dict[str, Any]) -> dict[str, Any]:
         fail("every task must carry the five-point witness required for closed rank 6")
     require_uint64(value.get("submitted_task_digest"), "submitted_task_digest")
     require_uint64(value.get("completed_result_digest"), "completed_result_digest")
+    require_uint64(
+        value.get("subnormal_negative_submitted_task_digest"),
+        "subnormal_negative_submitted_task_digest",
+    )
+    require_uint64(
+        value.get("subnormal_negative_completed_result_digest"),
+        "subnormal_negative_completed_result_digest",
+    )
+    if (
+        type(value.get("subnormal_negative_qualified")) is not bool
+        or not value["subnormal_negative_qualified"]
+        or type(value.get("subnormal_negative_directed_ambiguous")) is not bool
+        or not value["subnormal_negative_directed_ambiguous"]
+    ):
+        fail("the negative subnormal underflow guard must pass via the ambiguous fixed-limb path")
+    require_int(
+        value.get("subnormal_negative_kernel_elapsed_nanoseconds"),
+        "subnormal_negative_kernel_elapsed_nanoseconds",
+        minimum=1,
+    )
     require_int(
         value.get("kernel_elapsed_nanoseconds"),
         "kernel_elapsed_nanoseconds",

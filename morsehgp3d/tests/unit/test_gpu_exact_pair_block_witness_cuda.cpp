@@ -279,6 +279,11 @@ void test_compact_batch_contract() {
                  node(2U, 2U, 4U));
   invalid.support_block.kind = ExactPairBlockAuthorityKind::diagonal;
   tasks.push_back(invalid);
+  tasks.push_back(cross_task(
+      6U,
+      node(3U, 4U, 5U),
+      node(4U, 2U, 3U),
+      node(5U, 6U, 8U)));
 
   auto result = morsehgp3d::gpu::qualify_exact_pair_block_witnesses_cuda(
       traversal_lease(8U), tasks, ExactPairBlockWitnessCudaConfig{3U, 4U});
@@ -286,7 +291,7 @@ void test_compact_batch_contract() {
       result.status ==
           ExactPairBlockWitnessCudaStatus::non_authoritative_host_fake,
       "the GCC launcher must remain explicitly non-authoritative");
-  check(result.records.size() == 6U, "every compact task must be returned");
+  check(result.records.size() == 7U, "every compact task must be returned");
   check(
       result.records[0].decision ==
               ExactPairBlockWitnessCudaDecision::certified_closed &&
@@ -298,23 +303,37 @@ void test_compact_batch_contract() {
           residual_fixed_limb_overflow,
       "fixed-limb overflow must remain residual");
   check(
+      result.records[1].decision == ExactPairBlockWitnessCudaDecision::
+          inconclusive_nonnegative_q &&
+          !result.records[1].fixed_limb_evaluation_performed &&
+          result.records[1].exact_sign == 0,
+      "a directed nonnegative interval may only route fail-open without "
+      "entering the fixed-limb path");
+  check(
       result.audit.certified_task_count == 1U &&
           result.audit.nonnegative_task_count == 1U &&
           result.audit.fixed_limb_residual_count == 1U &&
           result.audit.insufficient_witness_task_count == 1U &&
-          result.audit.support_overlap_task_count == 1U &&
+          result.audit.support_overlap_task_count == 2U &&
           result.audit.invalid_authority_task_count == 1U,
       "the compact receipt counters must partition the batch");
   check(
-      result.audit.submitted_unordered_pair_mass == 6U &&
+      result.records[6].decision ==
+              ExactPairBlockWitnessCudaDecision::residual_support_overlap &&
+          result.audit.submitted_unordered_pair_mass == 7U &&
           result.audit.pruned_unordered_pair_mass == 1U &&
-          result.audit.residual_unordered_pair_mass == 5U &&
+          result.audit.residual_unordered_pair_mass == 6U &&
           result.audit.local_submitted_mass_conservation_validated,
-      "the local submitted mass must be conserved exactly");
+      "inverted support order must fail like CUDA and conserve mass");
   check(
       result.audit.submitted_task_digest != 0U &&
           result.audit.completed_result_digest != 0U &&
           result.audit.compact_batch_abi_validated &&
+          result.audit.proposal_partition_validated &&
+          result.audit.directed_nonnegative_count == 1U &&
+          result.audit.directed_nonnegative_short_circuit_count == 1U &&
+          result.audit.directed_nonnegative_short_circuit_validated &&
+          result.audit.directed_interval_never_closes_or_prunes &&
           result.audit.fp64_used_as_proposal_only &&
           result.audit.negative_closure_requires_fixed_limb_exact_decision,
       "the scheduler-facing compact ABI must expose digests and proof gates");
@@ -328,6 +347,42 @@ void test_compact_batch_contract() {
           !result.audit.ordinary_or_higher_order_delaunay_materialized,
       "a component batch must make no frontier, hierarchy, SLO or Delaunay "
       "claim");
+}
+
+void test_repeated_pattern_keeps_geometry_and_affine_identities_separate() {
+  const std::array<ExactPairBlockWitnessCudaTask, 3U> pattern{
+      cross_task(0U, node(0U, 0U, 1U), node(1U, 1U, 2U),
+                 node(2U, 2U, 4U)),
+      cross_task(1U, node(0U, 0U, 1U), node(1U, 1U, 2U),
+                 node(2U, 2U, 4U)),
+      cross_task(2U, node(0U, 0U, 1U), node(1U, 1U, 2U),
+                 node(2U, 2U, 4U))};
+  auto result = morsehgp3d::gpu::
+      qualify_repeated_exact_pair_block_witness_pattern_cuda(
+          traversal_lease(8U),
+          pattern,
+          4U,
+          41U,
+          ExactPairBlockWitnessCudaConfig{3U, 2U});
+  check(
+      result.status ==
+              ExactPairBlockWitnessCudaStatus::non_authoritative_host_fake &&
+          result.pattern_records.size() == pattern.size() &&
+          result.pattern_records[0].task_id == 41U &&
+          result.pattern_records[1].task_id == 42U &&
+          result.pattern_records[2].task_id == 43U &&
+          result.pattern_records[0].decision ==
+              ExactPairBlockWitnessCudaDecision::certified_closed &&
+          result.pattern_records[1].decision ==
+              ExactPairBlockWitnessCudaDecision::inconclusive_nonnegative_q &&
+          result.pattern_records[2].decision ==
+              ExactPairBlockWitnessCudaDecision::
+                  residual_fixed_limb_overflow &&
+          result.audit.first_task_id == 41U &&
+          result.audit.last_task_id == 52U &&
+          result.audit.pattern_results_repeated_exactly,
+      "the fake repeated path must retain pattern geometry decisions while "
+      "using CUDA-equivalent affine logical identities");
 }
 
 void test_preflight_refusal_does_not_consume_authority() {
@@ -361,6 +416,7 @@ void test_preflight_refusal_does_not_consume_authority() {
 int main() {
   test_hostile_exact_fixed_limb_differential();
   test_compact_batch_contract();
+  test_repeated_pattern_keeps_geometry_and_affine_identities_separate();
   test_preflight_refusal_does_not_consume_authority();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";

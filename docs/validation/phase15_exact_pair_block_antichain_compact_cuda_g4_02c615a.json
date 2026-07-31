@@ -1,0 +1,317 @@
+{
+  "artifact_role": "compact_recipe_transactional_exact_pair_block_antichain_component_qualification",
+  "backend": "cuda_g4",
+  "checks": {
+    "aot_audit": {
+      "antichain_architectures": [
+        "sm_120"
+      ],
+      "antichain_ptx_entry_count": 0,
+      "witness_architectures": [
+        "sm_120"
+      ],
+      "witness_ptx_entry_count": 0
+    },
+    "aot_release": {
+      "antichain_architectures": [
+        "sm_120"
+      ],
+      "antichain_ptx_entry_count": 0,
+      "witness_architectures": [
+        "sm_120"
+      ],
+      "witness_ptx_entry_count": 0
+    },
+    "audit_build": "passed",
+    "compact_k10_memcheck": {
+      "error_count": 0,
+      "leaked_allocation_count": 0,
+      "leaked_byte_count": 0,
+      "physical_predicate_task_count": 1000000,
+      "process_local_transcript_digest": 9875489428434213921,
+      "status": "passed"
+    },
+    "compact_k10_racecheck": {
+      "error_count": 0,
+      "hazard_count": 0,
+      "physical_predicate_task_count": 1000000,
+      "process_local_transcript_digest": 9875489428434213921,
+      "status": "passed",
+      "warning_count": 0
+    },
+    "direct_scientific_digest_equivalence_with_prior_receipt": "passed",
+    "release_build": "passed",
+    "release_ctest": "passed_6_of_6",
+    "source_snapshot_archive_sha256_verified": true
+  },
+  "claims": {
+    "complete_hgp_hierarchy": false,
+    "complete_pair_catalog": false,
+    "five_or_ten_trees": false,
+    "global_pair_coverage_closed": false,
+    "hierarchy_or_tree": false,
+    "min_cluster_size_20_materialized": false,
+    "pairwise_disjoint_support_products": false,
+    "product_scalability": false,
+    "public_status_claimed": false,
+    "slo_claimed": false,
+    "support3_or_support4": false,
+    "twenty_million_point_cloud": false
+  },
+  "compact_recipe_component_profiles": {
+    "fifty_thousand_points": {
+      "k10": {
+        "accounted_device_bytes": 12800480,
+        "cloud_generation_nanoseconds": 28671841,
+        "compositor_wall_nanoseconds": 12603380,
+        "device_batch_arena_bytes": 3200560,
+        "device_to_host_result_bytes": 3200000,
+        "host_to_device_task_bytes": 560,
+        "kernel_elapsed_nanoseconds": 2670816,
+        "lbvh_build_nanoseconds": 1254271024,
+        "materialization_nanoseconds": 30,
+        "maximum_closed_rank": 11,
+        "model_qualification_nanoseconds": 3307430,
+        "morse_order_k": 10,
+        "persistent_lbvh_device_bytes": 9599920,
+        "physical_predicate_task_count": 3200000,
+        "point_count": 50000,
+        "predicate_capacity": 3200000,
+        "predicate_pattern_task_count": 10,
+        "process_local_transcript_digest": 16035470398759690667,
+        "total_wall_nanoseconds": 1299016415,
+        "transaction_capacity": 600000,
+        "transaction_count": 320000,
+        "transaction_input_bytes": 320,
+        "transaction_output_bytes": 48
+      },
+      "k5": {
+        "accounted_device_bytes": 12600200,
+        "cloud_generation_nanoseconds": 28953591,
+        "compositor_wall_nanoseconds": 11893530,
+        "device_batch_arena_bytes": 3000280,
+        "device_to_host_result_bytes": 3000000,
+        "host_to_device_task_bytes": 280,
+        "kernel_elapsed_nanoseconds": 2479872,
+        "lbvh_build_nanoseconds": 1255479364,
+        "materialization_nanoseconds": 30,
+        "maximum_closed_rank": 6,
+        "model_qualification_nanoseconds": 2970510,
+        "morse_order_k": 5,
+        "persistent_lbvh_device_bytes": 9599920,
+        "physical_predicate_task_count": 3000000,
+        "point_count": 50000,
+        "predicate_capacity": 3200000,
+        "predicate_pattern_task_count": 5,
+        "process_local_transcript_digest": 13016604636829149405,
+        "total_wall_nanoseconds": 1299452505,
+        "transaction_capacity": 600000,
+        "transaction_count": 600000,
+        "transaction_input_bytes": 320,
+        "transaction_output_bytes": 48
+      },
+      "performance_interpretation": {
+        "complete_tree_latency_measured": false,
+        "k10_lbvh_share_percent": 96.555441,
+        "k10_total_over_one_second_factor": 1.299016,
+        "k10_total_over_primary_100ms_factor": 12.990164,
+        "k5_lbvh_share_percent": 96.616026,
+        "k5_total_over_one_second_factor": 1.299453,
+        "k5_total_over_primary_100ms_factor": 12.994525,
+        "min_cluster_size_applied": false,
+        "qualified_scope": "synthetic_compact_recipe_component_only_not_warm_e2e"
+      }
+    },
+    "twenty_million_physical_predicates": {
+      "comparison_to_precompact_baseline": {
+        "historical_receipt_path": "docs/validation/phase15_exact_pair_block_antichain_cuda_g4_3bf31e7.json",
+        "historical_receipt_sha256": "6c41cb7f71738223eccfedd7c3ba396135cba0b17698e7e3cc829d24b4f38c6e",
+        "k10_compositor_speedup_factor": 81.990369,
+        "k10_total_speedup_factor": 4.923861,
+        "k5_compositor_speedup_factor": 91.807227,
+        "k5_total_speedup_factor": 5.465501,
+        "precompact_baseline_preserved": true
+      },
+      "k10": {
+        "accounted_device_bytes": 80000480,
+        "cloud_generation_nanoseconds": 182507493,
+        "compositor_wall_nanoseconds": 75161690,
+        "device_batch_arena_bytes": 20000560,
+        "device_to_host_result_bytes": 20000000,
+        "host_to_device_task_bytes": 560,
+        "kernel_elapsed_nanoseconds": 15548512,
+        "lbvh_build_nanoseconds": 1332869172,
+        "materialization_nanoseconds": 40,
+        "maximum_closed_rank": 11,
+        "model_qualification_nanoseconds": 2993589,
+        "morse_order_k": 10,
+        "persistent_lbvh_device_bytes": 59999920,
+        "physical_predicate_task_count": 20000000,
+        "point_count_capacity_scaffold": 312500,
+        "predicate_capacity": 20000000,
+        "predicate_pattern_task_count": 10,
+        "process_local_transcript_digest": 768119972304798360,
+        "total_wall_nanoseconds": 1594046614,
+        "transaction_capacity": 3750000,
+        "transaction_count": 2000000,
+        "transaction_input_bytes": 320,
+        "transaction_output_bytes": 48
+      },
+      "k5": {
+        "accounted_device_bytes": 84000328,
+        "cloud_generation_nanoseconds": 198408594,
+        "compositor_wall_nanoseconds": 75168772,
+        "device_batch_arena_bytes": 20000280,
+        "device_to_host_result_bytes": 20000000,
+        "host_to_device_task_bytes": 280,
+        "kernel_elapsed_nanoseconds": 15389312,
+        "lbvh_build_nanoseconds": 1331995115,
+        "materialization_nanoseconds": 30,
+        "maximum_closed_rank": 6,
+        "model_qualification_nanoseconds": 2933630,
+        "morse_order_k": 5,
+        "persistent_lbvh_device_bytes": 64000048,
+        "physical_predicate_task_count": 20000000,
+        "point_count_capacity_scaffold": 333334,
+        "predicate_capacity": 21333376,
+        "predicate_pattern_task_count": 5,
+        "process_local_transcript_digest": 312283018357147881,
+        "total_wall_nanoseconds": 1609017031,
+        "transaction_capacity": 4000008,
+        "transaction_count": 4000000,
+        "transaction_input_bytes": 320,
+        "transaction_output_bytes": 48
+      }
+    }
+  },
+  "compact_recipe_semantics": {
+    "affine_unique_transaction_ids": true,
+    "batch_semantics": "compact_repeated_exact_model_recipe_with_affine_unique_ids_and_physical_predicate_expansion",
+    "cpu_oracle_model_certified": true,
+    "cpu_oracle_model_invocation_count": 1,
+    "global_pair_coverage_closed": false,
+    "hierarchy_or_tree_claimed": false,
+    "pairwise_disjoint_support_products_validated": false,
+    "per_transaction_host_materialization_avoided": true,
+    "physical_predicate_evaluations_performed": true,
+    "public_status": "not_claimed",
+    "repeated_model_transaction": true,
+    "slo_claimed": false,
+    "submitted_support_products_may_overlap": true
+  },
+  "component_only": true,
+  "deployment_status": "validated_real_G4_compact_recipe_transactional_antichain_component_only",
+  "direct_regression": {
+    "antichain_audit": {
+      "k10_kernel_elapsed_nanoseconds": 88128,
+      "k10_wall_nanoseconds": 3151610,
+      "k5_kernel_elapsed_nanoseconds": 91328,
+      "k5_wall_nanoseconds": 2306430
+    },
+    "antichain_release": {
+      "k10_certified_transaction_count": 514,
+      "k10_completed_transaction_digest": 14152769725194484746,
+      "k10_kernel_elapsed_nanoseconds": 89600,
+      "k10_predicate_result_digest": 11730230348190022584,
+      "k10_wall_nanoseconds": 2542490,
+      "k5_certified_transaction_count": 514,
+      "k5_completed_transaction_digest": 10352759483848761708,
+      "k5_kernel_elapsed_nanoseconds": 93184,
+      "k5_predicate_result_digest": 10412204196153000790,
+      "k5_wall_nanoseconds": 1980930,
+      "total_predicate_task_count": 7727
+    },
+    "witness_schema_v2_release": {
+      "certified_count": 948,
+      "directed_nonnegative_short_circuit_count": 6520,
+      "fixed_limb_evaluation_count": 1608,
+      "fixed_limb_residual_count": 660,
+      "kernel_elapsed_nanoseconds": 177504,
+      "mismatch_count": 0,
+      "subnormal_negative_qualified": true,
+      "wall_nanoseconds": 2829950
+    }
+  },
+  "environment": {
+    "base_image_ref": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+    "compute_capability": "12.0",
+    "cuda_compiler": "12.9.86",
+    "cuda_toolkit_preflight": "12.9.41",
+    "driver": "580.173.02",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpu_uuid": "GPU-3dfcf2d3-8092-d43b-0ca1-0696f972227d",
+    "machine_type": "g4-standard-48",
+    "qualification_image_id": "sha256:bcdb1df5262d7e3c87d0e00f4c6c1007a98330f50a9bb9691aa9986899f49622",
+    "vram_mib": 97887
+  },
+  "phase": "15",
+  "profile": "hgp_reduced",
+  "provenance": {
+    "binary_sha256": {
+      "antichain_audit": "7cbbb7115fe1a5b7bf5bada78214c9cef815136747c98f90bae505c318b56f13",
+      "antichain_release": "51ec6c81601917833f956cd3045b3ae1f6c723baff4671fcb8443008d421042e",
+      "witness_audit": "70fa64493689bda3cde256f7f4e033537cdd2d961fdec25e630d8e2a2aa91557",
+      "witness_release": "021259ef633cc9a398e2f747818701f07c0aa8db8871e3e1ab1fa3894898aaa6"
+    },
+    "raw_sha256": {
+      "antichain_audit_json": "9953884f15f6bf53686d5bf7b4e2e7c509a95d88d62d3f63076b7407f0bd1200",
+      "antichain_release_json": "149bc5d96f595567bf99724e7fd59211c5f0809a2ac3a535abf622ea15862692",
+      "aot_audit_antichain_elf": "0e2c0328de74222517a214e0053e1e8e416d6eceb81df0eaed6b5b82a01f9653",
+      "aot_audit_antichain_ptx": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "aot_audit_witness_elf": "0e2c0328de74222517a214e0053e1e8e416d6eceb81df0eaed6b5b82a01f9653",
+      "aot_audit_witness_ptx": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "aot_release_antichain_elf": "8a0886efdc252008d74f3fc0dfbc28ac4ab15aea786500c76821ff2097dcfc08",
+      "aot_release_antichain_ptx": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "aot_release_witness_elf": "d3c8d48b5b4414e3faec4c658a6740497b084600fbf7da59e1219ad00049a858",
+      "aot_release_witness_ptx": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "audit_build_log": "361f38e90091bd6f918db4ba447017a2090a94675a18a3f67ebe1d3f30686839",
+      "audit_configure_log": "6e0980d7f373a3ae800c7c087a3db3ced5f69e3e3d4bf40a4cc517f53a87a6b0",
+      "binary_sha256_manifest": "c3cde21a6f3051811e987c6ea6e4f22586f8165c767c00c5db359135e9f7ec2a",
+      "compact_20m_k10_json": "773721484ec14439d2a98860616fc11ecf864b2be92414943ab6ea0dac60ce85",
+      "compact_20m_k5_json": "81c26e5e5f1e28a5f992ea40249cb3ad9b544b04656cb202fc9adf9a9486e42f",
+      "compact_50k_k10_json": "e3416f38a0ed08b4a76791053a75b5d2e8026bdd359754ee00332889e01822e9",
+      "compact_50k_k5_json": "2e254c8e0e3f08985733e812108e19489a3778a13b3582fea9f6001c8290179b",
+      "compact_memcheck_log": "cad4a3093341be14cf8426f72f4b7398aa021ca0d94381b575a41cb6b189b8b1",
+      "compact_racecheck_log": "a60f7be36e70d37301f3429da51d8cbc12b5b03a1310b2b46ca2afe0bb4e39a3",
+      "ephemeral_git_head": "56b6d49e487df9314345b2a61b32e748d271a49fc0df32b60e52c105cc9738c7",
+      "image_build_log": "85e75b64bc3cc621350189586c07cd5b0c3362022adebc34d2472d3b0c287160",
+      "image_id": "0e83405bad5eef3113ac7abe08b663f1bca819184523d44d484be3bf1ff1a717",
+      "nvidia_smi_log": "d58ff28270df68027ab9cde732464fcdf7f54d3e99818714de4e18c51538c79e",
+      "preflight_log": "014f055b676d5da1fd2b1a2f8d8613be5dbc7e303871db4a94e0ed9107e60259",
+      "release_build_log": "63115562a676fa9a70af16e81617dd164955365b7910290f98879f29dfdbe184",
+      "release_configure_log": "8a5479b6ba6c63977562818755475827d071ab255c8a7ac47b99b9155229772b",
+      "release_ctest_log": "fb2ac5cad1fa33a77cea6e5773adc7bc4c4c9c3982ea65dc379e892cf83036e8",
+      "witness_release_json": "6bf0d81e1f63ae387325b020c09767c2e451222e7402ef5db2b6c84db77e06b3"
+    },
+    "results_archive_sha256": "4772ce6c61a7ff229d76ebdf3a38cfda2b950943fd405995112c2b26be47c2e5"
+  },
+  "schema": "morsehgp3d.phase15.exact_pair_block_antichain_compact_cuda_g4_qualification.v1",
+  "scientific_public_status": null,
+  "scientific_result_claimed": false,
+  "scientific_scope": "compact_repeated_exact_model_recipe_transactional_predicate_throughput_and_memory_component_only",
+  "source_snapshot": {
+    "archive_sha256": "02c615a24f334526a3b4d736a64590e007b80215630e148825f55d48d6d1e7eb",
+    "base_git_sha": "da55bcf729da310042dd762c5c9663fc04697940",
+    "clean_reconstruction_for_cuda_manifest": true,
+    "ephemeral_git_head": "f06fbf19e95c4817842f27278eaf63168521ab02",
+    "original_worktree_was_wip": true
+  },
+  "status": "passed",
+  "vm_lifecycle": {
+    "final_inventory_other_active_project_e_hgp_vm_count": 0,
+    "final_status": "TERMINATED",
+    "guest_shutdown_minutes": 45,
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "instance_termination_action": "STOP",
+    "last_start_timestamp": "2026-07-31T06:53:24.586-07:00",
+    "last_stop_timestamp": "2026-07-31T06:59:00.104-07:00",
+    "local_session_key_directory_removed": true,
+    "machine_type": "g4-standard-48",
+    "max_run_duration_seconds": 3600,
+    "os_login_session_key_revoked": true,
+    "project": "devpod-gpu-exploration",
+    "provisioning_model": "SPOT",
+    "targeted_stop_verified": true,
+    "zone": "europe-west4-ai1a"
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "artifact_role": "bounded_transactional_multi_node_exact_pair_block_antichain_component_qualification",
+  "backend": "cuda_g4",
+  "checks": {
+    "aot_audit_architectures": [
+      "sm_120"
+    ],
+    "aot_audit_ptx_entry_count": 0,
+    "aot_release_architectures": [
+      "sm_120"
+    ],
+    "aot_release_ptx_entry_count": 0,
+    "audit_build": "passed",
+    "direct_scientific_digest_equivalence": "passed",
+    "host_release_ctest": "passed_4_of_4",
+    "memcheck": {
+      "error_count": 0,
+      "leaked_allocation_count": 0,
+      "leaked_byte_count": 0,
+      "status": "passed"
+    },
+    "racecheck": {
+      "error_count": 0,
+      "hazard_count": 0,
+      "status": "passed",
+      "warning_count": 0
+    },
+    "release_build": "passed",
+    "source_snapshot_archive_sha256_verified": true
+  },
+  "claims": {
+    "complete_hgp_hierarchy": false,
+    "complete_pair_catalog": false,
+    "five_or_ten_trees": false,
+    "global_pair_coverage_closed": false,
+    "hierarchy_or_tree": false,
+    "min_cluster_size_20_materialized": false,
+    "pairwise_disjoint_support_products": false,
+    "product_scalability": false,
+    "public_status_claimed": false,
+    "slo_claimed": false,
+    "support3_or_support4": false
+  },
+  "component_only": true,
+  "deployment_status": "validated_real_G4_bounded_transactional_antichain_component_only",
+  "direct_differential": {
+    "audit_replay": {
+      "k10_kernel_elapsed_nanoseconds": 92096,
+      "k10_wall_nanoseconds": 3165289,
+      "k5_kernel_elapsed_nanoseconds": 92672,
+      "k5_wall_nanoseconds": 2319179
+    },
+    "k10": {
+      "canonical_transaction_digest": 18329646613799026989,
+      "certified_transaction_count": 514,
+      "completed_transaction_digest": 14152769725194484746,
+      "insufficient_transaction_count": 1,
+      "invalid_transaction_count": 1,
+      "maximum_closed_rank": 11,
+      "nonnegative_transaction_count": 1,
+      "predicate_result_digest": 11730230348190022584,
+      "predicate_task_count": 5151,
+      "predicate_task_digest": 6936178233557271219,
+      "process_local_transcript_digest": 13141450555512721155,
+      "submitted_transaction_digest": 12806078509426196685,
+      "transaction_count": 517
+    },
+    "k5": {
+      "canonical_transaction_digest": 1057002860524355709,
+      "certified_transaction_count": 514,
+      "completed_transaction_digest": 10352759483848761708,
+      "insufficient_transaction_count": 1,
+      "invalid_transaction_count": 1,
+      "maximum_closed_rank": 6,
+      "nonnegative_transaction_count": 1,
+      "predicate_result_digest": 10412204196153000790,
+      "predicate_task_count": 2576,
+      "predicate_task_digest": 2811183515709828347,
+      "process_local_transcript_digest": 8153960261853433073,
+      "submitted_transaction_digest": 12108740685065621181,
+      "transaction_count": 517
+    },
+    "multileaf_witness_transaction_count": 2,
+    "point_count": 128,
+    "release_replays": [
+      {
+        "k10_kernel_elapsed_nanoseconds": 92192,
+        "k10_wall_nanoseconds": 2515969,
+        "k5_kernel_elapsed_nanoseconds": 92544,
+        "k5_wall_nanoseconds": 1986759
+      },
+      {
+        "k10_kernel_elapsed_nanoseconds": 92192,
+        "k10_wall_nanoseconds": 2519859,
+        "k5_kernel_elapsed_nanoseconds": 91328,
+        "k5_wall_nanoseconds": 2003939
+      },
+      {
+        "k10_kernel_elapsed_nanoseconds": 92064,
+        "k10_wall_nanoseconds": 2527239,
+        "k5_kernel_elapsed_nanoseconds": 92416,
+        "k5_wall_nanoseconds": 1981580
+      }
+    ],
+    "schema_version": 1,
+    "support_mass_gt_one_transaction_count": 8,
+    "total_predicate_task_count": 7727
+  },
+  "environment": {
+    "base_image_ref": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+    "compute_capability": "12.0",
+    "cuda_compiler": "12.9.86",
+    "cuda_toolkit_preflight": "12.9.41",
+    "driver": "580.173.02",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpu_uuid": "GPU-ff0a2268-46e7-7a6f-0c5b-16ad68f1dc34",
+    "initial_image_id": "sha256:67a44924afddb6406c4cfee5c5271702af7fdebde37facbf6f22bf7c48300238",
+    "machine_type": "g4-standard-48",
+    "qualification_image_id": "sha256:e94ace3d8cf1512512973690d128ccac4199fe73e58ceba7a42659d9b3ad8ae6",
+    "vram_mib": 97887
+  },
+  "massive_component_baselines": {
+    "k10": {
+      "accounted_device_bytes": 1659999920,
+      "cloud_generation_nanoseconds": 175247947,
+      "compositor_wall_nanoseconds": 6162534679,
+      "cpu_oracle_model_invocation_count": 1,
+      "device_batch_arena_bytes": 1600000000,
+      "device_to_host_result_bytes": 480000000,
+      "host_to_device_task_bytes": 1120000000,
+      "kernel_elapsed_nanoseconds": 14771840,
+      "lbvh_build_nanoseconds": 1324455583,
+      "materialization_nanoseconds": 180943305,
+      "maximum_closed_rank": 11,
+      "model_qualification_nanoseconds": 3040258,
+      "point_count_capacity_scaffold": 312500,
+      "predicate_capacity": 20000000,
+      "predicate_target": 20000000,
+      "process_local_transcript_digest": 15500560665580241387,
+      "total_wall_nanoseconds": 7848863592,
+      "transaction_capacity": 3750000,
+      "transaction_count": 2000000,
+      "transaction_input_bytes": 640000000,
+      "transaction_output_bytes": 96000000
+    },
+    "k5": {
+      "accounted_device_bytes": 1664000048,
+      "cloud_generation_nanoseconds": 194269180,
+      "compositor_wall_nanoseconds": 6901036481,
+      "cpu_oracle_model_invocation_count": 1,
+      "device_batch_arena_bytes": 1600000000,
+      "device_to_host_result_bytes": 480000000,
+      "host_to_device_task_bytes": 1120000000,
+      "kernel_elapsed_nanoseconds": 14751936,
+      "lbvh_build_nanoseconds": 1334367508,
+      "materialization_nanoseconds": 356711822,
+      "maximum_closed_rank": 6,
+      "model_qualification_nanoseconds": 2916789,
+      "point_count_capacity_scaffold": 333334,
+      "predicate_capacity": 21333376,
+      "predicate_target": 20000000,
+      "process_local_transcript_digest": 7824390145412743163,
+      "total_wall_nanoseconds": 8794083857,
+      "transaction_capacity": 4000008,
+      "transaction_count": 4000000,
+      "transaction_input_bytes": 1280000000,
+      "transaction_output_bytes": 192000000
+    },
+    "performance_role": "baseline_before_compact_host_transaction_materialization",
+    "qualified_scope": "transactional_predicate_throughput_and_memory_only",
+    "repeated_model_transaction": true,
+    "submitted_support_products_may_overlap": true
+  },
+  "phase": "15",
+  "profile": "hgp_reduced",
+  "provenance": {
+    "binary_sha256": {
+      "antichain_audit": "c0fe98e3d05ce99a22d6e16f384ccb08a37183017674c4fcb0b9b177f59d7ccb",
+      "antichain_release": "291c6bb70d9a8e584d122daec786c246613a792e5a847bad6e55dc350f98251f",
+      "witness_audit": "e00820e16ad0b715bc960c41bad9788f3639c7c671fea933a6681e922673ccaa",
+      "witness_release": "28d5b5f6afcf1c681af55c5e752193b8311dc5e6e7c4a072917ef4bf62f0399b"
+    },
+    "initial_raw_sha256": {
+      "antichain_audit": "ce3dd6e203c87024f339c8b4473d0a01d6506e9db7b57173d53b4737d78e3f73",
+      "antichain_mass_k10": "e6009cefc3cbaf53dabd5bc269920cb9c5c961c89294a367ff82c0ee718715fc",
+      "antichain_mass_k5": "257cf59762e59c8f1b95d5bf767f1001bd4200b734e9e1882abda95a391e0e79",
+      "antichain_release_1": "9c380869b6cdd2db0c96c4e26e654eb336969cf4de51675d5506252e7c0cc73a",
+      "antichain_release_2": "82c8aa5c13c068501b27a01163438b29c9d18d43e5220c9581f13ce157f5d735",
+      "antichain_release_3": "8be150b3a1a5a504ff90bffb7845a15cdc98a17b37222f9aabfb99e3eb0488c8",
+      "witness_schema_v2_release": "b6ccad59febee4bb2a02542e72d02587f0073434e0d3751331cf22bc20d6a3ea"
+    },
+    "json_extraction": "last_JSON_object_after_NVIDIA_container_banner",
+    "log_sha256": {
+      "antichain_memcheck": "213808ac97ae757d7f0ff2ade69ea52617dbbb49024a58b91a3677170301a951",
+      "antichain_racecheck": "29851d8dcfd54852504cfb81e1a61b00f5efb5a92861838ab546d30437df9bf4",
+      "antichain_release_followup": "b07bb3c7ff3b2e4cd98a6e0bf027adff4648007a13a71ee8f819263758b2f6c9",
+      "audit_antichain_elf": "0e2c0328de74222517a214e0053e1e8e416d6eceb81df0eaed6b5b82a01f9653",
+      "audit_antichain_ptx": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "release_antichain_elf": "8a0886efdc252008d74f3fc0dfbc28ac4ab15aea786500c76821ff2097dcfc08",
+      "release_antichain_ptx": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "release_ctest": "3d88c7d8be309e4f9801681e28ab255fcd4418d24ba741655ccfd79c1ca5909c"
+    }
+  },
+  "schema": "morsehgp3d.phase15.exact_pair_block_antichain_cuda_g4_qualification.v1",
+  "scientific_public_status": null,
+  "scientific_result_claimed": false,
+  "scientific_scope": "bounded_local_transactional_exact_pair_block_antichain_component_only",
+  "source_snapshot": {
+    "archive_sha256": "3bf31e7238c1c3c59c3b12c91e696e7e0c55ea9b9124fdcf77cc66294d5dc775",
+    "base_git_sha": "da55bcf729da310042dd762c5c9663fc04697940",
+    "clean_reconstruction_for_cuda_manifest": true,
+    "original_worktree_was_wip": true
+  },
+  "status": "passed",
+  "vm_lifecycle": {
+    "final_inventory_other_active_project_e_hgp_vm_count": 0,
+    "followup_session": {
+      "final_status": "TERMINATED",
+      "guest_shutdown_minutes": 30,
+      "last_start_timestamp": "2026-07-31T06:26:48.939-07:00",
+      "last_stop_timestamp": "2026-07-31T06:31:44.502-07:00",
+      "targeted_stop_verified": true
+    },
+    "initial_direct_and_massive_session": {
+      "final_status": "TERMINATED",
+      "guest_shutdown_minutes": 45,
+      "last_start_timestamp": "2026-07-31T06:15:58.678-07:00",
+      "targeted_stop_verified": true
+    },
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "instance_termination_action": "STOP",
+    "machine_type": "g4-standard-48",
+    "max_run_duration_seconds": 3600,
+    "project": "devpod-gpu-exploration",
+    "provisioning_model": "SPOT",
+    "zone": "europe-west4-ai1a"
+  }
+}

@@ -613,6 +613,85 @@ else()
   )
 endif()
 
+# Host/fake compositor for atomic multi-node witness antichain decisions.  It
+# flattens each sufficient antichain into one rank-two exact-predicate batch,
+# then counts the support-product mass exactly once.  It does not mutate or
+# close a global frontier.
+add_library(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract
+  STATIC
+    include/morsehgp3d/gpu/exact_pair_block_antichain_cuda.hpp
+    src/gpu/exact_pair_block_antichain_cuda.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_pair_block_antichain_cuda_host_contract
+  ALIAS morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract
+  PUBLIC morsehgp3d::gpu_exact_pair_block_witness_cuda_host_contract
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+# Host executable specification for a future resident CUDA pair-block
+# scheduler.  Complete waves are staged in the inactive buffer and published
+# atomically; rejected waves restore the source partition without allocating
+# a global pair matrix.
+add_library(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+  STATIC
+    include/morsehgp3d/gpu/exact_pair_block_transactional_frontier_cuda.hpp
+    src/gpu/exact_pair_block_transactional_frontier_cuda.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+  ALIAS
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+  PUBLIC morsehgp3d::pair_support
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 add_library(
   morsehgp3d_anchored_pair_witness_bank
   STATIC
@@ -3496,6 +3575,38 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_library(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda
+    STATIC
+      include/morsehgp3d/gpu/exact_pair_block_antichain_cuda.hpp
+      src/gpu/exact_pair_block_antichain_cuda.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_exact_pair_block_antichain_cuda
+    ALIAS morsehgp3d_gpu_exact_pair_block_antichain_cuda
+  )
+  target_include_directories(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda
+    PUBLIC morsehgp3d::gpu_exact_pair_block_witness_cuda
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda PUBLIC cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_antichain_cuda PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_antichain_cuda
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
   add_executable(
     morsehgp3d_gpu_exact_pair_block_witness_cuda_qualification
     src/tools/gpu_exact_pair_block_witness_cuda_qualification.cpp
@@ -3515,6 +3626,30 @@ if(MORSEHGP3D_ENABLE_CUDA)
   else()
     target_compile_options(
       morsehgp3d_gpu_exact_pair_block_witness_cuda_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda_qualification
+    src/tools/gpu_exact_pair_block_antichain_cuda_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda_qualification
+    PRIVATE morsehgp3d::gpu_exact_pair_block_antichain_cuda
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_pair_block_antichain_cuda_qualification
+    PRIVATE cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_antichain_cuda_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_antichain_cuda_qualification
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()

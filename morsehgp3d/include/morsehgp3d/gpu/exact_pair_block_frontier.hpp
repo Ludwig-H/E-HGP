@@ -16,7 +16,7 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::size_t
-    exact_pair_block_frontier_maximum_closed_rank = 6U;
+    exact_pair_block_frontier_maximum_closed_rank = 11U;
 inline constexpr std::size_t
     exact_pair_block_frontier_maximum_witness_antichain_node_count =
         exact_pair_block_frontier_maximum_closed_rank - 1U;
