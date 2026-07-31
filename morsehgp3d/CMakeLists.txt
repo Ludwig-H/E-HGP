@@ -3672,6 +3672,31 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_executable(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification
+    src/tools/gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification
+    PRIVATE
+      morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification
+    PRIVATE cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
   add_library(
     morsehgp3d_gpu_exact_pair_block_antichain_cuda
     STATIC
