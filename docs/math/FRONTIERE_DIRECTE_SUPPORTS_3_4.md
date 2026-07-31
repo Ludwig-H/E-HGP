@@ -12,6 +12,14 @@ La cascade porte sur la taille du support minimal, pas sur des cliques d'objets 
 
 La même non-hérédité vaut entre supports trois et quatre. La fixture [`tetrahedron_face_filter_counterexamples.json`](../../tests/fixtures/regressions/tetrahedron_face_filter_counterexamples.json) recertifie d'une part un tétraèdre de barycentriques $(1/8,3/8,3/8,1/8)$ dont deux faces sont obtuses, d'autre part un tétraèdre à quatre faces aiguës dont une barycentrique vaut $-1/12$. Exiger des faces aiguës perd donc un support quatre valide, tandis qu'accepter leurs cliques introduit un faux support quatre. La frontière des quadruplets applique directement l'indépendance affine et les quatre signes barycentriques; les fermetures issues des supports deux et trois sont fusionnées en parallèle, jamais utilisées comme autorité d'exclusion.
 
+### 1.2 Deux politiques terminales distinctes
+
+La frontière historique de ce document classe les supports par rang fermé au plus $s_{\max}$ et transforme un extra-shell pertinent en diagnostic. Cette politique reste correcte pour son catalogue critique borné et pour les contrats `RelevantGP`; elle ne constitue pas l'autorité des carriers Gabriel de cardinalité fixée hors `RelevantGP`.
+
+Le futur mode strict-interior-aware pour $q=3$ conserve la même partition canonique des triplets et les mêmes prédicats de support minimal, mais remplace la fenêtre de rang par la capacité du simplexe à contenir tous les intérieurs stricts. Pour un support trois, un seul témoin strictement intérieur rejette le carrier, tandis que tout extra-shell est sur la frontière et ne le rejette jamais. Si aucun intérieur strict n'existe, le triangle support est émis exactement une fois, même lorsque son rang fermé dépasse trois. La fixture [`gabriel_carrier_strict_interior_extra_shell_matrix.json`](../../tests/fixtures/regressions/gabriel_carrier_strict_interior_extra_shell_matrix.json) fixe ce cas cosphérique ainsi que les trois branches correspondantes des supports deux.
+
+Les deux politiques doivent avoir des types, compteurs et statuts séparés. Un reçu `above_window` du mode rang fermé ne peut ni fermer ni pruner le mode carrier; seul un nombre suffisant d'intérieurs stricts, certifiés par une antichaîne disjointe hors support, possède ce pouvoir. Le shell complet reste logiquement rejouable, mais ses identifiants ne sont matérialisés que lorsqu'ils paramètrent directement une sortie nécessaire.
+
 ## 2. Partition canonique des sous-ensembles
 
 Une entrée de frontière est une suite de groupes $(N_i,r_i)$, où les plages Morton des nœuds $N_i$ sont deux à deux disjointes et strictement ordonnées, $r_i\geq1$ et $\sum_i r_i=m$. Elle représente les supports prenant exactement $r_i$ feuilles distinctes dans $N_i$.
@@ -63,6 +71,8 @@ $$t_m=s_{\max}-m+1.$$
 
 Si l'union de ces plages contient au moins $t_m$ observations, chaque support affine indépendant a au moins $t_m$ points strictement intérieurs et au moins ses $m$ points sur le shell. Son rang fermé est donc au moins $t_m+m=s_{\max}+1$; le produit entier est hors de la fenêtre utile. Une égalité de borne ne compte jamais comme intérieur strict.
 
+Le seuil $t_m$ ci-dessus appartient exclusivement au mode de rang fermé. Dans le mode carrier $q=3$ et support trois, le seuil de rejet vaut un intérieur strict; les égalités de shell ne contribuent jamais à ce compte. Une borne qui additionne intérieurs et shell est invalide pour cette décision.
+
 ## 5. Classification terminale sparse
 
 Une feuille non exclue est recertifiée avec les primitives exactes existantes : dépendance affine, centre circonscrit, barycentriques et réduction éventuelle du support. Un support dépendant, extérieur ou réduit sur sa frontière est résolu sans émission à cette taille.
@@ -70,6 +80,8 @@ Une feuille non exclue est recertifiée avec les primitives exactes existantes :
 Pour un support minimal, une requête LBVH de boule fermée agrège un sous-arbre extérieur lorsque sa distance minimale est strictement supérieure au niveau et un sous-arbre intérieur lorsque sa distance maximale est strictement inférieure. Toute égalité descend. La requête conserve au plus $s_{\max}-m$ identifiants intérieurs, compte le shell complet et ne conserve d'un extra-shell que son cardinal exact et son plus petit identifiant hors support.
 
 Le résultat régulier exige un shell exactement égal au support. Un extra-shell pertinent reste un diagnostic de dégénérescence. Les points extérieurs sont comptés sans être matérialisés. Ainsi, une classification terminale n'alloue ni la partition globale du nuage, ni une cellule, ni une liste de cofaces.
+
+Cette exigence de shell régulier appartient elle aussi au mode de rang fermé. Le mode carrier $q=3$ accepte au contraire un support trois dès que sa liste d'intérieurs stricts est vide, conserve le compte exact d'extra-shell et un certificat de rejeu, puis émet le support une seule fois. Cette fermeture locale ne résout ni les incidences silencieuses de Gamma$_2$, ni l'arrangement Morse d'une cosphère.
 
 ## 6. Bornes exactes issues de binary64
 

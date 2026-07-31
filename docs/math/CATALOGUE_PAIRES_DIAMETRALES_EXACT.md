@@ -129,6 +129,22 @@ $$\left\lbrace u,v\right\rbrace\subseteq Q\subseteq\left\lbrace u,v\right\rbrace
 
 En effet, omettre un point de $I$ laisse un point de $X\setminus Q$ dans l'intérieur ouvert de la miniboule; réciproquement, si $I\subseteq Q$, tout point omis de $E$ est seulement sur le shell et ne viole pas la condition de Gabriel. Pour une cardinalité cible $q$, le nombre exact de simplexes abstraits de Gabriel portés par ce record est donc $\binom{\lvert E\rvert}{q-2-\lvert I\rvert}$, avec la convention que ce coefficient vaut zéro lorsque $q-2-\lvert I\rvert\notin\left\lbrack0,\lvert E\rvert\right\rbrack$.
 
+### Spécialisation aux carriers de cardinalité trois
+
+Pour $q=3$, la formule précédente sépare strictement intérieur et shell; le rang fermé $\lvert T\rvert+\lvert I\rvert+\lvert E\rvert$ ne décide pas l'admission.
+
+| support minimal | intérieurs stricts | triangles Gabriel portés |
+|---|---:|---|
+| $\lvert T\rvert=2$ | $\lvert I\rvert=0$ | $T\cup\left\lbrace e\right\rbrace$ pour chaque $e\in E$, soit $\lvert E\rvert$ sorties |
+| $\lvert T\rvert=2$ | $\lvert I\rvert=1$ | l'unique triangle $T\cup I$, indépendamment de $E$ |
+| $\lvert T\rvert=2$ | $\lvert I\rvert\geq2$ | aucun |
+| $\lvert T\rvert=3$ | $I=\varnothing$ | l'unique triangle $T$, indépendamment de $E$ |
+| $\lvert T\rvert=3$ | $\lvert I\rvert\geq1$ | aucun |
+
+La fixture rationnelle [`gabriel_carrier_strict_interior_extra_shell_matrix.json`](../../tests/fixtures/regressions/gabriel_carrier_strict_interior_extra_shell_matrix.json) fixe quatre cas entiers : paire sans intérieur et deux extra-shells, paire avec un intérieur et deux extra-shells, paire avec deux intérieurs et un extra-shell, puis triangle strictement aigu sans intérieur et avec un extra-shell. Les quatre rangs fermés sont supérieurs à trois; trois carriers restent néanmoins non vides. Son checker `Fraction` reconstruit les boules et la partition globale, puis compare la formule à une seconde énumération Gabriel exacte.
+
+Un futur flux paire strict-interior-aware doit donc chercher d'abord jusqu'à deux intérieurs sans matérialiser les shell points. Deux intérieurs ferment le record sans sortie; un seul intérieur émet directement $T\cup I$; seulement en l'absence d'intérieur une seconde passe streame les $e\in E$, chacun correspondant à une sortie nécessaire. Pour un support trois, le premier intérieur strict suffit à rejeter le carrier de cardinalité trois; en son absence, $T$ est émis une fois et les extra-shells restent une classification de frontière, jamais un multiplicateur de ce triangle. Cette politique est une API distincte de `maximum_closed_rank`.
+
 Un record énumère par ailleurs exactement $R-2$ triplets candidats et $\binom{R-2}{2}$ quadruplets candidats de même miniboule, sans nouveau parcours global. Ces deux comptes incluent les ensembles non Gabriel qui omettent un intérieur strict. Un filtre exact d'indépendance affine peut ensuite produire un catalogue optionnel de triangles et tétraèdres géométriques; il ne doit jamais supprimer un simplexe abstrait de Gabriel du flux HGP. Pour un triplet non dégénéré, un troisième sommet strictement intérieur donne un triangle obtus et un sommet supplémentaire du shell donne un triangle rectangle. Réciproquement, tout triangle non aigu dont le rang $R$ appartient aux buckets effectivement émis est retrouvé par son plus long côté. À $R=11$, le record ne propose que 9 triplets et 36 quadruplets de cette branche, au lieu de toutes les cliques du saturé.
 
 Sous `RelevantGP`, un simplexe utile de Gabriel à support propre ne peut omettre ni intérieur strict, par le critère précédent, ni point du shell, par définition de `RelevantGP`; il est donc l'unique saturé $Q=S$ et vérifie $\lvert Q\rvert=R$. Sans cette hypothèse, un catalogue limité aux seules boules de rang fermé $R\leq s_{\max}$ n'est pas exhaustif pour les simplexes de cardinalité au plus $s_{\max}$ : une paire antipodale peut être Gabriel tout en portant un shell cosphérique arbitrairement grand. La fixture [`relevant_gp_extra_shell_above_smax.json`](../../morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json) impose précisément le diagnostic `unsupported_degeneracy` au lieu d'une fausse complétude.
