@@ -216,8 +216,9 @@ la frontière device et exécute, dans cet ordre, 50k adversarial rang 11
 rang 11 (240 s). Le 50k doit fermer son contrat; 10M/30M peuvent rapporter
 une censure ou une couverture incomplète avec JSON valide et code zéro. Pour
 ces deux seules unités, le code 124 sans JSON devient un reçu de timeout
-canonique non qualifiant si stderr est strictement vide, puis la campagne
-continue; tout autre code reste fatal. Les résultats direct-scale restent des
+canonique non qualifiant seulement si stderr est strictement vide et si le
+temps mural externe atteint au moins la borne fixe, puis la campagne continue;
+tout autre code reste fatal. Les résultats direct-scale restent des
 diagnostics component/profile-only et
 ne revendiquent ni exactitude full-pipeline, ni scale_eligible, ni catalogue
 global, hiérarchie, SLO ou statut public.
@@ -2562,7 +2563,7 @@ def validate_direct_scale_timeout(
         "stdout_sha256": sha256_text(stdout),
         "timed_out": True,
         "timeout_seconds": timeout_seconds,
-        "timeout_source": "exit_status_124",
+        "timeout_source": "exit_status_124_with_external_wall_at_least_fixed_bound",
     }.items():
         if value.get(key) != expected or type(value.get(key)) is not type(expected):
             fail(f"direct-scale timeout n={point_count}.{key}: unexpected value")
@@ -2574,7 +2575,11 @@ def validate_direct_scale_timeout(
         "scientific_result": False,
     }:
         fail(f"direct-scale timeout n={point_count}: unexpected claim")
-    if not finished > started > 0 or stderr != "":
+    if (
+        not finished > started > 0
+        or finished - started < timeout_seconds * 1_000_000_000
+        or stderr != ""
+    ):
         fail(f"direct-scale timeout n={point_count}: invalid receipt evidence")
 
 
@@ -2645,7 +2650,7 @@ if value.get("execution") != {
         "direct_scale_30m_rank11",
     ],
     "external_clock": "guest_host_realtime_nanoseconds",
-    "fixed_timeout_command": "/usr/bin/timeout --foreground --kill-after=5s 60s",
+    "fixed_timeout_command": "/usr/bin/timeout --kill-after=5s --foreground 60s",
     "point_count": 16,
     "run_order": [5, 10],
     "timeouts_seconds": {
@@ -2798,7 +2803,7 @@ for run, maximum_order in zip(runs, (5, 10), strict=True):
     if run.get("maximum_order") != maximum_order or run.get("timeout_seconds") != 60:
         fail(f"artifact run K={maximum_order}: invocation mismatch")
     expected_command = [
-        "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+        "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
         "/workspace/repository/build/morsehgp3d-cuda-release/"
         "morsehgp3d_gpu_exact_pair_block_transactional_frontier_"
         "resident_cuda_qualification",
@@ -2836,7 +2841,7 @@ for run, maximum_order in zip(reducer_runs, (5, 10), strict=True):
         f"reducer-source run K={maximum_order}",
     )
     expected_command = [
-        "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+        "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
         "/workspace/repository/build/morsehgp3d-cuda-release/"
         "morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification",
         "--K", str(maximum_order), "--require-complete",
@@ -2896,14 +2901,14 @@ for run, (point_count, timeout_seconds, run_kind) in zip(
     )
     if point_count == 50000:
         expected_command = [
-            "/usr/bin/timeout", "--foreground", "--kill-after=5s", "120s",
+            "/usr/bin/timeout", "--kill-after=5s", "--foreground", "120s",
             frontier_binary, "--point-count", "50000", "--family",
             "adversarial_mixed_dyadic", "--maximum-closed-rank", "11",
             "--anchor-tile-capacity", "4096", "--seed", seed,
         ]
     else:
         expected_command = [
-            "/usr/bin/timeout", "--foreground", "--kill-after=5s",
+            "/usr/bin/timeout", "--kill-after=5s", "--foreground",
             f"{timeout_seconds}s", frontier_binary, "--point-count",
             str(point_count), "--family", "affine_uniform_binary64",
             "--maximum-closed-rank", "11", "--direct-scale",

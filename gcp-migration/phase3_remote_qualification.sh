@@ -319,9 +319,10 @@ la frontière device suivie de 50k adversarial rang 11 (120 s), 10M affine
 direct-scale rang 11 (180 s) et 30M affine direct-scale rang 11 (240 s). Le
 50k doit fermer son contrat; 10M/30M peuvent rester censurés ou incomplets
 avec JSON valide et code zéro. Pour ces deux seules unités, le code 124 sans
-JSON devient un reçu de timeout canonique non qualifiant si stderr est
-strictement vide, puis l'unité suivante est lancée; tout autre code reste
-fatal. Ces profils sont component/profile-only, sans revendication
+JSON devient un reçu de timeout canonique non qualifiant seulement si stderr
+est strictement vide et si le temps mural externe atteint au moins la borne
+fixe, puis l'unité suivante est lancée; tout autre code reste fatal. Ces
+profils sont component/profile-only, sans revendication
 exact/full-pipeline ou scale_eligible, catalogue, hiérarchie, SLO ni statut
 public.
 EOF
@@ -3574,7 +3575,7 @@ PY
         "phase15-resident-transactional-semantic-k5" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_K5_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_K5_STDERR_LOG}" \
-        /usr/bin/timeout --foreground --kill-after=5s 60s \
+        /usr/bin/timeout --kill-after=5s --foreground 60s \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_BINARY_PATH}" \
         --point-count 16 --K 5 --semantic-line-fixture --require-complete; then
         phase15_resident_transactional_semantic_k5_status=0
@@ -3612,7 +3613,7 @@ PY
         "phase15-resident-transactional-semantic-k10" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_K10_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_K10_STDERR_LOG}" \
-        /usr/bin/timeout --foreground --kill-after=5s 60s \
+        /usr/bin/timeout --kill-after=5s --foreground 60s \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_BINARY_PATH}" \
         --point-count 16 --K 10 --semantic-line-fixture --require-complete; then
         phase15_resident_transactional_semantic_k10_status=0
@@ -3695,7 +3696,7 @@ PY
             die "Horloge murale illisible avant ${label}."
         if run_container_split_output \
             "${label}" "${stdout_path}" "${stderr_path}" \
-            /usr/bin/timeout --foreground --kill-after=5s \
+            /usr/bin/timeout --kill-after=5s --foreground \
             "${fixed_timeout_seconds}s" "$@"; then
             run_status=0
         else
@@ -3717,6 +3718,14 @@ PY
             PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS -gt \
                 PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS ]] || \
             die "Mesure murale externe invalide pour ${label}."
+        if ((run_status == 124 && \
+            PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS - \
+                PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS < \
+                fixed_timeout_seconds * 1000000000)); then
+            report_failure_log "${label}" "${stdout_path}"
+            report_failure_log "${label}-stderr" "${stderr_path}"
+            die "Le code 124 de ${label} est antérieur à la borne fixe de ${fixed_timeout_seconds} secondes."
+        fi
         if [[ -s "${stderr_path}" ]]; then
             report_failure_log "${label}-stderr" "${stderr_path}"
             die "L'unité ${label} doit conserver stderr vide."
@@ -4964,7 +4973,7 @@ frontier_50k_result = json.loads(frontier_50k_path.read_text(encoding="utf-8"))
 
 def direct_scale_command(point_count, timeout_seconds):
     return [
-        "/usr/bin/timeout", "--foreground", "--kill-after=5s",
+        "/usr/bin/timeout", "--kill-after=5s", "--foreground",
         f"{timeout_seconds}s",
         "/workspace/repository/build/morsehgp3d-cuda-release/"
         "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
@@ -5019,7 +5028,7 @@ def direct_scale_result(
         "stdout_sha256": digest(stdout_path),
         "timed_out": True,
         "timeout_seconds": timeout_seconds,
-        "timeout_source": "exit_status_124",
+        "timeout_source": "exit_status_124_with_external_wall_at_least_fixed_bound",
     }
 
 
@@ -5124,7 +5133,7 @@ artifact = {
             "direct_scale_30m_rank11",
         ],
         "external_clock": "guest_host_realtime_nanoseconds",
-        "fixed_timeout_command": "/usr/bin/timeout --foreground --kill-after=5s 60s",
+        "fixed_timeout_command": "/usr/bin/timeout --kill-after=5s --foreground 60s",
         "point_count": 16,
         "run_order": [5, 10],
         "timeouts_seconds": {
@@ -5202,7 +5211,7 @@ artifact = {
     "runs": [
         {
             "command": [
-                "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification",
                 "--point-count", "16", "--K", "5", "--semantic-line-fixture",
                 "--require-complete",
@@ -5216,7 +5225,7 @@ artifact = {
         },
         {
             "command": [
-                "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification",
                 "--point-count", "16", "--K", "10", "--semantic-line-fixture",
                 "--require-complete",
@@ -5232,7 +5241,7 @@ artifact = {
     "reducer_source_runs": [
         {
             "command": [
-                "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification",
                 "--K", "5", "--require-complete",
             ],
@@ -5245,7 +5254,7 @@ artifact = {
         },
         {
             "command": [
-                "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification",
                 "--K", "10", "--require-complete",
             ],
@@ -5260,7 +5269,7 @@ artifact = {
     "frontier_profile_runs": [
         {
             "command": [
-                "/usr/bin/timeout", "--foreground", "--kill-after=5s", "120s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "120s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
                 "--point-count", "50000", "--family", "adversarial_mixed_dyadic",
                 "--maximum-closed-rank", "11", "--anchor-tile-capacity", "4096",
