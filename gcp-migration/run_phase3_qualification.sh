@@ -45,6 +45,7 @@ PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=11
 PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=0
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=0
 PHASE15_RANKED_PAIR_CLASSIFIER=0
+PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA=0
 MORTON_YAO48_SEED_WORK_PROFILE=0
 
 SESSION_CERTIFIED=0
@@ -72,6 +73,8 @@ LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT=""
+LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
+LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -93,7 +96,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5|--phase15-device-frontier-50k-kmax5-warm] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5|--phase15-device-frontier-50k-kmax5-warm] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--phase15-exact-pair-block-witness-cuda] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -191,6 +194,13 @@ racecheck. Tout repli exact ou désaccord échoue fermé. Ce composant ne
 revendique ni Gamma2 complet, ni hiérarchie K2, ni échelle industrielle, ni
 SLO, ni statut scientifique ou public.
 
+--phase15-exact-pair-block-witness-cuda qualifie nativement le composant borné
+A×B×W sur 128 points contre son oracle exact hôte, avec build Release et
+audit, ELF AOT sm_120 sans PTX, memcheck et racecheck. Cette route n'est pas un
+smoke et ne ferme ni catalogue global, ni hiérarchie, ni SLO. Elle s'exécute
+seule ou, exclusivement, dans la même session que le profil explicite
+--phase15-device-frontier-50k-kmax5-warm.
+
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
 dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
@@ -276,6 +286,12 @@ while (($# > 0)); do
             PHASE15_RANKED_PAIR_CLASSIFIER=1
             shift
             ;;
+        --phase15-exact-pair-block-witness-cuda)
+            ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 0)) || \
+                die "--phase15-exact-pair-block-witness-cuda ne peut être fourni qu'une fois."
+            PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA=1
+            shift
+            ;;
         --result-dir)
             (($# >= 2)) || die "Valeur manquante après --result-dir."
             RESULT_DIR="$2"
@@ -315,8 +331,25 @@ if ((PHASE15_EXACT_DIAMETRAL_PHI == 1 && \
      PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
      PHASE15_DEVICE_FRONTIER_50K == 1 || \
      PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1 || \
-     PHASE15_RANKED_PAIR_CLASSIFIER == 1))); then
+     PHASE15_RANKED_PAIR_CLASSIFIER == 1 || \
+     PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1))); then
     die "--phase15-exact-diametral-phi est mutuellement exclusive de tous les autres compagnons."
+fi
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    if ((PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
+         PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || \
+         PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
+         PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
+         PHASE15_EXACT_DIAMETRAL_PHI == 1 || \
+         PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1 || \
+         PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
+        die "--phase15-exact-pair-block-witness-cuda est exclusive des autres compagnons hors warm Kmax5."
+    fi
+    if ((PHASE15_DEVICE_FRONTIER_50K == 1 && \
+         (PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK != 6 || \
+          PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE != 1))); then
+        die "--phase15-exact-pair-block-witness-cuda ne peut accompagner que --phase15-device-frontier-50k-kmax5-warm."
+    fi
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1 && \
     (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
@@ -514,6 +547,12 @@ if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
         ! -L "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT="${RESULT_DIR}/phase15-exact-pair-block-witness-cuda-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" && \
+        ! -L "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
@@ -646,6 +685,18 @@ if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact ranked-pair-classifier Phase 15 temporaire local."
+    fi
+fi
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    if ! LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase15-exact-pair-block-witness-cuda-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        if [[ -n "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}"
+            LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
+        fi
+        die "Impossible de créer l'artefact exact pair-block witness CUDA Phase 15 temporaire local."
     fi
 fi
 
@@ -1150,6 +1201,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -1238,6 +1293,7 @@ printf '%s\n' \
     "  frontier 50k Phase 15: $([[ ${PHASE15_DEVICE_FRONTIER_50K} == 1 ]] && printf 'qualification non-smoke rang fermé %s activée%s' "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" "$([[ ${PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE} == 1 ]] && printf ' avec warmup complet' || true)" || printf 'désactivé')" \
     "  négatif Gabriel q=3: $([[ ${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR} == 1 ]] && printf 'carrier pair-only; aucune suppression Gamma2 activée' || printf 'désactivé')" \
     "  classifieur rangs 2-3: $([[ ${PHASE15_RANKED_PAIR_CLASSIFIER} == 1 ]] && printf 'qualification CUDA native bornée activée' || printf 'désactivé')" \
+    "  pair-block A×B×W: $([[ ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA} == 1 ]] && printf 'différentiel CUDA natif borné activé' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -1270,6 +1326,7 @@ remote_phase15_exact_diametral_phi_artifact=""
 remote_phase15_device_frontier_50k_artifact=""
 remote_phase15_device_frontier_strict_interior_artifact=""
 remote_phase15_ranked_pair_classifier_artifact=""
+remote_phase15_exact_pair_block_witness_cuda_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -1284,6 +1341,7 @@ quoted_phase15_exact_diametral_phi_artifact=""
 quoted_phase15_device_frontier_50k_artifact=""
 quoted_phase15_device_frontier_strict_interior_artifact=""
 quoted_phase15_ranked_pair_classifier_artifact=""
+quoted_phase15_exact_pair_block_witness_cuda_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
@@ -1294,6 +1352,7 @@ phase15_exact_diametral_phi_worker_option=""
 phase15_device_frontier_50k_worker_option=""
 phase15_device_frontier_strict_interior_worker_option=""
 phase15_ranked_pair_classifier_worker_option=""
+phase15_exact_pair_block_witness_cuda_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
@@ -1366,6 +1425,11 @@ if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
     quoted_phase15_ranked_pair_classifier_artifact="$(shell_quote "${remote_phase15_ranked_pair_classifier_artifact}")"
     phase15_ranked_pair_classifier_worker_option=" --phase15-ranked-pair-classifier-output ${quoted_phase15_ranked_pair_classifier_artifact}"
 fi
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    remote_phase15_exact_pair_block_witness_cuda_artifact="${REMOTE_WORKDIR}/phase15-exact-pair-block-witness-cuda-result.json"
+    quoted_phase15_exact_pair_block_witness_cuda_artifact="$(shell_quote "${remote_phase15_exact_pair_block_witness_cuda_artifact}")"
+    phase15_exact_pair_block_witness_cuda_worker_option=" --phase15-exact-pair-block-witness-cuda-output ${quoted_phase15_exact_pair_block_witness_cuda_artifact}"
+fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
@@ -1382,7 +1446,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}${phase15_exact_pair_block_witness_cuda_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1518,6 +1582,19 @@ if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase15_ranked_pair_classifier_artifact}" \
         "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase15_exact_pair_block_witness_cuda_artifact}" \
+        "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -1987,6 +2064,30 @@ if lifecycle != {
     "worker_mutates_gcp": False,
 }:
     raise SystemExit("contrat de cycle de vie spatial absent")
+PY
+fi
+
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    [[ -s "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" ]] || \
+        die "Artefact exact pair-block witness CUDA Phase 15 distant récupéré mais vide."
+    python3 -B - "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+from pathlib import Path
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+environment_artifact_path = Path(sys.argv[3])
+sys.path.insert(0, sys.argv[4])
+
+import assemble_phase15_exact_pair_block_witness_cuda_qualification as assembler
+
+assembler.validate_artifact_file(
+    artifact_path,
+    git_sha=git_sha,
+    environment_artifact_path=environment_artifact_path,
+)
 PY
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
@@ -3639,7 +3740,9 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" \
     "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT}" \
     "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" \
-    "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}" <<'PY'
+    "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}" \
+    "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
+    "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" <<'PY'
 import hashlib
 import json
 import os
@@ -3690,6 +3793,12 @@ if sys.argv[28] or sys.argv[29]:
             "paire de publication q3 Gabriel négatif Phase 15 incomplète"
         )
     pairs.append((Path(sys.argv[28]), Path(sys.argv[29])))
+if sys.argv[30] or sys.argv[31]:
+    if not sys.argv[30] or not sys.argv[31]:
+        raise SystemExit(
+            "paire de publication exact pair-block witness CUDA Phase 15 incomplète"
+        )
+    pairs.append((Path(sys.argv[30]), Path(sys.argv[31])))
 
 documents = []
 for temporary, _ in pairs:
@@ -3812,6 +3921,9 @@ fi
 if [[ -n "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
@@ -3823,6 +3935,7 @@ LOCAL_PHASE15_EXACT_DIAMETRAL_PHI_TEMP_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
+LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -3870,6 +3983,10 @@ fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
     printf '[ARTEFACT] Qualification ranked-pair-classifier Phase 15 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT}"
+fi
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    printf '[ARTEFACT] Qualification exact pair-block witness CUDA Phase 15 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -3924,4 +4041,8 @@ fi
 if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1)); then
     printf '[SUCCÈS] Qualification ranked-pair-classifier Phase 15 compagnon conservée : %s\n' \
         "${LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT}"
+fi
+if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
+    printf '[SUCCÈS] Qualification exact pair-block witness CUDA Phase 15 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}"
 fi

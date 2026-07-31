@@ -18,6 +18,7 @@ readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/a
 readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_device_frontier_50k_qualification.py"
 readonly PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_device_frontier_strict_interior_qualification.py"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_ranked_pair_classifier_qualification.py"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_exact_pair_block_witness_cuda_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -50,6 +51,8 @@ readonly PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_BINARY_RELATIVE="${PHASE15_DEVI
 readonly PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_BINARY_RELATIVE}"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE}"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_witness_cuda_qualification"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE}"
 readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification"
 readonly MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_PATH="${CONTAINER_REPOSITORY}/${MORTON_YAO48_RADIAL_SUBTREE_FILTER_BINARY_RELATIVE}"
 readonly MORTON_YAO48_SEED_WORK_PROFILE_BINARY_PATH="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_seed_work_profile"
@@ -138,6 +141,10 @@ PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW=""
 PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH=""
 PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PARENT=""
 PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_BASE=""
+PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW=""
+PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH=""
+PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT=""
+PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE=""
 MORTON_YAO48_SEED_WORK_PROFILE=0
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
@@ -156,6 +163,7 @@ PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_PUBLISH_TEMP=""
 PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP=""
+PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -231,7 +239,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json [--phase15-device-frontier-50k-maximum-closed-rank 6|11] [--phase15-device-frontier-50k-warm-profile]] [--phase15-device-frontier-strict-interior-output /CHEMIN/ABSOLU.json] [--phase15-ranked-pair-classifier-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json [--phase15-device-frontier-50k-maximum-closed-rank 6|11] [--phase15-device-frontier-50k-warm-profile]] [--phase15-device-frontier-strict-interior-output /CHEMIN/ABSOLU.json] [--phase15-ranked-pair-classifier-output /CHEMIN/ABSOLU.json] [--phase15-exact-pair-block-witness-cuda-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -287,6 +295,11 @@ tuile pour la qualification directe, puis un passage borné séparé sous
 memcheck et racecheck. Tout repli exact, désaccord, censure ou sortie non
 fermée échoue; ce composant support-2 ne revendique ni Gamma2 complet, ni
 hiérarchie K2, ni échelle industrielle, ni SLO, ni statut public.
+L'option exact pair-block witness CUDA Phase 15 qualifie le lot natif borné
+A×B×W n=128 contre l'oracle exact hôte, puis audite l'ELF AOT sm_120 sans
+PTX et répète le binaire sous memcheck et racecheck. Elle s'exécute seule ou
+avec le seul profil device-frontier Kmax5 warm; elle ne ferme aucun catalogue
+global, produit de supports, arbre, SLO ou statut public.
 EOF
 }
 
@@ -409,6 +422,14 @@ while (($# > 0)); do
             [[ -z "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]] || \
                 die "--phase15-ranked-pair-classifier-output ne peut être fourni qu'une fois."
             PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase15-exact-pair-block-witness-cuda-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase15-exact-pair-block-witness-cuda-output."
+            [[ -z "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]] || \
+                die "--phase15-exact-pair-block-witness-cuda-output ne peut être fourni qu'une fois."
+            PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -544,7 +565,8 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" ]] && \
        -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
        -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" || \
        -n "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW}" || \
-       -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
+       -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" || \
+       -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
     die "--phase15-exact-diametral-phi-output est exclusive des autres compagnons."
 fi
 if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
@@ -590,7 +612,8 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW}" ]]; then
           -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
           -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" || \
           -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" || \
-          -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
+          -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" || \
+          -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
         die "--phase15-device-frontier-strict-interior-output est exclusive des autres compagnons."
     fi
 fi
@@ -608,8 +631,45 @@ if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
           -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
           -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" || \
           -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" || \
-          -n "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW}" ]]; then
+          -n "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW}" || \
+          -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
         die "--phase15-ranked-pair-classifier-output est exclusive des autres compagnons."
+    fi
+fi
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
+    case "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase15-exact-pair-block-witness-cuda-output doit être un chemin absolu." ;;
+    esac
+    for existing_output in \
+        "${OUTPUT_RAW}" "${PHASE4_OUTPUT_RAW}" "${PHASE5_OUTPUT_RAW}" \
+        "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" \
+        "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW}" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}"; do
+        [[ -z "${existing_output}" || \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" != \
+                "${existing_output}" ]] || \
+            die "La sortie exact pair-block witness CUDA Phase 15 doit être distincte de toutes les autres sorties."
+    done
+    if [[ -n "${PHASE4_OUTPUT_RAW}" || -n "${PHASE5_OUTPUT_RAW}" || \
+          -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" || \
+          -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
+          -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
+          -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW}" || \
+          -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
+        die "--phase15-exact-pair-block-witness-cuda-output est exclusive des autres compagnons hors warm Kmax5."
+    fi
+    if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]] && \
+       ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK != 6 || \
+         PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE != 1)); then
+        die "--phase15-exact-pair-block-witness-cuda-output ne peut accompagner que le device-frontier rang fermé 6 warm."
     fi
 fi
 certify_fixed_timeout || \
@@ -956,6 +1016,47 @@ if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]] || \
         die "La sortie ranked-pair-classifier Phase 15 doit être inexistante : ${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
+    PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}")"
+    PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE="$(basename -- \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}")"
+    [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE}" && \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE}" != "." && \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact exact pair-block witness CUDA Phase 15 invalide."
+    [[ -d "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT}" ]] || \
+        die "Le parent de --phase15-exact-pair-block-witness-cuda-output doit déjà exister."
+    PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT="$(cd -- \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie exact pair-block witness CUDA Phase 15 illisible."
+    PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH="${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE}"
+    [[ "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT}" == \
+        "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    for existing_output in \
+        "${OUTPUT_PATH}" "${PHASE4_OUTPUT_PATH}" "${PHASE5_OUTPUT_PATH}" \
+        "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" \
+        "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" \
+        "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_PATH}" \
+        "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}"; do
+        [[ -z "${existing_output}" || \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" != \
+                "${existing_output}" ]] || \
+            die "La sortie exact pair-block witness CUDA Phase 15 doit être distincte de toutes les autres sorties."
+    done
+    case "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase15-exact-pair-block-witness-cuda-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" && \
+        ! -L "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]] || \
+        die "La sortie exact pair-block witness CUDA Phase 15 doit être inexistante : ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -982,12 +1083,14 @@ readonly PHASE15_EXACT_DIAMETRAL_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_EXA
 readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER_RELATIVE}"
 readonly PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_ASSEMBLER_RELATIVE}"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER_RELATIVE}"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
     die "Le Dockerfile Phase 3 doit partir de l'image CUDA épinglée ${BASE_IMAGE_REF}."
 [[ -f "${ASSEMBLER}" && ! -L "${ASSEMBLER}" ]] || \
     die "Assembleur Phase 3 absent ou symbolique : ${ASSEMBLER}."
+
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE4_ASSEMBLER}" && ! -L "${PHASE4_ASSEMBLER}" ]] || \
         die "Assembleur Phase 4 absent ou symbolique : ${PHASE4_ASSEMBLER}."
@@ -1044,6 +1147,11 @@ if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}" && \
         ! -L "${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}" ]] || \
         die "Assembleur ranked-pair-classifier Phase 15 absent ou symbolique : ${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER}."
+fi
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}" && \
+        ! -L "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}" ]] || \
+        die "Assembleur exact pair-block witness CUDA Phase 15 absent ou symbolique : ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}."
 fi
 
 remove_container_from_cidfile() {
@@ -1231,6 +1339,10 @@ cleanup() {
         -f "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" && \
+        -f "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -1373,6 +1485,16 @@ if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
         ! -L "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" ]] || \
         die "Le nom temporaire ranked-pair-classifier Phase 15 reste occupé."
 fi
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
+    PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP="$(mktemp \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT}/.${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire exact pair-block witness CUDA Phase 15."
+    rm -f -- "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" || \
+        die "Impossible de libérer le nom temporaire exact pair-block witness CUDA Phase 15."
+    [[ ! -e "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" && \
+        ! -L "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" ]] || \
+        die "Le nom temporaire exact pair-block witness CUDA Phase 15 reste occupé."
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -1463,6 +1585,15 @@ readonly PHASE15_RANKED_PAIR_CLASSIFIER_PTX_LOG="${LOG_DIR}/phase15-ranked-pair-
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_PTX_STDERR_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-cuobjdump-ptx.stderr.log"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_MEMCHECK_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-memcheck.log"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_RACECHECK_LOG="${LOG_DIR}/phase15-ranked-pair-classifier-racecheck.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_LOG="${RESULT_DIR}/phase15-exact-pair-block-witness-cuda-qualification.json"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_STDERR_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-qualification.stderr.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RELEASE_BUILD_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-release-build.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_AUDIT_BUILD_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-audit-build.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ELF_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-cuobjdump-elf.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-cuobjdump-ptx.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_STDERR_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-cuobjdump-ptx.stderr.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_MEMCHECK_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-memcheck.log"
+readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RACECHECK_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-racecheck.log"
 declare -a PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS=()
 declare -a PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS=()
 
@@ -3025,6 +3156,124 @@ PY
     fi
 fi
 
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
+    begin_unit "phase15-exact-pair-block-witness-cuda-release-build"
+    if ! run_container "phase15-exact-pair-block-witness-cuda-release-build" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RELEASE_BUILD_LOG}" \
+        cmake --build "${MODULE_DIR}" \
+        --target morsehgp3d_gpu_exact_pair_block_witness_cuda_qualification \
+        --parallel 2; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-release-build" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RELEASE_BUILD_LOG}"
+        die "La cible exact pair-block witness CUDA Phase 15 n'a pas pu être construite en Release."
+    fi
+    begin_unit "phase15-exact-pair-block-witness-cuda-audit-build"
+    if ! run_container "phase15-exact-pair-block-witness-cuda-audit-build" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_AUDIT_BUILD_LOG}" \
+        cmake --build "${AUDIT_MODULE_DIR}" \
+        --target morsehgp3d_gpu_exact_pair_block_witness_cuda_qualification \
+        --parallel 2; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-audit-build" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_AUDIT_BUILD_LOG}"
+        die "La cible exact pair-block witness CUDA Phase 15 n'a pas pu être construite sous le preset audit."
+    fi
+    [[ -f "${BUILD_DIR}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire exact pair-block witness CUDA Phase 15 n'a pas été construit sûrement."
+
+    begin_unit "phase15-exact-pair-block-witness-cuda-qualification"
+    if ! run_container_split_output \
+        "phase15-exact-pair-block-witness-cuda-qualification" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_LOG}" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_STDERR_LOG}" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-qualification" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_LOG}"
+        report_failure_log "phase15-exact-pair-block-witness-cuda-qualification-stderr" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_STDERR_LOG}"
+        die "La qualification différentielle exact pair-block witness CUDA Phase 15 a échoué."
+    fi
+    if ! python3 -B - \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_LOG}" \
+        "$(dirname -- "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}")" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+sys.path.insert(0, sys.argv[2])
+import assemble_phase15_exact_pair_block_witness_cuda_qualification as assembler
+
+raw = path.read_text(encoding="utf-8")
+lines = raw.splitlines()
+if len(lines) != 1 or not lines[0]:
+    raise SystemExit("qualification stdout must contain exactly one JSON line")
+value = json.loads(lines[0])
+assembler.validate_qualification(value)
+if raw != json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n":
+    raise SystemExit("qualification stdout must be canonical JSON")
+PY
+    then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-qualification" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_LOG}"
+        die "La sortie différentielle exact pair-block witness CUDA Phase 15 est incomplète ou non canonique."
+    fi
+
+    begin_unit "phase15-exact-pair-block-witness-cuda-cuobjdump-elf"
+    if ! run_container "phase15-exact-pair-block-witness-cuda-cuobjdump-elf" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ELF_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lelf \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-cuobjdump-elf" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister l'ELF exact pair-block witness CUDA Phase 15."
+    fi
+    phase15_exact_pair_block_witness_cuda_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ELF_LOG}" | sort -u || true)"
+    [[ "${phase15_exact_pair_block_witness_cuda_architectures}" == "sm_120" ]] || \
+        die "Le binaire exact pair-block witness CUDA Phase 15 doit contenir uniquement un ELF sm_120; observé : ${phase15_exact_pair_block_witness_cuda_architectures:-aucun}."
+
+    begin_unit "phase15-exact-pair-block-witness-cuda-cuobjdump-ptx"
+    if ! run_container_split_output \
+        "phase15-exact-pair-block-witness-cuda-cuobjdump-ptx" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_LOG}" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-cuobjdump-ptx-stderr" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX exact pair-block witness CUDA Phase 15."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_LOG}"; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-cuobjdump-ptx" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le binaire exact pair-block witness CUDA Phase 15."
+    fi
+
+    begin_unit "phase15-exact-pair-block-witness-cuda-memcheck"
+    if ! run_container "phase15-exact-pair-block-witness-cuda-memcheck" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_MEMCHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer --target-processes all \
+        --tool memcheck --leak-check full --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-memcheck" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_MEMCHECK_LOG}"
+        die "Le memcheck exact pair-block witness CUDA Phase 15 a échoué."
+    fi
+    begin_unit "phase15-exact-pair-block-witness-cuda-racecheck"
+    if ! run_container "phase15-exact-pair-block-witness-cuda-racecheck" \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RACECHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer --target-processes all \
+        --tool racecheck --report-api-errors no --error-exitcode=86 \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_PATH}"; then
+        report_failure_log "phase15-exact-pair-block-witness-cuda-racecheck" \
+            "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RACECHECK_LOG}"
+        die "Le racecheck exact pair-block witness CUDA Phase 15 a échoué."
+    fi
+fi
+
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     begin_unit "phase4-spatial-differential"
     if ! run_container "phase4-spatial-differential" \
@@ -3685,6 +3934,25 @@ if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
         --binary "${BUILD_DIR}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE#build/}" \
         --output "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --release-build-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RELEASE_BUILD_LOG}" \
+        --audit-build-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_AUDIT_BUILD_LOG}" \
+        --qualification-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_LOG}" \
+        --qualification-stderr-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_QUALIFICATION_STDERR_LOG}" \
+        --elf-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ELF_LOG}" \
+        --ptx-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_STDERR_LOG}" \
+        --memcheck-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_MEMCHECK_LOG}" \
+        --racecheck-log "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RACECHECK_LOG}" \
+        --binary "${BUILD_DIR}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE#build/}" \
+        --output "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}"
+fi
 
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
@@ -3704,7 +3972,9 @@ python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" \
     "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" \
     "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_PUBLISH_TEMP}" \
-    "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_PATH}" <<'PY'
+    "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_PATH}" \
+    "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" \
+    "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -3776,6 +4046,18 @@ if sys.argv[21] or sys.argv[22]:
             Path(sys.argv[21]),
             Path(sys.argv[22]),
             "Phase 15 device-frontier strict-interior",
+        )
+    )
+if sys.argv[23] or sys.argv[24]:
+    if not sys.argv[23] or not sys.argv[24]:
+        raise SystemExit(
+            "incomplete Phase 15 exact pair-block witness CUDA publication pair"
+        )
+    pairs.append(
+        (
+            Path(sys.argv[23]),
+            Path(sys.argv[24]),
+            "Phase 15 exact pair-block witness CUDA",
         )
     )
 for temporary, _, label in pairs:
@@ -3850,6 +4132,9 @@ fi
 if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
@@ -3861,6 +4146,7 @@ PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_PUBLISH_TEMP=""
 PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP=""
+PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
@@ -3903,5 +4189,9 @@ fi
 if [[ -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon ranked-pair-classifier Phase 15 provisoire publié sans remplacement : %s\n' \
         "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon exact pair-block witness CUDA Phase 15 provisoire publié sans remplacement : %s\n' \
+        "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'
