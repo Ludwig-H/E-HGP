@@ -103,6 +103,19 @@ struct Phase15MortonYao48DeviceTiledWitnessBankSlot {
   std::uint64_t witness_morton_position{};
   std::uint64_t squared_distance_lower_bits{};
   std::uint64_t squared_distance_upper_bits{};
+  std::uint64_t witness_coordinate_bits[3U]{};
+  std::uint64_t direction_lower_bits[3U]{};
+  std::uint64_t direction_upper_bits[3U]{};
+};
+
+// Exact cache for the most recent prune receipt in one output chunk. It is
+// separate from the mutable banks because a witness may be evicted after the
+// prune that retained it.
+struct Phase15MortonYao48DeviceTiledCachedPruneWitness {
+  std::uint64_t witness_point_id{};
+  std::uint64_t witness_coordinate_bits[3U]{};
+  std::uint64_t direction_lower_bits[3U]{};
+  std::uint64_t direction_upper_bits[3U]{};
 };
 
 // This is the only per-anchor payload copied to the host.  Counts without a
@@ -152,6 +165,7 @@ struct alignas(16) Phase15MortonYao48DeviceTiledAnchorCheckpoint {
   std::uint64_t cumulative_unbanked_candidate_count{};
   std::uint64_t retained_witness_count{};
   std::uint64_t completed_subdivision_count{};
+  std::uint64_t active_witness_slot_mask[8U]{};
   std::uint64_t tile_epoch{};
   std::uint64_t chunk_sequence{};
   std::uint64_t state{};
@@ -163,11 +177,13 @@ static_assert(
 static_assert(
     sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord) == 128U);
 static_assert(
-    sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) == 32U);
+    sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) == 104U);
+static_assert(
+    sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness) == 80U);
 static_assert(
     sizeof(Phase15MortonYao48DeviceTiledAnchorControl) == 168U);
 static_assert(
-    sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) == 160U);
+    sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) == 224U);
 static_assert(std::is_trivially_copyable_v<
               Phase15MortonYao48DeviceTiledAnchorControl>);
 static_assert(std::is_standard_layout_v<
@@ -229,6 +245,8 @@ struct Phase15MortonYao48DeviceTiledBatch {
       device_prune_regions{};
   const Phase15MortonYao48DeviceTiledWitnessBankSlot*
       device_witness_bank_slots{};
+  const Phase15MortonYao48DeviceTiledCachedPruneWitness*
+      device_cached_prune_witnesses{};
   const Phase15MortonYao48DeviceTiledAnchorControl*
       device_anchor_controls{};
   std::vector<Phase15MortonYao48DeviceTiledAnchorControl>
@@ -236,6 +254,7 @@ struct Phase15MortonYao48DeviceTiledBatch {
   std::size_t physical_candidate_capacity{};
   std::size_t physical_prune_region_capacity{};
   std::size_t physical_witness_bank_slot_capacity{};
+  std::size_t physical_cached_prune_witness_capacity{};
   std::size_t physical_anchor_control_capacity{};
   std::size_t physical_anchor_checkpoint_capacity{};
   std::size_t physical_pending_anchor_count_capacity{};
@@ -268,6 +287,10 @@ struct Phase15MortonYao48DeviceTiledBatch {
   bool ambiguous_cone_to_unbanked_candidate_requested{false};
   bool target_tested_before_bank_insert_requested{false};
   bool retained_witnesses_outside_pruned_subtree_requested{false};
+  bool witness_direction_intervals_cached_per_bank_slot_requested{false};
+  bool active_witness_slot_mask_authenticated_requested{false};
+  bool inactive_witness_slots_skipped_in_physical_order_requested{false};
+  bool last_prune_witness_direction_cache_retained_requested{false};
   bool nonnegative_diametral_witness_interval_lower_bound_requested{false};
   bool strictly_positive_diametral_witness_interval_lower_bound_requested{
       false};
@@ -372,6 +395,7 @@ phase15_morton_yao48_device_tiled_metadata_digest(
   hash_size(batch.physical_candidate_capacity);
   hash_size(batch.physical_prune_region_capacity);
   hash_size(batch.physical_witness_bank_slot_capacity);
+  hash_size(batch.physical_cached_prune_witness_capacity);
   hash_size(batch.physical_anchor_control_capacity);
   hash_size(batch.physical_anchor_checkpoint_capacity);
   hash_size(batch.physical_pending_anchor_count_capacity);
@@ -406,6 +430,12 @@ phase15_morton_yao48_device_tiled_metadata_digest(
            batch.ambiguous_cone_to_unbanked_candidate_requested,
            batch.target_tested_before_bank_insert_requested,
            batch.retained_witnesses_outside_pruned_subtree_requested,
+           batch
+               .witness_direction_intervals_cached_per_bank_slot_requested,
+           batch.active_witness_slot_mask_authenticated_requested,
+           batch
+               .inactive_witness_slots_skipped_in_physical_order_requested,
+           batch.last_prune_witness_direction_cache_retained_requested,
            batch
                .nonnegative_diametral_witness_interval_lower_bound_requested,
            batch

@@ -413,6 +413,11 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           "the fake Phase 15 bank count overflows size_t"),
       request.witness_slot_count_per_bank,
       "the fake Phase 15 bank slot capacity overflows size_t");
+  batch.physical_cached_prune_witness_capacity = checked_product(
+      request.anchor_count,
+      morsehgp3d::gpu::
+          morton_yao48_device_tiled_pair_frontier_cached_prune_witnesses_per_anchor,
+      "the fake Phase 15 cached prune witness capacity overflows size_t");
   batch.physical_anchor_control_capacity = request.anchor_count;
   batch.physical_anchor_checkpoint_capacity = request.anchor_count;
   batch.physical_pending_anchor_count_capacity = 1U;
@@ -433,6 +438,14 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           batch.physical_witness_bank_slot_capacity,
           sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
           "the fake Phase 15 witness arena bytes overflow size_t"),
+      "the fake Phase 15 arena bytes overflow size_t");
+  arena_bytes = checked_size_sum(
+      arena_bytes,
+      checked_product(
+          batch.physical_cached_prune_witness_capacity,
+          sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness),
+          "the fake Phase 15 cached prune witness arena bytes overflow "
+          "size_t"),
       "the fake Phase 15 arena bytes overflow size_t");
   arena_bytes = checked_size_sum(
       arena_bytes,
@@ -475,6 +488,10 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
   batch.ambiguous_cone_to_unbanked_candidate_requested = true;
   batch.target_tested_before_bank_insert_requested = true;
   batch.retained_witnesses_outside_pruned_subtree_requested = true;
+  batch.witness_direction_intervals_cached_per_bank_slot_requested = true;
+  batch.active_witness_slot_mask_authenticated_requested = true;
+  batch.inactive_witness_slots_skipped_in_physical_order_requested = true;
+  batch.last_prune_witness_direction_cache_retained_requested = true;
   batch.nonnegative_diametral_witness_interval_lower_bound_requested =
       request.prune_semantics ==
       MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;

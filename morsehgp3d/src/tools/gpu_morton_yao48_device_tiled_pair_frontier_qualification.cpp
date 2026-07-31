@@ -66,6 +66,8 @@ using morsehgp3d::gpu::detail::Phase15MortonYao48DeviceTiledBatch;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledCandidateRecord;
 using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledCachedPruneWitness;
+using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledExecutionKind;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledFailureCode;
@@ -1205,7 +1207,15 @@ void hash_anchor_control(
 
 [[nodiscard]] bool invalid_bank_slot(
     const Phase15MortonYao48DeviceTiledWitnessBankSlot& slot) noexcept {
-  return slot.witness_point_id == kInvalid &&
+  bool cached_fields_invalid = true;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    cached_fields_invalid =
+        cached_fields_invalid &&
+        slot.witness_coordinate_bits[axis] == kInvalid &&
+        slot.direction_lower_bits[axis] == kInvalid &&
+        slot.direction_upper_bits[axis] == kInvalid;
+  }
+  return cached_fields_invalid && slot.witness_point_id == kInvalid &&
          slot.witness_morton_position == kInvalid &&
          slot.squared_distance_lower_bits == kInvalid &&
          slot.squared_distance_upper_bits == kInvalid;
@@ -1330,6 +1340,11 @@ void validate_batch_contract(
           "the expected bank count overflows size_t"),
       request.witness_slot_count_per_bank,
       "the expected bank-slot capacity overflows size_t");
+  const std::size_t expected_cached_prune_witnesses = checked_product(
+      request.anchor_count,
+      morsehgp3d::gpu::
+          morton_yao48_device_tiled_pair_frontier_cached_prune_witnesses_per_anchor,
+      "the expected cached prune witness capacity overflows size_t");
   std::size_t expected_arena_bytes = checked_product(
       expected_candidates,
       sizeof(Phase15MortonYao48DeviceTiledCandidateRecord),
@@ -1347,6 +1362,13 @@ void validate_batch_contract(
           expected_banks,
           sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
           "the expected witness arena bytes overflow size_t"),
+      "the expected arena bytes overflow size_t");
+  expected_arena_bytes = checked_size_sum(
+      expected_arena_bytes,
+      checked_product(
+          expected_cached_prune_witnesses,
+          sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness),
+          "the expected cached prune witness arena bytes overflow size_t"),
       "the expected arena bytes overflow size_t");
   expected_arena_bytes = checked_size_sum(
       expected_arena_bytes,
@@ -1381,11 +1403,14 @@ void validate_batch_contract(
           batch.device_candidate_records != nullptr &&
           batch.device_prune_regions != nullptr &&
           batch.device_witness_bank_slots != nullptr &&
+          batch.device_cached_prune_witnesses != nullptr &&
           batch.device_anchor_controls != nullptr &&
           batch.host_anchor_controls.size() == request.anchor_count &&
           batch.physical_candidate_capacity == expected_candidates &&
           batch.physical_prune_region_capacity == expected_prunes &&
           batch.physical_witness_bank_slot_capacity == expected_banks &&
+          batch.physical_cached_prune_witness_capacity ==
+              expected_cached_prune_witnesses &&
           batch.physical_anchor_control_capacity == request.anchor_count &&
           batch.physical_anchor_checkpoint_capacity == request.anchor_count &&
           batch.physical_pending_anchor_count_capacity == 1U &&
@@ -1440,6 +1465,12 @@ void validate_batch_contract(
           batch.ambiguous_cone_to_unbanked_candidate_requested &&
           batch.target_tested_before_bank_insert_requested &&
           batch.retained_witnesses_outside_pruned_subtree_requested &&
+          batch
+              .witness_direction_intervals_cached_per_bank_slot_requested &&
+          batch.active_witness_slot_mask_authenticated_requested &&
+          batch
+              .inactive_witness_slots_skipped_in_physical_order_requested &&
+          batch.last_prune_witness_direction_cache_retained_requested &&
           (request.prune_semantics ==
                    MortonYao48DeviceTiledPairFrontierPruneSemantics::
                        closed_rank_window
@@ -1972,6 +2003,42 @@ void validate_bank_slot(
           scaled_points[static_cast<std::size_t>(slot.witness_point_id)]) ==
           cone,
       "a retained bank slot is stored in the wrong exact cone");
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const std::int64_t anchor_coordinate =
+        scaled_points[static_cast<std::size_t>(anchor_id)].coordinate[axis];
+    const std::int64_t witness_coordinate =
+        scaled_points[static_cast<std::size_t>(slot.witness_point_id)]
+            .coordinate[axis];
+    const double expected_witness_coordinate =
+        std::ldexp(static_cast<double>(witness_coordinate), -20);
+    require(
+        slot.witness_coordinate_bits[axis] ==
+            std::bit_cast<std::uint64_t>(expected_witness_coordinate),
+        "a retained bank slot cached a foreign witness coordinate");
+    require(
+        slot.direction_lower_bits[axis] != kInvalid &&
+            slot.direction_upper_bits[axis] != kInvalid,
+        "a retained bank slot has no finite cached direction interval");
+    const double direction_lower =
+        std::bit_cast<double>(slot.direction_lower_bits[axis]);
+    const double direction_upper =
+        std::bit_cast<double>(slot.direction_upper_bits[axis]);
+    const long double exact_direction = std::ldexp(
+        static_cast<long double>(witness_coordinate - anchor_coordinate),
+        -20);
+    require(
+        std::isfinite(direction_lower) &&
+            std::isfinite(direction_upper) &&
+            direction_lower <= direction_upper &&
+            static_cast<long double>(direction_lower) <= exact_direction &&
+            exact_direction <= static_cast<long double>(direction_upper) &&
+            (exact_direction == 0.0L
+                 ? direction_lower == 0.0 && direction_upper == 0.0
+                 : (exact_direction > 0.0L
+                        ? direction_lower > 0.0
+                        : direction_upper < 0.0)),
+        "a retained bank slot cached an invalid directional interval");
+  }
   require(
       slot.squared_distance_lower_bits != kInvalid &&
           slot.squared_distance_upper_bits != kInvalid,
@@ -2239,6 +2306,10 @@ void validate_scaling_tile_lease(
   require(
       !audit.candidate_device_to_host_performed &&
           !audit.certified_prune_device_to_host_performed &&
+          audit.witness_direction_intervals_cached_per_bank_slot &&
+          audit.active_witness_slot_mask_authenticated &&
+          audit.inactive_witness_slots_skipped_in_physical_order &&
+          audit.last_prune_witness_direction_cache_retained &&
           audit.nonnegative_diametral_witness_interval_lower_bound_required &&
           !audit
                .strictly_positive_diametral_witness_interval_lower_bound_required &&
@@ -2361,6 +2432,10 @@ void validate_scaling_advance(
           audit.ambiguous_cone_routed_to_unbanked_candidate &&
           audit.target_tested_before_witness_bank_insert &&
           audit.retained_witnesses_outside_pruned_subtree_required &&
+          audit.witness_direction_intervals_cached_per_bank_slot &&
+          audit.active_witness_slot_mask_authenticated &&
+          audit.inactive_witness_slots_skipped_in_physical_order &&
+          audit.last_prune_witness_direction_cache_retained &&
           audit.nonnegative_diametral_witness_interval_lower_bound_required &&
           !audit
                .strictly_positive_diametral_witness_interval_lower_bound_required &&
@@ -2632,6 +2707,19 @@ void validate_scaling_advance(
             sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
             "the scaling witness byte capacity overflows size_t"),
         "the scaling witness byte capacity does not fit uint64");
+    const std::uint64_t cached_prune_witness_bytes = checked_u64(
+        checked_product(
+            checked_product(
+                requested_anchor_count,
+                morsehgp3d::gpu::
+                    morton_yao48_device_tiled_pair_frontier_cached_prune_witnesses_per_anchor,
+                "the scaling cached prune witness capacity overflows "
+                "size_t"),
+            sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness),
+            "the scaling cached prune witness byte capacity overflows "
+            "size_t"),
+        "the scaling cached prune witness byte capacity does not fit "
+        "uint64");
     const std::uint64_t control_bytes = checked_u64(
         checked_product(
             requested_anchor_count,
@@ -2651,6 +2739,10 @@ void validate_scaling_advance(
     tile_arena_bytes = checked_u64_sum(
         tile_arena_bytes,
         witness_bytes,
+        "the scaling tile arena bytes overflow uint64");
+    tile_arena_bytes = checked_u64_sum(
+        tile_arena_bytes,
+        cached_prune_witness_bytes,
         "the scaling tile arena bytes overflow uint64");
     tile_arena_bytes = checked_u64_sum(
         tile_arena_bytes,

@@ -228,19 +228,33 @@ def validate_result(
         == (640, 2048, 2048, 48),
         "fixed frontier capacities differ from the qualified ABI",
     )
-    require((candidate_size, prune_size, witness_size, control_size) == (48, 128, 32, 96), "record ABI sizes differ")
+    require(
+        (candidate_size, prune_size, witness_size, control_size)
+        == (48, 128, 104, 168),
+        "record ABI sizes differ",
+    )
 
     expected_candidate_bytes = anchor_tile_capacity * candidate_per_anchor * candidate_size
     expected_prune_bytes = anchor_tile_capacity * prune_per_anchor * prune_size
     expected_witness_bytes = (
         anchor_tile_capacity * banks_per_anchor * (maximum_closed_rank - 1) * witness_size
     )
+    expected_cached_prune_witness_bytes = anchor_tile_capacity * 10 * 80
     expected_control_bytes = anchor_tile_capacity * control_size
     require(record.get("peak_candidate_device_capacity_bytes") == expected_candidate_bytes, "candidate allocation differs")
     require(record.get("peak_prune_device_capacity_bytes") == expected_prune_bytes, "prune allocation differs")
     require(record.get("peak_witness_bank_device_capacity_bytes") == expected_witness_bytes, "witness allocation differs")
     require(record.get("peak_control_device_capacity_bytes") == expected_control_bytes, "control allocation differs")
-    expected_tile_bytes = expected_candidate_bytes + expected_prune_bytes + expected_witness_bytes + expected_control_bytes
+    expected_checkpoint_bytes = anchor_tile_capacity * 224
+    expected_tile_bytes = (
+        expected_candidate_bytes
+        + expected_prune_bytes
+        + expected_witness_bytes
+        + expected_cached_prune_witness_bytes
+        + expected_control_bytes
+        + expected_checkpoint_bytes
+        + 8
+    )
     require(record.get("peak_tile_output_device_capacity_bytes") == expected_tile_bytes, "tile allocation mass differs")
 
     node_count = 2 * point_count - 1

@@ -42,6 +42,8 @@ using morsehgp3d::gpu::detail::
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledCandidateRecord;
 using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledCachedPruneWitness;
+using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledPruneRegionRecord;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledWitnessBankSlot;
@@ -67,7 +69,9 @@ using morsehgp3d::gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build;
 using morsehgp3d::spatial::CanonicalPointCloud;
 
 static_assert(sizeof(Phase15MortonYao48DeviceTiledAnchorControl) == 168U);
-static_assert(sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) == 160U);
+static_assert(sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) == 224U);
+static_assert(sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) == 104U);
+static_assert(sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness) == 80U);
 static_assert(!std::is_copy_constructible_v<
               MortonYao48DeviceCandidateTileLease>);
 static_assert(std::is_nothrow_move_constructible_v<
@@ -191,6 +195,8 @@ void check_throws(Function&& function, const std::string& message) {
           sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord) +
       anchor_count * 48U * (maximum_closed_rank - 1U) *
           sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) +
+      anchor_count * 10U *
+          sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness) +
       anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorControl) +
       anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) +
       sizeof(std::uint64_t);
@@ -205,6 +211,8 @@ void check_throws(Function&& function, const std::string& message) {
           sizeof(Phase15MortonYao48DeviceTiledPruneRegionRecord) +
       anchor_count * 48U * required_witness_count *
           sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) +
+      anchor_count * 10U *
+          sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness) +
       anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorControl) +
       anchor_count * sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) +
       sizeof(std::uint64_t);
@@ -503,8 +511,15 @@ void test_multiple_tiles_keep_one_exact_arena_account() {
           first.candidate_tile->audit()
                   .physical_anchor_checkpoint_capacity == 2U &&
           first.candidate_tile->audit()
-                  .physical_pending_anchor_count_capacity == 1U,
-      "the first tile publishes the complete v4 arena account");
+                  .physical_cached_prune_witness_capacity == 20U &&
+          first.candidate_tile->audit()
+                  .physical_pending_anchor_count_capacity == 1U &&
+          first.audit.witness_direction_intervals_cached_per_bank_slot &&
+          first.audit.active_witness_slot_mask_authenticated &&
+          first.audit.inactive_witness_slots_skipped_in_physical_order &&
+          first.audit.last_prune_witness_direction_cache_retained,
+      "the first tile publishes the complete v5 arena and witness-cache "
+      "account");
   first.candidate_tile.reset();
 
   auto second = context.advance();
@@ -565,7 +580,8 @@ void test_detached_tile_survives_context_destruction() {
           views.retained_authority_identity == retained_identity &&
           arena_bytes == expected_arena_bytes(2U, 2U) &&
           views.physical_device_arena_capacity_bytes == arena_bytes,
-      "a detached v4 tile retains its authority and exact arena audit after context destruction");
+      "a detached v5 tile retains its authority and exact arena audit after "
+      "context destruction");
 }
 
 void test_node_capacity_censure_is_terminal_and_idempotent() {
@@ -707,6 +723,11 @@ void test_strict_interior_threshold_is_authenticated_and_shell_open() {
               .q3_exact_diametral_pair_support_gabriel_negative_only &&
           lease.audit().gamma2_silent_handoff_required &&
           !lease.audit().gamma2_prune_or_discard_authorized &&
+          lease.audit()
+              .witness_direction_intervals_cached_per_bank_slot &&
+          lease.audit().active_witness_slot_mask_authenticated &&
+          lease.audit().inactive_witness_slots_skipped_in_physical_order &&
+          lease.audit().last_prune_witness_direction_cache_retained &&
           views.prune_semantics == strict &&
           views.required_witness_count == 2U &&
           lease.audit().physical_device_arena_capacity_bytes ==

@@ -15,7 +15,7 @@ class Phase15MortonYao48DeviceCandidateTilePrivateViewAccess;
 }
 
 inline constexpr std::uint32_t
-    morton_yao48_device_tiled_pair_frontier_schema_version = 4U;
+    morton_yao48_device_tiled_pair_frontier_schema_version = 5U;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_maximum_closed_rank = 11U;
 inline constexpr std::size_t
@@ -30,6 +30,9 @@ inline constexpr std::size_t
         morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_witness_bank_count = 48U;
+inline constexpr std::size_t
+    morton_yao48_device_tiled_pair_frontier_cached_prune_witnesses_per_anchor =
+        10U;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_strict_interior_threshold = 2U;
 inline constexpr std::string_view
@@ -52,8 +55,9 @@ inline constexpr std::string_view
     morton_yao48_device_tiled_pair_frontier_proof_basis =
         "interval_cone_classification_ambiguity_to_unbanked_candidate_"
         "target_tested_before_bank_insert_retained_witnesses_outside_"
-        "subtree_authenticated_closed_rank_or_strict_interior_"
-        "diametral_witness_interval_lower_bound_v2";
+        "subtree_authenticated_active_slot_mask_cached_direction_intervals_"
+        "physical_slot_order_closed_rank_or_strict_interior_"
+        "diametral_witness_interval_lower_bound_v3";
 
 enum class MortonYao48DeviceTiledPairFrontierPruneSemantics : std::uint8_t {
   closed_rank_window = 0U,
@@ -151,6 +155,7 @@ struct MortonYao48DeviceCandidateTileLeaseAudit {
   std::size_t physical_candidate_capacity{};
   std::size_t physical_prune_region_capacity{};
   std::size_t physical_witness_bank_slot_capacity{};
+  std::size_t physical_cached_prune_witness_capacity{};
   std::size_t physical_anchor_control_capacity{};
   std::size_t physical_anchor_checkpoint_capacity{};
   std::size_t physical_pending_anchor_count_capacity{};
@@ -175,6 +180,10 @@ struct MortonYao48DeviceCandidateTileLeaseAudit {
   bool candidate_device_to_host_performed{false};
   bool certified_prune_device_to_host_performed{false};
   bool censored_anchor_outputs_withheld{false};
+  bool witness_direction_intervals_cached_per_bank_slot{false};
+  bool active_witness_slot_mask_authenticated{false};
+  bool inactive_witness_slots_skipped_in_physical_order{false};
+  bool last_prune_witness_direction_cache_retained{false};
   bool nonnegative_diametral_witness_interval_lower_bound_required{false};
   bool strictly_positive_diametral_witness_interval_lower_bound_required{
       false};
@@ -350,6 +359,10 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   bool ambiguous_cone_routed_to_unbanked_candidate{false};
   bool target_tested_before_witness_bank_insert{false};
   bool retained_witnesses_outside_pruned_subtree_required{false};
+  bool witness_direction_intervals_cached_per_bank_slot{false};
+  bool active_witness_slot_mask_authenticated{false};
+  bool inactive_witness_slots_skipped_in_physical_order{false};
+  bool last_prune_witness_direction_cache_retained{false};
   bool nonnegative_diametral_witness_interval_lower_bound_required{false};
   bool strictly_positive_diametral_witness_interval_lower_bound_required{
       false};

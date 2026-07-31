@@ -45,6 +45,8 @@ constexpr std::size_t kAxisCount = 3U;
 constexpr std::uint64_t kInvalid = UINT64_MAX;
 constexpr std::uint64_t kConeCount = UINT64_C(48);
 constexpr std::uint64_t kAmbiguousCone = kConeCount;
+constexpr std::uint64_t kActiveWitnessMaskWordCount = UINT64_C(8);
+constexpr std::uint64_t kCachedPruneWitnessCapacityPerAnchor = UINT64_C(10);
 constexpr std::uint64_t kCandidateFlagAmbiguousCone = UINT64_C(1) << 0U;
 constexpr std::uint64_t kCandidateFlagCertifiedCone = UINT64_C(1) << 1U;
 constexpr std::uint64_t kCandidateFlagBankInserted = UINT64_C(1) << 2U;
@@ -96,6 +98,11 @@ static_assert(
     morton_yao48_device_tiled_pair_frontier_witness_bank_count == 48U);
 static_assert(
     morton_yao48_device_tiled_pair_frontier_maximum_closed_rank == 11U);
+static_assert(
+    morton_yao48_device_tiled_pair_frontier_witness_bank_count *
+            (morton_yao48_device_tiled_pair_frontier_maximum_closed_rank -
+             1U) <=
+        kActiveWitnessMaskWordCount * 64U);
 
 // Private ABI retained by MortonLbvhDeviceTraversalLease.  The frontier never
 // owns or copies the O(n) certified node arena.
@@ -333,6 +340,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
       std::size_t candidate_capacity,
       std::size_t prune_capacity,
       std::size_t witness_capacity,
+      std::size_t cached_prune_witness_capacity,
       std::size_t control_capacity,
       std::size_t checkpoint_capacity)
       : device_(traversal.cuda_device),
@@ -363,6 +371,9 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
       witnesses_.allocate(
           witness_capacity,
           "cudaMalloc Phase 15 tiled Morton/Yao48 witness banks");
+      cached_prune_witnesses_.allocate(
+          cached_prune_witness_capacity,
+          "cudaMalloc Phase 15 tiled Morton/Yao48 cached prune witnesses");
       controls_.allocate(
           control_capacity,
           "cudaMalloc Phase 15 tiled Morton/Yao48 anchor controls");
@@ -423,6 +434,10 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
       noexcept {
     return witnesses_.get();
   }
+  [[nodiscard]] Phase15MortonYao48DeviceTiledCachedPruneWitness*
+      cached_prune_witnesses() noexcept {
+    return cached_prune_witnesses_.get();
+  }
   [[nodiscard]] Phase15MortonYao48DeviceTiledAnchorControl* controls()
       noexcept {
     return controls_.get();
@@ -441,6 +456,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
       std::size_t candidate_capacity,
       std::size_t prune_capacity,
       std::size_t witness_capacity,
+      std::size_t cached_prune_witness_capacity,
       std::size_t control_capacity,
       std::size_t checkpoint_capacity) const noexcept {
     return request.resume_same_tile && device_ == traversal.cuda_device &&
@@ -463,6 +479,8 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
            candidates_.count() == candidate_capacity &&
            prunes_.count() == prune_capacity &&
            witnesses_.count() == witness_capacity &&
+           cached_prune_witnesses_.count() ==
+               cached_prune_witness_capacity &&
            controls_.count() == control_capacity &&
            checkpoints_.count() == checkpoint_capacity &&
            pending_anchor_count_.count() == 1U;
@@ -474,6 +492,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
       std::size_t candidate_capacity,
       std::size_t prune_capacity,
       std::size_t witness_capacity,
+      std::size_t cached_prune_witness_capacity,
       std::size_t control_capacity,
       std::size_t checkpoint_capacity) const noexcept {
     return !request.resume_same_tile &&
@@ -495,6 +514,8 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
            candidates_.count() == candidate_capacity &&
            prunes_.count() == prune_capacity &&
            witnesses_.count() == witness_capacity &&
+           cached_prune_witnesses_.count() ==
+               cached_prune_witness_capacity &&
            controls_.count() == control_capacity &&
            checkpoints_.count() == checkpoint_capacity &&
            pending_anchor_count_.count() == 1U;
@@ -529,6 +550,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
     pending_anchor_count_.abandon();
     checkpoints_.abandon();
     controls_.abandon();
+    cached_prune_witnesses_.abandon();
     witnesses_.abandon();
     prunes_.abandon();
     candidates_.abandon();
@@ -538,6 +560,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
     pending_anchor_count_.reset();
     checkpoints_.reset();
     controls_.reset();
+    cached_prune_witnesses_.reset();
     witnesses_.reset();
     prunes_.reset();
     candidates_.reset();
@@ -562,6 +585,8 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
   DeviceBuffer<Phase15MortonYao48DeviceTiledCandidateRecord> candidates_;
   DeviceBuffer<Phase15MortonYao48DeviceTiledPruneRegionRecord> prunes_;
   DeviceBuffer<Phase15MortonYao48DeviceTiledWitnessBankSlot> witnesses_;
+  DeviceBuffer<Phase15MortonYao48DeviceTiledCachedPruneWitness>
+      cached_prune_witnesses_;
   DeviceBuffer<Phase15MortonYao48DeviceTiledAnchorControl> controls_;
   DeviceBuffer<Phase15MortonYao48DeviceTiledAnchorCheckpoint> checkpoints_;
   DeviceBuffer<std::uint64_t> pending_anchor_count_;
@@ -700,6 +725,40 @@ struct Phase15MortonYao48DeviceTiledLaunchShape {
              << 32U |
          static_cast<std::uint64_t>(
              __shfl_sync(kFullWarpMask, low, source_lane));
+}
+
+[[nodiscard]] __device__ std::uint64_t active_witness_count_warp(
+    std::uint64_t active_mask_word,
+    unsigned int) noexcept {
+  std::uint64_t count = UINT64_C(0);
+  for (int source_lane = 0;
+       source_lane < static_cast<int>(kActiveWitnessMaskWordCount);
+       ++source_lane) {
+    count += static_cast<std::uint64_t>(
+        __popcll(warp_broadcast_u64(active_mask_word, source_lane)));
+  }
+  return count;
+}
+
+[[nodiscard]] __device__ bool active_witness_mask_word_valid(
+    std::uint64_t active_mask_word,
+    std::uint64_t witness_capacity,
+    unsigned int lane) noexcept {
+  if (lane >= kActiveWitnessMaskWordCount) {
+    return active_mask_word == UINT64_C(0);
+  }
+  const std::uint64_t word_begin =
+      static_cast<std::uint64_t>(lane) * UINT64_C(64);
+  if (word_begin >= witness_capacity) {
+    return active_mask_word == UINT64_C(0);
+  }
+  const std::uint64_t remaining = witness_capacity - word_begin;
+  if (remaining >= UINT64_C(64)) {
+    return true;
+  }
+  const std::uint64_t allowed =
+      (UINT64_C(1) << static_cast<unsigned int>(remaining)) - UINT64_C(1);
+  return (active_mask_word & ~allowed) == UINT64_C(0);
 }
 
 // Returns -1, 0 or +1 for a certified sign and 2 for an interval ambiguity.
@@ -892,30 +951,39 @@ load_certified_hot_node_warp(
   return hot;
 }
 
-[[nodiscard]] __device__ bool witness_point_certifies_node(
-    std::uint64_t witness_point_id,
+[[nodiscard]] __device__ device::DeviceInterval decode_cached_interval(
+    std::uint64_t lower_bits,
+    std::uint64_t upper_bits) noexcept {
+  if (lower_bits == kInvalid || upper_bits == kInvalid) {
+    return device::invalid_interval();
+  }
+  return device::checked_interval(
+      __longlong_as_double(static_cast<long long int>(lower_bits)),
+      __longlong_as_double(static_cast<long long int>(upper_bits)));
+}
+
+template <typename CachedWitness>
+[[nodiscard]] __device__ bool cached_witness_certifies_node(
+    const CachedWitness& witness,
     const Phase15MortonYao48DeviceTiledHotNode& node,
-    const std::uint64_t* coordinate_bits,
-    std::uint64_t point_count,
-    std::uint64_t anchor_point_id,
     MortonYao48DeviceTiledPairFrontierPruneSemantics
         prune_semantics) noexcept {
-  if (witness_point_id == kInvalid || witness_point_id >= point_count ||
-      witness_point_id == anchor_point_id) {
-    return false;
-  }
-
   device::DeviceInterval sum = device::point_interval(UINT64_C(0));
   for (unsigned int axis = 0U; axis < kAxisCount; ++axis) {
-    const std::uint64_t anchor_bits =
-        coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
-                        anchor_point_id];
-    const std::uint64_t witness_bits =
-        coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
-                        witness_point_id];
-    device::DeviceInterval direction;
-    const int sign = certified_difference_sign(
-        witness_bits, anchor_bits, direction);
+    const device::DeviceInterval direction = decode_cached_interval(
+        witness.direction_lower_bits[axis],
+        witness.direction_upper_bits[axis]);
+    if (!direction.valid) {
+      return false;
+    }
+    int sign = 2;
+    if (direction.lower == 0.0 && direction.upper == 0.0) {
+      sign = 0;
+    } else if (direction.lower > 0.0) {
+      sign = 1;
+    } else if (direction.upper < 0.0) {
+      sign = -1;
+    }
     if (sign == 2) {
       return false;
     }
@@ -926,7 +994,7 @@ load_certified_hot_node_warp(
         sign > 0 ? node.lower_bits[axis] : node.upper_bits[axis];
     const device::DeviceInterval delta = device::subtract_intervals(
         device::point_interval(bound_bits),
-        device::point_interval(witness_bits));
+        device::point_interval(witness.witness_coordinate_bits[axis]));
     const device::DeviceInterval product =
         device::multiply_intervals(direction, delta);
     sum = device::add_intervals(sum, product);
@@ -945,7 +1013,6 @@ load_certified_hot_node_warp(
 [[nodiscard]] __device__ bool witness_certifies_node(
     const Phase15MortonYao48DeviceTiledWitnessBankSlot& witness,
     const Phase15MortonYao48DeviceTiledHotNode& node,
-    const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
     std::uint64_t anchor_point_id,
     std::uint64_t anchor_morton_position,
@@ -953,13 +1020,10 @@ load_certified_hot_node_warp(
         prune_semantics) noexcept {
   return witness.witness_morton_position >= node.leaf_end &&
          witness.witness_morton_position < anchor_morton_position &&
-         witness_point_certifies_node(
-             witness.witness_point_id,
-             node,
-             coordinate_bits,
-             point_count,
-             anchor_point_id,
-             prune_semantics);
+         witness.witness_point_id != kInvalid &&
+         witness.witness_point_id < point_count &&
+         witness.witness_point_id != anchor_point_id &&
+         cached_witness_certifies_node(witness, node, prune_semantics);
 }
 
 struct Phase15MortonYao48DeviceTiledSelectedWitnesses {
@@ -975,9 +1039,10 @@ struct Phase15MortonYao48DeviceTiledSelectedWitnesses {
 [[nodiscard]] __device__ Phase15MortonYao48DeviceTiledSelectedWitnesses
 try_cached_certifying_witnesses_warp(
     const Phase15MortonYao48DeviceTiledPruneRegionRecord* cached,
+    const Phase15MortonYao48DeviceTiledCachedPruneWitness*
+        cached_witnesses,
     Phase15MortonYao48DeviceTiledPruneRegionRecord* output,
     const Phase15MortonYao48DeviceTiledHotNode& node,
-    const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
     std::uint64_t anchor_point_id,
     std::uint64_t required_witness_count,
@@ -985,7 +1050,8 @@ try_cached_certifying_witnesses_warp(
     std::uint64_t required_prune_flag,
     unsigned int lane) noexcept {
   Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
-  if (cached == nullptr || required_witness_count == 0U ||
+  if (cached == nullptr || cached_witnesses == nullptr ||
+      required_witness_count == 0U ||
       required_witness_count > 10U || cached->flags != required_prune_flag ||
       cached->retained_witness_count != required_witness_count) {
     return selected;
@@ -994,13 +1060,12 @@ try_cached_certifying_witnesses_warp(
   bool certifies = false;
   if (lane < required_witness_count) {
     point_id = cached->witness_point_ids[lane];
-    certifies = witness_point_certifies_node(
-        point_id,
-        node,
-        coordinate_bits,
-        point_count,
-        anchor_point_id,
-        prune_semantics);
+    certifies =
+        point_id != kInvalid && point_id < point_count &&
+        point_id != anchor_point_id &&
+        cached_witnesses[lane].witness_point_id == point_id &&
+        cached_witness_certifies_node(
+            cached_witnesses[lane], node, prune_semantics);
   }
   const unsigned int required_mask =
       required_witness_count == kWarpSize
@@ -1029,60 +1094,104 @@ select_certifying_witnesses_warp(
     const Phase15MortonYao48DeviceTiledWitnessBankSlot* witnesses,
     std::uint64_t witness_count,
     std::uint64_t witness_slots_per_bank,
+    std::uint64_t active_witness_slot_mask_word,
     const Phase15MortonYao48DeviceTiledHotNode& node,
-    const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
     std::uint64_t anchor_point_id,
     std::uint64_t anchor_morton_position,
     std::uint64_t required_witness_count,
     MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics,
     Phase15MortonYao48DeviceTiledPruneRegionRecord* output,
+    Phase15MortonYao48DeviceTiledCachedPruneWitness*
+        output_cached_witnesses,
     unsigned int lane) noexcept {
   Phase15MortonYao48DeviceTiledSelectedWitnesses selected{};
+  std::uint64_t selected_slot_index = kInvalid;
+  const std::uint64_t active_word_count =
+      witness_count / UINT64_C(64) +
+      (witness_count % UINT64_C(64) == 0U ? UINT64_C(0) : UINT64_C(1));
 
-  for (std::uint64_t base = 0U;
-       base < witness_count && selected.count < required_witness_count;
-       base += kWarpSize) {
-    const std::uint64_t slot_index = base + lane;
-    std::uint64_t candidate_point_id = kInvalid;
-    std::uint64_t candidate_bank = 0U;
-    bool certifies = false;
-    if (slot_index < witness_count) {
-      const Phase15MortonYao48DeviceTiledWitnessBankSlot slot =
-          witnesses[slot_index];
-      certifies = witness_certifies_node(
-          slot,
-          node,
-          coordinate_bits,
-          point_count,
-          anchor_point_id,
-          anchor_morton_position,
-          prune_semantics);
-      candidate_point_id = slot.witness_point_id;
-      candidate_bank = slot_index / witness_slots_per_bank;
-    }
-    unsigned int mask = __ballot_sync(kFullWarpMask, certifies);
-    while (mask != 0U && selected.count < required_witness_count) {
-      const int owner_lane = __ffs(static_cast<int>(mask)) - 1;
-      const std::uint64_t point_id =
-          warp_broadcast_u64(candidate_point_id, owner_lane);
-      const std::uint64_t bank =
-          warp_broadcast_u64(candidate_bank, owner_lane);
-      // Every target leaf is encountered once and has one unique certified
-      // cone.  Consequently active bank slots cannot duplicate a PointId.
-      if (point_id != kInvalid && bank < kConeCount) {
-        if (lane == 0U) {
-          output->witness_point_ids[selected.count] = point_id;
-        }
-        selected.bank_mask |= UINT64_C(1) << bank;
-        ++selected.count;
+  for (std::uint64_t word_index = 0U;
+       word_index < active_word_count &&
+       selected.count < required_witness_count;
+       ++word_index) {
+    const std::uint64_t active_word = warp_broadcast_u64(
+        active_witness_slot_mask_word,
+        static_cast<int>(word_index));
+    for (std::uint64_t half = 0U;
+         half < UINT64_C(2) &&
+         selected.count < required_witness_count;
+         ++half) {
+      const std::uint64_t slot_index =
+          word_index * UINT64_C(64) + half * UINT64_C(32) + lane;
+      const bool active =
+          slot_index < witness_count &&
+          (active_word &
+           (UINT64_C(1) << (half * UINT64_C(32) + lane))) != 0U;
+      Phase15MortonYao48DeviceTiledWitnessBankSlot slot{};
+      std::uint64_t candidate_point_id = kInvalid;
+      std::uint64_t candidate_bank = 0U;
+      bool certifies = false;
+      if (active) {
+        slot = witnesses[slot_index];
+        certifies = witness_certifies_node(
+            slot,
+            node,
+            point_count,
+            anchor_point_id,
+            anchor_morton_position,
+            prune_semantics);
+        candidate_point_id = slot.witness_point_id;
+        candidate_bank = slot_index / witness_slots_per_bank;
       }
-      mask &= mask - 1U;
+      unsigned int mask = __ballot_sync(kFullWarpMask, certifies);
+      while (mask != 0U && selected.count < required_witness_count) {
+        const int owner_lane = __ffs(static_cast<int>(mask)) - 1;
+        const std::uint64_t point_id =
+            warp_broadcast_u64(candidate_point_id, owner_lane);
+        const std::uint64_t bank =
+            warp_broadcast_u64(candidate_bank, owner_lane);
+        const std::uint64_t physical_slot =
+            warp_broadcast_u64(slot_index, owner_lane);
+        // Every target leaf is encountered once and has one unique certified
+        // cone. Consequently active bank slots cannot duplicate a PointId.
+        if (point_id != kInvalid && bank < kConeCount) {
+          if (lane == 0U) {
+            output->witness_point_ids[selected.count] = point_id;
+          }
+          if (lane == selected.count) {
+            selected_slot_index = physical_slot;
+          }
+          selected.bank_mask |= UINT64_C(1) << bank;
+          ++selected.count;
+        }
+        mask &= mask - 1U;
+      }
     }
   }
-  if (selected.count == required_witness_count && lane == 0U) {
-    for (std::uint64_t index = required_witness_count; index < 10U; ++index) {
-      output->witness_point_ids[index] = UINT64_C(0);
+  if (selected.count == required_witness_count) {
+    if (lane < required_witness_count &&
+        selected_slot_index < witness_count) {
+      const Phase15MortonYao48DeviceTiledWitnessBankSlot& slot =
+          witnesses[selected_slot_index];
+      Phase15MortonYao48DeviceTiledCachedPruneWitness& cached =
+          output_cached_witnesses[lane];
+      cached.witness_point_id = slot.witness_point_id;
+      for (unsigned int axis = 0U; axis < kAxisCount; ++axis) {
+        cached.witness_coordinate_bits[axis] =
+            slot.witness_coordinate_bits[axis];
+        cached.direction_lower_bits[axis] =
+            slot.direction_lower_bits[axis];
+        cached.direction_upper_bits[axis] =
+            slot.direction_upper_bits[axis];
+      }
+    }
+    if (lane == 0U) {
+      for (std::uint64_t index = required_witness_count;
+           index < 10U;
+           ++index) {
+        output->witness_point_ids[index] = UINT64_C(0);
+      }
     }
   }
   return selected;
@@ -1128,6 +1237,7 @@ select_certifying_witnesses_warp(
 struct Phase15MortonYao48DeviceTiledBankUpdate {
   bool inserted{false};
   bool replaced{false};
+  std::uint64_t physical_slot_index{kInvalid};
 };
 
 [[nodiscard]] __device__ Phase15MortonYao48DeviceTiledBankUpdate
@@ -1192,8 +1302,31 @@ update_witness_bank_after_candidate(
     stored.squared_distance_lower_bits = kInvalid;
     stored.squared_distance_upper_bits = kInvalid;
   }
+  for (unsigned int axis = 0U; axis < kAxisCount; ++axis) {
+    const std::uint64_t anchor_bits =
+        coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
+                        anchor_point_id];
+    const std::uint64_t witness_bits =
+        coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
+                        target_point_id];
+    stored.witness_coordinate_bits[axis] = witness_bits;
+    device::DeviceInterval direction;
+    static_cast<void>(certified_difference_sign(
+        witness_bits, anchor_bits, direction));
+    if (direction.valid) {
+      stored.direction_lower_bits[axis] = static_cast<std::uint64_t>(
+          __double_as_longlong(direction.lower));
+      stored.direction_upper_bits[axis] = static_cast<std::uint64_t>(
+          __double_as_longlong(direction.upper));
+    } else {
+      stored.direction_lower_bits[axis] = kInvalid;
+      stored.direction_upper_bits[axis] = kInvalid;
+    }
+  }
   bank[destination] = stored;
   update.inserted = true;
+  update.physical_slot_index =
+      cone_index * witness_slots_per_bank + destination;
   return update;
 }
 
@@ -1278,6 +1411,8 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
     Phase15MortonYao48DeviceTiledCandidateRecord* candidates,
     Phase15MortonYao48DeviceTiledPruneRegionRecord* prunes,
     Phase15MortonYao48DeviceTiledWitnessBankSlot* witnesses,
+    Phase15MortonYao48DeviceTiledCachedPruneWitness*
+        cached_prune_witnesses,
     Phase15MortonYao48DeviceTiledAnchorControl* controls,
     Phase15MortonYao48DeviceTiledAnchorCheckpoint* checkpoints,
     std::uint64_t* pending_anchor_count) {
@@ -1301,6 +1436,10 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
         witness_bank_count * witness_slots_per_bank;
     Phase15MortonYao48DeviceTiledWitnessBankSlot* anchor_witnesses =
         witnesses + anchor_slot * witness_capacity;
+    Phase15MortonYao48DeviceTiledCachedPruneWitness*
+        anchor_cached_prune_witnesses =
+            cached_prune_witnesses +
+            anchor_slot * kCachedPruneWitnessCapacityPerAnchor;
     Phase15MortonYao48DeviceTiledAnchorCheckpoint* checkpoint =
         checkpoints + anchor_slot;
     if (subdivision_index != 0U &&
@@ -1333,6 +1472,7 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
     std::uint64_t retained_witness_count = 0U;
     std::uint64_t completed_subdivision_count = 0U;
     std::uint64_t prior_state = kStatusActive;
+    std::uint64_t active_witness_slot_mask_word = UINT64_C(0);
     if (load_checkpoint) {
       cursor = checkpoint->cursor;
       candidate_count = checkpoint->candidate_count;
@@ -1358,6 +1498,10 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
       completed_subdivision_count =
           checkpoint->completed_subdivision_count;
       prior_state = checkpoint->state;
+      if (lane < kActiveWitnessMaskWordCount) {
+        active_witness_slot_mask_word =
+            checkpoint->active_witness_slot_mask[lane];
+      }
     }
     std::uint64_t subdivision_node_visit_count = 0U;
     std::uint64_t yield_reason = kYieldNone;
@@ -1425,6 +1569,11 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
                     checkpoint->chunk_sequence + UINT64_C(1) ==
                         chunk_sequence
               : checkpoint->chunk_sequence == chunk_sequence;
+      const bool active_mask_valid = active_witness_mask_word_valid(
+          active_witness_slot_mask_word, witness_capacity, lane);
+      const std::uint64_t active_witness_count =
+          active_witness_count_warp(
+              active_witness_slot_mask_word, lane);
       const bool checkpoint_valid =
           checkpoint->reserved_zero == UINT64_C(0) &&
           checkpoint->anchor_morton_position == anchor_morton_position &&
@@ -1446,7 +1595,9 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
           cumulative_certified_pruned_mass <=
               anchor_morton_position - cumulative_candidate_count &&
           cumulative_node_visit_count <= node_count &&
-          retained_witness_count <= witness_capacity;
+          retained_witness_count <= witness_capacity &&
+          active_mask_valid &&
+          active_witness_count == retained_witness_count;
       if (!__all_sync(kFullWarpMask, checkpoint_valid)) {
         failure_code = kFailureInvariant;
         fatal = true;
@@ -1562,9 +1713,9 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
             prune_count == 0U ? nullptr : output_prune - 1U;
         selected = try_cached_certifying_witnesses_warp(
             cached_prune,
+            anchor_cached_prune_witnesses,
             output_prune,
             node,
-            coordinate_bits,
             point_count,
             anchor_point_id,
             required_witness_count,
@@ -1576,14 +1727,15 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
               anchor_witnesses,
               witness_capacity,
               witness_slots_per_bank,
+              active_witness_slot_mask_word,
               node,
-              coordinate_bits,
               point_count,
               anchor_point_id,
               anchor_morton_position,
               required_witness_count,
               prune_semantics,
               output_prune,
+              anchor_cached_prune_witnesses,
               lane);
         }
       }
@@ -1742,8 +1894,33 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
         const bool replaced =
             __shfl_sync(
                 kFullWarpMask, bank_update.replaced ? 1U : 0U, 0) != 0U;
-        if (inserted && !replaced) {
-          ++retained_witness_count;
+        const std::uint64_t inserted_slot_index = warp_broadcast_u64(
+            bank_update.physical_slot_index, 0);
+        if (inserted) {
+          if (inserted_slot_index >= witness_capacity) {
+            failure_code = kFailureInvariant;
+            fatal = true;
+          } else {
+            const std::uint64_t mask_word_index =
+                inserted_slot_index / UINT64_C(64);
+            const std::uint64_t mask_bit =
+                UINT64_C(1)
+                << static_cast<unsigned int>(
+                       inserted_slot_index % UINT64_C(64));
+            const std::uint64_t prior_mask_word = warp_broadcast_u64(
+                active_witness_slot_mask_word,
+                static_cast<int>(mask_word_index));
+            if ((!replaced && (prior_mask_word & mask_bit) != 0U) ||
+                (replaced && (prior_mask_word & mask_bit) == 0U)) {
+              failure_code = kFailureInvariant;
+              fatal = true;
+            } else if (!replaced) {
+              if (lane == mask_word_index) {
+                active_witness_slot_mask_word |= mask_bit;
+              }
+              ++retained_witness_count;
+            }
+          }
         }
         __syncwarp(kFullWarpMask);
       }
@@ -1757,11 +1934,18 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
       }
     }
 
+    const bool active_mask_valid = active_witness_mask_word_valid(
+        active_witness_slot_mask_word, witness_capacity, lane);
+    const std::uint64_t active_witness_count =
+        active_witness_count_warp(
+            active_witness_slot_mask_word, lane);
     const bool delta_counts_valid =
         candidate_count <= candidate_capacity &&
         prune_count <= prune_capacity &&
         ambiguous_candidate_count <= unbanked_candidate_count &&
-        unbanked_candidate_count <= candidate_count;
+        unbanked_candidate_count <= candidate_count &&
+        active_mask_valid &&
+        active_witness_count == retained_witness_count;
     const bool cumulative_counts_valid =
         cumulative_ambiguous_candidate_count <=
             cumulative_unbanked_candidate_count &&
@@ -1937,6 +2121,11 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
             1ULL);
       }
     }
+    __syncwarp(kFullWarpMask);
+    if (lane < kActiveWitnessMaskWordCount) {
+      checkpoint->active_witness_slot_mask[lane] =
+          active_witness_slot_mask_word;
+    }
     anchor_slot += anchor_stride;
   }
 }
@@ -2039,6 +2228,11 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           "the Phase 15 tiled Morton/Yao48 bank count overflows size_t"),
       request.witness_slot_count_per_bank,
       "the Phase 15 tiled Morton/Yao48 witness capacity overflows size_t");
+  const std::size_t cached_prune_witness_capacity = checked_product(
+      request.anchor_count,
+      static_cast<std::size_t>(kCachedPruneWitnessCapacityPerAnchor),
+      "the Phase 15 tiled Morton/Yao48 cached prune witness capacity "
+      "overflows size_t");
   const std::size_t control_capacity = request.anchor_count;
   const std::size_t checkpoint_capacity = request.anchor_count;
   const std::size_t maximum_subdivision_count =
@@ -2061,6 +2255,11 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       witness_capacity,
       sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot),
       "the Phase 15 tiled Morton/Yao48 witness bytes overflow size_t");
+  const std::size_t cached_prune_witness_bytes = checked_product(
+      cached_prune_witness_capacity,
+      sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness),
+      "the Phase 15 tiled Morton/Yao48 cached prune witness bytes overflow "
+      "size_t");
   const std::size_t control_bytes = checked_product(
       control_capacity,
       sizeof(Phase15MortonYao48DeviceTiledAnchorControl),
@@ -2076,6 +2275,10 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
   device_arena_capacity_bytes = checked_sum(
       device_arena_capacity_bytes,
       witness_bytes,
+      "the Phase 15 tiled Morton/Yao48 arena bytes overflow size_t");
+  device_arena_capacity_bytes = checked_sum(
+      device_arena_capacity_bytes,
+      cached_prune_witness_bytes,
       "the Phase 15 tiled Morton/Yao48 arena bytes overflow size_t");
   device_arena_capacity_bytes = checked_sum(
       device_arena_capacity_bytes,
@@ -2117,6 +2320,7 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
             candidate_capacity,
             prune_capacity,
             witness_capacity,
+            cached_prune_witness_capacity,
             control_capacity,
             checkpoint_capacity)) {
       throw std::invalid_argument(
@@ -2134,6 +2338,7 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
               candidate_capacity,
               prune_capacity,
               witness_capacity,
+              cached_prune_witness_capacity,
               control_capacity,
               checkpoint_capacity)) {
         resources->rebind_fresh_tile(request);
@@ -2154,6 +2359,7 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
               candidate_capacity,
               prune_capacity,
               witness_capacity,
+              cached_prune_witness_capacity,
               control_capacity,
               checkpoint_capacity);
       retained_device_resources = resources;
@@ -2183,6 +2389,14 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
               witness_bytes,
               resources->stream()),
           "cudaMemsetAsync Phase 15 tiled Morton/Yao48 witness banks");
+      check_cuda(
+          cudaMemsetAsync(
+              resources->cached_prune_witnesses(),
+              0xff,
+              cached_prune_witness_bytes,
+              resources->stream()),
+          "cudaMemsetAsync Phase 15 tiled Morton/Yao48 cached prune "
+          "witnesses");
     }
     check_cuda(
         cudaMemsetAsync(
@@ -2276,6 +2490,7 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           resources->candidates(),
           resources->prunes(),
           resources->witnesses(),
+          resources->cached_prune_witnesses(),
           resources->controls(),
           resources->checkpoints(),
           resources->pending_anchor_count());
@@ -2411,10 +2626,14 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     batch.device_candidate_records = resources->candidates();
     batch.device_prune_regions = resources->prunes();
     batch.device_witness_bank_slots = resources->witnesses();
+    batch.device_cached_prune_witnesses =
+        resources->cached_prune_witnesses();
     batch.device_anchor_controls = resources->controls();
     batch.physical_candidate_capacity = candidate_capacity;
     batch.physical_prune_region_capacity = prune_capacity;
     batch.physical_witness_bank_slot_capacity = witness_capacity;
+    batch.physical_cached_prune_witness_capacity =
+        cached_prune_witness_capacity;
     batch.physical_anchor_control_capacity = control_capacity;
     batch.physical_anchor_checkpoint_capacity = checkpoint_capacity;
     batch.physical_pending_anchor_count_capacity = 1U;
@@ -2449,6 +2668,10 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     batch.ambiguous_cone_to_unbanked_candidate_requested = true;
     batch.target_tested_before_bank_insert_requested = true;
     batch.retained_witnesses_outside_pruned_subtree_requested = true;
+    batch.witness_direction_intervals_cached_per_bank_slot_requested = true;
+    batch.active_witness_slot_mask_authenticated_requested = true;
+    batch.inactive_witness_slots_skipped_in_physical_order_requested = true;
+    batch.last_prune_witness_direction_cache_retained_requested = true;
     batch.nonnegative_diametral_witness_interval_lower_bound_requested =
         request.prune_semantics ==
         MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;

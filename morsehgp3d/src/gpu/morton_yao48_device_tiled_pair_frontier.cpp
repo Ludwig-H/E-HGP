@@ -170,6 +170,10 @@ struct ValidatedBatch final {
           "the Phase 15 witness-bank arena extent overflows size_t"),
       request.witness_slot_count_per_bank,
       "the Phase 15 witness-slot arena extent overflows size_t");
+  const std::size_t cached_prune_witness_count = checked_size_product(
+      request.anchor_count,
+      morton_yao48_device_tiled_pair_frontier_cached_prune_witnesses_per_anchor,
+      "the Phase 15 cached-prune-witness arena extent overflows size_t");
   std::size_t bytes = checked_size_product(
       candidate_count,
       sizeof(detail::Phase15MortonYao48DeviceTiledCandidateRecord),
@@ -187,6 +191,13 @@ struct ValidatedBatch final {
           witness_count,
           sizeof(detail::Phase15MortonYao48DeviceTiledWitnessBankSlot),
           "the Phase 15 witness arena bytes overflow size_t"),
+      "the Phase 15 output arena bytes overflow size_t");
+  bytes = checked_size_sum(
+      bytes,
+      checked_size_product(
+          cached_prune_witness_count,
+          sizeof(detail::Phase15MortonYao48DeviceTiledCachedPruneWitness),
+          "the Phase 15 cached-prune-witness arena bytes overflow size_t"),
       "the Phase 15 output arena bytes overflow size_t");
   bytes = checked_size_sum(
       bytes,
@@ -369,6 +380,11 @@ void validate_batch_envelope(
       bank_count,
       request.witness_slot_count_per_bank,
       "the Phase 15 witness bank slot capacity overflows size_t");
+  const std::size_t expected_cached_prune_witness_capacity =
+      checked_size_product(
+          request.anchor_count,
+          morton_yao48_device_tiled_pair_frontier_cached_prune_witnesses_per_anchor,
+          "the Phase 15 cached prune witness capacity overflows size_t");
   const std::size_t expected_device_arena_capacity_bytes =
       checked_device_arena_capacity_bytes(request);
   const std::size_t expected_maximum_subdivision_count =
@@ -391,6 +407,8 @@ void validate_batch_envelope(
       batch.physical_candidate_capacity != expected_candidate_capacity ||
       batch.physical_prune_region_capacity != expected_prune_capacity ||
       batch.physical_witness_bank_slot_capacity != expected_bank_capacity ||
+      batch.physical_cached_prune_witness_capacity !=
+          expected_cached_prune_witness_capacity ||
       batch.physical_anchor_control_capacity != request.anchor_count ||
       batch.physical_anchor_checkpoint_capacity != request.anchor_count ||
       batch.physical_pending_anchor_count_capacity != 1U ||
@@ -423,6 +441,12 @@ void validate_batch_envelope(
       !batch.ambiguous_cone_to_unbanked_candidate_requested ||
       !batch.target_tested_before_bank_insert_requested ||
       !batch.retained_witnesses_outside_pruned_subtree_requested ||
+      !batch
+           .witness_direction_intervals_cached_per_bank_slot_requested ||
+      !batch.active_witness_slot_mask_authenticated_requested ||
+      !batch
+           .inactive_witness_slots_skipped_in_physical_order_requested ||
+      !batch.last_prune_witness_direction_cache_retained_requested ||
       batch.nonnegative_diametral_witness_interval_lower_bound_requested !=
           closed_rank_semantics ||
       batch
@@ -446,6 +470,7 @@ void validate_batch_envelope(
       if (batch.device_candidate_records != nullptr ||
           batch.device_prune_regions != nullptr ||
           batch.device_witness_bank_slots != nullptr ||
+          batch.device_cached_prune_witnesses != nullptr ||
           batch.device_anchor_controls != nullptr ||
           batch.anchor_control_device_to_host_count != 0U ||
           batch.anchor_control_device_to_host_byte_count != 0U ||
@@ -473,6 +498,7 @@ void validate_batch_envelope(
       if (batch.device_candidate_records == nullptr ||
           batch.device_prune_regions == nullptr ||
           batch.device_witness_bank_slots == nullptr ||
+          batch.device_cached_prune_witnesses == nullptr ||
           batch.device_anchor_controls == nullptr ||
           batch.anchor_control_device_to_host_count != request.anchor_count ||
           batch.anchor_control_device_to_host_byte_count !=
@@ -846,6 +872,9 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
       physical_anchor_control_capacity_ *
       morton_yao48_device_tiled_pair_frontier_witness_bank_count *
       audit_.required_witness_count;
+  const std::size_t expected_cached_prune_witness_capacity =
+      physical_anchor_control_capacity_ *
+      morton_yao48_device_tiled_pair_frontier_cached_prune_witnesses_per_anchor;
   const std::size_t expected_candidate_capacity =
       physical_anchor_control_capacity_ *
       morton_yao48_device_tiled_pair_frontier_candidates_per_anchor;
@@ -859,6 +888,8 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
           sizeof(detail::Phase15MortonYao48DeviceTiledPruneRegionRecord) +
       expected_witness_capacity *
           sizeof(detail::Phase15MortonYao48DeviceTiledWitnessBankSlot) +
+      expected_cached_prune_witness_capacity *
+          sizeof(detail::Phase15MortonYao48DeviceTiledCachedPruneWitness) +
       physical_anchor_control_capacity_ * sizeof(AnchorControl) +
       physical_anchor_control_capacity_ *
           sizeof(detail::Phase15MortonYao48DeviceTiledAnchorCheckpoint) +
@@ -914,6 +945,8 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
               morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor ||
       audit_.physical_witness_bank_slot_capacity !=
           expected_witness_capacity ||
+      audit_.physical_cached_prune_witness_capacity !=
+          expected_cached_prune_witness_capacity ||
       audit_.physical_anchor_control_capacity !=
           physical_anchor_control_capacity_ ||
       audit_.physical_anchor_checkpoint_capacity !=
@@ -934,6 +967,10 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
           authorized_anchor_count *
               morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor ||
       audit_.process_restart_resumable ||
+      !audit_.witness_direction_intervals_cached_per_bank_slot ||
+      !audit_.active_witness_slot_mask_authenticated ||
+      !audit_.inactive_witness_slots_skipped_in_physical_order ||
+      !audit_.last_prune_witness_direction_cache_retained ||
       (audit_.yield_reason ==
            MortonYao48DeviceTiledPairFrontierYieldReason::none) !=
           !audit_.resumable_after_lease_release ||
@@ -1263,6 +1300,10 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
   audit.ambiguous_cone_routed_to_unbanked_candidate = true;
   audit.target_tested_before_witness_bank_insert = true;
   audit.retained_witnesses_outside_pruned_subtree_required = true;
+  audit.witness_direction_intervals_cached_per_bank_slot = true;
+  audit.active_witness_slot_mask_authenticated = true;
+  audit.inactive_witness_slots_skipped_in_physical_order = true;
+  audit.last_prune_witness_direction_cache_retained = true;
   audit.nonnegative_diametral_witness_interval_lower_bound_required =
       config_.prune_semantics ==
       MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window;
@@ -1452,6 +1493,8 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
           batch.physical_prune_region_capacity;
       lease_audit.physical_witness_bank_slot_capacity =
           batch.physical_witness_bank_slot_capacity;
+      lease_audit.physical_cached_prune_witness_capacity =
+          batch.physical_cached_prune_witness_capacity;
       lease_audit.physical_anchor_control_capacity =
           batch.physical_anchor_control_capacity;
       lease_audit.physical_anchor_checkpoint_capacity =
@@ -1481,6 +1524,10 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
       lease_audit.host_fake_lifecycle_exercised = host_fake;
       lease_audit.cuda_device_storage_retained = !host_fake;
       lease_audit.censored_anchor_outputs_withheld = validated.fatal;
+      lease_audit.witness_direction_intervals_cached_per_bank_slot = true;
+      lease_audit.active_witness_slot_mask_authenticated = true;
+      lease_audit.inactive_witness_slots_skipped_in_physical_order = true;
+      lease_audit.last_prune_witness_direction_cache_retained = true;
       lease_audit.nonnegative_diametral_witness_interval_lower_bound_required =
           request.prune_semantics ==
           MortonYao48DeviceTiledPairFrontierPruneSemantics::
