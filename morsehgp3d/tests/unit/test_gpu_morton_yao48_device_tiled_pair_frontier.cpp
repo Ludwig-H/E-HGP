@@ -605,6 +605,8 @@ void test_hostile_initial_envelopes_poison_fail_stop() {
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
               forged_cuda_execution,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::
+              forged_device_arena_reuse,
+          FakeMortonYao48DeviceTiledPairFrontierCorruption::
               missing_output_owner,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::shared_output_owner,
           FakeMortonYao48DeviceTiledPairFrontierCorruption::

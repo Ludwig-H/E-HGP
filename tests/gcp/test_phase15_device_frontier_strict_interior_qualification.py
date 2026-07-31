@@ -36,6 +36,8 @@ def rank_result(
             "bounded_exact_pair_count": 6,
             "candidate_pair_mass": candidate_mass,
             "certified_pruned_pair_mass": negative_mass,
+            "fresh_tile_device_arena_allocation_count": 1,
+            "fresh_tile_device_arena_reuse_count": 0,
             "gamma2_prune_or_discard_authorized": False,
             "gamma2_silent_handoff_required":
                 semantics == "strict_interior_threshold",

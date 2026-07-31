@@ -67,6 +67,8 @@ def rank_result() -> dict[str, object]:
         "device_total_bytes": 48_000_000_000,
         "every_prune_fully_recertified": True,
         "fully_recertified_prune_count": 900_000,
+        "fresh_tile_device_arena_allocation_count": 2,
+        "fresh_tile_device_arena_reuse_count": 11,
         "gamma2_prune_or_discard_authorized": False,
         "gamma2_silent_handoff_required": False,
         "launcher_ns": 30_000,

@@ -468,6 +468,46 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
            pending_anchor_count_.count() == 1U;
   }
 
+  [[nodiscard]] bool can_rebind_fresh_tile(
+      const Phase15MortonYao48DeviceTiledAdoptedTraversal& traversal,
+      const Phase15MortonYao48DeviceTiledRequest& request,
+      std::size_t candidate_capacity,
+      std::size_t prune_capacity,
+      std::size_t witness_capacity,
+      std::size_t control_capacity,
+      std::size_t checkpoint_capacity) const noexcept {
+    return !request.resume_same_tile &&
+           request.chunk_sequence == UINT64_C(1) &&
+           request.tile_epoch != tile_epoch_ &&
+           request.anchor_begin != anchor_begin_ &&
+           device_ == traversal.cuda_device &&
+           traversal_owner_.get() == traversal.retained_owner.get() &&
+           source_cloud_identity_.get() ==
+               traversal.source_cloud_identity.get() &&
+           device_coordinate_bits_ == traversal.device_coordinate_bits &&
+           device_morton_point_ids_ ==
+               traversal.device_morton_point_ids &&
+           device_nodes_ == traversal.device_nodes &&
+           source_snapshot_epoch_ == request.source_snapshot_epoch &&
+           maximum_closed_rank_ == request.maximum_closed_rank &&
+           prune_semantics_ == request.prune_semantics &&
+           required_witness_count_ == request.required_witness_count &&
+           candidates_.count() == candidate_capacity &&
+           prunes_.count() == prune_capacity &&
+           witnesses_.count() == witness_capacity &&
+           controls_.count() == control_capacity &&
+           checkpoints_.count() == checkpoint_capacity &&
+           pending_anchor_count_.count() == 1U;
+  }
+
+  void rebind_fresh_tile(
+      const Phase15MortonYao48DeviceTiledRequest& request) noexcept {
+    tile_epoch_ = request.tile_epoch;
+    chunk_sequence_ = request.chunk_sequence;
+    anchor_begin_ = request.anchor_begin;
+    anchor_count_ = request.anchor_count;
+  }
+
   void commit_chunk_sequence(std::uint64_t chunk_sequence) noexcept {
     chunk_sequence_ = chunk_sequence;
   }
@@ -2060,6 +2100,8 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
   }
 
   std::shared_ptr<Phase15MortonYao48DeviceTiledCudaResources> resources;
+  bool fresh_tile_device_arena_allocated = false;
+  bool fresh_tile_device_arena_reused = false;
   if (request.resume_same_tile) {
     if (retained_device_resources == nullptr) {
       throw std::invalid_argument(
@@ -2082,20 +2124,41 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           "arena extent does not match the retained tile");
     }
   } else {
-    // The uniqueness check above proves that no detached tile lease retains
-    // this completed arena.  Release it before allocating the next tile so
-    // the physical peak is exactly one output arena.
-    retained_device_resources.reset();
-    resources =
-        std::make_shared<Phase15MortonYao48DeviceTiledCudaResources>(
-            traversal,
-            request,
-            candidate_capacity,
-            prune_capacity,
-            witness_capacity,
-            control_capacity,
-            checkpoint_capacity);
-    retained_device_resources = resources;
+    if (retained_device_resources != nullptr) {
+      resources = std::static_pointer_cast<
+          Phase15MortonYao48DeviceTiledCudaResources>(
+          retained_device_resources);
+      if (resources->can_rebind_fresh_tile(
+              traversal,
+              request,
+              candidate_capacity,
+              prune_capacity,
+              witness_capacity,
+              control_capacity,
+              checkpoint_capacity)) {
+        resources->rebind_fresh_tile(request);
+        fresh_tile_device_arena_reused = true;
+      } else {
+        resources.reset();
+        retained_device_resources.reset();
+      }
+    }
+    if (resources == nullptr) {
+      // The uniqueness check above proves that no detached tile lease
+      // retains the completed arena. A different extent still replaces it,
+      // so the physical peak remains exactly one output arena.
+      resources =
+          std::make_shared<Phase15MortonYao48DeviceTiledCudaResources>(
+              traversal,
+              request,
+              candidate_capacity,
+              prune_capacity,
+              witness_capacity,
+              control_capacity,
+              checkpoint_capacity);
+      retained_device_resources = resources;
+      fresh_tile_device_arena_allocated = true;
+    }
   }
   try {
     if (!request.resume_same_tile) {
@@ -2402,6 +2465,10 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
     // This flag names the real CUDA envelope expected by the host contract;
     // it does not claim exact ranks or scientific catalog qualification.
     batch.cuda_execution_contract_satisfied = true;
+    batch.fresh_tile_device_arena_allocated =
+        fresh_tile_device_arena_allocated;
+    batch.fresh_tile_device_arena_reused =
+        fresh_tile_device_arena_reused;
     batch.resume_same_tile = request.resume_same_tile;
     batch.capacity_yield_resumable = any_chunk_ready;
     batch.process_restart_resumable = false;

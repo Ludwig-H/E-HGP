@@ -13,6 +13,7 @@ enum class FakeMortonYao48DeviceTiledPairFrontierCorruption : std::uint8_t {
   stale_output_epoch,
   candidate_device_to_host,
   forged_cuda_execution,
+  forged_device_arena_reuse,
   missing_output_owner,
   shared_output_owner,
   corrupt_metadata_digest,

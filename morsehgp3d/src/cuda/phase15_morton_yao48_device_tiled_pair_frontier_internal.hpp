@@ -278,6 +278,11 @@ struct Phase15MortonYao48DeviceTiledBatch {
   bool global_pair_matrix_materialized{false};
   bool higher_order_structure_materialized{false};
   bool cuda_execution_contract_satisfied{false};
+  // A fresh CUDA tile either allocates one exact arena or rebinds the sole
+  // retained arena from a completed equal-extent tile. Resumed chunks do
+  // neither. Host fakes leave both flags false.
+  bool fresh_tile_device_arena_allocated{false};
+  bool fresh_tile_device_arena_reused{false};
   bool resume_same_tile{false};
   bool capacity_yield_resumable{false};
   bool process_restart_resumable{false};
@@ -412,6 +417,8 @@ phase15_morton_yao48_device_tiled_metadata_digest(
            batch.global_pair_matrix_materialized,
            batch.higher_order_structure_materialized,
            batch.cuda_execution_contract_satisfied,
+           batch.fresh_tile_device_arena_allocated,
+           batch.fresh_tile_device_arena_reused,
            batch.resume_same_tile,
            batch.capacity_yield_resumable,
            batch.process_restart_resumable}) {

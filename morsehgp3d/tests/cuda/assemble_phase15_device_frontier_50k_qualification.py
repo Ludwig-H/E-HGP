@@ -129,6 +129,8 @@ RANK_KEYS = {
     "device_total_bytes",
     "every_prune_fully_recertified",
     "fully_recertified_prune_count",
+    "fresh_tile_device_arena_allocation_count",
+    "fresh_tile_device_arena_reuse_count",
     "gamma2_prune_or_discard_authorized",
     "gamma2_silent_handoff_required",
     "launcher_ns",
@@ -307,6 +309,8 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
         "bounded_non_support_shell_equality_count": 0,
         "censored_anchor_count": 0,
         "complete_anchor_count": POINT_COUNT,
+        "fresh_tile_device_arena_allocation_count": 2,
+        "fresh_tile_device_arena_reuse_count": 11,
         "maximum_closed_rank": MAXIMUM_CLOSED_RANK,
         "required_witness_count": MAXIMUM_CLOSED_RANK - 1,
         "tile_count": 13,
@@ -362,6 +366,12 @@ def validate_rank(value: dict[str, Any]) -> dict[str, Any]:
         != value["tile_count"] + value["resumed_chunk_count"]
     ):
         fail("rank chunk count does not close initial tiles plus resumes")
+    if (
+        value["fresh_tile_device_arena_allocation_count"]
+        + value["fresh_tile_device_arena_reuse_count"]
+        != value["tile_count"]
+    ):
+        fail("rank fresh arena lifecycle does not close the tile count")
     if (
         value["candidate_yield_anchor_count"]
         + value["prune_yield_anchor_count"]

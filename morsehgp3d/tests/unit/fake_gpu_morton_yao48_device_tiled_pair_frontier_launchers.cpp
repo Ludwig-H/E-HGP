@@ -501,6 +501,9 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       batch.cuda_execution_contract_satisfied = true;
       batch.cuda_device = 0;
       break;
+    case Corruption::forged_device_arena_reuse:
+      batch.fresh_tile_device_arena_reused = true;
+      break;
     case Corruption::missing_output_owner:
       batch.retained_output_owner.reset();
       break;

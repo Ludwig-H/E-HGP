@@ -137,6 +137,8 @@ RANK_KEYS = {
     "device_total_bytes",
     "every_prune_fully_recertified",
     "fully_recertified_prune_count",
+    "fresh_tile_device_arena_allocation_count",
+    "fresh_tile_device_arena_reuse_count",
     "gamma2_prune_or_discard_authorized",
     "gamma2_silent_handoff_required",
     "launcher_ns",
@@ -363,6 +365,16 @@ def validate_rank(
         value.get("required_witness_count"),
         "rank_result.required_witness_count",
         expected=2,
+    )
+    require_integer(
+        value.get("fresh_tile_device_arena_allocation_count"),
+        "rank_result.fresh_tile_device_arena_allocation_count",
+        expected=1,
+    )
+    require_integer(
+        value.get("fresh_tile_device_arena_reuse_count"),
+        "rank_result.fresh_tile_device_arena_reuse_count",
+        expected=0,
     )
     for field in ("bounded_exact_pair_count", "unordered_pair_universe_count"):
         require_integer(value.get(field), f"rank_result.{field}", expected=6)

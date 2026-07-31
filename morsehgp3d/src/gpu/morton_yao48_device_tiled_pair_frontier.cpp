@@ -454,7 +454,9 @@ void validate_batch_envelope(
           batch.kernel_launch_count != 0U ||
           batch.synchronization_count != 0U ||
           batch.cuda_device != -1 ||
-          batch.cuda_execution_contract_satisfied) {
+          batch.cuda_execution_contract_satisfied ||
+          batch.fresh_tile_device_arena_allocated ||
+          batch.fresh_tile_device_arena_reused) {
         throw std::runtime_error(
             "the Phase 15 host fake forged CUDA execution metadata");
       }
@@ -484,7 +486,12 @@ void validate_batch_envelope(
           batch.resume_control_device_to_host_byte_count !=
               expected_resume_bytes ||
           batch.cuda_device != traversal.cuda_device ||
-          !batch.cuda_execution_contract_satisfied) {
+          !batch.cuda_execution_contract_satisfied ||
+          (request.resume_same_tile
+               ? batch.fresh_tile_device_arena_allocated ||
+                     batch.fresh_tile_device_arena_reused
+               : batch.fresh_tile_device_arena_allocated ==
+                     batch.fresh_tile_device_arena_reused)) {
         throw std::runtime_error(
             "the Phase 15 CUDA tile returned invalid resident views or "
             "control-only transfer metadata");

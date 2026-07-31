@@ -207,6 +207,8 @@ struct RankMetrics {
   std::size_t tile_count{};
   std::size_t chunk_count{};
   std::size_t resumed_chunk_count{};
+  std::size_t fresh_tile_device_arena_allocation_count{};
+  std::size_t fresh_tile_device_arena_reuse_count{};
   std::size_t candidate_yield_anchor_count{};
   std::size_t prune_yield_anchor_count{};
   std::size_t complete_anchor_count{};
@@ -1404,6 +1406,13 @@ void validate_batch_contract(
                   phase15_morton_yao48_device_tiled_metadata_digest(batch),
       "the CUDA tile batch identity or digest is invalid");
   require(
+      request.resume_same_tile
+          ? !batch.fresh_tile_device_arena_allocated &&
+                !batch.fresh_tile_device_arena_reused
+          : batch.fresh_tile_device_arena_allocated !=
+                batch.fresh_tile_device_arena_reused,
+      "the CUDA tile batch has invalid fresh-arena lifecycle metadata");
+  require(
       batch.fixed_anchor_segments_allocated &&
           batch.output_owner_detached_for_tile_lifetime &&
           batch.interval_cone_classification_requested &&
@@ -1832,8 +1841,7 @@ void validate_prune_record(
       "a prune record has invalid mass or witness cardinality");
   const PointId anchor_id =
       leaves[static_cast<std::size_t>(anchor_position)].point_id;
-  std::vector<PointId> witnesses;
-  witnesses.reserve(record.retained_witness_count);
+  std::array<PointId, 10U> witnesses{};
   std::uint64_t exact_bank_mask = 0U;
   for (std::size_t witness_index = 0U;
        witness_index < 10U;
@@ -1858,12 +1866,14 @@ void validate_prune_record(
         scaled_points[static_cast<std::size_t>(anchor_id)],
         scaled_points[static_cast<std::size_t>(witness_id)]);
     exact_bank_mask |= UINT64_C(1) << cone;
-    witnesses.push_back(witness_id);
+    witnesses[witness_index] = witness_id;
   }
-  std::sort(witnesses.begin(), witnesses.end());
+  const auto witness_end =
+      witnesses.begin() +
+      static_cast<std::ptrdiff_t>(record.retained_witness_count);
+  std::sort(witnesses.begin(), witness_end);
   require(
-      std::adjacent_find(witnesses.begin(), witnesses.end()) ==
-              witnesses.end() &&
+      std::adjacent_find(witnesses.begin(), witness_end) == witness_end &&
           exact_bank_mask == record.retained_witness_bank_mask,
       "a prune record has duplicate witnesses or an invalid bank mask");
 
@@ -2950,6 +2960,14 @@ void validate_scaling_advance(
       ++metrics.chunk_count;
       if (request.resume_same_tile) {
         ++metrics.resumed_chunk_count;
+      } else if (batch.fresh_tile_device_arena_reused) {
+        ++metrics.fresh_tile_device_arena_reuse_count;
+      } else {
+        require(
+            batch.fresh_tile_device_arena_allocated,
+            "a fresh qualification tile neither allocated nor reused its "
+            "device arena");
+        ++metrics.fresh_tile_device_arena_allocation_count;
       }
       validate_batch_contract(batch, request, adopted.cuda_device);
 
@@ -3229,6 +3247,13 @@ void validate_scaling_advance(
   }
   metrics.every_prune_fully_recertified =
       metrics.fully_recertified_prune_count == metrics.prune_region_count;
+  require(
+      metrics.fresh_tile_device_arena_allocation_count != 0U &&
+          metrics.fresh_tile_device_arena_allocation_count +
+                  metrics.fresh_tile_device_arena_reuse_count ==
+              metrics.tile_count,
+      "the qualification fresh-arena lifecycle does not close its tile "
+      "count");
   metrics.component_contract_validated = true;
   return metrics;
 }
@@ -3661,6 +3686,10 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << (metrics.gamma2_silent_handoff_required ? "true" : "false") << ','
       << "\"fully_recertified_prune_count\":"
       << metrics.fully_recertified_prune_count << ','
+      << "\"fresh_tile_device_arena_allocation_count\":"
+      << metrics.fresh_tile_device_arena_allocation_count << ','
+      << "\"fresh_tile_device_arena_reuse_count\":"
+      << metrics.fresh_tile_device_arena_reuse_count << ','
       << "\"launcher_ns\":" << metrics.launcher_ns << ','
       << "\"lease_release_ns\":" << metrics.lease_release_ns << ','
       << "\"maximum_closed_rank\":" << metrics.maximum_closed_rank << ','
