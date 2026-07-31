@@ -33,6 +33,8 @@ using morsehgp3d::gpu::ExactPairBlockQProposalState;
 using morsehgp3d::gpu::ExactPairBlockWitnessBudget;
 using morsehgp3d::gpu::ExactPairBlockWitnessStatus;
 using morsehgp3d::gpu::exact_pair_block_frontier_maximum_pending_authority_count;
+using morsehgp3d::gpu::
+    exact_pair_block_frontier_maximum_witness_antichain_node_count;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -79,6 +81,30 @@ void require(bool condition, const std::string& message) {
   return CanonicalPointCloud::rejecting_duplicates(points);
 }
 
+[[nodiscard]] CanonicalPointCloud make_antichain_certifying_cloud() {
+  const std::array<double, 7U> x_coordinates{
+      -6.0, -2.0, -1.0, 0.0, 1.0, 2.0, 6.0};
+  std::vector<CertifiedPoint3> points;
+  points.reserve(x_coordinates.size());
+  for (double x : x_coordinates) {
+    points.push_back(
+        CertifiedPoint3::from_binary64(x, 0.0, 0.0));
+  }
+  return CanonicalPointCloud::rejecting_duplicates(points);
+}
+
+[[nodiscard]] CanonicalPointCloud make_block_certifying_cloud() {
+  const std::array<double, 9U> x_coordinates{
+      -7.0, -6.0, -2.0, -1.0, 0.0, 1.0, 2.0, 6.0, 7.0};
+  std::vector<CertifiedPoint3> points;
+  points.reserve(x_coordinates.size());
+  for (double x : x_coordinates) {
+    points.push_back(
+        CertifiedPoint3::from_binary64(x, 0.0, 0.0));
+  }
+  return CanonicalPointCloud::rejecting_duplicates(points);
+}
+
 [[nodiscard]] bool disjoint(
     const ExactPairBlockNodeAuthority& first,
     const ExactPairBlockNodeAuthority& second) {
@@ -89,6 +115,7 @@ void require(bool condition, const std::string& message) {
 struct OpenHarvest {
   std::set<std::array<PointId, 2U>> terminal_pairs;
   std::vector<ExactPairBlockNodeAuthority> singleton_nodes;
+  std::vector<ExactPairBlockNodeAuthority> native_nodes;
   std::optional<ExactPairBlockAuthority> first_cross_block;
   ExactPairBlockFrontierAudit audit;
 };
@@ -131,6 +158,8 @@ struct OpenHarvest {
     if (!harvest.first_cross_block.has_value()) {
       harvest.first_cross_block = source;
     }
+    harvest.native_nodes.push_back(source.first);
+    harvest.native_nodes.push_back(source.second);
 
     const auto opened = frontier.open_cross_block(
         index,
@@ -434,6 +463,356 @@ void test_exact_negative_q_commits_only_its_cross_mass() {
       "the exact negative-Q commit did not conserve the remaining pair mass");
 }
 
+void test_disjoint_witness_antichain_closes_rank_six() {
+  const CanonicalPointCloud cloud =
+      make_antichain_certifying_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const OpenHarvest harvest =
+      open_entire_partition(index, cloud);
+  std::array<
+      std::size_t,
+      exact_pair_block_frontier_maximum_witness_antichain_node_count>
+      witness_node_indices{};
+  std::size_t witness_count = 0U;
+  std::set<std::size_t> seen_witness_nodes;
+  for (const ExactPairBlockNodeAuthority& node :
+       harvest.singleton_nodes) {
+    const PointId point_id =
+        index.leaves()[node.leaf_begin].point_id;
+    if (point_id > 0U && point_id + 1U < cloud.size() &&
+        seen_witness_nodes.insert(node.node_index).second) {
+      require(
+          witness_count < witness_node_indices.size(),
+          "the antichain fixture exposed too many interior leaves");
+      witness_node_indices[witness_count] = node.node_index;
+      ++witness_count;
+    }
+  }
+  require(
+      witness_count == witness_node_indices.size(),
+      "the antichain fixture did not expose five singleton witnesses");
+
+  auto frontier = ExactPairBlockFrontierContext::start(
+      index, cloud, ExactPairBlockFrontierConfig{6U, false});
+  std::size_t iteration_count = 0U;
+  while (!frontier.complete()) {
+    require(
+        ++iteration_count < 512U,
+        "the antichain fixture did not expose its endpoint pair");
+    const auto step = frontier.advance(
+        index,
+        cloud,
+        ExactPairBlockFrontierCapacity{
+            exact_pair_block_frontier_maximum_pending_authority_count});
+    if (step.kind == ExactPairBlockFrontierStepKind::complete) {
+      break;
+    }
+    require(
+        step.kind == ExactPairBlockFrontierStepKind::cross_block &&
+            step.cross_block.has_value(),
+        "the antichain fixture lost cross authority");
+    const auto& active = *step.cross_block;
+    const PointId first_id =
+        active.first.leaf_count() == 1U
+        ? index.leaves()[active.first.leaf_begin].point_id
+        : cloud.size();
+    const PointId second_id =
+        active.second.leaf_count() == 1U
+        ? index.leaves()[active.second.leaf_begin].point_id
+        : cloud.size();
+    if (first_id == 0U && second_id + 1U == cloud.size()) {
+      const auto singleton =
+          frontier.try_certify_with_witness(
+              index,
+              cloud,
+              witness_node_indices[0],
+              ExactPairBlockQProposal{
+                  ExactPairBlockQProposalState::ambiguous, 0},
+              ExactPairBlockWitnessBudget{1U});
+      require(
+          singleton.status ==
+                  ExactPairBlockWitnessStatus::
+                      inconclusive_insufficient_witness_mass &&
+              singleton.exact_q_replay.has_value() &&
+              singleton.exact_q_replay->maximum.maximum_phi.sign() < 0 &&
+              singleton.authenticated_witness_point_count == 1U &&
+              !singleton.frontier_mutated,
+          "the singleton compatibility path skipped exact replay before "
+          "its insufficient-mass decision");
+      const auto audit_before = frontier.audit();
+      const std::array<ExactPairBlockQProposal, 5U>
+          proposals{{
+              {ExactPairBlockQProposalState::usable, 1},
+              {ExactPairBlockQProposalState::ambiguous, 0},
+              {ExactPairBlockQProposalState::ambiguous, 0},
+              {ExactPairBlockQProposalState::ambiguous, 0},
+              {ExactPairBlockQProposalState::ambiguous, 0},
+          }};
+      auto overlapping_nodes = witness_node_indices;
+      overlapping_nodes[1] = overlapping_nodes[0];
+      const auto overlapping =
+          frontier.try_certify_with_witness_antichain(
+              index,
+              cloud,
+              overlapping_nodes,
+              proposals,
+              ExactPairBlockWitnessBudget{5U});
+      require(
+          overlapping.status ==
+                  ExactPairBlockWitnessStatus::
+                      inconclusive_witness_antichain_overlap &&
+              !overlapping.frontier_mutated &&
+              frontier.audit() == audit_before,
+          "overlapping witness nodes incorrectly formed an antichain");
+
+      const std::array<ExactPairBlockQProposal, 4U>
+          four_proposals{{
+              {ExactPairBlockQProposalState::ambiguous, 0},
+              {ExactPairBlockQProposalState::ambiguous, 0},
+              {ExactPairBlockQProposalState::ambiguous, 0},
+              {ExactPairBlockQProposalState::ambiguous, 0},
+          }};
+      const auto insufficient =
+          frontier.try_certify_with_witness_antichain(
+              index,
+              cloud,
+              std::span<const std::size_t>{
+                  witness_node_indices.data(), 4U},
+              four_proposals,
+              ExactPairBlockWitnessBudget{4U});
+      require(
+          insufficient.status ==
+                  ExactPairBlockWitnessStatus::
+                      inconclusive_insufficient_witness_mass &&
+              !insufficient.frontier_mutated &&
+              frontier.audit() == audit_before,
+          "four singleton witnesses incorrectly closed rank six");
+
+      const auto certified =
+          frontier.try_certify_with_witness_antichain(
+              index,
+              cloud,
+              witness_node_indices,
+              proposals,
+              ExactPairBlockWitnessBudget{5U});
+      require(
+          certified.status ==
+                  ExactPairBlockWitnessStatus::certified_closed &&
+              certified.frontier_mutated &&
+              certified.submitted_witness_node_count == 5U &&
+              certified.authenticated_witness_node_count == 5U &&
+              certified.authenticated_witness_point_count == 5U &&
+              certified.exact_q_replay_count == 5U &&
+              certified.proposal_mismatch_count == 1U &&
+              certified.certified_unordered_pair_mass == 1U,
+          "five exact disjoint witnesses did not close rank six");
+      for (std::size_t replay_index = 0U;
+           replay_index < certified.exact_q_replay_count;
+           ++replay_index) {
+        require(
+            certified.exact_q_replays[replay_index]
+                    .maximum.maximum_phi.sign() < 0,
+            "an antichain member was not strictly interior");
+      }
+      continue;
+    }
+    const auto opened = frontier.open_cross_block(
+        index,
+        cloud,
+        ExactPairBlockFrontierCapacity{
+            exact_pair_block_frontier_maximum_pending_authority_count});
+    require(
+        opened.kind != ExactPairBlockOpenKind::inconclusive_capacity &&
+            opened.kind !=
+                ExactPairBlockOpenKind::inconclusive_arithmetic_overflow,
+        "the antichain fixture could not open a non-target block");
+  }
+  require(
+      frontier.audit().complete &&
+          frontier.audit().certified_unordered_pair_mass == 1U &&
+          frontier.audit().terminal_unordered_pair_mass == 20U &&
+          frontier.audit().exact_q_evaluation_count == 6U &&
+          frontier.audit().exact_q_proposal_mismatch_count == 1U &&
+          frontier.audit().exact_mass_conservation_verified,
+      "the antichain certificate did not conserve the 21 endpoint pairs");
+}
+
+[[nodiscard]] bool node_point_ids_are_between(
+    const MortonLbvhIndex& index,
+    const ExactPairBlockNodeAuthority& node,
+    PointId minimum,
+    PointId maximum) {
+  for (std::size_t leaf_index = node.leaf_begin;
+       leaf_index < node.leaf_end;
+       ++leaf_index) {
+    const PointId point_id = index.leaves()[leaf_index].point_id;
+    if (point_id < minimum || point_id > maximum) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void test_multileaf_block_and_witness_antichain_commit_mass() {
+  const CanonicalPointCloud cloud = make_block_certifying_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const OpenHarvest harvest = open_entire_partition(index, cloud);
+
+  std::optional<ExactPairBlockNodeAuthority> multi_witness;
+  std::set<std::size_t> seen_nodes;
+  for (const ExactPairBlockNodeAuthority& node : harvest.native_nodes) {
+    if (!seen_nodes.insert(node.node_index).second ||
+        node.leaf_count() < 2U ||
+        !node_point_ids_are_between(index, node, 2U, 6U)) {
+      continue;
+    }
+    if (!multi_witness.has_value() ||
+        node.leaf_count() > multi_witness->leaf_count()) {
+      multi_witness = node;
+    }
+  }
+  require(
+      multi_witness.has_value(),
+      "the block fixture exposed no native multi-leaf middle witness");
+
+  std::array<
+      std::size_t,
+      exact_pair_block_frontier_maximum_witness_antichain_node_count>
+      witness_node_indices{};
+  std::size_t witness_node_count = 0U;
+  witness_node_indices[witness_node_count] =
+      multi_witness->node_index;
+  ++witness_node_count;
+  std::set<PointId> covered_witness_ids;
+  for (std::size_t leaf_index = multi_witness->leaf_begin;
+       leaf_index < multi_witness->leaf_end;
+       ++leaf_index) {
+    covered_witness_ids.insert(
+        index.leaves()[leaf_index].point_id);
+  }
+  for (PointId point_id = 2U; point_id <= 6U; ++point_id) {
+    if (covered_witness_ids.contains(point_id)) {
+      continue;
+    }
+    const auto singleton = std::find_if(
+        harvest.singleton_nodes.begin(),
+        harvest.singleton_nodes.end(),
+        [&index, point_id](
+            const ExactPairBlockNodeAuthority& node) {
+          return index.leaves()[node.leaf_begin].point_id ==
+              point_id;
+        });
+    require(
+        singleton != harvest.singleton_nodes.end() &&
+            witness_node_count < witness_node_indices.size(),
+        "the block fixture could not complete its witness antichain");
+    witness_node_indices[witness_node_count] =
+        singleton->node_index;
+    ++witness_node_count;
+  }
+  require(
+      witness_node_count <=
+              exact_pair_block_frontier_maximum_witness_antichain_node_count &&
+          multi_witness->leaf_count() >= 2U,
+      "the block fixture lost its bounded multi-leaf witness cover");
+
+  std::array<
+      ExactPairBlockQProposal,
+      exact_pair_block_frontier_maximum_witness_antichain_node_count>
+      proposals{};
+  for (std::size_t proposal_index = 0U;
+       proposal_index < witness_node_count;
+       ++proposal_index) {
+    proposals[proposal_index] = ExactPairBlockQProposal{
+        ExactPairBlockQProposalState::ambiguous, 0};
+  }
+
+  auto frontier = ExactPairBlockFrontierContext::start(
+      index, cloud, ExactPairBlockFrontierConfig{6U, false});
+  bool certified_block = false;
+  std::size_t certified_block_mass = 0U;
+  std::size_t iteration_count = 0U;
+  while (!frontier.complete()) {
+    require(
+        ++iteration_count < 1024U,
+        "the block fixture did not terminate");
+    const auto step = frontier.advance(
+        index,
+        cloud,
+        ExactPairBlockFrontierCapacity{
+            exact_pair_block_frontier_maximum_pending_authority_count});
+    if (step.kind == ExactPairBlockFrontierStepKind::complete) {
+      break;
+    }
+    require(
+        step.kind == ExactPairBlockFrontierStepKind::cross_block &&
+            step.cross_block.has_value(),
+        "the block fixture lost cross authority");
+    const ExactPairBlockAuthority& active = *step.cross_block;
+    const bool left_support =
+        node_point_ids_are_between(index, active.first, 0U, 1U);
+    const bool right_support =
+        node_point_ids_are_between(index, active.second, 7U, 8U);
+    if (!certified_block && left_support && right_support &&
+        active.first.leaf_count() > 1U &&
+        active.second.leaf_count() > 1U &&
+        active.unordered_pair_mass > 1U) {
+      const auto certified =
+          frontier.try_certify_with_witness_antichain(
+              index,
+              cloud,
+              std::span<const std::size_t>{
+                  witness_node_indices.data(), witness_node_count},
+              std::span<const ExactPairBlockQProposal>{
+                  proposals.data(), witness_node_count},
+              ExactPairBlockWitnessBudget{witness_node_count});
+      require(
+          certified.status ==
+                  ExactPairBlockWitnessStatus::certified_closed &&
+              certified.frontier_mutated &&
+              certified.authenticated_witness_point_count == 5U &&
+              certified.authenticated_witness_node_count ==
+                  witness_node_count &&
+              certified.exact_q_replay_count == witness_node_count &&
+              certified.certified_unordered_pair_mass ==
+                  active.unordered_pair_mass,
+          "the exact multi-leaf witness antichain did not close its block");
+      for (std::size_t replay_index = 0U;
+           replay_index < certified.exact_q_replay_count;
+           ++replay_index) {
+        require(
+            certified.exact_q_replays[replay_index]
+                    .maximum.maximum_phi.sign() < 0,
+            "a multi-leaf block witness lacked a strict exact Q proof");
+      }
+      certified_block_mass = active.unordered_pair_mass;
+      certified_block = true;
+      continue;
+    }
+    const auto opened = frontier.open_cross_block(
+        index,
+        cloud,
+        ExactPairBlockFrontierCapacity{
+            exact_pair_block_frontier_maximum_pending_authority_count});
+    require(
+        opened.kind != ExactPairBlockOpenKind::inconclusive_capacity &&
+            opened.kind !=
+                ExactPairBlockOpenKind::inconclusive_arithmetic_overflow,
+        "the block fixture could not open a non-target authority");
+  }
+  const std::size_t total_pair_mass =
+      cloud.size() * (cloud.size() - 1U) / 2U;
+  require(
+      certified_block && certified_block_mass > 1U &&
+          frontier.audit().complete &&
+          frontier.audit().certified_unordered_pair_mass ==
+              certified_block_mass &&
+          frontier.audit().terminal_unordered_pair_mass ==
+              total_pair_mass - certified_block_mass &&
+          frontier.audit().exact_mass_conservation_verified,
+      "the compressed multi-leaf block commit lost pair mass");
+}
+
 void test_capacity_failures_roll_back_authority() {
   const CanonicalPointCloud cloud = make_cloud();
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
@@ -513,6 +892,8 @@ int main() {
     test_exact_q_bound_matches_24_corner_products();
     test_ambiguous_and_overflow_proposals_fail_closed();
     test_exact_negative_q_commits_only_its_cross_mass();
+    test_disjoint_witness_antichain_closes_rank_six();
+    test_multileaf_block_and_witness_antichain_commit_mass();
     test_capacity_failures_roll_back_authority();
   } catch (const std::exception& error) {
     std::cerr << "FAIL: " << error.what() << '\n';

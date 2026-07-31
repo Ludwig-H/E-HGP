@@ -441,66 +441,236 @@ ExactPairBlockFrontierContext::try_certify_with_witness(
     std::size_t witness_node_index,
     ExactPairBlockQProposal proposal,
     ExactPairBlockWitnessBudget budget) & {
+  const std::array<std::size_t, 1U> witness_node_indices{
+      witness_node_index};
+  const std::array<ExactPairBlockQProposal, 1U> proposals{proposal};
+  ExactPairBlockWitnessAntichainResult antichain =
+      try_certify_with_witness_antichain_impl(
+          index,
+          cloud,
+          witness_node_indices,
+          proposals,
+          budget,
+          true);
+
+  ExactPairBlockWitnessResult result;
+  result.status = antichain.status;
+  result.support_block = antichain.support_block;
+  if (antichain.authenticated_witness_node_count != 0U) {
+    result.witness = antichain.witnesses[0];
+  }
+  if (antichain.exact_q_replay_count != 0U) {
+    result.exact_q_replay = antichain.exact_q_replays[0];
+  }
+  result.proposal = proposal;
+  result.required_witness_point_count =
+      antichain.required_witness_point_count;
+  result.authenticated_witness_point_count =
+      antichain.authenticated_witness_point_count;
+  result.certified_unordered_pair_mass =
+      antichain.certified_unordered_pair_mass;
+  result.frontier_mutated = antichain.frontier_mutated;
+  result.proposal_agreed_with_exact =
+      antichain.proposal_agreement_count == 1U;
+  return result;
+}
+
+ExactPairBlockWitnessAntichainResult
+ExactPairBlockFrontierContext::try_certify_with_witness_antichain(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const std::size_t> witness_node_indices,
+    std::span<const ExactPairBlockQProposal> proposals,
+    ExactPairBlockWitnessBudget budget) & {
+  return try_certify_with_witness_antichain_impl(
+      index,
+      cloud,
+      witness_node_indices,
+      proposals,
+      budget,
+      false);
+}
+
+ExactPairBlockWitnessAntichainResult
+ExactPairBlockFrontierContext::
+    try_certify_with_witness_antichain_impl(
+        const spatial::MortonLbvhIndex& index,
+        const spatial::CanonicalPointCloud& cloud,
+        std::span<const std::size_t> witness_node_indices,
+        std::span<const ExactPairBlockQProposal> proposals,
+        ExactPairBlockWitnessBudget budget,
+        bool replay_before_insufficient_mass_decision) & {
   if (!validated_for(index, cloud)) {
     throw std::invalid_argument(
-        "an exact pair-block witness names foreign authority");
+        "an exact pair-block witness antichain names foreign authority");
   }
   if (!awaiting_cross_block_.has_value()) {
     throw std::logic_error(
-        "an exact pair-block witness has no active support block");
+        "an exact pair-block witness antichain has no active support block");
   }
-  switch (proposal.state) {
-    case ExactPairBlockQProposalState::usable:
-      if (proposal.proposed_maximum_sign < -1 ||
-          proposal.proposed_maximum_sign > 1) {
-        throw std::invalid_argument(
-            "a usable pair-block Q proposal sign must be -1, 0 or 1");
-      }
-      break;
-    case ExactPairBlockQProposalState::ambiguous:
-    case ExactPairBlockQProposalState::arithmetic_overflow:
-      break;
-    default:
-      throw std::invalid_argument(
-          "an exact pair-block Q proposal has an invalid state");
+  if (witness_node_indices.size() != proposals.size()) {
+    throw std::invalid_argument(
+        "an exact pair-block witness antichain requires one proposal per node");
   }
-
-  ExactPairBlockWitnessResult result;
+  ExactPairBlockWitnessAntichainResult result;
   result.support_block = *awaiting_cross_block_;
-  result.proposal = proposal;
+  result.submitted_witness_node_count =
+      witness_node_indices.size();
   result.required_witness_point_count =
       config_.maximum_closed_rank - 1U;
-
-  if (witness_node_index >= index.nodes_.size()) {
+  if (witness_node_indices.size() >
+      exact_pair_block_frontier_maximum_witness_antichain_node_count) {
     result.status = ExactPairBlockWitnessStatus::
-        inconclusive_invalid_witness_authority;
+        inconclusive_witness_antichain_capacity;
     return result;
   }
-  const ExactPairBlockNodeAuthority witness =
-      node_authority(index, witness_node_index);
-  result.witness = witness;
-  result.authenticated_witness_point_count = witness.leaf_count();
-  if (!ranges_are_disjoint(witness, result.support_block.first) ||
-      !ranges_are_disjoint(witness, result.support_block.second)) {
-    result.status = ExactPairBlockWitnessStatus::
-        inconclusive_witness_support_overlap;
-    return result;
+  for (std::size_t proposal_index = 0U;
+       proposal_index < proposals.size();
+       ++proposal_index) {
+    const ExactPairBlockQProposal proposal = proposals[proposal_index];
+    switch (proposal.state) {
+      case ExactPairBlockQProposalState::usable:
+        if (proposal.proposed_maximum_sign < -1 ||
+            proposal.proposed_maximum_sign > 1) {
+          throw std::invalid_argument(
+              "a usable pair-block Q proposal sign must be -1, 0 or 1");
+        }
+        break;
+      case ExactPairBlockQProposalState::ambiguous:
+      case ExactPairBlockQProposalState::arithmetic_overflow:
+        break;
+      default:
+        throw std::invalid_argument(
+            "an exact pair-block Q proposal has an invalid state");
+    }
+    result.proposals[proposal_index] = proposal;
   }
 
-  if (budget.maximum_exact_q_evaluation_count == 0U) {
-    if (proposal.state ==
-        ExactPairBlockQProposalState::ambiguous) {
+  struct WitnessAndProposal {
+    ExactPairBlockNodeAuthority witness{};
+    ExactPairBlockQProposal proposal{};
+  };
+  std::array<
+      WitnessAndProposal,
+      exact_pair_block_frontier_maximum_witness_antichain_node_count>
+      canonical{};
+  for (std::size_t witness_index = 0U;
+       witness_index < witness_node_indices.size();
+       ++witness_index) {
+    if (witness_node_indices[witness_index] >=
+        index.nodes_.size()) {
+      result.status = ExactPairBlockWitnessStatus::
+          inconclusive_invalid_witness_authority;
+      return result;
+    }
+    canonical[witness_index] = WitnessAndProposal{
+        node_authority(index, witness_node_indices[witness_index]),
+        proposals[witness_index]};
+  }
+  const auto precedes =
+      [](const WitnessAndProposal& first,
+         const WitnessAndProposal& second) {
+        if (first.witness.leaf_begin !=
+            second.witness.leaf_begin) {
+          return first.witness.leaf_begin <
+              second.witness.leaf_begin;
+        }
+        if (first.witness.leaf_end != second.witness.leaf_end) {
+          return first.witness.leaf_end <
+              second.witness.leaf_end;
+        }
+        return first.witness.node_index <
+            second.witness.node_index;
+      };
+  // The bound is five.  A direct insertion sort keeps every accessed extent
+  // visible to strict compiler diagnostics and avoids a general-purpose
+  // sorting implementation whose internal pivot arithmetic assumes a much
+  // larger random-access range.
+  for (std::size_t sorted_count = 1U;
+       sorted_count < witness_node_indices.size();
+       ++sorted_count) {
+    const WitnessAndProposal inserted = canonical[sorted_count];
+    std::size_t destination = sorted_count;
+    while (destination != 0U &&
+           precedes(inserted, canonical[destination - 1U])) {
+      canonical[destination] = canonical[destination - 1U];
+      --destination;
+    }
+    canonical[destination] = inserted;
+  }
+
+  std::size_t authenticated_point_count = 0U;
+  for (std::size_t witness_index = 0U;
+       witness_index < witness_node_indices.size();
+       ++witness_index) {
+    const ExactPairBlockNodeAuthority witness =
+        canonical[witness_index].witness;
+    result.witnesses[witness_index] = witness;
+    result.proposals[witness_index] =
+        canonical[witness_index].proposal;
+    ++result.authenticated_witness_node_count;
+    if (!checked_add(
+            authenticated_point_count,
+            witness.leaf_count(),
+            authenticated_point_count)) {
+      result.status = ExactPairBlockWitnessStatus::
+          inconclusive_arithmetic_overflow;
+      return result;
+    }
+    result.authenticated_witness_point_count =
+        authenticated_point_count;
+    if (!ranges_are_disjoint(
+            witness, result.support_block.first) ||
+        !ranges_are_disjoint(
+            witness, result.support_block.second)) {
+      result.status = ExactPairBlockWitnessStatus::
+          inconclusive_witness_support_overlap;
+      return result;
+    }
+    if (witness_index != 0U &&
+        canonical[witness_index - 1U].witness.leaf_end >
+            witness.leaf_begin) {
+      result.status = ExactPairBlockWitnessStatus::
+          inconclusive_witness_antichain_overlap;
+      return result;
+    }
+  }
+  if (budget.maximum_exact_q_evaluation_count <
+      witness_node_indices.size()) {
+    if (witness_node_indices.size() == 1U &&
+        proposals[0].state ==
+            ExactPairBlockQProposalState::ambiguous) {
       result.status = ExactPairBlockWitnessStatus::
           inconclusive_ambiguous_proposal;
     } else if (
-        proposal.state ==
-        ExactPairBlockQProposalState::arithmetic_overflow) {
+        witness_node_indices.size() == 1U &&
+        proposals[0].state ==
+            ExactPairBlockQProposalState::arithmetic_overflow) {
       result.status = ExactPairBlockWitnessStatus::
           inconclusive_proposal_arithmetic_overflow;
     } else {
       result.status = ExactPairBlockWitnessStatus::
           inconclusive_exact_replay_limit;
     }
+    return result;
+  }
+  const bool witness_mass_insufficient =
+      authenticated_point_count <
+      result.required_witness_point_count;
+  if (witness_mass_insufficient &&
+      !replay_before_insufficient_mass_decision) {
+    result.status = ExactPairBlockWitnessStatus::
+        inconclusive_insufficient_witness_mass;
+    return result;
+  }
+  constexpr std::size_t maximum_counter =
+      std::numeric_limits<std::size_t>::max();
+  if (audit_.exact_q_evaluation_count >
+          maximum_counter - witness_node_indices.size() ||
+      audit_.exact_q_proposal_mismatch_count >
+          maximum_counter - witness_node_indices.size()) {
+    result.status = ExactPairBlockWitnessStatus::
+        inconclusive_arithmetic_overflow;
     return result;
   }
 
@@ -518,31 +688,42 @@ ExactPairBlockFrontierContext::try_certify_with_witness(
         }
         return bounds;
       };
-  ExactPairBlockQReplay replay;
-  replay.boxes = {
-      exact_bounds(result.support_block.first.node_index),
-      exact_bounds(result.support_block.second.node_index),
-      exact_bounds(witness.node_index)};
-  replay.maximum = hierarchy::exact_diametral_phi_aabb_maximum(
-      replay.boxes[0], replay.boxes[1], replay.boxes[2]);
-  result.exact_q_replay = replay;
-  ++audit_.exact_q_evaluation_count;
-  if (proposal.state == ExactPairBlockQProposalState::usable) {
-    result.proposal_agreed_with_exact =
-        proposal.proposed_maximum_sign ==
-        replay.maximum.maximum_phi.sign();
-    if (!result.proposal_agreed_with_exact) {
-      ++audit_.exact_q_proposal_mismatch_count;
+  const spatial::ExactDyadicAabb3 first_support_bounds =
+      exact_bounds(result.support_block.first.node_index);
+  const spatial::ExactDyadicAabb3 second_support_bounds =
+      exact_bounds(result.support_block.second.node_index);
+  for (std::size_t witness_index = 0U;
+       witness_index < witness_node_indices.size();
+       ++witness_index) {
+    ExactPairBlockQReplay replay;
+    replay.boxes = {
+        first_support_bounds,
+        second_support_bounds,
+        exact_bounds(result.witnesses[witness_index].node_index)};
+    replay.maximum =
+        hierarchy::exact_diametral_phi_aabb_maximum(
+            replay.boxes[0], replay.boxes[1], replay.boxes[2]);
+    result.exact_q_replays[witness_index] = replay;
+    ++result.exact_q_replay_count;
+    ++audit_.exact_q_evaluation_count;
+    const ExactPairBlockQProposal proposal =
+        result.proposals[witness_index];
+    if (proposal.state == ExactPairBlockQProposalState::usable) {
+      if (proposal.proposed_maximum_sign ==
+          replay.maximum.maximum_phi.sign()) {
+        ++result.proposal_agreement_count;
+      } else {
+        ++result.proposal_mismatch_count;
+        ++audit_.exact_q_proposal_mismatch_count;
+      }
+    }
+    if (replay.maximum.maximum_phi.sign() >= 0) {
+      result.status = ExactPairBlockWitnessStatus::
+          inconclusive_nonnegative_q;
+      return result;
     }
   }
-
-  if (replay.maximum.maximum_phi.sign() >= 0) {
-    result.status = ExactPairBlockWitnessStatus::
-        inconclusive_nonnegative_q;
-    return result;
-  }
-  if (witness.leaf_count() <
-      result.required_witness_point_count) {
+  if (witness_mass_insufficient) {
     result.status = ExactPairBlockWitnessStatus::
         inconclusive_insufficient_witness_mass;
     return result;

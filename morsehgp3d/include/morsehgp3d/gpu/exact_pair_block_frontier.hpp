@@ -10,12 +10,16 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 
 namespace morsehgp3d::gpu {
 
 inline constexpr std::size_t
     exact_pair_block_frontier_maximum_closed_rank = 6U;
+inline constexpr std::size_t
+    exact_pair_block_frontier_maximum_witness_antichain_node_count =
+        exact_pair_block_frontier_maximum_closed_rank - 1U;
 inline constexpr std::size_t
     exact_pair_block_frontier_maximum_lbvh_depth =
         3U * spatial::MortonLbvhIndex::morton_bits_per_axis +
@@ -147,6 +151,8 @@ enum class ExactPairBlockWitnessStatus : std::uint8_t {
   inconclusive_insufficient_witness_mass,
   inconclusive_invalid_witness_authority,
   inconclusive_witness_support_overlap,
+  inconclusive_witness_antichain_overlap,
+  inconclusive_witness_antichain_capacity,
   inconclusive_ambiguous_proposal,
   inconclusive_proposal_arithmetic_overflow,
   inconclusive_exact_replay_limit,
@@ -180,6 +186,41 @@ struct ExactPairBlockWitnessResult {
   friend bool operator==(
       const ExactPairBlockWitnessResult&,
       const ExactPairBlockWitnessResult&) = default;
+};
+
+// At most R-1 nonempty, pairwise-disjoint native nodes are ever necessary:
+// once their disjoint leaf mass reaches R-1, further witnesses cannot
+// strengthen the rank decision.  Each node is nevertheless recertified by an
+// independent exact Q maximum before any mass is committed.
+struct ExactPairBlockWitnessAntichainResult {
+  ExactPairBlockWitnessStatus status{
+      ExactPairBlockWitnessStatus::inconclusive_exact_replay_limit};
+  ExactPairBlockAuthority support_block{};
+  std::array<
+      ExactPairBlockNodeAuthority,
+      exact_pair_block_frontier_maximum_witness_antichain_node_count>
+      witnesses{};
+  std::array<
+      ExactPairBlockQReplay,
+      exact_pair_block_frontier_maximum_witness_antichain_node_count>
+      exact_q_replays{};
+  std::array<
+      ExactPairBlockQProposal,
+      exact_pair_block_frontier_maximum_witness_antichain_node_count>
+      proposals{};
+  std::size_t submitted_witness_node_count{};
+  std::size_t authenticated_witness_node_count{};
+  std::size_t exact_q_replay_count{};
+  std::size_t required_witness_point_count{};
+  std::size_t authenticated_witness_point_count{};
+  std::size_t proposal_agreement_count{};
+  std::size_t proposal_mismatch_count{};
+  std::size_t certified_unordered_pair_mass{};
+  bool frontier_mutated{false};
+
+  friend bool operator==(
+      const ExactPairBlockWitnessAntichainResult&,
+      const ExactPairBlockWitnessAntichainResult&) = default;
 };
 
 struct ExactPairBlockFrontierAudit {
@@ -224,7 +265,8 @@ class ExactPairBlockFrontierContext {
   static constexpr std::string_view public_status = "not_claimed";
   static constexpr std::string_view phase_marker = "phase15_AxBxW_host";
   static constexpr std::string_view proof_basis =
-      "native_lbvh_TL_CLR_TR_exact_mass_exact_dyadic_Q_8_corners_per_axis_v1";
+      "native_lbvh_TL_CLR_TR_exact_mass_disjoint_witness_antichain_"
+      "exact_dyadic_Q_8_corners_per_axis_v2";
 
   [[nodiscard]] static ExactPairBlockFrontierContext start(
       const spatial::MortonLbvhIndex& index,
@@ -283,6 +325,14 @@ class ExactPairBlockFrontierContext {
       ExactPairBlockQProposal proposal,
       ExactPairBlockWitnessBudget budget) &;
 
+  [[nodiscard]] ExactPairBlockWitnessAntichainResult
+  try_certify_with_witness_antichain(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const std::size_t> witness_node_indices,
+      std::span<const ExactPairBlockQProposal> proposals,
+      ExactPairBlockWitnessBudget budget) &;
+
   [[nodiscard]] ExactPairBlockOpenResult open_cross_block(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
@@ -307,6 +357,14 @@ class ExactPairBlockFrontierContext {
       const spatial::MortonLbvhIndex& index,
       std::size_t first_node_index,
       std::size_t second_node_index) const;
+  [[nodiscard]] ExactPairBlockWitnessAntichainResult
+  try_certify_with_witness_antichain_impl(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const std::size_t> witness_node_indices,
+      std::span<const ExactPairBlockQProposal> proposals,
+      ExactPairBlockWitnessBudget budget,
+      bool replay_before_insufficient_mass_decision) &;
   void validate_authority(
       const spatial::MortonLbvhIndex& index,
       const ExactPairBlockAuthority& authority) const;
