@@ -129,6 +129,7 @@ PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PARENT=""
 PHASE15_DEVICE_FRONTIER_50K_OUTPUT_BASE=""
 PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=11
 PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK_PROVIDED=0
+PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=0
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW=""
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_PATH=""
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_PARENT=""
@@ -230,7 +231,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json [--phase15-device-frontier-50k-maximum-closed-rank 6|11]] [--phase15-device-frontier-strict-interior-output /CHEMIN/ABSOLU.json] [--phase15-ranked-pair-classifier-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json [--phase15-device-frontier-50k-maximum-closed-rank 6|11] [--phase15-device-frontier-50k-warm-profile]] [--phase15-device-frontier-strict-interior-output /CHEMIN/ABSOLU.json] [--phase15-ranked-pair-classifier-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -269,6 +270,10 @@ sur demande explicite, tuile 4096, famille adversarial_mixed_dyadic et graine
 enregistrée. Toute censure ou masse non résolue échoue fermé; le compagnon
 reste un résultat de composant sans catalogue scientifique, exactitude de
 hiérarchie, SLO ou statut public.
+Avec --phase15-device-frontier-50k-warm-profile, le rang fermé 6 exécute une
+passe complète d'échauffement hors chrono puis une passe complète mesurée dans
+le même processus. Les contextes de rang sont indépendants et les masses,
+le digest et la fermeture doivent rester identiques.
 L'option device-frontier strict-interior Phase 15 qualifie séparément le mode
 q=3 Gabriel pair-carrier negative-only à deux témoins strictement intérieurs
 sur la fixture discriminante A/X, shell égal et intérieur strict. Elle exécute
@@ -384,6 +389,12 @@ while (($# > 0)); do
             PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK_PROVIDED=1
             shift 2
             ;;
+        --phase15-device-frontier-50k-warm-profile)
+            ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 0)) || \
+                die "--phase15-device-frontier-50k-warm-profile ne peut être fourni qu'une fois."
+            PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=1
+            shift
+            ;;
         --phase15-device-frontier-strict-interior-output)
             (($# >= 2)) || \
                 die "Valeur manquante après --phase15-device-frontier-strict-interior-output."
@@ -421,6 +432,14 @@ done
 if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK_PROVIDED == 1)) && \
     [[ -z "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
     die "--phase15-device-frontier-50k-maximum-closed-rank exige --phase15-device-frontier-50k-output."
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1)) && \
+    [[ -z "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" ]]; then
+    die "--phase15-device-frontier-50k-warm-profile exige --phase15-device-frontier-50k-output."
+fi
+if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1 && \
+    PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK != 6)); then
+    die "--phase15-device-frontier-50k-warm-profile exige le rang fermé 6."
 fi
 [[ "${GCE_DEADLINE_RAW}" =~ ^[0-9]{10}$ ]] || \
     die "--gce-deadline-epoch doit être un epoch UTC positif sur dix chiffres."
@@ -2573,6 +2592,12 @@ PY
 fi
 
 if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
+    declare -a phase15_device_frontier_50k_warm_command_option=()
+    if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1)); then
+        phase15_device_frontier_50k_warm_command_option=(
+            --warmup-run-count 1
+        )
+    fi
     begin_unit "phase15-device-frontier-50k-build"
     if ! run_container "phase15-device-frontier-50k-build" \
         "${PHASE15_DEVICE_FRONTIER_50K_BUILD_LOG}" \
@@ -2604,7 +2629,8 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
         --maximum-closed-rank \
             "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" \
         --anchor-tile-capacity 4096 \
-        --seed "${PHASE15_DEVICE_FRONTIER_50K_SEED}"; then
+        --seed "${PHASE15_DEVICE_FRONTIER_50K_SEED}" \
+        "${phase15_device_frontier_50k_warm_command_option[@]}"; then
         phase15_device_frontier_50k_status=0
     else
         phase15_device_frontier_50k_status=$?
@@ -2620,7 +2646,8 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
         "${phase15_device_frontier_50k_status}" \
         "${PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH}" \
         "${PHASE15_DEVICE_FRONTIER_50K_SEED}" \
-        "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" <<'PY'
+        "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE}" <<'PY'
 import json
 from pathlib import Path
 import sys
@@ -2632,6 +2659,7 @@ status = int(sys.argv[4])
 binary = sys.argv[5]
 seed = sys.argv[6]
 maximum_closed_rank = sys.argv[7]
+warm_profile = sys.argv[8] == "1"
 if finished <= started:
     raise SystemExit("qualification device-frontier 50k sans intervalle positif")
 record = {
@@ -2649,6 +2677,8 @@ record = {
     "schema": "morsehgp3d.phase15.device_frontier_50k_timing.v1",
     "started_epoch_ns": started,
 }
+if warm_profile:
+    record["command"].extend(["--warmup-run-count", "1"])
 path.write_text(
     json.dumps(record, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
     + "\n",
@@ -2668,7 +2698,8 @@ PY
         "${PHASE15_DEVICE_FRONTIER_50K_TIMING_LOG}" \
         "$(dirname -- "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}")" \
         "${HEAD_SHA}" \
-        "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" <<'PY'
+        "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE}" <<'PY'
 from pathlib import Path
 import sys
 
@@ -2678,6 +2709,7 @@ timing_path = Path(sys.argv[3])
 sys.path.insert(0, sys.argv[4])
 git_sha = sys.argv[5]
 maximum_closed_rank = int(sys.argv[6])
+warm_profile = sys.argv[7] == "1"
 
 import assemble_phase15_device_frontier_50k_qualification as assembler
 
@@ -2689,6 +2721,7 @@ assembler.validate_qualification(
     qualification,
     git_sha=git_sha,
     maximum_closed_rank=maximum_closed_rank,
+    warm_profile=warm_profile,
 )
 if stderr_path.read_text(encoding="utf-8") != "":
     raise SystemExit("stderr non vide pour la qualification device-frontier 50k")
@@ -2697,7 +2730,9 @@ timing = assembler.parse_single_line_json(
     timing_raw, "temps device-frontier 50k"
 )
 assembler.validate_timing(
-    timing, maximum_closed_rank=maximum_closed_rank
+    timing,
+    maximum_closed_rank=maximum_closed_rank,
+    warm_profile=warm_profile,
 )
 PY
     then
@@ -3592,6 +3627,10 @@ if [[ -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_PATH}" ]]; then
         --output "${PHASE15_EXACT_DIAMETRAL_PHI_PUBLISH_TEMP}"
 fi
 if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
+    declare -a phase15_device_frontier_50k_warm_assembler_option=()
+    if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1)); then
+        phase15_device_frontier_50k_warm_assembler_option=(--warm-profile)
+    fi
     python3 -B "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}" \
         --git-sha "${HEAD_SHA}" \
         --base-image-ref "${BASE_IMAGE_REF}" \
@@ -3605,6 +3644,7 @@ if [[ -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_PATH}" ]]; then
         --binary "${BUILD_DIR}/${PHASE15_DEVICE_FRONTIER_50K_BINARY_RELATIVE#build/}" \
         --maximum-closed-rank \
             "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" \
+        "${phase15_device_frontier_50k_warm_assembler_option[@]}" \
         --output "${PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP}"
 fi
 if [[ -n "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_PATH}" ]]; then

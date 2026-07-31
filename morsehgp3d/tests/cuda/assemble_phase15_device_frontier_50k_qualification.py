@@ -28,15 +28,27 @@ SCHEMA = (
     "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
     "50k_cuda_g4_qualification.v1"
 )
+WARM_SCHEMA = (
+    "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
+    "50k_cuda_g4_warm_component_qualification.v1"
+)
 QUALIFICATION_SCHEMA = (
     "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
     "qualification.v1"
 )
+WARM_QUALIFICATION_SCHEMA = (
+    "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
+    "warm_component_qualification.v1"
+)
 TIMING_SCHEMA = "morsehgp3d.phase15.device_frontier_50k_timing.v1"
 ARTIFACT_ROLE = "device_tiled_pair_frontier_50k_component_qualification"
+WARM_ARTIFACT_ROLE = (
+    "device_tiled_pair_frontier_50k_warm_component_qualification"
+)
 BACKEND = "cuda_g4"
 PROFILE = "hgp_reduced"
 MODE = "offline_device_tiled_pair_frontier_qualification"
+WARM_MODE = "offline_device_tiled_pair_frontier_warm_component_qualification"
 DEPLOYMENT_STATUS = "component_only"
 PUBLIC_STATUS = "not_claimed"
 SCIENTIFIC_SCOPE = "complete_50k_rank11_device_frontier_component_coverage_only"
@@ -68,9 +80,13 @@ def require_supported_maximum_closed_rank(maximum_closed_rank: Any) -> int:
     return maximum_closed_rank
 
 
-def qualification_command(maximum_closed_rank: int) -> list[str]:
+def qualification_command(
+    maximum_closed_rank: int, *, warm_profile: bool = False
+) -> list[str]:
     require_supported_maximum_closed_rank(maximum_closed_rank)
-    return [
+    if warm_profile and maximum_closed_rank != KMAX5_MAXIMUM_CLOSED_RANK:
+        fail("the warm component profile requires maximum_closed_rank=6")
+    command = [
         BINARY_CONTAINER_PATH,
         "--point-count",
         str(POINT_COUNT),
@@ -83,17 +99,26 @@ def qualification_command(maximum_closed_rank: int) -> list[str]:
         "--seed",
         str(SEED),
     ]
+    if warm_profile:
+        command.extend(["--warmup-run-count", "1"])
+    return command
 
 
-def scientific_scope(maximum_closed_rank: int) -> str:
+def scientific_scope(
+    maximum_closed_rank: int, *, warm_profile: bool = False
+) -> str:
     require_supported_maximum_closed_rank(maximum_closed_rank)
+    warm = "warm_" if warm_profile else ""
     return (
-        f"complete_50k_rank{maximum_closed_rank}_device_frontier_"
+        f"complete_50k_rank{maximum_closed_rank}_device_frontier_{warm}"
         "component_coverage_only"
     )
 
 
 QUALIFICATION_COMMAND = qualification_command(MAXIMUM_CLOSED_RANK)
+WARM_QUALIFICATION_COMMAND = qualification_command(
+    KMAX5_MAXIMUM_CLOSED_RANK, warm_profile=True
+)
 
 QUALIFICATION_KEYS = {
     "all_rank_thresholds_exercised",
@@ -134,6 +159,20 @@ QUALIFICATION_KEYS = {
     "success",
     "tight_cluster_point_count",
     "total_ns",
+}
+WARM_QUALIFICATION_KEYS = QUALIFICATION_KEYS | {
+    "cuda_process_reused_across_runs",
+    "hierarchy_reduction_performed",
+    "hierarchy_tree_count",
+    "independent_rank_context_per_run",
+    "rank_threshold_count",
+    "timed_scope",
+    "warm_e2e_measured",
+    "warm_e2e_slo_claimed",
+    "warmup_excluded_from_total_ns",
+    "warmup_measurement_equivalence_validated",
+    "warmup_run_count",
+    "warmup_total_ns",
 }
 RANK_KEYS = {
     "bank_entry_count",
@@ -306,7 +345,10 @@ def validate_build_log(raw: str) -> None:
 
 
 def validate_timing(
-    value: dict[str, Any], *, maximum_closed_rank: int = MAXIMUM_CLOSED_RANK
+    value: dict[str, Any],
+    *,
+    maximum_closed_rank: int = MAXIMUM_CLOSED_RANK,
+    warm_profile: bool = False,
 ) -> dict[str, Any]:
     maximum_closed_rank = require_supported_maximum_closed_rank(
         maximum_closed_rank
@@ -314,7 +356,9 @@ def validate_timing(
     require_exact_keys(value, TIMING_KEYS, "qualification timing")
     if value.get("schema") != TIMING_SCHEMA:
         fail("qualification timing schema differs")
-    if value.get("command") != qualification_command(maximum_closed_rank):
+    if value.get("command") != qualification_command(
+        maximum_closed_rank, warm_profile=warm_profile
+    ):
         fail("qualification timing command differs from the guarded command")
     started = require_integer(
         value.get("started_epoch_ns"), "timing started_epoch_ns", minimum=1
@@ -437,20 +481,29 @@ def validate_qualification(
     *,
     git_sha: str,
     maximum_closed_rank: int = MAXIMUM_CLOSED_RANK,
+    warm_profile: bool = False,
 ) -> dict[str, Any]:
     maximum_closed_rank = require_supported_maximum_closed_rank(
         maximum_closed_rank
     )
-    require_exact_keys(value, QUALIFICATION_KEYS, "50k qualification result")
+    require_exact_keys(
+        value,
+        WARM_QUALIFICATION_KEYS if warm_profile else QUALIFICATION_KEYS,
+        "50k qualification result",
+    )
     expected_scalars = {
         "backend": BACKEND,
         "deployment_status": DEPLOYMENT_STATUS,
         "family": FAMILY,
         "git_sha": git_sha,
-        "mode": MODE,
+        "mode": WARM_MODE if warm_profile else MODE,
         "profile": PROFILE,
         "public_status": PUBLIC_STATUS,
-        "schema": QUALIFICATION_SCHEMA,
+        "schema": (
+            WARM_QUALIFICATION_SCHEMA
+            if warm_profile
+            else QUALIFICATION_SCHEMA
+        ),
     }
     for field, expected in expected_scalars.items():
         if value.get(field) != expected:
@@ -500,6 +553,45 @@ def validate_qualification(
         "tight_cluster_point_count",
     ):
         require_integer(value.get(field), f"qualification {field}", minimum=1)
+    if warm_profile:
+        for field in (
+            "cuda_process_reused_across_runs",
+            "independent_rank_context_per_run",
+            "warmup_excluded_from_total_ns",
+            "warmup_measurement_equivalence_validated",
+        ):
+            require_boolean(value.get(field), True, f"qualification {field}")
+        for field in (
+            "hierarchy_reduction_performed",
+            "warm_e2e_measured",
+            "warm_e2e_slo_claimed",
+        ):
+            require_boolean(value.get(field), False, f"qualification {field}")
+        require_exact_integer(
+            value.get("hierarchy_tree_count"),
+            0,
+            "qualification hierarchy_tree_count",
+        )
+        require_exact_integer(
+            value.get("rank_threshold_count"),
+            1,
+            "qualification rank_threshold_count",
+        )
+        require_exact_integer(
+            value.get("warmup_run_count"),
+            1,
+            "qualification warmup_run_count",
+        )
+        require_integer(
+            value.get("warmup_total_ns"),
+            "qualification warmup_total_ns",
+            minimum=1,
+        )
+        if value.get("timed_scope") != (
+            "complete_rank_component_pass_excluding_generation_"
+            "canonicalization_and_warmup"
+        ):
+            fail("qualification timed_scope differs from the warm contract")
     ranks = value.get("rank_results")
     if not isinstance(ranks, list) or len(ranks) != 1 or not isinstance(ranks[0], dict):
         fail(
@@ -541,6 +633,7 @@ def validate_artifact(
     git_sha: str,
     environment_artifact_path: Path,
     maximum_closed_rank: int = MAXIMUM_CLOSED_RANK,
+    warm_profile: bool = False,
 ) -> dict[str, Any]:
     maximum_closed_rank = require_supported_maximum_closed_rank(
         maximum_closed_rank
@@ -551,14 +644,18 @@ def validate_artifact(
     if raw != canonical_json(value):
         fail("Phase 15 50k artifact must be canonical JSON")
     expected_scalars = {
-        "artifact_role": ARTIFACT_ROLE,
+        "artifact_role": (
+            WARM_ARTIFACT_ROLE if warm_profile else ARTIFACT_ROLE
+        ),
         "backend": BACKEND,
         "deployment_status": DEPLOYMENT_STATUS,
-        "mode": MODE,
+        "mode": WARM_MODE if warm_profile else MODE,
         "phase": "15",
         "profile": PROFILE,
-        "schema": SCHEMA,
-        "scientific_scope": scientific_scope(maximum_closed_rank),
+        "schema": WARM_SCHEMA if warm_profile else SCHEMA,
+        "scientific_scope": scientific_scope(
+            maximum_closed_rank, warm_profile=warm_profile
+        ),
         "status": "worker_passed_pending_shutdown",
     }
     for field, expected in expected_scalars.items():
@@ -572,7 +669,9 @@ def validate_artifact(
         fail("scientific_public_status must be null")
     if value.get("claims") != NO_CLAIMS:
         fail("Phase 15 50k artifact must not publish product or exactness claims")
-    if value.get("command") != qualification_command(maximum_closed_rank):
+    if value.get("command") != qualification_command(
+        maximum_closed_rank, warm_profile=warm_profile
+    ):
         fail("Phase 15 50k artifact command differs from the guarded command")
     if value.get("git") != {"clean": True, "sha": git_sha}:
         fail("Phase 15 50k artifact does not bind the clean Git SHA")
@@ -629,10 +728,12 @@ def validate_artifact(
         parse_single_line_json(logs["qualification"], "50k qualification log"),
         git_sha=git_sha,
         maximum_closed_rank=maximum_closed_rank,
+        warm_profile=warm_profile,
     )
     timing = validate_timing(
         parse_single_line_json(logs["timing"], "50k timing log"),
         maximum_closed_rank=maximum_closed_rank,
+        warm_profile=warm_profile,
     )
     if value.get("timing") != timing:
         fail("Phase 15 50k timing summary differs from its log")
@@ -659,6 +760,7 @@ def validate_artifact_file(
     git_sha: str,
     environment_artifact_path: Path,
     maximum_closed_rank: int = MAXIMUM_CLOSED_RANK,
+    warm_profile: bool = False,
 ) -> dict[str, Any]:
     raw, _ = read_text_evidence(artifact_path, "Phase 15 50k artifact")
     value = parse_json_object(raw, "Phase 15 50k artifact")
@@ -668,6 +770,7 @@ def validate_artifact_file(
         git_sha=git_sha,
         environment_artifact_path=environment_artifact_path,
         maximum_closed_rank=maximum_closed_rank,
+        warm_profile=warm_profile,
     )
 
 
@@ -689,6 +792,7 @@ def parse_arguments(arguments: Sequence[str] | None = None) -> argparse.Namespac
         choices=sorted(SUPPORTED_MAXIMUM_CLOSED_RANKS),
         default=MAXIMUM_CLOSED_RANK,
     )
+    parser.add_argument("--warm-profile", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args(arguments)
 
@@ -703,6 +807,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
         fail("--base-image-ref is not the pinned CUDA image")
     if args.image_ref != f"morsehgp3d-phase3:{args.git_sha}":
         fail("--image-ref is not tied to the qualified SHA")
+    if (
+        args.warm_profile
+        and args.maximum_closed_rank != KMAX5_MAXIMUM_CLOSED_RANK
+    ):
+        fail("--warm-profile requires --maximum-closed-rank 6")
     environment_sha256 = _validate_environment_artifact(
         args.environment_artifact,
         git_sha=args.git_sha,
@@ -733,13 +842,17 @@ def main(arguments: Sequence[str] | None = None) -> int:
         parse_single_line_json(logs["qualification"], "50k qualification log"),
         git_sha=args.git_sha,
         maximum_closed_rank=args.maximum_closed_rank,
+        warm_profile=args.warm_profile,
     )
     timing = validate_timing(
         parse_single_line_json(logs["timing"], "50k timing log"),
         maximum_closed_rank=args.maximum_closed_rank,
+        warm_profile=args.warm_profile,
     )
     artifact = {
-        "artifact_role": ARTIFACT_ROLE,
+        "artifact_role": (
+            WARM_ARTIFACT_ROLE if args.warm_profile else ARTIFACT_ROLE
+        ),
         "backend": BACKEND,
         "binary": {
             "qualification_sha256": sha256_file(
@@ -755,7 +868,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "timed_exit_status": 0,
         },
         "claims": dict(NO_CLAIMS),
-        "command": qualification_command(args.maximum_closed_rank),
+        "command": qualification_command(
+            args.maximum_closed_rank, warm_profile=args.warm_profile
+        ),
         "component_only": True,
         "deployment_status": DEPLOYMENT_STATUS,
         "git": {"clean": True, "sha": args.git_sha},
@@ -766,7 +881,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         },
         "log_sha256": log_sha256,
         "logs": logs,
-        "mode": MODE,
+        "mode": WARM_MODE if args.warm_profile else MODE,
         "phase": "15",
         "profile": PROFILE,
         "provenance": {
@@ -774,10 +889,12 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "environment_artifact_sha256": environment_sha256,
             "qualified_binary_relative_path": BINARY_RELATIVE_PATH,
         },
-        "schema": SCHEMA,
+        "schema": WARM_SCHEMA if args.warm_profile else SCHEMA,
         "scientific_public_status": None,
         "scientific_result_claimed": False,
-        "scientific_scope": scientific_scope(args.maximum_closed_rank),
+        "scientific_scope": scientific_scope(
+            args.maximum_closed_rank, warm_profile=args.warm_profile
+        ),
         "status": "worker_passed_pending_shutdown",
         "timing": timing,
         "vm_lifecycle": dict(WORKER_LIFECYCLE),
@@ -788,6 +905,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         git_sha=args.git_sha,
         environment_artifact_path=args.environment_artifact,
         maximum_closed_rank=args.maximum_closed_rank,
+        warm_profile=args.warm_profile,
     )
     write_exclusive_atomic(args.output, artifact)
     return 0

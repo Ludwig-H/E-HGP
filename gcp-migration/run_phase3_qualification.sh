@@ -42,6 +42,7 @@ PHASE9_PAIR_SUPPORT_PHI=0
 PHASE15_EXACT_DIAMETRAL_PHI=0
 PHASE15_DEVICE_FRONTIER_50K=0
 PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=11
+PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=0
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=0
 PHASE15_RANKED_PAIR_CLASSIFIER=0
 MORTON_YAO48_SEED_WORK_PROFILE=0
@@ -92,7 +93,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5|--phase15-device-frontier-50k-kmax5-warm] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -168,6 +169,12 @@ public revendiqué.
 50k avec K_max=5, donc un unique rang fermé maximal 6 et cinq témoins requis.
 Cette route ne qualifie pas cinq arbres complets et ne revendique ni
 hiérarchie, ni SLO, ni statut scientifique ou public.
+
+--phase15-device-frontier-50k-kmax5-warm exécute ce profil deux fois dans le
+même processus : une passe complète d'échauffement hors chrono, puis une passe
+complète mesurée avec des contextes de rang indépendants. Masses, digest et
+fermeture doivent être identiques; cela reste une mesure de composant sans
+cinq arbres, réduction hiérarchique ou revendication de SLO.
 
 --phase15-device-frontier-strict-interior ajoute exclusivement la
 qualification native `q3_gabriel_exact_diametral_pair_support_negative_only` à deux témoins
@@ -251,6 +258,14 @@ while (($# > 0)); do
                 die "Les options device-frontier 50k Phase 15 sont mutuellement exclusives."
             PHASE15_DEVICE_FRONTIER_50K=1
             PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=6
+            shift
+            ;;
+        --phase15-device-frontier-50k-kmax5-warm)
+            ((PHASE15_DEVICE_FRONTIER_50K == 0)) || \
+                die "Les options device-frontier 50k Phase 15 sont mutuellement exclusives."
+            PHASE15_DEVICE_FRONTIER_50K=1
+            PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK=6
+            PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=1
             shift
             ;;
         --phase15-device-frontier-strict-interior)
@@ -476,7 +491,11 @@ fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
     phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k"
     if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
-        phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k-kmax5"
+        if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1)); then
+            phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k-kmax5-warm"
+        else
+            phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k-kmax5"
+        fi
     fi
     LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT="${RESULT_DIR}/${phase15_device_frontier_50k_result_prefix}-${HEAD_SHA}.json"
     [[ ! -e "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_RESULT}" && \
@@ -600,7 +619,11 @@ fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
     phase15_device_frontier_50k_temp_prefix="phase15-device-frontier-50k"
     if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
-        phase15_device_frontier_50k_temp_prefix="phase15-device-frontier-50k-kmax5"
+        if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1)); then
+            phase15_device_frontier_50k_temp_prefix="phase15-device-frontier-50k-kmax5-warm"
+        else
+            phase15_device_frontier_50k_temp_prefix="phase15-device-frontier-50k-kmax5"
+        fi
     fi
     if ! LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT="$(mktemp \
         "${RESULT_DIR}/.${phase15_device_frontier_50k_temp_prefix}-${HEAD_SHA}.XXXXXXXX.partial")"; then
@@ -1212,7 +1235,7 @@ printf '%s\n' \
     "  replay H-polytope: $([[ ${PHASE7_H_POLYTOPE} == 1 ]] && printf 'qualification CUDA G4 Phase 7.8 activée' || printf 'désactivé')" \
     "  replay Phi Phase 9: $([[ ${PHASE9_PAIR_SUPPORT_PHI} == 1 ]] && printf 'qualification CUDA G4 + recertification CPU activée' || printf 'désactivé')" \
     "  replay Phi Phase 15: $([[ ${PHASE15_EXACT_DIAMETRAL_PHI} == 1 ]] && printf 'prédicat ponctuel exact CUDA G4 activé' || printf 'désactivé')" \
-    "  frontier 50k Phase 15: $([[ ${PHASE15_DEVICE_FRONTIER_50K} == 1 ]] && printf 'qualification non-smoke rang fermé %s activée' "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" || printf 'désactivé')" \
+    "  frontier 50k Phase 15: $([[ ${PHASE15_DEVICE_FRONTIER_50K} == 1 ]] && printf 'qualification non-smoke rang fermé %s activée%s' "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" "$([[ ${PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE} == 1 ]] && printf ' avec warmup complet' || true)" || printf 'désactivé')" \
     "  négatif Gabriel q=3: $([[ ${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR} == 1 ]] && printf 'carrier pair-only; aucune suppression Gamma2 activée' || printf 'désactivé')" \
     "  classifieur rangs 2-3: $([[ ${PHASE15_RANKED_PAIR_CLASSIFIER} == 1 ]] && printf 'qualification CUDA native bornée activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
@@ -1317,13 +1340,20 @@ fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
     phase15_device_frontier_50k_remote_prefix="phase15-device-frontier-50k"
     if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
-        phase15_device_frontier_50k_remote_prefix="phase15-device-frontier-50k-kmax5"
+        if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1)); then
+            phase15_device_frontier_50k_remote_prefix="phase15-device-frontier-50k-kmax5-warm"
+        else
+            phase15_device_frontier_50k_remote_prefix="phase15-device-frontier-50k-kmax5"
+        fi
     fi
     remote_phase15_device_frontier_50k_artifact="${REMOTE_WORKDIR}/${phase15_device_frontier_50k_remote_prefix}-result.json"
     quoted_phase15_device_frontier_50k_artifact="$(shell_quote "${remote_phase15_device_frontier_50k_artifact}")"
     phase15_device_frontier_50k_worker_option=" --phase15-device-frontier-50k-output ${quoted_phase15_device_frontier_50k_artifact}"
     if ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK == 6)); then
         phase15_device_frontier_50k_worker_option+=" --phase15-device-frontier-50k-maximum-closed-rank 6"
+    fi
+    if ((PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE == 1)); then
+        phase15_device_frontier_50k_worker_option+=" --phase15-device-frontier-50k-warm-profile"
     fi
 fi
 if ((PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1)); then
@@ -1965,7 +1995,8 @@ if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
     python3 -B - "${LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT}" \
         "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
         "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" \
-        "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" <<'PY'
+        "${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}" \
+        "${PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE}" <<'PY'
 from pathlib import Path
 import sys
 
@@ -1974,6 +2005,7 @@ git_sha = sys.argv[2]
 environment_artifact_path = Path(sys.argv[3])
 sys.path.insert(0, sys.argv[4])
 maximum_closed_rank = int(sys.argv[5])
+warm_profile = sys.argv[6] == "1"
 
 import assemble_phase15_device_frontier_50k_qualification as assembler
 
@@ -1982,6 +2014,7 @@ assembler.validate_artifact_file(
     git_sha=git_sha,
     environment_artifact_path=environment_artifact_path,
     maximum_closed_rank=maximum_closed_rank,
+    warm_profile=warm_profile,
 )
 PY
 fi

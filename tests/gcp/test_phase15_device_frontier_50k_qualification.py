@@ -106,10 +106,12 @@ def rank_result(
 
 def qualification_result(
     maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+    *,
+    warm_profile: bool = False,
 ) -> dict[str, object]:
     # Keep the producer's actual compact key order. It is deterministic but the
     # two rank-threshold fields are intentionally emitted after rank_results.
-    return {
+    result = {
         "anchor_tile_capacity": assembler.ANCHOR_TILE_CAPACITY,
         "backend": assembler.BACKEND,
         "canonicalization_ns": 10_000,
@@ -131,7 +133,7 @@ def qualification_result(
         "guard_size_passed": True,
         "higher_order_structure_materialized": False,
         "jitter_grid_point_count": 125,
-        "mode": assembler.MODE,
+        "mode": assembler.WARM_MODE if warm_profile else assembler.MODE,
         "ordinary_delaunay_materialized": False,
         "ordinary_emst_computed": False,
         "peak_host_rss_bytes": 128_000_000,
@@ -144,20 +146,49 @@ def qualification_result(
         "all_rank_thresholds_exercised": False,
         "required_rank_triplet_exercised": False,
         "sampled_prune_limit": assembler.SAMPLED_PRUNE_LIMIT,
-        "schema": assembler.QUALIFICATION_SCHEMA,
+        "schema": (
+            assembler.WARM_QUALIFICATION_SCHEMA
+            if warm_profile
+            else assembler.QUALIFICATION_SCHEMA
+        ),
         "scientific_pair_catalog_published": False,
         "seed": assembler.SEED,
         "success": True,
         "tight_cluster_point_count": 128,
         "total_ns": 100_000,
     }
+    if warm_profile:
+        result.update(
+            {
+                "cuda_process_reused_across_runs": True,
+                "hierarchy_reduction_performed": False,
+                "hierarchy_tree_count": 0,
+                "independent_rank_context_per_run": True,
+                "rank_threshold_count": 1,
+                "timed_scope": (
+                    "complete_rank_component_pass_excluding_generation_"
+                    "canonicalization_and_warmup"
+                ),
+                "warm_e2e_measured": False,
+                "warm_e2e_slo_claimed": False,
+                "warmup_excluded_from_total_ns": True,
+                "warmup_measurement_equivalence_validated": True,
+                "warmup_run_count": 1,
+                "warmup_total_ns": 200_000,
+            }
+        )
+    return result
 
 
 def timing_result(
     maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+    *,
+    warm_profile: bool = False,
 ) -> dict[str, object]:
     return {
-        "command": assembler.qualification_command(maximum_closed_rank),
+        "command": assembler.qualification_command(
+            maximum_closed_rank, warm_profile=warm_profile
+        ),
         "elapsed_wall_ns": 2_000_000_000,
         "exit_status": 0,
         "finished_epoch_ns": 1_800_000_002_000_000_000,
@@ -261,6 +292,25 @@ class Phase15DeviceFrontier50kScriptWiringTests(unittest.TestCase):
             "maximum_closed_rank = int(sys.argv[6])",
             "maximum_closed_rank=maximum_closed_rank",
             '"${PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK}"',
+        ):
+            self.assertIn(marker, remote)
+
+    def test_kmax5_warm_route_is_explicit_and_keeps_component_scope(self) -> None:
+        remote = REMOTE_SCRIPT.read_text(encoding="utf-8")
+        orchestrator = ORCHESTRATOR_SCRIPT.read_text(encoding="utf-8")
+
+        for marker in (
+            "--phase15-device-frontier-50k-kmax5-warm",
+            "PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=1",
+            'phase15_device_frontier_50k_result_prefix="phase15-device-frontier-50k-kmax5-warm"',
+            '--phase15-device-frontier-50k-warm-profile"',
+        ):
+            self.assertIn(marker, orchestrator)
+        for marker in (
+            "--phase15-device-frontier-50k-warm-profile",
+            "--warmup-run-count 1",
+            "warm_profile=warm_profile",
+            "--warm-profile",
         ):
             self.assertIn(marker, remote)
 
@@ -378,6 +428,7 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
         *,
         output: Path | None = None,
         maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+        warm_profile: bool = False,
     ) -> subprocess.CompletedProcess[str]:
         command = [
             sys.executable,
@@ -408,6 +459,8 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
             command.extend(
                 ["--maximum-closed-rank", str(maximum_closed_rank)]
             )
+        if warm_profile:
+            command.append("--warm-profile")
         command.extend(["--output", str(output or self.output)])
         return subprocess.run(
             command,
@@ -421,9 +474,11 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
         self,
         *,
         maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+        warm_profile: bool = False,
     ) -> None:
         completed = self.run_assembler(
-            maximum_closed_rank=maximum_closed_rank
+            maximum_closed_rank=maximum_closed_rank,
+            warm_profile=warm_profile,
         )
         self.assertNotEqual(completed.returncode, 0, completed.stdout)
         self.assertFalse(self.output.exists())
@@ -432,12 +487,14 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
         self,
         *,
         maximum_closed_rank: int = assembler.MAXIMUM_CLOSED_RANK,
+        warm_profile: bool = False,
     ) -> dict[str, object]:
         return assembler.validate_artifact_file(
             self.output,
             git_sha=GIT_SHA,
             environment_artifact_path=self.environment,
             maximum_closed_rank=maximum_closed_rank,
+            warm_profile=warm_profile,
         )
 
     def test_valid_evidence_is_complete_component_only_pending_shutdown(self) -> None:
@@ -507,6 +564,72 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
         self.assertEqual(artifact["claims"], assembler.NO_CLAIMS)
         self.assertFalse(artifact["claims"]["exact_hierarchy_claimed"])
         self.assertFalse(artifact["claims"]["slo_claimed"])
+
+    def test_valid_kmax5_warm_evidence_separates_warmup_and_measurement(
+        self,
+    ) -> None:
+        maximum_closed_rank = assembler.KMAX5_MAXIMUM_CLOSED_RANK
+        write_json(
+            self.qualification,
+            qualification_result(
+                maximum_closed_rank, warm_profile=True
+            ),
+            sort_keys=False,
+        )
+        write_json(
+            self.timing,
+            timing_result(maximum_closed_rank, warm_profile=True),
+        )
+
+        completed = self.run_assembler(
+            maximum_closed_rank=maximum_closed_rank,
+            warm_profile=True,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        artifact = self.validate_output(
+            maximum_closed_rank=maximum_closed_rank,
+            warm_profile=True,
+        )
+        qualification = artifact["checks"]["qualification"]
+        self.assertEqual(artifact["schema"], assembler.WARM_SCHEMA)
+        self.assertEqual(artifact["mode"], assembler.WARM_MODE)
+        self.assertEqual(
+            artifact["command"], assembler.WARM_QUALIFICATION_COMMAND
+        )
+        self.assertEqual(qualification["warmup_run_count"], 1)
+        self.assertGreater(qualification["warmup_total_ns"], 0)
+        self.assertIs(qualification["warmup_excluded_from_total_ns"], True)
+        self.assertIs(
+            qualification["warmup_measurement_equivalence_validated"], True
+        )
+        self.assertEqual(qualification["hierarchy_tree_count"], 0)
+        self.assertIs(qualification["warm_e2e_measured"], False)
+        self.assertEqual(artifact["claims"], assembler.NO_CLAIMS)
+
+    def test_kmax5_warm_rejects_unvalidated_replay_or_tree_claim(self) -> None:
+        maximum_closed_rank = assembler.KMAX5_MAXIMUM_CLOSED_RANK
+        for field, replacement in (
+            ("warmup_measurement_equivalence_validated", False),
+            ("warmup_excluded_from_total_ns", False),
+            ("hierarchy_tree_count", 5),
+            ("warm_e2e_measured", True),
+        ):
+            with self.subTest(field=field):
+                value = qualification_result(
+                    maximum_closed_rank, warm_profile=True
+                )
+                value[field] = replacement
+                write_json(self.qualification, value, sort_keys=False)
+                write_json(
+                    self.timing,
+                    timing_result(
+                        maximum_closed_rank, warm_profile=True
+                    ),
+                )
+                self.assert_rejected(
+                    maximum_closed_rank=maximum_closed_rank,
+                    warm_profile=True,
+                )
 
     def test_kmax5_rejects_rank11_qualification_or_timing(self) -> None:
         maximum_closed_rank = assembler.KMAX5_MAXIMUM_CLOSED_RANK

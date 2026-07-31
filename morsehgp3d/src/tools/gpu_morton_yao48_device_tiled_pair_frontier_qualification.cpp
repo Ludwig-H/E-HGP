@@ -84,6 +84,9 @@ using morsehgp3d::spatial::PointId;
 inline constexpr std::string_view kSchema =
     "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
     "qualification.v1";
+inline constexpr std::string_view kWarmComponentSchema =
+    "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
+    "warm_component_qualification.v1";
 inline constexpr std::string_view kScalingSmokeSchema =
     "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_"
     "scaling_smoke.v1";
@@ -97,6 +100,8 @@ inline constexpr std::string_view kBackend = "cuda_g4";
 inline constexpr std::string_view kProfile = "hgp_reduced";
 inline constexpr std::string_view kMode =
     "offline_device_tiled_pair_frontier_qualification";
+inline constexpr std::string_view kWarmComponentMode =
+    "offline_device_tiled_pair_frontier_warm_component_qualification";
 inline constexpr std::string_view kStrictInteriorThresholdMode =
     "native_bounded_q3_gabriel_exact_diametral_pair_support_negative_only_"
     "qualification";
@@ -163,6 +168,7 @@ struct Options {
           morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity};
   std::size_t sampled_prune_limit{4096U};
   std::size_t exact_prune_target_check_limit{1'000'000U};
+  std::size_t warmup_run_count{0U};
   std::uint64_t seed{UINT64_C(0x15a048d1e7c93b25)};
 };
 
@@ -421,6 +427,9 @@ void require(bool condition, const std::string& message) {
         index + 1 < argc) {
       options.exact_prune_target_check_limit = parse_size(
           argv[++index], "invalid --exact-prune-target-check-limit");
+    } else if (argument == "--warmup-run-count" && index + 1 < argc) {
+      options.warmup_run_count =
+          parse_size(argv[++index], "invalid --warmup-run-count");
     } else if (argument == "--seed" && index + 1 < argc) {
       options.seed = parse_u64(argv[++index], "invalid --seed");
     } else {
@@ -437,7 +446,8 @@ void require(bool condition, const std::string& message) {
           "[--maximum-closed-rank R|--all-ranks] "
           "[--scaling-smoke|--direct-scale] "
           "[--anchor-tile-capacity N] [--sampled-prune-limit N] "
-          "[--exact-prune-target-check-limit N] [--seed N]");
+          "[--exact-prune-target-check-limit N] "
+          "[--warmup-run-count 0|1] [--seed N]");
     }
   }
   if (options.scaling_smoke && options.direct_scale) {
@@ -525,6 +535,17 @@ void require(bool condition, const std::string& message) {
       options.exact_prune_target_check_limit == 0U) {
     throw std::invalid_argument(
         "qualification sampling limits must be strictly positive");
+  }
+  if (options.warmup_run_count > 1U) {
+    throw std::invalid_argument("--warmup-run-count must be zero or one");
+  }
+  if (options.warmup_run_count != 0U &&
+      (large_scale || strict_interior_threshold || options.all_ranks ||
+       !options.maximum_closed_rank.has_value() ||
+       *options.maximum_closed_rank != 6U)) {
+    throw std::invalid_argument(
+        "--warmup-run-count 1 requires the explicit standard "
+        "--maximum-closed-rank 6");
   }
   const bool known_family =
       options.family == "adversarial_mixed_dyadic" ||
@@ -3258,6 +3279,82 @@ void validate_scaling_advance(
   return metrics;
 }
 
+void require_warmup_measurement_equivalence(
+    const RankMetrics& warmup,
+    const RankMetrics& measured) {
+  require(
+      warmup.maximum_closed_rank == measured.maximum_closed_rank &&
+          warmup.prune_semantics == measured.prune_semantics &&
+          warmup.required_witness_count == measured.required_witness_count &&
+          warmup.tile_count == measured.tile_count &&
+          warmup.chunk_count == measured.chunk_count &&
+          warmup.resumed_chunk_count == measured.resumed_chunk_count &&
+          warmup.fresh_tile_device_arena_allocation_count ==
+              measured.fresh_tile_device_arena_allocation_count &&
+          warmup.fresh_tile_device_arena_reuse_count ==
+              measured.fresh_tile_device_arena_reuse_count &&
+          warmup.candidate_yield_anchor_count ==
+              measured.candidate_yield_anchor_count &&
+          warmup.prune_yield_anchor_count ==
+              measured.prune_yield_anchor_count &&
+          warmup.complete_anchor_count == measured.complete_anchor_count &&
+          warmup.censored_anchor_count == measured.censored_anchor_count &&
+          warmup.candidate_record_count == measured.candidate_record_count &&
+          warmup.prune_region_count == measured.prune_region_count &&
+          warmup.bank_entry_count == measured.bank_entry_count &&
+          warmup.ambiguous_candidate_count ==
+              measured.ambiguous_candidate_count &&
+          warmup.unbanked_candidate_count ==
+              measured.unbanked_candidate_count &&
+          warmup.fully_recertified_prune_count ==
+              measured.fully_recertified_prune_count &&
+          warmup.sampled_recertified_prune_count ==
+              measured.sampled_recertified_prune_count &&
+          warmup.candidate_pair_mass == measured.candidate_pair_mass &&
+          warmup.certified_pruned_pair_mass ==
+              measured.certified_pruned_pair_mass &&
+          warmup.unresolved_pair_mass == measured.unresolved_pair_mass &&
+          warmup.unordered_pair_universe_count ==
+              measured.unordered_pair_universe_count &&
+          warmup.physical_node_visit_count ==
+              measured.physical_node_visit_count &&
+          warmup.prune_witness_target_check_count ==
+              measured.prune_witness_target_check_count &&
+          warmup.bounded_exact_pair_count ==
+              measured.bounded_exact_pair_count &&
+          warmup.bounded_admitted_pair_count ==
+              measured.bounded_admitted_pair_count &&
+          warmup.bounded_candidate_admitted_pair_count ==
+              measured.bounded_candidate_admitted_pair_count &&
+          warmup.bounded_candidate_rejected_pair_count ==
+              measured.bounded_candidate_rejected_pair_count &&
+          warmup.bounded_non_support_shell_equality_count ==
+              measured.bounded_non_support_shell_equality_count &&
+          warmup.output_digest == measured.output_digest &&
+          warmup.qualification_device_to_host_bytes ==
+              measured.qualification_device_to_host_bytes &&
+          warmup.traversal_device_capacity_bytes ==
+              measured.traversal_device_capacity_bytes &&
+          warmup.peak_tile_output_device_capacity_bytes ==
+              measured.peak_tile_output_device_capacity_bytes &&
+          warmup.bounded_bruteforce_performed ==
+              measured.bounded_bruteforce_performed &&
+          warmup.every_prune_fully_recertified ==
+              measured.every_prune_fully_recertified &&
+          warmup.coverage_partition_complete ==
+              measured.coverage_partition_complete &&
+          warmup.q3_exact_diametral_pair_support_gabriel_negative_only ==
+              measured.q3_exact_diametral_pair_support_gabriel_negative_only &&
+          warmup.gamma2_silent_handoff_required ==
+              measured.gamma2_silent_handoff_required &&
+          warmup.gamma2_prune_or_discard_authorized ==
+              measured.gamma2_prune_or_discard_authorized &&
+          warmup.component_contract_validated ==
+              measured.component_contract_validated,
+      "the warmup and measured component passes changed their exact "
+      "partition, digest, closure, or deterministic structural counters");
+}
+
 struct StrictInteriorThresholdCaseMetrics {
   StrictInteriorThresholdFixtureCloud fixture_cloud{
       StrictInteriorThresholdFixtureCloud::boundary_shell};
@@ -4148,19 +4245,55 @@ int main(int argc, char** argv) {
     const std::vector<std::size_t> ranks = requested_ranks(options);
     std::vector<RankMetrics> results;
     results.reserve(ranks.size());
+    const bool warm_component_profile = options.warmup_run_count == 1U;
+    std::uint64_t warmup_total_ns = 0U;
+    bool warmup_measurement_equivalence_validated = false;
     bool any_censure = false;
     bool all_coverage_complete = true;
-    for (const std::size_t rank : ranks) {
+    std::uint64_t total_ns = 0U;
+    if (warm_component_profile) {
+      require(
+          ranks.size() == 1U,
+          "the warm component profile requires exactly one rank");
+      const auto warmup_start = Clock::now();
+      const RankMetrics warmup = qualify_rank(
+          options,
+          cloud,
+          scaled_points,
+          ranks.front(),
+          options.prune_semantics);
+      warmup_total_ns = nanoseconds(Clock::now() - warmup_start);
+
+      const auto measured_start = Clock::now();
       results.push_back(
           qualify_rank(
               options,
               cloud,
               scaled_points,
-              rank,
+              ranks.front(),
               options.prune_semantics));
+      total_ns = nanoseconds(Clock::now() - measured_start);
+      require_warmup_measurement_equivalence(warmup, results.back());
+      warmup_measurement_equivalence_validated = true;
       any_censure = any_censure || results.back().censored_anchor_count != 0U;
       all_coverage_complete =
           all_coverage_complete && results.back().coverage_partition_complete;
+    } else {
+      for (const std::size_t rank : ranks) {
+        results.push_back(
+            qualify_rank(
+                options,
+                cloud,
+                scaled_points,
+                rank,
+                options.prune_semantics));
+        any_censure =
+            any_censure || results.back().censored_anchor_count != 0U;
+        all_coverage_complete =
+            all_coverage_complete &&
+            results.back().coverage_partition_complete;
+      }
+      total_ns = nanoseconds(Clock::now() - total_start);
     }
     const bool coverage_success = !any_censure;
     const bool exit_success = coverage_success;
@@ -4171,7 +4304,6 @@ int main(int argc, char** argv) {
     const bool all_rank_thresholds_exercised =
         ranks == std::vector<std::size_t>{
                      2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U};
-    const std::uint64_t total_ns = nanoseconds(Clock::now() - total_start);
 
     std::cout
         << "{\"anchor_tile_capacity\":" << options.anchor_tile_capacity
@@ -4200,7 +4332,8 @@ int main(int argc, char** argv) {
         << "\"higher_order_structure_materialized\":false,"
         << "\"jitter_grid_point_count\":"
         << generated.features.jitter_grid_point_count << ','
-        << "\"mode\":\"" << kMode << "\","
+        << "\"mode\":\""
+        << (warm_component_profile ? kWarmComponentMode : kMode) << "\","
         << "\"ordinary_delaunay_materialized\":false,"
         << "\"ordinary_emst_computed\":false,"
         << "\"peak_host_rss_bytes\":" << peak_host_rss_bytes() << ','
@@ -4224,13 +4357,35 @@ int main(int argc, char** argv) {
         << "\"required_rank_triplet_exercised\":"
         << (rank_triplet_exercised ? "true" : "false") << ','
         << "\"sampled_prune_limit\":" << options.sampled_prune_limit << ','
-        << "\"schema\":\"" << kSchema << "\","
+        << "\"schema\":\""
+        << (warm_component_profile ? kWarmComponentSchema : kSchema)
+        << "\","
         << "\"scientific_pair_catalog_published\":false,"
         << "\"seed\":" << options.seed << ','
         << "\"success\":" << (coverage_success ? "true" : "false") << ','
         << "\"tight_cluster_point_count\":"
         << generated.features.clustered_point_count << ','
-        << "\"total_ns\":" << total_ns << "}\n";
+        << "\"total_ns\":" << total_ns;
+    if (warm_component_profile) {
+      std::cout
+          << ",\"cuda_process_reused_across_runs\":true,"
+          << "\"hierarchy_reduction_performed\":false,"
+          << "\"hierarchy_tree_count\":0,"
+          << "\"independent_rank_context_per_run\":true,"
+          << "\"rank_threshold_count\":1,"
+          << "\"timed_scope\":"
+             "\"complete_rank_component_pass_excluding_generation_"
+             "canonicalization_and_warmup\","
+          << "\"warm_e2e_measured\":false,"
+          << "\"warm_e2e_slo_claimed\":false,"
+          << "\"warmup_excluded_from_total_ns\":true,"
+          << "\"warmup_measurement_equivalence_validated\":"
+          << (warmup_measurement_equivalence_validated ? "true" : "false")
+          << ','
+          << "\"warmup_run_count\":" << options.warmup_run_count << ','
+          << "\"warmup_total_ns\":" << warmup_total_ns;
+    }
+    std::cout << "}\n";
     return exit_success ? EXIT_SUCCESS : EXIT_FAILURE;
   } catch (const std::exception& error) {
     if (scaling_smoke_requested || direct_scale_requested) {
