@@ -44,6 +44,8 @@ using morsehgp3d::gpu::detail::
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledCachedPruneWitness;
 using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledNodeBounds;
+using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledPruneRegionRecord;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledWitnessBankSlot;
@@ -54,6 +56,8 @@ using morsehgp3d::gpu::test_support::
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledAnchorStatus;
 using morsehgp3d::gpu::test_support::
+    FakeMortonYao48DeviceTiledAdoptionCorruption;
+using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledPairFrontierConfiguration;
 using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledPairFrontierCorruption;
@@ -61,6 +65,8 @@ using morsehgp3d::gpu::test_support::
     FakeMortonYao48DeviceTiledPairFrontierLaunch;
 using morsehgp3d::gpu::test_support::
     configure_fake_gpu_morton_yao48_device_tiled_pair_frontier;
+using morsehgp3d::gpu::test_support::
+    configure_fake_gpu_morton_yao48_device_tiled_adoption_corruption;
 using morsehgp3d::gpu::test_support::
     fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count;
 using morsehgp3d::gpu::test_support::
@@ -72,6 +78,7 @@ static_assert(sizeof(Phase15MortonYao48DeviceTiledAnchorControl) == 168U);
 static_assert(sizeof(Phase15MortonYao48DeviceTiledAnchorCheckpoint) == 224U);
 static_assert(sizeof(Phase15MortonYao48DeviceTiledWitnessBankSlot) == 104U);
 static_assert(sizeof(Phase15MortonYao48DeviceTiledCachedPruneWitness) == 80U);
+static_assert(sizeof(Phase15MortonYao48DeviceTiledNodeBounds) == 48U);
 static_assert(!std::is_copy_constructible_v<
               MortonYao48DeviceCandidateTileLease>);
 static_assert(std::is_nothrow_move_constructible_v<
@@ -501,6 +508,14 @@ void test_multiple_tiles_keep_one_exact_arena_account() {
 
   auto first = context.advance();
   const std::uint64_t first_tile_epoch = first.audit.tile_epoch;
+  constexpr std::size_t expected_node_count = 11U;
+  constexpr std::size_t expected_node_bound_view_bytes =
+      expected_node_count * sizeof(Phase15MortonYao48DeviceTiledNodeBounds);
+  const auto first_views = first.candidate_tile.has_value()
+                               ? Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
+                                     *first.candidate_tile)
+                               : morsehgp3d::gpu::detail::
+                                     Phase15MortonYao48DeviceCandidateTilePrivateViews{};
   check(
       first.status == MortonYao48DeviceTiledPairFrontierStatus::tile_complete &&
           first.candidate_tile.has_value() &&
@@ -518,8 +533,40 @@ void test_multiple_tiles_keep_one_exact_arena_account() {
           first.audit.active_witness_slot_mask_authenticated &&
           first.audit.inactive_witness_slots_skipped_in_physical_order &&
           first.audit.last_prune_witness_direction_cache_retained,
-      "the first tile publishes the complete v5 arena and witness-cache "
+      "the first tile publishes the complete v6 arena and witness-cache "
       "account");
+  check(
+      first.candidate_tile.has_value() &&
+          first.audit.resolved_node_bound_count == expected_node_count &&
+          first.audit.retained_node_bound_view_capacity_bytes ==
+              expected_node_bound_view_bytes &&
+          first.audit.node_bound_view_allocation_capacity_bytes == 0U &&
+          first.audit.node_bound_view_build_allocation_count == 0U &&
+          first.audit.node_bound_view_build_kernel_launch_count == 0U &&
+          first.audit.node_bound_view_build_synchronization_count == 0U &&
+          first.audit
+                  .node_bound_view_validation_device_to_host_byte_count ==
+              0U &&
+          first.audit.node_bound_view_extent_authenticated &&
+          first.audit
+              .node_bound_view_validation_sentinel_authenticated &&
+          first.audit.node_bound_view_bound_to_snapshot_identity &&
+          first.audit.node_bound_view_built_once_per_adoption &&
+          first.audit.node_bound_view_reused_without_tile_allocation &&
+          first.audit.source_node_extremum_point_ids_retained &&
+          first.audit.node_bound_view_build_included_in_context_creation &&
+          first.candidate_tile->audit().resolved_node_bound_count ==
+              expected_node_count &&
+          first.candidate_tile->audit()
+                  .retained_node_bound_view_capacity_bytes ==
+              expected_node_bound_view_bytes &&
+          first.candidate_tile->audit()
+              .node_bound_view_reused_without_tile_allocation &&
+          first_views.device_node_bounds == nullptr &&
+          first_views.retained_node_bound_view_capacity_bytes ==
+              expected_node_bound_view_bytes,
+      "the host fake authenticates exactly 2n-1 snapshot-bound node extents "
+      "with no per-tile allocation or hidden CUDA build cost");
   first.candidate_tile.reset();
 
   auto second = context.advance();
@@ -527,8 +574,16 @@ void test_multiple_tiles_keep_one_exact_arena_account() {
       second.status == MortonYao48DeviceTiledPairFrontierStatus::tile_complete &&
           second.audit.tile_epoch != first_tile_epoch &&
           second.audit.chunk_sequence == 1U &&
-          !second.audit.resumes_same_tile,
-      "a new tile starts a fresh epoch and chunk sequence");
+          !second.audit.resumes_same_tile &&
+          second.audit.resolved_node_bound_count == expected_node_count &&
+          second.audit.retained_node_bound_view_capacity_bytes ==
+              expected_node_bound_view_bytes &&
+          second.audit.node_bound_view_build_allocation_count == 0U &&
+          second.audit.node_bound_view_build_kernel_launch_count == 0U &&
+          second.audit.node_bound_view_build_synchronization_count == 0U &&
+          second.audit.node_bound_view_reused_without_tile_allocation,
+      "a new tile starts a fresh epoch while reusing the one adoption-scoped "
+      "node-bound view at zero tile-build cost");
   second.candidate_tile.reset();
   auto third = context.advance();
   check(
@@ -536,9 +591,38 @@ void test_multiple_tiles_keep_one_exact_arena_account() {
               MortonYao48DeviceTiledPairFrontierStatus::frontier_complete &&
           third.audit.cumulative_candidate_pair_mass == 15U &&
           third.audit.unresolved_pair_mass == 0U &&
+          third.audit.resolved_node_bound_count == expected_node_count &&
+          third.audit.node_bound_view_build_allocation_count == 0U &&
+          third.audit.node_bound_view_build_kernel_launch_count == 0U &&
+          third.audit.node_bound_view_build_synchronization_count == 0U &&
           fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() ==
               3U,
       "three physical tiles close one pair partition exactly once");
+}
+
+void test_node_bound_view_adoption_validation_fails_closed() {
+  for (const auto corruption : {
+           FakeMortonYao48DeviceTiledAdoptionCorruption::
+               wrong_resolved_node_count,
+           FakeMortonYao48DeviceTiledAdoptionCorruption::
+               invalid_validation_sentinel}) {
+    reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
+    auto traversal = traversal_lease(6U);
+    configure_fake_gpu_morton_yao48_device_tiled_adoption_corruption(
+        corruption);
+    check_throws<std::runtime_error>(
+        [&traversal] {
+          MortonYao48DeviceTiledPairFrontierContext invalid{
+              std::move(traversal),
+              MortonYao48DeviceTiledPairFrontierConfig{2U, 2U}};
+        },
+        "a malformed node-bound count or validation sentinel fails closed "
+        "during adoption");
+    check(
+        fake_gpu_morton_yao48_device_tiled_pair_frontier_launch_count() == 0U,
+        "a rejected node-bound adoption launches no frontier tile");
+  }
+  reset_fake_gpu_morton_yao48_device_tiled_pair_frontier();
 }
 
 void test_detached_tile_survives_context_destruction() {
@@ -786,6 +870,7 @@ int main() {
   test_chunk_subdivisions_are_not_a_global_call_ceiling();
   test_stale_and_rollback_transcripts_poison_fail_stop();
   test_multiple_tiles_keep_one_exact_arena_account();
+  test_node_bound_view_adoption_validation_fails_closed();
   test_detached_tile_survives_context_destruction();
   test_node_capacity_censure_is_terminal_and_idempotent();
   test_hostile_initial_envelopes_poison_fail_stop();

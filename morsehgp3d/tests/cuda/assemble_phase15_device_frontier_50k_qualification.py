@@ -64,6 +64,9 @@ EXACT_PRUNE_TARGET_CHECK_LIMIT = 1_000_000
 SEED = 1_558_325_537_444_281_125
 FAMILY = "adversarial_mixed_dyadic"
 UNORDERED_PAIR_UNIVERSE = POINT_COUNT * (POINT_COUNT - 1) // 2
+CERTIFIED_NODE_COUNT = 2 * POINT_COUNT - 1
+NODE_BOUND_VIEW_CAPACITY_BYTES = 48 * CERTIFIED_NODE_COUNT
+NODE_BOUND_VIEW_ALLOCATION_CAPACITY_BYTES = NODE_BOUND_VIEW_CAPACITY_BYTES + 16
 BINARY_RELATIVE_PATH = (
     "build/morsehgp3d-cuda-release/"
     "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification"
@@ -204,6 +207,18 @@ RANK_KEYS = {
     "lease_release_ns",
     "maximum_closed_rank",
     "minimum_device_free_bytes",
+    "node_bound_view_allocation_capacity_bytes",
+    "node_bound_view_bound_to_snapshot_identity",
+    "node_bound_view_build_allocation_count",
+    "node_bound_view_build_included_in_context_creation",
+    "node_bound_view_build_included_in_traversal_adoption_ns",
+    "node_bound_view_build_kernel_launch_count",
+    "node_bound_view_build_synchronization_count",
+    "node_bound_view_built_once_per_adoption",
+    "node_bound_view_extent_authenticated",
+    "node_bound_view_reused_without_tile_allocation",
+    "node_bound_view_validation_device_to_host_byte_count",
+    "node_bound_view_validation_sentinel_authenticated",
     "node_copy_ns",
     "output_digest_fnv1a",
     "peak_tile_output_device_capacity_bytes",
@@ -218,7 +233,10 @@ RANK_KEYS = {
     "qualification_output_copy_ns",
     "required_witness_count",
     "resumed_chunk_count",
+    "resolved_node_bound_count",
+    "retained_node_bound_view_capacity_bytes",
     "sampled_recertified_prune_count",
+    "source_node_extremum_point_ids_retained",
     "tile_count",
     "traversal_adoption_ns",
     "traversal_device_capacity_bytes",
@@ -396,7 +414,18 @@ def validate_rank(
         "censored_anchor_count": 0,
         "complete_anchor_count": POINT_COUNT,
         "maximum_closed_rank": maximum_closed_rank,
+        "node_bound_view_allocation_capacity_bytes": (
+            NODE_BOUND_VIEW_ALLOCATION_CAPACITY_BYTES
+        ),
+        "node_bound_view_build_allocation_count": 1,
+        "node_bound_view_build_kernel_launch_count": 1,
+        "node_bound_view_build_synchronization_count": 1,
+        "node_bound_view_validation_device_to_host_byte_count": 16,
         "required_witness_count": maximum_closed_rank - 1,
+        "resolved_node_bound_count": CERTIFIED_NODE_COUNT,
+        "retained_node_bound_view_capacity_bytes": (
+            NODE_BOUND_VIEW_CAPACITY_BYTES
+        ),
         "tile_count": 13,
         "unordered_pair_universe_count": UNORDERED_PAIR_UNIVERSE,
         "unresolved_pair_mass": 0,
@@ -415,7 +444,18 @@ def validate_rank(
         False,
         "rank result.bounded_bruteforce_performed",
     )
-    for field in ("component_contract_validated", "coverage_partition_complete"):
+    for field in (
+        "component_contract_validated",
+        "coverage_partition_complete",
+        "node_bound_view_bound_to_snapshot_identity",
+        "node_bound_view_build_included_in_context_creation",
+        "node_bound_view_build_included_in_traversal_adoption_ns",
+        "node_bound_view_built_once_per_adoption",
+        "node_bound_view_extent_authenticated",
+        "node_bound_view_reused_without_tile_allocation",
+        "node_bound_view_validation_sentinel_authenticated",
+        "source_node_extremum_point_ids_retained",
+    ):
         require_boolean(value.get(field), True, f"rank result.{field}")
     require_boolean(
         value.get("every_prune_fully_recertified"),
@@ -439,6 +479,14 @@ def validate_rank(
         "gamma2_silent_handoff_required",
         "prune_semantics",
         "q3_exact_diametral_pair_support_gabriel_negative_only",
+        "node_bound_view_bound_to_snapshot_identity",
+        "node_bound_view_build_included_in_context_creation",
+        "node_bound_view_build_included_in_traversal_adoption_ns",
+        "node_bound_view_built_once_per_adoption",
+        "node_bound_view_extent_authenticated",
+        "node_bound_view_reused_without_tile_allocation",
+        "node_bound_view_validation_sentinel_authenticated",
+        "source_node_extremum_point_ids_retained",
     }:
         require_integer(value.get(field), f"rank result.{field}")
     if value["candidate_record_count"] != value["candidate_pair_mass"]:

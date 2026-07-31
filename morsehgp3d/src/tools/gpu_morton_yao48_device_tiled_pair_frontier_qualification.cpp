@@ -72,6 +72,8 @@ using morsehgp3d::gpu::detail::
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledFailureCode;
 using morsehgp3d::gpu::detail::
+    Phase15MortonYao48DeviceTiledNodeBounds;
+using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledPairFrontierContextState;
 using morsehgp3d::gpu::detail::
     Phase15MortonYao48DeviceTiledPruneRegionRecord;
@@ -250,6 +252,13 @@ struct RankMetrics {
   std::uint64_t bounded_bruteforce_ns{};
   std::uint64_t qualification_device_to_host_bytes{};
   std::uint64_t traversal_device_capacity_bytes{};
+  std::uint64_t retained_node_bound_view_capacity_bytes{};
+  std::uint64_t node_bound_view_allocation_capacity_bytes{};
+  std::uint64_t resolved_node_bound_count{};
+  std::uint64_t node_bound_view_build_allocation_count{};
+  std::uint64_t node_bound_view_build_kernel_launch_count{};
+  std::uint64_t node_bound_view_build_synchronization_count{};
+  std::uint64_t node_bound_view_validation_device_to_host_byte_count{};
   std::uint64_t peak_tile_output_device_capacity_bytes{};
   std::uint64_t device_total_bytes{};
   std::uint64_t minimum_device_free_bytes{};
@@ -260,6 +269,14 @@ struct RankMetrics {
   bool gamma2_silent_handoff_required{false};
   bool gamma2_prune_or_discard_authorized{false};
   bool component_contract_validated{false};
+  bool node_bound_view_extent_authenticated{false};
+  bool node_bound_view_validation_sentinel_authenticated{false};
+  bool node_bound_view_bound_to_snapshot_identity{false};
+  bool node_bound_view_built_once_per_adoption{false};
+  bool node_bound_view_reused_without_tile_allocation{false};
+  bool source_node_extremum_point_ids_retained{false};
+  bool node_bound_view_build_included_in_context_creation{false};
+  bool node_bound_view_build_included_in_traversal_adoption_ns{false};
 };
 
 struct ScalingSmokeMetrics {
@@ -283,6 +300,13 @@ struct ScalingSmokeMetrics {
   std::size_t resume_control_device_to_host_byte_count{};
   std::size_t anchor_control_device_to_host_count{};
   std::size_t anchor_control_device_to_host_byte_count{};
+  std::size_t retained_node_bound_view_capacity_bytes{};
+  std::size_t node_bound_view_allocation_capacity_bytes{};
+  std::size_t resolved_node_bound_count{};
+  std::size_t node_bound_view_build_allocation_count{};
+  std::size_t node_bound_view_build_kernel_launch_count{};
+  std::size_t node_bound_view_build_synchronization_count{};
+  std::size_t node_bound_view_validation_device_to_host_byte_count{};
   std::uint64_t candidate_pair_mass{};
   std::uint64_t certified_pruned_pair_mass{};
   std::uint64_t unresolved_pair_mass{};
@@ -2262,12 +2286,31 @@ void validate_scaling_tile_lease(
     const Options& options,
     std::size_t expected_anchor_begin,
     std::size_t expected_anchor_end) {
+  const std::size_t expected_node_count = 2U * options.point_count - 1U;
+  const std::size_t expected_node_bound_view_capacity_bytes =
+      checked_product(
+          expected_node_count,
+          sizeof(Phase15MortonYao48DeviceTiledNodeBounds),
+          "the scaling-smoke node-bound view extent overflows size_t");
   require(
       audit.schema_version ==
               morsehgp3d::gpu::
                   morton_yao48_device_tiled_pair_frontier_schema_version &&
           audit.point_count == options.point_count &&
           audit.certified_node_count == 2U * options.point_count - 1U &&
+          audit.retained_node_bound_view_capacity_bytes ==
+              expected_node_bound_view_capacity_bytes &&
+          audit.node_bound_view_allocation_capacity_bytes ==
+              checked_size_sum(
+                  expected_node_bound_view_capacity_bytes,
+                  2U * sizeof(std::uint64_t),
+                  "the scaling-smoke node-bound allocation extent overflows size_t") &&
+          audit.resolved_node_bound_count == expected_node_count &&
+          audit.node_bound_view_build_allocation_count == 1U &&
+          audit.node_bound_view_build_kernel_launch_count == 1U &&
+          audit.node_bound_view_build_synchronization_count == 1U &&
+          audit.node_bound_view_validation_device_to_host_byte_count ==
+              2U * sizeof(std::uint64_t) &&
           audit.maximum_closed_rank ==
               options.maximum_closed_rank.value_or(11U) &&
           audit.prune_semantics ==
@@ -2298,6 +2341,13 @@ void validate_scaling_tile_lease(
           audit.source_device_views_retained &&
           audit.source_device_extents_retained &&
           audit.source_views_bound_to_snapshot_identity &&
+          audit.node_bound_view_extent_authenticated &&
+          audit.node_bound_view_validation_sentinel_authenticated &&
+          audit.node_bound_view_bound_to_snapshot_identity &&
+          audit.node_bound_view_built_once_per_adoption &&
+          audit.node_bound_view_reused_without_tile_allocation &&
+          audit.source_node_extremum_point_ids_retained &&
+          audit.node_bound_view_build_included_in_context_creation &&
           audit.output_owner_retained &&
           audit.output_buffers_detached_for_tile_lifetime &&
           audit.cuda_device_storage_retained &&
@@ -2335,6 +2385,11 @@ void validate_scaling_advance(
           audit.certified_node_count,
           morsehgp3d::gpu::
               morton_yao48_device_tiled_pair_frontier_node_visits_per_anchor);
+  const std::size_t expected_node_bound_view_capacity_bytes =
+      checked_product(
+          audit.certified_node_count,
+          sizeof(Phase15MortonYao48DeviceTiledNodeBounds),
+          "the scaling-smoke public node-bound view extent overflows size_t");
   require(
       audit.schema_version ==
               morsehgp3d::gpu::
@@ -2342,6 +2397,19 @@ void validate_scaling_advance(
           audit.advance_sequence == expected_advance_sequence &&
           audit.point_count == options.point_count &&
           audit.certified_node_count == 2U * options.point_count - 1U &&
+          audit.retained_node_bound_view_capacity_bytes ==
+              expected_node_bound_view_capacity_bytes &&
+          audit.node_bound_view_allocation_capacity_bytes ==
+              checked_size_sum(
+                  expected_node_bound_view_capacity_bytes,
+                  2U * sizeof(std::uint64_t),
+                  "the scaling-smoke public node-bound allocation extent overflows size_t") &&
+          audit.resolved_node_bound_count == audit.certified_node_count &&
+          audit.node_bound_view_build_allocation_count == 1U &&
+          audit.node_bound_view_build_kernel_launch_count == 1U &&
+          audit.node_bound_view_build_synchronization_count == 1U &&
+          audit.node_bound_view_validation_device_to_host_byte_count ==
+              2U * sizeof(std::uint64_t) &&
           audit.maximum_closed_rank == maximum_closed_rank &&
           audit.anchor_tile_capacity == options.anchor_tile_capacity &&
           audit.fixed_node_visit_capacity_per_anchor ==
@@ -2403,6 +2471,13 @@ void validate_scaling_advance(
       "the scaling-smoke public audit does not close its global mass identity");
   require(
       audit.source_traversal_lease_authenticated &&
+          audit.node_bound_view_extent_authenticated &&
+          audit.node_bound_view_validation_sentinel_authenticated &&
+          audit.node_bound_view_bound_to_snapshot_identity &&
+          audit.node_bound_view_built_once_per_adoption &&
+          audit.node_bound_view_reused_without_tile_allocation &&
+          audit.source_node_extremum_point_ids_retained &&
+          audit.node_bound_view_build_included_in_context_creation &&
           audit.fixed_per_anchor_caps_enforced &&
           audit.atomic_completed_anchor_prefix_validated &&
           audit.candidate_pruned_unresolved_partition_validated &&
@@ -2670,6 +2745,19 @@ void validate_scaling_advance(
         audit.anchor_control_device_to_host_count;
     metrics.anchor_control_device_to_host_byte_count +=
         audit.anchor_control_device_to_host_byte_count;
+    metrics.retained_node_bound_view_capacity_bytes =
+        audit.retained_node_bound_view_capacity_bytes;
+    metrics.node_bound_view_allocation_capacity_bytes =
+        audit.node_bound_view_allocation_capacity_bytes;
+    metrics.resolved_node_bound_count = audit.resolved_node_bound_count;
+    metrics.node_bound_view_build_allocation_count =
+        audit.node_bound_view_build_allocation_count;
+    metrics.node_bound_view_build_kernel_launch_count =
+        audit.node_bound_view_build_kernel_launch_count;
+    metrics.node_bound_view_build_synchronization_count =
+        audit.node_bound_view_build_synchronization_count;
+    metrics.node_bound_view_validation_device_to_host_byte_count =
+        audit.node_bound_view_validation_device_to_host_byte_count;
     expected_anchor_begin = audit.next_anchor_position;
 
     const std::size_t requested_anchor_count =
@@ -2975,8 +3063,36 @@ void validate_scaling_advance(
           adopted.source_cloud_identity != nullptr &&
           adopted.device_coordinate_bits != nullptr &&
           adopted.device_morton_point_ids != nullptr &&
-          adopted.device_nodes != nullptr && adopted.point_count == cloud.size() &&
+          adopted.device_nodes != nullptr &&
+          adopted.device_node_bounds != nullptr &&
+          adopted.point_count == cloud.size() &&
           adopted.certified_node_count == node_count &&
+          adopted.retained_node_bound_view_capacity_bytes ==
+              checked_product(
+                  node_count,
+                  sizeof(Phase15MortonYao48DeviceTiledNodeBounds),
+                  "the qualification node-bound view extent overflows size_t") &&
+          adopted.node_bound_view_allocation_capacity_bytes ==
+              checked_size_sum(
+                  checked_product(
+                      node_count,
+                      sizeof(Phase15MortonYao48DeviceTiledNodeBounds),
+                      "the qualification node-bound view extent overflows size_t"),
+                  2U * sizeof(std::uint64_t),
+                  "the qualification node-bound allocation extent overflows size_t") &&
+          adopted.resolved_node_bound_count == node_count &&
+          adopted.node_bound_view_build_allocation_count == 1U &&
+          adopted.node_bound_view_build_kernel_launch_count == 1U &&
+          adopted.node_bound_view_build_synchronization_count == 1U &&
+          adopted.node_bound_view_validation_device_to_host_byte_count ==
+              2U * sizeof(std::uint64_t) &&
+          adopted.node_bound_view_extent_authenticated &&
+          adopted.node_bound_view_validation_sentinel_authenticated &&
+          adopted.node_bound_view_bound_to_snapshot_identity &&
+          adopted.node_bound_view_built_once_per_adoption &&
+          adopted.node_bound_view_reused_without_tile_allocation &&
+          adopted.source_node_extremum_point_ids_retained &&
+          adopted.node_bound_view_build_included_in_context_creation &&
           adopted.execution_kind ==
               Phase15MortonYao48DeviceTiledExecutionKind::cuda &&
           adopted.canonical_coordinate_words_retained &&
@@ -2985,6 +3101,42 @@ void validate_scaling_advance(
           adopted.cuda_device_storage_retained &&
           !adopted.host_fake_lifecycle_exercised,
       "the Phase 15 qualification could not authenticate traversal adoption");
+  metrics.retained_node_bound_view_capacity_bytes = checked_u64(
+      adopted.retained_node_bound_view_capacity_bytes,
+      "the qualification retained node-bound view extent does not fit uint64");
+  metrics.node_bound_view_allocation_capacity_bytes = checked_u64(
+      adopted.node_bound_view_allocation_capacity_bytes,
+      "the qualification node-bound allocation extent does not fit uint64");
+  metrics.resolved_node_bound_count = checked_u64(
+      adopted.resolved_node_bound_count,
+      "the qualification resolved node-bound count does not fit uint64");
+  metrics.node_bound_view_build_allocation_count = checked_u64(
+      adopted.node_bound_view_build_allocation_count,
+      "the qualification node-bound allocation count does not fit uint64");
+  metrics.node_bound_view_build_kernel_launch_count = checked_u64(
+      adopted.node_bound_view_build_kernel_launch_count,
+      "the qualification node-bound kernel count does not fit uint64");
+  metrics.node_bound_view_build_synchronization_count = checked_u64(
+      adopted.node_bound_view_build_synchronization_count,
+      "the qualification node-bound synchronization count does not fit uint64");
+  metrics.node_bound_view_validation_device_to_host_byte_count = checked_u64(
+      adopted.node_bound_view_validation_device_to_host_byte_count,
+      "the qualification node-bound validation copy does not fit uint64");
+  metrics.node_bound_view_extent_authenticated =
+      adopted.node_bound_view_extent_authenticated;
+  metrics.node_bound_view_validation_sentinel_authenticated =
+      adopted.node_bound_view_validation_sentinel_authenticated;
+  metrics.node_bound_view_bound_to_snapshot_identity =
+      adopted.node_bound_view_bound_to_snapshot_identity;
+  metrics.node_bound_view_built_once_per_adoption =
+      adopted.node_bound_view_built_once_per_adoption;
+  metrics.node_bound_view_reused_without_tile_allocation =
+      adopted.node_bound_view_reused_without_tile_allocation;
+  metrics.source_node_extremum_point_ids_retained =
+      adopted.source_node_extremum_point_ids_retained;
+  metrics.node_bound_view_build_included_in_context_creation =
+      adopted.node_bound_view_build_included_in_context_creation;
+  metrics.node_bound_view_build_included_in_traversal_adoption_ns = true;
 
   CudaDeviceGuard device_guard{adopted.cuda_device};
   std::size_t free_bytes = 0U;
@@ -3427,6 +3579,20 @@ void require_warmup_measurement_equivalence(
               measured.qualification_device_to_host_bytes &&
           warmup.traversal_device_capacity_bytes ==
               measured.traversal_device_capacity_bytes &&
+          warmup.retained_node_bound_view_capacity_bytes ==
+              measured.retained_node_bound_view_capacity_bytes &&
+          warmup.node_bound_view_allocation_capacity_bytes ==
+              measured.node_bound_view_allocation_capacity_bytes &&
+          warmup.resolved_node_bound_count ==
+              measured.resolved_node_bound_count &&
+          warmup.node_bound_view_build_allocation_count ==
+              measured.node_bound_view_build_allocation_count &&
+          warmup.node_bound_view_build_kernel_launch_count ==
+              measured.node_bound_view_build_kernel_launch_count &&
+          warmup.node_bound_view_build_synchronization_count ==
+              measured.node_bound_view_build_synchronization_count &&
+          warmup.node_bound_view_validation_device_to_host_byte_count ==
+              measured.node_bound_view_validation_device_to_host_byte_count &&
           warmup.peak_tile_output_device_capacity_bytes ==
               measured.peak_tile_output_device_capacity_bytes &&
           warmup.bounded_bruteforce_performed ==
@@ -3442,7 +3608,23 @@ void require_warmup_measurement_equivalence(
           warmup.gamma2_prune_or_discard_authorized ==
               measured.gamma2_prune_or_discard_authorized &&
           warmup.component_contract_validated ==
-              measured.component_contract_validated,
+              measured.component_contract_validated &&
+          warmup.node_bound_view_extent_authenticated ==
+              measured.node_bound_view_extent_authenticated &&
+          warmup.node_bound_view_validation_sentinel_authenticated ==
+              measured.node_bound_view_validation_sentinel_authenticated &&
+          warmup.node_bound_view_bound_to_snapshot_identity ==
+              measured.node_bound_view_bound_to_snapshot_identity &&
+          warmup.node_bound_view_built_once_per_adoption ==
+              measured.node_bound_view_built_once_per_adoption &&
+          warmup.node_bound_view_reused_without_tile_allocation ==
+              measured.node_bound_view_reused_without_tile_allocation &&
+          warmup.source_node_extremum_point_ids_retained ==
+              measured.source_node_extremum_point_ids_retained &&
+          warmup.node_bound_view_build_included_in_context_creation ==
+              measured.node_bound_view_build_included_in_context_creation &&
+          warmup.node_bound_view_build_included_in_traversal_adoption_ns ==
+              measured.node_bound_view_build_included_in_traversal_adoption_ns,
       "the warmup and measured component passes changed their exact "
       "partition, digest, closure, or deterministic structural counters");
 }
@@ -3888,6 +4070,45 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << metrics.required_witness_count << ','
       << "\"minimum_device_free_bytes\":" << metrics.minimum_device_free_bytes
       << ','
+      << "\"node_bound_view_allocation_capacity_bytes\":"
+      << metrics.node_bound_view_allocation_capacity_bytes << ','
+      << "\"node_bound_view_bound_to_snapshot_identity\":"
+      << (metrics.node_bound_view_bound_to_snapshot_identity ? "true" : "false")
+      << ','
+      << "\"node_bound_view_build_allocation_count\":"
+      << metrics.node_bound_view_build_allocation_count << ','
+      << "\"node_bound_view_build_included_in_context_creation\":"
+      << (metrics.node_bound_view_build_included_in_context_creation
+              ? "true"
+              : "false")
+      << ','
+      << "\"node_bound_view_build_included_in_traversal_adoption_ns\":"
+      << (metrics.node_bound_view_build_included_in_traversal_adoption_ns
+              ? "true"
+              : "false")
+      << ','
+      << "\"node_bound_view_build_kernel_launch_count\":"
+      << metrics.node_bound_view_build_kernel_launch_count << ','
+      << "\"node_bound_view_build_synchronization_count\":"
+      << metrics.node_bound_view_build_synchronization_count << ','
+      << "\"node_bound_view_built_once_per_adoption\":"
+      << (metrics.node_bound_view_built_once_per_adoption ? "true" : "false")
+      << ','
+      << "\"node_bound_view_extent_authenticated\":"
+      << (metrics.node_bound_view_extent_authenticated ? "true" : "false")
+      << ','
+      << "\"node_bound_view_reused_without_tile_allocation\":"
+      << (metrics.node_bound_view_reused_without_tile_allocation
+              ? "true"
+              : "false")
+      << ','
+      << "\"node_bound_view_validation_device_to_host_byte_count\":"
+      << metrics.node_bound_view_validation_device_to_host_byte_count << ','
+      << "\"node_bound_view_validation_sentinel_authenticated\":"
+      << (metrics.node_bound_view_validation_sentinel_authenticated
+              ? "true"
+              : "false")
+      << ','
       << "\"node_copy_ns\":" << metrics.node_copy_ns << ','
       << "\"output_digest_fnv1a\":" << metrics.output_digest << ','
       << "\"peak_tile_output_device_capacity_bytes\":"
@@ -3911,6 +4132,13 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << "\"sampled_recertified_prune_count\":"
       << metrics.sampled_recertified_prune_count << ','
       << "\"resumed_chunk_count\":" << metrics.resumed_chunk_count << ','
+      << "\"resolved_node_bound_count\":"
+      << metrics.resolved_node_bound_count << ','
+      << "\"retained_node_bound_view_capacity_bytes\":"
+      << metrics.retained_node_bound_view_capacity_bytes << ','
+      << "\"source_node_extremum_point_ids_retained\":"
+      << (metrics.source_node_extremum_point_ids_retained ? "true" : "false")
+      << ','
       << "\"tile_count\":" << metrics.tile_count << ','
       << "\"traversal_adoption_ns\":" << metrics.adoption_ns << ','
       << "\"traversal_device_capacity_bytes\":"
@@ -4089,6 +4317,7 @@ void print_scaling_smoke_json(
       << ','
       << "\"component_only\":true,"
       << "\"context_creation_ns\":" << metrics.context_creation_ns << ','
+      << "\"node_bound_view_build_included_in_context_creation\":true,"
       << "\"context_release_ns\":" << metrics.context_release_ns << ','
       << "\"coverage_complete\":"
       << (metrics.coverage_complete ? "true" : "false") << ','
@@ -4144,6 +4373,21 @@ void print_scaling_smoke_json(
       << "\"minimum_device_free_bytes\":"
       << metrics.minimum_device_free_bytes << ','
       << "\"mixed_yield_count\":" << metrics.mixed_yield_count << ','
+      << "\"node_bound_view_allocation_capacity_bytes\":"
+      << metrics.node_bound_view_allocation_capacity_bytes << ','
+      << "\"node_bound_view_build_allocation_count\":"
+      << metrics.node_bound_view_build_allocation_count << ','
+      << "\"node_bound_view_build_kernel_launch_count\":"
+      << metrics.node_bound_view_build_kernel_launch_count << ','
+      << "\"node_bound_view_build_synchronization_count\":"
+      << metrics.node_bound_view_build_synchronization_count << ','
+      << "\"node_bound_view_validation_device_to_host_byte_count\":"
+      << metrics.node_bound_view_validation_device_to_host_byte_count << ','
+      << "\"node_bound_view_validation_sentinel_authenticated\":true,"
+      << "\"node_bound_view_extent_authenticated\":true,"
+      << "\"node_bound_view_bound_to_snapshot_identity\":true,"
+      << "\"node_bound_view_built_once_per_adoption\":true,"
+      << "\"node_bound_view_reused_without_tile_allocation\":true,"
       << "\"mode\":\""
       << (options.direct_scale
               ? "device_resident_budgeted_morton_yao48_anchor_tiles_direct_scale"
@@ -4167,6 +4411,11 @@ void print_scaling_smoke_json(
       << "\"complete_pair_mass_validated\":"
       << (complete_pair_mass_validated ? "true" : "false") << ','
       << "\"point_count\":" << options.point_count << ','
+      << "\"resolved_node_bound_count\":"
+      << metrics.resolved_node_bound_count << ','
+      << "\"retained_node_bound_view_capacity_bytes\":"
+      << metrics.retained_node_bound_view_capacity_bytes << ','
+      << "\"source_node_extremum_point_ids_retained\":true,"
       << "\"process_restart_resumable\":false,"
       << "\"product_claimed\":false,"
       << "\"profile\":\"" << kProfile << "\","

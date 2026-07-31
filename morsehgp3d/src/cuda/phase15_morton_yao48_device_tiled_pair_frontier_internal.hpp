@@ -189,12 +189,29 @@ static_assert(std::is_trivially_copyable_v<
 static_assert(std::is_standard_layout_v<
               Phase15MortonYao48DeviceTiledAnchorControl>);
 
+// Exact binary64 input words resolved once from the certified extremum
+// PointIds of one LBVH node.  Structural fields and the original PointIds
+// remain in the source node arena; this view only removes six repeated
+// coordinate indirections from every frontier visit.
+struct Phase15MortonYao48DeviceTiledNodeBounds {
+  std::uint64_t lower_coordinate_bits[3U]{};
+  std::uint64_t upper_coordinate_bits[3U]{};
+};
+
+static_assert(
+    sizeof(Phase15MortonYao48DeviceTiledNodeBounds) == 48U);
+static_assert(std::is_standard_layout_v<
+              Phase15MortonYao48DeviceTiledNodeBounds>);
+static_assert(std::is_trivially_copyable_v<
+              Phase15MortonYao48DeviceTiledNodeBounds>);
+
 struct Phase15MortonYao48DeviceTiledAdoptedTraversal {
   std::shared_ptr<void> retained_owner;
   std::shared_ptr<const void> source_cloud_identity;
   const std::uint64_t* device_coordinate_bits{};
   const std::uint64_t* device_morton_point_ids{};
   const void* device_nodes{};
+  const Phase15MortonYao48DeviceTiledNodeBounds* device_node_bounds{};
   std::size_t point_count{};
   std::size_t certified_node_count{};
   std::size_t maximum_point_count{};
@@ -202,6 +219,13 @@ struct Phase15MortonYao48DeviceTiledAdoptedTraversal {
   std::size_t retained_coordinate_word_capacity{};
   std::size_t retained_morton_point_id_capacity{};
   std::size_t retained_node_capacity{};
+  std::size_t retained_node_bound_view_capacity_bytes{};
+  std::size_t node_bound_view_allocation_capacity_bytes{};
+  std::size_t resolved_node_bound_count{};
+  std::size_t node_bound_view_build_allocation_count{};
+  std::size_t node_bound_view_build_kernel_launch_count{};
+  std::size_t node_bound_view_build_synchronization_count{};
+  std::size_t node_bound_view_validation_device_to_host_byte_count{};
   std::uint64_t source_snapshot_epoch{};
   int cuda_device{-1};
   Phase15MortonYao48DeviceTiledExecutionKind execution_kind{
@@ -209,6 +233,13 @@ struct Phase15MortonYao48DeviceTiledAdoptedTraversal {
   bool canonical_coordinate_words_retained{false};
   bool active_morton_point_ids_retained{false};
   bool certified_device_nodes_retained{false};
+  bool node_bound_view_extent_authenticated{false};
+  bool node_bound_view_validation_sentinel_authenticated{false};
+  bool node_bound_view_bound_to_snapshot_identity{false};
+  bool node_bound_view_built_once_per_adoption{false};
+  bool node_bound_view_reused_without_tile_allocation{false};
+  bool source_node_extremum_point_ids_retained{false};
+  bool node_bound_view_build_included_in_context_creation{false};
   bool host_fake_lifecycle_exercised{false};
   bool cuda_device_storage_retained{false};
 };
@@ -324,6 +355,7 @@ struct Phase15MortonYao48DeviceCandidateTilePrivateViews {
   const std::uint64_t* device_coordinate_bits{};
   const std::uint64_t* device_morton_point_ids{};
   const void* device_nodes{};
+  const void* device_node_bounds{};
   const Phase15MortonYao48DeviceTiledCandidateRecord*
       device_candidate_records{};
   const Phase15MortonYao48DeviceTiledPruneRegionRecord*
@@ -337,6 +369,7 @@ struct Phase15MortonYao48DeviceCandidateTilePrivateViews {
   std::size_t retained_coordinate_word_capacity{};
   std::size_t retained_morton_point_id_capacity{};
   std::size_t retained_node_capacity{};
+  std::size_t retained_node_bound_view_capacity_bytes{};
   MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
       MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
   std::size_t required_witness_count{};

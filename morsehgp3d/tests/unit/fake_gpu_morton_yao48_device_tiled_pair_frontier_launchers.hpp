@@ -32,6 +32,12 @@ enum class FakeMortonYao48DeviceTiledPairFrontierCorruption : std::uint8_t {
   simulated_launcher_failure,
 };
 
+enum class FakeMortonYao48DeviceTiledAdoptionCorruption : std::uint8_t {
+  none,
+  wrong_resolved_node_count,
+  invalid_validation_sentinel,
+};
+
 enum class FakeMortonYao48DeviceTiledAnchorStatus : std::uint8_t {
   active,
   chunk_ready,
@@ -71,6 +77,8 @@ struct FakeMortonYao48DeviceTiledPairFrontierConfiguration {
 
 void configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
     FakeMortonYao48DeviceTiledPairFrontierConfiguration configuration);
+void configure_fake_gpu_morton_yao48_device_tiled_adoption_corruption(
+    FakeMortonYao48DeviceTiledAdoptionCorruption corruption);
 void reset_fake_gpu_morton_yao48_device_tiled_pair_frontier() noexcept;
 
 [[nodiscard]] std::size_t

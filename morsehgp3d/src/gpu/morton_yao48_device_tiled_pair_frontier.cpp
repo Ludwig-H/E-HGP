@@ -271,6 +271,11 @@ void validate_adopted_traversal(
       source.maximum_point_count,
       3U,
       "the adopted Phase 15 coordinate capacity overflows size_t");
+  const std::size_t expected_node_bound_view_capacity_bytes =
+      checked_size_product(
+          expected_node_count,
+          sizeof(detail::Phase15MortonYao48DeviceTiledNodeBounds),
+          "the adopted Phase 15 node-bound view extent overflows size_t");
   if (!adopted.retained_owner || !adopted.source_cloud_identity ||
       adopted.point_count != source.point_count ||
       adopted.certified_node_count != source.certified_node_count ||
@@ -283,10 +288,20 @@ void validate_adopted_traversal(
       adopted.retained_morton_point_id_capacity !=
           source.maximum_point_count ||
       adopted.retained_node_capacity != expected_maximum_node_count ||
+      adopted.retained_node_bound_view_capacity_bytes !=
+          expected_node_bound_view_capacity_bytes ||
+      adopted.resolved_node_bound_count != expected_node_count ||
       adopted.source_snapshot_epoch != source.source_snapshot_epoch ||
       !adopted.canonical_coordinate_words_retained ||
       !adopted.active_morton_point_ids_retained ||
       !adopted.certified_device_nodes_retained ||
+      !adopted.node_bound_view_extent_authenticated ||
+      !adopted.node_bound_view_validation_sentinel_authenticated ||
+      !adopted.node_bound_view_bound_to_snapshot_identity ||
+      !adopted.node_bound_view_built_once_per_adoption ||
+      !adopted.node_bound_view_reused_without_tile_allocation ||
+      !adopted.source_node_extremum_point_ids_retained ||
+      !adopted.node_bound_view_build_included_in_context_creation ||
       adopted.host_fake_lifecycle_exercised ==
           adopted.cuda_device_storage_retained) {
     throw std::runtime_error(
@@ -300,7 +315,15 @@ void validate_adopted_traversal(
           adopted.cuda_device_storage_retained ||
           adopted.device_coordinate_bits != nullptr ||
           adopted.device_morton_point_ids != nullptr ||
-          adopted.device_nodes != nullptr || adopted.cuda_device != -1) {
+          adopted.device_nodes != nullptr ||
+          adopted.device_node_bounds != nullptr ||
+          adopted.node_bound_view_allocation_capacity_bytes != 0U ||
+          adopted.node_bound_view_build_allocation_count != 0U ||
+          adopted.node_bound_view_build_kernel_launch_count != 0U ||
+          adopted.node_bound_view_build_synchronization_count != 0U ||
+          adopted.node_bound_view_validation_device_to_host_byte_count !=
+              0U ||
+          adopted.cuda_device != -1) {
         throw std::runtime_error(
             "the Phase 15 host-fake traversal adoption forged device "
             "storage");
@@ -311,7 +334,19 @@ void validate_adopted_traversal(
           !adopted.cuda_device_storage_retained ||
           adopted.device_coordinate_bits == nullptr ||
           adopted.device_morton_point_ids == nullptr ||
-          adopted.device_nodes == nullptr || adopted.cuda_device < 0) {
+          adopted.device_nodes == nullptr ||
+          adopted.device_node_bounds == nullptr ||
+          adopted.node_bound_view_allocation_capacity_bytes !=
+              checked_size_sum(
+                  expected_node_bound_view_capacity_bytes,
+                  2U * sizeof(std::uint64_t),
+                  "the adopted Phase 15 node-bound allocation extent overflows size_t") ||
+          adopted.node_bound_view_build_allocation_count != 1U ||
+          adopted.node_bound_view_build_kernel_launch_count != 1U ||
+          adopted.node_bound_view_build_synchronization_count != 1U ||
+          adopted.node_bound_view_validation_device_to_host_byte_count !=
+              2U * sizeof(std::uint64_t) ||
+          adopted.cuda_device < 0) {
         throw std::runtime_error(
             "the Phase 15 CUDA traversal adoption omitted resident views");
       }
@@ -807,6 +842,7 @@ MortonYao48DeviceCandidateTileLease::
         const std::uint64_t* device_coordinate_bits,
         const std::uint64_t* device_morton_point_ids,
         const void* device_nodes,
+        const void* device_node_bounds,
         const void* device_candidate_records,
         const void* device_certified_prune_regions,
         const void* device_anchor_controls,
@@ -814,6 +850,7 @@ MortonYao48DeviceCandidateTileLease::
         std::size_t retained_coordinate_word_capacity,
         std::size_t retained_morton_point_id_capacity,
         std::size_t retained_node_capacity,
+        std::size_t retained_node_bound_view_capacity_bytes,
         std::size_t physical_anchor_control_capacity,
         std::size_t authorized_anchor_control_extent,
         int cuda_device,
@@ -826,6 +863,7 @@ MortonYao48DeviceCandidateTileLease::
       device_coordinate_bits_(device_coordinate_bits),
       device_morton_point_ids_(device_morton_point_ids),
       device_nodes_(device_nodes),
+      device_node_bounds_(device_node_bounds),
       device_candidate_records_(device_candidate_records),
       device_certified_prune_regions_(device_certified_prune_regions),
       device_anchor_controls_(device_anchor_controls),
@@ -835,6 +873,8 @@ MortonYao48DeviceCandidateTileLease::
       retained_morton_point_id_capacity_(
           retained_morton_point_id_capacity),
       retained_node_capacity_(retained_node_capacity),
+      retained_node_bound_view_capacity_bytes_(
+          retained_node_bound_view_capacity_bytes),
       physical_anchor_control_capacity_(
           physical_anchor_control_capacity),
       authorized_anchor_control_extent_(
@@ -857,6 +897,15 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
       audit_.prune_semantics ==
       MortonYao48DeviceTiledPairFrontierPruneSemantics::
           strict_interior_threshold;
+  const bool node_bound_view_extent_computable =
+      audit_.certified_node_count <=
+      std::numeric_limits<std::size_t>::max() /
+          sizeof(detail::Phase15MortonYao48DeviceTiledNodeBounds);
+  const std::size_t expected_node_bound_view_capacity_bytes =
+      node_bound_view_extent_computable
+          ? audit_.certified_node_count *
+                sizeof(detail::Phase15MortonYao48DeviceTiledNodeBounds)
+          : 0U;
   if (audit_.maximum_closed_rank < 2U ||
       audit_.maximum_closed_rank >
           morton_yao48_device_tiled_pair_frontier_maximum_closed_rank ||
@@ -910,6 +959,12 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
           3U * audit_.point_count ||
       audit_.retained_morton_point_id_capacity < audit_.point_count ||
       audit_.retained_node_capacity < audit_.certified_node_count ||
+      !node_bound_view_extent_computable ||
+      audit_.retained_node_bound_view_capacity_bytes !=
+          expected_node_bound_view_capacity_bytes ||
+      audit_.retained_node_bound_view_capacity_bytes !=
+          retained_node_bound_view_capacity_bytes_ ||
+      audit_.resolved_node_bound_count != audit_.certified_node_count ||
       audit_.certified_node_count != certified_node_count_ ||
       audit_.retained_coordinate_word_capacity !=
           retained_coordinate_word_capacity_ ||
@@ -980,6 +1035,13 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
           audit_.cuda_device_storage_retained ||
       !audit_.source_device_extents_retained ||
       !audit_.source_views_bound_to_snapshot_identity ||
+      !audit_.node_bound_view_extent_authenticated ||
+      !audit_.node_bound_view_validation_sentinel_authenticated ||
+      !audit_.node_bound_view_bound_to_snapshot_identity ||
+      !audit_.node_bound_view_built_once_per_adoption ||
+      !audit_.node_bound_view_reused_without_tile_allocation ||
+      !audit_.source_node_extremum_point_ids_retained ||
+      !audit_.node_bound_view_build_included_in_context_creation ||
       !audit_.output_owner_retained ||
       !audit_.output_buffers_detached_for_tile_lifetime ||
       audit_
@@ -1011,19 +1073,40 @@ bool MortonYao48DeviceCandidateTileLease::ready() const noexcept {
            device_coordinate_bits_ == nullptr &&
            device_morton_point_ids_ == nullptr &&
            device_nodes_ == nullptr &&
+           device_node_bounds_ == nullptr &&
            device_candidate_records_ == nullptr &&
            device_certified_prune_regions_ == nullptr &&
            device_anchor_controls_ == nullptr &&
+           audit_.node_bound_view_allocation_capacity_bytes == 0U &&
+           audit_.node_bound_view_build_allocation_count == 0U &&
+           audit_.node_bound_view_build_kernel_launch_count == 0U &&
+           audit_.node_bound_view_build_synchronization_count == 0U &&
+           audit_.node_bound_view_validation_device_to_host_byte_count ==
+               0U &&
            cuda_device_ == -1;
+  }
+  if (expected_node_bound_view_capacity_bytes >
+      std::numeric_limits<std::size_t>::max() -
+          2U * sizeof(std::uint64_t)) {
+    return false;
   }
   return !audit_.host_fake_lifecycle_exercised &&
          audit_.cuda_device_storage_retained &&
          device_coordinate_bits_ != nullptr &&
          device_morton_point_ids_ != nullptr &&
          device_nodes_ != nullptr &&
+         device_node_bounds_ != nullptr &&
          device_candidate_records_ != nullptr &&
          device_certified_prune_regions_ != nullptr &&
          device_anchor_controls_ != nullptr &&
+         audit_.node_bound_view_allocation_capacity_bytes ==
+             expected_node_bound_view_capacity_bytes +
+                 2U * sizeof(std::uint64_t) &&
+         audit_.node_bound_view_build_allocation_count == 1U &&
+         audit_.node_bound_view_build_kernel_launch_count == 1U &&
+         audit_.node_bound_view_build_synchronization_count == 1U &&
+         audit_.node_bound_view_validation_device_to_host_byte_count ==
+             2U * sizeof(std::uint64_t) &&
          cuda_device_ >= 0;
 }
 
@@ -1052,6 +1135,7 @@ detail::Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
   views.device_coordinate_bits = lease.device_coordinate_bits_;
   views.device_morton_point_ids = lease.device_morton_point_ids_;
   views.device_nodes = lease.device_nodes_;
+  views.device_node_bounds = lease.device_node_bounds_;
   views.device_candidate_records =
       static_cast<const Phase15MortonYao48DeviceTiledCandidateRecord*>(
           lease.device_candidate_records_);
@@ -1070,6 +1154,8 @@ detail::Phase15MortonYao48DeviceCandidateTilePrivateViewAccess::inspect(
   views.retained_morton_point_id_capacity =
       lease.retained_morton_point_id_capacity_;
   views.retained_node_capacity = lease.retained_node_capacity_;
+  views.retained_node_bound_view_capacity_bytes =
+      lease.retained_node_bound_view_capacity_bytes_;
   views.prune_semantics = lease.audit_.prune_semantics;
   views.required_witness_count = lease.audit_.required_witness_count;
   views.physical_candidate_record_capacity =
@@ -1207,6 +1293,23 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
       morton_yao48_device_tiled_pair_frontier_prune_regions_per_anchor;
   audit.fixed_witness_bank_count_per_anchor =
       morton_yao48_device_tiled_pair_frontier_witness_bank_count;
+  if (host_ != nullptr) {
+    audit.retained_node_bound_view_capacity_bytes =
+        host_->traversal.retained_node_bound_view_capacity_bytes;
+    audit.node_bound_view_allocation_capacity_bytes =
+        host_->traversal.node_bound_view_allocation_capacity_bytes;
+    audit.resolved_node_bound_count =
+        host_->traversal.resolved_node_bound_count;
+    audit.node_bound_view_build_allocation_count =
+        host_->traversal.node_bound_view_build_allocation_count;
+    audit.node_bound_view_build_kernel_launch_count =
+        host_->traversal.node_bound_view_build_kernel_launch_count;
+    audit.node_bound_view_build_synchronization_count =
+        host_->traversal.node_bound_view_build_synchronization_count;
+    audit.node_bound_view_validation_device_to_host_byte_count =
+        host_->traversal
+            .node_bound_view_validation_device_to_host_byte_count;
+  }
   audit.tile_epoch = tile_epoch;
   audit.chunk_sequence = chunk_sequence;
   audit.yield_reason = yield_reason;
@@ -1262,6 +1365,28 @@ MortonYao48DeviceTiledPairFrontierContext::make_audit(
   audit.certified_prune_device_to_host_count = 0U;
   audit.cuda_device = cuda_device;
   audit.source_traversal_lease_authenticated = host_ != nullptr;
+  audit.node_bound_view_extent_authenticated =
+      host_ != nullptr &&
+      host_->traversal.node_bound_view_extent_authenticated;
+  audit.node_bound_view_validation_sentinel_authenticated =
+      host_ != nullptr &&
+      host_->traversal
+          .node_bound_view_validation_sentinel_authenticated;
+  audit.node_bound_view_bound_to_snapshot_identity =
+      host_ != nullptr &&
+      host_->traversal.node_bound_view_bound_to_snapshot_identity;
+  audit.node_bound_view_built_once_per_adoption =
+      host_ != nullptr &&
+      host_->traversal.node_bound_view_built_once_per_adoption;
+  audit.node_bound_view_reused_without_tile_allocation =
+      host_ != nullptr &&
+      host_->traversal.node_bound_view_reused_without_tile_allocation;
+  audit.source_node_extremum_point_ids_retained =
+      host_ != nullptr &&
+      host_->traversal.source_node_extremum_point_ids_retained;
+  audit.node_bound_view_build_included_in_context_creation =
+      host_ != nullptr &&
+      host_->traversal.node_bound_view_build_included_in_context_creation;
   audit.fixed_per_anchor_caps_enforced = true;
   audit.atomic_completed_anchor_prefix_validated = true;
   audit.censored_anchor_outputs_withheld =
@@ -1475,6 +1600,21 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
           host_->traversal.retained_morton_point_id_capacity;
       lease_audit.retained_node_capacity =
           host_->traversal.retained_node_capacity;
+      lease_audit.retained_node_bound_view_capacity_bytes =
+          host_->traversal.retained_node_bound_view_capacity_bytes;
+      lease_audit.node_bound_view_allocation_capacity_bytes =
+          host_->traversal.node_bound_view_allocation_capacity_bytes;
+      lease_audit.resolved_node_bound_count =
+          host_->traversal.resolved_node_bound_count;
+      lease_audit.node_bound_view_build_allocation_count =
+          host_->traversal.node_bound_view_build_allocation_count;
+      lease_audit.node_bound_view_build_kernel_launch_count =
+          host_->traversal.node_bound_view_build_kernel_launch_count;
+      lease_audit.node_bound_view_build_synchronization_count =
+          host_->traversal.node_bound_view_build_synchronization_count;
+      lease_audit.node_bound_view_validation_device_to_host_byte_count =
+          host_->traversal
+              .node_bound_view_validation_device_to_host_byte_count;
       lease_audit.maximum_closed_rank = config_.maximum_closed_rank;
       lease_audit.prune_semantics = request.prune_semantics;
       lease_audit.required_witness_count = request.required_witness_count;
@@ -1519,6 +1659,22 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
       lease_audit.source_device_views_retained = !host_fake;
       lease_audit.source_device_extents_retained = true;
       lease_audit.source_views_bound_to_snapshot_identity = true;
+      lease_audit.node_bound_view_extent_authenticated =
+          host_->traversal.node_bound_view_extent_authenticated;
+      lease_audit.node_bound_view_validation_sentinel_authenticated =
+          host_->traversal
+              .node_bound_view_validation_sentinel_authenticated;
+      lease_audit.node_bound_view_bound_to_snapshot_identity =
+          host_->traversal.node_bound_view_bound_to_snapshot_identity;
+      lease_audit.node_bound_view_built_once_per_adoption =
+          host_->traversal.node_bound_view_built_once_per_adoption;
+      lease_audit.node_bound_view_reused_without_tile_allocation =
+          host_->traversal.node_bound_view_reused_without_tile_allocation;
+      lease_audit.source_node_extremum_point_ids_retained =
+          host_->traversal.source_node_extremum_point_ids_retained;
+      lease_audit.node_bound_view_build_included_in_context_creation =
+          host_->traversal
+              .node_bound_view_build_included_in_context_creation;
       lease_audit.output_owner_retained = true;
       lease_audit.output_buffers_detached_for_tile_lifetime = true;
       lease_audit.host_fake_lifecycle_exercised = host_fake;
@@ -1555,6 +1711,7 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
           host_->traversal.device_coordinate_bits,
           host_->traversal.device_morton_point_ids,
           host_->traversal.device_nodes,
+          host_->traversal.device_node_bounds,
           batch.device_candidate_records,
           batch.device_prune_regions,
           batch.device_anchor_controls,
@@ -1562,6 +1719,7 @@ MortonYao48DeviceTiledPairFrontierContext::advance() {
           host_->traversal.retained_coordinate_word_capacity,
           host_->traversal.retained_morton_point_id_capacity,
           host_->traversal.retained_node_capacity,
+          host_->traversal.retained_node_bound_view_capacity_bytes,
           batch.physical_anchor_control_capacity,
           validated.authorized_anchor_count,
           batch.cuda_device,

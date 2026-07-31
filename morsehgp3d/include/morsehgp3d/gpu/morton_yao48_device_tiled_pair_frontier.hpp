@@ -15,7 +15,7 @@ class Phase15MortonYao48DeviceCandidateTilePrivateViewAccess;
 }
 
 inline constexpr std::uint32_t
-    morton_yao48_device_tiled_pair_frontier_schema_version = 5U;
+    morton_yao48_device_tiled_pair_frontier_schema_version = 6U;
 inline constexpr std::size_t
     morton_yao48_device_tiled_pair_frontier_maximum_closed_rank = 11U;
 inline constexpr std::size_t
@@ -57,7 +57,7 @@ inline constexpr std::string_view
         "target_tested_before_bank_insert_retained_witnesses_outside_"
         "subtree_authenticated_active_slot_mask_cached_direction_intervals_"
         "physical_slot_order_closed_rank_or_strict_interior_"
-        "diametral_witness_interval_lower_bound_v3";
+        "diametral_witness_interval_lower_bound_resident_exact_node_bounds_v4";
 
 enum class MortonYao48DeviceTiledPairFrontierPruneSemantics : std::uint8_t {
   closed_rank_window = 0U,
@@ -142,6 +142,13 @@ struct MortonYao48DeviceCandidateTileLeaseAudit {
   std::size_t retained_coordinate_word_capacity{};
   std::size_t retained_morton_point_id_capacity{};
   std::size_t retained_node_capacity{};
+  std::size_t retained_node_bound_view_capacity_bytes{};
+  std::size_t node_bound_view_allocation_capacity_bytes{};
+  std::size_t resolved_node_bound_count{};
+  std::size_t node_bound_view_build_allocation_count{};
+  std::size_t node_bound_view_build_kernel_launch_count{};
+  std::size_t node_bound_view_build_synchronization_count{};
+  std::size_t node_bound_view_validation_device_to_host_byte_count{};
   std::size_t maximum_closed_rank{};
   MortonYao48DeviceTiledPairFrontierPruneSemantics prune_semantics{
       MortonYao48DeviceTiledPairFrontierPruneSemantics::closed_rank_window};
@@ -173,6 +180,13 @@ struct MortonYao48DeviceCandidateTileLeaseAudit {
   bool source_device_views_retained{false};
   bool source_device_extents_retained{false};
   bool source_views_bound_to_snapshot_identity{false};
+  bool node_bound_view_extent_authenticated{false};
+  bool node_bound_view_validation_sentinel_authenticated{false};
+  bool node_bound_view_bound_to_snapshot_identity{false};
+  bool node_bound_view_built_once_per_adoption{false};
+  bool node_bound_view_reused_without_tile_allocation{false};
+  bool source_node_extremum_point_ids_retained{false};
+  bool node_bound_view_build_included_in_context_creation{false};
   bool output_owner_retained{false};
   bool output_buffers_detached_for_tile_lifetime{false};
   bool host_fake_lifecycle_exercised{false};
@@ -234,6 +248,7 @@ class MortonYao48DeviceCandidateTileLease final {
       const std::uint64_t* device_coordinate_bits,
       const std::uint64_t* device_morton_point_ids,
       const void* device_nodes,
+      const void* device_node_bounds,
       const void* device_candidate_records,
       const void* device_certified_prune_regions,
       const void* device_anchor_controls,
@@ -241,6 +256,7 @@ class MortonYao48DeviceCandidateTileLease final {
       std::size_t retained_coordinate_word_capacity,
       std::size_t retained_morton_point_id_capacity,
       std::size_t retained_node_capacity,
+      std::size_t retained_node_bound_view_capacity_bytes,
       std::size_t physical_anchor_control_capacity,
       std::size_t authorized_anchor_control_extent,
       int cuda_device,
@@ -253,6 +269,7 @@ class MortonYao48DeviceCandidateTileLease final {
   const std::uint64_t* device_coordinate_bits_{};
   const std::uint64_t* device_morton_point_ids_{};
   const void* device_nodes_{};
+  const void* device_node_bounds_{};
   const void* device_candidate_records_{};
   const void* device_certified_prune_regions_{};
   const void* device_anchor_controls_{};
@@ -260,6 +277,7 @@ class MortonYao48DeviceCandidateTileLease final {
   std::size_t retained_coordinate_word_capacity_{};
   std::size_t retained_morton_point_id_capacity_{};
   std::size_t retained_node_capacity_{};
+  std::size_t retained_node_bound_view_capacity_bytes_{};
   std::size_t physical_anchor_control_capacity_{};
   std::size_t authorized_anchor_control_extent_{};
   int cuda_device_{-1};
@@ -291,6 +309,13 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   std::size_t fixed_candidate_capacity_per_anchor{};
   std::size_t fixed_prune_region_capacity_per_anchor{};
   std::size_t fixed_witness_bank_count_per_anchor{};
+  std::size_t retained_node_bound_view_capacity_bytes{};
+  std::size_t node_bound_view_allocation_capacity_bytes{};
+  std::size_t resolved_node_bound_count{};
+  std::size_t node_bound_view_build_allocation_count{};
+  std::size_t node_bound_view_build_kernel_launch_count{};
+  std::size_t node_bound_view_build_synchronization_count{};
+  std::size_t node_bound_view_validation_device_to_host_byte_count{};
   std::uint64_t tile_epoch{};
   std::uint64_t chunk_sequence{};
   MortonYao48DeviceTiledPairFrontierYieldReason yield_reason{
@@ -331,6 +356,13 @@ struct MortonYao48DeviceTiledPairFrontierAudit {
   std::size_t certified_prune_device_to_host_count{};
   int cuda_device{-1};
   bool source_traversal_lease_authenticated{false};
+  bool node_bound_view_extent_authenticated{false};
+  bool node_bound_view_validation_sentinel_authenticated{false};
+  bool node_bound_view_bound_to_snapshot_identity{false};
+  bool node_bound_view_built_once_per_adoption{false};
+  bool node_bound_view_reused_without_tile_allocation{false};
+  bool source_node_extremum_point_ids_retained{false};
+  bool node_bound_view_build_included_in_context_creation{false};
   bool fixed_per_anchor_caps_enforced{false};
   bool atomic_completed_anchor_prefix_validated{false};
   bool censored_anchor_outputs_withheld{false};

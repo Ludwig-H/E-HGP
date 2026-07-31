@@ -80,6 +80,20 @@ def rank_result(
         "lease_release_ns": 4_000,
         "maximum_closed_rank": maximum_closed_rank,
         "minimum_device_free_bytes": 40_000_000_000,
+        "node_bound_view_allocation_capacity_bytes": (
+            assembler.NODE_BOUND_VIEW_ALLOCATION_CAPACITY_BYTES
+        ),
+        "node_bound_view_bound_to_snapshot_identity": True,
+        "node_bound_view_build_allocation_count": 1,
+        "node_bound_view_build_included_in_context_creation": True,
+        "node_bound_view_build_included_in_traversal_adoption_ns": True,
+        "node_bound_view_build_kernel_launch_count": 1,
+        "node_bound_view_build_synchronization_count": 1,
+        "node_bound_view_built_once_per_adoption": True,
+        "node_bound_view_extent_authenticated": True,
+        "node_bound_view_reused_without_tile_allocation": True,
+        "node_bound_view_validation_device_to_host_byte_count": 16,
+        "node_bound_view_validation_sentinel_authenticated": True,
         "node_copy_ns": 5_000,
         "output_digest_fnv1a": 14_695_981_039_346_656_037,
         "peak_tile_output_device_capacity_bytes": 256_000_000,
@@ -94,7 +108,12 @@ def rank_result(
         "qualification_output_copy_ns": 6_000,
         "required_witness_count": maximum_closed_rank - 1,
         "resumed_chunk_count": 14,
+        "resolved_node_bound_count": assembler.CERTIFIED_NODE_COUNT,
+        "retained_node_bound_view_capacity_bytes": (
+            assembler.NODE_BOUND_VIEW_CAPACITY_BYTES
+        ),
         "sampled_recertified_prune_count": 900_000,
+        "source_node_extremum_point_ids_retained": True,
         "tile_count": 13,
         "traversal_adoption_ns": 7_000,
         "traversal_device_capacity_bytes": 64_000_000,
@@ -701,6 +720,27 @@ class Phase15DeviceFrontier50kAssemblerTests(unittest.TestCase):
                 {"q3_exact_diametral_pair_support_gabriel_negative_only": True},
             ),
             ("chunk closure", {"chunk_count": 26}),
+            ("node bound count", {"resolved_node_bound_count": 99_998}),
+            (
+                "node bound view extent",
+                {"retained_node_bound_view_capacity_bytes": 4_799_951},
+            ),
+            (
+                "node bound allocation extent",
+                {"node_bound_view_allocation_capacity_bytes": 4_799_967},
+            ),
+            (
+                "node bound repeated build",
+                {"node_bound_view_build_kernel_launch_count": 2},
+            ),
+            (
+                "node bound validation sentinel",
+                {"node_bound_view_validation_sentinel_authenticated": False},
+            ),
+            (
+                "node bound timing scope",
+                {"node_bound_view_build_included_in_context_creation": False},
+            ),
             (
                 "yield closure",
                 {

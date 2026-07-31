@@ -28,6 +28,8 @@ struct FakeCumulativeAnchor final {
 
 std::mutex fake_mutex;
 FakeMortonYao48DeviceTiledPairFrontierConfiguration fake_configuration;
+FakeMortonYao48DeviceTiledAdoptionCorruption fake_adoption_corruption{
+    FakeMortonYao48DeviceTiledAdoptionCorruption::none};
 std::shared_ptr<void> held_shared_output_owner;
 std::vector<FakeCumulativeAnchor> fake_cumulative_anchors;
 std::size_t fake_next_transcript{};
@@ -52,9 +54,17 @@ void configure_fake_gpu_morton_yao48_device_tiled_pair_frontier(
   fake_chunk_sequence = 0U;
 }
 
+void configure_fake_gpu_morton_yao48_device_tiled_adoption_corruption(
+    FakeMortonYao48DeviceTiledAdoptionCorruption corruption) {
+  std::lock_guard<std::mutex> lock{fake_mutex};
+  fake_adoption_corruption = corruption;
+}
+
 void reset_fake_gpu_morton_yao48_device_tiled_pair_frontier() noexcept {
   std::lock_guard<std::mutex> lock{fake_mutex};
   fake_configuration = {};
+  fake_adoption_corruption =
+      FakeMortonYao48DeviceTiledAdoptionCorruption::none;
   held_shared_output_owner.reset();
   fake_cumulative_anchors.clear();
   fake_next_transcript = 0U;
@@ -77,6 +87,8 @@ namespace {
 
 using Corruption = test_support::
     FakeMortonYao48DeviceTiledPairFrontierCorruption;
+using AdoptionCorruption = test_support::
+    FakeMortonYao48DeviceTiledAdoptionCorruption;
 using FakeAnchor = test_support::FakeMortonYao48DeviceTiledAnchor;
 using FakeAnchorStatus = test_support::
     FakeMortonYao48DeviceTiledAnchorStatus;
@@ -130,6 +142,11 @@ using FakeProgress = test_support::FakeCumulativeAnchor;
         "the fake Phase 15 launcher transcript is exhausted");
   }
   return configuration.launches[test_support::fake_next_transcript++];
+}
+
+[[nodiscard]] AdoptionCorruption adoption_corruption() {
+  std::lock_guard<std::mutex> lock{test_support::fake_mutex};
+  return test_support::fake_adoption_corruption;
 }
 
 [[nodiscard]] std::vector<FakeProgress> begin_continuation(
@@ -217,6 +234,7 @@ adopt_phase15_morton_yao48_device_tiled_traversal(
         "lease");
   }
   const MortonLbvhDeviceTraversalLeaseAudit audit = traversal_lease.audit();
+  const AdoptionCorruption corruption = adoption_corruption();
   auto owner = std::make_shared<MortonLbvhDeviceTraversalLease>(
       std::move(traversal_lease));
 
@@ -232,12 +250,31 @@ adopt_phase15_morton_yao48_device_tiled_traversal(
   adopted.retained_morton_point_id_capacity =
       audit.retained_morton_point_id_capacity;
   adopted.retained_node_capacity = audit.retained_node_capacity;
+  adopted.retained_node_bound_view_capacity_bytes = checked_product(
+      audit.certified_node_count,
+      sizeof(Phase15MortonYao48DeviceTiledNodeBounds),
+      "the fake Phase 15 node-bound view extent overflows size_t");
+  adopted.resolved_node_bound_count = audit.certified_node_count;
+  if (corruption == AdoptionCorruption::wrong_resolved_node_count) {
+    adopted.resolved_node_bound_count =
+        adopted.resolved_node_bound_count == 0U
+            ? 1U
+            : adopted.resolved_node_bound_count - 1U;
+  }
   adopted.source_snapshot_epoch = audit.source_snapshot_epoch;
   adopted.execution_kind =
       Phase15MortonYao48DeviceTiledExecutionKind::host_fake;
   adopted.canonical_coordinate_words_retained = true;
   adopted.active_morton_point_ids_retained = true;
   adopted.certified_device_nodes_retained = true;
+  adopted.node_bound_view_extent_authenticated = true;
+  adopted.node_bound_view_validation_sentinel_authenticated =
+      corruption != AdoptionCorruption::invalid_validation_sentinel;
+  adopted.node_bound_view_bound_to_snapshot_identity = true;
+  adopted.node_bound_view_built_once_per_adoption = true;
+  adopted.node_bound_view_reused_without_tile_allocation = true;
+  adopted.source_node_extremum_point_ids_retained = true;
+  adopted.node_bound_view_build_included_in_context_creation = true;
   adopted.host_fake_lifecycle_exercised = true;
   adopted.cuda_device_storage_retained = false;
   return adopted;
@@ -262,7 +299,22 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       traversal.cuda_device_storage_retained ||
       traversal.device_coordinate_bits != nullptr ||
       traversal.device_morton_point_ids != nullptr ||
-      traversal.device_nodes != nullptr || traversal.cuda_device != -1 ||
+      traversal.device_nodes != nullptr ||
+      traversal.device_node_bounds != nullptr ||
+      traversal.resolved_node_bound_count != traversal.certified_node_count ||
+      !traversal.node_bound_view_extent_authenticated ||
+      !traversal.node_bound_view_validation_sentinel_authenticated ||
+      !traversal.node_bound_view_bound_to_snapshot_identity ||
+      !traversal.node_bound_view_built_once_per_adoption ||
+      !traversal.node_bound_view_reused_without_tile_allocation ||
+      !traversal.source_node_extremum_point_ids_retained ||
+      !traversal.node_bound_view_build_included_in_context_creation ||
+      traversal.node_bound_view_allocation_capacity_bytes != 0U ||
+      traversal.node_bound_view_build_allocation_count != 0U ||
+      traversal.node_bound_view_build_kernel_launch_count != 0U ||
+      traversal.node_bound_view_build_synchronization_count != 0U ||
+      traversal.node_bound_view_validation_device_to_host_byte_count != 0U ||
+      traversal.cuda_device != -1 ||
       request.source_snapshot_epoch != traversal.source_snapshot_epoch ||
       request.point_count != traversal.point_count ||
       request.certified_node_count != traversal.certified_node_count ||

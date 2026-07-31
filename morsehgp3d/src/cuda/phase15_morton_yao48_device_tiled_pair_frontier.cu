@@ -47,6 +47,9 @@ constexpr std::uint64_t kConeCount = UINT64_C(48);
 constexpr std::uint64_t kAmbiguousCone = kConeCount;
 constexpr std::uint64_t kActiveWitnessMaskWordCount = UINT64_C(8);
 constexpr std::uint64_t kCachedPruneWitnessCapacityPerAnchor = UINT64_C(10);
+constexpr std::uint64_t kNodeBoundViewValidationSentinel =
+    UINT64_C(0x4d59423438564236);
+constexpr unsigned int kNodeBoundBuildThreadsPerBlock = 256U;
 constexpr std::uint64_t kCandidateFlagAmbiguousCone = UINT64_C(1) << 0U;
 constexpr std::uint64_t kCandidateFlagCertifiedCone = UINT64_C(1) << 1U;
 constexpr std::uint64_t kCandidateFlagBankInserted = UINT64_C(1) << 2U;
@@ -116,10 +119,9 @@ struct Phase15MortonYao48DeviceTiledNode {
 };
 
 // Register-resident view of one node from the already-certified traversal
-// lease.  Bounds are resolved from their extremum PointIds exactly once per
-// warp and per visited node; witness tests therefore never repeat the six
-// indirect coordinate loads.  Structural certification belongs to the LBVH
-// lease and is deliberately not replayed for every (anchor, node) pair.
+// lease. Bounds are read from the adoption-scoped exact view, while the
+// structural fields and original extremum PointIds remain authoritative in
+// the LBVH node arena.
 struct Phase15MortonYao48DeviceTiledHotNode {
   std::uint64_t lower_bits[3];
   std::uint64_t upper_bits[3];
@@ -332,6 +334,238 @@ void require_device_pointer(
   }
 }
 
+class Phase15MortonYao48DeviceTiledBuildStream final {
+ public:
+  Phase15MortonYao48DeviceTiledBuildStream() {
+    check_cuda(
+        cudaStreamCreateWithFlags(&stream_, cudaStreamNonBlocking),
+        "cudaStreamCreateWithFlags for Phase 15 tiled Morton/Yao48 node-bound view");
+  }
+
+  Phase15MortonYao48DeviceTiledBuildStream(
+      const Phase15MortonYao48DeviceTiledBuildStream&) = delete;
+  Phase15MortonYao48DeviceTiledBuildStream& operator=(
+      const Phase15MortonYao48DeviceTiledBuildStream&) = delete;
+
+  ~Phase15MortonYao48DeviceTiledBuildStream() {
+    if (stream_ != nullptr) {
+      static_cast<void>(cudaStreamDestroy(stream_));
+    }
+  }
+
+  [[nodiscard]] cudaStream_t get() const noexcept { return stream_; }
+
+ private:
+  cudaStream_t stream_{nullptr};
+};
+
+__global__ void resolve_tiled_morton_yao48_node_bounds_kernel(
+    const std::uint64_t* coordinate_bits,
+    const Phase15MortonYao48DeviceTiledNode* nodes,
+    std::uint64_t point_count,
+    std::uint64_t node_count,
+    Phase15MortonYao48DeviceTiledNodeBounds* node_bounds,
+    std::uint64_t* resolved_node_count,
+    std::uint64_t* validation_sentinel) {
+  __shared__ unsigned long long block_resolved_counts[
+      kNodeBoundBuildThreadsPerBlock];
+  const std::uint64_t thread_index =
+      static_cast<std::uint64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  const std::uint64_t thread_stride =
+      static_cast<std::uint64_t>(gridDim.x) * blockDim.x;
+  unsigned long long local_resolved_count = 0ULL;
+  for (std::uint64_t node_index = thread_index;
+       node_index < node_count;
+       node_index += thread_stride) {
+    const Phase15MortonYao48DeviceTiledNode& node = nodes[node_index];
+    Phase15MortonYao48DeviceTiledNodeBounds resolved{};
+    bool valid = true;
+    for (unsigned int axis = 0U; axis < kAxisCount; ++axis) {
+      const std::uint64_t lower_point_id = node.lower_point_ids[axis];
+      const std::uint64_t upper_point_id = node.upper_point_ids[axis];
+      if (lower_point_id >= point_count || upper_point_id >= point_count) {
+        valid = false;
+        continue;
+      }
+      const std::uint64_t lower_bits =
+          coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
+                          lower_point_id];
+      const std::uint64_t upper_bits =
+          coordinate_bits[static_cast<std::uint64_t>(axis) * point_count +
+                          upper_point_id];
+      const device::DeviceInterval lower = device::point_interval(lower_bits);
+      const device::DeviceInterval upper = device::point_interval(upper_bits);
+      if (!lower.valid || !upper.valid || lower.lower > upper.upper) {
+        valid = false;
+        continue;
+      }
+      resolved.lower_coordinate_bits[axis] = lower_bits;
+      resolved.upper_coordinate_bits[axis] = upper_bits;
+    }
+    if (valid) {
+      node_bounds[node_index] = resolved;
+    } else {
+      atomicExch(
+          reinterpret_cast<unsigned long long*>(validation_sentinel),
+          0ULL);
+    }
+    ++local_resolved_count;
+  }
+  block_resolved_counts[threadIdx.x] = local_resolved_count;
+  __syncthreads();
+  for (unsigned int stride = kNodeBoundBuildThreadsPerBlock / 2U;
+       stride != 0U;
+       stride /= 2U) {
+    if (threadIdx.x < stride) {
+      block_resolved_counts[threadIdx.x] +=
+          block_resolved_counts[threadIdx.x + stride];
+    }
+    __syncthreads();
+  }
+  if (threadIdx.x == 0U) {
+    atomicAdd(
+        reinterpret_cast<unsigned long long*>(resolved_node_count),
+        block_resolved_counts[0U]);
+  }
+}
+
+class Phase15MortonYao48DeviceTiledNodeBoundViewResources final {
+ public:
+  Phase15MortonYao48DeviceTiledNodeBoundViewResources(
+      std::shared_ptr<void> source_owner,
+      const std::uint64_t* device_coordinate_bits,
+      const void* device_nodes,
+      std::size_t point_count,
+      std::size_t node_count,
+      int device)
+      : source_owner_(std::move(source_owner)), device_(device) {
+    if (!source_owner_ || point_count == 0U || node_count == 0U) {
+      throw std::invalid_argument(
+          "the Phase 15 tiled Morton/Yao48 node-bound view has no source authority or extent");
+    }
+    const std::size_t bound_word_count = checked_product(
+        node_count,
+        6U,
+        "the Phase 15 tiled Morton/Yao48 node-bound view extent overflows size_t");
+    const std::size_t allocation_word_count = checked_sum(
+        bound_word_count,
+        2U,
+        "the Phase 15 tiled Morton/Yao48 node-bound validation extent overflows size_t");
+    words_.allocate(
+        allocation_word_count,
+        "cudaMalloc Phase 15 tiled Morton/Yao48 node-bound view");
+
+    Phase15MortonYao48DeviceTiledBuildStream stream;
+    const std::uint64_t initial_controls[2U]{
+        UINT64_C(0), kNodeBoundViewValidationSentinel};
+    check_cuda(
+        cudaMemcpyAsync(
+            words_.get() + bound_word_count,
+            initial_controls,
+            sizeof(initial_controls),
+            cudaMemcpyHostToDevice,
+            stream.get()),
+        "cudaMemcpyAsync Phase 15 tiled Morton/Yao48 node-bound validation controls host-to-device");
+
+    const std::size_t requested_blocks =
+        node_count / kNodeBoundBuildThreadsPerBlock +
+        (node_count % kNodeBoundBuildThreadsPerBlock == 0U ? 0U : 1U);
+    const auto block_count = static_cast<unsigned int>(
+        std::min<std::size_t>(requested_blocks, 65'535U));
+    resolve_tiled_morton_yao48_node_bounds_kernel<<<
+        block_count, kNodeBoundBuildThreadsPerBlock, 0U, stream.get()>>>(
+        device_coordinate_bits,
+        static_cast<const Phase15MortonYao48DeviceTiledNode*>(device_nodes),
+        checked_u64(
+            point_count,
+            "the Phase 15 tiled Morton/Yao48 node-bound point count does not fit uint64"),
+        checked_u64(
+            node_count,
+            "the Phase 15 tiled Morton/Yao48 node-bound count does not fit uint64"),
+        bounds(),
+        words_.get() + bound_word_count,
+        words_.get() + bound_word_count + 1U);
+    check_cuda(
+        cudaPeekAtLastError(),
+        "Phase 15 tiled Morton/Yao48 node-bound view kernel launch");
+
+    std::uint64_t controls[2U]{};
+    check_cuda(
+        cudaMemcpyAsync(
+            controls,
+            words_.get() + bound_word_count,
+            sizeof(controls),
+            cudaMemcpyDeviceToHost,
+            stream.get()),
+        "cudaMemcpyAsync Phase 15 tiled Morton/Yao48 node-bound validation controls device-to-host");
+    check_cuda(
+        cudaStreamSynchronize(stream.get()),
+        "cudaStreamSynchronize Phase 15 tiled Morton/Yao48 node-bound view");
+    resolved_node_count_ = controls[0U];
+    validation_sentinel_ = controls[1U];
+    if (resolved_node_count_ != checked_u64(
+                                    node_count,
+                                    "the Phase 15 tiled Morton/Yao48 node-bound count does not fit uint64") ||
+        validation_sentinel_ != kNodeBoundViewValidationSentinel) {
+      throw std::runtime_error(
+          "the Phase 15 tiled Morton/Yao48 node-bound view did not resolve exactly every certified node");
+    }
+  }
+
+  Phase15MortonYao48DeviceTiledNodeBoundViewResources(
+      const Phase15MortonYao48DeviceTiledNodeBoundViewResources&) = delete;
+  Phase15MortonYao48DeviceTiledNodeBoundViewResources& operator=(
+      const Phase15MortonYao48DeviceTiledNodeBoundViewResources&) = delete;
+
+  ~Phase15MortonYao48DeviceTiledNodeBoundViewResources() {
+    int previous_device = 0;
+    const cudaError_t query_status = cudaGetDevice(&previous_device);
+    bool restore_device = false;
+    if (query_status == cudaSuccess && previous_device != device_) {
+      restore_device = cudaSetDevice(device_) == cudaSuccess;
+    }
+    if (query_status != cudaSuccess ||
+        (previous_device != device_ && !restore_device)) {
+      words_.abandon();
+      return;
+    }
+    words_.reset();
+    if (restore_device) {
+      static_cast<void>(cudaSetDevice(previous_device));
+    }
+  }
+
+  [[nodiscard]] Phase15MortonYao48DeviceTiledNodeBounds* bounds() noexcept {
+    return reinterpret_cast<Phase15MortonYao48DeviceTiledNodeBounds*>(
+        words_.get());
+  }
+
+  [[nodiscard]] const Phase15MortonYao48DeviceTiledNodeBounds* bounds()
+      const noexcept {
+    return reinterpret_cast<const Phase15MortonYao48DeviceTiledNodeBounds*>(
+        words_.get());
+  }
+
+  [[nodiscard]] std::size_t allocation_capacity_bytes() const noexcept {
+    return words_.count() * sizeof(std::uint64_t);
+  }
+
+  [[nodiscard]] std::uint64_t resolved_node_count() const noexcept {
+    return resolved_node_count_;
+  }
+
+  [[nodiscard]] bool validation_sentinel_authenticated() const noexcept {
+    return validation_sentinel_ == kNodeBoundViewValidationSentinel;
+  }
+
+ private:
+  std::shared_ptr<void> source_owner_;
+  int device_{-1};
+  DeviceBuffer<std::uint64_t> words_;
+  std::uint64_t resolved_node_count_{};
+  std::uint64_t validation_sentinel_{};
+};
+
 class Phase15MortonYao48DeviceTiledCudaResources final {
  public:
   Phase15MortonYao48DeviceTiledCudaResources(
@@ -349,6 +583,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
         device_coordinate_bits_(traversal.device_coordinate_bits),
         device_morton_point_ids_(traversal.device_morton_point_ids),
         device_nodes_(traversal.device_nodes),
+        device_node_bounds_(traversal.device_node_bounds),
         source_snapshot_epoch_(request.source_snapshot_epoch),
         tile_epoch_(request.tile_epoch),
         chunk_sequence_(request.chunk_sequence),
@@ -467,6 +702,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
            device_morton_point_ids_ ==
                traversal.device_morton_point_ids &&
            device_nodes_ == traversal.device_nodes &&
+           device_node_bounds_ == traversal.device_node_bounds &&
            source_snapshot_epoch_ == request.source_snapshot_epoch &&
            tile_epoch_ == request.tile_epoch &&
            chunk_sequence_ != UINT64_MAX &&
@@ -507,6 +743,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
            device_morton_point_ids_ ==
                traversal.device_morton_point_ids &&
            device_nodes_ == traversal.device_nodes &&
+           device_node_bounds_ == traversal.device_node_bounds &&
            source_snapshot_epoch_ == request.source_snapshot_epoch &&
            maximum_closed_rank_ == request.maximum_closed_rank &&
            prune_semantics_ == request.prune_semantics &&
@@ -573,6 +810,7 @@ class Phase15MortonYao48DeviceTiledCudaResources final {
   const std::uint64_t* device_coordinate_bits_{};
   const std::uint64_t* device_morton_point_ids_{};
   const void* device_nodes_{};
+  const Phase15MortonYao48DeviceTiledNodeBounds* device_node_bounds_{};
   std::uint64_t source_snapshot_epoch_{};
   std::uint64_t tile_epoch_{};
   std::uint64_t chunk_sequence_{};
@@ -596,6 +834,14 @@ void validate_launch(
     const Phase15MortonYao48DeviceTiledAdoptedTraversal& traversal,
     const Phase15MortonYao48DeviceTiledRequest& request) {
   const std::size_t node_count = checked_node_count(traversal.point_count);
+  const std::size_t node_bound_view_bytes = checked_product(
+      node_count,
+      sizeof(Phase15MortonYao48DeviceTiledNodeBounds),
+      "the Phase 15 tiled Morton/Yao48 node-bound view extent overflows size_t");
+  const std::size_t node_bound_allocation_bytes = checked_sum(
+      node_bound_view_bytes,
+      2U * sizeof(std::uint64_t),
+      "the Phase 15 tiled Morton/Yao48 node-bound allocation extent overflows size_t");
   const std::size_t coordinate_word_count = checked_product(
       traversal.point_count,
       kAxisCount,
@@ -611,13 +857,31 @@ void validate_launch(
       traversal.cuda_device < 0 ||
       traversal.device_coordinate_bits == nullptr ||
       traversal.device_morton_point_ids == nullptr ||
-      traversal.device_nodes == nullptr || traversal.point_count == 0U ||
+      traversal.device_nodes == nullptr ||
+      traversal.device_node_bounds == nullptr || traversal.point_count == 0U ||
       traversal.certified_node_count != node_count ||
       traversal.maximum_point_count < traversal.point_count ||
       traversal.maximum_node_count < traversal.certified_node_count ||
       traversal.retained_coordinate_word_capacity < coordinate_word_count ||
       traversal.retained_morton_point_id_capacity < traversal.point_count ||
       traversal.retained_node_capacity < traversal.certified_node_count ||
+      traversal.retained_node_bound_view_capacity_bytes !=
+          node_bound_view_bytes ||
+      traversal.node_bound_view_allocation_capacity_bytes !=
+          node_bound_allocation_bytes ||
+      traversal.resolved_node_bound_count != node_count ||
+      traversal.node_bound_view_build_allocation_count != 1U ||
+      traversal.node_bound_view_build_kernel_launch_count != 1U ||
+      traversal.node_bound_view_build_synchronization_count != 1U ||
+      traversal.node_bound_view_validation_device_to_host_byte_count !=
+          2U * sizeof(std::uint64_t) ||
+      !traversal.node_bound_view_extent_authenticated ||
+      !traversal.node_bound_view_validation_sentinel_authenticated ||
+      !traversal.node_bound_view_bound_to_snapshot_identity ||
+      !traversal.node_bound_view_built_once_per_adoption ||
+      !traversal.node_bound_view_reused_without_tile_allocation ||
+      !traversal.source_node_extremum_point_ids_retained ||
+      !traversal.node_bound_view_build_included_in_context_creation ||
       traversal.source_snapshot_epoch == 0U ||
       request.source_snapshot_epoch != traversal.source_snapshot_epoch ||
       request.output_buffer_epoch == 0U ||
@@ -916,9 +1180,8 @@ classify_yao48_cone_by_intervals(
 [[nodiscard]] __device__ Phase15MortonYao48DeviceTiledHotNode
 load_certified_hot_node_warp(
     const Phase15MortonYao48DeviceTiledNode* nodes,
+    const Phase15MortonYao48DeviceTiledNodeBounds* node_bounds,
     std::uint64_t node_index,
-    const std::uint64_t* coordinate_bits,
-    std::uint64_t point_count,
     unsigned int lane) noexcept {
   Phase15MortonYao48DeviceTiledHotNode hot{};
   if (lane == 0U) {
@@ -932,13 +1195,10 @@ load_certified_hot_node_warp(
   hot.leaf_end = warp_broadcast_u64(hot.leaf_end, 0);
 
   if (lane < kAxisCount) {
-    const Phase15MortonYao48DeviceTiledNode& source = nodes[node_index];
-    hot.lower_bits[lane] =
-        coordinate_bits[static_cast<std::uint64_t>(lane) * point_count +
-                        source.lower_point_ids[lane]];
-    hot.upper_bits[lane] =
-        coordinate_bits[static_cast<std::uint64_t>(lane) * point_count +
-                        source.upper_point_ids[lane]];
+    const Phase15MortonYao48DeviceTiledNodeBounds& bounds =
+        node_bounds[node_index];
+    hot.lower_bits[lane] = bounds.lower_coordinate_bits[lane];
+    hot.upper_bits[lane] = bounds.upper_coordinate_bits[lane];
   }
   for (unsigned int axis = 0U; axis < kAxisCount; ++axis) {
     hot.lower_bits[axis] =
@@ -1389,6 +1649,7 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
     const std::uint64_t* coordinate_bits,
     const std::uint64_t* morton_point_ids,
     const Phase15MortonYao48DeviceTiledNode* nodes,
+    const Phase15MortonYao48DeviceTiledNodeBounds* node_bounds,
     std::uint64_t point_count,
     std::uint64_t node_count,
     std::uint64_t anchor_begin,
@@ -1661,7 +1922,7 @@ __global__ void build_tiled_morton_yao48_pair_frontier_kernel(
       }
       const Phase15MortonYao48DeviceTiledHotNode node =
           load_certified_hot_node_warp(
-              nodes, cursor, coordinate_bits, point_count, lane);
+              nodes, node_bounds, cursor, lane);
       if (node.leaf_begin >= node.leaf_end ||
           node.leaf_end > point_count) {
         failure_code = kFailureMalformed;
@@ -2178,15 +2439,45 @@ adopt_phase15_morton_yao48_device_tiled_traversal(
         "ready CUDA-resident traversal lease");
   }
   const MortonLbvhDeviceTraversalLeaseAudit audit = traversal_lease.audit_;
+  const std::size_t expected_node_count = checked_node_count(audit.point_count);
+  const std::size_t node_bound_view_bytes = checked_product(
+      expected_node_count,
+      sizeof(Phase15MortonYao48DeviceTiledNodeBounds),
+      "the adopted Phase 15 tiled Morton/Yao48 node-bound view extent overflows size_t");
+  DeviceGuard guard{traversal_lease.cuda_device_};
+  require_device_pointer(
+      traversal_lease.device_coordinate_bits_,
+      traversal_lease.cuda_device_,
+      alignof(std::uint64_t),
+      "coordinate");
+  require_device_pointer(
+      traversal_lease.device_nodes_,
+      traversal_lease.cuda_device_,
+      alignof(Phase15MortonYao48DeviceTiledNode),
+      "node");
+  auto node_bound_resources = std::make_shared<
+      Phase15MortonYao48DeviceTiledNodeBoundViewResources>(
+      traversal_lease.retained_resources_,
+      traversal_lease.device_coordinate_bits_,
+      traversal_lease.device_nodes_,
+      audit.point_count,
+      expected_node_count,
+      traversal_lease.cuda_device_);
+  require_device_pointer(
+      node_bound_resources->bounds(),
+      traversal_lease.cuda_device_,
+      alignof(Phase15MortonYao48DeviceTiledNodeBounds),
+      "resolved node-bound view");
 
   Phase15MortonYao48DeviceTiledAdoptedTraversal adopted;
-  adopted.retained_owner = std::move(traversal_lease.retained_resources_);
+  adopted.retained_owner = node_bound_resources;
   adopted.source_cloud_identity =
       std::move(traversal_lease.source_cloud_identity_);
   adopted.device_coordinate_bits = traversal_lease.device_coordinate_bits_;
   adopted.device_morton_point_ids =
       traversal_lease.device_morton_point_ids_;
   adopted.device_nodes = traversal_lease.device_nodes_;
+  adopted.device_node_bounds = node_bound_resources->bounds();
   adopted.point_count = audit.point_count;
   adopted.certified_node_count = audit.certified_node_count;
   adopted.maximum_point_count = audit.maximum_point_count;
@@ -2196,6 +2487,16 @@ adopt_phase15_morton_yao48_device_tiled_traversal(
   adopted.retained_morton_point_id_capacity =
       audit.retained_morton_point_id_capacity;
   adopted.retained_node_capacity = audit.retained_node_capacity;
+  adopted.retained_node_bound_view_capacity_bytes = node_bound_view_bytes;
+  adopted.node_bound_view_allocation_capacity_bytes =
+      node_bound_resources->allocation_capacity_bytes();
+  adopted.resolved_node_bound_count = static_cast<std::size_t>(
+      node_bound_resources->resolved_node_count());
+  adopted.node_bound_view_build_allocation_count = 1U;
+  adopted.node_bound_view_build_kernel_launch_count = 1U;
+  adopted.node_bound_view_build_synchronization_count = 1U;
+  adopted.node_bound_view_validation_device_to_host_byte_count =
+      2U * sizeof(std::uint64_t);
   adopted.source_snapshot_epoch = audit.source_snapshot_epoch;
   adopted.cuda_device = traversal_lease.cuda_device_;
   adopted.execution_kind =
@@ -2206,10 +2507,24 @@ adopt_phase15_morton_yao48_device_tiled_traversal(
       audit.active_morton_point_ids_retained;
   adopted.certified_device_nodes_retained =
       audit.certified_device_nodes_retained;
+  adopted.node_bound_view_extent_authenticated =
+      adopted.resolved_node_bound_count == expected_node_count &&
+      adopted.retained_node_bound_view_capacity_bytes ==
+          node_bound_view_bytes;
+  adopted.node_bound_view_validation_sentinel_authenticated =
+      node_bound_resources->validation_sentinel_authenticated();
+  adopted.node_bound_view_bound_to_snapshot_identity =
+      audit.source_snapshot_epoch != 0U &&
+      adopted.source_cloud_identity != nullptr;
+  adopted.node_bound_view_built_once_per_adoption = true;
+  adopted.node_bound_view_reused_without_tile_allocation = true;
+  adopted.source_node_extremum_point_ids_retained = true;
+  adopted.node_bound_view_build_included_in_context_creation = true;
   adopted.host_fake_lifecycle_exercised = false;
   adopted.cuda_device_storage_retained =
       audit.cuda_device_storage_retained;
 
+  traversal_lease.retained_resources_.reset();
   traversal_lease.device_coordinate_bits_ = nullptr;
   traversal_lease.device_morton_point_ids_ = nullptr;
   traversal_lease.device_nodes_ = nullptr;
@@ -2240,6 +2555,11 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
       traversal.cuda_device,
       alignof(Phase15MortonYao48DeviceTiledNode),
       "node");
+  require_device_pointer(
+      traversal.device_node_bounds,
+      traversal.cuda_device,
+      alignof(Phase15MortonYao48DeviceTiledNodeBounds),
+      "resolved node-bound view");
 
   cudaDeviceProp properties{};
   check_cuda(
@@ -2473,6 +2793,7 @@ build_phase15_morton_yao48_device_tiled_pair_frontier_on_device(
           traversal.device_morton_point_ids,
           static_cast<const Phase15MortonYao48DeviceTiledNode*>(
               traversal.device_nodes),
+          traversal.device_node_bounds,
           checked_u64(
               request.point_count,
               "the Phase 15 tiled Morton/Yao48 point count does not fit "
