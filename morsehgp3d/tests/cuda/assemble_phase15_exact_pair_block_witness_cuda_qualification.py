@@ -135,12 +135,6 @@ BUILD_FAILURE_RE = re.compile(
     r"ld(?:\.lld)?: error:))",
     re.IGNORECASE,
 )
-QUALIFICATION_STDERR_RE = re.compile(
-    r"\[TIMEOUT\] unité=phase15-exact-pair-block-witness-cuda-qualification, "
-    r"borne douce=[1-9][0-9]*s, kill-after=5s, "
-    r"réserve post-timeout=60s\.\n"
-    r"[0-9a-f]{64}\n\Z"
-)
 
 
 def fail(message: str) -> NoReturn:
@@ -314,6 +308,13 @@ def validate_build_log(value: str, label: str) -> None:
         fail(f"{label} is empty or contains a build failure")
 
 
+def validate_qualification_stderr(value: str) -> None:
+    """The split-output worker isolates application stderr from infrastructure."""
+
+    if value != "":
+        fail("qualification application stderr must be empty")
+
+
 def validate_environment_artifact(
     path: Path,
     *,
@@ -346,8 +347,7 @@ def _validate_embedded_evidence(value: dict[str, Any]) -> None:
             fail(f"log {name} must be text")
         if digests.get(name) != hashlib.sha256(log.encode("utf-8")).hexdigest():
             fail(f"log digest differs for {name}")
-    if QUALIFICATION_STDERR_RE.fullmatch(logs["qualification_stderr"]) is None:
-        fail("qualification stderr is not the guarded timeout/container receipt")
+    validate_qualification_stderr(logs["qualification_stderr"])
     validate_build_log(logs["release_build"], "release build log")
     validate_build_log(logs["audit_build"], "audit build log")
     direct = validate_qualification(
@@ -372,6 +372,7 @@ def _validate_embedded_evidence(value: dict[str, Any]) -> None:
         "memcheck": "passed",
         "memcheck_qualification": memcheck,
         "qualification": direct,
+        "qualification_stderr_empty": True,
         "racecheck": "passed",
         "racecheck_qualification": racecheck,
         "release_build": "passed",
@@ -576,6 +577,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "memcheck": "passed",
         "memcheck_qualification": memcheck,
         "qualification": direct,
+        "qualification_stderr_empty": True,
         "racecheck": "passed",
         "racecheck_qualification": racecheck,
         "release_build": "passed",
