@@ -46,6 +46,7 @@ PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=0
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=0
 PHASE15_RANKED_PAIR_CLASSIFIER=0
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA=0
+PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC=0
 MORTON_YAO48_SEED_WORK_PROFILE=0
 
 SESSION_CERTIFIED=0
@@ -75,6 +76,8 @@ LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT=""
+LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT=""
+LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -96,7 +99,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5|--phase15-device-frontier-50k-kmax5-warm] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--phase15-exact-pair-block-witness-cuda] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5|--phase15-device-frontier-50k-kmax5-warm] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--phase15-exact-pair-block-witness-cuda] [--phase15-resident-transactional-semantic] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -201,6 +204,21 @@ smoke et ne ferme ni catalogue global, ni hiérarchie, ni SLO. Elle s'exécute
 seule ou, exclusivement, dans la même session que le profil explicite
 --phase15-device-frontier-50k-kmax5-warm.
 
+--phase15-resident-transactional-semantic qualifie exclusivement la fixture
+sémantique résidente n=16 pour K=5 puis K=10. Chaque exécution est bornée à
+60 secondes et mesurée par l'horloge murale externe de l'invité. Elle exige
+les masses fermées, les recettes certifiée/fail-open, l'autorité terminale,
+un unique lancement persistant, zéro readback intermédiaire et un ELF sm_120
+sans PTX. La même campagne enchaîne le full-chain vers la source du réducteur
+sur moment_curve_12 pour K=5 puis K=10 (60 s chacun), puis construit une fois
+la frontière device et exécute, dans cet ordre, 50k adversarial rang 11
+(120 s), 10M affine direct-scale rang 11 (180 s) et 30M affine direct-scale
+rang 11 (240 s). Le 50k doit fermer son contrat; 10M/30M peuvent rapporter
+une censure ou une couverture incomplète avec JSON valide et code zéro. Ces
+deux derniers résultats restent des diagnostics component/profile-only et
+ne revendiquent ni exactitude full-pipeline, ni scale_eligible, ni catalogue
+global, hiérarchie, SLO ou statut public.
+
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
 dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
@@ -292,6 +310,12 @@ while (($# > 0)); do
             PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA=1
             shift
             ;;
+        --phase15-resident-transactional-semantic)
+            ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 0)) || \
+                die "--phase15-resident-transactional-semantic ne peut être fourni qu'une fois."
+            PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC=1
+            shift
+            ;;
         --result-dir)
             (($# >= 2)) || die "Valeur manquante après --result-dir."
             RESULT_DIR="$2"
@@ -380,6 +404,18 @@ if ((PHASE15_RANKED_PAIR_CLASSIFIER == 1 && \
      PHASE15_DEVICE_FRONTIER_50K == 1 || \
      PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1))); then
     die "--phase15-ranked-pair-classifier est mutuellement exclusive de tous les autres compagnons."
+fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1 && \
+    (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || \
+     PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
+     PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
+     PHASE15_EXACT_DIAMETRAL_PHI == 1 || \
+     PHASE15_DEVICE_FRONTIER_50K == 1 || \
+     PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1 || \
+     PHASE15_RANKED_PAIR_CLASSIFIER == 1 || \
+     PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1))); then
+    die "--phase15-resident-transactional-semantic est mutuellement exclusive de tous les autres compagnons."
 fi
 
 ((ASSUME_YES == 1)) || \
@@ -553,6 +589,12 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
         ! -L "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
+    LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT="${RESULT_DIR}/phase15-resident-transactional-semantic-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" && \
+        ! -L "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
@@ -697,6 +739,14 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
             LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
         fi
         die "Impossible de créer l'artefact exact pair-block witness CUDA Phase 15 temporaire local."
+    fi
+fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
+    if ! LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase15-resident-transactional-semantic-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact resident-transactional-semantic Phase 15 temporaire local."
     fi
 fi
 
@@ -1205,6 +1255,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -1294,6 +1348,7 @@ printf '%s\n' \
     "  négatif Gabriel q=3: $([[ ${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR} == 1 ]] && printf 'carrier pair-only; aucune suppression Gamma2 activée' || printf 'désactivé')" \
     "  classifieur rangs 2-3: $([[ ${PHASE15_RANKED_PAIR_CLASSIFIER} == 1 ]] && printf 'qualification CUDA native bornée activée' || printf 'désactivé')" \
     "  pair-block A×B×W: $([[ ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA} == 1 ]] && printf 'différentiel CUDA natif borné activé' || printf 'désactivé')" \
+    "  campagne resident: $([[ ${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC} == 1 ]] && printf 'scheduler n=16 K5/K10 + reducer-source K5/K10 + frontier 50k/10M/30M activés' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -1327,6 +1382,7 @@ remote_phase15_device_frontier_50k_artifact=""
 remote_phase15_device_frontier_strict_interior_artifact=""
 remote_phase15_ranked_pair_classifier_artifact=""
 remote_phase15_exact_pair_block_witness_cuda_artifact=""
+remote_phase15_resident_transactional_semantic_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -1342,6 +1398,7 @@ quoted_phase15_device_frontier_50k_artifact=""
 quoted_phase15_device_frontier_strict_interior_artifact=""
 quoted_phase15_ranked_pair_classifier_artifact=""
 quoted_phase15_exact_pair_block_witness_cuda_artifact=""
+quoted_phase15_resident_transactional_semantic_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
@@ -1353,6 +1410,7 @@ phase15_device_frontier_50k_worker_option=""
 phase15_device_frontier_strict_interior_worker_option=""
 phase15_ranked_pair_classifier_worker_option=""
 phase15_exact_pair_block_witness_cuda_worker_option=""
+phase15_resident_transactional_semantic_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
@@ -1430,6 +1488,11 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
     quoted_phase15_exact_pair_block_witness_cuda_artifact="$(shell_quote "${remote_phase15_exact_pair_block_witness_cuda_artifact}")"
     phase15_exact_pair_block_witness_cuda_worker_option=" --phase15-exact-pair-block-witness-cuda-output ${quoted_phase15_exact_pair_block_witness_cuda_artifact}"
 fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
+    remote_phase15_resident_transactional_semantic_artifact="${REMOTE_WORKDIR}/phase15-resident-transactional-semantic-result.json"
+    quoted_phase15_resident_transactional_semantic_artifact="$(shell_quote "${remote_phase15_resident_transactional_semantic_artifact}")"
+    phase15_resident_transactional_semantic_worker_option=" --phase15-resident-transactional-semantic-output ${quoted_phase15_resident_transactional_semantic_artifact}"
+fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
@@ -1446,7 +1509,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}${phase15_exact_pair_block_witness_cuda_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}${phase15_exact_pair_block_witness_cuda_worker_option}${phase15_resident_transactional_semantic_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1595,6 +1658,19 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase15_exact_pair_block_witness_cuda_artifact}" \
         "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase15_resident_transactional_semantic_artifact}" \
+        "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -2088,6 +2164,718 @@ assembler.validate_artifact_file(
     git_sha=git_sha,
     environment_artifact_path=environment_artifact_path,
 )
+PY
+fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
+    [[ -s "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" ]] || \
+        die "Artefact resident-transactional-semantic Phase 15 distant récupéré mais vide."
+    python3 -B - \
+        "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+sys.path.insert(0, sys.argv[4])
+import assemble_phase15_device_frontier_50k_qualification as frontier_assembler
+
+
+def fail(message):
+    raise SystemExit(message)
+
+
+def reject_duplicates(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            fail(f"duplicate JSON key: {key}")
+        value[key] = item
+    return value
+
+
+def exact_object(value, keys, context):
+    if not isinstance(value, dict) or set(value) != set(keys):
+        fail(f"{context}: unexpected object shape")
+    return value
+
+
+def integer(value, context, minimum=0):
+    if type(value) is not int or value < minimum:
+        fail(f"{context}: invalid integer")
+    return value
+
+
+def sha256_text(value):
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def validate_run(value, maximum_order):
+    exact_object(
+        value,
+        {
+            "schema", "backend", "profile", "mode", "public_status",
+            "point_count", "maximum_order", "fixture", "maximum_closed_rank",
+            "require_complete", "status", "qualified_runtime_contract",
+            "runtime_smoke_passed", "rollback_contract_passed",
+            "semantic_recipe_contract_passed", "qualified",
+            "global_pair_coverage_closed", "terminal_authority_complete",
+            "capacity_wave_rollback", "mass", "counts", "cuda",
+            "timings_nanoseconds", "claims", "qualified_scope",
+        },
+        f"run K={maximum_order}",
+    )
+    expected_scalars = {
+        "schema": "morsehgp3d.phase15.resident_transactional_frontier_qualification.v1",
+        "backend": "cuda_g4",
+        "profile": "hgp_reduced",
+        "mode": "resident_transactional_pair_partition",
+        "public_status": "not_claimed",
+        "point_count": 16,
+        "maximum_order": maximum_order,
+        "fixture": "semantic_line_16",
+        "maximum_closed_rank": maximum_order + 1,
+        "require_complete": True,
+        "status": "qualified_cuda_terminal_authority",
+        "qualified_runtime_contract": True,
+        "runtime_smoke_passed": True,
+        "rollback_contract_passed": False,
+        "semantic_recipe_contract_passed": True,
+        "qualified": True,
+        "global_pair_coverage_closed": True,
+        "terminal_authority_complete": True,
+        "capacity_wave_rollback": False,
+        "qualified_scope": "pair_block_partition_scheduler_only",
+    }
+    for key, expected in expected_scalars.items():
+        if value.get(key) != expected or type(value.get(key)) is not type(expected):
+            fail(f"run K={maximum_order}.{key}: unexpected value")
+    mass = exact_object(
+        value.get("mass"),
+        {"universe", "pending", "inflight", "pruned", "terminal"},
+        f"run K={maximum_order}.mass",
+    )
+    if mass != {"universe": 120, "pending": 0, "inflight": 0, "pruned": 4, "terminal": 116}:
+        fail(f"run K={maximum_order}: semantic mass mismatch")
+    counts = exact_object(
+        value.get("counts"),
+        {
+            "waves", "commits", "rollbacks", "pending_blocks", "terminal_pairs",
+            "prune_receipts", "submitted_prune_recipes", "matched_prune_recipes",
+            "exact_prune_attempts", "certified_prunes", "fail_open_prunes",
+        },
+        f"run K={maximum_order}.counts",
+    )
+    for key in counts:
+        integer(counts[key], f"run K={maximum_order}.counts.{key}")
+    if counts["waves"] < 1 or counts["commits"] != counts["waves"]:
+        fail(f"run K={maximum_order}: non-committed resident wave")
+    for key, expected in {
+        "rollbacks": 0, "pending_blocks": 0, "terminal_pairs": 116,
+        "prune_receipts": 1, "submitted_prune_recipes": 2,
+        "matched_prune_recipes": 2, "exact_prune_attempts": 2,
+        "certified_prunes": 1, "fail_open_prunes": 1,
+    }.items():
+        if counts[key] != expected:
+            fail(f"run K={maximum_order}.counts.{key}: semantic mismatch")
+    cuda = exact_object(
+        value.get("cuda"),
+        {
+            "kernel_launches", "synchronizations", "intermediate_control_readbacks",
+            "kernel_elapsed_nanoseconds", "device_arena_bytes",
+            "serial_device_reference", "scale_eligible",
+        },
+        f"run K={maximum_order}.cuda",
+    )
+    for key, expected in {
+        "kernel_launches": 1,
+        "synchronizations": 3,
+        "intermediate_control_readbacks": 0,
+        "serial_device_reference": True,
+        "scale_eligible": False,
+    }.items():
+        if cuda.get(key) != expected or type(cuda.get(key)) is not type(expected):
+            fail(f"run K={maximum_order}.cuda.{key}: unexpected value")
+    integer(cuda.get("kernel_elapsed_nanoseconds"), "kernel elapsed", 1)
+    integer(cuda.get("device_arena_bytes"), "device arena", 1)
+    timings = exact_object(
+        value.get("timings_nanoseconds"),
+        {"generation", "canonicalization", "lbvh_build", "scheduler_wall", "total"},
+        f"run K={maximum_order}.timings",
+    )
+    for key in timings:
+        integer(timings[key], f"run K={maximum_order}.timings.{key}")
+    if timings["total"] < sum(timings[key] for key in ("generation", "canonicalization", "lbvh_build", "scheduler_wall")):
+        fail(f"run K={maximum_order}: total timing smaller than components")
+    if value.get("claims") != {
+        "pair_catalog_complete": False,
+        "supports_3_4": False,
+        "hierarchy_or_tree": False,
+        "min_cluster_size_applied": False,
+        "slo": False,
+    }:
+        fail(f"run K={maximum_order}: unexpected scientific claim")
+
+
+def validate_reducer_run(value, maximum_order):
+    exact_object(
+        value,
+        {
+            "schema", "backend", "git_sha", "profile", "mode", "public_status", "fixture",
+            "point_count", "maximum_order", "maximum_closed_rank",
+            "require_complete", "qualified",
+            "cut_certified", "pair_authority_certified", "higher_terminal",
+            "bridge_certified", "provider_replay_certified", "pair_cut",
+            "pair_classification", "reducer_source", "digests",
+            "timings_nanoseconds", "claims", "qualified_scope",
+        },
+        f"reducer run K={maximum_order}",
+    )
+    for key, expected in {
+        "schema": "morsehgp3d.phase15.transactional_pair_to_reducer_source_qualification.v1",
+        "backend": "cuda_g4_plus_reference_cpu",
+        "git_sha": git_sha,
+        "profile": "hgp_reduced",
+        "mode": "complete_direct_terminal_source_chain",
+        "public_status": "not_claimed",
+        "fixture": "moment_curve_12",
+        "point_count": 12,
+        "maximum_order": maximum_order,
+        "maximum_closed_rank": maximum_order + 1,
+        "require_complete": True,
+        "qualified": True,
+        "cut_certified": True,
+        "pair_authority_certified": True,
+        "higher_terminal": True,
+        "bridge_certified": True,
+        "provider_replay_certified": True,
+        "qualified_scope": "terminal_direct_supports_to_bounded_reducer_source_only",
+    }.items():
+        if value.get(key) != expected or type(value.get(key)) is not type(expected):
+            fail(f"reducer run K={maximum_order}.{key}: unexpected value")
+    pair_cut = exact_object(
+        value.get("pair_cut"),
+        {
+            "universe", "pruned", "terminal", "kernel_launches",
+            "synchronizations", "kernel_elapsed_nanoseconds", "cuda_device",
+            "serial_device_reference", "scale_eligible",
+        },
+        "reducer pair cut",
+    )
+    for key in ("universe", "pruned", "terminal", "kernel_launches", "synchronizations", "cuda_device"):
+        integer(pair_cut.get(key), f"reducer pair cut.{key}")
+    if (
+        pair_cut["universe"] != 66
+        or pair_cut["pruned"] + pair_cut["terminal"] != 66
+        or pair_cut["terminal"] < 1
+        or pair_cut["kernel_launches"] != 1
+        or pair_cut["synchronizations"] != 3
+        or pair_cut.get("serial_device_reference") is not True
+        or pair_cut.get("scale_eligible") is not False
+    ):
+        fail("reducer moment-curve pair cut does not close")
+    integer(pair_cut.get("kernel_elapsed_nanoseconds"), "reducer kernel elapsed", 1)
+    classification = exact_object(
+        value.get("pair_classification"),
+        {"terminal_pairs", "above_rank", "records", "node_visits"},
+        "reducer pair classification",
+    )
+    for key in classification:
+        integer(classification[key], f"reducer classification.{key}")
+    if classification["terminal_pairs"] != pair_cut["terminal"] or classification["above_rank"] > classification["terminal_pairs"] or classification["records"] != classification["terminal_pairs"] - classification["above_rank"] or classification["node_visits"] < 1:
+        fail("reducer pair classification does not close")
+    source = exact_object(
+        value.get("reducer_source"),
+        {"events", "seeds", "batches", "visited_batches"},
+        "reducer source",
+    )
+    for key in source:
+        integer(source[key], f"reducer source.{key}")
+    if source["visited_batches"] != source["batches"]:
+        fail("reducer provider replay is incomplete")
+    digests = exact_object(
+        value.get("digests"),
+        {
+            "submitted_recipe_fnv1a", "final_cut_fnv1a",
+            "pair_cloud_sha256", "pair_lbvh_sha256", "pair_output_sha256",
+            "pair_semantic_sha256", "higher_semantic_sha256",
+            "higher_output_chain_sha256", "higher_checkpoint_sha256",
+            "normalized_terminal_output_sha256",
+            "reducer_source_manifest_sha256",
+        },
+        "reducer digests",
+    )
+    integer(digests.get("submitted_recipe_fnv1a"), "reducer submitted recipe digest", 1)
+    integer(digests.get("final_cut_fnv1a"), "reducer final cut digest", 1)
+    for key in set(digests) - {"submitted_recipe_fnv1a", "final_cut_fnv1a"}:
+        digest = digests[key]
+        if (
+            not isinstance(digest, str)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            or digest == "0" * 64
+        ):
+            fail(f"reducer digests.{key}: invalid certified SHA-256")
+    timings = exact_object(
+        value.get("timings_nanoseconds"),
+        {
+            "generation", "canonicalization", "lbvh_build", "scheduler_setup_wall",
+            "scheduler_wall",
+            "cut_validation_wall", "pair_adapter_wall", "higher_support_wall",
+            "bridge_wall", "bridge_output_inspection_wall",
+            "provider_replay_wall", "total",
+        },
+        "reducer timings",
+    )
+    for key in timings:
+        integer(timings[key], f"reducer timings.{key}")
+    if timings["total"] < sum(timings[key] for key in timings if key != "total"):
+        fail("reducer total timing is smaller than components")
+    if value.get("claims") != {
+        "ordinary_or_higher_order_delaunay": False,
+        "global_pair_matrix": False,
+        "hierarchy_reduction": False,
+        "public_exact": False,
+    }:
+        fail("reducer run makes an unexpected claim")
+
+
+def validate_direct_scale_run(value, point_count):
+    if not isinstance(value, dict) or "error" in value:
+        fail(f"direct-scale {point_count}: failure diagnostic or non-object")
+    for key, expected in {
+        "schema": "morsehgp3d.phase15.morton_yao48_device_tiled_pair_frontier_direct_scale.v1",
+        "backend": "cuda_g4",
+        "profile": "hgp_reduced",
+        "mode": "device_resident_budgeted_morton_yao48_anchor_tiles_direct_scale",
+        "public_status": "not_claimed",
+        "deployment_status": "profile_only",
+        "component_only": True,
+        "profile_only": True,
+        "run_kind": "direct_scale",
+        "point_count": point_count,
+        "family": "affine_uniform_binary64",
+        "maximum_closed_rank": 11,
+        "prune_semantics": "closed_rank_window",
+        "required_witness_count": 10,
+        "direct_large_scale_guard_passed": True,
+        "execution_success": True,
+        "backpressure_validated": True,
+        "exactness_claimed": False,
+        "product_claimed": False,
+        "qualification_claimed": False,
+        "scalability_claimed": False,
+        "scientific_claimed": False,
+        "global_pair_matrix_materialized": False,
+        "higher_order_structure_materialized": False,
+        "ordinary_delaunay_materialized": False,
+        "ordinary_emst_computed": False,
+        "dense_pair_fallback_performed": False,
+        "raw_candidate_or_prune_view_accessed": False,
+        "scientific_pair_catalog_published": False,
+        "warm_e2e_slo_claimed": False,
+    }.items():
+        if value.get(key) != expected or type(value.get(key)) is not type(expected):
+            fail(f"direct-scale {point_count}.{key}: unexpected value")
+    if value.get("git_sha") != git_sha:
+        fail(f"direct-scale {point_count}: git binding mismatch")
+    for key in (
+        "generation_ns", "canonicalization_ns", "build_ns", "lease_release_ns",
+        "host_release_ns", "context_creation_ns", "context_release_ns",
+        "frontier_ns", "total_ns", "candidate_pair_mass",
+        "certified_pruned_pair_mass", "unresolved_pair_mass",
+        "unordered_pair_universe_count",
+    ):
+        integer(value.get(key), f"direct-scale {point_count}.{key}")
+    if value["total_ns"] < value["generation_ns"] + value["canonicalization_ns"] + value["frontier_ns"]:
+        fail(f"direct-scale {point_count}: total timing smaller than major components")
+    if value["candidate_pair_mass"] + value["certified_pruned_pair_mass"] + value["unresolved_pair_mass"] != value["unordered_pair_universe_count"] or value.get("pair_mass_partition_validated") is not True:
+        fail(f"direct-scale {point_count}: pair mass partition mismatch")
+    for key in ("coverage_complete", "coverage_success", "complete_pair_mass_validated", "censored"):
+        if type(value.get(key)) is not bool:
+            fail(f"direct-scale {point_count}.{key}: expected boolean diagnostic")
+    if value.get("scale_eligible", False) is not False:
+        fail(f"direct-scale {point_count}: must not become scale_eligible")
+    if value["coverage_complete"] != value["coverage_success"] or value["complete_pair_mass_validated"] != (value["coverage_complete"] and value["unresolved_pair_mass"] == 0):
+        fail(f"direct-scale {point_count}: completion diagnostics mismatch")
+    if value["coverage_complete"]:
+        if value["censored"] or value["unresolved_pair_mass"] != 0 or value.get("stop_reason") != "none":
+            fail(f"direct-scale {point_count}: complete coverage carries censure")
+    elif (
+        not value["censored"]
+        or value["unresolved_pair_mass"] == 0
+        or value.get("stop_reason") in (None, "none")
+    ):
+        fail(f"direct-scale {point_count}: incomplete coverage lacks terminal censure")
+
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+environment_path = Path(sys.argv[3])
+raw = artifact_path.read_text(encoding="utf-8")
+value = json.loads(raw, object_pairs_hook=reject_duplicates)
+if raw != json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n":
+    fail("resident artifact is not canonical one-object JSON")
+exact_object(
+    value,
+    {
+        "architecture", "artifact_role", "backend", "binary",
+        "build_commands", "campaign_binaries", "claims", "evidence",
+        "execution", "fixture", "frontier_profile_runs", "git", "image",
+        "log_sha256", "mode", "phase", "profile", "provenance",
+        "public_status", "qualified_scope", "reducer_source_runs", "runs",
+        "schema", "status", "vm_lifecycle",
+    },
+    "artifact",
+)
+for key, expected in {
+    "schema": "morsehgp3d.phase15.resident_transactional_semantic_qualification.v1",
+    "artifact_role": "component_qualification_only",
+    "backend": "cuda_g4",
+    "profile": "hgp_reduced",
+    "mode": "resident_transactional_pair_partition",
+    "phase": "15",
+    "fixture": "semantic_line_16",
+    "public_status": "not_claimed",
+    "qualified_scope": (
+        "bounded_scheduler_reducer_source_and_device_frontier_components_only"
+    ),
+    "status": "worker_passed_pending_shutdown",
+}.items():
+    if value.get(key) != expected:
+        fail(f"artifact.{key}: unexpected value")
+if value.get("git") != {"clean": True, "sha": git_sha}:
+    fail("resident artifact git binding mismatch")
+if value.get("architecture") != {
+    "global_cells_materialized": False,
+    "global_cofaces_materialized": False,
+    "global_incidences_materialized": False,
+    "higher_order_delaunay_materialized": False,
+}:
+    fail("resident artifact materialization contract mismatch")
+if value.get("claims") != {
+    "hierarchy_or_tree": False,
+    "min_cluster_size_applied": False,
+    "pair_catalog_complete": False,
+    "public_scientific_status": False,
+    "scalability": False,
+    "scale_eligible": False,
+    "scientific_exactness_beyond_qualified_scope": False,
+    "slo": False,
+    "supports_3_4": False,
+}:
+    fail("resident artifact claims mismatch")
+if value.get("execution") != {
+    "campaign_run_order": [
+        "resident_scheduler_k5",
+        "resident_scheduler_k10",
+        "reducer_source_k5",
+        "reducer_source_k10",
+        "frontier_50k_rank11",
+        "direct_scale_10m_rank11",
+        "direct_scale_30m_rank11",
+    ],
+    "external_clock": "guest_host_realtime_nanoseconds",
+    "fixed_timeout_command": "/usr/bin/timeout --foreground --kill-after=5s 60s",
+    "point_count": 16,
+    "run_order": [5, 10],
+    "timeouts_seconds": {
+        "direct_scale_10m_rank11": 180,
+        "direct_scale_30m_rank11": 240,
+        "frontier_50k_rank11": 120,
+        "reducer_source_k10": 60,
+        "reducer_source_k5": 60,
+        "resident_scheduler_k10": 60,
+        "resident_scheduler_k5": 60,
+    },
+    "timeout_seconds_per_run": 60,
+}:
+    fail("resident artifact execution contract mismatch")
+if value.get("vm_lifecycle") != {
+    "guest_shutdown_guard_verified": True,
+    "stop_responsibility": "external_orchestrator",
+    "worker_mutates_gcp": False,
+}:
+    fail("resident artifact lifecycle contract mismatch")
+environment_digest = hashlib.sha256(environment_path.read_bytes()).hexdigest()
+if value.get("provenance") != {
+    "environment_artifact_schema": "morsehgp3d.phase3.qualification.v1",
+    "environment_artifact_sha256": environment_digest,
+}:
+    fail("resident artifact Phase 3 provenance mismatch")
+image = exact_object(value.get("image"), {"base_ref", "id", "ref"}, "image")
+if image.get("base_ref") != (
+    "nvidia/cuda:12.9.2-devel-ubuntu24.04@"
+    "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
+):
+    fail("resident artifact base image mismatch")
+if image.get("ref") != f"morsehgp3d-phase3:{git_sha}" or re.fullmatch(r"sha256:[0-9a-f]{64}", image.get("id", "")) is None:
+    fail("resident artifact image identity mismatch")
+binary = exact_object(value.get("binary"), {"elf_architectures", "ptx_embedded", "relative_path", "sha256"}, "binary")
+if binary != {
+    "elf_architectures": ["sm_120"],
+    "ptx_embedded": False,
+    "relative_path": (
+        "build/morsehgp3d-cuda-release/"
+        "morsehgp3d_gpu_exact_pair_block_transactional_frontier_"
+        "resident_cuda_qualification"
+    ),
+    "sha256": binary.get("sha256"),
+} or re.fullmatch(r"[0-9a-f]{64}", binary.get("sha256", "")) is None:
+    fail("resident artifact binary audit mismatch")
+campaign_binary_paths = {
+    "device_frontier": (
+        "build/morsehgp3d-cuda-release/"
+        "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification"
+    ),
+    "reducer_source": (
+        "build/morsehgp3d-cuda-release/"
+        "morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification"
+    ),
+    "resident_scheduler": (
+        "build/morsehgp3d-cuda-release/"
+        "morsehgp3d_gpu_exact_pair_block_transactional_frontier_"
+        "resident_cuda_qualification"
+    ),
+}
+campaign_binaries = exact_object(
+    value.get("campaign_binaries"), set(campaign_binary_paths), "campaign binaries"
+)
+for role, relative_path in campaign_binary_paths.items():
+    campaign_binary = exact_object(
+        campaign_binaries[role], {"relative_path", "sha256"},
+        f"campaign binary {role}",
+    )
+    if campaign_binary.get("relative_path") != relative_path or re.fullmatch(
+        r"[0-9a-f]{64}", campaign_binary.get("sha256", "")
+    ) is None:
+        fail(f"campaign binary {role}: invalid identity")
+if campaign_binaries["resident_scheduler"]["sha256"] != binary["sha256"]:
+    fail("resident campaign binary digest diverges from the ELF-audited binary")
+expected_build_commands = {
+    "audit_resident_scheduler": [
+        "cmake", "--build", "/workspace/repository/build/morsehgp3d-cuda-audit",
+        "--target",
+        "morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification",
+        "--parallel", "2",
+    ],
+    "release_device_frontier": [
+        "cmake", "--build", "/workspace/repository/build/morsehgp3d-cuda-release",
+        "--target",
+        "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
+        "--parallel", "8",
+    ],
+    "release_reducer_source": [
+        "cmake", "--build", "/workspace/repository/build/morsehgp3d-cuda-release",
+        "--target",
+        "morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification",
+        "--parallel", "2",
+    ],
+    "release_resident_scheduler": [
+        "cmake", "--build", "/workspace/repository/build/morsehgp3d-cuda-release",
+        "--target",
+        "morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification",
+        "--parallel", "2",
+    ],
+}
+if value.get("build_commands") != expected_build_commands:
+    fail("resident campaign build command contract mismatch")
+evidence_keys = {
+    "cuobjdump_elf", "cuobjdump_ptx", "cuobjdump_ptx_stderr",
+    "k5_stdout", "k5_stderr", "k10_stdout", "k10_stderr",
+    "reducer_k5_stdout", "reducer_k5_stderr",
+    "reducer_k10_stdout", "reducer_k10_stderr",
+    "frontier_50k_stdout", "frontier_50k_stderr",
+    "direct_10m_stdout", "direct_10m_stderr",
+    "direct_30m_stdout", "direct_30m_stderr",
+}
+evidence = exact_object(value.get("evidence"), evidence_keys, "evidence")
+for key in evidence:
+    if not isinstance(evidence[key], str):
+        fail(f"resident evidence {key} is not text")
+if sorted(set(re.findall(r"sm_[0-9]+", evidence["cuobjdump_elf"]))) != ["sm_120"]:
+    fail("resident ELF evidence is not exclusively sm_120")
+stderr_evidence_keys = {
+    "k5_stderr", "k10_stderr", "reducer_k5_stderr", "reducer_k10_stderr",
+    "frontier_50k_stderr", "direct_10m_stderr", "direct_30m_stderr",
+}
+if evidence["cuobjdump_ptx"].strip() or any(
+    evidence[key].strip() for key in stderr_evidence_keys
+):
+    fail("resident PTX or qualification stderr evidence is non-empty")
+log_keys = evidence_keys | {
+    "release_build", "audit_build", "reducer_build", "frontier_build",
+}
+log_sha256 = exact_object(value.get("log_sha256"), log_keys, "log_sha256")
+for key, digest in log_sha256.items():
+    if re.fullmatch(r"[0-9a-f]{64}", digest or "") is None:
+        fail(f"resident log digest is invalid: {key}")
+    if key in evidence and digest != sha256_text(evidence[key]):
+        fail(f"resident evidence digest mismatch: {key}")
+runs = value.get("runs")
+if not isinstance(runs, list) or len(runs) != 2:
+    fail("resident artifact must contain exactly two runs")
+for run, maximum_order in zip(runs, (5, 10), strict=True):
+    exact_object(
+        run,
+        {
+            "command", "external_wall_finished_epoch_nanoseconds",
+            "external_wall_nanoseconds",
+            "external_wall_started_epoch_nanoseconds", "maximum_order",
+            "result", "timeout_seconds",
+        },
+        f"artifact run K={maximum_order}",
+    )
+    if run.get("maximum_order") != maximum_order or run.get("timeout_seconds") != 60:
+        fail(f"artifact run K={maximum_order}: invocation mismatch")
+    expected_command = [
+        "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+        "/workspace/repository/build/morsehgp3d-cuda-release/"
+        "morsehgp3d_gpu_exact_pair_block_transactional_frontier_"
+        "resident_cuda_qualification",
+        "--point-count", "16", "--K", str(maximum_order),
+        "--semantic-line-fixture", "--require-complete",
+    ]
+    if run.get("command") != expected_command:
+        fail(f"artifact run K={maximum_order}: command mismatch")
+    started = integer(run.get("external_wall_started_epoch_nanoseconds"), "external wall start", 1)
+    finished = integer(run.get("external_wall_finished_epoch_nanoseconds"), "external wall finish", 1)
+    elapsed = integer(run.get("external_wall_nanoseconds"), "external wall elapsed", 1)
+    if finished <= started or elapsed != finished - started:
+        fail(f"artifact run K={maximum_order}: external wall measurement mismatch")
+    validate_run(run.get("result"), maximum_order)
+    stdout_key = f"k{maximum_order}_stdout"
+    stdout = evidence[stdout_key]
+    lines = stdout.splitlines()
+    if len(lines) != 1 or stdout != lines[0] + "\n":
+        fail(f"artifact run K={maximum_order}: stdout is not one JSON line")
+    if json.loads(lines[0], object_pairs_hook=reject_duplicates) != run["result"]:
+        fail(f"artifact run K={maximum_order}: stdout/result divergence")
+
+reducer_runs = value.get("reducer_source_runs")
+if not isinstance(reducer_runs, list) or len(reducer_runs) != 2:
+    fail("resident artifact must contain exactly two reducer-source runs")
+for run, maximum_order in zip(reducer_runs, (5, 10), strict=True):
+    exact_object(
+        run,
+        {
+            "command", "external_wall_finished_epoch_nanoseconds",
+            "external_wall_nanoseconds",
+            "external_wall_started_epoch_nanoseconds", "maximum_order",
+            "result", "timeout_seconds",
+        },
+        f"reducer-source run K={maximum_order}",
+    )
+    expected_command = [
+        "/usr/bin/timeout", "--foreground", "--kill-after=5s", "60s",
+        "/workspace/repository/build/morsehgp3d-cuda-release/"
+        "morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification",
+        "--K", str(maximum_order), "--require-complete",
+    ]
+    if (
+        run.get("maximum_order") != maximum_order
+        or run.get("timeout_seconds") != 60
+        or run.get("command") != expected_command
+    ):
+        fail(f"reducer-source run K={maximum_order}: invocation mismatch")
+    started = integer(
+        run.get("external_wall_started_epoch_nanoseconds"),
+        "reducer external wall start", 1,
+    )
+    finished = integer(
+        run.get("external_wall_finished_epoch_nanoseconds"),
+        "reducer external wall finish", 1,
+    )
+    elapsed = integer(
+        run.get("external_wall_nanoseconds"), "reducer external wall elapsed", 1
+    )
+    if finished <= started or elapsed != finished - started:
+        fail(f"reducer-source run K={maximum_order}: external wall mismatch")
+    validate_reducer_run(run.get("result"), maximum_order)
+    stdout = evidence[f"reducer_k{maximum_order}_stdout"]
+    lines = stdout.splitlines()
+    if len(lines) != 1 or stdout != lines[0] + "\n":
+        fail(f"reducer-source run K={maximum_order}: stdout is not one JSON line")
+    if json.loads(lines[0], object_pairs_hook=reject_duplicates) != run["result"]:
+        fail(f"reducer-source run K={maximum_order}: stdout/result divergence")
+
+frontier_runs = value.get("frontier_profile_runs")
+frontier_contracts = (
+    (50000, 120, "component_qualification"),
+    (10000000, 180, "profile_only_diagnostic"),
+    (30000000, 240, "profile_only_diagnostic"),
+)
+if not isinstance(frontier_runs, list) or len(frontier_runs) != len(frontier_contracts):
+    fail("resident artifact must contain the ordered 50k/10M/30M frontier runs")
+frontier_binary = (
+    "/workspace/repository/build/morsehgp3d-cuda-release/"
+    "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification"
+)
+seed = "1558325537444281125"
+for run, (point_count, timeout_seconds, run_kind) in zip(
+    frontier_runs, frontier_contracts, strict=True
+):
+    exact_object(
+        run,
+        {
+            "command", "external_wall_finished_epoch_nanoseconds",
+            "external_wall_nanoseconds",
+            "external_wall_started_epoch_nanoseconds", "point_count",
+            "result", "run_kind", "timeout_seconds",
+        },
+        f"frontier profile run n={point_count}",
+    )
+    if point_count == 50000:
+        expected_command = [
+            "/usr/bin/timeout", "--foreground", "--kill-after=5s", "120s",
+            frontier_binary, "--point-count", "50000", "--family",
+            "adversarial_mixed_dyadic", "--maximum-closed-rank", "11",
+            "--anchor-tile-capacity", "4096", "--seed", seed,
+        ]
+    else:
+        expected_command = [
+            "/usr/bin/timeout", "--foreground", "--kill-after=5s",
+            f"{timeout_seconds}s", frontier_binary, "--point-count",
+            str(point_count), "--family", "affine_uniform_binary64",
+            "--maximum-closed-rank", "11", "--direct-scale",
+            "--anchor-tile-capacity", "4096", "--seed", seed,
+        ]
+    if (
+        run.get("point_count") != point_count
+        or run.get("timeout_seconds") != timeout_seconds
+        or run.get("run_kind") != run_kind
+        or run.get("command") != expected_command
+    ):
+        fail(f"frontier profile run n={point_count}: invocation mismatch")
+    started = integer(
+        run.get("external_wall_started_epoch_nanoseconds"),
+        "frontier external wall start", 1,
+    )
+    finished = integer(
+        run.get("external_wall_finished_epoch_nanoseconds"),
+        "frontier external wall finish", 1,
+    )
+    elapsed = integer(
+        run.get("external_wall_nanoseconds"), "frontier external wall elapsed", 1
+    )
+    if finished <= started or elapsed != finished - started:
+        fail(f"frontier profile run n={point_count}: external wall mismatch")
+    if point_count == 50000:
+        frontier_assembler.validate_qualification(
+            run.get("result"), git_sha=git_sha,
+            maximum_closed_rank=11, warm_profile=False,
+        )
+        stdout_key = "frontier_50k_stdout"
+    else:
+        validate_direct_scale_run(run.get("result"), point_count)
+        stdout_key = f"direct_{point_count // 1000000}m_stdout"
+    stdout = evidence[stdout_key]
+    lines = stdout.splitlines()
+    if len(lines) != 1 or stdout != lines[0] + "\n":
+        fail(f"frontier profile run n={point_count}: stdout is not one JSON line")
+    if json.loads(lines[0], object_pairs_hook=reject_duplicates) != run["result"]:
+        fail(f"frontier profile run n={point_count}: stdout/result divergence")
 PY
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
@@ -3742,7 +4530,9 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT}" \
     "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}" \
     "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
-    "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" <<'PY'
+    "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" \
+    "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" \
+    "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" <<'PY'
 import hashlib
 import json
 import os
@@ -3799,6 +4589,12 @@ if sys.argv[30] or sys.argv[31]:
             "paire de publication exact pair-block witness CUDA Phase 15 incomplète"
         )
     pairs.append((Path(sys.argv[30]), Path(sys.argv[31])))
+if sys.argv[32] or sys.argv[33]:
+    if not sys.argv[32] or not sys.argv[33]:
+        raise SystemExit(
+            "paire de publication resident-transactional-semantic Phase 15 incomplète"
+        )
+    pairs.append((Path(sys.argv[32]), Path(sys.argv[33])))
 
 documents = []
 for temporary, _ in pairs:
@@ -3924,6 +4720,9 @@ fi
 if [[ -n "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
@@ -3936,6 +4735,7 @@ LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
+LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -3987,6 +4787,10 @@ fi
 if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
     printf '[ARTEFACT] Qualification exact pair-block witness CUDA Phase 15 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}"
+fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
+    printf '[ARTEFACT] Qualification resident-transactional-semantic Phase 15 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -4045,4 +4849,8 @@ fi
 if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
     printf '[SUCCÈS] Qualification exact pair-block witness CUDA Phase 15 compagnon conservée : %s\n' \
         "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}"
+fi
+if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
+    printf '[SUCCÈS] Qualification resident-transactional-semantic Phase 15 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}"
 fi

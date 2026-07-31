@@ -3,6 +3,7 @@
 #include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/integer.hpp"
+#include "morsehgp3d/hierarchy/exact_direct_pair_terminal_authority.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/hierarchy/pair_support_stream.hpp"
 #include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
@@ -17,7 +18,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_support_terminal_certificate_schema_version = 3U;
+    direct_support_terminal_certificate_schema_version = 5U;
 inline constexpr std::string_view direct_support_terminal_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_support_terminal_profile =
@@ -27,10 +28,11 @@ inline constexpr std::string_view direct_support_terminal_mode =
 inline constexpr std::string_view direct_support_terminal_public_status =
     "not_claimed";
 inline constexpr std::string_view direct_support_terminal_proof_basis =
-    "either_fresh_exact_pair_v1_or_sealed_sparse_anchored_pair_session_"
-    "v1_and_either_fresh_grouped_higher_v2_replay_or_sealed_root_"
-    "anchored_fixed_chunk_higher_run_terminal_support_catalog_arities_"
-    "two_through_four_v3";
+    "exactly_one_of_fresh_exact_pair_v1_or_sealed_sparse_anchored_pair_"
+    "session_v1_or_sealed_transactional_direct_pair_terminal_authority_"
+    "v1_and_either_fresh_grouped_higher_v2_replay_or_sealed_root_anchored_"
+    "fixed_chunk_higher_run_terminal_support_catalog_arities_two_through_"
+    "four_with_complete_normalized_output_digest_v5";
 
 // This is a certificate for the direct support catalogue only.  It does not
 // construct a hierarchy, publish forest semantics, or promote a public exact
@@ -133,6 +135,7 @@ enum class ExactDirectSupportPairSourceKind : std::uint8_t {
   unspecified,
   fresh_resident_replay,
   sealed_sparse_anchored_session,
+  sealed_transactional_pair_terminal_authority,
 };
 
 struct ExactDirectSupportTerminalCertificate {
@@ -161,6 +164,10 @@ struct ExactDirectSupportTerminalCertificate {
   contract::CanonicalId higher_lbvh_digest{};
   contract::CanonicalId pair_semantic_digest{};
   contract::CanonicalId higher_semantic_digest{};
+  // Binds every normalized support-2/3/4 event and diagnostic, including
+  // derived H0 roles.  Pair-specific digests remain separate provenance
+  // domains; this digest closes the complete facade payload.
+  contract::CanonicalId normalized_terminal_output_digest{};
   std::array<ExactDirectSupportArityTerminalCertificate, 3>
       arity_certificates{};
   exact::BigInt exact_candidate_universe_size{0};
@@ -170,6 +177,10 @@ struct ExactDirectSupportTerminalCertificate {
   bool source_requirements_match{false};
   ExactDirectSupportPairSourceKind pair_source_kind{
       ExactDirectSupportPairSourceKind::unspecified};
+  // Complete provenance of the provider-neutral unordered transactional cut
+  // and its exact terminal classifier.  It remains default-initialized for
+  // fresh and sparse-anchored pair sources.
+  ExactDirectPairTerminalAudit pair_transactional_audit{};
   // budget.pair is meaningful only for the legacy fresh P7b source.  A P8l
   // source carries its own schedule and eight immutable physical caps below.
   bool pair_legacy_budget_applicable{false};
@@ -275,6 +286,19 @@ build_exact_direct_support_terminal_facade(
     std::size_t requested_maximum_order,
     const ExactHigherSupportStreamBudget& higher_budget,
     ExactSparseAnchoredPairTerminalAuthority pair_authority,
+    ExactHigherSupportTerminalAuthority higher_authority);
+
+// Consumes a provider-neutral, move-only support-2 authority produced from an
+// authenticated unordered transactional pair cut, plus the unchanged sealed
+// higher-support authority.  The host/fake source kind is accepted here for
+// contract tests; deployment qualification remains a concern of the caller.
+[[nodiscard]] ExactDirectSupportTerminalFacade
+build_exact_direct_support_terminal_facade(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportStreamBudget& higher_budget,
+    ExactDirectPairTerminalAuthority pair_authority,
     ExactHigherSupportTerminalAuthority higher_authority);
 
 struct ExactDirectSupportTerminalVerification {

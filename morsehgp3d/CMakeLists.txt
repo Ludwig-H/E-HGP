@@ -820,6 +820,95 @@ else()
   )
 endif()
 
+# Neutral move-only support-2 authority produced from an authenticated
+# unordered pair-block cut.  It is deliberately GPU-free and owns only
+# rank-relevant terminal records, never a dense pair catalogue.
+add_library(
+  morsehgp3d_exact_direct_pair_terminal_authority
+  STATIC
+    include/morsehgp3d/hierarchy/exact_direct_pair_terminal_authority.hpp
+    src/cpu/hierarchy/exact_direct_pair_terminal_authority.cpp
+)
+add_library(
+  morsehgp3d::exact_direct_pair_terminal_authority
+  ALIAS morsehgp3d_exact_direct_pair_terminal_authority
+)
+set_target_properties(
+  morsehgp3d_exact_direct_pair_terminal_authority
+  PROPERTIES
+    EXPORT_NAME exact_direct_pair_terminal_authority
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_exact_direct_pair_terminal_authority PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_exact_direct_pair_terminal_authority
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_exact_direct_pair_terminal_authority
+  PUBLIC morsehgp3d::pair_support
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_exact_direct_pair_terminal_authority PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_exact_direct_pair_terminal_authority
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+# Provider-neutral adapter.  Final executables choose exactly one resident
+# scheduler implementation: the host/fake contract in tests or CUDA on G4.
+add_library(
+  morsehgp3d_exact_pair_block_to_direct_pair_terminal
+  STATIC
+    include/morsehgp3d/gpu/exact_pair_block_to_direct_pair_terminal.hpp
+    src/gpu/exact_pair_block_to_direct_pair_terminal.cpp
+)
+add_library(
+  morsehgp3d::exact_pair_block_to_direct_pair_terminal
+  ALIAS morsehgp3d_exact_pair_block_to_direct_pair_terminal
+)
+set_target_properties(
+  morsehgp3d_exact_pair_block_to_direct_pair_terminal
+  PROPERTIES
+    EXPORT_NAME exact_pair_block_to_direct_pair_terminal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_exact_pair_block_to_direct_pair_terminal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_exact_pair_block_to_direct_pair_terminal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_exact_pair_block_to_direct_pair_terminal
+  PUBLIC morsehgp3d::exact_direct_pair_terminal_authority
+  PRIVATE
+    morsehgp3d::anchored_pair_candidate_classifier
+    morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_exact_pair_block_to_direct_pair_terminal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_exact_pair_block_to_direct_pair_terminal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 add_library(
   morsehgp3d_sparse_anchored_pair_session
   STATIC
@@ -926,6 +1015,7 @@ target_link_libraries(
   morsehgp3d_direct_support_terminal
   PUBLIC
     morsehgp3d::pair_support
+    morsehgp3d::exact_direct_pair_terminal_authority
     morsehgp3d::sparse_anchored_pair_session
     morsehgp3d::higher_support
   PRIVATE morsehgp3d::sanitizers
@@ -3697,6 +3787,37 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_executable(
+    morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
+    src/tools/gpu_exact_pair_block_to_reducer_source_cuda_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
+    PRIVATE
+      morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda
+      morsehgp3d::exact_pair_block_to_direct_pair_terminal
+      morsehgp3d::direct_morse_forest_source_authority
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
+    PRIVATE cxx_std_20
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
+    PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
   add_library(
     morsehgp3d_gpu_exact_pair_block_antichain_cuda
     STATIC
@@ -4613,6 +4734,7 @@ install(
     morsehgp3d_pair_support
     morsehgp3d_anchored_pair_witness_bank
     morsehgp3d_anchored_pair_candidate_classifier
+    morsehgp3d_exact_direct_pair_terminal_authority
     morsehgp3d_sparse_anchored_pair_session
     morsehgp3d_higher_support
     morsehgp3d_direct_support_terminal

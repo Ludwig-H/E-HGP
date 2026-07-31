@@ -3,6 +3,7 @@
 #include "morsehgp3d/hierarchy/capped_distinct_point_coverage.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_source_authority.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
+#include "morsehgp3d/hierarchy/exact_direct_pair_terminal_authority.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -12,7 +13,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_morse_terminal_reducer_source_bridge_schema_version = 1U;
+    direct_morse_terminal_reducer_source_bridge_schema_version = 2U;
 inline constexpr std::string_view
     direct_morse_terminal_reducer_source_bridge_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -30,7 +31,8 @@ inline constexpr std::string_view
     direct_morse_terminal_reducer_source_bridge_proof_basis =
         "sealed_pair_and_higher_terminal_authorities_complete_direct_"
         "supports_arities_two_through_four_then_fresh_event_seed_and_"
-        "bounded_reducer_source_replay_v1";
+        "bounded_reducer_source_replay_with_qualified_transactional_pair_"
+        "provenance_v2";
 
 enum class ExactDirectMorseTerminalReducerSourceBridgeDecision :
     std::uint8_t {
@@ -38,6 +40,7 @@ enum class ExactDirectMorseTerminalReducerSourceBridgeDecision :
   no_bridge_requested_order_not_five_or_ten,
   no_bridge_min_cluster_size_zero,
   no_bridge_pair_terminal_authority_not_sealed,
+  no_bridge_pair_terminal_authority_not_qualified_cuda,
   no_bridge_higher_terminal_authority_not_sealed,
   no_bridge_direct_support_catalog_not_terminal,
   no_bridge_relevant_extra_shell_diagnostics,
@@ -77,7 +80,10 @@ struct ExactDirectMorseTerminalReducerSourceBridgeAudit {
   std::size_t min_cluster_size{};
   bool requested_order_is_five_or_ten{false};
   bool min_cluster_size_positive{false};
+  ExactDirectSupportPairSourceKind pair_source_kind{
+      ExactDirectSupportPairSourceKind::unspecified};
   bool pair_terminal_authority_sealed_on_entry{false};
+  bool pair_terminal_authority_qualified_cuda_on_entry{false};
   bool higher_terminal_authority_sealed_on_entry{false};
   bool source_authorities_match{false};
   bool terminal_authorities_consumed_once{false};
@@ -181,6 +187,14 @@ class ExactDirectMorseTerminalReducerSourceBridge {
       std::unique_ptr<Impl> impl,
       ExactDirectMorseTerminalReducerSourceBridgeAudit audit) noexcept;
 
+  [[nodiscard]] static ExactDirectMorseTerminalReducerSourceBridgeBuildResult
+  finish_build(
+      const spatial::CanonicalPointCloud& cloud,
+      const ExactDirectSaddleArmSeedBudget& seed_budget,
+      std::size_t min_cluster_size,
+      ExactDirectMorseTerminalReducerSourceBridgeAudit audit,
+      ExactDirectSupportTerminalFacade facade);
+
   std::unique_ptr<Impl> impl_;
   ExactDirectMorseTerminalReducerSourceBridgeAudit audit_{};
 
@@ -193,6 +207,16 @@ class ExactDirectMorseTerminalReducerSourceBridge {
       const ExactDirectSaddleArmSeedBudget&,
       std::size_t,
       ExactSparseAnchoredPairTerminalAuthority&&,
+      ExactHigherSupportTerminalAuthority&&);
+  friend ExactDirectMorseTerminalReducerSourceBridgeBuildResult
+  build_exact_direct_morse_terminal_reducer_source_bridge(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t,
+      const ExactHigherSupportStreamBudget&,
+      const ExactDirectSaddleArmSeedBudget&,
+      std::size_t,
+      ExactDirectPairTerminalAuthority&&,
       ExactHigherSupportTerminalAuthority&&);
 };
 
@@ -216,6 +240,20 @@ build_exact_direct_morse_terminal_reducer_source_bridge(
     const ExactDirectSaddleArmSeedBudget& seed_budget,
     std::size_t min_cluster_size,
     ExactSparseAnchoredPairTerminalAuthority&& pair_authority,
+    ExactHigherSupportTerminalAuthority&& higher_authority);
+
+// Product Phase-15 entry.  Unlike the facade-level contract path, this bridge
+// accepts the neutral pair authority only when its resident cut provenance is
+// a qualified CUDA execution; a host/fake authority remains test-only.
+[[nodiscard]] ExactDirectMorseTerminalReducerSourceBridgeBuildResult
+build_exact_direct_morse_terminal_reducer_source_bridge(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportStreamBudget& higher_budget,
+    const ExactDirectSaddleArmSeedBudget& seed_budget,
+    std::size_t min_cluster_size,
+    ExactDirectPairTerminalAuthority&& pair_authority,
     ExactHigherSupportTerminalAuthority&& higher_authority);
 
 }  // namespace morsehgp3d::hierarchy

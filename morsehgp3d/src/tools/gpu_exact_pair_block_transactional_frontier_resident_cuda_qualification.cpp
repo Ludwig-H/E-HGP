@@ -2,8 +2,10 @@
 
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/gpu/morton_lbvh_build.hpp"
+#include "morsehgp3d/hierarchy/exact_block_rank_prune_receipt.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
+#include <array>
 #include <charconv>
 #include <chrono>
 #include <cstddef>
@@ -24,14 +26,17 @@ using Clock = std::chrono::steady_clock;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaConfig;
 using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaContext;
+using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaPruneRecipe;
 using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaStatus;
 using morsehgp3d::gpu::MortonLbvhBuildContext;
 using morsehgp3d::spatial::CanonicalPointCloud;
+using morsehgp3d::spatial::MortonLbvhIndex;
 
 struct Options {
   std::size_t point_count{};
   std::size_t maximum_order{};
   bool require_complete{false};
+  bool semantic_line_fixture{false};
 };
 
 [[nodiscard]] std::size_t parse_size(
@@ -57,6 +62,10 @@ struct Options {
       options.require_complete = true;
       continue;
     }
+    if (argument == "--semantic-line-fixture") {
+      options.semantic_line_fixture = true;
+      continue;
+    }
     if (index + 1 >= argc) {
       throw std::invalid_argument(
           "usage: --point-count N --K 5|10 [--require-complete]");
@@ -77,11 +86,87 @@ struct Options {
   }
   if (!point_count_seen || !maximum_order_seen ||
       options.point_count < 2U ||
-      (options.maximum_order != 5U && options.maximum_order != 10U)) {
+      (options.maximum_order != 5U && options.maximum_order != 10U) ||
+      (options.semantic_line_fixture && options.point_count != 16U)) {
     throw std::invalid_argument(
-        "qualification requires point-count >= 2 and K equal to 5 or 10");
+        "qualification requires point-count >= 2, K equal to 5 or 10, and "
+        "the semantic line fixture requires exactly 16 points");
   }
   return options;
+}
+
+[[nodiscard]] std::vector<CertifiedPoint3> semantic_line_points(
+    std::size_t point_count) {
+  std::vector<CertifiedPoint3> points;
+  points.reserve(point_count);
+  for (std::size_t index = 0U; index < point_count; ++index) {
+    const double coordinate = static_cast<double>(index);
+    points.push_back(CertifiedPoint3::from_binary64(
+        coordinate, coordinate / 16.0, coordinate / 256.0));
+  }
+  return points;
+}
+
+[[nodiscard]] std::size_t node_for_range(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::size_t leaf_begin,
+    std::size_t leaf_end) {
+  for (std::size_t node_index = 0U;
+       node_index < index.build_counters().node_count;
+       ++node_index) {
+    const auto probe = morsehgp3d::hierarchy::
+        certify_exact_block_rank_prune_receipt(
+            index,
+            cloud,
+            node_index,
+            node_index,
+            std::span<const std::size_t>{},
+            2U);
+    if (probe.status() == morsehgp3d::hierarchy::
+                              ExactBlockRankPruneStatus::
+                                  rejected_support_overlap &&
+        probe.audit().support_nodes[0].leaf_begin == leaf_begin &&
+        probe.audit().support_nodes[0].leaf_end == leaf_end) {
+      return node_index;
+    }
+  }
+  throw std::runtime_error(
+      "the semantic qualification LBVH range was not found");
+}
+
+[[nodiscard]] std::vector<
+    ExactPairBlockTransactionalFrontierResidentCudaPruneRecipe>
+semantic_line_recipes(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::size_t maximum_order) {
+  const std::size_t first_support = node_for_range(index, cloud, 0U, 2U);
+  const std::size_t second_support = node_for_range(index, cloud, 12U, 14U);
+  ExactPairBlockTransactionalFrontierResidentCudaPruneRecipe certified;
+  certified.source = {
+      morsehgp3d::gpu::ExactPairBlockAuthorityKind::cross,
+      {first_support, 0U, 2U},
+      {second_support, 12U, 14U},
+      4U};
+  certified.witness_node_count = maximum_order;
+  for (std::size_t witness_index = 0U;
+       witness_index < certified.witness_node_count;
+       ++witness_index) {
+    certified.witness_node_indices[witness_index] = node_for_range(
+        index,
+        cloud,
+        witness_index + 2U,
+        witness_index + 3U);
+  }
+
+  ExactPairBlockTransactionalFrontierResidentCudaPruneRecipe fail_open;
+  fail_open.source = {
+      morsehgp3d::gpu::ExactPairBlockAuthorityKind::cross,
+      {node_for_range(index, cloud, 0U, 8U), 0U, 8U},
+      {node_for_range(index, cloud, 8U, 16U), 8U, 16U},
+      64U};
+  return {certified, fail_open};
 }
 
 [[nodiscard]] std::vector<CertifiedPoint3> uniform_latin_points(
@@ -138,8 +223,9 @@ struct Options {
 int run(const Options& options) {
   const Clock::time_point total_begin = Clock::now();
   const Clock::time_point generation_begin = total_begin;
-  const std::vector<CertifiedPoint3> points =
-      uniform_latin_points(options.point_count);
+  const std::vector<CertifiedPoint3> points = options.semantic_line_fixture
+      ? semantic_line_points(options.point_count)
+      : uniform_latin_points(options.point_count);
   const Clock::time_point generation_end = Clock::now();
   const CanonicalPointCloud cloud =
       CanonicalPointCloud::rejecting_duplicates(
@@ -162,8 +248,14 @@ int run(const Options& options) {
           cloud,
           ExactPairBlockTransactionalFrontierResidentCudaConfig{
               options.maximum_order + 1U, 16U, 8U, 16U, 4U});
+  const std::vector<
+      ExactPairBlockTransactionalFrontierResidentCudaPruneRecipe>
+      recipes = options.semantic_line_fixture
+      ? semantic_line_recipes(index, cloud, options.maximum_order)
+      : std::vector<
+            ExactPairBlockTransactionalFrontierResidentCudaPruneRecipe>{};
   const Clock::time_point scheduler_begin = Clock::now();
-  auto result = scheduler.run({});
+  auto result = scheduler.run(recipes);
   const Clock::time_point scheduler_end = Clock::now();
 
   const auto& audit = result.audit();
@@ -191,8 +283,17 @@ int run(const Options& options) {
       audit.kernel_launch_count == 1U &&
       audit.synchronization_count == 3U && mass_conserved &&
       (complete_replay || rollback_contract);
-  const bool qualified = runtime_contract &&
-      (!options.require_complete || complete_replay);
+  const bool semantic_recipe_contract =
+      audit.recipe_catalog_nonempty && audit.recipe_path_exercised &&
+      audit.certified_prune_path_exercised &&
+      audit.fail_open_path_exercised &&
+      audit.fail_open_native_transition_validated;
+  // A rollback is a useful runtime/capacity smoke, never a terminal
+  // scientific qualification.  Keep the historical flag in the report for
+  // invocation provenance, but do not let its absence promote an incomplete
+  // cut.
+  const bool qualified =
+      runtime_contract && complete_replay && semantic_recipe_contract;
 
   std::cout
       << "{\"schema\":\"morsehgp3d.phase15.resident_transactional_"
@@ -203,6 +304,10 @@ int run(const Options& options) {
       << "\"public_status\":\"not_claimed\","
       << "\"point_count\":" << options.point_count << ','
       << "\"maximum_order\":" << options.maximum_order << ','
+      << "\"fixture\":\""
+      << (options.semantic_line_fixture ? "semantic_line_16"
+                                        : "uniform_latin")
+      << "\","
       << "\"maximum_closed_rank\":"
       << audit.maximum_closed_rank << ','
       << "\"require_complete\":"
@@ -210,6 +315,12 @@ int run(const Options& options) {
       << "\"status\":\"" << status_text(result.status()) << "\","
       << "\"qualified_runtime_contract\":"
       << (runtime_contract ? "true" : "false") << ','
+      << "\"runtime_smoke_passed\":"
+      << (runtime_contract ? "true" : "false") << ','
+      << "\"rollback_contract_passed\":"
+      << (rollback_contract ? "true" : "false") << ','
+      << "\"semantic_recipe_contract_passed\":"
+      << (semantic_recipe_contract ? "true" : "false") << ','
       << "\"qualified\":" << (qualified ? "true" : "false") << ','
       << "\"global_pair_coverage_closed\":"
       << (audit.global_pair_coverage_closed ? "true" : "false") << ','
@@ -230,6 +341,15 @@ int run(const Options& options) {
       << ",\"pending_blocks\":" << audit.pending_block_count
       << ",\"terminal_pairs\":" << audit.terminal_pair_count
       << ",\"prune_receipts\":" << audit.prune_receipt_count
+      << ",\"submitted_prune_recipes\":"
+      << audit.submitted_prune_recipe_count
+      << ",\"matched_prune_recipes\":"
+      << audit.matched_prune_recipe_count
+      << ",\"exact_prune_attempts\":"
+      << audit.exact_prune_attempt_count
+      << ",\"certified_prunes\":" << audit.certified_prune_count
+      << ",\"fail_open_prunes\":"
+      << audit.exact_prune_fail_open_count
       << "},"
       << "\"cuda\":{\"kernel_launches\":" << audit.kernel_launch_count
       << ",\"synchronizations\":" << audit.synchronization_count
@@ -238,6 +358,10 @@ int run(const Options& options) {
       << ",\"kernel_elapsed_nanoseconds\":"
       << audit.kernel_elapsed_nanoseconds
       << ",\"device_arena_bytes\":" << audit.device_arena_byte_count
+      << ",\"serial_device_reference\":"
+      << (audit.serial_device_reference ? "true" : "false")
+      << ",\"scale_eligible\":"
+      << (audit.scale_eligible ? "true" : "false")
       << "},"
       << "\"timings_nanoseconds\":{\"generation\":"
       << elapsed_nanoseconds(generation_begin, generation_end)

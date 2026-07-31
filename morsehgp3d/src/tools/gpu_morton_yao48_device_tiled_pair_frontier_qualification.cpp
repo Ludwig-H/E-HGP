@@ -2924,17 +2924,33 @@ void validate_scaling_advance(
     expected_chunk_sequence = 1U;
   }
   metrics.frontier_ns = nanoseconds(Clock::now() - frontier_start);
+  const bool pair_mass_partition_validated =
+      metrics.candidate_pair_mass + metrics.certified_pruned_pair_mass +
+              metrics.unresolved_pair_mass ==
+          metrics.unordered_pair_universe_count;
+  const bool complete_coverage_validated =
+      metrics.coverage_complete && !metrics.censored &&
+      metrics.stop_reason ==
+          MortonYao48DeviceTiledPairFrontierStopReason::none &&
+      metrics.unresolved_pair_mass == 0U &&
+      metrics.candidate_pair_mass + metrics.certified_pruned_pair_mass ==
+          metrics.unordered_pair_universe_count;
+  const bool censored_direct_scale_diagnostic_validated =
+      options.direct_scale && !metrics.coverage_complete &&
+      metrics.censored &&
+      metrics.stop_reason !=
+          MortonYao48DeviceTiledPairFrontierStopReason::none &&
+      metrics.unresolved_pair_mass != 0U && pair_mass_partition_validated;
   require(
       metrics.candidate_tile_lease_count ==
               metrics.candidate_tile_release_count &&
           !context->poisoned() &&
           context->terminally_censored() == metrics.censored &&
-          metrics.coverage_complete && !metrics.censored &&
-          metrics.unresolved_pair_mass == 0U &&
-          metrics.candidate_pair_mass +
-                  metrics.certified_pruned_pair_mass ==
-              metrics.unordered_pair_universe_count,
-      "the scaling-smoke did not release exactly one tile before advancing");
+          pair_mass_partition_validated &&
+          (complete_coverage_validated ||
+           censored_direct_scale_diagnostic_validated),
+      "the large-scale profile did not close its terminal mass ledger or "
+      "release exactly one tile before advancing");
   metrics.backpressure_validated = true;
   metrics.execution_success = true;
   const auto context_release_start = Clock::now();

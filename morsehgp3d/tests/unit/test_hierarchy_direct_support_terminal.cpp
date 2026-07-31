@@ -507,6 +507,32 @@ void test_sparse_pair_authority_avoids_p7b_replay() {
       !mutated_digest.terminal_catalog_certified(),
       "a sparse facade rejects a nonzero mutated pair output digest");
 
+  auto mutated_complete_digest = sparse_facade;
+  auto complete_digest_bytes =
+      mutated_complete_digest.certificate.normalized_terminal_output_digest
+          .bytes();
+  complete_digest_bytes[0] ^= 1U;
+  mutated_complete_digest.certificate.normalized_terminal_output_digest =
+      morsehgp3d::contract::CanonicalId{complete_digest_bytes};
+  check(
+      !mutated_complete_digest.terminal_catalog_certified(),
+      "a facade rejects a mutated complete normalized output digest");
+
+  auto mutated_higher_record = sparse_facade;
+  const auto higher_event = std::find_if(
+      mutated_higher_record.events.begin(),
+      mutated_higher_record.events.end(),
+      [](const auto& event) { return event.support_size > 2U; });
+  check(
+      higher_event != mutated_higher_record.events.end(),
+      "the facade digest fixture contains a higher-support event");
+  if (higher_event != mutated_higher_record.events.end()) {
+    ++higher_event->exterior_count;
+    check(
+        !mutated_higher_record.terminal_catalog_certified(),
+        "the complete output digest rejects a structurally plausible higher-support mutation");
+  }
+
   auto mutated_index = sparse_facade;
   ++mutated_index.events.front().event_index;
   check(

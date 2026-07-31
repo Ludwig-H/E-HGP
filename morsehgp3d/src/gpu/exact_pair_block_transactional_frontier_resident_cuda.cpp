@@ -233,6 +233,18 @@ inline constexpr std::uint64_t digest_prime = UINT64_C(1099511628211);
       block.second.node_index};
 }
 
+[[nodiscard]] auto authority_key(const ExactPairBlockAuthority& block) {
+  return std::tuple{
+      static_cast<std::uint8_t>(block.kind),
+      block.first.leaf_begin,
+      block.first.leaf_end,
+      block.first.node_index,
+      block.second.leaf_begin,
+      block.second.leaf_end,
+      block.second.node_index,
+      block.unordered_pair_mass};
+}
+
 }  // namespace
 
 struct ExactPairBlockTransactionalFrontierResidentCudaContext::HostState {
@@ -380,6 +392,216 @@ bool ExactPairBlockTransactionalFrontierResidentCudaResult::validated_for(
         std::array<spatial::PointId, 2U>{first_id, second_id}) {
       return false;
     }
+  }
+
+
+  // Reconstruct the scheduler's deterministic native split tree from the
+  // immutable LBVH and require the observed final cut to be exactly its leaf
+  // set.  Mass equality alone cannot exclude overlapping or duplicated
+  // Cartesian products, so it is not accepted as a coverage certificate.
+  using CutKey = decltype(authority_key(ExactPairBlockAuthority{}));
+  std::vector<CutKey> prune_keys;
+  std::vector<CutKey> terminal_keys;
+  std::vector<ExactPairBlockAuthority> replay_frontier;
+  try {
+    prune_keys.reserve(prune_receipts_.size());
+    terminal_keys.reserve(terminal_pairs_.size());
+    replay_frontier.reserve(
+        exact_pair_block_frontier_maximum_pending_authority_count);
+    for (const auto& receipt : prune_receipts_) {
+      prune_keys.push_back(authority_key(receipt.support_block));
+    }
+    for (const auto& terminal : terminal_pairs_) {
+      terminal_keys.push_back(authority_key(ExactPairBlockAuthority{
+          ExactPairBlockAuthorityKind::cross,
+          terminal.first_node,
+          terminal.second_node,
+          1U}));
+    }
+    std::sort(prune_keys.begin(), prune_keys.end());
+    std::sort(terminal_keys.begin(), terminal_keys.end());
+  } catch (const std::bad_alloc&) {
+    return false;
+  }
+  if (std::adjacent_find(prune_keys.begin(), prune_keys.end()) !=
+          prune_keys.end() ||
+      std::adjacent_find(terminal_keys.begin(), terminal_keys.end()) !=
+          terminal_keys.end()) {
+    return false;
+  }
+
+  const auto node_authority = [&index](std::size_t node_index) {
+    const auto& node = index.nodes_[node_index];
+    return ExactPairBlockNodeAuthority{
+        node_index, node.leaf_begin, node.leaf_end};
+  };
+  const auto make_diagonal = [&node_authority](
+                                 std::size_t node_index,
+                                 ExactPairBlockAuthority& result) {
+    const ExactPairBlockNodeAuthority node = node_authority(node_index);
+    std::size_t mass = 0U;
+    if (!checked_pair_count(node.leaf_count(), mass)) {
+      return false;
+    }
+    result = ExactPairBlockAuthority{
+        ExactPairBlockAuthorityKind::diagonal, node, node, mass};
+    return true;
+  };
+  const auto make_cross = [&node_authority](
+                              std::size_t first_node_index,
+                              std::size_t second_node_index,
+                              ExactPairBlockAuthority& result) {
+    ExactPairBlockNodeAuthority first =
+        node_authority(first_node_index);
+    ExactPairBlockNodeAuthority second =
+        node_authority(second_node_index);
+    if (second.leaf_begin < first.leaf_begin) {
+      std::swap(first, second);
+    }
+    std::size_t mass = 0U;
+    if (first.leaf_end > second.leaf_begin ||
+        !checked_product(first.leaf_count(), second.leaf_count(), mass)) {
+      return false;
+    }
+    result = ExactPairBlockAuthority{
+        ExactPairBlockAuthorityKind::cross, first, second, mass};
+    return true;
+  };
+  const auto push_nonempty = [&replay_frontier](
+                                 const ExactPairBlockAuthority& block) {
+    if (block.unordered_pair_mass != 0U) {
+      replay_frontier.push_back(block);
+    }
+  };
+
+  if (audit_.unordered_pair_universe_mass != 0U) {
+    ExactPairBlockAuthority root;
+    if (index.root_index_ >= index.nodes_.size() ||
+        !make_diagonal(index.root_index_, root) ||
+        root.unordered_pair_mass != audit_.unordered_pair_universe_mass) {
+      return false;
+    }
+    replay_frontier.push_back(root);
+  }
+
+  std::size_t replayed_prune_count = 0U;
+  std::size_t replayed_terminal_count = 0U;
+  std::size_t replayed_diagonal_split_count = 0U;
+  std::size_t replayed_cross_split_count = 0U;
+  try {
+    while (!replay_frontier.empty()) {
+      const ExactPairBlockAuthority source = replay_frontier.back();
+      replay_frontier.pop_back();
+      const CutKey key = authority_key(source);
+      if (std::binary_search(prune_keys.begin(), prune_keys.end(), key)) {
+        ++replayed_prune_count;
+        continue;
+      }
+
+      if (source.first.node_index >= index.nodes_.size() ||
+          source.second.node_index >= index.nodes_.size()) {
+        return false;
+      }
+      if (source.kind == ExactPairBlockAuthorityKind::diagonal) {
+        const auto& parent = index.nodes_[source.first.node_index];
+        if (source.first != source.second || parent.is_leaf() ||
+            parent.left_child >= index.nodes_.size() ||
+            parent.right_child >= index.nodes_.size() ||
+            parent.left_child == parent.right_child) {
+          return false;
+        }
+        ExactPairBlockAuthority left;
+        ExactPairBlockAuthority cross;
+        ExactPairBlockAuthority right;
+        if (!make_diagonal(parent.left_child, left) ||
+            !make_cross(parent.left_child, parent.right_child, cross) ||
+            !make_diagonal(parent.right_child, right)) {
+          return false;
+        }
+        std::size_t child_mass = 0U;
+        if (!checked_add(
+                left.unordered_pair_mass,
+                cross.unordered_pair_mass,
+                child_mass) ||
+            !checked_add(
+                child_mass, right.unordered_pair_mass, child_mass) ||
+            child_mass != source.unordered_pair_mass) {
+          return false;
+        }
+        push_nonempty(right);
+        push_nonempty(cross);
+        push_nonempty(left);
+        ++replayed_diagonal_split_count;
+        continue;
+      }
+
+      const auto& first_node = index.nodes_[source.first.node_index];
+      const auto& second_node = index.nodes_[source.second.node_index];
+      if (first_node.is_leaf() && second_node.is_leaf()) {
+        if (source.unordered_pair_mass != 1U ||
+            !std::binary_search(
+                terminal_keys.begin(), terminal_keys.end(), key)) {
+          return false;
+        }
+        ++replayed_terminal_count;
+        continue;
+      }
+
+      const bool split_second =
+          !second_node.is_leaf() &&
+          (first_node.is_leaf() ||
+           source.second.leaf_count() >= source.first.leaf_count());
+      ExactPairBlockAuthority first_child;
+      ExactPairBlockAuthority second_child;
+      if (split_second) {
+        if (second_node.left_child >= index.nodes_.size() ||
+            second_node.right_child >= index.nodes_.size() ||
+            !make_cross(
+                source.first.node_index,
+                second_node.left_child,
+                first_child) ||
+            !make_cross(
+                source.first.node_index,
+                second_node.right_child,
+                second_child)) {
+          return false;
+        }
+      } else {
+        if (first_node.is_leaf() ||
+            first_node.left_child >= index.nodes_.size() ||
+            first_node.right_child >= index.nodes_.size() ||
+            !make_cross(
+                first_node.left_child,
+                source.second.node_index,
+                first_child) ||
+            !make_cross(
+                first_node.right_child,
+                source.second.node_index,
+                second_child)) {
+          return false;
+        }
+      }
+      std::size_t child_mass = 0U;
+      if (!checked_add(
+              first_child.unordered_pair_mass,
+              second_child.unordered_pair_mass,
+              child_mass) ||
+          child_mass != source.unordered_pair_mass) {
+        return false;
+      }
+      push_nonempty(second_child);
+      push_nonempty(first_child);
+      ++replayed_cross_split_count;
+    }
+  } catch (const std::bad_alloc&) {
+    return false;
+  }
+
+  if (replayed_prune_count != prune_keys.size() ||
+      replayed_terminal_count != terminal_keys.size() ||
+      replayed_diagonal_split_count != audit_.diagonal_split_count ||
+      replayed_cross_split_count != audit_.cross_split_count) {
+    return false;
   }
 
   std::size_t final_mass = 0U;

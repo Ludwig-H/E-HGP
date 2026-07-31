@@ -80,9 +80,18 @@ namespace {
   audit.resident_wave_loop_executed = source.wave_begin_count != 0U;
   audit.zero_intermediate_d2h_validated = true;
   audit.complete_wave_atomic_commit_validated =
-      source.rejected_wave_restored_without_scientific_mutation;
+      source.wave_begin_count ==
+          source.wave_commit_count + source.wave_rollback_count;
   audit.capacity_wave_rollback_validated = capacity_rollback;
-  audit.fail_open_native_transition_validated = true;
+  audit.fail_open_native_transition_validated =
+      source.exact_prune_fail_open_count != 0U;
+  audit.recipe_catalog_nonempty = !request.recipes.empty();
+  audit.recipe_path_exercised =
+      source.exact_prune_attempt_count != 0U;
+  audit.certified_prune_path_exercised =
+      source.certified_prune_count != 0U;
+  audit.fail_open_path_exercised =
+      source.exact_prune_fail_open_count != 0U;
   audit.transactional_mass_conservation_validated =
       source.transactional_mass_conservation_validated;
   audit.native_split_partition_validated =
@@ -92,6 +101,8 @@ namespace {
   audit.terminal_authority_sealed = source.terminal_authority_sealed;
   audit.global_pair_coverage_closed = source.global_pair_coverage_closed;
   audit.host_fake_lifecycle_exercised = true;
+  audit.serial_device_reference = false;
+  audit.scale_eligible = false;
   return audit;
 }
 

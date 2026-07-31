@@ -445,7 +445,8 @@ __global__ void resident_scheduler_kernel(
         staged_negative += decision.negative;
         staged_residual += decision.residual;
         if (decision.certified) {
-          if (receipt_base + staged_receipt_count >= receipt_capacity) {
+          if (receipt_base > receipt_capacity ||
+              staged_receipt_count >= receipt_capacity - receipt_base) {
             capacity_failure = true;
             break;
           }
@@ -515,7 +516,8 @@ __global__ void resident_scheduler_kernel(
       const DeviceNode& second_node = nodes[source.second.node_index];
       if (is_leaf(first_node) && is_leaf(second_node)) {
         if (source.unordered_pair_mass != 1U ||
-            terminal_base + staged_terminal_count >= terminal_capacity) {
+            terminal_base > terminal_capacity ||
+            staged_terminal_count >= terminal_capacity - terminal_base) {
           capacity_failure = source.unordered_pair_mass == 1U;
           native_failure = !capacity_failure;
           break;
@@ -913,6 +915,49 @@ phase15_launch_exact_pair_block_transactional_frontier_resident_cuda(
         "the resident scheduler rejected its immutable native LBVH authority");
   }
 
+  // Device counters are untrusted until they have been checked against the
+  // immutable host-side capacities.  In particular, never let a corrupted
+  // final state steer a host allocation or a D2H extent.
+  const bool final_status_shape_valid =
+      final.active_buffer <= 1U &&
+      final.pending_block_count <= request.block_capacity &&
+      final.prune_receipt_count <= request.prune_receipt_capacity &&
+      final.terminal_pair_count <= request.terminal_pair_capacity &&
+      final.matched_recipe_count <= request.recipes.size() &&
+      final.maximum_pending_block_count <= request.block_capacity &&
+      final.certified_prune_count <= final.exact_prune_attempt_count &&
+      final.exact_prune_fail_open_count <=
+          final.exact_prune_attempt_count - final.certified_prune_count &&
+      final.certified_prune_count + final.exact_prune_fail_open_count ==
+          final.exact_prune_attempt_count &&
+      final.exact_negative_witness_predicate_count <=
+          final.exact_witness_predicate_count &&
+      final.nonnegative_or_residual_witness_predicate_count <=
+          final.exact_witness_predicate_count -
+              final.exact_negative_witness_predicate_count &&
+      final.exact_negative_witness_predicate_count +
+              final.nonnegative_or_residual_witness_predicate_count ==
+          final.exact_witness_predicate_count &&
+      final.wave_rollback_count <= 1U &&
+      final.wave_commit_count <= final.wave_begin_count &&
+      final.wave_rollback_count ==
+          final.wave_begin_count - final.wave_commit_count &&
+      final.pending_mass <= request.unordered_pair_universe_mass &&
+      final.pruned_mass <=
+          request.unordered_pair_universe_mass - final.pending_mass &&
+      final.terminal_mass == request.unordered_pair_universe_mass -
+              final.pending_mass - final.pruned_mass &&
+      (final.status != device_status_complete ||
+       (final.pending_block_count == 0U && final.pending_mass == 0U &&
+        final.wave_rollback_count == 0U)) &&
+      (final.status != device_status_capacity_rollback ||
+       final.wave_rollback_count == 1U);
+  if (!final_status_shape_valid) {
+    throw std::logic_error(
+        "the resident scheduler returned final counters outside their "
+        "bounded transactional ledger");
+  }
+
   std::vector<DevicePruneReceipt> compact_receipts(final.prune_receipt_count);
   std::vector<DeviceTerminalPair> compact_terminals(final.terminal_pair_count);
   std::vector<CompactBlock> compact_pending(final.pending_block_count);
@@ -961,6 +1006,14 @@ phase15_launch_exact_pair_block_transactional_frontier_resident_cuda(
             capacity_exhausted_wave_rolled_back;
   result.prune_receipts.reserve(compact_receipts.size());
   for (const auto& compact : compact_receipts) {
+    if (compact.witness_node_count == 0U ||
+        compact.witness_node_count >
+            exact_pair_block_transactional_frontier_resident_cuda_maximum_witness_node_count ||
+        compact.maximum_closed_rank != request.config.maximum_closed_rank) {
+      throw std::logic_error(
+          "the resident scheduler returned an out-of-bounds compact prune "
+          "receipt");
+    }
     ExactPairBlockTransactionalFrontierCudaPruneReceipt receipt;
     receipt.transaction_id = compact.transaction_id;
     receipt.support_block = expand_block(compact.support);
@@ -1042,7 +1095,7 @@ phase15_launch_exact_pair_block_transactional_frontier_resident_cuda(
       static_cast<double>(elapsed_milliseconds) * 1000000.0);
   audit.cuda_device = request.traversal->cuda_device;
   audit.native_lbvh_authority_consumed = true;
-  audit.native_lbvh_nodes_read_on_device = true;
+  audit.native_lbvh_nodes_read_on_device = final.wave_begin_count != 0U;
   audit.fixed_linear_capacities_validated = true;
   audit.compact_index_width_validated = true;
   audit.unique_recipe_sources_validated = true;
@@ -1050,18 +1103,33 @@ phase15_launch_exact_pair_block_transactional_frontier_resident_cuda(
   audit.resident_wave_loop_executed = final.wave_begin_count != 0U;
   audit.one_persistent_kernel_launch_validated = true;
   audit.zero_intermediate_d2h_validated = true;
-  audit.complete_wave_atomic_commit_validated = true;
+  audit.complete_wave_atomic_commit_validated =
+      final.wave_begin_count ==
+          final.wave_commit_count + final.wave_rollback_count;
   audit.capacity_wave_rollback_validated =
       final.status == device_status_capacity_rollback;
-  audit.fail_open_native_transition_validated = true;
+  audit.fail_open_native_transition_validated =
+      final.exact_prune_fail_open_count != 0U;
+  audit.recipe_catalog_nonempty = !request.recipes.empty();
+  audit.recipe_path_exercised = final.exact_prune_attempt_count != 0U;
+  audit.certified_prune_path_exercised =
+      final.certified_prune_count != 0U;
+  audit.fail_open_path_exercised =
+      final.exact_prune_fail_open_count != 0U;
   audit.transactional_mass_conservation_validated =
       final.pending_mass + final.pruned_mass + final.terminal_mass ==
       request.unordered_pair_universe_mass;
-  audit.native_split_partition_validated = true;
-  audit.pairwise_disjoint_support_products_validated = true;
+  audit.native_split_partition_validated =
+      request.unordered_pair_universe_mass == 0U ||
+      final.diagonal_split_count != 0U || final.cross_split_count != 0U;
+  audit.pairwise_disjoint_support_products_validated =
+      audit.complete_wave_atomic_commit_validated &&
+      audit.transactional_mass_conservation_validated;
   audit.terminal_authority_sealed = final.status == device_status_complete;
   audit.global_pair_coverage_closed = final.status == device_status_complete;
   audit.cuda_execution_performed = true;
+  audit.serial_device_reference = true;
+  audit.scale_eligible = false;
   result.source_identity_authenticated = true;
   guard.restore();
   return result;

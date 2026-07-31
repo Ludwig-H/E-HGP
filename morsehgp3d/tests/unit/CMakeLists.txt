@@ -753,6 +753,54 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
+  test_gpu_exact_pair_block_to_direct_pair_terminal.cpp
+  fake_gpu_exact_pair_block_transactional_frontier_resident_cuda_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
+  PRIVATE
+    morsehgp3d::exact_pair_block_to_direct_pair_terminal
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+    morsehgp3d::anchored_pair_candidate_classifier
+    morsehgp3d::direct_morse_forest_source_authority
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_anchored_pair_candidate_classifier_tests
   test_anchored_pair_candidate_classifier.cpp
 )
@@ -3481,6 +3529,10 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
   COMMAND morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_exact_pair_block_to_direct_pair_terminal
+  COMMAND morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
 )
 add_test(
   NAME morsehgp3d.anchored_pair_candidate_classifier

@@ -201,8 +201,25 @@ void test_supported_orders_produce_complete_provider() {
         visited == result.bridge->source_manifest().batch_count,
         "the provider exposes the complete dense batch partition");
 
+    const auto manifest_before_move = result.bridge->source_manifest();
+    auto moved_bridge = std::move(*result.bridge);
+    result.bridge.reset();
+    std::size_t post_move_visit_count = 0U;
+    auto inspect_after_move = [&](const auto& window) {
+      ++post_move_visit_count;
+      return window.certified_relative_to(manifest_before_move);
+    };
+    check(
+        manifest_before_move.batch_count != 0U &&
+            provider(0U, inspect_after_move) ==
+                ExactDirectMorseForestSourceBatchVisitDecision::
+                    complete_synchronous_visit &&
+            post_move_visit_count == 1U &&
+            moved_bridge.source_manifest() == manifest_before_move,
+        "a provider view remains bound to the stable pimpl after its bridge moves");
+
     auto coverage =
-        result.bridge->make_downstream_complete_component_coverage();
+        moved_bridge.make_downstream_complete_component_coverage();
     static_assert(!decltype(coverage)::source_pruning_authority);
     const std::array<morsehgp3d::spatial::PointId, 4U> covered{
         3U, 1U, 3U, 2U};

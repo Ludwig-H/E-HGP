@@ -14,7 +14,7 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
-    exact_pair_block_transactional_frontier_resident_cuda_schema_version = 1U;
+    exact_pair_block_transactional_frontier_resident_cuda_schema_version = 2U;
 inline constexpr std::size_t
     exact_pair_block_transactional_frontier_resident_cuda_maximum_closed_rank =
         11U;
@@ -141,6 +141,10 @@ struct ExactPairBlockTransactionalFrontierResidentCudaAudit {
   bool complete_wave_atomic_commit_validated{false};
   bool capacity_wave_rollback_validated{false};
   bool fail_open_native_transition_validated{false};
+  bool recipe_catalog_nonempty{false};
+  bool recipe_path_exercised{false};
+  bool certified_prune_path_exercised{false};
+  bool fail_open_path_exercised{false};
   bool transactional_mass_conservation_validated{false};
   bool native_split_partition_validated{false};
   bool pairwise_disjoint_support_products_validated{false};
@@ -148,6 +152,8 @@ struct ExactPairBlockTransactionalFrontierResidentCudaAudit {
   bool global_pair_coverage_closed{false};
   bool host_fake_lifecycle_exercised{false};
   bool cuda_execution_performed{false};
+  bool serial_device_reference{false};
+  bool scale_eligible{false};
   bool pair_catalog_complete_claimed{false};
   bool hierarchy_or_tree_claimed{false};
   bool slo_claimed{false};
