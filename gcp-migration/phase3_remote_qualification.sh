@@ -318,9 +318,12 @@ source du réducteur pour K=5 puis K=10 (60 s chacun), puis une unique build de
 la frontière device suivie de 50k adversarial rang 11 (120 s), 10M affine
 direct-scale rang 11 (180 s) et 30M affine direct-scale rang 11 (240 s). Le
 50k doit fermer son contrat; 10M/30M peuvent rester censurés ou incomplets
-avec JSON valide et code zéro. Ces profils sont component/profile-only, sans
-revendication exact/full-pipeline ou scale_eligible, catalogue, hiérarchie,
-SLO ni statut public.
+avec JSON valide et code zéro. Pour ces deux seules unités, le code 124 sans
+JSON devient un reçu de timeout canonique non qualifiant si stderr est
+strictement vide, puis l'unité suivante est lancée; tout autre code reste
+fatal. Ces profils sont component/profile-only, sans revendication
+exact/full-pipeline ou scale_eligible, catalogue, hiérarchie, SLO ni statut
+public.
 EOF
 }
 
@@ -3676,11 +3679,16 @@ PY
         local fixed_timeout_seconds="$2"
         local stdout_path="$3"
         local stderr_path="$4"
+        local exit_policy="$5"
         local run_status=0
-        shift 4
+        shift 5
         case "${fixed_timeout_seconds}" in
             60|120|180|240) ;;
             *) die "Borne fixe de campagne resident invalide : ${fixed_timeout_seconds}." ;;
+        esac
+        case "${exit_policy}" in
+            strict|canonical-direct-scale-timeout) ;;
+            *) die "Politique de sortie de campagne resident invalide : ${exit_policy}." ;;
         esac
         begin_unit "${label}"
         PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS="$("${DATE_BIN}" +%s%N)" || \
@@ -3695,10 +3703,14 @@ PY
         fi
         PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS="$("${DATE_BIN}" +%s%N)" || \
             die "Horloge murale illisible après ${label}."
+        PHASE15_RESIDENT_CAMPAIGN_LAST_EXIT_STATUS="${run_status}"
         if ((run_status != 0)); then
-            report_failure_log "${label}" "${stdout_path}"
-            report_failure_log "${label}-stderr" "${stderr_path}"
-            die "L'unité ${label} a échoué ou dépassé ${fixed_timeout_seconds} secondes."
+            if [[ "${exit_policy}" != "canonical-direct-scale-timeout" ]] || \
+               ((run_status != 124)); then
+                report_failure_log "${label}" "${stdout_path}"
+                report_failure_log "${label}-stderr" "${stderr_path}"
+                die "L'unité ${label} a échoué ou dépassé ${fixed_timeout_seconds} secondes."
+            fi
         fi
         [[ "${PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS}" =~ ^[0-9]{19}$ && \
             "${PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS}" =~ ^[0-9]{19}$ && \
@@ -3708,6 +3720,10 @@ PY
         if [[ -s "${stderr_path}" ]]; then
             report_failure_log "${label}-stderr" "${stderr_path}"
             die "L'unité ${label} doit conserver stderr vide."
+        fi
+        if ((run_status == 124)); then
+            printf '[TIMEOUT CANONIQUE] unité=%s, borne=%ss, résultat non qualifiant; poursuite autorisée.\n' \
+                "${label}" "${fixed_timeout_seconds}"
         fi
     }
 
@@ -4003,6 +4019,7 @@ PY
         "phase15-resident-transactional-semantic-reducer-k5" 60 \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K5_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K5_STDERR_LOG}" \
+        strict \
         "${PHASE15_REDUCER_SOURCE_BINARY_PATH}" --K 5 --require-complete
     phase15_resident_reducer_k5_started_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS}"
     phase15_resident_reducer_k5_finished_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS}"
@@ -4014,6 +4031,7 @@ PY
         "phase15-resident-transactional-semantic-reducer-k10" 60 \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K10_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_REDUCER_K10_STDERR_LOG}" \
+        strict \
         "${PHASE15_REDUCER_SOURCE_BINARY_PATH}" --K 10 --require-complete
     phase15_resident_reducer_k10_started_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS}"
     phase15_resident_reducer_k10_finished_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS}"
@@ -4040,6 +4058,7 @@ PY
         "phase15-resident-transactional-semantic-frontier-50k" 120 \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_FRONTIER_50K_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_FRONTIER_50K_STDERR_LOG}" \
+        strict \
         "${PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH}" \
         --point-count 50000 --family adversarial_mixed_dyadic \
         --maximum-closed-rank 11 --anchor-tile-capacity 4096 \
@@ -4070,29 +4089,37 @@ PY
         "phase15-resident-transactional-semantic-direct-10m" 180 \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_10M_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_10M_STDERR_LOG}" \
+        canonical-direct-scale-timeout \
         "${PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH}" \
         --point-count 10000000 --family affine_uniform_binary64 \
         --maximum-closed-rank 11 --direct-scale \
         --anchor-tile-capacity 4096 --seed "${PHASE15_DEVICE_FRONTIER_50K_SEED}"
     phase15_resident_direct_10m_started_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS}"
     phase15_resident_direct_10m_finished_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS}"
-    validate_phase15_direct_scale_run \
-        "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_10M_LOG}" 10000000 || \
-        die "La sortie direct-scale 10M viole le contrat JSON de diagnostic."
+    phase15_resident_direct_10m_exit_status="${PHASE15_RESIDENT_CAMPAIGN_LAST_EXIT_STATUS}"
+    if ((phase15_resident_direct_10m_exit_status == 0)); then
+        validate_phase15_direct_scale_run \
+            "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_10M_LOG}" 10000000 || \
+            die "La sortie direct-scale 10M viole le contrat JSON de diagnostic."
+    fi
 
     run_phase15_resident_campaign_unit \
         "phase15-resident-transactional-semantic-direct-30m" 240 \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_STDERR_LOG}" \
+        canonical-direct-scale-timeout \
         "${PHASE15_DEVICE_FRONTIER_50K_BINARY_PATH}" \
         --point-count 30000000 --family affine_uniform_binary64 \
         --maximum-closed-rank 11 --direct-scale \
         --anchor-tile-capacity 4096 --seed "${PHASE15_DEVICE_FRONTIER_50K_SEED}"
     phase15_resident_direct_30m_started_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_STARTED_NS}"
     phase15_resident_direct_30m_finished_ns="${PHASE15_RESIDENT_CAMPAIGN_LAST_FINISHED_NS}"
-    validate_phase15_direct_scale_run \
-        "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_LOG}" 30000000 || \
-        die "La sortie direct-scale 30M viole le contrat JSON de diagnostic."
+    phase15_resident_direct_30m_exit_status="${PHASE15_RESIDENT_CAMPAIGN_LAST_EXIT_STATUS}"
+    if ((phase15_resident_direct_30m_exit_status == 0)); then
+        validate_phase15_direct_scale_run \
+            "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_LOG}" 30000000 || \
+            die "La sortie direct-scale 30M viole le contrat JSON de diagnostic."
+    fi
 fi
 
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
@@ -4817,7 +4844,9 @@ if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" ]]; then
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_LOG}" \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_DIRECT_30M_STDERR_LOG}" \
         "${phase15_resident_direct_30m_started_ns}" \
-        "${phase15_resident_direct_30m_finished_ns}" <<'PY'
+        "${phase15_resident_direct_30m_finished_ns}" \
+        "${phase15_resident_direct_10m_exit_status}" \
+        "${phase15_resident_direct_30m_exit_status}" <<'PY'
 import hashlib
 import json
 import os
@@ -4876,6 +4905,8 @@ direct_30m_path = Path(sys.argv[41])
 direct_30m_stderr_path = Path(sys.argv[42])
 direct_30m_started = int(sys.argv[43])
 direct_30m_finished = int(sys.argv[44])
+direct_10m_exit_status = int(sys.argv[45])
+direct_30m_exit_status = int(sys.argv[46])
 
 environment = json.loads(environment_path.read_text(encoding="utf-8"))
 if (
@@ -4929,8 +4960,87 @@ k10_result = json.loads(k10_path.read_text(encoding="utf-8"))
 reducer_k5_result = json.loads(reducer_k5_path.read_text(encoding="utf-8"))
 reducer_k10_result = json.loads(reducer_k10_path.read_text(encoding="utf-8"))
 frontier_50k_result = json.loads(frontier_50k_path.read_text(encoding="utf-8"))
-direct_10m_result = json.loads(direct_10m_path.read_text(encoding="utf-8"))
-direct_30m_result = json.loads(direct_30m_path.read_text(encoding="utf-8"))
+
+
+def direct_scale_command(point_count, timeout_seconds):
+    return [
+        "/usr/bin/timeout", "--foreground", "--kill-after=5s",
+        f"{timeout_seconds}s",
+        "/workspace/repository/build/morsehgp3d-cuda-release/"
+        "morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
+        "--point-count", str(point_count), "--family",
+        "affine_uniform_binary64", "--maximum-closed-rank", "11",
+        "--direct-scale", "--anchor-tile-capacity", "4096", "--seed",
+        "1558325537444281125",
+    ]
+
+
+def direct_scale_result(
+    *, point_count, timeout_seconds, exit_status, stdout_path, stderr_path,
+    started, finished,
+):
+    if exit_status == 0:
+        return json.loads(stdout_path.read_text(encoding="utf-8"))
+    if exit_status != 124:
+        fail("a direct-scale result has an unauthorized exit status")
+    return {
+        "backend": "cuda_g4",
+        "binary_sha256": digest(frontier_binary_path),
+        "claims": {
+            "exactness": False,
+            "product": False,
+            "qualification": False,
+            "scalability": False,
+            "scientific_result": False,
+        },
+        "command": direct_scale_command(point_count, timeout_seconds),
+        "component_only": True,
+        "deployment_status": "profile_only",
+        "exit_status": 124,
+        "external_wall_finished_epoch_nanoseconds": finished,
+        "external_wall_nanoseconds": finished - started,
+        "external_wall_started_epoch_nanoseconds": started,
+        "family": "affine_uniform_binary64",
+        "git_sha": git_sha,
+        "internal_timings_available": False,
+        "maximum_closed_rank": 11,
+        "mode": "device_resident_budgeted_morton_yao48_anchor_tiles_direct_scale",
+        "point_count": point_count,
+        "profile": "hgp_reduced",
+        "profile_only": True,
+        "public_status": "not_claimed",
+        "qualified": False,
+        "run_kind": "direct_scale_timeout",
+        "scale_eligible": False,
+        "schema": "morsehgp3d.phase15.direct_scale_timeout.v1",
+        "status": "timeout",
+        "stderr_empty": True,
+        "stderr_sha256": digest(stderr_path),
+        "stdout_sha256": digest(stdout_path),
+        "timed_out": True,
+        "timeout_seconds": timeout_seconds,
+        "timeout_source": "exit_status_124",
+    }
+
+
+direct_10m_result = direct_scale_result(
+    point_count=10_000_000,
+    timeout_seconds=180,
+    exit_status=direct_10m_exit_status,
+    stdout_path=direct_10m_path,
+    stderr_path=direct_10m_stderr_path,
+    started=direct_10m_started,
+    finished=direct_10m_finished,
+)
+direct_30m_result = direct_scale_result(
+    point_count=30_000_000,
+    timeout_seconds=240,
+    exit_status=direct_30m_exit_status,
+    stdout_path=direct_30m_path,
+    stderr_path=direct_30m_stderr_path,
+    started=direct_30m_started,
+    finished=direct_30m_finished,
+)
 log_paths = {
     "release_build": release_build_path,
     "audit_build": audit_build_path,
@@ -5159,45 +5269,36 @@ artifact = {
             "external_wall_finished_epoch_nanoseconds": frontier_50k_finished,
             "external_wall_nanoseconds": frontier_50k_finished - frontier_50k_started,
             "external_wall_started_epoch_nanoseconds": frontier_50k_started,
+            "exit_status": 0,
             "point_count": 50000,
             "result": frontier_50k_result,
             "run_kind": "component_qualification",
             "timeout_seconds": 120,
         },
         {
-            "command": [
-                "/usr/bin/timeout", "--foreground", "--kill-after=5s", "180s",
-                "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
-                "--point-count", "10000000", "--family", "affine_uniform_binary64",
-                "--maximum-closed-rank", "11", "--direct-scale",
-                "--anchor-tile-capacity", "4096", "--seed", "1558325537444281125",
-            ],
+            "command": direct_scale_command(10_000_000, 180),
             "external_wall_finished_epoch_nanoseconds": direct_10m_finished,
             "external_wall_nanoseconds": direct_10m_finished - direct_10m_started,
             "external_wall_started_epoch_nanoseconds": direct_10m_started,
+            "exit_status": direct_10m_exit_status,
             "point_count": 10000000,
             "result": direct_10m_result,
             "run_kind": "profile_only_diagnostic",
             "timeout_seconds": 180,
         },
         {
-            "command": [
-                "/usr/bin/timeout", "--foreground", "--kill-after=5s", "240s",
-                "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification",
-                "--point-count", "30000000", "--family", "affine_uniform_binary64",
-                "--maximum-closed-rank", "11", "--direct-scale",
-                "--anchor-tile-capacity", "4096", "--seed", "1558325537444281125",
-            ],
+            "command": direct_scale_command(30_000_000, 240),
             "external_wall_finished_epoch_nanoseconds": direct_30m_finished,
             "external_wall_nanoseconds": direct_30m_finished - direct_30m_started,
             "external_wall_started_epoch_nanoseconds": direct_30m_started,
+            "exit_status": direct_30m_exit_status,
             "point_count": 30000000,
             "result": direct_30m_result,
             "run_kind": "profile_only_diagnostic",
             "timeout_seconds": 240,
         },
     ],
-    "schema": "morsehgp3d.phase15.resident_transactional_semantic_qualification.v1",
+    "schema": "morsehgp3d.phase15.resident_transactional_semantic_qualification.v2",
     "status": "worker_passed_pending_shutdown",
     "vm_lifecycle": {
         "guest_shutdown_guard_verified": True,

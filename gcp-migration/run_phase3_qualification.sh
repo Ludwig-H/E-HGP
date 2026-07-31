@@ -214,8 +214,11 @@ sur moment_curve_12 pour K=5 puis K=10 (60 s chacun), puis construit une fois
 la frontière device et exécute, dans cet ordre, 50k adversarial rang 11
 (120 s), 10M affine direct-scale rang 11 (180 s) et 30M affine direct-scale
 rang 11 (240 s). Le 50k doit fermer son contrat; 10M/30M peuvent rapporter
-une censure ou une couverture incomplète avec JSON valide et code zéro. Ces
-deux derniers résultats restent des diagnostics component/profile-only et
+une censure ou une couverture incomplète avec JSON valide et code zéro. Pour
+ces deux seules unités, le code 124 sans JSON devient un reçu de timeout
+canonique non qualifiant si stderr est strictement vide, puis la campagne
+continue; tout autre code reste fatal. Les résultats direct-scale restent des
+diagnostics component/profile-only et
 ne revendiquent ni exactitude full-pipeline, ni scale_eligible, ni catalogue
 global, hiérarchie, SLO ou statut public.
 
@@ -2510,6 +2513,71 @@ def validate_direct_scale_run(value, point_count):
         fail(f"direct-scale {point_count}: incomplete coverage lacks terminal censure")
 
 
+def validate_direct_scale_timeout(
+    value, *, point_count, timeout_seconds, command, started, finished,
+    stdout, stderr, binary_sha256,
+):
+    exact_object(
+        value,
+        {
+            "backend", "binary_sha256", "claims", "command",
+            "component_only", "deployment_status", "exit_status",
+            "external_wall_finished_epoch_nanoseconds",
+            "external_wall_nanoseconds",
+            "external_wall_started_epoch_nanoseconds", "family", "git_sha",
+            "internal_timings_available", "maximum_closed_rank", "mode",
+            "point_count", "profile", "profile_only", "public_status",
+            "qualified", "run_kind", "scale_eligible", "schema", "status",
+            "stderr_empty", "stderr_sha256", "stdout_sha256", "timed_out",
+            "timeout_seconds", "timeout_source",
+        },
+        f"direct-scale timeout n={point_count}",
+    )
+    for key, expected in {
+        "backend": "cuda_g4",
+        "binary_sha256": binary_sha256,
+        "command": command,
+        "component_only": True,
+        "deployment_status": "profile_only",
+        "exit_status": 124,
+        "external_wall_finished_epoch_nanoseconds": finished,
+        "external_wall_nanoseconds": finished - started,
+        "external_wall_started_epoch_nanoseconds": started,
+        "family": "affine_uniform_binary64",
+        "git_sha": git_sha,
+        "internal_timings_available": False,
+        "maximum_closed_rank": 11,
+        "mode": "device_resident_budgeted_morton_yao48_anchor_tiles_direct_scale",
+        "point_count": point_count,
+        "profile": "hgp_reduced",
+        "profile_only": True,
+        "public_status": "not_claimed",
+        "qualified": False,
+        "run_kind": "direct_scale_timeout",
+        "scale_eligible": False,
+        "schema": "morsehgp3d.phase15.direct_scale_timeout.v1",
+        "status": "timeout",
+        "stderr_empty": True,
+        "stderr_sha256": sha256_text(stderr),
+        "stdout_sha256": sha256_text(stdout),
+        "timed_out": True,
+        "timeout_seconds": timeout_seconds,
+        "timeout_source": "exit_status_124",
+    }.items():
+        if value.get(key) != expected or type(value.get(key)) is not type(expected):
+            fail(f"direct-scale timeout n={point_count}.{key}: unexpected value")
+    if value.get("claims") != {
+        "exactness": False,
+        "product": False,
+        "qualification": False,
+        "scalability": False,
+        "scientific_result": False,
+    }:
+        fail(f"direct-scale timeout n={point_count}: unexpected claim")
+    if not finished > started > 0 or stderr != "":
+        fail(f"direct-scale timeout n={point_count}: invalid receipt evidence")
+
+
 artifact_path = Path(sys.argv[1])
 git_sha = sys.argv[2]
 environment_path = Path(sys.argv[3])
@@ -2530,7 +2598,7 @@ exact_object(
     "artifact",
 )
 for key, expected in {
-    "schema": "morsehgp3d.phase15.resident_transactional_semantic_qualification.v1",
+    "schema": "morsehgp3d.phase15.resident_transactional_semantic_qualification.v2",
     "artifact_role": "component_qualification_only",
     "backend": "cuda_g4",
     "profile": "hgp_reduced",
@@ -2821,8 +2889,8 @@ for run, (point_count, timeout_seconds, run_kind) in zip(
         {
             "command", "external_wall_finished_epoch_nanoseconds",
             "external_wall_nanoseconds",
-            "external_wall_started_epoch_nanoseconds", "point_count",
-            "result", "run_kind", "timeout_seconds",
+            "external_wall_started_epoch_nanoseconds", "exit_status",
+            "point_count", "result", "run_kind", "timeout_seconds",
         },
         f"frontier profile run n={point_count}",
     )
@@ -2848,6 +2916,11 @@ for run, (point_count, timeout_seconds, run_kind) in zip(
         or run.get("command") != expected_command
     ):
         fail(f"frontier profile run n={point_count}: invocation mismatch")
+    exit_status = run.get("exit_status")
+    if type(exit_status) is not int or (
+        exit_status != 0 and not (point_count > 50000 and exit_status == 124)
+    ):
+        fail(f"frontier profile run n={point_count}: unauthorized exit status")
     started = integer(
         run.get("external_wall_started_epoch_nanoseconds"),
         "frontier external wall start", 1,
@@ -2867,15 +2940,31 @@ for run, (point_count, timeout_seconds, run_kind) in zip(
             maximum_closed_rank=11, warm_profile=False,
         )
         stdout_key = "frontier_50k_stdout"
+        stdout = evidence[stdout_key]
+        lines = stdout.splitlines()
+        if len(lines) != 1 or stdout != lines[0] + "\n":
+            fail(f"frontier profile run n={point_count}: stdout is not one JSON line")
+        if json.loads(lines[0], object_pairs_hook=reject_duplicates) != run["result"]:
+            fail(f"frontier profile run n={point_count}: stdout/result divergence")
     else:
-        validate_direct_scale_run(run.get("result"), point_count)
         stdout_key = f"direct_{point_count // 1000000}m_stdout"
-    stdout = evidence[stdout_key]
-    lines = stdout.splitlines()
-    if len(lines) != 1 or stdout != lines[0] + "\n":
-        fail(f"frontier profile run n={point_count}: stdout is not one JSON line")
-    if json.loads(lines[0], object_pairs_hook=reject_duplicates) != run["result"]:
-        fail(f"frontier profile run n={point_count}: stdout/result divergence")
+        stdout = evidence[stdout_key]
+        stderr = evidence[f"direct_{point_count // 1000000}m_stderr"]
+        if exit_status == 0:
+            validate_direct_scale_run(run.get("result"), point_count)
+            lines = stdout.splitlines()
+            if len(lines) != 1 or stdout != lines[0] + "\n":
+                fail(f"frontier profile run n={point_count}: stdout is not one JSON line")
+            if json.loads(lines[0], object_pairs_hook=reject_duplicates) != run["result"]:
+                fail(f"frontier profile run n={point_count}: stdout/result divergence")
+        else:
+            validate_direct_scale_timeout(
+                run.get("result"), point_count=point_count,
+                timeout_seconds=timeout_seconds, command=expected_command,
+                started=started, finished=finished, stdout=stdout,
+                stderr=stderr,
+                binary_sha256=campaign_binaries["device_frontier"]["sha256"],
+            )
 PY
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1)); then
