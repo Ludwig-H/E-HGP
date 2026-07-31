@@ -19,6 +19,7 @@ class MortonYao48PairFrontierContext;
 
 namespace detail {
 class Phase14MortonLbvhBuildContextState;
+class Phase15ExactPairBlockWitnessCudaTraversalAccess;
 struct Phase15MortonYao48DeviceTiledAdoptedTraversal;
 [[nodiscard]] Phase15MortonYao48DeviceTiledAdoptedTraversal
 adopt_phase15_morton_yao48_device_tiled_traversal(
@@ -337,6 +338,7 @@ class MortonLbvhDeviceTraversalLease final {
   friend class MortonLbvhBuildContext;
   friend class MortonYao48PairFrontierContext;
   friend class RankedDiametralPairCatalogContext;
+  friend class detail::Phase15ExactPairBlockWitnessCudaTraversalAccess;
   friend detail::Phase15MortonYao48DeviceTiledAdoptedTraversal
   detail::adopt_phase15_morton_yao48_device_tiled_traversal(
       MortonLbvhDeviceTraversalLease&& traversal_lease);
