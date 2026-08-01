@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/direct_morse_forest_reducer.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_k2_k1_target_authority.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_vertical_target_proposal_pipeline.hpp"
 #include "morsehgp3d/hierarchy/direct_saddle_arm_seed_journal.hpp"
@@ -72,6 +73,12 @@ struct Timings {
   double forest_finish_ms{};
   double vertical_target_pipeline_ms{};
   double vertical_journal_ms{};
+  double k2_to_k1_oracle_source_history_ms{};
+  double k2_to_k1_oracle_k1_ms{};
+  double k2_to_k1_oracle_hierarchy_ms{};
+  double k2_to_k1_target_authority_build_ms{};
+  double k2_to_k1_target_authority_verify_ms{};
+  double k2_to_k1_target_authority_ms{};
   double vertical_target_replay_diagnostic_ms{};
   double total_ms{};
 };
@@ -83,12 +90,14 @@ struct Report {
   std::string stop_category{"none"};
   std::string stop_detail{"none"};
   bool pipeline_complete{false};
+  bool resident_conditional_pipeline_complete{false};
   bool budget_exhausted{false};
   bool scientific_result_materialized{false};
   bool conditional_h0_candidate_certified{false};
   bool architecture_audit_complete{true};
   bool no_forbidden_global_structure_materialized{true};
   bool complete_hierarchy_attempt_requested{false};
+  bool bounded_k2_to_k1_target_authority_qualification_requested{false};
   bool configurable_pair_total_caps_disabled{false};
   bool downstream_static_confidence_caps_enabled{true};
   bool operational_deadline_reached{false};
@@ -256,6 +265,51 @@ struct Report {
   bool vertical_journal_higher_order_delaunay_materialized{false};
   bool vertical_journal_public_status_claimed{false};
 
+  bool k2_to_k1_target_authority_required{false};
+  bool k2_to_k1_target_authority_attempted{false};
+  bool k2_to_k1_target_authority_certified{false};
+  unsigned k2_to_k1_target_authority_decision{};
+  unsigned k2_to_k1_target_authority_scope{};
+  std::size_t k2_to_k1_oracle_source_batch_count{};
+  std::size_t k2_to_k1_oracle_source_group_count{};
+  std::size_t k2_to_k1_oracle_source_node_count{};
+  std::size_t k2_to_k1_oracle_k1_node_count{};
+  std::size_t k2_to_k1_oracle_external_checkpoint_count{};
+  std::string k2_to_k1_direct_cloud_digest;
+  std::string k2_to_k1_external_cloud_digest;
+  std::string k2_to_k1_external_hierarchy_digest;
+  std::size_t k2_to_k1_required_logical_output_entry_count{};
+  ExactDirectMorseK2K1TargetAuthorityCounters
+      k2_to_k1_target_authority_counters{};
+  std::optional<std::size_t>
+      k2_to_k1_rejected_label_resolution_index;
+  std::optional<std::size_t> k2_to_k1_rejected_atomic_group_index;
+  std::optional<std::size_t> k2_to_k1_rejected_source_binding_index;
+  bool k2_to_k1_direct_pipeline_freshly_replayed{false};
+  bool k2_to_k1_direct_vertical_journal_freshly_replayed{false};
+  bool k2_to_k1_external_hierarchy_freshly_replayed{false};
+  bool k2_to_k1_canonical_point_namespace_identity_certified{false};
+  bool k2_to_k1_all_observed_labels_present{false};
+  bool k2_to_k1_all_observed_labels_resolved{false};
+  bool k2_to_k1_every_direct_target_coverage_reconstructed{false};
+  bool k2_to_k1_every_external_target_coverage_reconstructed{false};
+  bool k2_to_k1_every_observed_target_coverage_equal{false};
+  bool k2_to_k1_observed_label_target_authority_replayed{false};
+  bool k2_to_k1_bidirectional_gamma_group_completeness_replayed{false};
+  bool k2_to_k1_silent_gamma_checkpoint_completeness_replayed{false};
+  bool k2_to_k1_external_target_authority_replayed{false};
+  bool k2_to_k1_global_morse_obligation_replayed{false};
+  bool k2_to_k1_all_naturality_squares_replayed{false};
+  bool k2_to_k1_vertical_maps_complete{false};
+  bool k2_to_k1_global_m1_claimed{false};
+  bool k2_to_k1_bounded_exhaustive_gamma_oracle_used{false};
+  bool k2_to_k1_gamma_cells_or_global_cofaces_persisted{false};
+  bool k2_to_k1_higher_order_delaunay_materialized{false};
+  bool k2_to_k1_public_status_claimed{false};
+  bool k2_to_k1_no_partial_scientific_payload_on_failure{false};
+  ExactDirectMorseK2K1TargetAuthorityVerification
+      k2_to_k1_target_authority_verification{};
+
   bool vertical_target_replay_diagnostic_attempted{false};
   bool vertical_target_replay_diagnostic_callback_invoked{false};
   bool vertical_target_replay_diagnostic_advance_certified{false};
@@ -326,11 +380,21 @@ struct Report {
   return options.mode == "complete_resident_diagnostic";
 }
 
+[[nodiscard]] bool bounded_k2_to_k1_target_authority_qualification(
+    const Options& options) noexcept {
+  return options.mode ==
+      "bounded_k2_k1_target_authority_qualification";
+}
+
 [[nodiscard]] Report make_report(const Options& options) {
   Report report;
   report.options = options;
   report.complete_hierarchy_attempt_requested =
       complete_resident_diagnostic(options);
+  report.bounded_k2_to_k1_target_authority_qualification_requested =
+      bounded_k2_to_k1_target_authority_qualification(options);
+  report.k2_to_k1_target_authority_required =
+      bounded_k2_to_k1_target_authority_qualification(options);
   report.configurable_pair_total_caps_disabled =
       complete_resident_diagnostic(options);
   report.effective_higher_chunk_limit =
@@ -372,7 +436,8 @@ void print_usage(std::ostream& output) {
   output
       << "usage: morsehgp3d_direct_morse_product_runner "
          "--point-count N [options]\n"
-      << "  --mode resident_timed|complete_resident_diagnostic\n"
+      << "  --mode resident_timed|complete_resident_diagnostic|"
+         "bounded_k2_k1_target_authority_qualification\n"
       << "  --family uniform_latin|eight_clusters\n"
       << "  --maximum-order K (alias: --K; 1 <= K <= 10)\n"
       << "  --support-work-budget N (cap for each P8l work axis)\n"
@@ -436,9 +501,12 @@ void parse_options(int argc, char** argv, Options& options) {
         "--family must be uniform_latin or eight_clusters");
   }
   if (options.mode != "resident_timed" &&
-      options.mode != "complete_resident_diagnostic") {
+      options.mode != "complete_resident_diagnostic" &&
+      options.mode !=
+          "bounded_k2_k1_target_authority_qualification") {
     throw std::invalid_argument(
-        "--mode must be resident_timed or complete_resident_diagnostic");
+        "--mode must be resident_timed, complete_resident_diagnostic, or "
+        "bounded_k2_k1_target_authority_qualification");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -1104,6 +1172,219 @@ make_vertical_journal_budget() {
   };
 }
 
+[[nodiscard]] std::size_t bounded_binomial(
+    std::size_t n, std::size_t k) noexcept {
+  if (k > n) {
+    return 0U;
+  }
+  k = std::min(k, n - k);
+  std::size_t value = 1U;
+  for (std::size_t index = 1U; index <= k; ++index) {
+    value = value * (n - k + index) / index;
+  }
+  return value;
+}
+
+[[nodiscard]] ExactPersistentReducedGammaOrderHistoryBudget
+make_bounded_gamma2_history_budget(std::size_t point_count) {
+  constexpr std::size_t order = 2U;
+  const std::size_t facet_count = bounded_binomial(point_count, order);
+  const std::size_t coface_count =
+      bounded_binomial(point_count, order + 1U);
+  const std::size_t union_count = checked_multiply(
+      order, coface_count, "bounded Gamma2 union capacity overflow");
+  const std::size_t activation_level_count = checked_add(
+      facet_count,
+      coface_count,
+      "bounded Gamma2 activation-level capacity overflow");
+  const std::size_t replay_count = checked_add(
+      activation_level_count,
+      1U,
+      "bounded Gamma2 replay capacity overflow");
+  ExactPersistentReducedGammaOrderHistoryBudget budget;
+  budget.gamma_budget = {facet_count, coface_count, union_count};
+  budget.maximum_activation_level_count = activation_level_count;
+  budget.maximum_total_facet_work_count = checked_multiply(
+      replay_count,
+      facet_count,
+      "bounded Gamma2 facet-work capacity overflow");
+  budget.maximum_total_coface_work_count = checked_multiply(
+      replay_count,
+      coface_count,
+      "bounded Gamma2 coface-work capacity overflow");
+  budget.maximum_total_union_work_count = checked_multiply(
+      replay_count,
+      union_count,
+      "bounded Gamma2 union-work capacity overflow");
+  budget.maximum_node_count = coface_count;
+  budget.maximum_child_reference_count =
+      coface_count == 0U ? 0U : coface_count - 1U;
+  budget.maximum_group_root_reference_count =
+      coface_count == 0U ? 0U : coface_count - 1U;
+  budget.maximum_group_count = activation_level_count;
+  budget.maximum_group_newly_active_facet_count = facet_count;
+  budget.maximum_group_equal_level_coface_count = coface_count;
+  budget.maximum_delta_facet_count = facet_count;
+  budget.maximum_delta_point_reference_count = checked_multiply(
+      order,
+      facet_count,
+      "bounded Gamma2 delta-point capacity overflow");
+  return budget;
+}
+
+[[nodiscard]] ExactK2K1HierarchyBudget
+make_bounded_k2_k1_hierarchy_budget() noexcept {
+  ExactK2K1HierarchyBudget budget;
+  budget.maximum_source_batch_count =
+      ExactK2K1HierarchyBudget::maximum_supported_source_batch_count;
+  budget.maximum_source_group_count =
+      ExactK2K1HierarchyBudget::maximum_supported_source_group_count;
+  budget.maximum_source_node_count =
+      ExactK2K1HierarchyBudget::maximum_supported_source_node_count;
+  budget.maximum_source_child_reference_count =
+      ExactK2K1HierarchyBudget::
+          maximum_supported_source_child_reference_count;
+  budget.maximum_source_root_reference_count =
+      ExactK2K1HierarchyBudget::
+          maximum_supported_source_root_reference_count;
+  budget.maximum_checkpoint_count =
+      ExactK2K1HierarchyBudget::maximum_supported_checkpoint_count;
+  budget.maximum_source_facet_replay_count =
+      ExactK2K1HierarchyBudget::
+          maximum_supported_source_facet_replay_count;
+  budget.maximum_vertical_endpoint_lookup_count =
+      ExactK2K1HierarchyBudget::
+          maximum_supported_vertical_endpoint_lookup_count;
+  budget.maximum_k1_parent_hop_count =
+      ExactK2K1HierarchyBudget::maximum_supported_k1_parent_hop_count;
+  budget.maximum_target_coverage_point_reference_count =
+      ExactK2K1HierarchyBudget::
+          maximum_supported_target_coverage_point_reference_count;
+  budget.maximum_digest_logical_entry_count =
+      ExactK2K1HierarchyBudget::
+          maximum_supported_digest_logical_entry_count;
+  budget.maximum_digest_exact_text_byte_count =
+      ExactK2K1HierarchyBudget::
+          maximum_supported_digest_exact_text_byte_count;
+  return budget;
+}
+
+[[nodiscard]] ExactReducedGammaCutBudget
+make_bounded_closed_gamma2_cut_budget() noexcept {
+  return {
+      ExactReducedGammaCutBudget::maximum_supported_batch_count,
+      ExactReducedGammaCutBudget::maximum_supported_group_record_count,
+      ExactReducedGammaCutBudget::maximum_supported_node_record_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_prior_root_reference_count,
+      ExactReducedGammaCutBudget::maximum_supported_child_reference_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_newly_active_facet_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_equal_level_coface_count,
+      ExactReducedGammaCutBudget::maximum_supported_delta_facet_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_delta_point_reference_count,
+      ExactReducedGammaCutBudget::maximum_supported_active_root_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_output_facet_reference_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_output_point_reference_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_facet_replay_work_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_point_id_replay_work_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_result_incidence_facet_check_count,
+      ExactReducedGammaCutBudget::
+          maximum_supported_result_incidence_point_id_work_count,
+  };
+}
+
+[[nodiscard]] ExactDirectMorseK2K1TargetAuthorityBudget
+make_bounded_k2_k1_target_authority_budget() noexcept {
+  // This cap is deliberately fixed and independent of the observed receipt.
+  // The n<=14 gate and the nested oracle hard caps bound all actual work far
+  // below it; exceeding it remains an atomic fail-closed outcome.
+  constexpr std::size_t work_cap = 1'000'000'000U;
+  return {
+      make_bounded_closed_gamma2_cut_budget(),
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+      work_cap,
+  };
+}
+
+[[nodiscard]] std::string_view k2_to_k1_target_authority_stop_detail(
+    ExactDirectMorseK2K1TargetAuthorityDecision decision) noexcept {
+  switch (decision) {
+    case ExactDirectMorseK2K1TargetAuthorityDecision::not_certified:
+      return "k2_to_k1_target_authority_not_certified";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_capacity_overflow:
+      return "k2_to_k1_target_authority_capacity_overflow";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_budget_exhausted:
+      return "k2_to_k1_target_authority_budget_exhausted";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_allocation_failed:
+      return "k2_to_k1_target_authority_allocation_failed";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_point_count_or_order_rejected:
+      return "k2_to_k1_target_authority_point_count_or_order_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_direct_pipeline_rejected:
+      return "k2_to_k1_target_authority_direct_pipeline_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_direct_journal_rejected:
+      return "k2_to_k1_target_authority_direct_journal_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_external_hierarchy_rejected:
+      return "k2_to_k1_target_authority_external_hierarchy_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_label_partition_rejected:
+      return "k2_to_k1_target_authority_label_partition_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_observed_k2_k1_label_missing:
+      return "k2_to_k1_target_authority_observed_label_missing";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_observed_k2_k1_label_unresolved:
+      return "k2_to_k1_target_authority_observed_label_unresolved";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_source_binding_rejected:
+      return "k2_to_k1_target_authority_source_binding_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_gamma_cut_rejected:
+      return "k2_to_k1_target_authority_gamma_cut_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_gamma_component_rejected:
+      return "k2_to_k1_target_authority_gamma_component_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_external_checkpoint_rejected:
+      return "k2_to_k1_target_authority_external_checkpoint_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_direct_target_rejected:
+      return "k2_to_k1_target_authority_direct_target_rejected";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        no_authority_target_coverage_mismatch:
+      return "k2_to_k1_target_authority_target_coverage_mismatch";
+    case ExactDirectMorseK2K1TargetAuthorityDecision::
+        complete_observed_resolved_k2_k1_label_target_authority_replay:
+      return "none";
+  }
+  return "k2_to_k1_target_authority_unknown_decision";
+}
+
 [[nodiscard]] std::string_view vertical_target_pipeline_stop_detail(
     ExactDirectMorseVerticalTargetProposalPipelineDecision decision)
     noexcept {
@@ -1382,8 +1663,8 @@ void emit_report(const Report& report) {
                  : "unassessed");
   std::cout
       << "{\n"
-      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v4\",\n"
-      << "  \"phase\":\"15_forest_relative_vertical_pipeline_and_journal\",\n"
+      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v5\",\n"
+      << "  \"phase\":\"15_k2_to_k1_observed_label_target_authority\",\n"
       << "  \"backend\":\"reference_cpu\",\n"
       << "  \"profile\":\"hgp_reduced\",\n"
       << "  \"mode\":\"" << json_escape(report.options.mode)
@@ -1407,7 +1688,7 @@ void emit_report(const Report& report) {
       << "  \"pipeline_complete\":"
       << boolean(report.pipeline_complete) << ",\n"
       << "  \"resident_conditional_pipeline_complete\":"
-      << boolean(report.pipeline_complete) << ",\n"
+      << boolean(report.resident_conditional_pipeline_complete) << ",\n"
       << "  \"budget_exhausted\":"
       << boolean(report.budget_exhausted) << ",\n"
       << "  \"scientific_result_materialized\":"
@@ -1415,6 +1696,18 @@ void emit_report(const Report& report) {
       << "  \"conditional_h0_candidate_certified\":"
       << boolean(report.conditional_h0_candidate_certified) << ",\n"
       << "  \"global_morse_obligation_replayed\":false,\n"
+      << "  \"k2_to_k1_observed_label_target_authority_replayed\":"
+      << boolean(
+             report.k2_to_k1_observed_label_target_authority_replayed)
+      << ",\n"
+      << "  \"bidirectional_gamma_group_completeness_replayed\":false,\n"
+      << "  \"silent_gamma_checkpoint_completeness_replayed\":false,\n"
+      << "  \"external_target_authority_replayed\":false,\n"
+      << "  \"all_naturality_squares_replayed\":false,\n"
+      << "  \"vertical_maps_complete\":false,\n"
+      << "  \"global_m1_claimed\":false,\n"
+      << "  \"product_architecture_claimed\":false,\n"
+      << "  \"scalable_50k_claimed\":false,\n"
       << "  \"warm_e2e_protocol_executed\":false,\n"
       << "  \"warm_e2e_slo_claimed\":false,\n"
       << "  \"warm_e2e_slo_outcome\":\"not_executed\",\n"
@@ -1422,10 +1715,17 @@ void emit_report(const Report& report) {
       << "  \"qualification_claimed\":false,\n"
       << "  \"complete_hierarchy_attempt_requested\":"
       << boolean(report.complete_hierarchy_attempt_requested) << ",\n"
+      << "  \"bounded_k2_to_k1_target_authority_qualification_requested\":"
+      << boolean(
+             report
+                 .bounded_k2_to_k1_target_authority_qualification_requested)
+      << ",\n"
       << "  \"attempt_kind\":\""
-      << (report.complete_hierarchy_attempt_requested
-              ? "right_censorable_full_pipeline_diagnostic"
-              : "fail_fast_capacity_diagnostic")
+      << (report.bounded_k2_to_k1_target_authority_qualification_requested
+              ? "fail_closed_bounded_k2_to_k1_target_authority_qualification"
+              : (report.complete_hierarchy_attempt_requested
+                     ? "right_censorable_full_pipeline_diagnostic"
+                     : "fail_fast_capacity_diagnostic"))
       << "\",\n"
       << "  \"configured_pair_total_caps_disabled\":"
       << boolean(report.configurable_pair_total_caps_disabled) << ",\n"
@@ -1473,16 +1773,31 @@ void emit_report(const Report& report) {
   }
   std::cout
       << "},\n"
-      << "  \"timing_scope\":"
-         "\"attempted_single_process_cpu_generation_to_materialized_forest_"
-         "and_forest_relative_vertical_target_pipeline_and_conditional_"
-         "vertical_journal\",\n"
+      << "  \"timing_scope\":\""
+      << (report.bounded_k2_to_k1_target_authority_qualification_requested
+              ? "attempted_single_process_cpu_generation_to_conditional_"
+                "vertical_journal_and_bounded_fresh_gamma2_emst_k1_"
+                "observed_label_target_authority"
+              : "attempted_single_process_cpu_generation_to_materialized_"
+                "forest_and_forest_relative_vertical_target_pipeline_and_"
+                "conditional_vertical_journal")
+      << "\",\n"
       << "  \"architecture_audit_complete\":"
       << boolean(report.architecture_audit_complete) << ",\n"
       << "  \"no_forbidden_global_structure_materialized\":"
       << boolean(
              report.no_forbidden_global_structure_materialized)
       << ",\n"
+      << "  \"no_forbidden_product_path_global_structure_materialized\":"
+      << boolean(report.no_forbidden_global_structure_materialized)
+      << ",\n"
+      << "  \"architecture_audit_scope\":"
+         "\"nonbounded_product_path_excluding_explicit_bounded_oracle\",\n"
+      << "  \"bounded_oracle_gamma_materialized_transiently\":"
+      << boolean(report.k2_to_k1_bounded_exhaustive_gamma_oracle_used)
+      << ",\n"
+      << "  \"bounded_oracle_global_structure_persisted\":false,\n"
+      << "  \"higher_order_delaunay_materialized\":false,\n"
       << "  \"budgets\":{\"support_work\":"
       << report.options.support_work_budget
       << ",\"support_records\":"
@@ -1524,6 +1839,18 @@ void emit_report(const Report& report) {
       << report.timings.vertical_target_pipeline_ms
       << ",\"vertical_journal\":"
       << report.timings.vertical_journal_ms
+      << ",\"k2_to_k1_oracle_source_history\":"
+      << report.timings.k2_to_k1_oracle_source_history_ms
+      << ",\"k2_to_k1_oracle_k1\":"
+      << report.timings.k2_to_k1_oracle_k1_ms
+      << ",\"k2_to_k1_oracle_hierarchy\":"
+      << report.timings.k2_to_k1_oracle_hierarchy_ms
+      << ",\"k2_to_k1_target_authority_build\":"
+      << report.timings.k2_to_k1_target_authority_build_ms
+      << ",\"k2_to_k1_target_authority_verify\":"
+      << report.timings.k2_to_k1_target_authority_verify_ms
+      << ",\"k2_to_k1_target_authority\":"
+      << report.timings.k2_to_k1_target_authority_ms
       << ",\"vertical_target_replay_diagnostic\":"
       << report.timings.vertical_target_replay_diagnostic_ms
       << ",\"total\":" << report.timings.total_ms << "},\n"
@@ -1956,6 +2283,172 @@ void emit_report(const Report& report) {
       << ",\"public_status_claimed\":"
       << boolean(report.vertical_journal_public_status_claimed)
       << "},\n"
+      << "  \"k2_to_k1_target_authority\":{\"required\":"
+      << boolean(report.k2_to_k1_target_authority_required)
+      << ",\"attempted\":"
+      << boolean(report.k2_to_k1_target_authority_attempted)
+      << ",\"certified_observed_label_target_authority\":"
+      << boolean(report.k2_to_k1_target_authority_certified)
+      << ",\"decision\":"
+      << report.k2_to_k1_target_authority_decision
+      << ",\"scope\":"
+      << report.k2_to_k1_target_authority_scope
+      << ",\"backend\":\"reference_cpu\""
+         ",\"profile\":\"hgp_reduced\""
+         ",\"mode\":\"bounded_n14_k2_to_k1_observed_label_external_"
+         "target_authority_conformance\""
+         ",\"public_status\":\"not_claimed\""
+         ",\"product_nonbounded_modes_keep_oracle_dormant\":true"
+      << ",\"oracle\":{\"source_batches\":"
+      << report.k2_to_k1_oracle_source_batch_count
+      << ",\"source_groups\":"
+      << report.k2_to_k1_oracle_source_group_count
+      << ",\"source_nodes\":"
+      << report.k2_to_k1_oracle_source_node_count
+      << ",\"k1_nodes\":"
+      << report.k2_to_k1_oracle_k1_node_count
+      << ",\"external_checkpoints\":"
+      << report.k2_to_k1_oracle_external_checkpoint_count
+      << "},\"digests\":{\"direct_cloud\":\""
+      << json_escape(report.k2_to_k1_direct_cloud_digest)
+      << "\",\"external_cloud\":\""
+      << json_escape(report.k2_to_k1_external_cloud_digest)
+      << "\",\"external_hierarchy\":\""
+      << json_escape(report.k2_to_k1_external_hierarchy_digest)
+      << "\"},\"required_logical_output_entries\":"
+      << report.k2_to_k1_required_logical_output_entry_count;
+  const auto& k2_to_k1_counters =
+      report.k2_to_k1_target_authority_counters;
+  std::cout
+      << ",\"counters\":{\"forest_node_scans\":"
+      << k2_to_k1_counters.forest_node_scan_count
+      << ",\"forest_child_reference_scans\":"
+      << k2_to_k1_counters.forest_child_reference_scan_count
+      << ",\"source_batch_scans\":"
+      << k2_to_k1_counters.source_batch_scan_count
+      << ",\"source_binding_scans\":"
+      << k2_to_k1_counters.source_binding_scan_count
+      << ",\"label_resolution_scans\":"
+      << k2_to_k1_counters.label_resolution_scan_count
+      << ",\"group_check_scans\":"
+      << k2_to_k1_counters.group_check_scan_count
+      << ",\"observed_k2_k1_labels\":"
+      << k2_to_k1_counters.observed_k2_k1_label_count
+      << ",\"resolved_k2_k1_labels\":"
+      << k2_to_k1_counters.resolved_k2_k1_label_count
+      << ",\"gamma_cut_builds\":"
+      << k2_to_k1_counters.gamma_cut_build_count
+      << ",\"gamma_active_root_scans\":"
+      << k2_to_k1_counters.gamma_active_root_scan_count
+      << ",\"gamma_facet_scans\":"
+      << k2_to_k1_counters.gamma_facet_scan_count
+      << ",\"external_checkpoint_scans\":"
+      << k2_to_k1_counters.external_checkpoint_scan_count
+      << ",\"direct_target_point_references\":"
+      << k2_to_k1_counters.direct_target_point_reference_count
+      << ",\"external_target_point_references\":"
+      << k2_to_k1_counters.external_target_point_reference_count
+      << ",\"certified_target_coverage_equalities\":"
+      << k2_to_k1_counters.certified_target_coverage_equality_count
+      << "},\"rejected_label_resolution_index\":";
+  if (report.k2_to_k1_rejected_label_resolution_index.has_value()) {
+    std::cout << *report.k2_to_k1_rejected_label_resolution_index;
+  } else {
+    std::cout << "null";
+  }
+  std::cout << ",\"rejected_atomic_group_index\":";
+  if (report.k2_to_k1_rejected_atomic_group_index.has_value()) {
+    std::cout << *report.k2_to_k1_rejected_atomic_group_index;
+  } else {
+    std::cout << "null";
+  }
+  std::cout << ",\"rejected_source_binding_index\":";
+  if (report.k2_to_k1_rejected_source_binding_index.has_value()) {
+    std::cout << *report.k2_to_k1_rejected_source_binding_index;
+  } else {
+    std::cout << "null";
+  }
+  const auto& k2_to_k1_verification =
+      report.k2_to_k1_target_authority_verification;
+  std::cout
+      << ",\"direct_pipeline_freshly_replayed\":"
+      << boolean(report.k2_to_k1_direct_pipeline_freshly_replayed)
+      << ",\"direct_vertical_journal_freshly_replayed\":"
+      << boolean(
+             report.k2_to_k1_direct_vertical_journal_freshly_replayed)
+      << ",\"external_k2_k1_hierarchy_freshly_replayed\":"
+      << boolean(report.k2_to_k1_external_hierarchy_freshly_replayed)
+      << ",\"canonical_point_namespace_identity_certified\":"
+      << boolean(
+             report.k2_to_k1_canonical_point_namespace_identity_certified)
+      << ",\"all_observed_k2_k1_labels_present\":"
+      << boolean(report.k2_to_k1_all_observed_labels_present)
+      << ",\"all_observed_k2_k1_labels_resolved\":"
+      << boolean(report.k2_to_k1_all_observed_labels_resolved)
+      << ",\"every_direct_target_coverage_reconstructed_transiently\":"
+      << boolean(
+             report.k2_to_k1_every_direct_target_coverage_reconstructed)
+      << ",\"every_external_target_coverage_reconstructed_transiently\":"
+      << boolean(
+             report.k2_to_k1_every_external_target_coverage_reconstructed)
+      << ",\"every_observed_k2_k1_target_coverage_equal\":"
+      << boolean(report.k2_to_k1_every_observed_target_coverage_equal)
+      << ",\"k2_to_k1_observed_label_target_authority_replayed\":"
+      << boolean(
+             report.k2_to_k1_observed_label_target_authority_replayed)
+      << ",\"verification\":{\"trusted_inputs_accepted\":"
+      << boolean(k2_to_k1_verification.trusted_inputs_accepted)
+      << ",\"direct_pipeline_freshly_replayed\":"
+      << boolean(k2_to_k1_verification.direct_pipeline_freshly_replayed)
+      << ",\"direct_vertical_journal_freshly_replayed\":"
+      << boolean(
+             k2_to_k1_verification
+                 .direct_vertical_journal_freshly_replayed)
+      << ",\"external_k2_k1_hierarchy_freshly_replayed\":"
+      << boolean(
+             k2_to_k1_verification
+                 .external_k2_k1_hierarchy_freshly_replayed)
+      << ",\"expected_result_freshly_reconstructed\":"
+      << boolean(
+             k2_to_k1_verification.expected_result_freshly_reconstructed)
+      << ",\"observed_recursively_equal\":"
+      << boolean(k2_to_k1_verification.observed_recursively_equal)
+      << ",\"observed_storage_within_budget\":"
+      << boolean(k2_to_k1_verification.observed_storage_within_budget)
+      << ",\"result_certified\":"
+      << boolean(k2_to_k1_verification.result_certified)
+      << "},\"bidirectional_gamma_group_completeness_replayed\":"
+      << boolean(
+             report
+                 .k2_to_k1_bidirectional_gamma_group_completeness_replayed)
+      << ",\"silent_gamma_checkpoint_completeness_replayed\":"
+      << boolean(
+             report
+                 .k2_to_k1_silent_gamma_checkpoint_completeness_replayed)
+      << ",\"external_target_authority_replayed\":"
+      << boolean(report.k2_to_k1_external_target_authority_replayed)
+      << ",\"global_morse_obligation_replayed\":"
+      << boolean(report.k2_to_k1_global_morse_obligation_replayed)
+      << ",\"all_naturality_squares_replayed\":"
+      << boolean(report.k2_to_k1_all_naturality_squares_replayed)
+      << ",\"vertical_maps_complete\":"
+      << boolean(report.k2_to_k1_vertical_maps_complete)
+      << ",\"global_m1_claimed\":"
+      << boolean(report.k2_to_k1_global_m1_claimed)
+      << ",\"bounded_exhaustive_gamma_oracle_used\":"
+      << boolean(report.k2_to_k1_bounded_exhaustive_gamma_oracle_used)
+      << ",\"bounded_oracle_gamma_materialized_transiently\":"
+      << boolean(report.k2_to_k1_bounded_exhaustive_gamma_oracle_used)
+      << ",\"gamma_cells_or_global_cofaces_persisted\":"
+      << boolean(
+             report.k2_to_k1_gamma_cells_or_global_cofaces_persisted)
+      << ",\"higher_order_delaunay_materialized\":"
+      << boolean(report.k2_to_k1_higher_order_delaunay_materialized)
+      << ",\"public_status_claimed\":"
+      << boolean(report.k2_to_k1_public_status_claimed)
+      << ",\"no_partial_scientific_payload_published_on_failure\":"
+      << boolean(report.k2_to_k1_no_partial_scientific_payload_on_failure)
+      << "},\n"
       << "  \"vertical_target_replay_diagnostic\":{\"attempted\":"
       << boolean(report.vertical_target_replay_diagnostic_attempted)
       << ",\"callback_invoked\":"
@@ -2125,6 +2618,29 @@ void emit_report(const Report& report) {
     report.stop_category = "invalid_input";
     report.stop_detail =
         "maximum_order_must_be_strictly_less_than_point_count";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 4;
+  }
+  if (bounded_k2_to_k1_target_authority_qualification(options) &&
+      options.point_count >
+          ExactK2K1HierarchyBudget::maximum_supported_point_count) {
+    report.terminal_stage = "input_preflight";
+    report.stop_category = "invalid_input";
+    report.stop_detail =
+        "bounded_k2_k1_target_authority_point_count_exceeds_14";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 4;
+  }
+  if (bounded_k2_to_k1_target_authority_qualification(options) &&
+      options.maximum_order < 2U) {
+    report.terminal_stage = "input_preflight";
+    report.stop_category = "invalid_input";
+    report.stop_detail =
+        "bounded_k2_k1_target_authority_requires_maximum_order_at_least_2";
     report.timings.total_ms =
         milliseconds(Clock::now() - total_start);
     emit_report(report);
@@ -2997,6 +3513,10 @@ void emit_report(const Report& report) {
         report);
   }
 
+  const ExactDirectMorseVerticalBudget vertical_journal_budget =
+      make_vertical_journal_budget();
+  const ExactDirectMorseVerticalConfig vertical_journal_config{
+      vertical_target_pipeline.external_target_authority_id};
   std::optional<ExactDirectMorseVerticalJournalResult> vertical_journal;
   if (report.vertical_target_pipeline_certified) {
     const Clock::time_point vertical_journal_begin = Clock::now();
@@ -3005,9 +3525,8 @@ void emit_report(const Report& report) {
         *forest,
         std::span<const ExactDirectMorseVerticalTargetProposal>{
             vertical_target_pipeline.proposals},
-        make_vertical_journal_budget(),
-        ExactDirectMorseVerticalConfig{
-            vertical_target_pipeline.external_target_authority_id}));
+        vertical_journal_budget,
+        vertical_journal_config));
     report.timings.vertical_journal_ms =
         milliseconds(Clock::now() - vertical_journal_begin);
     report.vertical_journal_decision =
@@ -3079,13 +3598,200 @@ void emit_report(const Report& report) {
         !vertical_journal->higher_order_delaunay_materialized &&
         !vertical_journal->public_status_claimed;
   }
-  report.pipeline_complete =
+  report.resident_conditional_pipeline_complete =
       report.conditional_h0_candidate_certified &&
       report.no_forbidden_global_structure_materialized &&
       report.vertical_target_pipeline_certified &&
       report.vertical_journal_certified;
+  std::optional<ExactDirectMorseK2K1TargetAuthorityResult>
+      k2_to_k1_target_authority;
+  if (report.resident_conditional_pipeline_complete &&
+      report.k2_to_k1_target_authority_required &&
+      vertical_journal.has_value()) {
+    const Clock::time_point authority_begin = Clock::now();
+    const ExactPersistentReducedGammaOrderHistoryBudget
+        source_history_budget =
+            make_bounded_gamma2_history_budget(cloud.size());
+    const ExactPersistentReducedGammaOrderHistory external_source_history =
+        build_exact_persistent_reduced_gamma_order_history(
+            cloud, 2U, source_history_budget);
+    const Clock::time_point source_history_end = Clock::now();
+    report.timings.k2_to_k1_oracle_source_history_ms =
+        milliseconds(source_history_end - authority_begin);
+    report.k2_to_k1_oracle_source_batch_count =
+        external_source_history.batch_metadata.size();
+    report.k2_to_k1_oracle_source_group_count =
+        external_source_history.group_records.size();
+    report.k2_to_k1_oracle_source_node_count =
+        external_source_history.nodes.size();
+
+    const K1CompactForest external_k1_forest =
+        build_compact_k1_forest(build_exact_complete_graph_emst(cloud));
+    const Clock::time_point k1_end = Clock::now();
+    report.timings.k2_to_k1_oracle_k1_ms =
+        milliseconds(k1_end - source_history_end);
+    report.k2_to_k1_oracle_k1_node_count =
+        external_k1_forest.node_count();
+
+    const ExactK2K1HierarchyBudget external_hierarchy_budget =
+        make_bounded_k2_k1_hierarchy_budget();
+    const ExactK2K1HierarchyResult external_hierarchy =
+        build_exact_k2_k1_hierarchy(
+            cloud,
+            source_history_budget,
+            external_source_history,
+            external_k1_forest,
+            external_hierarchy_budget);
+    const Clock::time_point external_hierarchy_end = Clock::now();
+    report.timings.k2_to_k1_oracle_hierarchy_ms =
+        milliseconds(external_hierarchy_end - k1_end);
+    report.k2_to_k1_oracle_external_checkpoint_count =
+        external_hierarchy.vertical_checkpoints.size();
+
+    const ExactDirectMorseK2K1TargetAuthorityBudget authority_budget =
+        make_bounded_k2_k1_target_authority_budget();
+    report.k2_to_k1_target_authority_attempted = true;
+    k2_to_k1_target_authority.emplace(
+        build_exact_direct_morse_k2_k1_target_authority(
+            index,
+            cloud,
+            *forest,
+            vertical_target_budget,
+            vertical_target_pipeline,
+            vertical_journal_budget,
+            vertical_journal_config,
+            *vertical_journal,
+            source_history_budget,
+            external_source_history,
+            external_k1_forest,
+            external_hierarchy_budget,
+            external_hierarchy,
+            authority_budget));
+    const Clock::time_point authority_build_end = Clock::now();
+    report.timings.k2_to_k1_target_authority_build_ms =
+        milliseconds(authority_build_end - external_hierarchy_end);
+    report.k2_to_k1_target_authority_verification =
+        verify_exact_direct_morse_k2_k1_target_authority(
+            index,
+            cloud,
+            *forest,
+            vertical_target_budget,
+            vertical_target_pipeline,
+            vertical_journal_budget,
+            vertical_journal_config,
+            *vertical_journal,
+            source_history_budget,
+            external_source_history,
+            external_k1_forest,
+            external_hierarchy_budget,
+            external_hierarchy,
+            authority_budget,
+            *k2_to_k1_target_authority);
+    const Clock::time_point authority_verify_end = Clock::now();
+    report.timings.k2_to_k1_target_authority_verify_ms =
+        milliseconds(authority_verify_end - authority_build_end);
+    report.timings.k2_to_k1_target_authority_ms =
+        milliseconds(authority_verify_end - authority_begin);
+
+    const auto& authority = *k2_to_k1_target_authority;
+    report.k2_to_k1_target_authority_decision =
+        static_cast<unsigned>(authority.decision);
+    report.k2_to_k1_target_authority_scope =
+        static_cast<unsigned>(authority.scope);
+    report.k2_to_k1_direct_cloud_digest =
+        authority.direct_canonical_cloud_digest.to_lower_hex();
+    report.k2_to_k1_external_cloud_digest =
+        authority.external_canonical_cloud_digest.to_lower_hex();
+    report.k2_to_k1_external_hierarchy_digest =
+        authority.external_hierarchy_projection_digest.to_lower_hex();
+    report.k2_to_k1_required_logical_output_entry_count =
+        authority.required_logical_output_entry_count;
+    report.k2_to_k1_target_authority_counters = authority.counters;
+    report.k2_to_k1_rejected_label_resolution_index =
+        authority.rejected_label_resolution_index;
+    report.k2_to_k1_rejected_atomic_group_index =
+        authority.rejected_atomic_group_index;
+    report.k2_to_k1_rejected_source_binding_index =
+        authority.rejected_source_binding_index;
+    report.k2_to_k1_direct_pipeline_freshly_replayed =
+        authority.direct_pipeline_freshly_replayed;
+    report.k2_to_k1_direct_vertical_journal_freshly_replayed =
+        authority.direct_vertical_journal_freshly_replayed;
+    report.k2_to_k1_external_hierarchy_freshly_replayed =
+        authority.external_k2_k1_hierarchy_freshly_replayed;
+    report.k2_to_k1_canonical_point_namespace_identity_certified =
+        authority.canonical_point_namespace_identity_certified;
+    report.k2_to_k1_all_observed_labels_present =
+        authority.all_observed_k2_k1_labels_present;
+    report.k2_to_k1_all_observed_labels_resolved =
+        authority.all_observed_k2_k1_labels_resolved;
+    report.k2_to_k1_every_direct_target_coverage_reconstructed =
+        authority.every_direct_target_coverage_reconstructed_transiently;
+    report.k2_to_k1_every_external_target_coverage_reconstructed =
+        authority.every_external_target_coverage_reconstructed_transiently;
+    report.k2_to_k1_every_observed_target_coverage_equal =
+        authority.every_observed_k2_k1_target_coverage_equal;
+    report.k2_to_k1_observed_label_target_authority_replayed =
+        authority.k2_to_k1_observed_label_target_authority_replayed;
+    report.k2_to_k1_bidirectional_gamma_group_completeness_replayed =
+        authority.bidirectional_gamma_group_completeness_replayed;
+    report.k2_to_k1_silent_gamma_checkpoint_completeness_replayed =
+        authority.silent_gamma_checkpoint_completeness_replayed;
+    report.k2_to_k1_external_target_authority_replayed =
+        authority.external_target_authority_replayed;
+    report.k2_to_k1_global_morse_obligation_replayed =
+        authority.global_morse_obligation_replayed;
+    report.k2_to_k1_all_naturality_squares_replayed =
+        authority.all_naturality_squares_replayed;
+    report.k2_to_k1_vertical_maps_complete =
+        authority.vertical_maps_complete;
+    report.k2_to_k1_global_m1_claimed = authority.global_m1_claimed;
+    report.k2_to_k1_bounded_exhaustive_gamma_oracle_used =
+        authority.bounded_exhaustive_gamma_oracle_used;
+    report.k2_to_k1_gamma_cells_or_global_cofaces_persisted =
+        authority.gamma_cells_or_global_cofaces_persisted;
+    report.k2_to_k1_higher_order_delaunay_materialized =
+        authority.higher_order_delaunay_materialized;
+    report.k2_to_k1_public_status_claimed =
+        authority.public_status_claimed;
+    report.k2_to_k1_no_partial_scientific_payload_on_failure =
+        authority.no_partial_scientific_payload_published_on_failure;
+
+    const auto& authority_counters = authority.counters;
+    const auto& verification =
+        report.k2_to_k1_target_authority_verification;
+    report.k2_to_k1_target_authority_certified =
+        authority.certified_observed_label_target_authority() &&
+        verification.result_certified &&
+        verification.expected_result_freshly_reconstructed &&
+        verification.observed_recursively_equal &&
+        authority_counters.observed_k2_k1_label_count > 0U &&
+        authority_counters.resolved_k2_k1_label_count ==
+            authority_counters.observed_k2_k1_label_count &&
+        authority_counters.certified_target_coverage_equality_count ==
+            authority_counters.resolved_k2_k1_label_count &&
+        authority.k2_to_k1_observed_label_target_authority_replayed &&
+        !authority.bidirectional_gamma_group_completeness_replayed &&
+        !authority.silent_gamma_checkpoint_completeness_replayed &&
+        !authority.external_target_authority_replayed &&
+        !authority.global_morse_obligation_replayed &&
+        !authority.all_naturality_squares_replayed &&
+        !authority.vertical_maps_complete && !authority.global_m1_claimed &&
+        authority.bounded_exhaustive_gamma_oracle_used &&
+        !authority.gamma_cells_or_global_cofaces_persisted &&
+        !authority.higher_order_delaunay_materialized &&
+        !authority.public_status_claimed &&
+        authority.no_partial_scientific_payload_published_on_failure;
+  }
+  report.pipeline_complete =
+      report.resident_conditional_pipeline_complete &&
+      (!report.k2_to_k1_target_authority_required ||
+       report.k2_to_k1_target_authority_certified);
   if (report.pipeline_complete) {
-    report.terminal_stage = "vertical_journal";
+    report.terminal_stage =
+        report.k2_to_k1_target_authority_required
+            ? "k2_to_k1_target_authority"
+            : "vertical_journal";
     report.stop_category = "none";
     report.stop_detail = "none";
   } else if (
@@ -3115,7 +3821,7 @@ void emit_report(const Report& report) {
                    : "certification_failure");
     report.stop_detail = vertical_target_pipeline_stop_detail(
         vertical_target_pipeline.decision);
-  } else {
+  } else if (!report.vertical_journal_certified) {
     report.terminal_stage = "vertical_journal";
     report.budget_exhausted =
         vertical_journal.has_value() &&
@@ -3134,6 +3840,26 @@ void emit_report(const Report& report) {
     report.stop_detail = vertical_journal.has_value()
         ? vertical_journal_stop_detail(vertical_journal->decision)
         : "vertical_journal_not_attempted";
+  } else {
+    report.terminal_stage = "k2_to_k1_target_authority";
+    report.budget_exhausted =
+        k2_to_k1_target_authority.has_value() &&
+        k2_to_k1_target_authority->decision ==
+            ExactDirectMorseK2K1TargetAuthorityDecision::
+                no_authority_budget_exhausted;
+    report.stop_category =
+        report.budget_exhausted
+            ? "budget_exhausted"
+            : (k2_to_k1_target_authority.has_value() &&
+                       k2_to_k1_target_authority->decision ==
+                           ExactDirectMorseK2K1TargetAuthorityDecision::
+                               no_authority_allocation_failed
+                   ? "operational_failure"
+                   : "certification_failure");
+    report.stop_detail = k2_to_k1_target_authority.has_value()
+        ? k2_to_k1_target_authority_stop_detail(
+              k2_to_k1_target_authority->decision)
+        : "k2_to_k1_target_authority_not_attempted";
   }
   report.timings.total_ms = milliseconds(Clock::now() - total_start);
   emit_report(report);

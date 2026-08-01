@@ -51,13 +51,14 @@ def run_case(
     binary: Path,
     arguments: tuple[str, ...],
     expected_returncode: int,
+    timeout_seconds: int = 20,
 ) -> dict[str, object]:
     completed = subprocess.run(
         [str(binary), *arguments],
         check=False,
         capture_output=True,
         text=True,
-        timeout=20,
+        timeout=timeout_seconds,
     )
     require(
         completed.returncode == expected_returncode,
@@ -73,6 +74,7 @@ def require_static_contract(project: Path) -> None:
         project / "src/tools/direct_morse_product_runner.cpp"
     ).read_text(encoding="utf-8")
     cmake = (project / "CMakeLists.txt").read_text(encoding="utf-8")
+    checker = Path(__file__).read_text(encoding="utf-8")
     runner_links = parenthesized_block(
         cmake,
         "target_link_libraries(\n    morsehgp3d_direct_morse_product_runner",
@@ -96,10 +98,14 @@ def require_static_contract(project: Path) -> None:
         "make_sparse_pair_total_capacity(options)",
         "build_exact_direct_morse_vertical_target_proposal_pipeline(",
         "build_exact_direct_morse_vertical_journal(",
+        "build_exact_direct_morse_k2_k1_target_authority(",
+        "verify_exact_direct_morse_k2_k1_target_authority(",
+        "bounded_k2_k1_target_authority_qualification",
+        "report.k2_to_k1_target_authority_certified",
         "report.vertical_target_pipeline_certified &&",
         "report.vertical_journal_certified;",
-        'morsehgp3d.direct-morse-product-run.v4',
-        '15_forest_relative_vertical_pipeline_and_journal',
+        'morsehgp3d.direct-morse-product-run.v5',
+        '15_k2_to_k1_observed_label_target_authority',
         'p7b_replay_performed\\\":false',
     ):
         require(required in runner, f"runner is missing P8n token {required!r}")
@@ -120,28 +126,48 @@ def require_static_contract(project: Path) -> None:
         "morsehgp3d::direct_morse_vertical_journal" in runner_links,
         "runner does not directly link the conditional vertical journal",
     )
+    require(
+        "morsehgp3d::direct_morse_k2_k1_target_authority" in runner_links,
+        "runner does not directly link the bounded K2-to-K1 target authority",
+    )
+    digest_equality_regression = (
+        'digests.get("direct_cloud")' + " == " + 'digests.get("external_cloud")'
+    )
+    require(
+        digest_equality_regression not in checker,
+        "checker equated distinct SHA domains instead of replaying one PointId namespace",
+    )
 
 
-def require_success_vertical_contract(report: dict[str, object]) -> None:
+def require_success_vertical_contract(
+    report: dict[str, object], *, authority_required: bool = False
+) -> None:
     require(
         report.get("phase")
-        == "15_forest_relative_vertical_pipeline_and_journal",
-        "success report retained the forest-only phase scope",
+        == "15_k2_to_k1_observed_label_target_authority",
+        "success report has the wrong observed-label authority phase scope",
+    )
+    expected_terminal_stage = (
+        "k2_to_k1_target_authority" if authority_required else "vertical_journal"
     )
     require(
-        report.get("terminal_stage") == "vertical_journal"
+        report.get("terminal_stage") == expected_terminal_stage
         and report.get("stop_category") == "none"
         and report.get("stop_detail") == "none",
-        "success report did not terminate at the conditional vertical journal",
+        "success report did not terminate at its required final stage",
+    )
+    expected_timing_scope = (
+        "attempted_single_process_cpu_generation_to_conditional_vertical_"
+        "journal_and_bounded_fresh_gamma2_emst_k1_observed_label_target_"
+        "authority"
+        if authority_required
+        else "attempted_single_process_cpu_generation_to_materialized_forest_"
+        "and_forest_relative_vertical_target_pipeline_and_conditional_"
+        "vertical_journal"
     )
     require(
-        report.get("timing_scope")
-        == (
-            "attempted_single_process_cpu_generation_to_materialized_forest_"
-            "and_forest_relative_vertical_target_pipeline_and_conditional_"
-            "vertical_journal"
-        ),
-        "success report retained a forest-only timing scope",
+        report.get("timing_scope") == expected_timing_scope,
+        "success report has the wrong timing scope",
     )
     timings = report.get("timings_ms")
     require(isinstance(timings, dict), "success report lost its timing ledger")
@@ -153,6 +179,27 @@ def require_success_vertical_contract(report: dict[str, object]) -> None:
         and timings.get("vertical_target_replay_diagnostic") == 0.0,
         "success timing ledger did not separate pipeline, journal and dormant diagnostic",
     )
+
+    authority = report.get("k2_to_k1_target_authority")
+    require(isinstance(authority, dict), "success report lost target authority receipt")
+    if not authority_required:
+        authority_counters = authority.get("counters")
+        authority_verification = authority.get("verification")
+        require(
+            authority.get("required") is False
+            and authority.get("attempted") is False
+            and authority.get("certified_observed_label_target_authority") is False
+            and authority.get(
+                "k2_to_k1_observed_label_target_authority_replayed"
+            )
+            is False
+            and authority.get("bounded_exhaustive_gamma_oracle_used") is False
+            and isinstance(authority_counters, dict)
+            and all(value == 0 for value in authority_counters.values())
+            and isinstance(authority_verification, dict)
+            and all(value is False for value in authority_verification.values()),
+            "a non-qualification mode activated the bounded Gamma2 oracle",
+        )
 
     pipeline = report.get("vertical_target_pipeline")
     require(isinstance(pipeline, dict), "success report lost the vertical pipeline")
@@ -264,6 +311,7 @@ def require_vertical_not_attempted(report: dict[str, object]) -> None:
     pipeline = report.get("vertical_target_pipeline")
     journal = report.get("vertical_journal")
     diagnostic = report.get("vertical_target_replay_diagnostic")
+    authority = report.get("k2_to_k1_target_authority")
     require(
         isinstance(pipeline, dict)
         and pipeline.get("attempted") is False
@@ -280,11 +328,17 @@ def require_vertical_not_attempted(report: dict[str, object]) -> None:
         isinstance(diagnostic, dict) and diagnostic.get("attempted") is False,
         "an upstream stop attempted vertical failure replay",
     )
-
-
-def require_success_projection(report: dict[str, object]) -> None:
     require(
-        report.get("schema") == "morsehgp3d.direct-morse-product-run.v4",
+        isinstance(authority, dict) and authority.get("attempted") is False,
+        "an upstream stop attempted the bounded K2-to-K1 target authority",
+    )
+
+
+def require_success_projection(
+    report: dict[str, object], *, authority_required: bool = False
+) -> None:
+    require(
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v5",
         "success report has the wrong schema",
     )
     require(report.get("pipeline_complete") is True, "pipeline did not close")
@@ -298,8 +352,25 @@ def require_success_projection(report: dict[str, object]) -> None:
         report.get("no_forbidden_global_structure_materialized") is True,
         "success report materialized a forbidden global structure",
     )
+    require(
+        report.get("no_forbidden_product_path_global_structure_materialized")
+        is True
+        and report.get("architecture_audit_scope")
+        == "nonbounded_product_path_excluding_explicit_bounded_oracle"
+        and report.get("bounded_oracle_global_structure_persisted") is False
+        and report.get("higher_order_delaunay_materialized") is False,
+        "success report blurred product-path and bounded-oracle architecture",
+    )
     for unclaimed in (
         "global_morse_obligation_replayed",
+        "bidirectional_gamma_group_completeness_replayed",
+        "silent_gamma_checkpoint_completeness_replayed",
+        "external_target_authority_replayed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "global_m1_claimed",
+        "product_architecture_claimed",
+        "scalable_50k_claimed",
         "warm_e2e_protocol_executed",
         "warm_e2e_slo_claimed",
         "qualification_claimed",
@@ -613,7 +684,9 @@ def require_success_projection(report: dict[str, object]) -> None:
     require(report.get("pipeline_counts") == expected_pipeline, "pipeline projection changed")
     require(report.get("decisions") == expected_decisions, "downstream decisions changed")
     require(report.get("forest") == expected_forest, "forest projection changed")
-    require_success_vertical_contract(report)
+    require_success_vertical_contract(
+        report, authority_required=authority_required
+    )
 
 
 def require_capacity_stop(report: dict[str, object]) -> None:
@@ -746,6 +819,204 @@ def require_complete_diagnostic_contract(report: dict[str, object]) -> None:
     require_success_vertical_contract(report)
 
 
+def require_bounded_target_authority_contract(report: dict[str, object]) -> None:
+    require(
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v5"
+        and report.get("pipeline_complete") is True
+        and report.get("resident_conditional_pipeline_complete") is True
+        and report.get("scientific_result_materialized") is True
+        and report.get("conditional_h0_candidate_certified") is True
+        and report.get("no_forbidden_product_path_global_structure_materialized")
+        is True,
+        "bounded qualification lost its conditional direct pipeline",
+    )
+    pair = report.get("pair_support")
+    higher = report.get("higher_support")
+    pipeline_counts = report.get("pipeline_counts")
+    forest = report.get("forest")
+    require(
+        isinstance(pair, dict)
+        and pair.get("source_kind") == "sealed_sparse_anchored_session"
+        and pair.get("authority_kind") == "sealed_in_process_terminal_authority"
+        and pair.get("p7b_replay_performed") is False
+        and pair.get("status") == "complete"
+        and pair.get("maximum_closed_rank") == 4,
+        "bounded qualification lost its direct sparse-pair provenance",
+    )
+    require(
+        isinstance(higher, dict)
+        and higher.get("status") == "complete"
+        and higher.get("full_geometry_replay_avoided") is True
+        and isinstance(pipeline_counts, dict)
+        and pipeline_counts.get("terminal_catalog_certified") is True
+        and pipeline_counts.get("committed_batches", 0) > 0
+        and isinstance(forest, dict)
+        and forest.get("nodes", 0) > 0,
+        "bounded qualification did not close its direct forest prefix",
+    )
+    for unclaimed in (
+        "global_morse_obligation_replayed",
+        "bidirectional_gamma_group_completeness_replayed",
+        "silent_gamma_checkpoint_completeness_replayed",
+        "external_target_authority_replayed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "global_m1_claimed",
+        "product_architecture_claimed",
+        "scalable_50k_claimed",
+        "qualification_claimed",
+    ):
+        require(report.get(unclaimed) is False, f"bounded runner overclaimed {unclaimed}")
+    require_success_vertical_contract(report, authority_required=True)
+    require(
+        report.get("mode") == "bounded_k2_k1_target_authority_qualification"
+        and report.get(
+            "bounded_k2_to_k1_target_authority_qualification_requested"
+        )
+        is True
+        and report.get("complete_hierarchy_attempt_requested") is False
+        and report.get("attempt_kind")
+        == "fail_closed_bounded_k2_to_k1_target_authority_qualification"
+        and report.get("k2_to_k1_observed_label_target_authority_replayed")
+        is True
+        and report.get("bounded_oracle_gamma_materialized_transiently") is True,
+        "bounded qualification mode did not publish its narrow local outcome",
+    )
+    timings = report.get("timings_ms")
+    require(isinstance(timings, dict), "bounded authority lost its timing ledger")
+    for name in (
+        "k2_to_k1_oracle_source_history",
+        "k2_to_k1_oracle_k1",
+        "k2_to_k1_oracle_hierarchy",
+        "k2_to_k1_target_authority_build",
+        "k2_to_k1_target_authority_verify",
+        "k2_to_k1_target_authority",
+    ):
+        require(
+            type(timings.get(name)) in (int, float) and timings[name] >= 0,
+            f"bounded authority lost timing component {name}",
+        )
+    require(
+        timings["k2_to_k1_target_authority"] > 0,
+        "bounded authority aggregate timing is empty",
+    )
+
+    authority = report.get("k2_to_k1_target_authority")
+    require(isinstance(authority, dict), "bounded authority receipt is absent")
+    counters = authority.get("counters")
+    verification = authority.get("verification")
+    oracle = authority.get("oracle")
+    digests = authority.get("digests")
+    require(
+        authority.get("required") is True
+        and authority.get("attempted") is True
+        and authority.get("certified_observed_label_target_authority") is True
+        and authority.get("decision") == 17
+        and authority.get("scope") == 1
+        and authority.get("backend") == "reference_cpu"
+        and authority.get("profile") == "hgp_reduced"
+        and authority.get("public_status") == "not_claimed"
+        and authority.get("product_nonbounded_modes_keep_oracle_dormant") is True,
+        "bounded authority did not expose the certified core identity",
+    )
+    require(isinstance(counters, dict), "bounded authority counters are absent")
+    observed_labels = counters.get("observed_k2_k1_labels")
+    resolved_labels = counters.get("resolved_k2_k1_labels")
+    require(
+        isinstance(observed_labels, int)
+        and observed_labels > 0
+        and resolved_labels == observed_labels
+        and counters.get("gamma_cut_builds") == observed_labels
+        and counters.get("certified_target_coverage_equalities") == observed_labels
+        and counters.get("direct_target_point_references")
+        == counters.get("external_target_point_references"),
+        "bounded authority did not close its observed-label coverage partition",
+    )
+    require(
+        isinstance(oracle, dict)
+        and oracle.get("source_batches", 0) > 0
+        and oracle.get("source_groups", 0) > 0
+        and oracle.get("source_nodes", 0) > 0
+        and oracle.get("k1_nodes", 0) > 0
+        and oracle.get("external_checkpoints", 0) > 0,
+        "bounded authority did not report its fresh Gamma2/K1 oracle",
+    )
+    require(
+        isinstance(digests, dict)
+        and all(
+            isinstance(value, str)
+            and len(value) == 64
+            and value == value.lower()
+            and all(character in "0123456789abcdef" for character in value)
+            and any(character != "0" for character in value)
+            for value in digests.values()
+        ),
+        "bounded authority lost a nonzero canonical digest",
+    )
+    # The direct higher-support and external phase15-tg2a projections use
+    # distinct SHA domains. PointId namespace identity comes from fresh replay
+    # over the same cloud and the certified namespace fact below, never from
+    # equality of these unrelated digest values.
+    for fact in (
+        "direct_pipeline_freshly_replayed",
+        "direct_vertical_journal_freshly_replayed",
+        "external_k2_k1_hierarchy_freshly_replayed",
+        "canonical_point_namespace_identity_certified",
+        "all_observed_k2_k1_labels_present",
+        "all_observed_k2_k1_labels_resolved",
+        "every_direct_target_coverage_reconstructed_transiently",
+        "every_external_target_coverage_reconstructed_transiently",
+        "every_observed_k2_k1_target_coverage_equal",
+        "k2_to_k1_observed_label_target_authority_replayed",
+        "bounded_exhaustive_gamma_oracle_used",
+    ):
+        require(authority.get(fact) is True, f"bounded authority lost local fact {fact}")
+    require(
+        isinstance(verification, dict)
+        and all(value is True for value in verification.values()),
+        "bounded authority did not pass independent fresh verification",
+    )
+    for unclaimed in (
+        "bidirectional_gamma_group_completeness_replayed",
+        "silent_gamma_checkpoint_completeness_replayed",
+        "external_target_authority_replayed",
+        "global_morse_obligation_replayed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "global_m1_claimed",
+        "gamma_cells_or_global_cofaces_persisted",
+        "higher_order_delaunay_materialized",
+        "public_status_claimed",
+    ):
+        require(authority.get(unclaimed) is False, f"bounded authority overclaimed {unclaimed}")
+    require(
+        authority.get("bounded_oracle_gamma_materialized_transiently") is True
+        and authority.get("no_partial_scientific_payload_published_on_failure")
+        is True,
+        "bounded authority blurred transient oracle storage or success semantics",
+    )
+
+
+def require_bounded_target_authority_guard(report: dict[str, object]) -> None:
+    require(
+        report.get("terminal_stage") == "input_preflight"
+        and report.get("stop_category") == "invalid_input"
+        and report.get("stop_detail")
+        == "bounded_k2_k1_target_authority_point_count_exceeds_14"
+        and report.get("canonical_point_count") == 0,
+        "bounded target-authority mode did not fail closed above n=14",
+    )
+    authority = report.get("k2_to_k1_target_authority")
+    require(
+        isinstance(authority, dict)
+        and authority.get("required") is True
+        and authority.get("attempted") is False
+        and authority.get("bounded_exhaustive_gamma_oracle_used") is False,
+        "bounded target-authority guard started the exhaustive oracle",
+    )
+    require_vertical_not_attempted(report)
+
+
 def main() -> int:
     require(len(sys.argv) == 3, "usage: check_direct_morse_sparse_pair_runner.py PROJECT RUNNER")
     project = Path(sys.argv[1]).resolve()
@@ -781,10 +1052,37 @@ def main() -> int:
         0,
     )
     require_complete_diagnostic_contract(complete_diagnostic)
+    bounded_target_authority = run_case(
+        binary,
+        (
+            "--point-count",
+            "4",
+            "--K",
+            "3",
+            "--mode",
+            "bounded_k2_k1_target_authority_qualification",
+        ),
+        0,
+        timeout_seconds=60,
+    )
+    require_bounded_target_authority_contract(bounded_target_authority)
+    bounded_target_authority_guard = run_case(
+        binary,
+        (
+            "--point-count",
+            "15",
+            "--K",
+            "10",
+            "--mode",
+            "bounded_k2_k1_target_authority_qualification",
+        ),
+        4,
+    )
+    require_bounded_target_authority_guard(bounded_target_authority_guard)
     print(
         json.dumps(
             {
-                "schema": "morsehgp3d.phase15.vertical_product_runner_gate.v2",
+                "schema": "morsehgp3d.phase15.vertical_product_runner_gate.v3",
                 "bounded_p7b_projection_matched": True,
                 "p7b_default_runner_replay_count": 0,
                 "p8l_capacity_stop_typed": True,
@@ -792,6 +1090,9 @@ def main() -> int:
                 "complete_diagnostic_contract": True,
                 "vertical_target_pipeline_required": True,
                 "conditional_vertical_journal_required": True,
+                "bounded_k2_k1_target_authority_required": True,
+                "bounded_k2_k1_target_authority_n14_guarded": True,
+                "k2_to_k1_observed_label_target_authority_replayed": True,
                 "vertical_nonclaims_preserved": True,
             },
             separators=(",", ":"),

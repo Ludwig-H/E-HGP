@@ -245,6 +245,40 @@ Le profil 50 000/$K_{\max}=5$ tranche aussi la question de performance de cette 
 
 Le premier correctif guidé par ce profil réutilise l'arène CUDA entre deux tuiles fraîches de même étendue. Le rebind n'est permis qu'après libération de la lease précédente et unicité du propriétaire, pour le même traversal, snapshot, configuration et capacités, avec un nouvel epoch et une nouvelle plage d'ancres. Les segments candidates, prunes et témoins, les contrôles et les checkpoints restent entièrement réinitialisés; une reprise intra-tuile n'alloue ni ne rebind. À 50 000 points, la télémétrie attend exactement deux allocations et onze réutilisations pour treize tuiles, car les douze premières ont 4 096 ancres et la dernière 848. Le test hôte strict, les tests de mutation des assembleurs et la qualification native 50 000 sur G4 passent désormais; le profil $K_{\max}=5$ ci-dessus ferme lui aussi les compteurs deux plus onze. Aucun memcheck ou racecheck spécifique de ce rebind n'est revendiqué à ce SHA. Ce correctif de durée de vie ne modifie aucune décision géométrique ni aucun statut scientifique.
 
+### Autorité cible externe observée $K=2\to1$ — qualification hôte bornée
+
+Le follow-up `reference_cpu / hgp_reduced / bounded_n14_k2_to_k1_observed_label_external_target_authority_conformance` est `implemented_and_freshly_certified`, avec `deployment_status=architecture_only` et `public_status=not_claimed`. `ExactDirectMorseK2K1TargetAuthority` rejoue fraîchement le pipeline direct, son journal vertical, l'histoire Gamma2 exhaustive, l'EMST/K1 compact et `ExactK2K1Hierarchy`. Pour chacun des seuls labels directs `K2->K1` observés et résolus, il reconstruit transitoirement le sous-arbre cible direct et le checkpoint externe fermé, canonise leurs couvertures par `PointId` et exige leur égalité. Le résultat ne conserve ni facette, coface, composante Gamma ou couverture de cible.
+
+Le build Release strict du core et de `direct_morse_product_runner` passe. Après deux gardes d'overflow mécaniques et le relink final, le CTest E5 `morsehgp3d.hierarchy_direct_morse_k2_k1_target_authority` passe `1/1` en 22,34 s. Le checker Release `check_direct_morse_sparse_pair_runner.py` accepte séparément les contrats v5 et v3 en 20,56 s. La correction de fixture qui porte le scratch locator de 1 024 à 1 025 slots réserve le sentinel demandé par le locator; elle relève uniquement de l'infrastructure de test et ne constitue pas une contradiction mathématique.
+
+Le run manuel Release local distinct du checker utilise `uniform_latin`, quatre points et un ordre maximal demandé et effectif trois. Son reçu v5 termine au stage `k2_to_k1_target_authority` avec quatre labels `K2->K1` observés et résolus, quatre coupes Gamma2 fermées, quatre égalités de couverture, seize références `PointId` directes et seize externes. Les digests `direct_cloud=dca51fc0b5fb760f5174de8349b19fce2eaca028fc650ae2924866d297f2743b` et `external_cloud=b5a1cbbfaf7532417dc25b59fb60856b1e437c349162e438f8bf5e7f9b5357b5` sont différents par construction parce que leurs domaines sont séparés; `external_hierarchy=b62511a4c692d9a80489df4193846911ce32e8e3fcf0d4e9c1fd10bf5ba6b9cd`. L'identité canonique est certifiée par deux replays frais depuis le même nuage, pas par l'égalité des digests.
+
+| Champ `timings_ms` | Millisecondes |
+|---|---:|
+| `generation` | 0,023 |
+| `canonicalization` | 0,010 |
+| `lbvh` | 0,012 |
+| `pair_support` | 1,012 |
+| `higher_support` | 6,454 |
+| `terminal_facade` | 0,169 |
+| `event_journal` | 0,183 |
+| `saddle_seed_journal` | 0,085 |
+| `batch_plan` | 0,820 |
+| `reducer_setup` | 1,794 |
+| `reducer_stream` | 1,225 |
+| `forest_finish` | 0,010 |
+| `vertical_target_pipeline` | 2,786 |
+| `vertical_journal` | 0,015 |
+| `k2_to_k1_oracle_source_history` | 6 414,997 |
+| `k2_to_k1_oracle_k1` | 0,561 |
+| `k2_to_k1_oracle_hierarchy` | 6 263,758 |
+| `k2_to_k1_target_authority_build` | 6 709,835 |
+| `k2_to_k1_target_authority_verify` | 2 757,990 |
+| `k2_to_k1_target_authority` | 22 147,142 |
+| `total` | 22 161,752 |
+
+Ces temps mesurent un oracle exhaustif borné, pas un chemin produit ni un SLO. Le mode accepte seulement `n<=14`; `n=15` est rejeté fail-fast avant le travail Gamma2/K1. La porte suivante est explicitement non satisfaite : complétude bidirectionnelle des groupes Gamma, checkpoints silencieux, autorité cible externe globale, obligation Morse globale, M.1, toutes les naturalités, applications verticales complètes, hiérarchie produit massive, scalabilité, SLO et statut public restent faux. Aucun GCP n'a été utilisé pour cette qualification hôte.
+
 ### Reçu de nettoyage des oracles historiques
 
 Le reçu étroit `legacy_geogram_morton_surrogate_cleanup_complete` est fermé : les exécutables `morsehgp3d_gpu_morton_window_h0_surrogate` et `morsehgp3d_gpu_geogram_low_order_diagnostic`, leur option CMake et leur présence dans les presets CUDA ont été retirés. Leurs fixtures exactes, checkers, rapports archivés et le helper épinglé de reproduction Geogram restent disponibles comme preuves négatives et oracles bornés; aucun d'eux n'est lié, lancé ou mesuré par le chemin produit. `tools/check_scope.py` verrouille désormais l'absence des deux sources et des identifiants de cible dans le CMake racine, les presets, le catalogue des tests unitaires, le contrat de build, la CI et la campagne pair-first active. Le test de la forêt directe $k=1$ conserve lui aussi l'oracle EMST comme fixture scellée : sa cible ne lie plus `morsehgp3d::hierarchy` et son inspection `nm` exclut le symbole de construction EMST complet. Le reçu général `legacy_oracle_cleanup_complete` reste ouvert jusqu'à ce que les cinq variantes directes, PDEL, l'overlay et leurs anciennes campagnes soient eux aussi injoignables depuis le build, les presets et les benchmarks produit. Ce nettoyage partiel ne ferme ni la phase, ni le catalogue, ni un statut scientifique.
