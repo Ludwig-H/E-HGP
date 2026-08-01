@@ -1,5 +1,7 @@
 #pragma once
 
+#include "phase15_exact_higher_support_product_fixed.cuh"
+
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
@@ -10,14 +12,14 @@
 #define MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD
 #endif
 
-namespace morsehgp3d::gpu::detail::exact_higher_support_product_fixed {
+namespace morsehgp3d::gpu::detail::exact_higher_support_product_fixed512 {
 
 inline constexpr std::size_t axis_count = 3U;
 inline constexpr std::size_t maximum_support_size = 4U;
-inline constexpr std::size_t limb_count = 16U;
-inline constexpr std::size_t fixed_bit_count = 1024U;
-inline constexpr std::uint64_t aligned_coordinate_bit_limit = 124U;
-inline constexpr std::size_t proven_maximum_expression_bit_count = 1013U;
+inline constexpr std::size_t limb_count = 8U;
+inline constexpr std::size_t fixed_bit_count = 512U;
+inline constexpr std::uint64_t aligned_coordinate_bit_limit = 61U;
+inline constexpr std::size_t proven_maximum_expression_bit_count = 509U;
 inline constexpr std::uint64_t expression_coordinate_multiplier = 8U;
 inline constexpr std::uint64_t expression_bit_overhead = 21U;
 
@@ -33,28 +35,26 @@ enum class Decision : std::uint8_t {
   requires_cpu_rational_fallback = 2U,
 };
 
-struct UInt1024 {
+struct UInt512 {
   std::uint64_t limb[limb_count]{};
 };
 
-struct Signed1024 {
-  UInt1024 magnitude{};
+struct Signed512 {
+  UInt512 magnitude{};
   bool negative{false};
 };
 
-struct Interval1024 {
-  Signed1024 lower{};
-  Signed1024 upper{};
+struct Interval512 {
+  Signed512 lower{};
+  Signed512 upper{};
 };
 
-struct Binary64Aabb3 {
-  std::uint64_t lower[axis_count]{};
-  std::uint64_t upper[axis_count]{};
-};
+using Binary64Aabb3 =
+    exact_higher_support_product_fixed::Binary64Aabb3;
 
 struct BoxCoordinates {
-  Signed1024 lower[axis_count]{};
-  Signed1024 upper[axis_count]{};
+  Signed512 lower[axis_count]{};
+  Signed512 upper[axis_count]{};
 };
 
 struct DyadicWord {
@@ -63,8 +63,8 @@ struct DyadicWord {
   bool negative{false};
 };
 
-using Vector3 = Interval1024[axis_count];
-using Matrix3 = Interval1024[axis_count][axis_count];
+using Vector3 = Interval512[axis_count];
+using Matrix3 = Interval512[axis_count][axis_count];
 
 struct AlignedProduct {
   std::size_t support_size{};
@@ -78,19 +78,19 @@ struct SupportEvaluation {
   std::size_t dimension{};
   Vector3 directions[axis_count]{};
   Matrix3 gram{};
-  Interval1024 squared_direction_norms[axis_count]{};
-  Interval1024 cramer_numerators[axis_count]{};
-  Interval1024 gram_determinant{};
+  Interval512 squared_direction_norms[axis_count]{};
+  Interval512 cramer_numerators[axis_count]{};
+  Interval512 gram_determinant{};
 };
 
-static_assert(std::is_standard_layout_v<UInt1024>);
-static_assert(std::is_trivially_copyable_v<UInt1024>);
-static_assert(sizeof(UInt1024) == 128U);
-static_assert(std::is_standard_layout_v<Signed1024>);
-static_assert(std::is_trivially_copyable_v<Signed1024>);
+static_assert(std::is_standard_layout_v<UInt512>);
+static_assert(std::is_trivially_copyable_v<UInt512>);
+static_assert(sizeof(UInt512) == 64U);
+static_assert(std::is_standard_layout_v<Signed512>);
+static_assert(std::is_trivially_copyable_v<Signed512>);
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool is_zero(
-    const UInt1024& value) noexcept {
+    const UInt512& value) noexcept {
   for (std::size_t index = 0U; index < limb_count; ++index) {
     if (value.limb[index] != 0U) {
       return false;
@@ -100,7 +100,7 @@ static_assert(std::is_trivially_copyable_v<Signed1024>);
 }
 
 MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline void normalize(
-    Signed1024& value) noexcept {
+    Signed512& value) noexcept {
   if (is_zero(value.magnitude)) {
     value.negative = false;
   }
@@ -117,7 +117,7 @@ bit_width_u64(std::uint64_t value) noexcept {
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline unsigned int
-bit_width(const UInt1024& value) noexcept {
+bit_width(const UInt512& value) noexcept {
   for (std::size_t index = limb_count; index != 0U; --index) {
     if (value.limb[index - 1U] != 0U) {
       return static_cast<unsigned int>((index - 1U) * 64U) +
@@ -128,8 +128,8 @@ bit_width(const UInt1024& value) noexcept {
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline int compare(
-    const UInt1024& left,
-    const UInt1024& right) noexcept {
+    const UInt512& left,
+    const UInt512& right) noexcept {
   for (std::size_t index = limb_count; index != 0U; --index) {
     if (left.limb[index - 1U] < right.limb[index - 1U]) {
       return -1;
@@ -142,8 +142,8 @@ bit_width(const UInt1024& value) noexcept {
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline int compare(
-    const Signed1024& left,
-    const Signed1024& right) noexcept {
+    const Signed512& left,
+    const Signed512& right) noexcept {
   const bool left_negative = left.negative && !is_zero(left.magnitude);
   const bool right_negative = right.negative && !is_zero(right.magnitude);
   if (left_negative != right_negative) {
@@ -154,20 +154,20 @@ bit_width(const UInt1024& value) noexcept {
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool is_negative(
-    const Signed1024& value) noexcept {
+    const Signed512& value) noexcept {
   return value.negative && !is_zero(value.magnitude);
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool is_nonpositive(
-    const Signed1024& value) noexcept {
+    const Signed512& value) noexcept {
   return value.negative || is_zero(value.magnitude);
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool add(
-    const UInt1024& left,
-    const UInt1024& right,
-    UInt1024& output) noexcept {
-  output = UInt1024{};
+    const UInt512& left,
+    const UInt512& right,
+    UInt512& output) noexcept {
+  output = UInt512{};
   std::uint64_t carry = 0U;
   for (std::size_t index = 0U; index < limb_count; ++index) {
     const std::uint64_t first = left.limb[index] + right.limb[index];
@@ -181,11 +181,11 @@ bit_width(const UInt1024& value) noexcept {
   return carry == 0U;
 }
 
-[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline UInt1024
+[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline UInt512
 subtract_magnitudes(
-    const UInt1024& greater,
-    const UInt1024& lesser) noexcept {
-  UInt1024 output{};
+    const UInt512& greater,
+    const UInt512& lesser) noexcept {
+  UInt512 output{};
   std::uint64_t borrow = 0U;
   for (std::size_t index = 0U; index < limb_count; ++index) {
     const std::uint64_t first = greater.limb[index] - lesser.limb[index];
@@ -200,10 +200,10 @@ subtract_magnitudes(
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool add_signed(
-    const Signed1024& left,
-    const Signed1024& right,
-    Signed1024& output) noexcept {
-  output = Signed1024{};
+    const Signed512& left,
+    const Signed512& right,
+    Signed512& output) noexcept {
+  output = Signed512{};
   const bool left_negative = left.negative && !is_zero(left.magnitude);
   const bool right_negative = right.negative && !is_zero(right.magnitude);
   if (left_negative == right_negative) {
@@ -227,8 +227,8 @@ subtract_magnitudes(
   return true;
 }
 
-[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline Signed1024 negate(
-    Signed1024 value) noexcept {
+[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline Signed512 negate(
+    Signed512 value) noexcept {
   if (!is_zero(value.magnitude)) {
     value.negative = !value.negative;
   }
@@ -236,17 +236,17 @@ subtract_magnitudes(
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool subtract_signed(
-    const Signed1024& left,
-    const Signed1024& right,
-    Signed1024& output) noexcept {
+    const Signed512& left,
+    const Signed512& right,
+    Signed512& output) noexcept {
   return add_signed(left, negate(right), output);
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool shift_word(
     std::uint64_t magnitude,
     unsigned int shift,
-    UInt1024& output) noexcept {
-  output = UInt1024{};
+    UInt512& output) noexcept {
+  output = UInt512{};
   if (magnitude == 0U) {
     return true;
   }
@@ -264,10 +264,10 @@ subtract_magnitudes(
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool shift_left(
-    const UInt1024& input,
+    const UInt512& input,
     unsigned int shift,
-    UInt1024& output) noexcept {
-  output = UInt1024{};
+    UInt512& output) noexcept {
+  output = UInt512{};
   const unsigned int width = bit_width(input);
   if (width == 0U) {
     return true;
@@ -313,7 +313,7 @@ MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline void multiply_u64(
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool add_word(
-    UInt1024& value,
+    UInt512& value,
     std::size_t index,
     std::uint64_t word) noexcept {
   while (word != 0U) {
@@ -329,7 +329,7 @@ MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline void multiply_u64(
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline std::size_t
-active_limb_count(const UInt1024& value) noexcept {
+active_limb_count(const UInt512& value) noexcept {
   for (std::size_t index = limb_count; index != 0U; --index) {
     if (value.limb[index - 1U] != 0U) {
       return index;
@@ -339,10 +339,10 @@ active_limb_count(const UInt1024& value) noexcept {
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool multiply(
-    const UInt1024& left,
-    const UInt1024& right,
-    UInt1024& output) noexcept {
-  output = UInt1024{};
+    const UInt512& left,
+    const UInt512& right,
+    UInt512& output) noexcept {
+  output = UInt512{};
   const std::size_t left_count = active_limb_count(left);
   const std::size_t right_count = active_limb_count(right);
   for (std::size_t left_index = 0U;
@@ -369,10 +369,10 @@ active_limb_count(const UInt1024& value) noexcept {
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool multiply_signed(
-    const Signed1024& left,
-    const Signed1024& right,
-    Signed1024& output) noexcept {
-  output = Signed1024{};
+    const Signed512& left,
+    const Signed512& right,
+    Signed512& output) noexcept {
+  output = Signed512{};
   if (!multiply(left.magnitude, right.magnitude, output.magnitude)) {
     return false;
   }
@@ -382,9 +382,9 @@ active_limb_count(const UInt1024& value) noexcept {
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool scale_by_two(
-    const Signed1024& input,
-    Signed1024& output) noexcept {
-  output = Signed1024{};
+    const Signed512& input,
+    Signed512& output) noexcept {
+  output = Signed512{};
   output.negative = input.negative;
   if (!shift_left(input.magnitude, 1U, output.magnitude)) {
     return false;
@@ -393,34 +393,34 @@ active_limb_count(const UInt1024& value) noexcept {
   return true;
 }
 
-[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline Interval1024
-singleton(const Signed1024& value) noexcept {
-  return Interval1024{value, value};
+[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline Interval512
+singleton(const Signed512& value) noexcept {
+  return Interval512{value, value};
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool add_interval(
-    const Interval1024& left,
-    const Interval1024& right,
-    Interval1024& output) noexcept {
+    const Interval512& left,
+    const Interval512& right,
+    Interval512& output) noexcept {
   return add_signed(left.lower, right.lower, output.lower) &&
       add_signed(left.upper, right.upper, output.upper);
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool
 subtract_interval(
-    const Interval1024& left,
-    const Interval1024& right,
-    Interval1024& output) noexcept {
+    const Interval512& left,
+    const Interval512& right,
+    Interval512& output) noexcept {
   return subtract_signed(left.lower, right.upper, output.lower) &&
       subtract_signed(left.upper, right.lower, output.upper);
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool
 multiply_interval(
-    const Interval1024& left,
-    const Interval1024& right,
-    Interval1024& output) noexcept {
-  Signed1024 candidates[4]{};
+    const Interval512& left,
+    const Interval512& right,
+    Interval512& output) noexcept {
+  Signed512 candidates[4]{};
   if (!multiply_signed(left.lower, right.lower, candidates[0]) ||
       !multiply_signed(left.lower, right.upper, candidates[1]) ||
       !multiply_signed(left.upper, right.lower, candidates[2]) ||
@@ -441,10 +441,10 @@ multiply_interval(
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool square_interval(
-    const Interval1024& input,
-    Interval1024& output) noexcept {
-  Signed1024 lower_squared{};
-  Signed1024 upper_squared{};
+    const Interval512& input,
+    Interval512& output) noexcept {
+  Signed512 lower_squared{};
+  Signed512 upper_squared{};
   if (!multiply_signed(input.lower, input.lower, lower_squared) ||
       !multiply_signed(input.upper, input.upper, upper_squared)) {
     return false;
@@ -453,7 +453,7 @@ multiply_interval(
       ? lower_squared
       : upper_squared;
   if (is_nonpositive(input.lower) && !is_negative(input.upper)) {
-    output.lower = Signed1024{};
+    output.lower = Signed512{};
   } else {
     output.lower = compare(lower_squared, upper_squared) <= 0
         ? lower_squared
@@ -464,8 +464,8 @@ multiply_interval(
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool
 scale_interval_by_two(
-    const Interval1024& input,
-    Interval1024& output) noexcept {
+    const Interval512& input,
+    Interval512& output) noexcept {
   return scale_by_two(input.lower, output.lower) &&
       scale_by_two(input.upper, output.upper);
 }
@@ -474,15 +474,15 @@ scale_interval_by_two(
     const Vector3& left,
     const Vector3& right,
     bool same_vector,
-    Interval1024& output) noexcept {
-  output = singleton(Signed1024{});
+    Interval512& output) noexcept {
+  output = singleton(Signed512{});
   for (std::size_t axis = 0U; axis < axis_count; ++axis) {
-    Interval1024 term{};
+    Interval512 term{};
     if (!(same_vector ? square_interval(left[axis], term)
                       : multiply_interval(left[axis], right[axis], term))) {
       return false;
     }
-    Interval1024 next{};
+    Interval512 next{};
     if (!add_interval(output, term, next)) {
       return false;
     }
@@ -494,14 +494,14 @@ scale_interval_by_two(
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool determinant(
     const Matrix3& matrix,
     std::size_t dimension,
-    Interval1024& output) noexcept {
+    Interval512& output) noexcept {
   if (dimension == 1U) {
     output = matrix[0][0];
     return true;
   }
   if (dimension == 2U) {
-    Interval1024 first{};
-    Interval1024 second{};
+    Interval512 first{};
+    Interval512 second{};
     return multiply_interval(matrix[0][0], matrix[1][1], first) &&
         multiply_interval(matrix[0][1], matrix[1][0], second) &&
         subtract_interval(first, second, output);
@@ -509,11 +509,11 @@ scale_interval_by_two(
   if (dimension != 3U) {
     return false;
   }
-  Interval1024 first_product{};
-  Interval1024 second_product{};
-  Interval1024 first_minor{};
-  Interval1024 second_minor{};
-  Interval1024 third_minor{};
+  Interval512 first_product{};
+  Interval512 second_product{};
+  Interval512 first_minor{};
+  Interval512 second_minor{};
+  Interval512 third_minor{};
   if (!multiply_interval(matrix[1][1], matrix[2][2], first_product) ||
       !multiply_interval(matrix[1][2], matrix[2][1], second_product) ||
       !subtract_interval(first_product, second_product, first_minor) ||
@@ -525,10 +525,10 @@ scale_interval_by_two(
       !subtract_interval(first_product, second_product, third_minor)) {
     return false;
   }
-  Interval1024 first_term{};
-  Interval1024 second_term{};
-  Interval1024 third_term{};
-  Interval1024 difference{};
+  Interval512 first_term{};
+  Interval512 second_term{};
+  Interval512 third_term{};
+  Interval512 difference{};
   return multiply_interval(matrix[0][0], first_minor, first_term) &&
       multiply_interval(matrix[0][1], second_minor, second_term) &&
       multiply_interval(matrix[0][2], third_minor, third_term) &&
@@ -641,76 +641,11 @@ MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline void update_minimum_exponent(
   return true;
 }
 
-[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool
-update_aligned_coordinate_bit_width(
-    const Binary64Aabb3& box,
-    int minimum_exponent,
-    std::uint64_t& maximum_width) noexcept {
-  for (std::size_t axis = 0U; axis < axis_count; ++axis) {
-    DyadicWord words[2]{};
-    if (!decode_binary64(box.lower[axis], words[0]) ||
-        !decode_binary64(box.upper[axis], words[1])) {
-      return false;
-    }
-    for (const DyadicWord& word : words) {
-      if (word.magnitude == 0U) {
-        continue;
-      }
-      const int shift = word.exponent - minimum_exponent;
-      if (shift < 0) {
-        return false;
-      }
-      const std::uint64_t width =
-          static_cast<std::uint64_t>(bit_width_u64(word.magnitude)) +
-          static_cast<std::uint64_t>(shift);
-      if (width > maximum_width) {
-        maximum_width = width;
-      }
-    }
-  }
-  return true;
-}
-
-// Integer-only preflight shared by the host selector and the device.  For a
-// maximum aligned coordinate width W, the largest query-power expression is
-// bounded by 8*W+21 bits (directions, Gram, Cramer determinant, then power).
-[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool
-aligned_product_coordinate_bit_width(
-    const Binary64Aabb3 support[maximum_support_size],
-    std::size_t support_size,
-    const Binary64Aabb3* query,
-    std::uint64_t& maximum_width) noexcept {
-  maximum_width = 0U;
-  if (support_size != 3U && support_size != 4U) {
-    return false;
-  }
-  bool exponent_initialized = false;
-  int minimum_exponent = 0;
-  for (std::size_t index = 0U; index < support_size; ++index) {
-    if (!scan_box(support[index], exponent_initialized, minimum_exponent)) {
-      return false;
-    }
-  }
-  if (query != nullptr &&
-      !scan_box(*query, exponent_initialized, minimum_exponent)) {
-    return false;
-  }
-  for (std::size_t index = 0U; index < support_size; ++index) {
-    if (!update_aligned_coordinate_bit_width(
-            support[index], minimum_exponent, maximum_width)) {
-      return false;
-    }
-  }
-  return query == nullptr ||
-      update_aligned_coordinate_bit_width(
-          *query, minimum_exponent, maximum_width);
-}
-
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool align_word(
     const DyadicWord& word,
     int minimum_exponent,
-    Signed1024& output) noexcept {
-  output = Signed1024{};
+    Signed512& output) noexcept {
+  output = Signed512{};
   if (word.magnitude == 0U) {
     return true;
   }
@@ -760,12 +695,14 @@ aligned_product_coordinate_bit_width(
   bool exponent_initialized = false;
   int minimum_exponent = 0;
   for (std::size_t index = 0U; index < support_size; ++index) {
-    if (!scan_box(support[index], exponent_initialized, minimum_exponent)) {
+    if (!exact_higher_support_product_fixed512::scan_box(
+            support[index], exponent_initialized, minimum_exponent)) {
       return false;
     }
   }
   if (query != nullptr &&
-      !scan_box(*query, exponent_initialized, minimum_exponent)) {
+      !exact_higher_support_product_fixed512::scan_box(
+          *query, exponent_initialized, minimum_exponent)) {
     return false;
   }
   output.support_size = support_size;
@@ -855,17 +792,17 @@ aligned_product_coordinate_bit_width(
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline bool
 barycentric_numerators(
     const SupportEvaluation& support,
-    Interval1024 output[maximum_support_size]) noexcept {
-  Interval1024 sum = singleton(Signed1024{});
+    Interval512 output[maximum_support_size]) noexcept {
+  Interval512 sum = singleton(Signed512{});
   for (std::size_t index = 0U; index < support.dimension; ++index) {
     output[index + 1U] = support.cramer_numerators[index];
-    Interval1024 next{};
+    Interval512 next{};
     if (!add_interval(sum, support.cramer_numerators[index], next)) {
       return false;
     }
     sum = next;
   }
-  Interval1024 twice_determinant{};
+  Interval512 twice_determinant{};
   return scale_interval_by_two(
              support.gram_determinant, twice_determinant) &&
       subtract_interval(twice_determinant, sum, output[0]);
@@ -879,31 +816,31 @@ triangle_has_nonacute_vertex_for_every_tuple(
   for (std::size_t vertex = 0U; vertex < 3U; ++vertex) {
     const std::size_t first = (vertex + 1U) % 3U;
     const std::size_t second = (vertex + 2U) % 3U;
-    Signed1024 sum{};
+    Signed512 sum{};
     for (std::size_t axis = 0U; axis < axis_count; ++axis) {
       bool initialized = false;
-      Signed1024 axis_maximum{};
+      Signed512 axis_maximum{};
       for (std::size_t vertex_selector = 0U;
            vertex_selector < 2U;
            ++vertex_selector) {
-        const Signed1024& vertex_value = vertex_selector == 0U
+        const Signed512& vertex_value = vertex_selector == 0U
             ? product.support[vertex].lower[axis]
             : product.support[vertex].upper[axis];
         for (std::size_t first_selector = 0U;
              first_selector < 2U;
              ++first_selector) {
-          const Signed1024& first_value = first_selector == 0U
+          const Signed512& first_value = first_selector == 0U
               ? product.support[first].lower[axis]
               : product.support[first].upper[axis];
           for (std::size_t second_selector = 0U;
                second_selector < 2U;
                ++second_selector) {
-            const Signed1024& second_value = second_selector == 0U
+            const Signed512& second_value = second_selector == 0U
                 ? product.support[second].lower[axis]
                 : product.support[second].upper[axis];
-            Signed1024 first_difference{};
-            Signed1024 second_difference{};
-            Signed1024 candidate{};
+            Signed512 first_difference{};
+            Signed512 second_difference{};
+            Signed512 candidate{};
             if (!subtract_signed(
                     first_value, vertex_value, first_difference) ||
                 !subtract_signed(
@@ -919,7 +856,7 @@ triangle_has_nonacute_vertex_for_every_tuple(
           }
         }
       }
-      Signed1024 next{};
+      Signed512 next{};
       if (!initialized || !add_signed(sum, axis_maximum, next)) {
         return false;
       }
@@ -938,9 +875,9 @@ query_scaled_power_for_coordinates(
     const AlignedProduct& product,
     const SupportEvaluation& support,
     const BoxCoordinates& query,
-    Interval1024& output) noexcept {
+    Interval512& output) noexcept {
   Vector3 delta{};
-  Interval1024 delta_square{};
+  Interval512 delta_square{};
   if (!difference_box(query, product.support[0], delta) ||
       !dot(delta, delta, true, delta_square) ||
       !multiply_interval(
@@ -948,9 +885,9 @@ query_scaled_power_for_coordinates(
     return false;
   }
   for (std::size_t index = 0U; index < support.dimension; ++index) {
-    Interval1024 direction_dot{};
-    Interval1024 term{};
-    Interval1024 next{};
+    Interval512 direction_dot{};
+    Interval512 term{};
+    Interval512 next{};
     if (!dot(
             support.directions[index],
             delta,
@@ -972,25 +909,25 @@ query_scaled_power_for_coordinates(
 query_scaled_power(
     const AlignedProduct& product,
     const SupportEvaluation& support,
-    Interval1024& output) noexcept {
+    Interval512& output) noexcept {
   if (!product.has_query ||
       !query_scaled_power_for_coordinates(
           product, support, product.query, output)) {
     return false;
   }
   bool initialized = false;
-  Signed1024 corner_upper{};
+  Signed512 corner_upper{};
   for (std::size_t selector = 0U; selector < 8U; ++selector) {
     BoxCoordinates corner{};
     for (std::size_t axis = 0U; axis < axis_count; ++axis) {
-      const Signed1024 coordinate =
+      const Signed512 coordinate =
           (selector & (std::size_t{1} << axis)) != 0U
           ? product.query.upper[axis]
           : product.query.lower[axis];
       corner.lower[axis] = coordinate;
       corner.upper[axis] = coordinate;
     }
-    Interval1024 candidate{};
+    Interval512 candidate{};
     if (!query_scaled_power_for_coordinates(
             product, support, corner, candidate)) {
       return false;
@@ -1033,7 +970,7 @@ no_well_centered_support(
       return Decision::certified;
     }
   }
-  Interval1024 barycentric[maximum_support_size]{};
+  Interval512 barycentric[maximum_support_size]{};
   if (!barycentric_numerators(support, barycentric)) {
     return Decision::requires_cpu_rational_fallback;
   }
@@ -1052,7 +989,7 @@ query_strictly_inside_every_independent_sphere(
     const Binary64Aabb3& query_box) noexcept {
   AlignedProduct product{};
   SupportEvaluation support{};
-  Interval1024 power{};
+  Interval512 power{};
   if (!align_product(
           support_boxes, support_size, &query_box, product) ||
       !evaluate_support(product, support) ||
@@ -1064,6 +1001,6 @@ query_strictly_inside_every_independent_sphere(
       : Decision::exact_false;
 }
 
-}  // namespace morsehgp3d::gpu::detail::exact_higher_support_product_fixed
+}  // namespace morsehgp3d::gpu::detail::exact_higher_support_product_fixed512
 
 #undef MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD

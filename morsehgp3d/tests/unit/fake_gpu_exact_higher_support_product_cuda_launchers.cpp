@@ -1,4 +1,6 @@
 #include "phase15_exact_higher_support_product_cuda_internal.hpp"
+#include "phase15_exact_higher_support_product_fixed.cuh"
+#include "phase15_exact_higher_support_product_fixed512.cuh"
 
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
 
@@ -11,6 +13,7 @@ namespace morsehgp3d::gpu::test_support {
 namespace {
 
 std::atomic<bool> corrupt_next_receipt{false};
+std::atomic<bool> force_next_int512_fallback{false};
 std::atomic<std::size_t> launcher_call_count{0U};
 
 }  // namespace
@@ -19,8 +22,13 @@ void corrupt_next_exact_higher_support_product_receipt() noexcept {
   corrupt_next_receipt.store(true, std::memory_order_relaxed);
 }
 
+void force_next_exact_higher_support_product_int512_fallback() noexcept {
+  force_next_int512_fallback.store(true, std::memory_order_relaxed);
+}
+
 void reset_exact_higher_support_product_fake() noexcept {
   corrupt_next_receipt.store(false, std::memory_order_relaxed);
+  force_next_int512_fallback.store(false, std::memory_order_relaxed);
   launcher_call_count.store(0U, std::memory_order_relaxed);
 }
 
@@ -32,6 +40,11 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
   return corrupt_next_receipt.exchange(false, std::memory_order_relaxed);
 }
 
+[[nodiscard]] bool consume_forced_int512_fallback() noexcept {
+  return force_next_int512_fallback.exchange(
+      false, std::memory_order_relaxed);
+}
+
 void count_launcher_call() noexcept {
   launcher_call_count.fetch_add(1U, std::memory_order_relaxed);
 }
@@ -40,6 +53,9 @@ void count_launcher_call() noexcept {
 
 namespace morsehgp3d::gpu::detail {
 namespace {
+
+namespace fixed = exact_higher_support_product_fixed;
+namespace fixed512 = exact_higher_support_product_fixed512;
 
 [[nodiscard]] spatial::ExactDyadicAabb3 exact_aabb(
     const Phase15ExactHigherSupportProductCudaRawAabb3& source) noexcept {
@@ -51,6 +67,40 @@ namespace {
     result.upper_binary64_bits[axis] = source.upper[axis];
   }
   return result;
+}
+
+[[nodiscard]] fixed::Binary64Aabb3 fixed_aabb(
+    const Phase15ExactHigherSupportProductCudaRawAabb3& source) noexcept {
+  fixed::Binary64Aabb3 result{};
+  for (std::size_t axis = 0U;
+       axis < phase15_exact_higher_support_product_axis_count;
+       ++axis) {
+    result.lower[axis] = source.lower[axis];
+    result.upper[axis] = source.upper[axis];
+  }
+  return result;
+}
+
+[[nodiscard]] bool valid_arithmetic_width(
+    const Phase15ExactHigherSupportProductCudaTask& task) noexcept {
+  fixed::Binary64Aabb3 support[fixed::maximum_support_size]{};
+  for (std::size_t index = 0U; index < task.support_size; ++index) {
+    support[index] = fixed_aabb(task.support_boxes[index]);
+  }
+  const fixed::Binary64Aabb3 query_box = fixed_aabb(task.query_box);
+  std::uint64_t width = 0U;
+  if (!fixed::aligned_product_coordinate_bit_width(
+          support,
+          task.support_size,
+          task.has_query_box != 0U ? &query_box : nullptr,
+          width)) {
+    return false;
+  }
+  const auto expected = width <= fixed512::aligned_coordinate_bit_limit
+      ? Phase15ExactHigherSupportProductCudaArithmeticWidth::int512
+      : Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024;
+  return task.aligned_coordinate_bit_width == width &&
+      task.arithmetic_width == expected;
 }
 
 [[nodiscard]] bool valid_compact_task(
@@ -90,7 +140,8 @@ namespace {
 
   if (task.kind == ExactHigherSupportProductCudaTaskKind::support_prune) {
     return !task.has_query_box && task.query_node_index == 0U &&
-        task.query_leaf_begin == 0U && task.query_leaf_end == 0U;
+        task.query_leaf_begin == 0U && task.query_leaf_end == 0U &&
+        valid_arithmetic_width(task);
   }
   if (task.kind !=
           ExactHigherSupportProductCudaTaskKind::query_strict_interior ||
@@ -108,7 +159,7 @@ namespace {
       return false;
     }
   }
-  return true;
+  return valid_arithmetic_width(task);
 }
 
 }  // namespace
@@ -172,15 +223,30 @@ phase15_launch_exact_higher_support_product_cuda(
     Phase15ExactHigherSupportProductCudaDeviceRecord record;
     record.task_id = task.task_id;
     record.kind = task.kind;
-    if (backend == hierarchy::
+    if (task.arithmetic_width ==
+            Phase15ExactHigherSupportProductCudaArithmeticWidth::int512 &&
+        test_support::consume_forced_int512_fallback()) {
+      record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
+          requires_host_int1024_fallback;
+      record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
+          bounded_dyadic_int1024;
+    } else if (backend == hierarchy::
             ExactHigherSupportProductAabbDecisionBackend::
                 arbitrary_precision_rational) {
       record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
           requires_cpu_rational_fallback;
+      record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
+          arbitrary_precision_rational;
     } else {
       record.outcome = certified
           ? Phase15ExactHigherSupportProductCudaDeviceOutcome::certified
           : Phase15ExactHigherSupportProductCudaDeviceOutcome::exact_false;
+      record.backend = task.arithmetic_width ==
+              Phase15ExactHigherSupportProductCudaArithmeticWidth::int512
+          ? Phase15ExactHigherSupportProductCudaDeviceBackend::
+                bounded_dyadic_int512
+          : Phase15ExactHigherSupportProductCudaDeviceBackend::
+                bounded_dyadic_int1024;
     }
     receipt.records.push_back(record);
   }
@@ -194,6 +260,7 @@ phase15_launch_exact_higher_support_product_cuda(
   receipt.kernel_elapsed_ns_available = false;
   receipt.every_task_classified_once = true;
   receipt.host_fake_lifecycle_exercised = true;
+  receipt.narrow_int512_kernel_executed = false;
   if (test_support::consume_receipt_corruption()) {
     ++receipt.completed_result_digest;
   }

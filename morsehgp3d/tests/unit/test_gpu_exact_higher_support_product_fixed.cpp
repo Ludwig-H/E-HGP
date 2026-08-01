@@ -1,4 +1,5 @@
 #include "phase15_exact_higher_support_product_fixed.cuh"
+#include "phase15_exact_higher_support_product_fixed512.cuh"
 
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
 
@@ -17,6 +18,8 @@ namespace {
 
 namespace fixed =
     morsehgp3d::gpu::detail::exact_higher_support_product_fixed;
+namespace fixed512 =
+    morsehgp3d::gpu::detail::exact_higher_support_product_fixed512;
 using morsehgp3d::hierarchy::
     ExactHigherSupportProductAabbDecisionBackend;
 using morsehgp3d::hierarchy::
@@ -29,6 +32,10 @@ static_assert(fixed::limb_count == 16U);
 static_assert(fixed::fixed_bit_count == 1024U);
 static_assert(fixed::aligned_coordinate_bit_limit == 124U);
 static_assert(fixed::proven_maximum_expression_bit_count == 1013U);
+static_assert(fixed512::limb_count == 8U);
+static_assert(fixed512::fixed_bit_count == 512U);
+static_assert(fixed512::aligned_coordinate_bit_limit == 61U);
+static_assert(fixed512::proven_maximum_expression_bit_count == 509U);
 
 int failures = 0;
 
@@ -109,6 +116,23 @@ void check_support_parity(
             certified(actual) == expected,
         label + " matches the CPU int1024 decision DAG");
   }
+  std::uint64_t coordinate_width = 0U;
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native.data(), Size, nullptr, coordinate_width),
+      label + " has a valid integer-only width preflight");
+  const fixed512::Decision narrow =
+      fixed512::no_well_centered_support(native.data(), Size);
+  if (coordinate_width <= fixed512::aligned_coordinate_bit_limit) {
+    check(
+        narrow != fixed512::Decision::requires_cpu_rational_fallback &&
+            (narrow == fixed512::Decision::certified) == expected,
+        label + " matches the CPU decision through int512");
+  } else {
+    check(
+        narrow == fixed512::Decision::requires_cpu_rational_fallback,
+        label + " fails closed outside the int512 width envelope");
+  }
 }
 
 template <std::size_t Size>
@@ -136,6 +160,24 @@ void check_query_parity(
             certified(actual) == expected,
         label + " matches the CPU int1024 decision DAG");
   }
+  std::uint64_t coordinate_width = 0U;
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native.data(), Size, &native_query, coordinate_width),
+      label + " query has a valid integer-only width preflight");
+  const fixed512::Decision narrow =
+      fixed512::query_strictly_inside_every_independent_sphere(
+          native.data(), Size, native_query);
+  if (coordinate_width <= fixed512::aligned_coordinate_bit_limit) {
+    check(
+        narrow != fixed512::Decision::requires_cpu_rational_fallback &&
+            (narrow == fixed512::Decision::certified) == expected,
+        label + " query matches the CPU decision through int512");
+  } else {
+    check(
+        narrow == fixed512::Decision::requires_cpu_rational_fallback,
+        label + " query fails closed outside the int512 width envelope");
+  }
 }
 
 [[nodiscard]] boost::multiprecision::cpp_int cpp_value(
@@ -152,6 +194,16 @@ void check_query_parity(
   fixed::UInt1024 value{};
   value.limb[exponent / 64U] = UINT64_C(1) << (exponent % 64U);
   return value;
+}
+
+[[nodiscard]] boost::multiprecision::cpp_int cpp_value(
+    const fixed512::UInt512& value) {
+  boost::multiprecision::cpp_int result = 0;
+  for (std::size_t index = fixed512::limb_count; index != 0U; --index) {
+    result <<= 64U;
+    result += value.limb[index - 1U];
+  }
+  return result;
 }
 
 void test_checked_uint1024_arithmetic() {
@@ -195,6 +247,92 @@ void test_checked_uint1024_arithmetic() {
   check(
       !fixed::add(all_ones, one, sum),
       "a 16-limb addition carry-out fails closed");
+}
+
+void test_checked_uint512_arithmetic() {
+  fixed512::UInt512 low_256_ones{};
+  for (std::size_t index = 0U; index < 4U; ++index) {
+    low_256_ones.limb[index] = UINT64_MAX;
+  }
+  fixed512::UInt512 square{};
+  check(
+      fixed512::multiply(low_256_ones, low_256_ones, square),
+      "the 8-limb product accepts (2^256-1)^2");
+  const boost::multiprecision::cpp_int expected =
+      (boost::multiprecision::cpp_int{1} << 256U) - 1;
+  check(
+      cpp_value(square) == expected * expected &&
+          fixed512::bit_width(square) == 512U,
+      "the int512 carry chain equals the arbitrary-precision product");
+
+  fixed512::UInt512 all_ones{};
+  for (std::uint64_t& limb : all_ones.limb) {
+    limb = UINT64_MAX;
+  }
+  fixed512::UInt512 one{};
+  one.limb[0] = 1U;
+  fixed512::UInt512 sum{};
+  check(
+      !fixed512::add(all_ones, one, sum),
+      "an int512 addition carry-out fails closed");
+}
+
+void test_int512_width_boundary() {
+  const double bit_minus_60 = std::ldexp(1.0, -60);
+  const double bit_minus_61 = std::ldexp(1.0, -61);
+  const std::array<ExactDyadicAabb3, 3> width_61{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(0.0, bit_minus_60)};
+  const std::array<ExactDyadicAabb3, 3> width_62{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(0.0, bit_minus_61)};
+  const auto native_61 = fixed_boxes(width_61);
+  const auto native_62 = fixed_boxes(width_62);
+  std::uint64_t observed_width_61 = 0U;
+  std::uint64_t observed_width_62 = 0U;
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native_61.data(), 3U, nullptr, observed_width_61) &&
+          observed_width_61 == 61U,
+      "the selector certifies the int512 W=61 boundary");
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native_62.data(), 3U, nullptr, observed_width_62) &&
+          observed_width_62 == 62U,
+      "the selector distinguishes the first width outside int512");
+  check(
+      fixed512::no_well_centered_support(native_61.data(), 3U) !=
+          fixed512::Decision::requires_cpu_rational_fallback,
+      "the W=61 support stays in the proved 509-bit envelope");
+  check(
+      fixed512::no_well_centered_support(native_62.data(), 3U) ==
+          fixed512::Decision::requires_cpu_rational_fallback,
+      "the W=62 support fails closed toward int1024");
+
+  const std::array<ExactDyadicAabb3, 4> tetrahedron_61{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, bit_minus_60)};
+  const ExactDyadicAabb3 tetrahedron_query =
+      point_box(0.25, 0.25, 0.0);
+  const auto native_tetrahedron = fixed_boxes(tetrahedron_61);
+  const fixed::Binary64Aabb3 native_query = fixed_box(tetrahedron_query);
+  std::uint64_t tetrahedron_width = 0U;
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native_tetrahedron.data(),
+          4U,
+          &native_query,
+          tetrahedron_width) &&
+          tetrahedron_width == 61U,
+      "the tetrahedron query reaches the global int512 W=61 bound");
+  check_query_parity(
+      tetrahedron_61,
+      tetrahedron_query,
+      "W=61 tetrahedron query boundary");
 }
 
 void test_named_triangle_and_tetrahedron_fixtures() {
@@ -307,6 +445,8 @@ void test_small_deterministic_dyadic_grid() {
 
 int main() {
   test_checked_uint1024_arithmetic();
+  test_checked_uint512_arithmetic();
+  test_int512_width_boundary();
   test_named_triangle_and_tetrahedron_fixtures();
   test_wide_exponent_fallback();
   test_small_deterministic_dyadic_grid();

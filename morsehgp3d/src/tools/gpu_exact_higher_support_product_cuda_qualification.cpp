@@ -6,6 +6,7 @@
 #include <array>
 #include <bit>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -41,18 +42,19 @@ using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
-inline constexpr std::size_t qualification_task_count = 10U;
-inline constexpr std::size_t fixture_family_count = 5U;
+inline constexpr std::size_t qualification_task_count = 11U;
+inline constexpr std::size_t fixture_family_count = 6U;
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
   return CertifiedPoint3::from_binary64(x, y, z);
 }
 
-// Five logical fixture families share one immutable PointId namespace so all
-// nine predicates can be submitted through one resident epoch and one kernel.
+// Six logical fixture families share one immutable PointId namespace so all
+// eleven predicates use one resident epoch, one batch and one synchronization;
+// the mixed exact-width batch exercises the separate int512/int1024 kernels.
 [[nodiscard]] CanonicalPointCloud qualification_cloud() {
   const double denormal = std::numeric_limits<double>::denorm_min();
-  const std::array<CertifiedPoint3, 21> points{
+  const std::array<CertifiedPoint3, 24> points{
       // Acute triangle, exact centre and a distinct shell point.
       point(-1.0, 0.0, 0.0),
       point(1.0, 0.0, 0.0),
@@ -78,7 +80,11 @@ inline constexpr std::size_t fixture_family_count = 5U;
       // Exponent span above 124 bits: integral kernel must fall back.
       point(denormal, 30.0, 0.0),
       point(1.0, 30.0, 0.0),
-      point(1.0, 31.0, 0.0)};
+      point(1.0, 31.0, 0.0),
+      // W=62: outside int512, inside the existing int1024 envelope.
+      point(0.0, 0.0, std::ldexp(1.0, -61)),
+      point(1.0, 0.0, std::ldexp(1.0, -61)),
+      point(0.0, 1.0, std::ldexp(1.0, -61))};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
 }
@@ -530,7 +536,10 @@ int main() {
             cloud, leaf_nodes, epoch, 108U,
             std::array<std::size_t, 3>{18U, 19U, 20U}),
         internal_node_support_task(
-            cloud, index, epoch, 109U, internal_receipt)};
+            cloud, index, epoch, 109U, internal_receipt),
+        support_task(
+            cloud, leaf_nodes, epoch, 110U,
+            std::array<std::size_t, 3>{21U, 22U, 23U})};
 
     std::vector<ExactHigherSupportProductCudaTask> tasks;
     tasks.reserve(qualified_tasks.size());
@@ -588,17 +597,23 @@ int main() {
            ++task_index) {
         const QualifiedTask& expected = qualified_tasks[task_index];
         const auto& actual = result.records[task_index];
-        const ExactHigherSupportProductCudaBackend expected_backend =
+        const bool expected_rational_backend =
             expected.expected_backend ==
-                ExactHigherSupportProductAabbDecisionBackend::
-                    bounded_dyadic_int1024
-            ? ExactHigherSupportProductCudaBackend::
-                  bounded_dyadic_int1024
-            : ExactHigherSupportProductCudaBackend::
-                  arbitrary_precision_rational;
-        const bool expected_cpu_fallback =
-            expected_backend == ExactHigherSupportProductCudaBackend::
+            ExactHigherSupportProductAabbDecisionBackend::
                 arbitrary_precision_rational;
+        const bool expected_cpu_fallback =
+            expected_rational_backend;
+        const bool backend_matches = expected_rational_backend
+            ? actual.backend == ExactHigherSupportProductCudaBackend::
+                  arbitrary_precision_rational
+            : actual.backend == ExactHigherSupportProductCudaBackend::
+                      bounded_dyadic_int512 ||
+                  actual.backend == ExactHigherSupportProductCudaBackend::
+                      bounded_dyadic_int1024;
+        const bool explicit_int1024_boundary_matches =
+            expected.task.task_id != 110U ||
+            actual.backend == ExactHigherSupportProductCudaBackend::
+                bounded_dyadic_int1024;
         const ExactHigherSupportProductCudaOutcome expected_outcome =
             expected.expected_certified
             ? ExactHigherSupportProductCudaOutcome::certified
@@ -606,7 +621,7 @@ int main() {
         if (actual.task_id != expected.task.task_id ||
             actual.kind != expected.task.kind ||
             actual.outcome != expected_outcome ||
-            actual.backend != expected_backend ||
+            !backend_matches || !explicit_int1024_boundary_matches ||
             actual.cpu_fallback_performed != expected_cpu_fallback) {
           ++mismatch_count;
         }
@@ -646,14 +661,18 @@ int main() {
             expected_query_task_count &&
         audit.certified_count == expected_certified_count &&
         audit.fail_open_count == tasks.size() - expected_certified_count &&
-        audit.bounded_dyadic_int1024_count ==
+        audit.bounded_dyadic_int512_count +
+                audit.bounded_dyadic_int1024_count ==
             tasks.size() - expected_fallback_count &&
+        audit.bounded_dyadic_int512_count != 0U &&
+        audit.bounded_dyadic_int1024_count != 0U &&
         audit.arbitrary_precision_rational_fallback_count ==
             expected_fallback_count &&
         audit.launcher_call_count == 1U &&
-        audit.kernel_launch_count == 1U &&
+        audit.kernel_launch_count == 2U &&
         audit.synchronization_count == 1U &&
         audit.kernel_elapsed_ns_available &&
+        audit.narrow_int512_kernel_executed &&
         audit.source_snapshot_epoch == epoch &&
         audit.submitted_task_digest != 0U &&
         audit.completed_result_digest != 0U && audit.cuda_device >= 0 &&
@@ -678,6 +697,8 @@ int main() {
 
     std::cout
         << "{\"backend\":\"cuda_g4\","
+        << "\"bounded_int512_count\":"
+        << audit.bounded_dyadic_int512_count << ','
         << "\"bounded_int1024_count\":"
         << audit.bounded_dyadic_int1024_count << ','
         << "\"certified_count\":" << audit.certified_count << ','
@@ -727,6 +748,9 @@ int main() {
         << "\"native_lbvh_nodes_read_on_device\":"
         << (audit.native_lbvh_nodes_read_on_device ? "true" : "false")
         << ','
+        << "\"narrow_int512_kernel_executed\":"
+        << (audit.narrow_int512_kernel_executed ? "true" : "false")
+        << ','
         << "\"ordinary_or_higher_order_delaunay_materialized\":"
         << (audit.ordinary_or_higher_order_delaunay_materialized
                 ? "true"
@@ -746,7 +770,10 @@ int main() {
                 ? "true"
                 : "false")
         << ','
-        << "\"schema_version\":1,\"source_authority_validated\":"
+        << "\"schema_version\":"
+        << morsehgp3d::gpu::
+               exact_higher_support_product_cuda_schema_version
+        << ",\"source_authority_validated\":"
         << (audit.source_authority_validated ? "true" : "false") << ','
         << "\"source_snapshot_epoch\":" << epoch << ','
         << "\"submitted_task_digest\":"
@@ -767,7 +794,10 @@ int main() {
         << "\"kernel_ns\":null,\"kernel_ns_available\":false,"
         << "\"host_batch_total_ns\":null,"
         << "\"host_batch_total_ns_available\":false,"
-        << "\"qualified\":false,\"schema_version\":1,"
+        << "\"qualified\":false,\"schema_version\":"
+        << morsehgp3d::gpu::
+               exact_higher_support_product_cuda_schema_version
+        << ','
         << "\"total_qualification_ns\":"
         << nanoseconds_between(total_begin, total_end) << "}\n";
     return 1;

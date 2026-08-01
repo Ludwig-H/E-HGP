@@ -1037,6 +1037,7 @@ add_library(
   STATIC
     include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
     src/cuda/phase15_exact_higher_support_product_fixed.cuh
+    src/cuda/phase15_exact_higher_support_product_fixed512.cuh
     src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
     src/gpu/exact_higher_support_product_cuda.cpp
 )
@@ -1077,6 +1078,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
       include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
       src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
       src/cuda/phase15_exact_higher_support_product_fixed.cuh
+      src/cuda/phase15_exact_higher_support_product_fixed512.cuh
       src/cuda/phase15_exact_higher_support_product_cuda.cu
       src/gpu/exact_higher_support_product_cuda.cpp
   )

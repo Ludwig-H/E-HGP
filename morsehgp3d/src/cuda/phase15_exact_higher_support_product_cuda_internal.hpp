@@ -29,11 +29,20 @@ static_assert(
     std::is_trivially_copyable_v<
         Phase15ExactHigherSupportProductCudaRawAabb3>);
 
+enum class Phase15ExactHigherSupportProductCudaArithmeticWidth :
+    std::uint8_t {
+  int512 = 0U,
+  int1024 = 1U,
+};
+
 struct Phase15ExactHigherSupportProductCudaTask {
   std::uint64_t task_id{};
   std::uint64_t source_snapshot_epoch{};
   ExactHigherSupportProductCudaTaskKind kind{
       ExactHigherSupportProductCudaTaskKind::support_prune};
+  Phase15ExactHigherSupportProductCudaArithmeticWidth arithmetic_width{
+      Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024};
+  std::uint64_t aligned_coordinate_bit_width{};
   std::uint8_t support_size{};
   std::uint8_t support_group_count{};
   std::uint64_t support_node_indices[
@@ -66,6 +75,13 @@ enum class Phase15ExactHigherSupportProductCudaDeviceOutcome : std::uint8_t {
   certified = 0U,
   exact_false = 1U,
   requires_cpu_rational_fallback = 2U,
+  requires_host_int1024_fallback = 3U,
+};
+
+enum class Phase15ExactHigherSupportProductCudaDeviceBackend : std::uint8_t {
+  bounded_dyadic_int512 = 0U,
+  bounded_dyadic_int1024 = 1U,
+  arbitrary_precision_rational = 2U,
 };
 
 struct Phase15ExactHigherSupportProductCudaDeviceRecord {
@@ -74,6 +90,9 @@ struct Phase15ExactHigherSupportProductCudaDeviceRecord {
       ExactHigherSupportProductCudaTaskKind::support_prune};
   Phase15ExactHigherSupportProductCudaDeviceOutcome outcome{
       Phase15ExactHigherSupportProductCudaDeviceOutcome::exact_false};
+  Phase15ExactHigherSupportProductCudaDeviceBackend backend{
+      Phase15ExactHigherSupportProductCudaDeviceBackend::
+          arbitrary_precision_rational};
 };
 
 static_assert(
@@ -113,6 +132,10 @@ phase15_exact_higher_support_product_task_digest(
         digest, task.source_snapshot_epoch);
     digest = phase15_exact_higher_support_product_digest_word(
         digest, static_cast<std::uint64_t>(task.kind));
+    digest = phase15_exact_higher_support_product_digest_word(
+        digest, static_cast<std::uint64_t>(task.arithmetic_width));
+    digest = phase15_exact_higher_support_product_digest_word(
+        digest, task.aligned_coordinate_bit_width);
     digest = phase15_exact_higher_support_product_digest_word(
         digest, task.support_size);
     digest = phase15_exact_higher_support_product_digest_word(
@@ -174,6 +197,8 @@ phase15_exact_higher_support_product_device_result_digest(
         digest, static_cast<std::uint64_t>(record.kind));
     digest = phase15_exact_higher_support_product_digest_word(
         digest, static_cast<std::uint64_t>(record.outcome));
+    digest = phase15_exact_higher_support_product_digest_word(
+        digest, static_cast<std::uint64_t>(record.backend));
   }
   return digest;
 }
@@ -210,6 +235,7 @@ struct Phase15ExactHigherSupportProductCudaReceipt {
   bool host_fake_lifecycle_exercised{false};
   bool cuda_execution_performed{false};
   bool native_lbvh_nodes_read_on_device{false};
+  bool narrow_int512_kernel_executed{false};
 };
 
 [[nodiscard]] Phase15ExactHigherSupportProductCudaReceipt
