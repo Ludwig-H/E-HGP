@@ -1453,6 +1453,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
+  test_hierarchy_direct_morse_unified_resident_session.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
+  PRIVATE morsehgp3d::direct_morse_unified_resident_session
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   test_hierarchy_relative_morse_boruvka.cpp
 )
@@ -3023,6 +3043,7 @@ set(
   morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
   morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
   morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
+  morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
@@ -4097,6 +4118,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_unified_resident_session
+  COMMAND morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_relative_morse_boruvka
   COMMAND morsehgp3d_hierarchy_relative_morse_boruvka_tests
 )
@@ -4421,6 +4446,20 @@ add_test(
 )
 set_tests_properties(
   morsehgp3d.phase15_pair_first_scale_campaign_contract
+  PROPERTIES TIMEOUT 60
+)
+add_test(
+  NAME morsehgp3d.phase15_true_hgp_scale_campaign_contract
+  COMMAND
+    "${CMAKE_COMMAND}"
+    -E env
+    "PYTHONDONTWRITEBYTECODE=1"
+    "${Python3_EXECUTABLE}"
+    -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/../profiling/test_phase15_true_hgp_scale_campaign.py"
+)
+set_tests_properties(
+  morsehgp3d.phase15_true_hgp_scale_campaign_contract
   PROPERTIES TIMEOUT 60
 )
 add_test(

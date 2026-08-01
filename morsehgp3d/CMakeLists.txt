@@ -1975,6 +1975,49 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_unified_resident_session
+  STATIC
+    src/cpu/hierarchy/direct_morse_unified_resident_session.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_unified_resident_session
+  ALIAS morsehgp3d_direct_morse_unified_resident_session
+)
+set_target_properties(
+  morsehgp3d_direct_morse_unified_resident_session
+  PROPERTIES
+    EXPORT_NAME direct_morse_unified_resident_session
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_unified_resident_session PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_unified_resident_session
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_unified_resident_session
+  PUBLIC
+    morsehgp3d::direct_frozen_unified_incidence_batch
+    morsehgp3d::direct_sparse_positive_facet_locator
+    morsehgp3d::facet_miniball
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_unified_resident_session PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_unified_resident_session
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_relative_morse_boruvka
   STATIC
     src/cpu/hierarchy/relative_morse_boruvka.cpp
@@ -5476,6 +5519,7 @@ install(
     morsehgp3d_direct_frozen_incidence_quotient
     morsehgp3d_direct_frozen_incidence_hgp_action_plan
     morsehgp3d_direct_frozen_unified_incidence_batch
+    morsehgp3d_direct_morse_unified_resident_session
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal

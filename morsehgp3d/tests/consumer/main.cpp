@@ -17,6 +17,7 @@
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_unified_incidence_batch.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_unified_resident_session.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_root_coverage_index.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
@@ -195,6 +196,25 @@ int main() {
       installed_frozen_unified_batch_probe.atomic_empty_failure()) {
     std::cerr
         << "installed frozen-unified predicate accepted a default result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_morse_unified_resident_session_schema_version == 1U);
+  using UnifiedResidentSession = morsehgp3d::hierarchy::
+      ExactDirectMorseUnifiedResidentSession;
+  static_assert(!std::is_copy_constructible_v<UnifiedResidentSession>);
+  static_assert(std::is_nothrow_move_constructible_v<UnifiedResidentSession>);
+  const UnifiedResidentSession installed_unified_resident_session_probe;
+  const morsehgp3d::hierarchy::
+      ExactDirectMorseUnifiedResidentInitializationResult
+          installed_unified_resident_initialization_probe;
+  if (installed_unified_resident_session_probe.certified_resident_session() ||
+      installed_unified_resident_session_probe.complete() ||
+      installed_unified_resident_initialization_probe
+          .certified_initialized_session()) {
+    std::cerr
+        << "installed unified-resident predicate accepted an empty result\n";
     return 1;
   }
   static_assert(
