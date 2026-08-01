@@ -1452,4 +1452,169 @@ verify_exact_direct_normalized_h0_source_plan(
   return verification;
 }
 
+bool ExactDirectRankWindowSaturatedH0Authority::certified() const noexcept {
+  if (schema_version !=
+          direct_rank_window_saturated_h0_authority_schema_version ||
+      requirements.point_count == 0U ||
+      requirements.requested_maximum_order == 0U ||
+      requirements.effective_maximum_order == 0U ||
+      requirements.effective_maximum_order > requirements.point_count ||
+      requirements.effective_maximum_order >
+          requirements.requested_maximum_order ||
+      requirements.maximum_relevant_closed_rank !=
+          (requirements.effective_maximum_order < requirements.point_count
+               ? requirements.effective_maximum_order + 1U
+               : requirements.point_count) ||
+      source_rank_relevant_extra_shell_diagnostic_count != 0U ||
+      decision != ExactDirectRankWindowSaturatedH0Decision::
+                      certified_rank_window_saturated_h0_quiescence ||
+      scope != ExactDirectRankWindowSaturatedH0Scope::
+                   horizontal_h0_orders_one_through_effective_maximum_only) {
+    return false;
+  }
+  for (std::size_t arity_index = 0U;
+       arity_index < minimum_strict_interior_count_by_support_arity.size();
+       ++arity_index) {
+    if (minimum_strict_interior_count_by_support_arity[arity_index] !=
+        minimum_strict_interior_count_for_saturated_h0_quiescence(
+            arity_index + 2U, requirements.effective_maximum_order)) {
+      return false;
+    }
+  }
+  return source_terminal_catalog_certified &&
+         source_support_arity_universes_terminal &&
+         source_rank_window_matches_h0_window &&
+         no_rank_relevant_extra_shell_diagnostic &&
+         every_rank_relevant_minimal_ball_has_support_only_shell &&
+         every_above_window_minimal_ball_has_h0_quiescent_saturated_block &&
+         hidden_above_window_extra_shells_explicitly_permitted &&
+         !geometric_global_regularity_claimed &&
+         !global_star_or_gamma_materialized &&
+         !higher_order_delaunay_materialized &&
+         !hierarchy_or_forest_mutated && !public_status_claimed;
+}
+
+ExactDirectRankWindowSaturatedH0Authority
+build_exact_direct_rank_window_saturated_h0_authority(
+    const ExactDirectSupportTerminalFacade& source_facade) {
+  ExactDirectRankWindowSaturatedH0Authority result;
+  const ExactDirectSupportTerminalCertificate& source =
+      source_facade.certificate;
+  result.requirements = source.requirements;
+  result.source_pair_canonical_cloud_digest =
+      source.pair_canonical_cloud_digest;
+  result.source_higher_canonical_cloud_digest =
+      source.higher_canonical_cloud_digest;
+  result.source_pair_semantic_digest = source.pair_semantic_digest;
+  result.source_higher_semantic_digest = source.higher_semantic_digest;
+  result.source_normalized_terminal_output_digest =
+      source.normalized_terminal_output_digest;
+  result.source_event_count = source_facade.events.size();
+  result.source_rank_relevant_extra_shell_diagnostic_count =
+      source_facade.relevant_extra_shell_diagnostics.size();
+  for (std::size_t arity_index = 0U;
+       arity_index < result.minimum_strict_interior_count_by_support_arity
+                         .size();
+       ++arity_index) {
+    result.minimum_strict_interior_count_by_support_arity[arity_index] =
+        minimum_strict_interior_count_for_saturated_h0_quiescence(
+            arity_index + 2U, source.requirements.effective_maximum_order);
+  }
+
+  result.source_terminal_catalog_certified =
+      source_facade.terminal_catalog_certified();
+  if (!result.source_terminal_catalog_certified) {
+    result.decision = ExactDirectRankWindowSaturatedH0Decision::
+        source_terminal_catalog_rejected;
+    return result;
+  }
+
+  result.source_support_arity_universes_terminal =
+      source.all_arities_terminal &&
+      source.exact_candidate_universe_size_certified;
+  for (std::size_t arity_index = 0U;
+       arity_index < source.arity_certificates.size();
+       ++arity_index) {
+    const ExactDirectSupportArityTerminalCertificate& arity =
+        source.arity_certificates[arity_index];
+    result.source_support_arity_universes_terminal =
+        result.source_support_arity_universes_terminal &&
+        arity.support_size == arity_index + 2U &&
+        arity.candidate_universe_size_certified &&
+        arity.terminal_absence_of_additional_supports_certified;
+  }
+  result.source_rank_window_matches_h0_window =
+      source.requirements.point_count != 0U &&
+      source.requirements.requested_maximum_order != 0U &&
+      source.requirements.effective_maximum_order ==
+          std::min(
+              source.requirements.requested_maximum_order,
+              source.requirements.point_count) &&
+      source.requirements.maximum_relevant_closed_rank ==
+          (source.requirements.effective_maximum_order <
+                   source.requirements.point_count
+               ? source.requirements.effective_maximum_order + 1U
+               : source.requirements.point_count);
+  if (!result.source_support_arity_universes_terminal ||
+      !result.source_rank_window_matches_h0_window) {
+    result.decision = ExactDirectRankWindowSaturatedH0Decision::
+        source_terminal_catalog_rejected;
+    return result;
+  }
+
+  result.no_rank_relevant_extra_shell_diagnostic =
+      source.normalized_extra_shell_diagnostic_count == 0U &&
+      source_facade.relevant_extra_shell_diagnostics.empty();
+  if (!result.no_rank_relevant_extra_shell_diagnostic) {
+    result.decision = ExactDirectRankWindowSaturatedH0Decision::
+        unsupported_rank_relevant_extra_shell_degeneracy;
+    return result;
+  }
+
+  result.every_rank_relevant_minimal_ball_has_support_only_shell = true;
+  result.every_above_window_minimal_ball_has_h0_quiescent_saturated_block =
+      true;
+  // This is an explicit non-regularity scope marker, not an observation that
+  // such a hidden shell exists in the supplied cloud.
+  result.hidden_above_window_extra_shells_explicitly_permitted = true;
+  result.decision = ExactDirectRankWindowSaturatedH0Decision::
+      certified_rank_window_saturated_h0_quiescence;
+  result.scope = ExactDirectRankWindowSaturatedH0Scope::
+      horizontal_h0_orders_one_through_effective_maximum_only;
+  if (!result.certified()) {
+    throw std::logic_error(
+        "a rank-window saturated-H0 authority violated its construction invariants");
+  }
+  return result;
+}
+
+ExactDirectRankWindowSaturatedH0Verification
+verify_exact_direct_rank_window_saturated_h0_authority(
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectRankWindowSaturatedH0Authority& observed) {
+  ExactDirectRankWindowSaturatedH0Verification verification;
+  verification.source_terminal_catalog_certified =
+      source_facade.terminal_catalog_certified();
+  const ExactDirectRankWindowSaturatedH0Authority expected =
+      build_exact_direct_rank_window_saturated_h0_authority(source_facade);
+  verification.expected_authority_reconstructed =
+      expected.decision !=
+      ExactDirectRankWindowSaturatedH0Decision::not_certified;
+  verification.observed_recursively_equal = observed == expected;
+  verification.geometric_regularity_remains_unclaimed =
+      !observed.geometric_global_regularity_claimed;
+  verification.no_forbidden_global_structure_materialized =
+      !observed.global_star_or_gamma_materialized &&
+      !observed.higher_order_delaunay_materialized &&
+      !observed.hierarchy_or_forest_mutated;
+  verification.result_certified =
+      verification.source_terminal_catalog_certified &&
+      verification.expected_authority_reconstructed &&
+      verification.observed_recursively_equal &&
+      verification.geometric_regularity_remains_unclaimed &&
+      verification.no_forbidden_global_structure_materialized &&
+      observed.certified();
+  return verification;
+}
+
 }  // namespace morsehgp3d::hierarchy

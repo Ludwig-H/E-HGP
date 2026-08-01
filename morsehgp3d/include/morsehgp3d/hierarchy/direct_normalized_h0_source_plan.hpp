@@ -26,6 +26,56 @@ inline constexpr std::string_view direct_normalized_h0_source_plan_proof_basis =
     "canonical_factorized_coface_deduplication_and_exact_level_order_batches_"
     "without_successive_star_global_gamma_or_higher_delaunay_v1";
 
+inline constexpr std::uint32_t
+    direct_rank_window_saturated_h0_authority_schema_version = 1U;
+inline constexpr std::string_view
+    direct_rank_window_saturated_h0_authority_backend = "reference_cpu";
+inline constexpr std::string_view
+    direct_rank_window_saturated_h0_authority_profile = "hgp_reduced";
+inline constexpr std::string_view
+    direct_rank_window_saturated_h0_authority_mode =
+        "certified_rank_window_saturated_h0_quiescence";
+inline constexpr std::string_view
+    direct_rank_window_saturated_h0_authority_public_status = "not_claimed";
+inline constexpr std::string_view
+    direct_rank_window_saturated_h0_authority_proof_basis =
+        "terminal_support_arity_universes_rank_relevant_support_only_shells_"
+        "and_high_rank_saturated_johnson_h0_quiescence_without_global_star_"
+        "regularity_v1";
+
+// Let U be a minimal positive support of size s for a ball B and let p be
+// the number of cloud points strictly inside B.  If p+s>=K+2, then for every
+// requested order k<=K the strict k-face graph carried by Sat(B) is already
+// connected and covers Sat(B).  Activating its complete Johnson block is
+// consequently an H0 continuation with no coverage delta.  This numerical
+// helper checks only the rank inequality: the caller must separately own the
+// minimal-positive-support and exact strict-interior-count authorities.
+[[nodiscard]] constexpr std::size_t
+minimum_strict_interior_count_for_saturated_h0_quiescence(
+    std::size_t support_size,
+    std::size_t effective_maximum_order) noexcept {
+  if (support_size < 2U || support_size > 4U ||
+      effective_maximum_order == 0U) {
+    return 0U;
+  }
+  const std::size_t support_rank_credit = support_size - 2U;
+  return effective_maximum_order > support_rank_credit
+             ? effective_maximum_order - support_rank_credit
+             : 0U;
+}
+
+[[nodiscard]] constexpr bool
+minimal_support_saturated_h0_quiescent_through_order(
+    std::size_t support_size,
+    std::size_t strict_interior_count,
+    std::size_t effective_maximum_order) noexcept {
+  return support_size >= 2U && support_size <= 4U &&
+         effective_maximum_order != 0U &&
+         strict_interior_count >=
+             minimum_strict_interior_count_for_saturated_h0_quiescence(
+                 support_size, effective_maximum_order);
+}
+
 // The expensive per-facet first-incidence caps belong to the existing gateway
 // candidate authority and are not duplicated here.  These caps cover only the
 // linear integration pass and its normalized persistent arenas.
@@ -319,5 +369,97 @@ verify_exact_direct_normalized_h0_source_plan(
     const ExactDirectSparseGatewayCandidateJournalResult& source_gateway,
     const ExactDirectNormalizedH0SourcePlanBudget& budget,
     const ExactDirectNormalizedH0SourcePlanResult& observed);
+
+enum class ExactDirectRankWindowSaturatedH0Decision : std::uint8_t {
+  not_certified,
+  source_terminal_catalog_rejected,
+  unsupported_rank_relevant_extra_shell_degeneracy,
+  certified_rank_window_saturated_h0_quiescence,
+};
+
+enum class ExactDirectRankWindowSaturatedH0Scope : std::uint8_t {
+  unspecified,
+  horizontal_h0_orders_one_through_effective_maximum_only,
+};
+
+// This authority deliberately does not certify geometric regularity.  A ball
+// above the requested rank window may have an unvisited extra-shell point.
+// Its whole saturated Johnson block is instead certified H0-inert by the rank
+// inequality above.  Balls inside the rank window are accepted only when the
+// terminal support facade contains no extra-shell diagnostic at any arity.
+struct ExactDirectRankWindowSaturatedH0Authority {
+  static constexpr std::string_view backend =
+      direct_rank_window_saturated_h0_authority_backend;
+  static constexpr std::string_view profile =
+      direct_rank_window_saturated_h0_authority_profile;
+  static constexpr std::string_view mode =
+      direct_rank_window_saturated_h0_authority_mode;
+  static constexpr std::string_view public_status =
+      direct_rank_window_saturated_h0_authority_public_status;
+  static constexpr std::string_view proof_basis =
+      direct_rank_window_saturated_h0_authority_proof_basis;
+
+  std::uint32_t schema_version{
+      direct_rank_window_saturated_h0_authority_schema_version};
+  ExactDirectSupportTerminalRequirements requirements{};
+  contract::CanonicalId source_pair_canonical_cloud_digest{};
+  contract::CanonicalId source_higher_canonical_cloud_digest{};
+  contract::CanonicalId source_pair_semantic_digest{};
+  contract::CanonicalId source_higher_semantic_digest{};
+  contract::CanonicalId source_normalized_terminal_output_digest{};
+  std::size_t source_event_count{};
+  std::size_t source_rank_relevant_extra_shell_diagnostic_count{};
+  std::array<std::size_t, 3U>
+      minimum_strict_interior_count_by_support_arity{};
+
+  bool source_terminal_catalog_certified{false};
+  bool source_support_arity_universes_terminal{false};
+  bool source_rank_window_matches_h0_window{false};
+  bool no_rank_relevant_extra_shell_diagnostic{false};
+  bool every_rank_relevant_minimal_ball_has_support_only_shell{false};
+  bool every_above_window_minimal_ball_has_h0_quiescent_saturated_block{
+      false};
+  bool hidden_above_window_extra_shells_explicitly_permitted{false};
+  bool geometric_global_regularity_claimed{false};
+  bool global_star_or_gamma_materialized{false};
+  bool higher_order_delaunay_materialized{false};
+  bool hierarchy_or_forest_mutated{false};
+  bool public_status_claimed{false};
+  ExactDirectRankWindowSaturatedH0Decision decision{
+      ExactDirectRankWindowSaturatedH0Decision::not_certified};
+  ExactDirectRankWindowSaturatedH0Scope scope{
+      ExactDirectRankWindowSaturatedH0Scope::unspecified};
+
+  [[nodiscard]] bool certified() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectRankWindowSaturatedH0Authority&,
+      const ExactDirectRankWindowSaturatedH0Authority&) = default;
+};
+
+// Relative verifier over the already-certified terminal facade.  It does not
+// replay geometry or mint a durable authority; callers that need fresh source
+// replay must first use the facade's existing source-specific verifier.
+struct ExactDirectRankWindowSaturatedH0Verification {
+  bool source_terminal_catalog_certified{false};
+  bool expected_authority_reconstructed{false};
+  bool observed_recursively_equal{false};
+  bool geometric_regularity_remains_unclaimed{false};
+  bool no_forbidden_global_structure_materialized{false};
+  bool result_certified{false};
+
+  friend bool operator==(
+      const ExactDirectRankWindowSaturatedH0Verification&,
+      const ExactDirectRankWindowSaturatedH0Verification&) = default;
+};
+
+[[nodiscard]] ExactDirectRankWindowSaturatedH0Authority
+build_exact_direct_rank_window_saturated_h0_authority(
+    const ExactDirectSupportTerminalFacade& source_facade);
+
+[[nodiscard]] ExactDirectRankWindowSaturatedH0Verification
+verify_exact_direct_rank_window_saturated_h0_authority(
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectRankWindowSaturatedH0Authority& observed);
 
 }  // namespace morsehgp3d::hierarchy

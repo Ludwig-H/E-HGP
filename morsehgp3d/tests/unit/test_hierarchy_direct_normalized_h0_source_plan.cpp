@@ -488,11 +488,113 @@ void test_budget_failure_is_atomic_and_mutation_fails_replay() {
       "fresh replay rejects a forged omitted-noop claim");
 }
 
+void test_rank_window_saturated_h0_authority() {
+  check(
+      minimum_strict_interior_count_for_saturated_h0_quiescence(2U, 10U) ==
+              10U &&
+          minimum_strict_interior_count_for_saturated_h0_quiescence(
+              3U, 10U) == 9U &&
+          minimum_strict_interior_count_for_saturated_h0_quiescence(
+              4U, 10U) == 8U &&
+          minimal_support_saturated_h0_quiescent_through_order(
+              2U, 10U, 10U) &&
+          !minimal_support_saturated_h0_quiescent_through_order(
+              2U, 9U, 10U),
+      "the saturated-H0 no-op thresholds match pair and higher rank-prune cutoffs");
+
+  // A non-collinear variant of the permanent global-regularity counterexample
+  // isolates its scientific fact without introducing unrelated low-rank
+  // collinear shells: AB has ten strict interiors and the late point Y on its
+  // exact shell.  AB may be rank-pruned before Y is observed.  The authority
+  // accepts it only as an H0-inert high-rank saturated block; it never calls
+  // this cloud geometrically regular.
+  const std::array<CertifiedPoint3, 13U> hidden_shell_points{
+      point(-32.0, 0.0),
+      point(32.0, 0.0),
+      point(-24.0, 0.0),
+      point(-28.0, 8.0),
+      point(-15.0, 1.0, 2.0),
+      point(-11.0, -3.0, 5.0),
+      point(-7.0, 6.0, -4.0),
+      point(-3.0, -8.0, 7.0),
+      point(2.0, 5.0, 9.0),
+      point(6.0, -7.0, -3.0),
+      point(10.0, 4.0, -8.0),
+      point(15.0, -2.0, 6.0),
+      point(0.0, 32.0),
+  };
+  const CanonicalPointCloud hidden_shell_cloud =
+      canonical_cloud(hidden_shell_points);
+  const DirectSources hidden_shell_sources =
+      direct_sources(hidden_shell_cloud, 10U);
+  const auto hidden_shell_authority =
+      build_exact_direct_rank_window_saturated_h0_authority(
+          hidden_shell_sources.facade);
+  const auto hidden_shell_verification =
+      verify_exact_direct_rank_window_saturated_h0_authority(
+          hidden_shell_sources.facade, hidden_shell_authority);
+  check(
+      hidden_shell_sources.facade.relevant_extra_shell_diagnostics.empty(),
+      "the hidden-shell fixture has no rank-relevant extra-shell diagnostic");
+  check(
+      hidden_shell_sources.pair_stream.audit.rank_pruned_pair_count +
+              hidden_shell_sources.pair_stream.audit.above_rank_pair_count >
+          0U,
+      "the hidden-shell fixture exercises an above-window pair cutoff");
+  check(
+      hidden_shell_authority.certified() &&
+          hidden_shell_verification.result_certified &&
+          hidden_shell_authority
+              .hidden_above_window_extra_shells_explicitly_permitted &&
+          !hidden_shell_authority.geometric_global_regularity_claimed,
+      "the hidden-shell fixture is certified H0-inert above the rank window without a false regularity claim");
+
+  // At rank-relevant closed rank, a complete extra shell is not silently
+  // normalized.  The square's antipodal supports expose the common shell and
+  // force the dedicated unsupported-degeneracy decision.
+  const std::array<CertifiedPoint3, 4U> square_points{
+      point(-1.0, 0.0),
+      point(0.0, -1.0),
+      point(0.0, 1.0),
+      point(1.0, 0.0),
+  };
+  const CanonicalPointCloud square_cloud = canonical_cloud(square_points);
+  const DirectSources square_sources = direct_sources(square_cloud, 2U);
+  const auto square_authority =
+      build_exact_direct_rank_window_saturated_h0_authority(
+          square_sources.facade);
+  const auto square_verification =
+      verify_exact_direct_rank_window_saturated_h0_authority(
+          square_sources.facade, square_authority);
+  check(
+      !square_sources.facade.relevant_extra_shell_diagnostics.empty() &&
+          square_authority.decision ==
+              ExactDirectRankWindowSaturatedH0Decision::
+                  unsupported_rank_relevant_extra_shell_degeneracy &&
+          !square_authority.certified() &&
+          square_verification.observed_recursively_equal &&
+          !square_verification.result_certified &&
+          !square_authority.geometric_global_regularity_claimed,
+      "a rank-relevant cospherical block fails open instead of being mislabeled regular or H0-inert");
+
+  auto forged = hidden_shell_authority;
+  forged.geometric_global_regularity_claimed = true;
+  const auto forged_verification =
+      verify_exact_direct_rank_window_saturated_h0_authority(
+          hidden_shell_sources.facade, forged);
+  check(
+      !forged.certified() && !forged_verification.observed_recursively_equal &&
+          !forged_verification.geometric_regularity_remains_unclaimed &&
+          !forged_verification.result_certified,
+      "the relative verifier rejects promotion of H0 quiescence to geometric global regularity");
+}
+
 }  // namespace
 
 int main() {
   test_e5_complete_compressed_source_and_explicit_blocker();
   test_budget_failure_is_atomic_and_mutation_fails_replay();
+  test_rank_window_saturated_h0_authority();
   if (failures != 0) {
     std::cerr << failures
               << " direct normalized-H0 source-plan test(s) failed\n";

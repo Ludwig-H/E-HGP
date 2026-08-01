@@ -1495,6 +1495,12 @@ Le CTest `morsehgp3d.hierarchy_direct_normalized_vertical_square_receipt` doit f
 
 Le succès publie exactement deux images et un carré. Deux racines dans le même arbre, une union ou intersection falsifiée, un label initial absent, une inclusion non attestée, un cap juste insuffisant et une mutation de sortie doivent publier un échec atomique ou être rejetés par le vérificateur frais. Le test exige explicitement faux les claims de régularité globale, complétude d'incidence, toutes naturalités, cartes verticales complètes et statut public. Un seul build/test Release suffit; aucun oracle Gamma, sanitizer répété, CUDA ou GCP n'est requis pour ce lemme local.
 
+### 14.14p Autorité de fenêtre de rang pour les boules saturées $H_0$
+
+Le CTest `morsehgp3d.hierarchy_direct_normalized_h0_source_plan` vérifie les seuils exacts de quiescence saturée : paire $p\geq K_{\mathrm{eff}}$, triangle $p\geq K_{\mathrm{eff}}-1$ et tétraèdre $p\geq K_{\mathrm{eff}}-2$. Chaque succès doit rester relatif à une façade terminale certifiée pour les univers complets de supports deux, trois et quatre, conserver faux le claim de régularité géométrique et ne matérialiser ni `Star`, ni Gamma, ni Delaunay d'ordre supérieur.
+
+La fixture non collinéaire `AB/Y` doit conserver dix intérieurs stricts et le témoin `Y` exactement sur le shell après le cutoff : l'autorité accepte seulement l'inertie $H_0$ du bloc haut-rang. À l'inverse, le carré cosphérique dont l'extra-shell reste dans la fenêtre doit produire `unsupported_rank_relevant_extra_shell_degeneracy`. Une mutation qui positionne `geometric_global_regularity_claimed=true` doit être rejetée par le vérificateur relatif. Une seule exécution Release ciblée suffit; aucun benchmark, sanitizer répété, CUDA ou GCP n'est requis.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.
