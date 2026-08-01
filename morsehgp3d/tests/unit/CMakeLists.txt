@@ -1331,6 +1331,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
+  test_hierarchy_direct_normalized_h0_source_plan.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
+  PRIVATE morsehgp3d::direct_normalized_h0_source_plan
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
   test_hierarchy_direct_sparse_successive_incidence.cpp
 )
@@ -3131,6 +3151,7 @@ set(
   morsehgp3d_hierarchy_direct_sparse_facet_descent_step_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_closure_tests
   morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+  morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
   morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
@@ -4183,6 +4204,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_first_incidence
   COMMAND morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_normalized_h0_source_plan
+  COMMAND morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_successive_incidence

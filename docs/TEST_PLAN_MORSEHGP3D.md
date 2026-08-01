@@ -1479,6 +1479,14 @@ Le test `direct_morse_unified_resident_session` doit vérifier le plan unifié e
 
 Les douze commits, les deux incidences silencieuses au niveau exact `17/2`, le delta ponctuel vide, la racine retrouvée au niveau `9`, les caps sparse et persistants, les deux tickets simultanés, le troisième ticket refusé et le rollback locator non trivial restent inchangés. Un seul build Release et les deux CTests batch/session suffisent pour ce follow-up; aucun sanitizer répété, CUDA, G4 ou GCP n'est requis. Cette réduction de travail ne certifie ni la complétude Gamma, ni l'identité publique v2, ni la verticalité ou le passage à 50 k.
 
+### 14.14n Validation du plan candidat normalisé
+
+Le CTest `morsehgp3d.hierarchy_direct_normalized_h0_source_plan` doit construire l'autorité gateway existante depuis E5, la vérifier fraîchement et engager son identité scientifique complète avant toute intégration. Il exclut tous les rôles et candidats d'ordre un vers l'autorité Borůvka, puis exige que chaque naissance et selle directe d'ordre supérieur soit jointe une fois et que chaque candidat de première incidence soit référencé une fois. Les cofaces identiques issues de plusieurs facettes du cœur sont dédupliquées; leur identité persistante est une facette propriétaire externe et un `PointId` ajouté, tandis que la clé complète transitoire est libérée avant publication.
+
+Les lots doivent être uniques et strictement triés par niveau rationnel exact puis ordre. Chaque coface appartient à un seul lot et chaque référence plate recolle à ses offsets CSR. Near-first et far-first doivent produire la même projection scientifique et les mêmes lots. Un cap de scan gateway nul publie un échec atomique sans coface, naissance, référence ou lot; forger le claim de no-op tardif doit être rejeté par le rejeu frais.
+
+Le test exige explicitement faux `global_regularity_authority_certified`, `omitted_late_cofaces_qr1_noop_certified`, `incidence_complete_reduction_proved`, `resident_atomic_fold_performed`, `campaign_v3_single_gateway_per_core_facet_satisfied`, `campaign_v3_product_source_claimed` et `public_status_claimed`. Ce jalon audite encore tous les co-minimiseurs et ne satisfait donc pas la compression v3 à un gateway persistant au plus par facette. Aucun Star global, Gamma, catalogue de Delaunay d'ordre supérieur, test GPU ou campagne de performance ne doit être ajouté à ce CTest.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.
