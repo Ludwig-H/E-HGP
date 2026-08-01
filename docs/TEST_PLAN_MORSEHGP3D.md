@@ -2384,13 +2384,17 @@ Ce jalon exige `v1-correctness`, la Phase 12 et M.1 fermés, la migration contra
 
 Le principe final est simple : **chaque événement peut être rapide ou lent, mais il doit être vrai ; chaque catalogue peut être complet ou budgété, mais son statut doit le dire ; chaque VM peut être préemptée, mais elle ne doit jamais rester allumée par oubli.**
 
-### T15-HARTIGAN-V3 — manifeste rationnel normalisé borné
+### T15-HARTIGAN-V4 — manifeste rationnel normalisé transactionnel et reprenable
 
-- initialiser un contrat à dix ordres avec comptes exacts de lots et de no-op, puis rejeter overflow, budget de records moins un et entier rationnel dépassant 4 096 chiffres avant toute mutation scientifique;
-- exiger un record par lot normalisé, y compris tout no-op certifié `q_R=1`, et rejeter `q_R=0`, delta non nul dans un no-op, rupture de chaîne source, ordre ou index non contigu et niveau rationnel décroissant;
+- initialiser un contrat fixe à dix ordres avec comptes exacts de lots et de no-op, puis rejeter overflow, budget de records moins un et entier rationnel dépassant 4 096 chiffres avant toute mutation scientifique;
+- exiger un record par lot normalisé et sa partition complète `q_R=0 / q_R=1 / q_R>=2`; accepter une naissance `q_R=0`, mais n'omettre que l'unique groupe `q_R=1` dont les quatre deltas sont nuls;
+- réserver l'encodage scalaire v3 à une compatibilité explicitement marquée du contrat fixe et le refuser dans le mode produit streaming;
 - muter chaque champ scientifique d'un record et vérifier que la racine SHA-256 ne se recertifie plus;
+- préparer un ticket move-only avec toutes les allocations et tous les digests terminés, interdire deux tickets vivants, puis vérifier que le commit est `noexcept`, sans allocation, étranger/périmé atomiquement rejeté et non rejouable;
+- exporter un checkpoint sans autorité process-locale, budget ou arène de records, contrôler forme et intégrité, remint l'autorité et retrouver le même suffixe; le test produit devra en plus rejouer fraîchement la source jusqu'au curseur avant de recertifier ce préfixe;
+- en mode streaming, refuser le scellement public et exiger l'attestation privée move-only issue de l'épuisement du produit, avec égalité de la science source, de la chaîne finale et des comptes par ordre;
 - vérifier que caps mémoire et identifiants process-locaux différents conservent la même chaîne pour une identité scientifique, un préfixe source et des niveaux identiques;
-- sceller seulement si les comptes par ordre, les no-op et la racine source finale ferment exactement, puis refuser toute écriture ultérieure;
+- sceller le contrat fixe seulement si les comptes par ordre, les no-op et la racine source finale ferment exactement, puis refuser toute écriture ultérieure;
 - conserver une mémoire résidente indépendante du nombre de records déjà émis : dix résumés d'ordre et état de chaîne seulement, sans Gamma, facettes, cofaces, incidences ou mosaïque de Delaunay globale.
 
 ### T15-K1-SEAM — session fermée scellée Borůvka
