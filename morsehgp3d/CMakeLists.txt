@@ -1029,6 +1029,98 @@ else()
   )
 endif()
 
+# Host/fake contract for the two exact higher-support P6a product decisions.
+# The launcher remains unresolved here and is supplied by a CPU fake in the
+# targeted unit test; no product frontier or DFS integration is claimed.
+add_library(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+  STATIC
+    include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
+    src/cuda/phase15_exact_higher_support_product_fixed.cuh
+    src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
+    src/gpu/exact_higher_support_product_cuda.cpp
+)
+add_library(
+  morsehgp3d::gpu_exact_higher_support_product_cuda_host_contract
+  ALIAS morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+  PUBLIC morsehgp3d::higher_support
+  PRIVATE Threads::Threads morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+if(MORSEHGP3D_ENABLE_CUDA)
+  add_library(
+    morsehgp3d_gpu_exact_higher_support_product_cuda
+    STATIC
+      include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
+      src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
+      src/cuda/phase15_exact_higher_support_product_fixed.cuh
+      src/cuda/phase15_exact_higher_support_product_cuda.cu
+      src/gpu/exact_higher_support_product_cuda.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_exact_higher_support_product_cuda
+    ALIAS morsehgp3d_gpu_exact_higher_support_product_cuda
+  )
+  target_include_directories(
+    morsehgp3d_gpu_exact_higher_support_product_cuda
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_higher_support_product_cuda
+    PUBLIC morsehgp3d::higher_support
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_higher_support_product_cuda PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_exact_higher_support_product_cuda
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_higher_support_product_cuda
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_higher_support_product_cuda
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+endif()
+
 add_library(
   morsehgp3d_direct_support_terminal
   STATIC
@@ -3135,6 +3227,48 @@ target_link_libraries(
 )
 
 add_library(
+  morsehgp3d_direct_star_h0_retraction_differential
+  STATIC
+    src/cpu/hierarchy/direct_star_h0_retraction_differential.cpp
+)
+add_library(
+  morsehgp3d::direct_star_h0_retraction_differential
+  ALIAS morsehgp3d_direct_star_h0_retraction_differential
+)
+set_target_properties(
+  morsehgp3d_direct_star_h0_retraction_differential
+  PROPERTIES
+    EXPORT_NAME direct_star_h0_retraction_differential
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_star_h0_retraction_differential PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_star_h0_retraction_differential
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_star_h0_retraction_differential
+  PUBLIC
+    morsehgp3d::direct_sparse_unified_level_plan
+    morsehgp3d::hierarchy
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_star_h0_retraction_differential PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_star_h0_retraction_differential
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_morse_k2_k1_target_authority
   STATIC
     src/cpu/hierarchy/direct_morse_k2_k1_target_authority.cpp
@@ -4411,6 +4545,32 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_executable(
+    morsehgp3d_gpu_exact_higher_support_product_cuda_qualification
+    src/tools/gpu_exact_higher_support_product_cuda_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_exact_higher_support_product_cuda_qualification
+    PRIVATE
+      morsehgp3d::gpu_exact_higher_support_product_cuda
+      morsehgp3d::gpu_morton_lbvh_build
+  )
+  target_compile_features(
+    morsehgp3d_gpu_exact_higher_support_product_cuda_qualification
+    PRIVATE cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_exact_higher_support_product_cuda_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_exact_higher_support_product_cuda_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
   add_library(
     morsehgp3d_gpu_exact_pair_block_witness_cuda
     STATIC
@@ -5509,6 +5669,7 @@ install(
     morsehgp3d_direct_sparse_successive_incidence
     morsehgp3d_direct_sparse_successive_incidence_star_journal
     morsehgp3d_direct_sparse_unified_level_plan
+    morsehgp3d_direct_star_h0_retraction_differential
     morsehgp3d_direct_sparse_gateway_candidate_journal
     morsehgp3d_direct_sparse_gateway_candidate_localization
     morsehgp3d_direct_sparse_gateway_clock

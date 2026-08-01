@@ -1018,6 +1018,82 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+  test_gpu_exact_higher_support_product_cuda.cpp
+  fake_gpu_exact_higher_support_product_cuda_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_higher_support_product_cuda_host_contract
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+  test_gpu_exact_higher_support_product_fixed.cpp
+)
+target_include_directories(
+  morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+  PRIVATE morsehgp3d::higher_support
+)
+target_compile_features(
+  morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_higher_support_stream_tests
   test_hierarchy_higher_support_stream.cpp
 )
@@ -1310,6 +1386,26 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_star_h0_retraction_differential_tests
+  test_hierarchy_direct_star_h0_retraction_differential.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_star_h0_retraction_differential_tests
+  PRIVATE morsehgp3d::direct_star_h0_retraction_differential
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_star_h0_retraction_differential_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_star_h0_retraction_differential_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -3021,6 +3117,8 @@ set(
   morsehgp3d_anchored_pair_candidate_classifier_tests
   morsehgp3d_sparse_anchored_pair_session_tests
   morsehgp3d_hierarchy_higher_support_product_tests
+  morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+  morsehgp3d_gpu_exact_higher_support_product_fixed_tests
   morsehgp3d_hierarchy_higher_support_stream_tests
   morsehgp3d_hierarchy_direct_support_differential_tests
   morsehgp3d_hierarchy_direct_support_terminal_tests
@@ -3036,6 +3134,7 @@ set(
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
   morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+  morsehgp3d_hierarchy_direct_star_h0_retraction_differential_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_journal_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_localization_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_clock_tests
@@ -4028,6 +4127,14 @@ add_test(
   COMMAND morsehgp3d_hierarchy_higher_support_product_tests
 )
 add_test(
+  NAME morsehgp3d.gpu_exact_higher_support_product_cuda_host_contract
+  COMMAND morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_exact_higher_support_product_fixed
+  COMMAND morsehgp3d_gpu_exact_higher_support_product_fixed_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_higher_support_stream
   COMMAND morsehgp3d_hierarchy_higher_support_stream_tests
 )
@@ -4088,6 +4195,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_unified_level_plan
   COMMAND morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_star_h0_retraction_differential
+  COMMAND morsehgp3d_hierarchy_direct_star_h0_retraction_differential_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_gateway_candidate_journal
@@ -4460,6 +4571,20 @@ add_test(
 )
 set_tests_properties(
   morsehgp3d.phase15_true_hgp_scale_campaign_contract
+  PROPERTIES TIMEOUT 60
+)
+add_test(
+  NAME morsehgp3d.phase15_true_hgp_scale_campaign_v3_contract
+  COMMAND
+    "${CMAKE_COMMAND}"
+    -E env
+    "PYTHONDONTWRITEBYTECODE=1"
+    "${Python3_EXECUTABLE}"
+    -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/../profiling/test_phase15_true_hgp_scale_campaign_v3.py"
+)
+set_tests_properties(
+  morsehgp3d.phase15_true_hgp_scale_campaign_v3_contract
   PROPERTIES TIMEOUT 60
 )
 add_test(

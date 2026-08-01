@@ -663,6 +663,7 @@ MortonLbvhDeviceTraversalLease::MortonLbvhDeviceTraversalLease(
     MortonLbvhDeviceTraversalLeaseAudit audit,
     std::shared_ptr<void> retained_resources,
     std::shared_ptr<const void> source_cloud_identity,
+    std::shared_ptr<const void> source_index_identity,
     const std::uint64_t* device_coordinate_bits,
     const std::uint64_t* device_morton_point_ids,
     const void* device_nodes,
@@ -670,6 +671,7 @@ MortonLbvhDeviceTraversalLease::MortonLbvhDeviceTraversalLease(
     : audit_(std::move(audit)),
       retained_resources_(std::move(retained_resources)),
       source_cloud_identity_(std::move(source_cloud_identity)),
+      source_index_identity_(std::move(source_index_identity)),
       device_coordinate_bits_(device_coordinate_bits),
       device_morton_point_ids_(device_morton_point_ids),
       device_nodes_(device_nodes),
@@ -680,6 +682,7 @@ bool MortonLbvhDeviceTraversalLease::ready() const noexcept {
           morton_lbvh_device_traversal_lease_schema_version ||
       !retained_resources_ ||
       !source_cloud_identity_ ||
+      !source_index_identity_ ||
       audit_.maximum_point_count == 0U ||
       audit_.maximum_node_count !=
           2U * audit_.maximum_point_count - 1U ||
@@ -716,6 +719,7 @@ bool MortonLbvhDeviceTraversalLease::ready() const noexcept {
       !audit_.canonical_coordinate_words_retained ||
       !audit_.active_morton_point_ids_retained ||
       !audit_.certified_device_nodes_retained ||
+      !audit_.source_index_identity_retained ||
       !audit_.builder_transients_released ||
       audit_.cuda_device_storage_retained ==
           audit_.host_fake_lifecycle_exercised ||
@@ -1344,6 +1348,7 @@ MortonLbvhBuildContext::release_device_traversal_lease(
       retained.active_morton_point_ids_retained;
   audit.certified_device_nodes_retained =
       retained.certified_device_nodes_retained;
+  audit.source_index_identity_retained = true;
   audit.builder_transients_released =
       retained.builder_transients_released;
   audit.cuda_device_storage_retained =
@@ -1357,6 +1362,7 @@ MortonLbvhBuildContext::release_device_traversal_lease(
       std::move(audit),
       std::move(retained.retained_resources),
       std::move(last_cloud_identity_),
+      certified_build.certified_index().identity_,
       retained.device_coordinate_bits,
       retained.device_morton_point_ids,
       retained.device_nodes,

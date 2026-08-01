@@ -13,6 +13,7 @@
 namespace morsehgp3d::gpu {
 
 class DirectSparseFacetTopKProposalContext;
+class ExactHigherSupportProductCudaContext;
 class AnchoredPairCandidateProposalContext;
 class MortonLbvhDeviceTraversalLease;
 class MortonYao48PairFrontierContext;
@@ -268,6 +269,7 @@ struct MortonLbvhDeviceTraversalLeaseAudit {
   bool canonical_coordinate_words_retained{false};
   bool active_morton_point_ids_retained{false};
   bool certified_device_nodes_retained{false};
+  bool source_index_identity_retained{false};
   bool builder_transients_released{false};
   bool cuda_device_storage_retained{false};
   bool host_fake_lifecycle_exercised{false};
@@ -319,6 +321,7 @@ class MortonLbvhDeviceTraversalLease final {
       MortonLbvhDeviceTraversalLeaseAudit audit,
       std::shared_ptr<void> retained_resources,
       std::shared_ptr<const void> source_cloud_identity,
+      std::shared_ptr<const void> source_index_identity,
       const std::uint64_t* device_coordinate_bits,
       const std::uint64_t* device_morton_point_ids,
       const void* device_nodes,
@@ -329,6 +332,10 @@ class MortonLbvhDeviceTraversalLease final {
   MortonLbvhDeviceTraversalLeaseAudit audit_{};
   std::shared_ptr<void> retained_resources_;
   std::shared_ptr<const void> source_cloud_identity_;
+  // Shared with the exact certified MortonLbvhIndex whose device snapshot
+  // was released.  Consumers compare token ownership, never object address
+  // or a builder-local epoch, before accepting the resident arrays.
+  std::shared_ptr<const void> source_index_identity_;
   const std::uint64_t* device_coordinate_bits_{};
   const std::uint64_t* device_morton_point_ids_{};
   const void* device_nodes_{};
@@ -339,6 +346,7 @@ class MortonLbvhDeviceTraversalLease final {
   friend class MortonLbvhBuildContext;
   friend class MortonYao48PairFrontierContext;
   friend class RankedDiametralPairCatalogContext;
+  friend class ExactHigherSupportProductCudaContext;
   friend class detail::Phase15ExactPairBlockWitnessCudaTraversalAccess;
   friend class detail::
       Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess;
