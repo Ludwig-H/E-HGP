@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/direct_morse_unified_resident_session.hpp"
 
+#include "direct_frozen_unified_incidence_batch_internal.hpp"
 #include "morsehgp3d/hierarchy/facet_miniball.hpp"
 
 #include <algorithm>
@@ -418,7 +419,8 @@ void canonicalize_points(std::vector<PointId>& points) {
     const ExactDirectFrozenUnifiedIncidenceBatchVerification& verification)
     noexcept {
   return verification.requested_budget_certified &&
-         verification.source_plan_freshly_verified &&
+         !verification.source_plan_freshly_verified &&
+         verification.source_plan_immutable_resident_authority_certified &&
          verification.expected_result_freshly_reconstructed &&
          verification.supplied_latent_carrier_coverage_freshly_replayed &&
          verification.quotient_freshly_streaming_verified &&
@@ -426,7 +428,8 @@ void canonicalize_points(std::vector<PointId>& points) {
          verification.observed_recursively_equal &&
          verification.result_facts_and_scope_certified &&
          verification.no_forbidden_global_structure_or_mutation &&
-         verification.fresh_replay_certified &&
+         !verification.fresh_replay_certified &&
+         verification.immutable_authority_batch_reconstruction_certified &&
          verification.result_certified;
 }
 
@@ -831,9 +834,15 @@ class ResidentDeltaStage {
 }  // namespace
 
 struct ExactDirectMorseUnifiedResidentSession::Impl {
+  explicit Impl(const ExactDirectSparseUnifiedLevelPlanResult& source_plan)
+      : plan(source_plan) {}
+
   SourceReferences source{};
   ExactDirectMorseUnifiedResidentSessionBudget budget{};
-  ExactDirectSparseUnifiedLevelPlanResult plan{};
+  const ExactDirectSparseUnifiedLevelPlanResult plan;
+  std::optional<
+      internal::ExactDirectFrozenUnifiedImmutablePlanAuthority>
+      source_plan_authority;
   ExactDirectSparsePositiveFacetLocator locator{};
   ResidentState state{};
   std::shared_ptr<const SessionSeal> seal;
@@ -844,6 +853,7 @@ struct ExactDirectMorseUnifiedResidentSession::Impl {
   std::size_t epoch{};
   std::size_t source_plan_initial_verification_count{};
   std::size_t frozen_batch_source_replay_count{};
+  std::size_t frozen_batch_reconstruction_count{};
   bool initialized{false};
 };
 
@@ -913,11 +923,14 @@ bool ExactDirectMorseUnifiedResidentAuthorityBundle::
          counters.planned_group_record_count ==
              counters.sparse_delta_group_append_count &&
          frozen_batch.certified_frozen_unified_incidence_batch() &&
+         !frozen_batch.source_plan_freshly_verified &&
+         frozen_batch
+             .source_plan_verified_once_by_immutable_resident_authority &&
          frozen_verification_complete(frozen_verification) &&
          locator_snapshot_strictly_pre_batch &&
          every_unresolved_facet_has_fresh_exact_equal_miniball &&
          csr_authorities_share_identity_and_pre_batch_state &&
-         frozen_batch_built_and_freshly_verified &&
+         frozen_batch_freshly_reconstructed_from_immutable_plan_authority &&
          !global_facet_coface_or_gamma_catalog_materialized &&
          !supplied_star_global_completeness_claimed &&
          !public_status_claimed;
@@ -1011,7 +1024,9 @@ bool ExactDirectMorseUnifiedResidentSession::certified_resident_session()
          impl_->authority_id != 0U &&
          impl_->locator_instance_id != 0U &&
          impl_->source_plan_initial_verification_count == 1U &&
-         impl_->plan.certified_bounded_plan() &&
+         impl_->frozen_batch_source_replay_count == 0U &&
+         impl_->source_plan_authority.has_value() &&
+         impl_->source_plan_authority->certifies(impl_->plan) &&
          impl_->locator.certified_positive_locator() &&
          impl_->state.components.size() == impl_->plan.facet_tokens.size() &&
          impl_->state.roots.size() <=
@@ -1057,6 +1072,11 @@ std::size_t ExactDirectMorseUnifiedResidentSession::
 std::size_t ExactDirectMorseUnifiedResidentSession::
     frozen_batch_source_replay_count() const noexcept {
   return impl_ == nullptr ? 0U : impl_->frozen_batch_source_replay_count;
+}
+
+std::size_t ExactDirectMorseUnifiedResidentSession::
+    frozen_batch_reconstruction_count() const noexcept {
+  return impl_ == nullptr ? 0U : impl_->frozen_batch_reconstruction_count;
 }
 
 const ExactDirectSparseUnifiedLevelPlanResult&
@@ -1429,27 +1449,18 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
               no_authority_budget_exhausted);
     }
 
-    if (impl_->frozen_batch_source_replay_count >
+    if (!impl_->source_plan_authority.has_value() ||
+        !impl_->source_plan_authority->certifies(impl_->plan) ||
+        impl_->frozen_batch_reconstruction_count >
         std::numeric_limits<std::size_t>::max() - 2U) {
       return reject(
           ExactDirectMorseUnifiedResidentPreparationDecision::
               no_prepared_state_rejected);
     }
     bundle.frozen_batch =
-        build_exact_direct_frozen_unified_incidence_batch(
-            *impl_->source.index,
-            *impl_->source.cloud,
-            *impl_->source.facade,
-            *impl_->source.journal,
-            *impl_->source.arm_budget,
-            *impl_->source.arm_journal,
-            *impl_->source.incidence_budget,
-            *impl_->source.incidence_journal,
-            *impl_->source.star_budget,
-            impl_->source.traversal_order,
-            *impl_->source.star,
-            *impl_->source.plan_budget,
-            impl_->plan,
+        internal::
+            build_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
+            *impl_->source_plan_authority,
             impl_->cursor,
             bundle.facet_resolutions,
             bundle.prior_root_coverages,
@@ -1457,27 +1468,16 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
             bundle.latent_carrier_coverages,
             bundle.latent_carrier_coverage_point_references,
             impl_->budget.frozen_batch);
-    ++impl_->frozen_batch_source_replay_count;
+    ++impl_->frozen_batch_reconstruction_count;
     if (!bundle.frozen_batch.certified_frozen_unified_incidence_batch()) {
       return reject(
           ExactDirectMorseUnifiedResidentPreparationDecision::
               no_frozen_batch_rejected);
     }
     bundle.frozen_verification =
-        verify_exact_direct_frozen_unified_incidence_batch(
-            *impl_->source.index,
-            *impl_->source.cloud,
-            *impl_->source.facade,
-            *impl_->source.journal,
-            *impl_->source.arm_budget,
-            *impl_->source.arm_journal,
-            *impl_->source.incidence_budget,
-            *impl_->source.incidence_journal,
-            *impl_->source.star_budget,
-            impl_->source.traversal_order,
-            *impl_->source.star,
-            *impl_->source.plan_budget,
-            impl_->plan,
+        internal::
+            verify_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
+            *impl_->source_plan_authority,
             impl_->cursor,
             bundle.facet_resolutions,
             bundle.prior_root_coverages,
@@ -1486,7 +1486,7 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
             bundle.latent_carrier_coverage_point_references,
             impl_->budget.frozen_batch,
             bundle.frozen_batch);
-    ++impl_->frozen_batch_source_replay_count;
+    ++impl_->frozen_batch_reconstruction_count;
     if (!frozen_verification_complete(bundle.frozen_verification)) {
       return reject(
           ExactDirectMorseUnifiedResidentPreparationDecision::
@@ -1931,7 +1931,9 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
         bundle.counters.equal_resolution_count ==
             bundle.counters.unresolved_locator_probe_count;
     bundle.csr_authorities_share_identity_and_pre_batch_state = true;
-    bundle.frozen_batch_built_and_freshly_verified = true;
+    bundle
+        .frozen_batch_freshly_reconstructed_from_immutable_plan_authority =
+        true;
     bundle.global_facet_coface_or_gamma_catalog_materialized = false;
     bundle.supplied_star_global_completeness_claimed = false;
     bundle.public_status_claimed = false;
@@ -2141,8 +2143,12 @@ initialize_exact_direct_morse_unified_resident_session(
     return output;
   }
   try {
-    const auto plan_verification =
-        verify_exact_direct_sparse_unified_level_plan(
+    auto impl =
+        std::make_unique<ExactDirectMorseUnifiedResidentSession::Impl>(
+            source_plan);
+    auto authority_initialization =
+        internal::ExactDirectFrozenUnifiedImmutablePlanAuthorityFactory::
+            create(
             index,
             cloud,
             source_facade,
@@ -2155,16 +2161,19 @@ initialize_exact_direct_morse_unified_resident_session(
             source_star_traversal_order,
             source_star,
             source_plan_budget,
-            source_plan);
-    output.source_plan_initial_verification_count = 1U;
-    if (!plan_verification.result_certified) {
+            impl->plan);
+    output.source_plan_initial_verification_count =
+        authority_initialization.source_plan_verification_count;
+    if (!authority_initialization.source_plan_freshly_verified_once ||
+        !authority_initialization.authority.has_value()) {
       output.decision =
           ExactDirectMorseUnifiedResidentInitializationDecision::
               no_source_plan_not_freshly_verified;
       return output;
     }
 
-    auto impl = std::make_unique<ExactDirectMorseUnifiedResidentSession::Impl>();
+    impl->source_plan_authority =
+        std::move(authority_initialization.authority);
     impl->source = {
         &index,
         &cloud,
@@ -2180,7 +2189,6 @@ initialize_exact_direct_morse_unified_resident_session(
         &source_plan_budget,
     };
     impl->budget = budget;
-    impl->plan = source_plan;
     impl->authority_id = session_authority_id;
     impl->locator_instance_id = allocate_locator_instance_id();
     if (impl->locator_instance_id == 0U) {
@@ -2189,7 +2197,8 @@ initialize_exact_direct_morse_unified_resident_session(
               no_session_budget_rejected;
       return output;
     }
-    impl->source_plan_initial_verification_count = 1U;
+    impl->source_plan_initial_verification_count =
+        output.source_plan_initial_verification_count;
     impl->seal = std::make_shared<const SessionSeal>(
         SessionSeal{session_authority_id, impl->locator_instance_id});
     impl->ticket_registry = std::make_shared<OutstandingTicketRegistry>(

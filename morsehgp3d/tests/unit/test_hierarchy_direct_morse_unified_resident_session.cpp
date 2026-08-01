@@ -607,8 +607,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
           ExactDirectMorseUnifiedResidentSession::public_status ==
               "not_claimed" &&
           ExactDirectMorseUnifiedResidentSession::deployment_status ==
-              "bounded_sparse_resident_delta_without_full_state_copy_v2",
-      "the session advertises its bounded sparse-delta v2 scope");
+              "bounded_sparse_resident_delta_without_per_batch_plan_replay_v3",
+      "the session advertises its bounded immutable-plan-authority v3 scope");
 
   std::optional<ExactFrozenIncidencePriorRootId> residual_root;
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp stamp_after_17_2{};
@@ -635,9 +635,18 @@ void test_e5_live_twelve_batches(const E5Context& context) {
             !bundle.supplied_star_global_completeness_claimed &&
             !bundle.public_status_claimed &&
             bundle.counters.resident_state_full_copy_count == 0U &&
+            !bundle.frozen_batch.source_plan_freshly_verified &&
+            bundle.frozen_batch
+                .source_plan_verified_once_by_immutable_resident_authority &&
+            !bundle.frozen_verification.source_plan_freshly_verified &&
+            bundle.frozen_verification
+                .source_plan_immutable_resident_authority_certified &&
+            !bundle.frozen_verification.fresh_replay_certified &&
+            bundle.frozen_verification
+                .immutable_authority_batch_reconstruction_certified &&
             bundle.counters.sparse_delta_group_append_count ==
                 bundle.counters.planned_group_record_count,
-        "the authority shares one live locator identity and carries only its honest sparse resident delta");
+        "the authority shares one live locator identity, names its immutable plan lease honestly, and carries only its sparse resident delta");
 
     if (bundle.squared_level == level(17, 2)) {
       residual_17_2_checked =
@@ -713,8 +722,9 @@ void test_e5_live_twelve_batches(const E5Context& context) {
       retained_delta_point_count == 6U,
       "E5 retains exactly six persistently budgeted group-delta points");
   check(
-      session.frozen_batch_source_replay_count() == 24U,
-      "the current frozen builder and verifier source-plan replays are both exposed per batch");
+      session.frozen_batch_source_replay_count() == 0U &&
+          session.frozen_batch_reconstruction_count() == 24U,
+      "E5 performs zero per-batch source-plan replays while retaining two fresh frozen-batch reconstructions per batch");
 }
 
 void test_group_delta_point_caps(const E5Context& context) {

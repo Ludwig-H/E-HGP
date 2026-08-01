@@ -1473,6 +1473,12 @@ Les vingt-deux dimensions de capacité non nulles du batch doivent être exercé
 
 Cette validation certifie seulement le batch relativement aux spans externes et l'index relativement à la forêt directe fournie. Elle ne certifie ni l'origine géométrique des résolutions, ni l'alignement strict de toutes les autorités dans une session produit, ni la transaction du reducer, la complétude Gamma, l'identité publique v2, M.1, naturalité, verticalité, 50 k, les régimes massifs, le SLO ou le statut public exact.
 
+### 14.14m Validation courte de l'autorité résidente de plan immuable
+
+Le test `direct_morse_unified_resident_session` doit vérifier le plan unifié exactement une fois à l'initialisation, le copier dans un membre constant et lier une autorité interne move-only à cette adresse stable. Pour chacun des douze lots E5, le builder et le vérificateur résidents doivent annoncer `source_plan_freshly_verified=false`, certifier l'autorité immuable et reconstruire le lot sans appeler le vérificateur global du plan. Le compteur final exigé est zéro rejeu global et vingt-quatre reconstructions locales. Le chemin standalone du batch garde au contraire son rejeu frais et son certificat propre.
+
+Les douze commits, les deux incidences silencieuses au niveau exact `17/2`, le delta ponctuel vide, la racine retrouvée au niveau `9`, les caps sparse et persistants, les deux tickets simultanés, le troisième ticket refusé et le rollback locator non trivial restent inchangés. Un seul build Release et les deux CTests batch/session suffisent pour ce follow-up; aucun sanitizer répété, CUDA, G4 ou GCP n'est requis. Cette réduction de travail ne certifie ni la complétude Gamma, ni l'identité publique v2, ni la verticalité ou le passage à 50 k.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.

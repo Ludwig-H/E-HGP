@@ -16,7 +16,7 @@ namespace morsehgp3d::hierarchy {
 struct ExactDirectMorseUnifiedResidentInitializationResult;
 
 inline constexpr std::uint32_t
-    direct_morse_unified_resident_session_schema_version = 2U;
+    direct_morse_unified_resident_session_schema_version = 3U;
 inline constexpr std::string_view
     direct_morse_unified_resident_session_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -24,18 +24,19 @@ inline constexpr std::string_view
 inline constexpr std::string_view
     direct_morse_unified_resident_session_mode =
         "certified_resident_unified_strict_prebatch_authority_and_atomic_"
-        "sparse_delta_commit_v2";
+        "sparse_delta_commit_with_immutable_verified_plan_authority_v3";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_public_status = "not_claimed";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_deployment_status =
-        "bounded_sparse_resident_delta_without_full_state_copy_v2";
+        "bounded_sparse_resident_delta_without_per_batch_plan_replay_v3";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_proof_basis =
         "one_initial_unified_plan_verification_resident_sparse_positive_"
         "locator_exact_local_miniball_miss_certification_strict_pre_batch_"
         "frozen_authority_bundle_move_only_epoch_ticket_single_locator_"
-        "transaction_with_rollbackable_pre_staged_sparse_delta_v2";
+        "transaction_with_rollbackable_pre_staged_sparse_delta_and_immutable_"
+        "verified_plan_authority_v3";
 
 struct ExactDirectMorseUnifiedResidentSparseDeltaBudget {
   std::size_t maximum_component_patch_count{};
@@ -53,10 +54,10 @@ struct ExactDirectMorseUnifiedResidentSparseDeltaBudget {
       const ExactDirectMorseUnifiedResidentSparseDeltaBudget&) = default;
 };
 
-// The frozen-batch API currently replays its source plan in both its builder
-// and verifier.  Those replays are counted separately from the one session
-// initialization verification so the remaining hot-path refactor cannot be
-// hidden behind an aggregate counter.
+// The public standalone frozen-batch API retains its fresh source-plan replay.
+// The resident session instead holds an internal immutable authority created
+// by its one initialization verification; no global source-plan replay is
+// permitted on the per-batch path.
 struct ExactDirectMorseUnifiedResidentSessionBudget {
   ExactDirectSparsePositiveFacetLocatorBudget locator{};
   ExactDirectSparsePositiveFacetProbeBudget probe{};
@@ -153,7 +154,8 @@ struct ExactDirectMorseUnifiedResidentAuthorityBundle {
   bool locator_snapshot_strictly_pre_batch{false};
   bool every_unresolved_facet_has_fresh_exact_equal_miniball{false};
   bool csr_authorities_share_identity_and_pre_batch_state{false};
-  bool frozen_batch_built_and_freshly_verified{false};
+  bool frozen_batch_freshly_reconstructed_from_immutable_plan_authority{
+      false};
   bool global_facet_coface_or_gamma_catalog_materialized{false};
   bool supplied_star_global_completeness_claimed{false};
   bool public_status_claimed{false};
@@ -337,6 +339,8 @@ class ExactDirectMorseUnifiedResidentSession {
   [[nodiscard]] std::size_t source_plan_initial_verification_count()
       const noexcept;
   [[nodiscard]] std::size_t frozen_batch_source_replay_count()
+      const noexcept;
+  [[nodiscard]] std::size_t frozen_batch_reconstruction_count()
       const noexcept;
   [[nodiscard]] const ExactDirectSparseUnifiedLevelPlanResult& plan()
       const noexcept;

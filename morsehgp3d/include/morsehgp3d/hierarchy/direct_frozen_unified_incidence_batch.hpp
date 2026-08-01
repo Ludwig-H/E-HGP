@@ -13,7 +13,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_frozen_unified_incidence_batch_schema_version = 1U;
+    direct_frozen_unified_incidence_batch_schema_version = 2U;
 inline constexpr std::string_view
     direct_frozen_unified_incidence_batch_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -28,7 +28,8 @@ inline constexpr std::string_view
         "resolution_prior_root_and_latent_carrier_point_coverage_"
         "factorized_coface_"
         "hyperedges_frozen_typed_quotient_qr_actions_and_exact_group_"
-        "facet_point_set_differences_v1";
+        "facet_point_set_differences_fresh_call_or_verified_immutable_"
+        "resident_plan_authority_v2";
 
 // One record is required for every facet token touched by a non-deferred
 // coface in the selected batch.  The records are strictly ordered by
@@ -326,6 +327,7 @@ struct ExactDirectFrozenUnifiedIncidenceBatchResult {
   ExactDirectFrozenUnifiedIncidenceBatchCounters counters{};
 
   bool source_plan_freshly_verified{false};
+  bool source_plan_verified_once_by_immutable_resident_authority{false};
   bool selected_batch_partition_freshly_replayed{false};
   bool direct_births_excluded_and_deferred{false};
   bool one_hyperedge_per_direct_saddle_and_residual{false};
@@ -398,6 +400,7 @@ build_exact_direct_frozen_unified_incidence_batch(
 struct ExactDirectFrozenUnifiedIncidenceBatchVerification {
   bool requested_budget_certified{false};
   bool source_plan_freshly_verified{false};
+  bool source_plan_immutable_resident_authority_certified{false};
   bool expected_result_freshly_reconstructed{false};
   bool supplied_latent_carrier_coverage_freshly_replayed{false};
   bool quotient_freshly_streaming_verified{false};
@@ -406,6 +409,7 @@ struct ExactDirectFrozenUnifiedIncidenceBatchVerification {
   bool result_facts_and_scope_certified{false};
   bool no_forbidden_global_structure_or_mutation{false};
   bool fresh_replay_certified{false};
+  bool immutable_authority_batch_reconstruction_certified{false};
   bool result_certified{false};
 
   friend bool operator==(
