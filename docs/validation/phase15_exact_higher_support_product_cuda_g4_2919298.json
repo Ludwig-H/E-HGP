@@ -1,0 +1,151 @@
+{
+  "schema": "morsehgp3d.phase15.exact_higher_support_product_cuda_qualification.v1",
+  "artifact_role": "bounded_component_qualification_only",
+  "status": "passed",
+  "qualified": true,
+  "scale_eligible": false,
+  "phase": "15",
+  "git_sha": "291929897d0ef75e00b684317657e9d5d602a82c",
+  "backend": "cuda_g4_exact_signed_int1024_plus_reference_cpu_arbitrary_precision_rational_fallback",
+  "profile": "hgp_reduced",
+  "mode": "batched_exact_support_prune_and_query_strict_interior",
+  "public_status": "not_claimed",
+  "environment": {
+    "project": "devpod-gpu-exploration",
+    "zone": "europe-west4-ai1a",
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "machine_type": "g4-standard-48",
+    "provisioning_model": "SPOT",
+    "instance_termination_action": "STOP",
+    "max_run_duration_seconds": 14400,
+    "guest_shutdown_minutes": 60,
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver_version": "580.173.02",
+    "observed_memory_total_mib": 97887,
+    "observed_memory_free_mib": 97250,
+    "observed_memory_total_bytes_from_mib": 102641958912,
+    "observed_memory_free_bytes_from_mib": 101974016000,
+    "container_cuda_version": "12.9.2",
+    "nvcc_version": "12.9.86",
+    "image_ref": "morsehgp3d-higher-support:291929897d0e",
+    "image_id": "sha256:730f26d59ed67ae7a310a074869d70b283b6e876b261815b0286126207424782",
+    "image_build_ns": 790706631
+  },
+  "release_build": {
+    "configure_ns": 8657192589,
+    "target_build_ns": 55217191212,
+    "binary_sha256": "19bb0b7911bbad052a21825193419c2f163137a2d77e2aa3bcfbf909f65646d1"
+  },
+  "qualification": {
+    "point_count": 21,
+    "task_count": 10,
+    "fixture_family_count": 5,
+    "internal_node_receipt_task_count": 1,
+    "internal_node_receipt_leaf_count": 3,
+    "bounded_int1024_count": 9,
+    "rational_fallback_count": 1,
+    "certified_count": 5,
+    "fail_open_count": 5,
+    "mismatch_count": 0,
+    "kernel_launch_count": 1,
+    "synchronization_count": 1,
+    "source_snapshot_epoch": 2,
+    "submitted_task_digest": 1536663643217923127,
+    "completed_result_digest": 14444768796014597577,
+    "lbvh_build_total_ns": 1257931912,
+    "host_batch_total_ns": 9853335,
+    "kernel_ns": 8355136,
+    "total_qualification_ns": 1268538467,
+    "outer_wall_ns": 1474839258,
+    "cuda_execution_performed": true,
+    "native_lbvh_nodes_read_on_device": true,
+    "resident_lease_index_identity_validated": true,
+    "source_authority_validated": true,
+    "every_task_validated_before_launch": true,
+    "every_result_validated_once": true,
+    "output_published_atomically": true,
+    "overlap_rejected_without_launch": true,
+    "floating_point_decision_performed": false,
+    "global_product_frontier_mutated": false,
+    "ordinary_or_higher_order_delaunay_materialized": false,
+    "global_cell_coface_or_incidence_arena_materialized": false
+  },
+  "aot_audit": {
+    "architectures": [
+      "sm_120"
+    ],
+    "ptx_listing_bytes": 0,
+    "kernel_register_count": 255,
+    "kernel_stack_bytes_per_thread": 22544,
+    "kernel_spill_store_bytes": 8,
+    "kernel_spill_load_bytes": 8,
+    "kernel_static_shared_bytes": 0,
+    "kernel_local_bytes_reported_by_cuobjdump": 0,
+    "theoretical_stack_bytes_per_64_thread_block": 1442816,
+    "ptxas_kernel_compile_ms": 20324.438,
+    "audit_configure_ns": 7325366232,
+    "audit_target_build_ns": 56931046105
+  },
+  "compute_sanitizer_memcheck": {
+    "status": "passed",
+    "error_count": 0,
+    "leaked_bytes": 0,
+    "outer_wall_ns": 1812679061,
+    "instrumented_lbvh_build_total_ns": 1318022666,
+    "instrumented_host_batch_total_ns": 134701801,
+    "instrumented_kernel_ns": 132924896,
+    "instrumented_total_qualification_ns": 1453528767,
+    "completed_result_digest": 14444768796014597577
+  },
+  "scale_rejection": {
+    "reason": "native_exact_kernel_has_255_registers_and_22544_stack_bytes_per_thread_and_the_bounded_ten_task_kernel_already_takes_8355136ns",
+    "fifty_k_or_massive_extrapolation_permitted": false,
+    "next_gate": "replace_the_monolithic_int1024_per_thread_DAG_with_a_certified_narrow_or_cooperative_exact_path_then_requalify_resources_before_true_50000"
+  },
+  "orchestration": {
+    "qualification_run_count": 1,
+    "memcheck_run_count": 1,
+    "pre_benchmark_guarded_sessions": [
+      {
+        "last_start_timestamp": "2026-08-01T10:58:29.216-07:00",
+        "failure_stage": "local_remote_script_interpolation_before_ssh_qualification",
+        "cuda_build_started": false,
+        "targeted_stop_verified": true,
+        "session_key_revoked": true
+      },
+      {
+        "last_start_timestamp": "2026-08-01T11:02:08.987-07:00",
+        "failure_stage": "direct_Docker_socket_permission_preflight",
+        "cuda_build_started": false,
+        "targeted_stop_verified": true,
+        "session_key_revoked": true
+      },
+      {
+        "last_start_timestamp": "2026-08-01T11:06:29.368-07:00",
+        "failure_stage": "container_stdin_closed_before_CMake_due_to_missing_interactive_flag",
+        "cuda_build_started": false,
+        "targeted_stop_verified": true,
+        "session_key_revoked": true
+      }
+    ],
+    "local_preflight_failure_without_GCP_mutation": "grouped_readonly_assignment_rejected_before_session_key_creation",
+    "successful_last_start_timestamp": "2026-08-01T11:11:31.907-07:00",
+    "successful_last_stop_timestamp": "2026-08-01T11:15:46.318-07:00",
+    "final_status": "TERMINATED",
+    "other_active_e_hgp_instance_count": 0,
+    "session_key_revoked": true,
+    "local_private_key_copy_deleted": true
+  },
+  "nonclaims": {
+    "incidence_complete_reduction_proved": false,
+    "complete_sparse_source": false,
+    "horizontal_forests_complete": false,
+    "vertical_maps_complete": false,
+    "true_hgp_50000_qualified": false,
+    "secondary_p95_below_one_second": false,
+    "massive_campaign_unlocked": false,
+    "phase15_exit_gate_satisfied": false,
+    "phase16_entry_gate_satisfied": false,
+    "public_exact": false
+  }
+}
