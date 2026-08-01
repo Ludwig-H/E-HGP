@@ -187,7 +187,7 @@ int main() {
   }
   static_assert(
       morsehgp3d::hierarchy::
-          direct_frozen_unified_incidence_batch_schema_version == 2U);
+          direct_frozen_unified_incidence_batch_schema_version == 3U);
   const morsehgp3d::hierarchy::
       ExactDirectFrozenUnifiedIncidenceBatchResult
           installed_frozen_unified_batch_probe;
@@ -200,7 +200,7 @@ int main() {
   }
   static_assert(
       morsehgp3d::hierarchy::
-          direct_morse_unified_resident_session_schema_version == 4U);
+          direct_morse_unified_resident_session_schema_version == 5U);
   using UnifiedResidentSession = morsehgp3d::hierarchy::
       ExactDirectMorseUnifiedResidentSession;
   static_assert(!std::is_copy_constructible_v<UnifiedResidentSession>);

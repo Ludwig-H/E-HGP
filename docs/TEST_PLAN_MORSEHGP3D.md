@@ -1501,6 +1501,14 @@ Le CTest `morsehgp3d.hierarchy_direct_normalized_h0_source_plan` vérifie les se
 
 La fixture non collinéaire `AB/Y` doit conserver dix intérieurs stricts et le témoin `Y` exactement sur le shell après le cutoff : l'autorité accepte seulement l'inertie $H_0$ du bloc haut-rang. À l'inverse, le carré cosphérique dont l'extra-shell reste dans la fenêtre doit produire `unsupported_rank_relevant_extra_shell_degeneracy`. Une mutation qui positionne `geometric_global_regularity_claimed=true` doit être rejetée par le vérificateur relatif. Une seule exécution Release ciblée suffit; aucun benchmark, sanitizer répété, CUDA ou GCP n'est requis.
 
+### 14.14q Adaptateur résident du plan normalisé candidat
+
+Le CTest `morsehgp3d.hierarchy_direct_morse_unified_resident_session` doit initialiser la session depuis le plan normalisé et toutes ses sources, sans accepter de booléen de confiance ni de capability construite par l'appelant. La factory doit rejouer le plan une fois, construire le curseur sparse sous ownership `const`, puis lier à son adresse stable une autorité move-only. Les scopes frozen `successive_incidence_star` et `normalized_direct_source` sont exclusifs et les versions de schéma doivent avancer sans renuméroter les anciennes décisions.
+
+Avant toute allocation de l'adaptateur et avant le rejeu source, un préflight doit refuser débordements, compteurs observés hostiles, scans, occurrences de suppressions, facettes distinctes, points de clés et stockage logique hors budget. Une source falsifiant un claim doit échouer au rejeu frais et ne jamais recevoir l'autorité. Le test E5 doit préparer puis committer atomiquement les lots compatibles, conserver les niveaux rationnels exacts et vérifier que les lots frozen portent le scope normalisé sans `Star`.
+
+La classification d'une facette absente doit distinguer naissance égale, strictement ultérieure contradictoire et strictement antérieure nécessitant la rétraction. Dans ce dernier cas, `prepare_next()` doit retourner `no_normalized_h0_retraction_authority_for_strictly_earlier_facet`; le curseur peut être épuisé sur une fixture compatible, mais `complete()` reste faux sans capability de rétraction. Un seul build et test Release plus la compilation du consumer suffisent; aucun sanitizer répété, CUDA ou GCP n'est requis.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.

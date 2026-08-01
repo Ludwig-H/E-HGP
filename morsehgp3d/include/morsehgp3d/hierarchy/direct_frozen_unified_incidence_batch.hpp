@@ -13,13 +13,13 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_frozen_unified_incidence_batch_schema_version = 2U;
+    direct_frozen_unified_incidence_batch_schema_version = 3U;
 inline constexpr std::string_view
     direct_frozen_unified_incidence_batch_backend = "reference_cpu";
 inline constexpr std::string_view
     direct_frozen_unified_incidence_batch_profile = "hgp_reduced";
 inline constexpr std::string_view direct_frozen_unified_incidence_batch_mode =
-    "certified_frozen_unified_incidence_batch";
+    "certified_frozen_unified_incidence_batch_v3";
 inline constexpr std::string_view
     direct_frozen_unified_incidence_batch_public_status = "not_claimed";
 inline constexpr std::string_view
@@ -29,7 +29,7 @@ inline constexpr std::string_view
         "factorized_coface_"
         "hyperedges_frozen_typed_quotient_qr_actions_and_exact_group_"
         "facet_point_set_differences_fresh_call_or_verified_immutable_"
-        "resident_plan_authority_v2";
+        "resident_plan_authority_with_typed_normalized_source_scope_v3";
 
 // One record is required for every facet token touched by a non-deferred
 // coface in the selected batch.  The records are strictly ordered by
@@ -260,6 +260,7 @@ enum class ExactDirectFrozenUnifiedIncidenceBatchDecision : std::uint8_t {
 enum class ExactDirectFrozenUnifiedIncidenceBatchScope : std::uint8_t {
   unspecified,
   exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only,
+  exact_selected_batch_relative_to_verified_normalized_direct_source_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only,
 };
 
 struct ExactDirectFrozenUnifiedIncidenceBatchResult {
@@ -347,6 +348,8 @@ struct ExactDirectFrozenUnifiedIncidenceBatchResult {
   bool all_output_within_budget{false};
   bool no_partial_scientific_payload_published{false};
   bool reducer_locator_forest_or_caller_state_mutated{false};
+  bool successive_star_source_authority{false};
+  bool normalized_direct_source_authority{false};
   bool global_facet_coface_or_gamma_catalog_materialized{false};
   bool supplied_star_global_completeness_claimed{false};
   bool public_status_claimed{false};

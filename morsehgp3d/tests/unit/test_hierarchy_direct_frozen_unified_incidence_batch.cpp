@@ -846,6 +846,79 @@ void test_e5_all_batches_and_exact_records(const E5Context& context) {
       "E5 preserves ten facet deltas, six point references and one fully redundant delta with canonical owners");
 }
 
+void test_birth_only_batch_has_no_unbudgeted_hyperedge_scratch(
+    const E5Context& context) {
+  const auto birth_only = std::find_if(
+      context.plan.batches.begin(),
+      context.plan.batches.end(),
+      [&](const auto& batch) {
+        if (batch.direct_reference_count == 0U ||
+            batch.residual_reference_count != 0U ||
+            batch.coface_facet_reference_count != 0U) {
+          return false;
+        }
+        const auto begin = context.plan.direct_references.begin() +
+            static_cast<std::ptrdiff_t>(batch.direct_reference_offset);
+        const auto end = begin +
+            static_cast<std::ptrdiff_t>(batch.direct_reference_count);
+        return std::all_of(begin, end, [](const auto& reference) {
+          return reference.role == ExactDirectMorseH0Role::birth;
+        });
+      });
+  check(
+      birth_only != context.plan.batches.end(),
+      "E5 exposes a direct-birth-only frozen batch");
+  if (birth_only == context.plan.batches.end()) {
+    return;
+  }
+
+  const BatchAuthority authority = authority_for(context.plan, *birth_only);
+  const auto baseline = run_batch(
+      context,
+      LbvhTraversalOrder::near_first,
+      birth_only->batch_index,
+      authority,
+      unlimited_batch_budget());
+  const auto exact = exact_budget_for(baseline);
+  const auto exact_result = run_batch(
+      context,
+      LbvhTraversalOrder::near_first,
+      birth_only->batch_index,
+      authority,
+      exact);
+  auto one_short_birth_scan = exact;
+  const bool scan_cap_can_be_shortened =
+      one_short_birth_scan.maximum_batch_direct_reference_scan_count != 0U;
+  if (scan_cap_can_be_shortened) {
+    --one_short_birth_scan.maximum_batch_direct_reference_scan_count;
+  }
+  const auto rejected = run_batch(
+      context,
+      LbvhTraversalOrder::near_first,
+      birth_only->batch_index,
+      authority,
+      one_short_birth_scan);
+
+  check(
+      baseline.certified_frozen_unified_incidence_batch() &&
+          exact_result.certified_frozen_unified_incidence_batch() &&
+          authority.resolutions.empty() &&
+          baseline.counters.deferred_direct_birth_count ==
+              birth_only->direct_reference_count &&
+          baseline.required_hyperedge_capacity == 0U &&
+          baseline.required_direct_saddle_hyperedge_capacity == 0U &&
+          baseline.required_residual_hyperedge_capacity == 0U &&
+          baseline.required_residual_incidence_record_capacity == 0U &&
+          baseline.required_scratch_entry_capacity == 0U,
+      "a birth-only batch scans births without reserving any hyperedge, metadata, slice or residual-record scratch");
+  check(
+      scan_cap_can_be_shortened && rejected.atomic_empty_failure() &&
+          rejected.decision ==
+              ExactDirectFrozenUnifiedIncidenceBatchDecision::
+                  no_batch_budget_exhausted,
+      "the birth scan is the only B-sized capacity and its cap-minus-one fails before reconstruction");
+}
+
 void test_latent_coverage_and_point_scan_regressions(
     const E5Context& context) {
   bool full_latent_coverage_exercised = false;
@@ -1444,6 +1517,7 @@ int main() {
       "a default non-certified result is neither success nor an atomic failure");
   const E5Context context = e5_context(LbvhTraversalOrder::near_first);
   test_e5_all_batches_and_exact_records(context);
+  test_birth_only_batch_has_no_unbudgeted_hyperedge_scratch(context);
   test_latent_coverage_and_point_scan_regressions(context);
   test_mixed_local_delta_and_canonical_ownership();
   test_permutations_and_caps(context);

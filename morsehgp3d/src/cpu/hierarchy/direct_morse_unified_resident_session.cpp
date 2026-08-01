@@ -9,6 +9,7 @@
 #include <limits>
 #include <new>
 #include <stdexcept>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -456,6 +457,766 @@ void canonicalize_points(std::vector<PointId>& points) {
   return births;
 }
 
+[[nodiscard]] bool facet_key_is_canonical(
+    const ExactDirectSparseFacetKey& key) noexcept {
+  if (key.point_count == 0U ||
+      key.point_count > key.point_ids.size()) {
+    return false;
+  }
+  for (std::size_t index = 0U; index < key.point_count; ++index) {
+    if ((index != 0U &&
+         key.point_ids[index - 1U] >= key.point_ids[index]) ||
+        static_cast<std::size_t>(key.point_ids[index]) ==
+            std::numeric_limits<std::size_t>::max()) {
+      return false;
+    }
+  }
+  return std::all_of(
+      key.point_ids.begin() +
+          static_cast<std::ptrdiff_t>(key.point_count),
+      key.point_ids.end(),
+      [](PointId point_id) { return point_id == PointId{}; });
+}
+
+[[nodiscard]] bool facet_key_less(
+    const ExactDirectSparseFacetKey& left,
+    const ExactDirectSparseFacetKey& right) noexcept {
+  if (left.point_count != right.point_count) {
+    return left.point_count < right.point_count;
+  }
+  return std::lexicographical_compare(
+      left.point_ids.begin(),
+      left.point_ids.begin() +
+          static_cast<std::ptrdiff_t>(left.point_count),
+      right.point_ids.begin(),
+      right.point_ids.begin() +
+          static_cast<std::ptrdiff_t>(right.point_count));
+}
+
+struct NormalizedCofaceScratch {
+  std::array<PointId, 11U> point_ids{};
+  std::size_t point_count{};
+  std::size_t occurrence_offset{};
+};
+
+struct NormalizedFacetOccurrenceScratch {
+  std::size_t source_coface_index{};
+  std::size_t removed_union_point_index{};
+  PointId removed_point_id{};
+  ExactDirectSparseFacetKey facet_key{};
+};
+
+struct NormalizedResidentCompatibilityBuild {
+  ExactDirectSparseUnifiedLevelPlanResult plan{};
+  std::size_t reconstructed_coface_count{};
+  std::size_t transient_k_plus_one_key_count{};
+  bool every_source_reference_consumed_once{false};
+  bool every_coface_reconstructed_transiently{false};
+  bool no_k_plus_one_key_persisted{false};
+  bool no_successive_star_materialized{false};
+  bool no_global_gamma_or_higher_delaunay_materialized{false};
+  bool certified{false};
+};
+
+struct NormalizedResidentAdapterPreflight {
+  std::size_t coface_facet_occurrence_count{};
+  std::size_t coface_occurrence_facet_key_point_count{};
+  std::size_t direct_coface_count{};
+  std::size_t residual_coface_count{};
+  std::size_t maximum_distinct_facet_count{};
+  std::size_t maximum_facet_key_point_count{};
+  std::size_t maximum_direct_reference_count{};
+  std::size_t maximum_batch_coface_index_scratch_count{};
+  std::size_t conservative_logical_storage_entry_count{};
+  std::size_t simultaneous_adapter_entry_count{};
+  bool certified{false};
+};
+
+[[nodiscard]] constexpr bool facet_token_count_fits_token_id(
+    std::size_t token_count) noexcept {
+  if (token_count == 0U) {
+    return true;
+  }
+  if constexpr (
+      sizeof(std::size_t) > sizeof(ExactFrozenIncidenceTokenId)) {
+    return token_count - 1U <=
+           static_cast<std::size_t>(
+               std::numeric_limits<ExactFrozenIncidenceTokenId>::max());
+  }
+  return true;
+}
+
+[[nodiscard]] bool normalized_adapter_budget_accepts_source_shape(
+    const ExactDirectSparseGatewayCandidateJournalResult& gateway,
+    const ExactDirectNormalizedH0SourcePlanResult& source,
+    const ExactDirectNormalizedH0ResidentAdapterBudget& budget,
+    const ExactDirectMorseUnifiedResidentSessionBudget& session_budget,
+    NormalizedResidentAdapterPreflight& preflight) noexcept {
+  preflight = {};
+  if (source.direct_birth_references.size() >
+          budget.maximum_source_direct_birth_scan_count ||
+      source.cofaces.size() > budget.maximum_source_coface_scan_count ||
+      source.batches.size() > budget.maximum_source_batch_scan_count ||
+      source.cofaces.size() >
+          budget.maximum_coface_occurrence_offset_scratch_count ||
+      source.batches.size() >
+          session_budget.locator.maximum_committed_batch_count ||
+      source.gateway_candidate_references.size() >
+          budget.maximum_logical_storage_entry_count ||
+      source.batch_coface_references.size() != source.cofaces.size() ||
+      source.required_source_role_scan_count >
+          source.requested_budget.maximum_source_role_scan_count ||
+      source.required_source_gateway_token_scan_count >
+          source.requested_budget.maximum_source_gateway_token_scan_count ||
+      source.required_source_gateway_candidate_scan_count >
+          source.requested_budget
+              .maximum_source_gateway_candidate_scan_count ||
+      source.required_distinct_coface_count >
+          source.requested_budget.maximum_distinct_coface_count ||
+      source.required_direct_coface_count >
+          source.requested_budget.maximum_direct_coface_count ||
+      source.required_residual_coface_count >
+          source.requested_budget.maximum_residual_coface_count ||
+      source.required_batch_count >
+          source.requested_budget.maximum_batch_count ||
+      source.required_direct_birth_reference_count >
+          source.requested_budget.maximum_direct_birth_reference_count ||
+      source.required_batch_coface_reference_count >
+          source.requested_budget.maximum_batch_coface_reference_count ||
+      source.logical_storage_entry_count >
+          source.requested_budget.maximum_logical_storage_entry_count ||
+      source.required_source_gateway_token_scan_count !=
+          gateway.facet_tokens.size() ||
+      source.required_source_gateway_candidate_scan_count !=
+          gateway.gateway_candidates.size() ||
+      source.source_gateway_token_count != gateway.facet_tokens.size() ||
+      source.source_gateway_candidate_count !=
+          gateway.gateway_candidates.size() ||
+      source.required_higher_order_gateway_candidate_count !=
+          source.gateway_candidate_references.size() ||
+      source.required_distinct_coface_count != source.cofaces.size() ||
+      source.required_direct_birth_reference_count !=
+          source.direct_birth_references.size() ||
+      source.required_batch_coface_reference_count !=
+          source.batch_coface_references.size() ||
+      source.required_batch_count != source.batches.size()) {
+    return false;
+  }
+
+  std::size_t gateway_candidate_partition_count = 0U;
+  if (add_overflow(
+          source.excluded_order_one_gateway_candidate_count,
+          source.required_higher_order_gateway_candidate_count,
+          gateway_candidate_partition_count) ||
+      gateway_candidate_partition_count !=
+          source.source_gateway_candidate_count) {
+    return false;
+  }
+
+  std::size_t source_support_point_count = 0U;
+  for (std::size_t index = 0U; index < source.cofaces.size(); ++index) {
+    const auto& coface = source.cofaces[index];
+    std::size_t deletion_count = 0U;
+    std::size_t occurrence_point_count = 0U;
+    if (coface.coface_index != index || coface.order == 0U ||
+        coface.order > direct_sparse_positive_facet_maximum_point_count ||
+        coface.positive_support_point_count >
+            coface.positive_support_point_ids.size() ||
+        add_overflow(coface.order, 1U, deletion_count) ||
+        add_overflow(
+            preflight.coface_facet_occurrence_count,
+            deletion_count,
+            preflight.coface_facet_occurrence_count) ||
+        preflight.coface_facet_occurrence_count >
+            budget.maximum_coface_facet_reference_count ||
+        deletion_count >
+            std::numeric_limits<std::size_t>::max() / coface.order) {
+      return false;
+    }
+    occurrence_point_count = deletion_count * coface.order;
+    if (add_overflow(
+            preflight.coface_occurrence_facet_key_point_count,
+            occurrence_point_count,
+            preflight.coface_occurrence_facet_key_point_count) ||
+        add_overflow(
+            source_support_point_count,
+            coface.positive_support_point_count,
+            source_support_point_count)) {
+      return false;
+    }
+    switch (coface.kind) {
+      case ExactDirectNormalizedH0SourceCofaceKind::direct_saddle:
+        if (add_overflow(
+                preflight.direct_coface_count,
+                1U,
+                preflight.direct_coface_count)) {
+          return false;
+        }
+        break;
+      case ExactDirectNormalizedH0SourceCofaceKind::
+          first_incidence_residual:
+        if (add_overflow(
+                preflight.residual_coface_count,
+                1U,
+                preflight.residual_coface_count)) {
+          return false;
+        }
+        break;
+      default:
+        return false;
+    }
+  }
+  if (preflight.direct_coface_count !=
+          source.required_direct_coface_count ||
+      preflight.residual_coface_count !=
+          source.required_residual_coface_count ||
+      preflight.direct_coface_count >
+          std::numeric_limits<std::size_t>::max() -
+              preflight.residual_coface_count ||
+      preflight.direct_coface_count + preflight.residual_coface_count !=
+          source.cofaces.size()) {
+    return false;
+  }
+
+  std::size_t higher_order_direct_role_count = 0U;
+  std::size_t source_role_partition_count = 0U;
+  if (add_overflow(
+          source.direct_birth_references.size(),
+          preflight.direct_coface_count,
+          higher_order_direct_role_count) ||
+      add_overflow(
+          source.excluded_order_one_role_count,
+          higher_order_direct_role_count,
+          source_role_partition_count) ||
+      source_role_partition_count != source.required_source_role_scan_count) {
+    return false;
+  }
+
+  preflight.maximum_facet_key_point_count =
+      preflight.coface_occurrence_facet_key_point_count;
+  for (std::size_t index = 0U;
+       index < source.direct_birth_references.size();
+       ++index) {
+    const auto& birth = source.direct_birth_references[index];
+    if (birth.direct_birth_reference_index != index ||
+        !facet_key_is_canonical(birth.birth_facet_key) ||
+        add_overflow(
+            preflight.maximum_facet_key_point_count,
+            birth.birth_facet_key.point_count,
+            preflight.maximum_facet_key_point_count)) {
+      return false;
+    }
+  }
+  if (add_overflow(
+          preflight.coface_facet_occurrence_count,
+          source.direct_birth_references.size(),
+          preflight.maximum_distinct_facet_count) ||
+      add_overflow(
+          source.direct_birth_references.size(),
+          preflight.direct_coface_count,
+          preflight.maximum_direct_reference_count) ||
+      preflight.maximum_distinct_facet_count >
+          budget.maximum_distinct_facet_count ||
+      preflight.maximum_distinct_facet_count >
+          budget.maximum_distinct_facet_scratch_count ||
+      preflight.coface_facet_occurrence_count >
+          budget.maximum_facet_occurrence_scratch_count ||
+      preflight.maximum_facet_key_point_count >
+          budget.maximum_facet_key_point_count ||
+      preflight.maximum_distinct_facet_count >
+          session_budget.locator.maximum_component_handle_count ||
+      !facet_token_count_fits_token_id(
+          preflight.maximum_distinct_facet_count)) {
+    return false;
+  }
+
+  std::size_t birth_cursor = 0U;
+  std::size_t coface_reference_cursor = 0U;
+  for (std::size_t index = 0U; index < source.batches.size(); ++index) {
+    const auto& batch = source.batches[index];
+    if (batch.batch_index != index ||
+        batch.direct_birth_reference_offset != birth_cursor ||
+        batch.direct_birth_reference_count >
+            source.direct_birth_references.size() - birth_cursor ||
+        batch.coface_reference_offset != coface_reference_cursor ||
+        batch.coface_reference_count >
+            source.batch_coface_references.size() -
+                coface_reference_cursor ||
+        add_overflow(
+            birth_cursor,
+            batch.direct_birth_reference_count,
+            birth_cursor) ||
+        add_overflow(
+            coface_reference_cursor,
+            batch.coface_reference_count,
+            coface_reference_cursor)) {
+      return false;
+    }
+    preflight.maximum_batch_coface_index_scratch_count = std::max(
+        preflight.maximum_batch_coface_index_scratch_count,
+        batch.coface_reference_count);
+    if (preflight.maximum_batch_coface_index_scratch_count >
+        budget.maximum_batch_coface_index_scratch_count) {
+      return false;
+    }
+  }
+  if (birth_cursor != source.direct_birth_references.size() ||
+      coface_reference_cursor != source.batch_coface_references.size()) {
+    return false;
+  }
+
+  std::size_t source_logical = 0U;
+  const std::size_t source_logical_increments[]{
+      source.gateway_candidate_references.size(),
+      source.cofaces.size(),
+      source_support_point_count,
+      source.direct_birth_references.size(),
+      source.batch_coface_references.size(),
+      source.batches.size(),
+  };
+  for (const std::size_t increment : source_logical_increments) {
+    if (add_overflow(source_logical, increment, source_logical)) {
+      return false;
+    }
+  }
+  if (source_logical != source.logical_storage_entry_count) {
+    return false;
+  }
+
+  const std::size_t compatibility_logical_increments[]{
+      preflight.maximum_distinct_facet_count,
+      preflight.maximum_facet_key_point_count,
+      preflight.maximum_direct_reference_count,
+      preflight.residual_coface_count,
+      preflight.coface_facet_occurrence_count,
+      source.batches.size(),
+  };
+  for (const std::size_t increment : compatibility_logical_increments) {
+    if (add_overflow(
+            preflight.conservative_logical_storage_entry_count,
+            increment,
+            preflight.conservative_logical_storage_entry_count)) {
+      return false;
+    }
+  }
+  if (preflight.conservative_logical_storage_entry_count >
+      budget.maximum_logical_storage_entry_count) {
+    return false;
+  }
+
+  // Peak adapter coexistence: the durable plan reserves all five arenas while
+  // coface offsets, occurrence records and keys, raw distinct facets and keys,
+  // plus the largest per-batch coface-index sort scratch are still alive.
+  // Counting this conservative peak keeps the candidate adapter explicitly
+  // bounded; it is not an architecture for massive-cloud ingestion.
+  preflight.simultaneous_adapter_entry_count =
+      preflight.conservative_logical_storage_entry_count;
+  const std::size_t simultaneous_scratch_increments[]{
+      source.cofaces.size(),
+      preflight.coface_facet_occurrence_count,
+      preflight.coface_occurrence_facet_key_point_count,
+      preflight.maximum_distinct_facet_count,
+      preflight.maximum_facet_key_point_count,
+      preflight.maximum_batch_coface_index_scratch_count,
+  };
+  for (const std::size_t increment : simultaneous_scratch_increments) {
+    if (add_overflow(
+            preflight.simultaneous_adapter_entry_count,
+            increment,
+            preflight.simultaneous_adapter_entry_count)) {
+      return false;
+    }
+  }
+  if (preflight.simultaneous_adapter_entry_count >
+      budget.maximum_simultaneous_adapter_entry_count) {
+    return false;
+  }
+  preflight.certified = true;
+  return true;
+}
+
+[[nodiscard]] bool reconstruct_normalized_coface(
+    const ExactDirectSparseGatewayCandidateJournalResult& gateway,
+    const ExactDirectNormalizedH0SourceCoface& source,
+    NormalizedCofaceScratch& destination) noexcept {
+  if (source.owner_source_gateway_token_index >=
+      gateway.facet_tokens.size()) {
+    return false;
+  }
+  const auto& owner =
+      gateway.facet_tokens[source.owner_source_gateway_token_index];
+  const auto& core = owner.source_facet_key;
+  if (owner.facet_token_index !=
+          source.owner_source_gateway_token_index ||
+      !facet_key_is_canonical(core) || core.point_count != source.order ||
+      source.order + 1U > destination.point_ids.size() ||
+      std::binary_search(
+          core.point_ids.begin(),
+          core.point_ids.begin() +
+              static_cast<std::ptrdiff_t>(core.point_count),
+          source.added_point_id)) {
+    return false;
+  }
+  const auto insertion = std::lower_bound(
+      core.point_ids.begin(),
+      core.point_ids.begin() +
+          static_cast<std::ptrdiff_t>(core.point_count),
+      source.added_point_id);
+  const std::size_t insertion_index = static_cast<std::size_t>(
+      insertion - core.point_ids.begin());
+  std::copy_n(
+      core.point_ids.begin(),
+      insertion_index,
+      destination.point_ids.begin());
+  destination.point_ids[insertion_index] = source.added_point_id;
+  std::copy(
+      insertion,
+      core.point_ids.begin() +
+          static_cast<std::ptrdiff_t>(core.point_count),
+      destination.point_ids.begin() +
+          static_cast<std::ptrdiff_t>(insertion_index + 1U));
+  destination.point_count = core.point_count + 1U;
+  return destination.point_count == source.order + 1U;
+}
+
+[[nodiscard]] ExactDirectSparseFacetKey delete_normalized_coface_point(
+    const NormalizedCofaceScratch& coface,
+    std::size_t removed_index) {
+  if (removed_index >= coface.point_count || coface.point_count <= 1U ||
+      coface.point_count - 1U >
+          direct_sparse_positive_facet_maximum_point_count) {
+    throw std::logic_error("invalid normalized coface deletion");
+  }
+  ExactDirectSparseFacetKey facet;
+  facet.point_count = coface.point_count - 1U;
+  std::size_t cursor = 0U;
+  for (std::size_t index = 0U; index < coface.point_count; ++index) {
+    if (index != removed_index) {
+      facet.point_ids[cursor++] = coface.point_ids[index];
+    }
+  }
+  return facet;
+}
+
+[[nodiscard]] std::optional<std::size_t> find_facet_token_index(
+    const std::vector<ExactDirectSparseFacetKey>& facets,
+    const ExactDirectSparseFacetKey& key) noexcept {
+  const auto found = std::lower_bound(
+      facets.begin(), facets.end(), key, facet_key_less);
+  if (found == facets.end() || *found != key) {
+    return std::nullopt;
+  }
+  return static_cast<std::size_t>(found - facets.begin());
+}
+
+[[nodiscard]] NormalizedResidentCompatibilityBuild
+build_normalized_resident_compatibility_plan(
+    const ExactDirectSparseGatewayCandidateJournalResult& gateway,
+    const ExactDirectNormalizedH0SourcePlanResult& source,
+    const ExactDirectNormalizedH0ResidentAdapterBudget& budget,
+    const NormalizedResidentAdapterPreflight& preflight) {
+  NormalizedResidentCompatibilityBuild output;
+  if (!preflight.certified) {
+    return output;
+  }
+
+  std::vector<std::size_t> coface_occurrence_offsets(
+      source.cofaces.size());
+  std::vector<NormalizedFacetOccurrenceScratch> occurrences;
+  std::vector<ExactDirectSparseFacetKey> distinct_facets;
+  occurrences.reserve(preflight.coface_facet_occurrence_count);
+  distinct_facets.reserve(preflight.maximum_distinct_facet_count);
+
+  for (const auto& birth : source.direct_birth_references) {
+    if (birth.direct_birth_reference_index >=
+            source.direct_birth_references.size() ||
+        !facet_key_is_canonical(birth.birth_facet_key)) {
+      return output;
+    }
+    distinct_facets.push_back(birth.birth_facet_key);
+  }
+  for (std::size_t index = 0U; index < source.cofaces.size(); ++index) {
+    NormalizedCofaceScratch reconstructed;
+    reconstructed.occurrence_offset = occurrences.size();
+    coface_occurrence_offsets[index] = reconstructed.occurrence_offset;
+    if (!reconstruct_normalized_coface(
+            gateway, source.cofaces[index], reconstructed)) {
+      return output;
+    }
+    ++output.reconstructed_coface_count;
+    ++output.transient_k_plus_one_key_count;
+    for (std::size_t removed = 0U;
+         removed < reconstructed.point_count;
+         ++removed) {
+      auto facet = delete_normalized_coface_point(reconstructed, removed);
+      if (!facet_key_is_canonical(facet)) {
+        return output;
+      }
+      distinct_facets.push_back(facet);
+      occurrences.push_back(
+          {index,
+           removed,
+           reconstructed.point_ids[removed],
+           std::move(facet)});
+    }
+  }
+  if (occurrences.size() != preflight.coface_facet_occurrence_count) {
+    return output;
+  }
+  std::sort(distinct_facets.begin(), distinct_facets.end(), facet_key_less);
+  distinct_facets.erase(
+      std::unique(distinct_facets.begin(), distinct_facets.end()),
+      distinct_facets.end());
+  if (distinct_facets.size() > budget.maximum_distinct_facet_count) {
+    return output;
+  }
+  std::size_t facet_point_count = 0U;
+  for (const auto& facet : distinct_facets) {
+    if (add_overflow(
+            facet_point_count, facet.point_count, facet_point_count) ||
+        facet_point_count > budget.maximum_facet_key_point_count) {
+      return output;
+    }
+  }
+
+  auto& plan = output.plan;
+  plan.point_count = source.point_count;
+  plan.source_event_projection_count = source.source_event_projection_count;
+  plan.source_role_record_count = source.source_role_record_count;
+  plan.source_incidence_family_count = source.source_incidence_family_count;
+  plan.required_source_role_scan_count =
+      source.required_source_role_scan_count;
+  plan.required_higher_order_direct_role_count =
+      preflight.maximum_direct_reference_count;
+  plan.excluded_order_one_role_count = source.excluded_order_one_role_count;
+  plan.required_direct_birth_reference_count =
+      source.direct_birth_references.size();
+  plan.required_direct_saddle_reference_count =
+      preflight.direct_coface_count;
+  plan.required_source_family_scan_count =
+      source.source_incidence_family_count;
+  plan.required_higher_order_saddle_family_count =
+      preflight.direct_coface_count;
+  plan.required_coface_deletion_reference_count = occurrences.size();
+  plan.required_distinct_facet_token_count = distinct_facets.size();
+  plan.required_facet_key_point_count = facet_point_count;
+  plan.required_batch_count = source.batches.size();
+  plan.source_pair_canonical_cloud_digest =
+      source.source_pair_canonical_cloud_digest;
+  plan.source_higher_canonical_cloud_digest =
+      source.source_higher_canonical_cloud_digest;
+  plan.source_pair_semantic_digest = source.source_pair_semantic_digest;
+  plan.source_higher_semantic_digest = source.source_higher_semantic_digest;
+  plan.facet_tokens.reserve(distinct_facets.size());
+  for (std::size_t index = 0U; index < distinct_facets.size(); ++index) {
+    plan.facet_tokens.push_back(
+        {index, distinct_facets[index], std::nullopt, 0U, 0U});
+  }
+  plan.direct_references.reserve(
+      preflight.maximum_direct_reference_count);
+  plan.residual_references.reserve(preflight.residual_coface_count);
+  plan.coface_facet_references.reserve(occurrences.size());
+  plan.batches.reserve(source.batches.size());
+
+  for (std::size_t batch_index = 0U;
+       batch_index < source.batches.size();
+       ++batch_index) {
+    const auto& source_batch = source.batches[batch_index];
+    if (source_batch.batch_index != batch_index ||
+        source_batch.direct_birth_reference_offset >
+            source.direct_birth_references.size() ||
+        source_batch.direct_birth_reference_count >
+            source.direct_birth_references.size() -
+                source_batch.direct_birth_reference_offset ||
+        source_batch.coface_reference_offset >
+            source.batch_coface_references.size() ||
+        source_batch.coface_reference_count >
+            source.batch_coface_references.size() -
+                source_batch.coface_reference_offset) {
+      return {};
+    }
+    const std::size_t direct_offset = plan.direct_references.size();
+    const std::size_t residual_offset = plan.residual_references.size();
+    const std::size_t facet_offset = plan.coface_facet_references.size();
+
+    for (std::size_t local = 0U;
+         local < source_batch.direct_birth_reference_count;
+         ++local) {
+      const auto& birth = source.direct_birth_references
+          [source_batch.direct_birth_reference_offset + local];
+      const auto facet_index =
+          find_facet_token_index(distinct_facets, birth.birth_facet_key);
+      if (!facet_index.has_value() ||
+          birth.direct_birth_reference_index !=
+              source_batch.direct_birth_reference_offset + local ||
+          birth.birth_facet_key.point_count != source_batch.order) {
+        return {};
+      }
+      ++plan.facet_tokens[*facet_index].direct_birth_reference_count;
+      plan.direct_references.push_back(
+          {plan.direct_references.size(),
+           birth.source_role_record_index,
+           birth.source_event_projection_index,
+           ExactDirectMorseH0Role::birth,
+           std::nullopt,
+           std::nullopt,
+           *facet_index});
+    }
+
+    std::vector<std::size_t> batch_coface_indices;
+    batch_coface_indices.reserve(source_batch.coface_reference_count);
+    for (std::size_t local = 0U;
+         local < source_batch.coface_reference_count;
+         ++local) {
+      const auto& reference = source.batch_coface_references
+          [source_batch.coface_reference_offset + local];
+      if (reference.batch_coface_reference_index !=
+              source_batch.coface_reference_offset + local ||
+          reference.source_coface_index >= source.cofaces.size()) {
+        return {};
+      }
+      batch_coface_indices.push_back(reference.source_coface_index);
+    }
+    std::sort(batch_coface_indices.begin(), batch_coface_indices.end());
+    if (std::adjacent_find(
+            batch_coface_indices.begin(), batch_coface_indices.end()) !=
+        batch_coface_indices.end()) {
+      return {};
+    }
+
+    for (const std::size_t coface_index : batch_coface_indices) {
+      const auto& coface = source.cofaces[coface_index];
+      if (coface.order != source_batch.order ||
+          coface.squared_level != source_batch.squared_level) {
+        return {};
+      }
+      if (coface.kind ==
+          ExactDirectNormalizedH0SourceCofaceKind::direct_saddle) {
+        if (!coface.source_role_record_index.has_value() ||
+            !coface.source_event_projection_index.has_value() ||
+            !coface.source_incidence_family_index.has_value()) {
+          return {};
+        }
+        plan.direct_references.push_back(
+            {plan.direct_references.size(),
+             *coface.source_role_record_index,
+             *coface.source_event_projection_index,
+             ExactDirectMorseH0Role::saddle,
+             coface.source_incidence_family_index,
+             coface_index,
+             std::nullopt});
+      } else {
+        plan.residual_references.push_back(
+            {plan.residual_references.size(), coface_index});
+      }
+      for (std::size_t removed = 0U;
+           removed < coface.order + 1U;
+           ++removed) {
+        const auto& occurrence = occurrences
+            [coface_occurrence_offsets[coface_index] + removed];
+        const auto facet_index = find_facet_token_index(
+            distinct_facets, occurrence.facet_key);
+        if (!facet_index.has_value() ||
+            occurrence.source_coface_index != coface_index ||
+            occurrence.removed_union_point_index != removed) {
+          return {};
+        }
+        ++plan.facet_tokens[*facet_index]
+              .coface_deletion_reference_count;
+        plan.coface_facet_references.push_back(
+            {plan.coface_facet_references.size(),
+             coface_index,
+             removed,
+             occurrence.removed_point_id,
+             *facet_index});
+      }
+    }
+    plan.batches.push_back(
+        {batch_index,
+         source_batch.future_snapshot_index,
+         source_batch.squared_level,
+         source_batch.order,
+         direct_offset,
+         plan.direct_references.size() - direct_offset,
+         residual_offset,
+         plan.residual_references.size() - residual_offset,
+         facet_offset,
+         plan.coface_facet_references.size() - facet_offset});
+  }
+
+  plan.required_direct_reference_count = plan.direct_references.size();
+  plan.required_residual_reference_count = plan.residual_references.size();
+  std::size_t logical_storage = 0U;
+  const std::size_t logical_increments[]{
+      plan.facet_tokens.size(),
+      facet_point_count,
+      plan.direct_references.size(),
+      plan.residual_references.size(),
+      plan.coface_facet_references.size(),
+      plan.batches.size(),
+  };
+  for (const std::size_t increment : logical_increments) {
+    if (add_overflow(logical_storage, increment, logical_storage) ||
+        logical_storage > budget.maximum_logical_storage_entry_count) {
+      return {};
+    }
+  }
+  if (plan.direct_references.size() !=
+          preflight.maximum_direct_reference_count ||
+      plan.residual_references.size() !=
+          preflight.residual_coface_count ||
+      plan.coface_facet_references.size() != occurrences.size()) {
+    return {};
+  }
+  plan.logical_storage_entry_count = logical_storage;
+  plan.order_one_roles_and_families_excluded_to_preserve_boruvka_authority =
+      source.order_one_roles_excluded_to_preserve_boruvka_authority;
+  plan.every_higher_order_direct_role_projected_once =
+      source.every_higher_order_direct_birth_projected_once &&
+      source.every_higher_order_direct_saddle_joined_once;
+  plan.every_higher_order_saddle_role_joined_to_one_family =
+      source.every_higher_order_direct_saddle_joined_once;
+  plan.facet_tokens_canonical_and_deduplicated = true;
+  plan.unique_batch_per_exact_level_and_order =
+      source.unique_batch_per_exact_level_and_order;
+  plan.direct_and_residual_same_level_order_share_one_future_snapshot = true;
+  plan.batches_sorted_by_exact_level_then_order =
+      source.batches_sorted_by_exact_level_then_order;
+  plan.logical_storage_within_budget = true;
+  plan.no_partial_scientific_payload_published = true;
+  plan.no_k_plus_one_coface_key_persisted = true;
+  plan.no_global_facet_or_coface_catalog_materialized = true;
+  plan.reducer_snapshot_or_forest_mutated = false;
+  plan.bounded_star_global_completeness_claimed = false;
+  plan.public_status_claimed = false;
+  plan.partial_refinement_only = true;
+  // This compatibility cursor is deliberately not a certified
+  // SuccessiveStar plan.  Its non-forgeable resident authority comes from the
+  // freshly verified normalized source instead.
+  plan.source_star_freshly_verified = false;
+  plan.direct_star_cofaces_crosschecked_bijectively = false;
+  plan.star_direct_cofaces_are_crosscheck_only_not_residual_references = false;
+  plan.every_star_residual_coface_referenced_once = false;
+  plan.every_star_coface_contributes_all_factorized_deletions = false;
+  plan.decision = ExactDirectSparseUnifiedLevelPlanDecision::not_certified;
+  plan.scope = ExactDirectSparseUnifiedLevelPlanScope::unspecified;
+
+  output.every_source_reference_consumed_once = true;
+  output.every_coface_reconstructed_transiently =
+      output.reconstructed_coface_count == source.cofaces.size() &&
+      output.transient_k_plus_one_key_count == source.cofaces.size();
+  output.no_k_plus_one_key_persisted = plan.no_k_plus_one_coface_key_persisted;
+  output.no_successive_star_materialized = true;
+  output.no_global_gamma_or_higher_delaunay_materialized = true;
+  output.certified =
+      output.every_source_reference_consumed_once &&
+      output.every_coface_reconstructed_transiently &&
+      output.no_k_plus_one_key_persisted &&
+      output.no_successive_star_materialized &&
+      output.no_global_gamma_or_higher_delaunay_materialized;
+  return output;
+}
+
 [[nodiscard]] bool finalize_resident_delta(
     const ResidentState& state,
     const ExactDirectMorseUnifiedResidentSessionBudget& budget,
@@ -815,13 +1576,145 @@ class ResidentDeltaStage {
 
 }  // namespace
 
+namespace internal {
+
+ExactDirectFrozenUnifiedImmutablePlanAuthorityInitialization
+ExactDirectFrozenUnifiedImmutablePlanAuthorityFactory::
+    create_from_normalized_direct_source(
+        const spatial::MortonLbvhIndex& index,
+        const spatial::CanonicalPointCloud& cloud,
+        const ExactDirectSupportTerminalFacade& source_facade,
+        const ExactDirectMorseEventJournalResult& source_journal,
+        const ExactDirectSaddleArmSeedBudget& source_arm_budget,
+        const ExactDirectSaddleArmSeedJournalResult& source_arm_journal,
+        const ExactDirectClosedSaddleIncidenceBudget&
+            source_incidence_budget,
+        const ExactDirectClosedSaddleIncidenceJournalResult&
+            source_incidence_journal,
+        const ExactDirectSparseGatewayCandidateBudget& source_gateway_budget,
+        spatial::LbvhTraversalOrder source_gateway_traversal_order,
+        const ExactDirectSparseGatewayCandidateJournalResult& source_gateway,
+        const ExactDirectNormalizedH0SourcePlanBudget& source_plan_budget,
+        const ExactDirectNormalizedH0SourcePlanResult& source_plan,
+        const ExactDirectNormalizedH0ResidentAdapterBudget& adapter_budget,
+        const ExactDirectMorseUnifiedResidentSessionBudget& session_budget) {
+  ExactDirectFrozenUnifiedImmutablePlanAuthorityInitialization output;
+  NormalizedResidentAdapterPreflight preflight;
+  if (!normalized_adapter_budget_accepts_source_shape(
+          source_gateway,
+          source_plan,
+          adapter_budget,
+          session_budget,
+          preflight) ||
+      !preflight.certified) {
+    return output;
+  }
+  output.normalized_adapter_preflight_certified = true;
+  output.normalized_preflight_coface_facet_occurrence_count =
+      preflight.coface_facet_occurrence_count;
+  output.source_plan_verification_count = 1U;
+  const auto verification = verify_exact_direct_normalized_h0_source_plan(
+      index,
+      cloud,
+      source_facade,
+      source_journal,
+      source_arm_budget,
+      source_arm_journal,
+      source_incidence_budget,
+      source_incidence_journal,
+      source_gateway_budget,
+      source_gateway_traversal_order,
+      source_gateway,
+      source_plan_budget,
+      source_plan);
+  if (!verification.result_certified) {
+    return output;
+  }
+  output.source_plan_freshly_verified_once = true;
+  auto adapted = build_normalized_resident_compatibility_plan(
+      source_gateway, source_plan, adapter_budget, preflight);
+  if (!adapted.certified) {
+    return output;
+  }
+  auto immutable_plan =
+      std::make_unique<const ExactDirectSparseUnifiedLevelPlanResult>(
+          std::move(adapted.plan));
+  const bool compatibility_cursor_is_honestly_normalized =
+      immutable_plan->point_count == source_plan.point_count &&
+      immutable_plan->source_pair_canonical_cloud_digest ==
+          source_plan.source_pair_canonical_cloud_digest &&
+      immutable_plan->source_higher_canonical_cloud_digest ==
+          source_plan.source_higher_canonical_cloud_digest &&
+      immutable_plan->source_pair_semantic_digest ==
+          source_plan.source_pair_semantic_digest &&
+      immutable_plan->source_higher_semantic_digest ==
+          source_plan.source_higher_semantic_digest &&
+      !immutable_plan->source_star_freshly_verified &&
+      !immutable_plan->direct_star_cofaces_crosschecked_bijectively &&
+      !immutable_plan->bounded_star_global_completeness_claimed &&
+      !immutable_plan->public_status_claimed &&
+      immutable_plan->no_k_plus_one_coface_key_persisted &&
+      immutable_plan->no_global_facet_or_coface_catalog_materialized &&
+      immutable_plan->decision ==
+          ExactDirectSparseUnifiedLevelPlanDecision::not_certified &&
+      immutable_plan->scope ==
+          ExactDirectSparseUnifiedLevelPlanScope::unspecified;
+  if (!compatibility_cursor_is_honestly_normalized) {
+    return output;
+  }
+  output.authority = ExactDirectFrozenUnifiedImmutablePlanAuthority{
+      immutable_plan.get(),
+      ExactDirectFrozenUnifiedImmutablePlanAuthorityKind::
+          normalized_direct_h0_candidate_source};
+  output.normalized_immutable_plan = std::move(immutable_plan);
+  output.normalized_reconstructed_coface_count =
+      adapted.reconstructed_coface_count;
+  output.normalized_adapter_construction_certified = true;
+  output.every_normalized_coface_reconstructed_transiently =
+      adapted.every_coface_reconstructed_transiently;
+  return output;
+}
+
+}  // namespace internal
+
+ExactDirectNormalizedH0CandidateFacetDisposition
+classify_exact_direct_normalized_h0_candidate_facet_birth(
+    const exact::ExactLevel& facet_birth_squared_level,
+    const exact::ExactLevel& active_squared_level) noexcept {
+  if (facet_birth_squared_level < active_squared_level) {
+    return ExactDirectNormalizedH0CandidateFacetDisposition::
+        fail_open_strictly_earlier_without_retraction_authority;
+  }
+  if (active_squared_level < facet_birth_squared_level) {
+    return ExactDirectNormalizedH0CandidateFacetDisposition::
+        contradiction_strictly_later_than_active_level;
+  }
+  return ExactDirectNormalizedH0CandidateFacetDisposition::
+      equal_at_active_level;
+}
+
 struct ExactDirectMorseUnifiedResidentSession::Impl {
-  explicit Impl(const ExactDirectSparseUnifiedLevelPlanResult& source_plan)
-      : plan(source_plan) {}
+  explicit Impl(
+        const ExactDirectSparseUnifiedLevelPlanResult& source_plan,
+      ExactDirectMorseUnifiedResidentSourceKind source_kind_value =
+          ExactDirectMorseUnifiedResidentSourceKind::
+              successive_incidence_star)
+      : plan_storage(
+            std::make_unique<const ExactDirectSparseUnifiedLevelPlanResult>(
+                source_plan)),
+        source_kind(source_kind_value) {}
+
+  explicit Impl(ExactDirectMorseUnifiedResidentSourceKind source_kind_value)
+      : source_kind(source_kind_value) {}
+
+  [[nodiscard]] const ExactDirectSparseUnifiedLevelPlanResult&
+  immutable_plan() const noexcept {
+    return *plan_storage;
+  }
 
   SourceReferences source{};
   ExactDirectMorseUnifiedResidentSessionBudget budget{};
-  const ExactDirectSparseUnifiedLevelPlanResult plan;
+  std::unique_ptr<const ExactDirectSparseUnifiedLevelPlanResult> plan_storage;
   std::optional<
       internal::ExactDirectFrozenUnifiedImmutablePlanAuthority>
       source_plan_authority;
@@ -836,6 +1729,14 @@ struct ExactDirectMorseUnifiedResidentSession::Impl {
   std::size_t source_plan_initial_verification_count{};
   std::size_t frozen_batch_source_replay_count{};
   std::size_t frozen_batch_reconstruction_count{};
+  ExactDirectMorseUnifiedResidentSourceKind source_kind{
+      ExactDirectMorseUnifiedResidentSourceKind::successive_incidence_star};
+  bool normalized_adapter_construction_certified{false};
+  bool every_normalized_coface_reconstructed_transiently{false};
+  ExactDirectNormalizedH0ResidentRetractionMode normalized_retraction_mode{
+      ExactDirectNormalizedH0ResidentRetractionMode::
+          not_applicable_successive_incidence_star};
+  bool normalized_h0_retraction_authority_certified{false};
   bool initialized{false};
 };
 
@@ -1025,7 +1926,42 @@ ExactDirectMorseUnifiedResidentSession::
 
 bool ExactDirectMorseUnifiedResidentSession::certified_resident_session()
     const noexcept {
-  return impl_ != nullptr && impl_->initialized && impl_->seal != nullptr &&
+  if (impl_ == nullptr || impl_->plan_storage == nullptr) {
+    return false;
+  }
+  const bool normalized =
+      impl_->source_kind ==
+      ExactDirectMorseUnifiedResidentSourceKind::
+          normalized_direct_h0_candidate_source;
+  const bool authority_kind_matches =
+      impl_->source_plan_authority.has_value() &&
+      ((normalized &&
+        impl_->source_plan_authority->kind() ==
+            internal::ExactDirectFrozenUnifiedImmutablePlanAuthorityKind::
+                normalized_direct_h0_candidate_source) ||
+       (!normalized &&
+        impl_->source_plan_authority->kind() ==
+            internal::ExactDirectFrozenUnifiedImmutablePlanAuthorityKind::
+                successive_incidence_star));
+  const bool normalized_adapter_facts_match =
+      !normalized ||
+      (impl_->normalized_adapter_construction_certified &&
+       impl_->every_normalized_coface_reconstructed_transiently &&
+       impl_->normalized_retraction_mode ==
+           ExactDirectNormalizedH0ResidentRetractionMode::
+               candidate_fail_open_without_h0_retraction_authority &&
+       !impl_->normalized_h0_retraction_authority_certified &&
+       !impl_->immutable_plan().source_star_freshly_verified &&
+       !impl_->immutable_plan().direct_star_cofaces_crosschecked_bijectively &&
+       !impl_->immutable_plan().bounded_star_global_completeness_claimed &&
+       !impl_->immutable_plan().public_status_claimed &&
+       impl_->immutable_plan().no_k_plus_one_coface_key_persisted &&
+       impl_->immutable_plan().no_global_facet_or_coface_catalog_materialized &&
+       impl_->immutable_plan().decision ==
+           ExactDirectSparseUnifiedLevelPlanDecision::not_certified &&
+       impl_->immutable_plan().scope ==
+           ExactDirectSparseUnifiedLevelPlanScope::unspecified);
+  return impl_->initialized && impl_->seal != nullptr &&
          impl_->ticket_registry != nullptr &&
          impl_->ticket_registry->maximum_ticket_count ==
              impl_->budget.sparse_delta.maximum_outstanding_ticket_count &&
@@ -1036,9 +1972,11 @@ bool ExactDirectMorseUnifiedResidentSession::certified_resident_session()
          impl_->source_plan_initial_verification_count == 1U &&
          impl_->frozen_batch_source_replay_count == 0U &&
          impl_->source_plan_authority.has_value() &&
-         impl_->source_plan_authority->certifies(impl_->plan) &&
+         impl_->source_plan_authority->certifies(impl_->immutable_plan()) &&
+         authority_kind_matches && normalized_adapter_facts_match &&
          impl_->locator.certified_positive_locator() &&
-         impl_->state.components.size() == impl_->plan.facet_tokens.size() &&
+         impl_->state.components.size() ==
+             impl_->immutable_plan().facet_tokens.size() &&
          impl_->state.roots.size() <=
              impl_->budget.maximum_resident_root_count &&
          impl_->state.group_records.size() <=
@@ -1053,15 +1991,22 @@ bool ExactDirectMorseUnifiedResidentSession::certified_resident_session()
          impl_->state.group_coverage_delta_point_reference_count <=
              impl_->budget
                  .maximum_group_coverage_delta_point_reference_count &&
-         impl_->cursor <= impl_->plan.batches.size() &&
+         impl_->cursor <= impl_->immutable_plan().batches.size() &&
          impl_->epoch == impl_->cursor &&
          impl_->locator.snapshot_stamp().committed_batch_count ==
              impl_->cursor;
 }
 
 bool ExactDirectMorseUnifiedResidentSession::complete() const noexcept {
+  return source_cursor_exhausted() &&
+         (!normalized_direct_source_session() ||
+          normalized_h0_retraction_authority_certified());
+}
+
+bool ExactDirectMorseUnifiedResidentSession::source_cursor_exhausted()
+    const noexcept {
   return certified_resident_session() &&
-         impl_->cursor == impl_->plan.batches.size();
+         impl_->cursor == impl_->immutable_plan().batches.size();
 }
 
 std::size_t ExactDirectMorseUnifiedResidentSession::batch_cursor()
@@ -1089,10 +2034,40 @@ std::size_t ExactDirectMorseUnifiedResidentSession::
   return impl_ == nullptr ? 0U : impl_->frozen_batch_reconstruction_count;
 }
 
+ExactDirectMorseUnifiedResidentSourceKind
+ExactDirectMorseUnifiedResidentSession::source_kind() const noexcept {
+  return impl_ == nullptr
+      ? ExactDirectMorseUnifiedResidentSourceKind::successive_incidence_star
+      : impl_->source_kind;
+}
+
+bool ExactDirectMorseUnifiedResidentSession::
+    normalized_direct_source_session() const noexcept {
+  return impl_ != nullptr &&
+         impl_->source_kind ==
+             ExactDirectMorseUnifiedResidentSourceKind::
+                 normalized_direct_h0_candidate_source;
+}
+
+ExactDirectNormalizedH0ResidentRetractionMode
+ExactDirectMorseUnifiedResidentSession::normalized_h0_retraction_mode()
+    const noexcept {
+  return impl_ == nullptr
+      ? ExactDirectNormalizedH0ResidentRetractionMode::
+            not_applicable_successive_incidence_star
+      : impl_->normalized_retraction_mode;
+}
+
+bool ExactDirectMorseUnifiedResidentSession::
+    normalized_h0_retraction_authority_certified() const noexcept {
+  return impl_ != nullptr &&
+         impl_->normalized_h0_retraction_authority_certified;
+}
+
 const ExactDirectSparseUnifiedLevelPlanResult&
 ExactDirectMorseUnifiedResidentSession::plan() const noexcept {
   static const ExactDirectSparseUnifiedLevelPlanResult empty{};
-  return impl_ == nullptr ? empty : impl_->plan;
+  return impl_ == nullptr ? empty : impl_->immutable_plan();
 }
 
 const ExactDirectSparsePositiveFacetLocator&
@@ -1122,10 +2097,41 @@ ExactDirectMorseUnifiedResidentSession::group_records() const noexcept {
 
 bool ExactDirectMorseUnifiedResidentInitializationResult::
     certified_initialized_session() const noexcept {
+  const bool normalized =
+      source_kind == ExactDirectMorseUnifiedResidentSourceKind::
+                         normalized_direct_h0_candidate_source;
+  const bool source_receipt_certified =
+      normalized
+      ? normalized_source_plan_consumed_directly &&
+            normalized_sparse_compatibility_plan_certified &&
+            every_normalized_coface_reconstructed_transiently &&
+            normalized_h0_retraction_mode ==
+                ExactDirectNormalizedH0ResidentRetractionMode::
+                    candidate_fail_open_without_h0_retraction_authority &&
+            !normalized_h0_retraction_authority_certified &&
+            normalized_candidate_fails_open_on_strictly_earlier_facet &&
+            !successive_incidence_star_materialized_by_adapter
+      : !normalized_source_plan_consumed_directly &&
+            !normalized_sparse_compatibility_plan_certified &&
+            !every_normalized_coface_reconstructed_transiently &&
+            normalized_h0_retraction_mode ==
+                ExactDirectNormalizedH0ResidentRetractionMode::
+                    not_applicable_successive_incidence_star &&
+            !normalized_h0_retraction_authority_certified &&
+            !normalized_candidate_fails_open_on_strictly_earlier_facet &&
+            !successive_incidence_star_materialized_by_adapter;
   return session.has_value() && session->certified_resident_session() &&
+         session->source_kind() == source_kind && source_receipt_certified &&
+         session->normalized_h0_retraction_mode() ==
+             normalized_h0_retraction_mode &&
+         session->normalized_h0_retraction_authority_certified() ==
+             normalized_h0_retraction_authority_certified &&
          source_plan_initial_verification_count == 1U &&
          source_plan_freshly_verified_once && source_plan_owned_by_session &&
          locator_and_component_state_initialized &&
+         !global_regularity_authority_certified &&
+         !omitted_late_cofaces_qr1_noop_certified &&
+         !normalized_verticality_certified &&
          no_global_facet_coface_or_gamma_catalog_materialized &&
          !public_status_claimed &&
          decision == ExactDirectMorseUnifiedResidentInitializationDecision::
@@ -1148,7 +2154,7 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
         ExactDirectMorseUnifiedResidentPreparationDecision::
             no_session_not_initialized);
   }
-  if (impl_->cursor >= impl_->plan.batches.size()) {
+  if (impl_->cursor >= impl_->immutable_plan().batches.size()) {
     return reject(
         ExactDirectMorseUnifiedResidentPreparationDecision::
             no_plan_exhausted);
@@ -1172,7 +2178,7 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
     prepared->delta.next_replay_token = impl_->state.next_replay_token;
     prepared->bundle.counters.resident_state_full_copy_count = 0U;
 
-    const auto& batch = impl_->plan.batches[impl_->cursor];
+    const auto& batch = impl_->immutable_plan().batches[impl_->cursor];
     auto& bundle = prepared->bundle;
     bundle.identity = {
         direct_morse_unified_resident_session_schema_version,
@@ -1180,10 +2186,10 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
         impl_->locator_instance_id,
         impl_->epoch,
         impl_->cursor,
-        impl_->plan.source_pair_canonical_cloud_digest,
-        impl_->plan.source_higher_canonical_cloud_digest,
-        impl_->plan.source_pair_semantic_digest,
-        impl_->plan.source_higher_semantic_digest,
+        impl_->immutable_plan().source_pair_canonical_cloud_digest,
+        impl_->immutable_plan().source_higher_canonical_cloud_digest,
+        impl_->immutable_plan().source_pair_semantic_digest,
+        impl_->immutable_plan().source_higher_semantic_digest,
         prepared->source_stamp,
     };
     bundle.source_batch_index = batch.batch_index;
@@ -1192,7 +2198,7 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
     bundle.order = batch.order;
 
     const std::vector<std::size_t> touched =
-        touched_facets(impl_->plan, batch);
+        touched_facets(impl_->immutable_plan(), batch);
     if (touched.size() > impl_->budget.maximum_facet_resolution_count ||
         touched.size() > impl_->budget.locator.maximum_batch_query_count) {
       return reject(
@@ -1203,13 +2209,14 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
     prepared->queries.reserve(touched.size());
 
     for (const std::size_t facet_token_index : touched) {
-      if (facet_token_index >= impl_->plan.facet_tokens.size()) {
+      if (facet_token_index >=
+          impl_->immutable_plan().facet_tokens.size()) {
         return reject(
             ExactDirectMorseUnifiedResidentPreparationDecision::
                 contradiction_locator_state_inconsistent);
       }
       const auto& key =
-          impl_->plan.facet_tokens[facet_token_index].facet_key;
+          impl_->immutable_plan().facet_tokens[facet_token_index].facet_key;
       ExactDirectSparseFacetWitness witness;
       if (!checked_next_witness(
               prepared->delta, impl_->authority_id, witness)) {
@@ -1311,12 +2318,28 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
             ExactDirectMorseUnifiedResidentPreparationDecision::
                 no_facet_miniball_certification_failed);
       }
-      if (miniball.squared_radius < batch.squared_level) {
+      const auto candidate_facet_disposition =
+          classify_exact_direct_normalized_h0_candidate_facet_birth(
+              miniball.squared_radius, batch.squared_level);
+      if (candidate_facet_disposition ==
+          ExactDirectNormalizedH0CandidateFacetDisposition::
+              fail_open_strictly_earlier_without_retraction_authority) {
         return reject(
-            ExactDirectMorseUnifiedResidentPreparationDecision::
-                contradiction_unresolved_facet_birth_below_active_level);
+            impl_->source_kind ==
+                        ExactDirectMorseUnifiedResidentSourceKind::
+                            normalized_direct_h0_candidate_source &&
+                    impl_->normalized_retraction_mode ==
+                        ExactDirectNormalizedH0ResidentRetractionMode::
+                            candidate_fail_open_without_h0_retraction_authority &&
+                    !impl_->normalized_h0_retraction_authority_certified
+                ? ExactDirectMorseUnifiedResidentPreparationDecision::
+                      no_normalized_h0_retraction_authority_for_strictly_earlier_facet
+                : ExactDirectMorseUnifiedResidentPreparationDecision::
+                      contradiction_unresolved_facet_birth_below_active_level);
       }
-      if (batch.squared_level < miniball.squared_radius) {
+      if (candidate_facet_disposition ==
+          ExactDirectNormalizedH0CandidateFacetDisposition::
+              contradiction_strictly_later_than_active_level) {
         return reject(
             ExactDirectMorseUnifiedResidentPreparationDecision::
                 contradiction_unresolved_facet_birth_above_active_level);
@@ -1460,7 +2483,8 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
     }
 
     if (!impl_->source_plan_authority.has_value() ||
-        !impl_->source_plan_authority->certifies(impl_->plan) ||
+        !impl_->source_plan_authority->certifies(
+            impl_->immutable_plan()) ||
         impl_->frozen_batch_reconstruction_count >
             std::numeric_limits<std::size_t>::max() - 1U) {
       return reject(
@@ -1498,7 +2522,7 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
     }
 
     const std::vector<std::size_t> births =
-        direct_birth_facets(impl_->plan, batch);
+        direct_birth_facets(impl_->immutable_plan(), batch);
     std::vector<std::size_t> equal_facets;
     equal_facets.reserve(bundle.frozen_batch.equal_facet_binding_records.size());
     for (const auto& equal :
@@ -1591,7 +2615,8 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
           equal_component.root_id.reset();
           if (!assign_component_latent_points(
                   *equal_patch,
-                  key_points(impl_->plan.facet_tokens[handle].facet_key),
+                  key_points(
+                      impl_->immutable_plan().facet_tokens[handle].facet_key),
                   prepared->delta,
                   impl_->budget.sparse_delta)) {
             return reject(
@@ -1828,7 +2853,9 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
       }
       prepared->bindings.push_back(
           {prepared->bindings.size(),
-           impl_->plan.facet_tokens[equal.facet_token_index].facet_key,
+           impl_->immutable_plan()
+               .facet_tokens[equal.facet_token_index]
+               .facet_key,
            equal.facet_token_index,
            witness});
       ++bundle.counters.planned_equal_binding_count;
@@ -1874,7 +2901,9 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
         if (!assign_component_latent_points(
                 *birth_patch,
                 key_points(
-                    impl_->plan.facet_tokens[birth_handle].facet_key),
+                    impl_->immutable_plan()
+                        .facet_tokens[birth_handle]
+                        .facet_key),
                 prepared->delta,
                 impl_->budget.sparse_delta)) {
           return reject(
@@ -1891,7 +2920,7 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
       }
       prepared->bindings.push_back(
           {prepared->bindings.size(),
-           impl_->plan.facet_tokens[birth_handle].facet_key,
+           impl_->immutable_plan().facet_tokens[birth_handle].facet_key,
            birth_handle,
            witness});
       ++bundle.counters.planned_birth_binding_count;
@@ -2181,7 +3210,7 @@ initialize_exact_direct_morse_unified_resident_session(
             source_star_traversal_order,
             source_star,
             source_plan_budget,
-            impl->plan);
+            impl->immutable_plan());
     output.source_plan_initial_verification_count =
         authority_initialization.source_plan_verification_count;
     if (!authority_initialization.source_plan_freshly_verified_once ||
@@ -2226,7 +3255,7 @@ initialize_exact_direct_morse_unified_resident_session(
             0U,
             budget.sparse_delta.maximum_outstanding_ticket_count});
     impl->locator = build_exact_direct_sparse_positive_facet_locator(
-        impl->plan.facet_tokens.size(),
+        impl->immutable_plan().facet_tokens.size(),
         budget.locator,
         {session_authority_id, ~std::uint64_t{0U}});
     if (!impl->locator.certified_positive_locator()) {
@@ -2235,11 +3264,14 @@ initialize_exact_direct_morse_unified_resident_session(
               no_locator_initialization_rejected;
       return output;
     }
-    impl->state.components.resize(impl->plan.facet_tokens.size());
+    impl->state.components.resize(
+        impl->immutable_plan().facet_tokens.size());
     for (std::size_t index_value = 0U;
          index_value < impl->state.components.size();
          ++index_value) {
-      if (impl->plan.facet_tokens[index_value].facet_token_index !=
+      if (impl->immutable_plan()
+              .facet_tokens[index_value]
+              .facet_token_index !=
           index_value) {
         output.decision =
             ExactDirectMorseUnifiedResidentInitializationDecision::
@@ -2276,6 +3308,204 @@ initialize_exact_direct_morse_unified_resident_session(
     output.decision =
         ExactDirectMorseUnifiedResidentInitializationDecision::
             no_session_budget_rejected;
+    return output;
+  }
+}
+
+ExactDirectMorseUnifiedResidentInitializationResult
+initialize_exact_direct_normalized_h0_resident_session(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_journal,
+    const ExactDirectSaddleArmSeedBudget& source_arm_budget,
+    const ExactDirectSaddleArmSeedJournalResult& source_arm_journal,
+    const ExactDirectClosedSaddleIncidenceBudget& source_incidence_budget,
+    const ExactDirectClosedSaddleIncidenceJournalResult&
+        source_incidence_journal,
+    const ExactDirectSparseGatewayCandidateBudget& source_gateway_budget,
+    spatial::LbvhTraversalOrder source_gateway_traversal_order,
+    const ExactDirectSparseGatewayCandidateJournalResult& source_gateway,
+    const ExactDirectNormalizedH0SourcePlanBudget& source_plan_budget,
+    const ExactDirectNormalizedH0SourcePlanResult& source_plan,
+    const ExactDirectNormalizedH0ResidentAdapterBudget& adapter_budget,
+    std::uint64_t session_authority_id,
+    const ExactDirectMorseUnifiedResidentSessionBudget& budget) {
+  ExactDirectMorseUnifiedResidentInitializationResult output;
+  output.source_kind =
+      ExactDirectMorseUnifiedResidentSourceKind::
+          normalized_direct_h0_candidate_source;
+  if (session_authority_id == 0U ||
+      budget.sparse_delta.maximum_outstanding_ticket_count == 0U) {
+    output.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_session_budget_rejected;
+    return output;
+  }
+  try {
+    auto authority_initialization =
+        internal::ExactDirectFrozenUnifiedImmutablePlanAuthorityFactory::
+            create_from_normalized_direct_source(
+                index,
+                cloud,
+                source_facade,
+                source_journal,
+                source_arm_budget,
+                source_arm_journal,
+                source_incidence_budget,
+                source_incidence_journal,
+                source_gateway_budget,
+                source_gateway_traversal_order,
+                source_gateway,
+                source_plan_budget,
+                source_plan,
+                adapter_budget,
+                budget);
+    output.source_plan_initial_verification_count =
+        authority_initialization.source_plan_verification_count;
+    if (!authority_initialization.normalized_adapter_preflight_certified) {
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_normalized_adapter_budget_rejected;
+      return output;
+    }
+    if (!authority_initialization.source_plan_freshly_verified_once) {
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_source_plan_not_freshly_verified;
+      return output;
+    }
+    if (!authority_initialization.authority.has_value() ||
+        authority_initialization.normalized_immutable_plan == nullptr ||
+        !authority_initialization.normalized_adapter_construction_certified) {
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_normalized_adapter_construction_rejected;
+      return output;
+    }
+    auto impl =
+        std::make_unique<ExactDirectMorseUnifiedResidentSession::Impl>(
+            ExactDirectMorseUnifiedResidentSourceKind::
+                normalized_direct_h0_candidate_source);
+    impl->plan_storage =
+        std::move(authority_initialization.normalized_immutable_plan);
+    if (!authority_initialization
+             .every_normalized_coface_reconstructed_transiently ||
+        authority_initialization.normalized_reconstructed_coface_count !=
+            source_plan.cofaces.size() ||
+        impl->immutable_plan().coface_facet_references.size() !=
+            authority_initialization
+                .normalized_preflight_coface_facet_occurrence_count) {
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_normalized_adapter_construction_rejected;
+      return output;
+    }
+
+    impl->source_plan_authority =
+        std::move(authority_initialization.authority);
+    impl->source.cloud = &cloud;
+    impl->budget = budget;
+    impl->authority_id = session_authority_id;
+    impl->locator_instance_id = allocate_locator_instance_id();
+    if (impl->locator_instance_id == 0U) {
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_session_budget_rejected;
+      return output;
+    }
+    impl->source_plan_initial_verification_count =
+        output.source_plan_initial_verification_count;
+    impl->normalized_adapter_construction_certified =
+        authority_initialization.normalized_adapter_construction_certified;
+    impl->every_normalized_coface_reconstructed_transiently =
+        authority_initialization
+            .every_normalized_coface_reconstructed_transiently;
+    impl->normalized_retraction_mode =
+        ExactDirectNormalizedH0ResidentRetractionMode::
+            candidate_fail_open_without_h0_retraction_authority;
+    impl->normalized_h0_retraction_authority_certified = false;
+    impl->seal = std::make_shared<const SessionSeal>(
+        SessionSeal{session_authority_id, impl->locator_instance_id});
+    impl->ticket_registry = std::make_shared<OutstandingTicketRegistry>(
+        OutstandingTicketRegistry{
+            0U,
+            budget.sparse_delta.maximum_outstanding_ticket_count});
+    impl->locator = build_exact_direct_sparse_positive_facet_locator(
+        impl->immutable_plan().facet_tokens.size(),
+        budget.locator,
+        {session_authority_id, ~std::uint64_t{0U}});
+    if (!impl->locator.certified_positive_locator()) {
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_locator_initialization_rejected;
+      return output;
+    }
+    impl->state.components.resize(
+        impl->immutable_plan().facet_tokens.size());
+    for (std::size_t component_index = 0U;
+         component_index < impl->state.components.size();
+         ++component_index) {
+      if (impl->immutable_plan()
+              .facet_tokens[component_index]
+              .facet_token_index !=
+          component_index) {
+        output.decision =
+            ExactDirectMorseUnifiedResidentInitializationDecision::
+                no_normalized_adapter_construction_rejected;
+        return output;
+      }
+      impl->state.components[component_index].component_handle =
+          component_index;
+      impl->state.components[component_index].parent_handle =
+          component_index;
+    }
+    impl->initialized = true;
+    ExactDirectMorseUnifiedResidentSession session{std::move(impl)};
+    if (!session.certified_resident_session()) {
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_locator_initialization_rejected;
+      return output;
+    }
+    output.session.emplace(std::move(session));
+    output.source_plan_freshly_verified_once = true;
+    output.source_plan_owned_by_session = true;
+    output.locator_and_component_state_initialized = true;
+    output.normalized_source_plan_consumed_directly = true;
+    output.normalized_sparse_compatibility_plan_certified = true;
+    output.every_normalized_coface_reconstructed_transiently =
+        authority_initialization
+            .every_normalized_coface_reconstructed_transiently;
+    output.normalized_h0_retraction_mode =
+        ExactDirectNormalizedH0ResidentRetractionMode::
+            candidate_fail_open_without_h0_retraction_authority;
+    output.normalized_h0_retraction_authority_certified = false;
+    output.normalized_candidate_fails_open_on_strictly_earlier_facet = true;
+    output.successive_incidence_star_materialized_by_adapter = false;
+    output.global_regularity_authority_certified = false;
+    output.omitted_late_cofaces_qr1_noop_certified = false;
+    output.normalized_verticality_certified = false;
+    output.no_global_facet_coface_or_gamma_catalog_materialized = true;
+    output.public_status_claimed = false;
+    output.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            complete_certified_bounded_resident_session;
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_allocation_failed;
+    return output;
+  } catch (const std::length_error&) {
+    output.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_normalized_adapter_budget_rejected;
+    return output;
+  } catch (const std::logic_error&) {
+    output.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_normalized_adapter_construction_rejected;
     return output;
   }
 }

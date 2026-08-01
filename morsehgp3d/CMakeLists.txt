@@ -2137,7 +2137,9 @@ target_link_libraries(
   PUBLIC
     morsehgp3d::direct_frozen_incidence_hgp_action_plan
     morsehgp3d::direct_sparse_unified_level_plan
-  PRIVATE morsehgp3d::sanitizers
+  PRIVATE
+    morsehgp3d::direct_normalized_h0_source_plan
+    morsehgp3d::sanitizers
 )
 if(MSVC)
   target_compile_options(
@@ -2178,6 +2180,7 @@ target_link_libraries(
   morsehgp3d_direct_morse_unified_resident_session
   PUBLIC
     morsehgp3d::direct_frozen_unified_incidence_batch
+    morsehgp3d::direct_normalized_h0_source_plan
     morsehgp3d::direct_sparse_positive_facet_locator
     morsehgp3d::facet_miniball
   PRIVATE morsehgp3d::sanitizers

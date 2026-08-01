@@ -17,6 +17,12 @@ namespace {
 
 using spatial::PointId;
 
+enum class VerifiedPlanAuthorityKind : std::uint8_t {
+  freshly_verified_standalone_successive_star,
+  immutable_verified_resident_successive_star,
+  immutable_verified_resident_normalized_direct_source,
+};
+
 [[nodiscard]] std::optional<std::size_t> checked_add(
     std::size_t left,
     std::size_t right) noexcept {
@@ -118,12 +124,23 @@ using spatial::PointId;
 
 [[nodiscard]] ExactDirectFrozenUnifiedIncidenceBatchResult base_result(
     std::size_t batch_index,
-    const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget) {
+    const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget,
+    VerifiedPlanAuthorityKind authority_kind =
+        VerifiedPlanAuthorityKind::
+            freshly_verified_standalone_successive_star) {
   ExactDirectFrozenUnifiedIncidenceBatchResult result;
   result.requested_budget = budget;
   result.source_batch_index = batch_index;
-  result.scope = ExactDirectFrozenUnifiedIncidenceBatchScope::
-      exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only;
+  const bool normalized =
+      authority_kind == VerifiedPlanAuthorityKind::
+                            immutable_verified_resident_normalized_direct_source;
+  result.successive_star_source_authority = !normalized;
+  result.normalized_direct_source_authority = normalized;
+  result.scope = normalized
+      ? ExactDirectFrozenUnifiedIncidenceBatchScope::
+            exact_selected_batch_relative_to_verified_normalized_direct_source_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only
+      : ExactDirectFrozenUnifiedIncidenceBatchScope::
+            exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only;
   result.no_partial_scientific_payload_published = true;
   result.reducer_locator_forest_or_caller_state_mutated = false;
   result.global_facet_coface_or_gamma_catalog_materialized = false;
@@ -981,10 +998,13 @@ struct HyperedgeMeta {
     std::vector<ExactFrozenIncidenceToken>& tokens,
     std::vector<std::size_t>& facet_token_indices,
     std::vector<HyperedgeMeta>& metadata,
+    std::size_t required_hyperedge_capacity,
     std::size_t& deferred_birth_count) {
   std::vector<CofaceSlice> slices;
-  slices.reserve(batch.direct_reference_count +
-                 batch.residual_reference_count);
+  // Direct births are scan-only and never own a coface slice.  Reserving from
+  // batch.direct_reference_count would therefore allocate O(B) scratch that
+  // the certified hyperedge scratch requirement deliberately does not count.
+  slices.reserve(required_hyperedge_capacity);
   const std::size_t references_begin =
       batch.coface_facet_reference_offset;
   const std::size_t references_end = references_begin +
@@ -1007,8 +1027,7 @@ struct HyperedgeMeta {
     slices.push_back({source_coface, slice_begin, cursor - slice_begin});
   }
 
-  metadata.reserve(
-      batch.direct_reference_count + batch.residual_reference_count);
+  metadata.reserve(required_hyperedge_capacity);
   for (std::size_t local = 0U; local < batch.direct_reference_count;
        ++local) {
     const auto& direct = source_plan.direct_references
@@ -1040,7 +1059,8 @@ struct HyperedgeMeta {
          residual.residual_reference_index,
          residual.source_star_coface_index});
   }
-  if (metadata.size() != slices.size()) {
+  if (metadata.size() != required_hyperedge_capacity ||
+      metadata.size() != slices.size()) {
     return false;
   }
 
@@ -1409,8 +1429,10 @@ struct PointOccurrence {
         ExactDirectFrozenUnifiedCoverageDeltaFacetReference>& delta_facets,
     const std::vector<
         ExactDirectFrozenUnifiedCoverageDeltaPointReference>& delta_points,
+    std::size_t required_residual_record_capacity,
     std::vector<ExactDirectFrozenUnifiedResidualIncidenceRecord>& records) {
-  records.reserve(metadata.size());
+  // Direct-saddle metadata coexists here but never produces a residual record.
+  records.reserve(required_residual_record_capacity);
   std::vector<std::size_t> owned_facet_counts(hyperedges.size(), 0U);
   std::vector<std::size_t> owned_point_counts(hyperedges.size(), 0U);
   for (const auto& reference : delta_facets) {
@@ -1468,7 +1490,7 @@ struct PointOccurrence {
          local.fully_redundant,
          owned_facet_count == 0U && owned_point_count == 0U});
   }
-  return true;
+  return records.size() == required_residual_record_capacity;
 }
 
 [[nodiscard]] bool build_equal_bindings(
@@ -1980,9 +2002,15 @@ find_delta_facet_reference(
 
 bool ExactDirectFrozenUnifiedIncidenceBatchResult::
     certified_frozen_unified_incidence_batch() const noexcept {
-  constexpr auto certified_scope =
-      ExactDirectFrozenUnifiedIncidenceBatchScope::
-          exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only;
+  const bool source_scope_certified =
+      successive_star_source_authority !=
+          normalized_direct_source_authority &&
+      ((successive_star_source_authority &&
+        scope == ExactDirectFrozenUnifiedIncidenceBatchScope::
+                     exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only) ||
+       (normalized_direct_source_authority &&
+        scope == ExactDirectFrozenUnifiedIncidenceBatchScope::
+                     exact_selected_batch_relative_to_verified_normalized_direct_source_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only));
   return schema_version ==
              direct_frozen_unified_incidence_batch_schema_version &&
          (source_plan_freshly_verified !=
@@ -2056,7 +2084,7 @@ bool ExactDirectFrozenUnifiedIncidenceBatchResult::
          action_plan.certified_frozen_incidence_hgp_action_plan() &&
          decision == ExactDirectFrozenUnifiedIncidenceBatchDecision::
                          complete_certified_frozen_unified_incidence_batch &&
-         scope == certified_scope;
+         source_scope_certified;
 }
 
 bool ExactDirectFrozenUnifiedIncidenceBatchResult::atomic_empty_failure()
@@ -2083,16 +2111,17 @@ bool ExactDirectFrozenUnifiedIncidenceBatchResult::atomic_empty_failure()
          !global_facet_coface_or_gamma_catalog_materialized &&
          !supplied_star_global_completeness_claimed &&
          !public_status_claimed &&
-         scope == ExactDirectFrozenUnifiedIncidenceBatchScope::
-             exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only;
+         (successive_star_source_authority !=
+          normalized_direct_source_authority) &&
+         ((successive_star_source_authority &&
+           scope == ExactDirectFrozenUnifiedIncidenceBatchScope::
+                        exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only) ||
+          (normalized_direct_source_authority &&
+           scope == ExactDirectFrozenUnifiedIncidenceBatchScope::
+                        exact_selected_batch_relative_to_verified_normalized_direct_source_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only));
 }
 
 namespace {
-
-enum class VerifiedPlanAuthorityKind : std::uint8_t {
-  freshly_verified_standalone_call,
-  immutable_verified_resident_session,
-};
 
 struct VerifiedPlanBuildAudit {
   std::size_t batch_construction_count{};
@@ -2121,17 +2150,18 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     std::span<const PointId> latent_carrier_coverage_point_references,
     const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget) {
   ExactDirectFrozenUnifiedIncidenceBatchResult result =
-      base_result(batch_index, budget);
+      base_result(batch_index, budget, authority_kind);
   if (audit != nullptr) {
     ++audit->batch_construction_count;
   }
   try {
     result.source_plan_freshly_verified =
         authority_kind ==
-        VerifiedPlanAuthorityKind::freshly_verified_standalone_call;
+        VerifiedPlanAuthorityKind::
+            freshly_verified_standalone_successive_star;
     result.source_plan_verified_once_by_immutable_resident_authority =
-        authority_kind ==
-        VerifiedPlanAuthorityKind::immutable_verified_resident_session;
+        authority_kind != VerifiedPlanAuthorityKind::
+                              freshly_verified_standalone_successive_star;
     if (batch_index >= source_plan.batches.size() ||
         source_plan.batches[batch_index].batch_index != batch_index) {
       return fail(
@@ -2239,6 +2269,7 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
             tokens,
             facet_token_indices,
             metadata,
+            result.required_hyperedge_capacity,
             deferred_birth_count)) {
       return fail(
           std::move(result),
@@ -2311,8 +2342,8 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
 
     const auto action_budget = action_budget_from(budget);
     const bool resident_authority =
-        authority_kind ==
-        VerifiedPlanAuthorityKind::immutable_verified_resident_session;
+        authority_kind != VerifiedPlanAuthorityKind::
+                              freshly_verified_standalone_successive_star;
     auto action_plan = [&]() {
       if (resident_authority) {
         return internal::
@@ -2388,6 +2419,7 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
             provenance,
             delta_facets,
             delta_points,
+            result.required_residual_incidence_record_capacity,
             residual_records) ||
         !build_equal_bindings(
             facet_resolutions,
@@ -2584,7 +2616,8 @@ build_exact_direct_frozen_unified_incidence_batch(
     return
         build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
             source_plan,
-            VerifiedPlanAuthorityKind::freshly_verified_standalone_call,
+            VerifiedPlanAuthorityKind::
+                freshly_verified_standalone_successive_star,
             nullptr,
             batch_index,
             facet_resolutions,
@@ -2659,7 +2692,8 @@ verify_exact_direct_frozen_unified_incidence_batch(
     expected =
         build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
             source_plan,
-            VerifiedPlanAuthorityKind::freshly_verified_standalone_call,
+            VerifiedPlanAuthorityKind::
+                freshly_verified_standalone_successive_star,
             nullptr,
             batch_index,
             facet_resolutions,
@@ -2773,7 +2807,10 @@ ExactDirectFrozenUnifiedImmutablePlanAuthorityFactory::create(
     return output;
   }
   output.authority =
-      ExactDirectFrozenUnifiedImmutablePlanAuthority{&immutable_plan};
+      ExactDirectFrozenUnifiedImmutablePlanAuthority{
+          &immutable_plan,
+          ExactDirectFrozenUnifiedImmutablePlanAuthorityKind::
+              successive_incidence_star};
   output.source_plan_freshly_verified_once = true;
   return output;
 }
@@ -2794,7 +2831,16 @@ ExactDirectFrozenUnifiedResidentBatchAttestedBuilder::build_once(
     ExactDirectFrozenUnifiedIncidenceBatchResult& destination) {
   if (!authority.valid()) {
     destination = fail(
-        base_result(batch_index, budget),
+        base_result(
+            batch_index,
+            budget,
+            authority.kind() ==
+                    ExactDirectFrozenUnifiedImmutablePlanAuthorityKind::
+                        normalized_direct_h0_candidate_source
+                ? VerifiedPlanAuthorityKind::
+                      immutable_verified_resident_normalized_direct_source
+                : VerifiedPlanAuthorityKind::
+                      immutable_verified_resident_successive_star),
         ExactDirectFrozenUnifiedIncidenceBatchDecision::
             no_batch_source_plan_not_freshly_verified);
     return std::nullopt;
@@ -2803,7 +2849,13 @@ ExactDirectFrozenUnifiedResidentBatchAttestedBuilder::build_once(
   destination =
       build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
           authority.plan(),
-          VerifiedPlanAuthorityKind::immutable_verified_resident_session,
+          authority.kind() ==
+                  ExactDirectFrozenUnifiedImmutablePlanAuthorityKind::
+                      normalized_direct_h0_candidate_source
+              ? VerifiedPlanAuthorityKind::
+                    immutable_verified_resident_normalized_direct_source
+              : VerifiedPlanAuthorityKind::
+                    immutable_verified_resident_successive_star,
           &audit,
           batch_index,
           facet_resolutions,
