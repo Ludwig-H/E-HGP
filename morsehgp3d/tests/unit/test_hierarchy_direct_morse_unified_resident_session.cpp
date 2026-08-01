@@ -9,6 +9,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 namespace {
@@ -22,8 +23,21 @@ using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
-static_assert(direct_morse_unified_resident_session_schema_version == 6U);
+static_assert(direct_morse_unified_resident_session_schema_version == 7U);
 static_assert(direct_frozen_unified_incidence_batch_schema_version == 3U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectNormalizedH0ResidentRetractionMode::
+            candidate_fail_open_without_h0_retraction_authority) == 1U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectNormalizedH0ResidentRetractionMode::
+            certified_rank_window_and_sparse_strict_facet_closure) == 2U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectNormalizedH0ResidentRetractionMode::
+            certified_horizontal_incidence_complete_rank_window_and_sparse_strict_facet_closure) ==
+    3U);
 static_assert(
     static_cast<std::uint8_t>(
         ExactDirectMorseUnifiedResidentInitializationDecision::
@@ -32,6 +46,18 @@ static_assert(
     static_cast<std::uint8_t>(
         ExactDirectMorseUnifiedResidentInitializationDecision::
             no_normalized_adapter_budget_rejected) == 6U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_strict_facet_closure_configuration_rejected) == 10U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_normalized_h0_incidence_reduction_authority_rejected) == 11U);
+static_assert(
+    !std::is_copy_constructible_v<ExactDirectMorseUnifiedResidentSession> &&
+    std::is_nothrow_move_constructible_v<
+        ExactDirectMorseUnifiedResidentSession>);
 static_assert(
     static_cast<std::uint8_t>(
         ExactDirectMorseUnifiedResidentPreparationDecision::
@@ -501,6 +527,38 @@ initialize_normalized_certified(
       session_budget);
 }
 
+[[nodiscard]] ExactDirectMorseUnifiedResidentInitializationResult
+initialize_normalized_incidence_complete(
+    const NormalizedContext& context,
+    const ExactDirectNormalizedH0IncidenceReductionAuthority&
+        incidence_authority,
+    std::uint64_t authority_id,
+    const ExactDirectMorseUnifiedResidentSessionBudget& session_budget =
+        generous_session_budget()) {
+  return initialize_exact_direct_normalized_h0_incidence_complete_resident_session(
+          context.index,
+          context.cloud,
+          context.source.facade,
+          context.source.event_journal,
+          context.source.arm_budget,
+          context.source.arm_journal,
+          context.source.incidence_budget,
+          context.source.incidence_journal,
+          context.gateway_budget,
+          LbvhTraversalOrder::near_first,
+          context.gateway,
+          context.plan_budget,
+          context.plan,
+          context.rank_authority,
+          incidence_authority,
+          generous_strict_facet_closure_budget(),
+          {},
+          LbvhTraversalOrder::near_first,
+          generous_normalized_adapter_budget(),
+          authority_id,
+          session_budget);
+}
+
 [[nodiscard]] bool two_point_key_is(
     const ExactDirectSparseFacetKey& key,
     PointId first,
@@ -889,8 +947,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
           ExactDirectMorseUnifiedResidentSession::public_status ==
               "not_claimed" &&
           ExactDirectMorseUnifiedResidentSession::deployment_status ==
-              "architecture_only_authentic_strict_miss_path_integration_qualified_not_source_complete_v6",
-      "the session advertises the authentic strict-miss path qualification without claiming source completeness");
+              "architecture_only_horizontal_incidence_complete_resident_integration_qualified_not_vertical_v7",
+      "the session advertises horizontal source-complete resident integration without claiming vertical completion");
 
   std::optional<ExactFrozenIncidencePriorRootId> residual_root;
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp stamp_after_17_2{};
@@ -1653,6 +1711,144 @@ void test_authentic_normalized_strict_miss_atomic_commit() {
       "the authentic two-seed batch rejects at seed cap one without mutating locator or resident state");
 }
 
+void test_incidence_complete_normalized_resident_initializer() {
+  const std::array<CertifiedPoint3, 5U> points{
+      point(-2.0, -1.0),
+      point(-2.0, 1.0),
+      point(0.0, 0.0),
+      point(3.0, 2.0),
+      point(4.0, -1.0),
+  };
+  auto cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+  auto context = normalized_context(std::move(cloud));
+  const auto incidence_authority =
+      build_exact_direct_normalized_h0_incidence_reduction_authority(
+          context.index,
+          context.cloud,
+          context.source.facade,
+          context.source.event_journal,
+          context.source.arm_budget,
+          context.source.arm_journal,
+          context.source.incidence_budget,
+          context.source.incidence_journal,
+          context.gateway_budget,
+          LbvhTraversalOrder::near_first,
+          context.gateway,
+          context.plan_budget,
+          context.plan,
+          context.rank_authority);
+  const auto incidence_verification =
+      verify_exact_direct_normalized_h0_incidence_reduction_authority(
+          context.index,
+          context.cloud,
+          context.source.facade,
+          context.source.event_journal,
+          context.source.arm_budget,
+          context.source.arm_journal,
+          context.source.incidence_budget,
+          context.source.incidence_journal,
+          context.gateway_budget,
+          LbvhTraversalOrder::near_first,
+          context.gateway,
+          context.plan_budget,
+          context.plan,
+          context.rank_authority,
+          incidence_authority);
+  check(
+      incidence_authority.certified_horizontal_incidence_reduction() &&
+          incidence_verification.result_certified &&
+          incidence_authority.incidence_complete_reduction_proved &&
+          !incidence_authority.resident_fold_executed &&
+          !incidence_authority.vertical_maps_complete &&
+          !incidence_authority.public_status_claimed,
+      "the E5 source supplies a horizontal-only incidence-complete reduction authority");
+  if (!incidence_authority.certified_horizontal_incidence_reduction()) {
+    return;
+  }
+
+  auto forged = incidence_authority;
+  forged.resident_fold_executed = true;
+  const auto forged_rejected =
+      initialize_normalized_incidence_complete(context, forged, 7050U);
+  check(
+      !forged_rejected.session.has_value() &&
+          forged_rejected.source_plan_initial_verification_count == 0U &&
+          !forged_rejected
+               .normalized_h0_incidence_reduction_authority_freshly_verified &&
+          !forged_rejected
+               .normalized_h0_incidence_reduction_session_capability_issued &&
+          !forged_rejected.incidence_complete_reduction_proved &&
+          forged_rejected.decision ==
+              ExactDirectMorseUnifiedResidentInitializationDecision::
+                  no_normalized_h0_incidence_reduction_authority_rejected,
+      "a forged public incidence receipt is rejected recursively before any resident session becomes observable");
+
+  auto initialized = initialize_normalized_incidence_complete(
+      context, incidence_authority, 7051U);
+  if (!initialized.certified_initialized_session()) {
+    std::cerr << "incidence-complete init decision: "
+              << static_cast<int>(initialized.decision)
+              << ", session=" << initialized.session.has_value()
+              << ", fresh="
+              << initialized
+                     .normalized_h0_incidence_reduction_authority_freshly_verified
+              << ", capability="
+              << initialized
+                     .normalized_h0_incidence_reduction_session_capability_issued
+              << ", complete="
+              << initialized.incidence_complete_reduction_proved << '\n';
+  }
+  check(
+      initialized.certified_initialized_session() &&
+          initialized.session.has_value() &&
+          initialized.source_plan_initial_verification_count == 1U &&
+          initialized.normalized_h0_retraction_mode ==
+              ExactDirectNormalizedH0ResidentRetractionMode::
+                  certified_horizontal_incidence_complete_rank_window_and_sparse_strict_facet_closure &&
+          initialized.normalized_h0_retraction_authority_certified &&
+          initialized.rank_window_saturated_h0_authority_freshly_verified &&
+          initialized.strict_facet_closure_session_capability_issued &&
+          initialized
+              .normalized_h0_incidence_reduction_authority_freshly_verified &&
+          initialized
+              .normalized_h0_incidence_reduction_session_capability_issued &&
+          initialized.incidence_complete_reduction_proved &&
+          !initialized.global_regularity_authority_certified &&
+          !initialized.normalized_verticality_certified &&
+          !initialized.public_status_claimed,
+      "the third initializer seals the recursively verified horizontal source authority without promoting vertical or public claims");
+  if (!initialized.session.has_value()) {
+    return;
+  }
+
+  auto& session = *initialized.session;
+  check(
+      session.certified_resident_session() &&
+          session.normalized_direct_source_session() &&
+          session.normalized_horizontal_incidence_reduction_certified(),
+      "the horizontal incidence capability is process-private and bound to the live move-only resident session");
+  while (session.batch_cursor() < session.plan().batches.size()) {
+    auto prepared = session.prepare_next();
+    check(
+        prepared.certified_prepared_batch() && prepared.ticket.has_value() &&
+            prepared.ticket->authority_bundle()
+                .rank_window_saturated_h0_authority_certified,
+        "the source-complete mode retains the existing rank-window and strict-closure prepared-batch contract");
+    if (!prepared.ticket.has_value()) {
+      break;
+    }
+    check(
+        session.commit(std::move(*prepared.ticket))
+            .certified_committed_batch(),
+        "the source-complete horizontal receipt is followed by the unchanged atomic resident commit");
+  }
+  check(
+      session.source_cursor_exhausted() && session.complete() &&
+          session.normalized_horizontal_incidence_reduction_certified(),
+      "all normalized batches commit before the horizontally source-complete resident session reports completion");
+}
+
 void test_certified_normalized_terminal_order_rejected() {
   const std::array<CertifiedPoint3, 3U> points{
       point(0.0, 0.0),
@@ -1736,6 +1932,7 @@ int main() {
   test_normalized_source_resident_atomic_fold(context);
   test_certified_normalized_strict_carrier_fold();
   test_authentic_normalized_strict_miss_atomic_commit();
+  test_incidence_complete_normalized_resident_initializer();
   test_certified_normalized_terminal_order_rejected();
   if (failures != 0) {
     std::cerr << failures << " resident-session test(s) failed\n";

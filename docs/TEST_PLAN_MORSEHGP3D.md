@@ -1519,6 +1519,22 @@ Les tests vérifient les trois comptes de scratch : observations de passe un, so
 
 La source normalisée AC reste le contrôle où AC est déjà liée à son niveau égal. La branche authentique est couverte séparément par les six points binaires64 entiers $(1,6,-1)$, $(1,-3,-8)$, $(0,-5,6)$, $(1,-8,3)$, $(3,-7,-6)$ et $(-2,0,-8)$ à $K=2$. Le CTest doit exiger sur l'unique lot strict `normalized_strict_facet_seed_count=2`, `normalized_strict_facet_closure_build_count=1`, deux projections et deux résolutions carriers, l'attestation privée pré-lot, puis un commit atomique certifié avec exactement un appel locator. Une seconde session avec le cap de graines abaissé à un doit refuser ce lot sans ticket et sans mutation du curseur, de l'époque, du stamp locator, des composantes, des racines ou des groupes. Le statut qualifié est `architecture_only_authentic_strict_miss_path_integration_qualified_not_source_complete_v6`; il ne revendique aucune complétude globale ou produit de la source. Un build Release ciblé, ce CTest et la compilation du consumer suffisent; aucun sanitizer répété, CUDA ou GCP n'est demandé.
 
+### 14.14s Autorité compositionnelle d'incidences horizontales
+
+Le CTest `morsehgp3d.hierarchy_direct_normalized_h0_source_plan` doit construire `ExactDirectNormalizedH0IncidenceReductionAuthority` depuis le nuage, le LBVH, la façade terminale, tous les journaux source, le journal gateway, le plan normalisé et l'autorité de fenêtre issus des mêmes entrées. Le vérificateur doit rejouer récursivement le plan et la fenêtre, lier budgets, ordre de parcours, digests et identités scientifiques, puis exiger l'égalité complète du reçu reconstruit.
+
+Un succès exige toutes les naissances et cofaces directes d'ordre supérieur, toutes les facettes du cœur, toutes les familles de première incidence et tous leurs co-minimiseurs, les lots rationnels exacts et les cofaces factorisées reconstructibles. Il exige simultanément les shells pertinents réduits au support et l'inertie $H_0$ de chaque bloc saturé au-dessus de la fenêtre. `incidence_complete_reduction_proved` peut alors être vrai uniquement avec la portée `normalized_horizontal_h0_orders_two_through_effective_maximum`.
+
+Le test doit conserver faux régularité géométrique globale, fold résident, couture Borůvka, verticales complètes, toutes naturalités, identité v2, produit de campagne, structures globales, statut public et performance. Forger au moins un de ces claims, notamment `vertical_maps_complete=true`, doit faire échouer la certification récursive. Un seul build et CTest Release ciblés, le checker de statut, le checker documentaire et `git diff --check` suffisent; aucun sanitizer répété, CUDA, G4 ou benchmark n'est requis.
+
+### 14.14t Initialiseur résident horizontalement source-complet
+
+Le CTest résident doit exercer le troisième initialiseur v7 avec le reçu d'incidences construit sur les mêmes autorités E5. Les ordinaux historiques restent candidat `1` et rang--fermeture `2`; le nouveau mode est ajouté en `3`, et le rejet du reçu horizontal est ajouté après toutes les décisions v6. Le reçu public doit être reconstruit récursivement avant toute session. Une copie forgée avec `resident_fold_executed=true` doit échouer avant le rejeu résident, sans capability ni état observable.
+
+Après succès, la capability privée doit être non copiable, liée à l'adresse du plan immuable, à l'autorité de session, aux quatre digests source et aux comptes exacts de lots et de cofaces. Le test parcourt tous les lots E5 avec les transactions résidentes existantes, exige `source_plan_initial_verification_count=1`, la fin du curseur, `complete()=true` et `incidence_complete_reduction_proved=true`. Les anciens initialiseurs doivent garder leurs reçus et leurs comportements bit à bit, en particulier le fail-open candidat et le mode rang--fermeture sans claim de complétude horizontale.
+
+Le test conserve faux ordre un, régularité globale, verticalité, toutes naturalités, identité publique, reprise durable, performance et statut public. Les deux CTests source et résident, puis la compilation syntaxique stricte du consumer, suffisent; aucun sanitizer répété, CUDA, G4 ou benchmark n'est requis.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.
@@ -2389,6 +2405,19 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - reculer depuis la coupe terminale vers zéro et vérifier une décision non monotone avec stamps pré--post et état interne inchangés;
 - conserver faux tout claim de Gamma, Delaunay, carte verticale complète, vrai 50 k, scalabilité massive, Phase 16 ou statut public exact.
 
+### T15-K2-K1-RESIDENT-BRIDGE — couture conditionnelle scellée
+
+- vérifier que le digest canonique du nuage K1 égale celui du manifeste pair résident pour le même nuage; muter un point à cardinalité constante et exiger `no_cloud_or_point_namespace_mismatch` avant le move des deux sessions;
+- construire deux ponts frais sur le même nuage et vérifier des identifiants de pont et K1 distincts; remplacer le stamp K1 imbriqué par celui de l'autre session, altérer son instance, puis rendre l'ancien stamp périmé par un commit et exiger trois rejets live;
+- préparer un ticket composite, vérifier que son accessor const retourne le vrai bundle résident pré-lot, puis déplacer ce ticket vers un pont étranger; aucun curseur résident, stamp vertical ou record K2 ne doit changer dans le pont émetteur;
+- repréparer le même lot après cet abandon : l'avance K1 déjà effectuée reste un cache cible monotone, le retry doit être idempotent et le record committé doit compter le saut depuis le dernier stamp K1 publié, sans couture verticale intermédiaire;
+- attacher le pont à un résident déjà avancé de deux lots tandis que K1 reste au cut zéro, préparer le prochain lot K2 et exiger la consommation d'au moins deux niveaux d'égalité K1 exacts avant le commit résident;
+- pour chaque groupe K2, consommer exhaustivement les CSR des racines antérieures, les CSR des carriers latents et le delta exact, dédupliquer les `PointId`, interroger chaque singleton par la capability K1 live et exiger une racine fermée unique;
+- préparer deux tickets sur le même snapshot, committer le premier puis envoyer le second au même pont; le rejet résident périmé doit conserver exactement stamp, compteurs et transcript verticaux;
+- fixer `maximum_committed_k2_batch_count` au nombre exact de lots K2 puis à cette valeur moins un; la seconde initialisation doit refuser avant consommation des sessions;
+- faire transiter tout lot d'ordre différent de deux sans record ni compteur vertical K2 et sans l'annoncer comme carte verticale complète;
+- conserver faux `incidence_complete_reduction`, `vertical_maps_complete`, naturalité tous ordres, M.1, matrice de paires, Star, Gamma, Delaunay et statut public exact.
+
 ### T15-ATLEAST20-STREAM — vue aval exacte relative par lots complets
 
 - refuser un digest scientifique source nul, puis lier ce digest à chaque transcript, session, checkpoint et chaîne scientifique afin que deux nuages distincts partageant les mêmes `PointId` et identifiants de racines ne puissent pas collisionner;
@@ -2402,6 +2431,17 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - exporter, rehasher et restaurer un checkpoint avec une nouvelle autorité, poursuivre la chaîne sous cette autorité et vérifier que les digests scientifiques n'ont pas changé au restore;
 - compiler les deux types de session et de lot comme move-only et conserver faux `source_pruning_authority`, `source_hierarchy_authority`, `upstream_resident_adapter_certified`, `source_exactness_claimed`, `public_exactness_claimed` et `public_status_claimed`;
 - vérifier qu'aucune facette, coface, incidence, cellule, Gamma, mosaïque de Delaunay, copie de `coverage_log` ou arène de source exhaustive n'est possédée par ce noyau aval.
+
+### T15-RESIDENT-ATLEAST20 — transaction amont--vue non forgeable
+
+- construire l'adaptateur uniquement depuis une vraie session résidente à la genèse; un résident dont un lot est déjà committé doit être rejeté plutôt que recevoir un préfixe de vue inventé;
+- interdire statiquement à un transcript public de construire le ticket composite ou d'appeler les coutures privées de préparation et de commit de la vue;
+- dériver l'identité scientifique du type de source et des quatre digests du plan immuable, en excluant autorité et locator process-locaux;
+- projeter depuis le vrai bundle pré-lot les actions, `q_R`, racines antérieures et deltas; vérifier sur E5 les trois règles `q_R=0`, `q_R=1` et `q_R>=2`, puis parcourir douze lots et sept records;
+- finir toutes les allocations, réserves, transitions de taille et chaînes de digest avant le commit résident; après succès, comparer sans allocation chaque champ du suffixe réel puis publier la vue par la couture `noexcept`;
+- préparer deux tickets frères, committer le gagnant puis exiger que le rejet résident périmé du perdant ne modifie ni curseur, racine suivante, records, digest source ou digest vue;
+- fixer le cap de staging au besoin exact moins un et exiger le rejet pendant la préparation de vue, avant toute mutation résidente;
+- conserver faux source normalisée complète, verticalité, toutes naturalités, reprise composite durable, vrai 50 k, G4 et statut public exact.
 
 ### T15-TRUE-HGP-V3-RUNTIME — orchestration durable encore fermée
 

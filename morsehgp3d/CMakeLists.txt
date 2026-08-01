@@ -1786,6 +1786,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+  STATIC
+    src/cpu/hierarchy/direct_normalized_h0_incidence_reduction_authority.cpp
+)
+add_library(
+  morsehgp3d::direct_normalized_h0_incidence_reduction_authority
+  ALIAS morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+)
+set_target_properties(
+  morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+  PROPERTIES
+    EXPORT_NAME direct_normalized_h0_incidence_reduction_authority
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+  PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+  PUBLIC morsehgp3d::direct_normalized_h0_source_plan
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_normalized_vertical_square_receipt
   STATIC
     src/cpu/hierarchy/direct_normalized_vertical_square_receipt.cpp
@@ -2222,6 +2264,7 @@ target_link_libraries(
   morsehgp3d_direct_morse_unified_resident_session
   PUBLIC
     morsehgp3d::direct_frozen_unified_incidence_batch
+    morsehgp3d::direct_normalized_h0_incidence_reduction_authority
     morsehgp3d::direct_normalized_h0_source_plan
     morsehgp3d::direct_sparse_facet_descent_closure
     morsehgp3d::direct_sparse_positive_facet_locator
@@ -2235,6 +2278,48 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_morse_unified_resident_session
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_resident_at_least20_adapter
+  STATIC
+    src/cpu/hierarchy/direct_morse_resident_at_least20_adapter.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_resident_at_least20_adapter
+  ALIAS morsehgp3d_direct_morse_resident_at_least20_adapter
+)
+set_target_properties(
+  morsehgp3d_direct_morse_resident_at_least20_adapter
+  PROPERTIES
+    EXPORT_NAME direct_morse_resident_at_least20_adapter
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_resident_at_least20_adapter PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_resident_at_least20_adapter
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_resident_at_least20_adapter
+  PUBLIC
+    morsehgp3d::direct_at_least20_stream_view
+    morsehgp3d::direct_morse_unified_resident_session
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_at_least20_adapter PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_at_least20_adapter
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -3432,6 +3517,48 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_k1_boruvka_closed_cut_session
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
+  STATIC
+    src/cpu/hierarchy/direct_morse_resident_k2_k1_closed_cut_bridge.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_resident_k2_k1_closed_cut_bridge
+  ALIAS morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
+)
+set_target_properties(
+  morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
+  PROPERTIES
+    EXPORT_NAME direct_morse_resident_k2_k1_closed_cut_bridge
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
+  PUBLIC
+    morsehgp3d::direct_k1_boruvka_closed_cut_session
+    morsehgp3d::direct_morse_unified_resident_session
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -5878,6 +6005,7 @@ install(
     morsehgp3d_direct_sparse_facet_descent_closure
     morsehgp3d_direct_sparse_first_incidence
     morsehgp3d_direct_normalized_h0_source_plan
+    morsehgp3d_direct_normalized_h0_incidence_reduction_authority
     morsehgp3d_direct_normalized_vertical_square_receipt
     morsehgp3d_direct_sparse_successive_incidence
     morsehgp3d_direct_sparse_successive_incidence_star_journal
@@ -5894,6 +6022,7 @@ install(
     morsehgp3d_direct_frozen_incidence_hgp_action_plan
     morsehgp3d_direct_frozen_unified_incidence_batch
     morsehgp3d_direct_morse_unified_resident_session
+    morsehgp3d_direct_morse_resident_at_least20_adapter
     morsehgp3d_normalized_exact_hartigan_level_manifest
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
@@ -5920,6 +6049,7 @@ install(
     morsehgp3d_yao48_geometry
     morsehgp3d_hierarchy
     morsehgp3d_direct_k1_boruvka_closed_cut_session
+    morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
     morsehgp3d_yao48_ranked_pair_candidates_reference
     morsehgp3d_exact_ranked_diametral_pair_catalog_reference
     morsehgp3d_sanitizers

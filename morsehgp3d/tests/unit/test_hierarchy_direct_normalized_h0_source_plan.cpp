@@ -1,3 +1,4 @@
+#include "morsehgp3d/hierarchy/direct_normalized_h0_incidence_reduction_authority.hpp"
 #include "morsehgp3d/hierarchy/direct_normalized_h0_source_plan.hpp"
 
 #include <algorithm>
@@ -589,12 +590,103 @@ void test_rank_window_saturated_h0_authority() {
       "the relative verifier rejects promotion of H0 quiescence to geometric global regularity");
 }
 
+void test_incidence_reduction_authority_is_fresh_and_horizontal_only() {
+  const std::array<CertifiedPoint3, 5U> points{
+      point(-2.0, -1.0),
+      point(-2.0, 1.0),
+      point(0.0, 0.0),
+      point(3.0, 2.0),
+      point(4.0, -1.0),
+  };
+  const CanonicalPointCloud cloud = canonical_cloud(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const DirectSources direct = direct_sources(cloud, 2U);
+  const auto integrated = build_and_verify(
+      index, cloud, direct, LbvhTraversalOrder::near_first);
+  const auto rank_window =
+      build_exact_direct_rank_window_saturated_h0_authority(direct.facade);
+  const auto authority =
+      build_exact_direct_normalized_h0_incidence_reduction_authority(
+          index,
+          cloud,
+          direct.facade,
+          direct.event_journal,
+          direct.arm_budget,
+          direct.arm_journal,
+          direct.incidence_budget,
+          direct.incidence_journal,
+          integrated.gateway_budget,
+          LbvhTraversalOrder::near_first,
+          integrated.gateway,
+          integrated.plan_budget,
+          integrated.plan,
+          rank_window);
+  const auto verification =
+      verify_exact_direct_normalized_h0_incidence_reduction_authority(
+          index,
+          cloud,
+          direct.facade,
+          direct.event_journal,
+          direct.arm_budget,
+          direct.arm_journal,
+          direct.incidence_budget,
+          direct.incidence_journal,
+          integrated.gateway_budget,
+          LbvhTraversalOrder::near_first,
+          integrated.gateway,
+          integrated.plan_budget,
+          integrated.plan,
+          rank_window,
+          authority);
+  check(
+      authority.certified_horizontal_incidence_reduction() &&
+          verification.result_certified &&
+          authority.incidence_complete_reduction_proved &&
+          authority.rank_relevant_corollary_4_1_certified &&
+          authority.above_window_theorem_4_2_certified &&
+          !authority.geometric_global_regularity_claimed &&
+          !authority.resident_fold_executed &&
+          !authority.order_one_boruvka_seam_certified &&
+          !authority.vertical_maps_complete &&
+          !authority.all_naturality_squares_replayed &&
+          !authority.campaign_product_claimed &&
+          !authority.public_status_claimed,
+      "fresh source and rank-window replay certify only the normalized horizontal incidence reduction");
+
+  auto forged = authority;
+  forged.vertical_maps_complete = true;
+  const auto forged_verification =
+      verify_exact_direct_normalized_h0_incidence_reduction_authority(
+          index,
+          cloud,
+          direct.facade,
+          direct.event_journal,
+          direct.arm_budget,
+          direct.arm_journal,
+          direct.incidence_budget,
+          direct.incidence_journal,
+          integrated.gateway_budget,
+          LbvhTraversalOrder::near_first,
+          integrated.gateway,
+          integrated.plan_budget,
+          integrated.plan,
+          rank_window,
+          forged);
+  check(
+      !forged.certified_horizontal_incidence_reduction() &&
+          !forged_verification.observed_recursively_equal &&
+          !forged_verification.unsupported_claims_remain_false &&
+          !forged_verification.result_certified,
+      "a caller cannot promote the horizontal authority into a vertical or product certificate");
+}
+
 }  // namespace
 
 int main() {
   test_e5_complete_compressed_source_and_explicit_blocker();
   test_budget_failure_is_atomic_and_mutation_fails_replay();
   test_rank_window_saturated_h0_authority();
+  test_incidence_reduction_authority_is_fresh_and_horizontal_only();
   if (failures != 0) {
     std::cerr << failures
               << " direct normalized-H0 source-plan test(s) failed\n";

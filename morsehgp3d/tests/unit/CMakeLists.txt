@@ -1355,7 +1355,8 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
-  PRIVATE morsehgp3d::direct_normalized_h0_source_plan
+  PRIVATE
+    morsehgp3d::direct_normalized_h0_incidence_reduction_authority
 )
 if(MSVC)
   target_compile_options(
@@ -1628,6 +1629,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_resident_at_least20_adapter_tests
+  test_hierarchy_direct_morse_resident_at_least20_adapter.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_resident_at_least20_adapter_tests
+  PRIVATE morsehgp3d::direct_morse_resident_at_least20_adapter
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_resident_at_least20_adapter_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_resident_at_least20_adapter_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_normalized_exact_hartigan_level_manifest_tests
   test_hierarchy_normalized_exact_hartigan_level_manifest.cpp
 )
@@ -1663,6 +1684,26 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_k1_boruvka_closed_cut_session_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
+  test_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
+  PRIVATE morsehgp3d::direct_morse_resident_k2_k1_closed_cut_bridge
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -3245,8 +3286,10 @@ set(
   morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
   morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
   morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
+  morsehgp3d_hierarchy_direct_morse_resident_at_least20_adapter_tests
   morsehgp3d_hierarchy_normalized_exact_hartigan_level_manifest_tests
   morsehgp3d_hierarchy_direct_k1_boruvka_closed_cut_session_tests
+  morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
@@ -4349,12 +4392,20 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_morse_unified_resident_session_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_resident_at_least20_adapter
+  COMMAND morsehgp3d_hierarchy_direct_morse_resident_at_least20_adapter_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_normalized_exact_hartigan_level_manifest
   COMMAND morsehgp3d_hierarchy_normalized_exact_hartigan_level_manifest_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_k1_boruvka_closed_cut_session
   COMMAND morsehgp3d_hierarchy_direct_k1_boruvka_closed_cut_session_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge
+  COMMAND morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_relative_morse_boruvka

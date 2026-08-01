@@ -200,7 +200,7 @@ int main() {
   }
   static_assert(
       morsehgp3d::hierarchy::
-          direct_morse_unified_resident_session_schema_version == 5U);
+          direct_morse_unified_resident_session_schema_version == 7U);
   using UnifiedResidentSession = morsehgp3d::hierarchy::
       ExactDirectMorseUnifiedResidentSession;
   static_assert(!std::is_copy_constructible_v<UnifiedResidentSession>);
@@ -211,6 +211,8 @@ int main() {
           installed_unified_resident_initialization_probe;
   if (installed_unified_resident_session_probe.certified_resident_session() ||
       installed_unified_resident_session_probe.complete() ||
+      installed_unified_resident_session_probe
+          .normalized_horizontal_incidence_reduction_certified() ||
       installed_unified_resident_initialization_probe
           .certified_initialized_session()) {
     std::cerr

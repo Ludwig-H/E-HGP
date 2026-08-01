@@ -14,6 +14,9 @@
 
 namespace morsehgp3d::hierarchy {
 
+class ExactDirectMorseResidentAtLeast20Adapter;
+class ExactDirectMorseNormalizedH0ProductSession;
+
 inline constexpr std::uint32_t
     direct_at_least20_stream_view_schema_version = 1U;
 inline constexpr std::size_t direct_at_least20_stream_view_threshold = 20U;
@@ -49,12 +52,12 @@ enum class ExactDirectAtLeast20VisibleTransitionKind : std::uint8_t {
   multifusion,
 };
 
-// This is the explicit adapter boundary.  The downstream kernel freshly
-// canonicalizes and shape-checks it, but cannot prove that an upstream
-// resident source actually committed it.  A future resident adapter must
-// construct this transcript from one non-forgeable post-commit capability.
-// Until then, exactness is deliberately relative to the stated committed
-// source premise and never promotes a source or public hierarchy status.
+// This is the explicit public/standalone boundary.  The downstream kernel
+// freshly canonicalizes and shape-checks it, but cannot prove that an upstream
+// resident source actually committed it.  The integrated resident adapter and
+// future product coordinator bypass this public seam through private move-only
+// prepare/commit capabilities.  Public-input exactness therefore remains
+// relative and never promotes a source or public hierarchy status.
 struct ExactDirectAtLeast20CommittedGroupInput {
   std::size_t source_group_index{};
   ExactDirectAtLeast20SourceAction source_action{
@@ -342,6 +345,48 @@ struct ExactDirectAtLeast20CheckpointBuildResult {
 };
 
 struct ExactDirectAtLeast20StreamViewSessionInitializationResult;
+struct ExactDirectAtLeast20StreamViewPreparationResult;
+
+// This ticket is issued only by a view session after every validation,
+// capacity reservation, visible-transition allocation and digest computation
+// has completed.  Callers can move or destroy it but cannot construct one or
+// ask the view to commit it.  The resident adapter and the future normalized
+// product coordinator are the only cross-component friends; neither can mint
+// it from a public committed-batch transcript.
+class ExactDirectAtLeast20StreamViewPreparedBatch {
+ public:
+  ExactDirectAtLeast20StreamViewPreparedBatch() noexcept;
+  ~ExactDirectAtLeast20StreamViewPreparedBatch();
+  ExactDirectAtLeast20StreamViewPreparedBatch(
+      ExactDirectAtLeast20StreamViewPreparedBatch&&) noexcept;
+  ExactDirectAtLeast20StreamViewPreparedBatch& operator=(
+      ExactDirectAtLeast20StreamViewPreparedBatch&&) noexcept;
+  ExactDirectAtLeast20StreamViewPreparedBatch(
+      const ExactDirectAtLeast20StreamViewPreparedBatch&) = delete;
+  ExactDirectAtLeast20StreamViewPreparedBatch& operator=(
+      const ExactDirectAtLeast20StreamViewPreparedBatch&) = delete;
+
+  [[nodiscard]] bool valid() const noexcept;
+  [[nodiscard]] bool consumed() const noexcept;
+
+ private:
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+
+  explicit ExactDirectAtLeast20StreamViewPreparedBatch(
+      std::unique_ptr<Impl>) noexcept;
+  friend class ExactDirectAtLeast20StreamViewSession;
+};
+
+struct ExactDirectAtLeast20StreamViewPreparationResult {
+  std::optional<ExactDirectAtLeast20StreamViewPreparedBatch> ticket;
+  ExactDirectAtLeast20StreamConsumeResult result{};
+  bool no_scientific_state_mutated{false};
+  bool all_allocations_and_digests_completed{false};
+  bool resident_commit_capability_bound{false};
+
+  [[nodiscard]] bool certified_prepared_batch() const noexcept;
+};
 
 // The session owns only the downstream cap-20 summaries, root tombstones,
 // exact per-order level cursors and digest chain.  It never owns or filters a
@@ -401,6 +446,18 @@ class ExactDirectAtLeast20StreamViewSession {
 
   explicit ExactDirectAtLeast20StreamViewSession(
       std::unique_ptr<Impl>) noexcept;
+
+  [[nodiscard]] ExactDirectAtLeast20StreamViewPreparationResult
+  prepare_relative_batch(
+      ExactDirectAtLeast20CommittedBatch&& batch) noexcept;
+  [[nodiscard]] ExactDirectAtLeast20StreamViewPreparationResult
+  prepare_resident_batch(
+      ExactDirectAtLeast20CommittedBatchInput&& input) noexcept;
+  [[nodiscard]] ExactDirectAtLeast20StreamConsumeResult
+  commit_prepared_batch(
+      ExactDirectAtLeast20StreamViewPreparedBatch&& ticket,
+      bool resident_commit_succeeded) noexcept;
+
   friend ExactDirectAtLeast20StreamViewSessionInitializationResult
   initialize_exact_direct_at_least20_stream_view_session(
       std::uint64_t,
@@ -414,6 +471,11 @@ class ExactDirectAtLeast20StreamViewSession {
       ExactDirectAtLeast20StreamViewCheckpoint&&,
       std::uint64_t,
       const ExactDirectAtLeast20StreamViewBudget&);
+  friend class ExactDirectMorseResidentAtLeast20Adapter;
+  // Reserved for the single owner that will compose resident horizontal,
+  // K2->K1 vertical and downstream view commits without duplicating the
+  // resident session.  This friendship exposes no implementation today.
+  friend class ExactDirectMorseNormalizedH0ProductSession;
 };
 
 enum class ExactDirectAtLeast20SessionInitializationDecision

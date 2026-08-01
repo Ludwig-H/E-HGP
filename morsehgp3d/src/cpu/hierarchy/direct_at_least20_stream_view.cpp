@@ -263,6 +263,20 @@ struct OrderCursorState {
   exact::ExactLevel last_squared_level{};
 };
 
+static_assert(
+    std::is_nothrow_move_constructible_v<CappedDistinctPointCoverage> &&
+    std::is_nothrow_move_assignable_v<CappedDistinctPointCoverage> &&
+    std::is_nothrow_move_constructible_v<RootState> &&
+    std::is_nothrow_move_assignable_v<RootState> &&
+    std::is_nothrow_move_constructible_v<RootLookupEntry> &&
+    std::is_nothrow_move_assignable_v<RootLookupEntry> &&
+    std::is_nothrow_move_constructible_v<OrderCursorState> &&
+    std::is_nothrow_move_assignable_v<OrderCursorState>);
+
+// Identity-only process capability.  Its address, not any public scalar, binds
+// a prepared view batch to the exact session that reserved its commit suffix.
+struct ViewSessionSeal final {};
+
 struct StagedGroup {
   StagedGroup(
       const ExactDirectAtLeast20CommittedGroupInput* source_value,
@@ -525,6 +539,26 @@ struct ExactDirectAtLeast20CommittedBatch::Impl {
   bool consumed{false};
 };
 
+struct ExactDirectAtLeast20StreamViewPreparedBatch::Impl {
+  std::shared_ptr<const ViewSessionSeal> seal;
+  ExactDirectAtLeast20CommittedBatch batch;
+  std::vector<StagedGroup> staged_groups;
+  exact::ExactLevel committed_level{};
+  contract::CanonicalId expected_source_commit_digest{};
+  contract::CanonicalId expected_view_digest{};
+  contract::CanonicalId committed_view_digest{};
+  std::size_t expected_source_batch_cursor{};
+  std::size_t expected_source_epoch{};
+  std::size_t target_root_state_count{};
+  std::size_t target_order_cursor_count{};
+  std::size_t target_active_root_count{};
+  std::size_t target_retained_point_count{};
+  ExactDirectAtLeast20StreamConsumeResult result{};
+  bool resident_commit_capability_bound{false};
+  bool prepared{false};
+  bool consumed{false};
+};
+
 struct ExactDirectAtLeast20StreamViewSession::Impl {
   Impl(
       std::uint64_t authority_id,
@@ -540,7 +574,8 @@ struct ExactDirectAtLeast20StreamViewSession::Impl {
         source_scientific_digest(std::move(scientific_digest)),
         source_commit_digest(std::move(source_digest)),
         view_digest(std::move(view_digest_value)),
-        budget(std::move(budget_value)) {}
+        budget(std::move(budget_value)),
+        seal(std::make_shared<const ViewSessionSeal>()) {}
 
   std::uint64_t source_session_authority_id{};
   std::size_t next_source_batch_cursor{};
@@ -549,6 +584,7 @@ struct ExactDirectAtLeast20StreamViewSession::Impl {
   contract::CanonicalId source_commit_digest{};
   contract::CanonicalId view_digest{};
   ExactDirectAtLeast20StreamViewBudget budget{};
+  std::shared_ptr<const ViewSessionSeal> seal;
   std::vector<RootState> roots;
   std::vector<RootLookupEntry> root_lookup;
   std::vector<OrderCursorState> order_cursors;
@@ -568,6 +604,29 @@ ExactDirectAtLeast20CommittedBatch::operator=(
 ExactDirectAtLeast20CommittedBatch::ExactDirectAtLeast20CommittedBatch(
     std::unique_ptr<Impl> impl) noexcept
     : impl_(std::move(impl)) {}
+
+ExactDirectAtLeast20StreamViewPreparedBatch::
+    ExactDirectAtLeast20StreamViewPreparedBatch() noexcept = default;
+ExactDirectAtLeast20StreamViewPreparedBatch::
+    ~ExactDirectAtLeast20StreamViewPreparedBatch() = default;
+ExactDirectAtLeast20StreamViewPreparedBatch::
+    ExactDirectAtLeast20StreamViewPreparedBatch(
+        ExactDirectAtLeast20StreamViewPreparedBatch&&) noexcept = default;
+ExactDirectAtLeast20StreamViewPreparedBatch&
+ExactDirectAtLeast20StreamViewPreparedBatch::operator=(
+    ExactDirectAtLeast20StreamViewPreparedBatch&&) noexcept = default;
+ExactDirectAtLeast20StreamViewPreparedBatch::
+    ExactDirectAtLeast20StreamViewPreparedBatch(
+        std::unique_ptr<Impl> impl) noexcept
+    : impl_(std::move(impl)) {}
+
+bool ExactDirectAtLeast20StreamViewPreparedBatch::valid() const noexcept {
+  return impl_ != nullptr && impl_->prepared && !impl_->consumed;
+}
+
+bool ExactDirectAtLeast20StreamViewPreparedBatch::consumed() const noexcept {
+  return impl_ == nullptr || impl_->consumed;
+}
 
 bool ExactDirectAtLeast20CommittedBatch::valid_relative_transcript()
     const noexcept {
@@ -870,7 +929,6 @@ bool ExactDirectAtLeast20StreamConsumeResult::
       !complete_equal_level_batch_observed_before_visibility ||
       !hidden_roots_retained_in_source_fold || source_pruning_performed ||
       scientific_state_mutated_on_failure ||
-      upstream_source_commit_capability_verified ||
       source_exactness_claimed || public_status_claimed ||
       !exact_relative_downstream_fold_certified ||
       counters.processed_group_count !=
@@ -892,6 +950,19 @@ bool ExactDirectAtLeast20StreamConsumeResult::
     }
   }
   return true;
+}
+
+bool ExactDirectAtLeast20StreamViewPreparationResult::
+    certified_prepared_batch() const noexcept {
+  return ticket.has_value() && ticket->valid() &&
+      result.decision ==
+          ExactDirectAtLeast20StreamConsumeDecision::not_consumed &&
+      !result.scientific_state_mutated_on_failure &&
+      no_scientific_state_mutated &&
+      all_allocations_and_digests_completed &&
+      result.upstream_source_commit_capability_verified ==
+          resident_commit_capability_bound &&
+      !result.source_exactness_claimed && !result.public_status_claimed;
 }
 
 ExactDirectAtLeast20StreamViewSession::
@@ -965,249 +1036,234 @@ ExactDirectAtLeast20StreamViewSession::view_digest() const noexcept {
   return impl_ == nullptr ? empty_digest : impl_->view_digest;
 }
 
-ExactDirectAtLeast20StreamConsumeResult
-ExactDirectAtLeast20StreamViewSession::consume(
+ExactDirectAtLeast20StreamViewPreparationResult
+ExactDirectAtLeast20StreamViewSession::prepare_relative_batch(
     ExactDirectAtLeast20CommittedBatch&& batch) noexcept {
+  ExactDirectAtLeast20StreamViewPreparationResult output;
   ExactDirectAtLeast20StreamConsumeResult result;
   result.source_pruning_performed = false;
   result.scientific_state_mutated_on_failure = false;
+  const auto reject = [&](ExactDirectAtLeast20StreamConsumeDecision decision) {
+    result.visible_transitions.clear();
+    result.decision = decision;
+    output.result = std::move(result);
+    output.no_scientific_state_mutated = true;
+    return std::move(output);
+  };
+
   if (impl_ == nullptr) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_session_not_initialized;
-    return result;
+    return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                      no_session_not_initialized);
   }
   result.view_digest_before = impl_->view_digest;
   if (!batch.valid_relative_transcript()) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_batch_not_sealed_or_already_consumed;
-    return result;
+    return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                      no_batch_not_sealed_or_already_consumed);
   }
-  ExactDirectAtLeast20CommittedBatch::Impl& source = *batch.impl_;
-  const ExactDirectAtLeast20CommittedBatchInput& input = source.input;
-  result.source_batch_cursor_before = input.source_batch_cursor_before;
-  result.source_batch_cursor_after = input.source_batch_cursor_after;
-  result.source_epoch_before = input.source_epoch_before;
-  result.source_epoch_after = input.source_epoch_after;
-  result.order = input.order;
-  result.source_commit_digest = source.source_commit_digest;
-  result.counters.processed_group_count = input.groups.size();
-  result.counters.processed_prior_root_reference_count =
-      source.counters.prior_root_reference_count;
-  result.counters.processed_coverage_delta_point_reference_count =
-      source.counters.deduplicated_coverage_delta_point_reference_count;
-  result.counters.active_root_count_before = impl_->active_root_count;
-  result.counters.retained_point_reference_count_before =
-      impl_->retained_point_reference_count;
 
-  // ExactLevel owns multiprecision integers.  Even this diagnostic copy may
-  // allocate, so keep it in the prepare region covered by a failure result.
   try {
+    auto prepared =
+        std::make_unique<ExactDirectAtLeast20StreamViewPreparedBatch::Impl>();
+    prepared->seal = impl_->seal;
+    ExactDirectAtLeast20CommittedBatch::Impl& source =
+        *batch.impl_;
+    const ExactDirectAtLeast20CommittedBatchInput& input = source.input;
+    result.source_batch_cursor_before = input.source_batch_cursor_before;
+    result.source_batch_cursor_after = input.source_batch_cursor_after;
+    result.source_epoch_before = input.source_epoch_before;
+    result.source_epoch_after = input.source_epoch_after;
+    result.order = input.order;
     result.squared_level = input.squared_level;
-  } catch (const std::exception&) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_allocation_failed;
-    return result;
-  }
+    result.source_commit_digest = source.source_commit_digest;
+    result.counters.processed_group_count = input.groups.size();
+    result.counters.processed_prior_root_reference_count =
+        source.counters.prior_root_reference_count;
+    result.counters.processed_coverage_delta_point_reference_count =
+        source.counters.deduplicated_coverage_delta_point_reference_count;
+    result.counters.active_root_count_before = impl_->active_root_count;
+    result.counters.retained_point_reference_count_before =
+        impl_->retained_point_reference_count;
 
-  if (input.source_session_authority_id !=
-      impl_->source_session_authority_id) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_foreign_source_session_rejected;
-    return result;
-  }
-  if (input.source_scientific_digest !=
-      impl_->source_scientific_digest) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_foreign_source_science_rejected;
-    return result;
-  }
-  if (input.source_batch_cursor_before != impl_->next_source_batch_cursor ||
-      input.source_epoch_before != impl_->source_epoch ||
-      input.previous_source_commit_digest != impl_->source_commit_digest) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_stale_source_stamp_rejected;
-    return result;
-  }
-  try {
+    if (input.source_session_authority_id !=
+        impl_->source_session_authority_id) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_foreign_source_session_rejected);
+    }
+    if (input.source_scientific_digest !=
+        impl_->source_scientific_digest) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_foreign_source_science_rejected);
+    }
+    if (input.source_batch_cursor_before !=
+            impl_->next_source_batch_cursor ||
+        input.source_epoch_before != impl_->source_epoch ||
+        input.previous_source_commit_digest != impl_->source_commit_digest) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_stale_source_stamp_rejected);
+    }
     for (const OrderCursorState& cursor : impl_->order_cursors) {
       if (!batch_key_less(
               cursor.last_squared_level,
               cursor.order,
               input.squared_level,
               input.order)) {
-        result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-            no_nonincreasing_order_level_rejected;
-        return result;
+        return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                          no_nonincreasing_order_level_rejected);
       }
     }
-  } catch (const std::exception&) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_allocation_failed;
-    return result;
-  }
-  const auto existing_order_cursor =
-      find_order_cursor(impl_->order_cursors, input.order);
+    const auto existing_order_cursor =
+        find_order_cursor(impl_->order_cursors, input.order);
 
-  std::size_t retired_root_count = 0U;
-  std::size_t retired_retained_count = 0U;
-  std::size_t new_root_state_count = 0U;
-  std::size_t staged_retained_count = 0U;
-  std::size_t visible_transition_count = 0U;
-  std::size_t visible_child_reference_count = 0U;
-  for (const ExactDirectAtLeast20CommittedGroupInput& group : input.groups) {
-    StackCappedCoverage staged_coverage;
-    for (const ExactDirectAtLeast20RootId child_root_id :
-         group.prior_root_ids) {
-      const auto lookup = find_root_lookup(
-          impl_->root_lookup, RootKey{input.order, child_root_id});
-      if (lookup == impl_->root_lookup.end() ||
-          !impl_->roots[lookup->root_state_index].active) {
-        result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-            no_unknown_or_inactive_prior_root_rejected;
-        return result;
+    std::size_t retired_root_count = 0U;
+    std::size_t retired_retained_count = 0U;
+    std::size_t new_root_state_count = 0U;
+    std::size_t staged_retained_count = 0U;
+    std::size_t visible_transition_count = 0U;
+    std::size_t visible_child_reference_count = 0U;
+    for (const ExactDirectAtLeast20CommittedGroupInput& group : input.groups) {
+      StackCappedCoverage staged_coverage;
+      for (const ExactDirectAtLeast20RootId child_root_id :
+           group.prior_root_ids) {
+        const auto lookup = find_root_lookup(
+            impl_->root_lookup, RootKey{input.order, child_root_id});
+        if (lookup == impl_->root_lookup.end() ||
+            !impl_->roots[lookup->root_state_index].active) {
+          return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                            no_unknown_or_inactive_prior_root_rejected);
+        }
+        const RootState& child = impl_->roots[lookup->root_state_index];
+        staged_coverage.merge(child.coverage.smallest_distinct_point_ids());
+        if (!checked_add(retired_root_count, 1U, retired_root_count) ||
+            !checked_add(
+                retired_retained_count,
+                child.coverage.retained_distinct_count(),
+                retired_retained_count)) {
+          return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                            no_batch_partition_rejected);
+        }
+        if (child.coverage.coverage_size_at_least_threshold()) {
+          ++visible_child_reference_count;
+        }
       }
-      const RootState& child = impl_->roots[lookup->root_state_index];
-      staged_coverage.merge(child.coverage.smallest_distinct_point_ids());
-      if (!checked_add(retired_root_count, 1U, retired_root_count) ||
-          !checked_add(
-              retired_retained_count,
-              child.coverage.retained_distinct_count(),
-              retired_retained_count)) {
-        result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-            no_batch_partition_rejected;
-        return result;
+      const std::size_t delta_cap = std::min(
+          direct_at_least20_stream_view_threshold,
+          group.coverage_delta_point_ids.size());
+      staged_coverage.merge(std::span<const spatial::PointId>{
+          group.coverage_delta_point_ids.data(), delta_cap});
+      if (!checked_add(
+              staged_retained_count,
+              staged_coverage.size,
+              staged_retained_count)) {
+        return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                          no_staging_budget_exhausted);
       }
-      if (child.coverage.coverage_size_at_least_threshold()) {
-        ++visible_child_reference_count;
+      if (staged_coverage.visible()) {
+        ++visible_transition_count;
+      }
+
+      const RootKey result_key{input.order, group.resultant_root_id};
+      const auto result_lookup =
+          find_root_lookup(impl_->root_lookup, result_key);
+      const bool reuses_own_continuation_root =
+          group.source_action ==
+              ExactDirectAtLeast20SourceAction::continuation &&
+          group.prior_root_ids.front() == group.resultant_root_id;
+      if (result_lookup != impl_->root_lookup.end()) {
+        if (!reuses_own_continuation_root ||
+            result_lookup->root_state_index >= impl_->roots.size() ||
+            !impl_->roots[result_lookup->root_state_index].active) {
+          return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                            no_resultant_root_collision_rejected);
+        }
+      } else {
+        ++new_root_state_count;
       }
     }
-    const std::size_t delta_cap = std::min(
-        direct_at_least20_stream_view_threshold,
-        group.coverage_delta_point_ids.size());
-    staged_coverage.merge(std::span<const spatial::PointId>{
-        group.coverage_delta_point_ids.data(), delta_cap});
+
+    std::size_t target_root_state_count = 0U;
+    std::size_t target_active_root_count = 0U;
+    std::size_t target_retained_point_count = 0U;
     if (!checked_add(
+            impl_->roots.size(),
+            new_root_state_count,
+            target_root_state_count) ||
+        !checked_sub_add(
+            impl_->active_root_count,
+            retired_root_count,
+            input.groups.size(),
+            target_active_root_count) ||
+        !checked_sub_add(
+            impl_->retained_point_reference_count,
+            retired_retained_count,
             staged_retained_count,
-            staged_coverage.size,
-            staged_retained_count)) {
-      result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-          no_staging_budget_exhausted;
-      return result;
+            target_retained_point_count)) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_batch_partition_rejected);
     }
-    if (staged_coverage.visible()) {
-      ++visible_transition_count;
+    result.counters.active_root_count_after = target_active_root_count;
+    result.counters.retained_point_reference_count_after =
+        target_retained_point_count;
+    if (target_root_state_count > impl_->budget.maximum_root_state_count) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_root_state_budget_exhausted);
+    }
+    if (target_active_root_count >
+        impl_->budget.maximum_active_root_count) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_active_root_budget_exhausted);
+    }
+    if (target_retained_point_count >
+        impl_->budget.maximum_retained_point_reference_count) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_retained_point_budget_exhausted);
+    }
+    if (visible_transition_count >
+        impl_->budget.maximum_batch_visible_transition_count) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_visible_transition_budget_exhausted);
+    }
+    if (visible_child_reference_count >
+        impl_->budget.maximum_batch_visible_child_reference_count) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_visible_child_reference_budget_exhausted);
     }
 
-    const RootKey result_key{input.order, group.resultant_root_id};
-    const auto result_lookup = find_root_lookup(impl_->root_lookup, result_key);
-    const bool reuses_own_continuation_root =
-        group.source_action ==
-            ExactDirectAtLeast20SourceAction::continuation &&
-        group.prior_root_ids.front() == group.resultant_root_id;
-    if (result_lookup != impl_->root_lookup.end()) {
-      if (!reuses_own_continuation_root ||
-          result_lookup->root_state_index >= impl_->roots.size() ||
-          !impl_->roots[result_lookup->root_state_index].active) {
-        result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-            no_resultant_root_collision_rejected;
-        return result;
-      }
-    } else {
-      ++new_root_state_count;
+    std::size_t required_staging_entry_count = input.groups.size();
+    if (!checked_add(
+            required_staging_entry_count,
+            source.counters.prior_root_reference_count,
+            required_staging_entry_count) ||
+        !checked_add(
+            required_staging_entry_count,
+            staged_retained_count,
+            required_staging_entry_count) ||
+        !checked_add(
+            required_staging_entry_count,
+            visible_transition_count,
+            required_staging_entry_count) ||
+        !checked_add(
+            required_staging_entry_count,
+            visible_child_reference_count,
+            required_staging_entry_count) ||
+        required_staging_entry_count >
+            impl_->budget.maximum_staging_entry_count) {
+      return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                        no_staging_budget_exhausted);
     }
-  }
+    result.counters.required_staging_entry_count =
+        required_staging_entry_count;
 
-  std::size_t target_root_state_count = 0U;
-  std::size_t target_active_root_count = 0U;
-  std::size_t target_retained_point_count = 0U;
-  if (!checked_add(
-          impl_->roots.size(),
-          new_root_state_count,
-          target_root_state_count) ||
-      !checked_sub_add(
-          impl_->active_root_count,
-          retired_root_count,
-          input.groups.size(),
-          target_active_root_count) ||
-      !checked_sub_add(
-          impl_->retained_point_reference_count,
-          retired_retained_count,
-          staged_retained_count,
-          target_retained_point_count)) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_batch_partition_rejected;
-    return result;
-  }
-  result.counters.active_root_count_after = target_active_root_count;
-  result.counters.retained_point_reference_count_after =
-      target_retained_point_count;
-  if (target_root_state_count > impl_->budget.maximum_root_state_count) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_root_state_budget_exhausted;
-    return result;
-  }
-  if (target_active_root_count > impl_->budget.maximum_active_root_count) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_active_root_budget_exhausted;
-    return result;
-  }
-  if (target_retained_point_count >
-      impl_->budget.maximum_retained_point_reference_count) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_retained_point_budget_exhausted;
-    return result;
-  }
-  if (visible_transition_count >
-      impl_->budget.maximum_batch_visible_transition_count) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_visible_transition_budget_exhausted;
-    return result;
-  }
-  if (visible_child_reference_count >
-      impl_->budget.maximum_batch_visible_child_reference_count) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_visible_child_reference_budget_exhausted;
-    return result;
-  }
-
-  std::size_t required_staging_entry_count = input.groups.size();
-  if (!checked_add(
-          required_staging_entry_count,
-          source.counters.prior_root_reference_count,
-          required_staging_entry_count) ||
-      !checked_add(
-          required_staging_entry_count,
-          staged_retained_count,
-          required_staging_entry_count) ||
-      !checked_add(
-          required_staging_entry_count,
-          visible_transition_count,
-          required_staging_entry_count) ||
-      !checked_add(
-          required_staging_entry_count,
-          visible_child_reference_count,
-          required_staging_entry_count) ||
-      required_staging_entry_count >
-          impl_->budget.maximum_staging_entry_count) {
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_staging_budget_exhausted;
-    return result;
-  }
-  result.counters.required_staging_entry_count =
-      required_staging_entry_count;
-
-  try {
-    // Capacity-only mutations happen after every logical cap has passed and
-    // before any scientific field changes.  Subsequent commit operations are
-    // allocation-free and use only nothrow moves.
+    // Capacity-only mutations are operational and happen before the ticket is
+    // published.  From this point through commit, every scientific operation
+    // is an allocation-free nothrow move, insert into reserved capacity or
+    // scalar assignment.
     impl_->roots.reserve(target_root_state_count);
     impl_->root_lookup.reserve(target_root_state_count);
     if (existing_order_cursor == impl_->order_cursors.end()) {
       impl_->order_cursors.reserve(impl_->order_cursors.size() + 1U);
     }
 
-    std::vector<StagedGroup> staged_groups;
-    staged_groups.reserve(input.groups.size());
+    prepared->staged_groups.reserve(input.groups.size());
     result.visible_transitions.reserve(visible_transition_count);
     for (const ExactDirectAtLeast20CommittedGroupInput& group : input.groups) {
       CappedDistinctPointCoverage coverage{
@@ -1280,89 +1336,217 @@ ExactDirectAtLeast20StreamViewSession::consume(
       } else {
         ++result.counters.hidden_result_count;
       }
-      staged_groups.push_back(std::move(staged));
+      prepared->staged_groups.push_back(std::move(staged));
     }
 
-    exact::ExactLevel committed_level = input.squared_level;
-    const contract::CanonicalId committed_view_digest = next_view_digest(
+    prepared->committed_level = input.squared_level;
+    prepared->committed_view_digest = next_view_digest(
         impl_->view_digest,
         source.source_commit_digest,
         input.order,
         input.squared_level,
-        staged_groups,
+        prepared->staged_groups,
         result.visible_transitions);
+    prepared->expected_source_batch_cursor =
+        impl_->next_source_batch_cursor;
+    prepared->expected_source_epoch = impl_->source_epoch;
+    prepared->expected_source_commit_digest = impl_->source_commit_digest;
+    prepared->expected_view_digest = impl_->view_digest;
+    prepared->target_root_state_count = target_root_state_count;
+    prepared->target_order_cursor_count = impl_->order_cursors.size() +
+        (existing_order_cursor == impl_->order_cursors.end() ? 1U : 0U);
+    prepared->target_active_root_count = target_active_root_count;
+    prepared->target_retained_point_count = target_retained_point_count;
+    prepared->result = std::move(result);
+    // Keep the caller-owned relative transcript intact on every preparation
+    // rejection.  This final move is nothrow and happens only after every
+    // validation, allocation and digest computation has succeeded.
+    prepared->batch = std::move(batch);
+    prepared->prepared = true;
 
-    // Allocation-free scientific commit.
-    for (StagedGroup& staged : staged_groups) {
-      for (const std::size_t child_index : staged.child_root_state_indices) {
-        RootState& child = impl_->roots[child_index];
-        child.active = false;
-        child.coverage = CappedDistinctPointCoverage{
-            direct_at_least20_stream_view_threshold};
-      }
-      const RootKey result_key{
-          input.order, staged.source->resultant_root_id};
-      if (staged.reuses_continuation_root_state) {
-        RootState& result_root =
-            impl_->roots[staged.continuation_root_state_index];
-        result_root.coverage = std::move(staged.coverage);
-        result_root.active = true;
-      } else {
-        const std::size_t new_index = impl_->roots.size();
-        impl_->roots.emplace_back(
-            result_key, std::move(staged.coverage), true);
-        const auto insert_position = std::lower_bound(
-            impl_->root_lookup.begin(),
-            impl_->root_lookup.end(),
-            result_key,
-            [](const RootLookupEntry& entry, const RootKey& key) {
-              return entry.key < key;
-            });
-        impl_->root_lookup.insert(
-            insert_position, RootLookupEntry{result_key, new_index});
-      }
-    }
-    auto order_cursor = find_order_cursor(impl_->order_cursors, input.order);
-    if (order_cursor == impl_->order_cursors.end()) {
-      const auto insert_position = std::lower_bound(
-          impl_->order_cursors.begin(),
-          impl_->order_cursors.end(),
-          input.order,
-          [](const OrderCursorState& cursor, std::size_t order) {
-            return cursor.order < order;
-          });
-      impl_->order_cursors.insert(
-          insert_position,
-          OrderCursorState{input.order, std::move(committed_level)});
-    } else {
-      order_cursor->last_squared_level = std::move(committed_level);
-    }
-    impl_->active_root_count = target_active_root_count;
-    impl_->retained_point_reference_count = target_retained_point_count;
-    impl_->next_source_batch_cursor = input.source_batch_cursor_after;
-    impl_->source_epoch = input.source_epoch_after;
-    impl_->source_commit_digest = source.source_commit_digest;
-    impl_->view_digest = committed_view_digest;
-    source.consumed = true;
-
-    result.view_digest_after = impl_->view_digest;
-    result.complete_equal_level_batch_observed_before_visibility = true;
-    result.hidden_roots_retained_in_source_fold = true;
-    result.exact_relative_downstream_fold_certified = true;
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        complete_certified_atomic_downstream_batch_fold;
-    return result;
+    output.ticket.emplace(ExactDirectAtLeast20StreamViewPreparedBatch{
+        std::move(prepared)});
+    output.result.decision =
+        ExactDirectAtLeast20StreamConsumeDecision::not_consumed;
+    output.result.scientific_state_mutated_on_failure = false;
+    output.no_scientific_state_mutated = true;
+    output.all_allocations_and_digests_completed = true;
+    return output;
   } catch (const std::bad_alloc&) {
-    result.visible_transitions.clear();
-    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_allocation_failed;
-    return result;
+    return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                      no_allocation_failed);
   } catch (const std::exception&) {
-    result.visible_transitions.clear();
+    return reject(ExactDirectAtLeast20StreamConsumeDecision::
+                      no_batch_partition_rejected);
+  }
+}
+
+ExactDirectAtLeast20StreamViewPreparationResult
+ExactDirectAtLeast20StreamViewSession::prepare_resident_batch(
+    ExactDirectAtLeast20CommittedBatchInput&& input) noexcept {
+  ExactDirectAtLeast20StreamViewPreparationResult output;
+  auto sealed =
+      seal_exact_direct_at_least20_committed_batch_relative_transcript(
+          std::move(input), impl_ == nullptr
+              ? ExactDirectAtLeast20StreamViewBudget{}
+              : impl_->budget);
+  if (!sealed.certified_relative_transcript() ||
+      !sealed.batch.has_value()) {
+    output.result.decision =
+        sealed.decision ==
+                ExactDirectAtLeast20CommittedBatchDecision::
+                    no_batch_allocation_failed
+            ? ExactDirectAtLeast20StreamConsumeDecision::
+                  no_allocation_failed
+            : ExactDirectAtLeast20StreamConsumeDecision::
+                  no_batch_not_sealed_or_already_consumed;
+    output.result.scientific_state_mutated_on_failure = false;
+    output.no_scientific_state_mutated = true;
+    return output;
+  }
+  output = prepare_relative_batch(std::move(sealed.batch.value()));
+  if (!output.certified_prepared_batch() ||
+      !output.ticket.has_value()) {
+    return output;
+  }
+  output.ticket->impl_->resident_commit_capability_bound = true;
+  output.ticket->impl_->result.upstream_source_commit_capability_verified =
+      true;
+  output.result.upstream_source_commit_capability_verified = true;
+  output.resident_commit_capability_bound = true;
+  return output;
+}
+
+ExactDirectAtLeast20StreamConsumeResult
+ExactDirectAtLeast20StreamViewSession::commit_prepared_batch(
+    ExactDirectAtLeast20StreamViewPreparedBatch&& ticket,
+    bool resident_commit_succeeded) noexcept {
+  auto prepared = std::move(ticket.impl_);
+  if (prepared == nullptr || !prepared->prepared || prepared->consumed) {
+    ExactDirectAtLeast20StreamConsumeResult result;
+    result.scientific_state_mutated_on_failure = false;
     result.decision = ExactDirectAtLeast20StreamConsumeDecision::
-        no_batch_partition_rejected;
+        no_batch_not_sealed_or_already_consumed;
     return result;
   }
+  prepared->consumed = true;
+  const bool resident_contract_matches =
+      prepared->resident_commit_capability_bound ==
+      resident_commit_succeeded;
+  const bool prepared_capacity_is_still_resident =
+      impl_ != nullptr &&
+      impl_->roots.capacity() >= prepared->target_root_state_count &&
+      impl_->root_lookup.capacity() >= prepared->target_root_state_count &&
+      impl_->order_cursors.capacity() >=
+          prepared->target_order_cursor_count;
+  const bool session_is_fresh =
+      impl_ != nullptr && prepared->seal.get() == impl_->seal.get() &&
+      prepared->expected_source_batch_cursor ==
+          impl_->next_source_batch_cursor &&
+      prepared->expected_source_epoch == impl_->source_epoch &&
+      prepared->expected_source_commit_digest ==
+          impl_->source_commit_digest &&
+      prepared->expected_view_digest == impl_->view_digest &&
+      prepared_capacity_is_still_resident;
+  if (!resident_contract_matches || !session_is_fresh) {
+    if (resident_commit_succeeded) {
+      // The upstream resident transaction is already irreversible.  Returning
+      // an ordinary failure would falsely claim cross-component atomicity.
+      std::terminate();
+    }
+    ExactDirectAtLeast20StreamConsumeResult result =
+        std::move(prepared->result);
+    result.visible_transitions.clear();
+    result.scientific_state_mutated_on_failure = false;
+    result.exact_relative_downstream_fold_certified = false;
+    result.decision = ExactDirectAtLeast20StreamConsumeDecision::
+        no_stale_source_stamp_rejected;
+    return result;
+  }
+
+  ExactDirectAtLeast20CommittedBatch::Impl& source =
+      *prepared->batch.impl_;
+  const ExactDirectAtLeast20CommittedBatchInput& input = source.input;
+
+  // Allocation-free scientific commit.  All vector capacities, coverage
+  // summaries, transition payloads, exact-level copies and digests live in
+  // the prepared ticket already.
+  for (StagedGroup& staged : prepared->staged_groups) {
+    for (const std::size_t child_index : staged.child_root_state_indices) {
+      RootState& child = impl_->roots[child_index];
+      child.active = false;
+      child.coverage = CappedDistinctPointCoverage{
+          direct_at_least20_stream_view_threshold};
+    }
+    const RootKey result_key{
+        input.order, staged.source->resultant_root_id};
+    if (staged.reuses_continuation_root_state) {
+      RootState& result_root =
+          impl_->roots[staged.continuation_root_state_index];
+      result_root.coverage = std::move(staged.coverage);
+      result_root.active = true;
+    } else {
+      const std::size_t new_index = impl_->roots.size();
+      impl_->roots.emplace_back(
+          result_key, std::move(staged.coverage), true);
+      const auto insert_position = std::lower_bound(
+          impl_->root_lookup.begin(),
+          impl_->root_lookup.end(),
+          result_key,
+          [](const RootLookupEntry& entry, const RootKey& key) {
+            return entry.key < key;
+          });
+      impl_->root_lookup.insert(
+          insert_position, RootLookupEntry{result_key, new_index});
+    }
+  }
+  auto order_cursor = find_order_cursor(impl_->order_cursors, input.order);
+  if (order_cursor == impl_->order_cursors.end()) {
+    const auto insert_position = std::lower_bound(
+        impl_->order_cursors.begin(),
+        impl_->order_cursors.end(),
+        input.order,
+        [](const OrderCursorState& cursor, std::size_t order) {
+          return cursor.order < order;
+        });
+    impl_->order_cursors.insert(
+        insert_position,
+        OrderCursorState{
+            input.order, std::move(prepared->committed_level)});
+  } else {
+    order_cursor->last_squared_level =
+        std::move(prepared->committed_level);
+  }
+  impl_->active_root_count = prepared->target_active_root_count;
+  impl_->retained_point_reference_count =
+      prepared->target_retained_point_count;
+  impl_->next_source_batch_cursor = input.source_batch_cursor_after;
+  impl_->source_epoch = input.source_epoch_after;
+  impl_->source_commit_digest = source.source_commit_digest;
+  impl_->view_digest = prepared->committed_view_digest;
+  source.consumed = true;
+
+  ExactDirectAtLeast20StreamConsumeResult result =
+      std::move(prepared->result);
+  result.view_digest_after = impl_->view_digest;
+  result.complete_equal_level_batch_observed_before_visibility = true;
+  result.hidden_roots_retained_in_source_fold = true;
+  result.scientific_state_mutated_on_failure = false;
+  result.exact_relative_downstream_fold_certified = true;
+  result.decision = ExactDirectAtLeast20StreamConsumeDecision::
+      complete_certified_atomic_downstream_batch_fold;
+  return result;
+}
+
+ExactDirectAtLeast20StreamConsumeResult
+ExactDirectAtLeast20StreamViewSession::consume(
+    ExactDirectAtLeast20CommittedBatch&& batch) noexcept {
+  auto prepared = prepare_relative_batch(std::move(batch));
+  if (!prepared.certified_prepared_batch() ||
+      !prepared.ticket.has_value()) {
+    return std::move(prepared.result);
+  }
+  return commit_prepared_batch(std::move(prepared.ticket.value()), false);
 }
 
 bool ExactDirectAtLeast20CheckpointBuildResult::certified_checkpoint()

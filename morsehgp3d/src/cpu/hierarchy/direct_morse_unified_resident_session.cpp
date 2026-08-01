@@ -226,6 +226,172 @@ class ResidentNormalizedStrictFacetClosureAuthority {
   std::uint64_t session_authority_id_{};
 };
 
+// The public fixed-size incidence receipt remains caller-owned and copyable.
+// Only a fresh recursive verification can mint this process-private move-only
+// capability.  It is bound to the immutable compatibility cursor and session
+// authority, so no public bool or later receipt mutation can promote an
+// existing candidate or rank+closure session.
+class ResidentNormalizedHorizontalIncidenceReductionAuthority {
+ public:
+  ResidentNormalizedHorizontalIncidenceReductionAuthority(
+      const ResidentNormalizedHorizontalIncidenceReductionAuthority&) =
+      delete;
+  ResidentNormalizedHorizontalIncidenceReductionAuthority& operator=(
+      const ResidentNormalizedHorizontalIncidenceReductionAuthority&) =
+      delete;
+  ResidentNormalizedHorizontalIncidenceReductionAuthority(
+      ResidentNormalizedHorizontalIncidenceReductionAuthority&&) noexcept =
+      default;
+  ResidentNormalizedHorizontalIncidenceReductionAuthority& operator=(
+      ResidentNormalizedHorizontalIncidenceReductionAuthority&&) noexcept =
+      default;
+
+  [[nodiscard]] static std::optional<
+      ResidentNormalizedHorizontalIncidenceReductionAuthority>
+  issue(
+      const ExactDirectSparseUnifiedLevelPlanResult& compatibility_plan,
+      const ExactDirectNormalizedH0SourcePlanResult& source_plan,
+      const ExactDirectNormalizedH0IncidenceReductionAuthority& authority,
+      const ExactDirectNormalizedH0IncidenceReductionVerification&
+          verification,
+      std::uint64_t session_authority_id) noexcept {
+    const bool direct_birth_partition_fits =
+        compatibility_plan.required_direct_birth_reference_count <=
+        compatibility_plan.direct_references.size();
+    const std::size_t compatibility_direct_coface_count =
+        direct_birth_partition_fits
+        ? compatibility_plan.direct_references.size() -
+              compatibility_plan.required_direct_birth_reference_count
+        : 0U;
+    const bool compatibility_coface_count_fits =
+        direct_birth_partition_fits &&
+        compatibility_direct_coface_count <=
+        std::numeric_limits<std::size_t>::max() -
+            compatibility_plan.residual_references.size();
+    const std::size_t compatibility_coface_count =
+        compatibility_coface_count_fits
+        ? compatibility_direct_coface_count +
+              compatibility_plan.residual_references.size()
+        : 0U;
+    if (!verification.result_certified ||
+        !verification.expected_authority_freshly_reconstructed ||
+        !verification.observed_recursively_equal ||
+        !verification.unsupported_claims_remain_false ||
+        !authority.certified_horizontal_incidence_reduction() ||
+        !authority.incidence_complete_reduction_proved ||
+        session_authority_id == 0U ||
+        !source_plan.certified_complete_candidate_source_plan() ||
+        compatibility_plan.point_count != source_plan.point_count ||
+        compatibility_plan.point_count != authority.point_count ||
+        compatibility_plan.batches.size() != authority.normalized_batch_count ||
+        !compatibility_coface_count_fits ||
+        compatibility_coface_count != authority.normalized_coface_count ||
+        source_plan.source_direct_event_count !=
+            authority.source_direct_event_count ||
+        source_plan.source_gateway_token_count !=
+            authority.source_core_facet_count ||
+        source_plan.source_gateway_candidate_count !=
+            authority.source_gateway_candidate_count ||
+        source_plan.cofaces.size() != authority.normalized_coface_count ||
+        source_plan.batches.size() != authority.normalized_batch_count ||
+        source_plan.source_gateway_scientific_identity_digest !=
+            authority.source_gateway_scientific_identity_digest ||
+        compatibility_plan.source_pair_canonical_cloud_digest !=
+            authority.source_pair_canonical_cloud_digest ||
+        compatibility_plan.source_higher_canonical_cloud_digest !=
+            authority.source_higher_canonical_cloud_digest ||
+        compatibility_plan.source_pair_semantic_digest !=
+            authority.source_pair_semantic_digest ||
+        compatibility_plan.source_higher_semantic_digest !=
+            authority.source_higher_semantic_digest ||
+        !compatibility_plan.no_k_plus_one_coface_key_persisted ||
+        !compatibility_plan.no_global_facet_or_coface_catalog_materialized ||
+        compatibility_plan.bounded_star_global_completeness_claimed ||
+        compatibility_plan.public_status_claimed) {
+      return std::nullopt;
+    }
+    return ResidentNormalizedHorizontalIncidenceReductionAuthority{
+        &compatibility_plan, authority, session_authority_id};
+  }
+
+  [[nodiscard]] bool certifies(
+      const ExactDirectSparseUnifiedLevelPlanResult& compatibility_plan,
+      std::uint64_t session_authority_id) const noexcept {
+    if (compatibility_plan.required_direct_birth_reference_count >
+        compatibility_plan.direct_references.size()) {
+      return false;
+    }
+    const std::size_t compatibility_direct_coface_count =
+        compatibility_plan.direct_references.size() -
+        compatibility_plan.required_direct_birth_reference_count;
+    if (compatibility_direct_coface_count >
+        std::numeric_limits<std::size_t>::max() -
+            compatibility_plan.residual_references.size()) {
+      return false;
+    }
+    const std::size_t compatibility_coface_count =
+        compatibility_direct_coface_count +
+        compatibility_plan.residual_references.size();
+    return compatibility_plan_ == &compatibility_plan &&
+           session_authority_id_ != 0U &&
+           session_authority_id_ == session_authority_id &&
+           authority_.certified_horizontal_incidence_reduction() &&
+           authority_.incidence_complete_reduction_proved &&
+           compatibility_plan.point_count == authority_.point_count &&
+           compatibility_plan.batches.size() ==
+               authority_.normalized_batch_count &&
+           compatibility_coface_count == authority_.normalized_coface_count &&
+           compatibility_plan.source_pair_canonical_cloud_digest ==
+               authority_.source_pair_canonical_cloud_digest &&
+           compatibility_plan.source_higher_canonical_cloud_digest ==
+               authority_.source_higher_canonical_cloud_digest &&
+           compatibility_plan.source_pair_semantic_digest ==
+               authority_.source_pair_semantic_digest &&
+           compatibility_plan.source_higher_semantic_digest ==
+               authority_.source_higher_semantic_digest &&
+           compatibility_plan.no_k_plus_one_coface_key_persisted &&
+           compatibility_plan.no_global_facet_or_coface_catalog_materialized &&
+           !compatibility_plan.bounded_star_global_completeness_claimed &&
+           !compatibility_plan.public_status_claimed;
+  }
+
+ private:
+  ResidentNormalizedHorizontalIncidenceReductionAuthority(
+      const ExactDirectSparseUnifiedLevelPlanResult* compatibility_plan,
+      const ExactDirectNormalizedH0IncidenceReductionAuthority& authority,
+      std::uint64_t session_authority_id) noexcept
+      : compatibility_plan_(compatibility_plan),
+        authority_(authority),
+        session_authority_id_(session_authority_id) {}
+
+  const ExactDirectSparseUnifiedLevelPlanResult* compatibility_plan_{};
+  ExactDirectNormalizedH0IncidenceReductionAuthority authority_{};
+  std::uint64_t session_authority_id_{};
+};
+
+static_assert(
+    !std::is_copy_constructible_v<
+        ResidentNormalizedHorizontalIncidenceReductionAuthority> &&
+    std::is_nothrow_move_constructible_v<
+        ResidentNormalizedHorizontalIncidenceReductionAuthority>);
+
+[[nodiscard]] bool certified_normalized_strict_closure_mode(
+    ExactDirectNormalizedH0ResidentRetractionMode mode) noexcept {
+  return mode ==
+             ExactDirectNormalizedH0ResidentRetractionMode::
+                 certified_rank_window_and_sparse_strict_facet_closure ||
+         mode ==
+             ExactDirectNormalizedH0ResidentRetractionMode::
+                 certified_horizontal_incidence_complete_rank_window_and_sparse_strict_facet_closure;
+}
+
+[[nodiscard]] bool certified_normalized_incidence_complete_mode(
+    ExactDirectNormalizedH0ResidentRetractionMode mode) noexcept {
+  return mode ==
+         ExactDirectNormalizedH0ResidentRetractionMode::
+             certified_horizontal_incidence_complete_rank_window_and_sparse_strict_facet_closure;
+}
+
 [[nodiscard]] bool facet_key_is_canonical(
     const ExactDirectSparseFacetKey& key) noexcept;
 
@@ -2030,6 +2196,8 @@ struct ExactDirectMorseUnifiedResidentSession::Impl {
       source_plan_authority;
   std::optional<ResidentNormalizedStrictFacetClosureAuthority>
       normalized_strict_facet_closure_authority;
+  std::optional<ResidentNormalizedHorizontalIncidenceReductionAuthority>
+      normalized_horizontal_incidence_reduction_authority;
   ExactDirectSparsePositiveFacetLocator locator{};
   ResidentState state{};
   std::shared_ptr<const SessionSeal> seal;
@@ -2370,25 +2538,42 @@ bool ExactDirectMorseUnifiedResidentSession::certified_resident_session()
           ExactDirectNormalizedH0ResidentRetractionMode::
               candidate_fail_open_without_h0_retraction_authority &&
       !impl_->normalized_h0_retraction_authority_certified &&
-      !impl_->normalized_strict_facet_closure_authority.has_value();
-  const bool normalized_certified_facts_match =
+      !impl_->normalized_strict_facet_closure_authority.has_value() &&
+      !impl_->normalized_horizontal_incidence_reduction_authority.has_value();
+  const bool normalized_strict_closure_facts_match =
       normalized_plan_facts_match && impl_->source.index != nullptr &&
       impl_->source.cloud != nullptr &&
-      impl_->normalized_retraction_mode ==
-          ExactDirectNormalizedH0ResidentRetractionMode::
-              certified_rank_window_and_sparse_strict_facet_closure &&
+      certified_normalized_strict_closure_mode(
+          impl_->normalized_retraction_mode) &&
       impl_->normalized_h0_retraction_authority_certified &&
       impl_->normalized_strict_facet_closure_authority.has_value() &&
       impl_->normalized_strict_facet_closure_authority->certifies(
           impl_->immutable_plan(), impl_->authority_id);
+  const bool normalized_rank_closure_facts_match =
+      normalized_strict_closure_facts_match &&
+      impl_->normalized_retraction_mode ==
+          ExactDirectNormalizedH0ResidentRetractionMode::
+              certified_rank_window_and_sparse_strict_facet_closure &&
+      !impl_->normalized_horizontal_incidence_reduction_authority.has_value();
+  const bool normalized_incidence_complete_facts_match =
+      normalized_strict_closure_facts_match &&
+      certified_normalized_incidence_complete_mode(
+          impl_->normalized_retraction_mode) &&
+      impl_->normalized_horizontal_incidence_reduction_authority.has_value() &&
+      impl_->normalized_horizontal_incidence_reduction_authority->certifies(
+          impl_->immutable_plan(), impl_->authority_id);
   const bool normalized_adapter_facts_match =
       normalized
-      ? normalized_candidate_facts_match || normalized_certified_facts_match
+      ? normalized_candidate_facts_match ||
+            normalized_rank_closure_facts_match ||
+            normalized_incidence_complete_facts_match
       : impl_->normalized_retraction_mode ==
                 ExactDirectNormalizedH0ResidentRetractionMode::
                     not_applicable_successive_incidence_star &&
             !impl_->normalized_h0_retraction_authority_certified &&
-            !impl_->normalized_strict_facet_closure_authority.has_value();
+            !impl_->normalized_strict_facet_closure_authority.has_value() &&
+            !impl_->normalized_horizontal_incidence_reduction_authority
+                 .has_value();
   return impl_->initialized && impl_->seal != nullptr &&
          impl_->ticket_registry != nullptr &&
          impl_->ticket_registry->maximum_ticket_count ==
@@ -2492,6 +2677,17 @@ bool ExactDirectMorseUnifiedResidentSession::
          impl_->normalized_h0_retraction_authority_certified;
 }
 
+bool ExactDirectMorseUnifiedResidentSession::
+    normalized_horizontal_incidence_reduction_certified() const noexcept {
+  return impl_ != nullptr &&
+         certified_normalized_incidence_complete_mode(
+             impl_->normalized_retraction_mode) &&
+         impl_->normalized_horizontal_incidence_reduction_authority
+             .has_value() &&
+         impl_->normalized_horizontal_incidence_reduction_authority->certifies(
+             impl_->immutable_plan(), impl_->authority_id);
+}
+
 const ExactDirectSparseUnifiedLevelPlanResult&
 ExactDirectMorseUnifiedResidentSession::plan() const noexcept {
   static const ExactDirectSparseUnifiedLevelPlanResult empty{};
@@ -2541,8 +2737,11 @@ bool ExactDirectMorseUnifiedResidentInitializationResult::
       !normalized_h0_retraction_authority_certified &&
       normalized_candidate_fails_open_on_strictly_earlier_facet &&
       !rank_window_saturated_h0_authority_freshly_verified &&
-      !strict_facet_closure_session_capability_issued;
-  const bool normalized_certified_receipt =
+      !strict_facet_closure_session_capability_issued &&
+      !normalized_h0_incidence_reduction_authority_freshly_verified &&
+      !normalized_h0_incidence_reduction_session_capability_issued &&
+      !incidence_complete_reduction_proved;
+  const bool normalized_rank_closure_receipt =
       normalized_common_receipt &&
       normalized_h0_retraction_mode ==
           ExactDirectNormalizedH0ResidentRetractionMode::
@@ -2550,10 +2749,26 @@ bool ExactDirectMorseUnifiedResidentInitializationResult::
       normalized_h0_retraction_authority_certified &&
       !normalized_candidate_fails_open_on_strictly_earlier_facet &&
       rank_window_saturated_h0_authority_freshly_verified &&
-      strict_facet_closure_session_capability_issued;
+      strict_facet_closure_session_capability_issued &&
+      !normalized_h0_incidence_reduction_authority_freshly_verified &&
+      !normalized_h0_incidence_reduction_session_capability_issued &&
+      !incidence_complete_reduction_proved;
+  const bool normalized_incidence_complete_receipt =
+      normalized_common_receipt &&
+      normalized_h0_retraction_mode ==
+          ExactDirectNormalizedH0ResidentRetractionMode::
+              certified_horizontal_incidence_complete_rank_window_and_sparse_strict_facet_closure &&
+      normalized_h0_retraction_authority_certified &&
+      !normalized_candidate_fails_open_on_strictly_earlier_facet &&
+      rank_window_saturated_h0_authority_freshly_verified &&
+      strict_facet_closure_session_capability_issued &&
+      normalized_h0_incidence_reduction_authority_freshly_verified &&
+      normalized_h0_incidence_reduction_session_capability_issued &&
+      incidence_complete_reduction_proved;
   const bool source_receipt_certified =
       normalized
-      ? normalized_candidate_receipt || normalized_certified_receipt
+      ? normalized_candidate_receipt || normalized_rank_closure_receipt ||
+            normalized_incidence_complete_receipt
       : !normalized_source_plan_consumed_directly &&
             !normalized_sparse_compatibility_plan_certified &&
             !every_normalized_coface_reconstructed_transiently &&
@@ -2564,13 +2779,18 @@ bool ExactDirectMorseUnifiedResidentInitializationResult::
             !normalized_candidate_fails_open_on_strictly_earlier_facet &&
             !rank_window_saturated_h0_authority_freshly_verified &&
             !strict_facet_closure_session_capability_issued &&
-            !successive_incidence_star_materialized_by_adapter;
+            !successive_incidence_star_materialized_by_adapter &&
+            !normalized_h0_incidence_reduction_authority_freshly_verified &&
+            !normalized_h0_incidence_reduction_session_capability_issued &&
+            !incidence_complete_reduction_proved;
   return session.has_value() && session->certified_resident_session() &&
          session->source_kind() == source_kind && source_receipt_certified &&
          session->normalized_h0_retraction_mode() ==
              normalized_h0_retraction_mode &&
          session->normalized_h0_retraction_authority_certified() ==
              normalized_h0_retraction_authority_certified &&
+         session->normalized_horizontal_incidence_reduction_certified() ==
+             incidence_complete_reduction_proved &&
          source_plan_initial_verification_count == 1U &&
          source_plan_freshly_verified_once && source_plan_owned_by_session &&
          locator_and_component_state_initialized &&
@@ -2657,9 +2877,8 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
         impl_->source_kind ==
             ExactDirectMorseUnifiedResidentSourceKind::
                 normalized_direct_h0_candidate_source &&
-        impl_->normalized_retraction_mode ==
-            ExactDirectNormalizedH0ResidentRetractionMode::
-                certified_rank_window_and_sparse_strict_facet_closure &&
+        certified_normalized_strict_closure_mode(
+            impl_->normalized_retraction_mode) &&
         impl_->normalized_h0_retraction_authority_certified &&
         impl_->normalized_strict_facet_closure_authority.has_value();
 
@@ -4595,6 +4814,179 @@ initialize_exact_direct_normalized_h0_certified_resident_session(
             no_strict_facet_closure_configuration_rejected;
   }
   return output;
+}
+
+ExactDirectMorseUnifiedResidentInitializationResult
+initialize_exact_direct_normalized_h0_incidence_complete_resident_session(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_journal,
+    const ExactDirectSaddleArmSeedBudget& source_arm_budget,
+    const ExactDirectSaddleArmSeedJournalResult& source_arm_journal,
+    const ExactDirectClosedSaddleIncidenceBudget& source_incidence_budget,
+    const ExactDirectClosedSaddleIncidenceJournalResult&
+        source_incidence_journal,
+    const ExactDirectSparseGatewayCandidateBudget& source_gateway_budget,
+    spatial::LbvhTraversalOrder source_gateway_traversal_order,
+    const ExactDirectSparseGatewayCandidateJournalResult& source_gateway,
+    const ExactDirectNormalizedH0SourcePlanBudget& source_plan_budget,
+    const ExactDirectNormalizedH0SourcePlanResult& source_plan,
+    const ExactDirectRankWindowSaturatedH0Authority&
+        source_rank_window_authority,
+    const ExactDirectNormalizedH0IncidenceReductionAuthority&
+        source_incidence_reduction_authority,
+    const ExactDirectSparseFacetDescentClosureBudget&
+        strict_facet_closure_budget,
+    const ExactDirectSparseFacetDescentClosureConfig&
+        strict_facet_closure_config,
+    spatial::LbvhTraversalOrder strict_facet_closure_traversal_order,
+    const ExactDirectNormalizedH0ResidentAdapterBudget& adapter_budget,
+    std::uint64_t session_authority_id,
+    const ExactDirectMorseUnifiedResidentSessionBudget& budget) {
+  ExactDirectMorseUnifiedResidentInitializationResult rejected;
+  rejected.source_kind =
+      ExactDirectMorseUnifiedResidentSourceKind::
+          normalized_direct_h0_candidate_source;
+  const auto& requirements = source_facade.certificate.requirements;
+  if (source_facade.terminal_catalog_certified() &&
+      requirements.point_count == cloud.size() &&
+      requirements.effective_maximum_order == cloud.size()) {
+    rejected.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_normalized_terminal_order_equal_point_count_unsupported;
+    return rejected;
+  }
+  if (!closure_budget_within_confidence_caps(strict_facet_closure_budget) ||
+      !valid_closure_traversal_order(
+          strict_facet_closure_traversal_order)) {
+    rejected.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_strict_facet_closure_configuration_rejected;
+    return rejected;
+  }
+  if (session_authority_id == 0U ||
+      budget.sparse_delta.maximum_outstanding_ticket_count == 0U) {
+    rejected.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_session_budget_rejected;
+    return rejected;
+  }
+
+  try {
+    // This replay is deliberately independent of the one compatibility-plan
+    // verification retained by the resident initializer.  It recursively
+    // reconstructs the fixed-size horizontal source certificate before any
+    // resident session or private capability can become observable.
+    const auto incidence_verification =
+        verify_exact_direct_normalized_h0_incidence_reduction_authority(
+            index,
+            cloud,
+            source_facade,
+            source_journal,
+            source_arm_budget,
+            source_arm_journal,
+            source_incidence_budget,
+            source_incidence_journal,
+            source_gateway_budget,
+            source_gateway_traversal_order,
+            source_gateway,
+            source_plan_budget,
+            source_plan,
+            source_rank_window_authority,
+            source_incidence_reduction_authority);
+    if (!incidence_verification.result_certified ||
+        !source_incidence_reduction_authority
+             .certified_horizontal_incidence_reduction() ||
+        !source_incidence_reduction_authority
+             .incidence_complete_reduction_proved) {
+      rejected.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_normalized_h0_incidence_reduction_authority_rejected;
+      return rejected;
+    }
+
+    // Reuse, without modifying, the existing rank-window + closure factory.
+    // It retains its historical mode and output whenever called directly.
+    auto output = initialize_exact_direct_normalized_h0_certified_resident_session(
+        index,
+        cloud,
+        source_facade,
+        source_journal,
+        source_arm_budget,
+        source_arm_journal,
+        source_incidence_budget,
+        source_incidence_journal,
+        source_gateway_budget,
+        source_gateway_traversal_order,
+        source_gateway,
+        source_plan_budget,
+        source_plan,
+        source_rank_window_authority,
+        strict_facet_closure_budget,
+        strict_facet_closure_config,
+        strict_facet_closure_traversal_order,
+        adapter_budget,
+        session_authority_id,
+        budget);
+    if (!output.session.has_value()) {
+      return output;
+    }
+
+    auto& session = *output.session;
+    auto& impl = *session.impl_;
+    auto incidence_authority =
+        ResidentNormalizedHorizontalIncidenceReductionAuthority::issue(
+            impl.immutable_plan(),
+            source_plan,
+            source_incidence_reduction_authority,
+            incidence_verification,
+            session_authority_id);
+    if (!incidence_authority.has_value()) {
+      output.session.reset();
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_normalized_h0_incidence_reduction_authority_rejected;
+      return output;
+    }
+    impl.normalized_horizontal_incidence_reduction_authority.emplace(
+        std::move(*incidence_authority));
+    impl.normalized_retraction_mode =
+        ExactDirectNormalizedH0ResidentRetractionMode::
+            certified_horizontal_incidence_complete_rank_window_and_sparse_strict_facet_closure;
+    output.normalized_h0_retraction_mode = impl.normalized_retraction_mode;
+    output.normalized_h0_incidence_reduction_authority_freshly_verified =
+        true;
+    output.normalized_h0_incidence_reduction_session_capability_issued = true;
+    output.incidence_complete_reduction_proved = true;
+    if (!session.certified_resident_session() ||
+        !session.normalized_horizontal_incidence_reduction_certified() ||
+        !output.certified_initialized_session()) {
+      output.session.reset();
+      output.normalized_h0_incidence_reduction_session_capability_issued =
+          false;
+      output.incidence_complete_reduction_proved = false;
+      output.decision =
+          ExactDirectMorseUnifiedResidentInitializationDecision::
+              no_normalized_h0_incidence_reduction_authority_rejected;
+    }
+    return output;
+  } catch (const std::bad_alloc&) {
+    rejected.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_allocation_failed;
+    return rejected;
+  } catch (const std::length_error&) {
+    rejected.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_normalized_h0_incidence_reduction_authority_rejected;
+    return rejected;
+  } catch (const std::logic_error&) {
+    rejected.decision =
+        ExactDirectMorseUnifiedResidentInitializationDecision::
+            no_normalized_h0_incidence_reduction_authority_rejected;
+    return rejected;
+  }
 }
 
 }  // namespace morsehgp3d::hierarchy

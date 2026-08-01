@@ -135,7 +135,12 @@ void append_level(
 [[nodiscard]] contract::CanonicalId canonical_cloud_digest(
     const spatial::CanonicalPointCloud& cloud) {
   contract::CanonicalSha256Builder builder;
-  builder.update(canonical_cloud_domain);
+  // Match the canonical pair-support DigestWriter domain encoding exactly:
+  // a length-prefixed text value followed by the point-count and coordinate
+  // words.  Raw domain bytes would mint a distinct namespace for the same
+  // cloud and make a sealed K1 session impossible to bind to its resident
+  // pair-source authority.
+  append_text(builder, canonical_cloud_domain);
   append_size(builder, cloud.size());
   for (std::size_t point_index = 0U;
        point_index < cloud.size();
