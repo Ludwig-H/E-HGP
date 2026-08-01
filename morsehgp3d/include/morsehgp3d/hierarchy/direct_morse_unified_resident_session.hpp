@@ -84,7 +84,7 @@ inline constexpr std::string_view
     direct_morse_unified_resident_session_public_status = "not_claimed";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_deployment_status =
-        "architecture_only_not_strict_miss_integration_qualified_v6";
+        "architecture_only_authentic_strict_miss_path_integration_qualified_not_source_complete_v6";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_proof_basis =
         "one_initial_unified_plan_verification_resident_sparse_positive_"

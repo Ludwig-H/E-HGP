@@ -889,8 +889,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
           ExactDirectMorseUnifiedResidentSession::public_status ==
               "not_claimed" &&
           ExactDirectMorseUnifiedResidentSession::deployment_status ==
-              "architecture_only_not_strict_miss_integration_qualified_v6",
-      "the session advertises the certified-carrier architecture without claiming strict-miss integration qualification");
+              "architecture_only_authentic_strict_miss_path_integration_qualified_not_source_complete_v6",
+      "the session advertises the authentic strict-miss path qualification without claiming source completeness");
 
   std::optional<ExactFrozenIncidencePriorRootId> residual_root;
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp stamp_after_17_2{};
@@ -1496,6 +1496,163 @@ void test_certified_normalized_strict_carrier_fold() {
       "the separate AC-to-DE closure helper resolves one strict seed, while its seed cap minus one rejects without mutating the locator");
 }
 
+void test_authentic_normalized_strict_miss_atomic_commit() {
+  // Bounded deterministic witness discovered by the strict-miss audit.  All
+  // coordinates are integer-valued binary64 inputs; the certified direct
+  // source is deliberately capped at K=2.
+  const std::array<CertifiedPoint3, 6U> points{
+      point(1.0, 6.0, -1.0),
+      point(1.0, -3.0, -8.0),
+      point(0.0, -5.0, 6.0),
+      point(1.0, -8.0, 3.0),
+      point(3.0, -7.0, -6.0),
+      point(-2.0, 0.0, -8.0),
+  };
+  auto cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+  auto context = normalized_context(std::move(cloud));
+  check(
+      context.cloud.size() == points.size() &&
+          context.source.facade.certificate.requirements
+                  .effective_maximum_order == 2U &&
+          context.plan.certified_complete_candidate_source_plan() &&
+          context.rank_authority.certified(),
+      "the permanent six-point witness supplies an exact certified K=2 normalized source and rank authority");
+  if (!context.plan.certified_complete_candidate_source_plan() ||
+      !context.rank_authority.certified()) {
+    return;
+  }
+
+  constexpr std::uint64_t certified_authority_id = 7040U;
+  auto initialized = initialize_normalized_certified(
+      context,
+      context.rank_authority,
+      generous_strict_facet_closure_budget(),
+      certified_authority_id);
+  check(
+      initialized.certified_initialized_session() &&
+          initialized.session.has_value(),
+      "the permanent six-point witness initializes the private certified strict-closure session");
+  if (!initialized.session.has_value()) {
+    return;
+  }
+
+  auto& session = *initialized.session;
+  std::size_t strict_batch_count = 0U;
+  std::size_t strict_seed_count = 0U;
+  std::size_t strict_closure_build_count = 0U;
+  std::optional<std::size_t> strict_batch_cursor;
+  while (session.batch_cursor() < session.plan().batches.size()) {
+    const std::size_t cursor_before = session.batch_cursor();
+    const std::size_t epoch_before = session.epoch();
+    auto prepared = session.prepare_next();
+    check(
+        prepared.certified_prepared_batch() && prepared.ticket.has_value(),
+        "every batch of the permanent strict-miss witness prepares under certified resident authorities");
+    if (!prepared.ticket.has_value()) {
+      break;
+    }
+    const auto counters = prepared.ticket->authority_bundle().counters;
+    const std::size_t order = prepared.ticket->authority_bundle().order;
+    const bool strict_batch =
+        counters.normalized_strict_facet_seed_count != 0U;
+    if (strict_batch) {
+      ++strict_batch_count;
+      strict_seed_count += counters.normalized_strict_facet_seed_count;
+      strict_closure_build_count +=
+          counters.normalized_strict_facet_closure_build_count;
+      strict_batch_cursor = cursor_before;
+      check(
+          order == 2U &&
+              counters.normalized_strict_facet_seed_count == 2U &&
+              counters.normalized_strict_facet_closure_build_count == 1U &&
+              counters.normalized_strict_facet_closure_seed_projection_count ==
+                  2U &&
+              counters.normalized_strict_facet_carrier_resolution_count == 2U &&
+              counters.planned_strict_facet_binding_count == 2U &&
+              prepared.ticket->authority_bundle()
+                  .private_strict_facet_closure_attestation_issued &&
+              prepared.ticket->authority_bundle()
+                  .every_strict_facet_miss_has_certified_relative_positive_closure &&
+              prepared.ticket->authority_bundle()
+                  .strict_facet_closure_bound_to_pre_batch_locator_snapshot,
+          "the authentic K=2 locator miss has exactly two strict seeds, one closure build and a private pre-batch attestation");
+    }
+    const auto committed = session.commit(std::move(*prepared.ticket));
+    check(
+        committed.certified_committed_batch() &&
+            committed.ticket_consumed &&
+            committed.exactly_one_locator_apply_batch_called &&
+            committed.sparse_delta_staged_with_rollback_before_locator &&
+            committed.staged_sparse_delta_released_after_locator_commit &&
+            committed.cursor_and_epoch_advanced_once &&
+            committed.committed_batch_index == cursor_before &&
+            committed.committed_epoch == epoch_before + 1U,
+        "each witness ticket, including the strict batch, commits through one certified atomic resident transaction");
+  }
+  check(
+      strict_batch_count == 1U && strict_seed_count == 2U &&
+          strict_closure_build_count == 1U && strict_batch_cursor.has_value() &&
+          session.source_cursor_exhausted() && session.complete(),
+      "the complete witness run contains exactly one authentic two-seed strict batch and one closure construction");
+  if (!strict_batch_cursor.has_value()) {
+    return;
+  }
+
+  auto seed_cap_minus_one = generous_strict_facet_closure_budget();
+  seed_cap_minus_one.maximum_seed_count = 1U;
+  auto capped_initialized = initialize_normalized_certified(
+      context,
+      context.rank_authority,
+      seed_cap_minus_one,
+      7041U);
+  check(
+      capped_initialized.certified_initialized_session() &&
+          capped_initialized.session.has_value(),
+      "the same witness initializes with the strict seed cap reduced from two to one");
+  if (!capped_initialized.session.has_value()) {
+    return;
+  }
+
+  auto& capped = *capped_initialized.session;
+  bool cap_rejected_without_mutation = false;
+  while (capped.batch_cursor() < capped.plan().batches.size()) {
+    const std::size_t cursor_before = capped.batch_cursor();
+    const std::size_t epoch_before = capped.epoch();
+    const auto stamp_before = capped.locator().snapshot_stamp();
+    const auto components_before = capped.component_states();
+    const auto roots_before = capped.root_coverages();
+    const auto groups_before = capped.group_records();
+    auto prepared = capped.prepare_next();
+    if (prepared.decision ==
+        ExactDirectMorseUnifiedResidentPreparationDecision::
+            no_strict_facet_closure_budget_exhausted) {
+      cap_rejected_without_mutation =
+          cursor_before == *strict_batch_cursor &&
+          prepared.no_scientific_state_mutated &&
+          !prepared.ticket.has_value() && capped.batch_cursor() == cursor_before &&
+          capped.epoch() == epoch_before &&
+          capped.locator().snapshot_stamp() == stamp_before &&
+          capped.component_states() == components_before &&
+          capped.root_coverages() == roots_before &&
+          capped.group_records() == groups_before;
+      break;
+    }
+    check(
+        prepared.certified_prepared_batch() && prepared.ticket.has_value(),
+        "batches preceding the authentic strict miss remain commit-ready under the cap-minus-one budget");
+    if (!prepared.ticket.has_value()) {
+      break;
+    }
+    check(
+        capped.commit(std::move(*prepared.ticket)).certified_committed_batch(),
+        "batches preceding the authentic strict miss commit under the cap-minus-one budget");
+  }
+  check(
+      cap_rejected_without_mutation,
+      "the authentic two-seed batch rejects at seed cap one without mutating locator or resident state");
+}
+
 void test_certified_normalized_terminal_order_rejected() {
   const std::array<CertifiedPoint3, 3U> points{
       point(0.0, 0.0),
@@ -1578,6 +1735,7 @@ int main() {
   test_normalized_candidate_birth_classifier();
   test_normalized_source_resident_atomic_fold(context);
   test_certified_normalized_strict_carrier_fold();
+  test_authentic_normalized_strict_miss_atomic_commit();
   test_certified_normalized_terminal_order_rejected();
   if (failures != 0) {
     std::cerr << failures << " resident-session test(s) failed\n";
