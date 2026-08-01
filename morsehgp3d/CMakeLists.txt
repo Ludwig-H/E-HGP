@@ -5086,6 +5086,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d::direct_morse_vertical_journal
       morsehgp3d::direct_morse_k2_k1_target_authority
       morsehgp3d::direct_morse_m1_o5_death_accounting
+      morsehgp3d::direct_morse_gamma_carrier_conformance
   )
   morsehgp3d_apply_sanitizers(morsehgp3d_direct_morse_product_runner)
   if(MSVC)

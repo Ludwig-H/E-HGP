@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/direct_morse_forest_reducer.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_k2_k1_target_authority.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_m1_o5_death_accounting.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp"
@@ -83,6 +84,7 @@ struct Timings {
   double m1_o5_death_accounting_build_ms{};
   double m1_o5_death_accounting_verify_ms{};
   double m1_o5_death_accounting_ms{};
+  double direct_morse_gamma_carrier_conformance_ms{};
   double vertical_target_replay_diagnostic_ms{};
   double total_ms{};
 };
@@ -103,6 +105,8 @@ struct Report {
   bool complete_hierarchy_attempt_requested{false};
   bool bounded_k2_to_k1_target_authority_qualification_requested{false};
   bool bounded_m1_o5_death_accounting_qualification_requested{false};
+  bool bounded_direct_gamma_carrier_conformance_qualification_requested{
+      false};
   bool configurable_pair_total_caps_disabled{false};
   bool downstream_static_confidence_caps_enabled{true};
   bool operational_deadline_reached{false};
@@ -322,6 +326,12 @@ struct Report {
   ExactDirectMorseM1O5DeathAccountingVerification
       m1_o5_death_accounting_verification{};
 
+  bool direct_morse_gamma_carrier_conformance_required{false};
+  bool direct_morse_gamma_carrier_conformance_attempted{false};
+  bool direct_morse_gamma_carrier_conformance_certified{false};
+  ExactDirectMorseGammaCarrierConformanceResult
+      direct_morse_gamma_carrier_conformance{};
+
   bool vertical_target_replay_diagnostic_attempted{false};
   bool vertical_target_replay_diagnostic_callback_invoked{false};
   bool vertical_target_replay_diagnostic_advance_certified{false};
@@ -404,6 +414,12 @@ struct Report {
       "bounded_m1_o5_death_accounting_qualification";
 }
 
+[[nodiscard]] bool bounded_direct_gamma_carrier_conformance_qualification(
+    const Options& options) noexcept {
+  return options.mode ==
+      "bounded_direct_gamma_carrier_conformance_qualification";
+}
+
 [[nodiscard]] Report make_report(const Options& options) {
   Report report;
   report.options = options;
@@ -413,10 +429,15 @@ struct Report {
       bounded_k2_to_k1_target_authority_qualification(options);
   report.bounded_m1_o5_death_accounting_qualification_requested =
       bounded_m1_o5_death_accounting_qualification(options);
+  report
+      .bounded_direct_gamma_carrier_conformance_qualification_requested =
+      bounded_direct_gamma_carrier_conformance_qualification(options);
   report.k2_to_k1_target_authority_required =
       bounded_k2_to_k1_target_authority_qualification(options);
   report.m1_o5_death_accounting_required =
       bounded_m1_o5_death_accounting_qualification(options);
+  report.direct_morse_gamma_carrier_conformance_required =
+      bounded_direct_gamma_carrier_conformance_qualification(options);
   // The core result defaults this caller-relative premise to true.  A mode
   // that did not execute O5 must instead publish a completely dormant receipt.
   report.m1_o5_death_accounting
@@ -464,7 +485,8 @@ void print_usage(std::ostream& output) {
          "--point-count N [options]\n"
       << "  --mode resident_timed|complete_resident_diagnostic|"
          "bounded_k2_k1_target_authority_qualification|"
-         "bounded_m1_o5_death_accounting_qualification\n"
+         "bounded_m1_o5_death_accounting_qualification|"
+         "bounded_direct_gamma_carrier_conformance_qualification\n"
       << "  --family uniform_latin|eight_clusters\n"
       << "  --maximum-order K (alias: --K; 1 <= K <= 10)\n"
       << "  --support-work-budget N (cap for each P8l work axis)\n"
@@ -532,11 +554,14 @@ void parse_options(int argc, char** argv, Options& options) {
       options.mode !=
           "bounded_k2_k1_target_authority_qualification" &&
       options.mode !=
-          "bounded_m1_o5_death_accounting_qualification") {
+          "bounded_m1_o5_death_accounting_qualification" &&
+      options.mode !=
+          "bounded_direct_gamma_carrier_conformance_qualification") {
     throw std::invalid_argument(
         "--mode must be resident_timed, complete_resident_diagnostic, or "
         "bounded_k2_k1_target_authority_qualification, or "
-        "bounded_m1_o5_death_accounting_qualification");
+        "bounded_m1_o5_death_accounting_qualification, or "
+        "bounded_direct_gamma_carrier_conformance_qualification");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -1215,6 +1240,237 @@ make_vertical_journal_budget() {
   return value;
 }
 
+[[nodiscard]] std::size_t checked_power_of_two(
+    std::size_t exponent,
+    std::string_view description) {
+  std::size_t value = 1U;
+  for (std::size_t index = 0U; index < exponent; ++index) {
+    value = checked_multiply(value, 2U, description);
+  }
+  return value;
+}
+
+[[nodiscard]] ExactDirectMorseGammaCarrierConformanceBudget
+make_bounded_direct_gamma_carrier_conformance_budget(
+    std::size_t point_count,
+    std::size_t order) {
+  const std::size_t facet_count = bounded_binomial(point_count, order);
+  const std::size_t coface_count =
+      bounded_binomial(point_count, order + 1U);
+  const std::size_t activation_count = checked_add(
+      facet_count,
+      coface_count,
+      "bounded direct--Gamma activation capacity overflow");
+  const std::size_t exhaustive_run_count = checked_add(
+      activation_count,
+      1U,
+      "bounded direct--Gamma exhaustive-run capacity overflow");
+  const std::size_t strict_gamma_union_count = checked_multiply(
+      order,
+      coface_count,
+      "bounded direct--Gamma strict-Gamma union capacity overflow");
+
+  std::size_t critical_candidate_count = 0U;
+  for (std::size_t support_size = 1U;
+       support_size <= std::min(std::size_t{4U}, point_count);
+       ++support_size) {
+    critical_candidate_count = checked_add(
+        critical_candidate_count,
+        bounded_binomial(point_count, support_size),
+        "bounded direct--Gamma critical-candidate capacity overflow");
+  }
+  const std::size_t critical_point_classification_count = checked_multiply(
+      critical_candidate_count,
+      point_count,
+      "bounded direct--Gamma critical-classification capacity overflow");
+
+  std::size_t selected_event_support_count = 0U;
+  const std::size_t maximum_selected_support_size =
+      std::min({std::size_t{4U}, order + 1U, point_count});
+  for (std::size_t support_size = 2U;
+       support_size <= maximum_selected_support_size;
+       ++support_size) {
+    selected_event_support_count = checked_add(
+        selected_event_support_count,
+        bounded_binomial(point_count, support_size),
+        "bounded direct--Gamma selected-event capacity overflow");
+  }
+  const std::size_t event_projection_count =
+      std::min(activation_count, selected_event_support_count);
+  const std::size_t history_point_id_scan_count = checked_add(
+      checked_multiply(
+          order,
+          facet_count,
+          "bounded direct--Gamma history-facet PointId capacity overflow"),
+      checked_multiply(
+          order + 1U,
+          coface_count,
+          "bounded direct--Gamma history-coface PointId capacity overflow"),
+      "bounded direct--Gamma history PointId capacity overflow");
+  const std::size_t catalog_point_id_scan_count = checked_multiply(
+      order + 1U,
+      event_projection_count,
+      "bounded direct--Gamma catalog PointId capacity overflow");
+
+  ExactDirectMorseGammaCarrierConformanceBudget budget;
+  auto& overlay = budget.overlay_budget;
+  overlay.critical_catalog_budget = {
+      critical_candidate_count, critical_point_classification_count};
+  auto& history = overlay.reduced_gamma_history_budget;
+  history.gamma_budget = {
+      facet_count, coface_count, strict_gamma_union_count};
+  history.maximum_activation_level_count = activation_count;
+  history.maximum_total_facet_work_count = checked_multiply(
+      exhaustive_run_count,
+      facet_count,
+      "bounded direct--Gamma total facet-work capacity overflow");
+  history.maximum_total_coface_work_count = checked_multiply(
+      exhaustive_run_count,
+      coface_count,
+      "bounded direct--Gamma total coface-work capacity overflow");
+  history.maximum_total_union_work_count = checked_multiply(
+      exhaustive_run_count,
+      strict_gamma_union_count,
+      "bounded direct--Gamma total union-work capacity overflow");
+  history.maximum_node_count = coface_count;
+  history.maximum_child_reference_count = coface_count - 1U;
+  history.maximum_group_root_reference_count = coface_count - 1U;
+  history.maximum_group_count = activation_count;
+  history.maximum_group_newly_active_facet_count = facet_count;
+  history.maximum_group_equal_level_coface_count = coface_count;
+  history.maximum_delta_facet_count = facet_count;
+  history.maximum_delta_point_reference_count = checked_multiply(
+      order,
+      facet_count,
+      "bounded direct--Gamma delta PointId capacity overflow");
+  overlay.maximum_event_projection_count = event_projection_count;
+  overlay.maximum_group_overlay_count = activation_count;
+  overlay.maximum_label_slot_count = activation_count;
+  overlay.maximum_history_point_id_scan_count =
+      history_point_id_scan_count;
+  overlay.maximum_catalog_point_id_scan_count =
+      catalog_point_id_scan_count;
+  overlay.maximum_group_event_reference_count = event_projection_count;
+
+  const std::size_t subset_count = checked_power_of_two(
+      point_count,
+      "bounded direct--Gamma power-set capacity overflow");
+  const std::size_t half_subset_count = subset_count / 2U;
+  const std::size_t forest_reference_count = checked_multiply(
+      point_count,
+      half_subset_count,
+      "bounded direct--Gamma multiorder forest-reference capacity overflow");
+  const std::size_t group_scratch_count = checked_multiply(
+      6U,
+      facet_count,
+      "bounded direct--Gamma carrier scratch capacity overflow");
+  const std::size_t parent_hop_count = checked_multiply(
+      2U,
+      checked_multiply(
+          forest_reference_count,
+          facet_count,
+          "bounded direct--Gamma parent-hop capacity overflow"),
+      "bounded direct--Gamma parent-hop capacity overflow");
+  const int binary64_exponent_span_signed =
+      std::numeric_limits<double>::max_exponent -
+      std::numeric_limits<double>::min_exponent;
+  const std::size_t binary64_exact_coordinate_span = checked_add(
+      static_cast<std::size_t>(binary64_exponent_span_signed),
+      static_cast<std::size_t>(std::numeric_limits<double>::digits),
+      "bounded direct--Gamma exact-coordinate bit capacity overflow");
+  const std::size_t exact_level_integer_bit_count = checked_multiply(
+      8U,
+      binary64_exact_coordinate_span,
+      "bounded direct--Gamma exact-level bit capacity overflow");
+
+  auto& carrier = budget.carrier_cut_budget;
+  carrier.maximum_forest_birth_record_scan_count = subset_count;
+  carrier.maximum_forest_node_scan_count = subset_count;
+  carrier.maximum_forest_batch_scan_count = subset_count;
+  carrier.maximum_forest_atomic_group_scan_count = subset_count;
+  carrier.maximum_forest_saddle_scan_count = subset_count;
+  carrier.maximum_forest_arm_binding_scan_count = forest_reference_count;
+  carrier.maximum_forest_child_reference_scan_count = forest_reference_count;
+  carrier.maximum_forest_final_root_scan_count = subset_count;
+  carrier.maximum_component_state_count = subset_count;
+  carrier.maximum_node_marker_state_count = subset_count;
+  carrier.maximum_index_entry_count = facet_count;
+  carrier.maximum_group_carrier_scratch_count = group_scratch_count;
+  carrier.maximum_group_prior_root_scratch_count = group_scratch_count;
+  carrier.maximum_parent_hop_count = parent_hop_count;
+  carrier.maximum_exact_level_comparison_count = forest_reference_count;
+  carrier.maximum_single_exact_level_integer_bit_count =
+      exact_level_integer_bit_count;
+  carrier.maximum_logical_output_entry_count = facet_count;
+
+  const std::size_t carrier_anchor_count = checked_multiply(
+      checked_multiply(
+          2U,
+          activation_count,
+          "bounded direct--Gamma carrier-anchor capacity overflow"),
+      facet_count,
+      "bounded direct--Gamma carrier-anchor capacity overflow");
+  const std::size_t gamma_lookup_count = checked_multiply(
+      carrier_anchor_count,
+      facet_count,
+      "bounded direct--Gamma component/facet lookup capacity overflow");
+  const std::size_t group_event_reference_count = checked_add(
+      facet_count,
+      checked_multiply(
+          2U,
+          coface_count,
+          "bounded direct--Gamma group-event capacity overflow"),
+      "bounded direct--Gamma group-event capacity overflow");
+  const std::size_t coface_membership_count = checked_multiply(
+      order + 1U,
+      coface_count,
+      "bounded direct--Gamma coface-membership capacity overflow");
+  const std::size_t group_component_membership_count = checked_multiply(
+      checked_add(
+          coface_membership_count,
+          activation_count,
+          "bounded direct--Gamma component-membership capacity overflow"),
+      facet_count,
+      "bounded direct--Gamma component-membership capacity overflow");
+  const std::size_t gamma_label_comparison_count = checked_multiply(
+      coface_membership_count,
+      checked_add(
+          coface_count,
+          order + 1U,
+          "bounded direct--Gamma label-comparison capacity overflow"),
+      "bounded direct--Gamma label-comparison capacity overflow");
+  budget.maximum_direct_role_scan_count = activation_count;
+  budget.maximum_forest_birth_scan_count = subset_count;
+  budget.maximum_forest_saddle_scan_count = subset_count;
+  budget.maximum_forest_atomic_group_scan_count = subset_count;
+  budget.maximum_activation_level_count = activation_count;
+  budget.maximum_gamma_transition_build_count = activation_count;
+  budget.maximum_checkpoint_count = activation_count;
+  budget.maximum_group_audit_count = activation_count;
+  budget.maximum_carrier_anchor_scan_count = carrier_anchor_count;
+  budget.maximum_gamma_component_scan_count = gamma_lookup_count;
+  budget.maximum_gamma_facet_scan_count = gamma_lookup_count;
+  budget.maximum_group_event_reference_scan_count =
+      group_event_reference_count;
+  budget.maximum_arm_binding_scan_count = coface_membership_count;
+  budget.maximum_gamma_incidence_join_count = coface_membership_count;
+  budget.maximum_carrier_cut_entry_lookup_count =
+      coface_membership_count;
+  budget.maximum_group_component_membership_count =
+      group_component_membership_count;
+  budget.maximum_gamma_label_comparison_count =
+      gamma_label_comparison_count;
+  budget.maximum_logical_scratch_entry_count = group_scratch_count;
+  budget.maximum_logical_output_entry_count = checked_add(
+      checked_multiply(
+          2U,
+          activation_count,
+          "bounded direct--Gamma logical-output capacity overflow"),
+      1U,
+      "bounded direct--Gamma logical-output capacity overflow");
+  return budget;
+}
+
 [[nodiscard]] ExactPersistentReducedGammaOrderHistoryBudget
 make_bounded_gamma2_history_budget(std::size_t point_count) {
   constexpr std::size_t order = 2U;
@@ -1430,6 +1686,55 @@ make_bounded_m1_o5_death_accounting_budget() noexcept {
       return "none";
   }
   return "m1_o5_death_accounting_unknown_decision";
+}
+
+[[nodiscard]] std::string_view
+direct_morse_gamma_carrier_conformance_stop_detail(
+    ExactDirectMorseGammaCarrierConformanceDecision decision) noexcept {
+  switch (decision) {
+    case ExactDirectMorseGammaCarrierConformanceDecision::not_certified:
+      return "direct_morse_gamma_carrier_conformance_not_certified";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_capacity_overflow:
+      return "direct_morse_gamma_carrier_conformance_capacity_overflow";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_budget_exhausted:
+      return "direct_morse_gamma_carrier_conformance_budget_exhausted";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_allocation_failed:
+      return "direct_morse_gamma_carrier_conformance_allocation_failed";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_point_count_or_order_rejected:
+      return "direct_morse_gamma_carrier_conformance_point_count_or_order_rejected";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_direct_forest_replay_rejected:
+      return "direct_morse_gamma_carrier_conformance_direct_forest_replay_rejected";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_overlay_rejected:
+      return "direct_morse_gamma_carrier_conformance_overlay_rejected";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_direct_role_overlay_mismatch:
+      return "direct_morse_gamma_carrier_conformance_direct_role_overlay_mismatch";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_direct_group_overlay_mismatch:
+      return "direct_morse_gamma_carrier_conformance_direct_group_overlay_mismatch";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_gamma_residual_group_rejected:
+      return "direct_morse_gamma_carrier_conformance_gamma_residual_group_rejected";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_gamma_transition_rejected:
+      return "direct_morse_gamma_carrier_conformance_gamma_transition_rejected";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_carrier_cut_replay_rejected:
+      return "direct_morse_gamma_carrier_conformance_carrier_cut_replay_rejected";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        no_conformance_carrier_partition_mismatch:
+      return "direct_morse_gamma_carrier_conformance_carrier_partition_mismatch";
+    case ExactDirectMorseGammaCarrierConformanceDecision::
+        complete_bounded_single_order_direct_gamma_carrier_group_conformance:
+      return "none";
+  }
+  return "direct_morse_gamma_carrier_conformance_unknown_decision";
 }
 
 [[nodiscard]] std::string_view k2_to_k1_target_authority_stop_detail(
@@ -1846,6 +2151,113 @@ void emit_m1_o5_batch_audits_json(
   std::cout << ']';
 }
 
+void emit_direct_morse_gamma_carrier_checkpoints_json(
+    std::span<const ExactDirectMorseGammaCarrierCheckpointAudit>
+        checkpoints) {
+  std::cout << '[';
+  for (std::size_t index = 0U; index < checkpoints.size(); ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    const auto& checkpoint = checkpoints[index];
+    std::cout
+        << "{\"activation_level_index\":"
+        << checkpoint.activation_level_index
+        << ",\"squared_level\":{\"numerator\":\""
+        << json_escape(checkpoint.squared_level.numerator_string())
+        << "\",\"denominator\":\""
+        << json_escape(checkpoint.squared_level.denominator_string())
+        << "\"},\"direct_batch_present\":"
+        << (checkpoint.direct_batch_present ? "true" : "false")
+        << ",\"strict_direct_carrier_count\":"
+        << checkpoint.strict_direct_carrier_count
+        << ",\"strict_gamma_component_count\":"
+        << checkpoint.strict_gamma_component_count
+        << ",\"strict_birth_anchor_count\":"
+        << checkpoint.strict_birth_anchor_count
+        << ",\"closed_direct_carrier_count\":"
+        << checkpoint.closed_direct_carrier_count
+        << ",\"closed_gamma_component_count\":"
+        << checkpoint.closed_gamma_component_count
+        << ",\"closed_birth_anchor_count\":"
+        << checkpoint.closed_birth_anchor_count
+        << ",\"gamma_group_count\":"
+        << checkpoint.gamma_group_count
+        << ",\"silent_gamma_group_count\":"
+        << checkpoint.silent_gamma_group_count
+        << ",\"strict_partition_bijective\":"
+        << (checkpoint.strict_partition_bijective ? "true" : "false")
+        << ",\"closed_partition_bijective\":"
+        << (checkpoint.closed_partition_bijective ? "true" : "false")
+        << '}';
+  }
+  std::cout << ']';
+}
+
+void emit_direct_morse_gamma_group_audits_json(
+    std::span<const ExactDirectMorseGammaGroupAudit> audits) {
+  std::cout << '[';
+  for (std::size_t index = 0U; index < audits.size(); ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    const auto& audit = audits[index];
+    std::cout
+        << "{\"group_audit_index\":" << index
+        << ",\"squared_level\":{\"numerator\":\""
+        << json_escape(audit.squared_level.numerator_string())
+        << "\",\"denominator\":\""
+        << json_escape(audit.squared_level.denominator_string())
+        << "\"},\"gamma_kind\":"
+        << static_cast<unsigned>(audit.gamma_kind)
+        << ",\"classification\":"
+        << static_cast<unsigned>(audit.classification)
+        << ",\"direct_birth_role_count\":"
+        << audit.direct_birth_role_count
+        << ",\"direct_saddle_role_count\":"
+        << audit.direct_saddle_role_count
+        << ",\"residual_newly_active_facet_count\":"
+        << audit.residual_newly_active_facet_count
+        << ",\"residual_equal_level_coface_count\":"
+        << audit.residual_equal_level_coface_count
+        << ",\"gamma_prior_root_count\":"
+        << audit.gamma_prior_root_count
+        << ",\"direct_prior_root_count\":";
+    if (audit.direct_prior_root_count.has_value()) {
+      std::cout << *audit.direct_prior_root_count;
+    } else {
+      std::cout << "null";
+    }
+    std::cout
+        << ",\"coverage_delta_present\":"
+        << (audit.coverage_delta_present ? "true" : "false")
+        << ",\"delta_facet_count\":" << audit.delta_facet_count
+        << ",\"delta_point_count\":" << audit.delta_point_count
+        << ",\"direct_arm_binding_count\":"
+        << audit.direct_arm_binding_count
+        << ",\"strict_gamma_component_count\":"
+        << audit.strict_gamma_component_count
+        << ",\"latent_strict_gamma_component_count\":"
+        << audit.latent_strict_gamma_component_count
+        << ",\"resolved_strict_gamma_component_count\":"
+        << audit.resolved_strict_gamma_component_count
+        << ",\"fully_redundant_delta\":"
+        << (audit.fully_redundant_delta ? "true" : "false")
+        << ",\"direct_atomic_group_present\":"
+        << (audit.direct_atomic_group_present ? "true" : "false")
+        << ",\"direct_arm_strict_component_bijection\":"
+        << (audit.direct_arm_strict_component_bijection
+                ? "true"
+                : "false")
+        << ",\"silent_one_root_zero_point_continuation\":"
+        << (audit.silent_one_root_zero_point_continuation
+                ? "true"
+                : "false")
+        << '}';
+  }
+  std::cout << ']';
+}
+
 void emit_report(const Report& report) {
   const auto boolean = [](bool value) {
     return value ? "true" : "false";
@@ -1864,8 +2276,8 @@ void emit_report(const Report& report) {
                  : "unassessed");
   std::cout
       << "{\n"
-      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v6\",\n"
-      << "  \"phase\":\"15_conditional_direct_equal_level_m1_o5_death_accounting\",\n"
+      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v7\",\n"
+      << "  \"phase\":\"15_bounded_direct_gamma_carrier_group_conformance\",\n"
       << "  \"backend\":\"reference_cpu\",\n"
       << "  \"profile\":\"hgp_reduced\",\n"
       << "  \"mode\":\"" << json_escape(report.options.mode)
@@ -1907,6 +2319,8 @@ void emit_report(const Report& report) {
       << "  \"all_naturality_squares_replayed\":false,\n"
       << "  \"vertical_maps_complete\":false,\n"
       << "  \"global_m1_claimed\":false,\n"
+      << "  \"product_sparse_silent_source_complete\":false,\n"
+      << "  \"forest_semantics_exact\":false,\n"
       << "  \"product_architecture_claimed\":false,\n"
       << "  \"scalable_50k_claimed\":false,\n"
       << "  \"warm_e2e_protocol_executed\":false,\n"
@@ -1926,14 +2340,22 @@ void emit_report(const Report& report) {
              report
                  .bounded_m1_o5_death_accounting_qualification_requested)
       << ",\n"
+      << "  \"bounded_direct_gamma_carrier_conformance_qualification_requested\":"
+      << boolean(
+             report
+                 .bounded_direct_gamma_carrier_conformance_qualification_requested)
+      << ",\n"
       << "  \"attempt_kind\":\""
-      << (report.bounded_m1_o5_death_accounting_qualification_requested
-              ? "fail_closed_bounded_m1_o5_death_accounting_qualification"
-              : (report.bounded_k2_to_k1_target_authority_qualification_requested
-                     ? "fail_closed_bounded_k2_to_k1_target_authority_qualification"
-                     : (report.complete_hierarchy_attempt_requested
-                            ? "right_censorable_full_pipeline_diagnostic"
-                            : "fail_fast_capacity_diagnostic")))
+      << (report
+                  .bounded_direct_gamma_carrier_conformance_qualification_requested
+              ? "fail_closed_bounded_direct_gamma_carrier_conformance_qualification"
+              : (report.bounded_m1_o5_death_accounting_qualification_requested
+                     ? "fail_closed_bounded_m1_o5_death_accounting_qualification"
+                     : (report.bounded_k2_to_k1_target_authority_qualification_requested
+                            ? "fail_closed_bounded_k2_to_k1_target_authority_qualification"
+                            : (report.complete_hierarchy_attempt_requested
+                                   ? "right_censorable_full_pipeline_diagnostic"
+                                   : "fail_fast_capacity_diagnostic"))))
       << "\",\n"
       << "  \"configured_pair_total_caps_disabled\":"
       << boolean(report.configurable_pair_total_caps_disabled) << ",\n"
@@ -1982,16 +2404,21 @@ void emit_report(const Report& report) {
   std::cout
       << "},\n"
       << "  \"timing_scope\":\""
-      << (report.bounded_m1_o5_death_accounting_qualification_requested
+      << (report
+                  .bounded_direct_gamma_carrier_conformance_qualification_requested
               ? "attempted_single_process_cpu_generation_to_certified_forest_"
-                "and_bounded_fresh_m1_o5_death_accounting"
-              : (report.bounded_k2_to_k1_target_authority_qualification_requested
-                     ? "attempted_single_process_cpu_generation_to_conditional_"
-                       "vertical_journal_and_bounded_fresh_gamma2_emst_k1_"
-                       "observed_label_target_authority"
-                     : "attempted_single_process_cpu_generation_to_materialized_"
-                       "forest_and_forest_relative_vertical_target_pipeline_and_"
-                       "conditional_vertical_journal"))
+                "and_bounded_fresh_single_order_direct_gamma_carrier_group_"
+                "conformance"
+              : (report.bounded_m1_o5_death_accounting_qualification_requested
+                     ? "attempted_single_process_cpu_generation_to_certified_forest_"
+                       "and_bounded_fresh_m1_o5_death_accounting"
+                     : (report.bounded_k2_to_k1_target_authority_qualification_requested
+                            ? "attempted_single_process_cpu_generation_to_conditional_"
+                              "vertical_journal_and_bounded_fresh_gamma2_emst_k1_"
+                              "observed_label_target_authority"
+                            : "attempted_single_process_cpu_generation_to_materialized_"
+                              "forest_and_forest_relative_vertical_target_pipeline_and_"
+                              "conditional_vertical_journal")))
       << "\",\n"
       << "  \"architecture_audit_complete\":"
       << boolean(report.architecture_audit_complete) << ",\n"
@@ -2005,7 +2432,12 @@ void emit_report(const Report& report) {
       << "  \"architecture_audit_scope\":"
          "\"nonbounded_product_path_excluding_explicit_bounded_oracle\",\n"
       << "  \"bounded_oracle_gamma_materialized_transiently\":"
-      << boolean(report.k2_to_k1_bounded_exhaustive_gamma_oracle_used)
+      << boolean(
+             report.k2_to_k1_bounded_exhaustive_gamma_oracle_used ||
+             report.direct_morse_gamma_carrier_conformance
+                 .bounded_exhaustive_gamma_oracle_used ||
+             report.direct_morse_gamma_carrier_conformance.counters
+                     .overlay_build_count != 0U)
       << ",\n"
       << "  \"bounded_oracle_global_structure_persisted\":false,\n"
       << "  \"higher_order_delaunay_materialized\":false,\n"
@@ -2068,6 +2500,8 @@ void emit_report(const Report& report) {
       << report.timings.m1_o5_death_accounting_verify_ms
       << ",\"m1_o5_death_accounting\":"
       << report.timings.m1_o5_death_accounting_ms
+      << ",\"direct_morse_gamma_carrier_conformance\":"
+      << report.timings.direct_morse_gamma_carrier_conformance_ms
       << ",\"vertical_target_replay_diagnostic\":"
       << report.timings.vertical_target_replay_diagnostic_ms
       << ",\"total\":" << report.timings.total_ms << "},\n"
@@ -2889,6 +3323,345 @@ void emit_report(const Report& report) {
       << boolean(m1_o5.scalable_50k_claimed)
       << ",\"no_partial_scientific_payload_published_on_failure\":"
       << boolean(m1_o5.no_partial_scientific_payload_published_on_failure)
+      << "},\n";
+
+  const auto& conformance =
+      report.direct_morse_gamma_carrier_conformance;
+  const auto& conformance_budget = conformance.requested_budget;
+  const auto& overlay_budget = conformance_budget.overlay_budget;
+  const auto& history_budget =
+      overlay_budget.reduced_gamma_history_budget;
+  const auto& gamma_budget = history_budget.gamma_budget;
+  const auto& carrier_cut_budget =
+      conformance_budget.carrier_cut_budget;
+  const auto& conformance_counters = conformance.counters;
+  std::cout
+      << "  \"direct_morse_gamma_carrier_conformance\":{\"required\":"
+      << boolean(report.direct_morse_gamma_carrier_conformance_required)
+      << ",\"attempted\":"
+      << boolean(report.direct_morse_gamma_carrier_conformance_attempted)
+      << ",\"certified_bounded_single_order_conformance\":"
+      << boolean(report.direct_morse_gamma_carrier_conformance_certified)
+      << ",\"schema_version\":" << conformance.schema_version
+      << ",\"backend\":\""
+      << ExactDirectMorseGammaCarrierConformanceResult::backend
+      << "\",\"profile\":\""
+      << ExactDirectMorseGammaCarrierConformanceResult::profile
+      << "\",\"mode\":\""
+      << ExactDirectMorseGammaCarrierConformanceResult::mode
+      << "\",\"deployment_status\":\""
+      << ExactDirectMorseGammaCarrierConformanceResult::deployment_status
+      << "\",\"public_status\":\""
+      << ExactDirectMorseGammaCarrierConformanceResult::public_status
+      << "\",\"proof_basis\":\""
+      << ExactDirectMorseGammaCarrierConformanceResult::proof_basis
+      << "\",\"decision\":"
+      << static_cast<unsigned>(conformance.decision)
+      << ",\"scope\":" << static_cast<unsigned>(conformance.scope)
+      << ",\"builder_includes_fresh_verifier\":"
+      << boolean(report.direct_morse_gamma_carrier_conformance_attempted)
+      << ",\"external_verifier_replay_performed\":false"
+      << ",\"timing_includes_embedded_fresh_verifier\":"
+      << boolean(report.direct_morse_gamma_carrier_conformance_attempted)
+      << ",\"requested_budget\":{\"overlay\":{"
+         "\"critical_catalog\":{\"candidates\":"
+      << overlay_budget.critical_catalog_budget.maximum_candidate_count
+      << ",\"point_classifications\":"
+      << overlay_budget.critical_catalog_budget
+             .maximum_point_classification_count
+      << "},\"reduced_gamma_history\":{\"gamma\":{"
+         "\"facets\":"
+      << gamma_budget.maximum_enumerated_facet_count
+      << ",\"cofaces\":"
+      << gamma_budget.maximum_enumerated_coface_count
+      << ",\"union_attempts\":"
+      << gamma_budget.maximum_union_attempt_count
+      << "},\"activation_levels\":"
+      << history_budget.maximum_activation_level_count
+      << ",\"total_facet_work\":"
+      << history_budget.maximum_total_facet_work_count
+      << ",\"total_coface_work\":"
+      << history_budget.maximum_total_coface_work_count
+      << ",\"total_union_work\":"
+      << history_budget.maximum_total_union_work_count
+      << ",\"nodes\":" << history_budget.maximum_node_count
+      << ",\"child_references\":"
+      << history_budget.maximum_child_reference_count
+      << ",\"group_root_references\":"
+      << history_budget.maximum_group_root_reference_count
+      << ",\"groups\":" << history_budget.maximum_group_count
+      << ",\"group_newly_active_facets\":"
+      << history_budget.maximum_group_newly_active_facet_count
+      << ",\"group_equal_level_cofaces\":"
+      << history_budget.maximum_group_equal_level_coface_count
+      << ",\"delta_facets\":"
+      << history_budget.maximum_delta_facet_count
+      << ",\"delta_point_references\":"
+      << history_budget.maximum_delta_point_reference_count
+      << "},\"event_projections\":"
+      << overlay_budget.maximum_event_projection_count
+      << ",\"group_overlays\":"
+      << overlay_budget.maximum_group_overlay_count
+      << ",\"label_slots\":"
+      << overlay_budget.maximum_label_slot_count
+      << ",\"history_point_id_scans\":"
+      << overlay_budget.maximum_history_point_id_scan_count
+      << ",\"catalog_point_id_scans\":"
+      << overlay_budget.maximum_catalog_point_id_scan_count
+      << ",\"group_event_references\":"
+      << overlay_budget.maximum_group_event_reference_count
+      << "},\"carrier_cut\":{\"forest_birth_record_scans\":"
+      << carrier_cut_budget.maximum_forest_birth_record_scan_count
+      << ",\"forest_node_scans\":"
+      << carrier_cut_budget.maximum_forest_node_scan_count
+      << ",\"forest_batch_scans\":"
+      << carrier_cut_budget.maximum_forest_batch_scan_count
+      << ",\"forest_atomic_group_scans\":"
+      << carrier_cut_budget.maximum_forest_atomic_group_scan_count
+      << ",\"forest_saddle_scans\":"
+      << carrier_cut_budget.maximum_forest_saddle_scan_count
+      << ",\"forest_arm_binding_scans\":"
+      << carrier_cut_budget.maximum_forest_arm_binding_scan_count
+      << ",\"forest_child_reference_scans\":"
+      << carrier_cut_budget.maximum_forest_child_reference_scan_count
+      << ",\"forest_final_root_scans\":"
+      << carrier_cut_budget.maximum_forest_final_root_scan_count
+      << ",\"component_states\":"
+      << carrier_cut_budget.maximum_component_state_count
+      << ",\"node_marker_states\":"
+      << carrier_cut_budget.maximum_node_marker_state_count
+      << ",\"index_entries\":"
+      << carrier_cut_budget.maximum_index_entry_count
+      << ",\"group_carrier_scratch\":"
+      << carrier_cut_budget.maximum_group_carrier_scratch_count
+      << ",\"group_prior_root_scratch\":"
+      << carrier_cut_budget.maximum_group_prior_root_scratch_count
+      << ",\"parent_hops\":"
+      << carrier_cut_budget.maximum_parent_hop_count
+      << ",\"exact_level_comparisons\":"
+      << carrier_cut_budget.maximum_exact_level_comparison_count
+      << ",\"single_exact_level_integer_bits\":"
+      << carrier_cut_budget.maximum_single_exact_level_integer_bit_count
+      << ",\"logical_output_entries\":"
+      << carrier_cut_budget.maximum_logical_output_entry_count
+      << "},\"direct_role_scans\":"
+      << conformance_budget.maximum_direct_role_scan_count
+      << ",\"forest_birth_scans\":"
+      << conformance_budget.maximum_forest_birth_scan_count
+      << ",\"forest_saddle_scans\":"
+      << conformance_budget.maximum_forest_saddle_scan_count
+      << ",\"forest_atomic_group_scans\":"
+      << conformance_budget.maximum_forest_atomic_group_scan_count
+      << ",\"activation_levels\":"
+      << conformance_budget.maximum_activation_level_count
+      << ",\"gamma_transition_builds\":"
+      << conformance_budget.maximum_gamma_transition_build_count
+      << ",\"checkpoints\":"
+      << conformance_budget.maximum_checkpoint_count
+      << ",\"group_audits\":"
+      << conformance_budget.maximum_group_audit_count
+      << ",\"carrier_anchor_scans\":"
+      << conformance_budget.maximum_carrier_anchor_scan_count
+      << ",\"gamma_component_scans\":"
+      << conformance_budget.maximum_gamma_component_scan_count
+      << ",\"gamma_facet_scans\":"
+      << conformance_budget.maximum_gamma_facet_scan_count
+      << ",\"group_event_reference_scans\":"
+      << conformance_budget.maximum_group_event_reference_scan_count
+      << ",\"arm_binding_scans\":"
+      << conformance_budget.maximum_arm_binding_scan_count
+      << ",\"gamma_incidence_joins\":"
+      << conformance_budget.maximum_gamma_incidence_join_count
+      << ",\"carrier_cut_entry_lookups\":"
+      << conformance_budget.maximum_carrier_cut_entry_lookup_count
+      << ",\"group_component_memberships\":"
+      << conformance_budget.maximum_group_component_membership_count
+      << ",\"gamma_label_comparisons\":"
+      << conformance_budget.maximum_gamma_label_comparison_count
+      << ",\"logical_scratch_entries\":"
+      << conformance_budget.maximum_logical_scratch_entry_count
+      << ",\"logical_output_entries\":"
+      << conformance_budget.maximum_logical_output_entry_count
+      << "},\"receipt\":{\"point_count\":" << conformance.point_count
+      << ",\"order\":" << conformance.order
+      << ",\"exhaustive_facet_count\":"
+      << conformance.exhaustive_facet_count
+      << ",\"exhaustive_coface_count\":"
+      << conformance.exhaustive_coface_count
+      << ",\"required_direct_role_scan_capacity\":"
+      << conformance.required_direct_role_scan_capacity
+      << ",\"required_forest_birth_scan_capacity\":"
+      << conformance.required_forest_birth_scan_capacity
+      << ",\"required_forest_saddle_scan_capacity\":"
+      << conformance.required_forest_saddle_scan_capacity
+      << ",\"required_forest_atomic_group_scan_capacity\":"
+      << conformance.required_forest_atomic_group_scan_capacity
+      << ",\"required_activation_level_capacity\":"
+      << conformance.required_activation_level_capacity
+      << ",\"required_carrier_anchor_scan_capacity\":"
+      << conformance.required_carrier_anchor_scan_capacity
+      << ",\"required_gamma_component_scan_capacity\":"
+      << conformance.required_gamma_component_scan_capacity
+      << ",\"required_gamma_facet_scan_capacity\":"
+      << conformance.required_gamma_facet_scan_capacity
+      << ",\"required_group_event_reference_scan_capacity\":"
+      << conformance.required_group_event_reference_scan_capacity
+      << ",\"required_arm_binding_scan_capacity\":"
+      << conformance.required_arm_binding_scan_capacity
+      << ",\"required_gamma_incidence_join_capacity\":"
+      << conformance.required_gamma_incidence_join_capacity
+      << ",\"required_carrier_cut_entry_lookup_capacity\":"
+      << conformance.required_carrier_cut_entry_lookup_capacity
+      << ",\"required_group_component_membership_capacity\":"
+      << conformance.required_group_component_membership_capacity
+      << ",\"required_gamma_label_comparison_capacity\":"
+      << conformance.required_gamma_label_comparison_capacity
+      << ",\"required_logical_scratch_entries\":"
+      << conformance.required_logical_scratch_entry_count
+      << ",\"required_checkpoint_capacity\":"
+      << conformance.required_checkpoint_capacity
+      << ",\"required_group_audit_capacity\":"
+      << conformance.required_group_audit_capacity
+      << ",\"required_logical_output_entries\":"
+      << conformance.required_logical_output_entry_count
+      << ",\"checkpoints\":";
+  emit_direct_morse_gamma_carrier_checkpoints_json(
+      conformance.checkpoints);
+  std::cout << ",\"group_audits\":";
+  emit_direct_morse_gamma_group_audits_json(conformance.group_audits);
+  std::cout
+      << "},\"counters\":{\"preflights\":"
+      << conformance_counters.preflight_count
+      << ",\"direct_forest_verifications\":"
+      << conformance_counters.direct_forest_verification_count
+      << ",\"overlay_builds\":"
+      << conformance_counters.overlay_build_count
+      << ",\"direct_role_scans\":"
+      << conformance_counters.direct_role_scan_count
+      << ",\"direct_birth_roles\":"
+      << conformance_counters.direct_birth_role_count
+      << ",\"direct_saddle_roles\":"
+      << conformance_counters.direct_saddle_role_count
+      << ",\"forest_birth_scans\":"
+      << conformance_counters.forest_birth_scan_count
+      << ",\"forest_saddle_scans\":"
+      << conformance_counters.forest_saddle_scan_count
+      << ",\"forest_atomic_group_scans\":"
+      << conformance_counters.forest_atomic_group_scan_count
+      << ",\"group_event_reference_scans\":"
+      << conformance_counters.group_event_reference_scan_count
+      << ",\"activation_levels\":"
+      << conformance_counters.activation_level_count
+      << ",\"gamma_transition_builds\":"
+      << conformance_counters.gamma_transition_build_count
+      << ",\"carrier_cut_builds\":"
+      << conformance_counters.carrier_cut_build_count
+      << ",\"checkpoints\":"
+      << conformance_counters.checkpoint_count
+      << ",\"strict_partition_bijections\":"
+      << conformance_counters.strict_partition_bijection_count
+      << ",\"closed_partition_bijections\":"
+      << conformance_counters.closed_partition_bijection_count
+      << ",\"carrier_anchor_scans\":"
+      << conformance_counters.carrier_anchor_scan_count
+      << ",\"gamma_component_scans\":"
+      << conformance_counters.gamma_component_scan_count
+      << ",\"gamma_facet_scans\":"
+      << conformance_counters.gamma_facet_scan_count
+      << ",\"group_audits\":"
+      << conformance_counters.group_audit_count
+      << ",\"arm_binding_scans\":"
+      << conformance_counters.arm_binding_scan_count
+      << ",\"gamma_incidence_joins\":"
+      << conformance_counters.gamma_incidence_join_count
+      << ",\"carrier_cut_entry_lookups\":"
+      << conformance_counters.carrier_cut_entry_lookup_count
+      << ",\"group_component_memberships\":"
+      << conformance_counters.group_component_membership_count
+      << ",\"gamma_label_comparisons\":"
+      << conformance_counters.gamma_label_comparison_count
+      << ",\"maximum_logical_scratch_entries\":"
+      << conformance_counters.maximum_logical_scratch_entry_count
+      << ",\"direct_birth_groups\":"
+      << conformance_counters.direct_birth_group_count
+      << ",\"direct_saddle_groups\":"
+      << conformance_counters.direct_saddle_group_count
+      << ",\"mixed_direct_residual_groups\":"
+      << conformance_counters.mixed_direct_residual_group_count
+      << ",\"silent_residual_continuation_groups\":"
+      << conformance_counters.silent_residual_continuation_group_count
+      << ",\"silent_checkpoints\":"
+      << conformance_counters.silent_checkpoint_count
+      << "},\"scalar_preflight_certified\":"
+      << boolean(conformance.scalar_preflight_certified)
+      << ",\"source_forest_freshly_replayed_relative_to_facade\":"
+      << boolean(
+             conformance.source_forest_freshly_replayed_relative_to_facade)
+      << ",\"critical_catalog_gamma_overlay_freshly_replayed\":"
+      << boolean(
+             conformance.critical_catalog_gamma_overlay_freshly_replayed)
+      << ",\"direct_h0_catalog_roles_bidirectionally_reconciled\":"
+      << boolean(
+             conformance.direct_h0_catalog_roles_bidirectionally_reconciled)
+      << ",\"direct_atomic_groups_bidirectionally_reconciled\":"
+      << boolean(conformance.direct_atomic_groups_bidirectionally_reconciled)
+      << ",\"direct_saddle_arms_bidirectionally_reconciled_with_strict_gamma_components\":"
+      << boolean(
+             conformance
+                 .direct_saddle_arms_bidirectionally_reconciled_with_strict_gamma_components)
+      << ",\"carrier_partition_bijective_at_every_strict_checkpoint\":"
+      << boolean(
+             conformance
+                 .carrier_partition_bijective_at_every_strict_checkpoint)
+      << ",\"carrier_partition_bijective_at_every_closed_checkpoint\":"
+      << boolean(
+             conformance
+                 .carrier_partition_bijective_at_every_closed_checkpoint)
+      << ",\"every_gamma_group_classified_once\":"
+      << boolean(conformance.every_gamma_group_classified_once)
+      << ",\"every_provenance_free_gamma_group_is_silent_continuation\":"
+      << boolean(
+             conformance
+                 .every_provenance_free_gamma_group_is_silent_continuation)
+      << ",\"every_silent_continuation_preserves_one_root_and_adds_zero_points\":"
+      << boolean(
+             conformance
+                 .every_silent_continuation_preserves_one_root_and_adds_zero_points)
+      << ",\"bounded_carrier_faithfulness_replayed\":"
+      << boolean(conformance.bounded_carrier_faithfulness_replayed)
+      << ",\"bounded_silent_gamma_group_completeness_replayed\":"
+      << boolean(
+             conformance.bounded_silent_gamma_group_completeness_replayed)
+      << ",\"bounded_bidirectional_gamma_group_completeness_replayed\":"
+      << boolean(
+             conformance
+                 .bounded_bidirectional_gamma_group_completeness_replayed)
+      << ",\"bounded_exhaustive_gamma_oracle_used\":"
+      << boolean(conformance.bounded_exhaustive_gamma_oracle_used)
+      << ",\"product_sparse_silent_source_complete\":"
+      << boolean(conformance.product_sparse_silent_source_complete)
+      << ",\"global_morse_obligation_replayed\":"
+      << boolean(conformance.global_morse_obligation_replayed)
+      << ",\"global_m1_claimed\":"
+      << boolean(conformance.global_m1_claimed)
+      << ",\"all_naturality_squares_replayed\":"
+      << boolean(conformance.all_naturality_squares_replayed)
+      << ",\"vertical_maps_complete\":"
+      << boolean(conformance.vertical_maps_complete)
+      << ",\"forest_semantics_exact\":"
+      << boolean(conformance.forest_semantics_exact)
+      << ",\"scalable_50k_claimed\":"
+      << boolean(conformance.scalable_50k_claimed)
+      << ",\"gamma_cells_or_global_cofaces_persisted\":"
+      << boolean(conformance.gamma_cells_or_global_cofaces_persisted)
+      << ",\"higher_order_delaunay_materialized\":"
+      << boolean(conformance.higher_order_delaunay_materialized)
+      << ",\"public_status_claimed\":"
+      << boolean(conformance.public_status_claimed)
+      << ",\"no_partial_scientific_payload_published_on_failure\":"
+      << boolean(
+             conformance
+                 .no_partial_scientific_payload_published_on_failure)
       << "},\n"
       << "  \"vertical_target_replay_diagnostic\":{\"attempted\":"
       << boolean(report.vertical_target_replay_diagnostic_attempted)
@@ -3104,6 +3877,28 @@ void emit_report(const Report& report) {
     report.stop_category = "invalid_input";
     report.stop_detail =
         "bounded_m1_o5_death_accounting_requires_maximum_order_at_least_2";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 4;
+  }
+  if (bounded_direct_gamma_carrier_conformance_qualification(options) &&
+      options.point_count > 14U) {
+    report.terminal_stage = "input_preflight";
+    report.stop_category = "invalid_input";
+    report.stop_detail =
+        "bounded_direct_gamma_carrier_conformance_point_count_exceeds_14";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 4;
+  }
+  if (bounded_direct_gamma_carrier_conformance_qualification(options) &&
+      options.maximum_order < 2U) {
+    report.terminal_stage = "input_preflight";
+    report.stop_category = "invalid_input";
+    report.stop_detail =
+        "bounded_direct_gamma_carrier_conformance_requires_maximum_order_at_least_2";
     report.timings.total_ms =
         milliseconds(Clock::now() - total_start);
     emit_report(report);
@@ -3920,6 +4715,116 @@ void emit_report(const Report& report) {
       forest->counters.aggregate_closure_node_count;
   report.forest_aggregate_closure_step_call_count =
       forest->counters.aggregate_closure_step_call_count;
+  if (bounded_direct_gamma_carrier_conformance_qualification(options)) {
+    report.terminal_stage = "direct_morse_gamma_carrier_conformance";
+    if (!report.conditional_h0_candidate_certified ||
+        !report.no_forbidden_global_structure_materialized) {
+      report.stop_category = "certification_failure";
+      report.stop_detail =
+          "direct_morse_gamma_carrier_conformance_requires_certified_forest";
+      report.timings.total_ms =
+          milliseconds(Clock::now() - total_start);
+      emit_report(report);
+      return 3;
+    }
+
+    const ExactDirectMorseGammaCarrierConformanceBudget
+        conformance_budget =
+            make_bounded_direct_gamma_carrier_conformance_budget(
+                cloud.size(), options.maximum_order);
+    const Clock::time_point conformance_begin = Clock::now();
+    report.direct_morse_gamma_carrier_conformance_attempted = true;
+    report.direct_morse_gamma_carrier_conformance =
+        build_exact_direct_morse_gamma_carrier_conformance(
+            index,
+            cloud,
+            options.maximum_order,
+            facade,
+            event_journal,
+            seed_budget,
+            seed_journal,
+            forest_budget,
+            forest_config,
+            morsehgp3d::spatial::LbvhTraversalOrder::near_first,
+            *forest,
+            conformance_budget);
+    report.timings.direct_morse_gamma_carrier_conformance_ms =
+        milliseconds(Clock::now() - conformance_begin);
+
+    const auto& conformance =
+        report.direct_morse_gamma_carrier_conformance;
+    report.direct_morse_gamma_carrier_conformance_certified =
+        conformance.certified_bounded_conformance() &&
+        conformance.scalar_preflight_certified &&
+        conformance.source_forest_freshly_replayed_relative_to_facade &&
+        conformance.critical_catalog_gamma_overlay_freshly_replayed &&
+        conformance.direct_h0_catalog_roles_bidirectionally_reconciled &&
+        conformance.direct_atomic_groups_bidirectionally_reconciled &&
+        conformance
+            .direct_saddle_arms_bidirectionally_reconciled_with_strict_gamma_components &&
+        conformance
+            .carrier_partition_bijective_at_every_strict_checkpoint &&
+        conformance
+            .carrier_partition_bijective_at_every_closed_checkpoint &&
+        conformance.every_gamma_group_classified_once &&
+        conformance
+            .every_provenance_free_gamma_group_is_silent_continuation &&
+        conformance
+            .every_silent_continuation_preserves_one_root_and_adds_zero_points &&
+        conformance.bounded_carrier_faithfulness_replayed &&
+        conformance.bounded_silent_gamma_group_completeness_replayed &&
+        conformance
+            .bounded_bidirectional_gamma_group_completeness_replayed &&
+        conformance.bounded_exhaustive_gamma_oracle_used &&
+        !conformance.product_sparse_silent_source_complete &&
+        !conformance.global_morse_obligation_replayed &&
+        !conformance.global_m1_claimed &&
+        !conformance.all_naturality_squares_replayed &&
+        !conformance.vertical_maps_complete &&
+        !conformance.forest_semantics_exact &&
+        !conformance.scalable_50k_claimed &&
+        !conformance.gamma_cells_or_global_cofaces_persisted &&
+        !conformance.higher_order_delaunay_materialized &&
+        !conformance.public_status_claimed &&
+        conformance.no_partial_scientific_payload_published_on_failure;
+    report.no_forbidden_global_structure_materialized =
+        report.no_forbidden_global_structure_materialized &&
+        !conformance.gamma_cells_or_global_cofaces_persisted &&
+        !conformance.higher_order_delaunay_materialized &&
+        !conformance.public_status_claimed;
+    report.pipeline_complete =
+        report.direct_morse_gamma_carrier_conformance_certified;
+    if (report.pipeline_complete) {
+      report.stop_category = "none";
+      report.stop_detail = "none";
+    } else {
+      report.budget_exhausted =
+          conformance.decision ==
+          ExactDirectMorseGammaCarrierConformanceDecision::
+              no_conformance_budget_exhausted;
+      report.stop_category =
+          report.budget_exhausted
+              ? "budget_exhausted"
+              : (conformance.decision ==
+                         ExactDirectMorseGammaCarrierConformanceDecision::
+                             no_conformance_allocation_failed
+                     ? "operational_failure"
+                     : "certification_failure");
+      report.stop_detail =
+          direct_morse_gamma_carrier_conformance_stop_detail(
+              conformance.decision);
+    }
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    if (report.pipeline_complete) {
+      return 0;
+    }
+    if (report.budget_exhausted) {
+      return 2;
+    }
+    return report.stop_category == "operational_failure" ? 5 : 3;
+  }
   if (bounded_m1_o5_death_accounting_qualification(options)) {
     report.terminal_stage = "m1_o5_death_accounting";
     if (!report.conditional_h0_candidate_certified ||

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Short P8n runner gate including bounded direct M1/O5 accounting."""
+"""Short product-runner gate through bounded direct--Gamma conformance."""
 
 from __future__ import annotations
 
 import json
 import subprocess
 import sys
+from fractions import Fraction
+from math import comb
 from pathlib import Path
 
 
@@ -13,9 +15,59 @@ class ContractError(ValueError):
     """A sparse-pair product-runner invariant was violated."""
 
 
+DIRECT_GAMMA_PROOF_BASIS = (
+    "fresh_direct_forest_replay_and_fresh_bounded_critical_catalog_"
+    "reduced_gamma_overlay_then_bidirectional_h0_role_and_atomic_group_"
+    "reconciliation_plus_strict_closed_carrier_partition_bijections_at_"
+    "every_exhaustive_gamma_activation_level_plus_each_direct_saddle_"
+    "arm_exact_coface_incidence_strict_component_and_frozen_carrier_"
+    "join_with_latent_iff_isolated_and_resolved_iff_nontrivial_"
+    "distinction_with_residual_groups_accepted_only_as_one_root_zero_"
+    "point_continuations_v1"
+)
+
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ContractError(message)
+
+
+def nonnegative_integer(value: object, name: str) -> int:
+    require(
+        type(value) is int and value >= 0,
+        f"{name} is not a nonnegative integer",
+    )
+    return value
+
+
+def exact_level(value: object, name: str) -> Fraction:
+    require(
+        isinstance(value, dict)
+        and set(value) == {"numerator", "denominator"}
+        and isinstance(value.get("numerator"), str)
+        and isinstance(value.get("denominator"), str),
+        f"{name} is not one canonical exact-level object",
+    )
+    numerator_text = value["numerator"]
+    denominator_text = value["denominator"]
+    try:
+        numerator = int(numerator_text)
+        denominator = int(denominator_text)
+    except ValueError as error:
+        raise ContractError(f"{name} contains a noninteger exact level") from error
+    require(
+        denominator > 0
+        and str(numerator) == numerator_text
+        and str(denominator) == denominator_text,
+        f"{name} is not in canonical signed-numerator/positive-denominator form",
+    )
+    return Fraction(numerator, denominator)
+
+
+def numeric_tree_is_zero(value: object) -> bool:
+    if isinstance(value, dict):
+        return bool(value) and all(numeric_tree_is_zero(item) for item in value.values())
+    return type(value) is int and value == 0
 
 
 def strict_json_object(text: str) -> dict[str, object]:
@@ -102,19 +154,31 @@ def require_static_contract(project: Path) -> None:
         "verify_exact_direct_morse_k2_k1_target_authority(",
         "build_exact_direct_morse_m1_o5_death_accounting(",
         "verify_exact_direct_morse_m1_o5_death_accounting(",
+        "build_exact_direct_morse_gamma_carrier_conformance(",
         "bounded_k2_k1_target_authority_qualification",
         "bounded_m1_o5_death_accounting_qualification",
+        "bounded_direct_gamma_carrier_conformance_qualification",
         "bounded_m1_o5_death_accounting_point_count_exceeds_14",
         "bounded_m1_o5_death_accounting_requires_maximum_order_at_least_2",
+        "bounded_direct_gamma_carrier_conformance_point_count_exceeds_14",
+        "bounded_direct_gamma_carrier_conformance_requires_maximum_order_at_least_2",
         "report.k2_to_k1_target_authority_certified",
         "report.m1_o5_death_accounting_certified",
+        "report.direct_morse_gamma_carrier_conformance_certified",
         "report.vertical_target_pipeline_certified &&",
         "report.vertical_journal_certified;",
-        'morsehgp3d.direct-morse-product-run.v6',
-        '15_conditional_direct_equal_level_m1_o5_death_accounting',
+        'morsehgp3d.direct-morse-product-run.v7',
+        '15_bounded_direct_gamma_carrier_group_conformance',
+        'builder_includes_fresh_verifier',
+        'external_verifier_replay_performed',
+        'timing_includes_embedded_fresh_verifier',
         'p7b_replay_performed\\\":false',
     ):
         require(required in runner, f"runner is missing P8n token {required!r}")
+    require(
+        "verify_exact_direct_morse_gamma_carrier_conformance(" not in runner,
+        "runner performed a redundant external direct--Gamma verifier replay",
+    )
     require(
         "morsehgp3d::sparse_anchored_pair_session" in runner_links,
         "runner does not directly link the P8l session",
@@ -139,6 +203,10 @@ def require_static_contract(project: Path) -> None:
     require(
         "morsehgp3d::direct_morse_m1_o5_death_accounting" in runner_links,
         "runner does not directly link bounded direct M1/O5 accounting",
+    )
+    require(
+        "morsehgp3d::direct_morse_gamma_carrier_conformance" in runner_links,
+        "runner does not directly link bounded direct--Gamma conformance",
     )
     digest_equality_regression = (
         'digests.get("direct_cloud")' + " == " + 'digests.get("external_cloud")'
@@ -234,7 +302,7 @@ def require_success_vertical_contract(
     require_m1_o5_dormant(report)
     require(
         report.get("phase")
-        == "15_conditional_direct_equal_level_m1_o5_death_accounting",
+        == "15_bounded_direct_gamma_carrier_group_conformance",
         "success report has the wrong direct M1/O5 phase scope",
     )
     expected_terminal_stage = (
@@ -429,7 +497,7 @@ def require_success_projection(
     report: dict[str, object], *, authority_required: bool = False
 ) -> None:
     require(
-        report.get("schema") == "morsehgp3d.direct-morse-product-run.v6",
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v7",
         "success report has the wrong schema",
     )
     require(report.get("pipeline_complete") is True, "pipeline did not close")
@@ -912,7 +980,7 @@ def require_complete_diagnostic_contract(report: dict[str, object]) -> None:
 
 def require_bounded_target_authority_contract(report: dict[str, object]) -> None:
     require(
-        report.get("schema") == "morsehgp3d.direct-morse-product-run.v6"
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v7"
         and report.get("pipeline_complete") is True
         and report.get("resident_conditional_pipeline_complete") is True
         and report.get("scientific_result_materialized") is True
@@ -1148,9 +1216,9 @@ def require_bounded_m1_o5_accounting_guard(report: dict[str, object]) -> None:
 
 def require_bounded_m1_o5_accounting_contract(report: dict[str, object]) -> None:
     require(
-        report.get("schema") == "morsehgp3d.direct-morse-product-run.v6"
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v7"
         and report.get("phase")
-        == "15_conditional_direct_equal_level_m1_o5_death_accounting"
+        == "15_bounded_direct_gamma_carrier_group_conformance"
         and report.get("mode")
         == "bounded_m1_o5_death_accounting_qualification"
         and report.get("bounded_m1_o5_death_accounting_qualification_requested")
@@ -1462,6 +1530,868 @@ def require_bounded_m1_o5_accounting_contract(report: dict[str, object]) -> None
         require(accounting.get(unclaimed) is False, f"bounded M1/O5 overclaimed {unclaimed}")
 
 
+def expected_direct_gamma_budget(point_count: int, order: int) -> dict[str, object]:
+    facet_count = comb(point_count, order)
+    coface_count = comb(point_count, order + 1)
+    activation_count = facet_count + coface_count
+    exhaustive_run_count = activation_count + 1
+    strict_gamma_union_count = order * coface_count
+    critical_candidate_count = sum(
+        comb(point_count, support_size)
+        for support_size in range(1, min(4, point_count) + 1)
+    )
+    selected_event_support_count = sum(
+        comb(point_count, support_size)
+        for support_size in range(2, min(4, order + 1, point_count) + 1)
+    )
+    event_projection_count = min(
+        activation_count, selected_event_support_count
+    )
+    history_point_id_scan_count = (
+        order * facet_count + (order + 1) * coface_count
+    )
+    catalog_point_id_scan_count = (order + 1) * event_projection_count
+    subset_count = 1 << point_count
+    forest_reference_count = point_count * (subset_count // 2)
+    group_scratch_count = 6 * facet_count
+    parent_hop_count = 2 * forest_reference_count * facet_count
+    exact_level_integer_bit_count = 8 * (
+        sys.float_info.max_exp
+        - sys.float_info.min_exp
+        + sys.float_info.mant_dig
+    )
+    carrier_anchor_count = 2 * activation_count * facet_count
+    gamma_lookup_count = carrier_anchor_count * facet_count
+    group_event_reference_count = facet_count + 2 * coface_count
+    arm_binding_count = (order + 1) * coface_count
+    group_component_membership_count = (
+        arm_binding_count + activation_count
+    ) * facet_count
+    gamma_label_comparison_count = arm_binding_count * (
+        coface_count + order + 1
+    )
+    return {
+        "overlay": {
+            "critical_catalog": {
+                "candidates": critical_candidate_count,
+                "point_classifications": (
+                    critical_candidate_count * point_count
+                ),
+            },
+            "reduced_gamma_history": {
+                "gamma": {
+                    "facets": facet_count,
+                    "cofaces": coface_count,
+                    "union_attempts": strict_gamma_union_count,
+                },
+                "activation_levels": activation_count,
+                "total_facet_work": exhaustive_run_count * facet_count,
+                "total_coface_work": exhaustive_run_count * coface_count,
+                "total_union_work": (
+                    exhaustive_run_count * strict_gamma_union_count
+                ),
+                "nodes": coface_count,
+                "child_references": coface_count - 1,
+                "group_root_references": coface_count - 1,
+                "groups": activation_count,
+                "group_newly_active_facets": facet_count,
+                "group_equal_level_cofaces": coface_count,
+                "delta_facets": facet_count,
+                "delta_point_references": order * facet_count,
+            },
+            "event_projections": event_projection_count,
+            "group_overlays": activation_count,
+            "label_slots": activation_count,
+            "history_point_id_scans": history_point_id_scan_count,
+            "catalog_point_id_scans": catalog_point_id_scan_count,
+            "group_event_references": event_projection_count,
+        },
+        "carrier_cut": {
+            "forest_birth_record_scans": subset_count,
+            "forest_node_scans": subset_count,
+            "forest_batch_scans": subset_count,
+            "forest_atomic_group_scans": subset_count,
+            "forest_saddle_scans": subset_count,
+            "forest_arm_binding_scans": forest_reference_count,
+            "forest_child_reference_scans": forest_reference_count,
+            "forest_final_root_scans": subset_count,
+            "component_states": subset_count,
+            "node_marker_states": subset_count,
+            "index_entries": facet_count,
+            "group_carrier_scratch": group_scratch_count,
+            "group_prior_root_scratch": group_scratch_count,
+            "parent_hops": parent_hop_count,
+            "exact_level_comparisons": forest_reference_count,
+            "single_exact_level_integer_bits": exact_level_integer_bit_count,
+            "logical_output_entries": facet_count,
+        },
+        "direct_role_scans": activation_count,
+        "forest_birth_scans": subset_count,
+        "forest_saddle_scans": subset_count,
+        "forest_atomic_group_scans": subset_count,
+        "activation_levels": activation_count,
+        "gamma_transition_builds": activation_count,
+        "checkpoints": activation_count,
+        "group_audits": activation_count,
+        "carrier_anchor_scans": carrier_anchor_count,
+        "gamma_component_scans": gamma_lookup_count,
+        "gamma_facet_scans": gamma_lookup_count,
+        "group_event_reference_scans": group_event_reference_count,
+        "arm_binding_scans": arm_binding_count,
+        "gamma_incidence_joins": arm_binding_count,
+        "carrier_cut_entry_lookups": arm_binding_count,
+        "group_component_memberships": group_component_membership_count,
+        "gamma_label_comparisons": gamma_label_comparison_count,
+        "logical_scratch_entries": group_scratch_count,
+        "logical_output_entries": 2 * activation_count + 1,
+    }
+
+
+def require_direct_gamma_carrier_inactive(
+    report: dict[str, object], *, required: bool
+) -> None:
+    block = report.get("direct_morse_gamma_carrier_conformance")
+    timings = report.get("timings_ms")
+    require(
+        report.get(
+            "bounded_direct_gamma_carrier_conformance_qualification_requested"
+        )
+        is required,
+        "direct--Gamma qualification request disagrees with its dormant/guard state",
+    )
+    require(isinstance(block, dict), "report lost the direct--Gamma block")
+    require(isinstance(timings, dict), "report lost its timing ledger")
+    require(
+        block.get("required") is required
+        and block.get("attempted") is False
+        and block.get("certified_bounded_single_order_conformance") is False
+        and block.get("schema_version") == 1
+        and block.get("backend") == "reference_cpu"
+        and block.get("profile") == "hgp_reduced"
+        and block.get("mode")
+        == "bounded_n14_single_order_direct_gamma_carrier_group_conformance"
+        and block.get("deployment_status") == "architecture_only"
+        and block.get("public_status") == "not_claimed"
+        and block.get("proof_basis") == DIRECT_GAMMA_PROOF_BASIS
+        and block.get("decision") == 0
+        and block.get("scope") == 0
+        and block.get("builder_includes_fresh_verifier") is False
+        and block.get("external_verifier_replay_performed") is False
+        and block.get("timing_includes_embedded_fresh_verifier") is False,
+        "an inactive direct--Gamma block retained execution or certification state",
+    )
+    budget = block.get("requested_budget")
+    receipt = block.get("receipt")
+    counters = block.get("counters")
+    require(
+        isinstance(budget, dict) and numeric_tree_is_zero(budget),
+        "an inactive direct--Gamma block retained a trusted work budget",
+    )
+    require(isinstance(receipt, dict), "inactive direct--Gamma receipt is absent")
+    for name, value in receipt.items():
+        if name in ("checkpoints", "group_audits"):
+            require(value == [], f"inactive direct--Gamma receipt retained {name}")
+        else:
+            require(
+                type(value) is int and value == 0,
+                f"inactive direct--Gamma receipt retained {name}",
+            )
+    require(
+        isinstance(counters, dict)
+        and counters
+        and all(type(value) is int and value == 0 for value in counters.values()),
+        "an inactive direct--Gamma block retained counters",
+    )
+    for fact in (
+        "scalar_preflight_certified",
+        "source_forest_freshly_replayed_relative_to_facade",
+        "critical_catalog_gamma_overlay_freshly_replayed",
+        "direct_h0_catalog_roles_bidirectionally_reconciled",
+        "direct_atomic_groups_bidirectionally_reconciled",
+        "direct_saddle_arms_bidirectionally_reconciled_with_strict_gamma_components",
+        "carrier_partition_bijective_at_every_strict_checkpoint",
+        "carrier_partition_bijective_at_every_closed_checkpoint",
+        "every_gamma_group_classified_once",
+        "every_provenance_free_gamma_group_is_silent_continuation",
+        "every_silent_continuation_preserves_one_root_and_adds_zero_points",
+        "bounded_carrier_faithfulness_replayed",
+        "bounded_silent_gamma_group_completeness_replayed",
+        "bounded_bidirectional_gamma_group_completeness_replayed",
+        "bounded_exhaustive_gamma_oracle_used",
+        "product_sparse_silent_source_complete",
+        "global_morse_obligation_replayed",
+        "global_m1_claimed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "forest_semantics_exact",
+        "scalable_50k_claimed",
+        "gamma_cells_or_global_cofaces_persisted",
+        "higher_order_delaunay_materialized",
+        "public_status_claimed",
+        "no_partial_scientific_payload_published_on_failure",
+    ):
+        require(block.get(fact) is False, f"inactive direct--Gamma block set {fact}")
+    require(
+        timings.get("direct_morse_gamma_carrier_conformance") == 0.0,
+        "inactive direct--Gamma work retained a timing",
+    )
+
+
+def require_direct_gamma_carrier_dormant(report: dict[str, object]) -> None:
+    require_direct_gamma_carrier_inactive(report, required=False)
+
+
+def require_o5_k2_k1_vertical_dormant(report: dict[str, object]) -> None:
+    require_vertical_not_attempted(report)
+    timings = report.get("timings_ms")
+    pipeline = report.get("vertical_target_pipeline")
+    journal = report.get("vertical_journal")
+    authority = report.get("k2_to_k1_target_authority")
+    require(isinstance(timings, dict), "carrier mode lost its timing ledger")
+    require(
+        isinstance(pipeline, dict)
+        and pipeline.get("attempted") is False
+        and pipeline.get("certified") is False
+        and pipeline.get("decision") == 0
+        and pipeline.get("required_sessions") == 0
+        and pipeline.get("required_groups") == 0
+        and pipeline.get("required_proposals") == 0
+        and pipeline.get("source_group_count_by_order") == []
+        and isinstance(pipeline.get("counters"), dict)
+        and all(value == 0 for value in pipeline["counters"].values()),
+        "carrier mode executed or populated the vertical target pipeline",
+    )
+    require(
+        isinstance(journal, dict)
+        and journal.get("attempted") is False
+        and journal.get("certified_conditional_candidate") is False
+        and journal.get("decision") == 0
+        and isinstance(journal.get("counters"), dict)
+        and all(value == 0 for value in journal["counters"].values()),
+        "carrier mode executed or populated the vertical journal",
+    )
+    require(
+        isinstance(authority, dict)
+        and authority.get("required") is False
+        and authority.get("attempted") is False
+        and authority.get("certified_observed_label_target_authority") is False
+        and authority.get("decision") == 0
+        and authority.get("scope") == 0
+        and isinstance(authority.get("oracle"), dict)
+        and all(value == 0 for value in authority["oracle"].values())
+        and isinstance(authority.get("counters"), dict)
+        and all(value == 0 for value in authority["counters"].values())
+        and isinstance(authority.get("verification"), dict)
+        and all(value is False for value in authority["verification"].values())
+        and authority.get("bounded_exhaustive_gamma_oracle_used") is False,
+        "carrier mode executed or populated K2-to-K1 target authority work",
+    )
+    for timing_name in (
+        "vertical_target_pipeline",
+        "vertical_journal",
+        "vertical_target_replay_diagnostic",
+        "k2_to_k1_oracle_source_history",
+        "k2_to_k1_oracle_k1",
+        "k2_to_k1_oracle_hierarchy",
+        "k2_to_k1_target_authority_build",
+        "k2_to_k1_target_authority_verify",
+        "k2_to_k1_target_authority",
+        "m1_o5_death_accounting_build",
+        "m1_o5_death_accounting_verify",
+        "m1_o5_death_accounting",
+    ):
+        require(
+            timings.get(timing_name) == 0.0,
+            f"carrier mode retained dormant timing {timing_name}",
+        )
+
+
+def require_bounded_direct_gamma_carrier_guard(report: dict[str, object]) -> None:
+    require(
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v7"
+        and report.get("phase")
+        == "15_bounded_direct_gamma_carrier_group_conformance"
+        and report.get("mode")
+        == "bounded_direct_gamma_carrier_conformance_qualification"
+        and report.get("terminal_stage") == "input_preflight"
+        and report.get("stop_category") == "invalid_input"
+        and report.get("stop_detail")
+        == "bounded_direct_gamma_carrier_conformance_point_count_exceeds_14"
+        and report.get("canonical_point_count") == 0,
+        "bounded direct--Gamma mode did not fail closed above n=14",
+    )
+    require_direct_gamma_carrier_inactive(report, required=True)
+    require_o5_k2_k1_vertical_dormant(report)
+
+
+def require_bounded_direct_gamma_carrier_contract(
+    report: dict[str, object]
+) -> None:
+    require(
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v7"
+        and report.get("phase")
+        == "15_bounded_direct_gamma_carrier_group_conformance"
+        and report.get("mode")
+        == "bounded_direct_gamma_carrier_conformance_qualification"
+        and report.get("family") == "uniform_latin"
+        and report.get("point_count") == 3
+        and report.get("canonical_point_count") == 3
+        and report.get("requested_maximum_order") == 2
+        and report.get("effective_maximum_order") == 2
+        and report.get(
+            "bounded_direct_gamma_carrier_conformance_qualification_requested"
+        )
+        is True
+        and report.get(
+            "bounded_k2_to_k1_target_authority_qualification_requested"
+        )
+        is False
+        and report.get("bounded_m1_o5_death_accounting_qualification_requested")
+        is False
+        and report.get("complete_hierarchy_attempt_requested") is False
+        and report.get("attempt_kind")
+        == "fail_closed_bounded_direct_gamma_carrier_conformance_qualification",
+        "bounded direct--Gamma run lost its explicit n=3, K=2 identity",
+    )
+    require(
+        report.get("pipeline_complete") is True
+        and report.get("resident_conditional_pipeline_complete") is False
+        and report.get("scientific_result_materialized") is True
+        and report.get("conditional_h0_candidate_certified") is True
+        and report.get("terminal_stage")
+        == "direct_morse_gamma_carrier_conformance"
+        and report.get("stop_category") == "none"
+        and report.get("stop_detail") == "none"
+        and report.get("timing_scope")
+        == "attempted_single_process_cpu_generation_to_certified_forest_"
+        "and_bounded_fresh_single_order_direct_gamma_carrier_group_"
+        "conformance",
+        "bounded direct--Gamma run did not terminate exactly at conformance",
+    )
+    require(
+        report.get("no_forbidden_global_structure_materialized") is True
+        and report.get(
+            "no_forbidden_product_path_global_structure_materialized"
+        )
+        is True
+        and report.get("architecture_audit_scope")
+        == "nonbounded_product_path_excluding_explicit_bounded_oracle"
+        and report.get("bounded_oracle_gamma_materialized_transiently") is True
+        and report.get("bounded_oracle_global_structure_persisted") is False
+        and report.get("higher_order_delaunay_materialized") is False,
+        "bounded direct--Gamma run blurred transient oracle and product storage",
+    )
+    for unclaimed in (
+        "global_morse_obligation_replayed",
+        "k2_to_k1_observed_label_target_authority_replayed",
+        "bidirectional_gamma_group_completeness_replayed",
+        "silent_gamma_checkpoint_completeness_replayed",
+        "external_target_authority_replayed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "global_m1_claimed",
+        "product_sparse_silent_source_complete",
+        "forest_semantics_exact",
+        "product_architecture_claimed",
+        "scalable_50k_claimed",
+        "warm_e2e_protocol_executed",
+        "warm_e2e_slo_claimed",
+        "qualification_claimed",
+    ):
+        require(report.get(unclaimed) is False, f"carrier runner overclaimed {unclaimed}")
+    require_o5_k2_k1_vertical_dormant(report)
+
+    timings = report.get("timings_ms")
+    require(isinstance(timings, dict), "carrier run lost its timing ledger")
+    conformance_timing = timings.get("direct_morse_gamma_carrier_conformance")
+    total_timing = timings.get("total")
+    require(
+        type(conformance_timing) in (int, float)
+        and conformance_timing > 0
+        and type(total_timing) in (int, float)
+        and total_timing >= conformance_timing,
+        "carrier timing does not include its embedded fresh verifier",
+    )
+
+    block = report.get("direct_morse_gamma_carrier_conformance")
+    require(isinstance(block, dict), "bounded direct--Gamma receipt is absent")
+    require(
+        block.get("required") is True
+        and block.get("attempted") is True
+        and block.get("certified_bounded_single_order_conformance") is True
+        and block.get("schema_version") == 1
+        and block.get("backend") == "reference_cpu"
+        and block.get("profile") == "hgp_reduced"
+        and block.get("mode")
+        == "bounded_n14_single_order_direct_gamma_carrier_group_conformance"
+        and block.get("deployment_status") == "architecture_only"
+        and block.get("public_status") == "not_claimed"
+        and block.get("proof_basis") == DIRECT_GAMMA_PROOF_BASIS
+        and block.get("decision") == 13
+        and block.get("scope") == 1
+        and block.get("builder_includes_fresh_verifier") is True
+        and block.get("external_verifier_replay_performed") is False
+        and block.get("timing_includes_embedded_fresh_verifier") is True,
+        "bounded direct--Gamma receipt lost its certified core identity",
+    )
+    budget = block.get("requested_budget")
+    receipt = block.get("receipt")
+    counters = block.get("counters")
+    require(
+        budget == expected_direct_gamma_budget(3, 2),
+        "bounded direct--Gamma budget is not the outcome-independent n=3, K=2 envelope",
+    )
+    require(isinstance(receipt, dict), "direct--Gamma scientific receipt is absent")
+    require(isinstance(counters, dict), "direct--Gamma counters are absent")
+
+    facet_count = comb(3, 2)
+    coface_count = comb(3, 3)
+    activation_bound = facet_count + coface_count
+    checkpoints = receipt.get("checkpoints")
+    group_audits = receipt.get("group_audits")
+    require(
+        receipt.get("point_count") == 3
+        and receipt.get("order") == 2
+        and receipt.get("exhaustive_facet_count") == facet_count
+        and receipt.get("exhaustive_coface_count") == coface_count
+        and isinstance(checkpoints, list)
+        and checkpoints
+        and isinstance(group_audits, list)
+        and group_audits,
+        "direct--Gamma receipt has an empty or wrong exhaustive source scope",
+    )
+
+    classification_counts = [0, 0, 0, 0]
+    birth_role_count = 0
+    saddle_role_count = 0
+    arm_binding_count = 0
+    strict_component_count = 0
+    groups_by_level: dict[Fraction, list[int]] = {}
+    previous_group_level: Fraction | None = None
+    for index, group in enumerate(group_audits):
+        require(isinstance(group, dict), "direct--Gamma group audit is not an object")
+        level = exact_level(group.get("squared_level"), f"group_audits[{index}].squared_level")
+        require(
+            previous_group_level is None or previous_group_level <= level,
+            "direct--Gamma group audits are not in level order",
+        )
+        previous_group_level = level
+        groups_by_level.setdefault(level, []).append(index)
+        require(
+            group.get("group_audit_index") == index,
+            "direct--Gamma group audit indices are not canonical",
+        )
+        numeric_names = (
+            "gamma_kind",
+            "classification",
+            "direct_birth_role_count",
+            "direct_saddle_role_count",
+            "residual_newly_active_facet_count",
+            "residual_equal_level_coface_count",
+            "gamma_prior_root_count",
+            "delta_facet_count",
+            "delta_point_count",
+            "direct_arm_binding_count",
+            "strict_gamma_component_count",
+            "latent_strict_gamma_component_count",
+            "resolved_strict_gamma_component_count",
+        )
+        values = {
+            name: nonnegative_integer(group.get(name), f"group_audits[{index}].{name}")
+            for name in numeric_names
+        }
+        kind = values["gamma_kind"]
+        classification = values["classification"]
+        require(kind in range(4), "direct--Gamma group retained an unknown Gamma kind")
+        require(
+            classification in range(4),
+            "direct--Gamma group retained an unknown classification",
+        )
+        prior_roots = values["gamma_prior_root_count"]
+        require(
+            ((kind in (0, 1)) and prior_roots == 0)
+            or (kind == 2 and prior_roots == 1)
+            or (kind == 3 and prior_roots >= 2),
+            "direct--Gamma group kind disagrees with its prior-root count",
+        )
+        for flag in (
+            "coverage_delta_present",
+            "fully_redundant_delta",
+            "direct_atomic_group_present",
+            "direct_arm_strict_component_bijection",
+            "silent_one_root_zero_point_continuation",
+        ):
+            require(
+                type(group.get(flag)) is bool,
+                f"direct--Gamma group lost Boolean fact {flag}",
+            )
+        direct_prior = group.get("direct_prior_root_count")
+        require(
+            direct_prior is None
+            or (type(direct_prior) is int and direct_prior >= 0),
+            "direct--Gamma group has an invalid direct prior-root count",
+        )
+        coverage = group["coverage_delta_present"]
+        delta_facets = values["delta_facet_count"]
+        delta_points = values["delta_point_count"]
+        fully_redundant = group["fully_redundant_delta"]
+        require(
+            coverage == (kind != 0)
+            and delta_facets <= facet_count
+            and delta_points <= 3
+            and (
+                (not coverage and delta_facets == 0 and delta_points == 0 and not fully_redundant)
+                or (
+                    coverage
+                    and fully_redundant
+                    == (delta_facets == 0 and delta_points == 0)
+                )
+            ),
+            "direct--Gamma coverage delta is not canonical",
+        )
+        births = values["direct_birth_role_count"]
+        saddles = values["direct_saddle_role_count"]
+        residual = (
+            values["residual_newly_active_facet_count"]
+            + values["residual_equal_level_coface_count"]
+        )
+        has_saddle = saddles != 0
+        if has_saddle:
+            require(
+                group["direct_atomic_group_present"] is True
+                and group["direct_arm_strict_component_bijection"] is True
+                and values["direct_arm_binding_count"] > 0
+                and values["strict_gamma_component_count"] > 0
+                and values["latent_strict_gamma_component_count"]
+                + values["resolved_strict_gamma_component_count"]
+                == values["strict_gamma_component_count"]
+                and values["resolved_strict_gamma_component_count"]
+                == prior_roots,
+                "direct saddle arms did not biject frozen carriers with strict Gamma components",
+            )
+        else:
+            require(
+                values["direct_arm_binding_count"] == 0
+                and values["strict_gamma_component_count"] == 0
+                and values["latent_strict_gamma_component_count"] == 0
+                and values["resolved_strict_gamma_component_count"] == 0
+                and group["direct_arm_strict_component_bijection"] is False,
+                "a nonsaddle Gamma group retained arm--component evidence",
+            )
+        if classification == 0:
+            require(
+                births > 0
+                and saddles == 0
+                and residual == 0
+                and kind == 0
+                and group["direct_atomic_group_present"] is False
+                and direct_prior is None
+                and coverage is False
+                and group["silent_one_root_zero_point_continuation"] is False,
+                "direct birth-carrier classification is inconsistent",
+            )
+        elif classification == 1:
+            require(
+                births == 0
+                and saddles > 0
+                and residual == 0
+                and kind != 0
+                and group["direct_atomic_group_present"] is True
+                and direct_prior == prior_roots
+                and group["silent_one_root_zero_point_continuation"] is False,
+                "direct saddle-group classification is inconsistent",
+            )
+        elif classification == 2:
+            require(
+                (births > 0) != (saddles > 0)
+                and residual > 0
+                and group["silent_one_root_zero_point_continuation"] is False,
+                "mixed direct/residual classification is inconsistent",
+            )
+            require(
+                (
+                    saddles > 0
+                    and group["direct_atomic_group_present"] is True
+                    and direct_prior == prior_roots
+                )
+                or (
+                    births > 0
+                    and group["direct_atomic_group_present"] is False
+                    and direct_prior is None
+                ),
+                "mixed direct/residual group has inconsistent direct provenance",
+            )
+        else:
+            require(
+                births == 0
+                and saddles == 0
+                and residual > 0
+                and kind == 2
+                and prior_roots == 1
+                and coverage is True
+                and group["direct_atomic_group_present"] is False
+                and direct_prior is None
+                and delta_points == 0
+                and group["silent_one_root_zero_point_continuation"] is True,
+                "silent residual continuation classification is inconsistent",
+            )
+        classification_counts[classification] += 1
+        birth_role_count += births
+        saddle_role_count += saddles
+        arm_binding_count += values["direct_arm_binding_count"]
+        strict_component_count += values["strict_gamma_component_count"]
+
+    silent_group_count_from_checkpoints = 0
+    silent_checkpoint_count = 0
+    previous_checkpoint_level: Fraction | None = None
+    for index, checkpoint in enumerate(checkpoints):
+        require(isinstance(checkpoint, dict), "direct--Gamma checkpoint is not an object")
+        level = exact_level(
+            checkpoint.get("squared_level"),
+            f"checkpoints[{index}].squared_level",
+        )
+        require(
+            checkpoint.get("activation_level_index") == index
+            and (previous_checkpoint_level is None or previous_checkpoint_level < level),
+            "direct--Gamma checkpoints are not canonically indexed and ordered",
+        )
+        previous_checkpoint_level = level
+        level_groups = groups_by_level.pop(level, [])
+        require(level_groups, "an exhaustive activation checkpoint has no Gamma group")
+        silent_at_level = sum(
+            group_audits[group_index].get("classification") == 3
+            for group_index in level_groups
+        )
+        direct_at_level = any(
+            group_audits[group_index].get("classification") != 3
+            for group_index in level_groups
+        )
+        numeric_names = (
+            "strict_direct_carrier_count",
+            "strict_gamma_component_count",
+            "strict_birth_anchor_count",
+            "closed_direct_carrier_count",
+            "closed_gamma_component_count",
+            "closed_birth_anchor_count",
+            "gamma_group_count",
+            "silent_gamma_group_count",
+        )
+        values = {
+            name: nonnegative_integer(
+                checkpoint.get(name), f"checkpoints[{index}].{name}"
+            )
+            for name in numeric_names
+        }
+        require(
+            checkpoint.get("strict_partition_bijective") is True
+            and checkpoint.get("closed_partition_bijective") is True
+            and checkpoint.get("direct_batch_present") is direct_at_level
+            and values["strict_direct_carrier_count"]
+            == values["strict_gamma_component_count"]
+            and values["closed_direct_carrier_count"]
+            == values["closed_gamma_component_count"]
+            and values["strict_birth_anchor_count"]
+            >= values["strict_direct_carrier_count"]
+            and values["closed_birth_anchor_count"]
+            >= values["closed_direct_carrier_count"]
+            and values["gamma_group_count"] == len(level_groups)
+            and values["silent_gamma_group_count"] == silent_at_level,
+            "direct--Gamma checkpoint partition or group accounting is inconsistent",
+        )
+        silent_group_count_from_checkpoints += silent_at_level
+        silent_checkpoint_count += silent_at_level != 0
+    require(
+        not groups_by_level
+        and sum(
+            nonnegative_integer(
+                checkpoint.get("gamma_group_count"), "checkpoint.gamma_group_count"
+            )
+            for checkpoint in checkpoints
+        )
+        == len(group_audits),
+        "checkpoints do not partition every serialized Gamma group exactly once",
+    )
+
+    def counter(name: str) -> int:
+        return nonnegative_integer(counters.get(name), f"counters.{name}")
+
+    require(
+        counter("preflights") == 1
+        and counter("direct_forest_verifications") == 1
+        and counter("overlay_builds") == 1
+        and counter("direct_role_scans") == birth_role_count + saddle_role_count
+        and counter("direct_birth_roles") == birth_role_count
+        and counter("direct_saddle_roles") == saddle_role_count
+        and counter("forest_saddle_scans") == saddle_role_count
+        and counter("group_event_reference_scans") == saddle_role_count,
+        "direct--Gamma source replay counters do not close",
+    )
+    require(
+        counter("activation_levels") == len(checkpoints)
+        and counter("gamma_transition_builds") == len(checkpoints)
+        and counter("carrier_cut_builds") == len(checkpoints)
+        and counter("checkpoints") == len(checkpoints)
+        and counter("strict_partition_bijections") == len(checkpoints)
+        and counter("closed_partition_bijections") == len(checkpoints)
+        and counter("group_audits") == len(group_audits),
+        "direct--Gamma checkpoint replay counters do not close",
+    )
+    require(
+        counter("direct_birth_groups") == classification_counts[0]
+        and counter("direct_saddle_groups") == classification_counts[1]
+        and counter("mixed_direct_residual_groups") == classification_counts[2]
+        and counter("silent_residual_continuation_groups")
+        == classification_counts[3]
+        and counter("silent_residual_continuation_groups")
+        == silent_group_count_from_checkpoints
+        and counter("silent_checkpoints") == silent_checkpoint_count,
+        "direct--Gamma group-classification counters do not close",
+    )
+    require(
+        saddle_role_count > 0
+        and arm_binding_count > 0
+        and counter("arm_binding_scans") == arm_binding_count
+        and counter("gamma_incidence_joins") == arm_binding_count
+        and counter("carrier_cut_entry_lookups") == arm_binding_count
+        and counter("group_component_memberships")
+        >= arm_binding_count + strict_component_count,
+        "n=3, K=2 did not exercise every exact arm/incidence/carrier join",
+    )
+
+    expected_required = {
+        "required_direct_role_scan_capacity": birth_role_count + saddle_role_count,
+        "required_forest_birth_scan_capacity": counter("forest_birth_scans"),
+        "required_forest_atomic_group_scan_capacity": counter(
+            "forest_atomic_group_scans"
+        ),
+        "required_activation_level_capacity": activation_bound,
+        "required_carrier_anchor_scan_capacity": (
+            2 * activation_bound * birth_role_count
+        ),
+        "required_gamma_component_scan_capacity": (
+            2 * activation_bound * birth_role_count * facet_count
+        ),
+        "required_gamma_facet_scan_capacity": (
+            2 * activation_bound * birth_role_count * facet_count
+        ),
+        "required_group_event_reference_scan_capacity": (
+            birth_role_count + 2 * saddle_role_count
+        ),
+        "required_arm_binding_scan_capacity": arm_binding_count,
+        "required_gamma_incidence_join_capacity": arm_binding_count,
+        "required_carrier_cut_entry_lookup_capacity": arm_binding_count,
+        "required_group_component_membership_capacity": (
+            (arm_binding_count + activation_bound) * facet_count
+        ),
+        "required_gamma_label_comparison_capacity": (
+            arm_binding_count * (coface_count + 2 + 1)
+        ),
+        "required_logical_scratch_entries": (
+            3 * birth_role_count + 3 * facet_count
+        ),
+        "required_checkpoint_capacity": activation_bound,
+        "required_group_audit_capacity": activation_bound,
+        "required_logical_output_entries": 2 * activation_bound + 1,
+    }
+    for name, expected in expected_required.items():
+        require(
+            receipt.get(name) == expected,
+            f"direct--Gamma receipt has the wrong combinatorial capacity {name}",
+        )
+    require(
+        nonnegative_integer(
+            receipt.get("required_forest_saddle_scan_capacity"),
+            "receipt.required_forest_saddle_scan_capacity",
+        )
+        >= counter("forest_saddle_scans"),
+        "direct--Gamma forest saddle preflight undercounts its scan",
+    )
+    required_to_budget = {
+        "required_direct_role_scan_capacity": "direct_role_scans",
+        "required_forest_birth_scan_capacity": "forest_birth_scans",
+        "required_forest_saddle_scan_capacity": "forest_saddle_scans",
+        "required_forest_atomic_group_scan_capacity": "forest_atomic_group_scans",
+        "required_activation_level_capacity": "activation_levels",
+        "required_carrier_anchor_scan_capacity": "carrier_anchor_scans",
+        "required_gamma_component_scan_capacity": "gamma_component_scans",
+        "required_gamma_facet_scan_capacity": "gamma_facet_scans",
+        "required_group_event_reference_scan_capacity": "group_event_reference_scans",
+        "required_arm_binding_scan_capacity": "arm_binding_scans",
+        "required_gamma_incidence_join_capacity": "gamma_incidence_joins",
+        "required_carrier_cut_entry_lookup_capacity": "carrier_cut_entry_lookups",
+        "required_group_component_membership_capacity": "group_component_memberships",
+        "required_gamma_label_comparison_capacity": "gamma_label_comparisons",
+        "required_logical_scratch_entries": "logical_scratch_entries",
+        "required_checkpoint_capacity": "checkpoints",
+        "required_group_audit_capacity": "group_audits",
+        "required_logical_output_entries": "logical_output_entries",
+    }
+    for required_name, budget_name in required_to_budget.items():
+        require(
+            nonnegative_integer(receipt.get(required_name), f"receipt.{required_name}")
+            <= nonnegative_integer(budget.get(budget_name), f"budget.{budget_name}"),
+            f"direct--Gamma receipt exceeded budget {budget_name}",
+        )
+    for counter_name, budget_name in (
+        ("direct_role_scans", "direct_role_scans"),
+        ("forest_birth_scans", "forest_birth_scans"),
+        ("forest_saddle_scans", "forest_saddle_scans"),
+        ("forest_atomic_group_scans", "forest_atomic_group_scans"),
+        ("activation_levels", "activation_levels"),
+        ("gamma_transition_builds", "gamma_transition_builds"),
+        ("checkpoints", "checkpoints"),
+        ("group_audits", "group_audits"),
+        ("carrier_anchor_scans", "carrier_anchor_scans"),
+        ("gamma_component_scans", "gamma_component_scans"),
+        ("gamma_facet_scans", "gamma_facet_scans"),
+        ("group_event_reference_scans", "group_event_reference_scans"),
+        ("arm_binding_scans", "arm_binding_scans"),
+        ("gamma_incidence_joins", "gamma_incidence_joins"),
+        ("carrier_cut_entry_lookups", "carrier_cut_entry_lookups"),
+        ("group_component_memberships", "group_component_memberships"),
+        ("gamma_label_comparisons", "gamma_label_comparisons"),
+        ("maximum_logical_scratch_entries", "logical_scratch_entries"),
+    ):
+        require(
+            counter(counter_name)
+            <= nonnegative_integer(budget.get(budget_name), f"budget.{budget_name}"),
+            f"direct--Gamma counter exceeded budget {budget_name}",
+        )
+
+    for fact in (
+        "scalar_preflight_certified",
+        "source_forest_freshly_replayed_relative_to_facade",
+        "critical_catalog_gamma_overlay_freshly_replayed",
+        "direct_h0_catalog_roles_bidirectionally_reconciled",
+        "direct_atomic_groups_bidirectionally_reconciled",
+        "direct_saddle_arms_bidirectionally_reconciled_with_strict_gamma_components",
+        "carrier_partition_bijective_at_every_strict_checkpoint",
+        "carrier_partition_bijective_at_every_closed_checkpoint",
+        "every_gamma_group_classified_once",
+        "every_provenance_free_gamma_group_is_silent_continuation",
+        "every_silent_continuation_preserves_one_root_and_adds_zero_points",
+        "bounded_carrier_faithfulness_replayed",
+        "bounded_silent_gamma_group_completeness_replayed",
+        "bounded_bidirectional_gamma_group_completeness_replayed",
+        "bounded_exhaustive_gamma_oracle_used",
+        "no_partial_scientific_payload_published_on_failure",
+    ):
+        require(block.get(fact) is True, f"bounded direct--Gamma lost local fact {fact}")
+    for unclaimed in (
+        "product_sparse_silent_source_complete",
+        "global_morse_obligation_replayed",
+        "global_m1_claimed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "forest_semantics_exact",
+        "scalable_50k_claimed",
+        "gamma_cells_or_global_cofaces_persisted",
+        "higher_order_delaunay_materialized",
+        "public_status_claimed",
+    ):
+        require(block.get(unclaimed) is False, f"bounded direct--Gamma overclaimed {unclaimed}")
+
+
 def main() -> int:
     require(len(sys.argv) == 3, "usage: check_direct_morse_sparse_pair_runner.py PROJECT RUNNER")
     project = Path(sys.argv[1]).resolve()
@@ -1551,10 +2481,55 @@ def main() -> int:
         4,
     )
     require_bounded_m1_o5_accounting_guard(bounded_m1_o5_accounting_guard)
+    for historical_report in (
+        success,
+        capacity,
+        resident_guard,
+        complete_diagnostic,
+        bounded_target_authority,
+        bounded_target_authority_guard,
+        bounded_m1_o5_accounting,
+        bounded_m1_o5_accounting_guard,
+    ):
+        require_direct_gamma_carrier_dormant(historical_report)
+
+    bounded_direct_gamma_carrier = run_case(
+        binary,
+        (
+            "--point-count",
+            "3",
+            "--K",
+            "2",
+            "--family",
+            "uniform_latin",
+            "--mode",
+            "bounded_direct_gamma_carrier_conformance_qualification",
+        ),
+        0,
+        timeout_seconds=60,
+    )
+    require_bounded_direct_gamma_carrier_contract(
+        bounded_direct_gamma_carrier
+    )
+    bounded_direct_gamma_carrier_guard = run_case(
+        binary,
+        (
+            "--point-count",
+            "15",
+            "--K",
+            "10",
+            "--mode",
+            "bounded_direct_gamma_carrier_conformance_qualification",
+        ),
+        4,
+    )
+    require_bounded_direct_gamma_carrier_guard(
+        bounded_direct_gamma_carrier_guard
+    )
     print(
         json.dumps(
             {
-                "schema": "morsehgp3d.phase15.vertical_product_runner_gate.v4",
+                "schema": "morsehgp3d.phase15.vertical_product_runner_gate.v5",
                 "bounded_p7b_projection_matched": True,
                 "p7b_default_runner_replay_count": 0,
                 "p8l_capacity_stop_typed": True,
@@ -1569,6 +2544,13 @@ def main() -> int:
                 "bounded_m1_o5_death_accounting_n14_guarded": True,
                 "m1_o5_receipt_freshly_verified": True,
                 "m1_o5_vertical_and_gamma_work_dormant": True,
+                "bounded_direct_gamma_carrier_conformance_required": True,
+                "bounded_direct_gamma_carrier_conformance_n14_guarded": True,
+                "direct_gamma_carrier_receipt_freshly_verified": True,
+                "direct_gamma_builder_embeds_fresh_verifier": True,
+                "direct_gamma_external_verifier_replay_count": 0,
+                "direct_gamma_old_modes_dormant": True,
+                "direct_gamma_o5_k2k1_and_vertical_work_dormant": True,
                 "vertical_nonclaims_preserved": True,
             },
             separators=(",", ":"),

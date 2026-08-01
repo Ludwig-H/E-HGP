@@ -158,6 +158,8 @@ La coupe impose aussi la distinction normative suivante : un carrier actif est l
 
 Ce checkpoint conserve seulement des audits agrégés et reconstruit récursivement le détail depuis les sources. Il ne sérialise aucun `Attachment`, chemin, coface, incidence, composante ou carrier, n'injecte pas les labels Gamma résiduels dans la forêt directe et ne rend donc vrai ni `attachments_complete_by_order`, ni H5 sur un domaine non borné, ni M.1.
 
+Le runner `morsehgp3d.direct-morse-product-run.v7`, phase `15_bounded_direct_gamma_carrier_group_conformance`, expose ce checkpoint uniquement dans le mode `bounded_direct_gamma_carrier_conformance_qualification`; son gate est `morsehgp3d.phase15.vertical_product_runner_gate.v5`. Le builder inclut son vérificateur frais embarqué et le runner n'effectue aucun replay externe supplémentaire. Cette enveloppe exécutable reste un falsificateur : les anciens modes gardent le reçu carrier dormant et le mode carrier garde O5, l'autorité $K=2\to1$ et la verticalité dormants. Ni `pipeline_complete` dans ce mode borné, ni son chrono englobant builder et vérificateur ne constituent une attestation de H5 global, de complétude produit ou de M.1.
+
 ### H6 — simultanéité exacte
 
 Pour chaque ordre et chaque niveau exact, l'état strictement antérieur est figé avant toute union. Tous les événements du niveau sont insérés dans un hypergraphe commun, puis ses composantes sont contractées en une seule opération sémantique. Les unions physiques, la publication des nœuds et les ancres verticales n'interviennent qu'après détermination de cette contraction.
@@ -232,7 +234,7 @@ Les noms ci-dessous sont des champs logiques normatifs; leur encodage est figé 
 | indice et multiplicité | `CriticalEvent.birth_order`, `saddle_order` et `morse_roles[]` | chaque rôle donne `order`, `morse_index`, `local_multiplicity` et `arm_count`; $\mu=s-k$ et $\Delta_{\mu}=\binom{\lvert U\rvert-1}{\mu}$ sont rejouables |
 | catalogue | `RunCertificate.catalog_complete_by_rank[1..s_max]` | vrai à chaque rang requis par le profil |
 | bras et chemins | `Attachment` | un enregistrement exact par triple attendu, cible pré-lot et chemin strict rejouable |
-| conformité bornée bras--Gamma--carrier | `ExactDirectMorseGammaCarrierConformance` | falsificateur mono-ordre $n\leq14$ : chaque bras rejoint sa coface catalogue, son incidence Gamma, sa composante stricte et son carrier gelé; ne remplace ni `Attachment`, ni `attachments_complete_by_order` |
+| conformité bornée bras--Gamma--carrier | `ExactDirectMorseGammaCarrierConformance`; reçu runner v7/gate v5 | falsificateur mono-ordre $n\leq14$ : chaque bras rejoint sa coface catalogue, son incidence Gamma, sa composante stricte et son carrier gelé; le builder inclut son vérificateur frais sans replay externe; ne remplace ni `Attachment`, ni `attachments_complete_by_order` |
 | complétude des attaches | `RunCertificate.attachments_complete_by_order[1..Keff]` | vrai à chaque ordre; aucun bras omis ou indécis |
 | simultanéité | `EqualLevelBatch` | niveau exact, événements complets, état pré-lot, contraction et état post-lot rejouables |
 | fermeture des lots | `RunCertificate.batches_complete_by_order[1..Keff]` | vrai à chaque ordre et invariant sous permutation |
@@ -274,7 +276,7 @@ Le statut du contrat M.1 reste `proof_obligation` tant que toutes les obligation
 
 Les preuves externes déjà enregistrées — correspondance K-polyèdres–$\pi_0$, caractérisation locale des centres, indice et multiplicité — peuvent être citées. Le passage simultané local–global et la naturalité complète ne sont pas considérés comme acquis par simple citation de ces résultats.
 
-Le checkpoint borné carriers--Gamma apporte une preuve par invariants de programme relative à un nuage et un ordre acceptés : tous les bras directs observés sont joints aux composantes strictes exhaustives et la partition des carriers est conforme à chaque coupe stricte et fermée. Il ne prouve ni que le producteur sparse émet toutes les incidences résiduelles nécessaires, ni O3 sur le domaine général, ni aucune des autres obligations ouvertes.
+Le checkpoint borné carriers--Gamma apporte une preuve par invariants de programme relative à un nuage et un ordre acceptés : tous les bras directs observés sont joints aux composantes strictes exhaustives et la partition des carriers est conforme à chaque coupe stricte et fermée. Son intégration runner v7/gate v5 rend ce falsificateur rejouable et fail-closed, sans ajouter de prémisse ou de conclusion mathématique. Il ne prouve ni que le producteur sparse émet toutes les incidences résiduelles nécessaires, ni O3 sur le domaine général, ni aucune des autres obligations ouvertes.
 
 ## 9. Contre-exemples et falsificateurs attendus
 

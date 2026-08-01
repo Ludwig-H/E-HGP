@@ -4430,7 +4430,7 @@ if(TARGET morsehgp3d_direct_morse_product_runner)
   )
   set_tests_properties(
     morsehgp3d.direct_morse_sparse_pair_runner
-    PROPERTIES TIMEOUT 30
+    PROPERTIES TIMEOUT 90
   )
 endif()
 if(TARGET morsehgp3d_massive_sparse_pair_prefix_smoke)
