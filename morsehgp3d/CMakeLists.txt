@@ -1854,6 +1854,134 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_forest_carrier_cut_index
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_carrier_cut_index.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_carrier_cut_index
+  ALIAS morsehgp3d_direct_morse_forest_carrier_cut_index
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_carrier_cut_index
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_carrier_cut_index
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_carrier_cut_index PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_carrier_cut_index
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_carrier_cut_index
+  PUBLIC morsehgp3d::direct_morse_forest_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_carrier_cut_index PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_carrier_cut_index
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_carrier_cut_replay_session.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_carrier_cut_replay_session
+  ALIAS morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_carrier_cut_replay_session
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+  PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+  PUBLIC
+    morsehgp3d::direct_morse_forest_carrier_cut_index
+    morsehgp3d::direct_sparse_positive_facet_locator
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_carrier_cut_closure_adapter.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_carrier_cut_closure_adapter
+  ALIAS morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_carrier_cut_closure_adapter
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+  PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+  PUBLIC
+    morsehgp3d::direct_morse_forest_carrier_cut_replay_session
+    morsehgp3d::direct_sparse_facet_descent_closure
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_morse_forest_source_authority
   STATIC
     src/cpu/hierarchy/direct_morse_forest_source_authority.cpp
@@ -1933,6 +2061,90 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_morse_vertical_journal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_vertical_target_proposal_adapter
+  STATIC
+    src/cpu/hierarchy/direct_morse_vertical_target_proposal_adapter.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_vertical_target_proposal_adapter
+  ALIAS morsehgp3d_direct_morse_vertical_target_proposal_adapter
+)
+set_target_properties(
+  morsehgp3d_direct_morse_vertical_target_proposal_adapter
+  PROPERTIES
+    EXPORT_NAME direct_morse_vertical_target_proposal_adapter
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_vertical_target_proposal_adapter PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_vertical_target_proposal_adapter
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_vertical_target_proposal_adapter
+  PUBLIC
+    morsehgp3d::direct_morse_forest_carrier_cut_closure_adapter
+    morsehgp3d::direct_morse_vertical_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_vertical_target_proposal_adapter PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_vertical_target_proposal_adapter
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_vertical_target_proposal_pipeline
+  STATIC
+    src/cpu/hierarchy/direct_morse_vertical_target_proposal_pipeline.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_vertical_target_proposal_pipeline
+  ALIAS morsehgp3d_direct_morse_vertical_target_proposal_pipeline
+)
+set_target_properties(
+  morsehgp3d_direct_morse_vertical_target_proposal_pipeline
+  PROPERTIES
+    EXPORT_NAME direct_morse_vertical_target_proposal_pipeline
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_vertical_target_proposal_pipeline PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_vertical_target_proposal_pipeline
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_vertical_target_proposal_pipeline
+  PUBLIC
+    morsehgp3d::direct_morse_forest_carrier_cut_replay_session
+    morsehgp3d::direct_morse_vertical_target_proposal_adapter
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_vertical_target_proposal_pipeline PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_vertical_target_proposal_pipeline
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -3884,6 +4096,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
       morsehgp3d::exact_pair_block_to_direct_pair_terminal
       morsehgp3d::direct_morse_forest_source_authority
       morsehgp3d::direct_morse_terminal_forest_reduction
+      morsehgp3d::direct_morse_vertical_target_proposal_pipeline
       morsehgp3d::direct_morse_vertical_journal
   )
   target_compile_features(
@@ -4844,10 +5057,15 @@ install(
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal
+    morsehgp3d_direct_morse_forest_carrier_cut_index
+    morsehgp3d_direct_morse_forest_carrier_cut_replay_session
+    morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
     morsehgp3d_direct_morse_forest_source_authority
     morsehgp3d_direct_morse_forest_reducer
     morsehgp3d_direct_morse_terminal_forest_reduction
     morsehgp3d_direct_morse_vertical_journal
+    morsehgp3d_direct_morse_vertical_target_proposal_adapter
+    morsehgp3d_direct_morse_vertical_target_proposal_pipeline
     morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_direct_morse_budget
     morsehgp3d_direct_sparse_facet_descent_batch_plan

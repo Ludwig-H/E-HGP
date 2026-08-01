@@ -1367,6 +1367,66 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+  test_hierarchy_direct_morse_forest_carrier_cut_index.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+  PRIVATE morsehgp3d::direct_morse_forest_carrier_cut_index
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_replay_session_tests
+  test_hierarchy_direct_morse_forest_carrier_cut_replay_session.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_replay_session_tests
+  PRIVATE morsehgp3d::direct_morse_forest_carrier_cut_replay_session
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_replay_session_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_replay_session_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_closure_adapter_tests
+  test_hierarchy_direct_morse_forest_carrier_cut_closure_adapter.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_closure_adapter_tests
+  PRIVATE morsehgp3d::direct_morse_forest_carrier_cut_closure_adapter
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_closure_adapter_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_closure_adapter_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
   test_hierarchy_direct_morse_forest_reducer.cpp
   fake_gpu_phase14_facet_top_k_proposal_launchers.cpp
@@ -1438,6 +1498,46 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_adapter_tests
+  test_hierarchy_direct_morse_vertical_target_proposal_adapter.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_adapter_tests
+  PRIVATE morsehgp3d::direct_morse_vertical_target_proposal_adapter
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_adapter_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_adapter_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_pipeline_tests
+  test_hierarchy_direct_morse_vertical_target_proposal_pipeline.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_pipeline_tests
+  PRIVATE morsehgp3d::direct_morse_vertical_target_proposal_pipeline
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_pipeline_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_pipeline_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -2750,9 +2850,14 @@ set(
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_replay_session_tests
+  morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_closure_adapter_tests
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
   morsehgp3d_hierarchy_direct_morse_terminal_reducer_source_bridge_tests
   morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
+  morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_adapter_tests
+  morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_pipeline_tests
   morsehgp3d_hierarchy_direct_morse_budget_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_executor_tests
@@ -3749,6 +3854,18 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_morse_forest_journal_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_forest_carrier_cut_index
+  COMMAND morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_forest_carrier_cut_replay_session
+  COMMAND morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_replay_session_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_forest_carrier_cut_closure_adapter
+  COMMAND morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_closure_adapter_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_direct_morse_forest_reducer
   COMMAND morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
 )
@@ -3759,6 +3876,14 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_vertical_journal
   COMMAND morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_vertical_target_proposal_adapter
+  COMMAND morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_adapter_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_vertical_target_proposal_pipeline
+  COMMAND morsehgp3d_hierarchy_direct_morse_vertical_target_proposal_pipeline_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_budget

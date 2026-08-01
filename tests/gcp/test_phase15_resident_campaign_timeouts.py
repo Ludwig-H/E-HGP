@@ -119,6 +119,7 @@ class Phase15ResidentCampaignTimeoutTests(unittest.TestCase):
 
     def test_runner_assembler_and_validator_use_the_explicit_contract(self) -> None:
         for name in (
+            "PHASE15_RESIDENT_REDUCER_TIMEOUT_SECONDS",
             "PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS",
             "PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS",
             "PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS",
@@ -139,11 +140,11 @@ class Phase15ResidentCampaignTimeoutTests(unittest.TestCase):
                 rf'[\s\S]*?canonical-direct-scale-timeout\s+\\',
             )
         self.assertIn(
-            ") != (600, 2400, 5400):\n    fail(\"resident campaign timeout contract drift\")",
+            ") != (300, 600, 2400, 5400):\n    fail(\"resident campaign timeout contract drift\")",
             self.remote,
         )
         self.assertIn(
-            ") != (600, 2400, 5400):\n    raise SystemExit(\"resident artifact timeout contract drift\")",
+            ") != (300, 600, 2400, 5400):\n    raise SystemExit(\"resident artifact timeout contract drift\")",
             self.wrapper,
         )
         self.assertIn(
@@ -158,6 +159,46 @@ class Phase15ResidentCampaignTimeoutTests(unittest.TestCase):
             "exit_status != 0 and not (point_count > 50000 and exit_status == 124)",
             self.wrapper,
         )
+
+    def test_reducer_artifact_uses_300_seconds_while_scheduler_stays_at_60(self) -> None:
+        remote_scheduler_runs = self.remote.split('"runs": [', 1)[1].split(
+            '"reducer_source_runs": [', 1
+        )[0]
+        remote_reducer_runs = self.remote.split(
+            '"reducer_source_runs": [', 1
+        )[1].split('"frontier_profile_runs": [', 1)[0]
+        self.assertEqual(2, remote_scheduler_runs.count('"timeout_seconds": 60'))
+        self.assertEqual(2, remote_scheduler_runs.count('"60s"'))
+        self.assertEqual(
+            2,
+            remote_reducer_runs.count(
+                '"timeout_seconds": reducer_timeout_seconds'
+            ),
+        )
+        self.assertEqual(
+            2,
+            remote_reducer_runs.count('f"{reducer_timeout_seconds}s"'),
+        )
+        self.assertNotIn('"timeout_seconds": 60', remote_reducer_runs)
+        self.assertNotIn('"60s"', remote_reducer_runs)
+
+        wrapper_scheduler_contract = self.wrapper.split(
+            'runs = value.get("runs")', 1
+        )[1].split('reducer_runs = value.get("reducer_source_runs")', 1)[0]
+        wrapper_reducer_contract = self.wrapper.split(
+            'reducer_runs = value.get("reducer_source_runs")', 1
+        )[1].split('frontier_runs = value.get("frontier_profile_runs")', 1)[0]
+        self.assertIn('run.get("timeout_seconds") != 60', wrapper_scheduler_contract)
+        self.assertIn('"60s"', wrapper_scheduler_contract)
+        self.assertIn(
+            'run.get("timeout_seconds") != reducer_timeout_seconds',
+            wrapper_reducer_contract,
+        )
+        self.assertIn(
+            'f"{reducer_timeout_seconds}s"', wrapper_reducer_contract
+        )
+        self.assertNotIn('run.get("timeout_seconds") != 60', wrapper_reducer_contract)
+        self.assertNotIn('"60s"', wrapper_reducer_contract)
 
     def test_help_reports_the_new_bounds_without_entering_gcp(self) -> None:
         for path in (REMOTE_PATH, WRAPPER_PATH):

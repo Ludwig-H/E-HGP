@@ -3815,19 +3815,20 @@ exact(
         "recipe_catalog_certified",
         "cut_certified", "pair_authority_certified", "higher_terminal",
         "bridge_certified", "provider_replay_certified",
-        "forest_reduction_certified", "vertical_worklist_certified",
+        "forest_reduction_certified", "vertical_target_pipeline_certified",
+        "vertical_journal_certified",
         "automatic_recipe_catalog", "pair_cut", "pair_classification", "reducer_source",
-        "forest_reduction", "vertical_worklist", "digests",
+        "forest_reduction", "vertical_target_pipeline", "vertical_journal", "digests",
         "timings_nanoseconds", "claims", "qualified_scope",
     },
     "reducer qualification",
 )
 for key, expected in {
-    "schema": "morsehgp3d.phase15.transactional_pair_to_conditional_forest_qualification.v3",
+    "schema": "morsehgp3d.phase15.transactional_pair_to_conditional_forest_qualification.v4",
     "backend": "cuda_g4_plus_reference_cpu",
     "git_sha": git_sha,
     "profile": "hgp_reduced",
-    "mode": "automatic_exact_prune_recipes_to_complete_direct_terminal_source_to_conditional_forest_and_vertical_worklist",
+    "mode": "automatic_exact_prune_recipes_to_complete_direct_terminal_source_to_conditional_forest_to_forest_relative_multiorder_vertical_targets_and_zero_missing_label_vertical_journal",
     "public_status": "not_claimed",
     "fixture": "eight_clusters_12",
     "point_count": 12,
@@ -3842,8 +3843,9 @@ for key, expected in {
     "bridge_certified": True,
     "provider_replay_certified": True,
     "forest_reduction_certified": True,
-    "vertical_worklist_certified": True,
-    "qualified_scope": "automatic_exact_prune_cut_to_terminal_direct_supports_bounded_conditional_h0_forest_and_explicit_vertical_worklist_only",
+    "vertical_target_pipeline_certified": True,
+    "vertical_journal_certified": True,
+    "qualified_scope": "automatic_exact_prune_cut_to_terminal_direct_supports_bounded_conditional_h0_forest_forest_relative_multiorder_vertical_target_proposals_and_zero_missing_label_conditional_vertical_journal_only",
 }.items():
     if value.get(key) != expected or type(value.get(key)) is not type(expected):
         fail(f"reducer qualification.{key}: unexpected value")
@@ -3957,35 +3959,113 @@ if (
     or forest["logical_output_entries"] < forest["final_roots"]
 ):
     fail("forest_reduction: conditional H0 forest did not close")
+pipeline = exact(
+    value.get("vertical_target_pipeline"),
+    {
+        "decision", "source_batches_scanned", "source_groups_scanned",
+        "target_order_lookups", "required_sessions", "initialized_sessions",
+        "session_audits", "required_groups", "preflight_plans",
+        "executed_plans", "replay_advances", "closure_builds",
+        "proposal_adapters", "group_audits", "representatives",
+        "projected_target_facets", "distinct_target_facets",
+        "retained_key_point_references", "closure_terminal_summaries",
+        "closure_unresolved_terminals", "closure_active_latent_terminals",
+        "closure_resolved_terminals", "proposals", "unresolved_proposals",
+        "resolved_proposals", "equal_level_same_target_order_groups",
+        "matching_canonical_point_namespace_required",
+        "forest_to_cloud_namespace_identity_certified", "forest_relative_only",
+        "global_forbidden_structure_materialized",
+        "external_target_authority_replayed", "vertical_maps_complete",
+    },
+    "vertical_target_pipeline",
+)
+pipeline_boolean_keys = {
+    "matching_canonical_point_namespace_required",
+    "forest_to_cloud_namespace_identity_certified", "forest_relative_only",
+    "global_forbidden_structure_materialized",
+    "external_target_authority_replayed", "vertical_maps_complete",
+}
+for key in set(pipeline) - pipeline_boolean_keys:
+    integer(pipeline[key], f"vertical_target_pipeline.{key}")
+if (
+    pipeline["required_sessions"] < 1
+    or pipeline["required_groups"] < 1
+    or pipeline["proposals"] < 1
+    or pipeline["source_batches_scanned"] != forest["committed_batches"]
+    or pipeline["source_groups_scanned"] != pipeline["required_groups"]
+    or pipeline["target_order_lookups"] < pipeline["required_sessions"]
+    or pipeline["initialized_sessions"] != pipeline["required_sessions"]
+    or pipeline["session_audits"] != pipeline["required_sessions"]
+    or pipeline["preflight_plans"] != pipeline["required_groups"]
+    or pipeline["executed_plans"] != pipeline["required_groups"]
+    or pipeline["replay_advances"] != pipeline["required_groups"]
+    or pipeline["closure_builds"] != pipeline["required_groups"]
+    or pipeline["proposal_adapters"] != pipeline["required_groups"]
+    or pipeline["group_audits"] != pipeline["required_groups"]
+    or pipeline["representatives"] != pipeline["proposals"]
+    or pipeline["projected_target_facets"] < 2 * pipeline["representatives"]
+    or pipeline["distinct_target_facets"] < 1
+    or pipeline["distinct_target_facets"] > pipeline["projected_target_facets"]
+    or pipeline["retained_key_point_references"] <
+        pipeline["projected_target_facets"]
+    or pipeline["closure_terminal_summaries"] !=
+        pipeline["distinct_target_facets"]
+    or pipeline["closure_unresolved_terminals"] +
+        pipeline["closure_active_latent_terminals"] +
+        pipeline["closure_resolved_terminals"] !=
+        pipeline["closure_terminal_summaries"]
+    or pipeline["unresolved_proposals"] + pipeline["resolved_proposals"] !=
+        pipeline["proposals"]
+    or pipeline["equal_level_same_target_order_groups"] >
+        pipeline["required_groups"]
+    or pipeline["decision"] !=
+        (15 if pipeline["unresolved_proposals"] != 0 else 14)
+    or pipeline.get("matching_canonical_point_namespace_required") is not True
+    or pipeline.get("forest_to_cloud_namespace_identity_certified") is not False
+    or pipeline.get("forest_relative_only") is not True
+    or pipeline.get("global_forbidden_structure_materialized") is not False
+    or pipeline.get("external_target_authority_replayed") is not False
+    or pipeline.get("vertical_maps_complete") is not False
+):
+    fail("vertical_target_pipeline: forest-relative proposal pipeline did not close")
 vertical = exact(
-    value.get("vertical_worklist"),
+    value.get("vertical_journal"),
     {
         "decision", "expected_labels", "missing_labels",
         "unresolved_labels", "resolved_labels", "partial_groups",
         "complete_groups", "external_target_authority_replayed",
-        "vertical_maps_complete",
+        "all_naturality_squares_replayed", "vertical_maps_complete",
+        "public_status_claimed",
     },
-    "vertical_worklist",
+    "vertical_journal",
 )
-for key in {
-    "decision", "expected_labels", "missing_labels", "unresolved_labels",
-    "resolved_labels", "partial_groups", "complete_groups",
-}:
-    integer(vertical[key], f"vertical_worklist.{key}")
+vertical_boolean_keys = {
+    "external_target_authority_replayed", "all_naturality_squares_replayed",
+    "vertical_maps_complete", "public_status_claimed",
+}
+for key in set(vertical) - vertical_boolean_keys:
+    integer(vertical[key], f"vertical_journal.{key}")
 expected_vertical_decision = (
     10
-    if vertical["expected_labels"] == 0 and vertical["partial_groups"] == 0
+    if vertical["unresolved_labels"] == 0 and vertical["partial_groups"] == 0
     else 9
 )
 if (
     vertical["decision"] != expected_vertical_decision
-    or vertical["missing_labels"] != vertical["expected_labels"]
-    or vertical["unresolved_labels"] != 0
-    or vertical["resolved_labels"] != 0
+    or vertical["expected_labels"] != pipeline["proposals"]
+    or vertical["missing_labels"] != 0
+    or vertical["unresolved_labels"] + vertical["resolved_labels"] !=
+        vertical["expected_labels"]
+    or vertical["unresolved_labels"] != pipeline["unresolved_proposals"]
+    or vertical["resolved_labels"] != pipeline["resolved_proposals"]
+    or vertical["partial_groups"] + vertical["complete_groups"] !=
+        pipeline["required_groups"]
     or vertical.get("external_target_authority_replayed") is not False
+    or vertical.get("all_naturality_squares_replayed") is not False
     or vertical.get("vertical_maps_complete") is not False
+    or vertical.get("public_status_claimed") is not False
 ):
-    fail("vertical_worklist: explicit conditional worklist did not close")
+    fail("vertical_journal: zero-missing conditional journal did not close")
 digests = exact(
     value.get("digests"),
     {
@@ -4019,7 +4099,8 @@ timings = exact(
         "provider_replay_wall", "forest_reduction_wrapper_wall",
         "forest_plan_wall", "forest_reducer_setup_wall",
         "forest_reducer_stream_wall", "forest_finish_wall",
-        "forest_reduction_internal_total_wall", "vertical_worklist_wall",
+        "forest_reduction_internal_total_wall",
+        "vertical_target_proposal_pipeline_wall", "vertical_journal_wall",
         "total",
     },
     "reducer timings",
@@ -4049,6 +4130,7 @@ if value.get("claims") != {
     "global_pair_matrix": False,
     "hierarchy_reduction": True,
     "conditional_h0_only": True,
+    "forest_relative_vertical_target_proposals": True,
     "vertical_target_authority": False,
     "vertical_maps_complete": False,
     "public_exact": False,
@@ -5017,6 +5099,7 @@ if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" ]]; then
         "${phase15_resident_direct_30m_finished_ns}" \
         "${phase15_resident_direct_10m_exit_status}" \
         "${phase15_resident_direct_30m_exit_status}" \
+        "${PHASE15_RESIDENT_REDUCER_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS}" \
         "${PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS}" <<'PY'
@@ -5080,14 +5163,16 @@ direct_30m_started = int(sys.argv[43])
 direct_30m_finished = int(sys.argv[44])
 direct_10m_exit_status = int(sys.argv[45])
 direct_30m_exit_status = int(sys.argv[46])
-frontier_50k_timeout_seconds = int(sys.argv[47])
-direct_10m_timeout_seconds = int(sys.argv[48])
-direct_30m_timeout_seconds = int(sys.argv[49])
+reducer_timeout_seconds = int(sys.argv[47])
+frontier_50k_timeout_seconds = int(sys.argv[48])
+direct_10m_timeout_seconds = int(sys.argv[49])
+direct_30m_timeout_seconds = int(sys.argv[50])
 if (
+    reducer_timeout_seconds,
     frontier_50k_timeout_seconds,
     direct_10m_timeout_seconds,
     direct_30m_timeout_seconds,
-) != (600, 2400, 5400):
+) != (300, 600, 2400, 5400):
     fail("resident campaign timeout contract drift")
 
 environment = json.loads(environment_path.read_text(encoding="utf-8"))
@@ -5313,8 +5398,8 @@ artifact = {
             "direct_scale_10m_rank11": direct_10m_timeout_seconds,
             "direct_scale_30m_rank11": direct_30m_timeout_seconds,
             "frontier_50k_rank11": frontier_50k_timeout_seconds,
-            "reducer_source_k10": 300,
-            "reducer_source_k5": 300,
+            "reducer_source_k10": reducer_timeout_seconds,
+            "reducer_source_k5": reducer_timeout_seconds,
             "resident_scheduler_k10": 60,
             "resident_scheduler_k5": 60,
         },
@@ -5379,7 +5464,8 @@ artifact = {
     },
     "public_status": "not_claimed",
     "qualified_scope": (
-        "bounded_scheduler_reducer_source_and_device_frontier_components_only"
+        "bounded_scheduler_conditional_forest_forest_relative_vertical_"
+        "target_pipeline_and_device_frontier_components_only"
     ),
     "runs": [
         {
@@ -5414,7 +5500,8 @@ artifact = {
     "reducer_source_runs": [
         {
             "command": [
-                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground",
+                f"{reducer_timeout_seconds}s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification",
                 "--K", "5", "--require-complete",
             ],
@@ -5423,11 +5510,12 @@ artifact = {
             "external_wall_started_epoch_nanoseconds": reducer_k5_started,
             "maximum_order": 5,
             "result": reducer_k5_result,
-            "timeout_seconds": 60,
+            "timeout_seconds": reducer_timeout_seconds,
         },
         {
             "command": [
-                "/usr/bin/timeout", "--kill-after=5s", "--foreground", "60s",
+                "/usr/bin/timeout", "--kill-after=5s", "--foreground",
+                f"{reducer_timeout_seconds}s",
                 "/workspace/repository/build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification",
                 "--K", "10", "--require-complete",
             ],
@@ -5436,7 +5524,7 @@ artifact = {
             "external_wall_started_epoch_nanoseconds": reducer_k10_started,
             "maximum_order": 10,
             "result": reducer_k10_result,
-            "timeout_seconds": 60,
+            "timeout_seconds": reducer_timeout_seconds,
         },
     ],
     "frontier_profile_runs": [

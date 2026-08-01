@@ -43,7 +43,8 @@ def valid_fullchain_result() -> dict:
             "forest_reducer_stream_wall",
             "forest_finish_wall",
             "forest_reduction_internal_total_wall",
-            "vertical_worklist_wall",
+            "vertical_target_proposal_pipeline_wall",
+            "vertical_journal_wall",
             "total",
         )
     }
@@ -53,14 +54,15 @@ def valid_fullchain_result() -> dict:
     return {
         "schema": (
             "morsehgp3d.phase15."
-            "transactional_pair_to_conditional_forest_qualification.v3"
+            "transactional_pair_to_conditional_forest_qualification.v4"
         ),
         "backend": "cuda_g4_plus_reference_cpu",
         "git_sha": GIT_SHA,
         "profile": "hgp_reduced",
         "mode": (
             "automatic_exact_prune_recipes_to_complete_direct_terminal_source_"
-            "to_conditional_forest_and_vertical_worklist"
+            "to_conditional_forest_to_forest_relative_multiorder_vertical_"
+            "targets_and_zero_missing_label_vertical_journal"
         ),
         "public_status": "not_claimed",
         "fixture": "eight_clusters_12",
@@ -76,7 +78,8 @@ def valid_fullchain_result() -> dict:
         "bridge_certified": True,
         "provider_replay_certified": True,
         "forest_reduction_certified": True,
-        "vertical_worklist_certified": True,
+        "vertical_target_pipeline_certified": True,
+        "vertical_journal_certified": True,
         "automatic_recipe_catalog": {
             "decision": 9,
             "product_visits": 4,
@@ -139,16 +142,52 @@ def valid_fullchain_result() -> dict:
             "logical_output_entries": 1,
             "conditional_h0_candidate": True,
         },
-        "vertical_worklist": {
-            "decision": 10,
-            "expected_labels": 0,
-            "missing_labels": 0,
-            "unresolved_labels": 0,
-            "resolved_labels": 0,
-            "partial_groups": 0,
-            "complete_groups": 0,
+        "vertical_target_pipeline": {
+            "decision": 15,
+            "source_batches_scanned": 1,
+            "source_groups_scanned": 1,
+            "target_order_lookups": 1,
+            "required_sessions": 1,
+            "initialized_sessions": 1,
+            "session_audits": 1,
+            "required_groups": 1,
+            "preflight_plans": 1,
+            "executed_plans": 1,
+            "replay_advances": 1,
+            "closure_builds": 1,
+            "proposal_adapters": 1,
+            "group_audits": 1,
+            "representatives": 2,
+            "projected_target_facets": 4,
+            "distinct_target_facets": 3,
+            "retained_key_point_references": 7,
+            "closure_terminal_summaries": 3,
+            "closure_unresolved_terminals": 1,
+            "closure_active_latent_terminals": 1,
+            "closure_resolved_terminals": 1,
+            "proposals": 2,
+            "unresolved_proposals": 1,
+            "resolved_proposals": 1,
+            "equal_level_same_target_order_groups": 0,
+            "matching_canonical_point_namespace_required": True,
+            "forest_to_cloud_namespace_identity_certified": False,
+            "forest_relative_only": True,
+            "global_forbidden_structure_materialized": False,
             "external_target_authority_replayed": False,
             "vertical_maps_complete": False,
+        },
+        "vertical_journal": {
+            "decision": 9,
+            "expected_labels": 2,
+            "missing_labels": 0,
+            "unresolved_labels": 1,
+            "resolved_labels": 1,
+            "partial_groups": 1,
+            "complete_groups": 0,
+            "external_target_authority_replayed": False,
+            "all_naturality_squares_replayed": False,
+            "vertical_maps_complete": False,
+            "public_status_claimed": False,
         },
         "digests": {
             "submitted_recipe_fnv1a": 1,
@@ -169,13 +208,15 @@ def valid_fullchain_result() -> dict:
             "global_pair_matrix": False,
             "hierarchy_reduction": True,
             "conditional_h0_only": True,
+            "forest_relative_vertical_target_proposals": True,
             "vertical_target_authority": False,
             "vertical_maps_complete": False,
             "public_exact": False,
         },
         "qualified_scope": (
             "automatic_exact_prune_cut_to_terminal_direct_supports_bounded_"
-            "conditional_h0_forest_and_explicit_vertical_worklist_only"
+            "conditional_h0_forest_forest_relative_multiorder_vertical_target_"
+            "proposals_and_zero_missing_label_conditional_vertical_journal_only"
         ),
     }
 
@@ -241,7 +282,7 @@ class Phase15ResidentFullchainValidatorTests(unittest.TestCase):
             self.wrapper_validator(value, 5)
         self.assert_remote_accepts(value, False)
 
-    def test_v3_automatic_recipe_catalog_contract_is_accepted(self) -> None:
+    def test_v4_mixed_resolved_and_unresolved_contract_is_accepted(self) -> None:
         self.assert_both_accept(valid_fullchain_result())
 
     def test_catalog_receipt_and_mass_partitions_are_strict(self) -> None:
@@ -277,16 +318,37 @@ class Phase15ResidentFullchainValidatorTests(unittest.TestCase):
                 value["pair_cut"][key] = replacement
                 self.assert_both_reject(value)
 
-    def test_v2_shape_and_missing_catalog_timing_are_rejected(self) -> None:
+    def test_vertical_pipeline_and_journal_partitions_are_strict(self) -> None:
+        mutations = {
+            "missing_label": ("vertical_journal", "missing_labels", 1),
+            "closure_partition": (
+                "vertical_target_pipeline",
+                "closure_resolved_terminals",
+                0,
+            ),
+            "proposal_partition": (
+                "vertical_target_pipeline",
+                "resolved_proposals",
+                0,
+            ),
+            "label_partition": ("vertical_journal", "resolved_labels", 0),
+        }
+        for name, (section, key, replacement) in mutations.items():
+            with self.subTest(name=name):
+                value = deepcopy(valid_fullchain_result())
+                value[section][key] = replacement
+                self.assert_both_reject(value)
+
+    def test_v3_shape_and_missing_pipeline_timing_are_rejected(self) -> None:
         value = valid_fullchain_result()
         value["schema"] = (
             "morsehgp3d.phase15."
-            "transactional_pair_to_conditional_forest_qualification.v2"
+            "transactional_pair_to_conditional_forest_qualification.v3"
         )
         self.assert_both_reject(value)
 
         value = valid_fullchain_result()
-        del value["timings_nanoseconds"]["automatic_recipe_catalog_wall"]
+        del value["timings_nanoseconds"]["vertical_target_proposal_pipeline_wall"]
         self.assert_both_reject(value)
 
 

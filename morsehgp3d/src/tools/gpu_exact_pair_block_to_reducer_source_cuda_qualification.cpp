@@ -6,6 +6,7 @@
 #include "morsehgp3d/hierarchy/direct_morse_terminal_forest_reduction.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_terminal_reducer_source_bridge.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_vertical_target_proposal_pipeline.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
@@ -238,8 +239,118 @@ forest_reduction_config() {
   return config;
 }
 
+[[nodiscard]]
+hierarchy::ExactDirectMorseVerticalTargetProposalPipelineBudget
+vertical_target_pipeline_budget(
+    const hierarchy::ExactDirectMorseForestJournalResult& forest) {
+  constexpr std::size_t capacity = 16384U;
+  constexpr std::size_t group_capacity = 4096U;
+  constexpr std::size_t large_capacity = 1000000U;
+  hierarchy::ExactDirectMorseVerticalTargetProposalPipelineBudget budget;
+
+  auto& carrier = budget.session_budget.carrier_state_budget;
+  carrier.maximum_forest_birth_record_scan_count = capacity;
+  carrier.maximum_forest_node_scan_count = capacity;
+  carrier.maximum_forest_batch_scan_count = capacity;
+  carrier.maximum_forest_atomic_group_scan_count = capacity;
+  carrier.maximum_forest_saddle_scan_count = capacity;
+  carrier.maximum_forest_arm_binding_scan_count = capacity;
+  carrier.maximum_forest_child_reference_scan_count = capacity;
+  carrier.maximum_forest_final_root_scan_count = capacity;
+  carrier.maximum_component_state_count = capacity;
+  carrier.maximum_node_marker_state_count = capacity;
+  carrier.maximum_index_entry_count = capacity;
+  carrier.maximum_group_carrier_scratch_count = capacity;
+  carrier.maximum_group_prior_root_scratch_count = capacity;
+  carrier.maximum_parent_hop_count = large_capacity;
+  carrier.maximum_exact_level_comparison_count = large_capacity;
+  carrier.maximum_single_exact_level_integer_bit_count = capacity;
+  carrier.maximum_logical_output_entry_count = 65536U;
+
+  budget.session_budget.locator_budget =
+      forest.requested_budget.locator_budget;
+  budget.session_budget.maximum_replayed_global_batch_count = capacity;
+  budget.session_budget.maximum_replayed_locator_union_count = capacity;
+  budget.session_budget.maximum_replayed_locator_binding_count = capacity;
+  budget.session_budget.maximum_batch_group_plan_count = capacity;
+  budget.session_budget.maximum_batch_group_carrier_reference_count =
+      capacity;
+  budget.session_budget.maximum_batch_group_prior_root_reference_count =
+      capacity;
+  budget.session_budget.maximum_batch_locator_union_scratch_count =
+      capacity;
+  budget.session_budget.maximum_batch_locator_binding_scratch_count =
+      capacity;
+
+  auto& plan = budget.facet_plan_budget;
+  plan.maximum_group_saddle_scan_count = capacity;
+  plan.maximum_group_arm_binding_scan_count = capacity;
+  plan.maximum_binding_sort_scratch_count = group_capacity;
+  plan.maximum_representative_binding_count = group_capacity;
+  plan.maximum_projected_target_facet_reference_count = 65536U;
+  plan.maximum_distinct_target_facet_count = group_capacity;
+  plan.maximum_sort_comparison_count = large_capacity;
+  plan.maximum_target_facet_lookup_comparison_count = large_capacity;
+  plan.maximum_retained_key_point_reference_count = 131072U;
+  plan.maximum_logical_output_entry_count = 131072U;
+
+  auto& closure = budget.closure_budget;
+  closure.maximum_canonical_key_scan_count = group_capacity;
+  closure.maximum_terminal_summary_count = group_capacity;
+  closure.maximum_terminal_key_point_reference_count = 131072U;
+  closure.maximum_carrier_cut_lookup_count = group_capacity;
+  closure.maximum_logical_output_entry_count = 65536U;
+  closure.closure_budget = {
+      group_capacity,
+      65536U,
+      65536U,
+      131073U,
+      descent_step_budget(),
+  };
+
+  auto& proposal = budget.proposal_budget;
+  proposal.maximum_source_saddle_revalidation_count = capacity;
+  proposal.maximum_source_binding_revalidation_count = capacity;
+  proposal.maximum_source_key_lookup_comparison_count = large_capacity;
+  proposal.maximum_closure_summary_scan_count = group_capacity;
+  proposal.maximum_positive_terminal_probe_count = group_capacity;
+  proposal.maximum_positive_terminal_probe_slot_visit_count =
+      large_capacity;
+  proposal.maximum_positive_terminal_probe_parent_hop_count =
+      large_capacity;
+  proposal.positive_terminal_probe_budget = {65537U, capacity};
+  proposal.maximum_carrier_entry_revalidation_count = group_capacity;
+  proposal.maximum_target_node_lookup_count = group_capacity;
+  proposal.maximum_exact_level_comparison_count = large_capacity;
+  proposal.maximum_single_exact_level_integer_bit_count = capacity;
+  proposal.maximum_proposal_count = group_capacity;
+  proposal.maximum_logical_output_entry_count = 65536U;
+
+  budget.maximum_source_batch_scan_count = capacity;
+  budget.maximum_source_atomic_group_scan_count = capacity;
+  budget.maximum_referenced_target_order_count = 9U;
+  budget.maximum_target_order_lookup_count = large_capacity;
+  budget.maximum_preflight_facet_plan_count = capacity;
+  budget.maximum_executed_facet_plan_count = capacity;
+  budget.maximum_replay_advance_count = capacity;
+  budget.maximum_closure_build_count = capacity;
+  budget.maximum_proposal_adapter_count = capacity;
+  budget.maximum_aggregate_representative_count = capacity;
+  budget.maximum_aggregate_projected_target_facet_reference_count =
+      163840U;
+  budget.maximum_aggregate_distinct_target_facet_count = 163840U;
+  budget.maximum_aggregate_retained_key_point_reference_count = 2000000U;
+  budget.maximum_aggregate_plan_logical_output_entry_count = large_capacity;
+  budget.maximum_aggregate_closure_terminal_summary_count = 163840U;
+  budget.maximum_aggregate_proposal_count = capacity;
+  budget.maximum_session_audit_count = 9U;
+  budget.maximum_group_audit_count = capacity;
+  budget.maximum_logical_output_entry_count = 65536U;
+  return budget;
+}
+
 [[nodiscard]] hierarchy::ExactDirectMorseVerticalBudget vertical_budget() {
-  constexpr std::size_t capacity = 4096U;
+  constexpr std::size_t capacity = 16384U;
   return {
       capacity,
       capacity,
@@ -441,30 +552,54 @@ int run(const Options& options) {
   }
   const Clock::time_point forest_reduction_end = Clock::now();
 
-  const Clock::time_point vertical_begin = forest_reduction_end;
+  const Clock::time_point vertical_target_pipeline_begin =
+      forest_reduction_end;
+  std::optional<
+      hierarchy::ExactDirectMorseVerticalTargetProposalPipelineResult>
+      vertical_target_pipeline;
+  if (forest_reduction.has_value() &&
+      forest_reduction->certified_reduction() &&
+      forest_reduction->forest.has_value()) {
+    vertical_target_pipeline.emplace(
+        hierarchy::build_exact_direct_morse_vertical_target_proposal_pipeline(
+            *forest_reduction->forest,
+            index,
+            cloud,
+            vertical_target_pipeline_budget(*forest_reduction->forest)));
+  }
+  const Clock::time_point vertical_target_pipeline_end = Clock::now();
+
+  const Clock::time_point vertical_journal_begin =
+      vertical_target_pipeline_end;
   std::optional<hierarchy::ExactDirectMorseVerticalJournalResult>
       vertical_journal;
   if (forest_reduction.has_value() &&
       forest_reduction->certified_reduction() &&
-      forest_reduction->forest.has_value()) {
-    const std::span<
-        const hierarchy::ExactDirectMorseVerticalTargetProposal>
-        no_target_proposals{};
+      forest_reduction->forest.has_value() &&
+      vertical_target_pipeline.has_value() &&
+      vertical_target_pipeline->certified_multiorder_target_proposals()) {
     vertical_journal.emplace(
         hierarchy::build_exact_direct_morse_vertical_journal(
             *forest_reduction->forest,
-            no_target_proposals,
+            std::span<
+                const hierarchy::ExactDirectMorseVerticalTargetProposal>{
+                vertical_target_pipeline->proposals},
             vertical_budget(),
             hierarchy::ExactDirectMorseVerticalConfig{
-                UINT64_C(0x4D485047563131)}));
+                vertical_target_pipeline->external_target_authority_id}));
   }
-  const Clock::time_point vertical_end = Clock::now();
+  const Clock::time_point vertical_journal_end = Clock::now();
 
   const hierarchy::ExactDirectMorseTerminalForestReductionAudit
       empty_forest_audit{};
   const auto& forest_audit = forest_reduction.has_value()
       ? forest_reduction->audit
       : empty_forest_audit;
+  const hierarchy::ExactDirectMorseVerticalTargetProposalPipelineResult
+      empty_vertical_target_pipeline{};
+  const auto& vertical_pipeline = vertical_target_pipeline.has_value()
+      ? *vertical_target_pipeline
+      : empty_vertical_target_pipeline;
   const hierarchy::ExactDirectMorseVerticalJournalResult
       empty_vertical_journal{};
   const auto& vertical = vertical_journal.has_value()
@@ -473,29 +608,46 @@ int run(const Options& options) {
   const bool forest_reduction_certified =
       forest_reduction.has_value() &&
       forest_reduction->certified_reduction();
-  const bool vertical_worklist_certified =
+  const bool vertical_target_pipeline_certified =
+      vertical_target_pipeline.has_value() &&
+      vertical_target_pipeline->certified_multiorder_target_proposals() &&
+      vertical_target_pipeline->required_referenced_target_order_count != 0U &&
+      vertical_target_pipeline->required_group_count != 0U &&
+      !vertical_target_pipeline->proposals.empty();
+  const bool vertical_journal_certified =
       vertical_journal.has_value() &&
       vertical_journal->certified_conditional_vertical_candidate() &&
-      vertical_journal->counters.missing_label_count ==
+      vertical_target_pipeline_certified &&
+      vertical_journal->counters.expected_label_count ==
+          vertical_target_pipeline->proposals.size() &&
+      vertical_journal->counters.missing_label_count == 0U &&
+      vertical_journal->counters.unresolved_label_count <=
           vertical_journal->counters.expected_label_count &&
-      vertical_journal->counters.unresolved_label_count == 0U &&
-      vertical_journal->counters.resolved_label_count == 0U &&
+      vertical_journal->counters.resolved_label_count ==
+          vertical_journal->counters.expected_label_count -
+              vertical_journal->counters.unresolved_label_count &&
+      vertical_journal->counters.complete_group_count +
+              vertical_journal->counters.partial_group_count ==
+          vertical_target_pipeline->required_group_count &&
       !vertical_journal->external_target_authority_replayed &&
+      !vertical_journal->all_naturality_squares_replayed &&
       !vertical_journal->vertical_maps_complete &&
       !vertical_journal->public_status_claimed;
   const bool qualified = recipe_catalog_certified && cut_certified &&
       pair_authority_certified && higher_terminal && bridge_result.certified() &&
       provider_replay_certified && forest_reduction_certified &&
-      vertical_worklist_certified;
+      vertical_target_pipeline_certified && vertical_journal_certified;
 
   std::cout
       << "{\"schema\":\"morsehgp3d.phase15.transactional_pair_to_"
-         "conditional_forest_qualification.v3\","
+         "conditional_forest_qualification.v4\","
       << "\"backend\":\"cuda_g4_plus_reference_cpu\","
       << "\"git_sha\":\"" << kGitSha << "\","
       << "\"profile\":\"hgp_reduced\","
       << "\"mode\":\"automatic_exact_prune_recipes_to_complete_direct_"
-         "terminal_source_to_conditional_forest_and_vertical_worklist\","
+         "terminal_source_to_conditional_forest_to_forest_relative_"
+         "multiorder_vertical_targets_and_zero_missing_label_vertical_"
+         "journal\","
       << "\"public_status\":\"not_claimed\","
       << "\"fixture\":\"eight_clusters_12\","
       << "\"point_count\":" << cloud.size() << ','
@@ -519,8 +671,10 @@ int run(const Options& options) {
       << (provider_replay_certified ? "true" : "false") << ','
       << "\"forest_reduction_certified\":"
       << (forest_reduction_certified ? "true" : "false") << ','
-      << "\"vertical_worklist_certified\":"
-      << (vertical_worklist_certified ? "true" : "false") << ','
+      << "\"vertical_target_pipeline_certified\":"
+      << (vertical_target_pipeline_certified ? "true" : "false") << ','
+      << "\"vertical_journal_certified\":"
+      << (vertical_journal_certified ? "true" : "false") << ','
       << "\"automatic_recipe_catalog\":{\"decision\":"
       << static_cast<unsigned>(recipe_catalog_audit.decision)
       << ",\"product_visits\":"
@@ -615,7 +769,81 @@ int run(const Options& options) {
               ? "true"
               : "false")
       << "},"
-      << "\"vertical_worklist\":{\"decision\":"
+      << "\"vertical_target_pipeline\":{\"decision\":"
+      << static_cast<unsigned>(vertical_pipeline.decision)
+      << ",\"source_batches_scanned\":"
+      << vertical_pipeline.counters.source_batch_scan_count
+      << ",\"source_groups_scanned\":"
+      << vertical_pipeline.counters.source_atomic_group_scan_count
+      << ",\"target_order_lookups\":"
+      << vertical_pipeline.counters.target_order_lookup_count
+      << ",\"required_sessions\":"
+      << vertical_pipeline.required_referenced_target_order_count
+      << ",\"initialized_sessions\":"
+      << vertical_pipeline.counters.initialized_session_count
+      << ",\"session_audits\":"
+      << vertical_pipeline.session_audits.size()
+      << ",\"required_groups\":"
+      << vertical_pipeline.required_group_count
+      << ",\"preflight_plans\":"
+      << vertical_pipeline.counters.preflight_facet_plan_count
+      << ",\"executed_plans\":"
+      << vertical_pipeline.counters.executed_facet_plan_count
+      << ",\"replay_advances\":"
+      << vertical_pipeline.counters.replay_advance_count
+      << ",\"closure_builds\":"
+      << vertical_pipeline.counters.closure_build_count
+      << ",\"proposal_adapters\":"
+      << vertical_pipeline.counters.proposal_adapter_count
+      << ",\"group_audits\":"
+      << vertical_pipeline.group_audits.size()
+      << ",\"representatives\":"
+      << vertical_pipeline.counters.representative_count
+      << ",\"projected_target_facets\":"
+      << vertical_pipeline.counters.projected_target_facet_reference_count
+      << ",\"distinct_target_facets\":"
+      << vertical_pipeline.counters.distinct_target_facet_count
+      << ",\"retained_key_point_references\":"
+      << vertical_pipeline.counters.retained_key_point_reference_count
+      << ",\"closure_terminal_summaries\":"
+      << vertical_pipeline.counters.closure_terminal_summary_count
+      << ",\"closure_unresolved_terminals\":"
+      << vertical_pipeline.counters.closure_unresolved_terminal_count
+      << ",\"closure_active_latent_terminals\":"
+      << vertical_pipeline.counters.closure_active_latent_terminal_count
+      << ",\"closure_resolved_terminals\":"
+      << vertical_pipeline.counters.closure_resolved_terminal_count
+      << ",\"proposals\":" << vertical_pipeline.proposals.size()
+      << ",\"unresolved_proposals\":"
+      << vertical_pipeline.counters.unresolved_proposal_count
+      << ",\"resolved_proposals\":"
+      << vertical_pipeline.counters.resolved_proposal_count
+      << ",\"equal_level_same_target_order_groups\":"
+      << vertical_pipeline.counters
+             .equal_level_same_target_order_group_count
+      << ",\"matching_canonical_point_namespace_required\":"
+      << (vertical_pipeline.matching_canonical_point_namespace_required
+              ? "true"
+              : "false")
+      << ",\"forest_to_cloud_namespace_identity_certified\":"
+      << (vertical_pipeline.forest_to_cloud_namespace_identity_certified
+              ? "true"
+              : "false")
+      << ",\"forest_relative_only\":"
+      << (vertical_pipeline.forest_relative_only ? "true" : "false")
+      << ",\"global_forbidden_structure_materialized\":"
+      << (vertical_pipeline
+                  .global_facet_coface_incidence_cell_gamma_or_delaunay_materialized
+              ? "true"
+              : "false")
+      << ",\"external_target_authority_replayed\":"
+      << (vertical_pipeline.external_target_authority_replayed
+              ? "true"
+              : "false")
+      << ",\"vertical_maps_complete\":"
+      << (vertical_pipeline.vertical_maps_complete ? "true" : "false")
+      << "},"
+      << "\"vertical_journal\":{\"decision\":"
       << static_cast<unsigned>(vertical.decision)
       << ",\"expected_labels\":"
       << vertical.counters.expected_label_count
@@ -631,8 +859,12 @@ int run(const Options& options) {
       << vertical.counters.complete_group_count
       << ",\"external_target_authority_replayed\":"
       << (vertical.external_target_authority_replayed ? "true" : "false")
+      << ",\"all_naturality_squares_replayed\":"
+      << (vertical.all_naturality_squares_replayed ? "true" : "false")
       << ",\"vertical_maps_complete\":"
-      << (vertical.vertical_maps_complete ? "true" : "false") << "},"
+      << (vertical.vertical_maps_complete ? "true" : "false")
+      << ",\"public_status_claimed\":"
+      << (vertical.public_status_claimed ? "true" : "false") << "},"
       << "\"digests\":{\"submitted_recipe_fnv1a\":"
       << cut_audit.submitted_recipe_digest
       << ",\"final_cut_fnv1a\":" << cut_audit.final_cut_digest
@@ -685,18 +917,24 @@ int run(const Options& options) {
       << forest_audit.timings.forest_finish_wall_nanoseconds
       << ",\"forest_reduction_internal_total_wall\":"
       << forest_audit.timings.total_wall_nanoseconds
-      << ",\"vertical_worklist_wall\":"
-      << elapsed_nanoseconds(vertical_begin, vertical_end)
+      << ",\"vertical_target_proposal_pipeline_wall\":"
+      << elapsed_nanoseconds(
+             vertical_target_pipeline_begin,
+             vertical_target_pipeline_end)
+      << ",\"vertical_journal_wall\":"
+      << elapsed_nanoseconds(vertical_journal_begin, vertical_journal_end)
       << ",\"total\":"
-      << elapsed_nanoseconds(total_begin, vertical_end) << "},"
+      << elapsed_nanoseconds(total_begin, vertical_journal_end) << "},"
       << "\"claims\":{\"ordinary_or_higher_order_delaunay\":false,"
          "\"global_pair_matrix\":false,\"hierarchy_reduction\":true,"
          "\"conditional_h0_only\":true,"
+         "\"forest_relative_vertical_target_proposals\":true,"
          "\"vertical_target_authority\":false,"
          "\"vertical_maps_complete\":false,\"public_exact\":false},"
       << "\"qualified_scope\":\"automatic_exact_prune_cut_to_terminal_"
-         "direct_supports_bounded_conditional_h0_forest_and_explicit_"
-         "vertical_worklist_only\"}"
+         "direct_supports_bounded_conditional_h0_forest_forest_relative_"
+         "multiorder_vertical_target_proposals_and_zero_missing_label_"
+         "conditional_vertical_journal_only\"}"
       << '\n';
   return qualified ? 0 : 2;
 }
