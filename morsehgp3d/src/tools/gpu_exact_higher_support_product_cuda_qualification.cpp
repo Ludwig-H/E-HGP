@@ -41,7 +41,7 @@ using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
-inline constexpr std::size_t qualification_task_count = 9U;
+inline constexpr std::size_t qualification_task_count = 10U;
 inline constexpr std::size_t fixture_family_count = 5U;
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
@@ -99,6 +99,7 @@ inline constexpr std::size_t fixture_family_count = 5U;
 struct LeafNodeFixture {
   std::vector<std::uint64_t> node_index_by_leaf_position;
   std::vector<std::size_t> leaf_position_by_point_id;
+  std::vector<ExactHigherSupportNodeReceipt> internal_node_receipts;
 };
 
 // Certified snapshots are strict left/right postorder.  Replaying the public
@@ -156,6 +157,17 @@ struct LeafNodeFixture {
     const std::size_t split = find_split(begin, end);
     replay_postorder(begin, split);
     replay_postorder(split, end);
+    if (!std::in_range<std::uint64_t>(next_node_index) ||
+        !std::in_range<std::uint64_t>(begin) ||
+        !std::in_range<std::uint64_t>(end)) {
+      throw std::length_error(
+          "a qualification internal node receipt does not fit uint64");
+    }
+    fixture.internal_node_receipts.push_back(
+        ExactHigherSupportNodeReceipt{
+            static_cast<std::uint64_t>(next_node_index),
+            static_cast<std::uint64_t>(begin),
+            static_cast<std::uint64_t>(end)});
     ++next_node_index;
   };
   replay_postorder(0U, leaves.size());
@@ -174,6 +186,34 @@ struct LeafNodeFixture {
         position;
   }
   return fixture;
+}
+
+[[nodiscard]] ExactHigherSupportNodeReceipt smallest_internal_receipt(
+    const LeafNodeFixture& fixture,
+    std::uint64_t minimum_leaf_count) {
+  const auto found = std::min_element(
+      fixture.internal_node_receipts.begin(),
+      fixture.internal_node_receipts.end(),
+      [minimum_leaf_count](
+          const ExactHigherSupportNodeReceipt& left,
+          const ExactHigherSupportNodeReceipt& right) {
+        const std::uint64_t left_count = left.leaf_end - left.leaf_begin;
+        const std::uint64_t right_count = right.leaf_end - right.leaf_begin;
+        const bool left_eligible = left_count >= minimum_leaf_count;
+        const bool right_eligible = right_count >= minimum_leaf_count;
+        if (left_eligible != right_eligible) {
+          return left_eligible;
+        }
+        return left_count != right_count
+            ? left_count < right_count
+            : left.leaf_begin < right.leaf_begin;
+      });
+  if (found == fixture.internal_node_receipts.end() ||
+      found->leaf_end - found->leaf_begin < minimum_leaf_count) {
+    throw std::logic_error(
+        "the qualification LBVH has no sufficiently large internal node");
+  }
+  return *found;
 }
 
 [[nodiscard]] ExactHigherSupportNodeReceipt individual_leaf_receipt(
@@ -244,9 +284,55 @@ template <std::size_t SupportSize>
   return ExactDyadicAabb3{words, words};
 }
 
+[[nodiscard]] ExactDyadicAabb3 public_range_box(
+    const CanonicalPointCloud& cloud,
+    const MortonLbvhIndex& index,
+    const ExactHigherSupportNodeReceipt& receipt) {
+  const auto leaves = index.leaves();
+  if (!std::in_range<std::size_t>(receipt.leaf_begin) ||
+      !std::in_range<std::size_t>(receipt.leaf_end)) {
+    throw std::length_error(
+        "a qualification internal range does not fit size_t");
+  }
+  const std::size_t begin =
+      static_cast<std::size_t>(receipt.leaf_begin);
+  const std::size_t end = static_cast<std::size_t>(receipt.leaf_end);
+  if (begin >= end || end > leaves.size()) {
+    throw std::logic_error(
+        "a qualification internal range is outside the public leaves");
+  }
+  std::array<PointId, 3> lower_ids{
+      leaves[begin].point_id,
+      leaves[begin].point_id,
+      leaves[begin].point_id};
+  std::array<PointId, 3> upper_ids = lower_ids;
+  for (std::size_t position = begin + 1U; position < end; ++position) {
+    const PointId point_id = leaves[position].point_id;
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      if (cloud.point(point_id).coordinate(axis) <
+          cloud.point(lower_ids[axis]).coordinate(axis)) {
+        lower_ids[axis] = point_id;
+      }
+      if (cloud.point(upper_ids[axis]).coordinate(axis) <
+          cloud.point(point_id).coordinate(axis)) {
+        upper_ids[axis] = point_id;
+      }
+    }
+  }
+  ExactDyadicAabb3 box{};
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    box.lower_binary64_bits[axis] =
+        cloud.point(lower_ids[axis]).canonical_input_bits()[axis];
+    box.upper_binary64_bits[axis] =
+        cloud.point(upper_ids[axis]).canonical_input_bits()[axis];
+  }
+  return box;
+}
+
 struct QualifiedTask {
   ExactHigherSupportProductCudaTask task{};
   bool expected_certified{false};
+  bool uses_internal_node_receipt{false};
   ExactHigherSupportProductAabbDecisionBackend expected_backend{
       ExactHigherSupportProductAabbDecisionBackend::
           arbitrary_precision_rational};
@@ -277,6 +363,37 @@ template <std::size_t SupportSize>
   result.expected_certified =
       exact_higher_support_product_no_well_centered_certified(
           boxes, &result.expected_backend);
+  return result;
+}
+
+[[nodiscard]] QualifiedTask internal_node_support_task(
+    const CanonicalPointCloud& cloud,
+    const MortonLbvhIndex& index,
+    std::uint64_t epoch,
+    std::uint64_t task_id,
+    const ExactHigherSupportNodeReceipt& receipt) {
+  const std::uint64_t leaf_count = receipt.leaf_end - receipt.leaf_begin;
+  if (leaf_count < 3U) {
+    throw std::logic_error(
+        "an internal qualification support requires at least three leaves");
+  }
+  const ExactDyadicAabb3 box = public_range_box(cloud, index, receipt);
+  const std::array<ExactDyadicAabb3, 3> boxes{box, box, box};
+  QualifiedTask result;
+  result.task.task_id = task_id;
+  result.task.source_snapshot_epoch = epoch;
+  result.task.kind = ExactHigherSupportProductCudaTaskKind::support_prune;
+  result.task.product.support_size = 3U;
+  result.task.product.group_count = 1U;
+  result.task.product.groups[0] = {
+      receipt.node_index,
+      receipt.leaf_begin,
+      receipt.leaf_end,
+      3U};
+  result.expected_certified =
+      exact_higher_support_product_no_well_centered_certified(
+          boxes, &result.expected_backend);
+  result.uses_internal_node_receipt = true;
   return result;
 }
 
@@ -374,6 +491,8 @@ int main() {
     }
     const MortonLbvhIndex& index = build.certified_index();
     const LeafNodeFixture leaf_nodes = individual_leaf_nodes(index);
+    const ExactHigherSupportNodeReceipt internal_receipt =
+        smallest_internal_receipt(leaf_nodes, 3U);
     auto traversal = builder.release_device_traversal_lease(build);
     if (!traversal.cuda_resident() ||
         traversal.audit().host_fake_lifecycle_exercised) {
@@ -409,12 +528,17 @@ int main() {
             std::array<std::size_t, 4>{13U, 14U, 15U, 16U}, 17U),
         support_task(
             cloud, leaf_nodes, epoch, 108U,
-            std::array<std::size_t, 3>{18U, 19U, 20U})};
+            std::array<std::size_t, 3>{18U, 19U, 20U}),
+        internal_node_support_task(
+            cloud, index, epoch, 109U, internal_receipt)};
 
     std::vector<ExactHigherSupportProductCudaTask> tasks;
     tasks.reserve(qualified_tasks.size());
     std::size_t expected_certified_count = 0U;
     std::size_t expected_fallback_count = 0U;
+    std::size_t expected_support_task_count = 0U;
+    std::size_t expected_query_task_count = 0U;
+    std::size_t internal_node_receipt_task_count = 0U;
     for (const QualifiedTask& task : qualified_tasks) {
       tasks.push_back(task.task);
       expected_certified_count += task.expected_certified ? 1U : 0U;
@@ -424,10 +548,29 @@ int main() {
                       arbitrary_precision_rational
           ? 1U
           : 0U;
+      expected_support_task_count +=
+          task.task.kind ==
+                  ExactHigherSupportProductCudaTaskKind::support_prune
+          ? 1U
+          : 0U;
+      expected_query_task_count +=
+          task.task.kind == ExactHigherSupportProductCudaTaskKind::
+                  query_strict_interior
+          ? 1U
+          : 0U;
+      internal_node_receipt_task_count +=
+          task.uses_internal_node_receipt ? 1U : 0U;
     }
-    if (expected_fallback_count != 1U) {
+    if (qualified_tasks[8].expected_backend !=
+            ExactHigherSupportProductAabbDecisionBackend::
+                arbitrary_precision_rational ||
+        expected_fallback_count == 0U) {
       throw std::logic_error(
-          "qualification did not isolate exactly one wide-exponent fallback");
+          "qualification lost its explicit wide-exponent fallback");
+    }
+    if (internal_node_receipt_task_count != 1U) {
+      throw std::logic_error(
+          "qualification did not isolate one internal-node receipt task");
     }
 
     ExactHigherSupportProductCudaContext context{
@@ -498,8 +641,9 @@ int main() {
         result.stop_reason == ExactHigherSupportProductCudaStopReason::none &&
         audit.submitted_task_count == tasks.size() &&
         audit.completed_task_count == tasks.size() &&
-        audit.support_prune_task_count == 5U &&
-        audit.query_strict_interior_task_count == 4U &&
+        audit.support_prune_task_count == expected_support_task_count &&
+        audit.query_strict_interior_task_count ==
+            expected_query_task_count &&
         audit.certified_count == expected_certified_count &&
         audit.fail_open_count == tasks.size() - expected_certified_count &&
         audit.bounded_dyadic_int1024_count ==
@@ -564,6 +708,10 @@ int main() {
         << (audit.host_fake_lifecycle_exercised ? "true" : "false") << ','
         << "\"host_batch_total_ns\":"
         << nanoseconds_between(batch_begin, batch_end) << ','
+        << "\"internal_node_receipt_leaf_count\":"
+        << internal_receipt.leaf_end - internal_receipt.leaf_begin << ','
+        << "\"internal_node_receipt_task_count\":"
+        << internal_node_receipt_task_count << ','
         << "\"kernel_launch_count\":" << audit.kernel_launch_count << ','
         << "\"kernel_elapsed_ns\":" << audit.kernel_elapsed_ns << ','
         << "\"kernel_elapsed_ns_available\":"
