@@ -1487,6 +1487,8 @@ Les lots doivent être uniques et strictement triés par niveau rationnel exact 
 
 Le test exige explicitement faux `global_regularity_authority_certified`, `omitted_late_cofaces_qr1_noop_certified`, `incidence_complete_reduction_proved`, `resident_atomic_fold_performed`, `campaign_v3_single_gateway_per_core_facet_satisfied`, `campaign_v3_product_source_claimed` et `public_status_claimed`. Ce jalon audite encore tous les co-minimiseurs et ne satisfait donc pas la compression v3 à un gateway persistant au plus par facette. Aucun Star global, Gamma, catalogue de Delaunay d'ordre supérieur, test GPU ou campagne de performance ne doit être ajouté à ce CTest.
 
+Le checker `check_higher_rank_prune_star_regularity_counterexample.py` doit rester un test rationnel court distinct. Il recalcule la miniball régulière directe `ACD`, l'unique première incidence de `AC`, puis la coface tardive `ACB` dont dix points sont strictement intérieurs avant un extra-shell non visité. Le préfixe fermé vaut douze pour une fenêtre maximale onze : le prune de rang est attendu et exact, tandis que toute conclusion `global_regularity_authority_certified` est interdite. Le test de mutation remplace le témoin extérieur exact et doit échouer fermé.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.

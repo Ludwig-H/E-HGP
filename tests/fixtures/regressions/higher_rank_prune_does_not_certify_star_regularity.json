@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d_exact_star_regularity_rank_prune_counterexample",
+  "fixture_id": "higher-rank-prune-does-not-certify-late-star-extra-shell-v1",
+  "description": "A direct regular triangle installs the core facet AC, but a later coface containing AC has ten strict interior witnesses before an unvisited exact shell point. A closed-rank cutoff can therefore finish before observing the shell and cannot certify global regularity of Star(D_k).",
+  "maximum_closed_rank": 11,
+  "point_labels": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E0",
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "E6",
+    "E7",
+    "Y"
+  ],
+  "points": [
+    [-32, 0, 0],
+    [32, 0, 0],
+    [-24, 0, 0],
+    [-28, 8, 0],
+    [-16, 0, 0],
+    [-12, 0, 0],
+    [-8, 0, 0],
+    [-4, 0, 0],
+    [0, 0, 0],
+    [4, 0, 0],
+    [8, 0, 0],
+    [12, 0, 0],
+    [0, 32, 0]
+  ],
+  "direct_core_coface": {
+    "point_ids": [0, 2, 3],
+    "support_point_ids": [0, 2, 3],
+    "center": [-28, 3, 0],
+    "squared_level": 25,
+    "interior_point_ids": [],
+    "shell_point_ids": [0, 2, 3]
+  },
+  "core_facet_first_incidence": {
+    "facet_point_ids": [0, 2],
+    "source_miniball_squared_level": 16,
+    "first_incidence_squared_level": 25,
+    "cominimizer_point_ids": [3]
+  },
+  "late_star_coface": {
+    "point_ids": [0, 1, 2],
+    "support_point_ids": [0, 1],
+    "center": [0, 0, 0],
+    "squared_level": 1024,
+    "strict_interior_point_ids": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "shell_point_ids": [0, 1, 12],
+    "rank_prune_prefix_point_ids": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "unvisited_extra_shell_point_ids": [12]
+  },
+  "contradicted_claim": "A complete higher-support stream whose rank-pruned products emitted no relevant extra-shell diagnostic certifies the global regularity required for every late coface in Star(D_k).",
+  "scope_note": "The fixture does not contradict the exact rank-prune decision: AB already has closed rank twelve before Y is visited. It contradicts only promotion of that cutoff receipt into shell closure or global Star regularity."
+}
