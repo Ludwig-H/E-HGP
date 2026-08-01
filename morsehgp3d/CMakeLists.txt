@@ -2197,6 +2197,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_normalized_exact_hartigan_level_manifest
+  STATIC
+    src/cpu/hierarchy/normalized_exact_hartigan_level_manifest.cpp
+)
+add_library(
+  morsehgp3d::normalized_exact_hartigan_level_manifest
+  ALIAS morsehgp3d_normalized_exact_hartigan_level_manifest
+)
+set_target_properties(
+  morsehgp3d_normalized_exact_hartigan_level_manifest
+  PROPERTIES
+    EXPORT_NAME normalized_exact_hartigan_level_manifest
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_normalized_exact_hartigan_level_manifest PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_normalized_exact_hartigan_level_manifest
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_normalized_exact_hartigan_level_manifest
+  PUBLIC morsehgp3d::contract
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_normalized_exact_hartigan_level_manifest PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_normalized_exact_hartigan_level_manifest
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_relative_morse_boruvka
   STATIC
     src/cpu/hierarchy/relative_morse_boruvka.cpp
@@ -3312,6 +3352,46 @@ target_link_libraries(
     morsehgp3d::yao48_geometry
   PRIVATE morsehgp3d::sanitizers
 )
+
+add_library(
+  morsehgp3d_direct_k1_boruvka_closed_cut_session
+  STATIC
+    src/cpu/hierarchy/direct_k1_boruvka_closed_cut_session.cpp
+)
+add_library(
+  morsehgp3d::direct_k1_boruvka_closed_cut_session
+  ALIAS morsehgp3d_direct_k1_boruvka_closed_cut_session
+)
+set_target_properties(
+  morsehgp3d_direct_k1_boruvka_closed_cut_session
+  PROPERTIES
+    EXPORT_NAME direct_k1_boruvka_closed_cut_session
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_k1_boruvka_closed_cut_session PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_k1_boruvka_closed_cut_session
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_k1_boruvka_closed_cut_session
+  PUBLIC morsehgp3d::hierarchy
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_k1_boruvka_closed_cut_session PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_k1_boruvka_closed_cut_session
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
 
 add_library(
   morsehgp3d_direct_star_h0_retraction_differential
@@ -5770,6 +5850,7 @@ install(
     morsehgp3d_direct_frozen_incidence_hgp_action_plan
     morsehgp3d_direct_frozen_unified_incidence_batch
     morsehgp3d_direct_morse_unified_resident_session
+    morsehgp3d_normalized_exact_hartigan_level_manifest
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal
@@ -5794,6 +5875,7 @@ install(
     morsehgp3d_pair_support_codec
     morsehgp3d_yao48_geometry
     morsehgp3d_hierarchy
+    morsehgp3d_direct_k1_boruvka_closed_cut_session
     morsehgp3d_yao48_ranked_pair_candidates_reference
     morsehgp3d_exact_ranked_diametral_pair_catalog_reference
     morsehgp3d_sanitizers

@@ -2357,3 +2357,24 @@ Ce jalon peut être qualifié uniquement si :
 Ce jalon exige `v1-correctness`, la Phase 12 et M.1 fermés, la migration contractuelle versionnée vers la base exacte du flux direct, puis G6, G7 et G7b. La preuve dédiée `three_sparse_3m_exact_runs` matérialise les trois graines de G7b et interdit qu'un statut limité satisfasse implicitement ce jalon. Il exige aussi au moins une campagne à dix millions qui se termine sans corruption ni OOM non contrôlé : soit `forest_semantics=exact, public_status=exact` si le certificat reste sparse, soit `mode=budgeted, forest_semantics=partial_refinement` avec `public_status=conditional` ou `public_status=budget_exhausted`, checkpoint durable, `PartialScope` et diagnostic complet. Seul `public_status=exact` peut valider l'objectif conditionnel de dix minutes.
 
 Le principe final est simple : **chaque événement peut être rapide ou lent, mais il doit être vrai ; chaque catalogue peut être complet ou budgété, mais son statut doit le dire ; chaque VM peut être préemptée, mais elle ne doit jamais rester allumée par oubli.**
+
+### T15-HARTIGAN-V3 — manifeste rationnel normalisé borné
+
+- initialiser un contrat à dix ordres avec comptes exacts de lots et de no-op, puis rejeter overflow, budget de records moins un et entier rationnel dépassant 4 096 chiffres avant toute mutation scientifique;
+- exiger un record par lot normalisé, y compris tout no-op certifié `q_R=1`, et rejeter `q_R=0`, delta non nul dans un no-op, rupture de chaîne source, ordre ou index non contigu et niveau rationnel décroissant;
+- muter chaque champ scientifique d'un record et vérifier que la racine SHA-256 ne se recertifie plus;
+- vérifier que caps mémoire et identifiants process-locaux différents conservent la même chaîne pour une identité scientifique, un préfixe source et des niveaux identiques;
+- sceller seulement si les comptes par ordre, les no-op et la racine source finale ferment exactement, puis refuser toute écriture ultérieure;
+- conserver une mémoire résidente indépendante du nombre de records déjà émis : dix résumés d'ordre et état de chaîne seulement, sans Gamma, facettes, cofaces, incidences ou mosaïque de Delaunay globale.
+
+### T15-K1-SEAM — session fermée scellée Borůvka
+
+- dériver de `point_count` les bornes de rondes, arêtes, niveaux, nœuds, enfants, quatre tableaux d'état, digests historiques et checkpoint avant le rejeu frais; un cap parent moins un doit refuser la fabrique sans muter le témoin Borůvka;
+- rejeter avant tout scan de niveaux un témoin dont `point_count`, le nombre d'arêtes ou le nombre de rondes dépasse la forme conservatrice, puis rejeter par rejeu frais un flag d'autorité ou une arête forgés;
+- partir de la coupe fermée zéro avec une racine-feuille par singleton, avancer directement au troisième niveau d'une fixture à trois niveaux et attester que les deux niveaux intermédiaires restants ont été consommés;
+- traiter deux représentations rationnelles exactement égales comme un seul cut, puis rendre le second appel idempotent sans mutation;
+- refuser un stamp périmé, un stamp d'une seconde session et un identifiant d'instance altéré avant de publier une racine;
+- altérer la racine d'une réponse puis la racine d'un checkpoint et exiger le rejet par la capability live;
+- créer deux sessions fraîches sur la même autorité, vérifier des identifiants live distincts et un digest scientifique de checkpoint identique au même cut;
+- reculer depuis la coupe terminale vers zéro et vérifier une décision non monotone avec stamps pré--post et état interne inchangés;
+- conserver faux tout claim de Gamma, Delaunay, carte verticale complète, vrai 50 k, scalabilité massive, Phase 16 ou statut public exact.
