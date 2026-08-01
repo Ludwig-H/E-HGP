@@ -415,24 +415,6 @@ void canonicalize_points(std::vector<PointId>& points) {
              budget.maximum_fresh_facet_miniball_support_enumeration_count;
 }
 
-[[nodiscard]] bool frozen_verification_complete(
-    const ExactDirectFrozenUnifiedIncidenceBatchVerification& verification)
-    noexcept {
-  return verification.requested_budget_certified &&
-         !verification.source_plan_freshly_verified &&
-         verification.source_plan_immutable_resident_authority_certified &&
-         verification.expected_result_freshly_reconstructed &&
-         verification.supplied_latent_carrier_coverage_freshly_replayed &&
-         verification.quotient_freshly_streaming_verified &&
-         verification.action_plan_freshly_streaming_verified &&
-         verification.observed_recursively_equal &&
-         verification.result_facts_and_scope_certified &&
-         verification.no_forbidden_global_structure_or_mutation &&
-         !verification.fresh_replay_certified &&
-         verification.immutable_authority_batch_reconstruction_certified &&
-         verification.result_certified;
-}
-
 [[nodiscard]] std::vector<std::size_t> touched_facets(
     const ExactDirectSparseUnifiedLevelPlanResult& plan,
     const ExactDirectSparseUnifiedLevelPlanBatch& batch) {
@@ -870,6 +852,9 @@ struct ExactDirectMorseUnifiedResidentPreparedBatch::Impl {
   }
 
   ExactDirectMorseUnifiedResidentAuthorityBundle bundle{};
+  std::optional<
+      internal::ExactDirectFrozenUnifiedResidentBatchAttestation>
+      frozen_batch_attestation;
   std::shared_ptr<const SessionSeal> seal;
   std::shared_ptr<OutstandingTicketRegistry> ticket_registry;
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp source_stamp{};
@@ -882,6 +867,23 @@ struct ExactDirectMorseUnifiedResidentPreparedBatch::Impl {
   bool owns_ticket_slot{false};
   bool consumed{false};
 };
+
+bool ExactDirectMorseUnifiedResidentFrozenBatchReceipt::
+    certified_single_construction_receipt() const noexcept {
+  return schema_version ==
+             direct_morse_unified_resident_session_schema_version &&
+         frozen_batch_construction_count == 1U &&
+         quotient_streaming_verification_count == 1U &&
+         action_plan_streaming_verification_count == 1U &&
+         structural_certification_count == 1U &&
+         source_plan_immutable_authority_certified &&
+         frozen_batch_structurally_certified &&
+         internal_move_only_attestation_issued &&
+         !independent_expected_batch_freshly_reconstructed &&
+         !global_facet_coface_or_gamma_catalog_materialized &&
+         !supplied_star_global_completeness_claimed &&
+         !public_status_claimed;
+}
 
 bool ExactDirectMorseUnifiedResidentAuthorityBundle::
     certified_strict_pre_batch_bundle() const noexcept {
@@ -922,15 +924,20 @@ bool ExactDirectMorseUnifiedResidentAuthorityBundle::
          counters.resident_state_full_copy_count == 0U &&
          counters.planned_group_record_count ==
              counters.sparse_delta_group_append_count &&
-         frozen_batch.certified_frozen_unified_incidence_batch() &&
+         frozen_batch.schema_version ==
+             direct_frozen_unified_incidence_batch_schema_version &&
+         frozen_batch.decision ==
+             ExactDirectFrozenUnifiedIncidenceBatchDecision::
+                 complete_certified_frozen_unified_incidence_batch &&
          !frozen_batch.source_plan_freshly_verified &&
          frozen_batch
              .source_plan_verified_once_by_immutable_resident_authority &&
-         frozen_verification_complete(frozen_verification) &&
+         frozen_batch.frozen_quotient_freshly_streaming_verified &&
+         frozen_batch.frozen_hgp_action_plan_freshly_streaming_verified &&
+         frozen_batch_receipt.certified_single_construction_receipt() &&
          locator_snapshot_strictly_pre_batch &&
          every_unresolved_facet_has_fresh_exact_equal_miniball &&
          csr_authorities_share_identity_and_pre_batch_state &&
-         frozen_batch_freshly_reconstructed_from_immutable_plan_authority &&
          !global_facet_coface_or_gamma_catalog_materialized &&
          !supplied_star_global_completeness_claimed &&
          !public_status_claimed;
@@ -971,6 +978,9 @@ bool ExactDirectMorseUnifiedResidentPreparedBatch::valid() const noexcept {
          impl_->source_cursor == impl_->bundle.identity.batch_cursor &&
          impl_->source_epoch == impl_->bundle.identity.epoch &&
          impl_->source_stamp == impl_->bundle.identity.locator_stamp &&
+         impl_->frozen_batch_attestation.has_value() &&
+         impl_->frozen_batch_attestation->attests(
+             impl_->bundle.frozen_batch) &&
          impl_->bundle.certified_strict_pre_batch_bundle();
 }
 
@@ -1452,31 +1462,14 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
     if (!impl_->source_plan_authority.has_value() ||
         !impl_->source_plan_authority->certifies(impl_->plan) ||
         impl_->frozen_batch_reconstruction_count >
-        std::numeric_limits<std::size_t>::max() - 2U) {
+            std::numeric_limits<std::size_t>::max() - 1U) {
       return reject(
           ExactDirectMorseUnifiedResidentPreparationDecision::
               no_prepared_state_rejected);
     }
-    bundle.frozen_batch =
-        internal::
-            build_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
-            *impl_->source_plan_authority,
-            impl_->cursor,
-            bundle.facet_resolutions,
-            bundle.prior_root_coverages,
-            bundle.prior_root_coverage_point_references,
-            bundle.latent_carrier_coverages,
-            bundle.latent_carrier_coverage_point_references,
-            impl_->budget.frozen_batch);
-    ++impl_->frozen_batch_reconstruction_count;
-    if (!bundle.frozen_batch.certified_frozen_unified_incidence_batch()) {
-      return reject(
-          ExactDirectMorseUnifiedResidentPreparationDecision::
-              no_frozen_batch_rejected);
-    }
-    bundle.frozen_verification =
-        internal::
-            verify_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
+    prepared->frozen_batch_attestation =
+        internal::ExactDirectFrozenUnifiedResidentBatchAttestedBuilder::
+            build_once(
             *impl_->source_plan_authority,
             impl_->cursor,
             bundle.facet_resolutions,
@@ -1487,7 +1480,18 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
             impl_->budget.frozen_batch,
             bundle.frozen_batch);
     ++impl_->frozen_batch_reconstruction_count;
-    if (!frozen_verification_complete(bundle.frozen_verification)) {
+    if (!prepared->frozen_batch_attestation.has_value()) {
+      return reject(
+          bundle.frozen_batch.decision ==
+                  ExactDirectFrozenUnifiedIncidenceBatchDecision::
+                      complete_certified_frozen_unified_incidence_batch
+              ? ExactDirectMorseUnifiedResidentPreparationDecision::
+                    no_frozen_batch_verification_rejected
+              : ExactDirectMorseUnifiedResidentPreparationDecision::
+                    no_frozen_batch_rejected);
+    }
+    if (!prepared->frozen_batch_attestation->attests(
+            bundle.frozen_batch)) {
       return reject(
           ExactDirectMorseUnifiedResidentPreparationDecision::
               no_frozen_batch_verification_rejected);
@@ -1931,9 +1935,22 @@ ExactDirectMorseUnifiedResidentSession::prepare_next() {
         bundle.counters.equal_resolution_count ==
             bundle.counters.unresolved_locator_probe_count;
     bundle.csr_authorities_share_identity_and_pre_batch_state = true;
-    bundle
-        .frozen_batch_freshly_reconstructed_from_immutable_plan_authority =
+    bundle.frozen_batch_receipt.frozen_batch_construction_count = 1U;
+    bundle.frozen_batch_receipt.quotient_streaming_verification_count = 1U;
+    bundle.frozen_batch_receipt.action_plan_streaming_verification_count =
+        1U;
+    bundle.frozen_batch_receipt.structural_certification_count = 1U;
+    bundle.frozen_batch_receipt.source_plan_immutable_authority_certified =
         true;
+    bundle.frozen_batch_receipt.frozen_batch_structurally_certified = true;
+    bundle.frozen_batch_receipt.internal_move_only_attestation_issued = true;
+    bundle.frozen_batch_receipt
+        .independent_expected_batch_freshly_reconstructed = false;
+    bundle.frozen_batch_receipt
+        .global_facet_coface_or_gamma_catalog_materialized = false;
+    bundle.frozen_batch_receipt.supplied_star_global_completeness_claimed =
+        false;
+    bundle.frozen_batch_receipt.public_status_claimed = false;
     bundle.global_facet_coface_or_gamma_catalog_materialized = false;
     bundle.supplied_star_global_completeness_claimed = false;
     bundle.public_status_claimed = false;
@@ -2003,7 +2020,10 @@ ExactDirectMorseUnifiedResidentSession::commit(
   }
 
   const auto& delta_counters = consumed_ticket->bundle.counters;
-  if (!consumed_ticket->bundle.certified_strict_pre_batch_bundle() ||
+  if (!consumed_ticket->frozen_batch_attestation.has_value() ||
+      !consumed_ticket->frozen_batch_attestation->attests(
+          consumed_ticket->bundle.frozen_batch) ||
+      !consumed_ticket->bundle.certified_strict_pre_batch_bundle() ||
       delta_counters.resident_state_full_copy_count != 0U ||
       delta_counters.sparse_delta_component_patch_count !=
           consumed_ticket->delta.component_patches.size() ||

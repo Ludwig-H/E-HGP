@@ -87,35 +87,78 @@ class ExactDirectFrozenUnifiedImmutablePlanAuthorityFactory final {
           const ExactDirectSparseUnifiedLevelPlanResult& immutable_plan);
 };
 
-[[nodiscard]] ExactDirectFrozenUnifiedIncidenceBatchResult
-build_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
-    const ExactDirectFrozenUnifiedImmutablePlanAuthority& authority,
-    std::size_t batch_index,
-    std::span<const ExactDirectFrozenUnifiedFacetResolution>
-        facet_resolutions,
-    std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
-        prior_root_coverages,
-    std::span<const spatial::PointId> prior_root_coverage_point_references,
-    std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
-        latent_carrier_coverages,
-    std::span<const spatial::PointId>
-        latent_carrier_coverage_point_references,
-    const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget);
+class ExactDirectFrozenUnifiedResidentBatchAttestedBuilder;
 
-[[nodiscard]] ExactDirectFrozenUnifiedIncidenceBatchVerification
-verify_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
-    const ExactDirectFrozenUnifiedImmutablePlanAuthority& authority,
-    std::size_t batch_index,
-    std::span<const ExactDirectFrozenUnifiedFacetResolution>
-        facet_resolutions,
-    std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
-        prior_root_coverages,
-    std::span<const spatial::PointId> prior_root_coverage_point_references,
-    std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
-        latent_carrier_coverages,
-    std::span<const spatial::PointId>
-        latent_carrier_coverage_point_references,
-    const ExactDirectFrozenUnifiedIncidenceBatchBudget& trusted_budget,
-    const ExactDirectFrozenUnifiedIncidenceBatchResult& observed);
+// This capability is tied to the stable address of the batch stored in a
+// resident ticket.  It cannot be copied or constructed by callers.  Moving a
+// ticket moves only its owning unique_ptr, so the attested address remains
+// stable through prepare, validation and commit.
+class ExactDirectFrozenUnifiedResidentBatchAttestation final {
+ public:
+  ExactDirectFrozenUnifiedResidentBatchAttestation(
+      ExactDirectFrozenUnifiedResidentBatchAttestation&& other) noexcept
+      : batch_(std::exchange(other.batch_, nullptr)),
+        certified_(std::exchange(other.certified_, false)) {}
+  ExactDirectFrozenUnifiedResidentBatchAttestation& operator=(
+      ExactDirectFrozenUnifiedResidentBatchAttestation&& other) noexcept {
+    if (this != &other) {
+      batch_ = std::exchange(other.batch_, nullptr);
+      certified_ = std::exchange(other.certified_, false);
+    }
+    return *this;
+  }
+  ExactDirectFrozenUnifiedResidentBatchAttestation(
+      const ExactDirectFrozenUnifiedResidentBatchAttestation&) = delete;
+  ExactDirectFrozenUnifiedResidentBatchAttestation& operator=(
+      const ExactDirectFrozenUnifiedResidentBatchAttestation&) = delete;
+
+  [[nodiscard]] bool attests(
+      const ExactDirectFrozenUnifiedIncidenceBatchResult& batch)
+      const noexcept {
+    return certified_ && batch_ == &batch &&
+           batch.schema_version ==
+               direct_frozen_unified_incidence_batch_schema_version &&
+           batch.decision == ExactDirectFrozenUnifiedIncidenceBatchDecision::
+                                 complete_certified_frozen_unified_incidence_batch &&
+           !batch.source_plan_freshly_verified &&
+           batch.source_plan_verified_once_by_immutable_resident_authority &&
+           batch.frozen_quotient_freshly_streaming_verified &&
+           batch.frozen_hgp_action_plan_freshly_streaming_verified;
+  }
+
+ private:
+  explicit ExactDirectFrozenUnifiedResidentBatchAttestation(
+      const ExactDirectFrozenUnifiedIncidenceBatchResult* batch) noexcept
+      : batch_(batch), certified_(batch != nullptr) {}
+
+  const ExactDirectFrozenUnifiedIncidenceBatchResult* batch_{};
+  bool certified_{false};
+
+  friend class ExactDirectFrozenUnifiedResidentBatchAttestedBuilder;
+};
+
+class ExactDirectFrozenUnifiedResidentBatchAttestedBuilder final {
+ public:
+  // Exactly one scientific batch construction is performed.  The shared core
+  // performs exactly one streaming quotient verification and exactly one
+  // streaming action-plan verification before a capability can be issued.
+  [[nodiscard]] static
+      std::optional<ExactDirectFrozenUnifiedResidentBatchAttestation>
+      build_once(
+          const ExactDirectFrozenUnifiedImmutablePlanAuthority& authority,
+          std::size_t batch_index,
+          std::span<const ExactDirectFrozenUnifiedFacetResolution>
+              facet_resolutions,
+          std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
+              prior_root_coverages,
+          std::span<const spatial::PointId>
+              prior_root_coverage_point_references,
+          std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
+              latent_carrier_coverages,
+          std::span<const spatial::PointId>
+              latent_carrier_coverage_point_references,
+          const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget,
+          ExactDirectFrozenUnifiedIncidenceBatchResult& destination);
+};
 
 }  // namespace morsehgp3d::hierarchy::internal

@@ -1,6 +1,7 @@
 #include "morsehgp3d/hierarchy/direct_frozen_unified_incidence_batch.hpp"
 
 #include "direct_frozen_unified_incidence_batch_internal.hpp"
+#include "direct_frozen_incidence_hgp_action_plan_internal.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -2093,6 +2094,13 @@ enum class VerifiedPlanAuthorityKind : std::uint8_t {
   immutable_verified_resident_session,
 };
 
+struct VerifiedPlanBuildAudit {
+  std::size_t batch_construction_count{};
+  std::size_t quotient_streaming_verification_count{};
+  std::size_t action_plan_streaming_verification_count{};
+  std::size_t structural_certification_count{};
+};
+
 // Both callers enter after certification of this exact plan.  Standalone
 // callers perform that verification freshly for the current call; the
 // resident path holds a non-forgeable internal lease over its const plan.
@@ -2101,6 +2109,7 @@ enum class VerifiedPlanAuthorityKind : std::uint8_t {
 build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     const ExactDirectSparseUnifiedLevelPlanResult& source_plan,
     VerifiedPlanAuthorityKind authority_kind,
+    VerifiedPlanBuildAudit* audit,
     std::size_t batch_index,
     std::span<const ExactDirectFrozenUnifiedFacetResolution>
         facet_resolutions,
@@ -2113,6 +2122,9 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget) {
   ExactDirectFrozenUnifiedIncidenceBatchResult result =
       base_result(batch_index, budget);
+  if (audit != nullptr) {
+    ++audit->batch_construction_count;
+  }
   try {
     result.source_plan_freshly_verified =
         authority_kind ==
@@ -2251,10 +2263,13 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     const auto quotient_budget = quotient_budget_from(budget);
     auto quotient = build_exact_direct_frozen_incidence_quotient(
         hyperedges, tokens, quotient_budget);
-    const auto quotient_verification =
-        verify_exact_direct_frozen_incidence_quotient_streaming(
-            hyperedges, tokens, quotient_budget, quotient);
-    if (!quotient_verification.result_certified) {
+    if (audit != nullptr) {
+      ++audit->quotient_streaming_verification_count;
+    }
+    auto verified_quotient_authority =
+        internal::ExactFrozenIncidenceVerifiedQuotientAuthorityFactory::
+            verify_once(hyperedges, tokens, quotient_budget, quotient);
+    if (!verified_quotient_authority.has_value()) {
       return fail(
           std::move(result),
           ExactDirectFrozenUnifiedIncidenceBatchDecision::
@@ -2295,25 +2310,50 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     }
 
     const auto action_budget = action_budget_from(budget);
-    auto action_plan =
-        build_exact_direct_frozen_incidence_hgp_action_plan(
-            hyperedges,
-            tokens,
-            quotient_budget,
-            quotient,
-            provenance,
-            attachments,
-            action_budget);
-    const auto action_verification =
-        verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
-            hyperedges,
-            tokens,
-            quotient_budget,
-            quotient,
-            provenance,
-            attachments,
-            action_budget,
-            action_plan);
+    const bool resident_authority =
+        authority_kind ==
+        VerifiedPlanAuthorityKind::immutable_verified_resident_session;
+    auto action_plan = [&]() {
+      if (resident_authority) {
+        return internal::
+            build_exact_direct_frozen_incidence_hgp_action_plan_from_verified_quotient(
+                *verified_quotient_authority,
+                provenance,
+                attachments,
+                action_budget);
+      }
+      return build_exact_direct_frozen_incidence_hgp_action_plan(
+          hyperedges,
+          tokens,
+          quotient_budget,
+          quotient,
+          provenance,
+          attachments,
+          action_budget);
+    }();
+    if (audit != nullptr) {
+      ++audit->action_plan_streaming_verification_count;
+    }
+    const auto action_verification = [&]() {
+      if (resident_authority) {
+        return internal::
+            verify_exact_direct_frozen_incidence_hgp_action_plan_streaming_from_verified_quotient(
+                *verified_quotient_authority,
+                provenance,
+                attachments,
+                action_budget,
+                action_plan);
+      }
+      return verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
+          hyperedges,
+          tokens,
+          quotient_budget,
+          quotient,
+          provenance,
+          attachments,
+          action_budget,
+          action_plan);
+    }();
     if (!action_verification.result_certified) {
       return fail(
           std::move(result),
@@ -2465,6 +2505,9 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     result.no_partial_scientific_payload_published = true;
     result.decision = ExactDirectFrozenUnifiedIncidenceBatchDecision::
         complete_certified_frozen_unified_incidence_batch;
+    if (audit != nullptr) {
+      ++audit->structural_certification_count;
+    }
     if (!result.certified_frozen_unified_incidence_batch()) {
       return fail(
           std::move(result),
@@ -2542,6 +2585,7 @@ build_exact_direct_frozen_unified_incidence_batch(
         build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
             source_plan,
             VerifiedPlanAuthorityKind::freshly_verified_standalone_call,
+            nullptr,
             batch_index,
             facet_resolutions,
             prior_root_coverages,
@@ -2616,6 +2660,7 @@ verify_exact_direct_frozen_unified_incidence_batch(
         build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
             source_plan,
             VerifiedPlanAuthorityKind::freshly_verified_standalone_call,
+            nullptr,
             batch_index,
             facet_resolutions,
             prior_root_coverages,
@@ -2733,8 +2778,8 @@ ExactDirectFrozenUnifiedImmutablePlanAuthorityFactory::create(
   return output;
 }
 
-ExactDirectFrozenUnifiedIncidenceBatchResult
-build_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
+std::optional<ExactDirectFrozenUnifiedResidentBatchAttestation>
+ExactDirectFrozenUnifiedResidentBatchAttestedBuilder::build_once(
     const ExactDirectFrozenUnifiedImmutablePlanAuthority& authority,
     std::size_t batch_index,
     std::span<const ExactDirectFrozenUnifiedFacetResolution>
@@ -2744,19 +2789,22 @@ build_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
     std::span<const spatial::PointId> prior_root_coverage_point_references,
     std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
         latent_carrier_coverages,
-    std::span<const spatial::PointId>
-        latent_carrier_coverage_point_references,
-    const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget) {
+    std::span<const spatial::PointId> latent_carrier_coverage_point_references,
+    const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget,
+    ExactDirectFrozenUnifiedIncidenceBatchResult& destination) {
   if (!authority.valid()) {
-    return fail(
+    destination = fail(
         base_result(batch_index, budget),
         ExactDirectFrozenUnifiedIncidenceBatchDecision::
             no_batch_source_plan_not_freshly_verified);
+    return std::nullopt;
   }
-  return
+  VerifiedPlanBuildAudit audit;
+  destination =
       build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
           authority.plan(),
           VerifiedPlanAuthorityKind::immutable_verified_resident_session,
+          &audit,
           batch_index,
           facet_resolutions,
           prior_root_coverages,
@@ -2764,108 +2812,21 @@ build_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
           latent_carrier_coverages,
           latent_carrier_coverage_point_references,
           budget);
-}
-
-ExactDirectFrozenUnifiedIncidenceBatchVerification
-verify_exact_direct_frozen_unified_incidence_batch_from_immutable_authority(
-    const ExactDirectFrozenUnifiedImmutablePlanAuthority& authority,
-    std::size_t batch_index,
-    std::span<const ExactDirectFrozenUnifiedFacetResolution>
-        facet_resolutions,
-    std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
-        prior_root_coverages,
-    std::span<const spatial::PointId> prior_root_coverage_point_references,
-    std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
-        latent_carrier_coverages,
-    std::span<const spatial::PointId>
-        latent_carrier_coverage_point_references,
-    const ExactDirectFrozenUnifiedIncidenceBatchBudget& trusted_budget,
-    const ExactDirectFrozenUnifiedIncidenceBatchResult& observed) {
-  ExactDirectFrozenUnifiedIncidenceBatchVerification verification;
-  verification.requested_budget_certified =
-      observed.requested_budget == trusted_budget;
-  verification.source_plan_freshly_verified = false;
-  verification.source_plan_immutable_resident_authority_certified =
-      authority.valid();
-
-  ExactDirectFrozenUnifiedIncidenceBatchResult expected;
-  if (verification.source_plan_immutable_resident_authority_certified) {
-    expected =
-        build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
-            authority.plan(),
-            VerifiedPlanAuthorityKind::immutable_verified_resident_session,
-            batch_index,
-            facet_resolutions,
-            prior_root_coverages,
-            prior_root_coverage_point_references,
-            latent_carrier_coverages,
-            latent_carrier_coverage_point_references,
-            trusted_budget);
-  } else {
-    expected = fail(
-        base_result(batch_index, trusted_budget),
-        ExactDirectFrozenUnifiedIncidenceBatchDecision::
-            no_batch_source_plan_not_freshly_verified);
+  if (destination.decision !=
+          ExactDirectFrozenUnifiedIncidenceBatchDecision::
+              complete_certified_frozen_unified_incidence_batch ||
+      destination.source_plan_freshly_verified ||
+      !destination
+           .source_plan_verified_once_by_immutable_resident_authority ||
+      !destination.frozen_quotient_freshly_streaming_verified ||
+      !destination.frozen_hgp_action_plan_freshly_streaming_verified ||
+      audit.batch_construction_count != 1U ||
+      audit.quotient_streaming_verification_count != 1U ||
+      audit.action_plan_streaming_verification_count != 1U ||
+      audit.structural_certification_count != 1U) {
+    return std::nullopt;
   }
-  verification.expected_result_freshly_reconstructed =
-      expected.certified_frozen_unified_incidence_batch();
-  verification.supplied_latent_carrier_coverage_freshly_replayed =
-      verification.expected_result_freshly_reconstructed &&
-      expected.latent_carrier_coverage_csr_canonical_and_exhaustive &&
-      expected.latent_facets_covered_by_their_carriers &&
-      expected.counters.latent_carrier_coverage_count ==
-          latent_carrier_coverages.size() &&
-      expected.counters.latent_carrier_coverage_point_reference_count ==
-          latent_carrier_coverage_point_references.size();
-  if (observed.quotient.requested_budget ==
-      quotient_budget_from(trusted_budget)) {
-    const auto quotient_verification =
-        verify_exact_direct_frozen_incidence_quotient_streaming(
-            observed.quotient_hyperedges,
-            observed.quotient_token_references,
-            observed.quotient.requested_budget,
-            observed.quotient);
-    verification.quotient_freshly_streaming_verified =
-        quotient_verification.result_certified;
-  }
-  if (verification.quotient_freshly_streaming_verified &&
-      observed.action_plan.requested_budget ==
-          action_budget_from(trusted_budget)) {
-    const auto action_verification =
-        verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
-            observed.quotient_hyperedges,
-            observed.quotient_token_references,
-            observed.quotient.requested_budget,
-            observed.quotient,
-            observed.provenance,
-            observed.root_attachments,
-            observed.action_plan.requested_budget,
-            observed.action_plan);
-    verification.action_plan_freshly_streaming_verified =
-        action_verification.result_certified;
-  }
-  verification.observed_recursively_equal = observed == expected;
-  verification.result_facts_and_scope_certified =
-      observed.certified_frozen_unified_incidence_batch();
-  verification.no_forbidden_global_structure_or_mutation =
-      !observed.reducer_locator_forest_or_caller_state_mutated &&
-      !observed.global_facet_coface_or_gamma_catalog_materialized &&
-      !observed.supplied_star_global_completeness_claimed &&
-      !observed.public_status_claimed;
-  verification.fresh_replay_certified = false;
-  verification.immutable_authority_batch_reconstruction_certified =
-      verification.source_plan_immutable_resident_authority_certified &&
-      verification.expected_result_freshly_reconstructed &&
-      verification.supplied_latent_carrier_coverage_freshly_replayed &&
-      verification.quotient_freshly_streaming_verified &&
-      verification.action_plan_freshly_streaming_verified &&
-      verification.observed_recursively_equal;
-  verification.result_certified =
-      verification.requested_budget_certified &&
-      verification.result_facts_and_scope_certified &&
-      verification.no_forbidden_global_structure_or_mutation &&
-      verification.immutable_authority_batch_reconstruction_certified;
-  return verification;
+  return ExactDirectFrozenUnifiedResidentBatchAttestation{&destination};
 }
 
 }  // namespace internal

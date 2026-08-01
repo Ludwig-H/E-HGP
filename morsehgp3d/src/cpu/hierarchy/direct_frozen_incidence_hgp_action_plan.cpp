@@ -1,5 +1,7 @@
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
 
+#include "direct_frozen_incidence_hgp_action_plan_internal.hpp"
+
 #include <algorithm>
 #include <limits>
 #include <new>
@@ -164,7 +166,9 @@ analyze_frozen_incidence_hgp_action_plan(
     const ExactFrozenIncidenceQuotientResult& quotient,
     std::span<const ExactFrozenIncidenceHyperedgeProvenance> provenance,
     std::span<const ExactFrozenIncidenceRootAttachment> root_attachments,
-    const ExactFrozenIncidenceHgpActionPlanBudget& budget) {
+    const ExactFrozenIncidenceHgpActionPlanBudget& budget,
+    const internal::ExactFrozenIncidenceVerifiedQuotientAuthority*
+        verified_quotient_authority) {
   FrozenIncidenceHgpActionPlanAnalysis analysis;
   analysis.facts = make_requirement_result(
       quotient_hyperedges.size(),
@@ -177,13 +181,16 @@ analyze_frozen_incidence_hgp_action_plan(
     return analysis;
   }
 
-  const auto quotient_verification =
-      verify_exact_direct_frozen_incidence_quotient_streaming(
-          quotient_hyperedges,
-          quotient_token_references,
-          trusted_quotient_budget,
-          quotient);
-  if (!quotient_verification.result_certified) {
+  const bool quotient_certified =
+      verified_quotient_authority != nullptr
+          ? verified_quotient_authority->valid()
+          : verify_exact_direct_frozen_incidence_quotient_streaming(
+                quotient_hyperedges,
+                quotient_token_references,
+                trusted_quotient_budget,
+                quotient)
+                .result_certified;
+  if (!quotient_certified) {
     result.decision = ExactFrozenIncidenceHgpActionPlanDecision::
         no_frozen_incidence_hgp_action_plan_quotient_rejected;
     return analysis;
@@ -663,15 +670,19 @@ bool ExactFrozenIncidenceHgpActionPlanResult::atomic_empty_failure()
          residual_hyperedge_indices.empty() && prior_root_ids.empty();
 }
 
+namespace {
+
 ExactFrozenIncidenceHgpActionPlanResult
-build_exact_direct_frozen_incidence_hgp_action_plan(
+build_frozen_incidence_hgp_action_plan_with_optional_quotient_authority(
     std::span<const ExactFrozenIncidenceHyperedge> quotient_hyperedges,
     std::span<const ExactFrozenIncidenceToken> quotient_token_references,
     const ExactFrozenIncidenceQuotientBudget& trusted_quotient_budget,
     const ExactFrozenIncidenceQuotientResult& quotient,
     std::span<const ExactFrozenIncidenceHyperedgeProvenance> provenance,
     std::span<const ExactFrozenIncidenceRootAttachment> root_attachments,
-    const ExactFrozenIncidenceHgpActionPlanBudget& budget) {
+    const ExactFrozenIncidenceHgpActionPlanBudget& budget,
+    const internal::ExactFrozenIncidenceVerifiedQuotientAuthority*
+        verified_quotient_authority) {
   try {
     FrozenIncidenceHgpActionPlanAnalysis analysis =
         analyze_frozen_incidence_hgp_action_plan(
@@ -681,7 +692,8 @@ build_exact_direct_frozen_incidence_hgp_action_plan(
             quotient,
             provenance,
             root_attachments,
-            budget);
+            budget,
+            verified_quotient_authority);
     ExactFrozenIncidenceHgpActionPlanResult result =
         std::move(analysis.facts);
     if (result.decision != ExactFrozenIncidenceHgpActionPlanDecision::
@@ -762,7 +774,7 @@ build_exact_direct_frozen_incidence_hgp_action_plan(
 }
 
 ExactFrozenIncidenceHgpActionPlanStreamingVerification
-verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
+verify_frozen_incidence_hgp_action_plan_with_optional_quotient_authority(
     std::span<const ExactFrozenIncidenceHyperedge> quotient_hyperedges,
     std::span<const ExactFrozenIncidenceToken> quotient_token_references,
     const ExactFrozenIncidenceQuotientBudget& trusted_quotient_budget,
@@ -770,7 +782,9 @@ verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
     std::span<const ExactFrozenIncidenceHyperedgeProvenance> provenance,
     std::span<const ExactFrozenIncidenceRootAttachment> root_attachments,
     const ExactFrozenIncidenceHgpActionPlanBudget& trusted_budget,
-    const ExactFrozenIncidenceHgpActionPlanResult& observed) {
+    const ExactFrozenIncidenceHgpActionPlanResult& observed,
+    const internal::ExactFrozenIncidenceVerifiedQuotientAuthority*
+        verified_quotient_authority) {
   ExactFrozenIncidenceHgpActionPlanStreamingVerification verification;
   try {
     const FrozenIncidenceHgpActionPlanAnalysis analysis =
@@ -781,7 +795,8 @@ verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
             quotient,
             provenance,
             root_attachments,
-            trusted_budget);
+            trusted_budget,
+            verified_quotient_authority);
     const ExactFrozenIncidenceHgpActionPlanResult& expected =
         analysis.facts;
     const bool replay_complete =
@@ -876,5 +891,109 @@ verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
     return verification;
   }
 }
+
+}  // namespace
+
+ExactFrozenIncidenceHgpActionPlanResult
+build_exact_direct_frozen_incidence_hgp_action_plan(
+    std::span<const ExactFrozenIncidenceHyperedge> quotient_hyperedges,
+    std::span<const ExactFrozenIncidenceToken> quotient_token_references,
+    const ExactFrozenIncidenceQuotientBudget& trusted_quotient_budget,
+    const ExactFrozenIncidenceQuotientResult& quotient,
+    std::span<const ExactFrozenIncidenceHyperedgeProvenance> provenance,
+    std::span<const ExactFrozenIncidenceRootAttachment> root_attachments,
+    const ExactFrozenIncidenceHgpActionPlanBudget& budget) {
+  return
+      build_frozen_incidence_hgp_action_plan_with_optional_quotient_authority(
+          quotient_hyperedges,
+          quotient_token_references,
+          trusted_quotient_budget,
+          quotient,
+          provenance,
+          root_attachments,
+          budget,
+          nullptr);
+}
+
+ExactFrozenIncidenceHgpActionPlanStreamingVerification
+verify_exact_direct_frozen_incidence_hgp_action_plan_streaming(
+    std::span<const ExactFrozenIncidenceHyperedge> quotient_hyperedges,
+    std::span<const ExactFrozenIncidenceToken> quotient_token_references,
+    const ExactFrozenIncidenceQuotientBudget& trusted_quotient_budget,
+    const ExactFrozenIncidenceQuotientResult& quotient,
+    std::span<const ExactFrozenIncidenceHyperedgeProvenance> provenance,
+    std::span<const ExactFrozenIncidenceRootAttachment> root_attachments,
+    const ExactFrozenIncidenceHgpActionPlanBudget& trusted_budget,
+    const ExactFrozenIncidenceHgpActionPlanResult& observed) {
+  return
+      verify_frozen_incidence_hgp_action_plan_with_optional_quotient_authority(
+          quotient_hyperedges,
+          quotient_token_references,
+          trusted_quotient_budget,
+          quotient,
+          provenance,
+          root_attachments,
+          trusted_budget,
+          observed,
+          nullptr);
+}
+
+namespace internal {
+
+std::optional<ExactFrozenIncidenceVerifiedQuotientAuthority>
+ExactFrozenIncidenceVerifiedQuotientAuthorityFactory::verify_once(
+    std::span<const ExactFrozenIncidenceHyperedge> hyperedges,
+    std::span<const ExactFrozenIncidenceToken> tokens,
+    const ExactFrozenIncidenceQuotientBudget& budget,
+    const ExactFrozenIncidenceQuotientResult& quotient) {
+  const auto verification =
+      verify_exact_direct_frozen_incidence_quotient_streaming(
+          hyperedges, tokens, budget, quotient);
+  if (!verification.result_certified) {
+    return std::nullopt;
+  }
+  return ExactFrozenIncidenceVerifiedQuotientAuthority{
+      hyperedges, tokens, budget, &quotient};
+}
+
+ExactFrozenIncidenceHgpActionPlanResult
+build_exact_direct_frozen_incidence_hgp_action_plan_from_verified_quotient(
+    const ExactFrozenIncidenceVerifiedQuotientAuthority& authority,
+    std::span<const ExactFrozenIncidenceHyperedgeProvenance> provenance,
+    std::span<const ExactFrozenIncidenceRootAttachment> root_attachments,
+    const ExactFrozenIncidenceHgpActionPlanBudget& budget) {
+  return
+      build_frozen_incidence_hgp_action_plan_with_optional_quotient_authority(
+          authority.hyperedges(),
+          authority.tokens(),
+          authority.budget(),
+          authority.quotient(),
+          provenance,
+          root_attachments,
+          budget,
+          &authority);
+}
+
+ExactFrozenIncidenceHgpActionPlanStreamingVerification
+verify_exact_direct_frozen_incidence_hgp_action_plan_streaming_from_verified_quotient(
+    const ExactFrozenIncidenceVerifiedQuotientAuthority& authority,
+    std::span<const ExactFrozenIncidenceHyperedgeProvenance> provenance,
+    std::span<const ExactFrozenIncidenceRootAttachment> root_attachments,
+    const ExactFrozenIncidenceHgpActionPlanBudget& trusted_budget,
+    const ExactFrozenIncidenceHgpActionPlanResult& observed) {
+  return
+      verify_frozen_incidence_hgp_action_plan_with_optional_quotient_authority(
+          authority.hyperedges(),
+          authority.tokens(),
+          authority.budget(),
+          authority.quotient(),
+          provenance,
+          root_attachments,
+          trusted_budget,
+          observed,
+          &authority);
+}
+
+}  // namespace internal
 
 }  // namespace morsehgp3d::hierarchy

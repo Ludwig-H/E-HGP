@@ -359,8 +359,16 @@ void test_ticket_guards(const E5Context& context) {
       foreign_preparation.certified_prepared_batch(),
       "a foreign-ticket fixture prepares");
   if (foreign_preparation.ticket.has_value()) {
-    const auto foreign = second.commit(
-        std::move(*foreign_preparation.ticket));
+    const auto* attested_batch_address =
+        &foreign_preparation.ticket->authority_bundle().frozen_batch;
+    ExactDirectMorseUnifiedResidentPreparedBatch moved_ticket =
+        std::move(*foreign_preparation.ticket);
+    check(
+        moved_ticket.valid() && foreign_preparation.ticket->consumed() &&
+            &moved_ticket.authority_bundle().frozen_batch ==
+                attested_batch_address,
+        "moving a ticket preserves the stable attested batch address and revalidates its capability");
+    const auto foreign = second.commit(std::move(moved_ticket));
     check(
         foreign.decision ==
                 ExactDirectMorseUnifiedResidentCommitDecision::
@@ -607,8 +615,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
           ExactDirectMorseUnifiedResidentSession::public_status ==
               "not_claimed" &&
           ExactDirectMorseUnifiedResidentSession::deployment_status ==
-              "bounded_sparse_resident_delta_without_per_batch_plan_replay_v3",
-      "the session advertises its bounded immutable-plan-authority v3 scope");
+              "bounded_sparse_resident_delta_single_batch_construction_v4",
+      "the session advertises its single-construction attestation v4 scope");
 
   std::optional<ExactFrozenIncidencePriorRootId> residual_root;
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp stamp_after_17_2{};
@@ -638,15 +646,21 @@ void test_e5_live_twelve_batches(const E5Context& context) {
             !bundle.frozen_batch.source_plan_freshly_verified &&
             bundle.frozen_batch
                 .source_plan_verified_once_by_immutable_resident_authority &&
-            !bundle.frozen_verification.source_plan_freshly_verified &&
-            bundle.frozen_verification
-                .source_plan_immutable_resident_authority_certified &&
-            !bundle.frozen_verification.fresh_replay_certified &&
-            bundle.frozen_verification
-                .immutable_authority_batch_reconstruction_certified &&
+            bundle.frozen_batch_receipt
+                .certified_single_construction_receipt() &&
+            bundle.frozen_batch_receipt.frozen_batch_construction_count ==
+                1U &&
+            bundle.frozen_batch_receipt
+                    .quotient_streaming_verification_count == 1U &&
+            bundle.frozen_batch_receipt
+                    .action_plan_streaming_verification_count == 1U &&
+            bundle.frozen_batch_receipt.structural_certification_count ==
+                1U &&
+            !bundle.frozen_batch_receipt
+                 .independent_expected_batch_freshly_reconstructed &&
             bundle.counters.sparse_delta_group_append_count ==
                 bundle.counters.planned_group_record_count,
-        "the authority shares one live locator identity, names its immutable plan lease honestly, and carries only its sparse resident delta");
+        "the authority shares one live locator identity and carries one honestly attested frozen construction with one quotient/action streaming verification");
 
     if (bundle.squared_level == level(17, 2)) {
       residual_17_2_checked =
@@ -723,8 +737,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
       "E5 retains exactly six persistently budgeted group-delta points");
   check(
       session.frozen_batch_source_replay_count() == 0U &&
-          session.frozen_batch_reconstruction_count() == 24U,
-      "E5 performs zero per-batch source-plan replays while retaining two fresh frozen-batch reconstructions per batch");
+          session.frozen_batch_reconstruction_count() == 12U,
+      "E5 performs zero per-batch source-plan replays and exactly one attested frozen construction for each of its twelve batches");
 }
 
 void test_group_delta_point_caps(const E5Context& context) {

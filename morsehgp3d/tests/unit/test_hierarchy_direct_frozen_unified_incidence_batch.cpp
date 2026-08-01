@@ -528,6 +528,7 @@ struct ResolutionChoice {
     const ExactDirectFrozenUnifiedIncidenceBatchVerification& verification) {
   return verification.requested_budget_certified &&
          verification.source_plan_freshly_verified &&
+         !verification.source_plan_immutable_resident_authority_certified &&
          verification.expected_result_freshly_reconstructed &&
          verification.supplied_latent_carrier_coverage_freshly_replayed &&
          verification.quotient_freshly_streaming_verified &&
@@ -536,6 +537,8 @@ struct ResolutionChoice {
          verification.result_facts_and_scope_certified &&
          verification.no_forbidden_global_structure_or_mutation &&
          verification.fresh_replay_certified &&
+         !verification
+              .immutable_authority_batch_reconstruction_certified &&
          verification.result_certified;
 }
 

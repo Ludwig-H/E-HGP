@@ -16,7 +16,7 @@ namespace morsehgp3d::hierarchy {
 struct ExactDirectMorseUnifiedResidentInitializationResult;
 
 inline constexpr std::uint32_t
-    direct_morse_unified_resident_session_schema_version = 3U;
+    direct_morse_unified_resident_session_schema_version = 4U;
 inline constexpr std::string_view
     direct_morse_unified_resident_session_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -24,19 +24,20 @@ inline constexpr std::string_view
 inline constexpr std::string_view
     direct_morse_unified_resident_session_mode =
         "certified_resident_unified_strict_prebatch_authority_and_atomic_"
-        "sparse_delta_commit_with_immutable_verified_plan_authority_v3";
+        "sparse_delta_commit_with_single_attested_batch_construction_v4";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_public_status = "not_claimed";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_deployment_status =
-        "bounded_sparse_resident_delta_without_per_batch_plan_replay_v3";
+        "bounded_sparse_resident_delta_single_batch_construction_v4";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_proof_basis =
         "one_initial_unified_plan_verification_resident_sparse_positive_"
         "locator_exact_local_miniball_miss_certification_strict_pre_batch_"
         "frozen_authority_bundle_move_only_epoch_ticket_single_locator_"
         "transaction_with_rollbackable_pre_staged_sparse_delta_and_immutable_"
-        "verified_plan_authority_v3";
+        "verified_plan_authority_single_batch_construction_single_quotient_"
+        "action_streaming_verification_move_only_attestation_v4";
 
 struct ExactDirectMorseUnifiedResidentSparseDeltaBudget {
   std::size_t maximum_component_patch_count{};
@@ -132,6 +133,32 @@ struct ExactDirectMorseUnifiedResidentBatchCounters {
       const ExactDirectMorseUnifiedResidentBatchCounters&) = default;
 };
 
+// Public, structurally checkable receipt for the resident-only fast path.  The
+// non-forgeable capability itself remains inside the move-only prepared ticket.
+// Unlike the standalone verifier, this receipt makes no claim of an
+// independently reconstructed expected batch.
+struct ExactDirectMorseUnifiedResidentFrozenBatchReceipt {
+  std::uint32_t schema_version{
+      direct_morse_unified_resident_session_schema_version};
+  std::size_t frozen_batch_construction_count{};
+  std::size_t quotient_streaming_verification_count{};
+  std::size_t action_plan_streaming_verification_count{};
+  std::size_t structural_certification_count{};
+  bool source_plan_immutable_authority_certified{false};
+  bool frozen_batch_structurally_certified{false};
+  bool internal_move_only_attestation_issued{false};
+  bool independent_expected_batch_freshly_reconstructed{false};
+  bool global_facet_coface_or_gamma_catalog_materialized{false};
+  bool supplied_star_global_completeness_claimed{false};
+  bool public_status_claimed{false};
+
+  [[nodiscard]] bool certified_single_construction_receipt() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectMorseUnifiedResidentFrozenBatchReceipt&,
+      const ExactDirectMorseUnifiedResidentFrozenBatchReceipt&) = default;
+};
+
 // All five authority arenas and the frozen result share exactly one identity.
 // They are the strict pre-batch view retained by the ticket until commit.
 struct ExactDirectMorseUnifiedResidentAuthorityBundle {
@@ -149,13 +176,11 @@ struct ExactDirectMorseUnifiedResidentAuthorityBundle {
   std::vector<spatial::PointId>
       latent_carrier_coverage_point_references;
   ExactDirectFrozenUnifiedIncidenceBatchResult frozen_batch{};
-  ExactDirectFrozenUnifiedIncidenceBatchVerification frozen_verification{};
+  ExactDirectMorseUnifiedResidentFrozenBatchReceipt frozen_batch_receipt{};
   ExactDirectMorseUnifiedResidentBatchCounters counters{};
   bool locator_snapshot_strictly_pre_batch{false};
   bool every_unresolved_facet_has_fresh_exact_equal_miniball{false};
   bool csr_authorities_share_identity_and_pre_batch_state{false};
-  bool frozen_batch_freshly_reconstructed_from_immutable_plan_authority{
-      false};
   bool global_facet_coface_or_gamma_catalog_materialized{false};
   bool supplied_star_global_completeness_claimed{false};
   bool public_status_claimed{false};
