@@ -1,5 +1,6 @@
 #include "phase15_exact_higher_support_product_cuda_internal.hpp"
 #include "phase15_exact_higher_support_product_fixed.cuh"
+#include "phase15_exact_higher_support_product_fixed256.cuh"
 #include "phase15_exact_higher_support_product_fixed512.cuh"
 
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
@@ -13,6 +14,7 @@ namespace morsehgp3d::gpu::test_support {
 namespace {
 
 std::atomic<bool> corrupt_next_receipt{false};
+std::atomic<bool> force_next_int256_fallback{false};
 std::atomic<bool> force_next_int512_fallback{false};
 std::atomic<std::size_t> launcher_call_count{0U};
 
@@ -22,12 +24,17 @@ void corrupt_next_exact_higher_support_product_receipt() noexcept {
   corrupt_next_receipt.store(true, std::memory_order_relaxed);
 }
 
+void force_next_exact_higher_support_product_int256_fallback() noexcept {
+  force_next_int256_fallback.store(true, std::memory_order_relaxed);
+}
+
 void force_next_exact_higher_support_product_int512_fallback() noexcept {
   force_next_int512_fallback.store(true, std::memory_order_relaxed);
 }
 
 void reset_exact_higher_support_product_fake() noexcept {
   corrupt_next_receipt.store(false, std::memory_order_relaxed);
+  force_next_int256_fallback.store(false, std::memory_order_relaxed);
   force_next_int512_fallback.store(false, std::memory_order_relaxed);
   launcher_call_count.store(0U, std::memory_order_relaxed);
 }
@@ -38,6 +45,11 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
 
 [[nodiscard]] bool consume_receipt_corruption() noexcept {
   return corrupt_next_receipt.exchange(false, std::memory_order_relaxed);
+}
+
+[[nodiscard]] bool consume_forced_int256_fallback() noexcept {
+  return force_next_int256_fallback.exchange(
+      false, std::memory_order_relaxed);
 }
 
 [[nodiscard]] bool consume_forced_int512_fallback() noexcept {
@@ -55,6 +67,7 @@ namespace morsehgp3d::gpu::detail {
 namespace {
 
 namespace fixed = exact_higher_support_product_fixed;
+namespace fixed256 = exact_higher_support_product_fixed256;
 namespace fixed512 = exact_higher_support_product_fixed512;
 
 [[nodiscard]] spatial::ExactDyadicAabb3 exact_aabb(
@@ -96,7 +109,12 @@ namespace fixed512 = exact_higher_support_product_fixed512;
           width)) {
     return false;
   }
-  const auto expected = width <= fixed512::aligned_coordinate_bit_limit
+  const auto expected = fixed256::expression_fits(
+                            task.support_size,
+                            task.has_query_box != 0U,
+                            width)
+      ? Phase15ExactHigherSupportProductCudaArithmeticWidth::int256
+      : width <= fixed512::aligned_coordinate_bit_limit
       ? Phase15ExactHigherSupportProductCudaArithmeticWidth::int512
       : Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024;
   return task.aligned_coordinate_bit_width == width &&
@@ -224,6 +242,13 @@ phase15_launch_exact_higher_support_product_cuda(
     record.task_id = task.task_id;
     record.kind = task.kind;
     if (task.arithmetic_width ==
+            Phase15ExactHigherSupportProductCudaArithmeticWidth::int256 &&
+        test_support::consume_forced_int256_fallback()) {
+      record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
+          requires_host_int512_fallback;
+      record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
+          bounded_dyadic_int512;
+    } else if (task.arithmetic_width ==
             Phase15ExactHigherSupportProductCudaArithmeticWidth::int512 &&
         test_support::consume_forced_int512_fallback()) {
       record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
@@ -241,12 +266,24 @@ phase15_launch_exact_higher_support_product_cuda(
       record.outcome = certified
           ? Phase15ExactHigherSupportProductCudaDeviceOutcome::certified
           : Phase15ExactHigherSupportProductCudaDeviceOutcome::exact_false;
-      record.backend = task.arithmetic_width ==
-              Phase15ExactHigherSupportProductCudaArithmeticWidth::int512
-          ? Phase15ExactHigherSupportProductCudaDeviceBackend::
-                bounded_dyadic_int512
-          : Phase15ExactHigherSupportProductCudaDeviceBackend::
-                bounded_dyadic_int1024;
+      switch (task.arithmetic_width) {
+        case Phase15ExactHigherSupportProductCudaArithmeticWidth::int256:
+          record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
+              bounded_dyadic_int256;
+          break;
+        case Phase15ExactHigherSupportProductCudaArithmeticWidth::int512:
+          record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
+              bounded_dyadic_int512;
+          break;
+        case Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024:
+          record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
+              bounded_dyadic_int1024;
+          break;
+        default:
+          throw std::logic_error(
+              "the fake exact higher-support product launcher lost its "
+              "arithmetic route");
+      }
     }
     receipt.records.push_back(record);
   }
@@ -260,6 +297,7 @@ phase15_launch_exact_higher_support_product_cuda(
   receipt.kernel_elapsed_ns_available = false;
   receipt.every_task_classified_once = true;
   receipt.host_fake_lifecycle_exercised = true;
+  receipt.narrow_int256_kernel_executed = false;
   receipt.narrow_int512_kernel_executed = false;
   if (test_support::consume_receipt_corruption()) {
     ++receipt.completed_result_digest;

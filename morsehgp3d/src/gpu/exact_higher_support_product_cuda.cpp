@@ -2,6 +2,7 @@
 
 #include "phase15_exact_higher_support_product_cuda_internal.hpp"
 #include "phase15_exact_higher_support_product_fixed.cuh"
+#include "phase15_exact_higher_support_product_fixed256.cuh"
 #include "phase15_exact_higher_support_product_fixed512.cuh"
 
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
@@ -22,6 +23,7 @@ namespace morsehgp3d::gpu {
 namespace {
 
 namespace fixed = detail::exact_higher_support_product_fixed;
+namespace fixed256 = detail::exact_higher_support_product_fixed256;
 namespace fixed512 = detail::exact_higher_support_product_fixed512;
 
 [[nodiscard]] std::uint64_t public_result_digest(
@@ -113,10 +115,19 @@ void select_arithmetic_width(
         "host-certified finite AABBs");
   }
   task.aligned_coordinate_bit_width = coordinate_width;
-  task.arithmetic_width =
-      coordinate_width <= fixed512::aligned_coordinate_bit_limit
-      ? detail::Phase15ExactHigherSupportProductCudaArithmeticWidth::int512
-      : detail::Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024;
+  if (fixed256::expression_fits(
+          task.support_size,
+          task.has_query_box != 0U,
+          coordinate_width)) {
+    task.arithmetic_width =
+        detail::Phase15ExactHigherSupportProductCudaArithmeticWidth::int256;
+  } else if (coordinate_width <= fixed512::aligned_coordinate_bit_limit) {
+    task.arithmetic_width =
+        detail::Phase15ExactHigherSupportProductCudaArithmeticWidth::int512;
+  } else {
+    task.arithmetic_width =
+        detail::Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024;
+  }
 }
 
 }  // namespace
@@ -453,6 +464,14 @@ ExactHigherSupportProductCudaContext::evaluate(
   }
 
   base_audit.every_task_validated_before_launch = true;
+  const std::size_t prepared_int256_count = static_cast<std::size_t>(
+      std::count_if(
+          prepared.begin(),
+          prepared.end(),
+          [](const auto& task) {
+            return task.arithmetic_width == detail::
+                Phase15ExactHigherSupportProductCudaArithmeticWidth::int256;
+          }));
   const std::size_t prepared_int512_count = static_cast<std::size_t>(
       std::count_if(
           prepared.begin(),
@@ -462,8 +481,9 @@ ExactHigherSupportProductCudaContext::evaluate(
                 Phase15ExactHigherSupportProductCudaArithmeticWidth::int512;
           }));
   const std::size_t prepared_int1024_count =
-      prepared.size() - prepared_int512_count;
+      prepared.size() - prepared_int256_count - prepared_int512_count;
   const std::size_t expected_cuda_kernel_count =
+      (prepared_int256_count != 0U ? 1U : 0U) +
       (prepared_int512_count != 0U ? 1U : 0U) +
       (prepared_int1024_count != 0U ? 1U : 0U);
   base_audit.submitted_task_digest =
@@ -508,6 +528,7 @@ ExactHigherSupportProductCudaContext::evaluate(
           receipt.synchronization_count != 0U ||
           receipt.kernel_elapsed_ns_available ||
           receipt.kernel_elapsed_ns != 0U ||
+          receipt.narrow_int256_kernel_executed ||
           receipt.narrow_int512_kernel_executed ||
           receipt.cuda_device != -1) {
         throw std::logic_error(
@@ -520,6 +541,8 @@ ExactHigherSupportProductCudaContext::evaluate(
         receipt.kernel_launch_count != expected_cuda_kernel_count ||
         receipt.synchronization_count != 1U ||
         !receipt.kernel_elapsed_ns_available ||
+        receipt.narrow_int256_kernel_executed !=
+            (prepared_int256_count != 0U) ||
         receipt.narrow_int512_kernel_executed !=
             (prepared_int512_count != 0U) ||
         receipt.cuda_device != impl_->cuda_device) {
@@ -541,20 +564,43 @@ ExactHigherSupportProductCudaContext::evaluate(
       record.task_id = device_record.task_id;
       record.kind = device_record.kind;
       const auto bounded_backend = [&]() {
-        const auto expected_backend =
-            prepared_task.arithmetic_width == detail::
-                    Phase15ExactHigherSupportProductCudaArithmeticWidth::
-                        int512
-            ? detail::Phase15ExactHigherSupportProductCudaDeviceBackend::
-                  bounded_dyadic_int512
-            : detail::Phase15ExactHigherSupportProductCudaDeviceBackend::
-                  bounded_dyadic_int1024;
+        detail::Phase15ExactHigherSupportProductCudaDeviceBackend
+            expected_backend{};
+        switch (prepared_task.arithmetic_width) {
+          case detail::
+              Phase15ExactHigherSupportProductCudaArithmeticWidth::int256:
+            expected_backend = detail::
+                Phase15ExactHigherSupportProductCudaDeviceBackend::
+                    bounded_dyadic_int256;
+            break;
+          case detail::
+              Phase15ExactHigherSupportProductCudaArithmeticWidth::int512:
+            expected_backend = detail::
+                Phase15ExactHigherSupportProductCudaDeviceBackend::
+                    bounded_dyadic_int512;
+            break;
+          case detail::
+              Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024:
+            expected_backend = detail::
+                Phase15ExactHigherSupportProductCudaDeviceBackend::
+                    bounded_dyadic_int1024;
+            break;
+          default:
+            throw std::logic_error(
+                "the exact higher-support product host selected an unknown "
+                "arithmetic route");
+        }
         if (device_record.backend != expected_backend) {
           throw std::logic_error(
               "the exact higher-support product launcher changed the "
               "preflight arithmetic route");
         }
         switch (device_record.backend) {
+          case detail::Phase15ExactHigherSupportProductCudaDeviceBackend::
+              bounded_dyadic_int256:
+            ++base_audit.bounded_dyadic_int256_count;
+            return ExactHigherSupportProductCudaBackend::
+                bounded_dyadic_int256;
           case detail::Phase15ExactHigherSupportProductCudaDeviceBackend::
               bounded_dyadic_int512:
             ++base_audit.bounded_dyadic_int512_count;
@@ -585,24 +631,41 @@ ExactHigherSupportProductCudaContext::evaluate(
         case detail::Phase15ExactHigherSupportProductCudaDeviceOutcome::
             requires_cpu_rational_fallback:
         case detail::Phase15ExactHigherSupportProductCudaDeviceOutcome::
-            requires_host_int1024_fallback: {
+            requires_host_int1024_fallback:
+        case detail::Phase15ExactHigherSupportProductCudaDeviceOutcome::
+            requires_host_int512_fallback: {
+          const bool int512_required = device_record.outcome == detail::
+              Phase15ExactHigherSupportProductCudaDeviceOutcome::
+                  requires_host_int512_fallback;
+          const bool int1024_required = device_record.outcome == detail::
+              Phase15ExactHigherSupportProductCudaDeviceOutcome::
+                  requires_host_int1024_fallback;
           const bool rational_required = device_record.outcome == detail::
               Phase15ExactHigherSupportProductCudaDeviceOutcome::
                   requires_cpu_rational_fallback;
-          const bool prepared_for_int512 =
-              prepared_task.arithmetic_width == detail::
-                  Phase15ExactHigherSupportProductCudaArithmeticWidth::
-                      int512;
-          if (rational_required == prepared_for_int512) {
+          const bool route_matches =
+              (int512_required && prepared_task.arithmetic_width == detail::
+                      Phase15ExactHigherSupportProductCudaArithmeticWidth::
+                          int256) ||
+              (int1024_required && prepared_task.arithmetic_width == detail::
+                      Phase15ExactHigherSupportProductCudaArithmeticWidth::
+                          int512) ||
+              (rational_required && prepared_task.arithmetic_width == detail::
+                      Phase15ExactHigherSupportProductCudaArithmeticWidth::
+                          int1024);
+          if (!route_matches) {
             throw std::logic_error(
                 "the exact higher-support product fallback escaped its "
                 "preflight arithmetic route");
           }
-          const auto expected_device_backend = rational_required
+          const auto expected_device_backend = int512_required
               ? detail::Phase15ExactHigherSupportProductCudaDeviceBackend::
-                    arbitrary_precision_rational
+                    bounded_dyadic_int512
+              : int1024_required
+              ? detail::Phase15ExactHigherSupportProductCudaDeviceBackend::
+                    bounded_dyadic_int1024
               : detail::Phase15ExactHigherSupportProductCudaDeviceBackend::
-                    bounded_dyadic_int1024;
+                    arbitrary_precision_rational;
           if (device_record.backend != expected_device_backend) {
             throw std::logic_error(
                 "the exact higher-support product fallback carried the "
@@ -622,19 +685,46 @@ ExactHigherSupportProductCudaContext::evaluate(
           const std::span<const spatial::ExactDyadicAabb3> support_boxes{
               exact_support_boxes.data(), prepared_task.support_size};
           bool certified = false;
-          if (prepared_task.kind ==
-              ExactHigherSupportProductCudaTaskKind::support_prune) {
-            certified = hierarchy::
-                exact_higher_support_product_no_well_centered_certified(
-                    support_boxes, &backend);
-          } else {
-            certified = hierarchy::
-                exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
-                    support_boxes,
-                    exact_aabb(prepared_task.query_box),
-                    &backend);
+          bool resolved_by_int512 = false;
+          if (int512_required) {
+            fixed::Binary64Aabb3 fixed_support_boxes[
+                fixed::maximum_support_size]{};
+            for (std::size_t support_index = 0U;
+                 support_index < prepared_task.support_size;
+                 ++support_index) {
+              fixed_support_boxes[support_index] =
+                  fixed_aabb(prepared_task.support_boxes[support_index]);
+            }
+            const fixed512::Decision decision = prepared_task.kind ==
+                    ExactHigherSupportProductCudaTaskKind::support_prune
+                ? fixed512::no_well_centered_support(
+                      fixed_support_boxes, prepared_task.support_size)
+                : fixed512::
+                      query_strictly_inside_every_independent_sphere(
+                          fixed_support_boxes,
+                          prepared_task.support_size,
+                          fixed_aabb(prepared_task.query_box));
+            if (decision !=
+                fixed512::Decision::requires_cpu_rational_fallback) {
+              certified = decision == fixed512::Decision::certified;
+              resolved_by_int512 = true;
+            }
           }
-          if (rational_required &&
+          if (!resolved_by_int512) {
+            if (prepared_task.kind ==
+                ExactHigherSupportProductCudaTaskKind::support_prune) {
+              certified = hierarchy::
+                  exact_higher_support_product_no_well_centered_certified(
+                      support_boxes, &backend);
+            } else {
+              certified = hierarchy::
+                  exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+                      support_boxes,
+                      exact_aabb(prepared_task.query_box),
+                      &backend);
+            }
+          }
+          if (!resolved_by_int512 && rational_required &&
               backend != hierarchy::
                   ExactHigherSupportProductAabbDecisionBackend::
                       arbitrary_precision_rational) {
@@ -645,7 +735,11 @@ ExactHigherSupportProductCudaContext::evaluate(
           record.outcome = certified
               ? ExactHigherSupportProductCudaOutcome::certified
               : ExactHigherSupportProductCudaOutcome::fail_open;
-          if (backend == hierarchy::
+          if (resolved_by_int512) {
+            record.backend = ExactHigherSupportProductCudaBackend::
+                bounded_dyadic_int512;
+            ++base_audit.bounded_dyadic_int512_count;
+          } else if (backend == hierarchy::
                   ExactHigherSupportProductAabbDecisionBackend::
                       arbitrary_precision_rational) {
             record.backend = ExactHigherSupportProductCudaBackend::
@@ -673,7 +767,8 @@ ExactHigherSupportProductCudaContext::evaluate(
       staged_records.push_back(record);
     }
 
-    if (base_audit.bounded_dyadic_int512_count +
+    if (base_audit.bounded_dyadic_int256_count +
+                base_audit.bounded_dyadic_int512_count +
                 base_audit.bounded_dyadic_int1024_count +
                 base_audit.arbitrary_precision_rational_fallback_count !=
             tasks.size() ||
@@ -697,6 +792,8 @@ ExactHigherSupportProductCudaContext::evaluate(
         receipt.cuda_execution_performed;
     base_audit.native_lbvh_nodes_read_on_device =
         receipt.native_lbvh_nodes_read_on_device;
+    base_audit.narrow_int256_kernel_executed =
+        receipt.narrow_int256_kernel_executed;
     base_audit.narrow_int512_kernel_executed =
         receipt.narrow_int512_kernel_executed;
 

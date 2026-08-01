@@ -203,6 +203,14 @@ Pour une composante source d'ordre $k+1$, chacun de ses labels devient une cofac
 
 Si le support n'est pas essentiel, si un autre point est exactement sur la frontière ou si une transition conserve le niveau, le lemme 2 ne s'applique pas. La référence Gamma exhaustive reste exacte, mais la compression silencieuse doit soit contracter les plateaux par un quotient multivalué démontré, soit retourner `unsupported_degeneracy`.
 
+### 6.1 Carré vertical normalisé local
+
+Une fois les composantes horizontales normalisées fournies par une autorité séparée, leur application verticale ne demande pas de reconstruire Gamma. Considérons une composante fermée $C$ d'ordre $k+1$ avec sa liste exhaustive de labels et un arbre couvrant d'adjacences. Pour chaque arête de l'arbre, les deux labels ont une union égale à une coface source active et une intersection $F$ de cardinal $k$. Si toutes ces facettes communes se résolvent vers la même racine fermée $R$ à l'ordre $k$ et à la même coupe exacte, la connexité de l'arbre prouve que le choix du label source ne change pas l'image verticale de $C$.
+
+Pour une inclusion horizontale certifiée $C_a\to C_b$ entre deux coupes fermées, les labels de $C_a$ doivent tous persister dans $C_b$. La facette témoin canonique $F_a$ de l'arbre de $C_a$ est alors re-résolue à la coupe $b$, après composition attestée de tous les niveaux cibles intermédiaires. Si sa racine obtenue est l'image verticale indépendante de $C_b$, le carré commute. Le raisonnement couvre une continuation $q_R=1$ : aucune création de nœud n'est nécessaire, seulement l'unicité du successeur horizontal et la re-résolution du même carrier.
+
+`ExactDirectNormalizedVerticalSquareReceipt` implémente ce certificat local avec budgets, échecs atomiques et vérificateur frais. Il est conditionnel aux reçus exhaustifs de membership source, de spanning tree, de résolution cible et d'inclusion horizontale que le plan candidat actuel ne produit pas encore. Il ne positionne donc ni `all_naturality_squares_replayed`, ni `vertical_maps_complete`, ni `incidence_complete_reduction_proved`, ni `global_regularity_authority_certified`. Ses arènes ne contiennent que les labels et arêtes d'une composante, les bindings de facettes demandés, deux images et un carré; elles ne matérialisent aucune étoile, Gamma ou mosaïque de Delaunay d'ordre supérieur.
+
 ## 7. Portée algorithmique
 
 La complétion $G_k^{+}$ exhaustive inspecte jusqu'à $\binom{n}{k+1}$ cofaces. Une coface non-Gabriel émet au plus $\lvert I\rvert\leq k-1$ attaches silencieuses. Pour une version à la demande qui examine $p$ facettes-portes, une recherche naïve de $\lambda$ coûte $O(p(n-k))$ calculs de miniball; aucune borne pratique n'est encore démontrée pour la longueur maximale des descentes.

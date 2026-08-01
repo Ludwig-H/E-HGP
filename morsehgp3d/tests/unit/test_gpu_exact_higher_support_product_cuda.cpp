@@ -23,6 +23,7 @@
 
 namespace morsehgp3d::gpu::test_support {
 void corrupt_next_exact_higher_support_product_receipt() noexcept;
+void force_next_exact_higher_support_product_int256_fallback() noexcept;
 void force_next_exact_higher_support_product_int512_fallback() noexcept;
 void reset_exact_higher_support_product_fake() noexcept;
 [[nodiscard]] std::size_t
@@ -45,6 +46,8 @@ using morsehgp3d::gpu::test_support::
     corrupt_next_exact_higher_support_product_receipt;
 using morsehgp3d::gpu::test_support::
     exact_higher_support_product_fake_launcher_call_count;
+using morsehgp3d::gpu::test_support::
+    force_next_exact_higher_support_product_int256_fallback;
 using morsehgp3d::gpu::test_support::
     force_next_exact_higher_support_product_int512_fallback;
 using morsehgp3d::gpu::test_support::
@@ -82,6 +85,19 @@ static_assert(
         CanonicalPointCloud&&,
         MortonLbvhDeviceTraversalLease&&,
         std::size_t>);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactHigherSupportProductCudaBackend::bounded_dyadic_int1024) == 0U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactHigherSupportProductCudaBackend::arbitrary_precision_rational) ==
+    1U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactHigherSupportProductCudaBackend::bounded_dyadic_int512) == 2U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactHigherSupportProductCudaBackend::bounded_dyadic_int256) == 3U);
 
 int failures = 0;
 
@@ -139,6 +155,17 @@ void check_throws(Function&& function, const std::string& message) {
       point(0.0, 0.0, 0.0),
       point(1.0, 0.0, 0.0),
       point(0.0, bit_minus_61, 0.0)};
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] CanonicalPointCloud int512_boundary_cloud() {
+  const double bit_minus_39 = std::ldexp(1.0, -39);
+  const std::array<CertifiedPoint3, 4> points{
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, bit_minus_39)};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
 }
@@ -386,9 +413,9 @@ void test_batched_parity_and_preflight() {
               bounded_dyadic_int1024 &&
           result.records[0].backend ==
               ExactHigherSupportProductCudaBackend::
-                  bounded_dyadic_int512 &&
+                  bounded_dyadic_int256 &&
           !result.records[0].cpu_fallback_performed,
-      "ordinary dyadics select the exact int512 host-fake path");
+      "ordinary support-3 dyadics select the exact int256 host-fake path");
 
   const auto& audit = result.audit;
   check(
@@ -396,7 +423,8 @@ void test_batched_parity_and_preflight() {
           audit.completed_task_count == 1U &&
           audit.support_prune_task_count == 1U &&
           audit.query_strict_interior_task_count == 0U &&
-          audit.bounded_dyadic_int512_count == 1U &&
+          audit.bounded_dyadic_int256_count == 1U &&
+          audit.bounded_dyadic_int512_count == 0U &&
           audit.bounded_dyadic_int1024_count == 0U &&
           audit.arbitrary_precision_rational_fallback_count == 0U &&
           audit.launcher_call_count == 1U &&
@@ -514,7 +542,7 @@ void test_positive_certificates_and_disjoint_query_receipt() {
               ExactHigherSupportProductCudaOutcome::certified &&
           result.records[0].backend ==
               ExactHigherSupportProductCudaBackend::
-                  bounded_dyadic_int512 &&
+                  bounded_dyadic_int256 &&
           !result.records[0].cpu_fallback_performed,
       "a collinear singleton support product exercises the positive exact "
       "prune branch");
@@ -528,7 +556,7 @@ void test_positive_certificates_and_disjoint_query_receipt() {
               ExactHigherSupportProductCudaOutcome::certified &&
           result.records[1].backend ==
               ExactHigherSupportProductCudaBackend::
-                  bounded_dyadic_int512 &&
+                  bounded_dyadic_int256 &&
           !result.records[1].cpu_fallback_performed,
       "a disjoint interior singleton query exercises the positive exact "
       "rank-prune branch");
@@ -537,7 +565,8 @@ void test_positive_certificates_and_disjoint_query_receipt() {
           result.audit.query_strict_interior_task_count == 1U &&
           result.audit.certified_count == 2U &&
           result.audit.fail_open_count == 0U &&
-          result.audit.bounded_dyadic_int512_count == 2U &&
+          result.audit.bounded_dyadic_int256_count == 2U &&
+          result.audit.bounded_dyadic_int512_count == 0U &&
           result.audit.bounded_dyadic_int1024_count == 0U &&
           result.audit.arbitrary_precision_rational_fallback_count == 0U &&
           result.audit.submitted_task_digest != 0U &&
@@ -608,6 +637,7 @@ void test_integral_bigint_fallback() {
                    ? ExactHigherSupportProductCudaOutcome::certified
                    : ExactHigherSupportProductCudaOutcome::fail_open) &&
           result.audit.arbitrary_precision_rational_fallback_count == 1U &&
+          result.audit.bounded_dyadic_int256_count == 0U &&
           result.audit.bounded_dyadic_int512_count == 0U &&
           result.audit.bounded_dyadic_int1024_count == 0U,
       "a wide dyadic exponent range falls back integrally to the exact "
@@ -635,6 +665,7 @@ void test_int1024_preflight_route() {
               ExactHigherSupportProductCudaBackend::
                   bounded_dyadic_int1024 &&
           !result.records[0].cpu_fallback_performed &&
+          result.audit.bounded_dyadic_int256_count == 0U &&
           result.audit.bounded_dyadic_int512_count == 0U &&
           result.audit.bounded_dyadic_int1024_count == 1U &&
           result.audit.arbitrary_precision_rational_fallback_count == 0U,
@@ -675,7 +706,7 @@ void test_malformed_receipt_is_atomic_and_poisoning() {
 void test_int512_sentinel_falls_back_to_host_int1024() {
   reset_fake_gpu_phase14_morton_lbvh_build();
   reset_exact_higher_support_product_fake();
-  const CanonicalPointCloud cloud = ordinary_cloud();
+  const CanonicalPointCloud cloud = int512_boundary_cloud();
   MortonLbvhBuildContext builder{cloud.size()};
   auto build = builder.build(cloud);
   const MortonLbvhIndex& index = build.certified_index();
@@ -683,9 +714,16 @@ void test_int512_sentinel_falls_back_to_host_int1024() {
   const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
   ExactHigherSupportProductCudaContext context{
       index, cloud, std::move(lease), 1U};
-  const ExactHigherSupportProductCudaTask task =
-      support_task(index, cloud.size(), epoch, 40U);
-  const auto boxes = repeated_root_boxes(index);
+  ExactHigherSupportProductCudaTask task;
+  task.task_id = 40U;
+  task.source_snapshot_epoch = epoch;
+  task.kind = ExactHigherSupportProductCudaTaskKind::support_prune;
+  task.product = root_product(index, cloud.size(), 4U);
+  const std::array<ExactDyadicAabb3, 4> boxes{
+      index.root_aabb(),
+      index.root_aabb(),
+      index.root_aabb(),
+      index.root_aabb()};
   ExactHigherSupportProductAabbDecisionBackend backend{};
   const bool expected =
       exact_higher_support_product_no_well_centered_certified(
@@ -705,10 +743,50 @@ void test_int512_sentinel_falls_back_to_host_int1024() {
               (expected
                    ? ExactHigherSupportProductCudaOutcome::certified
                    : ExactHigherSupportProductCudaOutcome::fail_open) &&
+          result.audit.bounded_dyadic_int256_count == 0U &&
           result.audit.bounded_dyadic_int512_count == 0U &&
           result.audit.bounded_dyadic_int1024_count == 1U &&
           result.audit.arbitrary_precision_rational_fallback_count == 0U,
       "an unexpected int512 sentinel falls back through host int1024");
+}
+
+void test_int256_sentinel_falls_back_to_host_int512() {
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_exact_higher_support_product_fake();
+  const CanonicalPointCloud cloud = ordinary_cloud();
+  MortonLbvhBuildContext builder{cloud.size()};
+  auto build = builder.build(cloud);
+  const MortonLbvhIndex& index = build.certified_index();
+  auto lease = builder.release_device_traversal_lease(build);
+  const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+  ExactHigherSupportProductCudaContext context{
+      index, cloud, std::move(lease), 1U};
+  const ExactHigherSupportProductCudaTask task =
+      support_task(index, cloud.size(), epoch, 39U);
+  const auto boxes = repeated_root_boxes(index);
+  ExactHigherSupportProductAabbDecisionBackend backend{};
+  const bool expected =
+      exact_higher_support_product_no_well_centered_certified(
+          boxes, &backend);
+  force_next_exact_higher_support_product_int256_fallback();
+  const auto result = context.evaluate(
+      std::span<const ExactHigherSupportProductCudaTask>{&task, 1U});
+  check(
+      result.complete() && result.records.size() == 1U &&
+          backend == ExactHigherSupportProductAabbDecisionBackend::
+              bounded_dyadic_int1024 &&
+          result.records[0].backend ==
+              ExactHigherSupportProductCudaBackend::bounded_dyadic_int512 &&
+          result.records[0].cpu_fallback_performed &&
+          result.records[0].outcome ==
+              (expected
+                   ? ExactHigherSupportProductCudaOutcome::certified
+                   : ExactHigherSupportProductCudaOutcome::fail_open) &&
+          result.audit.bounded_dyadic_int256_count == 0U &&
+          result.audit.bounded_dyadic_int512_count == 1U &&
+          result.audit.bounded_dyadic_int1024_count == 0U &&
+          result.audit.arbitrary_precision_rational_fallback_count == 0U,
+      "an unexpected int256 sentinel falls back through host int512");
 }
 
 }  // namespace
@@ -719,6 +797,7 @@ int main() {
   test_foreign_resident_index_identity_is_rejected();
   test_int1024_preflight_route();
   test_integral_bigint_fallback();
+  test_int256_sentinel_falls_back_to_host_int512();
   test_int512_sentinel_falls_back_to_host_int1024();
   test_malformed_receipt_is_atomic_and_poisoning();
   if (failures != 0) {

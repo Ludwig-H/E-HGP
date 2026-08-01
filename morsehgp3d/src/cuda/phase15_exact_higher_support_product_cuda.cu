@@ -1,6 +1,7 @@
 #include "phase15_exact_higher_support_product_cuda_internal.hpp"
 
 #include "phase15_exact_higher_support_product_fixed.cuh"
+#include "phase15_exact_higher_support_product_fixed256.cuh"
 #include "phase15_exact_higher_support_product_fixed512.cuh"
 
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -39,6 +40,7 @@ namespace morsehgp3d::gpu::detail {
 namespace {
 
 namespace fixed = exact_higher_support_product_fixed;
+namespace fixed256 = exact_higher_support_product_fixed256;
 namespace fixed512 = exact_higher_support_product_fixed512;
 
 inline constexpr unsigned int threads_per_block = 64U;
@@ -292,6 +294,21 @@ fixed_outcome(fixed::Decision decision) noexcept {
 }
 
 [[nodiscard]] __device__ Phase15ExactHigherSupportProductCudaDeviceOutcome
+fixed256_outcome(fixed256::Decision decision) noexcept {
+  switch (decision) {
+    case fixed256::Decision::certified:
+      return Phase15ExactHigherSupportProductCudaDeviceOutcome::certified;
+    case fixed256::Decision::exact_false:
+      return Phase15ExactHigherSupportProductCudaDeviceOutcome::exact_false;
+    case fixed256::Decision::requires_cpu_rational_fallback:
+      return Phase15ExactHigherSupportProductCudaDeviceOutcome::
+          requires_cpu_rational_fallback;
+  }
+  return Phase15ExactHigherSupportProductCudaDeviceOutcome::
+      requires_cpu_rational_fallback;
+}
+
+[[nodiscard]] __device__ Phase15ExactHigherSupportProductCudaDeviceOutcome
 fixed512_outcome(fixed512::Decision decision) noexcept {
   switch (decision) {
     case fixed512::Decision::certified:
@@ -304,6 +321,18 @@ fixed512_outcome(fixed512::Decision decision) noexcept {
   }
   return Phase15ExactHigherSupportProductCudaDeviceOutcome::
       requires_cpu_rational_fallback;
+}
+
+[[nodiscard]] __device__ __noinline__ fixed256::Decision
+evaluate_fixed256(
+    ExactHigherSupportProductCudaTaskKind kind,
+    const fixed::Binary64Aabb3 support_boxes[maximum_support_size],
+    std::size_t support_size,
+    const fixed::Binary64Aabb3& query_box) noexcept {
+  return kind == ExactHigherSupportProductCudaTaskKind::support_prune
+      ? fixed256::no_well_centered_support(support_boxes, support_size)
+      : fixed256::query_strictly_inside_every_independent_sphere(
+            support_boxes, support_size, query_box);
 }
 
 [[nodiscard]] __device__ __noinline__ fixed512::Decision
@@ -329,7 +358,7 @@ evaluate_fixed512(
             support_boxes, support_size, query_box);
 }
 
-template <bool UseInt512>
+template <Phase15ExactHigherSupportProductCudaArithmeticWidth Width>
 [[nodiscard]] __device__ Phase15ExactHigherSupportProductCudaDeviceRecord
 evaluate_task(
     const std::uint64_t* coordinate_bits,
@@ -445,8 +474,15 @@ evaluate_task(
         task.support_size,
         query,
         native_coordinate_width);
-    const auto expected_width =
-        native_coordinate_width <= fixed512::aligned_coordinate_bit_limit
+    const auto expected_width = fixed256::expression_fits(
+                                    task.support_size,
+                                    task.kind ==
+                                        ExactHigherSupportProductCudaTaskKind::
+                                            query_strict_interior,
+                                    native_coordinate_width)
+        ? Phase15ExactHigherSupportProductCudaArithmeticWidth::int256
+        : native_coordinate_width <=
+                fixed512::aligned_coordinate_bit_limit
         ? Phase15ExactHigherSupportProductCudaArithmeticWidth::int512
         : Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024;
     authority_valid = authority_valid &&
@@ -459,7 +495,25 @@ evaluate_task(
     return record;
   }
 
-  if constexpr (UseInt512) {
+  if constexpr (
+      Width == Phase15ExactHigherSupportProductCudaArithmeticWidth::int256) {
+    const fixed256::Decision narrow_decision = evaluate_fixed256(
+        task.kind, support_boxes, task.support_size, query_box);
+    if (narrow_decision ==
+        fixed256::Decision::requires_cpu_rational_fallback) {
+      record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
+          requires_host_int512_fallback;
+      record.backend =
+          Phase15ExactHigherSupportProductCudaDeviceBackend::
+              bounded_dyadic_int512;
+    } else {
+      record.outcome = fixed256_outcome(narrow_decision);
+      record.backend =
+          Phase15ExactHigherSupportProductCudaDeviceBackend::
+              bounded_dyadic_int256;
+    }
+  } else if constexpr (
+      Width == Phase15ExactHigherSupportProductCudaArithmeticWidth::int512) {
     const fixed512::Decision narrow_decision = evaluate_fixed512(
         task.kind, support_boxes, task.support_size, query_box);
     if (narrow_decision ==
@@ -489,7 +543,7 @@ evaluate_task(
   return record;
 }
 
-template <bool UseInt512>
+template <Phase15ExactHigherSupportProductCudaArithmeticWidth Width>
 __global__ void morsehgp3d_phase15_exact_higher_support_product_kernel(
     const std::uint64_t* coordinate_bits,
     const DeviceNode* nodes,
@@ -506,13 +560,10 @@ __global__ void morsehgp3d_phase15_exact_higher_support_product_kernel(
   if (index >= task_count) {
     return;
   }
-  constexpr auto selected_width = UseInt512
-      ? Phase15ExactHigherSupportProductCudaArithmeticWidth::int512
-      : Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024;
-  if (tasks[index].arithmetic_width != selected_width) {
+  if (tasks[index].arithmetic_width != Width) {
     return;
   }
-  records[index] = evaluate_task<UseInt512>(
+  records[index] = evaluate_task<Width>(
       coordinate_bits,
       nodes,
       point_count,
@@ -564,10 +615,14 @@ phase15_launch_exact_higher_support_product_cuda(
   }
   const std::size_t block_count =
       (request.tasks.size() - 1U) / threads_per_block + 1U;
+  std::size_t int256_task_count = 0U;
   std::size_t int512_task_count = 0U;
   std::size_t int1024_task_count = 0U;
   for (const auto& task : request.tasks) {
     switch (task.arithmetic_width) {
+      case Phase15ExactHigherSupportProductCudaArithmeticWidth::int256:
+        ++int256_task_count;
+        break;
       case Phase15ExactHigherSupportProductCudaArithmeticWidth::int512:
         ++int512_task_count;
         break;
@@ -581,6 +636,7 @@ phase15_launch_exact_higher_support_product_cuda(
     }
   }
   const std::size_t arithmetic_kernel_count =
+      (int256_task_count != 0U ? 1U : 0U) +
       (int512_task_count != 0U ? 1U : 0U) +
       (int1024_task_count != 0U ? 1U : 0U);
   if (arithmetic_kernel_count == 0U) {
@@ -635,8 +691,30 @@ phase15_launch_exact_higher_support_product_cuda(
     check_cuda(
         cudaEventRecord(kernel_begin.get(), stream.get()),
         "cudaEventRecord exact higher-support product kernel begin");
+    if (int256_task_count != 0U) {
+      morsehgp3d_phase15_exact_higher_support_product_kernel<
+          Phase15ExactHigherSupportProductCudaArithmeticWidth::int256>
+          <<<static_cast<unsigned int>(block_count),
+             threads_per_block,
+             0U,
+             stream.get()>>>(
+              request.device_coordinate_bits,
+              static_cast<const DeviceNode*>(request.device_nodes),
+              request.point_count,
+              request.certified_node_count,
+              request.source_snapshot_epoch,
+              request.resident_lease_index_identity_validated,
+              device_tasks,
+              device_records,
+              device_authority_failure,
+              request.tasks.size());
+      check_cuda(
+          cudaGetLastError(),
+          "Phase 15 exact higher-support int256 kernel launch");
+    }
     if (int512_task_count != 0U) {
-      morsehgp3d_phase15_exact_higher_support_product_kernel<true>
+      morsehgp3d_phase15_exact_higher_support_product_kernel<
+          Phase15ExactHigherSupportProductCudaArithmeticWidth::int512>
           <<<static_cast<unsigned int>(block_count),
              threads_per_block,
              0U,
@@ -656,7 +734,8 @@ phase15_launch_exact_higher_support_product_cuda(
           "Phase 15 exact higher-support int512 kernel launch");
     }
     if (int1024_task_count != 0U) {
-      morsehgp3d_phase15_exact_higher_support_product_kernel<false>
+      morsehgp3d_phase15_exact_higher_support_product_kernel<
+          Phase15ExactHigherSupportProductCudaArithmeticWidth::int1024>
           <<<static_cast<unsigned int>(block_count),
              threads_per_block,
              0U,
@@ -737,6 +816,7 @@ phase15_launch_exact_higher_support_product_cuda(
   receipt.host_fake_lifecycle_exercised = false;
   receipt.cuda_execution_performed = true;
   receipt.native_lbvh_nodes_read_on_device = true;
+  receipt.narrow_int256_kernel_executed = int256_task_count != 0U;
   receipt.narrow_int512_kernel_executed = int512_task_count != 0U;
   return receipt;
 }

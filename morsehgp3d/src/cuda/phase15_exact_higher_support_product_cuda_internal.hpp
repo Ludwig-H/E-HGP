@@ -33,6 +33,7 @@ enum class Phase15ExactHigherSupportProductCudaArithmeticWidth :
     std::uint8_t {
   int512 = 0U,
   int1024 = 1U,
+  int256 = 2U,
 };
 
 struct Phase15ExactHigherSupportProductCudaTask {
@@ -76,12 +77,14 @@ enum class Phase15ExactHigherSupportProductCudaDeviceOutcome : std::uint8_t {
   exact_false = 1U,
   requires_cpu_rational_fallback = 2U,
   requires_host_int1024_fallback = 3U,
+  requires_host_int512_fallback = 4U,
 };
 
 enum class Phase15ExactHigherSupportProductCudaDeviceBackend : std::uint8_t {
   bounded_dyadic_int512 = 0U,
   bounded_dyadic_int1024 = 1U,
   arbitrary_precision_rational = 2U,
+  bounded_dyadic_int256 = 3U,
 };
 
 struct Phase15ExactHigherSupportProductCudaDeviceRecord {
@@ -235,6 +238,7 @@ struct Phase15ExactHigherSupportProductCudaReceipt {
   bool host_fake_lifecycle_exercised{false};
   bool cuda_execution_performed{false};
   bool native_lbvh_nodes_read_on_device{false};
+  bool narrow_int256_kernel_executed{false};
   bool narrow_int512_kernel_executed{false};
 };
 

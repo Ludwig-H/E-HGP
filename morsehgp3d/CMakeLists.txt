@@ -1037,6 +1037,7 @@ add_library(
   STATIC
     include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
     src/cuda/phase15_exact_higher_support_product_fixed.cuh
+    src/cuda/phase15_exact_higher_support_product_fixed256.cuh
     src/cuda/phase15_exact_higher_support_product_fixed512.cuh
     src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
     src/gpu/exact_higher_support_product_cuda.cpp
@@ -1078,6 +1079,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
       include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
       src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
       src/cuda/phase15_exact_higher_support_product_fixed.cuh
+      src/cuda/phase15_exact_higher_support_product_fixed256.cuh
       src/cuda/phase15_exact_higher_support_product_fixed512.cuh
       src/cuda/phase15_exact_higher_support_product_cuda.cu
       src/gpu/exact_higher_support_product_cuda.cpp
@@ -1737,6 +1739,46 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_normalized_h0_source_plan
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_normalized_vertical_square_receipt
+  STATIC
+    src/cpu/hierarchy/direct_normalized_vertical_square_receipt.cpp
+)
+add_library(
+  morsehgp3d::direct_normalized_vertical_square_receipt
+  ALIAS morsehgp3d_direct_normalized_vertical_square_receipt
+)
+set_target_properties(
+  morsehgp3d_direct_normalized_vertical_square_receipt
+  PROPERTIES
+    EXPORT_NAME direct_normalized_vertical_square_receipt
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_normalized_vertical_square_receipt PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_normalized_vertical_square_receipt
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_normalized_vertical_square_receipt
+  PUBLIC morsehgp3d::contract
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_normalized_vertical_square_receipt PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_normalized_vertical_square_receipt
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -5709,6 +5751,7 @@ install(
     morsehgp3d_direct_sparse_facet_descent_closure
     morsehgp3d_direct_sparse_first_incidence
     morsehgp3d_direct_normalized_h0_source_plan
+    morsehgp3d_direct_normalized_vertical_square_receipt
     morsehgp3d_direct_sparse_successive_incidence
     morsehgp3d_direct_sparse_successive_incidence_star_journal
     morsehgp3d_direct_sparse_unified_level_plan

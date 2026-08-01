@@ -1,4 +1,5 @@
 #include "phase15_exact_higher_support_product_fixed.cuh"
+#include "phase15_exact_higher_support_product_fixed256.cuh"
 #include "phase15_exact_higher_support_product_fixed512.cuh"
 
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
@@ -18,6 +19,8 @@ namespace {
 
 namespace fixed =
     morsehgp3d::gpu::detail::exact_higher_support_product_fixed;
+namespace fixed256 =
+    morsehgp3d::gpu::detail::exact_higher_support_product_fixed256;
 namespace fixed512 =
     morsehgp3d::gpu::detail::exact_higher_support_product_fixed512;
 using morsehgp3d::hierarchy::
@@ -32,6 +35,13 @@ static_assert(fixed::limb_count == 16U);
 static_assert(fixed::fixed_bit_count == 1024U);
 static_assert(fixed::aligned_coordinate_bit_limit == 124U);
 static_assert(fixed::proven_maximum_expression_bit_count == 1013U);
+static_assert(fixed256::limb_count == 4U);
+static_assert(fixed256::fixed_bit_count == 256U);
+static_assert(fixed256::aligned_coordinate_bit_limit(3U, false) == 61U);
+static_assert(fixed256::aligned_coordinate_bit_limit(3U, true) == 40U);
+static_assert(fixed256::aligned_coordinate_bit_limit(4U, false) == 39U);
+static_assert(fixed256::aligned_coordinate_bit_limit(4U, true) == 29U);
+static_assert(fixed256::proven_maximum_expression_bit_count == 255U);
 static_assert(fixed512::limb_count == 8U);
 static_assert(fixed512::fixed_bit_count == 512U);
 static_assert(fixed512::aligned_coordinate_bit_limit == 61U);
@@ -121,6 +131,18 @@ void check_support_parity(
       fixed::aligned_product_coordinate_bit_width(
           native.data(), Size, nullptr, coordinate_width),
       label + " has a valid integer-only width preflight");
+  const fixed256::Decision narrow256 =
+      fixed256::no_well_centered_support(native.data(), Size);
+  if (fixed256::expression_fits(Size, false, coordinate_width)) {
+    check(
+        narrow256 != fixed256::Decision::requires_cpu_rational_fallback &&
+            (narrow256 == fixed256::Decision::certified) == expected,
+        label + " matches the CPU decision through int256");
+  } else {
+    check(
+        narrow256 == fixed256::Decision::requires_cpu_rational_fallback,
+        label + " fails closed outside its arity-specific int256 envelope");
+  }
   const fixed512::Decision narrow =
       fixed512::no_well_centered_support(native.data(), Size);
   if (coordinate_width <= fixed512::aligned_coordinate_bit_limit) {
@@ -165,6 +187,20 @@ void check_query_parity(
       fixed::aligned_product_coordinate_bit_width(
           native.data(), Size, &native_query, coordinate_width),
       label + " query has a valid integer-only width preflight");
+  const fixed256::Decision narrow256 =
+      fixed256::query_strictly_inside_every_independent_sphere(
+          native.data(), Size, native_query);
+  if (fixed256::expression_fits(Size, true, coordinate_width)) {
+    check(
+        narrow256 != fixed256::Decision::requires_cpu_rational_fallback &&
+            (narrow256 == fixed256::Decision::certified) == expected,
+        label + " query matches the CPU decision through int256");
+  } else {
+    check(
+        narrow256 == fixed256::Decision::requires_cpu_rational_fallback,
+        label +
+            " query fails closed outside its arity-specific int256 envelope");
+  }
   const fixed512::Decision narrow =
       fixed512::query_strictly_inside_every_independent_sphere(
           native.data(), Size, native_query);
@@ -194,6 +230,16 @@ void check_query_parity(
   fixed::UInt1024 value{};
   value.limb[exponent / 64U] = UINT64_C(1) << (exponent % 64U);
   return value;
+}
+
+[[nodiscard]] boost::multiprecision::cpp_int cpp_value(
+    const fixed256::UInt256& value) {
+  boost::multiprecision::cpp_int result = 0;
+  for (std::size_t index = fixed256::limb_count; index != 0U; --index) {
+    result <<= 64U;
+    result += value.limb[index - 1U];
+  }
+  return result;
 }
 
 [[nodiscard]] boost::multiprecision::cpp_int cpp_value(
@@ -277,6 +323,34 @@ void test_checked_uint512_arithmetic() {
       "an int512 addition carry-out fails closed");
 }
 
+void test_checked_uint256_arithmetic() {
+  fixed256::UInt256 low_128_ones{};
+  for (std::size_t index = 0U; index < 2U; ++index) {
+    low_128_ones.limb[index] = UINT64_MAX;
+  }
+  fixed256::UInt256 square{};
+  check(
+      fixed256::multiply(low_128_ones, low_128_ones, square),
+      "the 4-limb product accepts (2^128-1)^2");
+  const boost::multiprecision::cpp_int expected =
+      (boost::multiprecision::cpp_int{1} << 128U) - 1;
+  check(
+      cpp_value(square) == expected * expected &&
+          fixed256::bit_width(square) == 256U,
+      "the int256 carry chain equals the arbitrary-precision product");
+
+  fixed256::UInt256 all_ones{};
+  for (std::uint64_t& limb : all_ones.limb) {
+    limb = UINT64_MAX;
+  }
+  fixed256::UInt256 one{};
+  one.limb[0] = 1U;
+  fixed256::UInt256 sum{};
+  check(
+      !fixed256::add(all_ones, one, sum),
+      "an int256 addition carry-out fails closed");
+}
+
 void test_int512_width_boundary() {
   const double bit_minus_60 = std::ldexp(1.0, -60);
   const double bit_minus_61 = std::ldexp(1.0, -61);
@@ -333,6 +407,92 @@ void test_int512_width_boundary() {
       tetrahedron_61,
       tetrahedron_query,
       "W=61 tetrahedron query boundary");
+}
+
+void test_int256_arity_boundaries() {
+  const std::array<ExactDyadicAabb3, 3> support3_61{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(0.0, std::ldexp(1.0, -60))};
+  const std::array<ExactDyadicAabb3, 3> support3_62{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(0.0, std::ldexp(1.0, -61))};
+  const auto native_support3_61 = fixed_boxes(support3_61);
+  const auto native_support3_62 = fixed_boxes(support3_62);
+  check(
+      fixed256::no_well_centered_support(
+          native_support3_61.data(), 3U) !=
+          fixed256::Decision::requires_cpu_rational_fallback &&
+          fixed256::no_well_centered_support(
+              native_support3_62.data(), 3U) ==
+              fixed256::Decision::requires_cpu_rational_fallback,
+      "support-3 int256 accepts W=61 and rejects W=62");
+
+  const std::array<ExactDyadicAabb3, 3> query3_40{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(0.0, std::ldexp(1.0, -39))};
+  const std::array<ExactDyadicAabb3, 3> query3_41{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(0.0, std::ldexp(1.0, -40))};
+  const auto native_query3_40 = fixed_boxes(query3_40);
+  const auto native_query3_41 = fixed_boxes(query3_41);
+  const fixed::Binary64Aabb3 triangle_query =
+      fixed_box(point_box(0.25, 0.0));
+  check(
+      fixed256::query_strictly_inside_every_independent_sphere(
+          native_query3_40.data(), 3U, triangle_query) !=
+          fixed256::Decision::requires_cpu_rational_fallback &&
+          fixed256::query_strictly_inside_every_independent_sphere(
+              native_query3_41.data(), 3U, triangle_query) ==
+              fixed256::Decision::requires_cpu_rational_fallback,
+      "query-3 int256 accepts W=40 and rejects W=41");
+
+  const std::array<ExactDyadicAabb3, 4> support4_39{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, std::ldexp(1.0, -38))};
+  const std::array<ExactDyadicAabb3, 4> support4_40{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, std::ldexp(1.0, -39))};
+  const auto native_support4_39 = fixed_boxes(support4_39);
+  const auto native_support4_40 = fixed_boxes(support4_40);
+  check(
+      fixed256::no_well_centered_support(
+          native_support4_39.data(), 4U) !=
+          fixed256::Decision::requires_cpu_rational_fallback &&
+          fixed256::no_well_centered_support(
+              native_support4_40.data(), 4U) ==
+              fixed256::Decision::requires_cpu_rational_fallback,
+      "support-4 int256 accepts W=39 and rejects W=40");
+
+  const std::array<ExactDyadicAabb3, 4> query4_29{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, std::ldexp(1.0, -28))};
+  const std::array<ExactDyadicAabb3, 4> query4_30{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, std::ldexp(1.0, -29))};
+  const auto native_query4_29 = fixed_boxes(query4_29);
+  const auto native_query4_30 = fixed_boxes(query4_30);
+  const fixed::Binary64Aabb3 tetrahedron_query =
+      fixed_box(point_box(0.25, 0.25, 0.0));
+  check(
+      fixed256::query_strictly_inside_every_independent_sphere(
+          native_query4_29.data(), 4U, tetrahedron_query) !=
+          fixed256::Decision::requires_cpu_rational_fallback &&
+          fixed256::query_strictly_inside_every_independent_sphere(
+              native_query4_30.data(), 4U, tetrahedron_query) ==
+              fixed256::Decision::requires_cpu_rational_fallback,
+      "query-4 int256 accepts W=29 and rejects W=30");
 }
 
 void test_named_triangle_and_tetrahedron_fixtures() {
@@ -445,7 +605,9 @@ void test_small_deterministic_dyadic_grid() {
 
 int main() {
   test_checked_uint1024_arithmetic();
+  test_checked_uint256_arithmetic();
   test_checked_uint512_arithmetic();
+  test_int256_arity_boundaries();
   test_int512_width_boundary();
   test_named_triangle_and_tetrahedron_fixtures();
   test_wide_exponent_fallback();

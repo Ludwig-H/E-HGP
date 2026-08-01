@@ -14,7 +14,7 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
-    exact_higher_support_product_cuda_schema_version = 2U;
+    exact_higher_support_product_cuda_schema_version = 3U;
 inline constexpr std::string_view exact_higher_support_product_cuda_backend =
     "cuda_g4_launcher_seam_plus_exact_host_fake";
 inline constexpr std::string_view exact_higher_support_product_cuda_profile =
@@ -59,6 +59,7 @@ enum class ExactHigherSupportProductCudaBackend : std::uint8_t {
   bounded_dyadic_int1024 = 0U,
   arbitrary_precision_rational = 1U,
   bounded_dyadic_int512 = 2U,
+  bounded_dyadic_int256 = 3U,
 };
 
 struct ExactHigherSupportProductCudaRecord {
@@ -100,6 +101,7 @@ struct ExactHigherSupportProductCudaAudit {
   std::size_t query_strict_interior_task_count{};
   std::size_t certified_count{};
   std::size_t fail_open_count{};
+  std::size_t bounded_dyadic_int256_count{};
   std::size_t bounded_dyadic_int512_count{};
   std::size_t bounded_dyadic_int1024_count{};
   std::size_t arbitrary_precision_rational_fallback_count{};
@@ -122,6 +124,7 @@ struct ExactHigherSupportProductCudaAudit {
   bool host_fake_lifecycle_exercised{false};
   bool cuda_execution_performed{false};
   bool native_lbvh_nodes_read_on_device{false};
+  bool narrow_int256_kernel_executed{false};
   bool narrow_int512_kernel_executed{false};
   bool global_product_frontier_mutated{false};
   bool ordinary_or_higher_order_delaunay_materialized{false};

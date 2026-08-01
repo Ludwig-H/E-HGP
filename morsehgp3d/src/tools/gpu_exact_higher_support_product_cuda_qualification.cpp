@@ -42,7 +42,7 @@ using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
-inline constexpr std::size_t qualification_task_count = 11U;
+inline constexpr std::size_t qualification_task_count = 12U;
 inline constexpr std::size_t fixture_family_count = 6U;
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
@@ -50,11 +50,11 @@ inline constexpr std::size_t fixture_family_count = 6U;
 }
 
 // Six logical fixture families share one immutable PointId namespace so all
-// eleven predicates use one resident epoch, one batch and one synchronization;
-// the mixed exact-width batch exercises the separate int512/int1024 kernels.
+// twelve predicates use one resident epoch, one batch and one synchronization;
+// the mixed exact-width batch exercises separate int256/int512/int1024 kernels.
 [[nodiscard]] CanonicalPointCloud qualification_cloud() {
   const double denormal = std::numeric_limits<double>::denorm_min();
-  const std::array<CertifiedPoint3, 24> points{
+  const std::array<CertifiedPoint3, 25> points{
       // Acute triangle, exact centre and a distinct shell point.
       point(-1.0, 0.0, 0.0),
       point(1.0, 0.0, 0.0),
@@ -84,7 +84,9 @@ inline constexpr std::size_t fixture_family_count = 6U;
       // W=62: outside int512, inside the existing int1024 envelope.
       point(0.0, 0.0, std::ldexp(1.0, -61)),
       point(1.0, 0.0, std::ldexp(1.0, -61)),
-      point(0.0, 1.0, std::ldexp(1.0, -61))};
+      point(0.0, 1.0, std::ldexp(1.0, -61)),
+      // W=42 query-3: outside its int256 bound, inside int512.
+      point(0.0, std::ldexp(1.0, -40), 0.0)};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
 }
@@ -539,7 +541,10 @@ int main() {
             cloud, index, epoch, 109U, internal_receipt),
         support_task(
             cloud, leaf_nodes, epoch, 110U,
-            std::array<std::size_t, 3>{21U, 22U, 23U})};
+            std::array<std::size_t, 3>{21U, 22U, 23U}),
+        query_task(
+            cloud, leaf_nodes, epoch, 111U,
+            std::array<std::size_t, 3>{0U, 1U, 2U}, 24U)};
 
     std::vector<ExactHigherSupportProductCudaTask> tasks;
     tasks.reserve(qualified_tasks.size());
@@ -607,6 +612,8 @@ int main() {
             ? actual.backend == ExactHigherSupportProductCudaBackend::
                   arbitrary_precision_rational
             : actual.backend == ExactHigherSupportProductCudaBackend::
+                      bounded_dyadic_int256 ||
+                  actual.backend == ExactHigherSupportProductCudaBackend::
                       bounded_dyadic_int512 ||
                   actual.backend == ExactHigherSupportProductCudaBackend::
                       bounded_dyadic_int1024;
@@ -614,6 +621,10 @@ int main() {
             expected.task.task_id != 110U ||
             actual.backend == ExactHigherSupportProductCudaBackend::
                 bounded_dyadic_int1024;
+        const bool explicit_int512_boundary_matches =
+            expected.task.task_id != 111U ||
+            actual.backend == ExactHigherSupportProductCudaBackend::
+                bounded_dyadic_int512;
         const ExactHigherSupportProductCudaOutcome expected_outcome =
             expected.expected_certified
             ? ExactHigherSupportProductCudaOutcome::certified
@@ -622,6 +633,7 @@ int main() {
             actual.kind != expected.task.kind ||
             actual.outcome != expected_outcome ||
             !backend_matches || !explicit_int1024_boundary_matches ||
+            !explicit_int512_boundary_matches ||
             actual.cpu_fallback_performed != expected_cpu_fallback) {
           ++mismatch_count;
         }
@@ -661,17 +673,20 @@ int main() {
             expected_query_task_count &&
         audit.certified_count == expected_certified_count &&
         audit.fail_open_count == tasks.size() - expected_certified_count &&
-        audit.bounded_dyadic_int512_count +
+        audit.bounded_dyadic_int256_count +
+                audit.bounded_dyadic_int512_count +
                 audit.bounded_dyadic_int1024_count ==
             tasks.size() - expected_fallback_count &&
+        audit.bounded_dyadic_int256_count != 0U &&
         audit.bounded_dyadic_int512_count != 0U &&
         audit.bounded_dyadic_int1024_count != 0U &&
         audit.arbitrary_precision_rational_fallback_count ==
             expected_fallback_count &&
         audit.launcher_call_count == 1U &&
-        audit.kernel_launch_count == 2U &&
+        audit.kernel_launch_count == 3U &&
         audit.synchronization_count == 1U &&
         audit.kernel_elapsed_ns_available &&
+        audit.narrow_int256_kernel_executed &&
         audit.narrow_int512_kernel_executed &&
         audit.source_snapshot_epoch == epoch &&
         audit.submitted_task_digest != 0U &&
@@ -697,6 +712,8 @@ int main() {
 
     std::cout
         << "{\"backend\":\"cuda_g4\","
+        << "\"bounded_int256_count\":"
+        << audit.bounded_dyadic_int256_count << ','
         << "\"bounded_int512_count\":"
         << audit.bounded_dyadic_int512_count << ','
         << "\"bounded_int1024_count\":"
@@ -747,6 +764,9 @@ int main() {
            "interior\","
         << "\"native_lbvh_nodes_read_on_device\":"
         << (audit.native_lbvh_nodes_read_on_device ? "true" : "false")
+        << ','
+        << "\"narrow_int256_kernel_executed\":"
+        << (audit.narrow_int256_kernel_executed ? "true" : "false")
         << ','
         << "\"narrow_int512_kernel_executed\":"
         << (audit.narrow_int512_kernel_executed ? "true" : "false")
