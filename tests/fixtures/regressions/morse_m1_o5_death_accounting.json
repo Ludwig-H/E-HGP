@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "kind": "morse-m1-o5-death-accounting-regression-v1",
+  "description": "Finite equal-level carrier hypergraphs that distinguish local Morse multiplicity from canonical global H0 deaths.",
+  "cases": [
+    {
+      "fixture_id": "CE-M1-02-three-arms-three-roots",
+      "carrier_roots": {"a": "r1", "b": "r2", "c": "r3"},
+      "events": [["a", "b", "c"]],
+      "expected": {"group_q": [3], "touched_root_count": 3, "positive_group_count": 1, "death_count": 2, "local_multiplicity_capacity": 2}
+    },
+    {
+      "fixture_id": "CE-M1-03-four-arms-four-roots",
+      "carrier_roots": {"a": "r1", "b": "r2", "c": "r3", "d": "r4"},
+      "events": [["a", "b", "c", "d"]],
+      "expected": {"group_q": [4], "touched_root_count": 4, "positive_group_count": 1, "death_count": 3, "local_multiplicity_capacity": 3}
+    },
+    {
+      "fixture_id": "CE-M1-04a-repeated-target",
+      "carrier_roots": {"a": "r1", "b": "r1", "c": "r2"},
+      "events": [["a", "b", "c"]],
+      "expected": {"group_q": [2], "touched_root_count": 2, "positive_group_count": 1, "death_count": 1, "local_multiplicity_capacity": 2}
+    },
+    {
+      "fixture_id": "CE-M1-04b-all-arms-already-connected",
+      "carrier_roots": {"a": "r1", "b": "r1", "c": "r1"},
+      "events": [["a", "b", "c"]],
+      "expected": {"group_q": [1], "touched_root_count": 1, "positive_group_count": 1, "death_count": 0, "local_multiplicity_capacity": 2}
+    },
+    {
+      "fixture_id": "CE-M1-01-simultaneous-overlap",
+      "carrier_roots": {"a": "r1", "b": "r2", "c": "r3", "d": "r4"},
+      "events": [["a", "b", "c"], ["b", "c", "d"]],
+      "expected": {"group_q": [4], "touched_root_count": 4, "positive_group_count": 1, "death_count": 3, "local_multiplicity_capacity": 4}
+    },
+    {
+      "fixture_id": "CE-M1-O5-latent-chain",
+      "carrier_roots": {"a": "r1", "b": null, "c": null, "d": null, "e": null, "f": "r2"},
+      "events": [["a", "b", "c"], ["c", "d", "e"], ["e", "f"]],
+      "expected": {"group_q": [2], "touched_root_count": 2, "positive_group_count": 1, "death_count": 1, "local_multiplicity_capacity": 5}
+    },
+    {
+      "fixture_id": "CE-M1-O5-same-root-preunion",
+      "carrier_roots": {"a": "r1", "a2": "r1", "b": "r2", "x": null},
+      "events": [["a", "x"], ["a2", "b"]],
+      "expected": {"group_q": [2], "touched_root_count": 2, "positive_group_count": 1, "death_count": 1, "local_multiplicity_capacity": 2}
+    },
+    {
+      "fixture_id": "CE-M1-O5-pure-latent-class",
+      "carrier_roots": {"a": null, "b": null, "c": null},
+      "events": [["a", "b", "c"]],
+      "expected": {"group_q": [0], "touched_root_count": 0, "positive_group_count": 0, "death_count": 0, "local_multiplicity_capacity": 2}
+    },
+    {
+      "fixture_id": "CE-M1-O5-duplicate-event",
+      "carrier_roots": {"a": "r1", "b": "r2"},
+      "events": [["a", "b"], ["a", "b"]],
+      "expected": {"group_q": [2], "touched_root_count": 2, "positive_group_count": 1, "death_count": 1, "local_multiplicity_capacity": 2}
+    }
+  ]
+}

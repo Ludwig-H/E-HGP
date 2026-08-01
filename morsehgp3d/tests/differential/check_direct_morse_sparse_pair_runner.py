@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Short P8n product-runner gate against the bounded P7b projection."""
+"""Short P8n runner gate including bounded direct M1/O5 accounting."""
 
 from __future__ import annotations
 
@@ -100,12 +100,18 @@ def require_static_contract(project: Path) -> None:
         "build_exact_direct_morse_vertical_journal(",
         "build_exact_direct_morse_k2_k1_target_authority(",
         "verify_exact_direct_morse_k2_k1_target_authority(",
+        "build_exact_direct_morse_m1_o5_death_accounting(",
+        "verify_exact_direct_morse_m1_o5_death_accounting(",
         "bounded_k2_k1_target_authority_qualification",
+        "bounded_m1_o5_death_accounting_qualification",
+        "bounded_m1_o5_death_accounting_point_count_exceeds_14",
+        "bounded_m1_o5_death_accounting_requires_maximum_order_at_least_2",
         "report.k2_to_k1_target_authority_certified",
+        "report.m1_o5_death_accounting_certified",
         "report.vertical_target_pipeline_certified &&",
         "report.vertical_journal_certified;",
-        'morsehgp3d.direct-morse-product-run.v5',
-        '15_k2_to_k1_observed_label_target_authority',
+        'morsehgp3d.direct-morse-product-run.v6',
+        '15_conditional_direct_equal_level_m1_o5_death_accounting',
         'p7b_replay_performed\\\":false',
     ):
         require(required in runner, f"runner is missing P8n token {required!r}")
@@ -130,6 +136,10 @@ def require_static_contract(project: Path) -> None:
         "morsehgp3d::direct_morse_k2_k1_target_authority" in runner_links,
         "runner does not directly link the bounded K2-to-K1 target authority",
     )
+    require(
+        "morsehgp3d::direct_morse_m1_o5_death_accounting" in runner_links,
+        "runner does not directly link bounded direct M1/O5 accounting",
+    )
     digest_equality_regression = (
         'digests.get("direct_cloud")' + " == " + 'digests.get("external_cloud")'
     )
@@ -139,13 +149,93 @@ def require_static_contract(project: Path) -> None:
     )
 
 
+def require_m1_o5_dormant(report: dict[str, object]) -> None:
+    accounting = report.get("m1_o5_death_accounting")
+    timings = report.get("timings_ms")
+    require(isinstance(accounting, dict), "report lost the dormant M1/O5 block")
+    require(isinstance(timings, dict), "report lost its timing ledger")
+    require(
+        report.get("bounded_m1_o5_death_accounting_qualification_requested")
+        is False,
+        "a non-O5 mode published an O5 qualification request",
+    )
+    budget = accounting.get("requested_budget")
+    receipt = accounting.get("receipt")
+    counters = accounting.get("counters")
+    verification = accounting.get("verification")
+    require(
+        accounting.get("required") is False
+        and accounting.get("attempted") is False
+        and accounting.get("certified_bounded_conditional_m1_o5_accounting")
+        is False
+        and accounting.get("decision") == 0
+        and accounting.get("scope") == 0,
+        "a non-O5 mode activated bounded M1/O5 accounting",
+    )
+    require(
+        isinstance(budget, dict) and all(value == 0 for value in budget.values()),
+        "a dormant M1/O5 block retained a trusted work budget",
+    )
+    require(
+        isinstance(receipt, dict)
+        and receipt.get("point_count") == 0
+        and receipt.get("effective_maximum_order") == 0
+        and receipt.get("required_logical_output_entries") == 0
+        and receipt.get("event_audits") == []
+        and receipt.get("group_audits") == []
+        and receipt.get("batch_audits") == []
+        and all(
+            receipt.get(name) == "0" * 64
+            for name in (
+                "source_canonical_cloud_digest",
+                "event_audit_digest",
+                "group_audit_digest",
+                "batch_audit_digest",
+            )
+        ),
+        "a dormant M1/O5 block retained a scientific receipt",
+    )
+    require(
+        isinstance(counters, dict) and all(value == 0 for value in counters.values()),
+        "a dormant M1/O5 block retained counters",
+    )
+    require(
+        isinstance(verification, dict)
+        and all(value is False for value in verification.values()),
+        "a dormant M1/O5 block retained verifier facts",
+    )
+    for optional_index in (
+        "rejected_source_family_index",
+        "rejected_source_binding_index",
+        "rejected_atomic_group_index",
+        "rejected_source_batch_index",
+    ):
+        require(
+            accounting.get(optional_index) is None,
+            f"a dormant M1/O5 block retained {optional_index}",
+        )
+    for flag, value in accounting.items():
+        if isinstance(value, bool) and flag not in (
+            "product_non_o5_modes_keep_accounting_dormant",
+        ):
+            require(value is False, f"a dormant M1/O5 block set {flag}")
+    require(
+        accounting.get("product_non_o5_modes_keep_accounting_dormant") is True
+        and timings.get("m1_o5_death_accounting_build") == 0.0
+        and timings.get("m1_o5_death_accounting_verify") == 0.0
+        and timings.get("m1_o5_death_accounting") == 0.0,
+        "a non-O5 mode did not keep O5 timing and policy dormant",
+    )
+
+
 def require_success_vertical_contract(
     report: dict[str, object], *, authority_required: bool = False
 ) -> None:
+    require_m1_o5_dormant(report)
     require(
         report.get("phase")
-        == "15_k2_to_k1_observed_label_target_authority",
-        "success report has the wrong observed-label authority phase scope",
+        == "15_conditional_direct_equal_level_m1_o5_death_accounting",
+        "success report has the wrong direct M1/O5 phase scope",
     )
     expected_terminal_stage = (
         "k2_to_k1_target_authority" if authority_required else "vertical_journal"
@@ -308,6 +398,7 @@ def require_success_vertical_contract(
 
 
 def require_vertical_not_attempted(report: dict[str, object]) -> None:
+    require_m1_o5_dormant(report)
     pipeline = report.get("vertical_target_pipeline")
     journal = report.get("vertical_journal")
     diagnostic = report.get("vertical_target_replay_diagnostic")
@@ -338,7 +429,7 @@ def require_success_projection(
     report: dict[str, object], *, authority_required: bool = False
 ) -> None:
     require(
-        report.get("schema") == "morsehgp3d.direct-morse-product-run.v5",
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v6",
         "success report has the wrong schema",
     )
     require(report.get("pipeline_complete") is True, "pipeline did not close")
@@ -821,7 +912,7 @@ def require_complete_diagnostic_contract(report: dict[str, object]) -> None:
 
 def require_bounded_target_authority_contract(report: dict[str, object]) -> None:
     require(
-        report.get("schema") == "morsehgp3d.direct-morse-product-run.v5"
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v6"
         and report.get("pipeline_complete") is True
         and report.get("resident_conditional_pipeline_complete") is True
         and report.get("scientific_result_materialized") is True
@@ -1017,6 +1108,360 @@ def require_bounded_target_authority_guard(report: dict[str, object]) -> None:
     require_vertical_not_attempted(report)
 
 
+def require_bounded_m1_o5_accounting_guard(report: dict[str, object]) -> None:
+    require(
+        report.get("terminal_stage") == "input_preflight"
+        and report.get("stop_category") == "invalid_input"
+        and report.get("stop_detail")
+        == "bounded_m1_o5_death_accounting_point_count_exceeds_14"
+        and report.get("canonical_point_count") == 0,
+        "bounded M1/O5 mode did not fail closed above n=14",
+    )
+    accounting = report.get("m1_o5_death_accounting")
+    require(
+        isinstance(accounting, dict)
+        and accounting.get("required") is True
+        and accounting.get("attempted") is False
+        and accounting.get("certified_bounded_conditional_m1_o5_accounting")
+        is False
+        and accounting.get("bounded_exhaustive_gamma_oracle_used") is False,
+        "bounded M1/O5 guard started accounting or an exhaustive oracle",
+    )
+    pipeline = report.get("vertical_target_pipeline")
+    journal = report.get("vertical_journal")
+    diagnostic = report.get("vertical_target_replay_diagnostic")
+    authority = report.get("k2_to_k1_target_authority")
+    require(
+        isinstance(pipeline, dict)
+        and pipeline.get("attempted") is False
+        and pipeline.get("certified") is False
+        and isinstance(journal, dict)
+        and journal.get("attempted") is False
+        and journal.get("certified_conditional_candidate") is False
+        and isinstance(diagnostic, dict)
+        and diagnostic.get("attempted") is False
+        and isinstance(authority, dict)
+        and authority.get("attempted") is False,
+        "bounded M1/O5 guard attempted a downstream or oracle stage",
+    )
+
+
+def require_bounded_m1_o5_accounting_contract(report: dict[str, object]) -> None:
+    require(
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v6"
+        and report.get("phase")
+        == "15_conditional_direct_equal_level_m1_o5_death_accounting"
+        and report.get("mode")
+        == "bounded_m1_o5_death_accounting_qualification"
+        and report.get("bounded_m1_o5_death_accounting_qualification_requested")
+        is True
+        and report.get("bounded_k2_to_k1_target_authority_qualification_requested")
+        is False
+        and report.get("attempt_kind")
+        == "fail_closed_bounded_m1_o5_death_accounting_qualification",
+        "bounded M1/O5 run lost its explicit identity",
+    )
+    require(
+        report.get("pipeline_complete") is True
+        and report.get("resident_conditional_pipeline_complete") is False
+        and report.get("scientific_result_materialized") is True
+        and report.get("conditional_h0_candidate_certified") is True
+        and report.get("terminal_stage") == "m1_o5_death_accounting"
+        and report.get("stop_category") == "none"
+        and report.get("stop_detail") == "none"
+        and report.get("timing_scope")
+        == "attempted_single_process_cpu_generation_to_certified_forest_"
+        "and_bounded_fresh_m1_o5_death_accounting",
+        "bounded M1/O5 run did not terminate exactly after its fresh verifier",
+    )
+    require(
+        report.get("no_forbidden_global_structure_materialized") is True
+        and report.get("no_forbidden_product_path_global_structure_materialized")
+        is True
+        and report.get("bounded_oracle_gamma_materialized_transiently") is False
+        and report.get("bounded_oracle_global_structure_persisted") is False
+        and report.get("higher_order_delaunay_materialized") is False,
+        "bounded M1/O5 run violated the reduced product architecture",
+    )
+    for unclaimed in (
+        "global_morse_obligation_replayed",
+        "bidirectional_gamma_group_completeness_replayed",
+        "silent_gamma_checkpoint_completeness_replayed",
+        "external_target_authority_replayed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "global_m1_claimed",
+        "product_architecture_claimed",
+        "scalable_50k_claimed",
+        "qualification_claimed",
+    ):
+        require(report.get(unclaimed) is False, f"M1/O5 runner overclaimed {unclaimed}")
+
+    vertical_pipeline = report.get("vertical_target_pipeline")
+    vertical_journal = report.get("vertical_journal")
+    diagnostic = report.get("vertical_target_replay_diagnostic")
+    require(
+        isinstance(vertical_pipeline, dict)
+        and vertical_pipeline.get("attempted") is False
+        and vertical_pipeline.get("certified") is False
+        and vertical_pipeline.get("decision") == 0
+        and vertical_pipeline.get("required_sessions") == 0
+        and vertical_pipeline.get("required_groups") == 0
+        and vertical_pipeline.get("required_proposals") == 0
+        and vertical_pipeline.get("source_group_count_by_order") == []
+        and isinstance(vertical_pipeline.get("counters"), dict)
+        and all(value == 0 for value in vertical_pipeline["counters"].values()),
+        "bounded M1/O5 mode executed the vertical target pipeline",
+    )
+    require(
+        isinstance(vertical_journal, dict)
+        and vertical_journal.get("attempted") is False
+        and vertical_journal.get("certified_conditional_candidate") is False
+        and vertical_journal.get("decision") == 0
+        and isinstance(vertical_journal.get("counters"), dict)
+        and all(value == 0 for value in vertical_journal["counters"].values()),
+        "bounded M1/O5 mode executed the vertical journal",
+    )
+    require(
+        isinstance(diagnostic, dict) and diagnostic.get("attempted") is False,
+        "bounded M1/O5 mode executed vertical failure replay",
+    )
+    k2_authority = report.get("k2_to_k1_target_authority")
+    require(
+        isinstance(k2_authority, dict)
+        and k2_authority.get("required") is False
+        and k2_authority.get("attempted") is False
+        and k2_authority.get("certified_observed_label_target_authority") is False
+        and isinstance(k2_authority.get("oracle"), dict)
+        and all(value == 0 for value in k2_authority["oracle"].values())
+        and isinstance(k2_authority.get("counters"), dict)
+        and all(value == 0 for value in k2_authority["counters"].values())
+        and isinstance(k2_authority.get("verification"), dict)
+        and all(value is False for value in k2_authority["verification"].values())
+        and k2_authority.get("bounded_exhaustive_gamma_oracle_used") is False,
+        "bounded M1/O5 mode executed Gamma2/K1 authority work",
+    )
+
+    timings = report.get("timings_ms")
+    require(isinstance(timings, dict), "M1/O5 run lost its timing ledger")
+    require(
+        type(timings.get("m1_o5_death_accounting_build")) in (int, float)
+        and timings["m1_o5_death_accounting_build"] >= 0
+        and type(timings.get("m1_o5_death_accounting_verify")) in (int, float)
+        and timings["m1_o5_death_accounting_verify"] >= 0
+        and type(timings.get("m1_o5_death_accounting")) in (int, float)
+        and timings["m1_o5_death_accounting"] > 0
+        and timings["vertical_target_pipeline"] == 0.0
+        and timings["vertical_journal"] == 0.0
+        and timings["k2_to_k1_oracle_source_history"] == 0.0
+        and timings["k2_to_k1_oracle_k1"] == 0.0
+        and timings["k2_to_k1_oracle_hierarchy"] == 0.0
+        and timings["k2_to_k1_target_authority"] == 0.0,
+        "M1/O5 timing ledger is not isolated from vertical and Gamma/K1 work",
+    )
+
+    accounting = report.get("m1_o5_death_accounting")
+    require(isinstance(accounting, dict), "bounded M1/O5 receipt is absent")
+    budget = accounting.get("requested_budget")
+    receipt = accounting.get("receipt")
+    counters = accounting.get("counters")
+    verification = accounting.get("verification")
+    require(
+        accounting.get("required") is True
+        and accounting.get("attempted") is True
+        and accounting.get("certified_bounded_conditional_m1_o5_accounting")
+        is True
+        and accounting.get("schema_version") == 1
+        and accounting.get("backend") == "reference_cpu"
+        and accounting.get("profile") == "hgp_reduced"
+        and accounting.get("mode")
+        == "bounded_n14_conditional_direct_equal_level_m1_o5_death_accounting"
+        and accounting.get("deployment_status") == "architecture_only"
+        and accounting.get("public_status") == "not_claimed"
+        and accounting.get("decision") == 15
+        and accounting.get("scope") == 1,
+        "bounded M1/O5 receipt lost its certified core identity",
+    )
+    require(
+        isinstance(budget, dict)
+        and budget
+        and all(value == 65536 for value in budget.values()),
+        "bounded M1/O5 run did not use its fixed independent n<=14 budget",
+    )
+    require(
+        isinstance(receipt, dict)
+        and receipt.get("point_count") == 4
+        and receipt.get("effective_maximum_order") == 3
+        and isinstance(receipt.get("required_logical_output_entries"), int)
+        and receipt["required_logical_output_entries"] > 0,
+        "bounded M1/O5 receipt has the wrong source scope",
+    )
+    for digest_name in (
+        "source_canonical_cloud_digest",
+        "event_audit_digest",
+        "group_audit_digest",
+        "batch_audit_digest",
+    ):
+        digest = receipt.get(digest_name)
+        require(
+            isinstance(digest, str)
+            and len(digest) == 64
+            and digest == digest.lower()
+            and all(character in "0123456789abcdef" for character in digest)
+            and any(character != "0" for character in digest),
+            f"bounded M1/O5 receipt lost nonzero digest {digest_name}",
+        )
+    event_audits = receipt.get("event_audits")
+    group_audits = receipt.get("group_audits")
+    batch_audits = receipt.get("batch_audits")
+    require(
+        isinstance(event_audits, list)
+        and event_audits
+        and isinstance(group_audits, list)
+        and group_audits
+        and isinstance(batch_audits, list)
+        and batch_audits,
+        "bounded M1/O5 scientific receipt is empty",
+    )
+    for index, event in enumerate(event_audits):
+        require(isinstance(event, dict), "M1/O5 event audit is not an object")
+        support = event.get("canonical_support_point_ids")
+        require(
+            event.get("event_audit_index") == index
+            and isinstance(support, list)
+            and len(support) == event.get("support_point_count")
+            and event.get("arm_count") == event.get("support_point_count")
+            and isinstance(event.get("arm_count"), int)
+            and event["arm_count"] >= 2
+            and event.get("delta_one") == event["arm_count"] - 1,
+            "an M1/O5 event audit broke Delta1=|U|-1",
+        )
+    for index, group in enumerate(group_audits):
+        require(isinstance(group, dict), "M1/O5 group audit is not an object")
+        kind = group.get("kind")
+        roots = group.get("prior_reduced_root_count")
+        deaths = group.get("death_count")
+        require(
+            group.get("group_audit_index") == index
+            and isinstance(roots, int)
+            and isinstance(deaths, int)
+            and (
+                (kind == 0 and roots == 0 and deaths == 0)
+                or (kind == 1 and roots == 1 and deaths == 0)
+                or (kind == 2 and roots >= 2 and deaths == roots - 1)
+            ),
+            "an M1/O5 group audit broke its q_R death identity",
+        )
+    total_local_capacity = 0
+    total_touched_roots = 0
+    total_positive_groups = 0
+    total_deaths = 0
+    for index, batch in enumerate(batch_audits):
+        require(isinstance(batch, dict), "M1/O5 batch audit is not an object")
+        deaths = batch.get("global_death_count")
+        capacity = batch.get("local_multiplicity_capacity")
+        touched = batch.get("touched_distinct_prior_root_count")
+        positive_groups = batch.get("positive_root_group_count")
+        require(
+            batch.get("batch_audit_index") == index
+            and isinstance(deaths, int)
+            and isinstance(capacity, int)
+            and isinstance(touched, int)
+            and isinstance(positive_groups, int)
+            and deaths == batch.get("sum_group_death_count")
+            and deaths <= capacity
+            and touched == deaths + positive_groups,
+            "an M1/O5 batch audit broke death accounting or its local bound",
+        )
+        total_local_capacity += capacity
+        total_touched_roots += touched
+        total_positive_groups += positive_groups
+        total_deaths += deaths
+    require(isinstance(counters, dict), "bounded M1/O5 counters are absent")
+    require(
+        counters.get("event_audits") == len(event_audits)
+        and counters.get("group_audits") == len(group_audits)
+        and counters.get("batch_audits") == len(batch_audits)
+        and counters.get("total_local_multiplicity_capacity")
+        == total_local_capacity
+        and counters.get("total_touched_distinct_prior_roots")
+        == total_touched_roots
+        and counters.get("total_positive_root_groups") == total_positive_groups
+        and counters.get("total_global_deaths") == total_deaths,
+        "bounded M1/O5 aggregate counters do not match the serialized receipt",
+    )
+    cap_pairs = (
+        ("event_audits", "event_audits"),
+        ("group_audits", "group_audits"),
+        ("batch_audits", "batch_audits"),
+        ("source_family_scans", "source_family_scans"),
+        ("source_arm_seed_scans", "source_arm_seed_scans"),
+        ("source_binding_scans", "source_binding_scans"),
+        ("source_saddle_scans", "source_saddle_scans"),
+        ("source_group_scans", "source_group_scans"),
+        ("source_batch_scans", "source_batch_scans"),
+        ("point_id_reference_scans", "point_id_reference_scans"),
+        ("prior_root_reference_scans", "prior_root_reference_scans"),
+        ("exact_level_comparisons", "exact_level_comparisons"),
+        ("peak_logical_scratch_entries", "logical_scratch_entries"),
+    )
+    for counter_name, budget_name in cap_pairs:
+        require(
+            isinstance(counters.get(counter_name), int)
+            and counters[counter_name] <= budget[budget_name],
+            f"bounded M1/O5 counter exceeded {budget_name}",
+        )
+    require(
+        receipt["required_logical_output_entries"]
+        <= budget["logical_output_entries"],
+        "bounded M1/O5 receipt exceeded its logical-output cap",
+    )
+    for fact in (
+        "budget_preflight_certified",
+        "source_event_journal_freshly_replayed_relative_to_facade",
+        "source_seed_journal_freshly_replayed_relative_to_facade",
+        "source_forest_freshly_replayed_relative_to_facade",
+        "conditional_on_caller_fresh_phase9_facade_replay",
+        "every_index_one_event_has_complete_shell_arms",
+        "every_arm_seed_point_id_and_exact_level_joined",
+        "same_prior_root_carriers_unioned_before_saddle_hyperedges",
+        "every_saddle_hyperedge_including_latent_closed_transitively",
+        "simultaneous_carrier_quotient_reconstructed",
+        "quotient_partition_matches_forest_atomic_groups",
+        "group_root_counts_kinds_and_children_replayed",
+        "group_death_counts_replayed",
+        "batch_global_death_identity_replayed",
+        "local_index_one_multiplicity_bounds_replayed",
+        "m1_o5_combinatorial_accounting_replayed",
+    ):
+        require(accounting.get(fact) is True, f"bounded M1/O5 lost local fact {fact}")
+    require(
+        isinstance(verification, dict)
+        and all(value is True for value in verification.values()),
+        "bounded M1/O5 independent verifier was not completely fresh",
+    )
+    for unclaimed in (
+        "event_local_death_attribution_serialized",
+        "durable_carrier_root_or_node_ids_serialized",
+        "source_catalog_complete_for_full_pi0",
+        "carrier_faithfulness_complete",
+        "silent_gamma_group_completeness",
+        "bidirectional_gamma_group_completeness",
+        "external_target_authority_replayed",
+        "global_morse_obligation_replayed",
+        "global_m1_claimed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "forest_semantics_exact",
+        "bounded_exhaustive_gamma_oracle_used",
+        "gamma_cells_or_global_cofaces_materialized",
+        "higher_order_delaunay_materialized",
+        "public_status_claimed",
+        "scalable_50k_claimed",
+    ):
+        require(accounting.get(unclaimed) is False, f"bounded M1/O5 overclaimed {unclaimed}")
+
+
 def main() -> int:
     require(len(sys.argv) == 3, "usage: check_direct_morse_sparse_pair_runner.py PROJECT RUNNER")
     project = Path(sys.argv[1]).resolve()
@@ -1079,10 +1524,37 @@ def main() -> int:
         4,
     )
     require_bounded_target_authority_guard(bounded_target_authority_guard)
+    bounded_m1_o5_accounting = run_case(
+        binary,
+        (
+            "--point-count",
+            "4",
+            "--K",
+            "3",
+            "--mode",
+            "bounded_m1_o5_death_accounting_qualification",
+        ),
+        0,
+        timeout_seconds=120,
+    )
+    require_bounded_m1_o5_accounting_contract(bounded_m1_o5_accounting)
+    bounded_m1_o5_accounting_guard = run_case(
+        binary,
+        (
+            "--point-count",
+            "15",
+            "--K",
+            "10",
+            "--mode",
+            "bounded_m1_o5_death_accounting_qualification",
+        ),
+        4,
+    )
+    require_bounded_m1_o5_accounting_guard(bounded_m1_o5_accounting_guard)
     print(
         json.dumps(
             {
-                "schema": "morsehgp3d.phase15.vertical_product_runner_gate.v3",
+                "schema": "morsehgp3d.phase15.vertical_product_runner_gate.v4",
                 "bounded_p7b_projection_matched": True,
                 "p7b_default_runner_replay_count": 0,
                 "p8l_capacity_stop_typed": True,
@@ -1093,6 +1565,10 @@ def main() -> int:
                 "bounded_k2_k1_target_authority_required": True,
                 "bounded_k2_k1_target_authority_n14_guarded": True,
                 "k2_to_k1_observed_label_target_authority_replayed": True,
+                "bounded_m1_o5_death_accounting_required": True,
+                "bounded_m1_o5_death_accounting_n14_guarded": True,
+                "m1_o5_receipt_freshly_verified": True,
+                "m1_o5_vertical_and_gamma_work_dormant": True,
                 "vertical_nonclaims_preserved": True,
             },
             separators=(",", ":"),

@@ -1,7 +1,7 @@
 # Contrat candidat M.1 — reconstruction de `full_pi0`
 
 > [!WARNING]
-> **Statut scientifique : `proof_obligation`.** Ce document fige un énoncé à démontrer; il ne contient pas sa preuve et ne promeut pas `full_pi0` au statut `exact`. Un accord exhaustif avec l'oracle est nécessaire à la phase 12, mais ne remplace pas la preuve.
+> **Statut scientifique global : `proof_obligation`.** Ce document fige un énoncé à démontrer et ne promeut pas `full_pi0` au statut `exact`. Seule O5 possède désormais une preuve combinatoire locale conditionnelle; O1–O4 et O6–O9 restent ouvertes, et un accord exhaustif avec l'oracle ne remplace pas leurs preuves.
 
 | propriété | valeur normative |
 |---|---|
@@ -247,21 +247,21 @@ Pour un ordre $k$, `attachments_complete_by_order[k]` vaut vrai si et seulement 
 
 Pour un ordre $k$, `batches_complete_by_order[k]` vaut vrai si et seulement si chaque événement utile est affecté à exactement un lot d'égalité algébrique, tous les runs susceptibles de contenir ce niveau ont été fusionnés, la contraction simultanée est terminée, et son résultat canonique est sérialisé.
 
-## 8. Obligations de preuve ouvertes
+## 8. Obligations de preuve
 
-Chaque obligation reste `proof_obligation` jusqu'à une preuve lisible, liée dans `proof_basis`, et des tests de falsification correspondants.
+Le statut du contrat M.1 reste `proof_obligation` tant que toutes les obligations ne sont pas fermées. Une obligation ne peut quitter ce statut qu'avec une preuve lisible et liée; sa validation logicielle demeure un statut séparé.
 
-| identifiant | obligation à fermer |
-|---|---|
-| O1 — changements de $H_0$ | déduire rigoureusement de la théorie locale que, dans le domaine H2, aucun changement global de $\pi_0$ ne survient hors des minima et événements d'indice un catalogués |
-| O2 — complétude des germes | montrer que les $\lvert U\rvert$ facettes $F_u$ représentent tous et seulement les germes stricts pertinents d'un événement d'indice un |
-| O3 — local vers global | montrer qu'un chemin d'attache certifié identifie exactement la composante globale du germe dans $L_k^{<}(a)$ et que toutes les attaches nécessaires sont couvertes |
-| O4 — niveaux simultanés | prouver que la contraction d'un unique hypergraphe par niveau représente le passage de $L_k^{<}(a)$ à $L_k(a)$ pour plusieurs centres, y compris les interactions naissance–selle, sans ordre auxiliaire |
-| O5 — multiplicité | relier la multiplicité locale $\Delta_{\mu}$ au nombre de bras et démontrer la comptabilité globale des décès $H_0$ sans addition abusive entre événements incidents |
-| O6 — exhaustivité temporelle | montrer que les coupes de la forêt sont constantes entre niveaux critiques et exactes aux niveaux fermés, y compris les cas limites $k=1$ et $k=n$ |
-| O7 — verticalité | prouver l'existence, l'unicité et la propagation des cibles verticales complètes, puis la commutation de tous les carrés ordre–échelle |
-| O8 — domaine | démontrer que les hypothèses de H2 excluent précisément les phénomènes locaux non traités utilisés dans O1–O7, sans généralisation silencieuse aux plateaux |
-| O9 — représentation finie | prouver que `MergeForest`, `coverage_log`, lots et ancres suffisent à rejouer toutes les composantes, notamment les composantes recouvrantes pour $k\geq2$ |
+| identifiant | statut | obligation à fermer |
+|---|---|---|
+| O1 — changements de $H_0$ | `proof_obligation` | déduire rigoureusement de la théorie locale que, dans le domaine H2, aucun changement global de $\pi_0$ ne survient hors des minima et événements d'indice un catalogués |
+| O2 — complétude des germes | `proof_obligation` | montrer que les $\lvert U\rvert$ facettes $F_u$ représentent tous et seulement les germes stricts pertinents d'un événement d'indice un |
+| O3 — local vers global | `proof_obligation` | montrer qu'un chemin d'attache certifié identifie exactement la composante globale du germe dans $L_k^{<}(a)$ et que toutes les attaches nécessaires sont couvertes |
+| O4 — niveaux simultanés | `proof_obligation` | prouver que la contraction d'un unique hypergraphe par niveau représente le passage de $L_k^{<}(a)$ à $L_k(a)$ pour plusieurs centres, y compris les interactions naissance–selle, sans ordre auxiliaire |
+| O5 — multiplicité | `proved_here` | la [preuve locale de comptabilité des décès](../math/COMPTABILITE_M1_O5_DECES_H0.md) établit par lot $D=\sum_C\max(q_C-1,0)=\lvert R_{\mathrm{touch}}\rvert-\lvert\left\lbrace C:q_C>0\right\rbrace\rvert\leq\sum_e(\lvert U_e\rvert-1)=\sum_e\Delta_1(e)$, sans attribution canonique par événement; la [fixture permanente](../../tests/fixtures/regressions/morse_m1_o5_death_accounting.json) à neuf cas et son [checker indépendant](../../tests/oracle/test_morse_m1_o5_death_accounting.py) passent 4/4 en 0,001 s; le builder local borné, son vérificateur frais et leur intégration runner sont `implemented_and_freshly_certified`, sans fermer O1–O4, O6–O9 ni M.1 global |
+| O6 — exhaustivité temporelle | `proof_obligation` | montrer que les coupes de la forêt sont constantes entre niveaux critiques et exactes aux niveaux fermés, y compris les cas limites $k=1$ et $k=n$ |
+| O7 — verticalité | `proof_obligation` | prouver l'existence, l'unicité et la propagation des cibles verticales complètes, puis la commutation de tous les carrés ordre–échelle |
+| O8 — domaine | `proof_obligation` | démontrer que les hypothèses de H2 excluent précisément les phénomènes locaux non traités utilisés dans O1–O7, sans généralisation silencieuse aux plateaux |
+| O9 — représentation finie | `proof_obligation` | prouver que `MergeForest`, `coverage_log`, lots et ancres suffisent à rejouer toutes les composantes, notamment les composantes recouvrantes pour $k\geq2$ |
 
 Les preuves externes déjà enregistrées — correspondance K-polyèdres–$\pi_0$, caractérisation locale des centres, indice et multiplicité — peuvent être citées. Le passage simultané local–global et la naturalité complète ne sont pas considérés comme acquis par simple citation de ces résultats.
 
@@ -283,8 +283,12 @@ Les familles suivantes doivent casser une reconstruction affaiblie. Elles ne son
 | CE-M1-10 | lot commun à deux ordres où l'ancre ne cible correctement que l'état post-lot | flèche verticale prématurée ou carré non commutatif |
 | CE-M1-11 | shell de plus de quatre points ou plateau de successeurs | publication `exact` hors du domaine H2 |
 | CE-M1-12 | suppression volontaire d'un événement, d'un bras ou d'une attache | booléen de complétude vrai malgré un artefact manquant |
+| CE-M1-13 | deux racines reliées uniquement par une chaîne de deux hyperarêtes passant par le même carrier latent canonique | omission des latents ou contraction limitée aux paires de racines directement coprésentes |
+| CE-M1-14 | plusieurs occurrences, événements et bras portant une même racine pré-lot, avec une hyperarête redondante | comptage des occurrences au lieu des racines distinctes, décès fictif ou attribution événementielle dépendante de l'ordre |
 
 Chaque désaccord avec l'oracle doit être minimisé par suppression de points et réduction des coordonnées. S'il contredit l'énoncé candidat plutôt qu'une hypothèse ou l'implémentation, le cas devient une fixture permanente, l'optimisation est suspendue et le registre des preuves est mis à jour avant toute poursuite.
+
+La fixture `morse_m1_o5_death_accounting.json` fige CE-M1-01 à CE-M1-04 ainsi que les cas de chaîne latente, pré-union par même racine, classe purement latente et événement dupliqué. Ses neuf cas, complétés par la permutation des événements et de leurs bras, sont des falsificateurs combinatoires permanents, pas des contradictions topologiques à M.1.
 
 ## 10. Conditions de statut public
 
@@ -322,7 +326,7 @@ La promotion de `proof_obligation` exige conjointement :
 
 - une preuve couvrant O1–O9;
 - une revue explicite de chaque usage d'un théorème externe;
-- les fixtures CE-M1-01 à CE-M1-12 ou une justification documentée de leur impossibilité;
+- les fixtures CE-M1-01 à CE-M1-14 ou une justification documentée de leur impossibilité;
 - l'égalité avec $\Gamma_k$ à chaque intervalle critique sur le domaine exhaustif;
 - l'invariance sous toute permutation des événements d'un lot;
 - la commutation de toutes les applications verticales testables;

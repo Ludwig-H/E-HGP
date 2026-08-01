@@ -1378,6 +1378,31 @@ Le build Release strict du core et du runner passe. Après deux gardes d'overflo
 
 Les digests de nuage direct et externe doivent rester différents parce que leurs domaines sont séparés; l'identité ne peut être certifiée que par deux replays frais depuis le même nuage canonique. Les assertions doivent garder faux `external_target_authority_replayed`, la complétude bidirectionnelle ou silencieuse, l'obligation Morse globale, M.1, toutes les naturalités, les applications verticales complètes, la persistance Gamma, le Delaunay d'ordre supérieur, la scalabilité, le SLO et le statut public. La porte suivante reste explicitement non satisfaite.
 
+### 14.14g Validation de la comptabilité locale M.1/O5 des décès $H_0$
+
+Le mode ciblé est `reference_cpu / hgp_reduced / bounded_n14_conditional_direct_equal_level_m1_o5_death_accounting`. Sa porte d'entrée est la façade directe, le journal d'événements, les graines de bras et le journal de forêt v4 fraîchement rejouables, relativement à la façade; l'autorité cible $K=2\to1$ est orthogonale et ne doit pas devenir une dépendance du builder O5.
+
+Le falsificateur combinatoire indépendant existe déjà. La fixture [`morse_m1_o5_death_accounting.json`](../tests/fixtures/regressions/morse_m1_o5_death_accounting.json) conserve neuf cas CE-M1-01 à CE-M1-04, chaîne latente, pré-union par même racine, classe purement latente et événement dupliqué. Le checker [`test_morse_m1_o5_death_accounting.py`](../tests/oracle/test_morse_m1_o5_death_accounting.py) passe 4/4 en 0,001 s et permute aussi l'ordre des événements et de leurs bras. Pour chaque cas, il doit reconstruire la clôture par même racine pré-lot puis hyperarêtes, carriers latents inclus, et vérifier simultanément
+
+$$D=\sum_C\max(q_C-1,0)=\lvert R_{\mathrm{touch}}\rvert-\left\lvert\left\lbrace C:q_C>0\right\rbrace\right\rvert\leq\sum_e\bigl(\lvert U_e\rvert-1\bigr)=\sum_e\Delta_1(e).$$
+
+CE-M1-01 doit aussi prouver que la somme naïve par événement est strictement supérieure au décès canonique du lot. La chaîne latente doit relier deux racines sans hyperarête qui les contienne directement; la pré-union doit identifier deux carriers exposant la même racine avant les unions événementielles. Ces cas restent des falsificateurs combinatoires permanents et ne sont pas enregistrés comme contradictions topologiques.
+
+Le builder produit et son vérificateur frais sont `implemented_and_freshly_certified`. Le CTest strict Release passe `1/1` en 0,05 s, 0,06 s pour le CTest total, et impose :
+
+- rejeu frais de la façade, du journal d'événements, des graines de bras et de la forêt v4;
+- présence réelle sur E5 des catégories $q_C=0$, $q_C=1$ et $q_C\geq2$, avec les deux identités et la borne vérifiées pour chaque lot;
+- absence d'attribution canonique de décès par événement et d'identifiants process-local durables de carrier, racine ou nœud;
+- vérification fraîche récursive du résultat complet;
+- caps exactement suffisants puis caps de groupes, comparaisons de niveaux, passages de bindings et scratch moins un, avec échec atomique sans payload;
+- rejet d'une forêt dont $q_C$ est muté et d'un reçu dont le décès global est muté;
+- rejet des certificats d'échec portant un schéma ou enum inconnu, un fait positif, un compteur ou un digest scientifique;
+- rejet fail-fast de $n=15$ avant tout rejeu des autorités sources.
+
+Le runner Release publie le schéma v6 et son checker intégré v4 passe en 19,736 s, garde O5 $n=15$ distinct inclus, tout en conservant les modes antérieurs. Le reçu manuel `uniform_latin`, $n=4$, $K=3$ ferme 6 audits d'événement, 6 audits de groupe, 12 audits de lot, 7 racines touchées, 4 groupes positifs et 3 décès globaux; le total interne vaut 23,040 ms, la construction 3,949 ms, la vérification 6,373 ms, l'agrégat O5 10,322 ms et le mur externe 0,025 s. Il rapporte 24 scans de bindings, 18 de selles, 36 de lots, 36 comparaisons exactes et 25 entrées logiques de scratch au pic. Dans ce mode, Gamma, l'autorité cible $K=2\to1$ et le suffixe vertical restent dormants.
+
+Le succès conserve faux la complétude des événements, bras, carriers et incidences silencieuses, la suffisance topologique strict--fermé, O1–O4, O6–O9, M.1 global, la naturalité, la verticalité, les applications complètes, Gamma ou Delaunay global matérialisé, la scalabilité, les SLO et `public_status`. Aucun benchmark massif ni GCP n'est requis pour ce gate fonctionnel borné; la porte suivante porte sur la fidélité des carriers et incidences silencieuses, puis la complétude bidirectionnelle des groupes Gamma et des checkpoints silencieux.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.

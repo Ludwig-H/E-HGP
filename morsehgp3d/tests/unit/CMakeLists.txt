@@ -402,6 +402,15 @@ target_link_libraries(
 )
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_m1_o5_death_accounting_tests
+  test_hierarchy_direct_morse_m1_o5_death_accounting.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_m1_o5_death_accounting_tests
+  PRIVATE morsehgp3d::direct_morse_m1_o5_death_accounting
+)
+
+add_executable(
   morsehgp3d_hierarchy_size_condensed_hierarchy_tests
   test_hierarchy_size_condensed_hierarchy.cpp
 )
@@ -2826,6 +2835,7 @@ set(
   morsehgp3d_hierarchy_reduced_gamma_history_tests
   morsehgp3d_hierarchy_exact_k2_k1_hierarchy_tests
   morsehgp3d_hierarchy_direct_morse_k2_k1_target_authority_tests
+  morsehgp3d_hierarchy_direct_morse_m1_o5_death_accounting_tests
   morsehgp3d_hierarchy_size_condensed_hierarchy_tests
   morsehgp3d_hierarchy_reduced_gamma_cut_tests
   morsehgp3d_hierarchy_critical_event_gamma_overlay_tests
@@ -2984,6 +2994,10 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_hierarchy_direct_morse_k2_k1_target_authority_tests
+    PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_m1_o5_death_accounting_tests
     PRIVATE /W4 /WX
   )
   target_compile_options(
@@ -3291,6 +3305,16 @@ else()
   )
   target_compile_options(
     morsehgp3d_hierarchy_direct_morse_k2_k1_target_authority_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_m1_o5_death_accounting_tests
     PRIVATE
       -Wall
       -Wextra
@@ -3710,6 +3734,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_k2_k1_target_authority
   COMMAND morsehgp3d_hierarchy_direct_morse_k2_k1_target_authority_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_m1_o5_death_accounting
+  COMMAND morsehgp3d_hierarchy_direct_morse_m1_o5_death_accounting_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_size_condensed_hierarchy

@@ -2850,6 +2850,47 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_m1_o5_death_accounting
+  STATIC
+    src/cpu/hierarchy/direct_morse_m1_o5_death_accounting.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_m1_o5_death_accounting
+  ALIAS morsehgp3d_direct_morse_m1_o5_death_accounting
+)
+set_target_properties(
+  morsehgp3d_direct_morse_m1_o5_death_accounting
+  PROPERTIES
+    EXPORT_NAME direct_morse_m1_o5_death_accounting
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_m1_o5_death_accounting PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_m1_o5_death_accounting
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_m1_o5_death_accounting
+  PUBLIC
+    morsehgp3d::direct_morse_forest_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_m1_o5_death_accounting PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_m1_o5_death_accounting
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_yao48_ranked_pair_candidates_reference
   STATIC
     src/cpu/hierarchy/yao48_ranked_pair_candidates.cpp
@@ -5002,6 +5043,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d::direct_morse_vertical_target_proposal_pipeline
       morsehgp3d::direct_morse_vertical_journal
       morsehgp3d::direct_morse_k2_k1_target_authority
+      morsehgp3d::direct_morse_m1_o5_death_accounting
   )
   morsehgp3d_apply_sanitizers(morsehgp3d_direct_morse_product_runner)
   if(MSVC)
@@ -5114,6 +5156,7 @@ install(
     morsehgp3d_direct_morse_vertical_target_proposal_adapter
     morsehgp3d_direct_morse_vertical_target_proposal_pipeline
     morsehgp3d_direct_morse_k2_k1_target_authority
+    morsehgp3d_direct_morse_m1_o5_death_accounting
     morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_direct_morse_budget
     morsehgp3d_direct_sparse_facet_descent_batch_plan
