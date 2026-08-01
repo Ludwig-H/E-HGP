@@ -1009,6 +1009,27 @@ class ClosureBuilder {
       } else if (target_was_closed) {
         const ExactDirectSparseFacetDescentNode& target =
             result_.nodes[target_index];
+        const bool target_is_terminal =
+            target.terminal_node_index == target_index;
+        const bool target_has_outgoing_edge =
+            target.outgoing_edge_index.has_value();
+        const bool target_closed_shape_certified =
+            target.terminal_pointer_certified &&
+            target.terminal_node_index < result_.nodes.size() &&
+            target_is_terminal != target_has_outgoing_edge &&
+            (!target_has_outgoing_edge ||
+             (*target.outgoing_edge_index < result_.edges.size() &&
+              result_.edges[*target.outgoing_edge_index]
+                      .source_node_index == target_index));
+        if (!target_closed_shape_certified) {
+          poison_cycle(
+              current.facet_key,
+              witness.successor_facet_key,
+              step.decision,
+              false,
+              true);
+          return PathBuildStatus::contradiction;
+        }
         if (strict_positive &&
             (target.closure_disposition !=
                  ExactDirectSparseFacetDescentClosureDisposition::
@@ -1028,7 +1049,8 @@ class ClosureBuilder {
         if (strict_unresolved &&
             target.closure_disposition ==
                 ExactDirectSparseFacetDescentClosureDisposition::
-                    relative_positive) {
+                    relative_positive &&
+            target_is_terminal) {
           poison_cycle(
               current.facet_key,
               witness.successor_facet_key,

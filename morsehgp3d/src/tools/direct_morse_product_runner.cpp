@@ -1,4 +1,6 @@
 #include "morsehgp3d/hierarchy/direct_morse_forest_reducer.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_vertical_target_proposal_pipeline.hpp"
 #include "morsehgp3d/hierarchy/direct_saddle_arm_seed_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
@@ -68,6 +70,9 @@ struct Timings {
   double reducer_setup_ms{};
   double reducer_stream_ms{};
   double forest_finish_ms{};
+  double vertical_target_pipeline_ms{};
+  double vertical_journal_ms{};
+  double vertical_target_replay_diagnostic_ms{};
   double total_ms{};
 };
 
@@ -219,6 +224,66 @@ struct Report {
   std::size_t forest_logical_output_entry_count{};
   std::size_t forest_aggregate_closure_node_count{};
   std::size_t forest_aggregate_closure_step_call_count{};
+
+  bool vertical_target_pipeline_attempted{false};
+  bool vertical_target_pipeline_certified{false};
+  unsigned vertical_target_pipeline_decision{};
+  ExactDirectMorseVerticalTargetProposalPipelineCounters
+      vertical_target_pipeline_counters{};
+  std::size_t vertical_target_required_session_count{};
+  std::size_t vertical_target_required_group_count{};
+  std::size_t vertical_target_required_proposal_count{};
+  std::vector<std::size_t> vertical_target_source_group_count_by_order;
+  std::optional<std::size_t> vertical_target_rejected_source_group_index;
+  unsigned vertical_target_rejected_closure_adapter_decision{};
+
+  bool vertical_journal_attempted{false};
+  bool vertical_journal_certified{false};
+  unsigned vertical_journal_decision{};
+  std::size_t vertical_journal_adjacent_family_count{};
+  std::size_t vertical_journal_label_resolution_count{};
+  std::size_t vertical_journal_group_check_count{};
+  std::size_t vertical_journal_checkpoint_count{};
+  std::size_t vertical_journal_logical_output_entry_count{};
+  ExactDirectMorseVerticalCounters vertical_journal_counters{};
+  bool vertical_journal_source_forest_shape_replayed{false};
+  bool vertical_journal_conditional_on_fresh_source_forest_replay{false};
+  bool vertical_journal_external_target_authority_replayed{false};
+  bool vertical_journal_global_morse_obligation_replayed{false};
+  bool vertical_journal_all_naturality_squares_replayed{false};
+  bool vertical_journal_vertical_maps_complete{false};
+  bool vertical_journal_gamma_or_global_cofaces_materialized{false};
+  bool vertical_journal_higher_order_delaunay_materialized{false};
+  bool vertical_journal_public_status_claimed{false};
+
+  bool vertical_target_replay_diagnostic_attempted{false};
+  bool vertical_target_replay_diagnostic_callback_invoked{false};
+  bool vertical_target_replay_diagnostic_advance_certified{false};
+  std::optional<std::size_t> vertical_target_diagnostic_source_group_index;
+  std::optional<std::size_t> vertical_target_diagnostic_source_batch_index;
+  std::size_t vertical_target_diagnostic_source_order{};
+  std::size_t vertical_target_diagnostic_target_order{};
+  std::string vertical_target_diagnostic_level_numerator{"0"};
+  std::string vertical_target_diagnostic_level_denominator{"1"};
+  std::uint64_t vertical_target_diagnostic_query_token{};
+  unsigned vertical_target_diagnostic_plan_decision{};
+  unsigned vertical_target_diagnostic_session_initialization_decision{};
+  unsigned vertical_target_diagnostic_advance_decision{};
+  unsigned vertical_target_diagnostic_closure_adapter_decision{};
+  unsigned vertical_target_diagnostic_inner_closure_decision{};
+  unsigned vertical_target_diagnostic_inner_closure_disposition{};
+  std::vector<std::size_t>
+      vertical_target_diagnostic_representative_binding_indices;
+  std::vector<ExactDirectSparseFacetKey>
+      vertical_target_diagnostic_source_keys;
+  std::vector<std::size_t>
+      vertical_target_diagnostic_target_facet_indices;
+  std::vector<ExactDirectSparseFacetKey>
+      vertical_target_diagnostic_target_keys;
+  ExactDirectSparseFacetDescentClosureCounters
+      vertical_target_diagnostic_closure_counters{};
+  std::optional<ExactDirectSparseFacetDescentContradictionWitness>
+      vertical_target_diagnostic_contradiction_witness;
 };
 
 [[nodiscard]] double milliseconds(Clock::duration duration) {
@@ -889,6 +954,354 @@ make_execution_budget(
   };
 }
 
+[[nodiscard]] ExactDirectSparseFacetDescentStepBudget
+vertical_target_descent_step_budget() {
+  return {
+      ExactDirectSparsePositiveFacetProbeBudget{65537U, 16384U},
+      ExactLbvhTopKBudget{
+          1000000U,
+          1000000U,
+          1000000U,
+          1000000U,
+          1000000U,
+          16U,
+          16384U},
+      ExactDirectSparsePositiveFacetProbeBudget{65537U, 16384U},
+  };
+}
+
+[[nodiscard]] ExactDirectMorseVerticalTargetProposalPipelineBudget
+make_vertical_target_pipeline_budget(
+    const ExactDirectMorseForestJournalResult& forest) {
+  constexpr std::size_t capacity = 16384U;
+  constexpr std::size_t group_capacity = 4096U;
+  constexpr std::size_t large_capacity = 1000000U;
+  ExactDirectMorseVerticalTargetProposalPipelineBudget budget;
+
+  auto& carrier = budget.session_budget.carrier_state_budget;
+  carrier.maximum_forest_birth_record_scan_count = capacity;
+  carrier.maximum_forest_node_scan_count = capacity;
+  carrier.maximum_forest_batch_scan_count = capacity;
+  carrier.maximum_forest_atomic_group_scan_count = capacity;
+  carrier.maximum_forest_saddle_scan_count = capacity;
+  carrier.maximum_forest_arm_binding_scan_count = capacity;
+  carrier.maximum_forest_child_reference_scan_count = capacity;
+  carrier.maximum_forest_final_root_scan_count = capacity;
+  carrier.maximum_component_state_count = capacity;
+  carrier.maximum_node_marker_state_count = capacity;
+  carrier.maximum_index_entry_count = capacity;
+  carrier.maximum_group_carrier_scratch_count = capacity;
+  carrier.maximum_group_prior_root_scratch_count = capacity;
+  carrier.maximum_parent_hop_count = large_capacity;
+  carrier.maximum_exact_level_comparison_count = large_capacity;
+  carrier.maximum_single_exact_level_integer_bit_count = capacity;
+  carrier.maximum_logical_output_entry_count = 65536U;
+
+  budget.session_budget.locator_budget =
+      forest.requested_budget.locator_budget;
+  budget.session_budget.maximum_replayed_global_batch_count = capacity;
+  budget.session_budget.maximum_replayed_locator_union_count = capacity;
+  budget.session_budget.maximum_replayed_locator_binding_count = capacity;
+  budget.session_budget.maximum_batch_group_plan_count = capacity;
+  budget.session_budget.maximum_batch_group_carrier_reference_count =
+      capacity;
+  budget.session_budget.maximum_batch_group_prior_root_reference_count =
+      capacity;
+  budget.session_budget.maximum_batch_locator_union_scratch_count =
+      capacity;
+  budget.session_budget.maximum_batch_locator_binding_scratch_count =
+      capacity;
+
+  auto& plan = budget.facet_plan_budget;
+  plan.maximum_group_saddle_scan_count = capacity;
+  plan.maximum_group_arm_binding_scan_count = capacity;
+  plan.maximum_binding_sort_scratch_count = group_capacity;
+  plan.maximum_representative_binding_count = group_capacity;
+  plan.maximum_projected_target_facet_reference_count = 65536U;
+  plan.maximum_distinct_target_facet_count = group_capacity;
+  plan.maximum_sort_comparison_count = large_capacity;
+  plan.maximum_target_facet_lookup_comparison_count = large_capacity;
+  plan.maximum_retained_key_point_reference_count = 131072U;
+  plan.maximum_logical_output_entry_count = 131072U;
+
+  auto& closure = budget.closure_budget;
+  closure.maximum_canonical_key_scan_count = group_capacity;
+  closure.maximum_terminal_summary_count = group_capacity;
+  closure.maximum_terminal_key_point_reference_count = 131072U;
+  closure.maximum_carrier_cut_lookup_count = group_capacity;
+  closure.maximum_logical_output_entry_count = 65536U;
+  closure.closure_budget = {
+      group_capacity,
+      65536U,
+      65536U,
+      131073U,
+      vertical_target_descent_step_budget(),
+  };
+
+  auto& proposal = budget.proposal_budget;
+  proposal.maximum_source_saddle_revalidation_count = capacity;
+  proposal.maximum_source_binding_revalidation_count = capacity;
+  proposal.maximum_source_key_lookup_comparison_count = large_capacity;
+  proposal.maximum_closure_summary_scan_count = group_capacity;
+  proposal.maximum_positive_terminal_probe_count = group_capacity;
+  proposal.maximum_positive_terminal_probe_slot_visit_count =
+      large_capacity;
+  proposal.maximum_positive_terminal_probe_parent_hop_count =
+      large_capacity;
+  proposal.positive_terminal_probe_budget = {65537U, capacity};
+  proposal.maximum_carrier_entry_revalidation_count = group_capacity;
+  proposal.maximum_target_node_lookup_count = group_capacity;
+  proposal.maximum_exact_level_comparison_count = large_capacity;
+  proposal.maximum_single_exact_level_integer_bit_count = capacity;
+  proposal.maximum_proposal_count = group_capacity;
+  proposal.maximum_logical_output_entry_count = 65536U;
+
+  budget.maximum_source_batch_scan_count = capacity;
+  budget.maximum_source_atomic_group_scan_count = capacity;
+  budget.maximum_referenced_target_order_count = 9U;
+  budget.maximum_target_order_lookup_count = large_capacity;
+  budget.maximum_preflight_facet_plan_count = capacity;
+  budget.maximum_executed_facet_plan_count = capacity;
+  budget.maximum_replay_advance_count = capacity;
+  budget.maximum_closure_build_count = capacity;
+  budget.maximum_proposal_adapter_count = capacity;
+  budget.maximum_aggregate_representative_count = capacity;
+  budget.maximum_aggregate_projected_target_facet_reference_count =
+      163840U;
+  budget.maximum_aggregate_distinct_target_facet_count = 163840U;
+  budget.maximum_aggregate_retained_key_point_reference_count = 2000000U;
+  budget.maximum_aggregate_plan_logical_output_entry_count = large_capacity;
+  budget.maximum_aggregate_closure_terminal_summary_count = 163840U;
+  budget.maximum_aggregate_proposal_count = capacity;
+  budget.maximum_session_audit_count = 9U;
+  budget.maximum_group_audit_count = capacity;
+  budget.maximum_logical_output_entry_count = 65536U;
+  return budget;
+}
+
+[[nodiscard]] ExactDirectMorseVerticalBudget
+make_vertical_journal_budget() {
+  constexpr std::size_t capacity = 16384U;
+  return {
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity * capacity,
+      capacity,
+      capacity * capacity,
+      capacity,
+      capacity * capacity,
+  };
+}
+
+[[nodiscard]] std::string_view vertical_target_pipeline_stop_detail(
+    ExactDirectMorseVerticalTargetProposalPipelineDecision decision)
+    noexcept {
+  switch (decision) {
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        not_certified:
+      return "vertical_target_pipeline_not_certified";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_source_forest_rejected:
+      return "vertical_target_pipeline_source_forest_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_point_namespace_rejected:
+      return "vertical_target_pipeline_point_namespace_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_source_shape_rejected:
+      return "vertical_target_pipeline_source_shape_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_capacity_overflow:
+      return "vertical_target_pipeline_capacity_overflow";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_budget_exhausted:
+      return "vertical_target_pipeline_budget_exhausted";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_allocation_failed:
+      return "vertical_target_pipeline_allocation_failed";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_token_overflow:
+      return "vertical_target_pipeline_token_overflow";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_facet_plan_rejected:
+      return "vertical_target_pipeline_facet_plan_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_session_initialization_rejected:
+      return "vertical_target_pipeline_session_initialization_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_replay_advance_rejected:
+      return "vertical_target_pipeline_replay_advance_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_closure_rejected:
+      return "vertical_target_pipeline_closure_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        no_pipeline_proposal_adapter_rejected:
+      return "vertical_target_pipeline_proposal_adapter_rejected";
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        complete_empty_adjacent_group_set:
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        complete_all_resolved_multiorder_target_proposals:
+    case ExactDirectMorseVerticalTargetProposalPipelineDecision::
+        complete_with_unresolved_multiorder_target_proposals:
+      return "none";
+  }
+  return "vertical_target_pipeline_unknown_decision";
+}
+
+[[nodiscard]] std::string_view vertical_journal_stop_detail(
+    ExactDirectMorseVerticalDecision decision) noexcept {
+  switch (decision) {
+    case ExactDirectMorseVerticalDecision::not_certified:
+      return "vertical_journal_not_certified";
+    case ExactDirectMorseVerticalDecision::no_vertical_capacity_overflow:
+      return "vertical_journal_capacity_overflow";
+    case ExactDirectMorseVerticalDecision::no_vertical_budget_exhausted:
+      return "vertical_journal_budget_exhausted";
+    case ExactDirectMorseVerticalDecision::no_vertical_allocation_failed:
+      return "vertical_journal_allocation_failed";
+    case ExactDirectMorseVerticalDecision::no_vertical_source_forest_rejected:
+      return "vertical_journal_source_forest_rejected";
+    case ExactDirectMorseVerticalDecision::no_vertical_forest_shape_rejected:
+      return "vertical_journal_forest_shape_rejected";
+    case ExactDirectMorseVerticalDecision::
+        no_vertical_proposal_partition_rejected:
+      return "vertical_journal_proposal_partition_rejected";
+    case ExactDirectMorseVerticalDecision::no_vertical_target_rejected:
+      return "vertical_journal_target_rejected";
+    case ExactDirectMorseVerticalDecision::
+        no_vertical_relative_target_conflict:
+      return "vertical_journal_relative_target_conflict";
+    case ExactDirectMorseVerticalDecision::
+        complete_conditional_partial_vertical_journal:
+    case ExactDirectMorseVerticalDecision::
+        complete_conditional_total_relative_vertical_journal:
+      return "none";
+  }
+  return "vertical_journal_unknown_decision";
+}
+
+void diagnose_rejected_vertical_target_group(
+    const ExactDirectMorseForestJournalResult& forest,
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    const ExactDirectMorseVerticalTargetProposalPipelineBudget& budget,
+    const ExactDirectMorseVerticalTargetProposalPipelineResult& pipeline,
+    Report& report) {
+  if (!pipeline.rejected_source_atomic_group_index.has_value()) {
+    return;
+  }
+  const Clock::time_point begin = Clock::now();
+  report.vertical_target_replay_diagnostic_attempted = true;
+  const std::size_t group_index =
+      *pipeline.rejected_source_atomic_group_index;
+  report.vertical_target_diagnostic_source_group_index = group_index;
+  if (group_index >= forest.atomic_groups.size()) {
+    report.timings.vertical_target_replay_diagnostic_ms =
+        milliseconds(Clock::now() - begin);
+    return;
+  }
+  const auto& group = forest.atomic_groups[group_index];
+  report.vertical_target_diagnostic_source_batch_index = group.batch_index;
+  if (group.batch_index >= forest.batches.size()) {
+    report.timings.vertical_target_replay_diagnostic_ms =
+        milliseconds(Clock::now() - begin);
+    return;
+  }
+  const auto& batch = forest.batches[group.batch_index];
+  if (batch.order < 2U ||
+      group_index > std::numeric_limits<std::uint64_t>::max() / 3U - 1U) {
+    report.timings.vertical_target_replay_diagnostic_ms =
+        milliseconds(Clock::now() - begin);
+    return;
+  }
+  report.vertical_target_diagnostic_source_order = batch.order;
+  report.vertical_target_diagnostic_target_order = batch.order - 1U;
+  report.vertical_target_diagnostic_level_numerator =
+      batch.squared_level.numerator_string();
+  report.vertical_target_diagnostic_level_denominator =
+      batch.squared_level.denominator_string();
+  report.vertical_target_diagnostic_query_token =
+      3U * (static_cast<std::uint64_t>(group_index) + 1U);
+
+  const auto plan = build_exact_direct_morse_vertical_target_facet_plan(
+      forest, group_index, budget.facet_plan_budget);
+  report.vertical_target_diagnostic_plan_decision =
+      static_cast<unsigned>(plan.decision);
+  for (const auto& representative : plan.representatives) {
+    report.vertical_target_diagnostic_representative_binding_indices
+        .push_back(
+            representative.representative_arm_root_binding_index);
+    report.vertical_target_diagnostic_source_keys.push_back(
+        representative.source_strict_arm_key);
+  }
+  report.vertical_target_diagnostic_target_facet_indices =
+      plan.target_facet_indices;
+  report.vertical_target_diagnostic_target_keys =
+      plan.canonical_distinct_target_facet_keys;
+  if (!plan.certified_group_local_target_facet_plan()) {
+    report.timings.vertical_target_replay_diagnostic_ms =
+        milliseconds(Clock::now() - begin);
+    return;
+  }
+
+  auto initialized =
+      build_exact_direct_morse_forest_carrier_cut_replay_session(
+          forest,
+          batch.order - 1U,
+          budget.session_budget);
+  report.vertical_target_diagnostic_session_initialization_decision =
+      static_cast<unsigned>(initialized.decision);
+  if (!initialized.certified_ready_session() || !initialized.session) {
+    report.timings.vertical_target_replay_diagnostic_ms =
+        milliseconds(Clock::now() - begin);
+    return;
+  }
+
+  const auto advanced = initialized.session->advance_to_closed_cut(
+      batch.squared_level,
+      [&](const ExactDirectMorseForestCarrierCutReplayView& view) {
+        report.vertical_target_replay_diagnostic_callback_invoked = true;
+        const ExactDirectSparseFacetWitness query_witness{
+            pipeline.external_target_authority_id,
+            report.vertical_target_diagnostic_query_token};
+        const auto closure =
+            view.build_closure_summary_from_canonical_distinct_keys(
+                index,
+                cloud,
+                plan.canonical_distinct_target_facet_keys,
+                query_witness,
+                budget.closure_budget,
+                forest.config.closure_config,
+                forest.traversal_order);
+        report.vertical_target_diagnostic_closure_adapter_decision =
+            static_cast<unsigned>(closure.decision);
+        report.vertical_target_diagnostic_inner_closure_decision =
+            static_cast<unsigned>(closure.closure_decision);
+        report.vertical_target_diagnostic_inner_closure_disposition =
+            static_cast<unsigned>(closure.closure_disposition);
+        report.vertical_target_diagnostic_closure_counters =
+            closure.closure_counters;
+        report.vertical_target_diagnostic_contradiction_witness =
+            closure.contradiction_witness;
+      });
+  report.vertical_target_diagnostic_advance_decision =
+      static_cast<unsigned>(advanced.decision);
+  report.vertical_target_replay_diagnostic_advance_certified =
+      advanced.certified_forest_relative_closed_cut();
+  report.timings.vertical_target_replay_diagnostic_ms =
+      milliseconds(Clock::now() - begin);
+}
+
 [[nodiscard]] std::string json_escape(std::string_view text) {
   std::string escaped;
   escaped.reserve(text.size());
@@ -917,6 +1330,40 @@ make_execution_budget(
   return escaped;
 }
 
+void emit_facet_key_json(const ExactDirectSparseFacetKey& key) {
+  std::cout << '[';
+  for (std::size_t index = 0U; index < key.point_count; ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    std::cout << key.point_ids[index];
+  }
+  std::cout << ']';
+}
+
+void emit_facet_key_vector_json(
+    std::span<const ExactDirectSparseFacetKey> keys) {
+  std::cout << '[';
+  for (std::size_t index = 0U; index < keys.size(); ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    emit_facet_key_json(keys[index]);
+  }
+  std::cout << ']';
+}
+
+void emit_size_vector_json(std::span<const std::size_t> values) {
+  std::cout << '[';
+  for (std::size_t index = 0U; index < values.size(); ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    std::cout << values[index];
+  }
+  std::cout << ']';
+}
+
 void emit_report(const Report& report) {
   const auto boolean = [](bool value) {
     return value ? "true" : "false";
@@ -935,8 +1382,8 @@ void emit_report(const Report& report) {
                  : "unassessed");
   std::cout
       << "{\n"
-      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v3\",\n"
-      << "  \"phase\":\"14Q_to_15D\",\n"
+      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v4\",\n"
+      << "  \"phase\":\"15_forest_relative_vertical_pipeline_and_journal\",\n"
       << "  \"backend\":\"reference_cpu\",\n"
       << "  \"profile\":\"hgp_reduced\",\n"
       << "  \"mode\":\"" << json_escape(report.options.mode)
@@ -1027,7 +1474,9 @@ void emit_report(const Report& report) {
   std::cout
       << "},\n"
       << "  \"timing_scope\":"
-         "\"attempted_single_process_cpu_generation_to_materialized_forest\",\n"
+         "\"attempted_single_process_cpu_generation_to_materialized_forest_"
+         "and_forest_relative_vertical_target_pipeline_and_conditional_"
+         "vertical_journal\",\n"
       << "  \"architecture_audit_complete\":"
       << boolean(report.architecture_audit_complete) << ",\n"
       << "  \"no_forbidden_global_structure_materialized\":"
@@ -1071,6 +1520,12 @@ void emit_report(const Report& report) {
       << report.timings.reducer_stream_ms
       << ",\"forest_finish\":"
       << report.timings.forest_finish_ms
+      << ",\"vertical_target_pipeline\":"
+      << report.timings.vertical_target_pipeline_ms
+      << ",\"vertical_journal\":"
+      << report.timings.vertical_journal_ms
+      << ",\"vertical_target_replay_diagnostic\":"
+      << report.timings.vertical_target_replay_diagnostic_ms
       << ",\"total\":" << report.timings.total_ms << "},\n"
       << "  \"pair_support\":{\"source_kind\":\""
       << report.pair_source_kind << "\",\"authority_kind\":\""
@@ -1375,7 +1830,257 @@ void emit_report(const Report& report) {
       << ",\"aggregate_closure_nodes\":"
       << report.forest_aggregate_closure_node_count
       << ",\"aggregate_closure_step_calls\":"
-      << report.forest_aggregate_closure_step_call_count << "}\n"
+      << report.forest_aggregate_closure_step_call_count << "},\n"
+      << "  \"vertical_target_pipeline\":{\"attempted\":"
+      << boolean(report.vertical_target_pipeline_attempted)
+      << ",\"certified\":"
+      << boolean(report.vertical_target_pipeline_certified)
+      << ",\"decision\":"
+      << report.vertical_target_pipeline_decision
+      << ",\"required_sessions\":"
+      << report.vertical_target_required_session_count
+      << ",\"required_groups\":"
+      << report.vertical_target_required_group_count
+      << ",\"required_proposals\":"
+      << report.vertical_target_required_proposal_count
+      << ",\"source_group_count_by_order\":";
+  emit_size_vector_json(report.vertical_target_source_group_count_by_order);
+  std::cout
+      << ",\"rejected_source_atomic_group_index\":";
+  if (report.vertical_target_rejected_source_group_index.has_value()) {
+    std::cout << *report.vertical_target_rejected_source_group_index;
+  } else {
+    std::cout << "null";
+  }
+  const auto& vertical_counters =
+      report.vertical_target_pipeline_counters;
+  std::cout
+      << ",\"rejected_closure_adapter_decision\":"
+      << report.vertical_target_rejected_closure_adapter_decision
+      << ",\"counters\":{\"source_batches_scanned\":"
+      << vertical_counters.source_batch_scan_count
+      << ",\"source_groups_scanned\":"
+      << vertical_counters.source_atomic_group_scan_count
+      << ",\"target_order_lookups\":"
+      << vertical_counters.target_order_lookup_count
+      << ",\"referenced_target_orders\":"
+      << vertical_counters.referenced_target_order_count
+      << ",\"initialized_sessions\":"
+      << vertical_counters.initialized_session_count
+      << ",\"preflight_plans\":"
+      << vertical_counters.preflight_facet_plan_count
+      << ",\"executed_plans\":"
+      << vertical_counters.executed_facet_plan_count
+      << ",\"replay_advances\":"
+      << vertical_counters.replay_advance_count
+      << ",\"closure_builds\":"
+      << vertical_counters.closure_build_count
+      << ",\"proposal_adapters\":"
+      << vertical_counters.proposal_adapter_count
+      << ",\"representatives\":"
+      << vertical_counters.representative_count
+      << ",\"projected_target_facets\":"
+      << vertical_counters.projected_target_facet_reference_count
+      << ",\"distinct_target_facets\":"
+      << vertical_counters.distinct_target_facet_count
+      << ",\"closure_terminal_summaries\":"
+      << vertical_counters.closure_terminal_summary_count
+      << ",\"unresolved_proposals\":"
+      << vertical_counters.unresolved_proposal_count
+      << ",\"resolved_proposals\":"
+      << vertical_counters.resolved_proposal_count
+      << "},\"forest_relative_only\":true,"
+         "\"external_target_authority_replayed\":false,"
+         "\"vertical_maps_complete\":false,"
+         "\"public_status_claimed\":false},\n"
+      << "  \"vertical_journal\":{\"attempted\":"
+      << boolean(report.vertical_journal_attempted)
+      << ",\"certified_conditional_candidate\":"
+      << boolean(report.vertical_journal_certified)
+      << ",\"decision\":"
+      << report.vertical_journal_decision
+      << ",\"adjacent_families\":"
+      << report.vertical_journal_adjacent_family_count
+      << ",\"label_resolutions\":"
+      << report.vertical_journal_label_resolution_count
+      << ",\"group_checks\":"
+      << report.vertical_journal_group_check_count
+      << ",\"checkpoints\":"
+      << report.vertical_journal_checkpoint_count
+      << ",\"logical_output_entries\":"
+      << report.vertical_journal_logical_output_entry_count;
+  const auto& vertical_journal_counters =
+      report.vertical_journal_counters;
+  std::cout
+      << ",\"counters\":{\"expected_labels\":"
+      << vertical_journal_counters.expected_label_count
+      << ",\"missing_labels\":"
+      << vertical_journal_counters.missing_label_count
+      << ",\"unresolved_labels\":"
+      << vertical_journal_counters.unresolved_label_count
+      << ",\"resolved_labels\":"
+      << vertical_journal_counters.resolved_label_count
+      << ",\"complete_groups\":"
+      << vertical_journal_counters.complete_group_count
+      << ",\"partial_groups\":"
+      << vertical_journal_counters.partial_group_count
+      << ",\"expected_elementary_group_squares\":"
+      << vertical_journal_counters.expected_elementary_group_square_count
+      << ",\"checked_elementary_group_squares\":"
+      << vertical_journal_counters.checked_elementary_group_square_count
+      << ",\"unresolved_elementary_group_squares\":"
+      << vertical_journal_counters.unresolved_elementary_group_square_count
+      << ",\"late_checkpoints\":"
+      << vertical_journal_counters.late_checkpoint_count
+      << "},\"source_forest_shape_replayed\":"
+      << boolean(report.vertical_journal_source_forest_shape_replayed)
+      << ",\"conditional_on_caller_fresh_source_forest_replay\":"
+      << boolean(
+             report
+                 .vertical_journal_conditional_on_fresh_source_forest_replay)
+      << ",\"external_target_authority_replayed\":"
+      << boolean(
+             report.vertical_journal_external_target_authority_replayed)
+      << ",\"global_morse_obligation_replayed\":"
+      << boolean(report.vertical_journal_global_morse_obligation_replayed)
+      << ",\"all_naturality_squares_replayed\":"
+      << boolean(report.vertical_journal_all_naturality_squares_replayed)
+      << ",\"vertical_maps_complete\":"
+      << boolean(report.vertical_journal_vertical_maps_complete)
+      << ",\"gamma_cells_or_global_cofaces_materialized\":"
+      << boolean(
+             report.vertical_journal_gamma_or_global_cofaces_materialized)
+      << ",\"higher_order_delaunay_materialized\":"
+      << boolean(
+             report.vertical_journal_higher_order_delaunay_materialized)
+      << ",\"public_status_claimed\":"
+      << boolean(report.vertical_journal_public_status_claimed)
+      << "},\n"
+      << "  \"vertical_target_replay_diagnostic\":{\"attempted\":"
+      << boolean(report.vertical_target_replay_diagnostic_attempted)
+      << ",\"callback_invoked\":"
+      << boolean(report.vertical_target_replay_diagnostic_callback_invoked)
+      << ",\"advance_certified\":"
+      << boolean(
+             report.vertical_target_replay_diagnostic_advance_certified)
+      << ",\"source_atomic_group_index\":";
+  if (report.vertical_target_diagnostic_source_group_index.has_value()) {
+    std::cout << *report.vertical_target_diagnostic_source_group_index;
+  } else {
+    std::cout << "null";
+  }
+  std::cout << ",\"source_batch_index\":";
+  if (report.vertical_target_diagnostic_source_batch_index.has_value()) {
+    std::cout << *report.vertical_target_diagnostic_source_batch_index;
+  } else {
+    std::cout << "null";
+  }
+  std::cout
+      << ",\"source_order\":"
+      << report.vertical_target_diagnostic_source_order
+      << ",\"target_order\":"
+      << report.vertical_target_diagnostic_target_order
+      << ",\"closed_squared_level\":{\"numerator\":\""
+      << json_escape(report.vertical_target_diagnostic_level_numerator)
+      << "\",\"denominator\":\""
+      << json_escape(report.vertical_target_diagnostic_level_denominator)
+      << "\"},\"query_token\":"
+      << report.vertical_target_diagnostic_query_token
+      << ",\"plan_decision\":"
+      << report.vertical_target_diagnostic_plan_decision
+      << ",\"session_initialization_decision\":"
+      << report.vertical_target_diagnostic_session_initialization_decision
+      << ",\"advance_decision\":"
+      << report.vertical_target_diagnostic_advance_decision
+      << ",\"closure_adapter_decision\":"
+      << report.vertical_target_diagnostic_closure_adapter_decision
+      << ",\"inner_closure_decision\":"
+      << report.vertical_target_diagnostic_inner_closure_decision
+      << ",\"inner_closure_disposition\":"
+      << report.vertical_target_diagnostic_inner_closure_disposition
+      << ",\"representative_binding_indices\":";
+  emit_size_vector_json(
+      report.vertical_target_diagnostic_representative_binding_indices);
+  std::cout << ",\"source_keys\":";
+  emit_facet_key_vector_json(report.vertical_target_diagnostic_source_keys);
+  std::cout << ",\"target_facet_indices\":";
+  emit_size_vector_json(report.vertical_target_diagnostic_target_facet_indices);
+  std::cout << ",\"canonical_distinct_target_keys\":";
+  emit_facet_key_vector_json(report.vertical_target_diagnostic_target_keys);
+  const auto& closure_counters =
+      report.vertical_target_diagnostic_closure_counters;
+  std::cout
+      << ",\"closure_counters\":{\"input_seed_references\":"
+      << closure_counters.input_seed_reference_count
+      << ",\"processed_seed_references\":"
+      << closure_counters.processed_seed_reference_count
+      << ",\"distinct_seed_keys\":"
+      << closure_counters.distinct_seed_key_count
+      << ",\"duplicate_seed_key_references\":"
+      << closure_counters.duplicate_seed_key_reference_count
+      << ",\"interned_nodes\":"
+      << closure_counters.interned_node_count
+      << ",\"evaluated_step_sources\":"
+      << closure_counters.evaluated_step_source_count
+      << ",\"strict_edges\":"
+      << closure_counters.strict_edge_count
+      << ",\"terminal_nodes\":"
+      << closure_counters.terminal_node_count
+      << ",\"relative_positive_terminals\":"
+      << closure_counters.relative_positive_terminal_count
+      << ",\"unresolved_terminals\":"
+      << closure_counters.unresolved_terminal_count
+      << ",\"budget_terminals\":"
+      << closure_counters.budget_terminal_count
+      << ",\"source_positive_hits\":"
+      << closure_counters.source_positive_hit_count
+      << ",\"successor_positive_hits\":"
+      << closure_counters.successor_positive_hit_count
+      << ",\"memoized_seed_reuses\":"
+      << closure_counters.memoized_seed_reuse_count
+      << ",\"memoized_suffix_reuses\":"
+      << closure_counters.memoized_suffix_reuse_count
+      << ",\"diagnostic_strict_witness_without_edge\":"
+      << closure_counters.diagnostic_strict_witness_without_edge_count
+      << ",\"memo_slot_visits\":"
+      << closure_counters.memo_slot_visit_count
+      << ",\"memo_full_key_comparisons\":"
+      << closure_counters.memo_full_key_comparison_count
+      << ",\"equal_fingerprint_distinct_keys\":"
+      << closure_counters.equal_fingerprint_distinct_key_count
+      << ",\"locator_snapshot_checks\":"
+      << closure_counters.locator_snapshot_check_count
+      << ",\"distinct_cached_miniballs\":"
+      << closure_counters.distinct_cached_miniball_count
+      << ",\"source_miniball_builds\":"
+      << closure_counters.source_miniball_build_count
+      << ",\"source_miniball_reuses\":"
+      << closure_counters.source_miniball_reuse_count
+      << ",\"successor_miniball_builds\":"
+      << closure_counters.successor_miniball_build_count
+      << ",\"successor_miniball_reuses\":"
+      << closure_counters.successor_miniball_reuse_count
+      << "},\"contradiction_witness\":";
+  if (report.vertical_target_diagnostic_contradiction_witness.has_value()) {
+    const auto& witness =
+        *report.vertical_target_diagnostic_contradiction_witness;
+    std::cout << "{\"source_key\":";
+    emit_facet_key_json(witness.source_facet_key);
+    std::cout << ",\"target_key\":";
+    emit_facet_key_json(witness.target_facet_key);
+    std::cout
+        << ",\"local_step_decision\":"
+        << static_cast<unsigned>(witness.local_step_decision)
+        << ",\"visiting_cycle_detected\":"
+        << boolean(witness.visiting_cycle_detected)
+        << ",\"shared_target_geometry_mismatch\":"
+        << boolean(witness.shared_target_geometry_mismatch) << '}';
+  } else {
+    std::cout << "null";
+  }
+  std::cout
+      << ",\"global_structure_materialized\":false,"
+         "\"public_status_claimed\":false}\n"
       << "}\n";
 }
 
@@ -2236,27 +2941,209 @@ void emit_report(const Report& report) {
       forest->counters.aggregate_closure_node_count;
   report.forest_aggregate_closure_step_call_count =
       forest->counters.aggregate_closure_step_call_count;
+  report.vertical_target_source_group_count_by_order.assign(
+      forest->effective_maximum_order + 1U, 0U);
+  for (const auto& batch : forest->batches) {
+    if (batch.order >= 2U &&
+        batch.order <
+            report.vertical_target_source_group_count_by_order.size()) {
+      report.vertical_target_source_group_count_by_order[batch.order] +=
+          batch.atomic_group_count;
+    }
+  }
+
+  const ExactDirectMorseVerticalTargetProposalPipelineBudget
+      vertical_target_budget =
+          make_vertical_target_pipeline_budget(*forest);
+  const Clock::time_point vertical_target_begin = Clock::now();
+  report.vertical_target_pipeline_attempted = true;
+  const ExactDirectMorseVerticalTargetProposalPipelineResult
+      vertical_target_pipeline =
+          build_exact_direct_morse_vertical_target_proposal_pipeline(
+              *forest, index, cloud, vertical_target_budget);
+  const Clock::time_point vertical_target_end = Clock::now();
+  report.timings.vertical_target_pipeline_ms =
+      milliseconds(vertical_target_end - vertical_target_begin);
+  report.vertical_target_pipeline_certified =
+      vertical_target_pipeline.certified_multiorder_target_proposals();
+  report.vertical_target_pipeline_decision =
+      static_cast<unsigned>(vertical_target_pipeline.decision);
+  report.vertical_target_pipeline_counters =
+      vertical_target_pipeline.counters;
+  report.vertical_target_required_session_count =
+      vertical_target_pipeline.required_referenced_target_order_count;
+  report.vertical_target_required_group_count =
+      vertical_target_pipeline.required_group_count;
+  report.vertical_target_required_proposal_count =
+      vertical_target_pipeline.required_proposal_count;
+  report.vertical_target_rejected_source_group_index =
+      vertical_target_pipeline.rejected_source_atomic_group_index;
+  report.vertical_target_rejected_closure_adapter_decision =
+      static_cast<unsigned>(
+          vertical_target_pipeline.rejected_closure_decision);
+  report.no_forbidden_global_structure_materialized =
+      report.no_forbidden_global_structure_materialized &&
+      !vertical_target_pipeline
+           .global_facet_coface_incidence_cell_gamma_or_delaunay_materialized &&
+      !vertical_target_pipeline.higher_order_delaunay_materialized &&
+      !vertical_target_pipeline.public_status_claimed;
+  if (!report.vertical_target_pipeline_certified) {
+    diagnose_rejected_vertical_target_group(
+        *forest,
+        index,
+        cloud,
+        vertical_target_budget,
+        vertical_target_pipeline,
+        report);
+  }
+
+  std::optional<ExactDirectMorseVerticalJournalResult> vertical_journal;
+  if (report.vertical_target_pipeline_certified) {
+    const Clock::time_point vertical_journal_begin = Clock::now();
+    report.vertical_journal_attempted = true;
+    vertical_journal.emplace(build_exact_direct_morse_vertical_journal(
+        *forest,
+        std::span<const ExactDirectMorseVerticalTargetProposal>{
+            vertical_target_pipeline.proposals},
+        make_vertical_journal_budget(),
+        ExactDirectMorseVerticalConfig{
+            vertical_target_pipeline.external_target_authority_id}));
+    report.timings.vertical_journal_ms =
+        milliseconds(Clock::now() - vertical_journal_begin);
+    report.vertical_journal_decision =
+        static_cast<unsigned>(vertical_journal->decision);
+    report.vertical_journal_adjacent_family_count =
+        vertical_journal->adjacent_families.size();
+    report.vertical_journal_label_resolution_count =
+        vertical_journal->label_resolutions.size();
+    report.vertical_journal_group_check_count =
+        vertical_journal->group_checks.size();
+    report.vertical_journal_checkpoint_count =
+        vertical_journal->checkpoints.size();
+    report.vertical_journal_logical_output_entry_count =
+        vertical_journal->logical_output_entry_count;
+    report.vertical_journal_counters = vertical_journal->counters;
+    report.vertical_journal_source_forest_shape_replayed =
+        vertical_journal->source_forest_shape_replayed;
+    report.vertical_journal_conditional_on_fresh_source_forest_replay =
+        vertical_journal
+            ->conditional_on_caller_fresh_source_forest_replay;
+    report.vertical_journal_external_target_authority_replayed =
+        vertical_journal->external_target_authority_replayed;
+    report.vertical_journal_global_morse_obligation_replayed =
+        vertical_journal->global_morse_obligation_replayed;
+    report.vertical_journal_all_naturality_squares_replayed =
+        vertical_journal->all_naturality_squares_replayed;
+    report.vertical_journal_vertical_maps_complete =
+        vertical_journal->vertical_maps_complete;
+    report.vertical_journal_gamma_or_global_cofaces_materialized =
+        vertical_journal->gamma_cells_or_global_cofaces_materialized;
+    report.vertical_journal_higher_order_delaunay_materialized =
+        vertical_journal->higher_order_delaunay_materialized;
+    report.vertical_journal_public_status_claimed =
+        vertical_journal->public_status_claimed;
+
+    const auto& counters = vertical_journal->counters;
+    const bool label_partition_matches_pipeline =
+        counters.expected_label_count ==
+            vertical_target_pipeline.proposals.size() &&
+        counters.missing_label_count == 0U &&
+        counters.unresolved_label_count <=
+            counters.expected_label_count &&
+        counters.resolved_label_count ==
+            counters.expected_label_count -
+                counters.unresolved_label_count;
+    const bool group_partition_matches_pipeline =
+        counters.complete_group_count <=
+            vertical_target_pipeline.required_group_count &&
+        counters.partial_group_count ==
+            vertical_target_pipeline.required_group_count -
+                counters.complete_group_count;
+    report.vertical_journal_certified =
+        vertical_journal->certified_conditional_vertical_candidate() &&
+        label_partition_matches_pipeline &&
+        group_partition_matches_pipeline &&
+        vertical_journal->source_forest_shape_replayed &&
+        vertical_journal
+            ->conditional_on_caller_fresh_source_forest_replay &&
+        !vertical_journal->external_target_authority_replayed &&
+        !vertical_journal->global_morse_obligation_replayed &&
+        !vertical_journal->all_naturality_squares_replayed &&
+        !vertical_journal->vertical_maps_complete &&
+        !vertical_journal->gamma_cells_or_global_cofaces_materialized &&
+        !vertical_journal->higher_order_delaunay_materialized &&
+        !vertical_journal->public_status_claimed;
+    report.no_forbidden_global_structure_materialized =
+        report.no_forbidden_global_structure_materialized &&
+        !vertical_journal->gamma_cells_or_global_cofaces_materialized &&
+        !vertical_journal->higher_order_delaunay_materialized &&
+        !vertical_journal->public_status_claimed;
+  }
   report.pipeline_complete =
       report.conditional_h0_candidate_certified &&
-      report.no_forbidden_global_structure_materialized;
-  report.terminal_stage = "forest_materialized";
+      report.no_forbidden_global_structure_materialized &&
+      report.vertical_target_pipeline_certified &&
+      report.vertical_journal_certified;
   if (report.pipeline_complete) {
+    report.terminal_stage = "vertical_journal";
     report.stop_category = "none";
     report.stop_detail = "none";
   } else if (
       !report.no_forbidden_global_structure_materialized) {
+    report.terminal_stage = "architecture_audit";
     report.stop_category = "architecture_violation";
     report.stop_detail =
         "forbidden_global_structure_materialized";
-  } else {
+  } else if (!report.conditional_h0_candidate_certified) {
+    report.terminal_stage = "forest_finish";
     report.stop_category = "certification_failure";
     report.stop_detail =
         "conditional_h0_candidate_not_certified";
+  } else if (!report.vertical_target_pipeline_certified) {
+    report.terminal_stage = "vertical_target_pipeline";
+    report.budget_exhausted =
+        vertical_target_pipeline.decision ==
+        ExactDirectMorseVerticalTargetProposalPipelineDecision::
+            no_pipeline_budget_exhausted;
+    report.stop_category =
+        report.budget_exhausted
+            ? "budget_exhausted"
+            : (vertical_target_pipeline.decision ==
+                       ExactDirectMorseVerticalTargetProposalPipelineDecision::
+                           no_pipeline_allocation_failed
+                   ? "operational_failure"
+                   : "certification_failure");
+    report.stop_detail = vertical_target_pipeline_stop_detail(
+        vertical_target_pipeline.decision);
+  } else {
+    report.terminal_stage = "vertical_journal";
+    report.budget_exhausted =
+        vertical_journal.has_value() &&
+        vertical_journal->decision ==
+            ExactDirectMorseVerticalDecision::
+                no_vertical_budget_exhausted;
+    report.stop_category =
+        report.budget_exhausted
+            ? "budget_exhausted"
+            : (vertical_journal.has_value() &&
+                       vertical_journal->decision ==
+                           ExactDirectMorseVerticalDecision::
+                               no_vertical_allocation_failed
+                   ? "operational_failure"
+                   : "certification_failure");
+    report.stop_detail = vertical_journal.has_value()
+        ? vertical_journal_stop_detail(vertical_journal->decision)
+        : "vertical_journal_not_attempted";
   }
-  report.timings.total_ms =
-      milliseconds(finish_end - total_start);
+  report.timings.total_ms = milliseconds(Clock::now() - total_start);
   emit_report(report);
-  return report.pipeline_complete ? 0 : 3;
+  if (report.pipeline_complete) {
+    return 0;
+  }
+  if (report.budget_exhausted) {
+    return 2;
+  }
+  return report.stop_category == "operational_failure" ? 5 : 3;
 }
 
 }  // namespace

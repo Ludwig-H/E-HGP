@@ -416,6 +416,38 @@ find_projection(
   return canonical_cloud(input);
 }
 
+[[nodiscard]] CanonicalPointCloud eight_clusters_12_cloud() {
+  constexpr double local_scale = 1.0 / 1048576.0;
+  constexpr double transverse_scale = 1.0 / 4194304.0;
+  std::vector<CertifiedPoint3> input;
+  input.reserve(12U);
+  for (std::size_t point_index = 0U;
+       point_index < 12U;
+       ++point_index) {
+    const std::size_t cluster = point_index % 8U;
+    const std::size_t local = point_index / 8U + 1U;
+    const double center_x = (cluster & 1U) == 0U ? 0.25 : 0.75;
+    const double center_y = (cluster & 2U) == 0U ? 0.25 : 0.75;
+    const double center_z = (cluster & 4U) == 0U ? 0.25 : 0.75;
+    const std::size_t permuted_y =
+        (local * 40503U + cluster * 7919U) % 65536U;
+    const std::size_t permuted_z =
+        (local * 25717U + cluster * 104729U) % 65536U;
+    input.push_back(point(
+        center_x + static_cast<double>(local) * local_scale,
+        center_y + static_cast<double>(permuted_y) * transverse_scale,
+        center_z + static_cast<double>(permuted_z) * transverse_scale));
+  }
+  return CanonicalPointCloud::rejecting_duplicates(input);
+}
+
+[[nodiscard]] ExactLevel eight_clusters_k5_batch_134_level() {
+  return {
+      BigInt{"184275717930382362955087706835462389"},
+      BigInt{"1100610387434899158997161593872056320"},
+  };
+}
+
 [[nodiscard]] CanonicalPointCloud ac_de_cloud() {
   const std::array<CertifiedPoint3, 5U> input{
       point(0.0, 0.0, 7.0),
@@ -1144,6 +1176,134 @@ void test_chain_and_shared_seed_suffix() {
           seed_f1->terminal_node_index == node_f2->node_index && shared_suffix &&
           !seed_f0->reused_existing_node && seed_f1->reused_existing_node,
       "the F1 seed projection shares the suffix already built from F0");
+}
+
+void test_unresolved_step_reuses_closed_relative_positive_suffix() {
+  const CanonicalPointCloud cloud = eight_clusters_12_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactDirectSparseFacetKey closed_suffix_root = key({0U, 2U, 4U});
+  const ExactDirectSparseFacetKey later_source = key({2U, 4U, 6U});
+  const ExactLevel closed_level = eight_clusters_k5_batch_134_level();
+  const ExactDirectSparseFacetDescentClosureBudget budget =
+      generous_closure_budget();
+  const ExactDirectSparseFacetWitness query_witness = witness(9341U);
+
+  const std::array<ExactDirectSparseFacetDescentClosureSeed, 1U>
+      discovery_seed{{{0U, closed_suffix_root}}};
+  const ExactDirectSparsePositiveFacetLocator empty_locator = make_locator();
+  const auto unresolved = build_and_verify(
+      index,
+      cloud,
+      discovery_seed,
+      closed_level,
+      query_witness,
+      empty_locator,
+      budget,
+      {},
+      LbvhTraversalOrder::near_first,
+      "the eight-cluster closed-suffix discovery closure");
+  const auto* const unresolved_projection = find_projection(unresolved, 0U);
+  const auto* const unresolved_root =
+      find_node(unresolved, closed_suffix_root);
+  check(
+      unresolved.certified_complete_with_unresolved_terminals() &&
+          unresolved_projection != nullptr && unresolved_root != nullptr &&
+          unresolved_root->outgoing_edge_index.has_value() &&
+          unresolved_projection->terminal_node_index <
+              unresolved.nodes.size() &&
+          unresolved_projection->terminal_node_index !=
+              unresolved_root->node_index,
+      "[0,2,4] has a certified nontrivial unresolved suffix in the exact eight-cluster cut");
+  if (unresolved_projection == nullptr || unresolved_root == nullptr ||
+      !unresolved_root->outgoing_edge_index.has_value() ||
+      unresolved_projection->terminal_node_index >= unresolved.nodes.size() ||
+      unresolved_projection->terminal_node_index ==
+          unresolved_root->node_index) {
+    return;
+  }
+
+  const ExactDirectSparseFacetKey positive_terminal =
+      unresolved.nodes[unresolved_projection->terminal_node_index].facet_key;
+  ExactDirectSparsePositiveFacetLocator locator = make_locator();
+  seed_binding(locator, positive_terminal, 3U, 9342U);
+  const std::array<ExactDirectSparseFacetDescentClosureSeed, 2U> seeds{{
+      {0U, closed_suffix_root},
+      {1U, later_source},
+  }};
+  const auto result = build_and_verify(
+      index,
+      cloud,
+      seeds,
+      closed_level,
+      query_witness,
+      locator,
+      budget,
+      {},
+      LbvhTraversalOrder::near_first,
+      "the eight-cluster unresolved-to-closed-positive-suffix closure");
+
+  check(
+      result.certified_complete_relative_positive_closure() &&
+          !result.contradiction_witness.has_value() &&
+          result.counters.memoized_suffix_reuse_count >= 1U,
+      "the later strict-unresolved step reuses the already closed relative-positive suffix without contradiction");
+  check_functional_forest_shape(
+      result,
+      "the eight-cluster unresolved-to-closed-positive-suffix closure");
+
+  const auto* const suffix_root_node =
+      find_node(result, closed_suffix_root);
+  const auto* const later_source_node = find_node(result, later_source);
+  const auto* const first_projection = find_projection(result, 0U);
+  const auto* const second_projection = find_projection(result, 1U);
+  check(
+      suffix_root_node != nullptr && later_source_node != nullptr &&
+          first_projection != nullptr && second_projection != nullptr,
+      "both eight-cluster seeds and their projections are interned");
+  if (suffix_root_node == nullptr || later_source_node == nullptr ||
+      first_projection == nullptr || second_projection == nullptr) {
+    return;
+  }
+
+  const bool later_edge_targets_closed_suffix =
+      later_source_node->outgoing_edge_index.has_value() &&
+      *later_source_node->outgoing_edge_index < result.edges.size() &&
+      result.edges[*later_source_node->outgoing_edge_index]
+              .target_node_index == suffix_root_node->node_index;
+  const bool suffix_root_is_closed_nonterminal =
+      suffix_root_node->terminal_pointer_certified &&
+      suffix_root_node->outgoing_edge_index.has_value() &&
+      suffix_root_node->terminal_node_index < result.nodes.size() &&
+      suffix_root_node->terminal_node_index != suffix_root_node->node_index;
+  check(
+      later_source_node->local_step_decision ==
+              ExactDirectSparseFacetDescentStepDecision::
+                  complete_unresolved_strict_successor_not_bound &&
+          later_edge_targets_closed_suffix &&
+          suffix_root_is_closed_nonterminal &&
+          suffix_root_node->closure_disposition ==
+              ExactDirectSparseFacetDescentClosureDisposition::
+                  relative_positive,
+      "[2,4,6] reaches closed nonterminal [0,2,4] through the strict-unresolved seam");
+  if (!suffix_root_is_closed_nonterminal) {
+    return;
+  }
+
+  const auto& terminal =
+      result.nodes[suffix_root_node->terminal_node_index];
+  check(
+      first_projection->terminal_node_index == terminal.node_index &&
+          second_projection->terminal_node_index == terminal.node_index &&
+          later_source_node->terminal_node_index == terminal.node_index &&
+          terminal.terminal_pointer_certified &&
+          terminal.terminal_node_index == terminal.node_index &&
+          !terminal.outgoing_edge_index.has_value() &&
+          terminal.kind ==
+              ExactDirectSparseFacetDescentNodeKind::
+                  positive_locator_terminal &&
+          terminal.resolved_component_handle ==
+              std::optional<ExactDirectSparseComponentHandle>{3U},
+      "both eight-cluster seeds share the same directly bound positive terminal");
 }
 
 void test_five_point_ac_to_de_relative_positive_closure() {
@@ -2303,6 +2463,7 @@ int main() {
   test_top_k_proposal_preinterned_seed_reached_as_dynamic_successor();
   test_top_k_proposal_atomic_rejections();
   test_chain_and_shared_seed_suffix();
+  test_unresolved_step_reuses_closed_relative_positive_suffix();
   test_five_point_ac_to_de_relative_positive_closure();
   test_top_k_proposal_ac_to_de_exact_carrier_invariance();
   test_order_traversal_collisions_and_duplicates();

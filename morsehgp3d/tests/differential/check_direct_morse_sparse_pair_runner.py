@@ -94,7 +94,12 @@ def require_static_contract(project: Path) -> None:
         "make_sparse_pair_maximum_closed_rank(options)",
         "make_sparse_pair_advance_budget(options)",
         "make_sparse_pair_total_capacity(options)",
-        'morsehgp3d.direct-morse-product-run.v3',
+        "build_exact_direct_morse_vertical_target_proposal_pipeline(",
+        "build_exact_direct_morse_vertical_journal(",
+        "report.vertical_target_pipeline_certified &&",
+        "report.vertical_journal_certified;",
+        'morsehgp3d.direct-morse-product-run.v4',
+        '15_forest_relative_vertical_pipeline_and_journal',
         'p7b_replay_performed\\\":false',
     ):
         require(required in runner, f"runner is missing P8n token {required!r}")
@@ -106,11 +111,180 @@ def require_static_contract(project: Path) -> None:
         "morsehgp3d::pair_support" not in runner_links,
         "runner still directly links the P7b stream",
     )
+    require(
+        "morsehgp3d::direct_morse_vertical_target_proposal_pipeline"
+        in runner_links,
+        "runner does not directly link the vertical target pipeline",
+    )
+    require(
+        "morsehgp3d::direct_morse_vertical_journal" in runner_links,
+        "runner does not directly link the conditional vertical journal",
+    )
+
+
+def require_success_vertical_contract(report: dict[str, object]) -> None:
+    require(
+        report.get("phase")
+        == "15_forest_relative_vertical_pipeline_and_journal",
+        "success report retained the forest-only phase scope",
+    )
+    require(
+        report.get("terminal_stage") == "vertical_journal"
+        and report.get("stop_category") == "none"
+        and report.get("stop_detail") == "none",
+        "success report did not terminate at the conditional vertical journal",
+    )
+    require(
+        report.get("timing_scope")
+        == (
+            "attempted_single_process_cpu_generation_to_materialized_forest_"
+            "and_forest_relative_vertical_target_pipeline_and_conditional_"
+            "vertical_journal"
+        ),
+        "success report retained a forest-only timing scope",
+    )
+    timings = report.get("timings_ms")
+    require(isinstance(timings, dict), "success report lost its timing ledger")
+    require(
+        type(timings.get("vertical_target_pipeline")) in (int, float)
+        and timings["vertical_target_pipeline"] > 0
+        and type(timings.get("vertical_journal")) in (int, float)
+        and timings["vertical_journal"] > 0
+        and timings.get("vertical_target_replay_diagnostic") == 0.0,
+        "success timing ledger did not separate pipeline, journal and dormant diagnostic",
+    )
+
+    pipeline = report.get("vertical_target_pipeline")
+    require(isinstance(pipeline, dict), "success report lost the vertical pipeline")
+    counters = pipeline.get("counters")
+    require(isinstance(counters, dict), "vertical pipeline lost its counters")
+    required_groups = pipeline.get("required_groups")
+    required_proposals = pipeline.get("required_proposals")
+    require(
+        pipeline.get("attempted") is True
+        and pipeline.get("certified") is True
+        and isinstance(required_groups, int)
+        and required_groups > 0
+        and isinstance(required_proposals, int)
+        and required_proposals > 0,
+        "vertical target pipeline was not a nonempty certified stage",
+    )
+    require(
+        counters.get("executed_plans") == required_groups
+        and counters.get("replay_advances") == required_groups
+        and counters.get("closure_builds") == required_groups
+        and counters.get("proposal_adapters") == required_groups
+        and counters.get("unresolved_proposals", 0)
+        + counters.get("resolved_proposals", 0)
+        == required_proposals,
+        "vertical target pipeline partitions do not close",
+    )
+    require(
+        pipeline.get("forest_relative_only") is True
+        and pipeline.get("external_target_authority_replayed") is False
+        and pipeline.get("vertical_maps_complete") is False
+        and pipeline.get("public_status_claimed") is False,
+        "vertical target pipeline overclaimed its forest-relative scope",
+    )
+
+    journal = report.get("vertical_journal")
+    require(isinstance(journal, dict), "success report lost the vertical journal")
+    journal_counters = journal.get("counters")
+    require(isinstance(journal_counters, dict), "vertical journal lost its counters")
+    expected_labels = journal_counters.get("expected_labels")
+    unresolved_labels = journal_counters.get("unresolved_labels")
+    resolved_labels = journal_counters.get("resolved_labels")
+    complete_groups = journal_counters.get("complete_groups")
+    partial_groups = journal_counters.get("partial_groups")
+    expected_squares = journal_counters.get("expected_elementary_group_squares")
+    checked_squares = journal_counters.get("checked_elementary_group_squares")
+    unresolved_squares = journal_counters.get(
+        "unresolved_elementary_group_squares"
+    )
+    require(
+        journal.get("attempted") is True
+        and journal.get("certified_conditional_candidate") is True
+        and journal.get("source_forest_shape_replayed") is True
+        and journal.get("conditional_on_caller_fresh_source_forest_replay")
+        is True,
+        "conditional vertical journal was not certified from the fresh forest",
+    )
+    require(
+        expected_labels == required_proposals
+        and journal.get("label_resolutions") == expected_labels
+        and journal_counters.get("missing_labels") == 0
+        and isinstance(unresolved_labels, int)
+        and isinstance(resolved_labels, int)
+        and unresolved_labels + resolved_labels == expected_labels,
+        "conditional vertical journal label partition does not close",
+    )
+    require(
+        isinstance(complete_groups, int)
+        and isinstance(partial_groups, int)
+        and complete_groups + partial_groups == required_groups
+        and journal.get("group_checks") == required_groups,
+        "conditional vertical journal group partition does not close",
+    )
+    require(
+        isinstance(expected_squares, int)
+        and isinstance(checked_squares, int)
+        and isinstance(unresolved_squares, int)
+        and checked_squares + unresolved_squares == expected_squares,
+        "conditional vertical journal square partition does not close",
+    )
+    for unclaimed in (
+        "external_target_authority_replayed",
+        "global_morse_obligation_replayed",
+        "all_naturality_squares_replayed",
+        "vertical_maps_complete",
+        "gamma_cells_or_global_cofaces_materialized",
+        "higher_order_delaunay_materialized",
+        "public_status_claimed",
+    ):
+        require(journal.get(unclaimed) is False, f"vertical journal overclaimed {unclaimed}")
+
+    diagnostic = report.get("vertical_target_replay_diagnostic")
+    require(isinstance(diagnostic, dict), "success report lost diagnostic scope")
+    require(
+        diagnostic.get("attempted") is False
+        and diagnostic.get("callback_invoked") is False
+        and diagnostic.get("advance_certified") is False
+        and diagnostic.get("source_atomic_group_index") is None
+        and diagnostic.get("source_batch_index") is None
+        and diagnostic.get("source_keys") == []
+        and diagnostic.get("canonical_distinct_target_keys") == []
+        and diagnostic.get("contradiction_witness") is None
+        and diagnostic.get("global_structure_materialized") is False
+        and diagnostic.get("public_status_claimed") is False,
+        "success report unexpectedly executed or populated failure replay",
+    )
+
+
+def require_vertical_not_attempted(report: dict[str, object]) -> None:
+    pipeline = report.get("vertical_target_pipeline")
+    journal = report.get("vertical_journal")
+    diagnostic = report.get("vertical_target_replay_diagnostic")
+    require(
+        isinstance(pipeline, dict)
+        and pipeline.get("attempted") is False
+        and pipeline.get("certified") is False,
+        "an upstream stop attempted the vertical target pipeline",
+    )
+    require(
+        isinstance(journal, dict)
+        and journal.get("attempted") is False
+        and journal.get("certified_conditional_candidate") is False,
+        "an upstream stop attempted the conditional vertical journal",
+    )
+    require(
+        isinstance(diagnostic, dict) and diagnostic.get("attempted") is False,
+        "an upstream stop attempted vertical failure replay",
+    )
 
 
 def require_success_projection(report: dict[str, object]) -> None:
     require(
-        report.get("schema") == "morsehgp3d.direct-morse-product-run.v3",
+        report.get("schema") == "morsehgp3d.direct-morse-product-run.v4",
         "success report has the wrong schema",
     )
     require(report.get("pipeline_complete") is True, "pipeline did not close")
@@ -439,6 +613,7 @@ def require_success_projection(report: dict[str, object]) -> None:
     require(report.get("pipeline_counts") == expected_pipeline, "pipeline projection changed")
     require(report.get("decisions") == expected_decisions, "downstream decisions changed")
     require(report.get("forest") == expected_forest, "forest projection changed")
+    require_success_vertical_contract(report)
 
 
 def require_capacity_stop(report: dict[str, object]) -> None:
@@ -529,6 +704,7 @@ def require_capacity_stop(report: dict[str, object]) -> None:
         all(value == 0 for value in forest.values()),
         "record-cap run retained forest output",
     )
+    require_vertical_not_attempted(report)
 
 
 def require_resident_guard(report: dict[str, object]) -> None:
@@ -541,6 +717,7 @@ def require_resident_guard(report: dict[str, object]) -> None:
     require(report.get("canonical_point_count") == 0, "resident guard generated the cloud")
     pair = report.get("pair_support")
     require(isinstance(pair, dict) and pair.get("status") == "not_run", "resident guard ran P8l")
+    require_vertical_not_attempted(report)
 
 
 def require_complete_diagnostic_contract(report: dict[str, object]) -> None:
@@ -566,6 +743,7 @@ def require_complete_diagnostic_contract(report: dict[str, object]) -> None:
         and total_capacity["schedule_advances"] > 2**63,
         "complete diagnostic retained the caller P8l fail-fast cap",
     )
+    require_success_vertical_contract(report)
 
 
 def main() -> int:
@@ -606,12 +784,15 @@ def main() -> int:
     print(
         json.dumps(
             {
-                "schema": "morsehgp3d.phase14.sparse_pair_runner_gate.v1",
+                "schema": "morsehgp3d.phase15.vertical_product_runner_gate.v2",
                 "bounded_p7b_projection_matched": True,
                 "p7b_default_runner_replay_count": 0,
                 "p8l_capacity_stop_typed": True,
                 "resident_50001_fail_fast": True,
                 "complete_diagnostic_contract": True,
+                "vertical_target_pipeline_required": True,
+                "conditional_vertical_journal_required": True,
+                "vertical_nonclaims_preserved": True,
             },
             separators=(",", ":"),
             sort_keys=True,
