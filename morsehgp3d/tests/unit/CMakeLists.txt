@@ -1255,6 +1255,46 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
+  test_hierarchy_direct_sparse_successive_incidence.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
+  PRIVATE morsehgp3d::direct_sparse_successive_incidence
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
+  test_hierarchy_direct_sparse_successive_incidence_star_journal.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
+  PRIVATE morsehgp3d::direct_sparse_successive_incidence_star_journal
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_journal_tests
   test_hierarchy_direct_sparse_gateway_candidate_journal.cpp
 )
@@ -2873,6 +2913,8 @@ set(
   morsehgp3d_hierarchy_direct_sparse_facet_descent_step_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_closure_tests
   morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+  morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
+  morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_journal_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_localization_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_clock_tests
@@ -3908,6 +3950,14 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_first_incidence
   COMMAND morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_successive_incidence
+  COMMAND morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_successive_incidence_star_journal
+  COMMAND morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_gateway_candidate_journal

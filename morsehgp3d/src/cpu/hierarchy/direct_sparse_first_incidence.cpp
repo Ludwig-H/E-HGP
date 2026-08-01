@@ -1,5 +1,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_first_incidence.hpp"
 
+#include "direct_sparse_incidence_engine.hpp"
+
 #include "morsehgp3d/exact/support.hpp"
 
 #include <algorithm>
@@ -425,6 +427,7 @@ class ExactDirectSparseFirstIncidenceBuilder {
       const spatial::CanonicalPointCloud& cloud,
       const ExactDirectSparseFacetKey& source_facet_key,
       std::span<const PointId> incumbent_seed_point_ids,
+      std::optional<exact::ExactLevel> exclusive_lower_squared_level,
       const ExactDirectSparseFirstIncidenceBudget& budget,
       spatial::LbvhTraversalOrder traversal_order)
       : index_(index),
@@ -432,6 +435,8 @@ class ExactDirectSparseFirstIncidenceBuilder {
         source_facet_key_(source_facet_key),
         source_point_ids_(used_point_ids(source_facet_key_)),
         incumbent_seed_point_ids_(incumbent_seed_point_ids),
+        exclusive_lower_squared_level_(
+            std::move(exclusive_lower_squared_level)),
         budget_(budget),
         traversal_order_(traversal_order) {
     result_.source_facet_key = source_facet_key_;
@@ -634,8 +639,7 @@ class ExactDirectSparseFirstIncidenceBuilder {
         classified_point_count !=
             result_.audit.exact_point_evaluation_count ||
         result_.audit.excluded_facet_point_count !=
-            source_point_ids_.size() ||
-        !incumbent_squared_level_.has_value()) {
+            source_point_ids_.size()) {
       throw std::logic_error(
           "a complete direct sparse first-incidence traversal lost an eligible point");
     }
@@ -643,6 +647,19 @@ class ExactDirectSparseFirstIncidenceBuilder {
       return exhausted(
           ExactDirectSparseFirstIncidenceStopReason::
               cominimizer_entry_limit);
+    }
+    if (!incumbent_squared_level_.has_value()) {
+      if (!exclusive_lower_squared_level_.has_value() ||
+          at_or_below_exclusive_threshold_point_count_ !=
+              result_.audit.exact_point_evaluation_count) {
+        throw std::logic_error(
+            "a threshold-complete direct sparse incidence lost a candidate classification");
+      }
+      result_.all_cominimizers_retained_atomically = true;
+      result_.no_partial_first_incidence_payload_published = true;
+      result_.decision =
+          ExactDirectSparseFirstIncidenceDecision::complete_no_coface;
+      return std::move(result_);
     }
     std::sort(
         result_.cominimizers.begin(),
@@ -1002,6 +1019,11 @@ class ExactDirectSparseFirstIncidenceBuilder {
 
   void observe_candidate(
       ExactDirectSparseFirstIncidenceMinimizer candidate) {
+    if (exclusive_lower_squared_level_.has_value() &&
+        candidate.squared_level <= *exclusive_lower_squared_level_) {
+      ++at_or_below_exclusive_threshold_point_count_;
+      return;
+    }
     if (!incumbent_squared_level_.has_value() ||
         candidate.squared_level < *incumbent_squared_level_) {
       incumbent_squared_level_ = candidate.squared_level;
@@ -1056,11 +1078,19 @@ class ExactDirectSparseFirstIncidenceBuilder {
   ExactDirectSparseFacetKey source_facet_key_{};
   std::span<const PointId> source_point_ids_;
   std::span<const PointId> incumbent_seed_point_ids_;
+  std::optional<exact::ExactLevel> exclusive_lower_squared_level_;
   ExactDirectSparseFirstIncidenceBudget budget_{};
   spatial::LbvhTraversalOrder traversal_order_;
   ExactDirectSparseFirstIncidenceResult result_{};
   std::optional<exact::ExactLevel> incumbent_squared_level_;
+  std::size_t at_or_below_exclusive_threshold_point_count_{};
   bool cominimizer_overflowed_{false};
+
+ public:
+  [[nodiscard]] std::size_t
+  at_or_below_exclusive_threshold_point_count() const noexcept {
+    return at_or_below_exclusive_threshold_point_count_;
+  }
 };
 
 bool ExactDirectSparseFirstIncidenceResult::
@@ -1128,6 +1158,40 @@ bool ExactDirectSparseFirstIncidenceResult::certified_budget_exhaustion()
                          no_first_incidence_budget_exhausted;
 }
 
+detail::ExactDirectSparseIncidenceEngineOutcome
+detail::build_exact_direct_sparse_incidence_engine(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetKey& source_facet_key,
+    std::span<const PointId> incumbent_seed_point_ids,
+    std::optional<exact::ExactLevel> exclusive_lower_squared_level,
+    const ExactDirectSparseFirstIncidenceBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order) {
+  if (!index.validated_for(cloud)) {
+    throw std::invalid_argument(
+        "the Morton LBVH belongs to a different canonical point namespace");
+  }
+  require_valid_traversal_order(traversal_order);
+  require_valid_source_key(cloud, source_facet_key);
+  require_valid_incumbent_seeds(
+      cloud, source_facet_key, incumbent_seed_point_ids);
+  const std::optional<exact::ExactLevel> retained_threshold =
+      exclusive_lower_squared_level;
+  ExactDirectSparseFirstIncidenceBuilder builder{
+      index,
+      cloud,
+      source_facet_key,
+      incumbent_seed_point_ids,
+      std::move(exclusive_lower_squared_level),
+      budget,
+      traversal_order};
+  ExactDirectSparseFirstIncidenceResult traversal = builder.run();
+  return {
+      std::move(traversal),
+      retained_threshold,
+      builder.at_or_below_exclusive_threshold_point_count()};
+}
+
 ExactDirectSparseFirstIncidenceResult
 build_exact_direct_sparse_first_incidence(
     const spatial::MortonLbvhIndex& index,
@@ -1152,22 +1216,17 @@ build_exact_direct_sparse_first_incidence_with_incumbent_seeds(
     std::span<const PointId> incumbent_seed_point_ids,
     const ExactDirectSparseFirstIncidenceBudget& budget,
     spatial::LbvhTraversalOrder traversal_order) {
-  if (!index.validated_for(cloud)) {
-    throw std::invalid_argument(
-        "the Morton LBVH belongs to a different canonical point namespace");
-  }
-  require_valid_traversal_order(traversal_order);
-  require_valid_source_key(cloud, source_facet_key);
-  require_valid_incumbent_seeds(
-      cloud, source_facet_key, incumbent_seed_point_ids);
-  ExactDirectSparseFirstIncidenceBuilder builder{
-      index,
-      cloud,
-      source_facet_key,
-      incumbent_seed_point_ids,
-      budget,
-      traversal_order};
-  ExactDirectSparseFirstIncidenceResult result = builder.run();
+  detail::ExactDirectSparseIncidenceEngineOutcome outcome =
+      detail::build_exact_direct_sparse_incidence_engine(
+          index,
+          cloud,
+          source_facet_key,
+          incumbent_seed_point_ids,
+          std::nullopt,
+          budget,
+          traversal_order);
+  ExactDirectSparseFirstIncidenceResult result =
+      std::move(outcome.traversal);
   if (!result.certified_complete_first_incidence() &&
       !result.certified_complete_no_coface() &&
       !result.certified_budget_exhaustion()) {

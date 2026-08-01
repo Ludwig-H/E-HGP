@@ -1433,6 +1433,20 @@ L'audit d'architecture doit distinguer `bounded_oracle_gamma_materialized_transi
 
 Les mesures Release doivent rester attribuées à leurs exécutions distinctes : manuel 1 `6047.695/6058.414 ms` composant/total et `real/user/sys=6.065/5.625/0.014 s`; manuel 2 `6237.051/6242.016 ms`; checker direct initial `32.483 s`, dont sous-run carrier `14431.934/14440.145 ms`; audit direct final après renommage du gate `54.520 s`. Le CTest final avec timeout de 90 s passe `1/1`, `test=49.33 s` et `total=49.35 s`. La variabilité de ces chronos interdit toute interprétation comme benchmark ou SLO.
 
+### 14.14i Validation du curseur d'incidences successives
+
+Le mode est `reference_cpu / hgp_reduced / certified`, de portée `single_supplied_facet_next_strict_one_point_coface_level_only`. Sur la facette `03` d'E5, un premier appel sans seuil doit rendre les deux co-minimiseurs `013` et `023` à $\frac{17}{2}$; le seuil exclusif $\frac{17}{2}$ doit rendre seulement `034` à $\frac{85}{9}$; le seuil $\frac{85}{9}$ doit certifier l'absence de niveau ultérieur après évaluation exacte des trois points admissibles.
+
+Les parcours near-first et far-first et un incumbent seed exact doivent conserver niveau et shell. Les neuf caps exactement suffisants passent et chacun moins un rend un échec atomique sans niveau ni co-minimiseur. Le vérificateur doit rejeter seuil, niveau, compteur, fait d'architecture, tail de support et miniboule imbriquée surdimensionnée mutés avant de certifier le replay. Le cas $n=k$ reste terminal et une facette de cardinal onze est refusée. Le test historique de première incidence et le nouveau test passent ensemble `2/2` en 1,02 s lors de l'audit indépendant.
+
+### 14.14j Validation de l'étoile successive higher-order fournie
+
+Le mode reste `reference_cpu / hgp_reduced / certified`, avec la portée `bounded_successive_incidence_star_of_supplied_direct_higher_order_facets_only`. Le builder doit scanner toutes les familles, compter séparément les familles $k=1$ puis les exclure avant toute requête géométrique, et n'interroger que les suppressions strictes ou égales des familles $k\geq2$. L'identité des appels est nombre de shells plus nombre de facettes; les occurrences doivent valoir $\sum_{F}(n-\lvert F\rvert)$, la somme des minima de shells et celle des multiplicités de cofaces doivent retrouver le même total.
+
+Sur E5, les comptes attendus sont dix familles scannées, six familles $k=1$ exclues, quatre familles higher-order, huit facettes, 24 occurrences, dix triangles, quatre cofaces directes et six résiduelles. Les résidus sont exactement `013/023` à $\frac{17}{2}$, `034` à $\frac{85}{9}$ et `014/124/134` à $10$, dans trois lots de tailles deux, un et trois. Near/far et permutation d'entrée doivent conserver le payload scientifique; une source sans selle higher-order doit fermer un journal vide.
+
+Chaque cap global et chacun des neuf caps enfant moins un doivent effacer les cinq arènes scientifiques. Les mutations d'enum, propriétaire, point ajouté, support, niveau, lot, statut public et journal source doivent être rejetées par reconstruction fraîche. Le CTest Release ciblé passe `1/1` en 0,49 s. Le succès garde faux la complétude Gamma globale, la source silencieuse produit, toute mutation de forêt, M.1, naturalité, verticalité, 50 k, SLO et statut public; aucun GCP n'est requis.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.

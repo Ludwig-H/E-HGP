@@ -11,6 +11,8 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_successive_incidence.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_successive_incidence_star_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/anchored_pair_candidate_classifier.hpp"
@@ -117,6 +119,32 @@ int main() {
   static_assert(
       morsehgp3d::hierarchy::
           direct_morse_gamma_carrier_conformance_schema_version == 1U);
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_sparse_successive_incidence_schema_version == 1U);
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseSuccessiveIncidenceResult
+          installed_successive_incidence_probe;
+  if (installed_successive_incidence_probe
+          .certified_complete_next_incidence() ||
+      installed_successive_incidence_probe
+          .certified_complete_no_strictly_higher_coface() ||
+      installed_successive_incidence_probe.certified_budget_exhaustion()) {
+    std::cerr << "installed successive-incidence predicate accepted an empty result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_sparse_successive_incidence_star_journal_schema_version ==
+      1U);
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseSuccessiveIncidenceStarJournalResult
+          installed_successive_incidence_star_probe;
+  if (installed_successive_incidence_star_probe.certified_bounded_star()) {
+    std::cerr
+        << "installed successive-incidence star predicate accepted an empty result\n";
+    return 1;
+  }
   const morsehgp3d::hierarchy::
       ExactDirectMorseGammaCarrierConformanceResult
           installed_carrier_conformance_probe;

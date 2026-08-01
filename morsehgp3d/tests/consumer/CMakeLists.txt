@@ -24,6 +24,8 @@ target_link_libraries(
     morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
     morsehgp3d::direct_sparse_gateway_historical_quotient
     morsehgp3d::direct_sparse_positive_facet_prefix_sweep
+    morsehgp3d::direct_sparse_successive_incidence
+    morsehgp3d::direct_sparse_successive_incidence_star_journal
 )
 
 include(CTest)

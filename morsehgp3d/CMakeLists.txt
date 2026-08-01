@@ -1443,6 +1443,89 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_successive_incidence
+  STATIC
+    src/cpu/hierarchy/direct_sparse_successive_incidence.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_successive_incidence
+  ALIAS morsehgp3d_direct_sparse_successive_incidence
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_successive_incidence
+  PROPERTIES
+    EXPORT_NAME direct_sparse_successive_incidence
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_successive_incidence PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_successive_incidence
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_successive_incidence
+  PUBLIC
+    morsehgp3d::direct_sparse_first_incidence
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_successive_incidence PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_successive_incidence
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_sparse_successive_incidence_star_journal
+  STATIC
+    src/cpu/hierarchy/direct_sparse_successive_incidence_star_journal.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_successive_incidence_star_journal
+  ALIAS morsehgp3d_direct_sparse_successive_incidence_star_journal
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_successive_incidence_star_journal
+  PROPERTIES
+    EXPORT_NAME direct_sparse_successive_incidence_star_journal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_successive_incidence_star_journal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_successive_incidence_star_journal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_successive_incidence_star_journal
+  PUBLIC
+    morsehgp3d::direct_closed_saddle_incidence_journal
+    morsehgp3d::direct_sparse_successive_incidence
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_successive_incidence_star_journal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_successive_incidence_star_journal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_sparse_gateway_candidate_journal
   STATIC
     src/cpu/hierarchy/direct_sparse_gateway_candidate_journal.cpp
@@ -5179,6 +5262,8 @@ install(
     morsehgp3d_direct_sparse_facet_descent_step
     morsehgp3d_direct_sparse_facet_descent_closure
     morsehgp3d_direct_sparse_first_incidence
+    morsehgp3d_direct_sparse_successive_incidence
+    morsehgp3d_direct_sparse_successive_incidence_star_journal
     morsehgp3d_direct_sparse_gateway_candidate_journal
     morsehgp3d_direct_sparse_gateway_candidate_localization
     morsehgp3d_direct_sparse_gateway_clock

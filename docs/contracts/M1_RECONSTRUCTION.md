@@ -158,6 +158,10 @@ La coupe impose aussi la distinction normative suivante : un carrier actif est l
 
 Ce checkpoint conserve seulement des audits agrégés et reconstruit récursivement le détail depuis les sources. Il ne sérialise aucun `Attachment`, chemin, coface, incidence, composante ou carrier, n'injecte pas les labels Gamma résiduels dans la forêt directe et ne rend donc vrai ni `attachments_complete_by_order`, ni H5 sur un domaine non borné, ni M.1.
 
+`ExactDirectSparseSuccessiveIncidence` apporte maintenant un certificat exact plus local : pour une facette fournie et un seuil exclusif, il rend le prochain shell complet de cofaces à un point ou prouve qu'il n'en existe plus. `ExactDirectSparseSuccessiveIncidenceStarJournal` épuise ce curseur sur toutes les suppressions distinctes des familles directes $k\geq2$, après scan et exclusion explicite des familles $k=1$. Sur E5, cette étoile retrouve exactement les six triangles résiduels responsables des trois checkpoints silencieux.
+
+Ce progrès ne rend pas H3 ou H5 globaux : le journal est complet pour l'étoile fournie, mais ne prouve pas que toute facette utile apparaît comme suppression directe. Il ne construit aucun `Attachment`, ne mute pas le quotient et conserve `product_sparse_silent_source_complete=false`. Une fermeture récursive non justifiée est interdite, car elle pourrait reconstruire Gamma global sous un autre nom.
+
 Le runner `morsehgp3d.direct-morse-product-run.v7`, phase `15_bounded_direct_gamma_carrier_group_conformance`, expose ce checkpoint uniquement dans le mode `bounded_direct_gamma_carrier_conformance_qualification`; son gate est `morsehgp3d.phase15.vertical_product_runner_gate.v5`. Le builder inclut son vérificateur frais embarqué et le runner n'effectue aucun replay externe supplémentaire. Cette enveloppe exécutable reste un falsificateur : les anciens modes gardent le reçu carrier dormant et le mode carrier garde O5, l'autorité $K=2\to1$ et la verticalité dormants. Ni `pipeline_complete` dans ce mode borné, ni son chrono englobant builder et vérificateur ne constituent une attestation de H5 global, de complétude produit ou de M.1.
 
 ### H6 — simultanéité exacte
