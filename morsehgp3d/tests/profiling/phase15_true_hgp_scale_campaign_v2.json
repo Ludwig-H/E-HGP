@@ -1,0 +1,131 @@
+{
+  "schema": "morsehgp3d.phase15.true_hgp_scale_campaign_plan.v2",
+  "phase": "15",
+  "algorithm_scope": "complete_certified_morse_hgp3d_source_orders_1_through_10_with_at_least20_condensed_view",
+  "artifact_role": "future_complete_true_hgp_product_gate",
+  "backend": "cuda_g4",
+  "profile": "hgp_reduced",
+  "mode": "budgeted_true_source_then_at_least_min_cluster_size20_condensed_view",
+  "maximum_order": 10,
+  "entry_gate_satisfied": false,
+  "execution_status": "blocked_until_complete_true_hgp_binary_and_entry_gate",
+  "binary_protocol": {
+    "capability_argument": "--phase15-true-hgp-capabilities-json",
+    "capability_schema": "morsehgp3d.phase15.true_hgp_binary_capabilities.v2",
+    "hartigan_level_manifest_record_schema": "morsehgp3d.phase15.exact_hartigan_level_manifest_record.v1",
+    "run_request_schema": "morsehgp3d.phase15.true_hgp_scale_run_request.v2",
+    "session_argument": "--phase15-true-hgp-session-jsonl",
+    "session_request_schema": "morsehgp3d.phase15.true_hgp_session_request.v2",
+    "run_schema": "morsehgp3d.phase15.true_hgp_scale_run.v2"
+  },
+  "claim_policy": {
+    "benchmark_can_promote_public_exact": false,
+    "component_measurements_are_results": false,
+    "pair_first_measurements_are_results": false,
+    "point_mst_surrogate_measurements_are_results": false,
+    "requires_complete_binary_capability_handshake": true
+  },
+  "families": [
+    {
+      "id": "affine_uniform_binary64",
+      "generator": "deterministic_affine_uniform_binary64_v1",
+      "parameters": {
+        "affine_condition_bound": 16,
+        "coordinate_mantissa_bits": 53
+      },
+      "warmup_seeds": [5001, 5002],
+      "measured_seeds": [5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110]
+    },
+    {
+      "id": "jittered_dyadic_grid3d",
+      "generator": "deterministic_jittered_dyadic_grid3d_v1",
+      "parameters": {
+        "dyadic_denominator_exponent": 30,
+        "jitter_numerator_bound": 3
+      },
+      "warmup_seeds": [6001, 6002],
+      "measured_seeds": [6101, 6102, 6103, 6104, 6105, 6106, 6107, 6108, 6109, 6110]
+    },
+    {
+      "id": "balanced_multiscale_clusters",
+      "generator": "deterministic_balanced_multiscale_clusters_v1",
+      "parameters": {
+        "cluster_count": 64,
+        "scale_level_count": 8
+      },
+      "warmup_seeds": [4001, 4002],
+      "measured_seeds": [4101, 4102, 4103, 4104, 4105, 4106, 4107, 4108, 4109, 4110]
+    }
+  ],
+  "fifty_k_protocol": {
+    "point_count": 50000,
+    "warmups_per_family_session": 2,
+    "measured_runs_per_family": 10,
+    "fresh_cloud_per_measured_run": true,
+    "recovery_warmups_are_measurements": false,
+    "nearest_rank_family_p95_rank": 10,
+    "nearest_rank_aggregate_p95_rank": 29,
+    "slo_comparison": "strict_less_than",
+    "slo_p95_warm_e2e_ns": 1000000000,
+    "slo_role": "secondary_progression_gate",
+    "wall_time_cap_ms_per_run": 30000
+  },
+  "hartigan_level_contract": {
+    "binary64_level_serialization_allowed": false,
+    "denominator_must_be_positive": true,
+    "integer_encoding": "canonical_base10_without_plus_or_leading_zero",
+    "manifest_record_schema": "morsehgp3d.phase15.exact_hartigan_level_manifest_record.v1",
+    "maximum_decimal_digits_per_integer": 4096,
+    "one_record_per_equal_level_batch": true,
+    "ordered_record_chain": "sha256_v1",
+    "rational_must_be_reduced": true,
+    "representation": "canonical_reduced_rational_decimal_v1"
+  },
+  "massive_scales": [
+    {
+      "point_count": 1000000,
+      "required_previous_point_count": 50000,
+      "family": "affine_uniform_binary64",
+      "seed": 5101,
+      "wall_time_cap_ms": 600000,
+      "resume_contract": "one_forced_checkpoint_then_fresh_resume_with_uninterrupted_digest_equivalence"
+    },
+    {
+      "point_count": 10000001,
+      "required_previous_point_count": 1000000,
+      "family": "affine_uniform_binary64",
+      "seed": 5101,
+      "wall_time_cap_ms": 3600000,
+      "resume_contract": "one_forced_checkpoint_then_fresh_resume_with_uninterrupted_digest_equivalence"
+    },
+    {
+      "point_count": 30000000,
+      "required_previous_point_count": 10000001,
+      "family": "affine_uniform_binary64",
+      "seed": 5101,
+      "wall_time_cap_ms": 7200000,
+      "resume_contract": "one_forced_checkpoint_then_fresh_resume_with_uninterrupted_digest_equivalence"
+    }
+  ],
+  "view": {
+    "relation": "at_least",
+    "min_cluster_size": 20,
+    "cardinality_basis": "distinct_PointId_union_of_component_facets",
+    "evaluation_boundary": "after_complete_equal_level_batch"
+  },
+  "timing_contract": {
+    "cloud_generation_timed": false,
+    "outer_harness_spool_timed": false,
+    "p95_rule": "nearest_rank",
+    "warm_e2e_begins_with_raw_coordinates_in_memory": true,
+    "warm_e2e_ends_after_source_view_validation_and_scientific_output_seal": true
+  },
+  "spool_contract": {
+    "identity_fields": ["git_sha", "binary_sha256", "plan_sha256", "capabilities_sha256"],
+    "atomic_file_fsync_rename_directory_fsync": true,
+    "ordered_receipt_chain": "sha256_v1",
+    "active_run_checkpoint_in_head": true,
+    "posix_single_writer_lock": true,
+    "resume_rehashes_binary_and_plan": true
+  }
+}

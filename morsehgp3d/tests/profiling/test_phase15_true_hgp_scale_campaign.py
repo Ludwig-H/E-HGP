@@ -6,6 +6,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib.util
+import json
 import os
 from pathlib import Path
 import signal
@@ -21,7 +22,8 @@ from unittest import mock
 
 DIRECTORY = Path(__file__).resolve().parent
 HARNESS = DIRECTORY / "phase15_true_hgp_scale_campaign.py"
-PLAN = DIRECTORY / "phase15_true_hgp_scale_campaign_v1.json"
+PLAN = DIRECTORY / "phase15_true_hgp_scale_campaign_v2.json"
+LEGACY_PLAN = DIRECTORY / "phase15_true_hgp_scale_campaign_v1.json"
 if str(DIRECTORY) not in sys.path:
     sys.path.insert(0, str(DIRECTORY))
 
@@ -74,6 +76,7 @@ def make_complete_run(
             "exact_replay_closed": True,
             "forests_complete_by_order": [True] * campaign.MAXIMUM_ORDER,
             "gamma_complete_by_order": [True] * campaign.MAXIMUM_ORDER,
+            "hartigan_levels_complete": True,
             "numeric_failure_count": 0,
             "output_chain_closed": True,
             "silent_q1_incidences_complete": True,
@@ -107,6 +110,38 @@ def make_complete_run(
         ],
         "family": copy.deepcopy(request["family"]),
         "git_sha": GIT_SHA,
+        "hartigan_levels": {
+            "all_equal_level_batches_covered": True,
+            "binary64_level_count": 0,
+            "manifest_file": f"artifacts/{run_id}-hartigan-levels.jsonl",
+            "manifest_record_count": sum(
+                range(1, campaign.MAXIMUM_ORDER + 1)
+            ),
+            "manifest_sha256": hashlib.sha256(
+                f"hartigan-manifest:{run_id}".encode("ascii")
+            ).hexdigest(),
+            "ordered_rational_chain_sha256": hashlib.sha256(
+                f"hartigan-chain:{run_id}".encode("ascii")
+            ).hexdigest(),
+            "records_by_order": [
+                {
+                    "equal_level_batch_count": order,
+                    "first_level": {
+                        "denominator": "2",
+                        "numerator": str(4 * order + 1),
+                    },
+                    "last_level": {
+                        "denominator": "2",
+                        "numerator": str(2 * order + 1),
+                    },
+                    "order": order,
+                    "rational_record_count": order,
+                }
+                for order in range(1, campaign.MAXIMUM_ORDER + 1)
+            ],
+            "representation": campaign.HARTIGAN_LEVEL_REPRESENTATION,
+            "schema": campaign.HARTIGAN_LEVEL_RECEIPT_SCHEMA,
+        },
         "implementation": copy.deepcopy(campaign.IMPLEMENTATION_CONTRACT),
         "maximum_order": campaign.MAXIMUM_ORDER,
         "mode": campaign.MODE,
@@ -186,6 +221,27 @@ class TrueHgpPlanTests(unittest.TestCase):
         self.assertFalse(self.plan["entry_gate_satisfied"])
         self.assertEqual(self.plan, campaign.expected_plan_document())
         self.assertEqual(self.plan_digest, runtime.sha256_file(PLAN, "test plan"))
+        self.assertEqual(campaign.SLO_P95_NS, 1_000_000_000)
+        self.assertEqual(
+            self.plan["fifty_k_protocol"]["slo_role"],
+            "secondary_progression_gate",
+        )
+        self.assertEqual(
+            self.plan["hartigan_level_contract"],
+            campaign.HARTIGAN_LEVEL_CONTRACT,
+        )
+
+        legacy = json.loads(LEGACY_PLAN.read_text(encoding="ascii"))
+        self.assertEqual(
+            legacy["schema"],
+            "morsehgp3d.phase15.true_hgp_scale_campaign_plan.v1",
+        )
+        self.assertEqual(
+            legacy["fifty_k_protocol"]["slo_p95_warm_e2e_ns"],
+            100_000_000,
+        )
+        with self.assertRaisesRegex(campaign.ContractError, "frozen v2"):
+            campaign.read_plan(LEGACY_PLAN)
 
         requests = campaign.expected_50k_requests(self.plan)
         self.assertEqual(len(requests), 36)
@@ -199,6 +255,13 @@ class TrueHgpPlanTests(unittest.TestCase):
                 ["warmup", "warmup", *("measured" for _ in range(10))],
             )
             self.assertTrue(all(request["fresh_cloud"] for request in family_requests))
+            self.assertTrue(
+                all(
+                    request["hartigan_level_contract"]
+                    == campaign.HARTIGAN_LEVEL_CONTRACT
+                    for request in family_requests
+                )
+            )
 
         massive = campaign.expected_massive_requests(self.plan)
         self.assertEqual(
@@ -244,6 +307,13 @@ class TrueHgpPlanTests(unittest.TestCase):
                 git_sha=GIT_SHA,
             ),
             capabilities,
+        )
+        self.assertTrue(capabilities["capabilities"]["exact_rational_hartigan_levels"])
+        self.assertTrue(capabilities["capabilities"]["hartigan_level_manifest_complete"])
+        self.assertFalse(capabilities["capabilities"]["binary64_hartigan_levels"])
+        self.assertEqual(
+            capabilities["hartigan_level_contract"],
+            campaign.HARTIGAN_LEVEL_CONTRACT,
         )
         for flag in ("component_only", "pair_catalog_only", "point_mst_surrogate"):
             hostile = copy.deepcopy(capabilities)
@@ -354,6 +424,26 @@ class TrueHgpRunContractTests(unittest.TestCase):
             "integer closure mask": lambda run: run["closure"].__setitem__(
                 "coverage_complete_by_order", [1] * campaign.MAXIMUM_ORDER
             ),
+            "open exact Hartigan closure": lambda run: run["closure"].__setitem__(
+                "hartigan_levels_complete", False
+            ),
+            "binary64 Hartigan level": lambda run: run["hartigan_levels"].__setitem__(
+                "binary64_level_count", 1
+            ),
+            "non-rational Hartigan level": lambda run: run["hartigan_levels"][
+                "records_by_order"
+            ][0]["first_level"].__setitem__("numerator", 5.0),
+            "unreduced Hartigan level": lambda run: run["hartigan_levels"][
+                "records_by_order"
+            ][0].__setitem__(
+                "first_level", {"denominator": "2", "numerator": "2"}
+            ),
+            "missing rational batch": lambda run: run["hartigan_levels"][
+                "records_by_order"
+            ][0].__setitem__("rational_record_count", 0),
+            "Hartigan manifest traversal": lambda run: run[
+                "hartigan_levels"
+            ].__setitem__("manifest_file", "../hartigan-levels.jsonl"),
             "timed stages outside e2e": lambda run: run["timings_ns"].__setitem__(
                 "source_construction", run["timings_ns"]["warm_e2e"]
             ),

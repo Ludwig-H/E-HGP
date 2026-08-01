@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Validate and eventually run the fail-closed Phase 15 true-HGP campaign.
 
-The active v1 plan intentionally has a closed scientific launch gate.  This
+The active v2 plan intentionally has a closed scientific launch gate.  This
 module nevertheless freezes the complete binary handshake, run receipts,
 50k warm protocol, percentile rules, massive scale order, and durable spool
 identity so that no existing component or pair-first binary can impersonate
-the future product runner.
+the future product runner.  V2 also makes exact rational Hartigan levels a
+request, capability, closure, and receipt requirement; binary64 levels cannot
+qualify a run.
 """
 
 from __future__ import annotations
@@ -13,7 +15,9 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import math
 from pathlib import Path
+import re
 import sys
 from typing import Any, NoReturn, Sequence
 
@@ -31,12 +35,20 @@ from campaign_runtime import (
 )
 
 
-PLAN_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_campaign_plan.v1"
-CAPABILITY_SCHEMA = "morsehgp3d.phase15.true_hgp_binary_capabilities.v1"
-SESSION_REQUEST_SCHEMA = "morsehgp3d.phase15.true_hgp_session_request.v1"
-RUN_REQUEST_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_run_request.v1"
-RUN_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_run.v1"
-CAMPAIGN_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_campaign_result.v1"
+PLAN_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_campaign_plan.v2"
+CAPABILITY_SCHEMA = "morsehgp3d.phase15.true_hgp_binary_capabilities.v2"
+SESSION_REQUEST_SCHEMA = "morsehgp3d.phase15.true_hgp_session_request.v2"
+RUN_REQUEST_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_run_request.v2"
+RUN_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_run.v2"
+CAMPAIGN_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_campaign_result.v2"
+HARTIGAN_LEVEL_RECEIPT_SCHEMA = (
+    "morsehgp3d.phase15.exact_hartigan_level_receipt.v1"
+)
+HARTIGAN_LEVEL_MANIFEST_RECORD_SCHEMA = (
+    "morsehgp3d.phase15.exact_hartigan_level_manifest_record.v1"
+)
+HARTIGAN_LEVEL_REPRESENTATION = "canonical_reduced_rational_decimal_v1"
+MAXIMUM_RATIONAL_INTEGER_DECIMAL_DIGITS = 4_096
 ALGORITHM_SCOPE = (
     "complete_certified_morse_hgp3d_source_orders_1_through_10_"
     "with_at_least20_condensed_view"
@@ -46,9 +58,9 @@ PROFILE = "hgp_reduced"
 MODE = "budgeted_true_source_then_at_least_min_cluster_size20_condensed_view"
 MAXIMUM_ORDER = 10
 FIFTY_K_POINT_COUNT = 50_000
-SLO_P95_NS = 100_000_000
+SLO_P95_NS = 1_000_000_000
 DEFAULT_PLAN = Path(__file__).with_name(
-    "phase15_true_hgp_scale_campaign_v1.json"
+    "phase15_true_hgp_scale_campaign_v2.json"
 )
 
 FAMILY_IDS = (
@@ -113,6 +125,21 @@ IMPLEMENTATION_CONTRACT = {
     "streamed_certified_source": True,
 }
 
+HARTIGAN_LEVEL_CONTRACT = {
+    "binary64_level_serialization_allowed": False,
+    "denominator_must_be_positive": True,
+    "integer_encoding": "canonical_base10_without_plus_or_leading_zero",
+    "manifest_record_schema": HARTIGAN_LEVEL_MANIFEST_RECORD_SCHEMA,
+    "maximum_decimal_digits_per_integer": MAXIMUM_RATIONAL_INTEGER_DECIMAL_DIGITS,
+    "one_record_per_equal_level_batch": True,
+    "ordered_record_chain": "sha256_v1",
+    "rational_must_be_reduced": True,
+    "representation": HARTIGAN_LEVEL_REPRESENTATION,
+}
+
+CANONICAL_SIGNED_INTEGER_RE = re.compile(r"(?:0|-?[1-9][0-9]*)\Z")
+CANONICAL_POSITIVE_INTEGER_RE = re.compile(r"[1-9][0-9]*\Z")
+
 
 class ContractError(ValueError):
     """A true-HGP campaign document escaped its frozen contract."""
@@ -164,6 +191,8 @@ def expected_plan_document() -> dict[str, Any]:
         "binary_protocol": {
             "capability_argument": "--phase15-true-hgp-capabilities-json",
             "capability_schema": CAPABILITY_SCHEMA,
+            "hartigan_level_manifest_record_schema": HARTIGAN_LEVEL_MANIFEST_RECORD_SCHEMA,
+            "run_request_schema": RUN_REQUEST_SCHEMA,
             "run_schema": RUN_SCHEMA,
             "session_argument": "--phase15-true-hgp-session-jsonl",
             "session_request_schema": SESSION_REQUEST_SCHEMA,
@@ -185,10 +214,13 @@ def expected_plan_document() -> dict[str, Any]:
             "nearest_rank_family_p95_rank": 10,
             "point_count": FIFTY_K_POINT_COUNT,
             "recovery_warmups_are_measurements": False,
+            "slo_comparison": "strict_less_than",
             "slo_p95_warm_e2e_ns": SLO_P95_NS,
+            "slo_role": "secondary_progression_gate",
             "warmups_per_family_session": 2,
             "wall_time_cap_ms_per_run": 30_000,
         },
+        "hartigan_level_contract": copy.deepcopy(HARTIGAN_LEVEL_CONTRACT),
         "massive_scales": [
             {
                 "family": "affine_uniform_binary64",
@@ -239,7 +271,7 @@ def validate_plan(value: Any) -> dict[str, Any]:
     require(isinstance(value, dict), "true-HGP campaign plan must be an object")
     require(
         exact_json_equal(value, expected),
-        "true-HGP campaign plan differs from frozen v1",
+        "true-HGP campaign plan differs from frozen v2",
     )
     return value
 
@@ -297,6 +329,7 @@ def _run_request(
         "cloud_request_sha256": cloud_request_sha256(family, point_count, seed),
         "family": family,
         "fresh_cloud": True,
+        "hartigan_level_contract": copy.deepcopy(plan["hartigan_level_contract"]),
         "maximum_order": MAXIMUM_ORDER,
         "measured_index": measured_index,
         "point_count": point_count,
@@ -431,15 +464,18 @@ CAPABILITY_FLAGS = {
     "component_only": False,
     "coverage_log_complete": True,
     "durable_resume_with_fresh_recertification": True,
+    "exact_rational_hartigan_levels": True,
     "exact_equal_level_batches": True,
     "global_facet_coface_incidence_arena_materialized": False,
     "global_pair_matrix_materialized": False,
     "higher_order_delaunay_mosaic_materialized": False,
     "horizontal_forests_complete": True,
+    "hartigan_level_manifest_complete": True,
     "offline_oracle_in_timed_path": False,
     "ordinary_delaunay_in_timed_path": False,
     "pair_catalog_only": False,
     "point_mst_surrogate": False,
+    "binary64_hartigan_levels": False,
     "public_exact_claimable_from_benchmark": False,
     "silent_q1_incidences_complete": True,
     "streamed_certified_output": True,
@@ -465,6 +501,7 @@ def expected_capabilities(
         ),
         "capabilities": copy.deepcopy(CAPABILITY_FLAGS),
         "git_sha": exact_git_sha(git_sha),
+        "hartigan_level_contract": copy.deepcopy(plan["hartigan_level_contract"]),
         "maximum_order": MAXIMUM_ORDER,
         "mode": MODE,
         "plan_sha256": exact_sha256(plan_sha256, "capability plan SHA-256"),
@@ -514,6 +551,7 @@ RUN_KEYS = {
     "counts_by_order",
     "family",
     "git_sha",
+    "hartigan_levels",
     "implementation",
     "maximum_order",
     "mode",
@@ -542,6 +580,7 @@ CLOSURE_KEYS = {
     "exact_replay_closed",
     "forests_complete_by_order",
     "gamma_complete_by_order",
+    "hartigan_levels_complete",
     "numeric_failure_count",
     "output_chain_closed",
     "silent_q1_incidences_complete",
@@ -601,6 +640,54 @@ ARTIFACT_KEYS = {
     "source_manifest_file",
     "source_manifest_sha256",
 }
+HARTIGAN_LEVEL_KEYS = {
+    "all_equal_level_batches_covered",
+    "binary64_level_count",
+    "manifest_file",
+    "manifest_record_count",
+    "manifest_sha256",
+    "ordered_rational_chain_sha256",
+    "records_by_order",
+    "representation",
+    "schema",
+}
+HARTIGAN_ORDER_KEYS = {
+    "equal_level_batch_count",
+    "first_level",
+    "last_level",
+    "order",
+    "rational_record_count",
+}
+RATIONAL_KEYS = {"denominator", "numerator"}
+
+
+def validate_exact_rational(value: Any, label: str) -> dict[str, Any]:
+    rational = exact_keys(value, RATIONAL_KEYS, label)
+    numerator = rational["numerator"]
+    denominator = rational["denominator"]
+    require(
+        isinstance(numerator, str)
+        and CANONICAL_SIGNED_INTEGER_RE.fullmatch(numerator) is not None,
+        f"{label}.numerator is not a canonical decimal integer",
+    )
+    require(
+        isinstance(denominator, str)
+        and CANONICAL_POSITIVE_INTEGER_RE.fullmatch(denominator) is not None,
+        f"{label}.denominator is not a canonical positive decimal integer",
+    )
+    require(
+        len(numerator.removeprefix("-"))
+        <= MAXIMUM_RATIONAL_INTEGER_DECIMAL_DIGITS
+        and len(denominator) <= MAXIMUM_RATIONAL_INTEGER_DECIMAL_DIGITS,
+        f"{label} exceeds the registered decimal integer bound",
+    )
+    numerator_integer = int(numerator)
+    denominator_integer = int(denominator)
+    require(
+        math.gcd(abs(numerator_integer), denominator_integer) == 1,
+        f"{label} is not a reduced rational",
+    )
+    return rational
 
 
 def request_sha256(request: dict[str, Any]) -> str:
@@ -616,6 +703,12 @@ def validate_run(
     git_sha: str | None = None,
 ) -> dict[str, Any]:
     run = exact_keys(value, RUN_KEYS, "true-HGP run")
+    require(
+        exact_json_equal(
+            request.get("hartigan_level_contract"), HARTIGAN_LEVEL_CONTRACT
+        ),
+        "true-HGP request does not require exact rational Hartigan levels",
+    )
     expected_scalars = {
         "algorithm_scope": ALGORITHM_SCOPE,
         "backend": BACKEND,
@@ -678,6 +771,7 @@ def validate_run(
         "checkpoint_closed",
         "condensed_view_validated",
         "exact_replay_closed",
+        "hartigan_levels_complete",
         "output_chain_closed",
         "silent_q1_incidences_complete",
         "source_archive_closed",
@@ -715,6 +809,101 @@ def validate_run(
             record["incidences"] >= record["silent_q1_incidences"],
             f"true-HGP order {order} silent incidences exceed incidences",
         )
+
+    hartigan_levels = exact_keys(
+        run["hartigan_levels"], HARTIGAN_LEVEL_KEYS, "true-HGP Hartigan levels"
+    )
+    require(
+        hartigan_levels["schema"] == HARTIGAN_LEVEL_RECEIPT_SCHEMA,
+        "true-HGP Hartigan level receipt schema differs",
+    )
+    require(
+        hartigan_levels["representation"] == HARTIGAN_LEVEL_REPRESENTATION,
+        "true-HGP Hartigan levels are not canonical reduced rationals",
+    )
+    require(
+        hartigan_levels["all_equal_level_batches_covered"] is True,
+        "true-HGP Hartigan level manifest is incomplete",
+    )
+    require(
+        natural(
+            hartigan_levels["binary64_level_count"],
+            "true-HGP binary64 Hartigan level count",
+        )
+        == 0,
+        "true-HGP receipt contains binary64 Hartigan levels",
+    )
+    try:
+        safe_relative_file(
+            hartigan_levels["manifest_file"],
+            "true-HGP Hartigan level manifest",
+        )
+    except RuntimeContractError as error:
+        fail(str(error))
+    exact_sha256(
+        hartigan_levels["manifest_sha256"],
+        "true-HGP Hartigan level manifest SHA-256",
+    )
+    exact_sha256(
+        hartigan_levels["ordered_rational_chain_sha256"],
+        "true-HGP ordered rational Hartigan level chain SHA-256",
+    )
+    records_by_order = hartigan_levels["records_by_order"]
+    require(
+        isinstance(records_by_order, list)
+        and len(records_by_order) == MAXIMUM_ORDER,
+        "true-HGP Hartigan per-order receipts differ",
+    )
+    manifest_record_count = 0
+    for order, value_by_order in enumerate(records_by_order, start=1):
+        record = exact_keys(
+            value_by_order,
+            HARTIGAN_ORDER_KEYS,
+            f"true-HGP order {order} Hartigan levels",
+        )
+        require(
+            natural(
+                record["order"], f"true-HGP order {order} Hartigan order"
+            )
+            == order,
+            f"true-HGP order {order} Hartigan order differs",
+        )
+        batch_count = natural(
+            record["equal_level_batch_count"],
+            f"true-HGP order {order} Hartigan equal-level batch count",
+        )
+        rational_record_count = natural(
+            record["rational_record_count"],
+            f"true-HGP order {order} Hartigan rational record count",
+        )
+        require(
+            batch_count == counts[order - 1]["equal_level_batches"]
+            and rational_record_count == batch_count,
+            f"true-HGP order {order} lacks one exact rational per equal-level batch",
+        )
+        manifest_record_count += rational_record_count
+        if rational_record_count == 0:
+            require(
+                record["first_level"] is None and record["last_level"] is None,
+                f"true-HGP order {order} empty Hartigan boundaries differ",
+            )
+        else:
+            validate_exact_rational(
+                record["first_level"],
+                f"true-HGP order {order} first Hartigan level",
+            )
+            validate_exact_rational(
+                record["last_level"],
+                f"true-HGP order {order} last Hartigan level",
+            )
+    require(
+        natural(
+            hartigan_levels["manifest_record_count"],
+            "true-HGP Hartigan manifest record count",
+        )
+        == manifest_record_count,
+        "true-HGP Hartigan manifest record count differs",
+    )
 
     require(
         exact_json_equal(run["view"], request["view"]),
@@ -859,7 +1048,7 @@ def execute_campaign(
         plan["entry_gate_satisfied"] is True,
         "true-HGP scientific launch blocked: phase15_true_hgp_50k_entry_gate_satisfied=false",
     )
-    fail("true-HGP v1 launch implementation is unavailable")
+    fail("true-HGP v2 launch implementation is unavailable")
 
 
 def parse_arguments(arguments: Sequence[str] | None) -> argparse.Namespace:

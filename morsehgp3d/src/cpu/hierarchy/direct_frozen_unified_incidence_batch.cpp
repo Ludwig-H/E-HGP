@@ -2083,22 +2083,13 @@ bool ExactDirectFrozenUnifiedIncidenceBatchResult::atomic_empty_failure()
              exact_selected_batch_relative_to_supplied_successive_star_and_external_facet_resolution_prior_root_and_latent_carrier_coverage_authorities_only;
 }
 
-ExactDirectFrozenUnifiedIncidenceBatchResult
-build_exact_direct_frozen_unified_incidence_batch(
-    const spatial::MortonLbvhIndex& index,
-    const spatial::CanonicalPointCloud& cloud,
-    const ExactDirectSupportTerminalFacade& source_facade,
-    const ExactDirectMorseEventJournalResult& source_journal,
-    const ExactDirectSaddleArmSeedBudget& source_arm_budget,
-    const ExactDirectSaddleArmSeedJournalResult& source_arm_journal,
-    const ExactDirectClosedSaddleIncidenceBudget& source_incidence_budget,
-    const ExactDirectClosedSaddleIncidenceJournalResult&
-        source_incidence_journal,
-    const ExactDirectSparseSuccessiveIncidenceStarJournalBudget&
-        source_star_budget,
-    spatial::LbvhTraversalOrder source_star_traversal_order,
-    const ExactDirectSparseSuccessiveIncidenceStarJournalResult& source_star,
-    const ExactDirectSparseUnifiedLevelPlanBudget& source_plan_budget,
+namespace {
+
+// Both public callers freshly verify this exact plan before entering and keep
+// it immutable for the call.  The core starts at the former post-verification
+// boundary so the scientific batch construction remains shared and unchanged.
+[[nodiscard]] ExactDirectFrozenUnifiedIncidenceBatchResult
+build_exact_direct_frozen_unified_incidence_batch_from_freshly_verified_plan(
     const ExactDirectSparseUnifiedLevelPlanResult& source_plan,
     std::size_t batch_index,
     std::span<const ExactDirectFrozenUnifiedFacetResolution>
@@ -2113,27 +2104,6 @@ build_exact_direct_frozen_unified_incidence_batch(
   ExactDirectFrozenUnifiedIncidenceBatchResult result =
       base_result(batch_index, budget);
   try {
-    const auto source_verification =
-        verify_exact_direct_sparse_unified_level_plan(
-            index,
-            cloud,
-            source_facade,
-            source_journal,
-            source_arm_budget,
-            source_arm_journal,
-            source_incidence_budget,
-            source_incidence_journal,
-            source_star_budget,
-            source_star_traversal_order,
-            source_star,
-            source_plan_budget,
-            source_plan);
-    if (!source_verification.result_certified) {
-      return fail(
-          std::move(result),
-          ExactDirectFrozenUnifiedIncidenceBatchDecision::
-              no_batch_source_plan_not_freshly_verified);
-    }
     result.source_plan_freshly_verified = true;
     if (batch_index >= source_plan.batches.size() ||
         source_plan.batches[batch_index].batch_index != batch_index) {
@@ -2500,6 +2470,82 @@ build_exact_direct_frozen_unified_incidence_batch(
   }
 }
 
+}  // namespace
+
+ExactDirectFrozenUnifiedIncidenceBatchResult
+build_exact_direct_frozen_unified_incidence_batch(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_journal,
+    const ExactDirectSaddleArmSeedBudget& source_arm_budget,
+    const ExactDirectSaddleArmSeedJournalResult& source_arm_journal,
+    const ExactDirectClosedSaddleIncidenceBudget& source_incidence_budget,
+    const ExactDirectClosedSaddleIncidenceJournalResult&
+        source_incidence_journal,
+    const ExactDirectSparseSuccessiveIncidenceStarJournalBudget&
+        source_star_budget,
+    spatial::LbvhTraversalOrder source_star_traversal_order,
+    const ExactDirectSparseSuccessiveIncidenceStarJournalResult& source_star,
+    const ExactDirectSparseUnifiedLevelPlanBudget& source_plan_budget,
+    const ExactDirectSparseUnifiedLevelPlanResult& source_plan,
+    std::size_t batch_index,
+    std::span<const ExactDirectFrozenUnifiedFacetResolution>
+        facet_resolutions,
+    std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
+        prior_root_coverages,
+    std::span<const PointId> prior_root_coverage_point_references,
+    std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
+        latent_carrier_coverages,
+    std::span<const PointId> latent_carrier_coverage_point_references,
+    const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget) {
+  ExactDirectFrozenUnifiedIncidenceBatchResult result =
+      base_result(batch_index, budget);
+  try {
+    const auto source_verification =
+        verify_exact_direct_sparse_unified_level_plan(
+            index,
+            cloud,
+            source_facade,
+            source_journal,
+            source_arm_budget,
+            source_arm_journal,
+            source_incidence_budget,
+            source_incidence_journal,
+            source_star_budget,
+            source_star_traversal_order,
+            source_star,
+            source_plan_budget,
+            source_plan);
+    if (!source_verification.result_certified) {
+      return fail(
+          std::move(result),
+          ExactDirectFrozenUnifiedIncidenceBatchDecision::
+              no_batch_source_plan_not_freshly_verified);
+    }
+    return
+        build_exact_direct_frozen_unified_incidence_batch_from_freshly_verified_plan(
+            source_plan,
+            batch_index,
+            facet_resolutions,
+            prior_root_coverages,
+            prior_root_coverage_point_references,
+            latent_carrier_coverages,
+            latent_carrier_coverage_point_references,
+            budget);
+  } catch (const std::bad_alloc&) {
+    return fail(
+        std::move(result),
+        ExactDirectFrozenUnifiedIncidenceBatchDecision::
+            no_batch_allocation_failed);
+  } catch (const std::length_error&) {
+    return fail(
+        std::move(result),
+        ExactDirectFrozenUnifiedIncidenceBatchDecision::
+            no_batch_capacity_overflow);
+  }
+}
+
 ExactDirectFrozenUnifiedIncidenceBatchVerification
 verify_exact_direct_frozen_unified_incidence_batch(
     const spatial::MortonLbvhIndex& index,
@@ -2548,27 +2594,24 @@ verify_exact_direct_frozen_unified_incidence_batch(
           source_plan);
   verification.source_plan_freshly_verified =
       source_verification.result_certified;
-  const auto expected = build_exact_direct_frozen_unified_incidence_batch(
-      index,
-      cloud,
-      source_facade,
-      source_journal,
-      source_arm_budget,
-      source_arm_journal,
-      source_incidence_budget,
-      source_incidence_journal,
-      source_star_budget,
-      source_star_traversal_order,
-      source_star,
-      source_plan_budget,
-      source_plan,
-      batch_index,
-      facet_resolutions,
-      prior_root_coverages,
-      prior_root_coverage_point_references,
-      latent_carrier_coverages,
-      latent_carrier_coverage_point_references,
-      trusted_budget);
+  ExactDirectFrozenUnifiedIncidenceBatchResult expected;
+  if (source_verification.result_certified) {
+    expected =
+        build_exact_direct_frozen_unified_incidence_batch_from_freshly_verified_plan(
+            source_plan,
+            batch_index,
+            facet_resolutions,
+            prior_root_coverages,
+            prior_root_coverage_point_references,
+            latent_carrier_coverages,
+            latent_carrier_coverage_point_references,
+            trusted_budget);
+  } else {
+    expected = fail(
+        base_result(batch_index, trusted_budget),
+        ExactDirectFrozenUnifiedIncidenceBatchDecision::
+            no_batch_source_plan_not_freshly_verified);
+  }
   verification.expected_result_freshly_reconstructed =
       expected.certified_frozen_unified_incidence_batch();
   verification.supplied_latent_carrier_coverage_freshly_replayed =

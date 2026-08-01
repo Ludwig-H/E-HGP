@@ -16,7 +16,7 @@ namespace morsehgp3d::hierarchy {
 struct ExactDirectMorseUnifiedResidentInitializationResult;
 
 inline constexpr std::uint32_t
-    direct_morse_unified_resident_session_schema_version = 1U;
+    direct_morse_unified_resident_session_schema_version = 2U;
 inline constexpr std::string_view
     direct_morse_unified_resident_session_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -24,19 +24,34 @@ inline constexpr std::string_view
 inline constexpr std::string_view
     direct_morse_unified_resident_session_mode =
         "certified_resident_unified_strict_prebatch_authority_and_atomic_"
-        "state_commit_v1";
+        "sparse_delta_commit_v2";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_public_status = "not_claimed";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_deployment_status =
-        "bounded_oracle_full_resident_state_copy_per_prepared_batch_not_"
-        "massive_deployment_path";
+        "bounded_sparse_resident_delta_without_full_state_copy_v2";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_proof_basis =
         "one_initial_unified_plan_verification_resident_sparse_positive_"
         "locator_exact_local_miniball_miss_certification_strict_pre_batch_"
         "frozen_authority_bundle_move_only_epoch_ticket_single_locator_"
-        "transaction_then_prepared_noexcept_state_replacement_v1";
+        "transaction_with_rollbackable_pre_staged_sparse_delta_v2";
+
+struct ExactDirectMorseUnifiedResidentSparseDeltaBudget {
+  std::size_t maximum_component_patch_count{};
+  std::size_t maximum_component_patch_latent_point_reference_count{};
+  std::size_t maximum_root_replacement_count{};
+  std::size_t maximum_new_root_count{};
+  std::size_t maximum_root_patch_point_reference_count{};
+  std::size_t maximum_group_append_count{};
+  std::size_t maximum_group_child_reference_count{};
+  std::size_t maximum_group_coverage_delta_point_reference_count{};
+  std::size_t maximum_outstanding_ticket_count{};
+
+  friend bool operator==(
+      const ExactDirectMorseUnifiedResidentSparseDeltaBudget&,
+      const ExactDirectMorseUnifiedResidentSparseDeltaBudget&) = default;
+};
 
 // The frozen-batch API currently replays its source plan in both its builder
 // and verifier.  Those replays are counted separately from the one session
@@ -55,9 +70,11 @@ struct ExactDirectMorseUnifiedResidentSessionBudget {
   std::size_t maximum_fresh_facet_miniball_support_enumeration_count{};
   std::size_t maximum_resident_root_count{};
   std::size_t maximum_resident_root_point_reference_count{};
+  std::size_t maximum_resident_component_latent_point_reference_count{};
   std::size_t maximum_group_record_count{};
   std::size_t maximum_group_child_reference_count{};
   std::size_t maximum_group_coverage_delta_point_reference_count{};
+  ExactDirectMorseUnifiedResidentSparseDeltaBudget sparse_delta{};
 
   friend bool operator==(
       const ExactDirectMorseUnifiedResidentSessionBudget&,
@@ -100,6 +117,14 @@ struct ExactDirectMorseUnifiedResidentBatchCounters {
   std::size_t planned_birth_binding_count{};
   std::size_t planned_group_record_count{};
   std::size_t resident_state_full_copy_count{};
+  std::size_t sparse_delta_component_patch_count{};
+  std::size_t sparse_delta_component_latent_point_reference_count{};
+  std::size_t sparse_delta_root_replacement_count{};
+  std::size_t sparse_delta_new_root_count{};
+  std::size_t sparse_delta_root_point_reference_count{};
+  std::size_t sparse_delta_group_append_count{};
+  std::size_t sparse_delta_group_child_reference_count{};
+  std::size_t sparse_delta_group_coverage_delta_point_reference_count{};
 
   friend bool operator==(
       const ExactDirectMorseUnifiedResidentBatchCounters&,
@@ -202,6 +227,8 @@ enum class ExactDirectMorseUnifiedResidentPreparationDecision
   no_facet_miniball_certification_failed,
   no_frozen_batch_rejected,
   no_frozen_batch_verification_rejected,
+  no_outstanding_ticket_budget_exhausted,
+  no_sparse_delta_budget_exhausted,
   no_prepared_state_rejected,
   no_allocation_failed,
   complete_certified_prepared_batch,
@@ -212,6 +239,7 @@ enum class ExactDirectMorseUnifiedResidentCommitDecision : std::uint8_t {
   no_ticket_already_consumed,
   no_foreign_ticket_rejected,
   no_stale_ticket_rejected,
+  no_sparse_delta_staging_rejected,
   no_locator_transaction_rejected,
   complete_certified_atomic_batch_commit,
 };
@@ -259,7 +287,8 @@ struct ExactDirectMorseUnifiedResidentCommitResult {
   ExactDirectSparsePositiveFacetBatchResult locator_batch{};
   bool ticket_consumed{false};
   bool exactly_one_locator_apply_batch_called{false};
-  bool prepared_state_installed_after_locator_commit{false};
+  bool sparse_delta_staged_with_rollback_before_locator{false};
+  bool staged_sparse_delta_released_after_locator_commit{false};
   bool cursor_and_epoch_advanced_once{false};
   bool no_scientific_state_mutated_on_failure{false};
   ExactDirectMorseUnifiedResidentCommitDecision decision{
@@ -268,6 +297,13 @@ struct ExactDirectMorseUnifiedResidentCommitResult {
   [[nodiscard]] bool certified_committed_batch() const noexcept;
 };
 
+// This mutable session is deliberately not internally synchronized.  The
+// caller must externally serialize every call on one session, including const
+// accessors, and every call, move or destruction of tickets issued by it,
+// against prepare/commit and each other.  Caller-owned source authorities must
+// remain alive and immutable for the complete session lifetime.  References
+// and iterators returned by accessors must not be used across a later prepare,
+// commit, move or destruction of the session.
 class ExactDirectMorseUnifiedResidentSession {
  public:
   static constexpr std::string_view backend =

@@ -156,35 +156,47 @@ unlimited_frozen_budget() {
 
 [[nodiscard]] ExactDirectMorseUnifiedResidentSessionBudget
 generous_session_budget() {
-  return {
-      {
-          1024U,
-          1024U,
-          10240U,
-          1024U,
-          1024U,
-          1024U,
-          1024U,
-          1024U,
-          10240U,
-          4097U,
-          4097U,
-      },
-      {4097U, 1024U},
-      unlimited_frozen_budget(),
+  ExactDirectMorseUnifiedResidentSessionBudget budget{};
+  budget.locator = {
       1024U,
       1024U,
       10240U,
       1024U,
-      10240U,
       1024U,
-      1048576U,
       1024U,
-      10240U,
       1024U,
       1024U,
       10240U,
+      4097U,
+      4097U,
   };
+  budget.probe = {4097U, 1024U};
+  budget.frozen_batch = unlimited_frozen_budget();
+  budget.maximum_facet_resolution_count = 1024U;
+  budget.maximum_prior_root_coverage_count = 1024U;
+  budget.maximum_prior_root_coverage_point_reference_count = 10240U;
+  budget.maximum_latent_carrier_coverage_count = 1024U;
+  budget.maximum_latent_carrier_coverage_point_reference_count = 10240U;
+  budget.maximum_fresh_facet_miniball_count = 1024U;
+  budget.maximum_fresh_facet_miniball_support_enumeration_count = 1048576U;
+  budget.maximum_resident_root_count = 1024U;
+  budget.maximum_resident_root_point_reference_count = 10240U;
+  budget.maximum_resident_component_latent_point_reference_count = 10240U;
+  budget.maximum_group_record_count = 1024U;
+  budget.maximum_group_child_reference_count = 1024U;
+  budget.maximum_group_coverage_delta_point_reference_count = 10240U;
+  budget.sparse_delta = {
+      1024U,
+      10240U,
+      1024U,
+      1024U,
+      10240U,
+      1024U,
+      10240U,
+      10240U,
+      2U,
+  };
+  return budget;
 }
 
 struct DirectSources {
@@ -313,23 +325,6 @@ initialize(
       budget);
 }
 
-[[nodiscard]] std::size_t touched_count(
-    const ExactDirectSparseUnifiedLevelPlanBatch& batch,
-    const ExactDirectSparseUnifiedLevelPlanResult& plan) {
-  std::vector<std::size_t> touched;
-  for (std::size_t local = 0U;
-       local < batch.coface_facet_reference_count;
-       ++local) {
-    touched.push_back(
-        plan.coface_facet_references
-            [batch.coface_facet_reference_offset + local]
-                .facet_token_index);
-  }
-  std::sort(touched.begin(), touched.end());
-  touched.erase(std::unique(touched.begin(), touched.end()), touched.end());
-  return touched.size();
-}
-
 void test_ticket_guards(const E5Context& context) {
   auto first_init = initialize(context, 7001U, generous_session_budget());
   auto second_init = initialize(context, 7002U, generous_session_budget());
@@ -380,6 +375,13 @@ void test_ticket_guards(const E5Context& context) {
       stale_a.certified_prepared_batch() &&
           stale_b.certified_prepared_batch(),
       "two tickets may observe the same strict pre-batch epoch");
+  const auto third_ticket = second.prepare_next();
+  check(
+      third_ticket.decision ==
+              ExactDirectMorseUnifiedResidentPreparationDecision::
+                  no_outstanding_ticket_budget_exhausted &&
+          !third_ticket.ticket.has_value() && second.batch_cursor() == 0U,
+      "the explicit two-ticket resident scratch cap rejects a third sibling");
   if (stale_a.ticket.has_value() && stale_b.ticket.has_value()) {
     const auto committed = second.commit(std::move(*stale_a.ticket));
     const auto stale = second.commit(std::move(*stale_b.ticket));
@@ -400,55 +402,189 @@ void test_ticket_guards(const E5Context& context) {
 }
 
 void test_cap_minus_one(const E5Context& context) {
-  const auto target = std::find_if(
-      context.plan.batches.begin(),
-      context.plan.batches.end(),
-      [&](const auto& batch) {
-        return touched_count(batch, context.plan) != 0U;
-      });
-  check(target != context.plan.batches.end(), "E5 has a non-empty incidence batch");
-  if (target == context.plan.batches.end()) {
+  auto baseline_init = initialize(context, 7003U, generous_session_budget());
+  check(
+      baseline_init.certified_initialized_session(),
+      "the sparse-delta cap fixture initializes its baseline session");
+  if (!baseline_init.session.has_value()) {
     return;
   }
+  auto& baseline = *baseline_init.session;
+  std::size_t maximum_component_patch_count = 0U;
+  while (!baseline.complete()) {
+    auto prepared = baseline.prepare_next();
+    if (!prepared.certified_prepared_batch() || !prepared.ticket.has_value()) {
+      check(false, "the sparse-delta baseline prepares every E5 batch");
+      return;
+    }
+    maximum_component_patch_count = std::max(
+        maximum_component_patch_count,
+        prepared.ticket->authority_bundle()
+            .counters.sparse_delta_component_patch_count);
+    if (!baseline.commit(std::move(*prepared.ticket))
+             .certified_committed_batch()) {
+      check(false, "the sparse-delta baseline commits every E5 batch");
+      return;
+    }
+  }
+  check(
+      maximum_component_patch_count != 0U,
+      "E5 exercises at least one sparse resident component patch");
+  if (maximum_component_patch_count == 0U) {
+    return;
+  }
+
   auto budget = generous_session_budget();
-  budget.maximum_facet_resolution_count =
-      touched_count(*target, context.plan) - 1U;
-  auto initialized = initialize(context, 7003U, budget);
+  budget.sparse_delta.maximum_component_patch_count =
+      maximum_component_patch_count - 1U;
+  auto initialized = initialize(context, 7013U, budget);
   check(
       initialized.certified_initialized_session(),
-      "a cap-minus-one session initializes before the targeted batch");
-  if (!initialized.certified_initialized_session()) {
-    std::cerr << "cap init decision: "
-              << static_cast<int>(initialized.decision) << '\n';
-  }
+      "the sparse-delta cap-minus-one session initializes before prepare");
   if (!initialized.session.has_value()) {
     return;
   }
   auto& session = *initialized.session;
-  while (session.batch_cursor() < target->batch_index) {
+  bool exact_atomic_rejection_observed = false;
+  while (!session.complete()) {
+    const std::size_t cursor_before = session.batch_cursor();
+    const auto stamp_before = session.locator().snapshot_stamp();
+    const auto components_before = session.component_states();
+    const auto roots_before = session.root_coverages();
+    const auto groups_before = session.group_records();
     auto prepared = session.prepare_next();
-    check(
-        prepared.certified_prepared_batch(),
-        "all earlier zero-resolution batches remain admissible");
-    if (!prepared.ticket.has_value()) {
-      return;
-    }
-    check(
-        session.commit(std::move(*prepared.ticket))
-            .certified_committed_batch(),
-        "an earlier cap fixture batch commits");
-  }
-  const std::size_t cursor_before = session.batch_cursor();
-  const auto stamp_before = session.locator().snapshot_stamp();
-  auto rejected = session.prepare_next();
-  check(
-      rejected.decision ==
+    if (!prepared.certified_prepared_batch()) {
+      exact_atomic_rejection_observed =
+          prepared.decision ==
               ExactDirectMorseUnifiedResidentPreparationDecision::
-                  no_authority_budget_exhausted &&
-          !rejected.ticket.has_value() &&
+                  no_sparse_delta_budget_exhausted &&
+          !prepared.ticket.has_value() &&
           session.batch_cursor() == cursor_before &&
-          session.locator().snapshot_stamp() == stamp_before,
-      "the exact facet-resolution cap minus one fails before mutation");
+          session.locator().snapshot_stamp() == stamp_before &&
+          session.component_states() == components_before &&
+          session.root_coverages() == roots_before &&
+          session.group_records() == groups_before;
+      break;
+    }
+    if (!prepared.ticket.has_value() ||
+        !session.commit(std::move(*prepared.ticket))
+             .certified_committed_batch()) {
+      break;
+    }
+  }
+  check(
+      exact_atomic_rejection_observed,
+      "the exact sparse-delta component cap minus one rejects before every scientific mutation");
+}
+
+void test_locator_rejection_rolls_back_staged_delta(
+    const E5Context& context) {
+  auto baseline_initialized =
+      initialize(context, 7014U, generous_session_budget());
+  check(
+      baseline_initialized.certified_initialized_session(),
+      "the locator-rollback baseline session initializes");
+  if (!baseline_initialized.session.has_value()) {
+    return;
+  }
+  auto& baseline = *baseline_initialized.session;
+  std::optional<std::size_t> target_cursor;
+  std::size_t committed_binding_cap = 0U;
+  while (!baseline.complete()) {
+    auto prepared = baseline.prepare_next();
+    if (!prepared.certified_prepared_batch() ||
+        !prepared.ticket.has_value()) {
+      break;
+    }
+    const auto& counters = prepared.ticket->authority_bundle().counters;
+    const bool non_vacuous_resident_delta =
+        counters.sparse_delta_component_patch_count != 0U &&
+        (counters.sparse_delta_root_replacement_count != 0U ||
+         counters.sparse_delta_new_root_count != 0U) &&
+        counters.sparse_delta_group_append_count != 0U;
+    const bool locator_binding_requested =
+        counters.planned_equal_binding_count != 0U ||
+        counters.planned_birth_binding_count != 0U;
+    const auto stamp_before = baseline.locator().snapshot_stamp();
+    const auto committed = baseline.commit(std::move(*prepared.ticket));
+    if (!committed.certified_committed_batch()) {
+      break;
+    }
+    const auto stamp_after = baseline.locator().snapshot_stamp();
+    if (non_vacuous_resident_delta && locator_binding_requested &&
+        stamp_after.inserted_key_count > stamp_before.inserted_key_count) {
+      target_cursor = committed.committed_batch_index;
+      committed_binding_cap = stamp_before.inserted_key_count;
+      break;
+    }
+  }
+  check(
+      target_cursor.has_value(),
+      "E5 exposes a rollback target with component, root, group and new locator binding work");
+  if (!target_cursor.has_value()) {
+    return;
+  }
+
+  auto budget = generous_session_budget();
+  budget.locator.maximum_committed_binding_count = committed_binding_cap;
+  auto initialized = initialize(context, 7015U, budget);
+  check(
+      initialized.certified_initialized_session(),
+      "the locator-rollback fixture initializes at the exact pre-target binding cap");
+  if (!initialized.session.has_value()) {
+    return;
+  }
+  auto& session = *initialized.session;
+  bool rollback_observed = false;
+  while (!session.complete()) {
+    const std::size_t cursor_before = session.batch_cursor();
+    const std::size_t epoch_before = session.epoch();
+    const auto stamp_before = session.locator().snapshot_stamp();
+    const auto components_before = session.component_states();
+    const auto roots_before = session.root_coverages();
+    const auto groups_before = session.group_records();
+    auto prepared = session.prepare_next();
+    if (!prepared.certified_prepared_batch() ||
+        !prepared.ticket.has_value()) {
+      break;
+    }
+    const auto& counters = prepared.ticket->authority_bundle().counters;
+    const bool non_vacuous_resident_delta =
+        counters.sparse_delta_component_patch_count != 0U &&
+        (counters.sparse_delta_root_replacement_count != 0U ||
+         counters.sparse_delta_new_root_count != 0U) &&
+        counters.sparse_delta_group_append_count != 0U;
+    const bool locator_binding_requested =
+        counters.planned_equal_binding_count != 0U ||
+        counters.planned_birth_binding_count != 0U;
+    const auto committed = session.commit(std::move(*prepared.ticket));
+    if (committed.certified_committed_batch()) {
+      continue;
+    }
+    rollback_observed =
+        committed.decision ==
+            ExactDirectMorseUnifiedResidentCommitDecision::
+                no_locator_transaction_rejected &&
+        committed.ticket_consumed &&
+        committed.exactly_one_locator_apply_batch_called &&
+        committed.sparse_delta_staged_with_rollback_before_locator &&
+        !committed.staged_sparse_delta_released_after_locator_commit &&
+        committed.no_scientific_state_mutated_on_failure &&
+        cursor_before == *target_cursor && non_vacuous_resident_delta &&
+        locator_binding_requested &&
+        committed.locator_batch.counters.binding_request_count != 0U &&
+        stamp_before.inserted_key_count == committed_binding_cap &&
+        session.batch_cursor() == cursor_before &&
+        session.epoch() == epoch_before &&
+        session.locator().snapshot_stamp() == stamp_before &&
+        session.component_states() == components_before &&
+        session.root_coverages() == roots_before &&
+        session.group_records() == groups_before;
+    break;
+  }
+  check(
+      rollback_observed,
+      "a non-vacuous locator rejection restores every pre-staged resident arena and scalar");
 }
 
 void test_e5_live_twelve_batches(const E5Context& context) {
@@ -471,8 +607,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
           ExactDirectMorseUnifiedResidentSession::public_status ==
               "not_claimed" &&
           ExactDirectMorseUnifiedResidentSession::deployment_status ==
-              "bounded_oracle_full_resident_state_copy_per_prepared_batch_not_massive_deployment_path",
-      "the session advertises the bounded supplied-star and non-massive scope");
+              "bounded_sparse_resident_delta_without_full_state_copy_v2",
+      "the session advertises its bounded sparse-delta v2 scope");
 
   std::optional<ExactFrozenIncidencePriorRootId> residual_root;
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp stamp_after_17_2{};
@@ -498,8 +634,10 @@ void test_e5_live_twelve_batches(const E5Context& context) {
             !bundle.global_facet_coface_or_gamma_catalog_materialized &&
             !bundle.supplied_star_global_completeness_claimed &&
             !bundle.public_status_claimed &&
-            bundle.counters.resident_state_full_copy_count == 1U,
-        "the whole authority bundle shares one live locator identity and honest bounded scope");
+            bundle.counters.resident_state_full_copy_count == 0U &&
+            bundle.counters.sparse_delta_group_append_count ==
+                bundle.counters.planned_group_record_count,
+        "the authority shares one live locator identity and carries only its honest sparse resident delta");
 
     if (bundle.squared_level == level(17, 2)) {
       residual_17_2_checked =
@@ -516,6 +654,9 @@ void test_e5_live_twelve_batches(const E5Context& context) {
         }
         if (delta.point_reference_count == 0U) {
           ++empty_group_record_count;
+          residual_17_2_checked =
+              residual_17_2_checked &&
+              bundle.counters.sparse_delta_root_replacement_count == 0U;
         }
       }
     }
@@ -572,8 +713,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
       retained_delta_point_count == 6U,
       "E5 retains exactly six persistently budgeted group-delta points");
   check(
-      session.frozen_batch_source_replay_count() == 36U,
-      "the current frozen API's three source-plan replays per batch are exposed, not hidden");
+      session.frozen_batch_source_replay_count() == 24U,
+      "the current frozen builder and verifier source-plan replays are both exposed per batch");
 }
 
 void test_group_delta_point_caps(const E5Context& context) {
@@ -625,6 +766,7 @@ int main() {
       "the E5 unified source plan is certified");
   test_ticket_guards(context);
   test_cap_minus_one(context);
+  test_locator_rejection_rolls_back_staged_delta(context);
   test_e5_live_twelve_batches(context);
   test_group_delta_point_caps(context);
   if (failures != 0) {
