@@ -2458,3 +2458,14 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - produire ensuite un reçu sémantiquement invalide, vérifier l'absence de commit et la conservation du même ordinal actif;
 - recharger tout préfixe committé, rehasher plan et binaire, revalider chaque requête et reçu avant de poursuivre; toute modification d'entrée, corruption de checkpoint ou rupture de progression doit échouer fermée;
 - conserver le plan v3, les artefacts v1/v2, le gate scientifique, les statuts de phase et `public_status` inchangés; le faux binaire et ce test n'autorisent aucun lancement GCP.
+
+### T15-TRUE-HGP-V4-RUNTIME — contrat exact exécutable, gate encore fermé
+
+- conserver byte-identiques les harness, plans et tests v1 à v3, puis vérifier que le plan v4 refuse toute régularité globale et exige la source normalisée résidente v7, tous les co-minimiseurs de première incidence et la saturation de fenêtre de rang;
+- exiger K1 fermé et les neuf cartes adjacentes `2->1` à `10->9`, dix forêts horizontales, la vue `at_least20` et zéro surrogate par MST ou partition de points;
+- vérifier chaque partition de lot `q_R=0 / q_R=1 / q_R>1`; le compte total doit égaler les groupes résidents et un no-op ne peut être omis que pour exactement un groupe `q_R=1` avec deltas facette, point, parent et nœud tous nuls;
+- exiger un record rationnel réduit v4 par lot, y compris omis, zéro niveau binary64, zéro record scalaire v3, dix résumés d'ordre cohérents et des chemins/digests de manifeste sûrs; l'archivage et le rehash du payload réel restent obligatoires au raccord du binaire;
+- exécuter réellement sous le faux protocole trente-six requêtes 50 k, soit deux warmups et dix nuages frais pour chacune des trois familles, puis appliquer le p95 nearest-rank strictement inférieur à une seconde;
+- n'autoriser ensuite que `1 000 000`, `10 000 001`, `30 000 000` dans cet ordre; chaque taille exige exactement un checkpoint forcé, un nouveau processus, une recertification et un rejeu frais, et l'égalité des digests résident v7, K1, horizontal, toutes verticales, Hartigan et `at_least20`;
+- interrompre une transaction puis reprendre exactement le même checkpoint et le même wrapper; faire suivre un reçu invalide et vérifier dans les deux cas que seul un reçu entièrement validé avance `HEAD`;
+- avec le plan livré, refuser avant lecture du binaire ou création du spool; aucun faux reçu, benchmark, chrono composant ou test hôte ne peut ouvrir le gate, promouvoir `public_status`, lancer GCP ou satisfaire Phase 16.
