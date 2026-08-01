@@ -20,6 +20,10 @@ using morsehgp3d::hierarchy::
 using morsehgp3d::hierarchy::
     ExactDirectK1BoruvkaClosedCutInitializationDecision;
 using morsehgp3d::hierarchy::
+    ExactDirectK1BoruvkaClosedCutCheckpoint;
+using morsehgp3d::hierarchy::
+    ExactDirectK1BoruvkaClosedCutRestoreDecision;
+using morsehgp3d::hierarchy::
     ExactDirectK1BoruvkaClosedCutRootQueryDecision;
 using morsehgp3d::hierarchy::
     ExactDirectK1BoruvkaClosedCutSession;
@@ -31,6 +35,8 @@ using morsehgp3d::hierarchy::build_compact_k1_forest;
 using morsehgp3d::hierarchy::
     build_exact_direct_k1_boruvka_closed_cut_session;
 using morsehgp3d::hierarchy::build_exact_lbvh_boruvka;
+using morsehgp3d::hierarchy::
+    restore_exact_direct_k1_boruvka_closed_cut_session;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
@@ -88,6 +94,26 @@ struct Fixture {
   ExactDirectK1BoruvkaClosedCutSessionBudget budget{
       budget_for(cloud.size())};
 };
+
+[[nodiscard]] bool same_semantic_checkpoint(
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& left,
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& right) {
+  return left.schema_version == right.schema_version &&
+      left.stamp.schema_version == right.stamp.schema_version &&
+      left.stamp.committed_level_cursor ==
+          right.stamp.committed_level_cursor &&
+      left.stamp.closed_squared_level == right.stamp.closed_squared_level &&
+      left.stamp.canonical_cloud_digest ==
+          right.stamp.canonical_cloud_digest &&
+      left.stamp.committed_history_digest ==
+          right.stamp.committed_history_digest &&
+      left.source_forest_digest == right.source_forest_digest &&
+      left.canonical_component_minimum_by_point ==
+          right.canonical_component_minimum_by_point &&
+      left.closed_root_node_id_by_point ==
+          right.closed_root_node_id_by_point &&
+      left.state_digest == right.state_digest;
+}
 
 void test_fresh_seal_and_forged_source_rejection() {
   Fixture fixture;
@@ -289,12 +315,183 @@ void test_cap_minus_one_rejects_before_authority_replay() {
       "preflight rejection does not mutate the supplied Boruvka witness");
 }
 
+void test_fresh_semantic_mid_cut_restore_and_terminal_continuation() {
+  Fixture fixture;
+  auto uninterrupted = build_exact_direct_k1_boruvka_closed_cut_session(
+      fixture.index, fixture.cloud, fixture.boruvka, fixture.budget);
+  auto checkpoint_source =
+      build_exact_direct_k1_boruvka_closed_cut_session(
+          fixture.index, fixture.cloud, fixture.boruvka, fixture.budget);
+  const ExactLevel mid_level = fixture.forest.levels.at(1U);
+  check(
+      uninterrupted.session.advance_closed_to(mid_level).decision ==
+              ExactDirectK1BoruvkaClosedCutAdvanceDecision::
+                  complete_certified_monotone_closed_cut &&
+          checkpoint_source.session.advance_closed_to(mid_level).decision ==
+              ExactDirectK1BoruvkaClosedCutAdvanceDecision::
+                  complete_certified_monotone_closed_cut,
+      "the restore fixture did not reach its exact intermediate cut");
+  const auto mid_checkpoint = checkpoint_source.session.export_checkpoint();
+  const auto observed_edges = fixture.boruvka.emst_edges;
+  const auto observed_rounds = fixture.boruvka.rounds;
+
+  auto restored = restore_exact_direct_k1_boruvka_closed_cut_session(
+      fixture.index,
+      fixture.cloud,
+      fixture.boruvka,
+      mid_checkpoint.checkpoint,
+      fixture.budget);
+  check(
+      restored.certified_restored_session() &&
+          restored.receipt.decision ==
+              ExactDirectK1BoruvkaClosedCutRestoreDecision::
+                  complete_certified_fresh_semantic_replay_restore &&
+          restored.receipt.checkpoint_stamp.session_instance_id !=
+              restored.receipt.restored_stamp.session_instance_id &&
+          restored.receipt.scientific_digests_identical &&
+          restored.receipt.semantic_checkpoint_equality_certified &&
+          restored.receipt.replayed_closed_cut_level_count == 2U,
+      "the public mid-cut checkpoint was not recertified by fresh replay");
+  check(
+      !restored.receipt.observed_boruvka_authority_mutated &&
+          !restored.receipt.durable_checkpoint_file_codec_claimed &&
+          !restored.receipt.gamma_cells_or_global_cofaces_materialized &&
+          !restored.receipt
+               .ordinary_or_higher_order_delaunay_materialized &&
+          !restored.receipt.public_status_claimed &&
+          fixture.boruvka.emst_edges == observed_edges &&
+          fixture.boruvka.rounds == observed_rounds,
+      "semantic restore mutated observed authority or overclaimed its scope");
+
+  const ExactLevel terminal_level = fixture.forest.levels.back();
+  const auto uninterrupted_terminal =
+      uninterrupted.session.advance_closed_to(terminal_level);
+  const auto restored_terminal =
+      restored.session.advance_closed_to(terminal_level);
+  const auto uninterrupted_checkpoint =
+      uninterrupted.session.export_checkpoint();
+  const auto restored_checkpoint = restored.session.export_checkpoint();
+  check(
+      uninterrupted_terminal.decision ==
+              ExactDirectK1BoruvkaClosedCutAdvanceDecision::
+                  complete_certified_monotone_closed_cut &&
+          restored_terminal.decision ==
+              ExactDirectK1BoruvkaClosedCutAdvanceDecision::
+                  complete_certified_monotone_closed_cut &&
+          uninterrupted.session.verify_checkpoint(
+              uninterrupted_checkpoint.checkpoint) &&
+          restored.session.verify_checkpoint(restored_checkpoint.checkpoint) &&
+          uninterrupted_checkpoint.checkpoint.stamp.session_instance_id !=
+              restored_checkpoint.checkpoint.stamp.session_instance_id &&
+          same_semantic_checkpoint(
+              uninterrupted_checkpoint.checkpoint,
+              restored_checkpoint.checkpoint),
+      "restored continuation diverged from the uninterrupted terminal state");
+}
+
+void test_restore_rejects_mutated_semantics_and_cap_minus_one() {
+  Fixture fixture;
+  auto source = build_exact_direct_k1_boruvka_closed_cut_session(
+      fixture.index, fixture.cloud, fixture.boruvka, fixture.budget);
+  static_cast<void>(source.session.advance_closed_to(
+      fixture.forest.levels.front()));
+  const auto exported = source.session.export_checkpoint();
+  const auto observed_edges = fixture.boruvka.emst_edges;
+  const auto observed_rounds = fixture.boruvka.rounds;
+
+  auto expect_semantic_rejection = [&](const auto& checkpoint,
+                                       const std::string& name) {
+    auto rejected = restore_exact_direct_k1_boruvka_closed_cut_session(
+        fixture.index,
+        fixture.cloud,
+        fixture.boruvka,
+        checkpoint,
+        fixture.budget);
+    check(
+        !rejected.certified_restored_session() &&
+            !rejected.session.ready() &&
+            rejected.receipt.decision ==
+                ExactDirectK1BoruvkaClosedCutRestoreDecision::
+                    no_semantic_checkpoint_mismatch,
+        name + " was accepted as replay-certified state");
+  };
+
+  auto mutated_checkpoint = exported.checkpoint;
+  ++mutated_checkpoint.closed_root_node_id_by_point.front();
+  expect_semantic_rejection(mutated_checkpoint, "mutated checkpoint root");
+
+  auto mutated_state = exported.checkpoint;
+  mutated_state.state_digest = {};
+  expect_semantic_rejection(mutated_state, "mutated checkpoint state digest");
+
+  auto mutated_cloud_digest = exported.checkpoint;
+  mutated_cloud_digest.stamp.canonical_cloud_digest = {};
+  expect_semantic_rejection(
+      mutated_cloud_digest, "mutated checkpoint cloud digest");
+
+  auto mutated_cursor = exported.checkpoint;
+  ++mutated_cursor.stamp.committed_level_cursor;
+  expect_semantic_rejection(mutated_cursor, "mutated checkpoint cursor");
+
+  auto mutated_level = exported.checkpoint;
+  mutated_level.stamp.closed_squared_level = fixture.forest.levels.at(1U);
+  expect_semantic_rejection(mutated_level, "mutated checkpoint exact level");
+
+  const std::array<CertifiedPoint3, 4> changed_points{
+      point(0.0), point(1.0), point(3.0), point(8.0)};
+  const auto changed_cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{changed_points});
+  const auto changed_index = MortonLbvhIndex::build(changed_cloud);
+  const auto changed_boruvka =
+      build_exact_lbvh_boruvka(changed_index, changed_cloud);
+  auto changed_cloud_restore =
+      restore_exact_direct_k1_boruvka_closed_cut_session(
+          changed_index,
+          changed_cloud,
+          changed_boruvka,
+          exported.checkpoint,
+          fixture.budget);
+  check(
+      !changed_cloud_restore.certified_restored_session() &&
+          changed_cloud_restore.receipt.boruvka_authority_freshly_replayed &&
+          changed_cloud_restore.receipt.decision ==
+              ExactDirectK1BoruvkaClosedCutRestoreDecision::
+                  no_semantic_checkpoint_mismatch,
+      "a valid replay over a different cloud accepted the old checkpoint");
+
+  auto insufficient = fixture.budget;
+  insufficient.maximum_checkpoint_state_entry_count =
+      2U * fixture.cloud.size() - 1U;
+  auto budget_rejected =
+      restore_exact_direct_k1_boruvka_closed_cut_session(
+          fixture.index,
+          fixture.cloud,
+          fixture.boruvka,
+          exported.checkpoint,
+          insufficient);
+  check(
+      !budget_rejected.certified_restored_session() &&
+          !budget_rejected.session.ready() &&
+          budget_rejected.receipt.initialization_decision ==
+              ExactDirectK1BoruvkaClosedCutInitializationDecision::
+                  no_preflight_budget_exhausted &&
+          budget_rejected.receipt.decision ==
+              ExactDirectK1BoruvkaClosedCutRestoreDecision::
+                  no_preflight_budget_exhausted &&
+          !budget_rejected.receipt.boruvka_authority_freshly_replayed &&
+          fixture.boruvka.emst_edges == observed_edges &&
+          fixture.boruvka.rounds == observed_rounds,
+      "checkpoint cap minus one did not reject before fresh replay");
+}
+
 }  // namespace
 
 int main() {
   test_fresh_seal_and_forged_source_rejection();
   test_intermediate_levels_equal_cuts_and_stamp_scope();
   test_cap_minus_one_rejects_before_authority_replay();
+  test_fresh_semantic_mid_cut_restore_and_terminal_continuation();
+  test_restore_rejects_mutated_semantics_and_cap_minus_one();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";
     return 1;

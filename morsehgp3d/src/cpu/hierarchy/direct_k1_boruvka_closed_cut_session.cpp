@@ -360,6 +360,96 @@ void append_level(
   return maximum;
 }
 
+[[nodiscard]] bool checkpoint_shape_matches_cloud(
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& checkpoint,
+    std::size_t point_count) noexcept {
+  return checkpoint.schema_version ==
+             direct_k1_boruvka_closed_cut_session_schema_version &&
+         checkpoint.stamp.schema_version ==
+             direct_k1_boruvka_closed_cut_session_schema_version &&
+         checkpoint.stamp.session_instance_id != 0U &&
+         point_count != 0U &&
+         checkpoint.stamp.committed_level_cursor < point_count &&
+         checkpoint.canonical_component_minimum_by_point.size() ==
+             point_count &&
+         checkpoint.closed_root_node_id_by_point.size() == point_count;
+}
+
+// session_instance_id is the sole operational field intentionally ignored by
+// semantic restore.  Every other checkpoint field, including the exact cut,
+// cursor, history, forest, pointwise partition and state digest, must be
+// reproduced by the freshly replayed session.
+[[nodiscard]] bool semantic_checkpoint_equal_ignoring_instance_id(
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& checkpoint,
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& expected) noexcept {
+  return checkpoint.schema_version == expected.schema_version &&
+         checkpoint.stamp.schema_version ==
+             expected.stamp.schema_version &&
+         checkpoint.stamp.committed_level_cursor ==
+             expected.stamp.committed_level_cursor &&
+         checkpoint.stamp.closed_squared_level ==
+             expected.stamp.closed_squared_level &&
+         checkpoint.stamp.canonical_cloud_digest ==
+             expected.stamp.canonical_cloud_digest &&
+         checkpoint.stamp.committed_history_digest ==
+             expected.stamp.committed_history_digest &&
+         checkpoint.source_forest_digest ==
+             expected.source_forest_digest &&
+         checkpoint.canonical_component_minimum_by_point ==
+             expected.canonical_component_minimum_by_point &&
+         checkpoint.closed_root_node_id_by_point ==
+             expected.closed_root_node_id_by_point &&
+         checkpoint.state_digest == expected.state_digest;
+}
+
+[[nodiscard]] bool checkpoint_scientific_digests_equal(
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& checkpoint,
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& expected) noexcept {
+  return checkpoint.stamp.canonical_cloud_digest ==
+             expected.stamp.canonical_cloud_digest &&
+         checkpoint.stamp.committed_history_digest ==
+             expected.stamp.committed_history_digest &&
+         checkpoint.source_forest_digest ==
+             expected.source_forest_digest &&
+         checkpoint.state_digest == expected.state_digest;
+}
+
+[[nodiscard]] ExactDirectK1BoruvkaClosedCutRestoreDecision
+restore_decision_from_initialization(
+    ExactDirectK1BoruvkaClosedCutInitializationDecision decision) noexcept {
+  switch (decision) {
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::
+        no_preflight_capacity_overflow:
+      return ExactDirectK1BoruvkaClosedCutRestoreDecision::
+          no_preflight_capacity_overflow;
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::
+        no_preflight_budget_exhausted:
+      return ExactDirectK1BoruvkaClosedCutRestoreDecision::
+          no_preflight_budget_exhausted;
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::
+        no_boruvka_authority_rejected:
+      return ExactDirectK1BoruvkaClosedCutRestoreDecision::
+          no_boruvka_authority_rejected;
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::
+        no_compact_k1_forest_rejected:
+      return ExactDirectK1BoruvkaClosedCutRestoreDecision::
+          no_compact_k1_forest_rejected;
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::
+        no_allocation_failed:
+      return ExactDirectK1BoruvkaClosedCutRestoreDecision::
+          no_allocation_failed;
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::
+        no_session_instance_id_exhausted:
+      return ExactDirectK1BoruvkaClosedCutRestoreDecision::
+          no_session_instance_id_exhausted;
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::not_certified:
+    case ExactDirectK1BoruvkaClosedCutInitializationDecision::
+        complete_certified_sealed_session:
+      return ExactDirectK1BoruvkaClosedCutRestoreDecision::not_certified;
+  }
+  return ExactDirectK1BoruvkaClosedCutRestoreDecision::not_certified;
+}
+
 }  // namespace
 
 struct ExactDirectK1BoruvkaClosedCutSession::Impl {
@@ -1030,6 +1120,204 @@ build_exact_direct_k1_boruvka_closed_cut_session(
                   no_compact_k1_forest_rejected
             : ExactDirectK1BoruvkaClosedCutInitializationDecision::
                   no_boruvka_authority_rejected;
+    return output;
+  }
+}
+
+bool ExactDirectK1BoruvkaClosedCutSessionRestore::
+    certified_restored_session() const noexcept {
+  return receipt.schema_version ==
+             direct_k1_boruvka_closed_cut_session_schema_version &&
+         receipt.allocation_free_structural_preflight_certified &&
+         receipt.boruvka_authority_freshly_replayed &&
+         receipt.compact_k1_equal_level_forest_certified &&
+         receipt.closed_cut_prefix_freshly_replayed &&
+         receipt.expected_checkpoint_freshly_exported &&
+         receipt.semantic_checkpoint_equality_certified &&
+         receipt.session_instance_ids_distinct &&
+         receipt.scientific_digests_identical &&
+         !receipt.observed_boruvka_authority_mutated &&
+         !receipt.durable_checkpoint_file_codec_claimed &&
+         !receipt.gamma_cells_or_global_cofaces_materialized &&
+         !receipt.ordinary_or_higher_order_delaunay_materialized &&
+         !receipt.public_status_claimed &&
+         receipt.initialization_decision ==
+             ExactDirectK1BoruvkaClosedCutInitializationDecision::
+                 complete_certified_sealed_session &&
+         receipt.advance_decision ==
+             ExactDirectK1BoruvkaClosedCutAdvanceDecision::
+                 complete_certified_monotone_closed_cut &&
+         receipt.checkpoint_decision ==
+             ExactDirectK1BoruvkaClosedCutCheckpointDecision::
+                 complete_checkpoint_ready_state &&
+         receipt.decision ==
+             ExactDirectK1BoruvkaClosedCutRestoreDecision::
+                 complete_certified_fresh_semantic_replay_restore &&
+         receipt.checkpoint_stamp.session_instance_id != 0U &&
+         receipt.restored_stamp.session_instance_id != 0U &&
+         receipt.checkpoint_stamp.session_instance_id !=
+             receipt.restored_stamp.session_instance_id &&
+         receipt.checkpoint_stamp.schema_version ==
+             receipt.restored_stamp.schema_version &&
+         receipt.checkpoint_stamp.committed_level_cursor ==
+             receipt.restored_stamp.committed_level_cursor &&
+         receipt.checkpoint_stamp.closed_squared_level ==
+             receipt.restored_stamp.closed_squared_level &&
+         receipt.checkpoint_source_forest_digest ==
+             receipt.restored_source_forest_digest &&
+         receipt.checkpoint_state_digest ==
+             receipt.restored_state_digest &&
+         receipt.checkpoint_stamp.canonical_cloud_digest ==
+             receipt.restored_stamp.canonical_cloud_digest &&
+         receipt.checkpoint_stamp.committed_history_digest ==
+             receipt.restored_stamp.committed_history_digest &&
+         session.ready() && session.verify_stamp(receipt.restored_stamp);
+}
+
+ExactDirectK1BoruvkaClosedCutSessionRestore
+restore_exact_direct_k1_boruvka_closed_cut_session(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const K1ExactBoruvkaResult& observed_boruvka,
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& checkpoint,
+    const ExactDirectK1BoruvkaClosedCutSessionBudget& budget) {
+  ExactDirectK1BoruvkaClosedCutSessionRestore output;
+  if (!checkpoint_shape_matches_cloud(checkpoint, cloud.size())) {
+    output.receipt.decision =
+        ExactDirectK1BoruvkaClosedCutRestoreDecision::
+            no_checkpoint_shape_rejected;
+    return output;
+  }
+
+  try {
+    auto initialization =
+        build_exact_direct_k1_boruvka_closed_cut_session(
+            index, cloud, observed_boruvka, budget);
+    auto record_initialization = [&output](
+                                     const auto& fresh_initialization) {
+      output.receipt.initialization_decision =
+          fresh_initialization.decision;
+      output.receipt.allocation_free_structural_preflight_certified =
+          fresh_initialization
+              .allocation_free_structural_preflight_certified;
+      output.receipt.boruvka_authority_freshly_replayed =
+          fresh_initialization.boruvka_authority_freshly_replayed;
+      output.receipt.compact_k1_equal_level_forest_certified =
+          fresh_initialization.compact_k1_equal_level_forest_certified;
+      output.receipt.replayed_boruvka_round_count =
+          fresh_initialization.replayed_boruvka_round_count;
+      output.receipt.replayed_boruvka_component_minimum_count =
+          fresh_initialization.replayed_boruvka_component_minimum_count;
+    };
+    record_initialization(initialization);
+    if (!initialization.certified_ready_session()) {
+      output.receipt.decision = restore_decision_from_initialization(
+          initialization.decision);
+      return output;
+    }
+
+    // An old numeric id can recur after a process restart because session ids
+    // are intentionally process-local.  If it does, discard this capability
+    // and freshly replay once more so the returned capability is visibly
+    // distinct from the checkpoint's obsolete one.
+    if (initialization.session.current_stamp().session_instance_id ==
+        checkpoint.stamp.session_instance_id) {
+      initialization =
+          build_exact_direct_k1_boruvka_closed_cut_session(
+              index, cloud, observed_boruvka, budget);
+      record_initialization(initialization);
+      if (!initialization.certified_ready_session()) {
+        output.receipt.decision = restore_decision_from_initialization(
+            initialization.decision);
+        return output;
+      }
+    }
+
+    const auto fresh_initial_stamp = initialization.session.current_stamp();
+    if (fresh_initial_stamp.session_instance_id ==
+        checkpoint.stamp.session_instance_id) {
+      output.receipt.decision =
+          ExactDirectK1BoruvkaClosedCutRestoreDecision::
+              no_session_instance_id_not_distinct;
+      return output;
+    }
+
+    // Preserve the factory's allocation-free structural gate: the exact-level
+    // copy into the audit receipt happens only after that gate and the fresh
+    // Boruvka recertification have succeeded.
+    output.receipt.checkpoint_stamp = checkpoint.stamp;
+    output.receipt.checkpoint_source_forest_digest =
+        checkpoint.source_forest_digest;
+    output.receipt.checkpoint_state_digest = checkpoint.state_digest;
+
+    auto advance = initialization.session.advance_closed_to(
+        checkpoint.stamp.closed_squared_level);
+    output.receipt.advance_decision = advance.decision;
+    output.receipt.replayed_closed_cut_level_count =
+        advance.consumed_intermediate_level_count;
+    output.receipt.replayed_closed_cut_edge_count =
+        advance.consumed_edge_count;
+    output.receipt.replayed_closed_cut_merge_node_count =
+        advance.consumed_merge_node_count;
+    if (advance.decision !=
+            ExactDirectK1BoruvkaClosedCutAdvanceDecision::
+                complete_certified_monotone_closed_cut ||
+        !initialization.session.verify_advance_receipt(advance)) {
+      output.receipt.decision =
+          ExactDirectK1BoruvkaClosedCutRestoreDecision::
+              no_closed_cut_prefix_replay_rejected;
+      return output;
+    }
+    output.receipt.closed_cut_prefix_freshly_replayed = true;
+
+    const auto expected = initialization.session.export_checkpoint();
+    output.receipt.checkpoint_decision = expected.decision;
+    if (expected.decision !=
+            ExactDirectK1BoruvkaClosedCutCheckpointDecision::
+                complete_checkpoint_ready_state ||
+        !initialization.session.verify_checkpoint(expected.checkpoint)) {
+      output.receipt.decision =
+          ExactDirectK1BoruvkaClosedCutRestoreDecision::
+              no_expected_checkpoint_export_rejected;
+      return output;
+    }
+    output.receipt.expected_checkpoint_freshly_exported = true;
+    output.receipt.restored_stamp = expected.checkpoint.stamp;
+    output.receipt.restored_source_forest_digest =
+        expected.checkpoint.source_forest_digest;
+    output.receipt.restored_state_digest = expected.checkpoint.state_digest;
+    output.receipt.session_instance_ids_distinct =
+        checkpoint.stamp.session_instance_id !=
+            expected.checkpoint.stamp.session_instance_id;
+    output.receipt.scientific_digests_identical =
+        checkpoint_scientific_digests_equal(
+            checkpoint, expected.checkpoint);
+
+    if (!output.receipt.session_instance_ids_distinct) {
+      output.receipt.decision =
+          ExactDirectK1BoruvkaClosedCutRestoreDecision::
+              no_session_instance_id_not_distinct;
+      return output;
+    }
+    if (!semantic_checkpoint_equal_ignoring_instance_id(
+            checkpoint, expected.checkpoint)) {
+      output.receipt.decision =
+          ExactDirectK1BoruvkaClosedCutRestoreDecision::
+              no_semantic_checkpoint_mismatch;
+      return output;
+    }
+
+    output.receipt.semantic_checkpoint_equality_certified = true;
+    output.session = std::move(initialization.session);
+    output.receipt.decision =
+        ExactDirectK1BoruvkaClosedCutRestoreDecision::
+            complete_certified_fresh_semantic_replay_restore;
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.session = {};
+    output.receipt.semantic_checkpoint_equality_certified = false;
+    output.receipt.decision =
+        ExactDirectK1BoruvkaClosedCutRestoreDecision::no_allocation_failed;
     return output;
   }
 }

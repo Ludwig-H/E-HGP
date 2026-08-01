@@ -2402,8 +2402,10 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - refuser un stamp périmé, un stamp d'une seconde session et un identifiant d'instance altéré avant de publier une racine;
 - altérer la racine d'une réponse puis la racine d'un checkpoint et exiger le rejet par la capability live;
 - créer deux sessions fraîches sur la même autorité, vérifier des identifiants live distincts et un digest scientifique de checkpoint identique au même cut;
+- exporter une coupe intermédiaire, restaurer par préflight et Borůvka fraîchement rejoués, exiger un nouvel identifiant d'instance, puis poursuivre jusqu'au terminal et comparer tous les champs sémantiques au run ininterrompu;
+- muter séparément cloud, niveau exact, curseur, racine et digest d'état du checkpoint; chaque restore doit échouer sans rendre de session, et le cap de checkpoint moins un doit refuser avant le rejeu Borůvka;
 - reculer depuis la coupe terminale vers zéro et vérifier une décision non monotone avec stamps pré--post et état interne inchangés;
-- conserver faux tout claim de Gamma, Delaunay, carte verticale complète, vrai 50 k, scalabilité massive, Phase 16 ou statut public exact.
+- conserver faux tout claim de codec fichier, reconstruction directe de DSU, Gamma, Delaunay, carte verticale complète, vrai 50 k, scalabilité massive, Phase 16 ou statut public exact.
 
 ### T15-K2-K1-RESIDENT-BRIDGE — couture conditionnelle scellée
 

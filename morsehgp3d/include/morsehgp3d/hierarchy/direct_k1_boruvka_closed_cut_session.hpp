@@ -28,6 +28,14 @@ inline constexpr std::string_view
     direct_k1_boruvka_closed_cut_session_proof_basis =
         "fresh_exact_lbvh_boruvka_replay_compact_equal_level_k1_forest_"
         "monotone_closed_prefix_private_session_capability_v1";
+inline constexpr std::string_view
+    direct_k1_boruvka_closed_cut_restore_mode =
+        "certified_semantic_restore_by_fresh_exact_replay_no_file_codec";
+inline constexpr std::string_view
+    direct_k1_boruvka_closed_cut_restore_proof_basis =
+        "allocation_free_preflight_fresh_exact_lbvh_boruvka_replay_"
+        "fresh_closed_cut_prefix_replay_full_semantic_checkpoint_equality_"
+        "process_local_capability_remint_v1";
 
 // The conservative structural requirements are derived from point_count
 // before the fresh Boruvka replay or any session-owned arena is allocated.
@@ -125,6 +133,22 @@ enum class ExactDirectK1BoruvkaClosedCutCheckpointDecision : std::uint8_t {
   complete_checkpoint_ready_state,
 };
 
+enum class ExactDirectK1BoruvkaClosedCutRestoreDecision : std::uint8_t {
+  not_certified,
+  no_checkpoint_shape_rejected,
+  no_preflight_capacity_overflow,
+  no_preflight_budget_exhausted,
+  no_boruvka_authority_rejected,
+  no_compact_k1_forest_rejected,
+  no_allocation_failed,
+  no_session_instance_id_exhausted,
+  no_session_instance_id_not_distinct,
+  no_closed_cut_prefix_replay_rejected,
+  no_expected_checkpoint_export_rejected,
+  no_semantic_checkpoint_mismatch,
+  complete_certified_fresh_semantic_replay_restore,
+};
+
 struct ExactDirectK1BoruvkaClosedCutAdvanceReceipt {
   std::uint32_t schema_version{
       direct_k1_boruvka_closed_cut_session_schema_version};
@@ -162,10 +186,12 @@ struct ExactDirectK1BoruvkaClosedCutRootQueryResult {
 
 // A checkpoint stores the semantic partition, not the implementation's DSU
 // topology.  canonical_component_minimum_by_point and
-// closed_root_node_id_by_point therefore make a later deterministic restore
-// possible without persisting path-compression artifacts.  This component
-// exports and live-verifies the record; a durable codec/restore entry point is
-// intentionally left to the run-store integration.
+// closed_root_node_id_by_point therefore permit deterministic semantic
+// recertification without persisting path-compression artifacts.  The public
+// record never carries authority: restore freshly replays exact LBVH Boruvka,
+// replays the committed closed prefix, exports the expected checkpoint and
+// requires full semantic equality.  This is a semantic restore entry point;
+// serialization and a durable file codec remain outside this component.
 struct ExactDirectK1BoruvkaClosedCutCheckpoint {
   std::uint32_t schema_version{
       direct_k1_boruvka_closed_cut_session_schema_version};
@@ -184,6 +210,49 @@ struct ExactDirectK1BoruvkaClosedCutCheckpointExportResult {
   ExactDirectK1BoruvkaClosedCutCheckpoint checkpoint{};
   ExactDirectK1BoruvkaClosedCutCheckpointDecision decision{
       ExactDirectK1BoruvkaClosedCutCheckpointDecision::not_certified};
+};
+
+struct ExactDirectK1BoruvkaClosedCutRestoreReceipt {
+  std::uint32_t schema_version{
+      direct_k1_boruvka_closed_cut_session_schema_version};
+  ExactDirectK1BoruvkaClosedCutSessionStamp checkpoint_stamp{};
+  ExactDirectK1BoruvkaClosedCutSessionStamp restored_stamp{};
+  contract::CanonicalId checkpoint_source_forest_digest{};
+  contract::CanonicalId restored_source_forest_digest{};
+  contract::CanonicalId checkpoint_state_digest{};
+  contract::CanonicalId restored_state_digest{};
+  std::size_t replayed_boruvka_round_count{};
+  std::size_t replayed_boruvka_component_minimum_count{};
+  std::size_t replayed_closed_cut_level_count{};
+  std::size_t replayed_closed_cut_edge_count{};
+  std::size_t replayed_closed_cut_merge_node_count{};
+  bool allocation_free_structural_preflight_certified{false};
+  bool boruvka_authority_freshly_replayed{false};
+  bool compact_k1_equal_level_forest_certified{false};
+  bool closed_cut_prefix_freshly_replayed{false};
+  bool expected_checkpoint_freshly_exported{false};
+  bool semantic_checkpoint_equality_certified{false};
+  bool session_instance_ids_distinct{false};
+  bool scientific_digests_identical{false};
+  bool observed_boruvka_authority_mutated{false};
+  bool durable_checkpoint_file_codec_claimed{false};
+  bool gamma_cells_or_global_cofaces_materialized{false};
+  bool ordinary_or_higher_order_delaunay_materialized{false};
+  bool public_status_claimed{false};
+  ExactDirectK1BoruvkaClosedCutInitializationDecision
+      initialization_decision{
+          ExactDirectK1BoruvkaClosedCutInitializationDecision::
+              not_certified};
+  ExactDirectK1BoruvkaClosedCutAdvanceDecision advance_decision{
+      ExactDirectK1BoruvkaClosedCutAdvanceDecision::not_certified};
+  ExactDirectK1BoruvkaClosedCutCheckpointDecision checkpoint_decision{
+      ExactDirectK1BoruvkaClosedCutCheckpointDecision::not_certified};
+  ExactDirectK1BoruvkaClosedCutRestoreDecision decision{
+      ExactDirectK1BoruvkaClosedCutRestoreDecision::not_certified};
+
+  friend bool operator==(
+      const ExactDirectK1BoruvkaClosedCutRestoreReceipt&,
+      const ExactDirectK1BoruvkaClosedCutRestoreReceipt&) = default;
 };
 
 class ExactDirectK1BoruvkaClosedCutSession;
@@ -289,6 +358,13 @@ struct ExactDirectK1BoruvkaClosedCutSessionInitialization {
   [[nodiscard]] bool certified_ready_session() const noexcept;
 };
 
+struct ExactDirectK1BoruvkaClosedCutSessionRestore {
+  ExactDirectK1BoruvkaClosedCutRestoreReceipt receipt{};
+  ExactDirectK1BoruvkaClosedCutSession session{};
+
+  [[nodiscard]] bool certified_restored_session() const noexcept;
+};
+
 // The observed public Boruvka record never carries authority by itself.  The
 // factory first derives conservative sizes from the immutable cloud, then
 // freshly replays the exact LBVH Boruvka producer against the same cloud and
@@ -298,6 +374,21 @@ build_exact_direct_k1_boruvka_closed_cut_session(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     const K1ExactBoruvkaResult& observed_boruvka,
+    const ExactDirectK1BoruvkaClosedCutSessionBudget& budget);
+
+// This restores semantic state, not operational authority.  The checkpoint is
+// read-only input and is never trusted: the same cloud/index/observed Boruvka
+// tuple must mint a fresh sealed session, replay exactly the checkpoint's
+// closed cut and reproduce every semantic checkpoint field.  Only the old
+// process-local session_instance_id is excluded from semantic equality, and a
+// distinct new instance id is required before success.  No file codec is
+// provided here.
+[[nodiscard]] ExactDirectK1BoruvkaClosedCutSessionRestore
+restore_exact_direct_k1_boruvka_closed_cut_session(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const K1ExactBoruvkaResult& observed_boruvka,
+    const ExactDirectK1BoruvkaClosedCutCheckpoint& checkpoint,
     const ExactDirectK1BoruvkaClosedCutSessionBudget& budget);
 
 }  // namespace morsehgp3d::hierarchy
