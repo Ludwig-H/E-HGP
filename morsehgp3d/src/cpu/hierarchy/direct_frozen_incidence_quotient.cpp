@@ -574,7 +574,8 @@ bool ExactFrozenIncidenceQuotientResult::
 
 bool ExactFrozenIncidenceQuotientResult::atomic_empty_failure()
     const noexcept {
-  return decision != ExactFrozenIncidenceQuotientDecision::
+  return decision != ExactFrozenIncidenceQuotientDecision::not_certified &&
+         decision != ExactFrozenIncidenceQuotientDecision::
                          complete_certified_frozen_incidence_quotient &&
          hyperedge_bindings.empty() && token_bindings.empty() &&
          groups.empty() && group_tokens.empty();

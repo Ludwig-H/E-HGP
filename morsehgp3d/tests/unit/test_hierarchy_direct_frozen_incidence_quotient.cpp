@@ -97,6 +97,15 @@ struct DiscriminatingFixture {
   }};
 };
 
+void check_default_result_is_not_an_atomic_failure() {
+  const ExactFrozenIncidenceQuotientResult result;
+  check(
+      result.decision ==
+              ExactFrozenIncidenceQuotientDecision::not_certified &&
+          !result.atomic_empty_failure(),
+      "a default not-certified quotient is not a certified atomic failure");
+}
+
 void check_empty_quotient() {
   const auto result = build_exact_direct_frozen_incidence_quotient(
       std::span<const ExactFrozenIncidenceHyperedge>{},
@@ -495,6 +504,7 @@ void check_fresh_streaming_verifier_and_mutations() {
 }  // namespace
 
 int main() {
+  check_default_result_is_not_an_atomic_failure();
   check_empty_quotient();
   check_equal_chain_latent_bridge_and_q_r_partition();
   check_typed_identity_and_duplicate_references();

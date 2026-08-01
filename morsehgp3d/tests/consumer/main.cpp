@@ -16,6 +16,8 @@
 #include "morsehgp3d/hierarchy/direct_sparse_unified_level_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
+#include "morsehgp3d/hierarchy/direct_frozen_unified_incidence_batch.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_forest_root_coverage_index.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/anchored_pair_candidate_classifier.hpp"
@@ -164,9 +166,10 @@ int main() {
   const morsehgp3d::hierarchy::ExactFrozenIncidenceQuotientResult
       installed_frozen_incidence_quotient_probe;
   if (installed_frozen_incidence_quotient_probe
-          .certified_frozen_incidence_quotient()) {
+          .certified_frozen_incidence_quotient() ||
+      installed_frozen_incidence_quotient_probe.atomic_empty_failure()) {
     std::cerr
-        << "installed frozen-incidence quotient predicate accepted an empty result\n";
+        << "installed frozen-incidence quotient predicate accepted a default result\n";
     return 1;
   }
   static_assert(
@@ -175,9 +178,37 @@ int main() {
   const morsehgp3d::hierarchy::ExactFrozenIncidenceHgpActionPlanResult
       installed_frozen_incidence_action_probe;
   if (installed_frozen_incidence_action_probe
-          .certified_frozen_incidence_hgp_action_plan()) {
+          .certified_frozen_incidence_hgp_action_plan() ||
+      installed_frozen_incidence_action_probe.atomic_empty_failure()) {
     std::cerr
-        << "installed frozen-incidence action predicate accepted an empty result\n";
+        << "installed frozen-incidence action predicate accepted a default result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_frozen_unified_incidence_batch_schema_version == 1U);
+  const morsehgp3d::hierarchy::
+      ExactDirectFrozenUnifiedIncidenceBatchResult
+          installed_frozen_unified_batch_probe;
+  if (installed_frozen_unified_batch_probe
+          .certified_frozen_unified_incidence_batch() ||
+      installed_frozen_unified_batch_probe.atomic_empty_failure()) {
+    std::cerr
+        << "installed frozen-unified predicate accepted a default result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_morse_forest_root_coverage_index_schema_version == 1U);
+  const morsehgp3d::hierarchy::
+      ExactDirectMorseForestRootCoverageIndexResult
+          installed_root_coverage_index_probe;
+  if (installed_root_coverage_index_probe
+          .certified_forest_relative_root_coverage_index() ||
+      installed_root_coverage_index_probe.certified_atomic_failure() ||
+      installed_root_coverage_index_probe.certified_outcome()) {
+    std::cerr
+        << "installed root-coverage predicate accepted an empty result\n";
     return 1;
   }
   const morsehgp3d::hierarchy::

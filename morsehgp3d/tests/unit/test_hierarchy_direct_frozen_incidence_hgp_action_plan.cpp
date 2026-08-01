@@ -179,6 +179,15 @@ struct E5SuffixFixture {
   }};
 };
 
+void check_default_result_is_not_an_atomic_failure() {
+  const ExactFrozenIncidenceHgpActionPlanResult result;
+  check(
+      result.decision ==
+              ExactFrozenIncidenceHgpActionPlanDecision::not_certified &&
+          !result.atomic_empty_failure(),
+      "a default not-certified action plan is not a certified atomic failure");
+}
+
 [[nodiscard]] ExactFrozenIncidenceQuotientResult build_quotient(
     std::span<const ExactFrozenIncidenceHyperedge> hyperedges,
     std::span<const ExactFrozenIncidenceToken> tokens) {
@@ -837,6 +846,7 @@ void check_fresh_streaming_verifier_and_mutations() {
 }  // namespace
 
 int main() {
+  check_default_result_is_not_an_atomic_failure();
   check_e5_suffix_shape_and_actions();
   check_mixed_bridges_authorize_q0_and_q2();
   check_scope_rejections_are_atomic();

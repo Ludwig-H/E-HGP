@@ -655,7 +655,9 @@ bool ExactFrozenIncidenceHgpActionPlanResult::
 
 bool ExactFrozenIncidenceHgpActionPlanResult::atomic_empty_failure()
     const noexcept {
-  return decision != ExactFrozenIncidenceHgpActionPlanDecision::
+  return decision !=
+             ExactFrozenIncidenceHgpActionPlanDecision::not_certified &&
+         decision != ExactFrozenIncidenceHgpActionPlanDecision::
                          complete_certified_frozen_incidence_hgp_action_plan &&
          groups.empty() && direct_hyperedge_indices.empty() &&
          residual_hyperedge_indices.empty() && prior_root_ids.empty();

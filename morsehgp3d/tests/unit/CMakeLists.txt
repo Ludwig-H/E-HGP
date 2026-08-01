@@ -1433,6 +1433,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
+  test_hierarchy_direct_frozen_unified_incidence_batch.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
+  PRIVATE morsehgp3d::direct_frozen_unified_incidence_batch
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   test_hierarchy_relative_morse_boruvka.cpp
 )
@@ -1509,6 +1529,26 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_forest_root_coverage_index_tests
+  test_hierarchy_direct_morse_forest_root_coverage_index.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_forest_root_coverage_index_tests
+  PRIVATE morsehgp3d::direct_morse_forest_root_coverage_index
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_root_coverage_index_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_root_coverage_index_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -2982,10 +3022,12 @@ set(
   morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
   morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
   morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
+  morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+  morsehgp3d_hierarchy_direct_morse_forest_root_coverage_index_tests
   morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_replay_session_tests
   morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_closure_adapter_tests
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
@@ -4051,6 +4093,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_frozen_unified_incidence_batch
+  COMMAND morsehgp3d_hierarchy_direct_frozen_unified_incidence_batch_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_relative_morse_boruvka
   COMMAND morsehgp3d_hierarchy_relative_morse_boruvka_tests
 )
@@ -4065,6 +4111,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_forest_carrier_cut_index
   COMMAND morsehgp3d_hierarchy_direct_morse_forest_carrier_cut_index_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_forest_root_coverage_index
+  COMMAND morsehgp3d_hierarchy_direct_morse_forest_root_coverage_index_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_forest_carrier_cut_replay_session

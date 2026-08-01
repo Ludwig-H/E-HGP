@@ -29,6 +29,8 @@ target_link_libraries(
     morsehgp3d::direct_sparse_unified_level_plan
     morsehgp3d::direct_frozen_incidence_quotient
     morsehgp3d::direct_frozen_incidence_hgp_action_plan
+    morsehgp3d::direct_frozen_unified_incidence_batch
+    morsehgp3d::direct_morse_forest_root_coverage_index
 )
 
 include(CTest)

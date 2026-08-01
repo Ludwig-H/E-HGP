@@ -1933,6 +1933,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_frozen_unified_incidence_batch
+  STATIC
+    src/cpu/hierarchy/direct_frozen_unified_incidence_batch.cpp
+)
+add_library(
+  morsehgp3d::direct_frozen_unified_incidence_batch
+  ALIAS morsehgp3d_direct_frozen_unified_incidence_batch
+)
+set_target_properties(
+  morsehgp3d_direct_frozen_unified_incidence_batch
+  PROPERTIES
+    EXPORT_NAME direct_frozen_unified_incidence_batch
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_frozen_unified_incidence_batch PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_frozen_unified_incidence_batch
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_frozen_unified_incidence_batch
+  PUBLIC
+    morsehgp3d::direct_frozen_incidence_hgp_action_plan
+    morsehgp3d::direct_sparse_unified_level_plan
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_frozen_unified_incidence_batch PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_frozen_unified_incidence_batch
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_relative_morse_boruvka
   STATIC
     src/cpu/hierarchy/relative_morse_boruvka.cpp
@@ -2091,6 +2133,46 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_morse_forest_carrier_cut_index
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_forest_root_coverage_index
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_root_coverage_index.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_root_coverage_index
+  ALIAS morsehgp3d_direct_morse_forest_root_coverage_index
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_root_coverage_index
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_root_coverage_index
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_root_coverage_index PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_root_coverage_index
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_root_coverage_index
+  PUBLIC morsehgp3d::direct_morse_forest_carrier_cut_index
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_root_coverage_index PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_root_coverage_index
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -5393,10 +5475,12 @@ install(
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_frozen_incidence_quotient
     morsehgp3d_direct_frozen_incidence_hgp_action_plan
+    morsehgp3d_direct_frozen_unified_incidence_batch
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal
     morsehgp3d_direct_morse_forest_carrier_cut_index
+    morsehgp3d_direct_morse_forest_root_coverage_index
     morsehgp3d_direct_morse_forest_carrier_cut_replay_session
     morsehgp3d_direct_morse_forest_carrier_cut_closure_adapter
     morsehgp3d_direct_morse_forest_source_authority
