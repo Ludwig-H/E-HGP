@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/direct_morse_vertical_target_proposal_pipeline.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp"
+#include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 
 #include <algorithm>
 #include <array>
@@ -543,6 +544,26 @@ void populate_multiorder_locator_stamps(
   return CanonicalPointCloud::rejecting_duplicates(points);
 }
 
+[[nodiscard]] CanonicalPointCloud foreign_cloud_fixture() {
+  const std::array<CertifiedPoint3, 4U> points{
+      CertifiedPoint3::from_binary64(100.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(101.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(110.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(111.0, 0.0, 0.0),
+  };
+  return CanonicalPointCloud::rejecting_duplicates(points);
+}
+
+void bind_forest_to_cloud(
+    ExactDirectMorseForestJournalResult& forest,
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud) {
+  forest.source_higher_canonical_cloud_digest =
+      make_exact_higher_support_checkpoint_manifest(
+          index, cloud, forest.effective_maximum_order)
+          .canonical_cloud_digest;
+}
+
 [[nodiscard]] ExactDirectMorseForestJournalResult conflict_forest_fixture() {
   ExactDirectMorseForestJournalResult forest;
   forest.requested_budget = forest_budget();
@@ -738,12 +759,13 @@ manual_composition(
 }
 
 void test_complete_multiorder_pipeline() {
-  const auto forest = multiorder_forest_fixture();
+  auto forest = multiorder_forest_fixture();
+  const auto cloud = cloud_fixture();
+  const auto index = MortonLbvhIndex::build(cloud);
+  bind_forest_to_cloud(forest, index, cloud);
   check(
       forest.certified_conditional_h0_candidate(),
       "the multiorder forest fixture is certified");
-  const auto cloud = cloud_fixture();
-  const auto index = MortonLbvhIndex::build(cloud);
   const auto result =
       build_exact_direct_morse_vertical_target_proposal_pipeline(
           forest, index, cloud, pipeline_budget());
@@ -796,12 +818,51 @@ void test_complete_multiorder_pipeline() {
   check(
       result.lbvh_validated_for_cloud_and_point_count_matches &&
           result.matching_canonical_point_namespace_required &&
-          !result.forest_to_cloud_namespace_identity_certified &&
+          result.forest_to_cloud_namespace_identity_certified &&
+          result.source_forest_canonical_cloud_digest ==
+              forest.source_higher_canonical_cloud_digest &&
+          result.replayed_canonical_cloud_digest ==
+              forest.source_higher_canonical_cloud_digest &&
           !result.external_target_authority_replayed &&
           !result.vertical_maps_complete && !result.public_status_claimed &&
           !result.global_facet_coface_incidence_cell_gamma_or_delaunay_materialized &&
           result.no_plan_closure_locator_or_session_reference_retained,
-      "the pipeline retains compact conditional receipts without namespace or public promotion");
+      "the pipeline binds the source forest to the freshly replayed cloud without public promotion");
+
+  const auto foreign_cloud = foreign_cloud_fixture();
+  const auto foreign_index = MortonLbvhIndex::build(foreign_cloud);
+  const auto foreign =
+      build_exact_direct_morse_vertical_target_proposal_pipeline(
+          forest, foreign_index, foreign_cloud, pipeline_budget());
+  check(
+      foreign.decision ==
+              ExactDirectMorseVerticalTargetProposalPipelineDecision::
+                  no_pipeline_point_namespace_rejected &&
+          foreign.certified_atomic_failure() && foreign.proposals.empty() &&
+          foreign.group_audits.empty() && foreign.session_audits.empty() &&
+          !foreign.forest_to_cloud_namespace_identity_certified,
+      "a fresh same-cardinality LBVH over a foreign cloud is rejected atomically");
+
+  auto mutated_digest_forest = forest;
+  mutated_digest_forest.source_higher_canonical_cloud_digest =
+      make_exact_higher_support_checkpoint_manifest(
+          foreign_index,
+          foreign_cloud,
+          mutated_digest_forest.effective_maximum_order)
+          .canonical_cloud_digest;
+  const auto mutated_digest =
+      build_exact_direct_morse_vertical_target_proposal_pipeline(
+          mutated_digest_forest, index, cloud, pipeline_budget());
+  check(
+      mutated_digest.decision ==
+              ExactDirectMorseVerticalTargetProposalPipelineDecision::
+                  no_pipeline_point_namespace_rejected &&
+          mutated_digest.certified_atomic_failure() &&
+          mutated_digest.proposals.empty() &&
+          mutated_digest.group_audits.empty() &&
+          mutated_digest.session_audits.empty() &&
+          !mutated_digest.forest_to_cloud_namespace_identity_certified,
+      "a certified forest carrying a different nonzero cloud digest is rejected atomically");
 
   const auto manual = manual_composition(forest, index, cloud);
   check(
@@ -904,7 +965,12 @@ void test_complete_multiorder_pipeline() {
   auto forged_equal_count = result;
   ++forged_equal_count.counters.equal_level_same_target_order_group_count;
   auto forged_namespace = result;
-  forged_namespace.forest_to_cloud_namespace_identity_certified = true;
+  forged_namespace.forest_to_cloud_namespace_identity_certified = false;
+  auto forged_replayed_digest = result;
+  forged_replayed_digest.replayed_canonical_cloud_digest =
+      make_exact_higher_support_checkpoint_manifest(
+          foreign_index, foreign_cloud, forest.effective_maximum_order)
+          .canonical_cloud_digest;
   auto forged_plan_budget = result;
   forged_plan_budget.requested_budget.facet_plan_budget
       .maximum_distinct_target_facet_count = 4U;
@@ -916,18 +982,20 @@ void test_complete_multiorder_pipeline() {
           !forged_prefix.certified_multiorder_target_proposals() &&
           !forged_equal_count.certified_multiorder_target_proposals() &&
           !forged_namespace.certified_multiorder_target_proposals() &&
+          !forged_replayed_digest.certified_multiorder_target_proposals() &&
           !forged_plan_budget.certified_multiorder_target_proposals() &&
           !forged_session_budget.certified_multiorder_target_proposals(),
-      "the certificate reconstructs monotonicity, equal cuts, stage budgets and namespace honesty");
+      "the certificate reconstructs monotonicity, equal cuts, stage budgets and namespace identity");
 }
 
 void test_known_target_root_conflict() {
-  const auto forest = conflict_forest_fixture();
+  auto forest = conflict_forest_fixture();
+  const auto cloud = conflict_cloud_fixture();
+  const auto index = MortonLbvhIndex::build(cloud);
+  bind_forest_to_cloud(forest, index, cloud);
   check(
       forest.certified_conditional_h0_candidate(),
       "the historical conflict forest fixture is certified");
-  const auto cloud = conflict_cloud_fixture();
-  const auto index = MortonLbvhIndex::build(cloud);
   const auto result =
       build_exact_direct_morse_vertical_target_proposal_pipeline(
           forest, index, cloud, pipeline_budget());

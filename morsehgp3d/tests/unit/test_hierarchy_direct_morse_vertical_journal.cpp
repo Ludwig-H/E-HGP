@@ -151,6 +151,9 @@ void check(bool condition, const std::string& message) {
 
 [[nodiscard]] ExactDirectMorseForestJournalResult forest_fixture() {
   ExactDirectMorseForestJournalResult forest;
+  forest.source_higher_canonical_cloud_digest =
+      morsehgp3d::contract::CanonicalId::from_lower_hex(
+          std::string(64U, '1'));
   forest.point_count = 4U;
   forest.effective_maximum_order = 4U;
   forest.implicit_order_one_prefix_count = 4U;

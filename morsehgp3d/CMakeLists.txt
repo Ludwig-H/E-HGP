@@ -2136,7 +2136,9 @@ target_link_libraries(
   PUBLIC
     morsehgp3d::direct_morse_forest_carrier_cut_replay_session
     morsehgp3d::direct_morse_vertical_target_proposal_adapter
-  PRIVATE morsehgp3d::sanitizers
+  PRIVATE
+    morsehgp3d::higher_support
+    morsehgp3d::sanitizers
 )
 if(MSVC)
   target_compile_options(

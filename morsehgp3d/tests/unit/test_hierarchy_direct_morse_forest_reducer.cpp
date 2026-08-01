@@ -1331,7 +1331,15 @@ void test_incremental_identity_and_chunk_independence() {
       resident.certified_conditional_h0_candidate() &&
           one_batch_chunks.certified_conditional_h0_candidate() &&
           two_batch_chunks.certified_conditional_h0_candidate() &&
-          integrated_adapter.certified_conditional_h0_candidate(),
+          integrated_adapter.certified_conditional_h0_candidate() &&
+          resident.source_higher_canonical_cloud_digest ==
+              scenario.facade.certificate.higher_canonical_cloud_digest &&
+          one_batch_chunks.source_higher_canonical_cloud_digest ==
+              resident.source_higher_canonical_cloud_digest &&
+          two_batch_chunks.source_higher_canonical_cloud_digest ==
+              resident.source_higher_canonical_cloud_digest &&
+          integrated_adapter.source_higher_canonical_cloud_digest ==
+              resident.source_higher_canonical_cloud_digest,
       "resident and streaming reductions certify the same conditional scope");
   check(
       one_batch_chunks.implicit_order_one_prefix_count ==
@@ -1812,6 +1820,8 @@ void test_segmented_output_identity_retry_and_no_history() {
           segmented.seal.point_count == resident.point_count &&
           segmented.seal.effective_maximum_order ==
               resident.effective_maximum_order &&
+          segmented.seal.source_higher_canonical_cloud_digest ==
+              resident.source_higher_canonical_cloud_digest &&
           segmented.seal.final_cursor == expected_begin &&
           segmented.seal.final_locator_stamp ==
               resident.final_locator_stamp &&
@@ -1820,6 +1830,11 @@ void test_segmented_output_identity_retry_and_no_history() {
           segmented.seal.logical_output_entry_count ==
               resident.logical_output_entry_count,
       "the O(K) segmented seal closes the same counters, roots and locator stamp as the resident journal");
+  auto forged_seal = segmented.seal;
+  forged_seal.source_higher_canonical_cloud_digest = {};
+  check(
+      !forged_seal.certified_conditional_h0_candidate(),
+      "the segmented seal rejects erasure of its source cloud identity");
   check(
       expected_begin.segment_count == resident.batches.size() &&
           expected_begin.implicit_order_one_prefix_count ==

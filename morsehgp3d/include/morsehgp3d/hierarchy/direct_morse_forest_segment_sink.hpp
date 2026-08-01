@@ -11,7 +11,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t direct_morse_forest_output_segment_schema_version =
-    1U;
+    2U;
 inline constexpr std::string_view direct_morse_forest_output_segment_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_forest_output_segment_profile =
@@ -142,6 +142,7 @@ struct ExactDirectMorseForestFinalSeal {
       direct_morse_forest_output_segment_schema_version};
   std::size_t point_count{};
   std::size_t effective_maximum_order{};
+  contract::CanonicalId source_higher_canonical_cloud_digest{};
   ExactDirectMorseForestSegmentCursor final_cursor{};
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp final_locator_stamp{};
   ExactDirectMorseForestCounters counters{};

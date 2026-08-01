@@ -1063,6 +1063,7 @@ bool ExactDirectMorseForestFinalSeal::certified_conditional_h0_candidate()
     const noexcept {
   return schema_version == direct_morse_forest_output_segment_schema_version &&
          point_count != 0U && effective_maximum_order != 0U &&
+         source_higher_canonical_cloud_digest != contract::CanonicalId{} &&
          final_cursor.implicit_order_one_prefix_count == point_count &&
          final_cursor.batch_record_count == final_cursor.segment_count &&
          counters.birth_record_count ==
@@ -1326,6 +1327,8 @@ class ExactDirectMorseForestReducer::Impl {
     result_.point_count = source_manifest_.point_count;
     result_.effective_maximum_order =
         source_manifest_.effective_maximum_order;
+    result_.source_higher_canonical_cloud_digest =
+        source_manifest_.source_higher_canonical_cloud_digest;
     initialize_scope(result_);
     result_.source_event_journal_freshly_replayed = false;
     result_.source_strict_arm_journal_freshly_replayed = false;
@@ -1790,6 +1793,8 @@ class ExactDirectMorseForestReducer::Impl {
     ExactDirectMorseForestFinalSeal seal;
     seal.point_count = result_.point_count;
     seal.effective_maximum_order = result_.effective_maximum_order;
+    seal.source_higher_canonical_cloud_digest =
+        result_.source_higher_canonical_cloud_digest;
     seal.final_cursor = output_cursor_;
     seal.final_locator_stamp = locator_.snapshot_stamp();
     seal.counters = result_.counters;

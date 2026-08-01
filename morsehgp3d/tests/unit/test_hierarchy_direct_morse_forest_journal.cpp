@@ -336,6 +336,8 @@ void test_acute_triangle_creates_one_reduced_birth_from_latent_edges() {
 
   check(
       result.certified_conditional_h0_candidate() && triangle != nullptr &&
+          result.source_higher_canonical_cloud_digest ==
+              scenario.facade.certificate.higher_canonical_cloud_digest &&
           triangle->kind ==
               ExactDirectMorseForestAtomicGroupKind::reduced_birth &&
           triangle->saddle_record_count == 1U &&

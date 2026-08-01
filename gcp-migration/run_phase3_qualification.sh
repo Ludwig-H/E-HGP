@@ -2415,7 +2415,7 @@ def validate_reducer_run(value, maximum_order):
         f"reducer run K={maximum_order}",
     )
     for key, expected in {
-        "schema": "morsehgp3d.phase15.transactional_pair_to_conditional_forest_qualification.v4",
+        "schema": "morsehgp3d.phase15.transactional_pair_to_conditional_forest_qualification.v5",
         "backend": "cuda_g4_plus_reference_cpu",
         "git_sha": git_sha,
         "profile": "hgp_reduced",
@@ -2612,7 +2612,7 @@ def validate_reducer_run(value, maximum_order):
         or pipeline["decision"] !=
             (15 if pipeline["unresolved_proposals"] != 0 else 14)
         or pipeline.get("matching_canonical_point_namespace_required") is not True
-        or pipeline.get("forest_to_cloud_namespace_identity_certified") is not False
+        or pipeline.get("forest_to_cloud_namespace_identity_certified") is not True
         or pipeline.get("forest_relative_only") is not True
         or pipeline.get("global_forbidden_structure_materialized") is not False
         or pipeline.get("external_target_authority_replayed") is not False
@@ -2666,6 +2666,8 @@ def validate_reducer_run(value, maximum_order):
             "higher_output_chain_sha256", "higher_checkpoint_sha256",
             "normalized_terminal_output_sha256",
             "reducer_source_manifest_sha256",
+            "source_forest_canonical_cloud_sha256",
+            "replayed_canonical_cloud_sha256",
         },
         "reducer digests",
     )
@@ -2679,6 +2681,11 @@ def validate_reducer_run(value, maximum_order):
             or digest == "0" * 64
         ):
             fail(f"reducer digests.{key}: invalid certified SHA-256")
+    if (
+        digests["source_forest_canonical_cloud_sha256"] !=
+        digests["replayed_canonical_cloud_sha256"]
+    ):
+        fail("reducer forest source and replayed canonical cloud identities diverge")
     timings = exact_object(
         value.get("timings_nanoseconds"),
         {

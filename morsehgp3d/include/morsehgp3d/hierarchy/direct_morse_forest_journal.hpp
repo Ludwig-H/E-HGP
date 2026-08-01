@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_root_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_saddle_arm_seed_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_closure.hpp"
@@ -14,7 +15,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t direct_morse_forest_journal_schema_version =
-    3U;
+    4U;
 inline constexpr std::string_view direct_morse_forest_journal_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_forest_journal_profile =
@@ -294,6 +295,7 @@ struct ExactDirectMorseForestJournalResult {
       spatial::LbvhTraversalOrder::near_first};
   std::size_t point_count{};
   std::size_t effective_maximum_order{};
+  contract::CanonicalId source_higher_canonical_cloud_digest{};
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp final_locator_stamp{};
 
   // On success this is exactly point_count.  Logical birth records and nodes

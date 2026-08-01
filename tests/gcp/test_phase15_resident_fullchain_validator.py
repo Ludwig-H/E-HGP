@@ -54,7 +54,7 @@ def valid_fullchain_result() -> dict:
     return {
         "schema": (
             "morsehgp3d.phase15."
-            "transactional_pair_to_conditional_forest_qualification.v4"
+            "transactional_pair_to_conditional_forest_qualification.v5"
         ),
         "backend": "cuda_g4_plus_reference_cpu",
         "git_sha": GIT_SHA,
@@ -170,7 +170,7 @@ def valid_fullchain_result() -> dict:
             "resolved_proposals": 1,
             "equal_level_same_target_order_groups": 0,
             "matching_canonical_point_namespace_required": True,
-            "forest_to_cloud_namespace_identity_certified": False,
+            "forest_to_cloud_namespace_identity_certified": True,
             "forest_relative_only": True,
             "global_forbidden_structure_materialized": False,
             "external_target_authority_replayed": False,
@@ -192,7 +192,10 @@ def valid_fullchain_result() -> dict:
         "digests": {
             "submitted_recipe_fnv1a": 1,
             "final_cut_fnv1a": 1,
-            "pair_cloud_sha256": sha256,
+            # Pair and higher streams intentionally use distinct digest
+            # domains; namespace binding only compares the two higher-domain
+            # forest/replay identities below.
+            "pair_cloud_sha256": "2" * 64,
             "pair_lbvh_sha256": sha256,
             "pair_output_sha256": sha256,
             "pair_semantic_sha256": sha256,
@@ -201,6 +204,8 @@ def valid_fullchain_result() -> dict:
             "higher_checkpoint_sha256": sha256,
             "normalized_terminal_output_sha256": sha256,
             "reducer_source_manifest_sha256": sha256,
+            "source_forest_canonical_cloud_sha256": sha256,
+            "replayed_canonical_cloud_sha256": sha256,
         },
         "timings_nanoseconds": timings,
         "claims": {
@@ -282,8 +287,45 @@ class Phase15ResidentFullchainValidatorTests(unittest.TestCase):
             self.wrapper_validator(value, 5)
         self.assert_remote_accepts(value, False)
 
-    def test_v4_mixed_resolved_and_unresolved_contract_is_accepted(self) -> None:
+    def test_v5_mixed_resolved_and_unresolved_contract_is_accepted(self) -> None:
         self.assert_both_accept(valid_fullchain_result())
+
+    def test_namespace_identity_is_mandatory_and_digest_bound(self) -> None:
+        mutations = {
+            "identity_false": (
+                "vertical_target_pipeline",
+                "forest_to_cloud_namespace_identity_certified",
+                False,
+            ),
+            "replayed_digest_diverges": (
+                "digests",
+                "replayed_canonical_cloud_sha256",
+                "2" * 64,
+            ),
+            "source_digest_diverges": (
+                "digests",
+                "source_forest_canonical_cloud_sha256",
+                "3" * 64,
+            ),
+            "zero_replayed_digest": (
+                "digests",
+                "replayed_canonical_cloud_sha256",
+                "0" * 64,
+            ),
+        }
+        for name, (section, key, replacement) in mutations.items():
+            with self.subTest(name=name):
+                value = deepcopy(valid_fullchain_result())
+                value[section][key] = replacement
+                self.assert_both_reject(value)
+
+    def test_historical_v4_contract_is_rejected_by_the_live_validator(self) -> None:
+        value = valid_fullchain_result()
+        value["schema"] = (
+            "morsehgp3d.phase15."
+            "transactional_pair_to_conditional_forest_qualification.v4"
+        )
+        self.assert_both_reject(value)
 
     def test_catalog_receipt_and_mass_partitions_are_strict(self) -> None:
         mutations = {

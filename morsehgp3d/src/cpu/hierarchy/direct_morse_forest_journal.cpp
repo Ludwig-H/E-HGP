@@ -1154,6 +1154,7 @@ bool ExactDirectMorseForestJournalResult::
     certified_conditional_h0_candidate() const noexcept {
   const ExactDirectMorseForestJournalView view{*this};
   return schema_version == direct_morse_forest_journal_schema_version &&
+         source_higher_canonical_cloud_digest != contract::CanonicalId{} &&
          decision == ExactDirectMorseForestDecision::
                          complete_conditional_exact_direct_morse_forest &&
          budget_preflight_certified &&
@@ -1261,6 +1262,8 @@ build_exact_direct_morse_forest_journal(
   result.traversal_order = traversal_order;
   result.point_count = cloud.size();
   result.effective_maximum_order = source_journal.effective_maximum_order;
+  result.source_higher_canonical_cloud_digest =
+      source_facade.certificate.higher_canonical_cloud_digest;
   initialize_scope(result);
 
   if (!source_sizes_within_budget(

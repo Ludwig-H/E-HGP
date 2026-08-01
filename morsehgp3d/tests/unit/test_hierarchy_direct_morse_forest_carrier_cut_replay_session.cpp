@@ -334,6 +334,9 @@ void populate_real_locator_stamps(
 
 [[nodiscard]] ExactDirectMorseForestJournalResult forest_fixture() {
   ExactDirectMorseForestJournalResult forest;
+  forest.source_higher_canonical_cloud_digest =
+      morsehgp3d::contract::CanonicalId::from_lower_hex(
+          std::string(64U, '1'));
   forest.requested_budget = forest_budget();
   forest.config.locator_config.external_authority_id = authority_id;
   forest.point_count = 3U;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_carrier_cut_replay_session.hpp"
 
 #include <cstddef>
@@ -11,7 +12,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_morse_vertical_target_proposal_pipeline_schema_version = 1U;
+    direct_morse_vertical_target_proposal_pipeline_schema_version = 2U;
 inline constexpr std::string_view
     direct_morse_vertical_target_proposal_pipeline_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -24,10 +25,11 @@ inline constexpr std::string_view
         "not_claimed";
 inline constexpr std::string_view
     direct_morse_vertical_target_proposal_pipeline_proof_basis =
-        "accepted_exact_direct_morse_forest_one_monotone_historical_session_"
+        "accepted_exact_direct_morse_forest_fresh_higher_support_canonical_"
+        "cloud_namespace_replay_one_monotone_historical_session_"
         "per_referenced_target_order_group_local_k_facet_plan_then_one_10_5c_"
         "closure_then_compact_proposal_adapter_with_post_advance_atomic_"
-        "publication_and_disjoint_query_tokens_v1";
+        "publication_and_disjoint_query_tokens_v2";
 
 // Nested budgets apply independently to every referenced target-order session
 // or source atomic group.  Aggregate caps are exact over the group-local plans:
@@ -210,6 +212,8 @@ struct ExactDirectMorseVerticalTargetProposalPipelineResult {
   std::size_t point_count{};
   std::size_t effective_maximum_order{};
   std::uint64_t external_target_authority_id{};
+  contract::CanonicalId source_forest_canonical_cloud_digest{};
+  contract::CanonicalId replayed_canonical_cloud_digest{};
   std::size_t required_referenced_target_order_count{};
   std::size_t required_group_count{};
   std::size_t required_representative_count{};

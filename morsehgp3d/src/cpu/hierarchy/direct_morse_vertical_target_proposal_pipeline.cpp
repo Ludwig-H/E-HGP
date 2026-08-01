@@ -1,5 +1,7 @@
 #include "morsehgp3d/hierarchy/direct_morse_vertical_target_proposal_pipeline.hpp"
 
+#include "morsehgp3d/hierarchy/higher_support_stream.hpp"
+
 #include <algorithm>
 #include <limits>
 #include <memory>
@@ -102,7 +104,6 @@ using PipelineSessionAudit =
 [[nodiscard]] bool pipeline_non_scope_honest(
     const PipelineResult& result) noexcept {
   return result.matching_canonical_point_namespace_required &&
-         !result.forest_to_cloud_namespace_identity_certified &&
          result.forest_relative_only &&
          !result.external_target_authority_replayed &&
          !result.vertical_maps_complete &&
@@ -392,6 +393,8 @@ build_exact_direct_morse_vertical_target_proposal_pipeline(
   result.effective_maximum_order = source_forest.effective_maximum_order;
   result.external_target_authority_id =
       source_forest.config.locator_config.external_authority_id;
+  result.source_forest_canonical_cloud_digest =
+      source_forest.source_higher_canonical_cloud_digest;
 
   if (!source_forest.certified_conditional_h0_candidate()) {
     fail(result, PipelineDecision::no_pipeline_source_forest_rejected);
@@ -405,10 +408,32 @@ build_exact_direct_morse_vertical_target_proposal_pipeline(
     fail(result, PipelineDecision::no_pipeline_point_namespace_rejected);
     return result;
   }
-  // The LBVH/cloud identity is owned by the spatial layer.  The forest does
-  // not retain a coordinate digest: preserving its canonical PointId
-  // namespace is an explicit caller precondition, never a pipeline claim.
   result.lbvh_validated_for_cloud_and_point_count_matches = true;
+  try {
+    result.replayed_canonical_cloud_digest =
+        make_exact_higher_support_checkpoint_manifest(
+            index,
+            cloud,
+            source_forest.effective_maximum_order)
+            .canonical_cloud_digest;
+  } catch (const std::bad_alloc&) {
+    fail(result, PipelineDecision::no_pipeline_allocation_failed);
+    return result;
+  } catch (const std::length_error&) {
+    fail(result, PipelineDecision::no_pipeline_capacity_overflow);
+    return result;
+  } catch (const std::exception&) {
+    fail(result, PipelineDecision::no_pipeline_point_namespace_rejected);
+    return result;
+  }
+  if (result.source_forest_canonical_cloud_digest ==
+          contract::CanonicalId{} ||
+      result.source_forest_canonical_cloud_digest !=
+          result.replayed_canonical_cloud_digest) {
+    fail(result, PipelineDecision::no_pipeline_point_namespace_rejected);
+    return result;
+  }
+  result.forest_to_cloud_namespace_identity_certified = true;
 
   std::vector<GroupDescriptor> descriptors;
   std::vector<std::size_t> target_orders;
@@ -1033,7 +1058,10 @@ bool ExactDirectMorseVerticalTargetProposalPipelineResult::
       !source_forest_certified ||
       !lbvh_validated_for_cloud_and_point_count_matches ||
       !matching_canonical_point_namespace_required ||
-      forest_to_cloud_namespace_identity_certified ||
+      !forest_to_cloud_namespace_identity_certified ||
+      source_forest_canonical_cloud_digest == contract::CanonicalId{} ||
+      source_forest_canonical_cloud_digest !=
+          replayed_canonical_cloud_digest ||
       !aggregate_budget_preflight_certified ||
       !one_session_per_referenced_target_order ||
       !source_groups_processed_in_batch_then_group_order ||

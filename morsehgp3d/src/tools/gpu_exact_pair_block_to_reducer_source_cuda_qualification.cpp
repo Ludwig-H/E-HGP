@@ -640,7 +640,7 @@ int run(const Options& options) {
 
   std::cout
       << "{\"schema\":\"morsehgp3d.phase15.transactional_pair_to_"
-         "conditional_forest_qualification.v4\","
+         "conditional_forest_qualification.v5\","
       << "\"backend\":\"cuda_g4_plus_reference_cpu\","
       << "\"git_sha\":\"" << kGitSha << "\","
       << "\"profile\":\"hgp_reduced\","
@@ -869,6 +869,10 @@ int run(const Options& options) {
       << cut_audit.submitted_recipe_digest
       << ",\"final_cut_fnv1a\":" << cut_audit.final_cut_digest
       << ",\"pair_cloud_sha256\":\"" << pair_cloud_digest
+      << "\",\"source_forest_canonical_cloud_sha256\":\""
+      << vertical_pipeline.source_forest_canonical_cloud_digest.to_lower_hex()
+      << "\",\"replayed_canonical_cloud_sha256\":\""
+      << vertical_pipeline.replayed_canonical_cloud_digest.to_lower_hex()
       << "\",\"pair_lbvh_sha256\":\"" << pair_lbvh_digest
       << "\",\"pair_output_sha256\":\"" << pair_output_digest
       << "\",\"pair_semantic_sha256\":\"" << pair_semantic_digest
