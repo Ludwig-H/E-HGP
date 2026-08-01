@@ -1295,6 +1295,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+  test_hierarchy_direct_sparse_unified_level_plan.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+  PRIVATE morsehgp3d::direct_sparse_unified_level_plan
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_journal_tests
   test_hierarchy_direct_sparse_gateway_candidate_journal.cpp
 )
@@ -1368,6 +1388,46 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
+  test_hierarchy_direct_frozen_incidence_quotient.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
+  PRIVATE morsehgp3d::direct_frozen_incidence_quotient
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
+  test_hierarchy_direct_frozen_incidence_hgp_action_plan.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
+  PRIVATE morsehgp3d::direct_frozen_incidence_hgp_action_plan
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -2915,10 +2975,13 @@ set(
   morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
+  morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_journal_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_localization_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_clock_tests
   morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
+  morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
+  morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
@@ -3960,6 +4023,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_unified_level_plan
+  COMMAND morsehgp3d_hierarchy_direct_sparse_unified_level_plan_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_gateway_candidate_journal
   COMMAND morsehgp3d_hierarchy_direct_sparse_gateway_candidate_journal_tests
 )
@@ -3974,6 +4041,14 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_frozen_root_quotient
   COMMAND morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_frozen_incidence_quotient
+  COMMAND morsehgp3d_hierarchy_direct_frozen_incidence_quotient_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_frozen_incidence_hgp_action_plan
+  COMMAND morsehgp3d_hierarchy_direct_frozen_incidence_hgp_action_plan_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_relative_morse_boruvka

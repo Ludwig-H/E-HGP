@@ -1526,6 +1526,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_unified_level_plan
+  STATIC
+    src/cpu/hierarchy/direct_sparse_unified_level_plan.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_unified_level_plan
+  ALIAS morsehgp3d_direct_sparse_unified_level_plan
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_unified_level_plan
+  PROPERTIES
+    EXPORT_NAME direct_sparse_unified_level_plan
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_unified_level_plan PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_unified_level_plan
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_unified_level_plan
+  PUBLIC morsehgp3d::direct_sparse_successive_incidence_star_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_unified_level_plan PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_unified_level_plan
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_sparse_gateway_candidate_journal
   STATIC
     src/cpu/hierarchy/direct_sparse_gateway_candidate_journal.cpp
@@ -1809,6 +1849,85 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_frozen_root_quotient
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_frozen_incidence_quotient
+  STATIC
+    src/cpu/hierarchy/direct_frozen_incidence_quotient.cpp
+)
+add_library(
+  morsehgp3d::direct_frozen_incidence_quotient
+  ALIAS morsehgp3d_direct_frozen_incidence_quotient
+)
+set_target_properties(
+  morsehgp3d_direct_frozen_incidence_quotient
+  PROPERTIES
+    EXPORT_NAME direct_frozen_incidence_quotient
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_frozen_incidence_quotient PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_frozen_incidence_quotient
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_frozen_incidence_quotient
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_frozen_incidence_quotient PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_frozen_incidence_quotient
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_frozen_incidence_hgp_action_plan
+  STATIC
+    src/cpu/hierarchy/direct_frozen_incidence_hgp_action_plan.cpp
+)
+add_library(
+  morsehgp3d::direct_frozen_incidence_hgp_action_plan
+  ALIAS morsehgp3d_direct_frozen_incidence_hgp_action_plan
+)
+set_target_properties(
+  morsehgp3d_direct_frozen_incidence_hgp_action_plan
+  PROPERTIES
+    EXPORT_NAME direct_frozen_incidence_hgp_action_plan
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_frozen_incidence_hgp_action_plan PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_frozen_incidence_hgp_action_plan
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_frozen_incidence_hgp_action_plan
+  PUBLIC morsehgp3d::direct_frozen_incidence_quotient
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_frozen_incidence_hgp_action_plan PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_frozen_incidence_hgp_action_plan
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -5264,6 +5383,7 @@ install(
     morsehgp3d_direct_sparse_first_incidence
     morsehgp3d_direct_sparse_successive_incidence
     morsehgp3d_direct_sparse_successive_incidence_star_journal
+    morsehgp3d_direct_sparse_unified_level_plan
     morsehgp3d_direct_sparse_gateway_candidate_journal
     morsehgp3d_direct_sparse_gateway_candidate_localization
     morsehgp3d_direct_sparse_gateway_clock
@@ -5271,6 +5391,8 @@ install(
     morsehgp3d_direct_sparse_gateway_temporal_resolution
     morsehgp3d_direct_sparse_gateway_historical_quotient
     morsehgp3d_direct_frozen_root_quotient
+    morsehgp3d_direct_frozen_incidence_quotient
+    morsehgp3d_direct_frozen_incidence_hgp_action_plan
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal

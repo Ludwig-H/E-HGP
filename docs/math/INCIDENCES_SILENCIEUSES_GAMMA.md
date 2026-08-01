@@ -112,6 +112,22 @@ Une coface minimisante $Q=F\cup\lbrace x\rbrace$ peut localiser la racine de $F$
 
 Cette observation suggère de ne calculer $\lambda(F)$ que pour les facettes réutilisées par un futur lot Gabriel. Il s'agit d'une piste parcimonieuse, pas d'un théorème établi : il reste à prouver l'induction en présence de plusieurs minimiseurs au même niveau et de lots partageant des attaches silencieuses. Même une version suffisante pour la seule forêt des unions de points ne publierait pas toutes les facettes de Gamma sans un oracle total de rejeu.
 
+### 5.1 Falsification exacte de l'étoile une-étape
+
+La fixture permanente [`moment_curve_k3_one_step_star_incompleteness_n9`](../../morsehgp3d/tests/unit/fixtures/moment_curve_k3_one_step_star_incompleteness_n9.hpp) prend neuf points de la courbe des moments,
+
+$$p_i=(10\,000i,i^2,i^3),\qquad 0\leq i\leq8.$$
+
+À l'ordre $k=3$, l'oracle exact borné certifie seulement les six familles directes $0123$, $1234$, $2345$, $3456$, $4567$ et $5678$. Leurs dix-neuf suppressions distinctes sont exactement les triplets dont la portée des indices est au plus trois. La facette $F=048$ n'appartient pas à cette frontière. Sa miniball possède le support essentiel unique $08$ et le niveau exact
+
+$$\beta(048)=1\,600\,066\,560.$$
+
+Les points $1,2,3,5,6,7$ sont tous strictement intérieurs à cette boule et aucun point extérieur n'est sur son shell. Les six cofaces $048x$, pour $x\in\lbrace1,2,3,5,6,7\rbrace$, conservent le support $08$, sont non-Gabriel et attachent silencieusement $048$ dans $\Gamma_3$. Pourtant aucune de leurs quatre facettes n'est une suppression directe : chaque facette candidate contient deux indices parmi $0,4,8$ dont l'écart est au moins quatre. Le compte exact est donc six cofaces cibles et zéro coface visible depuis l'étoile une-étape.
+
+Tous les quadruplets de la fixture sont affinement indépendants, avec un déterminant absolu minimal de $120\,000$. L'échec n'est donc ni un plateau, ni une cosphéricité, ni une autre dégénérescence exclue par le lemme 2 : il provient d'un saturé de rang neuf invisible depuis la frontière directe de rang quatre.
+
+Cette fixture réfute toute assertion `product_sparse_silent_source_complete` fondée sur la seule fermeture une-étape des suppressions directes. Elle ne prouve pas, à elle seule, une différence des seules unions de points publiques : ses six cofaces sont des continuations $q=1$ à delta de points nul. Une source Gamma facettée exacte doit soit porter implicitement le générateur saturé et son bloc de Johnson, soit découvrir les facettes requises par une worklist à la demande munie de certificats de terminaison et d'exclusion. Récursivement énumérer toutes les suppressions nouvelles reconstruirait Gamma et reste interdit comme architecture produit.
+
 ## 6. Niveaux égaux, verticales et dégénérescences
 
 Une descente stricte termine avant le lot cible; les facettes de même niveau restent dans l'hypergraphe temporaire du lot. Toute séquentialisation pourrait créer des fusions binaires artificielles et est interdite.

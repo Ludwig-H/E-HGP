@@ -26,6 +26,9 @@ target_link_libraries(
     morsehgp3d::direct_sparse_positive_facet_prefix_sweep
     morsehgp3d::direct_sparse_successive_incidence
     morsehgp3d::direct_sparse_successive_incidence_star_journal
+    morsehgp3d::direct_sparse_unified_level_plan
+    morsehgp3d::direct_frozen_incidence_quotient
+    morsehgp3d::direct_frozen_incidence_hgp_action_plan
 )
 
 include(CTest)

@@ -13,6 +13,9 @@
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_successive_incidence.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_successive_incidence_star_journal.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_unified_level_plan.hpp"
+#include "morsehgp3d/hierarchy/direct_frozen_incidence_quotient.hpp"
+#include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/anchored_pair_candidate_classifier.hpp"
@@ -143,6 +146,38 @@ int main() {
   if (installed_successive_incidence_star_probe.certified_bounded_star()) {
     std::cerr
         << "installed successive-incidence star predicate accepted an empty result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::direct_sparse_unified_level_plan_schema_version ==
+      1U);
+  const morsehgp3d::hierarchy::ExactDirectSparseUnifiedLevelPlanResult
+      installed_unified_level_plan_probe;
+  if (installed_unified_level_plan_probe.certified_bounded_plan()) {
+    std::cerr
+        << "installed unified-level plan predicate accepted an empty result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::direct_frozen_incidence_quotient_schema_version ==
+      1U);
+  const morsehgp3d::hierarchy::ExactFrozenIncidenceQuotientResult
+      installed_frozen_incidence_quotient_probe;
+  if (installed_frozen_incidence_quotient_probe
+          .certified_frozen_incidence_quotient()) {
+    std::cerr
+        << "installed frozen-incidence quotient predicate accepted an empty result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_frozen_incidence_hgp_action_plan_schema_version == 1U);
+  const morsehgp3d::hierarchy::ExactFrozenIncidenceHgpActionPlanResult
+      installed_frozen_incidence_action_probe;
+  if (installed_frozen_incidence_action_probe
+          .certified_frozen_incidence_hgp_action_plan()) {
+    std::cerr
+        << "installed frozen-incidence action predicate accepted an empty result\n";
     return 1;
   }
   const morsehgp3d::hierarchy::
