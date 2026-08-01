@@ -23,16 +23,21 @@ import sys
 from typing import Any, NoReturn, Sequence
 
 from campaign_runtime import (
+    CampaignSpool,
     RuntimeContractError,
+    campaign_identity,
     canonical_bytes,
     canonical_json,
     exact_git_sha,
     exact_sha256,
     natural,
     parse_json_text,
+    read_canonical_json,
     require_regular_file,
+    run_canonical_json_process,
     safe_relative_file,
     sha256_bytes,
+    sha256_file,
 )
 
 PLAN_SCHEMA = "morsehgp3d.phase15.true_hgp_scale_campaign_plan.v3"
@@ -62,6 +67,10 @@ MAXIMUM_ORDER = 10
 FIFTY_K_POINT_COUNT = 50_000
 SLO_P95_NS = 1_000_000_000
 DEFAULT_PLAN = Path(__file__).with_name("phase15_true_hgp_scale_campaign_v3.json")
+CAPABILITY_ARGUMENT = "--phase15-true-hgp-v3-capabilities-json"
+SESSION_ARGUMENT = "--phase15-true-hgp-v3-session-jsonl"
+ACTIVE_CHECKPOINT_SCHEMA = "morsehgp3d.phase15.true_hgp_campaign_active_checkpoint.v3"
+CAPABILITY_TIMEOUT_SECONDS = 30.0
 
 FAMILY_IDS = (
     "affine_uniform_binary64",
@@ -236,11 +245,11 @@ def expected_plan_document() -> dict[str, Any]:
         ),
         "backend": BACKEND,
         "binary_protocol": {
-            "capability_argument": "--phase15-true-hgp-v3-capabilities-json",
+            "capability_argument": CAPABILITY_ARGUMENT,
             "capability_schema": CAPABILITY_SCHEMA,
             "run_request_schema": RUN_REQUEST_SCHEMA,
             "run_schema": RUN_SCHEMA,
-            "session_argument": "--phase15-true-hgp-v3-session-jsonl",
+            "session_argument": SESSION_ARGUMENT,
             "session_request_schema": SESSION_REQUEST_SCHEMA,
         },
         "claim_policy": {
@@ -459,6 +468,69 @@ def expected_massive_requests(plan: dict[str, Any]) -> list[dict[str, Any]]:
         )
         for index, scale in enumerate(plan["massive_scales"])
     ]
+
+
+def active_checkpoint_document(
+    *,
+    identity: dict[str, str],
+    ordinal: int,
+    request: dict[str, Any],
+) -> dict[str, Any]:
+    """Build the durable outer-harness marker for one pending binary request."""
+
+    natural(ordinal, "v3 active checkpoint ordinal")
+    request_digest = request_sha256(request)
+    run_id = request.get("run_id")
+    require(
+        isinstance(run_id, str) and run_id, "v3 active checkpoint run ID is invalid"
+    )
+    return {
+        "campaign_id": exact_sha256(identity.get("campaign_id"), "v3 campaign ID"),
+        "ordinal": ordinal,
+        "request_sha256": request_digest,
+        "run_id": run_id,
+        "schema": ACTIVE_CHECKPOINT_SCHEMA,
+    }
+
+
+def session_request(
+    *,
+    identity: dict[str, str],
+    ordinal: int,
+    request: dict[str, Any],
+    active_checkpoint: dict[str, Any],
+) -> dict[str, Any]:
+    """Build one canonical JSONL transaction bound to its durable checkpoint."""
+
+    natural(ordinal, "v3 session ordinal")
+    require(
+        active_checkpoint.get("ordinal") == ordinal,
+        "v3 session active checkpoint ordinal differs",
+    )
+    request_digest = request_sha256(request)
+    require(
+        active_checkpoint.get("request_sha256") == request_digest
+        and active_checkpoint.get("run_id") == request.get("run_id"),
+        "v3 session active checkpoint request differs",
+    )
+    checkpoint_reference = {
+        "checkpoint_file": safe_relative_file(
+            active_checkpoint.get("checkpoint_file"),
+            "v3 session active checkpoint file",
+        ),
+        "checkpoint_sha256": exact_sha256(
+            active_checkpoint.get("checkpoint_sha256"),
+            "v3 session active checkpoint SHA-256",
+        ),
+    }
+    return {
+        "active_checkpoint": checkpoint_reference,
+        "identity": copy.deepcopy(identity),
+        "ordinal": ordinal,
+        "request_chain_sha256": sha256_bytes(canonical_bytes(request)),
+        "requests": [copy.deepcopy(request)],
+        "schema": SESSION_REQUEST_SCHEMA,
+    }
 
 
 def expected_capabilities(
@@ -1152,13 +1224,330 @@ def validate_scale_progression(completed_point_counts: list[int]) -> int | None:
     return expected[len(completed_point_counts)]
 
 
-def execute_campaign(plan: dict[str, Any]) -> None:
+def _binary_size_bytes(binary: Path) -> int:
+    try:
+        return natural(
+            binary.stat().st_size,
+            "true-HGP v3 binary size",
+            positive=True,
+        )
+    except OSError as error:
+        fail(f"cannot stat true-HGP v3 binary: {error}")
+
+
+def _require_immutable_inputs(
+    *,
+    plan_path: Path,
+    plan_sha256: str,
+    binary: Path,
+    binary_sha256: str,
+    binary_size_bytes: int,
+) -> None:
+    require(
+        sha256_file(plan_path, "true-HGP v3 campaign plan") == plan_sha256,
+        "true-HGP v3 plan changed during execution",
+    )
+    require(
+        sha256_file(binary, "true-HGP v3 binary") == binary_sha256
+        and _binary_size_bytes(binary) == binary_size_bytes,
+        "true-HGP v3 binary changed during execution",
+    )
+
+
+def _binary_handshake(
+    *,
+    plan: dict[str, Any],
+    plan_path: Path,
+    plan_sha256: str,
+    binary: Path,
+    git_sha: str,
+) -> tuple[dict[str, str], str, int]:
+    require_regular_file(plan_path, "true-HGP v3 campaign plan")
+    require_regular_file(binary, "true-HGP v3 binary")
+    exact_git_sha(git_sha)
+    exact_sha256(plan_sha256, "true-HGP v3 plan SHA-256")
+    require(
+        sha256_file(plan_path, "true-HGP v3 campaign plan") == plan_sha256,
+        "true-HGP v3 plan changed before launch",
+    )
+    binary_size = _binary_size_bytes(binary)
+    binary_digest = sha256_file(binary, "true-HGP v3 binary")
+    binary_command = str(binary.absolute())
+    capabilities = run_canonical_json_process(
+        [binary_command, CAPABILITY_ARGUMENT],
+        request=None,
+        timeout_seconds=CAPABILITY_TIMEOUT_SECONDS,
+        label="true-HGP v3 capability handshake",
+    )
+    _require_immutable_inputs(
+        plan_path=plan_path,
+        plan_sha256=plan_sha256,
+        binary=binary,
+        binary_sha256=binary_digest,
+        binary_size_bytes=binary_size,
+    )
+    validate_capabilities(
+        capabilities,
+        plan=plan,
+        plan_sha256=plan_sha256,
+        binary_sha256=binary_digest,
+        binary_size_bytes=binary_size,
+        git_sha=git_sha,
+    )
+    capabilities_digest = sha256_bytes(canonical_bytes(capabilities))
+    identity = campaign_identity(
+        git_sha=git_sha,
+        binary_sha256=binary_digest,
+        plan_sha256=plan_sha256,
+        capabilities_sha256=capabilities_digest,
+    )
+    return identity, binary_digest, binary_size
+
+
+def _read_expected_spool_object(
+    *,
+    spool: CampaignSpool,
+    relative_file: Any,
+    expected_sha256: Any,
+    label: str,
+) -> dict[str, Any]:
+    relative = safe_relative_file(relative_file, f"{label} path")
+    expected_digest = exact_sha256(expected_sha256, f"{label} SHA-256")
+    value, payload = read_canonical_json(spool.root / relative, label)
+    require(sha256_bytes(payload) == expected_digest, f"{label} digest differs")
+    return value
+
+
+def _load_committed_runs(
+    *,
+    spool: CampaignSpool,
+    requests: list[dict[str, Any]],
+    binary_sha256: str,
+    plan_sha256: str,
+    git_sha: str,
+) -> list[dict[str, Any]]:
+    assert spool.head is not None
+    commits = spool.head["commits"]
+    require(
+        len(commits) <= len(requests),
+        "true-HGP v3 spool has more commits than registered requests",
+    )
+    runs: list[dict[str, Any]] = []
+    for ordinal, commit in enumerate(commits):
+        expected_request = requests[ordinal]
+        expected_request_digest = request_sha256(expected_request)
+        require(
+            commit["ordinal"] == ordinal
+            and commit["run_id"] == expected_request["run_id"]
+            and commit["role"] == expected_request["role"]
+            and commit["request_sha256"] == expected_request_digest,
+            f"true-HGP v3 committed prefix differs at ordinal {ordinal}",
+        )
+        stored_request = _read_expected_spool_object(
+            spool=spool,
+            relative_file=commit["request_file"],
+            expected_sha256=commit["request_sha256"],
+            label=f"true-HGP v3 request {ordinal}",
+        )
+        require(
+            exact_json_equal(stored_request, expected_request),
+            f"true-HGP v3 request {ordinal} differs from the registered request",
+        )
+        receipt = _read_expected_spool_object(
+            spool=spool,
+            relative_file=commit["receipt_file"],
+            expected_sha256=commit["receipt_sha256"],
+            label=f"true-HGP v3 receipt {ordinal}",
+        )
+        runs.append(
+            validate_run(
+                receipt,
+                expected_request,
+                binary_sha256=binary_sha256,
+                plan_sha256=plan_sha256,
+                git_sha=git_sha,
+            )
+        )
+    return runs
+
+
+def _validate_committed_prefix(
+    runs: list[dict[str, Any]], plan: dict[str, Any]
+) -> int | None:
+    primary_count = len(expected_50k_requests(plan))
+    require(
+        len(runs) <= primary_count + len(MASSIVE_POINT_COUNTS),
+        "true-HGP v3 committed prefix is too long",
+    )
+    completed_point_counts: list[int] = []
+    if len(runs) >= primary_count:
+        summary = build_50k_summary(runs[:primary_count], plan)
+        require(
+            summary["gate_passed"] is True,
+            "true-HGP v3 50k p95 gate failed; massive scales remain blocked",
+        )
+        completed_point_counts.append(FIFTY_K_POINT_COUNT)
+        completed_point_counts.extend(
+            run["point_count"] for run in runs[primary_count:]
+        )
+    next_point_count = validate_scale_progression(completed_point_counts)
+    if len(runs) < primary_count:
+        require(
+            next_point_count == FIFTY_K_POINT_COUNT,
+            "true-HGP v3 50k prefix progression differs",
+        )
+    return next_point_count
+
+
+def _resume_or_begin_request(
+    *,
+    spool: CampaignSpool,
+    identity: dict[str, str],
+    ordinal: int,
+    request: dict[str, Any],
+) -> dict[str, Any]:
+    assert spool.head is not None
+    request_digest = request_sha256(request)
+    active = spool.head["active_run"]
+    if active is None:
+        request_file, stored_digest = spool.publish_request(ordinal, request)
+        require(stored_digest == request_digest, "v3 published request digest differs")
+        return spool.commit_checkpoint(
+            ordinal=ordinal,
+            run_id=request["run_id"],
+            request_file=request_file,
+            request_sha256=request_digest,
+            checkpoint=active_checkpoint_document(
+                identity=identity,
+                ordinal=ordinal,
+                request=request,
+            ),
+        )
+
+    require(
+        active["ordinal"] == ordinal
+        and active["run_id"] == request["run_id"]
+        and active["request_sha256"] == request_digest,
+        "true-HGP v3 active checkpoint is not the next registered request",
+    )
+    stored_request = _read_expected_spool_object(
+        spool=spool,
+        relative_file=active["request_file"],
+        expected_sha256=active["request_sha256"],
+        label=f"true-HGP v3 active request {ordinal}",
+    )
+    require(
+        exact_json_equal(stored_request, request),
+        "true-HGP v3 active request differs from the registered request",
+    )
+    checkpoint = _read_expected_spool_object(
+        spool=spool,
+        relative_file=active["checkpoint_file"],
+        expected_sha256=active["checkpoint_sha256"],
+        label=f"true-HGP v3 active checkpoint {ordinal}",
+    )
+    require(
+        exact_json_equal(
+            checkpoint,
+            active_checkpoint_document(
+                identity=identity,
+                ordinal=ordinal,
+                request=request,
+            ),
+        ),
+        "true-HGP v3 active checkpoint content differs",
+    )
+    return active
+
+
+def execute_campaign(
+    *,
+    plan: dict[str, Any],
+    plan_path: Path,
+    plan_sha256: str,
+    binary: Path | None,
+    git_sha: str | None,
+    spool_parent: Path | None,
+) -> None:
     validate_plan(plan)
     require(
         plan["entry_gate_satisfied"] is True,
         "true-HGP v3 launch blocked: phase15_true_hgp_v3_entry_gate_satisfied=false",
     )
-    fail("true-HGP v3 launch implementation is unavailable")
+    require(binary is not None, "true-HGP v3 launch requires --binary")
+    require(git_sha is not None, "true-HGP v3 launch requires --git-sha")
+    require(spool_parent is not None, "true-HGP v3 launch requires --spool-parent")
+    identity, binary_digest, binary_size = _binary_handshake(
+        plan=plan,
+        plan_path=plan_path,
+        plan_sha256=plan_sha256,
+        binary=binary,
+        git_sha=git_sha,
+    )
+    requests = [*expected_50k_requests(plan), *expected_massive_requests(plan)]
+    with CampaignSpool(spool_parent, identity) as spool:
+        runs = _load_committed_runs(
+            spool=spool,
+            requests=requests,
+            binary_sha256=binary_digest,
+            plan_sha256=plan_sha256,
+            git_sha=git_sha,
+        )
+        while len(runs) < len(requests):
+            next_point_count = _validate_committed_prefix(runs, plan)
+            ordinal = len(runs)
+            request = requests[ordinal]
+            require(
+                request["point_count"] == next_point_count,
+                "true-HGP v3 next request breaks scale progression",
+            )
+            _require_immutable_inputs(
+                plan_path=plan_path,
+                plan_sha256=plan_sha256,
+                binary=binary,
+                binary_sha256=binary_digest,
+                binary_size_bytes=binary_size,
+            )
+            active = _resume_or_begin_request(
+                spool=spool,
+                identity=identity,
+                ordinal=ordinal,
+                request=request,
+            )
+            transaction = session_request(
+                identity=identity,
+                ordinal=ordinal,
+                request=request,
+                active_checkpoint=active,
+            )
+            run = run_canonical_json_process(
+                [str(binary.absolute()), SESSION_ARGUMENT],
+                request=transaction,
+                timeout_seconds=request["wall_time_cap_ms"] / 1_000.0,
+                label=f"true-HGP v3 run {request['run_id']}",
+            )
+            validated = validate_run(
+                run,
+                request,
+                binary_sha256=binary_digest,
+                plan_sha256=plan_sha256,
+                git_sha=git_sha,
+            )
+            _require_immutable_inputs(
+                plan_path=plan_path,
+                plan_sha256=plan_sha256,
+                binary=binary,
+                binary_sha256=binary_digest,
+                binary_size_bytes=binary_size,
+            )
+            spool.commit_receipt(
+                ordinal=ordinal,
+                request_file=active["request_file"],
+                request_sha256=active["request_sha256"],
+                receipt=validated,
+            )
+            runs.append(validated)
+        _validate_committed_prefix(runs, plan)
 
 
 def parse_arguments(arguments: Sequence[str] | None) -> argparse.Namespace:
@@ -1166,18 +1555,30 @@ def parse_arguments(arguments: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--plan", type=Path, default=DEFAULT_PLAN)
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("emit-plan")
-    subparsers.add_parser("run")
+    run_parser = subparsers.add_parser("run")
+    # These stay parser-optional so the closed scientific gate is checked
+    # before any binary or spool path is required or touched.
+    run_parser.add_argument("--binary", type=Path)
+    run_parser.add_argument("--git-sha")
+    run_parser.add_argument("--spool-parent", type=Path)
     return parser.parse_args(arguments)
 
 
 def main(arguments: Sequence[str] | None = None) -> int:
     try:
         args = parse_arguments(arguments)
-        plan, _ = read_plan(args.plan)
+        plan, plan_digest = read_plan(args.plan)
         if args.command == "emit-plan":
             print(canonical_json(plan))
         elif args.command == "run":
-            execute_campaign(plan)
+            execute_campaign(
+                plan=plan,
+                plan_path=args.plan,
+                plan_sha256=plan_digest,
+                binary=args.binary,
+                git_sha=args.git_sha,
+                spool_parent=args.spool_parent,
+            )
         else:
             fail("unknown true-HGP v3 campaign command")
     except (ContractError, RuntimeContractError) as error:

@@ -20,8 +20,9 @@ using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
+using morsehgp3d::spatial::PointId;
 
-static_assert(direct_morse_unified_resident_session_schema_version == 5U);
+static_assert(direct_morse_unified_resident_session_schema_version == 6U);
 static_assert(direct_frozen_unified_incidence_batch_schema_version == 3U);
 static_assert(
     static_cast<std::uint8_t>(
@@ -52,6 +53,10 @@ void check(bool condition, const std::string& message) {
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y) {
   return CertifiedPoint3::from_binary64(x, y, 0.0);
+}
+
+[[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
+  return CertifiedPoint3::from_binary64(x, y, z);
 }
 
 [[nodiscard]] ExactLevel level(
@@ -185,6 +190,28 @@ generous_normalized_adapter_budget() {
   };
 }
 
+[[nodiscard]] ExactDirectSparseFacetDescentClosureBudget
+generous_strict_facet_closure_budget() {
+  return {
+      1024U,
+      4096U,
+      4096U,
+      8193U,
+      {
+          ExactDirectSparsePositiveFacetProbeBudget{4097U, 1024U},
+          morsehgp3d::spatial::ExactLbvhTopKBudget{
+              1048576U,
+              1048576U,
+              1048576U,
+              1048576U,
+              1024U,
+              10U,
+              10U},
+          ExactDirectSparsePositiveFacetProbeBudget{4097U, 1024U},
+      },
+  };
+}
+
 [[nodiscard]] ExactDirectSparseSuccessiveIncidenceStarJournalBudget
 generous_star_budget() {
   return {
@@ -279,6 +306,10 @@ generous_session_budget() {
   budget.maximum_latent_carrier_coverage_point_reference_count = 10240U;
   budget.maximum_fresh_facet_miniball_count = 1024U;
   budget.maximum_fresh_facet_miniball_support_enumeration_count = 1048576U;
+  budget.maximum_normalized_facet_observation_scratch_count = 1024U;
+  budget.maximum_normalized_strict_facet_scratch_count = 1024U;
+  budget.maximum_normalized_strict_facet_simultaneous_scratch_entry_count =
+      16384U;
   budget.maximum_resident_root_count = 1024U;
   budget.maximum_resident_root_point_reference_count = 10240U;
   budget.maximum_resident_component_latent_point_reference_count = 10240U;
@@ -309,16 +340,22 @@ struct DirectSources {
 };
 
 [[nodiscard]] DirectSources direct_sources(
-    const CanonicalPointCloud& cloud) {
+    const CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order = 2U) {
   const ExactDirectSupportTerminalBudget terminal_budget{
       unlimited_pair_budget(), unlimited_higher_budget()};
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
   const auto pair = build_exact_pair_support_stream(
-      index, cloud, 2U, terminal_budget.pair);
+      index, cloud, requested_maximum_order, terminal_budget.pair);
   const auto higher = build_exact_higher_support_stream(
-      index, cloud, 2U, terminal_budget.higher);
+      index, cloud, requested_maximum_order, terminal_budget.higher);
   auto facade = build_exact_direct_support_terminal_facade(
-      index, cloud, 2U, terminal_budget, pair, higher);
+      index,
+      cloud,
+      requested_maximum_order,
+      terminal_budget,
+      pair,
+      higher);
   auto event_journal =
       build_exact_direct_morse_event_journal(cloud, facade);
   const auto arm_budget = unlimited_arm_budget();
@@ -352,6 +389,125 @@ struct E5Context {
   ExactDirectSparseUnifiedLevelPlanBudget plan_budget;
   ExactDirectSparseUnifiedLevelPlanResult plan;
 };
+
+struct NormalizedContext {
+  CanonicalPointCloud cloud;
+  MortonLbvhIndex index;
+  DirectSources source;
+  ExactDirectSparseGatewayCandidateBudget gateway_budget;
+  ExactDirectSparseGatewayCandidateJournalResult gateway;
+  ExactDirectNormalizedH0SourcePlanBudget plan_budget;
+  ExactDirectNormalizedH0SourcePlanResult plan;
+  ExactDirectRankWindowSaturatedH0Authority rank_authority;
+};
+
+[[nodiscard]] NormalizedContext normalized_context(
+    CanonicalPointCloud cloud) {
+  auto index = MortonLbvhIndex::build(cloud);
+  auto source = direct_sources(cloud);
+  auto gateway_budget = generous_gateway_budget();
+  auto gateway = build_exact_direct_sparse_gateway_candidate_journal(
+      index,
+      cloud,
+      source.facade,
+      source.event_journal,
+      source.arm_budget,
+      source.arm_journal,
+      source.incidence_budget,
+      source.incidence_journal,
+      gateway_budget,
+      LbvhTraversalOrder::near_first);
+  auto plan_budget = generous_normalized_plan_budget();
+  auto plan = build_exact_direct_normalized_h0_source_plan(
+      index,
+      cloud,
+      source.facade,
+      source.event_journal,
+      source.arm_budget,
+      source.arm_journal,
+      source.incidence_budget,
+      source.incidence_journal,
+      gateway_budget,
+      LbvhTraversalOrder::near_first,
+      gateway,
+      plan_budget);
+  auto rank_authority =
+      build_exact_direct_rank_window_saturated_h0_authority(source.facade);
+  return {
+      std::move(cloud),
+      std::move(index),
+      std::move(source),
+      gateway_budget,
+      std::move(gateway),
+      plan_budget,
+      std::move(plan),
+      std::move(rank_authority),
+  };
+}
+
+[[nodiscard]] ExactDirectMorseUnifiedResidentInitializationResult
+initialize_normalized_candidate(
+    const NormalizedContext& context,
+    std::uint64_t authority_id,
+    const ExactDirectMorseUnifiedResidentSessionBudget& session_budget =
+        generous_session_budget()) {
+  return initialize_exact_direct_normalized_h0_resident_session(
+      context.index,
+      context.cloud,
+      context.source.facade,
+      context.source.event_journal,
+      context.source.arm_budget,
+      context.source.arm_journal,
+      context.source.incidence_budget,
+      context.source.incidence_journal,
+      context.gateway_budget,
+      LbvhTraversalOrder::near_first,
+      context.gateway,
+      context.plan_budget,
+      context.plan,
+      generous_normalized_adapter_budget(),
+      authority_id,
+      session_budget);
+}
+
+[[nodiscard]] ExactDirectMorseUnifiedResidentInitializationResult
+initialize_normalized_certified(
+    const NormalizedContext& context,
+    const ExactDirectRankWindowSaturatedH0Authority& rank_authority,
+    const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+    std::uint64_t authority_id,
+    const ExactDirectMorseUnifiedResidentSessionBudget& session_budget =
+        generous_session_budget()) {
+  return initialize_exact_direct_normalized_h0_certified_resident_session(
+      context.index,
+      context.cloud,
+      context.source.facade,
+      context.source.event_journal,
+      context.source.arm_budget,
+      context.source.arm_journal,
+      context.source.incidence_budget,
+      context.source.incidence_journal,
+      context.gateway_budget,
+      LbvhTraversalOrder::near_first,
+      context.gateway,
+      context.plan_budget,
+      context.plan,
+      rank_authority,
+      closure_budget,
+      {},
+      LbvhTraversalOrder::near_first,
+      generous_normalized_adapter_budget(),
+      authority_id,
+      session_budget);
+}
+
+[[nodiscard]] bool two_point_key_is(
+    const ExactDirectSparseFacetKey& key,
+    PointId first,
+    PointId second) noexcept {
+  return key.point_count == 2U && key.point_ids[0] == first &&
+         key.point_ids[1] == second;
+}
 
 [[nodiscard]] E5Context e5_context() {
   const std::array points{
@@ -733,8 +889,8 @@ void test_e5_live_twelve_batches(const E5Context& context) {
           ExactDirectMorseUnifiedResidentSession::public_status ==
               "not_claimed" &&
           ExactDirectMorseUnifiedResidentSession::deployment_status ==
-              "bounded_sparse_resident_delta_normalized_candidate_v5",
-      "the session advertises its normalized candidate-aware v5 scope");
+              "architecture_only_not_strict_miss_integration_qualified_v6",
+      "the session advertises the certified-carrier architecture without claiming strict-miss integration qualification");
 
   std::optional<ExactFrozenIncidencePriorRootId> residual_root;
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp stamp_after_17_2{};
@@ -1126,6 +1282,270 @@ void test_normalized_source_resident_atomic_fold(const E5Context& context) {
       "the normalized candidate cursor is exhausted without claiming a complete H0 fold or replaying the source per batch");
 }
 
+void test_certified_normalized_strict_carrier_fold() {
+  // Input labels A, B, C, D, E canonicalize to D=0, A=1, B=2, C=3, E=4.
+  const std::array<CertifiedPoint3, 5U> points{
+      point(0.0, 0.0, 7.0),
+      point(0.0, 9.0, 6.0),
+      point(1.0, 4.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(4.0, 1.0, 2.0),
+  };
+  auto cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+  const bool canonical_ids_preserved =
+      cloud.size() == points.size() && cloud.source_index(0U) == 3U &&
+      cloud.source_index(1U) == 0U && cloud.source_index(2U) == 1U &&
+      cloud.source_index(3U) == 2U && cloud.source_index(4U) == 4U;
+  auto context = normalized_context(std::move(cloud));
+  check(
+      canonical_ids_preserved,
+      "the permanent AC-to-DE input preserves the documented canonical D,A,B,C,E ids");
+  check(
+      context.gateway.certified_partial_refinement(),
+      "the permanent AC-to-DE cloud supplies the certified sparse gateway source");
+  check(
+      context.plan.certified_complete_candidate_source_plan(),
+      "the permanent AC-to-DE cloud supplies the certified normalized source");
+  check(
+      context.rank_authority.certified(),
+      "the permanent AC-to-DE cloud supplies the certified rank-window authority");
+  if (!context.plan.certified_complete_candidate_source_plan() ||
+      !context.rank_authority.certified()) {
+    return;
+  }
+
+  auto forged_rank = context.rank_authority;
+  forged_rank.public_status_claimed = true;
+  const auto forged_rank_rejected = initialize_normalized_certified(
+      context,
+      forged_rank,
+      generous_strict_facet_closure_budget(),
+      7030U);
+  check(
+      !forged_rank_rejected.session.has_value() &&
+          forged_rank_rejected.source_plan_initial_verification_count == 1U &&
+          forged_rank_rejected.decision ==
+              ExactDirectMorseUnifiedResidentInitializationDecision::
+                  no_rank_window_saturated_h0_authority_rejected,
+      "a forged rank-window authority is rejected after the single normalized-source replay and before a certified session is issued");
+
+  auto candidate_initialized =
+      initialize_normalized_candidate(context, 7031U);
+  check(
+      candidate_initialized.certified_initialized_session() &&
+          candidate_initialized.session.has_value(),
+      "the unchanged candidate initializer remains independently constructible on the strict AC fixture");
+  if (candidate_initialized.session.has_value()) {
+    auto& candidate = *candidate_initialized.session;
+    while (candidate.batch_cursor() < candidate.plan().batches.size()) {
+      auto prepared = candidate.prepare_next();
+      if (!prepared.certified_prepared_batch() ||
+          !candidate.commit(std::move(*prepared.ticket))
+               .certified_committed_batch()) {
+        break;
+      }
+    }
+    check(
+        candidate.source_cursor_exhausted() && !candidate.complete() &&
+            candidate.normalized_h0_retraction_mode() ==
+                ExactDirectNormalizedH0ResidentRetractionMode::
+                    candidate_fail_open_without_h0_retraction_authority,
+        "the unchanged candidate initializer and fail-open completion semantics remain intact on the AC fixture");
+  }
+
+  constexpr std::uint64_t certified_authority_id = 7032U;
+  auto initialized = initialize_normalized_certified(
+      context,
+      context.rank_authority,
+      generous_strict_facet_closure_budget(),
+      certified_authority_id);
+  check(
+      initialized.certified_initialized_session() &&
+          initialized.session.has_value() &&
+          initialized.normalized_h0_retraction_mode ==
+              ExactDirectNormalizedH0ResidentRetractionMode::
+                  certified_rank_window_and_sparse_strict_facet_closure &&
+          initialized.normalized_h0_retraction_authority_certified &&
+          !initialized
+               .normalized_candidate_fails_open_on_strictly_earlier_facet &&
+          initialized.rank_window_saturated_h0_authority_freshly_verified &&
+          initialized.strict_facet_closure_session_capability_issued,
+      "the second initializer issues the private certified carrier capability without a caller bool");
+  if (!initialized.session.has_value()) {
+    return;
+  }
+
+  auto& session = *initialized.session;
+  const auto ac_token = std::find_if(
+      session.plan().facet_tokens.begin(),
+      session.plan().facet_tokens.end(),
+      [](const ExactDirectSparseUnifiedLevelPlanFacetToken& token) {
+        return two_point_key_is(token.facet_key, 1U, 3U);
+      });
+  const auto de_token = std::find_if(
+      session.plan().facet_tokens.begin(),
+      session.plan().facet_tokens.end(),
+      [](const ExactDirectSparseUnifiedLevelPlanFacetToken& token) {
+        return two_point_key_is(token.facet_key, 0U, 4U);
+      });
+  bool later_ac_resolved_to_de = false;
+  while (session.batch_cursor() < session.plan().batches.size()) {
+    auto prepared = session.prepare_next();
+    check(
+        prepared.certified_prepared_batch() && prepared.ticket.has_value(),
+        "every certified normalized batch prepares under the rank-window and sparse-closure capability");
+    if (!prepared.ticket.has_value()) {
+      break;
+    }
+    const auto& bundle = prepared.ticket->authority_bundle();
+    check(
+        bundle.rank_window_saturated_h0_authority_certified &&
+            bundle.every_locator_miss_has_fresh_exact_miniball &&
+            bundle
+                .every_strict_facet_miss_has_certified_relative_positive_closure &&
+            bundle.strict_facet_closure_bound_to_pre_batch_locator_snapshot,
+        "each certified ticket remains bound to the rank-window and strict-closure carrier scope");
+    if (bundle.squared_level == level(83886, 3563) &&
+        ac_token != session.plan().facet_tokens.end() &&
+        de_token != session.plan().facet_tokens.end()) {
+      const auto ac_resolution = std::find_if(
+          bundle.facet_resolutions.begin(),
+          bundle.facet_resolutions.end(),
+          [&](const ExactDirectFrozenUnifiedFacetResolution& resolution) {
+            return resolution.facet_token_index == ac_token->facet_token_index;
+          });
+      const auto de_probe = session.locator().probe_positive_facet(
+          de_token->facet_key,
+          {certified_authority_id, 9000001U},
+          generous_session_budget().probe);
+      later_ac_resolved_to_de =
+          ac_resolution != bundle.facet_resolutions.end() &&
+          de_probe.certified_positive_hit() &&
+          ac_resolution->token.kind !=
+              ExactFrozenIncidenceTokenKind::equal_facet &&
+          ac_resolution->token.token_id == de_probe.component_handle;
+    }
+    check(
+        session.commit(std::move(*prepared.ticket))
+            .certified_committed_batch(),
+        "the certified carrier resolutions, locator bindings and sparse resident delta commit atomically");
+  }
+  check(
+      later_ac_resolved_to_de && session.source_cursor_exhausted() &&
+          session.complete(),
+      "the later AC arm is already carried by DE through the resident positive cache and all certified normalized commits make complete() true");
+
+  if (ac_token == session.plan().facet_tokens.end() ||
+      de_token == session.plan().facet_tokens.end()) {
+    return;
+  }
+  constexpr std::uint64_t helper_authority_id = 7033U;
+  auto helper_locator = build_exact_direct_sparse_positive_facet_locator(
+      session.plan().facet_tokens.size(),
+      generous_session_budget().locator,
+      {helper_authority_id, ~std::uint64_t{0U}});
+  const std::array<ExactDirectSparseFacetBinding, 1U> de_binding{{
+      {0U,
+       de_token->facet_key,
+       de_token->facet_token_index,
+       {helper_authority_id, 1U}},
+  }};
+  const auto seeded = helper_locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      de_binding);
+  const auto helper_stamp = helper_locator.snapshot_stamp();
+  const std::array<ExactDirectSparseFacetKey, 1U> ac_seed{{
+      ac_token->facet_key,
+  }};
+  const auto closure =
+      build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+          context.index,
+          context.cloud,
+          ac_seed,
+          level(33, 2),
+          {helper_authority_id, 2U},
+          helper_locator,
+          generous_strict_facet_closure_budget(),
+          {},
+          LbvhTraversalOrder::near_first);
+  auto cap_minus_one = generous_strict_facet_closure_budget();
+  cap_minus_one.maximum_seed_count = 0U;
+  const auto rejected_closure =
+      build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+          context.index,
+          context.cloud,
+          ac_seed,
+          level(33, 2),
+          {helper_authority_id, 3U},
+          helper_locator,
+          cap_minus_one,
+          {},
+          LbvhTraversalOrder::near_first);
+  check(
+      seeded.certified_committed_batch() &&
+          closure.certified_complete_relative_positive_closure() &&
+          closure.seed_projections.size() == 1U &&
+          closure.nodes[closure.seed_projections[0].terminal_node_index]
+                  .resolved_component_handle ==
+              std::optional<ExactDirectSparseComponentHandle>{
+                  de_token->facet_token_index} &&
+          rejected_closure.certified_budget_exhaustion() &&
+          helper_locator.snapshot_stamp() == helper_stamp,
+      "the separate AC-to-DE closure helper resolves one strict seed, while its seed cap minus one rejects without mutating the locator");
+}
+
+void test_certified_normalized_terminal_order_rejected() {
+  const std::array<CertifiedPoint3, 3U> points{
+      point(0.0, 0.0),
+      point(1.0, 0.0),
+      point(0.0, 1.0),
+  };
+  const auto cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+  const auto index = MortonLbvhIndex::build(cloud);
+  const auto source = direct_sources(cloud, cloud.size());
+  const auto rank =
+      build_exact_direct_rank_window_saturated_h0_authority(source.facade);
+  const ExactDirectSparseGatewayCandidateBudget gateway_budget{};
+  const ExactDirectSparseGatewayCandidateJournalResult gateway{};
+  const ExactDirectNormalizedH0SourcePlanBudget plan_budget{};
+  const ExactDirectNormalizedH0SourcePlanResult plan{};
+  const auto rejected =
+      initialize_exact_direct_normalized_h0_certified_resident_session(
+          index,
+          cloud,
+          source.facade,
+          source.event_journal,
+          source.arm_budget,
+          source.arm_journal,
+          source.incidence_budget,
+          source.incidence_journal,
+          gateway_budget,
+          LbvhTraversalOrder::near_first,
+          gateway,
+          plan_budget,
+          plan,
+          rank,
+          generous_strict_facet_closure_budget(),
+          {},
+          LbvhTraversalOrder::near_first,
+          generous_normalized_adapter_budget(),
+          7034U,
+          generous_session_budget());
+  check(
+      source.facade.terminal_catalog_certified() &&
+          source.facade.certificate.requirements.effective_maximum_order ==
+              cloud.size() &&
+          !rejected.session.has_value() &&
+          rejected.source_plan_initial_verification_count == 0U &&
+          rejected.decision ==
+              ExactDirectMorseUnifiedResidentInitializationDecision::
+                  no_normalized_terminal_order_equal_point_count_unsupported,
+      "the certified initializer rejects K=n before normalized replay or adapter allocation");
+}
+
 void test_normalized_candidate_birth_classifier() {
   check(
       classify_exact_direct_normalized_h0_candidate_facet_birth(
@@ -1157,6 +1577,8 @@ int main() {
   test_group_delta_point_caps(context);
   test_normalized_candidate_birth_classifier();
   test_normalized_source_resident_atomic_fold(context);
+  test_certified_normalized_strict_carrier_fold();
+  test_certified_normalized_terminal_order_rejected();
   if (failures != 0) {
     std::cerr << failures << " resident-session test(s) failed\n";
     return 1;

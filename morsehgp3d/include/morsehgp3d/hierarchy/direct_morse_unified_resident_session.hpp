@@ -2,6 +2,7 @@
 
 #include "morsehgp3d/hierarchy/direct_normalized_h0_source_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_unified_incidence_batch.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_facet_descent_closure.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_locator.hpp"
 
 #include <cstddef>
@@ -21,12 +22,13 @@ enum class ExactDirectMorseUnifiedResidentSourceKind : std::uint8_t {
   normalized_direct_h0_candidate_source,
 };
 
-// The candidate mode is the only normalized mode constructible today.  A
-// future rank-window + direct/M(F) authority may add a factory-issued mode;
-// callers cannot promote this enum into such a capability themselves.
+// The certified mode is constructible only through the rank-window + sparse
+// strict-facet closure initializer.  The enum is descriptive: callers cannot
+// promote it, or a bool, into the private move-only session capability.
 enum class ExactDirectNormalizedH0ResidentRetractionMode : std::uint8_t {
   not_applicable_successive_incidence_star,
   candidate_fail_open_without_h0_retraction_authority,
+  certified_rank_window_and_sparse_strict_facet_closure,
 };
 
 enum class ExactDirectNormalizedH0CandidateFacetDisposition : std::uint8_t {
@@ -68,7 +70,7 @@ struct ExactDirectNormalizedH0ResidentAdapterBudget {
 };
 
 inline constexpr std::uint32_t
-    direct_morse_unified_resident_session_schema_version = 5U;
+    direct_morse_unified_resident_session_schema_version = 6U;
 inline constexpr std::string_view
     direct_morse_unified_resident_session_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -76,12 +78,13 @@ inline constexpr std::string_view
 inline constexpr std::string_view
     direct_morse_unified_resident_session_mode =
         "certified_resident_unified_strict_prebatch_authority_and_atomic_"
-        "sparse_delta_commit_with_normalized_candidate_fail_open_v5";
+        "sparse_delta_commit_with_normalized_candidate_fail_open_or_rank_"
+        "window_sparse_strict_facet_closure_v6";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_public_status = "not_claimed";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_deployment_status =
-        "bounded_sparse_resident_delta_normalized_candidate_v5";
+        "architecture_only_not_strict_miss_integration_qualified_v6";
 inline constexpr std::string_view
     direct_morse_unified_resident_session_proof_basis =
         "one_initial_unified_plan_verification_resident_sparse_positive_"
@@ -90,7 +93,8 @@ inline constexpr std::string_view
         "transaction_with_rollbackable_pre_staged_sparse_delta_and_immutable_"
         "verified_plan_authority_single_batch_construction_single_quotient_"
         "action_streaming_verification_move_only_attestation_and_normalized_"
-        "candidate_fail_open_without_h0_retraction_authority_v5";
+        "candidate_fail_open_or_fresh_rank_window_authority_one_sparse_"
+        "strict_facet_closure_per_nonempty_strict_miss_set_v6";
 
 struct ExactDirectMorseUnifiedResidentSparseDeltaBudget {
   std::size_t maximum_component_patch_count{};
@@ -123,6 +127,16 @@ struct ExactDirectMorseUnifiedResidentSessionBudget {
   std::size_t maximum_latent_carrier_coverage_point_reference_count{};
   std::size_t maximum_fresh_facet_miniball_count{};
   std::size_t maximum_fresh_facet_miniball_support_enumeration_count{};
+  // Certified-normalized pass-1 observations have their own cap.  The strict
+  // cap counts the three concurrent strict-side vectors (observation indices,
+  // canonical keys and compact carrier records).  The simultaneous cap also
+  // includes pass-1 observations and the returned closure nodes, edges and
+  // seed projections; closure-internal memo/step arenas retain their own
+  // explicit ExactDirectSparseFacetDescentClosureBudget bounds.
+  std::size_t maximum_normalized_facet_observation_scratch_count{};
+  std::size_t maximum_normalized_strict_facet_scratch_count{};
+  std::size_t
+      maximum_normalized_strict_facet_simultaneous_scratch_entry_count{};
   std::size_t maximum_resident_root_count{};
   std::size_t maximum_resident_root_point_reference_count{};
   std::size_t maximum_resident_component_latent_point_reference_count{};
@@ -167,9 +181,20 @@ struct ExactDirectMorseUnifiedResidentBatchCounters {
   std::size_t rooted_resolution_count{};
   std::size_t latent_resolution_count{};
   std::size_t equal_resolution_count{};
+  std::size_t normalized_strict_facet_seed_count{};
+  std::size_t normalized_facet_observation_scratch_entry_peak{};
+  std::size_t normalized_strict_facet_scratch_entry_peak{};
+  std::size_t normalized_strict_facet_simultaneous_scratch_entry_peak{};
+  std::size_t normalized_strict_facet_closure_build_count{};
+  std::size_t normalized_strict_facet_closure_node_count{};
+  std::size_t normalized_strict_facet_closure_edge_count{};
+  std::size_t normalized_strict_facet_closure_seed_projection_count{};
+  std::size_t normalized_strict_facet_closure_locator_snapshot_check_count{};
+  std::size_t normalized_strict_facet_carrier_resolution_count{};
   std::size_t planned_component_union_count{};
   std::size_t planned_equal_binding_count{};
   std::size_t planned_birth_binding_count{};
+  std::size_t planned_strict_facet_binding_count{};
   std::size_t planned_group_record_count{};
   std::size_t resident_state_full_copy_count{};
   std::size_t sparse_delta_component_patch_count{};
@@ -233,6 +258,11 @@ struct ExactDirectMorseUnifiedResidentAuthorityBundle {
   ExactDirectMorseUnifiedResidentBatchCounters counters{};
   bool locator_snapshot_strictly_pre_batch{false};
   bool every_unresolved_facet_has_fresh_exact_equal_miniball{false};
+  bool every_locator_miss_has_fresh_exact_miniball{false};
+  bool every_strict_facet_miss_has_certified_relative_positive_closure{false};
+  bool strict_facet_closure_bound_to_pre_batch_locator_snapshot{false};
+  bool rank_window_saturated_h0_authority_certified{false};
+  bool private_strict_facet_closure_attestation_issued{false};
   bool csr_authorities_share_identity_and_pre_batch_state{false};
   bool global_facet_coface_or_gamma_catalog_materialized{false};
   bool supplied_star_global_completeness_claimed{false};
@@ -295,6 +325,9 @@ enum class ExactDirectMorseUnifiedResidentInitializationDecision
   complete_certified_bounded_resident_session,
   no_normalized_adapter_budget_rejected,
   no_normalized_adapter_construction_rejected,
+  no_rank_window_saturated_h0_authority_rejected,
+  no_normalized_terminal_order_equal_point_count_unsupported,
+  no_strict_facet_closure_configuration_rejected,
 };
 
 enum class ExactDirectMorseUnifiedResidentPreparationDecision
@@ -315,6 +348,9 @@ enum class ExactDirectMorseUnifiedResidentPreparationDecision
   no_allocation_failed,
   complete_certified_prepared_batch,
   no_normalized_h0_retraction_authority_for_strictly_earlier_facet,
+  no_strict_facet_closure_budget_exhausted,
+  no_strict_facet_closure_unresolved,
+  contradiction_strict_facet_closure_rejected,
 };
 
 enum class ExactDirectMorseUnifiedResidentCommitDecision : std::uint8_t {
@@ -489,6 +525,28 @@ class ExactDirectMorseUnifiedResidentSession {
       const ExactDirectNormalizedH0ResidentAdapterBudget&,
       std::uint64_t,
       const ExactDirectMorseUnifiedResidentSessionBudget&);
+  friend ExactDirectMorseUnifiedResidentInitializationResult
+  initialize_exact_direct_normalized_h0_certified_resident_session(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&,
+      const ExactDirectSupportTerminalFacade&,
+      const ExactDirectMorseEventJournalResult&,
+      const ExactDirectSaddleArmSeedBudget&,
+      const ExactDirectSaddleArmSeedJournalResult&,
+      const ExactDirectClosedSaddleIncidenceBudget&,
+      const ExactDirectClosedSaddleIncidenceJournalResult&,
+      const ExactDirectSparseGatewayCandidateBudget&,
+      spatial::LbvhTraversalOrder,
+      const ExactDirectSparseGatewayCandidateJournalResult&,
+      const ExactDirectNormalizedH0SourcePlanBudget&,
+      const ExactDirectNormalizedH0SourcePlanResult&,
+      const ExactDirectRankWindowSaturatedH0Authority&,
+      const ExactDirectSparseFacetDescentClosureBudget&,
+      const ExactDirectSparseFacetDescentClosureConfig&,
+      spatial::LbvhTraversalOrder,
+      const ExactDirectNormalizedH0ResidentAdapterBudget&,
+      std::uint64_t,
+      const ExactDirectMorseUnifiedResidentSessionBudget&);
 };
 
 struct ExactDirectMorseUnifiedResidentInitializationResult {
@@ -508,6 +566,8 @@ struct ExactDirectMorseUnifiedResidentInitializationResult {
               not_applicable_successive_incidence_star};
   bool normalized_h0_retraction_authority_certified{false};
   bool normalized_candidate_fails_open_on_strictly_earlier_facet{false};
+  bool rank_window_saturated_h0_authority_freshly_verified{false};
+  bool strict_facet_closure_session_capability_issued{false};
   bool successive_incidence_star_materialized_by_adapter{false};
   bool global_regularity_authority_certified{false};
   bool omitted_late_cofaces_qr1_noop_certified{false};
@@ -564,6 +624,41 @@ initialize_exact_direct_normalized_h0_resident_session(
     const ExactDirectSparseGatewayCandidateJournalResult& source_gateway,
     const ExactDirectNormalizedH0SourcePlanBudget& source_plan_budget,
     const ExactDirectNormalizedH0SourcePlanResult& source_plan,
+    const ExactDirectNormalizedH0ResidentAdapterBudget& adapter_budget,
+    std::uint64_t session_authority_id,
+    const ExactDirectMorseUnifiedResidentSessionBudget& budget);
+
+// Certified normalized H0 carrier mode.  The supplied rank-window authority
+// is freshly reconstructed against the already-certified terminal facade.
+// Each nonempty set of strict locator misses is then resolved by exactly one
+// sparse functional-forest closure against the immutable pre-batch locator
+// snapshot.  K=n remains deliberately unsupported.  The closure graph is
+// transient; only a private move-only compact attestation survives in the
+// prepared ticket, and no Star, Gamma or higher-order Delaunay mosaic is
+// materialized.
+[[nodiscard]] ExactDirectMorseUnifiedResidentInitializationResult
+initialize_exact_direct_normalized_h0_certified_resident_session(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_journal,
+    const ExactDirectSaddleArmSeedBudget& source_arm_budget,
+    const ExactDirectSaddleArmSeedJournalResult& source_arm_journal,
+    const ExactDirectClosedSaddleIncidenceBudget& source_incidence_budget,
+    const ExactDirectClosedSaddleIncidenceJournalResult&
+        source_incidence_journal,
+    const ExactDirectSparseGatewayCandidateBudget& source_gateway_budget,
+    spatial::LbvhTraversalOrder source_gateway_traversal_order,
+    const ExactDirectSparseGatewayCandidateJournalResult& source_gateway,
+    const ExactDirectNormalizedH0SourcePlanBudget& source_plan_budget,
+    const ExactDirectNormalizedH0SourcePlanResult& source_plan,
+    const ExactDirectRankWindowSaturatedH0Authority&
+        source_rank_window_authority,
+    const ExactDirectSparseFacetDescentClosureBudget&
+        strict_facet_closure_budget,
+    const ExactDirectSparseFacetDescentClosureConfig&
+        strict_facet_closure_config,
+    spatial::LbvhTraversalOrder strict_facet_closure_traversal_order,
     const ExactDirectNormalizedH0ResidentAdapterBudget& adapter_budget,
     std::uint64_t session_authority_id,
     const ExactDirectMorseUnifiedResidentSessionBudget& budget);

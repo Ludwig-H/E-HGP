@@ -1509,6 +1509,16 @@ Avant toute allocation de l'adaptateur et avant le rejeu source, un préflight d
 
 La classification d'une facette absente doit distinguer naissance égale, strictement ultérieure contradictoire et strictement antérieure nécessitant la rétraction. Dans ce dernier cas, `prepare_next()` doit retourner `no_normalized_h0_retraction_authority_for_strictly_earlier_facet`; le curseur peut être épuisé sur une fixture compatible, mais `complete()` reste faux sans capability de rétraction. Un seul build et test Release plus la compilation du consumer suffisent; aucun sanitizer répété, CUDA ou GCP n'est requis.
 
+### 14.14r Carrier résident normalisé certifié
+
+Le même CTest doit exercer le second initialiseur v6 avec une `ExactDirectRankWindowSaturatedH0Authority` fraîchement vérifiée, sans booléen de promotion public. Une autorité forgée est rejetée, $K=n$ échoue avant le rejeu du plan et l'initialiseur candidat conserve exactement son fail-open et `complete()=false`. Dans le mode certifié, toutes les sondes d'un lot précèdent la réduction et partagent le stamp locator pré-lot; un ensemble strict non vide doit produire exactement une fermeture sur des clés canoniques distinctes et chaque projection doit être `relative_positive`.
+
+Le compactage d'une projection stricte doit garder la clé terminale, le témoin de binding issu du locator et le carrier racine ou latent courant. Avant staging, le commit rejoue cette clé avec ce témoin d'autorité session contre le locator pré-lot et exige la même composante. Les nouveaux bindings, le frozen batch, le delta résident, le curseur et le locator sont alors committés ensemble; témoin, terminal, stamp, cap ou ticket périmé falsifié doit laisser tout cet état inchangé. `complete()` n'est vrai qu'après commit de tous les lots certifiés.
+
+Les tests vérifient les trois comptes de scratch : observations de passe un, somme des vecteurs indices--clés--records carriers et pic simultané avec nœuds, arêtes et projections du graphe de fermeture. Le préflight conservateur doit rejeter avant construction du graphe si les maxima explicites configurés dépassent le cap simultané; le pic effectif doit rester sous ce cap. Les mémos et pas internes restent couverts par le budget explicite de la fermeture. La fixture AC vers DE du helper sparse couvre une graine et son cap moins un sans mutation.
+
+La source normalisée AC actuelle lie déjà AC à son niveau égal avant le lot où sa naissance serait strictement antérieure. Elle ne couvre donc pas une vraie exécution résidente avec `normalized_strict_facet_seed_count>0`; tant qu'une petite fixture exacte authentique ne ferme pas aussi `build_count=1`, attestation privée et commit atomique, le statut doit rester `architecture_only_not_strict_miss_integration_qualified_v6`. Un build Release ciblé, ce CTest et la compilation du consumer suffisent; aucun sanitizer répété, CUDA ou GCP n'est demandé.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.
@@ -2378,3 +2388,27 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - créer deux sessions fraîches sur la même autorité, vérifier des identifiants live distincts et un digest scientifique de checkpoint identique au même cut;
 - reculer depuis la coupe terminale vers zéro et vérifier une décision non monotone avec stamps pré--post et état interne inchangés;
 - conserver faux tout claim de Gamma, Delaunay, carte verticale complète, vrai 50 k, scalabilité massive, Phase 16 ou statut public exact.
+
+### T15-ATLEAST20-STREAM — vue aval exacte relative par lots complets
+
+- refuser un digest scientifique source nul, puis lier ce digest à chaque transcript, session, checkpoint et chaîne scientifique afin que deux nuages distincts partageant les mêmes `PointId` et identifiants de racines ne puissent pas collisionner;
+- exiger pour l'initialiseur vide cursor zéro, epoch zéro et digest de commit nul; tout préfixe non vide doit passer par restore, avec vérification fraîche du checkpoint sous son ancienne autorité puis remint explicite d'une nouvelle autorité;
+- construire une racine cachée avec dix-neuf `PointId` distincts, ajouter dans un lot complet le vingtième avec doublons et vérifier exactement une `threshold_entry`, `source_q_r=1`, `q_visible=0` et les vingt plus petits identifiants;
+- permuter les groupes, enfants et deltas d'un même lot et exiger des digests source et vue identiques; répéter sous deux autorités process-locales différentes et conserver les mêmes digests scientifiques;
+- accepter deux groupes de racines disjoints dont les couvertures en observations se recouvrent, car les composantes de facettes ne forment pas une partition des `PointId`; vérifier que chaque résumé reste indépendant et capé à vingt;
+- fusionner deux racines visibles à couvertures recouvrantes, conserver `source_q_r=2`, obtenir `q_visible=2`, une multifusion visible et le résumé canonique dédupliqué;
+- refuser sans mutation une autorité étrangère, un digest scientifique source étranger, un cursor ou epoch périmé, une racine absente ou inactive, une collision de successeur et une inversion de l'ordre global strict `(niveau exact, ordre)`;
+- fixer chaque cap à la frontière, puis au moins le staging à la valeur exacte moins un, et vérifier avant commit que racines, compteurs, curseurs, epochs, source digest, view digest et état consumed restent inchangés;
+- exporter, rehasher et restaurer un checkpoint avec une nouvelle autorité, poursuivre la chaîne sous cette autorité et vérifier que les digests scientifiques n'ont pas changé au restore;
+- compiler les deux types de session et de lot comme move-only et conserver faux `source_pruning_authority`, `source_hierarchy_authority`, `upstream_resident_adapter_certified`, `source_exactness_claimed`, `public_exactness_claimed` et `public_status_claimed`;
+- vérifier qu'aucune facette, coface, incidence, cellule, Gamma, mosaïque de Delaunay, copie de `coverage_log` ou arène de source exhaustive n'est possédée par ce noyau aval.
+
+### T15-TRUE-HGP-V3-RUNTIME — orchestration durable encore fermée
+
+- avec le plan gelé, appeler `run` avec binaire, SHA Git et spool invalides, exiger le rejet explicite du gate avant toute inspection de ces chemins et vérifier qu'aucun répertoire de spool n'est créé;
+- sous un plan ouvert uniquement dans le test, authentifier un faux binaire par handshake et engager les SHA-256 Git, plan, binaire et capabilities dans l'identité du spool;
+- exécuter exactement trente-six requêtes 50 k, fermer le p95 nearest-rank strictement inférieur à une seconde, puis autoriser dans l'ordre 1 M, 10 000 001 et 30 M sans saut de prédécesseur;
+- provoquer un timeout sur le premier ordinal, vérifier que le checkpoint reste actif sans reçu committé, puis reprendre avec un wrapper JSONL strictement identique;
+- produire ensuite un reçu sémantiquement invalide, vérifier l'absence de commit et la conservation du même ordinal actif;
+- recharger tout préfixe committé, rehasher plan et binaire, revalider chaque requête et reçu avant de poursuivre; toute modification d'entrée, corruption de checkpoint ou rupture de progression doit échouer fermée;
+- conserver le plan v3, les artefacts v1/v2, le gate scientifique, les statuts de phase et `public_status` inchangés; le faux binaire et ce test n'autorisent aucun lancement GCP.

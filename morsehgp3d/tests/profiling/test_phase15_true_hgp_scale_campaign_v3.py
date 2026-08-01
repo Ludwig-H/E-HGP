@@ -10,7 +10,9 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 DIRECTORY = Path(__file__).resolve().parent
 HARNESS = DIRECTORY / "phase15_true_hgp_scale_campaign_v3.py"
@@ -227,6 +229,101 @@ def make_complete_run(
     }
 
 
+def install_fake_binary(
+    directory: Path,
+    *,
+    timeout_session_numbers: tuple[int, ...] = (),
+    invalid_session_numbers: tuple[int, ...] = (),
+) -> tuple[Path, Path, Path]:
+    """Install a protocol-faithful fake whose own digest is self-reported."""
+
+    binary = directory / "fake-true-hgp-v3.py"
+    state = directory / "fake-state.json"
+    log = directory / "fake-session-log.jsonl"
+    source = f"""#!/usr/bin/env python3
+import json
+from pathlib import Path
+import sys
+import time
+
+DIRECTORY = Path({str(DIRECTORY)!r})
+PLAN = Path({str(PLAN)!r})
+STATE = Path({str(state)!r})
+LOG = Path({str(log)!r})
+GIT_SHA = {GIT_SHA!r}
+TIMEOUT_SESSION_NUMBERS = {list(timeout_session_numbers)!r}
+INVALID_SESSION_NUMBERS = {list(invalid_session_numbers)!r}
+sys.path.insert(0, str(DIRECTORY))
+
+import campaign_runtime as runtime
+import phase15_true_hgp_scale_campaign_v3 as campaign
+import test_phase15_true_hgp_scale_campaign_v3 as fixture
+
+binary = Path(__file__)
+binary_sha256 = runtime.sha256_file(binary, "fake binary")
+plan, plan_sha256 = campaign.read_plan(PLAN)
+capabilities = campaign.expected_capabilities(
+    plan=plan,
+    plan_sha256=plan_sha256,
+    binary_sha256=binary_sha256,
+    binary_size_bytes=binary.stat().st_size,
+    git_sha=GIT_SHA,
+)
+
+if sys.argv[1:] == [campaign.CAPABILITY_ARGUMENT]:
+    print(runtime.canonical_json(capabilities))
+    raise SystemExit(0)
+if sys.argv[1:] != [campaign.SESSION_ARGUMENT]:
+    raise SystemExit(64)
+
+raw = sys.stdin.buffer.read().decode("ascii")
+session = runtime.parse_json_text(raw, "fake v3 session", canonical_line=True)
+if set(session) != {{
+    "active_checkpoint", "identity", "ordinal", "request_chain_sha256",
+    "requests", "schema"
+}} or session["schema"] != campaign.SESSION_REQUEST_SCHEMA:
+    raise RuntimeError("fake received an invalid session wrapper")
+if not isinstance(session["requests"], list) or len(session["requests"]) != 1:
+    raise RuntimeError("fake session is not mono-request")
+request = session["requests"][0]
+if session["request_chain_sha256"] != runtime.sha256_bytes(
+    runtime.canonical_bytes(request)
+):
+    raise RuntimeError("fake request chain differs")
+expected_identity = runtime.campaign_identity(
+    git_sha=GIT_SHA,
+    binary_sha256=binary_sha256,
+    plan_sha256=plan_sha256,
+    capabilities_sha256=runtime.sha256_bytes(runtime.canonical_bytes(capabilities)),
+)
+if session["identity"] != expected_identity:
+    raise RuntimeError("fake campaign identity differs")
+
+with LOG.open("ab") as stream:
+    stream.write(raw.encode("ascii"))
+if STATE.exists():
+    state = json.loads(STATE.read_text(encoding="ascii"))
+else:
+    state = {{"session_count": 0}}
+session_number = state["session_count"]
+state["session_count"] = session_number + 1
+STATE.write_text(runtime.canonical_json(state) + "\\n", encoding="ascii")
+if session_number in TIMEOUT_SESSION_NUMBERS:
+    time.sleep(2.0)
+
+fixture.BINARY_SHA256 = binary_sha256
+fixture.PLAN_SHA256 = plan_sha256
+fixture.GIT_SHA = GIT_SHA
+run = fixture.make_complete_run(request)
+if session_number in INVALID_SESSION_NUMBERS:
+    run["public_status"] = "exact"
+print(runtime.canonical_json(run))
+"""
+    binary.write_text(source, encoding="ascii")
+    binary.chmod(0o700)
+    return binary, state, log
+
+
 class TrueHgpV3PlanTests(unittest.TestCase):
     def setUp(self) -> None:
         self.plan, self.plan_digest = campaign.read_plan(PLAN)
@@ -331,15 +428,154 @@ class TrueHgpV3PlanTests(unittest.TestCase):
                 git_sha=GIT_SHA,
             )
 
-        result = subprocess.run(
-            [sys.executable, "-B", str(HARNESS), "--plan", str(PLAN), "run"],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        self.assertEqual(result.returncode, 2)
-        self.assertIn("phase15_true_hgp_v3_entry_gate_satisfied=false", result.stderr)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            spool = root / "must-not-exist"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(HARNESS),
+                    "--plan",
+                    str(PLAN),
+                    "run",
+                    "--binary",
+                    str(root / "missing-binary"),
+                    "--git-sha",
+                    "not-a-git-sha",
+                    "--spool-parent",
+                    str(spool),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertIn(
+                "phase15_true_hgp_v3_entry_gate_satisfied=false", result.stderr
+            )
+            self.assertNotIn("binary", result.stderr.split("false", maxsplit=1)[-1])
+            self.assertFalse(spool.exists())
+
+
+class TrueHgpV3ExecutionTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.closed_plan, self.plan_digest = campaign.read_plan(PLAN)
+
+    def execute_open(
+        self,
+        *,
+        plan: dict[str, object],
+        binary: Path,
+        spool_parent: Path,
+    ) -> None:
+        with mock.patch.object(
+            campaign, "validate_plan", side_effect=lambda value: value
+        ):
+            campaign.execute_campaign(
+                plan=plan,
+                plan_path=PLAN,
+                plan_sha256=self.plan_digest,
+                binary=binary,
+                git_sha=GIT_SHA,
+                spool_parent=spool_parent,
+            )
+
+    def read_only_head(self, spool_parent: Path) -> dict[str, object]:
+        roots = list(spool_parent.glob("campaign-*"))
+        self.assertEqual(len(roots), 1)
+        head, _ = runtime.read_canonical_json(roots[0] / "HEAD.json", "test HEAD")
+        return head
+
+    def test_fake_binary_runs_contiguous_50k_gate_then_registered_massive_scales(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary, state, log = install_fake_binary(root)
+            spool_parent = root / "spool"
+            open_plan = copy.deepcopy(self.closed_plan)
+            open_plan["entry_gate_satisfied"] = True
+
+            self.execute_open(
+                plan=open_plan,
+                binary=binary,
+                spool_parent=spool_parent,
+            )
+            head = self.read_only_head(spool_parent)
+            self.assertEqual(head["next_ordinal"], 39)
+            self.assertIsNone(head["active_run"])
+            self.assertEqual(
+                json.loads(state.read_text(encoding="ascii"))["session_count"], 39
+            )
+            sessions = [
+                runtime.parse_json_text(line, "fake session log", canonical_line=True)
+                for line in log.read_text(encoding="ascii").splitlines(keepends=True)
+            ]
+            self.assertEqual(
+                [session["requests"][0]["point_count"] for session in sessions],
+                [campaign.FIFTY_K_POINT_COUNT] * 36
+                + list(campaign.MASSIVE_POINT_COUNTS),
+            )
+            self.assertTrue(
+                all(
+                    session["schema"] == campaign.SESSION_REQUEST_SCHEMA
+                    and session["ordinal"] == ordinal
+                    for ordinal, session in enumerate(sessions)
+                )
+            )
+
+            # A complete spool is a no-op after the mandatory fresh handshake.
+            self.execute_open(
+                plan=open_plan,
+                binary=binary,
+                spool_parent=spool_parent,
+            )
+            self.assertEqual(
+                json.loads(state.read_text(encoding="ascii"))["session_count"], 39
+            )
+
+    def test_timeout_resumes_same_checkpoint_and_invalid_receipt_is_not_committed(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary, _, log = install_fake_binary(
+                root,
+                timeout_session_numbers=(0,),
+                invalid_session_numbers=(2,),
+            )
+            spool_parent = root / "spool"
+            open_plan = copy.deepcopy(self.closed_plan)
+            open_plan["entry_gate_satisfied"] = True
+            open_plan["fifty_k_protocol"]["wall_time_cap_ms_per_run"] = 500
+
+            with self.assertRaisesRegex(runtime.RuntimeContractError, "timeout"):
+                self.execute_open(
+                    plan=open_plan,
+                    binary=binary,
+                    spool_parent=spool_parent,
+                )
+            timed_out_head = self.read_only_head(spool_parent)
+            self.assertEqual(timed_out_head["next_ordinal"], 0)
+            self.assertEqual(timed_out_head["active_run"]["ordinal"], 0)
+
+            with self.assertRaisesRegex(campaign.ContractError, "public exactness"):
+                self.execute_open(
+                    plan=open_plan,
+                    binary=binary,
+                    spool_parent=spool_parent,
+                )
+            invalid_head = self.read_only_head(spool_parent)
+            self.assertEqual(invalid_head["next_ordinal"], 1)
+            self.assertEqual(invalid_head["active_run"]["ordinal"], 1)
+            sessions = [
+                runtime.parse_json_text(line, "fake session log", canonical_line=True)
+                for line in log.read_text(encoding="ascii").splitlines(keepends=True)
+            ]
+            self.assertEqual([session["ordinal"] for session in sessions], [0, 0, 1])
+            self.assertEqual(sessions[0], sessions[1])
 
 
 class TrueHgpV3RunTests(unittest.TestCase):
@@ -453,6 +689,17 @@ class TrueHgpV3RunTests(unittest.TestCase):
         self.assertFalse(
             campaign.build_50k_summary(threshold, self.plan)["gate_passed"]
         )
+        complete_primary = [
+            make_complete_run(
+                request,
+                warm_e2e_ns=(
+                    campaign.SLO_P95_NS if request["role"] == "measured" else 10_000_000
+                ),
+            )
+            for request in campaign.expected_50k_requests(self.plan)
+        ]
+        with self.assertRaisesRegex(campaign.ContractError, "massive scales"):
+            campaign._validate_committed_prefix(complete_primary, self.plan)
 
         self.assertEqual(campaign.validate_scale_progression([]), 50_000)
         self.assertEqual(campaign.validate_scale_progression([50_000]), 1_000_000)

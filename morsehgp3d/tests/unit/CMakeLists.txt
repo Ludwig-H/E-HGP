@@ -267,6 +267,25 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_at_least20_stream_view_tests
+  test_hierarchy_direct_at_least20_stream_view.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_at_least20_stream_view_tests
+  PRIVATE morsehgp3d::direct_at_least20_stream_view
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_at_least20_stream_view_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_at_least20_stream_view_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
   test_hierarchy_exact_q3_gabriel_triangle_oracle.cpp
 )
@@ -3168,6 +3187,7 @@ set(
   morsehgp3d_hierarchy_yao48_ranked_pair_candidates_tests
   morsehgp3d_hierarchy_exact_ranked_diametral_pair_catalog_reference_tests
   morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
+  morsehgp3d_hierarchy_direct_at_least20_stream_view_tests
   morsehgp3d_hierarchy_exact_q3_gabriel_triangle_oracle_tests
   morsehgp3d_hierarchy_silent_pair_gateway_tests
   morsehgp3d_hierarchy_silent_pair_gateway_gamma2_differential_tests
@@ -4060,6 +4080,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_capped_distinct_point_coverage
   COMMAND morsehgp3d_hierarchy_capped_distinct_point_coverage_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_at_least20_stream_view
+  COMMAND morsehgp3d_hierarchy_direct_at_least20_stream_view_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_exact_q3_gabriel_triangle_oracle
