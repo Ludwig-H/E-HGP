@@ -11,6 +11,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/anchored_pair_candidate_classifier.hpp"
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
@@ -112,7 +113,18 @@ int main() {
           SparseAnchoredPairTerminalAuthority>);
   static_assert(
       morsehgp3d::hierarchy::direct_support_terminal_certificate_schema_version ==
-      3U);
+      5U);
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_morse_gamma_carrier_conformance_schema_version == 1U);
+  const morsehgp3d::hierarchy::
+      ExactDirectMorseGammaCarrierConformanceResult
+          installed_carrier_conformance_probe;
+  if (installed_carrier_conformance_probe.certified_outcome()) {
+    std::cerr
+        << "installed carrier-conformance predicate accepted an empty result\n";
+    return 1;
+  }
 
   static_assert(
       morsehgp3d::hierarchy::

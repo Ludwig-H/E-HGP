@@ -2891,6 +2891,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_gamma_carrier_conformance
+  STATIC
+    src/cpu/hierarchy/direct_morse_gamma_carrier_conformance.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_gamma_carrier_conformance
+  ALIAS morsehgp3d_direct_morse_gamma_carrier_conformance
+)
+set_target_properties(
+  morsehgp3d_direct_morse_gamma_carrier_conformance
+  PROPERTIES
+    EXPORT_NAME direct_morse_gamma_carrier_conformance
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_gamma_carrier_conformance PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_gamma_carrier_conformance
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_gamma_carrier_conformance
+  PUBLIC
+    morsehgp3d::direct_morse_forest_carrier_cut_index
+    morsehgp3d::hierarchy
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_gamma_carrier_conformance PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_gamma_carrier_conformance
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_yao48_ranked_pair_candidates_reference
   STATIC
     src/cpu/hierarchy/yao48_ranked_pair_candidates.cpp
@@ -5157,6 +5199,7 @@ install(
     morsehgp3d_direct_morse_vertical_target_proposal_pipeline
     morsehgp3d_direct_morse_k2_k1_target_authority
     morsehgp3d_direct_morse_m1_o5_death_accounting
+    morsehgp3d_direct_morse_gamma_carrier_conformance
     morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_direct_morse_budget
     morsehgp3d_direct_sparse_facet_descent_batch_plan

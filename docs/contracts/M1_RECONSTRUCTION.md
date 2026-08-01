@@ -1,7 +1,7 @@
 # Contrat candidat M.1 — reconstruction de `full_pi0`
 
 > [!WARNING]
-> **Statut scientifique global : `proof_obligation`.** Ce document fige un énoncé à démontrer et ne promeut pas `full_pi0` au statut `exact`. Seule O5 possède désormais une preuve combinatoire locale conditionnelle; O1–O4 et O6–O9 restent ouvertes, et un accord exhaustif avec l'oracle ne remplace pas leurs preuves.
+> **Statut scientifique global : `proof_obligation`.** Ce document fige un énoncé à démontrer et ne promeut pas `full_pi0` au statut `exact`. Seule O5 possède désormais une preuve combinatoire locale conditionnelle. Le checkpoint carriers--Gamma valide en outre, sur une instance mono-ordre bornée, le raccord exact de chaque bras de selle à sa composante stricte et à son carrier gelé; il ne ferme aucune obligation globale. O1–O4 et O6–O9 restent ouvertes, et un accord exhaustif avec l'oracle ne remplace pas leurs preuves.
 
 | propriété | valeur normative |
 |---|---|
@@ -150,6 +150,14 @@ Pour tout ordre $k$, tout événement d'indice un de niveau $a$ et tout $u\in U$
 
 Le chemin initial identifie le bon germe local; la suite reste dans le sous-niveau strict; la cible désigne une composante de l'état pré-lot. Une racine atteinte par plusieurs chemins doit être indépendante des choix canoniques autorisés.
 
+### H5.1 — checkpoint borné de conformité des bras et carriers
+
+`ExactDirectMorseGammaCarrierConformance` fournit un falsificateur machine de H3--H5 pour une instance et un ordre $2\leq k<n\leq14$, $k\leq10$. Après rejeu frais des autorités directes et de l'oracle Gamma borné, chaque bras de selle suit la chaîne exacte suivante : événement direct, projection catalogue, coface fermée exacte, facette stricte, incidence Gamma tokenisée, composante stricte, puis carrier forestier gelé dans la coupe pré-lot. Les composantes strictes du groupe et ses carriers gelés sont mis en bijection.
+
+La coupe impose aussi la distinction normative suivante : un carrier actif est latent si et seulement si sa composante Gamma est réduite à une facette isolée; il est résolu par une racine réduite si et seulement si sa composante est non triviale. La racine antérieure optionnelle du binding doit être celle de l'entrée de coupe. Cette distinction interdit de traiter une facette isolée comme une racine publique ou une composante non triviale comme un latent.
+
+Ce checkpoint conserve seulement des audits agrégés et reconstruit récursivement le détail depuis les sources. Il ne sérialise aucun `Attachment`, chemin, coface, incidence, composante ou carrier, n'injecte pas les labels Gamma résiduels dans la forêt directe et ne rend donc vrai ni `attachments_complete_by_order`, ni H5 sur un domaine non borné, ni M.1.
+
 ### H6 — simultanéité exacte
 
 Pour chaque ordre et chaque niveau exact, l'état strictement antérieur est figé avant toute union. Tous les événements du niveau sont insérés dans un hypergraphe commun, puis ses composantes sont contractées en une seule opération sémantique. Les unions physiques, la publication des nœuds et les ancres verticales n'interviennent qu'après détermination de cette contraction.
@@ -224,6 +232,7 @@ Les noms ci-dessous sont des champs logiques normatifs; leur encodage est figé 
 | indice et multiplicité | `CriticalEvent.birth_order`, `saddle_order` et `morse_roles[]` | chaque rôle donne `order`, `morse_index`, `local_multiplicity` et `arm_count`; $\mu=s-k$ et $\Delta_{\mu}=\binom{\lvert U\rvert-1}{\mu}$ sont rejouables |
 | catalogue | `RunCertificate.catalog_complete_by_rank[1..s_max]` | vrai à chaque rang requis par le profil |
 | bras et chemins | `Attachment` | un enregistrement exact par triple attendu, cible pré-lot et chemin strict rejouable |
+| conformité bornée bras--Gamma--carrier | `ExactDirectMorseGammaCarrierConformance` | falsificateur mono-ordre $n\leq14$ : chaque bras rejoint sa coface catalogue, son incidence Gamma, sa composante stricte et son carrier gelé; ne remplace ni `Attachment`, ni `attachments_complete_by_order` |
 | complétude des attaches | `RunCertificate.attachments_complete_by_order[1..Keff]` | vrai à chaque ordre; aucun bras omis ou indécis |
 | simultanéité | `EqualLevelBatch` | niveau exact, événements complets, état pré-lot, contraction et état post-lot rejouables |
 | fermeture des lots | `RunCertificate.batches_complete_by_order[1..Keff]` | vrai à chaque ordre et invariant sous permutation |
@@ -264,6 +273,8 @@ Le statut du contrat M.1 reste `proof_obligation` tant que toutes les obligation
 | O9 — représentation finie | `proof_obligation` | prouver que `MergeForest`, `coverage_log`, lots et ancres suffisent à rejouer toutes les composantes, notamment les composantes recouvrantes pour $k\geq2$ |
 
 Les preuves externes déjà enregistrées — correspondance K-polyèdres–$\pi_0$, caractérisation locale des centres, indice et multiplicité — peuvent être citées. Le passage simultané local–global et la naturalité complète ne sont pas considérés comme acquis par simple citation de ces résultats.
+
+Le checkpoint borné carriers--Gamma apporte une preuve par invariants de programme relative à un nuage et un ordre acceptés : tous les bras directs observés sont joints aux composantes strictes exhaustives et la partition des carriers est conforme à chaque coupe stricte et fermée. Il ne prouve ni que le producteur sparse émet toutes les incidences résiduelles nécessaires, ni O3 sur le domaine général, ni aucune des autres obligations ouvertes.
 
 ## 9. Contre-exemples et falsificateurs attendus
 
