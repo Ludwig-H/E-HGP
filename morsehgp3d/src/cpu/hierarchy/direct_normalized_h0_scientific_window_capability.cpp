@@ -179,14 +179,26 @@ struct ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::Impl {
   ExactDirectNormalizedH0AuthenticatedWindowStreamPreparedWindow
       structural_ticket{};
   std::shared_ptr<const ScientificWindowControl> control;
+  std::shared_ptr<const void> projection_capability_identity;
+  const ExactDirectNormalizedH0ResidentOwnedBatchWindow*
+      projection_owned_window_address{};
+  const void* projection_local_to_stable_data_address{};
+  const void* projection_facet_token_data_address{};
+  const void* projection_batch_data_address{};
+  const void* projection_direct_reference_data_address{};
   contract::CanonicalId source_chain_digest{};
   contract::CanonicalId batch_identity_digest{};
   contract::CanonicalId successor_chain_digest{};
+  std::size_t projection_local_to_stable_size{};
+  std::size_t projection_facet_token_size{};
+  std::size_t projection_batch_size{};
+  std::size_t projection_direct_reference_size{};
   exact::ExactLevel squared_level{};
   std::size_t source_batch_index{};
   std::size_t source_epoch{};
   std::size_t order{};
   bool scientific_binding_issued{false};
+  bool projection_payload_privately_attested{false};
 };
 
 struct ExactDirectNormalizedH0ScientificWindowCapabilitySession::Impl {
@@ -253,6 +265,58 @@ std::size_t ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::
     return 0U;
   }
   return impl_->control->manifest.stable_facet_token_count;
+}
+
+bool ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::
+    privately_attests_projection_payload() const noexcept {
+  if (impl_ == nullptr || !impl_->scientific_binding_issued ||
+      !impl_->projection_payload_privately_attested ||
+      impl_->projection_capability_identity == nullptr ||
+      !control_is_scientific(impl_->control) ||
+      !impl_->structural_ticket.valid()) {
+    return false;
+  }
+  const auto& owned = impl_->structural_ticket.owned_window();
+  if (impl_->projection_owned_window_address != &owned ||
+      impl_->projection_local_to_stable_data_address !=
+          owned.local_to_stable_facet_token_indices.data() ||
+      impl_->projection_local_to_stable_size !=
+          owned.local_to_stable_facet_token_indices.size() ||
+      impl_->projection_facet_token_data_address !=
+          owned.local_plan.facet_tokens.data() ||
+      impl_->projection_facet_token_size !=
+          owned.local_plan.facet_tokens.size() ||
+      impl_->projection_batch_data_address != owned.local_plan.batches.data() ||
+      impl_->projection_batch_size != owned.local_plan.batches.size() ||
+      impl_->projection_direct_reference_data_address !=
+          owned.local_plan.direct_references.data() ||
+      impl_->projection_direct_reference_size !=
+          owned.local_plan.direct_references.size() ||
+      owned.manifest_digest != impl_->control->manifest.manifest_digest ||
+      owned.source_batch_index != impl_->source_batch_index ||
+      owned.source_chain_digest != impl_->source_chain_digest ||
+      owned.batch_identity_digest != impl_->batch_identity_digest ||
+      owned.successor_chain_digest != impl_->successor_chain_digest ||
+      owned.local_plan.batches.size() != 1U) {
+    return false;
+  }
+  const auto& batch = owned.local_plan.batches.front();
+  return batch.batch_index == impl_->source_batch_index &&
+         batch.squared_level == impl_->squared_level &&
+         batch.order == impl_->order;
+}
+
+const void* ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::
+    projection_capability_identity() const noexcept {
+  return impl_ == nullptr ? nullptr
+                          : impl_->projection_capability_identity.get();
+}
+
+std::shared_ptr<const void>
+ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::
+    share_projection_capability_identity() const noexcept {
+  return impl_ == nullptr ? std::shared_ptr<const void>{}
+                          : impl_->projection_capability_identity;
 }
 
 const ExactDirectNormalizedH0ResidentOwnedBatchWindow&
@@ -459,6 +523,26 @@ ExactDirectNormalizedH0ScientificWindowCapabilitySession::prepare_next() {
     impl->order = batch.order;
     impl->scientific_binding_issued = true;
     impl->structural_ticket = std::move(*structural.ticket);
+    impl->projection_capability_identity =
+        std::make_shared<const std::uint8_t>(std::uint8_t{0U});
+    const auto& projection_owned = impl->structural_ticket.owned_window();
+    impl->projection_owned_window_address = &projection_owned;
+    impl->projection_local_to_stable_data_address =
+        projection_owned.local_to_stable_facet_token_indices.data();
+    impl->projection_local_to_stable_size =
+        projection_owned.local_to_stable_facet_token_indices.size();
+    impl->projection_facet_token_data_address =
+        projection_owned.local_plan.facet_tokens.data();
+    impl->projection_facet_token_size =
+        projection_owned.local_plan.facet_tokens.size();
+    impl->projection_batch_data_address =
+        projection_owned.local_plan.batches.data();
+    impl->projection_batch_size = projection_owned.local_plan.batches.size();
+    impl->projection_direct_reference_data_address =
+        projection_owned.local_plan.direct_references.data();
+    impl->projection_direct_reference_size =
+        projection_owned.local_plan.direct_references.size();
+    impl->projection_payload_privately_attested = true;
     ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow ticket{
         std::move(impl)};
     if (!ticket.valid()) {

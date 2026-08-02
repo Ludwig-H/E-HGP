@@ -14,6 +14,11 @@ struct ExactDirectNormalizedH0RelativeFrozenIncidenceBatch::Impl {
   ExactDirectFrozenUnifiedIncidenceBatchResult frozen{};
   std::optional<internal::ExactDirectFrozenUnifiedResidentBatchAttestation>
       attestation;
+  std::shared_ptr<const void> scientific_window_projection_identity;
+  const ExactDirectFrozenUnifiedIncidenceBatchResult*
+      projection_frozen_payload_address{};
+  const void* projection_frozen_attestation_address{};
+  const void* projection_local_to_stable_data_address{};
   std::vector<std::size_t> local_to_stable_facet_token_indices;
   contract::CanonicalId manifest_digest{};
   contract::CanonicalId source_chain_digest{};
@@ -22,8 +27,10 @@ struct ExactDirectNormalizedH0RelativeFrozenIncidenceBatch::Impl {
   std::size_t source_batch_index{};
   std::size_t stable_facet_token_count{};
   std::size_t stable_resolution_count{};
+  std::size_t projection_local_to_stable_size{};
   bool scientific_window_privately_attested{false};
   bool required_stable_resolutions_translated_injectively{false};
+  bool projection_payload_privately_attested{false};
 };
 
 ExactDirectNormalizedH0RelativeFrozenIncidenceBatch::
@@ -126,6 +133,39 @@ ExactDirectNormalizedH0RelativeFrozenIncidenceBatch::frozen_batch()
     const noexcept {
   static const ExactDirectFrozenUnifiedIncidenceBatchResult empty{};
   return impl_ == nullptr ? empty : impl_->frozen;
+}
+
+bool ExactDirectNormalizedH0RelativeFrozenIncidenceBatch::
+    privately_attests_projection_payload() const noexcept {
+  return impl_ != nullptr &&
+         impl_->projection_payload_privately_attested &&
+         impl_->scientific_window_privately_attested &&
+         impl_->required_stable_resolutions_translated_injectively &&
+         impl_->scientific_window_projection_identity != nullptr &&
+         impl_->attestation.has_value() &&
+         impl_->projection_frozen_attestation_address == &*impl_->attestation &&
+         impl_->projection_frozen_payload_address == &impl_->frozen &&
+         impl_->projection_local_to_stable_data_address ==
+             impl_->local_to_stable_facet_token_indices.data() &&
+         impl_->projection_local_to_stable_size ==
+             impl_->local_to_stable_facet_token_indices.size() &&
+         impl_->stable_resolution_count <=
+             impl_->local_to_stable_facet_token_indices.size() &&
+         impl_->frozen.source_batch_index == impl_->source_batch_index &&
+         !impl_->frozen.source_plan_freshly_verified &&
+         impl_->frozen
+             .source_plan_verified_once_by_immutable_resident_authority &&
+         impl_->frozen.normalized_direct_source_authority &&
+         !impl_->frozen.successive_star_source_authority &&
+         !impl_->frozen.global_facet_coface_or_gamma_catalog_materialized &&
+         !impl_->frozen.public_status_claimed;
+}
+
+const void* ExactDirectNormalizedH0RelativeFrozenIncidenceBatch::
+    scientific_window_projection_capability_identity() const noexcept {
+  return impl_ == nullptr
+             ? nullptr
+             : impl_->scientific_window_projection_identity.get();
 }
 
 bool ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuildResult::
@@ -277,6 +317,25 @@ ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuilder::build(
     impl->required_stable_resolutions_translated_injectively =
         output.stable_resolution_scan_count ==
         output.stable_to_local_translation_count;
+    impl->scientific_window_projection_identity =
+        scientific_window.share_projection_capability_identity();
+    if (impl->scientific_window_projection_identity == nullptr) {
+      output.decision =
+          ExactDirectNormalizedH0RelativeFrozenIncidenceBatchDecision::
+              no_scientific_window_capability_rejected;
+      return output;
+    }
+    // From this point onward the batch owns an immutable payload and exposes
+    // it only through const views.  Projection can therefore authenticate the
+    // exact mint-time object and retained mapping in O(1), without replaying
+    // the frozen quotient/action attestation.
+    impl->projection_frozen_payload_address = &impl->frozen;
+    impl->projection_frozen_attestation_address = &*impl->attestation;
+    impl->projection_local_to_stable_data_address =
+        impl->local_to_stable_facet_token_indices.data();
+    impl->projection_local_to_stable_size =
+        impl->local_to_stable_facet_token_indices.size();
+    impl->projection_payload_privately_attested = true;
     ExactDirectNormalizedH0RelativeFrozenIncidenceBatch batch{
         std::move(impl)};
     if (!batch.valid()) {

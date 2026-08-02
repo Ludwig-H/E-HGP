@@ -1416,7 +1416,7 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
-  PRIVATE morsehgp3d::direct_normalized_h0_relative_frozen_incidence_batch
+  PRIVATE morsehgp3d::direct_normalized_h0_sparse_forest_projection
 )
 if(MSVC)
   target_compile_options(

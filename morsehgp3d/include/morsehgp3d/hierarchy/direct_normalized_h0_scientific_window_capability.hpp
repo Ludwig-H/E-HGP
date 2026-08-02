@@ -89,6 +89,7 @@ enum class ExactDirectNormalizedH0ScientificWindowCapabilitySealDecision
 
 struct ExactDirectNormalizedH0ScientificWindowCapabilityInitializationResult;
 class ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuilder;
+class ExactDirectNormalizedH0SparseForestProjection;
 class ExactDirectNormalizedH0ScientificWindowCapabilitySession;
 
 // Immutable, process-local evidence that one scientific window session was
@@ -175,11 +176,20 @@ class ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow {
 
   [[nodiscard]] bool scientifically_attests_owned_window() const noexcept;
   [[nodiscard]] std::size_t stable_facet_token_count() const noexcept;
+  // Projection is allowed to trust this O(1), process-local capability seam:
+  // the complete const payload was verified when the window was minted, and
+  // the retained identity prevents a relative batch from being rebound to a
+  // distinct prepared window with merely equal public values.
+  [[nodiscard]] bool privately_attests_projection_payload() const noexcept;
+  [[nodiscard]] const void* projection_capability_identity() const noexcept;
+  [[nodiscard]] std::shared_ptr<const void>
+  share_projection_capability_identity() const noexcept;
 
   explicit ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow(
       std::unique_ptr<Impl>) noexcept;
   friend class ExactDirectNormalizedH0ScientificWindowCapabilitySession;
   friend class ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuilder;
+  friend class ExactDirectNormalizedH0SparseForestProjection;
 };
 
 struct ExactDirectNormalizedH0ScientificWindowCapabilityPreparationResult {

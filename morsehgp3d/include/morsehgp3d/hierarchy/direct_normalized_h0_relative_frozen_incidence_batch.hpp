@@ -12,6 +12,8 @@
 
 namespace morsehgp3d::hierarchy {
 
+class ExactDirectNormalizedH0SparseForestProjection;
+
 inline constexpr std::uint32_t
     direct_normalized_h0_relative_frozen_incidence_batch_schema_version = 1U;
 inline constexpr std::string_view
@@ -96,9 +98,16 @@ class ExactDirectNormalizedH0RelativeFrozenIncidenceBatch {
   struct Impl;
   std::unique_ptr<Impl> impl_;
 
+  // Projection consumes only this private O(1) mint-time attestation.  The
+  // public valid() predicate remains the deliberately defensive full audit.
+  [[nodiscard]] bool privately_attests_projection_payload() const noexcept;
+  [[nodiscard]] const void* scientific_window_projection_capability_identity()
+      const noexcept;
+
   explicit ExactDirectNormalizedH0RelativeFrozenIncidenceBatch(
       std::unique_ptr<Impl>) noexcept;
   friend class ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuilder;
+  friend class ExactDirectNormalizedH0SparseForestProjection;
 };
 
 struct ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuildResult {

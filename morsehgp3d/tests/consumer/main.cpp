@@ -21,6 +21,7 @@
 #include "morsehgp3d/hierarchy/direct_morse_unified_resident_session.hpp"
 #include "morsehgp3d/hierarchy/direct_normalized_h0_relative_frozen_incidence_batch.hpp"
 #include "morsehgp3d/hierarchy/direct_normalized_h0_scientific_window_capability.hpp"
+#include "morsehgp3d/hierarchy/direct_normalized_h0_sparse_forest_projection.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_root_coverage_index.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
@@ -37,6 +38,7 @@
 #include <cstdint>
 #include <iostream>
 #include <span>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -259,6 +261,96 @@ int main() {
   if (installed_relative_frozen_batch_probe.valid()) {
     std::cerr
         << "installed relative-frozen predicate accepted an empty batch\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+              direct_normalized_h0_sparse_forest_projection_schema_version ==
+          1U);
+  using SparseForestProjection = morsehgp3d::hierarchy::
+      ExactDirectNormalizedH0SparseForestProjection;
+  using SparseForestProjectionResult = morsehgp3d::hierarchy::
+      ExactDirectNormalizedH0SparseForestProjectionResult;
+  static_assert(!std::is_aggregate_v<SparseForestProjectionResult>);
+  static_assert(!std::is_copy_constructible_v<SparseForestProjectionResult>);
+  static_assert(!std::is_copy_assignable_v<SparseForestProjectionResult>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<SparseForestProjectionResult>);
+  static_assert(std::is_nothrow_move_assignable_v<SparseForestProjectionResult>);
+  static_assert(
+      SparseForestProjection::backend == std::string_view{"reference_cpu"});
+  static_assert(
+      SparseForestProjection::profile == std::string_view{"hgp_reduced"});
+  static_assert(
+      SparseForestProjection::mode ==
+      std::string_view{
+          "scientific_window_external_carrier_relative_sparse_forest_"
+          "projection_v1"});
+  static_assert(
+      SparseForestProjection::deployment_status ==
+      std::string_view{
+          "architecture_only_prepared_forest_ticket_no_source_commit_no_"
+          "root_ledger_no_vertical_no_durable_restart"});
+  static_assert(
+      SparseForestProjection::public_status ==
+      std::string_view{"not_claimed"});
+  static_assert(
+      SparseForestProjectionResult::backend == SparseForestProjection::backend);
+  static_assert(
+      SparseForestProjectionResult::profile == SparseForestProjection::profile);
+  static_assert(
+      SparseForestProjectionResult::mode == SparseForestProjection::mode);
+  static_assert(
+      SparseForestProjectionResult::deployment_status ==
+      SparseForestProjection::deployment_status);
+  static_assert(
+      SparseForestProjectionResult::public_status ==
+      SparseForestProjection::public_status);
+  SparseForestProjectionResult installed_sparse_forest_projection_probe;
+  if (installed_sparse_forest_projection_probe.certified_prepared_projection() ||
+      installed_sparse_forest_projection_probe.has_forest_ticket() ||
+      installed_sparse_forest_projection_probe.forest_ticket() != nullptr) {
+    std::cerr
+        << "installed sparse-forest projection accepted a default result\n";
+    return 1;
+  }
+  installed_sparse_forest_projection_probe.scientific_authority_id = 1U;
+  installed_sparse_forest_projection_probe.scientific_source_stamp_bound = true;
+  installed_sparse_forest_projection_probe
+      .scientific_window_and_relative_batch_bound = true;
+  installed_sparse_forest_projection_probe
+      .manifest_source_identity_and_batch_bound = true;
+  installed_sparse_forest_projection_probe.forest_pre_state_bound = true;
+  installed_sparse_forest_projection_probe
+      .forest_pre_stamp_is_not_scientific_cursor_chain_or_root_ledger_alignment =
+      true;
+  installed_sparse_forest_projection_probe
+      .carrier_attachments_canonical_exhaustive_and_rooted = true;
+  installed_sparse_forest_projection_probe
+      .opaque_token_ids_kept_distinct_from_stable_handles = true;
+  installed_sparse_forest_projection_probe
+      .exact_relative_to_external_carrier_attachments = true;
+  installed_sparse_forest_projection_probe
+      .all_fallible_projection_work_completed_before_commit = true;
+  installed_sparse_forest_projection_probe
+      .forest_physical_capacity_may_have_changed = true;
+  installed_sparse_forest_projection_probe.forest_decision =
+      morsehgp3d::hierarchy::
+          ExactDirectSparseStableFacetForestPreparationDecision::
+              complete_canonical_staging;
+  installed_sparse_forest_projection_probe.decision =
+      morsehgp3d::hierarchy::
+          ExactDirectNormalizedH0SparseForestProjectionDecision::
+              complete_external_attachment_relative_sparse_forest_preparation;
+  installed_sparse_forest_projection_probe.scope =
+      morsehgp3d::hierarchy::
+          ExactDirectNormalizedH0SparseForestProjectionScope::
+              exact_scientific_window_relative_to_publicly_supplied_external_carrier_attachments_only;
+  if (installed_sparse_forest_projection_probe.certified_prepared_projection() ||
+      installed_sparse_forest_projection_probe.has_forest_ticket() ||
+      installed_sparse_forest_projection_probe.forest_ticket() != nullptr) {
+    std::cerr
+        << "installed sparse-forest projection accepted forged public fields\n";
     return 1;
   }
   const morsehgp3d::hierarchy::ExactDirectSparseStableFacetForest
