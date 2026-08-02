@@ -89,6 +89,64 @@ enum class ExactDirectNormalizedH0ScientificWindowCapabilitySealDecision
 
 struct ExactDirectNormalizedH0ScientificWindowCapabilityInitializationResult;
 class ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuilder;
+class ExactDirectNormalizedH0ScientificWindowCapabilitySession;
+
+// Immutable, process-local evidence that one scientific window session was
+// minted from the privately reverified source control.  The default object is
+// deliberately uncertified, and only the session may attach the private
+// control identity.  The digest/count surface is sufficient for a future
+// coordinator without exposing the compatibility manifest or source plan.
+class ExactDirectNormalizedH0ScientificSourceStamp {
+ public:
+  ExactDirectNormalizedH0ScientificSourceStamp() noexcept;
+  ~ExactDirectNormalizedH0ScientificSourceStamp();
+  ExactDirectNormalizedH0ScientificSourceStamp(
+      ExactDirectNormalizedH0ScientificSourceStamp&&) noexcept;
+  ExactDirectNormalizedH0ScientificSourceStamp& operator=(
+      ExactDirectNormalizedH0ScientificSourceStamp&&) noexcept;
+  ExactDirectNormalizedH0ScientificSourceStamp(
+      const ExactDirectNormalizedH0ScientificSourceStamp&) = delete;
+  ExactDirectNormalizedH0ScientificSourceStamp& operator=(
+      const ExactDirectNormalizedH0ScientificSourceStamp&) = delete;
+
+  [[nodiscard]] bool certified_scientific_source_stamp() const noexcept;
+  [[nodiscard]] std::uint32_t schema_version() const noexcept;
+  [[nodiscard]] std::uint64_t scientific_authority_id() const noexcept;
+  [[nodiscard]] const contract::CanonicalId& manifest_digest() const noexcept;
+  [[nodiscard]] const contract::CanonicalId& source_identity_digest()
+      const noexcept;
+  [[nodiscard]] const contract::CanonicalId&
+  horizontal_incidence_authority_digest() const noexcept;
+  [[nodiscard]] std::size_t stable_facet_token_count() const noexcept;
+  [[nodiscard]] std::size_t batch_count() const noexcept;
+  [[nodiscard]] const contract::CanonicalId& initial_chain_digest()
+      const noexcept;
+  [[nodiscard]] const contract::CanonicalId& final_chain_digest()
+      const noexcept;
+  [[nodiscard]] bool vertical_maps_complete() const noexcept;
+  [[nodiscard]] bool durable_restart_supported() const noexcept;
+  [[nodiscard]] bool public_status_claimed() const noexcept;
+
+ private:
+  std::shared_ptr<const void> private_control_identity_;
+  std::uint32_t schema_version_{};
+  std::uint64_t scientific_authority_id_{};
+  contract::CanonicalId manifest_digest_{};
+  contract::CanonicalId source_identity_digest_{};
+  contract::CanonicalId horizontal_incidence_authority_digest_{};
+  std::size_t stable_facet_token_count_{};
+  std::size_t batch_count_{};
+  contract::CanonicalId initial_chain_digest_{};
+  contract::CanonicalId final_chain_digest_{};
+  bool private_scientific_attestation_issued_{false};
+  bool vertical_maps_complete_{false};
+  bool durable_restart_supported_{false};
+  bool public_status_claimed_{false};
+
+  explicit ExactDirectNormalizedH0ScientificSourceStamp(
+      std::shared_ptr<const void>) noexcept;
+  friend class ExactDirectNormalizedH0ScientificWindowCapabilitySession;
+};
 
 class ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow {
  public:
@@ -244,6 +302,8 @@ class ExactDirectNormalizedH0ScientificWindowCapabilitySession {
       const noexcept;
   [[nodiscard]] const void* provider_identity() const noexcept;
   [[nodiscard]] bool horizontal_incidence_source_bound() const noexcept;
+  [[nodiscard]] const ExactDirectNormalizedH0ScientificSourceStamp&
+  scientific_source_stamp() const noexcept;
   [[nodiscard]] bool global_compatibility_plan_retained() const noexcept;
   [[nodiscard]] bool public_status_claimed() const noexcept;
 

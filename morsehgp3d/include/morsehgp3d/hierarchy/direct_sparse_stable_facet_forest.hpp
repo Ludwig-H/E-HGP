@@ -309,8 +309,17 @@ class ExactDirectSparseStableFacetForest {
   [[nodiscard]] ExactDirectSparseStableFacetForestStamp current_stamp()
       const noexcept;
   [[nodiscard]] std::size_t outstanding_ticket_count() const noexcept;
+  // Rows are append-only in canonical handle order within each committed
+  // batch.  Their order is intentionally not globally sorted across batches.
+  // A prepare_batch call may reserve durable row capacity and therefore
+  // invalidate a previously returned span even when no logical commit follows.
   [[nodiscard]] std::span<const ExactDirectSparseStableFacetForestEntry>
   observed_entries() const noexcept;
+  // Physical architecture metric only.  The index is empty at initialization
+  // and grows from observed/staged handle requirements, never from the scalar
+  // stable_facet_token_count namespace bound.
+  [[nodiscard]] std::size_t materialized_handle_index_slot_count()
+      const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetLookupResult lookup(
       ExactDirectSparseStableFacetHandle) const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestPreparationResult

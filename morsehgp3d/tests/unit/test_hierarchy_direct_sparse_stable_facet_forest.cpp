@@ -4,12 +4,66 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
+#include <limits>
+#include <new>
 #include <span>
 #include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+namespace allocation_probe {
+
+bool active = false;
+std::size_t count = 0U;
+
+void record() noexcept {
+  if (active) {
+    ++count;
+  }
+}
+
+void begin() noexcept {
+  count = 0U;
+  active = true;
+}
+
+[[nodiscard]] std::size_t finish() noexcept {
+  active = false;
+  return count;
+}
+
+}  // namespace allocation_probe
+
+void* operator new(std::size_t size) {
+  allocation_probe::record();
+  if (void* memory = std::malloc(size == 0U ? 1U : size); memory != nullptr) {
+    return memory;
+  }
+  throw std::bad_alloc{};
+}
+
+void* operator new[](std::size_t size) {
+  return ::operator new(size);
+}
+
+void operator delete(void* memory) noexcept {
+  std::free(memory);
+}
+
+void operator delete[](void* memory) noexcept {
+  ::operator delete(memory);
+}
+
+void operator delete(void* memory, std::size_t) noexcept {
+  ::operator delete(memory);
+}
+
+void operator delete[](void* memory, std::size_t) noexcept {
+  ::operator delete(memory);
+}
 
 namespace {
 
@@ -74,6 +128,323 @@ template <std::size_t Size>
       {1'000'000'001U, digest("normalized-structural-source")}, budget);
 }
 
+struct BoundedOracleRow {
+  ExactDirectSparseStableFacetHandle handle{};
+  ExactDirectSparseFacetKey key{};
+  ExactDirectSparseStableFacetHandle parent{};
+  std::size_t component_size{};
+};
+
+class BoundedStableFacetOracle {
+ public:
+  void insert(
+      ExactDirectSparseStableFacetHandle handle,
+      const ExactDirectSparseFacetKey& key) {
+    if (row_index(handle) == no_row) {
+      rows_.push_back({handle, key, handle, 1U});
+    }
+  }
+
+  void unite(
+      ExactDirectSparseStableFacetHandle left,
+      ExactDirectSparseStableFacetHandle right) {
+    const std::size_t left_root = root_row(left);
+    const std::size_t right_root = root_row(right);
+    if (left_root == no_row || right_root == no_row ||
+        left_root == right_root) {
+      return;
+    }
+    auto& left_entry = rows_[left_root];
+    auto& right_entry = rows_[right_root];
+    const bool left_wins =
+        left_entry.component_size > right_entry.component_size ||
+        (left_entry.component_size == right_entry.component_size &&
+         left_entry.handle < right_entry.handle);
+    auto& root = left_wins ? left_entry : right_entry;
+    auto& child = left_wins ? right_entry : left_entry;
+    root.component_size += child.component_size;
+    child.component_size = 0U;
+    child.parent = root.handle;
+  }
+
+  [[nodiscard]] ExactDirectSparseStableFacetHandle root_handle(
+      ExactDirectSparseStableFacetHandle handle) const {
+    const std::size_t root = root_row(handle);
+    return root == no_row ? ExactDirectSparseStableFacetHandle{}
+                          : rows_[root].handle;
+  }
+
+  [[nodiscard]] std::size_t component_size(
+      ExactDirectSparseStableFacetHandle handle) const {
+    const std::size_t root = root_row(handle);
+    return root == no_row ? 0U : rows_[root].component_size;
+  }
+
+  [[nodiscard]] const ExactDirectSparseFacetKey* key(
+      ExactDirectSparseStableFacetHandle handle) const {
+    const std::size_t row = row_index(handle);
+    return row == no_row ? nullptr : &rows_[row].key;
+  }
+
+ private:
+  static constexpr std::size_t no_row =
+      std::numeric_limits<std::size_t>::max();
+
+  [[nodiscard]] std::size_t row_index(
+      ExactDirectSparseStableFacetHandle handle) const {
+    const auto found = std::find_if(
+        rows_.begin(), rows_.end(), [handle](const BoundedOracleRow& row) {
+          return row.handle == handle;
+        });
+    return found == rows_.end()
+               ? no_row
+               : static_cast<std::size_t>(found - rows_.begin());
+  }
+
+  [[nodiscard]] std::size_t root_row(
+      ExactDirectSparseStableFacetHandle handle) const {
+    std::size_t row = row_index(handle);
+    std::size_t hops = 0U;
+    while (row != no_row && rows_[row].parent != rows_[row].handle &&
+           hops <= rows_.size()) {
+      row = row_index(rows_[row].parent);
+      ++hops;
+    }
+    return hops <= rows_.size() ? row : no_row;
+  }
+
+  std::vector<BoundedOracleRow> rows_;
+};
+
+void apply_oracle_batch(
+    BoundedStableFacetOracle& oracle,
+    std::span<const ExactDirectSparseStableFacetInsertion> input_insertions,
+    std::span<const ExactDirectSparseStableFacetUnion> input_unions) {
+  std::vector<ExactDirectSparseStableFacetInsertion> insertions(
+      input_insertions.begin(), input_insertions.end());
+  std::vector<ExactDirectSparseStableFacetUnion> unions(
+      input_unions.begin(), input_unions.end());
+  std::sort(
+      insertions.begin(),
+      insertions.end(),
+      [](const auto& left, const auto& right) {
+        return left.stable_source_facet_token_index <
+               right.stable_source_facet_token_index;
+      });
+  for (auto& operation : unions) {
+    if (operation.right_handle < operation.left_handle) {
+      std::swap(operation.left_handle, operation.right_handle);
+    }
+  }
+  std::sort(
+      unions.begin(), unions.end(), [](const auto& left, const auto& right) {
+        return left.left_handle < right.left_handle ||
+               (left.left_handle == right.left_handle &&
+                left.right_handle < right.right_handle);
+      });
+  for (const auto& insertion : insertions) {
+    oracle.insert(
+        insertion.stable_source_facet_token_index, insertion.facet_key);
+  }
+  for (const auto& operation : unions) {
+    oracle.unite(operation.left_handle, operation.right_handle);
+  }
+}
+
+[[nodiscard]] ExactDirectSparseFacetKey key_for_handle(std::size_t handle) {
+  return facet(std::array<PointId, 2U>{
+      static_cast<PointId>(handle + 1U),
+      static_cast<PointId>(handle + 1'000'001U)});
+}
+
+void commit_oracle_batch(
+    ExactDirectSparseStableFacetForest& forest,
+    BoundedStableFacetOracle& oracle,
+    std::span<const ExactDirectSparseStableFacetInsertion> insertions,
+    std::span<const ExactDirectSparseStableFacetUnion> unions,
+    std::string_view label) {
+  auto prepared = forest.prepare_batch(insertions, unions);
+  if (!prepared.certified_prepared()) {
+    check(false, std::string{label} + " prepares exactly");
+    return;
+  }
+  allocation_probe::begin();
+  const auto committed = forest.commit(std::move(*prepared.ticket));
+  const std::size_t commit_allocation_count = allocation_probe::finish();
+  if (!committed.certified_commit() || commit_allocation_count != 0U) {
+    check(
+        false,
+        std::string{label} + " commits exactly without allocation");
+    return;
+  }
+  apply_oracle_batch(oracle, insertions, unions);
+}
+
+void test_append_only_multibatch_index() {
+  auto initialization = initialize();
+  auto forest = std::move(*initialization.forest);
+  BoundedStableFacetOracle oracle;
+
+  const std::array first_insertions{
+      ExactDirectSparseStableFacetInsertion{800U, key_for_handle(800U)},
+      ExactDirectSparseStableFacetInsertion{900U, key_for_handle(900U)},
+      ExactDirectSparseStableFacetInsertion{1'000U, key_for_handle(1'000U)},
+  };
+  const std::array first_unions{
+      ExactDirectSparseStableFacetUnion{1'000U, 900U},
+      ExactDirectSparseStableFacetUnion{800U, 900U},
+  };
+  commit_oracle_batch(
+      forest, oracle, first_insertions, first_unions, "ascending handle batch");
+
+  const std::array second_insertions{
+      ExactDirectSparseStableFacetInsertion{700U, key_for_handle(700U)},
+      ExactDirectSparseStableFacetInsertion{600U, key_for_handle(600U)},
+      ExactDirectSparseStableFacetInsertion{500U, key_for_handle(500U)},
+  };
+  const std::array second_unions{
+      ExactDirectSparseStableFacetUnion{700U, 600U},
+      ExactDirectSparseStableFacetUnion{600U, 500U},
+      ExactDirectSparseStableFacetUnion{500U, 800U},
+  };
+  commit_oracle_batch(
+      forest,
+      oracle,
+      second_insertions,
+      second_unions,
+      "descending handle batch");
+
+  const std::array third_insertions{
+      ExactDirectSparseStableFacetInsertion{850U, key_for_handle(850U)},
+      ExactDirectSparseStableFacetInsertion{550U, key_for_handle(550U)},
+      ExactDirectSparseStableFacetInsertion{950U, key_for_handle(950U)},
+  };
+  const std::array third_unions{
+      ExactDirectSparseStableFacetUnion{850U, 950U},
+      ExactDirectSparseStableFacetUnion{550U, 850U},
+      ExactDirectSparseStableFacetUnion{550U, 1'000U},
+  };
+  commit_oracle_batch(
+      forest,
+      oracle,
+      third_insertions,
+      third_unions,
+      "interleaved handle batch");
+
+  constexpr std::array expected_append_order{
+      800U, 900U, 1'000U, 500U, 600U, 700U, 550U, 850U, 950U};
+  const auto observed_entries = forest.observed_entries();
+  bool append_order_exact =
+      observed_entries.size() == expected_append_order.size();
+  for (std::size_t index = 0U;
+       append_order_exact && index < observed_entries.size();
+       ++index) {
+    append_order_exact =
+        observed_entries[index].stable_source_facet_token_index ==
+        expected_append_order[index];
+  }
+  check(
+      append_order_exact,
+      "durable rows append canonically within each batch without global resort");
+
+  for (const auto handle : expected_append_order) {
+    const auto observed = forest.lookup(handle);
+    const auto* expected_key = oracle.key(handle);
+    check(
+        expected_key != nullptr && observed.certified_observed() &&
+            observed.root_handle == oracle.root_handle(handle) &&
+            observed.component_size == oracle.component_size(handle) &&
+            observed.facet_key == *expected_key,
+        "flat-index lookup agrees with the bounded stable-handle oracle");
+  }
+  check(
+      forest.materialized_handle_index_slot_count() >=
+              2U * observed_entries.size() &&
+          forest.materialized_handle_index_slot_count() < 1'000U,
+      "the handle index scales with observed rows rather than the billion-token namespace");
+}
+
+void test_flat_index_collision_chain() {
+  auto initialization = initialize();
+  auto forest = std::move(*initialization.forest);
+  BoundedStableFacetOracle oracle;
+  // Under the production 64-bit mixer, these four handles all start in bucket
+  // seven of the eight-slot table required by four rows.  Exact handle
+  // comparison must therefore survive one complete linear-probing cluster.
+  constexpr std::array collision_handles{0U, 7U, 13U, 16U};
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{16U, key_for_handle(16U)},
+      ExactDirectSparseStableFacetInsertion{0U, key_for_handle(0U)},
+      ExactDirectSparseStableFacetInsertion{13U, key_for_handle(13U)},
+      ExactDirectSparseStableFacetInsertion{7U, key_for_handle(7U)},
+  };
+  const std::array unions{
+      ExactDirectSparseStableFacetUnion{0U, 7U},
+      ExactDirectSparseStableFacetUnion{13U, 16U},
+      ExactDirectSparseStableFacetUnion{7U, 13U},
+  };
+  commit_oracle_batch(
+      forest, oracle, insertions, unions, "colliding handle-index batch");
+  check(
+      forest.materialized_handle_index_slot_count() == 8U,
+      "four observed handles materialize only the required eight index slots");
+  for (const auto handle : collision_handles) {
+    const auto observed = forest.lookup(handle);
+    check(
+        observed.certified_observed() &&
+            observed.root_handle == oracle.root_handle(handle) &&
+            observed.component_size == oracle.component_size(handle),
+        "linear-probing collisions retain exact DSU lookup semantics");
+  }
+}
+
+void test_sibling_ticket_survives_physical_rehash() {
+  auto initialization = initialize();
+  auto forest = std::move(*initialization.forest);
+  const auto initial_stamp = forest.current_stamp();
+  const std::array small_insertions{
+      ExactDirectSparseStableFacetInsertion{600U, key_for_handle(600U)}};
+  const std::array large_insertions{
+      ExactDirectSparseStableFacetInsertion{100U, key_for_handle(100U)},
+      ExactDirectSparseStableFacetInsertion{101U, key_for_handle(101U)},
+      ExactDirectSparseStableFacetInsertion{102U, key_for_handle(102U)},
+      ExactDirectSparseStableFacetInsertion{103U, key_for_handle(103U)},
+      ExactDirectSparseStableFacetInsertion{104U, key_for_handle(104U)},
+      ExactDirectSparseStableFacetInsertion{105U, key_for_handle(105U)},
+      ExactDirectSparseStableFacetInsertion{106U, key_for_handle(106U)},
+      ExactDirectSparseStableFacetInsertion{107U, key_for_handle(107U)},
+  };
+  auto small = forest.prepare_batch(small_insertions, {});
+  auto large = forest.prepare_batch(large_insertions, {});
+  check(
+      small.certified_prepared() && large.certified_prepared() &&
+          forest.current_stamp() == initial_stamp &&
+          forest.observed_entries().empty() &&
+          forest.materialized_handle_index_slot_count() >= 16U &&
+          forest.outstanding_ticket_count() == 2U,
+      "a sibling may grow row and index capacity without semantic mutation");
+  allocation_probe::begin();
+  const auto committed_small = forest.commit(std::move(*small.ticket));
+  const std::size_t commit_allocation_count = allocation_probe::finish();
+  check(
+      committed_small.certified_commit() &&
+          committed_small.inserted_handle_count == 1U &&
+          forest.lookup(600U).certified_observed() &&
+          commit_allocation_count == 0U,
+      "a ticket prepared before a sibling rehash commits without retained slot addresses");
+  const auto stamp_after_small = forest.current_stamp();
+  const auto stale_large = forest.commit(std::move(*large.ticket));
+  check(
+      stale_large.ticket_consumed && !stale_large.state_mutated &&
+          stale_large.decision ==
+              ExactDirectSparseStableFacetForestCommitDecision::
+                  no_stale_or_sibling_ticket_rejected &&
+          forest.current_stamp() == stamp_after_small &&
+          forest.observed_entries().size() == 1U &&
+          forest.lookup(600U).certified_observed(),
+      "stale sibling rejection leaves append rows and the rehashed index intact");
+}
+
 void run_tests() {
   constexpr std::size_t handle_a = 900'000'000U;
   constexpr std::size_t handle_b = 2U;
@@ -86,8 +457,9 @@ void run_tests() {
   check(
       initialization.certified_initialized() &&
           initialization.namespace_capacity_not_materialized &&
-          initialization.forest->observed_entries().empty(),
-      "a billion-token namespace initializes with zero durable rows");
+          initialization.forest->observed_entries().empty() &&
+          initialization.forest->materialized_handle_index_slot_count() == 0U,
+      "a billion-token namespace initializes with zero rows and zero index slots");
   auto forest = std::move(*initialization.forest);
   const auto initial_stamp = forest.current_stamp();
   const auto missing = forest.lookup(handle_a);
@@ -101,6 +473,48 @@ void run_tests() {
           ExactDirectSparseStableFacetLookupDisposition::
               handle_out_of_namespace,
       "a handle outside the scalar namespace is rejected");
+
+  auto point_count_eleven = key_a;
+  point_count_eleven.point_count = point_count_eleven.point_ids.size() + 1U;
+  auto point_count_size_max = key_a;
+  point_count_size_max.point_count =
+      std::numeric_limits<std::size_t>::max();
+  const std::array malformed_point_count_eleven{
+      ExactDirectSparseStableFacetInsertion{
+          handle_a, point_count_eleven}};
+  const std::array malformed_point_count_size_max{
+      ExactDirectSparseStableFacetInsertion{
+          handle_a, point_count_size_max}};
+  const std::array malformed_same_handle_pair{
+      ExactDirectSparseStableFacetInsertion{
+          handle_a, point_count_size_max},
+      ExactDirectSparseStableFacetInsertion{
+          handle_a, point_count_eleven},
+  };
+  const auto check_malformed_batch_rejected =
+      [&](std::span<const ExactDirectSparseStableFacetInsertion> malformed,
+          std::string_view label) {
+        const auto result = forest.prepare_batch(malformed, {});
+        check(
+            !result.ticket.has_value() &&
+                result.decision ==
+                    ExactDirectSparseStableFacetForestPreparationDecision::
+                        no_input_shape_rejected &&
+                !result.forest_logical_state_mutated &&
+                forest.current_stamp() == initial_stamp &&
+                forest.observed_entries().empty() &&
+                forest.outstanding_ticket_count() == 0U,
+            std::string{label});
+      };
+  check_malformed_batch_rejected(
+      malformed_point_count_eleven,
+      "point_count above fixed key capacity is rejected before staging");
+  check_malformed_batch_rejected(
+      malformed_point_count_size_max,
+      "SIZE_MAX point_count is rejected before staging");
+  check_malformed_batch_rejected(
+      malformed_same_handle_pair,
+      "two malformed insertions sharing one handle never reach sorting");
 
   const std::array insertions_a{
       ExactDirectSparseStableFacetInsertion{handle_a, key_a},
@@ -136,7 +550,9 @@ void run_tests() {
           forest.outstanding_ticket_count() == 2U,
       "canonical staging is independent of request order and mutation-free");
 
+  allocation_probe::begin();
   auto committed = forest.commit(std::move(*prepared_a.ticket));
+  const std::size_t first_commit_allocation_count = allocation_probe::finish();
   check(
       committed.certified_commit() && committed.inserted_handle_count == 3U &&
           committed.effective_union_count == 2U &&
@@ -144,7 +560,8 @@ void run_tests() {
           committed.post_stamp.observed_handle_count == 3U &&
           committed.post_stamp.component_count == 1U &&
           forest.observed_entries().size() == 3U &&
-          forest.outstanding_ticket_count() == 1U,
+          forest.outstanding_ticket_count() == 1U &&
+          first_commit_allocation_count == 0U,
       "one allocation-free commit inserts only observed handles and joins them");
   const auto stamp_after_commit = forest.current_stamp();
   auto stale = forest.commit(std::move(*prepared_b.ticket));
@@ -264,6 +681,10 @@ void run_tests() {
           !checkpoint.vertical_maps_complete &&
           !checkpoint.public_status_claimed,
       "the semantic checkpoint honestly omits all restart state and claims");
+
+  test_append_only_multibatch_index();
+  test_flat_index_collision_chain();
+  test_sibling_ticket_survives_physical_rehash();
 }
 
 }  // namespace

@@ -34,6 +34,12 @@ static_assert(
         ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow>);
 static_assert(
     !std::is_copy_constructible_v<
+        ExactDirectNormalizedH0ScientificSourceStamp> &&
+    std::is_nothrow_move_constructible_v<
+        ExactDirectNormalizedH0ScientificSourceStamp> &&
+    !std::is_aggregate_v<ExactDirectNormalizedH0ScientificSourceStamp>);
+static_assert(
+    !std::is_copy_constructible_v<
         ExactDirectNormalizedH0RelativeFrozenIncidenceBatch> &&
     std::is_nothrow_move_constructible_v<
         ExactDirectNormalizedH0RelativeFrozenIncidenceBatch>);
@@ -583,15 +589,71 @@ void test_full_e5_stream_and_terminal_seal(const E5Fixture& fixture) {
     return;
   }
   auto& session = *initialized.session;
+  const auto& initial_source_stamp = session.scientific_source_stamp();
+  const auto* const source_stamp_address = &initial_source_stamp;
+  const auto source_stamp_schema = initial_source_stamp.schema_version();
+  const auto source_stamp_authority =
+      initial_source_stamp.scientific_authority_id();
+  const auto source_stamp_manifest = initial_source_stamp.manifest_digest();
+  const auto source_stamp_identity =
+      initial_source_stamp.source_identity_digest();
+  const auto source_stamp_incidence =
+      initial_source_stamp.horizontal_incidence_authority_digest();
+  const auto source_stamp_facet_count =
+      initial_source_stamp.stable_facet_token_count();
+  const auto source_stamp_batch_count = initial_source_stamp.batch_count();
+  const auto source_stamp_initial_chain =
+      initial_source_stamp.initial_chain_digest();
+  const auto source_stamp_final_chain =
+      initial_source_stamp.final_chain_digest();
+  const auto source_stamp_persists = [&]() {
+    const auto& observed = session.scientific_source_stamp();
+    return &observed == source_stamp_address &&
+           observed.certified_scientific_source_stamp() &&
+           observed.schema_version() == source_stamp_schema &&
+           observed.scientific_authority_id() == source_stamp_authority &&
+           observed.manifest_digest() == source_stamp_manifest &&
+           observed.source_identity_digest() == source_stamp_identity &&
+           observed.horizontal_incidence_authority_digest() ==
+               source_stamp_incidence &&
+           observed.stable_facet_token_count() == source_stamp_facet_count &&
+           observed.batch_count() == source_stamp_batch_count &&
+           observed.initial_chain_digest() == source_stamp_initial_chain &&
+           observed.final_chain_digest() == source_stamp_final_chain &&
+           !observed.vertical_maps_complete() &&
+           !observed.durable_restart_supported() &&
+           !observed.public_status_claimed();
+  };
   check(
       fixture.manifest.batch_count == 9U &&
           fixture.manifest.batch_count ==
               fixture.compatibility_plan.batches.size() &&
           session.certified_scientific_window_stream() &&
           session.horizontal_incidence_source_bound() &&
+          initial_source_stamp.certified_scientific_source_stamp() &&
+          initial_source_stamp.schema_version() ==
+              direct_normalized_h0_scientific_window_capability_schema_version &&
+          initial_source_stamp.scientific_authority_id() ==
+              UINT64_C(0xE5C101) &&
+          initial_source_stamp.manifest_digest() ==
+              fixture.manifest.manifest_digest &&
+          initial_source_stamp.source_identity_digest() ==
+              fixture.manifest.source_identity_digest &&
+          initial_source_stamp.horizontal_incidence_authority_digest() ==
+              fixture.manifest.horizontal_incidence_authority_digest &&
+          initial_source_stamp.stable_facet_token_count() ==
+              fixture.manifest.stable_facet_token_count &&
+          initial_source_stamp.batch_count() == fixture.manifest.batch_count &&
+          initial_source_stamp.initial_chain_digest() ==
+              fixture.manifest.initial_batch_chain_digest &&
+          initial_source_stamp.final_chain_digest() ==
+              fixture.manifest.final_batch_chain_digest &&
+          !initial_source_stamp.vertical_maps_complete() &&
+          !initial_source_stamp.durable_restart_supported() &&
+          !initial_source_stamp.public_status_claimed() &&
           !session.global_compatibility_plan_retained() &&
           session.provider_identity() == &provider,
-      "the order-two E5 scientific session binds all nine manifested batches to the exact provider without retaining the global plan");
+      "the order-two E5 scientific session exposes one privately minted constant source stamp without retaining the global plan");
 
   std::size_t committed = 0U;
   bool relative_batch_checked = false;
@@ -804,9 +866,10 @@ void test_full_e5_stream_and_terminal_seal(const E5Fixture& fixture) {
               retained_local_to_stable.end()) &&
           committed == fixture.manifest.batch_count &&
           session.complete() &&
+          source_stamp_persists() &&
           session.current_chain_digest() ==
               fixture.manifest.final_batch_chain_digest,
-      "the non-identity relative frozen seam remains independently interpretable after its ticket is committed and the complete E5 scientific prefix reaches the exact terminal chain");
+      "the non-identity relative frozen seam remains independently interpretable and the scientific source stamp stays constant after all E5 commits");
   const auto sealed = session.seal();
   check(
       sealed.certified_scientific_seal() && sealed.newly_sealed &&
@@ -818,8 +881,9 @@ void test_full_e5_stream_and_terminal_seal(const E5Fixture& fixture) {
           !sealed.seal->resident_fold_executed &&
           !sealed.seal->vertical_maps_complete &&
           !sealed.seal->durable_restart_supported &&
-          !sealed.seal->public_status_claimed && session.sealed(),
-      "the real E5 terminal seal remains horizontal, transient and non-public");
+          !sealed.seal->public_status_claimed && session.sealed() &&
+          source_stamp_persists(),
+      "the real E5 terminal seal preserves the privately certified horizontal, transient and non-public source stamp");
 }
 
 void test_forged_authority_is_rejected(const E5Fixture& fixture) {
@@ -910,6 +974,20 @@ void test_foreign_and_replayed_tickets(const E5Fixture& fixture) {
   if (!first.session.has_value() || !second.session.has_value()) {
     return;
   }
+  const auto& first_stamp = first.session->scientific_source_stamp();
+  const auto& second_stamp = second.session->scientific_source_stamp();
+  check(
+      first_stamp.certified_scientific_source_stamp() &&
+          second_stamp.certified_scientific_source_stamp() &&
+          first_stamp.scientific_authority_id() == UINT64_C(0xE5C401) &&
+          second_stamp.scientific_authority_id() == UINT64_C(0xE5C402) &&
+          first_stamp.scientific_authority_id() !=
+              second_stamp.scientific_authority_id() &&
+          first_stamp.manifest_digest() == second_stamp.manifest_digest() &&
+          first_stamp.source_identity_digest() ==
+              second_stamp.source_identity_digest() &&
+          &first_stamp != &second_stamp,
+      "two E5 sessions mint distinct non-forgeable authority stamps for the same exact source identity");
   auto foreign_ticket = first.session->prepare_next();
   check(
       foreign_ticket.certified_scientific_preparation(),
@@ -984,10 +1062,24 @@ void test_corrupt_provider_chain_is_rejected(const E5Fixture& fixture) {
       "the E5 session remains unmodified and can retry after a corrupt chain rejection");
 }
 
+void test_default_session_has_no_scientific_source_stamp() {
+  ExactDirectNormalizedH0ScientificWindowCapabilitySession session;
+  const auto& stamp = session.scientific_source_stamp();
+  check(
+      !stamp.certified_scientific_source_stamp() &&
+          stamp.scientific_authority_id() == 0U &&
+          stamp.stable_facet_token_count() == 0U &&
+          stamp.batch_count() == 0U && !stamp.vertical_maps_complete() &&
+          !stamp.durable_restart_supported() &&
+          !stamp.public_status_claimed(),
+      "a default session cannot forge a scientific source stamp");
+}
+
 }  // namespace
 
 int main() {
   try {
+    test_default_session_has_no_scientific_source_stamp();
     const E5Fixture fixture = e5_fixture();
     check(
         fixture.source_plan.certified_complete_candidate_source_plan() &&

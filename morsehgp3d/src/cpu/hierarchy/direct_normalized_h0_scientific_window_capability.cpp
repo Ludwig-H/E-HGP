@@ -33,7 +33,7 @@ struct ScientificWindowControl {
 }
 
 [[nodiscard]] bool control_is_scientific(
-    const std::shared_ptr<const ScientificWindowControl>& control) noexcept {
+    const ScientificWindowControl* control) noexcept {
   return control != nullptr && control->scientific_authority_id != 0U &&
          control->provider_identity != nullptr &&
          control->manifest.certified() &&
@@ -41,7 +41,139 @@ struct ScientificWindowControl {
          control->expected_manifest_freshly_reconstructed;
 }
 
+[[nodiscard]] bool control_is_scientific(
+    const std::shared_ptr<const ScientificWindowControl>& control) noexcept {
+  return control_is_scientific(control.get());
+}
+
 }  // namespace
+
+ExactDirectNormalizedH0ScientificSourceStamp::
+    ExactDirectNormalizedH0ScientificSourceStamp() noexcept = default;
+ExactDirectNormalizedH0ScientificSourceStamp::
+    ~ExactDirectNormalizedH0ScientificSourceStamp() = default;
+ExactDirectNormalizedH0ScientificSourceStamp::
+    ExactDirectNormalizedH0ScientificSourceStamp(
+        ExactDirectNormalizedH0ScientificSourceStamp&&) noexcept = default;
+ExactDirectNormalizedH0ScientificSourceStamp&
+ExactDirectNormalizedH0ScientificSourceStamp::operator=(
+    ExactDirectNormalizedH0ScientificSourceStamp&&) noexcept = default;
+
+ExactDirectNormalizedH0ScientificSourceStamp::
+    ExactDirectNormalizedH0ScientificSourceStamp(
+        std::shared_ptr<const void> private_control_identity) noexcept
+    : private_control_identity_(std::move(private_control_identity)) {
+  const auto* control = static_cast<const ScientificWindowControl*>(
+      private_control_identity_.get());
+  if (!control_is_scientific(control)) {
+    private_control_identity_.reset();
+    return;
+  }
+  schema_version_ =
+      direct_normalized_h0_scientific_window_capability_schema_version;
+  scientific_authority_id_ = control->scientific_authority_id;
+  manifest_digest_ = control->manifest.manifest_digest;
+  source_identity_digest_ = control->manifest.source_identity_digest;
+  horizontal_incidence_authority_digest_ =
+      control->manifest.horizontal_incidence_authority_digest;
+  stable_facet_token_count_ = control->manifest.stable_facet_token_count;
+  batch_count_ = control->manifest.batch_count;
+  initial_chain_digest_ = control->manifest.initial_batch_chain_digest;
+  final_chain_digest_ = control->manifest.final_batch_chain_digest;
+  private_scientific_attestation_issued_ = true;
+  vertical_maps_complete_ = false;
+  durable_restart_supported_ = false;
+  public_status_claimed_ = false;
+}
+
+bool ExactDirectNormalizedH0ScientificSourceStamp::
+    certified_scientific_source_stamp() const noexcept {
+  const auto* control = static_cast<const ScientificWindowControl*>(
+      private_control_identity_.get());
+  return private_scientific_attestation_issued_ &&
+         control_is_scientific(control) &&
+         schema_version_ ==
+             direct_normalized_h0_scientific_window_capability_schema_version &&
+         scientific_authority_id_ == control->scientific_authority_id &&
+         manifest_digest_ == control->manifest.manifest_digest &&
+         source_identity_digest_ == control->manifest.source_identity_digest &&
+         horizontal_incidence_authority_digest_ ==
+             control->manifest.horizontal_incidence_authority_digest &&
+         stable_facet_token_count_ ==
+             control->manifest.stable_facet_token_count &&
+         batch_count_ == control->manifest.batch_count &&
+         initial_chain_digest_ ==
+             control->manifest.initial_batch_chain_digest &&
+         final_chain_digest_ == control->manifest.final_batch_chain_digest &&
+         !vertical_maps_complete_ && !durable_restart_supported_ &&
+         !public_status_claimed_;
+}
+
+std::uint32_t ExactDirectNormalizedH0ScientificSourceStamp::schema_version()
+    const noexcept {
+  return schema_version_;
+}
+
+std::uint64_t
+ExactDirectNormalizedH0ScientificSourceStamp::scientific_authority_id()
+    const noexcept {
+  return scientific_authority_id_;
+}
+
+const contract::CanonicalId&
+ExactDirectNormalizedH0ScientificSourceStamp::manifest_digest()
+    const noexcept {
+  return manifest_digest_;
+}
+
+const contract::CanonicalId&
+ExactDirectNormalizedH0ScientificSourceStamp::source_identity_digest()
+    const noexcept {
+  return source_identity_digest_;
+}
+
+const contract::CanonicalId& ExactDirectNormalizedH0ScientificSourceStamp::
+    horizontal_incidence_authority_digest() const noexcept {
+  return horizontal_incidence_authority_digest_;
+}
+
+std::size_t
+ExactDirectNormalizedH0ScientificSourceStamp::stable_facet_token_count()
+    const noexcept {
+  return stable_facet_token_count_;
+}
+
+std::size_t ExactDirectNormalizedH0ScientificSourceStamp::batch_count()
+    const noexcept {
+  return batch_count_;
+}
+
+const contract::CanonicalId&
+ExactDirectNormalizedH0ScientificSourceStamp::initial_chain_digest()
+    const noexcept {
+  return initial_chain_digest_;
+}
+
+const contract::CanonicalId&
+ExactDirectNormalizedH0ScientificSourceStamp::final_chain_digest()
+    const noexcept {
+  return final_chain_digest_;
+}
+
+bool ExactDirectNormalizedH0ScientificSourceStamp::vertical_maps_complete()
+    const noexcept {
+  return vertical_maps_complete_;
+}
+
+bool ExactDirectNormalizedH0ScientificSourceStamp::durable_restart_supported()
+    const noexcept {
+  return durable_restart_supported_;
+}
+
+bool ExactDirectNormalizedH0ScientificSourceStamp::public_status_claimed()
+    const noexcept {
+  return public_status_claimed_;
+}
 
 struct ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::Impl {
   ExactDirectNormalizedH0AuthenticatedWindowStreamPreparedWindow
@@ -60,6 +192,7 @@ struct ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::Impl {
 struct ExactDirectNormalizedH0ScientificWindowCapabilitySession::Impl {
   ExactDirectNormalizedH0AuthenticatedWindowStreamSession structural_stream{};
   std::shared_ptr<const ScientificWindowControl> control;
+  ExactDirectNormalizedH0ScientificSourceStamp scientific_source_stamp{};
   std::optional<ExactDirectNormalizedH0ScientificWindowCapabilityFinalSeal>
       final_seal;
   std::size_t scientifically_committed_batch_count{};
@@ -191,12 +324,18 @@ ExactDirectNormalizedH0ScientificWindowCapabilitySession::operator=(
 ExactDirectNormalizedH0ScientificWindowCapabilitySession::
     ExactDirectNormalizedH0ScientificWindowCapabilitySession(
         std::unique_ptr<Impl> impl) noexcept
-    : impl_(std::move(impl)) {}
+    : impl_(std::move(impl)) {
+  if (impl_ != nullptr) {
+    impl_->scientific_source_stamp =
+        ExactDirectNormalizedH0ScientificSourceStamp{impl_->control};
+  }
+}
 
 bool ExactDirectNormalizedH0ScientificWindowCapabilitySession::
     certified_scientific_window_stream() const noexcept {
   if (impl_ == nullptr || !impl_->initialized ||
       !control_is_scientific(impl_->control) ||
+      !impl_->scientific_source_stamp.certified_scientific_source_stamp() ||
       !impl_->structural_stream.provisional_bound_stream() ||
       impl_->structural_stream.provider_identity() !=
           impl_->control->provider_identity ||
@@ -257,6 +396,13 @@ ExactDirectNormalizedH0ScientificWindowCapabilitySession::provider_identity()
 bool ExactDirectNormalizedH0ScientificWindowCapabilitySession::
     horizontal_incidence_source_bound() const noexcept {
   return certified_scientific_window_stream();
+}
+
+const ExactDirectNormalizedH0ScientificSourceStamp&
+ExactDirectNormalizedH0ScientificWindowCapabilitySession::
+    scientific_source_stamp() const noexcept {
+  static const ExactDirectNormalizedH0ScientificSourceStamp empty{};
+  return impl_ == nullptr ? empty : impl_->scientific_source_stamp;
 }
 
 bool ExactDirectNormalizedH0ScientificWindowCapabilitySession::

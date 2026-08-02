@@ -14,6 +14,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_successive_incidence.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_successive_incidence_star_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_unified_level_plan.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_stable_facet_forest.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_unified_incidence_batch.hpp"
@@ -227,14 +228,23 @@ int main() {
       1U);
   using ScientificWindowSession = morsehgp3d::hierarchy::
       ExactDirectNormalizedH0ScientificWindowCapabilitySession;
+  using ScientificSourceStamp = morsehgp3d::hierarchy::
+      ExactDirectNormalizedH0ScientificSourceStamp;
   static_assert(!std::is_copy_constructible_v<ScientificWindowSession>);
   static_assert(
       std::is_nothrow_move_constructible_v<ScientificWindowSession>);
+  static_assert(!std::is_copy_constructible_v<ScientificSourceStamp>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<ScientificSourceStamp>);
+  static_assert(!std::is_aggregate_v<ScientificSourceStamp>);
   const ScientificWindowSession installed_scientific_window_session_probe;
+  const ScientificSourceStamp installed_scientific_source_stamp_probe;
   if (installed_scientific_window_session_probe
-          .certified_scientific_window_stream()) {
+          .certified_scientific_window_stream() ||
+      installed_scientific_source_stamp_probe
+          .certified_scientific_source_stamp()) {
     std::cerr
-        << "installed scientific-window predicate accepted an empty session\n";
+        << "installed scientific-window API accepted an empty source capability\n";
     return 1;
   }
   static_assert(
@@ -249,6 +259,15 @@ int main() {
   if (installed_relative_frozen_batch_probe.valid()) {
     std::cerr
         << "installed relative-frozen predicate accepted an empty batch\n";
+    return 1;
+  }
+  const morsehgp3d::hierarchy::ExactDirectSparseStableFacetForest
+      installed_sparse_forest_probe;
+  if (installed_sparse_forest_probe.certified_structure_only_forest() ||
+      installed_sparse_forest_probe
+              .materialized_handle_index_slot_count() != 0U) {
+    std::cerr
+        << "installed sparse-forest API accepted an empty session\n";
     return 1;
   }
   static_assert(

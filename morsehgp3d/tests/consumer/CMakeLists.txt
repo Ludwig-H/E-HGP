@@ -33,6 +33,7 @@ target_link_libraries(
     morsehgp3d::direct_morse_unified_resident_session
     morsehgp3d::direct_normalized_h0_scientific_window_capability
     morsehgp3d::direct_normalized_h0_relative_frozen_incidence_batch
+    morsehgp3d::direct_sparse_stable_facet_forest
     morsehgp3d::direct_morse_forest_root_coverage_index
 )
 

@@ -233,30 +233,133 @@ struct PreparedTicketRegistry {
   std::size_t outstanding_count{};
 };
 
-[[nodiscard]] auto entry_lower_bound(
-    std::vector<ExactDirectSparseStableFacetForestEntry>& entries,
+[[nodiscard]] std::size_t mix_stable_handle(
     ExactDirectSparseStableFacetHandle handle) noexcept {
-  return std::lower_bound(
-      entries.begin(),
-      entries.end(),
-      handle,
-      [](const ExactDirectSparseStableFacetForestEntry& entry,
-         ExactDirectSparseStableFacetHandle value) {
-        return entry.stable_source_facet_token_index < value;
-      });
+  std::uint64_t word = static_cast<std::uint64_t>(handle) +
+                       UINT64_C(0x9e3779b97f4a7c15);
+  word = (word ^ (word >> 30U)) * UINT64_C(0xbf58476d1ce4e5b9);
+  word = (word ^ (word >> 27U)) * UINT64_C(0x94d049bb133111eb);
+  word ^= word >> 31U;
+  return static_cast<std::size_t>(word);
 }
 
-[[nodiscard]] auto entry_lower_bound(
-    const std::vector<ExactDirectSparseStableFacetForestEntry>& entries,
+[[nodiscard]] bool power_of_two(std::size_t value) noexcept {
+  return value != 0U && (value & (value - 1U)) == 0U;
+}
+
+[[nodiscard]] bool required_handle_index_slot_count(
+    std::size_t entry_count, std::size_t& slot_count) noexcept {
+  if (entry_count == 0U) {
+    slot_count = 0U;
+    return true;
+  }
+  if (entry_count > std::numeric_limits<std::size_t>::max() / 2U) {
+    return false;
+  }
+  const std::size_t required = 2U * entry_count;
+  std::size_t candidate = 2U;
+  while (candidate < required) {
+    if (candidate > std::numeric_limits<std::size_t>::max() / 2U) {
+      return false;
+    }
+    candidate *= 2U;
+  }
+  slot_count = candidate;
+  return true;
+}
+
+[[nodiscard]] bool geometric_entry_capacity(
+    std::size_t current_capacity,
+    std::size_t required_capacity,
+    std::size_t maximum_capacity,
+    std::size_t& target_capacity) noexcept {
+  if (required_capacity > maximum_capacity) {
+    return false;
+  }
+  target_capacity = current_capacity;
+  if (required_capacity <= current_capacity) {
+    return true;
+  }
+  target_capacity = current_capacity == 0U ? 1U : current_capacity;
+  while (target_capacity < required_capacity) {
+    if (target_capacity >= maximum_capacity) {
+      target_capacity = maximum_capacity;
+      break;
+    }
+    const std::size_t available = maximum_capacity - target_capacity;
+    const std::size_t growth = std::min(target_capacity, available);
+    if (growth == 0U) {
+      target_capacity = maximum_capacity;
+      break;
+    }
+    target_capacity += growth;
+  }
+  return target_capacity >= required_capacity;
+}
+
+[[nodiscard]] std::optional<std::size_t> handle_index_row(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<const std::size_t> slots,
     ExactDirectSparseStableFacetHandle handle) noexcept {
-  return std::lower_bound(
-      entries.begin(),
-      entries.end(),
-      handle,
-      [](const ExactDirectSparseStableFacetForestEntry& entry,
-         ExactDirectSparseStableFacetHandle value) {
-        return entry.stable_source_facet_token_index < value;
-      });
+  if (slots.empty() || !power_of_two(slots.size())) {
+    return std::nullopt;
+  }
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot_index = mix_stable_handle(handle) & mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    const std::size_t row_plus_one = slots[slot_index];
+    if (row_plus_one == 0U) {
+      return std::nullopt;
+    }
+    const std::size_t row = row_plus_one - 1U;
+    if (row >= entries.size()) {
+      return std::nullopt;
+    }
+    if (entries[row].stable_source_facet_token_index == handle) {
+      return row;
+    }
+    slot_index = (slot_index + 1U) & mask;
+  }
+  return std::nullopt;
+}
+
+[[nodiscard]] bool insert_handle_index_row(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<std::size_t> slots,
+    std::size_t row) noexcept {
+  if (row >= entries.size() || row == std::numeric_limits<std::size_t>::max() ||
+      slots.empty() || !power_of_two(slots.size())) {
+    return false;
+  }
+  const auto handle = entries[row].stable_source_facet_token_index;
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot_index = mix_stable_handle(handle) & mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    const std::size_t row_plus_one = slots[slot_index];
+    if (row_plus_one == 0U) {
+      slots[slot_index] = row + 1U;
+      return true;
+    }
+    const std::size_t existing_row = row_plus_one - 1U;
+    if (existing_row >= entries.size() ||
+        entries[existing_row].stable_source_facet_token_index == handle) {
+      return false;
+    }
+    slot_index = (slot_index + 1U) & mask;
+  }
+  return false;
+}
+
+[[nodiscard]] bool rebuild_handle_index(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<std::size_t> slots) noexcept {
+  std::fill(slots.begin(), slots.end(), 0U);
+  for (std::size_t row = 0U; row < entries.size(); ++row) {
+    if (!insert_handle_index_row(entries, slots, row)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 [[nodiscard]] bool insertion_span_contains_handle(
@@ -313,6 +416,11 @@ struct ExactDirectSparseStableFacetForest::Impl {
   ExactDirectSparseStableFacetForestBudget budget{};
   std::uint64_t session_instance_id{};
   std::vector<ExactDirectSparseStableFacetForestEntry> entries;
+  // Open-addressed stable-handle index.  A zero slot is empty; every occupied
+  // slot stores durable row_index + 1.  Stable handles are compared against the
+  // append-only row itself, so the table does not duplicate the handle payload.
+  std::vector<std::size_t> handle_index_slots;
+  std::size_t handle_index_entry_count{};
   std::shared_ptr<PreparedTicketRegistry> registry;
   std::size_t epoch{};
   std::size_t committed_batch_count{};
@@ -344,21 +452,19 @@ struct ExactDirectSparseStableFacetForest::Impl {
   [[nodiscard]] std::optional<std::size_t> root_index(
       ExactDirectSparseStableFacetHandle handle) const noexcept {
     std::size_t hop_count = 0U;
-    ExactDirectSparseStableFacetHandle cursor = handle;
+    auto cursor = handle_index_row(entries, handle_index_slots, handle);
     while (hop_count <= entries.size()) {
-      const auto found = entry_lower_bound(entries, cursor);
-      if (found == entries.end() ||
-          found->stable_source_facet_token_index != cursor) {
+      if (!cursor.has_value()) {
         return std::nullopt;
       }
-      const std::size_t index =
-          static_cast<std::size_t>(found - entries.begin());
-      if (found->parent_handle == cursor) {
-        return found->component_size != 0U
-                   ? std::optional<std::size_t>{index}
+      const auto& entry = entries[*cursor];
+      if (entry.parent_handle == entry.stable_source_facet_token_index) {
+        return entry.component_size != 0U
+                   ? std::optional<std::size_t>{*cursor}
                    : std::nullopt;
       }
-      cursor = found->parent_handle;
+      cursor = handle_index_row(
+          entries, handle_index_slots, entry.parent_handle);
       if (!checked_increment(hop_count)) {
         return std::nullopt;
       }
@@ -394,6 +500,32 @@ struct ExactDirectSparseStableFacetForest::Impl {
     child.parent_handle = root.stable_source_facet_token_index;
     child.component_size = 0U;
     root.component_size = combined_size;
+    return true;
+  }
+
+  [[nodiscard]] bool ensure_handle_index_capacity(
+      std::size_t required_entry_count) {
+    std::size_t required_slots = 0U;
+    if (!required_handle_index_slot_count(
+            required_entry_count, required_slots)) {
+      return false;
+    }
+    if (required_slots <= handle_index_slots.size()) {
+      return true;
+    }
+    std::vector<std::size_t> replacement(required_slots, 0U);
+    if (!rebuild_handle_index(entries, replacement)) {
+      return false;
+    }
+    handle_index_slots.swap(replacement);
+    return true;
+  }
+
+  [[nodiscard]] bool rebuild_current_handle_index() noexcept {
+    if (!rebuild_handle_index(entries, handle_index_slots)) {
+      return false;
+    }
+    handle_index_entry_count = entries.size();
     return true;
   }
 };
@@ -547,8 +679,15 @@ ExactDirectSparseStableFacetForest::ExactDirectSparseStableFacetForest(
 
 bool ExactDirectSparseStableFacetForest::certified_structure_only_forest()
     const noexcept {
+  const bool handle_index_shape_valid =
+      impl_ != nullptr &&
+      ((impl_->handle_index_slots.empty() && impl_->entries.empty()) ||
+       (power_of_two(impl_->handle_index_slots.size()) &&
+        impl_->entries.size() <= impl_->handle_index_slots.size() / 2U)) &&
+      impl_->handle_index_entry_count == impl_->entries.size();
   return impl_ != nullptr && impl_->initialized &&
          impl_->session_instance_id != 0U && impl_->registry != nullptr &&
+         handle_index_shape_valid &&
          impl_->entries.size() <= impl_->budget.maximum_observed_handle_count &&
          impl_->entries.size() <= impl_->config.stable_facet_token_count &&
          impl_->component_count <= impl_->entries.size() &&
@@ -581,6 +720,11 @@ ExactDirectSparseStableFacetForest::observed_entries() const noexcept {
                    impl_->entries};
 }
 
+std::size_t ExactDirectSparseStableFacetForest::
+    materialized_handle_index_slot_count() const noexcept {
+  return impl_ == nullptr ? 0U : impl_->handle_index_slots.size();
+}
+
 ExactDirectSparseStableFacetLookupResult
 ExactDirectSparseStableFacetForest::lookup(
     ExactDirectSparseStableFacetHandle handle) const noexcept {
@@ -596,9 +740,9 @@ ExactDirectSparseStableFacetForest::lookup(
         ExactDirectSparseStableFacetLookupDisposition::handle_out_of_namespace;
     return result;
   }
-  const auto found = entry_lower_bound(impl_->entries, handle);
-  if (found == impl_->entries.end() ||
-      found->stable_source_facet_token_index != handle) {
+  const auto found = handle_index_row(
+      impl_->entries, impl_->handle_index_slots, handle);
+  if (!found.has_value()) {
     result.disposition =
         ExactDirectSparseStableFacetLookupDisposition::unobserved;
     return result;
@@ -608,7 +752,7 @@ ExactDirectSparseStableFacetForest::lookup(
     result.root_resolved_without_mutation = false;
     return result;
   }
-  result.facet_key = found->facet_key;
+  result.facet_key = impl_->entries[*found].facet_key;
   result.root_handle =
       impl_->entries[*root].stable_source_facet_token_index;
   result.component_size = impl_->entries[*root].component_size;
@@ -680,6 +824,43 @@ ExactDirectSparseStableFacetForest::prepare_batch(
     return output;
   }
 
+  // Validate every externally supplied key before any copy or comparison.
+  // `insertion_less` delegates to `key_less`, whose iterator bounds are only
+  // meaningful for a canonical fixed-capacity key.  In particular, neither a
+  // hostile point_count nor two hostile keys sharing one handle may reach the
+  // sorting comparator.
+  for (const auto& insertion : input_insertions) {
+    if (insertion.stable_source_facet_token_index >=
+            impl_->config.stable_facet_token_count ||
+        !canonical_key(insertion.facet_key) ||
+        !checked_add(
+            output.batch_key_point_count,
+            insertion.facet_key.point_count,
+            output.batch_key_point_count)) {
+      output.decision =
+          ExactDirectSparseStableFacetForestPreparationDecision::
+              no_input_shape_rejected;
+      return output;
+    }
+  }
+  for (const auto& operation : input_unions) {
+    if (operation.left_handle >=
+            impl_->config.stable_facet_token_count ||
+        operation.right_handle >=
+            impl_->config.stable_facet_token_count) {
+      output.decision =
+          ExactDirectSparseStableFacetForestPreparationDecision::
+              no_input_shape_rejected;
+      return output;
+    }
+  }
+  if (output.batch_key_point_count >
+      impl_->budget.maximum_batch_key_point_count) {
+    output.decision = ExactDirectSparseStableFacetForestPreparationDecision::
+        no_budget_exhausted;
+    return output;
+  }
+
   try {
     std::vector<ExactDirectSparseStableFacetInsertion> insertions(
         input_insertions.begin(), input_insertions.end());
@@ -692,27 +873,6 @@ ExactDirectSparseStableFacetForest::prepare_batch(
       }
     }
     std::sort(unions.begin(), unions.end(), union_less);
-
-    for (const auto& insertion : insertions) {
-      if (insertion.stable_source_facet_token_index >=
-              impl_->config.stable_facet_token_count ||
-          !canonical_key(insertion.facet_key) ||
-          !checked_add(
-              output.batch_key_point_count,
-              insertion.facet_key.point_count,
-              output.batch_key_point_count)) {
-        output.decision =
-            ExactDirectSparseStableFacetForestPreparationDecision::
-                no_input_shape_rejected;
-        return output;
-      }
-    }
-    if (output.batch_key_point_count >
-        impl_->budget.maximum_batch_key_point_count) {
-      output.decision = ExactDirectSparseStableFacetForestPreparationDecision::
-          no_budget_exhausted;
-      return output;
-    }
 
     std::size_t new_key_point_count = 0U;
     for (std::size_t begin = 0U; begin < insertions.size();) {
@@ -739,14 +899,13 @@ ExactDirectSparseStableFacetForest::prepare_batch(
           return output;
         }
       }
-      const auto existing = entry_lower_bound(
+      const auto existing = handle_index_row(
           impl_->entries,
+          impl_->handle_index_slots,
           insertions[begin].stable_source_facet_token_index);
-      const bool exists =
-          existing != impl_->entries.end() &&
-          existing->stable_source_facet_token_index ==
-              insertions[begin].stable_source_facet_token_index;
-      if (exists && existing->facet_key != insertions[begin].facet_key) {
+      const bool exists = existing.has_value();
+      if (exists &&
+          impl_->entries[*existing].facet_key != insertions[begin].facet_key) {
         output.decision =
             ExactDirectSparseStableFacetForestPreparationDecision::
                 contradiction_stable_handle_key_collision;
@@ -807,17 +966,10 @@ ExactDirectSparseStableFacetForest::prepare_batch(
 
     for (std::size_t index = 0U; index < unions.size(); ++index) {
       const auto& operation = unions[index];
-      if (operation.left_handle >= impl_->config.stable_facet_token_count ||
-          operation.right_handle >= impl_->config.stable_facet_token_count) {
-        output.decision =
-            ExactDirectSparseStableFacetForestPreparationDecision::
-                no_input_shape_rejected;
-        return output;
-      }
       const auto handle_available = [&](ExactDirectSparseStableFacetHandle h) {
-        const auto existing = entry_lower_bound(impl_->entries, h);
-        return (existing != impl_->entries.end() &&
-                existing->stable_source_facet_token_index == h) ||
+        return handle_index_row(
+                   impl_->entries, impl_->handle_index_slots, h)
+                   .has_value() ||
                insertion_span_contains_handle(insertions, h);
       };
       if (!handle_available(operation.left_handle) ||
@@ -836,7 +988,18 @@ ExactDirectSparseStableFacetForest::prepare_batch(
       }
     }
 
-    impl_->entries.reserve(next_observed_count);
+    std::size_t target_entry_capacity = 0U;
+    if (!geometric_entry_capacity(
+            impl_->entries.capacity(),
+            next_observed_count,
+            impl_->budget.maximum_observed_handle_count,
+            target_entry_capacity) ||
+        !impl_->ensure_handle_index_capacity(next_observed_count)) {
+      output.decision = ExactDirectSparseStableFacetForestPreparationDecision::
+          no_capacity_overflow;
+      return output;
+    }
+    impl_->entries.reserve(target_entry_capacity);
     auto prepared = std::make_unique<
         ExactDirectSparseStableFacetForestPreparedBatch::Impl>();
     prepared->registry = impl_->registry;
@@ -914,6 +1077,7 @@ ExactDirectSparseStableFacetForest::commit(
   std::size_t post_epoch = 0U;
   std::size_t post_component_upper_bound = 0U;
   std::size_t effective_union_upper_bound = 0U;
+  std::size_t required_handle_index_slots = 0U;
   if (!checked_add(
           impl_->entries.size(),
           prepared.new_handle_count,
@@ -941,13 +1105,18 @@ ExactDirectSparseStableFacetForest::commit(
       !checked_add(
           impl_->committed_effective_union_count,
           prepared.unions.size(),
-          effective_union_upper_bound)) {
+          effective_union_upper_bound) ||
+      !required_handle_index_slot_count(
+          required_capacity, required_handle_index_slots) ||
+      required_handle_index_slots > impl_->handle_index_slots.size() ||
+      impl_->handle_index_entry_count != impl_->entries.size()) {
     output.decision =
         ExactDirectSparseStableFacetForestCommitDecision::no_ticket_rejected;
     return output;
   }
   static_cast<void>(effective_union_upper_bound);
 
+  const std::size_t pre_entry_count = impl_->entries.size();
   for (std::size_t begin = 0U; begin < prepared.insertions.size();) {
     std::size_t end = begin;
     if (!checked_increment(end)) {
@@ -965,18 +1134,29 @@ ExactDirectSparseStableFacetForest::commit(
       }
     }
     const auto& insertion = prepared.insertions[begin];
-    auto position = entry_lower_bound(
-        impl_->entries, insertion.stable_source_facet_token_index);
-    if (position == impl_->entries.end() ||
-        position->stable_source_facet_token_index !=
-            insertion.stable_source_facet_token_index) {
-      position = impl_->entries.insert(
-          position,
+    if (!handle_index_row(
+             impl_->entries,
+             impl_->handle_index_slots,
+             insertion.stable_source_facet_token_index)
+             .has_value()) {
+      impl_->entries.push_back(
           {insertion.stable_source_facet_token_index,
            insertion.facet_key,
            insertion.stable_source_facet_token_index,
            1U});
-      static_cast<void>(position);
+      if (!insert_handle_index_row(
+              impl_->entries,
+              impl_->handle_index_slots,
+              impl_->entries.size() - 1U)) {
+        impl_->entries.resize(pre_entry_count);
+        static_cast<void>(impl_->rebuild_current_handle_index());
+        output.inserted_handle_count = 0U;
+        output.decision =
+            ExactDirectSparseStableFacetForestCommitDecision::
+                no_ticket_rejected;
+        return output;
+      }
+      ++impl_->handle_index_entry_count;
       static_cast<void>(checked_increment(output.inserted_handle_count));
     }
     begin = end;
