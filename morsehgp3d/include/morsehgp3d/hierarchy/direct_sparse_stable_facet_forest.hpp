@@ -8,6 +8,7 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <vector>
 
 namespace morsehgp3d::hierarchy {
 
@@ -292,6 +293,137 @@ class ExactDirectSparseStableFacetForestPreparedBatch {
   explicit ExactDirectSparseStableFacetForestPreparedBatch(
       std::unique_ptr<Impl>) noexcept;
   friend class ExactDirectSparseStableFacetForest;
+  friend class ExactDirectSparseStableFacetForestPreparedPreview;
+};
+
+// A preview is bounded independently from the durable forest budget.  The
+// shadow-node upper bound is conservative: every new handle, requested
+// handle, and union endpoint may contribute one sparse pre-root.  The total
+// entry bound covers that shadow arena plus the requested output records.
+struct ExactDirectSparseStableFacetForestPreparedPreviewBudget {
+  std::size_t maximum_requested_handle_count{};
+  std::size_t maximum_shadow_node_count{};
+  std::size_t maximum_union_replay_count{};
+  std::size_t maximum_total_entry_count{};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetForestPreparedPreviewBudget&,
+      const ExactDirectSparseStableFacetForestPreparedPreviewBudget&) =
+      default;
+};
+
+struct ExactDirectSparseStableFacetForestPreparedPreviewRecord {
+  ExactDirectSparseStableFacetHandle requested_handle{};
+  ExactDirectSparseStableFacetHandle post_root_handle{};
+  std::size_t post_component_size{};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetForestPreparedPreviewRecord&,
+      const ExactDirectSparseStableFacetForestPreparedPreviewRecord&) =
+      default;
+};
+
+enum class ExactDirectSparseStableFacetForestPreparedPreviewDecision
+    : std::uint8_t {
+  not_prepared,
+  no_forest_rejected,
+  no_ticket_rejected,
+  no_foreign_ticket_rejected,
+  no_stale_or_sibling_ticket_rejected,
+  no_capacity_overflow,
+  no_budget_exhausted,
+  no_requested_handle_shape_rejected,
+  no_requested_handle_unknown_rejected,
+  no_allocation_failed,
+  complete_sealed_sparse_shadow_preview,
+};
+
+// This receipt is readable and copyable for transaction planning and audit.
+// It cannot itself authorize anything: only a privately minted preview can
+// certify an exact receipt and bind it to one live prepared-ticket identity.
+struct ExactDirectSparseStableFacetForestPreparedPreviewReceipt {
+  ExactDirectSparseStableFacetForestStamp pre_stamp{};
+  contract::CanonicalId canonical_batch_digest{};
+  std::size_t requested_handle_count{};
+  std::size_t shadow_node_count{};
+  std::size_t shadow_node_upper_bound{};
+  std::size_t union_request_count{};
+  std::size_t expected_effective_union_count{};
+  std::size_t total_entry_upper_bound{};
+  std::vector<ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+      records;
+  bool ticket_identity_bound{false};
+  bool all_overflow_and_budget_checks_completed_before_allocation{false};
+  bool sparse_pre_roots_and_new_handles_only{false};
+  bool canonical_union_replay_exact{false};
+  bool forest_logical_state_mutated{false};
+  bool source_exactness_claimed{false};
+  bool public_status_claimed{false};
+  ExactDirectSparseStableFacetForestPreparedPreviewDecision decision{
+      ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+          not_prepared};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&,
+      const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&) =
+      default;
+};
+
+// Move-only, privately minted capability.  Its immutable receipt and private
+// ticket identity make a copied or edited public receipt non-authoritative.
+class ExactDirectSparseStableFacetForestPreparedPreview final {
+ public:
+  ExactDirectSparseStableFacetForestPreparedPreview() noexcept;
+  ~ExactDirectSparseStableFacetForestPreparedPreview();
+  ExactDirectSparseStableFacetForestPreparedPreview(
+      ExactDirectSparseStableFacetForestPreparedPreview&&) noexcept;
+  ExactDirectSparseStableFacetForestPreparedPreview& operator=(
+      ExactDirectSparseStableFacetForestPreparedPreview&&) noexcept;
+  ExactDirectSparseStableFacetForestPreparedPreview(
+      const ExactDirectSparseStableFacetForestPreparedPreview&) = delete;
+  ExactDirectSparseStableFacetForestPreparedPreview& operator=(
+      const ExactDirectSparseStableFacetForestPreparedPreview&) = delete;
+
+  [[nodiscard]] const
+  ExactDirectSparseStableFacetForestPreparedPreviewReceipt&
+  receipt() const noexcept;
+  [[nodiscard]] std::span<
+      const ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+  records() const noexcept;
+  [[nodiscard]] bool certified_sparse_shadow_preview() const noexcept;
+  [[nodiscard]] bool certified_for(
+      const ExactDirectSparseStableFacetForestPreparedBatch&,
+      const ExactDirectSparseStableFacetForestStamp& expected_pre_stamp)
+      const noexcept;
+  [[nodiscard]] bool certifies_receipt(
+      const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&) const
+      noexcept;
+
+ private:
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+
+  explicit ExactDirectSparseStableFacetForestPreparedPreview(
+      std::unique_ptr<Impl>) noexcept;
+  friend class ExactDirectSparseStableFacetForest;
+};
+
+struct ExactDirectSparseStableFacetForestPreparedPreviewResult {
+  std::optional<ExactDirectSparseStableFacetForestPreparedPreview> preview;
+  ExactDirectSparseStableFacetForestStamp pre_stamp{};
+  std::size_t requested_handle_count{};
+  std::size_t shadow_node_upper_bound{};
+  std::size_t union_request_count{};
+  std::size_t total_entry_upper_bound{};
+  bool all_overflow_and_budget_checks_completed_before_allocation{false};
+  bool forest_logical_state_mutated{false};
+  bool source_exactness_claimed{false};
+  bool public_status_claimed{false};
+  ExactDirectSparseStableFacetForestPreparedPreviewDecision decision{
+      ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+          not_prepared};
+
+  [[nodiscard]] bool certified_prepared_preview() const noexcept;
 };
 
 struct ExactDirectSparseStableFacetForestPreparationResult {
@@ -420,6 +552,12 @@ class ExactDirectSparseStableFacetForest {
   prepare_batch(
       std::span<const ExactDirectSparseStableFacetInsertion>,
       std::span<const ExactDirectSparseStableFacetUnion>) noexcept;
+  [[nodiscard]] ExactDirectSparseStableFacetForestPreparedPreviewResult
+  preview_prepared_batch(
+      const ExactDirectSparseStableFacetForestPreparedBatch&,
+      std::span<const ExactDirectSparseStableFacetHandle> requested_handles,
+      const ExactDirectSparseStableFacetForestPreparedPreviewBudget&) const
+      noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestCommitResult commit(
       ExactDirectSparseStableFacetForestPreparedBatch&&) noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestCheckpoint checkpoint()

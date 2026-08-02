@@ -233,6 +233,17 @@ struct PreparedTicketRegistry {
   std::size_t outstanding_count{};
 };
 
+// Process-local capability identity only.  It is deliberately absent from
+// every logical digest and survives moves through shared ownership so a
+// sealed preview can distinguish otherwise identical sibling tickets.
+struct PreparedTicketIdentity final {};
+
+struct SparseShadowNode {
+  ExactDirectSparseStableFacetHandle root_handle{};
+  std::size_t parent_index{};
+  std::size_t component_size{};
+};
+
 [[nodiscard]] std::size_t mix_stable_handle(
     ExactDirectSparseStableFacetHandle handle) noexcept {
   std::uint64_t word = static_cast<std::uint64_t>(handle) +
@@ -500,6 +511,7 @@ struct PositiveKeyIndexSearchResult {
 
 struct ExactDirectSparseStableFacetForestPreparedBatch::Impl {
   std::shared_ptr<PreparedTicketRegistry> registry;
+  std::shared_ptr<const PreparedTicketIdentity> identity;
   ExactDirectSparseStableFacetForestStamp pre_stamp{};
   contract::CanonicalId batch_digest{};
   contract::CanonicalId successor_history_digest{};
@@ -528,6 +540,20 @@ struct ExactDirectSparseStableFacetForestPreparedBatch::Impl {
     consumed = true;
     release_registry();
   }
+};
+
+struct ExactDirectSparseStableFacetForestPreparedPreview::Impl {
+  const ExactDirectSparseStableFacetForestPreparedPreviewReceipt receipt;
+  const std::shared_ptr<const PreparedTicketIdentity> ticket_identity;
+  const bool minted;
+
+  Impl(
+      ExactDirectSparseStableFacetForestPreparedPreviewReceipt&& input_receipt,
+      std::shared_ptr<const PreparedTicketIdentity> input_ticket_identity)
+      noexcept
+      : receipt(std::move(input_receipt)),
+        ticket_identity(std::move(input_ticket_identity)),
+        minted(ticket_identity != nullptr) {}
 };
 
 struct ExactDirectSparseStableFacetForest::Impl {
@@ -833,6 +859,120 @@ std::size_t
 ExactDirectSparseStableFacetForestPreparedBatch::compatible_repeat_count()
     const noexcept {
   return impl_ == nullptr ? 0U : impl_->compatible_repeat_count;
+}
+
+ExactDirectSparseStableFacetForestPreparedPreview::
+    ExactDirectSparseStableFacetForestPreparedPreview() noexcept = default;
+ExactDirectSparseStableFacetForestPreparedPreview::
+    ~ExactDirectSparseStableFacetForestPreparedPreview() = default;
+ExactDirectSparseStableFacetForestPreparedPreview::
+    ExactDirectSparseStableFacetForestPreparedPreview(
+        ExactDirectSparseStableFacetForestPreparedPreview&&) noexcept =
+    default;
+ExactDirectSparseStableFacetForestPreparedPreview&
+ExactDirectSparseStableFacetForestPreparedPreview::operator=(
+    ExactDirectSparseStableFacetForestPreparedPreview&&) noexcept = default;
+ExactDirectSparseStableFacetForestPreparedPreview::
+    ExactDirectSparseStableFacetForestPreparedPreview(
+        std::unique_ptr<Impl> impl) noexcept
+    : impl_(std::move(impl)) {}
+
+const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&
+ExactDirectSparseStableFacetForestPreparedPreview::receipt() const noexcept {
+  static const ExactDirectSparseStableFacetForestPreparedPreviewReceipt empty;
+  return impl_ == nullptr ? empty : impl_->receipt;
+}
+
+std::span<const ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+ExactDirectSparseStableFacetForestPreparedPreview::records() const noexcept {
+  return impl_ == nullptr
+             ? std::span<
+                   const ExactDirectSparseStableFacetForestPreparedPreviewRecord>{}
+             : std::span<
+                   const ExactDirectSparseStableFacetForestPreparedPreviewRecord>{
+                   impl_->receipt.records};
+}
+
+bool ExactDirectSparseStableFacetForestPreparedPreview::
+    certified_sparse_shadow_preview() const noexcept {
+  if (impl_ == nullptr || !impl_->minted ||
+      impl_->ticket_identity == nullptr) {
+    return false;
+  }
+  const auto& value = impl_->receipt;
+  std::size_t expected_total_entry_upper_bound = 0U;
+  if (value.pre_stamp.session_instance_id == 0U ||
+      value.canonical_batch_digest == contract::CanonicalId{} ||
+      value.requested_handle_count != value.records.size() ||
+      value.shadow_node_count > value.shadow_node_upper_bound ||
+      value.expected_effective_union_count > value.union_request_count ||
+      !checked_add(
+          value.shadow_node_upper_bound,
+          value.requested_handle_count,
+          expected_total_entry_upper_bound) ||
+      value.total_entry_upper_bound != expected_total_entry_upper_bound ||
+      !value.ticket_identity_bound ||
+      !value.all_overflow_and_budget_checks_completed_before_allocation ||
+      !value.sparse_pre_roots_and_new_handles_only ||
+      !value.canonical_union_replay_exact ||
+      value.forest_logical_state_mutated || value.source_exactness_claimed ||
+      value.public_status_claimed ||
+      value.decision !=
+          ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+              complete_sealed_sparse_shadow_preview) {
+    return false;
+  }
+  for (std::size_t index = 0U; index < value.records.size(); ++index) {
+    const auto& record = value.records[index];
+    if (record.requested_handle >= value.pre_stamp.stable_facet_token_count ||
+        record.post_root_handle >=
+            value.pre_stamp.stable_facet_token_count ||
+        record.post_component_size == 0U ||
+        (index != 0U &&
+         value.records[index - 1U].requested_handle >=
+             record.requested_handle)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ExactDirectSparseStableFacetForestPreparedPreview::certified_for(
+    const ExactDirectSparseStableFacetForestPreparedBatch& ticket,
+    const ExactDirectSparseStableFacetForestStamp& expected_pre_stamp) const
+    noexcept {
+  return certified_sparse_shadow_preview() && ticket.valid() &&
+         ticket.impl_ != nullptr && ticket.impl_->identity != nullptr &&
+         impl_->ticket_identity == ticket.impl_->identity &&
+         impl_->receipt.pre_stamp == expected_pre_stamp &&
+         ticket.impl_->pre_stamp == expected_pre_stamp &&
+         impl_->receipt.canonical_batch_digest == ticket.impl_->batch_digest;
+}
+
+bool ExactDirectSparseStableFacetForestPreparedPreview::certifies_receipt(
+    const ExactDirectSparseStableFacetForestPreparedPreviewReceipt& candidate)
+    const noexcept {
+  return certified_sparse_shadow_preview() && impl_->receipt == candidate;
+}
+
+bool ExactDirectSparseStableFacetForestPreparedPreviewResult::
+    certified_prepared_preview() const noexcept {
+  if (!preview.has_value() ||
+      !preview->certified_sparse_shadow_preview()) {
+    return false;
+  }
+  const auto& value = preview->receipt();
+  return pre_stamp == value.pre_stamp &&
+         requested_handle_count == value.requested_handle_count &&
+         shadow_node_upper_bound == value.shadow_node_upper_bound &&
+         union_request_count == value.union_request_count &&
+         total_entry_upper_bound == value.total_entry_upper_bound &&
+         all_overflow_and_budget_checks_completed_before_allocation &&
+         !forest_logical_state_mutated && !source_exactness_claimed &&
+         !public_status_claimed && decision == value.decision &&
+         decision ==
+             ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                 complete_sealed_sparse_shadow_preview;
 }
 
 bool ExactDirectSparseStableFacetForestPreparationResult::certified_prepared()
@@ -1365,6 +1505,7 @@ ExactDirectSparseStableFacetForest::prepare_batch(
     auto prepared = std::make_unique<
         ExactDirectSparseStableFacetForestPreparedBatch::Impl>();
     prepared->registry = impl_->registry;
+    prepared->identity = std::make_shared<const PreparedTicketIdentity>();
     prepared->pre_stamp = output.pre_stamp;
     prepared->insertions = std::move(insertions);
     prepared->unions = std::move(unions);
@@ -1399,6 +1540,370 @@ ExactDirectSparseStableFacetForest::prepare_batch(
   } catch (const std::length_error&) {
     output.decision = ExactDirectSparseStableFacetForestPreparationDecision::
         no_allocation_failed;
+    return output;
+  }
+}
+
+ExactDirectSparseStableFacetForestPreparedPreviewResult
+ExactDirectSparseStableFacetForest::preview_prepared_batch(
+    const ExactDirectSparseStableFacetForestPreparedBatch& ticket,
+    std::span<const ExactDirectSparseStableFacetHandle> requested_handles,
+    const ExactDirectSparseStableFacetForestPreparedPreviewBudget& budget)
+    const noexcept {
+  ExactDirectSparseStableFacetForestPreparedPreviewResult output;
+  output.pre_stamp = current_stamp();
+  output.requested_handle_count = requested_handles.size();
+  if (!certified_structure_only_forest()) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_forest_rejected;
+    return output;
+  }
+  if (ticket.impl_ == nullptr || ticket.impl_->consumed ||
+      !ticket.impl_->registry_counted || ticket.impl_->identity == nullptr) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_ticket_rejected;
+    return output;
+  }
+  const auto& prepared = *ticket.impl_;
+  if (prepared.pre_stamp.session_instance_id != impl_->session_instance_id) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_foreign_ticket_rejected;
+    return output;
+  }
+  if (prepared.pre_stamp != output.pre_stamp) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_stale_or_sibling_ticket_rejected;
+    return output;
+  }
+
+  output.union_request_count = prepared.unions.size();
+  if (requested_handles.size() > budget.maximum_requested_handle_count ||
+      prepared.unions.size() > budget.maximum_union_replay_count) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_budget_exhausted;
+    return output;
+  }
+
+  // This is the complete conservative allocation shape.  It is derived and
+  // capped before even the first requested-handle scan, so a hostile SIZE_MAX
+  // span cannot reach pointer arithmetic or allocation.  The preview later
+  // compacts duplicate pre-roots in place.
+  std::size_t union_endpoint_upper_bound = 0U;
+  std::size_t new_and_endpoint_upper_bound = 0U;
+  std::size_t post_observed_handle_count = 0U;
+  if (!checked_add(
+          prepared.unions.size(),
+          prepared.unions.size(),
+          union_endpoint_upper_bound) ||
+      !checked_add(
+          prepared.new_handle_count,
+          union_endpoint_upper_bound,
+          new_and_endpoint_upper_bound) ||
+      !checked_add(
+          new_and_endpoint_upper_bound,
+          requested_handles.size(),
+          output.shadow_node_upper_bound) ||
+      !checked_add(
+          output.shadow_node_upper_bound,
+          requested_handles.size(),
+          output.total_entry_upper_bound) ||
+      !checked_add(
+          impl_->entries.size(),
+          prepared.new_handle_count,
+          post_observed_handle_count)) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_capacity_overflow;
+    return output;
+  }
+  if (post_observed_handle_count > impl_->config.stable_facet_token_count ||
+      output.shadow_node_upper_bound > budget.maximum_shadow_node_count ||
+      output.total_entry_upper_bound > budget.maximum_total_entry_count) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_budget_exhausted;
+    return output;
+  }
+
+  // Requested records are canonical and unique.  Every requested handle must
+  // exist in the exact post-ticket namespace, either in the immutable forest
+  // or among this ticket's already canonicalized insertions.
+  for (std::size_t index = 0U; index < requested_handles.size(); ++index) {
+    const auto handle = requested_handles[index];
+    if (handle >= impl_->config.stable_facet_token_count ||
+        (index != 0U && requested_handles[index - 1U] >= handle)) {
+      output.decision =
+          ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+              no_requested_handle_shape_rejected;
+      return output;
+    }
+    if (!handle_index_row(
+             impl_->entries, impl_->handle_index_slots, handle)
+             .has_value() &&
+        !insertion_span_contains_handle(prepared.insertions, handle)) {
+      output.decision =
+          ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+              no_requested_handle_unknown_rejected;
+      return output;
+    }
+  }
+  output.all_overflow_and_budget_checks_completed_before_allocation = true;
+
+  try {
+    std::vector<SparseShadowNode> shadow_nodes;
+    shadow_nodes.reserve(output.shadow_node_upper_bound);
+
+    const auto pre_root = [&](ExactDirectSparseStableFacetHandle handle)
+        -> std::optional<std::pair<
+            ExactDirectSparseStableFacetHandle,
+            std::size_t>> {
+      const auto durable_row = handle_index_row(
+          impl_->entries, impl_->handle_index_slots, handle);
+      if (durable_row.has_value()) {
+        const auto root = impl_->root_index(handle);
+        if (!root.has_value()) {
+          return std::nullopt;
+        }
+        const auto& root_entry = impl_->entries[*root];
+        return std::pair{
+            root_entry.stable_source_facet_token_index,
+            root_entry.component_size};
+      }
+      if (insertion_span_contains_handle(prepared.insertions, handle)) {
+        return std::pair{handle, std::size_t{1U}};
+      }
+      return std::nullopt;
+    };
+    const auto append_pre_root = [&](ExactDirectSparseStableFacetHandle handle) {
+      const auto root = pre_root(handle);
+      if (!root.has_value()) {
+        return false;
+      }
+      shadow_nodes.push_back({root->first, 0U, root->second});
+      return true;
+    };
+
+    // New handles are sparse singleton roots even when neither requested nor
+    // unioned.  Compatible repeats resolve to their existing pre-root and add
+    // no shadow row here.
+    for (std::size_t begin = 0U; begin < prepared.insertions.size();) {
+      std::size_t end = begin + 1U;
+      while (end < prepared.insertions.size() &&
+             prepared.insertions[end].stable_source_facet_token_index ==
+                 prepared.insertions[begin]
+                     .stable_source_facet_token_index) {
+        ++end;
+      }
+      const auto handle =
+          prepared.insertions[begin].stable_source_facet_token_index;
+      if (!handle_index_row(
+               impl_->entries, impl_->handle_index_slots, handle)
+               .has_value()) {
+        shadow_nodes.push_back({handle, 0U, 1U});
+      }
+      begin = end;
+    }
+    for (const auto handle : requested_handles) {
+      if (!append_pre_root(handle)) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_requested_handle_unknown_rejected;
+        return output;
+      }
+    }
+    for (const auto& operation : prepared.unions) {
+      if (!append_pre_root(operation.left_handle) ||
+          !append_pre_root(operation.right_handle)) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_ticket_rejected;
+        return output;
+      }
+    }
+    if (shadow_nodes.size() > output.shadow_node_upper_bound) {
+      output.decision =
+          ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+              no_capacity_overflow;
+      return output;
+    }
+
+    std::sort(
+        shadow_nodes.begin(),
+        shadow_nodes.end(),
+        [](const SparseShadowNode& left, const SparseShadowNode& right) {
+          return left.root_handle < right.root_handle;
+        });
+    std::size_t compact_count = 0U;
+    for (const auto& node : shadow_nodes) {
+      if (compact_count != 0U &&
+          shadow_nodes[compact_count - 1U].root_handle == node.root_handle) {
+        if (shadow_nodes[compact_count - 1U].component_size !=
+            node.component_size) {
+          output.decision =
+              ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                  no_ticket_rejected;
+          return output;
+        }
+        continue;
+      }
+      shadow_nodes[compact_count] = node;
+      shadow_nodes[compact_count].parent_index = compact_count;
+      ++compact_count;
+    }
+    shadow_nodes.resize(compact_count);
+
+    const auto shadow_index_for_handle = [&](
+                                             ExactDirectSparseStableFacetHandle
+                                                 handle)
+        -> std::optional<std::size_t> {
+      const auto root = pre_root(handle);
+      if (!root.has_value()) {
+        return std::nullopt;
+      }
+      const auto found = std::lower_bound(
+          shadow_nodes.begin(),
+          shadow_nodes.end(),
+          root->first,
+          [](const SparseShadowNode& node,
+             ExactDirectSparseStableFacetHandle value) {
+            return node.root_handle < value;
+          });
+      if (found == shadow_nodes.end() ||
+          found->root_handle != root->first) {
+        return std::nullopt;
+      }
+      return static_cast<std::size_t>(found - shadow_nodes.begin());
+    };
+    const auto shadow_root_index = [&](std::size_t index)
+        -> std::optional<std::size_t> {
+      std::size_t hops = 0U;
+      while (index < shadow_nodes.size() &&
+             shadow_nodes[index].parent_index != index &&
+             hops <= shadow_nodes.size()) {
+        index = shadow_nodes[index].parent_index;
+        ++hops;
+      }
+      return index < shadow_nodes.size() && hops <= shadow_nodes.size() &&
+                     shadow_nodes[index].component_size != 0U
+                 ? std::optional<std::size_t>{index}
+                 : std::nullopt;
+    };
+
+    std::size_t effective_union_count = 0U;
+    for (const auto& operation : prepared.unions) {
+      const auto left_node = shadow_index_for_handle(operation.left_handle);
+      const auto right_node = shadow_index_for_handle(operation.right_handle);
+      if (!left_node.has_value() || !right_node.has_value()) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_ticket_rejected;
+        return output;
+      }
+      const auto left_root = shadow_root_index(*left_node);
+      const auto right_root = shadow_root_index(*right_node);
+      if (!left_root.has_value() || !right_root.has_value()) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_ticket_rejected;
+        return output;
+      }
+      if (*left_root == *right_root) {
+        continue;
+      }
+      auto& left = shadow_nodes[*left_root];
+      auto& right = shadow_nodes[*right_root];
+      std::size_t combined_size = 0U;
+      if (!checked_add(
+              left.component_size, right.component_size, combined_size) ||
+          combined_size > post_observed_handle_count ||
+          !checked_increment(effective_union_count)) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_capacity_overflow;
+        return output;
+      }
+      const bool left_wins =
+          left.component_size > right.component_size ||
+          (left.component_size == right.component_size &&
+           left.root_handle < right.root_handle);
+      auto& root = left_wins ? left : right;
+      auto& child = left_wins ? right : left;
+      child.parent_index = left_wins ? *left_root : *right_root;
+      child.component_size = 0U;
+      root.component_size = combined_size;
+    }
+
+    std::vector<ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+        records;
+    records.reserve(requested_handles.size());
+    for (const auto handle : requested_handles) {
+      const auto node = shadow_index_for_handle(handle);
+      if (!node.has_value()) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_ticket_rejected;
+        return output;
+      }
+      const auto root = shadow_root_index(*node);
+      if (!root.has_value()) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_ticket_rejected;
+        return output;
+      }
+      records.push_back(
+          {handle,
+           shadow_nodes[*root].root_handle,
+           shadow_nodes[*root].component_size});
+    }
+    if (current_stamp() != output.pre_stamp || !ticket.valid()) {
+      output.decision =
+          ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+              no_stale_or_sibling_ticket_rejected;
+      return output;
+    }
+
+    ExactDirectSparseStableFacetForestPreparedPreviewReceipt receipt;
+    receipt.pre_stamp = output.pre_stamp;
+    receipt.canonical_batch_digest = prepared.batch_digest;
+    receipt.requested_handle_count = requested_handles.size();
+    receipt.shadow_node_count = shadow_nodes.size();
+    receipt.shadow_node_upper_bound = output.shadow_node_upper_bound;
+    receipt.union_request_count = prepared.unions.size();
+    receipt.expected_effective_union_count = effective_union_count;
+    receipt.total_entry_upper_bound = output.total_entry_upper_bound;
+    receipt.records = std::move(records);
+    receipt.ticket_identity_bound = true;
+    receipt.all_overflow_and_budget_checks_completed_before_allocation = true;
+    receipt.sparse_pre_roots_and_new_handles_only = true;
+    receipt.canonical_union_replay_exact = true;
+    receipt.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            complete_sealed_sparse_shadow_preview;
+    auto preview_impl = std::make_unique<
+        ExactDirectSparseStableFacetForestPreparedPreview::Impl>(
+        std::move(receipt), prepared.identity);
+    output.preview.emplace(
+        ExactDirectSparseStableFacetForestPreparedPreview{
+            std::move(preview_impl)});
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            complete_sealed_sparse_shadow_preview;
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_allocation_failed;
+    return output;
+  } catch (const std::length_error&) {
+    output.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            no_allocation_failed;
     return output;
   }
 }

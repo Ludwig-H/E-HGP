@@ -90,6 +90,11 @@ static_assert(
         ExactDirectSparseStableFacetPositiveLookupResult> &&
     std::is_nothrow_copy_constructible_v<
         ExactDirectSparseStableFacetPositiveLookupResult>);
+static_assert(
+    !std::is_copy_constructible_v<
+        ExactDirectSparseStableFacetForestPreparedPreview> &&
+    std::is_nothrow_move_constructible_v<
+        ExactDirectSparseStableFacetForestPreparedPreview>);
 
 int failures = 0;
 
@@ -127,6 +132,17 @@ template <std::size_t Size>
       32U,
       32U,
       4U,
+  };
+}
+
+[[nodiscard]]
+ExactDirectSparseStableFacetForestPreparedPreviewBudget
+generous_preview_budget() {
+  return {
+      64U,
+      256U,
+      128U,
+      320U,
   };
 }
 
@@ -871,6 +887,337 @@ void test_sibling_ticket_survives_physical_rehash() {
       "stale sibling rejection leaves append rows and both rehashed indexes intact");
 }
 
+void test_prepared_sparse_shadow_preview_q_like_replay() {
+  auto initialization = initialize();
+  auto forest = std::move(*initialization.forest);
+  BoundedStableFacetOracle oracle;
+  const std::array initial_insertions{
+      ExactDirectSparseStableFacetInsertion{10U, key_for_handle(10U)},
+      ExactDirectSparseStableFacetInsertion{20U, key_for_handle(20U)},
+      ExactDirectSparseStableFacetInsertion{30U, key_for_handle(30U)},
+      ExactDirectSparseStableFacetInsertion{40U, key_for_handle(40U)},
+  };
+  const std::array initial_unions{
+      ExactDirectSparseStableFacetUnion{10U, 20U},
+      ExactDirectSparseStableFacetUnion{30U, 40U},
+  };
+  commit_oracle_batch(
+      forest,
+      oracle,
+      initial_insertions,
+      initial_unions,
+      "preview pre-forest");
+
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{20U, key_for_handle(20U)},
+      ExactDirectSparseStableFacetInsertion{50U, key_for_handle(50U)},
+      ExactDirectSparseStableFacetInsertion{60U, key_for_handle(60U)},
+      ExactDirectSparseStableFacetInsertion{70U, key_for_handle(70U)},
+      ExactDirectSparseStableFacetInsertion{80U, key_for_handle(80U)},
+  };
+  const std::array unions{
+      ExactDirectSparseStableFacetUnion{60U, 70U},
+      ExactDirectSparseStableFacetUnion{50U, 60U},
+      ExactDirectSparseStableFacetUnion{20U, 50U},
+      ExactDirectSparseStableFacetUnion{50U, 50U},
+      ExactDirectSparseStableFacetUnion{70U, 30U},
+      ExactDirectSparseStableFacetUnion{10U, 50U},
+      ExactDirectSparseStableFacetUnion{70U, 60U},
+  };
+  constexpr std::array<ExactDirectSparseStableFacetHandle, 8U> requested{
+      10U, 20U, 30U, 40U, 50U, 60U, 70U, 80U};
+  auto prepared = forest.prepare_batch(insertions, unions);
+  const auto pre_stamp = forest.current_stamp();
+  auto preview = forest.preview_prepared_batch(
+      *prepared.ticket, requested, generous_preview_budget());
+  check(
+      prepared.certified_prepared() &&
+          prepared.compatible_repeat_count == 1U &&
+          preview.certified_prepared_preview() &&
+          preview.preview->certified_for(*prepared.ticket, pre_stamp) &&
+          forest.current_stamp() == pre_stamp,
+      "q-like preparation mints one ticket-bound mutation-free sparse preview");
+
+  const auto& receipt = preview.preview->receipt();
+  bool expected_records = receipt.records.size() == requested.size();
+  for (std::size_t index = 0U;
+       expected_records && index + 1U < receipt.records.size();
+       ++index) {
+    const auto& record = receipt.records[index];
+    expected_records =
+        record.requested_handle == requested[index] &&
+        record.post_root_handle == 10U && record.post_component_size == 7U;
+  }
+  if (expected_records && !receipt.records.empty()) {
+    const auto& singleton = receipt.records.back();
+    expected_records = singleton.requested_handle == 80U &&
+                       singleton.post_root_handle == 80U &&
+                       singleton.post_component_size == 1U;
+  }
+  check(
+      expected_records && receipt.shadow_node_count == 6U &&
+          receipt.shadow_node_upper_bound == 26U &&
+          receipt.total_entry_upper_bound == 34U &&
+          receipt.union_request_count == unions.size() &&
+          receipt.expected_effective_union_count == 4U &&
+          receipt.sparse_pre_roots_and_new_handles_only &&
+          receipt.canonical_union_replay_exact,
+      "repeat, new singleton, chain, multifusion, duplicate and self unions replay exactly over six sparse roots");
+
+  auto tampered = receipt;
+  ++tampered.expected_effective_union_count;
+  check(
+      !preview.preview->certifies_receipt(tampered),
+      "an edited effective-union count cannot pass the private preview mint");
+  tampered = receipt;
+  tampered.records.front().post_root_handle = 30U;
+  check(
+      !preview.preview->certifies_receipt(tampered),
+      "an edited post-root record cannot pass the private preview mint");
+  tampered = receipt;
+  tampered.canonical_union_replay_exact = false;
+  check(
+      !preview.preview->certifies_receipt(tampered) &&
+          preview.preview->certifies_receipt(receipt),
+      "a copied public receipt certifies only at exact equality with the immutable sealed receipt");
+  ExactDirectSparseStableFacetForestPreparedPreview forged;
+  check(
+      !forged.certified_sparse_shadow_preview(),
+      "default construction cannot forge a sealed prepared preview");
+
+  const auto expected_post_records = receipt.records;
+  const std::size_t expected_effective_union_count =
+      receipt.expected_effective_union_count;
+  allocation_probe::begin();
+  const auto committed = forest.commit(std::move(*prepared.ticket));
+  const std::size_t commit_allocations = allocation_probe::finish();
+  bool post_lookup_equality = committed.certified_commit() &&
+                              commit_allocations == 0U &&
+                              committed.effective_union_count ==
+                                  expected_effective_union_count;
+  for (const auto& expected : expected_post_records) {
+    const auto observed = forest.lookup(expected.requested_handle);
+    post_lookup_equality =
+        post_lookup_equality && observed.certified_observed() &&
+        observed.root_handle == expected.post_root_handle &&
+        observed.component_size == expected.post_component_size;
+  }
+  check(
+      post_lookup_equality &&
+          preview.preview->certified_sparse_shadow_preview() &&
+          !preview.preview->certified_for(*prepared.ticket, pre_stamp),
+      "every sealed post-root and size equals the allocation-free post-commit forest lookup");
+}
+
+void test_prepared_sparse_shadow_preview_ticket_identity() {
+  auto initialization = initialize();
+  auto foreign_initialization = initialize();
+  auto forest = std::move(*initialization.forest);
+  auto foreign_forest = std::move(*foreign_initialization.forest);
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{21U, key_for_handle(21U)}};
+  constexpr std::array<ExactDirectSparseStableFacetHandle, 1U> requested{21U};
+  auto sibling_a = forest.prepare_batch(insertions, {});
+  auto sibling_b = forest.prepare_batch(insertions, {});
+  const auto pre_stamp = forest.current_stamp();
+  auto preview_a = forest.preview_prepared_batch(
+      *sibling_a.ticket, requested, generous_preview_budget());
+  auto preview_b = forest.preview_prepared_batch(
+      *sibling_b.ticket, requested, generous_preview_budget());
+  check(
+      sibling_a.ticket->canonical_batch_digest() ==
+              sibling_b.ticket->canonical_batch_digest() &&
+          preview_a.certified_prepared_preview() &&
+          preview_b.certified_prepared_preview() &&
+          preview_a.preview->certified_for(*sibling_a.ticket, pre_stamp) &&
+          !preview_a.preview->certified_for(*sibling_b.ticket, pre_stamp) &&
+          preview_b.preview->certified_for(*sibling_b.ticket, pre_stamp) &&
+          !preview_b.preview->certified_for(*sibling_a.ticket, pre_stamp),
+      "private shared identities distinguish siblings with identical stamps and batch digests");
+
+  ExactDirectSparseStableFacetForestPreparedBatch moved_ticket =
+      std::move(*sibling_a.ticket);
+  ExactDirectSparseStableFacetForestPreparedPreview moved_preview =
+      std::move(*preview_a.preview);
+  check(
+      moved_preview.certified_for(moved_ticket, pre_stamp) &&
+          !moved_preview.certified_for(*sibling_a.ticket, pre_stamp) &&
+          !preview_a.preview->certified_sparse_shadow_preview(),
+      "ticket and preview moves preserve one identity without minting an ABA sibling");
+
+  const auto foreign_attempt = foreign_forest.preview_prepared_batch(
+      moved_ticket, requested, generous_preview_budget());
+  check(
+      !foreign_attempt.preview.has_value() &&
+          foreign_attempt.decision ==
+              ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                  no_foreign_ticket_rejected &&
+          moved_ticket.valid(),
+      "a foreign forest rejects the ticket without consuming its identity");
+
+  const auto committed = forest.commit(std::move(moved_ticket));
+  const auto stale_attempt = forest.preview_prepared_batch(
+      *sibling_b.ticket, requested, generous_preview_budget());
+  check(
+      committed.certified_commit() &&
+          moved_preview.certified_sparse_shadow_preview() &&
+          !moved_preview.certified_for(moved_ticket, pre_stamp) &&
+          preview_b.preview->certified_for(*sibling_b.ticket, pre_stamp) &&
+          !preview_b.preview->certified_for(
+              *sibling_b.ticket, forest.current_stamp()) &&
+          !stale_attempt.preview.has_value() &&
+          stale_attempt.decision ==
+              ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                  no_stale_or_sibling_ticket_rejected,
+      "a sibling seal remains historical but fails against the freshly read post-commit stamp");
+
+  ExactDirectSparseStableFacetForestPreparedPreview orphaned_preview;
+  {
+    auto lifetime_initialization = initialize();
+    auto lifetime_forest = std::move(*lifetime_initialization.forest);
+    auto lifetime_ticket = lifetime_forest.prepare_batch(insertions, {});
+    auto lifetime_preview = lifetime_forest.preview_prepared_batch(
+        *lifetime_ticket.ticket, requested, generous_preview_budget());
+    orphaned_preview = std::move(*lifetime_preview.preview);
+  }
+  check(
+      orphaned_preview.certified_sparse_shadow_preview(),
+      "the sealed receipt retains its unique identity safely after ticket destruction without a raw-pointer ABA seam");
+}
+
+void test_prepared_sparse_shadow_preview_caps_and_size_max() {
+  auto initialization = initialize();
+  auto forest = std::move(*initialization.forest);
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{1U, key_for_handle(1U)},
+      ExactDirectSparseStableFacetInsertion{2U, key_for_handle(2U)},
+  };
+  const std::array unions{ExactDirectSparseStableFacetUnion{1U, 2U}};
+  constexpr std::array<ExactDirectSparseStableFacetHandle, 2U> requested{1U,
+                                                                        2U};
+  auto prepared = forest.prepare_batch(insertions, unions);
+  const auto pre_stamp = forest.current_stamp();
+  const ExactDirectSparseStableFacetForestPreparedPreviewBudget exact_budget{
+      2U, 6U, 1U, 8U};
+  const auto exact = forest.preview_prepared_batch(
+      *prepared.ticket, requested, exact_budget);
+  check(
+      exact.certified_prepared_preview() &&
+          exact.preview->receipt().shadow_node_upper_bound == 6U &&
+          exact.preview->receipt().total_entry_upper_bound == 8U,
+      "the exact conservative preview caps admit the two-root q-like batch");
+
+  const auto check_cap_minus_one = [&](auto budget, std::string_view label) {
+    allocation_probe::begin();
+    const auto rejected = forest.preview_prepared_batch(
+        *prepared.ticket, requested, budget);
+    const std::size_t allocation_count = allocation_probe::finish();
+    check(
+        !rejected.preview.has_value() &&
+            rejected.decision ==
+                ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                    no_budget_exhausted &&
+            allocation_count == 0U &&
+            !rejected.forest_logical_state_mutated &&
+            forest.current_stamp() == pre_stamp,
+        std::string{label});
+  };
+  auto requested_cap_minus_one = exact_budget;
+  requested_cap_minus_one.maximum_requested_handle_count = 1U;
+  check_cap_minus_one(
+      requested_cap_minus_one,
+      "requested-record cap minus one rejects before preview allocation");
+  auto shadow_cap_minus_one = exact_budget;
+  shadow_cap_minus_one.maximum_shadow_node_count = 5U;
+  check_cap_minus_one(
+      shadow_cap_minus_one,
+      "shadow-node cap minus one rejects before preview allocation");
+  auto union_cap_minus_one = exact_budget;
+  union_cap_minus_one.maximum_union_replay_count = 0U;
+  check_cap_minus_one(
+      union_cap_minus_one,
+      "union-replay cap minus one rejects before preview allocation");
+  auto total_cap_minus_one = exact_budget;
+  total_cap_minus_one.maximum_total_entry_count = 7U;
+  check_cap_minus_one(
+      total_cap_minus_one,
+      "total-entry cap minus one rejects before preview allocation");
+
+  constexpr std::array<ExactDirectSparseStableFacetHandle, 2U>
+      duplicate_requested{1U, 1U};
+  allocation_probe::begin();
+  const auto duplicate_rejected = forest.preview_prepared_batch(
+      *prepared.ticket, duplicate_requested, generous_preview_budget());
+  const std::size_t duplicate_rejection_allocations =
+      allocation_probe::finish();
+  constexpr std::array<ExactDirectSparseStableFacetHandle, 1U>
+      unknown_requested{3U};
+  allocation_probe::begin();
+  const auto unknown_rejected = forest.preview_prepared_batch(
+      *prepared.ticket, unknown_requested, generous_preview_budget());
+  const std::size_t unknown_rejection_allocations =
+      allocation_probe::finish();
+  check(
+      duplicate_rejected.decision ==
+              ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                  no_requested_handle_shape_rejected &&
+          unknown_rejected.decision ==
+              ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                  no_requested_handle_unknown_rejected &&
+          duplicate_rejection_allocations == 0U &&
+          unknown_rejection_allocations == 0U &&
+          forest.current_stamp() == pre_stamp,
+      "noncanonical or unavailable requested handles fail before shadow allocation");
+
+  auto maximum_namespace_initialization =
+      initialize_exact_direct_sparse_stable_facet_forest(
+          {std::numeric_limits<std::size_t>::max(),
+           digest("preview-maximum-scalar-namespace")},
+          generous_budget());
+  auto maximum_namespace_forest =
+      std::move(*maximum_namespace_initialization.forest);
+  constexpr auto maximum_valid_handle =
+      std::numeric_limits<std::size_t>::max() - 1U;
+  const std::array maximum_insertion{
+      ExactDirectSparseStableFacetInsertion{
+          maximum_valid_handle,
+          facet(std::array<PointId, 2U>{7U, 11U})}};
+  auto maximum_ticket =
+      maximum_namespace_forest.prepare_batch(maximum_insertion, {});
+  const std::array maximum_requested{maximum_valid_handle};
+  const ExactDirectSparseStableFacetForestPreparedPreviewBudget
+      maximum_preview_budget{
+          std::numeric_limits<std::size_t>::max(),
+          std::numeric_limits<std::size_t>::max(),
+          std::numeric_limits<std::size_t>::max(),
+          std::numeric_limits<std::size_t>::max()};
+  const auto maximum_preview = maximum_namespace_forest.preview_prepared_batch(
+      *maximum_ticket.ticket,
+      maximum_requested,
+      maximum_preview_budget);
+  const std::array outside_namespace_requested{
+      std::numeric_limits<std::size_t>::max()};
+  allocation_probe::begin();
+  const auto outside_namespace =
+      maximum_namespace_forest.preview_prepared_batch(
+          *maximum_ticket.ticket,
+          outside_namespace_requested,
+          maximum_preview_budget);
+  const std::size_t outside_namespace_allocations =
+      allocation_probe::finish();
+  check(
+      maximum_preview.certified_prepared_preview() &&
+          maximum_preview.preview->records().size() == 1U &&
+          maximum_preview.preview->records().front().requested_handle ==
+              maximum_valid_handle &&
+          maximum_namespace_forest.observed_entries().empty() &&
+          outside_namespace.decision ==
+              ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                  no_requested_handle_shape_rejected &&
+          outside_namespace_allocations == 0U,
+      "SIZE_MAX caps and namespace remain scalar while SIZE_MAX itself is rejected as the exclusive bound");
+}
+
 void run_tests() {
   constexpr std::size_t handle_a = 900'000'000U;
   constexpr std::size_t handle_b = 2U;
@@ -1154,6 +1501,9 @@ void run_tests() {
   test_positive_index_budget_preflight();
   test_positive_bijection_sibling_adversaries_and_idempotence();
   test_sibling_ticket_survives_physical_rehash();
+  test_prepared_sparse_shadow_preview_q_like_replay();
+  test_prepared_sparse_shadow_preview_ticket_identity();
+  test_prepared_sparse_shadow_preview_caps_and_size_max();
 }
 
 }  // namespace

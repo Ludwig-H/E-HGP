@@ -389,6 +389,21 @@ int main() {
     return 1;
   }
   static_assert(
+      !std::is_copy_constructible_v<
+          morsehgp3d::hierarchy::
+              ExactDirectSparseStableFacetForestPreparedPreview> &&
+      std::is_nothrow_move_constructible_v<
+          morsehgp3d::hierarchy::
+              ExactDirectSparseStableFacetForestPreparedPreview>);
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseStableFacetForestPreparedPreview
+          installed_sparse_preview_probe;
+  if (installed_sparse_preview_probe.certified_sparse_shadow_preview() ||
+      !installed_sparse_preview_probe.records().empty()) {
+    std::cerr << "installed sparse-preview API accepted an empty capability\n";
+    return 1;
+  }
+  static_assert(
       morsehgp3d::hierarchy::
           direct_morse_forest_root_coverage_index_schema_version == 1U);
   const morsehgp3d::hierarchy::
