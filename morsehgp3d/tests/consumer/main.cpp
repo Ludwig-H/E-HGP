@@ -355,11 +355,37 @@ int main() {
   }
   const morsehgp3d::hierarchy::ExactDirectSparseStableFacetForest
       installed_sparse_forest_probe;
+  static_assert(
+      morsehgp3d::hierarchy::
+              direct_sparse_stable_facet_forest_storage_schema_version ==
+          2U);
+  static_assert(
+      morsehgp3d::hierarchy::ExactDirectSparseStableFacetForest::mode ==
+      std::string_view{
+          "transactional_sparse_stable_handle_full_key_positive_structure_"
+          "only_v2"});
   if (installed_sparse_forest_probe.certified_structure_only_forest() ||
       installed_sparse_forest_probe
-              .materialized_handle_index_slot_count() != 0U) {
+              .materialized_handle_index_slot_count() != 0U ||
+      installed_sparse_forest_probe
+              .materialized_positive_key_index_slot_count() != 0U) {
     std::cerr
         << "installed sparse-forest API accepted an empty session\n";
+    return 1;
+  }
+  const morsehgp3d::hierarchy::ExactDirectSparseFacetKey
+      installed_positive_key_probe{};
+  const auto installed_positive_lookup =
+      installed_sparse_forest_probe.lookup_positive_full_key(
+          installed_positive_key_probe);
+  if (installed_positive_lookup.certified_observed() ||
+      installed_positive_lookup.certified_unobserved() ||
+      installed_positive_lookup.disposition !=
+          morsehgp3d::hierarchy::
+              ExactDirectSparseStableFacetPositiveLookupDisposition::
+                  not_certified) {
+    std::cerr
+        << "installed full-key lookup accepted an empty forest session\n";
     return 1;
   }
   static_assert(

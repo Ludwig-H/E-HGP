@@ -81,6 +81,15 @@ static_assert(
     !std::is_copy_constructible_v<ExactDirectSparseStableFacetForest> &&
     std::is_nothrow_move_constructible_v<
         ExactDirectSparseStableFacetForest>);
+static_assert(direct_sparse_stable_facet_forest_schema_version == 1U);
+static_assert(direct_sparse_stable_facet_forest_storage_schema_version == 2U);
+static_assert(
+    std::is_aggregate_v<
+        ExactDirectSparseStableFacetPositiveLookupReceipt> &&
+    !std::is_aggregate_v<
+        ExactDirectSparseStableFacetPositiveLookupResult> &&
+    std::is_nothrow_copy_constructible_v<
+        ExactDirectSparseStableFacetPositiveLookupResult>);
 
 int failures = 0;
 
@@ -126,6 +135,18 @@ template <std::size_t Size>
         generous_budget()) {
   return initialize_exact_direct_sparse_stable_facet_forest(
       {1'000'000'001U, digest("normalized-structural-source")}, budget);
+}
+
+[[nodiscard]] ExactDirectSparseStableFacetForestInitialization
+initialize_with_positive_fingerprint_mask(
+    std::uint64_t fingerprint_mask,
+    const ExactDirectSparseStableFacetForestBudget& budget =
+        generous_budget()) {
+  return initialize_exact_direct_sparse_stable_facet_forest(
+      {1'000'000'001U,
+       digest("normalized-structural-source"),
+       fingerprint_mask},
+      budget);
 }
 
 struct BoundedOracleRow {
@@ -257,6 +278,70 @@ void apply_oracle_batch(
       static_cast<PointId>(handle + 1'000'001U)});
 }
 
+void check_positive_lookup_receipt_tamper_round_trip(
+    ExactDirectSparseStableFacetPositiveLookupResult genuine,
+    bool expected_observed,
+    std::string_view label) {
+  using Receipt = ExactDirectSparseStableFacetPositiveLookupReceipt;
+  const Receipt original = static_cast<const Receipt&>(genuine);
+  const auto certified = [&]() {
+    return expected_observed ? genuine.certified_observed()
+                             : genuine.certified_unobserved();
+  };
+  const auto verify_mutation_and_restore = [&](std::string_view category) {
+    check(
+        !certified(),
+        std::string{label} + " rejects public " + std::string{category} +
+            " mutation");
+    static_cast<Receipt&>(genuine) = original;
+    check(
+        certified(),
+        std::string{label} + " recertifies after exact " +
+            std::string{category} + " restoration");
+  };
+
+  check(certified(), std::string{label} + " starts privately certified");
+  genuine.requested_key.point_ids[0U] += 1U;
+  verify_mutation_and_restore("requested-key");
+  genuine.bound_handle ^= 1U;
+  verify_mutation_and_restore("bound-handle");
+  genuine.root_handle ^= 1U;
+  verify_mutation_and_restore("root-handle");
+  genuine.component_size ^= 1U;
+  verify_mutation_and_restore("component-size");
+  genuine.forest_stamp.epoch ^= 1U;
+  verify_mutation_and_restore("forest-stamp");
+  genuine.forest_stamp.source_identity_digest =
+      digest("tampered-positive-lookup-source-digest");
+  verify_mutation_and_restore("source-digest");
+  genuine.forest_stamp.semantic_history_digest =
+      digest("tampered-positive-lookup-history-digest");
+  verify_mutation_and_restore("history-digest");
+  genuine.slot_visit_count ^= 1U;
+  verify_mutation_and_restore("slot-visit-count");
+  genuine.full_key_comparison_count ^= 1U;
+  verify_mutation_and_restore("full-key-comparison-count");
+
+  constexpr std::array receipt_flags{
+      &Receipt::forest_certified_at_entry,
+      &Receipt::requested_key_canonical,
+      &Receipt::lookup_completed_without_mutation,
+      &Receipt::fingerprint_used_only_as_accelerator,
+      &Receipt::complete_key_comparison_authoritative,
+      &Receipt::immutable_key_handle_binding_observed,
+      &Receipt::root_resolved_without_mutation,
+      &Receipt::source_exactness_claimed,
+      &Receipt::public_status_claimed,
+  };
+  for (const auto flag : receipt_flags) {
+    genuine.*flag = !(genuine.*flag);
+    verify_mutation_and_restore("flag");
+  }
+  genuine.disposition =
+      ExactDirectSparseStableFacetPositiveLookupDisposition::not_certified;
+  verify_mutation_and_restore("disposition");
+}
+
 void commit_oracle_batch(
     ExactDirectSparseStableFacetForest& forest,
     BoundedStableFacetOracle& oracle,
@@ -350,18 +435,30 @@ void test_append_only_multibatch_index() {
   for (const auto handle : expected_append_order) {
     const auto observed = forest.lookup(handle);
     const auto* expected_key = oracle.key(handle);
+    const auto positive = expected_key == nullptr
+                              ? ExactDirectSparseStableFacetPositiveLookupResult{}
+                              : forest.lookup_positive_full_key(*expected_key);
     check(
         expected_key != nullptr && observed.certified_observed() &&
             observed.root_handle == oracle.root_handle(handle) &&
             observed.component_size == oracle.component_size(handle) &&
-            observed.facet_key == *expected_key,
-        "flat-index lookup agrees with the bounded stable-handle oracle");
+            observed.facet_key == *expected_key &&
+            positive.certified_observed() &&
+            positive.bound_handle == handle &&
+            positive.root_handle == oracle.root_handle(handle) &&
+            positive.component_size == oracle.component_size(handle),
+        "both sparse indexes agree with the bounded stable-handle oracle");
   }
   check(
       forest.materialized_handle_index_slot_count() >=
               2U * observed_entries.size() &&
           forest.materialized_handle_index_slot_count() < 1'000U,
       "the handle index scales with observed rows rather than the billion-token namespace");
+  check(
+      forest.materialized_positive_key_index_slot_count() >=
+              2U * observed_entries.size() &&
+          forest.materialized_positive_key_index_slot_count() < 1'000U,
+      "the full-key index scales with observed rows rather than the billion-token namespace");
 }
 
 void test_flat_index_collision_chain() {
@@ -398,6 +495,328 @@ void test_flat_index_collision_chain() {
   }
 }
 
+void test_positive_full_key_index_collision_and_injective_binding() {
+  auto collided_initialization =
+      initialize_with_positive_fingerprint_mask(0U);
+  auto regular_initialization = initialize();
+  auto collided = std::move(*collided_initialization.forest);
+  auto regular = std::move(*regular_initialization.forest);
+  const auto expected_v1_initial_digest = CanonicalId::from_lower_hex(
+      "c6f8f6721497a92c93740e8c3316509756d0bcbabf86f0d7ed32ffba7621d418");
+  const auto expected_v1_batch_digest = CanonicalId::from_lower_hex(
+      "39316233b5579f8c1aab7319c976b1cbd55242d5e5814d80c8610fb3ea5ee5c4");
+  const auto expected_v1_post_history_digest = CanonicalId::from_lower_hex(
+      "6a395f021581fc7743545c57d8ba3ef2a5940980dc959a78e88235de6823dc75");
+  check(
+      collided.current_stamp().semantic_history_digest ==
+              regular.current_stamp().semantic_history_digest &&
+          collided.current_stamp().semantic_history_digest ==
+              expected_v1_initial_digest,
+      "the physical fingerprint mask preserves the frozen v1 logical initial digest");
+
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{10U, key_for_handle(10U)},
+      ExactDirectSparseStableFacetInsertion{11U, key_for_handle(11U)},
+      ExactDirectSparseStableFacetInsertion{12U, key_for_handle(12U)},
+      ExactDirectSparseStableFacetInsertion{13U, key_for_handle(13U)},
+  };
+  const std::array unions{
+      ExactDirectSparseStableFacetUnion{10U, 11U},
+      ExactDirectSparseStableFacetUnion{12U, 13U},
+      ExactDirectSparseStableFacetUnion{11U, 12U},
+  };
+  auto collided_prepared = collided.prepare_batch(insertions, unions);
+  auto regular_prepared = regular.prepare_batch(insertions, unions);
+  check(
+      collided_prepared.certified_prepared() &&
+          regular_prepared.certified_prepared() &&
+          collided_prepared.ticket->canonical_batch_digest() ==
+              regular_prepared.ticket->canonical_batch_digest() &&
+          collided_prepared.ticket->canonical_batch_digest() ==
+              expected_v1_batch_digest &&
+          collided.materialized_handle_index_slot_count() == 8U &&
+          collided.materialized_positive_key_index_slot_count() == 8U,
+      "preparation reserves rows and both sparse indexes before either ticket commits");
+
+  allocation_probe::begin();
+  const auto collided_commit =
+      collided.commit(std::move(*collided_prepared.ticket));
+  const std::size_t collided_commit_allocations = allocation_probe::finish();
+  allocation_probe::begin();
+  const auto regular_commit = regular.commit(std::move(*regular_prepared.ticket));
+  const std::size_t regular_commit_allocations = allocation_probe::finish();
+  check(
+      collided_commit.certified_commit() && regular_commit.certified_commit() &&
+          collided_commit_allocations == 0U &&
+          regular_commit_allocations == 0U &&
+          collided.certified_structure_only_forest() &&
+          regular.certified_structure_only_forest() &&
+          collided.current_stamp().semantic_history_digest ==
+              regular.current_stamp().semantic_history_digest &&
+          collided.current_stamp().semantic_history_digest ==
+              expected_v1_post_history_digest,
+      "both row+1 indexes commit allocation-free with the frozen v1 history digest");
+
+  std::array<ExactDirectSparseStableFacetPositiveLookupResult, 4U> hits{};
+  allocation_probe::begin();
+  for (std::size_t index = 0U; index < hits.size(); ++index) {
+    hits[index] = collided.lookup_positive_full_key(
+        key_for_handle(10U + index));
+  }
+  const auto miss =
+      collided.lookup_positive_full_key(key_for_handle(99U));
+  const std::size_t lookup_allocations = allocation_probe::finish();
+  bool every_hit_exact = lookup_allocations == 0U;
+  for (std::size_t index = 0U; index < hits.size(); ++index) {
+    every_hit_exact =
+        every_hit_exact && hits[index].certified_observed() &&
+        hits[index].bound_handle == 10U + index &&
+        hits[index].root_handle == 10U &&
+        hits[index].component_size == hits.size() &&
+        hits[index].forest_stamp == collided.current_stamp();
+  }
+  check(
+      every_hit_exact && hits.back().slot_visit_count == hits.size() &&
+          hits.back().full_key_comparison_count == hits.size(),
+      "forced equal fingerprints still return the authoritative full-key binding and DSU root");
+  check(
+      miss.certified_unobserved() && miss.slot_visit_count == 5U &&
+          miss.full_key_comparison_count == hits.size() &&
+          miss.forest_stamp == collided.current_stamp(),
+      "a collision-chain miss compares every occupied complete key before the empty terminator");
+
+  ExactDirectSparseStableFacetPositiveLookupResult forged_hit;
+  static_cast<ExactDirectSparseStableFacetPositiveLookupReceipt&>(forged_hit) =
+      static_cast<const ExactDirectSparseStableFacetPositiveLookupReceipt&>(
+          hits.front());
+  ExactDirectSparseStableFacetPositiveLookupResult forged_miss;
+  static_cast<ExactDirectSparseStableFacetPositiveLookupReceipt&>(forged_miss) =
+      static_cast<const ExactDirectSparseStableFacetPositiveLookupReceipt&>(
+          miss);
+  check(
+      !forged_hit.certified_observed() &&
+          !forged_hit.certified_unobserved() &&
+          !forged_miss.certified_observed() &&
+          !forged_miss.certified_unobserved(),
+      "complete public hit and miss receipts cannot forge the private mint");
+  check_positive_lookup_receipt_tamper_round_trip(
+      hits.front(), true, "a minted positive hit");
+  check_positive_lookup_receipt_tamper_round_trip(
+      miss, false, "a minted positive miss");
+
+  const auto before_cross_batch_collision = collided.current_stamp();
+  const std::array cross_batch_collision{
+      ExactDirectSparseStableFacetInsertion{77U, key_for_handle(10U)}};
+  const auto rejected_cross_batch =
+      collided.prepare_batch(cross_batch_collision, {});
+  check(
+      !rejected_cross_batch.ticket.has_value() &&
+          rejected_cross_batch.decision ==
+              ExactDirectSparseStableFacetForestPreparationDecision::
+                  contradiction_stable_handle_key_collision &&
+          collided.current_stamp() == before_cross_batch_collision &&
+          collided.lookup_positive_full_key(key_for_handle(10U))
+                  .bound_handle == 10U &&
+          collided.lookup(77U).certified_unobserved(),
+      "an existing complete key cannot be rebound to a second stable handle");
+
+  auto fresh_initialization = initialize_with_positive_fingerprint_mask(0U);
+  auto fresh = std::move(*fresh_initialization.forest);
+  const auto fresh_stamp = fresh.current_stamp();
+  const std::array within_batch_collision{
+      ExactDirectSparseStableFacetInsertion{20U, key_for_handle(20U)},
+      ExactDirectSparseStableFacetInsertion{21U, key_for_handle(20U)},
+  };
+  const auto rejected_within_batch =
+      fresh.prepare_batch(within_batch_collision, {});
+  check(
+      !rejected_within_batch.ticket.has_value() &&
+          rejected_within_batch.decision ==
+              ExactDirectSparseStableFacetForestPreparationDecision::
+                  contradiction_stable_handle_key_collision &&
+          fresh.current_stamp() == fresh_stamp &&
+          fresh.observed_entries().empty() &&
+          fresh.materialized_handle_index_slot_count() == 0U &&
+          fresh.materialized_positive_key_index_slot_count() == 0U,
+      "an intra-batch complete-key rebinding is rejected before physical reservation or mutation");
+}
+
+void test_positive_index_budget_preflight() {
+  auto maximum_namespace_initialization =
+      initialize_exact_direct_sparse_stable_facet_forest(
+          {std::numeric_limits<std::size_t>::max(),
+           digest("maximum-scalar-namespace")},
+          generous_budget());
+  check(
+      maximum_namespace_initialization.certified_initialized() &&
+          maximum_namespace_initialization.forest->observed_entries().empty() &&
+          maximum_namespace_initialization.forest->
+                  materialized_handle_index_slot_count() == 0U &&
+          maximum_namespace_initialization.forest->
+                  materialized_positive_key_index_slot_count() == 0U,
+      "even a SIZE_MAX scalar namespace materializes neither sparse index");
+
+  auto one_row_budget = generous_budget();
+  one_row_budget.maximum_observed_handle_count = 1U;
+  auto initialization = initialize(one_row_budget);
+  auto forest = std::move(*initialization.forest);
+  const auto pre_stamp = forest.current_stamp();
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{1U, key_for_handle(1U)},
+      ExactDirectSparseStableFacetInsertion{2U, key_for_handle(2U)},
+  };
+  const auto rejected = forest.prepare_batch(insertions, {});
+  check(
+      !rejected.ticket.has_value() &&
+          rejected.decision ==
+              ExactDirectSparseStableFacetForestPreparationDecision::
+                  no_budget_exhausted &&
+          forest.current_stamp() == pre_stamp &&
+          forest.observed_entries().empty() &&
+          forest.materialized_handle_index_slot_count() == 0U &&
+          forest.materialized_positive_key_index_slot_count() == 0U &&
+          forest.certified_structure_only_forest(),
+      "the durable row budget rejects before reserving either sparse index");
+}
+
+void test_positive_bijection_sibling_adversaries_and_idempotence() {
+  const auto shared_key = key_for_handle(300U);
+  const std::array key_to_first_handle{
+      ExactDirectSparseStableFacetInsertion{301U, shared_key}};
+  const std::array key_to_second_handle{
+      ExactDirectSparseStableFacetInsertion{302U, shared_key}};
+  auto key_sibling_initialization = initialize();
+  auto key_sibling_forest = std::move(*key_sibling_initialization.forest);
+  const auto key_sibling_pre_stamp = key_sibling_forest.current_stamp();
+  auto key_to_first =
+      key_sibling_forest.prepare_batch(key_to_first_handle, {});
+  auto key_to_second =
+      key_sibling_forest.prepare_batch(key_to_second_handle, {});
+  check(
+      key_to_first.certified_prepared() && key_to_second.certified_prepared() &&
+          key_to_first.pre_stamp == key_sibling_pre_stamp &&
+          key_to_second.pre_stamp == key_sibling_pre_stamp,
+      "K-to-H1 and K-to-H2 may stage only as siblings of one frozen pre-state");
+  const auto first_commit =
+      key_sibling_forest.commit(std::move(*key_to_first.ticket));
+  const auto after_first_commit = key_sibling_forest.current_stamp();
+  const auto stale_second =
+      key_sibling_forest.commit(std::move(*key_to_second.ticket));
+  const auto key_binding_after_stale =
+      key_sibling_forest.lookup_positive_full_key(shared_key);
+  const auto absent_key_receipt =
+      key_sibling_forest.lookup_positive_full_key(key_for_handle(303U));
+  check(
+      first_commit.certified_commit() && stale_second.ticket_consumed &&
+          !stale_second.state_mutated &&
+          stale_second.decision ==
+              ExactDirectSparseStableFacetForestCommitDecision::
+                  no_stale_or_sibling_ticket_rejected &&
+          key_sibling_forest.current_stamp() == after_first_commit &&
+          key_binding_after_stale.certified_observed_for(after_first_commit) &&
+          absent_key_receipt.certified_unobserved_for(after_first_commit) &&
+          key_binding_after_stale.bound_handle == 301U &&
+          key_sibling_forest.lookup(302U).certified_unobserved(),
+      "committing K-to-H1 makes sibling K-to-H2 stale without rebinding the key");
+
+  const auto key_slot_count =
+      key_sibling_forest.materialized_positive_key_index_slot_count();
+  auto idempotent =
+      key_sibling_forest.prepare_batch(key_to_first_handle, {});
+  const auto idempotent_commit =
+      key_sibling_forest.commit(std::move(*idempotent.ticket));
+  const auto after_idempotent = key_sibling_forest.current_stamp();
+  const auto key_binding_after_idempotent =
+      key_sibling_forest.lookup_positive_full_key(shared_key);
+  check(
+      idempotent_commit.certified_commit() &&
+          idempotent_commit.inserted_handle_count == 0U &&
+          idempotent_commit.compatible_repeat_count == 1U &&
+          idempotent_commit.post_stamp.observed_handle_count == 1U &&
+          idempotent_commit.post_stamp.component_count == 1U &&
+          key_sibling_forest.materialized_positive_key_index_slot_count() ==
+              key_slot_count &&
+          key_binding_after_idempotent.certified_observed_for(
+              after_idempotent) &&
+          key_binding_after_idempotent.bound_handle == 301U &&
+          key_binding_after_idempotent.root_handle == 301U &&
+          key_binding_after_idempotent.component_size == 1U,
+      "a cross-batch identical key-handle repeat advances history without duplicating index state");
+  check(
+      key_binding_after_stale.certified_observed_for(after_first_commit) &&
+          !key_binding_after_stale.certified_observed_for(after_idempotent) &&
+          absent_key_receipt.certified_unobserved_for(after_first_commit) &&
+          !absent_key_receipt.certified_unobserved_for(after_idempotent),
+      "genuine old hit and miss receipts are rejected against the post-commit forest stamp");
+
+  const auto before_cross_batch_rebind = key_sibling_forest.current_stamp();
+  const auto cross_batch_rebind =
+      key_sibling_forest.prepare_batch(key_to_second_handle, {});
+  check(
+      !cross_batch_rebind.ticket.has_value() &&
+          cross_batch_rebind.decision ==
+              ExactDirectSparseStableFacetForestPreparationDecision::
+                  contradiction_stable_handle_key_collision &&
+          key_sibling_forest.current_stamp() == before_cross_batch_rebind &&
+          key_sibling_forest.lookup_positive_full_key(shared_key)
+                  .bound_handle == 301U,
+      "a later batch cannot rebind an idempotently retained complete key");
+
+  const auto first_key = key_for_handle(400U);
+  const auto second_key = key_for_handle(401U);
+  const std::array handle_to_first_key{
+      ExactDirectSparseStableFacetInsertion{410U, first_key}};
+  const std::array handle_to_second_key{
+      ExactDirectSparseStableFacetInsertion{410U, second_key}};
+  auto handle_sibling_initialization = initialize();
+  auto handle_sibling_forest = std::move(*handle_sibling_initialization.forest);
+  auto handle_to_first =
+      handle_sibling_forest.prepare_batch(handle_to_first_key, {});
+  auto handle_to_second =
+      handle_sibling_forest.prepare_batch(handle_to_second_key, {});
+  check(
+      handle_to_first.certified_prepared() &&
+          handle_to_second.certified_prepared(),
+      "H-to-K1 and H-to-K2 may stage only as siblings of one frozen pre-state");
+  const auto handle_first_commit =
+      handle_sibling_forest.commit(std::move(*handle_to_first.ticket));
+  const auto handle_post_stamp = handle_sibling_forest.current_stamp();
+  const auto handle_stale_second =
+      handle_sibling_forest.commit(std::move(*handle_to_second.ticket));
+  check(
+      handle_first_commit.certified_commit() &&
+          handle_stale_second.ticket_consumed &&
+          !handle_stale_second.state_mutated &&
+          handle_sibling_forest.current_stamp() == handle_post_stamp &&
+          handle_sibling_forest.lookup_positive_full_key(first_key)
+                  .bound_handle == 410U &&
+          handle_sibling_forest.lookup_positive_full_key(second_key)
+                  .certified_unobserved() &&
+          handle_sibling_forest.lookup(410U).facet_key == first_key,
+      "committing H-to-K1 makes sibling H-to-K2 stale without rewriting the handle");
+
+  auto within_batch_initialization = initialize();
+  auto within_batch_forest = std::move(*within_batch_initialization.forest);
+  const auto within_batch_stamp = within_batch_forest.current_stamp();
+  const std::array one_handle_two_keys{
+      ExactDirectSparseStableFacetInsertion{510U, first_key},
+      ExactDirectSparseStableFacetInsertion{510U, second_key},
+  };
+  const auto within_batch_rejected =
+      within_batch_forest.prepare_batch(one_handle_two_keys, {});
+  check(
+      !within_batch_rejected.ticket.has_value() &&
+          within_batch_rejected.decision ==
+              ExactDirectSparseStableFacetForestPreparationDecision::
+                  contradiction_stable_handle_key_collision &&
+          within_batch_forest.current_stamp() == within_batch_stamp &&
+          within_batch_forest.observed_entries().empty() &&
+          within_batch_forest.materialized_handle_index_slot_count() == 0U &&
+          within_batch_forest.materialized_positive_key_index_slot_count() ==
+              0U,
+      "one intra-batch handle cannot name two complete keys before reservation");
+}
+
 void test_sibling_ticket_survives_physical_rehash() {
   auto initialization = initialize();
   auto forest = std::move(*initialization.forest);
@@ -421,8 +840,9 @@ void test_sibling_ticket_survives_physical_rehash() {
           forest.current_stamp() == initial_stamp &&
           forest.observed_entries().empty() &&
           forest.materialized_handle_index_slot_count() >= 16U &&
+          forest.materialized_positive_key_index_slot_count() >= 16U &&
           forest.outstanding_ticket_count() == 2U,
-      "a sibling may grow row and index capacity without semantic mutation");
+      "a sibling may grow row and both index capacities without semantic mutation");
   allocation_probe::begin();
   const auto committed_small = forest.commit(std::move(*small.ticket));
   const std::size_t commit_allocation_count = allocation_probe::finish();
@@ -430,8 +850,10 @@ void test_sibling_ticket_survives_physical_rehash() {
       committed_small.certified_commit() &&
           committed_small.inserted_handle_count == 1U &&
           forest.lookup(600U).certified_observed() &&
+          forest.lookup_positive_full_key(key_for_handle(600U))
+                  .certified_observed() &&
           commit_allocation_count == 0U,
-      "a ticket prepared before a sibling rehash commits without retained slot addresses");
+      "a ticket prepared before sibling rehashes commits without retained slot addresses");
   const auto stamp_after_small = forest.current_stamp();
   const auto stale_large = forest.commit(std::move(*large.ticket));
   check(
@@ -441,8 +863,12 @@ void test_sibling_ticket_survives_physical_rehash() {
                   no_stale_or_sibling_ticket_rejected &&
           forest.current_stamp() == stamp_after_small &&
           forest.observed_entries().size() == 1U &&
-          forest.lookup(600U).certified_observed(),
-      "stale sibling rejection leaves append rows and the rehashed index intact");
+          forest.lookup(600U).certified_observed() &&
+          forest.lookup_positive_full_key(key_for_handle(600U))
+                  .certified_observed() &&
+          forest.lookup_positive_full_key(key_for_handle(100U))
+                  .certified_unobserved(),
+      "stale sibling rejection leaves append rows and both rehashed indexes intact");
 }
 
 void run_tests() {
@@ -458,8 +884,10 @@ void run_tests() {
       initialization.certified_initialized() &&
           initialization.namespace_capacity_not_materialized &&
           initialization.forest->observed_entries().empty() &&
-          initialization.forest->materialized_handle_index_slot_count() == 0U,
-      "a billion-token namespace initializes with zero rows and zero index slots");
+          initialization.forest->materialized_handle_index_slot_count() == 0U &&
+          initialization.forest->
+                  materialized_positive_key_index_slot_count() == 0U,
+      "a billion-token namespace initializes with zero rows and zero slots in both indexes");
   auto forest = std::move(*initialization.forest);
   const auto initial_stamp = forest.current_stamp();
   const auto missing = forest.lookup(handle_a);
@@ -468,6 +896,28 @@ void run_tests() {
           !missing.missing_handle_means_source_absent &&
           !missing.source_exactness_claimed,
       "an unobserved sparse handle is not promoted to source absence");
+  allocation_probe::begin();
+  const auto missing_positive = forest.lookup_positive_full_key(key_a);
+  const std::size_t empty_positive_lookup_allocations =
+      allocation_probe::finish();
+  check(
+      missing_positive.certified_unobserved() &&
+          missing_positive.forest_stamp == initial_stamp &&
+          missing_positive.slot_visit_count == 0U &&
+          empty_positive_lookup_allocations == 0U,
+      "an empty full-key index certifies an allocation-free unobserved result at its forest stamp");
+  auto invalid_positive_key = key_a;
+  invalid_positive_key.point_count = 1U;
+  const auto invalid_positive =
+      forest.lookup_positive_full_key(invalid_positive_key);
+  check(
+      invalid_positive.disposition ==
+              ExactDirectSparseStableFacetPositiveLookupDisposition::
+                  input_key_rejected &&
+          !invalid_positive.certified_observed() &&
+          !invalid_positive.certified_unobserved() &&
+          invalid_positive.forest_stamp == initial_stamp,
+      "the positive lookup rejects a noncanonical requested key explicitly");
   check(
       forest.lookup(1'000'000'001U).disposition ==
           ExactDirectSparseStableFacetLookupDisposition::
@@ -584,6 +1034,20 @@ void run_tests() {
           observed_c.root_handle == handle_b &&
           observed_a.component_size == 3U && observed_a.facet_key == key_a,
       "deterministic union-by-size resolves the canonical stable root");
+  const auto positive_a = forest.lookup_positive_full_key(key_a);
+  const auto positive_b = forest.lookup_positive_full_key(key_b);
+  const auto positive_c = forest.lookup_positive_full_key(key_c);
+  check(
+      positive_a.certified_observed() &&
+          positive_b.certified_observed() &&
+          positive_c.certified_observed() &&
+          positive_a.bound_handle == handle_a &&
+          positive_b.bound_handle == handle_b &&
+          positive_c.bound_handle == handle_c &&
+          positive_a.root_handle == handle_b &&
+          positive_a.component_size == 3U &&
+          positive_a.forest_stamp == forest.current_stamp(),
+      "full-key positive lookup returns the immutable stable binding and current DSU root");
 
   const std::array repeated{
       ExactDirectSparseStableFacetInsertion{handle_b, key_b}};
@@ -667,7 +1131,9 @@ void run_tests() {
           budget_rejection.decision ==
               ExactDirectSparseStableFacetForestPreparationDecision::
                   no_budget_exhausted &&
-          tight_forest.observed_entries().empty(),
+          tight_forest.observed_entries().empty() &&
+          tight_forest.materialized_handle_index_slot_count() == 0U &&
+          tight_forest.materialized_positive_key_index_slot_count() == 0U,
       "strict request caps reject before staging or logical mutation");
 
   const auto checkpoint = forest.checkpoint();
@@ -684,6 +1150,9 @@ void run_tests() {
 
   test_append_only_multibatch_index();
   test_flat_index_collision_chain();
+  test_positive_full_key_index_collision_and_injective_binding();
+  test_positive_index_budget_preflight();
+  test_positive_bijection_sibling_adversaries_and_idempotence();
   test_sibling_ticket_survives_physical_rehash();
 }
 

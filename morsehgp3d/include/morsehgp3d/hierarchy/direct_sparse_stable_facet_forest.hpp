@@ -15,12 +15,16 @@ struct ExactDirectSparseStableFacetForestInitialization;
 
 inline constexpr std::uint32_t direct_sparse_stable_facet_forest_schema_version =
     1U;
+// The logical schema and its semantic digest remain v1.  Storage v2 adds a
+// second sparse open-addressed index whose slots contain row_index + 1 only.
+inline constexpr std::uint32_t
+    direct_sparse_stable_facet_forest_storage_schema_version = 2U;
 inline constexpr std::string_view direct_sparse_stable_facet_forest_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_sparse_stable_facet_forest_profile =
     "hgp_reduced";
 inline constexpr std::string_view direct_sparse_stable_facet_forest_mode =
-    "transactional_sparse_stable_handle_structure_only_v1";
+    "transactional_sparse_stable_handle_full_key_positive_structure_only_v2";
 inline constexpr std::string_view
     direct_sparse_stable_facet_forest_deployment_status =
         "architecture_only_reference_cpu_not_massive_qualified";
@@ -34,6 +38,10 @@ using ExactDirectSparseStableFacetHandle = std::size_t;
 struct ExactDirectSparseStableFacetForestConfig {
   std::size_t stable_facet_token_count{};
   contract::CanonicalId source_identity_digest{};
+  // Physical lookup tuning only.  It is deliberately excluded from every
+  // logical digest.  Zero is supported to force fingerprint collisions in
+  // exact tests; complete-key comparison remains authoritative.
+  std::uint64_t positive_key_fingerprint_mask{~std::uint64_t{0U}};
 
   friend bool operator==(
       const ExactDirectSparseStableFacetForestConfig&,
@@ -172,6 +180,85 @@ struct ExactDirectSparseStableFacetLookupResult {
   friend bool operator==(
       const ExactDirectSparseStableFacetLookupResult&,
       const ExactDirectSparseStableFacetLookupResult&) = default;
+};
+
+enum class ExactDirectSparseStableFacetPositiveLookupDisposition
+    : std::uint8_t {
+  not_certified,
+  input_key_rejected,
+  unobserved,
+  observed,
+  contradiction,
+};
+
+// Allocation-free positive lookup against one immutable forest snapshot.
+// The table slot stores only row_index + 1.  A fingerprint selects and filters
+// probes, but an observed answer is certified only after comparing the full
+// fixed-capacity key stored in the append-only row.
+struct ExactDirectSparseStableFacetPositiveLookupReceipt {
+  ExactDirectSparseFacetKey requested_key{};
+  ExactDirectSparseStableFacetHandle bound_handle{};
+  ExactDirectSparseStableFacetHandle root_handle{};
+  std::size_t component_size{};
+  ExactDirectSparseStableFacetForestStamp forest_stamp{};
+  std::size_t slot_visit_count{};
+  std::size_t full_key_comparison_count{};
+  bool forest_certified_at_entry{false};
+  bool requested_key_canonical{false};
+  bool lookup_completed_without_mutation{false};
+  bool fingerprint_used_only_as_accelerator{false};
+  bool complete_key_comparison_authoritative{false};
+  bool immutable_key_handle_binding_observed{false};
+  bool root_resolved_without_mutation{false};
+  bool source_exactness_claimed{false};
+  bool public_status_claimed{false};
+  ExactDirectSparseStableFacetPositiveLookupDisposition disposition{
+      ExactDirectSparseStableFacetPositiveLookupDisposition::not_certified};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetPositiveLookupReceipt&,
+      const ExactDirectSparseStableFacetPositiveLookupReceipt&) = default;
+};
+
+// The public receipt remains directly readable, while certification is bound
+// to an inline private snapshot minted only by the forest.  Copying a genuine
+// lookup copies its snapshot; default construction and public field edits
+// cannot forge certification.  No heap allocation or digest is involved.
+class ExactDirectSparseStableFacetPositiveLookupResult final
+    : public ExactDirectSparseStableFacetPositiveLookupReceipt {
+ public:
+  ExactDirectSparseStableFacetPositiveLookupResult() noexcept = default;
+  ~ExactDirectSparseStableFacetPositiveLookupResult() = default;
+  ExactDirectSparseStableFacetPositiveLookupResult(
+      const ExactDirectSparseStableFacetPositiveLookupResult&) noexcept =
+      default;
+  ExactDirectSparseStableFacetPositiveLookupResult& operator=(
+      const ExactDirectSparseStableFacetPositiveLookupResult&) noexcept =
+      default;
+  ExactDirectSparseStableFacetPositiveLookupResult(
+      ExactDirectSparseStableFacetPositiveLookupResult&&) noexcept = default;
+  ExactDirectSparseStableFacetPositiveLookupResult& operator=(
+      ExactDirectSparseStableFacetPositiveLookupResult&&) noexcept = default;
+
+  [[nodiscard]] bool certified_observed() const noexcept;
+  [[nodiscard]] bool certified_unobserved() const noexcept;
+  [[nodiscard]] bool certified_observed_for(
+      const ExactDirectSparseStableFacetForestStamp&) const noexcept;
+  [[nodiscard]] bool certified_unobserved_for(
+      const ExactDirectSparseStableFacetForestStamp&) const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetPositiveLookupResult&,
+      const ExactDirectSparseStableFacetPositiveLookupResult&) = default;
+
+ private:
+  explicit ExactDirectSparseStableFacetPositiveLookupResult(
+      const ExactDirectSparseStableFacetPositiveLookupReceipt&) noexcept;
+
+  ExactDirectSparseStableFacetPositiveLookupReceipt private_receipt_snapshot_{};
+  bool minted_{false};
+
+  friend class ExactDirectSparseStableFacetForest;
 };
 
 class ExactDirectSparseStableFacetForestPreparedBatch {
@@ -320,8 +407,15 @@ class ExactDirectSparseStableFacetForest {
   // stable_facet_token_count namespace bound.
   [[nodiscard]] std::size_t materialized_handle_index_slot_count()
       const noexcept;
+  // Physical architecture metric only.  Like the handle index, this remains
+  // empty at initialization and grows from observed rows, never from the
+  // scalar source namespace bound.
+  [[nodiscard]] std::size_t materialized_positive_key_index_slot_count()
+      const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetLookupResult lookup(
       ExactDirectSparseStableFacetHandle) const noexcept;
+  [[nodiscard]] ExactDirectSparseStableFacetPositiveLookupResult
+  lookup_positive_full_key(const ExactDirectSparseFacetKey&) const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestPreparationResult
   prepare_batch(
       std::span<const ExactDirectSparseStableFacetInsertion>,

@@ -362,6 +362,125 @@ struct PreparedTicketRegistry {
   return true;
 }
 
+enum class PositiveKeyIndexSearchDisposition : std::uint8_t {
+  unobserved,
+  observed,
+  contradiction,
+};
+
+struct PositiveKeyIndexSearchResult {
+  PositiveKeyIndexSearchDisposition disposition{
+      PositiveKeyIndexSearchDisposition::contradiction};
+  std::size_t row{};
+  std::size_t slot_visit_count{};
+  std::size_t full_key_comparison_count{};
+};
+
+[[nodiscard]] PositiveKeyIndexSearchResult positive_key_index_search(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<const std::size_t> slots,
+    const ExactDirectSparseFacetKey& key,
+    std::uint64_t fingerprint_mask) noexcept {
+  PositiveKeyIndexSearchResult result;
+  if (slots.empty()) {
+    result.disposition = entries.empty()
+                             ? PositiveKeyIndexSearchDisposition::unobserved
+                             : PositiveKeyIndexSearchDisposition::contradiction;
+    return result;
+  }
+  if (!power_of_two(slots.size())) {
+    return result;
+  }
+  const std::uint64_t requested_fingerprint =
+      fingerprint_exact_direct_sparse_facet_key(key, fingerprint_mask);
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot_index =
+      static_cast<std::size_t>(requested_fingerprint) & mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    ++result.slot_visit_count;
+    const std::size_t row_plus_one = slots[slot_index];
+    if (row_plus_one == 0U) {
+      result.disposition = PositiveKeyIndexSearchDisposition::unobserved;
+      return result;
+    }
+    const std::size_t row = row_plus_one - 1U;
+    if (row >= entries.size()) {
+      return result;
+    }
+    const auto& stored_key = entries[row].facet_key;
+    if (fingerprint_exact_direct_sparse_facet_key(
+            stored_key, fingerprint_mask) == requested_fingerprint) {
+      ++result.full_key_comparison_count;
+      if (stored_key == key) {
+        result.disposition = PositiveKeyIndexSearchDisposition::observed;
+        result.row = row;
+        return result;
+      }
+    }
+    slot_index = (slot_index + 1U) & mask;
+  }
+  return result;
+}
+
+[[nodiscard]] bool insert_positive_key_index_row(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<std::size_t> slots,
+    std::size_t row,
+    std::uint64_t fingerprint_mask) noexcept {
+  if (row >= entries.size() || row == std::numeric_limits<std::size_t>::max() ||
+      slots.empty() || !power_of_two(slots.size())) {
+    return false;
+  }
+  const auto& key = entries[row].facet_key;
+  const std::uint64_t fingerprint =
+      fingerprint_exact_direct_sparse_facet_key(key, fingerprint_mask);
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot_index = static_cast<std::size_t>(fingerprint) & mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    const std::size_t row_plus_one = slots[slot_index];
+    if (row_plus_one == 0U) {
+      slots[slot_index] = row + 1U;
+      return true;
+    }
+    const std::size_t existing_row = row_plus_one - 1U;
+    if (existing_row >= entries.size()) {
+      return false;
+    }
+    const auto& existing_key = entries[existing_row].facet_key;
+    if (fingerprint_exact_direct_sparse_facet_key(
+            existing_key, fingerprint_mask) == fingerprint &&
+        existing_key == key) {
+      return false;
+    }
+    slot_index = (slot_index + 1U) & mask;
+  }
+  return false;
+}
+
+[[nodiscard]] bool rebuild_positive_key_index(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<std::size_t> slots,
+    std::uint64_t fingerprint_mask) noexcept {
+  std::fill(slots.begin(), slots.end(), 0U);
+  for (std::size_t row = 0U; row < entries.size(); ++row) {
+    if (!insert_positive_key_index_row(
+            entries, slots, row, fingerprint_mask)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+[[nodiscard]] bool key_then_handle_insertion_less(
+    const ExactDirectSparseStableFacetInsertion& left,
+    const ExactDirectSparseStableFacetInsertion& right) noexcept {
+  if (left.facet_key != right.facet_key) {
+    return key_less(left.facet_key, right.facet_key);
+  }
+  return left.stable_source_facet_token_index <
+         right.stable_source_facet_token_index;
+}
+
 [[nodiscard]] bool insertion_span_contains_handle(
     std::span<const ExactDirectSparseStableFacetInsertion> insertions,
     ExactDirectSparseStableFacetHandle handle) noexcept {
@@ -421,6 +540,12 @@ struct ExactDirectSparseStableFacetForest::Impl {
   // append-only row itself, so the table does not duplicate the handle payload.
   std::vector<std::size_t> handle_index_slots;
   std::size_t handle_index_entry_count{};
+  // Open-addressed full-key positive index.  Like the handle index, every
+  // occupied slot stores row_index + 1 only.  The row's complete key is the
+  // sole identity authority; the configured fingerprint is just a probe
+  // accelerator and is never persisted or digested.
+  std::vector<std::size_t> positive_key_index_slots;
+  std::size_t positive_key_index_entry_count{};
   std::shared_ptr<PreparedTicketRegistry> registry;
   std::size_t epoch{};
   std::size_t committed_batch_count{};
@@ -430,6 +555,7 @@ struct ExactDirectSparseStableFacetForest::Impl {
   std::size_t committed_effective_union_count{};
   contract::CanonicalId semantic_history_digest{};
   bool initialized{false};
+  bool poisoned{false};
 
   [[nodiscard]] ExactDirectSparseStableFacetForestStamp stamp()
       const noexcept {
@@ -528,6 +654,38 @@ struct ExactDirectSparseStableFacetForest::Impl {
     handle_index_entry_count = entries.size();
     return true;
   }
+
+  [[nodiscard]] bool ensure_positive_key_index_capacity(
+      std::size_t required_entry_count) {
+    std::size_t required_slots = 0U;
+    if (!required_handle_index_slot_count(
+            required_entry_count, required_slots)) {
+      return false;
+    }
+    if (required_slots <= positive_key_index_slots.size()) {
+      return true;
+    }
+    std::vector<std::size_t> replacement(required_slots, 0U);
+    if (!rebuild_positive_key_index(
+            entries,
+            replacement,
+            config.positive_key_fingerprint_mask)) {
+      return false;
+    }
+    positive_key_index_slots.swap(replacement);
+    return true;
+  }
+
+  [[nodiscard]] bool rebuild_current_positive_key_index() noexcept {
+    if (!rebuild_positive_key_index(
+            entries,
+            positive_key_index_slots,
+            config.positive_key_fingerprint_mask)) {
+      return false;
+    }
+    positive_key_index_entry_count = entries.size();
+    return true;
+  }
 };
 
 static_assert(std::is_nothrow_move_constructible_v<
@@ -554,6 +712,66 @@ bool ExactDirectSparseStableFacetLookupResult::certified_unobserved()
          !public_status_claimed &&
          disposition ==
              ExactDirectSparseStableFacetLookupDisposition::unobserved;
+}
+
+ExactDirectSparseStableFacetPositiveLookupResult::
+    ExactDirectSparseStableFacetPositiveLookupResult(
+        const ExactDirectSparseStableFacetPositiveLookupReceipt& receipt)
+    noexcept
+    : ExactDirectSparseStableFacetPositiveLookupReceipt(receipt),
+      private_receipt_snapshot_(receipt),
+      minted_(
+          receipt.disposition ==
+              ExactDirectSparseStableFacetPositiveLookupDisposition::observed ||
+          receipt.disposition ==
+              ExactDirectSparseStableFacetPositiveLookupDisposition::
+                  unobserved) {}
+
+bool ExactDirectSparseStableFacetPositiveLookupResult::certified_observed()
+    const noexcept {
+  return minted_ &&
+         static_cast<const ExactDirectSparseStableFacetPositiveLookupReceipt&>(
+             *this) == private_receipt_snapshot_ &&
+         forest_stamp.session_instance_id != 0U &&
+         forest_certified_at_entry && requested_key_canonical &&
+         lookup_completed_without_mutation &&
+         fingerprint_used_only_as_accelerator &&
+         complete_key_comparison_authoritative &&
+         immutable_key_handle_binding_observed &&
+         root_resolved_without_mutation && full_key_comparison_count != 0U &&
+         component_size != 0U && !source_exactness_claimed &&
+         !public_status_claimed &&
+         disposition ==
+             ExactDirectSparseStableFacetPositiveLookupDisposition::observed;
+}
+
+bool ExactDirectSparseStableFacetPositiveLookupResult::certified_unobserved()
+    const noexcept {
+  return minted_ &&
+         static_cast<const ExactDirectSparseStableFacetPositiveLookupReceipt&>(
+             *this) == private_receipt_snapshot_ &&
+         forest_stamp.session_instance_id != 0U &&
+         forest_certified_at_entry && requested_key_canonical &&
+         lookup_completed_without_mutation &&
+         fingerprint_used_only_as_accelerator &&
+         complete_key_comparison_authoritative &&
+         !immutable_key_handle_binding_observed &&
+         root_resolved_without_mutation && component_size == 0U &&
+         !source_exactness_claimed && !public_status_claimed &&
+         disposition == ExactDirectSparseStableFacetPositiveLookupDisposition::
+                            unobserved;
+}
+
+bool ExactDirectSparseStableFacetPositiveLookupResult::certified_observed_for(
+    const ExactDirectSparseStableFacetForestStamp& expected_stamp)
+    const noexcept {
+  return certified_observed() && forest_stamp == expected_stamp;
+}
+
+bool ExactDirectSparseStableFacetPositiveLookupResult::certified_unobserved_for(
+    const ExactDirectSparseStableFacetForestStamp& expected_stamp)
+    const noexcept {
+  return certified_unobserved() && forest_stamp == expected_stamp;
 }
 
 ExactDirectSparseStableFacetForestPreparedBatch::
@@ -685,9 +903,17 @@ bool ExactDirectSparseStableFacetForest::certified_structure_only_forest()
        (power_of_two(impl_->handle_index_slots.size()) &&
         impl_->entries.size() <= impl_->handle_index_slots.size() / 2U)) &&
       impl_->handle_index_entry_count == impl_->entries.size();
+  const bool positive_key_index_shape_valid =
+      impl_ != nullptr &&
+      ((impl_->positive_key_index_slots.empty() && impl_->entries.empty()) ||
+       (power_of_two(impl_->positive_key_index_slots.size()) &&
+        impl_->entries.size() <=
+            impl_->positive_key_index_slots.size() / 2U)) &&
+      impl_->positive_key_index_entry_count == impl_->entries.size();
   return impl_ != nullptr && impl_->initialized &&
-         impl_->session_instance_id != 0U && impl_->registry != nullptr &&
-         handle_index_shape_valid &&
+         !impl_->poisoned && impl_->session_instance_id != 0U &&
+         impl_->registry != nullptr &&
+         handle_index_shape_valid && positive_key_index_shape_valid &&
          impl_->entries.size() <= impl_->budget.maximum_observed_handle_count &&
          impl_->entries.size() <= impl_->config.stable_facet_token_count &&
          impl_->component_count <= impl_->entries.size() &&
@@ -725,6 +951,11 @@ std::size_t ExactDirectSparseStableFacetForest::
   return impl_ == nullptr ? 0U : impl_->handle_index_slots.size();
 }
 
+std::size_t ExactDirectSparseStableFacetForest::
+    materialized_positive_key_index_slot_count() const noexcept {
+  return impl_ == nullptr ? 0U : impl_->positive_key_index_slots.size();
+}
+
 ExactDirectSparseStableFacetLookupResult
 ExactDirectSparseStableFacetForest::lookup(
     ExactDirectSparseStableFacetHandle handle) const noexcept {
@@ -759,6 +990,77 @@ ExactDirectSparseStableFacetForest::lookup(
   result.immutable_handle_key_binding_observed = true;
   result.disposition = ExactDirectSparseStableFacetLookupDisposition::observed;
   return result;
+}
+
+ExactDirectSparseStableFacetPositiveLookupResult
+ExactDirectSparseStableFacetForest::lookup_positive_full_key(
+    const ExactDirectSparseFacetKey& key) const noexcept {
+  ExactDirectSparseStableFacetPositiveLookupResult result;
+  result.requested_key = key;
+  result.forest_stamp = current_stamp();
+  result.forest_certified_at_entry = certified_structure_only_forest();
+  if (!result.forest_certified_at_entry) {
+    return result;
+  }
+  result.requested_key_canonical = canonical_key(key);
+  if (!result.requested_key_canonical) {
+    result.lookup_completed_without_mutation = true;
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveLookupDisposition::
+            input_key_rejected;
+    return result;
+  }
+  result.fingerprint_used_only_as_accelerator = true;
+  result.complete_key_comparison_authoritative = true;
+  const PositiveKeyIndexSearchResult found = positive_key_index_search(
+      impl_->entries,
+      impl_->positive_key_index_slots,
+      key,
+      impl_->config.positive_key_fingerprint_mask);
+  result.slot_visit_count = found.slot_visit_count;
+  result.full_key_comparison_count = found.full_key_comparison_count;
+  if (found.disposition == PositiveKeyIndexSearchDisposition::contradiction) {
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveLookupDisposition::contradiction;
+    return result;
+  }
+  result.lookup_completed_without_mutation = true;
+  result.root_resolved_without_mutation = true;
+  if (found.disposition == PositiveKeyIndexSearchDisposition::unobserved) {
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveLookupDisposition::unobserved;
+    return ExactDirectSparseStableFacetPositiveLookupResult{
+        static_cast<
+            const ExactDirectSparseStableFacetPositiveLookupReceipt&>(
+            result)};
+  }
+  if (found.row >= impl_->entries.size()) {
+    result.lookup_completed_without_mutation = false;
+    result.root_resolved_without_mutation = false;
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveLookupDisposition::contradiction;
+    return result;
+  }
+  const auto& entry = impl_->entries[found.row];
+  const auto root = impl_->root_index(
+      entry.stable_source_facet_token_index);
+  if (!root.has_value()) {
+    result.lookup_completed_without_mutation = false;
+    result.root_resolved_without_mutation = false;
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveLookupDisposition::contradiction;
+    return result;
+  }
+  result.bound_handle = entry.stable_source_facet_token_index;
+  result.root_handle =
+      impl_->entries[*root].stable_source_facet_token_index;
+  result.component_size = impl_->entries[*root].component_size;
+  result.immutable_key_handle_binding_observed = true;
+  result.disposition =
+      ExactDirectSparseStableFacetPositiveLookupDisposition::observed;
+  return ExactDirectSparseStableFacetPositiveLookupResult{
+      static_cast<const ExactDirectSparseStableFacetPositiveLookupReceipt&>(
+          result)};
 }
 
 ExactDirectSparseStableFacetForestPreparationResult
@@ -866,6 +1168,61 @@ ExactDirectSparseStableFacetForest::prepare_batch(
         input_insertions.begin(), input_insertions.end());
     std::vector<ExactDirectSparseStableFacetUnion> unions(
         input_unions.begin(), input_unions.end());
+    // First certify the inverse key binding.  This sort is preparation-only;
+    // the vector is restored to the historical handle/key canonical order
+    // before digesting, so the logical batch/history digest remains v1.
+    std::sort(
+        insertions.begin(), insertions.end(), key_then_handle_insertion_less);
+    for (std::size_t begin = 0U; begin < insertions.size();) {
+      std::size_t end = begin;
+      if (!checked_increment(end)) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparationDecision::
+                no_capacity_overflow;
+        return output;
+      }
+      while (end < insertions.size() &&
+             insertions[end].facet_key == insertions[begin].facet_key) {
+        if (insertions[end].stable_source_facet_token_index !=
+            insertions[begin].stable_source_facet_token_index) {
+          output.decision =
+              ExactDirectSparseStableFacetForestPreparationDecision::
+                  contradiction_stable_handle_key_collision;
+          return output;
+        }
+        if (!checked_increment(end)) {
+          output.decision =
+              ExactDirectSparseStableFacetForestPreparationDecision::
+                  no_capacity_overflow;
+          return output;
+        }
+      }
+      const PositiveKeyIndexSearchResult existing_key =
+          positive_key_index_search(
+              impl_->entries,
+              impl_->positive_key_index_slots,
+              insertions[begin].facet_key,
+              impl_->config.positive_key_fingerprint_mask);
+      const auto existing_handle = handle_index_row(
+          impl_->entries,
+          impl_->handle_index_slots,
+          insertions[begin].stable_source_facet_token_index);
+      if (existing_key.disposition ==
+              PositiveKeyIndexSearchDisposition::contradiction ||
+          (existing_key.disposition ==
+               PositiveKeyIndexSearchDisposition::observed &&
+           (impl_->entries[existing_key.row]
+                    .stable_source_facet_token_index !=
+                insertions[begin].stable_source_facet_token_index ||
+            !existing_handle.has_value() ||
+            *existing_handle != existing_key.row))) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparationDecision::
+                contradiction_stable_handle_key_collision;
+        return output;
+      }
+      begin = end;
+    }
     std::sort(insertions.begin(), insertions.end(), insertion_less);
     for (auto& operation : unions) {
       if (operation.right_handle < operation.left_handle) {
@@ -993,13 +1350,18 @@ ExactDirectSparseStableFacetForest::prepare_batch(
             impl_->entries.capacity(),
             next_observed_count,
             impl_->budget.maximum_observed_handle_count,
-            target_entry_capacity) ||
-        !impl_->ensure_handle_index_capacity(next_observed_count)) {
+            target_entry_capacity)) {
       output.decision = ExactDirectSparseStableFacetForestPreparationDecision::
           no_capacity_overflow;
       return output;
     }
     impl_->entries.reserve(target_entry_capacity);
+    if (!impl_->ensure_handle_index_capacity(next_observed_count) ||
+        !impl_->ensure_positive_key_index_capacity(next_observed_count)) {
+      output.decision = ExactDirectSparseStableFacetForestPreparationDecision::
+          no_capacity_overflow;
+      return output;
+    }
     auto prepared = std::make_unique<
         ExactDirectSparseStableFacetForestPreparedBatch::Impl>();
     prepared->registry = impl_->registry;
@@ -1078,6 +1440,7 @@ ExactDirectSparseStableFacetForest::commit(
   std::size_t post_component_upper_bound = 0U;
   std::size_t effective_union_upper_bound = 0U;
   std::size_t required_handle_index_slots = 0U;
+  std::size_t required_positive_key_index_slots = 0U;
   if (!checked_add(
           impl_->entries.size(),
           prepared.new_handle_count,
@@ -1109,7 +1472,12 @@ ExactDirectSparseStableFacetForest::commit(
       !required_handle_index_slot_count(
           required_capacity, required_handle_index_slots) ||
       required_handle_index_slots > impl_->handle_index_slots.size() ||
-      impl_->handle_index_entry_count != impl_->entries.size()) {
+      !required_handle_index_slot_count(
+          required_capacity, required_positive_key_index_slots) ||
+      required_positive_key_index_slots >
+          impl_->positive_key_index_slots.size() ||
+      impl_->handle_index_entry_count != impl_->entries.size() ||
+      impl_->positive_key_index_entry_count != impl_->entries.size()) {
     output.decision =
         ExactDirectSparseStableFacetForestCommitDecision::no_ticket_rejected;
     return output;
@@ -1117,6 +1485,12 @@ ExactDirectSparseStableFacetForest::commit(
   static_cast<void>(effective_union_upper_bound);
 
   const std::size_t pre_entry_count = impl_->entries.size();
+  const auto rollback_new_rows_and_both_indexes = [&]() noexcept {
+    impl_->entries.resize(pre_entry_count);
+    const bool handle_restored = impl_->rebuild_current_handle_index();
+    const bool key_restored = impl_->rebuild_current_positive_key_index();
+    return handle_restored && key_restored;
+  };
   for (std::size_t begin = 0U; begin < prepared.insertions.size();) {
     std::size_t end = begin;
     if (!checked_increment(end)) {
@@ -1147,9 +1521,15 @@ ExactDirectSparseStableFacetForest::commit(
       if (!insert_handle_index_row(
               impl_->entries,
               impl_->handle_index_slots,
-              impl_->entries.size() - 1U)) {
-        impl_->entries.resize(pre_entry_count);
-        static_cast<void>(impl_->rebuild_current_handle_index());
+              impl_->entries.size() - 1U) ||
+          !insert_positive_key_index_row(
+              impl_->entries,
+              impl_->positive_key_index_slots,
+              impl_->entries.size() - 1U,
+              impl_->config.positive_key_fingerprint_mask)) {
+        if (!rollback_new_rows_and_both_indexes()) {
+          impl_->poisoned = true;
+        }
         output.inserted_handle_count = 0U;
         output.decision =
             ExactDirectSparseStableFacetForestCommitDecision::
@@ -1157,6 +1537,7 @@ ExactDirectSparseStableFacetForest::commit(
         return output;
       }
       ++impl_->handle_index_entry_count;
+      ++impl_->positive_key_index_entry_count;
       static_cast<void>(checked_increment(output.inserted_handle_count));
     }
     begin = end;
@@ -1255,7 +1636,9 @@ initialize_exact_direct_sparse_stable_facet_forest(
         ExactDirectSparseStableFacetForest{std::move(impl)});
     output.sparse_empty_state_initialized = true;
     output.namespace_capacity_not_materialized =
-        output.forest->observed_entries().empty();
+        output.forest->observed_entries().empty() &&
+        output.forest->materialized_handle_index_slot_count() == 0U &&
+        output.forest->materialized_positive_key_index_slot_count() == 0U;
     output.decision = ExactDirectSparseStableFacetForestInitializationDecision::
         complete_empty_sparse_structure;
     return output;
