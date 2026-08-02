@@ -3564,6 +3564,47 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+  STATIC
+    src/cpu/hierarchy/direct_morse_resident_all_orders_vertical_bridge.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_resident_all_orders_vertical_bridge
+  ALIAS morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+)
+set_target_properties(
+  morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+  PROPERTIES
+    EXPORT_NAME direct_morse_resident_all_orders_vertical_bridge
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_resident_all_orders_vertical_bridge PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+  PUBLIC morsehgp3d::direct_morse_resident_k2_k1_closed_cut_bridge
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_star_h0_retraction_differential
   STATIC
     src/cpu/hierarchy/direct_star_h0_retraction_differential.cpp
@@ -6050,6 +6091,7 @@ install(
     morsehgp3d_hierarchy
     morsehgp3d_direct_k1_boruvka_closed_cut_session
     morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
+    morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
     morsehgp3d_yao48_ranked_pair_candidates_reference
     morsehgp3d_exact_ranked_diametral_pair_catalog_reference
     morsehgp3d_sanitizers

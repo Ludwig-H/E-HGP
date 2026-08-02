@@ -2469,3 +2469,16 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - n'autoriser ensuite que `1 000 000`, `10 000 001`, `30 000 000` dans cet ordre; chaque taille exige exactement un checkpoint forcé, un nouveau processus, une recertification et un rejeu frais, et l'égalité des digests résident v7, K1, horizontal, toutes verticales, Hartigan et `at_least20`;
 - interrompre une transaction puis reprendre exactement le même checkpoint et le même wrapper; faire suivre un reçu invalide et vérifier dans les deux cas que seul un reçu entièrement validé avance `HEAD`;
 - avec le plan livré, refuser avant lecture du binaire ou création du spool; aucun faux reçu, benchmark, chrono composant ou test hôte ne peut ouvrir le gate, promouvoir `public_status`, lancer GCP ou satisfaire Phase 16.
+
+### T15-ALL-ORDERS-VERTICAL — couture résidente adjacente et scellement terminal
+
+- ordonner le plan par niveau rationnel exact puis ordre, et vérifier qu'au même niveau chaque ordre cible inférieur est déjà committé avant la projection de l'ordre source;
+- pour chaque groupe d'ordre au moins trois, re-sonder toutes les facettes témoins des racines antérieures, projeter toutes les suppressions codimension un de chaque facette nouvelle et exiger une racine cible live unique;
+- conserver une facette cible canonique persistante par racine résultante, puis re-sonder chaque témoin au scellement après toutes les fusions propres à la cible;
+- rejouer au terminal les comptes de lots, l'historique locator et les unions, puis composer les images finales sans atlas global de facettes, cofaces ou incidences;
+- drainer la coupe K1 jusqu'au niveau terminal, mémoriser le reçu de drain et vérifier qu'un second scellement est idempotent sans perte du compte de suffixe;
+- accepter un drain K1 vide avec une source K2 complète, puisque les arêtes EMST sont Gabriel, et exercer séparément un plan résident vide produisant un suffixe terminal K1 non vide;
+- sur E5, exiger un groupe supérieur non vide, trente suppressions codimension un sur trente, un témoin terminal valide et la réussite des régressions K1 et K2--K1;
+- ne positionner `all_naturality_squares_replayed` et `vertical_maps_complete` que dans le sceau final; garder faux M.1, `global_morse_obligation_replayed` et tout statut public;
+- transmettre la capability source normalisée v7 live et obliger la future session produit à l'exiger vraie avant tout gate de campagne;
+- vérifier qu'aucune matrice de paires, Star, Gamma, cellule, catalogue global de facettes, cofaces, incidences ou Delaunay ordinaire ou d'ordre supérieur n'est possédé par la couture.

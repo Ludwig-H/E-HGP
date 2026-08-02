@@ -452,6 +452,13 @@ restore_decision_from_initialization(
 
 }  // namespace
 
+contract::CanonicalId
+canonical_exact_direct_k1_closed_cut_source_forest_digest(
+    const contract::CanonicalId& canonical_cloud_digest,
+    const K1CompactForest& forest) {
+  return compute_source_forest_digest(canonical_cloud_digest, forest);
+}
+
 struct ExactDirectK1BoruvkaClosedCutSession::Impl {
   struct Seal {
     std::uint64_t session_instance_id{};
@@ -609,6 +616,26 @@ std::size_t ExactDirectK1BoruvkaClosedCutSession::point_count() const
   return impl_ == nullptr ? 0U : impl_->forest.point_count;
 }
 
+std::size_t ExactDirectK1BoruvkaClosedCutSession::distinct_level_count() const
+    noexcept {
+  return impl_ == nullptr ? 0U : impl_->forest.levels.size();
+}
+
+bool ExactDirectK1BoruvkaClosedCutSession::terminal_complete() const noexcept {
+  return ready() && impl_->committed_level_cursor == impl_->forest.levels.size();
+}
+
+contract::CanonicalId
+ExactDirectK1BoruvkaClosedCutSession::source_forest_digest() const noexcept {
+  return impl_ == nullptr ? contract::CanonicalId{}
+                          : impl_->source_forest_digest;
+}
+
+bool ExactDirectK1BoruvkaClosedCutSession::verify_source_forest_digest(
+    const contract::CanonicalId& digest) const noexcept {
+  return ready() && digest == impl_->source_forest_digest;
+}
+
 ExactDirectK1BoruvkaClosedCutSessionStamp
 ExactDirectK1BoruvkaClosedCutSession::current_stamp() const {
   if (impl_ == nullptr) {
@@ -728,6 +755,20 @@ ExactDirectK1BoruvkaClosedCutSession::advance_closed_to(
             no_exact_comparison_failed;
     return receipt;
   }
+}
+
+ExactDirectK1BoruvkaClosedCutAdvanceReceipt
+ExactDirectK1BoruvkaClosedCutSession::advance_closed_to_terminal() & {
+  if (!ready()) {
+    ExactDirectK1BoruvkaClosedCutAdvanceReceipt receipt;
+    receipt.decision =
+        ExactDirectK1BoruvkaClosedCutAdvanceDecision::no_session_not_ready;
+    return receipt;
+  }
+  if (impl_->forest.levels.empty() || terminal_complete()) {
+    return advance_closed_to(impl_->closed_squared_level);
+  }
+  return advance_closed_to(impl_->forest.levels.back());
 }
 
 ExactDirectK1BoruvkaClosedCutRootQueryResult
@@ -1058,7 +1099,8 @@ build_exact_direct_k1_boruvka_closed_cut_session(
       return output;
     }
     output.compact_k1_equal_level_forest_certified = true;
-    output.source_forest_digest = compute_source_forest_digest(
+    output.source_forest_digest =
+        canonical_exact_direct_k1_closed_cut_source_forest_digest(
         output.canonical_cloud_digest, forest);
     std::vector<contract::CanonicalId> history_prefixes =
         build_history_prefixes(forest, output.source_forest_digest);

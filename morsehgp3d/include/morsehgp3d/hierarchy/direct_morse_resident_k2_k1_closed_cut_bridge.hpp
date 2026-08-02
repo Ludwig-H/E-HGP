@@ -247,6 +247,48 @@ struct ExactDirectMorseResidentK2K1ClosedCutCommitResult {
   [[nodiscard]] bool certified_committed_batch() const noexcept;
 };
 
+enum class ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision
+    : std::uint8_t {
+  not_certified,
+  no_bridge_not_ready,
+  no_resident_not_exhausted,
+  no_owned_k1_terminal_advance_rejected,
+  complete_certified_owned_k1_terminal_target_history,
+};
+
+// Allocation-free receipt for the owned K1 target-only suffix.  The live K1
+// session verifies the detailed advance receipt internally; only stable
+// counters and digests cross this seam.
+struct ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult {
+  std::uint32_t schema_version{
+      direct_morse_resident_k2_k1_closed_cut_bridge_schema_version};
+  std::uint64_t k1_session_instance_id{};
+  std::size_t pre_k1_level_cursor{};
+  std::size_t terminal_k1_level_cursor{};
+  std::size_t distinct_k1_level_count{};
+  std::size_t consumed_target_only_k1_level_count{};
+  contract::CanonicalId k1_source_forest_digest{};
+  contract::CanonicalId terminal_k1_history_digest{};
+  bool resident_cursor_exhausted{false};
+  bool live_k1_advance_receipt_verified{false};
+  bool every_remaining_k1_equal_level_batch_consumed{false};
+  bool terminal_k1_cursor_complete{false};
+  bool owned_k1_state_mutated{false};
+  bool global_facet_coface_or_gamma_catalog_materialized{false};
+  bool ordinary_or_higher_order_delaunay_materialized{false};
+  bool public_status_claimed{false};
+  ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision decision{
+      ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+          not_certified};
+
+  [[nodiscard]] bool certified_terminal_target_history() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult&,
+      const ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult&) =
+      default;
+};
+
 class ExactDirectMorseResidentK2K1ClosedCutBridge;
 struct ExactDirectMorseResidentK2K1ClosedCutInitialization;
 
@@ -289,6 +331,24 @@ class ExactDirectMorseResidentK2K1ClosedCutBridge {
   [[nodiscard]] const std::vector<
       ExactDirectMorseResidentK2K1ClosedCutBatchRecord>&
   committed_k2_batches() const noexcept;
+  // These facts are read directly from the privately owned resident session.
+  // They are observations of that live capability, never caller assertions.
+  [[nodiscard]] ExactDirectMorseUnifiedResidentSourceKind resident_source_kind()
+      const noexcept;
+  [[nodiscard]] bool resident_normalized_direct_source_session() const noexcept;
+  [[nodiscard]] ExactDirectNormalizedH0ResidentRetractionMode
+  resident_normalized_h0_retraction_mode() const noexcept;
+  [[nodiscard]] bool
+  resident_normalized_horizontal_incidence_reduction_certified()
+      const noexcept;
+  [[nodiscard]] ExactDirectK1BoruvkaClosedCutSessionStamp
+  owned_k1_current_stamp() const;
+  [[nodiscard]] contract::CanonicalId owned_k1_source_forest_digest()
+      const noexcept;
+  [[nodiscard]] bool verify_owned_k1_source_forest_digest(
+      const contract::CanonicalId&) const noexcept;
+  [[nodiscard]] std::size_t owned_k1_distinct_level_count() const noexcept;
+  [[nodiscard]] bool owned_k1_terminal_complete() const noexcept;
   // These forwarded resident views follow the resident session lifetime
   // contract: do not retain them across prepare, commit, move or destruction.
   [[nodiscard]] const ExactDirectSparseUnifiedLevelPlanResult& resident_plan()
@@ -308,6 +368,9 @@ class ExactDirectMorseResidentK2K1ClosedCutBridge {
   prepare_next();
   [[nodiscard]] ExactDirectMorseResidentK2K1ClosedCutCommitResult commit(
       ExactDirectMorseResidentK2K1ClosedCutPreparedBatch&&) noexcept;
+  [[nodiscard]]
+  ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult
+  seal_owned_k1_terminal_target_history() noexcept;
 
  private:
   explicit ExactDirectMorseResidentK2K1ClosedCutBridge(

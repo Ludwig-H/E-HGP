@@ -274,10 +274,24 @@ struct ExactDirectMorseResidentK2K1ClosedCutBridge::Impl {
   ExactDirectMorseResidentK2K1ClosedCutBridgeStamp committed_stamp{};
   std::vector<ExactDirectMorseResidentK2K1ClosedCutBatchRecord>
       committed_k2_batches;
+  std::optional<ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult>
+      terminal_k1_target_history;
   bool initialized{false};
 
   [[nodiscard]] bool structurally_ready() const noexcept {
-    return initialized && seal != nullptr &&
+    const bool terminal_history_ready =
+        !terminal_k1_target_history.has_value() ||
+        (terminal_k1_target_history->certified_terminal_target_history() &&
+         resident.complete() && k1.terminal_complete() &&
+         terminal_k1_target_history->k1_source_forest_digest ==
+             k1.source_forest_digest() &&
+         terminal_k1_target_history->distinct_k1_level_count ==
+             k1.distinct_level_count() &&
+         committed_stamp.committed_k1_stamp.committed_level_cursor ==
+             terminal_k1_target_history->terminal_k1_level_cursor &&
+         committed_stamp.committed_k1_stamp.committed_history_digest ==
+             terminal_k1_target_history->terminal_k1_history_digest);
+    return terminal_history_ready && initialized && seal != nullptr &&
            seal->bridge_session_instance_id != 0U &&
            seal->resident_session_authority_id != 0U &&
            seal->k1_session_instance_id != 0U &&
@@ -479,6 +493,30 @@ bool ExactDirectMorseResidentK2K1ClosedCutCommitResult::
          (transit || k2);
 }
 
+bool ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult::
+    certified_terminal_target_history() const noexcept {
+  return schema_version ==
+             direct_morse_resident_k2_k1_closed_cut_bridge_schema_version &&
+         k1_session_instance_id != 0U &&
+         pre_k1_level_cursor <= terminal_k1_level_cursor &&
+         terminal_k1_level_cursor == distinct_k1_level_count &&
+         consumed_target_only_k1_level_count ==
+             terminal_k1_level_cursor - pre_k1_level_cursor &&
+         k1_source_forest_digest != contract::CanonicalId{} &&
+         terminal_k1_history_digest != contract::CanonicalId{} &&
+         resident_cursor_exhausted && live_k1_advance_receipt_verified &&
+         every_remaining_k1_equal_level_batch_consumed &&
+         terminal_k1_cursor_complete &&
+         owned_k1_state_mutated ==
+             (consumed_target_only_k1_level_count != 0U) &&
+         !global_facet_coface_or_gamma_catalog_materialized &&
+         !ordinary_or_higher_order_delaunay_materialized &&
+         !public_status_claimed &&
+         decision ==
+             ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+                 complete_certified_owned_k1_terminal_target_history;
+}
+
 ExactDirectMorseResidentK2K1ClosedCutBridge::
     ExactDirectMorseResidentK2K1ClosedCutBridge() noexcept = default;
 ExactDirectMorseResidentK2K1ClosedCutBridge::
@@ -524,6 +562,69 @@ ExactDirectMorseResidentK2K1ClosedCutBridge::committed_k2_batches() const
       ExactDirectMorseResidentK2K1ClosedCutBatchRecord>
       empty;
   return impl_ == nullptr ? empty : impl_->committed_k2_batches;
+}
+
+ExactDirectMorseUnifiedResidentSourceKind
+ExactDirectMorseResidentK2K1ClosedCutBridge::resident_source_kind() const
+    noexcept {
+  return impl_ == nullptr
+             ? ExactDirectMorseUnifiedResidentSourceKind::
+                   successive_incidence_star
+             : impl_->resident.source_kind();
+}
+
+bool ExactDirectMorseResidentK2K1ClosedCutBridge::
+    resident_normalized_direct_source_session() const noexcept {
+  return impl_ != nullptr && impl_->resident.normalized_direct_source_session();
+}
+
+ExactDirectNormalizedH0ResidentRetractionMode
+ExactDirectMorseResidentK2K1ClosedCutBridge::
+    resident_normalized_h0_retraction_mode() const noexcept {
+  return impl_ == nullptr
+             ? ExactDirectNormalizedH0ResidentRetractionMode::
+                   not_applicable_successive_incidence_star
+             : impl_->resident.normalized_h0_retraction_mode();
+}
+
+bool ExactDirectMorseResidentK2K1ClosedCutBridge::
+    resident_normalized_horizontal_incidence_reduction_certified()
+        const noexcept {
+  return impl_ != nullptr &&
+         impl_->resident
+             .normalized_horizontal_incidence_reduction_certified();
+}
+
+ExactDirectK1BoruvkaClosedCutSessionStamp
+ExactDirectMorseResidentK2K1ClosedCutBridge::owned_k1_current_stamp() const {
+  if (!ready()) {
+    throw std::logic_error("the K2-to-K1 resident bridge is not ready");
+  }
+  return impl_->k1.current_stamp();
+}
+
+contract::CanonicalId
+ExactDirectMorseResidentK2K1ClosedCutBridge::owned_k1_source_forest_digest()
+    const noexcept {
+  return impl_ == nullptr ? contract::CanonicalId{}
+                          : impl_->k1.source_forest_digest();
+}
+
+bool ExactDirectMorseResidentK2K1ClosedCutBridge::
+    verify_owned_k1_source_forest_digest(
+        const contract::CanonicalId& digest) const noexcept {
+  return impl_ != nullptr && impl_->k1.verify_source_forest_digest(digest);
+}
+
+std::size_t
+ExactDirectMorseResidentK2K1ClosedCutBridge::owned_k1_distinct_level_count()
+    const noexcept {
+  return impl_ == nullptr ? 0U : impl_->k1.distinct_level_count();
+}
+
+bool ExactDirectMorseResidentK2K1ClosedCutBridge::owned_k1_terminal_complete()
+    const noexcept {
+  return impl_ != nullptr && impl_->k1.terminal_complete();
 }
 
 const ExactDirectSparseUnifiedLevelPlanResult&
@@ -955,6 +1056,87 @@ ExactDirectMorseResidentK2K1ClosedCutBridge::commit(
     std::terminate();
   }
   return output;
+}
+
+ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult
+ExactDirectMorseResidentK2K1ClosedCutBridge::
+    seal_owned_k1_terminal_target_history() noexcept {
+  ExactDirectMorseResidentK2K1ClosedCutTerminalTargetResult output;
+  if (!ready()) {
+    output.decision =
+        ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+            no_bridge_not_ready;
+    return output;
+  }
+  if (impl_->terminal_k1_target_history.has_value()) {
+    return *impl_->terminal_k1_target_history;
+  }
+  if (!impl_->resident.complete()) {
+    output.decision =
+        ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+            no_resident_not_exhausted;
+    return output;
+  }
+  output.resident_cursor_exhausted = true;
+  try {
+    const auto pre_stamp = impl_->k1.current_stamp();
+    output.k1_session_instance_id = pre_stamp.session_instance_id;
+    output.pre_k1_level_cursor = pre_stamp.committed_level_cursor;
+    output.distinct_k1_level_count = impl_->k1.distinct_level_count();
+    output.k1_source_forest_digest = impl_->k1.source_forest_digest();
+
+    auto advance = impl_->k1.advance_closed_to_terminal();
+    if (advance.decision !=
+            ExactDirectK1BoruvkaClosedCutAdvanceDecision::
+                complete_certified_monotone_closed_cut ||
+        !impl_->k1.verify_advance_receipt(advance) ||
+        !impl_->k1.verify_stamp(advance.post_stamp)) {
+      output.decision =
+          ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+              no_owned_k1_terminal_advance_rejected;
+      return output;
+    }
+    output.live_k1_advance_receipt_verified = true;
+    output.terminal_k1_level_cursor =
+        advance.post_stamp.committed_level_cursor;
+    output.consumed_target_only_k1_level_count =
+        advance.consumed_intermediate_level_count;
+    output.terminal_k1_history_digest =
+        advance.post_stamp.committed_history_digest;
+    output.owned_k1_state_mutated = advance.state_mutated;
+    output.every_remaining_k1_equal_level_batch_consumed =
+        output.terminal_k1_level_cursor == output.distinct_k1_level_count &&
+        output.consumed_target_only_k1_level_count ==
+            output.terminal_k1_level_cursor - output.pre_k1_level_cursor;
+    output.terminal_k1_cursor_complete = impl_->k1.terminal_complete();
+    if (!output.every_remaining_k1_equal_level_batch_consumed ||
+        !output.terminal_k1_cursor_complete) {
+      output.decision =
+          ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+              no_owned_k1_terminal_advance_rejected;
+      return output;
+    }
+    impl_->committed_stamp.committed_k1_stamp =
+        std::move(advance.post_stamp);
+    output.decision =
+        ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+            complete_certified_owned_k1_terminal_target_history;
+    if (!output.certified_terminal_target_history() ||
+        !impl_->structurally_ready()) {
+      std::terminate();
+    }
+    impl_->terminal_k1_target_history.emplace(output);
+    if (!impl_->structurally_ready()) {
+      std::terminate();
+    }
+    return *impl_->terminal_k1_target_history;
+  } catch (...) {
+    output = {};
+    output.decision =
+        ExactDirectMorseResidentK2K1ClosedCutTerminalTargetDecision::
+            no_owned_k1_terminal_advance_rejected;
+    return output;
+  }
 }
 
 bool ExactDirectMorseResidentK2K1ClosedCutInitialization::

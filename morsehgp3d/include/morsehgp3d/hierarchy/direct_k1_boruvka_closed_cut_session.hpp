@@ -2,6 +2,7 @@
 
 #include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/hierarchy/boruvka.hpp"
+#include "morsehgp3d/hierarchy/k1_forest.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -258,6 +259,14 @@ struct ExactDirectK1BoruvkaClosedCutRestoreReceipt {
 class ExactDirectK1BoruvkaClosedCutSession;
 struct ExactDirectK1BoruvkaClosedCutSessionInitialization;
 
+// Canonical source-forest identity shared by the private K1 cut and future
+// independent K1 streams.  This is the one domain implementation; callers do
+// not duplicate its SHA framing.
+[[nodiscard]] contract::CanonicalId
+canonical_exact_direct_k1_closed_cut_source_forest_digest(
+    const contract::CanonicalId& canonical_cloud_digest,
+    const K1CompactForest& forest);
+
 // Scientific authority is the live object, not a public receipt boolean.
 // Construction is private, the object is move-only, and every stamp/root/
 // checkpoint is accepted only through replay against this sealed source.
@@ -290,11 +299,18 @@ class ExactDirectK1BoruvkaClosedCutSession {
   [[nodiscard]] bool ready() const noexcept;
   [[nodiscard]] bool poisoned() const noexcept;
   [[nodiscard]] std::size_t point_count() const noexcept;
+  [[nodiscard]] std::size_t distinct_level_count() const noexcept;
+  [[nodiscard]] bool terminal_complete() const noexcept;
+  [[nodiscard]] contract::CanonicalId source_forest_digest() const noexcept;
+  [[nodiscard]] bool verify_source_forest_digest(
+      const contract::CanonicalId&) const noexcept;
   [[nodiscard]] ExactDirectK1BoruvkaClosedCutSessionStamp current_stamp()
       const;
 
   [[nodiscard]] ExactDirectK1BoruvkaClosedCutAdvanceReceipt
   advance_closed_to(const exact::ExactLevel& closed_squared_level) &;
+  [[nodiscard]] ExactDirectK1BoruvkaClosedCutAdvanceReceipt
+  advance_closed_to_terminal() &;
 
   [[nodiscard]] ExactDirectK1BoruvkaClosedCutRootQueryResult
   query_singleton_root(
