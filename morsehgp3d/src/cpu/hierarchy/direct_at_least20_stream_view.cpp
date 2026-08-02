@@ -1366,6 +1366,11 @@ ExactDirectAtLeast20StreamViewSession::prepare_relative_batch(
 
     output.ticket.emplace(ExactDirectAtLeast20StreamViewPreparedBatch{
         std::move(prepared)});
+    // The ticket owns the full prepared result after the move above.  Retain
+    // the fixed-size post-batch source-chain digest in the public preparation
+    // receipt so a composite owner can bind its own chain to this exact lot
+    // rather than to the preceding source prefix.
+    output.result.source_commit_digest = source.source_commit_digest;
     output.result.decision =
         ExactDirectAtLeast20StreamConsumeDecision::not_consumed;
     output.result.scientific_state_mutated_on_failure = false;

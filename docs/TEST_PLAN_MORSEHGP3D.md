@@ -2482,3 +2482,41 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - ne positionner `all_naturality_squares_replayed` et `vertical_maps_complete` que dans le sceau final; garder faux M.1, `global_morse_obligation_replayed` et tout statut public;
 - transmettre la capability source normalisée v7 live et obliger la future session produit à l'exiger vraie avant tout gate de campagne;
 - vérifier qu'aucune matrice de paires, Star, Gamma, cellule, catalogue global de facettes, cofaces, incidences ou Delaunay ordinaire ou d'ordre supérieur n'est possédé par la couture.
+
+### T15-K1-NORMALIZED-PRODUCT — lots exacts d'ordre un
+
+- recertifier fraîchement Borůvka et son digest de forêt avant de construire une session move-only;
+- émettre une genèse implicite de `n` singletons `q_R=0` sans arène de `n` groupes, puis une multifusion CSR par lot d'égalité positif;
+- conserver les niveaux rationnels exacts, les comptes facette, point, parent et nœud, ainsi que la partition complète des groupes;
+- mettre à jour la vue `at_least20` dans la même transaction et couvrir entrée au seuil, continuation et multifusion;
+- préparer toutes allocations et digests avant le commit, puis rejeter tickets frère périmé, étranger et cap exact moins un sans mutation;
+- restaurer un checkpoint seulement après nouveau rejeu Borůvka et de chaque lot du préfixe, puis comparer le terminal au run ininterrompu;
+- sceller uniquement après épuisement de la forêt et fermeture de la vue, sans codec durable, Gamma, Star, matrice de paires ou statut public.
+
+### T15-NORMALIZED-H0-PRODUCT — coordinateur unique
+
+- exiger à la genèse la capability normalisée v7 d'incidences horizontales, la même identité canonique de nuage et le même digest K1 recertifié;
+- fusionner K1 et résident par ordre strict `(niveau rationnel exact, ordre)` et préparer source, cartes verticales, `at_least20` et Hartigan avant le commit source;
+- distinguer le nombre de transitions structurelles du nombre de records Hartigan : un frozen batch sans groupe avance source, verticales et vue sans record rationnel;
+- ne jamais synthétiser un faux groupe `q_R=1`; conserver en revanche le vrai no-op à groupe unique `q_R=1` et quatre deltas nuls comme record omis certifié;
+- exiger un index Hartigan contigu indépendant du curseur structurel et l'égalité des deux compteurs attendus au checkpoint et au sceau;
+- couvrir tickets abandonné, étranger et périmé, budgets de records, caps aval, ordre exact, source vide et sceau idempotent;
+- engager le digest cap-20 post-lot et rejeter toute falsification d'une arène K1, d'un stamp vertical, d'une chaîne cap-20, d'un rationnel ou résumé Hartigan, d'un lien terminal et du statut public;
+- préallouer le stockage final avant la fermeture Hartigan irréversible, puis exiger que chaque second scellement retourne le même `shared_ptr` sans nouvelle copie;
+- conserver `restart_supported=false` et `durable_file_codec_claimed=false` tant que la couture verticale ne possède pas de restore;
+- laisser M.1, exactitude publique, vrai 50 k et gate G4 faux même si K1, verticales, Hartigan et `at_least20` se ferment relativement à la source possédée.
+
+### T15-WINDOWED-INGRESS — fournisseur structurel, pas encore résident exact
+
+- accepter un manifeste supérieur vide avec chaîne finale égale à la chaîne initiale;
+- lier le reçu de replay au digest du manifeste et à l'identité process-locale exacte du provider;
+- exiger exactement un callback par visite; un second callback invalide définitivement la visite même si le provider ignore le retour `false`;
+- vérifier par additions contrôlées tous les caps, curseurs et compteurs, et rejeter les formes d'overflow avant copie;
+- recopier au plus une fenêtre et conserver la traduction locale--stable sans plan global certifié;
+- valider en un seul passage canonique toutes les suppressions d'une coface et refuser références manquantes, dupliquées ou désordonnées;
+- envelopper le provider dans un flux à un seul ticket move-only, lier identité process-locale, manifeste, curseur, époque et chaîne, puis rejeter ticket étranger, périmé, rejoué ou double callback sans mutation scientifique;
+- garder le checkpoint de ce flux explicitement non redémarrable et `source_exactness_claimed=false`, `public_status=not_claimed`, sans mutation de résident, locator ou forest;
+- initialiser le forest sparse avec un namespace très grand sans allocation proportionnelle, puis couvrir insertions canoniques, doublon idempotent, remapping interdit, unions déterministes, frères périmés et caps moins un;
+- vérifier que le digest de lot du forest est invariant par permutation et que son checkpoint métadonnées reste explicitement non redémarrable, sans prétendre aux cartes verticales;
+- avant tout raccord massif, exiger une capability scientifique de fenêtre non forgeable, un builder quotient/action relatif et la composition durable avec le forest sparse à handles stables;
+- pour le runtime v4, archiver les trois artefacts avec taille et SHA-256 avant reçu, refuser absent, lien symbolique, taille et digest altérés, puis rehash chaque archive à la reprise.

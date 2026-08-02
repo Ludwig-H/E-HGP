@@ -1828,6 +1828,128 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_normalized_h0_resident_batch_provider
+  STATIC
+    src/cpu/hierarchy/direct_normalized_h0_resident_batch_provider.cpp
+)
+add_library(
+  morsehgp3d::direct_normalized_h0_resident_batch_provider
+  ALIAS morsehgp3d_direct_normalized_h0_resident_batch_provider
+)
+set_target_properties(
+  morsehgp3d_direct_normalized_h0_resident_batch_provider
+  PROPERTIES
+    EXPORT_NAME direct_normalized_h0_resident_batch_provider
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_normalized_h0_resident_batch_provider PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_normalized_h0_resident_batch_provider
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_normalized_h0_resident_batch_provider
+  PUBLIC
+    morsehgp3d::direct_normalized_h0_incidence_reduction_authority
+    morsehgp3d::direct_sparse_unified_level_plan
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_resident_batch_provider PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_resident_batch_provider
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_normalized_h0_authenticated_window_stream
+  STATIC
+    src/cpu/hierarchy/direct_normalized_h0_authenticated_window_stream.cpp
+)
+add_library(
+  morsehgp3d::direct_normalized_h0_authenticated_window_stream
+  ALIAS morsehgp3d_direct_normalized_h0_authenticated_window_stream
+)
+set_target_properties(
+  morsehgp3d_direct_normalized_h0_authenticated_window_stream
+  PROPERTIES
+    EXPORT_NAME direct_normalized_h0_authenticated_window_stream
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_normalized_h0_authenticated_window_stream PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_normalized_h0_authenticated_window_stream
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_normalized_h0_authenticated_window_stream
+  PUBLIC morsehgp3d::direct_normalized_h0_resident_batch_provider
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_authenticated_window_stream PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_authenticated_window_stream
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_sparse_stable_facet_forest
+  STATIC
+    src/cpu/hierarchy/direct_sparse_stable_facet_forest.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_stable_facet_forest
+  ALIAS morsehgp3d_direct_sparse_stable_facet_forest
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_stable_facet_forest
+  PROPERTIES
+    EXPORT_NAME direct_sparse_stable_facet_forest
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_stable_facet_forest PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_stable_facet_forest
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_stable_facet_forest
+  PUBLIC morsehgp3d::direct_sparse_positive_facet_locator
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_stable_facet_forest PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_stable_facet_forest
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_normalized_vertical_square_receipt
   STATIC
     src/cpu/hierarchy/direct_normalized_vertical_square_receipt.cpp
@@ -3640,6 +3762,50 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_normalized_h0_product_session
+  STATIC
+    src/cpu/hierarchy/direct_morse_normalized_h0_product_session.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_normalized_h0_product_session
+  ALIAS morsehgp3d_direct_morse_normalized_h0_product_session
+)
+set_target_properties(
+  morsehgp3d_direct_morse_normalized_h0_product_session
+  PROPERTIES
+    EXPORT_NAME direct_morse_normalized_h0_product_session
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_normalized_h0_product_session PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_normalized_h0_product_session
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_normalized_h0_product_session
+  PUBLIC
+    morsehgp3d::direct_k1_normalized_product_stream
+    morsehgp3d::direct_morse_resident_all_orders_vertical_bridge
+    morsehgp3d::direct_morse_resident_at_least20_adapter
+    morsehgp3d::normalized_exact_hartigan_level_manifest
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_normalized_h0_product_session PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_normalized_h0_product_session
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -6087,6 +6253,9 @@ install(
     morsehgp3d_direct_sparse_first_incidence
     morsehgp3d_direct_normalized_h0_source_plan
     morsehgp3d_direct_normalized_h0_incidence_reduction_authority
+    morsehgp3d_direct_normalized_h0_resident_batch_provider
+    morsehgp3d_direct_normalized_h0_authenticated_window_stream
+    morsehgp3d_direct_sparse_stable_facet_forest
     morsehgp3d_direct_normalized_vertical_square_receipt
     morsehgp3d_direct_sparse_successive_incidence
     morsehgp3d_direct_sparse_successive_incidence_star_journal
@@ -6133,6 +6302,7 @@ install(
     morsehgp3d_direct_k1_normalized_product_stream
     morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
     morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+    morsehgp3d_direct_morse_normalized_h0_product_session
     morsehgp3d_yao48_ranked_pair_candidates_reference
     morsehgp3d_exact_ranked_diametral_pair_catalog_reference
     morsehgp3d_sanitizers

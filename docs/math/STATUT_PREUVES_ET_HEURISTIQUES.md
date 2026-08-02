@@ -1046,6 +1046,18 @@ Au terminal, le rejeu des comptes du plan, du locator et des unions atteste que 
 
 `ExactDirectMorseResidentAllOrdersVerticalBridge` est `validated_host_software` pour cette induction conditionnelle. Son sceau final peut porter `all_naturality_squares_replayed=true` et `vertical_maps_complete=true`, mais uniquement pour la source qu'il possède. La campagne produit devra vérifier séparément que cette source possède la capability normalisée v7 d'incidences horizontales complètes. M.1, l'obligation Morse globale, Hartigan, `at_least20`, la reprise composite et le statut public restent faux. L'algorithme ne construit aucune matrice globale, Star, Gamma, cellule, facette, coface, incidence ou mosaïque de Delaunay.
 
+### V5septdecies bis — coordinateur produit normalisé borné
+
+`ExactDirectMorseNormalizedH0ProductSession` est `validated_host_software` pour la composition conditionnelle d'une source K1 Borůvka fraîche, d'un résident v7 possédant sa capability d'incidences horizontales, des neuf coutures verticales, du fold `at_least20` et du manifeste Hartigan rationnel. Le calendrier est l'ordre total niveau exact puis ordre. Une transition structurelle résidente sans groupe avance les autorités de source et de vue sans inventer de record Hartigan; un vrai no-op à groupe unique reste au contraire engagé.
+
+L'atomicité est locale au ticket composite : tout travail fallible et le digest cap-20 post-lot sont préparés avant le commit source. Les checkpoints et sceaux réencodent leurs sous-objets et vérifient les liens terminaux; le stockage final est préalloué avant la fermeture Hartigan irréversible. Cette validation reste relative aux sources possédées et en mémoire. La restauration verticale, M.1, l'obligation Morse globale, le binaire massif et le statut public ne sont pas prouvés.
+
+### V5octodecies — ingress fenêtré structurel et forêt sparse
+
+Le fournisseur de lots, son flux authentifié à une fenêtre et la forêt à handles stables sont `validated_host_software` comme coutures d'architecture. Le premier recertifie la forme canonique d'une fenêtre contre un manifeste structurel. Le deuxième lie cette fenêtre à une identité process-locale, un curseur, une époque et une chaîne stricts. Le troisième conserve seulement les handles réellement observés, leurs clés immuables et un DSU déterministe; la taille déclarée du namespace reste un scalaire et ne provoque aucune allocation proportionnelle.
+
+Ces propriétés prouvent des bornes de représentation et l'atomicité locale du protocole, pas la complétude scientifique de la source. Le reçu du provider reste forgeable par un producteur cohérent mais incomplet, l'identité process-locale n'est pas une preuve mathématique, et aucun builder quotient/action fenêtré ne relie encore les suppressions de cofaces au forest sparse. Les checkpoints du flux et du forest sont donc honnêtement non redémarrables. `source_exactness_claimed`, les cartes verticales complètes, le statut public et la porte massive restent faux.
+
 ### V6 — tour globale de boules saturées
 
 Les théorèmes S.1–S.6 de [`TOUR_BOULES_SATUREES.md`](TOUR_BOULES_SATUREES.md) donnent une représentation combinatoire exacte de Gamma par saturés et une forêt de Kruskal commune aux ordres. Il reste à construire un oracle indépendant borné, à convertir ses coupes en `MergeForest`, `coverage_log` et applications verticales canoniques, puis à certifier la persistance et les dégénérescences. La voie brute possède jusqu'à $O(n^4)$ supports, $O(n^5)$ memberships et $O(M^2)$ paires de générateurs; elle est donc un oracle petit $n$, pas un remplacement scalable de la voie actuelle. Une sous-famille proposée puis saturée reste `partial_refinement`.

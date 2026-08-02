@@ -1371,6 +1371,65 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
+  test_hierarchy_direct_normalized_h0_resident_batch_provider.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
+  PRIVATE morsehgp3d::direct_normalized_h0_resident_batch_provider
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+  test_hierarchy_direct_normalized_h0_authenticated_window_stream.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+  PRIVATE morsehgp3d::direct_normalized_h0_authenticated_window_stream
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
+  test_hierarchy_direct_sparse_stable_facet_forest.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
+  PRIVATE morsehgp3d::direct_sparse_stable_facet_forest
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_normalized_vertical_square_receipt_tests
   test_hierarchy_direct_normalized_vertical_square_receipt.cpp
 )
@@ -1744,6 +1803,26 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_morse_resident_all_orders_vertical_bridge_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
+  test_hierarchy_direct_morse_normalized_h0_product_session.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
+  PRIVATE morsehgp3d::direct_morse_normalized_h0_product_session
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -3313,6 +3392,9 @@ set(
   morsehgp3d_hierarchy_direct_sparse_facet_descent_closure_tests
   morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
   morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
+  morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
+  morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+  morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
   morsehgp3d_hierarchy_direct_normalized_vertical_square_receipt_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
@@ -3332,6 +3414,7 @@ set(
   morsehgp3d_hierarchy_direct_k1_normalized_product_stream_tests
   morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
   morsehgp3d_hierarchy_direct_morse_resident_all_orders_vertical_bridge_tests
+  morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
@@ -4382,6 +4465,18 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_normalized_h0_resident_batch_provider
+  COMMAND morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_normalized_h0_authenticated_window_stream
+  COMMAND morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_stable_facet_forest
+  COMMAND morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_direct_normalized_vertical_square_receipt
   COMMAND morsehgp3d_hierarchy_direct_normalized_vertical_square_receipt_tests
 )
@@ -4456,6 +4551,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_resident_all_orders_vertical_bridge
   COMMAND morsehgp3d_hierarchy_direct_morse_resident_all_orders_vertical_bridge_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_normalized_h0_product_session
+  COMMAND morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_relative_morse_boruvka
