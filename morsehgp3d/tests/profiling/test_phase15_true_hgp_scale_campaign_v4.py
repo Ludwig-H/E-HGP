@@ -54,11 +54,24 @@ def digest(label: str) -> str:
     return hashlib.sha256(label.encode("ascii")).hexdigest()
 
 
+def artifact_payloads(run_id: str) -> dict[str, bytes]:
+    return {
+        "checkpoint": (f"checkpoint-manifest-v4:{run_id}\n").encode("ascii"),
+        "normalized_source": (f"normalized-source-manifest-v4:{run_id}\n").encode(
+            "ascii"
+        ),
+        "hartigan": (f"hartigan-rational-level-manifest-v4:{run_id}\n").encode(
+            "ascii"
+        ),
+    }
+
+
 def make_complete_run(
     request: dict[str, object], *, warm_e2e_ns: int = 10_000_000
 ) -> dict[str, object]:
     run_id = request["run_id"]
     assert isinstance(run_id, str)
+    payloads = artifact_payloads(run_id)
     counts = []
     hartigan_orders = []
     manifest_record_count = 0
@@ -120,11 +133,19 @@ def make_complete_run(
         "algorithm_scope": campaign.ALGORITHM_SCOPE,
         "artifacts": {
             "checkpoint_manifest_file": f"artifacts/{run_id}-checkpoint.json",
-            "checkpoint_manifest_sha256": digest(f"checkpoint:{run_id}"),
+            "checkpoint_manifest_sha256": hashlib.sha256(
+                payloads["checkpoint"]
+            ).hexdigest(),
+            "checkpoint_manifest_size_bytes": len(payloads["checkpoint"]),
             "normalized_source_manifest_file": (
                 f"artifacts/{run_id}-normalized-source.json"
             ),
-            "normalized_source_manifest_sha256": digest(f"source:{run_id}"),
+            "normalized_source_manifest_sha256": hashlib.sha256(
+                payloads["normalized_source"]
+            ).hexdigest(),
+            "normalized_source_manifest_size_bytes": len(
+                payloads["normalized_source"]
+            ),
             "output_chain_sha256": digest(f"output:{run_id}"),
         },
         "backend": campaign.BACKEND,
@@ -189,7 +210,8 @@ def make_complete_run(
             "legacy_single_group_scalar_qr_record_count": 0,
             "manifest_file": f"artifacts/{run_id}-hartigan-v4.jsonl",
             "manifest_record_count": manifest_record_count,
-            "manifest_sha256": digest(f"hartigan-manifest:{run_id}"),
+            "manifest_sha256": hashlib.sha256(payloads["hartigan"]).hexdigest(),
+            "manifest_size_bytes": len(payloads["hartigan"]),
             "ordered_rational_chain_sha256": digest(f"hartigan-chain:{run_id}"),
             "records_by_order": hartigan_orders,
             "representation": campaign.HARTIGAN_LEVEL_REPRESENTATION,
@@ -286,6 +308,10 @@ def install_fake_binary(
     failed_session_numbers: tuple[int, ...] = (),
     timeout_session_numbers: tuple[int, ...] = (),
     invalid_session_numbers: tuple[int, ...] = (),
+    missing_artifact_session_numbers: tuple[int, ...] = (),
+    symlink_artifact_session_numbers: tuple[int, ...] = (),
+    wrong_size_artifact_session_numbers: tuple[int, ...] = (),
+    wrong_digest_artifact_session_numbers: tuple[int, ...] = (),
 ) -> tuple[Path, Path, Path]:
     """Install a protocol-faithful fake whose own digest is self-reported."""
 
@@ -306,6 +332,10 @@ GIT_SHA = {GIT_SHA!r}
 TIMEOUT_SESSION_NUMBERS = {list(timeout_session_numbers)!r}
 FAILED_SESSION_NUMBERS = {list(failed_session_numbers)!r}
 INVALID_SESSION_NUMBERS = {list(invalid_session_numbers)!r}
+MISSING_ARTIFACT_SESSION_NUMBERS = {list(missing_artifact_session_numbers)!r}
+SYMLINK_ARTIFACT_SESSION_NUMBERS = {list(symlink_artifact_session_numbers)!r}
+WRONG_SIZE_ARTIFACT_SESSION_NUMBERS = {list(wrong_size_artifact_session_numbers)!r}
+WRONG_DIGEST_ARTIFACT_SESSION_NUMBERS = {list(wrong_digest_artifact_session_numbers)!r}
 sys.path.insert(0, str(DIRECTORY))
 
 import campaign_runtime as runtime
@@ -332,7 +362,7 @@ if sys.argv[1:] != [campaign.SESSION_ARGUMENT]:
 raw = sys.stdin.buffer.read().decode("ascii")
 session = runtime.parse_json_text(raw, "fake v4 session", canonical_line=True)
 if set(session) != {{
-    "active_checkpoint", "identity", "ordinal", "request_chain_sha256",
+    "active_checkpoint", "filesystem", "identity", "ordinal", "request_chain_sha256",
     "requests", "schema"
 }} or session["schema"] != campaign.SESSION_REQUEST_SCHEMA:
     raise RuntimeError("fake received an invalid session wrapper")
@@ -351,6 +381,21 @@ expected_identity = runtime.campaign_identity(
 )
 if session["identity"] != expected_identity:
     raise RuntimeError("fake campaign identity differs")
+artifact_root = Path(session["filesystem"]["artifact_staging_root"])
+spool_root = Path(session["filesystem"]["spool_root"])
+checkpoint = Path(session["active_checkpoint"]["checkpoint_file"])
+if (
+    not artifact_root.is_absolute()
+    or artifact_root.resolve(strict=True) != artifact_root
+    or Path.cwd() != artifact_root
+    or not spool_root.is_absolute()
+    or spool_root.resolve(strict=True) != spool_root
+    or artifact_root.parent != spool_root / "attempts"
+    or checkpoint.parent != spool_root / "checkpoints"
+    or runtime.sha256_file(checkpoint, "fake active checkpoint")
+    != session["active_checkpoint"]["checkpoint_sha256"]
+):
+    raise RuntimeError("fake received a non-physical filesystem authority")
 
 with LOG.open("ab") as stream:
     stream.write(raw.encode("ascii"))
@@ -370,6 +415,29 @@ fixture.BINARY_SHA256 = binary_sha256
 fixture.PLAN_SHA256 = plan_sha256
 fixture.GIT_SHA = GIT_SHA
 run = fixture.make_complete_run(request)
+payloads = fixture.artifact_payloads(request["run_id"])
+artifact_files = [
+    (run["artifacts"]["checkpoint_manifest_file"], payloads["checkpoint"]),
+    (
+        run["artifacts"]["normalized_source_manifest_file"],
+        payloads["normalized_source"],
+    ),
+    (run["hartigan_levels"]["manifest_file"], payloads["hartigan"]),
+]
+for relative, payload in artifact_files:
+    path = artifact_root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(payload)
+fault_path = artifact_root / artifact_files[0][0]
+if session_number in MISSING_ARTIFACT_SESSION_NUMBERS:
+    fault_path.unlink()
+if session_number in SYMLINK_ARTIFACT_SESSION_NUMBERS:
+    fault_path.unlink()
+    fault_path.symlink_to(artifact_root / artifact_files[1][0])
+if session_number in WRONG_SIZE_ARTIFACT_SESSION_NUMBERS:
+    fault_path.write_bytes(payloads["checkpoint"] + b"x")
+if session_number in WRONG_DIGEST_ARTIFACT_SESSION_NUMBERS:
+    fault_path.write_bytes(b"X" + payloads["checkpoint"][1:])
 if session_number in INVALID_SESSION_NUMBERS:
     run["public_status"] = "exact"
 print(runtime.canonical_json(run))
@@ -616,9 +684,51 @@ class TrueHgpV4ExecutionTests(unittest.TestCase):
                 all(
                     session["schema"] == campaign.SESSION_REQUEST_SCHEMA
                     and session["ordinal"] == ordinal
+                    and Path(session["filesystem"]["spool_root"]).is_absolute()
+                    and Path(
+                        session["filesystem"]["artifact_staging_root"]
+                    ).is_absolute()
+                    and Path(
+                        session["active_checkpoint"]["checkpoint_file"]
+                    ).is_absolute()
                     for ordinal, session in enumerate(sessions)
                 )
             )
+            campaign_root = next(spool_parent.glob("campaign-*"))
+            self.assertEqual(len(list((campaign_root / "artifacts").iterdir())), 117)
+            for commit in head["commits"]:
+                receipt, _ = runtime.read_canonical_json(
+                    campaign_root / commit["receipt_file"], "test receipt"
+                )
+                declarations = (
+                    (
+                        receipt["artifacts"],
+                        "checkpoint_manifest_file",
+                        "checkpoint_manifest_size_bytes",
+                        "checkpoint_manifest_sha256",
+                    ),
+                    (
+                        receipt["artifacts"],
+                        "normalized_source_manifest_file",
+                        "normalized_source_manifest_size_bytes",
+                        "normalized_source_manifest_sha256",
+                    ),
+                    (
+                        receipt["hartigan_levels"],
+                        "manifest_file",
+                        "manifest_size_bytes",
+                        "manifest_sha256",
+                    ),
+                )
+                for container, file_key, size_key, digest_key in declarations:
+                    artifact = campaign_root / container[file_key]
+                    self.assertTrue(artifact.is_file())
+                    self.assertFalse(artifact.is_symlink())
+                    self.assertEqual(artifact.stat().st_size, container[size_key])
+                    self.assertEqual(
+                        runtime.sha256_file(artifact, "test archived artifact"),
+                        container[digest_key],
+                    )
 
             # A complete spool is a no-op after the mandatory fresh handshake.
             self.execute_open(
@@ -677,6 +787,40 @@ class TrueHgpV4ExecutionTests(unittest.TestCase):
             ]
             self.assertEqual([session["ordinal"] for session in sessions], [0, 0, 1])
             self.assertEqual(sessions[0], sessions[1])
+
+    def test_missing_symlink_wrong_size_and_wrong_digest_artifacts_never_commit(
+        self,
+    ) -> None:
+        faults = {
+            "missing": {"missing_artifact_session_numbers": (0,)},
+            "symlink": {"symlink_artifact_session_numbers": (0,)},
+            "wrong size": {"wrong_size_artifact_session_numbers": (0,)},
+            "wrong digest": {"wrong_digest_artifact_session_numbers": (0,)},
+        }
+        for label, options in faults.items():
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                open_plan, open_plan_path, open_plan_digest = self.publish_open_plan(root)
+                binary, _, _ = install_fake_binary(
+                    root, plan_path=open_plan_path, **options
+                )
+                spool_parent = root / "spool"
+                with self.assertRaisesRegex(
+                    runtime.RuntimeContractError,
+                    "checkpoint-manifest",
+                ):
+                    self.execute_open(
+                        plan=open_plan,
+                        plan_path=open_plan_path,
+                        plan_digest=open_plan_digest,
+                        binary=binary,
+                        spool_parent=spool_parent,
+                    )
+                head = self.read_only_head(spool_parent)
+                self.assertEqual(head["next_ordinal"], 0)
+                self.assertEqual(head["active_run"]["ordinal"], 0)
+                campaign_root = next(spool_parent.glob("campaign-*"))
+                self.assertEqual(list((campaign_root / "artifacts").iterdir()), [])
 
 
 class TrueHgpV4RunTests(unittest.TestCase):

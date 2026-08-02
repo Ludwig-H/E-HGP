@@ -541,6 +541,8 @@ def session_request(
     ordinal: int,
     request: dict[str, Any],
     active_checkpoint: dict[str, Any],
+    spool_root: Path,
+    artifact_staging_root: Path,
 ) -> dict[str, Any]:
     """Build one canonical JSONL transaction bound to its durable checkpoint."""
 
@@ -555,11 +557,30 @@ def session_request(
         and active_checkpoint.get("run_id") == request.get("run_id"),
         "v4 session active checkpoint request differs",
     )
+    checkpoint_relative = safe_relative_file(
+        active_checkpoint.get("checkpoint_file"),
+        "v4 session active checkpoint file",
+    )
+    try:
+        physical_spool_root = spool_root.resolve(strict=True)
+        physical_artifact_root = artifact_staging_root.resolve(strict=True)
+        physical_checkpoint = (physical_spool_root / checkpoint_relative).resolve(
+            strict=True
+        )
+    except OSError as error:
+        fail(f"cannot resolve v4 session filesystem authority: {error}")
+    require(
+        spool_root.is_absolute()
+        and spool_root == physical_spool_root
+        and artifact_staging_root.is_absolute()
+        and artifact_staging_root == physical_artifact_root
+        and physical_artifact_root.parent == physical_spool_root / "attempts"
+        and physical_checkpoint.parent == physical_spool_root / "checkpoints",
+        "v4 session filesystem authority is not physical or escapes the spool",
+    )
+    require_regular_file(physical_checkpoint, "v4 session active checkpoint")
     checkpoint_reference = {
-        "checkpoint_file": safe_relative_file(
-            active_checkpoint.get("checkpoint_file"),
-            "v4 session active checkpoint file",
-        ),
+        "checkpoint_file": str(physical_checkpoint),
         "checkpoint_sha256": exact_sha256(
             active_checkpoint.get("checkpoint_sha256"),
             "v4 session active checkpoint SHA-256",
@@ -567,6 +588,10 @@ def session_request(
     }
     return {
         "active_checkpoint": checkpoint_reference,
+        "filesystem": {
+            "artifact_staging_root": str(physical_artifact_root),
+            "spool_root": str(physical_spool_root),
+        },
         "identity": copy.deepcopy(identity),
         "ordinal": ordinal,
         "request_chain_sha256": sha256_bytes(canonical_bytes(request)),
@@ -754,6 +779,7 @@ HARTIGAN_KEYS = {
     "manifest_file",
     "manifest_record_count",
     "manifest_sha256",
+    "manifest_size_bytes",
     "ordered_rational_chain_sha256",
     "records_by_order",
     "representation",
@@ -825,8 +851,10 @@ RESOURCE_KEYS = {
 ARTIFACT_KEYS = {
     "checkpoint_manifest_file",
     "checkpoint_manifest_sha256",
+    "checkpoint_manifest_size_bytes",
     "normalized_source_manifest_file",
     "normalized_source_manifest_sha256",
+    "normalized_source_manifest_size_bytes",
     "output_chain_sha256",
 }
 
@@ -1112,6 +1140,11 @@ def validate_run(
         safe_relative_file(hartigan["manifest_file"], "v4 Hartigan manifest")
     except RuntimeContractError as error:
         fail(str(error))
+    natural(
+        hartigan["manifest_size_bytes"],
+        "true-HGP v4 Hartigan manifest size",
+        positive=True,
+    )
     for key in ("manifest_sha256", "ordered_rational_chain_sha256"):
         exact_sha256(hartigan[key], f"true-HGP v4 Hartigan {key}")
     records_by_order = hartigan["records_by_order"]
@@ -1313,6 +1346,11 @@ def validate_run(
         "output_chain_sha256",
     ):
         exact_sha256(artifacts[key], f"true-HGP v4 artifact {key}")
+    for key in (
+        "checkpoint_manifest_size_bytes",
+        "normalized_source_manifest_size_bytes",
+    ):
+        natural(artifacts[key], f"true-HGP v4 artifact {key}", positive=True)
     return run
 
 
@@ -1485,6 +1523,88 @@ def _read_expected_spool_object(
     return value
 
 
+def _run_artifact_declarations(
+    run: dict[str, Any],
+) -> tuple[tuple[dict[str, Any], str, str, str, str], ...]:
+    return (
+        (
+            run["artifacts"],
+            "checkpoint_manifest_file",
+            "checkpoint_manifest_size_bytes",
+            "checkpoint_manifest_sha256",
+            "checkpoint-manifest",
+        ),
+        (
+            run["artifacts"],
+            "normalized_source_manifest_file",
+            "normalized_source_manifest_size_bytes",
+            "normalized_source_manifest_sha256",
+            "normalized-source-manifest",
+        ),
+        (
+            run["hartigan_levels"],
+            "manifest_file",
+            "manifest_size_bytes",
+            "manifest_sha256",
+            "hartigan-level-manifest",
+        ),
+    )
+
+
+def _archive_run_artifacts(
+    *,
+    spool: CampaignSpool,
+    artifact_staging_root: Path,
+    ordinal: int,
+    run: dict[str, Any],
+) -> dict[str, Any]:
+    """Authenticate and durably import every file claimed by one receipt."""
+
+    archived = copy.deepcopy(run)
+    for container, file_key, size_key, digest_key, kind in _run_artifact_declarations(
+        archived
+    ):
+        digest = exact_sha256(container[digest_key], f"v4 {kind} SHA-256")
+        destination = f"artifacts/{ordinal:05d}-{kind}-{digest}"
+        container[file_key] = spool.import_regular_file(
+            source_root=artifact_staging_root,
+            source_file=container[file_key],
+            destination_file=destination,
+            expected_size_bytes=natural(
+                container[size_key], f"v4 {kind} size", positive=True
+            ),
+            expected_sha256=digest,
+            label=f"true-HGP v4 {kind}",
+        )
+    return archived
+
+
+def _verify_archived_run_artifacts(
+    *, spool: CampaignSpool, run: dict[str, Any]
+) -> None:
+    """Rehash all receipt-bound artifacts whenever a committed prefix is opened."""
+
+    artifact_parent = spool.physical_root() / "artifacts"
+    for container, file_key, size_key, digest_key, kind in _run_artifact_declarations(
+        run
+    ):
+        relative = Path(safe_relative_file(container[file_key], f"v4 {kind} path"))
+        require(
+            len(relative.parts) == 2 and relative.parts[0] == "artifacts",
+            f"v4 {kind} is not archived in the campaign spool",
+        )
+        path = spool.physical_root() / relative
+        require(path.parent == artifact_parent, f"v4 {kind} archive path escapes")
+        require_regular_file(path, f"archived true-HGP v4 {kind}")
+        size = natural(container[size_key], f"v4 {kind} size", positive=True)
+        require(path.stat().st_size == size, f"archived v4 {kind} size differs")
+        require(
+            sha256_file(path, f"archived true-HGP v4 {kind}")
+            == exact_sha256(container[digest_key], f"v4 {kind} SHA-256"),
+            f"archived v4 {kind} SHA-256 differs",
+        )
+
+
 def _load_committed_runs(
     *,
     spool: CampaignSpool,
@@ -1526,15 +1646,15 @@ def _load_committed_runs(
             expected_sha256=commit["receipt_sha256"],
             label=f"true-HGP v4 receipt {ordinal}",
         )
-        runs.append(
-            validate_run(
-                receipt,
-                expected_request,
-                binary_sha256=binary_sha256,
-                plan_sha256=plan_sha256,
-                git_sha=git_sha,
-            )
+        validated = validate_run(
+            receipt,
+            expected_request,
+            binary_sha256=binary_sha256,
+            plan_sha256=plan_sha256,
+            git_sha=git_sha,
         )
+        _verify_archived_run_artifacts(spool=spool, run=validated)
+        runs.append(validated)
     return runs
 
 
@@ -1681,17 +1801,23 @@ def execute_campaign(
                 ordinal=ordinal,
                 request=request,
             )
+            artifact_staging_root = spool.prepare_attempt_directory(
+                ordinal, active["request_sha256"]
+            )
             transaction = session_request(
                 identity=identity,
                 ordinal=ordinal,
                 request=request,
                 active_checkpoint=active,
+                spool_root=spool.physical_root(),
+                artifact_staging_root=artifact_staging_root,
             )
             run = run_canonical_json_process(
                 [str(binary.absolute()), SESSION_ARGUMENT],
                 request=transaction,
                 timeout_seconds=request["wall_time_cap_ms"] / 1_000.0,
                 label=f"true-HGP v4 run {request['run_id']}",
+                cwd=artifact_staging_root,
             )
             validated = validate_run(
                 run,
@@ -1707,13 +1833,27 @@ def execute_campaign(
                 binary_sha256=binary_digest,
                 binary_size_bytes=binary_size,
             )
+            archived = _archive_run_artifacts(
+                spool=spool,
+                artifact_staging_root=artifact_staging_root,
+                ordinal=ordinal,
+                run=validated,
+            )
+            validated_archived = validate_run(
+                archived,
+                request,
+                binary_sha256=binary_digest,
+                plan_sha256=plan_sha256,
+                git_sha=git_sha,
+            )
+            _verify_archived_run_artifacts(spool=spool, run=validated_archived)
             spool.commit_receipt(
                 ordinal=ordinal,
                 request_file=active["request_file"],
                 request_sha256=active["request_sha256"],
-                receipt=validated,
+                receipt=validated_archived,
             )
-            runs.append(validated)
+            runs.append(validated_archived)
         _validate_committed_prefix(runs, plan)
 
 

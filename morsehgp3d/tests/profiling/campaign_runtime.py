@@ -18,6 +18,7 @@ from pathlib import Path
 import re
 import shutil
 import signal
+import stat
 import subprocess
 import tempfile
 from typing import Any, NoReturn, Sequence
@@ -342,14 +343,21 @@ class CampaignSpool:
             )
         )
         try:
-            for name in ("requests", "receipts", "checkpoints", "attempts"):
+            directory_names = (
+                "requests",
+                "receipts",
+                "checkpoints",
+                "attempts",
+                "artifacts",
+            )
+            for name in directory_names:
                 (temporary / name).mkdir()
             atomic_publish(temporary / "identity.json", canonical_bytes(self.identity))
             initial_head = self._initial_head()
             atomic_publish(temporary / "HEAD.json", canonical_bytes(initial_head))
             for path in (
                 temporary,
-                *(temporary / name for name in ("requests", "receipts", "checkpoints", "attempts")),
+                *(temporary / name for name in directory_names),
             ):
                 fsync_directory(path)
             os.replace(temporary, self.root)
@@ -377,12 +385,170 @@ class CampaignSpool:
             self.root.is_dir() and not self.root.is_symlink(),
             "campaign spool root is invalid",
         )
+        # ``artifacts`` was added by the v4 scientific harness.  It is not a
+        # structural prerequisite here so pre-existing v1--v3 spools remain
+        # readable; the importing v4 path creates and validates it below.
         for name in ("requests", "receipts", "checkpoints", "attempts"):
             directory = self.root / name
             require(
                 directory.is_dir() and not directory.is_symlink(),
                 f"campaign spool {name} directory is invalid",
             )
+
+    def physical_root(self) -> Path:
+        """Return the existing canonical absolute spool root."""
+
+        self._require_open()
+        self._require_internal_directories()
+        try:
+            physical = self.root.resolve(strict=True)
+        except OSError as error:
+            fail(f"cannot resolve campaign spool root: {error}")
+        require(
+            physical.is_absolute() and physical.is_dir() and not physical.is_symlink(),
+            "campaign spool physical root is invalid",
+        )
+        return physical
+
+    def prepare_attempt_directory(self, ordinal: int, request_sha256: str) -> Path:
+        """Create or reopen one stable physical artifact staging directory."""
+
+        self._require_open()
+        self._require_internal_directories()
+        require(
+            ordinal == self.next_ordinal,
+            "attempt ordinal is not the next campaign run",
+        )
+        digest = exact_sha256(request_sha256, "attempt request SHA-256")
+        parent = self.physical_root() / "attempts"
+        path = parent / f"{ordinal:05d}-{digest}"
+        if path.exists() or path.is_symlink():
+            require(path.is_dir() and not path.is_symlink(), "attempt directory is invalid")
+        else:
+            try:
+                path.mkdir(mode=0o700)
+            except OSError as error:
+                fail(f"cannot create attempt directory: {error}")
+            fsync_directory(parent)
+        try:
+            physical = path.resolve(strict=True)
+        except OSError as error:
+            fail(f"cannot resolve attempt directory: {error}")
+        require(
+            physical.parent == parent and physical.is_dir() and not physical.is_symlink(),
+            "attempt directory escapes the campaign spool",
+        )
+        return physical
+
+    def import_regular_file(
+        self,
+        *,
+        source_root: Path,
+        source_file: str,
+        destination_file: str,
+        expected_size_bytes: int,
+        expected_sha256: str,
+        label: str,
+    ) -> str:
+        """Stream, authenticate, fsync and immutably publish one staged artifact."""
+
+        self._require_open()
+        self._require_internal_directories()
+        source_relative = Path(safe_relative_file(source_file, f"{label} source path"))
+        destination_relative = safe_relative_file(
+            destination_file, f"{label} destination path"
+        )
+        size = natural(expected_size_bytes, f"{label} size", positive=True)
+        expected_digest = exact_sha256(expected_sha256, f"{label} SHA-256")
+        try:
+            physical_source_root = source_root.resolve(strict=True)
+        except OSError as error:
+            fail(f"cannot resolve {label} source root: {error}")
+        require(
+            source_root.is_absolute()
+            and source_root == physical_source_root
+            and source_root.is_dir()
+            and not source_root.is_symlink(),
+            f"{label} source root is not a physical directory",
+        )
+        current = source_root
+        for component in source_relative.parts[:-1]:
+            current /= component
+            require(
+                current.is_dir() and not current.is_symlink(),
+                f"{label} source parent is not a physical directory",
+            )
+        source = source_root / source_relative
+        spool_root = self.physical_root()
+        artifact_parent = spool_root / "artifacts"
+        if artifact_parent.exists() or artifact_parent.is_symlink():
+            require(
+                artifact_parent.is_dir() and not artifact_parent.is_symlink(),
+                "campaign artifact archive is invalid",
+            )
+        else:
+            try:
+                artifact_parent.mkdir(mode=0o700)
+            except OSError as error:
+                fail(f"cannot create campaign artifact archive: {error}")
+            fsync_directory(spool_root)
+        destination = spool_root / destination_relative
+        require(
+            destination.parent == artifact_parent,
+            f"{label} destination is outside the artifact archive",
+        )
+        source_descriptor = -1
+        temporary: Path | None = None
+        try:
+            source_descriptor = os.open(
+                source,
+                os.O_RDONLY
+                | getattr(os, "O_NOFOLLOW", 0)
+                | getattr(os, "O_NONBLOCK", 0),
+            )
+            source_stat = os.fstat(source_descriptor)
+            require(stat.S_ISREG(source_stat.st_mode), f"{label} source is not regular")
+            require(source_stat.st_size == size, f"{label} source size differs")
+            destination_descriptor, temporary_name = tempfile.mkstemp(
+                dir=destination.parent,
+                prefix=f".{destination.name}.",
+                suffix=".tmp",
+            )
+            temporary = Path(temporary_name)
+            digest = hashlib.sha256()
+            copied = 0
+            with os.fdopen(source_descriptor, "rb", closefd=True) as source_stream:
+                source_descriptor = -1
+                with os.fdopen(destination_descriptor, "wb") as destination_stream:
+                    for block in iter(lambda: source_stream.read(1024 * 1024), b""):
+                        destination_stream.write(block)
+                        digest.update(block)
+                        copied += len(block)
+                    destination_stream.flush()
+                    os.fsync(destination_stream.fileno())
+            require(copied == size, f"{label} copied size differs")
+            require(digest.hexdigest() == expected_digest, f"{label} SHA-256 differs")
+            try:
+                os.link(temporary, destination)
+            except FileExistsError:
+                require_regular_file(destination, f"existing {label}")
+                require(
+                    destination.stat().st_size == size,
+                    f"existing {label} size differs",
+                )
+                require(
+                    sha256_file(destination, f"existing {label}") == expected_digest,
+                    f"existing {label} SHA-256 differs",
+                )
+            fsync_directory(destination.parent)
+        except OSError as error:
+            fail(f"cannot import {label}: {error}")
+        finally:
+            if source_descriptor >= 0:
+                os.close(source_descriptor)
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+        return destination_relative
 
     def _validate_head(self, value: Any) -> dict[str, Any]:
         self._require_internal_directories()
@@ -730,6 +896,7 @@ def run_process_group(
     input_bytes: bytes | None,
     timeout_seconds: float,
     terminate_grace_seconds: float = 1.0,
+    cwd: Path | None = None,
 ) -> GuardedProcessResult:
     require(command and all(isinstance(item, str) and item for item in command), "process command is invalid")
     require(timeout_seconds > 0.0, "process timeout must be positive")
@@ -741,6 +908,7 @@ def run_process_group(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             start_new_session=True,
+            cwd=cwd,
         )
     except OSError as error:
         fail(f"cannot start guarded process: {error}")
@@ -795,11 +963,13 @@ def run_canonical_json_process(
     request: dict[str, Any] | None,
     timeout_seconds: float,
     label: str,
+    cwd: Path | None = None,
 ) -> dict[str, Any]:
     result = run_process_group(
         command,
         input_bytes=None if request is None else canonical_bytes(request),
         timeout_seconds=timeout_seconds,
+        cwd=cwd,
     )
     require(not result.timed_out, f"{label} reached its process-group timeout")
     require(result.returncode == 0, f"{label} failed with status {result.returncode}")
