@@ -262,6 +262,118 @@ class ExactDirectSparseStableFacetPositiveLookupResult final
   friend class ExactDirectSparseStableFacetForest;
 };
 
+// A full-key probe may traverse two sparse indexes: first the positive-key
+// table, then the stable-handle table while resolving the immutable DSU root.
+// Every unit of that work is independently bounded.  Zero limits are valid
+// and make the probe fail closed before performing the corresponding work.
+struct ExactDirectSparseStableFacetPositiveProbeBudget {
+  std::size_t maximum_positive_key_slot_visit_count{};
+  std::size_t maximum_full_key_comparison_count{};
+  std::size_t maximum_handle_index_slot_visit_count{};
+  std::size_t maximum_parent_hop_count{};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetPositiveProbeBudget&,
+      const ExactDirectSparseStableFacetPositiveProbeBudget&) = default;
+};
+
+enum class ExactDirectSparseStableFacetPositiveProbeDisposition
+    : std::uint8_t {
+  not_certified,
+  input_key_rejected,
+  unobserved,
+  observed,
+  budget_exhausted,
+  contradiction,
+};
+
+enum class ExactDirectSparseStableFacetPositiveProbeDecision : std::uint8_t {
+  not_certified,
+  no_input_key_rejected,
+  complete_unobserved,
+  complete_observed,
+  no_positive_key_slot_budget_exhausted,
+  no_full_key_comparison_budget_exhausted,
+  no_handle_index_slot_budget_exhausted,
+  no_parent_hop_budget_exhausted,
+  contradiction_positive_key_index,
+  contradiction_root_resolution,
+};
+
+struct ExactDirectSparseStableFacetPositiveProbeReceipt {
+  ExactDirectSparseFacetKey requested_key{};
+  ExactDirectSparseStableFacetPositiveProbeBudget requested_budget{};
+  ExactDirectSparseStableFacetHandle bound_handle{};
+  ExactDirectSparseStableFacetHandle root_handle{};
+  std::size_t component_size{};
+  ExactDirectSparseStableFacetForestStamp forest_stamp{};
+  std::size_t positive_key_slot_visit_count{};
+  std::size_t full_key_comparison_count{};
+  std::size_t handle_index_slot_visit_count{};
+  std::size_t parent_hop_count{};
+  bool forest_certified_at_entry{false};
+  bool requested_key_canonical{false};
+  bool lookup_completed_without_mutation{false};
+  bool fingerprint_used_only_as_accelerator{false};
+  bool complete_key_comparison_authoritative{false};
+  bool immutable_key_handle_binding_observed{false};
+  bool root_resolved_without_mutation{false};
+  bool source_exactness_claimed{false};
+  bool public_status_claimed{false};
+  ExactDirectSparseStableFacetPositiveProbeDisposition disposition{
+      ExactDirectSparseStableFacetPositiveProbeDisposition::not_certified};
+  ExactDirectSparseStableFacetPositiveProbeDecision decision{
+      ExactDirectSparseStableFacetPositiveProbeDecision::not_certified};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetPositiveProbeReceipt&,
+      const ExactDirectSparseStableFacetPositiveProbeReceipt&) = default;
+};
+
+// Like the historical lookup result, this result is readable and copyable but
+// privately minted.  Public receipt edits therefore invalidate certification.
+class ExactDirectSparseStableFacetPositiveProbeResult final
+    : public ExactDirectSparseStableFacetPositiveProbeReceipt {
+ public:
+  ExactDirectSparseStableFacetPositiveProbeResult() noexcept = default;
+  ~ExactDirectSparseStableFacetPositiveProbeResult() = default;
+  ExactDirectSparseStableFacetPositiveProbeResult(
+      const ExactDirectSparseStableFacetPositiveProbeResult&) noexcept =
+      default;
+  ExactDirectSparseStableFacetPositiveProbeResult& operator=(
+      const ExactDirectSparseStableFacetPositiveProbeResult&) noexcept =
+      default;
+  ExactDirectSparseStableFacetPositiveProbeResult(
+      ExactDirectSparseStableFacetPositiveProbeResult&&) noexcept = default;
+  ExactDirectSparseStableFacetPositiveProbeResult& operator=(
+      ExactDirectSparseStableFacetPositiveProbeResult&&) noexcept = default;
+
+  [[nodiscard]] bool certified_observed() const noexcept;
+  [[nodiscard]] bool certified_unobserved() const noexcept;
+  [[nodiscard]] bool certified_budget_exhaustion() const noexcept;
+  [[nodiscard]] bool certified_fail_closed_contradiction() const noexcept;
+  [[nodiscard]] bool certified_for(
+      const ExactDirectSparseStableFacetForestStamp&) const noexcept;
+  [[nodiscard]] bool certified_observed_for(
+      const ExactDirectSparseStableFacetForestStamp&) const noexcept;
+  [[nodiscard]] bool certified_unobserved_for(
+      const ExactDirectSparseStableFacetForestStamp&) const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetPositiveProbeResult&,
+      const ExactDirectSparseStableFacetPositiveProbeResult&) = default;
+
+ private:
+  [[nodiscard]] bool certified_common() const noexcept;
+  explicit ExactDirectSparseStableFacetPositiveProbeResult(
+      const ExactDirectSparseStableFacetPositiveProbeReceipt&) noexcept;
+
+  ExactDirectSparseStableFacetPositiveProbeReceipt private_receipt_snapshot_{};
+  bool minted_{false};
+
+  friend class ExactDirectSparseStableFacetForest;
+};
+
 class ExactDirectSparseStableFacetForestPreparedBatch {
  public:
   ExactDirectSparseStableFacetForestPreparedBatch() noexcept;
@@ -553,6 +665,13 @@ class ExactDirectSparseStableFacetForest {
       ExactDirectSparseStableFacetHandle) const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetPositiveLookupResult
   lookup_positive_full_key(const ExactDirectSparseFacetKey&) const noexcept;
+  // This synchronous const probe is allocation-free but is not a concurrency
+  // primitive.  Callers must externally exclude forest mutation for the whole
+  // call and compare the returned stamp at their larger transaction boundary.
+  [[nodiscard]] ExactDirectSparseStableFacetPositiveProbeResult
+  probe_positive_full_key(
+      const ExactDirectSparseFacetKey&,
+      const ExactDirectSparseStableFacetPositiveProbeBudget&) const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestPreparationResult
   prepare_batch(
       std::span<const ExactDirectSparseStableFacetInsertion>,

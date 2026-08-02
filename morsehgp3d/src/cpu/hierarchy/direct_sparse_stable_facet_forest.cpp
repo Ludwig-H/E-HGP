@@ -387,6 +387,16 @@ struct PositiveKeyIndexSearchResult {
   std::size_t full_key_comparison_count{};
 };
 
+struct BoundedPositiveKeyIndexSearchResult {
+  PositiveKeyIndexSearchDisposition disposition{
+      PositiveKeyIndexSearchDisposition::contradiction};
+  ExactDirectSparseStableFacetPositiveProbeDecision budget_decision{
+      ExactDirectSparseStableFacetPositiveProbeDecision::not_certified};
+  std::size_t row{};
+  std::size_t slot_visit_count{};
+  std::size_t full_key_comparison_count{};
+};
+
 [[nodiscard]] PositiveKeyIndexSearchResult positive_key_index_search(
     std::span<const ExactDirectSparseStableFacetForestEntry> entries,
     std::span<const std::size_t> slots,
@@ -427,6 +437,119 @@ struct PositiveKeyIndexSearchResult {
         result.row = row;
         return result;
       }
+    }
+    slot_index = (slot_index + 1U) & mask;
+  }
+  return result;
+}
+
+[[nodiscard]] BoundedPositiveKeyIndexSearchResult
+positive_key_index_search_bounded(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<const std::size_t> slots,
+    const ExactDirectSparseFacetKey& key,
+    std::uint64_t fingerprint_mask,
+    const ExactDirectSparseStableFacetPositiveProbeBudget& budget) noexcept {
+  BoundedPositiveKeyIndexSearchResult result;
+  if (slots.empty()) {
+    result.disposition = entries.empty()
+                             ? PositiveKeyIndexSearchDisposition::unobserved
+                             : PositiveKeyIndexSearchDisposition::contradiction;
+    return result;
+  }
+  if (!power_of_two(slots.size())) {
+    return result;
+  }
+  const std::uint64_t requested_fingerprint =
+      fingerprint_exact_direct_sparse_facet_key(key, fingerprint_mask);
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot_index =
+      static_cast<std::size_t>(requested_fingerprint) & mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    if (result.slot_visit_count >=
+        budget.maximum_positive_key_slot_visit_count) {
+      result.budget_decision =
+          ExactDirectSparseStableFacetPositiveProbeDecision::
+              no_positive_key_slot_budget_exhausted;
+      return result;
+    }
+    ++result.slot_visit_count;
+    const std::size_t row_plus_one = slots[slot_index];
+    if (row_plus_one == 0U) {
+      result.disposition = PositiveKeyIndexSearchDisposition::unobserved;
+      return result;
+    }
+    const std::size_t row = row_plus_one - 1U;
+    if (row >= entries.size()) {
+      return result;
+    }
+    const auto& stored_key = entries[row].facet_key;
+    if (fingerprint_exact_direct_sparse_facet_key(
+            stored_key, fingerprint_mask) == requested_fingerprint) {
+      if (result.full_key_comparison_count >=
+          budget.maximum_full_key_comparison_count) {
+        result.budget_decision =
+            ExactDirectSparseStableFacetPositiveProbeDecision::
+                no_full_key_comparison_budget_exhausted;
+        return result;
+      }
+      ++result.full_key_comparison_count;
+      if (stored_key == key) {
+        result.disposition = PositiveKeyIndexSearchDisposition::observed;
+        result.row = row;
+        return result;
+      }
+    }
+    slot_index = (slot_index + 1U) & mask;
+  }
+  return result;
+}
+
+enum class BoundedHandleIndexSearchDisposition : std::uint8_t {
+  unobserved,
+  observed,
+  budget_exhausted,
+  contradiction,
+};
+
+struct BoundedHandleIndexSearchResult {
+  BoundedHandleIndexSearchDisposition disposition{
+      BoundedHandleIndexSearchDisposition::contradiction};
+  std::size_t row{};
+};
+
+[[nodiscard]] BoundedHandleIndexSearchResult handle_index_row_bounded(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<const std::size_t> slots,
+    ExactDirectSparseStableFacetHandle handle,
+    std::size_t maximum_slot_visit_count,
+    std::size_t& cumulative_slot_visit_count) noexcept {
+  BoundedHandleIndexSearchResult result;
+  if (slots.empty() || !power_of_two(slots.size())) {
+    return result;
+  }
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot_index = mix_stable_handle(handle) & mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    if (cumulative_slot_visit_count >= maximum_slot_visit_count) {
+      result.disposition =
+          BoundedHandleIndexSearchDisposition::budget_exhausted;
+      return result;
+    }
+    ++cumulative_slot_visit_count;
+    const std::size_t row_plus_one = slots[slot_index];
+    if (row_plus_one == 0U) {
+      result.disposition = BoundedHandleIndexSearchDisposition::unobserved;
+      return result;
+    }
+    const std::size_t row = row_plus_one - 1U;
+    if (row >= entries.size()) {
+      return result;
+    }
+    if (entries[row].stable_source_facet_token_index == handle) {
+      result.disposition = BoundedHandleIndexSearchDisposition::observed;
+      result.row = row;
+      return result;
     }
     slot_index = (slot_index + 1U) & mask;
   }
@@ -795,6 +918,145 @@ bool ExactDirectSparseStableFacetPositiveLookupResult::certified_observed_for(
 }
 
 bool ExactDirectSparseStableFacetPositiveLookupResult::certified_unobserved_for(
+    const ExactDirectSparseStableFacetForestStamp& expected_stamp)
+    const noexcept {
+  return certified_unobserved() && forest_stamp == expected_stamp;
+}
+
+ExactDirectSparseStableFacetPositiveProbeResult::
+    ExactDirectSparseStableFacetPositiveProbeResult(
+        const ExactDirectSparseStableFacetPositiveProbeReceipt& receipt)
+    noexcept
+    : ExactDirectSparseStableFacetPositiveProbeReceipt(receipt),
+      private_receipt_snapshot_(receipt),
+      minted_(
+          receipt.disposition ==
+              ExactDirectSparseStableFacetPositiveProbeDisposition::observed ||
+          receipt.disposition ==
+              ExactDirectSparseStableFacetPositiveProbeDisposition::
+                  unobserved ||
+          receipt.disposition ==
+              ExactDirectSparseStableFacetPositiveProbeDisposition::
+                  budget_exhausted ||
+          receipt.disposition ==
+              ExactDirectSparseStableFacetPositiveProbeDisposition::
+                  contradiction) {}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::certified_common()
+    const noexcept {
+  return minted_ &&
+         static_cast<
+             const ExactDirectSparseStableFacetPositiveProbeReceipt&>(*this) ==
+             private_receipt_snapshot_ &&
+         forest_stamp.session_instance_id != 0U &&
+         forest_certified_at_entry && requested_key_canonical &&
+         fingerprint_used_only_as_accelerator &&
+         complete_key_comparison_authoritative &&
+         positive_key_slot_visit_count <=
+             requested_budget.maximum_positive_key_slot_visit_count &&
+         full_key_comparison_count <=
+             requested_budget.maximum_full_key_comparison_count &&
+         handle_index_slot_visit_count <=
+             requested_budget.maximum_handle_index_slot_visit_count &&
+         parent_hop_count <= requested_budget.maximum_parent_hop_count &&
+         !source_exactness_claimed && !public_status_claimed;
+}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::certified_observed()
+    const noexcept {
+  return certified_common() && lookup_completed_without_mutation &&
+         immutable_key_handle_binding_observed &&
+         root_resolved_without_mutation && full_key_comparison_count != 0U &&
+         component_size != 0U &&
+         disposition ==
+             ExactDirectSparseStableFacetPositiveProbeDisposition::observed &&
+         decision ==
+             ExactDirectSparseStableFacetPositiveProbeDecision::
+                 complete_observed;
+}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::certified_unobserved()
+    const noexcept {
+  return certified_common() && lookup_completed_without_mutation &&
+         !immutable_key_handle_binding_observed &&
+         root_resolved_without_mutation && bound_handle == 0U &&
+         root_handle == 0U && component_size == 0U &&
+         disposition == ExactDirectSparseStableFacetPositiveProbeDisposition::
+                            unobserved &&
+         decision == ExactDirectSparseStableFacetPositiveProbeDecision::
+                         complete_unobserved;
+}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::
+certified_budget_exhaustion() const noexcept {
+  bool exhausted_exact_cap = false;
+  switch (decision) {
+    case ExactDirectSparseStableFacetPositiveProbeDecision::
+        no_positive_key_slot_budget_exhausted:
+      exhausted_exact_cap =
+          positive_key_slot_visit_count ==
+          requested_budget.maximum_positive_key_slot_visit_count;
+      break;
+    case ExactDirectSparseStableFacetPositiveProbeDecision::
+        no_full_key_comparison_budget_exhausted:
+      exhausted_exact_cap =
+          full_key_comparison_count ==
+          requested_budget.maximum_full_key_comparison_count;
+      break;
+    case ExactDirectSparseStableFacetPositiveProbeDecision::
+        no_handle_index_slot_budget_exhausted:
+      exhausted_exact_cap =
+          handle_index_slot_visit_count ==
+          requested_budget.maximum_handle_index_slot_visit_count;
+      break;
+    case ExactDirectSparseStableFacetPositiveProbeDecision::
+        no_parent_hop_budget_exhausted:
+      exhausted_exact_cap =
+          parent_hop_count == requested_budget.maximum_parent_hop_count;
+      break;
+    default:
+      break;
+  }
+  return certified_common() && lookup_completed_without_mutation &&
+         !immutable_key_handle_binding_observed &&
+         !root_resolved_without_mutation && bound_handle == 0U &&
+         root_handle == 0U && component_size == 0U && exhausted_exact_cap &&
+         disposition == ExactDirectSparseStableFacetPositiveProbeDisposition::
+                            budget_exhausted;
+}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::
+certified_fail_closed_contradiction() const noexcept {
+  const bool contradiction_decision =
+      decision == ExactDirectSparseStableFacetPositiveProbeDecision::
+                      contradiction_positive_key_index ||
+      decision == ExactDirectSparseStableFacetPositiveProbeDecision::
+                      contradiction_root_resolution;
+  return certified_common() && lookup_completed_without_mutation &&
+         !immutable_key_handle_binding_observed &&
+         !root_resolved_without_mutation && bound_handle == 0U &&
+         root_handle == 0U && component_size == 0U &&
+         contradiction_decision &&
+         disposition == ExactDirectSparseStableFacetPositiveProbeDisposition::
+                            contradiction;
+}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::certified_for(
+    const ExactDirectSparseStableFacetForestStamp& expected_stamp)
+    const noexcept {
+  return forest_stamp == expected_stamp &&
+         (certified_observed() || certified_unobserved() ||
+          certified_budget_exhaustion() ||
+          certified_fail_closed_contradiction());
+}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::certified_observed_for(
+    const ExactDirectSparseStableFacetForestStamp& expected_stamp)
+    const noexcept {
+  return certified_observed() && forest_stamp == expected_stamp;
+}
+
+bool ExactDirectSparseStableFacetPositiveProbeResult::certified_unobserved_for(
     const ExactDirectSparseStableFacetForestStamp& expected_stamp)
     const noexcept {
   return certified_unobserved() && forest_stamp == expected_stamp;
@@ -1200,6 +1462,164 @@ ExactDirectSparseStableFacetForest::lookup_positive_full_key(
       ExactDirectSparseStableFacetPositiveLookupDisposition::observed;
   return ExactDirectSparseStableFacetPositiveLookupResult{
       static_cast<const ExactDirectSparseStableFacetPositiveLookupReceipt&>(
+          result)};
+}
+
+ExactDirectSparseStableFacetPositiveProbeResult
+ExactDirectSparseStableFacetForest::probe_positive_full_key(
+    const ExactDirectSparseFacetKey& key,
+    const ExactDirectSparseStableFacetPositiveProbeBudget& budget)
+    const noexcept {
+  ExactDirectSparseStableFacetPositiveProbeResult result;
+  result.requested_key = key;
+  result.requested_budget = budget;
+  result.forest_stamp = current_stamp();
+  result.forest_certified_at_entry = certified_structure_only_forest();
+  if (!result.forest_certified_at_entry) {
+    return result;
+  }
+  result.requested_key_canonical = canonical_key(key);
+  if (!result.requested_key_canonical) {
+    result.lookup_completed_without_mutation = true;
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveProbeDisposition::
+            input_key_rejected;
+    result.decision =
+        ExactDirectSparseStableFacetPositiveProbeDecision::
+            no_input_key_rejected;
+    return result;
+  }
+  result.fingerprint_used_only_as_accelerator = true;
+  result.complete_key_comparison_authoritative = true;
+  result.lookup_completed_without_mutation = true;
+  const auto found = positive_key_index_search_bounded(
+      impl_->entries,
+      impl_->positive_key_index_slots,
+      key,
+      impl_->config.positive_key_fingerprint_mask,
+      budget);
+  result.positive_key_slot_visit_count = found.slot_visit_count;
+  result.full_key_comparison_count = found.full_key_comparison_count;
+  if (found.budget_decision !=
+      ExactDirectSparseStableFacetPositiveProbeDecision::not_certified) {
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveProbeDisposition::
+            budget_exhausted;
+    result.decision = found.budget_decision;
+    return ExactDirectSparseStableFacetPositiveProbeResult{
+        static_cast<
+            const ExactDirectSparseStableFacetPositiveProbeReceipt&>(
+            result)};
+  }
+  if (found.disposition == PositiveKeyIndexSearchDisposition::contradiction) {
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveProbeDisposition::contradiction;
+    result.decision =
+        ExactDirectSparseStableFacetPositiveProbeDecision::
+            contradiction_positive_key_index;
+    return ExactDirectSparseStableFacetPositiveProbeResult{
+        static_cast<
+            const ExactDirectSparseStableFacetPositiveProbeReceipt&>(
+            result)};
+  }
+  if (found.disposition == PositiveKeyIndexSearchDisposition::unobserved) {
+    result.lookup_completed_without_mutation = true;
+    result.root_resolved_without_mutation = true;
+    result.disposition =
+        ExactDirectSparseStableFacetPositiveProbeDisposition::unobserved;
+    result.decision =
+        ExactDirectSparseStableFacetPositiveProbeDecision::
+            complete_unobserved;
+    return ExactDirectSparseStableFacetPositiveProbeResult{
+        static_cast<
+            const ExactDirectSparseStableFacetPositiveProbeReceipt&>(
+            result)};
+  }
+
+  std::size_t cursor = found.row;
+  while (true) {
+    if (cursor >= impl_->entries.size()) {
+      result.disposition =
+          ExactDirectSparseStableFacetPositiveProbeDisposition::contradiction;
+      result.decision =
+          ExactDirectSparseStableFacetPositiveProbeDecision::
+              contradiction_root_resolution;
+      break;
+    }
+    const auto& entry = impl_->entries[cursor];
+    if (entry.parent_handle == entry.stable_source_facet_token_index) {
+      if (entry.component_size == 0U) {
+        result.disposition = ExactDirectSparseStableFacetPositiveProbeDisposition::
+                                 contradiction;
+        result.decision =
+            ExactDirectSparseStableFacetPositiveProbeDecision::
+                contradiction_root_resolution;
+        break;
+      }
+      const auto& bound_entry = impl_->entries[found.row];
+      result.bound_handle =
+          bound_entry.stable_source_facet_token_index;
+      result.root_handle = entry.stable_source_facet_token_index;
+      result.component_size = entry.component_size;
+      result.immutable_key_handle_binding_observed = true;
+      result.root_resolved_without_mutation = true;
+      result.disposition =
+          ExactDirectSparseStableFacetPositiveProbeDisposition::observed;
+      result.decision =
+          ExactDirectSparseStableFacetPositiveProbeDecision::
+              complete_observed;
+      return ExactDirectSparseStableFacetPositiveProbeResult{
+          static_cast<
+              const ExactDirectSparseStableFacetPositiveProbeReceipt&>(
+              result)};
+    }
+    if (result.parent_hop_count >= impl_->entries.size()) {
+      result.disposition =
+          ExactDirectSparseStableFacetPositiveProbeDisposition::contradiction;
+      result.decision =
+          ExactDirectSparseStableFacetPositiveProbeDecision::
+              contradiction_root_resolution;
+      break;
+    }
+    if (result.parent_hop_count >= budget.maximum_parent_hop_count) {
+      result.disposition =
+          ExactDirectSparseStableFacetPositiveProbeDisposition::
+              budget_exhausted;
+      result.decision =
+          ExactDirectSparseStableFacetPositiveProbeDecision::
+              no_parent_hop_budget_exhausted;
+      break;
+    }
+    const auto parent = handle_index_row_bounded(
+        impl_->entries,
+        impl_->handle_index_slots,
+        entry.parent_handle,
+        budget.maximum_handle_index_slot_visit_count,
+        result.handle_index_slot_visit_count);
+    if (parent.disposition ==
+        BoundedHandleIndexSearchDisposition::budget_exhausted) {
+      result.disposition =
+          ExactDirectSparseStableFacetPositiveProbeDisposition::
+              budget_exhausted;
+      result.decision =
+          ExactDirectSparseStableFacetPositiveProbeDecision::
+              no_handle_index_slot_budget_exhausted;
+      break;
+    }
+    if (parent.disposition !=
+        BoundedHandleIndexSearchDisposition::observed) {
+      result.disposition =
+          ExactDirectSparseStableFacetPositiveProbeDisposition::contradiction;
+      result.decision =
+          ExactDirectSparseStableFacetPositiveProbeDecision::
+              contradiction_root_resolution;
+      break;
+    }
+    ++result.parent_hop_count;
+    cursor = parent.row;
+  }
+  return ExactDirectSparseStableFacetPositiveProbeResult{
+      static_cast<const ExactDirectSparseStableFacetPositiveProbeReceipt&>(
           result)};
 }
 

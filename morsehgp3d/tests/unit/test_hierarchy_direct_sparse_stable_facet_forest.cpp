@@ -657,6 +657,217 @@ void test_positive_full_key_index_collision_and_injective_binding() {
       "an intra-batch complete-key rebinding is rejected before physical reservation or mutation");
 }
 
+[[nodiscard]] bool any_positive_probe_certification(
+    const ExactDirectSparseStableFacetPositiveProbeResult& result) {
+  return result.certified_observed() || result.certified_unobserved() ||
+         result.certified_budget_exhaustion() ||
+         result.certified_fail_closed_contradiction();
+}
+
+void test_bounded_positive_full_key_probe_caps_collision_and_stamp() {
+  auto initialization = initialize_with_positive_fingerprint_mask(0U);
+  auto forest = std::move(*initialization.forest);
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{10U, key_for_handle(10U)},
+      ExactDirectSparseStableFacetInsertion{11U, key_for_handle(11U)},
+      ExactDirectSparseStableFacetInsertion{12U, key_for_handle(12U)},
+      ExactDirectSparseStableFacetInsertion{13U, key_for_handle(13U)},
+  };
+  const std::array unions{
+      ExactDirectSparseStableFacetUnion{10U, 11U},
+      ExactDirectSparseStableFacetUnion{12U, 13U},
+      ExactDirectSparseStableFacetUnion{11U, 12U},
+  };
+  auto prepared = forest.prepare_batch(insertions, unions);
+  const auto committed = forest.commit(std::move(*prepared.ticket));
+  check(committed.certified_commit(), "bounded-probe forest commits");
+
+  constexpr std::size_t maximum =
+      std::numeric_limits<std::size_t>::max();
+  const ExactDirectSparseStableFacetPositiveProbeBudget generous{
+      maximum, maximum, maximum, maximum};
+  const auto pre_stamp = forest.current_stamp();
+  const auto entries_before = forest.observed_entries();
+  const std::vector<ExactDirectSparseStableFacetForestEntry> entry_copy{
+      entries_before.begin(), entries_before.end()};
+  allocation_probe::begin();
+  const auto exact =
+      forest.probe_positive_full_key(key_for_handle(13U), generous);
+  const auto miss =
+      forest.probe_positive_full_key(key_for_handle(99U), generous);
+  const std::size_t exact_probe_allocations = allocation_probe::finish();
+  check(
+      exact.certified_observed_for(pre_stamp) &&
+          exact.bound_handle == 13U && exact.root_handle == 10U &&
+          exact.component_size == 4U &&
+          exact.positive_key_slot_visit_count == 4U &&
+          exact.full_key_comparison_count == 4U &&
+          exact.handle_index_slot_visit_count != 0U &&
+          exact.parent_hop_count == 1U &&
+          miss.certified_unobserved_for(pre_stamp) &&
+          miss.positive_key_slot_visit_count == 5U &&
+          miss.full_key_comparison_count == 4U &&
+          exact_probe_allocations == 0U &&
+          forest.current_stamp() == pre_stamp &&
+          std::equal(
+              forest.observed_entries().begin(),
+              forest.observed_entries().end(),
+              entry_copy.begin(),
+              entry_copy.end()),
+      "mask-zero bounded hit and miss compare full keys, resolve the root, allocate nothing and mutate nothing");
+
+  const auto check_cap = [&](auto budget,
+                             auto expected_decision,
+                             std::string_view label) {
+    allocation_probe::begin();
+    const auto exhausted =
+        forest.probe_positive_full_key(key_for_handle(13U), budget);
+    const std::size_t allocations = allocation_probe::finish();
+    check(
+        exhausted.certified_budget_exhaustion() &&
+            exhausted.certified_for(pre_stamp) &&
+            exhausted.decision == expected_decision &&
+            exhausted.bound_handle == 0U && exhausted.root_handle == 0U &&
+            exhausted.component_size == 0U && allocations == 0U &&
+            forest.current_stamp() == pre_stamp,
+        std::string{label});
+    return exhausted;
+  };
+
+  auto positive_slot_exact = generous;
+  positive_slot_exact.maximum_positive_key_slot_visit_count =
+      exact.positive_key_slot_visit_count;
+  check(
+      forest.probe_positive_full_key(
+                key_for_handle(13U), positive_slot_exact)
+          .certified_observed_for(pre_stamp),
+      "the exact positive-slot cap succeeds");
+  --positive_slot_exact.maximum_positive_key_slot_visit_count;
+  const auto positive_slot_exhausted = check_cap(
+      positive_slot_exact,
+      ExactDirectSparseStableFacetPositiveProbeDecision::
+          no_positive_key_slot_budget_exhausted,
+      "the positive-slot cap minus one fails closed");
+
+  auto full_key_exact = generous;
+  full_key_exact.maximum_full_key_comparison_count =
+      exact.full_key_comparison_count;
+  check(
+      forest.probe_positive_full_key(key_for_handle(13U), full_key_exact)
+          .certified_observed_for(pre_stamp),
+      "the exact full-key comparison cap succeeds");
+  --full_key_exact.maximum_full_key_comparison_count;
+  const auto full_key_exhausted = check_cap(
+      full_key_exact,
+      ExactDirectSparseStableFacetPositiveProbeDecision::
+          no_full_key_comparison_budget_exhausted,
+      "the full-key comparison cap minus one fails separately from slots");
+
+  auto handle_slot_exact = generous;
+  handle_slot_exact.maximum_handle_index_slot_visit_count =
+      exact.handle_index_slot_visit_count;
+  check(
+      forest.probe_positive_full_key(key_for_handle(13U), handle_slot_exact)
+          .certified_observed_for(pre_stamp),
+      "the exact handle-index slot cap succeeds");
+  --handle_slot_exact.maximum_handle_index_slot_visit_count;
+  const auto handle_slot_exhausted = check_cap(
+      handle_slot_exact,
+      ExactDirectSparseStableFacetPositiveProbeDecision::
+          no_handle_index_slot_budget_exhausted,
+      "the handle-index slot cap minus one fails closed");
+
+  auto parent_hop_exact = generous;
+  parent_hop_exact.maximum_parent_hop_count = exact.parent_hop_count;
+  check(
+      forest.probe_positive_full_key(key_for_handle(13U), parent_hop_exact)
+          .certified_observed_for(pre_stamp),
+      "the exact parent-hop cap succeeds");
+  --parent_hop_exact.maximum_parent_hop_count;
+  const auto parent_hop_exhausted = check_cap(
+      parent_hop_exact,
+      ExactDirectSparseStableFacetPositiveProbeDecision::
+          no_parent_hop_budget_exhausted,
+      "the parent-hop cap minus one fails closed");
+
+  const ExactDirectSparseStableFacetPositiveProbeBudget zero{};
+  const auto root_with_zero_dsu_caps = forest.probe_positive_full_key(
+      key_for_handle(10U),
+      {exact.positive_key_slot_visit_count,
+       exact.full_key_comparison_count,
+       0U,
+       0U});
+  auto empty_initialization = initialize_with_positive_fingerprint_mask(0U);
+  auto empty = std::move(*empty_initialization.forest);
+  const auto empty_zero =
+      empty.probe_positive_full_key(key_for_handle(10U), zero);
+  check(
+      root_with_zero_dsu_caps.certified_observed_for(pre_stamp) &&
+          root_with_zero_dsu_caps.parent_hop_count == 0U &&
+          root_with_zero_dsu_caps.handle_index_slot_visit_count == 0U &&
+          empty_zero.certified_unobserved_for(empty.current_stamp()) &&
+          empty_zero.positive_key_slot_visit_count == 0U,
+      "zero caps suffice for an empty index and for DSU resolution of an already-root binding");
+
+  using ProbeReceipt = ExactDirectSparseStableFacetPositiveProbeReceipt;
+  const auto check_forged = [&](const auto& genuine,
+                                std::string_view label) {
+    ExactDirectSparseStableFacetPositiveProbeResult forged;
+    static_cast<ProbeReceipt&>(forged) =
+        static_cast<const ProbeReceipt&>(genuine);
+    check(
+        !any_positive_probe_certification(forged),
+        std::string{label});
+  };
+  check_forged(exact, "a copied observed receipt cannot forge its mint");
+  check_forged(miss, "a copied unobserved receipt cannot forge its mint");
+  check_forged(
+      positive_slot_exhausted,
+      "a copied positive-slot exhaustion cannot forge its mint");
+  auto tampered_budget = parent_hop_exhausted;
+  ++tampered_budget.parent_hop_count;
+  check(
+      !any_positive_probe_certification(tampered_budget),
+      "tampering a minted cap counter invalidates every certification");
+  auto tampered_observed = exact;
+  ++tampered_observed.root_handle;
+  auto tampered_unobserved = miss;
+  tampered_unobserved.disposition =
+      ExactDirectSparseStableFacetPositiveProbeDisposition::contradiction;
+  auto tampered_full_key_budget = full_key_exhausted;
+  tampered_full_key_budget.decision =
+      ExactDirectSparseStableFacetPositiveProbeDecision::
+          contradiction_positive_key_index;
+  check(
+      !any_positive_probe_certification(tampered_observed) &&
+          !any_positive_probe_certification(tampered_unobserved) &&
+          !any_positive_probe_certification(tampered_full_key_budget) &&
+          handle_slot_exhausted.certified_budget_exhaustion(),
+      "observed, unobserved and budget public receipt mutations are rejected");
+  ProbeReceipt forged_contradiction_receipt =
+      static_cast<const ProbeReceipt&>(positive_slot_exhausted);
+  forged_contradiction_receipt.disposition =
+      ExactDirectSparseStableFacetPositiveProbeDisposition::contradiction;
+  forged_contradiction_receipt.decision =
+      ExactDirectSparseStableFacetPositiveProbeDecision::
+          contradiction_positive_key_index;
+  ExactDirectSparseStableFacetPositiveProbeResult forged_contradiction;
+  static_cast<ProbeReceipt&>(forged_contradiction) =
+      forged_contradiction_receipt;
+  check(
+      !forged_contradiction.certified_fail_closed_contradiction(),
+      "a complete public contradiction receipt cannot forge a private mint");
+
+  const std::array later_insertion{
+      ExactDirectSparseStableFacetInsertion{20U, key_for_handle(20U)}};
+  auto later = forest.prepare_batch(later_insertion, {});
+  const auto later_commit = forest.commit(std::move(*later.ticket));
+  check(
+      later_commit.certified_commit() && exact.certified_for(pre_stamp) &&
+          !exact.certified_for(forest.current_stamp()),
+      "a genuine probe remains historical and fails certification for a later forest stamp");
+}
+
 void test_positive_index_budget_preflight() {
   auto maximum_namespace_initialization =
       initialize_exact_direct_sparse_stable_facet_forest(
@@ -1509,6 +1720,7 @@ void run_tests() {
   test_append_only_multibatch_index();
   test_flat_index_collision_chain();
   test_positive_full_key_index_collision_and_injective_binding();
+  test_bounded_positive_full_key_probe_caps_collision_and_stamp();
   test_positive_index_budget_preflight();
   test_positive_bijection_sibling_adversaries_and_idempotence();
   test_sibling_ticket_survives_physical_rehash();
