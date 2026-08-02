@@ -138,6 +138,13 @@ void hash_id(
 
 }  // namespace
 
+contract::CanonicalId
+ExactDirectMorseResidentAtLeast20ProjectionSeam::scientific_source_digest(
+    const ExactDirectSparseUnifiedLevelPlanResult& plan,
+    ExactDirectMorseUnifiedResidentSourceKind source_kind) {
+  return resident_scientific_digest(plan, source_kind);
+}
+
 ExactDirectMorseResidentAtLeast20ProjectionSeam::Result
 ExactDirectMorseResidentAtLeast20ProjectionSeam::project_verified_bundle(
     const ExactDirectMorseUnifiedResidentAuthorityBundle& bundle,

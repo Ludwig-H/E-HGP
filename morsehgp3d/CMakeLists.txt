@@ -3522,6 +3522,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_k1_normalized_product_stream
+  STATIC
+    src/cpu/hierarchy/direct_k1_normalized_product_stream.cpp
+)
+add_library(
+  morsehgp3d::direct_k1_normalized_product_stream
+  ALIAS morsehgp3d_direct_k1_normalized_product_stream
+)
+set_target_properties(
+  morsehgp3d_direct_k1_normalized_product_stream
+  PROPERTIES
+    EXPORT_NAME direct_k1_normalized_product_stream
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_k1_normalized_product_stream PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_k1_normalized_product_stream
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_k1_normalized_product_stream
+  PUBLIC morsehgp3d::direct_k1_boruvka_closed_cut_session
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_k1_normalized_product_stream PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_k1_normalized_product_stream
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
   STATIC
     src/cpu/hierarchy/direct_morse_resident_k2_k1_closed_cut_bridge.cpp
@@ -6090,6 +6130,7 @@ install(
     morsehgp3d_yao48_geometry
     morsehgp3d_hierarchy
     morsehgp3d_direct_k1_boruvka_closed_cut_session
+    morsehgp3d_direct_k1_normalized_product_stream
     morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
     morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
     morsehgp3d_yao48_ranked_pair_candidates_reference

@@ -103,6 +103,12 @@ class ExactDirectMorseResidentAtLeast20ProjectionSeam {
     Decision decision{Decision::rejected};
   };
 
+  // One canonical framing shared by the autonomous adapter and the product
+  // coordinator.  This is a scientific identity helper only: the caller must
+  // still authenticate the immutable plan through its live resident ticket.
+  [[nodiscard]] static contract::CanonicalId scientific_source_digest(
+      const ExactDirectSparseUnifiedLevelPlanResult&,
+      ExactDirectMorseUnifiedResidentSourceKind);
   [[nodiscard]] static Result project_verified_bundle(
       const ExactDirectMorseUnifiedResidentAuthorityBundle&,
       std::uint64_t,
