@@ -2405,6 +2405,91 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_normalized_h0_scientific_window_capability
+  STATIC
+    src/cpu/hierarchy/direct_normalized_h0_scientific_window_capability.cpp
+)
+add_library(
+  morsehgp3d::direct_normalized_h0_scientific_window_capability
+  ALIAS morsehgp3d_direct_normalized_h0_scientific_window_capability
+)
+set_target_properties(
+  morsehgp3d_direct_normalized_h0_scientific_window_capability
+  PROPERTIES
+    EXPORT_NAME direct_normalized_h0_scientific_window_capability
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_normalized_h0_scientific_window_capability PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_normalized_h0_scientific_window_capability
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_normalized_h0_scientific_window_capability
+  PUBLIC
+    morsehgp3d::direct_morse_unified_resident_session
+    morsehgp3d::direct_normalized_h0_authenticated_window_stream
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_scientific_window_capability PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_scientific_window_capability
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
+  STATIC
+    src/cpu/hierarchy/direct_normalized_h0_relative_frozen_incidence_batch.cpp
+)
+add_library(
+  morsehgp3d::direct_normalized_h0_relative_frozen_incidence_batch
+  ALIAS morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
+)
+set_target_properties(
+  morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
+  PROPERTIES
+    EXPORT_NAME direct_normalized_h0_relative_frozen_incidence_batch
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
+  PUBLIC
+    morsehgp3d::direct_frozen_unified_incidence_batch
+    morsehgp3d::direct_normalized_h0_scientific_window_capability
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_morse_resident_at_least20_adapter
   STATIC
     src/cpu/hierarchy/direct_morse_resident_at_least20_adapter.cpp
@@ -6272,6 +6357,8 @@ install(
     morsehgp3d_direct_frozen_incidence_hgp_action_plan
     morsehgp3d_direct_frozen_unified_incidence_batch
     morsehgp3d_direct_morse_unified_resident_session
+    morsehgp3d_direct_normalized_h0_scientific_window_capability
+    morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
     morsehgp3d_direct_morse_resident_at_least20_adapter
     morsehgp3d_normalized_exact_hartigan_level_manifest
     morsehgp3d_relative_morse_boruvka

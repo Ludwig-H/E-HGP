@@ -2506,17 +2506,24 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - conserver `restart_supported=false` et `durable_file_codec_claimed=false` tant que la couture verticale ne possède pas de restore;
 - laisser M.1, exactitude publique, vrai 50 k et gate G4 faux même si K1, verticales, Hartigan et `at_least20` se ferment relativement à la source possédée.
 
-### T15-WINDOWED-INGRESS — fournisseur structurel, pas encore résident exact
+### T15-WINDOWED-INGRESS — capability scientifique et batch gelé relatifs
 
 - accepter un manifeste supérieur vide avec chaîne finale égale à la chaîne initiale;
 - lier le reçu de replay au digest du manifeste et à l'identité process-locale exacte du provider;
 - exiger exactement un callback par visite; un second callback invalide définitivement la visite même si le provider ignore le retour `false`;
 - vérifier par additions contrôlées tous les caps, curseurs et compteurs, et rejeter les formes d'overflow avant copie;
-- recopier au plus une fenêtre et conserver la traduction locale--stable sans plan global certifié;
+- recopier au plus une fenêtre et conserver la traduction locale--stable sans retenir le plan global certifié;
 - valider en un seul passage canonique toutes les suppressions d'une coface et refuser références manquantes, dupliquées ou désordonnées;
 - envelopper le provider dans un flux à un seul ticket move-only, lier identité process-locale, manifeste, curseur, époque et chaîne, puis rejeter ticket étranger, périmé, rejoué ou double callback sans mutation scientifique;
 - garder le checkpoint de ce flux explicitement non redémarrable et `source_exactness_claimed=false`, `public_status=not_claimed`, sans mutation de résident, locator ou forest;
 - initialiser le forest sparse avec un namespace très grand sans allocation proportionnelle, puis couvrir insertions canoniques, doublon idempotent, remapping interdit, unions déterministes, frères périmés et caps moins un;
 - vérifier que le digest de lot du forest est invariant par permutation et que son checkpoint métadonnées reste explicitement non redémarrable, sans prétendre aux cartes verticales;
-- avant tout raccord massif, exiger une capability scientifique de fenêtre non forgeable, un builder quotient/action relatif et la composition durable avec le forest sparse à handles stables;
+- vérifier fraîchement l'autorité horizontale, reconstruire transitoirement le plan de compatibilité, exiger l'égalité exacte du manifeste et compter honnêtement les deux rejeux du plan normalisé;
+- rejouer intégralement le provider une fois avant publication, puis vérifier que le plan global transitoire et son autorité liée à l'adresse ne sont pas retenus;
+- exiger la capability privée dans le builder relatif, borner séparément la traduction complète locale--stable, les résolutions stables demandées et le batch gelé, puis rejeter cap moins un, ordre non strict, handle dupliqué ou hors fenêtre sans mutation et sans consommation du ticket;
+- distinguer l'indice de stockage nul du plan local mono-lot de l'indice scientifique du lot source, construire exactement un batch, puis exiger les rejeux streaming frais du quotient et de l'action;
+- conserver la traduction locale--stable dans le résultat move-only et vérifier qu'il reste valide et interprétable après commit et destruction du ticket scientifique;
+- avant tout raccord massif, exiger encore la composition transactionnelle et durable du builder avec le forest sparse à handles stables;
 - pour le runtime v4, archiver les trois artefacts avec taille et SHA-256 avant reçu, refuser absent, lien symbolique, taille et digest altérés, puis rehash chaque archive à la reprise.
+
+La validation stricte ciblée doit rester exacte, sans test smoke. La relance Release finale passe 5/5 en 2,72 secondes : provider 0,00 seconde, flux authentifié 0,00 seconde, capability 0,12 seconde, batch gelé 2,26 secondes et session résidente 0,33 seconde. La campagne sanitizer antérieure passe 2/2 en 69,08 secondes : capability 2,47 secondes et batch gelé 66,59 secondes. Après ajout des rejets de résolution stable dupliquée et de budget frozen moins un, la capability seule repasse en 2,48 secondes; ce dernier chrono n'est pas présenté comme une nouvelle campagne combinée. L'installation Release et le consommateur externe liant explicitement les deux nouvelles cibles passent 1/1 en 0,01 seconde. Ces tests valident les régressions ciblées; ils ne constituent ni un résultat true-HGP 50 k, ni un SLO inférieur à une seconde, ni une qualification G4 ou massive.

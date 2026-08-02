@@ -1411,6 +1411,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
+  test_hierarchy_direct_normalized_h0_scientific_window_capability.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
+  PRIVATE morsehgp3d::direct_normalized_h0_relative_frozen_incidence_batch
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
   test_hierarchy_direct_sparse_stable_facet_forest.cpp
 )
@@ -3394,6 +3414,7 @@ set(
   morsehgp3d_hierarchy_direct_normalized_h0_source_plan_tests
   morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
   morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+  morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
   morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
   morsehgp3d_hierarchy_direct_normalized_vertical_square_receipt_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
@@ -4471,6 +4492,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_normalized_h0_authenticated_window_stream
   COMMAND morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_normalized_h0_scientific_window_capability
+  COMMAND morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_stable_facet_forest

@@ -138,11 +138,13 @@ class ExactDirectFrozenUnifiedImmutablePlanAuthorityFactory final {
 };
 
 class ExactDirectFrozenUnifiedResidentBatchAttestedBuilder;
+class ExactDirectFrozenUnifiedScientificWindowBatchAttestedBuilder;
 
-// This capability is tied to the stable address of the batch stored in a
-// resident ticket.  It cannot be copied or constructed by callers.  Moving a
-// ticket moves only its owning unique_ptr, so the attested address remains
-// stable through prepare, validation and commit.
+// This internal capability is tied only to the stable address of a batch that
+// was rebuilt through one of the guarded immutable-plan paths.  The owner may
+// be a resident ticket or the PImpl of a scientific-window-relative batch.
+// Neither capability is caller-constructible; moving either owner moves only
+// its unique_ptr, so the attested address remains stable for the owner's life.
 class ExactDirectFrozenUnifiedResidentBatchAttestation final {
  public:
   ExactDirectFrozenUnifiedResidentBatchAttestation(
@@ -185,6 +187,7 @@ class ExactDirectFrozenUnifiedResidentBatchAttestation final {
   bool certified_{false};
 
   friend class ExactDirectFrozenUnifiedResidentBatchAttestedBuilder;
+  friend class ExactDirectFrozenUnifiedScientificWindowBatchAttestedBuilder;
 };
 
 class ExactDirectFrozenUnifiedResidentBatchAttestedBuilder final {
@@ -199,6 +202,32 @@ class ExactDirectFrozenUnifiedResidentBatchAttestedBuilder final {
           std::size_t batch_index,
           std::span<const ExactDirectFrozenUnifiedFacetResolution>
               facet_resolutions,
+          std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
+              prior_root_coverages,
+          std::span<const spatial::PointId>
+              prior_root_coverage_point_references,
+          std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
+              latent_carrier_coverages,
+          std::span<const spatial::PointId>
+              latent_carrier_coverage_point_references,
+          const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget,
+          ExactDirectFrozenUnifiedIncidenceBatchResult& destination);
+};
+
+// Internal seam used only after a private scientific-window capability has
+// authenticated the exact one-batch local compatibility image.  The public
+// window-relative builder performs that capability check before entering
+// here; this class then performs exactly one quotient/action reconstruction
+// and issues the same address-bound batch attestation as the resident path.
+class ExactDirectFrozenUnifiedScientificWindowBatchAttestedBuilder final {
+ public:
+  [[nodiscard]] static
+      std::optional<ExactDirectFrozenUnifiedResidentBatchAttestation>
+      build_once(
+          const ExactDirectSparseUnifiedLevelPlanResult& local_plan,
+          std::size_t source_batch_index,
+          std::span<const ExactDirectFrozenUnifiedFacetResolution>
+              local_facet_resolutions,
           std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
               prior_root_coverages,
           std::span<const spatial::PointId>

@@ -2130,15 +2130,17 @@ struct VerifiedPlanBuildAudit {
   std::size_t structural_certification_count{};
 };
 
-// Both callers enter after certification of this exact plan.  Standalone
-// callers perform that verification freshly for the current call; the
-// resident path holds a non-forgeable internal lease over its const plan.
-// The batch itself is rebuilt on every entry in both modes.
+// Every caller enters after certification of this exact plan.  Standalone
+// callers replay the complete plan for the current call; the resident path
+// holds a non-forgeable lease over its immutable complete plan; the scientific
+// window path holds a private capability over one authenticated local plan.
+// The selected batch, quotient and action plan are rebuilt on every entry.
 [[nodiscard]] ExactDirectFrozenUnifiedIncidenceBatchResult
 build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     const ExactDirectSparseUnifiedLevelPlanResult& source_plan,
     VerifiedPlanAuthorityKind authority_kind,
     VerifiedPlanBuildAudit* audit,
+    std::size_t batch_storage_index,
     std::size_t batch_index,
     std::span<const ExactDirectFrozenUnifiedFacetResolution>
         facet_resolutions,
@@ -2162,14 +2164,14 @@ build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
     result.source_plan_verified_once_by_immutable_resident_authority =
         authority_kind != VerifiedPlanAuthorityKind::
                               freshly_verified_standalone_successive_star;
-    if (batch_index >= source_plan.batches.size() ||
-        source_plan.batches[batch_index].batch_index != batch_index) {
+    if (batch_storage_index >= source_plan.batches.size() ||
+        source_plan.batches[batch_storage_index].batch_index != batch_index) {
       return fail(
           std::move(result),
           ExactDirectFrozenUnifiedIncidenceBatchDecision::
               no_batch_index_rejected);
     }
-    const auto& batch = source_plan.batches[batch_index];
+    const auto& batch = source_plan.batches[batch_storage_index];
     if (!initialize_requirements(
             source_plan,
             batch,
@@ -2620,6 +2622,7 @@ build_exact_direct_frozen_unified_incidence_batch(
                 freshly_verified_standalone_successive_star,
             nullptr,
             batch_index,
+            batch_index,
             facet_resolutions,
             prior_root_coverages,
             prior_root_coverage_point_references,
@@ -2695,6 +2698,7 @@ verify_exact_direct_frozen_unified_incidence_batch(
             VerifiedPlanAuthorityKind::
                 freshly_verified_standalone_successive_star,
             nullptr,
+            batch_index,
             batch_index,
             facet_resolutions,
             prior_root_coverages,
@@ -2858,6 +2862,7 @@ ExactDirectFrozenUnifiedResidentBatchAttestedBuilder::build_once(
                     immutable_verified_resident_successive_star,
           &audit,
           batch_index,
+          batch_index,
           facet_resolutions,
           prior_root_coverages,
           prior_root_coverage_point_references,
@@ -2870,6 +2875,65 @@ ExactDirectFrozenUnifiedResidentBatchAttestedBuilder::build_once(
       destination.source_plan_freshly_verified ||
       !destination
            .source_plan_verified_once_by_immutable_resident_authority ||
+      !destination.frozen_quotient_freshly_streaming_verified ||
+      !destination.frozen_hgp_action_plan_freshly_streaming_verified ||
+      audit.batch_construction_count != 1U ||
+      audit.quotient_streaming_verification_count != 1U ||
+      audit.action_plan_streaming_verification_count != 1U ||
+      audit.structural_certification_count != 1U) {
+    return std::nullopt;
+  }
+  return ExactDirectFrozenUnifiedResidentBatchAttestation{&destination};
+}
+
+std::optional<ExactDirectFrozenUnifiedResidentBatchAttestation>
+ExactDirectFrozenUnifiedScientificWindowBatchAttestedBuilder::build_once(
+    const ExactDirectSparseUnifiedLevelPlanResult& local_plan,
+    std::size_t source_batch_index,
+    std::span<const ExactDirectFrozenUnifiedFacetResolution>
+        local_facet_resolutions,
+    std::span<const ExactDirectFrozenUnifiedPriorRootCoverage>
+        prior_root_coverages,
+    std::span<const spatial::PointId> prior_root_coverage_point_references,
+    std::span<const ExactDirectFrozenUnifiedLatentCarrierCoverage>
+        latent_carrier_coverages,
+    std::span<const spatial::PointId>
+        latent_carrier_coverage_point_references,
+    const ExactDirectFrozenUnifiedIncidenceBatchBudget& budget,
+    ExactDirectFrozenUnifiedIncidenceBatchResult& destination) {
+  if (local_plan.batches.size() != 1U ||
+      local_plan.batches.front().batch_index != source_batch_index) {
+    destination = fail(
+        base_result(
+            source_batch_index,
+            budget,
+            VerifiedPlanAuthorityKind::
+                immutable_verified_resident_normalized_direct_source),
+        ExactDirectFrozenUnifiedIncidenceBatchDecision::
+            no_batch_index_rejected);
+    return std::nullopt;
+  }
+  VerifiedPlanBuildAudit audit;
+  destination =
+      build_exact_direct_frozen_unified_incidence_batch_from_verified_plan_authority(
+          local_plan,
+          VerifiedPlanAuthorityKind::
+              immutable_verified_resident_normalized_direct_source,
+          &audit,
+          0U,
+          source_batch_index,
+          local_facet_resolutions,
+          prior_root_coverages,
+          prior_root_coverage_point_references,
+          latent_carrier_coverages,
+          latent_carrier_coverage_point_references,
+          budget);
+  if (destination.decision !=
+          ExactDirectFrozenUnifiedIncidenceBatchDecision::
+              complete_certified_frozen_unified_incidence_batch ||
+      destination.source_plan_freshly_verified ||
+      !destination.source_plan_verified_once_by_immutable_resident_authority ||
+      !destination.normalized_direct_source_authority ||
       !destination.frozen_quotient_freshly_streaming_verified ||
       !destination.frozen_hgp_action_plan_freshly_streaming_verified ||
       audit.batch_construction_count != 1U ||

@@ -18,6 +18,8 @@
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_unified_incidence_batch.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_unified_resident_session.hpp"
+#include "morsehgp3d/hierarchy/direct_normalized_h0_relative_frozen_incidence_batch.hpp"
+#include "morsehgp3d/hierarchy/direct_normalized_h0_scientific_window_capability.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_root_coverage_index.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_gamma_carrier_conformance.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
@@ -217,6 +219,36 @@ int main() {
           .certified_initialized_session()) {
     std::cerr
         << "installed unified-resident predicate accepted an empty result\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_normalized_h0_scientific_window_capability_schema_version ==
+      1U);
+  using ScientificWindowSession = morsehgp3d::hierarchy::
+      ExactDirectNormalizedH0ScientificWindowCapabilitySession;
+  static_assert(!std::is_copy_constructible_v<ScientificWindowSession>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<ScientificWindowSession>);
+  const ScientificWindowSession installed_scientific_window_session_probe;
+  if (installed_scientific_window_session_probe
+          .certified_scientific_window_stream()) {
+    std::cerr
+        << "installed scientific-window predicate accepted an empty session\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_normalized_h0_relative_frozen_incidence_batch_schema_version ==
+      1U);
+  using RelativeFrozenBatch = morsehgp3d::hierarchy::
+      ExactDirectNormalizedH0RelativeFrozenIncidenceBatch;
+  static_assert(!std::is_copy_constructible_v<RelativeFrozenBatch>);
+  static_assert(std::is_nothrow_move_constructible_v<RelativeFrozenBatch>);
+  const RelativeFrozenBatch installed_relative_frozen_batch_probe;
+  if (installed_relative_frozen_batch_probe.valid()) {
+    std::cerr
+        << "installed relative-frozen predicate accepted an empty batch\n";
     return 1;
   }
   static_assert(
