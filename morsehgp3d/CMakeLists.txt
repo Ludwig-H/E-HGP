@@ -1950,6 +1950,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_root_ledger
+  STATIC
+    src/cpu/hierarchy/direct_sparse_root_ledger.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_root_ledger
+  ALIAS morsehgp3d_direct_sparse_root_ledger
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_root_ledger
+  PROPERTIES
+    EXPORT_NAME direct_sparse_root_ledger
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_root_ledger PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_root_ledger
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_root_ledger
+  PUBLIC
+    morsehgp3d::direct_frozen_incidence_hgp_action_plan
+    morsehgp3d::direct_sparse_stable_facet_forest
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_root_ledger PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_root_ledger
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_normalized_vertical_square_receipt
   STATIC
     src/cpu/hierarchy/direct_normalized_vertical_square_receipt.cpp
@@ -6383,6 +6425,7 @@ install(
     morsehgp3d_direct_normalized_h0_resident_batch_provider
     morsehgp3d_direct_normalized_h0_authenticated_window_stream
     morsehgp3d_direct_sparse_stable_facet_forest
+    morsehgp3d_direct_sparse_root_ledger
     morsehgp3d_direct_normalized_vertical_square_receipt
     morsehgp3d_direct_sparse_successive_incidence
     morsehgp3d_direct_sparse_successive_incidence_star_journal

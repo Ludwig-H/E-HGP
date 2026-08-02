@@ -35,6 +35,7 @@ target_link_libraries(
     morsehgp3d::direct_normalized_h0_relative_frozen_incidence_batch
     morsehgp3d::direct_normalized_h0_sparse_forest_projection
     morsehgp3d::direct_sparse_stable_facet_forest
+    morsehgp3d::direct_sparse_root_ledger
     morsehgp3d::direct_morse_forest_root_coverage_index
 )
 

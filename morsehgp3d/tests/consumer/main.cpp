@@ -15,6 +15,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_successive_incidence_star_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_unified_level_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_stable_facet_forest.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_root_ledger.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_unified_incidence_batch.hpp"
@@ -401,6 +402,35 @@ int main() {
   if (installed_sparse_preview_probe.certified_sparse_shadow_preview() ||
       !installed_sparse_preview_probe.records().empty()) {
     std::cerr << "installed sparse-preview API accepted an empty capability\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::direct_sparse_root_ledger_schema_version == 1U &&
+      morsehgp3d::hierarchy::ExactDirectSparseRootLedger::mode ==
+          std::string_view{
+              "prepared_forest_preview_bound_sparse_root_coverage_dag_"
+              "structure_only_v1"});
+  static_assert(
+      !std::is_copy_constructible_v<
+          morsehgp3d::hierarchy::ExactDirectSparseRootLedger> &&
+      std::is_nothrow_move_constructible_v<
+          morsehgp3d::hierarchy::ExactDirectSparseRootLedger> &&
+      !std::is_copy_constructible_v<
+          morsehgp3d::hierarchy::ExactDirectSparseRootLedgerPreparedBatch>);
+  const morsehgp3d::hierarchy::ExactDirectSparseRootLedger
+      installed_sparse_root_ledger_probe;
+  const auto installed_sparse_root_lookup =
+      installed_sparse_root_ledger_probe.lookup_active_root(0U);
+  if (installed_sparse_root_ledger_probe.certified_structure_only_ledger() ||
+      installed_sparse_root_ledger_probe
+              .materialized_active_handle_index_slot_count() != 0U ||
+      installed_sparse_root_ledger_probe
+              .materialized_active_root_id_index_slot_count() != 0U ||
+      installed_sparse_root_lookup.certified_observed() ||
+      installed_sparse_root_lookup.certified_unobserved() ||
+      installed_sparse_root_ledger_probe.checkpoint()
+          .certified_honest_nonrestartable()) {
+    std::cerr << "installed sparse-root-ledger API accepted an empty session\n";
     return 1;
   }
   static_assert(

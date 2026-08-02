@@ -355,6 +355,11 @@ struct ExactDirectSparseStableFacetForestPreparedPreviewReceipt {
   bool ticket_identity_bound{false};
   bool all_overflow_and_budget_checks_completed_before_allocation{false};
   bool sparse_pre_roots_and_new_handles_only{false};
+  // True exactly when the requested-handle set contains every insertion
+  // handle and both endpoints of every canonical union in the private ticket.
+  // Extra requested handles are allowed.  A composite ledger transaction
+  // must require this fact before claiming forest--ledger exhaustiveness.
+  bool requested_handles_cover_all_ticket_touched_handles{false};
   bool canonical_union_replay_exact{false};
   bool forest_logical_state_mutated{false};
   bool source_exactness_claimed{false};

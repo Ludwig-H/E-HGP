@@ -961,8 +961,19 @@ void test_prepared_sparse_shadow_preview_q_like_replay() {
           receipt.union_request_count == unions.size() &&
           receipt.expected_effective_union_count == 4U &&
           receipt.sparse_pre_roots_and_new_handles_only &&
+          receipt.requested_handles_cover_all_ticket_touched_handles &&
           receipt.canonical_union_replay_exact,
       "repeat, new singleton, chain, multifusion, duplicate and self unions replay exactly over six sparse roots");
+
+  constexpr std::array<ExactDirectSparseStableFacetHandle, 1U>
+      partial_requested{10U};
+  const auto partial_preview = forest.preview_prepared_batch(
+      *prepared.ticket, partial_requested, generous_preview_budget());
+  check(
+      partial_preview.certified_prepared_preview() &&
+          !partial_preview.preview->receipt()
+               .requested_handles_cover_all_ticket_touched_handles,
+      "a sealed subset preview stays exact but cannot claim exhaustive ticket-handle coverage");
 
   auto tampered = receipt;
   ++tampered.expected_effective_union_count;

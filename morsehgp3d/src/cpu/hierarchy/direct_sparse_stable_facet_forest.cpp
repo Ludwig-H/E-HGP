@@ -1655,6 +1655,25 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
   output.all_overflow_and_budget_checks_completed_before_allocation = true;
 
   try {
+    const auto requested_contains = [&](
+                                        ExactDirectSparseStableFacetHandle
+                                            handle) noexcept {
+      return std::binary_search(
+          requested_handles.begin(), requested_handles.end(), handle);
+    };
+    bool requested_handles_cover_all_ticket_touched_handles = true;
+    for (const auto& insertion : prepared.insertions) {
+      requested_handles_cover_all_ticket_touched_handles =
+          requested_handles_cover_all_ticket_touched_handles &&
+          requested_contains(insertion.stable_source_facet_token_index);
+    }
+    for (const auto& operation : prepared.unions) {
+      requested_handles_cover_all_ticket_touched_handles =
+          requested_handles_cover_all_ticket_touched_handles &&
+          requested_contains(operation.left_handle) &&
+          requested_contains(operation.right_handle);
+    }
+
     std::vector<SparseShadowNode> shadow_nodes;
     shadow_nodes.reserve(output.shadow_node_upper_bound);
 
@@ -1881,6 +1900,8 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
     receipt.ticket_identity_bound = true;
     receipt.all_overflow_and_budget_checks_completed_before_allocation = true;
     receipt.sparse_pre_roots_and_new_handles_only = true;
+    receipt.requested_handles_cover_all_ticket_touched_handles =
+        requested_handles_cover_all_ticket_touched_handles;
     receipt.canonical_union_replay_exact = true;
     receipt.decision =
         ExactDirectSparseStableFacetForestPreparedPreviewDecision::
