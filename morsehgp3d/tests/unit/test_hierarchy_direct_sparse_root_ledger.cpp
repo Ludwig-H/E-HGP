@@ -83,6 +83,9 @@ static_assert(
         ExactDirectSparseRootLedgerPreparedBatch>);
 static_assert(
     !std::is_aggregate_v<ExactDirectSparseRootLedgerLookupResult>);
+static_assert(
+    !std::is_aggregate_v<
+        ExactDirectSparseRootLedgerActiveRootProbeResult>);
 
 int failures = 0;
 
@@ -479,6 +482,204 @@ void test_qr_transitions_coverage_and_migration() {
           !checkpoint.history_entries_serialized &&
           !checkpoint.coverage_dag_serialized,
       "checkpoint must be explicit semantic metadata, never a restart image");
+}
+
+void test_bounded_active_root_probe() {
+  // A zero fingerprint mask forces every active root into the same physical
+  // linear-probing cluster while exact handle equality remains authoritative.
+  auto context = make_context(1'000U, 1U, 0U);
+  const std::array<ExactDirectSparseStableFacetHandle, 2U> birth_handles{
+      10U, 30U};
+  const std::array births{
+      ExactDirectSparseRootLedgerStandaloneBirth{10U, 0U, 1U, 1U},
+      ExactDirectSparseRootLedgerStandaloneBirth{30U, 1U, 1U, 1U},
+  };
+  const std::array<PointId, 2U> birth_points{1U, 2U};
+  (void)commit_births(context, birth_handles, births, birth_points);
+
+  const std::array rooted_insertions{
+      ExactDirectSparseStableFacetInsertion{11U, facet(11U)}};
+  const std::array rooted_unions{
+      ExactDirectSparseStableFacetUnion{10U, 11U}};
+  const std::array<ExactDirectSparseStableFacetHandle, 2U> rooted_preview{
+      10U, 11U};
+  const std::array<ExactDirectSparseStableFacetHandle, 1U> rooted_parent{10U};
+  (void)commit_group(
+      context,
+      rooted_insertions,
+      rooted_unions,
+      rooted_preview,
+      {0U, 11U, 0U, 1U, 0U, 0U, 1U},
+      rooted_parent,
+      {});
+
+  check(
+      context.ledger.materialized_active_handle_index_slot_count() == 8U,
+      "collision probe fixture must retain the minimum physical root index");
+  const auto pre_stamp = context.ledger.current_stamp();
+  const std::vector<ExactDirectSparseRootLedgerEntry> history_before{
+      context.ledger.history_entries().begin(),
+      context.ledger.history_entries().end()};
+  const std::vector<ExactDirectSparseRootCoverageNode> coverage_before{
+      context.ledger.coverage_nodes().begin(),
+      context.ledger.coverage_nodes().end()};
+  const std::vector<ExactDirectSparseRootCoverageId>
+      coverage_parents_before{
+          context.ledger.coverage_parent_references().begin(),
+          context.ledger.coverage_parent_references().end()};
+  const std::vector<PointId> coverage_deltas_before{
+      context.ledger.coverage_point_deltas().begin(),
+      context.ledger.coverage_point_deltas().end()};
+  const std::vector<ExactDirectSparseRootId> prior_root_parents_before{
+      context.ledger.prior_root_parent_references().begin(),
+      context.ledger.prior_root_parent_references().end()};
+
+  allocation_probe::begin();
+  const auto rooted = context.ledger.probe_active_root(
+      10U, ExactDirectSparseRootLedgerActiveRootProbeBudget{1U});
+  const std::size_t rooted_allocations = allocation_probe::finish();
+  check(
+      rooted_allocations == 0U && rooted.certified_observed() &&
+          rooted.certified_observed_rooted() &&
+          !rooted.certified_observed_latent() &&
+          rooted.certified_for(pre_stamp) &&
+          rooted.entry.prior_root_id == 1U &&
+          rooted.root_index_slot_visit_count == 1U &&
+          rooted.exact_key_comparison_count == 1U,
+      "bounded root probe must certify an allocation-free rooted hit at its "
+      "exact cap");
+
+  allocation_probe::begin();
+  const auto latent = context.ledger.probe_active_root(
+      30U, ExactDirectSparseRootLedgerActiveRootProbeBudget{2U});
+  const std::size_t latent_allocations = allocation_probe::finish();
+  check(
+      latent_allocations == 0U && latent.certified_observed() &&
+          latent.certified_observed_latent() &&
+          !latent.certified_observed_rooted() &&
+          latent.certified_for(pre_stamp) &&
+          !latent.entry.prior_root_id.has_value() &&
+          latent.root_index_slot_visit_count == 2U &&
+          latent.exact_key_comparison_count == 2U,
+      "forced collisions must retain exact latent semantics at cap");
+
+  allocation_probe::begin();
+  const auto missing = context.ledger.probe_active_root(
+      777U, ExactDirectSparseRootLedgerActiveRootProbeBudget{3U});
+  const std::size_t missing_allocations = allocation_probe::finish();
+  check(
+      missing_allocations == 0U && missing.certified_unobserved() &&
+          missing.certified_for(pre_stamp) &&
+          missing.entry == ExactDirectSparseRootLedgerEntry{} &&
+          missing.root_index_slot_visit_count == 3U &&
+          missing.exact_key_comparison_count == 2U,
+      "a bounded collision-chain miss must stop only at the authoritative "
+      "empty slot");
+
+  allocation_probe::begin();
+  const auto rooted_zero = context.ledger.probe_active_root(
+      10U, ExactDirectSparseRootLedgerActiveRootProbeBudget{0U});
+  const auto latent_cap_minus_one = context.ledger.probe_active_root(
+      30U, ExactDirectSparseRootLedgerActiveRootProbeBudget{1U});
+  const auto missing_cap_minus_one = context.ledger.probe_active_root(
+      777U, ExactDirectSparseRootLedgerActiveRootProbeBudget{2U});
+  const auto maximal_missing = context.ledger.probe_active_root(
+      std::numeric_limits<ExactDirectSparseStableFacetHandle>::max(),
+      ExactDirectSparseRootLedgerActiveRootProbeBudget{
+          std::numeric_limits<std::size_t>::max()});
+  const std::size_t remaining_probe_allocations = allocation_probe::finish();
+  check(
+      remaining_probe_allocations == 0U &&
+          rooted_zero.certified_budget_exhaustion() &&
+          rooted_zero.certified_for(pre_stamp) &&
+          rooted_zero.root_index_slot_visit_count == 0U &&
+          rooted_zero.entry == ExactDirectSparseRootLedgerEntry{} &&
+          latent_cap_minus_one.certified_budget_exhaustion() &&
+          latent_cap_minus_one.root_index_slot_visit_count == 1U &&
+          latent_cap_minus_one.entry == ExactDirectSparseRootLedgerEntry{} &&
+          missing_cap_minus_one.certified_budget_exhaustion() &&
+          missing_cap_minus_one.root_index_slot_visit_count == 2U &&
+          missing_cap_minus_one.entry ==
+              ExactDirectSparseRootLedgerEntry{} &&
+          maximal_missing.certified_unobserved() &&
+          maximal_missing.requested_forest_root_handle ==
+              std::numeric_limits<
+                  ExactDirectSparseStableFacetHandle>::max() &&
+          maximal_missing.requested_budget
+                  .maximum_root_index_slot_visit_count ==
+              std::numeric_limits<std::size_t>::max(),
+      "zero and cap-minus-one probes must fail closed at the exact slot cap "
+      "without payload; every disposition and SIZE_MAX stay allocation-free");
+
+  const auto unchanged = [](const auto& before, const auto current) {
+    return before.size() == current.size() &&
+           std::equal(
+               before.begin(), before.end(), current.begin(), current.end());
+  };
+  check(
+      context.ledger.current_stamp() == pre_stamp &&
+          unchanged(history_before, context.ledger.history_entries()) &&
+          unchanged(coverage_before, context.ledger.coverage_nodes()) &&
+          unchanged(
+              coverage_parents_before,
+              context.ledger.coverage_parent_references()) &&
+          unchanged(
+              coverage_deltas_before,
+              context.ledger.coverage_point_deltas()) &&
+          unchanged(
+              prior_root_parents_before,
+              context.ledger.prior_root_parent_references()) &&
+          context.ledger.lookup_active_root(10U).certified_observed() &&
+          context.ledger.lookup_active_root(30U).certified_observed() &&
+          context.ledger.lookup_active_root(777U).certified_unobserved(),
+      "bounded probes must not mutate the ledger and historical lookup "
+      "behavior must remain intact");
+
+  auto tampered = rooted;
+  tampered.entry.prior_root_id.reset();
+  auto comparison_tamper = rooted;
+  comparison_tamper.exact_key_comparison_count = 0U;
+  auto payload_tamper = rooted_zero;
+  payload_tamper.entry = rooted.entry;
+  ExactDirectSparseRootLedgerActiveRootProbeResult forged;
+  forged.ledger_stamp = pre_stamp;
+  forged.requested_forest_root_handle = 10U;
+  forged.requested_budget = {1U};
+  forged.entry = rooted.entry;
+  forged.root_index_slot_visit_count = 1U;
+  forged.exact_key_comparison_count = 1U;
+  forged.ledger_certified_at_entry = true;
+  forged.sparse_active_root_index_authoritative = true;
+  forged.fingerprint_used_only_as_accelerator = true;
+  forged.exact_forest_root_handle_comparison_authoritative = true;
+  forged.lookup_completed_without_mutation = true;
+  forged.disposition =
+      ExactDirectSparseRootLedgerActiveRootProbeDisposition::observed_rooted;
+  forged.decision =
+      ExactDirectSparseRootLedgerActiveRootProbeDecision::
+          complete_observed_rooted;
+  check(
+      !tampered.certified_observed() &&
+          !comparison_tamper.certified_observed() &&
+          !payload_tamper.certified_budget_exhaustion() &&
+          !forged.certified_observed(),
+      "private probe minting must reject public tamper, injected payload and "
+      "forgery");
+
+  auto foreign = make_context(1'000U, 1U, 0U);
+  check(
+      !rooted.certified_for(foreign.ledger.current_stamp()),
+      "a privately minted probe must reject a foreign ledger stamp");
+
+  const std::array<ExactDirectSparseStableFacetHandle, 1U> later_handle{50U};
+  const std::array later_birth{
+      ExactDirectSparseRootLedgerStandaloneBirth{50U, 0U, 1U, 1U}};
+  const std::array<PointId, 1U> later_point{3U};
+  (void)commit_births(context, later_handle, later_birth, later_point);
+  check(
+      rooted.certified_for(pre_stamp) &&
+          !rooted.certified_for(context.ledger.current_stamp()),
+      "a privately minted probe must not certify for a stale successor stamp");
 }
 
 void test_caps_siblings_foreign_and_tamper() {
@@ -1053,6 +1254,7 @@ void test_csr_partitions_duplicate_parents_and_empty_forest_gate() {
 
 int main() {
   test_qr_transitions_coverage_and_migration();
+  test_bounded_active_root_probe();
   test_caps_siblings_foreign_and_tamper();
   test_root_id_max_namespace_size_max_and_digest();
   test_csr_partitions_duplicate_parents_and_empty_forest_gate();

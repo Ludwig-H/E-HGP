@@ -295,6 +295,86 @@ template <class Key, class KeyForRow, class Fingerprint>
   return std::nullopt;
 }
 
+[[nodiscard]] bool power_of_two(std::size_t value) noexcept {
+  return value != 0U && (value & (value - 1U)) == 0U;
+}
+
+enum class ActiveRootIndexSearchDisposition : std::uint8_t {
+  unobserved,
+  observed,
+  budget_exhausted,
+  contradiction,
+};
+
+struct BoundedActiveRootIndexSearchResult {
+  ActiveRootIndexSearchDisposition disposition{
+      ActiveRootIndexSearchDisposition::contradiction};
+  std::size_t row{};
+  std::size_t slot_visit_count{};
+  std::size_t exact_key_comparison_count{};
+};
+
+// Unlike find_slot_row(), this helper is used only by the additive bounded
+// probe.  The historical lookup above deliberately remains byte-for-byte
+// unchanged.  Fingerprints select a starting slot; equality of the complete
+// forest-root handle remains authoritative under arbitrary collisions.
+[[nodiscard]] BoundedActiveRootIndexSearchResult
+active_root_index_search_bounded(
+    std::span<const ExactDirectSparseRootLedgerEntry> rows,
+    std::span<const std::size_t> slots,
+    std::size_t active_root_count,
+    ExactDirectSparseStableFacetHandle requested_handle,
+    std::uint64_t fingerprint_mask,
+    const ExactDirectSparseRootLedgerActiveRootProbeBudget& budget) noexcept {
+  BoundedActiveRootIndexSearchResult result;
+  if (slots.empty()) {
+    result.disposition = active_root_count == 0U
+                             ? ActiveRootIndexSearchDisposition::unobserved
+                             : ActiveRootIndexSearchDisposition::contradiction;
+    return result;
+  }
+  if (!power_of_two(slots.size()) || active_root_count > slots.size() ||
+      active_root_count > rows.size()) {
+    return result;
+  }
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot = static_cast<std::size_t>(handle_fingerprint(
+                         requested_handle, fingerprint_mask)) &
+                     mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    if (result.slot_visit_count >=
+        budget.maximum_root_index_slot_visit_count) {
+      result.disposition =
+          ActiveRootIndexSearchDisposition::budget_exhausted;
+      return result;
+    }
+    ++result.slot_visit_count;
+    const std::size_t encoded = slots[slot];
+    if (encoded == 0U) {
+      result.disposition = ActiveRootIndexSearchDisposition::unobserved;
+      return result;
+    }
+    if (encoded != tombstone_slot) {
+      const std::size_t row = encoded - 1U;
+      if (row >= rows.size()) {
+        return result;
+      }
+      ++result.exact_key_comparison_count;
+      if (rows[row].forest_root_handle == requested_handle) {
+        result.row = row;
+        result.disposition = ActiveRootIndexSearchDisposition::observed;
+        return result;
+      }
+    }
+    slot = (slot + 1U) & mask;
+  }
+
+  // A table containing no empty slot is legal after accumulated tombstones.
+  // Visiting the complete table with exact comparisons still proves absence.
+  result.disposition = ActiveRootIndexSearchDisposition::unobserved;
+  return result;
+}
+
 template <class Key, class KeyForRow, class Fingerprint>
 [[nodiscard]] bool erase_slot(
     const std::vector<ExactDirectSparseRootLedgerEntry>& rows,
@@ -604,6 +684,130 @@ bool ExactDirectSparseRootLedgerLookupResult::certified_for(
          ledger_stamp == expected;
 }
 
+ExactDirectSparseRootLedgerActiveRootProbeResult::
+    ExactDirectSparseRootLedgerActiveRootProbeResult(
+        const ExactDirectSparseRootLedgerActiveRootProbeReceipt& receipt)
+    noexcept
+    : ExactDirectSparseRootLedgerActiveRootProbeReceipt(receipt),
+      private_receipt_snapshot_(receipt),
+      minted_(
+          receipt.disposition ==
+              ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                  unobserved ||
+          receipt.disposition ==
+              ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                  observed_latent ||
+          receipt.disposition ==
+              ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                  observed_rooted ||
+          receipt.disposition ==
+              ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                  budget_exhausted ||
+          receipt.disposition ==
+              ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                  contradiction) {}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::certified_common()
+    const noexcept {
+  return minted_ &&
+         static_cast<const
+             ExactDirectSparseRootLedgerActiveRootProbeReceipt&>(*this) ==
+             private_receipt_snapshot_ &&
+         ledger_stamp.schema_version ==
+             direct_sparse_root_ledger_schema_version &&
+         ledger_stamp.session_instance_id != 0U && ledger_certified_at_entry &&
+         sparse_active_root_index_authoritative &&
+         fingerprint_used_only_as_accelerator &&
+         exact_forest_root_handle_comparison_authoritative &&
+         lookup_completed_without_mutation &&
+         root_index_slot_visit_count <=
+             requested_budget.maximum_root_index_slot_visit_count &&
+         exact_key_comparison_count <= root_index_slot_visit_count &&
+         !source_exactness_claimed && !public_status_claimed;
+}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::
+    certified_observed_latent() const noexcept {
+  return certified_common() &&
+         exact_key_comparison_count != 0U &&
+         entry.forest_root_handle == requested_forest_root_handle &&
+         entry.history_index < ledger_stamp.history_entry_count &&
+         entry.committed_batch_index < ledger_stamp.committed_batch_count &&
+         entry.coverage_id != 0U &&
+         entry.coverage_id <= ledger_stamp.coverage_node_count &&
+         !entry.prior_root_id.has_value() &&
+         disposition ==
+             ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                 observed_latent &&
+         decision == ExactDirectSparseRootLedgerActiveRootProbeDecision::
+                         complete_observed_latent;
+}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::
+    certified_observed_rooted() const noexcept {
+  return certified_common() &&
+         exact_key_comparison_count != 0U &&
+         entry.forest_root_handle == requested_forest_root_handle &&
+         entry.history_index < ledger_stamp.history_entry_count &&
+         entry.committed_batch_index < ledger_stamp.committed_batch_count &&
+         entry.coverage_id != 0U &&
+         entry.coverage_id <= ledger_stamp.coverage_node_count &&
+         entry.prior_root_id.has_value() && *entry.prior_root_id != 0U &&
+         disposition ==
+             ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                 observed_rooted &&
+         decision == ExactDirectSparseRootLedgerActiveRootProbeDecision::
+                         complete_observed_rooted;
+}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::certified_observed()
+    const noexcept {
+  return certified_observed_latent() || certified_observed_rooted();
+}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::certified_unobserved()
+    const noexcept {
+  return certified_common() &&
+         entry == ExactDirectSparseRootLedgerEntry{} &&
+         disposition ==
+             ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                 unobserved &&
+         decision == ExactDirectSparseRootLedgerActiveRootProbeDecision::
+                         complete_unobserved;
+}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::
+    certified_budget_exhaustion() const noexcept {
+  return certified_common() &&
+         entry == ExactDirectSparseRootLedgerEntry{} &&
+         root_index_slot_visit_count ==
+             requested_budget.maximum_root_index_slot_visit_count &&
+         disposition ==
+             ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                 budget_exhausted &&
+         decision == ExactDirectSparseRootLedgerActiveRootProbeDecision::
+                         no_root_index_slot_budget_exhausted;
+}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::
+    certified_fail_closed_contradiction() const noexcept {
+  return certified_common() &&
+         entry == ExactDirectSparseRootLedgerEntry{} &&
+         disposition ==
+             ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+                 contradiction &&
+         decision == ExactDirectSparseRootLedgerActiveRootProbeDecision::
+                         contradiction_active_root_index;
+}
+
+bool ExactDirectSparseRootLedgerActiveRootProbeResult::certified_for(
+    const ExactDirectSparseRootLedgerStamp& expected) const noexcept {
+  return ledger_stamp == expected &&
+         (certified_observed() || certified_unobserved() ||
+          certified_budget_exhaustion() ||
+          certified_fail_closed_contradiction());
+}
+
 bool ExactDirectSparseRootLedgerCommitResult::certified_commit()
     const noexcept {
   std::size_t expected_history_count = 0U;
@@ -819,6 +1023,100 @@ ExactDirectSparseRootLedger::lookup_active_root_id(
   receipt.disposition =
       ExactDirectSparseRootLedgerLookupDisposition::observed_rooted;
   return ExactDirectSparseRootLedgerLookupResult(receipt);
+}
+
+ExactDirectSparseRootLedgerActiveRootProbeResult
+ExactDirectSparseRootLedger::probe_active_root(
+    ExactDirectSparseStableFacetHandle handle,
+    const ExactDirectSparseRootLedgerActiveRootProbeBudget& budget)
+    const noexcept {
+  ExactDirectSparseRootLedgerActiveRootProbeReceipt receipt;
+  receipt.requested_forest_root_handle = handle;
+  receipt.requested_budget = budget;
+  receipt.ledger_certified_at_entry = certified_structure_only_ledger();
+  if (!receipt.ledger_certified_at_entry) {
+    return ExactDirectSparseRootLedgerActiveRootProbeResult{};
+  }
+  receipt.ledger_stamp = impl_->stamp();
+  receipt.sparse_active_root_index_authoritative = true;
+  receipt.fingerprint_used_only_as_accelerator = true;
+  receipt.exact_forest_root_handle_comparison_authoritative = true;
+  receipt.lookup_completed_without_mutation = true;
+
+  const auto found = active_root_index_search_bounded(
+      impl_->history,
+      impl_->active_handle_slots,
+      impl_->active_root_count,
+      handle,
+      impl_->config.forest_root_fingerprint_mask,
+      budget);
+  receipt.root_index_slot_visit_count = found.slot_visit_count;
+  receipt.exact_key_comparison_count = found.exact_key_comparison_count;
+  if (found.disposition ==
+      ActiveRootIndexSearchDisposition::budget_exhausted) {
+    receipt.disposition =
+        ExactDirectSparseRootLedgerActiveRootProbeDisposition::
+            budget_exhausted;
+    receipt.decision =
+        ExactDirectSparseRootLedgerActiveRootProbeDecision::
+            no_root_index_slot_budget_exhausted;
+    return ExactDirectSparseRootLedgerActiveRootProbeResult(receipt);
+  }
+  if (found.disposition == ActiveRootIndexSearchDisposition::contradiction) {
+    receipt.disposition =
+        ExactDirectSparseRootLedgerActiveRootProbeDisposition::contradiction;
+    receipt.decision =
+        ExactDirectSparseRootLedgerActiveRootProbeDecision::
+            contradiction_active_root_index;
+    return ExactDirectSparseRootLedgerActiveRootProbeResult(receipt);
+  }
+  if (found.disposition == ActiveRootIndexSearchDisposition::unobserved) {
+    receipt.disposition =
+        ExactDirectSparseRootLedgerActiveRootProbeDisposition::unobserved;
+    receipt.decision =
+        ExactDirectSparseRootLedgerActiveRootProbeDecision::
+            complete_unobserved;
+    return ExactDirectSparseRootLedgerActiveRootProbeResult(receipt);
+  }
+
+  if (found.row >= impl_->history.size()) {
+    receipt.disposition =
+        ExactDirectSparseRootLedgerActiveRootProbeDisposition::contradiction;
+    receipt.decision =
+        ExactDirectSparseRootLedgerActiveRootProbeDecision::
+            contradiction_active_root_index;
+    return ExactDirectSparseRootLedgerActiveRootProbeResult(receipt);
+  }
+  const auto& entry = impl_->history[found.row];
+  if (entry.history_index != found.row ||
+      entry.forest_root_handle != handle || entry.coverage_id == 0U ||
+      entry.coverage_id > impl_->coverage_nodes.size() ||
+      impl_->coverage_nodes[entry.coverage_id - 1U].coverage_id !=
+          entry.coverage_id ||
+      entry.committed_batch_index >= impl_->committed_batch_count ||
+      (entry.prior_root_id.has_value() && *entry.prior_root_id == 0U)) {
+    receipt.disposition =
+        ExactDirectSparseRootLedgerActiveRootProbeDisposition::contradiction;
+    receipt.decision =
+        ExactDirectSparseRootLedgerActiveRootProbeDecision::
+            contradiction_active_root_index;
+    return ExactDirectSparseRootLedgerActiveRootProbeResult(receipt);
+  }
+  receipt.entry = entry;
+  if (entry.prior_root_id.has_value()) {
+    receipt.disposition =
+        ExactDirectSparseRootLedgerActiveRootProbeDisposition::observed_rooted;
+    receipt.decision =
+        ExactDirectSparseRootLedgerActiveRootProbeDecision::
+            complete_observed_rooted;
+  } else {
+    receipt.disposition =
+        ExactDirectSparseRootLedgerActiveRootProbeDisposition::observed_latent;
+    receipt.decision =
+        ExactDirectSparseRootLedgerActiveRootProbeDecision::
+            complete_observed_latent;
+  }
+  return ExactDirectSparseRootLedgerActiveRootProbeResult(receipt);
 }
 
 ExactDirectSparseRootLedgerPreparationResult

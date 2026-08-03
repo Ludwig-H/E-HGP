@@ -358,6 +358,106 @@ class ExactDirectSparseRootLedgerLookupResult final
   friend class ExactDirectSparseRootLedger;
 };
 
+// The historical active-root lookup remains available unchanged.  This
+// additive probe is the fail-closed entry point for callers that must account
+// for every physical slot visited in the sparse active-handle index.  A zero
+// cap is valid and exhausts before reading a slot from a nonempty index.
+struct ExactDirectSparseRootLedgerActiveRootProbeBudget {
+  std::size_t maximum_root_index_slot_visit_count{};
+
+  friend bool operator==(
+      const ExactDirectSparseRootLedgerActiveRootProbeBudget&,
+      const ExactDirectSparseRootLedgerActiveRootProbeBudget&) = default;
+};
+
+enum class ExactDirectSparseRootLedgerActiveRootProbeDisposition
+    : std::uint8_t {
+  not_certified,
+  unobserved,
+  observed_latent,
+  observed_rooted,
+  budget_exhausted,
+  contradiction,
+};
+
+enum class ExactDirectSparseRootLedgerActiveRootProbeDecision
+    : std::uint8_t {
+  not_certified,
+  complete_unobserved,
+  complete_observed_latent,
+  complete_observed_rooted,
+  no_root_index_slot_budget_exhausted,
+  contradiction_active_root_index,
+};
+
+struct ExactDirectSparseRootLedgerActiveRootProbeReceipt {
+  ExactDirectSparseStableFacetHandle requested_forest_root_handle{};
+  ExactDirectSparseRootLedgerActiveRootProbeBudget requested_budget{};
+  ExactDirectSparseRootLedgerEntry entry{};
+  ExactDirectSparseRootLedgerStamp ledger_stamp{};
+  std::size_t root_index_slot_visit_count{};
+  std::size_t exact_key_comparison_count{};
+  bool ledger_certified_at_entry{false};
+  bool sparse_active_root_index_authoritative{false};
+  bool fingerprint_used_only_as_accelerator{false};
+  bool exact_forest_root_handle_comparison_authoritative{false};
+  bool lookup_completed_without_mutation{false};
+  bool source_exactness_claimed{false};
+  bool public_status_claimed{false};
+  ExactDirectSparseRootLedgerActiveRootProbeDisposition disposition{
+      ExactDirectSparseRootLedgerActiveRootProbeDisposition::not_certified};
+  ExactDirectSparseRootLedgerActiveRootProbeDecision decision{
+      ExactDirectSparseRootLedgerActiveRootProbeDecision::not_certified};
+
+  friend bool operator==(
+      const ExactDirectSparseRootLedgerActiveRootProbeReceipt&,
+      const ExactDirectSparseRootLedgerActiveRootProbeReceipt&) = default;
+};
+
+// Readable and copyable like the historical lookup, but only the ledger can
+// mint a certifying private snapshot.  Public edits, default construction and
+// stale ledger stamps therefore cannot be promoted into carrier authority.
+class ExactDirectSparseRootLedgerActiveRootProbeResult final
+    : public ExactDirectSparseRootLedgerActiveRootProbeReceipt {
+ public:
+  ExactDirectSparseRootLedgerActiveRootProbeResult() noexcept = default;
+  ~ExactDirectSparseRootLedgerActiveRootProbeResult() = default;
+  ExactDirectSparseRootLedgerActiveRootProbeResult(
+      const ExactDirectSparseRootLedgerActiveRootProbeResult&) noexcept =
+      default;
+  ExactDirectSparseRootLedgerActiveRootProbeResult& operator=(
+      const ExactDirectSparseRootLedgerActiveRootProbeResult&) noexcept =
+      default;
+  ExactDirectSparseRootLedgerActiveRootProbeResult(
+      ExactDirectSparseRootLedgerActiveRootProbeResult&&) noexcept = default;
+  ExactDirectSparseRootLedgerActiveRootProbeResult& operator=(
+      ExactDirectSparseRootLedgerActiveRootProbeResult&&) noexcept = default;
+
+  [[nodiscard]] bool certified_observed() const noexcept;
+  [[nodiscard]] bool certified_observed_latent() const noexcept;
+  [[nodiscard]] bool certified_observed_rooted() const noexcept;
+  [[nodiscard]] bool certified_unobserved() const noexcept;
+  [[nodiscard]] bool certified_budget_exhaustion() const noexcept;
+  [[nodiscard]] bool certified_fail_closed_contradiction() const noexcept;
+  [[nodiscard]] bool certified_for(
+      const ExactDirectSparseRootLedgerStamp&) const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseRootLedgerActiveRootProbeResult&,
+      const ExactDirectSparseRootLedgerActiveRootProbeResult&) = default;
+
+ private:
+  [[nodiscard]] bool certified_common() const noexcept;
+  explicit ExactDirectSparseRootLedgerActiveRootProbeResult(
+      const ExactDirectSparseRootLedgerActiveRootProbeReceipt&) noexcept;
+
+  ExactDirectSparseRootLedgerActiveRootProbeReceipt
+      private_receipt_snapshot_{};
+  bool minted_{false};
+
+  friend class ExactDirectSparseRootLedger;
+};
+
 struct ExactDirectSparseRootCoverageMaterializationBudget {
   std::size_t maximum_requested_root_count{};
   std::size_t maximum_reachable_coverage_node_count{};
@@ -479,6 +579,10 @@ class ExactDirectSparseRootLedger {
       ExactDirectSparseStableFacetHandle) const noexcept;
   [[nodiscard]] ExactDirectSparseRootLedgerLookupResult lookup_active_root_id(
       ExactDirectSparseRootId) const noexcept;
+  [[nodiscard]] ExactDirectSparseRootLedgerActiveRootProbeResult
+  probe_active_root(
+      ExactDirectSparseStableFacetHandle,
+      const ExactDirectSparseRootLedgerActiveRootProbeBudget&) const noexcept;
 
   [[nodiscard]] ExactDirectSparseRootLedgerPreparationResult prepare_transition(
       const ExactDirectSparseStableFacetForest& forest,
