@@ -563,6 +563,231 @@ struct ExactDirectSparseRootLedger::Impl {
   }
 };
 
+namespace {
+
+template <class HandleAt, class BindingAt>
+[[nodiscard]] ExactDirectSparseRootCoverageMaterializationResult
+materialize_requested_coverages_from_bindings(
+    const ExactDirectSparseRootLedgerStamp& ledger_stamp,
+    std::span<const ExactDirectSparseRootCoverageNode> coverage_nodes,
+    std::span<const ExactDirectSparseRootCoverageId> coverage_parents,
+    std::span<const spatial::PointId> coverage_deltas,
+    std::size_t requested_root_count,
+    const ExactDirectSparseRootCoverageMaterializationBudget& budget,
+    HandleAt handle_at,
+    BindingAt binding_at) noexcept {
+  ExactDirectSparseRootCoverageMaterializationResult output;
+  output.ledger_stamp = ledger_stamp;
+  output.requested_root_count = requested_root_count;
+  if (requested_root_count > budget.maximum_requested_root_count) {
+    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
+        no_budget_exhausted;
+    return output;
+  }
+  for (std::size_t index = 1U; index < requested_root_count; ++index) {
+    if (handle_at(index - 1U) >= handle_at(index)) {
+      output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
+          no_requested_root_shape_rejected;
+      return output;
+    }
+  }
+
+  const auto fail = [&output](
+                        ExactDirectSparseRootCoverageMaterializationDecision
+                            decision) {
+    output.records.clear();
+    output.point_ids.clear();
+    output.decision = decision;
+  };
+
+  try {
+    output.records.reserve(requested_root_count);
+    for (std::size_t requested_index = 0U;
+         requested_index < requested_root_count;
+         ++requested_index) {
+      const auto handle = handle_at(requested_index);
+      const ExactDirectSparseRootLedgerEntry* binding =
+          binding_at(requested_index);
+      if (binding == nullptr) {
+        fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                 no_requested_root_unobserved_rejected);
+        return output;
+      }
+      if (binding->forest_root_handle != handle) {
+        fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                 contradiction_coverage_dag);
+        return output;
+      }
+
+      std::vector<ExactDirectSparseRootCoverageId> stack;
+      std::unordered_set<ExactDirectSparseRootCoverageId> visited;
+      std::vector<spatial::PointId> points;
+      if (budget.maximum_scratch_entry_count == 0U) {
+        fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                 no_budget_exhausted);
+        return output;
+      }
+      stack.push_back(binding->coverage_id);
+      output.scratch_entry_count =
+          std::max(output.scratch_entry_count, std::size_t{1U});
+      while (!stack.empty()) {
+        const auto coverage_id = stack.back();
+        stack.pop_back();
+        if (visited.find(coverage_id) != visited.end()) {
+          continue;
+        }
+        std::size_t scratch_after_visit = 0U;
+        if (!checked_add(visited.size(), 1U, scratch_after_visit) ||
+            !checked_add(
+                scratch_after_visit, stack.size(), scratch_after_visit) ||
+            !checked_add(
+                scratch_after_visit, points.size(), scratch_after_visit) ||
+            scratch_after_visit > budget.maximum_scratch_entry_count) {
+          fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                   no_budget_exhausted);
+          return output;
+        }
+        visited.insert(coverage_id);
+        output.scratch_entry_count =
+            std::max(output.scratch_entry_count, scratch_after_visit);
+        if (coverage_id == 0U || coverage_id > coverage_nodes.size()) {
+          fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                   contradiction_coverage_dag);
+          return output;
+        }
+        if (!checked_increment(output.reachable_coverage_node_count) ||
+            output.reachable_coverage_node_count >
+                budget.maximum_reachable_coverage_node_count) {
+          fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                   no_budget_exhausted);
+          return output;
+        }
+        const auto& node = coverage_nodes[coverage_id - 1U];
+        if (node.coverage_id != coverage_id ||
+            !valid_slice(
+                node.parent_offset,
+                node.parent_count,
+                coverage_parents.size()) ||
+            !valid_slice(
+                node.point_delta_offset,
+                node.point_delta_count,
+                coverage_deltas.size())) {
+          fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                   contradiction_coverage_dag);
+          return output;
+        }
+        const auto parents = coverage_parents.subspan(
+            node.parent_offset, node.parent_count);
+        std::size_t post_parent_scan_count = 0U;
+        std::size_t post_stack_size = 0U;
+        std::size_t scratch_after_parents = 0U;
+        if (!checked_add(
+                output.parent_reference_scan_count,
+                parents.size(),
+                post_parent_scan_count) ||
+            post_parent_scan_count >
+                budget.maximum_parent_reference_scan_count ||
+            !checked_add(stack.size(), parents.size(), post_stack_size) ||
+            !checked_add(
+                visited.size(), post_stack_size, scratch_after_parents) ||
+            !checked_add(
+                scratch_after_parents,
+                points.size(),
+                scratch_after_parents) ||
+            scratch_after_parents > budget.maximum_scratch_entry_count) {
+          fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                   no_budget_exhausted);
+          return output;
+        }
+        for (const auto parent : parents) {
+          if (parent == 0U || parent >= coverage_id) {
+            fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                     contradiction_coverage_dag);
+            return output;
+          }
+        }
+        output.parent_reference_scan_count = post_parent_scan_count;
+        stack.insert(stack.end(), parents.begin(), parents.end());
+        output.scratch_entry_count =
+            std::max(output.scratch_entry_count, scratch_after_parents);
+        const auto deltas = coverage_deltas.subspan(
+            node.point_delta_offset, node.point_delta_count);
+        if (!strict_points(deltas)) {
+          fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                   contradiction_coverage_dag);
+          return output;
+        }
+        std::size_t post_delta_scan_count = 0U;
+        std::size_t post_point_size = 0U;
+        std::size_t scratch_after_deltas = 0U;
+        if (!checked_add(
+                output.point_delta_scan_count,
+                deltas.size(),
+                post_delta_scan_count) ||
+            post_delta_scan_count > budget.maximum_point_delta_scan_count ||
+            !checked_add(points.size(), deltas.size(), post_point_size) ||
+            !checked_add(
+                visited.size(), stack.size(), scratch_after_deltas) ||
+            !checked_add(
+                scratch_after_deltas,
+                post_point_size,
+                scratch_after_deltas) ||
+            scratch_after_deltas > budget.maximum_scratch_entry_count) {
+          fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                   no_budget_exhausted);
+          return output;
+        }
+        output.point_delta_scan_count = post_delta_scan_count;
+        points.insert(points.end(), deltas.begin(), deltas.end());
+        output.scratch_entry_count =
+            std::max(output.scratch_entry_count, scratch_after_deltas);
+      }
+      std::sort(points.begin(), points.end());
+      points.erase(std::unique(points.begin(), points.end()), points.end());
+      std::size_t post_output_count = 0U;
+      if (!checked_add(
+              output.point_ids.size(), points.size(), post_output_count)) {
+        fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                 no_capacity_overflow);
+        return output;
+      }
+      if (post_output_count > budget.maximum_output_point_count) {
+        fail(ExactDirectSparseRootCoverageMaterializationDecision::
+                 no_budget_exhausted);
+        return output;
+      }
+      output.records.push_back({
+          handle,
+          binding->prior_root_id,
+          binding->coverage_id,
+          output.point_ids.size(),
+          points.size()});
+      output.point_ids.insert(
+          output.point_ids.end(), points.begin(), points.end());
+    }
+    output.only_requested_coverage_dags_traversed = true;
+    output.canonical_sorted_unique_points = true;
+    output.ledger_logical_state_mutated = false;
+    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
+        complete_requested_roots_only;
+    return output;
+  } catch (const std::bad_alloc&) {
+    fail(ExactDirectSparseRootCoverageMaterializationDecision::
+             no_allocation_failed);
+    return output;
+  } catch (const std::length_error&) {
+    fail(ExactDirectSparseRootCoverageMaterializationDecision::
+             no_capacity_overflow);
+    return output;
+  } catch (...) {
+    fail(ExactDirectSparseRootCoverageMaterializationDecision::
+             contradiction_coverage_dag);
+    return output;
+  }
+}
+
+}  // namespace
+
 static_assert(std::is_nothrow_move_constructible_v<
               ExactDirectSparseRootLedgerEntry>);
 static_assert(std::is_nothrow_move_constructible_v<
@@ -857,6 +1082,237 @@ bool ExactDirectSparseRootCoverageMaterializationResult::
     }
   }
   return cursor == point_ids.size();
+}
+
+const ExactDirectSparseRootLedgerStamp&
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::ledger_stamp()
+    const & noexcept {
+  return ledger_stamp_;
+}
+
+const ExactDirectSparseRootCoverageFromActiveRootProofsBudget&
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::requested_budget()
+    const & noexcept {
+  return requested_budget_;
+}
+
+const ExactDirectSparseRootCoverageFromActiveRootProofsCounters&
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::counters()
+    const & noexcept {
+  return counters_;
+}
+
+std::span<const ExactDirectSparseRootCoverageMaterializationRecord>
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::records()
+    const & noexcept {
+  return materialization_.records;
+}
+
+std::span<const spatial::PointId>
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::point_ids()
+    const & noexcept {
+  return materialization_.point_ids;
+}
+
+ExactDirectSparseRootCoverageMaterializationDecision
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::coverage_decision()
+    const noexcept {
+  return materialization_.decision;
+}
+
+ExactDirectSparseRootCoverageFromActiveRootProofsDisposition
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::disposition()
+    const noexcept {
+  return disposition_;
+}
+
+ExactDirectSparseRootCoverageFromActiveRootProofsDecision
+ExactDirectSparseRootCoverageFromActiveRootProofsResult::decision()
+    const noexcept {
+  return decision_;
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::
+    no_historical_active_root_lookup() const noexcept {
+  return no_historical_active_root_lookup_;
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::
+    certified_common() const noexcept {
+  return minted_ &&
+         ledger_stamp_.schema_version ==
+             direct_sparse_root_ledger_schema_version &&
+         ledger_stamp_.session_instance_id != 0U &&
+         counters_.proof_count <= requested_budget_.maximum_proof_count &&
+         counters_.aggregate_requested_root_index_slot_visit_count <=
+             requested_budget_
+                 .maximum_aggregate_requested_root_index_slot_visit_count &&
+         counters_.aggregate_root_index_slot_visit_count <=
+             requested_budget_.maximum_aggregate_root_index_slot_visit_count &&
+         counters_.aggregate_exact_key_comparison_count <=
+             requested_budget_.maximum_aggregate_exact_key_comparison_count &&
+         counters_.direct_history_entry_access_count <=
+             requested_budget_.maximum_direct_history_entry_access_count &&
+         counters_.aggregate_root_index_slot_visit_count <=
+             counters_.aggregate_requested_root_index_slot_visit_count &&
+         counters_.aggregate_exact_key_comparison_count <=
+             counters_.aggregate_root_index_slot_visit_count &&
+         counters_.direct_history_entry_access_count <=
+             counters_.proof_count &&
+         no_historical_active_root_lookup_ && ledger_certified_at_entry_ &&
+         !materialization_.ledger_logical_state_mutated &&
+         !materialization_.source_exactness_claimed &&
+         !materialization_.public_status_claimed &&
+         !ledger_logical_state_mutated_ && !source_exactness_claimed_ &&
+         !public_status_claimed_;
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::
+    certified_requested_only_materialization() const noexcept {
+  return certified_common() && proof_set_canonical_ &&
+         every_proof_observed_for_stamp_ &&
+         entries_match_append_only_history_ &&
+         proof_set_complete_for_requested_handles_ &&
+         ledger_stamp_unchanged_ &&
+         counters_.direct_history_entry_access_count ==
+             counters_.proof_count &&
+         counters_.proof_count <=
+             requested_budget_.coverage.maximum_requested_root_count &&
+         materialization_.ledger_stamp == ledger_stamp_ &&
+         materialization_.requested_root_count == counters_.proof_count &&
+         materialization_.reachable_coverage_node_count <=
+             requested_budget_.coverage
+                 .maximum_reachable_coverage_node_count &&
+         materialization_.parent_reference_scan_count <=
+             requested_budget_.coverage
+                 .maximum_parent_reference_scan_count &&
+         materialization_.point_delta_scan_count <=
+             requested_budget_.coverage.maximum_point_delta_scan_count &&
+         materialization_.point_ids.size() <=
+             requested_budget_.coverage.maximum_output_point_count &&
+         materialization_.scratch_entry_count <=
+             requested_budget_.coverage.maximum_scratch_entry_count &&
+         materialization_.certified_requested_only_materialization() &&
+         disposition_ ==
+             ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+                 complete &&
+         decision_ ==
+             ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+                 complete_requested_roots_only;
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::
+    certified_budget_exhaustion() const noexcept {
+  if (!certified_common() || !materialization_.records.empty() ||
+      !materialization_.point_ids.empty() ||
+      disposition_ !=
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              budget_exhausted) {
+    return false;
+  }
+  switch (decision_) {
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_proof_count_budget_exhausted:
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_aggregate_requested_slot_budget_exhausted:
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_aggregate_slot_visit_budget_exhausted:
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_aggregate_exact_comparison_budget_exhausted:
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_history_access_budget_exhausted:
+      return ledger_stamp_unchanged_ &&
+             materialization_.decision ==
+                 ExactDirectSparseRootCoverageMaterializationDecision::
+                     not_materialized;
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_coverage_budget_exhausted:
+      return ledger_stamp_unchanged_ &&
+             materialization_.decision ==
+                 ExactDirectSparseRootCoverageMaterializationDecision::
+                     no_budget_exhausted;
+    default:
+      return false;
+  }
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::
+    certified_rejection() const noexcept {
+  if (!certified_common() || !materialization_.records.empty() ||
+      !materialization_.point_ids.empty() ||
+      disposition_ !=
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              rejected) {
+    return false;
+  }
+  switch (decision_) {
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_proof_shape_rejected:
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_proof_rejected:
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_counter_capacity_overflow:
+      return ledger_stamp_unchanged_ &&
+             materialization_.decision ==
+                 ExactDirectSparseRootCoverageMaterializationDecision::
+                     not_materialized;
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_ledger_stamp_changed:
+      return !ledger_stamp_unchanged_;
+    case ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+        no_coverage_materialization_rejected:
+      return ledger_stamp_unchanged_ &&
+             materialization_.decision !=
+                 ExactDirectSparseRootCoverageMaterializationDecision::
+                     not_materialized &&
+             materialization_.decision !=
+                 ExactDirectSparseRootCoverageMaterializationDecision::
+                     no_budget_exhausted &&
+             materialization_.decision !=
+                 ExactDirectSparseRootCoverageMaterializationDecision::
+                     contradiction_coverage_dag &&
+             materialization_.decision !=
+                 ExactDirectSparseRootCoverageMaterializationDecision::
+                     complete_requested_roots_only;
+    default:
+      return false;
+  }
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::
+    certified_fail_closed_contradiction() const noexcept {
+  if (!certified_common() || !materialization_.records.empty() ||
+      !materialization_.point_ids.empty() || !ledger_stamp_unchanged_ ||
+      disposition_ !=
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              contradiction) {
+    return false;
+  }
+  if (decision_ ==
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          contradiction_history_entry) {
+    return materialization_.decision ==
+           ExactDirectSparseRootCoverageMaterializationDecision::
+               not_materialized;
+  }
+  return decision_ ==
+             ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+                 contradiction_coverage_dag &&
+         materialization_.decision ==
+             ExactDirectSparseRootCoverageMaterializationDecision::
+                 contradiction_coverage_dag;
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::
+    certified_outcome() const noexcept {
+  return certified_requested_only_materialization() ||
+         certified_budget_exhaustion() || certified_rejection() ||
+         certified_fail_closed_contradiction();
+}
+
+bool ExactDirectSparseRootCoverageFromActiveRootProofsResult::certified_for(
+    const ExactDirectSparseRootLedgerStamp& expected) const noexcept {
+  return ledger_stamp_ == expected && certified_outcome();
 }
 
 bool ExactDirectSparseRootLedgerCheckpoint::certified_honest_nonrestartable()
@@ -2095,229 +2551,253 @@ ExactDirectSparseRootLedger::materialize_active_coverages(
         no_ledger_rejected;
     return output;
   }
-  output.ledger_stamp = impl_->stamp();
-  output.requested_root_count = requested_handles.size();
-  if (requested_handles.size() > budget.maximum_requested_root_count) {
-    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-        no_budget_exhausted;
+  return materialize_requested_coverages_from_bindings(
+      impl_->stamp(),
+      impl_->coverage_nodes,
+      impl_->coverage_parents,
+      impl_->coverage_deltas,
+      requested_handles.size(),
+      budget,
+      [&requested_handles](std::size_t index) {
+        return requested_handles[index];
+      },
+      [this, &requested_handles](std::size_t index)
+          -> const ExactDirectSparseRootLedgerEntry* {
+        const auto row = impl_->handle_row(requested_handles[index]);
+        return row.has_value() ? &impl_->history[*row] : nullptr;
+      });
+}
+
+ExactDirectSparseRootCoverageFromActiveRootProofsResult
+ExactDirectSparseRootLedger::
+    materialize_active_coverages_from_active_root_proofs(
+        std::span<
+            const ExactDirectSparseRootLedgerActiveRootProbeResult> proofs,
+        const ExactDirectSparseRootCoverageFromActiveRootProofsBudget& budget)
+        const noexcept {
+  ExactDirectSparseRootCoverageFromActiveRootProofsResult output;
+  output.requested_budget_ = budget;
+  output.no_historical_active_root_lookup_ = true;
+  output.ledger_certified_at_entry_ = certified_structure_only_ledger();
+  if (!output.ledger_certified_at_entry_) {
+    output.disposition_ =
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::rejected;
+    output.decision_ =
+        ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+            no_ledger_rejected;
     return output;
   }
-  if (std::adjacent_find(
-          requested_handles.begin(),
-          requested_handles.end(),
-          std::greater_equal<>()) != requested_handles.end()) {
-    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-        no_requested_root_shape_rejected;
-    return output;
-  }
-  try {
-    output.records.reserve(requested_handles.size());
-    for (const auto handle : requested_handles) {
-      const auto row = impl_->handle_row(handle);
-      if (!row.has_value()) {
-        output.records.clear();
-        output.point_ids.clear();
-        output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-            no_requested_root_unobserved_rejected;
-        return output;
-      }
-      const auto& binding = impl_->history[*row];
-      std::vector<ExactDirectSparseRootCoverageId> stack;
-      std::unordered_set<ExactDirectSparseRootCoverageId> visited;
-      std::vector<spatial::PointId> points;
-      if (budget.maximum_scratch_entry_count == 0U) {
-        output.records.clear();
-        output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-            no_budget_exhausted;
-        return output;
-      }
-      stack.push_back(binding.coverage_id);
-      output.scratch_entry_count =
-          std::max(output.scratch_entry_count, std::size_t{1U});
-      while (!stack.empty()) {
-        const auto coverage_id = stack.back();
-        stack.pop_back();
-        if (visited.find(coverage_id) != visited.end()) {
-          continue;
-        }
-        std::size_t scratch_after_visit = 0U;
-        if (!checked_add(visited.size(), 1U, scratch_after_visit) ||
-            !checked_add(
-                scratch_after_visit, stack.size(), scratch_after_visit) ||
-            !checked_add(
-                scratch_after_visit, points.size(), scratch_after_visit) ||
-            scratch_after_visit > budget.maximum_scratch_entry_count) {
-          output.records.clear();
-          output.point_ids.clear();
-          output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-              no_budget_exhausted;
-          return output;
-        }
-        visited.insert(coverage_id);
-        output.scratch_entry_count =
-            std::max(output.scratch_entry_count, scratch_after_visit);
-        if (coverage_id == 0U || coverage_id > impl_->coverage_nodes.size()) {
-          output.records.clear();
-          output.point_ids.clear();
-          output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-              contradiction_coverage_dag;
-          return output;
-        }
-        if (!checked_increment(output.reachable_coverage_node_count) ||
-            output.reachable_coverage_node_count >
-                budget.maximum_reachable_coverage_node_count) {
-          output.records.clear();
-          output.point_ids.clear();
-          output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-              no_budget_exhausted;
-          return output;
-        }
-        const auto& node = impl_->coverage_nodes[coverage_id - 1U];
-        if (node.coverage_id != coverage_id ||
-            !valid_slice(
-                node.parent_offset,
-                node.parent_count,
-                impl_->coverage_parents.size()) ||
-            !valid_slice(
-                node.point_delta_offset,
-                node.point_delta_count,
-                impl_->coverage_deltas.size())) {
-          output.records.clear();
-          output.point_ids.clear();
-          output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-              contradiction_coverage_dag;
-          return output;
-        }
-        const auto parents =
-            std::span<const ExactDirectSparseRootCoverageId>(
-                impl_->coverage_parents)
-                .subspan(node.parent_offset, node.parent_count);
-        std::size_t post_parent_scan_count = 0U;
-        std::size_t post_stack_size = 0U;
-        std::size_t scratch_after_parents = 0U;
-        if (!checked_add(
-                output.parent_reference_scan_count,
-                parents.size(),
-                post_parent_scan_count) ||
-            post_parent_scan_count >
-                budget.maximum_parent_reference_scan_count ||
-            !checked_add(stack.size(), parents.size(), post_stack_size) ||
-            !checked_add(
-                visited.size(), post_stack_size, scratch_after_parents) ||
-            !checked_add(
-                scratch_after_parents,
-                points.size(),
-                scratch_after_parents) ||
-            scratch_after_parents > budget.maximum_scratch_entry_count) {
-          output.records.clear();
-          output.point_ids.clear();
-          output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-              no_budget_exhausted;
-          return output;
-        }
-        for (const auto parent : parents) {
-          if (parent == 0U || parent >= coverage_id) {
-            output.records.clear();
-            output.point_ids.clear();
-            output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-                contradiction_coverage_dag;
-            return output;
-          }
-        }
-        output.parent_reference_scan_count = post_parent_scan_count;
-        stack.insert(stack.end(), parents.begin(), parents.end());
-        output.scratch_entry_count =
-            std::max(output.scratch_entry_count, scratch_after_parents);
-        const auto deltas = std::span<const spatial::PointId>(
-                                impl_->coverage_deltas)
-                                .subspan(
-                                    node.point_delta_offset,
-                                    node.point_delta_count);
-        if (!strict_points(deltas)) {
-          output.records.clear();
-          output.point_ids.clear();
-          output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-              contradiction_coverage_dag;
-          return output;
-        }
-        std::size_t post_delta_scan_count = 0U;
-        std::size_t post_point_size = 0U;
-        std::size_t scratch_after_deltas = 0U;
-        if (!checked_add(
-                output.point_delta_scan_count,
-                deltas.size(),
-                post_delta_scan_count) ||
-            post_delta_scan_count > budget.maximum_point_delta_scan_count ||
-            !checked_add(points.size(), deltas.size(), post_point_size) ||
-            !checked_add(
-                visited.size(), stack.size(), scratch_after_deltas) ||
-            !checked_add(
-                scratch_after_deltas,
-                post_point_size,
-                scratch_after_deltas) ||
-            scratch_after_deltas > budget.maximum_scratch_entry_count) {
-          output.records.clear();
-          output.point_ids.clear();
-          output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-              no_budget_exhausted;
-          return output;
-        }
-        output.point_delta_scan_count = post_delta_scan_count;
-        points.insert(points.end(), deltas.begin(), deltas.end());
-        output.scratch_entry_count =
-            std::max(output.scratch_entry_count, scratch_after_deltas);
-      }
-      std::sort(points.begin(), points.end());
-      points.erase(std::unique(points.begin(), points.end()), points.end());
-      std::size_t post_output_count = 0U;
-      if (!checked_add(
-              output.point_ids.size(), points.size(), post_output_count)) {
-        output.records.clear();
-        output.point_ids.clear();
-        output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-            no_capacity_overflow;
-        return output;
-      }
-      if (post_output_count > budget.maximum_output_point_count) {
-        output.records.clear();
-        output.point_ids.clear();
-        output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-            no_budget_exhausted;
-        return output;
-      }
-      output.records.push_back({
-          handle,
-          binding.prior_root_id,
-          binding.coverage_id,
-          output.point_ids.size(),
-          points.size()});
-      output.point_ids.insert(
-          output.point_ids.end(), points.begin(), points.end());
+  output.ledger_stamp_ = impl_->stamp();
+
+  const auto finish = [&output, this](
+                          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition
+                              disposition,
+                          ExactDirectSparseRootCoverageFromActiveRootProofsDecision
+                              decision) {
+    output.ledger_stamp_unchanged_ =
+        impl_ != nullptr && impl_->stamp() == output.ledger_stamp_;
+    if (!output.ledger_stamp_unchanged_) {
+      disposition =
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              rejected;
+      decision = ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_ledger_stamp_changed;
     }
-    output.only_requested_coverage_dags_traversed = true;
-    output.canonical_sorted_unique_points = true;
-    output.ledger_logical_state_mutated = false;
-    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-        complete_requested_roots_only;
+    if (disposition !=
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+            complete) {
+      output.materialization_.records.clear();
+      output.materialization_.point_ids.clear();
+    }
+    output.disposition_ = disposition;
+    output.decision_ = decision;
+    output.minted_ = true;
+  };
+
+  output.counters_.proof_count =
+      std::min(proofs.size(), budget.maximum_proof_count);
+  if (proofs.size() > budget.maximum_proof_count) {
+    finish(
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+            budget_exhausted,
+        ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+            no_proof_count_budget_exhausted);
     return output;
-  } catch (const std::bad_alloc&) {
-    output.records.clear();
-    output.point_ids.clear();
-    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-        no_allocation_failed;
+  }
+  output.counters_.proof_count = proofs.size();
+
+  std::size_t aggregate_requested_slots = 0U;
+  std::size_t aggregate_actual_slots = 0U;
+  std::size_t aggregate_exact_comparisons = 0U;
+  for (std::size_t index = 0U; index < proofs.size(); ++index) {
+    const auto& proof = proofs[index];
+    if (index != 0U &&
+        proofs[index - 1U].requested_forest_root_handle >=
+            proof.requested_forest_root_handle) {
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              rejected,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              no_proof_shape_rejected);
+      return output;
+    }
+    if (!proof.certified_observed() ||
+        !proof.certified_for(output.ledger_stamp_)) {
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              rejected,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              no_proof_rejected);
+      return output;
+    }
+    if (!checked_add(
+            aggregate_requested_slots,
+            proof.requested_budget.maximum_root_index_slot_visit_count,
+            aggregate_requested_slots) ||
+        !checked_add(
+            aggregate_actual_slots,
+            proof.root_index_slot_visit_count,
+            aggregate_actual_slots) ||
+        !checked_add(
+            aggregate_exact_comparisons,
+            proof.exact_key_comparison_count,
+            aggregate_exact_comparisons)) {
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              rejected,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              no_counter_capacity_overflow);
+      return output;
+    }
+  }
+  output.proof_set_canonical_ = true;
+  output.every_proof_observed_for_stamp_ = true;
+
+  if (aggregate_requested_slots >
+      budget.maximum_aggregate_requested_root_index_slot_visit_count) {
+    output.counters_.aggregate_requested_root_index_slot_visit_count =
+        budget.maximum_aggregate_requested_root_index_slot_visit_count;
+    finish(
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+            budget_exhausted,
+        ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+            no_aggregate_requested_slot_budget_exhausted);
     return output;
-  } catch (const std::length_error&) {
-    output.records.clear();
-    output.point_ids.clear();
-    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-        no_capacity_overflow;
+  }
+  output.counters_.aggregate_requested_root_index_slot_visit_count =
+      aggregate_requested_slots;
+  if (aggregate_actual_slots >
+      budget.maximum_aggregate_root_index_slot_visit_count) {
+    output.counters_.aggregate_root_index_slot_visit_count =
+        budget.maximum_aggregate_root_index_slot_visit_count;
+    finish(
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+            budget_exhausted,
+        ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+            no_aggregate_slot_visit_budget_exhausted);
     return output;
-  } catch (...) {
-    output.records.clear();
-    output.point_ids.clear();
-    output.decision = ExactDirectSparseRootCoverageMaterializationDecision::
-        contradiction_coverage_dag;
+  }
+  output.counters_.aggregate_root_index_slot_visit_count =
+      aggregate_actual_slots;
+  if (aggregate_exact_comparisons >
+      budget.maximum_aggregate_exact_key_comparison_count) {
+    output.counters_.aggregate_exact_key_comparison_count =
+        budget.maximum_aggregate_exact_key_comparison_count;
+    finish(
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+            budget_exhausted,
+        ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+            no_aggregate_exact_comparison_budget_exhausted);
     return output;
+  }
+  output.counters_.aggregate_exact_key_comparison_count =
+      aggregate_exact_comparisons;
+  if (proofs.size() > budget.maximum_direct_history_entry_access_count) {
+    output.counters_.direct_history_entry_access_count =
+        budget.maximum_direct_history_entry_access_count;
+    finish(
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+            budget_exhausted,
+        ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+            no_history_access_budget_exhausted);
+    return output;
+  }
+
+  for (const auto& proof : proofs) {
+    if (proof.entry.history_index >= impl_->history.size()) {
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              contradiction,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              contradiction_history_entry);
+      return output;
+    }
+    if (!checked_increment(
+            output.counters_.direct_history_entry_access_count)) {
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              rejected,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              no_counter_capacity_overflow);
+      return output;
+    }
+    if (impl_->history[proof.entry.history_index] != proof.entry) {
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              contradiction,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              contradiction_history_entry);
+      return output;
+    }
+  }
+  output.entries_match_append_only_history_ = true;
+  output.proof_set_complete_for_requested_handles_ = true;
+
+  output.materialization_ = materialize_requested_coverages_from_bindings(
+      output.ledger_stamp_,
+      impl_->coverage_nodes,
+      impl_->coverage_parents,
+      impl_->coverage_deltas,
+      proofs.size(),
+      budget.coverage,
+      [&proofs](std::size_t index) {
+        return proofs[index].requested_forest_root_handle;
+      },
+      [&proofs](std::size_t index) {
+        return &proofs[index].entry;
+      });
+
+  if (output.materialization_.certified_requested_only_materialization()) {
+    finish(
+        ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::complete,
+        ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+            complete_requested_roots_only);
+    return output;
+  }
+  switch (output.materialization_.decision) {
+    case ExactDirectSparseRootCoverageMaterializationDecision::
+        no_budget_exhausted:
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              budget_exhausted,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              no_coverage_budget_exhausted);
+      return output;
+    case ExactDirectSparseRootCoverageMaterializationDecision::
+        contradiction_coverage_dag:
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              contradiction,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              contradiction_coverage_dag);
+      return output;
+    default:
+      finish(
+          ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+              rejected,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+              no_coverage_materialization_rejected);
+      return output;
   }
 }
 

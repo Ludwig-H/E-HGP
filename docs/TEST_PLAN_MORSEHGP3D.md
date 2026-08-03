@@ -2599,12 +2599,28 @@ Les chronos de ce Stage B doivent être publiés seulement comme diagnostics hô
 - démarrer `first_allocated_root_id=UINT64_MAX`, l'allouer exactement une fois sans wrap, permettre ensuite une continuation $q_R=1$ sans allocation et refuser toute transition $q_R=0$ ou $q_R>1$ supplémentaire exigeant un nouvel identifiant;
 - comparer deux sessions logiquement identiques mais d'identités process-locales et de masques physiques différents, puis exiger le même digest sémantique; vérifier séparément que le checkpoint lié à la session ne sérialise ni index, ni historique, ni DAG et ne supporte aucun restore;
 - maintenir faux `frozen_scientific_authority_replayed`, source exacte, cursor, consommation ou classification de la fermeture livrée, capability privée de couverture, verticale, durable et statut public; les spans externes ne peuvent jamais promouvoir le ledger en preuve scientifique;
-- ne pas étendre la borne du nouveau probe à `prepare_transition` ou `materialize_active_coverages`, dont les implémentations historiques restent inchangées; aucun futur coordinateur ne peut revendiquer un pipeline borné avant leur remplacement ou leur enveloppe explicitement budgétée;
+- ne pas étendre la borne du nouveau probe à `prepare_transition`; la matérialisation historique conserve sa sémantique via le helper partagé, mais seul le nouveau chemin lié aux preuves est admissible dans un futur coordinateur borné;
 - vérifier l'absence de catalogue global de facettes, cofaces, incidences, cellules, Gamma ou Delaunay d'ordre supérieur et interdire toute qualification 50 k, G4 ou massive à partir de ce composant.
 
 La validation historique du CTest ledger exact passait 1/1, test 0,02 et total 0,03 seconde en Release, puis 1/1, test et total 0,04 seconde sous ASan/UBSan. Après ajout du probe, le CTest exact ciblé passe 1/1 avec un total de 0,01 seconde en Release, puis 1/1, test 0,02 et total 0,03 seconde sous ASan/UBSan sans diagnostic; le consumer source strict passe en syntax-only. Le CTest forest d'attestation des handles touchés historique passait 1/1, test 0,01 et total 0,02 seconde en Release, puis 1/1, test 0,03 et total 0,04 seconde sous ASan/UBSan. La couverture actuelle reste ciblée : elle n'est pas une matrice exhaustive valeur exacte/cap moins un de tous les compteurs, n'injecte pas déterministiquement `bad_alloc` et ne peut injecter la contradiction interne défensive du probe. Ces exécutions exactes ciblées ne sont ni des smoke tests, ni des benchmarks true-HGP ou des gates de performance. GCP non utilisé.
 
 Les diagnostics Release `/tmp` doivent rester étiquetés `structure_only` : 50 k mesure 0,32264 seconde de naissances composites puis 0,18604 seconde pour 25 000 paires $q_R=0$, avec 37 572 KiB de RSS HWM; 1 M mesure seulement les naissances, en 3,65022 secondes et 654 492 KiB. Ne pas les additionner, les extrapoler ou les employer comme preuve true-HGP, SLO, G4 ou massive.
+
+### T15-ACTIVE-ROOT-PROOF-COVERAGE — matérialisation demandée liée aux preuves
+
+- annoncer `reference_cpu / hgp_reduced / active_root_proof_bound_requested_coverage_materialization_v1`, Phase 15 `in_progress`, Phase 16 `blocked` et `public_status=not_claimed` sans modifier de gate;
+- construire des preuves rooted et latent fraîches avec `probe_active_root`, les ordonner strictement par handle et exiger simultanément `certified_observed()` et `certified_for(L0)` avant tout accès à l'historique;
+- vérifier séparément les cinq caps agrégés exacts et moins un : nombre de preuves, slots demandés, visites de slots, comparaisons de handles complets et accès directs à l'historique; couvrir aussi les additions à `SIZE_MAX` sans wrap;
+- prouver par couverture source que ce chemin n'appelle ni `handle_row`, ni lookup historique, puis vérifier un accès direct à l'entrée append-only désignée par chaque preuve;
+- comparer records, points et compteurs de parcours avec l'API historique sur la même demande, tout en exigeant qu'un seul helper implémente le parcours du DAG demandé pour les deux surfaces;
+- exercer les six caps du parcours DAG exacts et moins un : racines, nœuds atteignables, références parentes, deltas, points produits et scratch;
+- rejeter sans payload ordre inversé, doublon, miss, épuisement, objet par défaut, falsification, preuve étrangère ou périmée et tout changement de stamp;
+- vérifier que le résultat est privé, immuable et non agrégat, que ses accessors ne rendent aucune référence depuis un temporaire et que preuves, stamp et cinq arènes persistantes restent inchangés;
+- maintenir explicites les gaps : contradictions défensives non injectables et opérations de hash du scratch `unordered_set` non comptées individuellement;
+- maintenir non bornés `prepare_transition`, le preview sans pré-origine ou pré-racine, la reconstruction de croissance d'index et les lookups post-mutation du commit;
+- vérifier que cette couture ne construit aucune population globale de facettes, cofaces, incidences, cellules, Gamma ou mosaïque de Delaunay d'ordre supérieur et n'autorise aucun claim true-HGP, 50 k sous la seconde ou dizaines de millions.
+
+La validation exacte passe 1/1 en 0,01 seconde en Release et 1/1 en 0,08 seconde sous ASan/UBSan, sans diagnostic. L'audit compte P0=0 et P1=0. Ces exécutions ciblées ne sont ni des smoke tests, ni des benchmarks ou des gates de performance. GCP non utilisé.
 
 ### T15-STABLE-FOREST-STRICT-DESCENT-CLOSURE — fermeture full-key v1
 

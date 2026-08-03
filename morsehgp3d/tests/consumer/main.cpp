@@ -440,7 +440,10 @@ int main() {
   static_assert(
       !std::is_aggregate_v<
           morsehgp3d::hierarchy::
-              ExactDirectSparseRootLedgerActiveRootProbeResult>);
+              ExactDirectSparseRootLedgerActiveRootProbeResult> &&
+      !std::is_aggregate_v<
+          morsehgp3d::hierarchy::
+              ExactDirectSparseRootCoverageFromActiveRootProofsResult>);
   const morsehgp3d::hierarchy::ExactDirectSparseRootLedger
       installed_sparse_root_ledger_probe;
   const auto installed_sparse_root_lookup =
@@ -450,6 +453,13 @@ int main() {
           0U,
           morsehgp3d::hierarchy::
               ExactDirectSparseRootLedgerActiveRootProbeBudget{0U});
+  const auto installed_sparse_root_proof_bound_materialization =
+      installed_sparse_root_ledger_probe
+          .materialize_active_coverages_from_active_root_proofs(
+              std::span<const morsehgp3d::hierarchy::
+                            ExactDirectSparseRootLedgerActiveRootProbeResult>{},
+              morsehgp3d::hierarchy::
+                  ExactDirectSparseRootCoverageFromActiveRootProofsBudget{});
   if (installed_sparse_root_ledger_probe.certified_structure_only_ledger() ||
       installed_sparse_root_ledger_probe
               .materialized_active_handle_index_slot_count() != 0U ||
@@ -462,6 +472,9 @@ int main() {
       installed_sparse_root_bounded_probe.certified_budget_exhaustion() ||
       installed_sparse_root_bounded_probe
           .certified_fail_closed_contradiction() ||
+      installed_sparse_root_proof_bound_materialization.certified_outcome() ||
+      !installed_sparse_root_proof_bound_materialization.records().empty() ||
+      !installed_sparse_root_proof_bound_materialization.point_ids().empty() ||
       installed_sparse_root_ledger_probe.checkpoint()
           .certified_honest_nonrestartable()) {
     std::cerr << "installed sparse-root-ledger API accepted an empty session\n";

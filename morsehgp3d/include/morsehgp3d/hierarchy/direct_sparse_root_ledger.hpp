@@ -516,6 +516,157 @@ struct ExactDirectSparseRootCoverageMaterializationResult {
   [[nodiscard]] bool certified_requested_only_materialization() const noexcept;
 };
 
+// Proof-bound wrapper for callers that have already paid for and retained
+// bounded active-root probes.  The first five caps cover only proof
+// validation; the nested budget remains the authoritative bound for the
+// requested-only coverage-DAG traversal shared with the historical API.
+struct ExactDirectSparseRootCoverageFromActiveRootProofsBudget {
+  std::size_t maximum_proof_count{};
+  std::size_t maximum_aggregate_requested_root_index_slot_visit_count{};
+  std::size_t maximum_aggregate_root_index_slot_visit_count{};
+  std::size_t maximum_aggregate_exact_key_comparison_count{};
+  std::size_t maximum_direct_history_entry_access_count{};
+  ExactDirectSparseRootCoverageMaterializationBudget coverage{};
+
+  friend bool operator==(
+      const ExactDirectSparseRootCoverageFromActiveRootProofsBudget&,
+      const ExactDirectSparseRootCoverageFromActiveRootProofsBudget&) =
+      default;
+};
+
+struct ExactDirectSparseRootCoverageFromActiveRootProofsCounters {
+  // Successful outcomes report exact work.  A budget-exhaustion receipt may
+  // saturate the counter that crossed a cap at that cap, so the failure
+  // capability never carries an out-of-budget work claim.
+  std::size_t proof_count{};
+  std::size_t aggregate_requested_root_index_slot_visit_count{};
+  std::size_t aggregate_root_index_slot_visit_count{};
+  std::size_t aggregate_exact_key_comparison_count{};
+  std::size_t direct_history_entry_access_count{};
+
+  friend bool operator==(
+      const ExactDirectSparseRootCoverageFromActiveRootProofsCounters&,
+      const ExactDirectSparseRootCoverageFromActiveRootProofsCounters&) =
+      default;
+};
+
+enum class ExactDirectSparseRootCoverageFromActiveRootProofsDisposition
+    : std::uint8_t {
+  not_certified,
+  complete,
+  rejected,
+  budget_exhausted,
+  contradiction,
+};
+
+enum class ExactDirectSparseRootCoverageFromActiveRootProofsDecision
+    : std::uint8_t {
+  not_certified,
+  no_ledger_rejected,
+  no_proof_count_budget_exhausted,
+  no_proof_shape_rejected,
+  no_proof_rejected,
+  no_counter_capacity_overflow,
+  no_aggregate_requested_slot_budget_exhausted,
+  no_aggregate_slot_visit_budget_exhausted,
+  no_aggregate_exact_comparison_budget_exhausted,
+  no_history_access_budget_exhausted,
+  contradiction_history_entry,
+  no_ledger_stamp_changed,
+  no_coverage_budget_exhausted,
+  no_coverage_materialization_rejected,
+  contradiction_coverage_dag,
+  complete_requested_roots_only,
+};
+
+// All scientific payload is private and exposed through const spans.  A
+// genuine copy preserves the capability; default construction cannot mint it.
+class ExactDirectSparseRootCoverageFromActiveRootProofsResult final {
+ public:
+  ExactDirectSparseRootCoverageFromActiveRootProofsResult() noexcept = default;
+  ~ExactDirectSparseRootCoverageFromActiveRootProofsResult() = default;
+  ExactDirectSparseRootCoverageFromActiveRootProofsResult(
+      const ExactDirectSparseRootCoverageFromActiveRootProofsResult&) =
+      default;
+  ExactDirectSparseRootCoverageFromActiveRootProofsResult& operator=(
+      const ExactDirectSparseRootCoverageFromActiveRootProofsResult&) =
+      default;
+  ExactDirectSparseRootCoverageFromActiveRootProofsResult(
+      ExactDirectSparseRootCoverageFromActiveRootProofsResult&&) noexcept =
+      default;
+  ExactDirectSparseRootCoverageFromActiveRootProofsResult& operator=(
+      ExactDirectSparseRootCoverageFromActiveRootProofsResult&&) noexcept =
+      default;
+
+  [[nodiscard]] const ExactDirectSparseRootLedgerStamp& ledger_stamp()
+      const & noexcept;
+  [[nodiscard]] const ExactDirectSparseRootLedgerStamp& ledger_stamp()
+      const && = delete;
+  [[nodiscard]] const
+  ExactDirectSparseRootCoverageFromActiveRootProofsBudget& requested_budget()
+      const & noexcept;
+  [[nodiscard]] const
+  ExactDirectSparseRootCoverageFromActiveRootProofsBudget& requested_budget()
+      const && = delete;
+  [[nodiscard]] const
+  ExactDirectSparseRootCoverageFromActiveRootProofsCounters& counters()
+      const & noexcept;
+  [[nodiscard]] const
+  ExactDirectSparseRootCoverageFromActiveRootProofsCounters& counters()
+      const && = delete;
+  [[nodiscard]] std::span<
+      const ExactDirectSparseRootCoverageMaterializationRecord>
+  records() const & noexcept;
+  [[nodiscard]] std::span<
+      const ExactDirectSparseRootCoverageMaterializationRecord>
+  records() const && = delete;
+  [[nodiscard]] std::span<const spatial::PointId> point_ids()
+      const & noexcept;
+  [[nodiscard]] std::span<const spatial::PointId> point_ids()
+      const && = delete;
+  [[nodiscard]] ExactDirectSparseRootCoverageMaterializationDecision
+  coverage_decision() const noexcept;
+  [[nodiscard]] ExactDirectSparseRootCoverageFromActiveRootProofsDisposition
+  disposition() const noexcept;
+  [[nodiscard]] ExactDirectSparseRootCoverageFromActiveRootProofsDecision
+  decision() const noexcept;
+  [[nodiscard]] bool no_historical_active_root_lookup() const noexcept;
+  [[nodiscard]] bool certified_requested_only_materialization() const noexcept;
+  [[nodiscard]] bool certified_budget_exhaustion() const noexcept;
+  [[nodiscard]] bool certified_rejection() const noexcept;
+  [[nodiscard]] bool certified_fail_closed_contradiction() const noexcept;
+  [[nodiscard]] bool certified_outcome() const noexcept;
+  [[nodiscard]] bool certified_for(
+      const ExactDirectSparseRootLedgerStamp&) const noexcept;
+
+ private:
+  [[nodiscard]] bool certified_common() const noexcept;
+
+  ExactDirectSparseRootLedgerStamp ledger_stamp_{};
+  ExactDirectSparseRootCoverageFromActiveRootProofsBudget requested_budget_{};
+  ExactDirectSparseRootCoverageFromActiveRootProofsCounters counters_{};
+  ExactDirectSparseRootCoverageMaterializationResult materialization_{};
+  bool proof_set_canonical_{false};
+  bool every_proof_observed_for_stamp_{false};
+  bool entries_match_append_only_history_{false};
+  bool proof_set_complete_for_requested_handles_{false};
+  bool no_historical_active_root_lookup_{false};
+  bool ledger_certified_at_entry_{false};
+  bool ledger_stamp_unchanged_{false};
+  bool ledger_logical_state_mutated_{false};
+  bool source_exactness_claimed_{false};
+  bool public_status_claimed_{false};
+  bool minted_{false};
+  ExactDirectSparseRootCoverageFromActiveRootProofsDisposition disposition_{
+      ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+          not_certified};
+  ExactDirectSparseRootCoverageFromActiveRootProofsDecision decision_{
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          not_certified};
+
+  friend class ExactDirectSparseRootLedger;
+};
+
 enum class ExactDirectSparseRootLedgerCheckpointDecision : std::uint8_t {
   not_available,
   complete_honest_nonrestartable_semantic_checkpoint,
@@ -604,6 +755,11 @@ class ExactDirectSparseRootLedger {
       std::span<const ExactDirectSparseStableFacetHandle>
           requested_forest_root_handles,
       const ExactDirectSparseRootCoverageMaterializationBudget&) const noexcept;
+  [[nodiscard]] ExactDirectSparseRootCoverageFromActiveRootProofsResult
+  materialize_active_coverages_from_active_root_proofs(
+      std::span<const ExactDirectSparseRootLedgerActiveRootProbeResult>,
+      const ExactDirectSparseRootCoverageFromActiveRootProofsBudget&)
+      const noexcept;
   [[nodiscard]] ExactDirectSparseRootLedgerCheckpoint checkpoint()
       const noexcept;
 

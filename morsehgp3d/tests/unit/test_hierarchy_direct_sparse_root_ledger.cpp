@@ -72,6 +72,11 @@ using morsehgp3d::contract::CanonicalId;
 using morsehgp3d::contract::CanonicalSha256Builder;
 using morsehgp3d::spatial::PointId;
 
+template <typename T>
+concept HasTraversalOrderMember = requires(const T& value) {
+  value.traversal_order;
+};
+
 static_assert(direct_sparse_root_ledger_schema_version == 1U);
 static_assert(direct_sparse_root_ledger_storage_schema_version == 1U);
 static_assert(
@@ -86,6 +91,22 @@ static_assert(
 static_assert(
     !std::is_aggregate_v<
         ExactDirectSparseRootLedgerActiveRootProbeResult>);
+static_assert(
+    !std::is_aggregate_v<
+        ExactDirectSparseRootCoverageFromActiveRootProofsResult>);
+static_assert(std::is_same_v<
+              decltype(std::declval<const
+                       ExactDirectSparseRootCoverageFromActiveRootProofsResult&>()
+                           .records()),
+              std::span<
+                  const ExactDirectSparseRootCoverageMaterializationRecord>>);
+static_assert(std::is_same_v<
+              decltype(std::declval<const
+                       ExactDirectSparseRootCoverageFromActiveRootProofsResult&>()
+                           .point_ids()),
+              std::span<const PointId>>);
+static_assert(!HasTraversalOrderMember<
+              ExactDirectSparseRootCoverageFromActiveRootProofsBudget>);
 
 int failures = 0;
 
@@ -682,6 +703,427 @@ void test_bounded_active_root_probe() {
       "a privately minted probe must not certify for a stale successor stamp");
 }
 
+void test_proof_bound_active_root_materialization() {
+  const auto make_fixture = []() {
+    // The zero fingerprint mask makes requested proof work observable: the
+    // rooted handle occupies the first slot and the latent handle the second.
+    auto context = make_context(1'000U, 1U, 0U);
+    const std::array<ExactDirectSparseStableFacetHandle, 2U> birth_handles{
+        10U, 30U};
+    const std::array births{
+        ExactDirectSparseRootLedgerStandaloneBirth{10U, 0U, 2U, 1U},
+        ExactDirectSparseRootLedgerStandaloneBirth{30U, 2U, 2U, 1U},
+    };
+    const std::array<PointId, 4U> birth_points{1U, 2U, 4U, 7U};
+    (void)commit_births(context, birth_handles, births, birth_points);
+
+    const std::array insertions{
+        ExactDirectSparseStableFacetInsertion{11U, facet(11U)}};
+    const std::array unions{
+        ExactDirectSparseStableFacetUnion{10U, 11U}};
+    const std::array<ExactDirectSparseStableFacetHandle, 2U> preview_handles{
+        10U, 11U};
+    const std::array<ExactDirectSparseStableFacetHandle, 1U> parents{10U};
+    const std::array<PointId, 2U> point_delta{2U, 3U};
+    (void)commit_group(
+        context,
+        insertions,
+        unions,
+        preview_handles,
+        {0U, 11U, 0U, 1U, 0U, 2U, 1U},
+        parents,
+        point_delta);
+    return context;
+  };
+
+  auto context = make_fixture();
+  const auto pre_stamp = context.ledger.current_stamp();
+  const std::vector<ExactDirectSparseRootLedgerEntry> history_before{
+      context.ledger.history_entries().begin(),
+      context.ledger.history_entries().end()};
+  const std::vector<ExactDirectSparseRootCoverageNode> coverage_before{
+      context.ledger.coverage_nodes().begin(),
+      context.ledger.coverage_nodes().end()};
+  const std::vector<ExactDirectSparseRootCoverageId>
+      coverage_parents_before{
+          context.ledger.coverage_parent_references().begin(),
+          context.ledger.coverage_parent_references().end()};
+  const std::vector<PointId> coverage_deltas_before{
+      context.ledger.coverage_point_deltas().begin(),
+      context.ledger.coverage_point_deltas().end()};
+  const std::vector<ExactDirectSparseRootId> prior_root_parents_before{
+      context.ledger.prior_root_parent_references().begin(),
+      context.ledger.prior_root_parent_references().end()};
+
+  const auto rooted = context.ledger.probe_active_root(
+      10U, ExactDirectSparseRootLedgerActiveRootProbeBudget{1U});
+  const auto latent = context.ledger.probe_active_root(
+      30U, ExactDirectSparseRootLedgerActiveRootProbeBudget{2U});
+  const auto missing = context.ledger.probe_active_root(
+      777U, ExactDirectSparseRootLedgerActiveRootProbeBudget{3U});
+  const auto exhausted = context.ledger.probe_active_root(
+      30U, ExactDirectSparseRootLedgerActiveRootProbeBudget{1U});
+  check(
+      rooted.certified_observed_rooted() &&
+          rooted.root_index_slot_visit_count == 1U &&
+          rooted.exact_key_comparison_count == 1U &&
+          latent.certified_observed_latent() &&
+          latent.root_index_slot_visit_count == 2U &&
+          latent.exact_key_comparison_count == 2U &&
+          missing.certified_unobserved() &&
+          exhausted.certified_budget_exhaustion(),
+      "proof materialization fixture must expose rooted, latent, miss and "
+      "forced-collision exhaustion");
+
+  const std::array<ExactDirectSparseStableFacetHandle, 2U> requested_handles{
+      10U, 30U};
+  const ExactDirectSparseRootCoverageMaterializationBudget coverage_budget{
+      2U, 3U, 1U, 6U, 5U, 6U};
+  const auto historical = context.ledger.materialize_active_coverages(
+      requested_handles, coverage_budget);
+  const std::array<PointId, 5U> expected_points{1U, 2U, 3U, 4U, 7U};
+  check(
+      historical.certified_requested_only_materialization() &&
+          historical.records.size() == 2U &&
+          historical.records[0U].forest_root_handle == 10U &&
+          historical.records[0U].prior_root_id == 1U &&
+          historical.records[0U].coverage_id == 3U &&
+          historical.records[0U].point_offset == 0U &&
+          historical.records[0U].point_count == 3U &&
+          historical.records[1U].forest_root_handle == 30U &&
+          !historical.records[1U].prior_root_id.has_value() &&
+          historical.records[1U].coverage_id == 2U &&
+          historical.records[1U].point_offset == 3U &&
+          historical.records[1U].point_count == 2U &&
+          historical.requested_root_count == 2U &&
+          historical.reachable_coverage_node_count == 3U &&
+          historical.parent_reference_scan_count == 1U &&
+          historical.point_delta_scan_count == 6U &&
+          historical.scratch_entry_count == 6U &&
+          std::equal(
+              historical.point_ids.begin(),
+              historical.point_ids.end(),
+              expected_points.begin(),
+              expected_points.end()),
+      "historical v1 materialization must expose the exact two-root oracle "
+      "and per-root traversal counters");
+
+  const auto rooted_copy = rooted;
+  const std::array proofs{rooted_copy, latent};
+  const auto proofs_before = proofs;
+  const ExactDirectSparseRootCoverageFromActiveRootProofsBudget exact_budget{
+      2U, 3U, 3U, 3U, 2U, coverage_budget};
+  const ExactDirectSparseRootCoverageFromActiveRootProofsCounters
+      exact_counters{2U, 3U, 3U, 3U, 2U};
+  const auto materialized =
+      context.ledger.materialize_active_coverages_from_active_root_proofs(
+          proofs, exact_budget);
+  check(
+      rooted_copy.certified_observed_rooted() &&
+          materialized.certified_requested_only_materialization() &&
+          materialized.certified_outcome() &&
+          materialized.certified_for(pre_stamp) &&
+          materialized.disposition() ==
+              ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+                  complete &&
+          materialized.decision() ==
+              ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+                  complete_requested_roots_only &&
+          materialized.coverage_decision() ==
+              ExactDirectSparseRootCoverageMaterializationDecision::
+                  complete_requested_roots_only &&
+          materialized.requested_budget() == exact_budget &&
+          materialized.counters() == exact_counters &&
+          materialized.no_historical_active_root_lookup() &&
+          materialized.records().size() == historical.records.size() &&
+          std::equal(
+              materialized.records().begin(),
+              materialized.records().end(),
+              historical.records.begin(),
+              historical.records.end()) &&
+          materialized.point_ids().size() == historical.point_ids.size() &&
+          std::equal(
+              materialized.point_ids().begin(),
+              materialized.point_ids().end(),
+              historical.point_ids.begin(),
+              historical.point_ids.end()),
+      "canonical rooted and latent proofs must reproduce v1 records, "
+      "offsets, points and exact aggregate work without a second lookup");
+  check(
+      proofs == proofs_before,
+      "proof-bound materialization must not modify authentic input proofs");
+
+  const auto copied_materialization = materialized;
+  ExactDirectSparseRootCoverageFromActiveRootProofsResult assigned;
+  check(
+      !assigned.certified_outcome() && assigned.records().empty() &&
+          assigned.point_ids().empty(),
+      "default proof-bound materialization cannot mint a certified payload");
+  assigned = copied_materialization;
+  check(
+      copied_materialization.certified_requested_only_materialization() &&
+          assigned.certified_requested_only_materialization() &&
+          assigned.certified_for(pre_stamp) &&
+          assigned.records().size() == materialized.records().size() &&
+          assigned.point_ids().size() == materialized.point_ids().size(),
+      "copy construction and assignment must preserve an authentic private "
+      "materialization capability");
+
+  const ExactDirectSparseRootCoverageFromActiveRootProofsBudget zero_budget{};
+  const auto empty =
+      context.ledger.materialize_active_coverages_from_active_root_proofs(
+          {}, zero_budget);
+  check(
+      empty.certified_requested_only_materialization() &&
+          empty.certified_for(pre_stamp) &&
+          empty.requested_budget() == zero_budget &&
+          empty.counters() ==
+              ExactDirectSparseRootCoverageFromActiveRootProofsCounters{} &&
+          empty.records().empty() && empty.point_ids().empty() &&
+          empty.no_historical_active_root_lookup(),
+      "an empty canonical proof set must complete under all-zero caps");
+
+  const auto payloadless = [](const auto& result) {
+    return result.records().empty() && result.point_ids().empty() &&
+           result.no_historical_active_root_lookup();
+  };
+  const auto expect_proof_budget_exhaustion =
+      [&](const ExactDirectSparseRootCoverageFromActiveRootProofsBudget& budget,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision decision,
+          const ExactDirectSparseRootCoverageFromActiveRootProofsCounters&
+              expected_counters,
+          const std::string& message) {
+        const auto result =
+            context.ledger.materialize_active_coverages_from_active_root_proofs(
+                proofs, budget);
+        check(
+            result.certified_budget_exhaustion() &&
+                result.certified_outcome() && result.certified_for(pre_stamp) &&
+                result.disposition() ==
+                    ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+                        budget_exhausted &&
+                result.decision() == decision &&
+                result.counters() == expected_counters &&
+                payloadless(result),
+            message);
+      };
+
+  auto reduced = exact_budget;
+  --reduced.maximum_proof_count;
+  expect_proof_budget_exhaustion(
+      reduced,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_count_budget_exhausted,
+      {1U, 0U, 0U, 0U, 0U},
+      "proof-count cap minus one must reject without scientific payload");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_requested_root_index_slot_visit_count;
+  expect_proof_budget_exhaustion(
+      reduced,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_aggregate_requested_slot_budget_exhausted,
+      {2U, 2U, 0U, 0U, 0U},
+      "aggregate requested-slot cap minus one must reject without payload");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_root_index_slot_visit_count;
+  expect_proof_budget_exhaustion(
+      reduced,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_aggregate_slot_visit_budget_exhausted,
+      {2U, 3U, 2U, 0U, 0U},
+      "aggregate actual-visit cap minus one must reject without payload");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_exact_key_comparison_count;
+  expect_proof_budget_exhaustion(
+      reduced,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_aggregate_exact_comparison_budget_exhausted,
+      {2U, 3U, 3U, 2U, 0U},
+      "aggregate exact-comparison cap minus one must reject without payload");
+  reduced = exact_budget;
+  --reduced.maximum_direct_history_entry_access_count;
+  expect_proof_budget_exhaustion(
+      reduced,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_history_access_budget_exhausted,
+      {2U, 3U, 3U, 3U, 1U},
+      "direct-history-access cap minus one must reject without payload");
+
+  const auto expect_coverage_budget_exhaustion =
+      [&](const ExactDirectSparseRootCoverageFromActiveRootProofsBudget& budget,
+          const std::string& message) {
+        const auto result =
+            context.ledger.materialize_active_coverages_from_active_root_proofs(
+                proofs, budget);
+        check(
+            result.certified_budget_exhaustion() &&
+                result.certified_outcome() && result.certified_for(pre_stamp) &&
+                result.decision() ==
+                    ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+                        no_coverage_budget_exhausted &&
+                result.coverage_decision() ==
+                    ExactDirectSparseRootCoverageMaterializationDecision::
+                        no_budget_exhausted &&
+                result.counters() == exact_counters &&
+                payloadless(result),
+            message);
+      };
+  reduced = exact_budget;
+  --reduced.coverage.maximum_requested_root_count;
+  expect_coverage_budget_exhaustion(
+      reduced, "v1 requested-root cap minus one must remain exact");
+  reduced = exact_budget;
+  --reduced.coverage.maximum_reachable_coverage_node_count;
+  expect_coverage_budget_exhaustion(
+      reduced, "v1 reachable-node cap minus one must remain exact");
+  reduced = exact_budget;
+  --reduced.coverage.maximum_parent_reference_scan_count;
+  expect_coverage_budget_exhaustion(
+      reduced, "v1 parent-reference cap minus one must remain exact");
+  reduced = exact_budget;
+  --reduced.coverage.maximum_point_delta_scan_count;
+  expect_coverage_budget_exhaustion(
+      reduced, "v1 point-delta cap minus one must remain exact");
+  reduced = exact_budget;
+  --reduced.coverage.maximum_output_point_count;
+  expect_coverage_budget_exhaustion(
+      reduced, "v1 output-point cap minus one must remain exact");
+  reduced = exact_budget;
+  --reduced.coverage.maximum_scratch_entry_count;
+  expect_coverage_budget_exhaustion(
+      reduced, "v1 scratch cap minus one must remain exact");
+
+  const auto expect_proof_rejection =
+      [&](std::span<const ExactDirectSparseRootLedgerActiveRootProbeResult>
+              rejected_proofs,
+          ExactDirectSparseRootCoverageFromActiveRootProofsDecision decision,
+          const std::string& message) {
+        const auto result =
+            context.ledger.materialize_active_coverages_from_active_root_proofs(
+                rejected_proofs, exact_budget);
+        check(
+            result.certified_rejection() && result.certified_outcome() &&
+                result.certified_for(pre_stamp) &&
+                result.disposition() ==
+                    ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+                        rejected &&
+                result.decision() == decision && payloadless(result),
+            message);
+      };
+  const std::array reversed{latent, rooted};
+  const std::array duplicate{rooted, rooted_copy};
+  const std::array missing_proof{missing};
+  const std::array exhausted_proof{exhausted};
+  ExactDirectSparseRootLedgerActiveRootProbeResult default_proof;
+  const std::array default_proofs{default_proof};
+  auto tampered = rooted;
+  tampered.exact_key_comparison_count = 0U;
+  const std::array tampered_proof{tampered};
+  expect_proof_rejection(
+      reversed,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_shape_rejected,
+      "descending proofs must be rejected without payload");
+  expect_proof_rejection(
+      duplicate,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_shape_rejected,
+      "duplicate proofs must be rejected without payload");
+  expect_proof_rejection(
+      missing_proof,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_rejected,
+      "a certified miss must not authorize coverage materialization");
+  expect_proof_rejection(
+      exhausted_proof,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_rejected,
+      "a certified exhausted probe must not authorize materialization");
+  expect_proof_rejection(
+      default_proofs,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_rejected,
+      "a default probe cannot authorize materialization");
+  expect_proof_rejection(
+      tampered_proof,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_rejected,
+      "a publicly tampered probe must be rejected without payload");
+
+  auto foreign = make_fixture();
+  const auto foreign_rooted = foreign.ledger.probe_active_root(
+      10U, ExactDirectSparseRootLedgerActiveRootProbeBudget{1U});
+  const std::array foreign_proof{foreign_rooted};
+  expect_proof_rejection(
+      foreign_proof,
+      ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+          no_proof_rejected,
+      "an authentic foreign-ledger probe must be rejected without payload");
+
+  const auto maximum = std::numeric_limits<std::size_t>::max();
+  const auto rooted_maximum = context.ledger.probe_active_root(
+      10U, ExactDirectSparseRootLedgerActiveRootProbeBudget{maximum});
+  const auto latent_maximum = context.ledger.probe_active_root(
+      30U, ExactDirectSparseRootLedgerActiveRootProbeBudget{maximum});
+  const std::array overflow_proofs{rooted_maximum, latent_maximum};
+  auto overflow_budget = exact_budget;
+  overflow_budget.maximum_aggregate_requested_root_index_slot_visit_count =
+      maximum;
+  const auto overflow =
+      context.ledger.materialize_active_coverages_from_active_root_proofs(
+          overflow_proofs, overflow_budget);
+  check(
+      overflow.certified_rejection() &&
+          overflow.certified_outcome() && overflow.certified_for(pre_stamp) &&
+          overflow.disposition() ==
+              ExactDirectSparseRootCoverageFromActiveRootProofsDisposition::
+                  rejected &&
+          overflow.decision() ==
+              ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+                  no_counter_capacity_overflow &&
+          payloadless(overflow),
+      "SIZE_MAX requested-slot aggregation must fail closed on overflow");
+
+  const auto unchanged = [](const auto& before, const auto current) {
+    return before.size() == current.size() &&
+           std::equal(
+               before.begin(), before.end(), current.begin(), current.end());
+  };
+  check(
+      context.ledger.current_stamp() == pre_stamp &&
+          unchanged(history_before, context.ledger.history_entries()) &&
+          unchanged(coverage_before, context.ledger.coverage_nodes()) &&
+          unchanged(
+              coverage_parents_before,
+              context.ledger.coverage_parent_references()) &&
+          unchanged(
+              coverage_deltas_before,
+              context.ledger.coverage_point_deltas()) &&
+          unchanged(
+              prior_root_parents_before,
+              context.ledger.prior_root_parent_references()),
+      "all proof-bound outcomes must leave the stamp and five ledger arenas "
+      "unchanged");
+
+  const std::array<ExactDirectSparseStableFacetHandle, 1U> later_handle{50U};
+  const std::array later_birth{
+      ExactDirectSparseRootLedgerStandaloneBirth{50U, 0U, 1U, 1U}};
+  const std::array<PointId, 1U> later_point{9U};
+  (void)commit_births(context, later_handle, later_birth, later_point);
+  const std::array stale_proof{rooted};
+  const auto stale =
+      context.ledger.materialize_active_coverages_from_active_root_proofs(
+          stale_proof, exact_budget);
+  check(
+      stale.certified_rejection() && stale.certified_outcome() &&
+          stale.certified_for(context.ledger.current_stamp()) &&
+          stale.decision() ==
+              ExactDirectSparseRootCoverageFromActiveRootProofsDecision::
+                  no_proof_rejected &&
+          payloadless(stale),
+      "a stale authentic probe must be rejected against the successor stamp");
+}
+
 void test_caps_siblings_foreign_and_tamper() {
   auto tight_budget = ledger_budget();
   tight_budget.maximum_point_delta_count = 1U;
@@ -1255,6 +1697,7 @@ void test_csr_partitions_duplicate_parents_and_empty_forest_gate() {
 int main() {
   test_qr_transitions_coverage_and_migration();
   test_bounded_active_root_probe();
+  test_proof_bound_active_root_materialization();
   test_caps_siblings_foreign_and_tamper();
   test_root_id_max_namespace_size_max_and_digest();
   test_csr_partitions_duplicate_parents_and_empty_forest_gate();
