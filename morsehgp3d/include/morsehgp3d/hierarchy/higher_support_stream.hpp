@@ -20,11 +20,23 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::size_t higher_support_maximum_requested_order = 10U;
-inline constexpr std::uint32_t higher_support_checkpoint_schema_version = 2U;
-inline constexpr std::uint32_t higher_support_traversal_version = 1U;
+inline constexpr std::size_t
+    higher_support_local_rank_probe_maximum_threshold = 9U;
+inline constexpr std::size_t
+    higher_support_local_rank_probe_maximum_candidate_count =
+        (2U * 4U + 2U) *
+            higher_support_local_rank_probe_maximum_threshold +
+        1U;
+inline constexpr std::size_t
+    higher_support_local_rank_probe_maximum_evaluation_count =
+        2U * higher_support_local_rank_probe_maximum_candidate_count;
+inline constexpr std::uint32_t higher_support_checkpoint_schema_version = 6U;
+inline constexpr std::uint32_t higher_support_traversal_version = 5U;
 inline constexpr std::string_view higher_support_stream_proof_basis =
     "exact_grouped_multiplicity_lbvh_support_partition_"
-    "universal_gram_cramer_rank_receipts_sparse_closed_ball_anchored_v2";
+    "universal_gram_cramer_well_centered_probe_gate_"
+    "bounded_local_morton_halo_antichain_cell_leaf_probe_"
+    "two_sided_query_cell_rank_receipts_sparse_closed_ball_anchored_v6";
 
 enum class ExactHigherSupportStreamStatus : std::uint8_t {
   complete,
@@ -170,10 +182,14 @@ enum class ExactHigherSupportPendingStage : std::uint8_t {
 };
 
 // The active product remains the back of the main frontier.  Its product
-// visit has already been charged.  During rank_search, rank_frontier and
-// strict_interior_receipts form one disjoint antichain of immutable Morton
-// ranges.  Exact universal power certificates are recomputed, never persisted
-// in the checkpoint cursor.
+// visit has already been charged.  The product path uses a deterministic,
+// bounded local Morton probe reconstructed from the product groups and this
+// cursor; it never treats the absence of a local witness as exhaustive.  Each
+// proposed leaf selects the highest external ancestor containing at most the
+// rank threshold leaves.  The ancestor is tested once; only an inconclusive
+// ancestor falls back to its originally proposed singleton leaves.
+// rank_frontier stays empty: no local or global DFS is persisted.  Exact
+// universal power certificates are recomputed, never persisted in the cursor.
 struct ExactHigherSupportPendingProduct {
   ExactHigherSupportFrontierEntry product{};
   ExactHigherSupportPendingStage stage{
@@ -181,6 +197,13 @@ struct ExactHigherSupportPendingProduct {
   bool rank_search_started{false};
   bool leaf_analysis_started{false};
   std::vector<ExactHigherSupportNodeReceipt> rank_frontier;
+  // next_candidate_index is the next bounded root.  When fallback_active is
+  // true, that root is next_candidate_index-1 and the second cursor names its
+  // next originally proposed singleton leaf.
+  std::size_t rank_probe_next_candidate_index{};
+  std::size_t rank_probe_next_fallback_leaf_index{};
+  bool rank_probe_fallback_active{false};
+  std::optional<std::uint64_t> rank_probe_center_seed_leaf_position;
   // Only immutable node receipts persist.  Their exact power analyses are
   // deterministically recomputed from the authority when the prune is emitted
   // or the checkpoint is verified.
@@ -338,6 +361,21 @@ struct ExactHigherSupportStreamAudit {
   std::size_t exact_product_analysis_count{};
   std::size_t rank_search_count{};
   std::size_t rank_witness_node_visit_count{};
+  std::size_t rank_local_probe_attempt_count{};
+  std::size_t rank_local_probe_center_seed_count{};
+  std::size_t rank_local_probe_center_path_node_visit_count{};
+  std::size_t rank_local_probe_candidate_evaluation_count{};
+  std::size_t rank_local_probe_pruned_product_count{};
+  std::size_t rank_local_probe_fail_open_product_count{};
+  // A product that is not yet certified universally well-centred is split
+  // immediately.  Skipping the positive-only rank probe cannot remove a
+  // support; it only postpones that probe until tighter support cells exist.
+  std::size_t rank_local_probe_geometric_gate_skip_count{};
+  // Exact two-sided query-cell decisions whose nonnegative lower power bound
+  // proves that no point in the complete Morton subtree is a strict interior
+  // witness for any independent sphere in the active support product.
+  std::size_t rank_query_outside_or_boundary_node_count{};
+  std::size_t rank_query_outside_or_boundary_point_count{};
   std::size_t emitted_prune_certificate_count{};
   std::size_t emitted_rank_receipt_count{};
   std::size_t leaf_support_analysis_count{};
@@ -358,6 +396,7 @@ struct ExactHigherSupportStreamAudit {
   std::size_t emitted_point_id_reference_count{};
   std::size_t maximum_frontier_entry_count{};
   std::size_t maximum_rank_frontier_entry_count{};
+  std::size_t maximum_rank_local_probe_candidate_count{};
   std::size_t maximum_closed_ball_frontier_entry_count{};
   bool exact_bigint_universe_certified{false};
   bool grouped_partition_accounting_certified{false};

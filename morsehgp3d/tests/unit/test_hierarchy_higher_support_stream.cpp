@@ -370,20 +370,144 @@ void test_nonzero_universal_rank_receipts() {
   const ExactHigherSupportStreamBudget budget = unlimited_budget();
   const auto result =
       build_exact_higher_support_stream(index, cloud, 3U, budget);
+  const ExhaustiveHigherDecision exhaustive = exhaustive_higher_decision(
+      cloud, result.requirements.maximum_relevant_closed_rank);
+  std::vector<SupportKey> streamed_events;
+  std::vector<SupportKey> streamed_diagnostics;
+  for (const auto& event : result.events) {
+    streamed_events.push_back(
+        SupportKey{event.support_size, event.support_ids});
+  }
+  for (const auto& diagnostic : result.relevant_extra_shell_diagnostics) {
+    streamed_diagnostics.push_back(
+        SupportKey{diagnostic.support_size, diagnostic.support_ids});
+  }
+  std::sort(streamed_events.begin(), streamed_events.end());
+  std::sort(streamed_diagnostics.begin(), streamed_diagnostics.end());
   check(
       result.stream_complete() &&
           result.audit.total_support_count == 210 &&
-          result.audit.rank_pruned_support_count == 32 &&
-          result.audit.emitted_rank_receipt_count == 9U &&
-          result.audit.above_rank_leaf_count == 12U &&
+          result.audit.rank_pruned_support_count == 44 &&
+          result.audit.emitted_rank_receipt_count > 0U &&
+          result.audit.above_rank_leaf_count == 0U &&
+          result.audit.rank_query_outside_or_boundary_node_count > 0U &&
+          result.audit.rank_query_outside_or_boundary_point_count >=
+              result.audit.rank_query_outside_or_boundary_node_count &&
           result.audit.resolved_support_count == 210 &&
-          result.audit.remaining_frontier_support_count == 0,
-      "nine exact universal receipts prune 32 higher supports at Kmax three");
+          result.audit.remaining_frontier_support_count == 0 &&
+          streamed_events == exhaustive.events &&
+          streamed_diagnostics == exhaustive.diagnostics,
+      "two-sided exact query-cell decisions preserve the n=9 exhaustive result while skipping outside subtrees"
+      " (rank_pruned=" +
+          result.audit.rank_pruned_support_count.str() +
+          ", receipts=" +
+          std::to_string(result.audit.emitted_rank_receipt_count) +
+          ", above_rank_leaves=" +
+          std::to_string(result.audit.above_rank_leaf_count) +
+          ", outside_nodes=" +
+          std::to_string(
+              result.audit.rank_query_outside_or_boundary_node_count) +
+          ", outside_points=" +
+          std::to_string(
+              result.audit.rank_query_outside_or_boundary_point_count) +
+          ", events=" + std::to_string(streamed_events.size()) + "/" +
+          std::to_string(exhaustive.events.size()) +
+          ", diagnostics=" +
+          std::to_string(streamed_diagnostics.size()) + "/" +
+          std::to_string(exhaustive.diagnostics.size()) +
+          ")");
   check(
       verify_exact_higher_support_stream(
           index, cloud, 3U, budget, result)
           .result_certified,
       "nonzero rank receipts survive independent fresh replay");
+
+  ExactHigherSupportStreamBudget no_closed_ball_frontier =
+      unlimited_budget();
+  no_closed_ball_frontier.maximum_auxiliary_frontier_entry_count = 0U;
+  const auto refused_closed_ball = build_exact_higher_support_stream(
+      index, cloud, 3U, no_closed_ball_frontier);
+  check(
+      refused_closed_ball.status ==
+              ExactHigherSupportStreamStatus::budget_exhausted &&
+          refused_closed_ball.stop_reason ==
+              ExactHigherSupportStopReason::auxiliary_frontier_entry_limit &&
+          refused_closed_ball.audit.rank_witness_node_visit_count > 0U &&
+          refused_closed_ball.audit.global_closed_ball_query_count == 0U &&
+          refused_closed_ball.grouped_frontier_partition_certified &&
+          refused_closed_ball.audit.resolved_support_count +
+                  refused_closed_ball.audit.remaining_frontier_support_count ==
+              refused_closed_ball.audit.total_support_count,
+      "a zero auxiliary cap permits the cursor-only rank probe then fails closed before a terminal closed-ball DFS");
+}
+
+void test_n14_local_rank_probe_exhaustive_differential() {
+  std::vector<CertifiedPoint3> points;
+  points.reserve(14U);
+  for (std::size_t index = 0U; index < 14U; ++index) {
+    const double x = static_cast<double>(index) - 7.0;
+    const double y =
+        static_cast<double>((index * index + 3U) % 17U) - 8.0;
+    const double z =
+        static_cast<double>((index * index * index + 5U) % 19U) - 9.0;
+    points.push_back(point(x, y, z));
+  }
+  CanonicalPointCloud cloud = cloud_from(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactHigherSupportStreamBudget budget = unlimited_budget();
+  const auto result =
+      build_exact_higher_support_stream(index, cloud, 5U, budget);
+  const ExhaustiveHigherDecision exhaustive = exhaustive_higher_decision(
+      cloud, result.requirements.maximum_relevant_closed_rank);
+  std::vector<SupportKey> streamed_events;
+  std::vector<SupportKey> streamed_diagnostics;
+  for (const auto& event : result.events) {
+    streamed_events.push_back(
+        SupportKey{event.support_size, event.support_ids});
+  }
+  for (const auto& diagnostic : result.relevant_extra_shell_diagnostics) {
+    streamed_diagnostics.push_back(
+        SupportKey{diagnostic.support_size, diagnostic.support_ids});
+  }
+  std::sort(streamed_events.begin(), streamed_events.end());
+  std::sort(streamed_diagnostics.begin(), streamed_diagnostics.end());
+  check(
+      result.stream_complete() &&
+          streamed_events == exhaustive.events &&
+          streamed_diagnostics == exhaustive.diagnostics &&
+          result.audit.rank_local_probe_attempt_count > 0U &&
+          result.audit.rank_local_probe_geometric_gate_skip_count > 0U &&
+          result.audit.rank_local_probe_candidate_evaluation_count <=
+              result.audit.rank_local_probe_attempt_count *
+                  morsehgp3d::hierarchy::
+                      higher_support_local_rank_probe_maximum_evaluation_count &&
+          result.audit.rank_local_probe_attempt_count ==
+              result.audit.rank_local_probe_pruned_product_count +
+                  result.audit.rank_local_probe_fail_open_product_count &&
+          result.audit.maximum_rank_frontier_entry_count == 0U &&
+          result.audit.maximum_rank_local_probe_candidate_count <=
+              morsehgp3d::hierarchy::
+                  higher_support_local_rank_probe_maximum_evaluation_count,
+      "the bounded local Morton rank probe preserves the n=14 exhaustive oracle without a root DFS"
+      " (attempts=" +
+          std::to_string(result.audit.rank_local_probe_attempt_count) +
+          ", candidates=" +
+          std::to_string(
+              result.audit.rank_local_probe_candidate_evaluation_count) +
+          ", prunes=" +
+          std::to_string(result.audit.rank_local_probe_pruned_product_count) +
+          ", fail_open=" +
+          std::to_string(
+              result.audit.rank_local_probe_fail_open_product_count) +
+          ", gate_skips=" +
+          std::to_string(
+              result.audit.rank_local_probe_geometric_gate_skip_count) +
+          ")");
+  check(
+      verify_exact_higher_support_stream(
+          index, cloud, 5U, budget, result)
+          .result_certified,
+      "the n=14 local Morton rank-probe differential survives fresh replay");
 }
 
 void test_input_contract() {
@@ -519,6 +643,16 @@ void test_reinjectable_chunks_and_hostile_mutations() {
       "a self-rehashed BigInt partition mutation fails closed");
 
   invalid = make_initial_exact_higher_support_checkpoint(authority);
+  invalid.cumulative_audit.rank_query_outside_or_boundary_node_count = 1U;
+  invalid.cumulative_audit.rank_query_outside_or_boundary_point_count = 1U;
+  invalid.checkpoint_digest =
+      compute_exact_higher_support_checkpoint_digest(invalid);
+  check(
+      !verify_exact_higher_support_checkpoint(authority, invalid)
+           .local_integrity_verified,
+      "a self-rehashed outside-subtree audit without a rank-node visit fails closed");
+
+  invalid = make_initial_exact_higher_support_checkpoint(authority);
   invalid.output_chain_digest = invalid.manifest.semantic_digest;
   invalid.checkpoint_digest =
       compute_exact_higher_support_checkpoint_digest(invalid);
@@ -615,7 +749,8 @@ void test_reinjectable_chunks_and_hostile_mutations() {
       observed_rank_cursor =
           pending.stage == ExactHigherSupportPendingStage::rank_search &&
           pending.rank_search_started &&
-          !pending.rank_frontier.empty();
+          pending.rank_probe_next_candidate_index > 0U &&
+          pending.rank_frontier.empty();
     }
   }
   check(
@@ -623,21 +758,26 @@ void test_reinjectable_chunks_and_hostile_mutations() {
           verify_exact_higher_support_checkpoint(
               receipt_authority, receipt_checkpoint)
               .local_integrity_verified,
-      "a nonempty exact rank DFS cursor is independently recertified");
+      "a nonempty exact local Morton rank-probe cursor is independently recertified");
   if (observed_rank_cursor) {
     ExactHigherSupportCheckpoint mutated_receipt = receipt_checkpoint;
-    mutated_receipt.pending_product->rank_frontier.back().leaf_end += 1U;
+    mutated_receipt.pending_product->rank_probe_next_candidate_index =
+        std::numeric_limits<std::size_t>::max();
     mutated_receipt.checkpoint_digest =
         compute_exact_higher_support_checkpoint_digest(mutated_receipt);
     check(
         !verify_exact_higher_support_checkpoint(
              receipt_authority, mutated_receipt)
              .local_integrity_verified,
-        "a self-rehashed active rank receipt with a false range fails closed");
+        "a self-rehashed local rank cursor beyond its regenerated halo fails closed");
 
     ExactHigherSupportCheckpoint oversized_receipts = receipt_checkpoint;
-    const auto receipt =
-        oversized_receipts.pending_product->rank_frontier.back();
+    const auto& first_group =
+        oversized_receipts.pending_product->product.groups[0];
+    const morsehgp3d::hierarchy::ExactHigherSupportNodeReceipt receipt{
+        first_group.node_index,
+        first_group.leaf_begin,
+        first_group.leaf_end};
     oversized_receipts.pending_product->strict_interior_receipts.assign(
         10U, receipt);
     oversized_receipts.checkpoint_digest =
@@ -648,18 +788,18 @@ void test_reinjectable_chunks_and_hostile_mutations() {
              .local_integrity_verified,
         "more than nine strict receipts fail before exact recomputation");
 
-    ExactHigherSupportCheckpoint oversized_rank_frontier =
+    ExactHigherSupportCheckpoint forbidden_rank_frontier =
         receipt_checkpoint;
-    oversized_rank_frontier.pending_product->rank_frontier.assign(
-        receipt_index.build_counters().maximum_depth + 2U, receipt);
-    oversized_rank_frontier.checkpoint_digest =
+    forbidden_rank_frontier.pending_product->rank_frontier.assign(
+        1U, receipt);
+    forbidden_rank_frontier.checkpoint_digest =
         compute_exact_higher_support_checkpoint_digest(
-            oversized_rank_frontier);
+            forbidden_rank_frontier);
     check(
         !verify_exact_higher_support_checkpoint(
-             receipt_authority, oversized_rank_frontier)
+             receipt_authority, forbidden_rank_frontier)
              .local_integrity_verified,
-        "a rank DFS stack above LBVH depth plus one fails before replay");
+        "a local rank frontier cannot be forged from a support-domain node");
   }
 
   CanonicalPointCloud singleton = cloud_from({point(0.0, 0.0, 0.0)});
@@ -935,6 +1075,7 @@ int main() {
   test_intrinsically_above_rank_and_budgeted_frontier();
   test_sparse_extra_shell_diagnostic();
   test_nonzero_universal_rank_receipts();
+  test_n14_local_rank_probe_exhaustive_differential();
   test_input_contract();
   test_reinjectable_chunks_and_hostile_mutations();
   test_internal_terminal_authority_and_clean_chunk_cap();

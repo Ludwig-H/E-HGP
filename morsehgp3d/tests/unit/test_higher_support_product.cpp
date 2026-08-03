@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
+#include "morsehgp3d/exact/support.hpp"
 
 #include <array>
 #include <bit>
@@ -11,6 +12,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -19,9 +21,15 @@ using morsehgp3d::exact::BigInt;
 using morsehgp3d::hierarchy::ExactHigherSupportProductAabbAnalysis;
 using morsehgp3d::hierarchy::
     ExactHigherSupportProductAabbDecisionBackend;
+using morsehgp3d::hierarchy::
+    ExactHigherSupportProductQueryCellDecision;
 using morsehgp3d::hierarchy::exact_higher_support_product_aabb_analysis;
 using morsehgp3d::hierarchy::
+    exact_higher_support_product_all_well_centered_certified;
+using morsehgp3d::hierarchy::
     exact_higher_support_product_no_well_centered_certified;
+using morsehgp3d::hierarchy::
+    exact_higher_support_product_query_cell_decision;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified;
 using morsehgp3d::spatial::ExactDyadicAabb3;
@@ -162,6 +170,168 @@ void test_triangle_scaled_power_certificate() {
           boundary.query_scaled_power->upper.is_zero() &&
           !boundary.query_strictly_inside_every_independent_sphere_certified(),
       "sphere equality is never accepted as a strict-interior witness");
+}
+
+void test_query_cell_two_sided_boundary_decision() {
+  const std::array<ExactDyadicAabb3, 3> support{
+      point_box(-1.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(0.0, 2.0)};
+  ExactHigherSupportProductAabbDecisionBackend backend =
+      ExactHigherSupportProductAabbDecisionBackend::
+          arbitrary_precision_rational;
+
+  check(
+      exact_higher_support_product_query_cell_decision(
+          support,
+          box(-0.1, 0.7, 0.0, 0.1, 0.8, 0.0),
+          &backend) ==
+              ExactHigherSupportProductQueryCellDecision::
+                  strictly_inside_every_independent_sphere &&
+          backend ==
+              ExactHigherSupportProductAabbDecisionBackend::
+                  bounded_dyadic_int1024,
+      "an exact Morton-like query cell wholly inside the triangle sphere is certified");
+
+  check(
+      exact_higher_support_product_query_cell_decision(
+          support,
+          point_box(3.0, 3.0),
+          &backend) ==
+          ExactHigherSupportProductQueryCellDecision::
+              outside_or_boundary_every_independent_sphere,
+      "an exact query cell wholly outside the triangle sphere is certified");
+
+  const ExactDyadicAabb3 crossing_boundary =
+      box(-1.0, 0.0, 0.0, 0.0, 0.75, 0.0);
+  const auto crossing_analysis =
+      exact_higher_support_product_aabb_analysis(
+          support,
+          crossing_boundary);
+  check(
+      crossing_analysis.query_scaled_power.has_value() &&
+          crossing_analysis.query_scaled_power->lower.sign() < 0 &&
+          crossing_analysis.query_scaled_power->upper.is_zero() &&
+          exact_higher_support_product_query_cell_decision(
+              support,
+              crossing_boundary,
+              &backend) ==
+              ExactHigherSupportProductQueryCellDecision::inconclusive,
+      "a query cell crossing the sphere boundary stays fail-open at exact equality");
+
+  check(
+      exact_higher_support_product_query_cell_decision(
+          support,
+          support[0],
+          &backend) ==
+              ExactHigherSupportProductQueryCellDecision::
+                  outside_or_boundary_every_independent_sphere &&
+          !exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+              support,
+              support[0]),
+      "sphere equality never contributes a strict-interior rank witness");
+}
+
+struct QueryCellDifferentialCounts {
+  std::size_t independent_support_count{};
+  std::size_t strictly_inside_count{};
+  std::size_t outside_or_boundary_count{};
+};
+
+template <std::size_t SupportSize>
+void compare_singleton_support_cell_decisions(
+    const std::array<std::size_t, SupportSize>& support_indices,
+    const std::vector<morsehgp3d::exact::CertifiedPoint3>& points,
+    QueryCellDifferentialCounts& counts) {
+  std::array<morsehgp3d::exact::ExactRational3, SupportSize> support{};
+  std::array<ExactDyadicAabb3, SupportSize> support_boxes{};
+  for (std::size_t index = 0U; index < SupportSize; ++index) {
+    support[index] = points[support_indices[index]].exact();
+    support_boxes[index] = ExactDyadicAabb3{
+        points[support_indices[index]].input_bits(),
+        points[support_indices[index]].input_bits()};
+  }
+  const auto sphere = [&]() {
+    if constexpr (SupportSize == 3U) {
+      return morsehgp3d::exact::circumcenter(
+          support[0], support[1], support[2]);
+    } else {
+      return morsehgp3d::exact::circumcenter(
+          support[0], support[1], support[2], support[3]);
+    }
+  }();
+  if (sphere.kind() != morsehgp3d::exact::CircumcenterKind::unique) {
+    return;
+  }
+  ++counts.independent_support_count;
+  if (!sphere.center().has_value() ||
+      !sphere.squared_level().has_value()) {
+    throw std::logic_error(
+        "an independent singleton support omitted its exact sphere");
+  }
+  for (const auto& query : points) {
+    const ExactDyadicAabb3 query_box{
+        query.input_bits(), query.input_bits()};
+    const ExactHigherSupportProductQueryCellDecision decision =
+        exact_higher_support_product_query_cell_decision(
+            support_boxes,
+            query_box);
+    const auto exact_location = morsehgp3d::exact::classify_sphere_point(
+        *sphere.center(), *sphere.squared_level(), query).location();
+    if (decision ==
+        ExactHigherSupportProductQueryCellDecision::
+            strictly_inside_every_independent_sphere) {
+      ++counts.strictly_inside_count;
+      check(
+          exact_location ==
+              morsehgp3d::exact::SpherePointLocation::strictly_inside,
+          "a certified singleton query cell agrees with exact sphere classification inside");
+    } else if (
+        decision ==
+        ExactHigherSupportProductQueryCellDecision::
+            outside_or_boundary_every_independent_sphere) {
+      ++counts.outside_or_boundary_count;
+      check(
+          exact_location !=
+              morsehgp3d::exact::SpherePointLocation::strictly_inside,
+          "a certified singleton query cell agrees with exact sphere classification outside or on shell");
+    } else {
+      check(
+          false,
+          "a singleton support and singleton query must have an exact two-sided power decision");
+    }
+  }
+}
+
+void test_small_n_query_cell_differential() {
+  using morsehgp3d::exact::CertifiedPoint3;
+  const std::vector<CertifiedPoint3> points{
+      CertifiedPoint3::from_binary64(1.0, 1.0, 1.0),
+      CertifiedPoint3::from_binary64(1.0, -1.0, -1.0),
+      CertifiedPoint3::from_binary64(-1.0, 1.0, -1.0),
+      CertifiedPoint3::from_binary64(-1.0, -1.0, 1.0),
+      CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(8.0, 8.0, 8.0)};
+  QueryCellDifferentialCounts counts;
+  for (std::size_t first = 0U; first < points.size(); ++first) {
+    for (std::size_t second = first + 1U; second < points.size(); ++second) {
+      for (std::size_t third = second + 1U; third < points.size(); ++third) {
+        compare_singleton_support_cell_decisions<3U>(
+            {first, second, third}, points, counts);
+        for (std::size_t fourth = third + 1U;
+             fourth < points.size();
+             ++fourth) {
+          compare_singleton_support_cell_decisions<4U>(
+              {first, second, third, fourth}, points, counts);
+        }
+      }
+    }
+  }
+  check(
+      counts.independent_support_count > 0U &&
+          counts.strictly_inside_count > 0U &&
+          counts.outside_or_boundary_count > 0U,
+      "the n=6 exact differential exercises independent triangle/tetrahedron cells on both sides of their spheres");
 }
 
 void test_tetrahedron_gram_cramer_certificates() {
@@ -326,6 +496,92 @@ void test_bounded_decision_parity() {
       "the bounded tetrahedron power decision matches the rational interval DAG");
 }
 
+void test_all_supports_well_centered_certificate() {
+  constexpr double triangle_epsilon = 1.0 / 1024.0;
+  const std::array<ExactDyadicAabb3, 3> acute_product{
+      box(-1.0 - triangle_epsilon, -triangle_epsilon, 0.0,
+          -1.0 + triangle_epsilon, triangle_epsilon, 0.0),
+      box(1.0 - triangle_epsilon, -triangle_epsilon, 0.0,
+          1.0 + triangle_epsilon, triangle_epsilon, 0.0),
+      box(-triangle_epsilon, 2.0 - triangle_epsilon, 0.0,
+          triangle_epsilon, 2.0 + triangle_epsilon, 0.0)};
+  ExactHigherSupportProductAabbDecisionBackend backend =
+      ExactHigherSupportProductAabbDecisionBackend::
+          arbitrary_precision_rational;
+  const auto acute_analysis =
+      exact_higher_support_product_aabb_analysis(acute_product);
+  check(
+      acute_analysis.all_supports_well_centered_certified() &&
+          exact_higher_support_product_all_well_centered_certified(
+              acute_product,
+              &backend) &&
+          backend ==
+              ExactHigherSupportProductAabbDecisionBackend::
+                  bounded_dyadic_int1024,
+      "a non-singleton acute-triangle box product is uniformly well-centred on the bounded backend");
+
+  constexpr double tetrahedron_epsilon = 1.0 / 4096.0;
+  const std::array<ExactDyadicAabb3, 4> regular_product{
+      box(1.0 - tetrahedron_epsilon,
+          1.0 - tetrahedron_epsilon,
+          1.0 - tetrahedron_epsilon,
+          1.0 + tetrahedron_epsilon,
+          1.0 + tetrahedron_epsilon,
+          1.0 + tetrahedron_epsilon),
+      box(1.0 - tetrahedron_epsilon,
+          -1.0 - tetrahedron_epsilon,
+          -1.0 - tetrahedron_epsilon,
+          1.0 + tetrahedron_epsilon,
+          -1.0 + tetrahedron_epsilon,
+          -1.0 + tetrahedron_epsilon),
+      box(-1.0 - tetrahedron_epsilon,
+          1.0 - tetrahedron_epsilon,
+          -1.0 - tetrahedron_epsilon,
+          -1.0 + tetrahedron_epsilon,
+          1.0 + tetrahedron_epsilon,
+          -1.0 + tetrahedron_epsilon),
+      box(-1.0 - tetrahedron_epsilon,
+          -1.0 - tetrahedron_epsilon,
+          1.0 - tetrahedron_epsilon,
+          -1.0 + tetrahedron_epsilon,
+          -1.0 + tetrahedron_epsilon,
+          1.0 + tetrahedron_epsilon)};
+  const auto regular_analysis =
+      exact_higher_support_product_aabb_analysis(regular_product);
+  check(
+      regular_analysis.all_supports_well_centered_certified() &&
+          exact_higher_support_product_all_well_centered_certified(
+              regular_product,
+              &backend) &&
+          backend ==
+              ExactHigherSupportProductAabbDecisionBackend::
+                  bounded_dyadic_int1024,
+      "a non-singleton regular-tetrahedron box product is uniformly well-centred on the bounded backend");
+
+  const std::array<ExactDyadicAabb3, 3> obtuse{
+      point_box(0.0, 0.0),
+      point_box(2.0, 0.0),
+      point_box(0.25, 0.05)};
+  check(
+      !exact_higher_support_product_all_well_centered_certified(
+          obtuse,
+          &backend) &&
+          backend ==
+              ExactHigherSupportProductAabbDecisionBackend::
+                  bounded_dyadic_int1024,
+      "an obtuse singleton triangle is not certified uniformly well-centred");
+
+  const std::array<ExactDyadicAabb3, 3> mixed_product{
+      box(-2.0, 2.0, 0.0, 2.0, 2.0, 0.0),
+      point_box(-1.0, 0.0),
+      point_box(1.0, 0.0)};
+  check(
+      !exact_higher_support_product_all_well_centered_certified(
+          mixed_product,
+          &backend),
+      "a support product spanning acute and nonacute triangles remains fail-open");
+}
+
 void test_bounded_decision_equalities_and_support_box_regression() {
   const std::array<ExactDyadicAabb3, 3> support{
       point_box(-1.0, 0.0),
@@ -412,6 +668,24 @@ void test_rational_decision_fallback() {
                   query)
                   .query_strictly_inside_every_independent_sphere_certified(),
       "an exponent span above 124 bits falls back integrally for sphere power");
+
+  const std::array<ExactDyadicAabb3, 3> fallback_acute{
+      point_box(-1.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 2.0, tiny)};
+  const bool all_well_centered =
+      exact_higher_support_product_all_well_centered_certified(
+          fallback_acute,
+          &backend);
+  check(
+      backend ==
+              ExactHigherSupportProductAabbDecisionBackend::
+                  arbitrary_precision_rational &&
+          all_well_centered &&
+          all_well_centered ==
+              exact_higher_support_product_aabb_analysis(fallback_acute)
+                  .all_supports_well_centered_certified(),
+      "an exponent span above 124 bits preserves the positive uniform well-centring certificate on rational fallback");
 }
 
 void test_input_contract() {
@@ -442,9 +716,12 @@ void test_input_contract() {
 int main() {
   test_triangle_gram_cramer_certificates();
   test_triangle_scaled_power_certificate();
+  test_query_cell_two_sided_boundary_decision();
+  test_small_n_query_cell_differential();
   test_tetrahedron_gram_cramer_certificates();
   test_support_box_corner_regressions();
   test_bounded_decision_parity();
+  test_all_supports_well_centered_certificate();
   test_bounded_decision_equalities_and_support_box_regression();
   test_rational_decision_fallback();
   test_input_contract();

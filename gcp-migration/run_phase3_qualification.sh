@@ -14,6 +14,10 @@ readonly PHASE15_RESIDENT_GUEST_SHUTDOWN_MINUTES=210
 readonly PHASE15_RESIDENT_EXPECTED_MAX_RUN_SECONDS=14400
 readonly PHASE15_RESIDENT_GCLOUD_REMOTE_TIMEOUT_SECONDS=12300
 readonly PHASE15_RESIDENT_SSH_KEY_TTL="250m"
+readonly POINT_QUALITY_GUEST_SHUTDOWN_MINUTES=450
+readonly POINT_QUALITY_EXPECTED_MAX_RUN_SECONDS=28800
+readonly POINT_QUALITY_GCLOUD_REMOTE_TIMEOUT_SECONDS=27000
+readonly POINT_QUALITY_SSH_KEY_TTL="490m"
 readonly PHASE15_RESIDENT_FRONTIER_50K_TIMEOUT_SECONDS=600
 readonly PHASE15_RESIDENT_DIRECT_10M_TIMEOUT_SECONDS=2400
 readonly PHASE15_RESIDENT_DIRECT_30M_TIMEOUT_SECONDS=5400
@@ -70,6 +74,9 @@ PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=0
 PHASE15_RANKED_PAIR_CLASSIFIER=0
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA=0
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC=0
+POINT_HIERARCHY_QUALITY_SCALE=0
+POINT_HIERARCHY_QUALITY_PRODUCER=""
+POINT_HIERARCHY_QUALITY_VERIFIER=""
 MORTON_YAO48_SEED_WORK_PROFILE=0
 
 SESSION_CERTIFIED=0
@@ -101,6 +108,8 @@ LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT=""
 LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT=""
 LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT=""
+LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT=""
+LOCAL_POINT_HIERARCHY_QUALITY_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -122,12 +131,13 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--morton-yao48-seed-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--phase15-exact-diametral-phi] [--phase15-device-frontier-50k|--phase15-device-frontier-50k-kmax5|--phase15-device-frontier-50k-kmax5-warm] [--phase15-device-frontier-strict-interior] [--phase15-ranked-pair-classifier] [--phase15-exact-pair-block-witness-cuda] [--phase15-resident-transactional-semantic] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [options] [--point-hierarchy-quality-scale --point-hierarchy-quality-producer PRODUCTEUR --point-hierarchy-quality-verifier VÉRIFICATEUR] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé
 pour 45 minutes après la certification des gardes, sauf pour la campagne
-resident Phase 15 explicitement bornée à 210 minutes sous maxRunDuration=4 h;
+resident Phase 15 bornée à 210 minutes et la campagne qualité bornée à
+450 minutes, sous leurs maxRunDuration respectifs de 4 h et 8 h;
 le coupe-circuit GCE reste borné séparément. Le script
 utilise exclusivement start_and_verify.sh et stop_and_verify.sh, et ne réussit
 qu'après une relecture GCE indépendante de l'état TERMINATED.
@@ -249,6 +259,16 @@ diagnostics component/profile-only et
 ne revendiquent ni exactitude full-pipeline, ni scale_eligible, ni catalogue
 global, hiérarchie, SLO ou statut public.
 
+--point-hierarchy-quality-scale ouvre une session gardée séparée pour
+`point_hierarchy_quality_campaign.py`. Avant toute clé SSH ou mutation GCP,
+l'orchestrateur exige le plan v2 suivi ouvert et les handshakes locaux de deux
+exécutables distincts fournis par --point-hierarchy-quality-producer et
+--point-hierarchy-quality-verifier. Le spool transactionnel persiste hors du
+répertoire temporaire de session et reprend au prochain ordinal non committé.
+Le producteur doit attester la chaîne nuage--tour MorseHGP3D exacte et complète
+aux échelles 50k, 10 000 001 et 30M, sans source synthétique, conditionnelle ou
+surrogate; le vérificateur rejoue indépendamment les certificats scientifiques.
+
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
 dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
@@ -345,6 +365,26 @@ while (($# > 0)); do
                 die "--phase15-resident-transactional-semantic ne peut être fourni qu'une fois."
             PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC=1
             shift
+            ;;
+        --point-hierarchy-quality-scale)
+            ((POINT_HIERARCHY_QUALITY_SCALE == 0)) || \
+                die "--point-hierarchy-quality-scale ne peut être fourni qu'une fois."
+            POINT_HIERARCHY_QUALITY_SCALE=1
+            shift
+            ;;
+        --point-hierarchy-quality-producer)
+            (($# >= 2)) || die "Valeur manquante après --point-hierarchy-quality-producer."
+            [[ -z "${POINT_HIERARCHY_QUALITY_PRODUCER}" ]] || \
+                die "--point-hierarchy-quality-producer ne peut être fourni qu'une fois."
+            POINT_HIERARCHY_QUALITY_PRODUCER="$2"
+            shift 2
+            ;;
+        --point-hierarchy-quality-verifier)
+            (($# >= 2)) || die "Valeur manquante après --point-hierarchy-quality-verifier."
+            [[ -z "${POINT_HIERARCHY_QUALITY_VERIFIER}" ]] || \
+                die "--point-hierarchy-quality-verifier ne peut être fourni qu'une fois."
+            POINT_HIERARCHY_QUALITY_VERIFIER="$2"
+            shift 2
             ;;
         --result-dir)
             (($# >= 2)) || die "Valeur manquante après --result-dir."
@@ -447,6 +487,27 @@ if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1 && \
      PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1))); then
     die "--phase15-resident-transactional-semantic est mutuellement exclusive de tous les autres compagnons."
 fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    ((PHASE4_SPATIAL_REFERENCE + PHASE5_K1_BORUVKA + \
+      PHASE5_K1_BORUVKA_WORK_PROFILE + \
+      PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE + \
+      PHASE7_H_POLYTOPE + PHASE9_PAIR_SUPPORT_PHI + \
+      PHASE15_EXACT_DIAMETRAL_PHI + PHASE15_DEVICE_FRONTIER_50K + \
+      PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR + \
+      PHASE15_RANKED_PAIR_CLASSIFIER + \
+      PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA + \
+      PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 0)) || \
+        die "--point-hierarchy-quality-scale est mutuellement exclusive de tous les autres compagnons."
+    [[ -n "${POINT_HIERARCHY_QUALITY_PRODUCER}" ]] || \
+        die "--point-hierarchy-quality-producer est obligatoire avec la campagne qualité."
+    [[ -n "${POINT_HIERARCHY_QUALITY_VERIFIER}" ]] || \
+        die "--point-hierarchy-quality-verifier est obligatoire avec la campagne qualité."
+else
+    [[ -z "${POINT_HIERARCHY_QUALITY_PRODUCER}" ]] || \
+        die "--point-hierarchy-quality-producer exige --point-hierarchy-quality-scale."
+    [[ -z "${POINT_HIERARCHY_QUALITY_VERIFIER}" ]] || \
+        die "--point-hierarchy-quality-verifier exige --point-hierarchy-quality-scale."
+fi
 
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     GUEST_SHUTDOWN_MINUTES="${PHASE15_RESIDENT_GUEST_SHUTDOWN_MINUTES}"
@@ -473,6 +534,16 @@ if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
         die "Le timeout SSH distant Phase 15 ne couvre pas les unités et la réserve opérationnelle."
     ((GCLOUD_REMOTE_TIMEOUT_SECONDS <= EXPECTED_MAX_RUN_SECONDS)) || \
         die "Le timeout SSH distant Phase 15 dépasse le coupe-circuit GCE contractuel."
+fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    GUEST_SHUTDOWN_MINUTES="${POINT_QUALITY_GUEST_SHUTDOWN_MINUTES}"
+    EXPECTED_MAX_RUN_SECONDS="${POINT_QUALITY_EXPECTED_MAX_RUN_SECONDS}"
+    GCLOUD_REMOTE_TIMEOUT_SECONDS="${POINT_QUALITY_GCLOUD_REMOTE_TIMEOUT_SECONDS}"
+    SSH_KEY_TTL="${POINT_QUALITY_SSH_KEY_TTL}"
+    ((GUEST_SHUTDOWN_MINUTES * 60 + TIMESTAMP_TOLERANCE_SECONDS <= \
+      EXPECTED_MAX_RUN_SECONDS)) || die "L'arrêt invité qualité dépasse la garde GCE."
+    ((GCLOUD_REMOTE_TIMEOUT_SECONDS <= EXPECTED_MAX_RUN_SECONDS)) || \
+        die "Le timeout distant qualité dépasse la garde GCE."
 fi
 readonly GUEST_SHUTDOWN_MINUTES
 readonly EXPECTED_MAX_RUN_SECONDS
@@ -527,20 +598,13 @@ REPOSITORY_ROOT="$(git -C "${SCRIPT_DIR}/.." rev-parse --show-toplevel 2>/dev/nu
 REPOSITORY_ROOT="$(cd -- "${REPOSITORY_ROOT}" && pwd -P)" || \
     die "Impossible de canoniser la racine Git."
 
-worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
+worktree_status="$(GIT_OPTIONAL_LOCKS=0 git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du dépôt."
 [[ -z "${worktree_status}" ]] || \
     die "Worktree sale : committez ou retirez toutes les modifications et fichiers non suivis avant toute session GCP."
 
 HEAD_SHA="$(git -C "${REPOSITORY_ROOT}" rev-parse HEAD)" || die "HEAD illisible."
 [[ "${HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]] || die "SHA HEAD non canonique : ${HEAD_SHA}."
-
-git -C "${REPOSITORY_ROOT}" fetch --quiet --no-tags \
-    origin refs/heads/main:refs/remotes/origin/main || \
-    die "Impossible de rafraîchir origin/main; démarrage refusé."
-git -C "${REPOSITORY_ROOT}" merge-base --is-ancestor \
-    "${HEAD_SHA}" refs/remotes/origin/main || \
-    die "HEAD ${HEAD_SHA} n'est pas présent sur origin/main; poussez-le avant toute session GCP."
 
 ORIGIN_URL="$(git -C "${REPOSITORY_ROOT}" remote get-url origin)" || \
     die "URL du remote origin illisible."
@@ -553,6 +617,61 @@ case "${ORIGIN_URL}" in
         die "Remote origin refusé : ${ORIGIN_URL}; le dépôt public E-HGP exact est obligatoire."
         ;;
 esac
+
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    point_quality_plan="${REPOSITORY_ROOT}/morsehgp3d/tests/profiling/point_hierarchy_quality_campaign_v2.json"
+    point_quality_campaign="${REPOSITORY_ROOT}/morsehgp3d/tests/profiling/point_hierarchy_quality_campaign.py"
+    point_quality_preflight="${REPOSITORY_ROOT}/gcp-migration/check_point_hierarchy_quality_preflight.py"
+    point_quality_worker="${REPOSITORY_ROOT}/gcp-migration/point_hierarchy_quality_remote_worker.sh"
+    [[ -f "${point_quality_plan}" && ! -L "${point_quality_plan}" ]] || \
+        die "Plan qualité absent, non régulier ou symbolique; aucun démarrage GCP."
+    [[ -f "${point_quality_campaign}" && ! -L "${point_quality_campaign}" ]] || \
+        die "Harnais qualité absent, non régulier ou symbolique; aucun démarrage GCP."
+    [[ -f "${point_quality_preflight}" && ! -L "${point_quality_preflight}" ]] || \
+        die "Checker qualité absent, non régulier ou symbolique; aucun démarrage GCP."
+    [[ -x "${point_quality_worker}" && ! -L "${point_quality_worker}" ]] || \
+        die "Worker qualité absent, non exécutable ou symbolique; aucun démarrage GCP."
+    case "${POINT_HIERARCHY_QUALITY_PRODUCER}" in
+        /*) ;;
+        *) die "--point-hierarchy-quality-producer doit être absolu; aucun démarrage GCP." ;;
+    esac
+    case "${POINT_HIERARCHY_QUALITY_VERIFIER}" in
+        /*) ;;
+        *) die "--point-hierarchy-quality-verifier doit être absolu; aucun démarrage GCP." ;;
+    esac
+    [[ -f "${POINT_HIERARCHY_QUALITY_PRODUCER}" && \
+        -x "${POINT_HIERARCHY_QUALITY_PRODUCER}" && \
+        ! -L "${POINT_HIERARCHY_QUALITY_PRODUCER}" ]] || \
+        die "Producteur qualité absent, non exécutable ou symbolique; aucun démarrage GCP."
+    [[ -f "${POINT_HIERARCHY_QUALITY_VERIFIER}" && \
+        -x "${POINT_HIERARCHY_QUALITY_VERIFIER}" && \
+        ! -L "${POINT_HIERARCHY_QUALITY_VERIFIER}" ]] || \
+        die "Vérificateur qualité absent, non exécutable ou symbolique; aucun démarrage GCP."
+    point_quality_producer_parent="$(cd -- "$(dirname -- "${POINT_HIERARCHY_QUALITY_PRODUCER}")" && pwd -P)" || \
+        die "Parent du producteur qualité illisible; aucun démarrage GCP."
+    point_quality_verifier_parent="$(cd -- "$(dirname -- "${POINT_HIERARCHY_QUALITY_VERIFIER}")" && pwd -P)" || \
+        die "Parent du vérificateur qualité illisible; aucun démarrage GCP."
+    POINT_HIERARCHY_QUALITY_PRODUCER="${point_quality_producer_parent}/$(basename -- "${POINT_HIERARCHY_QUALITY_PRODUCER}")"
+    POINT_HIERARCHY_QUALITY_VERIFIER="${point_quality_verifier_parent}/$(basename -- "${POINT_HIERARCHY_QUALITY_VERIFIER}")"
+    [[ "${POINT_HIERARCHY_QUALITY_PRODUCER}" != "${POINT_HIERARCHY_QUALITY_VERIFIER}" ]] || \
+        die "Le producteur et le vérificateur qualité doivent être deux fichiers distincts."
+    python3 -B "${point_quality_preflight}" \
+        --plan "${point_quality_plan}" \
+        --producer "${POINT_HIERARCHY_QUALITY_PRODUCER}" \
+        --verifier "${POINT_HIERARCHY_QUALITY_VERIFIER}" \
+        --expected-git-sha "${HEAD_SHA}" || \
+        die "Préflight qualité refusé avant clé SSH et avant toute mutation GCP."
+fi
+
+# Pour la campagne qualité, même la mise à jour locale de la ref distante est
+# postérieure à la porte v2. Une porte fermée ne provoque donc ni handshake,
+# ni écriture Git, ni clé SSH, ni mutation facturable.
+git -C "${REPOSITORY_ROOT}" fetch --quiet --no-tags \
+    origin refs/heads/main:refs/remotes/origin/main || \
+    die "Impossible de rafraîchir origin/main; démarrage refusé."
+git -C "${REPOSITORY_ROOT}" merge-base --is-ancestor \
+    "${HEAD_SHA}" refs/remotes/origin/main || \
+    die "HEAD ${HEAD_SHA} n'est pas présent sur origin/main; poussez-le avant toute session GCP."
 
 RESULT_DIR="$(python3 - "${RESULT_DIR}" <<'PY'
 from pathlib import Path
@@ -655,6 +774,12 @@ if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     [[ ! -e "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" && \
         ! -L "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    LOCAL_POINT_HIERARCHY_QUALITY_RESULT="${RESULT_DIR}/point-hierarchy-quality-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_POINT_HIERARCHY_QUALITY_RESULT}" && \
+        ! -L "${LOCAL_POINT_HIERARCHY_QUALITY_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_POINT_HIERARCHY_QUALITY_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
@@ -808,6 +933,14 @@ if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact resident-transactional-semantic Phase 15 temporaire local."
+    fi
+fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    if ! LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.point-hierarchy-quality-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact qualité temporaire local."
     fi
 fi
 
@@ -1320,6 +1453,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" && \
+        -e "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -1410,6 +1547,7 @@ printf '%s\n' \
     "  classifieur rangs 2-3: $([[ ${PHASE15_RANKED_PAIR_CLASSIFIER} == 1 ]] && printf 'qualification CUDA native bornée activée' || printf 'désactivé')" \
     "  pair-block A×B×W: $([[ ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA} == 1 ]] && printf 'différentiel CUDA natif borné activé' || printf 'désactivé')" \
     "  campagne resident: $([[ ${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC} == 1 ]] && printf 'scheduler n=16 K5/K10 + forêt H0/worklist K5/K10 + frontier 50k/10M/30M activés' || printf 'désactivé')" \
+    "  qualité points  : $([[ ${POINT_HIERARCHY_QUALITY_SCALE} == 1 ]] && printf 'true MorseHGP3D exact 50k/10M/30M activé' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -1444,6 +1582,10 @@ remote_phase15_device_frontier_strict_interior_artifact=""
 remote_phase15_ranked_pair_classifier_artifact=""
 remote_phase15_exact_pair_block_witness_cuda_artifact=""
 remote_phase15_resident_transactional_semantic_artifact=""
+remote_point_hierarchy_quality_artifact=""
+remote_point_hierarchy_quality_producer=""
+remote_point_hierarchy_quality_verifier=""
+remote_point_hierarchy_quality_spool=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -1460,6 +1602,10 @@ quoted_phase15_device_frontier_strict_interior_artifact=""
 quoted_phase15_ranked_pair_classifier_artifact=""
 quoted_phase15_exact_pair_block_witness_cuda_artifact=""
 quoted_phase15_resident_transactional_semantic_artifact=""
+quoted_point_hierarchy_quality_artifact=""
+quoted_point_hierarchy_quality_producer=""
+quoted_point_hierarchy_quality_verifier=""
+quoted_point_hierarchy_quality_spool=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
@@ -1554,6 +1700,18 @@ if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     quoted_phase15_resident_transactional_semantic_artifact="$(shell_quote "${remote_phase15_resident_transactional_semantic_artifact}")"
     phase15_resident_transactional_semantic_worker_option=" --phase15-resident-transactional-semantic-output ${quoted_phase15_resident_transactional_semantic_artifact}"
 fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    remote_point_hierarchy_quality_artifact="${REMOTE_WORKDIR}/point-hierarchy-quality-result.json"
+    remote_point_hierarchy_quality_producer="${REMOTE_WORKDIR}/point-hierarchy-quality-producer"
+    remote_point_hierarchy_quality_verifier="${REMOTE_WORKDIR}/point-hierarchy-quality-verifier"
+    # Deliberately outside REMOTE_WORKDIR: cleanup of one guarded session must
+    # not destroy the transaction prefix needed by the next guarded session.
+    remote_point_hierarchy_quality_spool="/var/tmp/morsehgp3d-point-quality-spool-v2-${HEAD_SHA}"
+    quoted_point_hierarchy_quality_artifact="$(shell_quote "${remote_point_hierarchy_quality_artifact}")"
+    quoted_point_hierarchy_quality_producer="$(shell_quote "${remote_point_hierarchy_quality_producer}")"
+    quoted_point_hierarchy_quality_verifier="$(shell_quote "${remote_point_hierarchy_quality_verifier}")"
+    quoted_point_hierarchy_quality_spool="$(shell_quote "${remote_point_hierarchy_quality_spool}")"
+fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
@@ -1571,6 +1729,35 @@ fi
 
 remote_exec \
     "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}${phase15_exact_pair_block_witness_cuda_worker_option}${phase15_resident_transactional_semantic_worker_option}"
+
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    certify_session_deadline || \
+        die "La garde GCE n'a pas pu être recertifiée avant le worker qualité."
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${POINT_HIERARCHY_QUALITY_PRODUCER}" \
+        "${INSTANCE_NAME}:${remote_point_hierarchy_quality_producer}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${POINT_HIERARCHY_QUALITY_VERIFIER}" \
+        "${INSTANCE_NAME}:${remote_point_hierarchy_quality_verifier}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+    remote_exec \
+        "chmod 500 ${quoted_point_hierarchy_quality_producer} ${quoted_point_hierarchy_quality_verifier} && test -x ${quoted_repository}/gcp-migration/point_hierarchy_quality_remote_worker.sh && cd ${quoted_repository} && ./gcp-migration/point_hierarchy_quality_remote_worker.sh --yes --source-root ${quoted_repository} --gce-deadline-epoch ${quoted_gce_deadline} --environment-artifact ${quoted_artifact} --producer ${quoted_point_hierarchy_quality_producer} --verifier ${quoted_point_hierarchy_quality_verifier} --spool ${quoted_point_hierarchy_quality_spool} --output ${quoted_point_hierarchy_quality_artifact}"
+fi
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1732,6 +1919,19 @@ if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase15_resident_transactional_semantic_artifact}" \
         "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_point_hierarchy_quality_artifact}" \
+        "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -4891,6 +5091,134 @@ assembler.validate_artifact_file(
 PY
 fi
 
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    [[ -s "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" ]] || \
+        die "Artefact qualité distant récupéré mais vide."
+    python3 -B - "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${POINT_HIERARCHY_QUALITY_PRODUCER}" \
+        "${POINT_HIERARCHY_QUALITY_VERIFIER}" "${point_quality_plan}" \
+        "${point_quality_campaign}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/profiling/point_hierarchy_quality_generator.py" \
+        "${LOCAL_TEMP_RESULT}" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+artifact_path = Path(sys.argv[1])
+expected_git_sha = sys.argv[2]
+producer_path = Path(sys.argv[3])
+verifier_path = Path(sys.argv[4])
+plan_path = Path(sys.argv[5])
+campaign_script_path = Path(sys.argv[6])
+generator_path = Path(sys.argv[7])
+environment_path = Path(sys.argv[8])
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+raw = artifact_path.read_text(encoding="utf-8")
+value = json.loads(raw)
+if raw != json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n":
+    raise SystemExit("le compagnon qualité n'est pas un JSON canonique")
+if not isinstance(value, dict) or value.get("schema") != "morsehgp3d.point_hierarchy.quality_gcp_worker.v2":
+    raise SystemExit("schéma du compagnon qualité inattendu")
+provenance = value.get("provenance")
+if not isinstance(provenance, dict) or set(provenance) != {
+    "campaign_script_sha256",
+    "environment_artifact_schema",
+    "environment_artifact_sha256",
+    "generator_sha256",
+    "git_sha",
+    "plan_sha256",
+    "producer_sha256",
+    "verifier_sha256",
+}:
+    raise SystemExit("provenance qualité absente")
+if provenance.get("git_sha") != expected_git_sha:
+    raise SystemExit("SHA Git qualité différent du HEAD gardé")
+if provenance.get("producer_sha256") != sha256(producer_path):
+    raise SystemExit("le producteur qualité distant diffère du producteur local préflighté")
+if provenance.get("verifier_sha256") != sha256(verifier_path):
+    raise SystemExit("le vérificateur distant diffère du vérificateur local préflighté")
+if provenance.get("producer_sha256") == provenance.get("verifier_sha256"):
+    raise SystemExit("le producteur et le vérificateur ne sont pas distincts")
+if provenance.get("plan_sha256") != sha256(plan_path):
+    raise SystemExit("le compagnon qualité n'est pas lié au plan v2 gardé")
+if provenance.get("campaign_script_sha256") != sha256(campaign_script_path):
+    raise SystemExit("le compagnon qualité n'est pas lié au harnais v2 gardé")
+if provenance.get("generator_sha256") != sha256(generator_path):
+    raise SystemExit("le compagnon qualité n'est pas lié au générateur v2 gardé")
+if provenance.get("environment_artifact_schema") != "morsehgp3d.phase3.qualification.v1":
+    raise SystemExit("schéma d'environnement qualité inattendu")
+if provenance.get("environment_artifact_sha256") != sha256(environment_path):
+    raise SystemExit("le compagnon qualité n'est pas lié à l'environnement Phase 3")
+lifecycle = value.get("vm_lifecycle")
+if not isinstance(lifecycle, dict) or lifecycle.get("guest_shutdown_guard_verified") is not True:
+    raise SystemExit("garde invitée qualité absente")
+if lifecycle.get("worker_mutates_gcp") is not False or lifecycle.get("stop_responsibility") != "external_orchestrator":
+    raise SystemExit("contrat de cycle de vie qualité invalide")
+campaign = value.get("campaign")
+if (
+    not isinstance(campaign, dict)
+    or campaign.get("schema")
+    != "morsehgp3d.point_hierarchy.quality_campaign_summary.v2"
+    or campaign.get("status") not in {"complete", "partial_resumable"}
+):
+    raise SystemExit("résumé de campagne qualité v2 incompatible")
+completed = campaign.get("completed_transaction_count")
+next_ordinal = campaign.get("next_transaction_ordinal")
+receipts = campaign.get("receipts")
+if (
+    type(completed) is not int
+    or type(next_ordinal) is not int
+    or not isinstance(receipts, list)
+    or completed != next_ordinal
+    or completed != len(receipts)
+    or not (0 <= completed <= campaign.get("total_transaction_count") == 84)
+):
+    raise SystemExit("préfixe de campagne qualité incohérent")
+if campaign.get("claims") != {
+    "deployment_status": "architecture_only",
+    "public_exact_status_claimed": False,
+    "quality_campaign_promotes_exact": False,
+}:
+    raise SystemExit("le compagnon qualité surestime son statut")
+if campaign["status"] == "complete":
+    if completed != 84 or campaign.get("exact_source_build_count") != 6:
+        raise SystemExit("campagne qualité complète sans ses 84 transactions")
+elif completed >= 84:
+    raise SystemExit("campagne qualité partielle sans ordinal restant")
+expected_pending = (
+    "worker_complete_pending_shutdown"
+    if campaign["status"] == "complete"
+    else "worker_partial_resumable_pending_shutdown"
+)
+if value.get("status") != expected_pending:
+    raise SystemExit("le compagnon qualité n'attend pas l'arrêt ciblé avec le bon statut")
+spool = value.get("spool")
+if (
+    not isinstance(spool, dict)
+    or spool.get("campaign_id") != campaign.get("campaign_id")
+    or spool.get("next_transaction_ordinal")
+    != campaign.get("next_transaction_ordinal")
+    or spool.get("total_transaction_count") != 84
+    or spool.get("persistent_across_guarded_sessions") is not True
+    or spool.get("resume_from_next_uncommitted_ordinal") is not True
+):
+    raise SystemExit("preuve de reprise du spool qualité absente")
+if re.fullmatch(r"[0-9a-f]{64}", str(spool.get("campaign_id"))) is None:
+    raise SystemExit("identité de spool qualité invalide")
+PY
+fi
+
 if certify_target_stopped; then
     stop_status=0
 else
@@ -4919,7 +5247,9 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
     "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" \
     "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" \
-    "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" <<'PY'
+    "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" \
+    "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" \
+    "${LOCAL_POINT_HIERARCHY_QUALITY_RESULT}" <<'PY'
 import hashlib
 import json
 import os
@@ -4982,6 +5312,10 @@ if sys.argv[32] or sys.argv[33]:
             "paire de publication resident-transactional-semantic Phase 15 incomplète"
         )
     pairs.append((Path(sys.argv[32]), Path(sys.argv[33])))
+if sys.argv[34] or sys.argv[35]:
+    if not sys.argv[34] or not sys.argv[35]:
+        raise SystemExit("paire de publication qualité de points incomplète")
+    pairs.append((Path(sys.argv[34]), Path(sys.argv[35])))
 
 documents = []
 for temporary, _ in pairs:
@@ -5005,7 +5339,13 @@ for temporary, _ in pairs:
             "zone": sys.argv[20],
         }
     )
-    value["status"] = "passed"
+    if value.get("schema") == "morsehgp3d.point_hierarchy.quality_gcp_worker.v2":
+        campaign_status = value.get("campaign", {}).get("status")
+        if campaign_status not in {"complete", "partial_resumable"}:
+            raise SystemExit("statut final de campagne qualité incompatible")
+        value["status"] = campaign_status
+    else:
+        value["status"] = "passed"
     documents.append(value)
 
 
@@ -5110,6 +5450,9 @@ fi
 if [[ -n "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
@@ -5123,6 +5466,7 @@ LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
 LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT=""
+LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -5178,6 +5522,10 @@ fi
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     printf '[ARTEFACT] Qualification resident-transactional-semantic Phase 15 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}"
+fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    printf '[ARTEFACT] Campagne qualité publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_POINT_HIERARCHY_QUALITY_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -5240,4 +5588,8 @@ fi
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     printf '[SUCCÈS] Qualification resident-transactional-semantic Phase 15 compagnon conservée : %s\n' \
         "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}"
+fi
+if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
+    printf '[SUCCÈS] Campagne qualité true MorseHGP3D conservée : %s\n' \
+        "${LOCAL_POINT_HIERARCHY_QUALITY_RESULT}"
 fi

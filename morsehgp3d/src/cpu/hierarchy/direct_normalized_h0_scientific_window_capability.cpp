@@ -319,6 +319,12 @@ ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::
                           : impl_->projection_capability_identity;
 }
 
+const void*
+ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::
+    scientific_control_identity() const noexcept {
+  return impl_ == nullptr ? nullptr : impl_->control.get();
+}
+
 const ExactDirectNormalizedH0ResidentOwnedBatchWindow&
 ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow::
     owned_window() const noexcept {

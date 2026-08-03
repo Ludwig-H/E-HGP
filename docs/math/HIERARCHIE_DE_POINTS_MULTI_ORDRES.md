@@ -301,6 +301,12 @@ $$E(u)=\sum_{x\in P(u)}m_x\bigl(\lambda_{\mathrm{exit}}(x,u)-\lambda_{\mathrm{in
 
 La condensation garantit que chaque différence est non négative. Pour les feuilles, le niveau de sortie doit être fini ou porté par une règle symbolique certifiée. Une contribution infinie issue de doublons à rayon nul n'est jamais remplacée silencieusement par `1e12` ou par un epsilon.
 
+La règle v1 emploie un unique symbole formel $\Lambda_{\infty}$ pour tout le lot de rayon carré nul, indépendamment de l'ordre $k$, conformément à la section 3. Une expression de stabilité est conservée sous la forme exacte suivante, sans évaluer une soustraction indéfinie d'infinis :
+
+$$A=c_{\infty}\Lambda_{\infty}+\sum_j c_j\lambda_j,\qquad \lambda_j<\Lambda_{\infty}.$$
+
+Deux masses symboliques égales s'annulent exactement. Si $c_{\infty}\neq0$, son signe décide avant toute partie finie; si $c_{\infty}=0$, seule la somme finie restante est comparée par intervalles rationnels certifiés. Cette règle est une sémantique symbolique explicite du lot commun, pas une limite flottante : elle n'introduit ni epsilon, ni plafond numérique, ni ordre artificiel entre $k/0$ et $k'/0$. Une feuille née au rayon nul mais absorbée à un rayon strictement positif quitte simplement sa branche au niveau fini de cette absorption; aucun pseudo-terminal n'est ajouté.
+
 La programmation dynamique EOM est
 
 $$R(u)=\max\left(E(u),\sum_{c\in\mathrm{children}(u)}R(c)\right).$$

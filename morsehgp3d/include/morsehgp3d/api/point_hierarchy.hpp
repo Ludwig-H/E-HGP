@@ -33,6 +33,8 @@ struct PositiveRationalExponent {
 
 struct DensityLevel {
   std::uint32_t order{0U};
+  // A zero squared radius denotes the single exact symbolic top-density batch
+  // Lambda_infinity.  It is never replaced by a finite radius or epsilon.
   exact::ExactLevel squared_radius{};
 
   friend bool operator==(const DensityLevel&, const DensityLevel&) = default;
@@ -67,9 +69,11 @@ struct CertifiedProjectableSimplex {
   SourceNodeId carrier_source_node_id{0U};
   std::vector<PointId> point_ids;
   std::vector<exact::ExactLevel> incident_coface_squared_radii;
-  // V1 requires this density to equal the carrier activation density.  A
-  // future extended-lifetime value would require an explicit pseudo-terminal
-  // in the hierarchy and is rejected rather than ignored by flat cuts.
+  // V1 requires this density to equal the carrier activation density.  At
+  // squared radius zero this is the common symbolic Lambda_infinity batch;
+  // EOM cancels equal zero-level mass exactly before comparing finite terms.
+  // A distinct extended-lifetime value would require an explicit
+  // pseudo-terminal and is rejected rather than ignored by flat cuts.
   DensityLevel terminal_exit_level{};
 };
 
@@ -225,8 +229,10 @@ class PointHierarchy {
 
   // HDBSCAN-style condensed-tree EOM selection.  The default matches
   // allow_single_cluster=false: a sole natural root cannot be the final
-  // cluster.  Every score comparison is certified with rational enclosures;
-  // an unresolved comparison fails closed.
+  // cluster.  Every finite score comparison is certified with rational
+  // enclosures.  A zero-radius batch is compared as the exact leading symbol
+  // Lambda_infinity; equal symbolic mass cancels, and any unresolved finite
+  // remainder fails closed.
   [[nodiscard]] FlatClustering select_excess_of_mass(
       std::uint64_t minimum_cluster_size,
       bool allow_single_cluster = false) const;

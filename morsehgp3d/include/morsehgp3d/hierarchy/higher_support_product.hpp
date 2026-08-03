@@ -56,6 +56,13 @@ struct ExactHigherSupportProductAabbAnalysis {
   // from the well-centred support stream.
   [[nodiscard]] bool no_well_centered_support_certified() const;
 
+  // True only when every tuple represented by the product is affinely
+  // independent and has a strictly positive circumcentre barycentric
+  // coordinate at every support vertex.  False is deliberately
+  // inconclusive: it does not prove that the product contains a
+  // non-well-centred tuple.
+  [[nodiscard]] bool all_supports_well_centered_certified() const;
+
   // True only when every query in the query box is strictly inside the
   // circumsphere of every affinely independent support in the product.
   // Degenerate tuples are irrelevant to the well-centred support stream.
@@ -82,6 +89,19 @@ enum class ExactHigherSupportProductAabbDecisionBackend : std::uint8_t {
   arbitrary_precision_rational = 1U,
 };
 
+// Exact, deliberately one-sided decisions for one query cell against a
+// product of triangle or tetrahedron supports.  The strict-inside decision
+// proves that every point of the query cell is strictly inside every sphere
+// induced by an affinely independent support tuple.  The outside decision
+// proves that every point is outside or on every such sphere.  Inconclusive
+// carries no geometric information and callers must split or otherwise fall
+// back.  In particular, a zero power endpoint is never a strict witness.
+enum class ExactHigherSupportProductQueryCellDecision : std::uint8_t {
+  inconclusive = 0U,
+  strictly_inside_every_independent_sphere = 1U,
+  outside_or_boundary_every_independent_sphere = 2U,
+};
+
 // Decision-only fast path for traversal sites that do not need to persist the
 // rich rational interval analysis.  backend, when non-null, reports whether
 // the exact fixed-width dyadic kernel fitted or the arbitrary-precision
@@ -92,7 +112,22 @@ exact_higher_support_product_no_well_centered_certified(
     ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);
 
 [[nodiscard]] bool
+exact_higher_support_product_all_well_centered_certified(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);
+
+[[nodiscard]] bool
 exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    const spatial::ExactDyadicAabb3& query_box,
+    ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);
+
+// This is the Morton/LBVH locality primitive used by the higher-support
+// stream.  It does not assert support-enumeration locality: support tuples may
+// cross arbitrary Morton-cell boundaries.  It only classifies the supplied
+// query cell with respect to the complete support-box product.
+[[nodiscard]] ExactHigherSupportProductQueryCellDecision
+exact_higher_support_product_query_cell_decision(
     std::span<const spatial::ExactDyadicAabb3> support_boxes,
     const spatial::ExactDyadicAabb3& query_box,
     ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);

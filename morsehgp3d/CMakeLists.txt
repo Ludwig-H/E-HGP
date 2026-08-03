@@ -2536,6 +2536,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_projectable_contribution_window
+  STATIC
+    src/cpu/hierarchy/direct_projectable_contribution_window.cpp
+)
+add_library(
+  morsehgp3d::direct_projectable_contribution_window
+  ALIAS morsehgp3d_direct_projectable_contribution_window
+)
+set_target_properties(
+  morsehgp3d_direct_projectable_contribution_window
+  PROPERTIES
+    EXPORT_NAME direct_projectable_contribution_window
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_projectable_contribution_window PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_projectable_contribution_window
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_projectable_contribution_window
+  PUBLIC morsehgp3d::direct_normalized_h0_scientific_window_capability
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_projectable_contribution_window PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_projectable_contribution_window
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
   STATIC
     src/cpu/hierarchy/direct_normalized_h0_relative_frozen_incidence_batch.cpp
@@ -2616,6 +2656,92 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_normalized_h0_sparse_forest_projection
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_sparse_carrier_origin_capability
+  STATIC
+    src/cpu/hierarchy/direct_sparse_carrier_origin_capability.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_carrier_origin_capability
+  ALIAS morsehgp3d_direct_sparse_carrier_origin_capability
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_carrier_origin_capability
+  PROPERTIES
+    EXPORT_NAME direct_sparse_carrier_origin_capability
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_carrier_origin_capability PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_carrier_origin_capability
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_carrier_origin_capability
+  PUBLIC
+    morsehgp3d::direct_normalized_h0_sparse_forest_projection
+    morsehgp3d::direct_sparse_root_ledger
+    morsehgp3d::direct_sparse_stable_facet_descent_closure
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_carrier_origin_capability PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_carrier_origin_capability
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
+  STATIC
+    src/cpu/hierarchy/direct_normalized_h0_source_forest_ledger_transaction.cpp
+)
+add_library(
+  morsehgp3d::direct_normalized_h0_source_forest_ledger_transaction
+  ALIAS morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
+)
+set_target_properties(
+  morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
+  PROPERTIES
+    EXPORT_NAME direct_normalized_h0_source_forest_ledger_transaction
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
+  PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
+  PUBLIC
+    morsehgp3d::direct_sparse_carrier_origin_capability
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -6491,8 +6617,11 @@ if(MORSEHGP3D_INSTALL_INTERNAL_TARGETS)
     morsehgp3d_direct_frozen_unified_incidence_batch
     morsehgp3d_direct_morse_unified_resident_session
     morsehgp3d_direct_normalized_h0_scientific_window_capability
+    morsehgp3d_direct_projectable_contribution_window
     morsehgp3d_direct_normalized_h0_relative_frozen_incidence_batch
     morsehgp3d_direct_normalized_h0_sparse_forest_projection
+    morsehgp3d_direct_sparse_carrier_origin_capability
+    morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
     morsehgp3d_direct_morse_resident_at_least20_adapter
     morsehgp3d_normalized_exact_hartigan_level_manifest
     morsehgp3d_relative_morse_boruvka

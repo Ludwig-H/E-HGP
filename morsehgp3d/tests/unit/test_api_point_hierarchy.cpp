@@ -123,6 +123,66 @@ void certify(CertifiedTowerInput& input) {
   return options;
 }
 
+[[nodiscard]] CertifiedTowerInput zero_leaf_positive_merge_tower() {
+  CertifiedTowerInput input;
+  input.point_count = 40U;
+  input.maximum_order = 1U;
+  constexpr std::uint64_t first_leaf = 1'000U;
+  constexpr std::uint64_t first_group = 2'000U;
+  constexpr std::uint64_t root = 3'000U;
+  for (std::uint64_t point = 0U; point < input.point_count; ++point) {
+    input.nodes.push_back(
+        CertifiedTowerNode{first_leaf + point, 1U, level(0)});
+    input.projectable_simplices.push_back(CertifiedProjectableSimplex{
+        4'000U + point,
+        1U,
+        first_leaf + point,
+        {point},
+        {level(1)},
+        {1U, level(0)}});
+  }
+  input.nodes.push_back(CertifiedTowerNode{first_group, 1U, level(1)});
+  input.nodes.push_back(CertifiedTowerNode{first_group + 1U, 1U, level(1)});
+  input.nodes.push_back(CertifiedTowerNode{root, 1U, level(4)});
+  for (std::uint64_t point = 0U; point < input.point_count; ++point) {
+    input.edges.push_back(CertifiedTowerEdge{
+        first_group + point / 20U,
+        first_leaf + point,
+        TowerEdgeKind::horizontal_forest,
+        {1U, level(1)}});
+  }
+  input.edges.push_back(CertifiedTowerEdge{
+      root,
+      first_group,
+      TowerEdgeKind::horizontal_forest,
+      {1U, level(4)}});
+  input.edges.push_back(CertifiedTowerEdge{
+      root,
+      first_group + 1U,
+      TowerEdgeKind::horizontal_forest,
+      {1U, level(4)}});
+  certify(input);
+  return input;
+}
+
+[[nodiscard]] CertifiedTowerInput zero_merge_tower() {
+  CertifiedTowerInput input;
+  input.point_count = 2U;
+  input.maximum_order = 1U;
+  input.nodes = {
+      CertifiedTowerNode{10U, 1U, level(0)},
+      CertifiedTowerNode{11U, 1U, level(0)}};
+  input.edges = {CertifiedTowerEdge{
+      10U, 11U, TowerEdgeKind::horizontal_forest, {1U, level(0)}}};
+  input.projectable_simplices = {
+      CertifiedProjectableSimplex{
+          100U, 1U, 10U, {0U}, {level(1)}, {1U, level(0)}},
+      CertifiedProjectableSimplex{
+          101U, 1U, 11U, {1U}, {level(1)}, {1U, level(0)}}};
+  certify(input);
+  return input;
+}
+
 void test_exact_density_comparator() {
   const PositiveRationalExponent exp_two{2U, 1U};
   check(
@@ -196,6 +256,24 @@ void test_multi_order_topology_partition_and_rendering() {
           allowed_root.noise_point_count == 0U &&
           allowed_root.selection_receipt_id != eom.selection_receipt_id,
       "allow_single_cluster is explicit and bound to the EOM receipt");
+}
+
+void test_zero_radius_eom_semantics() {
+  const PointHierarchy positive_merges = build_exact_point_hierarchy(
+      zero_leaf_positive_merge_tower(), exponent_two_options());
+  const auto condensed = positive_merges.select_excess_of_mass(20U);
+  check(
+      condensed.selected_node_ids.size() == 2U &&
+          condensed.noise_point_count == 0U,
+      "zero-radius singleton leaves exit at their finite positive merge when condensed");
+
+  const PointHierarchy zero_merge = build_exact_point_hierarchy(
+      zero_merge_tower(), exponent_two_options());
+  const auto symbolic = zero_merge.select_excess_of_mass(2U, true);
+  check(
+      symbolic.selected_node_ids.size() == 1U && symbolic.labels[0] == 0 &&
+          symbolic.labels[1] == 0 && symbolic.noise_point_count == 0U,
+      "a zero-level merge has an exact symbolic infinite EOM lifetime");
 }
 
 void test_permutation_invariance_and_parameter_binding() {
@@ -292,6 +370,7 @@ void test_fail_closed_contract() {
 int main() {
   test_exact_density_comparator();
   test_multi_order_topology_partition_and_rendering();
+  test_zero_radius_eom_semantics();
   test_permutation_invariance_and_parameter_binding();
   test_fail_closed_contract();
   if (failures != 0) {

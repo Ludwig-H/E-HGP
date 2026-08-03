@@ -41,6 +41,39 @@ La fixture contient 50 000 simplexes ponctuels, 99 999 nœuds source et 99 998 a
 
 Ce diagnostic n'est pas un p95 et ne couvre ni le nuage brut, ni la construction de la source HGP, ni la forêt complète de $T_1$ à $T_K$, ni les applications verticales, ni le streaming, ni CUDA, ni GCP. Il ne qualifie donc pas la cible produit 50 k et ne permet aucune extrapolation vers dix ou trente millions de points. `PointHierarchyBudget::large_resident_30m()` ne fait qu'ouvrir explicitement des plafonds fail-closed pour un processus disposant de la mémoire correspondante; ce profil n'est pas une preuve que la charge tient en mémoire ou termine.
 
+## Profil local des supports trois et quatre
+
+Le binaire de profil [`exact_higher_support_growth_profile.cpp`](../morsehgp3d/tests/profiling/exact_higher_support_growth_profile.cpp) mesure séparément la frontière exacte des triplets et quadruplets. Il utilise trois nuages dyadiques — uniforme, amas séparés et amas multi-échelles — pour $n\in\left\lbrace32,64,128\right\rbrace$ et $K\in\left\lbrace1,5,10\right\rbrace$. Le cas $K=1$ est explicitement non applicable aux arités trois et quatre. Chaque série s'arrête dès que le run précédent ne termine pas dans 5 000 unités ou dépasse une frontière de $8n$ entrées; ce coupe-circuit évite de transformer un profil négatif en campagne combinatoire.
+
+Avant la sonde Morton locale, les six runs applicables à $n=32$ atteignent tous `work_unit_limit`. L'univers exact contient 4 960 triplets et 35 960 quadruplets, soit 40 920 supports. Après 5 000 unités, seulement 53 à 62 supports sont résolus, c'est-à-dire environ 0,13 à 0,15 %. De 4 859 à 4 863 visites, soit environ 97 % du budget, sont consommées par la recherche de témoins de rang; aucun prune de rang, aucune analyse terminale et aucune requête de boule fermée n'est atteinte. Le pic de frontière reste faible, entre 15 et 17 entrées : le défaut est donc le travail, pas une matérialisation de l'univers.
+
+La version finale locale, `schema=6 / traversal=5`, applique d'abord une porte universelle de bon centrage : la borne inférieure du déterminant de Gram et celles de tous les numérateurs barycentriques doivent être strictement positives sur le produit. Un échec de cette porte reste inconclusif et poursuit la subdivision exacte; il n'élimine aucun support. Pour un produit admissible, au plus 91 positions Morton sont proposées. Elles sont regroupées sous une antichaîne de racines LBVH externes de masse au plus $H$, avec au plus 182 évaluations exactes cellule--ou--feuille : une cellule certifiée intérieure apporte toute sa masse, une cellule certifiée extérieure ou tangente est sautée et une cellule ambiguë retombe seulement sur ses feuilles effectivement proposées. `rank_frontier` reste vide; aucune DFS globale n'est cachée dans ce fallback.
+
+Le profil post-sonde suivant a été exécuté une seule fois avec la même limite de 5 000 unités :
+
+| Famille | $K$ | supports résolus sur 40 920 | visites de témoins de rang | produits refusés par la porte géométrique | Statut |
+|---|---:|---:|---:|---:|---|
+| uniforme | 5 | 1 793 | 1 063 | 2 158 | `NO-GO: work_unit_limit` |
+| uniforme | 10 | 1 350 | 1 991 | 1 668 | `NO-GO: work_unit_limit` |
+| amas séparés | 5 | 2 952 | 17 | 2 749 | `NO-GO: work_unit_limit` |
+| amas séparés | 10 | 2 922 | 70 | 2 723 | `NO-GO: work_unit_limit` |
+| amas multi-échelles | 5 | 2 838 | 505 | 2 507 | `NO-GO: work_unit_limit` |
+| amas multi-échelles | 10 | 2 825 | 531 | 2 494 | `NO-GO: work_unit_limit` |
+
+Ce résultat montre une amélioration locale nette face aux 53--62 supports de l'ancien parcours, mais les six cas atteignent encore le coupe-circuit : la porte de croissance reste fermée. Les runs $n=64$ et $n=128$ sont donc censurés; leurs univers auraient respectivement 677 040 et 11 009 376 supports. Le champ interne `ru_maxrss` est rejeté : il était déjà contaminé ou hérité avant le premier cas et `peak_rss_growth=0` dès ce cas. Une nouvelle exécution complète, surveillée extérieurement via `/proc/<pid>/status` toutes les 20 ms, a observé `EXTERNAL_PEAK_RSS_KIB=13896`, soit 13 896 Kio. C'est le pic échantillonné du processus complet, pas une mesure par famille ni une base d'extrapolation vers 50 000 points. Le harnais lit désormais `VmHWM` dans `/proc/self/status` sous Linux avant le fallback `getrusage` afin d'éviter ce high-water hérité lors des prochains profils.
+
+Il serait invalide de lancer 50 000 points sur GCP ou d'extrapoler vers dix millions à partir de cette ligne. La campagne facturable reste bloquée avant démarrage; GCP n'a pas été utilisé pour ce profil.
+
+## Campagne de qualité du clustering
+
+Le plan [`point_hierarchy_quality_campaign_v2.json`](../morsehgp3d/tests/profiling/point_hierarchy_quality_campaign_v2.json), SHA-256 `0c41a6ad648816fbe19326db85dea7b3aca6535f7ac1c27022d328abd3c213e8`, fixe la comparaison demandée sans fabriquer de résultats. Il construit une seule source exacte complète $T_1,\ldots,T_{10}$ par nuage, réutilise ses préfixes $K\in\left\lbrace1,5,10\right\rbrace$, puis rend DBSCAN et HDBSCAN-EOM pour $\mathrm{expZ}\in\left\lbrace1,2,3\right\rbrace$ avec `min_cluster_size=20` et `min_samples=K`. Les poids d'ordre valent exactement $1/K$ et la distribution simplexe--point emploie le poids de rayon inverse.
+
+À 50 000 points, la matrice comporte quatre difficultés : 8 boules séparées, 64 amas équilibrés multi-échelles, 24 filaments et 96 paires d'amas déséquilibrées reliées par des ponts. Les paliers 10 000 001 et 30 000 000 utilisent le profil multi-échelles 64. Les coordonnées dyadiques compressées, la vérité terrain et leurs digests sont matérialisés; aucune tour synthétique préconstruite ni source surrogate n'est admise.
+
+Chaque rendu publiera la proportion classifiée, le nombre de clusters, ARI et NMI sur tous les points, sur les vrais inliers et sur les seuls points classifiés, la couverture des vrais inliers, la précision, le rappel et le F1 du bruit, ainsi que les erreurs de fragmentation et de fusion. Les baselines scikit-learn utilisent le même $K$ comme `min_samples`; DBSCAN reçoit le même rayon calibré par quantile exact et shell d'égalité complet. Les baselines massives peuvent être omises uniquement avec le statut explicite `not_run_resource_cap`.
+
+Le protocole compte 84 transactions : 6 générations, 6 constructions exactes $T_1$ à $T_{10}$, 54 réductions/rendus et 18 baselines. Un producteur et un vérificateur scientifique distincts sont obligatoires. Le spool est transactionnel, reprend au prochain ordinal non committé et lie le bundle source durable à tous les préfixes. Le conteneur épingle NumPy, SciPy, scikit-learn, Joblib et threadpoolctl avec hashes. La porte reste `campaign_entry_gate_satisfied=false` tant que les exécutables réels n'existent pas; le test de contrat emploie seulement de faux exécutables et ne produit aucune mesure scientifique.
+
 ## Mesures existantes et provenance
 
 | Mesure | Périmètre réellement chronométré | Observation | Statut utilisable |

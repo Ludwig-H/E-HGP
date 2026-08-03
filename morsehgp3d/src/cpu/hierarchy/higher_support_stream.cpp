@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <iterator>
 #include <limits>
 #include <optional>
 #include <span>
@@ -219,6 +220,15 @@ void append_audit(
   MORSEHGP3D_APPEND_HIGHER_SIZE(exact_product_analysis_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(rank_search_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(rank_witness_node_visit_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_local_probe_attempt_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_local_probe_center_seed_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_local_probe_center_path_node_visit_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_local_probe_candidate_evaluation_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_local_probe_pruned_product_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_local_probe_fail_open_product_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_local_probe_geometric_gate_skip_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_query_outside_or_boundary_node_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(rank_query_outside_or_boundary_point_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(emitted_prune_certificate_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(emitted_rank_receipt_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(leaf_support_analysis_count);
@@ -239,6 +249,7 @@ void append_audit(
   MORSEHGP3D_APPEND_HIGHER_SIZE(emitted_point_id_reference_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(maximum_frontier_entry_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(maximum_rank_frontier_entry_count);
+  MORSEHGP3D_APPEND_HIGHER_SIZE(maximum_rank_local_probe_candidate_count);
   MORSEHGP3D_APPEND_HIGHER_SIZE(maximum_closed_ball_frontier_entry_count);
 #undef MORSEHGP3D_APPEND_HIGHER_SIZE
   writer.boolean(audit.exact_bigint_universe_certified);
@@ -318,7 +329,7 @@ void append_audit(
 [[nodiscard]] contract::CanonicalId checkpoint_digest(
     const ExactHigherSupportCheckpoint& checkpoint) {
   DigestWriter writer{
-      "MorseHGP3D/phase9/higher-support/checkpoint/v2"};
+      "MorseHGP3D/phase9/higher-support/checkpoint/v6"};
   const ExactHigherSupportCheckpointManifest& manifest = checkpoint.manifest;
   writer.u32(manifest.schema_version);
   writer.u32(manifest.traversal_version);
@@ -350,6 +361,14 @@ void append_audit(
     for (const ExactHigherSupportNodeReceipt& receipt :
          pending.rank_frontier) {
       append_node_receipt(writer, receipt);
+    }
+    writer.size(pending.rank_probe_next_candidate_index);
+    writer.size(pending.rank_probe_next_fallback_leaf_index);
+    writer.boolean(pending.rank_probe_fallback_active);
+    writer.boolean(
+        pending.rank_probe_center_seed_leaf_position.has_value());
+    if (pending.rank_probe_center_seed_leaf_position.has_value()) {
+      writer.u64(*pending.rank_probe_center_seed_leaf_position);
     }
     writer.size(pending.strict_interior_receipts.size());
     for (const ExactHigherSupportNodeReceipt& receipt :
@@ -615,7 +634,7 @@ class ExactHigherSupportStreamBuilder {
     manifest.lbvh_digest = lbvh_writer.finalize();
 
     DigestWriter semantic_writer{
-        "MorseHGP3D/phase9/higher-support/checkpoint-manifest/v2"};
+        "MorseHGP3D/phase9/higher-support/checkpoint-manifest/v6"};
     semantic_writer.u32(manifest.schema_version);
     semantic_writer.u32(manifest.traversal_version);
     semantic_writer.text(higher_support_stream_proof_basis);
@@ -690,6 +709,11 @@ class ExactHigherSupportStreamBuilder {
     RankSearchOutcome outcome{RankSearchOutcome::keep};
     exact::BigInt certified_point_count{0};
     std::vector<ExactHigherSupportRankReceipt> receipts;
+  };
+
+  struct LocalRankProbeCell {
+    std::size_t root_node_index{};
+    std::vector<std::size_t> fallback_leaf_node_indices;
   };
 
   void validate_inputs(std::size_t requested_maximum_order) const {
@@ -1007,6 +1031,10 @@ class ExactHigherSupportStreamBuilder {
           const bool empty_rank_payload =
               !pending.rank_search_started &&
               pending.rank_frontier.empty() &&
+              pending.rank_probe_next_candidate_index == 0U &&
+              pending.rank_probe_next_fallback_leaf_index == 0U &&
+              !pending.rank_probe_fallback_active &&
+              !pending.rank_probe_center_seed_leaf_position.has_value() &&
               pending.strict_interior_receipts.empty() &&
               pending.certified_strict_interior_point_count == 0;
           if (pending.stage !=
@@ -1019,15 +1047,62 @@ class ExactHigherSupportStreamBuilder {
               pending.leaf_analysis_started;
           const std::size_t required_rank_receipt_count =
               required_strict_interior_count(entry.support_size);
-          const std::size_t maximum_rank_frontier_size = checked_add(
-              index_.build_counters().maximum_depth,
-              1U,
-              "the higher-support rank-frontier cap overflows size_t");
-          const bool receipt_payload_within_caps =
+          bool rank_probe_state_valid = pending.rank_frontier.empty();
+          std::size_t rank_probe_candidate_count = 0U;
+          std::vector<LocalRankProbeCell> rank_probe_candidates;
+          if (pending.rank_search_started) {
+            const std::optional<std::size_t> expected_center_seed =
+                representative_center_seed_leaf_position(entry);
+            std::optional<std::size_t> persisted_center_seed;
+            if (pending.rank_probe_center_seed_leaf_position.has_value()) {
+              persisted_center_seed = checked_size(
+                  *pending.rank_probe_center_seed_leaf_position,
+                  "a persisted higher-support local rank center seed does not fit size_t");
+            }
+            rank_probe_candidates = local_rank_probe_candidate_cells(
+                entry, expected_center_seed);
+            rank_probe_candidate_count = rank_probe_candidates.size();
+            rank_probe_state_valid = rank_probe_state_valid &&
+                persisted_center_seed == expected_center_seed &&
+                pending.rank_probe_next_candidate_index <=
+                    rank_probe_candidate_count;
+            if (pending.rank_probe_fallback_active) {
+              rank_probe_state_valid = rank_probe_state_valid &&
+                  pending.rank_probe_next_candidate_index > 0U;
+              if (pending.rank_probe_next_candidate_index > 0U &&
+                  pending.rank_probe_next_candidate_index <=
+                      rank_probe_candidate_count) {
+                const LocalRankProbeCell& active =
+                    rank_probe_candidates[
+                        pending.rank_probe_next_candidate_index - 1U];
+                const std::array<spatial::ExactDyadicAabb3, 4> boxes =
+                    support_boxes(entry);
+                rank_probe_state_valid = rank_probe_state_valid &&
+                    pending.rank_probe_next_fallback_leaf_index <
+                        active.fallback_leaf_node_indices.size() &&
+                    exact_higher_support_product_query_cell_decision(
+                        std::span<const spatial::ExactDyadicAabb3>{
+                            boxes.data(), entry.support_size},
+                        node_box(active.root_node_index)) ==
+                        ExactHigherSupportProductQueryCellDecision::
+                            inconclusive;
+              }
+            } else {
+              rank_probe_state_valid = rank_probe_state_valid &&
+                  pending.rank_probe_next_fallback_leaf_index == 0U;
+            }
+          } else {
+            rank_probe_state_valid = rank_probe_state_valid &&
+                pending.rank_frontier.empty() &&
+                pending.rank_probe_next_candidate_index == 0U &&
+                pending.rank_probe_next_fallback_leaf_index == 0U &&
+                !pending.rank_probe_fallback_active &&
+                !pending.rank_probe_center_seed_leaf_position.has_value();
+          }
+          const bool receipt_payload_within_caps = rank_probe_state_valid &&
               required_rank_receipt_count <= 9U &&
               pending.strict_interior_receipts.size() <=
                   required_rank_receipt_count &&
-              pending.rank_frontier.size() <= maximum_rank_frontier_size &&
               pending.certified_strict_interior_point_count >= 0 &&
               pending.certified_strict_interior_point_count <=
                   exact::BigInt{cloud_.size()};
@@ -1039,31 +1114,32 @@ class ExactHigherSupportStreamBuilder {
           if (receipt_payload_within_caps) {
             switch (pending.stage) {
               case ExactHigherSupportPendingStage::analyze_product:
-                if (!empty_rank_payload || is_terminal(entry)) {
+                if (!empty_rank_payload) {
                   pending_valid = false;
                 }
                 break;
               case ExactHigherSupportPendingStage::emit_well_prune:
                 if (!empty_rank_payload ||
-                    (is_terminal(entry) &&
-                     required_strict_interior_count(entry.support_size) !=
-                         0U) ||
                     !no_well_centered_support_certified(entry)) {
                   pending_valid = false;
                 }
                 break;
               case ExactHigherSupportPendingStage::rank_search: {
-                if (is_terminal(entry) ||
-                    required_strict_interior_count(entry.support_size) == 0U ||
+                if (required_strict_interior_count(entry.support_size) == 0U ||
+                    !all_well_centered_support_certified(entry) ||
                     (!pending.rank_search_started && !empty_rank_payload) ||
                     (pending.rank_search_started &&
-                     pending.rank_frontier.empty())) {
+                     !pending.rank_probe_fallback_active &&
+                     pending.rank_probe_next_candidate_index >=
+                         rank_probe_candidate_count)) {
                   pending_valid = false;
                 }
                 break;
               }
               case ExactHigherSupportPendingStage::emit_rank_prune:
                 if (!pending.rank_frontier.empty() ||
+                    pending.rank_probe_fallback_active ||
+                    pending.rank_probe_next_fallback_leaf_index != 0U ||
                     pending.certified_strict_interior_point_count <
                         exact::BigInt{required_strict_interior_count(
                             entry.support_size)} ||
@@ -1115,14 +1191,9 @@ class ExactHigherSupportStreamBuilder {
 
             std::vector<std::pair<std::uint64_t, std::uint64_t>> intervals;
             intervals.reserve(checked_add(
-                pending.rank_frontier.size(),
+                0U,
                 pending.strict_interior_receipts.size(),
                 "the higher-support checkpoint receipt count overflows size_t"));
-            for (const ExactHigherSupportNodeReceipt& active :
-                 pending.rank_frontier) {
-              static_cast<void>(receipt_node_index(active));
-              intervals.emplace_back(active.leaf_begin, active.leaf_end);
-            }
             exact::BigInt recomputed_receipt_count{0};
             const std::array<spatial::ExactDyadicAabb3, 4> boxes =
                 support_boxes(entry);
@@ -1133,7 +1204,53 @@ class ExactHigherSupportStreamBuilder {
               const std::size_t query_node_index =
                   receipt_node_index(receipt);
               const Node& query = node(query_node_index);
-              if (node_range_intersects_support_domain(query, entry) ||
+              bool receipt_was_locally_probed = false;
+              const std::size_t consumed_candidate_count = std::min(
+                  pending.rank_probe_next_candidate_index,
+                  rank_probe_candidates.size());
+              for (std::size_t candidate_index = 0U;
+                   candidate_index < consumed_candidate_count;
+                   ++candidate_index) {
+                const LocalRankProbeCell& candidate =
+                    rank_probe_candidates[candidate_index];
+                if (candidate.root_node_index == query_node_index) {
+                  receipt_was_locally_probed = true;
+                  break;
+                }
+                const auto fallback = std::find(
+                    candidate.fallback_leaf_node_indices.begin(),
+                    candidate.fallback_leaf_node_indices.end(),
+                    query_node_index);
+                if (fallback ==
+                    candidate.fallback_leaf_node_indices.end()) {
+                  continue;
+                }
+                const auto root_decision =
+                    exact_higher_support_product_query_cell_decision(
+                        support_box_span,
+                        node_box(candidate.root_node_index));
+                std::size_t consumed_fallback_count =
+                    candidate.fallback_leaf_node_indices.size();
+                if (pending.rank_probe_fallback_active &&
+                    candidate_index + 1U ==
+                        consumed_candidate_count) {
+                  consumed_fallback_count =
+                      pending.rank_probe_next_fallback_leaf_index;
+                }
+                const std::size_t fallback_index =
+                    static_cast<std::size_t>(std::distance(
+                        candidate.fallback_leaf_node_indices.begin(),
+                        fallback));
+                if (root_decision ==
+                        ExactHigherSupportProductQueryCellDecision::
+                            inconclusive &&
+                    fallback_index < consumed_fallback_count) {
+                  receipt_was_locally_probed = true;
+                  break;
+                }
+              }
+              if (!receipt_was_locally_probed ||
+                  node_range_intersects_support_domain(query, entry) ||
                   !exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
                       support_box_span,
                       node_box(query_node_index))) {
@@ -1211,6 +1328,20 @@ class ExactHigherSupportStreamBuilder {
           classified_minimal,
           pending_leaf_analysis_started ? 1U : 0U,
           "the higher-support pending-minimal identity overflows size_t");
+      const std::size_t active_rank_probe_count =
+          checkpoint.pending_product.has_value() &&
+                  checkpoint.pending_product->stage ==
+                      ExactHigherSupportPendingStage::rank_search &&
+                  checkpoint.pending_product->rank_search_started
+              ? 1U
+              : 0U;
+      const std::size_t finished_or_active_rank_probe_count = checked_add(
+          checked_add(
+              audit.rank_local_probe_pruned_product_count,
+              audit.rank_local_probe_fail_open_product_count,
+              "the higher-support local rank outcome count overflows size_t"),
+          active_rank_probe_count,
+          "the higher-support local rank active count overflows size_t");
       audit_valid = audit_valid &&
           audit.total_support_count ==
               exact_higher_support_candidate_universe_size(cloud_.size()) &&
@@ -1228,6 +1359,38 @@ class ExactHigherSupportStreamBuilder {
               audit.support_product_visit_count,
               audit.rank_witness_node_visit_count,
               "the higher-support work identity overflows size_t") &&
+          audit.rank_local_probe_attempt_count == audit.rank_search_count &&
+          audit.rank_local_probe_attempt_count ==
+              finished_or_active_rank_probe_count &&
+          checked_add(
+              audit.rank_local_probe_attempt_count,
+              audit.rank_local_probe_geometric_gate_skip_count,
+              "the higher-support probe-gate audit overflows size_t") <=
+              audit.support_product_visit_count &&
+          audit.rank_local_probe_center_seed_count <=
+              audit.rank_local_probe_attempt_count &&
+          audit.rank_local_probe_center_path_node_visit_count >=
+              audit.rank_local_probe_center_seed_count &&
+          audit.rank_local_probe_candidate_evaluation_count ==
+              audit.rank_witness_node_visit_count &&
+          exact::BigInt{
+              audit.rank_local_probe_candidate_evaluation_count} <=
+              exact::BigInt{audit.rank_local_probe_attempt_count} *
+                  higher_support_local_rank_probe_maximum_evaluation_count &&
+          audit.maximum_rank_local_probe_candidate_count <=
+              higher_support_local_rank_probe_maximum_evaluation_count &&
+          audit.maximum_rank_frontier_entry_count == 0U &&
+          audit.rank_query_outside_or_boundary_node_count <=
+              audit.rank_local_probe_candidate_evaluation_count &&
+          audit.rank_query_outside_or_boundary_point_count >=
+              audit.rank_query_outside_or_boundary_node_count &&
+          exact::BigInt{
+              audit.rank_query_outside_or_boundary_point_count} <=
+              exact::BigInt{
+                  audit.rank_query_outside_or_boundary_node_count} *
+                  higher_support_local_rank_probe_maximum_threshold &&
+          (audit.rank_query_outside_or_boundary_node_count != 0U ||
+           audit.rank_query_outside_or_boundary_point_count == 0U) &&
           audit.leaf_support_analysis_count == leaf_analysis_identity &&
           audit.leaf_classified_support_count ==
               exact::BigInt{leaf_classified_identity} &&
@@ -1237,6 +1400,9 @@ class ExactHigherSupportStreamBuilder {
           (checkpoint.output_record_count != 0U ||
            checkpoint.output_chain_digest == initial_output_chain_digest()) &&
           audit.maximum_frontier_entry_count >= checkpoint.frontier.size() &&
+          (!checkpoint.pending_product.has_value() ||
+           audit.maximum_rank_frontier_entry_count >=
+               checkpoint.pending_product->rank_frontier.size()) &&
           audit.exact_bigint_universe_certified &&
           audit.grouped_partition_accounting_certified;
     } catch (const std::exception&) {
@@ -1353,17 +1519,287 @@ class ExactHigherSupportStreamBuilder {
     return maximum_rank - support_size + 1U;
   }
 
-  [[nodiscard]] bool node_range_inside_support_domain(
-      const Node& query,
+  [[nodiscard]] bool leaf_position_in_support_domain(
+      std::size_t leaf_position,
       const ExactHigherSupportFrontierEntry& entry) const {
     for (std::size_t index = 0U; index < entry.group_count; ++index) {
       const Node& support = node(group_node_index(entry.groups[index]));
-      if (support.leaf_begin <= query.leaf_begin &&
-          query.leaf_end <= support.leaf_end) {
+      if (support.leaf_begin <= leaf_position &&
+          leaf_position < support.leaf_end) {
         return true;
       }
     }
     return false;
+  }
+
+  [[nodiscard]] std::size_t bounded_external_node_index_at_position(
+      std::size_t leaf_position,
+      const ExactHigherSupportFrontierEntry& entry,
+      std::size_t maximum_point_count) const {
+    if (leaf_position >= index_.leaves_.size()) {
+      throw std::out_of_range(
+          "a higher-support local rank probe leaf position is outside the LBVH");
+    }
+    if (maximum_point_count == 0U ||
+        leaf_position_in_support_domain(leaf_position, entry)) {
+      throw std::logic_error(
+          "a higher-support local rank probe requires one external leaf and a positive cell bound");
+    }
+    std::size_t current_index = index_.root_index_;
+    while (true) {
+      const Node& current = node(current_index);
+      const std::size_t current_point_count =
+          current.leaf_end - current.leaf_begin;
+      if (current_point_count <= maximum_point_count &&
+          !node_range_intersects_support_domain(current, entry)) {
+        return current_index;
+      }
+      if (current.is_leaf()) {
+        throw std::logic_error(
+            "an external higher-support leaf did not yield a bounded external LBVH cell");
+      }
+      const Node& left = node(current.left_child);
+      const Node& right = node(current.right_child);
+      if (left.leaf_begin <= leaf_position &&
+          leaf_position < left.leaf_end) {
+        current_index = current.left_child;
+      } else if (
+          right.leaf_begin <= leaf_position &&
+          leaf_position < right.leaf_end) {
+        current_index = current.right_child;
+      } else {
+        throw std::logic_error(
+            "a higher-support local rank probe lost its LBVH leaf position");
+      }
+    }
+  }
+
+  [[nodiscard]] std::size_t leaf_node_index_below(
+      std::size_t ancestor_node_index,
+      std::size_t leaf_position) const {
+    std::size_t current_index = ancestor_node_index;
+    while (true) {
+      const Node& current = node(current_index);
+      if (!(current.leaf_begin <= leaf_position &&
+            leaf_position < current.leaf_end)) {
+        throw std::logic_error(
+            "a higher-support fallback leaf left its bounded candidate cell");
+      }
+      if (current.is_leaf()) {
+        return current_index;
+      }
+      const Node& left = node(current.left_child);
+      const Node& right = node(current.right_child);
+      if (left.leaf_begin <= leaf_position &&
+          leaf_position < left.leaf_end) {
+        current_index = current.left_child;
+      } else if (right.leaf_begin <= leaf_position &&
+                 leaf_position < right.leaf_end) {
+        current_index = current.right_child;
+      } else {
+        throw std::logic_error(
+            "a higher-support fallback path lost its leaf position");
+      }
+    }
+  }
+
+  [[nodiscard]] std::optional<exact::ExactCenter3>
+  representative_minimal_center(
+      const ExactHigherSupportFrontierEntry& entry) const {
+    static_cast<void>(entry_support_count(entry));
+    std::array<exact::ExactRational3, 4U> representative{};
+    std::size_t output_index = 0U;
+    for (std::size_t group_index = 0U;
+         group_index < entry.group_count;
+         ++group_index) {
+      const ExactHigherSupportNodeGroup& group = entry.groups[group_index];
+      const Node& support = node(group_node_index(group));
+      for (std::size_t copy = 0U; copy < group.multiplicity; ++copy) {
+        representative[output_index] =
+            cloud_.point(index_.leaves_[support.leaf_begin + copy].point_id)
+                .exact();
+        ++output_index;
+      }
+    }
+    if (output_index != entry.support_size) {
+      throw std::logic_error(
+          "a higher-support local rank probe omitted a representative support point");
+    }
+    if (entry.support_size == 3U) {
+      const std::array<exact::ExactRational3, 3U> support{
+          representative[0], representative[1], representative[2]};
+      const exact::CircumcenterSupportAnalysis analysis =
+          exact::analyze_circumcenter_support(support);
+      if (analysis.status() != exact::CircumcenterSupportStatus::minimal) {
+        return std::nullopt;
+      }
+      return analysis.circumcenter_result().center();
+    }
+    if (entry.support_size == 4U) {
+      const exact::CircumcenterSupportAnalysis analysis =
+          exact::analyze_circumcenter_support(representative);
+      if (analysis.status() != exact::CircumcenterSupportStatus::minimal) {
+        return std::nullopt;
+      }
+      return analysis.circumcenter_result().center();
+    }
+    throw std::logic_error(
+        "a higher-support local rank probe has an invalid support arity");
+  }
+
+  [[nodiscard]] std::optional<std::size_t>
+  representative_center_seed_leaf_position(
+      const ExactHigherSupportFrontierEntry& entry,
+      std::size_t* path_node_visit_count = nullptr) const {
+    const std::optional<exact::ExactCenter3> center =
+        representative_minimal_center(entry);
+    if (!center.has_value()) {
+      return std::nullopt;
+    }
+    std::size_t current_index = index_.root_index_;
+    while (true) {
+      if (path_node_visit_count != nullptr) {
+        increment(
+            *path_node_visit_count,
+            "the higher-support local rank center path count overflows size_t");
+      }
+      const Node& current = node(current_index);
+      if (current.is_leaf()) {
+        return current.leaf_begin;
+      }
+      const exact::ExactLevel left_distance =
+          index_.minimum_squared_distance_to_node(
+              cloud_, current.left_child, *center);
+      const exact::ExactLevel right_distance =
+          index_.minimum_squared_distance_to_node(
+              cloud_, current.right_child, *center);
+      const Node& left = node(current.left_child);
+      const Node& right = node(current.right_child);
+      if (left_distance < right_distance ||
+          (left_distance == right_distance &&
+           left.leaf_begin < right.leaf_begin)) {
+        current_index = current.left_child;
+      } else {
+        current_index = current.right_child;
+      }
+    }
+  }
+
+  [[nodiscard]] std::vector<LocalRankProbeCell>
+  local_rank_probe_candidate_cells(
+      const ExactHigherSupportFrontierEntry& entry,
+      std::optional<std::size_t> center_seed_leaf_position) const {
+    const std::size_t threshold =
+        required_strict_interior_count(entry.support_size);
+    if (threshold == 0U ||
+        threshold > higher_support_local_rank_probe_maximum_threshold) {
+      throw std::logic_error(
+          "a higher-support local rank probe threshold is outside [1, 9]");
+    }
+    std::vector<std::size_t> leaf_positions;
+    leaf_positions.reserve(
+        higher_support_local_rank_probe_maximum_candidate_count);
+    const auto append_leaf_position =
+        [this, &entry, &leaf_positions](std::size_t position) {
+          if (position >= index_.leaves_.size() ||
+              leaf_position_in_support_domain(position, entry) ||
+              std::find(
+                  leaf_positions.begin(), leaf_positions.end(), position) !=
+                  leaf_positions.end()) {
+            return;
+          }
+          leaf_positions.push_back(position);
+        };
+
+    // The representative-center path is proposal-only.  Its leaf and Morton
+    // halo are visited first, but every retained witness is still recertified
+    // universally against the complete support-box product below.
+    if (center_seed_leaf_position.has_value()) {
+      append_leaf_position(*center_seed_leaf_position);
+      for (std::size_t distance = 1U; distance <= threshold; ++distance) {
+        if (*center_seed_leaf_position >= distance) {
+          append_leaf_position(*center_seed_leaf_position - distance);
+        }
+        if (distance < index_.leaves_.size() &&
+            *center_seed_leaf_position <
+                index_.leaves_.size() - distance) {
+          append_leaf_position(*center_seed_leaf_position + distance);
+        }
+      }
+    }
+
+    for (std::size_t distance = 1U; distance <= threshold; ++distance) {
+      for (std::size_t group_index = 0U;
+           group_index < entry.group_count;
+           ++group_index) {
+        const Node& support =
+            node(group_node_index(entry.groups[group_index]));
+        if (support.leaf_begin >= distance) {
+          append_leaf_position(support.leaf_begin - distance);
+        }
+        if (distance <= index_.leaves_.size() &&
+            support.leaf_end <= index_.leaves_.size() - distance) {
+          append_leaf_position(support.leaf_end + distance - 1U);
+        }
+      }
+    }
+    if (leaf_positions.size() >
+        higher_support_local_rank_probe_maximum_candidate_count) {
+      throw std::logic_error(
+          "a higher-support local rank probe exceeded its fixed candidate bound");
+    }
+    std::vector<LocalRankProbeCell> candidate_cells;
+    candidate_cells.reserve(leaf_positions.size());
+    for (const std::size_t position : leaf_positions) {
+      const std::size_t candidate_node_index =
+          bounded_external_node_index_at_position(
+              position, entry, threshold);
+      auto candidate = std::find_if(
+          candidate_cells.begin(),
+          candidate_cells.end(),
+          [candidate_node_index](const LocalRankProbeCell& cell) {
+            return cell.root_node_index == candidate_node_index;
+          });
+      if (candidate == candidate_cells.end()) {
+        candidate_cells.push_back(
+            LocalRankProbeCell{candidate_node_index, {}});
+        candidate = std::prev(candidate_cells.end());
+      }
+      candidate->fallback_leaf_node_indices.push_back(
+          leaf_node_index_below(candidate_node_index, position));
+    }
+    for (std::size_t left = 0U;
+         left < candidate_cells.size();
+         ++left) {
+      const Node& left_node = node(candidate_cells[left].root_node_index);
+      if (left_node.leaf_end - left_node.leaf_begin > threshold ||
+          node_range_intersects_support_domain(left_node, entry) ||
+          candidate_cells[left].fallback_leaf_node_indices.empty()) {
+        throw std::logic_error(
+            "a higher-support local rank root violates its bounded external-cell contract");
+      }
+      for (const std::size_t fallback_leaf_node_index :
+           candidate_cells[left].fallback_leaf_node_indices) {
+        const Node& fallback_leaf = node(fallback_leaf_node_index);
+        if (!fallback_leaf.is_leaf() ||
+            fallback_leaf.leaf_begin < left_node.leaf_begin ||
+            fallback_leaf.leaf_end > left_node.leaf_end) {
+          throw std::logic_error(
+              "a higher-support fallback is not a leaf of its bounded candidate cell");
+        }
+      }
+      for (std::size_t right = left + 1U;
+           right < candidate_cells.size();
+           ++right) {
+        const Node& right_node = node(candidate_cells[right].root_node_index);
+        if (left_node.leaf_begin < right_node.leaf_end &&
+            right_node.leaf_begin < left_node.leaf_end) {
+          throw std::logic_error(
+              "higher-support local rank roots do not form an LBVH antichain");
+        }
+      }
+    }
+    return candidate_cells;
   }
 
   [[nodiscard]] bool node_range_intersects_support_domain(
@@ -1411,70 +1847,137 @@ class ExactHigherSupportStreamBuilder {
     if (required == 0U) {
       return RankSearchOutcome::prune;
     }
+    if (required > higher_support_local_rank_probe_maximum_threshold) {
+      throw std::logic_error(
+          "a higher-support local rank threshold exceeds nine witnesses");
+    }
     if (possible_external_witness_count(entry) < required) {
       return RankSearchOutcome::keep;
     }
-    if (!auxiliary_frontier_preflight()) {
-      return RankSearchOutcome::budget_exhausted;
+    if (!pending.rank_frontier.empty()) {
+      throw std::logic_error(
+          "the bounded higher-support local probe cannot resume a rank DFS");
     }
     if (!pending.rank_search_started) {
       pending.rank_search_started = true;
-      pending.rank_frontier.push_back(
-          make_node_receipt(index_.root_index_));
+      pending.rank_probe_next_candidate_index = 0U;
+      pending.rank_probe_next_fallback_leaf_index = 0U;
+      pending.rank_probe_fallback_active = false;
+      std::size_t center_path_node_visit_count = 0U;
+      const std::optional<std::size_t> center_seed =
+          representative_center_seed_leaf_position(
+              entry, &center_path_node_visit_count);
+      if (center_seed.has_value()) {
+        pending.rank_probe_center_seed_leaf_position = checked_u64(
+            *center_seed,
+            "a higher-support local rank center seed does not fit uint64");
+        increment(
+            result_.audit.rank_local_probe_center_seed_count,
+            "the higher-support local rank center-seed count overflows size_t");
+      }
+      result_.audit.rank_local_probe_center_path_node_visit_count =
+          checked_add(
+              result_.audit.rank_local_probe_center_path_node_visit_count,
+              center_path_node_visit_count,
+              "the higher-support local rank center-path count overflows size_t");
       increment(
           result_.audit.rank_search_count,
           "the higher-support rank-search count overflows size_t");
-      result_.audit.maximum_rank_frontier_entry_count = std::max(
-          result_.audit.maximum_rank_frontier_entry_count,
-          pending.rank_frontier.size());
+      increment(
+          result_.audit.rank_local_probe_attempt_count,
+          "the higher-support local rank attempt count overflows size_t");
     }
     const std::array<spatial::ExactDyadicAabb3, 4> boxes =
         support_boxes(entry);
     const std::span<const spatial::ExactDyadicAabb3> support_box_span{
         boxes.data(), entry.support_size};
-    while (!pending.rank_frontier.empty()) {
+    std::optional<std::size_t> center_seed;
+    if (pending.rank_probe_center_seed_leaf_position.has_value()) {
+      center_seed = checked_size(
+          *pending.rank_probe_center_seed_leaf_position,
+          "a higher-support local rank center seed does not fit size_t");
+    }
+    const std::vector<LocalRankProbeCell> candidate_cells =
+        local_rank_probe_candidate_cells(entry, center_seed);
+    std::size_t maximum_evaluation_count = candidate_cells.size();
+    for (const LocalRankProbeCell& candidate : candidate_cells) {
+      maximum_evaluation_count = checked_add(
+          maximum_evaluation_count,
+          candidate.fallback_leaf_node_indices.size(),
+          "the higher-support local rank plan size overflows size_t");
+    }
+    if (maximum_evaluation_count >
+        higher_support_local_rank_probe_maximum_evaluation_count) {
+      throw std::logic_error(
+          "a higher-support local rank plan exceeded its fixed evaluation bound");
+    }
+    result_.audit.maximum_rank_local_probe_candidate_count = std::max(
+        result_.audit.maximum_rank_local_probe_candidate_count,
+        maximum_evaluation_count);
+    if (pending.rank_probe_next_candidate_index >
+        candidate_cells.size() ||
+        (pending.rank_probe_fallback_active &&
+         (pending.rank_probe_next_candidate_index == 0U ||
+          pending.rank_probe_next_candidate_index >
+              candidate_cells.size() ||
+          pending.rank_probe_next_fallback_leaf_index >=
+              candidate_cells[
+                  pending.rank_probe_next_candidate_index - 1U]
+                  .fallback_leaf_node_indices.size())) ||
+        (!pending.rank_probe_fallback_active &&
+         pending.rank_probe_next_fallback_leaf_index != 0U)) {
+      throw std::logic_error(
+          "a higher-support local rank cursor exceeds its candidate list");
+    }
+    while (pending.rank_probe_fallback_active ||
+           pending.rank_probe_next_candidate_index <
+               candidate_cells.size()) {
       if (!consume_work_unit()) {
         return RankSearchOutcome::budget_exhausted;
       }
-      const std::size_t query_node_index =
-          receipt_node_index(pending.rank_frontier.back());
-      pending.rank_frontier.pop_back();
+      const bool evaluating_fallback =
+          pending.rank_probe_fallback_active;
+      const std::size_t candidate_index = evaluating_fallback
+          ? pending.rank_probe_next_candidate_index - 1U
+          : pending.rank_probe_next_candidate_index;
+      const LocalRankProbeCell& candidate =
+          candidate_cells[candidate_index];
+      std::size_t query_node_index = candidate.root_node_index;
+      if (evaluating_fallback) {
+        query_node_index = candidate.fallback_leaf_node_indices[
+            pending.rank_probe_next_fallback_leaf_index];
+        ++pending.rank_probe_next_fallback_leaf_index;
+        if (pending.rank_probe_next_fallback_leaf_index ==
+            candidate.fallback_leaf_node_indices.size()) {
+          pending.rank_probe_next_fallback_leaf_index = 0U;
+          pending.rank_probe_fallback_active = false;
+        }
+      } else {
+        ++pending.rank_probe_next_candidate_index;
+      }
       const Node& query = node(query_node_index);
+      if (query.leaf_end - query.leaf_begin > required ||
+          node_range_intersects_support_domain(query, entry)) {
+        throw std::logic_error(
+            "a higher-support local rank cursor left its bounded external LBVH cell");
+      }
       increment(
           result_.audit.rank_witness_node_visit_count,
           "the higher-support rank witness count overflows size_t");
+      increment(
+          result_.audit.rank_local_probe_candidate_evaluation_count,
+          "the higher-support local rank candidate count overflows size_t");
 
-      if (node_range_inside_support_domain(query, entry)) {
-        continue;
-      }
-      if (node_range_intersects_support_domain(query, entry)) {
-        if (query.is_leaf()) {
-          throw std::logic_error(
-              "a leaf partially overlaps a higher-support Morton domain");
-        }
-        pending.rank_frontier.push_back(
-            make_node_receipt(query.right_child));
-        pending.rank_frontier.push_back(
-            make_node_receipt(query.left_child));
-        if (pending.rank_frontier.size() >
-            result_.budget.maximum_auxiliary_frontier_entry_count) {
-          throw std::logic_error(
-              "a higher-support rank DFS exceeded its preflight bound");
-        }
-        result_.audit.maximum_rank_frontier_entry_count = std::max(
-            result_.audit.maximum_rank_frontier_entry_count,
-            pending.rank_frontier.size());
-        continue;
-      }
-
-      const bool query_strictly_inside =
-          exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+      const ExactHigherSupportProductQueryCellDecision query_cell_decision =
+          exact_higher_support_product_query_cell_decision(
               support_box_span,
               node_box(query_node_index));
       increment(
           result_.audit.exact_product_analysis_count,
           "the higher-support product-analysis count overflows size_t");
-      if (query_strictly_inside) {
+      if (query_cell_decision ==
+          ExactHigherSupportProductQueryCellDecision::
+              strictly_inside_every_independent_sphere) {
         const std::size_t point_count =
             query.leaf_end - query.leaf_begin;
         pending.certified_strict_interior_point_count += point_count;
@@ -1482,26 +1985,40 @@ class ExactHigherSupportStreamBuilder {
             make_node_receipt(query_node_index));
         if (pending.certified_strict_interior_point_count >=
             exact::BigInt{required}) {
-          pending.rank_frontier.clear();
+          pending.rank_probe_next_fallback_leaf_index = 0U;
+          pending.rank_probe_fallback_active = false;
+          increment(
+              result_.audit.rank_local_probe_pruned_product_count,
+              "the higher-support local rank prune count overflows size_t");
           return RankSearchOutcome::prune;
         }
         continue;
       }
-      if (!query.is_leaf()) {
-        pending.rank_frontier.push_back(
-            make_node_receipt(query.right_child));
-        pending.rank_frontier.push_back(
-            make_node_receipt(query.left_child));
-        if (pending.rank_frontier.size() >
-            result_.budget.maximum_auxiliary_frontier_entry_count) {
-          throw std::logic_error(
-              "a higher-support rank DFS exceeded its preflight bound");
-        }
-        result_.audit.maximum_rank_frontier_entry_count = std::max(
-            result_.audit.maximum_rank_frontier_entry_count,
-            pending.rank_frontier.size());
+      if (query_cell_decision ==
+          ExactHigherSupportProductQueryCellDecision::
+              outside_or_boundary_every_independent_sphere) {
+        // The exact lower power endpoint is nonnegative throughout this
+        // Morton cell and throughout the support product.  Equality supplies
+        // no strict rank witness, so the complete query subtree can be
+        // skipped without making any decision about the support product.
+        increment(
+            result_.audit.rank_query_outside_or_boundary_node_count,
+            "the higher-support outside-or-boundary node count overflows size_t");
+        result_.audit.rank_query_outside_or_boundary_point_count =
+            checked_add(
+                result_.audit.rank_query_outside_or_boundary_point_count,
+                query.leaf_end - query.leaf_begin,
+                "the higher-support outside-or-boundary point count overflows size_t");
+        continue;
+      }
+      if (!evaluating_fallback && !query.is_leaf()) {
+        pending.rank_probe_next_fallback_leaf_index = 0U;
+        pending.rank_probe_fallback_active = true;
       }
     }
+    increment(
+        result_.audit.rank_local_probe_fail_open_product_count,
+        "the higher-support local rank fail-open count overflows size_t");
     return RankSearchOutcome::keep;
   }
 
@@ -2189,11 +2706,12 @@ class ExactHigherSupportStreamBuilder {
         "the higher-support product-visit count overflows size_t");
     pending_product_.emplace();
     pending_product_->product = entry;
+    // Every product, including a singleton terminal support, must first pass
+    // the same exact well-centring and strict-interior rank decisions.  A
+    // terminal closed-ball classification is only the fail-open continuation
+    // after both block prunes failed.
     pending_product_->stage =
-        is_terminal(entry) &&
-                required_strict_interior_count(entry.support_size) != 0U
-            ? ExactHigherSupportPendingStage::classify_leaf
-            : ExactHigherSupportPendingStage::analyze_product;
+        ExactHigherSupportPendingStage::analyze_product;
     continue_pending_product();
   }
 
@@ -2216,6 +2734,15 @@ class ExactHigherSupportStreamBuilder {
             boxes.data(), entry.support_size});
   }
 
+  [[nodiscard]] bool all_well_centered_support_certified(
+      const ExactHigherSupportFrontierEntry& entry) const {
+    const std::array<spatial::ExactDyadicAabb3, 4> boxes =
+        support_boxes(entry);
+    return exact_higher_support_product_all_well_centered_certified(
+        std::span<const spatial::ExactDyadicAabb3>{
+            boxes.data(), entry.support_size});
+  }
+
   void clear_pending_rank_state() {
     if (!pending_product_.has_value()) {
       throw std::logic_error(
@@ -2223,6 +2750,10 @@ class ExactHigherSupportStreamBuilder {
     }
     pending_product_->rank_search_started = false;
     pending_product_->rank_frontier.clear();
+    pending_product_->rank_probe_next_candidate_index = 0U;
+    pending_product_->rank_probe_next_fallback_leaf_index = 0U;
+    pending_product_->rank_probe_fallback_active = false;
+    pending_product_->rank_probe_center_seed_leaf_position.reset();
     pending_product_->strict_interior_receipts.clear();
     pending_product_->certified_strict_interior_point_count = 0;
   }
@@ -2251,12 +2782,26 @@ class ExactHigherSupportStreamBuilder {
             pending_product_->stage =
                 ExactHigherSupportPendingStage::emit_rank_prune;
           } else {
-            if (is_terminal(entry)) {
-              throw std::logic_error(
-                  "a rank-relevant terminal support entered product analysis");
+            const bool rank_probe_eligible =
+                all_well_centered_support_certified(entry);
+            increment(
+                result_.audit.exact_product_analysis_count,
+                "the higher-support product-analysis count overflows size_t");
+            if (rank_probe_eligible) {
+              pending_product_->stage =
+                  ExactHigherSupportPendingStage::rank_search;
+            } else {
+              // This positive-only probe cannot certify a mixed or still
+              // geometrically unresolved support box.  Splitting the support
+              // product is an exact fail-open continuation: no support tuple
+              // is discarded and the gate is reconsidered on tighter cells.
+              increment(
+                  result_.audit.rank_local_probe_geometric_gate_skip_count,
+                  "the higher-support probe-gate skip count overflows size_t");
+              pending_product_->stage = is_terminal(entry)
+                  ? ExactHigherSupportPendingStage::classify_leaf
+                  : ExactHigherSupportPendingStage::expand_product;
             }
-            pending_product_->stage =
-                ExactHigherSupportPendingStage::rank_search;
           }
           continue;
         }
@@ -2282,8 +2827,9 @@ class ExactHigherSupportStreamBuilder {
                 ExactHigherSupportPendingStage::emit_rank_prune;
           } else {
             clear_pending_rank_state();
-            pending_product_->stage =
-                ExactHigherSupportPendingStage::expand_product;
+            pending_product_->stage = is_terminal(entry)
+                ? ExactHigherSupportPendingStage::classify_leaf
+                : ExactHigherSupportPendingStage::expand_product;
           }
           continue;
         }

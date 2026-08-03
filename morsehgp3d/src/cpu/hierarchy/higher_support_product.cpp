@@ -874,7 +874,33 @@ try_bounded_no_well_centered_decision(
 }
 
 [[nodiscard]] std::optional<bool>
-try_bounded_query_strictly_inside_decision(
+try_bounded_all_well_centered_decision(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes) {
+  const std::optional<BoundedProductCoordinates> coordinates =
+      try_bounded_product_coordinates(support_boxes, nullptr);
+  if (!coordinates.has_value()) {
+    return std::nullopt;
+  }
+  const BoundedSupportIntervalEvaluation support =
+      bounded_evaluate_support(*coordinates);
+  const BoundedExactInteger zero{};
+  if (support.gram_determinant.lower <= zero) {
+    return false;
+  }
+  const std::array<BoundedInterval, 4> barycentric =
+      bounded_barycentric_numerators(support);
+  for (std::size_t index = 0U;
+       index < support.support_size;
+       ++index) {
+    if (barycentric[index].lower <= zero) {
+      return false;
+    }
+  }
+  return true;
+}
+
+[[nodiscard]] std::optional<ExactHigherSupportProductQueryCellDecision>
+try_bounded_query_cell_decision(
     std::span<const spatial::ExactDyadicAabb3> support_boxes,
     const spatial::ExactDyadicAabb3& query_box) {
   const std::optional<BoundedProductCoordinates> coordinates =
@@ -888,10 +914,19 @@ try_bounded_query_strictly_inside_decision(
   }
   const BoundedSupportIntervalEvaluation support =
       bounded_evaluate_support(*coordinates);
-  return bounded_query_scaled_power(
-             support,
-             *coordinates->query_box)
-             .upper < BoundedExactInteger{};
+  const BoundedInterval power = bounded_query_scaled_power(
+      support,
+      *coordinates->query_box);
+  const BoundedExactInteger zero{};
+  if (power.upper < zero) {
+    return ExactHigherSupportProductQueryCellDecision::
+        strictly_inside_every_independent_sphere;
+  }
+  if (power.lower >= zero) {
+    return ExactHigherSupportProductQueryCellDecision::
+        outside_or_boundary_every_independent_sphere;
+  }
+  return ExactHigherSupportProductQueryCellDecision::inconclusive;
 }
 
 }  // namespace
@@ -925,6 +960,23 @@ no_well_centered_support_certified() const {
     }
   }
   return false;
+}
+
+bool ExactHigherSupportProductAabbAnalysis::
+all_supports_well_centered_certified() const {
+  if (support_size != 3U && support_size != 4U) {
+    return false;
+  }
+  const exact::ExactRational zero;
+  if (gram_determinant.lower <= zero) {
+    return false;
+  }
+  for (std::size_t index = 0U; index < support_size; ++index) {
+    if (barycentric_numerators[index].lower <= zero) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool ExactHigherSupportProductAabbAnalysis::
@@ -978,13 +1030,35 @@ bool exact_higher_support_product_no_well_centered_certified(
       .no_well_centered_support_certified();
 }
 
-bool
-exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+bool exact_higher_support_product_all_well_centered_certified(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    ExactHigherSupportProductAabbDecisionBackend* backend) {
+  const std::optional<bool> bounded =
+      try_bounded_all_well_centered_decision(support_boxes);
+  if (bounded.has_value()) {
+    if (backend != nullptr) {
+      *backend =
+          ExactHigherSupportProductAabbDecisionBackend::
+              bounded_dyadic_int1024;
+    }
+    return *bounded;
+  }
+  if (backend != nullptr) {
+    *backend =
+        ExactHigherSupportProductAabbDecisionBackend::
+            arbitrary_precision_rational;
+  }
+  return exact_higher_support_product_aabb_analysis(support_boxes)
+      .all_supports_well_centered_certified();
+}
+
+ExactHigherSupportProductQueryCellDecision
+exact_higher_support_product_query_cell_decision(
     std::span<const spatial::ExactDyadicAabb3> support_boxes,
     const spatial::ExactDyadicAabb3& query_box,
     ExactHigherSupportProductAabbDecisionBackend* backend) {
-  const std::optional<bool> bounded =
-      try_bounded_query_strictly_inside_decision(
+  const std::optional<ExactHigherSupportProductQueryCellDecision> bounded =
+      try_bounded_query_cell_decision(
           support_boxes,
           query_box);
   if (bounded.has_value()) {
@@ -1000,10 +1074,36 @@ exact_higher_support_product_query_strictly_inside_every_independent_sphere_cert
         ExactHigherSupportProductAabbDecisionBackend::
             arbitrary_precision_rational;
   }
-  return exact_higher_support_product_aabb_analysis(
+  const ExactHigherSupportProductAabbAnalysis analysis =
+      exact_higher_support_product_aabb_analysis(
+          support_boxes,
+          query_box);
+  if (!analysis.query_scaled_power.has_value()) {
+    throw std::logic_error(
+        "a higher-support query-cell analysis omitted its power interval");
+  }
+  if (analysis.query_scaled_power->upper.sign() < 0) {
+    return ExactHigherSupportProductQueryCellDecision::
+        strictly_inside_every_independent_sphere;
+  }
+  if (analysis.query_scaled_power->lower.sign() >= 0) {
+    return ExactHigherSupportProductQueryCellDecision::
+        outside_or_boundary_every_independent_sphere;
+  }
+  return ExactHigherSupportProductQueryCellDecision::inconclusive;
+}
+
+bool
+exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    const spatial::ExactDyadicAabb3& query_box,
+    ExactHigherSupportProductAabbDecisionBackend* backend) {
+  return exact_higher_support_product_query_cell_decision(
              support_boxes,
-             query_box)
-      .query_strictly_inside_every_independent_sphere_certified();
+             query_box,
+             backend) ==
+      ExactHigherSupportProductQueryCellDecision::
+          strictly_inside_every_independent_sphere;
 }
 
 }  // namespace morsehgp3d::hierarchy

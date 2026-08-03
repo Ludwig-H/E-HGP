@@ -1395,7 +1395,13 @@ void add_density_term(
     DensityExpression& expression,
     const DensityLevel& density,
     BigInt coefficient) {
-  coefficient *= density.order;
+  // All zero-radius levels belong to the same exact top batch.  Represent
+  // that batch by one formal symbol Lambda_infinity, consistently with
+  // compare_density_impl(), instead of attempting to distinguish k / 0.
+  // Finite levels retain their actual k / r^exp_z coefficient.
+  if (density.squared_radius.numerator() != 0) {
+    coefficient *= density.order;
+  }
   if (coefficient == 0) {
     return;
   }
@@ -1464,7 +1470,11 @@ void add_density_term(
   for (const auto& [key, term] : expression) {
     static_cast<void>(key);
     if (term.first.numerator() == 0 && term.second != 0) {
-      throw ExactCertificationError("EOM with an infinite density is undefined");
+      // DensityExpression is ordered lexicographically in the formal common
+      // symbol Lambda_infinity and its finite remainder.  Equal zero-level
+      // mass cancels exactly; otherwise the leading integer coefficient alone
+      // determines the sign.  No finite surrogate or epsilon is introduced.
+      return term.second > 0 ? 1 : -1;
     }
   }
 
@@ -1894,13 +1904,6 @@ FlatClustering PointHierarchy::select_excess_of_mass(
       break;
     }
 
-    for (const auto& [key, term] : stability) {
-      static_cast<void>(key);
-      if (term.first.numerator() == 0 && term.second != 0) {
-        throw ExactCertificationError(
-            "EOM cannot rank a condensed cluster with infinite stability");
-      }
-    }
     if (sign_density_expression_exact(
             stability,
             implementation_->exponent,

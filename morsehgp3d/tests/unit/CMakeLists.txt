@@ -1160,6 +1160,48 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_higher_support_terminal_prune_tests
+  test_hierarchy_higher_support_terminal_prune.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_higher_support_terminal_prune_tests
+  PRIVATE morsehgp3d::higher_support
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_higher_support_terminal_prune_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_higher_support_terminal_prune_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_exact_higher_support_growth_profile
+  ../profiling/exact_higher_support_growth_profile.cpp
+)
+target_link_libraries(
+  morsehgp3d_exact_higher_support_growth_profile
+  PRIVATE morsehgp3d::higher_support
+)
+target_compile_features(
+  morsehgp3d_exact_higher_support_growth_profile
+  PRIVATE cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_exact_higher_support_growth_profile PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_exact_higher_support_growth_profile
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_support_differential_tests
   test_hierarchy_direct_support_differential.cpp
 )
@@ -1459,6 +1501,28 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_projectable_contribution_window_tests
+  test_hierarchy_direct_projectable_contribution_window.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_projectable_contribution_window_tests
+  PRIVATE
+    morsehgp3d::direct_projectable_contribution_window
+    morsehgp3d::direct_normalized_h0_sparse_forest_projection
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_projectable_contribution_window_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_projectable_contribution_window_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
   test_hierarchy_direct_sparse_stable_facet_forest.cpp
 )
@@ -1512,6 +1576,47 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_sparse_root_ledger_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_sparse_carrier_origin_capability_tests
+  test_hierarchy_direct_sparse_carrier_origin_capability.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_carrier_origin_capability_tests
+  PRIVATE morsehgp3d::direct_sparse_carrier_origin_capability
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_carrier_origin_capability_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_carrier_origin_capability_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_direct_normalized_h0_source_forest_ledger_transaction_tests
+  test_hierarchy_direct_normalized_h0_source_forest_ledger_transaction.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_normalized_h0_source_forest_ledger_transaction_tests
+  PRIVATE
+    morsehgp3d::direct_normalized_h0_source_forest_ledger_transaction
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_source_forest_ledger_transaction_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_normalized_h0_source_forest_ledger_transaction_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -3477,6 +3582,7 @@ set(
   morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
   morsehgp3d_gpu_exact_higher_support_product_fixed_tests
   morsehgp3d_hierarchy_higher_support_stream_tests
+  morsehgp3d_hierarchy_higher_support_terminal_prune_tests
   morsehgp3d_hierarchy_direct_support_differential_tests
   morsehgp3d_hierarchy_direct_support_terminal_tests
   morsehgp3d_hierarchy_exact_low_order_gabriel_skeleton_tests
@@ -3492,9 +3598,12 @@ set(
   morsehgp3d_hierarchy_direct_normalized_h0_resident_batch_provider_tests
   morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
   morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
+  morsehgp3d_hierarchy_direct_projectable_contribution_window_tests
   morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
   morsehgp3d_hierarchy_direct_sparse_stable_facet_descent_closure_tests
   morsehgp3d_hierarchy_direct_sparse_root_ledger_tests
+  morsehgp3d_hierarchy_direct_sparse_carrier_origin_capability_tests
+  morsehgp3d_hierarchy_direct_normalized_h0_source_forest_ledger_transaction_tests
   morsehgp3d_hierarchy_direct_normalized_vertical_square_receipt_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_star_journal_tests
@@ -4531,6 +4640,18 @@ add_test(
   NAME morsehgp3d.hierarchy_higher_support_stream
   COMMAND morsehgp3d_hierarchy_higher_support_stream_tests
 )
+add_test(
+  NAME morsehgp3d.hierarchy_higher_support_terminal_prune
+  COMMAND morsehgp3d_hierarchy_higher_support_terminal_prune_tests
+)
+add_test(
+  NAME morsehgp3d.exact_higher_support_growth_profile_contract
+  COMMAND morsehgp3d_exact_higher_support_growth_profile --contract-test
+)
+set_tests_properties(
+  morsehgp3d.exact_higher_support_growth_profile_contract
+  PROPERTIES TIMEOUT 20
+)
 
 add_test(
   NAME morsehgp3d.hierarchy_direct_support_differential
@@ -4594,6 +4715,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_projectable_contribution_window
+  COMMAND morsehgp3d_hierarchy_direct_projectable_contribution_window_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_stable_facet_forest
   COMMAND morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
 )
@@ -4604,6 +4729,14 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_root_ledger
   COMMAND morsehgp3d_hierarchy_direct_sparse_root_ledger_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_carrier_origin_capability
+  COMMAND morsehgp3d_hierarchy_direct_sparse_carrier_origin_capability_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_normalized_h0_source_forest_ledger_transaction
+  COMMAND morsehgp3d_hierarchy_direct_normalized_h0_source_forest_ledger_transaction_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_normalized_vertical_square_receipt
@@ -5014,6 +5147,20 @@ set_tests_properties(
   PROPERTIES
     SKIP_RETURN_CODE 77
     TIMEOUT 30
+)
+add_test(
+  NAME morsehgp3d.point_hierarchy_quality_campaign_contract
+  COMMAND
+    "${CMAKE_COMMAND}"
+    -E env
+    "PYTHONDONTWRITEBYTECODE=1"
+    "${Python3_EXECUTABLE}"
+    -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/../profiling/test_point_hierarchy_quality_campaign.py"
+)
+set_tests_properties(
+  morsehgp3d.point_hierarchy_quality_campaign_contract
+  PROPERTIES TIMEOUT 90
 )
 add_test(
   NAME morsehgp3d.phase15_pair_first_scale_campaign_contract

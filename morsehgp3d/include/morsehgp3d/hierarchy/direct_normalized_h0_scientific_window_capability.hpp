@@ -90,6 +90,7 @@ enum class ExactDirectNormalizedH0ScientificWindowCapabilitySealDecision
 struct ExactDirectNormalizedH0ScientificWindowCapabilityInitializationResult;
 class ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuilder;
 class ExactDirectNormalizedH0SparseForestProjection;
+class ExactDirectProjectableContributionWindow;
 class ExactDirectNormalizedH0ScientificWindowCapabilitySession;
 
 // Immutable, process-local evidence that one scientific window session was
@@ -147,6 +148,7 @@ class ExactDirectNormalizedH0ScientificSourceStamp {
   explicit ExactDirectNormalizedH0ScientificSourceStamp(
       std::shared_ptr<const void>) noexcept;
   friend class ExactDirectNormalizedH0ScientificWindowCapabilitySession;
+  friend class ExactDirectProjectableContributionWindow;
 };
 
 class ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow {
@@ -184,12 +186,17 @@ class ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow {
   [[nodiscard]] const void* projection_capability_identity() const noexcept;
   [[nodiscard]] std::shared_ptr<const void>
   share_projection_capability_identity() const noexcept;
+  // O(1), process-local source-session identity.  It is deliberately private:
+  // contribution projection may compare it with the equally private source
+  // stamp identity, but neither identity is a serializable authority.
+  [[nodiscard]] const void* scientific_control_identity() const noexcept;
 
   explicit ExactDirectNormalizedH0ScientificWindowCapabilityPreparedWindow(
       std::unique_ptr<Impl>) noexcept;
   friend class ExactDirectNormalizedH0ScientificWindowCapabilitySession;
   friend class ExactDirectNormalizedH0RelativeFrozenIncidenceBatchBuilder;
   friend class ExactDirectNormalizedH0SparseForestProjection;
+  friend class ExactDirectProjectableContributionWindow;
 };
 
 struct ExactDirectNormalizedH0ScientificWindowCapabilityPreparationResult {

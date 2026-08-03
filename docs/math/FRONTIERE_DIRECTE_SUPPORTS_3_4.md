@@ -73,6 +73,28 @@ Si l'union de ces plages contient au moins $t_m$ observations, chaque support af
 
 Le seuil $t_m$ ci-dessus appartient exclusivement au mode de rang fermé. Dans le mode carrier $q=3$ et support trois, le seuil de rejet vaut un intérieur strict; les égalités de shell ne contribuent jamais à ce compte. Une borne qui additionne intérieurs et shell est invalide pour cette décision.
 
+### 4.1 Sens exact de l'inclusion Morton
+
+Le mécanisme certifiant des paires n'est pas « boule contenue dans une cellule Morton ». Il prouve au contraire qu'une boîte requête $Q$, portée par un nœud du LBVH, est strictement contenue dans toutes les boules d'un produit de supports. Pour les paires, cette relation est décidée par le maximum exact de $\phi(x,u,v)$. Pour les supports trois et quatre, elle est décidée sans division par l'intervalle exact du polynôme $P_U(x)$ ci-dessus.
+
+La décision de cellule possède trois valeurs. Si la borne supérieure de $P_U(Q)$ est strictement négative, toute la masse de $Q$ fournit des témoins intérieurs universels. Si sa borne inférieure est positive ou nulle, aucun point de $Q$ n'est un témoin strict pour aucun support affine indépendant du produit et le sous-arbre requête peut être sauté. Dans tous les autres cas, la relation est inconclusive. Une égalité à zéro ne fournit jamais un témoin de rang; elle autorise seulement le saut sûr du sous-arbre requête lorsque toute la borne inférieure est nulle ou positive.
+
+L'inclusion inverse $B(U)\subseteq Q$ ne possède aucun pouvoir d'énumération général : les sommets de $U$ peuvent franchir une frontière Morton, une autre boule pertinente peut dépendre d'un point situé hors de $Q$, et les cellules voisines dans l'espace ne sont pas nécessairement voisines dans l'ordre Morton. Elle ne partitionne donc ni $\binom{n}{3}$ ni $\binom{n}{4}$.
+
+### 4.2 Sonde Morton locale positive
+
+Le chemin produit ne doit pas chercher ses premiers témoins en parcourant le LBVH depuis la racine pour chaque produit. Il n'ouvre la sonde que lorsque l'analyse Gram--Cramer certifie universellement le bon centrage : la borne inférieure de $\Delta$ et celles de tous les numérateurs barycentriques sont strictement positives. Si cette condition n'est pas prouvée, le verdict est seulement inconclusif; le produit non terminal est subdivisé et le terminal poursuit sa fermeture exacte. Aucun tuple n'est rejeté par cette porte positive.
+
+Pour une entrée canonique $e$, notons $D(e)$ l'union de ses au plus quatre intervalles supports et $H=t_m\leq9$. Pour chaque intervalle $[b_i,e_i)$ et chaque $1\leq d\leq H$, la sonde propose les positions $b_i-d$ et $e_i+d-1$ lorsqu'elles appartiennent au nuage. Elle ajoute la feuille obtenue par descente exacte vers le centre représentatif, puis un halo de rayon $H$ autour de cette feuille. Après retrait de $D(e)$ et déduplication, le nombre de positions proposées satisfait
+
+$$L\leq(8+2)H+1\leq91.$$
+
+Chaque position est remontée vers le plus haut ancêtre LBVH externe au domaine support dont la masse ne dépasse pas $H$. Les racines obtenues sont dédupliquées et forment une antichaîne disjointe; chacune conserve seulement les feuilles proposées qui lui sont associées. La décision exacte à trois valeurs est appliquée d'abord à la racine : `strictly_inside_every_independent_sphere` ajoute sa masse entière et son reçu, `outside_or_boundary_every_independent_sphere` saute toute cette cellule locale, et `inconclusive` évalue seulement les singletons proposés associés. Il n'y a ni descente de tous les descendants ambigus, ni DFS depuis la racine globale. Il existe au plus $L$ évaluations de racines et $L$ évaluations de fallback, donc au plus 182 décisions exactes par produit admissible.
+
+Dès que la masse certifiée atteint $H$, les reçus de racines ou feuilles forment une antichaîne exacte hors support et le prune de rang s'applique à toute la masse du produit. Si le seuil n'est pas atteint, l'état positif est effacé et le produit non terminal est subdivisé; un terminal poursuit sa classification globale exacte de boule fermée. Le checkpoint `schema=6 / traversal=5` persiste le centre proposé, les deux curseurs scalaires cellule--fallback et les seuls reçus positifs; `rank_frontier` doit rester vide.
+
+Cette asymétrie ferme le problème des frontières Morton : le halo peut manquer un témoin spatialement proche, mais il ne peut jamais fabriquer un prune. L'exhaustivité reste portée exclusivement par la partition canonique de la section 2 et par ses expansions disjointes. La sonde ne crée ni propriétaire scientifique concurrent, ni liste de voisins autoritaire, ni fallback dense.
+
 ## 5. Classification terminale sparse
 
 Une feuille non exclue est recertifiée avec les primitives exactes existantes : dépendance affine, centre circonscrit, barycentriques et réduction éventuelle du support. Un support dépendant, extérieur ou réduit sur sa frontière est résolu sans émission à cette taille.
@@ -109,6 +131,14 @@ La limite 2 048 démontrée pour les paires ne couvre donc pas les supports troi
 Chaque entrée de frontière contient au plus quatre groupes et chaque certificat de rang au plus $t_m\leq9$ plages témoins utiles avant arrêt. La mémoire de travail dépend donc du LBVH, de la frontière explicitement budgetée, des certificats et de la sortie, jamais de $\binom{n}{3}$ ou $\binom{n}{4}$.
 
 Cette propriété mémoire ne constitue pas une borne de temps favorable. Si les intervalles restent ambigus et si peu de supports dépassent le rang, la frontière peut atteindre toutes les feuilles et le travail reste combinatoire. Le jalon CPU certifie l'objet et les exclusions; il ne ferme ni le SLO 50 000 points, ni la voie dix millions. Les prochaines mesures doivent porter sur les nombres de produits, les prunes de bon centrage, les reçus de rang, les feuilles et le pic de frontière. Une croissance défavorable est un no-go pour la borne choisie, pas une raison de remplacer l'exactitude par une liste de voisins excluante.
+
+Pour la sonde locale, posons $L\leq10H+1\leq91$ et $E\leq2L\leq182$, avec $H\leq9$. La porte universelle ajoute une analyse Gram--Cramer exacte. La construction du plan coûte une descente centrale, au plus $L$ conversions position--nœud et une déduplication bornée; les décisions cellule--ou--feuille coûtent au plus $E$ évaluations universelles. Si $d_T$ est la profondeur du LBVH et $T_{\mathrm{exact}}$ le coût d'une décision, une borne honnête par produit admissible est
+
+$$O\left(L^2+Ld_T+ET_{\mathrm{exact}}\right),$$
+
+avec un scratch $O(L+H)$. Si $V$ produits sont visités, cette écriture ne borne toujours pas $V$ : dans un cas adversarial, $V$ peut encore être de l'ordre de $\binom{n}{m}$. Le mot « sparse » désigne donc une propriété à mesurer sur les données cibles, jamais une conséquence automatique du halo.
+
+Le profil post-sonde à $n=32$ et 5 000 unités reste un no-go sur les six cas. Pour `uniform`, les couples $(K,\text{résolus},\text{visites rang},\text{porte})$ valent $(5,1793,1063,2158)$ et $(10,1350,1991,1668)$; pour `separated`, $(5,2952,17,2749)$ et $(10,2922,70,2723)$; pour `multiscale`, $(5,2838,505,2507)$ et $(10,2825,531,2494)$. Les tailles 64 et 128 sont coupées. Le champ interne `ru_maxrss`, contaminé ou hérité, est rejeté; une nouvelle exécution complète échantillonnée extérieurement toutes les 20 ms via `/proc/<pid>/status` observe 13 896 Kio. L'amélioration face aux 53--62 supports de l'ancien parcours ne suffit donc pas à ouvrir 50 k ou GCP.
 
 ## 8. Contre-exemples permanents aux coins supports
 
