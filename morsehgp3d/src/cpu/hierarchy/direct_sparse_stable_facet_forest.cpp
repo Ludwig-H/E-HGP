@@ -244,6 +244,14 @@ struct SparseShadowNode {
   std::size_t component_size{};
 };
 
+struct SparseShadowPreTicketState {
+  ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin origin{
+      ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+          not_certified};
+  ExactDirectSparseStableFacetHandle root_handle{};
+  std::size_t component_size{};
+};
+
 [[nodiscard]] std::size_t mix_stable_handle(
     ExactDirectSparseStableFacetHandle handle) noexcept {
   std::uint64_t word = static_cast<std::uint64_t>(handle) +
@@ -1186,10 +1194,26 @@ bool ExactDirectSparseStableFacetForestPreparedPreview::
   }
   for (std::size_t index = 0U; index < value.records.size(); ++index) {
     const auto& record = value.records[index];
+    const bool pre_ticket_origin_valid =
+        record.pre_ticket_origin ==
+            ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                durable_observed ||
+        record.pre_ticket_origin ==
+            ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                prepared_new;
     if (record.requested_handle >= value.pre_stamp.stable_facet_token_count ||
+        record.pre_root_handle >=
+            value.pre_stamp.stable_facet_token_count ||
         record.post_root_handle >=
             value.pre_stamp.stable_facet_token_count ||
+        !pre_ticket_origin_valid || record.pre_component_size == 0U ||
         record.post_component_size == 0U ||
+        (record.pre_ticket_origin ==
+             ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                 prepared_new &&
+         (record.pre_root_handle != record.requested_handle ||
+          record.pre_component_size != 1U)) ||
+        record.post_component_size < record.pre_component_size ||
         (index != 0U &&
          value.records[index - 1U].requested_handle >=
              record.requested_handle)) {
@@ -2097,10 +2121,9 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
     std::vector<SparseShadowNode> shadow_nodes;
     shadow_nodes.reserve(output.shadow_node_upper_bound);
 
-    const auto pre_root = [&](ExactDirectSparseStableFacetHandle handle)
-        -> std::optional<std::pair<
-            ExactDirectSparseStableFacetHandle,
-            std::size_t>> {
+    const auto resolve_pre_ticket_state = [&](
+        ExactDirectSparseStableFacetHandle handle)
+        -> std::optional<SparseShadowPreTicketState> {
       const auto durable_row = handle_index_row(
           impl_->entries, impl_->handle_index_slots, handle);
       if (durable_row.has_value()) {
@@ -2109,21 +2132,29 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
           return std::nullopt;
         }
         const auto& root_entry = impl_->entries[*root];
-        return std::pair{
+        return SparseShadowPreTicketState{
+            ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                durable_observed,
             root_entry.stable_source_facet_token_index,
             root_entry.component_size};
       }
       if (insertion_span_contains_handle(prepared.insertions, handle)) {
-        return std::pair{handle, std::size_t{1U}};
+        return SparseShadowPreTicketState{
+            ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                prepared_new,
+            handle,
+            std::size_t{1U}};
       }
       return std::nullopt;
     };
-    const auto append_pre_root = [&](ExactDirectSparseStableFacetHandle handle) {
-      const auto root = pre_root(handle);
-      if (!root.has_value()) {
+    const auto append_pre_ticket_root = [&](
+        ExactDirectSparseStableFacetHandle handle) {
+      const auto prestate = resolve_pre_ticket_state(handle);
+      if (!prestate.has_value()) {
         return false;
       }
-      shadow_nodes.push_back({root->first, 0U, root->second});
+      shadow_nodes.push_back(
+          {prestate->root_handle, 0U, prestate->component_size});
       return true;
     };
 
@@ -2148,7 +2179,7 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
       begin = end;
     }
     for (const auto handle : requested_handles) {
-      if (!append_pre_root(handle)) {
+      if (!append_pre_ticket_root(handle)) {
         output.decision =
             ExactDirectSparseStableFacetForestPreparedPreviewDecision::
                 no_requested_handle_unknown_rejected;
@@ -2156,8 +2187,8 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
       }
     }
     for (const auto& operation : prepared.unions) {
-      if (!append_pre_root(operation.left_handle) ||
-          !append_pre_root(operation.right_handle)) {
+      if (!append_pre_ticket_root(operation.left_handle) ||
+          !append_pre_ticket_root(operation.right_handle)) {
         output.decision =
             ExactDirectSparseStableFacetForestPreparedPreviewDecision::
                 no_ticket_rejected;
@@ -2196,27 +2227,33 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
     }
     shadow_nodes.resize(compact_count);
 
-    const auto shadow_index_for_handle = [&](
-                                             ExactDirectSparseStableFacetHandle
-                                                 handle)
+    const auto shadow_index_for_pre_root = [&shadow_nodes](
+                                               ExactDirectSparseStableFacetHandle
+                                                   pre_root_handle)
         -> std::optional<std::size_t> {
-      const auto root = pre_root(handle);
-      if (!root.has_value()) {
-        return std::nullopt;
-      }
       const auto found = std::lower_bound(
           shadow_nodes.begin(),
           shadow_nodes.end(),
-          root->first,
+          pre_root_handle,
           [](const SparseShadowNode& node,
              ExactDirectSparseStableFacetHandle value) {
             return node.root_handle < value;
           });
       if (found == shadow_nodes.end() ||
-          found->root_handle != root->first) {
+          found->root_handle != pre_root_handle) {
         return std::nullopt;
       }
       return static_cast<std::size_t>(found - shadow_nodes.begin());
+    };
+    const auto shadow_index_for_handle = [&resolve_pre_ticket_state,
+                                          &shadow_index_for_pre_root](
+                                             ExactDirectSparseStableFacetHandle
+                                                 handle)
+        -> std::optional<std::size_t> {
+      const auto prestate = resolve_pre_ticket_state(handle);
+      return prestate.has_value()
+                 ? shadow_index_for_pre_root(prestate->root_handle)
+                 : std::nullopt;
     };
     const auto shadow_root_index = [&](std::size_t index)
         -> std::optional<std::size_t> {
@@ -2281,7 +2318,14 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
         records;
     records.reserve(requested_handles.size());
     for (const auto handle : requested_handles) {
-      const auto node = shadow_index_for_handle(handle);
+      const auto prestate = resolve_pre_ticket_state(handle);
+      if (!prestate.has_value()) {
+        output.decision =
+            ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+                no_ticket_rejected;
+        return output;
+      }
+      const auto node = shadow_index_for_pre_root(prestate->root_handle);
       if (!node.has_value()) {
         output.decision =
             ExactDirectSparseStableFacetForestPreparedPreviewDecision::
@@ -2298,7 +2342,10 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
       records.push_back(
           {handle,
            shadow_nodes[*root].root_handle,
-           shadow_nodes[*root].component_size});
+           shadow_nodes[*root].component_size,
+           prestate->origin,
+           prestate->root_handle,
+           prestate->component_size});
     }
     if (current_stamp() != output.pre_stamp || !ticket.valid()) {
       output.decision =

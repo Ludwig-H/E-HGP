@@ -1150,20 +1150,44 @@ void test_prepared_sparse_shadow_preview_q_like_replay() {
       "q-like preparation mints one ticket-bound mutation-free sparse preview");
 
   const auto& receipt = preview.preview->receipt();
+  constexpr std::array<
+      ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin,
+      requested.size()>
+      expected_pre_origins{
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              durable_observed,
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              durable_observed,
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              durable_observed,
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              durable_observed,
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              prepared_new,
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              prepared_new,
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              prepared_new,
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              prepared_new};
+  constexpr std::array<ExactDirectSparseStableFacetHandle, requested.size()>
+      expected_pre_roots{10U, 10U, 30U, 30U, 50U, 60U, 70U, 80U};
+  constexpr std::array<std::size_t, requested.size()> expected_pre_sizes{
+      2U, 2U, 2U, 2U, 1U, 1U, 1U, 1U};
   bool expected_records = receipt.records.size() == requested.size();
   for (std::size_t index = 0U;
-       expected_records && index + 1U < receipt.records.size();
+       expected_records && index < receipt.records.size();
        ++index) {
     const auto& record = receipt.records[index];
     expected_records =
         record.requested_handle == requested[index] &&
-        record.post_root_handle == 10U && record.post_component_size == 7U;
-  }
-  if (expected_records && !receipt.records.empty()) {
-    const auto& singleton = receipt.records.back();
-    expected_records = singleton.requested_handle == 80U &&
-                       singleton.post_root_handle == 80U &&
-                       singleton.post_component_size == 1U;
+        record.pre_ticket_origin == expected_pre_origins[index] &&
+        record.pre_root_handle == expected_pre_roots[index] &&
+        record.pre_component_size == expected_pre_sizes[index] &&
+        record.post_root_handle == (index + 1U == requested.size() ? 80U
+                                                                   : 10U) &&
+        record.post_component_size == (index + 1U == requested.size() ? 1U
+                                                                       : 7U);
   }
   check(
       expected_records && receipt.shadow_node_count == 6U &&
@@ -1196,6 +1220,23 @@ void test_prepared_sparse_shadow_preview_q_like_replay() {
   check(
       !preview.preview->certifies_receipt(tampered),
       "an edited post-root record cannot pass the private preview mint");
+  tampered = receipt;
+  tampered.records.front().pre_ticket_origin =
+      ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+          prepared_new;
+  check(
+      !preview.preview->certifies_receipt(tampered),
+      "an edited pre-ticket origin cannot pass the private preview mint");
+  tampered = receipt;
+  tampered.records.front().pre_root_handle = 20U;
+  check(
+      !preview.preview->certifies_receipt(tampered),
+      "an edited pre-root cannot pass the private preview mint");
+  tampered = receipt;
+  ++tampered.records.front().pre_component_size;
+  check(
+      !preview.preview->certifies_receipt(tampered),
+      "an edited pre-component size cannot pass the private preview mint");
   tampered = receipt;
   tampered.canonical_union_replay_exact = false;
   check(
@@ -1432,6 +1473,13 @@ void test_prepared_sparse_shadow_preview_caps_and_size_max() {
           maximum_preview.preview->records().size() == 1U &&
           maximum_preview.preview->records().front().requested_handle ==
               maximum_valid_handle &&
+          maximum_preview.preview->records().front().pre_ticket_origin ==
+              ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                  prepared_new &&
+          maximum_preview.preview->records().front().pre_root_handle ==
+              maximum_valid_handle &&
+          maximum_preview.preview->records().front().pre_component_size ==
+              1U &&
           maximum_namespace_forest.observed_entries().empty() &&
           outside_namespace.decision ==
               ExactDirectSparseStableFacetForestPreparedPreviewDecision::

@@ -416,6 +416,16 @@ int main() {
       std::is_nothrow_move_constructible_v<
           morsehgp3d::hierarchy::
               ExactDirectSparseStableFacetForestPreparedPreview>);
+  constexpr morsehgp3d::hierarchy::
+      ExactDirectSparseStableFacetForestPreparedPreviewRecord
+          installed_sparse_preview_record_probe{};
+  static_assert(
+      installed_sparse_preview_record_probe.pre_ticket_origin ==
+          morsehgp3d::hierarchy::
+              ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                  not_certified &&
+      installed_sparse_preview_record_probe.pre_root_handle == 0U &&
+      installed_sparse_preview_record_probe.pre_component_size == 0U);
   const morsehgp3d::hierarchy::
       ExactDirectSparseStableFacetForestPreparedPreview
           installed_sparse_preview_probe;

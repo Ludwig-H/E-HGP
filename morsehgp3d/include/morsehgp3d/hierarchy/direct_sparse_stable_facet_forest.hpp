@@ -424,10 +424,23 @@ struct ExactDirectSparseStableFacetForestPreparedPreviewBudget {
       default;
 };
 
+enum class ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin
+    : std::uint8_t {
+  not_certified,
+  durable_observed,
+  prepared_new,
+};
+
 struct ExactDirectSparseStableFacetForestPreparedPreviewRecord {
   ExactDirectSparseStableFacetHandle requested_handle{};
   ExactDirectSparseStableFacetHandle post_root_handle{};
   std::size_t post_component_size{};
+  ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin
+      pre_ticket_origin{
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              not_certified};
+  ExactDirectSparseStableFacetHandle pre_root_handle{};
+  std::size_t pre_component_size{};
 
   friend bool operator==(
       const ExactDirectSparseStableFacetForestPreparedPreviewRecord&,
