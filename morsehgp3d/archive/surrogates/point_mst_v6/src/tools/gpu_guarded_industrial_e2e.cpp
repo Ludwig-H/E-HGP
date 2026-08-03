@@ -1,3 +1,5 @@
+// Archived point-MST surrogate v6 runner; excluded from the active product build.
+
 #include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/gpu/binary64_lbvh_top_k.hpp"

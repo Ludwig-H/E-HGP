@@ -34,6 +34,11 @@ option(
   "Instrument project-owned CPU targets with AddressSanitizer and UBSan"
   OFF
 )
+option(
+  MORSEHGP3D_INSTALL_INTERNAL_TARGETS
+  "Install internal research targets and headers"
+  OFF
+)
 
 if(MORSEHGP3D_CUDA_AUDIT AND NOT MORSEHGP3D_ENABLE_CUDA)
   message(FATAL_ERROR "MORSEHGP3D_CUDA_AUDIT requires MORSEHGP3D_ENABLE_CUDA=ON")
@@ -218,7 +223,7 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_contract
-  PRIVATE morsehgp3d::sanitizers
+  PRIVATE $<BUILD_INTERFACE:morsehgp3d::sanitizers>
 )
 if(MSVC)
   target_compile_options(morsehgp3d_contract PRIVATE /W4 /WX)
@@ -3814,6 +3819,81 @@ target_link_libraries(
   PRIVATE morsehgp3d::sanitizers
 )
 
+# Stable public reduction API.  This target consumes an already certified
+# all-orders Hartigan tower and never materializes an ordinary or higher-order
+# Delaunay mosaic.  The large source-authority graph remains an internal
+# producer and is deliberately absent from this target's public link surface.
+add_library(
+  morsehgp3d_point_hierarchy
+  STATIC
+    src/cpu/api/point_hierarchy.cpp
+)
+add_library(morsehgp3d::point_hierarchy ALIAS morsehgp3d_point_hierarchy)
+set_target_properties(
+  morsehgp3d_point_hierarchy
+  PROPERTIES
+    EXPORT_NAME point_hierarchy
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_point_hierarchy PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_point_hierarchy
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_point_hierarchy
+  PUBLIC
+    morsehgp3d::contract
+    morsehgp3d::exact
+  PRIVATE $<BUILD_INTERFACE:morsehgp3d::sanitizers>
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_point_hierarchy PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_point_hierarchy
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(morsehgp3d_public INTERFACE)
+add_library(morsehgp3d::morsehgp3d ALIAS morsehgp3d_public)
+set_target_properties(morsehgp3d_public PROPERTIES EXPORT_NAME morsehgp3d)
+target_compile_features(morsehgp3d_public INTERFACE cxx_std_20)
+target_link_libraries(
+  morsehgp3d_public
+  INTERFACE morsehgp3d::point_hierarchy
+)
+
+if(MORSEHGP3D_BUILD_TOOLS)
+  add_executable(
+    morsehgp3d_point_hierarchy_projection_benchmark
+    src/tools/point_hierarchy_projection_benchmark.cpp
+  )
+  target_compile_features(
+    morsehgp3d_point_hierarchy_projection_benchmark PRIVATE cxx_std_20
+  )
+  target_link_libraries(
+    morsehgp3d_point_hierarchy_projection_benchmark
+    PRIVATE morsehgp3d::morsehgp3d
+  )
+  morsehgp3d_apply_sanitizers(
+    morsehgp3d_point_hierarchy_projection_benchmark
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_point_hierarchy_projection_benchmark PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_point_hierarchy_projection_benchmark
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+endif()
+
 add_library(
   morsehgp3d_direct_k1_boruvka_closed_cut_session
   STATIC
@@ -5936,52 +6016,6 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
-  add_library(
-    morsehgp3d_gpu_binary64_lbvh_top_k
-    STATIC
-      include/morsehgp3d/gpu/binary64_lbvh_top_k.hpp
-      src/cuda/phase14_binary64_lbvh_top_k_internal.hpp
-      src/cuda/phase14_binary64_lbvh_top_k.cu
-      src/gpu/binary64_lbvh_top_k.cpp
-  )
-  add_library(
-    morsehgp3d::gpu_binary64_lbvh_top_k
-    ALIAS morsehgp3d_gpu_binary64_lbvh_top_k
-  )
-  target_include_directories(
-    morsehgp3d_gpu_binary64_lbvh_top_k
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
-  )
-  target_link_libraries(
-    morsehgp3d_gpu_binary64_lbvh_top_k
-    PUBLIC morsehgp3d::gpu_morton_lbvh_build
-  )
-  target_compile_features(
-    morsehgp3d_gpu_binary64_lbvh_top_k PUBLIC cxx_std_20
-  )
-  morsehgp3d_configure_cuda_target(
-    morsehgp3d_gpu_binary64_lbvh_top_k
-  )
-  if(MSVC)
-    target_compile_options(
-      morsehgp3d_gpu_binary64_lbvh_top_k
-      PRIVATE
-        $<$<COMPILE_LANGUAGE:CXX>:/W4>
-        $<$<COMPILE_LANGUAGE:CXX>:/WX>
-    )
-  else()
-    target_compile_options(
-      morsehgp3d_gpu_binary64_lbvh_top_k
-      PRIVATE
-        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
-        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
-        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
-        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
-        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
-        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
-    )
-  endif()
-
   add_executable(
     morsehgp3d_gpu_morton_lbvh_build_component_smoke
     src/tools/gpu_morton_lbvh_build_component_smoke.cpp
@@ -6171,43 +6205,6 @@ if(MORSEHGP3D_ENABLE_CUDA)
   endif()
 
   if(MORSEHGP3D_BUILD_TOOLS)
-    add_executable(
-      morsehgp3d_gpu_guarded_industrial_e2e
-      src/tools/gpu_guarded_industrial_e2e.cpp
-    )
-    target_link_libraries(
-      morsehgp3d_gpu_guarded_industrial_e2e
-      PRIVATE
-        morsehgp3d::contract
-        morsehgp3d::gpu_binary64_lbvh_top_k
-        morsehgp3d::gpu_morton_lbvh_build
-        morsehgp3d::spatial
-        Threads::Threads
-    )
-    target_compile_features(
-      morsehgp3d_gpu_guarded_industrial_e2e PRIVATE cxx_std_20
-    )
-    target_compile_definitions(
-      morsehgp3d_gpu_guarded_industrial_e2e
-      PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
-    )
-    if(MSVC)
-      target_compile_options(
-        morsehgp3d_gpu_guarded_industrial_e2e PRIVATE /W4 /WX
-      )
-    else()
-      target_compile_options(
-        morsehgp3d_gpu_guarded_industrial_e2e
-        PRIVATE
-          -Wall
-          -Wextra
-          -Wpedantic
-          -Wconversion
-          -Wsign-conversion
-          -Werror
-      )
-    endif()
-
     add_executable(
       morsehgp3d_gpu_morton_yao48_seed_work_profile
       src/cuda/phase14_morton_window_knn_internal.hpp
@@ -6437,9 +6434,17 @@ include(CMakePackageConfigHelpers)
 
 install(
   TARGETS
+    morsehgp3d_public
+    morsehgp3d_point_hierarchy
     morsehgp3d_contract
     morsehgp3d_exact
-    morsehgp3d_spatial
+  EXPORT MorseHGP3DTargets
+)
+
+if(MORSEHGP3D_INSTALL_INTERNAL_TARGETS)
+  install(
+    TARGETS
+      morsehgp3d_spatial
     morsehgp3d_morton_triangular_block_pair_schedule
     morsehgp3d_facet_miniball
     morsehgp3d_capped_distinct_point_coverage
@@ -6521,13 +6526,13 @@ install(
     morsehgp3d_direct_morse_normalized_h0_product_session
     morsehgp3d_yao48_ranked_pair_candidates_reference
     morsehgp3d_exact_ranked_diametral_pair_catalog_reference
-    morsehgp3d_sanitizers
-  EXPORT MorseHGP3DTargets
-)
-if(UNIX)
-  install(
-    TARGETS
-      morsehgp3d_pair_support_durable
+      morsehgp3d_sanitizers
+    EXPORT MorseHGP3DTargets
+  )
+  if(UNIX)
+    install(
+      TARGETS
+        morsehgp3d_pair_support_durable
       morsehgp3d_atomic_linear_run_store
       morsehgp3d_sparse_anchored_pair_chunk_run
       morsehgp3d_sparse_anchored_pair_h0_run
@@ -6535,10 +6540,11 @@ if(UNIX)
       morsehgp3d_sparse_higher_support_h0_chunk_run
       morsehgp3d_sparse_direct_h0_atomic_run_reader
       morsehgp3d_direct_morse_chunk_run
-    EXPORT MorseHGP3DTargets
-  )
+      EXPORT MorseHGP3DTargets
+    )
+  endif()
 endif()
-if(MORSEHGP3D_BUILD_TOOLS)
+if(MORSEHGP3D_INSTALL_INTERNAL_TARGETS AND MORSEHGP3D_BUILD_TOOLS)
   install(
     TARGETS
       morsehgp3d_replay_predicate
@@ -6547,6 +6553,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d_anchored_pair_candidate_pipeline_smoke
       morsehgp3d_direct_morse_product_runner
       morsehgp3d_massive_sparse_pair_prefix_smoke
+      morsehgp3d_point_hierarchy_projection_benchmark
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
   )
   install(
@@ -6556,10 +6563,36 @@ if(MORSEHGP3D_BUILD_TOOLS)
   )
 endif()
 install(
-  DIRECTORY include/
-  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-  PATTERN "morsehgp3d/gpu" EXCLUDE
+  FILES include/morsehgp3d/morsehgp3d.hpp
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/morsehgp3d"
 )
+install(
+  DIRECTORY include/morsehgp3d/api/
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/morsehgp3d/api"
+  FILES_MATCHING PATTERN "*.hpp"
+)
+install(
+  DIRECTORY include/morsehgp3d/contract/
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/morsehgp3d/contract"
+  FILES_MATCHING PATTERN "*.hpp"
+)
+install(
+  DIRECTORY include/morsehgp3d/exact/
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/morsehgp3d/exact"
+  FILES_MATCHING PATTERN "*.hpp"
+)
+if(MORSEHGP3D_INSTALL_INTERNAL_TARGETS)
+  install(
+    DIRECTORY include/morsehgp3d/hierarchy/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/morsehgp3d/hierarchy"
+    FILES_MATCHING PATTERN "*.hpp"
+  )
+  install(
+    DIRECTORY include/morsehgp3d/spatial/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/morsehgp3d/spatial"
+    FILES_MATCHING PATTERN "*.hpp"
+  )
+endif()
 install(
   EXPORT MorseHGP3DTargets
   FILE MorseHGP3DTargets.cmake

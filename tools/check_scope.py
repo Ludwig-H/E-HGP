@@ -21,6 +21,40 @@ REMOVED_PATHS = (
     ROOT / "experiments" / "powercover3d",
     ROOT / "morsehgp3d" / "src" / "tools" / "gpu_geogram_low_order_diagnostic.cu",
     ROOT / "morsehgp3d" / "src" / "tools" / "gpu_morton_window_h0_surrogate.cpp",
+    ROOT / "morsehgp3d" / "include" / "morsehgp3d" / "gpu" / "binary64_lbvh_top_k.hpp",
+    ROOT / "morsehgp3d" / "src" / "cuda" / "phase14_binary64_lbvh_top_k_internal.hpp",
+    ROOT / "morsehgp3d" / "src" / "cuda" / "phase14_binary64_lbvh_top_k.cu",
+    ROOT / "morsehgp3d" / "src" / "gpu" / "binary64_lbvh_top_k.cpp",
+    ROOT / "morsehgp3d" / "src" / "tools" / "gpu_guarded_industrial_e2e.cpp",
+    ROOT
+    / "morsehgp3d"
+    / "include"
+    / "morsehgp3d"
+    / "hierarchy"
+    / "direct_morse_unified_resident_vertical_stream_bridge.hpp",
+    ROOT
+    / "morsehgp3d"
+    / "include"
+    / "morsehgp3d"
+    / "hierarchy"
+    / "direct_normalized_h0_retraction_authority.hpp",
+    ROOT
+    / "morsehgp3d"
+    / "src"
+    / "cpu"
+    / "hierarchy"
+    / "direct_morse_unified_resident_vertical_stream_bridge.cpp",
+    ROOT
+    / "morsehgp3d"
+    / "src"
+    / "cpu"
+    / "hierarchy"
+    / "direct_normalized_h0_retraction_authority.cpp",
+    ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "unit"
+    / "test_hierarchy_direct_normalized_h0_retraction_authority.cpp",
 )
 PRODUCT_BUILD_FILES = (
     ROOT / ".github" / "workflows" / "ci.yml",
@@ -43,6 +77,8 @@ BANNED_PRODUCT_IDENTIFIERS = (
     "MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC",
     "morsehgp3d_gpu_geogram_low_order_diagnostic",
     "morsehgp3d_gpu_morton_window_h0_surrogate",
+    "morsehgp3d_gpu_binary64_lbvh_top_k",
+    "morsehgp3d_gpu_guarded_industrial_e2e",
 )
 
 

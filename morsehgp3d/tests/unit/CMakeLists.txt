@@ -448,6 +448,34 @@ target_link_libraries(
 )
 
 add_executable(
+  morsehgp3d_api_point_hierarchy_tests
+  test_api_point_hierarchy.cpp
+)
+target_link_libraries(
+  morsehgp3d_api_point_hierarchy_tests
+  PRIVATE morsehgp3d::morsehgp3d
+)
+
+add_executable(
+  morsehgp3d_point_hierarchy_sklearn_dump
+  point_hierarchy_sklearn_dump.cpp
+)
+target_link_libraries(
+  morsehgp3d_point_hierarchy_sklearn_dump
+  PRIVATE morsehgp3d::morsehgp3d
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_point_hierarchy_sklearn_dump PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_point_hierarchy_sklearn_dump
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_reduced_gamma_cut_tests
   test_hierarchy_reduced_gamma_cut.cpp
 )
@@ -3422,6 +3450,8 @@ set(
   morsehgp3d_hierarchy_direct_morse_m1_o5_death_accounting_tests
   morsehgp3d_hierarchy_direct_morse_gamma_carrier_conformance_tests
   morsehgp3d_hierarchy_size_condensed_hierarchy_tests
+  morsehgp3d_api_point_hierarchy_tests
+  morsehgp3d_point_hierarchy_sklearn_dump
   morsehgp3d_hierarchy_reduced_gamma_cut_tests
   morsehgp3d_hierarchy_critical_event_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_tests
@@ -3433,6 +3463,14 @@ set(
   morsehgp3d_morton_grouped_anchored_pair_schedule_tests
   morsehgp3d_morton_triangular_block_pair_schedule_tests
   morsehgp3d_gpu_exact_pair_block_frontier_host_contract_tests
+  morsehgp3d_gpu_exact_pair_block_witness_cuda_host_contract_tests
+  morsehgp3d_gpu_exact_pair_block_antichain_cuda_host_contract_tests
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_cuda_host_contract_tests
+  morsehgp3d_gpu_exact_pair_block_transactional_page_plan_tests
+  morsehgp3d_gpu_exact_pair_block_transactional_paged_host_scheduler_tests
+  morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract_tests
+  morsehgp3d_gpu_exact_pair_block_automatic_prune_recipe_catalog_tests
+  morsehgp3d_gpu_exact_pair_block_to_direct_pair_terminal_tests
   morsehgp3d_anchored_pair_candidate_classifier_tests
   morsehgp3d_sparse_anchored_pair_session_tests
   morsehgp3d_hierarchy_higher_support_product_tests
@@ -3617,6 +3655,9 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_hierarchy_size_condensed_hierarchy_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_api_point_hierarchy_tests PRIVATE /W4 /WX
   )
   target_compile_options(
     morsehgp3d_hierarchy_reduced_gamma_cut_tests PRIVATE /W4 /WX
@@ -3950,6 +3991,16 @@ else()
   )
   target_compile_options(
     morsehgp3d_hierarchy_size_condensed_hierarchy_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_api_point_hierarchy_tests
     PRIVATE
       -Wall
       -Wextra
@@ -4375,6 +4426,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_size_condensed_hierarchy
   COMMAND morsehgp3d_hierarchy_size_condensed_hierarchy_tests
+)
+add_test(
+  NAME morsehgp3d.api_point_hierarchy
+  COMMAND morsehgp3d_api_point_hierarchy_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_reduced_gamma_cut
@@ -4943,6 +4998,23 @@ add_test(
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_test(
+  NAME morsehgp3d.point_hierarchy_sklearn_differential
+  COMMAND
+    "${CMAKE_COMMAND}"
+    -E env
+    "PYTHONDONTWRITEBYTECODE=1"
+    "${Python3_EXECUTABLE}"
+    -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_point_hierarchy_sklearn.py"
+    "$<TARGET_FILE:morsehgp3d_point_hierarchy_sklearn_dump>"
+)
+set_tests_properties(
+  morsehgp3d.point_hierarchy_sklearn_differential
+  PROPERTIES
+    SKIP_RETURN_CODE 77
+    TIMEOUT 30
+)
 add_test(
   NAME morsehgp3d.phase15_pair_first_scale_campaign_contract
   COMMAND

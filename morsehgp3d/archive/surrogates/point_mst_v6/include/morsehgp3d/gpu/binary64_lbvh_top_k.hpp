@@ -1,5 +1,7 @@
 #pragma once
 
+// Archived point-MST surrogate v6; excluded from the active API and build.
+
 #include "morsehgp3d/gpu/morton_lbvh_build.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 

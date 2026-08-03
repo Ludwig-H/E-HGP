@@ -22,6 +22,21 @@ Le résultat mathématique testé est prioritaire sur toute mesure de qualité p
 
 Chaque campagne valide aussi [`implementation_status.toml`](implementation_status.toml) : une phase ne peut être marquée fermée sans porte satisfaite et preuves référencées.
 
+### 1.1 Réduction exacte-relative vers les points
+
+Le réducteur public `build_exact_point_hierarchy` possède un périmètre de validation distinct de la source HGP. Le CTest `morsehgp3d.api_point_hierarchy` couvre actuellement :
+
+- le comparateur exact des densités pour plusieurs exposants rationnels `exp_z`, y compris le lot symbolique de rayon nul;
+- une tour à deux ordres, ses arêtes horizontales et verticales, le merge tree et l'unicité du terminal de chaque point;
+- le canal `stay`, les poids de rayon inverse, les poids rationnels entre ordres et leur liaison au reçu;
+- les coupes de rayon de type DBSCAN et la sélection EOM;
+- l'invariance par permutation des records source;
+- les rejets d'une source surrogate, d'un ordre manquant, d'une forêt cyclique ou d'une autorité absente.
+
+Le seul différentiel de cette API, `morsehgp3d.point_hierarchy_sklearn_differential`, compare les rendus plats à scikit-learn sur une fixture multi-ordres $K=2$ de neuf points : le rendu DBSCAN utilise `eps=1.5`, `reference_order=2` et `minimum_cluster_size=2`, tandis que scikit-learn utilise `eps=1.5` et `min_samples=2`; HDBSCAN utilise `min_cluster_size=4`, `min_samples=2`, `allow_single_cluster=false` et la sélection EOM. Le checker compare le bruit et les ensembles de membres à renommage de labels près. Il retourne le code de skip 77 lorsque scikit-learn avec HDBSCAN n'est pas disponible. Ce test vérifie une convention de sélection sur cette entrée; le filtre de taille du rendu reste distinct de `min_samples`, il ne partage pas l'autorité de preuve du réducteur, ne recertifie pas la tour HGP et ne transforme pas l'accord observé en égalité mathématique générale.
+
+Avant toute promotion, il reste obligatoire d'ajouter les fixtures de quasi-égalité avec rejeu de précision, d'échec par budget de certification, de racines concurrentes, de continuations qui modifient seulement les poids, de rayon nul end-to-end et d'identité entre chemins résident, streamé et restauré. Ces obligations sont listées intégralement dans la [présentation mathématique](math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md). Aucun test de ce sous-module ne qualifie 50 000 ou plusieurs millions de points.
+
 ## 2. Contrat mathématique observable
 
 ### 2.1 Filtration

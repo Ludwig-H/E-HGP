@@ -48,7 +48,6 @@ CUDA_TARGETS = [
     "morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier",
     "morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog",
     "morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification",
-    "morsehgp3d_gpu_guarded_industrial_e2e",
     "morsehgp3d_gpu_morton_yao48_seed_work_profile",
     "morsehgp3d_massive_sparse_pair_prefix_smoke",
 ]

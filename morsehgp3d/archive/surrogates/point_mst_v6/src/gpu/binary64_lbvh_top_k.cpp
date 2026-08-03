@@ -1,3 +1,5 @@
+// Archived point-MST surrogate v6; excluded from the active product build.
+
 #include "morsehgp3d/gpu/binary64_lbvh_top_k.hpp"
 
 #include "phase14_binary64_lbvh_top_k_internal.hpp"

@@ -1,3 +1,5 @@
+// Archived point-MST surrogate v6; excluded from the active product build.
+
 #include "phase14_binary64_lbvh_top_k_internal.hpp"
 
 #include <cuda_runtime.h>

@@ -8,6 +8,12 @@ Le seul chemin produit actif est le pipeline sparse exact `exact_sparse_frontier
 
 Les anciens surrogates, `two_edge`, `closed_star`, `square_clique`, `link_face_fan`, `one_edge`, Gamma exhaustif et le sidecar Geogram/PDEL sont gelés comme oracles bornés hors ligne. Geogram reste l'unique autorité Delaunay de ces diagnostics; aucune triangulation n'est recodée. La fenêtre Morton seule reste une heuristique historique, jamais une autorité de voisinage. Ils ne peuvent être ni une dépendance, ni un fallback, ni une correction, ni une option d'exécution du produit. Dès que leurs conclusions et fixtures permanentes sont scellées, un jalon de nettoyage conserve seulement les petits oracles, checkers et rapports nécessaires à la non-régression, puis retire leurs cibles, configurations et benchmarks du build produit. Les sections historiques ci-dessous documentent les décisions passées; elles ne rouvrent aucune architecture alternative.
 
+### Livraison aval exacte-relative
+
+La Phase 15 contient désormais une API publique CPU qui réduit une tour multi-ordres déclarée complète et exacte sous autorité externe en une hiérarchie laminaire de points. Le mode est `exact_relative_multi_order_laminar_point_projection_v1` : comparaison exacte des niveaux avec `exp_z` rationnel, poids simplexe--point par rayon inverse ou uniformes, poids rationnels entre ordres, routage descendant irréversible, coupes lambda et DBSCAN, puis sélection EOM. Le reçu lie les identifiants déclarés, le payload et les paramètres, refuse explicitement une source déclarée surrogate et ne rejoue ni n'authentifie l'autorité géométrique amont.
+
+Cette livraison ne ferme ni la Phase 15, ni la porte 50 k, ni la Phase 16. Les prochains gates restent, dans cet ordre : produire et sceller la tour HGP complète depuis le nuage, raccorder son flux de contributions au réducteur sans catalogue global, obtenir l'identité des chemins résident, streamé et repris, puis exécuter la campagne vraie 50 000 points avant 1 000 000, 10 000 001 et 30 000 000. `morsehgp3d.point_hierarchy_sklearn_differential`, l'unique comparaison comportementale scikit-learn, porte seulement sur les rendus plats d'une fixture multi-ordres $K=2$ de neuf points, avec ordre de référence et `min_samples` égaux à 2; ce n'est pas un oracle de la tour et il ne promeut aucun statut scientifique.
+
 ## 1. Règles de conduite pour tout agent
 
 Avant toute modification, l'agent doit lire :

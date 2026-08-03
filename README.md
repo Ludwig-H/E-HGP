@@ -1,72 +1,39 @@
 # E-HGP — MorseHGP3D
 
-MorseHGP3D vise à calculer la hiérarchie 3D des amas discrets de forte densité K-NN sans matérialiser la mosaïque de Delaunay d'ordre supérieur. La priorité actuelle est étroite : énumérer exactement toutes les paires dont la boule diamétrale fermée contient au plus $K_{\max}+1$ points, avec leur rang et la liste complète des points contenus, sans inspecter inconditionnellement l'univers quadratique.
+MorseHGP3D construit des hiérarchies 3D multi-ordres sans matérialiser la mosaïque de Delaunay d'ordre supérieur. Le dépôt sépare la source géométrique HGP sur les simplexes, la réduction aval en une hiérarchie laminaire de points et les rendus plats de clustering.
 
 > [!IMPORTANT]
-> État courant : Phase 15, porte d'entrée satisfaite, `backend=cuda_g4_plus_reference_cpu`, `profile=hgp_reduced`, `mode=resident_closed_rank23_pair_terminal_catalog`, `deployment_status=architecture_only`, `public_status=not_claimed`. Le parcours tuilé résident alimente désormais un classifieur CUDA multi-ordre avec `count/scan`, payload intérieur/shell, tri canonique et lease finale qui conserve l'autorité du nuage. L'enveloppe terminale ne publie que si toute la masse des paires est fermée avec zéro résidu et zéro fallback; la voie rapide des niveaux est exacte jusqu'à 256 bits et signale les cas larges, dont la borne binaire64 universelle est 4 200 bits. Le [reçu G4 `51102a0`](docs/validation/phase15_ranked_pair_classifier_g4_51102a0.json) ferme la qualification native bornée contre l'oracle indépendant toutes-paires/tous-témoins pour ce seul composant support deux aux rangs fermés 2 et 3, avec memcheck et racecheck propres. Cette tranche n'est ni $\Gamma_2$, ni la hiérarchie $k=2$, ni une exécution 50 k, et ne revendique aucune latence.
+> État courant : la Phase 15 reste `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Son réducteur aval utilise le mode `exact_relative_multi_order_laminar_point_projection_v1` : il est disponible et testé relativement à une tour de $T_1$ à $T_K$ déclarée complète et exacte par son producteur, puis liée à son payload par reçus. Le réducteur n'authentifie pas cette vérité amont. Le producteur géométrique complet de la tour, sa qualification GCP et les capacités 50 000 ou 10 000 001 points ne sont pas terminés. Aucun benchmark ne promeut ce statut.
 
-## Voie privilégiée
+## API de hiérarchie de points
 
-| ordre | objet généré | élimination immédiate |
-|---|---|---|
-| paires | toutes les paires de rang fermé $2\leq R\leq K_{\max}+1$, payload fermé complet | parcours Morton/LBVH fusionné avec banques Yao48; seules les feuilles survivantes sont classifiées exactement |
-| triangles | frontière indépendante des supports minimaux de taille trois | dépendance affine, triangles droits ou obtus déjà ramenés à un support de taille deux |
-| tétraèdres | frontière indépendante des supports minimaux de taille quatre; les fermetures de supports inférieurs sont fusionnées séparément | dépendance affine et centre circonscrit hors de l'intérieur strict |
-| hiérarchie | lots de niveaux exacts, incidences utiles et réduction Morse sparse | aucune cellule, coface ou mosaïque globale |
+L'en-tête public [`morsehgp3d/morsehgp3d.hpp`](morsehgp3d/include/morsehgp3d/morsehgp3d.hpp) et la cible CMake `morsehgp3d::morsehgp3d` exposent une seule voie aval :
 
-Les réductions vers un support inférieur sont exhaustives dans la fenêtre certifiée sous `RelevantGP`. Hors de ce domaine, une grande cosphère peut porter un petit simplexe Gabriel; elle déclenche `unsupported_degeneracy` au lieu d'être omise silencieusement.
+1. recevoir les forêts horizontales de tous les ordres, leurs coutures verticales et les simplexes projectables avec leurs reçus;
+2. ordonner exactement les niveaux de densité avec l'exposant rationnel positif `exp_z`;
+3. distribuer les contributions simplexe--point selon `inverse_radius` ou `uniform`, puis appliquer des poids rationnels entre ordres;
+4. construire le merge tree multi-ordres et router chaque point une seule fois, de façon descendante et irréversible;
+5. produire une coupe `lambda_cut`, une coupe de rayon `dbscan_radius` ou une sélection `excess_of_mass` de type HDBSCAN.
 
-Une seule passe paramétrée par $K_{\max}$ construit les buckets de rang fermé $R\leq K_{\max}+1$. Ici `requested_order=K` signifie donc « rang fermé au plus $K+1$ »; si une API demande littéralement « au plus $K_{\mathrm{total}}$ points dans la boule », le nombre de témoins requis pour exclure une paire est $K_{\mathrm{total}}-1$. Un simplexe Gabriel de cardinal $q$ alimente le niveau $q-1$; sous `RelevantGP`, son shell supplémentaire utile est vide, donc $q=R$ et ce routage se réduit à $k=R-1$.
+Chaque point possède un terminal unique. Les clusters d'une coupe ou d'une sélection forment donc une antichaîne et sont deux à deux disjoints; un point ne peut pas recevoir deux étiquettes. Aucun argument `splitting` n'est présent dans le cœur.
 
-Morton fournit l'index, la localité et l'ownership exact une fois; il ne sert jamais de certificat de proximité. Le parcours LBVH proche-en-premier remplit à la volée 48 banques Yao certifiées par ancre active. Dès qu'une banque contient le nombre requis de témoins distincts, les bornes directionnelles éliminent des feuilles ou régions lointaines avec une masse certifiée. Une chambre sous-remplie reste fail-open. L'échec d'un cutoff signifie seulement « candidat » : les survivants forment un sur-ensemble exhaustif et sont les seuls à atteindre la classification exacte.
+La fonction `build_exact_point_hierarchy` refuse une source déclarée surrogate ou incomplète, une déclaration d'exactitude absente et un payload incohérent avec son identifiant. L'appelant peut recalculer cet identifiant : ce contrôle lie le contenu, mais n'authentifie pas la vérité scientifique de la déclaration amont. Le reçu annonce seulement `exact_reduction_of_bound_payload=true`; l'autorité scientifique de la tour n'est pas rejouée et `public_exact_status_claimed` reste faux.
 
-Le chemin commun doit rester sur le GPU : construction Morton/LBVH, banques par chambre en mémoire $O(B\mathbin{\cdot}48\mathbin{\cdot}K_{\max})$ pour une tuile de $B$ ancres, prunes certifiés, classification des seuls survivants, `count/scan`, payload, tri, déduplication et découpage en chunks. Il ne matérialise ni ne visite par principe toutes les paires et ne possède aucun fallback dense. Son reçu ferme la comptabilité `candidate_pair_mass + certified_pruned_pair_mass + unresolved_pair_mass = n(n-1)/2`; seul un résidu nul autorise une sortie exhaustive. Le CPU reçoit seulement la canonicalisation finale et les replis numériques qui ne sont pas encore qualifiés sur GPU; aucun callback par paire et aucun transfert de candidats par vague ne sont admis.
+## Architecture active
 
-## Faits mathématiques qui structurent le code
+Le chemin produit amont vise une source sparse exacte : catalogue multi-ordre des paires de rang fermé utile, frontière indépendante des triangles aigus, frontière des tétraèdres bien centrés, incidences silencieuses, forêts horizontales et applications verticales. Il évite les catalogues globaux de cellules, cofaces et incidences; les oracles exhaustifs restent bornés et hors du chemin produit.
 
-- Une paire exacte $(u,v)$ et son saturé $S=X\cap B_{uv}$ ferment tous les sous-ensembles contenant $u$ et $v$ : leur miniboule est $B_{uv}$. Un tel sous-ensemble est Gabriel exactement lorsqu'il contient tous les points strictement intérieurs; les points supplémentaires du shell sont optionnels.
-- Cette fermeture ne suffit pas pour les triangles aigus. Une fixture rationnelle permanente donne un triangle aigu de rang trois dont les trois côtés ont rang quatre et qui n'est récupéré par aucun sous-graphe des paires de rang au plus trois.
-- Un triangle non dégénéré droit ou obtus a un support minimal de taille deux. La frontière de taille trois ne garde donc que les triangles aigus.
-- Un tétraèdre dont le centre circonscrit n'est pas strictement intérieur se réduit à un support de taille deux ou trois. La frontière indépendante de taille quatre ne garde que les tétraèdres bien centrés.
-- L'acuité des quatre faces ne filtre pas cette frontière : un tétraèdre bien centré peut avoir des faces obtuses, et quatre faces aiguës n'impliquent pas un centre intérieur. Une fixture rationnelle permanente recertifie les deux directions.
-- En dimension trois, tout miniball possède un support minimal de cardinal au plus quatre; cette cascade est exhaustive une fois chacune des trois frontières fermée.
+Le nouveau module de points ne remplace pas cette source. Il consomme une tour sous autorité externe et n'invente aucune complétude au moyen d'un MST de points, d'un graphe de voisinage ou d'une approximation numérique.
 
-Le nombre de résultats, et donc le pire cas de travail, peut lui-même être quadratique : à 50 000 points, il existe 1 249 975 000 paires non ordonnées. Le chemin produit doit être adaptatif et sous-quadratique sur les profils favorables qualifiés, mais ne revendique aucune borne universelle incompatible avec cette sortie. Le contrat de latence est sensible au profil et à la sortie; les caps explicites censurent tout cas défavorable par `budget_exhausted`, sans basculer vers un scan dense.
+## Exactitude, tests et performances
 
-## Objectifs de performance
+- La [présentation mathématique](docs/math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md) définit les niveaux multi-ordres, les poids, le canal `stay`, la laminarité et les trois rendus.
+- Le [plan de validation](docs/TEST_PLAN_MORSEHGP3D.md) distingue les fixtures du réducteur, l'unique comparaison comportementale `morsehgp3d.point_hierarchy_sklearn_differential` sur neuf points et les preuves de la source.
+- Le [rapport de performances](docs/PERFORMANCE_MORSEHGP3D.md) donne les mesures historiques avec leur provenance et leur périmètre exact, puis le protocole qui devra qualifier 50 000, 1 000 000, 10 000 001 et 30 000 000 points.
 
-La cible principale est un p95 `warm_e2e` strictement inférieur à 100 ms pour 50 000 points et $K_{\max}=10$ sur des familles enregistrées : nouveau nuage, index, calcul, validation et matérialisation bornée inclus. Le passage à l'échelle est vérifié séquentiellement à 1 M, 10 M puis 30 M de points, avec flux reprenable et caps de mémoire/sortie.
+À ce jour, la tentative HGP de référence à 50 000 points est censurée après au moins 300,000014 s sans hiérarchie complète. Les mesures à 10 M et 30 M concernent seulement une frontière partielle de composant. Le p95 historique de 95,791070 ms appartient à un point-MST rejeté et archivé; ce n'est pas une mesure de MorseHGP3D.
 
-La couverture tuilée CUDA bornée de run4 et le classifieur résident support deux des rangs 2--3 ont franchi leurs qualifications natives bornées; cela ne suffit pas à ouvrir le 50 k. Il faut encore persister et trier les niveaux exacts larges, construire la frontière indépendante des supports trois, fermer extra-shell, incidences, couverture et morphismes verticaux, puis réduire la vraie source avec la vue aval `min_cluster_size=20`. Un résultat produit complet à 50 000 points précède obligatoirement la campagne séquentielle 1 M, 10 M et 30 M. Les deux profils directs run5 à 10 M et 30 M localisent seulement `candidate_capacity`; ils ne satisfont aucune de ces portes. Les benchmarks utilisent uniquement les VM G4 `SPOT` et les coupe-circuits du dépôt; le [profil Morton--Yao48 borné](docs/validation/PHASE15_PROGRESS.md) illustre cette séparation.
-
-## Lire le dépôt
-
-1. Les Parties I et II du [manuscrit](docs/references/MANUSCRIT_THESE_HAUSEUX.pdf), pages PDF 35 à 134, définissent les clusters discrets visés.
-2. La [spécification](docs/SPECIFICATION_MORSEHGP3D.md) fixe l'objet public et les profils de sortie.
-3. Le [catalogue exact des paires diamétrales](docs/math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) donne le contrat, le théorème Yao48, l'oracle borné et l'architecture GPU attendue.
-4. La [frontière des supports trois et quatre](docs/math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md) formalise les triangles aigus puis les tétraèdres bien centrés.
-5. Le [registre des preuves](docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md), la [roadmap](docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md), le [plan de tests](docs/TEST_PLAN_MORSEHGP3D.md) et l'[état des phases](docs/implementation_status.toml) portent l'autorité opérationnelle.
-6. Les [replis maintenus](docs/research/README.md) sont peu nombreux et explicitement bornés; les [pistes abandonnées](docs/archive/abandoned/README.md) sont séparées de la navigation active.
-
-L'[index documentaire](docs/README.md) donne un parcours plus détaillé.
-
-## Arborescence
-
-```text
-.
-├── morsehgp3d/          # cœur C++20/CUDA et références bornées isolées
-├── reference/           # oracle Python exhaustif de petite taille
-├── docs/math/           # noyau mathématique actif
-├── docs/research/       # replis secondaires maintenus
-├── docs/archive/        # pistes abandonnées et rapports scellés
-├── docs/validation/     # revues actives et artefacts bruts des checkers
-├── tests/               # différentiels, fixtures et non-régressions
-├── gcp-migration/       # démarrage/arrêt G4 SPOT avec doubles coupe-circuits
-├── HGP-old/             # code historique du manuscrit, jamais dépendance produit
-└── tools/               # contrôles documentaires, scientifiques et opérationnels
-```
-
-## Vérifications locales
+## Construction locale
 
 ```bash
 cmake -S morsehgp3d -B build/morsehgp3d -DMORSEHGP3D_BUILD_TESTS=ON
@@ -74,12 +41,21 @@ cmake --build build/morsehgp3d --parallel
 ctest --test-dir build/morsehgp3d --output-on-failure
 python tools/check_docs.py
 python tools/check_implementation_status.py
-PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests/oracle -p 'test_*.py'
 ```
 
-## Sécurité GCP
+## Lire le dépôt
 
-Toute session GPU passe par [`gcp-migration/start_and_verify.sh`](gcp-migration/start_and_verify.sh), sur une cible G4 `SPOT` étiquetée `project=e-hgp`, avec `instanceTerminationAction=STOP`, durée bornée et arrêt invité armé. La session se termine toujours par [`stop_and_verify.sh`](gcp-migration/stop_and_verify.sh) sur la cible exacte. Les règles normatives sont dans [`AGENTS.md`](AGENTS.md).
+1. Les Parties I et II du [manuscrit](docs/references/MANUSCRIT_THESE_HAUSEUX.pdf), pages PDF 35 à 134, définissent l'objet HGP source.
+2. La [spécification](docs/SPECIFICATION_MORSEHGP3D.md) fixe les profils et statuts publics.
+3. La [hiérarchie de points multi-ordres](docs/math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md) fixe l'API aval exacte-relative.
+4. Le [registre des preuves](docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md), la [roadmap](docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md), le [plan de tests](docs/TEST_PLAN_MORSEHGP3D.md) et l'[état des phases](docs/implementation_status.toml) portent l'autorité opérationnelle.
+5. L'[index documentaire](docs/README.md) relie les contrats, preuves, validations et archives.
+
+## Archives et sécurité GCP
+
+Les voies falsifiées sont recensées dans [`docs/archive/abandoned/`](docs/archive/abandoned/README.md). Le point-MST surrogate est isolé sous [`morsehgp3d/archive/surrogates/point_mst_v6/`](morsehgp3d/archive/surrogates/point_mst_v6/README.md) et les prototypes non livrés sous [`morsehgp3d/archive/obsolete/`](morsehgp3d/archive/obsolete/phase15_prototypes/README.md); rien de ces répertoires n'entre dans le build, l'installation ou l'API publics.
+
+Toute session GPU passe par les scripts gardés de [`gcp-migration/`](gcp-migration/README.md), sur une G4 `SPOT` avec deux coupe-circuits, puis se termine par la certification `TERMINATED` de la cible exacte. Les règles normatives sont dans [`AGENTS.md`](AGENTS.md).
 
 ## Licences
 

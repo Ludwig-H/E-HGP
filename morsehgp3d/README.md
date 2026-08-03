@@ -1,65 +1,67 @@
-# MorseHGP3D — cœur C++20/CUDA
+# MorseHGP3D — bibliothèque C++20
 
-Ce répertoire contient le nouveau cœur, indépendant de `HGP-old`. La Phase 15 est active sous `reference_cpu / hgp_reduced / budgeted`; la porte d'entrée est satisfaite, la sortie reste ouverte et aucun statut public exact n'est revendiqué.
+Ce répertoire contient le cœur C++20/CUDA, ses tests et son API publique. Le composant livrable actuel est un réducteur CPU exact relativement à une tour HGP multi-ordres déclarée complète et exacte par son producteur. Il vérifie la liaison du payload et les invariants structurels rejouables, mais n'authentifie pas cette déclaration amont. Il ne construit pas encore la tour depuis un nuage brut et ne revendique ni statut public exact, ni qualification GCP à 50 000 ou plusieurs millions de points.
 
-## Priorité d'implémentation
+## Utilisation publique
 
-Le prochain composant produit est un catalogue GPU résident de toutes les paires dont le rang diamétral fermé vérifie $2\leq R\leq K_{\max}+1$. Chaque record doit contenir la paire canonique, le niveau exact, le rang, l'intérieur strict et le shell complet. Une seule exécution à $K_{\max}$ construit tous les buckets; un simplexe Gabriel porté de cardinal $q$ alimente l'ordre $q-1$, et seulement sous `RelevantGP` ce cardinal vaut systématiquement $R$.
+L'en-tête d'entrée est :
 
-Le pipeline attendu est :
-
-```text
-nuage canonique
-  -> Morton + LBVH résidents
-  -> tuiles d'ancres et ownership Morton exact une fois
-  -> parcours proche-en-premier et 48 banques Yao certifiées
-  -> prunes de régions avec masse, survivants ou résidu explicite
-  -> rang fermé exact sur les seuls survivants
-  -> count / scan / payload
-  -> tri, déduplication, chunks et transcript terminal
+```cpp
+#include <morsehgp3d/morsehgp3d.hpp>
 ```
 
-`requested_order=K` cible les rangs fermés au plus $K+1$ et remplit jusqu'à $K$ témoins par chambre. Une demande « au plus $K_{\mathrm{total}}$ points au total » cible le rang au plus $K_{\mathrm{total}}$ et requiert $K_{\mathrm{total}}-1$ témoins pour un prune. L'échec du cutoff Yao48 conserve un candidat; il ne prouve jamais que la paire sera publiée.
+Après installation du paquet CMake :
 
-Après ce catalogue viennent la frontière indépendante des triangles aigus, puis les tétraèdres bien centrés. Dans la fenêtre certifiée sous `RelevantGP`, les triangles droits, obtus ou dégénérés et les tétraèdres non bien centrés sont déjà ramenés à des supports plus petits. Hors de ce domaine, une cosphère de rang élevé produit `unsupported_degeneracy` plutôt qu'une fausse fermeture.
+```cmake
+find_package(MorseHGP3D CONFIG REQUIRED)
+target_link_libraries(mon_programme PRIVATE morsehgp3d::morsehgp3d)
+```
 
-## Ce qui est intégré
+Le contrat complet est déclaré dans [`api/point_hierarchy.hpp`](include/morsehgp3d/api/point_hierarchy.hpp). `build_exact_point_hierarchy` reçoit un `CertifiedTowerInput` comprenant :
 
-| cible CMake | statut et rôle |
+- les nœuds des forêts horizontales de $T_1$ à $T_K$ et leurs niveaux exacts;
+- les arêtes horizontales et verticales avec leur niveau d'activation;
+- les simplexes projectables, leurs `PointId`, leurs rayons de cofaces et leur niveau de sortie;
+- les identifiants déclarés des trois autorités amont et l'identifiant canonique du payload complet.
+
+La construction échoue fermé si un identifiant d'autorité ou une déclaration exigée manque, si la source est déclarée incomplète ou surrogate, si le payload ne correspond pas à son identifiant, si la tour est structurellement invalide ou si une comparaison dépasse son budget de certification. Ces champs publics forment un contrat avec le producteur; ils ne constituent pas à eux seuls une preuve non forgeable de la géométrie amont.
+
+## Paramètres et sorties
+
+| API | rôle exact |
 |---|---|
-| `morsehgp3d::exact`, `contract`, `spatial` | arithmétique exacte, coordonnées canoniques, prédicats, Morton/LBVH et oracles spatiaux |
-| `morsehgp3d::facet_miniball`, `pair_support`, `higher_support` | analyse exacte des supports et primitives de flux |
-| `morsehgp3d::hierarchy` | miniballs, Gamma/Gabriel bornés, EMST/Borůvka et réduction hiérarchique de référence |
-| `morsehgp3d::yao48_ranked_pair_candidates_reference` | oracle borné du cutoff directionnel exact et des candidats; source quadratique isolée |
-| `morsehgp3d::exact_ranked_diametral_pair_catalog_reference` | catalogue exact end-to-end borné à 512 points, comparé à un scan indépendant |
-| `morsehgp3d::gpu_ranked_diametral_pair_catalog_host_contract` | API, lease SoA, budgets et reçus fail-closed testés par un launcher hostile; aucun kernel CUDA ni résultat scientifique |
-| `morsehgp3d::gpu_morton_yao48_pair_frontier_host_reference` | spécification exécutable `architecture_only` du parcours Morton et des banques Yao48 fusionnés, avec prunes, survivants, résidu et masse exacte |
-| `morsehgp3d::gpu_exact_diametral_phi_host_contract` | contrat hostile et oracle multiprécision du signe ponctuel exact, disponible sans CUDA |
-| `morsehgp3d::gpu_exact_diametral_phi` | premier composant CUDA à trois étages : intervalle dirigé, limbs dyadiques fixes, puis lot CPU exact de repli; qualification de composant seulement |
-| `morsehgp3d::gpu_morton_yao48_device_tiled_pair_frontier` | couverture CUDA tuilée réellement résidente : candidates, prunes et banques restent sur device; run4 qualifie le composant borné et run5 localise `candidate_capacity` |
-| `morsehgp3d::gpu_morton_yao48_ranked_pair_tile_classifier` | classifieur CUDA multi-ordre résident, `count/scan`, payload fermé et tri canonique; qualification G4 bornée fermée pour le seul composant support deux des rangs 2--3 |
-| `morsehgp3d::gpu_exact_closed_rank23_pair_terminal_catalog` | drain terminal fixé aux rangs fermés 2--3, publication seulement après fermeture de la masse et zéro résidu/fallback; ce n'est ni Gamma2, ni k2, ni une hiérarchie |
+| `PositiveRationalExponent exp_z` | exposant rationnel positif de $k/r^z$; la valeur par défaut est 3 |
+| `SimplexPointWeighting::inverse_radius` | somme certifiée des contributions de rayon inverse élevé à `exp_z` |
+| `SimplexPointWeighting::uniform` | contribution exacte égale par simplexe, sans approximation |
+| `OrderWeight` | poids rationnel positif entre ordres, normalisé par point |
+| `PointHierarchyBudget` | caps de structure, d'incidences et de précision; tout dépassement échoue fermé |
+| `select_lambda_cut` | coupe exacte au niveau $k/r^z$ |
+| `select_dbscan_radius` | rendu de type DBSCAN par rayon carré exact et ordre de référence explicite |
+| `select_excess_of_mass` | condensation et sélection EOM de type HDBSCAN, avec comparaisons certifiées |
 
-Les deux bibliothèques `*_reference` sont exportées séparément et ne sont pas liées par `morsehgp3d::hierarchy`. Leur coût quadratique sert uniquement à falsifier le futur producteur. Elles ne doivent pas être renommées ni réutilisées comme chemin produit. Le contrat hôte/fake n'est pas installé : il fixe seulement l'ABI interne que le futur target CUDA devra satisfaire.
+Le profil `PointHierarchyBudget::large_resident_30m()` augmente seulement les caps explicites pour une exécution résidente disposant de ressources suffisantes. Il ne préalloue rien et ne vaut ni qualification mémoire, ni promesse de passage à 30 millions de points; la source et la projection restent résidentes et non streamées dans cette version.
 
-Une première couverture Morton--Yao48 tuilée existe désormais en CUDA réel : elle conserve les candidates, les reçus de prune et les banques sur device. Son contrat host/fake et la qualification G4 bornée run4 sont validés. Le cap de 2 048 visites est un quantum reprenable dans le même processus; chaque subdivision ajoute un contrôle scalaire de huit octets D2H et une synchronisation, sans transfert de candidate ou de reçu. Le nouveau classifieur consomme ces chunks sur device, décide exactement les rangs fermés 2--3 sur sa voie fixe, construit les payloads intérieur/shell par `count/scan` et conserve le nuage dans la lease terminale. Toute demande de calcul large reste un fallback non consommé et censure la sortie. Les tests host/fake stricts et ASan/UBSan passent; le [reçu G4 `51102a0`](../docs/validation/phase15_ranked_pair_classifier_g4_51102a0.json) ferme le différentiel natif toutes-paires/tous-témoins et Compute Sanitizer sur 257 points pour ce seul composant support deux. Cette tranche ne reconstruit ni Gamma2, ni la hiérarchie k2, ni les morphismes verticaux, et ne vaut aucune mesure 50 k ou SLO.
+Le routage descendant est effectué une seule fois. `terminal_node_by_point()` contient exactement un terminal par point, bruit compris, et `validate_partition_invariants()` rejoue les comptes et les intervalles DFS. Toutes les sélections renvoient un tableau de labels unique et attestent la disjonction des clusters. Le cœur n'expose pas d'argument `splitting`.
 
-## Frontières d'exactitude
+Le `ExactPointHierarchyReceipt` lie les paramètres, les poids, les autorités source, le payload et la réduction. Il distingue explicitement :
 
-- Morton est un ordre de données et de parcours, jamais une preuve de proximité.
-- Le cutoff Yao48 est appliqué seulement lorsqu'une chambre contient le seuil effectif de témoins distincts certifiés; une chambre sous-remplie descend sans cutoff.
-- Ces témoins n'ont pas besoin d'être les plus proches; une borne plus large réduit seulement le nombre de prunes.
-- Les survivants Yao48 constituent un sur-ensemble exhaustif, pas la réponse; seuls eux sont classifiés par le prédicat exact.
-- Les égalités de coque ne sont jamais prunées par approximation.
-- Une proposition flottante devient une décision seulement après filtre certifié, expansion exacte ou multiprécision.
-- Un cap de travail, mémoire, temps ou sortie échoue fermé et conserve la frontière résiduelle.
-- La fermeture d'une paire fournit des candidats de même miniboule; seuls ceux qui contiennent tout l'intérieur strict sont Gabriel, et elle ne fournit pas tous les triangles aigus.
-- Aucun tableau de toutes les paires, tous les triplets, toutes les cofaces ou toutes les cellules n'est une structure persistante admissible.
-- Aucun scan dense des paires n'est un fallback produit. Le pire cas quadratique est arrêté par les caps avec `budget_exhausted` et un résidu non nul.
+- `exact_reduction_of_bound_payload`, qui certifie le calcul aval;
+- `upstream_source_authority_replayed=false`, car ce module ne refait pas la preuve géométrique amont;
+- `public_exact_status_claimed=false`, tant que les portes du produit complet restent ouvertes.
 
-Le contrat scientifique détaillé est dans le [catalogue des paires](../docs/math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) et la [frontière des supports trois et quatre](../docs/math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md).
+## Validation disponible
 
-## Construction
+Le test dédié `morsehgp3d.api_point_hierarchy` couvre le comparateur de densité, une tour à deux ordres, la partition, les coupes DBSCAN, l'EOM, l'invariance par permutation, la liaison des poids et les rejets fail-closed. Il s'exécute avec :
+
+```bash
+ctest --test-dir build/morsehgp3d -R '^morsehgp3d\.api_point_hierarchy$' --output-on-failure
+```
+
+Le seul différentiel de cette API est `morsehgp3d.point_hierarchy_sklearn_differential`. Sur une fixture multi-ordres $K=2$ de neuf points, il compare les partitions DBSCAN et HDBSCAN-EOM à scikit-learn sans comparer les numéros arbitraires des labels. L'ordre de référence DBSCAN et `min_samples` valent tous deux 2. Le test est ignoré avec le code 77 si la version installée de scikit-learn ne fournit pas HDBSCAN. Il concerne uniquement les rendus plats : ce n'est ni un oracle de la tour HGP, ni une preuve de la réduction exacte, ni une qualification de performance.
+
+Les obligations mathématiques, cas encore manquants et non-promesses sont détaillés dans la [présentation multi-ordres](../docs/math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md), le [plan de tests](../docs/TEST_PLAN_MORSEHGP3D.md) et le [rapport de performances](../docs/PERFORMANCE_MORSEHGP3D.md).
+
+## Construction et tests
 
 ```bash
 cmake -S morsehgp3d -B build/morsehgp3d-cpu-release \
@@ -69,21 +71,21 @@ cmake --build build/morsehgp3d-cpu-release --parallel
 ctest --test-dir build/morsehgp3d-cpu-release --output-on-failure
 ```
 
-Configuration avec sanitizers :
+L'installation CMake est minimale par défaut : elle exporte seulement
+`morsehgp3d::morsehgp3d`, `morsehgp3d::point_hierarchy`,
+`morsehgp3d::contract` et `morsehgp3d::exact`, avec leurs en-têtes publics.
+Un consommateur appelle `find_package(MorseHGP3D CONFIG REQUIRED)` puis lie
+uniquement `morsehgp3d::morsehgp3d`. Les cibles et en-têtes de recherche
+historiques peuvent être ajoutés explicitement à un package de développement
+avec `MORSEHGP3D_INSTALL_INTERNAL_TARGETS=ON`; les archives et surrogates
+restent exclus dans les deux modes.
 
-```bash
-cmake -S morsehgp3d -B build/morsehgp3d-sanitizer \
-  -DCMAKE_BUILD_TYPE=Debug \
-  -DMORSEHGP3D_BUILD_TESTS=ON \
-  -DMORSEHGP3D_ENABLE_SANITIZERS=ON
-cmake --build build/morsehgp3d-sanitizer --parallel
-ctest --test-dir build/morsehgp3d-sanitizer --output-on-failure
-```
+Les compilations GCC et Clang utilisent les avertissements stricts. Les targets scientifiques internes restent séparées de `morsehgp3d::morsehgp3d`; l'API de points dépend seulement des briques publiques `contract` et `exact`.
 
-Les compilations GCC et Clang utilisent les avertissements stricts et un mode flottant certifié. Toute nouvelle cible de test C++ doit passer par la liste centralisée des sanitizers, contrôlée par `tests/configuration/check_phase3_build.py`.
+## Frontière produit et archives
 
-## Gate GPU
+La source amont active reste `exact_sparse_frontier` : supports minimaux deux à quatre, incidences utiles, lots exacts, forêts horizontales et verticales, sans mosaïque de Delaunay d'ordre supérieur ni catalogue global. Le réducteur public ne doit jamais devenir un substitut à cette source.
 
-Le gate GPU borné du classifieur résident support deux aux rangs 2--3 est fermé contre l'oracle exhaustif indépendant et Compute Sanitizer. La suite obligatoire persiste les niveaux exacts larges, ajoute la frontière de support trois, forme les facettes/cofaces et toutes leurs incidences, ferme extra-shell, la couverture et la verticalité, puis compare le flux et sa réduction à l'oracle Hartigan borné. Seulement après viennent le falsificateur de croissance et le résultat produit complet à 50 000/$K_{\max}=10$ avec la vue aval `min_cluster_size=20`. Les tailles 1 M, 10 M et 30 M de la campagne produit sont séquentielles et chacune doit fermer avant la suivante; les profils directs run5 ne satisfont pas ces gates.
+L'ancien point-MST est archivé dans [`archive/surrogates/point_mst_v6/`](archive/surrogates/point_mst_v6/README.md). Les prototypes Phase 15 sans cible ni validation sont dans [`archive/obsolete/phase15_prototypes/`](archive/obsolete/phase15_prototypes/README.md). Ces sources sont exclues du build, de l'installation et de l'API publics.
 
-Toute session G4 passe par les scripts gardés de [`gcp-migration`](../gcp-migration/) et se termine par la certification `TERMINATED` de la cible exacte.
+Toute campagne G4 suit les scripts gardés de [`gcp-migration`](../gcp-migration/) et ne commence qu'après fermeture de la porte scientifique correspondante.

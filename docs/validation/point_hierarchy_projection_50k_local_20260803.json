@@ -1,0 +1,113 @@
+{
+  "schema": "morsehgp3d.point_hierarchy.projection_benchmark_campaign.v1",
+  "captured_at_utc": "2026-08-03T09:40:30Z",
+  "scope": "synthetic_k1_projection_only_not_product_qualification",
+  "backend": "reference_cpu",
+  "profile": "balanced_k1_exact_relative",
+  "mode": "resident",
+  "deployment_status": "architecture_only",
+  "public_status": "not_claimed",
+  "base_commit": "43ce31cdd6f775e60bd28374a70ab36a054e2be7",
+  "worktree_state": "uncommitted_delivery_worktree",
+  "command": "build/morsehgp3d-cpu-release/morsehgp3d_point_hierarchy_projection_benchmark --points 50000",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cmake": "4.3.4",
+  "build_type": "Release",
+  "host": {
+    "architecture": "x86_64",
+    "logical_cpu_count": 2,
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+    "isolated_host": false
+  },
+  "fixture": {
+    "point_count": 50000,
+    "maximum_order": 1,
+    "source_node_count": 99999,
+    "source_edge_count": 99998,
+    "projectable_simplex_count": 50000,
+    "point_simplex_incidence_count": 50000,
+    "output_node_count": 100000,
+    "minimum_cluster_size": 20,
+    "raw_point_cloud_source_built": false,
+    "multi_order_source_built": false,
+    "upstream_source_authority_replayed": false,
+    "surrogate_source_used": false
+  },
+  "tool": {
+    "source_path": "morsehgp3d/src/tools/point_hierarchy_projection_benchmark.cpp",
+    "source_sha256": "6db83869f008f1614a9d11c1f3d76e910d1df9ab5f78a6c6fad27b071c2d1386",
+    "binary_size_bytes": 380608,
+    "binary_sha256": "ca156a4a595a96a55e10026bbc41707638af148db44051181ad574968d9271ef"
+  },
+  "runs": [
+    {
+      "input_generation_ns": 52517098,
+      "payload_seal_ns": 144341287,
+      "hierarchy_build_ns": 2876644384,
+      "dbscan_render_ns": 2170054,
+      "eom_render_ns": 18424388,
+      "invariant_replay_ns": 2999131,
+      "measured_stage_sum_ns": 3097096342,
+      "maximum_resident_set_kib": 127708
+    },
+    {
+      "input_generation_ns": 91548377,
+      "payload_seal_ns": 179056004,
+      "hierarchy_build_ns": 2792494187,
+      "dbscan_render_ns": 2155942,
+      "eom_render_ns": 16718485,
+      "invariant_replay_ns": 2832847,
+      "measured_stage_sum_ns": 3084805842,
+      "maximum_resident_set_kib": 127580
+    },
+    {
+      "input_generation_ns": 74509340,
+      "payload_seal_ns": 140737995,
+      "hierarchy_build_ns": 2721321061,
+      "dbscan_render_ns": 2172424,
+      "eom_render_ns": 16025882,
+      "invariant_replay_ns": 2385805,
+      "measured_stage_sum_ns": 2957152507,
+      "maximum_resident_set_kib": 127732
+    }
+  ],
+  "median": {
+    "input_generation_ns": 74509340,
+    "payload_seal_ns": 144341287,
+    "hierarchy_build_ns": 2792494187,
+    "dbscan_render_ns": 2170054,
+    "eom_render_ns": 16718485,
+    "invariant_replay_ns": 2832847,
+    "measured_stage_sum_ns": 3084805842,
+    "maximum_resident_set_kib": 127708
+  },
+  "output": {
+    "dbscan_cluster_count": 1562,
+    "dbscan_noise_point_count": 16,
+    "eom_cluster_count": 1561,
+    "eom_noise_point_count": 0,
+    "partition_invariants_valid": true,
+    "source_payload_binding_verified": true,
+    "exact_reduction_of_bound_payload": true,
+    "public_exact_status_claimed": false,
+    "tower_payload_id": "d1ab4b5a492d1deedf7805186cb44c5e2abd637f29c45549a67ca831521e52c6",
+    "hierarchy_reduction_receipt_id": "257b9d2d635382c13acb63743f48a50e349f5e99786dc8ed845e0229a77ac36c",
+    "dbscan_selection_receipt_id": "dd51982e04a31a06b1d0ec9e8793b4dd326ad69769b4611639b4b6ba9e4200fd",
+    "eom_selection_receipt_id": "80f192f7766137eebd53cdc7cedbc63674047bf5e7c51cde30f8e626bf4160ba"
+  },
+  "statistics": {
+    "fresh_process_count": 3,
+    "warmup_count": 0,
+    "p95_reported": false,
+    "external_wall_time_measured": false
+  },
+  "qualification": {
+    "gcp_used": false,
+    "source_construction_included": false,
+    "all_orders_projection_exercised": false,
+    "streaming_exercised": false,
+    "gpu_exercised": false,
+    "scale_qualified": false,
+    "product_result": false
+  }
+}

@@ -6,38 +6,34 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(MorseHGP3D CONFIG REQUIRED)
 
+foreach(
+  _morsehgp3d_public_target
+  IN ITEMS
+    morsehgp3d::morsehgp3d
+    morsehgp3d::point_hierarchy
+    morsehgp3d::contract
+    morsehgp3d::exact
+)
+  if(NOT TARGET "${_morsehgp3d_public_target}")
+    message(FATAL_ERROR "Missing public target ${_morsehgp3d_public_target}")
+  endif()
+endforeach()
+foreach(
+  _morsehgp3d_internal_target
+  IN ITEMS
+    morsehgp3d::spatial
+    morsehgp3d::hierarchy
+    morsehgp3d::sanitizers
+)
+  if(TARGET "${_morsehgp3d_internal_target}")
+    message(FATAL_ERROR "Internal target leaked: ${_morsehgp3d_internal_target}")
+  endif()
+endforeach()
+
 add_executable(morsehgp3d_consumer main.cpp)
 target_link_libraries(
   morsehgp3d_consumer
-  PRIVATE
-    morsehgp3d::contract
-    morsehgp3d::spatial
-    morsehgp3d::capped_distinct_point_coverage
-    morsehgp3d::silent_pair_gateway
-    morsehgp3d::anchored_pair_candidate_classifier
-    morsehgp3d::anchored_pair_witness_bank
-    morsehgp3d::sparse_anchored_pair_session
-    morsehgp3d::direct_support_terminal
-    morsehgp3d::direct_morse_gamma_carrier_conformance
-    morsehgp3d::direct_sparse_facet_descent_batch_executor
-    morsehgp3d::direct_sparse_facet_descent_batch_plan
-    morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
-    morsehgp3d::direct_sparse_gateway_historical_quotient
-    morsehgp3d::direct_sparse_positive_facet_prefix_sweep
-    morsehgp3d::direct_sparse_successive_incidence
-    morsehgp3d::direct_sparse_successive_incidence_star_journal
-    morsehgp3d::direct_sparse_unified_level_plan
-    morsehgp3d::direct_frozen_incidence_quotient
-    morsehgp3d::direct_frozen_incidence_hgp_action_plan
-    morsehgp3d::direct_frozen_unified_incidence_batch
-    morsehgp3d::direct_morse_unified_resident_session
-    morsehgp3d::direct_normalized_h0_scientific_window_capability
-    morsehgp3d::direct_normalized_h0_relative_frozen_incidence_batch
-    morsehgp3d::direct_normalized_h0_sparse_forest_projection
-    morsehgp3d::direct_sparse_stable_facet_forest
-    morsehgp3d::direct_sparse_stable_facet_descent_closure
-    morsehgp3d::direct_sparse_root_ledger
-    morsehgp3d::direct_morse_forest_root_coverage_index
+  PRIVATE morsehgp3d::morsehgp3d
 )
 
 include(CTest)

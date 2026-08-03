@@ -12,6 +12,7 @@ Le parcours normatif est volontairement court. Les notes de jalons antérieurs r
 | [Frontière directe des supports trois et quatre](FRONTIERE_DIRECTE_SUPPORTS_3_4.md) | pourquoi les triangles aigus gardent-ils une frontière indépendante et quels tétraèdres restent ensuite ? |
 | [Incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) | pourquoi le flot Gabriel brut peut-il manquer une liaison hiérarchique ? |
 | [Attaches par miniball](ATTACHES_DESCENTE_MINIBALL.md) | comment rattacher un bras connu à sa composante globale ? |
+| [Hiérarchie de points multi-ordres](HIERARCHIE_DE_POINTS_MULTI_ORDRES.md) | comment réduire une tour certifiée en une hiérarchie laminaire de points, pondérer les contributions et produire les rendus lambda, DBSCAN et EOM ? |
 | [Preuves et heuristiques](STATUT_PREUVES_ET_HEURISTIQUES.md) | quelles affirmations sont démontrées, conditionnelles, ouvertes ou fausses ? |
 
 ## Cascade active
