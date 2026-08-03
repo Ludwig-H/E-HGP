@@ -446,6 +446,38 @@ int main() {
     std::cerr << "installed sparse-preview API accepted an empty capability\n";
     return 1;
   }
+  using InstalledProofBoundPreoriginPreview =
+      morsehgp3d::hierarchy::
+          ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview;
+  using InstalledHistoricalPreview =
+      morsehgp3d::hierarchy::
+          ExactDirectSparseStableFacetForestPreparedPreview;
+  static_assert(
+      !std::is_aggregate_v<InstalledProofBoundPreoriginPreview> &&
+      !std::is_copy_constructible_v<InstalledProofBoundPreoriginPreview> &&
+      std::is_nothrow_move_constructible_v<
+          InstalledProofBoundPreoriginPreview> &&
+      !std::is_constructible_v<
+          InstalledHistoricalPreview,
+          InstalledProofBoundPreoriginPreview&&>);
+  static_assert(std::is_same_v<
+                decltype(std::declval<
+                             const InstalledProofBoundPreoriginPreview&>()
+                             .records()),
+                std::span<const morsehgp3d::hierarchy::
+                              ExactDirectSparseStableFacetForestPreparedPreviewRecord>>);
+  const InstalledProofBoundPreoriginPreview
+      installed_proof_bound_preorigin_preview;
+  if (installed_proof_bound_preorigin_preview
+          .certified_proof_bound_preorigin_preview() ||
+      !installed_proof_bound_preorigin_preview.records().empty() ||
+      installed_proof_bound_preorigin_preview
+          .no_historical_handle_or_root_lookup()) {
+    std::cerr
+        << "installed proof-bound preorigin preview accepted a default "
+           "capability\n";
+    return 1;
+  }
   static_assert(
       morsehgp3d::hierarchy::direct_sparse_root_ledger_schema_version == 1U &&
       morsehgp3d::hierarchy::ExactDirectSparseRootLedger::mode ==

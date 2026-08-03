@@ -540,6 +540,8 @@ class ExactDirectSparseStableFacetForestPreparedBatch {
       std::unique_ptr<Impl>) noexcept;
   friend class ExactDirectSparseStableFacetForest;
   friend class ExactDirectSparseStableFacetForestPreparedPreview;
+  friend class
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview;
 };
 
 // A preview is bounded independently from the durable forest budget.  The
@@ -690,6 +692,171 @@ struct ExactDirectSparseStableFacetForestPreparedPreviewResult {
   [[nodiscard]] bool certified_prepared_preview() const noexcept;
 };
 
+// A proof-bound pre-origin preview consumes already-minted bounded
+// handle-to-root probes instead of consulting the forest's historical handle
+// index or following DSU parents itself.  Both the budgets granted to those
+// probes and the work they actually reported are aggregated, so a later
+// coordinator can bound the whole proof-production envelope as well as the
+// realized work.  The nested replay budget retains the sparse-shadow bounds
+// of the historical preview.
+struct
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget {
+  std::size_t maximum_proof_count{};
+  std::size_t maximum_ticket_insertion_request_scan_count{};
+  ExactDirectSparseStableFacetHandleRootProbeBudget
+      maximum_aggregate_requested_probe_budget{};
+  ExactDirectSparseStableFacetHandleRootProbeCounters
+      maximum_aggregate_probe_counters{};
+  ExactDirectSparseStableFacetForestPreparedPreviewBudget replay{};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&,
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&) =
+      default;
+};
+
+struct
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters {
+  // Success reports exact totals.  On exhaustion, the counter whose next
+  // admitted unit would cross its cap is saturated at that cap; failed
+  // results carry no preview capability or semantic payload.
+  std::size_t proof_count{};
+  std::size_t ticket_insertion_request_scan_count{};
+  ExactDirectSparseStableFacetHandleRootProbeBudget
+      aggregate_requested_probe_budget{};
+  ExactDirectSparseStableFacetHandleRootProbeCounters
+      aggregate_probe_counters{};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters&,
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters&) =
+      default;
+};
+
+enum class
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewDecision
+    : std::uint8_t {
+  not_prepared,
+  no_forest_rejected,
+  no_ticket_rejected,
+  no_foreign_ticket_rejected,
+  no_stale_or_sibling_ticket_rejected,
+  no_capacity_overflow,
+  no_proof_count_budget_exhausted,
+  no_ticket_insertion_request_scan_budget_exhausted,
+  no_aggregate_requested_handle_index_slot_budget_exhausted,
+  no_aggregate_requested_exact_handle_comparison_budget_exhausted,
+  no_aggregate_requested_parent_hop_budget_exhausted,
+  no_aggregate_requested_direct_forest_entry_access_budget_exhausted,
+  no_aggregate_handle_index_slot_budget_exhausted,
+  no_aggregate_exact_handle_comparison_budget_exhausted,
+  no_aggregate_parent_hop_budget_exhausted,
+  no_aggregate_direct_forest_entry_access_budget_exhausted,
+  no_replay_budget_exhausted,
+  no_proof_shape_rejected,
+  no_proof_outcome_rejected,
+  no_proof_ticket_binding_rejected,
+  no_ticket_touch_coverage_rejected,
+  no_allocation_failed,
+  no_forest_stamp_changed,
+  contradiction_new_handle_classification,
+  contradiction_sparse_shadow_replay,
+  complete_sealed_proof_bound_preorigin_sparse_shadow_preview,
+};
+
+// This capability is deliberately distinct from the historical preview.  It
+// cannot be passed accidentally to the ledger's v1 prepare path, whose digest
+// does not bind pre-origin fields.  A future ledger fast path must consume this
+// type under a distinct v2 digest domain.
+class ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview
+    final {
+ public:
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview()
+      noexcept;
+  ~ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview();
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview(
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&&)
+      noexcept;
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&
+  operator=(
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&&)
+      noexcept;
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview(
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&) =
+      delete;
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&
+  operator=(
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&) =
+      delete;
+
+  [[nodiscard]] const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&
+  semantic_receipt() const & noexcept;
+  [[nodiscard]] const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&
+  semantic_receipt() const && = delete;
+  [[nodiscard]] std::span<
+      const ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+  records() const & noexcept;
+  [[nodiscard]] std::span<
+      const ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+  records() const && = delete;
+  [[nodiscard]] const
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&
+  requested_budget() const & noexcept;
+  [[nodiscard]] const
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&
+  requested_budget() const && = delete;
+  [[nodiscard]] const
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters&
+  counters() const & noexcept;
+  [[nodiscard]] const
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters&
+  counters() const && = delete;
+  [[nodiscard]] bool no_historical_handle_or_root_lookup() const noexcept;
+  [[nodiscard]] bool proofs_cover_all_ticket_touched_handles() const noexcept;
+  [[nodiscard]] bool certified_proof_bound_preorigin_preview() const noexcept;
+  [[nodiscard]] bool certified_for(
+      const ExactDirectSparseStableFacetForestPreparedBatch&,
+      const ExactDirectSparseStableFacetForestStamp& expected_pre_stamp)
+      const noexcept;
+  [[nodiscard]] bool certifies_semantic_receipt(
+      const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&) const
+      noexcept;
+
+ private:
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+
+  explicit
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview(
+      std::unique_ptr<Impl>) noexcept;
+  friend class ExactDirectSparseStableFacetForest;
+};
+
+struct
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewResult {
+  std::optional<
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview>
+      preview;
+  ExactDirectSparseStableFacetForestStamp pre_stamp{};
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget
+      requested_budget{};
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters
+      counters{};
+  std::size_t shadow_node_upper_bound{};
+  std::size_t union_request_count{};
+  std::size_t total_entry_upper_bound{};
+  bool all_overflow_and_budget_checks_completed_before_allocation{false};
+  bool forest_logical_state_mutated{false};
+  bool source_exactness_claimed{false};
+  bool public_status_claimed{false};
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewDecision
+      decision{
+          ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewDecision::
+              not_prepared};
+
+  [[nodiscard]] bool certified_prepared_preview() const noexcept;
+};
+
 struct ExactDirectSparseStableFacetForestPreparationResult {
   std::optional<ExactDirectSparseStableFacetForestPreparedBatch> ticket;
   ExactDirectSparseStableFacetForestStamp pre_stamp{};
@@ -836,6 +1003,13 @@ class ExactDirectSparseStableFacetForest {
       std::span<const ExactDirectSparseStableFacetHandle> requested_handles,
       const ExactDirectSparseStableFacetForestPreparedPreviewBudget&) const
       noexcept;
+  [[nodiscard]]
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewResult
+  preview_prepared_batch_from_stable_handle_root_proofs(
+      const ExactDirectSparseStableFacetForestPreparedBatch&,
+      std::span<const ExactDirectSparseStableFacetHandleRootProbeResult>,
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&)
+      const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestCommitResult commit(
       ExactDirectSparseStableFacetForestPreparedBatch&&) noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestCheckpoint checkpoint()

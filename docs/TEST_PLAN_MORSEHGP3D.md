@@ -2548,7 +2548,16 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - sceller le preview move-only avec l'identité privée `shared_ptr` du ticket; distinguer deux frères au même stamp et digest, couvrir move, objet déplacé, forest étranger, ticket périmé, destruction et falsification du reçu sans couture ABA par adresse;
 - exiger `certified_for(ticket, expected_pre_stamp)` avant commit et comparer le pré-stamp historique au stamp courant dans le coordinateur;
 - conserver le domaine de digest preview ledger v1 inchangé et vérifier qu'il n'atteste pas encore les trois champs de pré-état; réserver leur consommation à un fast-path distinct avec domaine v2;
-- positionner le probe handle--racine borné comme entrée obligatoire d'un preview de pré-origine proof-bound distinct, sans appeler `lookup-bound` le preview historique; seulement après cette couture ouvrir `active_root_proof_bound_prepare_transition_no_index_rebuild_v1`;
+- exercer `preview_prepared_batch_from_stable_handle_root_proofs` sous `stable_forest_proof_bound_preorigin_sparse_shadow_preview_v1` et vérifier que son résultat est exactement `ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview`, distinct du preview historique;
+- exiger que l'ordre canonique des preuves définisse exactement les records; accepter un sur-ensemble de preuves `observed`, mais couvrir chaque insertion et chaque endpoint d'union du ticket;
+- autoriser une preuve `unobserved` seulement pour une insertion réellement nouvelle; refuser comme shape hostile toute insertion compatible répétée annoncée `unobserved` et exiger son pré-état durable `observed`;
+- lier privément ticket live, pré-stamp et digest canonique du lot; rejeter ticket frère, étranger ou périmé, preuve étrangère ou stale et stamp modifié sans payload ni mutation;
+- prouver par couverture source que le nouveau chemin n'appelle ni `handle_index_row`, ni `root_index`, ni lookup, ni `observed_entries()` et ne scanne aucune population globale;
+- caper séparément `proof_count` et les scans insertion--demande, puis les quatre sommes des budgets demandés et les quatre sommes des compteurs effectifs des probes : slots handle, comparaisons exactes, sauts DSU et accès directs;
+- réutiliser en budget imbriqué les caps historiques de records demandés, nœuds shadow, unions rejouées et entrées totales; contrôler avant allocation tous les caps et overflows de prévol atteignables depuis les entrées, garder les overflows défensifs du rejeu comme contradictions privées non injectables et exiger un échec payloadless;
+- sur la fixture normative à cinq preuves, exiger pour les agrégats demandés et effectifs `18/17/3/24`, deux scans insertion--demande, borne shadow 8, deux nœuds compactés, treize entrées totales, une union demandée, une effective et cinq records;
+- couvrir chaque cap exact et moins un, ordre, doublon et forme hostiles, preuve étrangère ou périmée, move et objet déplacé, capability par défaut, copie puis falsification du reçu sémantique, invariance complète et égalité différentielle record par record avec le preview historique;
+- conserver strictement le digest preview ledger v1 inchangé; interdire au ledger de prétendre consommer les nouveaux champs ou preuves avant le domaine v2 du prochain `active_root_proof_bound_prepare_transition_no_index_rebuild_v1`;
 - enregistrer comme P2 le changement additif de layout et le risque pour des structured bindings externes écrits contre l'ancienne arité du record;
 - couvrir singleton nouveau, repeat compatible, chaîne, multifusion, self-union et doublons; comparer huit records au lookup post-commit et le nombre prédit d'unions effectives au commit;
 - rejeter chacun des quatre caps moins un, handles demandés dupliqués, inconnus ou `SIZE_MAX` avec zéro allocation et stamp inchangé;
@@ -2632,7 +2641,7 @@ Les diagnostics Release `/tmp` doivent rester étiquetés `structure_only` : 50 
 - rejeter sans payload ordre inversé, doublon, miss, épuisement, objet par défaut, falsification, preuve étrangère ou périmée et tout changement de stamp;
 - vérifier que le résultat est privé, immuable et non agrégat, que ses accessors ne rendent aucune référence depuis un temporaire et que preuves, stamp et cinq arènes persistantes restent inchangés;
 - maintenir explicites les gaps : contradictions défensives non injectables et opérations de hash du scratch `unordered_set` non comptées individuellement;
-- maintenir non bornés `prepare_transition`, les lookups historiques handle--racine DSU du preview désormais enrichi, la reconstruction de croissance d'index et les lookups post-mutation du commit;
+- maintenir non bornés `prepare_transition`, la reconstruction de croissance d'index et les lookups post-mutation du commit; le prochain coordinateur doit consommer le preview proof-bound et jamais retomber sur le preview historique;
 - vérifier que cette couture ne construit aucune population globale de facettes, cofaces, incidences, cellules, Gamma ou mosaïque de Delaunay d'ordre supérieur et n'autorise aucun claim true-HGP, 50 k sous la seconde ou dizaines de millions.
 
 La validation exacte passe 1/1 en 0,01 seconde en Release et 1/1 en 0,08 seconde sous ASan/UBSan, sans diagnostic. L'audit compte P0=0 et P1=0. Ces exécutions ciblées ne sont ni des smoke tests, ni des benchmarks ou des gates de performance. GCP non utilisé.

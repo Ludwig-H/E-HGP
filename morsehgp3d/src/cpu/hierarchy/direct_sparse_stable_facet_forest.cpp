@@ -782,6 +782,45 @@ struct ExactDirectSparseStableFacetForestPreparedPreview::Impl {
         minted(ticket_identity != nullptr) {}
 };
 
+struct ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    Impl {
+  const ExactDirectSparseStableFacetForestPreparedPreviewReceipt
+      semantic_receipt;
+  const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget
+      requested_budget;
+  const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters
+      counters;
+  const std::shared_ptr<const PreparedTicketIdentity> ticket_identity;
+  const bool proof_set_canonical;
+  const bool every_proof_fresh_for_pre_stamp;
+  const bool proof_records_bijective;
+  const bool new_handle_classification_exact;
+  const bool proofs_cover_all_ticket_touched_handles;
+  const bool no_historical_handle_or_root_lookup;
+  const bool minted;
+
+  Impl(
+      ExactDirectSparseStableFacetForestPreparedPreviewReceipt&&
+          input_semantic_receipt,
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&
+          input_requested_budget,
+      const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters&
+          input_counters,
+      std::shared_ptr<const PreparedTicketIdentity> input_ticket_identity)
+      noexcept
+      : semantic_receipt(std::move(input_semantic_receipt)),
+        requested_budget(input_requested_budget),
+        counters(input_counters),
+        ticket_identity(std::move(input_ticket_identity)),
+        proof_set_canonical(true),
+        every_proof_fresh_for_pre_stamp(true),
+        proof_records_bijective(true),
+        new_handle_classification_exact(true),
+        proofs_cover_all_ticket_touched_handles(true),
+        no_historical_handle_or_root_lookup(true),
+        minted(ticket_identity != nullptr) {}
+};
+
 struct ExactDirectSparseStableFacetForest::Impl {
   ExactDirectSparseStableFacetForestConfig config{};
   ExactDirectSparseStableFacetForestBudget budget{};
@@ -1553,6 +1592,233 @@ bool ExactDirectSparseStableFacetForestPreparedPreviewResult::
          decision ==
              ExactDirectSparseStableFacetForestPreparedPreviewDecision::
                  complete_sealed_sparse_shadow_preview;
+}
+
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview()
+    noexcept = default;
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    ~ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview() =
+        default;
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview(
+        ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&&)
+        noexcept = default;
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+operator=(
+    ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&&)
+    noexcept = default;
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview(
+        std::unique_ptr<Impl> impl) noexcept
+    : impl_(std::move(impl)) {}
+
+const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+semantic_receipt() const & noexcept {
+  static const ExactDirectSparseStableFacetForestPreparedPreviewReceipt empty;
+  return impl_ == nullptr ? empty : impl_->semantic_receipt;
+}
+
+std::span<const ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::records()
+    const & noexcept {
+  return impl_ == nullptr
+             ? std::span<
+                   const ExactDirectSparseStableFacetForestPreparedPreviewRecord>{}
+             : std::span<
+                   const ExactDirectSparseStableFacetForestPreparedPreviewRecord>{
+                   impl_->semantic_receipt.records};
+}
+
+const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+requested_budget() const & noexcept {
+  static const
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget
+          empty;
+  return impl_ == nullptr ? empty : impl_->requested_budget;
+}
+
+const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters&
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::counters()
+    const & noexcept {
+  static const
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters
+          empty;
+  return impl_ == nullptr ? empty : impl_->counters;
+}
+
+bool ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    no_historical_handle_or_root_lookup() const noexcept {
+  return impl_ != nullptr && impl_->no_historical_handle_or_root_lookup;
+}
+
+bool ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    proofs_cover_all_ticket_touched_handles() const noexcept {
+  return impl_ != nullptr &&
+         impl_->proofs_cover_all_ticket_touched_handles;
+}
+
+bool ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    certified_proof_bound_preorigin_preview() const noexcept {
+  if (impl_ == nullptr || !impl_->minted ||
+      impl_->ticket_identity == nullptr || !impl_->proof_set_canonical ||
+      !impl_->every_proof_fresh_for_pre_stamp ||
+      !impl_->proof_records_bijective ||
+      !impl_->new_handle_classification_exact ||
+      !impl_->proofs_cover_all_ticket_touched_handles ||
+      !impl_->no_historical_handle_or_root_lookup) {
+    return false;
+  }
+
+  const auto& value = impl_->semantic_receipt;
+  const auto& budget = impl_->requested_budget;
+  const auto& counters = impl_->counters;
+  const auto& aggregate_requested =
+      counters.aggregate_requested_probe_budget;
+  const auto& maximum_aggregate_requested =
+      budget.maximum_aggregate_requested_probe_budget;
+  const auto& aggregate_actual = counters.aggregate_probe_counters;
+  const auto& maximum_aggregate_actual =
+      budget.maximum_aggregate_probe_counters;
+  std::size_t expected_total_entry_upper_bound = 0U;
+  if (value.pre_stamp.session_instance_id == 0U ||
+      value.canonical_batch_digest == contract::CanonicalId{} ||
+      value.requested_handle_count != value.records.size() ||
+      value.requested_handle_count != counters.proof_count ||
+      value.shadow_node_count > value.shadow_node_upper_bound ||
+      value.expected_effective_union_count > value.union_request_count ||
+      !checked_add(
+          value.shadow_node_upper_bound,
+          value.requested_handle_count,
+          expected_total_entry_upper_bound) ||
+      value.total_entry_upper_bound != expected_total_entry_upper_bound ||
+      counters.proof_count > budget.maximum_proof_count ||
+      counters.ticket_insertion_request_scan_count >
+          budget.maximum_ticket_insertion_request_scan_count ||
+      aggregate_requested.maximum_handle_index_slot_visit_count >
+          maximum_aggregate_requested
+              .maximum_handle_index_slot_visit_count ||
+      aggregate_requested.maximum_exact_handle_comparison_count >
+          maximum_aggregate_requested
+              .maximum_exact_handle_comparison_count ||
+      aggregate_requested.maximum_parent_hop_count >
+          maximum_aggregate_requested.maximum_parent_hop_count ||
+      aggregate_requested.maximum_direct_forest_entry_access_count >
+          maximum_aggregate_requested
+              .maximum_direct_forest_entry_access_count ||
+      aggregate_actual.handle_index_slot_visit_count >
+          maximum_aggregate_actual.handle_index_slot_visit_count ||
+      aggregate_actual.exact_handle_comparison_count >
+          maximum_aggregate_actual.exact_handle_comparison_count ||
+      aggregate_actual.parent_hop_count >
+          maximum_aggregate_actual.parent_hop_count ||
+      aggregate_actual.direct_forest_entry_access_count >
+          maximum_aggregate_actual.direct_forest_entry_access_count ||
+      aggregate_actual.handle_index_slot_visit_count >
+          aggregate_requested.maximum_handle_index_slot_visit_count ||
+      aggregate_actual.exact_handle_comparison_count >
+          aggregate_requested.maximum_exact_handle_comparison_count ||
+      aggregate_actual.parent_hop_count >
+          aggregate_requested.maximum_parent_hop_count ||
+      aggregate_actual.direct_forest_entry_access_count >
+          aggregate_requested.maximum_direct_forest_entry_access_count ||
+      value.requested_handle_count >
+          budget.replay.maximum_requested_handle_count ||
+      value.shadow_node_upper_bound >
+          budget.replay.maximum_shadow_node_count ||
+      value.union_request_count >
+          budget.replay.maximum_union_replay_count ||
+      value.total_entry_upper_bound >
+          budget.replay.maximum_total_entry_count ||
+      !value.ticket_identity_bound ||
+      !value.all_overflow_and_budget_checks_completed_before_allocation ||
+      !value.sparse_pre_roots_and_new_handles_only ||
+      !value.requested_handles_cover_all_ticket_touched_handles ||
+      !value.canonical_union_replay_exact ||
+      value.forest_logical_state_mutated || value.source_exactness_claimed ||
+      value.public_status_claimed ||
+      value.decision !=
+          ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+              complete_sealed_sparse_shadow_preview) {
+    return false;
+  }
+
+  for (std::size_t index = 0U; index < value.records.size(); ++index) {
+    const auto& record = value.records[index];
+    const bool durable =
+        record.pre_ticket_origin ==
+        ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+            durable_observed;
+    const bool prepared_new =
+        record.pre_ticket_origin ==
+        ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+            prepared_new;
+    if ((!durable && !prepared_new) ||
+        record.requested_handle >= value.pre_stamp.stable_facet_token_count ||
+        record.pre_root_handle >=
+            value.pre_stamp.stable_facet_token_count ||
+        record.post_root_handle >=
+            value.pre_stamp.stable_facet_token_count ||
+        record.pre_component_size == 0U || record.post_component_size == 0U ||
+        (prepared_new &&
+         (record.pre_root_handle != record.requested_handle ||
+          record.pre_component_size != 1U)) ||
+        record.post_component_size < record.pre_component_size ||
+        (index != 0U &&
+         value.records[index - 1U].requested_handle >=
+             record.requested_handle)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    certified_for(
+        const ExactDirectSparseStableFacetForestPreparedBatch& ticket,
+        const ExactDirectSparseStableFacetForestStamp& expected_pre_stamp)
+        const noexcept {
+  return certified_proof_bound_preorigin_preview() && ticket.valid() &&
+         ticket.impl_ != nullptr && ticket.impl_->identity != nullptr &&
+         impl_->ticket_identity == ticket.impl_->identity &&
+         impl_->semantic_receipt.pre_stamp == expected_pre_stamp &&
+         ticket.impl_->pre_stamp == expected_pre_stamp &&
+         impl_->semantic_receipt.canonical_batch_digest ==
+             ticket.impl_->batch_digest &&
+         impl_->counters.ticket_insertion_request_scan_count ==
+             ticket.impl_->insertions.size();
+}
+
+bool ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+    certifies_semantic_receipt(
+        const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&
+            candidate) const noexcept {
+  return certified_proof_bound_preorigin_preview() &&
+         impl_->semantic_receipt == candidate;
+}
+
+bool ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewResult::
+    certified_prepared_preview() const noexcept {
+  if (!preview.has_value() ||
+      !preview->certified_proof_bound_preorigin_preview()) {
+    return false;
+  }
+  const auto& value = preview->semantic_receipt();
+  return pre_stamp == value.pre_stamp &&
+         requested_budget == preview->requested_budget() &&
+         counters == preview->counters() &&
+         shadow_node_upper_bound == value.shadow_node_upper_bound &&
+         union_request_count == value.union_request_count &&
+         total_entry_upper_bound == value.total_entry_upper_bound &&
+         all_overflow_and_budget_checks_completed_before_allocation &&
+         !forest_logical_state_mutated && !source_exactness_claimed &&
+         !public_status_claimed &&
+         decision ==
+             ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewDecision::
+                 complete_sealed_proof_bound_preorigin_sparse_shadow_preview;
 }
 
 bool ExactDirectSparseStableFacetForestPreparationResult::certified_prepared()
@@ -2887,6 +3153,505 @@ ExactDirectSparseStableFacetForest::preview_prepared_batch(
     output.decision =
         ExactDirectSparseStableFacetForestPreparedPreviewDecision::
             no_allocation_failed;
+    return output;
+  }
+}
+
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewResult
+ExactDirectSparseStableFacetForest::
+    preview_prepared_batch_from_stable_handle_root_proofs(
+        const ExactDirectSparseStableFacetForestPreparedBatch& ticket,
+        std::span<
+            const ExactDirectSparseStableFacetHandleRootProbeResult>
+            proofs,
+        const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget&
+            budget) const noexcept {
+  using Decision =
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewDecision;
+  using Origin =
+      ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin;
+
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewResult
+      output;
+  output.pre_stamp = current_stamp();
+  output.requested_budget = budget;
+  if (!certified_structure_only_forest()) {
+    output.decision = Decision::no_forest_rejected;
+    return output;
+  }
+  if (ticket.impl_ == nullptr || ticket.impl_->consumed ||
+      !ticket.impl_->registry_counted || ticket.impl_->identity == nullptr) {
+    output.decision = Decision::no_ticket_rejected;
+    return output;
+  }
+  const auto& prepared = *ticket.impl_;
+  if (prepared.pre_stamp.session_instance_id != impl_->session_instance_id) {
+    output.decision = Decision::no_foreign_ticket_rejected;
+    return output;
+  }
+  if (prepared.pre_stamp != output.pre_stamp) {
+    output.decision = Decision::no_stale_or_sibling_ticket_rejected;
+    return output;
+  }
+
+  output.union_request_count = prepared.unions.size();
+  if (proofs.size() > budget.maximum_proof_count) {
+    output.counters.proof_count = budget.maximum_proof_count;
+    output.decision = Decision::no_proof_count_budget_exhausted;
+    return output;
+  }
+  output.counters.proof_count = proofs.size();
+  if (prepared.insertions.size() >
+      budget.maximum_ticket_insertion_request_scan_count) {
+    output.counters.ticket_insertion_request_scan_count =
+        budget.maximum_ticket_insertion_request_scan_count;
+    output.decision =
+        Decision::no_ticket_insertion_request_scan_budget_exhausted;
+    return output;
+  }
+  output.counters.ticket_insertion_request_scan_count =
+      prepared.insertions.size();
+  if (proofs.size() > budget.replay.maximum_requested_handle_count ||
+      prepared.unions.size() > budget.replay.maximum_union_replay_count) {
+    output.decision = Decision::no_replay_budget_exhausted;
+    return output;
+  }
+
+  std::size_t union_endpoint_upper_bound = 0U;
+  std::size_t new_and_endpoint_upper_bound = 0U;
+  std::size_t post_observed_handle_count = 0U;
+  if (!checked_add(
+          prepared.unions.size(),
+          prepared.unions.size(),
+          union_endpoint_upper_bound) ||
+      !checked_add(
+          prepared.new_handle_count,
+          union_endpoint_upper_bound,
+          new_and_endpoint_upper_bound) ||
+      !checked_add(
+          new_and_endpoint_upper_bound,
+          proofs.size(),
+          output.shadow_node_upper_bound) ||
+      !checked_add(
+          output.shadow_node_upper_bound,
+          proofs.size(),
+          output.total_entry_upper_bound) ||
+      !checked_add(
+          impl_->entries.size(),
+          prepared.new_handle_count,
+          post_observed_handle_count)) {
+    output.decision = Decision::no_capacity_overflow;
+    return output;
+  }
+  if (post_observed_handle_count > impl_->config.stable_facet_token_count ||
+      output.shadow_node_upper_bound >
+          budget.replay.maximum_shadow_node_count ||
+      output.total_entry_upper_bound >
+          budget.replay.maximum_total_entry_count) {
+    output.decision = Decision::no_replay_budget_exhausted;
+    return output;
+  }
+
+  const auto add_bounded = [&](std::size_t increment,
+                               std::size_t& aggregate,
+                               std::size_t maximum,
+                               Decision exhausted) noexcept {
+    std::size_t next = 0U;
+    if (!checked_add(aggregate, increment, next)) {
+      output.decision = Decision::no_capacity_overflow;
+      return false;
+    }
+    if (next > maximum) {
+      aggregate = maximum;
+      output.decision = exhausted;
+      return false;
+    }
+    aggregate = next;
+    return true;
+  };
+
+  std::size_t unobserved_proof_count = 0U;
+  for (std::size_t index = 0U; index < proofs.size(); ++index) {
+    const auto& proof = proofs[index];
+    if ((index != 0U &&
+         proofs[index - 1U].requested_handle() >=
+             proof.requested_handle()) ||
+        proof.requested_handle() >=
+            output.pre_stamp.stable_facet_token_count) {
+      output.decision = Decision::no_proof_shape_rejected;
+      return output;
+    }
+    if ((!proof.certified_observed() && !proof.certified_unobserved()) ||
+        !proof.certified_for(output.pre_stamp)) {
+      output.decision = Decision::no_proof_outcome_rejected;
+      return output;
+    }
+    if (proof.certified_unobserved() &&
+        !checked_increment(unobserved_proof_count)) {
+      output.decision = Decision::no_capacity_overflow;
+      return output;
+    }
+
+    const auto& requested = proof.requested_budget();
+    auto& aggregate_requested =
+        output.counters.aggregate_requested_probe_budget;
+    if (!add_bounded(
+            requested.maximum_handle_index_slot_visit_count,
+            aggregate_requested.maximum_handle_index_slot_visit_count,
+            budget.maximum_aggregate_requested_probe_budget
+                .maximum_handle_index_slot_visit_count,
+            Decision::
+                no_aggregate_requested_handle_index_slot_budget_exhausted) ||
+        !add_bounded(
+            requested.maximum_exact_handle_comparison_count,
+            aggregate_requested.maximum_exact_handle_comparison_count,
+            budget.maximum_aggregate_requested_probe_budget
+                .maximum_exact_handle_comparison_count,
+            Decision::
+                no_aggregate_requested_exact_handle_comparison_budget_exhausted) ||
+        !add_bounded(
+            requested.maximum_parent_hop_count,
+            aggregate_requested.maximum_parent_hop_count,
+            budget.maximum_aggregate_requested_probe_budget
+                .maximum_parent_hop_count,
+            Decision::
+                no_aggregate_requested_parent_hop_budget_exhausted) ||
+        !add_bounded(
+            requested.maximum_direct_forest_entry_access_count,
+            aggregate_requested.maximum_direct_forest_entry_access_count,
+            budget.maximum_aggregate_requested_probe_budget
+                .maximum_direct_forest_entry_access_count,
+            Decision::
+                no_aggregate_requested_direct_forest_entry_access_budget_exhausted)) {
+      return output;
+    }
+
+    const auto& actual = proof.counters();
+    auto& aggregate_actual = output.counters.aggregate_probe_counters;
+    if (!add_bounded(
+            actual.handle_index_slot_visit_count,
+            aggregate_actual.handle_index_slot_visit_count,
+            budget.maximum_aggregate_probe_counters
+                .handle_index_slot_visit_count,
+            Decision::no_aggregate_handle_index_slot_budget_exhausted) ||
+        !add_bounded(
+            actual.exact_handle_comparison_count,
+            aggregate_actual.exact_handle_comparison_count,
+            budget.maximum_aggregate_probe_counters
+                .exact_handle_comparison_count,
+            Decision::no_aggregate_exact_handle_comparison_budget_exhausted) ||
+        !add_bounded(
+            actual.parent_hop_count,
+            aggregate_actual.parent_hop_count,
+            budget.maximum_aggregate_probe_counters.parent_hop_count,
+            Decision::no_aggregate_parent_hop_budget_exhausted) ||
+        !add_bounded(
+            actual.direct_forest_entry_access_count,
+            aggregate_actual.direct_forest_entry_access_count,
+            budget.maximum_aggregate_probe_counters
+                .direct_forest_entry_access_count,
+            Decision::
+                no_aggregate_direct_forest_entry_access_budget_exhausted)) {
+      return output;
+    }
+  }
+
+  const auto find_proof = [&proofs](
+                              ExactDirectSparseStableFacetHandle handle)
+      -> const ExactDirectSparseStableFacetHandleRootProbeResult* {
+    const auto found = std::lower_bound(
+        proofs.begin(),
+        proofs.end(),
+        handle,
+        [](const ExactDirectSparseStableFacetHandleRootProbeResult& proof,
+           ExactDirectSparseStableFacetHandle value) {
+          return proof.requested_handle() < value;
+        });
+    return found != proofs.end() && found->requested_handle() == handle
+               ? &*found
+               : nullptr;
+  };
+
+  std::size_t unobserved_insertion_handle_count = 0U;
+  for (std::size_t begin = 0U; begin < prepared.insertions.size();) {
+    std::size_t end = begin + 1U;
+    while (end < prepared.insertions.size() &&
+           prepared.insertions[end].stable_source_facet_token_index ==
+               prepared.insertions[begin]
+                   .stable_source_facet_token_index) {
+      ++end;
+    }
+    const auto handle =
+        prepared.insertions[begin].stable_source_facet_token_index;
+    const auto* proof = find_proof(handle);
+    if (proof == nullptr) {
+      output.decision = Decision::no_ticket_touch_coverage_rejected;
+      return output;
+    }
+    if (proof->certified_unobserved() &&
+        !checked_increment(unobserved_insertion_handle_count)) {
+      output.decision = Decision::no_capacity_overflow;
+      return output;
+    }
+    begin = end;
+  }
+  for (const auto& operation : prepared.unions) {
+    if (find_proof(operation.left_handle) == nullptr ||
+        find_proof(operation.right_handle) == nullptr) {
+      output.decision = Decision::no_ticket_touch_coverage_rejected;
+      return output;
+    }
+  }
+  if (unobserved_proof_count != unobserved_insertion_handle_count) {
+    output.decision = Decision::no_proof_ticket_binding_rejected;
+    return output;
+  }
+  if (unobserved_insertion_handle_count != prepared.new_handle_count) {
+    output.decision = Decision::contradiction_new_handle_classification;
+    return output;
+  }
+  if (current_stamp() != output.pre_stamp || !ticket.valid()) {
+    output.decision = Decision::no_forest_stamp_changed;
+    return output;
+  }
+  output.all_overflow_and_budget_checks_completed_before_allocation = true;
+
+  try {
+    const auto resolve_pre_ticket_state = [&find_proof](
+        ExactDirectSparseStableFacetHandle handle)
+        -> std::optional<SparseShadowPreTicketState> {
+      const auto* proof = find_proof(handle);
+      if (proof == nullptr) {
+        return std::nullopt;
+      }
+      if (proof->certified_observed()) {
+        return SparseShadowPreTicketState{
+            Origin::durable_observed,
+            proof->root_handle(),
+            proof->component_size()};
+      }
+      if (proof->certified_unobserved()) {
+        return SparseShadowPreTicketState{
+            Origin::prepared_new, handle, std::size_t{1U}};
+      }
+      return std::nullopt;
+    };
+
+    std::vector<SparseShadowNode> shadow_nodes;
+    shadow_nodes.reserve(output.shadow_node_upper_bound);
+    const auto append_pre_ticket_root = [&shadow_nodes,
+                                         &resolve_pre_ticket_state](
+                                            ExactDirectSparseStableFacetHandle
+                                                handle) {
+      const auto prestate = resolve_pre_ticket_state(handle);
+      if (!prestate.has_value()) {
+        return false;
+      }
+      shadow_nodes.push_back(
+          {prestate->root_handle, 0U, prestate->component_size});
+      return true;
+    };
+
+    // Every unobserved proof was already shown, without allocation, to name
+    // exactly one genuinely new insertion.  Gathering those proofs directly
+    // avoids a second physical scan of the ticket insertion requests.
+    for (const auto& proof : proofs) {
+      if (proof.certified_unobserved()) {
+        shadow_nodes.push_back({proof.requested_handle(), 0U, 1U});
+      }
+    }
+    for (const auto& proof : proofs) {
+      if (!append_pre_ticket_root(proof.requested_handle())) {
+        output.decision = Decision::contradiction_sparse_shadow_replay;
+        return output;
+      }
+    }
+    for (const auto& operation : prepared.unions) {
+      if (!append_pre_ticket_root(operation.left_handle) ||
+          !append_pre_ticket_root(operation.right_handle)) {
+        output.decision = Decision::contradiction_sparse_shadow_replay;
+        return output;
+      }
+    }
+    if (shadow_nodes.size() > output.shadow_node_upper_bound) {
+      output.decision = Decision::no_capacity_overflow;
+      return output;
+    }
+
+    std::sort(
+        shadow_nodes.begin(),
+        shadow_nodes.end(),
+        [](const SparseShadowNode& left, const SparseShadowNode& right) {
+          return left.root_handle < right.root_handle;
+        });
+    std::size_t compact_count = 0U;
+    for (const auto& node : shadow_nodes) {
+      if (compact_count != 0U &&
+          shadow_nodes[compact_count - 1U].root_handle == node.root_handle) {
+        if (shadow_nodes[compact_count - 1U].component_size !=
+            node.component_size) {
+          output.decision = Decision::contradiction_sparse_shadow_replay;
+          return output;
+        }
+        continue;
+      }
+      shadow_nodes[compact_count] = node;
+      shadow_nodes[compact_count].parent_index = compact_count;
+      ++compact_count;
+    }
+    shadow_nodes.resize(compact_count);
+
+    const auto shadow_index_for_pre_root = [&shadow_nodes](
+                                               ExactDirectSparseStableFacetHandle
+                                                   pre_root_handle)
+        -> std::optional<std::size_t> {
+      const auto found = std::lower_bound(
+          shadow_nodes.begin(),
+          shadow_nodes.end(),
+          pre_root_handle,
+          [](const SparseShadowNode& node,
+             ExactDirectSparseStableFacetHandle value) {
+            return node.root_handle < value;
+          });
+      return found != shadow_nodes.end() &&
+                     found->root_handle == pre_root_handle
+                 ? std::optional<std::size_t>{static_cast<std::size_t>(
+                       found - shadow_nodes.begin())}
+                 : std::nullopt;
+    };
+    const auto shadow_index_for_handle = [&resolve_pre_ticket_state,
+                                          &shadow_index_for_pre_root](
+                                             ExactDirectSparseStableFacetHandle
+                                                 handle)
+        -> std::optional<std::size_t> {
+      const auto prestate = resolve_pre_ticket_state(handle);
+      return prestate.has_value()
+                 ? shadow_index_for_pre_root(prestate->root_handle)
+                 : std::nullopt;
+    };
+    const auto shadow_root_index = [&shadow_nodes](std::size_t index)
+        -> std::optional<std::size_t> {
+      std::size_t hops = 0U;
+      while (index < shadow_nodes.size() &&
+             shadow_nodes[index].parent_index != index &&
+             hops <= shadow_nodes.size()) {
+        index = shadow_nodes[index].parent_index;
+        ++hops;
+      }
+      return index < shadow_nodes.size() && hops <= shadow_nodes.size() &&
+                     shadow_nodes[index].component_size != 0U
+                 ? std::optional<std::size_t>{index}
+                 : std::nullopt;
+    };
+
+    std::size_t effective_union_count = 0U;
+    for (const auto& operation : prepared.unions) {
+      const auto left_node = shadow_index_for_handle(operation.left_handle);
+      const auto right_node = shadow_index_for_handle(operation.right_handle);
+      if (!left_node.has_value() || !right_node.has_value()) {
+        output.decision = Decision::contradiction_sparse_shadow_replay;
+        return output;
+      }
+      const auto left_root = shadow_root_index(*left_node);
+      const auto right_root = shadow_root_index(*right_node);
+      if (!left_root.has_value() || !right_root.has_value()) {
+        output.decision = Decision::contradiction_sparse_shadow_replay;
+        return output;
+      }
+      if (*left_root == *right_root) {
+        continue;
+      }
+      auto& left = shadow_nodes[*left_root];
+      auto& right = shadow_nodes[*right_root];
+      std::size_t combined_size = 0U;
+      if (!checked_add(
+              left.component_size, right.component_size, combined_size) ||
+          combined_size > post_observed_handle_count ||
+          !checked_increment(effective_union_count)) {
+        output.decision = Decision::no_capacity_overflow;
+        return output;
+      }
+      const bool left_wins =
+          left.component_size > right.component_size ||
+          (left.component_size == right.component_size &&
+           left.root_handle < right.root_handle);
+      auto& root = left_wins ? left : right;
+      auto& child = left_wins ? right : left;
+      child.parent_index = left_wins ? *left_root : *right_root;
+      child.component_size = 0U;
+      root.component_size = combined_size;
+    }
+
+    std::vector<ExactDirectSparseStableFacetForestPreparedPreviewRecord>
+        records;
+    records.reserve(proofs.size());
+    for (const auto& proof : proofs) {
+      const auto prestate =
+          resolve_pre_ticket_state(proof.requested_handle());
+      if (!prestate.has_value()) {
+        output.decision = Decision::contradiction_sparse_shadow_replay;
+        return output;
+      }
+      const auto node = shadow_index_for_pre_root(prestate->root_handle);
+      if (!node.has_value()) {
+        output.decision = Decision::contradiction_sparse_shadow_replay;
+        return output;
+      }
+      const auto root = shadow_root_index(*node);
+      if (!root.has_value()) {
+        output.decision = Decision::contradiction_sparse_shadow_replay;
+        return output;
+      }
+      records.push_back(
+          {proof.requested_handle(),
+           shadow_nodes[*root].root_handle,
+           shadow_nodes[*root].component_size,
+           prestate->origin,
+           prestate->root_handle,
+           prestate->component_size});
+    }
+    if (current_stamp() != output.pre_stamp || !ticket.valid()) {
+      output.decision = Decision::no_forest_stamp_changed;
+      return output;
+    }
+
+    ExactDirectSparseStableFacetForestPreparedPreviewReceipt receipt;
+    receipt.pre_stamp = output.pre_stamp;
+    receipt.canonical_batch_digest = prepared.batch_digest;
+    receipt.requested_handle_count = proofs.size();
+    receipt.shadow_node_count = shadow_nodes.size();
+    receipt.shadow_node_upper_bound = output.shadow_node_upper_bound;
+    receipt.union_request_count = prepared.unions.size();
+    receipt.expected_effective_union_count = effective_union_count;
+    receipt.total_entry_upper_bound = output.total_entry_upper_bound;
+    receipt.records = std::move(records);
+    receipt.ticket_identity_bound = true;
+    receipt.all_overflow_and_budget_checks_completed_before_allocation = true;
+    receipt.sparse_pre_roots_and_new_handles_only = true;
+    receipt.requested_handles_cover_all_ticket_touched_handles = true;
+    receipt.canonical_union_replay_exact = true;
+    receipt.decision =
+        ExactDirectSparseStableFacetForestPreparedPreviewDecision::
+            complete_sealed_sparse_shadow_preview;
+    auto preview_impl = std::make_unique<
+        ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview::
+            Impl>(
+        std::move(receipt),
+        budget,
+        output.counters,
+        prepared.identity);
+    output.preview.emplace(
+        ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview{
+            std::move(preview_impl)});
+    output.decision =
+        Decision::
+            complete_sealed_proof_bound_preorigin_sparse_shadow_preview;
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.decision = Decision::no_allocation_failed;
+    return output;
+  } catch (const std::length_error&) {
+    output.decision = Decision::no_allocation_failed;
     return output;
   }
 }

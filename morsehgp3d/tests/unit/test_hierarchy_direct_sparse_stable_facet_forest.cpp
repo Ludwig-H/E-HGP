@@ -127,6 +127,24 @@ static_assert(std::is_same_v<
 static_assert(
     !HasPublicTraversalOrderMember<StableHandleRootProbeResult> &&
     !HasPublicTraversalOrderAccessor<StableHandleRootProbeResult>);
+using ProofBoundPreoriginPreview =
+    ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview;
+static_assert(!std::is_aggregate_v<ProofBoundPreoriginPreview>);
+static_assert(
+    !std::is_copy_constructible_v<ProofBoundPreoriginPreview> &&
+    std::is_nothrow_move_constructible_v<ProofBoundPreoriginPreview>);
+static_assert(!std::is_constructible_v<
+              ExactDirectSparseStableFacetForestPreparedPreview,
+              ProofBoundPreoriginPreview&&>);
+static_assert(std::is_same_v<
+              decltype(std::declval<const ProofBoundPreoriginPreview&>()
+                           .semantic_receipt()),
+              const ExactDirectSparseStableFacetForestPreparedPreviewReceipt&>);
+static_assert(std::is_same_v<
+              decltype(std::declval<const ProofBoundPreoriginPreview&>()
+                           .records()),
+              std::span<
+                  const ExactDirectSparseStableFacetForestPreparedPreviewRecord>>);
 
 int failures = 0;
 
@@ -1284,6 +1302,544 @@ void test_bounded_stable_handle_root_probe() {
       "successor stamp");
 }
 
+void test_proof_bound_preorigin_prepared_preview() {
+  using ProbeBudget =
+      ExactDirectSparseStableFacetHandleRootProbeBudget;
+  using ProbeCounters =
+      ExactDirectSparseStableFacetHandleRootProbeCounters;
+  using ProbeResult = ExactDirectSparseStableFacetHandleRootProbeResult;
+  using Preview =
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview;
+  using PreviewBudget =
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget;
+  using PreviewCounters =
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewCounters;
+  using PreviewDecision =
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewDecision;
+
+  const auto make_collision_forest = []() {
+    auto initialization = initialize();
+    auto forest = std::move(*initialization.forest);
+    const std::array insertions{
+        ExactDirectSparseStableFacetInsertion{0U, key_for_handle(0U)},
+        ExactDirectSparseStableFacetInsertion{7U, key_for_handle(7U)},
+        ExactDirectSparseStableFacetInsertion{13U, key_for_handle(13U)},
+        ExactDirectSparseStableFacetInsertion{16U, key_for_handle(16U)},
+    };
+    const std::array unions{
+        ExactDirectSparseStableFacetUnion{0U, 7U},
+        ExactDirectSparseStableFacetUnion{13U, 16U},
+        ExactDirectSparseStableFacetUnion{7U, 13U},
+    };
+    auto prepared = forest.prepare_batch(insertions, unions);
+    const auto committed = forest.commit(std::move(*prepared.ticket));
+    check(
+        committed.certified_commit(),
+        "the proof-bound preview collision pre-forest commits exactly");
+    return forest;
+  };
+
+  auto forest = make_collision_forest();
+  const auto proof_stamp = forest.current_stamp();
+  constexpr std::array<ExactDirectSparseStableFacetHandle, 5U> handles{
+      0U, 7U, 13U, 16U, 21U};
+  constexpr std::array<ProbeBudget, handles.size()> proof_budgets{
+      ProbeBudget{1U, 1U, 0U, 2U},
+      ProbeBudget{3U, 3U, 1U, 5U},
+      ProbeBudget{4U, 4U, 1U, 6U},
+      ProbeBudget{5U, 5U, 1U, 7U},
+      ProbeBudget{5U, 4U, 0U, 4U},
+  };
+  std::array<ProbeResult, handles.size()> proofs;
+  for (std::size_t index = 0U; index < proofs.size(); ++index) {
+    proofs[index] =
+        forest.probe_stable_handle_root(handles[index], proof_budgets[index]);
+  }
+  const auto extra_unobserved =
+      forest.probe_stable_handle_root(37U, ProbeBudget{5U, 4U, 0U, 4U});
+  check(
+      proofs[0U].certified_observed() &&
+          proofs[0U].counters() == ProbeCounters{1U, 1U, 0U, 2U} &&
+          proofs[1U].certified_observed() &&
+          proofs[1U].counters() == ProbeCounters{3U, 3U, 1U, 5U} &&
+          proofs[2U].certified_observed() &&
+          proofs[2U].counters() == ProbeCounters{4U, 4U, 1U, 6U} &&
+          proofs[3U].certified_observed() &&
+          proofs[3U].counters() == ProbeCounters{5U, 5U, 1U, 7U} &&
+          proofs[4U].certified_unobserved() &&
+          proofs[4U].counters() == ProbeCounters{5U, 4U, 0U, 4U} &&
+          extra_unobserved.certified_unobserved(),
+      "canonical preview proofs expose the frozen collision work and one "
+      "exact new-handle miss");
+  const auto proofs_before = proofs;
+
+  const std::array ticket_insertions{
+      ExactDirectSparseStableFacetInsertion{7U, key_for_handle(7U)},
+      ExactDirectSparseStableFacetInsertion{21U, key_for_handle(21U)},
+  };
+  const std::array ticket_unions{
+      ExactDirectSparseStableFacetUnion{16U, 21U}};
+  auto prepared = forest.prepare_batch(ticket_insertions, ticket_unions);
+  auto sibling = forest.prepare_batch(ticket_insertions, ticket_unions);
+  const auto pre_stamp = forest.current_stamp();
+  const std::vector<ExactDirectSparseStableFacetForestEntry> entries_before{
+      forest.observed_entries().begin(), forest.observed_entries().end()};
+  const auto entry_data_before = forest.observed_entries().data();
+  const auto handle_slots_before =
+      forest.materialized_handle_index_slot_count();
+  const auto positive_slots_before =
+      forest.materialized_positive_key_index_slot_count();
+  check(
+      prepared.certified_prepared() && sibling.certified_prepared() &&
+          pre_stamp == proof_stamp &&
+          std::all_of(
+              proofs.begin(), proofs.end(), [&](const auto& proof) {
+                return proof.certified_for(pre_stamp);
+              }),
+      "proofs captured before physical ticket reservation remain authentic "
+      "at the unchanged semantic pre-stamp");
+
+  const ExactDirectSparseStableFacetForestPreparedPreviewBudget replay_budget{
+      5U, 8U, 1U, 13U};
+  const PreviewBudget exact_budget{
+      5U,
+      2U,
+      ProbeBudget{18U, 17U, 3U, 24U},
+      ProbeCounters{18U, 17U, 3U, 24U},
+      replay_budget};
+  const PreviewCounters exact_counters{
+      5U,
+      2U,
+      ProbeBudget{18U, 17U, 3U, 24U},
+      ProbeCounters{18U, 17U, 3U, 24U}};
+  const auto historical = forest.preview_prepared_batch(
+      *prepared.ticket, handles, replay_budget);
+  const auto exact =
+      forest.preview_prepared_batch_from_stable_handle_root_proofs(
+          *prepared.ticket, proofs, exact_budget);
+  check(
+      historical.certified_prepared_preview() &&
+          exact.certified_prepared_preview() && exact.preview.has_value() &&
+          exact.decision ==
+              PreviewDecision::
+                  complete_sealed_proof_bound_preorigin_sparse_shadow_preview &&
+          exact.requested_budget == exact_budget &&
+          exact.counters == exact_counters &&
+          exact.shadow_node_upper_bound == 8U &&
+          exact.union_request_count == 1U &&
+          exact.total_entry_upper_bound == 13U &&
+          exact.preview->certified_proof_bound_preorigin_preview() &&
+          exact.preview->certified_for(*prepared.ticket, pre_stamp) &&
+          !exact.preview->certified_for(*sibling.ticket, pre_stamp) &&
+          exact.preview->requested_budget() == exact_budget &&
+          exact.preview->counters() == exact_counters &&
+          exact.preview->no_historical_handle_or_root_lookup() &&
+          exact.preview->proofs_cover_all_ticket_touched_handles() &&
+          exact.preview->semantic_receipt() ==
+              historical.preview->receipt(),
+      "five exact proofs reproduce the historical semantic preview while "
+      "remaining bound to one live ticket identity");
+
+  const auto records = exact.preview->records();
+  bool records_exact = records.size() == handles.size();
+  for (std::size_t index = 0U;
+       records_exact && index < records.size();
+       ++index) {
+    const auto& record = records[index];
+    const bool prepared_new = index + 1U == records.size();
+    records_exact =
+        record.requested_handle == handles[index] &&
+        record.pre_ticket_origin ==
+            (prepared_new
+                 ? ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                       prepared_new
+                 : ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                       durable_observed) &&
+        record.pre_root_handle == (prepared_new ? 21U : 0U) &&
+        record.pre_component_size == (prepared_new ? 1U : 4U) &&
+        record.post_root_handle == 0U && record.post_component_size == 5U;
+  }
+  check(
+      records_exact && exact.preview->semantic_receipt().shadow_node_count == 2U &&
+          exact.preview->semantic_receipt().expected_effective_union_count ==
+              1U &&
+          exact.preview->semantic_receipt()
+              .requested_handles_cover_all_ticket_touched_handles &&
+          proofs == proofs_before,
+      "observed proof extras remain durable records, the unobserved insertion "
+      "is a new singleton, and input proofs stay immutable");
+
+  auto edited_receipt = exact.preview->semantic_receipt();
+  edited_receipt.records.back().pre_ticket_origin =
+      ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+          durable_observed;
+  Preview default_preview;
+  check(
+      !exact.preview->certifies_semantic_receipt(edited_receipt) &&
+          exact.preview->certifies_semantic_receipt(
+              exact.preview->semantic_receipt()) &&
+          !default_preview.certified_proof_bound_preorigin_preview() &&
+          default_preview.records().empty() &&
+          !default_preview.no_historical_handle_or_root_lookup(),
+      "the private proof-bound mint rejects semantic origin edits and default "
+      "construction");
+
+  auto movable =
+      forest.preview_prepared_batch_from_stable_handle_root_proofs(
+          *sibling.ticket, proofs, exact_budget);
+  check(
+      movable.certified_prepared_preview(),
+      "the sibling proof-bound preview is available for move testing");
+  if (!movable.preview.has_value()) {
+    return;
+  }
+  Preview moved_preview = std::move(*movable.preview);
+  check(
+      moved_preview.certified_for(*sibling.ticket, pre_stamp) &&
+          !movable.preview->certified_proof_bound_preorigin_preview() &&
+          movable.preview->records().empty(),
+      "moving the distinct capability preserves one sibling identity and "
+      "leaves the source noncertifying");
+
+  constexpr std::size_t maximum =
+      std::numeric_limits<std::size_t>::max();
+  const PreviewBudget maximum_budget{
+      maximum,
+      maximum,
+      ProbeBudget{maximum, maximum, maximum, maximum},
+      ProbeCounters{maximum, maximum, maximum, maximum},
+      {maximum, maximum, maximum, maximum}};
+  const auto run_payloadless =
+      [&](std::span<const ProbeResult> input_proofs,
+          const PreviewBudget& budget,
+          PreviewDecision expected_decision,
+          std::string_view label) {
+        allocation_probe::begin();
+        auto result =
+            forest.preview_prepared_batch_from_stable_handle_root_proofs(
+                *prepared.ticket, input_proofs, budget);
+        const std::size_t allocations = allocation_probe::finish();
+        check(
+            !result.preview.has_value() &&
+                !result.certified_prepared_preview() &&
+                result.decision == expected_decision &&
+                !result.forest_logical_state_mutated && allocations == 0U &&
+                forest.current_stamp() == pre_stamp,
+            std::string{label});
+        return result;
+      };
+
+  auto reduced = exact_budget;
+  --reduced.maximum_proof_count;
+  auto proof_count_exhausted = run_payloadless(
+      proofs,
+      reduced,
+      PreviewDecision::no_proof_count_budget_exhausted,
+      "proof-count cap minus one fails before allocation");
+  check(
+      proof_count_exhausted.counters.proof_count == 4U,
+      "proof-count exhaustion stops exactly at its cap");
+
+  reduced = exact_budget;
+  --reduced.maximum_ticket_insertion_request_scan_count;
+  auto insertion_scan_exhausted = run_payloadless(
+      proofs,
+      reduced,
+      PreviewDecision::no_ticket_insertion_request_scan_budget_exhausted,
+      "ticket-insertion scan cap minus one fails before allocation");
+  check(
+      insertion_scan_exhausted.counters.ticket_insertion_request_scan_count ==
+          1U,
+      "ticket-insertion scan exhaustion stops exactly at its cap");
+
+  const auto check_aggregate_cap =
+      [&](PreviewBudget budget,
+          PreviewDecision decision,
+          std::size_t expected,
+          auto counter,
+          std::string_view label) {
+        auto result = run_payloadless(proofs, budget, decision, label);
+        check(
+            counter(result.counters) == expected,
+            std::string{label} + " reports its exact saturated counter");
+      };
+
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_requested_probe_budget
+        .maximum_handle_index_slot_visit_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::
+          no_aggregate_requested_handle_index_slot_budget_exhausted,
+      17U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_requested_probe_budget
+            .maximum_handle_index_slot_visit_count;
+      },
+      "aggregate requested-slot cap minus one");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_requested_probe_budget
+        .maximum_exact_handle_comparison_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::
+          no_aggregate_requested_exact_handle_comparison_budget_exhausted,
+      16U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_requested_probe_budget
+            .maximum_exact_handle_comparison_count;
+      },
+      "aggregate requested-comparison cap minus one");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_requested_probe_budget
+        .maximum_parent_hop_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::no_aggregate_requested_parent_hop_budget_exhausted,
+      2U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_requested_probe_budget
+            .maximum_parent_hop_count;
+      },
+      "aggregate requested-hop cap minus one");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_requested_probe_budget
+        .maximum_direct_forest_entry_access_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::
+          no_aggregate_requested_direct_forest_entry_access_budget_exhausted,
+      23U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_requested_probe_budget
+            .maximum_direct_forest_entry_access_count;
+      },
+      "aggregate requested-entry cap minus one");
+
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_probe_counters
+        .handle_index_slot_visit_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::no_aggregate_handle_index_slot_budget_exhausted,
+      17U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_probe_counters
+            .handle_index_slot_visit_count;
+      },
+      "aggregate actual-slot cap minus one");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_probe_counters
+        .exact_handle_comparison_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::no_aggregate_exact_handle_comparison_budget_exhausted,
+      16U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_probe_counters
+            .exact_handle_comparison_count;
+      },
+      "aggregate actual-comparison cap minus one");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_probe_counters.parent_hop_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::no_aggregate_parent_hop_budget_exhausted,
+      2U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_probe_counters.parent_hop_count;
+      },
+      "aggregate actual-hop cap minus one");
+  reduced = exact_budget;
+  --reduced.maximum_aggregate_probe_counters
+        .direct_forest_entry_access_count;
+  check_aggregate_cap(
+      reduced,
+      PreviewDecision::
+          no_aggregate_direct_forest_entry_access_budget_exhausted,
+      23U,
+      [](const PreviewCounters& counters) {
+        return counters.aggregate_probe_counters
+            .direct_forest_entry_access_count;
+      },
+      "aggregate actual-entry cap minus one");
+
+  reduced = exact_budget;
+  --reduced.replay.maximum_requested_handle_count;
+  (void)run_payloadless(
+      proofs,
+      reduced,
+      PreviewDecision::no_replay_budget_exhausted,
+      "nested requested-record cap minus one");
+  reduced = exact_budget;
+  --reduced.replay.maximum_shadow_node_count;
+  (void)run_payloadless(
+      proofs,
+      reduced,
+      PreviewDecision::no_replay_budget_exhausted,
+      "nested shadow-node cap minus one");
+  reduced = exact_budget;
+  --reduced.replay.maximum_union_replay_count;
+  (void)run_payloadless(
+      proofs,
+      reduced,
+      PreviewDecision::no_replay_budget_exhausted,
+      "nested union-replay cap minus one");
+  reduced = exact_budget;
+  --reduced.replay.maximum_total_entry_count;
+  (void)run_payloadless(
+      proofs,
+      reduced,
+      PreviewDecision::no_replay_budget_exhausted,
+      "nested total-entry cap minus one");
+
+  const ProbeBudget unbounded_probe_budget{
+      maximum, maximum, maximum, maximum};
+  const std::array<ProbeResult, 2U> aggregate_overflow_proofs{
+      forest.probe_stable_handle_root(0U, unbounded_probe_budget),
+      forest.probe_stable_handle_root(7U, unbounded_probe_budget)};
+  const auto aggregate_overflow = run_payloadless(
+      aggregate_overflow_proofs,
+      maximum_budget,
+      PreviewDecision::no_capacity_overflow,
+      "two authentic SIZE_MAX probe budgets overflow their aggregate before "
+      "allocation");
+  check(
+      aggregate_overflow.counters.aggregate_requested_probe_budget
+              .maximum_handle_index_slot_visit_count == maximum,
+      "aggregate overflow preserves the exact completed SIZE_MAX prefix");
+
+  const std::array<ProbeResult, 5U> reversed{
+      proofs[1U], proofs[0U], proofs[2U], proofs[3U], proofs[4U]};
+  const std::array<ProbeResult, 5U> duplicated{
+      proofs[0U], proofs[0U], proofs[2U], proofs[3U], proofs[4U]};
+  auto default_proofs = proofs;
+  default_proofs[0U] = ProbeResult{};
+  auto exhausted_proofs = proofs;
+  exhausted_proofs[3U] = forest.probe_stable_handle_root(
+      16U, ProbeBudget{0U, maximum, maximum, maximum});
+  (void)run_payloadless(
+      reversed,
+      maximum_budget,
+      PreviewDecision::no_proof_shape_rejected,
+      "descending proofs are rejected without allocation");
+  (void)run_payloadless(
+      duplicated,
+      maximum_budget,
+      PreviewDecision::no_proof_shape_rejected,
+      "duplicate proofs are rejected without allocation");
+  (void)run_payloadless(
+      default_proofs,
+      maximum_budget,
+      PreviewDecision::no_proof_outcome_rejected,
+      "a default proof cannot authorize pre-origin classification");
+  (void)run_payloadless(
+      exhausted_proofs,
+      maximum_budget,
+      PreviewDecision::no_proof_outcome_rejected,
+      "an exhausted proof cannot authorize pre-origin classification");
+
+  const std::array<ProbeResult, 4U> missing_endpoint{
+      proofs[0U], proofs[1U], proofs[2U], proofs[4U]};
+  const std::array<ProbeResult, 4U> missing_new{
+      proofs[0U], proofs[1U], proofs[2U], proofs[3U]};
+  const std::array<ProbeResult, 6U> unobserved_extra{
+      proofs[0U],
+      proofs[1U],
+      proofs[2U],
+      proofs[3U],
+      proofs[4U],
+      extra_unobserved};
+  (void)run_payloadless(
+      missing_endpoint,
+      maximum_budget,
+      PreviewDecision::no_ticket_touch_coverage_rejected,
+      "a missing durable union endpoint proof rejects exact ticket coverage");
+  (void)run_payloadless(
+      missing_new,
+      maximum_budget,
+      PreviewDecision::no_ticket_touch_coverage_rejected,
+      "a missing new-insertion proof rejects exact ticket coverage");
+  (void)run_payloadless(
+      unobserved_extra,
+      maximum_budget,
+      PreviewDecision::no_proof_ticket_binding_rejected,
+      "an unobserved proof outside ticket insertions cannot create a record");
+
+  auto foreign_forest = make_collision_forest();
+  auto foreign_proofs = proofs;
+  foreign_proofs[0U] = foreign_forest.probe_stable_handle_root(
+      0U, ProbeBudget{1U, 1U, 0U, 2U});
+  (void)run_payloadless(
+      foreign_proofs,
+      maximum_budget,
+      PreviewDecision::no_proof_outcome_rejected,
+      "an authentic foreign-stamp proof is rejected without allocation");
+  allocation_probe::begin();
+  const auto foreign_ticket =
+      foreign_forest.preview_prepared_batch_from_stable_handle_root_proofs(
+          *prepared.ticket, proofs, maximum_budget);
+  const std::size_t foreign_ticket_allocations = allocation_probe::finish();
+  check(
+      !foreign_ticket.preview.has_value() &&
+          foreign_ticket.decision == PreviewDecision::no_foreign_ticket_rejected &&
+          foreign_ticket_allocations == 0U,
+      "a foreign forest rejects the live ticket before proof work or "
+      "allocation");
+
+  check(
+      forest.current_stamp() == pre_stamp &&
+          forest.observed_entries().data() == entry_data_before &&
+          forest.observed_entries().size() == entries_before.size() &&
+          std::equal(
+              forest.observed_entries().begin(),
+              forest.observed_entries().end(),
+              entries_before.begin(),
+              entries_before.end()) &&
+          forest.materialized_handle_index_slot_count() ==
+              handle_slots_before &&
+          forest.materialized_positive_key_index_slot_count() ==
+              positive_slots_before &&
+          forest.outstanding_ticket_count() == 2U &&
+          prepared.ticket->valid() && sibling.ticket->valid() &&
+          proofs == proofs_before,
+      "success, every exhaustion and all reachable rejections preserve the "
+      "forest, both live tickets and authentic proofs");
+
+  const auto committed = forest.commit(std::move(*prepared.ticket));
+  allocation_probe::begin();
+  const auto stale_ticket =
+      forest.preview_prepared_batch_from_stable_handle_root_proofs(
+          *sibling.ticket, proofs, maximum_budget);
+  const std::size_t stale_ticket_allocations = allocation_probe::finish();
+  const std::array fresh_repeat{
+      ExactDirectSparseStableFacetInsertion{7U, key_for_handle(7U)}};
+  auto fresh_ticket = forest.prepare_batch(fresh_repeat, {});
+  const std::array<ProbeResult, 1U> stale_proof{proofs[1U]};
+  allocation_probe::begin();
+  const auto stale_proof_result =
+      forest.preview_prepared_batch_from_stable_handle_root_proofs(
+          *fresh_ticket.ticket, stale_proof, maximum_budget);
+  const std::size_t stale_proof_allocations = allocation_probe::finish();
+  check(
+      committed.certified_commit() &&
+          forest.lookup(21U).certified_observed() &&
+          forest.lookup(21U).root_handle == 0U &&
+          forest.lookup(21U).component_size == 5U &&
+          !exact.preview->certified_for(
+              *sibling.ticket, forest.current_stamp()) &&
+          !stale_ticket.preview.has_value() &&
+          stale_ticket.decision ==
+              PreviewDecision::no_stale_or_sibling_ticket_rejected &&
+          stale_ticket_allocations == 0U &&
+          !stale_proof_result.preview.has_value() &&
+          stale_proof_result.decision ==
+              PreviewDecision::no_proof_outcome_rejected &&
+          stale_proof_allocations == 0U,
+      "stale sibling tickets and stale proofs against a fresh ticket fail "
+      "closed without allocation");
+}
+
 void test_positive_index_budget_preflight() {
   auto maximum_namespace_initialization =
       initialize_exact_direct_sparse_stable_facet_forest(
@@ -2186,6 +2742,7 @@ void run_tests() {
   test_positive_full_key_index_collision_and_injective_binding();
   test_bounded_positive_full_key_probe_caps_collision_and_stamp();
   test_bounded_stable_handle_root_probe();
+  test_proof_bound_preorigin_prepared_preview();
   test_positive_index_budget_preflight();
   test_positive_bijection_sibling_adversaries_and_idempotence();
   test_sibling_ticket_survives_physical_rehash();
