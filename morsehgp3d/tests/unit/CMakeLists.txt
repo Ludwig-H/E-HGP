@@ -1450,6 +1450,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_sparse_stable_facet_descent_closure_tests
+  test_hierarchy_direct_sparse_stable_facet_descent_closure.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_stable_facet_descent_closure_tests
+  PRIVATE morsehgp3d::direct_sparse_stable_facet_descent_closure
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_stable_facet_descent_closure_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_stable_facet_descent_closure_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_root_ledger_tests
   test_hierarchy_direct_sparse_root_ledger.cpp
 )
@@ -3435,6 +3455,7 @@ set(
   morsehgp3d_hierarchy_direct_normalized_h0_authenticated_window_stream_tests
   morsehgp3d_hierarchy_direct_normalized_h0_scientific_window_capability_tests
   morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
+  morsehgp3d_hierarchy_direct_sparse_stable_facet_descent_closure_tests
   morsehgp3d_hierarchy_direct_sparse_root_ledger_tests
   morsehgp3d_hierarchy_direct_normalized_vertical_square_receipt_tests
   morsehgp3d_hierarchy_direct_sparse_successive_incidence_tests
@@ -4520,6 +4541,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_stable_facet_forest
   COMMAND morsehgp3d_hierarchy_direct_sparse_stable_facet_forest_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_stable_facet_descent_closure
+  COMMAND morsehgp3d_hierarchy_direct_sparse_stable_facet_descent_closure_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_root_ledger

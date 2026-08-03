@@ -15,6 +15,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_successive_incidence_star_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_unified_level_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_stable_facet_forest.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_stable_facet_descent_closure.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_root_ledger.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_frozen_incidence_hgp_action_plan.hpp"
@@ -387,6 +388,25 @@ int main() {
                   not_certified) {
     std::cerr
         << "installed full-key lookup accepted an empty forest session\n";
+    return 1;
+  }
+  static_assert(
+      morsehgp3d::hierarchy::
+              direct_sparse_stable_facet_descent_closure_schema_version ==
+          1U);
+  static_assert(
+      morsehgp3d::hierarchy::
+              ExactDirectSparseStableFacetDescentClosureResult::mode ==
+          std::string_view{
+              "stable_forest_full_key_strict_facet_descent_closure_v1"});
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseStableFacetDescentClosureResult
+          installed_stable_descent_closure_probe;
+  if (installed_stable_descent_closure_probe.certified_outcome() ||
+      installed_stable_descent_closure_probe.certified_for(
+          installed_sparse_forest_probe)) {
+    std::cerr
+        << "installed stable-descent closure API accepted an empty result\n";
     return 1;
   }
   static_assert(
