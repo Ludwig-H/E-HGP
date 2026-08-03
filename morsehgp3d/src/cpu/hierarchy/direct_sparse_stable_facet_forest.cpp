@@ -564,6 +564,101 @@ struct BoundedHandleIndexSearchResult {
   return result;
 }
 
+enum class StableHandleRootIndexSearchDisposition : std::uint8_t {
+  unobserved,
+  observed,
+  budget_exhausted,
+  contradiction,
+};
+
+struct StableHandleRootIndexSearchResult {
+  StableHandleRootIndexSearchDisposition disposition{
+      StableHandleRootIndexSearchDisposition::contradiction};
+  ExactDirectSparseStableFacetHandleRootProbeDecision budget_decision{
+      ExactDirectSparseStableFacetHandleRootProbeDecision::not_certified};
+  std::size_t row{};
+};
+
+// Allocation-free open-addressed lookup shared by the initial stable-handle
+// query and every DSU parent lookup.  The hash chooses only the first slot;
+// equality of the complete stable handle stored in the durable row is the
+// sole identity authority.  All counters are cumulative across calls.
+[[nodiscard]] StableHandleRootIndexSearchResult
+stable_handle_root_index_search_bounded(
+    std::span<const ExactDirectSparseStableFacetForestEntry> entries,
+    std::span<const std::size_t> slots,
+    ExactDirectSparseStableFacetHandle handle,
+    const ExactDirectSparseStableFacetHandleRootProbeBudget& budget,
+    ExactDirectSparseStableFacetHandleRootProbeCounters& counters) noexcept {
+  StableHandleRootIndexSearchResult result;
+  if (slots.empty()) {
+    result.disposition =
+        entries.empty()
+            ? StableHandleRootIndexSearchDisposition::unobserved
+            : StableHandleRootIndexSearchDisposition::contradiction;
+    return result;
+  }
+  if (!power_of_two(slots.size())) {
+    return result;
+  }
+
+  const std::size_t mask = slots.size() - 1U;
+  std::size_t slot_index = mix_stable_handle(handle) & mask;
+  for (std::size_t probe = 0U; probe < slots.size(); ++probe) {
+    if (counters.handle_index_slot_visit_count >=
+        budget.maximum_handle_index_slot_visit_count) {
+      result.disposition =
+          StableHandleRootIndexSearchDisposition::budget_exhausted;
+      result.budget_decision =
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              no_handle_index_slot_budget_exhausted;
+      return result;
+    }
+    ++counters.handle_index_slot_visit_count;
+
+    const std::size_t row_plus_one = slots[slot_index];
+    if (row_plus_one == 0U) {
+      result.disposition =
+          StableHandleRootIndexSearchDisposition::unobserved;
+      return result;
+    }
+    const std::size_t row = row_plus_one - 1U;
+    if (row >= entries.size()) {
+      return result;
+    }
+
+    if (counters.direct_forest_entry_access_count >=
+        budget.maximum_direct_forest_entry_access_count) {
+      result.disposition =
+          StableHandleRootIndexSearchDisposition::budget_exhausted;
+      result.budget_decision =
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              no_direct_forest_entry_access_budget_exhausted;
+      return result;
+    }
+    if (counters.exact_handle_comparison_count >=
+        budget.maximum_exact_handle_comparison_count) {
+      result.disposition =
+          StableHandleRootIndexSearchDisposition::budget_exhausted;
+      result.budget_decision =
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              no_exact_handle_comparison_budget_exhausted;
+      return result;
+    }
+    ++counters.direct_forest_entry_access_count;
+    ++counters.exact_handle_comparison_count;
+    const ExactDirectSparseStableFacetHandle stored_handle =
+        entries[row].stable_source_facet_token_index;
+    if (stored_handle == handle) {
+      result.disposition = StableHandleRootIndexSearchDisposition::observed;
+      result.row = row;
+      return result;
+    }
+    slot_index = (slot_index + 1U) & mask;
+  }
+  return result;
+}
+
 [[nodiscard]] bool insert_positive_key_index_row(
     std::span<const ExactDirectSparseStableFacetForestEntry> entries,
     std::span<std::size_t> slots,
@@ -1068,6 +1163,205 @@ bool ExactDirectSparseStableFacetPositiveProbeResult::certified_unobserved_for(
     const ExactDirectSparseStableFacetForestStamp& expected_stamp)
     const noexcept {
   return certified_unobserved() && forest_stamp == expected_stamp;
+}
+
+const ExactDirectSparseStableFacetForestStamp&
+ExactDirectSparseStableFacetHandleRootProbeResult::forest_stamp()
+    const & noexcept {
+  return forest_stamp_;
+}
+
+const ExactDirectSparseStableFacetHandleRootProbeBudget&
+ExactDirectSparseStableFacetHandleRootProbeResult::requested_budget()
+    const & noexcept {
+  return requested_budget_;
+}
+
+const ExactDirectSparseStableFacetHandleRootProbeCounters&
+ExactDirectSparseStableFacetHandleRootProbeResult::counters()
+    const & noexcept {
+  return counters_;
+}
+
+ExactDirectSparseStableFacetHandle
+ExactDirectSparseStableFacetHandleRootProbeResult::requested_handle()
+    const noexcept {
+  return requested_handle_;
+}
+
+ExactDirectSparseStableFacetHandle
+ExactDirectSparseStableFacetHandleRootProbeResult::root_handle()
+    const noexcept {
+  return root_handle_;
+}
+
+std::size_t
+ExactDirectSparseStableFacetHandleRootProbeResult::component_size()
+    const noexcept {
+  return component_size_;
+}
+
+ExactDirectSparseStableFacetHandleRootProbeDisposition
+ExactDirectSparseStableFacetHandleRootProbeResult::disposition()
+    const noexcept {
+  return disposition_;
+}
+
+ExactDirectSparseStableFacetHandleRootProbeDecision
+ExactDirectSparseStableFacetHandleRootProbeResult::decision() const noexcept {
+  return decision_;
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::certified_common()
+    const noexcept {
+  return minted_ &&
+         forest_stamp_.schema_version ==
+             direct_sparse_stable_facet_forest_schema_version &&
+         forest_stamp_.session_instance_id != 0U &&
+         forest_certified_at_entry_ && probe_completed_without_mutation_ &&
+         complete_handle_comparison_authoritative_ && allocation_free_ &&
+         counters_.handle_index_slot_visit_count <=
+             requested_budget_.maximum_handle_index_slot_visit_count &&
+         counters_.exact_handle_comparison_count <=
+             requested_budget_.maximum_exact_handle_comparison_count &&
+         counters_.parent_hop_count <=
+             requested_budget_.maximum_parent_hop_count &&
+         counters_.direct_forest_entry_access_count <=
+             requested_budget_.maximum_direct_forest_entry_access_count &&
+         counters_.exact_handle_comparison_count <=
+             counters_.handle_index_slot_visit_count &&
+         counters_.exact_handle_comparison_count <=
+             counters_.direct_forest_entry_access_count &&
+         counters_.parent_hop_count <=
+             forest_stamp_.observed_handle_count &&
+         !source_exactness_claimed_ && !public_status_claimed_;
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::certified_observed()
+    const noexcept {
+  return certified_common() && forest_stamp_unchanged_ &&
+         requested_handle_ < forest_stamp_.stable_facet_token_count &&
+         root_handle_ < forest_stamp_.stable_facet_token_count &&
+         immutable_handle_binding_observed_ &&
+         root_resolved_without_mutation_ &&
+         counters_.exact_handle_comparison_count != 0U &&
+         counters_.direct_forest_entry_access_count != 0U &&
+         component_size_ != 0U &&
+         component_size_ <= forest_stamp_.observed_handle_count &&
+         disposition_ ==
+             ExactDirectSparseStableFacetHandleRootProbeDisposition::observed &&
+         decision_ ==
+             ExactDirectSparseStableFacetHandleRootProbeDecision::
+                 complete_observed;
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::certified_unobserved()
+    const noexcept {
+  return certified_common() && forest_stamp_unchanged_ &&
+         requested_handle_ < forest_stamp_.stable_facet_token_count &&
+         !immutable_handle_binding_observed_ &&
+         root_resolved_without_mutation_ &&
+         counters_.parent_hop_count == 0U &&
+         counters_.direct_forest_entry_access_count ==
+             counters_.exact_handle_comparison_count &&
+         root_handle_ == 0U &&
+         component_size_ == 0U &&
+         disposition_ == ExactDirectSparseStableFacetHandleRootProbeDisposition::
+                             unobserved &&
+         decision_ == ExactDirectSparseStableFacetHandleRootProbeDecision::
+                          complete_unobserved;
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::certified_rejection()
+    const noexcept {
+  return certified_common() && forest_stamp_unchanged_ &&
+         requested_handle_ >= forest_stamp_.stable_facet_token_count &&
+         counters_ == ExactDirectSparseStableFacetHandleRootProbeCounters{} &&
+         !immutable_handle_binding_observed_ &&
+         !root_resolved_without_mutation_ && root_handle_ == 0U &&
+         component_size_ == 0U &&
+         disposition_ ==
+             ExactDirectSparseStableFacetHandleRootProbeDisposition::
+                 input_handle_rejected &&
+         decision_ == ExactDirectSparseStableFacetHandleRootProbeDecision::
+                          no_input_handle_rejected;
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::
+certified_budget_exhaustion() const noexcept {
+  bool exhausted_exact_cap = false;
+  switch (decision_) {
+    case ExactDirectSparseStableFacetHandleRootProbeDecision::
+        no_handle_index_slot_budget_exhausted:
+      exhausted_exact_cap =
+          counters_.handle_index_slot_visit_count ==
+          requested_budget_.maximum_handle_index_slot_visit_count;
+      break;
+    case ExactDirectSparseStableFacetHandleRootProbeDecision::
+        no_exact_handle_comparison_budget_exhausted:
+      exhausted_exact_cap =
+          counters_.exact_handle_comparison_count ==
+          requested_budget_.maximum_exact_handle_comparison_count;
+      break;
+    case ExactDirectSparseStableFacetHandleRootProbeDecision::
+        no_parent_hop_budget_exhausted:
+      exhausted_exact_cap =
+          counters_.parent_hop_count ==
+          requested_budget_.maximum_parent_hop_count;
+      break;
+    case ExactDirectSparseStableFacetHandleRootProbeDecision::
+        no_direct_forest_entry_access_budget_exhausted:
+      exhausted_exact_cap =
+          counters_.direct_forest_entry_access_count ==
+          requested_budget_.maximum_direct_forest_entry_access_count;
+      break;
+    default:
+      break;
+  }
+  return certified_common() && forest_stamp_unchanged_ &&
+         requested_handle_ < forest_stamp_.stable_facet_token_count &&
+         exhausted_exact_cap && !immutable_handle_binding_observed_ &&
+         !root_resolved_without_mutation_ && root_handle_ == 0U &&
+         component_size_ == 0U &&
+         disposition_ ==
+             ExactDirectSparseStableFacetHandleRootProbeDisposition::
+                 budget_exhausted;
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::
+certified_contradiction() const noexcept {
+  const bool stable_contradiction =
+      forest_stamp_unchanged_ &&
+      requested_handle_ < forest_stamp_.stable_facet_token_count &&
+      (decision_ == ExactDirectSparseStableFacetHandleRootProbeDecision::
+                        contradiction_handle_index ||
+       decision_ == ExactDirectSparseStableFacetHandleRootProbeDecision::
+                        contradiction_root_resolution);
+  const bool stamp_contradiction =
+      !forest_stamp_unchanged_ &&
+      decision_ == ExactDirectSparseStableFacetHandleRootProbeDecision::
+                       no_forest_stamp_changed;
+  return certified_common() &&
+         (stable_contradiction || stamp_contradiction) &&
+         !immutable_handle_binding_observed_ &&
+         !root_resolved_without_mutation_ && root_handle_ == 0U &&
+         component_size_ == 0U &&
+         disposition_ ==
+             ExactDirectSparseStableFacetHandleRootProbeDisposition::
+                 contradiction;
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::certified_outcome()
+    const noexcept {
+  return certified_observed() || certified_unobserved() ||
+         certified_rejection() || certified_budget_exhaustion() ||
+         certified_contradiction();
+}
+
+bool ExactDirectSparseStableFacetHandleRootProbeResult::certified_for(
+    const ExactDirectSparseStableFacetForestStamp& expected_stamp)
+    const noexcept {
+  return forest_stamp_ == expected_stamp && certified_outcome();
 }
 
 ExactDirectSparseStableFacetForestPreparedBatch::
@@ -1645,6 +1939,207 @@ ExactDirectSparseStableFacetForest::probe_positive_full_key(
   return ExactDirectSparseStableFacetPositiveProbeResult{
       static_cast<const ExactDirectSparseStableFacetPositiveProbeReceipt&>(
           result)};
+}
+
+ExactDirectSparseStableFacetHandleRootProbeResult
+ExactDirectSparseStableFacetForest::probe_stable_handle_root(
+    ExactDirectSparseStableFacetHandle handle,
+    const ExactDirectSparseStableFacetHandleRootProbeBudget& budget)
+    const noexcept {
+  ExactDirectSparseStableFacetHandleRootProbeResult result;
+  result.requested_handle_ = handle;
+  result.requested_budget_ = budget;
+  result.forest_stamp_ = current_stamp();
+  result.forest_certified_at_entry_ = certified_structure_only_forest();
+  if (!result.forest_certified_at_entry_) {
+    return result;
+  }
+
+  result.probe_completed_without_mutation_ = true;
+  result.complete_handle_comparison_authoritative_ = true;
+  result.allocation_free_ = true;
+
+  const auto finish =
+      [&](ExactDirectSparseStableFacetHandleRootProbeDisposition disposition,
+          ExactDirectSparseStableFacetHandleRootProbeDecision decision)
+      noexcept {
+        result.disposition_ = disposition;
+        result.decision_ = decision;
+        if (disposition !=
+            ExactDirectSparseStableFacetHandleRootProbeDisposition::observed) {
+          result.root_handle_ = 0U;
+          result.component_size_ = 0U;
+          result.immutable_handle_binding_observed_ = false;
+        }
+        result.forest_stamp_unchanged_ =
+            current_stamp() == result.forest_stamp_;
+        if (!result.forest_stamp_unchanged_) {
+          result.root_handle_ = 0U;
+          result.component_size_ = 0U;
+          result.immutable_handle_binding_observed_ = false;
+          result.root_resolved_without_mutation_ = false;
+          result.disposition_ =
+              ExactDirectSparseStableFacetHandleRootProbeDisposition::
+                  contradiction;
+          result.decision_ =
+              ExactDirectSparseStableFacetHandleRootProbeDecision::
+                  no_forest_stamp_changed;
+        }
+        result.minted_ = true;
+        return result;
+      };
+
+  if (handle >= impl_->config.stable_facet_token_count) {
+    return finish(
+        ExactDirectSparseStableFacetHandleRootProbeDisposition::
+            input_handle_rejected,
+        ExactDirectSparseStableFacetHandleRootProbeDecision::
+            no_input_handle_rejected);
+  }
+
+  const auto initial = stable_handle_root_index_search_bounded(
+      impl_->entries,
+      impl_->handle_index_slots,
+      handle,
+      budget,
+      result.counters_);
+  if (initial.disposition ==
+      StableHandleRootIndexSearchDisposition::budget_exhausted) {
+    return finish(
+        ExactDirectSparseStableFacetHandleRootProbeDisposition::
+            budget_exhausted,
+        initial.budget_decision);
+  }
+  if (initial.disposition ==
+      StableHandleRootIndexSearchDisposition::contradiction) {
+    return finish(
+        ExactDirectSparseStableFacetHandleRootProbeDisposition::contradiction,
+        ExactDirectSparseStableFacetHandleRootProbeDecision::
+            contradiction_handle_index);
+  }
+  if (initial.disposition ==
+      StableHandleRootIndexSearchDisposition::unobserved) {
+    result.root_resolved_without_mutation_ = true;
+    return finish(
+        ExactDirectSparseStableFacetHandleRootProbeDisposition::unobserved,
+        ExactDirectSparseStableFacetHandleRootProbeDecision::
+            complete_unobserved);
+  }
+
+  std::size_t cursor = initial.row;
+  while (true) {
+    if (cursor >= impl_->entries.size()) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              contradiction,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              contradiction_root_resolution);
+    }
+    if (result.counters_.direct_forest_entry_access_count >=
+        budget.maximum_direct_forest_entry_access_count) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              budget_exhausted,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              no_direct_forest_entry_access_budget_exhausted);
+    }
+    ++result.counters_.direct_forest_entry_access_count;
+    const auto& entry = impl_->entries[cursor];
+
+    if (entry.stable_source_facet_token_index >=
+        impl_->config.stable_facet_token_count) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              contradiction,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              contradiction_root_resolution);
+    }
+    if (entry.parent_handle ==
+        entry.stable_source_facet_token_index) {
+      if (entry.component_size == 0U ||
+          entry.component_size > result.forest_stamp_.observed_handle_count) {
+        return finish(
+            ExactDirectSparseStableFacetHandleRootProbeDisposition::
+                contradiction,
+            ExactDirectSparseStableFacetHandleRootProbeDecision::
+                contradiction_root_resolution);
+      }
+      result.root_handle_ = entry.stable_source_facet_token_index;
+      result.component_size_ = entry.component_size;
+      result.immutable_handle_binding_observed_ = true;
+      result.root_resolved_without_mutation_ = true;
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::observed,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              complete_observed);
+    }
+
+    if (entry.component_size != 0U ||
+        entry.parent_handle >= impl_->config.stable_facet_token_count) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              contradiction,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              contradiction_root_resolution);
+    }
+    if (result.counters_.parent_hop_count >=
+        result.forest_stamp_.observed_handle_count) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              contradiction,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              contradiction_root_resolution);
+    }
+    if (result.counters_.parent_hop_count >=
+        budget.maximum_parent_hop_count) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              budget_exhausted,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              no_parent_hop_budget_exhausted);
+    }
+
+    const auto parent = stable_handle_root_index_search_bounded(
+        impl_->entries,
+        impl_->handle_index_slots,
+        entry.parent_handle,
+        budget,
+        result.counters_);
+    if (parent.disposition ==
+        StableHandleRootIndexSearchDisposition::budget_exhausted) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              budget_exhausted,
+          parent.budget_decision);
+    }
+    if (parent.disposition ==
+        StableHandleRootIndexSearchDisposition::contradiction) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              contradiction,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              contradiction_handle_index);
+    }
+    if (parent.disposition ==
+        StableHandleRootIndexSearchDisposition::unobserved) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              contradiction,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              contradiction_root_resolution);
+    }
+
+    ++result.counters_.parent_hop_count;
+    if (result.counters_.parent_hop_count >=
+        result.forest_stamp_.observed_handle_count) {
+      return finish(
+          ExactDirectSparseStableFacetHandleRootProbeDisposition::
+              contradiction,
+          ExactDirectSparseStableFacetHandleRootProbeDecision::
+              contradiction_root_resolution);
+    }
+    cursor = parent.row;
+  }
 }
 
 ExactDirectSparseStableFacetForestPreparationResult

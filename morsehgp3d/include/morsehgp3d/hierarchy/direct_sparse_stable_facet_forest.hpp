@@ -374,6 +374,140 @@ class ExactDirectSparseStableFacetPositiveProbeResult final
   friend class ExactDirectSparseStableFacetForest;
 };
 
+// A stable-handle root probe bounds every physical unit needed to identify a
+// durable handle and follow its DSU parent chain.  The slot and exact-handle
+// counters are cumulative across the initial lookup and all parent lookups.
+// Zero limits are valid; an already-root handle therefore succeeds with a zero
+// parent-hop limit when the other work fits its own limits.
+struct ExactDirectSparseStableFacetHandleRootProbeBudget {
+  std::size_t maximum_handle_index_slot_visit_count{};
+  std::size_t maximum_exact_handle_comparison_count{};
+  std::size_t maximum_parent_hop_count{};
+  std::size_t maximum_direct_forest_entry_access_count{};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetHandleRootProbeBudget&,
+      const ExactDirectSparseStableFacetHandleRootProbeBudget&) = default;
+};
+
+struct ExactDirectSparseStableFacetHandleRootProbeCounters {
+  std::size_t handle_index_slot_visit_count{};
+  std::size_t exact_handle_comparison_count{};
+  std::size_t parent_hop_count{};
+  std::size_t direct_forest_entry_access_count{};
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetHandleRootProbeCounters&,
+      const ExactDirectSparseStableFacetHandleRootProbeCounters&) = default;
+};
+
+enum class ExactDirectSparseStableFacetHandleRootProbeDisposition
+    : std::uint8_t {
+  not_certified,
+  input_handle_rejected,
+  unobserved,
+  observed,
+  budget_exhausted,
+  contradiction,
+};
+
+enum class ExactDirectSparseStableFacetHandleRootProbeDecision
+    : std::uint8_t {
+  not_certified,
+  no_input_handle_rejected,
+  complete_unobserved,
+  complete_observed,
+  no_handle_index_slot_budget_exhausted,
+  no_exact_handle_comparison_budget_exhausted,
+  no_parent_hop_budget_exhausted,
+  no_direct_forest_entry_access_budget_exhausted,
+  contradiction_handle_index,
+  contradiction_root_resolution,
+  no_forest_stamp_changed,
+};
+
+// This result is deliberately not a public receipt.  Every semantic field is
+// private and only the forest can mint a certified outcome.  Copying a genuine
+// result preserves that authority, while default construction cannot create
+// one.  Reference accessors are lvalue-only so callers cannot retain a
+// reference into a temporary result.
+class ExactDirectSparseStableFacetHandleRootProbeResult final {
+ public:
+  ExactDirectSparseStableFacetHandleRootProbeResult() noexcept = default;
+  ~ExactDirectSparseStableFacetHandleRootProbeResult() = default;
+  ExactDirectSparseStableFacetHandleRootProbeResult(
+      const ExactDirectSparseStableFacetHandleRootProbeResult&) noexcept =
+      default;
+  ExactDirectSparseStableFacetHandleRootProbeResult& operator=(
+      const ExactDirectSparseStableFacetHandleRootProbeResult&) noexcept =
+      default;
+  ExactDirectSparseStableFacetHandleRootProbeResult(
+      ExactDirectSparseStableFacetHandleRootProbeResult&&) noexcept = default;
+  ExactDirectSparseStableFacetHandleRootProbeResult& operator=(
+      ExactDirectSparseStableFacetHandleRootProbeResult&&) noexcept = default;
+
+  [[nodiscard]] const ExactDirectSparseStableFacetForestStamp& forest_stamp()
+      const & noexcept;
+  [[nodiscard]] const ExactDirectSparseStableFacetForestStamp& forest_stamp()
+      const && = delete;
+  [[nodiscard]] const ExactDirectSparseStableFacetHandleRootProbeBudget&
+  requested_budget() const & noexcept;
+  [[nodiscard]] const ExactDirectSparseStableFacetHandleRootProbeBudget&
+  requested_budget() const && = delete;
+  [[nodiscard]] const ExactDirectSparseStableFacetHandleRootProbeCounters&
+  counters() const & noexcept;
+  [[nodiscard]] const ExactDirectSparseStableFacetHandleRootProbeCounters&
+  counters() const && = delete;
+  [[nodiscard]] ExactDirectSparseStableFacetHandle requested_handle()
+      const noexcept;
+  [[nodiscard]] ExactDirectSparseStableFacetHandle root_handle()
+      const noexcept;
+  [[nodiscard]] std::size_t component_size() const noexcept;
+  [[nodiscard]] ExactDirectSparseStableFacetHandleRootProbeDisposition
+  disposition() const noexcept;
+  [[nodiscard]] ExactDirectSparseStableFacetHandleRootProbeDecision decision()
+      const noexcept;
+
+  [[nodiscard]] bool certified_observed() const noexcept;
+  [[nodiscard]] bool certified_unobserved() const noexcept;
+  [[nodiscard]] bool certified_rejection() const noexcept;
+  [[nodiscard]] bool certified_budget_exhaustion() const noexcept;
+  [[nodiscard]] bool certified_contradiction() const noexcept;
+  [[nodiscard]] bool certified_outcome() const noexcept;
+  [[nodiscard]] bool certified_for(
+      const ExactDirectSparseStableFacetForestStamp&) const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseStableFacetHandleRootProbeResult&,
+      const ExactDirectSparseStableFacetHandleRootProbeResult&) = default;
+
+ private:
+  [[nodiscard]] bool certified_common() const noexcept;
+
+  ExactDirectSparseStableFacetForestStamp forest_stamp_{};
+  ExactDirectSparseStableFacetHandleRootProbeBudget requested_budget_{};
+  ExactDirectSparseStableFacetHandleRootProbeCounters counters_{};
+  ExactDirectSparseStableFacetHandle requested_handle_{};
+  ExactDirectSparseStableFacetHandle root_handle_{};
+  std::size_t component_size_{};
+  bool forest_certified_at_entry_{false};
+  bool probe_completed_without_mutation_{false};
+  bool complete_handle_comparison_authoritative_{false};
+  bool immutable_handle_binding_observed_{false};
+  bool root_resolved_without_mutation_{false};
+  bool forest_stamp_unchanged_{false};
+  bool allocation_free_{false};
+  bool source_exactness_claimed_{false};
+  bool public_status_claimed_{false};
+  ExactDirectSparseStableFacetHandleRootProbeDisposition disposition_{
+      ExactDirectSparseStableFacetHandleRootProbeDisposition::not_certified};
+  ExactDirectSparseStableFacetHandleRootProbeDecision decision_{
+      ExactDirectSparseStableFacetHandleRootProbeDecision::not_certified};
+  bool minted_{false};
+
+  friend class ExactDirectSparseStableFacetForest;
+};
+
 class ExactDirectSparseStableFacetForestPreparedBatch {
  public:
   ExactDirectSparseStableFacetForestPreparedBatch() noexcept;
@@ -685,6 +819,13 @@ class ExactDirectSparseStableFacetForest {
   probe_positive_full_key(
       const ExactDirectSparseFacetKey&,
       const ExactDirectSparseStableFacetPositiveProbeBudget&) const noexcept;
+  // Sequential const guard only: callers must exclude writers for the whole
+  // call.  The probe captures and rechecks the forest stamp, allocates nothing,
+  // and touches neither observed_entries() nor any global population scan.
+  [[nodiscard]] ExactDirectSparseStableFacetHandleRootProbeResult
+  probe_stable_handle_root(
+      ExactDirectSparseStableFacetHandle,
+      const ExactDirectSparseStableFacetHandleRootProbeBudget&) const noexcept;
   [[nodiscard]] ExactDirectSparseStableFacetForestPreparationResult
   prepare_batch(
       std::span<const ExactDirectSparseStableFacetInsertion>,

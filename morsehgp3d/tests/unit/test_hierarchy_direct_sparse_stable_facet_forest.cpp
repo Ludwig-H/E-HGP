@@ -96,6 +96,38 @@ static_assert(
     std::is_nothrow_move_constructible_v<
         ExactDirectSparseStableFacetForestPreparedPreview>);
 
+template <typename T>
+concept HasPublicTraversalOrderMember = requires(const T& value) {
+  value.traversal_order;
+};
+
+template <typename T>
+concept HasPublicTraversalOrderAccessor = requires(const T& value) {
+  value.traversal_order();
+};
+
+using StableHandleRootProbeResult =
+    ExactDirectSparseStableFacetHandleRootProbeResult;
+static_assert(!std::is_aggregate_v<StableHandleRootProbeResult>);
+static_assert(
+    std::is_nothrow_copy_constructible_v<StableHandleRootProbeResult> &&
+    std::is_nothrow_copy_assignable_v<StableHandleRootProbeResult>);
+static_assert(std::is_same_v<
+              decltype(std::declval<const StableHandleRootProbeResult&>()
+                           .forest_stamp()),
+              const ExactDirectSparseStableFacetForestStamp&>);
+static_assert(std::is_same_v<
+              decltype(std::declval<const StableHandleRootProbeResult&>()
+                           .requested_budget()),
+              const ExactDirectSparseStableFacetHandleRootProbeBudget&>);
+static_assert(std::is_same_v<
+              decltype(std::declval<const StableHandleRootProbeResult&>()
+                           .counters()),
+              const ExactDirectSparseStableFacetHandleRootProbeCounters&>);
+static_assert(
+    !HasPublicTraversalOrderMember<StableHandleRootProbeResult> &&
+    !HasPublicTraversalOrderAccessor<StableHandleRootProbeResult>);
+
 int failures = 0;
 
 void check(bool condition, const std::string& message) {
@@ -866,6 +898,390 @@ void test_bounded_positive_full_key_probe_caps_collision_and_stamp() {
       later_commit.certified_commit() && exact.certified_for(pre_stamp) &&
           !exact.certified_for(forest.current_stamp()),
       "a genuine probe remains historical and fails certification for a later forest stamp");
+}
+
+void test_bounded_stable_handle_root_probe() {
+  using Budget = ExactDirectSparseStableFacetHandleRootProbeBudget;
+  using Counters = ExactDirectSparseStableFacetHandleRootProbeCounters;
+  using Decision = ExactDirectSparseStableFacetHandleRootProbeDecision;
+  using Disposition =
+      ExactDirectSparseStableFacetHandleRootProbeDisposition;
+  using Result = ExactDirectSparseStableFacetHandleRootProbeResult;
+
+  const Result default_result;
+  check(
+      !default_result.certified_outcome() &&
+          !default_result.certified_observed() &&
+          !default_result.certified_unobserved() &&
+          !default_result.certified_rejection() &&
+          !default_result.certified_budget_exhaustion() &&
+          !default_result.certified_contradiction() &&
+          default_result.disposition() == Disposition::not_certified &&
+          default_result.decision() == Decision::not_certified &&
+          default_result.counters() == Counters{},
+      "a default handle-root probe result has no certifying authority");
+
+  auto empty_initialization = initialize();
+  auto empty = std::move(*empty_initialization.forest);
+  const auto empty_stamp = empty.current_stamp();
+  allocation_probe::begin();
+  const auto empty_miss = empty.probe_stable_handle_root(10U, Budget{});
+  const std::size_t empty_miss_allocations = allocation_probe::finish();
+  check(
+      empty_miss.certified_unobserved() &&
+          empty_miss.certified_for(empty_stamp) &&
+          empty_miss.forest_stamp() == empty_stamp &&
+          empty_miss.requested_budget() == Budget{} &&
+          empty_miss.requested_handle() == 10U &&
+          empty_miss.root_handle() == 0U &&
+          empty_miss.component_size() == 0U &&
+          empty_miss.counters() == Counters{} &&
+          empty_miss.decision() == Decision::complete_unobserved &&
+          empty_miss_allocations == 0U &&
+          empty.current_stamp() == empty_stamp &&
+          empty.observed_entries().empty(),
+      "an empty forest certifies an allocation-free miss with exactly zero "
+      "work");
+
+  auto initialization = initialize();
+  auto forest = std::move(*initialization.forest);
+  // The production mixer maps these four handles to the same first bucket in
+  // the eight-slot table required by four rows.  A child probe must therefore
+  // cross a real linear-probing cluster before following its DSU parent.
+  const std::array insertions{
+      ExactDirectSparseStableFacetInsertion{0U, key_for_handle(0U)},
+      ExactDirectSparseStableFacetInsertion{7U, key_for_handle(7U)},
+      ExactDirectSparseStableFacetInsertion{13U, key_for_handle(13U)},
+      ExactDirectSparseStableFacetInsertion{16U, key_for_handle(16U)},
+  };
+  const std::array unions{
+      ExactDirectSparseStableFacetUnion{0U, 7U},
+      ExactDirectSparseStableFacetUnion{13U, 16U},
+      ExactDirectSparseStableFacetUnion{7U, 13U},
+  };
+  auto prepared = forest.prepare_batch(insertions, unions);
+  const auto committed = forest.commit(std::move(*prepared.ticket));
+  check(
+      committed.certified_commit(),
+      "the stable-handle root-probe fixture commits exactly");
+
+  constexpr std::size_t maximum =
+      std::numeric_limits<std::size_t>::max();
+  const Budget maximum_budget{maximum, maximum, maximum, maximum};
+  const auto pre_stamp = forest.current_stamp();
+  const std::vector<ExactDirectSparseStableFacetForestEntry> entries_before{
+      forest.observed_entries().begin(), forest.observed_entries().end()};
+  const auto handle_slot_count_before =
+      forest.materialized_handle_index_slot_count();
+  const auto positive_slot_count_before =
+      forest.materialized_positive_key_index_slot_count();
+
+  allocation_probe::begin();
+  const auto zero_slot = forest.probe_stable_handle_root(
+      16U, Budget{0U, maximum, maximum, maximum});
+  const std::size_t zero_slot_allocations = allocation_probe::finish();
+  check(
+      zero_slot.certified_budget_exhaustion() &&
+          zero_slot.certified_for(pre_stamp) &&
+          zero_slot.decision() ==
+              Decision::no_handle_index_slot_budget_exhausted &&
+          zero_slot.requested_handle() == 16U &&
+          zero_slot.root_handle() == 0U &&
+          zero_slot.component_size() == 0U &&
+          zero_slot.counters() == Counters{} &&
+          zero_slot_allocations == 0U,
+      "a zero initial slot cap exhausts before every physical unit of probe "
+      "work");
+
+  allocation_probe::begin();
+  const auto zero_comparison = forest.probe_stable_handle_root(
+      16U, Budget{maximum, 0U, maximum, maximum});
+  const std::size_t zero_comparison_allocations =
+      allocation_probe::finish();
+  check(
+      zero_comparison.certified_budget_exhaustion() &&
+          zero_comparison.certified_for(pre_stamp) &&
+          zero_comparison.decision() ==
+              Decision::no_exact_handle_comparison_budget_exhausted &&
+          zero_comparison.requested_handle() == 16U &&
+          zero_comparison.root_handle() == 0U &&
+          zero_comparison.component_size() == 0U &&
+          zero_comparison.counters().handle_index_slot_visit_count == 1U &&
+          zero_comparison.counters().exact_handle_comparison_count == 0U &&
+          zero_comparison.counters().parent_hop_count == 0U &&
+          zero_comparison.counters().direct_forest_entry_access_count == 0U &&
+          zero_comparison_allocations == 0U,
+      "a zero initial exact-comparison cap consumes one slot but performs no "
+      "comparison or direct entry access");
+
+  allocation_probe::begin();
+  const auto zero_direct_access = forest.probe_stable_handle_root(
+      16U, Budget{maximum, maximum, maximum, 0U});
+  const std::size_t zero_direct_access_allocations =
+      allocation_probe::finish();
+  check(
+      zero_direct_access.certified_budget_exhaustion() &&
+          zero_direct_access.certified_for(pre_stamp) &&
+          zero_direct_access.decision() ==
+              Decision::no_direct_forest_entry_access_budget_exhausted &&
+          zero_direct_access.requested_handle() == 16U &&
+          zero_direct_access.root_handle() == 0U &&
+          zero_direct_access.component_size() == 0U &&
+          zero_direct_access.counters().handle_index_slot_visit_count == 1U &&
+          zero_direct_access.counters().exact_handle_comparison_count == 0U &&
+          zero_direct_access.counters().parent_hop_count == 0U &&
+          zero_direct_access.counters()
+                  .direct_forest_entry_access_count == 0U &&
+          zero_direct_access_allocations == 0U,
+      "a zero initial direct-access cap consumes one slot but reads and "
+      "compares no durable entry");
+
+  allocation_probe::begin();
+  const auto child = forest.probe_stable_handle_root(16U, maximum_budget);
+  const std::size_t child_allocations = allocation_probe::finish();
+  check(
+      child.certified_observed() && child.certified_for(pre_stamp) &&
+          child.forest_stamp() == pre_stamp &&
+          child.requested_budget() == maximum_budget &&
+          child.requested_handle() == 16U && child.root_handle() == 0U &&
+          child.component_size() == 4U &&
+          child.counters().handle_index_slot_visit_count == 5U &&
+          child.counters().exact_handle_comparison_count == 5U &&
+          child.counters().parent_hop_count == 1U &&
+          child.counters().handle_index_slot_visit_count >
+              child.counters().parent_hop_count + 1U &&
+          child.counters().direct_forest_entry_access_count == 7U &&
+          child.decision() == Decision::complete_observed &&
+          child_allocations == 0U,
+      "a child handle crosses a real collision cluster and resolves its exact "
+      "durable root and size with bounded nonzero work");
+
+  Result child_copy = child;
+  Result child_assigned;
+  child_assigned = child;
+  check(
+      child_copy == child && child_assigned == child &&
+          child_copy.certified_observed() &&
+          child_assigned.certified_for(pre_stamp),
+      "copy construction and assignment preserve a genuine private probe "
+      "mint");
+
+  allocation_probe::begin();
+  const auto root = forest.probe_stable_handle_root(0U, maximum_budget);
+  const std::size_t root_allocations = allocation_probe::finish();
+  check(
+          root.certified_observed() && root.certified_for(pre_stamp) &&
+          root.requested_handle() == 0U && root.root_handle() == 0U &&
+          root.component_size() == 4U &&
+          root.counters().handle_index_slot_visit_count == 1U &&
+          root.counters().exact_handle_comparison_count == 1U &&
+          root.counters().parent_hop_count == 0U &&
+          root.counters().direct_forest_entry_access_count == 2U &&
+          root_allocations == 0U,
+      "an already-root handle succeeds with exactly zero parent hops");
+
+  const Budget root_zero_hop_budget{
+      root.counters().handle_index_slot_visit_count,
+      root.counters().exact_handle_comparison_count,
+      0U,
+      root.counters().direct_forest_entry_access_count};
+  allocation_probe::begin();
+  const auto root_at_zero_hop_cap =
+      forest.probe_stable_handle_root(0U, root_zero_hop_budget);
+  const std::size_t root_at_zero_hop_cap_allocations =
+      allocation_probe::finish();
+  check(
+      root_at_zero_hop_cap.certified_observed() &&
+          root_at_zero_hop_cap.certified_for(pre_stamp) &&
+          root_at_zero_hop_cap.requested_budget() == root_zero_hop_budget &&
+          root_at_zero_hop_cap.counters() == root.counters() &&
+          root_at_zero_hop_cap.root_handle() == 0U &&
+          root_at_zero_hop_cap.component_size() == 4U &&
+          root_at_zero_hop_cap_allocations == 0U,
+      "an already-root handle succeeds at an explicit zero parent-hop cap");
+
+  allocation_probe::begin();
+  const auto nonempty_miss =
+      forest.probe_stable_handle_root(99U, maximum_budget);
+  const std::size_t nonempty_miss_allocations = allocation_probe::finish();
+  check(
+      nonempty_miss.certified_unobserved() &&
+          nonempty_miss.certified_for(pre_stamp) &&
+          nonempty_miss.requested_handle() == 99U &&
+          nonempty_miss.root_handle() == 0U &&
+          nonempty_miss.component_size() == 0U &&
+          nonempty_miss.counters().handle_index_slot_visit_count != 0U &&
+          nonempty_miss.counters().parent_hop_count == 0U &&
+          nonempty_miss.decision() == Decision::complete_unobserved &&
+          nonempty_miss_allocations == 0U,
+      "a nonempty sparse-index miss is exact, bounded, payloadless and "
+      "allocation-free");
+
+  allocation_probe::begin();
+  const auto outside_namespace = forest.probe_stable_handle_root(
+      1'000'000'001U, maximum_budget);
+  const std::size_t outside_namespace_allocations =
+      allocation_probe::finish();
+  check(
+      outside_namespace.certified_rejection() &&
+          outside_namespace.certified_for(pre_stamp) &&
+          outside_namespace.requested_handle() == 1'000'000'001U &&
+          outside_namespace.root_handle() == 0U &&
+          outside_namespace.component_size() == 0U &&
+          outside_namespace.counters() == Counters{} &&
+          outside_namespace.decision() == Decision::no_input_handle_rejected &&
+          outside_namespace_allocations == 0U,
+      "a handle at the exclusive namespace boundary is rejected before any "
+      "work");
+
+  const Budget exact_budget{
+      child.counters().handle_index_slot_visit_count,
+      child.counters().exact_handle_comparison_count,
+      child.counters().parent_hop_count,
+      child.counters().direct_forest_entry_access_count};
+  allocation_probe::begin();
+  const auto exact = forest.probe_stable_handle_root(16U, exact_budget);
+  const std::size_t exact_allocations = allocation_probe::finish();
+  check(
+      exact.certified_observed() && exact.certified_for(pre_stamp) &&
+          exact.requested_budget() == exact_budget &&
+          exact.counters() == child.counters() &&
+          exact.root_handle() == 0U && exact.component_size() == 4U &&
+          exact_allocations == 0U,
+      "all four exact work caps admit the child-root proof without "
+      "allocation");
+
+  const auto check_cap_minus_one =
+      [&](const Budget& budget,
+          Decision expected_decision,
+          std::size_t Counters::*counter,
+          std::size_t Budget::*limit,
+          std::string_view label) {
+        allocation_probe::begin();
+        const auto exhausted =
+            forest.probe_stable_handle_root(16U, budget);
+        const std::size_t allocations = allocation_probe::finish();
+        check(
+            exhausted.certified_budget_exhaustion() &&
+                exhausted.certified_for(pre_stamp) &&
+                exhausted.requested_handle() == 16U &&
+                exhausted.root_handle() == 0U &&
+                exhausted.component_size() == 0U &&
+                exhausted.decision() == expected_decision &&
+                exhausted.counters().*counter == budget.*limit &&
+                allocations == 0U && forest.current_stamp() == pre_stamp,
+            std::string{label});
+      };
+
+  auto handle_slot_cap_minus_one = exact_budget;
+  --handle_slot_cap_minus_one.maximum_handle_index_slot_visit_count;
+  check_cap_minus_one(
+      handle_slot_cap_minus_one,
+      Decision::no_handle_index_slot_budget_exhausted,
+      &Counters::handle_index_slot_visit_count,
+      &Budget::maximum_handle_index_slot_visit_count,
+      "the handle-index slot cap minus one fails closed without payload");
+
+  auto exact_comparison_cap_minus_one = exact_budget;
+  --exact_comparison_cap_minus_one.maximum_exact_handle_comparison_count;
+  check_cap_minus_one(
+      exact_comparison_cap_minus_one,
+      Decision::no_exact_handle_comparison_budget_exhausted,
+      &Counters::exact_handle_comparison_count,
+      &Budget::maximum_exact_handle_comparison_count,
+      "the exact-handle comparison cap minus one fails separately");
+
+  auto parent_hop_cap_minus_one = exact_budget;
+  --parent_hop_cap_minus_one.maximum_parent_hop_count;
+  check_cap_minus_one(
+      parent_hop_cap_minus_one,
+      Decision::no_parent_hop_budget_exhausted,
+      &Counters::parent_hop_count,
+      &Budget::maximum_parent_hop_count,
+      "the parent-hop cap minus one fails before following the next parent");
+
+  auto direct_access_cap_minus_one = exact_budget;
+  --direct_access_cap_minus_one.maximum_direct_forest_entry_access_count;
+  check_cap_minus_one(
+      direct_access_cap_minus_one,
+      Decision::no_direct_forest_entry_access_budget_exhausted,
+      &Counters::direct_forest_entry_access_count,
+      &Budget::maximum_direct_forest_entry_access_count,
+      "the direct-entry access cap minus one fails before the next arena "
+      "read");
+
+  const auto unchanged = [](const auto& before, const auto current) {
+    return before.size() == current.size() &&
+           std::equal(
+               before.begin(), before.end(), current.begin(), current.end());
+  };
+  check(
+      forest.current_stamp() == pre_stamp &&
+          unchanged(entries_before, forest.observed_entries()) &&
+          forest.materialized_handle_index_slot_count() ==
+              handle_slot_count_before &&
+          forest.materialized_positive_key_index_slot_count() ==
+              positive_slot_count_before,
+      "hits, misses, rejections and every exhaustion leave stamp, entries "
+      "and sparse indexes unchanged");
+
+  auto maximum_namespace_initialization =
+      initialize_exact_direct_sparse_stable_facet_forest(
+          {std::numeric_limits<std::size_t>::max(),
+           digest("handle-root-maximum-scalar-namespace")},
+          generous_budget());
+  auto maximum_namespace_forest =
+      std::move(*maximum_namespace_initialization.forest);
+  constexpr ExactDirectSparseStableFacetHandle maximum_valid_handle =
+      std::numeric_limits<ExactDirectSparseStableFacetHandle>::max() - 1U;
+  const std::array maximum_insertion{
+      ExactDirectSparseStableFacetInsertion{
+          maximum_valid_handle,
+          facet(std::array<PointId, 2U>{7U, 11U})}};
+  auto maximum_prepared =
+      maximum_namespace_forest.prepare_batch(maximum_insertion, {});
+  const auto maximum_commit =
+      maximum_namespace_forest.commit(std::move(*maximum_prepared.ticket));
+  const auto maximum_stamp = maximum_namespace_forest.current_stamp();
+  allocation_probe::begin();
+  const auto maximum_hit = maximum_namespace_forest.probe_stable_handle_root(
+      maximum_valid_handle, maximum_budget);
+  const auto maximum_rejected =
+      maximum_namespace_forest.probe_stable_handle_root(
+          std::numeric_limits<ExactDirectSparseStableFacetHandle>::max(),
+          maximum_budget);
+  const std::size_t maximum_probe_allocations = allocation_probe::finish();
+  check(
+      maximum_commit.certified_commit() && maximum_hit.certified_observed() &&
+          maximum_hit.certified_for(maximum_stamp) &&
+          maximum_hit.requested_budget() == maximum_budget &&
+          maximum_hit.root_handle() == maximum_valid_handle &&
+          maximum_hit.component_size() == 1U &&
+          maximum_rejected.certified_rejection() &&
+          maximum_rejected.certified_for(maximum_stamp) &&
+          maximum_rejected.decision() == Decision::no_input_handle_rejected &&
+          maximum_rejected.counters() == Counters{} &&
+          maximum_probe_allocations == 0U,
+      "SIZE_MAX work caps remain scalar while SIZE_MAX itself is the "
+      "exclusive namespace boundary");
+
+  auto foreign_initialization =
+      initialize_exact_direct_sparse_stable_facet_forest(
+          {1'000'000'001U, digest("foreign-handle-root-probe-source")},
+          generous_budget());
+  check(
+      !child.certified_for(foreign_initialization.forest->current_stamp()),
+      "a genuine handle-root proof rejects a foreign forest stamp");
+
+  const std::array later_insertion{
+      ExactDirectSparseStableFacetInsertion{20U, key_for_handle(20U)}};
+  auto later = forest.prepare_batch(later_insertion, {});
+  const auto later_commit = forest.commit(std::move(*later.ticket));
+  check(
+      later_commit.certified_commit() && child.certified_for(pre_stamp) &&
+          !child.certified_for(forest.current_stamp()),
+      "a genuine handle-root proof remains historical and rejects a stale "
+      "successor stamp");
 }
 
 void test_positive_index_budget_preflight() {
@@ -1769,6 +2185,7 @@ void run_tests() {
   test_flat_index_collision_chain();
   test_positive_full_key_index_collision_and_injective_binding();
   test_bounded_positive_full_key_probe_caps_collision_and_stamp();
+  test_bounded_stable_handle_root_probe();
   test_positive_index_budget_preflight();
   test_positive_bijection_sibling_adversaries_and_idempotence();
   test_sibling_ticket_survives_physical_rehash();

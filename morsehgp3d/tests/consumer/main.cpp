@@ -380,12 +380,24 @@ int main() {
   const auto installed_positive_lookup =
       installed_sparse_forest_probe.lookup_positive_full_key(
           installed_positive_key_probe);
+  static_assert(
+      !std::is_aggregate_v<
+          morsehgp3d::hierarchy::
+              ExactDirectSparseStableFacetHandleRootProbeResult>);
+  const auto installed_handle_root_probe =
+      installed_sparse_forest_probe.probe_stable_handle_root(
+          0U,
+          morsehgp3d::hierarchy::
+              ExactDirectSparseStableFacetHandleRootProbeBudget{});
   if (installed_positive_lookup.certified_observed() ||
       installed_positive_lookup.certified_unobserved() ||
       installed_positive_lookup.disposition !=
           morsehgp3d::hierarchy::
               ExactDirectSparseStableFacetPositiveLookupDisposition::
-                  not_certified) {
+                  not_certified ||
+      installed_handle_root_probe.certified_outcome() ||
+      installed_handle_root_probe.root_handle() != 0U ||
+      installed_handle_root_probe.component_size() != 0U) {
     std::cerr
         << "installed full-key lookup accepted an empty forest session\n";
     return 1;
