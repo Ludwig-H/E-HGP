@@ -38,6 +38,11 @@ void force_exact_higher_support_product_wrong_terminal_geometry_categories(
     bool enabled) noexcept;
 void corrupt_next_exact_higher_support_product_terminal_geometry_category()
     noexcept;
+void force_next_exact_higher_support_product_terminal_fallback_category_present()
+    noexcept;
+void force_next_exact_higher_support_product_nonterminal_category_present()
+    noexcept;
+void corrupt_next_exact_higher_support_product_component_schema() noexcept;
 }  // namespace morsehgp3d::gpu::test_support
 
 namespace {
@@ -68,6 +73,12 @@ using morsehgp3d::gpu::test_support::
     force_exact_higher_support_product_wrong_terminal_geometry_categories;
 using morsehgp3d::gpu::test_support::
     corrupt_next_exact_higher_support_product_terminal_geometry_category;
+using morsehgp3d::gpu::test_support::
+    force_next_exact_higher_support_product_terminal_fallback_category_present;
+using morsehgp3d::gpu::test_support::
+    force_next_exact_higher_support_product_nonterminal_category_present;
+using morsehgp3d::gpu::test_support::
+    corrupt_next_exact_higher_support_product_component_schema;
 using morsehgp3d::gpu::test_support::
     force_next_exact_higher_support_product_int256_fallback;
 using morsehgp3d::gpu::test_support::
@@ -136,9 +147,9 @@ static_assert(
     !std::is_move_constructible_v<
         ExactHigherSupportTerminalGeometryDecisionSource>);
 static_assert(
-    morsehgp3d::gpu::exact_higher_support_product_cuda_schema_version == 4U);
+    morsehgp3d::gpu::exact_higher_support_product_cuda_schema_version == 5U);
 static_assert(
-    !morsehgp3d::gpu::exact_higher_support_terminal_geometry_native_cuda);
+    morsehgp3d::gpu::exact_higher_support_terminal_geometry_native_cuda);
 static_assert(
     !morsehgp3d::gpu::
         exact_higher_support_terminal_classification_native_cuda);
@@ -793,7 +804,7 @@ void test_terminal_geometry_host_contract_categories() {
   const auto result = context.evaluate(tasks);
   check(
       result.complete() && result.records.size() == tasks.size(),
-      "the host-first terminal geometry batch publishes all four categories");
+      "the host fake terminal geometry batch publishes all four categories");
   for (std::size_t index_value = 0U;
        index_value < expected.size() && index_value < result.records.size();
        ++index_value) {
@@ -809,6 +820,8 @@ void test_terminal_geometry_host_contract_categories() {
   }
   check(
       result.audit.terminal_support_geometry_task_count == 9U &&
+          result.audit.terminal_support_size_3_task_count == 4U &&
+          result.audit.terminal_support_size_4_task_count == 5U &&
           result.audit.support_prune_task_count == 0U &&
           result.audit.query_strict_interior_task_count == 0U &&
           result.audit.terminal_affinely_dependent_count == 2U &&
@@ -818,10 +831,15 @@ void test_terminal_geometry_host_contract_categories() {
           result.audit.certified_count == 9U &&
           result.audit.fail_open_count == 0U &&
           result.audit.bounded_dyadic_int256_count == 9U &&
+          result.audit.terminal_geometry_native_kernel_decision_count == 0U &&
+          result.audit.terminal_geometry_host_fallback_decision_count == 0U &&
+          result.audit.
+                  terminal_geometry_device_fallback_without_category_count ==
+              0U &&
           !result.audit.terminal_geometry_decision_native_cuda &&
           result.audit.submitted_task_digest != 0U &&
           result.audit.completed_result_digest != 0U,
-      "the schema-4 audit closes the categorical partition without a native CUDA claim");
+      "the schema-5 host-fake audit closes both arities and all categories without a native CUDA execution claim");
 
   ExactHigherSupportProductCudaTask nonterminal = tasks[0];
   nonterminal.task_id = 10U;
@@ -877,6 +895,80 @@ void test_hostile_terminal_category_is_atomic_and_poisoning() {
       "a hostile terminal category poisons the shared context");
 }
 
+void test_schema5_category_presence_and_component_abi_fail_closed() {
+  {
+    reset_fake_gpu_phase14_morton_lbvh_build();
+    reset_exact_higher_support_product_fake();
+    const CanonicalPointCloud cloud = terminal_geometry_cloud();
+    MortonLbvhBuildContext builder{cloud.size()};
+    auto build = builder.build(cloud);
+    const MortonLbvhIndex& index = build.certified_index();
+    const LeafNodeFixture leaf_nodes = individual_leaf_nodes(index);
+    auto lease = builder.release_device_traversal_lease(build);
+    const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+    ExactHigherSupportProductCudaContext context{
+        index, cloud, std::move(lease), 1U};
+    const ExactHigherSupportProductCudaTask task =
+        terminal_geometry_task<3U>(
+            leaf_nodes, cloud, {0U, 1U, 2U}, epoch, 1U);
+    force_next_exact_higher_support_product_int256_fallback();
+    force_next_exact_higher_support_product_terminal_fallback_category_present();
+    check_throws<std::logic_error>(
+        [&] {
+          static_cast<void>(context.evaluate(
+              std::span<const ExactHigherSupportProductCudaTask>{
+                  &task, 1U}));
+        },
+        "a terminal fallback carrying a device category is rejected atomically");
+  }
+
+  {
+    reset_fake_gpu_phase14_morton_lbvh_build();
+    reset_exact_higher_support_product_fake();
+    const CanonicalPointCloud cloud = ordinary_cloud();
+    MortonLbvhBuildContext builder{cloud.size()};
+    auto build = builder.build(cloud);
+    const MortonLbvhIndex& index = build.certified_index();
+    auto lease = builder.release_device_traversal_lease(build);
+    const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+    ExactHigherSupportProductCudaContext context{
+        index, cloud, std::move(lease), 1U};
+    const ExactHigherSupportProductCudaTask task = support_task(
+        index, cloud.size(), epoch, 1U);
+    force_next_exact_higher_support_product_nonterminal_category_present();
+    check_throws<std::logic_error>(
+        [&] {
+          static_cast<void>(context.evaluate(
+              std::span<const ExactHigherSupportProductCudaTask>{
+                  &task, 1U}));
+        },
+        "a nonterminal record carrying a category is rejected atomically");
+  }
+
+  {
+    reset_fake_gpu_phase14_morton_lbvh_build();
+    reset_exact_higher_support_product_fake();
+    const CanonicalPointCloud cloud = ordinary_cloud();
+    MortonLbvhBuildContext builder{cloud.size()};
+    auto build = builder.build(cloud);
+    const MortonLbvhIndex& index = build.certified_index();
+    auto lease = builder.release_device_traversal_lease(build);
+    const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+    ExactHigherSupportProductCudaContext context{
+        index, cloud, std::move(lease), 1U};
+    const ExactHigherSupportProductCudaTask task = support_task(
+        index, cloud.size(), epoch, 1U);
+    corrupt_next_exact_higher_support_product_component_schema();
+    check_throws<std::logic_error>(
+        [&] {
+          static_cast<void>(context.evaluate(
+              std::span<const ExactHigherSupportProductCudaTask>{
+                  &task, 1U}));
+        },
+        "a stale schema-4 component receipt is rejected by schema 5");
+  }
+}
+
 void test_terminal_geometry_host_fallback_routes() {
   {
     reset_fake_gpu_phase14_morton_lbvh_build();
@@ -904,6 +996,13 @@ void test_terminal_geometry_host_fallback_routes() {
                 ExactHigherSupportProductCudaBackend::bounded_dyadic_int512 &&
             result.records[0].cpu_fallback_performed &&
             result.audit.bounded_dyadic_int512_count == 1U &&
+            result.audit.terminal_geometry_host_fallback_decision_count ==
+                1U &&
+            result.audit.
+                    terminal_geometry_device_fallback_without_category_count ==
+                1U &&
+            result.audit.terminal_int256_to_host_int512_fallback_count ==
+                1U &&
             result.audit.terminal_minimal_count == 1U,
         "a terminal int256 sentinel is replayed categorically by host int512");
   }
@@ -935,6 +1034,13 @@ void test_terminal_geometry_host_fallback_routes() {
                 ExactHigherSupportProductCudaBackend::bounded_dyadic_int1024 &&
             result.records[0].cpu_fallback_performed &&
             result.audit.bounded_dyadic_int1024_count == 1U &&
+            result.audit.terminal_geometry_host_fallback_decision_count ==
+                1U &&
+            result.audit.
+                    terminal_geometry_device_fallback_without_category_count ==
+                1U &&
+            result.audit.terminal_int512_to_host_int1024_fallback_count ==
+                1U &&
             result.audit.terminal_exterior_circumcenter_count == 1U,
         "a terminal int512 sentinel is replayed categorically by host int1024");
   }
@@ -964,6 +1070,13 @@ void test_terminal_geometry_host_fallback_routes() {
                 arbitrary_precision_rational &&
             result.records[0].cpu_fallback_performed &&
             result.audit.arbitrary_precision_rational_fallback_count == 1U &&
+            result.audit.terminal_geometry_host_fallback_decision_count ==
+                1U &&
+            result.audit.
+                    terminal_geometry_device_fallback_without_category_count ==
+                1U &&
+            result.audit.terminal_int1024_to_cpu_rational_fallback_count ==
+                1U &&
             result.audit.terminal_boundary_reduced_count == 1U,
         "a terminal category outside int1024 is replayed by the exact rational host DAG");
   }
@@ -1049,6 +1162,9 @@ void test_host_fake_is_positive_only_stream_proposal() {
               audit.terminal_support_geometry_task_count &&
           audit.terminal_geometry_host_fake_decision_count ==
               audit.terminal_geometry_decision_count &&
+          audit.terminal_geometry_native_kernel_decision_count == 0U &&
+          audit.terminal_geometry_component_cpu_fallback_decision_count ==
+              0U &&
           !audit.terminal_geometry_decision_native_cuda &&
           audit.native_certified_positive_count == 0U &&
           !audit.disabled_after_failure &&
@@ -1425,6 +1541,7 @@ int main() {
   test_positive_certificates_and_disjoint_query_receipt();
   test_terminal_geometry_host_contract_categories();
   test_hostile_terminal_category_is_atomic_and_poisoning();
+  test_schema5_category_presence_and_component_abi_fail_closed();
   test_terminal_geometry_host_fallback_routes();
   test_host_fake_is_positive_only_stream_proposal();
   test_adapter_launcher_corruption_fails_open_once();

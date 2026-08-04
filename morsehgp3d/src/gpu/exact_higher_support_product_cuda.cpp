@@ -492,10 +492,7 @@ ExactHigherSupportProductCudaContext::evaluate(
         ++base_audit.query_strict_interior_task_count;
         break;
       case ExactHigherSupportProductCudaTaskKind::terminal_support_geometry:
-        // Schema 4 deliberately exercises only the exact host fake.  Native
-        // CUDA rejects this kind before launcher submission until the
-        // categorical device path receives its own G4 qualification.
-        if (!impl_->host_fake || task.query_node.has_value() ||
+        if (task.query_node.has_value() ||
             task.product.group_count != task.product.support_size) {
           valid = false;
         }
@@ -510,6 +507,11 @@ ExactHigherSupportProductCudaContext::evaluate(
               source_node.is_leaf();
         }
         ++base_audit.terminal_support_geometry_task_count;
+        if (task.product.support_size == 3U) {
+          ++base_audit.terminal_support_size_3_task_count;
+        } else {
+          ++base_audit.terminal_support_size_4_task_count;
+        }
         break;
       default:
         valid = false;
@@ -556,6 +558,7 @@ ExactHigherSupportProductCudaContext::evaluate(
   base_audit.submitted_task_digest =
       detail::phase15_exact_higher_support_product_task_digest(prepared);
   const detail::Phase15ExactHigherSupportProductCudaRequest request{
+      exact_higher_support_product_cuda_schema_version,
       prepared,
       impl_->point_count,
       impl_->certified_node_count,
@@ -571,7 +574,9 @@ ExactHigherSupportProductCudaContext::evaluate(
   try {
     detail::Phase15ExactHigherSupportProductCudaReceipt receipt =
         detail::phase15_launch_exact_higher_support_product_cuda(request);
-    if (!receipt.source_identity_authenticated ||
+    if (receipt.component_schema_version !=
+            exact_higher_support_product_cuda_schema_version ||
+        !receipt.source_identity_authenticated ||
         !receipt.resident_lease_index_identity_validated ||
         !receipt.every_task_classified_once ||
         receipt.floating_point_decision_performed ||
@@ -597,6 +602,7 @@ ExactHigherSupportProductCudaContext::evaluate(
           receipt.kernel_elapsed_ns != 0U ||
           receipt.narrow_int256_kernel_executed ||
           receipt.narrow_int512_kernel_executed ||
+          receipt.terminal_geometry_decision_native_cuda ||
           receipt.cuda_device != -1) {
         throw std::logic_error(
             "the exact higher-support product fake claimed CUDA execution");
@@ -622,19 +628,26 @@ ExactHigherSupportProductCudaContext::evaluate(
     for (std::size_t index = 0U; index < tasks.size(); ++index) {
       const auto& device_record = receipt.records[index];
       const auto& prepared_task = prepared[index];
-      if (device_record.task_id != prepared_task.task_id ||
+      if (device_record.component_schema_version !=
+              exact_higher_support_product_cuda_schema_version ||
+          device_record.task_id != prepared_task.task_id ||
           device_record.kind != prepared_task.kind) {
         throw std::logic_error(
             "the exact higher-support product launcher permuted its batch");
       }
       const bool terminal_geometry_task = prepared_task.kind ==
           ExactHigherSupportProductCudaTaskKind::terminal_support_geometry;
+      const bool terminal_category_present =
+          device_record.terminal_geometry_decision_present == 1U;
+      const bool certified_terminal_category = terminal_geometry_task &&
+          device_record.outcome == detail::
+              Phase15ExactHigherSupportProductCudaDeviceOutcome::certified;
       if (device_record.terminal_geometry_decision_present > 1U ||
-          (device_record.terminal_geometry_decision_present != 0U) !=
-              terminal_geometry_task ||
-          !valid_terminal_geometry_decision(
-              device_record.terminal_geometry_decision) ||
-          (!terminal_geometry_task &&
+          terminal_category_present != certified_terminal_category ||
+          (terminal_category_present &&
+           !valid_terminal_geometry_decision(
+               device_record.terminal_geometry_decision)) ||
+          (!terminal_category_present &&
            device_record.terminal_geometry_decision != hierarchy::
                ExactHigherSupportTerminalGeometryDecision::
                    affinely_dependent)) {
@@ -645,7 +658,7 @@ ExactHigherSupportProductCudaContext::evaluate(
       ExactHigherSupportProductCudaRecord record;
       record.task_id = device_record.task_id;
       record.kind = device_record.kind;
-      if (terminal_geometry_task) {
+      if (terminal_category_present) {
         record.terminal_geometry_decision =
             device_record.terminal_geometry_decision;
       }
@@ -849,15 +862,27 @@ ExactHigherSupportProductCudaContext::evaluate(
               ? ExactHigherSupportProductCudaOutcome::certified
               : ExactHigherSupportProductCudaOutcome::fail_open;
           if (terminal_geometry_task) {
-            if (!fallback_terminal_geometry_decision.has_value() ||
-                record.terminal_geometry_decision !=
-                    fallback_terminal_geometry_decision) {
+            if (!fallback_terminal_geometry_decision.has_value()) {
               throw std::logic_error(
-                  "the exact higher-support product fallback disagreed "
-                  "with the terminal category receipt");
+                  "the exact higher-support product fallback failed to "
+                  "resolve a total terminal category");
             }
             record.terminal_geometry_decision =
                 fallback_terminal_geometry_decision;
+            ++base_audit.
+                terminal_geometry_host_fallback_decision_count;
+            ++base_audit.
+                terminal_geometry_device_fallback_without_category_count;
+            if (int512_required) {
+              ++base_audit.
+                  terminal_int256_to_host_int512_fallback_count;
+            } else if (int1024_required) {
+              ++base_audit.
+                  terminal_int512_to_host_int1024_fallback_count;
+            } else {
+              ++base_audit.
+                  terminal_int1024_to_cpu_rational_fallback_count;
+            }
           }
           if (resolved_by_int512) {
             record.backend = ExactHigherSupportProductCudaBackend::
@@ -889,6 +914,11 @@ ExactHigherSupportProductCudaContext::evaluate(
         ++base_audit.fail_open_count;
       }
       if (record.terminal_geometry_decision.has_value()) {
+        if (terminal_geometry_task && !impl_->host_fake &&
+            !record.cpu_fallback_performed) {
+          ++base_audit.
+              terminal_geometry_native_kernel_decision_count;
+        }
         switch (*record.terminal_geometry_decision) {
           case hierarchy::ExactHigherSupportTerminalGeometryDecision::
               affinely_dependent:
@@ -921,7 +951,22 @@ ExactHigherSupportProductCudaContext::evaluate(
                 base_audit.terminal_boundary_reduced_count +
                 base_audit.terminal_exterior_circumcenter_count +
                 base_audit.terminal_minimal_count !=
-            base_audit.terminal_support_geometry_task_count) {
+            base_audit.terminal_support_geometry_task_count ||
+        base_audit.terminal_support_size_3_task_count +
+                base_audit.terminal_support_size_4_task_count !=
+            base_audit.terminal_support_geometry_task_count ||
+        base_audit.terminal_geometry_host_fallback_decision_count !=
+            base_audit.
+                terminal_geometry_device_fallback_without_category_count ||
+        base_audit.terminal_int256_to_host_int512_fallback_count +
+                base_audit.
+                    terminal_int512_to_host_int1024_fallback_count +
+                base_audit.
+                    terminal_int1024_to_cpu_rational_fallback_count !=
+            base_audit.terminal_geometry_host_fallback_decision_count ||
+        receipt.terminal_geometry_decision_native_cuda !=
+            (base_audit.terminal_geometry_native_kernel_decision_count !=
+             0U)) {
       throw std::logic_error(
           "the exact higher-support product result partition is incomplete");
     }
@@ -944,6 +989,8 @@ ExactHigherSupportProductCudaContext::evaluate(
         receipt.narrow_int256_kernel_executed;
     base_audit.narrow_int512_kernel_executed =
         receipt.narrow_int512_kernel_executed;
+    base_audit.terminal_geometry_decision_native_cuda =
+        receipt.terminal_geometry_decision_native_cuda;
 
     ExactHigherSupportProductCudaResult result;
     result.status =

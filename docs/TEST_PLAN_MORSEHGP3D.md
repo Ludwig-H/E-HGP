@@ -2545,6 +2545,21 @@ La totalité est désormais testée d'abord par les liens d'événements, et non
 - exiger la matrice Release stricte ciblée cinq sur cinq et la validation ASan/UBSan du contrat hôte avant commit; conserver `terminal_geometry_native_cuda=false`, `terminal_classification_native_cuda=false`, les preuves G4 v5 comme historiques `positive-only` non transitives, et réserver v6 à la qualification terminale du SHA courant;
 - vérifier l'absence d'arène globale de supports, paires, Gamma, cofaces, incidences, cellules ou Delaunay; ne déduire ni SLO, ni débit 50 k, ni reprise 10 M/30 M, ni statut public.
 
+### T15-TERMINAL-SUPPORT-GEOMETRY-CUDA-V6 — candidat natif et porte matérielle
+
+- annoncer `phase=15`, `backend=cuda_native_candidate_plus_reference_cpu_exact_fallback`, `profile=hgp_reduced`, `mode=terminal_support_geometry_schema5_native_candidate_v1` et `deployment_status=schema5_native_candidate_host_contract_validated_G4_v6_pending`;
+- engager `component_schema_version=5` dans chaque tâche, record device, requête, reçu, digest soumis et digest complété; rejeter les tâches et reçus de schéma 4 et réserver `qualification_schema_version=6` au nouvel artefact;
+- accepter une tâche terminale native seulement pour trois ou quatre groupes, chacun de multiplicité un, couvrant exactement une feuille LBVH singleton, sans boîte ni nœud de requête;
+- pour un outcome terminal natif certifié, exiger `category_present=1`, une des quatre catégories valides et un backend correspondant à la largeur exécutée; pour toute route de fallback, exiger `category_present=0` jusqu'à la résolution hôte exacte;
+- forcer `int256 -> host int512`, `int512 -> host int1024` et `int1024 -> rationnel CPU`; refuser une catégorie présente sur fallback, une catégorie sur un prédicat non terminal et toute combinaison outcome--backend--présence incohérente;
+- vérifier que le flux consomme directement une catégorie seulement si la source scellée répond `native_exact_authority=true`; fake hôte, source désactivée, catégorie absente ou erreur restent CPU-rejoués et ne modifient aucun résultat scientifique;
+- conserver les compteurs supports trois et quatre hors digests et checkpoints, leur somme égale au total terminal; exiger les deux strictement positifs dans les fixtures stream;
+- conserver les 144 permutations permanentes des quatre triangles et cinq tétraèdres sur CPU, `int256`, `int512` et `int1024`;
+- construire le runner v6 avec 21 tâches, dont neuf terminales réparties quatre plus cinq; exiger les quatre catégories dans chaque arité, les trois largeurs, le fallback rationnel, la parité CPU, la répétabilité des digests, `terminal_geometry_native_cuda=true` et `terminal_classification_native_cuda=false`;
+- avant push du candidat, exiger Release stricte 5/5, ASan/UBSan host-contract 1/1 et compilation stricte du runner; ne lire ces validations que comme contrat hôte lorsque NVCC est absent;
+- avant qualification, étendre le workflow GCP gardé avec une option exclusive, builds Release et audit, AOT `sm_120` sans PTX, ressources `ptxas`, exécution directe, memcheck, assembleur et validateur canonique `morsehgp3d.phase15.exact_higher_support_terminal_geometry_cuda_g4.v6`;
+- ne publier l'artefact v6 qu'après arrêt ciblé et relecture `TERMINATED`; ne déduire ni classifieur terminal complet, ni pipeline produit, SLO, 50 k, reprise 10 M/30 M ou statut public.
+
 ### T15-K1-NORMALIZED-PRODUCT — lots exacts d'ordre un
 
 - recertifier fraîchement Borůvka et son digest de forêt avant de construire une session move-only;

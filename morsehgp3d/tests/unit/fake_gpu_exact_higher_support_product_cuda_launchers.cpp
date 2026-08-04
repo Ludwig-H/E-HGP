@@ -21,6 +21,9 @@ std::atomic<bool> force_next_int512_fallback{false};
 std::atomic<bool> force_false_positive_certificates{false};
 std::atomic<bool> force_wrong_terminal_geometry_categories{false};
 std::atomic<bool> corrupt_next_terminal_geometry_category{false};
+std::atomic<bool> force_next_terminal_fallback_category_present{false};
+std::atomic<bool> force_next_nonterminal_category_present{false};
+std::atomic<bool> corrupt_next_component_schema{false};
 std::atomic<std::size_t> forced_false_positive_count{0U};
 std::atomic<std::size_t> launcher_call_count{0U};
 
@@ -60,6 +63,22 @@ void corrupt_next_exact_higher_support_product_terminal_geometry_category()
       true, std::memory_order_relaxed);
 }
 
+void force_next_exact_higher_support_product_terminal_fallback_category_present()
+    noexcept {
+  force_next_terminal_fallback_category_present.store(
+      true, std::memory_order_relaxed);
+}
+
+void force_next_exact_higher_support_product_nonterminal_category_present()
+    noexcept {
+  force_next_nonterminal_category_present.store(
+      true, std::memory_order_relaxed);
+}
+
+void corrupt_next_exact_higher_support_product_component_schema() noexcept {
+  corrupt_next_component_schema.store(true, std::memory_order_relaxed);
+}
+
 std::size_t exact_higher_support_product_forced_false_positive_count()
     noexcept {
   return forced_false_positive_count.load(std::memory_order_relaxed);
@@ -75,6 +94,11 @@ void reset_exact_higher_support_product_fake() noexcept {
       false, std::memory_order_relaxed);
   corrupt_next_terminal_geometry_category.store(
       false, std::memory_order_relaxed);
+  force_next_terminal_fallback_category_present.store(
+      false, std::memory_order_relaxed);
+  force_next_nonterminal_category_present.store(
+      false, std::memory_order_relaxed);
+  corrupt_next_component_schema.store(false, std::memory_order_relaxed);
   forced_false_positive_count.store(0U, std::memory_order_relaxed);
   launcher_call_count.store(0U, std::memory_order_relaxed);
 }
@@ -115,6 +139,22 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
 [[nodiscard]] bool consume_terminal_geometry_category_corruption()
     noexcept {
   return corrupt_next_terminal_geometry_category.exchange(
+      false, std::memory_order_relaxed);
+}
+
+[[nodiscard]] bool consume_forced_terminal_fallback_category_presence()
+    noexcept {
+  return force_next_terminal_fallback_category_present.exchange(
+      false, std::memory_order_relaxed);
+}
+
+[[nodiscard]] bool consume_forced_nonterminal_category_presence() noexcept {
+  return force_next_nonterminal_category_present.exchange(
+      false, std::memory_order_relaxed);
+}
+
+[[nodiscard]] bool consume_component_schema_corruption() noexcept {
+  return corrupt_next_component_schema.exchange(
       false, std::memory_order_relaxed);
 }
 
@@ -189,7 +229,10 @@ namespace fixed512 = exact_higher_support_product_fixed512;
 [[nodiscard]] bool valid_compact_task(
     const Phase15ExactHigherSupportProductCudaTask& task,
     const Phase15ExactHigherSupportProductCudaRequest& request) noexcept {
-  if (task.source_snapshot_epoch != request.source_snapshot_epoch ||
+  if (task.component_schema_version !=
+          exact_higher_support_product_cuda_schema_version ||
+      task.component_schema_version != request.component_schema_version ||
+      task.source_snapshot_epoch != request.source_snapshot_epoch ||
       (task.support_size != 3U && task.support_size != 4U) ||
       task.support_group_count == 0U ||
       task.support_group_count > task.support_size ||
@@ -268,7 +311,9 @@ namespace fixed512 = exact_higher_support_product_fixed512;
 Phase15ExactHigherSupportProductCudaReceipt
 phase15_launch_exact_higher_support_product_cuda(
     const Phase15ExactHigherSupportProductCudaRequest& request) {
-  if (!request.host_fake || request.tasks.empty() ||
+  if (request.component_schema_version !=
+          exact_higher_support_product_cuda_schema_version ||
+      !request.host_fake || request.tasks.empty() ||
       request.tasks.size() > request.maximum_task_count ||
       request.point_count == 0U || request.certified_node_count == 0U ||
       request.source_snapshot_epoch == 0U ||
@@ -334,20 +379,9 @@ phase15_launch_exact_higher_support_product_cuda(
     }
 
     Phase15ExactHigherSupportProductCudaDeviceRecord record;
+    record.component_schema_version = request.component_schema_version;
     record.task_id = task.task_id;
     record.kind = task.kind;
-    if (terminal_geometry_decision.has_value()) {
-      record.terminal_geometry_decision_present = 1U;
-      record.terminal_geometry_decision = *terminal_geometry_decision;
-      if (test_support::wrong_terminal_geometry_categories_forced()) {
-        const std::uint8_t next = static_cast<std::uint8_t>(
-            (static_cast<std::uint8_t>(record.terminal_geometry_decision) +
-             1U) %
-            4U);
-        record.terminal_geometry_decision = static_cast<
-            hierarchy::ExactHigherSupportTerminalGeometryDecision>(next);
-      }
-    }
     if (task.arithmetic_width ==
             Phase15ExactHigherSupportProductCudaArithmeticWidth::int256 &&
         test_support::consume_forced_int256_fallback()) {
@@ -398,11 +432,44 @@ phase15_launch_exact_higher_support_product_cuda(
       }
     }
     if (terminal_geometry_decision.has_value() &&
+        record.outcome ==
+            Phase15ExactHigherSupportProductCudaDeviceOutcome::certified) {
+      record.terminal_geometry_decision_present = 1U;
+      record.terminal_geometry_decision = *terminal_geometry_decision;
+      if (test_support::wrong_terminal_geometry_categories_forced()) {
+        const std::uint8_t next = static_cast<std::uint8_t>(
+            (static_cast<std::uint8_t>(record.terminal_geometry_decision) +
+             1U) %
+            4U);
+        record.terminal_geometry_decision = static_cast<
+            hierarchy::ExactHigherSupportTerminalGeometryDecision>(next);
+      }
+    }
+    if (record.terminal_geometry_decision_present != 0U &&
         test_support::consume_terminal_geometry_category_corruption()) {
       record.terminal_geometry_decision = static_cast<
           hierarchy::ExactHigherSupportTerminalGeometryDecision>(255U);
     }
+    if (terminal_geometry_decision.has_value() &&
+        record.outcome !=
+            Phase15ExactHigherSupportProductCudaDeviceOutcome::certified &&
+        test_support::
+            consume_forced_terminal_fallback_category_presence()) {
+      record.terminal_geometry_decision_present = 1U;
+      record.terminal_geometry_decision =
+          hierarchy::ExactHigherSupportTerminalGeometryDecision::minimal;
+    }
+    if (!terminal_geometry_decision.has_value() &&
+        test_support::consume_forced_nonterminal_category_presence()) {
+      record.terminal_geometry_decision_present = 1U;
+      record.terminal_geometry_decision =
+          hierarchy::ExactHigherSupportTerminalGeometryDecision::minimal;
+    }
     receipt.records.push_back(record);
+  }
+  receipt.component_schema_version = request.component_schema_version;
+  if (test_support::consume_component_schema_corruption()) {
+    --receipt.component_schema_version;
   }
   receipt.submitted_task_digest = request.submitted_task_digest;
   receipt.completed_result_digest =

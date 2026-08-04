@@ -37,6 +37,8 @@ enum class Phase15ExactHigherSupportProductCudaArithmeticWidth :
 };
 
 struct Phase15ExactHigherSupportProductCudaTask {
+  std::uint32_t component_schema_version{
+      exact_higher_support_product_cuda_schema_version};
   std::uint64_t task_id{};
   std::uint64_t source_snapshot_epoch{};
   ExactHigherSupportProductCudaTaskKind kind{
@@ -88,6 +90,8 @@ enum class Phase15ExactHigherSupportProductCudaDeviceBackend : std::uint8_t {
 };
 
 struct Phase15ExactHigherSupportProductCudaDeviceRecord {
+  std::uint32_t component_schema_version{
+      exact_higher_support_product_cuda_schema_version};
   std::uint64_t task_id{};
   ExactHigherSupportProductCudaTaskKind kind{
       ExactHigherSupportProductCudaTaskKind::support_prune};
@@ -136,6 +140,8 @@ phase15_exact_higher_support_product_task_digest(
   digest = phase15_exact_higher_support_product_digest_word(
       digest, static_cast<std::uint64_t>(tasks.size()));
   for (const auto& task : tasks) {
+    digest = phase15_exact_higher_support_product_digest_word(
+        digest, task.component_schema_version);
     digest = phase15_exact_higher_support_product_digest_word(
         digest, task.task_id);
     digest = phase15_exact_higher_support_product_digest_word(
@@ -204,6 +210,8 @@ phase15_exact_higher_support_product_device_result_digest(
       digest, static_cast<std::uint64_t>(records.size()));
   for (const auto& record : records) {
     digest = phase15_exact_higher_support_product_digest_word(
+        digest, record.component_schema_version);
+    digest = phase15_exact_higher_support_product_digest_word(
         digest, record.task_id);
     digest = phase15_exact_higher_support_product_digest_word(
         digest, static_cast<std::uint64_t>(record.kind));
@@ -223,6 +231,8 @@ phase15_exact_higher_support_product_device_result_digest(
 }
 
 struct Phase15ExactHigherSupportProductCudaRequest {
+  std::uint32_t component_schema_version{
+      exact_higher_support_product_cuda_schema_version};
   std::span<const Phase15ExactHigherSupportProductCudaTask> tasks;
   std::size_t point_count{};
   std::size_t certified_node_count{};
@@ -237,6 +247,8 @@ struct Phase15ExactHigherSupportProductCudaRequest {
 };
 
 struct Phase15ExactHigherSupportProductCudaReceipt {
+  std::uint32_t component_schema_version{
+      exact_higher_support_product_cuda_schema_version};
   std::vector<Phase15ExactHigherSupportProductCudaDeviceRecord> records;
   std::uint64_t submitted_task_digest{};
   std::uint64_t completed_result_digest{};
@@ -256,6 +268,7 @@ struct Phase15ExactHigherSupportProductCudaReceipt {
   bool native_lbvh_nodes_read_on_device{false};
   bool narrow_int256_kernel_executed{false};
   bool narrow_int512_kernel_executed{false};
+  bool terminal_geometry_decision_native_cuda{false};
 };
 
 [[nodiscard]] Phase15ExactHigherSupportProductCudaReceipt

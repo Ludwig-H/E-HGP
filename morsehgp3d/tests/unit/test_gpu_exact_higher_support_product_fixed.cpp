@@ -498,6 +498,56 @@ void test_int512_width_boundary() {
       tetrahedron_61,
       tetrahedron_query,
       "W=61 tetrahedron query boundary");
+
+  const std::array<ExactDyadicAabb3, 4> terminal_int512_boundary{
+      point_box(-1.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, std::ldexp(1.0, 40))};
+  const std::array<ExactDyadicAabb3, 4> terminal_int1024_boundary{
+      point_box(-1.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, std::ldexp(1.0, 61))};
+  const auto native_terminal_int512 =
+      fixed_boxes(terminal_int512_boundary);
+  const auto native_terminal_int1024 =
+      fixed_boxes(terminal_int1024_boundary);
+  std::uint64_t terminal_int512_width = 0U;
+  std::uint64_t terminal_int1024_width = 0U;
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native_terminal_int512.data(),
+          4U,
+          nullptr,
+          terminal_int512_width) &&
+          terminal_int512_width == 41U &&
+          !fixed256::expression_fits(4U, false, terminal_int512_width) &&
+          fixed512::terminal_support_geometry(
+              native_terminal_int512.data(), 4U) ==
+              fixed512::TerminalGeometryDecision::boundary_reduced &&
+          exact_higher_support_terminal_geometry_decision(
+              terminal_int512_boundary) ==
+              ExactHigherSupportTerminalGeometryDecision::boundary_reduced,
+      "the schema-6 boundary tetrahedron selects native int512 categorically");
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native_terminal_int1024.data(),
+          4U,
+          nullptr,
+          terminal_int1024_width) &&
+          terminal_int1024_width == 62U &&
+          fixed512::terminal_support_geometry(
+              native_terminal_int1024.data(), 4U) ==
+              fixed512::TerminalGeometryDecision::
+                  requires_cpu_rational_fallback &&
+          fixed::terminal_support_geometry(
+              native_terminal_int1024.data(), 4U) ==
+              fixed::TerminalGeometryDecision::boundary_reduced &&
+          exact_higher_support_terminal_geometry_decision(
+              terminal_int1024_boundary) ==
+              ExactHigherSupportTerminalGeometryDecision::boundary_reduced,
+      "the schema-6 boundary tetrahedron selects native int1024 categorically");
 }
 
 void test_int256_arity_boundaries() {

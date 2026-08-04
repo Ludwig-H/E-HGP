@@ -8,6 +8,7 @@
 
 #include <cuda_runtime.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -323,6 +324,32 @@ fixed512_outcome(fixed512::Decision decision) noexcept {
       requires_cpu_rational_fallback;
 }
 
+template <typename FixedDecision>
+[[nodiscard]] __device__ bool public_terminal_geometry_decision(
+    FixedDecision decision,
+    hierarchy::ExactHigherSupportTerminalGeometryDecision& output)
+    noexcept {
+  using PublicDecision =
+      hierarchy::ExactHigherSupportTerminalGeometryDecision;
+  switch (decision) {
+    case FixedDecision::affinely_dependent:
+      output = PublicDecision::affinely_dependent;
+      return true;
+    case FixedDecision::boundary_reduced:
+      output = PublicDecision::boundary_reduced;
+      return true;
+    case FixedDecision::exterior_circumcenter:
+      output = PublicDecision::exterior_circumcenter;
+      return true;
+    case FixedDecision::minimal:
+      output = PublicDecision::minimal;
+      return true;
+    case FixedDecision::requires_cpu_rational_fallback:
+      return false;
+  }
+  return false;
+}
+
 [[nodiscard]] __device__ __noinline__ fixed256::Decision
 evaluate_fixed256(
     ExactHigherSupportProductCudaTaskKind kind,
@@ -370,6 +397,7 @@ evaluate_task(
     const Phase15ExactHigherSupportProductCudaTask& task,
     unsigned int* authority_failure) noexcept {
   Phase15ExactHigherSupportProductCudaDeviceRecord record{};
+  record.component_schema_version = task.component_schema_version;
   record.task_id = task.task_id;
   record.kind = task.kind;
   record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
@@ -379,6 +407,8 @@ evaluate_task(
 
   bool authority_valid =
       resident_lease_index_identity_validated &&
+      task.component_schema_version ==
+          exact_higher_support_product_cuda_schema_version &&
       task.source_snapshot_epoch == source_snapshot_epoch &&
       (task.support_size == 3U || task.support_size == 4U) &&
       task.support_group_count != 0U &&
@@ -458,6 +488,25 @@ evaluate_task(
           query_box) &&
           matches_proposed_box(query_box, task.query_box);
     }
+  } else if (
+      authority_valid &&
+      task.kind == ExactHigherSupportProductCudaTaskKind::
+          terminal_support_geometry) {
+    authority_valid = !task.has_query_box &&
+        task.query_node_index == 0U && task.query_leaf_begin == 0U &&
+        task.query_leaf_end == 0U &&
+        task.support_group_count == task.support_size;
+    for (std::size_t group = 0U;
+         authority_valid && group < task.support_group_count;
+         ++group) {
+      const DeviceNode& node = nodes[task.support_node_indices[group]];
+      authority_valid = task.support_multiplicities[group] == 1U &&
+          task.support_leaf_ends[group] ==
+              task.support_leaf_begins[group] + 1U &&
+          node.left_child == spatial::morton_lbvh_snapshot_invalid_node_index &&
+          node.right_child ==
+              spatial::morton_lbvh_snapshot_invalid_node_index;
+    }
   } else {
     authority_valid = false;
   }
@@ -497,6 +546,31 @@ evaluate_task(
 
   if constexpr (
       Width == Phase15ExactHigherSupportProductCudaArithmeticWidth::int256) {
+    if (task.kind == ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry) {
+      const fixed256::TerminalGeometryDecision decision =
+          fixed256::terminal_support_geometry(
+              support_boxes, task.support_size);
+      if (decision == fixed256::TerminalGeometryDecision::
+              requires_cpu_rational_fallback) {
+        record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
+            requires_host_int512_fallback;
+        record.backend =
+            Phase15ExactHigherSupportProductCudaDeviceBackend::
+                bounded_dyadic_int512;
+      } else if (public_terminal_geometry_decision(
+                     decision, record.terminal_geometry_decision)) {
+        record.outcome =
+            Phase15ExactHigherSupportProductCudaDeviceOutcome::certified;
+        record.backend =
+            Phase15ExactHigherSupportProductCudaDeviceBackend::
+                bounded_dyadic_int256;
+        record.terminal_geometry_decision_present = 1U;
+      } else {
+        atomicExch(authority_failure, 1U);
+      }
+      return record;
+    }
     const fixed256::Decision narrow_decision = evaluate_fixed256(
         task.kind, support_boxes, task.support_size, query_box);
     if (narrow_decision ==
@@ -514,6 +588,31 @@ evaluate_task(
     }
   } else if constexpr (
       Width == Phase15ExactHigherSupportProductCudaArithmeticWidth::int512) {
+    if (task.kind == ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry) {
+      const fixed512::TerminalGeometryDecision decision =
+          fixed512::terminal_support_geometry(
+              support_boxes, task.support_size);
+      if (decision == fixed512::TerminalGeometryDecision::
+              requires_cpu_rational_fallback) {
+        record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
+            requires_host_int1024_fallback;
+        record.backend =
+            Phase15ExactHigherSupportProductCudaDeviceBackend::
+                bounded_dyadic_int1024;
+      } else if (public_terminal_geometry_decision(
+                     decision, record.terminal_geometry_decision)) {
+        record.outcome =
+            Phase15ExactHigherSupportProductCudaDeviceOutcome::certified;
+        record.backend =
+            Phase15ExactHigherSupportProductCudaDeviceBackend::
+                bounded_dyadic_int512;
+        record.terminal_geometry_decision_present = 1U;
+      } else {
+        atomicExch(authority_failure, 1U);
+      }
+      return record;
+    }
     const fixed512::Decision narrow_decision = evaluate_fixed512(
         task.kind, support_boxes, task.support_size, query_box);
     if (narrow_decision ==
@@ -530,6 +629,31 @@ evaluate_task(
               bounded_dyadic_int512;
     }
   } else {
+    if (task.kind == ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry) {
+      const fixed::TerminalGeometryDecision decision =
+          fixed::terminal_support_geometry(
+              support_boxes, task.support_size);
+      if (decision == fixed::TerminalGeometryDecision::
+              requires_cpu_rational_fallback) {
+        record.outcome = Phase15ExactHigherSupportProductCudaDeviceOutcome::
+            requires_cpu_rational_fallback;
+        record.backend =
+            Phase15ExactHigherSupportProductCudaDeviceBackend::
+                arbitrary_precision_rational;
+      } else if (public_terminal_geometry_decision(
+                     decision, record.terminal_geometry_decision)) {
+        record.outcome =
+            Phase15ExactHigherSupportProductCudaDeviceOutcome::certified;
+        record.backend =
+            Phase15ExactHigherSupportProductCudaDeviceBackend::
+                bounded_dyadic_int1024;
+        record.terminal_geometry_decision_present = 1U;
+      } else {
+        atomicExch(authority_failure, 1U);
+      }
+      return record;
+    }
     const fixed::Decision wide_decision = evaluate_fixed1024(
         task.kind, support_boxes, task.support_size, query_box);
     record.outcome = fixed_outcome(wide_decision);
@@ -579,7 +703,9 @@ __global__ void morsehgp3d_phase15_exact_higher_support_product_kernel(
 Phase15ExactHigherSupportProductCudaReceipt
 phase15_launch_exact_higher_support_product_cuda(
     const Phase15ExactHigherSupportProductCudaRequest& request) {
-  if (request.host_fake || request.tasks.empty() ||
+  if (request.component_schema_version !=
+          exact_higher_support_product_cuda_schema_version ||
+      request.host_fake || request.tasks.empty() ||
       request.tasks.size() > request.maximum_task_count ||
       request.point_count == 0U || request.certified_node_count == 0U ||
       request.source_snapshot_epoch == 0U ||
@@ -619,11 +745,11 @@ phase15_launch_exact_higher_support_product_cuda(
   std::size_t int512_task_count = 0U;
   std::size_t int1024_task_count = 0U;
   for (const auto& task : request.tasks) {
-    if (task.kind == ExactHigherSupportProductCudaTaskKind::
-            terminal_support_geometry) {
+    if (task.component_schema_version !=
+        request.component_schema_version) {
       throw std::invalid_argument(
-          "schema 4 terminal support geometry is host-first and is not "
-          "accepted by the native CUDA launcher");
+          "the exact higher-support product batch uses a stale component "
+          "schema");
     }
     switch (task.arithmetic_width) {
       case Phase15ExactHigherSupportProductCudaArithmeticWidth::int256:
@@ -801,6 +927,7 @@ phase15_launch_exact_higher_support_product_cuda(
   guard.restore();
 
   Phase15ExactHigherSupportProductCudaReceipt receipt;
+  receipt.component_schema_version = request.component_schema_version;
   receipt.records = std::move(host_records);
   receipt.submitted_task_digest = request.submitted_task_digest;
   receipt.completed_result_digest =
@@ -824,6 +951,16 @@ phase15_launch_exact_higher_support_product_cuda(
   receipt.native_lbvh_nodes_read_on_device = true;
   receipt.narrow_int256_kernel_executed = int256_task_count != 0U;
   receipt.narrow_int512_kernel_executed = int512_task_count != 0U;
+  receipt.terminal_geometry_decision_native_cuda = std::any_of(
+      receipt.records.begin(),
+      receipt.records.end(),
+      [](const auto& record) {
+        return record.kind == ExactHigherSupportProductCudaTaskKind::
+                terminal_support_geometry &&
+            record.outcome ==
+                Phase15ExactHigherSupportProductCudaDeviceOutcome::certified &&
+            record.terminal_geometry_decision_present == 1U;
+      });
   return receipt;
 }
 

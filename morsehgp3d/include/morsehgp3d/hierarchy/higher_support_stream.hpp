@@ -161,9 +161,10 @@ static_assert(
 // Sealed categorical source for one already-terminal support.  It is exposed
 // only as the sibling of the existing positive source, so adding the
 // classifier does not multiply stream/session constructor overloads.  A
-// missing decision always falls back to the CPU singleton primitive.  In the
-// host-first schema the native-authority callback is deliberately false and
-// every host-fake category is replayed by the CPU before scientific use.
+// missing decision always falls back to the CPU singleton primitive.  A
+// non-native producer, including the host fake, is replayed by the CPU before
+// scientific use; only a sealed native exact authority may supply the
+// categorical result directly.
 class ExactHigherSupportTerminalGeometryDecisionSource final {
  public:
   ExactHigherSupportTerminalGeometryDecisionSource(

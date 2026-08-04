@@ -2883,6 +2883,11 @@ class ExactHigherSupportStreamBuilder {
     std::optional<ExactHigherSupportTerminalGeometryDecision> proposal;
     if (terminal_geometry_decision_source_ != nullptr) {
       proposal = terminal_geometry_decision_source_->decide(entry);
+      if (proposal.has_value() &&
+          terminal_geometry_decision_source_->native_exact_authority()) {
+        terminal_geometry_cache_ = std::pair{entry, *proposal};
+        return *proposal;
+      }
     }
     const std::array<spatial::ExactDyadicAabb3, 4> boxes =
         support_boxes(entry);
@@ -2891,10 +2896,9 @@ class ExactHigherSupportStreamBuilder {
             std::span<const spatial::ExactDyadicAabb3>{
                 boxes.data(), entry.support_size});
 
-    // Schema 4 deliberately gives the host fake no scientific authority.
-    // Even a well-formed but hostile categorical proposal is ignored after
-    // exact CPU replay.  A future native source may be compared here only
-    // after its separate device qualification changes the source contract.
+    // Missing, disabled and non-native proposals have no scientific
+    // authority.  In particular, a well-formed but hostile host-fake category
+    // is ignored after exact CPU replay.
     static_cast<void>(proposal);
     terminal_geometry_cache_ = std::pair{entry, cpu_decision};
     return cpu_decision;

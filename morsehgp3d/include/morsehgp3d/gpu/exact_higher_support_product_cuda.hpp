@@ -14,27 +14,27 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
-    exact_higher_support_product_cuda_schema_version = 4U;
-// Qualification v5 is the historical positive-only artifact for the
-// device-batched Morton frontier and bounded local witness plan.  It neither
-// qualifies component schema v4 nor the terminal-geometry gate.  The first
-// qualification artifact covering terminal geometry will use schema v6.
+    exact_higher_support_product_cuda_schema_version = 5U;
+// Qualification v5 is the historical positive-only artifact for component
+// schema v3.  It is deliberately non-transitive to component schemas v4 and
+// v5.  A qualification covering the native categorical terminal gate must
+// use schema v6 and bind the exact component schema in its artifact.
 inline constexpr std::uint32_t
-    exact_higher_support_product_cuda_qualification_schema_version = 5U;
+    exact_higher_support_product_cuda_qualification_schema_version = 6U;
 inline constexpr std::string_view exact_higher_support_product_cuda_backend =
-    "cuda_g4_launcher_seam_plus_exact_host_fake";
+    "cuda_g4_native_terminal_geometry_plus_exact_host_fallback";
 inline constexpr std::string_view exact_higher_support_product_cuda_profile =
     "hgp_reduced";
 inline constexpr std::string_view exact_higher_support_product_cuda_mode =
-    "batched_exact_support_prune_query_strict_interior_and_host_first_"
-    "terminal_geometry";
+    "batched_exact_support_prune_query_strict_interior_and_"
+    "native_terminal_geometry";
 inline constexpr std::string_view
     exact_higher_support_product_cuda_deployment_status =
-        "schema4_host_contract_validated_native_requalification_pending";
+        "schema5_native_implementation_g4_schema6_qualification_pending";
 inline constexpr std::string_view
     exact_higher_support_product_cuda_public_status = "not_claimed";
 inline constexpr bool
-    exact_higher_support_terminal_geometry_native_cuda = false;
+    exact_higher_support_terminal_geometry_native_cuda = true;
 inline constexpr bool
     exact_higher_support_terminal_classification_native_cuda = false;
 
@@ -117,12 +117,20 @@ struct ExactHigherSupportProductCudaAudit {
   std::size_t support_prune_task_count{};
   std::size_t query_strict_interior_task_count{};
   std::size_t terminal_support_geometry_task_count{};
+  std::size_t terminal_support_size_3_task_count{};
+  std::size_t terminal_support_size_4_task_count{};
   std::size_t certified_count{};
   std::size_t fail_open_count{};
   std::size_t terminal_affinely_dependent_count{};
   std::size_t terminal_boundary_reduced_count{};
   std::size_t terminal_exterior_circumcenter_count{};
   std::size_t terminal_minimal_count{};
+  std::size_t terminal_geometry_native_kernel_decision_count{};
+  std::size_t terminal_geometry_host_fallback_decision_count{};
+  std::size_t terminal_geometry_device_fallback_without_category_count{};
+  std::size_t terminal_int256_to_host_int512_fallback_count{};
+  std::size_t terminal_int512_to_host_int1024_fallback_count{};
+  std::size_t terminal_int1024_to_cpu_rational_fallback_count{};
   std::size_t bounded_dyadic_int256_count{};
   std::size_t bounded_dyadic_int512_count{};
   std::size_t bounded_dyadic_int1024_count{};
@@ -148,10 +156,10 @@ struct ExactHigherSupportProductCudaAudit {
   bool native_lbvh_nodes_read_on_device{false};
   bool narrow_int256_kernel_executed{false};
   bool narrow_int512_kernel_executed{false};
-  // Deliberately false in schema 4.  Native CUDA rejects terminal geometry
-  // tasks until a separately qualified device implementation is released.
-  bool terminal_geometry_decision_native_cuda{
-      exact_higher_support_terminal_geometry_native_cuda};
+  // Invocation-local evidence.  This is true only when at least one terminal
+  // category in this result was emitted by a native fixed-width CUDA kernel;
+  // host fakes and all-host-fallback terminal batches leave it false.
+  bool terminal_geometry_decision_native_cuda{false};
   bool global_product_frontier_mutated{false};
   bool ordinary_or_higher_order_delaunay_materialized{false};
   bool global_cell_coface_or_incidence_arena_materialized{false};

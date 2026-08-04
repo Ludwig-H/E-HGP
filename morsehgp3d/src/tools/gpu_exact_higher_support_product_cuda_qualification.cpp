@@ -13,6 +13,7 @@
 #include <functional>
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -37,30 +38,51 @@ using morsehgp3d::hierarchy::
 using morsehgp3d::hierarchy::ExactHigherSupportFrontierEntry;
 using morsehgp3d::hierarchy::ExactHigherSupportNodeReceipt;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
+using morsehgp3d::hierarchy::
+    ExactHigherSupportTerminalGeometryDecision;
 using morsehgp3d::hierarchy::build_exact_higher_support_stream;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_no_well_centered_certified;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified;
+using morsehgp3d::hierarchy::
+    exact_higher_support_terminal_geometry_decision;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
-inline constexpr std::size_t qualification_task_count = 12U;
+inline constexpr std::size_t historical_positive_task_count = 12U;
+inline constexpr std::size_t terminal_qualification_task_count = 9U;
+inline constexpr std::size_t qualification_task_count =
+    historical_positive_task_count + terminal_qualification_task_count;
 inline constexpr std::size_t fixture_family_count = 6U;
 inline constexpr std::size_t qualification_stream_task_capacity = 256U;
+
+static_assert(
+    morsehgp3d::gpu::exact_higher_support_product_cuda_schema_version == 5U);
+static_assert(
+    morsehgp3d::gpu::
+        exact_higher_support_product_cuda_qualification_schema_version ==
+    6U);
+static_assert(
+    morsehgp3d::gpu::exact_higher_support_terminal_geometry_native_cuda);
+static_assert(
+    !morsehgp3d::gpu::
+        exact_higher_support_terminal_classification_native_cuda);
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
   return CertifiedPoint3::from_binary64(x, y, z);
 }
 
-// Six logical fixture families share one immutable PointId namespace so all
-// twelve predicates use one resident epoch, one batch and one synchronization;
-// the mixed exact-width batch exercises separate int256/int512/int1024 kernels.
+// Six historical positive-predicate families and nine categorical terminal
+// fixtures share one immutable PointId namespace, one resident epoch, one
+// batch and one synchronization.  The terminal subset covers both arities,
+// all four categories, native int256/int512/int1024 routes and an exact host
+// rational fallback.
 [[nodiscard]] CanonicalPointCloud qualification_cloud() {
   const double denormal = std::numeric_limits<double>::denorm_min();
-  const std::array<CertifiedPoint3, 25> points{
+  const std::array<CertifiedPoint3, 28> points{
       // Acute triangle, exact centre and a distinct shell point.
       point(-1.0, 0.0, 0.0),
       point(1.0, 0.0, 0.0),
@@ -92,7 +114,11 @@ inline constexpr std::size_t qualification_stream_task_capacity = 256U;
       point(1.0, 0.0, std::ldexp(1.0, -61)),
       point(0.0, 1.0, std::ldexp(1.0, -61)),
       // W=42 query-3: outside its int256 bound, inside int512.
-      point(0.0, std::ldexp(1.0, -40), 0.0)};
+      point(0.0, std::ldexp(1.0, -40), 0.0),
+      // Boundary tetrahedra with pure int512 then int1024 terminal routes.
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, std::ldexp(1.0, 40)),
+      point(0.0, 0.0, std::ldexp(1.0, 61))};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
 }
@@ -347,6 +373,8 @@ struct QualifiedTask {
   ExactHigherSupportProductCudaTask task{};
   bool expected_certified{false};
   bool uses_internal_node_receipt{false};
+  std::optional<ExactHigherSupportTerminalGeometryDecision>
+      expected_terminal_geometry_decision;
   ExactHigherSupportProductAabbDecisionBackend expected_backend{
       ExactHigherSupportProductAabbDecisionBackend::
           arbitrary_precision_rational};
@@ -377,6 +405,30 @@ template <std::size_t SupportSize>
   result.expected_certified =
       exact_higher_support_product_no_well_centered_certified(
           boxes, &result.expected_backend);
+  return result;
+}
+
+template <std::size_t SupportSize>
+[[nodiscard]] QualifiedTask terminal_geometry_task(
+    const CanonicalPointCloud& cloud,
+    const LeafNodeFixture& leaf_nodes,
+    std::uint64_t epoch,
+    std::uint64_t task_id,
+    const std::array<std::size_t, SupportSize>& source_indices) {
+  QualifiedTask result = support_task(
+      cloud, leaf_nodes, epoch, task_id, source_indices);
+  result.task.kind =
+      ExactHigherSupportProductCudaTaskKind::terminal_support_geometry;
+  std::array<ExactDyadicAabb3, SupportSize> boxes{};
+  for (std::size_t index = 0U; index < SupportSize; ++index) {
+    const PointId point_id =
+        canonical_point_id_for_source(cloud, source_indices[index]);
+    boxes[index] = point_box(cloud, point_id);
+  }
+  result.expected_terminal_geometry_decision =
+      exact_higher_support_terminal_geometry_decision(
+          boxes, &result.expected_backend);
+  result.expected_certified = true;
   return result;
 }
 
@@ -563,7 +615,34 @@ int main() {
             std::array<std::size_t, 3>{21U, 22U, 23U}),
         query_task(
             cloud, leaf_nodes, epoch, 111U,
-            std::array<std::size_t, 3>{0U, 1U, 2U}, 24U)};
+            std::array<std::size_t, 3>{0U, 1U, 2U}, 24U),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 200U,
+            std::array<std::size_t, 3>{0U, 1U, 2U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 201U,
+            std::array<std::size_t, 3>{0U, 1U, 4U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 202U,
+            std::array<std::size_t, 3>{5U, 6U, 7U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 203U,
+            std::array<std::size_t, 3>{18U, 19U, 20U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 204U,
+            std::array<std::size_t, 4>{8U, 9U, 10U, 11U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 205U,
+            std::array<std::size_t, 4>{13U, 14U, 15U, 16U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 206U,
+            std::array<std::size_t, 4>{0U, 1U, 2U, 3U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 207U,
+            std::array<std::size_t, 4>{0U, 1U, 25U, 26U}),
+        terminal_geometry_task(
+            cloud, leaf_nodes, epoch, 208U,
+            std::array<std::size_t, 4>{0U, 1U, 25U, 27U})};
 
     std::vector<ExactHigherSupportProductCudaTask> tasks;
     tasks.reserve(qualified_tasks.size());
@@ -571,6 +650,14 @@ int main() {
     std::size_t expected_fallback_count = 0U;
     std::size_t expected_support_task_count = 0U;
     std::size_t expected_query_task_count = 0U;
+    std::size_t expected_terminal_task_count = 0U;
+    std::size_t expected_terminal_support_size_3_task_count = 0U;
+    std::size_t expected_terminal_support_size_4_task_count = 0U;
+    std::size_t expected_terminal_rational_fallback_count = 0U;
+    std::size_t expected_terminal_affinely_dependent_count = 0U;
+    std::size_t expected_terminal_boundary_reduced_count = 0U;
+    std::size_t expected_terminal_exterior_circumcenter_count = 0U;
+    std::size_t expected_terminal_minimal_count = 0U;
     std::size_t internal_node_receipt_task_count = 0U;
     for (const QualifiedTask& task : qualified_tasks) {
       tasks.push_back(task.task);
@@ -591,6 +678,47 @@ int main() {
                   query_strict_interior
           ? 1U
           : 0U;
+      if (task.task.kind == ExactHigherSupportProductCudaTaskKind::
+              terminal_support_geometry) {
+        ++expected_terminal_task_count;
+        if (task.task.product.support_size == 3U) {
+          ++expected_terminal_support_size_3_task_count;
+        } else if (task.task.product.support_size == 4U) {
+          ++expected_terminal_support_size_4_task_count;
+        } else {
+          throw std::logic_error(
+              "qualification contains an invalid terminal support arity");
+        }
+        expected_terminal_rational_fallback_count +=
+            task.expected_backend ==
+                    ExactHigherSupportProductAabbDecisionBackend::
+                        arbitrary_precision_rational
+            ? 1U
+            : 0U;
+        if (!task.expected_terminal_geometry_decision.has_value()) {
+          throw std::logic_error(
+              "qualification lost an expected terminal category");
+        }
+        switch (*task.expected_terminal_geometry_decision) {
+          case ExactHigherSupportTerminalGeometryDecision::
+              affinely_dependent:
+            ++expected_terminal_affinely_dependent_count;
+            break;
+          case ExactHigherSupportTerminalGeometryDecision::boundary_reduced:
+            ++expected_terminal_boundary_reduced_count;
+            break;
+          case ExactHigherSupportTerminalGeometryDecision::
+              exterior_circumcenter:
+            ++expected_terminal_exterior_circumcenter_count;
+            break;
+          case ExactHigherSupportTerminalGeometryDecision::minimal:
+            ++expected_terminal_minimal_count;
+            break;
+        }
+      } else if (task.expected_terminal_geometry_decision.has_value()) {
+        throw std::logic_error(
+            "a nonterminal qualification task carries a terminal category");
+      }
       internal_node_receipt_task_count +=
           task.uses_internal_node_receipt ? 1U : 0U;
     }
@@ -605,6 +733,18 @@ int main() {
       throw std::logic_error(
           "qualification did not isolate one internal-node receipt task");
     }
+    if (expected_terminal_task_count !=
+            terminal_qualification_task_count ||
+        expected_terminal_support_size_3_task_count != 4U ||
+        expected_terminal_support_size_4_task_count != 5U ||
+        expected_terminal_rational_fallback_count == 0U ||
+        expected_terminal_affinely_dependent_count == 0U ||
+        expected_terminal_boundary_reduced_count == 0U ||
+        expected_terminal_exterior_circumcenter_count == 0U ||
+        expected_terminal_minimal_count == 0U) {
+      throw std::logic_error(
+          "qualification lost terminal arity, category or fallback cover");
+    }
 
     ExactHigherSupportProductCudaContext context{
         index,
@@ -614,7 +754,18 @@ int main() {
     const auto batch_begin = std::chrono::steady_clock::now();
     const auto result = context.evaluate(tasks);
     const auto batch_end = std::chrono::steady_clock::now();
+    const auto repeated_result = context.evaluate(tasks);
+    const bool component_batch_repeatable =
+        repeated_result.status == result.status &&
+        repeated_result.stop_reason == result.stop_reason &&
+        repeated_result.records == result.records &&
+        repeated_result.audit.submitted_task_digest ==
+            result.audit.submitted_task_digest &&
+        repeated_result.audit.completed_result_digest ==
+            result.audit.completed_result_digest;
 
+    std::array<std::array<std::size_t, 4>, 2>
+        terminal_arity_category_counts{};
     std::size_t mismatch_count = 0U;
     if (result.records.size() != qualified_tasks.size()) {
       mismatch_count = qualified_tasks.size();
@@ -624,6 +775,18 @@ int main() {
            ++task_index) {
         const QualifiedTask& expected = qualified_tasks[task_index];
         const auto& actual = result.records[task_index];
+        if (actual.kind == ExactHigherSupportProductCudaTaskKind::
+                               terminal_support_geometry &&
+            actual.terminal_geometry_decision.has_value() &&
+            (expected.task.product.support_size == 3U ||
+             expected.task.product.support_size == 4U)) {
+          const std::size_t category_index = static_cast<std::size_t>(
+              *actual.terminal_geometry_decision);
+          if (category_index < 4U) {
+            ++terminal_arity_category_counts
+                [expected.task.product.support_size - 3U][category_index];
+          }
+        }
         const bool expected_rational_backend =
             expected.expected_backend ==
             ExactHigherSupportProductAabbDecisionBackend::
@@ -647,6 +810,26 @@ int main() {
             expected.task.task_id != 111U ||
             actual.backend == ExactHigherSupportProductCudaBackend::
                 bounded_dyadic_int512;
+        const bool terminal_int256_route_matches =
+            expected.task.task_id != 200U ||
+            (actual.backend == ExactHigherSupportProductCudaBackend::
+                 bounded_dyadic_int256 &&
+             !actual.cpu_fallback_performed);
+        const bool terminal_int512_route_matches =
+            expected.task.task_id != 207U ||
+            (actual.backend == ExactHigherSupportProductCudaBackend::
+                 bounded_dyadic_int512 &&
+             !actual.cpu_fallback_performed);
+        const bool terminal_int1024_route_matches =
+            expected.task.task_id != 208U ||
+            (actual.backend == ExactHigherSupportProductCudaBackend::
+                 bounded_dyadic_int1024 &&
+             !actual.cpu_fallback_performed);
+        const bool terminal_rational_fallback_matches =
+            expected.task.task_id != 203U ||
+            (actual.backend == ExactHigherSupportProductCudaBackend::
+                 arbitrary_precision_rational &&
+             actual.cpu_fallback_performed);
         const ExactHigherSupportProductCudaOutcome expected_outcome =
             expected.expected_certified
             ? ExactHigherSupportProductCudaOutcome::certified
@@ -656,11 +839,26 @@ int main() {
             actual.outcome != expected_outcome ||
             !backend_matches || !explicit_int1024_boundary_matches ||
             !explicit_int512_boundary_matches ||
+            !terminal_int256_route_matches ||
+            !terminal_int512_route_matches ||
+            !terminal_int1024_route_matches ||
+            !terminal_rational_fallback_matches ||
+            actual.terminal_geometry_decision !=
+                expected.expected_terminal_geometry_decision ||
             actual.cpu_fallback_performed != expected_cpu_fallback) {
           ++mismatch_count;
         }
       }
     }
+    const bool terminal_arity_category_matrix_covered = std::all_of(
+        terminal_arity_category_counts.begin(),
+        terminal_arity_category_counts.end(),
+        [](const auto& counts) {
+          return std::all_of(
+              counts.begin(), counts.end(), [](std::size_t count) {
+                return count != 0U;
+              });
+        });
 
     ExactHigherSupportProductCudaTask overlapping =
         qualified_tasks[2].task;
@@ -685,7 +883,7 @@ int main() {
 
     // Product-level qualification is insufficient if the sparse traversal
     // never consumes the device decisions.  Run the same immutable authority
-    // once on the CPU and once through the sealed positive-only native seam;
+    // once on the CPU and once through the sealed native decision seam;
     // the authenticated streams must remain fieldwise structurally equal.
     const ExactHigherSupportStreamBudget stream_budget =
         unlimited_stream_budget();
@@ -704,6 +902,11 @@ int main() {
         cpu_stream.stream_complete() && cuda_stream == cpu_stream &&
         stream_adapter.source().bound_to(index, cloud) &&
         stream_adapter.source().native_exact_authority() &&
+        stream_adapter.source().terminal_geometry_source().bound_to(
+            index, cloud) &&
+        stream_adapter.source()
+            .terminal_geometry_source()
+            .native_exact_authority() &&
         stream_adapter_audit.native_exact_authority &&
         !stream_adapter_audit
              .host_fake_positive_proposals_require_cpu_replay &&
@@ -717,6 +920,27 @@ int main() {
                     .native_component_cpu_fallback_certified_positive_count &&
         stream_adapter_audit.native_kernel_certified_positive_count > 0U &&
         stream_adapter_audit.host_fake_positive_proposal_count == 0U &&
+        stream_adapter_audit.terminal_support_geometry_task_count > 0U &&
+        stream_adapter_audit.support_size_3_terminal_geometry_task_count >
+            0U &&
+        stream_adapter_audit.support_size_4_terminal_geometry_task_count >
+            0U &&
+        stream_adapter_audit.support_size_3_terminal_geometry_task_count +
+                stream_adapter_audit.
+                    support_size_4_terminal_geometry_task_count ==
+            stream_adapter_audit.terminal_support_geometry_task_count &&
+        stream_adapter_audit.terminal_geometry_decision_count ==
+            stream_adapter_audit.terminal_support_geometry_task_count &&
+        stream_adapter_audit.terminal_geometry_native_kernel_decision_count +
+                stream_adapter_audit.
+                    terminal_geometry_component_cpu_fallback_decision_count ==
+            stream_adapter_audit.terminal_geometry_decision_count &&
+        stream_adapter_audit.terminal_geometry_native_kernel_decision_count >
+            0U &&
+        stream_adapter_audit.terminal_geometry_host_fake_decision_count ==
+            0U &&
+        stream_adapter_audit.terminal_geometry_native_rejection_count == 0U &&
+        stream_adapter_audit.terminal_geometry_decision_native_cuda &&
         stream_adapter_audit.support_size_3_certified_positive_count > 0U &&
         stream_adapter_audit.support_size_4_certified_positive_count > 0U &&
         stream_adapter_audit.support_size_3_certified_positive_count +
@@ -733,6 +957,7 @@ int main() {
         stream_adapter_audit.prefetch_call_count > 0U &&
         stream_adapter_audit.support_frontier_prefetch_call_count > 0U &&
         stream_adapter_audit.query_plan_prefetch_call_count > 0U &&
+        stream_adapter_audit.terminal_geometry_prefetch_call_count > 0U &&
         stream_adapter_audit.prefetched_task_count ==
             stream_adapter_audit.submitted_task_count &&
         stream_adapter_audit.on_demand_task_count == 0U &&
@@ -763,6 +988,35 @@ int main() {
         audit.support_prune_task_count == expected_support_task_count &&
         audit.query_strict_interior_task_count ==
             expected_query_task_count &&
+        audit.terminal_support_geometry_task_count ==
+            expected_terminal_task_count &&
+        audit.terminal_support_size_3_task_count ==
+            expected_terminal_support_size_3_task_count &&
+        audit.terminal_support_size_4_task_count ==
+            expected_terminal_support_size_4_task_count &&
+        audit.terminal_affinely_dependent_count ==
+            expected_terminal_affinely_dependent_count &&
+        audit.terminal_boundary_reduced_count ==
+            expected_terminal_boundary_reduced_count &&
+        audit.terminal_exterior_circumcenter_count ==
+            expected_terminal_exterior_circumcenter_count &&
+        audit.terminal_minimal_count == expected_terminal_minimal_count &&
+        audit.terminal_geometry_native_kernel_decision_count ==
+            expected_terminal_task_count -
+                expected_terminal_rational_fallback_count &&
+        audit.terminal_geometry_host_fallback_decision_count ==
+            expected_terminal_rational_fallback_count &&
+        audit.terminal_geometry_device_fallback_without_category_count ==
+            expected_terminal_rational_fallback_count &&
+        audit.terminal_int256_to_host_int512_fallback_count == 0U &&
+        audit.terminal_int512_to_host_int1024_fallback_count == 0U &&
+        audit.terminal_int1024_to_cpu_rational_fallback_count ==
+            expected_terminal_rational_fallback_count &&
+        audit.terminal_geometry_decision_native_cuda &&
+        morsehgp3d::gpu::
+            exact_higher_support_terminal_geometry_native_cuda &&
+        !morsehgp3d::gpu::
+            exact_higher_support_terminal_classification_native_cuda &&
         audit.certified_count == expected_certified_count &&
         audit.fail_open_count == tasks.size() - expected_certified_count &&
         audit.bounded_dyadic_int256_count +
@@ -799,6 +1053,8 @@ int main() {
         !audit.hierarchy_or_tree_claimed && !audit.slo_claimed &&
         !audit.public_status_claimed;
     const bool qualified = mismatch_count == 0U && audit_qualified &&
+        component_batch_repeatable &&
+        terminal_arity_category_matrix_covered &&
         overlap_rejected_without_launch && stream_adapter_qualified &&
         !context.host_fake();
     const auto total_end = std::chrono::steady_clock::now();
@@ -812,6 +1068,12 @@ int main() {
         << "\"bounded_int1024_count\":"
         << audit.bounded_dyadic_int1024_count << ','
         << "\"certified_count\":" << audit.certified_count << ','
+        << "\"component_schema_version\":"
+        << morsehgp3d::gpu::
+               exact_higher_support_product_cuda_schema_version
+        << ','
+        << "\"component_batch_repeatable\":"
+        << (component_batch_repeatable ? "true" : "false") << ','
         << "\"completed_result_digest\":"
         << audit.completed_result_digest << ','
         << "\"cuda_device\":" << audit.cuda_device << ','
@@ -858,7 +1120,7 @@ int main() {
         << nanoseconds_between(lbvh_begin, lbvh_end) << ','
         << "\"mismatch_count\":" << mismatch_count << ','
         << "\"mode\":\"device_resident_batched_morton_node_products_"
-           "and_bounded_local_query_plans\","
+           "bounded_local_query_plans_and_terminal_support_geometry\","
         << "\"native_lbvh_nodes_read_on_device\":"
         << (audit.native_lbvh_nodes_read_on_device ? "true" : "false")
         << ','
@@ -916,6 +1178,17 @@ int main() {
         << ','
         << "\"stream_adapter_native_kernel_certified_positive_count\":"
         << stream_adapter_audit.native_kernel_certified_positive_count << ','
+        << "\"stream_adapter_terminal_geometry_decision_count\":"
+        << stream_adapter_audit.terminal_geometry_decision_count << ','
+        << "\"stream_adapter_terminal_geometry_native_kernel_decision_count\":"
+        << stream_adapter_audit.
+               terminal_geometry_native_kernel_decision_count
+        << ','
+        << "\"stream_adapter_terminal_geometry_native_cuda\":"
+        << (stream_adapter_audit.terminal_geometry_decision_native_cuda
+                ? "true"
+                : "false")
+        << ','
         << "\"stream_adapter_native_cpu_fallback_certified_positive_count\":"
         << stream_adapter_audit
                .native_component_cpu_fallback_certified_positive_count
@@ -942,6 +1215,60 @@ int main() {
         << ','
         << "\"submitted_task_digest\":"
         << audit.submitted_task_digest << ','
+        << "\"terminal_affinely_dependent_count\":"
+        << audit.terminal_affinely_dependent_count << ','
+        << "\"terminal_boundary_reduced_count\":"
+        << audit.terminal_boundary_reduced_count << ','
+        << "\"terminal_classification_native_cuda\":"
+        << (morsehgp3d::gpu::
+                    exact_higher_support_terminal_classification_native_cuda
+                ? "true"
+                : "false")
+        << ','
+        << "\"terminal_device_fallback_without_category_count\":"
+        << audit.terminal_geometry_device_fallback_without_category_count
+        << ','
+        << "\"terminal_exterior_circumcenter_count\":"
+        << audit.terminal_exterior_circumcenter_count << ','
+        << "\"terminal_geometry_host_fallback_decision_count\":"
+        << audit.terminal_geometry_host_fallback_decision_count << ','
+        << "\"terminal_geometry_native_cuda\":"
+        << (audit.terminal_geometry_decision_native_cuda
+                ? "true"
+                : "false")
+        << ','
+        << "\"terminal_geometry_native_kernel_decision_count\":"
+        << audit.terminal_geometry_native_kernel_decision_count << ','
+        << "\"terminal_int256_to_host_int512_fallback_count\":"
+        << audit.terminal_int256_to_host_int512_fallback_count << ','
+        << "\"terminal_int512_to_host_int1024_fallback_count\":"
+        << audit.terminal_int512_to_host_int1024_fallback_count << ','
+        << "\"terminal_int1024_to_cpu_rational_fallback_count\":"
+        << audit.terminal_int1024_to_cpu_rational_fallback_count << ','
+        << "\"terminal_minimal_count\":"
+        << audit.terminal_minimal_count << ','
+        << "\"terminal_support_3_task_count\":"
+        << audit.terminal_support_size_3_task_count << ','
+        << "\"terminal_support_3_affinely_dependent_count\":"
+        << terminal_arity_category_counts[0U][0U] << ','
+        << "\"terminal_support_3_boundary_reduced_count\":"
+        << terminal_arity_category_counts[0U][1U] << ','
+        << "\"terminal_support_3_exterior_circumcenter_count\":"
+        << terminal_arity_category_counts[0U][2U] << ','
+        << "\"terminal_support_3_minimal_count\":"
+        << terminal_arity_category_counts[0U][3U] << ','
+        << "\"terminal_support_4_task_count\":"
+        << audit.terminal_support_size_4_task_count << ','
+        << "\"terminal_support_4_affinely_dependent_count\":"
+        << terminal_arity_category_counts[1U][0U] << ','
+        << "\"terminal_support_4_boundary_reduced_count\":"
+        << terminal_arity_category_counts[1U][1U] << ','
+        << "\"terminal_support_4_exterior_circumcenter_count\":"
+        << terminal_arity_category_counts[1U][2U] << ','
+        << "\"terminal_support_4_minimal_count\":"
+        << terminal_arity_category_counts[1U][3U] << ','
+        << "\"terminal_task_count\":"
+        << audit.terminal_support_geometry_task_count << ','
         << "\"synchronization_count\":"
         << audit.synchronization_count << ','
         << "\"task_count\":" << tasks.size() << ','
