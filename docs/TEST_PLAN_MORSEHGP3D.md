@@ -2532,6 +2532,19 @@ La totalité est désormais testée d'abord par les liens d'événements, et non
 - exiger en plus `verify_exact_direct_morse_resident_event_crosswalk_journal(...).result_certified`, qui reconstruit fraîchement depuis les autorités aussi bien le succès que l'enveloppe d'échec atomique attendue; refuser une arène observée hors cap avant sa comparaison et toute enveloppe inégale avant son rejeu structurel, notamment un record sous cap contenant un `BigInt` de niveau géant; vérifier séparément que la garde $n<K_{\mathrm{eff}}+2$ précède un journal de liens invalide, puis que décision ou digest d'échec substitué sont rejetés; rebâtir enfin un résultat autonome cohérent sous un budget relâché et exiger son rejet sous le budget de confiance original, car le digest n'est ni une MAC ni une autorité autonome;
 - garder faux digest sémantique commun d'événement, O7 bidirectionnel, `full_pi0`, M.1, Gamma/Delaunay, SLO, reprise massive et statut public; les caps sont des cardinalités logiques et non une preuve de passage physique unique.
 
+### T15-TERMINAL-SUPPORT-GEOMETRY-HOST — contrat catégoriel exact supports trois et quatre
+
+- annoncer `phase=15`, `backend=reference_cpu_plus_exact_host_fake`, `profile=hgp_reduced` et `mode=sealed_host_first_terminal_support_geometry_schema4_cpu_replayed_v1`; vérifier que la porte d'entrée Phase 15 est satisfaite sans prétendre fermer la phase;
+- exercer les quatre catégories exactes `affinely_dependent`, `boundary_reduced`, `exterior_circumcenter` et `minimal` pour les triangles, puis pour les tétraèdres; inclure un cas portant simultanément un numérateur barycentrique négatif et un zéro afin d'imposer la priorité `exterior_circumcenter`;
+- permuter les sommets des supports, couvrir zéro signé, exposants binary64 extrêmes et parité du fallback rationnel; comparer les wrappers catégoriels `int256`, `int512` et `int1024` à l'autorité CPU exacte;
+- forcer successivement les routes terminales `int256 -> host int512`, `int512 -> host int1024` et `int1024 -> rationnel`, sans catégorie partielle publiée par la largeur épuisée;
+- injecter un lot fake hôte contenant les quatre catégories et les deux arités; exiger que toute catégorie proposée, correcte ou hostile, soit rejouée sur CPU et que le résultat scientifique complet, les checkpoints multi-chunks, segments, digests et audits soient identiques au flux CPU seul;
+- vérifier que les trois catégories non minimales prennent `emit_well_prune`, tandis que `minimal` conserve l'analyse CPU du centre, du rayon, de la boule fermée, du rang et de l'événement;
+- refuser catégorie absente ou invalide, reçu d'un autre schéma, tâche non terminale dans la source scellée, dépassement de cap, digest falsifié et launcher fautif; chaque échec doit rester atomique, empoisonner ou désactiver selon le contrat existant et retomber sur CPU sans décision scientifique partielle;
+- sur le chemin CUDA réel du schéma 4, refuser toute tâche `terminal_support_geometry` avant lancement et vérifier que ce refus ne poisonne pas les prédicats positifs déjà disponibles;
+- exiger la matrice Release stricte ciblée cinq sur cinq et la validation ASan/UBSan du contrat hôte avant commit; conserver `terminal_geometry_native_cuda=false`, `terminal_classification_native_cuda=false`, les preuves G4 v5 comme historiques `positive-only` non transitives, et réserver v6 à la qualification terminale du SHA courant;
+- vérifier l'absence d'arène globale de supports, paires, Gamma, cofaces, incidences, cellules ou Delaunay; ne déduire ni SLO, ni débit 50 k, ni reprise 10 M/30 M, ni statut public.
+
 ### T15-K1-NORMALIZED-PRODUCT — lots exacts d'ordre un
 
 - recertifier fraîchement Borůvka et son digest de forêt avant de construire une session move-only;

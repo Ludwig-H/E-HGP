@@ -158,6 +158,92 @@ static_assert(
 static_assert(
     std::is_trivially_copyable_v<ExactHigherSupportQueryDecisionRequest>);
 
+// Sealed categorical source for one already-terminal support.  It is exposed
+// only as the sibling of the existing positive source, so adding the
+// classifier does not multiply stream/session constructor overloads.  A
+// missing decision always falls back to the CPU singleton primitive.  In the
+// host-first schema the native-authority callback is deliberately false and
+// every host-fake category is replayed by the CPU before scientific use.
+class ExactHigherSupportTerminalGeometryDecisionSource final {
+ public:
+  ExactHigherSupportTerminalGeometryDecisionSource(
+      const ExactHigherSupportTerminalGeometryDecisionSource&) = delete;
+  ExactHigherSupportTerminalGeometryDecisionSource& operator=(
+      const ExactHigherSupportTerminalGeometryDecisionSource&) = delete;
+  ExactHigherSupportTerminalGeometryDecisionSource(
+      ExactHigherSupportTerminalGeometryDecisionSource&&) = delete;
+  ExactHigherSupportTerminalGeometryDecisionSource& operator=(
+      ExactHigherSupportTerminalGeometryDecisionSource&&) = delete;
+
+  [[nodiscard]] bool bound_to(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud) const noexcept {
+    return bound_to_ != nullptr && bound_to_(state_, index, cloud);
+  }
+
+  [[nodiscard]] bool native_exact_authority() const noexcept {
+    return native_exact_authority_ != nullptr &&
+        native_exact_authority_(state_);
+  }
+
+  [[nodiscard]] std::size_t maximum_prefetch_task_count() const noexcept {
+    return maximum_prefetch_task_count_ != nullptr
+        ? maximum_prefetch_task_count_(state_)
+        : 0U;
+  }
+
+  void prefetch(
+      std::span<const ExactHigherSupportFrontierEntry> products) const
+      noexcept {
+    if (prefetch_ != nullptr) {
+      prefetch_(state_, products);
+    }
+  }
+
+  [[nodiscard]]
+  std::optional<ExactHigherSupportTerminalGeometryDecision> decide(
+      const ExactHigherSupportFrontierEntry& product) const noexcept {
+    return decide_ != nullptr ? decide_(state_, product) : std::nullopt;
+  }
+
+ private:
+  using BoundToFunction = bool (*)(
+      void*,
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&) noexcept;
+  using NativeExactAuthorityFunction = bool (*)(void*) noexcept;
+  using MaximumPrefetchTaskCountFunction = std::size_t (*)(void*) noexcept;
+  using PrefetchFunction = void (*)(
+      void*, std::span<const ExactHigherSupportFrontierEntry>) noexcept;
+  using DecideFunction =
+      std::optional<ExactHigherSupportTerminalGeometryDecision> (*)(
+          void*, const ExactHigherSupportFrontierEntry&) noexcept;
+
+  friend class ::morsehgp3d::gpu::
+      ExactHigherSupportProductCudaPositiveDecisionAdapter;
+
+  ExactHigherSupportTerminalGeometryDecisionSource(
+      void* state,
+      BoundToFunction bound_to,
+      NativeExactAuthorityFunction native_exact_authority,
+      MaximumPrefetchTaskCountFunction maximum_prefetch_task_count,
+      PrefetchFunction prefetch,
+      DecideFunction decide) noexcept
+      : state_(state),
+        bound_to_(bound_to),
+        native_exact_authority_(native_exact_authority),
+        maximum_prefetch_task_count_(maximum_prefetch_task_count),
+        prefetch_(prefetch),
+        decide_(decide) {}
+
+  void* state_{};
+  BoundToFunction bound_to_{};
+  NativeExactAuthorityFunction native_exact_authority_{};
+  MaximumPrefetchTaskCountFunction maximum_prefetch_task_count_{};
+  PrefetchFunction prefetch_{};
+  DecideFunction decide_{};
+};
+
 // Sealed positive-only decision seam for an exact accelerator.  The stream
 // remains fail-open: an absent or negative proposal is recomputed by the CPU
 // decision DAG.  A non-native producer (including the host fake) can only
@@ -186,6 +272,13 @@ class ExactHigherSupportPositiveDecisionSource final {
     return native_exact_authority_ != nullptr &&
         native_exact_authority_(state_);
   }
+
+  [[nodiscard]] const ExactHigherSupportTerminalGeometryDecisionSource&
+  terminal_geometry_source() const & noexcept {
+    return *terminal_geometry_source_;
+  }
+  const ExactHigherSupportTerminalGeometryDecisionSource&
+  terminal_geometry_source() const && = delete;
 
   // The scheduler only offers already-live sparse frontier entries and the
   // fixed-size local Morton witness plan.  These calls are performance hints:
@@ -259,7 +352,9 @@ class ExactHigherSupportPositiveDecisionSource final {
       CertifyNoWellCenteredSupportFunction
           certify_no_well_centered_support,
       CertifyQueryStrictlyInsideFunction
-          certify_query_strictly_inside) noexcept
+          certify_query_strictly_inside,
+      const ExactHigherSupportTerminalGeometryDecisionSource*
+          terminal_geometry_source) noexcept
       : state_(state),
         bound_to_(bound_to),
         native_exact_authority_(native_exact_authority),
@@ -271,7 +366,8 @@ class ExactHigherSupportPositiveDecisionSource final {
         certify_no_well_centered_support_(
             certify_no_well_centered_support),
         certify_query_strictly_inside_(
-            certify_query_strictly_inside) {}
+            certify_query_strictly_inside),
+        terminal_geometry_source_(terminal_geometry_source) {}
 
   void* state_{};
   BoundToFunction bound_to_{};
@@ -283,6 +379,8 @@ class ExactHigherSupportPositiveDecisionSource final {
   CertifyNoWellCenteredSupportFunction
       certify_no_well_centered_support_{};
   CertifyQueryStrictlyInsideFunction certify_query_strictly_inside_{};
+  const ExactHigherSupportTerminalGeometryDecisionSource*
+      terminal_geometry_source_{};
 };
 
 enum class ExactHigherSupportPruneReason : std::uint8_t {

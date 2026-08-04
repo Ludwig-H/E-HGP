@@ -31,6 +31,8 @@ namespace fixed512 = detail::exact_higher_support_product_fixed512;
   std::uint64_t digest =
       detail::phase15_exact_higher_support_product_digest_offset;
   digest = detail::phase15_exact_higher_support_product_digest_word(
+      digest, exact_higher_support_product_cuda_schema_version);
+  digest = detail::phase15_exact_higher_support_product_digest_word(
       digest, static_cast<std::uint64_t>(records.size()));
   for (const auto& record : records) {
     digest = detail::phase15_exact_higher_support_product_digest_word(
@@ -41,6 +43,17 @@ namespace fixed512 = detail::exact_higher_support_product_fixed512;
         digest, static_cast<std::uint64_t>(record.outcome));
     digest = detail::phase15_exact_higher_support_product_digest_word(
         digest, static_cast<std::uint64_t>(record.backend));
+    digest = detail::phase15_exact_higher_support_product_digest_word(
+        digest,
+        record.terminal_geometry_decision.has_value()
+            ? UINT64_C(1)
+            : UINT64_C(0));
+    digest = detail::phase15_exact_higher_support_product_digest_word(
+        digest,
+        record.terminal_geometry_decision.has_value()
+            ? static_cast<std::uint64_t>(
+                  *record.terminal_geometry_decision)
+            : UINT64_C(0));
     digest = detail::phase15_exact_higher_support_product_digest_word(
         digest, record.cpu_fallback_performed ? UINT64_C(1) : UINT64_C(0));
   }
@@ -54,6 +67,44 @@ namespace fixed512 = detail::exact_higher_support_product_fixed512;
     return value <= std::numeric_limits<std::size_t>::max();
   }
   return true;
+}
+
+[[nodiscard]] bool valid_terminal_geometry_decision(
+    hierarchy::ExactHigherSupportTerminalGeometryDecision decision)
+    noexcept {
+  switch (decision) {
+    case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+        affinely_dependent:
+    case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+        boundary_reduced:
+    case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+        exterior_circumcenter:
+    case hierarchy::ExactHigherSupportTerminalGeometryDecision::minimal:
+      return true;
+  }
+  return false;
+}
+
+[[nodiscard]]
+std::optional<hierarchy::ExactHigherSupportTerminalGeometryDecision>
+public_terminal_geometry_decision(
+    fixed512::TerminalGeometryDecision decision) noexcept {
+  using FixedDecision = fixed512::TerminalGeometryDecision;
+  using PublicDecision =
+      hierarchy::ExactHigherSupportTerminalGeometryDecision;
+  switch (decision) {
+    case FixedDecision::affinely_dependent:
+      return PublicDecision::affinely_dependent;
+    case FixedDecision::boundary_reduced:
+      return PublicDecision::boundary_reduced;
+    case FixedDecision::exterior_circumcenter:
+      return PublicDecision::exterior_circumcenter;
+    case FixedDecision::minimal:
+      return PublicDecision::minimal;
+    case FixedDecision::requires_cpu_rational_fallback:
+      return std::nullopt;
+  }
+  return std::nullopt;
 }
 
 [[nodiscard]] detail::Phase15ExactHigherSupportProductCudaRawAabb3
@@ -440,6 +491,26 @@ ExactHigherSupportProductCudaContext::evaluate(
         }
         ++base_audit.query_strict_interior_task_count;
         break;
+      case ExactHigherSupportProductCudaTaskKind::terminal_support_geometry:
+        // Schema 4 deliberately exercises only the exact host fake.  Native
+        // CUDA rejects this kind before launcher submission until the
+        // categorical device path receives its own G4 qualification.
+        if (!impl_->host_fake || task.query_node.has_value() ||
+            task.product.group_count != task.product.support_size) {
+          valid = false;
+        }
+        for (std::size_t group_index = 0U;
+             valid && group_index < task.product.group_count;
+             ++group_index) {
+          const auto& group = task.product.groups[group_index];
+          const auto& source_node = impl_->index->nodes_[
+              static_cast<std::size_t>(group.node_index)];
+          valid = group.multiplicity == 1U &&
+              group.leaf_end == group.leaf_begin + 1U &&
+              source_node.is_leaf();
+        }
+        ++base_audit.terminal_support_geometry_task_count;
+        break;
       default:
         valid = false;
         break;
@@ -556,9 +627,28 @@ ExactHigherSupportProductCudaContext::evaluate(
         throw std::logic_error(
             "the exact higher-support product launcher permuted its batch");
       }
+      const bool terminal_geometry_task = prepared_task.kind ==
+          ExactHigherSupportProductCudaTaskKind::terminal_support_geometry;
+      if (device_record.terminal_geometry_decision_present > 1U ||
+          (device_record.terminal_geometry_decision_present != 0U) !=
+              terminal_geometry_task ||
+          !valid_terminal_geometry_decision(
+              device_record.terminal_geometry_decision) ||
+          (!terminal_geometry_task &&
+           device_record.terminal_geometry_decision != hierarchy::
+               ExactHigherSupportTerminalGeometryDecision::
+                   affinely_dependent)) {
+        throw std::logic_error(
+            "the exact higher-support product launcher returned a malformed "
+            "terminal geometry category");
+      }
       ExactHigherSupportProductCudaRecord record;
       record.task_id = device_record.task_id;
       record.kind = device_record.kind;
+      if (terminal_geometry_task) {
+        record.terminal_geometry_decision =
+            device_record.terminal_geometry_decision;
+      }
       const auto bounded_backend = [&]() {
         detail::Phase15ExactHigherSupportProductCudaDeviceBackend
             expected_backend{};
@@ -621,6 +711,10 @@ ExactHigherSupportProductCudaContext::evaluate(
           break;
         case detail::Phase15ExactHigherSupportProductCudaDeviceOutcome::
             exact_false:
+          if (terminal_geometry_task) {
+            throw std::logic_error(
+                "a total terminal geometry task returned exact-false");
+          }
           record.outcome = ExactHigherSupportProductCudaOutcome::fail_open;
           record.backend = bounded_backend();
           break;
@@ -682,6 +776,9 @@ ExactHigherSupportProductCudaContext::evaluate(
               exact_support_boxes.data(), prepared_task.support_size};
           bool certified = false;
           bool resolved_by_int512 = false;
+          std::optional<
+              hierarchy::ExactHigherSupportTerminalGeometryDecision>
+              fallback_terminal_geometry_decision;
           if (int512_required) {
             fixed::Binary64Aabb3 fixed_support_boxes[
                 fixed::maximum_support_size]{};
@@ -691,19 +788,31 @@ ExactHigherSupportProductCudaContext::evaluate(
               fixed_support_boxes[support_index] =
                   fixed_aabb(prepared_task.support_boxes[support_index]);
             }
-            const fixed512::Decision decision = prepared_task.kind ==
-                    ExactHigherSupportProductCudaTaskKind::support_prune
-                ? fixed512::no_well_centered_support(
-                      fixed_support_boxes, prepared_task.support_size)
-                : fixed512::
-                      query_strictly_inside_every_independent_sphere(
+            if (terminal_geometry_task) {
+              fallback_terminal_geometry_decision =
+                  public_terminal_geometry_decision(
+                      fixed512::terminal_support_geometry(
                           fixed_support_boxes,
-                          prepared_task.support_size,
-                          fixed_aabb(prepared_task.query_box));
-            if (decision !=
-                fixed512::Decision::requires_cpu_rational_fallback) {
-              certified = decision == fixed512::Decision::certified;
-              resolved_by_int512 = true;
+                          prepared_task.support_size));
+              if (fallback_terminal_geometry_decision.has_value()) {
+                certified = true;
+                resolved_by_int512 = true;
+              }
+            } else {
+              const fixed512::Decision decision = prepared_task.kind ==
+                      ExactHigherSupportProductCudaTaskKind::support_prune
+                  ? fixed512::no_well_centered_support(
+                        fixed_support_boxes, prepared_task.support_size)
+                  : fixed512::
+                        query_strictly_inside_every_independent_sphere(
+                            fixed_support_boxes,
+                            prepared_task.support_size,
+                            fixed_aabb(prepared_task.query_box));
+              if (decision !=
+                  fixed512::Decision::requires_cpu_rational_fallback) {
+                certified = decision == fixed512::Decision::certified;
+                resolved_by_int512 = true;
+              }
             }
           }
           if (!resolved_by_int512) {
@@ -712,12 +821,20 @@ ExactHigherSupportProductCudaContext::evaluate(
               certified = hierarchy::
                   exact_higher_support_product_no_well_centered_certified(
                       support_boxes, &backend);
-            } else {
+            } else if (
+                prepared_task.kind ==
+                ExactHigherSupportProductCudaTaskKind::
+                    query_strict_interior) {
               certified = hierarchy::
                   exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
                       support_boxes,
                       exact_aabb(prepared_task.query_box),
                       &backend);
+            } else {
+              fallback_terminal_geometry_decision = hierarchy::
+                  exact_higher_support_terminal_geometry_decision(
+                      support_boxes, &backend);
+              certified = true;
             }
           }
           if (!resolved_by_int512 && rational_required &&
@@ -731,6 +848,17 @@ ExactHigherSupportProductCudaContext::evaluate(
           record.outcome = certified
               ? ExactHigherSupportProductCudaOutcome::certified
               : ExactHigherSupportProductCudaOutcome::fail_open;
+          if (terminal_geometry_task) {
+            if (!fallback_terminal_geometry_decision.has_value() ||
+                record.terminal_geometry_decision !=
+                    fallback_terminal_geometry_decision) {
+              throw std::logic_error(
+                  "the exact higher-support product fallback disagreed "
+                  "with the terminal category receipt");
+            }
+            record.terminal_geometry_decision =
+                fallback_terminal_geometry_decision;
+          }
           if (resolved_by_int512) {
             record.backend = ExactHigherSupportProductCudaBackend::
                 bounded_dyadic_int512;
@@ -760,6 +888,25 @@ ExactHigherSupportProductCudaContext::evaluate(
       } else {
         ++base_audit.fail_open_count;
       }
+      if (record.terminal_geometry_decision.has_value()) {
+        switch (*record.terminal_geometry_decision) {
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              affinely_dependent:
+            ++base_audit.terminal_affinely_dependent_count;
+            break;
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              boundary_reduced:
+            ++base_audit.terminal_boundary_reduced_count;
+            break;
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              exterior_circumcenter:
+            ++base_audit.terminal_exterior_circumcenter_count;
+            break;
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::minimal:
+            ++base_audit.terminal_minimal_count;
+            break;
+        }
+      }
       staged_records.push_back(record);
     }
 
@@ -769,7 +916,12 @@ ExactHigherSupportProductCudaContext::evaluate(
                 base_audit.arbitrary_precision_rational_fallback_count !=
             tasks.size() ||
         base_audit.certified_count + base_audit.fail_open_count !=
-            tasks.size()) {
+            tasks.size() ||
+        base_audit.terminal_affinely_dependent_count +
+                base_audit.terminal_boundary_reduced_count +
+                base_audit.terminal_exterior_circumcenter_count +
+                base_audit.terminal_minimal_count !=
+            base_audit.terminal_support_geometry_task_count) {
       throw std::logic_error(
           "the exact higher-support product result partition is incomplete");
     }

@@ -1,6 +1,7 @@
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
 #include "morsehgp3d/exact/support.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cmath>
@@ -8,6 +9,7 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
+#include <limits>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -23,6 +25,8 @@ using morsehgp3d::hierarchy::
     ExactHigherSupportProductAabbDecisionBackend;
 using morsehgp3d::hierarchy::
     ExactHigherSupportProductQueryCellDecision;
+using morsehgp3d::hierarchy::
+    ExactHigherSupportTerminalGeometryDecision;
 using morsehgp3d::hierarchy::exact_higher_support_product_aabb_analysis;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_all_well_centered_certified;
@@ -32,6 +36,8 @@ using morsehgp3d::hierarchy::
     exact_higher_support_product_query_cell_decision;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified;
+using morsehgp3d::hierarchy::
+    exact_higher_support_terminal_geometry_decision;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 
 int failures = 0;
@@ -688,6 +694,165 @@ void test_rational_decision_fallback() {
       "an exponent span above 124 bits preserves the positive uniform well-centring certificate on rational fallback");
 }
 
+template <std::size_t SupportSize>
+void check_terminal_geometry_permutations(
+    const std::array<ExactDyadicAabb3, SupportSize>& support,
+    ExactHigherSupportTerminalGeometryDecision expected,
+    const std::string& message) {
+  std::array<std::size_t, SupportSize> permutation{};
+  for (std::size_t index = 0U; index < SupportSize; ++index) {
+    permutation[index] = index;
+  }
+  do {
+    std::array<ExactDyadicAabb3, SupportSize> permuted{};
+    for (std::size_t index = 0U; index < SupportSize; ++index) {
+      permuted[index] = support[permutation[index]];
+    }
+    check(
+        exact_higher_support_terminal_geometry_decision(permuted) ==
+            expected,
+        message);
+  } while (std::next_permutation(
+      permutation.begin(), permutation.end()));
+}
+
+void test_terminal_geometry_categories() {
+  using Decision = ExactHigherSupportTerminalGeometryDecision;
+  const std::array<ExactDyadicAabb3, 3> acute{
+      point_box(0.0, 0.0),
+      point_box(4.0, 0.0),
+      point_box(1.0, 3.0)};
+  const std::array<ExactDyadicAabb3, 3> right{
+      point_box(0.0, 0.0),
+      point_box(2.0, 0.0),
+      point_box(0.0, 2.0)};
+  const std::array<ExactDyadicAabb3, 3> obtuse{
+      point_box(0.0, 0.0),
+      point_box(4.0, 0.0),
+      point_box(1.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 3> collinear{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(2.0, 0.0)};
+  check_terminal_geometry_permutations(
+      acute, Decision::minimal,
+      "every permutation of an acute triangle is terminal-minimal");
+  check_terminal_geometry_permutations(
+      right, Decision::boundary_reduced,
+      "every permutation of a right triangle is boundary-reduced");
+  check_terminal_geometry_permutations(
+      obtuse, Decision::exterior_circumcenter,
+      "every permutation of an obtuse triangle has an exterior centre");
+  check_terminal_geometry_permutations(
+      collinear, Decision::affinely_dependent,
+      "every permutation of a collinear triangle is dependent");
+
+  const std::array<ExactDyadicAabb3, 4> regular{
+      point_box(1.0, 1.0, 1.0),
+      point_box(1.0, -1.0, -1.0),
+      point_box(-1.0, 1.0, -1.0),
+      point_box(-1.0, -1.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 4> boundary{
+      point_box(1.0, 0.0, 0.0),
+      point_box(-1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 4> exterior{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 4> coplanar{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(1.0, 1.0, 0.0),
+      point_box(0.0, 1.0, 0.0)};
+  const std::array<ExactDyadicAabb3, 4> negative_and_zero{
+      point_box(0.0, 0.0, 0.0),
+      point_box(4.0, 0.0, 0.0),
+      point_box(1.0, 1.0, 0.0),
+      point_box(3.0, -1.0, 2.0)};
+  check_terminal_geometry_permutations(
+      regular, Decision::minimal,
+      "every permutation of a regular tetrahedron is terminal-minimal");
+  check_terminal_geometry_permutations(
+      boundary, Decision::boundary_reduced,
+      "every permutation of a boundary-centred tetrahedron is reduced");
+  check_terminal_geometry_permutations(
+      exterior, Decision::exterior_circumcenter,
+      "every permutation of the standard tetrahedron is exterior");
+  check_terminal_geometry_permutations(
+      coplanar, Decision::affinely_dependent,
+      "every permutation of a coplanar tetrahedron is dependent");
+  check_terminal_geometry_permutations(
+      negative_and_zero,
+      Decision::exterior_circumcenter,
+      "a negative tetrahedral barycentric takes precedence over a zero");
+
+  ExactHigherSupportProductAabbDecisionBackend backend =
+      ExactHigherSupportProductAabbDecisionBackend::
+          bounded_dyadic_int1024;
+  const double tiny = std::ldexp(1.0, -200);
+  const std::array<ExactDyadicAabb3, 3> wide_acute{
+      point_box(-1.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 2.0, tiny)};
+  check(
+      exact_higher_support_terminal_geometry_decision(
+          wide_acute, &backend) == Decision::minimal &&
+          backend == ExactHigherSupportProductAabbDecisionBackend::
+              arbitrary_precision_rational,
+      "wide singleton exponents preserve the category on rational fallback");
+
+  const double huge = std::ldexp(1.0, 1022);
+  const double denormal = std::numeric_limits<double>::denorm_min();
+  const std::array<ExactDyadicAabb3, 3> extreme_right{
+      point_box(0.0, 0.0, 0.0),
+      point_box(huge, 0.0, 0.0),
+      point_box(0.0, denormal, 0.0)};
+  check(
+      exact_higher_support_terminal_geometry_decision(
+          extreme_right, &backend) == Decision::boundary_reduced &&
+          backend == ExactHigherSupportProductAabbDecisionBackend::
+              arbitrary_precision_rational,
+      "the 2^1022 by 2^-1074 right triangle is boundary-reduced on exact rational fallback");
+  const std::array<ExactDyadicAabb3, 4> extreme_exterior{
+      extreme_right[0],
+      extreme_right[1],
+      extreme_right[2],
+      point_box(0.0, 0.0, 1.0)};
+  check(
+      exact_higher_support_terminal_geometry_decision(
+          extreme_exterior, &backend) == Decision::exterior_circumcenter &&
+          backend == ExactHigherSupportProductAabbDecisionBackend::
+              arbitrary_precision_rational,
+      "the extreme orthogonal tetrahedron preserves its exterior category on rational fallback");
+  for (const double scale : std::array<double, 2>{denormal, huge}) {
+    const std::array<ExactDyadicAabb3, 4> scaled_regular{
+        point_box(scale, scale, scale),
+        point_box(scale, -scale, -scale),
+        point_box(-scale, scale, -scale),
+        point_box(-scale, -scale, scale)};
+    check(
+        exact_higher_support_terminal_geometry_decision(scaled_regular) ==
+            Decision::minimal,
+        "a regular tetrahedron remains minimal at an extreme binary64 scale");
+  }
+
+  std::array<ExactDyadicAabb3, 3> signed_zero = acute;
+  signed_zero[0].lower_binary64_bits[2] = bits(-0.0);
+  check(
+      exact_higher_support_terminal_geometry_decision(signed_zero) ==
+          Decision::minimal,
+      "signed zero is canonicalized before singleton classification");
+  std::array<ExactDyadicAabb3, 3> signed_zero_right = right;
+  signed_zero_right[0].lower_binary64_bits[2] = bits(-0.0);
+  check(
+      exact_higher_support_terminal_geometry_decision(signed_zero_right) ==
+          Decision::boundary_reduced,
+      "signed zero preserves exact right-triangle boundary reduction");
+}
+
 void test_input_contract() {
   const std::array<ExactDyadicAabb3, 2> too_small{
       point_box(0.0, 0.0), point_box(1.0, 0.0)};
@@ -709,6 +874,23 @@ void test_input_contract() {
             exact_higher_support_product_aabb_analysis(reversed));
       },
       "a reversed dyadic AABB fails closed");
+
+  std::array<ExactDyadicAabb3, 3> non_singleton{
+      point_box(0.0, 0.0),
+      point_box(2.0, 0.0),
+      box(0.0, 1.0, 0.0, 0.5, 1.0, 0.0)};
+  check_throws<std::invalid_argument>(
+      [&]() {
+        static_cast<void>(
+            exact_higher_support_terminal_geometry_decision(non_singleton));
+      },
+      "a categorical terminal decision rejects a non-singleton box");
+  check_throws<std::invalid_argument>(
+      [&]() {
+        static_cast<void>(
+            exact_higher_support_terminal_geometry_decision(too_small));
+      },
+      "a categorical terminal decision rejects arity two");
 }
 
 }  // namespace
@@ -724,6 +906,7 @@ int main() {
   test_all_supports_well_centered_certificate();
   test_bounded_decision_equalities_and_support_box_regression();
   test_rational_decision_fallback();
+  test_terminal_geometry_categories();
   test_input_contract();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";

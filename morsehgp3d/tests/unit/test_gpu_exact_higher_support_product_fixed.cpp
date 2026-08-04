@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <string>
 
@@ -26,9 +27,13 @@ namespace fixed512 =
 using morsehgp3d::hierarchy::
     ExactHigherSupportProductAabbDecisionBackend;
 using morsehgp3d::hierarchy::
+    ExactHigherSupportTerminalGeometryDecision;
+using morsehgp3d::hierarchy::
     exact_higher_support_product_no_well_centered_certified;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified;
+using morsehgp3d::hierarchy::
+    exact_higher_support_terminal_geometry_decision;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 
 static_assert(fixed::limb_count == 16U);
@@ -102,6 +107,63 @@ template <std::size_t Size>
 
 [[nodiscard]] bool certified(fixed::Decision decision) {
   return decision == fixed::Decision::certified;
+}
+
+template <typename Decision>
+[[nodiscard]]
+std::optional<ExactHigherSupportTerminalGeometryDecision>
+public_terminal_decision(Decision decision) {
+  if (decision == Decision::requires_cpu_rational_fallback) {
+    return std::nullopt;
+  }
+  return static_cast<ExactHigherSupportTerminalGeometryDecision>(
+      static_cast<std::uint8_t>(decision));
+}
+
+template <std::size_t Size>
+void check_terminal_geometry_parity(
+    const std::array<ExactDyadicAabb3, Size>& boxes,
+    const std::string& label) {
+  const auto native = fixed_boxes(boxes);
+  ExactHigherSupportProductAabbDecisionBackend backend{};
+  const ExactHigherSupportTerminalGeometryDecision expected =
+      exact_higher_support_terminal_geometry_decision(boxes, &backend);
+  const auto wide = public_terminal_decision(
+      fixed::terminal_support_geometry(native.data(), Size));
+  if (backend == ExactHigherSupportProductAabbDecisionBackend::
+          arbitrary_precision_rational) {
+    check(!wide.has_value(), label + " requests rational fallback in int1024");
+  } else {
+    check(wide == expected, label + " matches the CPU category in int1024");
+  }
+
+  std::uint64_t coordinate_width = 0U;
+  check(
+      fixed::aligned_product_coordinate_bit_width(
+          native.data(), Size, nullptr, coordinate_width),
+      label + " has a valid categorical width preflight");
+  const auto narrow256 = public_terminal_decision(
+      fixed256::terminal_support_geometry(native.data(), Size));
+  if (fixed256::expression_fits(Size, false, coordinate_width)) {
+    check(
+        narrow256 == expected,
+        label + " matches the CPU category in int256");
+  } else {
+    check(
+        !narrow256.has_value(),
+        label + " fails closed outside the int256 category envelope");
+  }
+  const auto narrow512 = public_terminal_decision(
+      fixed512::terminal_support_geometry(native.data(), Size));
+  if (coordinate_width <= fixed512::aligned_coordinate_bit_limit) {
+    check(
+        narrow512 == expected,
+        label + " matches the CPU category in int512");
+  } else {
+    check(
+        !narrow512.has_value(),
+        label + " fails closed outside the int512 category envelope");
+  }
 }
 
 template <std::size_t Size>
@@ -554,6 +616,81 @@ void test_named_triangle_and_tetrahedron_fixtures() {
       regular, regular[2], "tetrahedron sphere equality");
 }
 
+void test_terminal_geometry_fixed_width_fixtures() {
+  const std::array<ExactDyadicAabb3, 3> acute{
+      point_box(0.0, 0.0),
+      point_box(4.0, 0.0),
+      point_box(1.0, 3.0)};
+  const std::array<ExactDyadicAabb3, 3> right{
+      point_box(0.0, 0.0),
+      point_box(2.0, 0.0),
+      point_box(0.0, 2.0)};
+  const std::array<ExactDyadicAabb3, 3> obtuse{
+      point_box(0.0, 0.0),
+      point_box(4.0, 0.0),
+      point_box(1.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 3> collinear{
+      point_box(0.0, 0.0),
+      point_box(1.0, 0.0),
+      point_box(2.0, 0.0)};
+  check_terminal_geometry_parity(acute, "acute triangle category");
+  check_terminal_geometry_parity(right, "right triangle category");
+  check_terminal_geometry_parity(obtuse, "obtuse triangle category");
+  check_terminal_geometry_parity(collinear, "dependent triangle category");
+  std::array<ExactDyadicAabb3, 3> signed_zero = right;
+  signed_zero[0].lower_binary64_bits[2] = std::bit_cast<std::uint64_t>(-0.0);
+  check_terminal_geometry_parity(
+      signed_zero, "signed-zero right triangle category");
+
+  const std::array<ExactDyadicAabb3, 4> regular{
+      point_box(1.0, 1.0, 1.0),
+      point_box(1.0, -1.0, -1.0),
+      point_box(-1.0, 1.0, -1.0),
+      point_box(-1.0, -1.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 4> boundary{
+      point_box(1.0, 0.0, 0.0),
+      point_box(-1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 4> exterior{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(0.0, 1.0, 0.0),
+      point_box(0.0, 0.0, 1.0)};
+  const std::array<ExactDyadicAabb3, 4> dependent{
+      point_box(0.0, 0.0, 0.0),
+      point_box(1.0, 0.0, 0.0),
+      point_box(1.0, 1.0, 0.0),
+      point_box(0.0, 1.0, 0.0)};
+  const std::array<ExactDyadicAabb3, 4> negative_and_zero{
+      point_box(0.0, 0.0, 0.0),
+      point_box(4.0, 0.0, 0.0),
+      point_box(1.0, 1.0, 0.0),
+      point_box(3.0, -1.0, 2.0)};
+  check_terminal_geometry_parity(regular, "regular tetrahedron category");
+  check_terminal_geometry_parity(boundary, "boundary tetrahedron category");
+  check_terminal_geometry_parity(exterior, "exterior tetrahedron category");
+  check_terminal_geometry_parity(dependent, "dependent tetrahedron category");
+  check_terminal_geometry_parity(
+      negative_and_zero,
+      "negative-before-zero tetrahedron category");
+
+  std::array<ExactDyadicAabb3, 3> nonsingleton = acute;
+  nonsingleton[2] = box(1.0, 3.0, 0.0, 1.25, 3.0, 0.0);
+  const auto native = fixed_boxes(nonsingleton);
+  check(
+      fixed256::terminal_support_geometry(native.data(), 3U) ==
+              fixed256::TerminalGeometryDecision::
+                  requires_cpu_rational_fallback &&
+          fixed512::terminal_support_geometry(native.data(), 3U) ==
+              fixed512::TerminalGeometryDecision::
+                  requires_cpu_rational_fallback &&
+          fixed::terminal_support_geometry(native.data(), 3U) ==
+              fixed::TerminalGeometryDecision::
+                  requires_cpu_rational_fallback,
+      "all fixed widths reject a non-singleton categorical product");
+}
+
 void test_wide_exponent_fallback() {
   const double tiny = std::ldexp(1.0, -200);
   const std::array<ExactDyadicAabb3, 3> support{
@@ -561,6 +698,8 @@ void test_wide_exponent_fallback() {
       point_box(1.0, 0.0),
       point_box(0.0, tiny)};
   check_support_parity(support, "wide-exponent support");
+  check_terminal_geometry_parity(
+      support, "wide-exponent terminal category");
   check_query_parity(
       support,
       point_box(0.5, tiny / 2.0),
@@ -610,6 +749,7 @@ int main() {
   test_int256_arity_boundaries();
   test_int512_width_boundary();
   test_named_triangle_and_tetrahedron_fixtures();
+  test_terminal_geometry_fixed_width_fixtures();
   test_wide_exponent_fallback();
   test_small_deterministic_dyadic_grid();
   if (failures != 0) {

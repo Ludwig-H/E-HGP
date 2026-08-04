@@ -899,6 +899,66 @@ try_bounded_all_well_centered_decision(
   return true;
 }
 
+void validate_terminal_singleton_support_boxes(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes) {
+  if (support_boxes.size() != 3U && support_boxes.size() != 4U) {
+    throw std::invalid_argument(
+        "a terminal higher-support decision requires three or four boxes");
+  }
+  for (const spatial::ExactDyadicAabb3& box : support_boxes) {
+    const ExactBoxCoordinates coordinates = exact_box_coordinates(box);
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      if (coordinates.lower[axis] != coordinates.upper[axis]) {
+        throw std::invalid_argument(
+            "a terminal higher-support decision requires singleton boxes");
+      }
+    }
+  }
+}
+
+[[nodiscard]] std::optional<ExactHigherSupportTerminalGeometryDecision>
+try_bounded_terminal_geometry_decision(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes) {
+  const std::optional<BoundedProductCoordinates> coordinates =
+      try_bounded_product_coordinates(support_boxes, nullptr);
+  if (!coordinates.has_value()) {
+    return std::nullopt;
+  }
+  const BoundedSupportIntervalEvaluation support =
+      bounded_evaluate_support(*coordinates);
+  const BoundedExactInteger zero{};
+  if (support.gram_determinant.lower !=
+      support.gram_determinant.upper) {
+    throw std::logic_error(
+        "a singleton support produced a nonsingleton Gram determinant");
+  }
+  if (support.gram_determinant.lower == zero) {
+    return ExactHigherSupportTerminalGeometryDecision::affinely_dependent;
+  }
+  if (support.gram_determinant.lower < zero) {
+    throw std::logic_error(
+        "an exact singleton Gram determinant became negative");
+  }
+
+  const std::array<BoundedInterval, 4> barycentric =
+      bounded_barycentric_numerators(support);
+  bool has_zero = false;
+  for (std::size_t index = 0U; index < support.support_size; ++index) {
+    if (barycentric[index].lower != barycentric[index].upper) {
+      throw std::logic_error(
+          "a singleton support produced a nonsingleton barycentric value");
+    }
+    if (barycentric[index].lower < zero) {
+      return ExactHigherSupportTerminalGeometryDecision::
+          exterior_circumcenter;
+    }
+    has_zero = has_zero || barycentric[index].lower == zero;
+  }
+  return has_zero
+      ? ExactHigherSupportTerminalGeometryDecision::boundary_reduced
+      : ExactHigherSupportTerminalGeometryDecision::minimal;
+}
+
 [[nodiscard]] std::optional<ExactHigherSupportProductQueryCellDecision>
 try_bounded_query_cell_decision(
     std::span<const spatial::ExactDyadicAabb3> support_boxes,
@@ -1091,6 +1151,60 @@ exact_higher_support_product_query_cell_decision(
         outside_or_boundary_every_independent_sphere;
   }
   return ExactHigherSupportProductQueryCellDecision::inconclusive;
+}
+
+ExactHigherSupportTerminalGeometryDecision
+exact_higher_support_terminal_geometry_decision(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    ExactHigherSupportProductAabbDecisionBackend* backend) {
+  validate_terminal_singleton_support_boxes(support_boxes);
+  const std::optional<ExactHigherSupportTerminalGeometryDecision> bounded =
+      try_bounded_terminal_geometry_decision(support_boxes);
+  if (bounded.has_value()) {
+    if (backend != nullptr) {
+      *backend = ExactHigherSupportProductAabbDecisionBackend::
+          bounded_dyadic_int1024;
+    }
+    return *bounded;
+  }
+
+  if (backend != nullptr) {
+    *backend = ExactHigherSupportProductAabbDecisionBackend::
+        arbitrary_precision_rational;
+  }
+  const ExactHigherSupportProductAabbAnalysis analysis =
+      exact_higher_support_product_aabb_analysis(support_boxes);
+  const exact::ExactRational zero;
+  if (analysis.gram_determinant.lower !=
+      analysis.gram_determinant.upper) {
+    throw std::logic_error(
+        "a singleton support produced a nonsingleton rational determinant");
+  }
+  if (analysis.gram_determinant.lower == zero) {
+    return ExactHigherSupportTerminalGeometryDecision::affinely_dependent;
+  }
+  if (analysis.gram_determinant.lower < zero) {
+    throw std::logic_error(
+        "an exact rational singleton Gram determinant became negative");
+  }
+  bool has_zero = false;
+  for (std::size_t index = 0U; index < analysis.support_size; ++index) {
+    const ExactRationalInterval& numerator =
+        analysis.barycentric_numerators[index];
+    if (numerator.lower != numerator.upper) {
+      throw std::logic_error(
+          "a singleton support produced a nonsingleton rational "
+          "barycentric value");
+    }
+    if (numerator.lower < zero) {
+      return ExactHigherSupportTerminalGeometryDecision::
+          exterior_circumcenter;
+    }
+    has_zero = has_zero || numerator.lower == zero;
+  }
+  return has_zero
+      ? ExactHigherSupportTerminalGeometryDecision::boundary_reduced
+      : ExactHigherSupportTerminalGeometryDecision::minimal;
 }
 
 bool

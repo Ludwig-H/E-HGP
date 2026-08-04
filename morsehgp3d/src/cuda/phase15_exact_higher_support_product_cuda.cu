@@ -619,6 +619,12 @@ phase15_launch_exact_higher_support_product_cuda(
   std::size_t int512_task_count = 0U;
   std::size_t int1024_task_count = 0U;
   for (const auto& task : request.tasks) {
+    if (task.kind == ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry) {
+      throw std::invalid_argument(
+          "schema 4 terminal support geometry is host-first and is not "
+          "accepted by the native CUDA launcher");
+    }
     switch (task.arithmetic_width) {
       case Phase15ExactHigherSupportProductCudaArithmeticWidth::int256:
         ++int256_task_count;

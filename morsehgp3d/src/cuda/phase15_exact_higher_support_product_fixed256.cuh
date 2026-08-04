@@ -84,6 +84,14 @@ enum class Decision : std::uint8_t {
   requires_cpu_rational_fallback = 2U,
 };
 
+enum class TerminalGeometryDecision : std::uint8_t {
+  affinely_dependent = 0U,
+  boundary_reduced = 1U,
+  exterior_circumcenter = 2U,
+  minimal = 3U,
+  requires_cpu_rational_fallback = 4U,
+};
+
 struct UInt256 {
   std::uint64_t limb[limb_count]{};
 };
@@ -1052,6 +1060,62 @@ no_well_centered_support(
     }
   }
   return Decision::exact_false;
+}
+
+[[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline
+TerminalGeometryDecision terminal_support_geometry(
+    const Binary64Aabb3 support_boxes[maximum_support_size],
+    std::size_t support_size) noexcept {
+  if (support_size != 3U && support_size != 4U) {
+    return TerminalGeometryDecision::requires_cpu_rational_fallback;
+  }
+  for (std::size_t index = 0U; index < support_size; ++index) {
+    for (std::size_t axis = 0U; axis < axis_count; ++axis) {
+      if (canonical_binary64_word(support_boxes[index].lower[axis]) !=
+          canonical_binary64_word(support_boxes[index].upper[axis])) {
+        return TerminalGeometryDecision::requires_cpu_rational_fallback;
+      }
+    }
+  }
+
+  AlignedProduct product{};
+  SupportEvaluation support{};
+  if (!align_product(
+          support_boxes, support_size, nullptr, product) ||
+      !evaluate_support(product, support) ||
+      compare(
+          support.gram_determinant.lower,
+          support.gram_determinant.upper) != 0) {
+    return TerminalGeometryDecision::requires_cpu_rational_fallback;
+  }
+  const Signed256 zero{};
+  const int determinant_sign =
+      compare(support.gram_determinant.lower, zero);
+  if (determinant_sign == 0) {
+    return TerminalGeometryDecision::affinely_dependent;
+  }
+  if (determinant_sign < 0) {
+    return TerminalGeometryDecision::requires_cpu_rational_fallback;
+  }
+
+  Interval256 barycentric[maximum_support_size]{};
+  if (!barycentric_numerators(support, barycentric)) {
+    return TerminalGeometryDecision::requires_cpu_rational_fallback;
+  }
+  bool has_zero = false;
+  for (std::size_t index = 0U; index < support_size; ++index) {
+    if (compare(barycentric[index].lower, barycentric[index].upper) != 0) {
+      return TerminalGeometryDecision::requires_cpu_rational_fallback;
+    }
+    const int sign = compare(barycentric[index].lower, zero);
+    if (sign < 0) {
+      return TerminalGeometryDecision::exterior_circumcenter;
+    }
+    has_zero = has_zero || sign == 0;
+  }
+  return has_zero
+      ? TerminalGeometryDecision::boundary_reduced
+      : TerminalGeometryDecision::minimal;
 }
 
 [[nodiscard]] MORSEHGP3D_HIGHER_SUPPORT_FIXED_HD inline Decision

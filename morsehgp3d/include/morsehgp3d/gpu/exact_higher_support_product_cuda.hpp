@@ -14,11 +14,11 @@
 namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
-    exact_higher_support_product_cuda_schema_version = 3U;
-// Qualification v5 adds device-batched Morton-frontier and bounded local
-// witness-plan consumption.  It is intentionally distinct from the component
-// wire/audit schema so the synchronous-per-decision v4 artifact cannot satisfy
-// the stronger integration gate.
+    exact_higher_support_product_cuda_schema_version = 4U;
+// Qualification v5 is the historical positive-only artifact for the
+// device-batched Morton frontier and bounded local witness plan.  It neither
+// qualifies component schema v4 nor the terminal-geometry gate.  The first
+// qualification artifact covering terminal geometry will use schema v6.
 inline constexpr std::uint32_t
     exact_higher_support_product_cuda_qualification_schema_version = 5U;
 inline constexpr std::string_view exact_higher_support_product_cuda_backend =
@@ -26,16 +26,22 @@ inline constexpr std::string_view exact_higher_support_product_cuda_backend =
 inline constexpr std::string_view exact_higher_support_product_cuda_profile =
     "hgp_reduced";
 inline constexpr std::string_view exact_higher_support_product_cuda_mode =
-    "batched_exact_support_prune_and_query_strict_interior";
+    "batched_exact_support_prune_query_strict_interior_and_host_first_"
+    "terminal_geometry";
 inline constexpr std::string_view
     exact_higher_support_product_cuda_deployment_status =
-        "native_cuda_bounded_qualified_scale_rejected";
+        "schema4_host_contract_validated_native_requalification_pending";
 inline constexpr std::string_view
     exact_higher_support_product_cuda_public_status = "not_claimed";
+inline constexpr bool
+    exact_higher_support_terminal_geometry_native_cuda = false;
+inline constexpr bool
+    exact_higher_support_terminal_classification_native_cuda = false;
 
 enum class ExactHigherSupportProductCudaTaskKind : std::uint8_t {
   support_prune = 0U,
   query_strict_interior = 1U,
+  terminal_support_geometry = 2U,
 };
 
 // Product and query receipts are immutable LBVH authorities.  No support
@@ -76,6 +82,11 @@ struct ExactHigherSupportProductCudaRecord {
       ExactHigherSupportProductCudaOutcome::fail_open};
   ExactHigherSupportProductCudaBackend backend{
       ExactHigherSupportProductCudaBackend::arbitrary_precision_rational};
+  // Present exactly for terminal_support_geometry.  All four scientific
+  // categories are positive exact decisions; absence is an operational
+  // failure, never a fifth geometric class.
+  std::optional<hierarchy::ExactHigherSupportTerminalGeometryDecision>
+      terminal_geometry_decision;
   bool cpu_fallback_performed{false};
 
   friend bool operator==(
@@ -105,8 +116,13 @@ struct ExactHigherSupportProductCudaAudit {
   std::size_t completed_task_count{};
   std::size_t support_prune_task_count{};
   std::size_t query_strict_interior_task_count{};
+  std::size_t terminal_support_geometry_task_count{};
   std::size_t certified_count{};
   std::size_t fail_open_count{};
+  std::size_t terminal_affinely_dependent_count{};
+  std::size_t terminal_boundary_reduced_count{};
+  std::size_t terminal_exterior_circumcenter_count{};
+  std::size_t terminal_minimal_count{};
   std::size_t bounded_dyadic_int256_count{};
   std::size_t bounded_dyadic_int512_count{};
   std::size_t bounded_dyadic_int1024_count{};
@@ -132,6 +148,10 @@ struct ExactHigherSupportProductCudaAudit {
   bool native_lbvh_nodes_read_on_device{false};
   bool narrow_int256_kernel_executed{false};
   bool narrow_int512_kernel_executed{false};
+  // Deliberately false in schema 4.  Native CUDA rejects terminal geometry
+  // tasks until a separately qualified device implementation is released.
+  bool terminal_geometry_decision_native_cuda{
+      exact_higher_support_terminal_geometry_native_cuda};
   bool global_product_frontier_mutated{false};
   bool ordinary_or_higher_order_delaunay_materialized{false};
   bool global_cell_coface_or_incidence_arena_materialized{false};

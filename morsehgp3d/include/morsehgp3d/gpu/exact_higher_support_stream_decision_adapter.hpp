@@ -25,9 +25,11 @@ struct ExactHigherSupportProductCudaPositiveDecisionAdapterAudit {
   std::size_t on_demand_task_count{};
   std::size_t support_prune_task_count{};
   std::size_t query_strict_interior_task_count{};
+  std::size_t terminal_support_geometry_task_count{};
   std::size_t prefetch_call_count{};
   std::size_t support_frontier_prefetch_call_count{};
   std::size_t query_plan_prefetch_call_count{};
+  std::size_t terminal_geometry_prefetch_call_count{};
   std::size_t prefetch_requested_task_count{};
   std::size_t prefetch_already_cached_task_count{};
   std::size_t evaluate_call_count{};
@@ -57,10 +59,19 @@ struct ExactHigherSupportProductCudaPositiveDecisionAdapterAudit {
   std::size_t support_size_4_certified_positive_count{};
   std::size_t support_prune_certified_positive_count{};
   std::size_t query_strict_interior_certified_positive_count{};
+  std::size_t terminal_geometry_decision_count{};
+  std::size_t terminal_affinely_dependent_count{};
+  std::size_t terminal_boundary_reduced_count{};
+  std::size_t terminal_exterior_circumcenter_count{};
+  std::size_t terminal_minimal_count{};
+  std::size_t terminal_geometry_host_fake_decision_count{};
+  std::size_t terminal_geometry_native_rejection_count{};
   bool source_binding_validated{false};
   bool native_exact_authority{false};
   bool host_fake_positive_proposals_require_cpu_replay{false};
   bool disabled_after_failure{false};
+  bool terminal_geometry_decision_native_cuda{
+      exact_higher_support_terminal_geometry_native_cuda};
   bool floating_point_decision_performed{false};
   bool global_product_frontier_mutated{false};
   bool higher_order_delaunay_materialized{false};
@@ -87,6 +98,13 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
         index_(&index),
         cloud_(&cloud),
         native_exact_authority_(!context.host_fake()),
+        terminal_geometry_source_(
+            this,
+            &bound_to_callback,
+            &terminal_geometry_native_exact_authority_callback,
+            &terminal_geometry_maximum_prefetch_task_count_callback,
+            &prefetch_terminal_geometry_callback,
+            &decide_terminal_geometry_callback),
         source_(
             this,
             &bound_to_callback,
@@ -95,7 +113,8 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
             &prefetch_no_well_centered_supports_callback,
             &prefetch_query_strictly_inside_callback,
             &certify_no_well_centered_support_callback,
-            &certify_query_strictly_inside_callback) {
+            &certify_query_strictly_inside_callback,
+            &terminal_geometry_source_) {
     if (context.maximum_task_count() == 0U ||
         context.source_snapshot_epoch() == 0U ||
         !context.bound_to(index, cloud)) {
@@ -165,6 +184,14 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
     return self->native_exact_authority_ && !self->disabled_;
   }
 
+  // Schema 4 is deliberately host-first for the categorical classifier.
+  // A native context retains authority for the two already-qualified
+  // positive predicates, but can never authorize terminal geometry.
+  [[nodiscard]] static bool
+  terminal_geometry_native_exact_authority_callback(void*) noexcept {
+    return false;
+  }
+
   [[nodiscard]] static std::size_t maximum_prefetch_task_count_callback(
       void* state) noexcept {
     const auto* self = static_cast<
@@ -174,6 +201,21 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
     }
     const std::lock_guard<std::mutex> lock{self->mutex_};
     return !self->disabled_ && self->context_ != nullptr
+        ? self->context_->maximum_task_count()
+        : 0U;
+  }
+
+  [[nodiscard]] static std::size_t
+  terminal_geometry_maximum_prefetch_task_count_callback(
+      void* state) noexcept {
+    const auto* self = static_cast<
+        ExactHigherSupportProductCudaPositiveDecisionAdapter*>(state);
+    if (self == nullptr) {
+      return 0U;
+    }
+    const std::lock_guard<std::mutex> lock{self->mutex_};
+    return !self->disabled_ && !self->native_exact_authority_ &&
+            self->context_ != nullptr
         ? self->context_->maximum_task_count()
         : 0U;
   }
@@ -200,6 +242,17 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
     }
   }
 
+  static void prefetch_terminal_geometry_callback(
+      void* state,
+      std::span<const hierarchy::ExactHigherSupportFrontierEntry> products)
+      noexcept {
+    auto* self = static_cast<
+        ExactHigherSupportProductCudaPositiveDecisionAdapter*>(state);
+    if (self != nullptr) {
+      self->prefetch_terminal_products(products);
+    }
+  }
+
   [[nodiscard]] static bool certify_no_well_centered_support_callback(
       void* state,
       const hierarchy::ExactHigherSupportFrontierEntry& product) {
@@ -221,6 +274,18 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
         ExactHigherSupportProductCudaTaskKind::query_strict_interior,
         product,
         &query_node);
+  }
+
+  [[nodiscard]] static
+  std::optional<hierarchy::ExactHigherSupportTerminalGeometryDecision>
+  decide_terminal_geometry_callback(
+      void* state,
+      const hierarchy::ExactHigherSupportFrontierEntry& product) noexcept {
+    auto* self = static_cast<
+        ExactHigherSupportProductCudaPositiveDecisionAdapter*>(state);
+    return self != nullptr
+        ? self->evaluate_terminal_geometry(product)
+        : std::nullopt;
   }
 
   [[nodiscard]] bool evaluate_positive(
@@ -260,6 +325,47 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
     } catch (...) {
       fail_open_after_callback_exception();
       return false;
+    }
+  }
+
+  [[nodiscard]]
+  std::optional<hierarchy::ExactHigherSupportTerminalGeometryDecision>
+  evaluate_terminal_geometry(
+      const hierarchy::ExactHigherSupportFrontierEntry& product) noexcept {
+    try {
+      const std::lock_guard<std::mutex> lock{mutex_};
+      if (native_exact_authority_) {
+        ++audit_.terminal_geometry_native_rejection_count;
+        return std::nullopt;
+      }
+      InternalRequest request;
+      request.kind =
+          ExactHigherSupportProductCudaTaskKind::terminal_support_geometry;
+      request.product = product;
+      if (!live_source_locked()) {
+        ++audit_.disabled_source_fallback_count;
+        return std::nullopt;
+      }
+      if (const CachedDecision* cached = find_cached_locked(request)) {
+        ++audit_.cache_hit_count;
+        return cached->record.terminal_geometry_decision;
+      }
+      ++audit_.cache_miss_count;
+      if (!evaluate_requests_locked(
+              std::span<const InternalRequest>{&request, 1U}, false)) {
+        return std::nullopt;
+      }
+      const CachedDecision* cached = find_cached_locked(request);
+      if (cached == nullptr ||
+          !cached->record.terminal_geometry_decision.has_value()) {
+        ++audit_.invalid_result_fail_open_count;
+        disable_after_failure();
+        return std::nullopt;
+      }
+      return cached->record.terminal_geometry_decision;
+    } catch (...) {
+      fail_open_after_callback_exception();
+      return std::nullopt;
     }
   }
 
@@ -324,6 +430,37 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
             ExactHigherSupportProductCudaTaskKind::query_strict_interior;
         request.product = query_request.product;
         request.query_node = query_request.query_node;
+        append_prefetch_miss_locked(requests, request);
+      }
+      static_cast<void>(evaluate_requests_locked(requests, true));
+    } catch (...) {
+      fail_open_after_callback_exception();
+    }
+  }
+
+  void prefetch_terminal_products(
+      std::span<const hierarchy::ExactHigherSupportFrontierEntry> products)
+      noexcept {
+    try {
+      const std::lock_guard<std::mutex> lock{mutex_};
+      ++audit_.prefetch_call_count;
+      ++audit_.terminal_geometry_prefetch_call_count;
+      audit_.prefetch_requested_task_count += products.size();
+      if (native_exact_authority_) {
+        audit_.terminal_geometry_native_rejection_count += products.size();
+        return;
+      }
+      if (!live_source_locked()) {
+        ++audit_.disabled_source_fallback_count;
+        return;
+      }
+      std::vector<InternalRequest> requests;
+      requests.reserve(products.size());
+      for (const auto& product : products) {
+        InternalRequest request;
+        request.kind = ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry;
+        request.product = product;
         append_prefetch_miss_locked(requests, request);
       }
       static_cast<void>(evaluate_requests_locked(requests, true));
@@ -424,11 +561,17 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
         audit_.on_demand_task_count += batch_size;
       }
       for (const ExactHigherSupportProductCudaTask& task : tasks) {
-        if (task.kind ==
-            ExactHigherSupportProductCudaTaskKind::support_prune) {
-          ++audit_.support_prune_task_count;
-        } else {
-          ++audit_.query_strict_interior_task_count;
+        switch (task.kind) {
+          case ExactHigherSupportProductCudaTaskKind::support_prune:
+            ++audit_.support_prune_task_count;
+            break;
+          case ExactHigherSupportProductCudaTaskKind::query_strict_interior:
+            ++audit_.query_strict_interior_task_count;
+            break;
+          case ExactHigherSupportProductCudaTaskKind::
+              terminal_support_geometry:
+            ++audit_.terminal_support_geometry_task_count;
+            break;
         }
       }
       ++audit_.evaluate_call_count;
@@ -464,6 +607,8 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
       std::span<const ExactHigherSupportProductCudaTask> tasks,
       const ExactHigherSupportProductCudaResult& result) const noexcept {
     if (!result.complete() || result.records.size() != tasks.size() ||
+        result.audit.schema_version !=
+            exact_higher_support_product_cuda_schema_version ||
         result.audit.submitted_task_count != tasks.size() ||
         result.audit.completed_task_count != tasks.size() ||
         !result.audit.source_authority_validated ||
@@ -478,22 +623,43 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
         result.audit.global_cell_coface_or_incidence_arena_materialized ||
         result.audit.hierarchy_or_tree_claimed ||
         result.audit.slo_claimed ||
-        result.audit.public_status_claimed) {
+        result.audit.public_status_claimed ||
+        result.audit.terminal_geometry_decision_native_cuda) {
       return false;
     }
     std::size_t expected_support_task_count = 0U;
+    std::size_t expected_query_task_count = 0U;
+    std::size_t expected_terminal_task_count = 0U;
     for (const ExactHigherSupportProductCudaTask& task : tasks) {
-      if (task.kind ==
-          ExactHigherSupportProductCudaTaskKind::support_prune) {
-        ++expected_support_task_count;
+      switch (task.kind) {
+        case ExactHigherSupportProductCudaTaskKind::support_prune:
+          ++expected_support_task_count;
+          break;
+        case ExactHigherSupportProductCudaTaskKind::query_strict_interior:
+          ++expected_query_task_count;
+          break;
+        case ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry:
+          ++expected_terminal_task_count;
+          break;
       }
     }
     if (result.audit.support_prune_task_count !=
             expected_support_task_count ||
         result.audit.query_strict_interior_task_count !=
-            tasks.size() - expected_support_task_count ||
+            expected_query_task_count ||
+        result.audit.terminal_support_geometry_task_count !=
+            expected_terminal_task_count ||
+        expected_support_task_count + expected_query_task_count +
+                expected_terminal_task_count !=
+            tasks.size() ||
         result.audit.certified_count + result.audit.fail_open_count !=
             tasks.size() ||
+        result.audit.terminal_affinely_dependent_count +
+                result.audit.terminal_boundary_reduced_count +
+                result.audit.terminal_exterior_circumcenter_count +
+                result.audit.terminal_minimal_count !=
+            expected_terminal_task_count ||
         result.audit.bounded_dyadic_int256_count +
                 result.audit.bounded_dyadic_int512_count +
                 result.audit.bounded_dyadic_int1024_count +
@@ -501,10 +667,46 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
             tasks.size()) {
       return false;
     }
+    std::size_t expected_terminal_affinely_dependent_count = 0U;
+    std::size_t expected_terminal_boundary_reduced_count = 0U;
+    std::size_t expected_terminal_exterior_circumcenter_count = 0U;
+    std::size_t expected_terminal_minimal_count = 0U;
     for (std::size_t index = 0U; index < tasks.size(); ++index) {
       if (result.records[index].task_id != tasks[index].task_id ||
           result.records[index].kind != tasks[index].kind) {
         return false;
+      }
+      const bool terminal = tasks[index].kind ==
+          ExactHigherSupportProductCudaTaskKind::terminal_support_geometry;
+      if (result.records[index].terminal_geometry_decision.has_value() !=
+          terminal) {
+        return false;
+      }
+      if (terminal) {
+        if (result.records[index].outcome !=
+            ExactHigherSupportProductCudaOutcome::certified) {
+          return false;
+        }
+        switch (*result.records[index].terminal_geometry_decision) {
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              affinely_dependent:
+            ++expected_terminal_affinely_dependent_count;
+            break;
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              boundary_reduced:
+            ++expected_terminal_boundary_reduced_count;
+            break;
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              exterior_circumcenter:
+            ++expected_terminal_exterior_circumcenter_count;
+            break;
+          case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              minimal:
+            ++expected_terminal_minimal_count;
+            break;
+          default:
+            return false;
+        }
       }
       switch (result.records[index].outcome) {
         case ExactHigherSupportProductCudaOutcome::certified:
@@ -524,7 +726,14 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
           return false;
       }
     }
-    return true;
+    return result.audit.terminal_affinely_dependent_count ==
+            expected_terminal_affinely_dependent_count &&
+        result.audit.terminal_boundary_reduced_count ==
+            expected_terminal_boundary_reduced_count &&
+        result.audit.terminal_exterior_circumcenter_count ==
+            expected_terminal_exterior_circumcenter_count &&
+        result.audit.terminal_minimal_count ==
+            expected_terminal_minimal_count;
   }
 
   void account_record(
@@ -533,6 +742,34 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
     account_backend(record);
     if (record.cpu_fallback_performed) {
       ++audit_.component_cpu_fallback_count;
+    }
+    if (request.kind == ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry) {
+      if (record.outcome == ExactHigherSupportProductCudaOutcome::fail_open ||
+          !record.terminal_geometry_decision.has_value()) {
+        ++audit_.fail_open_count;
+        return;
+      }
+      ++audit_.terminal_geometry_decision_count;
+      ++audit_.terminal_geometry_host_fake_decision_count;
+      switch (*record.terminal_geometry_decision) {
+        case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+            affinely_dependent:
+          ++audit_.terminal_affinely_dependent_count;
+          break;
+        case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+            boundary_reduced:
+          ++audit_.terminal_boundary_reduced_count;
+          break;
+        case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+            exterior_circumcenter:
+          ++audit_.terminal_exterior_circumcenter_count;
+          break;
+        case hierarchy::ExactHigherSupportTerminalGeometryDecision::minimal:
+          ++audit_.terminal_minimal_count;
+          break;
+      }
+      return;
     }
     if (record.outcome == ExactHigherSupportProductCudaOutcome::fail_open) {
       ++audit_.fail_open_count;
@@ -629,6 +866,8 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
   std::vector<CachedDecision> cache_;
   mutable std::mutex mutex_;
   ExactHigherSupportProductCudaPositiveDecisionAdapterAudit audit_{};
+  hierarchy::ExactHigherSupportTerminalGeometryDecisionSource
+      terminal_geometry_source_;
   hierarchy::ExactHigherSupportPositiveDecisionSource source_;
 };
 

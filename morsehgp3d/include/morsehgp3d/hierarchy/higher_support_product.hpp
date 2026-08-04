@@ -102,6 +102,17 @@ enum class ExactHigherSupportProductQueryCellDecision : std::uint8_t {
   outside_or_boundary_every_independent_sphere = 2U,
 };
 
+// Total exact geometry classification for one fixed triangle or
+// tetrahedron.  The public ordinals are independent from the implementation
+// enum used by exact::analyze_circumcenter_support, so neither layer can
+// silently become the wire authority of the other.
+enum class ExactHigherSupportTerminalGeometryDecision : std::uint8_t {
+  affinely_dependent = 0U,
+  boundary_reduced = 1U,
+  exterior_circumcenter = 2U,
+  minimal = 3U,
+};
+
 // Decision-only fast path for traversal sites that do not need to persist the
 // rich rational interval analysis.  backend, when non-null, reports whether
 // the exact fixed-width dyadic kernel fitted or the arbitrary-precision
@@ -132,6 +143,17 @@ exact_higher_support_product_query_cell_decision(
     const spatial::ExactDyadicAabb3& query_box,
     ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);
 
+// support_boxes must contain exactly three or four singleton AABBs.  The
+// function is total on that domain: affine dependence is a scientific
+// category, not an operational failure.  Non-singleton boxes are rejected
+// because a categorical result for a mixed product would not identify one
+// support.  Negative barycentric numerators take precedence over zeros, so a
+// support with both signs is exterior rather than merely boundary-reduced.
+[[nodiscard]] ExactHigherSupportTerminalGeometryDecision
+exact_higher_support_terminal_geometry_decision(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);
+
 inline constexpr const char*
     higher_support_product_bounded_decision_proof_basis =
         "common_dyadic_exponent_exact_int1024_interval_gram_cramer_"
@@ -141,5 +163,11 @@ inline constexpr const char*
 inline constexpr const char* higher_support_product_aabb_proof_basis =
     "exact_rational_interval_gram_cramer_barycentric_and_scaled_"
     "circumsphere_power_over_dyadic_aabb_products_v1";
+
+inline constexpr const char*
+    higher_support_terminal_geometry_decision_proof_basis =
+        "singleton_exact_gram_cramer_determinant_then_negative_before_zero_"
+        "circumcenter_barycentric_category_with_int1024_and_rational_"
+        "fallback_v1";
 
 }  // namespace morsehgp3d::hierarchy

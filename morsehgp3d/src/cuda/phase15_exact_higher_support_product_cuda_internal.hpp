@@ -96,6 +96,11 @@ struct Phase15ExactHigherSupportProductCudaDeviceRecord {
   Phase15ExactHigherSupportProductCudaDeviceBackend backend{
       Phase15ExactHigherSupportProductCudaDeviceBackend::
           arbitrary_precision_rational};
+  hierarchy::ExactHigherSupportTerminalGeometryDecision
+      terminal_geometry_decision{
+          hierarchy::ExactHigherSupportTerminalGeometryDecision::
+              affinely_dependent};
+  std::uint8_t terminal_geometry_decision_present{};
 };
 
 static_assert(
@@ -126,6 +131,8 @@ phase15_exact_higher_support_product_task_digest(
     std::span<const Phase15ExactHigherSupportProductCudaTask> tasks) noexcept {
   std::uint64_t digest =
       phase15_exact_higher_support_product_digest_offset;
+  digest = phase15_exact_higher_support_product_digest_word(
+      digest, exact_higher_support_product_cuda_schema_version);
   digest = phase15_exact_higher_support_product_digest_word(
       digest, static_cast<std::uint64_t>(tasks.size()));
   for (const auto& task : tasks) {
@@ -192,6 +199,8 @@ phase15_exact_higher_support_product_device_result_digest(
   std::uint64_t digest =
       phase15_exact_higher_support_product_digest_offset;
   digest = phase15_exact_higher_support_product_digest_word(
+      digest, exact_higher_support_product_cuda_schema_version);
+  digest = phase15_exact_higher_support_product_digest_word(
       digest, static_cast<std::uint64_t>(records.size()));
   for (const auto& record : records) {
     digest = phase15_exact_higher_support_product_digest_word(
@@ -202,6 +211,13 @@ phase15_exact_higher_support_product_device_result_digest(
         digest, static_cast<std::uint64_t>(record.outcome));
     digest = phase15_exact_higher_support_product_digest_word(
         digest, static_cast<std::uint64_t>(record.backend));
+    digest = phase15_exact_higher_support_product_digest_word(
+        digest,
+        static_cast<std::uint64_t>(
+            record.terminal_geometry_decision_present));
+    digest = phase15_exact_higher_support_product_digest_word(
+        digest,
+        static_cast<std::uint64_t>(record.terminal_geometry_decision));
   }
   return digest;
 }

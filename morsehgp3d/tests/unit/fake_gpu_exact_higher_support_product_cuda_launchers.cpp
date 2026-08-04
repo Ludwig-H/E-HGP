@@ -7,6 +7,7 @@
 
 #include <array>
 #include <atomic>
+#include <optional>
 #include <span>
 #include <stdexcept>
 
@@ -18,6 +19,8 @@ std::atomic<bool> throw_non_std_on_next_launch{false};
 std::atomic<bool> force_next_int256_fallback{false};
 std::atomic<bool> force_next_int512_fallback{false};
 std::atomic<bool> force_false_positive_certificates{false};
+std::atomic<bool> force_wrong_terminal_geometry_categories{false};
+std::atomic<bool> corrupt_next_terminal_geometry_category{false};
 std::atomic<std::size_t> forced_false_positive_count{0U};
 std::atomic<std::size_t> launcher_call_count{0U};
 
@@ -45,6 +48,18 @@ void force_exact_higher_support_product_false_positives(
       enabled, std::memory_order_relaxed);
 }
 
+void force_exact_higher_support_product_wrong_terminal_geometry_categories(
+    bool enabled) noexcept {
+  force_wrong_terminal_geometry_categories.store(
+      enabled, std::memory_order_relaxed);
+}
+
+void corrupt_next_exact_higher_support_product_terminal_geometry_category()
+    noexcept {
+  corrupt_next_terminal_geometry_category.store(
+      true, std::memory_order_relaxed);
+}
+
 std::size_t exact_higher_support_product_forced_false_positive_count()
     noexcept {
   return forced_false_positive_count.load(std::memory_order_relaxed);
@@ -56,6 +71,10 @@ void reset_exact_higher_support_product_fake() noexcept {
   force_next_int256_fallback.store(false, std::memory_order_relaxed);
   force_next_int512_fallback.store(false, std::memory_order_relaxed);
   force_false_positive_certificates.store(false, std::memory_order_relaxed);
+  force_wrong_terminal_geometry_categories.store(
+      false, std::memory_order_relaxed);
+  corrupt_next_terminal_geometry_category.store(
+      false, std::memory_order_relaxed);
   forced_false_positive_count.store(0U, std::memory_order_relaxed);
   launcher_call_count.store(0U, std::memory_order_relaxed);
 }
@@ -86,6 +105,17 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
 [[nodiscard]] bool false_positive_certificates_forced() noexcept {
   return force_false_positive_certificates.load(
       std::memory_order_relaxed);
+}
+
+[[nodiscard]] bool wrong_terminal_geometry_categories_forced() noexcept {
+  return force_wrong_terminal_geometry_categories.load(
+      std::memory_order_relaxed);
+}
+
+[[nodiscard]] bool consume_terminal_geometry_category_corruption()
+    noexcept {
+  return corrupt_next_terminal_geometry_category.exchange(
+      false, std::memory_order_relaxed);
 }
 
 void count_forced_false_positive() noexcept {
@@ -196,6 +226,24 @@ namespace fixed512 = exact_higher_support_product_fixed512;
         task.query_leaf_begin == 0U && task.query_leaf_end == 0U &&
         valid_arithmetic_width(task);
   }
+  if (task.kind ==
+      ExactHigherSupportProductCudaTaskKind::terminal_support_geometry) {
+    if (task.has_query_box || task.query_node_index != 0U ||
+        task.query_leaf_begin != 0U || task.query_leaf_end != 0U ||
+        task.support_group_count != task.support_size) {
+      return false;
+    }
+    for (std::size_t group_index = 0U;
+         group_index < task.support_group_count;
+         ++group_index) {
+      if (task.support_multiplicities[group_index] != 1U ||
+          task.support_leaf_ends[group_index] !=
+              task.support_leaf_begins[group_index] + 1U) {
+        return false;
+      }
+    }
+    return valid_arithmetic_width(task);
+  }
   if (task.kind !=
           ExactHigherSupportProductCudaTaskKind::query_strict_interior ||
       !task.has_query_box ||
@@ -259,6 +307,8 @@ phase15_launch_exact_higher_support_product_cuda(
         exact_support_boxes.data(), task.support_size};
     hierarchy::ExactHigherSupportProductAabbDecisionBackend backend{};
     bool certified = false;
+    std::optional<hierarchy::ExactHigherSupportTerminalGeometryDecision>
+        terminal_geometry_decision;
     if (task.kind ==
         ExactHigherSupportProductCudaTaskKind::support_prune) {
       certified = hierarchy::
@@ -270,6 +320,13 @@ phase15_launch_exact_higher_support_product_cuda(
       certified = hierarchy::
           exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
               support_boxes, exact_aabb(task.query_box), &backend);
+    } else if (
+        task.kind == ExactHigherSupportProductCudaTaskKind::
+            terminal_support_geometry) {
+      terminal_geometry_decision = hierarchy::
+          exact_higher_support_terminal_geometry_decision(
+              support_boxes, &backend);
+      certified = true;
     } else {
       throw std::invalid_argument(
           "the fake exact higher-support product launcher received an "
@@ -279,6 +336,18 @@ phase15_launch_exact_higher_support_product_cuda(
     Phase15ExactHigherSupportProductCudaDeviceRecord record;
     record.task_id = task.task_id;
     record.kind = task.kind;
+    if (terminal_geometry_decision.has_value()) {
+      record.terminal_geometry_decision_present = 1U;
+      record.terminal_geometry_decision = *terminal_geometry_decision;
+      if (test_support::wrong_terminal_geometry_categories_forced()) {
+        const std::uint8_t next = static_cast<std::uint8_t>(
+            (static_cast<std::uint8_t>(record.terminal_geometry_decision) +
+             1U) %
+            4U);
+        record.terminal_geometry_decision = static_cast<
+            hierarchy::ExactHigherSupportTerminalGeometryDecision>(next);
+      }
+    }
     if (task.arithmetic_width ==
             Phase15ExactHigherSupportProductCudaArithmeticWidth::int256 &&
         test_support::consume_forced_int256_fallback()) {
@@ -327,6 +396,11 @@ phase15_launch_exact_higher_support_product_cuda(
               "the fake exact higher-support product launcher lost its "
               "arithmetic route");
       }
+    }
+    if (terminal_geometry_decision.has_value() &&
+        test_support::consume_terminal_geometry_category_corruption()) {
+      record.terminal_geometry_decision = static_cast<
+          hierarchy::ExactHigherSupportTerminalGeometryDecision>(255U);
     }
     receipt.records.push_back(record);
   }

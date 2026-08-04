@@ -401,6 +401,10 @@ class ExactHigherSupportStreamBuilder {
       : index_(index),
         cloud_(cloud),
         positive_decision_source_(positive_decision_source),
+        terminal_geometry_decision_source_(
+            positive_decision_source != nullptr
+                ? &positive_decision_source->terminal_geometry_source()
+                : nullptr),
         output_chain_digest_(initial_output_chain_digest()),
         canonical_sort_records_(true) {
     validate_inputs(requested_maximum_order);
@@ -448,6 +452,10 @@ class ExactHigherSupportStreamBuilder {
       : index_(index),
         cloud_(cloud),
         positive_decision_source_(positive_decision_source),
+        terminal_geometry_decision_source_(
+            positive_decision_source != nullptr
+                ? &positive_decision_source->terminal_geometry_source()
+                : nullptr),
         output_chain_digest_(checkpoint.output_chain_digest),
         output_record_count_(checkpoint.output_record_count),
         canonical_sort_records_(false) {
@@ -747,14 +755,26 @@ class ExactHigherSupportStreamBuilder {
           "the higher-support accelerator decision source is not bound to "
           "the supplied cloud and LBVH");
     }
+    if (terminal_geometry_decision_source_ != nullptr &&
+        !terminal_geometry_decision_source_->bound_to(index_, cloud_)) {
+      throw std::invalid_argument(
+          "the higher-support terminal geometry source is not bound to "
+          "the supplied cloud and LBVH");
+    }
   }
 
   void prefetch_sparse_morton_frontier_slice() const {
     if (positive_decision_source_ == nullptr || frontier_.empty()) {
       return;
     }
-    const std::size_t capacity =
+    const std::size_t positive_capacity =
         positive_decision_source_->maximum_prefetch_task_count();
+    const std::size_t terminal_capacity =
+        terminal_geometry_decision_source_ != nullptr
+        ? terminal_geometry_decision_source_->maximum_prefetch_task_count()
+        : 0U;
+    const std::size_t capacity =
+        std::max(positive_capacity, terminal_capacity);
     const std::size_t count = std::min(capacity, frontier_.size());
     if (count == 0U) {
       return;
@@ -763,9 +783,28 @@ class ExactHigherSupportStreamBuilder {
     // neighbourhood is invented here: this bounded slice contains only live
     // nodes of the already-certified grouped sparse partition.  The slice is
     // already contiguous, so no auxiliary product catalogue is allocated.
-    positive_decision_source_->prefetch_no_well_centered_supports(
-        std::span<const ExactHigherSupportFrontierEntry>{
-            frontier_.data() + frontier_.size() - count, count});
+    std::vector<ExactHigherSupportFrontierEntry> product_requests;
+    std::vector<ExactHigherSupportFrontierEntry> terminal_requests;
+    product_requests.reserve(std::min(positive_capacity, count));
+    terminal_requests.reserve(std::min(terminal_capacity, count));
+    const std::size_t begin = frontier_.size() - count;
+    for (std::size_t index = begin; index < frontier_.size(); ++index) {
+      const ExactHigherSupportFrontierEntry& entry = frontier_[index];
+      if (is_terminal(entry)) {
+        if (terminal_requests.size() < terminal_capacity) {
+          terminal_requests.push_back(entry);
+        }
+      } else if (product_requests.size() < positive_capacity) {
+        product_requests.push_back(entry);
+      }
+    }
+    if (!product_requests.empty()) {
+      positive_decision_source_->prefetch_no_well_centered_supports(
+          product_requests);
+    }
+    if (!terminal_requests.empty()) {
+      terminal_geometry_decision_source_->prefetch(terminal_requests);
+    }
   }
 
   [[nodiscard]] const Node& node(std::size_t node_index) const {
@@ -2601,6 +2640,30 @@ class ExactHigherSupportStreamBuilder {
     }
     const exact::CircumcenterSupportAnalysis analysis =
         exact::analyze_circumcenter_support(support_points);
+    ExactHigherSupportTerminalGeometryDecision analysis_decision{};
+    switch (analysis.status()) {
+      case exact::CircumcenterSupportStatus::affinely_dependent:
+        analysis_decision =
+            ExactHigherSupportTerminalGeometryDecision::affinely_dependent;
+        break;
+      case exact::CircumcenterSupportStatus::boundary_reduced:
+        analysis_decision =
+            ExactHigherSupportTerminalGeometryDecision::boundary_reduced;
+        break;
+      case exact::CircumcenterSupportStatus::exterior_circumcenter:
+        analysis_decision = ExactHigherSupportTerminalGeometryDecision::
+            exterior_circumcenter;
+        break;
+      case exact::CircumcenterSupportStatus::minimal:
+        analysis_decision =
+            ExactHigherSupportTerminalGeometryDecision::minimal;
+        break;
+    }
+    if (terminal_geometry_decision(entry) != analysis_decision) {
+      throw std::logic_error(
+          "the terminal support geometry gate disagreed with exact leaf "
+          "analysis");
+    }
     const bool first_analysis =
         !pending_product_->leaf_analysis_started;
     if (first_analysis) {
@@ -2804,8 +2867,45 @@ class ExactHigherSupportStreamBuilder {
             boxes.data(), entry.support_size});
   }
 
+  [[nodiscard]] ExactHigherSupportTerminalGeometryDecision
+  terminal_geometry_decision(
+      const ExactHigherSupportFrontierEntry& entry) const {
+    if (!is_terminal(entry)) {
+      throw std::logic_error(
+          "a categorical higher-support geometry decision requires a "
+          "terminal product");
+    }
+    if (terminal_geometry_cache_.has_value() &&
+        terminal_geometry_cache_->first == entry) {
+      return terminal_geometry_cache_->second;
+    }
+
+    std::optional<ExactHigherSupportTerminalGeometryDecision> proposal;
+    if (terminal_geometry_decision_source_ != nullptr) {
+      proposal = terminal_geometry_decision_source_->decide(entry);
+    }
+    const std::array<spatial::ExactDyadicAabb3, 4> boxes =
+        support_boxes(entry);
+    const ExactHigherSupportTerminalGeometryDecision cpu_decision =
+        exact_higher_support_terminal_geometry_decision(
+            std::span<const spatial::ExactDyadicAabb3>{
+                boxes.data(), entry.support_size});
+
+    // Schema 4 deliberately gives the host fake no scientific authority.
+    // Even a well-formed but hostile categorical proposal is ignored after
+    // exact CPU replay.  A future native source may be compared here only
+    // after its separate device qualification changes the source contract.
+    static_cast<void>(proposal);
+    terminal_geometry_cache_ = std::pair{entry, cpu_decision};
+    return cpu_decision;
+  }
+
   [[nodiscard]] bool no_well_centered_support_certified(
       const ExactHigherSupportFrontierEntry& entry) const {
+    if (is_terminal(entry)) {
+      return terminal_geometry_decision(entry) !=
+          ExactHigherSupportTerminalGeometryDecision::minimal;
+    }
     if (positive_decision_source_ != nullptr &&
         positive_decision_source_->certifies_no_well_centered_support(
             entry) &&
@@ -2821,6 +2921,10 @@ class ExactHigherSupportStreamBuilder {
 
   [[nodiscard]] bool all_well_centered_support_certified(
       const ExactHigherSupportFrontierEntry& entry) const {
+    if (is_terminal(entry)) {
+      return terminal_geometry_decision(entry) ==
+          ExactHigherSupportTerminalGeometryDecision::minimal;
+    }
     const std::array<spatial::ExactDyadicAabb3, 4> boxes =
         support_boxes(entry);
     return exact_higher_support_product_all_well_centered_certified(
@@ -3025,6 +3129,12 @@ class ExactHigherSupportStreamBuilder {
   const spatial::CanonicalPointCloud& cloud_;
   const ExactHigherSupportPositiveDecisionSource*
       positive_decision_source_{};
+  const ExactHigherSupportTerminalGeometryDecisionSource*
+      terminal_geometry_decision_source_{};
+  mutable std::optional<std::pair<
+      ExactHigherSupportFrontierEntry,
+      ExactHigherSupportTerminalGeometryDecision>>
+      terminal_geometry_cache_;
   ExactHigherSupportStreamResult result_;
   std::vector<ExactHigherSupportFrontierEntry> frontier_;
   std::optional<ExactHigherSupportPendingProduct> pending_product_;

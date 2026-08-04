@@ -34,6 +34,10 @@ exact_higher_support_product_fake_launcher_call_count() noexcept;
 exact_higher_support_product_forced_false_positive_count() noexcept;
 void force_exact_higher_support_product_false_positives(
     bool enabled) noexcept;
+void force_exact_higher_support_product_wrong_terminal_geometry_categories(
+    bool enabled) noexcept;
+void corrupt_next_exact_higher_support_product_terminal_geometry_category()
+    noexcept;
 }  // namespace morsehgp3d::gpu::test_support
 
 namespace {
@@ -61,6 +65,10 @@ using morsehgp3d::gpu::test_support::
 using morsehgp3d::gpu::test_support::
     force_exact_higher_support_product_false_positives;
 using morsehgp3d::gpu::test_support::
+    force_exact_higher_support_product_wrong_terminal_geometry_categories;
+using morsehgp3d::gpu::test_support::
+    corrupt_next_exact_higher_support_product_terminal_geometry_category;
+using morsehgp3d::gpu::test_support::
     force_next_exact_higher_support_product_int256_fallback;
 using morsehgp3d::gpu::test_support::
     force_next_exact_higher_support_product_int512_fallback;
@@ -73,6 +81,11 @@ using morsehgp3d::hierarchy::
 using morsehgp3d::hierarchy::ExactHigherSupportFrontierEntry;
 using morsehgp3d::hierarchy::ExactHigherSupportNodeReceipt;
 using morsehgp3d::hierarchy::ExactHigherSupportPositiveDecisionSource;
+using morsehgp3d::hierarchy::ExactHigherSupportPruneReason;
+using morsehgp3d::hierarchy::
+    ExactHigherSupportTerminalGeometryDecisionSource;
+using morsehgp3d::hierarchy::
+    ExactHigherSupportTerminalGeometryDecision;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
@@ -113,6 +126,32 @@ static_assert(
     !std::is_default_constructible_v<
         morsehgp3d::hierarchy::
             ExactHigherSupportPositiveDecisionSource>);
+static_assert(
+    !std::is_default_constructible_v<
+        ExactHigherSupportTerminalGeometryDecisionSource>);
+static_assert(
+    !std::is_copy_constructible_v<
+        ExactHigherSupportTerminalGeometryDecisionSource>);
+static_assert(
+    !std::is_move_constructible_v<
+        ExactHigherSupportTerminalGeometryDecisionSource>);
+static_assert(
+    morsehgp3d::gpu::exact_higher_support_product_cuda_schema_version == 4U);
+static_assert(
+    !morsehgp3d::gpu::exact_higher_support_terminal_geometry_native_cuda);
+static_assert(
+    !morsehgp3d::gpu::
+        exact_higher_support_terminal_classification_native_cuda);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactHigherSupportProductCudaTaskKind::support_prune) == 0U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactHigherSupportProductCudaTaskKind::query_strict_interior) == 1U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactHigherSupportProductCudaTaskKind::terminal_support_geometry) ==
+    2U);
 static_assert(
     !std::is_constructible_v<
         ExactHigherSupportTerminalSession,
@@ -262,6 +301,30 @@ void check_throws(Function&& function, const std::string& message) {
       point(10.0, 0.0, 0.0),
       point(11.0, 0.0, 0.0),
       point(12.0, 0.0, 0.0)};
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] CanonicalPointCloud terminal_geometry_cloud() {
+  const std::array<CertifiedPoint3, 32> points{
+      point(0.0, 0.0, 0.0), point(4.0, 0.0, 0.0),
+      point(1.0, 3.0, 0.0),
+      point(10.0, 0.0, 0.0), point(12.0, 0.0, 0.0),
+      point(10.0, 2.0, 0.0),
+      point(20.0, 0.0, 0.0), point(24.0, 0.0, 0.0),
+      point(21.0, 1.0, 0.0),
+      point(30.0, 0.0, 0.0), point(31.0, 0.0, 0.0),
+      point(32.0, 0.0, 0.0),
+      point(41.0, 1.0, 1.0), point(41.0, -1.0, -1.0),
+      point(39.0, 1.0, -1.0), point(39.0, -1.0, 1.0),
+      point(51.0, 0.0, 0.0), point(49.0, 0.0, 0.0),
+      point(50.0, 1.0, 0.0), point(50.0, 0.0, 1.0),
+      point(60.0, 0.0, 0.0), point(61.0, 0.0, 0.0),
+      point(60.0, 1.0, 0.0), point(60.0, 0.0, 1.0),
+      point(70.0, 0.0, 0.0), point(71.0, 0.0, 0.0),
+      point(71.0, 1.0, 0.0), point(70.0, 1.0, 0.0),
+      point(80.0, 0.0, 0.0), point(84.0, 0.0, 0.0),
+      point(81.0, 1.0, 0.0), point(83.0, -1.0, 2.0)};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
 }
@@ -459,6 +522,27 @@ template <std::size_t SupportSize>
   task.kind =
       ExactHigherSupportProductCudaTaskKind::query_strict_interior;
   task.query_node = root_receipt(index, point_count);
+  return task;
+}
+
+template <std::size_t SupportSize>
+[[nodiscard]] ExactHigherSupportProductCudaTask terminal_geometry_task(
+    const LeafNodeFixture& fixture,
+    const CanonicalPointCloud& cloud,
+    const std::array<std::size_t, SupportSize>& source_indices,
+    std::uint64_t epoch,
+    std::uint64_t task_id) {
+  std::array<morsehgp3d::spatial::PointId, SupportSize> point_ids{};
+  for (std::size_t index = 0U; index < SupportSize; ++index) {
+    point_ids[index] =
+        canonical_point_id_for_source(cloud, source_indices[index]);
+  }
+  ExactHigherSupportProductCudaTask task;
+  task.task_id = task_id;
+  task.source_snapshot_epoch = epoch;
+  task.kind =
+      ExactHigherSupportProductCudaTaskKind::terminal_support_geometry;
+  task.product = individual_leaf_product(fixture, point_ids);
   return task;
 }
 
@@ -672,6 +756,219 @@ void test_positive_certificates_and_disjoint_query_receipt() {
       "positive support/query records close counters and both batch digests");
 }
 
+void test_terminal_geometry_host_contract_categories() {
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_exact_higher_support_product_fake();
+  const CanonicalPointCloud cloud = terminal_geometry_cloud();
+  MortonLbvhBuildContext builder{cloud.size()};
+  auto build = builder.build(cloud);
+  const MortonLbvhIndex& index = build.certified_index();
+  const LeafNodeFixture leaf_nodes = individual_leaf_nodes(index);
+  auto lease = builder.release_device_traversal_lease(build);
+  const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+  ExactHigherSupportProductCudaContext context{
+      index, cloud, std::move(lease), 9U};
+
+  const std::array<ExactHigherSupportProductCudaTask, 9> tasks{
+      terminal_geometry_task<3U>(leaf_nodes, cloud, {0U, 1U, 2U}, epoch, 1U),
+      terminal_geometry_task<3U>(leaf_nodes, cloud, {3U, 4U, 5U}, epoch, 2U),
+      terminal_geometry_task<3U>(leaf_nodes, cloud, {6U, 7U, 8U}, epoch, 3U),
+      terminal_geometry_task<3U>(leaf_nodes, cloud, {9U, 10U, 11U}, epoch, 4U),
+      terminal_geometry_task<4U>(leaf_nodes, cloud, {12U, 13U, 14U, 15U}, epoch, 5U),
+      terminal_geometry_task<4U>(leaf_nodes, cloud, {16U, 17U, 18U, 19U}, epoch, 6U),
+      terminal_geometry_task<4U>(leaf_nodes, cloud, {20U, 21U, 22U, 23U}, epoch, 7U),
+      terminal_geometry_task<4U>(leaf_nodes, cloud, {24U, 25U, 26U, 27U}, epoch, 8U),
+      terminal_geometry_task<4U>(leaf_nodes, cloud, {28U, 29U, 30U, 31U}, epoch, 9U)};
+  using Decision = ExactHigherSupportTerminalGeometryDecision;
+  const std::array<Decision, 9> expected{
+      Decision::minimal,
+      Decision::boundary_reduced,
+      Decision::exterior_circumcenter,
+      Decision::affinely_dependent,
+      Decision::minimal,
+      Decision::boundary_reduced,
+      Decision::exterior_circumcenter,
+      Decision::affinely_dependent,
+      Decision::exterior_circumcenter};
+  const auto result = context.evaluate(tasks);
+  check(
+      result.complete() && result.records.size() == tasks.size(),
+      "the host-first terminal geometry batch publishes all four categories");
+  for (std::size_t index_value = 0U;
+       index_value < expected.size() && index_value < result.records.size();
+       ++index_value) {
+    check(
+        result.records[index_value].outcome ==
+                ExactHigherSupportProductCudaOutcome::certified &&
+            result.records[index_value].terminal_geometry_decision ==
+                expected[index_value] &&
+            result.records[index_value].backend ==
+                ExactHigherSupportProductCudaBackend::bounded_dyadic_int256 &&
+            !result.records[index_value].cpu_fallback_performed,
+        "each terminal geometry record binds its exact categorical result");
+  }
+  check(
+      result.audit.terminal_support_geometry_task_count == 9U &&
+          result.audit.support_prune_task_count == 0U &&
+          result.audit.query_strict_interior_task_count == 0U &&
+          result.audit.terminal_affinely_dependent_count == 2U &&
+          result.audit.terminal_boundary_reduced_count == 2U &&
+          result.audit.terminal_exterior_circumcenter_count == 3U &&
+          result.audit.terminal_minimal_count == 2U &&
+          result.audit.certified_count == 9U &&
+          result.audit.fail_open_count == 0U &&
+          result.audit.bounded_dyadic_int256_count == 9U &&
+          !result.audit.terminal_geometry_decision_native_cuda &&
+          result.audit.submitted_task_digest != 0U &&
+          result.audit.completed_result_digest != 0U,
+      "the schema-4 audit closes the categorical partition without a native CUDA claim");
+
+  ExactHigherSupportProductCudaTask nonterminal = tasks[0];
+  nonterminal.task_id = 10U;
+  nonterminal.product = root_product(index, cloud.size(), 3U);
+  const auto rejected = context.evaluate(
+      std::span<const ExactHigherSupportProductCudaTask>{&nonterminal, 1U});
+  check(
+      rejected.status == ExactHigherSupportProductCudaStatus::invalid_batch &&
+          rejected.records.empty() &&
+          exact_higher_support_product_fake_launcher_call_count() == 1U,
+      "a terminal geometry task with a nonterminal receipt is rejected before launch");
+
+  ExactHigherSupportProductCudaTask still_valid_positive = tasks[0];
+  still_valid_positive.task_id = 11U;
+  still_valid_positive.kind =
+      ExactHigherSupportProductCudaTaskKind::support_prune;
+  const auto after_rejection = context.evaluate(
+      std::span<const ExactHigherSupportProductCudaTask>{
+          &still_valid_positive, 1U});
+  check(
+      after_rejection.complete() && after_rejection.records.size() == 1U &&
+          exact_higher_support_product_fake_launcher_call_count() == 2U,
+      "prelaunch terminal validation rejection does not poison existing positive decisions");
+}
+
+void test_hostile_terminal_category_is_atomic_and_poisoning() {
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_exact_higher_support_product_fake();
+  const CanonicalPointCloud cloud = terminal_geometry_cloud();
+  MortonLbvhBuildContext builder{cloud.size()};
+  auto build = builder.build(cloud);
+  const MortonLbvhIndex& index = build.certified_index();
+  const LeafNodeFixture leaf_nodes = individual_leaf_nodes(index);
+  auto lease = builder.release_device_traversal_lease(build);
+  const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+  ExactHigherSupportProductCudaContext context{
+      index, cloud, std::move(lease), 1U};
+  const ExactHigherSupportProductCudaTask task =
+      terminal_geometry_task<3U>(
+          leaf_nodes, cloud, {0U, 1U, 2U}, epoch, 1U);
+  corrupt_next_exact_higher_support_product_terminal_geometry_category();
+  check_throws<std::logic_error>(
+      [&] {
+        static_cast<void>(context.evaluate(
+            std::span<const ExactHigherSupportProductCudaTask>{&task, 1U}));
+      },
+      "an invalid category with a matching result digest is rejected atomically");
+  check_throws<std::logic_error>(
+      [&] {
+        static_cast<void>(context.evaluate(
+            std::span<const ExactHigherSupportProductCudaTask>{&task, 1U}));
+      },
+      "a hostile terminal category poisons the shared context");
+}
+
+void test_terminal_geometry_host_fallback_routes() {
+  {
+    reset_fake_gpu_phase14_morton_lbvh_build();
+    reset_exact_higher_support_product_fake();
+    const CanonicalPointCloud cloud = terminal_geometry_cloud();
+    MortonLbvhBuildContext builder{cloud.size()};
+    auto build = builder.build(cloud);
+    const MortonLbvhIndex& index = build.certified_index();
+    const LeafNodeFixture leaf_nodes = individual_leaf_nodes(index);
+    auto lease = builder.release_device_traversal_lease(build);
+    const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+    ExactHigherSupportProductCudaContext context{
+        index, cloud, std::move(lease), 1U};
+    const ExactHigherSupportProductCudaTask task =
+        terminal_geometry_task<3U>(
+            leaf_nodes, cloud, {0U, 1U, 2U}, epoch, 1U);
+    force_next_exact_higher_support_product_int256_fallback();
+    const auto result = context.evaluate(
+        std::span<const ExactHigherSupportProductCudaTask>{&task, 1U});
+    check(
+        result.complete() && result.records.size() == 1U &&
+            result.records[0].terminal_geometry_decision ==
+                ExactHigherSupportTerminalGeometryDecision::minimal &&
+            result.records[0].backend ==
+                ExactHigherSupportProductCudaBackend::bounded_dyadic_int512 &&
+            result.records[0].cpu_fallback_performed &&
+            result.audit.bounded_dyadic_int512_count == 1U &&
+            result.audit.terminal_minimal_count == 1U,
+        "a terminal int256 sentinel is replayed categorically by host int512");
+  }
+
+  {
+    reset_fake_gpu_phase14_morton_lbvh_build();
+    reset_exact_higher_support_product_fake();
+    const CanonicalPointCloud cloud = int512_boundary_cloud();
+    MortonLbvhBuildContext builder{cloud.size()};
+    auto build = builder.build(cloud);
+    const MortonLbvhIndex& index = build.certified_index();
+    const LeafNodeFixture leaf_nodes = individual_leaf_nodes(index);
+    auto lease = builder.release_device_traversal_lease(build);
+    const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+    ExactHigherSupportProductCudaContext context{
+        index, cloud, std::move(lease), 1U};
+    const ExactHigherSupportProductCudaTask task =
+        terminal_geometry_task<4U>(
+            leaf_nodes, cloud, {0U, 1U, 2U, 3U}, epoch, 1U);
+    force_next_exact_higher_support_product_int512_fallback();
+    const auto result = context.evaluate(
+        std::span<const ExactHigherSupportProductCudaTask>{&task, 1U});
+    check(
+        result.complete() && result.records.size() == 1U &&
+            result.records[0].terminal_geometry_decision ==
+                ExactHigherSupportTerminalGeometryDecision::
+                    exterior_circumcenter &&
+            result.records[0].backend ==
+                ExactHigherSupportProductCudaBackend::bounded_dyadic_int1024 &&
+            result.records[0].cpu_fallback_performed &&
+            result.audit.bounded_dyadic_int1024_count == 1U &&
+            result.audit.terminal_exterior_circumcenter_count == 1U,
+        "a terminal int512 sentinel is replayed categorically by host int1024");
+  }
+
+  {
+    reset_fake_gpu_phase14_morton_lbvh_build();
+    reset_exact_higher_support_product_fake();
+    const CanonicalPointCloud cloud = wide_exponent_cloud();
+    MortonLbvhBuildContext builder{cloud.size()};
+    auto build = builder.build(cloud);
+    const MortonLbvhIndex& index = build.certified_index();
+    const LeafNodeFixture leaf_nodes = individual_leaf_nodes(index);
+    auto lease = builder.release_device_traversal_lease(build);
+    const std::uint64_t epoch = lease.audit().source_snapshot_epoch;
+    ExactHigherSupportProductCudaContext context{
+        index, cloud, std::move(lease), 1U};
+    const ExactHigherSupportProductCudaTask task =
+        terminal_geometry_task<3U>(
+            leaf_nodes, cloud, {0U, 1U, 2U}, epoch, 1U);
+    const auto result = context.evaluate(
+        std::span<const ExactHigherSupportProductCudaTask>{&task, 1U});
+    check(
+        result.complete() && result.records.size() == 1U &&
+            result.records[0].terminal_geometry_decision ==
+                ExactHigherSupportTerminalGeometryDecision::boundary_reduced &&
+            result.records[0].backend == ExactHigherSupportProductCudaBackend::
+                arbitrary_precision_rational &&
+            result.records[0].cpu_fallback_performed &&
+            result.audit.arbitrary_precision_rational_fallback_count == 1U &&
+            result.audit.terminal_boundary_reduced_count == 1U,
+        "a terminal category outside int1024 is replayed by the exact rational host DAG");
+  }
+}
+
 void test_host_fake_is_positive_only_stream_proposal() {
   reset_fake_gpu_phase14_morton_lbvh_build();
   reset_exact_higher_support_product_fake();
@@ -682,6 +979,27 @@ void test_host_fake_is_positive_only_stream_proposal() {
   const ExactHigherSupportStreamBudget budget = unlimited_stream_budget();
   const auto cpu_result =
       build_exact_higher_support_stream(index, cloud, 4U, budget);
+  const bool terminal_nonminimal_emit_well_prune = std::any_of(
+      cpu_result.prune_certificates.begin(),
+      cpu_result.prune_certificates.end(),
+      [](const auto& certificate) {
+        if (certificate.reason !=
+                ExactHigherSupportPruneReason::no_well_centered_support ||
+            certificate.product.group_count !=
+                certificate.product.support_size) {
+          return false;
+        }
+        for (std::size_t index = 0U;
+             index < certificate.product.group_count;
+             ++index) {
+          const auto& group = certificate.product.groups[index];
+          if (group.multiplicity != 1U ||
+              group.leaf_end != group.leaf_begin + 1U) {
+            return false;
+          }
+        }
+        return true;
+      });
 
   auto lease = builder.release_device_traversal_lease(build);
   ExactHigherSupportProductCudaContext context{
@@ -689,14 +1007,24 @@ void test_host_fake_is_positive_only_stream_proposal() {
   ExactHigherSupportProductCudaPositiveDecisionAdapter adapter{
       context, index, cloud};
   force_exact_higher_support_product_false_positives(true);
+  force_exact_higher_support_product_wrong_terminal_geometry_categories(true);
   const auto assisted_result = build_exact_higher_support_stream(
       index, cloud, 4U, budget, adapter.source());
   force_exact_higher_support_product_false_positives(false);
+  force_exact_higher_support_product_wrong_terminal_geometry_categories(false);
 
   check(
-      cpu_result.stream_complete() && assisted_result == cpu_result,
+      cpu_result.stream_complete() && assisted_result == cpu_result &&
+          terminal_nonminimal_emit_well_prune &&
+          cpu_result.audit.minimal_leaf_count > 0U &&
+          cpu_result.audit.affinely_dependent_leaf_count == 0U &&
+          cpu_result.audit.boundary_reduced_leaf_count == 0U &&
+          cpu_result.audit.exterior_circumcenter_leaf_count == 0U &&
+          cpu_result.audit.leaf_support_analysis_count ==
+              cpu_result.audit.minimal_leaf_count,
       "the sealed CUDA seam preserves the complete authenticated sparse "
-      "higher-support stream with fieldwise exact structural equality");
+      "higher-support stream while nonminimal terminals remain exact "
+      "emit_well_prune records rather than leaf classifications");
   const auto& audit = adapter.audit();
   check(
       audit.source_binding_validated &&
@@ -705,11 +1033,18 @@ void test_host_fake_is_positive_only_stream_proposal() {
           audit.submitted_task_count > 0U &&
           audit.submitted_task_count ==
               audit.support_prune_task_count +
-                  audit.query_strict_interior_task_count &&
+                  audit.query_strict_interior_task_count +
+                  audit.terminal_support_geometry_task_count &&
           audit.certified_positive_count > 0U &&
           audit.host_fake_positive_proposal_count ==
               audit.certified_positive_count &&
           exact_higher_support_product_forced_false_positive_count() > 0U &&
+          audit.terminal_support_geometry_task_count > 0U &&
+          audit.terminal_geometry_decision_count ==
+              audit.terminal_support_geometry_task_count &&
+          audit.terminal_geometry_host_fake_decision_count ==
+              audit.terminal_geometry_decision_count &&
+          !audit.terminal_geometry_decision_native_cuda &&
           audit.native_certified_positive_count == 0U &&
           !audit.disabled_after_failure &&
           !audit.floating_point_decision_performed &&
@@ -720,9 +1055,13 @@ void test_host_fake_is_positive_only_stream_proposal() {
       "never as native exact authority");
   check(
       adapter.source().bound_to(index, cloud) &&
-          !adapter.source().native_exact_authority(),
+          !adapter.source().native_exact_authority() &&
+          adapter.source().terminal_geometry_source().bound_to(index, cloud) &&
+          !adapter.source()
+               .terminal_geometry_source()
+               .native_exact_authority(),
       "the sealed source retains the exact cloud/LBVH binding and withholds "
-      "native authority from the host fake");
+      "native authority from the host fake and terminal classifier");
 
   const std::size_t task_count_before_terminal_session =
       adapter.audit().submitted_task_count;
@@ -782,6 +1121,7 @@ void test_host_fake_is_positive_only_stream_proposal() {
       batched_audit.prefetch_call_count > 0U &&
           batched_audit.support_frontier_prefetch_call_count > 0U &&
           batched_audit.query_plan_prefetch_call_count > 0U &&
+          batched_audit.terminal_geometry_prefetch_call_count > 0U &&
           batched_audit.prefetched_task_count > 0U &&
           batched_audit.maximum_batch_size > 1U &&
           batched_audit.cache_hit_count > 0U &&
@@ -1078,6 +1418,9 @@ void test_int256_sentinel_falls_back_to_host_int512() {
 int main() {
   test_batched_parity_and_preflight();
   test_positive_certificates_and_disjoint_query_receipt();
+  test_terminal_geometry_host_contract_categories();
+  test_hostile_terminal_category_is_atomic_and_poisoning();
+  test_terminal_geometry_host_fallback_routes();
   test_host_fake_is_positive_only_stream_proposal();
   test_adapter_launcher_corruption_fails_open_once();
   test_adapter_non_std_launcher_exception_fails_open_once();
