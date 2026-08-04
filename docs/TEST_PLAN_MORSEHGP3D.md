@@ -2562,6 +2562,8 @@ La totalité est désormais testée d'abord par les liens d'événements, et non
 - tester statiquement le refus des options combinées avant toute action externe, l'acceptation du JSON direct mono-ligne non trié, le rejet des clés dupliquées, des mutations de la matrice deux par quatre, des ressources `ptxas`, du PTX et du memcheck, ainsi que le passage worker--final et les mutations de statut, génération ou provenance;
 - ne publier l'artefact v6 qu'après arrêt ciblé et relecture `TERMINATED`; ne déduire ni classifieur terminal complet, ni pipeline produit, SLO, 50 k, reprise 10 M/30 M ou statut public.
 
+Résultat observé : le [reçu G4 schema 6](validation/phase15_exact_higher_support_terminal_geometry_cuda_g4_57dc0e6.json), de SHA-256 `b5c51d80c52d9e11215ddfe0ac4ac0a2f822e473383924e430a3230cd44cd6a1`, lie le commit propre `57dc0e6ba2e15f07f216eb7641c6f70e4405448c` et l'arbre `6e3c6435abc445d6dd3a1f5bf30189310b8f1023`. Les 21 tâches, la matrice deux par quatre, les trois largeurs, le fallback rationnel, la parité CPU, la répétabilité, AOT `sm_120` sans PTX et memcheck passent. La même génération G4 est relue `TERMINATED` à `2026-08-04T17:22:36Z`. Ce résultat qualifie `terminal_geometry_native_cuda=true` dans le seul composant borné; `terminal_classification_native_cuda=false`, `component_only=true` et `public_status=not_claimed` restent autoritaires.
+
 ### T15-K1-NORMALIZED-PRODUCT — lots exacts d'ordre un
 
 - recertifier fraîchement Borůvka et son digest de forêt avant de construire une session move-only;
