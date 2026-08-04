@@ -1,6 +1,7 @@
 #include "morsehgp3d/gpu/exact_pair_block_to_direct_pair_terminal.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp"
 #include "morsehgp3d/gpu/exact_pair_block_automatic_prune_recipe_catalog.hpp"
 #include "morsehgp3d/gpu/morton_lbvh_build.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_terminal_forest_reduction.hpp"
@@ -30,11 +31,15 @@ namespace {
 
 using Clock = std::chrono::steady_clock;
 using morsehgp3d::exact::CertifiedPoint3;
+using morsehgp3d::gpu::ExactHigherSupportProductCudaContext;
+using morsehgp3d::gpu::
+    ExactHigherSupportProductCudaPositiveDecisionAdapter;
 using morsehgp3d::gpu::ExactPairBlockToDirectPairTerminalBudget;
 using morsehgp3d::gpu::ExactPairBlockAutomaticPruneRecipeCatalogBudget;
 using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaConfig;
 using morsehgp3d::gpu::ExactPairBlockTransactionalFrontierResidentCudaContext;
 using morsehgp3d::gpu::MortonLbvhBuildContext;
+using morsehgp3d::gpu::MortonLbvhSequentialProductTraversalAuthority;
 using morsehgp3d::hierarchy::ExactDirectSaddleArmSeedBudget;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
@@ -411,17 +416,29 @@ int run(const Options& options) {
         "the exact automatic prune-recipe catalog did not close");
   }
   const Clock::time_point scheduler_setup_begin = recipe_catalog_end;
-  auto traversal = builder.release_device_traversal_lease(build);
-  auto scheduler = ExactPairBlockTransactionalFrontierResidentCudaContext::
-      start(
-          std::move(traversal),
-          index,
-          cloud,
-          ExactPairBlockTransactionalFrontierResidentCudaConfig{
-              options.maximum_order + 1U, 16U, 8U, 16U, 4U});
-  const Clock::time_point scheduler_begin = Clock::now();
-  auto cut = scheduler.run(recipe_catalog.recipes);
-  const Clock::time_point scheduler_end = Clock::now();
+  MortonLbvhSequentialProductTraversalAuthority product_traversal{
+      builder.release_device_traversal_lease(build)};
+  Clock::time_point scheduler_begin{};
+  Clock::time_point scheduler_end{};
+  auto cut = [&]() {
+    auto pair_view = product_traversal.release_pair_view();
+    auto scheduler = ExactPairBlockTransactionalFrontierResidentCudaContext::
+        start(
+            std::move(pair_view),
+            index,
+            cloud,
+            ExactPairBlockTransactionalFrontierResidentCudaConfig{
+                options.maximum_order + 1U, 16U, 8U, 16U, 4U});
+    scheduler_begin = Clock::now();
+    auto result = scheduler.run(recipe_catalog.recipes);
+    scheduler_end = Clock::now();
+    return result;
+  }();
+  if (!product_traversal.higher_support_view_available()) {
+    throw std::logic_error(
+        "the resident pair scheduler did not release its unique traversal "
+        "view before the higher-support path");
+  }
   const Clock::time_point cut_validation_begin = Clock::now();
   const bool cut_certified =
       cut.qualified_cuda_terminal_authority() && cut.complete() &&
@@ -462,13 +479,111 @@ int run(const Options& options) {
   const ExactHigherSupportStreamBudget higher_budget =
       unlimited_higher_budget();
   const Clock::time_point higher_begin = Clock::now();
-  ExactHigherSupportTerminalSession higher_session{
-      index, cloud, options.maximum_order, higher_budget, 256U};
-  const bool higher_terminal =
-      higher_session.run_to_terminal() ==
-      ExactHigherSupportTerminalRunStatus::terminal;
-  auto higher_authority = std::move(higher_session).seal();
+  bool higher_terminal = false;
+  bool higher_context_bound = false;
+  std::uint64_t higher_source_snapshot_epoch = 0U;
+  morsehgp3d::gpu::
+      ExactHigherSupportProductCudaPositiveDecisionAdapterAudit
+          higher_adapter_audit{};
+  auto higher_authority = [&]() {
+    auto higher_support_view =
+        product_traversal.release_higher_support_view();
+    ExactHigherSupportProductCudaContext higher_context{
+        index, cloud, std::move(higher_support_view), 256U};
+    higher_context_bound = higher_context.bound_to(index, cloud) &&
+        !higher_context.host_fake();
+    higher_source_snapshot_epoch =
+        higher_context.source_snapshot_epoch();
+    ExactHigherSupportProductCudaPositiveDecisionAdapter higher_adapter{
+        higher_context, index, cloud};
+    ExactHigherSupportTerminalSession higher_session{
+        index,
+        cloud,
+        options.maximum_order,
+        higher_adapter.source(),
+        higher_budget,
+        256U};
+    higher_terminal =
+        higher_session.run_to_terminal() ==
+        ExactHigherSupportTerminalRunStatus::terminal;
+    auto authority = std::move(higher_session).seal();
+    higher_adapter_audit = higher_adapter.audit();
+    return authority;
+  }();
   const Clock::time_point higher_end = Clock::now();
+  const auto product_traversal_audit = product_traversal.audit();
+  const bool shared_product_traversal_certified =
+      product_traversal.complete() &&
+      product_traversal_audit.retained_device_snapshot_count == 1U &&
+      product_traversal_audit.persistent_capacity_accounting_count == 1U &&
+      product_traversal_audit.device_snapshot_copy_count == 0U &&
+      product_traversal_audit.source_traversal_lease_consumption_count == 1U &&
+      product_traversal_audit.pair_view_emission_count == 1U &&
+      product_traversal_audit.higher_support_view_emission_count == 1U &&
+      product_traversal_audit.pair_view_lifetime_completed &&
+      product_traversal_audit.higher_support_view_lifetime_completed &&
+      !product_traversal_audit.pair_view_outstanding &&
+      !product_traversal_audit.higher_support_view_outstanding &&
+      product_traversal_audit.source_snapshot_epoch != 0U &&
+      product_traversal_audit.source_snapshot_epoch ==
+          cut_audit.source_snapshot_epoch &&
+      product_traversal_audit.source_snapshot_epoch ==
+          higher_source_snapshot_epoch &&
+      product_traversal_audit.source_cloud_identity_retained &&
+      product_traversal_audit.source_index_identity_retained &&
+      product_traversal_audit.source_snapshot_epoch_retained &&
+      product_traversal_audit.immutable_device_views_preserved &&
+      product_traversal_audit.pair_then_higher_support_order_enforced &&
+      !product_traversal_audit.raw_device_pointer_exposed &&
+      !product_traversal_audit.second_host_snapshot_retained &&
+      !product_traversal_audit.higher_order_delaunay_mosaic_materialized &&
+      !product_traversal_audit.global_cell_or_coface_arena_materialized &&
+      !product_traversal_audit.public_status_claimed;
+  const bool higher_adapter_certified =
+      higher_context_bound && higher_adapter_audit.source_binding_validated &&
+      higher_adapter_audit.native_exact_authority &&
+      !higher_adapter_audit.host_fake_positive_proposals_require_cpu_replay &&
+      higher_adapter_audit.submitted_task_count > 0U &&
+      higher_adapter_audit.submitted_task_count ==
+          higher_adapter_audit.support_prune_task_count +
+              higher_adapter_audit.query_strict_interior_task_count &&
+      higher_adapter_audit.prefetched_task_count ==
+          higher_adapter_audit.submitted_task_count &&
+      higher_adapter_audit.on_demand_task_count == 0U &&
+      higher_adapter_audit.prefetch_call_count > 0U &&
+      higher_adapter_audit.support_frontier_prefetch_call_count > 0U &&
+      higher_adapter_audit.query_plan_prefetch_call_count > 0U &&
+      higher_adapter_audit.evaluate_call_count > 0U &&
+      higher_adapter_audit.synchronization_count ==
+          higher_adapter_audit.evaluate_call_count &&
+      higher_adapter_audit.maximum_batch_size > 1U &&
+      higher_adapter_audit.cache_miss_count == 0U &&
+      higher_adapter_audit.native_certified_positive_count ==
+          higher_adapter_audit.certified_positive_count &&
+      higher_adapter_audit.host_fake_positive_proposal_count == 0U &&
+      higher_adapter_audit.bounded_dyadic_int256_count +
+              higher_adapter_audit.bounded_dyadic_int512_count +
+              higher_adapter_audit.bounded_dyadic_int1024_count +
+              higher_adapter_audit.arbitrary_precision_rational_count ==
+          higher_adapter_audit.submitted_task_count &&
+      !higher_adapter_audit.disabled_after_failure &&
+      !higher_adapter_audit.floating_point_decision_performed &&
+      !higher_adapter_audit.global_product_frontier_mutated &&
+      !higher_adapter_audit.higher_order_delaunay_materialized &&
+      !higher_adapter_audit.hierarchy_or_public_status_claimed;
+  const bool higher_authority_certified =
+      higher_authority.sealed_in_process_terminal_authority() &&
+      higher_authority.bound_to(
+          index, cloud, options.maximum_order) &&
+      higher_authority.terminal_checkpoint_local_integrity_verified() &&
+      higher_authority.canonical_root_anchored_internal_production() &&
+      higher_authority
+          .committed_chunks_captured_once_without_fresh_replay() &&
+      higher_authority.no_forbidden_global_structure_materialized() &&
+      !higher_authority.fresh_replay_performed() &&
+      !higher_authority.durable_authority_claimed() &&
+      !higher_authority.hierarchy_reduction_performed() &&
+      !higher_authority.public_status_claimed();
 
   const Clock::time_point bridge_begin = Clock::now();
   auto bridge_result = morsehgp3d::hierarchy::
@@ -634,7 +749,9 @@ int run(const Options& options) {
       !vertical_journal->vertical_maps_complete &&
       !vertical_journal->public_status_claimed;
   const bool qualified = recipe_catalog_certified && cut_certified &&
-      pair_authority_certified && higher_terminal && bridge_result.certified() &&
+      pair_authority_certified && shared_product_traversal_certified &&
+      higher_adapter_certified && higher_terminal &&
+      higher_authority_certified && bridge_result.certified() &&
       provider_replay_certified && forest_reduction_certified &&
       vertical_target_pipeline_certified && vertical_journal_certified;
 
@@ -663,8 +780,14 @@ int run(const Options& options) {
       << (cut_certified ? "true" : "false") << ','
       << "\"pair_authority_certified\":"
       << (pair_authority_certified ? "true" : "false") << ','
+      << "\"shared_product_traversal_certified\":"
+      << (shared_product_traversal_certified ? "true" : "false") << ','
+      << "\"higher_adapter_certified\":"
+      << (higher_adapter_certified ? "true" : "false") << ','
       << "\"higher_terminal\":"
       << (higher_terminal ? "true" : "false") << ','
+      << "\"higher_authority_certified\":"
+      << (higher_authority_certified ? "true" : "false") << ','
       << "\"bridge_certified\":"
       << (bridge_result.certified() ? "true" : "false") << ','
       << "\"provider_replay_certified\":"
@@ -675,6 +798,49 @@ int run(const Options& options) {
       << (vertical_target_pipeline_certified ? "true" : "false") << ','
       << "\"vertical_journal_certified\":"
       << (vertical_journal_certified ? "true" : "false") << ','
+      << "\"shared_product_traversal\":{\"retained_snapshots\":"
+      << product_traversal_audit.retained_device_snapshot_count
+      << ",\"capacity_accountings\":"
+      << product_traversal_audit.persistent_capacity_accounting_count
+      << ",\"snapshot_copies\":"
+      << product_traversal_audit.device_snapshot_copy_count
+      << ",\"source_lease_consumptions\":"
+      << product_traversal_audit.source_traversal_lease_consumption_count
+      << ",\"pair_views\":"
+      << product_traversal_audit.pair_view_emission_count
+      << ",\"higher_support_views\":"
+      << product_traversal_audit.higher_support_view_emission_count
+      << ",\"pair_lifetime_completed\":"
+      << (product_traversal_audit.pair_view_lifetime_completed
+              ? "true"
+              : "false")
+      << ",\"higher_support_lifetime_completed\":"
+      << (product_traversal_audit.higher_support_view_lifetime_completed
+              ? "true"
+              : "false")
+      << ",\"source_snapshot_epoch\":"
+      << product_traversal_audit.source_snapshot_epoch << "},"
+      << "\"higher_support_positive_adapter\":{\"submitted_tasks\":"
+      << higher_adapter_audit.submitted_task_count
+      << ",\"prefetched_tasks\":"
+      << higher_adapter_audit.prefetched_task_count
+      << ",\"on_demand_tasks\":"
+      << higher_adapter_audit.on_demand_task_count
+      << ",\"support_prune_tasks\":"
+      << higher_adapter_audit.support_prune_task_count
+      << ",\"query_strict_interior_tasks\":"
+      << higher_adapter_audit.query_strict_interior_task_count
+      << ",\"evaluate_calls\":"
+      << higher_adapter_audit.evaluate_call_count
+      << ",\"synchronizations\":"
+      << higher_adapter_audit.synchronization_count
+      << ",\"maximum_batch_size\":"
+      << higher_adapter_audit.maximum_batch_size
+      << ",\"cache_hits\":" << higher_adapter_audit.cache_hit_count
+      << ",\"cache_misses\":" << higher_adapter_audit.cache_miss_count
+      << ",\"native_exact_authority\":"
+      << (higher_adapter_audit.native_exact_authority ? "true" : "false")
+      << ",\"terminal_classification_native_cuda\":false},"
       << "\"automatic_recipe_catalog\":{\"decision\":"
       << static_cast<unsigned>(recipe_catalog_audit.decision)
       << ",\"product_visits\":"

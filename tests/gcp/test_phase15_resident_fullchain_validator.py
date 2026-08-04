@@ -74,12 +74,40 @@ def valid_fullchain_result() -> dict:
         "recipe_catalog_certified": True,
         "cut_certified": True,
         "pair_authority_certified": True,
+        "shared_product_traversal_certified": True,
+        "higher_adapter_certified": True,
         "higher_terminal": True,
+        "higher_authority_certified": True,
         "bridge_certified": True,
         "provider_replay_certified": True,
         "forest_reduction_certified": True,
         "vertical_target_pipeline_certified": True,
         "vertical_journal_certified": True,
+        "shared_product_traversal": {
+            "retained_snapshots": 1,
+            "capacity_accountings": 1,
+            "snapshot_copies": 0,
+            "source_lease_consumptions": 1,
+            "pair_views": 1,
+            "higher_support_views": 1,
+            "pair_lifetime_completed": True,
+            "higher_support_lifetime_completed": True,
+            "source_snapshot_epoch": 1,
+        },
+        "higher_support_positive_adapter": {
+            "submitted_tasks": 4,
+            "prefetched_tasks": 4,
+            "on_demand_tasks": 0,
+            "support_prune_tasks": 2,
+            "query_strict_interior_tasks": 2,
+            "evaluate_calls": 2,
+            "synchronizations": 2,
+            "maximum_batch_size": 2,
+            "cache_hits": 4,
+            "cache_misses": 0,
+            "native_exact_authority": True,
+            "terminal_classification_native_cuda": False,
+        },
         "automatic_recipe_catalog": {
             "decision": 9,
             "product_visits": 4,
@@ -289,6 +317,86 @@ class Phase15ResidentFullchainValidatorTests(unittest.TestCase):
 
     def test_v5_mixed_resolved_and_unresolved_contract_is_accepted(self) -> None:
         self.assert_both_accept(valid_fullchain_result())
+
+    def test_shared_pair_then_higher_traversal_receipt_is_strict(self) -> None:
+        top_level_mutations = {
+            "shared_product_traversal_certified": False,
+            "higher_adapter_certified": False,
+            "higher_authority_certified": False,
+        }
+        for key, replacement in top_level_mutations.items():
+            with self.subTest(top_level=key):
+                value = deepcopy(valid_fullchain_result())
+                value[key] = replacement
+                self.assert_both_reject(value)
+
+        traversal_mutations = {
+            "retained_snapshots": 2,
+            "capacity_accountings": 2,
+            "snapshot_copies": 1,
+            "source_lease_consumptions": 2,
+            "pair_views": 2,
+            "higher_support_views": 2,
+            "pair_lifetime_completed": False,
+            "higher_support_lifetime_completed": False,
+            "source_snapshot_epoch": 0,
+        }
+        for key, replacement in traversal_mutations.items():
+            with self.subTest(traversal=key):
+                value = deepcopy(valid_fullchain_result())
+                value["shared_product_traversal"][key] = replacement
+                self.assert_both_reject(value)
+
+        for key in (
+            "pair_lifetime_completed",
+            "higher_support_lifetime_completed",
+        ):
+            with self.subTest(non_boolean=key):
+                value = deepcopy(valid_fullchain_result())
+                value["shared_product_traversal"][key] = 1
+                self.assert_both_reject(value)
+
+    def test_higher_support_adapter_remains_positive_only(self) -> None:
+        adapter_mutations = {
+            "submitted_tasks": 0,
+            "prefetched_tasks": 3,
+            "on_demand_tasks": 1,
+            "support_prune_tasks": 3,
+            "evaluate_calls": 0,
+            "synchronizations": 1,
+            "maximum_batch_size": 1,
+            "cache_misses": 1,
+            "native_exact_authority": False,
+            "terminal_classification_native_cuda": True,
+        }
+        for key, replacement in adapter_mutations.items():
+            with self.subTest(adapter=key):
+                value = deepcopy(valid_fullchain_result())
+                value["higher_support_positive_adapter"][key] = replacement
+                self.assert_both_reject(value)
+
+    def test_new_receipt_keys_are_mandatory_and_claims_stay_closed(self) -> None:
+        for key in (
+            "shared_product_traversal_certified",
+            "higher_adapter_certified",
+            "higher_authority_certified",
+            "shared_product_traversal",
+            "higher_support_positive_adapter",
+        ):
+            with self.subTest(missing=key):
+                value = deepcopy(valid_fullchain_result())
+                del value[key]
+                self.assert_both_reject(value)
+
+        for claim in (
+            "ordinary_or_higher_order_delaunay",
+            "global_pair_matrix",
+            "public_exact",
+        ):
+            with self.subTest(claim=claim):
+                value = deepcopy(valid_fullchain_result())
+                value["claims"][claim] = True
+                self.assert_both_reject(value)
 
     def test_namespace_identity_is_mandatory_and_digest_bound(self) -> None:
         mutations = {

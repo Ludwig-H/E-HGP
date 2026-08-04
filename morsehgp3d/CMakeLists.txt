@@ -5709,6 +5709,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
     morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification
     PRIVATE
       morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda
+      morsehgp3d::gpu_exact_higher_support_product_cuda
       morsehgp3d::gpu_exact_pair_block_automatic_prune_recipe_catalog
       morsehgp3d::exact_pair_block_to_direct_pair_terminal
       morsehgp3d::direct_morse_forest_source_authority

@@ -3813,10 +3813,13 @@ exact(
         "point_count", "maximum_order", "maximum_closed_rank",
         "require_complete", "qualified",
         "recipe_catalog_certified",
-        "cut_certified", "pair_authority_certified", "higher_terminal",
+        "cut_certified", "pair_authority_certified",
+        "shared_product_traversal_certified", "higher_adapter_certified",
+        "higher_terminal", "higher_authority_certified",
         "bridge_certified", "provider_replay_certified",
         "forest_reduction_certified", "vertical_target_pipeline_certified",
         "vertical_journal_certified",
+        "shared_product_traversal", "higher_support_positive_adapter",
         "automatic_recipe_catalog", "pair_cut", "pair_classification", "reducer_source",
         "forest_reduction", "vertical_target_pipeline", "vertical_journal", "digests",
         "timings_nanoseconds", "claims", "qualified_scope",
@@ -3839,7 +3842,10 @@ for key, expected in {
     "recipe_catalog_certified": True,
     "cut_certified": True,
     "pair_authority_certified": True,
+    "shared_product_traversal_certified": True,
+    "higher_adapter_certified": True,
     "higher_terminal": True,
+    "higher_authority_certified": True,
     "bridge_certified": True,
     "provider_replay_certified": True,
     "forest_reduction_certified": True,
@@ -3849,6 +3855,72 @@ for key, expected in {
 }.items():
     if value.get(key) != expected or type(value.get(key)) is not type(expected):
         fail(f"reducer qualification.{key}: unexpected value")
+shared_traversal = exact(
+    value.get("shared_product_traversal"),
+    {
+        "retained_snapshots", "capacity_accountings", "snapshot_copies",
+        "source_lease_consumptions", "pair_views", "higher_support_views",
+        "pair_lifetime_completed", "higher_support_lifetime_completed",
+        "source_snapshot_epoch",
+    },
+    "shared_product_traversal",
+)
+for key in {
+    "retained_snapshots", "capacity_accountings", "snapshot_copies",
+    "source_lease_consumptions", "pair_views", "higher_support_views",
+    "source_snapshot_epoch",
+}:
+    integer(shared_traversal.get(key), f"shared_product_traversal.{key}")
+if shared_traversal != {
+    "retained_snapshots": 1,
+    "capacity_accountings": 1,
+    "snapshot_copies": 0,
+    "source_lease_consumptions": 1,
+    "pair_views": 1,
+    "higher_support_views": 1,
+    "pair_lifetime_completed": True,
+    "higher_support_lifetime_completed": True,
+    "source_snapshot_epoch": shared_traversal["source_snapshot_epoch"],
+} or shared_traversal["source_snapshot_epoch"] < 1:
+    fail("shared_product_traversal: unique pair-then-higher snapshot contract did not close")
+if (
+    shared_traversal.get("pair_lifetime_completed") is not True
+    or shared_traversal.get("higher_support_lifetime_completed") is not True
+):
+    fail("shared_product_traversal: view lifetime flags are not strict booleans")
+higher_adapter = exact(
+    value.get("higher_support_positive_adapter"),
+    {
+        "submitted_tasks", "prefetched_tasks", "on_demand_tasks",
+        "support_prune_tasks", "query_strict_interior_tasks",
+        "evaluate_calls", "synchronizations", "maximum_batch_size",
+        "cache_hits", "cache_misses", "native_exact_authority",
+        "terminal_classification_native_cuda",
+    },
+    "higher_support_positive_adapter",
+)
+for key in {
+    "submitted_tasks", "prefetched_tasks", "on_demand_tasks",
+    "support_prune_tasks", "query_strict_interior_tasks",
+    "evaluate_calls", "synchronizations", "maximum_batch_size",
+    "cache_hits", "cache_misses",
+}:
+    integer(higher_adapter.get(key), f"higher_support_positive_adapter.{key}")
+if (
+    higher_adapter["submitted_tasks"] < 1
+    or higher_adapter["submitted_tasks"] !=
+        higher_adapter["support_prune_tasks"] +
+        higher_adapter["query_strict_interior_tasks"]
+    or higher_adapter["prefetched_tasks"] != higher_adapter["submitted_tasks"]
+    or higher_adapter["on_demand_tasks"] != 0
+    or higher_adapter["evaluate_calls"] < 1
+    or higher_adapter["synchronizations"] != higher_adapter["evaluate_calls"]
+    or higher_adapter["maximum_batch_size"] <= 1
+    or higher_adapter["cache_misses"] != 0
+    or higher_adapter.get("native_exact_authority") is not True
+    or higher_adapter.get("terminal_classification_native_cuda") is not False
+):
+    fail("higher_support_positive_adapter: exact positive-only CUDA receipt did not close")
 catalog = exact(
     value.get("automatic_recipe_catalog"),
     {
