@@ -32,6 +32,8 @@ inline constexpr std::uint32_t morton_lbvh_device_build_schema_version = 1U;
 inline constexpr std::uint32_t morton_lbvh_device_lease_schema_version = 1U;
 inline constexpr std::uint32_t
     morton_lbvh_device_traversal_lease_schema_version = 1U;
+inline constexpr std::uint32_t
+    morton_lbvh_sequential_product_traversal_authority_schema_version = 1U;
 inline constexpr std::string_view morton_lbvh_device_build_backend =
     "cuda_g4";
 inline constexpr std::string_view morton_lbvh_device_build_profile =
@@ -69,6 +71,21 @@ inline constexpr std::string_view
         "architecture_only";
 inline constexpr std::string_view
     morton_lbvh_device_traversal_lease_public_status = "not_claimed";
+inline constexpr std::string_view
+    morton_lbvh_sequential_product_traversal_authority_backend =
+        "cuda_g4_plus_reference_cpu";
+inline constexpr std::string_view
+    morton_lbvh_sequential_product_traversal_authority_profile =
+        "hgp_reduced";
+inline constexpr std::string_view
+    morton_lbvh_sequential_product_traversal_authority_mode =
+        "single_snapshot_pair_then_higher_support_read_only_views";
+inline constexpr std::string_view
+    morton_lbvh_sequential_product_traversal_authority_deployment_status =
+        "architecture_only";
+inline constexpr std::string_view
+    morton_lbvh_sequential_product_traversal_authority_public_status =
+        "not_claimed";
 
 enum class MortonLbvhDeviceBuildDecision : std::uint8_t {
   complete,
@@ -344,6 +361,7 @@ class MortonLbvhDeviceTraversalLease final {
   friend class AnchoredPairCandidateProposalContext;
   friend class Binary64LbvhTopKContext;
   friend class MortonLbvhBuildContext;
+  friend class MortonLbvhSequentialProductTraversalAuthority;
   friend class MortonYao48PairFrontierContext;
   friend class RankedDiametralPairCatalogContext;
   friend class ExactHigherSupportProductCudaContext;
@@ -353,6 +371,108 @@ class MortonLbvhDeviceTraversalLease final {
   friend detail::Phase15MortonYao48DeviceTiledAdoptedTraversal
   detail::adopt_phase15_morton_yao48_device_tiled_traversal(
       MortonLbvhDeviceTraversalLease&& traversal_lease);
+};
+
+// Sealed two-consumer authority for the product path.  It consumes the sole
+// traversal lease, then emits exactly one pair-path lease followed by exactly
+// one higher-support-path lease.  Both leases preserve the same immutable
+// cloud/index tokens, snapshot epoch, capacities and opaque const device
+// addresses.  The second emission is refused while the first lease (or a
+// context that adopted it) remains alive, so the same resident snapshot is
+// shared sequentially without exposing pointers or allocating a second arena.
+struct MortonLbvhSequentialProductTraversalAuthorityAudit {
+  std::size_t maximum_point_count{};
+  std::size_t maximum_node_count{};
+  std::size_t point_count{};
+  std::size_t certified_node_count{};
+  std::size_t persistent_device_byte_capacity{};
+  std::size_t retained_device_snapshot_count{};
+  std::size_t persistent_capacity_accounting_count{};
+  std::size_t device_snapshot_copy_count{};
+  std::size_t source_traversal_lease_consumption_count{};
+  std::size_t pair_view_emission_count{};
+  std::size_t higher_support_view_emission_count{};
+  std::uint64_t source_snapshot_epoch{};
+
+  bool source_lease_ready_at_consumption{false};
+  bool source_cloud_identity_retained{false};
+  bool source_index_identity_retained{false};
+  bool source_snapshot_epoch_retained{false};
+  bool immutable_device_views_preserved{false};
+  bool pair_then_higher_support_order_enforced{false};
+  bool pair_view_outstanding{false};
+  bool pair_view_lifetime_completed{false};
+  bool higher_support_view_outstanding{false};
+  bool higher_support_view_lifetime_completed{false};
+  bool raw_device_pointer_exposed{false};
+  bool second_host_snapshot_retained{false};
+  bool higher_order_delaunay_mosaic_materialized{false};
+  bool global_cell_or_coface_arena_materialized{false};
+  bool public_status_claimed{false};
+
+  friend bool operator==(
+      const MortonLbvhSequentialProductTraversalAuthorityAudit&,
+      const MortonLbvhSequentialProductTraversalAuthorityAudit&) = default;
+};
+
+class MortonLbvhSequentialProductTraversalAuthority final {
+ public:
+  static constexpr std::string_view backend =
+      morton_lbvh_sequential_product_traversal_authority_backend;
+  static constexpr std::string_view profile =
+      morton_lbvh_sequential_product_traversal_authority_profile;
+  static constexpr std::string_view mode =
+      morton_lbvh_sequential_product_traversal_authority_mode;
+  static constexpr std::string_view deployment_status =
+      morton_lbvh_sequential_product_traversal_authority_deployment_status;
+  static constexpr std::string_view public_status =
+      morton_lbvh_sequential_product_traversal_authority_public_status;
+
+  explicit MortonLbvhSequentialProductTraversalAuthority(
+      MortonLbvhDeviceTraversalLease&& source_lease);
+  ~MortonLbvhSequentialProductTraversalAuthority() noexcept = default;
+
+  MortonLbvhSequentialProductTraversalAuthority(
+      MortonLbvhSequentialProductTraversalAuthority&&) noexcept = default;
+  MortonLbvhSequentialProductTraversalAuthority& operator=(
+      MortonLbvhSequentialProductTraversalAuthority&&) noexcept = default;
+  MortonLbvhSequentialProductTraversalAuthority(
+      const MortonLbvhSequentialProductTraversalAuthority&) = delete;
+  MortonLbvhSequentialProductTraversalAuthority& operator=(
+      const MortonLbvhSequentialProductTraversalAuthority&) = delete;
+
+  [[nodiscard]] std::uint32_t schema_version() const noexcept {
+    return schema_version_;
+  }
+  [[nodiscard]] bool ready() const noexcept;
+  [[nodiscard]] bool pair_view_available() const noexcept;
+  [[nodiscard]] bool higher_support_view_available() const noexcept;
+  [[nodiscard]] bool complete() const noexcept;
+  [[nodiscard]] MortonLbvhSequentialProductTraversalAuthorityAudit audit()
+      const noexcept;
+
+  [[nodiscard]] MortonLbvhDeviceTraversalLease release_pair_view();
+  [[nodiscard]] MortonLbvhDeviceTraversalLease
+  release_higher_support_view();
+
+ private:
+  [[nodiscard]] MortonLbvhDeviceTraversalLease make_read_only_view(
+      std::weak_ptr<void>& view_lifetime);
+
+  std::uint32_t schema_version_{
+      morton_lbvh_sequential_product_traversal_authority_schema_version};
+  MortonLbvhDeviceTraversalLeaseAudit source_audit_{};
+  std::shared_ptr<void> source_resources_;
+  std::shared_ptr<const void> source_cloud_identity_;
+  std::shared_ptr<const void> source_index_identity_;
+  const std::uint64_t* device_coordinate_bits_{};
+  const std::uint64_t* device_morton_point_ids_{};
+  const void* device_nodes_{};
+  int cuda_device_{-1};
+  std::weak_ptr<void> pair_view_lifetime_;
+  std::weak_ptr<void> higher_support_view_lifetime_;
+  std::size_t pair_view_emission_count_{};
+  std::size_t higher_support_view_emission_count_{};
 };
 
 class MortonLbvhDeviceBuildResult final {

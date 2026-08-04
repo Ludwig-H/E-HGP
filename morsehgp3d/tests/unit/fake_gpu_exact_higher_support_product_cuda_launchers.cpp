@@ -14,14 +14,21 @@ namespace morsehgp3d::gpu::test_support {
 namespace {
 
 std::atomic<bool> corrupt_next_receipt{false};
+std::atomic<bool> throw_non_std_on_next_launch{false};
 std::atomic<bool> force_next_int256_fallback{false};
 std::atomic<bool> force_next_int512_fallback{false};
+std::atomic<bool> force_false_positive_certificates{false};
+std::atomic<std::size_t> forced_false_positive_count{0U};
 std::atomic<std::size_t> launcher_call_count{0U};
 
 }  // namespace
 
 void corrupt_next_exact_higher_support_product_receipt() noexcept {
   corrupt_next_receipt.store(true, std::memory_order_relaxed);
+}
+
+void throw_non_std_on_next_exact_higher_support_product_launch() noexcept {
+  throw_non_std_on_next_launch.store(true, std::memory_order_relaxed);
 }
 
 void force_next_exact_higher_support_product_int256_fallback() noexcept {
@@ -32,10 +39,24 @@ void force_next_exact_higher_support_product_int512_fallback() noexcept {
   force_next_int512_fallback.store(true, std::memory_order_relaxed);
 }
 
+void force_exact_higher_support_product_false_positives(
+    bool enabled) noexcept {
+  force_false_positive_certificates.store(
+      enabled, std::memory_order_relaxed);
+}
+
+std::size_t exact_higher_support_product_forced_false_positive_count()
+    noexcept {
+  return forced_false_positive_count.load(std::memory_order_relaxed);
+}
+
 void reset_exact_higher_support_product_fake() noexcept {
   corrupt_next_receipt.store(false, std::memory_order_relaxed);
+  throw_non_std_on_next_launch.store(false, std::memory_order_relaxed);
   force_next_int256_fallback.store(false, std::memory_order_relaxed);
   force_next_int512_fallback.store(false, std::memory_order_relaxed);
+  force_false_positive_certificates.store(false, std::memory_order_relaxed);
+  forced_false_positive_count.store(0U, std::memory_order_relaxed);
   launcher_call_count.store(0U, std::memory_order_relaxed);
 }
 
@@ -47,6 +68,11 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
   return corrupt_next_receipt.exchange(false, std::memory_order_relaxed);
 }
 
+[[nodiscard]] bool consume_non_std_launch_exception() noexcept {
+  return throw_non_std_on_next_launch.exchange(
+      false, std::memory_order_relaxed);
+}
+
 [[nodiscard]] bool consume_forced_int256_fallback() noexcept {
   return force_next_int256_fallback.exchange(
       false, std::memory_order_relaxed);
@@ -55,6 +81,15 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
 [[nodiscard]] bool consume_forced_int512_fallback() noexcept {
   return force_next_int512_fallback.exchange(
       false, std::memory_order_relaxed);
+}
+
+[[nodiscard]] bool false_positive_certificates_forced() noexcept {
+  return force_false_positive_certificates.load(
+      std::memory_order_relaxed);
+}
+
+void count_forced_false_positive() noexcept {
+  forced_false_positive_count.fetch_add(1U, std::memory_order_relaxed);
 }
 
 void count_launcher_call() noexcept {
@@ -198,6 +233,9 @@ phase15_launch_exact_higher_support_product_cuda(
         "the fake exact higher-support product launcher rejected its batch");
   }
   test_support::count_launcher_call();
+  if (test_support::consume_non_std_launch_exception()) {
+    throw 17;
+  }
 
   Phase15ExactHigherSupportProductCudaReceipt receipt;
   receipt.records.reserve(request.tasks.size());
@@ -263,6 +301,11 @@ phase15_launch_exact_higher_support_product_cuda(
       record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
           arbitrary_precision_rational;
     } else {
+      if (test_support::false_positive_certificates_forced() &&
+          !certified) {
+        certified = true;
+        test_support::count_forced_false_positive();
+      }
       record.outcome = certified
           ? Phase15ExactHigherSupportProductCudaDeviceOutcome::certified
           : Phase15ExactHigherSupportProductCudaDeviceOutcome::exact_false;

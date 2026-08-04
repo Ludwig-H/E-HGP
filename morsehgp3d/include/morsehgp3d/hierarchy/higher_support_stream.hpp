@@ -17,6 +17,10 @@
 #include <utility>
 #include <vector>
 
+namespace morsehgp3d::gpu {
+class ExactHigherSupportProductCudaPositiveDecisionAdapter;
+}
+
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::size_t higher_support_maximum_requested_order = 10U;
@@ -130,12 +134,156 @@ struct ExactHigherSupportNodeReceipt {
       const ExactHigherSupportNodeReceipt&) = default;
 };
 
+// One proposal-only query decision addressed by immutable Morton/LBVH
+// receipts.  Batching these small records lets an accelerator evaluate the
+// complete bounded local witness plan without transferring support masses or
+// materializing any global pair, triangle or tetrahedron catalogue.
+struct ExactHigherSupportQueryDecisionRequest {
+  ExactHigherSupportFrontierEntry product{};
+  ExactHigherSupportNodeReceipt query_node{};
+
+  friend bool operator==(
+      const ExactHigherSupportQueryDecisionRequest&,
+      const ExactHigherSupportQueryDecisionRequest&) = default;
+};
+
 static_assert(std::is_standard_layout_v<ExactHigherSupportNodeGroup>);
 static_assert(std::is_trivially_copyable_v<ExactHigherSupportNodeGroup>);
 static_assert(std::is_standard_layout_v<ExactHigherSupportFrontierEntry>);
 static_assert(std::is_trivially_copyable_v<ExactHigherSupportFrontierEntry>);
 static_assert(std::is_standard_layout_v<ExactHigherSupportNodeReceipt>);
 static_assert(std::is_trivially_copyable_v<ExactHigherSupportNodeReceipt>);
+static_assert(
+    std::is_standard_layout_v<ExactHigherSupportQueryDecisionRequest>);
+static_assert(
+    std::is_trivially_copyable_v<ExactHigherSupportQueryDecisionRequest>);
+
+// Sealed positive-only decision seam for an exact accelerator.  The stream
+// remains fail-open: an absent or negative proposal is recomputed by the CPU
+// decision DAG.  A non-native producer (including the host fake) can only
+// propose a positive result, which the stream also replays on the CPU before
+// using it.  Only the CUDA adapter can mint an instance, preventing callers
+// from injecting an unauthenticated geometric decision.
+class ExactHigherSupportPositiveDecisionSource final {
+ public:
+  ExactHigherSupportPositiveDecisionSource(
+      const ExactHigherSupportPositiveDecisionSource&) = delete;
+  ExactHigherSupportPositiveDecisionSource& operator=(
+      const ExactHigherSupportPositiveDecisionSource&) = delete;
+  ExactHigherSupportPositiveDecisionSource(
+      ExactHigherSupportPositiveDecisionSource&&) = delete;
+  ExactHigherSupportPositiveDecisionSource& operator=(
+      ExactHigherSupportPositiveDecisionSource&&) = delete;
+
+  [[nodiscard]] bool bound_to(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud) const noexcept {
+    return bound_to_ != nullptr &&
+        bound_to_(state_, index, cloud);
+  }
+
+  [[nodiscard]] bool native_exact_authority() const noexcept {
+    return native_exact_authority_ != nullptr &&
+        native_exact_authority_(state_);
+  }
+
+  // The scheduler only offers already-live sparse frontier entries and the
+  // fixed-size local Morton witness plan.  These calls are performance hints:
+  // a missing, negative or failed proposal is always recomputed by the CPU
+  // decision DAG before it can affect the scientific stream.
+  [[nodiscard]] std::size_t maximum_prefetch_task_count() const noexcept {
+    return maximum_prefetch_task_count_ != nullptr
+        ? maximum_prefetch_task_count_(state_)
+        : 0U;
+  }
+
+  void prefetch_no_well_centered_supports(
+      std::span<const ExactHigherSupportFrontierEntry> products) const
+      noexcept {
+    if (prefetch_no_well_centered_supports_ != nullptr) {
+      prefetch_no_well_centered_supports_(state_, products);
+    }
+  }
+
+  void prefetch_query_strictly_inside(
+      std::span<const ExactHigherSupportQueryDecisionRequest> requests) const
+      noexcept {
+    if (prefetch_query_strictly_inside_ != nullptr) {
+      prefetch_query_strictly_inside_(state_, requests);
+    }
+  }
+
+  [[nodiscard]] bool certifies_no_well_centered_support(
+      const ExactHigherSupportFrontierEntry& product) const {
+    return certify_no_well_centered_support_ != nullptr &&
+        certify_no_well_centered_support_(state_, product);
+  }
+
+  [[nodiscard]] bool certifies_query_strictly_inside(
+      const ExactHigherSupportFrontierEntry& product,
+      const ExactHigherSupportNodeReceipt& query_node) const {
+    return certify_query_strictly_inside_ != nullptr &&
+        certify_query_strictly_inside_(state_, product, query_node);
+  }
+
+ private:
+  using BoundToFunction = bool (*)(
+      void*,
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&) noexcept;
+  using NativeExactAuthorityFunction = bool (*)(void*) noexcept;
+  using MaximumPrefetchTaskCountFunction = std::size_t (*)(void*) noexcept;
+  using PrefetchNoWellCenteredSupportsFunction = void (*)(
+      void*, std::span<const ExactHigherSupportFrontierEntry>) noexcept;
+  using PrefetchQueryStrictlyInsideFunction = void (*)(
+      void*,
+      std::span<const ExactHigherSupportQueryDecisionRequest>) noexcept;
+  using CertifyNoWellCenteredSupportFunction = bool (*)(
+      void*, const ExactHigherSupportFrontierEntry&);
+  using CertifyQueryStrictlyInsideFunction = bool (*)(
+      void*,
+      const ExactHigherSupportFrontierEntry&,
+      const ExactHigherSupportNodeReceipt&);
+
+  friend class ::morsehgp3d::gpu::
+      ExactHigherSupportProductCudaPositiveDecisionAdapter;
+
+  ExactHigherSupportPositiveDecisionSource(
+      void* state,
+      BoundToFunction bound_to,
+      NativeExactAuthorityFunction native_exact_authority,
+      MaximumPrefetchTaskCountFunction maximum_prefetch_task_count,
+      PrefetchNoWellCenteredSupportsFunction
+          prefetch_no_well_centered_supports,
+      PrefetchQueryStrictlyInsideFunction prefetch_query_strictly_inside,
+      CertifyNoWellCenteredSupportFunction
+          certify_no_well_centered_support,
+      CertifyQueryStrictlyInsideFunction
+          certify_query_strictly_inside) noexcept
+      : state_(state),
+        bound_to_(bound_to),
+        native_exact_authority_(native_exact_authority),
+        maximum_prefetch_task_count_(maximum_prefetch_task_count),
+        prefetch_no_well_centered_supports_(
+            prefetch_no_well_centered_supports),
+        prefetch_query_strictly_inside_(
+            prefetch_query_strictly_inside),
+        certify_no_well_centered_support_(
+            certify_no_well_centered_support),
+        certify_query_strictly_inside_(
+            certify_query_strictly_inside) {}
+
+  void* state_{};
+  BoundToFunction bound_to_{};
+  NativeExactAuthorityFunction native_exact_authority_{};
+  MaximumPrefetchTaskCountFunction maximum_prefetch_task_count_{};
+  PrefetchNoWellCenteredSupportsFunction
+      prefetch_no_well_centered_supports_{};
+  PrefetchQueryStrictlyInsideFunction prefetch_query_strictly_inside_{};
+  CertifyNoWellCenteredSupportFunction
+      certify_no_well_centered_support_{};
+  CertifyQueryStrictlyInsideFunction certify_query_strictly_inside_{};
+};
 
 enum class ExactHigherSupportPruneReason : std::uint8_t {
   no_well_centered_support,
@@ -896,9 +1044,23 @@ class ExactHigherSupportTerminalSession {
       ExactHigherSupportStreamBudget chunk_budget,
       std::size_t maximum_chunk_count);
   ExactHigherSupportTerminalSession(
+      const ExactHigherSupportAuthorityContext& authority,
+      const ExactHigherSupportPositiveDecisionSource&
+          positive_decision_source,
+      ExactHigherSupportStreamBudget chunk_budget,
+      std::size_t maximum_chunk_count);
+  ExactHigherSupportTerminalSession(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
       std::size_t requested_maximum_order,
+      ExactHigherSupportStreamBudget chunk_budget,
+      std::size_t maximum_chunk_count);
+  ExactHigherSupportTerminalSession(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t requested_maximum_order,
+      const ExactHigherSupportPositiveDecisionSource&
+          positive_decision_source,
       ExactHigherSupportStreamBudget chunk_budget,
       std::size_t maximum_chunk_count);
   ExactHigherSupportTerminalSession(
@@ -911,6 +1073,34 @@ class ExactHigherSupportTerminalSession {
       const spatial::MortonLbvhIndex&,
       spatial::CanonicalPointCloud&&,
       std::size_t,
+      ExactHigherSupportStreamBudget,
+      std::size_t) = delete;
+  ExactHigherSupportTerminalSession(
+      spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t,
+      const ExactHigherSupportPositiveDecisionSource&,
+      ExactHigherSupportStreamBudget,
+      std::size_t) = delete;
+  ExactHigherSupportTerminalSession(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t,
+      const ExactHigherSupportPositiveDecisionSource&,
+      ExactHigherSupportStreamBudget,
+      std::size_t) = delete;
+  ExactHigherSupportTerminalSession(
+      const spatial::MortonLbvhIndex&,
+      spatial::CanonicalPointCloud&&,
+      std::size_t,
+      const ExactHigherSupportPositiveDecisionSource&,
+      ExactHigherSupportStreamBudget,
+      std::size_t) = delete;
+  ExactHigherSupportTerminalSession(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::size_t,
+      const ExactHigherSupportPositiveDecisionSource&,
       ExactHigherSupportStreamBudget,
       std::size_t) = delete;
 
@@ -993,6 +1183,10 @@ class ExactHigherSupportTerminalSession {
   contract::CanonicalId released_output_chain_digest_{};
   contract::CanonicalId released_checkpoint_digest_{};
   std::shared_ptr<bool> unsealed_segment_outstanding_;
+  // Non-owning by design: the sealed CUDA adapter is non-movable and must
+  // outlive the resident terminal session that consumes it.
+  const ExactHigherSupportPositiveDecisionSource*
+      positive_decision_source_{};
   bool unsealed_segment_drain_performed_{false};
   bool sealed_{false};
 };
@@ -1015,6 +1209,15 @@ build_exact_higher_support_stream(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
     const ExactHigherSupportStreamBudget& budget);
+
+[[nodiscard]] ExactHigherSupportStreamResult
+build_exact_higher_support_stream(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportStreamBudget& budget,
+    const ExactHigherSupportPositiveDecisionSource&
+        positive_decision_source);
 
 [[nodiscard]] ExactHigherSupportCheckpointManifest
 make_exact_higher_support_checkpoint_manifest(

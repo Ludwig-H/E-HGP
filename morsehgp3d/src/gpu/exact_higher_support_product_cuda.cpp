@@ -250,10 +250,6 @@ ExactHigherSupportProductCudaContext::
 ExactHigherSupportProductCudaContext(
     ExactHigherSupportProductCudaContext&&) noexcept = default;
 
-ExactHigherSupportProductCudaContext&
-ExactHigherSupportProductCudaContext::operator=(
-    ExactHigherSupportProductCudaContext&&) noexcept = default;
-
 ExactHigherSupportProductCudaResult
 ExactHigherSupportProductCudaContext::evaluate(
     std::span<const ExactHigherSupportProductCudaTask> tasks) {
@@ -822,6 +818,13 @@ std::uint64_t ExactHigherSupportProductCudaContext::source_snapshot_epoch()
 
 bool ExactHigherSupportProductCudaContext::host_fake() const noexcept {
   return impl_ && impl_->host_fake;
+}
+
+bool ExactHigherSupportProductCudaContext::bound_to(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud) const noexcept {
+  return impl_ != nullptr && impl_->index == &index &&
+      impl_->cloud == &cloud && index.validated_for(cloud);
 }
 
 }  // namespace morsehgp3d::gpu

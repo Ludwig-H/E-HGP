@@ -1076,13 +1076,14 @@ else()
   )
 endif()
 
-# Host/fake contract for the two exact higher-support P6a product decisions.
-# The launcher remains unresolved here and is supplied by a CPU fake in the
-# targeted unit test; no product frontier or DFS integration is claimed.
+# Host/fake contract for the two exact higher-support P6a product decisions
+# and their sealed positive-only sparse-stream adapter.  The launcher remains
+# unresolved here and is supplied by a CPU fake in the targeted unit test.
 add_library(
   morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
   STATIC
     include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
+    include/morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp
     src/cuda/phase15_exact_higher_support_product_fixed.cuh
     src/cuda/phase15_exact_higher_support_product_fixed256.cuh
     src/cuda/phase15_exact_higher_support_product_fixed512.cuh
@@ -1124,6 +1125,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
     morsehgp3d_gpu_exact_higher_support_product_cuda
     STATIC
       include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
+      include/morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp
       src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
       src/cuda/phase15_exact_higher_support_product_fixed.cuh
       src/cuda/phase15_exact_higher_support_product_fixed256.cuh

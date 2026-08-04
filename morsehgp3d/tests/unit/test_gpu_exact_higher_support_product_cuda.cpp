@@ -1,4 +1,5 @@
 #include "morsehgp3d/gpu/exact_higher_support_product_cuda.hpp"
+#include "morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp"
 
 #include "fake_gpu_phase14_morton_lbvh_build_launchers.hpp"
 
@@ -23,11 +24,16 @@
 
 namespace morsehgp3d::gpu::test_support {
 void corrupt_next_exact_higher_support_product_receipt() noexcept;
+void throw_non_std_on_next_exact_higher_support_product_launch() noexcept;
 void force_next_exact_higher_support_product_int256_fallback() noexcept;
 void force_next_exact_higher_support_product_int512_fallback() noexcept;
 void reset_exact_higher_support_product_fake() noexcept;
 [[nodiscard]] std::size_t
 exact_higher_support_product_fake_launcher_call_count() noexcept;
+[[nodiscard]] std::size_t
+exact_higher_support_product_forced_false_positive_count() noexcept;
+void force_exact_higher_support_product_false_positives(
+    bool enabled) noexcept;
 }  // namespace morsehgp3d::gpu::test_support
 
 namespace {
@@ -36,6 +42,8 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaBackend;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaContext;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaOutcome;
+using morsehgp3d::gpu::
+    ExactHigherSupportProductCudaPositiveDecisionAdapter;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaStatus;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaStopReason;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaTask;
@@ -45,7 +53,13 @@ using morsehgp3d::gpu::MortonLbvhDeviceTraversalLease;
 using morsehgp3d::gpu::test_support::
     corrupt_next_exact_higher_support_product_receipt;
 using morsehgp3d::gpu::test_support::
+    throw_non_std_on_next_exact_higher_support_product_launch;
+using morsehgp3d::gpu::test_support::
     exact_higher_support_product_fake_launcher_call_count;
+using morsehgp3d::gpu::test_support::
+    exact_higher_support_product_forced_false_positive_count;
+using morsehgp3d::gpu::test_support::
+    force_exact_higher_support_product_false_positives;
 using morsehgp3d::gpu::test_support::
     force_next_exact_higher_support_product_int256_fallback;
 using morsehgp3d::gpu::test_support::
@@ -58,6 +72,11 @@ using morsehgp3d::hierarchy::
     ExactHigherSupportProductAabbDecisionBackend;
 using morsehgp3d::hierarchy::ExactHigherSupportFrontierEntry;
 using morsehgp3d::hierarchy::ExactHigherSupportNodeReceipt;
+using morsehgp3d::hierarchy::ExactHigherSupportPositiveDecisionSource;
+using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
+using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
+using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
+using morsehgp3d::hierarchy::build_exact_higher_support_stream;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_no_well_centered_certified;
 using morsehgp3d::hierarchy::
@@ -66,11 +85,75 @@ using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
 
+template <typename Adapter>
+concept RvalueSourceAccessible = requires(Adapter&& adapter) {
+  std::move(adapter).source();
+};
+
+template <typename Adapter>
+concept ConstLvalueSourceAccessible = requires(const Adapter& adapter) {
+  adapter.source();
+};
+
 static_assert(
     !std::is_copy_constructible_v<ExactHigherSupportProductCudaContext>);
 static_assert(
+    !std::is_copy_constructible_v<
+        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
+static_assert(
+    !std::is_move_constructible_v<
+        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
+static_assert(
+    !RvalueSourceAccessible<
+        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
+static_assert(
+    !ConstLvalueSourceAccessible<
+        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
+static_assert(
+    !std::is_default_constructible_v<
+        morsehgp3d::hierarchy::
+            ExactHigherSupportPositiveDecisionSource>);
+static_assert(
+    !std::is_constructible_v<
+        ExactHigherSupportTerminalSession,
+        MortonLbvhIndex&&,
+        const CanonicalPointCloud&,
+        std::size_t,
+        const ExactHigherSupportPositiveDecisionSource&,
+        ExactHigherSupportStreamBudget,
+        std::size_t>);
+static_assert(
+    !std::is_constructible_v<
+        ExactHigherSupportTerminalSession,
+        const MortonLbvhIndex&&,
+        const CanonicalPointCloud&,
+        std::size_t,
+        const ExactHigherSupportPositiveDecisionSource&,
+        ExactHigherSupportStreamBudget,
+        std::size_t>);
+static_assert(
+    !std::is_constructible_v<
+        ExactHigherSupportTerminalSession,
+        const MortonLbvhIndex&,
+        CanonicalPointCloud&&,
+        std::size_t,
+        const ExactHigherSupportPositiveDecisionSource&,
+        ExactHigherSupportStreamBudget,
+        std::size_t>);
+static_assert(
+    !std::is_constructible_v<
+        ExactHigherSupportTerminalSession,
+        const MortonLbvhIndex&,
+        const CanonicalPointCloud&&,
+        std::size_t,
+        const ExactHigherSupportPositiveDecisionSource&,
+        ExactHigherSupportStreamBudget,
+        std::size_t>);
+static_assert(
     std::is_nothrow_move_constructible_v<
         ExactHigherSupportProductCudaContext>);
+static_assert(
+    !std::is_move_assignable_v<ExactHigherSupportProductCudaContext>);
 static_assert(
     !std::is_constructible_v<
         ExactHigherSupportProductCudaContext,
@@ -181,6 +264,19 @@ void check_throws(Function&& function, const std::string& message) {
       point(12.0, 0.0, 0.0)};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] ExactHigherSupportStreamBudget unlimited_stream_budget() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return ExactHigherSupportStreamBudget{
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum};
 }
 
 [[nodiscard]] morsehgp3d::spatial::PointId canonical_point_id_for_source(
@@ -576,6 +672,194 @@ void test_positive_certificates_and_disjoint_query_receipt() {
       "positive support/query records close counters and both batch digests");
 }
 
+void test_host_fake_is_positive_only_stream_proposal() {
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_exact_higher_support_product_fake();
+  const CanonicalPointCloud cloud = positive_certificate_cloud();
+  MortonLbvhBuildContext builder{cloud.size()};
+  auto build = builder.build(cloud);
+  const MortonLbvhIndex& index = build.certified_index();
+  const ExactHigherSupportStreamBudget budget = unlimited_stream_budget();
+  const auto cpu_result =
+      build_exact_higher_support_stream(index, cloud, 4U, budget);
+
+  auto lease = builder.release_device_traversal_lease(build);
+  ExactHigherSupportProductCudaContext context{
+      index, cloud, std::move(lease), 64U};
+  ExactHigherSupportProductCudaPositiveDecisionAdapter adapter{
+      context, index, cloud};
+  force_exact_higher_support_product_false_positives(true);
+  const auto assisted_result = build_exact_higher_support_stream(
+      index, cloud, 4U, budget, adapter.source());
+  force_exact_higher_support_product_false_positives(false);
+
+  check(
+      cpu_result.stream_complete() && assisted_result == cpu_result,
+      "the sealed CUDA seam preserves the complete authenticated sparse "
+      "higher-support stream with fieldwise exact structural equality");
+  const auto& audit = adapter.audit();
+  check(
+      audit.source_binding_validated &&
+          !audit.native_exact_authority &&
+          audit.host_fake_positive_proposals_require_cpu_replay &&
+          audit.submitted_task_count > 0U &&
+          audit.submitted_task_count ==
+              audit.support_prune_task_count +
+                  audit.query_strict_interior_task_count &&
+          audit.certified_positive_count > 0U &&
+          audit.host_fake_positive_proposal_count ==
+              audit.certified_positive_count &&
+          exact_higher_support_product_forced_false_positive_count() > 0U &&
+          audit.native_certified_positive_count == 0U &&
+          !audit.disabled_after_failure &&
+          !audit.floating_point_decision_performed &&
+          !audit.global_product_frontier_mutated &&
+          !audit.higher_order_delaunay_materialized &&
+          !audit.hierarchy_or_public_status_claimed,
+      "the host fake is audited only as a replayed positive proposal and "
+      "never as native exact authority");
+  check(
+      adapter.source().bound_to(index, cloud) &&
+          !adapter.source().native_exact_authority(),
+      "the sealed source retains the exact cloud/LBVH binding and withholds "
+      "native authority from the host fake");
+
+  const std::size_t task_count_before_terminal_session =
+      adapter.audit().submitted_task_count;
+  const std::size_t cache_hits_before_terminal_session =
+      adapter.audit().cache_hit_count;
+  ExactHigherSupportStreamBudget multi_chunk_budget = budget;
+  multi_chunk_budget.maximum_work_unit_count = 32U;
+  constexpr std::size_t maximum_chunk_count = 10000U;
+  ExactHigherSupportTerminalSession cpu_terminal_session{
+      index, cloud, 4U, multi_chunk_budget, maximum_chunk_count};
+  check(
+      cpu_terminal_session.run_to_terminal() ==
+          ExactHigherSupportTerminalRunStatus::terminal,
+      "the CPU resident sparse terminal reaches the multi-chunk reference");
+  auto cpu_terminal_authority = std::move(cpu_terminal_session).seal();
+  ExactHigherSupportTerminalSession assisted_terminal_session{
+      index,
+      cloud,
+      4U,
+      adapter.source(),
+      multi_chunk_budget,
+      maximum_chunk_count};
+  check(
+      assisted_terminal_session.run_to_terminal() ==
+          ExactHigherSupportTerminalRunStatus::terminal,
+      "the same sealed decision source runs the multi-chunk resident sparse "
+      "terminal producer to completion");
+  auto assisted_terminal_authority =
+      std::move(assisted_terminal_session).seal();
+  check(
+      cpu_terminal_authority.sealed_in_process_terminal_authority() &&
+          assisted_terminal_authority
+              .sealed_in_process_terminal_authority() &&
+          cpu_terminal_authority.chunk_count() > 1U &&
+          assisted_terminal_authority.terminal_checkpoint() ==
+              cpu_terminal_authority.terminal_checkpoint() &&
+          assisted_terminal_authority.segments().size() ==
+              cpu_terminal_authority.segments().size() &&
+          std::equal(
+              assisted_terminal_authority.segments().begin(),
+              assisted_terminal_authority.segments().end(),
+              cpu_terminal_authority.segments().begin()) &&
+          assisted_terminal_authority.event_count() ==
+              cpu_result.events.size() &&
+          assisted_terminal_authority
+                  .relevant_extra_shell_diagnostic_count() ==
+              cpu_result.relevant_extra_shell_diagnostics.size() &&
+          adapter.audit().submitted_task_count >=
+              task_count_before_terminal_session &&
+          adapter.audit().cache_hit_count >
+              cache_hits_before_terminal_session,
+      "the CUDA-assisted resident terminal preserves every CPU checkpoint, "
+      "segment, digest and audit across multiple chunks without claiming "
+      "durable or public authority");
+  const auto batched_audit = adapter.audit();
+  check(
+      batched_audit.prefetch_call_count > 0U &&
+          batched_audit.support_frontier_prefetch_call_count > 0U &&
+          batched_audit.query_plan_prefetch_call_count > 0U &&
+          batched_audit.prefetched_task_count > 0U &&
+          batched_audit.maximum_batch_size > 1U &&
+          batched_audit.cache_hit_count > 0U &&
+          batched_audit.evaluate_call_count <
+              batched_audit.submitted_task_count &&
+          batched_audit.synchronization_count <
+              batched_audit.submitted_task_count &&
+          batched_audit.maximum_cache_entry_count <=
+              batched_audit.cache_capacity,
+      "the sparse Morton frontier and bounded local witness plans are "
+      "device-batched with cache reuse and strictly fewer evaluations and "
+      "synchronizations than submitted exact tasks");
+}
+
+void test_adapter_launcher_corruption_fails_open_once() {
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_exact_higher_support_product_fake();
+  const CanonicalPointCloud cloud = ordinary_cloud();
+  MortonLbvhBuildContext builder{cloud.size()};
+  auto build = builder.build(cloud);
+  const MortonLbvhIndex& index = build.certified_index();
+  const ExactHigherSupportStreamBudget budget = unlimited_stream_budget();
+  const auto cpu_result =
+      build_exact_higher_support_stream(index, cloud, 4U, budget);
+  auto lease = builder.release_device_traversal_lease(build);
+  ExactHigherSupportProductCudaContext context{
+      index, cloud, std::move(lease), 1U};
+  ExactHigherSupportProductCudaPositiveDecisionAdapter adapter{
+      context, index, cloud};
+
+  corrupt_next_exact_higher_support_product_receipt();
+  const auto fail_open_result = build_exact_higher_support_stream(
+      index, cloud, 4U, budget, adapter.source());
+  const auto audit = adapter.audit();
+  check(
+      fail_open_result == cpu_result && audit.disabled_after_failure &&
+          audit.exception_fail_open_count == 1U &&
+          audit.invalid_result_fail_open_count == 0U &&
+          audit.submitted_task_count == 1U &&
+          audit.disabled_source_fallback_count > 0U &&
+          exact_higher_support_product_fake_launcher_call_count() == 1U,
+      "a malformed accelerator receipt disables the adapter once and the "
+      "complete sparse stream fails open with fieldwise exact structural "
+      "equality to CPU");
+}
+
+void test_adapter_non_std_launcher_exception_fails_open_once() {
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  reset_exact_higher_support_product_fake();
+  const CanonicalPointCloud cloud = ordinary_cloud();
+  MortonLbvhBuildContext builder{cloud.size()};
+  auto build = builder.build(cloud);
+  const MortonLbvhIndex& index = build.certified_index();
+  const ExactHigherSupportStreamBudget budget = unlimited_stream_budget();
+  const auto cpu_result =
+      build_exact_higher_support_stream(index, cloud, 4U, budget);
+  auto lease = builder.release_device_traversal_lease(build);
+  ExactHigherSupportProductCudaContext context{
+      index, cloud, std::move(lease), 1U};
+  ExactHigherSupportProductCudaPositiveDecisionAdapter adapter{
+      context, index, cloud};
+
+  throw_non_std_on_next_exact_higher_support_product_launch();
+  const auto fail_open_result = build_exact_higher_support_stream(
+      index, cloud, 4U, budget, adapter.source());
+  const auto audit = adapter.audit();
+  check(
+      fail_open_result == cpu_result && audit.disabled_after_failure &&
+          audit.exception_fail_open_count == 1U &&
+          audit.invalid_result_fail_open_count == 0U &&
+          audit.submitted_task_count == 1U &&
+          audit.disabled_source_fallback_count > 0U &&
+          exact_higher_support_product_fake_launcher_call_count() == 1U,
+      "a non-standard launcher exception disables the adapter once and "
+      "the complete sparse stream fails open with fieldwise exact structural "
+      "equality to CPU");
+}
+
 void test_foreign_resident_index_identity_is_rejected() {
   reset_fake_gpu_phase14_morton_lbvh_build();
   reset_exact_higher_support_product_fake();
@@ -794,6 +1078,9 @@ void test_int256_sentinel_falls_back_to_host_int512() {
 int main() {
   test_batched_parity_and_preflight();
   test_positive_certificates_and_disjoint_query_receipt();
+  test_host_fake_is_positive_only_stream_proposal();
+  test_adapter_launcher_corruption_fails_open_once();
+  test_adapter_non_std_launcher_exception_fails_open_once();
   test_foreign_resident_index_identity_is_rejected();
   test_int1024_preflight_route();
   test_integral_bigint_fallback();

@@ -1110,6 +1110,53 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+  test_gpu_morton_lbvh_sequential_product_traversal.cpp
+  fake_gpu_exact_higher_support_product_cuda_launchers.cpp
+  fake_gpu_exact_pair_block_transactional_frontier_resident_cuda_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+  PRIVATE
+    morsehgp3d::gpu_exact_higher_support_product_cuda_host_contract
+    morsehgp3d::gpu_exact_pair_block_transactional_frontier_resident_cuda_host_contract
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_gpu_exact_higher_support_product_fixed_tests
   test_gpu_exact_higher_support_product_fixed.cpp
 )
@@ -4631,6 +4678,10 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_exact_higher_support_product_cuda_host_contract
   COMMAND morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_morton_lbvh_sequential_product_traversal
+  COMMAND morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
 )
 add_test(
   NAME morsehgp3d.gpu_exact_higher_support_product_fixed

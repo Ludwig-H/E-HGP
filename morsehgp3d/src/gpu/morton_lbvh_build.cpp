@@ -34,6 +34,19 @@ constexpr std::uint64_t kMortonGridSize =
 constexpr std::uint64_t kMaximumMortonCoordinate =
     kMortonGridSize - UINT64_C(1);
 
+// A product view owns this small host-side indirection, never another device
+// snapshot.  Keeping the source allocation behind the indirection lets the
+// authority observe when an adopted view has left its consumer without
+// exposing the allocation or its raw addresses.
+struct SequentialProductTraversalViewRetainer final {
+  explicit SequentialProductTraversalViewRetainer(
+      std::shared_ptr<void> source_resources)
+      : source_resources_(std::move(source_resources)) {}
+
+ private:
+  std::shared_ptr<void> source_resources_;
+};
+
 [[nodiscard]] std::size_t checked_sum(
     std::size_t left,
     std::size_t right,
@@ -746,6 +759,211 @@ bool MortonLbvhDeviceTraversalLease::ready() const noexcept {
 
 bool MortonLbvhDeviceTraversalLease::cuda_resident() const noexcept {
   return ready() && audit_.cuda_device_storage_retained;
+}
+
+MortonLbvhSequentialProductTraversalAuthority::
+MortonLbvhSequentialProductTraversalAuthority(
+    MortonLbvhDeviceTraversalLease&& source_lease) {
+  if (!source_lease.ready()) {
+    throw std::invalid_argument(
+        "the sequential product traversal authority requires exactly one "
+        "ready traversal lease");
+  }
+
+  source_audit_ = source_lease.audit_;
+  source_resources_ = std::move(source_lease.retained_resources_);
+  source_cloud_identity_ =
+      std::move(source_lease.source_cloud_identity_);
+  source_index_identity_ =
+      std::move(source_lease.source_index_identity_);
+  device_coordinate_bits_ = source_lease.device_coordinate_bits_;
+  device_morton_point_ids_ = source_lease.device_morton_point_ids_;
+  device_nodes_ = source_lease.device_nodes_;
+  cuda_device_ = source_lease.cuda_device_;
+
+  // Make the caller-visible moved-from lease unambiguously unusable even
+  // though its raw addresses were only borrowed const views.
+  source_lease.schema_version_ = 0U;
+  source_lease.audit_ = {};
+  source_lease.device_coordinate_bits_ = nullptr;
+  source_lease.device_morton_point_ids_ = nullptr;
+  source_lease.device_nodes_ = nullptr;
+  source_lease.cuda_device_ = -1;
+
+  if (!ready()) {
+    throw std::logic_error(
+        "the sequential product traversal authority failed to preserve "
+        "its source lease invariants");
+  }
+}
+
+bool MortonLbvhSequentialProductTraversalAuthority::ready() const noexcept {
+  if (schema_version_ !=
+          morton_lbvh_sequential_product_traversal_authority_schema_version ||
+      !source_resources_ || !source_cloud_identity_ ||
+      !source_index_identity_ ||
+      pair_view_emission_count_ > 1U ||
+      higher_support_view_emission_count_ > 1U ||
+      higher_support_view_emission_count_ > pair_view_emission_count_) {
+    return false;
+  }
+  if (higher_support_view_emission_count_ == 1U &&
+      !pair_view_lifetime_.expired()) {
+    return false;
+  }
+
+  // Reuse the lease's complete shape/capacity validator.  This is an
+  // internal shared-owner probe only: it allocates and emits no view and
+  // never copies a host or device snapshot.
+  const MortonLbvhDeviceTraversalLease source_probe{
+      source_audit_,
+      source_resources_,
+      source_cloud_identity_,
+      source_index_identity_,
+      device_coordinate_bits_,
+      device_morton_point_ids_,
+      device_nodes_,
+      cuda_device_};
+  return source_probe.ready();
+}
+
+bool MortonLbvhSequentialProductTraversalAuthority::
+pair_view_available() const noexcept {
+  return ready() && pair_view_emission_count_ == 0U &&
+      higher_support_view_emission_count_ == 0U;
+}
+
+bool MortonLbvhSequentialProductTraversalAuthority::
+higher_support_view_available() const noexcept {
+  return ready() && pair_view_emission_count_ == 1U &&
+      higher_support_view_emission_count_ == 0U &&
+      pair_view_lifetime_.expired();
+}
+
+bool MortonLbvhSequentialProductTraversalAuthority::complete()
+    const noexcept {
+  return ready() && pair_view_emission_count_ == 1U &&
+      higher_support_view_emission_count_ == 1U;
+}
+
+MortonLbvhSequentialProductTraversalAuthorityAudit
+MortonLbvhSequentialProductTraversalAuthority::audit() const noexcept {
+  MortonLbvhSequentialProductTraversalAuthorityAudit result;
+  result.maximum_point_count = source_audit_.maximum_point_count;
+  result.maximum_node_count = source_audit_.maximum_node_count;
+  result.point_count = source_audit_.point_count;
+  result.certified_node_count = source_audit_.certified_node_count;
+  result.persistent_device_byte_capacity =
+      source_audit_.persistent_device_byte_capacity;
+  result.retained_device_snapshot_count = source_resources_ ? 1U : 0U;
+  result.persistent_capacity_accounting_count =
+      source_resources_ ? 1U : 0U;
+  result.device_snapshot_copy_count = 0U;
+  result.source_traversal_lease_consumption_count =
+      source_resources_ ? 1U : 0U;
+  result.pair_view_emission_count = pair_view_emission_count_;
+  result.higher_support_view_emission_count =
+      higher_support_view_emission_count_;
+  result.source_snapshot_epoch = source_audit_.source_snapshot_epoch;
+  result.source_lease_ready_at_consumption =
+      static_cast<bool>(source_resources_);
+  result.source_cloud_identity_retained =
+      static_cast<bool>(source_cloud_identity_);
+  result.source_index_identity_retained =
+      static_cast<bool>(source_index_identity_);
+  result.source_snapshot_epoch_retained =
+      source_audit_.source_snapshot_epoch != 0U;
+  result.immutable_device_views_preserved = ready();
+  result.pair_then_higher_support_order_enforced = ready();
+  result.pair_view_outstanding = pair_view_emission_count_ == 1U &&
+      !pair_view_lifetime_.expired();
+  result.pair_view_lifetime_completed = pair_view_emission_count_ == 1U &&
+      pair_view_lifetime_.expired();
+  result.higher_support_view_outstanding =
+      higher_support_view_emission_count_ == 1U &&
+      !higher_support_view_lifetime_.expired();
+  result.higher_support_view_lifetime_completed =
+      higher_support_view_emission_count_ == 1U &&
+      higher_support_view_lifetime_.expired();
+  return result;
+}
+
+MortonLbvhDeviceTraversalLease
+MortonLbvhSequentialProductTraversalAuthority::make_read_only_view(
+    std::weak_ptr<void>& view_lifetime) {
+  auto owner = std::make_shared<SequentialProductTraversalViewRetainer>(
+      source_resources_);
+  view_lifetime = owner;
+  MortonLbvhDeviceTraversalLease view{
+      source_audit_,
+      std::move(owner),
+      source_cloud_identity_,
+      source_index_identity_,
+      device_coordinate_bits_,
+      device_morton_point_ids_,
+      device_nodes_,
+      cuda_device_};
+  if (!view.ready()) {
+    view_lifetime.reset();
+    throw std::logic_error(
+        "a sequential product traversal view failed to preserve its "
+        "source lease invariants");
+  }
+  return view;
+}
+
+MortonLbvhDeviceTraversalLease
+MortonLbvhSequentialProductTraversalAuthority::release_pair_view() {
+  if (!ready()) {
+    throw std::logic_error(
+        "a moved-from or invalid sequential product traversal authority "
+        "cannot emit a pair view");
+  }
+  if (pair_view_emission_count_ != 0U) {
+    throw std::logic_error(
+        "the sequential product traversal authority emits its pair view "
+        "exactly once");
+  }
+  if (higher_support_view_emission_count_ != 0U) {
+    throw std::logic_error(
+        "the sequential product traversal authority cannot emit a pair "
+        "view after its higher-support view");
+  }
+
+  MortonLbvhDeviceTraversalLease view =
+      make_read_only_view(pair_view_lifetime_);
+  pair_view_emission_count_ = 1U;
+  return view;
+}
+
+MortonLbvhDeviceTraversalLease
+MortonLbvhSequentialProductTraversalAuthority::
+release_higher_support_view() {
+  if (!ready()) {
+    throw std::logic_error(
+        "a moved-from or invalid sequential product traversal authority "
+        "cannot emit a higher-support view");
+  }
+  if (pair_view_emission_count_ == 0U) {
+    throw std::logic_error(
+        "the sequential product traversal authority requires the pair "
+        "view before the higher-support view");
+  }
+  if (higher_support_view_emission_count_ != 0U) {
+    throw std::logic_error(
+        "the sequential product traversal authority emits its "
+        "higher-support view exactly once");
+  }
+  if (!pair_view_lifetime_.expired()) {
+    throw std::logic_error(
+        "the higher-support traversal view cannot overlap the pair-path "
+        "consumer lifetime");
+  }
+
+  MortonLbvhDeviceTraversalLease view =
+      make_read_only_view(higher_support_view_lifetime_);
+  higher_support_view_emission_count_ = 1U;
+  return view;
 }
 
 MortonLbvhDeviceBuildResult::MortonLbvhDeviceBuildResult(

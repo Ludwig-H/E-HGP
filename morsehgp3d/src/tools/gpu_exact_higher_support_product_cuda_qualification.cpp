@@ -1,4 +1,5 @@
 #include "morsehgp3d/gpu/exact_higher_support_product_cuda.hpp"
+#include "morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp"
 
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
 
@@ -24,6 +25,8 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaBackend;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaContext;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaOutcome;
+using morsehgp3d::gpu::
+    ExactHigherSupportProductCudaPositiveDecisionAdapter;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaStatus;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaStopReason;
 using morsehgp3d::gpu::ExactHigherSupportProductCudaTask;
@@ -33,6 +36,8 @@ using morsehgp3d::hierarchy::
     ExactHigherSupportProductAabbDecisionBackend;
 using morsehgp3d::hierarchy::ExactHigherSupportFrontierEntry;
 using morsehgp3d::hierarchy::ExactHigherSupportNodeReceipt;
+using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
+using morsehgp3d::hierarchy::build_exact_higher_support_stream;
 using morsehgp3d::hierarchy::
     exact_higher_support_product_no_well_centered_certified;
 using morsehgp3d::hierarchy::
@@ -44,6 +49,7 @@ using morsehgp3d::spatial::PointId;
 
 inline constexpr std::size_t qualification_task_count = 12U;
 inline constexpr std::size_t fixture_family_count = 6U;
+inline constexpr std::size_t qualification_stream_task_capacity = 256U;
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
   return CertifiedPoint3::from_binary64(x, y, z);
@@ -483,6 +489,19 @@ template <std::size_t SupportSize>
           .count());
 }
 
+[[nodiscard]] ExactHigherSupportStreamBudget unlimited_stream_budget() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return ExactHigherSupportStreamBudget{
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum};
+}
+
 }  // namespace
 
 int main() {
@@ -588,7 +607,10 @@ int main() {
     }
 
     ExactHigherSupportProductCudaContext context{
-        index, cloud, std::move(traversal), tasks.size()};
+        index,
+        cloud,
+        std::move(traversal),
+        qualification_stream_task_capacity};
     const auto batch_begin = std::chrono::steady_clock::now();
     const auto result = context.evaluate(tasks);
     const auto batch_end = std::chrono::steady_clock::now();
@@ -661,6 +683,76 @@ int main() {
         overlap_result.audit.kernel_launch_count == 0U &&
         overlap_result.audit.synchronization_count == 0U;
 
+    // Product-level qualification is insufficient if the sparse traversal
+    // never consumes the device decisions.  Run the same immutable authority
+    // once on the CPU and once through the sealed positive-only native seam;
+    // the authenticated streams must remain fieldwise structurally equal.
+    const ExactHigherSupportStreamBudget stream_budget =
+        unlimited_stream_budget();
+    const auto cpu_stream_begin = std::chrono::steady_clock::now();
+    const auto cpu_stream = build_exact_higher_support_stream(
+        index, cloud, 4U, stream_budget);
+    const auto cpu_stream_end = std::chrono::steady_clock::now();
+    ExactHigherSupportProductCudaPositiveDecisionAdapter stream_adapter{
+        context, index, cloud};
+    const auto cuda_stream_begin = std::chrono::steady_clock::now();
+    const auto cuda_stream = build_exact_higher_support_stream(
+        index, cloud, 4U, stream_budget, stream_adapter.source());
+    const auto cuda_stream_end = std::chrono::steady_clock::now();
+    const auto& stream_adapter_audit = stream_adapter.audit();
+    const bool stream_adapter_qualified =
+        cpu_stream.stream_complete() && cuda_stream == cpu_stream &&
+        stream_adapter.source().bound_to(index, cloud) &&
+        stream_adapter.source().native_exact_authority() &&
+        stream_adapter_audit.native_exact_authority &&
+        !stream_adapter_audit
+             .host_fake_positive_proposals_require_cpu_replay &&
+        stream_adapter_audit.submitted_task_count > 0U &&
+        stream_adapter_audit.certified_positive_count > 0U &&
+        stream_adapter_audit.native_certified_positive_count ==
+            stream_adapter_audit.certified_positive_count &&
+        stream_adapter_audit.native_certified_positive_count ==
+            stream_adapter_audit.native_kernel_certified_positive_count +
+                stream_adapter_audit
+                    .native_component_cpu_fallback_certified_positive_count &&
+        stream_adapter_audit.native_kernel_certified_positive_count > 0U &&
+        stream_adapter_audit.host_fake_positive_proposal_count == 0U &&
+        stream_adapter_audit.support_size_3_certified_positive_count > 0U &&
+        stream_adapter_audit.support_size_4_certified_positive_count > 0U &&
+        stream_adapter_audit.support_size_3_certified_positive_count +
+                stream_adapter_audit.support_size_4_certified_positive_count ==
+            stream_adapter_audit.certified_positive_count &&
+        stream_adapter_audit.support_prune_certified_positive_count > 0U &&
+        stream_adapter_audit
+                .query_strict_interior_certified_positive_count >
+            0U &&
+        stream_adapter_audit.support_prune_certified_positive_count +
+                stream_adapter_audit
+                    .query_strict_interior_certified_positive_count ==
+            stream_adapter_audit.certified_positive_count &&
+        stream_adapter_audit.prefetch_call_count > 0U &&
+        stream_adapter_audit.support_frontier_prefetch_call_count > 0U &&
+        stream_adapter_audit.query_plan_prefetch_call_count > 0U &&
+        stream_adapter_audit.prefetched_task_count ==
+            stream_adapter_audit.submitted_task_count &&
+        stream_adapter_audit.on_demand_task_count == 0U &&
+        stream_adapter_audit.maximum_batch_size > 1U &&
+        stream_adapter_audit.cache_hit_count > 0U &&
+        stream_adapter_audit.cache_miss_count == 0U &&
+        stream_adapter_audit.evaluate_call_count <
+            stream_adapter_audit.submitted_task_count &&
+        stream_adapter_audit.synchronization_count ==
+            stream_adapter_audit.evaluate_call_count &&
+        stream_adapter_audit.synchronization_count <
+            stream_adapter_audit.submitted_task_count &&
+        stream_adapter_audit.maximum_cache_entry_count <=
+            stream_adapter_audit.cache_capacity &&
+        !stream_adapter_audit.disabled_after_failure &&
+        !stream_adapter_audit.floating_point_decision_performed &&
+        !stream_adapter_audit.global_product_frontier_mutated &&
+        !stream_adapter_audit.higher_order_delaunay_materialized &&
+        !stream_adapter_audit.hierarchy_or_public_status_claimed;
+
     const auto& audit = result.audit;
     const bool audit_qualified =
         result.status ==
@@ -707,7 +799,8 @@ int main() {
         !audit.hierarchy_or_tree_claimed && !audit.slo_claimed &&
         !audit.public_status_claimed;
     const bool qualified = mismatch_count == 0U && audit_qualified &&
-        overlap_rejected_without_launch && !context.host_fake();
+        overlap_rejected_without_launch && stream_adapter_qualified &&
+        !context.host_fake();
     const auto total_end = std::chrono::steady_clock::now();
 
     std::cout
@@ -724,6 +817,10 @@ int main() {
         << "\"cuda_device\":" << audit.cuda_device << ','
         << "\"cuda_execution_performed\":"
         << (audit.cuda_execution_performed ? "true" : "false") << ','
+        << "\"cuda_stream_total_ns\":"
+        << nanoseconds_between(cuda_stream_begin, cuda_stream_end) << ','
+        << "\"cpu_stream_total_ns\":"
+        << nanoseconds_between(cpu_stream_begin, cpu_stream_end) << ','
         << "\"every_result_validated_once\":"
         << (audit.every_result_validated_once ? "true" : "false") << ','
         << "\"every_task_validated_before_launch\":"
@@ -760,8 +857,8 @@ int main() {
         << "\"lbvh_build_total_ns\":"
         << nanoseconds_between(lbvh_begin, lbvh_end) << ','
         << "\"mismatch_count\":" << mismatch_count << ','
-        << "\"mode\":\"batched_exact_support_prune_and_query_strict_"
-           "interior\","
+        << "\"mode\":\"device_resident_batched_morton_node_products_"
+           "and_bounded_local_query_plans\","
         << "\"native_lbvh_nodes_read_on_device\":"
         << (audit.native_lbvh_nodes_read_on_device ? "true" : "false")
         << ','
@@ -792,10 +889,57 @@ int main() {
         << ','
         << "\"schema_version\":"
         << morsehgp3d::gpu::
-               exact_higher_support_product_cuda_schema_version
+               exact_higher_support_product_cuda_qualification_schema_version
         << ",\"source_authority_validated\":"
         << (audit.source_authority_validated ? "true" : "false") << ','
         << "\"source_snapshot_epoch\":" << epoch << ','
+        << "\"stream_adapter_certified_positive_count\":"
+        << stream_adapter_audit.certified_positive_count << ','
+        << "\"stream_adapter_component_cpu_fallback_count\":"
+        << stream_adapter_audit.component_cpu_fallback_count << ','
+        << "\"stream_adapter_cache_capacity\":"
+        << stream_adapter_audit.cache_capacity << ','
+        << "\"stream_adapter_cache_hit_count\":"
+        << stream_adapter_audit.cache_hit_count << ','
+        << "\"stream_adapter_cache_miss_count\":"
+        << stream_adapter_audit.cache_miss_count << ','
+        << "\"stream_adapter_evaluate_call_count\":"
+        << stream_adapter_audit.evaluate_call_count << ','
+        << "\"stream_adapter_maximum_batch_size\":"
+        << stream_adapter_audit.maximum_batch_size << ','
+        << "\"stream_adapter_maximum_cache_entry_count\":"
+        << stream_adapter_audit.maximum_cache_entry_count << ','
+        << "\"stream_adapter_native_exact_authority\":"
+        << (stream_adapter_audit.native_exact_authority
+                ? "true"
+                : "false")
+        << ','
+        << "\"stream_adapter_native_kernel_certified_positive_count\":"
+        << stream_adapter_audit.native_kernel_certified_positive_count << ','
+        << "\"stream_adapter_native_cpu_fallback_certified_positive_count\":"
+        << stream_adapter_audit
+               .native_component_cpu_fallback_certified_positive_count
+        << ','
+        << "\"stream_adapter_qualified\":"
+        << (stream_adapter_qualified ? "true" : "false") << ','
+        << "\"stream_adapter_prefetch_call_count\":"
+        << stream_adapter_audit.prefetch_call_count << ','
+        << "\"stream_adapter_prefetched_task_count\":"
+        << stream_adapter_audit.prefetched_task_count << ','
+        << "\"stream_adapter_submitted_task_count\":"
+        << stream_adapter_audit.submitted_task_count << ','
+        << "\"stream_adapter_synchronization_count\":"
+        << stream_adapter_audit.synchronization_count << ','
+        << "\"stream_adapter_support_3_certified_positive_count\":"
+        << stream_adapter_audit.support_size_3_certified_positive_count << ','
+        << "\"stream_adapter_support_4_certified_positive_count\":"
+        << stream_adapter_audit.support_size_4_certified_positive_count << ','
+        << "\"stream_adapter_support_prune_certified_positive_count\":"
+        << stream_adapter_audit.support_prune_certified_positive_count << ','
+        << "\"stream_adapter_query_certified_positive_count\":"
+        << stream_adapter_audit
+               .query_strict_interior_certified_positive_count
+        << ','
         << "\"submitted_task_digest\":"
         << audit.submitted_task_digest << ','
         << "\"synchronization_count\":"
@@ -816,7 +960,7 @@ int main() {
         << "\"host_batch_total_ns_available\":false,"
         << "\"qualified\":false,\"schema_version\":"
         << morsehgp3d::gpu::
-               exact_higher_support_product_cuda_schema_version
+               exact_higher_support_product_cuda_qualification_schema_version
         << ','
         << "\"total_qualification_ns\":"
         << nanoseconds_between(total_begin, total_end) << "}\n";

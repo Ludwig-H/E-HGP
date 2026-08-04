@@ -14,6 +14,7 @@ namespace morsehgp3d::gpu::detail {
 struct Phase15ExactPairBlockTransactionalFrontierResidentCudaAdoptedTraversal {
   std::shared_ptr<void> retained_owner;
   std::shared_ptr<const void> source_cloud_identity;
+  std::shared_ptr<const void> source_index_identity;
   const std::uint64_t* device_coordinate_bits{};
   const std::uint64_t* device_morton_point_ids{};
   const void* device_nodes{};

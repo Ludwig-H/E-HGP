@@ -53,6 +53,7 @@ Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess::consume(
       adopted;
   adopted.retained_owner = owner;
   adopted.source_cloud_identity = owner->source_cloud_identity_;
+  adopted.source_index_identity = owner->source_index_identity_;
   adopted.device_coordinate_bits = owner->device_coordinate_bits_;
   adopted.device_morton_point_ids = owner->device_morton_point_ids_;
   adopted.device_nodes = owner->device_nodes_;
@@ -72,7 +73,8 @@ Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess::consume(
       adopted.device_morton_point_ids != nullptr &&
       adopted.device_nodes != nullptr && adopted.cuda_device >= 0;
   if (!adopted.ready || !adopted.retained_owner ||
-      !adopted.source_cloud_identity || (!fake_shape && !cuda_shape)) {
+      !adopted.source_cloud_identity || !adopted.source_index_identity ||
+      (!fake_shape && !cuda_shape)) {
     throw std::logic_error(
         "the resident transactional frontier failed to adopt the native "
         "LBVH authority");
@@ -693,6 +695,7 @@ ExactPairBlockTransactionalFrontierResidentCudaContext::start(
       Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess::
           consume(std::move(traversal_lease));
   if (host->traversal.source_cloud_identity.get() != cloud.identity_.get() ||
+      host->traversal.source_index_identity.get() != index.identity_.get() ||
       host->traversal.point_count != cloud.size() ||
       host->traversal.certified_node_count != index.nodes_.size()) {
     throw std::invalid_argument(

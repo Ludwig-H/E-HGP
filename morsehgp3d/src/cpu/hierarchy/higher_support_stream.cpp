@@ -395,12 +395,16 @@ class ExactHigherSupportStreamBuilder {
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
       std::size_t requested_maximum_order,
-      ExactHigherSupportStreamBudget budget)
+      ExactHigherSupportStreamBudget budget,
+      const ExactHigherSupportPositiveDecisionSource*
+          positive_decision_source = nullptr)
       : index_(index),
         cloud_(cloud),
+        positive_decision_source_(positive_decision_source),
         output_chain_digest_(initial_output_chain_digest()),
         canonical_sort_records_(true) {
     validate_inputs(requested_maximum_order);
+    validate_positive_decision_source();
     result_.budget = budget;
     result_.requirements.point_count = cloud_.size();
     result_.requirements.requested_maximum_order =
@@ -438,13 +442,17 @@ class ExactHigherSupportStreamBuilder {
       std::size_t requested_maximum_order,
       ExactHigherSupportStreamBudget budget,
       const ExactHigherSupportCheckpoint& checkpoint,
-      IntegrityVerifiedHigherCheckpointTag)
+      IntegrityVerifiedHigherCheckpointTag,
+      const ExactHigherSupportPositiveDecisionSource*
+          positive_decision_source = nullptr)
       : index_(index),
         cloud_(cloud),
+        positive_decision_source_(positive_decision_source),
         output_chain_digest_(checkpoint.output_chain_digest),
         output_record_count_(checkpoint.output_record_count),
         canonical_sort_records_(false) {
     validate_inputs(requested_maximum_order);
+    validate_positive_decision_source();
     result_.budget = budget;
     result_.requirements.point_count = cloud_.size();
     result_.requirements.requested_maximum_order =
@@ -730,6 +738,34 @@ class ExactHigherSupportStreamBuilder {
       throw std::out_of_range(
           "the higher-support stream requires 1<=Kmax<=10");
     }
+  }
+
+  void validate_positive_decision_source() const {
+    if (positive_decision_source_ != nullptr &&
+        !positive_decision_source_->bound_to(index_, cloud_)) {
+      throw std::invalid_argument(
+          "the higher-support accelerator decision source is not bound to "
+          "the supplied cloud and LBVH");
+    }
+  }
+
+  void prefetch_sparse_morton_frontier_slice() const {
+    if (positive_decision_source_ == nullptr || frontier_.empty()) {
+      return;
+    }
+    const std::size_t capacity =
+        positive_decision_source_->maximum_prefetch_task_count();
+    const std::size_t count = std::min(capacity, frontier_.size());
+    if (count == 0U) {
+      return;
+    }
+    // frontier_.back() is the deterministic next Morton product.  No dense
+    // neighbourhood is invented here: this bounded slice contains only live
+    // nodes of the already-certified grouped sparse partition.  The slice is
+    // already contiguous, so no auxiliary product catalogue is allocated.
+    positive_decision_source_->prefetch_no_well_centered_supports(
+        std::span<const ExactHigherSupportFrontierEntry>{
+            frontier_.data() + frontier_.size() - count, count});
   }
 
   [[nodiscard]] const Node& node(std::size_t node_index) const {
@@ -1929,6 +1965,42 @@ class ExactHigherSupportStreamBuilder {
       throw std::logic_error(
           "a higher-support local rank cursor exceeds its candidate list");
     }
+    if (positive_decision_source_ != nullptr &&
+        positive_decision_source_->maximum_prefetch_task_count() != 0U) {
+      std::vector<ExactHigherSupportQueryDecisionRequest> requests;
+      requests.reserve(maximum_evaluation_count);
+      const auto append_query =
+          [this, &entry, &requests](std::size_t query_node_index) {
+            requests.push_back(ExactHigherSupportQueryDecisionRequest{
+                entry, make_node_receipt(query_node_index)});
+          };
+      std::size_t next_candidate_index =
+          pending.rank_probe_next_candidate_index;
+      if (pending.rank_probe_fallback_active) {
+        const LocalRankProbeCell& active = candidate_cells[
+            pending.rank_probe_next_candidate_index - 1U];
+        for (std::size_t fallback_index =
+                 pending.rank_probe_next_fallback_leaf_index;
+             fallback_index < active.fallback_leaf_node_indices.size();
+             ++fallback_index) {
+          append_query(active.fallback_leaf_node_indices[fallback_index]);
+        }
+      }
+      for (; next_candidate_index < candidate_cells.size();
+           ++next_candidate_index) {
+        const LocalRankProbeCell& candidate =
+            candidate_cells[next_candidate_index];
+        append_query(candidate.root_node_index);
+        for (const std::size_t fallback_leaf_node_index :
+             candidate.fallback_leaf_node_indices) {
+          append_query(fallback_leaf_node_index);
+        }
+      }
+      // This is the complete remaining fixed-bound local Morton witness plan,
+      // never a scan of all points or all support tuples.  Negative proposals
+      // stay non-authoritative and are replayed by the CPU below.
+      positive_decision_source_->prefetch_query_strictly_inside(requests);
+    }
     while (pending.rank_probe_fallback_active ||
            pending.rank_probe_next_candidate_index <
                candidate_cells.size()) {
@@ -1969,9 +2041,16 @@ class ExactHigherSupportStreamBuilder {
           "the higher-support local rank candidate count overflows size_t");
 
       const ExactHigherSupportProductQueryCellDecision query_cell_decision =
-          exact_higher_support_product_query_cell_decision(
-              support_box_span,
-              node_box(query_node_index));
+          positive_decision_source_ != nullptr &&
+                  positive_decision_source_->
+                      certifies_query_strictly_inside(
+                          entry, make_node_receipt(query_node_index)) &&
+                  positive_decision_source_->native_exact_authority()
+              ? ExactHigherSupportProductQueryCellDecision::
+                    strictly_inside_every_independent_sphere
+              : exact_higher_support_product_query_cell_decision(
+                    support_box_span,
+                    node_box(query_node_index));
       increment(
           result_.audit.exact_product_analysis_count,
           "the higher-support product-analysis count overflows size_t");
@@ -2727,6 +2806,12 @@ class ExactHigherSupportStreamBuilder {
 
   [[nodiscard]] bool no_well_centered_support_certified(
       const ExactHigherSupportFrontierEntry& entry) const {
+    if (positive_decision_source_ != nullptr &&
+        positive_decision_source_->certifies_no_well_centered_support(
+            entry) &&
+        positive_decision_source_->native_exact_authority()) {
+      return true;
+    }
     const std::array<spatial::ExactDyadicAabb3, 4> boxes =
         support_boxes(entry);
     return exact_higher_support_product_no_well_centered_certified(
@@ -2769,6 +2854,7 @@ class ExactHigherSupportStreamBuilder {
           pending_product_->product;
       switch (pending_product_->stage) {
         case ExactHigherSupportPendingStage::analyze_product: {
+          prefetch_sparse_morton_frontier_slice();
           const bool no_well_centered =
               no_well_centered_support_certified(entry);
           increment(
@@ -2937,6 +3023,8 @@ class ExactHigherSupportStreamBuilder {
 
   const spatial::MortonLbvhIndex& index_;
   const spatial::CanonicalPointCloud& cloud_;
+  const ExactHigherSupportPositiveDecisionSource*
+      positive_decision_source_{};
   ExactHigherSupportStreamResult result_;
   std::vector<ExactHigherSupportFrontierEntry> frontier_;
   std::optional<ExactHigherSupportPendingProduct> pending_product_;
@@ -2955,6 +3043,23 @@ ExactHigherSupportStreamResult build_exact_higher_support_stream(
     const ExactHigherSupportStreamBudget& budget) {
   ExactHigherSupportStreamBuilder builder{
       index, cloud, requested_maximum_order, budget};
+  builder.execute();
+  return builder.take_result();
+}
+
+ExactHigherSupportStreamResult build_exact_higher_support_stream(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportStreamBudget& budget,
+    const ExactHigherSupportPositiveDecisionSource&
+        positive_decision_source) {
+  ExactHigherSupportStreamBuilder builder{
+      index,
+      cloud,
+      requested_maximum_order,
+      budget,
+      &positive_decision_source};
   builder.execute();
   return builder.take_result();
 }
@@ -3204,7 +3309,9 @@ build_exact_higher_support_stream_chunk_after_source_verification(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
     const ExactHigherSupportStreamBudget& chunk_budget,
-    const ExactHigherSupportCheckpoint& checkpoint) {
+    const ExactHigherSupportCheckpoint& checkpoint,
+    const ExactHigherSupportPositiveDecisionSource*
+        positive_decision_source = nullptr) {
   ExactHigherSupportStreamChunk chunk;
   chunk.manifest = checkpoint.manifest;
   chunk.budget = chunk_budget;
@@ -3236,7 +3343,8 @@ build_exact_higher_support_stream_chunk_after_source_verification(
       requested_maximum_order,
       chunk_budget,
       checkpoint,
-      IntegrityVerifiedHigherCheckpointTag{}};
+      IntegrityVerifiedHigherCheckpointTag{},
+      positive_decision_source};
   builder.execute();
   chunk.next_checkpoint = builder.take_checkpoint(
       checkpoint.manifest, checkpoint.next_chunk_sequence + 1U);
@@ -3600,6 +3708,21 @@ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
           maximum_chunk_count) {}
 
 ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportPositiveDecisionSource&
+        positive_decision_source,
+    ExactHigherSupportStreamBudget chunk_budget,
+    std::size_t maximum_chunk_count)
+    : ExactHigherSupportTerminalSession(
+          ExactHigherSupportAuthorityContext{
+              index, cloud, requested_maximum_order},
+          positive_decision_source,
+          chunk_budget,
+          maximum_chunk_count) {}
+
+ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
     const ExactHigherSupportAuthorityContext& authority,
     ExactHigherSupportStreamBudget chunk_budget,
     std::size_t maximum_chunk_count)
@@ -3628,6 +3751,23 @@ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
     throw std::logic_error(
         "the terminal higher-support initial retained accounting is inconsistent");
   }
+}
+
+ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
+    const ExactHigherSupportAuthorityContext& authority,
+    const ExactHigherSupportPositiveDecisionSource&
+        positive_decision_source,
+    ExactHigherSupportStreamBudget chunk_budget,
+    std::size_t maximum_chunk_count)
+    : ExactHigherSupportTerminalSession(
+          authority, chunk_budget, maximum_chunk_count) {
+  if (!positive_decision_source.bound_to(
+          authority_.index(), authority_.cloud())) {
+    throw std::invalid_argument(
+        "the terminal higher-support accelerator decision source is not "
+        "bound to the session authorities");
+  }
+  positive_decision_source_ = &positive_decision_source;
 }
 
 bool ExactHigherSupportTerminalSession::
@@ -3791,7 +3931,8 @@ void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
           authority_.cloud(),
           authority_.requested_maximum_order(),
           chunk_budget_,
-          trusted_checkpoint_);
+          trusted_checkpoint_,
+          positive_decision_source_);
   if (!chunk.builder_invariants_hold() ||
       chunk.manifest != authority_.manifest() ||
       chunk.budget != chunk_budget_ ||

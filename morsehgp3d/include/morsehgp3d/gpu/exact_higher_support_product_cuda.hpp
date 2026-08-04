@@ -15,6 +15,12 @@ namespace morsehgp3d::gpu {
 
 inline constexpr std::uint32_t
     exact_higher_support_product_cuda_schema_version = 3U;
+// Qualification v5 adds device-batched Morton-frontier and bounded local
+// witness-plan consumption.  It is intentionally distinct from the component
+// wire/audit schema so the synchronous-per-decision v4 artifact cannot satisfy
+// the stronger integration gate.
+inline constexpr std::uint32_t
+    exact_higher_support_product_cuda_qualification_schema_version = 5U;
 inline constexpr std::string_view exact_higher_support_product_cuda_backend =
     "cuda_g4_launcher_seam_plus_exact_host_fake";
 inline constexpr std::string_view exact_higher_support_product_cuda_profile =
@@ -191,7 +197,7 @@ class ExactHigherSupportProductCudaContext final {
   ExactHigherSupportProductCudaContext(
       ExactHigherSupportProductCudaContext&&) noexcept;
   ExactHigherSupportProductCudaContext& operator=(
-      ExactHigherSupportProductCudaContext&&) noexcept;
+      ExactHigherSupportProductCudaContext&&) noexcept = delete;
   ExactHigherSupportProductCudaContext(
       const ExactHigherSupportProductCudaContext&) = delete;
   ExactHigherSupportProductCudaContext& operator=(
@@ -203,6 +209,9 @@ class ExactHigherSupportProductCudaContext final {
   [[nodiscard]] std::size_t maximum_task_count() const noexcept;
   [[nodiscard]] std::uint64_t source_snapshot_epoch() const noexcept;
   [[nodiscard]] bool host_fake() const noexcept;
+  [[nodiscard]] bool bound_to(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud) const noexcept;
 
  private:
   struct Impl;

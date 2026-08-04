@@ -1,0 +1,2763 @@
+diff --git a/Testing/Temporary/CTestCostData.txt b/Testing/Temporary/CTestCostData.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..ed97d539c095cf1413af30cc23dea272095b97dd
+--- /dev/null
++++ b/Testing/Temporary/CTestCostData.txt
+@@ -0,0 +1 @@
++---
+diff --git a/morsehgp3d/CMakeLists.txt b/morsehgp3d/CMakeLists.txt
+index c365aad8a62ca1b49f46ff62cd5f1f1b36f29cf5..4ec40e06268dd416f2b79b94eef95b1f951d644f 100644
+--- a/morsehgp3d/CMakeLists.txt
++++ b/morsehgp3d/CMakeLists.txt
+@@ -1076,13 +1076,14 @@ else()
+   )
+ endif()
+ 
+-# Host/fake contract for the two exact higher-support P6a product decisions.
+-# The launcher remains unresolved here and is supplied by a CPU fake in the
+-# targeted unit test; no product frontier or DFS integration is claimed.
++# Host/fake contract for the two exact higher-support P6a product decisions
++# and their sealed positive-only sparse-stream adapter.  The launcher remains
++# unresolved here and is supplied by a CPU fake in the targeted unit test.
+ add_library(
+   morsehgp3d_gpu_exact_higher_support_product_cuda_host_contract
+   STATIC
+     include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
++    include/morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp
+     src/cuda/phase15_exact_higher_support_product_fixed.cuh
+     src/cuda/phase15_exact_higher_support_product_fixed256.cuh
+     src/cuda/phase15_exact_higher_support_product_fixed512.cuh
+@@ -1124,6 +1125,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
+     morsehgp3d_gpu_exact_higher_support_product_cuda
+     STATIC
+       include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
++      include/morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp
+       src/cuda/phase15_exact_higher_support_product_cuda_internal.hpp
+       src/cuda/phase15_exact_higher_support_product_fixed.cuh
+       src/cuda/phase15_exact_higher_support_product_fixed256.cuh
+diff --git a/morsehgp3d/include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp b/morsehgp3d/include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
+index 125964091437ecda9c3bd0bdafcb515c50e83b80..e4127f9645eff59182ca32ba1e4e756eaa99ca0f 100644
+--- a/morsehgp3d/include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
++++ b/morsehgp3d/include/morsehgp3d/gpu/exact_higher_support_product_cuda.hpp
+@@ -15,6 +15,11 @@ namespace morsehgp3d::gpu {
+ 
+ inline constexpr std::uint32_t
+     exact_higher_support_product_cuda_schema_version = 3U;
++// Qualification v4 adds end-to-end sparse-stream consumption and provenance
++// counters.  It is intentionally distinct from the component wire/audit
++// schema so pre-integration v3 artifacts cannot satisfy the stronger gate.
++inline constexpr std::uint32_t
++    exact_higher_support_product_cuda_qualification_schema_version = 4U;
+ inline constexpr std::string_view exact_higher_support_product_cuda_backend =
+     "cuda_g4_launcher_seam_plus_exact_host_fake";
+ inline constexpr std::string_view exact_higher_support_product_cuda_profile =
+@@ -191,7 +196,7 @@ class ExactHigherSupportProductCudaContext final {
+   ExactHigherSupportProductCudaContext(
+       ExactHigherSupportProductCudaContext&&) noexcept;
+   ExactHigherSupportProductCudaContext& operator=(
+-      ExactHigherSupportProductCudaContext&&) noexcept;
++      ExactHigherSupportProductCudaContext&&) noexcept = delete;
+   ExactHigherSupportProductCudaContext(
+       const ExactHigherSupportProductCudaContext&) = delete;
+   ExactHigherSupportProductCudaContext& operator=(
+@@ -203,6 +208,9 @@ class ExactHigherSupportProductCudaContext final {
+   [[nodiscard]] std::size_t maximum_task_count() const noexcept;
+   [[nodiscard]] std::uint64_t source_snapshot_epoch() const noexcept;
+   [[nodiscard]] bool host_fake() const noexcept;
++  [[nodiscard]] bool bound_to(
++      const spatial::MortonLbvhIndex& index,
++      const spatial::CanonicalPointCloud& cloud) const noexcept;
+ 
+  private:
+   struct Impl;
+diff --git a/morsehgp3d/include/morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp b/morsehgp3d/include/morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..f32881522c280c2f0dff716fb2b788025bdaac66
+--- /dev/null
++++ b/morsehgp3d/include/morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp
+@@ -0,0 +1,301 @@
++#pragma once
++
++#include "morsehgp3d/gpu/exact_higher_support_product_cuda.hpp"
++
++#include <cstddef>
++#include <cstdint>
++#include <exception>
++#include <limits>
++#include <mutex>
++#include <span>
++#include <stdexcept>
++
++namespace morsehgp3d::gpu {
++
++// Audit local to the accelerator seam.  These counters are deliberately not
++// mixed into the scientific stream audit: a CPU-only replay and an
++// accelerator-assisted run must produce the same authenticated stream.
++struct ExactHigherSupportProductCudaPositiveDecisionAdapterAudit {
++  std::size_t submitted_task_count{};
++  std::size_t support_prune_task_count{};
++  std::size_t query_strict_interior_task_count{};
++  std::size_t certified_positive_count{};
++  std::size_t fail_open_count{};
++  std::size_t invalid_result_fail_open_count{};
++  std::size_t exception_fail_open_count{};
++  std::size_t disabled_source_fallback_count{};
++  std::size_t bounded_dyadic_int256_count{};
++  std::size_t bounded_dyadic_int512_count{};
++  std::size_t bounded_dyadic_int1024_count{};
++  std::size_t arbitrary_precision_rational_count{};
++  std::size_t component_cpu_fallback_count{};
++  std::size_t native_certified_positive_count{};
++  std::size_t native_kernel_certified_positive_count{};
++  std::size_t native_component_cpu_fallback_certified_positive_count{};
++  std::size_t host_fake_positive_proposal_count{};
++  std::size_t support_size_3_certified_positive_count{};
++  std::size_t support_size_4_certified_positive_count{};
++  std::size_t support_prune_certified_positive_count{};
++  std::size_t query_strict_interior_certified_positive_count{};
++  bool source_binding_validated{false};
++  bool native_exact_authority{false};
++  bool host_fake_positive_proposals_require_cpu_replay{false};
++  bool disabled_after_failure{false};
++  bool floating_point_decision_performed{false};
++  bool global_product_frontier_mutated{false};
++  bool higher_order_delaunay_materialized{false};
++  bool hierarchy_or_public_status_claimed{false};
++
++  friend bool operator==(
++      const ExactHigherSupportProductCudaPositiveDecisionAdapterAudit&,
++      const ExactHigherSupportProductCudaPositiveDecisionAdapterAudit&) =
++      default;
++};
++
++// Bridges the native exact P6a predicates into the sparse higher-support
++// traversal.  It owns no cloud, index or CUDA context: all three authorities
++// must remain at stable addresses without being moved from, and they and this
++// non-movable adapter must outlive every stream/session using source().
++// A launcher error disables the seam and fails open to the CPU decision DAG.
++class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
++ public:
++  ExactHigherSupportProductCudaPositiveDecisionAdapter(
++      ExactHigherSupportProductCudaContext& context,
++      const spatial::MortonLbvhIndex& index,
++      const spatial::CanonicalPointCloud& cloud)
++      : context_(&context),
++        index_(&index),
++        cloud_(&cloud),
++        native_exact_authority_(!context.host_fake()),
++        source_(
++            this,
++            &bound_to_callback,
++            &native_exact_authority_callback,
++            &certify_no_well_centered_support_callback,
++            &certify_query_strictly_inside_callback) {
++    if (context.maximum_task_count() == 0U ||
++        context.source_snapshot_epoch() == 0U ||
++        !context.bound_to(index, cloud)) {
++      throw std::invalid_argument(
++          "the exact higher-support CUDA adapter requires a matching live "
++          "context");
++    }
++    audit_.source_binding_validated = true;
++    audit_.native_exact_authority = native_exact_authority_;
++    audit_.host_fake_positive_proposals_require_cpu_replay =
++        !native_exact_authority_;
++  }
++
++  ExactHigherSupportProductCudaPositiveDecisionAdapter(
++      const ExactHigherSupportProductCudaPositiveDecisionAdapter&) = delete;
++  ExactHigherSupportProductCudaPositiveDecisionAdapter& operator=(
++      const ExactHigherSupportProductCudaPositiveDecisionAdapter&) = delete;
++  ExactHigherSupportProductCudaPositiveDecisionAdapter(
++      ExactHigherSupportProductCudaPositiveDecisionAdapter&&) = delete;
++  ExactHigherSupportProductCudaPositiveDecisionAdapter& operator=(
++      ExactHigherSupportProductCudaPositiveDecisionAdapter&&) = delete;
++
++  [[nodiscard]] const hierarchy::ExactHigherSupportPositiveDecisionSource&
++  source() & noexcept {
++    return source_;
++  }
++  const hierarchy::ExactHigherSupportPositiveDecisionSource&
++  source() const & = delete;
++  const hierarchy::ExactHigherSupportPositiveDecisionSource&
++  source() && = delete;
++  const hierarchy::ExactHigherSupportPositiveDecisionSource&
++  source() const && = delete;
++
++  [[nodiscard]] ExactHigherSupportProductCudaPositiveDecisionAdapterAudit
++  audit() const {
++    const std::lock_guard<std::mutex> lock{mutex_};
++    return audit_;
++  }
++
++ private:
++  [[nodiscard]] static bool bound_to_callback(
++      void* state,
++      const spatial::MortonLbvhIndex& index,
++      const spatial::CanonicalPointCloud& cloud) noexcept {
++    const auto* self = static_cast<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter*>(state);
++    return self != nullptr && self->context_ != nullptr &&
++        self->index_ == &index && self->cloud_ == &cloud &&
++        self->context_->bound_to(index, cloud);
++  }
++
++  [[nodiscard]] static bool native_exact_authority_callback(
++      void* state) noexcept {
++    const auto* self = static_cast<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter*>(state);
++    if (self == nullptr) {
++      return false;
++    }
++    const std::lock_guard<std::mutex> lock{self->mutex_};
++    return self->native_exact_authority_ && !self->disabled_;
++  }
++
++  [[nodiscard]] static bool certify_no_well_centered_support_callback(
++      void* state,
++      const hierarchy::ExactHigherSupportFrontierEntry& product) {
++    auto* self = static_cast<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter*>(state);
++    return self != nullptr && self->evaluate_positive(
++        ExactHigherSupportProductCudaTaskKind::support_prune,
++        product,
++        nullptr);
++  }
++
++  [[nodiscard]] static bool certify_query_strictly_inside_callback(
++      void* state,
++      const hierarchy::ExactHigherSupportFrontierEntry& product,
++      const hierarchy::ExactHigherSupportNodeReceipt& query_node) {
++    auto* self = static_cast<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter*>(state);
++    return self != nullptr && self->evaluate_positive(
++        ExactHigherSupportProductCudaTaskKind::query_strict_interior,
++        product,
++        &query_node);
++  }
++
++  [[nodiscard]] bool evaluate_positive(
++      ExactHigherSupportProductCudaTaskKind kind,
++      const hierarchy::ExactHigherSupportFrontierEntry& product,
++      const hierarchy::ExactHigherSupportNodeReceipt* query_node) {
++    const std::lock_guard<std::mutex> lock{mutex_};
++    if (disabled_ || context_ == nullptr || index_ == nullptr ||
++        cloud_ == nullptr || !context_->bound_to(*index_, *cloud_)) {
++      ++audit_.disabled_source_fallback_count;
++      return false;
++    }
++    if (next_task_id_ == std::numeric_limits<std::uint64_t>::max()) {
++      disable_after_failure();
++      ++audit_.disabled_source_fallback_count;
++      return false;
++    }
++
++    ExactHigherSupportProductCudaTask task;
++    task.task_id = next_task_id_++;
++    task.source_snapshot_epoch = context_->source_snapshot_epoch();
++    task.kind = kind;
++    task.product = product;
++    if (query_node != nullptr) {
++      task.query_node = *query_node;
++    }
++    ++audit_.submitted_task_count;
++    if (kind == ExactHigherSupportProductCudaTaskKind::support_prune) {
++      ++audit_.support_prune_task_count;
++    } else {
++      ++audit_.query_strict_interior_task_count;
++    }
++
++    ExactHigherSupportProductCudaResult result;
++    try {
++      result = context_->evaluate(
++          std::span<const ExactHigherSupportProductCudaTask>{&task, 1U});
++    } catch (...) {
++      ++audit_.exception_fail_open_count;
++      disable_after_failure();
++      return false;
++    }
++
++    if (!valid_single_result(task, result)) {
++      ++audit_.invalid_result_fail_open_count;
++      disable_after_failure();
++      return false;
++    }
++
++    const ExactHigherSupportProductCudaRecord& record = result.records[0];
++    account_backend(record);
++    if (record.cpu_fallback_performed) {
++      ++audit_.component_cpu_fallback_count;
++    }
++    if (record.outcome == ExactHigherSupportProductCudaOutcome::fail_open) {
++      ++audit_.fail_open_count;
++      return false;
++    }
++    ++audit_.certified_positive_count;
++    if (native_exact_authority_) {
++      ++audit_.native_certified_positive_count;
++      if (record.cpu_fallback_performed) {
++        ++audit_.
++            native_component_cpu_fallback_certified_positive_count;
++      } else {
++        ++audit_.native_kernel_certified_positive_count;
++      }
++    } else {
++      ++audit_.host_fake_positive_proposal_count;
++    }
++    if (product.support_size == 3U) {
++      ++audit_.support_size_3_certified_positive_count;
++    } else if (product.support_size == 4U) {
++      ++audit_.support_size_4_certified_positive_count;
++    }
++    if (kind == ExactHigherSupportProductCudaTaskKind::support_prune) {
++      ++audit_.support_prune_certified_positive_count;
++    } else {
++      ++audit_.query_strict_interior_certified_positive_count;
++    }
++    return true;
++  }
++
++  [[nodiscard]] bool valid_single_result(
++      const ExactHigherSupportProductCudaTask& task,
++      const ExactHigherSupportProductCudaResult& result) const noexcept {
++    if (!result.complete() || result.records.size() != 1U ||
++        result.audit.submitted_task_count != 1U ||
++        result.audit.completed_task_count != 1U ||
++        !result.audit.source_authority_validated ||
++        !result.audit.resident_lease_index_identity_validated ||
++        !result.audit.every_task_validated_before_launch ||
++        !result.audit.every_result_validated_once ||
++        !result.audit.output_published_atomically ||
++        result.audit.floating_point_decision_performed ||
++        result.audit.bigint_support_mass_transferred ||
++        result.audit.global_product_frontier_mutated ||
++        result.audit.ordinary_or_higher_order_delaunay_materialized ||
++        result.audit.global_cell_coface_or_incidence_arena_materialized ||
++        result.audit.hierarchy_or_tree_claimed ||
++        result.audit.public_status_claimed) {
++      return false;
++    }
++    const ExactHigherSupportProductCudaRecord& record = result.records[0];
++    return record.task_id == task.task_id && record.kind == task.kind;
++  }
++
++  void account_backend(
++      const ExactHigherSupportProductCudaRecord& record) noexcept {
++    switch (record.backend) {
++      case ExactHigherSupportProductCudaBackend::bounded_dyadic_int256:
++        ++audit_.bounded_dyadic_int256_count;
++        break;
++      case ExactHigherSupportProductCudaBackend::bounded_dyadic_int512:
++        ++audit_.bounded_dyadic_int512_count;
++        break;
++      case ExactHigherSupportProductCudaBackend::bounded_dyadic_int1024:
++        ++audit_.bounded_dyadic_int1024_count;
++        break;
++      case ExactHigherSupportProductCudaBackend::
++          arbitrary_precision_rational:
++        ++audit_.arbitrary_precision_rational_count;
++        break;
++    }
++  }
++
++  void disable_after_failure() noexcept {
++    disabled_ = true;
++    audit_.disabled_after_failure = true;
++  }
++
++  ExactHigherSupportProductCudaContext* context_{};
++  const spatial::MortonLbvhIndex* index_{};
++  const spatial::CanonicalPointCloud* cloud_{};
++  bool native_exact_authority_{false};
++  bool disabled_{false};
++  std::uint64_t next_task_id_{1U};
++  mutable std::mutex mutex_;
++  ExactHigherSupportProductCudaPositiveDecisionAdapterAudit audit_{};
++  hierarchy::ExactHigherSupportPositiveDecisionSource source_;
++};
++
++}  // namespace morsehgp3d::gpu
+diff --git a/morsehgp3d/include/morsehgp3d/gpu/k1_boruvka.hpp b/morsehgp3d/include/morsehgp3d/gpu/k1_boruvka.hpp
+index 7455590fe711cf26d96af4387822310495d67e3c..c7c498a076a4054665b69b0b3bc54c73c93fdf51 100644
+--- a/morsehgp3d/include/morsehgp3d/gpu/k1_boruvka.hpp
++++ b/morsehgp3d/include/morsehgp3d/gpu/k1_boruvka.hpp
+@@ -1119,4 +1119,24 @@ verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+     const K1SeededExactBoruvkaResult& source,
+     const K1SeededExactCompactHierarchy& reduction);
+ 
++// Dual-tree source overloads for the same compact local adapter. They replay
++// the shared component-direct search rather than accepting the source flags,
++// then compare the compact arenas with reductions of both the recertified
++// source tree and the independent reference_cpu Boruvka anchor. This remains
++// a local k=1 hierarchy result and does not promote a MorseHGP3D public status.
++[[nodiscard]] K1SeededExactCompactHierarchy
++build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud,
++    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
++    const K1DualTreeExactBoruvkaResult& source);
++
++[[nodiscard]] K1SeededExactCompactHierarchyVerification
++verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud,
++    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
++    const K1DualTreeExactBoruvkaResult& source,
++    const K1SeededExactCompactHierarchy& reduction);
++
+ }  // namespace morsehgp3d::gpu
+diff --git a/morsehgp3d/include/morsehgp3d/hierarchy/higher_support_stream.hpp b/morsehgp3d/include/morsehgp3d/hierarchy/higher_support_stream.hpp
+index d921bec925dcd62a0e59c9af55f95521d709561c..8b954094c8fc8cebefe4a1fed5c1ca04713cdad2 100644
+--- a/morsehgp3d/include/morsehgp3d/hierarchy/higher_support_stream.hpp
++++ b/morsehgp3d/include/morsehgp3d/hierarchy/higher_support_stream.hpp
+@@ -17,6 +17,10 @@
+ #include <utility>
+ #include <vector>
+ 
++namespace morsehgp3d::gpu {
++class ExactHigherSupportProductCudaPositiveDecisionAdapter;
++}
++
+ namespace morsehgp3d::hierarchy {
+ 
+ inline constexpr std::size_t higher_support_maximum_requested_order = 10U;
+@@ -137,6 +141,88 @@ static_assert(std::is_trivially_copyable_v<ExactHigherSupportFrontierEntry>);
+ static_assert(std::is_standard_layout_v<ExactHigherSupportNodeReceipt>);
+ static_assert(std::is_trivially_copyable_v<ExactHigherSupportNodeReceipt>);
+ 
++// Sealed positive-only decision seam for an exact accelerator.  The stream
++// remains fail-open: an absent or negative proposal is recomputed by the CPU
++// decision DAG.  A non-native producer (including the host fake) can only
++// propose a positive result, which the stream also replays on the CPU before
++// using it.  Only the CUDA adapter can mint an instance, preventing callers
++// from injecting an unauthenticated geometric decision.
++class ExactHigherSupportPositiveDecisionSource final {
++ public:
++  ExactHigherSupportPositiveDecisionSource(
++      const ExactHigherSupportPositiveDecisionSource&) = delete;
++  ExactHigherSupportPositiveDecisionSource& operator=(
++      const ExactHigherSupportPositiveDecisionSource&) = delete;
++  ExactHigherSupportPositiveDecisionSource(
++      ExactHigherSupportPositiveDecisionSource&&) = delete;
++  ExactHigherSupportPositiveDecisionSource& operator=(
++      ExactHigherSupportPositiveDecisionSource&&) = delete;
++
++  [[nodiscard]] bool bound_to(
++      const spatial::MortonLbvhIndex& index,
++      const spatial::CanonicalPointCloud& cloud) const noexcept {
++    return bound_to_ != nullptr &&
++        bound_to_(state_, index, cloud);
++  }
++
++  [[nodiscard]] bool native_exact_authority() const noexcept {
++    return native_exact_authority_ != nullptr &&
++        native_exact_authority_(state_);
++  }
++
++  [[nodiscard]] bool certifies_no_well_centered_support(
++      const ExactHigherSupportFrontierEntry& product) const {
++    return certify_no_well_centered_support_ != nullptr &&
++        certify_no_well_centered_support_(state_, product);
++  }
++
++  [[nodiscard]] bool certifies_query_strictly_inside(
++      const ExactHigherSupportFrontierEntry& product,
++      const ExactHigherSupportNodeReceipt& query_node) const {
++    return certify_query_strictly_inside_ != nullptr &&
++        certify_query_strictly_inside_(state_, product, query_node);
++  }
++
++ private:
++  using BoundToFunction = bool (*)(
++      void*,
++      const spatial::MortonLbvhIndex&,
++      const spatial::CanonicalPointCloud&) noexcept;
++  using NativeExactAuthorityFunction = bool (*)(void*) noexcept;
++  using CertifyNoWellCenteredSupportFunction = bool (*)(
++      void*, const ExactHigherSupportFrontierEntry&);
++  using CertifyQueryStrictlyInsideFunction = bool (*)(
++      void*,
++      const ExactHigherSupportFrontierEntry&,
++      const ExactHigherSupportNodeReceipt&);
++
++  friend class ::morsehgp3d::gpu::
++      ExactHigherSupportProductCudaPositiveDecisionAdapter;
++
++  ExactHigherSupportPositiveDecisionSource(
++      void* state,
++      BoundToFunction bound_to,
++      NativeExactAuthorityFunction native_exact_authority,
++      CertifyNoWellCenteredSupportFunction
++          certify_no_well_centered_support,
++      CertifyQueryStrictlyInsideFunction
++          certify_query_strictly_inside) noexcept
++      : state_(state),
++        bound_to_(bound_to),
++        native_exact_authority_(native_exact_authority),
++        certify_no_well_centered_support_(
++            certify_no_well_centered_support),
++        certify_query_strictly_inside_(
++            certify_query_strictly_inside) {}
++
++  void* state_{};
++  BoundToFunction bound_to_{};
++  NativeExactAuthorityFunction native_exact_authority_{};
++  CertifyNoWellCenteredSupportFunction
++      certify_no_well_centered_support_{};
++  CertifyQueryStrictlyInsideFunction certify_query_strictly_inside_{};
++};
++
+ enum class ExactHigherSupportPruneReason : std::uint8_t {
+   no_well_centered_support,
+   strict_interior_rank_bound,
+@@ -895,12 +981,26 @@ class ExactHigherSupportTerminalSession {
+       const ExactHigherSupportAuthorityContext& authority,
+       ExactHigherSupportStreamBudget chunk_budget,
+       std::size_t maximum_chunk_count);
++  ExactHigherSupportTerminalSession(
++      const ExactHigherSupportAuthorityContext& authority,
++      const ExactHigherSupportPositiveDecisionSource&
++          positive_decision_source,
++      ExactHigherSupportStreamBudget chunk_budget,
++      std::size_t maximum_chunk_count);
+   ExactHigherSupportTerminalSession(
+       const spatial::MortonLbvhIndex& index,
+       const spatial::CanonicalPointCloud& cloud,
+       std::size_t requested_maximum_order,
+       ExactHigherSupportStreamBudget chunk_budget,
+       std::size_t maximum_chunk_count);
++  ExactHigherSupportTerminalSession(
++      const spatial::MortonLbvhIndex& index,
++      const spatial::CanonicalPointCloud& cloud,
++      std::size_t requested_maximum_order,
++      const ExactHigherSupportPositiveDecisionSource&
++          positive_decision_source,
++      ExactHigherSupportStreamBudget chunk_budget,
++      std::size_t maximum_chunk_count);
+   ExactHigherSupportTerminalSession(
+       spatial::MortonLbvhIndex&&,
+       const spatial::CanonicalPointCloud&,
+@@ -913,6 +1013,34 @@ class ExactHigherSupportTerminalSession {
+       std::size_t,
+       ExactHigherSupportStreamBudget,
+       std::size_t) = delete;
++  ExactHigherSupportTerminalSession(
++      spatial::MortonLbvhIndex&&,
++      const spatial::CanonicalPointCloud&,
++      std::size_t,
++      const ExactHigherSupportPositiveDecisionSource&,
++      ExactHigherSupportStreamBudget,
++      std::size_t) = delete;
++  ExactHigherSupportTerminalSession(
++      const spatial::MortonLbvhIndex&&,
++      const spatial::CanonicalPointCloud&,
++      std::size_t,
++      const ExactHigherSupportPositiveDecisionSource&,
++      ExactHigherSupportStreamBudget,
++      std::size_t) = delete;
++  ExactHigherSupportTerminalSession(
++      const spatial::MortonLbvhIndex&,
++      spatial::CanonicalPointCloud&&,
++      std::size_t,
++      const ExactHigherSupportPositiveDecisionSource&,
++      ExactHigherSupportStreamBudget,
++      std::size_t) = delete;
++  ExactHigherSupportTerminalSession(
++      const spatial::MortonLbvhIndex&,
++      const spatial::CanonicalPointCloud&&,
++      std::size_t,
++      const ExactHigherSupportPositiveDecisionSource&,
++      ExactHigherSupportStreamBudget,
++      std::size_t) = delete;
+ 
+   ExactHigherSupportTerminalSession(
+       const ExactHigherSupportTerminalSession&) = delete;
+@@ -993,6 +1121,10 @@ class ExactHigherSupportTerminalSession {
+   contract::CanonicalId released_output_chain_digest_{};
+   contract::CanonicalId released_checkpoint_digest_{};
+   std::shared_ptr<bool> unsealed_segment_outstanding_;
++  // Non-owning by design: the sealed CUDA adapter is non-movable and must
++  // outlive the resident terminal session that consumes it.
++  const ExactHigherSupportPositiveDecisionSource*
++      positive_decision_source_{};
+   bool unsealed_segment_drain_performed_{false};
+   bool sealed_{false};
+ };
+@@ -1016,6 +1148,15 @@ build_exact_higher_support_stream(
+     std::size_t requested_maximum_order,
+     const ExactHigherSupportStreamBudget& budget);
+ 
++[[nodiscard]] ExactHigherSupportStreamResult
++build_exact_higher_support_stream(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud,
++    std::size_t requested_maximum_order,
++    const ExactHigherSupportStreamBudget& budget,
++    const ExactHigherSupportPositiveDecisionSource&
++        positive_decision_source);
++
+ [[nodiscard]] ExactHigherSupportCheckpointManifest
+ make_exact_higher_support_checkpoint_manifest(
+     const spatial::MortonLbvhIndex& index,
+diff --git a/morsehgp3d/include/morsehgp3d/hierarchy/sparse_higher_support_h0_chunk_run.hpp b/morsehgp3d/include/morsehgp3d/hierarchy/sparse_higher_support_h0_chunk_run.hpp
+index 6e76e69f4b90d2554f82a3b695706e1efca5d950..8f21d399ef124f2824042501628c8b2cbcbca0b7 100644
+--- a/morsehgp3d/include/morsehgp3d/hierarchy/sparse_higher_support_h0_chunk_run.hpp
++++ b/morsehgp3d/include/morsehgp3d/hierarchy/sparse_higher_support_h0_chunk_run.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include "morsehgp3d/exact/rational.hpp"
+ #include "morsehgp3d/hierarchy/atomic_linear_run_store.hpp"
+ #include "morsehgp3d/hierarchy/sparse_direct_h0_candidate_merge.hpp"
+ 
+@@ -17,6 +18,15 @@ inline constexpr std::uint32_t
+     sparse_higher_support_h0_chunk_run_schema_version = 1U;
+ inline constexpr std::size_t
+     sparse_higher_support_h0_chunk_run_fixed_payload_byte_count = 278U;
++// Binary64 support-3 and support-4 formulas have conservative canonical
++// rational-field bounds of 6,973 and 9,503 decimal bytes respectively.  The
++// Phase-14AB wire stores numerator and denominator as separate length-prefixed
++// integers, so its actual per-integer cap must be able to consume either whole
++// conservative bound.  These constants do not impose dyadic denominators.
++inline constexpr std::size_t
++    sparse_higher_support_triangle_exact_integer_byte_count = 6973U;
++inline constexpr std::size_t
++    sparse_higher_support_tetrahedron_exact_integer_byte_count = 9503U;
+ inline constexpr std::string_view
+     sparse_higher_support_h0_chunk_run_backend = "reference_cpu";
+ inline constexpr std::string_view
+@@ -75,6 +85,22 @@ struct ExactSparseHigherSupportH0ChunkRunAudit {
+       const ExactSparseHigherSupportH0ChunkRunAudit&) = default;
+ };
+ 
++// Syntax-only validation result for the exact rational primitive shared by
++// persisted centers and squared levels.  This round trip never decodes a
++// durable chunk into scientific authority and never touches a run store.
++struct ExactSparseHigherSupportH0RationalWireRoundTrip {
++  std::uint8_t support_size{};
++  exact::ExactRational value;
++  std::size_t numerator_byte_count{};
++  std::size_t denominator_byte_count{};
++  std::size_t canonical_rational_field_byte_count{};
++  std::size_t encoded_wire_byte_count{};
++
++  friend bool operator==(
++      const ExactSparseHigherSupportH0RationalWireRoundTrip&,
++      const ExactSparseHigherSupportH0RationalWireRoundTrip&) = default;
++};
++
+ // Synchronous handoff derived only from a fresh canonical-root replay.  The
+ // durable payload is never decoded into scientific authority.  The store and
+ // context retain neither this projection nor any preceding common H0 run.
+@@ -164,6 +190,14 @@ class ExactSparseHigherSupportH0ChunkRunContext {
+       const AtomicLinearRunTransition& transition,
+       AtomicLinearRunRecertificationPhase phase) const;
+ 
++  // Exercises the same bounded canonical-integer writer used by durable
++  // chunks, followed by a syntax-only canonical parse.  It is intentionally
++  // pure with respect to producer/verifier caches and every store/HEAD.
++  [[nodiscard]] ExactSparseHigherSupportH0RationalWireRoundTrip
++  round_trip_exact_rational_wire_for_validation(
++      std::uint8_t support_size,
++      const exact::ExactRational& value) const;
++
+   [[nodiscard]] ExactSparseHigherSupportH0ChunkRunAudit audit()
+       const noexcept;
+ 
+diff --git a/morsehgp3d/src/cpu/hierarchy/higher_support_stream.cpp b/morsehgp3d/src/cpu/hierarchy/higher_support_stream.cpp
+index 8cd8fcfad5eb0a2d8008d59a45137b85742aed8d..44a5047ee569f2142d81c523544877478c1f8d5e 100644
+--- a/morsehgp3d/src/cpu/hierarchy/higher_support_stream.cpp
++++ b/morsehgp3d/src/cpu/hierarchy/higher_support_stream.cpp
+@@ -395,12 +395,16 @@ class ExactHigherSupportStreamBuilder {
+       const spatial::MortonLbvhIndex& index,
+       const spatial::CanonicalPointCloud& cloud,
+       std::size_t requested_maximum_order,
+-      ExactHigherSupportStreamBudget budget)
++      ExactHigherSupportStreamBudget budget,
++      const ExactHigherSupportPositiveDecisionSource*
++          positive_decision_source = nullptr)
+       : index_(index),
+         cloud_(cloud),
++        positive_decision_source_(positive_decision_source),
+         output_chain_digest_(initial_output_chain_digest()),
+         canonical_sort_records_(true) {
+     validate_inputs(requested_maximum_order);
++    validate_positive_decision_source();
+     result_.budget = budget;
+     result_.requirements.point_count = cloud_.size();
+     result_.requirements.requested_maximum_order =
+@@ -438,13 +442,17 @@ class ExactHigherSupportStreamBuilder {
+       std::size_t requested_maximum_order,
+       ExactHigherSupportStreamBudget budget,
+       const ExactHigherSupportCheckpoint& checkpoint,
+-      IntegrityVerifiedHigherCheckpointTag)
++      IntegrityVerifiedHigherCheckpointTag,
++      const ExactHigherSupportPositiveDecisionSource*
++          positive_decision_source = nullptr)
+       : index_(index),
+         cloud_(cloud),
++        positive_decision_source_(positive_decision_source),
+         output_chain_digest_(checkpoint.output_chain_digest),
+         output_record_count_(checkpoint.output_record_count),
+         canonical_sort_records_(false) {
+     validate_inputs(requested_maximum_order);
++    validate_positive_decision_source();
+     result_.budget = budget;
+     result_.requirements.point_count = cloud_.size();
+     result_.requirements.requested_maximum_order =
+@@ -732,6 +740,15 @@ class ExactHigherSupportStreamBuilder {
+     }
+   }
+ 
++  void validate_positive_decision_source() const {
++    if (positive_decision_source_ != nullptr &&
++        !positive_decision_source_->bound_to(index_, cloud_)) {
++      throw std::invalid_argument(
++          "the higher-support accelerator decision source is not bound to "
++          "the supplied cloud and LBVH");
++    }
++  }
++
+   [[nodiscard]] const Node& node(std::size_t node_index) const {
+     if (node_index >= index_.nodes_.size()) {
+       throw std::logic_error(
+@@ -1969,9 +1986,16 @@ class ExactHigherSupportStreamBuilder {
+           "the higher-support local rank candidate count overflows size_t");
+ 
+       const ExactHigherSupportProductQueryCellDecision query_cell_decision =
+-          exact_higher_support_product_query_cell_decision(
+-              support_box_span,
+-              node_box(query_node_index));
++          positive_decision_source_ != nullptr &&
++                  positive_decision_source_->
++                      certifies_query_strictly_inside(
++                          entry, make_node_receipt(query_node_index)) &&
++                  positive_decision_source_->native_exact_authority()
++              ? ExactHigherSupportProductQueryCellDecision::
++                    strictly_inside_every_independent_sphere
++              : exact_higher_support_product_query_cell_decision(
++                    support_box_span,
++                    node_box(query_node_index));
+       increment(
+           result_.audit.exact_product_analysis_count,
+           "the higher-support product-analysis count overflows size_t");
+@@ -2727,6 +2751,12 @@ class ExactHigherSupportStreamBuilder {
+ 
+   [[nodiscard]] bool no_well_centered_support_certified(
+       const ExactHigherSupportFrontierEntry& entry) const {
++    if (positive_decision_source_ != nullptr &&
++        positive_decision_source_->certifies_no_well_centered_support(
++            entry) &&
++        positive_decision_source_->native_exact_authority()) {
++      return true;
++    }
+     const std::array<spatial::ExactDyadicAabb3, 4> boxes =
+         support_boxes(entry);
+     return exact_higher_support_product_no_well_centered_certified(
+@@ -2937,6 +2967,8 @@ class ExactHigherSupportStreamBuilder {
+ 
+   const spatial::MortonLbvhIndex& index_;
+   const spatial::CanonicalPointCloud& cloud_;
++  const ExactHigherSupportPositiveDecisionSource*
++      positive_decision_source_{};
+   ExactHigherSupportStreamResult result_;
+   std::vector<ExactHigherSupportFrontierEntry> frontier_;
+   std::optional<ExactHigherSupportPendingProduct> pending_product_;
+@@ -2959,6 +2991,23 @@ ExactHigherSupportStreamResult build_exact_higher_support_stream(
+   return builder.take_result();
+ }
+ 
++ExactHigherSupportStreamResult build_exact_higher_support_stream(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud,
++    std::size_t requested_maximum_order,
++    const ExactHigherSupportStreamBudget& budget,
++    const ExactHigherSupportPositiveDecisionSource&
++        positive_decision_source) {
++  ExactHigherSupportStreamBuilder builder{
++      index,
++      cloud,
++      requested_maximum_order,
++      budget,
++      &positive_decision_source};
++  builder.execute();
++  return builder.take_result();
++}
++
+ ExactHigherSupportCheckpointManifest
+ make_exact_higher_support_checkpoint_manifest(
+     const spatial::MortonLbvhIndex& index,
+@@ -3204,7 +3253,9 @@ build_exact_higher_support_stream_chunk_after_source_verification(
+     const spatial::CanonicalPointCloud& cloud,
+     std::size_t requested_maximum_order,
+     const ExactHigherSupportStreamBudget& chunk_budget,
+-    const ExactHigherSupportCheckpoint& checkpoint) {
++    const ExactHigherSupportCheckpoint& checkpoint,
++    const ExactHigherSupportPositiveDecisionSource*
++        positive_decision_source = nullptr) {
+   ExactHigherSupportStreamChunk chunk;
+   chunk.manifest = checkpoint.manifest;
+   chunk.budget = chunk_budget;
+@@ -3236,7 +3287,8 @@ build_exact_higher_support_stream_chunk_after_source_verification(
+       requested_maximum_order,
+       chunk_budget,
+       checkpoint,
+-      IntegrityVerifiedHigherCheckpointTag{}};
++      IntegrityVerifiedHigherCheckpointTag{},
++      positive_decision_source};
+   builder.execute();
+   chunk.next_checkpoint = builder.take_checkpoint(
+       checkpoint.manifest, checkpoint.next_chunk_sequence + 1U);
+@@ -3599,6 +3651,21 @@ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
+           chunk_budget,
+           maximum_chunk_count) {}
+ 
++ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud,
++    std::size_t requested_maximum_order,
++    const ExactHigherSupportPositiveDecisionSource&
++        positive_decision_source,
++    ExactHigherSupportStreamBudget chunk_budget,
++    std::size_t maximum_chunk_count)
++    : ExactHigherSupportTerminalSession(
++          ExactHigherSupportAuthorityContext{
++              index, cloud, requested_maximum_order},
++          positive_decision_source,
++          chunk_budget,
++          maximum_chunk_count) {}
++
+ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
+     const ExactHigherSupportAuthorityContext& authority,
+     ExactHigherSupportStreamBudget chunk_budget,
+@@ -3630,6 +3697,23 @@ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
+   }
+ }
+ 
++ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
++    const ExactHigherSupportAuthorityContext& authority,
++    const ExactHigherSupportPositiveDecisionSource&
++        positive_decision_source,
++    ExactHigherSupportStreamBudget chunk_budget,
++    std::size_t maximum_chunk_count)
++    : ExactHigherSupportTerminalSession(
++          authority, chunk_budget, maximum_chunk_count) {
++  if (!positive_decision_source.bound_to(
++          authority_.index(), authority_.cloud())) {
++    throw std::invalid_argument(
++        "the terminal higher-support accelerator decision source is not "
++        "bound to the session authorities");
++  }
++  positive_decision_source_ = &positive_decision_source;
++}
++
+ bool ExactHigherSupportTerminalSession::
+ retained_segment_accounting_holds() const noexcept {
+   if (released_segment_count_ > chunk_count_ ||
+@@ -3791,7 +3875,8 @@ void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
+           authority_.cloud(),
+           authority_.requested_maximum_order(),
+           chunk_budget_,
+-          trusted_checkpoint_);
++          trusted_checkpoint_,
++          positive_decision_source_);
+   if (!chunk.builder_invariants_hold() ||
+       chunk.manifest != authority_.manifest() ||
+       chunk.budget != chunk_budget_ ||
+diff --git a/morsehgp3d/src/cpu/hierarchy/sparse_higher_support_h0_chunk_run.cpp b/morsehgp3d/src/cpu/hierarchy/sparse_higher_support_h0_chunk_run.cpp
+index 6377870672a2834991eb5013efd5c7232ef5f13a..9c163b6d23c33ac511d3263f0581974ddfbf21c9 100644
+--- a/morsehgp3d/src/cpu/hierarchy/sparse_higher_support_h0_chunk_run.cpp
++++ b/morsehgp3d/src/cpu/hierarchy/sparse_higher_support_h0_chunk_run.cpp
+@@ -214,6 +214,79 @@ class Writer {
+   std::vector<std::uint8_t> data_;
+ };
+ 
++class RationalFieldReader {
++ public:
++  RationalFieldReader(
++      std::span<const std::uint8_t> data,
++      const ExactSparseHigherSupportH0ChunkRunLimits& limits)
++      : data_(data), limits_(limits) {}
++
++  [[nodiscard]] std::uint8_t u8() {
++    require_available(1U);
++    return data_[offset_++];
++  }
++
++  [[nodiscard]] exact::BigInt integer() {
++    const std::size_t byte_count = size();
++    if (byte_count == 0U ||
++        byte_count > limits_.maximum_exact_integer_byte_count) {
++      throw std::invalid_argument(
++          "a Phase-14AB validation integer length exceeds its cap");
++    }
++    exact_integer_byte_count_ = checked_add(
++        exact_integer_byte_count_, byte_count,
++        "a Phase-14AB validation integer population overflows size_t");
++    if (exact_integer_byte_count_ >
++        limits_.maximum_total_exact_integer_byte_count_per_chunk) {
++      throw std::invalid_argument(
++          "a Phase-14AB validation integer population exceeds its cap");
++    }
++    require_available(byte_count);
++    const std::string_view encoded{
++        reinterpret_cast<const char*>(data_.data() + offset_),
++        byte_count};
++    exact::BigInt value = exact::parse_canonical_integer(encoded);
++    if (exact::canonical_integer_string(value) != encoded) {
++      throw std::invalid_argument(
++          "a Phase-14AB validation integer is not canonical");
++    }
++    offset_ += byte_count;
++    return value;
++  }
++
++  void require_finished() const {
++    if (offset_ != data_.size()) {
++      throw std::invalid_argument(
++          "a Phase-14AB validation rational has trailing bytes");
++    }
++  }
++
++ private:
++  [[nodiscard]] std::uint64_t u64() {
++    require_available(8U);
++    std::uint64_t value = 0U;
++    for (std::size_t index = 0U; index < 8U; ++index) {
++      value = (value << 8U) | data_[offset_ + index];
++    }
++    offset_ += 8U;
++    return value;
++  }
++
++  [[nodiscard]] std::size_t size() { return checked_size(u64()); }
++
++  void require_available(std::size_t byte_count) const {
++    if (byte_count > data_.size() - offset_) {
++      throw std::invalid_argument(
++          "a Phase-14AB validation rational is truncated");
++    }
++  }
++
++  std::span<const std::uint8_t> data_;
++  const ExactSparseHigherSupportH0ChunkRunLimits& limits_;
++  std::size_t offset_{};
++  std::size_t exact_integer_byte_count_{};
++};
++
+ void encode_center(Writer& writer, const exact::ExactCenter3& center) {
+   writer.integer(center.numerator(0U));
+   writer.integer(center.numerator(1U));
+@@ -909,6 +982,56 @@ ExactSparseHigherSupportH0ChunkRunContext::recertify_for_validation(
+   return impl_->recertify(transition, phase);
+ }
+ 
++ExactSparseHigherSupportH0RationalWireRoundTrip
++ExactSparseHigherSupportH0ChunkRunContext::
++    round_trip_exact_rational_wire_for_validation(
++        std::uint8_t support_size,
++        const exact::ExactRational& value) const {
++  if (support_size != 3U && support_size != 4U) {
++    throw std::invalid_argument(
++        "a Phase-14AB rational validation support must have arity 3 or 4");
++  }
++
++  Writer writer{impl_->limits};
++  writer.u8(support_size);
++  writer.integer(value.numerator());
++  writer.integer(value.denominator());
++  const std::vector<std::uint8_t> wire = std::move(writer).finish();
++
++  RationalFieldReader reader{wire, impl_->limits};
++  const std::uint8_t decoded_support_size = reader.u8();
++  exact::BigInt decoded_numerator = reader.integer();
++  exact::BigInt decoded_denominator = reader.integer();
++  reader.require_finished();
++  if (decoded_denominator <= 0) {
++    throw std::logic_error(
++        "a Phase-14AB rational validation denominator is not positive");
++  }
++  exact::ExactRational decoded{
++      std::move(decoded_numerator), std::move(decoded_denominator)};
++  if (decoded_support_size != support_size || decoded != value) {
++    throw std::logic_error(
++        "a Phase-14AB rational validation round trip changed its value");
++  }
++
++  const std::string numerator =
++      exact::canonical_integer_string(value.numerator());
++  const std::string denominator =
++      exact::canonical_integer_string(value.denominator());
++  return {
++      support_size,
++      std::move(decoded),
++      numerator.size(),
++      denominator.size(),
++      checked_add(
++          checked_add(
++              numerator.size(), 1U,
++              "a Phase-14AB rational-field length overflows size_t"),
++          denominator.size(),
++          "a Phase-14AB rational-field length overflows size_t"),
++      wire.size()};
++}
++
+ ExactSparseHigherSupportH0ChunkRunAudit
+ ExactSparseHigherSupportH0ChunkRunContext::audit() const noexcept {
+   ExactSparseHigherSupportH0ChunkRunAudit result;
+diff --git a/morsehgp3d/src/gpu/exact_higher_support_product_cuda.cpp b/morsehgp3d/src/gpu/exact_higher_support_product_cuda.cpp
+index 0076974861c2f3dec213dc43693bd4ab0cd467e3..0cb6150a78250d835ea198a91c661b3fa313cf36 100644
+--- a/morsehgp3d/src/gpu/exact_higher_support_product_cuda.cpp
++++ b/morsehgp3d/src/gpu/exact_higher_support_product_cuda.cpp
+@@ -250,10 +250,6 @@ ExactHigherSupportProductCudaContext::
+ ExactHigherSupportProductCudaContext(
+     ExactHigherSupportProductCudaContext&&) noexcept = default;
+ 
+-ExactHigherSupportProductCudaContext&
+-ExactHigherSupportProductCudaContext::operator=(
+-    ExactHigherSupportProductCudaContext&&) noexcept = default;
+-
+ ExactHigherSupportProductCudaResult
+ ExactHigherSupportProductCudaContext::evaluate(
+     std::span<const ExactHigherSupportProductCudaTask> tasks) {
+@@ -824,4 +820,11 @@ bool ExactHigherSupportProductCudaContext::host_fake() const noexcept {
+   return impl_ && impl_->host_fake;
+ }
+ 
++bool ExactHigherSupportProductCudaContext::bound_to(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud) const noexcept {
++  return impl_ != nullptr && impl_->index == &index &&
++      impl_->cloud == &cloud && index.validated_for(cloud);
++}
++
+ }  // namespace morsehgp3d::gpu
+diff --git a/morsehgp3d/src/gpu/k1_boruvka_hierarchy.cpp b/morsehgp3d/src/gpu/k1_boruvka_hierarchy.cpp
+index 5fdda6ce0e778dcba907a092e47d3e721c5bcefa..b0801d8318dd88443965949710b18b5ffc8d4261 100644
+--- a/morsehgp3d/src/gpu/k1_boruvka_hierarchy.cpp
++++ b/morsehgp3d/src/gpu/k1_boruvka_hierarchy.cpp
+@@ -56,13 +56,15 @@ template <typename Value>
+   return observed == from_source && from_source == from_reference;
+ }
+ 
++template <typename Source>
+ [[nodiscard]] K1SeededExactCompactHierarchyVerification
+ verify_compact_k1_hierarchy_with_source_verification(
+     const spatial::MortonLbvhIndex& index,
+     const spatial::CanonicalPointCloud& cloud,
+-    const K1SeededExactBoruvkaResult& source,
++    const Source& source,
+     const K1SeededExactCompactHierarchy& reduction,
+-    const K1SeededExactBoruvkaVerification& source_verification) {
++    bool source_emst_witness_certified,
++    bool source_status_separation_certified) {
+   K1SeededExactCompactHierarchyVerification verification;
+   verification.reduction_status_certified =
+       reduction.reduction_status ==
+@@ -73,9 +75,9 @@ verify_compact_k1_hierarchy_with_source_verification(
+       K1SeededExactHierarchyScope::local_k1_compact_forest_only;
+ 
+   verification.source_emst_witness_certified =
+-      source_verification.emst_witness_certified;
++      source_emst_witness_certified;
+   verification.source_status_separation_certified =
+-      source_verification.hierarchy_status_separation_certified &&
++      source_status_separation_certified &&
+       source.hierarchy_reduction_status ==
+           K1HybridHierarchyReductionStatus::not_performed &&
+       source.scientific_status ==
+@@ -207,7 +209,12 @@ verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+       verify_gpu_seeded_cpu_exact_external_1nn_k1_boruvka(
+           index, cloud, trusted_seed_policy, source);
+   return verify_compact_k1_hierarchy_with_source_verification(
+-      index, cloud, source, reduction, source_verification);
++      index,
++      cloud,
++      source,
++      reduction,
++      source_verification.emst_witness_certified,
++      source_verification.hierarchy_status_separation_certified);
+ }
+ 
+ K1SeededExactCompactHierarchy
+@@ -242,7 +249,8 @@ build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+           cloud,
+           source,
+           reduction,
+-          source_verification);
++          source_verification.emst_witness_certified,
++          source_verification.hierarchy_status_separation_certified);
+   if (!verification.local_k1_hierarchy_certified) {
+     throw std::logic_error(
+         "the seeded exact compact k=1 hierarchy failed its independent "
+@@ -251,4 +259,66 @@ build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+   return reduction;
+ }
+ 
++K1SeededExactCompactHierarchyVerification
++verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud,
++    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
++    const K1DualTreeExactBoruvkaResult& source,
++    const K1SeededExactCompactHierarchy& reduction) {
++  const K1DualTreeExactBoruvkaVerification source_verification =
++      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
++          index, cloud, trusted_seed_policy, source);
++  return verify_compact_k1_hierarchy_with_source_verification(
++      index,
++      cloud,
++      source,
++      reduction,
++      source_verification.emst_witness_certified,
++      source_verification.hierarchy_status_separation_certified);
++}
++
++K1SeededExactCompactHierarchy
++build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++    const spatial::MortonLbvhIndex& index,
++    const spatial::CanonicalPointCloud& cloud,
++    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
++    const K1DualTreeExactBoruvkaResult& source) {
++  // Revalidate the shared exact search before allocating from its untrusted
++  // edge payload. In particular, a copied true source flag is not authority.
++  const K1DualTreeExactBoruvkaVerification source_verification =
++      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
++          index, cloud, trusted_seed_policy, source);
++  if (!source_verification.emst_witness_certified) {
++    throw std::logic_error(
++        "the dual-tree exact compact k=1 hierarchy requires a freshly "
++        "recertified source EMST witness");
++  }
++
++  K1SeededExactCompactHierarchy reduction;
++  reduction.forest = hierarchy::build_compact_k1_forest(
++      source.point_count,
++      std::span<const hierarchy::ExactEmstEdge>{source.emst_edges});
++  reduction.reduction_status =
++      K1SeededExactHierarchyReductionStatus::
++          compact_k1_forest_certified;
++  reduction.scope =
++      K1SeededExactHierarchyScope::local_k1_compact_forest_only;
++
++  const K1SeededExactCompactHierarchyVerification verification =
++      verify_compact_k1_hierarchy_with_source_verification(
++          index,
++          cloud,
++          source,
++          reduction,
++          source_verification.emst_witness_certified,
++          source_verification.hierarchy_status_separation_certified);
++  if (!verification.local_k1_hierarchy_certified) {
++    throw std::logic_error(
++        "the dual-tree exact compact k=1 hierarchy failed its independent "
++        "source replay and two-source reduction verification");
++  }
++  return reduction;
++}
++
+ }  // namespace morsehgp3d::gpu
+diff --git a/morsehgp3d/src/tools/gpu_exact_higher_support_product_cuda_qualification.cpp b/morsehgp3d/src/tools/gpu_exact_higher_support_product_cuda_qualification.cpp
+index 32eb6a1360db4a394c7cd98e9c01704d35208adb..f6623585ba8165c0a3161a2aa0381e62d3d524bc 100644
+--- a/morsehgp3d/src/tools/gpu_exact_higher_support_product_cuda_qualification.cpp
++++ b/morsehgp3d/src/tools/gpu_exact_higher_support_product_cuda_qualification.cpp
+@@ -1,4 +1,5 @@
+ #include "morsehgp3d/gpu/exact_higher_support_product_cuda.hpp"
++#include "morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp"
+ 
+ #include "morsehgp3d/hierarchy/higher_support_product.hpp"
+ 
+@@ -24,6 +25,8 @@ using morsehgp3d::exact::CertifiedPoint3;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaBackend;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaContext;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaOutcome;
++using morsehgp3d::gpu::
++    ExactHigherSupportProductCudaPositiveDecisionAdapter;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaStatus;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaStopReason;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaTask;
+@@ -33,6 +36,8 @@ using morsehgp3d::hierarchy::
+     ExactHigherSupportProductAabbDecisionBackend;
+ using morsehgp3d::hierarchy::ExactHigherSupportFrontierEntry;
+ using morsehgp3d::hierarchy::ExactHigherSupportNodeReceipt;
++using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
++using morsehgp3d::hierarchy::build_exact_higher_support_stream;
+ using morsehgp3d::hierarchy::
+     exact_higher_support_product_no_well_centered_certified;
+ using morsehgp3d::hierarchy::
+@@ -483,6 +488,19 @@ template <std::size_t SupportSize>
+           .count());
+ }
+ 
++[[nodiscard]] ExactHigherSupportStreamBudget unlimited_stream_budget() {
++  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
++  return ExactHigherSupportStreamBudget{
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum};
++}
++
+ }  // namespace
+ 
+ int main() {
+@@ -661,6 +679,59 @@ int main() {
+         overlap_result.audit.kernel_launch_count == 0U &&
+         overlap_result.audit.synchronization_count == 0U;
+ 
++    // Product-level qualification is insufficient if the sparse traversal
++    // never consumes the device decisions.  Run the same immutable authority
++    // once on the CPU and once through the sealed positive-only native seam;
++    // the authenticated stream must remain bit-for-bit identical.
++    const ExactHigherSupportStreamBudget stream_budget =
++        unlimited_stream_budget();
++    const auto cpu_stream_begin = std::chrono::steady_clock::now();
++    const auto cpu_stream = build_exact_higher_support_stream(
++        index, cloud, 4U, stream_budget);
++    const auto cpu_stream_end = std::chrono::steady_clock::now();
++    ExactHigherSupportProductCudaPositiveDecisionAdapter stream_adapter{
++        context, index, cloud};
++    const auto cuda_stream_begin = std::chrono::steady_clock::now();
++    const auto cuda_stream = build_exact_higher_support_stream(
++        index, cloud, 4U, stream_budget, stream_adapter.source());
++    const auto cuda_stream_end = std::chrono::steady_clock::now();
++    const auto& stream_adapter_audit = stream_adapter.audit();
++    const bool stream_adapter_qualified =
++        cpu_stream.stream_complete() && cuda_stream == cpu_stream &&
++        stream_adapter.source().bound_to(index, cloud) &&
++        stream_adapter.source().native_exact_authority() &&
++        stream_adapter_audit.native_exact_authority &&
++        !stream_adapter_audit
++             .host_fake_positive_proposals_require_cpu_replay &&
++        stream_adapter_audit.submitted_task_count > 0U &&
++        stream_adapter_audit.certified_positive_count > 0U &&
++        stream_adapter_audit.native_certified_positive_count ==
++            stream_adapter_audit.certified_positive_count &&
++        stream_adapter_audit.native_certified_positive_count ==
++            stream_adapter_audit.native_kernel_certified_positive_count +
++                stream_adapter_audit
++                    .native_component_cpu_fallback_certified_positive_count &&
++        stream_adapter_audit.native_kernel_certified_positive_count > 0U &&
++        stream_adapter_audit.host_fake_positive_proposal_count == 0U &&
++        stream_adapter_audit.support_size_3_certified_positive_count > 0U &&
++        stream_adapter_audit.support_size_4_certified_positive_count > 0U &&
++        stream_adapter_audit.support_size_3_certified_positive_count +
++                stream_adapter_audit.support_size_4_certified_positive_count ==
++            stream_adapter_audit.certified_positive_count &&
++        stream_adapter_audit.support_prune_certified_positive_count > 0U &&
++        stream_adapter_audit
++                .query_strict_interior_certified_positive_count >
++            0U &&
++        stream_adapter_audit.support_prune_certified_positive_count +
++                stream_adapter_audit
++                    .query_strict_interior_certified_positive_count ==
++            stream_adapter_audit.certified_positive_count &&
++        !stream_adapter_audit.disabled_after_failure &&
++        !stream_adapter_audit.floating_point_decision_performed &&
++        !stream_adapter_audit.global_product_frontier_mutated &&
++        !stream_adapter_audit.higher_order_delaunay_materialized &&
++        !stream_adapter_audit.hierarchy_or_public_status_claimed;
++
+     const auto& audit = result.audit;
+     const bool audit_qualified =
+         result.status ==
+@@ -707,7 +778,8 @@ int main() {
+         !audit.hierarchy_or_tree_claimed && !audit.slo_claimed &&
+         !audit.public_status_claimed;
+     const bool qualified = mismatch_count == 0U && audit_qualified &&
+-        overlap_rejected_without_launch && !context.host_fake();
++        overlap_rejected_without_launch && stream_adapter_qualified &&
++        !context.host_fake();
+     const auto total_end = std::chrono::steady_clock::now();
+ 
+     std::cout
+@@ -724,6 +796,10 @@ int main() {
+         << "\"cuda_device\":" << audit.cuda_device << ','
+         << "\"cuda_execution_performed\":"
+         << (audit.cuda_execution_performed ? "true" : "false") << ','
++        << "\"cuda_stream_total_ns\":"
++        << nanoseconds_between(cuda_stream_begin, cuda_stream_end) << ','
++        << "\"cpu_stream_total_ns\":"
++        << nanoseconds_between(cpu_stream_begin, cpu_stream_end) << ','
+         << "\"every_result_validated_once\":"
+         << (audit.every_result_validated_once ? "true" : "false") << ','
+         << "\"every_task_validated_before_launch\":"
+@@ -792,10 +868,39 @@ int main() {
+         << ','
+         << "\"schema_version\":"
+         << morsehgp3d::gpu::
+-               exact_higher_support_product_cuda_schema_version
++               exact_higher_support_product_cuda_qualification_schema_version
+         << ",\"source_authority_validated\":"
+         << (audit.source_authority_validated ? "true" : "false") << ','
+         << "\"source_snapshot_epoch\":" << epoch << ','
++        << "\"stream_adapter_certified_positive_count\":"
++        << stream_adapter_audit.certified_positive_count << ','
++        << "\"stream_adapter_component_cpu_fallback_count\":"
++        << stream_adapter_audit.component_cpu_fallback_count << ','
++        << "\"stream_adapter_native_exact_authority\":"
++        << (stream_adapter_audit.native_exact_authority
++                ? "true"
++                : "false")
++        << ','
++        << "\"stream_adapter_native_kernel_certified_positive_count\":"
++        << stream_adapter_audit.native_kernel_certified_positive_count << ','
++        << "\"stream_adapter_native_cpu_fallback_certified_positive_count\":"
++        << stream_adapter_audit
++               .native_component_cpu_fallback_certified_positive_count
++        << ','
++        << "\"stream_adapter_qualified\":"
++        << (stream_adapter_qualified ? "true" : "false") << ','
++        << "\"stream_adapter_submitted_task_count\":"
++        << stream_adapter_audit.submitted_task_count << ','
++        << "\"stream_adapter_support_3_certified_positive_count\":"
++        << stream_adapter_audit.support_size_3_certified_positive_count << ','
++        << "\"stream_adapter_support_4_certified_positive_count\":"
++        << stream_adapter_audit.support_size_4_certified_positive_count << ','
++        << "\"stream_adapter_support_prune_certified_positive_count\":"
++        << stream_adapter_audit.support_prune_certified_positive_count << ','
++        << "\"stream_adapter_query_certified_positive_count\":"
++        << stream_adapter_audit
++               .query_strict_interior_certified_positive_count
++        << ','
+         << "\"submitted_task_digest\":"
+         << audit.submitted_task_digest << ','
+         << "\"synchronization_count\":"
+@@ -816,7 +921,7 @@ int main() {
+         << "\"host_batch_total_ns_available\":false,"
+         << "\"qualified\":false,\"schema_version\":"
+         << morsehgp3d::gpu::
+-               exact_higher_support_product_cuda_schema_version
++               exact_higher_support_product_cuda_qualification_schema_version
+         << ','
+         << "\"total_qualification_ns\":"
+         << nanoseconds_between(total_begin, total_end) << "}\n";
+diff --git a/morsehgp3d/tests/unit/fake_gpu_exact_higher_support_product_cuda_launchers.cpp b/morsehgp3d/tests/unit/fake_gpu_exact_higher_support_product_cuda_launchers.cpp
+index be1c3e257fb5ef96bccc2bb03346297f508435fb..ac353375c5d0a3d3b388c1aa1aacf7d60e28b3cc 100644
+--- a/morsehgp3d/tests/unit/fake_gpu_exact_higher_support_product_cuda_launchers.cpp
++++ b/morsehgp3d/tests/unit/fake_gpu_exact_higher_support_product_cuda_launchers.cpp
+@@ -14,8 +14,11 @@ namespace morsehgp3d::gpu::test_support {
+ namespace {
+ 
+ std::atomic<bool> corrupt_next_receipt{false};
++std::atomic<bool> throw_non_std_on_next_launch{false};
+ std::atomic<bool> force_next_int256_fallback{false};
+ std::atomic<bool> force_next_int512_fallback{false};
++std::atomic<bool> force_false_positive_certificates{false};
++std::atomic<std::size_t> forced_false_positive_count{0U};
+ std::atomic<std::size_t> launcher_call_count{0U};
+ 
+ }  // namespace
+@@ -24,6 +27,10 @@ void corrupt_next_exact_higher_support_product_receipt() noexcept {
+   corrupt_next_receipt.store(true, std::memory_order_relaxed);
+ }
+ 
++void throw_non_std_on_next_exact_higher_support_product_launch() noexcept {
++  throw_non_std_on_next_launch.store(true, std::memory_order_relaxed);
++}
++
+ void force_next_exact_higher_support_product_int256_fallback() noexcept {
+   force_next_int256_fallback.store(true, std::memory_order_relaxed);
+ }
+@@ -32,10 +39,24 @@ void force_next_exact_higher_support_product_int512_fallback() noexcept {
+   force_next_int512_fallback.store(true, std::memory_order_relaxed);
+ }
+ 
++void force_exact_higher_support_product_false_positives(
++    bool enabled) noexcept {
++  force_false_positive_certificates.store(
++      enabled, std::memory_order_relaxed);
++}
++
++std::size_t exact_higher_support_product_forced_false_positive_count()
++    noexcept {
++  return forced_false_positive_count.load(std::memory_order_relaxed);
++}
++
+ void reset_exact_higher_support_product_fake() noexcept {
+   corrupt_next_receipt.store(false, std::memory_order_relaxed);
++  throw_non_std_on_next_launch.store(false, std::memory_order_relaxed);
+   force_next_int256_fallback.store(false, std::memory_order_relaxed);
+   force_next_int512_fallback.store(false, std::memory_order_relaxed);
++  force_false_positive_certificates.store(false, std::memory_order_relaxed);
++  forced_false_positive_count.store(0U, std::memory_order_relaxed);
+   launcher_call_count.store(0U, std::memory_order_relaxed);
+ }
+ 
+@@ -47,6 +68,11 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
+   return corrupt_next_receipt.exchange(false, std::memory_order_relaxed);
+ }
+ 
++[[nodiscard]] bool consume_non_std_launch_exception() noexcept {
++  return throw_non_std_on_next_launch.exchange(
++      false, std::memory_order_relaxed);
++}
++
+ [[nodiscard]] bool consume_forced_int256_fallback() noexcept {
+   return force_next_int256_fallback.exchange(
+       false, std::memory_order_relaxed);
+@@ -57,6 +83,15 @@ std::size_t exact_higher_support_product_fake_launcher_call_count() noexcept {
+       false, std::memory_order_relaxed);
+ }
+ 
++[[nodiscard]] bool false_positive_certificates_forced() noexcept {
++  return force_false_positive_certificates.load(
++      std::memory_order_relaxed);
++}
++
++void count_forced_false_positive() noexcept {
++  forced_false_positive_count.fetch_add(1U, std::memory_order_relaxed);
++}
++
+ void count_launcher_call() noexcept {
+   launcher_call_count.fetch_add(1U, std::memory_order_relaxed);
+ }
+@@ -198,6 +233,9 @@ phase15_launch_exact_higher_support_product_cuda(
+         "the fake exact higher-support product launcher rejected its batch");
+   }
+   test_support::count_launcher_call();
++  if (test_support::consume_non_std_launch_exception()) {
++    throw 17;
++  }
+ 
+   Phase15ExactHigherSupportProductCudaReceipt receipt;
+   receipt.records.reserve(request.tasks.size());
+@@ -263,6 +301,11 @@ phase15_launch_exact_higher_support_product_cuda(
+       record.backend = Phase15ExactHigherSupportProductCudaDeviceBackend::
+           arbitrary_precision_rational;
+     } else {
++      if (test_support::false_positive_certificates_forced() &&
++          !certified) {
++        certified = true;
++        test_support::count_forced_false_positive();
++      }
+       record.outcome = certified
+           ? Phase15ExactHigherSupportProductCudaDeviceOutcome::certified
+           : Phase15ExactHigherSupportProductCudaDeviceOutcome::exact_false;
+diff --git a/morsehgp3d/tests/unit/test_gpu_exact_higher_support_product_cuda.cpp b/morsehgp3d/tests/unit/test_gpu_exact_higher_support_product_cuda.cpp
+index c6f7507f3781869e4e271f53f5aa6e93d7dd2035..d2790eb4c18ba6b34272a886bf6a67ad3647360a 100644
+--- a/morsehgp3d/tests/unit/test_gpu_exact_higher_support_product_cuda.cpp
++++ b/morsehgp3d/tests/unit/test_gpu_exact_higher_support_product_cuda.cpp
+@@ -1,4 +1,5 @@
+ #include "morsehgp3d/gpu/exact_higher_support_product_cuda.hpp"
++#include "morsehgp3d/gpu/exact_higher_support_stream_decision_adapter.hpp"
+ 
+ #include "fake_gpu_phase14_morton_lbvh_build_launchers.hpp"
+ 
+@@ -23,11 +24,16 @@
+ 
+ namespace morsehgp3d::gpu::test_support {
+ void corrupt_next_exact_higher_support_product_receipt() noexcept;
++void throw_non_std_on_next_exact_higher_support_product_launch() noexcept;
+ void force_next_exact_higher_support_product_int256_fallback() noexcept;
+ void force_next_exact_higher_support_product_int512_fallback() noexcept;
+ void reset_exact_higher_support_product_fake() noexcept;
+ [[nodiscard]] std::size_t
+ exact_higher_support_product_fake_launcher_call_count() noexcept;
++[[nodiscard]] std::size_t
++exact_higher_support_product_forced_false_positive_count() noexcept;
++void force_exact_higher_support_product_false_positives(
++    bool enabled) noexcept;
+ }  // namespace morsehgp3d::gpu::test_support
+ 
+ namespace {
+@@ -36,6 +42,8 @@ using morsehgp3d::exact::CertifiedPoint3;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaBackend;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaContext;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaOutcome;
++using morsehgp3d::gpu::
++    ExactHigherSupportProductCudaPositiveDecisionAdapter;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaStatus;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaStopReason;
+ using morsehgp3d::gpu::ExactHigherSupportProductCudaTask;
+@@ -44,8 +52,14 @@ using morsehgp3d::gpu::MortonLbvhBuildContext;
+ using morsehgp3d::gpu::MortonLbvhDeviceTraversalLease;
+ using morsehgp3d::gpu::test_support::
+     corrupt_next_exact_higher_support_product_receipt;
++using morsehgp3d::gpu::test_support::
++    throw_non_std_on_next_exact_higher_support_product_launch;
+ using morsehgp3d::gpu::test_support::
+     exact_higher_support_product_fake_launcher_call_count;
++using morsehgp3d::gpu::test_support::
++    exact_higher_support_product_forced_false_positive_count;
++using morsehgp3d::gpu::test_support::
++    force_exact_higher_support_product_false_positives;
+ using morsehgp3d::gpu::test_support::
+     force_next_exact_higher_support_product_int256_fallback;
+ using morsehgp3d::gpu::test_support::
+@@ -58,6 +72,11 @@ using morsehgp3d::hierarchy::
+     ExactHigherSupportProductAabbDecisionBackend;
+ using morsehgp3d::hierarchy::ExactHigherSupportFrontierEntry;
+ using morsehgp3d::hierarchy::ExactHigherSupportNodeReceipt;
++using morsehgp3d::hierarchy::ExactHigherSupportPositiveDecisionSource;
++using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
++using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
++using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
++using morsehgp3d::hierarchy::build_exact_higher_support_stream;
+ using morsehgp3d::hierarchy::
+     exact_higher_support_product_no_well_centered_certified;
+ using morsehgp3d::hierarchy::
+@@ -66,11 +85,75 @@ using morsehgp3d::spatial::CanonicalPointCloud;
+ using morsehgp3d::spatial::ExactDyadicAabb3;
+ using morsehgp3d::spatial::MortonLbvhIndex;
+ 
++template <typename Adapter>
++concept RvalueSourceAccessible = requires(Adapter&& adapter) {
++  std::move(adapter).source();
++};
++
++template <typename Adapter>
++concept ConstLvalueSourceAccessible = requires(const Adapter& adapter) {
++  adapter.source();
++};
++
+ static_assert(
+     !std::is_copy_constructible_v<ExactHigherSupportProductCudaContext>);
++static_assert(
++    !std::is_copy_constructible_v<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
++static_assert(
++    !std::is_move_constructible_v<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
++static_assert(
++    !RvalueSourceAccessible<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
++static_assert(
++    !ConstLvalueSourceAccessible<
++        ExactHigherSupportProductCudaPositiveDecisionAdapter>);
++static_assert(
++    !std::is_default_constructible_v<
++        morsehgp3d::hierarchy::
++            ExactHigherSupportPositiveDecisionSource>);
++static_assert(
++    !std::is_constructible_v<
++        ExactHigherSupportTerminalSession,
++        MortonLbvhIndex&&,
++        const CanonicalPointCloud&,
++        std::size_t,
++        const ExactHigherSupportPositiveDecisionSource&,
++        ExactHigherSupportStreamBudget,
++        std::size_t>);
++static_assert(
++    !std::is_constructible_v<
++        ExactHigherSupportTerminalSession,
++        const MortonLbvhIndex&&,
++        const CanonicalPointCloud&,
++        std::size_t,
++        const ExactHigherSupportPositiveDecisionSource&,
++        ExactHigherSupportStreamBudget,
++        std::size_t>);
++static_assert(
++    !std::is_constructible_v<
++        ExactHigherSupportTerminalSession,
++        const MortonLbvhIndex&,
++        CanonicalPointCloud&&,
++        std::size_t,
++        const ExactHigherSupportPositiveDecisionSource&,
++        ExactHigherSupportStreamBudget,
++        std::size_t>);
++static_assert(
++    !std::is_constructible_v<
++        ExactHigherSupportTerminalSession,
++        const MortonLbvhIndex&,
++        const CanonicalPointCloud&&,
++        std::size_t,
++        const ExactHigherSupportPositiveDecisionSource&,
++        ExactHigherSupportStreamBudget,
++        std::size_t>);
+ static_assert(
+     std::is_nothrow_move_constructible_v<
+         ExactHigherSupportProductCudaContext>);
++static_assert(
++    !std::is_move_assignable_v<ExactHigherSupportProductCudaContext>);
+ static_assert(
+     !std::is_constructible_v<
+         ExactHigherSupportProductCudaContext,
+@@ -183,6 +266,19 @@ void check_throws(Function&& function, const std::string& message) {
+       std::span<const CertifiedPoint3>{points});
+ }
+ 
++[[nodiscard]] ExactHigherSupportStreamBudget unlimited_stream_budget() {
++  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
++  return ExactHigherSupportStreamBudget{
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum,
++      maximum};
++}
++
+ [[nodiscard]] morsehgp3d::spatial::PointId canonical_point_id_for_source(
+     const CanonicalPointCloud& cloud,
+     std::size_t source_index) {
+@@ -576,6 +672,171 @@ void test_positive_certificates_and_disjoint_query_receipt() {
+       "positive support/query records close counters and both batch digests");
+ }
+ 
++void test_host_fake_is_positive_only_stream_proposal() {
++  reset_fake_gpu_phase14_morton_lbvh_build();
++  reset_exact_higher_support_product_fake();
++  const CanonicalPointCloud cloud = positive_certificate_cloud();
++  MortonLbvhBuildContext builder{cloud.size()};
++  auto build = builder.build(cloud);
++  const MortonLbvhIndex& index = build.certified_index();
++  const ExactHigherSupportStreamBudget budget = unlimited_stream_budget();
++  const auto cpu_result =
++      build_exact_higher_support_stream(index, cloud, 4U, budget);
++
++  auto lease = builder.release_device_traversal_lease(build);
++  ExactHigherSupportProductCudaContext context{
++      index, cloud, std::move(lease), 1U};
++  ExactHigherSupportProductCudaPositiveDecisionAdapter adapter{
++      context, index, cloud};
++  force_exact_higher_support_product_false_positives(true);
++  const auto assisted_result = build_exact_higher_support_stream(
++      index, cloud, 4U, budget, adapter.source());
++  force_exact_higher_support_product_false_positives(false);
++
++  check(
++      cpu_result.stream_complete() && assisted_result == cpu_result,
++      "the sealed CUDA seam preserves the complete authenticated sparse "
++      "higher-support stream bit for bit");
++  const auto& audit = adapter.audit();
++  check(
++      audit.source_binding_validated &&
++          !audit.native_exact_authority &&
++          audit.host_fake_positive_proposals_require_cpu_replay &&
++          audit.submitted_task_count > 0U &&
++          audit.submitted_task_count ==
++              audit.support_prune_task_count +
++                  audit.query_strict_interior_task_count &&
++          audit.certified_positive_count > 0U &&
++          audit.host_fake_positive_proposal_count ==
++              audit.certified_positive_count &&
++          exact_higher_support_product_forced_false_positive_count() > 0U &&
++          audit.native_certified_positive_count == 0U &&
++          !audit.disabled_after_failure &&
++          !audit.floating_point_decision_performed &&
++          !audit.global_product_frontier_mutated &&
++          !audit.higher_order_delaunay_materialized &&
++          !audit.hierarchy_or_public_status_claimed,
++      "the host fake is audited only as a replayed positive proposal and "
++      "never as native exact authority");
++  check(
++      adapter.source().bound_to(index, cloud) &&
++          !adapter.source().native_exact_authority(),
++      "the sealed source retains the exact cloud/LBVH binding and withholds "
++      "native authority from the host fake");
++
++  const std::size_t task_count_before_terminal_session =
++      adapter.audit().submitted_task_count;
++  ExactHigherSupportStreamBudget multi_chunk_budget = budget;
++  multi_chunk_budget.maximum_work_unit_count = 32U;
++  constexpr std::size_t maximum_chunk_count = 10000U;
++  ExactHigherSupportTerminalSession cpu_terminal_session{
++      index, cloud, 4U, multi_chunk_budget, maximum_chunk_count};
++  check(
++      cpu_terminal_session.run_to_terminal() ==
++          ExactHigherSupportTerminalRunStatus::terminal,
++      "the CPU resident sparse terminal reaches the multi-chunk reference");
++  auto cpu_terminal_authority = std::move(cpu_terminal_session).seal();
++  ExactHigherSupportTerminalSession assisted_terminal_session{
++      index,
++      cloud,
++      4U,
++      adapter.source(),
++      multi_chunk_budget,
++      maximum_chunk_count};
++  check(
++      assisted_terminal_session.run_to_terminal() ==
++          ExactHigherSupportTerminalRunStatus::terminal,
++      "the same sealed decision source runs the multi-chunk resident sparse "
++      "terminal producer to completion");
++  auto assisted_terminal_authority =
++      std::move(assisted_terminal_session).seal();
++  check(
++      cpu_terminal_authority.sealed_in_process_terminal_authority() &&
++          assisted_terminal_authority
++              .sealed_in_process_terminal_authority() &&
++          cpu_terminal_authority.chunk_count() > 1U &&
++          assisted_terminal_authority.terminal_checkpoint() ==
++              cpu_terminal_authority.terminal_checkpoint() &&
++          assisted_terminal_authority.segments().size() ==
++              cpu_terminal_authority.segments().size() &&
++          std::equal(
++              assisted_terminal_authority.segments().begin(),
++              assisted_terminal_authority.segments().end(),
++              cpu_terminal_authority.segments().begin()) &&
++          assisted_terminal_authority.event_count() ==
++              cpu_result.events.size() &&
++          assisted_terminal_authority
++                  .relevant_extra_shell_diagnostic_count() ==
++              cpu_result.relevant_extra_shell_diagnostics.size() &&
++          adapter.audit().submitted_task_count >
++              task_count_before_terminal_session,
++      "the CUDA-assisted resident terminal preserves every CPU checkpoint, "
++      "segment, digest and audit across multiple chunks without claiming "
++      "durable or public authority");
++}
++
++void test_adapter_launcher_corruption_fails_open_once() {
++  reset_fake_gpu_phase14_morton_lbvh_build();
++  reset_exact_higher_support_product_fake();
++  const CanonicalPointCloud cloud = ordinary_cloud();
++  MortonLbvhBuildContext builder{cloud.size()};
++  auto build = builder.build(cloud);
++  const MortonLbvhIndex& index = build.certified_index();
++  const ExactHigherSupportStreamBudget budget = unlimited_stream_budget();
++  const auto cpu_result =
++      build_exact_higher_support_stream(index, cloud, 4U, budget);
++  auto lease = builder.release_device_traversal_lease(build);
++  ExactHigherSupportProductCudaContext context{
++      index, cloud, std::move(lease), 1U};
++  ExactHigherSupportProductCudaPositiveDecisionAdapter adapter{
++      context, index, cloud};
++
++  corrupt_next_exact_higher_support_product_receipt();
++  const auto fail_open_result = build_exact_higher_support_stream(
++      index, cloud, 4U, budget, adapter.source());
++  const auto audit = adapter.audit();
++  check(
++      fail_open_result == cpu_result && audit.disabled_after_failure &&
++          audit.exception_fail_open_count == 1U &&
++          audit.invalid_result_fail_open_count == 0U &&
++          audit.submitted_task_count == 1U &&
++          audit.disabled_source_fallback_count > 0U &&
++          exact_higher_support_product_fake_launcher_call_count() == 1U,
++      "a malformed accelerator receipt disables the adapter once and the "
++      "complete sparse stream fails open bit for bit to CPU");
++}
++
++void test_adapter_non_std_launcher_exception_fails_open_once() {
++  reset_fake_gpu_phase14_morton_lbvh_build();
++  reset_exact_higher_support_product_fake();
++  const CanonicalPointCloud cloud = ordinary_cloud();
++  MortonLbvhBuildContext builder{cloud.size()};
++  auto build = builder.build(cloud);
++  const MortonLbvhIndex& index = build.certified_index();
++  const ExactHigherSupportStreamBudget budget = unlimited_stream_budget();
++  const auto cpu_result =
++      build_exact_higher_support_stream(index, cloud, 4U, budget);
++  auto lease = builder.release_device_traversal_lease(build);
++  ExactHigherSupportProductCudaContext context{
++      index, cloud, std::move(lease), 1U};
++  ExactHigherSupportProductCudaPositiveDecisionAdapter adapter{
++      context, index, cloud};
++
++  throw_non_std_on_next_exact_higher_support_product_launch();
++  const auto fail_open_result = build_exact_higher_support_stream(
++      index, cloud, 4U, budget, adapter.source());
++  const auto audit = adapter.audit();
++  check(
++      fail_open_result == cpu_result && audit.disabled_after_failure &&
++          audit.exception_fail_open_count == 1U &&
++          audit.invalid_result_fail_open_count == 0U &&
++          audit.submitted_task_count == 1U &&
++          audit.disabled_source_fallback_count > 0U &&
++          exact_higher_support_product_fake_launcher_call_count() == 1U,
++      "a non-standard launcher exception disables the adapter once and "
++      "the complete sparse stream fails open bit for bit to CPU");
++}
++
+ void test_foreign_resident_index_identity_is_rejected() {
+   reset_fake_gpu_phase14_morton_lbvh_build();
+   reset_exact_higher_support_product_fake();
+@@ -794,6 +1055,9 @@ void test_int256_sentinel_falls_back_to_host_int512() {
+ int main() {
+   test_batched_parity_and_preflight();
+   test_positive_certificates_and_disjoint_query_receipt();
++  test_host_fake_is_positive_only_stream_proposal();
++  test_adapter_launcher_corruption_fails_open_once();
++  test_adapter_non_std_launcher_exception_fails_open_once();
+   test_foreign_resident_index_identity_is_rejected();
+   test_int1024_preflight_route();
+   test_integral_bigint_fallback();
+diff --git a/morsehgp3d/tests/unit/test_gpu_k1_boruvka_hierarchy.cpp b/morsehgp3d/tests/unit/test_gpu_k1_boruvka_hierarchy.cpp
+index e4114332b5144ee260de98d24423a495aa1f7ca4..78d843af2141150eacac80e4ea62c9082a1526f1 100644
+--- a/morsehgp3d/tests/unit/test_gpu_k1_boruvka_hierarchy.cpp
++++ b/morsehgp3d/tests/unit/test_gpu_k1_boruvka_hierarchy.cpp
+@@ -22,6 +22,7 @@ using morsehgp3d::exact::BigInt;
+ using morsehgp3d::exact::CertifiedPoint3;
+ using morsehgp3d::exact::ExactLevel;
+ using morsehgp3d::gpu::K1BoruvkaMortonSeedPolicy;
++using morsehgp3d::gpu::K1DualTreeExactBoruvkaResult;
+ using morsehgp3d::gpu::K1HybridHierarchyReductionStatus;
+ using morsehgp3d::gpu::K1HybridScientificStatus;
+ using morsehgp3d::gpu::K1SeededExactBoruvkaResult;
+@@ -30,6 +31,7 @@ using morsehgp3d::gpu::K1SeededExactCompactHierarchyVerification;
+ using morsehgp3d::gpu::K1SeededExactHierarchyReductionStatus;
+ using morsehgp3d::gpu::K1SeededExactHierarchyScope;
+ using morsehgp3d::gpu::build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka;
++using morsehgp3d::gpu::build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka;
+ using morsehgp3d::gpu::build_gpu_seeded_cpu_exact_external_1nn_k1_boruvka;
+ using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_launch_count;
+ using morsehgp3d::gpu::test_support::reset_fake_gpu_k1_boruvka;
+@@ -304,6 +306,69 @@ void test_equal_level_square_is_one_canonical_multifusion() {
+       "equal-level reduction certifies the multifusion and preserves its source");
+ }
+ 
++void test_dual_tree_chain_reduces_to_the_same_compact_forest() {
++  reset_fake_gpu_k1_boruvka();
++  const std::array<CertifiedPoint3, 8> input = chain_points();
++  const CanonicalPointCloud cloud = canonical_cloud(input);
++  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
++  constexpr K1BoruvkaMortonSeedPolicy policy{1U};
++  const K1ExactBoruvkaResult reference =
++      build_exact_lbvh_boruvka(index, cloud);
++  const K1CompactForest expected = build_compact_k1_forest(
++      reference.point_count,
++      std::span<const morsehgp3d::hierarchy::ExactEmstEdge>{
++          reference.emst_edges});
++  const K1DualTreeExactBoruvkaResult source =
++      build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
++          index, cloud, policy);
++
++  const K1SeededExactCompactHierarchy reduction =
++      build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++          index, cloud, policy, source);
++  const K1SeededExactCompactHierarchyVerification verification =
++      verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++          index, cloud, policy, source, reduction);
++
++  check(
++      same_compact_forest(reduction.forest, expected) &&
++          reduction.forest.selected_edges == source.emst_edges,
++      "dual-tree source reduces to the independent CPU compact forest");
++  check(
++      all_local_certificates_close(verification) &&
++          reduction.forest.counters.stored_coverage_point_id_count == 0U &&
++          reduction.forest.counters.linear_storage_entry_count <=
++              reduction.forest.counters.linear_storage_entry_limit,
++      "dual-tree compact adapter closes replay, topology and linear storage");
++  check(
++      source.hierarchy_reduction_status ==
++              K1HybridHierarchyReductionStatus::not_performed &&
++          source.scientific_status ==
++              K1HybridScientificStatus::local_emst_witness_only &&
++          source.emst_witness_certified,
++      "dual-tree source remains a separate local EMST witness");
++
++  K1DualTreeExactBoruvkaResult falsified = source;
++  ++falsified.rounds.front().dual_tree_search_audit.
++      covered_unordered_point_pair_count;
++  const K1SeededExactCompactHierarchyVerification falsified_verification =
++      verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++          index, cloud, policy, falsified, reduction);
++  check(
++      !falsified_verification.source_emst_witness_certified &&
++          !falsified_verification.local_k1_hierarchy_certified,
++      "copied true flags cannot launder a falsified dual-tree traversal");
++  check_throws<std::logic_error>(
++      [&index, &cloud, &falsified]() {
++        static_cast<void>(
++            build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
++                index,
++                cloud,
++                K1BoruvkaMortonSeedPolicy{1U},
++                falsified));
++      },
++      "dual-tree compact builder fails before reducing a falsified source");
++}
++
+ void test_verifier_rejects_source_and_compact_arena_falsifications() {
+   reset_fake_gpu_k1_boruvka();
+   const std::array<CertifiedPoint3, 8> input = chain_points();
+@@ -493,6 +558,7 @@ int main() {
+   test_singleton_reduction_is_local_and_vacuous();
+   test_chain_matches_both_fresh_exact_reductions();
+   test_equal_level_square_is_one_canonical_multifusion();
++  test_dual_tree_chain_reduces_to_the_same_compact_forest();
+   test_verifier_rejects_source_and_compact_arena_falsifications();
+   test_invalid_or_mismatched_trusted_policy_fails_before_gpu_replay();
+ 
+diff --git a/morsehgp3d/tests/unit/test_hierarchy_direct_morse_resident_all_orders_vertical_bridge.cpp b/morsehgp3d/tests/unit/test_hierarchy_direct_morse_resident_all_orders_vertical_bridge.cpp
+index 18f744661738a9db7ccf36319b7c16ecc748af8c..7d3b79caac98473597f25850cd036202be70327a 100644
+--- a/morsehgp3d/tests/unit/test_hierarchy_direct_morse_resident_all_orders_vertical_bridge.cpp
++++ b/morsehgp3d/tests/unit/test_hierarchy_direct_morse_resident_all_orders_vertical_bridge.cpp
+@@ -231,16 +231,11 @@ struct Fixture {
+   K1ExactBoruvkaResult boruvka;
+ };
+ 
+-[[nodiscard]] Fixture fixture(std::size_t requested_maximum_order) {
+-  const std::array points{
+-      point(-2.0, 4.0, -8.0),
+-      point(-1.0, 1.0, -1.0),
+-      point(0.0, 0.0, 0.0),
+-      point(1.0, 1.0, 1.0),
+-      point(3.0, 9.0, 27.0),
+-  };
++[[nodiscard]] Fixture fixture_from_points(
++    const std::span<const CertifiedPoint3> points,
++    const std::size_t requested_maximum_order) {
+   auto cloud = CanonicalPointCloud::rejecting_duplicates(
+-      std::span<const CertifiedPoint3>{points});
++      points);
+   auto index = MortonLbvhIndex::build(cloud);
+   auto source = direct_sources(cloud, requested_maximum_order);
+   auto star_budget = generous_star_budget();
+@@ -282,6 +277,39 @@ struct Fixture {
+   };
+ }
+ 
++[[nodiscard]] Fixture fixture(std::size_t requested_maximum_order) {
++  const std::array points{
++      point(-2.0, 4.0, -8.0),
++      point(-1.0, 1.0, -1.0),
++      point(0.0, 0.0, 0.0),
++      point(1.0, 1.0, 1.0),
++      point(3.0, 9.0, 27.0),
++  };
++  return fixture_from_points(points, requested_maximum_order);
++}
++
++// Ten points are the minimum needed to request all nine adjacent arrows.  This
++// exact moment-curve source plans orders 2 through 10, but the conditional
++// SuccessiveStar locator currently exposes a reproducible K5-to-K4 missing
++// target facet.  The test below accepts only that fail-closed outcome or a
++// future complete relative replay; it never converts the plan into an M.1 or
++// public exactness claim.
++[[nodiscard]] Fixture maximum_order_ten_fixture() {
++  const std::array points{
++      point(0.0, 0.0, 0.0),
++      point(10000.0, 1.0, 1.0),
++      point(20000.0, 4.0, 8.0),
++      point(30000.0, 9.0, 27.0),
++      point(40000.0, 16.0, 64.0),
++      point(50000.0, 25.0, 125.0),
++      point(60000.0, 36.0, 216.0),
++      point(70000.0, 49.0, 343.0),
++      point(80000.0, 64.0, 512.0),
++      point(90000.0, 81.0, 729.0),
++  };
++  return fixture_from_points(points, 10U);
++}
++
+ [[nodiscard]] ExactDirectMorseUnifiedResidentInitializationResult
+ resident_initialization(const Fixture& source, std::uint64_t authority_id) {
+   return initialize_exact_direct_morse_unified_resident_session(
+@@ -746,6 +774,248 @@ void test_complete_all_orders_vertical_seal(const Fixture& source) {
+       "a mutated final deletion counter cannot replay against the live bridge");
+ }
+ 
++void test_maximum_order_ten_vertical_falsifier(const Fixture& source) {
++  constexpr std::size_t maximum_order = 10U;
++  std::array<std::size_t, maximum_order + 1U> planned_batches_by_order{};
++  bool shared_multi_order_level = false;
++  for (std::size_t index = 0U; index < source.plan.batches.size(); ++index) {
++    const auto& batch = source.plan.batches[index];
++    if (batch.order <= maximum_order) {
++      ++planned_batches_by_order[batch.order];
++    }
++    if (index != 0U &&
++        source.plan.batches[index - 1U].squared_level == batch.squared_level &&
++        source.plan.batches[index - 1U].order != batch.order) {
++      shared_multi_order_level = true;
++    }
++  }
++
++  bool every_adjacent_source_order_planned = true;
++  for (std::size_t order = 2U; order <= maximum_order; ++order) {
++    every_adjacent_source_order_planned =
++        every_adjacent_source_order_planned &&
++        planned_batches_by_order[order] != 0U;
++  }
++  check(
++      source.source.event_journal.requested_maximum_order == maximum_order &&
++          source.source.event_journal.effective_maximum_order == maximum_order &&
++          source.plan.certified_bounded_plan() &&
++          source.plan.unique_batch_per_exact_level_and_order &&
++          source.plan.batches_sorted_by_exact_level_then_order &&
++          every_adjacent_source_order_planned && shared_multi_order_level,
++      "the ten-point fixture plans every adjacent source order 2 through 10 and shares an exact level across orders");
++  if (!source.plan.certified_bounded_plan() ||
++      !every_adjacent_source_order_planned || !shared_multi_order_level) {
++    std::cerr << "K10 plan decision=" << static_cast<int>(source.plan.decision)
++              << ", batches=" << source.plan.batches.size()
++              << ", effective K="
++              << source.source.event_journal.effective_maximum_order
++              << ", shared level=" << shared_multi_order_level;
++    for (std::size_t order = 2U; order <= maximum_order; ++order) {
++      std::cerr << ", K" << order << "=" << planned_batches_by_order[order];
++    }
++    std::cerr << '\n';
++    return;
++  }
++
++  auto initialized = all_orders_initialization(source, 93301U);
++  check(
++      initialized.certified_ready_bridge(),
++      "the maximum-order all-orders vertical bridge initializes");
++  if (!initialized.certified_ready_bridge()) {
++    std::cerr << "K10 all-orders init decision="
++              << static_cast<int>(initialized.decision) << '\n';
++    return;
++  }
++  auto& bridge = initialized.bridge;
++  std::array<std::size_t, maximum_order + 1U> committed_batches_by_order{};
++  std::array<std::size_t, maximum_order + 1U> committed_groups_by_order{};
++  std::array<bool, maximum_order + 1U> witnessed_adjacent_arrow{};
++  bool continuation_observed = false;
++  bool multifusion_observed = false;
++  bool target_locator_gap_observed = false;
++  std::size_t blocked_cursor = std::numeric_limits<std::size_t>::max();
++  std::size_t blocked_order = 0U;
++
++  while (!bridge.resident_complete()) {
++    const auto before = bridge.current_stamp();
++    check(
++        before.resident_batch_cursor < source.plan.batches.size(),
++        "the maximum-order resident cursor remains inside the certified plan");
++    if (before.resident_batch_cursor >= source.plan.batches.size()) {
++      return;
++    }
++    const auto& planned = source.plan.batches[before.resident_batch_cursor];
++    const auto locator_stamp_before = bridge.resident_locator().snapshot_stamp();
++    const std::size_t higher_records_before =
++        bridge.committed_higher_batches().size();
++    const std::size_t k2_records_before = bridge.committed_k2_batches().size();
++    const std::size_t witnesses_before =
++        bridge.source_root_target_witnesses().size();
++    auto prepared = bridge.prepare_next();
++    if (!prepared.certified_prepared_batch()) {
++      const bool fail_closed_target_gap =
++          prepared.decision ==
++              ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
++                  no_target_facet_locator_probe_rejected &&
++          prepared
++              .no_resident_or_outer_vertical_scientific_state_mutated_on_failure &&
++          !prepared.ticket.has_value() && bridge.current_stamp() == before &&
++          bridge.resident_locator().snapshot_stamp() == locator_stamp_before &&
++          bridge.committed_higher_batches().size() == higher_records_before &&
++          bridge.committed_k2_batches().size() == k2_records_before &&
++          bridge.source_root_target_witnesses().size() == witnesses_before &&
++          !bridge.final_vertical_sealed();
++      check(
++          fail_closed_target_gap,
++          "the maximum-order SuccessiveStar target-facet gap fails closed without mutating the vertical transcript");
++      if (!fail_closed_target_gap) {
++        std::cerr << "K10 prepare decision="
++                  << static_cast<int>(prepared.decision)
++                  << ", cursor=" << before.resident_batch_cursor
++                  << ", order=" << planned.order << '\n';
++        return;
++      }
++      const auto repeated = bridge.prepare_next();
++      check(
++          repeated.decision == prepared.decision &&
++              repeated
++                  .no_resident_or_outer_vertical_scientific_state_mutated_on_failure &&
++              !repeated.ticket.has_value() && bridge.current_stamp() == before &&
++              bridge.resident_locator().snapshot_stamp() == locator_stamp_before,
++          "the same maximum-order target-facet gap is deterministic and replayable");
++      target_locator_gap_observed = true;
++      blocked_cursor = before.resident_batch_cursor;
++      blocked_order = planned.order;
++      break;
++    }
++    if (planned.order >= 3U) {
++      const auto* record = prepared.ticket->conditional_batch_record();
++      check(
++          record != nullptr && record->source_order == planned.order &&
++              record->target_order + 1U == record->source_order &&
++              record->source_batch_index == before.resident_batch_cursor,
++          "every higher-order ticket names its adjacent lower-order target and exact source batch");
++      if (record == nullptr) {
++        return;
++      }
++      witnessed_adjacent_arrow[record->source_order] =
++          witnessed_adjacent_arrow[record->source_order] ||
++          !record->group_images.empty();
++      committed_groups_by_order[record->source_order] +=
++          record->group_images.size();
++      for (const auto& group : record->group_images) {
++        continuation_observed =
++            continuation_observed ||
++            (group.q_r == 1U &&
++             group.action == ExactFrozenIncidenceHgpAction::continuation);
++        multifusion_observed =
++            multifusion_observed ||
++            (group.q_r >= 2U &&
++             group.action == ExactFrozenIncidenceHgpAction::multifusion);
++      }
++    } else {
++      check(
++          planned.order == 2U && prepared.nonhigher_transit_only,
++          "each K2 batch is routed through the owned adjacent K2-to-K1 bridge");
++    }
++
++    const auto committed = bridge.commit(std::move(*prepared.ticket));
++    check(
++        committed.certified_committed_batch(),
++        "every maximum-order vertical product batch commits");
++    if (!committed.certified_committed_batch()) {
++      std::cerr << "K10 commit decision="
++                << static_cast<int>(committed.decision)
++                << ", cursor=" << before.resident_batch_cursor
++                << ", order=" << planned.order << '\n';
++      return;
++    }
++    ++committed_batches_by_order[planned.order];
++    const auto after = bridge.current_stamp();
++    check(
++        after.resident_batch_cursor == before.resident_batch_cursor + 1U &&
++            after.resident_epoch == before.resident_epoch + 1U,
++        "maximum-order commits advance the resident cursor and epoch exactly once in product order");
++  }
++
++  for (const auto& record : bridge.committed_k2_batches()) {
++    check(
++        record.order == 2U && record.certified_conditional_k2_to_k1_batch(),
++        "every retained K2 record is one certified conditional K2-to-K1 batch");
++    committed_groups_by_order[2U] += record.group_images.size();
++  }
++  witnessed_adjacent_arrow[2U] = committed_groups_by_order[2U] != 0U;
++
++  if (target_locator_gap_observed) {
++    check(
++        blocked_cursor == 98U && blocked_order == 5U &&
++            witnessed_adjacent_arrow[2U] && continuation_observed &&
++            !bridge.resident_complete() &&
++            !bridge.conditional_all_adjacent_order_group_images_complete() &&
++            !bridge.final_vertical_sealed(),
++        "the minimal K10 plan reaches real adjacent images and a continuation before the reproducible K5-to-K4 target gap blocks sealing");
++    return;
++  }
++
++  bool every_adjacent_arrow_committed = true;
++  for (std::size_t order = 2U; order <= maximum_order; ++order) {
++    every_adjacent_arrow_committed =
++        every_adjacent_arrow_committed && witnessed_adjacent_arrow[order] &&
++        committed_batches_by_order[order] == planned_batches_by_order[order];
++  }
++  const auto terminal_stamp = bridge.current_stamp();
++  check(
++      every_adjacent_arrow_committed &&
++          bridge.conditional_all_adjacent_order_group_images_complete() &&
++          terminal_stamp.resident_batch_cursor == source.plan.batches.size() &&
++          terminal_stamp.committed_k2_batch_count == planned_batches_by_order[2U] &&
++          terminal_stamp.committed_higher_batch_count ==
++              source.plan.batches.size() - planned_batches_by_order[2U] &&
++          continuation_observed,
++      "all nine adjacent arrows retain complete group images relative to the owned K10 source and include a continuation");
++
++  const auto sealed = bridge.seal();
++  check(
++      sealed.certified_final_vertical_seal() && sealed.seal.has_value(),
++      "the maximum-order vertical transcript seals after all nine adjacent arrows");
++  if (!sealed.certified_final_vertical_seal() || !sealed.seal.has_value()) {
++    std::cerr << "K10 seal decision=" << static_cast<int>(sealed.decision)
++              << ", cursor=" << terminal_stamp.resident_batch_cursor << '\n';
++    return;
++  }
++  const auto& final = *sealed.seal;
++  check(
++      final.required_resident_batch_count == source.plan.batches.size() &&
++          final.required_k2_batch_count == planned_batches_by_order[2U] &&
++          final.required_higher_batch_count ==
++              source.plan.batches.size() - planned_batches_by_order[2U] &&
++          final.sealed_stamp == terminal_stamp &&
++          final.all_naturality_squares_replayed && final.vertical_maps_complete &&
++          final.every_required_plan_batch_replayed_in_exact_product_order &&
++          final.every_k2_batch_and_group_replayed_to_sealed_k1 &&
++          final.every_higher_group_bound_to_one_live_adjacent_order_root &&
++          (multifusion_observed ||
++           final.sealed_target_only_k1_level_count != 0U ||
++           final.sealed_terminal_locator_union_count != 0U) &&
++          !final.global_morse_obligation_replayed && !final.m1_replayed &&
++          !final.public_status_claimed,
++      "the K10 seal covers total relative vertical replay and a fusion or K1 drain without promoting M1 or public exactness");
++
++  for (const auto& witness : bridge.source_root_target_witnesses()) {
++    check(
++        witness.source_order == witness.target_order + 1U &&
++            witness.source_order >= 3U &&
++            witness.source_order <= maximum_order,
++        "each persistent maximum-order witness belongs to one adjacent higher-order arrow");
++  }
++  for (std::size_t order = 2U; order <= maximum_order; ++order) {
++    check(
++        committed_groups_by_order[order] != 0U,
++        "each adjacent arrow owns at least one committed conditional group image");
++  }
++}
++
+ }  // namespace
+ 
+ int main() {
+@@ -776,6 +1046,8 @@ int main() {
+   }
+   test_cap_minus_one_and_canonical_k1_digest(source);
+   test_complete_all_orders_vertical_seal(source);
++  const Fixture maximum_order_source = maximum_order_ten_fixture();
++  test_maximum_order_ten_vertical_falsifier(maximum_order_source);
+   const Fixture k1_target_only_source = fixture(1U);
+   test_owned_k1_target_only_terminal_drain(k1_target_only_source);
+   if (failures != 0) {
+diff --git a/morsehgp3d/tests/unit/test_sparse_higher_support_h0_chunk_run.cpp b/morsehgp3d/tests/unit/test_sparse_higher_support_h0_chunk_run.cpp
+index edefd25d4917dba1d90490b8453698c690ad444c..ccb113bfb261aaf36cae531bd7de190fecd6f7c2 100644
+--- a/morsehgp3d/tests/unit/test_sparse_higher_support_h0_chunk_run.cpp
++++ b/morsehgp3d/tests/unit/test_sparse_higher_support_h0_chunk_run.cpp
+@@ -25,7 +25,11 @@ namespace {
+ 
+ using namespace morsehgp3d::hierarchy;
+ using morsehgp3d::contract::CanonicalId;
++using morsehgp3d::exact::BigInt;
+ using morsehgp3d::exact::CertifiedPoint3;
++using morsehgp3d::exact::ExactLevel;
++using morsehgp3d::exact::ExactRational;
++using morsehgp3d::exact::parse_canonical_integer;
+ using morsehgp3d::spatial::CanonicalPointCloud;
+ using morsehgp3d::spatial::MortonLbvhIndex;
+ 
+@@ -92,6 +96,17 @@ class TemporaryWorkspace {
+       std::span<const CertifiedPoint3>{points});
+ }
+ 
++[[nodiscard]] CanonicalPointCloud e5_cloud() {
++  const std::array<CertifiedPoint3, 5U> points{
++      point(-2.0, -1.0, 0.0),
++      point(-2.0, 1.0, 0.0),
++      point(0.0, 0.0, 0.0),
++      point(3.0, 2.0, 0.0),
++      point(4.0, -1.0, 0.0)};
++  return CanonicalPointCloud::rejecting_duplicates(
++      std::span<const CertifiedPoint3>{points});
++}
++
+ [[nodiscard]] ExactHigherSupportStreamBudget chunk_budget() {
+   return {
+       1U,
+@@ -125,6 +140,32 @@ class TemporaryWorkspace {
+       1U};
+ }
+ 
++[[nodiscard]] ExactRational decimal_rational_with_integer_bytes(
++    std::size_t byte_count,
++    bool negative) {
++  require(
++      byte_count >= (negative ? 2U : 1U),
++      "the exact decimal boundary fixture is too short");
++  std::string numerator;
++  numerator.reserve(byte_count);
++  if (negative) {
++    numerator.push_back('-');
++  }
++  numerator.push_back('1');
++  numerator.append(byte_count - numerator.size(), '0');
++  return ExactRational{
++      parse_canonical_integer(numerator), BigInt{3}};
++}
++
++[[nodiscard]] ExactSparseHigherSupportH0ChunkRunLimits
++rational_boundary_limits(std::size_t exact_integer_byte_count) {
++  return {
++      256U,
++      exact_integer_byte_count,
++      exact_integer_byte_count + 1U,
++      exact_integer_byte_count + 18U};
++}
++
+ struct ExpectedSequence {
+   std::vector<ExactSparseDirectH0CandidateRun> runs;
+   std::vector<ExactHigherSupportStreamAudit> cumulative_audits;
+@@ -314,6 +355,140 @@ void require_store_scope(const AtomicLinearRunStoreStatus& status) {
+       "the atomic run store materialized forbidden Phase-14AB state");
+ }
+ 
++void test_general_rational_wire_budgets_are_syntax_only() {
++  require(
++      sparse_higher_support_triangle_exact_integer_byte_count == 6973U &&
++          sparse_higher_support_tetrahedron_exact_integer_byte_count ==
++              9503U,
++      "the higher-support conservative decimal budgets drifted");
++
++  constexpr std::array<std::size_t, 2U> byte_counts{
++      sparse_higher_support_triangle_exact_integer_byte_count,
++      sparse_higher_support_tetrahedron_exact_integer_byte_count};
++  constexpr std::array<std::uint8_t, 2U> support_sizes{3U, 4U};
++  const CanonicalPointCloud cloud = regular_tetrahedron();
++  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
++  const ExactHigherSupportAuthorityContext authority{index, cloud, 10U};
++
++  for (std::size_t case_index = 0U;
++       case_index < byte_counts.size(); ++case_index) {
++    const std::size_t byte_count = byte_counts[case_index];
++    const std::uint8_t support_size = support_sizes[case_index];
++    const ExactRational value = decimal_rational_with_integer_bytes(
++        byte_count, support_size == 4U);
++    ExactSparseHigherSupportH0ChunkRunContext exact_context{
++        authority,
++        chunk_budget(),
++        projection_limits(),
++        rational_boundary_limits(byte_count)};
++    const ExactSparseHigherSupportH0RationalWireRoundTrip round_trip =
++        exact_context.round_trip_exact_rational_wire_for_validation(
++            support_size, value);
++    require(
++        round_trip.support_size == support_size &&
++            round_trip.value == value &&
++            round_trip.numerator_byte_count == byte_count &&
++            round_trip.denominator_byte_count == 1U &&
++            round_trip.canonical_rational_field_byte_count ==
++                byte_count + 2U &&
++            round_trip.encoded_wire_byte_count == byte_count + 18U &&
++            value.denominator() == 3,
++        "an exact higher-support decimal boundary did not round-trip canonically");
++
++    ExactSparseHigherSupportH0ChunkRunLimits below =
++        rational_boundary_limits(byte_count);
++    below.maximum_exact_integer_byte_count = byte_count - 1U;
++    ExactSparseHigherSupportH0ChunkRunContext below_context{
++        authority, chunk_budget(), projection_limits(), below};
++    const ExactSparseHigherSupportH0ChunkRunAudit audit_before =
++        below_context.audit();
++    bool rejected = false;
++    try {
++      static_cast<void>(
++          below_context.round_trip_exact_rational_wire_for_validation(
++              support_size, value));
++    } catch (const std::length_error&) {
++      rejected = true;
++    }
++    require(
++        rejected && below_context.audit() == audit_before,
++        "a cap-minus-one syntax-only rational validation was not rejected");
++  }
++}
++
++void test_non_dyadic_1105_over_242_durable_round_trip() {
++  const CanonicalPointCloud cloud = e5_cloud();
++  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
++  const ExactHigherSupportAuthorityContext authority{index, cloud, 10U};
++  const ExactLevel target{BigInt{1105}, BigInt{242}};
++  TemporaryWorkspace workspace;
++  const std::filesystem::path run_directory =
++      workspace.make_run_directory();
++  AtomicLinearRunExternalAnchor terminal_anchor;
++  std::size_t published_target_count = 0U;
++
++  {
++    ExactSparseHigherSupportH0ChunkRunContext context{
++        authority,
++        chunk_budget(),
++        projection_limits(),
++        chunk_run_limits()};
++    auto store = context.create_new_store(run_directory, store_limits());
++    bool complete = false;
++    while (!complete) {
++      const AtomicLinearRunPublishResult publication =
++          context.publish_next_chunk(store);
++      require(
++          publication.decision ==
++                  AtomicLinearRunPublishDecision::durably_published &&
++              publication.trusted_state_advanced,
++          "the E5 non-dyadic fixture did not publish durably");
++      const auto& projection = accepted_projection(publication);
++      for (const ExactSparseDirectH0Candidate& candidate :
++           projection.run.candidates) {
++        if (candidate.support_size == 3U &&
++            candidate.squared_level == target) {
++          ++published_target_count;
++        }
++      }
++      complete = projection.session_complete;
++      terminal_anchor = publication.current_anchor;
++    }
++    require_store_scope(store.status());
++  }
++
++  std::size_t recovered_target_count = 0U;
++  {
++    ExactSparseHigherSupportH0ChunkRunContext context{
++        authority,
++        chunk_budget(),
++        projection_limits(),
++        chunk_run_limits()};
++    auto store = context.open_existing_store(
++        run_directory,
++        store_limits(),
++        terminal_anchor,
++        [&](const ExactSparseHigherSupportH0RecertifiedChunkProjection&
++                projection) {
++          for (const ExactSparseDirectH0Candidate& candidate :
++               projection.run.candidates) {
++            if (candidate.support_size == 3U &&
++                candidate.squared_level == target) {
++              require(
++                  candidate.squared_level.numerator_string() == "1105" &&
++                      candidate.squared_level.denominator_string() == "242",
++                  "the durable E5 level was changed or made dyadic");
++              ++recovered_target_count;
++            }
++          }
++        });
++    require_store_scope(store.status());
++  }
++  require(
++      published_target_count == 1U && recovered_target_count == 1U,
++      "the permanent 1105/242 higher-support event did not survive HEAD reopen");
++}
++
+ void test_context_binding_payload_floor_and_chunk_cap() {
+   constexpr std::size_t requested_maximum_order = 10U;
+   const CanonicalPointCloud cloud = regular_tetrahedron();
+@@ -820,6 +995,8 @@ void test_publish_reopen_finish_and_recertify() {
+ 
+ int main() {
+   try {
++    test_general_rational_wire_budgets_are_syntax_only();
++    test_non_dyadic_1105_over_242_durable_round_trip();
+     test_context_binding_payload_floor_and_chunk_cap();
+     test_retryable_pre_head_failure_reuses_pending_segment();
+     test_indeterminate_failure_requires_anchored_reopen();
+diff --git a/reference/morsehgp3d_oracle/__init__.py b/reference/morsehgp3d_oracle/__init__.py
+index 69fefaab16946cfc24cb57f97e4ffbff0f45a9d4..35a8f6f9459d0b3cd84a133b8f42f8765effdfcc 100644
+--- a/reference/morsehgp3d_oracle/__init__.py
++++ b/reference/morsehgp3d_oracle/__init__.py
+@@ -34,6 +34,7 @@ from .direct_gateway_differential import (
+     DifferentialProvenance,
+     DifferentialStage,
+     DifferentialVerdict,
++    DirectGatewayGammaDifferentialBudget,
+     DirectGatewayGammaCheckpoint,
+     DirectGatewayGammaDifferentialResult,
+     DirectGatewayGammaPathElement,
+@@ -141,6 +142,7 @@ __all__ = [
+     "DifferentialProvenance",
+     "DifferentialStage",
+     "DifferentialVerdict",
++    "DirectGatewayGammaDifferentialBudget",
+     "DirectGatewayGammaCheckpoint",
+     "DirectGatewayGammaDifferentialResult",
+     "DirectGatewayGammaPathElement",
+diff --git a/reference/morsehgp3d_oracle/direct_gateway_differential.py b/reference/morsehgp3d_oracle/direct_gateway_differential.py
+index 7b3c27243f31695b9f7c7b33baf66432ce85804a..3af054ad7a19631075e373b58f34a23e92061e7d 100644
+--- a/reference/morsehgp3d_oracle/direct_gateway_differential.py
++++ b/reference/morsehgp3d_oracle/direct_gateway_differential.py
+@@ -1,8 +1,11 @@
+ """Bounded exact differential for the Phase-10 direct gateway hypotheses.
+ 
+ This module is deliberately an exhaustive reference oracle.  It materializes
+-the complete :math:`Gamma_k` filtration only after enforcing ``n <= 14`` and
+-``k <= 10``.  Nothing in the production backend imports this module.
++the complete :math:`Gamma_k` filtration only after enforcing explicit bounds
++on points and every combinatorial arena.  The default budget preserves the
++historical ``n <= 14`` and ``k <= 10`` domain; a caller may opt into another
++small bounded case only by supplying all larger capacities.  Nothing in the
++production backend imports this module.
+ 
+ Point identifiers in results (and in ``excluded_gateway_cofaces``) refer to
+ the lexicographically sorted exact point cloud exposed as ``result.points``.
+@@ -14,6 +17,7 @@ from dataclasses import dataclass, fields
+ from enum import Enum
+ from fractions import Fraction
+ from itertools import combinations
++from math import comb
+ from typing import Any, Iterable, Sequence, TypeAlias, cast
+ 
+ from .catalog import CriticalCatalog, build_critical_catalog
+@@ -34,6 +38,85 @@ FacetPartition: TypeAlias = tuple[FacetComponent, ...]
+ CoveredPointPartition: TypeAlias = tuple[PointLabel, ...]
+ 
+ 
++@dataclass(frozen=True, slots=True)
++class DirectGatewayGammaDifferentialBudget:
++    """Trusted exhaustive-oracle limits checked before any exact geometry.
++
++    The defaults are the exact static maxima needed by every historical
++    ``3 <= n <= 14`` and ``2 <= k <= min(10, n - 1)`` request.  Increasing
++    ``maximum_point_count`` alone is intentionally insufficient: every arena
++    that grows combinatorially must also be raised explicitly.
++    """
++
++    maximum_point_count: int = 14
++    maximum_catalog_support_count: int = 1470
++    maximum_catalog_point_classification_count: int = 20580
++    maximum_gamma_facet_count: int = 3432
++    maximum_gamma_coface_count: int = 3432
++    maximum_checkpoint_count: int = 12870
++
++    def __post_init__(self) -> None:
++        for field in fields(self):
++            value = getattr(self, field.name)
++            if isinstance(value, bool) or not isinstance(value, int):
++                raise TypeError(f"{field.name} must be an integer")
++            if value < 0:
++                raise ValueError(f"{field.name} must be non-negative")
++
++
++def _preflight_exhaustive_budget(
++    point_count: int,
++    order: int,
++    budget: DirectGatewayGammaDifferentialBudget,
++) -> None:
++    """Reject an oversized oracle request before catalogue or Gamma work."""
++
++    required_support_count = sum(
++        comb(point_count, support_size)
++        for support_size in range(1, min(4, point_count) + 1)
++    )
++    required_point_classification_count = point_count * required_support_count
++    required_facet_count = comb(point_count, order)
++    required_coface_count = (
++        comb(point_count, order + 1) if order < point_count else 0
++    )
++    # There are at most one distinct level per facet or coface and the
++    # differential records both the open and closed cut at every level.
++    required_checkpoint_count = 2 * (
++        required_facet_count + required_coface_count
++    )
++    requirements = (
++        ("point count", point_count, budget.maximum_point_count),
++        (
++            "catalog support count",
++            required_support_count,
++            budget.maximum_catalog_support_count,
++        ),
++        (
++            "catalog point-classification count",
++            required_point_classification_count,
++            budget.maximum_catalog_point_classification_count,
++        ),
++        ("Gamma facet count", required_facet_count, budget.maximum_gamma_facet_count),
++        (
++            "Gamma coface count",
++            required_coface_count,
++            budget.maximum_gamma_coface_count,
++        ),
++        (
++            "checkpoint count",
++            required_checkpoint_count,
++            budget.maximum_checkpoint_count,
++        ),
++    )
++    for label, required, available in requirements:
++        if required > available:
++            raise ValueError(
++                f"direct gateway differential {label} requires {required}, "
++                f"budget permits {available}"
++            )
++
++
+ class DifferentialDecision(str, Enum):
+     """Overall bounded decision; equivalence is evidence, never a proof."""
+ 
+@@ -687,16 +770,19 @@ def build_direct_gateway_gamma_differential(
+     order: int,
+     *,
+     excluded_gateway_cofaces: Iterable[Iterable[int]] = (),
++    budget: DirectGatewayGammaDifferentialBudget = DirectGatewayGammaDifferentialBudget(),
+ ) -> DirectGatewayGammaDifferentialResult:
+     """Compare the two direct-gateway hypotheses with bounded exact Gamma.
+ 
+-    The structural domain is checked before constructing the catalogue or
+-    Gamma: ``3 <= n <= 14`` and ``2 <= order <= min(10, n - 1)``.  A RelevantGP
+-    violation is a returned ``UNSUPPORTED_DEGENERACY`` decision, not a partial
+-    comparison.  Exclusions are a diagnostic ablation of first-incidence
+-    cofaces only; a coface that is also a direct saddle remains generated.
+-    Any non-empty exclusion forces ``evidence_status=DIAGNOSTIC_ABLATION`` even
+-    though ``decision`` still reports the generator that was actually compared.
++    The structural domain and all trusted combinatorial capacities are checked
++    before constructing the catalogue or Gamma: ``3 <= n`` and
++    ``2 <= order <= min(10, n - 1)``.  The default budget keeps the historical
++    ``n <= 14`` ceiling.  A RelevantGP violation is a returned
++    ``UNSUPPORTED_DEGENERACY`` decision, not a partial comparison.  Exclusions
++    are a diagnostic ablation of first-incidence cofaces only; a coface that is
++    also a direct saddle remains generated.  Any non-empty exclusion forces
++    ``evidence_status=DIAGNOSTIC_ABLATION`` even though ``decision`` still
++    reports the generator that was actually compared.
+ 
+     Normative generator equivalence is intentionally projected onto
+     ``B_k union F_dir``.  Selected cofaces may use all their deletion facets as
+@@ -706,12 +792,15 @@ def build_direct_gateway_gamma_differential(
+ 
+     raw_points = tuple(points)
+     point_count = len(raw_points)
+-    if not 3 <= point_count <= 14:
+-        raise ValueError("the direct gateway differential requires 3 <= n <= 14")
++    if point_count < 3:
++        raise ValueError("the direct gateway differential requires n >= 3")
+     if isinstance(order, bool) or not isinstance(order, int):
+         raise TypeError("order must be an integer")
+     if not 2 <= order <= min(10, point_count - 1):
+         raise ValueError("order must lie in 2..min(10, n - 1)")
++    if not isinstance(budget, DirectGatewayGammaDifferentialBudget):
++        raise TypeError("budget must be a DirectGatewayGammaDifferentialBudget")
++    _preflight_exhaustive_budget(point_count, order, budget)
+     exclusions = _canonical_exclusions(
+         excluded_gateway_cofaces, point_count=point_count, order=order
+     )
+@@ -1090,6 +1179,7 @@ def verify_direct_gateway_gamma_differential(
+     observed: object,
+     *,
+     excluded_gateway_cofaces: Iterable[Iterable[int]] = (),
++    budget: DirectGatewayGammaDifferentialBudget = DirectGatewayGammaDifferentialBudget(),
+ ) -> bool:
+     """Freshly rebuild and compare a bounded differential result.
+ 
+@@ -1103,6 +1193,7 @@ def verify_direct_gateway_gamma_differential(
+         points,
+         order,
+         excluded_gateway_cofaces=excluded_gateway_cofaces,
++        budget=budget,
+     )
+     try:
+         return _strict_result_value_equal(expected, observed)
+@@ -1119,6 +1210,7 @@ __all__ = [
+     "DifferentialProvenance",
+     "DifferentialStage",
+     "DifferentialVerdict",
++    "DirectGatewayGammaDifferentialBudget",
+     "DirectGatewayGammaCheckpoint",
+     "DirectGatewayGammaDifferentialResult",
+     "DirectGatewayGammaPathElement",
+diff --git a/tests/oracle/test_direct_gateway_gamma_differential.py b/tests/oracle/test_direct_gateway_gamma_differential.py
+index b1861e368b0a4acd42ce51bb9bd54b79cf0fadcc..f88d3def6c60a9ca86b3dda8d5ab958e11f15242 100644
+--- a/tests/oracle/test_direct_gateway_gamma_differential.py
++++ b/tests/oracle/test_direct_gateway_gamma_differential.py
+@@ -5,7 +5,9 @@ from dataclasses import FrozenInstanceError, fields, replace
+ from fractions import Fraction
+ from unittest.mock import patch
+ 
++import reference.morsehgp3d_oracle as oracle_package
+ from reference.morsehgp3d_oracle import (
++    DirectGatewayGammaDifferentialBudget,
+     direct_gateway_differential as differential_module,
+ )
+ from reference.morsehgp3d_oracle.direct_gateway_differential import (
+@@ -37,6 +39,32 @@ E5_LABELS = ("A", "B", "C", "D", "E")
+ E5_SILENT_LEVEL = Fraction(33, 2)
+ E5_CONTINUATION_LEVEL = Fraction(83886, 3563)
+ 
++N15_POINTS: tuple[Point3, ...] = (
++    (0, -6, 27),
++    (-15, 30, 1),
++    (19, 22, -12),
++    (-15, 27, 3),
++    (0, 0, 0),
++    (6, 26, 27),
++    (2, 5, 1),
++    (25, -5, -29),
++    (-25, 8, 20),
++    (1, 2, 3),
++    (23, -7, 17),
++    (4, 1, 2),
++    (30, -1, -9),
++    (-13, -23, 17),
++    (-18, 1, -23),
++)
++N15_ORDER2_BUDGET = DirectGatewayGammaDifferentialBudget(
++    maximum_point_count=15,
++    maximum_catalog_support_count=1940,
++    maximum_catalog_point_classification_count=29100,
++    maximum_gamma_facet_count=105,
++    maximum_gamma_coface_count=455,
++    maximum_checkpoint_count=1120,
++)
++
+ 
+ def _canonical_ids(*labels: str) -> tuple[int, ...]:
+     """Translate fixture letters to the oracle's lexicographic point IDs."""
+@@ -110,6 +138,16 @@ def _amputated_filtration(
+ 
+ 
+ class DirectGatewayGammaDifferentialDomainTests(unittest.TestCase):
++    def test_budget_is_exposed_by_the_public_oracle_package(self) -> None:
++        self.assertIs(
++            oracle_package.DirectGatewayGammaDifferentialBudget,
++            DirectGatewayGammaDifferentialBudget,
++        )
++        self.assertIn(
++            "DirectGatewayGammaDifferentialBudget",
++            oracle_package.__all__,
++        )
++
+     def test_structural_domain_is_rejected_before_exhaustive_enumeration(self) -> None:
+         valid = E5_POINTS
+         invalid_calls = (
+@@ -140,6 +178,78 @@ class DirectGatewayGammaDifferentialDomainTests(unittest.TestCase):
+             catalog_builder.assert_not_called()
+             gamma_builder.assert_not_called()
+ 
++    def test_each_explicit_n15_capacity_is_preflighted_before_geometry(self) -> None:
++        short_budgets = (
++            replace(N15_ORDER2_BUDGET, maximum_point_count=14),
++            replace(N15_ORDER2_BUDGET, maximum_catalog_support_count=1939),
++            replace(
++                N15_ORDER2_BUDGET,
++                maximum_catalog_point_classification_count=29099,
++            ),
++            replace(N15_ORDER2_BUDGET, maximum_gamma_facet_count=104),
++            replace(N15_ORDER2_BUDGET, maximum_gamma_coface_count=454),
++            replace(N15_ORDER2_BUDGET, maximum_checkpoint_count=1119),
++        )
++        with (
++            patch.object(
++                differential_module,
++                "build_critical_catalog",
++                side_effect=AssertionError("catalogue reached before preflight"),
++            ) as catalog_builder,
++            patch.object(
++                differential_module,
++                "build_gamma_filtration",
++                side_effect=AssertionError("Gamma reached before preflight"),
++            ) as gamma_builder,
++        ):
++            for budget in short_budgets:
++                with self.subTest(budget=budget):
++                    with self.assertRaises(ValueError):
++                        build_direct_gateway_gamma_differential(
++                            N15_POINTS,
++                            2,
++                            budget=budget,
++                        )
++            catalog_builder.assert_not_called()
++            gamma_builder.assert_not_called()
++
++    def test_explicit_budget_runs_permanent_n15_full_pi0_falsifier(self) -> None:
++        result = build_direct_gateway_gamma_differential(
++            N15_POINTS,
++            2,
++            budget=N15_ORDER2_BUDGET,
++        )
++
++        self.assertEqual(result.point_count, 15)
++        self.assertEqual(result.order, 2)
++        self.assertTrue(result.relevant_gp)
++        self.assertEqual(
++            result.decision,
++            DifferentialDecision.OPEN_BOUNDED_EVIDENCE_ONLY,
++        )
++        self.assertEqual(
++            result.evidence_status,
++            DifferentialEvidenceStatus.OPEN_BOUNDED_EVIDENCE_ONLY,
++        )
++        self.assertTrue(result.bounded_equivalent)
++        self.assertEqual(result.scope, "oracle_only")
++        self.assertEqual(result.public_status, "not_claimed")
++        self.assertEqual(len(result.birth_facets), 32)
++        self.assertEqual(len(result.direct_saddle_cofaces), 40)
++        self.assertEqual(len(result.direct_facets), 53)
++        self.assertEqual(len(result.first_incidence_cofaces), 37)
++        self.assertEqual(len(result.generated_cofaces), 44)
++        self.assertEqual(len(result.cut_results), 576)
++        self.assertIsNone(result.first_failure)
++        self.assertTrue(
++            verify_direct_gateway_gamma_differential(
++                N15_POINTS,
++                2,
++                result,
++                budget=N15_ORDER2_BUDGET,
++            )
++        )
++
+     def test_relevant_gp_violation_is_an_explicit_unsupported_result(self) -> None:
+         right_triangle = ((0, 0, 0), (2, 0, 0), (0, 2, 0))
+         result = build_direct_gateway_gamma_differential(right_triangle, 2)
