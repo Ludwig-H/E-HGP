@@ -2719,6 +2719,31 @@ ExactDirectMorseUnifiedResidentSession::group_records() const noexcept {
   return impl_ == nullptr ? empty : impl_->state.group_records;
 }
 
+ExactDirectSparseFacetDescentClosureResult
+ExactDirectMorseUnifiedResidentSession::
+    build_resident_sparse_facet_descent_closure(
+        std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+        const exact::ExactLevel& closed_batch_squared_level,
+        const ExactDirectSparseFacetWitness& locator_query_witness,
+        const ExactDirectSparseFacetDescentClosureBudget& budget,
+        const ExactDirectSparseFacetDescentClosureConfig& config,
+        spatial::LbvhTraversalOrder traversal_order) const {
+  if (!certified_resident_session() || impl_->source.index == nullptr ||
+      impl_->source.cloud == nullptr) {
+    return {};
+  }
+  return build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+      *impl_->source.index,
+      *impl_->source.cloud,
+      canonical_distinct_keys,
+      closed_batch_squared_level,
+      locator_query_witness,
+      impl_->locator,
+      budget,
+      config,
+      traversal_order);
+}
+
 bool ExactDirectMorseUnifiedResidentInitializationResult::
     certified_initialized_session() const noexcept {
   const bool normalized =

@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/direct_morse_resident_all_orders_vertical_bridge.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -20,7 +21,7 @@ using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
 
 static_assert(
-    direct_morse_resident_all_orders_vertical_bridge_schema_version == 1U);
+    direct_morse_resident_all_orders_vertical_bridge_schema_version == 3U);
 static_assert(!std::is_copy_constructible_v<
               ExactDirectMorseResidentAllOrdersVerticalBridge>);
 static_assert(std::is_nothrow_move_constructible_v<
@@ -231,16 +232,11 @@ struct Fixture {
   K1ExactBoruvkaResult boruvka;
 };
 
-[[nodiscard]] Fixture fixture(std::size_t requested_maximum_order) {
-  const std::array points{
-      point(-2.0, 4.0, -8.0),
-      point(-1.0, 1.0, -1.0),
-      point(0.0, 0.0, 0.0),
-      point(1.0, 1.0, 1.0),
-      point(3.0, 9.0, 27.0),
-  };
+[[nodiscard]] Fixture fixture_from_points(
+    const std::span<const CertifiedPoint3> points,
+    const std::size_t requested_maximum_order) {
   auto cloud = CanonicalPointCloud::rejecting_duplicates(
-      std::span<const CertifiedPoint3>{points});
+      points);
   auto index = MortonLbvhIndex::build(cloud);
   auto source = direct_sources(cloud, requested_maximum_order);
   auto star_budget = generous_star_budget();
@@ -280,6 +276,39 @@ struct Fixture {
       std::move(plan),
       std::move(boruvka),
   };
+}
+
+[[nodiscard]] Fixture fixture(std::size_t requested_maximum_order) {
+  const std::array points{
+      point(-2.0, 4.0, -8.0),
+      point(-1.0, 1.0, -1.0),
+      point(0.0, 0.0, 0.0),
+      point(1.0, 1.0, 1.0),
+      point(3.0, 9.0, 27.0),
+  };
+  return fixture_from_points(points, requested_maximum_order);
+}
+
+// Ten points are the minimum needed to request all nine adjacent arrows.  This
+// exact moment-curve source plans orders 2 through 10.  At cursor 98 its
+// conditional SuccessiveStar locator lacks the direct K4 key {0,1,5,6}; the
+// all-orders bridge must resolve that deletion through one bounded transient
+// sparse descent, never by accepting the miss or scanning a global universe.
+// Completing this relative replay still does not prove M.1 or public exactness.
+[[nodiscard]] Fixture maximum_order_ten_fixture() {
+  const std::array points{
+      point(0.0, 0.0, 0.0),
+      point(10000.0, 1.0, 1.0),
+      point(20000.0, 4.0, 8.0),
+      point(30000.0, 9.0, 27.0),
+      point(40000.0, 16.0, 64.0),
+      point(50000.0, 25.0, 125.0),
+      point(60000.0, 36.0, 216.0),
+      point(70000.0, 49.0, 343.0),
+      point(80000.0, 64.0, 512.0),
+      point(90000.0, 81.0, 729.0),
+  };
+  return fixture_from_points(points, 10U);
 }
 
 [[nodiscard]] ExactDirectMorseUnifiedResidentInitializationResult
@@ -333,21 +362,53 @@ k1_initialization(const Fixture& source) {
 
 [[nodiscard]] ExactDirectMorseResidentK2K1ClosedCutBridgeBudget
 k2_bridge_budget(const Fixture& source) {
+  ExactDirectMorseResidentK2K1ClosedCutBridgeBudget budget;
   std::size_t k2_batch_count = 0U;
+  std::size_t saddle_count = 0U;
+  std::size_t birth_count = 0U;
+  std::size_t maximum_batch_saddle_count = 0U;
+  std::size_t maximum_batch_birth_count = 0U;
   for (const auto& batch : source.plan.batches) {
     if (batch.order == 2U) {
       ++k2_batch_count;
+      std::size_t batch_saddle_count = 0U;
+      std::size_t batch_birth_count = 0U;
+      for (std::size_t local = 0U;
+           local < batch.direct_reference_count;
+           ++local) {
+        if (source.plan
+                .direct_references[batch.direct_reference_offset + local]
+                .role == ExactDirectMorseH0Role::saddle) {
+          ++batch_saddle_count;
+          ++saddle_count;
+        } else {
+          ++batch_birth_count;
+          ++birth_count;
+        }
+      }
+      maximum_batch_saddle_count =
+          std::max(maximum_batch_saddle_count, batch_saddle_count);
+      maximum_batch_birth_count =
+          std::max(maximum_batch_birth_count, batch_birth_count);
     }
   }
-  return {
-      k2_batch_count,
-      4096U,
-      4096U,
-      65536U,
-      65536U,
-      65536U,
-      65536U,
-  };
+  budget.maximum_committed_k2_batch_count = k2_batch_count;
+  budget.maximum_committed_k2_group_count = 4096U;
+  budget.maximum_prepared_k2_group_count = 4096U;
+  budget.maximum_committed_k2_direct_saddle_group_binding_count =
+      saddle_count;
+  budget.maximum_prepared_k2_direct_saddle_group_binding_count =
+      maximum_batch_saddle_count;
+  budget.maximum_committed_k2_direct_birth_k1_binding_count = birth_count;
+  budget.maximum_prepared_k2_direct_birth_k1_binding_count =
+      maximum_batch_birth_count;
+  budget.maximum_direct_birth_k1_singleton_root_query_count =
+      2U * maximum_batch_birth_count;
+  budget.maximum_group_coverage_point_reference_scan_count = 65536U;
+  budget.maximum_group_point_scratch_count = 65536U;
+  budget.maximum_distinct_group_point_count = 65536U;
+  budget.maximum_singleton_root_query_count = 65536U;
+  return budget;
 }
 
 [[nodiscard]] ExactDirectMorseResidentK2K1ClosedCutInitialization
@@ -385,17 +446,59 @@ all_orders_budget(const Fixture& source) {
   budget.maximum_committed_higher_batch_count = higher_batch_count(source);
   budget.maximum_committed_higher_group_count = 4096U;
   budget.maximum_prepared_higher_group_count = 4096U;
+  std::size_t higher_saddle_count = 0U;
+  std::size_t maximum_batch_higher_saddle_count = 0U;
+  for (const auto& batch : source.plan.batches) {
+    if (batch.order < 3U) {
+      continue;
+    }
+    std::size_t batch_saddle_count = 0U;
+    for (std::size_t local = 0U;
+         local < batch.direct_reference_count;
+         ++local) {
+      if (source.plan
+              .direct_references[batch.direct_reference_offset + local]
+              .role == ExactDirectMorseH0Role::saddle) {
+        ++batch_saddle_count;
+        ++higher_saddle_count;
+      }
+    }
+    maximum_batch_higher_saddle_count =
+        std::max(maximum_batch_higher_saddle_count, batch_saddle_count);
+  }
+  budget.maximum_committed_higher_direct_saddle_group_binding_count =
+      higher_saddle_count;
+  budget.maximum_prepared_higher_direct_saddle_group_binding_count =
+      maximum_batch_higher_saddle_count;
   budget.maximum_persistent_source_root_witness_count = 4096U;
   budget.maximum_prior_root_witness_probe_count = 65536U;
   budget.maximum_final_root_witness_probe_count = 4096U;
   budget.maximum_source_facet_resolution_scan_count = 1048576U;
   budget.maximum_projected_target_facet_probe_count = 1048576U;
+  budget.maximum_sparse_target_closure_count = 1048576U;
   budget.maximum_expected_group_child_root_reference_count = 65536U;
   budget.maximum_expected_group_coverage_delta_point_reference_count =
       65536U;
   budget.maximum_query_replay_token =
       std::numeric_limits<std::uint64_t>::max();
   budget.target_probe = {4097U, 1024U};
+  budget.target_closure = {
+      4096U,
+      4096U,
+      4096U,
+      8193U,
+      {ExactDirectSparsePositiveFacetProbeBudget{4097U, 1024U},
+       morsehgp3d::spatial::ExactLbvhTopKBudget{
+           1048576U,
+           1048576U,
+           1048576U,
+           1048576U,
+           1024U,
+           10U,
+           10U},
+       ExactDirectSparsePositiveFacetProbeBudget{4097U, 1024U}},
+  };
+  budget.target_closure_traversal_order = LbvhTraversalOrder::near_first;
   return budget;
 }
 
@@ -454,21 +557,50 @@ void test_cap_minus_one_and_canonical_k1_digest(const Fixture& source) {
           k1.session.distinct_level_count() == forest.levels.size(),
       "the public canonical K1 forest digest and live level count match the sealed source");
 
-  auto inner = k2_bridge_initialization(source, 93101U);
+  std::uint64_t authority_id = 93101U;
+  const auto reject_budget = [&](
+                                 const ExactDirectMorseResidentAllOrdersVerticalBridgeBudget&
+                                     insufficient,
+                                 const std::string& message) {
+    auto inner = k2_bridge_initialization(source, authority_id++);
+    const auto rejected =
+        initialize_exact_direct_morse_resident_all_orders_vertical_bridge(
+            std::move(inner.bridge), insufficient);
+    check(
+        rejected.decision ==
+                ExactDirectMorseResidentAllOrdersVerticalInitializationDecision::
+                    no_budget_rejected &&
+            !rejected.owned_k2_k1_bridge_consumed && inner.bridge.ready(),
+        message);
+  };
+
   auto insufficient = all_orders_budget(source);
   check(
       insufficient.maximum_committed_higher_batch_count != 0U,
       "E5/K4 has at least one higher-order resident batch");
   --insufficient.maximum_committed_higher_batch_count;
-  const auto rejected =
-      initialize_exact_direct_morse_resident_all_orders_vertical_bridge(
-          std::move(inner.bridge), insufficient);
-  check(
-      rejected.decision ==
-              ExactDirectMorseResidentAllOrdersVerticalInitializationDecision::
-                  no_budget_rejected &&
-          !rejected.owned_k2_k1_bridge_consumed && inner.bridge.ready(),
+  reject_budget(
+      insufficient,
       "higher-batch cap minus one rejects before consuming the owned inner bridge");
+
+  insufficient = all_orders_budget(source);
+  if (insufficient
+          .maximum_committed_higher_direct_saddle_group_binding_count != 0U) {
+    --insufficient
+          .maximum_committed_higher_direct_saddle_group_binding_count;
+    reject_budget(
+        insufficient,
+        "higher direct-saddle binding cap minus one rejects before consuming the owned inner bridge");
+  }
+  insufficient = all_orders_budget(source);
+  if (insufficient
+          .maximum_prepared_higher_direct_saddle_group_binding_count != 0U) {
+    --insufficient
+          .maximum_prepared_higher_direct_saddle_group_binding_count;
+    reject_budget(
+        insufficient,
+        "prepared higher direct-saddle binding cap minus one rejects before consuming the owned inner bridge");
+  }
 }
 
 void test_owned_k1_target_only_terminal_drain(const Fixture& source) {
@@ -712,21 +844,79 @@ void test_complete_all_orders_vertical_seal(const Fixture& source) {
   }
 
   std::size_t observed_higher_groups = 0U;
+  bool saw_higher_direct_saddle_binding = false;
+  bool checked_higher_membership_mutations = false;
   for (const auto& record : bridge.committed_higher_batches()) {
     observed_higher_groups += record.group_images.size();
     check(
         record.certified_conditional_higher_batch() &&
+            record.o4_membership_digest !=
+                morsehgp3d::contract::CanonicalId{} &&
+            record.o4_membership_digest ==
+                canonical_exact_direct_morse_resident_higher_o4_membership_digest(
+                    record) &&
             !record.all_naturality_squares_replayed &&
             !record.vertical_maps_complete &&
             !record.global_morse_obligation_replayed &&
+            !record.full_pi0_membership_claimed && !record.m1_replayed &&
             !record.public_status_claimed,
         "batch records remain conditional after final sealing");
+    for (const auto& binding : record.direct_saddle_group_bindings) {
+      saw_higher_direct_saddle_binding = true;
+      const auto& direct =
+          source.plan.direct_references[binding.source_direct_reference_index];
+      check(
+          binding.certified_conditional_saddle_group_binding() &&
+              direct.role == ExactDirectMorseH0Role::saddle &&
+              direct.source_role_record_index ==
+                  binding.source_role_record_index &&
+              direct.source_event_projection_index ==
+                  binding.source_event_projection_index &&
+              direct.source_incidence_family_index ==
+                  std::optional<std::size_t>{
+                      binding.source_incidence_family_index} &&
+              binding.owner_group_index < record.group_images.size() &&
+              binding.resident_resultant_root_id ==
+                  record.group_images[binding.owner_group_index]
+                      .resident_resultant_source_root_id,
+          "a higher direct saddle retains its authentic event, family, frozen quotient group and committed source root");
+      if (!checked_higher_membership_mutations) {
+        auto event_mutation = record;
+        ++event_mutation.direct_saddle_group_bindings.front()
+              .source_event_projection_index;
+        check(
+            !event_mutation.certified_conditional_higher_batch(),
+            "mutating a higher direct-saddle event invalidates its O.4 digest");
+        auto group_mutation = record;
+        group_mutation.direct_saddle_group_bindings.front().owner_group_index =
+            group_mutation.group_images.size();
+        check(
+            !group_mutation.certified_conditional_higher_batch(),
+            "mutating a higher direct-saddle quotient group fails closed");
+        auto digest_mutation = record;
+        digest_mutation.o4_membership_digest = {};
+        check(
+            !digest_mutation.certified_conditional_higher_batch(),
+            "a missing higher O.4 membership digest fails closed");
+        auto m1_overclaim = record;
+        m1_overclaim.m1_replayed = true;
+        m1_overclaim.o4_membership_digest =
+            canonical_exact_direct_morse_resident_higher_o4_membership_digest(
+                m1_overclaim);
+        check(
+            !m1_overclaim.certified_conditional_higher_batch(),
+            "a coherently rehashed higher membership record cannot claim M.1");
+        checked_higher_membership_mutations = true;
+      }
+    }
   }
   check(
       observed_higher_groups ==
           bridge.current_stamp().committed_higher_group_count &&
-          observed_higher_groups == seal.sealed_higher_group_count,
-      "every committed K>=3 resident group has exactly one retained image");
+          observed_higher_groups == seal.sealed_higher_group_count &&
+          saw_higher_direct_saddle_binding &&
+          checked_higher_membership_mutations,
+      "every committed K>=3 resident group has one retained image and the fixture exercises authentic higher O.4 saddle membership");
 
   const auto stamp_before_repeat = bridge.current_stamp();
   const auto second_seal = bridge.seal();
@@ -744,6 +934,239 @@ void test_complete_all_orders_vertical_seal(const Fixture& source) {
       !mutated.certified_final_vertical_seal() &&
           !bridge.verify_final_vertical_seal(mutated),
       "a mutated final deletion counter cannot replay against the live bridge");
+}
+
+void test_maximum_order_ten_vertical_falsifier(const Fixture& source) {
+  constexpr std::size_t maximum_order = 10U;
+  std::array<std::size_t, maximum_order + 1U> planned_batches_by_order{};
+  bool shared_multi_order_level = false;
+  for (std::size_t index = 0U; index < source.plan.batches.size(); ++index) {
+    const auto& batch = source.plan.batches[index];
+    if (batch.order <= maximum_order) {
+      ++planned_batches_by_order[batch.order];
+    }
+    if (index != 0U &&
+        source.plan.batches[index - 1U].squared_level == batch.squared_level &&
+        source.plan.batches[index - 1U].order != batch.order) {
+      shared_multi_order_level = true;
+    }
+  }
+
+  bool every_adjacent_source_order_planned = true;
+  for (std::size_t order = 2U; order <= maximum_order; ++order) {
+    every_adjacent_source_order_planned =
+        every_adjacent_source_order_planned &&
+        planned_batches_by_order[order] != 0U;
+  }
+  check(
+      source.source.event_journal.requested_maximum_order == maximum_order &&
+          source.source.event_journal.effective_maximum_order == maximum_order &&
+          source.plan.certified_bounded_plan() &&
+          source.plan.unique_batch_per_exact_level_and_order &&
+          source.plan.batches_sorted_by_exact_level_then_order &&
+          every_adjacent_source_order_planned && shared_multi_order_level,
+      "the ten-point fixture plans every adjacent source order 2 through 10 and shares an exact level across orders");
+  if (!source.plan.certified_bounded_plan() ||
+      !every_adjacent_source_order_planned || !shared_multi_order_level) {
+    std::cerr << "K10 plan decision=" << static_cast<int>(source.plan.decision)
+              << ", batches=" << source.plan.batches.size()
+              << ", effective K="
+              << source.source.event_journal.effective_maximum_order
+              << ", shared level=" << shared_multi_order_level;
+    for (std::size_t order = 2U; order <= maximum_order; ++order) {
+      std::cerr << ", K" << order << "=" << planned_batches_by_order[order];
+    }
+    std::cerr << '\n';
+    return;
+  }
+
+  auto initialized = all_orders_initialization(source, 93301U);
+  check(
+      initialized.certified_ready_bridge(),
+      "the maximum-order all-orders vertical bridge initializes");
+  if (!initialized.certified_ready_bridge()) {
+    std::cerr << "K10 all-orders init decision="
+              << static_cast<int>(initialized.decision) << '\n';
+    return;
+  }
+  auto& bridge = initialized.bridge;
+  std::array<std::size_t, maximum_order + 1U> committed_batches_by_order{};
+  std::array<std::size_t, maximum_order + 1U> committed_groups_by_order{};
+  std::array<bool, maximum_order + 1U> witnessed_adjacent_arrow{};
+  bool continuation_observed = false;
+  bool cursor_98_direct_gap_certified = false;
+  bool cursor_98_sparse_target_closure_observed = false;
+  std::size_t sparse_target_closure_count = 0U;
+
+  while (!bridge.resident_complete()) {
+    const auto before = bridge.current_stamp();
+    check(
+        before.resident_batch_cursor < source.plan.batches.size(),
+        "the maximum-order resident cursor remains inside the certified plan");
+    if (before.resident_batch_cursor >= source.plan.batches.size()) {
+      return;
+    }
+    const auto& planned = source.plan.batches[before.resident_batch_cursor];
+    const auto locator_stamp_before = bridge.resident_locator().snapshot_stamp();
+    const std::size_t higher_records_before =
+        bridge.committed_higher_batches().size();
+    const std::size_t k2_records_before = bridge.committed_k2_batches().size();
+    const std::size_t witnesses_before =
+        bridge.source_root_target_witnesses().size();
+    if (before.resident_batch_cursor == 98U) {
+      ExactDirectSparseFacetKey missing_direct_target{};
+      missing_direct_target.point_count = 4U;
+      missing_direct_target.point_ids[0] = 0U;
+      missing_direct_target.point_ids[1] = 1U;
+      missing_direct_target.point_ids[2] = 5U;
+      missing_direct_target.point_ids[3] = 6U;
+      const ExactDirectSparseFacetWitness diagnostic_witness{
+          before.resident_session_authority_id, 987654321U};
+      const auto direct_probe = bridge.resident_locator().probe_positive_facet(
+          missing_direct_target,
+          diagnostic_witness,
+          all_orders_budget(source).target_probe);
+      const auto direct_verification =
+          verify_exact_direct_sparse_positive_facet_probe(
+              bridge.resident_locator(),
+              missing_direct_target,
+              diagnostic_witness,
+              all_orders_budget(source).target_probe,
+              direct_probe);
+      cursor_98_direct_gap_certified =
+          planned.order == 5U && direct_probe.certified_unresolved_miss() &&
+          direct_verification.result_certified;
+      check(
+          cursor_98_direct_gap_certified,
+          "cursor 98 retains the permanent certified direct-locator miss that requires sparse target descent");
+    }
+    auto prepared = bridge.prepare_next();
+    if (!prepared.certified_prepared_batch()) {
+      check(
+          false,
+          "every maximum-order batch, including the K5-to-K4 direct miss, prepares through exact sparse target descent");
+      std::cerr << "K10 prepare decision="
+                << static_cast<int>(prepared.decision)
+                << ", cursor=" << before.resident_batch_cursor
+                << ", order=" << planned.order
+                << ", stamp unchanged=" << (bridge.current_stamp() == before)
+                << ", locator unchanged="
+                << (bridge.resident_locator().snapshot_stamp() ==
+                    locator_stamp_before)
+                << ", higher records unchanged="
+                << (bridge.committed_higher_batches().size() ==
+                    higher_records_before)
+                << ", K2 records unchanged="
+                << (bridge.committed_k2_batches().size() == k2_records_before)
+                << ", witnesses unchanged="
+                << (bridge.source_root_target_witnesses().size() ==
+                    witnesses_before)
+                << '\n';
+      return;
+    }
+    if (planned.order >= 3U) {
+      const auto* record = prepared.ticket->conditional_batch_record();
+      check(
+          record != nullptr && record->source_order == planned.order &&
+              record->target_order + 1U == record->source_order &&
+              record->source_batch_index == before.resident_batch_cursor,
+          "every higher-order ticket names its adjacent lower-order target and exact source batch");
+      if (record == nullptr) {
+        return;
+      }
+      sparse_target_closure_count += record->sparse_target_closure_count;
+      if (before.resident_batch_cursor == 98U) {
+        cursor_98_sparse_target_closure_observed =
+            record->source_order == 5U &&
+            record->sparse_target_closure_count != 0U;
+      }
+      witnessed_adjacent_arrow[record->source_order] =
+          witnessed_adjacent_arrow[record->source_order] ||
+          !record->group_images.empty();
+      committed_groups_by_order[record->source_order] +=
+          record->group_images.size();
+      for (const auto& group : record->group_images) {
+        continuation_observed =
+            continuation_observed ||
+            (group.q_r == 1U &&
+             group.action == ExactFrozenIncidenceHgpAction::continuation);
+      }
+    } else {
+      check(
+          planned.order == 2U && prepared.nonhigher_transit_only,
+          "each K2 batch is routed through the owned adjacent K2-to-K1 bridge");
+    }
+
+    const auto committed = bridge.commit(std::move(*prepared.ticket));
+    check(
+        committed.certified_committed_batch(),
+        "every maximum-order vertical product batch commits");
+    if (!committed.certified_committed_batch()) {
+      std::cerr << "K10 commit decision="
+                << static_cast<int>(committed.decision)
+                << ", cursor=" << before.resident_batch_cursor
+                << ", order=" << planned.order << '\n';
+      return;
+    }
+    ++committed_batches_by_order[planned.order];
+    const auto after = bridge.current_stamp();
+    check(
+        after.resident_batch_cursor == before.resident_batch_cursor + 1U &&
+            after.resident_epoch == before.resident_epoch + 1U,
+        "maximum-order commits advance the resident cursor and epoch exactly once in product order");
+  }
+
+  for (const auto& record : bridge.committed_k2_batches()) {
+    check(
+        record.order == 2U && record.certified_conditional_k2_to_k1_batch(),
+        "every retained K2 record is one certified conditional K2-to-K1 batch");
+    committed_groups_by_order[2U] += record.group_images.size();
+  }
+  witnessed_adjacent_arrow[2U] = committed_groups_by_order[2U] != 0U;
+
+  bool every_nonterminal_adjacent_arrow_committed = true;
+  for (std::size_t order = 2U; order < maximum_order; ++order) {
+    every_nonterminal_adjacent_arrow_committed =
+        every_nonterminal_adjacent_arrow_committed &&
+        witnessed_adjacent_arrow[order] &&
+        committed_batches_by_order[order] == planned_batches_by_order[order];
+  }
+  const auto terminal_stamp = bridge.current_stamp();
+  check(
+      every_nonterminal_adjacent_arrow_committed &&
+          terminal_stamp.resident_batch_cursor == source.plan.batches.size() &&
+          terminal_stamp.committed_k2_batch_count == planned_batches_by_order[2U] &&
+          terminal_stamp.committed_higher_batch_count ==
+              source.plan.batches.size() - planned_batches_by_order[2U] &&
+          continuation_observed && cursor_98_direct_gap_certified &&
+          cursor_98_sparse_target_closure_observed &&
+          sparse_target_closure_count != 0U &&
+          committed_batches_by_order[maximum_order] ==
+              planned_batches_by_order[maximum_order] &&
+          committed_groups_by_order[maximum_order] == 0U &&
+          !witnessed_adjacent_arrow[maximum_order] && bridge.resident_complete() &&
+          !bridge.conditional_all_adjacent_order_group_images_complete(),
+      "the sparse closure repairs K5-to-K4 and exhausts all batches, while the missing K10 terminal component remains explicit");
+
+  const auto k1_stamp_before_rejected_seal = bridge.owned_k1_current_stamp();
+  const auto sealed = bridge.seal();
+  check(
+      sealed.decision ==
+              ExactDirectMorseResidentAllOrdersVerticalSealDecision::
+                  no_adjacent_source_order_component_coverage &&
+          !sealed.seal.has_value() &&
+          sealed.no_partial_seal_published_on_failure &&
+          bridge.owned_k1_current_stamp() == k1_stamp_before_rejected_seal &&
+          !bridge.final_vertical_sealed(),
+      "K10 terminal-source omission blocks the seal before K1 drain and cannot be promoted to vertical completeness");
+
+  for (const auto& witness : bridge.source_root_target_witnesses()) {
+    check(
+        witness.source_order == witness.target_order + 1U &&
+            witness.source_order >= 3U &&
+            witness.source_order <= maximum_order,
+        "each persistent maximum-order witness belongs to one adjacent higher-order arrow");
+  }
 }
 
 }  // namespace
@@ -776,6 +1199,8 @@ int main() {
   }
   test_cap_minus_one_and_canonical_k1_digest(source);
   test_complete_all_orders_vertical_seal(source);
+  const Fixture maximum_order_source = maximum_order_ten_fixture();
+  test_maximum_order_ten_vertical_falsifier(maximum_order_source);
   const Fixture k1_target_only_source = fixture(1U);
   test_owned_k1_target_only_terminal_drain(k1_target_only_source);
   if (failures != 0) {

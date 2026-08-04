@@ -22,7 +22,7 @@ using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
 static_assert(
-    direct_morse_resident_k2_k1_closed_cut_bridge_schema_version == 1U);
+    direct_morse_resident_k2_k1_closed_cut_bridge_schema_version == 2U);
 static_assert(!std::is_copy_constructible_v<
               ExactDirectMorseResidentK2K1ClosedCutBridge>);
 static_assert(std::is_nothrow_move_constructible_v<
@@ -347,21 +347,55 @@ k1_initialization(const Fixture& source) {
 
 [[nodiscard]] ExactDirectMorseResidentK2K1ClosedCutBridgeBudget
 bridge_budget(const Fixture& source) {
+  ExactDirectMorseResidentK2K1ClosedCutBridgeBudget budget;
   std::size_t k2_batch_count = 0U;
+  std::size_t saddle_count = 0U;
+  std::size_t birth_count = 0U;
+  std::size_t maximum_batch_saddle_count = 0U;
+  std::size_t maximum_batch_birth_count = 0U;
   for (const auto& batch : source.plan.batches) {
     if (batch.order == 2U) {
       ++k2_batch_count;
+      std::size_t batch_saddle_count = 0U;
+      std::size_t batch_birth_count = 0U;
+      for (std::size_t local = 0U;
+           local < batch.direct_reference_count;
+           ++local) {
+        const auto role = source.plan
+                              .direct_references[
+                                  batch.direct_reference_offset + local]
+                              .role;
+        if (role == ExactDirectMorseH0Role::saddle) {
+          ++batch_saddle_count;
+          ++saddle_count;
+        } else {
+          ++batch_birth_count;
+          ++birth_count;
+        }
+      }
+      maximum_batch_saddle_count =
+          std::max(maximum_batch_saddle_count, batch_saddle_count);
+      maximum_batch_birth_count =
+          std::max(maximum_batch_birth_count, batch_birth_count);
     }
   }
-  return {
-      k2_batch_count,
-      4096U,
-      1024U,
-      65536U,
-      65536U,
-      65536U,
-      65536U,
-  };
+  budget.maximum_committed_k2_batch_count = k2_batch_count;
+  budget.maximum_committed_k2_group_count = 4096U;
+  budget.maximum_prepared_k2_group_count = 1024U;
+  budget.maximum_committed_k2_direct_saddle_group_binding_count =
+      saddle_count;
+  budget.maximum_prepared_k2_direct_saddle_group_binding_count =
+      maximum_batch_saddle_count;
+  budget.maximum_committed_k2_direct_birth_k1_binding_count = birth_count;
+  budget.maximum_prepared_k2_direct_birth_k1_binding_count =
+      maximum_batch_birth_count;
+  budget.maximum_direct_birth_k1_singleton_root_query_count =
+      2U * maximum_batch_birth_count;
+  budget.maximum_group_coverage_point_reference_scan_count = 65536U;
+  budget.maximum_group_point_scratch_count = 65536U;
+  budget.maximum_distinct_group_point_count = 65536U;
+  budget.maximum_singleton_root_query_count = 65536U;
+  return budget;
 }
 
 [[nodiscard]] ExactDirectMorseResidentK2K1ClosedCutInitialization
@@ -591,15 +625,95 @@ void test_private_seals_retry_and_atomic_resident_rejection(
   check(
       independent_nonempty_group_checked,
       "the strict fixture reaches a nonempty K2 group for the independent CSR oracle");
+  bool saw_direct_saddle_binding = false;
+  bool saw_direct_birth_binding = false;
+  bool checked_saddle_mutations = false;
   for (const auto& record : first.bridge.committed_k2_batches()) {
     check(
         record.certified_conditional_k2_to_k1_batch() &&
+            record.o4_membership_digest !=
+                morsehgp3d::contract::CanonicalId{} &&
+            record.o4_membership_digest ==
+                canonical_exact_direct_morse_resident_k2_o4_membership_digest(
+                    record) &&
             record.group_images_exhaustive_from_frozen_csr &&
             record.every_group_has_one_live_closed_k1_root &&
             !record.incidence_complete_reduction &&
+            !record.full_pi0_membership_claimed && !record.m1_replayed &&
             !record.vertical_maps_complete && !record.public_status_claimed,
-        "every K2 group image is CSR-exhaustive, live-query consistent, and conditional only");
+        "every K2 group image and O.4 digest is authentic, live-query consistent, and conditional only");
+    for (const auto& binding : record.direct_saddle_group_bindings) {
+      saw_direct_saddle_binding = true;
+      const auto& direct =
+          source.plan.direct_references[binding.source_direct_reference_index];
+      check(
+          binding.certified_conditional_saddle_group_binding() &&
+              direct.role == ExactDirectMorseH0Role::saddle &&
+              direct.source_role_record_index ==
+                  binding.source_role_record_index &&
+              direct.source_event_projection_index ==
+                  binding.source_event_projection_index &&
+              direct.source_incidence_family_index ==
+                  std::optional<std::size_t>{
+                      binding.source_incidence_family_index} &&
+              binding.owner_group_index < record.group_images.size() &&
+              binding.resident_resultant_root_id ==
+                  record.group_images[binding.owner_group_index]
+                      .resident_resultant_root_id,
+          "a K2 direct saddle retains its authentic event, family, hyperedge, quotient group and resident root");
+      if (!checked_saddle_mutations) {
+        auto event_mutation = record;
+        ++event_mutation.direct_saddle_group_bindings.front()
+              .source_event_projection_index;
+        check(
+            !event_mutation.certified_conditional_k2_to_k1_batch(),
+            "mutating a persisted direct-saddle event invalidates the K2 O.4 digest");
+        auto group_mutation = record;
+        group_mutation.direct_saddle_group_bindings.front().owner_group_index =
+            group_mutation.group_images.size();
+        check(
+            !group_mutation.certified_conditional_k2_to_k1_batch(),
+            "mutating a persisted direct-saddle group invalidates K2 certification");
+        auto digest_mutation = record;
+        digest_mutation.o4_membership_digest = {};
+        check(
+            !digest_mutation.certified_conditional_k2_to_k1_batch(),
+            "a missing K2 O.4 digest fails closed");
+        auto full_pi0_overclaim = record;
+        full_pi0_overclaim.full_pi0_membership_claimed = true;
+        full_pi0_overclaim.o4_membership_digest =
+            canonical_exact_direct_morse_resident_k2_o4_membership_digest(
+                full_pi0_overclaim);
+        check(
+            !full_pi0_overclaim.certified_conditional_k2_to_k1_batch(),
+            "a coherently rehashed K2 membership record cannot claim full_pi0");
+        checked_saddle_mutations = true;
+      }
+    }
+    for (const auto& binding : record.direct_birth_k1_bindings) {
+      saw_direct_birth_binding = true;
+      const auto& direct =
+          source.plan.direct_references[binding.source_direct_reference_index];
+      check(
+          binding.certified_conditional_birth_k1_binding() &&
+              direct.role == ExactDirectMorseH0Role::birth &&
+              direct.source_role_record_index ==
+                  binding.source_role_record_index &&
+              direct.source_event_projection_index ==
+                  binding.source_event_projection_index &&
+              direct.direct_birth_facet_token_index ==
+                  std::optional<std::size_t>{
+                      binding.source_facet_token_index} &&
+              source.plan.facet_tokens[binding.source_facet_token_index]
+                      .facet_key.point_count ==
+                  2U,
+          "a direct K2 birth retains its authentic event and facet token and queries both K1 singleton roots");
+    }
   }
+  check(
+      saw_direct_saddle_binding && saw_direct_birth_binding &&
+          checked_saddle_mutations,
+      "the focused fixture exercises both O.4 saddle membership and the direct-birth rank-2 to K1 base case");
 }
 
 void test_midstream_attach_consumes_every_skipped_k1_level(
@@ -708,25 +822,74 @@ void test_canonical_cloud_digest_binding_and_negative_cloud(
 
 void test_cap_minus_one_rejects_before_consuming_sessions(
     const Fixture& source) {
-  auto resident = resident_initialization(source, 92001U);
-  auto k1 = k1_initialization(source);
+  std::uint64_t authority_id = 92001U;
+  const auto reject_budget = [&](
+                                 const ExactDirectMorseResidentK2K1ClosedCutBridgeBudget&
+                                     insufficient,
+                                 const std::string& message) {
+    auto resident = resident_initialization(source, authority_id++);
+    auto k1 = k1_initialization(source);
+    const auto rejected =
+        initialize_exact_direct_morse_resident_k2_k1_closed_cut_bridge(
+            std::move(*resident.session), std::move(k1.session), insufficient);
+    check(
+        rejected.decision ==
+                ExactDirectMorseResidentK2K1ClosedCutInitializationDecision::
+                    no_budget_rejected &&
+            !rejected.resident_live_session_consumed &&
+            !rejected.k1_live_session_consumed &&
+            resident.session->certified_resident_session() &&
+            k1.session.ready(),
+        message);
+  };
+
   auto insufficient = bridge_budget(source);
   check(
       insufficient.maximum_committed_k2_batch_count != 0U,
       "the fixture has at least one K2 resident batch");
   --insufficient.maximum_committed_k2_batch_count;
-  const auto rejected =
-      initialize_exact_direct_morse_resident_k2_k1_closed_cut_bridge(
-          std::move(*resident.session), std::move(k1.session), insufficient);
-  check(
-      rejected.decision ==
-              ExactDirectMorseResidentK2K1ClosedCutInitializationDecision::
-                  no_budget_rejected &&
-          !rejected.resident_live_session_consumed &&
-          !rejected.k1_live_session_consumed &&
-          resident.session->certified_resident_session() &&
-          k1.session.ready(),
+  reject_budget(
+      insufficient,
       "the exact K2-batch cap minus one rejects before either live session is consumed");
+
+  insufficient = bridge_budget(source);
+  if (insufficient
+          .maximum_committed_k2_direct_saddle_group_binding_count != 0U) {
+    --insufficient
+          .maximum_committed_k2_direct_saddle_group_binding_count;
+    reject_budget(
+        insufficient,
+        "the exact K2 direct-saddle binding cap minus one rejects before consuming either session");
+  }
+  insufficient = bridge_budget(source);
+  if (insufficient.maximum_committed_k2_direct_birth_k1_binding_count != 0U) {
+    --insufficient.maximum_committed_k2_direct_birth_k1_binding_count;
+    reject_budget(
+        insufficient,
+        "the exact K2 direct-birth to K1 binding cap minus one rejects before consuming either session");
+  }
+  insufficient = bridge_budget(source);
+  if (insufficient
+          .maximum_prepared_k2_direct_saddle_group_binding_count != 0U) {
+    --insufficient.maximum_prepared_k2_direct_saddle_group_binding_count;
+    reject_budget(
+        insufficient,
+        "the exact prepared K2 direct-saddle binding cap minus one rejects before consuming either session");
+  }
+  insufficient = bridge_budget(source);
+  if (insufficient.maximum_prepared_k2_direct_birth_k1_binding_count != 0U) {
+    --insufficient.maximum_prepared_k2_direct_birth_k1_binding_count;
+    reject_budget(
+        insufficient,
+        "the exact prepared K2 direct-birth binding cap minus one rejects before consuming either session");
+  }
+  insufficient = bridge_budget(source);
+  if (insufficient.maximum_direct_birth_k1_singleton_root_query_count != 0U) {
+    --insufficient.maximum_direct_birth_k1_singleton_root_query_count;
+    reject_budget(
+        insufficient,
+        "the exact K2 direct-birth singleton-query cap minus one rejects before consuming either session");
+  }
 }
 
 }  // namespace

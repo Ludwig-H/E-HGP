@@ -2436,10 +2436,13 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - repréparer le même lot après cet abandon : l'avance K1 déjà effectuée reste un cache cible monotone, le retry doit être idempotent et le record committé doit compter le saut depuis le dernier stamp K1 publié, sans couture verticale intermédiaire;
 - attacher le pont à un résident déjà avancé de deux lots tandis que K1 reste au cut zéro, préparer le prochain lot K2 et exiger la consommation d'au moins deux niveaux d'égalité K1 exacts avant le commit résident;
 - pour chaque groupe K2, consommer exhaustivement les CSR des racines antérieures, les CSR des carriers latents et le delta exact, dédupliquer les `PointId`, interroger chaque singleton par la capability K1 live et exiger une racine fermée unique;
+- rejouer la tranche des références directes contre les hyperarêtes et le quotient gelés du vrai bundle pré-lot; exiger une liaison selle--groupe exactement une fois par selle directe, consommer toutes les hyperarêtes résiduelles dans le même quotient et lier chaque naissance directe K2 à la racine K1 live commune aux deux points de sa facette;
+- engager références, indices d'événement, groupes, racines et bindings de naissance dans le digest canonique O4 du lot; muter événement, groupe ou digest, puis rehasher une revendication `full_pi0`, et exiger dans tous les cas le rejet du certificat conditionnel;
 - préparer deux tickets sur le même snapshot, committer le premier puis envoyer le second au même pont; le rejet résident périmé doit conserver exactement stamp, compteurs et transcript verticaux;
 - fixer `maximum_committed_k2_batch_count` au nombre exact de lots K2 puis à cette valeur moins un; la seconde initialisation doit refuser avant consommation des sessions;
+- diminuer séparément d'une unité les caps de bindings selles committés et préparés, de bindings naissances committés et préparés et de requêtes singleton des naissances; chaque préflight doit échouer sans payload ni consommation de session;
 - faire transiter tout lot d'ordre différent de deux sans record ni compteur vertical K2 et sans l'annoncer comme carte verticale complète;
-- conserver faux `incidence_complete_reduction`, `vertical_maps_complete`, naturalité tous ordres, M.1, matrice de paires, Star, Gamma, Delaunay et statut public exact.
+- conserver faux `incidence_complete_reduction`, `full_pi0_membership_claimed`, `m1_replayed`, `vertical_maps_complete`, naturalité tous ordres, matrice de paires, Star, Gamma, Delaunay et statut public exact; le digest O4 reste l'intégrité conditionnelle du lot fourni, jamais une autorité autonome de complétude.
 
 ### T15-ATLEAST20-STREAM — vue aval exacte relative par lots complets
 
@@ -2506,12 +2509,14 @@ La totalité est désormais testée d'abord par les liens d'événements, et non
 
 - ordonner le plan par niveau rationnel exact puis ordre, et vérifier qu'au même niveau chaque ordre cible inférieur est déjà committé avant la projection de l'ordre source;
 - pour chaque groupe d'ordre au moins trois, re-sonder toutes les facettes témoins des racines antérieures, projeter toutes les suppressions codimension un de chaque facette nouvelle et exiger une racine cible live unique;
+- rejouer chaque référence de selle directe supérieure contre l'hyperarête et le quotient gelés du bundle pré-lot, puis la lier exactement une fois à l'image du groupe et à la racine source résultante; toutes les hyperarêtes résiduelles doivent appartenir au même quotient;
+- engager ces bindings dans le digest canonique O4 du lot supérieur, rejeter les mutations d'événement, de groupe et de digest ainsi qu'une revendication M.1 même rehashée, puis exercer le cap préparé des bindings à la valeur exacte moins un;
 - conserver une facette cible canonique persistante par racine résultante, puis re-sonder chaque témoin au scellement après toutes les fusions propres à la cible;
 - rejouer au terminal les comptes de lots, l'historique locator et les unions, puis composer les images finales sans atlas global de facettes, cofaces ou incidences;
 - drainer la coupe K1 jusqu'au niveau terminal, mémoriser le reçu de drain et vérifier qu'un second scellement est idempotent sans perte du compte de suffixe;
 - accepter un drain K1 vide avec une source K2 complète, puisque les arêtes EMST sont Gabriel, et exercer séparément un plan résident vide produisant un suffixe terminal K1 non vide;
 - sur E5, exiger un groupe supérieur non vide, trente suppressions codimension un sur trente, un témoin terminal valide et la réussite des régressions K1 et K2--K1;
-- refuser d'utiliser les champs historiques `all_naturality_squares_replayed` et `vertical_maps_complete` comme preuve de totalité tant que le pont ne consomme pas le journal événementiel, n'installe pas les carriers latents et ne rejoue pas O7; garder faux M.1, `global_morse_obligation_replayed` et tout statut public;
+- refuser d'utiliser les champs historiques `all_naturality_squares_replayed` et `vertical_maps_complete` comme preuve de totalité; garder faux `full_pi0_membership_claimed`, M.1, `global_morse_obligation_replayed` et tout statut public;
 - transmettre la capability source normalisée v7 live et obliger la future session produit à l'exiger vraie avant tout gate de campagne;
 - vérifier qu'aucune matrice de paires, Star, Gamma, cellule, catalogue global de facettes, cofaces, incidences ou Delaunay ordinaire ou d'ordre supérieur n'est possédé par la couture.
 

@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <type_traits>
 #include <vector>
@@ -14,14 +15,14 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_morse_resident_k2_k1_closed_cut_bridge_schema_version = 1U;
+    direct_morse_resident_k2_k1_closed_cut_bridge_schema_version = 2U;
 inline constexpr std::string_view
     direct_morse_resident_k2_k1_closed_cut_bridge_backend = "reference_cpu";
 inline constexpr std::string_view
     direct_morse_resident_k2_k1_closed_cut_bridge_profile = "hgp_reduced";
 inline constexpr std::string_view
     direct_morse_resident_k2_k1_closed_cut_bridge_mode =
-        "certified_conditional_resident_k2_to_sealed_k1_closed_cut_stream_v1";
+        "certified_conditional_resident_k2_to_sealed_k1_closed_cut_stream_v2";
 inline constexpr std::string_view
     direct_morse_resident_k2_k1_closed_cut_bridge_public_status =
         "not_claimed";
@@ -30,7 +31,9 @@ inline constexpr std::string_view
         "private_move_only_bridge_and_resident_tickets_live_sealed_k1_"
         "monotone_closed_cut_replay_exhaustive_prior_root_latent_carrier_"
         "and_exact_delta_group_images_live_singleton_root_queries_"
-        "preallocated_post_resident_commit_publication_v1";
+        "authentic_direct_event_to_frozen_quotient_group_membership_and_"
+        "direct_birth_to_live_k1_root_bindings_canonical_digest_"
+        "preallocated_post_resident_commit_publication_v2";
 
 // The bridge never materializes a point-pair matrix, Star, Gamma, cells,
 // cofaces or a Delaunay mosaic.  One K2 preparation retains only a flat
@@ -40,6 +43,11 @@ struct ExactDirectMorseResidentK2K1ClosedCutBridgeBudget {
   std::size_t maximum_committed_k2_batch_count{};
   std::size_t maximum_committed_k2_group_count{};
   std::size_t maximum_prepared_k2_group_count{};
+  std::size_t maximum_committed_k2_direct_saddle_group_binding_count{};
+  std::size_t maximum_prepared_k2_direct_saddle_group_binding_count{};
+  std::size_t maximum_committed_k2_direct_birth_k1_binding_count{};
+  std::size_t maximum_prepared_k2_direct_birth_k1_binding_count{};
+  std::size_t maximum_direct_birth_k1_singleton_root_query_count{};
   std::size_t maximum_group_coverage_point_reference_scan_count{};
   std::size_t maximum_group_point_scratch_count{};
   std::size_t maximum_distinct_group_point_count{};
@@ -53,7 +61,12 @@ struct ExactDirectMorseResidentK2K1ClosedCutBridgeBudget {
 struct ExactDirectMorseResidentK2K1ClosedCutBridgeRequirements {
   std::size_t resident_batch_count{};
   std::size_t resident_k2_batch_count{};
+  std::size_t resident_k2_direct_saddle_reference_count{};
+  std::size_t resident_k2_direct_birth_reference_count{};
   std::size_t prepared_group_count{};
+  std::size_t prepared_k2_direct_saddle_group_binding_count{};
+  std::size_t prepared_k2_direct_birth_k1_binding_count{};
+  std::size_t direct_birth_k1_singleton_root_query_count{};
   std::size_t group_coverage_point_reference_scan_count{};
   std::size_t distinct_group_point_count{};
   std::size_t singleton_root_query_count{};
@@ -74,6 +87,8 @@ struct ExactDirectMorseResidentK2K1ClosedCutBridgeStamp {
   std::size_t resident_epoch{};
   std::size_t committed_k2_batch_count{};
   std::size_t committed_k2_group_count{};
+  std::size_t committed_k2_direct_saddle_group_binding_count{};
+  std::size_t committed_k2_direct_birth_k1_binding_count{};
   contract::CanonicalId canonical_cloud_digest{};
   contract::CanonicalId resident_higher_canonical_cloud_digest{};
   ExactDirectK1BoruvkaClosedCutSessionStamp committed_k1_stamp{};
@@ -81,6 +96,52 @@ struct ExactDirectMorseResidentK2K1ClosedCutBridgeStamp {
   friend bool operator==(
       const ExactDirectMorseResidentK2K1ClosedCutBridgeStamp&,
       const ExactDirectMorseResidentK2K1ClosedCutBridgeStamp&) = default;
+};
+
+// One flat, source-ordered record survives for every direct saddle reference.
+// It is extracted from the authentic resident pre-batch bundle by jointly
+// replaying the direct-reference slice, frozen hyperedge provenance and the
+// frozen quotient binding.  resident_resultant_root_id is populated only
+// after the resident commit has exposed the corresponding group image.
+struct ExactDirectMorseResidentDirectSaddleGroupBinding {
+  std::size_t binding_index{};
+  std::size_t source_direct_reference_index{};
+  std::size_t source_role_record_index{};
+  std::size_t source_event_projection_index{};
+  std::size_t source_incidence_family_index{};
+  std::size_t source_hyperedge_index{};
+  std::size_t owner_group_index{};
+  std::size_t group_image_index{};
+  ExactFrozenIncidencePriorRootId resident_resultant_root_id{};
+
+  [[nodiscard]] bool certified_conditional_saddle_group_binding()
+      const noexcept;
+
+  friend bool operator==(
+      const ExactDirectMorseResidentDirectSaddleGroupBinding&,
+      const ExactDirectMorseResidentDirectSaddleGroupBinding&) = default;
+};
+
+// A direct K2 birth is deferred by the frozen quotient, so its only authentic
+// adjacent-order image is obtained by querying both PointIds of its source
+// facet in the live closed K1 cut.  K1 node id zero is valid; the two explicit
+// truth bits distinguish a certified zero root from an uninitialized record.
+struct ExactDirectMorseResidentK2DirectBirthK1Binding {
+  std::size_t binding_index{};
+  std::size_t source_direct_reference_index{};
+  std::size_t source_role_record_index{};
+  std::size_t source_event_projection_index{};
+  std::size_t source_facet_token_index{};
+  std::size_t singleton_root_query_count{};
+  K1NodeId closed_k1_root_node_id{};
+  bool every_source_point_live_queried{false};
+  bool unique_closed_k1_root_certified{false};
+
+  [[nodiscard]] bool certified_conditional_birth_k1_binding() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectMorseResidentK2DirectBirthK1Binding&,
+      const ExactDirectMorseResidentK2DirectBirthK1Binding&) = default;
 };
 
 struct ExactDirectMorseResidentK2K1ClosedCutGroupImage {
@@ -114,17 +175,38 @@ struct ExactDirectMorseResidentK2K1ClosedCutBatchRecord {
   ExactDirectK1BoruvkaClosedCutSessionStamp published_pre_k1_stamp{};
   ExactDirectK1BoruvkaClosedCutSessionStamp live_post_k1_stamp{};
   std::size_t consumed_intermediate_k1_level_count{};
+  std::size_t frozen_hyperedge_count{};
+  std::size_t frozen_token_reference_count{};
+  std::size_t frozen_quotient_group_count{};
+  std::size_t frozen_direct_saddle_hyperedge_count{};
+  std::size_t frozen_residual_hyperedge_count{};
+  std::size_t direct_birth_k1_singleton_root_query_count{};
   std::size_t group_coverage_point_reference_scan_count{};
   std::size_t distinct_group_point_count{};
   std::size_t singleton_root_query_count{};
   std::vector<ExactDirectMorseResidentK2K1ClosedCutGroupImage> group_images;
+  std::vector<ExactDirectMorseResidentDirectSaddleGroupBinding>
+      direct_saddle_group_bindings;
+  std::vector<ExactDirectMorseResidentK2DirectBirthK1Binding>
+      direct_birth_k1_bindings;
+  contract::CanonicalId o4_membership_digest{};
   bool k1_cut_advanced_before_resident_commit{false};
   bool every_intermediate_k1_level_consumed{false};
   bool group_images_exhaustive_from_frozen_csr{false};
   bool every_group_has_one_live_closed_k1_root{false};
+  bool every_direct_saddle_bound_exactly_once{false};
+  bool bindings_replayed_against_frozen_hyperedge_quotient{false};
+  bool all_residual_hyperedges_consumed_in_same_quotient{false};
+  bool binding_group_images_crosschecked{false};
+  bool every_direct_birth_bound_exactly_once{false};
+  bool every_direct_birth_k1_root_live_verified{false};
+  bool direct_birth_equal_group_k1_roots_crosschecked{false};
+  bool o4_membership_digest_canonical{false};
   bool resident_batch_committed{false};
   bool post_commit_publication_allocation_free{false};
   bool incidence_complete_reduction{false};
+  bool full_pi0_membership_claimed{false};
+  bool m1_replayed{false};
   bool vertical_maps_complete{false};
   bool global_facet_coface_or_gamma_catalog_materialized{false};
   bool ordinary_or_higher_order_delaunay_materialized{false};
@@ -137,6 +219,15 @@ struct ExactDirectMorseResidentK2K1ClosedCutBatchRecord {
       const ExactDirectMorseResidentK2K1ClosedCutBatchRecord&,
       const ExactDirectMorseResidentK2K1ClosedCutBatchRecord&) = default;
 };
+
+// Allocation-free canonical digest of the conditional event-to-quotient O.4
+// slice retained for one supplied resident batch.  It is an integrity digest
+// of a record owned by the live bridge, not a standalone source authority and
+// not a certificate of O.4 adequacy or completeness, O.7, full_pi0 or M.1.
+// A zero digest denotes an encoding failure and is never certifiable.
+[[nodiscard]] contract::CanonicalId
+canonical_exact_direct_morse_resident_k2_o4_membership_digest(
+    const ExactDirectMorseResidentK2K1ClosedCutBatchRecord&) noexcept;
 
 enum class ExactDirectMorseResidentK2K1ClosedCutInitializationDecision
     : std::uint8_t {
@@ -237,6 +328,8 @@ struct ExactDirectMorseResidentK2K1ClosedCutCommitResult {
   std::size_t committed_resident_batch_cursor{};
   std::size_t committed_k2_batch_count{};
   std::size_t committed_k2_group_count{};
+  std::size_t committed_k2_direct_saddle_group_binding_count{};
+  std::size_t committed_k2_direct_birth_k1_binding_count{};
   bool ticket_consumed{false};
   bool vertical_state_mutated{false};
   bool no_vertical_state_mutated_on_resident_rejection{false};
@@ -363,6 +456,15 @@ class ExactDirectMorseResidentK2K1ClosedCutBridge {
   resident_root_coverages() const noexcept;
   [[nodiscard]] const std::vector<ExactDirectMorseUnifiedResidentGroupRecord>&
   resident_group_records() const noexcept;
+  [[nodiscard]] ExactDirectSparseFacetDescentClosureResult
+  build_resident_sparse_facet_descent_closure(
+      std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+      const exact::ExactLevel& closed_batch_squared_level,
+      const ExactDirectSparseFacetWitness& locator_query_witness,
+      const ExactDirectSparseFacetDescentClosureBudget& budget,
+      const ExactDirectSparseFacetDescentClosureConfig& config = {},
+      spatial::LbvhTraversalOrder traversal_order =
+          spatial::LbvhTraversalOrder::near_first) const;
 
   [[nodiscard]] ExactDirectMorseResidentK2K1ClosedCutPreparationResult
   prepare_next();

@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/direct_morse_normalized_h0_product_session.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -437,19 +438,53 @@ resident(Fixture& source, std::uint64_t authority_id) {
 
 [[nodiscard]] ExactDirectMorseResidentK2K1ClosedCutBridgeBudget
 k2_bridge_budget(const ExactDirectSparseUnifiedLevelPlanResult& plan) {
+  ExactDirectMorseResidentK2K1ClosedCutBridgeBudget budget;
   std::size_t batch_count = 0U;
+  std::size_t saddle_count = 0U;
+  std::size_t birth_count = 0U;
+  std::size_t maximum_batch_saddle_count = 0U;
+  std::size_t maximum_batch_birth_count = 0U;
   for (const auto& batch : plan.batches) {
-    batch_count += batch.order == 2U ? 1U : 0U;
+    if (batch.order != 2U) {
+      continue;
+    }
+    ++batch_count;
+    std::size_t batch_saddle_count = 0U;
+    std::size_t batch_birth_count = 0U;
+    for (std::size_t local = 0U;
+         local < batch.direct_reference_count;
+         ++local) {
+      if (plan.direct_references[batch.direct_reference_offset + local].role ==
+          ExactDirectMorseH0Role::saddle) {
+        ++batch_saddle_count;
+        ++saddle_count;
+      } else {
+        ++batch_birth_count;
+        ++birth_count;
+      }
+    }
+    maximum_batch_saddle_count =
+        std::max(maximum_batch_saddle_count, batch_saddle_count);
+    maximum_batch_birth_count =
+        std::max(maximum_batch_birth_count, batch_birth_count);
   }
-  return {
-      batch_count,
-      4096U,
-      4096U,
-      65536U,
-      65536U,
-      65536U,
-      65536U,
-  };
+  budget.maximum_committed_k2_batch_count = batch_count;
+  budget.maximum_committed_k2_group_count = 4096U;
+  budget.maximum_prepared_k2_group_count = 4096U;
+  budget.maximum_committed_k2_direct_saddle_group_binding_count =
+      saddle_count;
+  budget.maximum_prepared_k2_direct_saddle_group_binding_count =
+      maximum_batch_saddle_count;
+  budget.maximum_committed_k2_direct_birth_k1_binding_count = birth_count;
+  budget.maximum_prepared_k2_direct_birth_k1_binding_count =
+      maximum_batch_birth_count;
+  budget.maximum_direct_birth_k1_singleton_root_query_count =
+      2U * maximum_batch_birth_count;
+  budget.maximum_group_coverage_point_reference_scan_count = 65536U;
+  budget.maximum_group_point_scratch_count = 65536U;
+  budget.maximum_distinct_group_point_count = 65536U;
+  budget.maximum_singleton_root_query_count = 65536U;
+  return budget;
 }
 
 [[nodiscard]] ExactDirectMorseResidentAllOrdersVerticalBridgeBudget
@@ -462,17 +497,58 @@ vertical_budget(const ExactDirectSparseUnifiedLevelPlanResult& plan) {
   budget.maximum_committed_higher_batch_count = higher_batch_count;
   budget.maximum_committed_higher_group_count = 4096U;
   budget.maximum_prepared_higher_group_count = 4096U;
+  std::size_t higher_saddle_count = 0U;
+  std::size_t maximum_batch_higher_saddle_count = 0U;
+  for (const auto& batch : plan.batches) {
+    if (batch.order < 3U) {
+      continue;
+    }
+    std::size_t batch_saddle_count = 0U;
+    for (std::size_t local = 0U;
+         local < batch.direct_reference_count;
+         ++local) {
+      if (plan.direct_references[batch.direct_reference_offset + local].role ==
+          ExactDirectMorseH0Role::saddle) {
+        ++batch_saddle_count;
+        ++higher_saddle_count;
+      }
+    }
+    maximum_batch_higher_saddle_count =
+        std::max(maximum_batch_higher_saddle_count, batch_saddle_count);
+  }
+  budget.maximum_committed_higher_direct_saddle_group_binding_count =
+      higher_saddle_count;
+  budget.maximum_prepared_higher_direct_saddle_group_binding_count =
+      maximum_batch_higher_saddle_count;
   budget.maximum_persistent_source_root_witness_count = 4096U;
   budget.maximum_prior_root_witness_probe_count = 65536U;
   budget.maximum_final_root_witness_probe_count = 4096U;
   budget.maximum_source_facet_resolution_scan_count = 1048576U;
   budget.maximum_projected_target_facet_probe_count = 1048576U;
+  budget.maximum_sparse_target_closure_count = 1048576U;
   budget.maximum_expected_group_child_root_reference_count = 65536U;
   budget.maximum_expected_group_coverage_delta_point_reference_count =
       65536U;
   budget.maximum_query_replay_token =
       std::numeric_limits<std::uint64_t>::max();
   budget.target_probe = {4097U, 1024U};
+  budget.target_closure = {
+      4096U,
+      4096U,
+      4096U,
+      8193U,
+      {ExactDirectSparsePositiveFacetProbeBudget{4097U, 1024U},
+       morsehgp3d::spatial::ExactLbvhTopKBudget{
+           1048576U,
+           1048576U,
+           1048576U,
+           1048576U,
+           1024U,
+           10U,
+           10U},
+       ExactDirectSparsePositiveFacetProbeBudget{4097U, 1024U}},
+  };
+  budget.target_closure_traversal_order = LbvhTraversalOrder::near_first;
   return budget;
 }
 

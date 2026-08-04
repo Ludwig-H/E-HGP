@@ -13,7 +13,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_morse_resident_all_orders_vertical_bridge_schema_version = 1U;
+    direct_morse_resident_all_orders_vertical_bridge_schema_version = 3U;
 inline constexpr std::string_view
     direct_morse_resident_all_orders_vertical_bridge_backend =
         "reference_cpu";
@@ -22,7 +22,8 @@ inline constexpr std::string_view
 inline constexpr std::string_view
     direct_morse_resident_all_orders_vertical_bridge_mode =
         "certified_conditional_inductive_resident_all_adjacent_orders_"
-        "vertical_group_images_v1";
+        "vertical_group_images_with_sparse_target_descent_and_authentic_"
+        "direct_event_group_membership_v3";
 inline constexpr std::string_view
     direct_morse_resident_all_orders_vertical_bridge_public_status =
         "not_claimed";
@@ -31,10 +32,11 @@ inline constexpr std::string_view
         "owned_k2_k1_bridge_private_move_only_outer_ticket_exact_product_"
         "order_prebatch_locator_reprobe_one_persistent_canonical_target_"
         "facet_witness_per_source_root_all_nonroot_source_key_codimension_"
-        "one_deletions_live_root_agreement_terminal_exhausted_locator_"
+        "one_deletions_direct_locator_or_transient_demand_driven_sparse_"
+        "target_descent_to_live_root_agreement_terminal_exhausted_locator_"
         "witness_sweep_composes_monotone_target_unions_owned_normalized_"
         "source_capability_and_preallocated_post_resident_commit_"
-        "publication_v1";
+        "publication_with_canonical_o4_membership_digest_v3";
 
 // Every cap applies to one live all-orders bridge.  Target deletions are
 // generated in a fixed ExactDirectSparseFacetKey scratch object and are never
@@ -45,15 +47,22 @@ struct ExactDirectMorseResidentAllOrdersVerticalBridgeBudget {
   std::size_t maximum_committed_higher_batch_count{};
   std::size_t maximum_committed_higher_group_count{};
   std::size_t maximum_prepared_higher_group_count{};
+  std::size_t maximum_committed_higher_direct_saddle_group_binding_count{};
+  std::size_t maximum_prepared_higher_direct_saddle_group_binding_count{};
   std::size_t maximum_persistent_source_root_witness_count{};
   std::size_t maximum_prior_root_witness_probe_count{};
   std::size_t maximum_final_root_witness_probe_count{};
   std::size_t maximum_source_facet_resolution_scan_count{};
   std::size_t maximum_projected_target_facet_probe_count{};
+  std::size_t maximum_sparse_target_closure_count{};
   std::size_t maximum_expected_group_child_root_reference_count{};
   std::size_t maximum_expected_group_coverage_delta_point_reference_count{};
   std::uint64_t maximum_query_replay_token{};
   ExactDirectSparsePositiveFacetProbeBudget target_probe{};
+  ExactDirectSparseFacetDescentClosureBudget target_closure{};
+  ExactDirectSparseFacetDescentClosureConfig target_closure_config{};
+  spatial::LbvhTraversalOrder target_closure_traversal_order{
+      spatial::LbvhTraversalOrder::near_first};
 
   friend bool operator==(
       const ExactDirectMorseResidentAllOrdersVerticalBridgeBudget&,
@@ -64,12 +73,15 @@ struct ExactDirectMorseResidentAllOrdersVerticalBridgeRequirements {
   std::size_t resident_batch_count{};
   std::size_t resident_k2_batch_count{};
   std::size_t resident_higher_batch_count{};
+  std::size_t resident_higher_direct_saddle_reference_count{};
   std::size_t prepared_higher_group_count{};
+  std::size_t prepared_higher_direct_saddle_group_binding_count{};
   std::size_t persistent_source_root_witness_count_before{};
   std::size_t persistent_source_root_witness_count_after{};
   std::size_t prior_root_witness_probe_count{};
   std::size_t source_facet_resolution_scan_count{};
   std::size_t projected_target_facet_probe_count{};
+  std::size_t sparse_target_closure_count{};
   std::size_t expected_group_child_root_reference_count{};
   std::size_t expected_group_coverage_delta_point_reference_count{};
 
@@ -90,8 +102,11 @@ struct ExactDirectMorseResidentAllOrdersVerticalBridgeStamp {
   std::size_t resident_epoch{};
   std::size_t committed_k2_batch_count{};
   std::size_t committed_k2_group_count{};
+  std::size_t committed_k2_direct_saddle_group_binding_count{};
+  std::size_t committed_k2_direct_birth_k1_binding_count{};
   std::size_t committed_higher_batch_count{};
   std::size_t committed_higher_group_count{};
+  std::size_t committed_higher_direct_saddle_group_binding_count{};
   std::size_t persistent_source_root_witness_count{};
   std::uint64_t next_query_replay_token{};
   contract::CanonicalId canonical_cloud_digest{};
@@ -136,6 +151,7 @@ struct ExactDirectMorseResidentAllOrdersVerticalGroupImage {
   std::size_t prior_root_witness_probe_count{};
   std::size_t nonroot_source_facet_resolution_count{};
   std::size_t projected_target_facet_probe_count{};
+  std::size_t sparse_target_closure_count{};
   ExactFrozenIncidencePriorRootId resident_resultant_source_root_id{};
   ExactFrozenIncidencePriorRootId resolved_target_root_id{};
   ExactDirectSparseFacetKey canonical_target_facet_key{};
@@ -143,6 +159,7 @@ struct ExactDirectMorseResidentAllOrdersVerticalGroupImage {
   bool every_prior_source_root_witness_present_and_live_reprobed{false};
   bool every_latent_or_equal_source_key_projected_to_all_deletions{false};
   bool every_target_deletion_live_positive_and_rooted{false};
+  bool every_locator_miss_resolved_by_certified_sparse_target_closure{false};
   bool one_live_target_root_for_complete_group{false};
   bool resultant_source_root_bound_after_resident_commit{false};
 
@@ -163,14 +180,28 @@ struct ExactDirectMorseResidentAllOrdersVerticalBatchRecord {
   exact::ExactLevel squared_level{};
   std::size_t source_order{};
   std::size_t target_order{};
+  std::size_t frozen_hyperedge_count{};
+  std::size_t frozen_token_reference_count{};
+  std::size_t frozen_quotient_group_count{};
+  std::size_t frozen_direct_saddle_hyperedge_count{};
+  std::size_t frozen_residual_hyperedge_count{};
   std::size_t prior_root_witness_probe_count{};
   std::size_t source_facet_resolution_scan_count{};
   std::size_t projected_target_facet_probe_count{};
+  std::size_t sparse_target_closure_count{};
   std::vector<ExactDirectMorseResidentAllOrdersVerticalGroupImage>
       group_images;
+  std::vector<ExactDirectMorseResidentDirectSaddleGroupBinding>
+      direct_saddle_group_bindings;
+  contract::CanonicalId o4_membership_digest{};
   bool exact_product_order_target_batch_already_committed{false};
   bool pre_batch_locator_snapshot_immutable_during_all_probes{false};
   bool every_higher_group_has_one_inductive_target_image{false};
+  bool every_direct_saddle_bound_exactly_once{false};
+  bool bindings_replayed_against_frozen_hyperedge_quotient{false};
+  bool all_residual_hyperedges_consumed_in_same_quotient{false};
+  bool binding_group_images_crosschecked{false};
+  bool o4_membership_digest_canonical{false};
   bool actual_resident_group_suffix_compared_field_by_field{false};
   bool resident_batch_committed{false};
   bool post_resident_commit_publication_allocation_free{false};
@@ -178,6 +209,8 @@ struct ExactDirectMorseResidentAllOrdersVerticalBatchRecord {
   bool all_naturality_squares_replayed{false};
   bool vertical_maps_complete{false};
   bool global_morse_obligation_replayed{false};
+  bool full_pi0_membership_claimed{false};
+  bool m1_replayed{false};
   bool global_facet_coface_or_gamma_catalog_materialized{false};
   bool ordinary_or_higher_order_delaunay_materialized{false};
   bool pair_matrix_materialized{false};
@@ -189,6 +222,15 @@ struct ExactDirectMorseResidentAllOrdersVerticalBatchRecord {
       const ExactDirectMorseResidentAllOrdersVerticalBatchRecord&,
       const ExactDirectMorseResidentAllOrdersVerticalBatchRecord&) = default;
 };
+
+// Allocation-free canonical digest of the conditional event-to-quotient O.4
+// slice retained for one supplied resident batch.  It is an integrity digest
+// of a record owned by the live bridge, not a standalone source authority and
+// not a certificate of O.4 adequacy or completeness, O.7, full_pi0 or M.1.
+// A zero digest denotes an encoding failure and is never certifiable.
+[[nodiscard]] contract::CanonicalId
+canonical_exact_direct_morse_resident_higher_o4_membership_digest(
+    const ExactDirectMorseResidentAllOrdersVerticalBatchRecord&) noexcept;
 
 struct ExactDirectMorseResidentAllOrdersVerticalFinalSeal {
   std::uint32_t schema_version{
@@ -203,6 +245,7 @@ struct ExactDirectMorseResidentAllOrdersVerticalFinalSeal {
   std::size_t sealed_nonroot_source_facet_resolution_count{};
   std::size_t sealed_expected_projected_target_facet_probe_count{};
   std::size_t sealed_projected_target_facet_probe_count{};
+  std::size_t sealed_sparse_target_closure_count{};
   std::size_t sealed_persistent_source_root_witness_count{};
   std::size_t sealed_final_root_witness_probe_count{};
   std::size_t sealed_terminal_locator_union_count{};
@@ -303,6 +346,7 @@ enum class ExactDirectMorseResidentAllOrdersVerticalSealDecision
   no_outstanding_prepared_ticket,
   no_plan_batch_replay_mismatch,
   no_group_or_deletion_coverage_mismatch,
+  no_adjacent_source_order_component_coverage,
   no_terminal_target_witness_reprobe_rejected,
   no_owned_k1_terminal_target_history_rejected,
   complete_certified_final_vertical_seal,
@@ -374,6 +418,7 @@ struct ExactDirectMorseResidentAllOrdersVerticalCommitResult {
   std::size_t committed_resident_batch_cursor{};
   std::size_t committed_higher_batch_count{};
   std::size_t committed_higher_group_count{};
+  std::size_t committed_higher_direct_saddle_group_binding_count{};
   std::size_t persistent_source_root_witness_count{};
   bool ticket_consumed{false};
   bool outer_vertical_state_mutated{false};

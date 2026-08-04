@@ -485,6 +485,20 @@ class ExactDirectMorseUnifiedResidentSession {
   [[nodiscard]] const std::vector<ExactDirectMorseUnifiedResidentGroupRecord>&
   group_records() const noexcept;
 
+  // Builds one transient demand-driven target closure against the exact live
+  // pre-batch locator and the canonical cloud/LBVH already bound to this
+  // session.  No closure node, edge or binding is retained by the session.
+  // An unready session returns the default not-certified result.
+  [[nodiscard]] ExactDirectSparseFacetDescentClosureResult
+  build_resident_sparse_facet_descent_closure(
+      std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+      const exact::ExactLevel& closed_batch_squared_level,
+      const ExactDirectSparseFacetWitness& locator_query_witness,
+      const ExactDirectSparseFacetDescentClosureBudget& budget,
+      const ExactDirectSparseFacetDescentClosureConfig& config = {},
+      spatial::LbvhTraversalOrder traversal_order =
+          spatial::LbvhTraversalOrder::near_first) const;
+
   [[nodiscard]] ExactDirectMorseUnifiedResidentPreparationResult
   prepare_next();
   [[nodiscard]] ExactDirectMorseUnifiedResidentCommitResult commit(
