@@ -1040,6 +1040,11 @@ void test_host_fake_is_positive_only_stream_proposal() {
               audit.certified_positive_count &&
           exact_higher_support_product_forced_false_positive_count() > 0U &&
           audit.terminal_support_geometry_task_count > 0U &&
+          audit.support_size_3_terminal_geometry_task_count > 0U &&
+          audit.support_size_4_terminal_geometry_task_count > 0U &&
+          audit.support_size_3_terminal_geometry_task_count +
+                  audit.support_size_4_terminal_geometry_task_count ==
+              audit.terminal_support_geometry_task_count &&
           audit.terminal_geometry_decision_count ==
               audit.terminal_support_geometry_task_count &&
           audit.terminal_geometry_host_fake_decision_count ==

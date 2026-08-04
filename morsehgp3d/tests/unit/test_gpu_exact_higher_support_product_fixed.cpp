@@ -6,6 +6,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cmath>
@@ -164,6 +165,34 @@ void check_terminal_geometry_parity(
         !narrow512.has_value(),
         label + " fails closed outside the int512 category envelope");
   }
+}
+
+template <std::size_t Size>
+void check_terminal_geometry_fixed_width_permutations(
+    const std::array<ExactDyadicAabb3, Size>& boxes,
+    ExactHigherSupportTerminalGeometryDecision expected,
+    const std::string& label) {
+  std::array<std::size_t, Size> permutation{};
+  for (std::size_t index = 0U; index < Size; ++index) {
+    permutation[index] = index;
+  }
+  std::size_t permutation_index = 0U;
+  do {
+    std::array<ExactDyadicAabb3, Size> permuted{};
+    for (std::size_t index = 0U; index < Size; ++index) {
+      permuted[index] = boxes[permutation[index]];
+    }
+    const std::string permutation_label =
+        label + " permutation " + std::to_string(permutation_index);
+    check(
+        exact_higher_support_terminal_geometry_decision(permuted) ==
+            expected,
+        permutation_label + " preserves the CPU category");
+    check_terminal_geometry_parity(
+        permuted, permutation_label + " preserves every fixed-width route");
+    ++permutation_index;
+  } while (std::next_permutation(
+      permutation.begin(), permutation.end()));
 }
 
 template <std::size_t Size>
@@ -617,6 +646,7 @@ void test_named_triangle_and_tetrahedron_fixtures() {
 }
 
 void test_terminal_geometry_fixed_width_fixtures() {
+  using Decision = ExactHigherSupportTerminalGeometryDecision;
   const std::array<ExactDyadicAabb3, 3> acute{
       point_box(0.0, 0.0),
       point_box(4.0, 0.0),
@@ -633,10 +663,16 @@ void test_terminal_geometry_fixed_width_fixtures() {
       point_box(0.0, 0.0),
       point_box(1.0, 0.0),
       point_box(2.0, 0.0)};
-  check_terminal_geometry_parity(acute, "acute triangle category");
-  check_terminal_geometry_parity(right, "right triangle category");
-  check_terminal_geometry_parity(obtuse, "obtuse triangle category");
-  check_terminal_geometry_parity(collinear, "dependent triangle category");
+  check_terminal_geometry_fixed_width_permutations(
+      acute, Decision::minimal, "acute triangle category");
+  check_terminal_geometry_fixed_width_permutations(
+      right, Decision::boundary_reduced, "right triangle category");
+  check_terminal_geometry_fixed_width_permutations(
+      obtuse, Decision::exterior_circumcenter,
+      "obtuse triangle category");
+  check_terminal_geometry_fixed_width_permutations(
+      collinear, Decision::affinely_dependent,
+      "dependent triangle category");
   std::array<ExactDyadicAabb3, 3> signed_zero = right;
   signed_zero[0].lower_binary64_bits[2] = std::bit_cast<std::uint64_t>(-0.0);
   check_terminal_geometry_parity(
@@ -667,12 +703,20 @@ void test_terminal_geometry_fixed_width_fixtures() {
       point_box(4.0, 0.0, 0.0),
       point_box(1.0, 1.0, 0.0),
       point_box(3.0, -1.0, 2.0)};
-  check_terminal_geometry_parity(regular, "regular tetrahedron category");
-  check_terminal_geometry_parity(boundary, "boundary tetrahedron category");
-  check_terminal_geometry_parity(exterior, "exterior tetrahedron category");
-  check_terminal_geometry_parity(dependent, "dependent tetrahedron category");
-  check_terminal_geometry_parity(
+  check_terminal_geometry_fixed_width_permutations(
+      regular, Decision::minimal, "regular tetrahedron category");
+  check_terminal_geometry_fixed_width_permutations(
+      boundary, Decision::boundary_reduced,
+      "boundary tetrahedron category");
+  check_terminal_geometry_fixed_width_permutations(
+      exterior, Decision::exterior_circumcenter,
+      "exterior tetrahedron category");
+  check_terminal_geometry_fixed_width_permutations(
+      dependent, Decision::affinely_dependent,
+      "dependent tetrahedron category");
+  check_terminal_geometry_fixed_width_permutations(
       negative_and_zero,
+      Decision::exterior_circumcenter,
       "negative-before-zero tetrahedron category");
 
   std::array<ExactDyadicAabb3, 3> nonsingleton = acute;

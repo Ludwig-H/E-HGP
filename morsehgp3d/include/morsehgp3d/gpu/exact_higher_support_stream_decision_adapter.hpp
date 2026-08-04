@@ -26,6 +26,8 @@ struct ExactHigherSupportProductCudaPositiveDecisionAdapterAudit {
   std::size_t support_prune_task_count{};
   std::size_t query_strict_interior_task_count{};
   std::size_t terminal_support_geometry_task_count{};
+  std::size_t support_size_3_terminal_geometry_task_count{};
+  std::size_t support_size_4_terminal_geometry_task_count{};
   std::size_t prefetch_call_count{};
   std::size_t support_frontier_prefetch_call_count{};
   std::size_t query_plan_prefetch_call_count{};
@@ -571,6 +573,11 @@ class ExactHigherSupportProductCudaPositiveDecisionAdapter final {
           case ExactHigherSupportProductCudaTaskKind::
               terminal_support_geometry:
             ++audit_.terminal_support_geometry_task_count;
+            if (task.product.support_size == 3U) {
+              ++audit_.support_size_3_terminal_geometry_task_count;
+            } else if (task.product.support_size == 4U) {
+              ++audit_.support_size_4_terminal_geometry_task_count;
+            }
             break;
         }
       }
