@@ -369,6 +369,42 @@ correction séparés. Le compagnon conserve `artifact_role=benchmark_only`,
 `phase5-k1-boruvka-exact-search-work-profile-<SHA>.json` qu'après la
 certification ciblée `TERMINATED` de la même génération.
 
+La géométrie terminale native des supports trois et quatre possède une route
+courte et exclusive de Phase 15 :
+
+```bash
+GCP_ZONE=europe-west4-ai1a \
+GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
+./gcp-migration/run_phase3_qualification.sh \
+  --yes \
+  --phase15-exact-higher-support-terminal-geometry-cuda \
+  --result-dir /tmp/morsehgp3d-phase15-terminal-geometry
+```
+
+Cette route conserve les gardes courtes : `maxRunDuration=3600` secondes,
+arrêt invité à 45 minutes et clé OS Login bornée à 70 minutes. Le worker
+construit uniquement la cible terminale en Release puis en audit, extrait les
+ressources `ptxas` des trois kernels de largeur fixe, exécute directement le
+runner de 21 tâches, vérifie un cubin exclusivement `sm_120` sans PTX et répète
+le runner sous memcheck. Le schéma
+`morsehgp3d.phase15.exact_higher_support_terminal_geometry_cuda_g4.v6` exige
+les douze tâches historiques et neuf tâches terminales, réparties en quatre
+triangles et cinq tétraèdres. Chacune des quatre catégories terminales doit
+être strictement présente dans chaque arité; les trois largeurs, le repli
+rationnel exact, la parité avec l'autorité CPU et la répétabilité du lot sont
+obligatoires.
+
+Le worker ne publie qu'un compagnon provisoire. Après l'arrêt ciblé,
+l'orchestrateur relit `TERMINATED`, la génération `lastStartTimestamp`, le
+projet et le couple zone/instance autorisés; il réécrit l'environnement et le
+compagnon, recalcule leur provenance, puis relance le validateur v6 avant le
+premier lien dur final. Une divergence de cycle de vie, d'arbre Git, de digest
+ou de preuve embarquée interdit la publication. Le résultat final s'appelle
+`phase15-exact-higher-support-terminal-geometry-cuda-<SHA>.json`. Il qualifie
+seulement la géométrie terminale bornée : le classifieur terminal complet, le
+catalogue, la hiérarchie, le SLO 50 k, les campagnes 10 M/30 M et tout statut
+public restent hors de son périmètre.
+
 Pour la cible de capacité explicitement autorisée :
 
 ```bash
