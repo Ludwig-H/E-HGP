@@ -2052,7 +2052,9 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
-  PRIVATE morsehgp3d::direct_morse_normalized_h0_product_session
+  PRIVATE
+    morsehgp3d::direct_morse_normalized_h0_product_session
+    morsehgp3d::direct_morse_resident_event_crosswalk_journal
 )
 if(MSVC)
   target_compile_options(

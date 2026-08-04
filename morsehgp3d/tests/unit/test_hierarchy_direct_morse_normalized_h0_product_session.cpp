@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/direct_morse_normalized_h0_product_session.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_resident_event_crosswalk_journal.hpp"
 
 #include <algorithm>
 #include <array>
@@ -71,6 +72,10 @@ void check_seal_tamper_rejected(
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y) {
   return CertifiedPoint3::from_binary64(x, y, 0.0);
+}
+
+[[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
+  return CertifiedPoint3::from_binary64(x, y, z);
 }
 
 [[nodiscard]] ExactPairSupportStreamBudget pair_budget() {
@@ -241,6 +246,52 @@ gateway_identity_budget() {
   return budget;
 }
 
+[[nodiscard]] ExactDirectMorseForestBudget forest_budget() {
+  constexpr std::size_t capacity = 1048576U;
+  ExactDirectMorseForestBudget budget;
+  budget.maximum_source_role_scan_count = capacity;
+  budget.maximum_source_batch_scan_count = capacity;
+  budget.maximum_source_family_scan_count = capacity;
+  budget.maximum_source_arm_seed_scan_count = capacity;
+  budget.maximum_birth_record_count = capacity;
+  budget.maximum_arm_root_binding_count = capacity;
+  budget.maximum_saddle_record_count = capacity;
+  budget.maximum_atomic_group_count = capacity;
+  budget.maximum_child_reference_count = capacity;
+  budget.maximum_batch_record_count = capacity;
+  budget.maximum_node_count = capacity;
+  budget.maximum_final_root_count = capacity;
+  budget.maximum_batch_distinct_arm_count = 1024U;
+  budget.maximum_logical_output_entry_count = capacity;
+  budget.maximum_aggregate_closure_node_count = capacity;
+  budget.maximum_aggregate_closure_step_call_count = capacity;
+  budget.locator_budget = resident_budget().locator;
+  budget.closure_budget = closure_budget();
+  budget.quotient_budget = {1024U, 1024U, 1024U, 1024U, 65536U};
+  return budget;
+}
+
+[[nodiscard]] ExactDirectMorseForestConfig forest_config() {
+  ExactDirectMorseForestConfig config;
+  config.locator_config.external_authority_id = 97001U;
+  return config;
+}
+
+[[nodiscard]] ExactDirectMorseEventRankTowerLinkBudget link_budget(
+    const ExactDirectMorseForestJournalResult& forest) {
+  return {
+      forest.implicit_order_one_prefix_count + forest.birth_records.size(),
+      forest.saddle_records.size(),
+      forest.arm_root_bindings.size(),
+      forest.atomic_groups.size(),
+      forest.batches.size(),
+      forest.implicit_order_one_prefix_count + forest.nodes.size(),
+      forest.birth_records.size(),
+      forest.arm_root_bindings.size(),
+      forest.birth_records.size() + forest.arm_root_bindings.size(),
+  };
+}
+
 [[nodiscard]] ExactDirectAtLeast20StreamViewBudget view_budget() {
   return {
       1024U,
@@ -317,25 +368,25 @@ struct Fixture {
   K1ExactBoruvkaResult boruvka;
 };
 
-[[nodiscard]] Fixture fixture() {
-  const std::array points{
-      point(-2.0, -1.0),
-      point(-2.0, 1.0),
-      point(0.0, 0.0),
-      point(3.0, 2.0),
-      point(4.0, -1.0),
-  };
+[[nodiscard]] Fixture fixture_from_points(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order) {
   auto cloud = CanonicalPointCloud::rejecting_duplicates(
-      std::span<const CertifiedPoint3>{points});
+      points);
   auto index = MortonLbvhIndex::build(cloud);
   const ExactDirectSupportTerminalBudget terminal{
       pair_budget(), higher_budget()};
   const auto pair = build_exact_pair_support_stream(
-      index, cloud, 2U, terminal.pair);
+      index, cloud, requested_maximum_order, terminal.pair);
   const auto higher = build_exact_higher_support_stream(
-      index, cloud, 2U, terminal.higher);
+      index, cloud, requested_maximum_order, terminal.higher);
   auto facade = build_exact_direct_support_terminal_facade(
-      index, cloud, 2U, terminal, pair, higher);
+      index,
+      cloud,
+      requested_maximum_order,
+      terminal,
+      pair,
+      higher);
   auto events = build_exact_direct_morse_event_journal(cloud, facade);
   auto arm = arm_budget();
   auto arms = build_exact_direct_saddle_arm_seed_journal(
@@ -408,6 +459,41 @@ struct Fixture {
       std::move(authority),
       std::move(boruvka),
   };
+}
+
+[[nodiscard]] Fixture fixture() {
+  const std::array points{
+      point(-2.0, -1.0),
+      point(-2.0, 1.0),
+      point(0.0, 0.0),
+      point(3.0, 2.0),
+      point(4.0, -1.0),
+  };
+  return fixture_from_points(points, 2U);
+}
+
+[[nodiscard]] Fixture crosswalk_moment_curve_fixture(
+    std::size_t requested_maximum_order) {
+  const std::array points{
+      point(-2.0, 4.0, -8.0),
+      point(-1.0, 1.0, -1.0),
+      point(0.0, 0.0, 0.0),
+      point(1.0, 1.0, 1.0),
+      point(3.0, 9.0, 27.0),
+  };
+  return fixture_from_points(points, requested_maximum_order);
+}
+
+[[nodiscard]] Fixture crosswalk_k4_moment_curve_fixture() {
+  const std::array points{
+      point(-2.0, 4.0, -8.0),
+      point(-1.0, 1.0, -1.0),
+      point(0.0, 0.0, 0.0),
+      point(1.0, 1.0, 1.0),
+      point(2.0, 4.0, 8.0),
+      point(3.0, 9.0, 27.0),
+  };
+  return fixture_from_points(points, 4U);
 }
 
 [[nodiscard]] ExactDirectMorseUnifiedResidentInitializationResult
@@ -550,6 +636,101 @@ vertical_budget(const ExactDirectSparseUnifiedLevelPlanResult& plan) {
   };
   budget.target_closure_traversal_order = LbvhTraversalOrder::near_first;
   return budget;
+}
+
+[[nodiscard]] ExactDirectMorseResidentAllOrdersVerticalBridge
+sealed_vertical_bridge(Fixture& source) {
+  auto resident_initialization = resident(source, 98011U);
+  check(
+      resident_initialization.certified_initialized_session() &&
+          resident_initialization.session.has_value(),
+      "the crosswalk resident source initializes");
+  if (!resident_initialization.session.has_value()) {
+    return {};
+  }
+  const auto compatibility_plan = resident_initialization.session->plan();
+  auto bridge_k1 = build_exact_direct_k1_boruvka_closed_cut_session(
+      source.index,
+      source.cloud,
+      source.boruvka,
+      k1_budget(source.cloud.size()));
+  check(
+      bridge_k1.certified_ready_session(),
+      "the crosswalk K1 closed-cut source initializes");
+  if (!bridge_k1.certified_ready_session()) {
+    return {};
+  }
+  auto k2 = initialize_exact_direct_morse_resident_k2_k1_closed_cut_bridge(
+      std::move(*resident_initialization.session),
+      std::move(bridge_k1.session),
+      k2_bridge_budget(compatibility_plan));
+  check(
+      k2.certified_ready_bridge(),
+      "the crosswalk K2/K1 seam initializes");
+  if (!k2.certified_ready_bridge()) {
+    return {};
+  }
+  auto vertical =
+      initialize_exact_direct_morse_resident_all_orders_vertical_bridge(
+          std::move(k2.bridge), vertical_budget(compatibility_plan));
+  check(
+      vertical.certified_ready_bridge(),
+      "the crosswalk all-orders bridge initializes");
+  if (!vertical.certified_ready_bridge()) {
+    return {};
+  }
+  while (!vertical.bridge.resident_complete()) {
+    auto prepared = vertical.bridge.prepare_next();
+    check(
+        prepared.certified_prepared_batch() && prepared.ticket.has_value(),
+        "each crosswalk resident batch prepares");
+    if (!prepared.ticket.has_value()) {
+      break;
+    }
+    const auto committed =
+        vertical.bridge.commit(std::move(*prepared.ticket));
+    check(
+        committed.certified_committed_batch(),
+        "each crosswalk resident batch commits");
+    if (!committed.certified_committed_batch()) {
+      break;
+    }
+  }
+  const auto sealed = vertical.bridge.seal();
+  check(
+      sealed.certified_final_vertical_seal() &&
+          vertical.bridge.final_vertical_sealed(),
+      "the crosswalk consumes and seals the live normalized bridge");
+  return std::move(vertical.bridge);
+}
+
+[[nodiscard]] ExactDirectMorseResidentEventCrosswalkBudget crosswalk_budget(
+    const ExactDirectMorseForestJournalResult& forest,
+    const ExactDirectMorseEventRankTowerLinkJournalResult& links,
+    const ExactDirectMorseResidentAllOrdersVerticalBridge& bridge) {
+  std::size_t birth_binding_count = 0U;
+  std::size_t saddle_binding_count = 0U;
+  for (const auto& batch : bridge.committed_k2_batches()) {
+    birth_binding_count += batch.direct_birth_k1_bindings.size();
+    saddle_binding_count += batch.direct_saddle_group_bindings.size();
+  }
+  for (const auto& batch : bridge.committed_higher_batches()) {
+    saddle_binding_count += batch.direct_saddle_group_bindings.size();
+  }
+  return {
+      links.links.size(),
+      bridge.resident_plan().batches.size(),
+      bridge.committed_k2_batches().size(),
+      bridge.committed_higher_batches().size(),
+      birth_binding_count,
+      saddle_binding_count,
+      forest.birth_records.size(),
+      bridge.resident_plan().direct_references.size(),
+      birth_binding_count + saddle_binding_count,
+      bridge.resident_plan().source_event_projection_count,
+      links.links.size(),
+      links.links.size(),
+  };
 }
 
 [[nodiscard]] ExactDirectMorseNormalizedH0ProductInitialization
@@ -848,10 +1029,699 @@ void test_complete_atomic_product() {
       "the terminal product seal is idempotent and returns the same preallocated storage");
 }
 
+void test_resident_event_crosswalk_product_gate_precedes_link_replay() {
+  auto source = crosswalk_moment_curve_fixture(4U);
+  const auto forest = build_exact_direct_morse_forest_journal(
+      source.index,
+      source.cloud,
+      source.direct.facade,
+      source.direct.events,
+      source.direct.arm,
+      source.direct.arms,
+      forest_budget(),
+      forest_config(),
+      LbvhTraversalOrder::near_first);
+  check(
+      forest.certified_conditional_h0_candidate() &&
+          forest.point_count == 5U &&
+          forest.effective_maximum_order == 4U,
+      "the product-gate fixture owns a certified n=5, K=4 forest");
+
+  const ExactDirectMorseEventRankTowerLinkBudget invalid_link_budget{};
+  const ExactDirectMorseEventRankTowerLinkJournalResult invalid_link{};
+  const ExactDirectMorseResidentAllOrdersVerticalBridge absent_bridge{};
+  const ExactDirectMorseResidentEventCrosswalkBudget empty_budget{};
+  const auto rejected =
+      build_exact_direct_morse_resident_event_crosswalk_journal(
+          forest,
+          invalid_link_budget,
+          invalid_link,
+          absent_bridge,
+          empty_budget);
+  const auto verification =
+      verify_exact_direct_morse_resident_event_crosswalk_journal(
+          forest,
+          invalid_link_budget,
+          invalid_link,
+          absent_bridge,
+          empty_budget,
+          rejected);
+  check(
+      rejected.decision ==
+              ExactDirectMorseResidentEventCrosswalkDecision::
+                  no_crosswalk_product_n_at_least_k_plus_two_rejected &&
+          rejected.certified_atomic_failure(),
+      "n<K+2 rejects canonically before consulting an invalid link journal");
+  check(
+      verification.result_certified &&
+          verification.expected_journal_freshly_rebuilt &&
+          verification.observed_structure_certified &&
+          verification.observed_recursively_equal &&
+          !verification.source_link_freshly_replayed_relative_to_forest &&
+          !verification.live_bridge_final_seal_verified,
+      "fresh verification certifies the early product-gate failure envelope while retaining later-source diagnostics");
+}
+
+void test_resident_event_crosswalk_triple_join_and_fail_closed_caps() {
+  auto source = crosswalk_k4_moment_curve_fixture();
+  const auto forest_cap = forest_budget();
+  const auto forest_configuration = forest_config();
+  const auto forest = build_exact_direct_morse_forest_journal(
+      source.index,
+      source.cloud,
+      source.direct.facade,
+      source.direct.events,
+      source.direct.arm,
+      source.direct.arms,
+      forest_cap,
+      forest_configuration,
+      LbvhTraversalOrder::near_first);
+  check(
+      forest.certified_conditional_h0_candidate(),
+      "the n=6, K=4 crosswalk forest is conditionally certified");
+  if (!forest.certified_conditional_h0_candidate()) {
+    std::cerr
+        << "crosswalk n=6/K4 source diagnostics: terminal="
+        << source.direct.facade.terminal_catalog_certified()
+        << " events=" << source.direct.events.certified_partial_refinement()
+        << " arms=" << source.direct.arms.certified_partial_refinement()
+        << " incidences="
+        << source.direct.incidences.certified_partial_refinement()
+        << " gateway=" << source.gateway.certified_partial_refinement()
+        << " plan=" << source.plan.certified_complete_candidate_source_plan()
+        << " rank=" << source.rank.certified()
+        << " incidence_authority="
+        << source.incidence_authority
+               .certified_horizontal_incidence_reduction()
+        << " forest_decision=" << static_cast<int>(forest.decision) << '\n';
+  }
+  const auto links_cap = link_budget(forest);
+  const auto links =
+      build_exact_direct_morse_event_rank_tower_link_journal(
+          forest, links_cap);
+  check(
+      links.certified_conditional_event_rank_tower_links() &&
+          !links.links.empty(),
+      "the n=6, K=4 forest exposes nonempty exact adjacent-rank links");
+  auto bridge = sealed_vertical_bridge(source);
+  check(
+      bridge.final_vertical_sealed(),
+      "the n=6, K=4 crosswalk owns a live sealed vertical capability");
+  if (!forest.certified_conditional_h0_candidate() ||
+      !links.certified_conditional_event_rank_tower_links() ||
+      !bridge.final_vertical_sealed()) {
+    return;
+  }
+
+  const auto budget = crosswalk_budget(forest, links, bridge);
+  const auto journal =
+      build_exact_direct_morse_resident_event_crosswalk_journal(
+          forest, links_cap, links, bridge, budget);
+  const auto verification =
+      verify_exact_direct_morse_resident_event_crosswalk_journal(
+          forest, links_cap, links, bridge, budget, journal);
+  if (!journal.certified_conditional_resident_event_crosswalk()) {
+    std::cerr << "crosswalk decision=" << static_cast<int>(journal.decision)
+              << " forest_births=" << forest.birth_records.size()
+              << " links=" << links.links.size()
+              << " plan_direct="
+              << bridge.resident_plan().direct_references.size()
+              << " k2_batches=" << bridge.committed_k2_batches().size()
+              << " records=" << journal.records.size() << '\n';
+    const auto stamp = bridge.current_stamp();
+    std::cerr
+        << "namespace checks: link_point="
+        << (links.point_count == forest.point_count)
+        << " link_order="
+        << (links.effective_maximum_order == forest.effective_maximum_order)
+        << " link_projection="
+        << (links.source_event_projection_count ==
+            forest.source_event_projection_count)
+        << " plan_point="
+        << (bridge.resident_plan().point_count == forest.point_count)
+        << " plan_projection="
+        << (bridge.resident_plan().source_event_projection_count ==
+            forest.source_event_projection_count)
+        << " higher_cloud="
+        << (bridge.resident_plan().source_higher_canonical_cloud_digest ==
+            forest.source_higher_canonical_cloud_digest)
+        << " pair_cloud="
+        << (bridge.resident_plan().source_pair_canonical_cloud_digest ==
+            forest.source_higher_canonical_cloud_digest)
+        << " stamp_cloud="
+        << (stamp.canonical_cloud_digest ==
+            forest.source_higher_canonical_cloud_digest)
+        << " stamp_higher_cloud="
+        << (stamp.resident_higher_canonical_cloud_digest ==
+            forest.source_higher_canonical_cloud_digest)
+        << " pair_stamp_cloud="
+        << (bridge.resident_plan().source_pair_canonical_cloud_digest ==
+            stamp.canonical_cloud_digest)
+        << " cursor="
+        << (stamp.resident_batch_cursor ==
+            bridge.resident_plan().batches.size())
+        << '\n';
+  }
+  check(
+      journal.certified_conditional_resident_event_crosswalk() &&
+          verification.result_certified &&
+          journal.every_resident_direct_birth_replayed_against_exact_forest_birth &&
+          journal.every_resident_direct_birth_has_one_source_link &&
+          journal.every_resident_direct_saddle_below_k_has_one_source_link &&
+          journal.counters.forest_birth_record_scan_count ==
+              forest.birth_records.size() &&
+          journal.counters.resident_plan_direct_reference_scan_count ==
+              bridge.resident_plan().direct_references.size(),
+      "the bounded n=6, K=4 crosswalk certifies all three source/upper/lower joins");
+  check(
+      journal.counters.rank_two_k1_target_count > 0U &&
+          journal.counters.higher_rank_o4_target_count > 0U,
+      "the n=6, K=4 crosswalk exercises both typed K1 and higher-rank O4 target branches");
+
+  std::size_t k2_to_k1_target_count = 0U;
+  std::size_t k3_to_k2_target_count = 0U;
+  std::size_t k4_to_k3_target_count = 0U;
+  bool every_target_matches_live_bridge = !journal.records.empty();
+  const auto& resident_plan = bridge.resident_plan();
+  const auto& committed_k2_batches = bridge.committed_k2_batches();
+  const auto& committed_higher_batches = bridge.committed_higher_batches();
+  for (const auto& record : journal.records) {
+    if (record.k1_birth_target.has_value()) {
+      ++k2_to_k1_target_count;
+      const auto& target = *record.k1_birth_target;
+      if (target.k2_batch_record_index >= committed_k2_batches.size()) {
+        every_target_matches_live_bridge = false;
+        continue;
+      }
+      const auto& batch =
+          committed_k2_batches[target.k2_batch_record_index];
+      if (target.binding_index >= batch.direct_birth_k1_bindings.size() ||
+          target.source_batch_index >= resident_plan.batches.size() ||
+          target.source_direct_reference_index >=
+              resident_plan.direct_references.size()) {
+        every_target_matches_live_bridge = false;
+        continue;
+      }
+      const auto& binding =
+          batch.direct_birth_k1_bindings[target.binding_index];
+      const auto& plan_batch =
+          resident_plan.batches[target.source_batch_index];
+      const auto& direct = resident_plan.direct_references[
+          target.source_direct_reference_index];
+      every_target_matches_live_bridge =
+          every_target_matches_live_bridge && record.source_order == 2U &&
+          record.target_order == 1U && batch.order == record.source_order &&
+          batch.squared_level == record.squared_level &&
+          batch.source_batch_index == target.source_batch_index &&
+          plan_batch.batch_index == target.source_batch_index &&
+          plan_batch.order == record.source_order &&
+          plan_batch.squared_level == record.squared_level &&
+          target.source_direct_reference_index >=
+              plan_batch.direct_reference_offset &&
+          target.source_direct_reference_index -
+                  plan_batch.direct_reference_offset <
+              plan_batch.direct_reference_count &&
+          binding.binding_index == target.binding_index &&
+          binding.source_direct_reference_index ==
+              target.source_direct_reference_index &&
+          binding.source_role_record_index ==
+              target.source_role_record_index &&
+          binding.source_event_projection_index ==
+              record.source_event_projection_index &&
+          binding.source_facet_token_index ==
+              target.source_facet_token_index &&
+          binding.closed_k1_root_node_id == target.closed_k1_node.value &&
+          direct.direct_reference_index ==
+              target.source_direct_reference_index &&
+          direct.role == ExactDirectMorseH0Role::birth &&
+          direct.source_role_record_index ==
+              target.source_role_record_index &&
+          direct.source_event_projection_index ==
+              record.source_event_projection_index &&
+          direct.direct_birth_facet_token_index.has_value() &&
+          *direct.direct_birth_facet_token_index ==
+              target.source_facet_token_index &&
+          record.source_bridge_batch_membership_digest ==
+              batch.o4_membership_digest &&
+          canonical_exact_direct_morse_resident_k2_o4_membership_digest(
+              batch) == batch.o4_membership_digest;
+    } else if (record.o4_saddle_target.has_value() &&
+               record.o4_saddle_target->target_batch_is_k2) {
+      ++k3_to_k2_target_count;
+      const auto& target = *record.o4_saddle_target;
+      if (target.bridge_batch_record_index >= committed_k2_batches.size()) {
+        every_target_matches_live_bridge = false;
+        continue;
+      }
+      const auto& batch =
+          committed_k2_batches[target.bridge_batch_record_index];
+      if (target.binding_index >= batch.direct_saddle_group_bindings.size() ||
+          target.group_image_index >= batch.group_images.size() ||
+          target.source_batch_index >= resident_plan.batches.size() ||
+          target.source_direct_reference_index >=
+              resident_plan.direct_references.size()) {
+        every_target_matches_live_bridge = false;
+        continue;
+      }
+      const auto& binding =
+          batch.direct_saddle_group_bindings[target.binding_index];
+      const auto& image = batch.group_images[target.group_image_index];
+      const auto& plan_batch =
+          resident_plan.batches[target.source_batch_index];
+      const auto& direct = resident_plan.direct_references[
+          target.source_direct_reference_index];
+      every_target_matches_live_bridge =
+          every_target_matches_live_bridge && record.source_order == 3U &&
+          record.target_order == 2U && batch.order == record.target_order &&
+          batch.squared_level == record.squared_level &&
+          batch.source_batch_index == target.source_batch_index &&
+          plan_batch.batch_index == target.source_batch_index &&
+          plan_batch.order == record.target_order &&
+          plan_batch.squared_level == record.squared_level &&
+          target.source_direct_reference_index >=
+              plan_batch.direct_reference_offset &&
+          target.source_direct_reference_index -
+                  plan_batch.direct_reference_offset <
+              plan_batch.direct_reference_count &&
+          binding.binding_index == target.binding_index &&
+          binding.source_direct_reference_index ==
+              target.source_direct_reference_index &&
+          binding.source_role_record_index ==
+              target.source_role_record_index &&
+          binding.source_event_projection_index ==
+              record.source_event_projection_index &&
+          binding.source_incidence_family_index ==
+              target.source_incidence_family_index &&
+          binding.source_hyperedge_index == target.source_hyperedge_index &&
+          binding.owner_group_index == target.owner_group_index &&
+          binding.group_image_index == target.group_image_index &&
+          binding.resident_resultant_root_id ==
+              target.resident_resultant_root.value &&
+          image.owner_group_index == target.owner_group_index &&
+          image.resident_resultant_root_id ==
+              target.resident_resultant_root.value &&
+          direct.direct_reference_index ==
+              target.source_direct_reference_index &&
+          direct.role == ExactDirectMorseH0Role::saddle &&
+          direct.source_role_record_index ==
+              target.source_role_record_index &&
+          direct.source_event_projection_index ==
+              record.source_event_projection_index &&
+          direct.source_incidence_family_index.has_value() &&
+          *direct.source_incidence_family_index ==
+              target.source_incidence_family_index &&
+          record.source_bridge_batch_membership_digest ==
+              batch.o4_membership_digest &&
+          canonical_exact_direct_morse_resident_k2_o4_membership_digest(
+              batch) == batch.o4_membership_digest;
+    } else if (record.o4_saddle_target.has_value()) {
+      ++k4_to_k3_target_count;
+      const auto& target = *record.o4_saddle_target;
+      if (target.bridge_batch_record_index >=
+          committed_higher_batches.size()) {
+        every_target_matches_live_bridge = false;
+        continue;
+      }
+      const auto& batch =
+          committed_higher_batches[target.bridge_batch_record_index];
+      if (target.binding_index >= batch.direct_saddle_group_bindings.size() ||
+          target.group_image_index >= batch.group_images.size() ||
+          target.source_batch_index >= resident_plan.batches.size() ||
+          target.source_direct_reference_index >=
+              resident_plan.direct_references.size()) {
+        every_target_matches_live_bridge = false;
+        continue;
+      }
+      const auto& binding =
+          batch.direct_saddle_group_bindings[target.binding_index];
+      const auto& image = batch.group_images[target.group_image_index];
+      const auto& plan_batch =
+          resident_plan.batches[target.source_batch_index];
+      const auto& direct = resident_plan.direct_references[
+          target.source_direct_reference_index];
+      every_target_matches_live_bridge =
+          every_target_matches_live_bridge &&
+          record.source_order == 4U && record.target_order == 3U &&
+          record.source_order == batch.source_order + 1U &&
+          record.target_order == batch.source_order &&
+          batch.target_order + 1U == batch.source_order &&
+          batch.squared_level == record.squared_level &&
+          batch.source_batch_index == target.source_batch_index &&
+          plan_batch.batch_index == target.source_batch_index &&
+          plan_batch.order == record.target_order &&
+          plan_batch.squared_level == record.squared_level &&
+          target.source_direct_reference_index >=
+              plan_batch.direct_reference_offset &&
+          target.source_direct_reference_index -
+                  plan_batch.direct_reference_offset <
+              plan_batch.direct_reference_count &&
+          binding.binding_index == target.binding_index &&
+          binding.source_direct_reference_index ==
+              target.source_direct_reference_index &&
+          binding.source_role_record_index ==
+              target.source_role_record_index &&
+          binding.source_event_projection_index ==
+              record.source_event_projection_index &&
+          binding.source_incidence_family_index ==
+              target.source_incidence_family_index &&
+          binding.source_hyperedge_index == target.source_hyperedge_index &&
+          binding.owner_group_index == target.owner_group_index &&
+          binding.group_image_index == target.group_image_index &&
+          binding.resident_resultant_root_id ==
+              target.resident_resultant_root.value &&
+          image.owner_group_index == target.owner_group_index &&
+          image.resident_resultant_source_root_id ==
+              target.resident_resultant_root.value &&
+          direct.direct_reference_index ==
+              target.source_direct_reference_index &&
+          direct.role == ExactDirectMorseH0Role::saddle &&
+          direct.source_role_record_index ==
+              target.source_role_record_index &&
+          direct.source_event_projection_index ==
+              record.source_event_projection_index &&
+          direct.source_incidence_family_index.has_value() &&
+          *direct.source_incidence_family_index ==
+              target.source_incidence_family_index &&
+          record.source_bridge_batch_membership_digest ==
+              batch.o4_membership_digest &&
+          canonical_exact_direct_morse_resident_higher_o4_membership_digest(
+              batch) == batch.o4_membership_digest;
+    } else {
+      every_target_matches_live_bridge = false;
+    }
+  }
+  check(
+      k2_to_k1_target_count > 0U && k3_to_k2_target_count > 0U &&
+          k4_to_k3_target_count > 0U,
+      "the n=6, K=4 crosswalk exercises K2-to-K1, K3-to-K2 and higher-saddle K4-to-K3 targets");
+  check(
+      every_target_matches_live_bridge,
+      "an independent field-by-field oracle matches every crosswalk target to the live K1/K2/higher batch, binding, direct reference, group image, root and membership digest");
+
+  bool every_record_owns_the_exact_upper_birth = !journal.records.empty();
+  for (const auto& record : journal.records) {
+    const auto forest_birth = std::find_if(
+        forest.birth_records.begin(),
+        forest.birth_records.end(),
+        [&record](const auto& birth) {
+          return birth.birth_record_index == record.source_birth_record_index;
+        });
+    if (forest_birth == forest.birth_records.end() ||
+        record.source_upper_birth_direct_reference_index >=
+            bridge.resident_plan().direct_references.size() ||
+        record.source_upper_birth_facet_token_index >=
+            bridge.resident_plan().facet_tokens.size()) {
+      every_record_owns_the_exact_upper_birth = false;
+      continue;
+    }
+    const auto& direct = bridge.resident_plan().direct_references[
+        record.source_upper_birth_direct_reference_index];
+    const auto& token = bridge.resident_plan().facet_tokens[
+        record.source_upper_birth_facet_token_index];
+    every_record_owns_the_exact_upper_birth =
+        every_record_owns_the_exact_upper_birth &&
+        direct.role == ExactDirectMorseH0Role::birth &&
+        direct.source_role_record_index ==
+            record.source_upper_birth_role_record_index &&
+        direct.source_event_projection_index ==
+            record.source_event_projection_index &&
+        direct.direct_birth_facet_token_index.has_value() &&
+        *direct.direct_birth_facet_token_index ==
+            record.source_upper_birth_facet_token_index &&
+        token.facet_token_index ==
+            record.source_upper_birth_facet_token_index &&
+        forest_birth->source_event_projection_index ==
+            record.source_event_projection_index &&
+        forest_birth->order == record.source_order &&
+        forest_birth->facet_key == token.facet_key;
+  }
+  check(
+      every_record_owns_the_exact_upper_birth,
+      "every crosswalk record exposes the exact forest birth and resident upper birth provenance");
+
+  std::size_t top_order_saddle_count = 0U;
+  for (const auto& batch : bridge.resident_plan().batches) {
+    if (batch.order != forest.effective_maximum_order) {
+      continue;
+    }
+    for (std::size_t local = 0U; local < batch.direct_reference_count;
+         ++local) {
+      const auto& direct = bridge.resident_plan().direct_references[
+          batch.direct_reference_offset + local];
+      top_order_saddle_count +=
+          direct.role == ExactDirectMorseH0Role::saddle ? 1U : 0U;
+    }
+  }
+  check(
+      top_order_saddle_count != 0U &&
+          journal.certified_conditional_resident_event_crosswalk(),
+      "top-order saddles remain out of the below-K source-link obligation");
+
+  auto oversized_observed = journal;
+  oversized_observed.records.push_back({});
+  const auto oversized_verification =
+      verify_exact_direct_morse_resident_event_crosswalk_journal(
+          forest,
+          links_cap,
+          links,
+          bridge,
+          budget,
+          oversized_observed);
+  check(
+      !oversized_verification.observed_storage_within_budget &&
+          !oversized_verification.observed_structure_certified &&
+          !oversized_verification.observed_recursively_equal &&
+          !oversized_verification.result_certified,
+      "an observed arena above the trusted record cap is rejected before structural digest replay or recursive comparison");
+
+  if (!journal.records.empty()) {
+    auto giant_exact_level_observed = journal;
+    morsehgp3d::exact::BigInt giant_numerator{1};
+    giant_numerator <<= 1048576U;
+    giant_exact_level_observed.records[0U].squared_level =
+        morsehgp3d::exact::ExactLevel{std::move(giant_numerator)};
+    const auto giant_exact_level_verification =
+        verify_exact_direct_morse_resident_event_crosswalk_journal(
+            forest,
+            links_cap,
+            links,
+            bridge,
+            budget,
+            giant_exact_level_observed);
+    check(
+        giant_exact_level_verification.observed_storage_within_budget &&
+            giant_exact_level_verification.expected_journal_freshly_rebuilt &&
+            !giant_exact_level_verification.observed_recursively_equal &&
+            !giant_exact_level_verification.observed_structure_certified &&
+            !giant_exact_level_verification.result_certified,
+        "an in-cap observed record with a giant exact level is rejected by equality before observed structural digest replay");
+  }
+
+  auto relaxed_budget = budget;
+  ++relaxed_budget.maximum_link_scan_count;
+  const auto coherently_rehashed_relaxed_journal =
+      build_exact_direct_morse_resident_event_crosswalk_journal(
+          forest, links_cap, links, bridge, relaxed_budget);
+  const auto relaxed_under_original_authority =
+      verify_exact_direct_morse_resident_event_crosswalk_journal(
+          forest,
+          links_cap,
+          links,
+          bridge,
+          budget,
+          coherently_rehashed_relaxed_journal);
+  check(
+      coherently_rehashed_relaxed_journal
+              .certified_conditional_resident_event_crosswalk() &&
+          coherently_rehashed_relaxed_journal.crosswalk_digest !=
+              journal.crosswalk_digest &&
+          relaxed_under_original_authority.observed_storage_within_budget &&
+          !relaxed_under_original_authority.observed_recursively_equal &&
+          !relaxed_under_original_authority.observed_structure_certified &&
+          !relaxed_under_original_authority.result_certified,
+      "a coherently rehashed standalone result under a different budget remains non-authoritative and fresh replay under the original budget rejects it");
+
+  check(
+      budget.maximum_forest_birth_record_scan_count != 0U &&
+          budget.maximum_resident_plan_direct_reference_scan_count != 0U,
+      "the n=6, K=4 fixture exercises both newly enforced scan caps");
+  if (budget.maximum_forest_birth_record_scan_count != 0U) {
+    auto too_small = budget;
+    --too_small.maximum_forest_birth_record_scan_count;
+    const auto rejected =
+        build_exact_direct_morse_resident_event_crosswalk_journal(
+            forest, links_cap, links, bridge, too_small);
+    check(
+        rejected.decision ==
+                ExactDirectMorseResidentEventCrosswalkDecision::
+                    no_crosswalk_budget_exhausted &&
+            rejected.certified_atomic_failure(),
+        "forest birth scan cap minus one fails atomically before publication");
+    const auto rejected_verification =
+        verify_exact_direct_morse_resident_event_crosswalk_journal(
+            forest,
+            links_cap,
+            links,
+            bridge,
+            too_small,
+            rejected);
+    check(
+        rejected_verification.result_certified &&
+            rejected_verification.expected_journal_freshly_rebuilt &&
+            rejected_verification.observed_structure_certified &&
+            rejected_verification.observed_recursively_equal,
+        "fresh verification certifies the reconstructed atomic budget failure");
+
+    auto leaked_flag = rejected;
+    leaked_flag.every_resident_direct_birth_has_one_source_link = true;
+    check(
+        !leaked_flag.certified_atomic_failure(),
+        "atomic failure certification rejects a leaked success flag");
+    auto leaked_stamp = rejected;
+    leaked_stamp.source_bridge_stamp.bridge_session_instance_id = 1U;
+    check(
+        !leaked_stamp.certified_atomic_failure(),
+        "atomic failure certification rejects a leaked bridge stamp");
+    auto leaked_global_claim = rejected;
+    leaked_global_claim.gamma_cells_or_global_cofaces_materialized = true;
+    check(
+        !leaked_global_claim.certified_atomic_failure(),
+        "atomic failure certification rejects a leaked global structure claim");
+    auto mutated_schema = rejected;
+    ++mutated_schema.schema_version;
+    check(
+        !mutated_schema.certified_atomic_failure(),
+        "atomic failure certification rejects a mutated crosswalk schema version");
+    auto mutated_scope = rejected;
+    mutated_scope.scope =
+        ExactDirectMorseResidentEventCrosswalkScope::unspecified;
+    check(
+        !mutated_scope.certified_atomic_failure(),
+        "atomic failure certification rejects a mutated crosswalk scope");
+    auto mutated_failure_decision = rejected;
+    mutated_failure_decision.decision =
+        ExactDirectMorseResidentEventCrosswalkDecision::
+            no_crosswalk_source_namespace_mismatch;
+    check(
+        !mutated_failure_decision.certified_atomic_failure() &&
+            !verify_exact_direct_morse_resident_event_crosswalk_journal(
+                 forest,
+                 links_cap,
+                 links,
+                 bridge,
+                 too_small,
+                 mutated_failure_decision)
+                 .result_certified,
+        "the operational failure digest and fresh replay reject a substituted failure decision");
+    auto substituted_failure_digest = rejected;
+    substituted_failure_digest.crosswalk_digest = journal.crosswalk_digest;
+    check(
+        !substituted_failure_digest.certified_atomic_failure() &&
+            !verify_exact_direct_morse_resident_event_crosswalk_journal(
+                 forest,
+                 links_cap,
+                 links,
+                 bridge,
+                 too_small,
+                 substituted_failure_digest)
+                 .result_certified,
+        "fresh verification rejects a substituted failure-envelope digest");
+    auto mutated_failure_budget = rejected;
+    ++mutated_failure_budget.requested_budget.maximum_link_scan_count;
+    check(
+        !mutated_failure_budget.certified_atomic_failure(),
+        "the operational failure digest rejects a mutated requested budget");
+    auto missing_failure_digest = rejected;
+    missing_failure_digest.crosswalk_digest = {};
+    check(
+        !missing_failure_digest.certified_atomic_failure(),
+        "an atomic failure without its operational digest remains uncertified");
+  }
+  if (budget.maximum_resident_plan_direct_reference_scan_count != 0U) {
+    auto too_small = budget;
+    --too_small.maximum_resident_plan_direct_reference_scan_count;
+    const auto rejected =
+        build_exact_direct_morse_resident_event_crosswalk_journal(
+            forest, links_cap, links, bridge, too_small);
+    check(
+        rejected.decision ==
+                ExactDirectMorseResidentEventCrosswalkDecision::
+                    no_crosswalk_budget_exhausted &&
+            rejected.certified_atomic_failure(),
+        "resident direct-reference scan cap minus one fails atomically before publication");
+  }
+
+  const auto check_certified_crosswalk_mutation_rejected =
+      [&](auto mutate, const std::string& message) {
+        auto mutation = journal;
+        mutate(mutation);
+        check(
+            !mutation.certified_conditional_resident_event_crosswalk() &&
+                !verify_exact_direct_morse_resident_event_crosswalk_journal(
+                     forest,
+                     links_cap,
+                     links,
+                     bridge,
+                     budget,
+                     mutation)
+                     .result_certified,
+            message);
+      };
+  if (!journal.records.empty()) {
+    check_certified_crosswalk_mutation_rejected(
+        [](auto& value) {
+          ++value.records[0U].source_birth_record_index;
+        },
+        "crosswalk certification and fresh replay reject a record mutation without a matching digest");
+  }
+  check_certified_crosswalk_mutation_rejected(
+      [](auto& value) {
+        value.every_resident_direct_birth_has_one_source_link = false;
+      },
+      "crosswalk certification and fresh replay reject a missing coverage fact");
+  check_certified_crosswalk_mutation_rejected(
+      [](auto& value) {
+        value.no_partial_scientific_payload_published = false;
+      },
+      "complete crosswalk certification rejects a partial-publication flag");
+  check_certified_crosswalk_mutation_rejected(
+      [](auto& value) {
+        ++value.point_count;
+      },
+      "the result digest rejects a structurally plausible point-count mutation");
+  check_certified_crosswalk_mutation_rejected(
+      [](auto& value) {
+        ++value.requested_budget.maximum_link_scan_count;
+      },
+      "the result digest rejects a relaxed trusted-budget mutation");
+  check_certified_crosswalk_mutation_rejected(
+      [](auto& value) {
+        ++value.source_forest_final_locator_stamp.external_authority_id;
+      },
+      "the result digest rejects a forest locator-stamp mutation");
+  check_certified_crosswalk_mutation_rejected(
+      [](auto& value) {
+        ++value.source_bridge_stamp.resident_epoch;
+      },
+      "the result digest rejects a live bridge-stamp mutation");
+  check(
+      journal.counters.resident_plan_batch_scan_count != 0U,
+      "the n=6, K=4 crosswalk exposes a nonzero logical plan-batch cardinality");
+  if (journal.counters.resident_plan_batch_scan_count != 0U) {
+    check_certified_crosswalk_mutation_rejected(
+        [](auto& value) {
+          --value.counters.resident_plan_batch_scan_count;
+        },
+        "the result digest rejects an understated logical source cardinality");
+  }
+}
+
 }  // namespace
 
 int main() {
   test_complete_atomic_product();
+  test_resident_event_crosswalk_product_gate_precedes_link_replay();
+  test_resident_event_crosswalk_triple_join_and_fail_closed_caps();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";
     return 1;

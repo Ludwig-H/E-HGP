@@ -2520,6 +2520,18 @@ La totalité est désormais testée d'abord par les liens d'événements, et non
 - transmettre la capability source normalisée v7 live et obliger la future session produit à l'exiger vraie avant tout gate de campagne;
 - vérifier qu'aucune matrice de paires, Star, Gamma, cellule, catalogue global de facettes, cofaces, incidences ou Delaunay ordinaire ou d'ordre supérieur n'est possédé par la couture.
 
+### T15-RESIDENT-EVENT-CROSSWALK — jointure conditionnelle forêt--quotient
+
+- partir d'une forêt conditionnelle et de son journal de liens fraîchement vérifié, puis exiger un pont résident v3 live, source v7, entièrement consommé et scellé; refuser avant allocation scientifique tout cas où $n<K_{\mathrm{eff}}+2$;
+- construire exactement un record par lien et un slot scratch par projection événementielle; exercer dans la fixture positive $n=6$, $K_{\mathrm{eff}}=4$ au moins une cible naissance K2--racine K1, une cible K3--selle K2 et une cible K4--selle résidente K3 afin de couvrir les trois chemins typés du constructeur;
+- joindre naissance forestière et naissance directe résidente par projection, ordre, niveau rationnel exact et facette; pour un rang supérieur, retrouver la selle de l'ordre adjacent, son binding O4, son groupe et sa racine résultante au même niveau;
+- conserver des wrappers distincts pour `K1NodeId` et `ExactFrozenIncidencePriorRootId`, interdire toute comparaison numérique entre les deux domaines et rejeter les cibles absentes ou dupliquées;
+- exclure les selles du sommet de la fenêtre, qui ne correspondent à aucune naissance de rang supérieur dans la source, tout en exigeant un lien pour chaque selle directe strictement sous ce sommet;
+- diminuer séparément d'une unité les caps de naissances forestières et de références directes résidentes; les deux chemins doivent publier un échec atomique sans stamp scientifique, record, compteur ni flag de succès résiduel, mais avec une enveloppe opérationnelle canonique engageant budget demandé, décision, portée et digest de cette enveloppe;
+- engager dans le digest canonique le budget, les métadonnées, les stamps forêt et pont, les records, tous les compteurs, claims, décision et portée; muter point count, budget, stamp forêt, stamp pont, compteur, record et flag de couverture et exiger le rejet structurel; recouper indépendamment chaque cible K1, K2 ou supérieure avec le lot committé, le binding, la référence directe, le groupe, la racine et le digest O4 de l'autorité live;
+- exiger en plus `verify_exact_direct_morse_resident_event_crosswalk_journal(...).result_certified`, qui reconstruit fraîchement depuis les autorités aussi bien le succès que l'enveloppe d'échec atomique attendue; refuser une arène observée hors cap avant sa comparaison et toute enveloppe inégale avant son rejeu structurel, notamment un record sous cap contenant un `BigInt` de niveau géant; vérifier séparément que la garde $n<K_{\mathrm{eff}}+2$ précède un journal de liens invalide, puis que décision ou digest d'échec substitué sont rejetés; rebâtir enfin un résultat autonome cohérent sous un budget relâché et exiger son rejet sous le budget de confiance original, car le digest n'est ni une MAC ni une autorité autonome;
+- garder faux digest sémantique commun d'événement, O7 bidirectionnel, `full_pi0`, M.1, Gamma/Delaunay, SLO, reprise massive et statut public; les caps sont des cardinalités logiques et non une preuve de passage physique unique.
+
 ### T15-K1-NORMALIZED-PRODUCT — lots exacts d'ordre un
 
 - recertifier fraîchement Borůvka et son digest de forêt avant de construire une session move-only;
