@@ -19,7 +19,7 @@ namespace morsehgp3d::hierarchy {
 class ExactDirectMorseForestReducer;
 
 inline constexpr std::uint32_t
-    direct_sparse_facet_descent_batch_executor_schema_version = 2U;
+    direct_sparse_facet_descent_batch_executor_schema_version = 3U;
 inline constexpr std::string_view
     direct_sparse_facet_descent_batch_executor_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -36,7 +36,8 @@ inline constexpr std::string_view
     direct_sparse_facet_descent_batch_executor_proof_basis =
         "one_fresh_14c_session_anchor_canonical_batch_cursor_stable_family_"
         "selection_distinct_full_key_shared_10_5c_closure_compact_arm_join_"
-        "and_transient_graph_release_before_delta_publication_v1";
+        "terminal_birth_index_key_witness_exact_center_and_level_authority_"
+        "and_transient_graph_release_before_delta_publication_v3";
 inline constexpr std::uint32_t
     direct_sparse_facet_descent_batch_top_k_proposal_preparation_schema_version =
         1U;
@@ -127,6 +128,13 @@ struct ExactDirectSparseFacetDescentBatchResolvedKey {
   std::size_t resolved_key_index{};
   ExactDirectSparseFacetKey source_facet_key{};
   ExactDirectSparseFacetKey resolved_terminal_facet_key{};
+  // Durable terminal provenance is projected while the transient 10.5c
+  // closure is still alive.  The birth index is decoded from the exact
+  // locator witness; center and level are replayed from the immutable cloud
+  // or Phase-9 event authority, never reconstructed from floating point.
+  std::size_t terminal_birth_record_index{};
+  exact::ExactCenter3 terminal_birth_exact_center{};
+  exact::ExactLevel terminal_birth_exact_squared_level{};
   ExactDirectSparseComponentHandle resolved_component_handle{};
   ExactDirectSparseFacetWitness resolved_binding_witness{};
   ExactDirectSparseFacetDescentClosureDisposition closure_disposition{

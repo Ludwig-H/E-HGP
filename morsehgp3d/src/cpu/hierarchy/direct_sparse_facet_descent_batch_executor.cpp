@@ -121,6 +121,149 @@ struct CompactClosureProjection {
   std::optional<BuildFailure> failure;
 };
 
+struct TerminalBirthAuthority {
+  std::size_t source_journal_batch_index{};
+  std::size_t order{};
+  exact::ExactCenter3 exact_center{};
+  exact::ExactLevel exact_squared_level{};
+};
+
+[[nodiscard]] std::optional<std::vector<TerminalBirthAuthority>>
+resolve_terminal_birth_authorities(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_event_journal,
+    std::span<const std::size_t> terminal_birth_record_indices) {
+  std::vector<std::optional<TerminalBirthAuthority>> pending(
+      terminal_birth_record_indices.size());
+  std::vector<std::pair<std::size_t, std::size_t>> direct_targets;
+  direct_targets.reserve(terminal_birth_record_indices.size());
+  const ExactDirectMorseEventJournalView source_view{
+      source_event_journal};
+
+  for (std::size_t index = 0U;
+       index < terminal_birth_record_indices.size();
+       ++index) {
+    const std::size_t birth_index =
+        terminal_birth_record_indices[index];
+    if (birth_index >= cloud.size()) {
+      direct_targets.emplace_back(birth_index, index);
+      continue;
+    }
+    if (birth_index >= source_view.event_projection_count() ||
+        birth_index >= source_view.role_record_count()) {
+      return std::nullopt;
+    }
+    const auto projection = source_view.event_projection_at(birth_index);
+    const auto role = source_view.role_record_at(birth_index);
+    if (projection.event_projection_index != birth_index ||
+        projection.source !=
+            ExactDirectMorseEventSource::canonical_singleton ||
+        projection.source_index != birth_index ||
+        projection.support_size != 1U ||
+        projection.support_ids[0U] !=
+            static_cast<spatial::PointId>(birth_index) ||
+        projection.birth_order != std::optional<std::size_t>{1U} ||
+        projection.squared_level != exact::ExactLevel{} ||
+        role.role_record_index != birth_index ||
+        role.event_projection_index != birth_index ||
+        role.role != ExactDirectMorseH0Role::birth ||
+        role.batch_index >= source_event_journal.batches.size()) {
+      return std::nullopt;
+    }
+    const auto& batch = source_event_journal.batches[role.batch_index];
+    if (batch.batch_index != role.batch_index || batch.order != 1U ||
+        batch.squared_level != projection.squared_level ||
+        role.role_record_index < batch.role_record_offset ||
+        role.role_record_index - batch.role_record_offset >=
+            batch.role_record_count) {
+      return std::nullopt;
+    }
+    pending[index] = TerminalBirthAuthority{
+        role.batch_index,
+        batch.order,
+        cloud.point(static_cast<spatial::PointId>(birth_index)).exact(),
+        batch.squared_level};
+  }
+
+  std::sort(direct_targets.begin(), direct_targets.end());
+  std::size_t target_cursor = 0U;
+  std::size_t logical_birth_index = cloud.size();
+  for (const auto& role :
+       source_event_journal.materialized_direct_role_records) {
+    if (target_cursor == direct_targets.size()) {
+      break;
+    }
+    if (role.role != ExactDirectMorseH0Role::birth) {
+      continue;
+    }
+    if (logical_birth_index > direct_targets[target_cursor].first ||
+        role.batch_index >= source_event_journal.batches.size() ||
+        role.event_projection_index >=
+            source_view.event_projection_count()) {
+      return std::nullopt;
+    }
+    if (logical_birth_index == direct_targets[target_cursor].first) {
+      const auto projection =
+          source_view.event_projection_at(role.event_projection_index);
+      const auto& batch = source_event_journal.batches[role.batch_index];
+      if (projection.event_projection_index !=
+              role.event_projection_index ||
+          projection.source !=
+              ExactDirectMorseEventSource::
+                  direct_support_terminal_event ||
+          projection.source_index >= source_facade.events.size() ||
+          projection.birth_order !=
+              std::optional<std::size_t>{batch.order} ||
+          projection.squared_level != batch.squared_level ||
+          batch.batch_index != role.batch_index ||
+          role.role_record_index < batch.role_record_offset ||
+          role.role_record_index - batch.role_record_offset >=
+              batch.role_record_count) {
+        return std::nullopt;
+      }
+      const auto& event = source_facade.events[projection.source_index];
+      if (event.event_index != projection.source_index ||
+          event.support_size != projection.support_size ||
+          event.support_ids != projection.support_ids ||
+          event.birth_order != projection.birth_order ||
+          event.squared_level != projection.squared_level ||
+          event.closed_rank != projection.closed_rank) {
+        return std::nullopt;
+      }
+      const TerminalBirthAuthority authority{
+          role.batch_index,
+          batch.order,
+          event.center,
+          batch.squared_level};
+      while (target_cursor < direct_targets.size() &&
+             direct_targets[target_cursor].first ==
+                 logical_birth_index) {
+        pending[direct_targets[target_cursor].second] = authority;
+        ++target_cursor;
+      }
+    }
+    if (logical_birth_index ==
+        std::numeric_limits<std::size_t>::max()) {
+      return std::nullopt;
+    }
+    ++logical_birth_index;
+  }
+  if (target_cursor != direct_targets.size()) {
+    return std::nullopt;
+  }
+
+  std::vector<TerminalBirthAuthority> resolved;
+  resolved.reserve(pending.size());
+  for (auto& authority : pending) {
+    if (!authority.has_value()) {
+      return std::nullopt;
+    }
+    resolved.push_back(std::move(*authority));
+  }
+  return resolved;
+}
+
 struct ProposalPreparationEvidence {
   std::optional<
       ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>
@@ -1011,6 +1154,8 @@ summarize_closure(
 [[nodiscard]] CompactClosureProjection build_compact_closure_projection(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_event_journal,
     const std::vector<ExactDirectSparseFacetKey>& distinct_keys,
     std::size_t source_batch_index,
     const exact::ExactLevel& closed_batch_squared_level,
@@ -1115,7 +1260,20 @@ summarize_closure(
       return projection;
     }
 
-    projection.resolved_keys.reserve(distinct_keys.size());
+    if (source_batch_index >= source_event_journal.batches.size() ||
+        source_event_journal.batches[source_batch_index].batch_index !=
+            source_batch_index ||
+        source_event_journal.batches[source_batch_index].squared_level !=
+            closed_batch_squared_level) {
+      projection.failure = BuildFailure::shared_closure_contradiction;
+      return projection;
+    }
+    const std::size_t source_order =
+        source_event_journal.batches[source_batch_index].order;
+    std::vector<std::size_t> terminal_node_indices;
+    std::vector<std::size_t> terminal_birth_record_indices;
+    terminal_node_indices.reserve(distinct_keys.size());
+    terminal_birth_record_indices.reserve(distinct_keys.size());
     for (std::size_t key_index = 0U;
          key_index < distinct_keys.size();
          ++key_index) {
@@ -1140,7 +1298,56 @@ summarize_closure(
                   relative_positive ||
           terminal.resolved_binding_witness->external_authority_id !=
               locator.config().external_authority_id ||
-          terminal.resolved_binding_witness->replay_token == 0U) {
+          terminal.resolved_binding_witness->replay_token == 0U ||
+          terminal.resolved_binding_witness->replay_token % 3U != 1U ||
+          terminal.exact_center.has_value() !=
+              terminal.exact_squared_level.has_value() ||
+          terminal.exact_center_and_level_present !=
+              terminal.exact_center.has_value()) {
+        projection.failure = BuildFailure::shared_closure_contradiction;
+        return projection;
+      }
+      const std::uint64_t terminal_birth_record_index_u64 =
+          (terminal.resolved_binding_witness->replay_token - 1U) / 3U;
+      if (terminal_birth_record_index_u64 >
+          std::numeric_limits<std::size_t>::max()) {
+        projection.failure = BuildFailure::shared_closure_contradiction;
+        return projection;
+      }
+      terminal_node_indices.push_back(
+          seed_projection.terminal_node_index);
+      terminal_birth_record_indices.push_back(
+          static_cast<std::size_t>(terminal_birth_record_index_u64));
+    }
+
+    const auto terminal_birth_authorities =
+        resolve_terminal_birth_authorities(
+            cloud,
+            source_facade,
+            source_event_journal,
+            terminal_birth_record_indices);
+    if (!terminal_birth_authorities.has_value() ||
+        terminal_birth_authorities->size() != distinct_keys.size()) {
+      projection.failure = BuildFailure::shared_closure_contradiction;
+      return projection;
+    }
+
+    projection.resolved_keys.reserve(distinct_keys.size());
+    for (std::size_t key_index = 0U;
+         key_index < distinct_keys.size();
+         ++key_index) {
+      const auto& seed_projection = closure.seed_projections[key_index];
+      const auto& terminal = closure.nodes[terminal_node_indices[key_index]];
+      const auto& authority = (*terminal_birth_authorities)[key_index];
+      if (authority.source_journal_batch_index >= source_batch_index ||
+          authority.order != source_order ||
+          !(authority.exact_squared_level <
+            closed_batch_squared_level) ||
+          !valid_key(terminal.facet_key, cloud.size(), source_order) ||
+          (terminal.exact_center.has_value() &&
+           (*terminal.exact_center != authority.exact_center ||
+            *terminal.exact_squared_level !=
+                authority.exact_squared_level))) {
         projection.failure = BuildFailure::shared_closure_contradiction;
         projection.resolved_keys.clear();
         return projection;
@@ -1149,6 +1356,9 @@ summarize_closure(
           {key_index,
            distinct_keys[key_index],
            terminal.facet_key,
+           terminal_birth_record_indices[key_index],
+           authority.exact_center,
+           authority.exact_squared_level,
            *terminal.resolved_component_handle,
            *terminal.resolved_binding_witness,
            seed_projection.closure_disposition,
@@ -1267,6 +1477,11 @@ summarize_closure(
         resolved.resolved_binding_witness.external_authority_id !=
             result.locator_query_witness.external_authority_id ||
         resolved.resolved_binding_witness.replay_token == 0U ||
+        resolved.resolved_binding_witness.replay_token % 3U != 1U ||
+        (resolved.resolved_binding_witness.replay_token - 1U) / 3U !=
+            resolved.terminal_birth_record_index ||
+        !(resolved.terminal_birth_exact_squared_level <
+          result.closed_batch_squared_level) ||
         resolved.closure_disposition !=
             ExactDirectSparseFacetDescentClosureDisposition::
                 relative_positive ||
@@ -1689,6 +1904,8 @@ build_batch_execution(
             build_compact_closure_projection(
                 index,
                 cloud,
+                source_facade,
+                source_event_journal,
                 distinct_keys,
                 cursor.source_batch_index,
                 source_batch.squared_level,
@@ -1737,6 +1954,8 @@ build_batch_execution(
           build_compact_closure_projection(
               index,
               cloud,
+              source_facade,
+              source_event_journal,
               distinct_keys,
               cursor.source_batch_index,
               source_batch.squared_level,

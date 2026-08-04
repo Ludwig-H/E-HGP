@@ -2489,6 +2489,21 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 
 ### T15-ALL-ORDERS-VERTICAL — couture résidente adjacente et scellement terminal
 
+La totalité est désormais testée d'abord par les liens d'événements, et non par la présence d'au moins un groupe réduit dans chaque ordre. Le pont résident v2 reste dans cette section comme diagnostic conditionnel des images de groupes déjà représentées; son sceau ne peut pas fermer M.1.
+
+- rejouer fraîchement la forêt conditionnelle au schéma 6 et exiger, pour chaque selle, la projection canonique de l'événement et le digest des bras, puis, pour chaque binding, le point retiré, l'indice de naissance terminale, la même clé complète, le témoin privé, le centre rationnel et le niveau exacts dans un lot strictement antérieur du même ordre cible;
+- construire `ExactDirectMorseEventRankTowerLinkJournal` schéma 2 avec exactement un lien par naissance présente de rang au moins deux, vers la selle du même `source_event_projection_index`, à l'ordre adjacent et au même niveau rationnel exact;
+- conserver en CSR tous les terminaux de bras, leur carrier gelé et leur éventuelle racine antérieure, puis exiger que la cible du lien soit la racine atomique post-lot du groupe selle et que chaque lien engage les stamps strict-pré-lot et fermé-post-lot;
+- lorsque $K_{\mathrm{eff}}=n\geq2$, exiger exactement une naissance et un lien de rang $n$ même si l'ordre source possède zéro groupe; lorsque $K_{\mathrm{eff}}<n$, interdire d'inventer cette obligation hors fenêtre;
+- muter séparément rôle selle, projection événementielle, ordre adjacent, niveau exact, point retiré, naissance terminale, clé, témoin, centre, groupe, racine, stamps et chacun des caps; muter aussi de façon coordonnée naissance--selle puis clé--témoin--centre--niveau terminal; toute substitution doit échouer sans payload et le vérificateur fort doit reconstruire forêt et liens depuis les autorités amont;
+- construire `ExactDirectMorseEventVerticalPropagationJournal` avec une ancre par lien adjacent, puis traiter les groupes par ordre source et niveau rationnel croissant en activant exactement les parents de la forêt cible de niveau inférieur ou égal;
+- conserver en CSR tous les carriers distincts et toutes les racines sources antérieures d'un groupe, exiger leur convergence vers une unique racine inférieure avant d'ancrer le résultat source et rejeter atomiquement toute divergence ou budget de pointer-jumping insuffisant;
+- construire une fixture forest-relative où deux ancres inférieures restent distinctes avant le lot et ne convergent que par une multifusion inférieure au niveau exactement égal au groupe source; elle doit réussir en coupe fermée et détecter toute régression de `niveau inférieur ou égal` vers `niveau strictement inférieur`;
+- avancer chaque racine finale source d'ordre au moins deux vers l'unique racine finale de l'ordre inférieur; rejeter tout carrier non terminal qui n'atteint aucun groupe source, conserver explicitement l'unique carrier terminal de rang $n$ et rejeter toute mutation qui prétend le consommer;
+- couvrir un singleton sans ordre zéro, un nuage à trois points multi-ordres, un sommet de tour strictement sous $n$, un groupe de selles simultanées, la frontière égale précédente, une multifusion à deux racines antérieures, le rejeu fort forêt--liens--propagation, une falsification coordonnée et un cap de CSR insuffisant sans payload partiel;
+- garder les liens vers les ordres plus bas comme compositions adjacentes seulement; ne positionner ni O3/O4/O7, ni M.1, ni `vertical_maps_complete`, ni `public_status` depuis ces journaux conditionnels;
+- conserver comme régressions diagnostiques les projections de groupes v2 ci-dessous, dont le miss K5 vers K4 réparé par fermeture sparse et le lot terminal K10 sans groupe qui doit encore refuser son sceau historique;
+
 - ordonner le plan par niveau rationnel exact puis ordre, et vérifier qu'au même niveau chaque ordre cible inférieur est déjà committé avant la projection de l'ordre source;
 - pour chaque groupe d'ordre au moins trois, re-sonder toutes les facettes témoins des racines antérieures, projeter toutes les suppressions codimension un de chaque facette nouvelle et exiger une racine cible live unique;
 - conserver une facette cible canonique persistante par racine résultante, puis re-sonder chaque témoin au scellement après toutes les fusions propres à la cible;
@@ -2496,7 +2511,7 @@ Le principe final est simple : **chaque événement peut être rapide ou lent, m
 - drainer la coupe K1 jusqu'au niveau terminal, mémoriser le reçu de drain et vérifier qu'un second scellement est idempotent sans perte du compte de suffixe;
 - accepter un drain K1 vide avec une source K2 complète, puisque les arêtes EMST sont Gabriel, et exercer séparément un plan résident vide produisant un suffixe terminal K1 non vide;
 - sur E5, exiger un groupe supérieur non vide, trente suppressions codimension un sur trente, un témoin terminal valide et la réussite des régressions K1 et K2--K1;
-- ne positionner `all_naturality_squares_replayed` et `vertical_maps_complete` que dans le sceau final; garder faux M.1, `global_morse_obligation_replayed` et tout statut public;
+- refuser d'utiliser les champs historiques `all_naturality_squares_replayed` et `vertical_maps_complete` comme preuve de totalité tant que le pont ne consomme pas le journal événementiel, n'installe pas les carriers latents et ne rejoue pas O7; garder faux M.1, `global_morse_obligation_replayed` et tout statut public;
 - transmettre la capability source normalisée v7 live et obliger la future session produit à l'exiger vraie avant tout gate de campagne;
 - vérifier qu'aucune matrice de paires, Star, Gamma, cellule, catalogue global de facettes, cofaces, incidences ou Delaunay ordinaire ou d'ordre supérieur n'est possédé par la couture.
 

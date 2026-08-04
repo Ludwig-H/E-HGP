@@ -295,19 +295,186 @@ execution_budget() {
   return {authority_id, replay_token};
 }
 
-[[nodiscard]] bool key_less(
-    const ExactDirectSparseFacetKey& left,
-    const ExactDirectSparseFacetKey& right) noexcept {
-  const std::size_t shared_count =
-      std::min(left.point_count, right.point_count);
-  for (std::size_t point_index = 0U;
-       point_index < shared_count;
-       ++point_index) {
-    if (left.point_ids[point_index] != right.point_ids[point_index]) {
-      return left.point_ids[point_index] < right.point_ids[point_index];
+struct CanonicalBirthFixtureRecord {
+  std::size_t birth_record_index{};
+  ExactDirectSparseFacetKey key{};
+};
+
+[[nodiscard]] std::vector<CanonicalBirthFixtureRecord>
+canonical_birth_fixture_records(const Scenario& scenario) {
+  const ExactDirectMorseEventJournalView view{scenario.event_journal};
+  std::vector<CanonicalBirthFixtureRecord> records;
+  records.reserve(view.role_record_count());
+
+  for (std::size_t role_index = 0U;
+       role_index < view.role_record_count();
+       ++role_index) {
+    const auto role = view.role_record_at(role_index);
+    if (role.role != ExactDirectMorseH0Role::birth) {
+      continue;
     }
+    if (role.role_record_index != role_index ||
+        role.batch_index >= scenario.event_journal.batches.size() ||
+        role.event_projection_index >= view.event_projection_count()) {
+      throw std::logic_error(
+          "a canonical birth fixture role disagrees with its journal");
+    }
+    const auto& batch = scenario.event_journal.batches[role.batch_index];
+    const auto projection =
+        view.event_projection_at(role.event_projection_index);
+    if (batch.batch_index != role.batch_index ||
+        projection.event_projection_index !=
+            role.event_projection_index ||
+        projection.birth_order !=
+            std::optional<std::size_t>{batch.order} ||
+        projection.closed_rank != batch.order ||
+        projection.squared_level != batch.squared_level) {
+      throw std::logic_error(
+          "a canonical birth fixture projection disagrees with its batch");
+    }
+
+    ExactDirectSparseFacetKey key;
+    if (batch.order == 0U || batch.order > key.point_ids.size()) {
+      throw std::logic_error(
+          "a canonical birth fixture order exceeds the locator key");
+    }
+    key.point_count = batch.order;
+    std::vector<PointId> key_point_ids;
+    key_point_ids.reserve(key.point_count);
+    if (projection.source ==
+        ExactDirectMorseEventSource::canonical_singleton) {
+      if (batch.order != 1U ||
+          projection.source_index >= scenario.cloud.size() ||
+          projection.support_size != 1U ||
+          projection.support_ids[0U] !=
+              static_cast<PointId>(projection.source_index)) {
+        throw std::logic_error(
+            "a canonical singleton birth fixture is inconsistent");
+      }
+      key_point_ids.push_back(
+          static_cast<PointId>(projection.source_index));
+    } else {
+      if (projection.source !=
+              ExactDirectMorseEventSource::
+                  direct_support_terminal_event ||
+          projection.source_index >= scenario.facade.events.size()) {
+        throw std::logic_error(
+            "a direct birth fixture has no terminal event authority");
+      }
+      const auto& event =
+          scenario.facade.events[projection.source_index];
+      if (event.event_index != projection.source_index ||
+          event.support_size != projection.support_size ||
+          event.support_ids != projection.support_ids ||
+          event.birth_order != projection.birth_order ||
+          event.closed_rank != projection.closed_rank ||
+          event.squared_level != projection.squared_level) {
+        throw std::logic_error(
+            "a direct birth fixture changed terminal event identity");
+      }
+      for (const PointId point_id : event.interior_ids) {
+        if (key_point_ids.size() >= key.point_count) {
+          throw std::logic_error(
+              "a direct birth fixture exceeds its canonical key order");
+        }
+        key_point_ids.push_back(point_id);
+      }
+      for (std::size_t support_index = 0U;
+           support_index < event.support_size;
+           ++support_index) {
+        if (key_point_ids.size() >= key.point_count) {
+          throw std::logic_error(
+              "a direct birth fixture exceeds its canonical key order");
+        }
+        key_point_ids.push_back(event.support_ids[support_index]);
+      }
+      if (key_point_ids.size() != key.point_count) {
+        throw std::logic_error(
+            "a direct birth fixture did not fill its canonical key");
+      }
+      std::sort(key_point_ids.begin(), key_point_ids.end());
+    }
+
+    if (key_point_ids.size() != key.point_count) {
+      throw std::logic_error(
+          "a canonical birth fixture key has the wrong order");
+    }
+    for (std::size_t point_index = 0U;
+         point_index < key_point_ids.size();
+         ++point_index) {
+      if (static_cast<std::size_t>(key_point_ids[point_index]) >=
+              scenario.cloud.size() ||
+          (point_index != 0U &&
+           key_point_ids[point_index - 1U] >=
+               key_point_ids[point_index])) {
+        throw std::logic_error(
+            "a canonical birth fixture key is not strictly ordered");
+      }
+      key.point_ids[point_index] = key_point_ids[point_index];
+    }
+    records.push_back({records.size(), key});
   }
-  return left.point_count < right.point_count;
+  return records;
+}
+
+[[nodiscard]] std::size_t canonical_birth_fixture_count(
+    const Scenario& scenario) {
+  return canonical_birth_fixture_records(scenario).size();
+}
+
+[[nodiscard]] std::size_t canonical_birth_fixture_index(
+    const Scenario& scenario,
+    const ExactDirectSparseFacetKey& key) {
+  const auto records = canonical_birth_fixture_records(scenario);
+  const auto found = std::find_if(
+      records.begin(),
+      records.end(),
+      [&key](const CanonicalBirthFixtureRecord& record) {
+        return record.key == key;
+      });
+  if (found == records.end()) {
+    throw std::logic_error(
+        "a requested positive fixture key is not a canonical birth");
+  }
+  return found->birth_record_index;
+}
+
+void bind_canonical_birth_fixtures(
+    ExactDirectSparsePositiveFacetLocator& locator,
+    const Scenario& scenario) {
+  const auto records = canonical_birth_fixture_records(scenario);
+  std::vector<ExactDirectSparseFacetBinding> bindings;
+  bindings.reserve(records.size());
+  for (const auto& record : records) {
+    if (record.birth_record_index >
+        (std::numeric_limits<std::uint64_t>::max() - UINT64_C(1)) /
+            UINT64_C(3)) {
+      throw std::logic_error(
+          "a canonical birth fixture replay token overflows");
+    }
+    bindings.push_back(
+        {bindings.size(),
+         record.key,
+         record.birth_record_index,
+         query_witness(
+             static_cast<std::uint64_t>(record.birth_record_index) *
+                 UINT64_C(3) +
+             UINT64_C(1))});
+  }
+  const auto committed = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      bindings);
+  check(
+      committed.certified_committed_batch(),
+      "the batch-executor fixture binds canonical Morse birth authorities");
+}
+
+[[nodiscard]] ExactDirectSparsePositiveFacetLocator
+make_canonical_birth_fixture_locator(const Scenario& scenario) {
+  auto locator = make_locator(canonical_birth_fixture_count(scenario));
+  bind_canonical_birth_fixtures(locator, scenario);
+  return locator;
 }
 
 [[nodiscard]] ExactDirectSparseFacetKey two_point_key(
@@ -386,60 +553,6 @@ proposal_transcript(
   key.point_count = facet.point_count;
   key.point_ids = facet.point_ids;
   return key;
-}
-
-[[nodiscard]] std::vector<ExactDirectSparseFacetKey>
-all_distinct_arm_keys(const Scenario& scenario) {
-  std::vector<ExactDirectSparseFacetKey> keys;
-  keys.reserve(scenario.seed_journal.arm_seeds.size());
-  for (std::size_t arm_seed_index = 0U;
-       arm_seed_index < scenario.seed_journal.arm_seeds.size();
-       ++arm_seed_index) {
-    keys.push_back(facet_key(
-        reconstruct_exact_direct_saddle_arm_facet(
-            scenario.facade, scenario.seed_journal, arm_seed_index)));
-  }
-  std::sort(keys.begin(), keys.end(), key_less);
-  keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
-  return keys;
-}
-
-void bind_positive_keys(
-    ExactDirectSparsePositiveFacetLocator& locator,
-    std::span<const ExactDirectSparseFacetKey> keys) {
-  std::vector<ExactDirectSparseFacetBinding> bindings;
-  bindings.reserve(keys.size());
-  for (std::size_t key_index = 0U; key_index < keys.size(); ++key_index) {
-    bindings.push_back(
-        {key_index,
-         keys[key_index],
-         key_index,
-         query_witness(
-             static_cast<std::uint64_t>(key_index) * UINT64_C(3) +
-             UINT64_C(1))});
-  }
-  const auto committed = locator.apply_batch(
-      std::span<const ExactDirectSparseFacetQuery>{},
-      std::span<const ExactDirectSparseComponentUnion>{},
-      bindings);
-  check(
-      committed.certified_committed_batch(),
-      "the batch-executor fixture binds its compact positive-key authority");
-}
-
-[[nodiscard]] std::vector<ExactDirectSparseFacetKey> singleton_keys(
-    std::size_t point_count) {
-  std::vector<ExactDirectSparseFacetKey> keys;
-  keys.reserve(point_count);
-  for (std::size_t point_index = 0U;
-       point_index < point_count;
-       ++point_index) {
-    ExactDirectSparseFacetKey key;
-    key.point_count = 1U;
-    key.point_ids[0U] = static_cast<PointId>(point_index);
-    keys.push_back(key);
-  }
-  return keys;
 }
 
 [[nodiscard]] ExactDirectSparseFacetDescentBatchPlanResult build_plan(
@@ -578,8 +691,7 @@ void test_anchored_multibatch_retries_and_transient_closure_release() {
           executor.next_source_batch_index() == 1U,
       "the same first batch succeeds when retried against the current locator stamp");
 
-  const auto positive_singletons = singleton_keys(scenario.cloud.size());
-  bind_positive_keys(locator, positive_singletons);
+  bind_canonical_birth_fixtures(locator, scenario);
 
   auto one_arm_short = execution_caps;
   one_arm_short.maximum_selected_arm_seed_count = 11U;
@@ -742,10 +854,8 @@ void test_streaming_session_advances_across_chunk_boundaries() {
   const auto config = plan_config(
       ExactDirectMorseIndustrialPolicy::massive_external_streaming, 1U);
   const auto observed_plan = build_plan(scenario, config);
-  const auto positive_singletons = singleton_keys(scenario.cloud.size());
   ExactDirectSparsePositiveFacetLocator locator =
-      make_locator(scenario.cloud.size());
-  bind_positive_keys(locator, positive_singletons);
+      make_canonical_birth_fixture_locator(scenario);
   ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
       scenario.index,
       scenario.cloud,
@@ -826,13 +936,11 @@ void test_mixed_lanes_feed_one_shared_closure() {
     return;
   }
 
-  // This fixture isolates 14D scheduling: every factorized arm key is made a
-  // relative-positive external authority before the session, so no unrelated
-  // hierarchy commit is needed to reach the mixed structural batch.
-  const auto positive_keys = all_distinct_arm_keys(scenario);
+  // This fixture isolates 14D scheduling against the canonical Morse birth
+  // authority: every positive handle and replay token names the exact birth
+  // record reconstructed from the event journal.
   ExactDirectSparsePositiveFacetLocator locator =
-      make_locator(positive_keys.size());
-  bind_positive_keys(locator, positive_keys);
+      make_canonical_birth_fixture_locator(scenario);
   ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
       scenario.index,
       scenario.cloud,
@@ -923,33 +1031,17 @@ void test_canonical_key_view_executes_nonzero_strict_edge() {
   const ExactDirectSparseFacetKey ac = two_point_key(1U, 3U);
   const ExactDirectSparseFacetKey de = two_point_key(0U, 4U);
 
-  std::vector<ExactDirectSparseFacetKey> positive_keys =
-      all_distinct_arm_keys(scenario);
-  positive_keys.erase(
-      std::remove(positive_keys.begin(), positive_keys.end(), ac),
-      positive_keys.end());
-  positive_keys.push_back(de);
-  std::sort(positive_keys.begin(), positive_keys.end(), key_less);
-  positive_keys.erase(
-      std::unique(positive_keys.begin(), positive_keys.end()),
-      positive_keys.end());
-  const auto de_position =
-      std::lower_bound(positive_keys.begin(), positive_keys.end(), de, key_less);
+  const std::size_t de_handle =
+      canonical_birth_fixture_index(scenario, de);
   check(
-      observed_plan.complete_architecture_plan() &&
-          de_position != positive_keys.end() && *de_position == de,
-      "the E5 14D fixture owns one complete plan and one pre-bound DE carrier");
-  if (!observed_plan.complete_architecture_plan() ||
-      de_position == positive_keys.end() || *de_position != de) {
+      observed_plan.complete_architecture_plan(),
+      "the E5 14D fixture owns one complete plan and one canonical DE birth carrier");
+  if (!observed_plan.complete_architecture_plan()) {
     return;
   }
-  const std::size_t de_handle =
-      static_cast<std::size_t>(
-          std::distance(positive_keys.begin(), de_position));
 
   ExactDirectSparsePositiveFacetLocator locator =
-      make_locator(positive_keys.size());
-  bind_positive_keys(locator, positive_keys);
+      make_canonical_birth_fixture_locator(scenario);
   ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
       scenario.index,
       scenario.cloud,
@@ -972,7 +1064,7 @@ void test_canonical_key_view_executes_nonzero_strict_edge() {
         batch_witness, execution_budget(), closure_budget());
     check(
         prepared.complete_architecture_execution(),
-        "every E5 prefix lot remains complete when all arm keys except AC are pre-bound");
+        "every E5 prefix lot remains complete against the canonical birth authority");
     if (!prepared.complete_architecture_execution()) {
       break;
     }
@@ -1354,8 +1446,6 @@ void test_sealed_ticket_identity_stamp_epoch_and_single_use() {
 void test_sealed_ticket_closes_proposal_to_commit_budget_liveness() {
   const Scenario scenario =
       order_two_with_prunable_shell_scenario();
-  const std::vector<ExactDirectSparseFacetKey> all_arm_keys =
-      all_distinct_arm_keys(scenario);
   struct CandidateDescent {
     ExactDirectSparseFacetKey source_key{};
     ExactDirectSparseFacetKey successor_key{};
@@ -1412,20 +1502,6 @@ void test_sealed_ticket_closes_proposal_to_commit_budget_liveness() {
     return;
   }
 
-  std::vector<ExactDirectSparseFacetKey> positive_keys =
-      all_arm_keys;
-  positive_keys.erase(
-      std::remove(
-          positive_keys.begin(),
-          positive_keys.end(),
-          candidate_descent->source_key),
-      positive_keys.end());
-  positive_keys.push_back(candidate_descent->successor_key);
-  std::sort(positive_keys.begin(), positive_keys.end(), key_less);
-  positive_keys.erase(
-      std::unique(positive_keys.begin(), positive_keys.end()),
-      positive_keys.end());
-
   auto industrial_config = plan_config(
       ExactDirectMorseIndustrialPolicy::interactive_resident_50k,
       4096U);
@@ -1462,8 +1538,7 @@ void test_sealed_ticket_closes_proposal_to_commit_budget_liveness() {
   }
 
   ExactDirectSparsePositiveFacetLocator locator =
-      make_locator(positive_keys.size());
-  bind_positive_keys(locator, positive_keys);
+      make_canonical_birth_fixture_locator(scenario);
   ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
       scenario.index,
       scenario.cloud,
@@ -1925,8 +2000,7 @@ void test_integrated_chunked_proposal_seal_and_immediate_commit() {
           executor.next_source_batch_index() == 1U,
       "14L seals and commits an empty birth lot without inventing a proposal chunk");
 
-  const auto positive_singletons = singleton_keys(scenario.cloud.size());
-  bind_positive_keys(locator, positive_singletons);
+  bind_canonical_birth_fixtures(locator, scenario);
   const std::size_t source_batch_index =
       executor.next_source_batch_index();
   const std::size_t issued_before_failures =

@@ -2954,6 +2954,86 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_event_rank_tower_link_journal
+  STATIC
+    src/cpu/hierarchy/direct_morse_event_rank_tower_link_journal.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_event_rank_tower_link_journal
+  ALIAS morsehgp3d_direct_morse_event_rank_tower_link_journal
+)
+set_target_properties(
+  morsehgp3d_direct_morse_event_rank_tower_link_journal
+  PROPERTIES
+    EXPORT_NAME direct_morse_event_rank_tower_link_journal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_event_rank_tower_link_journal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_event_rank_tower_link_journal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_event_rank_tower_link_journal
+  PUBLIC morsehgp3d::direct_morse_forest_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_event_rank_tower_link_journal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_event_rank_tower_link_journal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_event_vertical_propagation_journal
+  STATIC
+    src/cpu/hierarchy/direct_morse_event_vertical_propagation_journal.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_event_vertical_propagation_journal
+  ALIAS morsehgp3d_direct_morse_event_vertical_propagation_journal
+)
+set_target_properties(
+  morsehgp3d_direct_morse_event_vertical_propagation_journal
+  PROPERTIES
+    EXPORT_NAME direct_morse_event_vertical_propagation_journal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_event_vertical_propagation_journal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_event_vertical_propagation_journal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_event_vertical_propagation_journal
+  PUBLIC morsehgp3d::direct_morse_event_rank_tower_link_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_event_vertical_propagation_journal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_event_vertical_propagation_journal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_morse_forest_carrier_cut_index
   STATIC
     src/cpu/hierarchy/direct_morse_forest_carrier_cut_index.cpp
@@ -6490,6 +6570,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d::higher_support
       morsehgp3d::direct_support_terminal
       morsehgp3d::direct_morse_forest_reducer
+      morsehgp3d::direct_morse_event_vertical_propagation_journal
       morsehgp3d::direct_morse_vertical_target_proposal_pipeline
       morsehgp3d::direct_morse_vertical_journal
       morsehgp3d::direct_morse_k2_k1_target_authority
@@ -6630,6 +6711,8 @@ if(MORSEHGP3D_INSTALL_INTERNAL_TARGETS)
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal
+    morsehgp3d_direct_morse_event_rank_tower_link_journal
+    morsehgp3d_direct_morse_event_vertical_propagation_journal
     morsehgp3d_direct_morse_forest_carrier_cut_index
     morsehgp3d_direct_morse_forest_root_coverage_index
     morsehgp3d_direct_morse_forest_carrier_cut_replay_session

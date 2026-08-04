@@ -593,6 +593,7 @@ void test_true_gabriel_counterexample_descends_ac_to_de_end_to_end() {
   }
 
   bool later_abc_ac_arm_reaches_de = false;
+  std::optional<std::size_t> later_abc_ac_binding_index;
   const auto* later_continuation =
       group_at(result, 2U, level(83886, 3563));
   const auto de_root_before_later =
@@ -635,10 +636,16 @@ void test_true_gabriel_counterexample_descends_ac_to_de_end_to_end() {
                 saddle->arm_binding_count &&
         binding.frozen_carrier_component_handle ==
             *de_root_before_later &&
+        binding.terminal_birth_record_index == *de_carrier &&
+        two_point_key_is(
+            binding.terminal_birth_facet_key, 0U, 4U) &&
+        binding.terminal_birth_binding_witness ==
+            view.birth_record_at(*de_carrier).binding_witness &&
         binding.prior_reduced_root_node_id ==
             std::optional<ExactDirectMorseForestNodeId>{
                 later_continuation->resulting_root_node_id}) {
       later_abc_ac_arm_reaches_de = true;
+      later_abc_ac_binding_index = binding.binding_index;
       break;
     }
   }
@@ -683,6 +690,51 @@ void test_true_gabriel_counterexample_descends_ac_to_de_end_to_end() {
           verification.observed_recursively_equal &&
           verification.result_certified,
       "the true Gabriel counterexample forest composition is freshly replayed end to end");
+
+  bool terminal_provenance_mutations_fail_closed =
+      later_abc_ac_binding_index.has_value();
+  if (later_abc_ac_binding_index.has_value()) {
+    auto wrong_identity = result;
+    auto& identity_binding = wrong_identity.arm_root_bindings[
+        *later_abc_ac_binding_index];
+    identity_binding.terminal_birth_record_index = 0U;
+    terminal_provenance_mutations_fail_closed =
+        terminal_provenance_mutations_fail_closed &&
+        !wrong_identity.certified_conditional_h0_candidate();
+
+    auto wrong_terminal_key = result;
+    auto& key_binding = wrong_terminal_key.arm_root_bindings[
+        *later_abc_ac_binding_index];
+    key_binding.terminal_birth_facet_key = key_binding.strict_arm_key;
+    terminal_provenance_mutations_fail_closed =
+        terminal_provenance_mutations_fail_closed &&
+        !wrong_terminal_key.certified_conditional_h0_candidate();
+
+    auto wrong_replay_token = result;
+    auto& witness_binding = wrong_replay_token.arm_root_bindings[
+        *later_abc_ac_binding_index];
+    ++witness_binding.terminal_birth_binding_witness.replay_token;
+    const auto rejected = verify_exact_direct_morse_forest_journal(
+        scenario.index,
+        scenario.cloud,
+        scenario.facade,
+        scenario.event_journal,
+        source_seed_budget(),
+        scenario.seed_journal,
+        forest_budget(),
+        forest_config(),
+        LbvhTraversalOrder::near_first,
+        wrong_replay_token);
+    terminal_provenance_mutations_fail_closed =
+        terminal_provenance_mutations_fail_closed &&
+        !wrong_replay_token.certified_conditional_h0_candidate() &&
+        rejected.expected_journal_freshly_reconstructed &&
+        !rejected.observed_recursively_equal &&
+        !rejected.result_certified;
+  }
+  check(
+      terminal_provenance_mutations_fail_closed,
+      "terminal birth identity, exact facet key and replay token mutations all fail closed");
 }
 
 }  // namespace

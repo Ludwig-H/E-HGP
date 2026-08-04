@@ -362,6 +362,12 @@ struct TemporaryArm {
   ExactDirectSparseFacetKey key{};
   ExactDirectSparseComponentHandle carrier_handle{};
   std::optional<ExactDirectMorseForestNodeId> prior_reduced_root_node_id;
+  std::size_t terminal_birth_record_index{};
+  ExactDirectSparseFacetKey terminal_birth_facet_key{};
+  ExactDirectSparseFacetWitness terminal_birth_binding_witness{};
+  PointId removed_support_point_id{};
+  exact::ExactCenter3 terminal_birth_exact_center{};
+  exact::ExactLevel terminal_birth_exact_squared_level{};
 };
 
 struct TemporarySaddle {
@@ -373,6 +379,11 @@ struct ResolvedKey {
   ExactDirectSparseFacetKey key{};
   ExactDirectSparseComponentHandle carrier_handle{};
   std::optional<ExactDirectMorseForestNodeId> prior_reduced_root_node_id;
+  std::size_t terminal_birth_record_index{};
+  ExactDirectSparseFacetKey terminal_birth_facet_key{};
+  ExactDirectSparseFacetWitness terminal_birth_binding_witness{};
+  exact::ExactCenter3 terminal_birth_exact_center{};
+  exact::ExactLevel terminal_birth_exact_squared_level{};
 };
 
 struct GroupPlan {
@@ -554,6 +565,30 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
   const std::size_t node_count = view.node_count();
   const std::size_t order_one_birth_count =
       result.implicit_order_one_prefix_count;
+  std::size_t maximum_event_projection_count = 0U;
+  if (!try_add(
+          birth_record_count,
+          result.saddle_records.size(),
+          maximum_event_projection_count) ||
+      result.source_event_projection_count < result.point_count ||
+      result.source_event_projection_count >
+          maximum_event_projection_count) {
+    return false;
+  }
+  std::vector<std::uint8_t> direct_event_role_bits;
+  std::vector<bool> source_family_seen;
+  std::vector<bool> source_arm_seed_seen;
+  try {
+    direct_event_role_bits.resize(
+        result.source_event_projection_count - result.point_count,
+        std::uint8_t{0U});
+    source_family_seen.resize(result.saddle_records.size(), false);
+    source_arm_seed_seen.resize(result.arm_root_bindings.size(), false);
+  } catch (const std::bad_alloc&) {
+    return false;
+  } catch (const std::length_error&) {
+    return false;
+  }
   const auto birth_order_at =
       [&result, birth_record_count](
           std::size_t logical_index) noexcept
@@ -666,25 +701,78 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
     const std::size_t logical_index =
         result.implicit_order_one_prefix_count + physical_index;
     const auto& birth = result.birth_records[physical_index];
+    const auto expected_birth_token = replay_token(logical_index, 1U);
     if (birth.birth_record_index != logical_index ||
         birth.component_handle != logical_index ||
         birth.order <= 1U ||
+        birth.source_event_projection_index < result.point_count ||
+        birth.source_event_projection_index >=
+            result.source_event_projection_count ||
         birth.order_one_birth_node_id.has_value() ||
         !valid_key(birth.facet_key, result.point_count, birth.order) ||
+        !expected_birth_token.has_value() ||
         birth.binding_witness.external_authority_id !=
             result.config.locator_config.external_authority_id ||
-        birth.binding_witness.replay_token == 0U) {
+        birth.binding_witness.replay_token != *expected_birth_token) {
       return false;
     }
+    const std::size_t direct_event_index =
+        birth.source_event_projection_index - result.point_count;
+    if ((direct_event_role_bits[direct_event_index] &
+         std::uint8_t{1U}) != 0U) {
+      return false;
+    }
+    direct_event_role_bits[direct_event_index] |= std::uint8_t{1U};
   }
   for (std::size_t index = 0U;
        index < result.arm_root_bindings.size();
        ++index) {
     const auto& binding = result.arm_root_bindings[index];
     if (binding.binding_index != index ||
+        binding.source_arm_seed_index >= source_arm_seed_seen.size() ||
+        source_arm_seed_seen[binding.source_arm_seed_index] ||
+        static_cast<std::size_t>(binding.removed_support_point_id) >=
+            result.point_count ||
         binding.frozen_carrier_component_handle >= birth_record_count ||
+        binding.terminal_birth_record_index >= birth_record_count ||
         (binding.prior_reduced_root_node_id.has_value() &&
          *binding.prior_reduced_root_node_id >= node_count)) {
+      return false;
+    }
+    source_arm_seed_seen[binding.source_arm_seed_index] = true;
+    for (std::size_t local = 0U;
+         local < binding.strict_arm_key.point_count;
+         ++local) {
+      if (binding.strict_arm_key.point_ids[local] ==
+          binding.removed_support_point_id) {
+        return false;
+      }
+    }
+    const auto terminal_birth =
+        view.birth_record_at(binding.terminal_birth_record_index);
+    const auto expected_terminal_token =
+        replay_token(binding.terminal_birth_record_index, 1U);
+    if (!expected_terminal_token.has_value() ||
+        terminal_birth.birth_record_index !=
+            binding.terminal_birth_record_index ||
+        terminal_birth.component_handle !=
+            binding.terminal_birth_record_index ||
+        terminal_birth.source_journal_batch_index >=
+            result.batches.size() ||
+        binding.terminal_birth_facet_key != terminal_birth.facet_key ||
+        binding.terminal_birth_binding_witness !=
+            terminal_birth.binding_witness ||
+        binding.terminal_birth_binding_witness.external_authority_id !=
+            result.config.locator_config.external_authority_id ||
+        binding.terminal_birth_binding_witness.replay_token !=
+            *expected_terminal_token ||
+        binding.terminal_birth_exact_squared_level !=
+            result.batches[terminal_birth.source_journal_batch_index]
+                .squared_level ||
+        !valid_key(
+            binding.terminal_birth_facet_key,
+            result.point_count,
+            terminal_birth.order)) {
       return false;
     }
   }
@@ -742,7 +830,23 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
   std::size_t expected_arm_binding_offset = 0U;
   for (std::size_t index = 0U; index < result.saddle_records.size(); ++index) {
     const auto& saddle = result.saddle_records[index];
+    std::size_t expected_projection_index = 0U;
+    if (!try_add(
+            result.point_count,
+            saddle.source_event_index,
+            expected_projection_index)) {
+      return false;
+    }
     if (saddle.saddle_record_index != index ||
+        saddle.source_family_index >= source_family_seen.size() ||
+        source_family_seen[saddle.source_family_index] ||
+        saddle.journal_event_projection_index !=
+            expected_projection_index ||
+        saddle.journal_event_projection_index < result.point_count ||
+        saddle.journal_event_projection_index >=
+            result.source_event_projection_count ||
+        saddle.source_event_arm_identity_digest ==
+            contract::CanonicalId{} ||
         saddle.arm_binding_offset != expected_arm_binding_offset ||
         saddle.arm_binding_offset > result.arm_root_bindings.size() ||
         saddle.arm_binding_count >
@@ -764,6 +868,14 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
             saddle.source_journal_batch_index) {
       return false;
     }
+    source_family_seen[saddle.source_family_index] = true;
+    const std::size_t direct_event_index =
+        saddle.journal_event_projection_index - result.point_count;
+    if ((direct_event_role_bits[direct_event_index] &
+         std::uint8_t{2U}) != 0U) {
+      return false;
+    }
+    direct_event_role_bits[direct_event_index] |= std::uint8_t{2U};
     const std::size_t order =
         result.batches[saddle.source_journal_batch_index].order;
     std::size_t observed_carrier_count = 0U;
@@ -775,8 +887,31 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
           saddle.arm_binding_offset + local];
       const auto carrier_order = birth_order_at(
           binding.frozen_carrier_component_handle);
+      const auto carrier_birth_batch_index = birth_batch_at(
+          binding.frozen_carrier_component_handle);
+      const auto terminal_birth_order = birth_order_at(
+          binding.terminal_birth_record_index);
+      const auto terminal_birth_batch_index = birth_batch_at(
+          binding.terminal_birth_record_index);
       if (binding.source_family_index != saddle.source_family_index ||
           carrier_order != std::optional<std::size_t>{order} ||
+          !carrier_birth_batch_index.has_value() ||
+          *carrier_birth_batch_index >=
+              saddle.source_journal_batch_index ||
+          *carrier_birth_batch_index >= result.batches.size() ||
+          result.batches[*carrier_birth_batch_index].order != order ||
+          !(result.batches[*carrier_birth_batch_index].squared_level <
+            result.batches[saddle.source_journal_batch_index]
+                .squared_level) ||
+          terminal_birth_order != std::optional<std::size_t>{order} ||
+          !terminal_birth_batch_index.has_value() ||
+          *terminal_birth_batch_index >=
+              saddle.source_journal_batch_index ||
+          *terminal_birth_batch_index >= result.batches.size() ||
+          result.batches[*terminal_birth_batch_index].order != order ||
+          !(result.batches[*terminal_birth_batch_index].squared_level <
+            result.batches[saddle.source_journal_batch_index]
+                .squared_level) ||
           (binding.prior_reduced_root_node_id.has_value() &&
            node_order_at(*binding.prior_reduced_root_node_id) !=
                std::optional<std::size_t>{order})) {
@@ -821,6 +956,12 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
   }
   if (expected_arm_binding_offset != result.arm_root_bindings.size()) {
     return false;
+  }
+  for (const std::uint8_t role_bits : direct_event_role_bits) {
+    if ((role_bits & std::uint8_t{1U}) != 0U &&
+        role_bits != std::uint8_t{3U}) {
+      return false;
+    }
   }
   std::size_t expected_group_saddle_offset = 0U;
   for (std::size_t index = 0U; index < result.atomic_groups.size(); ++index) {
@@ -1262,6 +1403,8 @@ build_exact_direct_morse_forest_journal(
   result.traversal_order = traversal_order;
   result.point_count = cloud.size();
   result.effective_maximum_order = source_journal.effective_maximum_order;
+  result.source_event_projection_count =
+      source_journal.event_projection_count;
   result.source_higher_canonical_cloud_digest =
       source_facade.certificate.higher_canonical_cloud_digest;
   initialize_scope(result);
@@ -1426,7 +1569,22 @@ build_exact_direct_morse_forest_journal(
            family_index < family_cursor;
            ++family_index) {
         const auto& family = source_seed_journal.families[family_index];
+        std::size_t expected_projection_index = 0U;
+        if (!try_add(
+                cloud.size(),
+                family.source_event_index,
+                expected_projection_index)) {
+          return fail(
+              std::move(result), BuildFailure::capacity_overflow);
+        }
         if (family.family_index != family_index ||
+            family.journal_event_projection_index !=
+                expected_projection_index ||
+            family.journal_event_projection_index < cloud.size() ||
+            family.journal_event_projection_index >=
+                source_view.event_projection_count() ||
+            family.source_event_arm_identity_digest ==
+                contract::CanonicalId{} ||
             family.order != source_batch.order ||
             family.critical_squared_level != source_batch.squared_level ||
             family.arm_seed_count == 0U ||
@@ -1440,6 +1598,21 @@ build_exact_direct_morse_forest_journal(
               std::move(result),
               BuildFailure::source_batch_inconsistent);
         }
+        const auto family_projection = source_view.event_projection_at(
+            family.journal_event_projection_index);
+        if (family_projection.event_projection_index !=
+                family.journal_event_projection_index ||
+            family_projection.source !=
+                ExactDirectMorseEventSource::direct_support_terminal_event ||
+            family_projection.source_index != family.source_event_index ||
+            family_projection.saddle_order !=
+                std::optional<std::size_t>{source_batch.order} ||
+            family_projection.squared_level !=
+                source_batch.squared_level) {
+          return fail(
+              std::move(result),
+              BuildFailure::source_batch_inconsistent);
+        }
         TemporarySaddle saddle;
         saddle.source_family_index = family_index;
         saddle.arms.reserve(family.arm_seed_count);
@@ -1447,13 +1620,38 @@ build_exact_direct_morse_forest_journal(
              local < family.arm_seed_count;
              ++local) {
           const std::size_t seed_index = family.arm_seed_offset + local;
+          const auto& source_seed =
+              source_seed_journal.arm_seeds[seed_index];
+          if (source_seed.arm_seed_index != seed_index ||
+              source_seed.family_index != family_index ||
+              static_cast<std::size_t>(
+                  source_seed.removed_support_point_id) >= cloud.size()) {
+            return fail(
+                std::move(result),
+                BuildFailure::source_batch_inconsistent);
+          }
           const auto facet =
               reconstruct_exact_direct_saddle_arm_facet(
                   source_facade, source_seed_journal, seed_index);
           const auto key =
               arm_key(facet, cloud.size(), source_batch.order);
-          saddle.arms.push_back(
-              {seed_index, key, 0U, std::nullopt});
+          if (std::find(
+                  key.point_ids.begin(),
+                  key.point_ids.begin() +
+                      static_cast<std::ptrdiff_t>(key.point_count),
+                  source_seed.removed_support_point_id) !=
+              key.point_ids.begin() +
+                  static_cast<std::ptrdiff_t>(key.point_count)) {
+            return fail(
+                std::move(result),
+                BuildFailure::source_batch_inconsistent);
+          }
+          TemporaryArm arm;
+          arm.source_seed_index = seed_index;
+          arm.key = key;
+          arm.removed_support_point_id =
+              source_seed.removed_support_point_id;
+          saddle.arms.push_back(std::move(arm));
           distinct_keys.push_back(key);
           if (!checked_increment(batch_arm_count)) {
             return fail(
@@ -1567,7 +1765,11 @@ build_exact_direct_morse_forest_journal(
           const auto& terminal =
               closure.nodes[projection.terminal_node_index];
           if (!terminal.resolved_component_handle.has_value() ||
-              !terminal.resolved_binding_witness.has_value()) {
+              !terminal.resolved_binding_witness.has_value() ||
+              terminal.exact_center.has_value() !=
+                  terminal.exact_squared_level.has_value() ||
+              terminal.exact_center_and_level_present !=
+                  terminal.exact_center.has_value()) {
             return fail(
                 std::move(result),
                 BuildFailure::closure_contradiction);
@@ -1594,9 +1796,77 @@ build_exact_direct_morse_forest_journal(
                 std::move(result),
                 BuildFailure::closure_contradiction);
           }
-          const auto source_birth = forest_view.birth_record_at(
-              static_cast<std::size_t>(birth_index_u64));
-          if (handle >= components.handle_count() ||
+          const std::size_t birth_index =
+              static_cast<std::size_t>(birth_index_u64);
+          const auto expected_birth_token = replay_token(birth_index, 1U);
+          if (!expected_birth_token.has_value() ||
+              binding_witness.replay_token != *expected_birth_token) {
+            return fail(
+                std::move(result),
+                BuildFailure::closure_contradiction);
+          }
+          const auto source_birth =
+              forest_view.birth_record_at(birth_index);
+          if (source_birth.birth_record_index != birth_index ||
+              source_birth.component_handle != birth_index ||
+              source_birth.order != source_batch.order ||
+              source_birth.source_event_projection_index >=
+                  source_view.event_projection_count() ||
+              source_birth.source_journal_batch_index >=
+                  source_batch_index ||
+              source_birth.source_journal_batch_index >=
+                  source_journal.batches.size()) {
+            return fail(
+                std::move(result),
+                BuildFailure::closure_contradiction);
+          }
+          const auto& terminal_birth_batch = source_journal.batches[
+              source_birth.source_journal_batch_index];
+          const auto terminal_projection = source_view.event_projection_at(
+              source_birth.source_event_projection_index);
+          std::optional<exact::ExactCenter3> expected_terminal_center;
+          if (terminal_projection.source ==
+              ExactDirectMorseEventSource::canonical_singleton) {
+            if (terminal_projection.source_index >= cloud.size()) {
+              return fail(
+                  std::move(result),
+                  BuildFailure::closure_contradiction);
+            }
+            expected_terminal_center = cloud.point(
+                static_cast<PointId>(terminal_projection.source_index))
+                                           .exact();
+          } else if (
+              terminal_projection.source ==
+                  ExactDirectMorseEventSource::
+                      direct_support_terminal_event &&
+              terminal_projection.source_index <
+                  source_facade.events.size()) {
+            expected_terminal_center = source_facade
+                                           .events[terminal_projection
+                                                       .source_index]
+                                           .center;
+          }
+          if (terminal_birth_batch.batch_index !=
+                  source_birth.source_journal_batch_index ||
+              terminal_birth_batch.order != source_batch.order ||
+              terminal_projection.event_projection_index !=
+                  source_birth.source_event_projection_index ||
+              terminal_projection.birth_order !=
+                  std::optional<std::size_t>{source_batch.order} ||
+              terminal_projection.squared_level !=
+                  terminal_birth_batch.squared_level ||
+              !expected_terminal_center.has_value() ||
+              (terminal.exact_center.has_value() &&
+               (*terminal.exact_center != *expected_terminal_center ||
+                *terminal.exact_squared_level !=
+                    terminal_birth_batch.squared_level)) ||
+              !(terminal_birth_batch.squared_level <
+                source_batch.squared_level) ||
+              !valid_key(
+                  terminal.facet_key,
+                  cloud.size(),
+                  source_batch.order) ||
+              handle >= components.handle_count() ||
               !components.active(handle) ||
               components.order(handle) != source_batch.order ||
               components.root(source_birth.component_handle) != handle ||
@@ -1609,7 +1879,12 @@ build_exact_direct_morse_forest_journal(
           resolved_keys[seed_index] = {
               distinct_keys[seed_index],
               components.root(handle),
-              components.reduced_root(handle)};
+              components.reduced_root(handle),
+              birth_index,
+              terminal.facet_key,
+              binding_witness,
+              *expected_terminal_center,
+              terminal_birth_batch.squared_level};
         }
       }
 
@@ -1631,6 +1906,16 @@ build_exact_direct_morse_forest_journal(
           arm.carrier_handle = found->carrier_handle;
           arm.prior_reduced_root_node_id =
               found->prior_reduced_root_node_id;
+          arm.terminal_birth_record_index =
+              found->terminal_birth_record_index;
+          arm.terminal_birth_facet_key =
+              found->terminal_birth_facet_key;
+          arm.terminal_birth_binding_witness =
+              found->terminal_birth_binding_witness;
+          arm.terminal_birth_exact_center =
+              found->terminal_birth_exact_center;
+          arm.terminal_birth_exact_squared_level =
+              found->terminal_birth_exact_squared_level;
         }
       }
 
@@ -1864,7 +2149,13 @@ build_exact_direct_morse_forest_journal(
                  saddle.source_family_index,
                  arm.key,
                  arm.carrier_handle,
-                 arm.prior_reduced_root_node_id});
+                 arm.prior_reduced_root_node_id,
+                 arm.terminal_birth_record_index,
+                 arm.terminal_birth_facet_key,
+                 arm.terminal_birth_binding_witness,
+                 arm.removed_support_point_id,
+                 arm.terminal_birth_exact_center,
+                 arm.terminal_birth_exact_squared_level});
             saddle_carriers.push_back(arm.carrier_handle);
             if (arm.prior_reduced_root_node_id.has_value()) {
               saddle_prior_reduced_roots.push_back(
@@ -1901,7 +2192,9 @@ build_exact_direct_morse_forest_journal(
                saddle_carriers.size() -
                    saddle_prior_reduced_roots.size(),
                saddle_prior_reduced_roots.size(),
-               plan.atomic_group_index});
+               plan.atomic_group_index,
+               family.journal_event_projection_index,
+               family.source_event_arm_identity_digest});
         }
 
         ExactDirectMorseForestAtomicGroup group_record;

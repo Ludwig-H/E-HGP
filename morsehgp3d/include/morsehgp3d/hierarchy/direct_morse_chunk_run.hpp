@@ -15,7 +15,7 @@
 
 namespace morsehgp3d::hierarchy {
 
-inline constexpr std::uint32_t direct_morse_chunk_run_schema_version = 1U;
+inline constexpr std::uint32_t direct_morse_chunk_run_schema_version = 2U;
 inline constexpr std::string_view direct_morse_chunk_run_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_chunk_run_profile =
@@ -134,6 +134,10 @@ class ExactDirectMorseChunkBatchLocatorResolverView {
 struct ExactDirectMorseChunkRunLimits {
   std::size_t maximum_batch_count_per_chunk{};
   std::size_t maximum_science_byte_count_per_batch{};
+  // Per-field cap for canonical exact integer/rational text.  This is
+  // intentionally independent of the enclosing science-segment cap so one
+  // forged length cannot claim the whole segment as one bigint.
+  std::size_t maximum_exact_text_byte_count{};
   std::size_t maximum_total_resolved_key_count_per_chunk{};
   std::size_t maximum_total_arm_join_count_per_chunk{};
   std::size_t maximum_payload_byte_count{};

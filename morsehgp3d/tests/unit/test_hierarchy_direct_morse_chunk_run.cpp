@@ -439,6 +439,7 @@ static_assert(
   return {
       maximum_batch_count,
       64U * 1024U,
+      8U * 1024U,
       4U,
       12U,
       maximum_payload_byte_count,

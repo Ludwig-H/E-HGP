@@ -15,7 +15,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t direct_morse_forest_journal_schema_version =
-    4U;
+    6U;
 inline constexpr std::string_view direct_morse_forest_journal_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_forest_journal_profile =
@@ -34,7 +34,10 @@ inline constexpr std::string_view direct_morse_forest_journal_proof_basis =
     "typed_frozen_r_root_or_l_latent_carrier_hyperedges_deduplicated_"
     "before_transitive_full_component_quotient_qr_counts_only_r_"
     "then_atomic_all_carrier_union_and_minimum_binding_commits_"
-    "conditional_on_lazy_carrier_component_faithfulness_v4";
+    "strict_arm_seed_removed_support_identity_and_terminal_birth_identity_"
+    "key_replay_witness_exact_center_and_level_persisted_same_event_"
+    "projection_and_arm_digest_persisted_"
+    "conditional_on_lazy_carrier_component_faithfulness_v6";
 
 using ExactDirectMorseForestNodeId = std::uint64_t;
 
@@ -127,6 +130,21 @@ struct ExactDirectMorseForestArmRootBinding {
   // enter the frozen batch hypergraph before q_R is evaluated.
   std::optional<ExactDirectMorseForestNodeId>
       prior_reduced_root_node_id;
+  // Durable exact provenance of the positive 10.5c terminal reached by this
+  // strict arm.  The birth identity alone is not enough to reject a
+  // same-order substitution, so its terminal key and locator replay witness
+  // are retained and checked against the referenced birth record.
+  std::size_t terminal_birth_record_index{};
+  ExactDirectSparseFacetKey terminal_birth_facet_key{};
+  ExactDirectSparseFacetWitness terminal_birth_binding_witness{};
+  // Seed identity and exact geometry of the birth selected by the closure
+  // terminal key/witness.  Geometry is freshly replayed from the canonical
+  // singleton cloud or Phase-9 event when a locator-hit terminal deliberately
+  // omits its transient miniball cache.  These trailing fields make a
+  // coordinated same-order terminal substitution observable upstream.
+  spatial::PointId removed_support_point_id{};
+  exact::ExactCenter3 terminal_birth_exact_center{};
+  exact::ExactLevel terminal_birth_exact_squared_level{};
 
   friend bool operator==(
       const ExactDirectMorseForestArmRootBinding&,
@@ -144,6 +162,11 @@ struct ExactDirectMorseForestSaddleRecord {
   std::size_t distinct_latent_carrier_count{};
   std::size_t distinct_prior_reduced_root_count{};
   std::size_t atomic_group_index{};
+  // Copied verbatim from the freshly replayed seed family.  The projection
+  // index is the join authority; source_event_index remains an independently
+  // checked canonical identity, never a replacement join key.
+  std::size_t journal_event_projection_index{};
+  contract::CanonicalId source_event_arm_identity_digest{};
 
   friend bool operator==(
       const ExactDirectMorseForestSaddleRecord&,
@@ -362,6 +385,10 @@ struct ExactDirectMorseForestJournalResult {
       ExactDirectMorseForestDecision::not_certified};
   ExactDirectMorseForestScope scope{
       ExactDirectMorseForestScope::unspecified};
+  // Logical projection count of the freshly replayed source event journal.
+  // It bounds the dense O(events) uniqueness audit without materializing any
+  // global geometric structure.
+  std::size_t source_event_projection_count{};
 
   [[nodiscard]] bool certified_conditional_h0_candidate() const noexcept;
   // Compatibility alias for schema-v2 callers.  It does not claim that the

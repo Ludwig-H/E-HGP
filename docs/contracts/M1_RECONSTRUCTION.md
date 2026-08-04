@@ -111,11 +111,13 @@ Les hypothèses suivantes sont cumulatives. Une hypothèse non établie interdit
 
 ### H1 — sémantique exacte de l'entrée
 
-- $1\leq K_{\max}\leq10$ et $K_{\mathrm{eff}}=\min(K_{\max},n)$;
+- $1\leq K_{\max}\leq10$, $n\geq K_{\max}+2$ et $K_{\mathrm{eff}}=K_{\max}$ pour le contrat produit v2 courant;
 - les coordonnées IEEE-754 finies sont interprétées comme dyadiques exacts;
 - les points sont distincts;
 - tous les niveaux publics sont des rayons carrés exacts;
 - aucun prédicat combinatoire décisif ne reste `unknown`.
+
+Les composants génériques peuvent continuer à représenter $K_{\mathrm{eff}}=n$ et les fixtures terminales correspondantes. Cette extension ne fait pas partie du claim produit courant : la marge de deux points exclut les bords $n=K_{\mathrm{eff}}$ et $n=K_{\mathrm{eff}}+1$, sans autoriser l'omission d'un événement ou d'une selle dont le rang appartient au périmètre restreint.
 
 ### H2 — domaine générique certifié
 
@@ -177,6 +179,12 @@ Toute incidence entre une naissance et un événement distinct du même niveau d
 Pour chaque $1\leq k<K_{\mathrm{eff}}$ et chaque niveau, les données candidates associent à toute composante source une cible unique accompagnée d'un témoin de l'inclusion $L_{k+1}(a)\subseteq L_k(a)$. Les ancres de rang $2\leq s\leq K_{\mathrm{eff}}$ sont posées vers l'état fermé post-lot de l'ordre inférieur, puis propagées sur les forêts.
 
 Les applications candidates sont totales sur le profil `full_pi0`, leurs cibles sont indépendantes du représentant choisi et chaque étape de propagation est rejouable. La commutation globale des carrés n'est pas supposée dans H7 : elle appartient à la conclusion de M.1 et doit aussi être recherchée comme falsificateur. Une application partielle ne satisfait pas H7.
+
+Un schéma de certificat candidat suffisant pour réaliser H7 est la correspondance du [théorème des ancres entre événements critiques de rangs adjacents](../math/THEOREME_ANCRES_EVENEMENTS_ADJACENTS.md). Pour chaque naissance de rang $s\geq2$, le même `event_id` fournit l'unique selle d'ordre $s-1$ au même niveau exact; chacun de ses bras termine sur une naissance de rang exactement $s-1$, puis un certificat O3/O4 relie ces terminaux à la composante inférieure fermée. Les ordres plus bas sont atteints par composition des liens adjacents. Cette réalisation n'exclut pas une autre preuve verticale équivalente satisfaisant les exigences abstraites inchangées de H7; une suppression opportuniste de facette, un hit de locator ou une fenêtre Morton ne constitue toutefois pas une telle preuve.
+
+Dans ce schéma candidat, lorsque $K_{\mathrm{eff}}=n\geq2$ et $s=n$, la naissance terminale $X$ est conservée et ancrée vers sa selle d'ordre $n-1$, même si elle ne produit aucun groupe d'incidence source. Il n'existe ni événement de rang $n+1$, ni selle d'ordre $n$. Cette règle est obligatoire dans `full_pi0`; son carrier peut rester latent dans `hgp_reduced` sans disparaître du certificat de totalité. Si $K_{\mathrm{eff}}<n$, aucun événement terminal de rang $n$ hors tour n'est exigé; si $n=1$, l'unique naissance d'ordre un n'a aucune flèche verticale.
+
+L'implémentation conditionnelle matérialise cette construction en deux journaux plats. `ExactDirectMorseEventRankTowerLinkJournal` joint chaque naissance au rôle selle adjacent du même événement avec géométrie et snapshots exacts; `ExactDirectMorseEventVerticalPropagationJournal` avance ensuite les ancres de tous les carriers et de toutes les racines antérieures et exige leur convergence par groupe. Il refuse un carrier non terminal sans groupe source et conserve explicitement l'unique carrier terminal latent. Le vérificateur fort reconstruit la forêt, les liens et la propagation depuis les autorités amont; le vérificateur compact, volontairement forest-relative, ne peut jamais autoriser seul un artefact persistant. Ce succès reste relatif à la forêt fournie : tant que la totalité O3 des carriers et une autorité O4 complète de memberships carrier--composante, naissances simultanées et incidences silencieuses ne sont pas établies, il ne satisfait ni la totalité H7 sur `full_pi0`, ni O7, ni la conclusion M.1.
 
 ### H8 — sortie rejouable et sans troncature
 
@@ -274,7 +282,7 @@ Le statut du contrat M.1 reste `proof_obligation` tant que toutes les obligation
 | O4 — niveaux simultanés | `proof_obligation` | prouver que la contraction d'un unique hypergraphe par niveau représente le passage de $L_k^{<}(a)$ à $L_k(a)$ pour plusieurs centres, y compris les interactions naissance–selle, sans ordre auxiliaire |
 | O5 — multiplicité | `proved_here` | la [preuve locale de comptabilité des décès](../math/COMPTABILITE_M1_O5_DECES_H0.md) établit par lot $D=\sum_C\max(q_C-1,0)=\lvert R_{\mathrm{touch}}\rvert-\lvert\left\lbrace C:q_C>0\right\rbrace\rvert\leq\sum_e(\lvert U_e\rvert-1)=\sum_e\Delta_1(e)$, sans attribution canonique par événement; la [fixture permanente](../../tests/fixtures/regressions/morse_m1_o5_death_accounting.json) à neuf cas et son [checker indépendant](../../tests/oracle/test_morse_m1_o5_death_accounting.py) passent 4/4 en 0,001 s; le builder local borné, son vérificateur frais et leur intégration runner sont `implemented_and_freshly_certified`, sans fermer O1–O4, O6–O9 ni M.1 global |
 | O6 — exhaustivité temporelle | `proof_obligation` | montrer que les coupes de la forêt sont constantes entre niveaux critiques et exactes aux niveaux fermés, y compris les cas limites $k=1$ et $k=n$ |
-| O7 — verticalité | `proof_obligation` | prouver l'existence, l'unicité et la propagation des cibles verticales complètes, puis la commutation de tous les carrés ordre–échelle |
+| O7 — verticalité | `proof_obligation` | la cible topologique par facette commune et sa naturalité sont démontrées relativement à Gamma complet; il reste à produire de façon sparse exactement un lien naissance--selle adjacent par événement, à propager toutes les ancres de carriers vers une cible unique et à rejouer tous les carrés ordre–échelle sans Gamma exhaustif |
 | O8 — domaine | `proof_obligation` | démontrer que les hypothèses de H2 excluent précisément les phénomènes locaux non traités utilisés dans O1–O7, sans généralisation silencieuse aux plateaux |
 | O9 — représentation finie | `proof_obligation` | prouver que `MergeForest`, `coverage_log`, lots et ancres suffisent à rejouer toutes les composantes, notamment les composantes recouvrantes pour $k\geq2$ |
 

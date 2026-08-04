@@ -622,6 +622,17 @@ void encode_facet_key(
   return key;
 }
 
+void encode_exact_text(
+    Writer& writer,
+    std::string_view value,
+    std::size_t maximum_exact_text_byte_count) {
+  if (value.empty() || value.size() > maximum_exact_text_byte_count) {
+    throw std::length_error(
+        "a Phase-15 chunk-run exact text exceeds its field cap");
+  }
+  writer.text(value);
+}
+
 void encode_locator_stamp(
     Writer& writer,
     const ExactDirectSparsePositiveFacetLocatorSnapshotStamp& stamp) {
@@ -674,7 +685,8 @@ void require_complete_scientific_delta(
 
 [[nodiscard]] std::vector<std::uint8_t> encode_science(
     const ExactDirectSparseFacetDescentBatchExecutionResult& result,
-    std::size_t maximum_byte_count) {
+    std::size_t maximum_byte_count,
+    std::size_t maximum_exact_text_byte_count) {
   require_complete_scientific_delta(result);
   Writer writer{maximum_byte_count};
   writer.u32(result.schema_version);
@@ -691,7 +703,10 @@ void require_complete_scientific_delta(
   writer.size(result.source_arm_seed_begin_index);
   writer.size(result.source_arm_seed_end_index);
   writer.size(result.source_facet_cardinality);
-  writer.text(result.closed_batch_squared_level.canonical_key());
+  encode_exact_text(
+      writer,
+      result.closed_batch_squared_level.canonical_key(),
+      maximum_exact_text_byte_count);
   writer.u64(result.locator_query_witness.external_authority_id);
   writer.u64(result.locator_query_witness.replay_token);
   encode_locator_stamp(writer, result.locator_snapshot_stamp);
@@ -709,10 +724,26 @@ void require_complete_scientific_delta(
   for (const auto& resolved : result.resolved_keys) {
     writer.size(resolved.resolved_key_index);
     encode_facet_key(writer, resolved.source_facet_key);
+    encode_facet_key(writer, resolved.resolved_terminal_facet_key);
+    writer.size(resolved.terminal_birth_record_index);
     writer.size(resolved.resolved_component_handle);
     writer.u64(
         resolved.resolved_binding_witness.external_authority_id);
     writer.u64(resolved.resolved_binding_witness.replay_token);
+    const exact::ExactRational3Record center =
+        resolved.terminal_birth_exact_center.to_record();
+    encode_exact_text(
+        writer, center.x_numerator, maximum_exact_text_byte_count);
+    encode_exact_text(
+        writer, center.y_numerator, maximum_exact_text_byte_count);
+    encode_exact_text(
+        writer, center.z_numerator, maximum_exact_text_byte_count);
+    encode_exact_text(
+        writer, center.denominator, maximum_exact_text_byte_count);
+    encode_exact_text(
+        writer,
+        resolved.terminal_birth_exact_squared_level.canonical_key(),
+        maximum_exact_text_byte_count);
     writer.u8(static_cast<std::uint8_t>(
         resolved.closure_disposition));
     writer.boolean(
@@ -774,7 +805,7 @@ struct ScienceShape {
         "a Phase-15 chunk-run batch interval is reversed");
   }
   const std::size_t facet_cardinality = reader.size();
-  if (facet_cardinality >
+  if (facet_cardinality == 0U || facet_cardinality >
       direct_sparse_positive_facet_maximum_point_count) {
     throw std::invalid_argument(
         "a Phase-15 chunk-run facet cardinality exceeds K=10");
@@ -787,8 +818,12 @@ struct ScienceShape {
     throw std::invalid_argument(
         "a Phase-15 chunk-run level is not canonical");
   }
-  static_cast<void>(reader.u64());
-  static_cast<void>(reader.u64());
+  const std::uint64_t locator_authority_id = reader.u64();
+  const std::uint64_t locator_query_token = reader.u64();
+  if (locator_authority_id == 0U || locator_query_token == 0U) {
+    throw std::invalid_argument(
+        "a Phase-15 chunk-run locator witness is invalid");
+  }
   static_cast<void>(decode_locator_stamp(reader));
   const std::size_t required_lane_count = reader.size();
   const std::size_t required_family_count = reader.size();
@@ -837,10 +872,43 @@ struct ScienceShape {
       throw std::invalid_argument(
           "a Phase-15 chunk-run resolved-key index is not dense");
     }
-    static_cast<void>(decode_facet_key(reader));
+    const auto source_facet_key = decode_facet_key(reader);
+    const auto terminal_facet_key = decode_facet_key(reader);
+    if (source_facet_key.point_count != facet_cardinality ||
+        terminal_facet_key.point_count != facet_cardinality) {
+      throw std::invalid_argument(
+          "a Phase-15 chunk-run resolved key changed order");
+    }
+    const std::size_t terminal_birth_record_index = reader.size();
     static_cast<void>(reader.size());
-    static_cast<void>(reader.u64());
-    static_cast<void>(reader.u64());
+    const std::uint64_t binding_authority_id = reader.u64();
+    const std::uint64_t binding_replay_token = reader.u64();
+    if (binding_authority_id != locator_authority_id ||
+        binding_replay_token == 0U ||
+        binding_replay_token % 3U != 1U ||
+        (binding_replay_token - 1U) / 3U !=
+            terminal_birth_record_index) {
+      throw std::invalid_argument(
+          "a Phase-15 chunk-run terminal birth witness is invalid");
+    }
+    const exact::ExactRational3 terminal_center =
+        exact::ExactRational3::from_record(
+            {exact::ExactRational3::schema_version,
+             reader.text(maximum_exact_text_byte_count),
+             reader.text(maximum_exact_text_byte_count),
+             reader.text(maximum_exact_text_byte_count),
+             reader.text(maximum_exact_text_byte_count),
+             exact::ExactRational3::unit});
+    static_cast<void>(terminal_center);
+    const std::string terminal_exact_level =
+        reader.text(maximum_exact_text_byte_count);
+    const exact::ExactLevel parsed_terminal_level{
+        exact::ExactRational::parse_canonical(terminal_exact_level)};
+    if (parsed_terminal_level.canonical_key() != terminal_exact_level ||
+        !(parsed_terminal_level < parsed_level)) {
+      throw std::invalid_argument(
+          "a Phase-15 chunk-run terminal birth level is invalid");
+    }
     if (reader.u8() !=
         static_cast<std::uint8_t>(
             ExactDirectSparseFacetDescentClosureDisposition::
@@ -1015,7 +1083,7 @@ struct ParsedPayload {
     batch.science.assign(science.begin(), science.end());
     batch.shape = validate_science(
         batch.science,
-        limits.maximum_science_byte_count_per_batch);
+        limits.maximum_exact_text_byte_count);
     if (batch.shape.source_batch_index !=
             parsed.chunk.source_batch_begin_index + index ||
         batch.shape.source_chunk_index != parsed.chunk.chunk_index) {
@@ -1233,6 +1301,7 @@ void hash_industrial_counters(
   hash_plan_budget(builder, plan_budget);
   hash_size(builder, limits.maximum_batch_count_per_chunk);
   hash_size(builder, limits.maximum_science_byte_count_per_batch);
+  hash_size(builder, limits.maximum_exact_text_byte_count);
   hash_size(
       builder, limits.maximum_total_resolved_key_count_per_chunk);
   hash_size(builder, limits.maximum_total_arm_join_count_per_chunk);
@@ -1460,6 +1529,9 @@ build_batch_cursors(
     const ExactDirectMorseChunkRunLimits& limits) noexcept {
   return limits.maximum_batch_count_per_chunk != 0U &&
          limits.maximum_science_byte_count_per_batch != 0U &&
+         limits.maximum_exact_text_byte_count != 0U &&
+         limits.maximum_exact_text_byte_count <=
+             limits.maximum_science_byte_count_per_batch &&
          limits.maximum_payload_byte_count != 0U &&
          limits.serialization_reserved_ns != 0U &&
          limits.checkpoint_reserved_ns != 0U;
@@ -1972,7 +2044,9 @@ struct ExactDirectMorseChunkRunContext::Impl {
             parsed.chunk.source_batch_begin_index + index;
         auto fresh = replay_batch(batch_index);
         const auto fresh_science = encode_science(
-            fresh, limits.maximum_science_byte_count_per_batch);
+            fresh,
+            limits.maximum_science_byte_count_per_batch,
+            limits.maximum_exact_text_byte_count);
         if (fresh_science != parsed.batches[index].science) {
           throw std::invalid_argument(
               "a Phase-15 transition science differs from fresh 14D");
@@ -2373,7 +2447,8 @@ ExactDirectMorseChunkRunContext::prepare_chunk_impl(
           fresh,
           std::min(
               impl_->limits.maximum_science_byte_count_per_batch,
-              remaining_payload_byte_count));
+              remaining_payload_byte_count),
+          impl_->limits.maximum_exact_text_byte_count);
     } catch (const std::length_error&) {
       if (remaining_payload_byte_count <=
           impl_->limits.maximum_science_byte_count_per_batch) {

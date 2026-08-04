@@ -105,6 +105,16 @@ void append_level(
   append_text(builder, value.denominator_string());
 }
 
+void append_center(
+    contract::CanonicalSha256Builder& builder,
+    const exact::ExactCenter3& value) {
+  const exact::ExactRational3Record record = value.to_record();
+  append_text(builder, record.x_numerator);
+  append_text(builder, record.y_numerator);
+  append_text(builder, record.z_numerator);
+  append_text(builder, record.denominator);
+}
+
 void append_key(
     contract::CanonicalSha256Builder& builder,
     const ExactDirectSparseFacetKey& value) {
@@ -181,7 +191,7 @@ void append_batch_precommit_payload(
   contract::CanonicalSha256Builder builder;
   append_text(
       builder,
-      "MorseHGP3D/phase15/forest-batch-segment-payload/v1");
+      "MorseHGP3D/phase15/forest-batch-segment-payload/v2");
   append_cursor_without_digest(builder, begin_cursor);
   append_batch_precommit_payload(builder, batch);
   append_size(builder, birth_records.size());
@@ -203,6 +213,14 @@ void append_batch_precommit_payload(
     append_key(builder, record.strict_arm_key);
     append_size(builder, record.frozen_carrier_component_handle);
     append_optional_node_id(builder, record.prior_reduced_root_node_id);
+    append_size(builder, record.terminal_birth_record_index);
+    append_key(builder, record.terminal_birth_facet_key);
+    append_witness(builder, record.terminal_birth_binding_witness);
+    append_u64(
+        builder,
+        static_cast<std::uint64_t>(record.removed_support_point_id));
+    append_center(builder, record.terminal_birth_exact_center);
+    append_level(builder, record.terminal_birth_exact_squared_level);
   }
   append_size(builder, saddle_records.size());
   for (const auto& record : saddle_records) {
@@ -216,6 +234,8 @@ void append_batch_precommit_payload(
     append_size(builder, record.distinct_latent_carrier_count);
     append_size(builder, record.distinct_prior_reduced_root_count);
     append_size(builder, record.atomic_group_index);
+    append_size(builder, record.journal_event_projection_index);
+    append_id(builder, record.source_event_arm_identity_digest);
   }
   append_size(builder, atomic_groups.size());
   for (const auto& record : atomic_groups) {
@@ -527,6 +547,12 @@ struct TemporaryArm {
   ExactDirectSparseFacetKey key{};
   ExactDirectSparseComponentHandle carrier_handle{};
   std::optional<ExactDirectMorseForestNodeId> prior_reduced_root_node_id;
+  std::size_t terminal_birth_record_index{};
+  ExactDirectSparseFacetKey terminal_birth_facet_key{};
+  ExactDirectSparseFacetWitness terminal_birth_binding_witness{};
+  PointId removed_support_point_id{};
+  exact::ExactCenter3 terminal_birth_exact_center{};
+  exact::ExactLevel terminal_birth_exact_squared_level{};
 };
 
 struct TemporarySaddle {
@@ -538,6 +564,11 @@ struct ResolvedState {
   ExactDirectSparseFacetKey key{};
   ExactDirectSparseComponentHandle carrier_handle{};
   std::optional<ExactDirectMorseForestNodeId> prior_reduced_root_node_id;
+  std::size_t terminal_birth_record_index{};
+  ExactDirectSparseFacetKey terminal_birth_facet_key{};
+  ExactDirectSparseFacetWitness terminal_birth_binding_witness{};
+  exact::ExactCenter3 terminal_birth_exact_center{};
+  exact::ExactLevel terminal_birth_exact_squared_level{};
 };
 
 struct GroupPlan {
@@ -1329,6 +1360,8 @@ class ExactDirectMorseForestReducer::Impl {
         source_manifest_.effective_maximum_order;
     result_.source_higher_canonical_cloud_digest =
         source_manifest_.source_higher_canonical_cloud_digest;
+    result_.source_event_projection_count =
+        source_manifest_.logical_event_projection_count;
     initialize_scope(result_);
     result_.source_event_journal_freshly_replayed = false;
     result_.source_strict_arm_journal_freshly_replayed = false;
@@ -2407,6 +2440,10 @@ class ExactDirectMorseForestReducer::Impl {
               resolved.source_facet_key,
               source_manifest_.point_count,
               source_batch.order) ||
+          !valid_key(
+              resolved.resolved_terminal_facet_key,
+              source_manifest_.point_count,
+              source_batch.order) ||
           (index != 0U &&
            !key_less(
                batch.resolved_keys[index - 1U].source_facet_key,
@@ -2431,7 +2468,10 @@ class ExactDirectMorseForestReducer::Impl {
       }
       const std::size_t birth_index =
           static_cast<std::size_t>(birth_index_u64);
-      if (birth_index >= global_logical_birth_record_count() ||
+      if (resolved.terminal_birth_record_index != birth_index ||
+          birth_index >= global_logical_birth_record_count() ||
+          !(resolved.terminal_birth_exact_squared_level <
+            source_batch.squared_level) ||
           resolved.resolved_component_handle >=
               components_.handle_count() ||
           !components_.active(resolved.resolved_component_handle) ||
@@ -2468,7 +2508,12 @@ class ExactDirectMorseForestReducer::Impl {
           {resolved.source_facet_key,
            resolved.resolved_component_handle,
            components_.reduced_root(
-               resolved.resolved_component_handle)});
+               resolved.resolved_component_handle),
+           birth_index,
+           resolved.resolved_terminal_facet_key,
+           resolved.resolved_binding_witness,
+           resolved.terminal_birth_exact_center,
+           resolved.terminal_birth_exact_squared_level});
     }
 
     std::vector<TemporarySaddle> temporary_saddles;
@@ -2484,13 +2529,45 @@ class ExactDirectMorseForestReducer::Impl {
       const auto& family =
           source_window.families[
               family_index - batch.source_family_begin_index];
-      if (family.family_index != family_index ||
+      std::size_t expected_projection_index = 0U;
+      if (!try_add(
+              source_manifest_.point_count,
+              family.source_event_index,
+              expected_projection_index) ||
+          family.family_index != family_index ||
           family.journal_batch_index != batch.source_batch_index ||
+          family.journal_event_projection_index !=
+              expected_projection_index ||
+          family.journal_event_projection_index <
+              source_manifest_.point_count ||
+          family.journal_event_projection_index >=
+              source_manifest_.logical_event_projection_count ||
+          family.source_event_arm_identity_digest ==
+              contract::CanonicalId{} ||
           family.order != source_batch.order ||
           family.critical_squared_level != source_batch.squared_level ||
           family.arm_seed_count == 0U ||
           family.arm_seed_count > 4U ||
           family.arm_seed_offset != arm_cursor) {
+        return reject(
+            std::move(folded),
+            ExactDirectMorseForestReducerFoldDecision::
+                no_reducer_batch_inconsistent);
+      }
+      const ExactDirectMorseEventProjection* family_projection =
+          source_window.projections.find(
+              family.journal_event_projection_index);
+      if (family_projection == nullptr ||
+          family_projection->event_projection_index !=
+              family.journal_event_projection_index ||
+          family_projection->source !=
+              ExactDirectMorseEventSource::
+                  direct_support_terminal_event ||
+          family_projection->source_index != family.source_event_index ||
+          family_projection->saddle_order !=
+              std::optional<std::size_t>{source_batch.order} ||
+          family_projection->squared_level !=
+              source_batch.squared_level) {
         return reject(
             std::move(folded),
             ExactDirectMorseForestReducerFoldDecision::
@@ -2543,7 +2620,13 @@ class ExactDirectMorseForestReducer::Impl {
             {arm_cursor,
              reconstructed,
              resolved.carrier_handle,
-             resolved.prior_reduced_root_node_id});
+             resolved.prior_reduced_root_node_id,
+             resolved.terminal_birth_record_index,
+             resolved.terminal_birth_facet_key,
+             resolved.terminal_birth_binding_witness,
+             seed.removed_support_point_id,
+             resolved.terminal_birth_exact_center,
+             resolved.terminal_birth_exact_squared_level});
         ++arm_cursor;
         ++join_cursor;
       }
@@ -2795,7 +2878,13 @@ class ExactDirectMorseForestReducer::Impl {
                saddle.source_family_index,
                arm.key,
                arm.carrier_handle,
-               arm.prior_reduced_root_node_id});
+               arm.prior_reduced_root_node_id,
+               arm.terminal_birth_record_index,
+               arm.terminal_birth_facet_key,
+               arm.terminal_birth_binding_witness,
+               arm.removed_support_point_id,
+               arm.terminal_birth_exact_center,
+               arm.terminal_birth_exact_squared_level});
           saddle_carriers.push_back(arm.carrier_handle);
           if (arm.prior_reduced_root_node_id.has_value()) {
             saddle_roots.push_back(*arm.prior_reduced_root_node_id);
@@ -2826,7 +2915,9 @@ class ExactDirectMorseForestReducer::Impl {
              saddle_carriers.size(),
              saddle_carriers.size() - saddle_roots.size(),
              saddle_roots.size(),
-             plan.atomic_group_index});
+             plan.atomic_group_index,
+             family.journal_event_projection_index,
+             family.source_event_arm_identity_digest});
       }
 
       ExactDirectMorseForestAtomicGroup group_record;

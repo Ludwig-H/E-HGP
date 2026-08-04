@@ -136,6 +136,8 @@ Ainsi, toute vraie naissance isolée est une sphère critique de rang fermé $k$
 
 ## 10. Ancre naissance–selle entre ordres
 
+La formulation normative complète, sa preuve locale, le lemme de facette commune, le cas terminal et le schéma de certificat sont fixés dans le [théorème des ancres entre événements critiques de rangs adjacents](THEOREME_ANCRES_EVENEMENTS_ADJACENTS.md). La flèche primitive relie le même événement de rang $s$ entre son rôle de naissance à l'ordre $s$ et son rôle de selle à l'ordre $s-1$; toute cible d'ordre plus bas est une composition de flèches adjacentes.
+
 Pour $2\leq s\leq K_{\mathrm{eff}}$, une sphère critique de rang $s$ est un minimum de $D_s$ et un événement d'indice un de $D_{s-1}$. À son niveau $a$, son centre appartient à $L_s(a)$ et à $L_{s-1}(a)$. Dans `full_pi0`, la composante nouvellement née dans $T_s$ doit être envoyée vers la composante de $T_{s-1}$ contenant ce centre après traitement du lot fermé de niveau $a$. Le rang un n'a pas de tranche inférieure; un événement de rang $K_{\mathrm{eff}}+1$ ne possède pas de tranche source dans la tour calculée.
 
 Dans la base exacte v2, la cible est l'unique composante de Gamma exhaustif qui contient la composante source au même niveau fermé. Le backend de référence la calcule directement et vérifie l'inclusion et l'unicité.
@@ -150,7 +152,7 @@ Une coface non-Gabriel peut contenir bien plus de points strictement intérieurs
 
 Toute composante source réduite d'ordre $k+1$ contient un label $Q$ de taille $k+1$. Vu à l'ordre $k$, ce label est une coface qui relie ses facettes, donc sa cible Gamma est non triviale. Deux labels adjacents de la source partagent une facette, ce qui garantit l'indépendance de la cible dans Gamma. L'oracle `locate_reduced_root(k,Q,a)` reste un candidat de réduction; ses flèches sont partielles sauf vérification indépendante contre Gamma.
 
-Pour $2\leq s\leq K_{\mathrm{eff}}$, le minimum de rang $s$ est initialement une facette isolée et n'est donc pas un nœud public de `hgp_reduced`. L'ancre naissance–selle ne doit pas être promise dans ce profil avant qu'une composante source non triviale soit effectivement représentée; elle devient alors un contrôle croisé de la cible Gamma. Cette asymétrie n'existe pas dans `full_pi0`.
+Pour $2\leq s\leq K_{\mathrm{eff}}$, le minimum de rang $s$ est initialement une facette isolée et n'est donc pas un nœud public de `hgp_reduced`. L'ancre naissance–selle existe néanmoins sur son carrier latent interne et doit rester dans le certificat; seule son exposition comme application sur un nœud public attend qu'une composante source non triviale soit représentée. Lorsqu'un binding résout ce carrier vers une racine dans un snapshot, l'ancien handle latent ne peut plus être comparé comme un singleton distinct. Cette asymétrie de représentation n'existe pas dans `full_pi0`.
 
 Cette règle reste correcte lorsque plusieurs événements partagent $a$, à condition de poser l'image après la contraction simultanée.
 

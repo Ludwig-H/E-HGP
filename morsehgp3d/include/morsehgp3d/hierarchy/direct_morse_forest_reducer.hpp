@@ -16,7 +16,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t direct_morse_forest_reducer_schema_version =
-    2U;
+    3U;
 inline constexpr std::string_view direct_morse_forest_reducer_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_forest_reducer_profile =
@@ -31,7 +31,7 @@ inline constexpr std::string_view direct_morse_forest_reducer_proof_basis =
     "strict_batch_stream_frozen_r_or_l_carrier_hypergraph_complete_"
     "transitive_quotient_qr_then_atomic_locator_and_scientific_commit_"
     "shared_locator_canonical_parent_authority_implicit_singleton_carrier_"
-    "base_and_direct_only_state_suffix_v2";
+    "base_direct_only_state_suffix_and_schema6_terminal_event_provenance_v3";
 inline constexpr std::uint32_t
     direct_morse_forest_live_commit_schema_version = 1U;
 inline constexpr std::string_view direct_morse_forest_live_commit_backend =
