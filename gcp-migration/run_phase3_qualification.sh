@@ -73,6 +73,7 @@ PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE=0
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR=0
 PHASE15_RANKED_PAIR_CLASSIFIER=0
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA=0
+PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA=0
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC=0
 POINT_HIERARCHY_QUALITY_SCALE=0
 POINT_HIERARCHY_QUALITY_PRODUCER=""
@@ -106,6 +107,8 @@ LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT=""
+LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT=""
+LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT=""
 LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT=""
 LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT=""
 LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT=""
@@ -239,6 +242,14 @@ smoke et ne ferme ni catalogue global, ni hiérarchie, ni SLO. Elle s'exécute
 seule ou, exclusivement, dans la même session que le profil explicite
 --phase15-device-frontier-50k-kmax5-warm.
 
+--phase15-exact-higher-support-terminal-geometry-cuda qualifie exclusivement
+le lot schema-6 de 21 tâches (12 historiques et 9 terminales) sur supports 3
+et 4. Elle exige les quatre catégories dans chacune des deux arités, la
+répétabilité du lot, les routes natives int256/int512/int1024, le repli
+rationnel exact, trois entrées ressources ptxas, un ELF sm_120 sans PTX et
+memcheck. Elle ne revendique ni classifieur terminal complet, ni catalogue
+Gamma2, hiérarchie, échelle industrielle, SLO ou statut public.
+
 --phase15-resident-transactional-semantic qualifie exclusivement la fixture
 sémantique résidente n=16 pour K=5 puis K=10. Chaque exécution est bornée à
 60 secondes et mesurée par l'horloge murale externe de l'invité. Elle exige
@@ -360,6 +371,12 @@ while (($# > 0)); do
             PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA=1
             shift
             ;;
+        --phase15-exact-higher-support-terminal-geometry-cuda)
+            ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 0)) || \
+                die "--phase15-exact-higher-support-terminal-geometry-cuda ne peut être fourni qu'une fois."
+            PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA=1
+            shift
+            ;;
         --phase15-resident-transactional-semantic)
             ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 0)) || \
                 die "--phase15-resident-transactional-semantic ne peut être fourni qu'une fois."
@@ -444,6 +461,21 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
           PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE != 1))); then
         die "--phase15-exact-pair-block-witness-cuda ne peut accompagner que --phase15-device-frontier-50k-kmax5-warm."
     fi
+fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1 && \
+    (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || \
+     MORTON_YAO48_SEED_WORK_PROFILE == 1 || \
+     PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 || \
+     PHASE7_H_POLYTOPE == 1 || PHASE9_PAIR_SUPPORT_PHI == 1 || \
+     PHASE15_EXACT_DIAMETRAL_PHI == 1 || \
+     PHASE15_DEVICE_FRONTIER_50K == 1 || \
+     PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR == 1 || \
+     PHASE15_RANKED_PAIR_CLASSIFIER == 1 || \
+     PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1 || \
+     PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1 || \
+     POINT_HIERARCHY_QUALITY_SCALE == 1))); then
+    die "--phase15-exact-higher-support-terminal-geometry-cuda est mutuellement exclusive de tous les autres compagnons."
 fi
 if ((PHASE15_DEVICE_FRONTIER_50K == 1 && \
     (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
@@ -605,6 +637,13 @@ worktree_status="$(GIT_OPTIONAL_LOCKS=0 git -C "${REPOSITORY_ROOT}" status --por
 
 HEAD_SHA="$(git -C "${REPOSITORY_ROOT}" rev-parse HEAD)" || die "HEAD illisible."
 [[ "${HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]] || die "SHA HEAD non canonique : ${HEAD_SHA}."
+HEAD_TREE=""
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    HEAD_TREE="$(git -C "${REPOSITORY_ROOT}" rev-parse 'HEAD^{tree}')" || \
+        die "Tree HEAD illisible."
+    [[ "${HEAD_TREE}" =~ ^[0-9a-f]{40}$ ]] || \
+        die "Tree HEAD non canonique : ${HEAD_TREE}."
+fi
 
 ORIGIN_URL="$(git -C "${REPOSITORY_ROOT}" remote get-url origin)" || \
     die "URL du remote origin illisible."
@@ -769,6 +808,12 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
         ! -L "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT="${RESULT_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT}" && \
+        ! -L "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT="${RESULT_DIR}/phase15-resident-transactional-semantic-${HEAD_SHA}.json"
     [[ ! -e "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" && \
@@ -925,6 +970,14 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
             LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
         fi
         die "Impossible de créer l'artefact exact pair-block witness CUDA Phase 15 temporaire local."
+    fi
+fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    if ! LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase15-exact-higher-support-terminal-geometry-cuda-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact terminal-geometry CUDA Phase 15 temporaire local."
     fi
 fi
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
@@ -1449,6 +1502,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" || true
+    fi
     if [[ -n "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" && \
         -e "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" || true
@@ -1546,6 +1603,7 @@ printf '%s\n' \
     "  négatif Gabriel q=3: $([[ ${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR} == 1 ]] && printf 'carrier pair-only; aucune suppression Gamma2 activée' || printf 'désactivé')" \
     "  classifieur rangs 2-3: $([[ ${PHASE15_RANKED_PAIR_CLASSIFIER} == 1 ]] && printf 'qualification CUDA native bornée activée' || printf 'désactivé')" \
     "  pair-block A×B×W: $([[ ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA} == 1 ]] && printf 'différentiel CUDA natif borné activé' || printf 'désactivé')" \
+    "  terminal geometry 3-4: $([[ ${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA} == 1 ]] && printf 'qualification schema-6 CUDA native activée' || printf 'désactivé')" \
     "  campagne resident: $([[ ${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC} == 1 ]] && printf 'scheduler n=16 K5/K10 + forêt H0/worklist K5/K10 + frontier 50k/10M/30M activés' || printf 'désactivé')" \
     "  qualité points  : $([[ ${POINT_HIERARCHY_QUALITY_SCALE} == 1 ]] && printf 'true MorseHGP3D exact 50k/10M/30M activé' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
@@ -1581,6 +1639,7 @@ remote_phase15_device_frontier_50k_artifact=""
 remote_phase15_device_frontier_strict_interior_artifact=""
 remote_phase15_ranked_pair_classifier_artifact=""
 remote_phase15_exact_pair_block_witness_cuda_artifact=""
+remote_phase15_exact_higher_support_terminal_geometry_cuda_artifact=""
 remote_phase15_resident_transactional_semantic_artifact=""
 remote_point_hierarchy_quality_artifact=""
 remote_point_hierarchy_quality_producer=""
@@ -1601,6 +1660,7 @@ quoted_phase15_device_frontier_50k_artifact=""
 quoted_phase15_device_frontier_strict_interior_artifact=""
 quoted_phase15_ranked_pair_classifier_artifact=""
 quoted_phase15_exact_pair_block_witness_cuda_artifact=""
+quoted_phase15_exact_higher_support_terminal_geometry_cuda_artifact=""
 quoted_phase15_resident_transactional_semantic_artifact=""
 quoted_point_hierarchy_quality_artifact=""
 quoted_point_hierarchy_quality_producer=""
@@ -1617,6 +1677,7 @@ phase15_device_frontier_50k_worker_option=""
 phase15_device_frontier_strict_interior_worker_option=""
 phase15_ranked_pair_classifier_worker_option=""
 phase15_exact_pair_block_witness_cuda_worker_option=""
+phase15_exact_higher_support_terminal_geometry_cuda_worker_option=""
 phase15_resident_transactional_semantic_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
@@ -1695,6 +1756,11 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
     quoted_phase15_exact_pair_block_witness_cuda_artifact="$(shell_quote "${remote_phase15_exact_pair_block_witness_cuda_artifact}")"
     phase15_exact_pair_block_witness_cuda_worker_option=" --phase15-exact-pair-block-witness-cuda-output ${quoted_phase15_exact_pair_block_witness_cuda_artifact}"
 fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    remote_phase15_exact_higher_support_terminal_geometry_cuda_artifact="${REMOTE_WORKDIR}/phase15-exact-higher-support-terminal-geometry-cuda-result.json"
+    quoted_phase15_exact_higher_support_terminal_geometry_cuda_artifact="$(shell_quote "${remote_phase15_exact_higher_support_terminal_geometry_cuda_artifact}")"
+    phase15_exact_higher_support_terminal_geometry_cuda_worker_option=" --phase15-exact-higher-support-terminal-geometry-cuda-output ${quoted_phase15_exact_higher_support_terminal_geometry_cuda_artifact}"
+fi
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     remote_phase15_resident_transactional_semantic_artifact="${REMOTE_WORKDIR}/phase15-resident-transactional-semantic-result.json"
     quoted_phase15_resident_transactional_semantic_artifact="$(shell_quote "${remote_phase15_resident_transactional_semantic_artifact}")"
@@ -1728,7 +1794,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}${phase15_exact_pair_block_witness_cuda_worker_option}${phase15_resident_transactional_semantic_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}${phase15_exact_diametral_phi_worker_option}${phase15_device_frontier_50k_worker_option}${phase15_device_frontier_strict_interior_worker_option}${phase15_ranked_pair_classifier_worker_option}${phase15_exact_pair_block_witness_cuda_worker_option}${phase15_exact_higher_support_terminal_geometry_cuda_worker_option}${phase15_resident_transactional_semantic_worker_option}"
 
 if ((POINT_HIERARCHY_QUALITY_SCALE == 1)); then
     certify_session_deadline || \
@@ -1906,6 +1972,19 @@ if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase15_exact_pair_block_witness_cuda_artifact}" \
         "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase15_exact_higher_support_terminal_geometry_cuda_artifact}" \
+        "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -2423,6 +2502,32 @@ import assemble_phase15_exact_pair_block_witness_cuda_qualification as assembler
 assembler.validate_artifact_file(
     artifact_path,
     git_sha=git_sha,
+    environment_artifact_path=environment_artifact_path,
+)
+PY
+fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    [[ -s "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" ]] || \
+        die "Artefact terminal-geometry CUDA Phase 15 distant récupéré mais vide."
+    python3 -B - \
+        "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${HEAD_TREE}" "${LOCAL_TEMP_RESULT}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+from pathlib import Path
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+git_tree = sys.argv[3]
+environment_artifact_path = Path(sys.argv[4])
+sys.path.insert(0, sys.argv[5])
+
+import assemble_phase15_exact_higher_support_terminal_geometry_cuda_qualification as assembler
+
+assembler.validate_artifact_file(
+    artifact_path,
+    git_sha=git_sha,
+    git_tree=git_tree,
     environment_artifact_path=environment_artifact_path,
 )
 PY
@@ -5319,10 +5424,13 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_RESULT}" \
     "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" \
     "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}" \
+    "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" \
+    "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT}" \
     "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" \
     "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RESULT}" \
     "${LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT}" \
-    "${LOCAL_POINT_HIERARCHY_QUALITY_RESULT}" <<'PY'
+    "${LOCAL_POINT_HIERARCHY_QUALITY_RESULT}" \
+    "${REPOSITORY_ROOT}" "${HEAD_SHA}" "${HEAD_TREE}" <<'PY'
 import hashlib
 import json
 import os
@@ -5382,13 +5490,19 @@ if sys.argv[30] or sys.argv[31]:
 if sys.argv[32] or sys.argv[33]:
     if not sys.argv[32] or not sys.argv[33]:
         raise SystemExit(
-            "paire de publication resident-transactional-semantic Phase 15 incomplète"
+            "paire de publication terminal-geometry CUDA Phase 15 incomplète"
         )
     pairs.append((Path(sys.argv[32]), Path(sys.argv[33])))
 if sys.argv[34] or sys.argv[35]:
     if not sys.argv[34] or not sys.argv[35]:
-        raise SystemExit("paire de publication qualité de points incomplète")
+        raise SystemExit(
+            "paire de publication resident-transactional-semantic Phase 15 incomplète"
+        )
     pairs.append((Path(sys.argv[34]), Path(sys.argv[35])))
+if sys.argv[36] or sys.argv[37]:
+    if not sys.argv[36] or not sys.argv[37]:
+        raise SystemExit("paire de publication qualité de points incomplète")
+    pairs.append((Path(sys.argv[36]), Path(sys.argv[37])))
 
 documents = []
 for temporary, _ in pairs:
@@ -5449,6 +5563,23 @@ for index in range(1, len(documents)):
         raise SystemExit("provenance Phase 3 du compagnon absente avant publication")
     provenance["environment_artifact_sha256"] = final_phase3_sha256
     rewrite_temporary(pairs[index][0], encode_document(documents[index]))
+
+if sys.argv[32] or sys.argv[33]:
+    sys.path.insert(0, str(Path(sys.argv[38]) / "morsehgp3d" / "tests" / "cuda"))
+    import assemble_phase15_exact_higher_support_terminal_geometry_cuda_qualification as terminal_geometry_assembler
+
+    terminal_geometry_assembler.validate_final_artifact_file(
+        Path(sys.argv[32]),
+        git_sha=sys.argv[39],
+        git_tree=sys.argv[40],
+        environment_artifact_path=Path(sys.argv[1]),
+        project=sys.argv[19],
+        zone=sys.argv[20],
+        instance=sys.argv[21],
+        guest_shutdown_minutes=int(sys.argv[22]),
+        final_status_verified_at_utc=sys.argv[24],
+        last_start_timestamp=sys.argv[25],
+    )
 
 published = []
 try:
@@ -5520,6 +5651,9 @@ fi
 if [[ -n "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT}"
+fi
 if [[ -n "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT}"
 fi
@@ -5538,6 +5672,7 @@ LOCAL_PHASE15_DEVICE_FRONTIER_50K_TEMP_RESULT=""
 LOCAL_PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_TEMP_RESULT=""
 LOCAL_PHASE15_RANKED_PAIR_CLASSIFIER_TEMP_RESULT=""
 LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_TEMP_RESULT=""
+LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_TEMP_RESULT=""
 LOCAL_PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_TEMP_RESULT=""
 LOCAL_POINT_HIERARCHY_QUALITY_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
@@ -5591,6 +5726,10 @@ fi
 if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
     printf '[ARTEFACT] Qualification exact pair-block witness CUDA Phase 15 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}"
+fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    printf '[ARTEFACT] Qualification terminal-geometry CUDA Phase 15 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT}"
 fi
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     printf '[ARTEFACT] Qualification resident-transactional-semantic Phase 15 publiée après certification TERMINATED : %s\n' \
@@ -5657,6 +5796,10 @@ fi
 if ((PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA == 1)); then
     printf '[SUCCÈS] Qualification exact pair-block witness CUDA Phase 15 compagnon conservée : %s\n' \
         "${LOCAL_PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RESULT}"
+fi
+if ((PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA == 1)); then
+    printf '[SUCCÈS] Qualification terminal-geometry CUDA Phase 15 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RESULT}"
 fi
 if ((PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC == 1)); then
     printf '[SUCCÈS] Qualification resident-transactional-semantic Phase 15 compagnon conservée : %s\n' \

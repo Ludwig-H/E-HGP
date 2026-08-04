@@ -19,6 +19,7 @@ readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/a
 readonly PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_device_frontier_strict_interior_qualification.py"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_ranked_pair_classifier_qualification.py"
 readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_exact_pair_block_witness_cuda_qualification.py"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase15_exact_higher_support_terminal_geometry_cuda_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -53,6 +54,9 @@ readonly PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE="build/morsehgp3d-cuda-r
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_RANKED_PAIR_CLASSIFIER_BINARY_RELATIVE}"
 readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_witness_cuda_qualification"
 readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE}"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_higher_support_product_cuda_qualification"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_RELATIVE}"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BINARY_RELATIVE="build/morsehgp3d-cuda-audit/morsehgp3d_gpu_exact_higher_support_product_cuda_qualification"
 readonly PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_transactional_frontier_resident_cuda_qualification"
 readonly PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_BINARY_RELATIVE}"
 readonly PHASE15_REDUCER_SOURCE_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_exact_pair_block_to_reducer_source_cuda_qualification"
@@ -164,6 +168,10 @@ PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW=""
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH=""
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PARENT=""
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_BASE=""
+PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW=""
+PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH=""
+PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT=""
+PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_BASE=""
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_RAW=""
 GUEST_GUARD_MIN_REMAINING_SECONDS="${DEFAULT_GUEST_GUARD_MIN_REMAINING_SECONDS}"
 GUEST_GUARD_MAX_REMAINING_SECONDS="${DEFAULT_GUEST_GUARD_MAX_REMAINING_SECONDS}"
@@ -189,6 +197,7 @@ PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_PUBLISH_TEMP=""
 PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP=""
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP=""
+PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP=""
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
@@ -265,7 +274,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json [--phase15-device-frontier-50k-maximum-closed-rank 6|11] [--phase15-device-frontier-50k-warm-profile]] [--phase15-device-frontier-strict-interior-output /CHEMIN/ABSOLU.json] [--phase15-ranked-pair-classifier-output /CHEMIN/ABSOLU.json] [--phase15-exact-pair-block-witness-cuda-output /CHEMIN/ABSOLU.json] [--phase15-resident-transactional-semantic-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--morton-yao48-seed-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json] [--phase15-exact-diametral-phi-output /CHEMIN/ABSOLU.json] [--phase15-device-frontier-50k-output /CHEMIN/ABSOLU.json [--phase15-device-frontier-50k-maximum-closed-rank 6|11] [--phase15-device-frontier-50k-warm-profile]] [--phase15-device-frontier-strict-interior-output /CHEMIN/ABSOLU.json] [--phase15-ranked-pair-classifier-output /CHEMIN/ABSOLU.json] [--phase15-exact-pair-block-witness-cuda-output /CHEMIN/ABSOLU.json] [--phase15-exact-higher-support-terminal-geometry-cuda-output /CHEMIN/ABSOLU.json] [--phase15-resident-transactional-semantic-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -326,6 +335,13 @@ A×B×W n=128 contre l'oracle exact hôte, puis audite l'ELF AOT sm_120 sans
 PTX et répète le binaire sous memcheck et racecheck. Elle s'exécute seule ou
 avec le seul profil device-frontier Kmax5 warm; elle ne ferme aucun catalogue
 global, produit de supports, arbre, SLO ou statut public.
+L'option exact higher-support terminal-geometry CUDA Phase 15 qualifie seule
+le lot schema-6 de 21 tâches (12 historiques et 9 terminales) sur supports 3
+et 4. Elle exige les quatre catégories terminales dans chaque arité, la
+répétabilité du lot, les routes natives int256/int512/int1024 et le repli
+rationnel exact, puis audite les trois ressources ptxas, l'ELF AOT sm_120 sans
+PTX et memcheck. Elle ne revendique ni classifieur terminal complet, ni
+catalogue Gamma2, hiérarchie, échelle industrielle, SLO ou statut public.
 L'option resident-transactional-semantic Phase 15 exécute exclusivement la
 fixture sémantique n=16 pour K=5 puis K=10. Chaque exécution est bornée à
 60 secondes et chronométrée depuis l'hôte invité; masses, transitions,
@@ -473,6 +489,14 @@ while (($# > 0)); do
             [[ -z "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]] || \
                 die "--phase15-exact-pair-block-witness-cuda-output ne peut être fourni qu'une fois."
             PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase15-exact-higher-support-terminal-geometry-cuda-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase15-exact-higher-support-terminal-geometry-cuda-output."
+            [[ -z "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW}" ]] || \
+                die "--phase15-exact-higher-support-terminal-geometry-cuda-output ne peut être fourni qu'une fois."
+            PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW="$2"
             shift 2
             ;;
         --phase15-resident-transactional-semantic-output)
@@ -721,6 +745,29 @@ if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
        ((PHASE15_DEVICE_FRONTIER_50K_MAXIMUM_CLOSED_RANK != 6 || \
          PHASE15_DEVICE_FRONTIER_50K_WARM_PROFILE != 1)); then
         die "--phase15-exact-pair-block-witness-cuda-output ne peut accompagner que le device-frontier rang fermé 6 warm."
+    fi
+fi
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW}" ]]; then
+    case "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase15-exact-higher-support-terminal-geometry-cuda-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW}" != \
+        "${OUTPUT_RAW}" ]] || \
+        die "Les sorties Phase 3 et terminal-geometry CUDA doivent être distinctes."
+    if [[ -n "${PHASE4_OUTPUT_RAW}" || -n "${PHASE5_OUTPUT_RAW}" || \
+          -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" || \
+          ${MORTON_YAO48_SEED_WORK_PROFILE} -eq 1 || \
+          -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" || \
+          -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" || \
+          -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_EXACT_DIAMETRAL_PHI_OUTPUT_RAW}" || \
+          -n "${PHASE15_DEVICE_FRONTIER_50K_OUTPUT_RAW}" || \
+          -n "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_RAW}" || \
+          -n "${PHASE15_RANKED_PAIR_CLASSIFIER_OUTPUT_RAW}" || \
+          -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" || \
+          -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_RAW}" ]]; then
+        die "--phase15-exact-higher-support-terminal-geometry-cuda-output est exclusive de tous les autres compagnons."
     fi
 fi
 if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_RAW}" ]]; then
@@ -1135,6 +1182,35 @@ if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]] || \
         die "La sortie exact pair-block witness CUDA Phase 15 doit être inexistante : ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW}" ]]; then
+    PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW}")"
+    PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_BASE="$(basename -- \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_RAW}")"
+    [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_BASE}" && \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_BASE}" != "." && \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact terminal-geometry CUDA Phase 15 invalide."
+    [[ -d "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT}" ]] || \
+        die "Le parent de --phase15-exact-higher-support-terminal-geometry-cuda-output doit déjà exister."
+    PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT="$(cd -- \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie terminal-geometry CUDA Phase 15 illisible."
+    PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH="${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_BASE}"
+    [[ "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT}" == \
+        "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    [[ "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" != \
+        "${OUTPUT_PATH}" ]] || \
+        die "Les sorties Phase 3 et terminal-geometry CUDA doivent être distinctes."
+    case "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase15-exact-higher-support-terminal-geometry-cuda-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" && \
+        ! -L "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" ]] || \
+        die "La sortie terminal-geometry CUDA Phase 15 doit être inexistante : ${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}."
+fi
 if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_RAW}" ]]; then
     PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PARENT="$(dirname -- \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_RAW}")"
@@ -1170,6 +1246,13 @@ worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-fi
 [[ -z "${worktree_status}" ]] || die "Le clone Git doit être entièrement propre avant qualification."
 HEAD_SHA="$(git -C "${REPOSITORY_ROOT}" rev-parse HEAD)" || die "HEAD Git illisible."
 [[ "${HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]] || die "SHA Git non canonique : ${HEAD_SHA}."
+HEAD_TREE=""
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" ]]; then
+    HEAD_TREE="$(git -C "${REPOSITORY_ROOT}" rev-parse 'HEAD^{tree}')" || \
+        die "Tree Git du clone qualifié illisible."
+    [[ "${HEAD_TREE}" =~ ^[0-9a-f]{40}$ ]] || \
+        die "Tree Git non canonique : ${HEAD_TREE}."
+fi
 verified_sha="$(git -C "${REPOSITORY_ROOT}" rev-parse --verify "${HEAD_SHA}^{commit}")" || \
     die "Le SHA ${HEAD_SHA} n'identifie pas un commit local."
 [[ "${verified_sha}" == "${HEAD_SHA}" ]] || die "Le commit qualifié n'est pas canonique."
@@ -1191,6 +1274,7 @@ readonly PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_DEV
 readonly PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_ASSEMBLER_RELATIVE}"
 readonly PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_RANKED_PAIR_CLASSIFIER_ASSEMBLER_RELATIVE}"
 readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER_RELATIVE}"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -1259,6 +1343,11 @@ if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}" && \
         ! -L "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}" ]] || \
         die "Assembleur exact pair-block witness CUDA Phase 15 absent ou symbolique : ${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_ASSEMBLER}."
+fi
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER}" && \
+        ! -L "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER}" ]] || \
+        die "Assembleur terminal-geometry CUDA Phase 15 absent ou symbolique : ${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER}."
 fi
 if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE15_DEVICE_FRONTIER_50K_ASSEMBLER}" && \
@@ -1455,6 +1544,10 @@ cleanup() {
         -f "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" && \
+        -f "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP}" && \
         -f "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP}" || true
@@ -1611,6 +1704,16 @@ if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
         ! -L "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" ]] || \
         die "Le nom temporaire exact pair-block witness CUDA Phase 15 reste occupé."
 fi
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" ]]; then
+    PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP="$(mktemp \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PARENT}/.${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire terminal-geometry CUDA Phase 15."
+    rm -f -- "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" || \
+        die "Impossible de libérer le nom temporaire terminal-geometry CUDA Phase 15."
+    [[ ! -e "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" && \
+        ! -L "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" ]] || \
+        die "Le nom temporaire terminal-geometry CUDA Phase 15 reste occupé."
+fi
 if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" ]]; then
     PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP="$(mktemp \
         "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PARENT}/.${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_BASE}.XXXXXXXX.partial")" || \
@@ -1720,6 +1823,14 @@ readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_LOG="${LOG_DIR}/phase15-exact
 readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PTX_STDERR_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-cuobjdump-ptx.stderr.log"
 readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_MEMCHECK_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-memcheck.log"
 readonly PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RACECHECK_LOG="${LOG_DIR}/phase15-exact-pair-block-witness-cuda-racecheck.log"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_LOG="${RESULT_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-qualification.json"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_STDERR_LOG="${LOG_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-qualification.stderr.log"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RELEASE_BUILD_LOG="${LOG_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-release-build.log"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BUILD_LOG="${LOG_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-audit-build.log"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ELF_LOG="${LOG_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-elf.log"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_LOG="${LOG_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-ptx.log"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_STDERR_LOG="${LOG_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-ptx.stderr.log"
+readonly PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_MEMCHECK_LOG="${LOG_DIR}/phase15-exact-higher-support-terminal-geometry-cuda-memcheck.log"
 readonly PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_RELEASE_BUILD_LOG="${LOG_DIR}/phase15-resident-transactional-semantic-release-build.log"
 readonly PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_AUDIT_BUILD_LOG="${LOG_DIR}/phase15-resident-transactional-semantic-audit-build.log"
 readonly PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_K5_LOG="${RESULT_DIR}/phase15-resident-transactional-semantic-k5.json"
@@ -3418,6 +3529,143 @@ PY
         report_failure_log "phase15-exact-pair-block-witness-cuda-racecheck" \
             "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_RACECHECK_LOG}"
         die "Le racecheck exact pair-block witness CUDA Phase 15 a échoué."
+    fi
+fi
+
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" ]]; then
+    begin_unit "phase15-exact-higher-support-terminal-geometry-cuda-release-build"
+    if ! run_container \
+        "phase15-exact-higher-support-terminal-geometry-cuda-release-build" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RELEASE_BUILD_LOG}" \
+        cmake --build "${MODULE_DIR}" \
+        --target morsehgp3d_gpu_exact_higher_support_product_cuda_qualification \
+        --parallel 2; then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-release-build" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RELEASE_BUILD_LOG}"
+        die "La cible terminal-geometry CUDA Phase 15 n'a pas pu être construite en Release."
+    fi
+    begin_unit "phase15-exact-higher-support-terminal-geometry-cuda-audit-build"
+    if ! run_container \
+        "phase15-exact-higher-support-terminal-geometry-cuda-audit-build" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BUILD_LOG}" \
+        cmake --build "${AUDIT_MODULE_DIR}" \
+        --target morsehgp3d_gpu_exact_higher_support_product_cuda_qualification \
+        --parallel 2; then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-audit-build" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BUILD_LOG}"
+        die "La cible terminal-geometry CUDA Phase 15 n'a pas pu être construite sous le preset audit."
+    fi
+    if ! python3 -B - \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BUILD_LOG}" \
+        "$(dirname -- "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER}")" <<'PY'
+from pathlib import Path
+import sys
+
+sys.path.insert(0, sys.argv[2])
+import assemble_phase15_exact_higher_support_terminal_geometry_cuda_qualification as assembler
+
+assembler.parse_ptxas_resources(Path(sys.argv[1]).read_text(encoding="utf-8"))
+PY
+    then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-audit-build" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BUILD_LOG}"
+        die "Les trois ressources ptxas terminal-geometry CUDA Phase 15 ne sont pas certifiées."
+    fi
+    [[ -f "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire terminal-geometry CUDA Phase 15 n'a pas été construit sûrement."
+    [[ -f "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire audit terminal-geometry CUDA Phase 15 n'a pas été construit sûrement."
+
+    begin_unit "phase15-exact-higher-support-terminal-geometry-cuda-qualification"
+    if ! run_container_split_output \
+        "phase15-exact-higher-support-terminal-geometry-cuda-qualification" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_LOG}" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_STDERR_LOG}" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_PATH}"; then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-qualification" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_LOG}"
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-qualification-stderr" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_STDERR_LOG}"
+        die "La qualification schema-6 terminal-geometry CUDA Phase 15 a échoué."
+    fi
+    if ! python3 -B - \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_LOG}" \
+        "$(dirname -- "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER}")" <<'PY'
+from pathlib import Path
+import sys
+
+sys.path.insert(0, sys.argv[2])
+import assemble_phase15_exact_higher_support_terminal_geometry_cuda_qualification as assembler
+
+raw = Path(sys.argv[1]).read_text(encoding="utf-8")
+assembler.validate_qualification(
+    assembler.parse_single_json_line(raw, "terminal-geometry qualification")
+)
+PY
+    then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-qualification" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_LOG}"
+        die "La sortie schema-6 terminal-geometry CUDA Phase 15 est incomplète ou non canonique."
+    fi
+
+    begin_unit "phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-elf"
+    if ! run_container \
+        "phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-elf" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ELF_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lelf \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_PATH}"; then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-elf" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister l'ELF terminal-geometry CUDA Phase 15."
+    fi
+    phase15_exact_higher_support_terminal_geometry_cuda_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ELF_LOG}" | sort -u || true)"
+    [[ "${phase15_exact_higher_support_terminal_geometry_cuda_architectures}" == "sm_120" ]] || \
+        die "Le binaire terminal-geometry CUDA Phase 15 doit contenir uniquement un ELF sm_120; observé : ${phase15_exact_higher_support_terminal_geometry_cuda_architectures:-aucun}."
+
+    begin_unit "phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-ptx"
+    if ! run_container_split_output \
+        "phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-ptx" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_LOG}" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_PATH}"; then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-ptx-stderr" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX terminal-geometry CUDA Phase 15."
+    fi
+    if grep -q '[^[:space:]]' \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_LOG}"; then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-cuobjdump-ptx" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le binaire terminal-geometry CUDA Phase 15."
+    fi
+
+    begin_unit "phase15-exact-higher-support-terminal-geometry-cuda-memcheck"
+    if ! run_container \
+        "phase15-exact-higher-support-terminal-geometry-cuda-memcheck" \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_MEMCHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer --target-processes all \
+        --tool memcheck --leak-check full --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_PATH}"; then
+        report_failure_log \
+            "phase15-exact-higher-support-terminal-geometry-cuda-memcheck" \
+            "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_MEMCHECK_LOG}"
+        die "Le memcheck terminal-geometry CUDA Phase 15 a échoué."
     fi
 fi
 
@@ -5132,6 +5380,26 @@ if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
         --binary "${BUILD_DIR}/${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_BINARY_RELATIVE#build/}" \
         --output "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --git-tree "${HEAD_TREE}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --release-build-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_RELEASE_BUILD_LOG}" \
+        --audit-build-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BUILD_LOG}" \
+        --qualification-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_LOG}" \
+        --qualification-stderr-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_QUALIFICATION_STDERR_LOG}" \
+        --elf-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_ELF_LOG}" \
+        --ptx-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PTX_STDERR_LOG}" \
+        --memcheck-log "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_MEMCHECK_LOG}" \
+        --binary "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_BINARY_RELATIVE#build/}" \
+        --audit-binary "${BUILD_DIR}/${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_AUDIT_BINARY_RELATIVE#build/}" \
+        --output "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}"
+fi
 if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" ]]; then
     python3 -B - \
         "${HEAD_SHA}" \
@@ -5703,6 +5971,8 @@ python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_OUTPUT_PATH}" \
     "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" \
     "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" \
+    "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" \
+    "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" \
     "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP}" \
     "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" <<'PY'
 import json
@@ -5793,12 +6063,24 @@ if sys.argv[23] or sys.argv[24]:
 if sys.argv[25] or sys.argv[26]:
     if not sys.argv[25] or not sys.argv[26]:
         raise SystemExit(
-            "incomplete Phase 15 resident transactional semantic publication pair"
+            "incomplete Phase 15 terminal-geometry CUDA publication pair"
         )
     pairs.append(
         (
             Path(sys.argv[25]),
             Path(sys.argv[26]),
+            "Phase 15 terminal-geometry CUDA",
+        )
+    )
+if sys.argv[27] or sys.argv[28]:
+    if not sys.argv[27] or not sys.argv[28]:
+        raise SystemExit(
+            "incomplete Phase 15 resident transactional semantic publication pair"
+        )
+    pairs.append(
+        (
+            Path(sys.argv[27]),
+            Path(sys.argv[28]),
             "Phase 15 resident transactional semantic",
         )
     )
@@ -5877,6 +6159,9 @@ fi
 if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP}"
+fi
 if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP}"
 fi
@@ -5892,6 +6177,7 @@ PHASE15_DEVICE_FRONTIER_50K_PUBLISH_TEMP=""
 PHASE15_DEVICE_FRONTIER_STRICT_INTERIOR_PUBLISH_TEMP=""
 PHASE15_RANKED_PAIR_CLASSIFIER_PUBLISH_TEMP=""
 PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_PUBLISH_TEMP=""
+PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_PUBLISH_TEMP=""
 PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
@@ -5939,6 +6225,10 @@ fi
 if [[ -n "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon exact pair-block witness CUDA Phase 15 provisoire publié sans remplacement : %s\n' \
         "${PHASE15_EXACT_PAIR_BLOCK_WITNESS_CUDA_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon terminal-geometry CUDA Phase 15 provisoire publié sans remplacement : %s\n' \
+        "${PHASE15_EXACT_HIGHER_SUPPORT_TERMINAL_GEOMETRY_CUDA_OUTPUT_PATH}"
 fi
 if [[ -n "${PHASE15_RESIDENT_TRANSACTIONAL_SEMANTIC_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon resident-transactional-semantic Phase 15 provisoire publié sans remplacement : %s\n' \
