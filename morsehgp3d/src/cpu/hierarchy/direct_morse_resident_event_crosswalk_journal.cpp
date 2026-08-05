@@ -222,6 +222,7 @@ void append_bridge_stamp(
   append_size(builder, stamp.committed_k2_direct_birth_k1_binding_count);
   append_size(builder, stamp.committed_higher_batch_count);
   append_size(builder, stamp.committed_higher_group_count);
+  append_size(builder, stamp.committed_terminal_component_image_count);
   append_size(
       builder, stamp.committed_higher_direct_saddle_group_binding_count);
   append_size(builder, stamp.persistent_source_root_witness_count);

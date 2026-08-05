@@ -956,6 +956,12 @@ void test_complete_atomic_product() {
     check_checkpoint_tamper_rejected(
         canonical,
         [](auto& value) {
+          ++value.vertical_stamp.committed_k2_direct_birth_k1_binding_count;
+        },
+        "checkpoint certification rejects a tampered nested K2 birth binding count");
+    check_checkpoint_tamper_rejected(
+        canonical,
+        [](auto& value) {
           value.higher_at_least20.view_digest =
               morsehgp3d::contract::CanonicalId{};
         },
@@ -1009,6 +1015,24 @@ void test_complete_atomic_product() {
           ++value.vertical.terminal_locator_stamp.binding_count;
         },
         "seal certification rejects a tampered nested vertical locator stamp");
+    check_seal_tamper_rejected(
+        canonical,
+        [](auto& value) {
+          ++value.vertical.sealed_stamp
+                .committed_k2_direct_birth_k1_binding_count;
+        },
+        "seal certification rejects a tampered nested K2 birth binding count");
+    if (canonical.vertical.sealed_projected_target_facet_probe_count != 0U) {
+      check_seal_tamper_rejected(
+          canonical,
+          [](auto& value) {
+            value.vertical.sealed_sparse_target_closure_count =
+                value.vertical.sealed_sparse_target_closure_count == 0U
+                    ? 1U
+                    : value.vertical.sealed_sparse_target_closure_count - 1U;
+          },
+          "seal digest rejects a still-in-range mutation of the sparse target closure count");
+    }
     check_seal_tamper_rejected(
         canonical,
         [](auto& value) {
@@ -1704,6 +1728,11 @@ void test_resident_event_crosswalk_triple_join_and_fail_closed_caps() {
         ++value.source_bridge_stamp.resident_epoch;
       },
       "the result digest rejects a live bridge-stamp mutation");
+  check_certified_crosswalk_mutation_rejected(
+      [](auto& value) {
+        ++value.source_bridge_stamp.committed_terminal_component_image_count;
+      },
+      "the result digest rejects a terminal-image count mutation in the live bridge stamp");
   check(
       journal.counters.resident_plan_batch_scan_count != 0U,
       "the n=6, K=4 crosswalk exposes a nonzero logical plan-batch cardinality");

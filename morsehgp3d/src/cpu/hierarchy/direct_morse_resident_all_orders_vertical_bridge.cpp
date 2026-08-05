@@ -397,6 +397,13 @@ struct AuthenticHigherDirectMembershipCounts {
   std::size_t birth_count{};
 };
 
+struct AuthenticTerminalComponentSource {
+  std::size_t direct_reference_index{};
+  std::size_t role_record_index{};
+  std::size_t event_projection_index{};
+  ExactDirectSparseFacetKey complete_source_facet_key{};
+};
+
 [[nodiscard]] bool inspect_authentic_higher_direct_membership(
     const ExactDirectSparseUnifiedLevelPlanResult& plan,
     const ExactDirectMorseUnifiedResidentAuthorityBundle& bundle,
@@ -510,6 +517,65 @@ struct AuthenticHigherDirectMembershipCounts {
   return true;
 }
 
+[[nodiscard]] bool inspect_authentic_terminal_component_source(
+    const ExactDirectSparseUnifiedLevelPlanResult& plan,
+    const ExactDirectMorseUnifiedResidentAuthorityBundle& bundle,
+    const AuthenticHigherDirectMembershipCounts& counts,
+    AuthenticTerminalComponentSource& source) noexcept {
+  source = {};
+  if (bundle.source_batch_index >= plan.batches.size() ||
+      bundle.order < 3U || bundle.order != plan.point_count ||
+      counts.birth_count != 1U || counts.saddle_count != 0U) {
+    return false;
+  }
+  const auto& batch = plan.batches[bundle.source_batch_index];
+  const auto& frozen = bundle.frozen_batch;
+  if (batch.direct_reference_count != 1U ||
+      batch.residual_reference_count != 0U ||
+      frozen.counters.hyperedge_count != 0U ||
+      frozen.counters.token_reference_count != 0U ||
+      frozen.counters.group_count != 0U ||
+      !frozen.quotient_hyperedges.empty() ||
+      !frozen.quotient_token_references.empty() ||
+      !frozen.quotient.groups.empty() ||
+      !frozen.action_plan.groups.empty() ||
+      !frozen.coverage_deltas.empty() ||
+      !bundle.facet_resolutions.empty()) {
+    return false;
+  }
+  const std::size_t direct_index = batch.direct_reference_offset;
+  if (direct_index >= plan.direct_references.size()) {
+    return false;
+  }
+  const auto& direct = plan.direct_references[direct_index];
+  if (direct.direct_reference_index != direct_index ||
+      direct.role != ExactDirectMorseH0Role::birth ||
+      direct.source_incidence_family_index.has_value() ||
+      !direct.direct_birth_facet_token_index.has_value() ||
+      *direct.direct_birth_facet_token_index >= plan.facet_tokens.size()) {
+    return false;
+  }
+  const auto& token =
+      plan.facet_tokens[*direct.direct_birth_facet_token_index];
+  if (token.facet_token_index != *direct.direct_birth_facet_token_index ||
+      token.direct_birth_reference_count != 1U ||
+      !canonical_facet_key(
+          token.facet_key, bundle.order, plan.point_count)) {
+    return false;
+  }
+  for (std::size_t index = 0U; index < plan.point_count; ++index) {
+    if (token.facet_key.point_ids[index] !=
+        static_cast<spatial::PointId>(index)) {
+      return false;
+    }
+  }
+  source.direct_reference_index = direct_index;
+  source.role_record_index = direct.source_role_record_index;
+  source.event_projection_index = direct.source_event_projection_index;
+  source.complete_source_facet_key = token.facet_key;
+  return true;
+}
+
 [[nodiscard]] bool populate_authentic_higher_saddle_membership(
     const ExactDirectSparseUnifiedLevelPlanResult& plan,
     const ExactDirectMorseUnifiedResidentAuthorityBundle& bundle,
@@ -581,7 +647,7 @@ struct AuthenticHigherDirectMembershipCounts {
   try {
     contract::CanonicalSha256Builder builder;
     builder.update(
-        "MorseHGP3D/direct_morse_resident_higher_o4_membership/v3");
+        "MorseHGP3D/direct_morse_resident_higher_o4_membership/v4");
     append_u32(builder, record.schema_version);
     append_snapshot_identity(builder, record.resident_pre_batch_identity);
     append_locator_stamp(builder, record.live_post_resident_locator_stamp);
@@ -613,6 +679,39 @@ struct AuthenticHigherDirectMembershipCounts {
       append_size(builder, binding.owner_group_index);
       append_size(builder, binding.group_image_index);
       append_u64(builder, binding.resident_resultant_root_id);
+    }
+    append_u8(builder, record.terminal_component_image.has_value() ? 1U : 0U);
+    if (record.terminal_component_image.has_value()) {
+      const auto& image = *record.terminal_component_image;
+      append_size(builder, image.source_batch_index);
+      append_size(builder, image.source_direct_reference_index);
+      append_size(builder, image.source_role_record_index);
+      append_size(builder, image.source_event_projection_index);
+      if (!append_level(builder, image.squared_level)) {
+        return {};
+      }
+      append_size(builder, image.source_order);
+      append_size(builder, image.target_order);
+      append_size(builder, image.complete_source_facet_key.point_count);
+      for (std::size_t index = 0U;
+           index < image.complete_source_facet_key.point_count;
+           ++index) {
+        append_size(
+            builder, image.complete_source_facet_key.point_ids[index]);
+      }
+      append_size(builder, image.canonical_target_facet_key.point_count);
+      for (std::size_t index = 0U;
+           index < image.canonical_target_facet_key.point_count;
+           ++index) {
+        append_size(
+            builder, image.canonical_target_facet_key.point_ids[index]);
+      }
+      append_u64(
+          builder, image.target_source_binding_witness.external_authority_id);
+      append_u64(builder, image.target_source_binding_witness.replay_token);
+      append_u64(builder, image.resolved_target_root_id);
+      append_size(builder, image.target_deletion_probe_count);
+      append_size(builder, image.sparse_target_closure_count);
     }
     return builder.finalize();
   } catch (...) {
@@ -712,17 +811,25 @@ struct ExactDirectMorseResidentAllOrdersVerticalBridge::Impl {
     }
     std::size_t group_count = 0U;
     std::size_t higher_saddle_binding_count = 0U;
+    std::size_t terminal_component_image_count = 0U;
     for (const auto& record : committed_higher_batches) {
       if (!record.certified_conditional_higher_batch() ||
           !checked_add(group_count, record.group_images.size(), group_count) ||
           !checked_add(
               higher_saddle_binding_count,
               record.direct_saddle_group_bindings.size(),
-              higher_saddle_binding_count)) {
+              higher_saddle_binding_count) ||
+          !checked_add(
+              terminal_component_image_count,
+              record.terminal_component_image.has_value() ? 1U : 0U,
+              terminal_component_image_count)) {
         return false;
       }
     }
     if (group_count != committed_stamp.committed_higher_group_count ||
+        terminal_component_image_count !=
+            committed_stamp.committed_terminal_component_image_count ||
+        terminal_component_image_count > 1U ||
         higher_saddle_binding_count !=
             committed_stamp
                 .committed_higher_direct_saddle_group_binding_count ||
@@ -833,6 +940,41 @@ bool ExactDirectMorseResidentAllOrdersVerticalGroupImage::
          resultant_source_root_bound_after_resident_commit;
 }
 
+bool ExactDirectMorseResidentTerminalComponentImage::
+    certified_conditional_terminal_component_image() const noexcept {
+  if (source_order < 3U || target_order + 1U != source_order ||
+      !canonical_facet_key(
+          complete_source_facet_key, source_order, source_order) ||
+      !canonical_facet_key(
+          canonical_target_facet_key, target_order, source_order) ||
+      target_source_binding_witness.external_authority_id == 0U ||
+      target_source_binding_witness.replay_token == 0U ||
+      resolved_target_root_id == 0U ||
+      target_deletion_probe_count != source_order ||
+      sparse_target_closure_count != 0U ||
+      !source_order_equals_cloud_point_count ||
+      !exactly_one_terminal_birth_reference ||
+      !frozen_terminal_batch_has_no_hyperedge_or_group ||
+      !every_codimension_one_deletion_probed ||
+      !every_target_deletion_live_positive_and_rooted ||
+      !every_target_deletion_direct_positive_hit ||
+      !one_live_target_root_for_complete_terminal_component ||
+      !pre_batch_locator_snapshot_immutable_during_all_probes ||
+      !resident_terminal_batch_committed_without_synthetic_group ||
+      global_facet_coface_or_gamma_catalog_materialized ||
+      ordinary_or_higher_order_delaunay_materialized ||
+      public_status_claimed) {
+    return false;
+  }
+  for (std::size_t index = 0U; index < source_order; ++index) {
+    if (complete_source_facet_key.point_ids[index] !=
+        static_cast<spatial::PointId>(index)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool ExactDirectMorseResidentAllOrdersVerticalBatchRecord::
     certified_conditional_higher_batch() const noexcept {
   if (schema_version !=
@@ -854,8 +996,6 @@ bool ExactDirectMorseResidentAllOrdersVerticalBatchRecord::
       frozen_quotient_group_count != group_images.size() ||
       frozen_direct_saddle_hyperedge_count !=
           direct_saddle_group_bindings.size() ||
-      source_facet_resolution_scan_count <
-          projected_target_facet_probe_count / source_order ||
       !exact_product_order_target_batch_already_committed ||
       !pre_batch_locator_snapshot_immutable_during_all_probes ||
       !every_higher_group_has_one_inductive_target_image ||
@@ -874,6 +1014,14 @@ bool ExactDirectMorseResidentAllOrdersVerticalBatchRecord::
       global_facet_coface_or_gamma_catalog_materialized ||
       ordinary_or_higher_order_delaunay_materialized ||
       pair_matrix_materialized || public_status_claimed) {
+    return false;
+  }
+  // The historical lower bound on facet-resolution scans holds for every
+  // ordinary batch; only the terminal singleton-component batch legitimately
+  // performs zero scans while still probing its full deletion shell.
+  if (!terminal_component_image.has_value() &&
+      source_facet_resolution_scan_count <
+          projected_target_facet_probe_count / source_order) {
     return false;
   }
   std::size_t expected_prior_probe_count = 0U;
@@ -919,6 +1067,30 @@ bool ExactDirectMorseResidentAllOrdersVerticalBatchRecord::
       return false;
     }
   }
+  if (terminal_component_image.has_value()) {
+    const auto& image = *terminal_component_image;
+    if (!group_images.empty() || !direct_saddle_group_bindings.empty() ||
+        frozen_hyperedge_count != 0U || frozen_token_reference_count != 0U ||
+        frozen_quotient_group_count != 0U ||
+        frozen_direct_saddle_hyperedge_count != 0U ||
+        frozen_residual_hyperedge_count != 0U ||
+        source_facet_resolution_scan_count != 0U ||
+        image.source_batch_index != source_batch_index ||
+        image.squared_level != squared_level ||
+        image.source_order != source_order ||
+        image.target_order != target_order ||
+        !image.certified_conditional_terminal_component_image() ||
+        !checked_add(
+            expected_target_probe_count,
+            image.target_deletion_probe_count,
+            expected_target_probe_count) ||
+        !checked_add(
+            expected_sparse_target_closure_count,
+            image.sparse_target_closure_count,
+            expected_sparse_target_closure_count)) {
+      return false;
+    }
+  }
   return expected_prior_probe_count == prior_root_witness_probe_count &&
          expected_target_probe_count == projected_target_facet_probe_count &&
          expected_sparse_target_closure_count ==
@@ -931,14 +1103,19 @@ bool ExactDirectMorseResidentAllOrdersVerticalBatchRecord::
 bool ExactDirectMorseResidentAllOrdersVerticalFinalSeal::
     certified_final_vertical_seal() const noexcept {
   std::size_t expected_resident_group_count = 0U;
+  std::size_t expected_final_target_reprobe_count = 0U;
   if (!checked_add(
           sealed_k2_group_count,
           sealed_higher_group_count,
-          expected_resident_group_count)) {
+          expected_resident_group_count) ||
+      !checked_add(
+          sealed_final_root_witness_probe_count,
+          sealed_terminal_final_target_reprobe_count,
+          expected_final_target_reprobe_count)) {
     return false;
   }
   const bool token_range_certified =
-      sealed_final_root_witness_probe_count == 0U
+      expected_final_target_reprobe_count == 0U
           ? final_root_witness_query_replay_token_begin == 0U &&
                 final_root_witness_query_replay_token_end == 0U
           : final_root_witness_query_replay_token_begin != 0U &&
@@ -946,7 +1123,7 @@ bool ExactDirectMorseResidentAllOrdersVerticalFinalSeal::
                     final_root_witness_query_replay_token_begin &&
                 final_root_witness_query_replay_token_end -
                         final_root_witness_query_replay_token_begin ==
-                    sealed_final_root_witness_probe_count - 1U;
+                    expected_final_target_reprobe_count - 1U;
   const bool source_facts_certified = normalized_source_facts_consistent(
       resident_source_kind,
       resident_normalized_direct_source_session,
@@ -965,6 +1142,18 @@ bool ExactDirectMorseResidentAllOrdersVerticalFinalSeal::
          sealed_stamp.committed_k2_group_count == sealed_k2_group_count &&
          sealed_stamp.committed_higher_group_count ==
              sealed_higher_group_count &&
+         sealed_stamp.committed_terminal_component_image_count ==
+             sealed_terminal_component_image_count &&
+         sealed_terminal_component_image_count <= 1U &&
+         sealed_terminal_final_target_reprobe_count ==
+             sealed_terminal_component_image_count &&
+         (sealed_terminal_component_image_count == 0U
+              ? sealed_terminal_target_deletion_probe_count == 0U &&
+                    sealed_terminal_sparse_target_closure_count == 0U
+              : sealed_terminal_target_deletion_probe_count >= 3U &&
+                    sealed_terminal_target_deletion_probe_count <=
+                        direct_sparse_positive_facet_maximum_point_count &&
+                    sealed_terminal_sparse_target_closure_count == 0U) &&
          sealed_stamp.persistent_source_root_witness_count ==
              sealed_persistent_source_root_witness_count &&
          expected_resident_group_count == required_resident_group_count &&
@@ -1002,6 +1191,7 @@ bool ExactDirectMorseResidentAllOrdersVerticalFinalSeal::
          every_required_plan_batch_replayed_in_exact_product_order &&
          every_k2_batch_and_group_replayed_to_sealed_k1 &&
          every_higher_group_bound_to_one_live_adjacent_order_root &&
+         every_terminal_component_bound_to_one_live_adjacent_order_root &&
          every_nonroot_source_key_projected_to_all_codimension_one_deletions &&
          every_resident_group_covered_exactly_once &&
          every_persistent_target_binding_reprobed_at_terminal_locator &&
@@ -1130,6 +1320,7 @@ namespace {
     const ExactDirectSparseFacetKey& key,
     std::size_t target_order,
     const exact::ExactLevel& closed_squared_level,
+    bool allow_sparse_target_closure,
     const std::optional<ExactDirectSparseFacetWitness>&
         required_source_binding_witness,
     const ExactDirectSparsePositiveFacetLocatorSnapshotStamp& expected_stamp,
@@ -1186,7 +1377,8 @@ namespace {
     canonical_target_key = key;
     source_binding_witness = probe.source_binding_witness;
   } else {
-    if (required_source_binding_witness.has_value() ||
+    if (!allow_sparse_target_closure ||
+        required_source_binding_witness.has_value() ||
         !probe.certified_unresolved_miss()) {
       return probe.certified_budget_exhaustion()
                  ? TargetProbeStatus::budget_exhausted
@@ -1335,6 +1527,67 @@ bool ExactDirectMorseResidentAllOrdersVerticalBridge::
     }
     imaged_source_order[batch.source_order] =
         imaged_source_order[batch.source_order] || !batch.group_images.empty();
+  }
+  for (std::size_t order = 2U;
+       order <= direct_sparse_positive_facet_maximum_point_count;
+       ++order) {
+    if (planned_source_order[order] && !imaged_source_order[order]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ExactDirectMorseResidentAllOrdersVerticalBridge::
+    conditional_all_adjacent_order_component_images_complete() const
+    noexcept {
+  if (!resident_complete() ||
+      impl_->committed_stamp.committed_k2_batch_count !=
+          impl_->required_k2_batch_count ||
+      impl_->committed_stamp.committed_higher_batch_count !=
+          impl_->required_higher_batch_count) {
+    return false;
+  }
+  std::array<bool, direct_sparse_positive_facet_maximum_point_count + 1U>
+      planned_source_order{};
+  std::array<bool, direct_sparse_positive_facet_maximum_point_count + 1U>
+      imaged_source_order{};
+  const std::size_t point_count = impl_->owned_bridge.resident_plan().point_count;
+  for (const auto& batch : impl_->owned_bridge.resident_plan().batches) {
+    if (batch.order < 2U ||
+        batch.order > direct_sparse_positive_facet_maximum_point_count) {
+      return false;
+    }
+    planned_source_order[batch.order] = true;
+  }
+  for (const auto& batch : impl_->owned_bridge.committed_k2_batches()) {
+    imaged_source_order[2U] =
+        imaged_source_order[2U] || !batch.group_images.empty();
+  }
+  std::size_t terminal_component_image_count = 0U;
+  for (const auto& batch : impl_->committed_higher_batches) {
+    if (batch.source_order < 3U ||
+        batch.source_order > direct_sparse_positive_facet_maximum_point_count) {
+      return false;
+    }
+    imaged_source_order[batch.source_order] =
+        imaged_source_order[batch.source_order] || !batch.group_images.empty();
+    if (batch.terminal_component_image.has_value()) {
+      if (batch.source_order != point_count ||
+          !batch.terminal_component_image
+               ->certified_conditional_terminal_component_image() ||
+          terminal_component_image_count ==
+              std::numeric_limits<std::size_t>::max()) {
+        return false;
+      }
+      ++terminal_component_image_count;
+      imaged_source_order[batch.source_order] = true;
+    }
+  }
+  if (terminal_component_image_count !=
+          impl_->committed_stamp.committed_terminal_component_image_count ||
+      terminal_component_image_count > 1U) {
+    return false;
   }
   for (std::size_t order = 2U;
        order <= direct_sparse_positive_facet_maximum_point_count;
@@ -1637,6 +1890,18 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::prepare_next() {
             plan, bundle, direct_counts)) {
       return reject(
           ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
+            no_frozen_group_shape_rejected);
+    }
+    AuthenticTerminalComponentSource terminal_source;
+    const bool terminal_component_batch =
+        bundle.order == plan.point_count && group_count == 0U;
+    if (terminal_component_batch &&
+        (impl_->committed_stamp.committed_terminal_component_image_count !=
+             0U ||
+         !inspect_authentic_terminal_component_source(
+             plan, bundle, direct_counts, terminal_source))) {
+      return reject(
+          ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
               no_frozen_group_shape_rejected);
     }
     if (quotient.groups.size() != group_count ||
@@ -1768,8 +2033,17 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::prepare_next() {
               projected_target_probe_count)) {
         return reject(
             ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
-                no_frozen_group_shape_rejected);
+              no_frozen_group_shape_rejected);
       }
+    }
+    if (terminal_component_batch &&
+        !checked_add(
+            projected_target_probe_count,
+            bundle.order,
+            projected_target_probe_count)) {
+      return reject(
+          ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
+              no_preparation_budget_exhausted);
     }
 
     std::size_t persistent_witness_count_after = 0U;
@@ -1867,6 +2141,80 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::prepare_next() {
     prepared->new_source_root_witness_count = new_root_witness_count;
     std::vector<GroupAccumulator> accumulators(group_count);
 
+    if (terminal_component_batch) {
+      record.terminal_component_image.emplace();
+      auto& image = *record.terminal_component_image;
+      image.source_batch_index = bundle.source_batch_index;
+      image.source_direct_reference_index =
+          terminal_source.direct_reference_index;
+      image.source_role_record_index = terminal_source.role_record_index;
+      image.source_event_projection_index =
+          terminal_source.event_projection_index;
+      image.squared_level = bundle.squared_level;
+      image.source_order = bundle.order;
+      image.target_order = record.target_order;
+      image.complete_source_facet_key =
+          terminal_source.complete_source_facet_key;
+      GroupAccumulator terminal_accumulator;
+      for (std::size_t erased_index = 0U;
+           erased_index < image.complete_source_facet_key.point_count;
+           ++erased_index) {
+        const auto target_key = erase_source_point(
+            image.complete_source_facet_key, erased_index);
+        TargetProbePayload probe;
+        const auto status = probe_target_key(
+            *impl_,
+            target_key,
+            record.target_order,
+            record.squared_level,
+            false,
+            std::nullopt,
+            locator_stamp,
+            prepared->next_query_replay_token,
+            probe);
+        if (status != TargetProbeStatus::complete) {
+          return reject(
+              status == TargetProbeStatus::budget_exhausted
+                  ? ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
+                        no_preparation_budget_exhausted
+                  : status == TargetProbeStatus::target_not_rooted
+                        ? ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
+                              no_target_component_not_rooted
+                        : ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
+                              no_target_facet_locator_probe_rejected);
+        }
+        if (!add_group_candidate(
+                terminal_accumulator, probe.canonical_target_key, probe)) {
+          return reject(
+              ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
+                  no_group_target_root_conflict);
+        }
+        ++image.target_deletion_probe_count;
+      }
+      if (!terminal_accumulator.initialized ||
+          image.target_deletion_probe_count != bundle.order) {
+        return reject(
+            ExactDirectMorseResidentAllOrdersVerticalPreparationDecision::
+                no_frozen_group_shape_rejected);
+      }
+      image.canonical_target_facet_key =
+          terminal_accumulator.canonical_target_key;
+      image.target_source_binding_witness =
+          terminal_accumulator.canonical_source_binding_witness;
+      image.resolved_target_root_id = terminal_accumulator.target_root_id;
+      image.source_order_equals_cloud_point_count = true;
+      image.exactly_one_terminal_birth_reference = true;
+      image.frozen_terminal_batch_has_no_hyperedge_or_group = true;
+      image.every_codimension_one_deletion_probed = true;
+      image.every_target_deletion_live_positive_and_rooted = true;
+      image.every_target_deletion_direct_positive_hit = true;
+      image.one_live_target_root_for_complete_terminal_component = true;
+      record.sparse_target_closure_count =
+          image.sparse_target_closure_count;
+      output.requirements.sparse_target_closure_count =
+          image.sparse_target_closure_count;
+    }
+
     for (std::size_t group_index = 0U;
          group_index < group_count;
          ++group_index) {
@@ -1931,6 +2279,7 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::prepare_next() {
             witness->canonical_target_facet_key,
             record.target_order,
             record.squared_level,
+            false,
             witness->target_source_binding_witness,
             locator_stamp,
             prepared->next_query_replay_token,
@@ -1990,6 +2339,7 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::prepare_next() {
             target_key,
             record.target_order,
             record.squared_level,
+            true,
             std::nullopt,
             locator_stamp,
             prepared->next_query_replay_token,
@@ -2073,6 +2423,10 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::prepare_next() {
               no_resident_pre_batch_identity_rejected);
     }
     record.pre_batch_locator_snapshot_immutable_during_all_probes = true;
+    if (record.terminal_component_image.has_value()) {
+      record.terminal_component_image
+          ->pre_batch_locator_snapshot_immutable_during_all_probes = true;
+    }
     if (impl_->ticket_registry->live_ticket_count ==
         std::numeric_limits<std::size_t>::max()) {
       return reject(
@@ -2302,6 +2656,17 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::commit(
       std::terminate();
     }
 
+    if (record.terminal_component_image.has_value()) {
+      if (!record.group_images.empty() ||
+          prepared->new_source_root_witness_count != 0U ||
+          resident_groups.size() !=
+              prepared->resident_group_record_count_before) {
+        std::terminate();
+      }
+      record.terminal_component_image
+          ->resident_terminal_batch_committed_without_synthetic_group = true;
+    }
+
     record.live_post_resident_locator_stamp =
         impl_->owned_bridge.resident_locator().snapshot_stamp();
     record.every_higher_group_has_one_inductive_target_image = true;
@@ -2322,6 +2687,11 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::commit(
     ++impl_->committed_stamp.committed_higher_batch_count;
     impl_->committed_stamp.committed_higher_group_count +=
         impl_->committed_higher_batches.back().group_images.size();
+    impl_->committed_stamp.committed_terminal_component_image_count +=
+        impl_->committed_higher_batches.back()
+                .terminal_component_image.has_value()
+            ? 1U
+            : 0U;
     impl_->committed_stamp
         .committed_higher_direct_saddle_group_binding_count +=
         impl_->committed_higher_batches.back()
@@ -2418,7 +2788,7 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
         ExactDirectMorseResidentAllOrdersVerticalSealDecision::
             no_outstanding_prepared_ticket);
   }
-  if (!conditional_all_adjacent_order_group_images_complete()) {
+  if (!conditional_all_adjacent_order_component_images_complete()) {
     return reject(
         ExactDirectMorseResidentAllOrdersVerticalSealDecision::
             no_adjacent_source_order_component_coverage);
@@ -2552,6 +2922,9 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
   std::size_t sealed_expected_target_probe_count = 0U;
   std::size_t sealed_target_probe_count = 0U;
   std::size_t sealed_sparse_target_closure_count = 0U;
+  std::size_t sealed_terminal_component_image_count = 0U;
+  std::size_t sealed_terminal_target_deletion_probe_count = 0U;
+  std::size_t sealed_terminal_sparse_target_closure_count = 0U;
   for (const auto& batch : higher_batches) {
     if (!checked_add(
             sealed_higher_group_count,
@@ -2595,6 +2968,42 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
           !checked_add(
               sealed_sparse_target_closure_count,
               group.sparse_target_closure_count,
+          sealed_sparse_target_closure_count)) {
+        return reject(
+            ExactDirectMorseResidentAllOrdersVerticalSealDecision::
+                no_group_or_deletion_coverage_mismatch);
+      }
+    }
+    if (batch.terminal_component_image.has_value()) {
+      const auto& image = *batch.terminal_component_image;
+      if (!image.certified_conditional_terminal_component_image() ||
+          !checked_add(
+              sealed_terminal_component_image_count,
+              1U,
+              sealed_terminal_component_image_count) ||
+          !checked_add(
+              sealed_terminal_target_deletion_probe_count,
+              image.target_deletion_probe_count,
+              sealed_terminal_target_deletion_probe_count) ||
+          !checked_add(
+              sealed_terminal_sparse_target_closure_count,
+              image.sparse_target_closure_count,
+              sealed_terminal_sparse_target_closure_count) ||
+          !checked_add(
+              sealed_expected_target_probe_count,
+              image.target_deletion_probe_count,
+              sealed_expected_target_probe_count) ||
+          !checked_add(
+              sealed_target_probe_count,
+              image.target_deletion_probe_count,
+              sealed_target_probe_count) ||
+          !checked_add(
+              observed_batch_sparse_target_closure_count,
+              image.sparse_target_closure_count,
+              observed_batch_sparse_target_closure_count) ||
+          !checked_add(
+              sealed_sparse_target_closure_count,
+              image.sparse_target_closure_count,
               sealed_sparse_target_closure_count)) {
         return reject(
             ExactDirectMorseResidentAllOrdersVerticalSealDecision::
@@ -2614,6 +3023,9 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
           impl_->committed_stamp.committed_k2_group_count ||
       sealed_higher_group_count !=
           impl_->committed_stamp.committed_higher_group_count ||
+      sealed_terminal_component_image_count !=
+          impl_->committed_stamp.committed_terminal_component_image_count ||
+      sealed_terminal_component_image_count > 1U ||
       sealed_k2_group_count > resident_groups.size() ||
       sealed_higher_group_count !=
           resident_groups.size() - sealed_k2_group_count) {
@@ -2656,7 +3068,12 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
   // intermediate target fusion without retaining a global vertical atlas.
   const std::size_t final_witness_probe_count =
       impl_->source_root_target_witnesses.size();
-  if (final_witness_probe_count >
+  std::size_t final_target_reprobe_count = 0U;
+  if (!checked_add(
+          final_witness_probe_count,
+          sealed_terminal_component_image_count,
+          final_target_reprobe_count) ||
+      final_target_reprobe_count >
           impl_->budget.maximum_final_root_witness_probe_count ||
       final_witness_probe_count >
           impl_->budget.maximum_persistent_source_root_witness_count) {
@@ -2668,10 +3085,10 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
       impl_->committed_stamp.next_query_replay_token;
   std::uint64_t terminal_query_token_begin = 0U;
   std::uint64_t terminal_query_token_end = 0U;
-  if (final_witness_probe_count != 0U) {
+  if (final_target_reprobe_count != 0U) {
     if (terminal_query_token == 0U ||
         terminal_query_token > impl_->budget.maximum_query_replay_token ||
-        final_witness_probe_count - 1U >
+        final_target_reprobe_count - 1U >
             impl_->budget.maximum_query_replay_token - terminal_query_token) {
       return reject(
           ExactDirectMorseResidentAllOrdersVerticalSealDecision::
@@ -2679,7 +3096,7 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
     }
     terminal_query_token_begin = terminal_query_token;
     terminal_query_token_end =
-        terminal_query_token + final_witness_probe_count - 1U;
+        terminal_query_token + final_target_reprobe_count - 1U;
   }
   for (const auto& witness : impl_->source_root_target_witnesses) {
     TargetProbePayload terminal_probe;
@@ -2689,6 +3106,7 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
         witness.target_order,
         plan.batches.empty() ? exact::ExactLevel{}
                              : plan.batches.back().squared_level,
+        false,
         witness.target_source_binding_witness,
         terminal_locator_stamp,
         terminal_query_token,
@@ -2697,6 +3115,31 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
         terminal_probe.target_root_id == 0U ||
         terminal_probe.source_binding_witness !=
             witness.target_source_binding_witness) {
+      return reject(
+          ExactDirectMorseResidentAllOrdersVerticalSealDecision::
+              no_terminal_target_witness_reprobe_rejected);
+    }
+  }
+  for (const auto& batch : higher_batches) {
+    if (!batch.terminal_component_image.has_value()) {
+      continue;
+    }
+    const auto& image = *batch.terminal_component_image;
+    TargetProbePayload terminal_probe;
+    const TargetProbeStatus status = probe_target_key(
+        *impl_,
+        image.canonical_target_facet_key,
+        image.target_order,
+        image.squared_level,
+        false,
+        image.target_source_binding_witness,
+        terminal_locator_stamp,
+        terminal_query_token,
+        terminal_probe);
+    if (status != TargetProbeStatus::complete ||
+        terminal_probe.target_root_id == 0U ||
+        terminal_probe.source_binding_witness !=
+            image.target_source_binding_witness) {
       return reject(
           ExactDirectMorseResidentAllOrdersVerticalSealDecision::
               no_terminal_target_witness_reprobe_rejected);
@@ -2729,6 +3172,14 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
   final.required_resident_group_count = resident_groups.size();
   final.sealed_k2_group_count = sealed_k2_group_count;
   final.sealed_higher_group_count = sealed_higher_group_count;
+  final.sealed_terminal_component_image_count =
+      sealed_terminal_component_image_count;
+  final.sealed_terminal_target_deletion_probe_count =
+      sealed_terminal_target_deletion_probe_count;
+  final.sealed_terminal_sparse_target_closure_count =
+      sealed_terminal_sparse_target_closure_count;
+  final.sealed_terminal_final_target_reprobe_count =
+      sealed_terminal_component_image_count;
   final.sealed_nonroot_source_facet_resolution_count =
       sealed_nonroot_resolution_count;
   final.sealed_expected_projected_target_facet_probe_count =
@@ -2781,6 +3232,7 @@ ExactDirectMorseResidentAllOrdersVerticalBridge::seal() noexcept {
   final.every_required_plan_batch_replayed_in_exact_product_order = true;
   final.every_k2_batch_and_group_replayed_to_sealed_k1 = true;
   final.every_higher_group_bound_to_one_live_adjacent_order_root = true;
+  final.every_terminal_component_bound_to_one_live_adjacent_order_root = true;
   final.every_nonroot_source_key_projected_to_all_codimension_one_deletions =
       true;
   final.every_resident_group_covered_exactly_once = true;

@@ -306,8 +306,14 @@ void append_vertical_stamp(
   append_size(builder, stamp.resident_epoch);
   append_size(builder, stamp.committed_k2_batch_count);
   append_size(builder, stamp.committed_k2_group_count);
+  append_size(
+      builder, stamp.committed_k2_direct_saddle_group_binding_count);
+  append_size(builder, stamp.committed_k2_direct_birth_k1_binding_count);
   append_size(builder, stamp.committed_higher_batch_count);
   append_size(builder, stamp.committed_higher_group_count);
+  append_size(builder, stamp.committed_terminal_component_image_count);
+  append_size(
+      builder, stamp.committed_higher_direct_saddle_group_binding_count);
   append_size(builder, stamp.persistent_source_root_witness_count);
   append_u64(builder, stamp.next_query_replay_token);
   append_id(builder, stamp.canonical_cloud_digest);
@@ -460,10 +466,15 @@ void append_vertical_final_seal(
   append_size(builder, seal.required_resident_group_count);
   append_size(builder, seal.sealed_k2_group_count);
   append_size(builder, seal.sealed_higher_group_count);
+  append_size(builder, seal.sealed_terminal_component_image_count);
+  append_size(builder, seal.sealed_terminal_target_deletion_probe_count);
+  append_size(builder, seal.sealed_terminal_sparse_target_closure_count);
+  append_size(builder, seal.sealed_terminal_final_target_reprobe_count);
   append_size(builder, seal.sealed_nonroot_source_facet_resolution_count);
   append_size(
       builder, seal.sealed_expected_projected_target_facet_probe_count);
   append_size(builder, seal.sealed_projected_target_facet_probe_count);
+  append_size(builder, seal.sealed_sparse_target_closure_count);
   append_size(builder, seal.sealed_persistent_source_root_witness_count);
   append_size(builder, seal.sealed_final_root_witness_probe_count);
   append_size(builder, seal.sealed_terminal_locator_union_count);
@@ -498,6 +509,9 @@ void append_vertical_final_seal(
   append_bool(builder, seal.every_k2_batch_and_group_replayed_to_sealed_k1);
   append_bool(
       builder, seal.every_higher_group_bound_to_one_live_adjacent_order_root);
+  append_bool(
+      builder,
+      seal.every_terminal_component_bound_to_one_live_adjacent_order_root);
   append_bool(
       builder,
       seal.every_nonroot_source_key_projected_to_all_codimension_one_deletions);

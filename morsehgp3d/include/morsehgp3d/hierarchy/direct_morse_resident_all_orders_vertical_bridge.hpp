@@ -13,7 +13,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_morse_resident_all_orders_vertical_bridge_schema_version = 3U;
+    direct_morse_resident_all_orders_vertical_bridge_schema_version = 4U;
 inline constexpr std::string_view
     direct_morse_resident_all_orders_vertical_bridge_backend =
         "reference_cpu";
@@ -23,7 +23,7 @@ inline constexpr std::string_view
     direct_morse_resident_all_orders_vertical_bridge_mode =
         "certified_conditional_inductive_resident_all_adjacent_orders_"
         "vertical_group_images_with_sparse_target_descent_and_authentic_"
-        "direct_event_group_membership_v3";
+        "direct_event_group_membership_plus_terminal_singleton_component_v4";
 inline constexpr std::string_view
     direct_morse_resident_all_orders_vertical_bridge_public_status =
         "not_claimed";
@@ -36,7 +36,8 @@ inline constexpr std::string_view
         "target_descent_to_live_root_agreement_terminal_exhausted_locator_"
         "witness_sweep_composes_monotone_target_unions_owned_normalized_"
         "source_capability_and_preallocated_post_resident_commit_"
-        "publication_with_canonical_o4_membership_digest_v3";
+        "publication_with_canonical_o4_membership_digest_plus_unique_k_"
+        "equals_n_source_facet_all_deletions_to_one_live_target_root_v4";
 
 // Every cap applies to one live all-orders bridge.  Target deletions are
 // generated in a fixed ExactDirectSparseFacetKey scratch object and are never
@@ -106,6 +107,7 @@ struct ExactDirectMorseResidentAllOrdersVerticalBridgeStamp {
   std::size_t committed_k2_direct_birth_k1_binding_count{};
   std::size_t committed_higher_batch_count{};
   std::size_t committed_higher_group_count{};
+  std::size_t committed_terminal_component_image_count{};
   std::size_t committed_higher_direct_saddle_group_binding_count{};
   std::size_t persistent_source_root_witness_count{};
   std::uint64_t next_query_replay_token{};
@@ -170,6 +172,50 @@ struct ExactDirectMorseResidentAllOrdersVerticalGroupImage {
       const ExactDirectMorseResidentAllOrdersVerticalGroupImage&) = default;
 };
 
+// When K=n, Gamma_K contains exactly the single facet V and no coface.  The
+// reduced horizontal source therefore has no ordinary group record for this
+// component.  This compact image certifies the missing adjacent vertical
+// arrow by probing all n codimension-one deletions of V at the same closed
+// level and requiring direct live target keys with one common root.  Each
+// deletion was an isolated Gamma_(n-1) component before V became active, so a
+// locator miss is a source contradiction rather than a sparse-descent case.
+// Only one canonical target binding is retained; no facet universe is
+// materialized.
+struct ExactDirectMorseResidentTerminalComponentImage {
+  std::size_t source_batch_index{};
+  std::size_t source_direct_reference_index{};
+  std::size_t source_role_record_index{};
+  std::size_t source_event_projection_index{};
+  exact::ExactLevel squared_level{};
+  std::size_t source_order{};
+  std::size_t target_order{};
+  ExactDirectSparseFacetKey complete_source_facet_key{};
+  ExactDirectSparseFacetKey canonical_target_facet_key{};
+  ExactDirectSparseFacetWitness target_source_binding_witness{};
+  ExactFrozenIncidencePriorRootId resolved_target_root_id{};
+  std::size_t target_deletion_probe_count{};
+  std::size_t sparse_target_closure_count{};
+  bool source_order_equals_cloud_point_count{false};
+  bool exactly_one_terminal_birth_reference{false};
+  bool frozen_terminal_batch_has_no_hyperedge_or_group{false};
+  bool every_codimension_one_deletion_probed{false};
+  bool every_target_deletion_live_positive_and_rooted{false};
+  bool every_target_deletion_direct_positive_hit{false};
+  bool one_live_target_root_for_complete_terminal_component{false};
+  bool pre_batch_locator_snapshot_immutable_during_all_probes{false};
+  bool resident_terminal_batch_committed_without_synthetic_group{false};
+  bool global_facet_coface_or_gamma_catalog_materialized{false};
+  bool ordinary_or_higher_order_delaunay_materialized{false};
+  bool public_status_claimed{false};
+
+  [[nodiscard]] bool certified_conditional_terminal_component_image()
+      const noexcept;
+
+  friend bool operator==(
+      const ExactDirectMorseResidentTerminalComponentImage&,
+      const ExactDirectMorseResidentTerminalComponentImage&) = default;
+};
+
 struct ExactDirectMorseResidentAllOrdersVerticalBatchRecord {
   std::uint32_t schema_version{
       direct_morse_resident_all_orders_vertical_bridge_schema_version};
@@ -193,6 +239,8 @@ struct ExactDirectMorseResidentAllOrdersVerticalBatchRecord {
       group_images;
   std::vector<ExactDirectMorseResidentDirectSaddleGroupBinding>
       direct_saddle_group_bindings;
+  std::optional<ExactDirectMorseResidentTerminalComponentImage>
+      terminal_component_image;
   contract::CanonicalId o4_membership_digest{};
   bool exact_product_order_target_batch_already_committed{false};
   bool pre_batch_locator_snapshot_immutable_during_all_probes{false};
@@ -242,6 +290,10 @@ struct ExactDirectMorseResidentAllOrdersVerticalFinalSeal {
   std::size_t required_resident_group_count{};
   std::size_t sealed_k2_group_count{};
   std::size_t sealed_higher_group_count{};
+  std::size_t sealed_terminal_component_image_count{};
+  std::size_t sealed_terminal_target_deletion_probe_count{};
+  std::size_t sealed_terminal_sparse_target_closure_count{};
+  std::size_t sealed_terminal_final_target_reprobe_count{};
   std::size_t sealed_nonroot_source_facet_resolution_count{};
   std::size_t sealed_expected_projected_target_facet_probe_count{};
   std::size_t sealed_projected_target_facet_probe_count{};
@@ -277,6 +329,7 @@ struct ExactDirectMorseResidentAllOrdersVerticalFinalSeal {
   bool every_required_plan_batch_replayed_in_exact_product_order{false};
   bool every_k2_batch_and_group_replayed_to_sealed_k1{false};
   bool every_higher_group_bound_to_one_live_adjacent_order_root{false};
+  bool every_terminal_component_bound_to_one_live_adjacent_order_root{false};
   bool every_nonroot_source_key_projected_to_all_codimension_one_deletions{
       false};
   bool every_resident_group_covered_exactly_once{false};
@@ -465,6 +518,8 @@ class ExactDirectMorseResidentAllOrdersVerticalBridge {
   [[nodiscard]] bool ready() const noexcept;
   [[nodiscard]] bool resident_complete() const noexcept;
   [[nodiscard]] bool conditional_all_adjacent_order_group_images_complete()
+      const noexcept;
+  [[nodiscard]] bool conditional_all_adjacent_order_component_images_complete()
       const noexcept;
   [[nodiscard]] ExactDirectMorseUnifiedResidentSourceKind resident_source_kind()
       const noexcept;

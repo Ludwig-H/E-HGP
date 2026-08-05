@@ -21,7 +21,7 @@ using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
 
 static_assert(
-    direct_morse_resident_all_orders_vertical_bridge_schema_version == 3U);
+    direct_morse_resident_all_orders_vertical_bridge_schema_version == 4U);
 static_assert(!std::is_copy_constructible_v<
               ExactDirectMorseResidentAllOrdersVerticalBridge>);
 static_assert(std::is_nothrow_move_constructible_v<
@@ -993,9 +993,13 @@ void test_maximum_order_ten_vertical_falsifier(const Fixture& source) {
   std::array<std::size_t, maximum_order + 1U> committed_batches_by_order{};
   std::array<std::size_t, maximum_order + 1U> committed_groups_by_order{};
   std::array<bool, maximum_order + 1U> witnessed_adjacent_arrow{};
+  std::size_t terminal_component_image_count = 0U;
+  std::size_t terminal_target_deletion_probe_count = 0U;
+  std::size_t terminal_sparse_target_closure_count = 0U;
   bool continuation_observed = false;
   bool cursor_98_direct_gap_certified = false;
   bool cursor_98_sparse_target_closure_observed = false;
+  bool terminal_all_deletions_direct_hit = false;
   std::size_t sparse_target_closure_count = 0U;
 
   while (!bridge.resident_complete()) {
@@ -1040,6 +1044,42 @@ void test_maximum_order_ten_vertical_falsifier(const Fixture& source) {
           cursor_98_direct_gap_certified,
           "cursor 98 retains the permanent certified direct-locator miss that requires sparse target descent");
     }
+    if (planned.order == maximum_order) {
+      terminal_all_deletions_direct_hit = true;
+      for (std::size_t erased = 0U; erased < maximum_order; ++erased) {
+        ExactDirectSparseFacetKey target_key{};
+        target_key.point_count = maximum_order - 1U;
+        std::size_t target_index = 0U;
+        for (std::size_t point_id = 0U; point_id < maximum_order;
+             ++point_id) {
+          if (point_id != erased) {
+            target_key.point_ids[target_index++] =
+                static_cast<morsehgp3d::spatial::PointId>(point_id);
+          }
+        }
+        const ExactDirectSparseFacetWitness diagnostic_witness{
+            before.resident_session_authority_id,
+            987654400U + static_cast<std::uint64_t>(erased)};
+        const auto direct_probe = bridge.resident_locator().probe_positive_facet(
+            target_key,
+            diagnostic_witness,
+            all_orders_budget(source).target_probe);
+        const auto direct_verification =
+            verify_exact_direct_sparse_positive_facet_probe(
+                bridge.resident_locator(),
+                target_key,
+                diagnostic_witness,
+                all_orders_budget(source).target_probe,
+                direct_probe);
+        terminal_all_deletions_direct_hit =
+            terminal_all_deletions_direct_hit &&
+            direct_probe.certified_positive_hit() &&
+            direct_verification.result_certified;
+      }
+      check(
+          terminal_all_deletions_direct_hit,
+          "every K=n deletion is already a direct live K=n-1 birth key before the unique terminal coface batch");
+    }
     auto prepared = bridge.prepare_next();
     if (!prepared.certified_prepared_batch()) {
       check(
@@ -1083,6 +1123,21 @@ void test_maximum_order_ten_vertical_falsifier(const Fixture& source) {
       witnessed_adjacent_arrow[record->source_order] =
           witnessed_adjacent_arrow[record->source_order] ||
           !record->group_images.empty();
+      if (record->terminal_component_image.has_value()) {
+        const auto& terminal = *record->terminal_component_image;
+        check(
+            planned.order == maximum_order &&
+                terminal.source_order == maximum_order &&
+                terminal.target_order + 1U == terminal.source_order &&
+                terminal.target_deletion_probe_count == maximum_order &&
+                terminal.complete_source_facet_key.point_count ==
+                    maximum_order &&
+                terminal.sparse_target_closure_count == 0U &&
+                terminal.one_live_target_root_for_complete_terminal_component &&
+                !terminal
+                     .resident_terminal_batch_committed_without_synthetic_group,
+            "the prepared K=n ticket projects every deletion to one live K=n-1 root without fabricating a source group");
+      }
       committed_groups_by_order[record->source_order] +=
           record->group_images.size();
       for (const auto& group : record->group_images) {
@@ -1109,6 +1164,36 @@ void test_maximum_order_ten_vertical_falsifier(const Fixture& source) {
       return;
     }
     ++committed_batches_by_order[planned.order];
+    if (planned.order == maximum_order) {
+      const auto& terminal_record = bridge.committed_higher_batches().back();
+      check(
+          terminal_record.terminal_component_image.has_value() &&
+              terminal_record.terminal_component_image
+                  ->certified_conditional_terminal_component_image(),
+          "the committed K=n batch retains one certified terminal component image");
+      if (terminal_record.terminal_component_image.has_value()) {
+        ++terminal_component_image_count;
+        terminal_target_deletion_probe_count +=
+            terminal_record.terminal_component_image
+                ->target_deletion_probe_count;
+        terminal_sparse_target_closure_count +=
+            terminal_record.terminal_component_image
+                ->sparse_target_closure_count;
+        auto altered_binding = terminal_record;
+        ++altered_binding.terminal_component_image
+              ->target_source_binding_witness.replay_token;
+        check(
+            !altered_binding.certified_conditional_higher_batch(),
+            "the canonical O.4 digest rejects a mutated terminal target binding witness");
+        auto altered_key = terminal_record;
+        altered_key.terminal_component_image
+            ->canonical_target_facet_key.point_ids[0] =
+            static_cast<morsehgp3d::spatial::PointId>(maximum_order);
+        check(
+            !altered_key.certified_conditional_higher_batch(),
+            "the terminal image rejects a mutated noncanonical target key");
+      }
+    }
     const auto after = bridge.current_stamp();
     check(
         after.resident_batch_cursor == before.resident_batch_cursor + 1U &&
@@ -1140,25 +1225,45 @@ void test_maximum_order_ten_vertical_falsifier(const Fixture& source) {
               source.plan.batches.size() - planned_batches_by_order[2U] &&
           continuation_observed && cursor_98_direct_gap_certified &&
           cursor_98_sparse_target_closure_observed &&
+          terminal_all_deletions_direct_hit &&
           sparse_target_closure_count != 0U &&
           committed_batches_by_order[maximum_order] ==
               planned_batches_by_order[maximum_order] &&
           committed_groups_by_order[maximum_order] == 0U &&
-          !witnessed_adjacent_arrow[maximum_order] && bridge.resident_complete() &&
-          !bridge.conditional_all_adjacent_order_group_images_complete(),
-      "the sparse closure repairs K5-to-K4 and exhausts all batches, while the missing K10 terminal component remains explicit");
+          !witnessed_adjacent_arrow[maximum_order] &&
+          terminal_component_image_count == 1U &&
+          terminal_target_deletion_probe_count == maximum_order &&
+          terminal_sparse_target_closure_count == 0U &&
+          terminal_stamp.committed_terminal_component_image_count == 1U &&
+          bridge.resident_complete() &&
+          !bridge.conditional_all_adjacent_order_group_images_complete() &&
+          bridge.conditional_all_adjacent_order_component_images_complete(),
+      "the sparse closure repairs K5-to-K4 and the explicit K=n singleton image closes the ninth adjacent component arrow");
 
-  const auto k1_stamp_before_rejected_seal = bridge.owned_k1_current_stamp();
   const auto sealed = bridge.seal();
   check(
-      sealed.decision ==
-              ExactDirectMorseResidentAllOrdersVerticalSealDecision::
-                  no_adjacent_source_order_component_coverage &&
-          !sealed.seal.has_value() &&
-          sealed.no_partial_seal_published_on_failure &&
-          bridge.owned_k1_current_stamp() == k1_stamp_before_rejected_seal &&
-          !bridge.final_vertical_sealed(),
-      "K10 terminal-source omission blocks the seal before K1 drain and cannot be promoted to vertical completeness");
+      sealed.certified_final_vertical_seal() && sealed.seal.has_value() &&
+          sealed.seal->sealed_terminal_component_image_count == 1U &&
+          sealed.seal->sealed_terminal_target_deletion_probe_count ==
+              maximum_order &&
+          sealed.seal->sealed_terminal_sparse_target_closure_count ==
+              terminal_sparse_target_closure_count &&
+          sealed.seal->sealed_terminal_final_target_reprobe_count == 1U &&
+          sealed.seal
+              ->every_terminal_component_bound_to_one_live_adjacent_order_root &&
+          sealed.seal->vertical_maps_complete &&
+          !sealed.seal->global_morse_obligation_replayed &&
+          !sealed.seal->m1_replayed && !sealed.seal->public_status_claimed &&
+          bridge.final_vertical_sealed(),
+      "the K=n component closes the conditional vertical seal while M.1 and public exactness remain fail-closed");
+  if (sealed.seal.has_value()) {
+    auto false_terminal_closure = *sealed.seal;
+    false_terminal_closure.sealed_terminal_sparse_target_closure_count = 1U;
+    check(
+        !false_terminal_closure.certified_final_vertical_seal() &&
+            !bridge.verify_final_vertical_seal(false_terminal_closure),
+        "a claimed K=n sparse closure contradicts the direct-birth deletion invariant and fails closed");
+  }
 
   for (const auto& witness : bridge.source_root_target_witnesses()) {
     check(
