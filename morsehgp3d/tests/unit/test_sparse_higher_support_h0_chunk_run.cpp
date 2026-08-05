@@ -25,7 +25,11 @@ namespace {
 
 using namespace morsehgp3d::hierarchy;
 using morsehgp3d::contract::CanonicalId;
+using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
+using morsehgp3d::exact::ExactLevel;
+using morsehgp3d::exact::ExactRational;
+using morsehgp3d::exact::parse_canonical_integer;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 
@@ -92,6 +96,17 @@ class TemporaryWorkspace {
       std::span<const CertifiedPoint3>{points});
 }
 
+[[nodiscard]] CanonicalPointCloud e5_cloud() {
+  const std::array<CertifiedPoint3, 5U> points{
+      point(-2.0, -1.0, 0.0),
+      point(-2.0, 1.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(3.0, 2.0, 0.0),
+      point(4.0, -1.0, 0.0)};
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
 [[nodiscard]] ExactHigherSupportStreamBudget chunk_budget() {
   return {
       1U,
@@ -123,6 +138,32 @@ class TemporaryWorkspace {
       encoded_bytes,
       transition_count * encoded_bytes,
       1U};
+}
+
+[[nodiscard]] ExactRational decimal_rational_with_integer_bytes(
+    std::size_t byte_count,
+    bool negative) {
+  require(
+      byte_count >= (negative ? 2U : 1U),
+      "the exact decimal boundary fixture is too short");
+  std::string numerator;
+  numerator.reserve(byte_count);
+  if (negative) {
+    numerator.push_back('-');
+  }
+  numerator.push_back('1');
+  numerator.append(byte_count - numerator.size(), '0');
+  return ExactRational{
+      parse_canonical_integer(numerator), BigInt{3}};
+}
+
+[[nodiscard]] ExactSparseHigherSupportH0ChunkRunLimits
+rational_boundary_limits(std::size_t exact_integer_byte_count) {
+  return {
+      256U,
+      exact_integer_byte_count,
+      exact_integer_byte_count + 1U,
+      exact_integer_byte_count + 18U};
 }
 
 struct ExpectedSequence {
@@ -312,6 +353,140 @@ void require_store_scope(const AtomicLinearRunStoreStatus& status) {
           status.global_gamma_cell_count == 0U &&
           status.higher_order_delaunay_cell_count == 0U,
       "the atomic run store materialized forbidden Phase-14AB state");
+}
+
+void test_general_rational_wire_budgets_are_syntax_only() {
+  require(
+      sparse_higher_support_triangle_exact_integer_byte_count == 6973U &&
+          sparse_higher_support_tetrahedron_exact_integer_byte_count ==
+              9503U,
+      "the higher-support conservative decimal budgets drifted");
+
+  constexpr std::array<std::size_t, 2U> byte_counts{
+      sparse_higher_support_triangle_exact_integer_byte_count,
+      sparse_higher_support_tetrahedron_exact_integer_byte_count};
+  constexpr std::array<std::uint8_t, 2U> support_sizes{3U, 4U};
+  const CanonicalPointCloud cloud = regular_tetrahedron();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactHigherSupportAuthorityContext authority{index, cloud, 10U};
+
+  for (std::size_t case_index = 0U;
+       case_index < byte_counts.size(); ++case_index) {
+    const std::size_t byte_count = byte_counts[case_index];
+    const std::uint8_t support_size = support_sizes[case_index];
+    const ExactRational value = decimal_rational_with_integer_bytes(
+        byte_count, support_size == 4U);
+    ExactSparseHigherSupportH0ChunkRunContext exact_context{
+        authority,
+        chunk_budget(),
+        projection_limits(),
+        rational_boundary_limits(byte_count)};
+    const ExactSparseHigherSupportH0RationalWireRoundTrip round_trip =
+        exact_context.round_trip_exact_rational_wire_for_validation(
+            support_size, value);
+    require(
+        round_trip.support_size == support_size &&
+            round_trip.value == value &&
+            round_trip.numerator_byte_count == byte_count &&
+            round_trip.denominator_byte_count == 1U &&
+            round_trip.canonical_rational_field_byte_count ==
+                byte_count + 2U &&
+            round_trip.encoded_wire_byte_count == byte_count + 18U &&
+            value.denominator() == 3,
+        "an exact higher-support decimal boundary did not round-trip canonically");
+
+    ExactSparseHigherSupportH0ChunkRunLimits below =
+        rational_boundary_limits(byte_count);
+    below.maximum_exact_integer_byte_count = byte_count - 1U;
+    ExactSparseHigherSupportH0ChunkRunContext below_context{
+        authority, chunk_budget(), projection_limits(), below};
+    const ExactSparseHigherSupportH0ChunkRunAudit audit_before =
+        below_context.audit();
+    bool rejected = false;
+    try {
+      static_cast<void>(
+          below_context.round_trip_exact_rational_wire_for_validation(
+              support_size, value));
+    } catch (const std::length_error&) {
+      rejected = true;
+    }
+    require(
+        rejected && below_context.audit() == audit_before,
+        "a cap-minus-one syntax-only rational validation was not rejected");
+  }
+}
+
+void test_non_dyadic_1105_over_242_durable_round_trip() {
+  const CanonicalPointCloud cloud = e5_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactHigherSupportAuthorityContext authority{index, cloud, 10U};
+  const ExactLevel target{BigInt{1105}, BigInt{242}};
+  TemporaryWorkspace workspace;
+  const std::filesystem::path run_directory =
+      workspace.make_run_directory();
+  AtomicLinearRunExternalAnchor terminal_anchor;
+  std::size_t published_target_count = 0U;
+
+  {
+    ExactSparseHigherSupportH0ChunkRunContext context{
+        authority,
+        chunk_budget(),
+        projection_limits(),
+        chunk_run_limits()};
+    auto store = context.create_new_store(run_directory, store_limits());
+    bool complete = false;
+    while (!complete) {
+      const AtomicLinearRunPublishResult publication =
+          context.publish_next_chunk(store);
+      require(
+          publication.decision ==
+                  AtomicLinearRunPublishDecision::durably_published &&
+              publication.trusted_state_advanced,
+          "the E5 non-dyadic fixture did not publish durably");
+      const auto& projection = accepted_projection(publication);
+      for (const ExactSparseDirectH0Candidate& candidate :
+           projection.run.candidates) {
+        if (candidate.support_size == 3U &&
+            candidate.squared_level == target) {
+          ++published_target_count;
+        }
+      }
+      complete = projection.session_complete;
+      terminal_anchor = publication.current_anchor;
+    }
+    require_store_scope(store.status());
+  }
+
+  std::size_t recovered_target_count = 0U;
+  {
+    ExactSparseHigherSupportH0ChunkRunContext context{
+        authority,
+        chunk_budget(),
+        projection_limits(),
+        chunk_run_limits()};
+    auto store = context.open_existing_store(
+        run_directory,
+        store_limits(),
+        terminal_anchor,
+        [&](const ExactSparseHigherSupportH0RecertifiedChunkProjection&
+                projection) {
+          for (const ExactSparseDirectH0Candidate& candidate :
+               projection.run.candidates) {
+            if (candidate.support_size == 3U &&
+                candidate.squared_level == target) {
+              require(
+                  candidate.squared_level.numerator_string() == "1105" &&
+                      candidate.squared_level.denominator_string() == "242",
+                  "the durable E5 level was changed or made dyadic");
+              ++recovered_target_count;
+            }
+          }
+        });
+    require_store_scope(store.status());
+  }
+  require(
+      published_target_count == 1U && recovered_target_count == 1U,
+      "the permanent 1105/242 higher-support event did not survive HEAD reopen");
 }
 
 void test_context_binding_payload_floor_and_chunk_cap() {
@@ -820,6 +995,8 @@ void test_publish_reopen_finish_and_recertify() {
 
 int main() {
   try {
+    test_general_rational_wire_budgets_are_syntax_only();
+    test_non_dyadic_1105_over_242_durable_round_trip();
     test_context_binding_payload_floor_and_chunk_cap();
     test_retryable_pre_head_failure_reuses_pending_segment();
     test_indeterminate_failure_requires_anchored_reopen();

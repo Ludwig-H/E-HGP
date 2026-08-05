@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/exact/rational.hpp"
 #include "morsehgp3d/hierarchy/atomic_linear_run_store.hpp"
 #include "morsehgp3d/hierarchy/sparse_direct_h0_candidate_merge.hpp"
 
@@ -17,6 +18,15 @@ inline constexpr std::uint32_t
     sparse_higher_support_h0_chunk_run_schema_version = 1U;
 inline constexpr std::size_t
     sparse_higher_support_h0_chunk_run_fixed_payload_byte_count = 278U;
+// Binary64 support-3 and support-4 formulas have conservative canonical
+// rational-field bounds of 6,973 and 9,503 decimal bytes respectively.  The
+// Phase-14AB wire stores numerator and denominator as separate length-prefixed
+// integers, so its actual per-integer cap must be able to consume either whole
+// conservative bound.  These constants do not impose dyadic denominators.
+inline constexpr std::size_t
+    sparse_higher_support_triangle_exact_integer_byte_count = 6973U;
+inline constexpr std::size_t
+    sparse_higher_support_tetrahedron_exact_integer_byte_count = 9503U;
 inline constexpr std::string_view
     sparse_higher_support_h0_chunk_run_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -73,6 +83,22 @@ struct ExactSparseHigherSupportH0ChunkRunAudit {
   friend bool operator==(
       const ExactSparseHigherSupportH0ChunkRunAudit&,
       const ExactSparseHigherSupportH0ChunkRunAudit&) = default;
+};
+
+// Syntax-only validation result for the exact rational primitive shared by
+// persisted centers and squared levels.  This round trip never decodes a
+// durable chunk into scientific authority and never touches a run store.
+struct ExactSparseHigherSupportH0RationalWireRoundTrip {
+  std::uint8_t support_size{};
+  exact::ExactRational value;
+  std::size_t numerator_byte_count{};
+  std::size_t denominator_byte_count{};
+  std::size_t canonical_rational_field_byte_count{};
+  std::size_t encoded_wire_byte_count{};
+
+  friend bool operator==(
+      const ExactSparseHigherSupportH0RationalWireRoundTrip&,
+      const ExactSparseHigherSupportH0RationalWireRoundTrip&) = default;
 };
 
 // Synchronous handoff derived only from a fresh canonical-root replay.  The
@@ -163,6 +189,14 @@ class ExactSparseHigherSupportH0ChunkRunContext {
   recertify_for_validation(
       const AtomicLinearRunTransition& transition,
       AtomicLinearRunRecertificationPhase phase) const;
+
+  // Exercises the same bounded canonical-integer writer used by durable
+  // chunks, followed by a syntax-only canonical parse.  It is intentionally
+  // pure with respect to producer/verifier caches and every store/HEAD.
+  [[nodiscard]] ExactSparseHigherSupportH0RationalWireRoundTrip
+  round_trip_exact_rational_wire_for_validation(
+      std::uint8_t support_size,
+      const exact::ExactRational& value) const;
 
   [[nodiscard]] ExactSparseHigherSupportH0ChunkRunAudit audit()
       const noexcept;

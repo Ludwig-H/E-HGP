@@ -214,6 +214,79 @@ class Writer {
   std::vector<std::uint8_t> data_;
 };
 
+class RationalFieldReader {
+ public:
+  RationalFieldReader(
+      std::span<const std::uint8_t> data,
+      const ExactSparseHigherSupportH0ChunkRunLimits& limits)
+      : data_(data), limits_(limits) {}
+
+  [[nodiscard]] std::uint8_t u8() {
+    require_available(1U);
+    return data_[offset_++];
+  }
+
+  [[nodiscard]] exact::BigInt integer() {
+    const std::size_t byte_count = size();
+    if (byte_count == 0U ||
+        byte_count > limits_.maximum_exact_integer_byte_count) {
+      throw std::invalid_argument(
+          "a Phase-14AB validation integer length exceeds its cap");
+    }
+    exact_integer_byte_count_ = checked_add(
+        exact_integer_byte_count_, byte_count,
+        "a Phase-14AB validation integer population overflows size_t");
+    if (exact_integer_byte_count_ >
+        limits_.maximum_total_exact_integer_byte_count_per_chunk) {
+      throw std::invalid_argument(
+          "a Phase-14AB validation integer population exceeds its cap");
+    }
+    require_available(byte_count);
+    const std::string_view encoded{
+        reinterpret_cast<const char*>(data_.data() + offset_),
+        byte_count};
+    exact::BigInt value = exact::parse_canonical_integer(encoded);
+    if (exact::canonical_integer_string(value) != encoded) {
+      throw std::invalid_argument(
+          "a Phase-14AB validation integer is not canonical");
+    }
+    offset_ += byte_count;
+    return value;
+  }
+
+  void require_finished() const {
+    if (offset_ != data_.size()) {
+      throw std::invalid_argument(
+          "a Phase-14AB validation rational has trailing bytes");
+    }
+  }
+
+ private:
+  [[nodiscard]] std::uint64_t u64() {
+    require_available(8U);
+    std::uint64_t value = 0U;
+    for (std::size_t index = 0U; index < 8U; ++index) {
+      value = (value << 8U) | data_[offset_ + index];
+    }
+    offset_ += 8U;
+    return value;
+  }
+
+  [[nodiscard]] std::size_t size() { return checked_size(u64()); }
+
+  void require_available(std::size_t byte_count) const {
+    if (byte_count > data_.size() - offset_) {
+      throw std::invalid_argument(
+          "a Phase-14AB validation rational is truncated");
+    }
+  }
+
+  std::span<const std::uint8_t> data_;
+  const ExactSparseHigherSupportH0ChunkRunLimits& limits_;
+  std::size_t offset_{};
+  std::size_t exact_integer_byte_count_{};
+};
+
 void encode_center(Writer& writer, const exact::ExactCenter3& center) {
   writer.integer(center.numerator(0U));
   writer.integer(center.numerator(1U));
@@ -907,6 +980,56 @@ ExactSparseHigherSupportH0ChunkRunContext::recertify_for_validation(
     const AtomicLinearRunTransition& transition,
     AtomicLinearRunRecertificationPhase phase) const {
   return impl_->recertify(transition, phase);
+}
+
+ExactSparseHigherSupportH0RationalWireRoundTrip
+ExactSparseHigherSupportH0ChunkRunContext::
+    round_trip_exact_rational_wire_for_validation(
+        std::uint8_t support_size,
+        const exact::ExactRational& value) const {
+  if (support_size != 3U && support_size != 4U) {
+    throw std::invalid_argument(
+        "a Phase-14AB rational validation support must have arity 3 or 4");
+  }
+
+  Writer writer{impl_->limits};
+  writer.u8(support_size);
+  writer.integer(value.numerator());
+  writer.integer(value.denominator());
+  const std::vector<std::uint8_t> wire = std::move(writer).finish();
+
+  RationalFieldReader reader{wire, impl_->limits};
+  const std::uint8_t decoded_support_size = reader.u8();
+  exact::BigInt decoded_numerator = reader.integer();
+  exact::BigInt decoded_denominator = reader.integer();
+  reader.require_finished();
+  if (decoded_denominator <= 0) {
+    throw std::logic_error(
+        "a Phase-14AB rational validation denominator is not positive");
+  }
+  exact::ExactRational decoded{
+      std::move(decoded_numerator), std::move(decoded_denominator)};
+  if (decoded_support_size != support_size || decoded != value) {
+    throw std::logic_error(
+        "a Phase-14AB rational validation round trip changed its value");
+  }
+
+  const std::string numerator =
+      exact::canonical_integer_string(value.numerator());
+  const std::string denominator =
+      exact::canonical_integer_string(value.denominator());
+  return {
+      support_size,
+      std::move(decoded),
+      numerator.size(),
+      denominator.size(),
+      checked_add(
+          checked_add(
+              numerator.size(), 1U,
+              "a Phase-14AB rational-field length overflows size_t"),
+          denominator.size(),
+          "a Phase-14AB rational-field length overflows size_t"),
+      wire.size()};
 }
 
 ExactSparseHigherSupportH0ChunkRunAudit
