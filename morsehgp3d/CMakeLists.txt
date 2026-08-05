@@ -4266,6 +4266,52 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_resident_naturality_square_campaign
+  STATIC
+    src/cpu/hierarchy/direct_morse_resident_naturality_square_campaign.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_resident_naturality_square_campaign
+  ALIAS morsehgp3d_direct_morse_resident_naturality_square_campaign
+)
+set_target_properties(
+  morsehgp3d_direct_morse_resident_naturality_square_campaign
+  PROPERTIES
+    EXPORT_NAME direct_morse_resident_naturality_square_campaign
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_resident_naturality_square_campaign PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_resident_naturality_square_campaign
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_resident_naturality_square_campaign
+  PUBLIC
+    morsehgp3d::direct_morse_resident_all_orders_vertical_bridge
+    morsehgp3d::direct_morse_vertical_journal
+    morsehgp3d::direct_normalized_h0_incidence_reduction_authority
+    morsehgp3d::direct_normalized_vertical_square_receipt
+    morsehgp3d::direct_sparse_gateway_clock
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_naturality_square_campaign
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_resident_naturality_square_campaign
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_morse_resident_event_crosswalk_journal
   STATIC
     src/cpu/hierarchy/direct_morse_resident_event_crosswalk_journal.cpp
@@ -6783,6 +6829,7 @@ if(MORSEHGP3D_INSTALL_INTERNAL_TARGETS)
     morsehgp3d_direct_k1_normalized_product_stream
     morsehgp3d_direct_morse_resident_k2_k1_closed_cut_bridge
     morsehgp3d_direct_morse_resident_all_orders_vertical_bridge
+    morsehgp3d_direct_morse_resident_naturality_square_campaign
     morsehgp3d_direct_morse_resident_event_crosswalk_journal
     morsehgp3d_direct_morse_normalized_h0_product_session
     morsehgp3d_yao48_ranked_pair_candidates_reference

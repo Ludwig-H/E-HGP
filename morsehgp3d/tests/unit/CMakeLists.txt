@@ -2047,6 +2047,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_resident_naturality_square_campaign_tests
+  test_hierarchy_direct_morse_resident_naturality_square_campaign.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_resident_naturality_square_campaign_tests
+  PRIVATE morsehgp3d::direct_morse_resident_naturality_square_campaign
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_resident_naturality_square_campaign_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_resident_naturality_square_campaign_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
   test_hierarchy_direct_morse_normalized_h0_product_session.cpp
 )
@@ -3716,6 +3736,7 @@ set(
   morsehgp3d_hierarchy_direct_k1_normalized_product_stream_tests
   morsehgp3d_hierarchy_direct_morse_resident_k2_k1_closed_cut_bridge_tests
   morsehgp3d_hierarchy_direct_morse_resident_all_orders_vertical_bridge_tests
+  morsehgp3d_hierarchy_direct_morse_resident_naturality_square_campaign_tests
   morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests
   morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
@@ -4912,6 +4933,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_resident_all_orders_vertical_bridge
   COMMAND morsehgp3d_hierarchy_direct_morse_resident_all_orders_vertical_bridge_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_resident_naturality_square_campaign
+  COMMAND morsehgp3d_hierarchy_direct_morse_resident_naturality_square_campaign_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_normalized_h0_product_session
