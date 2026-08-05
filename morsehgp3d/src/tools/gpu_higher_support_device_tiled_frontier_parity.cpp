@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -896,9 +897,107 @@ void run_parity_case(
   std::cout << label << ": OK (" << host.chunks.size() << " chunks)\n";
 }
 
+// Scale mode: full-universe native resolution with intrinsic closure
+// certification (every slot control already proves cumulative well + rank +
+// terminal == universe with unresolved == 0 through the sealed u128
+// partition), plus wall-clock timing.  Parity against the host engine is
+// kept at n=32; larger clouds are native-only with closure checks.
+void run_scale_case(
+    std::size_t point_count,
+    bool with_host_parity,
+    const std::string& label) {
+  const CanonicalPointCloud cloud = line_cloud(point_count);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const WitnessGeometry geometry = build_witness_geometry(index, cloud);
+  const std::array<std::size_t, 2> both_supports{3U, 4U};
+  std::vector<ExactHigherSupportFrontierEntry> roots;
+  for (const std::size_t support_size : both_supports) {
+    roots.push_back(root_entry(support_size, geometry));
+  }
+  CaseSetup setup;
+  setup.maximum_relevant_closed_rank = 5U;
+  const auto begin = std::chrono::steady_clock::now();
+  const TileTranscript native = run_native_tile(
+      setup,
+      cloud,
+      index.build_counters().maximum_depth,
+      std::span<const ExactHigherSupportFrontierEntry>{roots},
+      label);
+  const double seconds =
+      std::chrono::duration<double>(
+          std::chrono::steady_clock::now() - begin)
+          .count();
+  check(
+      native.completed && !native.fatal,
+      label + ": the native tile resolves its complete universe");
+  // Intrinsic closure: the final chunk's controls must close every slot
+  // partition with zero unresolved mass and cumulative masses summing to
+  // C(range,3) and C(range,4) respectively.
+  const ChunkSnapshot& last = native.chunks.back();
+  for (std::size_t slot = 0U; slot < last.controls.size(); ++slot) {
+    const Phase15HigherSupportDeviceTiledSlotControl& control =
+        last.controls[slot];
+    engine::EngineU128 resolved{
+        control.well_prune_mass_cumulative_lo,
+        control.well_prune_mass_cumulative_hi};
+    check(
+        morsehgp3d::gpu::detail::
+                phase15_higher_support_device_tiled_u128_add(
+                    resolved,
+                    engine::EngineU128{
+                        control.rank_prune_mass_cumulative_lo,
+                        control.rank_prune_mass_cumulative_hi}) &&
+            morsehgp3d::gpu::detail::
+                phase15_higher_support_device_tiled_u128_add(
+                    resolved,
+                    engine::EngineU128{
+                        control.terminal_mass_cumulative_lo,
+                        control.terminal_mass_cumulative_hi}),
+        label + ": closure sum stays in range");
+    engine::EngineU128 expected{};
+    check(
+        morsehgp3d::gpu::detail::
+            phase15_higher_support_device_tiled_binomial_u128(
+                point_count, slot == 0U ? 3U : 4U, expected),
+        label + ": expected binomial in range");
+    check(
+        control.unresolved_mass_lo == 0U &&
+            control.unresolved_mass_hi == 0U &&
+            resolved == expected,
+        label + ": the universe closes exactly on device");
+  }
+  if (with_host_parity) {
+    const TileTranscript host = run_engine_tile(
+        setup,
+        geometry,
+        std::span<const ExactHigherSupportFrontierEntry>{roots},
+        label);
+    compare_transcripts(native, host, label);
+  }
+  std::cout << label << ": OK in " << seconds << " s ("
+            << native.chunks.size() << " chunks)\n";
+}
+
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+  const bool scale_mode = argc > 1 && std::string{argv[1]} == "--scale";
+  if (scale_mode) {
+    try {
+      run_scale_case(32U, true, "scale/line32/parity");
+      run_scale_case(64U, false, "scale/line64/native");
+      run_scale_case(128U, false, "scale/line128/native");
+    } catch (const std::exception& error) {
+      std::cerr << "FAIL: unexpected exception: " << error.what() << '\n';
+      return 1;
+    }
+    if (failures != 0) {
+      std::cerr << failures << " scale failures\n";
+      return 1;
+    }
+    std::cout << "higher-support device tiled frontier scale runs passed\n";
+    return 0;
+  }
   try {
     const std::array<std::size_t, 2> both_supports{3U, 4U};
     const std::array<std::size_t, 1> support_three{3U};
