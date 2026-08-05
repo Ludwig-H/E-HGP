@@ -1,6 +1,8 @@
 # Définition de la hiérarchie HGP en dimension trois
 
 > **Statut.** La correspondance entre multicovertures et composantes de Gamma reste la définition normative. La proposition 6 et le théorème 5 du manuscrit sont contredits, dans leur formulation élaguée, par la fixture exacte `gabriel-point-set-counterexample-5-points-v1`; ils ne fondent plus la voie exacte v2.
+>
+> **Source.** L'objet défini ici est celui des deux premières parties du [manuscrit de thèse](../references/MANUSCRIT_THESE_HAUSEUX.pdf) de Louis Hauseux : Partie I, « du Single-Linkage à ses fondements », chapitres 2 à 5, pages PDF 35 à 76; Partie II, « La généralisation du Single-Linkage avec des interactions d'ordre supérieur », chapitres 6 à 9, pages PDF 77 à 134. Les théorèmes et propositions cités dans ce document sont numérotés selon la copie auteur du 5 juillet 2026, en particulier les chapitres 6 et 8 de la Partie II.
 
 ## 1. Des multicovertures aux K-polyèdres
 
@@ -221,6 +223,6 @@ La partition partielle est donc un raffinement de la partition exacte. Elle peut
 
 ## Références
 
-- L. Hauseux, [*Manuscrit de thèse*](../references/MANUSCRIT_THESE_HAUSEUX.pdf), chapitres 6 et 8.
+- L. Hauseux, [*Utilisation de graphes pour la classification et l'extraction de structures. Généralisation à des interactions d'ordre supérieur*](../references/MANUSCRIT_THESE_HAUSEUX.pdf), manuscrit de thèse, copie auteur du 5 juillet 2026 — Partie I, chapitres 2 à 5, pages PDF 35 à 76; Partie II, chapitres 6 à 9, pages PDF 77 à 134; en particulier les chapitres 6 et 8.
 - L. Hauseux, [*Generalization of single-linkage with higher-order interactions*](../references/pdfs/hauseux-et-al-hgp-applied-network-science-2026.pdf), *Applied Network Science*, 2026.
 - Y. Reani et O. Bobrowski, [*Morse Theory for the k-NN Distance Function*](https://arxiv.org/abs/2403.12792), 2024.

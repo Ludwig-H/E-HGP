@@ -2,6 +2,8 @@
 
 MorseHGP3D construit des hiérarchies 3D multi-ordres sans matérialiser la mosaïque de Delaunay d'ordre supérieur. Le dépôt sépare la source géométrique HGP sur les simplexes, la réduction aval en une hiérarchie laminaire de points et les rendus plats de clustering.
 
+L'objet scientifique implémenté est le HGP-Clusterer du [manuscrit de thèse de Louis Hauseux](docs/references/MANUSCRIT_THESE_HAUSEUX.pdf), *Utilisation de graphes pour la classification et l'extraction de structures. Généralisation à des interactions d'ordre supérieur* (copie auteur du 5 juillet 2026). La Partie I, « du Single-Linkage à ses fondements », chapitres 2 à 5, pages PDF 35 à 76, fixe le cadre Single-Linkage de référence; la Partie II, « La généralisation du Single-Linkage avec des interactions d'ordre supérieur », chapitres 6 à 9, pages PDF 77 à 134, définit les K-polyèdres du complexe de Čech, la hiérarchie HGP et sa pratique. Ces deux parties sont la définition normative de l'objet source de ce dépôt.
+
 > [!IMPORTANT]
 > État courant : la Phase 15 reste `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Son réducteur aval utilise le mode `exact_relative_multi_order_laminar_point_projection_v1` : il est disponible et testé relativement à une tour de $T_1$ à $T_K$ déclarée complète et exacte par son producteur, puis liée à son payload par reçus. Le réducteur n'authentifie pas cette vérité amont. Le producteur géométrique complet de la tour, sa qualification GCP et les capacités 50 000 ou 10 000 001 points ne sont pas terminés. Aucun benchmark ne promeut ce statut.
 

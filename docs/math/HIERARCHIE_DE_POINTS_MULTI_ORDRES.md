@@ -3,6 +3,8 @@
 > **Phase :** 15. **Backend de référence visé :** `reference_cpu`, puis projection streamée/GPU après certification différentielle. **Profile source :** `hgp_reduced`. **Mode proposé :** `exact_relative_multi_order_laminar_point_projection_v1`. **Statut public :** `not_claimed`.
 >
 > **Statut mathématique.** Ce document spécifie une réduction aval déterministe de la tour horizontale et verticale des composantes exactes. Lorsque la forêt source, ses couvertures et ses applications verticales sont certifiées, la réduction peut être certifiée exacte relativement à cette source. Elle ne prouve jamais la complétude géométrique de la source, ne remplace pas la hiérarchie HGP sur les facettes et ne peut promouvoir une source partielle, conditionnelle ou surrogate.
+>
+> **Source.** La tour amont consommée ici est l'objet HGP des deux premières parties du [manuscrit de thèse](../references/MANUSCRIT_THESE_HAUSEUX.pdf) de Louis Hauseux : Partie I, « du Single-Linkage à ses fondements », chapitres 2 à 5, pages PDF 35 à 76; Partie II, « La généralisation du Single-Linkage avec des interactions d'ordre supérieur », chapitres 6 à 9, pages PDF 77 à 134. Le score local de la section 6 généralise le chapitre 9 de la Partie II; la [définition HGP 3D](DEFINITION_HGP_3D.md) précise la correspondance normative avec les chapitres 6 et 8.
 
 ## 1. Objet et séparation des sémantiques
 
