@@ -4898,6 +4898,50 @@ else()
   )
 endif()
 
+# Anchored-session tile-transaction bridge for the Phase 15 supports-3/4
+# slot-tile engine.  Scientific authority stays with the anchored host
+# session (prepare_next/commit_prepared fresh replay); the bridge only
+# aligns device tiles with session-defined transition boundaries and
+# cross-validates masses and records in exact::BigInt before any commit.
+# UNIX-only because its sealed wire-cap validation contract consumes the
+# durable higher-support H0 chunk-run context.  The launcher seam stays
+# unresolved exactly like the frontier host contract.
+if(UNIX)
+  add_library(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_host_contract
+    STATIC
+      include/morsehgp3d/gpu/higher_support_device_tiled_session_bridge.hpp
+      src/gpu/higher_support_device_tiled_session_bridge.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_higher_support_device_tiled_session_bridge_host_contract
+    ALIAS
+      morsehgp3d_gpu_higher_support_device_tiled_session_bridge_host_contract
+  )
+  target_include_directories(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_host_contract
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_host_contract
+    PUBLIC
+      morsehgp3d::gpu_higher_support_device_tiled_frontier_host_contract
+      morsehgp3d::sparse_higher_support_h0_chunk_run
+      morsehgp3d::higher_support
+      morsehgp3d::spatial
+    PRIVATE morsehgp3d::sanitizers
+  )
+  target_compile_features(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_host_contract
+    PUBLIC cxx_std_20
+  )
+  target_compile_options(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Resident exact multi-order consumer for the device-tiled frontier.  The
 # host-only target intentionally leaves the classifier launcher unresolved:
 # unit tests provide the hostile fake below, while the CUDA target provides

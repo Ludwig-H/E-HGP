@@ -3340,6 +3340,55 @@ else()
       -Werror
   )
 endif()
+if(UNIX)
+  add_executable(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+    test_gpu_higher_support_device_tiled_session_bridge.cpp
+    fake_gpu_higher_support_device_tiled_frontier_launchers.cpp
+    fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+    "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+  )
+  target_include_directories(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+    PRIVATE
+      "${PROJECT_SOURCE_DIR}/src/cuda"
+      "${PROJECT_SOURCE_DIR}/src/gpu"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+    PRIVATE
+      morsehgp3d::gpu_higher_support_device_tiled_session_bridge_host_contract
+      morsehgp3d::gpu_higher_support_device_tiled_frontier_host_contract
+      morsehgp3d::sparse_higher_support_h0_chunk_run
+      morsehgp3d::higher_support
+      morsehgp3d::spatial
+      Threads::Threads
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+    PRIVATE
+      MORSEHGP3D_HARTIGAN_TRIANGLE_SIDE_RANK_FIXTURE="${PROJECT_SOURCE_DIR}/../tests/fixtures/regressions/hartigan_triangle_all_side_ranks_above_k.json"
+      MORSEHGP3D_TETRAHEDRON_FACE_FILTER_FIXTURE="${PROJECT_SOURCE_DIR}/../tests/fixtures/regressions/tetrahedron_face_filter_counterexamples.json"
+      MORSEHGP3D_GABRIEL_CARRIER_MATRIX_FIXTURE="${PROJECT_SOURCE_DIR}/../tests/fixtures/regressions/gabriel_carrier_strict_interior_extra_shell_matrix.json"
+  )
+  target_compile_features(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+    PRIVATE cxx_std_20
+  )
+  morsehgp3d_apply_sanitizers(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+  )
+  target_compile_options(
+    morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
 target_include_directories(
   morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_tests
   PRIVATE
@@ -5271,6 +5320,12 @@ add_test(
   NAME morsehgp3d.gpu_higher_support_device_tiled_frontier
   COMMAND morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
 )
+if(UNIX)
+  add_test(
+    NAME morsehgp3d.gpu_higher_support_device_tiled_session_bridge
+    COMMAND morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+  )
+endif()
 add_test(
   NAME morsehgp3d.gpu_morton_yao48_ranked_pair_tile_classifier
   COMMAND morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_tests
