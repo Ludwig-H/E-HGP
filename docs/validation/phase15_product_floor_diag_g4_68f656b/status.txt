@@ -1,0 +1,11 @@
+full50k=0
+sampled50k=0
+full257=0
+sampled257=0
+direct_10m=0
+ALL-DONE
+v2full50k=0
+v2sampled50k=0
+v2full257=0
+v2sampled257=0
+V2-DONE
