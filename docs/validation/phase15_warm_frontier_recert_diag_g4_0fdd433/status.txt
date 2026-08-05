@@ -1,0 +1,8 @@
+baseline_k5=0
+reduced_k5=0
+baseline_k10=1
+reduced_k10=1
+direct_1m=1
+ALL-DONE
+direct_10m=1
+direct_10m_v2=124
