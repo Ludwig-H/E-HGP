@@ -4855,6 +4855,49 @@ else()
   )
 endif()
 
+# Device-resident Phase 15 higher-support supports-3/4 slot-tile contract.
+# The host-only archive intentionally leaves traversal adoption and the
+# launcher unresolved; unit tests provide the scientific host fake, and no
+# CUDA target exists yet (deployment_status stays architecture_only).  The
+# per-slot product stacks and record segments remain resident.
+add_library(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract
+  STATIC
+    include/morsehgp3d/gpu/higher_support_device_tiled_frontier.hpp
+    src/cuda/phase15_higher_support_device_tiled_frontier_internal.hpp
+    src/gpu/higher_support_device_tiled_frontier.cpp
+)
+add_library(
+  morsehgp3d::gpu_higher_support_device_tiled_frontier_host_contract
+  ALIAS
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract
+  PUBLIC morsehgp3d::higher_support morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract
+  PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Resident exact multi-order consumer for the device-tiled frontier.  The
 # host-only target intentionally leaves the classifier launcher unresolved:
 # unit tests provide the hostile fake below, while the CUDA target provides

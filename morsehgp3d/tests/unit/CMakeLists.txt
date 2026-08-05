@@ -2922,6 +2922,13 @@ add_executable(
   "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
 )
 add_executable(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
+  test_gpu_higher_support_device_tiled_frontier.cpp
+  fake_gpu_higher_support_device_tiled_frontier_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+add_executable(
   morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_tests
   test_gpu_morton_yao48_ranked_pair_tile_classifier.cpp
   fake_gpu_morton_yao48_ranked_pair_tile_classifier_launchers.cpp
@@ -3281,6 +3288,49 @@ target_compile_options(
 else()
   target_compile_options(
     morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
+target_include_directories(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
+  PRIVATE
+    morsehgp3d::gpu_higher_support_device_tiled_frontier_host_contract
+    morsehgp3d::higher_support
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_definitions(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
+  PRIVATE
+    MORSEHGP3D_HIGHER_SUPPORT_AABB_CORNER_REGRESSION_FIXTURE="${PROJECT_SOURCE_DIR}/../tests/fixtures/regressions/higher_support_aabb_corner_regression.json"
+)
+target_compile_features(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
     PRIVATE
       -Wall
       -Wextra
@@ -3797,6 +3847,7 @@ set(
   morsehgp3d_gpu_morton_yao48_pair_frontier_tests
   morsehgp3d_gpu_morton_yao48_tiled_pair_frontier_tests
   morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_tests
+  morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
   morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_tests
   morsehgp3d_gpu_morton_yao48_ranked_pair_h0_projection_tests
   morsehgp3d_gpu_exact_pair_level_fixed_tests
@@ -5215,6 +5266,10 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_morton_yao48_device_tiled_pair_frontier
   COMMAND morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_higher_support_device_tiled_frontier
+  COMMAND morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
 )
 add_test(
   NAME morsehgp3d.gpu_morton_yao48_ranked_pair_tile_classifier
