@@ -172,6 +172,14 @@ struct Options {
           morton_yao48_device_tiled_pair_frontier_maximum_anchor_tile_capacity};
   std::size_t sampled_prune_limit{4096U};
   std::size_t exact_prune_target_check_limit{1'000'000U};
+  // Diagnostic-only deterministic sampling of the per-record host
+  // revalidation: when present, only the first N candidate records and the
+  // first N prune-region records of each anchor receive the full host
+  // validation, the per-anchor partition validation and the witness-bank
+  // validation are skipped, and the run reports
+  // every_record_validated=false with coverage_partition_complete=false.
+  // Absent means the historical full qualification audit.
+  std::optional<std::size_t> record_validation_sample_limit;
   std::size_t warmup_run_count{0U};
   std::uint64_t seed{UINT64_C(0x15a048d1e7c93b25)};
 };
@@ -262,6 +270,11 @@ struct RankMetrics {
   std::uint64_t peak_tile_output_device_capacity_bytes{};
   std::uint64_t device_total_bytes{};
   std::uint64_t minimum_device_free_bytes{};
+  std::size_t validated_candidate_record_count{};
+  std::size_t validated_prune_region_record_count{};
+  std::size_t skipped_record_validation_count{};
+  bool record_validation_sampled{false};
+  bool every_record_validated{false};
   bool bounded_bruteforce_performed{false};
   bool every_prune_fully_recertified{false};
   bool coverage_partition_complete{false};
@@ -453,6 +466,10 @@ void require(bool condition, const std::string& message) {
         index + 1 < argc) {
       options.exact_prune_target_check_limit = parse_size(
           argv[++index], "invalid --exact-prune-target-check-limit");
+    } else if (
+        argument == "--record-validation-sample-limit" && index + 1 < argc) {
+      options.record_validation_sample_limit = parse_size(
+          argv[++index], "invalid --record-validation-sample-limit");
     } else if (argument == "--warmup-run-count" && index + 1 < argc) {
       options.warmup_run_count =
           parse_size(argv[++index], "invalid --warmup-run-count");
@@ -473,6 +490,7 @@ void require(bool condition, const std::string& message) {
           "[--scaling-smoke|--direct-scale] "
           "[--anchor-tile-capacity N] [--sampled-prune-limit N] "
           "[--exact-prune-target-check-limit N] "
+          "[--record-validation-sample-limit N] "
           "[--warmup-run-count 0|1] [--seed N]");
     }
   }
@@ -3298,11 +3316,26 @@ void validate_scaling_advance(
                 batch.device_candidate_records + segment_begin,
                 authorized_count,
                 metrics);
+        std::size_t validated_in_anchor = 0U;
         for (const auto& record : candidates) {
           const std::uint64_t anchor_position =
               static_cast<std::uint64_t>(anchor_begin + slot);
-          validate_candidate_record(
-              record, anchor_position, leaves, scaled_points, metrics);
+          // Deterministic first-N-per-anchor sampling of the host
+          // revalidation; the skipped records are still copied, counted and
+          // partitioned, and the run is fail-closed reported as sampled.
+          if (!options.record_validation_sample_limit.has_value() ||
+              validated_in_anchor <
+                  *options.record_validation_sample_limit) {
+            validate_candidate_record(
+                record, anchor_position, leaves, scaled_points, metrics);
+            ++metrics.validated_candidate_record_count;
+            ++validated_in_anchor;
+          } else {
+            ++metrics.candidate_record_count;
+            metrics.candidate_pair_mass += UINT64_C(1);
+            hash_candidate(metrics.output_digest, record);
+            ++metrics.skipped_record_validation_count;
+          }
           partitions[slot].candidate_positions.push_back(
               record.partner_morton_position);
           if (!pair_classification.empty()) {
@@ -3339,21 +3372,42 @@ void validate_scaling_advance(
                 batch.device_prune_regions + segment_begin,
                 authorized_count,
                 metrics);
+        std::size_t validated_prunes_in_anchor = 0U;
         for (const auto& record : prunes) {
           const std::uint64_t anchor_position =
               static_cast<std::uint64_t>(anchor_begin + slot);
-          validate_prune_record(
-              record,
-              anchor_position,
-              maximum_closed_rank,
-              prune_semantics,
-              metrics.required_witness_count,
-              nodes,
-              leaves,
-              scaled_points,
-              position_by_point_id,
-              options,
-              metrics);
+          if (!options.record_validation_sample_limit.has_value() ||
+              validated_prunes_in_anchor <
+                  *options.record_validation_sample_limit) {
+            validate_prune_record(
+                record,
+                anchor_position,
+                maximum_closed_rank,
+                prune_semantics,
+                metrics.required_witness_count,
+                nodes,
+                leaves,
+                scaled_points,
+                position_by_point_id,
+                options,
+                metrics);
+            ++metrics.validated_prune_region_record_count;
+            ++validated_prunes_in_anchor;
+          } else {
+            // Skipped host revalidation keeps the structural bound check,
+            // the exact counters and the record digest so a sampled run
+            // reproduces the full run's output digest bit for bit.
+            require(
+                static_cast<std::size_t>(record.node_index) < nodes.size(),
+                "a sampled prune record references an out-of-range node");
+            const MortonLbvhSnapshotNode& sampled_node =
+                nodes[static_cast<std::size_t>(record.node_index)];
+            ++metrics.prune_region_count;
+            metrics.certified_pruned_pair_mass +=
+                sampled_node.leaf_end - sampled_node.leaf_begin;
+            hash_prune(metrics.output_digest, record);
+            ++metrics.skipped_record_validation_count;
+          }
           const MortonLbvhSnapshotNode& node =
               nodes[static_cast<std::size_t>(record.node_index)];
           partitions[slot].prune_intervals.emplace_back(
@@ -3386,11 +3440,13 @@ void validate_scaling_advance(
                   partitions[slot].prune_intervals.size() ==
                       progress[slot].prune_region_count,
               "a completed anchor cumulative count disagrees with its prefixes");
-          validate_anchor_partition(
-              partitions[slot],
-              static_cast<std::uint64_t>(anchor_begin + slot));
+          if (!options.record_validation_sample_limit.has_value()) {
+            validate_anchor_partition(
+                partitions[slot],
+                static_cast<std::uint64_t>(anchor_begin + slot));
+          }
         }
-        {
+        if (!options.record_validation_sample_limit.has_value()) {
           const std::vector<Phase15MortonYao48DeviceTiledWitnessBankSlot>
               banks = copy_device_records(
                   batch.device_witness_bank_slots,
@@ -3482,7 +3538,14 @@ void validate_scaling_advance(
           metrics.complete_anchor_count == cloud.size() &&
           metrics.unresolved_pair_mass == 0U,
       "the global candidate/pruned/unresolved mass identity does not close");
-  metrics.coverage_partition_complete = true;
+  metrics.record_validation_sampled =
+      options.record_validation_sample_limit.has_value();
+  metrics.every_record_validated =
+      !metrics.record_validation_sampled &&
+      metrics.skipped_record_validation_count == 0U;
+  // A sampled run keeps the exact mass identities and the output digest but
+  // can never claim the full coverage-partition audit.
+  metrics.coverage_partition_complete = !metrics.record_validation_sampled;
   if (cloud.size() <= 257U) {
     bounded_bruteforce_replay(
         leaves,
@@ -4066,6 +4129,16 @@ void print_rank_metrics(const RankMetrics& metrics) {
       << "\"device_total_bytes\":" << metrics.device_total_bytes << ','
       << "\"every_prune_fully_recertified\":"
       << (metrics.every_prune_fully_recertified ? "true" : "false") << ','
+      << "\"every_record_validated\":"
+      << (metrics.every_record_validated ? "true" : "false") << ','
+      << "\"record_validation_sampled\":"
+      << (metrics.record_validation_sampled ? "true" : "false") << ','
+      << "\"validated_candidate_record_count\":"
+      << metrics.validated_candidate_record_count << ','
+      << "\"validated_prune_region_record_count\":"
+      << metrics.validated_prune_region_record_count << ','
+      << "\"skipped_record_validation_count\":"
+      << metrics.skipped_record_validation_count << ','
       << "\"gamma2_prune_or_discard_authorized\":"
       << (metrics.gamma2_prune_or_discard_authorized ? "true" : "false")
       << ','
