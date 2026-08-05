@@ -6437,6 +6437,39 @@ if(MORSEHGP3D_ENABLE_CUDA)
   endif()
 
   add_executable(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_parity
+    src/tools/gpu_higher_support_device_tiled_frontier_parity.cpp
+  )
+  target_include_directories(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_parity
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_parity
+    PRIVATE
+      morsehgp3d::gpu_higher_support_device_tiled_frontier
+      morsehgp3d::gpu_morton_lbvh_build
+      morsehgp3d::higher_support
+      morsehgp3d::spatial
+      CUDA::cudart
+  )
+  target_compile_features(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier_parity
+    PRIVATE cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_higher_support_device_tiled_frontier_parity
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_higher_support_device_tiled_frontier_parity
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_executable(
     morsehgp3d_gpu_morton_yao48_radial_subtree_filter_qualification
     src/tools/gpu_morton_yao48_radial_subtree_filter_qualification.cpp
   )
