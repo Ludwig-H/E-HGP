@@ -546,6 +546,20 @@ validate_yield_reason(std::uint64_t raw) {
           sizeof(DeferredDecision),
           "the Phase 15 deferred int1024 arena bytes overflow size_t"),
       "the Phase 15 output arena bytes overflow size_t");
+  // Native rational-drain scratch: one staged task per slot plus the
+  // device rational-request counter word.  Accounted identically by the
+  // host fake so the canonical arena byte sum stays backend-independent.
+  bytes = checked_size_sum(
+      bytes,
+      checked_size_product(
+          request.slot_count,
+          sizeof(detail::Phase15HigherSupportDeviceTiledRationalDrainTask),
+          "the Phase 15 rational-task arena bytes overflow size_t"),
+      "the Phase 15 output arena bytes overflow size_t");
+  bytes = checked_size_sum(
+      bytes,
+      sizeof(std::uint64_t),
+      "the Phase 15 rational-counter arena bytes overflow size_t");
   return checked_size_sum(
       bytes,
       sizeof(std::uint64_t),
@@ -679,6 +693,9 @@ void validate_batch_envelope(
           batch.resume_control_device_to_host_byte_count != 0U ||
           batch.kernel_launch_count != 0U ||
           batch.synchronization_count != 0U ||
+          batch.host_rational_drain_relaunch_count != 0U ||
+          batch.rational_task_device_to_host_count != 0U ||
+          batch.rational_task_device_to_host_byte_count != 0U ||
           batch.cuda_device != -1 ||
           batch.cuda_execution_contract_satisfied ||
           batch.fresh_tile_device_arena_allocated ||
@@ -689,16 +706,30 @@ void validate_batch_envelope(
       }
       break;
     case ExecutionKind::cuda: {
-      // No CUDA launcher exists yet for this component; the contract is
-      // validated symmetrically so the future native path inherits it.
+      // Every kernel launch is either one bounded subdivision (fresh gate
+      // quantum) or one rational-drain relaunch of the same subdivision
+      // (no fresh quantum); each launch drains one two-word device control
+      // block (pending slots + staged rational requests) and one final
+      // synchronization covers the slot-control drain.
       const std::size_t expected_control_bytes = checked_size_product(
           request.slot_count,
           sizeof(SlotControl),
           "the Phase 15 slot-control transfer extent overflows size_t");
-      const std::size_t expected_resume_bytes = checked_size_product(
+      const std::size_t expected_launch_count = checked_size_sum(
           batch.traversal_subdivision_count,
-          sizeof(std::uint64_t),
+          batch.host_rational_drain_relaunch_count,
+          "the Phase 15 kernel launch count overflows size_t");
+      const std::size_t expected_resume_bytes = checked_size_product(
+          expected_launch_count,
+          2U * sizeof(std::uint64_t),
           "the Phase 15 resume-control transfer extent overflows size_t");
+      const std::size_t expected_rational_task_bytes =
+          checked_size_product(
+              batch.rational_task_device_to_host_count,
+              sizeof(detail::
+                         Phase15HigherSupportDeviceTiledRationalDrainTask),
+              "the Phase 15 rational-task transfer extent overflows "
+              "size_t");
       if (batch.prune_records == nullptr ||
           batch.terminal_records == nullptr ||
           batch.probe_receipts == nullptr ||
@@ -707,17 +738,20 @@ void validate_batch_envelope(
               request.slot_count ||
           batch.slot_control_device_to_host_byte_count !=
               expected_control_bytes ||
-          batch.kernel_launch_count !=
-              batch.traversal_subdivision_count ||
+          batch.kernel_launch_count != expected_launch_count ||
           batch.synchronization_count !=
               checked_size_sum(
-                  batch.traversal_subdivision_count,
+                  expected_launch_count,
                   1U,
                   "the Phase 15 synchronization count overflows size_t") ||
           batch.resume_control_device_to_host_count !=
-              batch.traversal_subdivision_count ||
+              expected_launch_count ||
           batch.resume_control_device_to_host_byte_count !=
               expected_resume_bytes ||
+          batch.rational_task_device_to_host_byte_count !=
+              expected_rational_task_bytes ||
+          (batch.host_rational_drain_relaunch_count == 0U) !=
+              (batch.rational_task_device_to_host_count == 0U) ||
           batch.cuda_device != traversal.cuda_device ||
           !batch.cuda_execution_contract_satisfied ||
           (request.resume_same_tile
@@ -838,12 +872,15 @@ void validate_batch_envelope(
                 request.probe_receipts_per_slot) ||
         control.stack_high_water >
             static_cast<std::uint64_t>(request.products_per_slot) ||
+        // Inline width escalations are bounded by the gate evaluations
+        // that triggered them, never by the deferred queue extent: each
+        // escalated decision consumed exactly one gate.
         control.deferred_int512_count >
-            static_cast<std::uint64_t>(
-                request.pending_decisions_per_slot) ||
+            launched_gate_evaluation_budget ||
         control.deferred_int1024_count >
-            static_cast<std::uint64_t>(
-                request.pending_decisions_per_slot) ||
+            launched_gate_evaluation_budget ||
+        control.rational_drain_count >
+            launched_gate_evaluation_budget ||
         control.gate_evaluation_count >
             launched_gate_evaluation_budget) {
       throw std::runtime_error(

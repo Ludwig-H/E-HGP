@@ -2185,6 +2185,20 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
           sizeof(Phase15HigherSupportDeviceTiledDeferredDecision),
           "the fake Phase 15 deferred arena bytes overflow size_t"),
       "the fake Phase 15 arena bytes overflow size_t");
+  // The canonical arena also accounts the native rational-drain scratch:
+  // one staged task per slot plus the device rational-request counter word,
+  // even though the fake never stages one.
+  arena_bytes = checked_size_sum(
+      arena_bytes,
+      checked_size_product(
+          request.slot_count,
+          sizeof(Phase15HigherSupportDeviceTiledRationalDrainTask),
+          "the fake Phase 15 rational-task arena bytes overflow size_t"),
+      "the fake Phase 15 arena bytes overflow size_t");
+  arena_bytes = checked_size_sum(
+      arena_bytes,
+      sizeof(std::uint64_t),
+      "the fake Phase 15 rational-counter arena bytes overflow size_t");
   batch.physical_device_arena_capacity_bytes = checked_size_sum(
       arena_bytes,
       sizeof(std::uint64_t),
@@ -2197,6 +2211,9 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
   batch.kernel_launch_count = 0U;
   batch.synchronization_count = 0U;
   batch.traversal_subdivision_count = pass_count;
+  batch.host_rational_drain_relaunch_count = 0U;
+  batch.rational_task_device_to_host_count = 0U;
+  batch.rational_task_device_to_host_byte_count = 0U;
   batch.source_snapshot_epoch = request.source_snapshot_epoch;
   batch.record_buffer_epoch = request.record_buffer_epoch;
   batch.tile_epoch = request.tile_epoch;

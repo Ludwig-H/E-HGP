@@ -360,6 +360,25 @@ struct alignas(16) Phase15HigherSupportDeviceTiledTerminalRecord {
   std::uint64_t reserved_zero[5U]{};
 };
 
+// 264-byte host rational-drain task.  When the int1024 evaluation of one
+// exact decision overflows the 124-bit aligned envelope, the native kernel
+// suspends the owning slot and stages the complete decision input here; the
+// launcher resolves it with the arbitrary-precision host primitives between
+// kernel relaunches of the same subdivision and writes the verdict back.
+// The host fake never stages one (it resolves rationally inline), so its
+// rational-task transfer accounting stays zero.
+struct Phase15HigherSupportDeviceTiledRationalDrainTask {
+  std::uint64_t support_lower_bits[4U][3U]{};
+  std::uint64_t support_upper_bits[4U][3U]{};
+  std::uint64_t query_lower_bits[3U]{};
+  std::uint64_t query_upper_bits[3U]{};
+  std::uint64_t wide_kind{};
+  std::uint64_t origin_slot_index{};
+  std::uint8_t support_size{};
+  std::uint8_t has_query{};
+  std::uint8_t reserved_zero_bytes[6U]{};
+};
+
 // 176-byte deferred wide decision.  Unused by the host fake (its queues stay
 // empty and their counters zero); the native path batches int512/int1024
 // escalations through it in M4.
@@ -394,6 +413,12 @@ static_assert(
     sizeof(Phase15HigherSupportDeviceTiledTerminalRecord) == 96U);
 static_assert(
     sizeof(Phase15HigherSupportDeviceTiledDeferredDecision) == 176U);
+static_assert(
+    sizeof(Phase15HigherSupportDeviceTiledRationalDrainTask) == 264U);
+static_assert(std::is_standard_layout_v<
+                  Phase15HigherSupportDeviceTiledRationalDrainTask> &&
+              std::is_trivially_copyable_v<
+                  Phase15HigherSupportDeviceTiledRationalDrainTask>);
 static_assert(std::is_standard_layout_v<
                   Phase15HigherSupportDeviceTiledProductRecord> &&
               std::is_trivially_copyable_v<
@@ -500,6 +525,12 @@ struct Phase15HigherSupportDeviceTiledBatch {
   std::size_t kernel_launch_count{};
   std::size_t synchronization_count{};
   std::size_t traversal_subdivision_count{};
+  // Rational-drain relaunches of one chunk: the launcher resolves staged
+  // int1024-overflow decisions on the host and relaunches the same
+  // subdivision without granting a fresh gate quantum.  Zero on the fake.
+  std::size_t host_rational_drain_relaunch_count{};
+  std::size_t rational_task_device_to_host_count{};
+  std::size_t rational_task_device_to_host_byte_count{};
   std::uint64_t source_snapshot_epoch{};
   std::uint64_t record_buffer_epoch{};
   std::uint64_t tile_epoch{};
@@ -635,6 +666,9 @@ phase15_higher_support_device_tiled_metadata_digest(
   hash_size(batch.kernel_launch_count);
   hash_size(batch.synchronization_count);
   hash_size(batch.traversal_subdivision_count);
+  hash_size(batch.host_rational_drain_relaunch_count);
+  hash_size(batch.rational_task_device_to_host_count);
+  hash_size(batch.rational_task_device_to_host_byte_count);
   hash_size(batch.maximum_relevant_closed_rank);
   phase15_higher_support_device_tiled_hash_word(
       digest, batch.source_snapshot_epoch);

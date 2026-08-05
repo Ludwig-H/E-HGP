@@ -26,6 +26,10 @@ struct Phase15MortonYao48DeviceTiledAdoptedTraversal;
 [[nodiscard]] Phase15MortonYao48DeviceTiledAdoptedTraversal
 adopt_phase15_morton_yao48_device_tiled_traversal(
     MortonLbvhDeviceTraversalLease&& traversal_lease);
+struct Phase15HigherSupportDeviceTiledAdoptedTraversal;
+[[nodiscard]] Phase15HigherSupportDeviceTiledAdoptedTraversal
+adopt_phase15_higher_support_device_tiled_traversal(
+    MortonLbvhDeviceTraversalLease&& traversal_lease);
 }
 
 inline constexpr std::uint32_t morton_lbvh_device_build_schema_version = 1U;
@@ -370,6 +374,9 @@ class MortonLbvhDeviceTraversalLease final {
       Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess;
   friend detail::Phase15MortonYao48DeviceTiledAdoptedTraversal
   detail::adopt_phase15_morton_yao48_device_tiled_traversal(
+      MortonLbvhDeviceTraversalLease&& traversal_lease);
+  friend detail::Phase15HigherSupportDeviceTiledAdoptedTraversal
+  detail::adopt_phase15_higher_support_device_tiled_traversal(
       MortonLbvhDeviceTraversalLease&& traversal_lease);
 };
 

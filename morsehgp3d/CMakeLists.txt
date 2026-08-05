@@ -6173,6 +6173,63 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  # Native CUDA backend of the Phase 15 higher-support device tiled
+  # frontier.  The scientific slot engine is shared verbatim with the
+  # host-compiled parity suite; this target contributes the resident arena,
+  # the thread-per-slot kernel and the bounded orchestration protocol, and
+  # replaces the test-only host fake behind the same sealed seam.
+  add_library(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier
+    STATIC
+      include/morsehgp3d/gpu/higher_support_device_tiled_frontier.hpp
+      src/cuda/phase15_higher_support_device_tiled_frontier_internal.hpp
+      src/cuda/phase15_higher_support_device_tiled_slot_engine.cuh
+      src/cuda/phase15_higher_support_device_tiled_frontier.cu
+      src/gpu/higher_support_device_tiled_frontier.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_higher_support_device_tiled_frontier
+    ALIAS morsehgp3d_gpu_higher_support_device_tiled_frontier
+  )
+  target_include_directories(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier
+    PUBLIC
+      morsehgp3d::gpu_morton_lbvh_build
+      morsehgp3d::higher_support
+      morsehgp3d::spatial
+  )
+  target_compile_features(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_higher_support_device_tiled_frontier
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_higher_support_device_tiled_frontier
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_higher_support_device_tiled_frontier
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
   add_library(
     morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier
     STATIC
