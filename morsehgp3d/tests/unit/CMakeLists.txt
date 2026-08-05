@@ -2851,6 +2851,7 @@ add_executable(
   "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka.cpp"
   "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka_seeded_exact.cpp"
   "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka_hierarchy.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/k1_dual_tree_normalized_product_adapter.cpp"
 )
 add_executable(
   morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host
@@ -3568,7 +3569,10 @@ target_link_libraries(
 )
 target_link_libraries(
   morsehgp3d_gpu_k1_boruvka_hierarchy_tests
-  PRIVATE morsehgp3d::hierarchy Threads::Threads
+  PRIVATE
+    morsehgp3d::hierarchy
+    morsehgp3d::direct_k1_normalized_product_stream
+    Threads::Threads
 )
 target_link_libraries(
   morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host

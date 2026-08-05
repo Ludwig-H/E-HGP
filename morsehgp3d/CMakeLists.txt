@@ -5506,6 +5506,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
       src/gpu/k1_boruvka_hybrid.cpp
       src/gpu/k1_boruvka_seeded_exact.cpp
       src/gpu/k1_boruvka_hierarchy.cpp
+      src/gpu/k1_dual_tree_normalized_product_adapter.cpp
   )
   add_library(
     morsehgp3d::gpu_k1_boruvka
@@ -5517,7 +5518,9 @@ if(MORSEHGP3D_ENABLE_CUDA)
   )
   target_link_libraries(
     morsehgp3d_gpu_k1_boruvka
-    PUBLIC morsehgp3d::hierarchy
+    PUBLIC
+      morsehgp3d::hierarchy
+      morsehgp3d::direct_k1_normalized_product_stream
     PRIVATE Threads::Threads
   )
   target_compile_features(morsehgp3d_gpu_k1_boruvka PUBLIC cxx_std_20)

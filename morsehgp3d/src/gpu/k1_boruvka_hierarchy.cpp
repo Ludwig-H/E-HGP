@@ -56,13 +56,15 @@ template <typename Value>
   return observed == from_source && from_source == from_reference;
 }
 
+template <typename Source>
 [[nodiscard]] K1SeededExactCompactHierarchyVerification
 verify_compact_k1_hierarchy_with_source_verification(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
-    const K1SeededExactBoruvkaResult& source,
+    const Source& source,
     const K1SeededExactCompactHierarchy& reduction,
-    const K1SeededExactBoruvkaVerification& source_verification) {
+    bool source_emst_witness_certified,
+    bool source_status_separation_certified) {
   K1SeededExactCompactHierarchyVerification verification;
   verification.reduction_status_certified =
       reduction.reduction_status ==
@@ -73,9 +75,9 @@ verify_compact_k1_hierarchy_with_source_verification(
       K1SeededExactHierarchyScope::local_k1_compact_forest_only;
 
   verification.source_emst_witness_certified =
-      source_verification.emst_witness_certified;
+      source_emst_witness_certified;
   verification.source_status_separation_certified =
-      source_verification.hierarchy_status_separation_certified &&
+      source_status_separation_certified &&
       source.hierarchy_reduction_status ==
           K1HybridHierarchyReductionStatus::not_performed &&
       source.scientific_status ==
@@ -207,7 +209,12 @@ verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
       verify_gpu_seeded_cpu_exact_external_1nn_k1_boruvka(
           index, cloud, trusted_seed_policy, source);
   return verify_compact_k1_hierarchy_with_source_verification(
-      index, cloud, source, reduction, source_verification);
+      index,
+      cloud,
+      source,
+      reduction,
+      source_verification.emst_witness_certified,
+      source_verification.hierarchy_status_separation_certified);
 }
 
 K1SeededExactCompactHierarchy
@@ -242,10 +249,73 @@ build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
           cloud,
           source,
           reduction,
-          source_verification);
+          source_verification.emst_witness_certified,
+          source_verification.hierarchy_status_separation_certified);
   if (!verification.local_k1_hierarchy_certified) {
     throw std::logic_error(
         "the seeded exact compact k=1 hierarchy failed its independent "
+        "source replay and two-source reduction verification");
+  }
+  return reduction;
+}
+
+K1SeededExactCompactHierarchyVerification
+verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1DualTreeExactBoruvkaResult& source,
+    const K1SeededExactCompactHierarchy& reduction) {
+  const K1DualTreeExactBoruvkaVerification source_verification =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, trusted_seed_policy, source);
+  return verify_compact_k1_hierarchy_with_source_verification(
+      index,
+      cloud,
+      source,
+      reduction,
+      source_verification.emst_witness_certified,
+      source_verification.hierarchy_status_separation_certified);
+}
+
+K1SeededExactCompactHierarchy
+build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1DualTreeExactBoruvkaResult& source) {
+  // Revalidate the shared exact search before allocating from its untrusted
+  // edge payload. In particular, a copied true source flag is not authority.
+  const K1DualTreeExactBoruvkaVerification source_verification =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, trusted_seed_policy, source);
+  if (!source_verification.emst_witness_certified) {
+    throw std::logic_error(
+        "the dual-tree exact compact k=1 hierarchy requires a freshly "
+        "recertified source EMST witness");
+  }
+
+  K1SeededExactCompactHierarchy reduction;
+  reduction.forest = hierarchy::build_compact_k1_forest(
+      source.point_count,
+      std::span<const hierarchy::ExactEmstEdge>{source.emst_edges});
+  reduction.reduction_status =
+      K1SeededExactHierarchyReductionStatus::
+          compact_k1_forest_certified;
+  reduction.scope =
+      K1SeededExactHierarchyScope::local_k1_compact_forest_only;
+
+  const K1SeededExactCompactHierarchyVerification verification =
+      verify_compact_k1_hierarchy_with_source_verification(
+          index,
+          cloud,
+          source,
+          reduction,
+          source_verification.emst_witness_certified,
+          source_verification.hierarchy_status_separation_certified);
+  if (!verification.local_k1_hierarchy_certified) {
+    throw std::logic_error(
+        "the dual-tree exact compact k=1 hierarchy failed its independent "
         "source replay and two-source reduction verification");
   }
   return reduction;

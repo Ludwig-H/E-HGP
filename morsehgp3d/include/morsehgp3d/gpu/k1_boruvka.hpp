@@ -1119,4 +1119,24 @@ verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
     const K1SeededExactBoruvkaResult& source,
     const K1SeededExactCompactHierarchy& reduction);
 
+// Dual-tree source overloads for the same compact local adapter. They replay
+// the shared component-direct search rather than accepting the source flags,
+// then compare the compact arenas with reductions of both the recertified
+// source tree and the independent reference_cpu Boruvka anchor. This remains
+// a local k=1 hierarchy result and does not promote a MorseHGP3D public status.
+[[nodiscard]] K1SeededExactCompactHierarchy
+build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1DualTreeExactBoruvkaResult& source);
+
+[[nodiscard]] K1SeededExactCompactHierarchyVerification
+verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1DualTreeExactBoruvkaResult& source,
+    const K1SeededExactCompactHierarchy& reduction);
+
 }  // namespace morsehgp3d::gpu
