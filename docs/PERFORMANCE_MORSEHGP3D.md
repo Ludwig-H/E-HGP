@@ -82,6 +82,8 @@ Le protocole compte 84 transactions : 6 générations, 6 constructions exactes $
 | 50 000 points, 30 répétitions, ancien point-MST | Coordonnées déjà en mémoire jusqu'à dix hiérarchies substitutives matérialisées ; génération synthétique exclue | p50 **88,803800 ms**, p95 **95,791070 ms**, p99 et maximum **96,045749 ms** | **surrogate rejeté et archivé**, interdit comme résultat produit |
 | 10 000 000 points, `cuda_g4` | Génération, canonicalisation, construction Morton/Yao48 et préfixe de frontière de paires tuilée | **26,618277005 s** internes ; **29,59 s** murales | profil de composants incomplet, sans forêt ni hiérarchie et à provenance insuffisante |
 | 30 000 000 points, `cuda_g4` | Même sous-chaîne Morton/Yao48/frontière partielle | **78,132751789 s** internes ; **81,09 s** murales | profil de composants incomplet, sans forêt ni hiérarchie et à provenance insuffisante |
+| 10 000 000 points, rang fermé 6, `cuda_g4` | Génération, canonicalisation, Morton/Yao48 et frontière de paires à couverture complète, manifeste validé | **901,164644151 s** internes | diagnostic de composant `profile_only` à provenance complète ; ni forêt, ni hiérarchie, ni SLO |
+| 30 000 000 points, rang fermé 6, `cuda_g4` | Même chaîne, première couverture complète des 449 999 985 000 000 paires | **4 241,430669737 s** internes | diagnostic de composant `profile_only` à provenance complète ; ni forêt, ni hiérarchie, ni SLO |
 
 ### Tentative HGP à 50 000 points : borne censurée
 
@@ -135,6 +137,25 @@ Les JSON déclarent le commit `10a5e76d29efe77d06ff931b66ac7bb14a583e06`, mais c
 
 > [!NOTE]
 > Le profil historique « 10 M » utilise exactement 10 000 000 de points. La campagne normative utilise **10 000 001** points afin de franchir sans ambiguïté le seuil de dix millions. Ce sont deux charges distinctes.
+
+### Couverture complète manifestée à 10 M et 30 M, rang fermé 6
+
+La session G4 du 5 août 2026 a exécuté pour la première fois le harnais [phase15_device_frontier_direct_scale.py](../gcp-migration/phase15_device_frontier_direct_scale.py) de bout en bout, au SHA propre `894089e6dc5458b1a38f11b0befc4f67a741d84d`, binaire de SHA-256 `ad258a4a2ff4e55ecc5fba3811d2b8111be8bb8ab73f374007322b21c2049a88` compilé dans le conteneur épinglé. Les artefacts et le [manifeste](validation/phase15_direct_scale_manifest_g4_894089e/manifest-through-30000000.json), de SHA-256 `eff8687170e4c133ad1db0c5a4d18ef0e7d9b4c6e814c2cb7f740b783442d4d6`, sont archivés sous [phase15_direct_scale_manifest_g4_894089e/](validation/phase15_direct_scale_manifest_g4_894089e/) avec la requête canonique `21dfb51149f1f1bdd669e999b9196ec7d9014b20aab2d65af86b6a6776a53428`.
+
+| Champ | 10 000 000 points | 30 000 000 points |
+|---|---:|---:|
+| temps interne total | 901,164644151 s | 4 241,430669737 s |
+| couverture | complète, `stop_reason=none` | complète, `stop_reason=none` |
+| univers de paires non ordonnées | 49 999 995 000 000 | 449 999 985 000 000 |
+| candidats conservés | 1 905 352 528 | 7 135 586 439 |
+| paires prunées certifiées | 49 998 089 647 472 | 449 992 849 413 561 |
+| paires non résolues | 0 | 0 |
+| ancres terminées | 9 999 999 | 29 999 999 |
+| subdivisions de traversée | 23 016 | 112 901 |
+| pic RSS hôte | 5 851 348 992 octets | 17 330 765 824 octets |
+| minimum de mémoire GPU libre | 97 194 213 376 octets | 91 433 336 832 octets |
+
+La fermeture de masse `candidats + prunées + non résolues = n(n-1)/2` est validée par le contrat du harnais aux deux échelles. Le passage de 10 M à 30 M multiplie l'univers de paires par 9 et le temps interne par 4,71 seulement. Ces exécutions utilisent le **rang fermé 6** et la seule famille `affine_uniform_binary64`, graine `1558325537444281125` ; elles remplacent l'échec historique `code 124` à 5 400 s du 30 M en démontrant que les cutoffs antérieurs étaient trop courts pour ce chemin. Le manifeste conserve `profile_only`, tous les claims à `false` : aucune forêt, aucune hiérarchie, aucun SLO, aucune qualification, et la campagne normative 10 000 001 / 30 000 000 du vrai HGP reste entièrement ouverte.
 
 ## Campagne reproductible de référence
 
