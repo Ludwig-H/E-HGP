@@ -3495,6 +3495,50 @@ void validate_scaling_advance(
                     retained_ids.end(),
                 "an anchor retained the same witness in multiple bank slots");
           }
+        } else {
+          // Sampled mode: the witness banks are still copied, walked in the
+          // same order, sentinel-disciplined, counted and hashed so a
+          // sampled run reproduces the full run's output digest bit for
+          // bit; only the exact per-slot validation is skipped.
+          const std::vector<Phase15MortonYao48DeviceTiledWitnessBankSlot>
+              banks = copy_device_records(
+                  batch.device_witness_bank_slots,
+                  batch.physical_witness_bank_slot_capacity,
+                  metrics);
+          const std::size_t slots_per_anchor = checked_product(
+              request.witness_bank_count_per_anchor,
+              request.witness_slot_count_per_bank,
+              "the bank slots per anchor overflow size_t");
+          for (std::size_t slot = 0U; slot < anchor_count; ++slot) {
+            for (std::size_t cone = 0U;
+                 cone < request.witness_bank_count_per_anchor;
+                 ++cone) {
+              bool empty_seen = false;
+              for (std::size_t bank_slot = 0U;
+                   bank_slot < request.witness_slot_count_per_bank;
+                   ++bank_slot) {
+                const std::size_t index =
+                    slot * slots_per_anchor +
+                    cone * request.witness_slot_count_per_bank + bank_slot;
+                const auto& retained = banks[index];
+                if (invalid_bank_slot(retained)) {
+                  empty_seen = true;
+                  continue;
+                }
+                require(
+                    !empty_seen,
+                    "a witness bank contains a nonempty slot after a "
+                    "sentinel");
+                ++metrics.bank_entry_count;
+                hash_bank_slot(
+                    metrics.output_digest,
+                    static_cast<std::uint64_t>(anchor_begin + slot),
+                    static_cast<std::uint64_t>(cone),
+                    retained);
+                ++metrics.skipped_record_validation_count;
+              }
+            }
+          }
         }
       }
       const std::uint64_t tile_recertification_ns =
