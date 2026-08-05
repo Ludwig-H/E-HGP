@@ -957,6 +957,12 @@ Les fixtures minimales permanentes sont `q2`, qui impose deux naissances puis un
 
 La cible `morsehgp3d.hierarchy_morse_gamma_partition_sweep` compile en Release strict sous GCC et Clang. Le dernier CTest fonctionnel ciblé, sous GCC, passe en 24,37 s avec les dix capacités juste insuffisantes, les caps local et imbriqué excessifs, les mutations et le rejeu frais. Aucun CTest Clang redondant, différentiel, sanitizer, benchmark, CUDA, G4 ou GCP n'est lancé. Ce jalon ne publie aucun identifiant durable, `Attachment`, `target_node_id`, transaction de forêt, certificat M.1, morphisme vertical, statut `exact` ou `public_status`.
 
+#### Lot `6.23-N15-K2-REFERENCE-FALSIFIER`
+
+Le CTest sériel `morsehgp3d.hierarchy_morse_gamma_partition_sweep.bounded_n15_k2_reference_falsifier`, étiqueté `long;phase15;reference_oracle` avec un délai de 900 s, exécute le même binaire avec `--bounded-n15-k2-reference-falsifier`. Il exige les trois opt-ins imbriqués explicites sur le budget du sweep, le budget du catalogue critique et le budget d'historique Gamma exhaustif; l'absence d'un seul opt-in doit refuser atomiquement toute extension au-delà de la frontière historique $n\leq14$. Le préflight doit fermer exactement 575 candidats, 8 625 classifications de points, $\binom{15}{2}=105$ facettes énumérées liées à la constante nommée du budget d'historique, 455 cofaces, 910 unions et 560 niveaux avant toute géométrie subordonnée.
+
+La ligne entière permanente à quinze points doit produire 14 naissances, 13 selles, 26 bras, deux lots, une multifusion simultanée, 14 checkpoints et une racine unique, puis le rejeu frais doit retrouver exactement les partitions Gamma à chaque niveau d'activation strict et fermé. Trois caps juste insuffisants, un opt-in manquant, un ordre d'observation différent et une mutation de statut interne doivent échouer fermés. Ce lot reste un oracle de référence déclenché uniquement par CLI : il n'entre pas dans le chemin produit Morton/LBVH et ne prouve ni complétude, ni Phase 6, ni M.1, ni scalabilité, ni statut public.
+
 ## 8. Ancrage fondamental à $k=1$
 
 À l'ordre $1$, la hiérarchie doit coïncider avec le single linkage porté par un arbre couvrant euclidien minimal. Une arête EMST $(u,v)$ de longueur carrée $\lVert u-v\rVert^2$ produit dans $L_1$ le niveau de fusion $\lVert u-v\rVert^2/4$ ; les tests vérifient explicitement ce facteur au lieu de comparer deux conventions implicites.

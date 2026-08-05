@@ -101,6 +101,31 @@ template <std::size_t Size>
   return canonical_cloud(input);
 }
 
+[[nodiscard]] CanonicalPointCloud bounded_n15_k2_line_cloud() {
+  // A permanent bounded-oracle fixture.  The integer line has only fourteen
+  // distinct positive-distance levels, but retains all 105 facets and 455
+  // cofaces and forces large simultaneous equal-level batches.  This is
+  // deliberately not a product input path and materializes the exhaustive
+  // Gamma oracle only under the CLI opt-in exercised below.
+  const std::array<CertifiedPoint3, 15> input{
+      point(0.0),
+      point(1.0),
+      point(2.0),
+      point(3.0),
+      point(4.0),
+      point(5.0),
+      point(6.0),
+      point(7.0),
+      point(8.0),
+      point(9.0),
+      point(10.0),
+      point(11.0),
+      point(12.0),
+      point(13.0),
+      point(14.0)};
+  return canonical_cloud(input);
+}
+
 [[nodiscard]] ExactCriticalCatalogBudget full_catalog_budget() {
   return {
       ExactCriticalCatalogBudget::maximum_supported_candidate_count,
@@ -193,6 +218,53 @@ full_history_budget() {
   budget.maximum_checkpoint_count =
       ExactMorseGammaPartitionSweepBudget::
           maximum_supported_checkpoint_count;
+  return budget;
+}
+
+[[nodiscard]] ExactMorseGammaPartitionSweepBudget
+bounded_n15_k2_exact_preflight_budget() {
+  ExactMorseGammaPartitionSweepBudget budget;
+  budget.critical_catalog_budget.maximum_candidate_count = 575U;
+  budget.critical_catalog_budget.maximum_point_classification_count = 8625U;
+  budget.critical_catalog_budget
+      .enable_bounded_n15_k2_reference_falsifier = true;
+  budget.per_arm_chain_budget = {0U};
+  auto& history = budget.gamma_oracle_history_budget;
+  static_assert(
+      ExactPersistentReducedGammaOrderHistoryBudget::
+              maximum_bounded_n15_k2_reference_falsifier_diameter_pair_count ==
+          105U,
+      "the bounded n=15,k=2 falsifier enumerates exactly C(15,2) diameter "
+      "pairs");
+  history.gamma_budget.maximum_enumerated_facet_count =
+      ExactPersistentReducedGammaOrderHistoryBudget::
+          maximum_bounded_n15_k2_reference_falsifier_diameter_pair_count;
+  history.gamma_budget.maximum_enumerated_coface_count = 455U;
+  history.gamma_budget.maximum_union_attempt_count = 910U;
+  history.gamma_budget.enable_bounded_n15_k2_reference_falsifier = true;
+  history.maximum_activation_level_count = 560U;
+  history.maximum_total_facet_work_count = 58905U;
+  history.maximum_total_coface_work_count = 255255U;
+  history.maximum_total_union_work_count = 510510U;
+  history.maximum_node_count = 455U;
+  history.maximum_child_reference_count = 454U;
+  history.maximum_group_root_reference_count = 454U;
+  history.maximum_group_count = 560U;
+  history.maximum_group_newly_active_facet_count = 105U;
+  history.maximum_group_equal_level_coface_count = 455U;
+  history.maximum_delta_facet_count = 105U;
+  history.maximum_delta_point_reference_count = 210U;
+  budget.maximum_birth_record_count = 560U;
+  budget.maximum_saddle_record_count = 560U;
+  budget.maximum_arm_reference_count = 2240U;
+  budget.maximum_node_count = 1119U;
+  budget.maximum_child_reference_count = 1118U;
+  budget.maximum_batch_record_count = 560U;
+  budget.maximum_contraction_group_count = 560U;
+  budget.maximum_group_root_reference_count = 2240U;
+  budget.maximum_batch_reference_count = 1680U;
+  budget.maximum_checkpoint_count = 560U;
+  budget.enable_bounded_n15_k2_reference_falsifier = true;
   return budget;
 }
 
@@ -743,9 +815,108 @@ void test_fresh_verifier_rejects_mutations_and_twin(
       "a same-size twin cloud cannot reuse the q2 genealogy or Gamma audit");
 }
 
+void test_bounded_n15_k2_reference_falsifier() {
+  const CanonicalPointCloud cloud = bounded_n15_k2_line_cloud();
+  const ExactMorseGammaPartitionSweepBudget budget =
+      bounded_n15_k2_exact_preflight_budget();
+
+  auto missing_opt_in = budget;
+  missing_opt_in.enable_bounded_n15_k2_reference_falsifier = false;
+  check_invalid_argument(
+      [&] {
+        static_cast<void>(build_exact_morse_gamma_partition_sweep(
+            cloud, 2U, missing_opt_in));
+      },
+      "n15-k2 fails closed unless the top-level bounded oracle is opted in");
+  check_invalid_argument(
+      [&] {
+        static_cast<void>(build_exact_morse_gamma_partition_sweep(
+            cloud, 3U, budget));
+      },
+      "the n15 opt-in cannot widen the falsifier beyond k=2");
+
+  std::array<ExactMorseGammaPartitionSweepBudget, 3> insufficient{
+      budget, budget, budget};
+  insufficient[0].maximum_checkpoint_count = 559U;
+  insufficient[1].critical_catalog_budget.maximum_candidate_count = 574U;
+  insufficient[2].gamma_oracle_history_budget
+      .maximum_total_union_work_count = 510509U;
+  for (const auto& short_budget : insufficient) {
+    const auto rejected = build_exact_morse_gamma_partition_sweep(
+        cloud, 2U, short_budget);
+    check(
+        rejected.conservative_preflight_bounds_certified &&
+            !rejected.preflight_budget_sufficient &&
+            rejected.counters.preflight_count == 1U &&
+            rejected.counters.critical_catalog_build_count == 0U &&
+            rejected.counters.critical_arm_family_build_count == 0U &&
+            rejected.counters.gamma_history_build_count == 0U &&
+            rejected.counters.gamma_transition_build_count == 0U &&
+            rejected.decision ==
+                ExactMorseGammaPartitionSweepDecision::
+                    no_sweep_preflight_budget_insufficient,
+        "each n15-k2 cap-minus-one stops before all geometry");
+    check_empty_payload(rejected, "n15-k2 cap-minus-one");
+  }
+
+  const ExactMorseGammaPartitionSweepResult result =
+      build_exact_morse_gamma_partition_sweep(cloud, 2U, budget);
+  check(
+      result.point_count == 15U && result.order == 2U &&
+          result.critical_event_support_bound == 560U &&
+          result.critical_arm_bound == 2240U &&
+          result.exhaustive_facet_count == 105U &&
+          result.exhaustive_coface_count == 455U &&
+          result.required_checkpoint_capacity == 560U &&
+          result.birth_records.size() == 14U &&
+          result.saddle_records.size() == 13U &&
+          result.counters.arm_reference_count == 26U &&
+          result.batch_records.size() == 2U &&
+          result.contraction_groups.size() == 1U &&
+          result.counters.multifusion_group_count == 1U &&
+          result.oracle_checkpoints.size() == 14U &&
+          result.final_root_node_ids.size() == 1U &&
+          result.scope == ExactMorseGammaPartitionSweepScope::
+              bounded_n15_k2_opt_in_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only &&
+          result.records_are_internal_falsifier_objects_not_public_forest_or_attachments &&
+          result.morse_gamma_partition_sweep_certified &&
+          result.decision == ExactMorseGammaPartitionSweepDecision::
+              complete_morse_gamma_partition_sweep,
+      "the opt-in n15-k2 Morse partition matches full-pi0 Gamma at every exact activation level");
+
+  auto forged = result;
+  forged.records_are_internal_falsifier_objects_not_public_forest_or_attachments =
+      false;
+  const auto forged_verification = verify_exact_morse_gamma_partition_sweep(
+      cloud, 2U, budget, forged);
+  check(
+      !forged_verification.result_facts_certified &&
+          !forged_verification.fresh_replay_certified &&
+          !forged_verification.
+              exact_morse_gamma_partition_sweep_decision_certified,
+      "fresh replay rejects promotion of the bounded n15 oracle into a public product object");
+}
+
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+  if (argc == 2 &&
+      std::string{argv[1]} == "--bounded-n15-k2-reference-falsifier") {
+    test_bounded_n15_k2_reference_falsifier();
+    if (failures != 0) {
+      std::cerr << failures
+                << " bounded n15-k2 Morse--Gamma falsifier test(s) failed\n";
+      return 1;
+    }
+    std::cout
+        << "bounded n15-k2 Morse--Gamma reference falsifier passed\n";
+    return 0;
+  }
+  if (argc != 1) {
+    std::cerr << "usage: " << argv[0]
+              << " [--bounded-n15-k2-reference-falsifier]\n";
+    return 2;
+  }
   const CanonicalPointCloud q2 = q2_triangle_cloud();
   const ExactMorseGammaPartitionSweepBudget q2_budget = full_budget(1U);
   const ExactMorseGammaPartitionSweepResult q2_result =

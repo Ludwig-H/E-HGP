@@ -87,13 +87,32 @@ void validate_domain(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t order,
     const SweepBudget& budget) {
-  if (cloud.size() < SweepResult::minimum_supported_point_count ||
-      cloud.size() > SweepResult::maximum_supported_point_count ||
-      order < SweepResult::minimum_supported_order ||
-      order > SweepResult::maximum_supported_order || order >= cloud.size()) {
+  const bool any_n15_opt_in =
+      budget.enable_bounded_n15_k2_reference_falsifier ||
+      budget.critical_catalog_budget
+          .enable_bounded_n15_k2_reference_falsifier ||
+      budget.gamma_oracle_history_budget.gamma_budget
+          .enable_bounded_n15_k2_reference_falsifier;
+  const bool legacy_domain =
+      cloud.size() >= SweepResult::minimum_supported_point_count &&
+      cloud.size() <= SweepResult::maximum_supported_point_count &&
+      order >= SweepResult::minimum_supported_order &&
+      order <= SweepResult::maximum_supported_order &&
+      order < cloud.size() && !any_n15_opt_in;
+  const bool bounded_n15_k2_domain =
+      cloud.size() ==
+          SweepResult::bounded_n15_k2_reference_falsifier_point_count &&
+      order == 2U &&
+      budget.enable_bounded_n15_k2_reference_falsifier &&
+      budget.critical_catalog_budget
+          .enable_bounded_n15_k2_reference_falsifier &&
+      budget.gamma_oracle_history_budget.gamma_budget
+          .enable_bounded_n15_k2_reference_falsifier;
+  if (!legacy_domain && !bounded_n15_k2_domain) {
     throw std::invalid_argument(
-        "the Morse--Gamma partition sweep requires 3<=n<=14, 2<=k<n "
-        "and k<=10");
+        "the Morse--Gamma partition sweep requires the legacy "
+        "3<=n<=14 domain or all three explicit bounded n=15, k=2 "
+        "reference-falsifier opt-ins");
   }
   validate_exact_morse_gamma_partition_sweep_budget_caps(budget);
 }
@@ -194,6 +213,80 @@ void derive_preflight(
              result.required_batch_reference_capacity &&
          budget.maximum_checkpoint_count >=
              result.required_checkpoint_capacity;
+}
+
+[[nodiscard]] bool subordinate_budgets_cover_n15_k2_preflight(
+    const SweepBudget& budget,
+    const SweepResult& result) {
+  if (!budget.enable_bounded_n15_k2_reference_falsifier) {
+    return true;
+  }
+  const std::size_t singleton_count = result.point_count;
+  const std::size_t catalog_candidate_count = checked_add(
+      singleton_count,
+      result.critical_event_support_bound,
+      "the n15-k2 critical-catalog preflight overflows");
+  const std::size_t catalog_point_classification_count = checked_multiply(
+      catalog_candidate_count,
+      result.point_count,
+      "the n15-k2 critical-catalog point preflight overflows");
+  const std::size_t gamma_union_attempt_count = checked_multiply(
+      result.order,
+      result.exhaustive_coface_count,
+      "the n15-k2 Gamma union preflight overflows");
+  const std::size_t activation_level_capacity = checked_add(
+      result.exhaustive_facet_count,
+      result.exhaustive_coface_count,
+      "the n15-k2 Gamma activation preflight overflows");
+  const std::size_t exhaustive_run_count = checked_add(
+      activation_level_capacity,
+      1U,
+      "the n15-k2 Gamma run preflight overflows");
+  const std::size_t total_facet_work = checked_multiply(
+      exhaustive_run_count,
+      result.exhaustive_facet_count,
+      "the n15-k2 Gamma facet-work preflight overflows");
+  const std::size_t total_coface_work = checked_multiply(
+      exhaustive_run_count,
+      result.exhaustive_coface_count,
+      "the n15-k2 Gamma coface-work preflight overflows");
+  const std::size_t total_union_work = checked_multiply(
+      exhaustive_run_count,
+      gamma_union_attempt_count,
+      "the n15-k2 Gamma union-work preflight overflows");
+  const auto& catalog = budget.critical_catalog_budget;
+  const auto& history = budget.gamma_oracle_history_budget;
+  const auto& gamma = history.gamma_budget;
+  return catalog.maximum_candidate_count >= catalog_candidate_count &&
+         catalog.maximum_point_classification_count >=
+             catalog_point_classification_count &&
+         gamma.maximum_enumerated_facet_count >=
+             result.exhaustive_facet_count &&
+         gamma.maximum_enumerated_coface_count >=
+             result.exhaustive_coface_count &&
+         gamma.maximum_union_attempt_count >= gamma_union_attempt_count &&
+         history.maximum_activation_level_count >=
+             activation_level_capacity &&
+         history.maximum_total_facet_work_count >= total_facet_work &&
+         history.maximum_total_coface_work_count >= total_coface_work &&
+         history.maximum_total_union_work_count >= total_union_work &&
+         history.maximum_node_count >= result.exhaustive_coface_count &&
+         history.maximum_child_reference_count >=
+             result.exhaustive_coface_count - 1U &&
+         history.maximum_group_root_reference_count >=
+             result.exhaustive_coface_count - 1U &&
+         history.maximum_group_count >= activation_level_capacity &&
+         history.maximum_group_newly_active_facet_count >=
+             result.exhaustive_facet_count &&
+         history.maximum_group_equal_level_coface_count >=
+             result.exhaustive_coface_count &&
+         history.maximum_delta_facet_count >=
+             result.exhaustive_facet_count &&
+         history.maximum_delta_point_reference_count >=
+             checked_multiply(
+                 result.order,
+                 result.exhaustive_facet_count,
+                 "the n15-k2 Gamma delta-point preflight overflows");
 }
 
 [[nodiscard]] std::size_t unique_value_count(
@@ -637,15 +730,20 @@ struct PartitionAudit {
   result.requested_budget = budget;
   result.point_count = cloud.size();
   result.order = order;
-  result.scope = SweepScope::
-      bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only;
+  result.scope = budget.enable_bounded_n15_k2_reference_falsifier
+      ? SweepScope::
+            bounded_n15_k2_opt_in_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only
+      : SweepScope::
+            bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only;
   result.records_are_internal_falsifier_objects_not_public_forest_or_attachments =
       true;
   result.diagnostic_outcomes_have_no_genealogy_payload = true;
   result.counters.preflight_count = 1U;
   derive_preflight(cloud, order, result);
   result.conservative_preflight_bounds_certified = true;
-  result.preflight_budget_sufficient = budget_covers_preflight(budget, result);
+  result.preflight_budget_sufficient =
+      budget_covers_preflight(budget, result) &&
+      subordinate_budgets_cover_n15_k2_preflight(budget, result);
   if (!result.preflight_budget_sufficient) {
     result.decision =
         SweepDecision::no_sweep_preflight_budget_insufficient;
@@ -1331,10 +1429,14 @@ verify_exact_morse_gamma_partition_sweep(
   verification.result_facts_certified = result_facts_match(result, expected);
   verification.counters_certified = result.counters == expected.counters;
   verification.decision_certified = result.decision == expected.decision;
+  const SweepScope expected_scope =
+      budget.enable_bounded_n15_k2_reference_falsifier
+          ? SweepScope::
+                bounded_n15_k2_opt_in_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only
+          : SweepScope::
+                bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only;
   verification.scope_certified =
-      result.scope == SweepScope::
-          bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only &&
-      result.scope == expected.scope;
+      result.scope == expected_scope && result.scope == expected.scope;
   verification.fresh_replay_certified = result == expected;
   verification.exact_morse_gamma_partition_sweep_decision_certified =
       verification.requested_budget_certified &&

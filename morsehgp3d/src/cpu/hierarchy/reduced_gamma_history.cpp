@@ -116,20 +116,27 @@ void validate_domain(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t order,
     const ExactPersistentReducedGammaOrderHistoryBudget& budget) {
-  if (cloud.size() <
-          ExactPersistentReducedGammaOrderHistory::
-              minimum_supported_point_count ||
-      cloud.size() >
-          ExactPersistentReducedGammaOrderHistory::
-              maximum_supported_point_count ||
-      order <
-          ExactPersistentReducedGammaOrderHistory::minimum_supported_order ||
-      order >
-          ExactPersistentReducedGammaOrderHistory::maximum_supported_order ||
-      order > cloud.size()) {
+  const bool legacy_domain =
+      cloud.size() >= ExactPersistentReducedGammaOrderHistory::
+                          minimum_supported_point_count &&
+      cloud.size() <= ExactPersistentReducedGammaOrderHistory::
+                          maximum_supported_point_count &&
+      order >=
+          ExactPersistentReducedGammaOrderHistory::minimum_supported_order &&
+      order <=
+          ExactPersistentReducedGammaOrderHistory::maximum_supported_order &&
+      order <= cloud.size() &&
+      !budget.gamma_budget.enable_bounded_n15_k2_reference_falsifier;
+  const bool bounded_n15_k2_domain =
+      cloud.size() == ExactPersistentReducedGammaOrderHistory::
+                          bounded_n15_k2_reference_falsifier_point_count &&
+      order == 2U &&
+      budget.gamma_budget.enable_bounded_n15_k2_reference_falsifier;
+  if (!legacy_domain && !bounded_n15_k2_domain) {
     throw std::invalid_argument(
-        "a persistent reduced-Gamma history requires 2<=n<=14 and "
-        "2<=k<=min(n,10)");
+        "a persistent reduced-Gamma history requires the legacy 2<=n<=14 "
+        "domain or the explicit bounded n=15, k=2 reference-falsifier "
+        "opt-in");
   }
   validate_budget_caps(budget);
 }
@@ -419,8 +426,12 @@ compute_exact_persistent_reduced_gamma_order_history(
   history.requested_budget = budget;
   history.point_count = cloud.size();
   history.order = order;
-  history.scope = ExactPersistentReducedGammaOrderHistoryScope::
-      bounded_n14_k10_single_order_persistent_hgp_reduced_gamma_history_including_empty_terminal_only;
+  history.scope = budget.gamma_budget
+                          .enable_bounded_n15_k2_reference_falsifier
+      ? ExactPersistentReducedGammaOrderHistoryScope::
+            bounded_n15_k2_opt_in_single_order_persistent_hgp_reduced_gamma_history_only
+      : ExactPersistentReducedGammaOrderHistoryScope::
+            bounded_n14_k10_single_order_persistent_hgp_reduced_gamma_history_including_empty_terminal_only;
   history.counters.preflight_count = 1U;
   history.exhaustive_facet_count = bounded_binomial(cloud.size(), order);
   history.exhaustive_coface_count =
@@ -1482,11 +1493,14 @@ verify_exact_persistent_reduced_gamma_order_history(
       history.counters == expected.counters;
   verification.decision_certified =
       history.decision == expected.decision;
+  const ExactPersistentReducedGammaOrderHistoryScope expected_scope =
+      budget.gamma_budget.enable_bounded_n15_k2_reference_falsifier
+          ? ExactPersistentReducedGammaOrderHistoryScope::
+                bounded_n15_k2_opt_in_single_order_persistent_hgp_reduced_gamma_history_only
+          : ExactPersistentReducedGammaOrderHistoryScope::
+                bounded_n14_k10_single_order_persistent_hgp_reduced_gamma_history_including_empty_terminal_only;
   verification.scope_certified =
-      history.scope ==
-          ExactPersistentReducedGammaOrderHistoryScope::
-              bounded_n14_k10_single_order_persistent_hgp_reduced_gamma_history_including_empty_terminal_only &&
-      history.scope == expected.scope;
+      history.scope == expected_scope && history.scope == expected.scope;
   verification.fresh_replay_certified = history == expected;
   verification.
       exact_persistent_reduced_gamma_order_history_decision_certified =

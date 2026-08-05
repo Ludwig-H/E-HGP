@@ -188,8 +188,33 @@ void check_complete_generic_catalog(
                                  complete_supported_critical_catalog &&
           result.scope == ExactCriticalCatalogScope::
                               bounded_n14_k10_exhaustive_supports_up_to_four_critical_catalog_h0_batches_only &&
+          std::string{result.scope_proof_basis()} ==
+              ExactCriticalCatalogResult::proof_basis &&
           all_certificates_close(verification),
       fixture + " closes the complete generic-catalogue certificate");
+}
+
+void test_n15_k2_scope_has_its_own_support_three_proof_basis() {
+  std::vector<CertifiedPoint3> input;
+  input.reserve(15U);
+  for (std::size_t index = 0U; index < 15U; ++index) {
+    input.push_back(point(static_cast<double>(index)));
+  }
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  ExactCriticalCatalogBudget budget{575U, 8625U};
+  budget.enable_bounded_n15_k2_reference_falsifier = true;
+  const ExactCriticalCatalogResult result =
+      build_exact_critical_catalog(cloud, 2U, budget);
+
+  check(
+      result.exhaustive_support_point_count_limit == 3U &&
+          result.required_candidate_count == 575U &&
+          result.scope == ExactCriticalCatalogScope::
+                              bounded_n15_k2_opt_in_exhaustive_supports_up_to_three_critical_catalog_h0_batches_only &&
+          std::string{result.scope_proof_basis()} ==
+              ExactCriticalCatalogResult::
+                  bounded_n15_k2_reference_falsifier_proof_basis,
+      "the n15-k2 opt-in publishes only its support-three proof basis");
 }
 
 void test_two_points_exhaust_all_three_supports() {
@@ -940,6 +965,7 @@ int main() {
   test_multi_size_supports_aggregate_into_one_degeneracy();
   test_minimal_supports_above_the_rank_window_remain_explicit();
   test_n14_preflight_is_exact_and_atomic();
+  test_n15_k2_scope_has_its_own_support_three_proof_basis();
   test_fresh_verifier_rejects_each_catalogue_layer();
 
   if (failures != 0) {

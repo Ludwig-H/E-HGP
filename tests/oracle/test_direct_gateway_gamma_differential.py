@@ -5,7 +5,9 @@ from dataclasses import FrozenInstanceError, fields, replace
 from fractions import Fraction
 from unittest.mock import patch
 
+import reference.morsehgp3d_oracle as oracle_package
 from reference.morsehgp3d_oracle import (
+    DirectGatewayGammaDifferentialBudget,
     direct_gateway_differential as differential_module,
 )
 from reference.morsehgp3d_oracle.direct_gateway_differential import (
@@ -36,6 +38,32 @@ E5_POINTS: tuple[Point3, ...] = (
 E5_LABELS = ("A", "B", "C", "D", "E")
 E5_SILENT_LEVEL = Fraction(33, 2)
 E5_CONTINUATION_LEVEL = Fraction(83886, 3563)
+
+N15_POINTS: tuple[Point3, ...] = (
+    (0, -6, 27),
+    (-15, 30, 1),
+    (19, 22, -12),
+    (-15, 27, 3),
+    (0, 0, 0),
+    (6, 26, 27),
+    (2, 5, 1),
+    (25, -5, -29),
+    (-25, 8, 20),
+    (1, 2, 3),
+    (23, -7, 17),
+    (4, 1, 2),
+    (30, -1, -9),
+    (-13, -23, 17),
+    (-18, 1, -23),
+)
+N15_ORDER2_BUDGET = DirectGatewayGammaDifferentialBudget(
+    maximum_point_count=15,
+    maximum_catalog_support_count=1940,
+    maximum_catalog_point_classification_count=29100,
+    maximum_gamma_facet_count=105,
+    maximum_gamma_coface_count=455,
+    maximum_checkpoint_count=1120,
+)
 
 
 def _canonical_ids(*labels: str) -> tuple[int, ...]:
@@ -110,6 +138,16 @@ def _amputated_filtration(
 
 
 class DirectGatewayGammaDifferentialDomainTests(unittest.TestCase):
+    def test_budget_is_exposed_by_the_public_oracle_package(self) -> None:
+        self.assertIs(
+            oracle_package.DirectGatewayGammaDifferentialBudget,
+            DirectGatewayGammaDifferentialBudget,
+        )
+        self.assertIn(
+            "DirectGatewayGammaDifferentialBudget",
+            oracle_package.__all__,
+        )
+
     def test_structural_domain_is_rejected_before_exhaustive_enumeration(self) -> None:
         valid = E5_POINTS
         invalid_calls = (
@@ -139,6 +177,111 @@ class DirectGatewayGammaDifferentialDomainTests(unittest.TestCase):
                 build_direct_gateway_gamma_differential(valid, True)
             catalog_builder.assert_not_called()
             gamma_builder.assert_not_called()
+
+    def test_each_explicit_n15_capacity_is_preflighted_before_geometry(self) -> None:
+        short_budgets = (
+            replace(N15_ORDER2_BUDGET, maximum_point_count=14),
+            replace(N15_ORDER2_BUDGET, maximum_catalog_support_count=1939),
+            replace(
+                N15_ORDER2_BUDGET,
+                maximum_catalog_point_classification_count=29099,
+            ),
+            replace(N15_ORDER2_BUDGET, maximum_gamma_facet_count=104),
+            replace(N15_ORDER2_BUDGET, maximum_gamma_coface_count=454),
+            replace(N15_ORDER2_BUDGET, maximum_checkpoint_count=1119),
+        )
+        with (
+            patch.object(
+                differential_module,
+                "build_critical_catalog",
+                side_effect=AssertionError("catalogue reached before preflight"),
+            ) as catalog_builder,
+            patch.object(
+                differential_module,
+                "build_gamma_filtration",
+                side_effect=AssertionError("Gamma reached before preflight"),
+            ) as gamma_builder,
+        ):
+            for budget in short_budgets:
+                with self.subTest(budget=budget):
+                    with self.assertRaises(ValueError):
+                        build_direct_gateway_gamma_differential(
+                            N15_POINTS,
+                            2,
+                            budget=budget,
+                        )
+            catalog_builder.assert_not_called()
+            gamma_builder.assert_not_called()
+
+    def test_oversized_budget_cannot_widen_the_n15_k2_contract(self) -> None:
+        oversized_budget = DirectGatewayGammaDifferentialBudget(
+            maximum_point_count=16,
+            maximum_catalog_support_count=10**6,
+            maximum_catalog_point_classification_count=10**7,
+            maximum_gamma_facet_count=10**6,
+            maximum_gamma_coface_count=10**6,
+            maximum_checkpoint_count=10**7,
+        )
+        n16_points = N15_POINTS + ((31, 37, 41),)
+        with (
+            patch.object(
+                differential_module,
+                "build_critical_catalog",
+                side_effect=AssertionError("catalogue reached outside contract"),
+            ) as catalog_builder,
+            patch.object(
+                differential_module,
+                "build_gamma_filtration",
+                side_effect=AssertionError("Gamma reached outside contract"),
+            ) as gamma_builder,
+        ):
+            for points, order in ((N15_POINTS, 3), (n16_points, 2)):
+                with self.subTest(point_count=len(points), order=order):
+                    with self.assertRaises(ValueError):
+                        build_direct_gateway_gamma_differential(
+                            points,
+                            order,
+                            budget=oversized_budget,
+                        )
+            catalog_builder.assert_not_called()
+            gamma_builder.assert_not_called()
+
+    def test_explicit_budget_runs_permanent_n15_full_pi0_falsifier(self) -> None:
+        result = build_direct_gateway_gamma_differential(
+            N15_POINTS,
+            2,
+            budget=N15_ORDER2_BUDGET,
+        )
+
+        self.assertEqual(result.point_count, 15)
+        self.assertEqual(result.order, 2)
+        self.assertTrue(result.relevant_gp)
+        self.assertEqual(
+            result.decision,
+            DifferentialDecision.OPEN_BOUNDED_EVIDENCE_ONLY,
+        )
+        self.assertEqual(
+            result.evidence_status,
+            DifferentialEvidenceStatus.OPEN_BOUNDED_EVIDENCE_ONLY,
+        )
+        self.assertTrue(result.bounded_equivalent)
+        self.assertEqual(result.scope, "oracle_only")
+        self.assertEqual(result.public_status, "not_claimed")
+        self.assertEqual(len(result.birth_facets), 32)
+        self.assertEqual(len(result.direct_saddle_cofaces), 40)
+        self.assertEqual(len(result.direct_facets), 53)
+        self.assertEqual(len(result.first_incidence_cofaces), 37)
+        self.assertEqual(len(result.generated_cofaces), 44)
+        self.assertEqual(len(result.cut_results), 576)
+        self.assertIsNone(result.first_failure)
+        self.assertTrue(
+            verify_direct_gateway_gamma_differential(
+                N15_POINTS,
+                2,
+                result,
+                budget=N15_ORDER2_BUDGET,
+            )
+        )
 
     def test_relevant_gp_violation_is_an_explicit_unsupported_result(self) -> None:
         right_triangle = ((0, 0, 0), (2, 0, 0), (0, 2, 0))

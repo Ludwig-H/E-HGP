@@ -38,6 +38,8 @@ struct ExactPersistentReducedGammaOrderHistoryBudget {
   static constexpr std::size_t
       maximum_supported_delta_point_reference_count = 24024U;
   static constexpr std::size_t maximum_supported_diameter_pair_count = 91U;
+  static constexpr std::size_t
+      maximum_bounded_n15_k2_reference_falsifier_diameter_pair_count = 105U;
 
   ExactStrictGammaBudget gamma_budget{};
   std::size_t maximum_activation_level_count{};
@@ -69,6 +71,7 @@ enum class ExactPersistentReducedGammaOrderHistoryDecision :
 enum class ExactPersistentReducedGammaOrderHistoryScope : std::uint8_t {
   unspecified,
   bounded_n14_k10_single_order_persistent_hgp_reduced_gamma_history_including_empty_terminal_only,
+  bounded_n15_k2_opt_in_single_order_persistent_hgp_reduced_gamma_history_only,
 };
 
 enum class ExactPersistentReducedGammaNodeKind : std::uint8_t {
@@ -203,6 +206,8 @@ struct ExactPersistentReducedGammaOrderHistoryCounters {
 struct ExactPersistentReducedGammaOrderHistory {
   static constexpr std::size_t minimum_supported_point_count = 2U;
   static constexpr std::size_t maximum_supported_point_count = 14U;
+  static constexpr std::size_t
+      bounded_n15_k2_reference_falsifier_point_count = 15U;
   static constexpr std::size_t minimum_supported_order = 2U;
   static constexpr std::size_t maximum_supported_order = 10U;
   static constexpr const char* proof_basis =

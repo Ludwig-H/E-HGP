@@ -12,6 +12,8 @@ namespace morsehgp3d::hierarchy {
 
 struct ExactStrictGammaBudget {
   static constexpr std::size_t maximum_supported_point_count = 14U;
+  static constexpr std::size_t
+      bounded_n15_k2_reference_falsifier_point_count = 15U;
   static constexpr std::size_t maximum_supported_order = 10U;
   static constexpr std::size_t maximum_supported_source_facet_count = 4U;
   static constexpr std::size_t maximum_supported_facet_count = 3432U;
@@ -22,6 +24,9 @@ struct ExactStrictGammaBudget {
   std::size_t maximum_enumerated_facet_count{};
   std::size_t maximum_enumerated_coface_count{};
   std::size_t maximum_union_attempt_count{};
+  // Opt-in reference-only extension.  It never widens the product domain
+  // beyond exactly n=15, k=2 and never changes public hierarchy status.
+  bool enable_bounded_n15_k2_reference_falsifier{false};
 
   friend bool operator==(
       const ExactStrictGammaBudget&,

@@ -23,6 +23,11 @@ struct ExactCriticalCatalogBudget {
 
   std::size_t maximum_candidate_count{};
   std::size_t maximum_point_classification_count{};
+  // This switch is intentionally narrower than the legacy n<=14 catalogue:
+  // it enables only the Phase-6 n=15, Kmax=2 reference falsifier.  That
+  // falsifier enumerates supports of sizes one through three, because larger
+  // supports cannot produce an order-two birth or saddle.
+  bool enable_bounded_n15_k2_reference_falsifier{false};
 
   friend bool operator==(
       const ExactCriticalCatalogBudget&,
@@ -53,6 +58,7 @@ enum class ExactCriticalCatalogDecision : std::uint8_t {
 enum class ExactCriticalCatalogScope : std::uint8_t {
   unspecified,
   bounded_n14_k10_exhaustive_supports_up_to_four_critical_catalog_h0_batches_only,
+  bounded_n15_k2_opt_in_exhaustive_supports_up_to_three_critical_catalog_h0_batches_only,
 };
 
 struct ExactCriticalCatalogPredicateCounters {
@@ -174,18 +180,40 @@ struct ExactCriticalCatalogCounters {
 struct ExactCriticalCatalogResult {
   static constexpr std::size_t minimum_supported_point_count = 1U;
   static constexpr std::size_t maximum_supported_point_count = 14U;
+  static constexpr std::size_t
+      bounded_n15_k2_reference_falsifier_point_count = 15U;
   static constexpr std::size_t minimum_supported_maximum_order = 1U;
   static constexpr std::size_t maximum_supported_maximum_order = 10U;
   static constexpr std::size_t maximum_support_point_count = 4U;
+  // Historical n<=14 proof basis retained for source compatibility.  Callers
+  // must use scope_proof_basis() when the bounded n=15, k=2 opt-in is enabled.
   static constexpr const char* proof_basis =
       "exhaustive_exact_supports_up_to_four_global_closed_ball_"
       "critical_catalog_h0_batches_v1";
+  static constexpr const char* bounded_n15_k2_reference_falsifier_proof_basis =
+      "bounded_n15_k2_exhaustive_exact_supports_up_to_three_global_closed_"
+      "ball_critical_catalog_h0_batches_reference_falsifier_v1";
+
+  [[nodiscard]] constexpr const char* scope_proof_basis() const noexcept {
+    switch (scope) {
+      case ExactCriticalCatalogScope::
+          bounded_n14_k10_exhaustive_supports_up_to_four_critical_catalog_h0_batches_only:
+        return proof_basis;
+      case ExactCriticalCatalogScope::
+          bounded_n15_k2_opt_in_exhaustive_supports_up_to_three_critical_catalog_h0_batches_only:
+        return bounded_n15_k2_reference_falsifier_proof_basis;
+      case ExactCriticalCatalogScope::unspecified:
+        return "";
+    }
+    return "";
+  }
 
   ExactCriticalCatalogBudget requested_budget{};
   std::size_t point_count{};
   std::size_t requested_maximum_order{};
   std::size_t effective_maximum_order{};
   std::size_t maximum_relevant_closed_rank{};
+  std::size_t exhaustive_support_point_count_limit{};
   std::size_t required_candidate_count{};
   std::size_t required_point_classification_count{};
   std::vector<ExactCriticalCatalogCandidate> candidates;

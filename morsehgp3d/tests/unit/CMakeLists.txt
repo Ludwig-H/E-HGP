@@ -5074,6 +5074,20 @@ add_test(
   COMMAND morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
 )
 add_test(
+  NAME
+    morsehgp3d.hierarchy_morse_gamma_partition_sweep.bounded_n15_k2_reference_falsifier
+  COMMAND
+    morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
+    --bounded-n15-k2-reference-falsifier
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_morse_gamma_partition_sweep.bounded_n15_k2_reference_falsifier
+  PROPERTIES
+    LABELS "long;phase15;reference_oracle"
+    RUN_SERIAL TRUE
+    TIMEOUT 900
+)
+add_test(
   NAME morsehgp3d.hierarchy_hartigan_all_orders
   COMMAND morsehgp3d_hierarchy_hartigan_all_orders_tests
 )

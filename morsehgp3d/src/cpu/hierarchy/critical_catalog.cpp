@@ -61,10 +61,11 @@ using spatial::PointId;
 }
 
 [[nodiscard]] std::array<std::size_t, 4> candidate_counts_by_size(
-    std::size_t point_count) {
+    std::size_t point_count,
+    std::size_t maximum_support_size) {
   std::array<std::size_t, 4> counts{};
   for (std::size_t support_size = 1U;
-       support_size <= counts.size();
+       support_size <= std::min(counts.size(), maximum_support_size);
        ++support_size) {
     counts[support_size - 1U] =
         bounded_binomial(point_count, support_size);
@@ -88,12 +89,21 @@ void validate_domain(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
     const ExactCriticalCatalogBudget& budget) {
-  if (cloud.size() <
-          ExactCriticalCatalogResult::minimum_supported_point_count ||
-      cloud.size() >
-          ExactCriticalCatalogResult::maximum_supported_point_count) {
+  const bool legacy_domain =
+      cloud.size() >=
+          ExactCriticalCatalogResult::minimum_supported_point_count &&
+      cloud.size() <=
+          ExactCriticalCatalogResult::maximum_supported_point_count &&
+      !budget.enable_bounded_n15_k2_reference_falsifier;
+  const bool bounded_n15_k2_domain =
+      cloud.size() == ExactCriticalCatalogResult::
+                          bounded_n15_k2_reference_falsifier_point_count &&
+      requested_maximum_order == 2U &&
+      budget.enable_bounded_n15_k2_reference_falsifier;
+  if (!legacy_domain && !bounded_n15_k2_domain) {
     throw std::invalid_argument(
-        "the exact critical catalogue requires 1<=n<=14");
+        "the exact critical catalogue requires legacy 1<=n<=14 or the "
+        "explicit bounded n=15, Kmax=2 reference-falsifier opt-in");
   }
   if (requested_maximum_order <
           ExactCriticalCatalogResult::minimum_supported_maximum_order ||
@@ -671,7 +681,7 @@ void build_h0_batches(ExactCriticalCatalogResult& result) {
     if (candidate.candidate_index != index ||
         candidate.support_point_ids.empty() ||
         candidate.support_point_ids.size() >
-            ExactCriticalCatalogResult::maximum_support_point_count ||
+            result.exhaustive_support_point_count_limit ||
         !std::is_sorted(
             candidate.support_point_ids.begin(),
             candidate.support_point_ids.end()) ||
@@ -999,8 +1009,14 @@ void build_h0_batches(ExactCriticalCatalogResult& result) {
           1U,
           "the critical-catalog maximum rank overflows size_t"),
       cloud.size());
+  const bool bounded_n15_k2 =
+      budget.enable_bounded_n15_k2_reference_falsifier;
+  result.exhaustive_support_point_count_limit = bounded_n15_k2
+      ? 3U
+      : ExactCriticalCatalogResult::maximum_support_point_count;
   const std::array<std::size_t, 4> required_by_size =
-      candidate_counts_by_size(cloud.size());
+      candidate_counts_by_size(
+          cloud.size(), result.exhaustive_support_point_count_limit);
   result.required_candidate_count = candidate_count_sum(required_by_size);
   result.required_point_classification_count = checked_multiply(
       result.required_candidate_count,
@@ -1008,8 +1024,11 @@ void build_h0_batches(ExactCriticalCatalogResult& result) {
       "the critical-catalog point-classification preflight overflows size_t");
   result.counters.preflight_count = 1U;
   result.candidate_space_size_certified = true;
-  result.scope = ExactCriticalCatalogScope::
-      bounded_n14_k10_exhaustive_supports_up_to_four_critical_catalog_h0_batches_only;
+  result.scope = bounded_n15_k2
+      ? ExactCriticalCatalogScope::
+            bounded_n15_k2_opt_in_exhaustive_supports_up_to_three_critical_catalog_h0_batches_only
+      : ExactCriticalCatalogScope::
+            bounded_n14_k10_exhaustive_supports_up_to_four_critical_catalog_h0_batches_only;
 
   if (budget.maximum_candidate_count <
           result.required_candidate_count ||
@@ -1027,7 +1046,9 @@ void build_h0_batches(ExactCriticalCatalogResult& result) {
   enumerate_supports<1U>(cloud, predicate_counters, result);
   enumerate_supports<2U>(cloud, predicate_counters, result);
   enumerate_supports<3U>(cloud, predicate_counters, result);
-  enumerate_supports<4U>(cloud, predicate_counters, result);
+  if (result.exhaustive_support_point_count_limit >= 4U) {
+    enumerate_supports<4U>(cloud, predicate_counters, result);
+  }
   result.predicate_counters = predicate_snapshot(predicate_counters);
 
   if (result.counters.enumerated_candidate_count !=
@@ -1143,7 +1164,9 @@ ExactCriticalCatalogVerification verify_exact_critical_catalog(
       result.effective_maximum_order ==
           expected.effective_maximum_order &&
       result.maximum_relevant_closed_rank ==
-          expected.maximum_relevant_closed_rank;
+          expected.maximum_relevant_closed_rank &&
+      result.exhaustive_support_point_count_limit ==
+          expected.exhaustive_support_point_count_limit;
   verification.derived_sizes_certified =
       result.required_candidate_count ==
           expected.required_candidate_count &&
@@ -1185,10 +1208,14 @@ ExactCriticalCatalogVerification verify_exact_critical_catalog(
       result.counters == expected.counters;
   verification.decision_certified =
       result.decision == expected.decision;
+  const ExactCriticalCatalogScope expected_scope =
+      budget.enable_bounded_n15_k2_reference_falsifier
+          ? ExactCriticalCatalogScope::
+                bounded_n15_k2_opt_in_exhaustive_supports_up_to_three_critical_catalog_h0_batches_only
+          : ExactCriticalCatalogScope::
+                bounded_n14_k10_exhaustive_supports_up_to_four_critical_catalog_h0_batches_only;
   verification.scope_certified =
-      result.scope == ExactCriticalCatalogScope::
-          bounded_n14_k10_exhaustive_supports_up_to_four_critical_catalog_h0_batches_only &&
-      result.scope == expected.scope;
+      result.scope == expected_scope && result.scope == expected.scope;
   verification.fresh_replay_certified = result == expected;
   verification.exact_critical_catalog_decision_certified =
       verification.requested_budget_certified &&

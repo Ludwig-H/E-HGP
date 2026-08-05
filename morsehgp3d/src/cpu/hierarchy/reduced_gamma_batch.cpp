@@ -295,15 +295,23 @@ compute_exact_reduced_gamma_batch(
     std::size_t order,
     const exact::ExactLevel& squared_level,
     ExactStrictGammaBudget budget) {
-  if (cloud.size() < 2U ||
-      cloud.size() >
-          ExactStrictGammaBudget::maximum_supported_point_count ||
-      order < 2U ||
-      order > ExactStrictGammaBudget::maximum_supported_order ||
-      order >= cloud.size()) {
+  const bool legacy_domain =
+      cloud.size() >= 2U &&
+      cloud.size() <=
+          ExactStrictGammaBudget::maximum_supported_point_count &&
+      order >= 2U &&
+      order <= ExactStrictGammaBudget::maximum_supported_order &&
+      order < cloud.size() &&
+      !budget.enable_bounded_n15_k2_reference_falsifier;
+  const bool bounded_n15_k2_domain =
+      cloud.size() == ExactStrictGammaBudget::
+                          bounded_n15_k2_reference_falsifier_point_count &&
+      order == 2U &&
+      budget.enable_bounded_n15_k2_reference_falsifier;
+  if (!legacy_domain && !bounded_n15_k2_domain) {
     throw std::invalid_argument(
-        "a reduced Gamma batch requires 2<=n<=14 and "
-        "2<=k<min(n,11)");
+        "a reduced Gamma batch requires the legacy 2<=n<=14 domain or the "
+        "explicit bounded n=15, k=2 reference-falsifier opt-in");
   }
 
   ExactReducedGammaBatchResult result;

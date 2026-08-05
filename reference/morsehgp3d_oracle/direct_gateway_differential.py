@@ -1,8 +1,11 @@
 """Bounded exact differential for the Phase-10 direct gateway hypotheses.
 
 This module is deliberately an exhaustive reference oracle.  It materializes
-the complete :math:`Gamma_k` filtration only after enforcing ``n <= 14`` and
-``k <= 10``.  Nothing in the production backend imports this module.
+the complete :math:`Gamma_k` filtration only after enforcing explicit bounds
+on points and every combinatorial arena.  The default budget preserves the
+historical ``n <= 14`` and ``k <= 10`` domain; the only larger case is the
+explicitly budgeted ``n = 15, k = 2`` falsifier.  Nothing in the production
+backend imports this module.
 
 Point identifiers in results (and in ``excluded_gateway_cofaces``) refer to
 the lexicographically sorted exact point cloud exposed as ``result.points``.
@@ -14,6 +17,7 @@ from dataclasses import dataclass, fields
 from enum import Enum
 from fractions import Fraction
 from itertools import combinations
+from math import comb
 from typing import Any, Iterable, Sequence, TypeAlias, cast
 
 from .catalog import CriticalCatalog, build_critical_catalog
@@ -32,6 +36,85 @@ CofaceLabel: TypeAlias = PointLabel
 FacetComponent: TypeAlias = tuple[FacetLabel, ...]
 FacetPartition: TypeAlias = tuple[FacetComponent, ...]
 CoveredPointPartition: TypeAlias = tuple[PointLabel, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class DirectGatewayGammaDifferentialBudget:
+    """Trusted exhaustive-oracle limits checked before any exact geometry.
+
+    The defaults are the exact static maxima needed by every historical
+    ``3 <= n <= 14`` and ``2 <= k <= min(10, n - 1)`` request.  Increasing
+    ``maximum_point_count`` alone is intentionally insufficient: every arena
+    that grows combinatorially must also be raised explicitly.
+    """
+
+    maximum_point_count: int = 14
+    maximum_catalog_support_count: int = 1470
+    maximum_catalog_point_classification_count: int = 20580
+    maximum_gamma_facet_count: int = 3432
+    maximum_gamma_coface_count: int = 3432
+    maximum_checkpoint_count: int = 12870
+
+    def __post_init__(self) -> None:
+        for field in fields(self):
+            value = getattr(self, field.name)
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{field.name} must be an integer")
+            if value < 0:
+                raise ValueError(f"{field.name} must be non-negative")
+
+
+def _preflight_exhaustive_budget(
+    point_count: int,
+    order: int,
+    budget: DirectGatewayGammaDifferentialBudget,
+) -> None:
+    """Reject an oversized oracle request before catalogue or Gamma work."""
+
+    required_support_count = sum(
+        comb(point_count, support_size)
+        for support_size in range(1, min(4, point_count) + 1)
+    )
+    required_point_classification_count = point_count * required_support_count
+    required_facet_count = comb(point_count, order)
+    required_coface_count = (
+        comb(point_count, order + 1) if order < point_count else 0
+    )
+    # There are at most one distinct level per facet or coface and the
+    # differential records both the open and closed cut at every level.
+    required_checkpoint_count = 2 * (
+        required_facet_count + required_coface_count
+    )
+    requirements = (
+        ("point count", point_count, budget.maximum_point_count),
+        (
+            "catalog support count",
+            required_support_count,
+            budget.maximum_catalog_support_count,
+        ),
+        (
+            "catalog point-classification count",
+            required_point_classification_count,
+            budget.maximum_catalog_point_classification_count,
+        ),
+        ("Gamma facet count", required_facet_count, budget.maximum_gamma_facet_count),
+        (
+            "Gamma coface count",
+            required_coface_count,
+            budget.maximum_gamma_coface_count,
+        ),
+        (
+            "checkpoint count",
+            required_checkpoint_count,
+            budget.maximum_checkpoint_count,
+        ),
+    )
+    for label, required, available in requirements:
+        if required > available:
+            raise ValueError(
+                f"direct gateway differential {label} requires {required}, "
+                f"budget permits {available}"
+            )
 
 
 class DifferentialDecision(str, Enum):
@@ -687,16 +770,19 @@ def build_direct_gateway_gamma_differential(
     order: int,
     *,
     excluded_gateway_cofaces: Iterable[Iterable[int]] = (),
+    budget: DirectGatewayGammaDifferentialBudget = DirectGatewayGammaDifferentialBudget(),
 ) -> DirectGatewayGammaDifferentialResult:
     """Compare the two direct-gateway hypotheses with bounded exact Gamma.
 
-    The structural domain is checked before constructing the catalogue or
-    Gamma: ``3 <= n <= 14`` and ``2 <= order <= min(10, n - 1)``.  A RelevantGP
-    violation is a returned ``UNSUPPORTED_DEGENERACY`` decision, not a partial
-    comparison.  Exclusions are a diagnostic ablation of first-incidence
-    cofaces only; a coface that is also a direct saddle remains generated.
-    Any non-empty exclusion forces ``evidence_status=DIAGNOSTIC_ABLATION`` even
-    though ``decision`` still reports the generator that was actually compared.
+    The structural domain and all trusted combinatorial capacities are checked
+    before constructing the catalogue or Gamma: the historical
+    ``3 <= n <= 14`` domain, plus only the explicitly budgeted
+    ``n = 15, order = 2`` falsifier.  A RelevantGP violation is a returned
+    ``UNSUPPORTED_DEGENERACY`` decision, not a partial comparison.  Exclusions
+    are a diagnostic ablation of first-incidence cofaces only; a coface that is
+    also a direct saddle remains generated.  Any non-empty exclusion forces
+    ``evidence_status=DIAGNOSTIC_ABLATION`` even though ``decision`` still
+    reports the generator that was actually compared.
 
     Normative generator equivalence is intentionally projected onto
     ``B_k union F_dir``.  Selected cofaces may use all their deletion facets as
@@ -706,12 +792,22 @@ def build_direct_gateway_gamma_differential(
 
     raw_points = tuple(points)
     point_count = len(raw_points)
-    if not 3 <= point_count <= 14:
-        raise ValueError("the direct gateway differential requires 3 <= n <= 14")
+    if point_count < 3:
+        raise ValueError("the direct gateway differential requires n >= 3")
     if isinstance(order, bool) or not isinstance(order, int):
         raise TypeError("order must be an integer")
     if not 2 <= order <= min(10, point_count - 1):
         raise ValueError("order must lie in 2..min(10, n - 1)")
+    legacy_domain = point_count <= 14
+    bounded_n15_k2_domain = point_count == 15 and order == 2
+    if not (legacy_domain or bounded_n15_k2_domain):
+        raise ValueError(
+            "the direct gateway differential requires 3 <= n <= 14 or "
+            "the explicitly budgeted n = 15, order = 2 falsifier"
+        )
+    if not isinstance(budget, DirectGatewayGammaDifferentialBudget):
+        raise TypeError("budget must be a DirectGatewayGammaDifferentialBudget")
+    _preflight_exhaustive_budget(point_count, order, budget)
     exclusions = _canonical_exclusions(
         excluded_gateway_cofaces, point_count=point_count, order=order
     )
@@ -1090,6 +1186,7 @@ def verify_direct_gateway_gamma_differential(
     observed: object,
     *,
     excluded_gateway_cofaces: Iterable[Iterable[int]] = (),
+    budget: DirectGatewayGammaDifferentialBudget = DirectGatewayGammaDifferentialBudget(),
 ) -> bool:
     """Freshly rebuild and compare a bounded differential result.
 
@@ -1103,6 +1200,7 @@ def verify_direct_gateway_gamma_differential(
         points,
         order,
         excluded_gateway_cofaces=excluded_gateway_cofaces,
+        budget=budget,
     )
     try:
         return _strict_result_value_equal(expected, observed)
@@ -1119,6 +1217,7 @@ __all__ = [
     "DifferentialProvenance",
     "DifferentialStage",
     "DifferentialVerdict",
+    "DirectGatewayGammaDifferentialBudget",
     "DirectGatewayGammaCheckpoint",
     "DirectGatewayGammaDifferentialResult",
     "DirectGatewayGammaPathElement",

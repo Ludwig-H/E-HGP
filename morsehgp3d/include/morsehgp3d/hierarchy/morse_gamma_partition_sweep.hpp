@@ -44,6 +44,9 @@ struct ExactMorseGammaPartitionSweepBudget {
   std::size_t maximum_group_root_reference_count{};
   std::size_t maximum_batch_reference_count{};
   std::size_t maximum_checkpoint_count{};
+  // The only domain extension authorized by this switch is n=15, k=2.
+  // Both subordinate reference budgets must carry their matching opt-ins.
+  bool enable_bounded_n15_k2_reference_falsifier{false};
 
   friend bool operator==(
       const ExactMorseGammaPartitionSweepBudget&,
@@ -64,6 +67,7 @@ enum class ExactMorseGammaPartitionSweepDecision : std::uint8_t {
 enum class ExactMorseGammaPartitionSweepScope : std::uint8_t {
   unspecified,
   bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only,
+  bounded_n15_k2_opt_in_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only,
 };
 
 enum class ExactMorseGammaNodeKind : std::uint8_t {
@@ -226,6 +230,8 @@ struct ExactMorseGammaPartitionSweepCounters {
 struct ExactMorseGammaPartitionSweepResult {
   static constexpr std::size_t minimum_supported_point_count = 3U;
   static constexpr std::size_t maximum_supported_point_count = 14U;
+  static constexpr std::size_t
+      bounded_n15_k2_reference_falsifier_point_count = 15U;
   static constexpr std::size_t minimum_supported_order = 2U;
   static constexpr std::size_t maximum_supported_order = 10U;
   static constexpr const char* proof_basis =

@@ -214,14 +214,23 @@ void validate_budget(const ExactStrictGammaBudget& budget) {
     std::span<const FacetLabel> canonical_source_facets,
     ExactStrictGammaBudget budget) {
   validate_budget(budget);
-  if (cloud.size() < 2U ||
-      cloud.size() >
-          ExactStrictGammaBudget::maximum_supported_point_count ||
-      order == 0U ||
-      order > ExactStrictGammaBudget::maximum_supported_order ||
-      order >= cloud.size()) {
+  const bool legacy_domain =
+      cloud.size() >= 2U &&
+      cloud.size() <=
+          ExactStrictGammaBudget::maximum_supported_point_count &&
+      order >= 1U &&
+      order <= ExactStrictGammaBudget::maximum_supported_order &&
+      order < cloud.size() &&
+      !budget.enable_bounded_n15_k2_reference_falsifier;
+  const bool bounded_n15_k2_domain =
+      cloud.size() == ExactStrictGammaBudget::
+                          bounded_n15_k2_reference_falsifier_point_count &&
+      order == 2U &&
+      budget.enable_bounded_n15_k2_reference_falsifier;
+  if (!legacy_domain && !bounded_n15_k2_domain) {
     throw std::invalid_argument(
-        "strict Gamma requires 2<=n<=14 and 1<=k<min(n,11)");
+        "strict Gamma requires the legacy 2<=n<=14 domain or the explicit "
+        "bounded n=15, k=2 reference-falsifier opt-in");
   }
   const std::vector<FacetLabel> sources = validate_sources(
       cloud, order, canonical_source_facets);
