@@ -50,6 +50,12 @@ namespace smoke_clouds = morsehgp3d::tools::pair_support_smoke;
 constexpr std::uint64_t locator_authority_id =
     UINT64_C(0x4D485047503344);
 
+// The device headers exist only in a CUDA build, so the option layer states
+// the two sealed bridge constants literally; the device branch static_asserts
+// them against the real ones.
+inline constexpr std::size_t runner_default_higher_tile_target = 16U;
+inline constexpr std::size_t runner_maximum_higher_tile_target = 1024U;
+
 struct Options {
   std::string family{"uniform_latin"};
   std::string mode{"resident_timed"};
@@ -65,6 +71,7 @@ struct Options {
   std::string archive_directory{};
   std::string higher_backend{"host_fixed_chunk"};
   std::string higher_verification_basis{"fresh_cpu_replay"};
+  std::size_t higher_tile_target{runner_default_higher_tile_target};
   bool point_count_supplied{false};
 };
 
@@ -230,6 +237,7 @@ struct Report {
   // Copied from the sealed certificate, never from the requested option, so
   // a run can never report a stronger basis than the one it actually used.
   std::string higher_verification_basis{"not_run"};
+  std::size_t higher_requested_tile_target{};
 
   bool terminal_catalog_certified{false};
   std::size_t canonical_point_count{};
@@ -494,6 +502,7 @@ conditional_adjacent_event_vertical_propagation_qualification(
       .conditional_on_caller_fresh_phase9_facade_replay = false;
   report.configurable_pair_total_caps_disabled =
       complete_resident_diagnostic(options);
+  report.higher_requested_tile_target = options.higher_tile_target;
   report.effective_higher_chunk_limit =
       complete_resident_diagnostic(options)
           ? std::numeric_limits<std::size_t>::max()
@@ -553,6 +562,8 @@ void print_usage(std::ostream& output) {
       << "  --higher-backend host_fixed_chunk|device_tiled_session\n"
       << "  --higher-verification-basis fresh_cpu_replay|tile_certified"
          " (tile_certified requires the device backend)\n"
+      << "  --higher-tile-target N (frontier entries pre-expanded before a"
+         " device tile; 1 <= N <= 1024)\n"
       << "Default caps are fail-fast diagnostics, not a 50k "
          "qualification envelope.\n";
 }
@@ -596,6 +607,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.higher_backend = value;
     } else if (option == "--higher-verification-basis") {
       options.higher_verification_basis = value;
+    } else if (option == "--higher-tile-target") {
+      options.higher_tile_target = parse_size(value, option);
     } else if (option == "--operational-deadline-ms") {
       options.operational_deadline_ms = parse_u64(value, option);
     } else {
@@ -659,6 +672,11 @@ void parse_options(int argc, char** argv, Options& options) {
     throw std::invalid_argument(
         "--higher-verification-basis tile_certified requires "
         "--higher-backend device_tiled_session");
+  }
+  if (options.higher_tile_target == 0U ||
+      options.higher_tile_target > runner_maximum_higher_tile_target) {
+    throw std::invalid_argument(
+        "--higher-tile-target must be in [1, 1024]");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -2990,7 +3008,9 @@ void emit_report(const Report& report) {
       << report.higher_authority_kind
       << "\",\"verification_basis\":\""
       << report.higher_verification_basis
-      << "\",\"full_geometry_replay_avoided\":"
+      << "\",\"requested_tile_target\":"
+      << report.higher_requested_tile_target
+      << ",\"full_geometry_replay_avoided\":"
       << boolean(
              report.higher_authority_kind ==
              "sealed_anchored_fixed_chunk_run")
@@ -4908,6 +4928,22 @@ bool count_reloaded_durable_segment(
         bridge_config;
     bridge_config.tile_certified_commit =
         options.higher_verification_basis == "tile_certified";
+    // How much frontier the session pre-expands before dispatching a tile.
+    // The device resolves up to slot_tile_capacity roots per launch, so a
+    // target far below it leaves the engine starved -- which is exactly the
+    // burst profile the c3 session measured.
+    static_assert(
+        runner_default_higher_tile_target ==
+            morsehgp3d::gpu::
+                higher_support_device_tiled_session_bridge_default_pre_expansion_target,
+        "the runner tile-target default drifted from the sealed bridge one");
+    static_assert(
+        runner_maximum_higher_tile_target ==
+            morsehgp3d::gpu::
+                higher_support_device_tiled_frontier_maximum_slot_tile_capacity,
+        "the runner tile-target bound drifted from the device slot capacity");
+    bridge_config.pre_expansion_target_entry_count =
+        options.higher_tile_target;
     const auto assembly =
         morsehgp3d::gpu::assemble_exact_higher_support_stream_device_tiled(
             cloud, index, options.maximum_order, higher_budget,

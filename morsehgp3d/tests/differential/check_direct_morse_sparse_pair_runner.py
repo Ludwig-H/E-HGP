@@ -814,6 +814,7 @@ def require_success_projection(
         # The fixed-chunk session re-derives every committed chunk on the
         # host, so its declared basis is the fresh replay.
         "verification_basis": "fresh_cpu_replay_every_commit",
+        "requested_tile_target": 16,
         "full_geometry_replay_avoided": True,
     }
     expected_pipeline = {
@@ -911,6 +912,7 @@ def require_capacity_stop(report: dict[str, object]) -> None:
         "chunks": 0,
         "authority_kind": "not_run",
         "verification_basis": "not_run",
+        "requested_tile_target": 16,
         "full_geometry_replay_avoided": False,
     }
     require(
