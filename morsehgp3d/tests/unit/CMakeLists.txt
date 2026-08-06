@@ -2287,6 +2287,7 @@ target_include_directories(
 target_link_libraries(
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
   PRIVATE
+    morsehgp3d::direct_morse_forest_durable_run_archive
     morsehgp3d::direct_morse_forest_reducer
     morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
     morsehgp3d::spatial

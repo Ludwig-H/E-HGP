@@ -1347,3 +1347,13 @@ Second incrément 15L : un fichier unique lie désormais un header de 128 octets
 Le test ciblé passe en Release bien sous la seconde : deux segments synthétiques chaînés publiés atomiquement (aucun final avant `finalize`, append hors chaîne rejeté), rechargement exact par `operator==` des deux segments et du sceau avec digests d'archive égaux, anti-rollback sur un digest terminal différent, second writer refusé, reprise valide / déchirée / absente, et invalidation après corruption d'un octet du fichier publié.
 
 Restent pour 15L-b (G4, avec l'obligation sanitizer ouverte de la suite transaction) : le recertifier massif réel depuis les runs pair--higher et le gate complet 1 M avant 10 000 001 points. Aucune identité resident--stream--restore n'est revendiquée au-delà des segments archivés, aucun 50 k, aucune entrée Phase 16, aucun statut public. GCP non utilisé.
+
+## Identité resident–stream–restore fermée sur le pipeline réel et requalification du gate 1 M
+
+Le suivi reste `phase=15`, `backend=reference_cpu`, `profile=hgp_reduced`, `deployment_status=architecture_only` et `public_status=not_claimed`. Aucun statut de phase ou gate d'échelle ne change.
+
+Le test d'identité segmenté du reducer gagne la patte durable : les segments 15I acquittés et le sceau terminal du pipeline réel reducer--exécuteur 14H sur la fixture exacte survivent à une interruption exercée (writer abandonné → espace de noms proprement absent, temporaire jamais promu), puis à une publication atomique et une relecture bornée, exactement égaux par `operator==` au flux dont ils viennent, avec digests d'archive égaux et reprise certifiant le final valide. Combinée à l'identité résident/segmenté déjà scellée, cela ferme l'exigence « atomicité durable et identité resident--stream--restore » du verrou ③ au niveau hôte.
+
+Requalification honnête du reste de la tranche : le « recertifier massif réel depuis les runs pair--higher » et le « gate complet 1 M avant 10 000 001 points » sont structurellement bloqués par le verrou suivant — la seule source de scénario aujourd'hui est la fixture exacte fixe, et produire les journaux depuis un nuage arbitraire à échelle est précisément « produire la tour exacte depuis le nuage » (verrou ④). Le gate 1 M passe donc APRÈS ④ dans l'ordre normatif, au lieu d'être artificiellement déféré à une session G4 de cette tranche. Les obligations G4 ouvertes restent la passe ASan/UBSan de la suite transaction et la re-exécution conteneur du golden wire du reducer (échec local préexistant, toolchain-dépendant, vérifié identique à HEAD).
+
+Ce jalon ne revendique ni recertifier massif, ni 1 M, ni 50 k, ni entrée Phase 16, ni statut public. GCP non utilisé pour cet incrément.

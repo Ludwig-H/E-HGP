@@ -2,8 +2,13 @@
 #include "fake_gpu_phase14_morton_lbvh_build_launchers.hpp"
 
 #include "morsehgp3d/gpu/direct_sparse_facet_top_k_integrated_adapter.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_forest_durable_run_archive.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_reducer.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_source_wire.hpp"
+
+#include <cstdio>
+
+#include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -37,6 +42,13 @@ using morsehgp3d::gpu::test_support::
 
 constexpr std::uint64_t authority_id = UINT64_C(0x15C);
 int failures = 0;
+
+[[nodiscard]] morsehgp3d::contract::CanonicalId digest_text(
+    std::string_view text) {
+  morsehgp3d::contract::CanonicalSha256Builder builder;
+  builder.update(text);
+  return builder.finalize();
+}
 
 template <typename Source>
 concept ForestReducerProjectable = requires(Source&& source) {
@@ -1853,6 +1865,123 @@ void test_segmented_output_identity_retry_and_no_history() {
               resident.batches.size() &&
           expected_begin.node_count == resident.nodes.size(),
       "the final scalar cursor counts the implicit prefix and all acknowledged physical suffixes");
+
+  // 15L resident--stream--restore identity: the acknowledged segments and
+  // the terminal seal of the real reducer pipeline survive an exercised
+  // interruption, an atomic durable publication and a bounded reload,
+  // field-exact against the stream they came from.
+  char directory_template[] = "/tmp/ehgp-reducer-durable-XXXXXX";
+  const char* directory = ::mkdtemp(directory_template);
+  check(
+      directory != nullptr,
+      "the durable identity fixture directory is created");
+  if (directory == nullptr) {
+    return;
+  }
+  const std::string directory_path{directory};
+  const std::string final_name{"reducer-run.mh3d"};
+  ExactDirectMorseForestSegmentCodecLimits codec_limits;
+  codec_limits.segment_limits = segment_limits();
+  codec_limits.maximum_final_root_count = 4096U;
+  ExactDirectMorseForestRunArchiveIdentity identity;
+  identity.manifest_digest = morsehgp3d::contract::CanonicalId{};
+  identity.source_identity_digest =
+      digest_text("reducer-fixture-source-identity");
+  identity.source_higher_canonical_cloud_digest =
+      segmented.seal.source_higher_canonical_cloud_digest;
+  identity.terminal_source_chain_digest =
+      digest_text("reducer-fixture-terminal-source-chain");
+  identity.point_count = segmented.seal.point_count;
+  identity.effective_maximum_order =
+      segmented.seal.effective_maximum_order;
+
+  auto interrupted_decision =
+      ExactDirectMorseForestRunArchiveDecision::not_certified;
+  {
+    auto interrupted = ExactDirectMorseForestRunArchiveWriter::open_new(
+        directory_path,
+        final_name,
+        identity,
+        codec_limits,
+        interrupted_decision);
+    check(
+        interrupted.open() &&
+            !segmented.segments.empty() &&
+            interrupted.append_segment(segmented.segments.front()) ==
+                ExactDirectMorseForestRunArchiveDecision::
+                    complete_atomic_run_archive,
+        "the interrupted durable writer appends the first real segment");
+    // Destruction before finalize is the exercised interruption: the
+    // temporary must vanish and no final file may appear.
+  }
+  const auto post_interruption =
+      recover_exact_direct_morse_forest_run_archive_directory(
+          directory_path, final_name, identity, codec_limits);
+  check(
+      post_interruption.certified_recovered() &&
+          post_interruption.decision ==
+              ExactDirectMorseForestRunArchiveRecoveryDecision::absent,
+      "an exercised interruption leaves a clean absent archive namespace");
+
+  auto publish_decision =
+      ExactDirectMorseForestRunArchiveDecision::not_certified;
+  auto writer = ExactDirectMorseForestRunArchiveWriter::open_new(
+      directory_path, final_name, identity, codec_limits, publish_decision);
+  check(
+      writer.open(),
+      "the durable writer reopens after the exercised interruption");
+  for (const auto& segment : segmented.segments) {
+    check(
+        writer.append_segment(segment) ==
+            ExactDirectMorseForestRunArchiveDecision::
+                complete_atomic_run_archive,
+        "every acknowledged real segment appends in chain order");
+  }
+  const auto published = writer.finalize(segmented.seal);
+  check(
+      published.certified_published() &&
+          published.appended_segment_count == segmented.segments.size(),
+      "the real segmented run publishes atomically");
+
+  std::vector<ExactDirectMorseForestBatchSegment> restored;
+  const auto restored_consume =
+      [](void* state,
+         const ExactDirectMorseForestBatchSegment& segment) noexcept {
+        try {
+          static_cast<std::vector<ExactDirectMorseForestBatchSegment>*>(
+              state)
+              ->push_back(segment);
+          return true;
+        } catch (...) {
+          return false;
+        }
+      };
+  const auto loaded = load_exact_direct_morse_forest_run_archive(
+      directory_path,
+      final_name,
+      identity,
+      codec_limits,
+      {&restored, restored_consume});
+  check(
+      loaded.certified_loaded() &&
+          restored.size() == segmented.segments.size() &&
+          std::equal(
+              restored.begin(),
+              restored.end(),
+              segmented.segments.begin()) &&
+          loaded.final_seal == segmented.seal &&
+          loaded.archive_digest == published.archive_digest,
+      "the bounded reload restores the real stream and its terminal seal "
+      "field-exact");
+  const auto recovered =
+      recover_exact_direct_morse_forest_run_archive_directory(
+          directory_path, final_name, identity, codec_limits);
+  check(
+      recovered.certified_recovered() &&
+          recovered.decision ==
+              ExactDirectMorseForestRunArchiveRecoveryDecision::
+                  valid_final_present,
+      "recovery certifies the published real run as the valid final");
 }
 
 void test_segment_cap_rejects_before_locator_mutation() {
