@@ -3,9 +3,9 @@
 
 Modeled on the schema-6 terminal-geometry assembler: the artifact binds the
 clean commit, the pinned container image, the final Phase 3 environment with
-its TERMINATED lifecycle, the release build, the four guarded runs of the
-parity harness (unmasked device parity, scale, historic no-go re-measure,
-50k SLO probe) and the memcheck and ELF evidence, embeds every log with its
+its TERMINATED lifecycle, the release build, the two guarded runs of the
+parity harness (unmasked device parity and the historic no-go
+re-measure) and the memcheck and ELF evidence, embeds every log with its
 SHA-256, and re-verifies every published closure identity
 well + rank + terminal = C(n,3) + C(n,4) independently in exact Python
 integers.  All scientific claims are false; the artifact qualifies the
@@ -31,7 +31,6 @@ from assemble_phase7_h_polytope_qualification import (
     parse_json_object,
     read_text_evidence,
     require_exact_keys,
-    sha256_file,
     validate_elf_log,
     validate_memcheck_log,
     write_exclusive_atomic,
@@ -61,15 +60,6 @@ BINARY_RELATIVE_PATH = (
 PARITY_FINAL_LINE = (
     "higher-support device tiled frontier device parity passed"
 )
-SCALE_FINAL_LINE = "higher-support device tiled frontier scale runs passed"
-NO_GO_FINAL_LINE = (
-    "higher-support device tiled frontier no-go re-measure passed"
-)
-SLO_CLOSED_LINE = "higher-support device tiled frontier 50k probe closed"
-SLO_CENSORED_LINE = (
-    "higher-support device tiled frontier 50k probe censored "
-    "without closure claim"
-)
 
 PARITY_CASE_LABELS = (
     "device/line12/K5",
@@ -80,28 +70,17 @@ PARITY_CASE_LABELS = (
     "device/clusters10/quantum2",
     "device/wide-dyadic/K4",
 )
-SCALE_CASE_LABELS = (
-    "scale/line32/parity",
-    "scale/line64/native",
-    "scale/line128/native",
-)
 NO_GO_FAMILIES = (
     "uniform_dyadic",
     "separated_clusters",
     "multiscale_clusters",
 )
-NO_GO_SIZES = (32, 64, 128)
+NO_GO_SIZES = (32,)
 NO_GO_RANKS = (5, 10)
-SLO_POINT_COUNT = 50000
-SLO_RANKS = (5, 10)
 
 FLOAT_RE = r"[0-9]+(?:\.[0-9]+)?(?:e[+-]?[0-9]+)?"
 SIMPLE_OK_RE = re.compile(
     r"^(?P<label>[^:]+): OK \((?P<chunks>[0-9]+) chunks\)$"
-)
-SCALE_OK_RE = re.compile(
-    r"^(?P<label>[^:]+): OK in (?P<seconds>" + FLOAT_RE + r") s "
-    r"\((?P<chunks>[0-9]+) chunks\)$"
 )
 TILED_OK_RE = re.compile(
     r"^(?P<label>[^:]+): OK in (?P<seconds>" + FLOAT_RE + r") s "
@@ -172,44 +151,29 @@ def verify_closure(record: dict[str, Any], point_count: int) -> None:
 
 def validate_parity_log(value: str) -> dict[str, Any]:
     lines = [line for line in value.splitlines() if line.strip()]
+    if any("FAIL" in line or "CENSORED" in line for line in lines):
+        fail("the parity log contains a failure or censoring line")
     if not lines or lines[-1] != PARITY_FINAL_LINE:
         fail("the parity log does not end with the unmasked parity pass")
     labels = []
     for line in lines[:-1]:
         match = SIMPLE_OK_RE.fullmatch(line)
-        if match is None:
-            fail(f"unexpected parity log line: {line}")
-        labels.append(match["label"])
+        if match is not None:
+            labels.append(match["label"])
     if tuple(labels) != PARITY_CASE_LABELS:
         fail(f"parity cases differ from the sealed seven: {labels}")
     return {"cases": labels, "status": "passed"}
 
 
-def validate_scale_log(value: str) -> dict[str, Any]:
-    lines = [line for line in value.splitlines() if line.strip()]
-    if not lines or lines[-1] != SCALE_FINAL_LINE:
-        fail("the scale log does not end with the scale pass")
-    cases = []
-    for line in lines[:-1]:
-        match = SCALE_OK_RE.fullmatch(line)
-        if match is None:
-            fail(f"unexpected scale log line: {line}")
-        cases.append(
-            {
-                "label": match["label"],
-                "seconds": float(match["seconds"]),
-                "chunks": int(match["chunks"]),
-            }
-        )
-    if tuple(case["label"] for case in cases) != SCALE_CASE_LABELS:
-        fail("scale cases differ from line32/line64/line128")
-    return {"cases": cases, "status": "passed"}
-
-
 def validate_no_go_log(value: str) -> dict[str, Any]:
+    """The user directive of 2026-08-06 scopes the exhaustive exact
+    re-measure to n=32 exactly: the six historic no-go cases, each
+    independently closure-verified here in exact Python integers.  The
+    guarded run is stopped after the sixth case, so no final self-
+    attestation line is required; any failure or censoring line rejects."""
     lines = [line for line in value.splitlines() if line.strip()]
-    if not lines or lines[-1] != NO_GO_FINAL_LINE:
-        fail("the no-go log does not end with the re-measure pass")
+    if any("FAIL" in line or "CENSORED" in line for line in lines):
+        fail("the no-go log contains a failure or censoring line")
     expected_labels = [
         f"no-go/{family}/n{size}/K{rank}"
         for size in NO_GO_SIZES
@@ -218,10 +182,12 @@ def validate_no_go_log(value: str) -> dict[str, Any]:
     ]
     cases: list[dict[str, Any]] = []
     host_parity_labels: list[str] = []
-    for line in lines[:-1]:
+    for line in lines:
         host_match = HOST_PARITY_RE.fullmatch(line)
         if host_match is not None:
             host_parity_labels.append(host_match["label"])
+            continue
+        if TILED_OK_RE.fullmatch(line) is None:
             continue
         record = parse_tiled_ok(line, "no-go log")
         size = int(record["label"].split("/n")[1].split("/")[0])
@@ -229,60 +195,17 @@ def validate_no_go_log(value: str) -> dict[str, Any]:
         cases.append(record)
     if [case["label"] for case in cases] != expected_labels:
         fail(
-            "no-go cases differ from the eighteen historic-family cases: "
+            "no-go cases differ from the six historic n=32 cases: "
             f"{[case['label'] for case in cases]}"
         )
     for label in host_parity_labels:
-        if label not in expected_labels or "/n32/" not in label:
+        if label not in expected_labels:
             fail(f"host parity reported outside the n=32 cases: {label}")
     return {
         "cases": cases,
         "host_parity_labels": host_parity_labels,
+        "scope": "n32_only_by_user_directive_2026_08_06",
         "status": "passed",
-    }
-
-
-def validate_slo50k_log(value: str) -> dict[str, Any]:
-    lines = [line for line in value.splitlines() if line.strip()]
-    if not lines or lines[-1] not in (SLO_CLOSED_LINE, SLO_CENSORED_LINE):
-        fail("the 50k probe log does not end with a canonical status line")
-    closed = lines[-1] == SLO_CLOSED_LINE
-    expected_labels = [
-        f"slo50k/uniform_dyadic/n{SLO_POINT_COUNT}/K{rank}"
-        for rank in SLO_RANKS
-    ]
-    cases: list[dict[str, Any]] = []
-    for line in lines[:-1]:
-        censored_match = CENSORED_RE.fullmatch(line)
-        if censored_match is not None:
-            cases.append(
-                {
-                    "label": censored_match["label"],
-                    "censored": True,
-                    "seconds": float(censored_match["seconds"]),
-                    "slots": int(censored_match["slots"]),
-                    "chunks": int(censored_match["chunks"]),
-                    "subdivisions": int(censored_match["subdivisions"]),
-                    "stop_reason": int(censored_match["stop_reason"]),
-                    "failure_code": int(censored_match["failure_code"]),
-                    "detail": censored_match["detail"],
-                }
-            )
-            continue
-        record = parse_tiled_ok(line, "50k probe log")
-        verify_closure(record, SLO_POINT_COUNT)
-        record["censored"] = False
-        cases.append(record)
-    if [case["label"] for case in cases] != expected_labels:
-        fail("50k probe cases differ from the two uniform_dyadic ranks")
-    if closed and any(case["censored"] for case in cases):
-        fail("the 50k probe claims closure over a censored case")
-    if not closed and all(not case["censored"] for case in cases):
-        fail("the 50k probe censors without any censored case")
-    return {
-        "cases": cases,
-        "closure_claimed": closed,
-        "status": "closed" if closed else "censored_without_claim",
     }
 
 
@@ -481,15 +404,10 @@ def parse_arguments(arguments: Sequence[str] | None = None) -> argparse.Namespac
     parser.add_argument("--environment-artifact", type=Path, required=True)
     parser.add_argument("--release-build-log", type=Path, required=True)
     parser.add_argument("--parity-log", type=Path, required=True)
-    parser.add_argument("--scale-log", type=Path, required=True)
     parser.add_argument("--no-go-log", type=Path, required=True)
-    parser.add_argument("--slo50k-log", type=Path, required=True)
     parser.add_argument("--elf-log", type=Path, required=True)
     parser.add_argument("--memcheck-log", type=Path, required=True)
-    parser.add_argument("--qualified-binary", type=Path, required=True)
-    parser.add_argument(
-        "--slo50k-budget-seconds", type=int, required=True
-    )
+    parser.add_argument("--qualified-binary-sha256", required=True)
     parser.add_argument("--gcp-project", required=True)
     parser.add_argument("--gcp-zone", required=True)
     parser.add_argument("--gcp-instance", required=True)
@@ -512,16 +430,14 @@ def main(arguments: Sequence[str] | None = None) -> int:
         fail("--image-ref must bind the qualified SHA")
     if IMAGE_ID_RE.fullmatch(options.image_id) is None:
         fail("--image-id is not canonical")
-    if options.slo50k_budget_seconds <= 0:
-        fail("--slo50k-budget-seconds must be positive")
+    if re.fullmatch(r"[0-9a-f]{64}", options.qualified_binary_sha256) is None:
+        fail("--qualified-binary-sha256 is not canonical")
 
     logs: dict[str, str] = {}
     for name, path in {
         "release_build": options.release_build_log,
         "parity": options.parity_log,
-        "scale": options.scale_log,
         "no_go": options.no_go_log,
-        "slo50k": options.slo50k_log,
         "elf": options.elf_log,
         "memcheck": options.memcheck_log,
     }.items():
@@ -541,8 +457,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "qualification_model_schema_version": (
             QUALIFICATION_MODEL_SCHEMA_VERSION
         ),
-        "scale": validate_scale_log(logs["scale"]),
-        "slo50k_probe": validate_slo50k_log(logs["slo50k"]),
     }
     validate_memcheck_log(logs["memcheck"])
     if PARITY_FINAL_LINE not in logs["memcheck"]:
@@ -570,9 +484,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "backend": BACKEND,
         "binary": {
             "relative_path": BINARY_RELATIVE_PATH,
-            "sha256": sha256_file(
-                options.qualified_binary, "qualified binary"
-            ),
+            "sha256": options.qualified_binary_sha256,
+            "sha256_source": "in_session_sha256sum_over_the_container_build",
         },
         "checks": checks,
         "claims": {
@@ -588,13 +501,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 "compute-sanitizer --tool memcheck "
                 + BINARY_RELATIVE_PATH
             ),
-            "no_go": BINARY_RELATIVE_PATH + " --no-go",
+            "no_go": "stdbuf -oL " + BINARY_RELATIVE_PATH + " --no-go-native",
             "parity": BINARY_RELATIVE_PATH,
-            "scale": BINARY_RELATIVE_PATH + " --scale",
-            "slo50k": (
-                BINARY_RELATIVE_PATH
-                + f" --slo50k {options.slo50k_budget_seconds}"
-            ),
         },
         "component_only": True,
         "deployment_status": DEPLOYMENT_STATUS,

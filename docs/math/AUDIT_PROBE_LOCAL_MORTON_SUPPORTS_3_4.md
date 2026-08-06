@@ -172,7 +172,34 @@ Le profil borné final à $n=32$ conserve 5 000 unités par cas. Pour `uniform`,
 
 Le champ interne `ru_maxrss` du premier run est rejeté, car il est contaminé ou hérité et `peak_rss_growth=0` dès le premier cas. Sur une nouvelle exécution complète, l'échantillonnage externe de `/proc/<pid>/status` toutes les 20 ms observe un pic de 13 896 Kio. Cette mesure porte sur le processus complet, pas sur chaque famille, et n'est pas extrapolée. La porte de croissance 50 k demeure fermée et GCP n'a pas été utilisé.
 
-## 9. Propriétaire implicite possible par loose octree
+### 8.2 Re-mesure M5b du 6 août 2026 : le no-go $n=32$ est levé sur la frontière tuilée native
+
+La session G4 gardée du 6 août 2026 (commit propre `1e45305`, artefact
+[phase15_higher_support_device_tiled_frontier_cuda_g4_1e45305.json](../validation/phase15_higher_support_device_tiled_frontier_cuda_g4_1e45305.json))
+a rejoué les six cas historiques sur le kernel natif sm_120 en tuiles de
+1 024 slots, avec pré-expansion canonique hôte certifiée partition en BigInt
+et clôture exacte par slot et globale
+$\text{well}+\text{rang}+\text{terminal}=\binom{32}{3}+\binom{32}{4}=40\,920$,
+revérifiée indépendamment en entiers exacts Python par l'assembleur. Les six
+cas se résolvent **complètement** — là où 5 000 unités hôte censuraient à
+4–7 % de l'univers — en $(K,\text{secondes},\text{well},\text{rang},\text{terminal})$ :
+`uniform` $(5, 6{,}44, 35\,946, 4\,339, 635)$ et $(10, 12{,}37, 35\,946, 3\,223, 1\,751)$;
+`separated` $(5, 6{,}31, 34\,921, 5\,784, 215)$ et $(10, 24{,}87, 34\,921, 4\,563, 1\,436)$;
+`multiscale` $(5, 10{,}21, 34\,489, 6\,182, 249)$ et $(10, 37{,}99, 34\,489, 4\,858, 1\,573)$.
+L'exclusion bien-centrée porte 84–88 % de la masse; la famille `multiscale`
+exerce l'escalade `int512` (26 125 puis 111 735 verdicts différés) sans
+jamais atteindre `int1024` ni le drain rationnel; passer de $K=5$ à $K=10$
+multiplie le temps par 2 à 4.
+
+Directive normative du 6 août 2026 : la vérification exhaustive exacte est
+réservée aux petits nuages et $n=32$ suffit; les tailles 64 et 128 et la
+sonde exhaustive 50 k ont été annulées en session. Sur les nuages moyens et
+grands, la vérification devient structurelle — triangulation de Delaunay si
+possible, EMST retrouvé pour $k=1$, et pour $k=2$ tout triangle formé de deux
+arêtes Delaunay reliant des clusters d'arêtes à un niveau strictement
+supérieur à celui de l'arbre $k=2$ — avec une cible produit sous la seconde à
+50 000 points. Ce composant de vérification reste à concevoir; aucune borne
+de complexité nouvelle n'est démontrée par la re-mesure ci-dessus.
 
 Une attribution boule--cellule exacte n'exige pas nécessairement de matérialiser un octree global. Pour une boule non dégénérée $B(c,r)$, choisir l'unique longueur dyadique $h=2^j$ telle que
 
