@@ -847,12 +847,147 @@ void test_sibling_ticket_and_foreign_closure_rejected(
 
 }  // namespace
 
+[[nodiscard]] ExactDirectProjectableContributionWindowBudget
+contribution_ingress_budget() {
+  return {
+      65'536U,
+      65'536U,
+      65'536U,
+      65'536U,
+      65'536U,
+      65'536U,
+      65'536U,
+      65'536U,
+      65'536U};
+}
+
+void test_contribution_window_ingress(const Fixture& value) {
+  CompatibilityProvider provider{value.manifest, value.compatibility_plan};
+  auto initialized =
+      initialize_session(value, provider, UINT64_C(0xC0217B01));
+  check(
+      initialized.certified_scientific_initialization() &&
+          initialized.session.has_value(),
+      "the ingress fixture initializes one exact scientific session");
+  if (!initialized.session.has_value()) {
+    return;
+  }
+  auto& session = *initialized.session;
+  auto state = initialize_state(session.scientific_source_stamp());
+  const auto& stamp = session.scientific_source_stamp();
+
+  bool stale_checked = false;
+  std::optional<ExactDirectProjectableContributionWindowResult>
+      previous_projection;
+  while (!session.complete()) {
+    std::optional<ExactDirectProjectableContributionWindowResult>
+        built_projection;
+    {
+      auto capability_prepared = session.prepare_next();
+      check(
+          capability_prepared.certified_scientific_preparation() &&
+              capability_prepared.ticket.has_value(),
+          "the ingress fixture mints the scientific capability window");
+      if (!capability_prepared.ticket.has_value()) {
+        return;
+      }
+      built_projection.emplace(ExactDirectProjectableContributionWindow::build(
+          stamp, *capability_prepared.ticket, contribution_ingress_budget()));
+    }
+    auto& projection = *built_projection;
+    check(
+        projection.certified_exhaustive_projection(),
+        "the same-batch contribution projection certifies");
+
+    auto prepared =
+        prepare_exact_direct_normalized_h0_source_forest_ledger_window(
+            session);
+    check(
+        prepared.certified_prepared_window(),
+        "the ingress transaction window prepares");
+    if (!prepared.window.has_value()) {
+      return;
+    }
+
+    if (previous_projection.has_value() && !stale_checked) {
+      const auto source_cursor = session.batch_cursor();
+      const auto forest_stamp = state.forest.current_stamp();
+      const auto ledger_stamp = state.ledger.current_stamp();
+      const auto stale_carriers =
+          carrier_input(prepared.window->owned_window());
+      auto stale_closure = build_carrier_closure(
+          value, prepared.window->owned_window(), stale_carriers,
+          state.forest);
+      auto rejected =
+          ExactDirectNormalizedH0SourceForestLedgerTransaction::execute(
+              session,
+              std::move(*prepared.window),
+              *previous_projection,
+              stale_closure,
+              stale_carriers.bindings,
+              state.forest,
+              state.ledger,
+              transaction_budget());
+      check(
+          rejected.certified_no_commit_failure() &&
+              rejected.decision() ==
+                  ExactDirectNormalizedH0SourceForestLedgerTransactionDecision::
+                      no_contribution_window_ingress_rejected &&
+              !rejected.contribution_window_ingress_bound() &&
+              session.batch_cursor() == source_cursor &&
+              state.forest.current_stamp() == forest_stamp &&
+              state.ledger.current_stamp() == ledger_stamp,
+          "a stale contribution projection rejects fail-closed without "
+          "advancing source, forest or ledger");
+      stale_checked = true;
+      prepared =
+          prepare_exact_direct_normalized_h0_source_forest_ledger_window(
+              session);
+      check(
+          prepared.certified_prepared_window(),
+          "the ingress transaction window re-prepares after the stale "
+          "rejection");
+      if (!prepared.window.has_value()) {
+        return;
+      }
+    }
+
+    const auto carriers = carrier_input(prepared.window->owned_window());
+    auto closure = build_carrier_closure(
+        value, prepared.window->owned_window(), carriers, state.forest);
+    auto result =
+        ExactDirectNormalizedH0SourceForestLedgerTransaction::execute(
+            session,
+            std::move(*prepared.window),
+            projection,
+            closure,
+            carriers.bindings,
+            state.forest,
+            state.ledger,
+            transaction_budget());
+    check(
+        result.certified_complete_transaction() &&
+            result.contribution_window_ingress_bound() &&
+            result.counters().contribution_atom_scan_count ==
+                result.counters().coface_facet_reference_scan_count &&
+            result.counters().contribution_touched_definition_scan_count ==
+                result.counters().touched_facet_count,
+        "the ingress-bound transaction completes with the projection "
+        "cross-check sealed");
+    previous_projection.emplace(std::move(projection));
+  }
+  check(
+      stale_checked,
+      "the stale-ingress rejection must be exercised by the stream");
+}
+
 int main() {
   try {
     const auto value = fixture();
     test_complete_stream_and_bounded_retry(value);
     test_foreign_source_window_rejected(value);
     test_sibling_ticket_and_foreign_closure_rejected(value);
+    test_contribution_window_ingress(value);
   } catch (const std::exception& error) {
     std::cerr << "FAIL: unexpected exception: " << error.what() << '\n';
     return 1;

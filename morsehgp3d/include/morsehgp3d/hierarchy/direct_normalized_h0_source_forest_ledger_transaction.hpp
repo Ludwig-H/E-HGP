@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/hierarchy/direct_projectable_contribution_window.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_carrier_origin_capability.hpp"
 
 #include <cstddef>
@@ -169,6 +170,9 @@ struct ExactDirectNormalizedH0SourceForestLedgerTransactionCounters {
   std::size_t standalone_birth_point_reference_count{};
   std::size_t preview_requested_handle_count{};
   std::size_t source_commit_attempt_count{};
+  // Contribution-window ingress path only; zero on the historical overload.
+  std::size_t contribution_atom_scan_count{};
+  std::size_t contribution_touched_definition_scan_count{};
 
   friend bool operator==(
       const ExactDirectNormalizedH0SourceForestLedgerTransactionCounters&,
@@ -205,6 +209,9 @@ enum class ExactDirectNormalizedH0SourceForestLedgerTransactionDecision
   no_root_ledger_commit_rejected,
   contradiction_source_commit_after_forest_ledger_commit,
   complete_forest_ledger_then_exactly_once_source_commit,
+  // Contribution-window ingress path only; appended so the historical
+  // numeric values never move.
+  no_contribution_window_ingress_rejected,
 };
 
 class ExactDirectNormalizedH0SourceForestLedgerTransactionResult final {
@@ -269,6 +276,7 @@ class ExactDirectNormalizedH0SourceForestLedgerTransactionResult final {
   [[nodiscard]] bool all_fallible_work_completed_before_any_logical_commit()
       const noexcept;
   [[nodiscard]] bool source_commit_after_forest_ledger_commit() const noexcept;
+  [[nodiscard]] bool contribution_window_ingress_bound() const noexcept;
   [[nodiscard]] bool partial_commit_requires_rebuild() const noexcept;
   [[nodiscard]] bool durable_atomicity_claimed() const noexcept;
   [[nodiscard]] bool global_forbidden_structure_materialized() const noexcept;
@@ -309,6 +317,7 @@ class ExactDirectNormalizedH0SourceForestLedgerTransactionResult final {
   bool all_fallible_work_completed_before_any_logical_commit_{false};
   bool forest_ledger_committed_{false};
   bool source_commit_after_forest_ledger_commit_{false};
+  bool contribution_window_ingress_bound_{false};
   bool partial_commit_requires_rebuild_{false};
   bool durable_atomicity_claimed_{false};
   bool global_forbidden_structure_materialized_{false};
@@ -350,6 +359,52 @@ class ExactDirectNormalizedH0SourceForestLedgerTransaction final {
               source_session,
           ExactDirectNormalizedH0SourceForestLedgerPreparedWindow
               prepared_window,
+          const ExactDirectSparseStableFacetDescentClosureResult&
+              candidate_closure,
+          std::span<const ExactDirectSparseCarrierOriginSeedBinding>
+              candidate_seed_bindings,
+          ExactDirectSparseStableFacetForest& forest,
+          ExactDirectSparseRootLedger& ledger,
+          const ExactDirectNormalizedH0SourceForestLedgerTransactionBudget&
+              budget) noexcept;
+
+  // Contribution-window ingress overload.  The certified exhaustive
+  // projection of the very same authenticated scientific window becomes the
+  // ingress of the touched-facet provenance: its identity digests must bind
+  // the transaction's source chain, batch cursor, manifest and source
+  // identity, its atom count must equal the batch's coface-deletion
+  // reference count, and its strictly ordered deduplicated touched-facet
+  // definitions must equal, stable token by stable token, the set the
+  // transaction derives internally.  Any divergence rejects fail-closed
+  // before any commit; the window stays a projection and never becomes a
+  // scientific authority of the pipeline.
+  [[nodiscard]] static
+      ExactDirectNormalizedH0SourceForestLedgerTransactionResult execute(
+          ExactDirectNormalizedH0ScientificWindowCapabilitySession&
+              source_session,
+          ExactDirectNormalizedH0SourceForestLedgerPreparedWindow
+              prepared_window,
+          const ExactDirectProjectableContributionWindowResult&
+              contribution_ingress,
+          const ExactDirectSparseStableFacetDescentClosureResult&
+              candidate_closure,
+          std::span<const ExactDirectSparseCarrierOriginSeedBinding>
+              candidate_seed_bindings,
+          ExactDirectSparseStableFacetForest& forest,
+          ExactDirectSparseRootLedger& ledger,
+          const ExactDirectNormalizedH0SourceForestLedgerTransactionBudget&
+              budget) noexcept;
+
+ private:
+  [[nodiscard]] static
+      ExactDirectNormalizedH0SourceForestLedgerTransactionResult
+      execute_with_optional_ingress(
+          ExactDirectNormalizedH0ScientificWindowCapabilitySession&
+              source_session,
+          ExactDirectNormalizedH0SourceForestLedgerPreparedWindow
+              prepared_window,
+          const ExactDirectProjectableContributionWindowResult*
+              contribution_ingress,
           const ExactDirectSparseStableFacetDescentClosureResult&
               candidate_closure,
           std::span<const ExactDirectSparseCarrierOriginSeedBinding>

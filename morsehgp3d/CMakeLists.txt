@@ -2733,6 +2733,7 @@ target_include_directories(
 target_link_libraries(
   morsehgp3d_direct_normalized_h0_source_forest_ledger_transaction
   PUBLIC
+    morsehgp3d::direct_projectable_contribution_window
     morsehgp3d::direct_sparse_carrier_origin_capability
   PRIVATE morsehgp3d::sanitizers
 )

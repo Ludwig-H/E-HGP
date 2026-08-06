@@ -290,6 +290,11 @@ bool ExactDirectNormalizedH0SourceForestLedgerTransactionResult::
 }
 
 bool ExactDirectNormalizedH0SourceForestLedgerTransactionResult::
+    contribution_window_ingress_bound() const noexcept {
+  return contribution_window_ingress_bound_;
+}
+
+bool ExactDirectNormalizedH0SourceForestLedgerTransactionResult::
     partial_commit_requires_rebuild() const noexcept {
   return partial_commit_requires_rebuild_;
 }
@@ -454,6 +459,57 @@ ExactDirectNormalizedH0SourceForestLedgerTransaction::execute(
     ExactDirectSparseRootLedger& ledger,
     const ExactDirectNormalizedH0SourceForestLedgerTransactionBudget& budget)
     noexcept {
+  return execute_with_optional_ingress(
+      source_session,
+      std::move(prepared_window),
+      nullptr,
+      candidate_closure,
+      candidate_seed_bindings,
+      forest,
+      ledger,
+      budget);
+}
+
+ExactDirectNormalizedH0SourceForestLedgerTransactionResult
+ExactDirectNormalizedH0SourceForestLedgerTransaction::execute(
+    ExactDirectNormalizedH0ScientificWindowCapabilitySession& source_session,
+    ExactDirectNormalizedH0SourceForestLedgerPreparedWindow prepared_window,
+    const ExactDirectProjectableContributionWindowResult& contribution_ingress,
+    const ExactDirectSparseStableFacetDescentClosureResult& candidate_closure,
+    std::span<const ExactDirectSparseCarrierOriginSeedBinding>
+        candidate_seed_bindings,
+    ExactDirectSparseStableFacetForest& forest,
+    ExactDirectSparseRootLedger& ledger,
+    const ExactDirectNormalizedH0SourceForestLedgerTransactionBudget& budget)
+    noexcept {
+  return execute_with_optional_ingress(
+      source_session,
+      std::move(prepared_window),
+      &contribution_ingress,
+      candidate_closure,
+      candidate_seed_bindings,
+      forest,
+      ledger,
+      budget);
+}
+
+ExactDirectNormalizedH0SourceForestLedgerTransactionResult
+ExactDirectNormalizedH0SourceForestLedgerTransaction::
+    execute_with_optional_ingress(
+        ExactDirectNormalizedH0ScientificWindowCapabilitySession&
+            source_session,
+        ExactDirectNormalizedH0SourceForestLedgerPreparedWindow
+            prepared_window,
+        const ExactDirectProjectableContributionWindowResult*
+            contribution_ingress,
+        const ExactDirectSparseStableFacetDescentClosureResult&
+            candidate_closure,
+        std::span<const ExactDirectSparseCarrierOriginSeedBinding>
+            candidate_seed_bindings,
+        ExactDirectSparseStableFacetForest& forest,
+        ExactDirectSparseRootLedger& ledger,
+        const ExactDirectNormalizedH0SourceForestLedgerTransactionBudget&
+            budget) noexcept {
   ExactDirectNormalizedH0SourceForestLedgerTransactionResult output;
   output.requested_budget_ = budget;
   output.source_cursor_pre_ = source_session.batch_cursor();
@@ -656,6 +712,59 @@ ExactDirectNormalizedH0SourceForestLedgerTransaction::execute(
                 no_carrier_closure_partition_rejected);
       }
       touched[local] = 1U;
+    }
+
+    // Contribution-window ingress: the certified exhaustive projection of
+    // this very window must bind the transaction's identities and reproduce,
+    // stable token by stable token, the touched-facet set derived above.
+    // Any divergence rejects fail-closed before any staging or commit.  The
+    // projection stays a cross-checked ingress; the scientific authority of
+    // the transaction is unchanged.
+    if (contribution_ingress != nullptr) {
+      const auto& ingress = *contribution_ingress;
+      const auto& ingress_receipt = ingress.receipt();
+      const auto definitions = ingress.facet_definitions();
+      output.counters_.contribution_atom_scan_count =
+          ingress.contribution_atoms().size();
+      output.counters_.contribution_touched_definition_scan_count =
+          definitions.size();
+      bool bound = ingress.certified_exhaustive_projection() &&
+          ingress_receipt.source_identity_digest ==
+              source_stamp.source_identity_digest() &&
+          ingress_receipt.manifest_digest ==
+              prepared_window.manifest_digest_ &&
+          ingress_receipt.source_chain_digest == output.source_chain_pre_ &&
+          ingress_receipt.source_batch_index == output.source_cursor_pre_ &&
+          ingress.contribution_atoms().size() ==
+              plan_batch.coface_facet_reference_count &&
+          definitions.size() <= budget.maximum_window_facet_scan_count &&
+          ingress.contribution_atoms().size() <=
+              budget.maximum_coface_facet_reference_scan_count;
+      if (bound) {
+        std::size_t definition_cursor = 0U;
+        for (std::size_t local = 0U;
+             bound && local < local_plan.facet_tokens.size();
+             ++local) {
+          if (touched[local] == 0U) {
+            continue;
+          }
+          const auto stable =
+              owned.local_to_stable_facet_token_indices[local];
+          bound = definition_cursor < definitions.size() &&
+              definitions[definition_cursor]
+                      .stable_source_facet_token_index == stable;
+          ++definition_cursor;
+        }
+        bound = bound && definition_cursor == definitions.size();
+      }
+      if (!bound) {
+        return finish(
+            ExactDirectNormalizedH0SourceForestLedgerTransactionDisposition::
+                rejected,
+            ExactDirectNormalizedH0SourceForestLedgerTransactionDecision::
+                no_contribution_window_ingress_rejected);
+      }
+      output.contribution_window_ingress_bound_ = true;
     }
 
     std::vector<std::size_t> expected_candidate_stable_handles;
