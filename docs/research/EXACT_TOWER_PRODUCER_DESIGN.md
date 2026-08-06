@@ -102,3 +102,51 @@ directives scellées du 6/8.
   (n≤14, secondes) ; les six nuages n=32 en différentiel complet vont à la
   session G4 de ④-b (l'exhaustif hôte n=32 non capé est trop lourd pour le
   codespace, directive du 6/8).
+
+## Design ④-b2 : le genre de source « session ancrée » de la façade
+
+Constat scellé par ④-b1 : `verify_exact_higher_support_stream` re-exécute
+le flux exhaustif et exige `observed == expected` au complet — base de
+certification correcte pour de petits nuages, structurellement
+anti-scalable et inaccessible au backend device (les payloads de prune ne
+sont pas retenus).
+
+**Principe.** La seule entité qui a VU et VÉRIFIÉ chaque transition est la
+session ancrée (`commit_prepared` rejoue fraîchement chaque chunk sur CPU).
+L'autorité du nouveau genre de source est donc la session elle-même, jamais
+le pont ni l'appelant : un assembleur de flux possédé par la couche
+hiérarchie accumule les records committés et minte, au terminal, un
+certificat scellé que la façade vérifie de façon bornée.
+
+**Composants.**
+- `ExactHigherSupportAnchoredStreamAssembler` (hierarchy) : possède la
+  session ancrée construite sur l'autorité ; expose à l'orchestrateur
+  (le pont M2) le même protocole prepare/commit par délégation ; sur chaque
+  commit vérifié, s'approprie les événements et diagnostics du chunk ; au
+  terminal (checkpoint `locally_complete`), trie sous l'ordre canonique
+  public, assemble le `ExactHigherSupportStreamResult` et minte le
+  certificat — records, tri et digests restent internes à l'autorité.
+- `ExactHigherSupportAnchoredStreamCertificate` (hierarchy, mint privé) :
+  lie le digest du manifeste d'autorité, le digest du checkpoint terminal,
+  le compte de transactions committées, les comptes et digests canoniques
+  des événements et diagnostics du résultat assemblé, et l'audit terminal ;
+  expose `certifies(result)` (recalcul des digests de contenu du résultat
+  présenté, égalité stricte) et `certified_for_authority(manifest)`.
+- Façade : `build_exact_direct_support_terminal_facade` gagne une surcharge
+  acceptant `(higher_result, certificate)` ; sa base de certification
+  devient : manifeste recalculé depuis (index, cloud, K) égal au manifeste
+  lié, `certificate.certifies(higher_result)`, clôture BigInt de l'univers
+  contre le binôme recalculé, et les invariants locaux du résultat — sans
+  aucune re-exécution du flux. Le certificat renseigne
+  `higher_source_kind = anchored_session_chain` dans le certificat de
+  façade ; le chemin historique `fresh_resident_replay` reste intact.
+- Pont M2 : surcharge de construction empruntant l'assembleur externe au
+  lieu de posséder sa session ; l'assemblage gpu ④-b1 se réécrit sur
+  l'assembleur et cesse de copier les records lui-même.
+
+**Différentiels.** (1) façade(anchored) ≡ façade(exhaustif) membre à membre
+sur les nuages fixtures — la tour device devient certifiable de bout en
+bout et son différentiel complet vs la tour exhaustive se rejoue ;
+(2) anti-forge : résultat mutés (événement altéré, audit gonflé, ordre
+non canonique), certificat d'une autre session/autorité, et certificat
+minté avant terminal — tous rejetés fermés.
