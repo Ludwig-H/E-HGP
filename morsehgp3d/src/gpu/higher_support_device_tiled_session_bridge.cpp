@@ -712,6 +712,11 @@ struct ClosedBallSummary {
   bool minimal{false};
   std::size_t interior_count{};
   std::size_t shell_count{};
+  std::size_t exterior_count{};
+  std::vector<PointId> interior_ids;
+  std::optional<PointId> canonical_extra_shell_witness_id;
+  exact::ExactCenter3 center{};
+  exact::ExactLevel squared_level{};
 };
 
 template <std::size_t SupportSize>
@@ -732,15 +737,29 @@ template <std::size_t SupportSize>
   if (!sphere.center().has_value() || !sphere.squared_level().has_value()) {
     fail("a minimal replayed support omitted its exact sphere");
   }
+  summary.center = *sphere.center();
+  summary.squared_level = *sphere.squared_level();
   for (PointId id = 0U; id < cloud.size(); ++id) {
     const auto classification = exact::classify_sphere_point(
         *sphere.center(), *sphere.squared_level(), cloud.point(id));
     if (classification.location() ==
         exact::SpherePointLocation::strictly_inside) {
       ++summary.interior_count;
+      summary.interior_ids.push_back(id);
     } else if (
         classification.location() == exact::SpherePointLocation::boundary) {
       ++summary.shell_count;
+      bool support_member = false;
+      for (std::size_t index = 0U; index < SupportSize; ++index) {
+        support_member = support_member || support_ids[index] == id;
+      }
+      if (!support_member &&
+          (!summary.canonical_extra_shell_witness_id.has_value() ||
+           id < *summary.canonical_extra_shell_witness_id)) {
+        summary.canonical_extra_shell_witness_id = id;
+      }
+    } else {
+      ++summary.exterior_count;
     }
   }
   return summary;
@@ -828,6 +847,8 @@ class Phase15HigherSupportDeviceTiledSessionBridgeState final {
 
   [[nodiscard]] HigherSupportDeviceTiledSessionBridgeAdvance
   advance_one_tile_transaction();
+  [[nodiscard]] HigherSupportDeviceTiledSessionBridgeAdvance
+  advance_one_tile_certified_transaction();
   void rebind(MortonLbvhDeviceTraversalLease&& traversal_lease);
 
   const hierarchy::ExactHigherSupportAuthorityContext* authority;
@@ -892,6 +913,11 @@ class Phase15HigherSupportDeviceTiledSessionBridgeState final {
       const HigherSupportDeviceTiledFrontierAudit& device_audit,
       const DrainedRecords& records);
   void validate_committed_event_wire(const ExactHigherSupportEvent& event);
+  [[nodiscard]] hierarchy::ExactHigherSupportTileCertifiedTile
+  synthesize_tile_certified_payload(
+      const std::vector<ExactHigherSupportFrontierEntry>& tile_roots,
+      const HigherSupportDeviceTiledFrontierAudit& device_audit,
+      const DrainedRecords& records);
 };
 
 void Phase15HigherSupportDeviceTiledSessionBridgeState::
@@ -1154,6 +1180,154 @@ void Phase15HigherSupportDeviceTiledSessionBridgeState::cross_validate_tile(
   audit.bidirectional_extra_shell_equality_enforced = true;
 }
 
+hierarchy::ExactHigherSupportTileCertifiedTile
+Phase15HigherSupportDeviceTiledSessionBridgeState::
+    synthesize_tile_certified_payload(
+        const std::vector<ExactHigherSupportFrontierEntry>& tile_roots,
+        const HigherSupportDeviceTiledFrontierAudit& device_audit,
+        const DrainedRecords& records) {
+  // Exact universe identity of the tile: the device partition closes on
+  // the same BigInt mass the trusted frontier roots carry.
+  BigInt roots_mass{0};
+  for (const ExactHigherSupportFrontierEntry& root : tile_roots) {
+    roots_mass += authenticated_entry_mass(geometry, root);
+  }
+  const BigInt device_well =
+      device_audit.cumulative_well_prune_support_mass - device_well_baseline;
+  const BigInt device_rank =
+      device_audit.cumulative_rank_prune_support_mass - device_rank_baseline;
+  const BigInt device_terminal =
+      device_audit.cumulative_terminal_support_mass -
+      device_terminal_baseline;
+  const BigInt device_resolved =
+      device_audit.cumulative_resolved_support_mass -
+      device_resolved_baseline;
+  if (device_audit.tile_universe_support_mass != roots_mass ||
+      device_audit.unresolved_support_mass != 0 ||
+      device_resolved != roots_mass ||
+      device_well + device_rank + device_terminal != roots_mass) {
+    fail("the device tile does not close the tile universe partition");
+  }
+  if (device_audit.transaction_stack_high_water >
+      higher_support_device_tiled_frontier_proved_stack_bound(
+          authority->index().build_counters().maximum_depth)) {
+    fail("the device slot stack exceeds the proved 16*depth + 1 bound");
+  }
+  audit.device_and_session_masses_cross_validated = true;
+
+  const std::size_t maximum_relevant_closed_rank =
+      authority->manifest().maximum_relevant_closed_rank;
+
+  // Per-record soundness: rich prune replay and exact terminal geometry
+  // replay, both re-adding to the audited device masses.
+  BigInt well_sum{0};
+  BigInt rank_sum{0};
+  for (const DrainedPrune& drained : records.prunes) {
+    bool well_kind = false;
+    const BigInt mass = replay_prune_record(
+        geometry, maximum_relevant_closed_rank, drained, well_kind);
+    if (well_kind) {
+      well_sum += mass;
+    } else {
+      rank_sum += mass;
+    }
+    ++audit.replayed_device_prune_record_count;
+  }
+  if (well_sum != device_well || rank_sum != device_rank ||
+      BigInt{static_cast<std::uint64_t>(records.terminals.size())} !=
+          device_terminal) {
+    fail("the drained record masses do not re-add to the audited masses");
+  }
+  audit.per_record_prune_replay_enforced = true;
+
+  hierarchy::ExactHigherSupportTileCertifiedTile tile;
+  tile.consumed_root_count = tile_roots.size();
+  tile.well_centering_pruned_support_mass = device_well;
+  tile.rank_pruned_support_mass = device_rank;
+  tile.leaf_classified_support_mass = device_terminal;
+
+  std::set<SupportKey> minimal_terminals;
+  for (const DrainedTerminal& drained : records.terminals) {
+    bool minimal = false;
+    const SupportKey key =
+        replay_terminal_record(authority->cloud(), drained, minimal);
+    ++audit.replayed_device_terminal_record_count;
+    switch (static_cast<hierarchy::ExactHigherSupportTerminalGeometryDecision>(
+        drained.record.terminal_geometry_decision)) {
+      case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+          affinely_dependent:
+        ++tile.affinely_dependent_leaf_count;
+        break;
+      case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+          boundary_reduced:
+        ++tile.boundary_reduced_leaf_count;
+        break;
+      case hierarchy::ExactHigherSupportTerminalGeometryDecision::
+          exterior_circumcenter:
+        ++tile.exterior_circumcenter_leaf_count;
+        break;
+      case hierarchy::ExactHigherSupportTerminalGeometryDecision::minimal:
+        break;
+    }
+    if (minimal && !minimal_terminals.insert(key).second) {
+      fail("a minimal terminal support is emitted more than once");
+    }
+  }
+  audit.terminal_geometry_replay_enforced = true;
+
+  // Host closed-ball classification of every minimal terminal: the exact
+  // consumer stage that produces the scientific records themselves.
+  for (const SupportKey& key : minimal_terminals) {
+    ClosedBallSummary summary =
+        closed_ball_summary(authority->cloud(), key);
+    ++audit.host_closed_ball_classification_count;
+    ++tile.closed_ball_query_count;
+    tile.point_classification_count += authority->cloud().size();
+    if (!summary.minimal) {
+      fail("a minimal terminal record fails its host closed-ball replay");
+    }
+    const std::size_t observed_closed_rank =
+        summary.interior_ids.size() + summary.shell_count;
+    const std::size_t minimum_possible_closed_rank =
+        summary.interior_ids.size() + key.support_size;
+    if (minimum_possible_closed_rank > maximum_relevant_closed_rank) {
+      ++tile.above_rank_leaf_count;
+      continue;
+    }
+    if (summary.shell_count == key.support_size) {
+      ExactHigherSupportEvent event;
+      event.support_size = key.support_size;
+      event.support_ids = key.support_ids;
+      event.center = summary.center;
+      event.squared_level = summary.squared_level;
+      event.interior_ids = std::move(summary.interior_ids);
+      event.closed_rank = observed_closed_rank;
+      event.exterior_count = summary.exterior_count;
+      validate_committed_event_wire(event);
+      tile.events.push_back(std::move(event));
+    } else {
+      if (!summary.canonical_extra_shell_witness_id.has_value()) {
+        fail("a higher-support extra shell omitted its canonical witness");
+      }
+      ExactHigherSupportExtraShellDiagnostic diagnostic;
+      diagnostic.support_size = key.support_size;
+      diagnostic.support_ids = key.support_ids;
+      diagnostic.center = summary.center;
+      diagnostic.squared_level = summary.squared_level;
+      diagnostic.interior_ids = std::move(summary.interior_ids);
+      diagnostic.shell_count = summary.shell_count;
+      diagnostic.canonical_extra_shell_witness_id =
+          *summary.canonical_extra_shell_witness_id;
+      diagnostic.minimum_possible_closed_rank = minimum_possible_closed_rank;
+      diagnostic.observed_closed_rank = observed_closed_rank;
+      diagnostic.exterior_count = summary.exterior_count;
+      tile.diagnostics.push_back(std::move(diagnostic));
+    }
+  }
+  audit.host_closed_ball_classification_performed = true;
+  return tile;
+}
+
 void Phase15HigherSupportDeviceTiledSessionBridgeState::
     validate_committed_event_wire(const ExactHigherSupportEvent& event) {
   if (wire_context == nullptr) {
@@ -1183,6 +1357,206 @@ void Phase15HigherSupportDeviceTiledSessionBridgeState::
   }
   validate_value(event.squared_level.rational());
   audit.wire_caps_validated = true;
+}
+
+HigherSupportDeviceTiledSessionBridgeAdvance
+Phase15HigherSupportDeviceTiledSessionBridgeState::
+    advance_one_tile_certified_transaction() {
+  if (poisoned) {
+    throw std::runtime_error(
+        "the higher-support session bridge is poisoned by a prior "
+        "cross-validation failure");
+  }
+  HigherSupportDeviceTiledSessionBridgeAdvance advance;
+  if (anchored_checkpoint().locally_complete()) {
+    audit.session_terminal_reached = true;
+    advance.status =
+        HigherSupportDeviceTiledSessionBridgeStatus::session_terminal;
+    advance.audit = audit;
+    return advance;
+  }
+  if (external_assembler == nullptr) {
+    throw std::runtime_error(
+        "the tile-certified path requires a borrowed anchored stream "
+        "assembler");
+  }
+  if (rebind_required || !frontier.has_value()) {
+    throw std::runtime_error(
+        "the higher-support session bridge requires a fresh frontier "
+        "engine rebind before this transaction");
+  }
+  try {
+    const std::vector<ExactHigherSupportFrontierEntry>& cur_frontier =
+        source_checkpoint.frontier;
+    if (cur_frontier.empty()) {
+      fail("a non-terminal anchored checkpoint has an empty frontier");
+    }
+
+    // Canonical pre-expansion transition, synthesized directly: below the
+    // pre-expansion target with a splittable back entry, the back entry is
+    // replaced by its canonical children.  No record, no resolved mass;
+    // the session's complete checkpoint verification recomputes the
+    // frontier mass and so certifies the conservation.
+    if (cur_frontier.size() < config.pre_expansion_target_entry_count &&
+        entry_expandable(geometry, cur_frontier.back())) {
+      if (consecutive_expansion_transitions >=
+          config.maximum_session_pre_expansion_transition_count) {
+        fail("the session pre-expansion backstop was exhausted");
+      }
+      const std::vector<ExactHigherSupportFrontierEntry> children =
+          expand_entry_canonically(geometry, cur_frontier.back());
+      hierarchy::ExactHigherSupportCheckpoint successor = source_checkpoint;
+      successor.frontier.pop_back();
+      for (std::size_t index = children.size(); index > 0U; --index) {
+        successor.frontier.push_back(children[index - 1U]);
+      }
+      successor.next_chunk_sequence =
+          source_checkpoint.next_chunk_sequence + 1U;
+      successor.cumulative_audit.maximum_frontier_entry_count = std::max(
+          successor.cumulative_audit.maximum_frontier_entry_count,
+          successor.frontier.size());
+      successor.cumulative_audit.support_product_expansion_count +=
+          children.size();
+      successor.cumulative_audit.generated_child_product_count +=
+          children.size();
+      successor.checkpoint_digest =
+          hierarchy::compute_exact_higher_support_checkpoint_digest(
+              successor);
+      if (!external_assembler->commit_canonical_expansion(
+              source_checkpoint, successor)) {
+        fail("the anchored chain rejected a synthesized canonical "
+             "expansion");
+      }
+      source_checkpoint = anchored_checkpoint();
+      verify_induction_identity();
+      ++audit.committed_transaction_count;
+      ++audit.committed_expansion_transition_count;
+      ++consecutive_expansion_transitions;
+      audit.session_counted_canonical_pre_expansion = true;
+      advance.status =
+          HigherSupportDeviceTiledSessionBridgeStatus::transaction_committed;
+      advance.expansion_transition = true;
+      advance.audit = audit;
+      return advance;
+    }
+    consecutive_expansion_transitions = 0U;
+
+    // Tile transaction: the frontier's back suffix, bounded by the slot
+    // tile capacity, is resolved wholly by the device.  No host generator
+    // runs and no work-unit boundary is searched.
+    const std::size_t root_count = std::min(
+        cur_frontier.size(), config.frontier_config.slot_tile_capacity);
+    std::vector<ExactHigherSupportFrontierEntry> tile_roots;
+    for (std::size_t index = cur_frontier.size();
+         index > cur_frontier.size() - root_count;
+         --index) {
+      tile_roots.push_back(cur_frontier[index - 1U]);
+    }
+    std::vector<ExactHigherSupportFrontierEntry> tile_entries =
+        pre_expand(tile_roots);
+
+    DrainedRecords records;
+    std::optional<HigherSupportDeviceTiledFrontierAudit> device_audit;
+    try {
+      frontier->open_tile(
+          std::span<const ExactHigherSupportFrontierEntry>{
+              tile_entries.data(), tile_entries.size()});
+      const std::size_t maximum_tile_advance_count =
+          config.frontier_config.maximum_subdivision_count +
+          tile_entries.size() *
+              (config.frontier_config.slot_tile_capacity + 16U);
+      std::size_t tile_advance_count = 0U;
+      while (!device_audit.has_value()) {
+        if (++tile_advance_count > maximum_tile_advance_count) {
+          throw std::runtime_error(
+              "the device tile did not converge within its advance "
+              "backstop");
+        }
+        HigherSupportDeviceTiledFrontierAdvance tile_advance =
+            frontier->advance();
+        if (tile_advance.record_drain.has_value()) {
+          drain_record_lease(*tile_advance.record_drain, records);
+          tile_advance.record_drain.reset();
+        }
+        if (tile_advance.status ==
+            HigherSupportDeviceTiledFrontierStatus::
+                frontier_tile_complete) {
+          device_audit.emplace(tile_advance.audit);
+        } else if (
+            tile_advance.status ==
+            HigherSupportDeviceTiledFrontierStatus::censored) {
+          throw std::runtime_error(
+              "the device tile was censored before completion");
+        }
+      }
+    } catch (...) {
+      rebind_required = true;
+      audit.frontier_context_rebind_required = true;
+      ++audit.censored_without_commit_count;
+      advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
+          censored_without_commit;
+      advance.tile_root_count = tile_roots.size();
+      advance.tile_slot_count = tile_entries.size();
+      advance.audit = audit;
+      return advance;
+    }
+
+    hierarchy::ExactHigherSupportTileCertifiedTile tile =
+        synthesize_tile_certified_payload(
+            tile_roots, *device_audit, records);
+    const std::size_t committed_event_count = tile.events.size();
+    const std::size_t committed_diagnostic_count = tile.diagnostics.size();
+    const hierarchy::ExactHigherSupportStreamChunkVerification verification =
+        external_assembler->commit_tile_certified(
+            source_checkpoint, std::move(tile));
+    if (!verification.chunk_transition_verified) {
+      fail("the anchored chain rejected a tile-certified transition");
+    }
+    source_checkpoint = anchored_checkpoint();
+    verify_induction_identity();
+
+    ++audit.committed_transaction_count;
+    ++audit.committed_tile_transaction_count;
+    audit.committed_tile_root_count += tile_roots.size();
+    audit.committed_tile_slot_count += tile_entries.size();
+    audit.committed_event_count += committed_event_count;
+    audit.committed_extra_shell_diagnostic_count +=
+        committed_diagnostic_count;
+    audit.committed_universe_support_mass +=
+        device_audit->tile_universe_support_mass;
+    audit.committed_device_well_prune_support_mass +=
+        device_audit->cumulative_well_prune_support_mass -
+        device_well_baseline;
+    audit.committed_device_rank_prune_support_mass +=
+        device_audit->cumulative_rank_prune_support_mass -
+        device_rank_baseline;
+    audit.committed_device_terminal_support_mass +=
+        device_audit->cumulative_terminal_support_mass -
+        device_terminal_baseline;
+    audit.committed_session_resolved_support_mass +=
+        device_audit->cumulative_resolved_support_mass -
+        device_resolved_baseline;
+    device_well_baseline =
+        device_audit->cumulative_well_prune_support_mass;
+    device_rank_baseline =
+        device_audit->cumulative_rank_prune_support_mass;
+    device_terminal_baseline =
+        device_audit->cumulative_terminal_support_mass;
+    device_resolved_baseline =
+        device_audit->cumulative_resolved_support_mass;
+
+    advance.status =
+        HigherSupportDeviceTiledSessionBridgeStatus::transaction_committed;
+    advance.tile_root_count = tile_roots.size();
+    advance.tile_slot_count = tile_entries.size();
+    advance.committed_events.clear();
+    advance.committed_extra_shell_diagnostics.clear();
+    advance.audit = audit;
+    return advance;
+  } catch (const std::exception&) {
+    poisoned = true;
+    throw;
+  }
 }
 
 HigherSupportDeviceTiledSessionBridgeAdvance
@@ -1548,7 +1922,9 @@ HigherSupportDeviceTiledSessionBridge::
 
 HigherSupportDeviceTiledSessionBridgeAdvance
 HigherSupportDeviceTiledSessionBridge::advance_one_tile_transaction() {
-  return state_->advance_one_tile_transaction();
+  return state_->config.tile_certified_commit
+      ? state_->advance_one_tile_certified_transaction()
+      : state_->advance_one_tile_transaction();
 }
 
 void HigherSupportDeviceTiledSessionBridge::rebind_frontier_context(

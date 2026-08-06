@@ -18,6 +18,7 @@ using namespace morsehgp3d::hierarchy;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
+using morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis;
 
 int failures = 0;
 
@@ -515,6 +516,102 @@ void test_tower_differentials() {
   run_tower_differential(skew_cube, 3U, "tower skewcube8/K3");
 }
 
+// R1-b: the same device-tiled assembly driven with the tile-certified
+// commit path -- no host generator, no work-unit boundary search -- must
+// reproduce the exhaustive oracle exactly, and its certificate must
+// declare the tile-certified basis.
+void run_tile_certified_assembly_differential(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    const std::string& label) {
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const auto oracle = build_exact_higher_support_stream(
+      index, cloud, requested_maximum_order, unlimited_higher_budget());
+  check(
+      oracle.stream_complete(),
+      label + ": the tile-certified oracle completes");
+
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      index, cloud);
+  gpu::HigherSupportDeviceTiledSessionBridgeConfig config;
+  config.tile_certified_commit = true;
+  const auto assembly =
+      gpu::assemble_exact_higher_support_stream_device_tiled(
+          cloud,
+          index,
+          requested_maximum_order,
+          unlimited_higher_budget(),
+          config);
+  check(
+      assembly.certified_assembled(),
+      label + ": the tile-certified assembly seals");
+  if (!assembly.certified_assembled() || !oracle.stream_complete()) {
+    return;
+  }
+  check(
+      assembly.higher->events == oracle.events &&
+          assembly.higher->relevant_extra_shell_diagnostics ==
+              oracle.relevant_extra_shell_diagnostics &&
+          assembly.higher->requirements == oracle.requirements,
+      label + ": the tile-certified assembly equals the oracle records");
+  check(
+      assembly.higher->audit.total_support_count ==
+              oracle.audit.total_support_count &&
+          assembly.higher->audit.resolved_support_count ==
+              oracle.audit.resolved_support_count &&
+          assembly.higher->audit.remaining_frontier_support_count == 0U &&
+          assembly.higher->stream_complete() &&
+          assembly.higher->absence_of_additional_higher_supports_certified(),
+      label + ": the tile-certified assembly closes the exact universe");
+  check(
+      assembly.higher->audit.work_unit_count == 0U &&
+          assembly.higher->audit.support_product_visit_count == 0U &&
+          assembly.higher->audit.rank_witness_node_visit_count == 0U,
+      label + ": the tile-certified assembly runs no host generator");
+  check(
+      assembly.certificate.verification_basis() ==
+          ExactHigherSupportVerificationBasis::
+              device_search_host_exact_record_classification_bigint_closure,
+      label + ": the certificate declares the tile-certified basis");
+}
+
+void test_tile_certified_assembly_differentials() {
+  const std::array<CertifiedPoint3, 4U> tetrahedron{
+      point(1.0, 1.0, 1.0),
+      point(-1.0, -1.0, 1.0),
+      point(-1.0, 1.0, -1.0),
+      point(1.0, -1.0, -1.0),
+  };
+  run_tile_certified_assembly_differential(
+      tetrahedron, 1U, "tile-certified tetrahedron/K1");
+
+  std::vector<CertifiedPoint3> line12;
+  for (std::size_t index = 0U; index < 12U; ++index) {
+    const double coordinate = static_cast<double>(index);
+    line12.push_back(
+        point(coordinate, coordinate / 8.0, coordinate / 64.0));
+  }
+  run_tile_certified_assembly_differential(
+      line12, 2U, "tile-certified line12/K2");
+
+  const std::array<CertifiedPoint3, 8U> sphere{
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(0.0, 0.0, -1.0),
+      point(0.5773502691896258, 0.5773502691896258, 0.5773502691896257),
+      point(-0.5773502691896258, -0.5773502691896258, 0.5773502691896258),
+  };
+  run_tile_certified_assembly_differential(
+      sphere, 3U, "tile-certified sphere8/K3");
+}
+
 void test_assembly_differentials() {
   const std::array<CertifiedPoint3, 4U> tetrahedron{
       point(1.0, 1.0, 1.0),
@@ -550,6 +647,7 @@ void test_assembly_differentials() {
 int main() {
   try {
     test_assembly_differentials();
+    test_tile_certified_assembly_differentials();
     test_tower_differentials();
     test_scalable_lanes_differentials();
     test_anchored_certificate_anti_forge();

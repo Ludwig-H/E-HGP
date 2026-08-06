@@ -833,6 +833,13 @@ class ExactHigherSupportAnchoredSession {
   [[nodiscard]] bool adopt_tile_certified_successor(
       const ExactHigherSupportCheckpoint& successor);
 
+  // Adopts a canonical pre-expansion successor: the frontier grows, no
+  // record is emitted, no mass is resolved, and the complete local
+  // verification (which recomputes the frontier mass) certifies the
+  // conservation.
+  [[nodiscard]] bool adopt_expansion_successor(
+      const ExactHigherSupportCheckpoint& successor);
+
  private:
   ExactHigherSupportAuthorityContext authority_;
   ExactHigherSupportCheckpoint trusted_checkpoint_{};
@@ -1018,6 +1025,11 @@ class ExactHigherSupportAnchoredStreamAssembler {
   commit_tile_certified(
       const ExactHigherSupportCheckpoint& reinjected_source,
       ExactHigherSupportTileCertifiedTile&& tile);
+  // Canonical pre-expansion under the tile-certified basis: no record, no
+  // resolved mass, the successor frontier is the caller's canonical split.
+  [[nodiscard]] bool commit_canonical_expansion(
+      const ExactHigherSupportCheckpoint& reinjected_source,
+      const ExactHigherSupportCheckpoint& successor);
   // At the locally-complete terminal, sorts the appropriated records under
   // the public canonical order, assembles the stream result and mints the
   // sealed certificate exactly once.

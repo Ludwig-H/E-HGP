@@ -3639,6 +3639,46 @@ bool ExactHigherSupportAnchoredSession::adopt_tile_certified_successor(
   return true;
 }
 
+bool ExactHigherSupportAnchoredSession::adopt_expansion_successor(
+    const ExactHigherSupportCheckpoint& successor) {
+  if (trusted_checkpoint_.locally_complete() ||
+      successor.manifest != trusted_checkpoint_.manifest ||
+      successor.next_chunk_sequence !=
+          trusted_checkpoint_.next_chunk_sequence + 1U ||
+      successor.pending_product.has_value() ||
+      trusted_checkpoint_.pending_product.has_value() ||
+      trusted_checkpoint_.frontier.empty() ||
+      successor.output_record_count !=
+          trusted_checkpoint_.output_record_count ||
+      successor.output_chain_digest !=
+          trusted_checkpoint_.output_chain_digest ||
+      successor.frontier.size() < trusted_checkpoint_.frontier.size() ||
+      successor.frontier == trusted_checkpoint_.frontier ||
+      successor.cumulative_audit.resolved_support_count !=
+          trusted_checkpoint_.cumulative_audit.resolved_support_count ||
+      successor.cumulative_audit.remaining_frontier_support_count !=
+          trusted_checkpoint_.cumulative_audit
+              .remaining_frontier_support_count ||
+      successor.cumulative_audit.emitted_record_count !=
+          trusted_checkpoint_.cumulative_audit.emitted_record_count) {
+    return false;
+  }
+  for (std::size_t index = 0U;
+       index + 1U < trusted_checkpoint_.frontier.size();
+       ++index) {
+    if (successor.frontier[index] != trusted_checkpoint_.frontier[index]) {
+      return false;
+    }
+  }
+  const ExactHigherSupportCheckpointVerification verification =
+      verify_exact_higher_support_checkpoint(authority_, successor);
+  if (!verification.local_integrity_verified) {
+    return false;
+  }
+  trusted_checkpoint_ = successor;
+  return true;
+}
+
 static_assert(
     std::is_nothrow_move_constructible_v<
         ExactHigherSupportTerminalSegment>,
@@ -4884,6 +4924,24 @@ ExactHigherSupportAnchoredStreamAssembler::commit_tile_certified(
   } catch (const std::exception&) {
     return verification;
   }
+}
+
+bool ExactHigherSupportAnchoredStreamAssembler::commit_canonical_expansion(
+    const ExactHigherSupportCheckpoint& reinjected_source,
+    const ExactHigherSupportCheckpoint& successor) {
+  if (sealed_ || reinjected_source != session_.trusted_checkpoint() ||
+      (locked_basis_.has_value() &&
+       *locked_basis_ !=
+           ExactHigherSupportVerificationBasis::
+               device_search_host_exact_record_classification_bigint_closure)) {
+    return false;
+  }
+  if (!session_.adopt_expansion_successor(successor)) {
+    return false;
+  }
+  locked_basis_ = ExactHigherSupportVerificationBasis::
+      device_search_host_exact_record_classification_bigint_closure;
+  return true;
 }
 
 ExactHigherSupportAnchoredStreamSeal

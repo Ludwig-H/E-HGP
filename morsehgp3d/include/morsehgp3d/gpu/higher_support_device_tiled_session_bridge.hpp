@@ -95,6 +95,14 @@ struct HigherSupportDeviceTiledSessionBridgeConfig {
   // maximum_relevant_closed_rank and certified LBVH depth are derived from
   // the authority and must not be preset inconsistently.
   HigherSupportDeviceTiledFrontierConfig frontier_config{};
+  // Reduced verification (R1): when set, the bridge stops running the
+  // host generator entirely.  Each transaction consumes the frontier's
+  // back suffix as one device tile whose drained records are replayed and
+  // host-classified into the transition payload; the anchored chain
+  // commits it through commit_tile_certified.  The minimal-work-unit
+  // boundary search and the fresh-replay commit are both retired on this
+  // path, and the sealed certificate declares the tile-certified basis.
+  bool tile_certified_commit{false};
 
   friend bool operator==(
       const HigherSupportDeviceTiledSessionBridgeConfig&,
