@@ -811,6 +811,9 @@ def require_success_projection(
         "prune_certificates": 11,
         "chunks": 1,
         "authority_kind": "sealed_anchored_fixed_chunk_run",
+        # The fixed-chunk session re-derives every committed chunk on the
+        # host, so its declared basis is the fresh replay.
+        "verification_basis": "fresh_cpu_replay_every_commit",
         "full_geometry_replay_avoided": True,
     }
     expected_pipeline = {
@@ -907,6 +910,7 @@ def require_capacity_stop(report: dict[str, object]) -> None:
         "prune_certificates": 0,
         "chunks": 0,
         "authority_kind": "not_run",
+        "verification_basis": "not_run",
         "full_geometry_replay_avoided": False,
     }
     require(

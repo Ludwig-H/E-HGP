@@ -64,6 +64,7 @@ struct Options {
   std::uint64_t operational_deadline_ms{};
   std::string archive_directory{};
   std::string higher_backend{"host_fixed_chunk"};
+  std::string higher_verification_basis{"fresh_cpu_replay"};
   bool point_count_supplied{false};
 };
 
@@ -226,6 +227,9 @@ struct Report {
   std::size_t higher_prune_certificates{};
   std::size_t higher_chunk_count{};
   std::string higher_authority_kind{"not_run"};
+  // Copied from the sealed certificate, never from the requested option, so
+  // a run can never report a stronger basis than the one it actually used.
+  std::string higher_verification_basis{"not_run"};
 
   bool terminal_catalog_certified{false};
   std::size_t canonical_point_count{};
@@ -547,6 +551,8 @@ void print_usage(std::ostream& output) {
       << "  --archive-directory DIR (required for "
          "durable_archive_recertification)\n"
       << "  --higher-backend host_fixed_chunk|device_tiled_session\n"
+      << "  --higher-verification-basis fresh_cpu_replay|tile_certified"
+         " (tile_certified requires the device backend)\n"
       << "Default caps are fail-fast diagnostics, not a 50k "
          "qualification envelope.\n";
 }
@@ -588,6 +594,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.archive_directory = value;
     } else if (option == "--higher-backend") {
       options.higher_backend = value;
+    } else if (option == "--higher-verification-basis") {
+      options.higher_verification_basis = value;
     } else if (option == "--operational-deadline-ms") {
       options.operational_deadline_ms = parse_u64(value, option);
     } else {
@@ -639,6 +647,18 @@ void parse_options(int argc, char** argv, Options& options) {
     throw std::invalid_argument(
         "--higher-backend must be host_fixed_chunk or "
         "device_tiled_session");
+  }
+  if (options.higher_verification_basis != "fresh_cpu_replay" &&
+      options.higher_verification_basis != "tile_certified") {
+    throw std::invalid_argument(
+        "--higher-verification-basis must be fresh_cpu_replay or "
+        "tile_certified");
+  }
+  if (options.higher_verification_basis == "tile_certified" &&
+      options.higher_backend != "device_tiled_session") {
+    throw std::invalid_argument(
+        "--higher-verification-basis tile_certified requires "
+        "--higher-backend device_tiled_session");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -2968,6 +2988,8 @@ void emit_report(const Report& report) {
       << ",\"chunks\":" << report.higher_chunk_count
       << ",\"authority_kind\":\""
       << report.higher_authority_kind
+      << "\",\"verification_basis\":\""
+      << report.higher_verification_basis
       << "\",\"full_geometry_replay_avoided\":"
       << boolean(
              report.higher_authority_kind ==
@@ -4882,9 +4904,14 @@ bool count_reloaded_durable_segment(
   Clock::time_point higher_stage_end = pair_end;
   if (options.higher_backend == "device_tiled_session") {
 #if MORSEHGP3D_RUNNER_HAS_DEVICE_TILED_HIGHER
+    morsehgp3d::gpu::HigherSupportDeviceTiledSessionBridgeConfig
+        bridge_config;
+    bridge_config.tile_certified_commit =
+        options.higher_verification_basis == "tile_certified";
     const auto assembly =
         morsehgp3d::gpu::assemble_exact_higher_support_stream_device_tiled(
-            cloud, index, options.maximum_order, higher_budget);
+            cloud, index, options.maximum_order, higher_budget,
+            bridge_config);
     higher_stage_end = Clock::now();
     report.timings.higher_support_ms =
         milliseconds(higher_stage_end - pair_end);
@@ -4919,6 +4946,12 @@ bool count_reloaded_durable_segment(
     report.higher_status = "complete";
     report.higher_stop_reason = "none";
     report.higher_authority_kind = "anchored_session_chain_certificate";
+    report.higher_verification_basis =
+        assembly.certificate.verification_basis() ==
+            morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis::
+                device_search_host_exact_record_classification_bigint_closure
+        ? "device_search_host_exact_record_classification_bigint_closure"
+        : "fresh_cpu_replay_every_commit";
     facade_storage.emplace(build_exact_direct_support_terminal_facade(
         index,
         cloud,
@@ -5020,6 +5053,7 @@ bool count_reloaded_durable_segment(
   report.higher_stop_reason = "none";
   report.higher_authority_kind =
       "sealed_anchored_fixed_chunk_run";
+  report.higher_verification_basis = "fresh_cpu_replay_every_commit";
   report.no_forbidden_global_structure_materialized =
       report.no_forbidden_global_structure_materialized &&
       higher_authority.no_forbidden_global_structure_materialized();
