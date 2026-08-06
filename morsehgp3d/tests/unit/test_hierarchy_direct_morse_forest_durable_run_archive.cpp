@@ -1,9 +1,12 @@
 #include "morsehgp3d/hierarchy/direct_morse_forest_durable_run_archive.hpp"
 
 #include <cstdint>
+#include <cstdio>
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include <unistd.h>
 
 namespace {
 
@@ -52,10 +55,14 @@ void check(bool condition, const std::string& message) {
 // adversarial exact payloads (huge reduced rationals, negative center
 // numerators, both optional shapes, every enum kind reachable in one
 // segment).
-[[nodiscard]] ExactDirectMorseForestBatchSegment make_segment() {
+[[nodiscard]] ExactDirectMorseForestBatchSegment make_segment(
+    const ExactDirectMorseForestSegmentCursor* chained_begin = nullptr) {
   ExactDirectMorseForestBatchSegment segment{};
-  segment.begin_cursor = {
-      1U, 5U, 2U, 1U, 1U, 1U, 2U, 1U, 3U, 100U, digest("begin-chain")};
+  segment.begin_cursor = chained_begin != nullptr
+      ? *chained_begin
+      : ExactDirectMorseForestSegmentCursor{
+            1U, 5U, 2U, 1U, 1U, 1U, 2U, 1U, 3U, 100U,
+            digest("begin-chain")};
   segment.payload_digest = digest("resident-payload");
 
   segment.birth_records.push_back(
@@ -138,15 +145,19 @@ void check(bool condition, const std::string& message) {
   second_node.atomic_group_index = 1U;
   segment.nodes = {first_node, second_node};
 
-  segment.batch.batch_index = 1U;
-  segment.batch.source_journal_batch_index = 1U;
+  segment.batch.batch_index = segment.begin_cursor.batch_record_count;
+  segment.batch.source_journal_batch_index = segment.batch.batch_index;
   segment.batch.order = 2U;
   segment.batch.squared_level = ExactLevel{BigInt{"5"}, BigInt{"8"}};
-  segment.batch.birth_record_offset = 7U;
+  segment.batch.birth_record_offset =
+      segment.begin_cursor.implicit_order_one_prefix_count +
+      segment.begin_cursor.birth_record_count;
   segment.batch.birth_record_count = segment.birth_records.size();
-  segment.batch.saddle_record_offset = 1U;
+  segment.batch.saddle_record_offset =
+      segment.begin_cursor.saddle_record_count;
   segment.batch.saddle_record_count = segment.saddle_records.size();
-  segment.batch.atomic_group_offset = 1U;
+  segment.batch.atomic_group_offset =
+      segment.begin_cursor.atomic_group_count;
   segment.batch.atomic_group_count = segment.atomic_groups.size();
   segment.batch.strict_pre_batch_carrier_count = 6U;
   segment.batch.strict_pre_batch_reduced_root_count = 2U;
@@ -383,6 +394,203 @@ void test_cap_minus_one_classes() {
       "encoding one final root above the cap rejects");
 }
 
+struct SegmentCollector {
+  std::vector<ExactDirectMorseForestBatchSegment> segments;
+
+  static bool consume(
+      void* state,
+      const ExactDirectMorseForestBatchSegment& segment) noexcept {
+    try {
+      static_cast<SegmentCollector*>(state)->segments.push_back(segment);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+};
+
+[[nodiscard]] ExactDirectMorseForestRunArchiveIdentity make_identity() {
+  ExactDirectMorseForestRunArchiveIdentity identity;
+  identity.manifest_digest = digest("manifest");
+  identity.source_identity_digest = digest("source-identity");
+  identity.source_higher_canonical_cloud_digest = digest("cloud");
+  identity.terminal_source_chain_digest = digest("terminal-source-chain");
+  identity.point_count = 40U;
+  identity.effective_maximum_order = 3U;
+  return identity;
+}
+
+void test_atomic_archive_publish_load_and_recovery() {
+  const auto limits = generous_limits();
+  const auto identity = make_identity();
+  char directory_template[] = "/tmp/ehgp-run-archive-XXXXXX";
+  const char* directory = ::mkdtemp(directory_template);
+  check(directory != nullptr, "the archive fixture directory is created");
+  if (directory == nullptr) {
+    return;
+  }
+  const std::string directory_path{directory};
+  const std::string final_name{"run.mh3d"};
+
+  const auto first = make_segment();
+  const auto second = make_segment(&first.end_cursor);
+  check(
+      second.certified_structure(),
+      "the chained second synthetic segment satisfies the 15I invariant");
+  auto seal = make_seal(second);
+
+  auto open_decision =
+      ExactDirectMorseForestRunArchiveDecision::not_certified;
+  auto writer = ExactDirectMorseForestRunArchiveWriter::open_new(
+      directory_path, final_name, identity, limits, open_decision);
+  check(
+      writer.open() &&
+          open_decision ==
+              ExactDirectMorseForestRunArchiveDecision::
+                  complete_atomic_run_archive,
+      "the run archive writer opens on a temporary");
+  check(
+      ::access((directory_path + "/" + final_name).c_str(), F_OK) != 0,
+      "no final file exists before finalize");
+  check(
+      writer.append_segment(first) ==
+              ExactDirectMorseForestRunArchiveDecision::
+                  complete_atomic_run_archive &&
+          writer.append_segment(second) ==
+              ExactDirectMorseForestRunArchiveDecision::
+                  complete_atomic_run_archive,
+      "both chained segments append");
+  check(
+      writer.append_segment(first) ==
+          ExactDirectMorseForestRunArchiveDecision::no_chain_rejected,
+      "an out-of-chain segment is rejected");
+  const auto published = writer.finalize(seal);
+  check(
+      published.certified_published() &&
+          published.appended_segment_count == 2U,
+      "the archive publishes atomically");
+  check(
+      ::access((directory_path + "/" + final_name + ".tmp").c_str(), F_OK) !=
+          0,
+      "the temporary is removed after publication");
+
+  SegmentCollector collector;
+  const auto loaded = load_exact_direct_morse_forest_run_archive(
+      directory_path,
+      final_name,
+      identity,
+      limits,
+      {&collector, &SegmentCollector::consume});
+  check(
+      loaded.certified_loaded() && loaded.delivered_segment_count == 2U &&
+          collector.segments.size() == 2U &&
+          collector.segments[0U] == first &&
+          collector.segments[1U] == second &&
+          loaded.final_seal == seal &&
+          loaded.archive_digest == published.archive_digest,
+      "the bounded loader restores both segments and the seal field-exact");
+
+  auto rollback_identity = identity;
+  rollback_identity.terminal_source_chain_digest =
+      digest("earlier-terminal-chain");
+  const auto rollback = load_exact_direct_morse_forest_run_archive(
+      directory_path,
+      final_name,
+      rollback_identity,
+      limits,
+      {&collector, &SegmentCollector::consume});
+  check(
+      !rollback.certified_loaded() &&
+          rollback.decision ==
+              ExactDirectMorseForestRunArchiveDecision::no_seal_rejected,
+      "a different terminal source chain digest is rejected anti-rollback");
+
+  auto second_open_decision =
+      ExactDirectMorseForestRunArchiveDecision::not_certified;
+  auto second_writer = ExactDirectMorseForestRunArchiveWriter::open_new(
+      directory_path, final_name, identity, limits, second_open_decision);
+  check(
+      !second_writer.open() &&
+          second_open_decision ==
+              ExactDirectMorseForestRunArchiveDecision::
+                  no_existing_final_rejected,
+      "an existing final file refuses a second writer");
+
+  const auto recovery_valid =
+      recover_exact_direct_morse_forest_run_archive_directory(
+          directory_path, final_name, identity, limits);
+  check(
+      recovery_valid.certified_recovered() &&
+          recovery_valid.decision ==
+              ExactDirectMorseForestRunArchiveRecoveryDecision::
+                  valid_final_present,
+      "recovery classifies the published final as valid");
+
+  const std::string torn_name{"torn.mh3d"};
+  {
+    const std::string torn_temporary =
+        directory_path + "/" + torn_name + ".tmp";
+    FILE* torn = std::fopen(torn_temporary.c_str(), "wb");
+    check(torn != nullptr, "the torn temporary fixture is created");
+    if (torn != nullptr) {
+      std::fputs("interrupted", torn);
+      std::fclose(torn);
+    }
+  }
+  const auto recovery_torn =
+      recover_exact_direct_morse_forest_run_archive_directory(
+          directory_path, torn_name, identity, limits);
+  check(
+      recovery_torn.certified_recovered() &&
+          recovery_torn.decision ==
+              ExactDirectMorseForestRunArchiveRecoveryDecision::
+                  torn_temporary_discarded &&
+          recovery_torn.discarded_temporary_count == 1U &&
+          ::access(
+              (directory_path + "/" + torn_name + ".tmp").c_str(), F_OK) !=
+              0,
+      "recovery discards a torn temporary and never promotes it");
+  const auto recovery_absent =
+      recover_exact_direct_morse_forest_run_archive_directory(
+          directory_path, torn_name, identity, limits);
+  check(
+      recovery_absent.decision ==
+          ExactDirectMorseForestRunArchiveRecoveryDecision::absent,
+      "recovery reports a clean absent archive");
+
+  // A corrupted published byte must fail the load and downgrade recovery.
+  const std::string final_path = directory_path + "/" + final_name;
+  {
+    FILE* file = std::fopen(final_path.c_str(), "r+b");
+    check(file != nullptr, "the corruption fixture reopens the final file");
+    if (file != nullptr) {
+      std::fseek(file, 200L, SEEK_SET);
+      const int byte = std::fgetc(file);
+      std::fseek(file, 200L, SEEK_SET);
+      std::fputc((byte ^ 0x40) & 0xFF, file);
+      std::fclose(file);
+    }
+  }
+  const auto corrupted = load_exact_direct_morse_forest_run_archive(
+      directory_path,
+      final_name,
+      identity,
+      limits,
+      {&collector, &SegmentCollector::consume});
+  check(
+      !corrupted.certified_loaded(),
+      "a corrupted published archive fails the bounded load");
+  const auto recovery_corrupted =
+      recover_exact_direct_morse_forest_run_archive_directory(
+          directory_path, final_name, identity, limits);
+  check(
+      !recovery_corrupted.certified_recovered() &&
+          recovery_corrupted.decision ==
+              ExactDirectMorseForestRunArchiveRecoveryDecision::
+                  invalid_final_present,
+      "recovery classifies the corrupted final as invalid");
+}
+
 }  // namespace
 
 int main() {
@@ -390,6 +598,7 @@ int main() {
     test_round_trip_and_determinism();
     test_corruption_truncation_and_suffix();
     test_cap_minus_one_classes();
+    test_atomic_archive_publish_load_and_recovery();
   } catch (const std::exception& error) {
     std::cerr << "FAIL: unexpected exception: " << error.what() << '\n';
     return 1;

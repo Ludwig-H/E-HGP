@@ -3,12 +3,17 @@
 #include "morsehgp3d/contract/canonical_id.hpp"
 
 #include <array>
+#include <cerrno>
 #include <cstring>
 #include <limits>
 #include <new>
 #include <stdexcept>
 #include <string>
 #include <utility>
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace morsehgp3d::hierarchy {
 
@@ -1031,6 +1036,715 @@ decode_exact_direct_morse_forest_final_seal(
         output.seal = std::move(seal);
         output.consumed_byte_count = bytes.size();
       });
+}
+
+// ===========================================================================
+// 15L-a2: the morsehgp3d-run.v1 durable file archive.
+// ===========================================================================
+
+namespace {
+
+constexpr std::array<std::uint8_t, 8U> run_magic{
+    'M', 'H', '3', 'D', 'R', 'U', 'N', '1'};
+constexpr std::array<std::uint8_t, 8U> end_magic{
+    'M', 'H', '3', 'D', 'E', 'N', 'D', '1'};
+constexpr std::size_t run_header_byte_count = 128U;
+constexpr std::uint8_t frame_region_tag = 0x01U;
+constexpr std::uint8_t footer_region_tag = 0x02U;
+constexpr std::string_view temporary_suffix = ".tmp";
+
+struct ArchiveFailure {
+  ExactDirectMorseForestRunArchiveDecision decision{
+      ExactDirectMorseForestRunArchiveDecision::no_io_failed};
+};
+
+[[noreturn]] void archive_fail(
+    ExactDirectMorseForestRunArchiveDecision decision) {
+  throw ArchiveFailure{decision};
+}
+
+struct UniqueFd {
+  int fd{-1};
+  UniqueFd() noexcept = default;
+  explicit UniqueFd(int value) noexcept : fd(value) {}
+  UniqueFd(const UniqueFd&) = delete;
+  UniqueFd& operator=(const UniqueFd&) = delete;
+  UniqueFd(UniqueFd&& other) noexcept : fd(other.fd) { other.fd = -1; }
+  UniqueFd& operator=(UniqueFd&& other) noexcept {
+    if (this != &other) {
+      reset();
+      fd = other.fd;
+      other.fd = -1;
+    }
+    return *this;
+  }
+  ~UniqueFd() { reset(); }
+  void reset() noexcept {
+    if (fd >= 0) {
+      static_cast<void>(::close(fd));
+      fd = -1;
+    }
+  }
+  [[nodiscard]] bool valid() const noexcept { return fd >= 0; }
+};
+
+[[nodiscard]] bool plain_file_name(const std::string& name) noexcept {
+  return !name.empty() && name.find('/') == std::string::npos &&
+         name != "." && name != ".." &&
+         name.find('\0') == std::string::npos;
+}
+
+void write_all_bytes(int fd, std::span<const std::uint8_t> bytes) {
+  std::size_t written = 0U;
+  while (written < bytes.size()) {
+    const ::ssize_t step = ::write(
+        fd, bytes.data() + written, bytes.size() - written);
+    if (step < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      archive_fail(ExactDirectMorseForestRunArchiveDecision::no_io_failed);
+    }
+    written += static_cast<std::size_t>(step);
+  }
+}
+
+[[nodiscard]] std::size_t read_some_bytes(
+    int fd, std::uint8_t* data, std::size_t count) {
+  std::size_t consumed = 0U;
+  while (consumed < count) {
+    const ::ssize_t step = ::read(fd, data + consumed, count - consumed);
+    if (step < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      archive_fail(ExactDirectMorseForestRunArchiveDecision::no_io_failed);
+    }
+    if (step == 0) {
+      break;
+    }
+    consumed += static_cast<std::size_t>(step);
+  }
+  return consumed;
+}
+
+void append_u64_bytes(std::vector<std::uint8_t>& out, std::uint64_t value) {
+  for (std::size_t index = 0U; index < 8U; ++index) {
+    out.push_back(
+        static_cast<std::uint8_t>((value >> (8U * (7U - index))) & 0xFFU));
+  }
+}
+
+[[nodiscard]] std::uint64_t parse_u64_bytes(const std::uint8_t* data) {
+  std::uint64_t value = 0U;
+  for (std::size_t index = 0U; index < 8U; ++index) {
+    value = (value << 8U) | data[index];
+  }
+  return value;
+}
+
+[[nodiscard]] std::vector<std::uint8_t> encode_run_header(
+    const ExactDirectMorseForestRunArchiveIdentity& identity) {
+  std::vector<std::uint8_t> out;
+  out.reserve(run_header_byte_count);
+  out.insert(out.end(), run_magic.begin(), run_magic.end());
+  for (const std::uint32_t schema :
+       {direct_morse_forest_durable_run_archive_schema_version,
+        direct_morse_forest_output_segment_schema_version}) {
+    for (std::size_t index = 0U; index < 4U; ++index) {
+      out.push_back(
+          static_cast<std::uint8_t>((schema >> (8U * (3U - index))) & 0xFFU));
+    }
+  }
+  for (const contract::CanonicalId* digest :
+       {&identity.manifest_digest,
+        &identity.source_identity_digest,
+        &identity.source_higher_canonical_cloud_digest}) {
+    out.insert(
+        out.end(), digest->bytes().begin(), digest->bytes().end());
+  }
+  append_u64_bytes(out, static_cast<std::uint64_t>(identity.point_count));
+  append_u64_bytes(
+      out, static_cast<std::uint64_t>(identity.effective_maximum_order));
+  if (out.size() != run_header_byte_count) {
+    archive_fail(
+        ExactDirectMorseForestRunArchiveDecision::no_identity_rejected);
+  }
+  return out;
+}
+
+// The incremental whole-archive digest absorbs every byte in file order.
+struct ArchiveDigest {
+  contract::CanonicalSha256Builder builder;
+  std::size_t byte_count{};
+
+  void absorb(std::span<const std::uint8_t> bytes) {
+    builder.update(std::string_view{
+        reinterpret_cast<const char*>(bytes.data()), bytes.size()});
+    byte_count += bytes.size();
+  }
+};
+
+}  // namespace
+
+bool ExactDirectMorseForestRunArchiveWriteResult::certified_published()
+    const noexcept {
+  return decision ==
+             ExactDirectMorseForestRunArchiveDecision::
+                 complete_atomic_run_archive &&
+         final_published && temporary_removed;
+}
+
+bool ExactDirectMorseForestRunArchiveLoadResult::certified_loaded()
+    const noexcept {
+  return decision ==
+             ExactDirectMorseForestRunArchiveDecision::
+                 complete_atomic_run_archive &&
+         !validated_prefix_only;
+}
+
+bool ExactDirectMorseForestRunArchiveRecoveryResult::certified_recovered()
+    const noexcept {
+  return decision == ExactDirectMorseForestRunArchiveRecoveryDecision::
+                         absent ||
+         decision == ExactDirectMorseForestRunArchiveRecoveryDecision::
+                         torn_temporary_discarded ||
+         decision == ExactDirectMorseForestRunArchiveRecoveryDecision::
+                         valid_final_present;
+}
+
+struct ExactDirectMorseForestRunArchiveWriter::Impl {
+  UniqueFd directory;
+  UniqueFd temporary;
+  std::string temporary_name;
+  std::string final_name;
+  ExactDirectMorseForestRunArchiveIdentity identity{};
+  ExactDirectMorseForestSegmentCodecLimits limits{};
+  ArchiveDigest digest;
+  ExactDirectMorseForestSegmentCursor chain_cursor{};
+  bool chain_seeded{false};
+  std::size_t appended_segment_count{};
+  bool finalized{false};
+
+  void write_and_absorb(std::span<const std::uint8_t> bytes) {
+    write_all_bytes(temporary.fd, bytes);
+    digest.absorb(bytes);
+  }
+
+  void abandon() noexcept {
+    if (temporary.valid()) {
+      temporary.reset();
+      if (directory.valid()) {
+        static_cast<void>(
+            ::unlinkat(directory.fd, temporary_name.c_str(), 0));
+        static_cast<void>(::fsync(directory.fd));
+      }
+    }
+  }
+};
+
+ExactDirectMorseForestRunArchiveWriter::
+    ExactDirectMorseForestRunArchiveWriter() noexcept = default;
+
+ExactDirectMorseForestRunArchiveWriter::
+    ~ExactDirectMorseForestRunArchiveWriter() {
+  if (impl_ != nullptr && !impl_->finalized) {
+    impl_->abandon();
+  }
+}
+
+ExactDirectMorseForestRunArchiveWriter::ExactDirectMorseForestRunArchiveWriter(
+    ExactDirectMorseForestRunArchiveWriter&&) noexcept = default;
+ExactDirectMorseForestRunArchiveWriter&
+ExactDirectMorseForestRunArchiveWriter::operator=(
+    ExactDirectMorseForestRunArchiveWriter&&) noexcept = default;
+
+bool ExactDirectMorseForestRunArchiveWriter::open() const noexcept {
+  return impl_ != nullptr && impl_->temporary.valid() && !impl_->finalized;
+}
+
+void ExactDirectMorseForestRunArchiveWriter::abandon() noexcept {
+  if (impl_ != nullptr && !impl_->finalized) {
+    impl_->abandon();
+  }
+}
+
+ExactDirectMorseForestRunArchiveWriter
+ExactDirectMorseForestRunArchiveWriter::open_new(
+    const std::string& directory_path,
+    const std::string& final_file_name,
+    const ExactDirectMorseForestRunArchiveIdentity& identity,
+    const ExactDirectMorseForestSegmentCodecLimits& limits,
+    ExactDirectMorseForestRunArchiveDecision& decision) noexcept {
+  ExactDirectMorseForestRunArchiveWriter writer;
+  decision = ExactDirectMorseForestRunArchiveDecision::not_certified;
+  try {
+    if (!plain_file_name(final_file_name)) {
+      decision =
+          ExactDirectMorseForestRunArchiveDecision::no_directory_rejected;
+      return writer;
+    }
+    auto impl = std::make_unique<Impl>();
+    impl->identity = identity;
+    impl->limits = limits;
+    impl->final_name = final_file_name;
+    impl->temporary_name =
+        final_file_name + std::string{temporary_suffix};
+    impl->directory = UniqueFd{::open(
+        directory_path.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC)};
+    if (!impl->directory.valid()) {
+      decision =
+          ExactDirectMorseForestRunArchiveDecision::no_directory_rejected;
+      return writer;
+    }
+    struct ::stat existing {};
+    if (::fstatat(
+            impl->directory.fd,
+            final_file_name.c_str(),
+            &existing,
+            AT_SYMLINK_NOFOLLOW) == 0) {
+      decision = ExactDirectMorseForestRunArchiveDecision::
+          no_existing_final_rejected;
+      return writer;
+    }
+    impl->temporary = UniqueFd{::openat(
+        impl->directory.fd,
+        impl->temporary_name.c_str(),
+        O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC,
+        0644)};
+    if (!impl->temporary.valid()) {
+      decision = ExactDirectMorseForestRunArchiveDecision::
+          no_existing_final_rejected;
+      return writer;
+    }
+    impl->write_and_absorb(encode_run_header(identity));
+    writer.impl_ = std::move(impl);
+    decision = ExactDirectMorseForestRunArchiveDecision::
+        complete_atomic_run_archive;
+    return writer;
+  } catch (const ArchiveFailure& failure) {
+    decision = failure.decision;
+    return writer;
+  } catch (const std::bad_alloc&) {
+    decision =
+        ExactDirectMorseForestRunArchiveDecision::no_allocation_failed;
+    return writer;
+  } catch (...) {
+    decision = ExactDirectMorseForestRunArchiveDecision::no_io_failed;
+    return writer;
+  }
+}
+
+ExactDirectMorseForestRunArchiveDecision
+ExactDirectMorseForestRunArchiveWriter::append_segment(
+    const ExactDirectMorseForestBatchSegment& segment) noexcept {
+  if (!open()) {
+    return ExactDirectMorseForestRunArchiveDecision::no_io_failed;
+  }
+  try {
+    if (impl_->chain_seeded) {
+      if (!(segment.begin_cursor == impl_->chain_cursor)) {
+        return ExactDirectMorseForestRunArchiveDecision::no_chain_rejected;
+      }
+    }
+    const auto encoded = encode_exact_direct_morse_forest_batch_segment(
+        segment, impl_->limits);
+    if (!encoded.certified_encoded()) {
+      return ExactDirectMorseForestRunArchiveDecision::no_codec_rejected;
+    }
+    std::vector<std::uint8_t> frame;
+    frame.reserve(1U + 8U + 8U + encoded.bytes.size() + 32U);
+    frame.push_back(frame_region_tag);
+    append_u64_bytes(
+        frame,
+        static_cast<std::uint64_t>(8U + encoded.bytes.size() + 32U));
+    append_u64_bytes(
+        frame, static_cast<std::uint64_t>(impl_->appended_segment_count));
+    frame.insert(frame.end(), encoded.bytes.begin(), encoded.bytes.end());
+    frame.insert(
+        frame.end(),
+        segment.end_cursor.chain_digest.bytes().begin(),
+        segment.end_cursor.chain_digest.bytes().end());
+    impl_->write_and_absorb(frame);
+    impl_->chain_cursor = segment.end_cursor;
+    impl_->chain_seeded = true;
+    ++impl_->appended_segment_count;
+    return ExactDirectMorseForestRunArchiveDecision::
+        complete_atomic_run_archive;
+  } catch (const ArchiveFailure& failure) {
+    return failure.decision;
+  } catch (const std::bad_alloc&) {
+    return ExactDirectMorseForestRunArchiveDecision::no_allocation_failed;
+  } catch (...) {
+    return ExactDirectMorseForestRunArchiveDecision::no_io_failed;
+  }
+}
+
+ExactDirectMorseForestRunArchiveWriteResult
+ExactDirectMorseForestRunArchiveWriter::finalize(
+    const ExactDirectMorseForestFinalSeal& seal) noexcept {
+  ExactDirectMorseForestRunArchiveWriteResult output;
+  if (!open()) {
+    output.decision = ExactDirectMorseForestRunArchiveDecision::no_io_failed;
+    return output;
+  }
+  try {
+    output.appended_segment_count = impl_->appended_segment_count;
+    if (impl_->chain_seeded &&
+        !(seal.final_cursor == impl_->chain_cursor)) {
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_seal_rejected;
+      return output;
+    }
+    const auto encoded_seal = encode_exact_direct_morse_forest_final_seal(
+        seal, impl_->limits);
+    if (!encoded_seal.certified_encoded()) {
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_codec_rejected;
+      return output;
+    }
+    std::vector<std::uint8_t> footer;
+    footer.push_back(footer_region_tag);
+    footer.insert(footer.end(), end_magic.begin(), end_magic.end());
+    append_u64_bytes(
+        footer,
+        static_cast<std::uint64_t>(impl_->appended_segment_count));
+    footer.insert(
+        footer.end(),
+        impl_->identity.terminal_source_chain_digest.bytes().begin(),
+        impl_->identity.terminal_source_chain_digest.bytes().end());
+    append_u64_bytes(
+        footer, static_cast<std::uint64_t>(encoded_seal.bytes.size()));
+    footer.insert(
+        footer.end(), encoded_seal.bytes.begin(), encoded_seal.bytes.end());
+    impl_->write_and_absorb(footer);
+    output.archive_digest = impl_->digest.builder.finalize();
+    std::vector<std::uint8_t> tail;
+    tail.insert(
+        tail.end(),
+        output.archive_digest.bytes().begin(),
+        output.archive_digest.bytes().end());
+    tail.insert(tail.end(), end_magic.begin(), end_magic.end());
+    write_all_bytes(impl_->temporary.fd, tail);
+    output.published_byte_count = impl_->digest.byte_count + tail.size();
+    if (::fdatasync(impl_->temporary.fd) != 0) {
+      archive_fail(ExactDirectMorseForestRunArchiveDecision::no_io_failed);
+    }
+    if (::linkat(
+            impl_->directory.fd,
+            impl_->temporary_name.c_str(),
+            impl_->directory.fd,
+            impl_->final_name.c_str(),
+            0) != 0) {
+      archive_fail(ExactDirectMorseForestRunArchiveDecision::no_io_failed);
+    }
+    output.final_published = true;
+    if (::unlinkat(
+            impl_->directory.fd, impl_->temporary_name.c_str(), 0) != 0) {
+      archive_fail(ExactDirectMorseForestRunArchiveDecision::no_io_failed);
+    }
+    output.temporary_removed = true;
+    if (::fsync(impl_->directory.fd) != 0) {
+      archive_fail(ExactDirectMorseForestRunArchiveDecision::no_io_failed);
+    }
+    impl_->temporary.reset();
+    impl_->finalized = true;
+    output.decision = ExactDirectMorseForestRunArchiveDecision::
+        complete_atomic_run_archive;
+    return output;
+  } catch (const ArchiveFailure& failure) {
+    output.decision = failure.decision;
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_allocation_failed;
+    return output;
+  } catch (...) {
+    output.decision = ExactDirectMorseForestRunArchiveDecision::no_io_failed;
+    return output;
+  }
+}
+
+namespace {
+
+// Shared bounded validation pass.  With a consumer it delivers each decoded
+// segment; without one it only validates.  Every consumed byte feeds the
+// running archive digest until the sealed digest bytes themselves.
+[[nodiscard]] ExactDirectMorseForestRunArchiveLoadResult
+validate_run_archive(
+    int directory_fd,
+    const std::string& final_file_name,
+    const ExactDirectMorseForestRunArchiveIdentity& expected_identity,
+    const ExactDirectMorseForestSegmentCodecLimits& limits,
+    const ExactDirectMorseForestRunArchiveConsumerView* consumer) {
+  ExactDirectMorseForestRunArchiveLoadResult output;
+  UniqueFd file{::openat(
+      directory_fd, final_file_name.c_str(), O_RDONLY | O_CLOEXEC)};
+  if (!file.valid()) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_io_failed;
+    return output;
+  }
+  ArchiveDigest digest;
+  const auto read_exact = [&](std::uint8_t* data,
+                              std::size_t count,
+                              bool absorb) {
+    if (read_some_bytes(file.fd, data, count) != count) {
+      archive_fail(
+          ExactDirectMorseForestRunArchiveDecision::no_archive_digest_rejected);
+    }
+    if (absorb) {
+      digest.absorb(std::span<const std::uint8_t>{data, count});
+    }
+  };
+  std::array<std::uint8_t, run_header_byte_count> header{};
+  read_exact(header.data(), header.size(), true);
+  const auto expected_header = encode_run_header(expected_identity);
+  if (!std::equal(
+          header.begin(), header.end(), expected_header.begin())) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_identity_rejected;
+    return output;
+  }
+  output.identity = expected_identity;
+  ExactDirectMorseForestSegmentCursor chain_cursor{};
+  bool chain_seeded = false;
+  std::vector<std::uint8_t> frame;
+  for (;;) {
+    std::uint8_t tag = 0U;
+    read_exact(&tag, 1U, true);
+    if (tag == footer_region_tag) {
+      break;
+    }
+    if (tag != frame_region_tag) {
+      output.validated_prefix_only = true;
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_chain_rejected;
+      return output;
+    }
+    std::array<std::uint8_t, 8U> length_bytes{};
+    read_exact(length_bytes.data(), length_bytes.size(), true);
+    const std::uint64_t frame_length = parse_u64_bytes(length_bytes.data());
+    if (frame_length < 8U + envelope_byte_count + 32U ||
+        frame_length >
+            8U + limits.maximum_encoded_byte_count + 32U) {
+      output.validated_prefix_only = true;
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_limit_exceeded;
+      return output;
+    }
+    frame.assign(static_cast<std::size_t>(frame_length), 0U);
+    read_exact(frame.data(), frame.size(), true);
+    const std::uint64_t segment_index = parse_u64_bytes(frame.data());
+    if (segment_index != output.delivered_segment_count) {
+      output.validated_prefix_only = true;
+      output.decision = ExactDirectMorseForestRunArchiveDecision::
+          no_segment_order_rejected;
+      return output;
+    }
+    const std::span<const std::uint8_t> encoded{
+        frame.data() + 8U, frame.size() - 8U - 32U};
+    const auto decoded = decode_exact_direct_morse_forest_batch_segment(
+        encoded, limits);
+    if (!decoded.certified_decoded()) {
+      output.validated_prefix_only = true;
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_codec_rejected;
+      return output;
+    }
+    std::array<std::uint8_t, 32U> chain_bytes{};
+    std::memcpy(
+        chain_bytes.data(), frame.data() + frame.size() - 32U, 32U);
+    if (contract::CanonicalId{chain_bytes} !=
+            decoded.segment.end_cursor.chain_digest ||
+        (chain_seeded &&
+         !(decoded.segment.begin_cursor == chain_cursor))) {
+      output.validated_prefix_only = true;
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_chain_rejected;
+      return output;
+    }
+    chain_cursor = decoded.segment.end_cursor;
+    chain_seeded = true;
+    if (consumer != nullptr) {
+      if (consumer->state == nullptr || consumer->consume == nullptr ||
+          !consumer->consume(consumer->state, decoded.segment)) {
+        output.validated_prefix_only = true;
+        output.decision = ExactDirectMorseForestRunArchiveDecision::
+            no_consumer_rejected;
+        return output;
+      }
+    }
+    ++output.delivered_segment_count;
+  }
+  std::array<std::uint8_t, 8U> observed_end_magic{};
+  read_exact(observed_end_magic.data(), observed_end_magic.size(), true);
+  if (!std::equal(
+          observed_end_magic.begin(),
+          observed_end_magic.end(),
+          end_magic.begin())) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_seal_rejected;
+    return output;
+  }
+  std::array<std::uint8_t, 8U> count_bytes{};
+  read_exact(count_bytes.data(), count_bytes.size(), true);
+  std::array<std::uint8_t, 32U> terminal_chain_bytes{};
+  read_exact(terminal_chain_bytes.data(), terminal_chain_bytes.size(), true);
+  std::array<std::uint8_t, 8U> seal_length_bytes{};
+  read_exact(seal_length_bytes.data(), seal_length_bytes.size(), true);
+  const std::uint64_t seal_length = parse_u64_bytes(seal_length_bytes.data());
+  if (parse_u64_bytes(count_bytes.data()) !=
+          output.delivered_segment_count ||
+      contract::CanonicalId{terminal_chain_bytes} !=
+          expected_identity.terminal_source_chain_digest) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_seal_rejected;
+    return output;
+  }
+  if (seal_length < envelope_byte_count ||
+      seal_length > limits.maximum_encoded_byte_count) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_limit_exceeded;
+    return output;
+  }
+  frame.assign(static_cast<std::size_t>(seal_length), 0U);
+  read_exact(frame.data(), frame.size(), true);
+  const auto decoded_seal = decode_exact_direct_morse_forest_final_seal(
+      frame, limits);
+  if (!decoded_seal.certified_decoded() ||
+      (chain_seeded &&
+       !(decoded_seal.seal.final_cursor == chain_cursor))) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_seal_rejected;
+    return output;
+  }
+  output.final_seal = decoded_seal.seal;
+  output.validated_byte_count = digest.byte_count;
+  output.archive_digest = digest.builder.finalize();
+  std::array<std::uint8_t, 32U> declared_digest{};
+  read_exact(declared_digest.data(), declared_digest.size(), false);
+  std::array<std::uint8_t, 8U> trailing_magic{};
+  read_exact(trailing_magic.data(), trailing_magic.size(), false);
+  std::uint8_t overflow = 0U;
+  if (contract::CanonicalId{declared_digest} != output.archive_digest ||
+      !std::equal(
+          trailing_magic.begin(),
+          trailing_magic.end(),
+          end_magic.begin()) ||
+      read_some_bytes(file.fd, &overflow, 1U) != 0U) {
+    output.decision = ExactDirectMorseForestRunArchiveDecision::
+        no_archive_digest_rejected;
+    return output;
+  }
+  output.decision =
+      ExactDirectMorseForestRunArchiveDecision::complete_atomic_run_archive;
+  return output;
+}
+
+}  // namespace
+
+ExactDirectMorseForestRunArchiveLoadResult
+load_exact_direct_morse_forest_run_archive(
+    const std::string& directory_path,
+    const std::string& final_file_name,
+    const ExactDirectMorseForestRunArchiveIdentity& expected_identity,
+    const ExactDirectMorseForestSegmentCodecLimits& limits,
+    const ExactDirectMorseForestRunArchiveConsumerView& consumer) noexcept {
+  ExactDirectMorseForestRunArchiveLoadResult output;
+  try {
+    if (!plain_file_name(final_file_name)) {
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_directory_rejected;
+      return output;
+    }
+    UniqueFd directory{::open(
+        directory_path.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC)};
+    if (!directory.valid()) {
+      output.decision =
+          ExactDirectMorseForestRunArchiveDecision::no_directory_rejected;
+      return output;
+    }
+    return validate_run_archive(
+        directory.fd, final_file_name, expected_identity, limits, &consumer);
+  } catch (const ArchiveFailure& failure) {
+    output.decision = failure.decision;
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.decision =
+        ExactDirectMorseForestRunArchiveDecision::no_allocation_failed;
+    return output;
+  } catch (...) {
+    output.decision = ExactDirectMorseForestRunArchiveDecision::no_io_failed;
+    return output;
+  }
+}
+
+ExactDirectMorseForestRunArchiveRecoveryResult
+recover_exact_direct_morse_forest_run_archive_directory(
+    const std::string& directory_path,
+    const std::string& final_file_name,
+    const ExactDirectMorseForestRunArchiveIdentity& expected_identity,
+    const ExactDirectMorseForestSegmentCodecLimits& limits) noexcept {
+  ExactDirectMorseForestRunArchiveRecoveryResult output;
+  try {
+    if (!plain_file_name(final_file_name)) {
+      output.decision = ExactDirectMorseForestRunArchiveRecoveryDecision::
+          no_directory_rejected;
+      return output;
+    }
+    UniqueFd directory{::open(
+        directory_path.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC)};
+    if (!directory.valid()) {
+      output.decision = ExactDirectMorseForestRunArchiveRecoveryDecision::
+          no_directory_rejected;
+      return output;
+    }
+    const std::string temporary_name =
+        final_file_name + std::string{temporary_suffix};
+    struct ::stat state {};
+    if (::fstatat(
+            directory.fd,
+            temporary_name.c_str(),
+            &state,
+            AT_SYMLINK_NOFOLLOW) == 0) {
+      if (::unlinkat(directory.fd, temporary_name.c_str(), 0) != 0 ||
+          ::fsync(directory.fd) != 0) {
+        output.decision =
+            ExactDirectMorseForestRunArchiveRecoveryDecision::no_io_failed;
+        return output;
+      }
+      output.discarded_temporary_count = 1U;
+    }
+    if (::fstatat(
+            directory.fd,
+            final_file_name.c_str(),
+            &state,
+            AT_SYMLINK_NOFOLLOW) != 0) {
+      output.decision = output.discarded_temporary_count != 0U
+          ? ExactDirectMorseForestRunArchiveRecoveryDecision::
+                torn_temporary_discarded
+          : ExactDirectMorseForestRunArchiveRecoveryDecision::absent;
+      return output;
+    }
+    output.final_present = true;
+    const auto validation = validate_run_archive(
+        directory.fd, final_file_name, expected_identity, limits, nullptr);
+    output.decision = validation.certified_loaded()
+        ? ExactDirectMorseForestRunArchiveRecoveryDecision::
+              valid_final_present
+        : ExactDirectMorseForestRunArchiveRecoveryDecision::
+              invalid_final_present;
+    return output;
+  } catch (const ArchiveFailure&) {
+    output.decision = ExactDirectMorseForestRunArchiveRecoveryDecision::
+        no_io_failed;
+    return output;
+  } catch (...) {
+    output.decision = ExactDirectMorseForestRunArchiveRecoveryDecision::
+        no_io_failed;
+    return output;
+  }
 }
 
 }  // namespace morsehgp3d::hierarchy
