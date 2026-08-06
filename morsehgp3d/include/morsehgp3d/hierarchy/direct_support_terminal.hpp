@@ -129,6 +129,7 @@ enum class ExactDirectSupportHigherSourceKind : std::uint8_t {
   unspecified,
   fresh_resident_replay,
   sealed_anchored_fixed_chunk_run,
+  anchored_session_chain,
 };
 
 enum class ExactDirectSupportPairSourceKind : std::uint8_t {
@@ -260,6 +261,23 @@ build_exact_direct_support_terminal_facade(
     const ExactDirectSupportTerminalBudget& budget,
     const ExactPairSupportStreamResult& pair_result,
     const ExactHigherSupportStreamResult& higher_result);
+
+// Anchored-session-chain source kind (4-b2).  The higher result is accepted
+// under the sealed certificate privately minted by the anchored stream
+// assembler: certification is the recomputed authority-manifest binding,
+// the strict content re-digest of the presented result and the BigInt
+// universe closure -- no exhaustive stream re-execution.  Every transition
+// behind the certificate was fresh-CPU-replayed by the anchored session at
+// commit time; per-transaction work-unit budgets are variable by design.
+[[nodiscard]] ExactDirectSupportTerminalFacade
+build_exact_direct_support_terminal_facade(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactDirectSupportTerminalBudget& budget,
+    const ExactPairSupportStreamResult& pair_result,
+    const ExactHigherSupportStreamResult& higher_result,
+    const ExactHigherSupportAnchoredStreamCertificate& higher_certificate);
 
 // Consumes a process-local root-anchored higher-support authority.  Its fixed
 // per-chunk budget must equal budget.higher.  This avoids a second complete

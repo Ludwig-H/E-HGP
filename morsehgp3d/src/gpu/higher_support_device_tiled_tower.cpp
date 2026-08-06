@@ -19,13 +19,17 @@ assemble_exact_higher_support_stream_device_tiled(
   try {
     hierarchy::ExactHigherSupportAuthorityContext authority{
         index, cloud, requested_maximum_order};
+    // The assembler owns the anchored scientific session and appropriates
+    // every verified transition; it must outlive the bridge that borrows
+    // it.
+    hierarchy::ExactHigherSupportAnchoredStreamAssembler assembler{
+        authority};
     MortonLbvhBuildContext lease_builder{cloud.size() + 2U};
     const auto lease_build = lease_builder.build(cloud);
     auto lease = lease_builder.release_device_traversal_lease(lease_build);
     HigherSupportDeviceTiledSessionBridge bridge{
-        authority, std::move(lease), bridge_config};
+        authority, assembler, std::move(lease), bridge_config};
 
-    hierarchy::ExactHigherSupportStreamResult higher;
     while (!bridge.session_terminal()) {
       auto advance = bridge.advance_one_tile_transaction();
       if (advance.status ==
@@ -39,54 +43,26 @@ assemble_exact_higher_support_stream_device_tiled(
         output.bridge_poisoned = bridge.poisoned();
         return output;
       }
-      higher.events.insert(
-          higher.events.end(),
-          std::make_move_iterator(advance.committed_events.begin()),
-          std::make_move_iterator(advance.committed_events.end()));
-      higher.relevant_extra_shell_diagnostics.insert(
-          higher.relevant_extra_shell_diagnostics.end(),
-          std::make_move_iterator(
-              advance.committed_extra_shell_diagnostics.begin()),
-          std::make_move_iterator(
-              advance.committed_extra_shell_diagnostics.end()));
     }
     output.session_terminal = bridge.session_terminal();
     output.bridge_poisoned = bridge.poisoned();
-
-    // Facade-compatible assembly under the exhaustive oracle's public
-    // canonical order.  The audit is the terminal anchored checkpoint's
-    // cumulative audit -- accumulated by the same host stream builder the
-    // exhaustive backend runs -- and the completion facts are carried by
-    // the session-terminal state, its audit identities and the bridge's
-    // per-commit rich prune replay.
-    const auto& checkpoint = bridge.trusted_checkpoint();
-    if (!output.session_terminal || output.bridge_poisoned ||
-        !checkpoint.locally_complete()) {
+    if (!output.session_terminal || output.bridge_poisoned) {
       return output;
     }
-    hierarchy::canonical_sort_exact_higher_support_events(higher.events);
-    hierarchy::canonical_sort_exact_higher_support_extra_shell_diagnostics(
-        higher.relevant_extra_shell_diagnostics);
-    higher.requirements = {
-        checkpoint.manifest.point_count,
-        checkpoint.manifest.requested_maximum_order,
-        checkpoint.manifest.effective_maximum_order,
-        checkpoint.manifest.maximum_relevant_closed_rank};
-    higher.budget = declared_budget;
-    higher.status = hierarchy::ExactHigherSupportStreamStatus::complete;
-    higher.stop_reason = hierarchy::ExactHigherSupportStopReason::none;
-    higher.audit = checkpoint.cumulative_audit;
-    higher.grouped_frontier_partition_certified =
-        checkpoint.cumulative_audit.grouped_partition_accounting_certified;
-    higher.all_prunes_replayable = true;
-    higher.all_rank_relevant_shells_complete = true;
-    higher.frontier_exhausted = checkpoint.frontier.empty();
-    higher.no_forbidden_global_structure_materialized = true;
-    higher.hierarchy_reduction_performed = false;
-    output.higher.emplace(std::move(higher));
+
+    // The anchored assembler -- not this driver -- assembles the stream
+    // result from the records it appropriated commit by commit, and mints
+    // the sealed certificate at the locally-complete terminal.
+    auto seal = assembler.seal_terminal_stream(declared_budget);
+    if (!seal.certified_sealed()) {
+      return output;
+    }
+    output.higher = std::move(seal.result);
+    output.certificate = seal.certificate;
     return output;
   } catch (...) {
     output.higher.reset();
+    output.certificate = {};
     return output;
   }
 }
@@ -133,6 +109,7 @@ build_exact_direct_morse_tower_from_cloud_device_tiled(
         std::move(index),
         std::move(pair),
         std::move(*assembly.higher),
+        assembly.certificate,
         requested_maximum_order,
         ExactDirectMorseTowerBackendKind::device_tiled_session_v1,
         budget);

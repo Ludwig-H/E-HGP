@@ -132,4 +132,17 @@ finish_exact_direct_morse_tower(
     ExactDirectMorseTowerBackendKind backend,
     const ExactDirectMorseTowerBudget& budget);
 
+// Anchored-session variant: the facade is built through the sealed
+// certificate overload instead of the fresh exhaustive replay.
+[[nodiscard]] ExactDirectMorseTowerResult
+finish_exact_direct_morse_tower(
+    spatial::CanonicalPointCloud&& cloud,
+    spatial::MortonLbvhIndex&& index,
+    ExactPairSupportStreamResult&& pair,
+    ExactHigherSupportStreamResult&& higher,
+    const ExactHigherSupportAnchoredStreamCertificate& higher_certificate,
+    std::size_t requested_maximum_order,
+    ExactDirectMorseTowerBackendKind backend,
+    const ExactDirectMorseTowerBudget& budget);
+
 }  // namespace morsehgp3d::hierarchy

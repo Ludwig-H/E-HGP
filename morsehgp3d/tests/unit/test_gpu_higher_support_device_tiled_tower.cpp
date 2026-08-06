@@ -87,6 +87,11 @@ void run_assembly_differential(
   if (!assembly.certified_assembled() || !oracle.stream_complete()) {
     return;
   }
+  check(
+      assembly.certificate.minted() &&
+          assembly.certificate.certifies(*assembly.higher),
+      label + ": the minted anchored certificate certifies the sealed "
+              "result");
   const auto& higher = *assembly.higher;
   check(
       higher.events == oracle.events,
@@ -113,20 +118,24 @@ void run_assembly_differential(
       label + ": the assembled result carries the completion certification");
 }
 
-// Sealed limitation of this increment: the terminal facade freshly re-runs
-// the exhaustive stream and requires total result equality (including the
-// prune-certificate payloads the assembly deliberately does not retain),
-// so the device tower stops fail-closed at no_facade_rejected until the
-// facade gains an anchored-session source kind -- the next increment.
-void test_sealed_facade_limitation() {
-  const std::array<CertifiedPoint3, 4U> tetrahedron{
-      point(1.0, 1.0, 1.0),
-      point(-1.0, -1.0, 1.0),
-      point(-1.0, 1.0, -1.0),
-      point(1.0, -1.0, -1.0),
-  };
-  auto cloud = CanonicalPointCloud::rejecting_duplicates(
-      std::span<const CertifiedPoint3>{tetrahedron});
+// 4-b2 end-to-end differential: the complete device-tiled tower -- pair
+// stream, anchored device-tiled higher stream sealed under its certificate,
+// facade through the anchored_session_chain source kind, both journals --
+// must reproduce the exhaustive host tower's scientific content.  Only the
+// facade's provenance facts (source kind, replay flag, chunk accounting and
+// checkpoint digest) may differ between the two backends.
+void run_tower_differential(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    const std::string& label) {
+  const auto host = build_exact_direct_morse_tower_from_cloud(
+      points,
+      requested_maximum_order,
+      ExactDirectMorseTowerBackendKind::exhaustive_host_v1,
+      unlimited_budget());
+  check(host.certified_tower(), label + ": the exhaustive host tower is certified");
+
+  auto cloud = CanonicalPointCloud::rejecting_duplicates(points);
   auto index = MortonLbvhIndex::build(cloud);
   gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
   gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
@@ -134,16 +143,194 @@ void test_sealed_facade_limitation() {
       index, cloud);
   const auto device =
       gpu::build_exact_direct_morse_tower_from_cloud_device_tiled(
-          std::move(cloud), std::move(index), 1U, unlimited_budget());
+          std::move(cloud),
+          std::move(index),
+          requested_maximum_order,
+          unlimited_budget());
   check(
-      !device.certified_tower() && !device.tower.has_value() &&
-          device.receipt.pair_stream_complete &&
-          device.receipt.higher_stream_complete &&
-          device.receipt.decision ==
-              ExactDirectMorseTowerDecision::no_facade_rejected,
-      "the device tower stops fail-closed at the sealed facade limitation "
-      "with both streams complete (decision=" +
+      device.certified_tower(),
+      label + ": the device-tiled tower is certified end to end (decision=" +
           std::to_string(static_cast<int>(device.receipt.decision)) + ")");
+  if (!host.certified_tower() || !device.certified_tower()) {
+    return;
+  }
+  const auto& host_tower = *host.tower;
+  const auto& device_tower = *device.tower;
+  check(
+      device_tower.pair == host_tower.pair,
+      label + ": the device tower's pair stream equals the host tower's");
+  check(
+      device_tower.higher.events == host_tower.higher.events &&
+          device_tower.higher.relevant_extra_shell_diagnostics ==
+              host_tower.higher.relevant_extra_shell_diagnostics &&
+          device_tower.higher.requirements ==
+              host_tower.higher.requirements,
+      label + ": the device tower's higher records equal the host tower's");
+  const auto& host_facade = host_tower.facade.certificate;
+  const auto& device_facade = device_tower.facade.certificate;
+  check(
+      device_tower.facade.events == host_tower.facade.events &&
+          device_tower.facade.relevant_extra_shell_diagnostics ==
+              host_tower.facade.relevant_extra_shell_diagnostics,
+      label + ": the device facade payload equals the host facade payload");
+  check(
+      device_facade.normalized_terminal_output_digest ==
+              host_facade.normalized_terminal_output_digest &&
+          device_facade.pair_semantic_digest ==
+              host_facade.pair_semantic_digest &&
+          device_facade.higher_semantic_digest ==
+              host_facade.higher_semantic_digest &&
+          device_facade.exact_candidate_universe_size ==
+              host_facade.exact_candidate_universe_size &&
+          device_facade.arity_certificates ==
+              host_facade.arity_certificates,
+      label + ": the device facade certificate carries the host facade's "
+              "scientific digests and universe closure");
+  check(
+      device_facade.higher_source_kind ==
+              ExactDirectSupportHigherSourceKind::anchored_session_chain &&
+          !device_facade.higher_result_freshly_replayed &&
+          host_facade.higher_source_kind ==
+              ExactDirectSupportHigherSourceKind::fresh_resident_replay &&
+          host_facade.higher_result_freshly_replayed,
+      label + ": the two backends declare their distinct higher source "
+              "kinds truthfully");
+  check(
+      device_tower.event_journal == host_tower.event_journal,
+      label + ": the device tower's Morse event journal equals the host "
+              "tower's");
+  check(
+      device_tower.seed_journal == host_tower.seed_journal,
+      label + ": the device tower's saddle-arm seed journal equals the "
+              "host tower's");
+  check(
+      device.receipt.backend ==
+              ExactDirectMorseTowerBackendKind::device_tiled_session_v1 &&
+          device.receipt.decision ==
+              ExactDirectMorseTowerDecision::complete_exact_tower &&
+          device.receipt.higher_event_count ==
+              host.receipt.higher_event_count &&
+          device.receipt.facade_event_count ==
+              host.receipt.facade_event_count &&
+          device.receipt.morse_event_projection_count ==
+              host.receipt.morse_event_projection_count &&
+          device.receipt.saddle_arm_seed_count ==
+              host.receipt.saddle_arm_seed_count,
+      label + ": the device receipt seals its backend and matches the host "
+              "stage counts");
+}
+
+// Anti-forge: the anchored certificate must fail closed against a mutated
+// result, an inflated audit, a foreign authority and a pre-terminal mint.
+void test_anchored_certificate_anti_forge() {
+  const std::array<CertifiedPoint3, 4U> tetrahedron{
+      point(1.0, 1.0, 1.0),
+      point(-1.0, -1.0, 1.0),
+      point(-1.0, 1.0, -1.0),
+      point(1.0, -1.0, -1.0),
+  };
+  const auto tetra_cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{tetrahedron});
+  const auto tetra_index = MortonLbvhIndex::build(tetra_cloud);
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      tetra_index, tetra_cloud);
+  const auto tetra = gpu::assemble_exact_higher_support_stream_device_tiled(
+      tetra_cloud, tetra_index, 1U, unlimited_higher_budget());
+  check(
+      tetra.certified_assembled(),
+      "anti-forge: the tetrahedron assembly seals");
+  if (!tetra.certified_assembled()) {
+    return;
+  }
+
+  // Inflated audit: one forged support in the universe accounting.
+  auto inflated = *tetra.higher;
+  ++inflated.audit.total_support_count;
+  check(
+      !tetra.certificate.certifies(inflated),
+      "anti-forge: an inflated audit fails the certificate");
+
+  // Mutated record set: one appropriated event dropped.
+  if (!tetra.higher->events.empty()) {
+    auto truncated = *tetra.higher;
+    truncated.events.pop_back();
+    check(
+        !tetra.certificate.certifies(truncated),
+        "anti-forge: a dropped event fails the certificate");
+  }
+
+  // Foreign certificate: a second anchored authority on a different cloud.
+  const std::array<CertifiedPoint3, 5U> pyramid{
+      point(1.0, 1.0, 0.0),
+      point(-1.0, 1.0, 0.0),
+      point(-1.0, -1.0, 0.0),
+      point(1.0, -1.0, 0.0),
+      point(0.0, 0.0, 1.5),
+  };
+  const auto pyramid_cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{pyramid});
+  const auto pyramid_index = MortonLbvhIndex::build(pyramid_cloud);
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      pyramid_index, pyramid_cloud);
+  const auto pyramid_assembly =
+      gpu::assemble_exact_higher_support_stream_device_tiled(
+          pyramid_cloud, pyramid_index, 1U, unlimited_higher_budget());
+  check(
+      pyramid_assembly.certified_assembled(),
+      "anti-forge: the pyramid assembly seals");
+  if (pyramid_assembly.certified_assembled()) {
+    check(
+        !tetra.certificate.certified_for_authority(
+            pyramid_assembly.certificate.manifest()) &&
+            !pyramid_assembly.certificate.certified_for_authority(
+                tetra.certificate.manifest()),
+        "anti-forge: certificates are bound to their own authority "
+        "manifest");
+    check(
+        !tetra.certificate.certifies(*pyramid_assembly.higher) &&
+            !pyramid_assembly.certificate.certifies(*tetra.higher),
+        "anti-forge: a foreign result fails the certificate");
+  }
+
+  // Pre-terminal mint: sealing before the session is locally complete
+  // yields no certificate.
+  ExactHigherSupportAuthorityContext authority{tetra_index, tetra_cloud, 1U};
+  ExactHigherSupportAnchoredStreamAssembler premature{authority};
+  const auto premature_seal =
+      premature.seal_terminal_stream(unlimited_higher_budget());
+  check(
+      !premature_seal.certified_sealed() &&
+          !premature_seal.certificate.minted(),
+      "anti-forge: a pre-terminal mint is refused");
+}
+
+void test_tower_differentials() {
+  const std::array<CertifiedPoint3, 4U> tetrahedron{
+      point(1.0, 1.0, 1.0),
+      point(-1.0, -1.0, 1.0),
+      point(-1.0, 1.0, -1.0),
+      point(1.0, -1.0, -1.0),
+  };
+  run_tower_differential(tetrahedron, 1U, "tower tetrahedron/K1");
+
+  // The octahedron-plus-poles sphere cloud legitimately fails the event
+  // journal's partial-refinement certification on every backend, so the
+  // end-to-end fixture is a skewed cube in general position whose
+  // exhaustive host tower certifies through both journals at K=3.
+  std::vector<CertifiedPoint3> skew_cube;
+  for (int x = 0; x < 2; ++x) {
+    for (int y = 0; y < 2; ++y) {
+      for (int z = 0; z < 2; ++z) {
+        skew_cube.push_back(point(
+            x * 1.0 + 0.125 * z, y * 1.0 + 0.0625 * x, z * 1.0 + 0.03125 * y));
+      }
+    }
+  }
+  run_tower_differential(skew_cube, 3U, "tower skewcube8/K3");
 }
 
 void test_assembly_differentials() {
@@ -181,7 +368,8 @@ void test_assembly_differentials() {
 int main() {
   try {
     test_assembly_differentials();
-    test_sealed_facade_limitation();
+    test_tower_differentials();
+    test_anchored_certificate_anti_forge();
   } catch (const std::exception& error) {
     std::cerr << "FAIL: unexpected exception: " << error.what() << '\n';
     return 1;

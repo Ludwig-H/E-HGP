@@ -238,6 +238,18 @@ class HigherSupportDeviceTiledSessionBridge final {
       HigherSupportDeviceTiledSessionBridgeConfig config = {},
       const hierarchy::ExactSparseHigherSupportH0ChunkRunContext*
           wire_validation_context = nullptr);
+
+  // Borrowed-assembler construction (4-b2): the external anchored stream
+  // assembler owns the scientific session and appropriates every verified
+  // transition; it must outlive this bridge.  All cross-validation and
+  // censure semantics are unchanged.
+  HigherSupportDeviceTiledSessionBridge(
+      const hierarchy::ExactHigherSupportAuthorityContext& authority,
+      hierarchy::ExactHigherSupportAnchoredStreamAssembler& stream_assembler,
+      MortonLbvhDeviceTraversalLease&& traversal_lease,
+      HigherSupportDeviceTiledSessionBridgeConfig config = {},
+      const hierarchy::ExactSparseHigherSupportH0ChunkRunContext*
+          wire_validation_context = nullptr);
   ~HigherSupportDeviceTiledSessionBridge() noexcept;
 
   HigherSupportDeviceTiledSessionBridge(

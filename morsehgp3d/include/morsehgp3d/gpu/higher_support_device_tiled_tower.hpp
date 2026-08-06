@@ -8,31 +8,34 @@
 
 namespace morsehgp3d::gpu {
 
-// Verrou ④, incrément b: the device-tiled exact tower.  The pair stream and
-// every downstream stage reuse the host tower helper unchanged; the higher
-// stage runs through the sealed M2 session bridge -- the anchored session
-// commits every transition through its own fresh CPU replay, the device
-// engine only proposes tiles that are cross-validated in exact::BigInt --
-// and the committed events and diagnostics are assembled into a
-// facade-compatible stream result under the exhaustive oracle's public
-// canonical record order.  Locally the launchers resolve to the certified
-// scientific host fake; on G4 the same code binds the native sm_120 kernel.
-// The device-tiled higher-stream assembly on its own: the anchored session
-// driven to terminal through the sealed M2 bridge, its committed events and
-// diagnostics re-ordered under the exhaustive oracle's public canonical
-// sort, the terminal checkpoint's cumulative audit sealed as the result
-// audit.  Sealed limitation of this increment: the terminal facade's
-// certification freshly re-runs the exhaustive stream and requires total
-// equality, so the device tower below stops fail-closed at
-// no_facade_rejected until the facade gains an anchored-session source
-// kind -- the next increment of the lock.
+// Verrou ④, incréments b1+b2: the device-tiled exact tower.  The pair
+// stream and every downstream stage reuse the host tower helper unchanged;
+// the higher stage runs through the sealed M2 session bridge -- the
+// anchored session commits every transition through its own fresh CPU
+// replay, the device engine only proposes tiles that are cross-validated in
+// exact::BigInt -- and the anchored stream assembler seals the committed
+// records into a facade-compatible stream result plus the mint-private
+// certificate the facade's anchored_session_chain source kind verifies
+// without any exhaustive re-run.  Locally the launchers resolve to the
+// certified scientific host fake; on G4 the same code binds the native
+// sm_120 kernel.
+// The device-tiled higher-stream assembly on its own: the anchored stream
+// assembler owns the scientific session, the bridge borrows it so every
+// verified transition is appropriated at commit time, and the terminal
+// seal carries both the facade-compatible stream result (public canonical
+// order, cumulative terminal audit) and the privately minted certificate
+// that binds it to the anchored chain.  The certificate is what the
+// terminal facade's anchored_session_chain source kind consumes instead of
+// a fresh exhaustive replay.
 struct HigherSupportDeviceTiledStreamAssembly {
   std::optional<hierarchy::ExactHigherSupportStreamResult> higher;
+  hierarchy::ExactHigherSupportAnchoredStreamCertificate certificate{};
   bool session_terminal{false};
   bool bridge_poisoned{false};
 
   [[nodiscard]] bool certified_assembled() const noexcept {
-    return higher.has_value() && session_terminal && !bridge_poisoned;
+    return higher.has_value() && certificate.minted() && session_terminal &&
+           !bridge_poisoned;
   }
 };
 

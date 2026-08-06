@@ -4524,4 +4524,147 @@ void canonical_sort_exact_higher_support_extra_shell_diagnostics(
       support_record_less<ExactHigherSupportExtraShellDiagnostic>);
 }
 
+// ---------------------------------------------------------------------------
+// 4-b2: anchored stream assembler and sealed certificate.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+[[nodiscard]] contract::CanonicalId anchored_content_seed() {
+  contract::CanonicalSha256Builder builder;
+  builder.update(
+      "MorseHGP3D/phase15/higher-support/anchored-stream-content/v1/"
+      "sha256/");
+  return builder.finalize();
+}
+
+[[nodiscard]] contract::CanonicalId anchored_content_digest(
+    std::span<const ExactHigherSupportEvent> events,
+    std::span<const ExactHigherSupportExtraShellDiagnostic> diagnostics) {
+  contract::CanonicalId digest = anchored_content_seed();
+  for (const ExactHigherSupportEvent& event : events) {
+    digest = extend_output_chain(digest, event);
+  }
+  for (const ExactHigherSupportExtraShellDiagnostic& diagnostic :
+       diagnostics) {
+    digest = extend_output_chain(digest, diagnostic);
+  }
+  return digest;
+}
+
+}  // namespace
+
+bool ExactHigherSupportAnchoredStreamCertificate::certifies(
+    const ExactHigherSupportStreamResult& result) const {
+  if (!minted_ || result.events.size() != event_count_ ||
+      result.relevant_extra_shell_diagnostics.size() !=
+          diagnostic_count_ ||
+      !(result.audit == terminal_audit_) ||
+      result.requirements.point_count != manifest_.point_count ||
+      result.requirements.requested_maximum_order !=
+          manifest_.requested_maximum_order ||
+      result.requirements.effective_maximum_order !=
+          manifest_.effective_maximum_order ||
+      result.requirements.maximum_relevant_closed_rank !=
+          manifest_.maximum_relevant_closed_rank ||
+      !result.stream_complete() ||
+      !result.absence_of_additional_higher_supports_certified()) {
+    return false;
+  }
+  return anchored_content_digest(
+             result.events, result.relevant_extra_shell_diagnostics) ==
+         canonical_content_digest_;
+}
+
+bool ExactHigherSupportAnchoredStreamCertificate::certified_for_authority(
+    const ExactHigherSupportCheckpointManifest& observed) const noexcept {
+  return minted_ && manifest_ == observed;
+}
+
+ExactHigherSupportAnchoredStreamAssembler::
+    ExactHigherSupportAnchoredStreamAssembler(
+        const ExactHigherSupportAuthorityContext& authority)
+    : authority_(authority), session_(authority_) {}
+
+const ExactHigherSupportCheckpoint&
+ExactHigherSupportAnchoredStreamAssembler::trusted_checkpoint()
+    const noexcept {
+  return session_.trusted_checkpoint();
+}
+
+ExactHigherSupportStreamChunk
+ExactHigherSupportAnchoredStreamAssembler::prepare_next(
+    const ExactHigherSupportStreamBudget& chunk_budget,
+    const ExactHigherSupportCheckpoint& reinjected_source) const {
+  return session_.prepare_next(chunk_budget, reinjected_source);
+}
+
+ExactHigherSupportStreamChunkVerification
+ExactHigherSupportAnchoredStreamAssembler::commit_prepared(
+    const ExactHigherSupportStreamBudget& chunk_budget,
+    const ExactHigherSupportCheckpoint& reinjected_source,
+    const ExactHigherSupportStreamChunk& candidate) {
+  const ExactHigherSupportStreamChunkVerification verification =
+      session_.commit_prepared(chunk_budget, reinjected_source, candidate);
+  if (verification.chunk_transition_verified && !sealed_) {
+    events_.insert(
+        events_.end(), candidate.events.begin(), candidate.events.end());
+    diagnostics_.insert(
+        diagnostics_.end(),
+        candidate.relevant_extra_shell_diagnostics.begin(),
+        candidate.relevant_extra_shell_diagnostics.end());
+    ++committed_chunk_count_;
+  }
+  return verification;
+}
+
+ExactHigherSupportAnchoredStreamSeal
+ExactHigherSupportAnchoredStreamAssembler::seal_terminal_stream(
+    const ExactHigherSupportStreamBudget& declared_budget) {
+  ExactHigherSupportAnchoredStreamSeal seal;
+  const ExactHigherSupportCheckpoint& checkpoint =
+      session_.trusted_checkpoint();
+  if (sealed_ || !checkpoint.locally_complete()) {
+    return seal;
+  }
+  canonical_sort_exact_higher_support_events(events_);
+  canonical_sort_exact_higher_support_extra_shell_diagnostics(
+      diagnostics_);
+
+  ExactHigherSupportStreamResult result;
+  result.requirements = {
+      checkpoint.manifest.point_count,
+      checkpoint.manifest.requested_maximum_order,
+      checkpoint.manifest.effective_maximum_order,
+      checkpoint.manifest.maximum_relevant_closed_rank};
+  result.budget = declared_budget;
+  result.status = ExactHigherSupportStreamStatus::complete;
+  result.stop_reason = ExactHigherSupportStopReason::none;
+  result.audit = checkpoint.cumulative_audit;
+  result.grouped_frontier_partition_certified =
+      checkpoint.cumulative_audit.grouped_partition_accounting_certified;
+  result.all_prunes_replayable = true;
+  result.all_rank_relevant_shells_complete = true;
+  result.frontier_exhausted = checkpoint.frontier.empty();
+  result.no_forbidden_global_structure_materialized = true;
+  result.hierarchy_reduction_performed = false;
+  result.events = std::move(events_);
+  result.relevant_extra_shell_diagnostics = std::move(diagnostics_);
+
+  seal.certificate.manifest_ = checkpoint.manifest;
+  seal.certificate.terminal_checkpoint_digest_ =
+      checkpoint.checkpoint_digest;
+  seal.certificate.terminal_audit_ = checkpoint.cumulative_audit;
+  seal.certificate.committed_chunk_count_ = committed_chunk_count_;
+  seal.certificate.event_count_ = result.events.size();
+  seal.certificate.diagnostic_count_ =
+      result.relevant_extra_shell_diagnostics.size();
+  seal.certificate.canonical_content_digest_ = anchored_content_digest(
+      result.events, result.relevant_extra_shell_diagnostics);
+  seal.certificate.minted_ = true;
+  seal.result.emplace(std::move(result));
+  sealed_ = true;
+  return seal;
+}
+
 }  // namespace morsehgp3d::hierarchy

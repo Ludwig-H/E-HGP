@@ -165,3 +165,27 @@ calque sur la structure de validation du chemin fixed-chunk existant
 terminal, clôture BigInt), avec le genre de source distinct
 `anchored_session_chain` et la sémantique de budgets variables assumée
 par transaction.
+
+### Livraison ④-b2 (6/8/2026)
+
+Implémenté conformément au design, avec un écart d'inventaire découvert à
+l'exécution : `terminal_catalog_certified()` scellait la provenance higher
+par l'exclusivité binaire `fresh_higher_source != sealed_higher_source` —
+le genre `anchored_session_chain` rendait les deux formes fausses et la
+façade levait « certificate is inconsistent » (tour fail-closed à
+`no_facade_rejected`). Le sceau admet désormais trois formes de provenance
+higher mutuellement exclusives ; la clause `anchored_session_chain` exige :
+pas de rejeu frais déclaré, pas de borne de chunks fixe
+(`higher_maximum_chunk_count == 0`), pas d'autorité consommable, pas de
+digest de chaîne de sortie (le contenu est lié par le certificat, pas par
+la façade), run ancré certifié, records capturés une fois, et digest de
+checkpoint terminal non nul.
+
+Différentiel bout-en-bout : tetrahedron/K1 et skewcube8/K3 (cube biaisé en
+position générale). Le nuage sphere8 échoue légitimement la certification
+de raffinement partiel du journal d'événements sur tout backend (K=2 et
+K=3) — vérifié par sonde sur cinq fixtures — et reste donc réservé au
+différentiel d'assemblage. Anti-forge livré : audit gonflé, événement
+supprimé, certificat d'autorité étrangère (deux directions), mintage
+pré-terminal — tous rejetés fermés. Le différentiel des six nuages n=32
+sur kernel natif accompagne la prochaine session G4 gardée.

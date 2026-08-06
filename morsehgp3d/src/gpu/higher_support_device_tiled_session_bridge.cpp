@@ -813,7 +813,7 @@ class Phase15HigherSupportDeviceTiledSessionBridgeState final {
         geometry(build_mirror_geometry(
             authority_context.index(), authority_context.cloud())) {
     validate_configuration();
-    source_checkpoint = session.trusted_checkpoint();
+    source_checkpoint = anchored_checkpoint();
     install_frontier_context(std::move(traversal_lease));
     audit.point_count = authority->cloud().size();
     audit.maximum_relevant_closed_rank =
@@ -834,6 +834,35 @@ class Phase15HigherSupportDeviceTiledSessionBridgeState final {
   HigherSupportDeviceTiledSessionBridgeConfig config;
   const hierarchy::ExactSparseHigherSupportH0ChunkRunContext* wire_context;
   hierarchy::ExactHigherSupportAnchoredSession session;
+  // When borrowed, the external assembler owns the scientific session and
+  // appropriates every verified transition; the owned member above stays
+  // untouched at its initial checkpoint.
+  hierarchy::ExactHigherSupportAnchoredStreamAssembler* external_assembler{
+      nullptr};
+
+  [[nodiscard]] const hierarchy::ExactHigherSupportCheckpoint&
+  anchored_checkpoint() const noexcept {
+    return external_assembler != nullptr
+        ? external_assembler->trusted_checkpoint()
+        : session.trusted_checkpoint();
+  }
+  [[nodiscard]] hierarchy::ExactHigherSupportStreamChunk anchored_prepare(
+      const hierarchy::ExactHigherSupportStreamBudget& chunk_budget,
+      const hierarchy::ExactHigherSupportCheckpoint& reinjected) const {
+    return external_assembler != nullptr
+        ? external_assembler->prepare_next(chunk_budget, reinjected)
+        : session.prepare_next(chunk_budget, reinjected);
+  }
+  [[nodiscard]] hierarchy::ExactHigherSupportStreamChunkVerification
+  anchored_commit(
+      const hierarchy::ExactHigherSupportStreamBudget& chunk_budget,
+      const hierarchy::ExactHigherSupportCheckpoint& reinjected,
+      const hierarchy::ExactHigherSupportStreamChunk& candidate) {
+    return external_assembler != nullptr
+        ? external_assembler->commit_prepared(
+              chunk_budget, reinjected, candidate)
+        : session.commit_prepared(chunk_budget, reinjected, candidate);
+  }
   MirrorGeometry geometry;
   std::optional<HigherSupportDeviceTiledFrontierContext> frontier;
   hierarchy::ExactHigherSupportCheckpoint source_checkpoint;
@@ -917,7 +946,7 @@ void Phase15HigherSupportDeviceTiledSessionBridgeState::
 void Phase15HigherSupportDeviceTiledSessionBridgeState::
     verify_induction_identity() {
   const ExactHigherSupportCheckpoint& trusted =
-      session.trusted_checkpoint();
+      anchored_checkpoint();
   BigInt frontier_mass{0};
   for (const ExactHigherSupportFrontierEntry& entry : trusted.frontier) {
     frontier_mass += authenticated_entry_mass(geometry, entry);
@@ -1165,7 +1194,7 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
         "cross-validation failure");
   }
   HigherSupportDeviceTiledSessionBridgeAdvance advance;
-  if (session.trusted_checkpoint().locally_complete()) {
+  if (anchored_checkpoint().locally_complete()) {
     audit.session_terminal_reached = true;
     advance.status =
         HigherSupportDeviceTiledSessionBridgeStatus::session_terminal;
@@ -1221,7 +1250,7 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
         };
     const auto probe = [&](std::size_t work_units) {
       ++audit.work_unit_probe_count;
-      return session.prepare_next(
+      return anchored_prepare(
           work_unit_probe_budget(work_units), source_checkpoint);
     };
     std::size_t lower = 0U;
@@ -1307,13 +1336,13 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
         }
       }
       const hierarchy::ExactHigherSupportStreamChunkVerification
-          verification = session.commit_prepared(
+          verification = anchored_commit(
               budget, source_checkpoint, *candidate);
       if (!verification.chunk_transition_verified) {
         fail("the anchored session rejected a canonical expansion "
              "transition");
       }
-      source_checkpoint = session.trusted_checkpoint();
+      source_checkpoint = anchored_checkpoint();
       verify_induction_identity();
       ++audit.committed_transaction_count;
       ++audit.committed_expansion_transition_count;
@@ -1400,13 +1429,13 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
         tile_roots, tile_entries, *candidate, *device_audit, records);
 
     const hierarchy::ExactHigherSupportStreamChunkVerification
-        verification = session.commit_prepared(
+        verification = anchored_commit(
             budget, source_checkpoint, *candidate);
     if (!verification.chunk_transition_verified) {
       fail("the anchored session rejected a cross-validated tile "
            "transition");
     }
-    source_checkpoint = session.trusted_checkpoint();
+    source_checkpoint = anchored_checkpoint();
     verify_induction_identity();
 
     ++audit.committed_transaction_count;
@@ -1440,7 +1469,7 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
         device_audit->cumulative_terminal_support_mass;
     device_resolved_baseline =
         device_audit->cumulative_resolved_support_mass;
-    if (session.trusted_checkpoint().locally_complete()) {
+    if (anchored_checkpoint().locally_complete()) {
       audit.session_terminal_reached = true;
     }
 
@@ -1492,6 +1521,28 @@ HigherSupportDeviceTiledSessionBridge::HigherSupportDeviceTiledSessionBridge(
               config,
               wire_validation_context)) {}
 
+HigherSupportDeviceTiledSessionBridge::HigherSupportDeviceTiledSessionBridge(
+    const hierarchy::ExactHigherSupportAuthorityContext& authority,
+    hierarchy::ExactHigherSupportAnchoredStreamAssembler& stream_assembler,
+    MortonLbvhDeviceTraversalLease&& traversal_lease,
+    HigherSupportDeviceTiledSessionBridgeConfig config,
+    const hierarchy::ExactSparseHigherSupportH0ChunkRunContext*
+        wire_validation_context)
+    : state_(
+          std::make_unique<
+              detail::Phase15HigherSupportDeviceTiledSessionBridgeState>(
+              authority,
+              std::move(traversal_lease),
+              config,
+              wire_validation_context)) {
+  // The borrowed assembler owns the scientific session; every anchored
+  // read, prepare and verified commit dispatches to it, and the state's
+  // own session stays untouched at its initial checkpoint.  The source
+  // checkpoint captured during construction is re-anchored accordingly.
+  state_->external_assembler = &stream_assembler;
+  state_->source_checkpoint = state_->anchored_checkpoint();
+}
+
 HigherSupportDeviceTiledSessionBridge::
     ~HigherSupportDeviceTiledSessionBridge() noexcept = default;
 
@@ -1507,11 +1558,11 @@ void HigherSupportDeviceTiledSessionBridge::rebind_frontier_context(
 
 const hierarchy::ExactHigherSupportCheckpoint&
 HigherSupportDeviceTiledSessionBridge::trusted_checkpoint() const noexcept {
-  return state_->session.trusted_checkpoint();
+  return state_->anchored_checkpoint();
 }
 
 bool HigherSupportDeviceTiledSessionBridge::session_terminal() const {
-  return state_->session.trusted_checkpoint().locally_complete();
+  return state_->anchored_checkpoint().locally_complete();
 }
 
 bool HigherSupportDeviceTiledSessionBridge::poisoned() const noexcept {

@@ -876,6 +876,103 @@ enum class ExactHigherSupportResidentAdvanceStatus : std::uint8_t {
   maximum_chunk_count_reached = 2U,
 };
 
+// ------------------------------------------------------------------------
+// 4-b2: the anchored stream assembler and its sealed certificate.  The
+// anchored session is the only entity that saw and fresh-replayed every
+// committed transition, so it owns the assembly: the assembler delegates
+// the prepare/commit protocol to an external orchestrator (the device-tiled
+// bridge), appropriates the committed records, and at terminal seals the
+// canonically sorted stream result together with a privately minted
+// certificate.  The facade accepts that pair without any exhaustive rerun.
+// ------------------------------------------------------------------------
+
+class ExactHigherSupportAnchoredStreamAssembler;
+
+class ExactHigherSupportAnchoredStreamCertificate {
+ public:
+  ExactHigherSupportAnchoredStreamCertificate() noexcept = default;
+
+  [[nodiscard]] bool minted() const noexcept { return minted_; }
+  [[nodiscard]] const ExactHigherSupportCheckpointManifest& manifest()
+      const noexcept {
+    return manifest_;
+  }
+  [[nodiscard]] const contract::CanonicalId& terminal_checkpoint_digest()
+      const noexcept {
+    return terminal_checkpoint_digest_;
+  }
+  [[nodiscard]] std::size_t committed_chunk_count() const noexcept {
+    return committed_chunk_count_;
+  }
+  // Strict content re-digest of the presented result through the one
+  // record-chain definition of this translation unit, plus count, audit,
+  // requirement and completion equality.  A forged or reordered record,
+  // an inflated audit or a foreign result fails closed.
+  [[nodiscard]] bool certifies(const ExactHigherSupportStreamResult&) const;
+  [[nodiscard]] bool certified_for_authority(
+      const ExactHigherSupportCheckpointManifest&) const noexcept;
+
+ private:
+  friend class ExactHigherSupportAnchoredStreamAssembler;
+
+  ExactHigherSupportCheckpointManifest manifest_{};
+  contract::CanonicalId terminal_checkpoint_digest_{};
+  contract::CanonicalId canonical_content_digest_{};
+  ExactHigherSupportStreamAudit terminal_audit_{};
+  std::size_t committed_chunk_count_{};
+  std::size_t event_count_{};
+  std::size_t diagnostic_count_{};
+  bool minted_{false};
+};
+
+struct ExactHigherSupportAnchoredStreamSeal {
+  std::optional<ExactHigherSupportStreamResult> result;
+  ExactHigherSupportAnchoredStreamCertificate certificate{};
+
+  [[nodiscard]] bool certified_sealed() const noexcept {
+    return result.has_value() && certificate.minted();
+  }
+};
+
+class ExactHigherSupportAnchoredStreamAssembler {
+ public:
+  explicit ExactHigherSupportAnchoredStreamAssembler(
+      const ExactHigherSupportAuthorityContext& authority);
+  ExactHigherSupportAnchoredStreamAssembler(
+      const ExactHigherSupportAnchoredStreamAssembler&) = delete;
+  ExactHigherSupportAnchoredStreamAssembler& operator=(
+      const ExactHigherSupportAnchoredStreamAssembler&) = delete;
+  ExactHigherSupportAnchoredStreamAssembler(
+      ExactHigherSupportAnchoredStreamAssembler&&) = delete;
+  ExactHigherSupportAnchoredStreamAssembler& operator=(
+      ExactHigherSupportAnchoredStreamAssembler&&) = delete;
+
+  [[nodiscard]] const ExactHigherSupportCheckpoint& trusted_checkpoint()
+      const noexcept;
+  [[nodiscard]] ExactHigherSupportStreamChunk prepare_next(
+      const ExactHigherSupportStreamBudget& chunk_budget,
+      const ExactHigherSupportCheckpoint& reinjected_source) const;
+  // Delegates to the anchored session; on a verified transition the
+  // candidate's events and diagnostics are appropriated into the assembly.
+  [[nodiscard]] ExactHigherSupportStreamChunkVerification commit_prepared(
+      const ExactHigherSupportStreamBudget& chunk_budget,
+      const ExactHigherSupportCheckpoint& reinjected_source,
+      const ExactHigherSupportStreamChunk& candidate);
+  // At the locally-complete terminal, sorts the appropriated records under
+  // the public canonical order, assembles the stream result and mints the
+  // sealed certificate exactly once.
+  [[nodiscard]] ExactHigherSupportAnchoredStreamSeal seal_terminal_stream(
+      const ExactHigherSupportStreamBudget& declared_budget);
+
+ private:
+  ExactHigherSupportAuthorityContext authority_;
+  ExactHigherSupportAnchoredSession session_;
+  std::vector<ExactHigherSupportEvent> events_;
+  std::vector<ExactHigherSupportExtraShellDiagnostic> diagnostics_;
+  std::size_t committed_chunk_count_{};
+  bool sealed_{false};
+};
+
 class ExactHigherSupportTerminalSession;
 class ExactSparseHigherSupportH0ChunkRunContext;
 struct ExactSparseDirectH0CandidateRun;

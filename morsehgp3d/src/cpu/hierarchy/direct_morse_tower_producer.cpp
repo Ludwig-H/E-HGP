@@ -20,11 +20,14 @@ bool ExactDirectMorseTowerResult::certified_tower() const noexcept {
          !receipt.public_status_claimed;
 }
 
-ExactDirectMorseTowerResult finish_exact_direct_morse_tower(
+namespace {
+
+ExactDirectMorseTowerResult finish_exact_direct_morse_tower_impl(
     spatial::CanonicalPointCloud&& cloud,
     spatial::MortonLbvhIndex&& index,
     ExactPairSupportStreamResult&& pair,
     ExactHigherSupportStreamResult&& higher,
+    const ExactHigherSupportAnchoredStreamCertificate* higher_certificate,
     std::size_t requested_maximum_order,
     ExactDirectMorseTowerBackendKind backend,
     const ExactDirectMorseTowerBudget& budget) {
@@ -50,13 +53,22 @@ ExactDirectMorseTowerResult finish_exact_direct_morse_tower(
       return output;
     }
 
-    auto facade = build_exact_direct_support_terminal_facade(
-        index,
-        cloud,
-        requested_maximum_order,
-        budget.terminal,
-        pair,
-        higher);
+    auto facade = higher_certificate != nullptr
+        ? build_exact_direct_support_terminal_facade(
+              index,
+              cloud,
+              requested_maximum_order,
+              budget.terminal,
+              pair,
+              higher,
+              *higher_certificate)
+        : build_exact_direct_support_terminal_facade(
+              index,
+              cloud,
+              requested_maximum_order,
+              budget.terminal,
+              pair,
+              higher);
     output.receipt.facade_event_count = facade.events.size();
     output.receipt.higher_canonical_cloud_digest =
         facade.certificate.higher_canonical_cloud_digest;
@@ -113,6 +125,47 @@ ExactDirectMorseTowerResult finish_exact_direct_morse_tower(
         ExactDirectMorseTowerDecision::no_facade_rejected;
     return output;
   }
+}
+
+}  // namespace
+
+ExactDirectMorseTowerResult finish_exact_direct_morse_tower(
+    spatial::CanonicalPointCloud&& cloud,
+    spatial::MortonLbvhIndex&& index,
+    ExactPairSupportStreamResult&& pair,
+    ExactHigherSupportStreamResult&& higher,
+    std::size_t requested_maximum_order,
+    ExactDirectMorseTowerBackendKind backend,
+    const ExactDirectMorseTowerBudget& budget) {
+  return finish_exact_direct_morse_tower_impl(
+      std::move(cloud),
+      std::move(index),
+      std::move(pair),
+      std::move(higher),
+      nullptr,
+      requested_maximum_order,
+      backend,
+      budget);
+}
+
+ExactDirectMorseTowerResult finish_exact_direct_morse_tower(
+    spatial::CanonicalPointCloud&& cloud,
+    spatial::MortonLbvhIndex&& index,
+    ExactPairSupportStreamResult&& pair,
+    ExactHigherSupportStreamResult&& higher,
+    const ExactHigherSupportAnchoredStreamCertificate& higher_certificate,
+    std::size_t requested_maximum_order,
+    ExactDirectMorseTowerBackendKind backend,
+    const ExactDirectMorseTowerBudget& budget) {
+  return finish_exact_direct_morse_tower_impl(
+      std::move(cloud),
+      std::move(index),
+      std::move(pair),
+      std::move(higher),
+      &higher_certificate,
+      requested_maximum_order,
+      backend,
+      budget);
 }
 
 ExactDirectMorseTowerResult build_exact_direct_morse_tower_from_cloud(

@@ -1036,6 +1036,20 @@ bool ExactDirectSupportTerminalCertificate::terminal_catalog_certified()
       higher_terminal_records_captured_once &&
       higher_output_chain_digest != contract::CanonicalId{} &&
       higher_terminal_checkpoint_digest != contract::CanonicalId{};
+  // The anchored session chain has no fixed per-chunk budget bound and no
+  // consumable terminal authority: its provenance is the assembler's
+  // mint-private certificate, whose only externally visible anchors are the
+  // variable committed-chunk count and the terminal checkpoint digest.
+  const bool anchored_session_chain_higher_source =
+      higher_source_kind ==
+          ExactDirectSupportHigherSourceKind::anchored_session_chain &&
+      !higher_result_freshly_replayed &&
+      higher_maximum_chunk_count == 0U &&
+      higher_root_anchored_run_certified &&
+      !higher_terminal_authority_consumed &&
+      higher_terminal_records_captured_once &&
+      higher_output_chain_digest == contract::CanonicalId{} &&
+      higher_terminal_checkpoint_digest != contract::CanonicalId{};
   exact::BigInt universe_sum{0};
   exact::BigInt event_count_sum{0};
   exact::BigInt diagnostic_count_sum{0};
@@ -1062,7 +1076,10 @@ bool ExactDirectSupportTerminalCertificate::terminal_catalog_certified()
                  (sealed_pair_source ? 1U : 0U) +
                  (sealed_transactional_pair_source ? 1U : 0U) ==
              1U &&
-         (fresh_higher_source != sealed_higher_source) &&
+         (fresh_higher_source ? 1U : 0U) +
+                 (sealed_higher_source ? 1U : 0U) +
+                 (anchored_session_chain_higher_source ? 1U : 0U) ==
+             1U &&
          pair_stream_terminal &&
          higher_stream_terminal && all_arities_terminal &&
          arities_certified && exact_candidate_universe_size_certified &&
@@ -1263,6 +1280,155 @@ ExactDirectSupportTerminalFacade build_exact_direct_support_terminal_facade(
   if (!facade.terminal_catalog_certified()) {
     throw std::logic_error(
         "the composed direct support terminal certificate is inconsistent");
+  }
+  return facade;
+}
+
+ExactDirectSupportTerminalFacade build_exact_direct_support_terminal_facade(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactDirectSupportTerminalBudget& budget,
+    const ExactPairSupportStreamResult& pair_result,
+    const ExactHigherSupportStreamResult& higher_result,
+    const ExactHigherSupportAnchoredStreamCertificate& higher_certificate) {
+  const ExactPairSupportCheckpointManifest pair_manifest =
+      make_exact_pair_support_checkpoint_manifest(
+          index, cloud, requested_maximum_order);
+  const ExactHigherSupportCheckpointManifest higher_manifest =
+      make_exact_higher_support_checkpoint_manifest(
+          index, cloud, requested_maximum_order);
+  const ExactPairSupportStreamVerification pair_verification =
+      verify_exact_pair_support_stream(
+          index,
+          cloud,
+          requested_maximum_order,
+          budget.pair,
+          pair_result);
+  const bool higher_certified =
+      higher_certificate.certified_for_authority(higher_manifest) &&
+      higher_certificate.certifies(higher_result) &&
+      higher_result.budget == budget.higher;
+
+  ExactDirectSupportTerminalFacade facade;
+  ExactDirectSupportTerminalCertificate& certificate = facade.certificate;
+  certificate.requested_budget = budget;
+  certificate.requirements = ExactDirectSupportTerminalRequirements{
+      pair_manifest.point_count,
+      pair_manifest.requested_maximum_order,
+      pair_manifest.effective_maximum_order,
+      pair_manifest.maximum_relevant_closed_rank};
+  certificate.pair_canonical_cloud_digest =
+      pair_manifest.canonical_cloud_digest;
+  certificate.higher_canonical_cloud_digest =
+      higher_manifest.canonical_cloud_digest;
+  certificate.pair_lbvh_digest = pair_manifest.lbvh_digest;
+  certificate.higher_lbvh_digest = higher_manifest.lbvh_digest;
+  certificate.pair_semantic_digest = pair_manifest.semantic_digest;
+  certificate.higher_semantic_digest = higher_manifest.semantic_digest;
+  certificate.source_authorities_match =
+      source_manifest_contracts_match(pair_manifest, higher_manifest);
+  certificate.source_requirements_match = source_requirements_match(
+      pair_result.requirements,
+      higher_result.requirements,
+      pair_manifest);
+  certificate.pair_source_kind =
+      ExactDirectSupportPairSourceKind::fresh_resident_replay;
+  certificate.pair_legacy_budget_applicable = true;
+  certificate.pair_result_freshly_replayed =
+      pair_verification.result_certified;
+  certificate.higher_result_freshly_replayed = false;
+  certificate.higher_source_kind =
+      ExactDirectSupportHigherSourceKind::anchored_session_chain;
+  certificate.higher_anchored_chunk_count =
+      higher_certificate.committed_chunk_count();
+  certificate.higher_root_anchored_run_certified = higher_certified;
+  certificate.higher_terminal_authority_consumed = false;
+  certificate.higher_terminal_records_captured_once = higher_certified;
+  certificate.higher_terminal_checkpoint_digest =
+      higher_certificate.terminal_checkpoint_digest();
+  certificate.pair_stream_terminal =
+      certificate.pair_result_freshly_replayed &&
+      pair_result.stream_complete() &&
+      pair_result.absence_of_additional_pair_supports_certified();
+  certificate.higher_stream_terminal =
+      higher_certified && higher_result.stream_complete() &&
+      higher_result.absence_of_additional_higher_supports_certified();
+  certificate.no_forbidden_global_structure_materialized =
+      pair_result.no_forbidden_global_structure_materialized &&
+      higher_result.no_forbidden_global_structure_materialized;
+  certificate.hierarchy_reduction_performed =
+      pair_result.hierarchy_reduction_performed ||
+      higher_result.hierarchy_reduction_performed;
+  certificate.scope = ExactDirectSupportTerminalScope::
+      direct_support_catalog_arities_two_through_four_only;
+
+  for (std::size_t index_value = 0U; index_value < 3U; ++index_value) {
+    ExactDirectSupportArityTerminalCertificate& arity =
+        certificate.arity_certificates[index_value];
+    arity.support_size =
+        static_cast<std::uint8_t>(index_value + 2U);
+    arity.exact_candidate_universe_size = exact_binomial(
+        cloud.size(), static_cast<std::size_t>(arity.support_size));
+    certificate.exact_candidate_universe_size +=
+        arity.exact_candidate_universe_size;
+  }
+
+  const bool pair_universe_certified =
+      certificate.pair_result_freshly_replayed &&
+      exact::BigInt{pair_result.audit.total_pair_count} ==
+          certificate.arity_certificates[0].exact_candidate_universe_size;
+  const bool higher_universe_certified =
+      higher_certified &&
+      higher_result.audit.exact_bigint_universe_certified &&
+      higher_result.audit.total_support_count ==
+          certificate.arity_certificates[1].exact_candidate_universe_size +
+              certificate.arity_certificates[2]
+                  .exact_candidate_universe_size;
+  certificate.arity_certificates[0]
+      .candidate_universe_size_certified = pair_universe_certified;
+  certificate.arity_certificates[1]
+      .candidate_universe_size_certified = higher_universe_certified;
+  certificate.arity_certificates[2]
+      .candidate_universe_size_certified = higher_universe_certified;
+  certificate.exact_candidate_universe_size_certified =
+      pair_universe_certified && higher_universe_certified;
+
+  if (!certificate.pair_result_freshly_replayed || !higher_certified ||
+      !certificate.source_authorities_match ||
+      !certificate.source_requirements_match) {
+    certificate.decision =
+        ExactDirectSupportTerminalDecision::source_result_not_certified;
+    return facade;
+  }
+
+  certificate.all_arities_terminal =
+      certificate.pair_stream_terminal &&
+      certificate.higher_stream_terminal &&
+      certificate.exact_candidate_universe_size_certified &&
+      certificate.no_forbidden_global_structure_materialized &&
+      !certificate.hierarchy_reduction_performed;
+  if (!certificate.all_arities_terminal) {
+    certificate.decision =
+        ExactDirectSupportTerminalDecision::source_stream_not_terminal;
+    return facade;
+  }
+
+  for (ExactDirectSupportArityTerminalCertificate& arity :
+       certificate.arity_certificates) {
+    arity.terminal_absence_of_additional_supports_certified = true;
+  }
+  normalize_terminal_records(pair_result, higher_result, facade);
+  certificate.decision =
+      facade.relevant_extra_shell_diagnostics.empty()
+          ? ExactDirectSupportTerminalDecision::
+                complete_direct_support_catalog
+          : ExactDirectSupportTerminalDecision::
+                complete_direct_support_catalog_with_relevant_extra_shell_diagnostics;
+  if (!facade.terminal_catalog_certified()) {
+    throw std::logic_error(
+        "the anchored-session direct support terminal certificate is "
+        "inconsistent");
   }
   return facade;
 }
