@@ -101,3 +101,39 @@ la session le valide par les invariants 1–5. Plus aucun appel au
 générateur hôte, plus aucune sonde de budget : les budgets par transaction
 disparaissent de ce chemin (le certificat déclare des tuiles variables,
 base `tile_certified_engine_with_exact_closure`).
+
+## Spécification du régime d'audit tuile-certifié (lecture complète du bloc d'identités)
+
+Le bloc `audit_valid` (higher_support_stream.cpp l.≈1395-1490) se
+décompose en trois classes, et le chemin tuile-certifié peut satisfaire le
+bloc EXISTANT sans nouvelle clause :
+
+- **A. Identités de partition de masse (BigInt)** — total == C(n,3)+C(n,4),
+  resolved + remaining == total, remaining == somme des masses de
+  frontière, resolved == terminal_sum, positivité, drapeaux de clôture :
+  fournies par les masses de l'audit device (deltas par tuile, clôture
+  BigInt par commit — la validation croisée du pont déjà en place).
+- **B. Identités records/chaîne (O(sortie))** — emitted_record_count,
+  output_record_count du checkpoint, digest initial, et les identités de
+  classification de feuilles (leaf_analysis, leaf_classified == identité
+  par catégories, minimal) : recomputées depuis les RECORDS drainés
+  eux-mêmes (chaque record porte sa catégorie : minimal/affinement
+  dépendant/bord réduit/circumcentre extérieur/au-dessus du rang) — le
+  moteur device, transcription bit-identique du classifieur CPU, produit
+  les mêmes catégories. La masse leaf_classified égale le compte de
+  records car la classification est à granularité d'un support.
+- **C. Compteurs de travail CPU** — visites, sondes, témoins : à ZÉRO sur
+  ce chemin ; toutes leurs contraintes sont des égalités 0==0 ou des
+  inégalités 0≤0 (work_unit == visits + witness, attempts == searches,
+  attempts + skips ≤ visits, etc.), plus les maxima de frontière
+  maintenus côté hôte (running max, trivial).
+
+La synthèse par tuile est donc : audit successeur = audit courant +
+{masses device, compteurs de catégories dérivés des records drainés,
+zéros de travail, maxima}, checkpoint successeur = {frontière préfixe
+(+ ré-entrées scindées), pas de pending, chaîne repliée sur les records,
+compte de records}, et `verify_exact_higher_support_checkpoint` vaut tel
+quel. L'honnêteté reste explicite : champ `verification_basis` du
+certificat (les zéros de travail en sont d'ailleurs le témoin interne).
+Le différentiel n=32 compare records/masses/complétude — PAS l'égalité
+totale d'audit (les compteurs de travail diffèrent par construction).
