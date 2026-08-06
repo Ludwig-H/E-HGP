@@ -77,3 +77,28 @@ directives scellées du 6/8.
   validations) mais les capacités physiques scellées du moteur tuilé.
 - Le sélecteur de backend est scellé dans le reçu de tour ; aucun chemin
   ne peut mélanger silencieusement les deux backends dans une même tour.
+
+## Décisions d'intégration ④-b (vérifiées sur les surfaces réelles)
+
+- La façade consomme exactement : `requirements`, `events`,
+  `relevant_extra_shell_diagnostics`, `audit`, `stream_complete()` et le
+  fait d'absence certifiée — jamais les `prune_certificates` eux-mêmes.
+- Le pont M2 expose par transaction `committed_events` et
+  `committed_extra_shell_diagnostics` déplacés du chunk vérifié par la
+  session, plus `session_terminal()`, `trusted_checkpoint()` et son audit
+  de masses BigInt ; l'assemblage boucle `advance_one_tile_transaction()`
+  jusqu'au terminal, échoue fermé sur poison/censure (l'orchestration de
+  rebind reste au-dessus en v1).
+- L'assemblage vit dans la couche GPU (`src/gpu/`) : la construction du
+  lease de traversée (`MortonLbvhBuildContext`) y est naturelle — fake
+  launchers en local (le fake scientifique certifié), natif sur G4 — et le
+  producteur ④-a est refactoré pour exposer un helper partagé des étages
+  aval (façade → journaux) consommé par les deux tours.
+- Le tri canonique de l'oracle exhaustif (`canonical_sort_records_`) doit
+  être exposé publiquement (même précédent que les digests de segments
+  15I) : l'égalité de RÉSULTAT exige l'ordre canonique, pas seulement
+  l'égalité d'ensembles du différentiel M2.
+- Différentiel local : tours device ≡ exhaustive sur les nuages fixtures
+  (n≤14, secondes) ; les six nuages n=32 en différentiel complet vont à la
+  session G4 de ④-b (l'exhaustif hôte n=32 non capé est trop lourd pour le
+  codespace, directive du 6/8).
