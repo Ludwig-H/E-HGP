@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import tempfile
 import sys
 from fractions import Fraction
 from math import comb
@@ -2408,6 +2409,65 @@ def main() -> int:
 
     success = run_case(binary, ("--point-count", "5", "--K", "4"), 0)
     require_success_projection(success)
+    with tempfile.TemporaryDirectory(prefix="mh3d-durable-") as archive_dir:
+        durable = run_case(
+            binary,
+            (
+                "--point-count",
+                "5",
+                "--K",
+                "4",
+                "--mode",
+                "durable_archive_recertification",
+                "--archive-directory",
+                archive_dir,
+            ),
+            0,
+        )
+        require(
+            durable.get("terminal_stage") == "durable_archive_recertification"
+            and durable.get("pipeline_complete") is True,
+            "durable recertification did not complete",
+        )
+        archive = durable.get("durable_archive")
+        require(isinstance(archive, dict), "durable projection missing")
+        require(
+            archive.get("requested") is True
+            and archive.get("published") is True
+            and archive.get("identity_recertified") is True
+            and archive.get("segments") == 26
+            and archive.get("reloaded_segments") == 26
+            and archive.get("archive_digest") not in (None, "", "unavailable"),
+            "durable archive projection changed",
+        )
+        forest = durable.get("forest")
+        require(
+            isinstance(forest, dict)
+            and forest.get("birth_records") == 17
+            and forest.get("saddles") == 13
+            and forest.get("final_roots") == 4
+            and forest.get("logical_output_entries") == 222,
+            "durable seal forest projection changed",
+        )
+        second_writer = run_case(
+            binary,
+            (
+                "--point-count",
+                "5",
+                "--K",
+                "4",
+                "--mode",
+                "durable_archive_recertification",
+                "--archive-directory",
+                archive_dir,
+            ),
+            3,
+        )
+        require(
+            second_writer.get("terminal_stage") == "durable_archive_open",
+            "a second durable writer must be refused on the published "
+            "namespace",
+        )
     capacity = run_case(
         binary,
         ("--point-count", "5", "--K", "4", "--support-record-budget", "1"),

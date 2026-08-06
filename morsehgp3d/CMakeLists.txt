@@ -6962,6 +6962,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d::higher_support
       morsehgp3d::direct_support_terminal
       morsehgp3d::direct_morse_forest_reducer
+      morsehgp3d::direct_morse_forest_durable_run_archive
       morsehgp3d::direct_morse_event_vertical_propagation_journal
       morsehgp3d::direct_morse_vertical_target_proposal_pipeline
       morsehgp3d::direct_morse_vertical_journal

@@ -1413,3 +1413,13 @@ Première exécution de la suite unitaire complète (254 tests) dans le conteneu
 - **`predicate_replay_differential`** : flake sous `ctest -j24` (contention) — passe 5/5 en série sur le même build conteneur à HEAD ; aucun lien avec ④-b2.
 
 La confirmation conteneur de l'ensemble (suite complète verte hors gardes d'environnement documentées) accompagne la prochaine session G4 gardée, avec l'image reconstruite incluant numpy.
+
+## ④-c1 : le mode de recertification durable du runner industriel — le recertifier massif réel composé
+
+Le suivi reste `phase=15`, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=durable_archive_recertification_v1`, `deployment_status=architecture_only` et `public_status=not_claimed`. Aucun statut de phase ou gate d'échelle ne change.
+
+Le runner produit industriel (`morsehgp3d_direct_morse_product_runner`) gagne le mode `durable_archive_recertification` (`--archive-directory` obligatoire, rejets typés dans les deux sens et refus d'un second writer sur un espace publié) : le reducer segmenté 15I streame chaque segment acquitté vers le writer d'archive 15L — un seul segment résident, le drain suit immédiatement chaque commit de batch —, `finish_segmented()` scelle, `finalize()` publie atomiquement, puis la récupération certifie `valid_final_present` et le rechargement borné un-segment-résident revérifie structure, compte, sceau terminal et digest d'archive. Les limites de segment raffinent le budget forêt (contrainte du constructeur segmenté) ; l'identité d'archive est mintée depuis les paramètres déterministes du run et le digest de nuage canonique higher de la façade. Le rapport JSON gagne l'objet `durable_archive` (publication, recertification, comptes, digest, durées).
+
+Validation ciblée en Release : le run durable n=5/K=4 streame 26 segments, publie (40 Ko) et recertifie ; la projection forêt du sceau égale le golden résident (17 naissances, 13 selles, 4 racines finales, 222 entrées logiques) ; le contrat statique et comportemental complet du runner reste vert avec le nouveau cas durable dans le checker.
+
+Restent dans ④-c : le branchement du backend device-tuilé dans le runner (nécessite la surcharge façade « autorité paire sparse + certificat de chaîne ancrée », les deux voies scalables ensemble), la levée du garde résident 50k pour ce chemin, puis le gate 1 M et les mesures 50k sur G4 uniquement. Aucun 50 k, aucune entrée Phase 16, aucun statut public. GCP non utilisé.

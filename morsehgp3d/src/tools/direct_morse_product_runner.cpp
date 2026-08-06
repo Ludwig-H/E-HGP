@@ -6,6 +6,7 @@
 #include "morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_vertical_target_proposal_pipeline.hpp"
 #include "morsehgp3d/hierarchy/direct_saddle_arm_seed_journal.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_forest_durable_run_archive.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
@@ -58,6 +59,7 @@ struct Options {
   std::size_t descent_work_budget{65'536U};
   std::uint64_t chunk_byte_budget{UINT64_C(1) << 30U};
   std::uint64_t operational_deadline_ms{};
+  std::string archive_directory{};
   bool point_count_supplied{false};
 };
 
@@ -74,6 +76,8 @@ struct Timings {
   double reducer_setup_ms{};
   double reducer_stream_ms{};
   double forest_finish_ms{};
+  double archive_finalize_ms{};
+  double archive_reload_ms{};
   double event_rank_tower_link_journal_ms{};
   double event_vertical_propagation_journal_ms{};
   double event_vertical_propagation_fresh_verification_ms{};
@@ -250,6 +254,13 @@ struct Report {
   std::size_t forest_aggregate_closure_node_count{};
   std::size_t forest_aggregate_closure_step_call_count{};
 
+  bool durable_archive_requested{false};
+  bool durable_archive_published{false};
+  bool durable_identity_recertified{false};
+  std::size_t durable_segment_count{};
+  std::size_t durable_reloaded_segment_count{};
+  std::string durable_archive_digest_hex{"unavailable"};
+
   bool conditional_adjacent_event_vertical_propagation_attempted{false};
   bool conditional_adjacent_event_vertical_propagation_certified{false};
   std::optional<ExactDirectMorseEventRankTowerLinkJournalResult>
@@ -418,6 +429,11 @@ struct Report {
   return options.mode == "complete_resident_diagnostic";
 }
 
+[[nodiscard]] bool durable_archive_recertification(
+    const Options& options) noexcept {
+  return options.mode == "durable_archive_recertification";
+}
+
 [[nodiscard]] bool bounded_k2_to_k1_target_authority_qualification(
     const Options& options) noexcept {
   return options.mode ==
@@ -513,7 +529,8 @@ void print_usage(std::ostream& output) {
          "bounded_k2_k1_target_authority_qualification|"
          "bounded_m1_o5_death_accounting_qualification|"
          "bounded_direct_gamma_carrier_conformance_qualification|"
-         "conditional_adjacent_event_vertical_propagation_qualification\n"
+         "conditional_adjacent_event_vertical_propagation_qualification|"
+         "durable_archive_recertification\n"
       << "  --family uniform_latin|eight_clusters\n"
       << "  --maximum-order K (alias: --K; 1 <= K <= 10)\n"
       << "  --support-work-budget N (cap for each P8l work axis)\n"
@@ -523,6 +540,8 @@ void print_usage(std::ostream& output) {
       << "  --descent-work-budget N\n"
       << "  --chunk-byte-budget N\n"
       << "  --operational-deadline-ms N (required for complete diagnostic)\n"
+      << "  --archive-directory DIR (required for "
+         "durable_archive_recertification)\n"
       << "Default caps are fail-fast diagnostics, not a 50k "
          "qualification envelope.\n";
 }
@@ -560,6 +579,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.descent_work_budget = parse_size(value, option);
     } else if (option == "--chunk-byte-budget") {
       options.chunk_byte_budget = parse_u64(value, option);
+    } else if (option == "--archive-directory") {
+      options.archive_directory = value;
     } else if (option == "--operational-deadline-ms") {
       options.operational_deadline_ms = parse_u64(value, option);
     } else {
@@ -585,13 +606,26 @@ void parse_options(int argc, char** argv, Options& options) {
       options.mode !=
           "bounded_direct_gamma_carrier_conformance_qualification" &&
       options.mode !=
-          "conditional_adjacent_event_vertical_propagation_qualification") {
+          "conditional_adjacent_event_vertical_propagation_qualification" &&
+      options.mode != "durable_archive_recertification") {
     throw std::invalid_argument(
         "--mode must be resident_timed, complete_resident_diagnostic, or "
         "bounded_k2_k1_target_authority_qualification, or "
         "bounded_m1_o5_death_accounting_qualification, or "
         "bounded_direct_gamma_carrier_conformance_qualification, or "
-        "conditional_adjacent_event_vertical_propagation_qualification");
+        "conditional_adjacent_event_vertical_propagation_qualification, or "
+        "durable_archive_recertification");
+  }
+  if (options.mode == "durable_archive_recertification" &&
+      options.archive_directory.empty()) {
+    throw std::invalid_argument(
+        "durable_archive_recertification requires --archive-directory");
+  }
+  if (options.mode != "durable_archive_recertification" &&
+      !options.archive_directory.empty()) {
+    throw std::invalid_argument(
+        "--archive-directory is only meaningful for "
+        "durable_archive_recertification");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -2971,6 +3005,21 @@ void emit_report(const Report& report) {
       << report.forest_aggregate_closure_node_count
       << ",\"aggregate_closure_step_calls\":"
       << report.forest_aggregate_closure_step_call_count << "},\n"
+      << "  \"durable_archive\":{\"requested\":"
+      << boolean(report.durable_archive_requested)
+      << ",\"published\":"
+      << boolean(report.durable_archive_published)
+      << ",\"identity_recertified\":"
+      << boolean(report.durable_identity_recertified)
+      << ",\"segments\":" << report.durable_segment_count
+      << ",\"reloaded_segments\":"
+      << report.durable_reloaded_segment_count
+      << ",\"archive_finalize_ms\":"
+      << report.timings.archive_finalize_ms
+      << ",\"archive_reload_ms\":"
+      << report.timings.archive_reload_ms
+      << ",\"archive_digest\":\""
+      << report.durable_archive_digest_hex << "\"},\n"
       << "  \"conditional_adjacent_event_vertical_propagation\":{\"requested\":"
       << boolean(
              report
@@ -4281,6 +4330,38 @@ void emit_report(const Report& report) {
   return 6;
 }
 
+[[nodiscard]] morsehgp3d::contract::CanonicalId durable_digest_text(
+    std::string_view text) {
+  morsehgp3d::contract::CanonicalSha256Builder builder;
+  builder.update(text);
+  return builder.finalize();
+}
+
+bool append_segment_to_durable_archive(
+    void* state,
+    const ExactDirectMorseForestBatchSegment& segment) noexcept {
+  auto* writer =
+      static_cast<ExactDirectMorseForestRunArchiveWriter*>(state);
+  return writer->append_segment(segment) ==
+         ExactDirectMorseForestRunArchiveDecision::
+             complete_atomic_run_archive;
+}
+
+struct DurableReloadProbe {
+  std::size_t segment_count{};
+  bool structure_certified{true};
+};
+
+bool count_reloaded_durable_segment(
+    void* state,
+    const ExactDirectMorseForestBatchSegment& segment) noexcept {
+  auto* probe = static_cast<DurableReloadProbe*>(state);
+  probe->structure_certified =
+      probe->structure_certified && segment.certified_structure();
+  ++probe->segment_count;
+  return true;
+}
+
 [[nodiscard]] int run(const Options& options) {
   Report report = make_report(options);
   const Clock::time_point total_start = Clock::now();
@@ -5033,14 +5114,80 @@ void emit_report(const Report& report) {
       execution_budget =
           make_execution_budget(options, seed_journal);
 
-  ExactDirectMorseForestReducer reducer(
-      cloud,
-      facade,
-      event_journal,
-      seed_budget,
-      seed_journal,
-      forest_budget,
-      forest_config);
+  const bool durable_mode = durable_archive_recertification(options);
+  report.durable_archive_requested = durable_mode;
+  const ExactDirectMorseForestSegmentLimits durable_segment_limits{
+      forest_budget.maximum_birth_record_count,
+      forest_budget.maximum_arm_root_binding_count,
+      forest_budget.maximum_saddle_record_count,
+      forest_budget.maximum_atomic_group_count,
+      forest_budget.maximum_child_reference_count,
+      forest_budget.maximum_node_count,
+  };
+  ExactDirectMorseForestSegmentCodecLimits durable_codec_limits;
+  durable_codec_limits.segment_limits = durable_segment_limits;
+  durable_codec_limits.maximum_final_root_count =
+      forest_budget.maximum_final_root_count;
+  ExactDirectMorseForestRunArchiveIdentity durable_identity;
+  durable_identity.manifest_digest = morsehgp3d::contract::CanonicalId{};
+  durable_identity.source_identity_digest = durable_digest_text(
+      "morsehgp3d/phase15/durable-campaign/source/" + options.family +
+      "/" + std::to_string(options.point_count) + "/" +
+      std::to_string(options.maximum_order));
+  durable_identity.source_higher_canonical_cloud_digest =
+      facade.certificate.higher_canonical_cloud_digest;
+  durable_identity.terminal_source_chain_digest = durable_digest_text(
+      "morsehgp3d/phase15/durable-campaign/terminal-source-chain/" +
+      options.family + "/" + std::to_string(options.point_count) + "/" +
+      std::to_string(options.maximum_order));
+  durable_identity.point_count = cloud.size();
+  durable_identity.effective_maximum_order =
+      event_journal.effective_maximum_order;
+  const std::string durable_final_name{"morsehgp3d-run.mh3d"};
+  std::optional<ExactDirectMorseForestRunArchiveWriter> durable_writer;
+  if (durable_mode) {
+    auto open_decision =
+        ExactDirectMorseForestRunArchiveDecision::not_certified;
+    durable_writer.emplace(
+        ExactDirectMorseForestRunArchiveWriter::open_new(
+            options.archive_directory,
+            durable_final_name,
+            durable_identity,
+            durable_codec_limits,
+            open_decision));
+    if (!durable_writer->open()) {
+      report.terminal_stage = "durable_archive_open";
+      report.stop_category = "certification_failure";
+      report.stop_detail = "durable_archive_writer_rejected";
+      report.timings.total_ms =
+          milliseconds(Clock::now() - total_start);
+      emit_report(report);
+      return 3;
+    }
+  }
+  auto make_reducer = [&]() {
+    if (durable_mode) {
+      return ExactDirectMorseForestReducer(
+          cloud,
+          facade,
+          event_journal,
+          seed_budget,
+          seed_journal,
+          forest_budget,
+          forest_config,
+          durable_segment_limits,
+          morsehgp3d::contract::CanonicalId{});
+    }
+    return ExactDirectMorseForestReducer(
+        cloud,
+        facade,
+        event_journal,
+        seed_budget,
+        seed_journal,
+        forest_budget,
+        forest_config);
+  };
+  ExactDirectMorseForestReducer reducer = make_reducer();
   ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
       index,
       cloud,
@@ -5132,6 +5279,17 @@ void emit_report(const Report& report) {
       break;
     }
     ++report.committed_batch_count;
+    if (durable_mode) {
+      const auto drained = reducer.drain_pending_output_segment(
+          {&*durable_writer, append_segment_to_durable_archive});
+      if (!drained.certified_acknowledged()) {
+        report.terminal_stage = "durable_segment_drain";
+        report.stop_category = "certification_failure";
+        report.stop_detail = "durable_segment_sink_rejected";
+        break;
+      }
+      ++report.durable_segment_count;
+    }
   }
   const Clock::time_point reducer_end = Clock::now();
   report.timings.reducer_stream_ms =
@@ -5150,6 +5308,96 @@ void emit_report(const Report& report) {
   if (deadline_due(options, operational_deadline)) {
     return emit_operational_deadline(
         report, "reducer_stream", total_start);
+  }
+
+  if (durable_mode) {
+    const Clock::time_point durable_finish_start = Clock::now();
+    std::optional<ExactDirectMorseForestFinalSeal> seal;
+    try {
+      seal.emplace(reducer.finish_segmented());
+    } catch (const std::logic_error& error) {
+      report.terminal_stage = "durable_finish_segmented";
+      report.stop_category = "certification_failure";
+      report.stop_detail = error.what();
+      report.timings.total_ms =
+          milliseconds(Clock::now() - total_start);
+      emit_report(report);
+      return 3;
+    }
+    const auto published = durable_writer->finalize(*seal);
+    const Clock::time_point durable_publish_end = Clock::now();
+    report.timings.archive_finalize_ms =
+        milliseconds(durable_publish_end - durable_finish_start);
+    report.durable_archive_published = published.certified_published();
+    if (!published.certified_published() ||
+        published.appended_segment_count !=
+            report.durable_segment_count) {
+      report.terminal_stage = "durable_archive_finalize";
+      report.stop_category = "certification_failure";
+      report.stop_detail = "durable_archive_publication_rejected";
+      report.timings.total_ms =
+          milliseconds(Clock::now() - total_start);
+      emit_report(report);
+      return 3;
+    }
+    report.durable_archive_digest_hex =
+        published.archive_digest.to_lower_hex();
+
+    const auto recovered =
+        recover_exact_direct_morse_forest_run_archive_directory(
+            options.archive_directory,
+            durable_final_name,
+            durable_identity,
+            durable_codec_limits);
+    DurableReloadProbe probe;
+    const auto reloaded = load_exact_direct_morse_forest_run_archive(
+        options.archive_directory,
+        durable_final_name,
+        durable_identity,
+        durable_codec_limits,
+        {&probe, count_reloaded_durable_segment});
+    const Clock::time_point durable_reload_end = Clock::now();
+    report.timings.archive_reload_ms =
+        milliseconds(durable_reload_end - durable_publish_end);
+    report.durable_reloaded_segment_count = probe.segment_count;
+    report.durable_identity_recertified =
+        recovered.certified_recovered() &&
+        recovered.decision ==
+            ExactDirectMorseForestRunArchiveRecoveryDecision::
+                valid_final_present &&
+        reloaded.certified_loaded() && probe.structure_certified &&
+        probe.segment_count == report.durable_segment_count &&
+        reloaded.final_seal == *seal &&
+        reloaded.archive_digest == published.archive_digest;
+    if (!report.durable_identity_recertified) {
+      report.terminal_stage = "durable_archive_recertification";
+      report.stop_category = "certification_failure";
+      report.stop_detail = "durable_reload_identity_rejected";
+      report.timings.total_ms =
+          milliseconds(Clock::now() - total_start);
+      emit_report(report);
+      return 3;
+    }
+
+    report.scientific_result_materialized = true;
+    report.conditional_h0_candidate_certified =
+        seal->conditional_exact_h0_only;
+    report.forest_birth_count = seal->counters.birth_record_count;
+    report.forest_saddle_count = seal->counters.saddle_record_count;
+    report.forest_atomic_group_count =
+        seal->counters.atomic_group_count;
+    report.forest_node_count = seal->counters.node_count;
+    report.forest_final_root_count = seal->counters.final_root_count;
+    report.forest_logical_output_entry_count =
+        seal->logical_output_entry_count;
+    report.pipeline_complete = true;
+    report.terminal_stage = "durable_archive_recertification";
+    report.stop_category = "none";
+    report.stop_detail = "none";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 0;
   }
 
   const Clock::time_point finish_start = Clock::now();
