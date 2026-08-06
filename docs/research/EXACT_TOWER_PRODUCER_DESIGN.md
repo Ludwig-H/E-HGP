@@ -150,3 +150,18 @@ bout et son différentiel complet vs la tour exhaustive se rejoue ;
 (2) anti-forge : résultat mutés (événement altéré, audit gonflé, ordre
 non canonique), certificat d'une autre session/autorité, et certificat
 minté avant terminal — tous rejetés fermés.
+
+### Raffinement d'inventaire ④-b2 (vérifié)
+
+`ExactHigherSupportTerminalAuthority` existe déjà et la façade l'accepte
+déjà sans re-run (`sealed_anchored_fixed_chunk_run`, validation par
+`bound_to` + digests + audit terminal) — MAIS elle est mintée par le
+runner à chunks fixes (`ExactHigherSupportTerminalSession`) et la façade
+valide l'égalité du budget fixe par chunk, incompatible avec les budgets
+variables du pont M2 (recherche de frontière minimale par transaction).
+Le certificat ④-b2 reste donc nécessaire ; sa surcharge de façade se
+calque sur la structure de validation du chemin fixed-chunk existant
+(liaison d'identité index/cloud/K, digests de manifeste et de checkpoint
+terminal, clôture BigInt), avec le genre de source distinct
+`anchored_session_chain` et la sémantique de budgets variables assumée
+par transaction.
