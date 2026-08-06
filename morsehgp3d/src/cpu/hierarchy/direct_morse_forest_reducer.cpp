@@ -943,6 +943,16 @@ void append_moved(std::vector<Value>& destination, std::vector<Value>& source) {
 
 }  // namespace
 
+contract::CanonicalId exact_direct_morse_forest_segment_payload_digest(
+    const ExactDirectMorseForestBatchSegment& segment) {
+  return segment_payload_digest(segment);
+}
+
+contract::CanonicalId exact_direct_morse_forest_segment_chain_digest(
+    const ExactDirectMorseForestBatchSegment& segment) {
+  return segment_chain_digest(segment);
+}
+
 bool ExactDirectMorseForestBatchSegment::certified_structure()
     const noexcept {
   std::size_t expected = 0U;

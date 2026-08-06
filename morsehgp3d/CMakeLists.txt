@@ -3775,6 +3775,48 @@ target_link_libraries(
     morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
   PRIVATE morsehgp3d::sanitizers
 )
+
+add_library(
+  morsehgp3d_direct_morse_forest_durable_run_archive
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_durable_run_archive.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_durable_run_archive
+  ALIAS morsehgp3d_direct_morse_forest_durable_run_archive
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_durable_run_archive
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_durable_run_archive
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_durable_run_archive
+  PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_durable_run_archive
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_durable_run_archive
+  PUBLIC
+    morsehgp3d::direct_morse_forest_reducer
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_durable_run_archive
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_durable_run_archive
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
 if(MSVC)
   target_compile_options(
     morsehgp3d_direct_morse_forest_reducer PRIVATE /W4 /WX

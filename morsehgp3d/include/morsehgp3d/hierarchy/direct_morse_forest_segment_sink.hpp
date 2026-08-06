@@ -91,6 +91,17 @@ struct ExactDirectMorseForestBatchSegment {
       const ExactDirectMorseForestBatchSegment&) = default;
 };
 
+// Public recomputation of the sealed per-segment digests.  The 15I reducer
+// mints them; certified_structure() and the 15L durable loader revalidate
+// them through these exact functions, so no parallel digest definition can
+// ever drift.
+[[nodiscard]] contract::CanonicalId
+exact_direct_morse_forest_segment_payload_digest(
+    const ExactDirectMorseForestBatchSegment&);
+[[nodiscard]] contract::CanonicalId
+exact_direct_morse_forest_segment_chain_digest(
+    const ExactDirectMorseForestBatchSegment&);
+
 // A synchronous, non-owning sink.  append must catch its own exceptions and
 // return false on failure.  A false result leaves the reducer's pending
 // segment intact for an identical retry.
