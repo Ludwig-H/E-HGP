@@ -3,6 +3,7 @@
 #include "phase15_higher_support_device_tiled_frontier_internal.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/exact/integer_circumcenter.hpp"
 #include "morsehgp3d/exact/support.hpp"
 #include "morsehgp3d/hierarchy/higher_support_closed_ball.hpp"
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
@@ -742,18 +743,17 @@ template <std::size_t SupportSize>
     support[index_in_support] =
         cloud.point(support_ids[index_in_support]).exact();
   }
-  const auto analysis = exact::analyze_circumcenter_support(support);
+  const auto analysis = exact::analyze_circumcenter_support_integer(support);
   ClosedBallSummary summary;
-  if (analysis.status() != exact::CircumcenterSupportStatus::minimal) {
+  if (analysis.status != exact::CircumcenterSupportStatus::minimal) {
     return summary;
   }
   summary.minimal = true;
-  const auto& sphere = analysis.circumcenter_result();
-  if (!sphere.center().has_value() || !sphere.squared_level().has_value()) {
+  if (!analysis.center.has_value() || !analysis.squared_level.has_value()) {
     fail("a minimal replayed support omitted its exact sphere");
   }
-  summary.center = *sphere.center();
-  summary.squared_level = *sphere.squared_level();
+  summary.center = *analysis.center;
+  summary.squared_level = *analysis.squared_level;
   // An intrinsically above-rank support carries no relevant closed ball,
   // exactly as the host generator's leaf preflight requires.
   if (SupportSize > maximum_relevant_closed_rank) {

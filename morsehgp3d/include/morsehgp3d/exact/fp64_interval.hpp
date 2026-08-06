@@ -196,6 +196,52 @@ struct Binary64Interval {
   return result;
 }
 
+[[nodiscard]] inline Binary64Interval divide_binary64_intervals(
+    const Binary64Interval& left, const Binary64Interval& right) noexcept {
+  if (!left.valid || !right.valid || (right.lower <= 0.0 && right.upper >= 0.0)) {
+    return invalid_binary64_interval();
+  }
+  const std::array<double, 4> quotients{
+      left.lower / right.lower,
+      left.lower / right.upper,
+      left.upper / right.lower,
+      left.upper / right.upper};
+  if (!std::all_of(quotients.begin(), quotients.end(), [](double value) {
+        return std::isfinite(value);
+      })) {
+    return invalid_binary64_interval();
+  }
+  const auto [minimum, maximum] =
+      std::minmax_element(quotients.begin(), quotients.end());
+  return outward_interval(*minimum, *maximum);
+}
+
+[[nodiscard]] inline Binary64Interval maximum_binary64_intervals(
+    const Binary64Interval& left, const Binary64Interval& right) noexcept {
+  if (!left.valid || !right.valid) {
+    return invalid_binary64_interval();
+  }
+  return Binary64Interval{
+      std::max(left.lower, right.lower),
+      std::max(left.upper, right.upper),
+      true};
+}
+
+// The magnitude of an interval: zero is attainable exactly when the interval
+// straddles it.
+[[nodiscard]] inline Binary64Interval magnitude_binary64_interval(
+    const Binary64Interval& value) noexcept {
+  if (!value.valid) {
+    return invalid_binary64_interval();
+  }
+  const double maximum_magnitude =
+      std::max(std::fabs(value.lower), std::fabs(value.upper));
+  const double minimum_magnitude = value.lower > 0.0 || value.upper < 0.0
+      ? std::min(std::fabs(value.lower), std::fabs(value.upper))
+      : 0.0;
+  return Binary64Interval{minimum_magnitude, maximum_magnitude, true};
+}
+
 [[nodiscard]] inline FilterResult sign_of_binary64_interval(
     const Binary64Interval& value) {
   if (!value.valid) {

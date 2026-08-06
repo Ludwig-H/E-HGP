@@ -1,5 +1,7 @@
 #include "morsehgp3d/exact/support.hpp"
 
+#include "morsehgp3d/exact/integer_circumcenter.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cfenv>
@@ -9,7 +11,9 @@
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <random>
 #include <string>
+#include <vector>
 #include <utility>
 
 #if defined(__SSE2__) || defined(_M_X64) || \
@@ -1337,6 +1341,183 @@ void test_extreme_singletons_and_invariants() {
       "a reduced-support query rejects an out-of-range index");
 }
 
+
+// The integer circumcentre analysis replaces the normalized rational path on
+// the higher-support hot path.  Its certificate is exact agreement with that
+// path -- same status, same canonical centre, same canonical squared level,
+// same reduced-support mask -- on ordinary and on degenerate supports, since
+// the degenerate ones are exactly where a determinant sign convention or a
+// cleared denominator would be wrong.
+void check_integer_analysis_matches_reference(
+    const std::array<ExactRational3, 4>& support,
+    const std::string& label) {
+  const auto reference =
+      morsehgp3d::exact::analyze_circumcenter_support(support);
+  const auto integer =
+      morsehgp3d::exact::analyze_circumcenter_support_integer(support);
+  const bool dependent =
+      reference.status() == CircumcenterSupportStatus::affinely_dependent;
+  check(
+      integer.status == reference.status(),
+      label + ": the integer tetrahedron analysis agrees on the status");
+  if (dependent) {
+    check(
+        !integer.center.has_value() && !integer.squared_level.has_value(),
+        label + ": a dependent tetrahedron carries no integer sphere");
+    return;
+  }
+  check(
+      integer.center.has_value() &&
+          integer.center == reference.circumcenter_result().center() &&
+          integer.squared_level ==
+              reference.circumcenter_result().squared_level(),
+      label + ": the integer tetrahedron sphere is the canonical one");
+  check(
+      integer.reduced_support_mask == reference.reduced_support_mask(),
+      label + ": the integer tetrahedron reduced mask agrees");
+}
+
+void check_integer_triangle_matches_reference(
+    const std::array<ExactRational3, 3>& support,
+    const std::string& label) {
+  const auto reference =
+      morsehgp3d::exact::analyze_circumcenter_support(support);
+  const auto integer =
+      morsehgp3d::exact::analyze_circumcenter_support_integer(support);
+  check(
+      integer.status == reference.status(),
+      label + ": the integer triangle analysis agrees on the status");
+  if (reference.status() == CircumcenterSupportStatus::affinely_dependent) {
+    check(
+        !integer.center.has_value(),
+        label + ": a dependent triangle carries no integer sphere");
+    return;
+  }
+  check(
+      integer.center.has_value() &&
+          integer.center == reference.circumcenter_result().center() &&
+          integer.squared_level ==
+              reference.circumcenter_result().squared_level(),
+      label + ": the integer triangle sphere is the canonical one");
+  check(
+      integer.reduced_support_mask == reference.reduced_support_mask(),
+      label + ": the integer triangle reduced mask agrees");
+}
+
+void test_integer_circumcenter_differential() {
+  const auto exact_point = [](double x, double y, double z) {
+    return CertifiedPoint3::from_binary64(x, y, z).exact();
+  };
+
+  // Random supports: the ordinary regime, both arities, many draws.
+  std::mt19937_64 rng{20260806U};
+  std::uniform_real_distribution<double> axis{-1.0, 1.0};
+  std::vector<ExactRational3> cloud;
+  for (std::size_t index = 0U; index < 12U; ++index) {
+    cloud.push_back(exact_point(axis(rng), axis(rng), axis(rng)));
+  }
+  std::size_t minimal_supports = 0U;
+  std::size_t exterior_supports = 0U;
+  std::size_t boundary_supports = 0U;
+  const auto count_status = [&](CircumcenterSupportStatus status) {
+    minimal_supports += status == CircumcenterSupportStatus::minimal ? 1U : 0U;
+    exterior_supports +=
+        status == CircumcenterSupportStatus::exterior_circumcenter ? 1U : 0U;
+    boundary_supports +=
+        status == CircumcenterSupportStatus::boundary_reduced ? 1U : 0U;
+  };
+  for (std::size_t a = 0U; a + 2U < cloud.size(); ++a) {
+    for (std::size_t b = a + 1U; b + 1U < cloud.size(); ++b) {
+      for (std::size_t c = b + 1U; c < cloud.size(); ++c) {
+        const std::array<ExactRational3, 3> triangle{
+            cloud[a], cloud[b], cloud[c]};
+        check_integer_triangle_matches_reference(triangle, "random triangle");
+        count_status(
+            morsehgp3d::exact::analyze_circumcenter_support(triangle).status());
+        for (std::size_t d = c + 1U; d < cloud.size(); ++d) {
+          const std::array<ExactRational3, 4> tetrahedron{
+              cloud[a], cloud[b], cloud[c], cloud[d]};
+          check_integer_analysis_matches_reference(
+              tetrahedron, "random tetrahedron");
+          count_status(
+              morsehgp3d::exact::analyze_circumcenter_support(tetrahedron)
+                  .status());
+        }
+      }
+    }
+  }
+  check(
+      minimal_supports != 0U && exterior_supports != 0U,
+      "the exhaustive random differential covered minimal and exterior "
+      "supports");
+
+  // Degenerate families: coplanar, collinear, repeated, right-angled (the
+  // centre lands exactly on a face, so the mask must reduce), and a regular
+  // tetrahedron whose centre is strictly interior.
+  check_integer_analysis_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(1.0, 0.0, 0.0),
+       exact_point(0.0, 1.0, 0.0),
+       exact_point(1.0, 1.0, 0.0)},
+      "coplanar tetrahedron");
+  check_integer_analysis_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(1.0, 0.0, 0.0),
+       exact_point(2.0, 0.0, 0.0),
+       exact_point(3.0, 0.0, 0.0)},
+      "collinear tetrahedron");
+  check_integer_analysis_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(0.0, 0.0, 0.0),
+       exact_point(1.0, 0.0, 0.0),
+       exact_point(0.0, 1.0, 0.0)},
+      "repeated tetrahedron vertex");
+  check_integer_analysis_matches_reference(
+      {exact_point(1.0, 1.0, 1.0),
+       exact_point(-1.0, -1.0, 1.0),
+       exact_point(-1.0, 1.0, -1.0),
+       exact_point(1.0, -1.0, -1.0)},
+      "regular tetrahedron");
+  check_integer_analysis_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(2.0, 0.0, 0.0),
+       exact_point(0.0, 2.0, 0.0),
+       exact_point(0.0, 0.0, 2.0)},
+      "right-angled tetrahedron");
+  check_integer_analysis_matches_reference(
+      {exact_point(1e200, 0.0, 0.0),
+       exact_point(-1e200, 0.0, 0.0),
+       exact_point(0.0, 1e-200, 0.0),
+       exact_point(0.0, 0.0, 1e200)},
+      "extreme exponent tetrahedron");
+
+  check_integer_triangle_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(1.0, 0.0, 0.0),
+       exact_point(2.0, 0.0, 0.0)},
+      "collinear triangle");
+  check_integer_triangle_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(2.0, 0.0, 0.0),
+       exact_point(0.0, 2.0, 0.0)},
+      "right-angled triangle");
+  check_integer_triangle_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(1.0, 0.0, 0.0),
+       exact_point(0.5, 0.8660254037844386, 0.0)},
+      "near-equilateral triangle");
+  check_integer_triangle_matches_reference(
+      {exact_point(0.0, 0.0, 0.0),
+       exact_point(4.0, 0.0, 0.0),
+       exact_point(1.0, 0.5, 0.0)},
+      "obtuse triangle");
+  check_integer_triangle_matches_reference(
+      {exact_point(1e-200, 1e200, 0.0),
+       exact_point(-1e-200, -1e200, 0.0),
+       exact_point(1e200, 0.0, 1e-200)},
+      "extreme exponent triangle");
+}
+
 }  // namespace
 
 int main() {
@@ -1350,6 +1531,7 @@ int main() {
   test_adaptive_support_sphere_classification();
   test_adaptive_support_fenv_fail_closed();
   test_extreme_singletons_and_invariants();
+  test_integer_circumcenter_differential();
 
   if (failures != 0) {
     std::cerr << failures << " support test(s) failed\n";

@@ -14,15 +14,14 @@ namespace {
 
 using spatial::PointId;
 
-// The per-axis extreme coordinates of one node's exact bounding box, borrowed
-// from the cloud in homogeneous form.
-[[nodiscard]] std::array<exact::ExactAxisCoordinate, 3> node_axis_coordinates(
+// The cloud points that realize one node's exact bounding box, one per axis.
+[[nodiscard]] std::array<const exact::CertifiedPoint3*, 3> node_bound_points(
     const spatial::CanonicalPointCloud& cloud,
     const std::array<PointId, 3>& point_ids) {
   return {
-      exact::exact_axis_coordinate(cloud.point(point_ids[0]).exact(), 0U),
-      exact::exact_axis_coordinate(cloud.point(point_ids[1]).exact(), 1U),
-      exact::exact_axis_coordinate(cloud.point(point_ids[2]).exact(), 2U)};
+      &cloud.point(point_ids[0]),
+      &cloud.point(point_ids[1]),
+      &cloud.point(point_ids[2])};
 }
 
 [[nodiscard]] std::size_t checked_add(
@@ -95,10 +94,10 @@ ExactHigherSupportIndexedClosedBallQuery::classify(
     increment(
         counters.node_visit_count,
         "the closed-ball node count overflows size_t");
-    const std::array<exact::ExactAxisCoordinate, 3> lower =
-        node_axis_coordinates(cloud, current.lower_point_ids);
-    const std::array<exact::ExactAxisCoordinate, 3> upper =
-        node_axis_coordinates(cloud, current.upper_point_ids);
+    const std::array<const exact::CertifiedPoint3*, 3> lower =
+        node_bound_points(cloud, current.lower_point_ids);
+    const std::array<const exact::CertifiedPoint3*, 3> upper =
+        node_bound_points(cloud, current.upper_point_ids);
     if (sphere.box_minimum_squared_distance_exceeds_level(lower, upper)) {
       classification.exterior_count = checked_add(
           classification.exterior_count,
@@ -141,7 +140,7 @@ ExactHigherSupportIndexedClosedBallQuery::classify(
     if (current.is_leaf()) {
       const PointId point_id = index.leaves_[current.leaf_begin].point_id;
       const exact::SpherePointLocation point_location =
-          sphere.classify_point(cloud.point(point_id).exact());
+          sphere.classify_point(cloud.point(point_id));
       increment(
           counters.exact_point_distance_evaluation_count,
           "the closed-ball exact-distance count overflows size_t");

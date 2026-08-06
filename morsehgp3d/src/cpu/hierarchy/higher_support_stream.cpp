@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 
+#include "morsehgp3d/exact/integer_circumcenter.hpp"
 #include "morsehgp3d/exact/support.hpp"
 #include "morsehgp3d/hierarchy/higher_support_closed_ball.hpp"
 
@@ -1697,20 +1698,20 @@ class ExactHigherSupportStreamBuilder {
     if (entry.support_size == 3U) {
       const std::array<exact::ExactRational3, 3U> support{
           representative[0], representative[1], representative[2]};
-      const exact::CircumcenterSupportAnalysis analysis =
-          exact::analyze_circumcenter_support(support);
-      if (analysis.status() != exact::CircumcenterSupportStatus::minimal) {
+      const exact::IntegerCircumcenterAnalysis analysis =
+          exact::analyze_circumcenter_support_integer(support);
+      if (analysis.status != exact::CircumcenterSupportStatus::minimal) {
         return std::nullopt;
       }
-      return analysis.circumcenter_result().center();
+      return analysis.center;
     }
     if (entry.support_size == 4U) {
-      const exact::CircumcenterSupportAnalysis analysis =
-          exact::analyze_circumcenter_support(representative);
-      if (analysis.status() != exact::CircumcenterSupportStatus::minimal) {
+      const exact::IntegerCircumcenterAnalysis analysis =
+          exact::analyze_circumcenter_support_integer(representative);
+      if (analysis.status != exact::CircumcenterSupportStatus::minimal) {
         return std::nullopt;
       }
-      return analysis.circumcenter_result().center();
+      return analysis.center;
     }
     throw std::logic_error(
         "a higher-support local rank probe has an invalid support arity");
@@ -2530,10 +2531,10 @@ class ExactHigherSupportStreamBuilder {
     for (std::size_t index = 0U; index < SupportSize; ++index) {
       support_points[index] = cloud_.point(support_ids[index]).exact();
     }
-    const exact::CircumcenterSupportAnalysis analysis =
-        exact::analyze_circumcenter_support(support_points);
+    const exact::IntegerCircumcenterAnalysis analysis =
+        exact::analyze_circumcenter_support_integer(support_points);
     ExactHigherSupportTerminalGeometryDecision analysis_decision{};
-    switch (analysis.status()) {
+    switch (analysis.status) {
       case exact::CircumcenterSupportStatus::affinely_dependent:
         analysis_decision =
             ExactHigherSupportTerminalGeometryDecision::affinely_dependent;
@@ -2564,7 +2565,7 @@ class ExactHigherSupportStreamBuilder {
           result_.audit.leaf_support_analysis_count,
           "the higher-support leaf-analysis count overflows size_t");
     }
-    switch (analysis.status()) {
+    switch (analysis.status) {
       case exact::CircumcenterSupportStatus::affinely_dependent:
         if (!first_analysis) {
           throw std::logic_error(
@@ -2603,21 +2604,18 @@ class ExactHigherSupportStreamBuilder {
         }
         break;
     }
-    const exact::CircumcenterResult& sphere =
-        analysis.circumcenter_result();
-    if (!sphere.center().has_value() ||
-        !sphere.squared_level().has_value()) {
+    if (!analysis.center.has_value() ||
+        !analysis.squared_level.has_value()) {
       throw std::logic_error(
           "a minimal higher support omitted its exact sphere");
     }
+    const exact::ExactCenter3& center = *analysis.center;
+    const exact::ExactLevel& squared_level = *analysis.squared_level;
     if (!leaf_query_preflight(SupportSize)) {
       return false;
     }
     SparseBallClassification classification = classify_sparse_closed_ball(
-        support_ids,
-        SupportSize,
-        *sphere.center(),
-        *sphere.squared_level());
+        support_ids, SupportSize, center, squared_level);
     if (classification.outcome == SparseBallOutcome::rank_exceeded) {
       increment(
           result_.audit.above_rank_leaf_count,
@@ -2646,8 +2644,8 @@ class ExactHigherSupportStreamBuilder {
       ExactHigherSupportEvent event;
       event.support_size = static_cast<std::uint8_t>(SupportSize);
       event.support_ids = support_ids;
-      event.center = *sphere.center();
-      event.squared_level = *sphere.squared_level();
+      event.center = center;
+      event.squared_level = squared_level;
       event.interior_ids = std::move(classification.interior_ids);
       event.closed_rank = observed_closed_rank;
       event.exterior_count = classification.exterior_count;
@@ -2670,8 +2668,8 @@ class ExactHigherSupportStreamBuilder {
       ExactHigherSupportExtraShellDiagnostic diagnostic;
       diagnostic.support_size = static_cast<std::uint8_t>(SupportSize);
       diagnostic.support_ids = support_ids;
-      diagnostic.center = *sphere.center();
-      diagnostic.squared_level = *sphere.squared_level();
+      diagnostic.center = center;
+      diagnostic.squared_level = squared_level;
       diagnostic.interior_ids = std::move(classification.interior_ids);
       diagnostic.shell_count = classification.shell_count;
       diagnostic.canonical_extra_shell_witness_id =
