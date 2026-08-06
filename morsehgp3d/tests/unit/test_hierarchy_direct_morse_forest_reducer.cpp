@@ -1561,9 +1561,14 @@ void test_canonical_source_batch_wire_and_provider() {
             0x00U, 0x00U, 0x00U, 0x01U, 0x00U, 0x00U, 0x00U, 0x01U,
             0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
             0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x27U};
+        // Golden provenance: minted with the wire at 91ed8a3; the encoder
+        // never changed, but the G4-qualified shared-LBVH refactor 2ebd8c2
+        // legitimately changed the upstream scenario content and only this
+        // payload digest (size and header bytes unchanged), as established
+        // by an eight-point bisection on 2026-08-06.  Re-minted accordingly.
         const auto golden_payload_digest =
             morsehgp3d::contract::CanonicalId::from_lower_hex(
-                "c41d0d485c16fa0cecb94ff1dd4cadcbe826fa9f8ff0304527c5309c2175fb71");
+                "6a73779a352efa2ca8f44de02dc461deb0642580b5bd54c211f3d89645e87006");
         check(
             first.bytes.size() == 359U &&
                 std::equal(
