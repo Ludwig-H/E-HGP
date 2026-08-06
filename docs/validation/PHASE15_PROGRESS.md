@@ -1423,3 +1423,13 @@ Le runner produit industriel (`morsehgp3d_direct_morse_product_runner`) gagne le
 Validation ciblée en Release : le run durable n=5/K=4 streame 26 segments, publie (40 Ko) et recertifie ; la projection forêt du sceau égale le golden résident (17 naissances, 13 selles, 4 racines finales, 222 entrées logiques) ; le contrat statique et comportemental complet du runner reste vert avec le nouveau cas durable dans le checker.
 
 Restent dans ④-c : le branchement du backend device-tuilé dans le runner (nécessite la surcharge façade « autorité paire sparse + certificat de chaîne ancrée », les deux voies scalables ensemble), la levée du garde résident 50k pour ce chemin, puis le gate 1 M et les mesures 50k sur G4 uniquement. Aucun 50 k, aucune entrée Phase 16, aucun statut public. GCP non utilisé.
+
+## ④-c2 : les deux voies scalables composent — autorité paire sparse P8l + certificat de chaîne ancrée
+
+Le suivi reste `phase=15`, `backend=reference_cpu_plus_certified_host_fake`, `profile=hgp_reduced`, `mode=scalable_lanes_facade_v1`, `deployment_status=architecture_only` et `public_status=not_claimed`. Aucun statut de phase ou gate d'échelle ne change.
+
+La nouvelle surcharge `build_exact_direct_support_terminal_facade` consomme l'autorité paire sparse scellée move-only (P8l) ET le certificat mint-privé de la chaîne de session ancrée (④-b2) : voie paire identique au chemin sparse existant (liaison schedule/capacités, clôture d'univers dirigé n², partitions certifiées), voie higher identique au chemin ④-b2 (liaison au manifeste recalculé, re-digest strict du contenu, égalité du budget déclaré, clôture BigInt) — aucun rejeu exhaustif nulle part. Un variant dédié de `normalize_terminal_records` plie les records paire libérés et le résultat higher certifié.
+
+La suite ciblée passe en Release : la façade des deux voies certifie et son payload (événements, diagnostics, `normalized_terminal_output_digest`) égale la façade oracle fraîche sur tetrahedron/K1 et skewcube8/K3, les deux voies déclarant véridiquement leurs genres scellés ; un budget higher déclaré non conforme échoue fermé sans payload ; les suites terminal et producteur de tour restent vertes.
+
+Reste dans ④-c : brancher cette composition dans le runner produit (backend device dans le pipeline industriel), lever le garde résident 50k pour ce chemin, puis gate 1 M et mesures 50k sur G4 uniquement (image conteneur avec numpy à reconstruire). Aucun 50 k, aucune entrée Phase 16, aucun statut public. GCP non utilisé.

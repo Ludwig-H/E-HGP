@@ -308,6 +308,188 @@ void test_anchored_certificate_anti_forge() {
       "anti-forge: a pre-terminal mint is refused");
 }
 
+// 4-c2: the two scalable lanes together.  The sealed P8l sparse pair
+// authority and the anchored-session-chain certified device higher stream
+// compose into a certified facade whose payload equals the fresh oracle's,
+// with truthfully distinct source kinds on both lanes and no exhaustive
+// replay anywhere.
+[[nodiscard]] ExactSparseAnchoredPairTerminalAuthority
+build_sparse_pair_authority(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::size_t maximum_closed_rank) {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  ExactSparseAnchoredPairSession session =
+      ExactSparseAnchoredPairSession::start(
+          index,
+          cloud,
+          maximum_closed_rank,
+          ExactMortonGroupedAnchoredPairScheduleConfig{4U, 0U},
+          ExactSparseAnchoredPairSessionTotalCapacity{
+              maximum,
+              maximum,
+              maximum,
+              maximum,
+              maximum,
+              maximum,
+              maximum,
+              maximum});
+  const ExactSparseAnchoredPairSessionAdvanceBudget advance_budget{
+      {4096U, 4096U, 4096U, 4096U},
+      {4096U},
+      1U,
+      maximum_closed_rank + 1U};
+  for (std::size_t call = 0U; call < 100000U; ++call) {
+    const auto step = session.advance(index, cloud, advance_budget);
+    if (step.kind() ==
+        ExactSparseAnchoredPairSessionStepKind::complete) {
+      return std::move(session).seal();
+    }
+    if (step.kind() ==
+        ExactSparseAnchoredPairSessionStepKind::total_capacity_exhausted) {
+      break;
+    }
+  }
+  throw std::logic_error(
+      "the sparse pair authority fixture did not terminate");
+}
+
+void run_scalable_lanes_differential(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    const std::string& label) {
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactDirectSupportTerminalBudget oracle_budget{
+      {std::numeric_limits<std::size_t>::max(),
+       std::numeric_limits<std::size_t>::max(),
+       std::numeric_limits<std::size_t>::max(),
+       std::numeric_limits<std::size_t>::max(),
+       std::numeric_limits<std::size_t>::max(),
+       std::numeric_limits<std::size_t>::max(),
+       std::numeric_limits<std::size_t>::max()},
+      unlimited_higher_budget()};
+  const auto pair_oracle = build_exact_pair_support_stream(
+      index, cloud, requested_maximum_order, oracle_budget.pair);
+  const auto higher_oracle = build_exact_higher_support_stream(
+      index, cloud, requested_maximum_order, oracle_budget.higher);
+  const auto oracle_facade = build_exact_direct_support_terminal_facade(
+      index,
+      cloud,
+      requested_maximum_order,
+      oracle_budget,
+      pair_oracle,
+      higher_oracle);
+  check(
+      oracle_facade.terminal_catalog_certified(),
+      label + ": the fresh oracle facade certifies");
+
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      index, cloud);
+  const auto assembly =
+      gpu::assemble_exact_higher_support_stream_device_tiled(
+          cloud,
+          index,
+          requested_maximum_order,
+          unlimited_higher_budget());
+  check(
+      assembly.certified_assembled(),
+      label + ": the device-tiled higher assembly seals");
+  if (!assembly.certified_assembled() ||
+      !oracle_facade.terminal_catalog_certified()) {
+    return;
+  }
+
+  const auto pair_manifest =
+      make_exact_pair_support_checkpoint_manifest(
+          index, cloud, requested_maximum_order);
+  auto pair_authority = build_sparse_pair_authority(
+      index,
+      cloud,
+      std::max<std::size_t>(
+          2U, pair_manifest.maximum_relevant_closed_rank));
+  const auto facade = build_exact_direct_support_terminal_facade(
+      index,
+      cloud,
+      requested_maximum_order,
+      unlimited_higher_budget(),
+      std::move(pair_authority),
+      *assembly.higher,
+      assembly.certificate);
+  check(
+      facade.terminal_catalog_certified(),
+      label + ": the scalable-lanes facade certifies");
+  check(
+      facade.events == oracle_facade.events &&
+          facade.relevant_extra_shell_diagnostics ==
+              oracle_facade.relevant_extra_shell_diagnostics &&
+          facade.certificate.normalized_terminal_output_digest ==
+              oracle_facade.certificate.normalized_terminal_output_digest,
+      label + ": the scalable-lanes facade payload equals the fresh "
+              "oracle facade payload");
+  check(
+      facade.certificate.pair_source_kind ==
+              ExactDirectSupportPairSourceKind::
+                  sealed_sparse_anchored_session &&
+          facade.certificate.higher_source_kind ==
+              ExactDirectSupportHigherSourceKind::anchored_session_chain &&
+          !facade.certificate.pair_result_freshly_replayed &&
+          !facade.certificate.higher_result_freshly_replayed,
+      label + ": both scalable lanes declare their sealed source kinds "
+              "truthfully");
+
+  // Anti-forge: a declared-budget mismatch is refused before any payload.
+  auto mismatch_authority = build_sparse_pair_authority(
+      index,
+      cloud,
+      std::max<std::size_t>(
+          2U, pair_manifest.maximum_relevant_closed_rank));
+  ExactHigherSupportStreamBudget wrong_budget = unlimited_higher_budget();
+  wrong_budget.maximum_work_unit_count = 1U;
+  const auto mismatched = build_exact_direct_support_terminal_facade(
+      index,
+      cloud,
+      requested_maximum_order,
+      wrong_budget,
+      std::move(mismatch_authority),
+      *assembly.higher,
+      assembly.certificate);
+  check(
+      !mismatched.terminal_catalog_certified() &&
+          mismatched.certificate.decision ==
+              ExactDirectSupportTerminalDecision::
+                  source_result_not_certified &&
+          mismatched.events.empty(),
+      label + ": a declared higher-budget mismatch fails closed with no "
+              "payload");
+}
+
+void test_scalable_lanes_differentials() {
+  const std::array<CertifiedPoint3, 4U> tetrahedron{
+      point(1.0, 1.0, 1.0),
+      point(-1.0, -1.0, 1.0),
+      point(-1.0, 1.0, -1.0),
+      point(1.0, -1.0, -1.0),
+  };
+  run_scalable_lanes_differential(
+      tetrahedron, 1U, "scalable-lanes tetrahedron/K1");
+
+  std::vector<CertifiedPoint3> skew_cube;
+  for (int x = 0; x < 2; ++x) {
+    for (int y = 0; y < 2; ++y) {
+      for (int z = 0; z < 2; ++z) {
+        skew_cube.push_back(point(
+            x * 1.0 + 0.125 * z, y * 1.0 + 0.0625 * x, z * 1.0 + 0.03125 * y));
+      }
+    }
+  }
+  run_scalable_lanes_differential(
+      skew_cube, 3U, "scalable-lanes skewcube8/K3");
+}
+
 void test_tower_differentials() {
   const std::array<CertifiedPoint3, 4U> tetrahedron{
       point(1.0, 1.0, 1.0),
@@ -369,6 +551,7 @@ int main() {
   try {
     test_assembly_differentials();
     test_tower_differentials();
+    test_scalable_lanes_differentials();
     test_anchored_certificate_anti_forge();
   } catch (const std::exception& error) {
     std::cerr << "FAIL: unexpected exception: " << error.what() << '\n';

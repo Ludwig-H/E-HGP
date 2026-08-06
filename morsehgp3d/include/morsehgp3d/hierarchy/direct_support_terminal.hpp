@@ -280,6 +280,21 @@ build_exact_direct_support_terminal_facade(
     const ExactHigherSupportStreamResult& higher_result,
     const ExactHigherSupportAnchoredStreamCertificate& higher_certificate);
 
+// Scale-shaped composition (4-c2): the sealed sparse anchored pair authority
+// (P8l) and the anchored-session-chain certified higher stream (4-b2)
+// together -- both lanes certified without any exhaustive replay.  The pair
+// lane consumes the move-only authority; the higher lane is accepted under
+// the assembler's mint-private certificate with the declared budget bound.
+[[nodiscard]] ExactDirectSupportTerminalFacade
+build_exact_direct_support_terminal_facade(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportStreamBudget& higher_budget,
+    ExactSparseAnchoredPairTerminalAuthority pair_authority,
+    const ExactHigherSupportStreamResult& higher_result,
+    const ExactHigherSupportAnchoredStreamCertificate& higher_certificate);
+
 // Consumes a process-local root-anchored higher-support authority.  Its fixed
 // per-chunk budget must equal budget.higher.  This avoids a second complete
 // higher-support traversal but does not claim fresh replay, durability,
