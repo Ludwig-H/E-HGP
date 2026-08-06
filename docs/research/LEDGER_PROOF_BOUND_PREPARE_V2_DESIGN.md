@@ -1,8 +1,17 @@
 # Design — prepare_transition proof-bound v2 du ledger sans rebuild d'index
 
-Statut : design en cours d'implémentation (verrou ② de l'ordre normatif de la
-roadmap). Aucun claim. Référence de scoping : session du 5/8/2026, vérifiée
-contre `direct_sparse_root_ledger.cpp` au commit `8b3fbeb`.
+Statut : **LIVRÉ le 6 août 2026** (même journée que ce design). Aucun claim.
+Référence de scoping : session du 5/8/2026, vérifiée contre
+`direct_sparse_root_ledger.cpp` au commit `8b3fbeb`. Écarts d'implémentation
+vs le design : (a) les représentants de groupes n'exigent PAS de preuve
+active (v1 ne consulte jamais l'index actif pour eux — seule l'existence du
+record de preview compte) ; la couverture de preuves exigée est exactement
+parents ∪ naissances ∪ post-roots prévisualisés ∪ pre-roots durablement
+observés ; (b) `PreparedBatch::valid()` accepte désormais les deux formes
+scellées (décision v1 avec preview historique, décision v2 avec preview
+pré-origine) ; (c) la réconciliation par record au commit est CONSERVÉE
+(bornée par le nombre de records) — la garantie no-lookup couvre l'étape
+prepare, qui était le verrou de la roadmap.
 
 ## Constat v1 (vérifié ligne à ligne)
 

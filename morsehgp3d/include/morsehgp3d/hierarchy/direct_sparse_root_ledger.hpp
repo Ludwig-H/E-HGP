@@ -194,6 +194,11 @@ enum class ExactDirectSparseRootLedgerPreparationDecision : std::uint8_t {
   contradiction_root_id_namespace_exhausted,
   no_allocation_failed,
   complete_sealed_structure_only_transition,
+  // Proof-bound v2 path only.  Appended so v1 numeric values never move.
+  no_unreserved_index_capacity_rejected,
+  no_active_root_proof_rejected,
+  no_active_root_proof_coverage_rejected,
+  complete_sealed_proof_bound_structure_only_transition,
 };
 
 enum class ExactDirectSparseRootLedgerCommitDecision : std::uint8_t {
@@ -237,6 +242,14 @@ struct ExactDirectSparseRootLedgerPreparationReceipt {
   bool vertical_maps_complete{false};
   bool durable_restart_supported{false};
   bool public_status_claimed{false};
+  // Proof-bound v2 facts.  The v1 path always reports them false/zero.  The
+  // no-lookup guarantee covers the PREPARE stage: every active-root fact is
+  // consumed from caller-minted bounded probe proofs and every pre-batch
+  // forest fact from the sealed pre-origin preview fields, never from the
+  // historical indexes.
+  std::size_t active_root_proof_count{};
+  bool proof_bound_preorigin_prepare{false};
+  bool prepare_no_historical_handle_or_root_lookup{false};
   ExactDirectSparseRootLedgerPreparationDecision decision{
       ExactDirectSparseRootLedgerPreparationDecision::not_prepared};
 
@@ -667,6 +680,32 @@ class ExactDirectSparseRootCoverageFromActiveRootProofsResult final {
   friend class ExactDirectSparseRootLedger;
 };
 
+enum class ExactDirectSparseRootLedgerIndexReservationDecision : std::uint8_t {
+  not_reserved,
+  no_ledger_rejected,
+  no_budget_capacity_overflow,
+  no_allocation_failed,
+  contradiction_active_index,
+  complete_full_capacity_already_reserved,
+  complete_full_capacity_reserved,
+};
+
+// One explicit, reported, at-most-state-sized migration of both active slot
+// tables to the capacity implied by the sealed cumulative budget.  After a
+// certified reservation the proof-bound v2 prepare can never require an
+// index rebuild: every later insertion fits the reserved capacity or the
+// transition is refused before any staging.
+struct ExactDirectSparseRootLedgerIndexReservationResult {
+  std::size_t reserved_handle_slot_count{};
+  std::size_t reserved_root_id_slot_count{};
+  std::size_t migrated_active_row_count{};
+  bool state_mutated{false};
+  ExactDirectSparseRootLedgerIndexReservationDecision decision{
+      ExactDirectSparseRootLedgerIndexReservationDecision::not_reserved};
+
+  [[nodiscard]] bool certified_reserved() const noexcept;
+};
+
 enum class ExactDirectSparseRootLedgerCheckpointDecision : std::uint8_t {
   not_available,
   complete_honest_nonrestartable_semantic_checkpoint,
@@ -739,6 +778,31 @@ class ExactDirectSparseRootLedger {
       const ExactDirectSparseStableFacetForest& forest,
       ExactDirectSparseStableFacetForestPreparedBatch&& forest_ticket,
       ExactDirectSparseStableFacetForestPreparedPreview&& forest_preview,
+      std::span<const ExactDirectSparseRootLedgerGroupTransition> groups,
+      std::span<const ExactDirectSparseStableFacetHandle> parent_root_handles,
+      std::span<const spatial::PointId> group_point_deltas,
+      std::span<const ExactDirectSparseRootLedgerStandaloneBirth>
+          standalone_births,
+      std::span<const spatial::PointId> standalone_birth_point_deltas) noexcept;
+
+  // Proof-bound v2 prepare.  No `const Forest&`: every pre-batch forest fact
+  // is consumed from the sealed pre-origin preview fields and every active
+  // ledger fact from caller-minted bounded probe proofs (canonical strictly
+  // sorted span, each certified for the current ledger stamp, covering
+  // exactly the parents, birth representatives, previewed pre roots and
+  // previewed post roots).  Requires a prior certified full-capacity index
+  // reservation so the rebuild path is structurally unreachable.  The
+  // transition and preview digests live in distinct v2 domains that bind
+  // the pre-origin fields.
+  [[nodiscard]] ExactDirectSparseRootLedgerIndexReservationResult
+  reserve_full_active_index_capacity() noexcept;
+  [[nodiscard]] ExactDirectSparseRootLedgerPreparationResult
+  prepare_transition_from_active_root_proofs(
+      ExactDirectSparseStableFacetForestPreparedBatch&& forest_ticket,
+      ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&&
+          forest_preview,
+      std::span<const ExactDirectSparseRootLedgerActiveRootProbeResult>
+          active_root_proofs,
       std::span<const ExactDirectSparseRootLedgerGroupTransition> groups,
       std::span<const ExactDirectSparseStableFacetHandle> parent_root_handles,
       std::span<const spatial::PointId> group_point_deltas,

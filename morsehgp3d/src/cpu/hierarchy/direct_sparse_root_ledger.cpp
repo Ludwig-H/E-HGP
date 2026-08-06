@@ -24,6 +24,13 @@ constexpr std::string_view successor_digest_domain =
     "MorseHGP3D/phase15/direct-sparse-root-ledger/successor/v1/sha256/";
 constexpr std::string_view checkpoint_digest_domain =
     "MorseHGP3D/phase15/direct-sparse-root-ledger/checkpoint/v1/sha256/";
+// Proof-bound v2 domains.  Distinct from v1 so the two prepare paths can
+// never produce colliding digests; the v2 preview digest additionally binds
+// the pre-origin fields of every record.
+constexpr std::string_view preview_digest_domain_v2 =
+    "MorseHGP3D/phase15/direct-sparse-root-ledger/forest-preview/v2/sha256/";
+constexpr std::string_view transition_digest_domain_v2 =
+    "MorseHGP3D/phase15/direct-sparse-root-ledger/transition/v2/sha256/";
 
 std::atomic<std::uint64_t> next_session_instance_id{1U};
 
@@ -425,6 +432,29 @@ template <class Key, class KeyForRow, class Fingerprint>
   return builder.finalize();
 }
 
+[[nodiscard]] contract::CanonicalId compute_preview_digest_v2(
+    const ExactDirectSparseStableFacetForestPreparedPreviewReceipt& receipt) {
+  contract::CanonicalSha256Builder builder;
+  builder.update(preview_digest_domain_v2);
+  append_forest_semantic_stamp(builder, receipt.pre_stamp);
+  append_id(builder, receipt.canonical_batch_digest);
+  append_size(builder, receipt.requested_handle_count);
+  append_size(builder, receipt.shadow_node_count);
+  append_size(builder, receipt.union_request_count);
+  append_size(builder, receipt.expected_effective_union_count);
+  append_size(builder, receipt.records.size());
+  for (const auto& record : receipt.records) {
+    append_size(builder, record.requested_handle);
+    append_size(builder, record.post_root_handle);
+    append_size(builder, record.post_component_size);
+    append_u8(
+        builder, static_cast<std::uint8_t>(record.pre_ticket_origin));
+    append_size(builder, record.pre_root_handle);
+    append_size(builder, record.pre_component_size);
+  }
+  return builder.finalize();
+}
+
 [[nodiscard]] const ExactDirectSparseStableFacetForestPreparedPreviewRecord*
 find_preview_record(
     std::span<const ExactDirectSparseStableFacetForestPreparedPreviewRecord>
@@ -451,6 +481,9 @@ struct ExactDirectSparseRootLedgerPreparedBatch::Impl {
   contract::CanonicalId successor_history_digest{};
   ExactDirectSparseStableFacetForestPreparedBatch forest_ticket;
   ExactDirectSparseStableFacetForestPreparedPreview forest_preview;
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview
+      proof_bound_preview;
+  bool proof_bound{false};
   std::vector<ExactDirectSparseRootLedgerEntry> staged_entries;
   std::vector<ExactDirectSparseRootCoverageNode> staged_coverage_nodes;
   std::vector<ExactDirectSparseRootCoverageId> staged_parent_references;
@@ -808,12 +841,22 @@ ExactDirectSparseRootLedgerPreparedBatch::
     : impl_(std::move(impl)) {}
 
 bool ExactDirectSparseRootLedgerPreparedBatch::valid() const noexcept {
-  return impl_ != nullptr && !impl_->consumed && impl_->registry != nullptr &&
-         impl_->identity != nullptr && impl_->registry_counted &&
-         impl_->receipt.decision ==
+  if (impl_ == nullptr || impl_->consumed || impl_->registry == nullptr ||
+      impl_->identity == nullptr || !impl_->registry_counted ||
+      !impl_->forest_ticket.valid() || impl_->forest_ticket.consumed()) {
+    return false;
+  }
+  if (impl_->proof_bound) {
+    return impl_->receipt.decision ==
+               ExactDirectSparseRootLedgerPreparationDecision::
+                   complete_sealed_proof_bound_structure_only_transition &&
+           impl_->proof_bound_preview.certified_for(
+               impl_->forest_ticket,
+               impl_->receipt.pre_stamp.aligned_forest_stamp);
+  }
+  return impl_->receipt.decision ==
              ExactDirectSparseRootLedgerPreparationDecision::
                  complete_sealed_structure_only_transition &&
-         impl_->forest_ticket.valid() && !impl_->forest_ticket.consumed() &&
          impl_->forest_preview.certified_for(
              impl_->forest_ticket, impl_->receipt.pre_stamp.aligned_forest_stamp);
 }
@@ -847,6 +890,14 @@ bool ExactDirectSparseRootLedgerPreparationResult::certified_prepared()
                                    static_cast<const
                                        ExactDirectSparseRootLedgerPreparationReceipt&>(
                                        *this));
+}
+
+bool ExactDirectSparseRootLedgerIndexReservationResult::certified_reserved()
+    const noexcept {
+  return decision == ExactDirectSparseRootLedgerIndexReservationDecision::
+                         complete_full_capacity_already_reserved ||
+         decision == ExactDirectSparseRootLedgerIndexReservationDecision::
+                         complete_full_capacity_reserved;
 }
 
 ExactDirectSparseRootLedgerLookupResult::
@@ -2342,6 +2393,861 @@ ExactDirectSparseRootLedger::prepare_transition(
   }
 }
 
+ExactDirectSparseRootLedgerIndexReservationResult
+ExactDirectSparseRootLedger::reserve_full_active_index_capacity() noexcept {
+  ExactDirectSparseRootLedgerIndexReservationResult output;
+  if (!certified_structure_only_ledger()) {
+    output.decision =
+        ExactDirectSparseRootLedgerIndexReservationDecision::
+            no_ledger_rejected;
+    return output;
+  }
+  std::size_t required_slots = 0U;
+  if (!required_slot_count(
+          impl_->budget.maximum_active_root_count, required_slots)) {
+    output.decision = ExactDirectSparseRootLedgerIndexReservationDecision::
+        no_budget_capacity_overflow;
+    return output;
+  }
+  if (impl_->active_handle_slots.size() >= required_slots &&
+      impl_->active_root_id_slots.size() >= required_slots) {
+    output.reserved_handle_slot_count = impl_->active_handle_slots.size();
+    output.reserved_root_id_slot_count = impl_->active_root_id_slots.size();
+    output.decision = ExactDirectSparseRootLedgerIndexReservationDecision::
+        complete_full_capacity_already_reserved;
+    return output;
+  }
+  try {
+    std::vector<std::size_t> handle_slots(required_slots, 0U);
+    std::vector<std::size_t> root_slots(required_slots, 0U);
+    std::size_t migrated = 0U;
+    // The encoded rows of the current tables are the exact live set; the
+    // migration never scans history or consults the forest, and its work is
+    // bounded by the current physical table sizes.
+    for (const std::size_t encoded : impl_->active_handle_slots) {
+      if (encoded == 0U || encoded == tombstone_slot) {
+        continue;
+      }
+      const std::size_t row = encoded - 1U;
+      if (row >= impl_->history.size() ||
+          !insert_slot(
+              handle_slots,
+              handle_fingerprint(
+                  impl_->history[row].forest_root_handle,
+                  impl_->config.forest_root_fingerprint_mask),
+              row)) {
+        output.decision =
+            ExactDirectSparseRootLedgerIndexReservationDecision::
+                contradiction_active_index;
+        return output;
+      }
+      ++migrated;
+    }
+    for (const std::size_t encoded : impl_->active_root_id_slots) {
+      if (encoded == 0U || encoded == tombstone_slot) {
+        continue;
+      }
+      const std::size_t row = encoded - 1U;
+      if (row >= impl_->history.size() ||
+          !impl_->history[row].prior_root_id.has_value() ||
+          !insert_slot(
+              root_slots,
+              root_id_fingerprint(
+                  *impl_->history[row].prior_root_id,
+                  impl_->config.root_id_fingerprint_mask),
+              row)) {
+        output.decision =
+            ExactDirectSparseRootLedgerIndexReservationDecision::
+                contradiction_active_index;
+        return output;
+      }
+    }
+    impl_->active_handle_slots.swap(handle_slots);
+    impl_->active_root_id_slots.swap(root_slots);
+    output.reserved_handle_slot_count = impl_->active_handle_slots.size();
+    output.reserved_root_id_slot_count = impl_->active_root_id_slots.size();
+    output.migrated_active_row_count = migrated;
+    output.state_mutated = true;
+    output.decision = ExactDirectSparseRootLedgerIndexReservationDecision::
+        complete_full_capacity_reserved;
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.decision = ExactDirectSparseRootLedgerIndexReservationDecision::
+        no_allocation_failed;
+    return output;
+  } catch (...) {
+    output.decision = ExactDirectSparseRootLedgerIndexReservationDecision::
+        no_allocation_failed;
+    return output;
+  }
+}
+
+ExactDirectSparseRootLedgerPreparationResult
+ExactDirectSparseRootLedger::prepare_transition_from_active_root_proofs(
+    ExactDirectSparseStableFacetForestPreparedBatch&& forest_ticket,
+    ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&&
+        forest_preview,
+    std::span<const ExactDirectSparseRootLedgerActiveRootProbeResult>
+        active_root_proofs,
+    std::span<const ExactDirectSparseRootLedgerGroupTransition> groups,
+    std::span<const ExactDirectSparseStableFacetHandle> parent_root_handles,
+    std::span<const spatial::PointId> group_point_deltas,
+    std::span<const ExactDirectSparseRootLedgerStandaloneBirth>
+        standalone_births,
+    std::span<const spatial::PointId> standalone_birth_point_deltas) noexcept {
+  ExactDirectSparseRootLedgerPreparationResult output;
+  output.proof_bound_preorigin_prepare = true;
+  output.active_root_proof_count = active_root_proofs.size();
+  if (!certified_structure_only_ledger()) {
+    output.decision =
+        ExactDirectSparseRootLedgerPreparationDecision::no_ledger_rejected;
+    return output;
+  }
+  output.pre_stamp = impl_->stamp();
+  output.forest_batch_digest = forest_ticket.canonical_batch_digest();
+  output.group_count = groups.size();
+  output.standalone_birth_count = standalone_births.size();
+  output.parent_root_reference_count = parent_root_handles.size();
+  std::size_t total_point_deltas = 0U;
+  if (!checked_add(
+          group_point_deltas.size(),
+          standalone_birth_point_deltas.size(),
+          total_point_deltas)) {
+    output.decision =
+        ExactDirectSparseRootLedgerPreparationDecision::no_capacity_overflow;
+    return output;
+  }
+  output.point_delta_count = total_point_deltas;
+  output.preview_record_count = forest_preview.records().size();
+
+  // Both slot tables must already hold the full budget-implied capacity, so
+  // no later insertion can ever require a rebuild.
+  std::size_t full_capacity_slots = 0U;
+  if (!required_slot_count(
+          impl_->budget.maximum_active_root_count, full_capacity_slots)) {
+    output.decision =
+        ExactDirectSparseRootLedgerPreparationDecision::no_capacity_overflow;
+    return output;
+  }
+  if (impl_->active_handle_slots.size() < full_capacity_slots ||
+      impl_->active_root_id_slots.size() < full_capacity_slots) {
+    output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+        no_unreserved_index_capacity_rejected;
+    return output;
+  }
+
+  if (!forest_ticket.valid() || forest_ticket.consumed() ||
+      forest_ticket.pre_stamp() != impl_->aligned_forest_stamp) {
+    output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+        no_forest_ticket_rejected;
+    return output;
+  }
+  if (!forest_preview.certified_for(
+          forest_ticket, impl_->aligned_forest_stamp) ||
+      !forest_preview.certified_proof_bound_preorigin_preview() ||
+      !forest_preview.no_historical_handle_or_root_lookup()) {
+    output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+        no_forest_preview_rejected;
+    return output;
+  }
+  if (!forest_preview.proofs_cover_all_ticket_touched_handles() ||
+      !forest_preview.semantic_receipt()
+           .requested_handles_cover_all_ticket_touched_handles) {
+    output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+        no_preview_exhaustiveness_rejected;
+    return output;
+  }
+  if (impl_->registry->outstanding_count >=
+      impl_->budget.maximum_outstanding_ticket_count) {
+    output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+        no_outstanding_ticket_budget_exhausted;
+    return output;
+  }
+
+  // The caller-minted probe proofs are the only source of active-root facts.
+  // They must be strictly sorted, individually certified for the current
+  // ledger stamp, and each observed proof must snapshot its history row
+  // bit-for-bit.
+  for (std::size_t index = 0U; index < active_root_proofs.size(); ++index) {
+    const auto& proof = active_root_proofs[index];
+    if ((index != 0U &&
+         active_root_proofs[index - 1U].requested_forest_root_handle >=
+             proof.requested_forest_root_handle) ||
+        !proof.certified_for(output.pre_stamp) ||
+        (!proof.certified_observed() && !proof.certified_unobserved())) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          no_active_root_proof_rejected;
+      return output;
+    }
+    if (proof.certified_observed() &&
+        (proof.entry.history_index >= impl_->history.size() ||
+         !(impl_->history[proof.entry.history_index] == proof.entry) ||
+         proof.entry.forest_root_handle !=
+             proof.requested_forest_root_handle)) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          no_active_root_proof_rejected;
+      return output;
+    }
+  }
+  const auto find_proof = [&](ExactDirectSparseStableFacetHandle handle)
+      -> const ExactDirectSparseRootLedgerActiveRootProbeResult* {
+    const auto it = std::lower_bound(
+        active_root_proofs.begin(),
+        active_root_proofs.end(),
+        handle,
+        [](const auto& proof, const auto value) {
+          return proof.requested_forest_root_handle < value;
+        });
+    if (it == active_root_proofs.end() ||
+        it->requested_forest_root_handle != handle) {
+      return nullptr;
+    }
+    return &*it;
+  };
+
+  std::size_t output_count = 0U;
+  std::size_t post_history_count = 0U;
+  std::size_t maximum_post_coverage_count = 0U;
+  std::size_t maximum_post_parent_count = 0U;
+  std::size_t maximum_post_delta_count = 0U;
+  std::size_t maximum_post_prior_root_parent_count = 0U;
+  std::size_t staging_count = 0U;
+  std::size_t required_preview_handle_capacity = 0U;
+  std::size_t active_upper_bound = 0U;
+  std::size_t output_staging = 0U;
+  std::size_t parent_staging = 0U;
+  if (!checked_add(groups.size(), standalone_births.size(), output_count) ||
+      output_count == 0U ||
+      !checked_add(
+          output_count,
+          parent_root_handles.size(),
+          required_preview_handle_capacity) ||
+      !checked_add(
+          impl_->active_root_count, output_count, active_upper_bound) ||
+      !checked_multiply(output_count, 4U, output_staging) ||
+      !checked_multiply(
+          parent_root_handles.size(), 6U, parent_staging) ||
+      !checked_add(impl_->history.size(), output_count, post_history_count) ||
+      !checked_add(
+          impl_->coverage_nodes.size(),
+          output_count,
+          maximum_post_coverage_count) ||
+      !checked_add(
+          impl_->coverage_parents.size(),
+          parent_root_handles.size(),
+          maximum_post_parent_count) ||
+      !checked_add(
+          impl_->coverage_deltas.size(),
+          total_point_deltas,
+          maximum_post_delta_count) ||
+      !checked_add(
+          impl_->prior_root_parents.size(),
+          parent_root_handles.size(),
+          maximum_post_prior_root_parent_count) ||
+      !checked_add(output_staging, parent_staging, staging_count) ||
+      !checked_add(staging_count, total_point_deltas, staging_count) ||
+      !checked_add(
+          staging_count, forest_preview.records().size(), staging_count)) {
+    output.decision =
+        ExactDirectSparseRootLedgerPreparationDecision::no_capacity_overflow;
+    return output;
+  }
+
+  if (groups.size() > impl_->budget.maximum_group_count ||
+      standalone_births.size() >
+          impl_->budget.maximum_standalone_birth_count ||
+      parent_root_handles.size() >
+          impl_->budget.maximum_parent_root_reference_count ||
+      total_point_deltas > impl_->budget.maximum_point_delta_count ||
+      forest_preview.records().size() >
+          impl_->budget.maximum_preview_record_count ||
+      staging_count > impl_->budget.maximum_staging_entry_count ||
+      post_history_count > impl_->budget.maximum_history_entry_count ||
+      maximum_post_coverage_count >
+          impl_->budget.maximum_coverage_node_count ||
+      maximum_post_parent_count >
+          impl_->budget.maximum_coverage_parent_reference_count ||
+      maximum_post_delta_count >
+          impl_->budget.maximum_coverage_point_delta_count ||
+      maximum_post_prior_root_parent_count >
+          impl_->budget.maximum_prior_root_parent_reference_count ||
+      impl_->committed_batch_count >=
+          impl_->budget.maximum_committed_batch_count) {
+    output.decision =
+        ExactDirectSparseRootLedgerPreparationDecision::no_budget_exhausted;
+    return output;
+  }
+
+  try {
+    auto prepared = std::make_unique<ExactDirectSparseRootLedgerPreparedBatch::
+        Impl>();
+    prepared->registry = impl_->registry;
+    prepared->identity = std::make_shared<const PreparedTicketIdentity>();
+    prepared->staged_entries.reserve(output_count);
+    prepared->staged_coverage_nodes.reserve(output_count);
+    prepared->staged_parent_references.reserve(parent_root_handles.size());
+    prepared->staged_point_deltas.reserve(total_point_deltas);
+    prepared->staged_prior_root_parents.reserve(parent_root_handles.size());
+    prepared->consumed_history_rows.reserve(parent_root_handles.size());
+    std::vector<ExactDirectSparseStableFacetHandle> required_preview_handles;
+    required_preview_handles.reserve(required_preview_handle_capacity);
+    std::vector<ExactDirectSparseStableFacetHandle> resulting_roots;
+    resulting_roots.reserve(output_count);
+
+    std::size_t parent_cursor = 0U;
+    std::size_t group_delta_cursor = 0U;
+    for (std::size_t index = 0U; index < groups.size(); ++index) {
+      const auto& group = groups[index];
+      if (group.source_group_index != index ||
+          group.parent_root_count == 0U ||
+          group.parent_root_offset != parent_cursor ||
+          group.point_delta_offset != group_delta_cursor ||
+          !valid_slice(
+              group.parent_root_offset,
+              group.parent_root_count,
+              parent_root_handles.size()) ||
+          !valid_slice(
+              group.point_delta_offset,
+              group.point_delta_count,
+              group_point_deltas.size())) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_input_shape_rejected;
+        return output;
+      }
+      if (!checked_add(
+              parent_cursor, group.parent_root_count, parent_cursor) ||
+          !checked_add(
+              group_delta_cursor,
+              group.point_delta_count,
+              group_delta_cursor)) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_capacity_overflow;
+        return output;
+      }
+      const auto parent_slice = parent_root_handles.subspan(
+          group.parent_root_offset, group.parent_root_count);
+      const auto delta_slice = group_point_deltas.subspan(
+          group.point_delta_offset, group.point_delta_count);
+      if (std::adjacent_find(
+              parent_slice.begin(),
+              parent_slice.end(),
+              std::greater_equal<>()) != parent_slice.end() ||
+          !strict_points(delta_slice)) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_input_shape_rejected;
+        return output;
+      }
+      required_preview_handles.push_back(group.representative_handle);
+      required_preview_handles.insert(
+          required_preview_handles.end(),
+          parent_slice.begin(),
+          parent_slice.end());
+    }
+    if (parent_cursor != parent_root_handles.size() ||
+        group_delta_cursor != group_point_deltas.size()) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          no_input_shape_rejected;
+      return output;
+    }
+    std::size_t birth_delta_cursor = 0U;
+    for (std::size_t index = 0U; index < standalone_births.size(); ++index) {
+      const auto& birth = standalone_births[index];
+      if (birth.facet_delta_count == 0U ||
+          birth.point_delta_offset != birth_delta_cursor ||
+          !valid_slice(
+              birth.point_delta_offset,
+              birth.point_delta_count,
+              standalone_birth_point_deltas.size()) ||
+          (index != 0U &&
+           standalone_births[index - 1U].representative_handle >=
+               birth.representative_handle) ||
+          !strict_points(standalone_birth_point_deltas.subspan(
+              birth.point_delta_offset, birth.point_delta_count))) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_input_shape_rejected;
+        return output;
+      }
+      if (!checked_add(
+              birth_delta_cursor,
+              birth.point_delta_count,
+              birth_delta_cursor)) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_capacity_overflow;
+        return output;
+      }
+      required_preview_handles.push_back(birth.representative_handle);
+    }
+    if (birth_delta_cursor != standalone_birth_point_deltas.size()) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          no_input_shape_rejected;
+      return output;
+    }
+    std::sort(required_preview_handles.begin(), required_preview_handles.end());
+    required_preview_handles.erase(
+        std::unique(
+            required_preview_handles.begin(), required_preview_handles.end()),
+        required_preview_handles.end());
+    const auto preview_records = forest_preview.records();
+    for (const auto handle : required_preview_handles) {
+      const auto record = find_preview_record(preview_records, handle);
+      if (record == nullptr || record->post_component_size == 0U) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_preview_exhaustiveness_rejected;
+        return output;
+      }
+    }
+    for (const auto& record : preview_records) {
+      if (record.post_component_size == 0U ||
+          record.pre_ticket_origin ==
+              ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                  not_certified) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_preview_exhaustiveness_rejected;
+        return output;
+      }
+    }
+    // Every active-root fact consumed below must be covered by a proof:
+    // parents and birth representatives (already in the required set), plus
+    // every previewed post root and every durably observed previewed pre
+    // root.
+    for (const auto& record : preview_records) {
+      if (find_proof(record.post_root_handle) == nullptr ||
+          (record.pre_ticket_origin ==
+               ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+                   durable_observed &&
+           find_proof(record.pre_root_handle) == nullptr)) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_active_root_proof_coverage_rejected;
+        return output;
+      }
+    }
+    std::optional<ExactDirectSparseRootId> next_root_id = impl_->next_root_id;
+    const auto allocate_root_id = [&]()
+        -> std::optional<ExactDirectSparseRootId> {
+      if (!next_root_id.has_value()) {
+        return std::nullopt;
+      }
+      const ExactDirectSparseRootId allocated = *next_root_id;
+      if (allocated == std::numeric_limits<ExactDirectSparseRootId>::max()) {
+        next_root_id.reset();
+      } else {
+        ++*next_root_id;
+      }
+      return allocated;
+    };
+
+    for (const auto& group : groups) {
+      const auto anchor_record =
+          find_preview_record(preview_records, group.representative_handle);
+      if (anchor_record == nullptr) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_preview_exhaustiveness_rejected;
+        return output;
+      }
+      const auto parents = parent_root_handles.subspan(
+          group.parent_root_offset, group.parent_root_count);
+      std::vector<ExactDirectSparseRootCoverageId> parent_coverages;
+      parent_coverages.reserve(parents.size());
+      std::vector<ExactDirectSparseRootId> parent_root_ids;
+      parent_root_ids.reserve(parents.size());
+      std::optional<ExactDirectSparseRootId> preserved_root_id;
+      std::size_t q_r = 0U;
+      for (const auto parent_handle : parents) {
+        const auto proof = find_proof(parent_handle);
+        const auto preview_record =
+            find_preview_record(preview_records, parent_handle);
+        if (proof == nullptr || !proof->certified_observed() ||
+            preview_record == nullptr ||
+            preview_record->post_root_handle !=
+                anchor_record->post_root_handle) {
+          output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+              contradiction_unknown_or_duplicate_parent_root;
+          return output;
+        }
+        const std::size_t row = proof->entry.history_index;
+        prepared->consumed_history_rows.push_back(row);
+        const auto& parent = impl_->history[row];
+        parent_coverages.push_back(parent.coverage_id);
+        if (parent.prior_root_id.has_value()) {
+          ++q_r;
+          preserved_root_id = parent.prior_root_id;
+          parent_root_ids.push_back(*parent.prior_root_id);
+        }
+      }
+      std::sort(parent_coverages.begin(), parent_coverages.end());
+      parent_coverages.erase(
+          std::unique(parent_coverages.begin(), parent_coverages.end()),
+          parent_coverages.end());
+      std::sort(parent_root_ids.begin(), parent_root_ids.end());
+      if (std::adjacent_find(parent_root_ids.begin(), parent_root_ids.end()) !=
+          parent_root_ids.end()) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            contradiction_unknown_or_duplicate_parent_root;
+        return output;
+      }
+      if (parent_coverages.empty()) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            contradiction_unknown_or_duplicate_parent_root;
+        return output;
+      }
+
+      std::optional<ExactDirectSparseRootId> result_root_id;
+      if (q_r == 1U) {
+        result_root_id = preserved_root_id;
+        ++output.q_r_one_count;
+      } else {
+        result_root_id = allocate_root_id();
+        if (!result_root_id.has_value()) {
+          output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+              contradiction_root_id_namespace_exhausted;
+          return output;
+        }
+        ++output.allocated_root_id_count;
+        if (q_r == 0U) {
+          ++output.q_r_zero_count;
+        } else {
+          ++output.q_r_multiple_count;
+        }
+      }
+
+      const auto delta = group_point_deltas.subspan(
+          group.point_delta_offset, group.point_delta_count);
+      ExactDirectSparseRootCoverageId coverage_id = 0U;
+      const bool reuse_coverage =
+          q_r == 1U && parent_coverages.size() == 1U && delta.empty();
+      if (reuse_coverage) {
+        coverage_id = parent_coverages.front();
+        ++output.reused_coverage_count;
+      } else {
+        std::size_t coverage_index = 0U;
+        if (!checked_add(
+                impl_->coverage_nodes.size(),
+                prepared->staged_coverage_nodes.size(),
+                coverage_index) ||
+            coverage_index == std::numeric_limits<std::size_t>::max()) {
+          output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+              no_capacity_overflow;
+          return output;
+        }
+        coverage_id = coverage_index + 1U;
+        ExactDirectSparseRootCoverageNode node;
+        node.coverage_id = coverage_id;
+        node.parent_offset = impl_->coverage_parents.size() +
+                             prepared->staged_parent_references.size();
+        node.parent_count = parent_coverages.size();
+        node.point_delta_offset = impl_->coverage_deltas.size() +
+                                  prepared->staged_point_deltas.size();
+        node.point_delta_count = delta.size();
+        prepared->staged_coverage_nodes.push_back(node);
+        prepared->staged_parent_references.insert(
+            prepared->staged_parent_references.end(),
+            parent_coverages.begin(),
+            parent_coverages.end());
+        prepared->staged_point_deltas.insert(
+            prepared->staged_point_deltas.end(), delta.begin(), delta.end());
+      }
+
+      ExactDirectSparseRootLedgerEntry entry;
+      entry.history_index =
+          impl_->history.size() + prepared->staged_entries.size();
+      entry.committed_batch_index = impl_->committed_batch_count;
+      entry.forest_root_handle = anchor_record->post_root_handle;
+      entry.source_group_index = group.source_group_index;
+      entry.prior_root_id = result_root_id;
+      entry.coverage_id = coverage_id;
+      entry.prior_root_parent_offset = impl_->prior_root_parents.size() +
+                                       prepared->staged_prior_root_parents.size();
+      entry.prior_root_parent_count = parent_root_ids.size();
+      entry.q_r = q_r;
+      entry.parent_root_count = parents.size();
+      entry.facet_delta_count = group.facet_delta_count;
+      entry.point_delta_count = delta.size();
+      entry.coverage_reused = reuse_coverage;
+      entry.kind = ExactDirectSparseRootLedgerTransitionKind::quotient_group;
+      prepared->staged_prior_root_parents.insert(
+          prepared->staged_prior_root_parents.end(),
+          parent_root_ids.begin(),
+          parent_root_ids.end());
+      prepared->staged_entries.push_back(entry);
+      resulting_roots.push_back(entry.forest_root_handle);
+    }
+
+    std::sort(
+        prepared->consumed_history_rows.begin(),
+        prepared->consumed_history_rows.end());
+    if (std::adjacent_find(
+            prepared->consumed_history_rows.begin(),
+            prepared->consumed_history_rows.end()) !=
+        prepared->consumed_history_rows.end()) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          contradiction_unknown_or_duplicate_parent_root;
+      return output;
+    }
+
+    for (const auto& birth : standalone_births) {
+      const auto record =
+          find_preview_record(preview_records, birth.representative_handle);
+      const auto proof = find_proof(birth.representative_handle);
+      if (record == nullptr ||
+          record->post_root_handle != birth.representative_handle ||
+          record->post_component_size != 1U || proof == nullptr ||
+          !proof->certified_unobserved()) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            contradiction_resulting_root_collision;
+        return output;
+      }
+      const auto delta = standalone_birth_point_deltas.subspan(
+          birth.point_delta_offset, birth.point_delta_count);
+      std::size_t coverage_index = 0U;
+      if (!checked_add(
+              impl_->coverage_nodes.size(),
+              prepared->staged_coverage_nodes.size(),
+              coverage_index) ||
+          coverage_index == std::numeric_limits<std::size_t>::max()) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_capacity_overflow;
+        return output;
+      }
+      ExactDirectSparseRootCoverageNode node;
+      node.coverage_id = coverage_index + 1U;
+      node.parent_offset = impl_->coverage_parents.size() +
+                           prepared->staged_parent_references.size();
+      node.point_delta_offset = impl_->coverage_deltas.size() +
+                                prepared->staged_point_deltas.size();
+      node.point_delta_count = delta.size();
+      prepared->staged_coverage_nodes.push_back(node);
+      prepared->staged_point_deltas.insert(
+          prepared->staged_point_deltas.end(), delta.begin(), delta.end());
+
+      ExactDirectSparseRootLedgerEntry entry;
+      entry.history_index =
+          impl_->history.size() + prepared->staged_entries.size();
+      entry.committed_batch_index = impl_->committed_batch_count;
+      entry.forest_root_handle = record->post_root_handle;
+      entry.coverage_id = node.coverage_id;
+      entry.facet_delta_count = birth.facet_delta_count;
+      entry.point_delta_count = delta.size();
+      entry.kind =
+          ExactDirectSparseRootLedgerTransitionKind::standalone_direct_birth;
+      entry.prior_root_parent_offset = impl_->prior_root_parents.size() +
+                                       prepared->staged_prior_root_parents.size();
+      prepared->staged_entries.push_back(entry);
+      resulting_roots.push_back(entry.forest_root_handle);
+    }
+
+    std::sort(resulting_roots.begin(), resulting_roots.end());
+    if (std::adjacent_find(resulting_roots.begin(), resulting_roots.end()) !=
+        resulting_roots.end()) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          contradiction_resulting_root_collision;
+      return output;
+    }
+    // The v1 per-record forest.lookup cross-check, replayed entirely from
+    // the sealed pre-origin fields and the caller-minted proofs.
+    for (const auto& record : preview_records) {
+      const bool post_root_is_staged = std::binary_search(
+          resulting_roots.begin(),
+          resulting_roots.end(),
+          record.post_root_handle);
+      if (record.pre_ticket_origin ==
+          ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+              durable_observed) {
+        const auto pre_proof = find_proof(record.pre_root_handle);
+        if (pre_proof == nullptr || !pre_proof->certified_observed()) {
+          output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+              no_preview_exhaustiveness_rejected;
+          return output;
+        }
+        const bool pre_root_consumed = std::binary_search(
+            prepared->consumed_history_rows.begin(),
+            prepared->consumed_history_rows.end(),
+            pre_proof->entry.history_index);
+        if ((pre_root_consumed && !post_root_is_staged) ||
+            (!pre_root_consumed &&
+             record.post_root_handle != record.pre_root_handle)) {
+          output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+              no_preview_exhaustiveness_rejected;
+          return output;
+        }
+      } else if (!post_root_is_staged) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_preview_exhaustiveness_rejected;
+        return output;
+      }
+    }
+    for (const auto& entry : prepared->staged_entries) {
+      const auto proof = find_proof(entry.forest_root_handle);
+      if (proof == nullptr) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            no_active_root_proof_coverage_rejected;
+        return output;
+      }
+      if (proof->certified_observed() &&
+          !std::binary_search(
+              prepared->consumed_history_rows.begin(),
+              prepared->consumed_history_rows.end(),
+              proof->entry.history_index)) {
+        output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+            contradiction_resulting_root_collision;
+        return output;
+      }
+    }
+
+    std::size_t post_active_count = 0U;
+    if (prepared->consumed_history_rows.size() > impl_->active_root_count ||
+        !checked_add(
+            impl_->active_root_count - prepared->consumed_history_rows.size(),
+            prepared->staged_entries.size(),
+            post_active_count) ||
+        post_active_count > impl_->budget.maximum_active_root_count) {
+      output.decision =
+          ExactDirectSparseRootLedgerPreparationDecision::no_budget_exhausted;
+      return output;
+    }
+    output.post_active_root_count = post_active_count;
+    std::size_t consumed_rooted = 0U;
+    for (const std::size_t row : prepared->consumed_history_rows) {
+      if (impl_->history[row].prior_root_id.has_value()) {
+        ++consumed_rooted;
+      }
+    }
+    if (consumed_rooted > impl_->rooted_active_count) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          contradiction_unknown_or_duplicate_parent_root;
+      return output;
+    }
+    std::size_t staged_rooted = 0U;
+    for (const auto& entry : prepared->staged_entries) {
+      if (entry.prior_root_id.has_value()) {
+        ++staged_rooted;
+      }
+    }
+    if (!checked_add(
+            impl_->rooted_active_count - consumed_rooted,
+            staged_rooted,
+            prepared->post_rooted_active_count)) {
+      output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+          no_capacity_overflow;
+      return output;
+    }
+    prepared->post_next_root_id = next_root_id;
+    // post_active_count is at most the sealed cumulative maximum, whose slot
+    // capacity both tables already hold: the rebuild path is unreachable.
+    prepared->replace_handle_slots = false;
+    prepared->replace_root_id_slots = false;
+
+    impl_->history.reserve(post_history_count);
+    impl_->coverage_nodes.reserve(
+        impl_->coverage_nodes.size() + prepared->staged_coverage_nodes.size());
+    impl_->coverage_parents.reserve(
+        impl_->coverage_parents.size() +
+        prepared->staged_parent_references.size());
+    impl_->coverage_deltas.reserve(
+        impl_->coverage_deltas.size() + prepared->staged_point_deltas.size());
+    impl_->prior_root_parents.reserve(
+        impl_->prior_root_parents.size() +
+        prepared->staged_prior_root_parents.size());
+
+    output.staged_coverage_node_count =
+        prepared->staged_coverage_nodes.size();
+    output.staged_coverage_parent_reference_count =
+        prepared->staged_parent_references.size();
+    output.staged_coverage_point_delta_count =
+        prepared->staged_point_deltas.size();
+    output.staged_prior_root_parent_reference_count =
+        prepared->staged_prior_root_parents.size();
+    output.preview_receipt_digest = compute_preview_digest_v2(
+        forest_preview.semantic_receipt());
+
+    contract::CanonicalSha256Builder transition_builder;
+    transition_builder.update(transition_digest_domain_v2);
+    append_ledger_semantic_stamp(transition_builder, output.pre_stamp);
+    append_id(transition_builder, output.forest_batch_digest);
+    append_id(transition_builder, output.preview_receipt_digest);
+    append_size(transition_builder, prepared->staged_entries.size());
+    for (const auto& entry : prepared->staged_entries) {
+      append_size(transition_builder, entry.forest_root_handle);
+      append_u8(
+          transition_builder,
+          entry.source_group_index.has_value() ? std::uint8_t{1U}
+                                               : std::uint8_t{0U});
+      if (entry.source_group_index.has_value()) {
+        append_size(transition_builder, *entry.source_group_index);
+      }
+      append_optional_root_id(transition_builder, entry.prior_root_id);
+      append_size(transition_builder, entry.coverage_id);
+      append_size(transition_builder, entry.prior_root_parent_offset);
+      append_size(transition_builder, entry.prior_root_parent_count);
+      append_size(transition_builder, entry.q_r);
+      append_size(transition_builder, entry.parent_root_count);
+      append_size(transition_builder, entry.facet_delta_count);
+      append_size(transition_builder, entry.point_delta_count);
+      append_u8(transition_builder, entry.coverage_reused ? 1U : 0U);
+      append_u8(
+          transition_builder, static_cast<std::uint8_t>(entry.kind));
+    }
+    append_size(
+        transition_builder, prepared->staged_parent_references.size());
+    for (const auto id : prepared->staged_parent_references) {
+      append_size(transition_builder, id);
+    }
+    append_size(transition_builder, prepared->staged_point_deltas.size());
+    for (const auto point : prepared->staged_point_deltas) {
+      append_u64(transition_builder, point);
+    }
+    append_size(
+        transition_builder, prepared->staged_prior_root_parents.size());
+    for (const auto root_id : prepared->staged_prior_root_parents) {
+      append_u64(transition_builder, root_id);
+    }
+    output.canonical_transition_digest = transition_builder.finalize();
+
+    contract::CanonicalSha256Builder successor_builder;
+    successor_builder.update(successor_digest_domain);
+    append_id(successor_builder, impl_->semantic_history_digest);
+    append_id(successor_builder, output.canonical_transition_digest);
+    prepared->successor_history_digest = successor_builder.finalize();
+
+    output.forest_ticket_identity_bound_by_private_preview = true;
+    output.all_previewed_parents_share_declared_post_root = true;
+    output.all_fallible_work_completed_before_commit = true;
+    output.forest_or_ledger_logical_state_mutated = false;
+    output.physical_capacity_may_have_changed = true;
+    output.external_transition_structure_only = true;
+    output.frozen_scientific_authority_replayed = false;
+    output.source_exactness_claimed = false;
+    output.vertical_maps_complete = false;
+    output.durable_restart_supported = false;
+    output.public_status_claimed = false;
+    output.prepare_no_historical_handle_or_root_lookup = true;
+    output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+        complete_sealed_proof_bound_structure_only_transition;
+    prepared->receipt = static_cast<const
+        ExactDirectSparseRootLedgerPreparationReceipt&>(output);
+    prepared->forest_ticket = std::move(forest_ticket);
+    prepared->proof_bound_preview = std::move(forest_preview);
+    prepared->proof_bound = true;
+    ++impl_->registry->outstanding_count;
+    prepared->registry_counted = true;
+    ExactDirectSparseRootLedgerPreparedBatch sealed_ticket(
+        std::move(prepared));
+    output.ticket.emplace(std::move(sealed_ticket));
+    return output;
+  } catch (const std::bad_alloc&) {
+    output.decision =
+        ExactDirectSparseRootLedgerPreparationDecision::no_allocation_failed;
+    return output;
+  } catch (const std::length_error&) {
+    output.decision =
+        ExactDirectSparseRootLedgerPreparationDecision::no_capacity_overflow;
+    return output;
+  } catch (...) {
+    output.decision = ExactDirectSparseRootLedgerPreparationDecision::
+        no_input_shape_rejected;
+    return output;
+  }
+}
+
 ExactDirectSparseRootLedgerCommitResult ExactDirectSparseRootLedger::commit(
     ExactDirectSparseRootLedgerPreparedBatch&& ticket,
     ExactDirectSparseStableFacetForest& forest) noexcept {
@@ -2364,10 +3270,14 @@ ExactDirectSparseRootLedgerCommitResult ExactDirectSparseRootLedger::commit(
         ExactDirectSparseRootLedgerCommitDecision::no_foreign_ticket_rejected;
     return output;
   }
+  const bool preview_certified = prepared.proof_bound
+      ? prepared.proof_bound_preview.certified_for(
+            prepared.forest_ticket, impl_->aligned_forest_stamp)
+      : prepared.forest_preview.certified_for(
+            prepared.forest_ticket, impl_->aligned_forest_stamp);
   if (prepared.receipt.pre_stamp != output.pre_stamp ||
       forest.current_stamp() != impl_->aligned_forest_stamp ||
-      !prepared.forest_preview.certified_for(
-          prepared.forest_ticket, impl_->aligned_forest_stamp)) {
+      !preview_certified) {
     prepared.consume();
     output.ticket_consumed = true;
     output.decision = ExactDirectSparseRootLedgerCommitDecision::
@@ -2377,7 +3287,9 @@ ExactDirectSparseRootLedgerCommitResult ExactDirectSparseRootLedger::commit(
 
   const std::size_t expected_inserted_handle_count =
       prepared.forest_ticket.new_handle_count();
-  const auto& expected_preview_receipt = prepared.forest_preview.receipt();
+  const auto& expected_preview_receipt = prepared.proof_bound
+      ? prepared.proof_bound_preview.semantic_receipt()
+      : prepared.forest_preview.receipt();
   output.forest_commit =
       forest.commit(std::move(prepared.forest_ticket));
   prepared.consume();

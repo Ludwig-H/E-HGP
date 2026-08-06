@@ -295,6 +295,453 @@ struct PreparedForest {
   return commit;
 }
 
+// ---------------------------------------------------------------------------
+// Proof-bound v2 helpers: the forest facts come from stable-handle root
+// probes sealed into the pre-origin preview, and the ledger facts from
+// caller-minted bounded active-root probes.  No prepare-stage historical
+// lookup remains.
+// ---------------------------------------------------------------------------
+
+[[nodiscard]] ExactDirectSparseStableFacetHandleRootProbeBudget
+forest_probe_budget() {
+  return {1024U, 1024U, 1024U, 1024U};
+}
+
+[[nodiscard]]
+ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreviewBudget
+proof_bound_preview_budget() {
+  return {
+      64U,
+      256U,
+      {65'536U, 65'536U, 65'536U, 65'536U},
+      {65'536U, 65'536U, 65'536U, 65'536U},
+      preview_budget()};
+}
+
+struct PreparedForestProofBound {
+  ExactDirectSparseStableFacetForestPreparedBatch ticket;
+  ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview preview;
+};
+
+[[nodiscard]] PreparedForestProofBound prepare_forest_proof_bound(
+    ExactDirectSparseStableFacetForest& forest,
+    std::span<const ExactDirectSparseStableFacetInsertion> insertions,
+    std::span<const ExactDirectSparseStableFacetUnion> unions,
+    std::span<const ExactDirectSparseStableFacetHandle> requested_handles) {
+  std::vector<ExactDirectSparseStableFacetHandleRootProbeResult> proofs;
+  proofs.reserve(requested_handles.size());
+  for (const auto handle : requested_handles) {
+    proofs.push_back(
+        forest.probe_stable_handle_root(handle, forest_probe_budget()));
+  }
+  auto preparation = forest.prepare_batch(insertions, unions);
+  check(
+      preparation.certified_prepared(),
+      "proof-bound forest preparation must certify");
+  auto preview = forest.preview_prepared_batch_from_stable_handle_root_proofs(
+      *preparation.ticket, proofs, proof_bound_preview_budget());
+  check(
+      preview.certified_prepared_preview() && preview.preview.has_value() &&
+          preview.preview->certified_proof_bound_preorigin_preview() &&
+          preview.preview->no_historical_handle_or_root_lookup() &&
+          preview.preview->proofs_cover_all_ticket_touched_handles(),
+      "the pre-origin sparse shadow preview must certify");
+  return {std::move(*preparation.ticket), std::move(*preview.preview)};
+}
+
+// Mints the canonical sorted ledger proof span covering the parents, birth
+// representatives, previewed post roots and durably observed previewed pre
+// roots.
+[[nodiscard]] std::vector<ExactDirectSparseRootLedgerActiveRootProbeResult>
+mint_ledger_proofs(
+    const ExactDirectSparseRootLedger& ledger,
+    const ExactDirectSparseStableFacetForestProofBoundPreoriginPreparedPreview&
+        preview,
+    std::span<const ExactDirectSparseStableFacetHandle> parents,
+    std::span<const ExactDirectSparseRootLedgerStandaloneBirth> births) {
+  std::vector<ExactDirectSparseStableFacetHandle> handles;
+  handles.insert(handles.end(), parents.begin(), parents.end());
+  for (const auto& birth : births) {
+    handles.push_back(birth.representative_handle);
+  }
+  for (const auto& record : preview.records()) {
+    handles.push_back(record.post_root_handle);
+    if (record.pre_ticket_origin ==
+        ExactDirectSparseStableFacetForestPreparedPreviewPreTicketOrigin::
+            durable_observed) {
+      handles.push_back(record.pre_root_handle);
+    }
+  }
+  std::sort(handles.begin(), handles.end());
+  handles.erase(
+      std::unique(handles.begin(), handles.end()), handles.end());
+  std::vector<ExactDirectSparseRootLedgerActiveRootProbeResult> proofs;
+  proofs.reserve(handles.size());
+  for (const auto handle : handles) {
+    proofs.push_back(ledger.probe_active_root(handle, {4'096U}));
+  }
+  return proofs;
+}
+
+[[nodiscard]] ExactDirectSparseRootLedgerPreparationResult
+prepare_v2(
+    Context& context,
+    std::span<const ExactDirectSparseRootLedgerGroupTransition> groups,
+    std::span<const ExactDirectSparseStableFacetHandle> parents,
+    std::span<const PointId> group_delta,
+    std::span<const ExactDirectSparseRootLedgerStandaloneBirth> births,
+    std::span<const PointId> birth_points,
+    std::span<const ExactDirectSparseStableFacetInsertion> insertions,
+    std::span<const ExactDirectSparseStableFacetUnion> unions,
+    std::span<const ExactDirectSparseStableFacetHandle> preview_handles) {
+  auto prepared_forest = prepare_forest_proof_bound(
+      context.forest, insertions, unions, preview_handles);
+  const auto proofs = mint_ledger_proofs(
+      context.ledger, prepared_forest.preview, parents, births);
+  return context.ledger.prepare_transition_from_active_root_proofs(
+      std::move(prepared_forest.ticket),
+      std::move(prepared_forest.preview),
+      proofs,
+      groups,
+      parents,
+      group_delta,
+      births,
+      birth_points);
+}
+
+void commit_v2(
+    Context& context,
+    std::span<const ExactDirectSparseRootLedgerGroupTransition> groups,
+    std::span<const ExactDirectSparseStableFacetHandle> parents,
+    std::span<const PointId> group_delta,
+    std::span<const ExactDirectSparseRootLedgerStandaloneBirth> births,
+    std::span<const PointId> birth_points,
+    std::span<const ExactDirectSparseStableFacetInsertion> insertions,
+    std::span<const ExactDirectSparseStableFacetUnion> unions,
+    std::span<const ExactDirectSparseStableFacetHandle> preview_handles) {
+  auto prepared = prepare_v2(
+      context,
+      groups,
+      parents,
+      group_delta,
+      births,
+      birth_points,
+      insertions,
+      unions,
+      preview_handles);
+  check(
+      prepared.certified_prepared() &&
+          prepared.decision ==
+              ExactDirectSparseRootLedgerPreparationDecision::
+                  complete_sealed_proof_bound_structure_only_transition &&
+          prepared.proof_bound_preorigin_prepare &&
+          prepared.prepare_no_historical_handle_or_root_lookup &&
+          prepared.active_root_proof_count != 0U,
+      "the proof-bound v2 preparation must certify with its sealed facts "
+      "(decision=" +
+          std::to_string(static_cast<int>(prepared.decision)) + ")");
+  if (!prepared.certified_prepared()) {
+    return;
+  }
+  allocation_probe::begin();
+  auto commit = context.ledger.commit(
+      std::move(*prepared.ticket), context.forest);
+  const std::size_t allocations = allocation_probe::finish();
+  check(
+      commit.certified_commit() && allocations == 0U,
+      "the proof-bound v2 commit must certify without allocation");
+}
+
+void test_proof_bound_prepare_v2() {
+  auto v1 = make_context(1'000U, 1U, 0U);
+  auto v2 = make_context(1'000U, 1U, 0U);
+
+  const std::array<ExactDirectSparseStableFacetHandle, 2U> birth_handles{
+      10U, 30U};
+  const std::array births{
+      ExactDirectSparseRootLedgerStandaloneBirth{10U, 0U, 2U, 1U},
+      ExactDirectSparseRootLedgerStandaloneBirth{30U, 2U, 1U, 1U},
+  };
+  const std::array<PointId, 3U> birth_points{1U, 2U, 7U};
+  std::vector<ExactDirectSparseStableFacetInsertion> birth_insertions;
+  for (const auto handle : birth_handles) {
+    birth_insertions.push_back({handle, facet(static_cast<PointId>(handle))});
+  }
+
+  // Before the one-time full-capacity reservation, the v2 path must refuse
+  // fail-closed without staging anything.
+  {
+    auto rejected = prepare_v2(
+        v2,
+        {},
+        {},
+        {},
+        births,
+        birth_points,
+        birth_insertions,
+        {},
+        birth_handles);
+    check(
+        !rejected.certified_prepared() &&
+            rejected.decision ==
+                ExactDirectSparseRootLedgerPreparationDecision::
+                    no_unreserved_index_capacity_rejected,
+        "v2 must refuse before the full-capacity index reservation");
+  }
+  const auto reservation = v2.ledger.reserve_full_active_index_capacity();
+  check(
+      reservation.certified_reserved() &&
+          reservation.decision ==
+              ExactDirectSparseRootLedgerIndexReservationDecision::
+                  complete_full_capacity_reserved &&
+          reservation.migrated_active_row_count == 0U,
+      "the empty-ledger reservation must certify");
+  const auto repeated = v2.ledger.reserve_full_active_index_capacity();
+  check(
+      repeated.certified_reserved() &&
+          repeated.decision ==
+              ExactDirectSparseRootLedgerIndexReservationDecision::
+                  complete_full_capacity_already_reserved,
+      "the repeated reservation must be a certified no-op");
+
+  // Identical logical sequences: v1 on the historical path, v2 on the
+  // proof-bound path.  Batch 1: two standalone births.
+  (void)commit_births(v1, birth_handles, births, birth_points);
+  commit_v2(
+      v2,
+      {},
+      {},
+      {},
+      births,
+      birth_points,
+      birth_insertions,
+      {},
+      birth_handles);
+
+  // Batch 2: a q_R=0 group over the first birth, with digest capture on
+  // both paths for the domain-separation assertion.
+  const std::array q0_insertions{
+      ExactDirectSparseStableFacetInsertion{11U, facet(11U)}};
+  const std::array q0_unions{ExactDirectSparseStableFacetUnion{10U, 11U}};
+  const std::array<ExactDirectSparseStableFacetHandle, 2U> q0_preview{
+      10U, 11U};
+  const std::array<ExactDirectSparseStableFacetHandle, 1U> q0_parents{10U};
+  const std::array<PointId, 2U> q0_delta{2U, 3U};
+  const std::array q0_groups{
+      ExactDirectSparseRootLedgerGroupTransition{0U, 11U, 0U, 1U, 0U, 2U, 1U}};
+
+  auto v1_forest = prepare_forest(
+      v1.forest, q0_insertions, q0_unions, q0_preview);
+  auto v1_prepared = v1.ledger.prepare_transition(
+      v1.forest,
+      std::move(v1_forest.ticket),
+      std::move(v1_forest.preview),
+      q0_groups,
+      q0_parents,
+      q0_delta,
+      {},
+      {});
+  check(
+      v1_prepared.certified_prepared() &&
+          !v1_prepared.proof_bound_preorigin_prepare &&
+          !v1_prepared.prepare_no_historical_handle_or_root_lookup &&
+          v1_prepared.active_root_proof_count == 0U,
+      "the v1 preparation must certify without proof-bound facts");
+  auto v1_commit = v1.ledger.commit(
+      std::move(*v1_prepared.ticket), v1.forest);
+  check(v1_commit.certified_commit(), "the v1 group commit must certify");
+
+  auto v2_prepared = prepare_v2(
+      v2,
+      q0_groups,
+      q0_parents,
+      q0_delta,
+      {},
+      {},
+      q0_insertions,
+      q0_unions,
+      q0_preview);
+  check(
+      v2_prepared.certified_prepared() &&
+          v2_prepared.decision ==
+              ExactDirectSparseRootLedgerPreparationDecision::
+                  complete_sealed_proof_bound_structure_only_transition,
+      "the v2 preparation of the identical group must certify (decision=" +
+          std::to_string(static_cast<int>(v2_prepared.decision)) + ")");
+  check(
+      v2_prepared.canonical_transition_digest !=
+              v1_prepared.canonical_transition_digest &&
+          v2_prepared.preview_receipt_digest !=
+              v1_prepared.preview_receipt_digest,
+      "the v2 digest domains must separate from v1 on the identical "
+      "transition");
+  auto v2_commit = v2.ledger.commit(
+      std::move(*v2_prepared.ticket), v2.forest);
+  check(v2_commit.certified_commit(), "the v2 group commit must certify");
+
+  // Batch 3: a q_R=1 migration group exercised through both paths.
+  const std::array q1_insertions{
+      ExactDirectSparseStableFacetInsertion{1U, facet(1U)},
+      ExactDirectSparseStableFacetInsertion{2U, facet(2U)},
+  };
+  const std::array q1_unions{
+      ExactDirectSparseStableFacetUnion{1U, 2U},
+      ExactDirectSparseStableFacetUnion{1U, 10U},
+  };
+  const std::array<ExactDirectSparseStableFacetHandle, 3U> q1_preview{
+      1U, 2U, 10U};
+  const std::array<ExactDirectSparseStableFacetHandle, 1U> q1_parents{10U};
+  const std::array q1_groups{
+      ExactDirectSparseRootLedgerGroupTransition{0U, 1U, 0U, 1U, 0U, 0U, 2U}};
+  (void)commit_group(
+      v1,
+      q1_insertions,
+      q1_unions,
+      q1_preview,
+      q1_groups[0U],
+      q1_parents,
+      {});
+  commit_v2(
+      v2,
+      q1_groups,
+      q1_parents,
+      {},
+      {},
+      {},
+      q1_insertions,
+      q1_unions,
+      q1_preview);
+
+  // Logical-state differential: identical histories, coverages and root
+  // ids; deliberately diverging semantic digests (domain separation).
+  const auto v1_history = v1.ledger.history_entries();
+  const auto v2_history = v2.ledger.history_entries();
+  check(
+      v1_history.size() == v2_history.size() &&
+          std::equal(
+              v1_history.begin(), v1_history.end(), v2_history.begin()),
+      "both paths must append the identical history");
+  const auto v1_nodes = v1.ledger.coverage_nodes();
+  const auto v2_nodes = v2.ledger.coverage_nodes();
+  check(
+      v1_nodes.size() == v2_nodes.size() &&
+          std::equal(v1_nodes.begin(), v1_nodes.end(), v2_nodes.begin()),
+      "both paths must build the identical coverage DAG");
+  const auto v1_deltas = v1.ledger.coverage_point_deltas();
+  const auto v2_deltas = v2.ledger.coverage_point_deltas();
+  check(
+      v1_deltas.size() == v2_deltas.size() &&
+          std::equal(v1_deltas.begin(), v1_deltas.end(), v2_deltas.begin()),
+      "both paths must record the identical point deltas");
+  const auto v1_stamp = v1.ledger.current_stamp();
+  const auto v2_stamp = v2.ledger.current_stamp();
+  check(
+      v1_stamp.epoch == v2_stamp.epoch &&
+          v1_stamp.committed_batch_count == v2_stamp.committed_batch_count &&
+          v1_stamp.active_root_count == v2_stamp.active_root_count &&
+          v1_stamp.rooted_active_count == v2_stamp.rooted_active_count &&
+          v1_stamp.history_entry_count == v2_stamp.history_entry_count &&
+          v1_stamp.next_allocatable_root_id ==
+              v2_stamp.next_allocatable_root_id,
+      "both paths must reach the identical logical stamp facts");
+  check(
+      v1_stamp.semantic_history_digest != v2_stamp.semantic_history_digest,
+      "the semantic digest chains must diverge by digest domain");
+  const auto v2_migrated = v2.ledger.lookup_active_root(1U);
+  check(
+      v2_migrated.certified_observed() &&
+          v2_migrated.entry.prior_root_id == 1U &&
+          v2_migrated.entry.coverage_reused &&
+          v2.ledger.lookup_active_root(10U).certified_unobserved(),
+      "the v2 q_R=1 migration must preserve id 1 on the preview root");
+
+  // Fail-closed rejections on the reserved context.
+  const std::array<ExactDirectSparseStableFacetHandle, 1U> reject_handles{
+      70U};
+  const std::array reject_births{
+      ExactDirectSparseRootLedgerStandaloneBirth{70U, 0U, 1U, 1U}};
+  const std::array<PointId, 1U> reject_points{55U};
+  const std::array reject_insertions{
+      ExactDirectSparseStableFacetInsertion{70U, facet(70U)}};
+  {
+    // A proof span that misses a required handle must be refused before
+    // any staging.
+    auto prepared_forest = prepare_forest_proof_bound(
+        v2.forest, reject_insertions, {}, reject_handles);
+    auto rejected = v2.ledger.prepare_transition_from_active_root_proofs(
+        std::move(prepared_forest.ticket),
+        std::move(prepared_forest.preview),
+        {},
+        {},
+        {},
+        {},
+        reject_births,
+        reject_points);
+    check(
+        !rejected.certified_prepared() &&
+            rejected.decision ==
+                ExactDirectSparseRootLedgerPreparationDecision::
+                    no_active_root_proof_coverage_rejected,
+        "a missing active-root proof must reject the v2 preparation");
+  }
+  {
+    // A stale proof minted before an interleaved commit must be refused.
+    const auto stale_proof = v2.ledger.probe_active_root(70U, {4'096U});
+    check(
+        stale_proof.certified_unobserved(),
+        "the stale-proof fixture must observe an absent root first");
+    commit_v2(
+        v2,
+        {},
+        {},
+        {},
+        reject_births,
+        reject_points,
+        reject_insertions,
+        {},
+        reject_handles);
+    const std::array<ExactDirectSparseStableFacetHandle, 1U> next_handles{
+        80U};
+    const std::array next_births{
+        ExactDirectSparseRootLedgerStandaloneBirth{80U, 0U, 1U, 1U}};
+    const std::array<PointId, 1U> next_points{66U};
+    const std::array next_insertions{
+        ExactDirectSparseStableFacetInsertion{80U, facet(80U)}};
+    auto prepared_forest = prepare_forest_proof_bound(
+        v2.forest, next_insertions, {}, next_handles);
+    std::vector<ExactDirectSparseRootLedgerActiveRootProbeResult> proofs =
+        mint_ledger_proofs(
+            v2.ledger, prepared_forest.preview, {}, next_births);
+    check(!proofs.empty(), "the stale-proof fixture must mint fresh proofs");
+    proofs.front() = stale_proof;
+    std::sort(
+        proofs.begin(),
+        proofs.end(),
+        [](const auto& lhs, const auto& rhs) {
+          return lhs.requested_forest_root_handle <
+                 rhs.requested_forest_root_handle;
+        });
+    auto rejected = v2.ledger.prepare_transition_from_active_root_proofs(
+        std::move(prepared_forest.ticket),
+        std::move(prepared_forest.preview),
+        proofs,
+        {},
+        {},
+        {},
+        next_births,
+        next_points);
+    check(
+        !rejected.certified_prepared() &&
+            (rejected.decision ==
+                 ExactDirectSparseRootLedgerPreparationDecision::
+                     no_active_root_proof_rejected ||
+             rejected.decision ==
+                 ExactDirectSparseRootLedgerPreparationDecision::
+                     no_active_root_proof_coverage_rejected),
+        "a stale active-root proof must reject the v2 preparation");
+  }
+}
+
 void test_qr_transitions_coverage_and_migration() {
   auto context = make_context(1'000U, 1U, 0U);
   check(
@@ -1698,6 +2145,7 @@ int main() {
   test_qr_transitions_coverage_and_migration();
   test_bounded_active_root_probe();
   test_proof_bound_active_root_materialization();
+  test_proof_bound_prepare_v2();
   test_caps_siblings_foreign_and_tamper();
   test_root_id_max_namespace_size_max_and_digest();
   test_csr_partitions_duplicate_parents_and_empty_forest_gate();
