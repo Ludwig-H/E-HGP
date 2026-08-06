@@ -7,6 +7,9 @@
 #include "morsehgp3d/hierarchy/direct_morse_vertical_target_proposal_pipeline.hpp"
 #include "morsehgp3d/hierarchy/direct_saddle_arm_seed_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_durable_run_archive.hpp"
+#if MORSEHGP3D_RUNNER_HAS_DEVICE_TILED_HIGHER
+#include "morsehgp3d/gpu/higher_support_device_tiled_tower.hpp"
+#endif
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
@@ -60,6 +63,7 @@ struct Options {
   std::uint64_t chunk_byte_budget{UINT64_C(1) << 30U};
   std::uint64_t operational_deadline_ms{};
   std::string archive_directory{};
+  std::string higher_backend{"host_fixed_chunk"};
   bool point_count_supplied{false};
 };
 
@@ -542,6 +546,7 @@ void print_usage(std::ostream& output) {
       << "  --operational-deadline-ms N (required for complete diagnostic)\n"
       << "  --archive-directory DIR (required for "
          "durable_archive_recertification)\n"
+      << "  --higher-backend host_fixed_chunk|device_tiled_session\n"
       << "Default caps are fail-fast diagnostics, not a 50k "
          "qualification envelope.\n";
 }
@@ -581,6 +586,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.chunk_byte_budget = parse_u64(value, option);
     } else if (option == "--archive-directory") {
       options.archive_directory = value;
+    } else if (option == "--higher-backend") {
+      options.higher_backend = value;
     } else if (option == "--operational-deadline-ms") {
       options.operational_deadline_ms = parse_u64(value, option);
     } else {
@@ -626,6 +633,12 @@ void parse_options(int argc, char** argv, Options& options) {
     throw std::invalid_argument(
         "--archive-directory is only meaningful for "
         "durable_archive_recertification");
+  }
+  if (options.higher_backend != "host_fixed_chunk" &&
+      options.higher_backend != "device_tiled_session") {
+    throw std::invalid_argument(
+        "--higher-backend must be host_fixed_chunk or "
+        "device_tiled_session");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -4865,6 +4878,69 @@ bool count_reloaded_durable_segment(
         report, "sparse_pair_terminal_authority", total_start);
   }
 
+  std::optional<ExactDirectSupportTerminalFacade> facade_storage;
+  Clock::time_point higher_stage_end = pair_end;
+  if (options.higher_backend == "device_tiled_session") {
+#if MORSEHGP3D_RUNNER_HAS_DEVICE_TILED_HIGHER
+    const auto assembly =
+        morsehgp3d::gpu::assemble_exact_higher_support_stream_device_tiled(
+            cloud, index, options.maximum_order, higher_budget);
+    higher_stage_end = Clock::now();
+    report.timings.higher_support_ms =
+        milliseconds(higher_stage_end - pair_end);
+    if (!assembly.certified_assembled()) {
+      report.higher_status = assembly.bridge_poisoned
+                                 ? "bridge_poisoned"
+                                 : "not_assembled";
+      report.higher_stop_reason = "device_tiled_assembly_rejected";
+      report.higher_authority_kind = "anchored_session_chain_certificate";
+      report.terminal_stage = "higher_support";
+      report.stop_category = "certification_failure";
+      report.stop_detail = "device_tiled_higher_assembly_rejected";
+      report.timings.total_ms =
+          milliseconds(Clock::now() - total_start);
+      emit_report(report);
+      return 3;
+    }
+    const ExactHigherSupportStreamAudit& device_audit =
+        assembly.higher->audit;
+    report.higher_work_units = device_audit.work_unit_count;
+    report.higher_product_visits =
+        device_audit.support_product_visit_count;
+    report.higher_closed_ball_queries =
+        device_audit.global_closed_ball_query_count;
+    report.higher_accepted_events = device_audit.accepted_event_count;
+    report.higher_extra_shell_diagnostics =
+        device_audit.relevant_extra_shell_diagnostic_count;
+    report.higher_prune_certificates =
+        device_audit.emitted_prune_certificate_count;
+    report.higher_chunk_count =
+        assembly.certificate.committed_chunk_count();
+    report.higher_status = "complete";
+    report.higher_stop_reason = "none";
+    report.higher_authority_kind = "anchored_session_chain_certificate";
+    facade_storage.emplace(build_exact_direct_support_terminal_facade(
+        index,
+        cloud,
+        options.maximum_order,
+        higher_budget,
+        std::move(pair_authority),
+        *assembly.higher,
+        assembly.certificate));
+#else
+    report.higher_status = "not_compiled";
+    report.higher_stop_reason = "device_backend_not_compiled";
+    report.higher_authority_kind = "anchored_session_chain_certificate";
+    report.terminal_stage = "higher_support";
+    report.stop_category = "invalid_input";
+    report.stop_detail =
+        "device_tiled_higher_backend_requires_a_cuda_build";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 4;
+#endif
+  } else {
   ExactHigherSupportTerminalSession higher_session{
       index,
       cloud,
@@ -4896,6 +4972,7 @@ bool count_reloaded_durable_segment(
     higher_run_status = higher_session.run_to_terminal();
   }
   const Clock::time_point higher_end = Clock::now();
+  higher_stage_end = higher_end;
   report.timings.higher_support_ms =
       milliseconds(higher_end - pair_end);
   const ExactHigherSupportStreamAudit& higher_audit =
@@ -4947,17 +5024,18 @@ bool count_reloaded_durable_segment(
       report.no_forbidden_global_structure_materialized &&
       higher_authority.no_forbidden_global_structure_materialized();
 
-  const ExactDirectSupportTerminalFacade facade =
-      build_exact_direct_support_terminal_facade(
-          index,
-          cloud,
-          options.maximum_order,
-          higher_budget,
-          std::move(pair_authority),
-          std::move(higher_authority));
+  facade_storage.emplace(build_exact_direct_support_terminal_facade(
+      index,
+      cloud,
+      options.maximum_order,
+      higher_budget,
+      std::move(pair_authority),
+      std::move(higher_authority)));
+  }
+  const ExactDirectSupportTerminalFacade& facade = *facade_storage;
   const Clock::time_point facade_end = Clock::now();
   report.timings.terminal_facade_ms =
-      milliseconds(facade_end - higher_end);
+      milliseconds(facade_end - higher_stage_end);
   report.terminal_catalog_certified =
       facade.terminal_catalog_certified();
   report.terminal_event_count = facade.events.size();

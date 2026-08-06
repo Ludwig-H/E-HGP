@@ -6970,6 +6970,20 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d::direct_morse_m1_o5_death_accounting
       morsehgp3d::direct_morse_gamma_carrier_conformance
   )
+  target_compile_definitions(
+    morsehgp3d_direct_morse_product_runner
+    PRIVATE
+      MORSEHGP3D_RUNNER_HAS_DEVICE_TILED_HIGHER=$<BOOL:${MORSEHGP3D_ENABLE_CUDA}>
+  )
+  if(MORSEHGP3D_ENABLE_CUDA)
+    target_link_libraries(
+      morsehgp3d_direct_morse_product_runner
+      PRIVATE
+        morsehgp3d::gpu_higher_support_device_tiled_tower_host_contract
+        morsehgp3d::gpu_higher_support_device_tiled_frontier
+        morsehgp3d::gpu_morton_lbvh_build
+    )
+  endif()
   morsehgp3d_apply_sanitizers(morsehgp3d_direct_morse_product_runner)
   if(MSVC)
     target_compile_options(

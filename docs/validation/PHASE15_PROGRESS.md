@@ -1433,3 +1433,11 @@ La nouvelle surcharge `build_exact_direct_support_terminal_facade` consomme l'au
 La suite ciblée passe en Release : la façade des deux voies certifie et son payload (événements, diagnostics, `normalized_terminal_output_digest`) égale la façade oracle fraîche sur tetrahedron/K1 et skewcube8/K3, les deux voies déclarant véridiquement leurs genres scellés ; un budget higher déclaré non conforme échoue fermé sans payload ; les suites terminal et producteur de tour restent vertes.
 
 Reste dans ④-c : brancher cette composition dans le runner produit (backend device dans le pipeline industriel), lever le garde résident 50k pour ce chemin, puis gate 1 M et mesures 50k sur G4 uniquement (image conteneur avec numpy à reconstruire). Aucun 50 k, aucune entrée Phase 16, aucun statut public. GCP non utilisé.
+
+## ④-c3 : le sélecteur de backend higher du runner — la voie device dans le pipeline industriel
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`, `public_status=not_claimed`. Aucun statut de phase ou gate d'échelle ne change.
+
+Le runner produit gagne `--higher-backend host_fixed_chunk|device_tiled_session` (défaut inchangé). La voie device assemble le flux higher par l'assembleur ancré à travers le pont M2 (`assemble_exact_higher_support_stream_device_tiled`) puis construit la façade par la surcharge ④-c2 des deux voies scalables (autorité paire P8l scellée + certificat de chaîne ancrée) — aucun rejeu exhaustif. La voie device n'est compilée que sous `MORSEHGP3D_ENABLE_CUDA` : les bibliothèques de contrat hôte laissent délibérément les symboles de launcher à l'unique définition de production CUDA (le fake est réservé aux tests), et un binaire non-CUDA rejette le drapeau fail-closed (`device_tiled_higher_backend_requires_a_cuda_build`, RC=4, entrée typée).
+
+Validation ciblée : rejet typé sans CUDA, rejet du backend inconnu au parse, contrat complet du runner (cas durable inclus) vert ; la configuration CUDA compile proprement et son exécution native accompagne la prochaine session G4 gardée (image reconstruite avec numpy, suite conteneur complète, backend device natif, mesures 50k). Aucun 50 k, aucune entrée Phase 16, aucun statut public.
