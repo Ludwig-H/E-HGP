@@ -1,0 +1,87 @@
+# Vérification réduite : la route vers 50k exhaustif exact < 100 ms
+
+Directive scellée du 6/8/2026 : une fois les tests verts (fait : 252/254
+conteneur), l'objectif est **50k points, exhaustif et exact, sous 100 ms**
+sur G4. Le profil mesuré en session c3 (run natif n=32/K=10 : 99,8 % CPU
+mono-thread, GPU en rafales quasi inactives, > 10 min) désigne le goulot
+sans ambiguïté : la couche de certification — le rejeu CPU frais de chaque
+transition par la session ancrée — pas le calcul géométrique device.
+
+## Modèle de confiance actuel (M2, ④-b2)
+
+- Le moteur device M5b est qualifié **bit-identique au fake certifié** au
+  seam (test du slot engine partagé, sans GPU) et ses six cas no-go n=32
+  sont résolus en clôture BigInt exacte (40 920 par cas).
+- Le pont M2 valide en `exact::BigInt` la partition des masses après
+  chaque commit : R_j + C(F_j) = C(n,3) + C(n,4).
+- La session ancrée re-rejoue CHAQUE transition sur CPU
+  (`commit_prepared` → reconstruction du chunk hôte → égalité totale).
+  C'est ce rejeu, séquentiel et en O(travail total), qu'il faut retirer.
+
+## Le nouveau chemin : commit certifié par tuile
+
+Un mode de commit `tile_certified` de la session ancrée (ou d'une session
+sœur dédiée), où le candidat device est accepté sous :
+
+1. **Identité de source** : le checkpoint réinjecté est le checkpoint de
+   confiance courant (inchangé) ;
+2. **Comptabilité de frontière** : les entrées consommées par la tuile
+   correspondent exactement au préfixe de frontière du checkpoint, et les
+   entrées résiduelles/scindées re-rentrent avec conservation de masse
+   BigInt (déjà la validation croisée du pont, déplacée dans la session) ;
+3. **Bonne formation O(sortie)** : records canoniques (ordre, arités,
+   bornes d'index), diagnostics bien formés, comptes d'audit délta
+   cohérents (identités par commit) ;
+4. **Chaîne de sortie** : le digest de chaîne est replié sur les records
+   CANDIDATS (`extend_output_chain`, O(records)) — la chaîne reste la
+   même définition unique qu'en ④-b2 ;
+5. **Clôture terminale exacte inchangée** :
+   `total_support_count == C(n,3)+C(n,4)` en BigInt, frontière vide,
+   partition groupée certifiée.
+
+Ce qui n'est PLUS re-dérivé sur CPU : la vérité géométrique de chaque
+record (centre/niveau/intérieurs), désormais portée par (a) la
+qualification M5b du moteur (seam bit-identique, arithmétique rationnelle
+exacte int512 on-device), (b) la clôture BigInt (aucun support perdu ni
+compté deux fois), (c) le différentiel exhaustif n=32 sanctionné (chemin
+rejeu ≡ chemin tuile-certifié, localement avec le fake), (d) le garde-fou
+structurel Delaunay externe à échelle
+(`DELAUNAY_STRUCTURAL_GUARD_DESIGN.md`).
+
+## Honnêteté du certificat
+
+Le certificat de chaîne ancrée gagne un champ `verification_basis` :
+`fresh_cpu_replay_every_commit` (chemin actuel, inchangé) ou
+`tile_certified_engine_with_exact_closure`. La façade recopie ce fait dans
+son certificat ; la base de preuve et les nonclaims TOML déclarent que le
+chemin tuile-certifié s'appuie sur la qualification M5b du moteur, pas sur
+un rejeu par transition. Aucun statut public ne change.
+
+## Point d'implémentation critique
+
+Dans le pont actuel, `prepare_next` de la session EST le générateur hôte
+du chunk (le device ne sert qu'à la validation croisée) : le CPU fait
+tout le travail même sans rejeu. Le chemin tuile-certifié doit donc
+inverser le flux : les payloads de tuile device deviennent le candidat
+(assemblés en `ExactHigherSupportStreamChunk` par l'assembleur), et la
+session les valide par les invariants 1–5 sans jamais exécuter son propre
+générateur. C'est le vrai retrait du O(travail) CPU.
+
+## Au-delà du higher : le bilan 100 ms
+
+Le contrat 100 ms exige qu'AUCUN étage ne reste séquentiel en O(univers) :
+
+- LBVH : build device (déjà).
+- Paires P8l : session CPU séquentielle aujourd'hui — à porter en tuiles
+  device sous le même modèle (validation croisée + clôture n² exacte),
+  incrément séparé.
+- Higher 3/4 : ce design.
+- Façade + journaux + reducer + archive : O(sortie) — à paralléliser
+  (48 cœurs) et pipeliner avec les tuiles ; l'archive 15L est déjà en
+  flux.
+
+Ordre des incréments : (R1) commit tuile-certifié + différentiel n=32
+rejeu ≡ tuile-certifié ; (R2) mesure G4 (n=32 natif attendu en secondes,
+ventilation 50k) ; (R3) paires device-tuilées ; (R4) parallélisation aval ;
+(R5) boucle mesure→optimisation jusqu'à < 100 ms, avec le garde Delaunay
+aux jalons.
