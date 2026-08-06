@@ -6318,3 +6318,27 @@ add_test(
   NAME hierarchy_direct_morse_forest_durable_run_archive
   COMMAND morsehgp3d_hierarchy_direct_morse_forest_durable_run_archive_tests
 )
+
+add_executable(
+  morsehgp3d_hierarchy_direct_morse_tower_producer_tests
+  test_hierarchy_direct_morse_tower_producer.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_tower_producer_tests
+  PRIVATE morsehgp3d::direct_morse_tower_producer
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_tower_producer_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_tower_producer_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+add_test(
+  NAME hierarchy_direct_morse_tower_producer
+  COMMAND morsehgp3d_hierarchy_direct_morse_tower_producer_tests
+)
