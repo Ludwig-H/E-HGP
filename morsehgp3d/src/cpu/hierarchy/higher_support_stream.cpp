@@ -1,6 +1,7 @@
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/higher_support_closed_ball.hpp"
 
 #include <algorithm>
 #include <array>
@@ -708,18 +709,11 @@ class ExactHigherSupportStreamBuilder {
     budget_exhausted,
   };
 
-  enum class SparseBallOutcome : std::uint8_t {
-    complete,
-    rank_exceeded,
-  };
-
-  struct SparseBallClassification {
-    SparseBallOutcome outcome{SparseBallOutcome::rank_exceeded};
-    std::vector<PointId> interior_ids;
-    std::size_t shell_count{};
-    std::optional<PointId> canonical_extra_shell_witness_id;
-    std::size_t exterior_count{};
-  };
+  // The closed-ball classification of a minimal support has exactly one
+  // definition in this project, shared with the device-tiled
+  // tile-certified path.
+  using SparseBallOutcome = ExactHigherSupportClosedBallOutcome;
+  using SparseBallClassification = ExactHigherSupportClosedBallClassification;
 
   struct RankSearchResult {
     RankSearchOutcome outcome{RankSearchOutcome::keep};
@@ -2464,156 +2458,54 @@ class ExactHigherSupportStreamBuilder {
     }
   }
 
+  // The traversal itself lives in the shared indexed query so the
+  // fresh-replay basis and the tile-certified basis record the same
+  // geometry by construction; this wrapper only meters it into the audit
+  // under the existing preflight discipline.
   [[nodiscard]] SparseBallClassification classify_sparse_closed_ball(
       const std::array<PointId, 4>& support_ids,
       std::size_t support_size,
       const exact::ExactCenter3& center,
       const exact::ExactLevel& squared_level) {
-    SparseBallClassification classification;
     const std::size_t interior_cap =
         result_.requirements.maximum_relevant_closed_rank - support_size;
-    classification.interior_ids.reserve(interior_cap);
     increment(
         result_.audit.global_closed_ball_query_count,
         "the higher-support closed-ball query count overflows size_t");
-    std::vector<std::size_t> frontier{index_.root_index_};
+    SparseBallClassification classification =
+        ExactHigherSupportIndexedClosedBallQuery::classify(
+            index_,
+            cloud_,
+            support_ids,
+            support_size,
+            center,
+            squared_level,
+            interior_cap,
+            result_.budget.maximum_auxiliary_frontier_entry_count);
+    const ExactHigherSupportClosedBallCounters& counters =
+        classification.counters;
+    result_.audit.closed_ball_node_visit_count = checked_add(
+        result_.audit.closed_ball_node_visit_count,
+        counters.node_visit_count,
+        "the higher-support closed-ball node count overflows size_t");
+    result_.audit.closed_ball_bulk_exterior_subtree_count = checked_add(
+        result_.audit.closed_ball_bulk_exterior_subtree_count,
+        counters.bulk_exterior_subtree_count,
+        "the higher-support exterior-subtree count overflows size_t");
+    result_.audit.closed_ball_bulk_interior_subtree_count = checked_add(
+        result_.audit.closed_ball_bulk_interior_subtree_count,
+        counters.bulk_interior_subtree_count,
+        "the higher-support interior-subtree count overflows size_t");
+    result_.audit.exact_point_distance_evaluation_count = checked_add(
+        result_.audit.exact_point_distance_evaluation_count,
+        counters.exact_point_distance_evaluation_count,
+        "the higher-support exact-distance count overflows size_t");
     result_.audit.maximum_closed_ball_frontier_entry_count = std::max(
         result_.audit.maximum_closed_ball_frontier_entry_count,
-        frontier.size());
-    std::array<bool, 4> support_seen{};
-    std::size_t interior_count = 0U;
-    while (!frontier.empty()) {
-      const std::size_t node_index = frontier.back();
-      frontier.pop_back();
-      const Node& current = node(node_index);
-      const std::size_t subtree_size =
-          current.leaf_end - current.leaf_begin;
-      increment(
-          result_.audit.closed_ball_node_visit_count,
-          "the higher-support closed-ball node count overflows size_t");
-      const exact::ExactLevel minimum_distance =
-          index_.minimum_squared_distance_to_node(
-              cloud_, node_index, center);
-      if (minimum_distance > squared_level) {
-        classification.exterior_count = checked_add(
-            classification.exterior_count,
-            subtree_size,
-            "the higher-support exterior count overflows size_t");
-        increment(
-            result_.audit.closed_ball_bulk_exterior_subtree_count,
-            "the higher-support exterior-subtree count overflows size_t");
-        add_point_classifications(subtree_size);
-        continue;
-      }
-      const exact::ExactLevel maximum_distance =
-          index_.maximum_squared_distance_to_node(
-              cloud_, node_index, center);
-      if (maximum_distance < squared_level) {
-        interior_count = checked_add(
-            interior_count,
-            subtree_size,
-            "the higher-support interior count overflows size_t");
-        increment(
-            result_.audit.closed_ball_bulk_interior_subtree_count,
-            "the higher-support interior-subtree count overflows size_t");
-        add_point_classifications(subtree_size);
-        if (interior_count > interior_cap) {
-          classification.outcome = SparseBallOutcome::rank_exceeded;
-          return classification;
-        }
-        for (std::size_t position = current.leaf_begin;
-             position < current.leaf_end;
-             ++position) {
-          classification.interior_ids.push_back(
-              index_.leaves_[position].point_id);
-        }
-        continue;
-      }
-      if (current.is_leaf()) {
-        const PointId point_id =
-            index_.leaves_[current.leaf_begin].point_id;
-        const exact::SpherePointClassification point_classification =
-            exact::classify_sphere_point(
-                center, squared_level, cloud_.point(point_id));
-        increment(
-            result_.audit.exact_point_distance_evaluation_count,
-            "the higher-support exact-distance count overflows size_t");
-        add_point_classifications(1U);
-        switch (point_classification.location()) {
-          case exact::SpherePointLocation::strictly_inside:
-            increment(
-                interior_count,
-                "the higher-support interior count overflows size_t");
-            if (interior_count > interior_cap) {
-              classification.outcome = SparseBallOutcome::rank_exceeded;
-              return classification;
-            }
-            classification.interior_ids.push_back(point_id);
-            break;
-          case exact::SpherePointLocation::boundary: {
-            increment(
-                classification.shell_count,
-                "the higher-support shell count overflows size_t");
-            bool is_support = false;
-            for (std::size_t support_index = 0U;
-                 support_index < support_size;
-                 ++support_index) {
-              if (point_id == support_ids[support_index]) {
-                support_seen[support_index] = true;
-                is_support = true;
-                break;
-              }
-            }
-            if (!is_support &&
-                (!classification.canonical_extra_shell_witness_id.has_value() ||
-                 point_id <
-                     *classification.canonical_extra_shell_witness_id)) {
-              classification.canonical_extra_shell_witness_id = point_id;
-            }
-            break;
-          }
-          case exact::SpherePointLocation::outside:
-            increment(
-                classification.exterior_count,
-                "the higher-support exterior count overflows size_t");
-            break;
-        }
-        continue;
-      }
-      frontier.push_back(current.right_child);
-      frontier.push_back(current.left_child);
-      if (frontier.size() >
-          result_.budget.maximum_auxiliary_frontier_entry_count) {
-        throw std::logic_error(
-            "a higher-support closed-ball DFS exceeded its preflight bound");
-      }
-      result_.audit.maximum_closed_ball_frontier_entry_count = std::max(
-          result_.audit.maximum_closed_ball_frontier_entry_count,
-          frontier.size());
-    }
-    const std::size_t classified_count = checked_add(
-        checked_add(
-            interior_count,
-            classification.shell_count,
-            "the higher-support partition count overflows size_t"),
-        classification.exterior_count,
-        "the higher-support partition count overflows size_t");
-    bool every_support_seen = true;
-    for (std::size_t index = 0U; index < support_size; ++index) {
-      every_support_seen = every_support_seen && support_seen[index];
-    }
-    if (classified_count != cloud_.size() || !every_support_seen ||
-        classification.shell_count < support_size ||
-        (classification.shell_count == support_size) !=
-            !classification.canonical_extra_shell_witness_id.has_value() ||
-        interior_count != classification.interior_ids.size()) {
-      throw std::logic_error(
-          "a higher-support sparse closed-ball traversal did not close its partition");
-    }
-    std::sort(
-        classification.interior_ids.begin(),
-        classification.interior_ids.end());
-    classification.outcome = SparseBallOutcome::complete;
+        counters.maximum_traversal_frontier_entry_count);
+    // One query classifies at most the whole cloud, which the leaf-query
+    // preflight has already reserved, so this can never trip.
+    add_point_classifications(counters.point_classification_count);
     return classification;
   }
 

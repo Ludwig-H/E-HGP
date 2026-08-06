@@ -1471,3 +1471,29 @@ Découverte de mise au point : une scission canonique peut produire **un seul en
 Validation ciblée en Release : l'assemblage tuile-certifié **égale l'oracle exhaustif** (événements, diagnostics, requirements, clôture d'univers) sur tetrahedron/K1, line12/K2 et sphere8/K3 ; ses compteurs de travail hôte (unités, visites de produits, témoins de rang) sont **tous nuls** ; le certificat scellé déclare la base tuile-certifiée. Les suites flux higher, pont M2, tour device et terminal restent vertes.
 
 Prochaine optimisation avant 50k : la classification closed-ball hôte reste un **scan linéaire par terminal minimal** — à remplacer par la requête indexée LBVH (la machinerie `closed_ball_bulk_*` du builder), puis mesure G4.
+
+## R1-c : la classification closed-ball indexée, et la vraie borne du chemin hôte
+
+Le suivi reste `phase=15`, `mode=tile_certified_bridge_v1`, `deployment_status=architecture_only`, `public_status=not_claimed`. Aucun statut de phase ou gate d'échelle ne change.
+
+**Une seule définition de la closed-ball.** Le scan linéaire par terminal minimal du pont (O(sortie × n), rédhibitoire à 50 000 points) est supprimé. La traversée indexée du générateur hôte est extraite en composant partagé `ExactHigherSupportIndexedClosedBallQuery` (`hierarchy/higher_support_closed_ball.hpp`) : décisions de sous-arbre en masse par les bornes exactes de nœud, classification exacte point par point uniquement là où la sphère coupe une feuille, sortie de rang dès que l'intérieur strict dépasse son cap, et clôture de partition auto-certifiée. Le générateur hôte (base `fresh_cpu_replay`) et le pont tuile-certifié (base `device_search_host_exact_record_classification_bigint_closure`) consomment désormais **la même implémentation** : les deux bases de vérification ne peuvent plus diverger sur la géométrie qu'elles enregistrent. Les compteurs de la traversée sont rendus au lieu d'être incrémentés dans un audit : le builder les replie à l'identique, donc ses identités d'audit sont inchangées.
+
+**La mesure qui recadre la mission.** Profilage local (Release, cœur unique) du coût unitaire des étages exacts, avant tout travail d'échelle :
+
+| opération | avant | après |
+| --- | --- | --- |
+| `classify_sphere_point` (centre rationnel) | 683 µs | 1,0 µs |
+| requête closed-ball complète (n=4096) | 56 741 µs | 276 µs |
+| `analyze_circumcenter_support` (support 4) | 7 184 µs | 732 µs |
+| PGCD sur opérandes de 220 bits | 21,8 µs | 3,2 µs |
+
+Deux causes, toutes deux fermées ici :
+
+1. **Le PGCD d'Euclide naïf.** `greatest_common_divisor` bouclait sur `%` : sur les opérandes de ~220 bits qu'un circumcentre exact produit réellement, cela fait ~130 divisions multiprécision, soit deux ordres de grandeur de plus que les multiplications qu'il réduisait — et **chaque** opération rationnelle normalisée l'appelait. L'implémentation binaire/Lehmer du backend donne la même fonction mathématique 7× moins cher.
+2. **La normalisation elle-même.** Aucune décision de la traversée n'a besoin de la forme réduite. `exact::ExactHomogeneousSphere3` porte la sphère en forme entière homogène (centre (x,y,z)/w, niveau ln/ld) et prend les trois décisions — point contre sphère, minimum et maximum de distance à une boîte — en arithmétique **entière pure**, sans réduire aucun intermédiaire. L'argument d'exactitude est élémentaire : comparer Σ(p_a w − x_a q)²/(q w)² à ln/ld, c'est comparer ld·Σ(p_a w − x_a q)² à ln·w²·q², deux entiers positifs, dénominateurs éliminés, aucun arrondi.
+
+Le résultat net sur la requête closed-ball est **206×**, et il porte sur l'étage que le régime tuile-certifié laisse à l'hôte par conception (la classification closed-ball des terminaux minimaux, `exact_higher_support_terminal_classification_native_cuda=false`).
+
+**Certificat.** Différentiel permanent dans la suite du flux higher : sur quatre familles — uniforme, cosphérique, réseau cubique, et écarts d'exposant extrêmes 1e200/1e-200 — et pour **chaque** support minimal de taille 3 et 4 du nuage, la requête indexée égale terme à terme la référence linéaire par le prédicat rationnel normalisé : mêmes identifiants intérieurs dans le même ordre, même compte de shell, même compte extérieur, même témoin canonique de shell surnuméraire ; et la sortie de rang est prise exactement quand l'intérieur strict dépasse le cap. Les familles cosphérique et réseau existent pour que les décisions de bord soient des **égalités exactes**, là où une comparaison filtrée ou réduite se tromperait. Les suites flux higher, pont M2 et tour device restent vertes ; les suites du cœur exact (types, prédicats, supports, ordre de niveau, LBVH spatial) valident le changement de PGCD.
+
+**Ce que cela ne dit pas.** Aucune mesure G4, aucun run 50k, aucun kernel natif, aucun gate d'échelle, aucun statut public. Le coût dominant restant sur ce chemin est `analyze_circumcenter_support` (732 µs par support terminal) : il reste entièrement en rationnels normalisés et c'est la prochaine cible avant toute mesure d'échelle.

@@ -49,6 +49,7 @@ class ExactAnchoredPairWitnessBankBuilder;
 class ExactHigherSupportAuthorityContext;
 class ExactHigherSupportTerminalAuthority;
 class ExactHigherSupportStreamBuilder;
+class ExactHigherSupportIndexedClosedBallQuery;
 class ExactPairSupportStreamBuilder;
 class ExactDirectSparseFirstIncidenceBuilder;
 class ExactLbvhYao48EmstBuilder;
@@ -453,6 +454,7 @@ class MortonLbvhIndex {
   friend class hierarchy::ExactHigherSupportAuthorityContext;
   friend class hierarchy::ExactHigherSupportTerminalAuthority;
   friend class hierarchy::ExactHigherSupportStreamBuilder;
+  friend class hierarchy::ExactHigherSupportIndexedClosedBallQuery;
   friend class hierarchy::ExactDirectSparseFirstIncidenceBuilder;
   friend class hierarchy::ExactLbvhYao48EmstBuilder;
   friend class ExactBudgetedLbvhTopKResult;

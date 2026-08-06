@@ -1,4 +1,5 @@
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/higher_support_closed_ball.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 
@@ -9,6 +10,8 @@
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <optional>
+#include <random>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -1279,7 +1282,188 @@ void test_tile_certified_commit_equals_fresh_replay() {
       "the honest tile still commits after the rejected forgeries");
 }
 
+// The indexed closed-ball query decides with homogeneous integer arithmetic:
+// bulk subtree decisions from the exact node bounds, per-point three-way
+// comparisons, and the rank exit.  Its certificate is that it agrees, term by
+// term, with the reference it replaces -- a linear sweep of the cloud through
+// the normalized rational predicate -- on every support of a cloud, including
+// the degenerate families the sparse decisions actually turn on.
+void check_indexed_closed_ball_equals_linear_reference(
+    const std::vector<CertifiedPoint3>& points,
+    const std::string& label) {
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::size_t frontier_bound = morsehgp3d::hierarchy::
+      ExactHigherSupportIndexedClosedBallQuery::proved_traversal_frontier_bound(
+          index);
+  const PointId count = static_cast<PointId>(cloud.size());
+  std::size_t compared_supports = 0U;
+  std::size_t rank_exit_agreements = 0U;
+
+  const auto compare_one =
+      [&](const std::array<PointId, 4>& ids, std::size_t support_size) {
+        const auto analysis = support_size == 3U
+            ? morsehgp3d::exact::analyze_circumcenter_support(
+                  std::array<morsehgp3d::exact::ExactRational3, 3>{
+                      cloud.point(ids[0]).exact(),
+                      cloud.point(ids[1]).exact(),
+                      cloud.point(ids[2]).exact()})
+            : morsehgp3d::exact::analyze_circumcenter_support(
+                  std::array<morsehgp3d::exact::ExactRational3, 4>{
+                      cloud.point(ids[0]).exact(),
+                      cloud.point(ids[1]).exact(),
+                      cloud.point(ids[2]).exact(),
+                      cloud.point(ids[3]).exact()});
+        if (analysis.status() !=
+            morsehgp3d::exact::CircumcenterSupportStatus::minimal) {
+          return;
+        }
+        const auto& sphere = analysis.circumcenter_result();
+        // Reference: the normalized rational predicate, every point, no index.
+        std::vector<PointId> reference_interior;
+        std::size_t reference_shell = 0U;
+        std::size_t reference_exterior = 0U;
+        std::optional<PointId> reference_witness;
+        for (PointId id = 0U; id < count; ++id) {
+          const auto classification =
+              morsehgp3d::exact::classify_sphere_point(
+                  *sphere.center(), *sphere.squared_level(), cloud.point(id));
+          switch (classification.location()) {
+            case morsehgp3d::exact::SpherePointLocation::strictly_inside:
+              reference_interior.push_back(id);
+              break;
+            case morsehgp3d::exact::SpherePointLocation::boundary: {
+              ++reference_shell;
+              bool support_member = false;
+              for (std::size_t index = 0U; index < support_size; ++index) {
+                support_member = support_member || ids[index] == id;
+              }
+              if (!support_member &&
+                  (!reference_witness.has_value() || id < *reference_witness)) {
+                reference_witness = id;
+              }
+              break;
+            }
+            case morsehgp3d::exact::SpherePointLocation::outside:
+              ++reference_exterior;
+              break;
+          }
+        }
+
+        const auto indexed = morsehgp3d::hierarchy::
+            ExactHigherSupportIndexedClosedBallQuery::classify(
+                index,
+                cloud,
+                ids,
+                support_size,
+                *sphere.center(),
+                *sphere.squared_level(),
+                cloud.size(),
+                frontier_bound);
+        ++compared_supports;
+        check(
+            indexed.outcome ==
+                    morsehgp3d::hierarchy::
+                        ExactHigherSupportClosedBallOutcome::complete &&
+                indexed.interior_ids == reference_interior &&
+                indexed.shell_count == reference_shell &&
+                indexed.exterior_count == reference_exterior &&
+                indexed.canonical_extra_shell_witness_id == reference_witness,
+            label + ": the indexed closed ball equals the linear reference");
+
+        // The rank exit is exactly "the strict interior exceeds the cap".
+        if (!reference_interior.empty()) {
+          const auto capped = morsehgp3d::hierarchy::
+              ExactHigherSupportIndexedClosedBallQuery::classify(
+                  index,
+                  cloud,
+                  ids,
+                  support_size,
+                  *sphere.center(),
+                  *sphere.squared_level(),
+                  reference_interior.size() - 1U,
+                  frontier_bound);
+          check(
+              capped.outcome ==
+                  morsehgp3d::hierarchy::
+                      ExactHigherSupportClosedBallOutcome::rank_exceeded,
+              label + ": the indexed closed ball takes its exact rank exit");
+          ++rank_exit_agreements;
+        }
+      };
+
+  for (PointId a = 0U; a + 2U < count; ++a) {
+    for (PointId b = a + 1U; b + 1U < count; ++b) {
+      for (PointId c = b + 1U; c < count; ++c) {
+        compare_one({a, b, c, 0U}, 3U);
+        for (PointId d = c + 1U; d < count; ++d) {
+          compare_one({a, b, c, d}, 4U);
+        }
+      }
+    }
+  }
+  check(
+      compared_supports != 0U && rank_exit_agreements != 0U,
+      label + ": the differential actually exercised minimal supports");
+}
+
+void test_indexed_closed_ball_differential() {
+  std::mt19937_64 rng{20260806U};
+  std::uniform_real_distribution<double> axis{0.0, 1.0};
+  std::vector<CertifiedPoint3> uniform;
+  for (std::size_t index = 0U; index < 14U; ++index) {
+    uniform.push_back(
+        CertifiedPoint3::from_binary64(axis(rng), axis(rng), axis(rng)));
+  }
+  check_indexed_closed_ball_equals_linear_reference(uniform, "uniform14");
+
+  // Cospherical and coplanar points: every boundary decision is an exact tie,
+  // which is where a filtered or reduced comparison would be wrong.
+  std::vector<CertifiedPoint3> cospherical{
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(0.0, 0.0, -1.0),
+      point(0.5, 0.5, 0.5),
+      point(-0.5, -0.5, -0.5),
+      point(0.25, -0.25, 0.5),
+  };
+  check_indexed_closed_ball_equals_linear_reference(
+      cospherical, "cospherical9");
+
+  // A lattice: massively many exact ties, and axis-aligned node boxes whose
+  // extreme coordinates coincide with the query centres.
+  std::vector<CertifiedPoint3> lattice;
+  for (int x = 0; x < 3; ++x) {
+    for (int y = 0; y < 3; ++y) {
+      for (int z = 0; z < 2; ++z) {
+        lattice.push_back(point(
+            static_cast<double>(x),
+            static_cast<double>(y),
+            static_cast<double>(z)));
+      }
+    }
+  }
+  check_indexed_closed_ball_equals_linear_reference(lattice, "lattice18");
+
+  // Extreme scales: the exponent spread the rational path must survive.
+  std::vector<CertifiedPoint3> scaled{
+      point(1e200, 1e-200, 0.0),
+      point(-1e200, 1e-200, 0.0),
+      point(0.0, 1e200, 1e-200),
+      point(0.0, -1e200, 1e-200),
+      point(1e-200, 0.0, 1e200),
+      point(1e-200, 0.0, -1e200),
+      point(1.0, 1.0, 1.0),
+  };
+  check_indexed_closed_ball_equals_linear_reference(scaled, "scaled7");
+}
+
 int main() {
+  test_indexed_closed_ball_differential();
   test_bigint_universe();
   test_regular_tetrahedron_complete_and_fresh_replay();
   test_intrinsically_above_rank_and_budgeted_frontier();

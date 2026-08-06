@@ -1045,6 +1045,7 @@ endif()
 add_library(
   morsehgp3d_higher_support
   STATIC
+    src/cpu/hierarchy/higher_support_closed_ball.cpp
     src/cpu/hierarchy/higher_support_product.cpp
     src/cpu/hierarchy/higher_support_stream.cpp
 )

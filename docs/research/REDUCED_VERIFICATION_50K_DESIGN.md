@@ -137,3 +137,44 @@ quel. L'honnêteté reste explicite : champ `verification_basis` du
 certificat (les zéros de travail en sont d'ailleurs le témoin interne).
 Le différentiel n=32 compare records/masses/complétude — PAS l'égalité
 totale d'audit (les compteurs de travail diffèrent par construction).
+
+## Le vrai budget hôte, mesuré (R1-c, 6/8 nuit)
+
+Le design ci-dessus supposait que le retrait du rejeu CPU par transition
+laissait un reste O(sortie) négligeable. La mesure dit autre chose, et
+elle recadre la route :
+
+| opération exacte | avant R1-c | après R1-c | cible |
+| --- | --- | --- | --- |
+| `classify_sphere_point` | 683 µs | 1,0 µs | ~0,05 µs (filtre fp64) |
+| requête closed-ball (n=4096) | 56 741 µs | 276 µs | ~20 µs |
+| `analyze_circumcenter_support` (4) | 7 184 µs | 732 µs | ~10 µs |
+
+Les deux causes fermées par R1-c sont (i) le PGCD d'Euclide naïf appelé
+par **chaque** opération rationnelle normalisée, et (ii) la normalisation
+elle-même, inutile pour toute décision de traversée
+(`exact::ExactHomogeneousSphere3`, arithmétique entière homogène).
+
+La conséquence pour le contrat : à 50 000 points, l'étage higher hôte
+paie une classification closed-ball et une analyse de circumcentre **par
+terminal minimal drainé**. Tant que l'analyse de circumcentre coûte
+732 µs, 10^5 terminaux coûtent 73 s sur un cœur, soit 1,5 s sur 48 cœurs
+— toujours quinze fois le contrat. L'ordre des incréments devient donc :
+
+- **R1-d** : `analyze_circumcenter_support` en déterminants entiers
+  (circumcentre homogène par Cramer, signes barycentriques comme signes de
+  déterminants), la forme réduite n'étant construite qu'une fois, pour le
+  payload de l'événement réellement émis.
+- **R1-e** : filtre par intervalles fp64 (`exact/fp64_interval.hpp`) en
+  tête des décisions point-contre-sphère et boîte-contre-sphère, l'entier
+  restant l'autorité en cas d'incertitude.
+- **R2** : mesure G4 (le natif n'est mesurable qu'après R1-d, sinon on
+  mesure l'arithmétique et pas la géométrie).
+- **R3/R4/R5** : inchangés (paires device-tuilées, parallélisation aval,
+  boucle jusqu'à < 100 ms).
+
+Note de méthode : ces coûts unitaires n'étaient visibles ni dans les
+suites (toutes sur de tout petits nuages) ni dans le profil G4 (qui
+attribuait 99,8 % à « le CPU », sans dire que le CPU passait son temps
+dans un PGCD). Toute cible d'échelle future doit commencer par le coût
+unitaire mesuré des étages exacts.

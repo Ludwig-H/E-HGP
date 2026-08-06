@@ -16,15 +16,15 @@ inline BigInt magnitude(BigInt value) {
   return value < 0 ? -value : value;
 }
 
+// Same mathematical function as the textbook Euclid loop, taken from the
+// backend's binary/Lehmer implementation.  This is not a micro-detail: every
+// normalized rational operation calls it, and on the ~220-bit operands a
+// circumcenter actually produces, the naive loop ran about 130 bignum
+// divisions -- two orders of magnitude more than the multiplications it was
+// reducing.
 inline BigInt greatest_common_divisor(BigInt left, BigInt right) {
-  left = magnitude(std::move(left));
-  right = magnitude(std::move(right));
-  while (right != 0) {
-    BigInt remainder = left % right;
-    left = std::move(right);
-    right = std::move(remainder);
-  }
-  return left;
+  return boost::multiprecision::gcd(
+      magnitude(std::move(left)), magnitude(std::move(right)));
 }
 
 inline BigInt power_of_two(unsigned int exponent) {

@@ -4,6 +4,7 @@
 
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/higher_support_closed_ball.hpp"
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
 #include "morsehgp3d/spatial/aabb.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -36,6 +37,7 @@ using hierarchy::ExactHigherSupportStreamBudget;
 using hierarchy::ExactHigherSupportStreamChunk;
 using spatial::CanonicalPointCloud;
 using spatial::ExactDyadicAabb3;
+using spatial::MortonLbvhIndex;
 using spatial::MortonLeafRecord;
 using spatial::PointId;
 using PruneKind = detail::Phase15HigherSupportDeviceTiledPruneKind;
@@ -708,24 +710,37 @@ struct SupportKey {
 // Host closed-ball classification of one fixed minimal support: the exact
 // consumer stage that stays on the host in v1
 // (exact_higher_support_terminal_classification_native_cuda == false).
+// The traversal is the one shared indexed query, so this stage costs the
+// visited subtrees of the sphere and not a linear sweep of the cloud --
+// the difference between O(output * n) and the product contract at 50k.
 struct ClosedBallSummary {
   bool minimal{false};
-  std::size_t interior_count{};
+  // False when the strict interior escapes the relevant closed rank, the
+  // one condition under which the indexed query stops early and the
+  // record is an above-rank leaf.
+  bool within_relevant_rank{false};
   std::size_t shell_count{};
   std::size_t exterior_count{};
   std::vector<PointId> interior_ids;
   std::optional<PointId> canonical_extra_shell_witness_id;
   exact::ExactCenter3 center{};
   exact::ExactLevel squared_level{};
+  hierarchy::ExactHigherSupportClosedBallCounters counters{};
+  bool queried{false};
 };
 
 template <std::size_t SupportSize>
 [[nodiscard]] ClosedBallSummary closed_ball_summary_sized(
+    const MortonLbvhIndex& index,
     const CanonicalPointCloud& cloud,
-    const std::array<PointId, 4>& support_ids) {
+    const std::array<PointId, 4>& support_ids,
+    std::size_t maximum_relevant_closed_rank) {
   std::array<exact::ExactRational3, SupportSize> support{};
-  for (std::size_t index = 0U; index < SupportSize; ++index) {
-    support[index] = cloud.point(support_ids[index]).exact();
+  for (std::size_t index_in_support = 0U;
+       index_in_support < SupportSize;
+       ++index_in_support) {
+    support[index_in_support] =
+        cloud.point(support_ids[index_in_support]).exact();
   }
   const auto analysis = exact::analyze_circumcenter_support(support);
   ClosedBallSummary summary;
@@ -739,38 +754,47 @@ template <std::size_t SupportSize>
   }
   summary.center = *sphere.center();
   summary.squared_level = *sphere.squared_level();
-  for (PointId id = 0U; id < cloud.size(); ++id) {
-    const auto classification = exact::classify_sphere_point(
-        *sphere.center(), *sphere.squared_level(), cloud.point(id));
-    if (classification.location() ==
-        exact::SpherePointLocation::strictly_inside) {
-      ++summary.interior_count;
-      summary.interior_ids.push_back(id);
-    } else if (
-        classification.location() == exact::SpherePointLocation::boundary) {
-      ++summary.shell_count;
-      bool support_member = false;
-      for (std::size_t index = 0U; index < SupportSize; ++index) {
-        support_member = support_member || support_ids[index] == id;
-      }
-      if (!support_member &&
-          (!summary.canonical_extra_shell_witness_id.has_value() ||
-           id < *summary.canonical_extra_shell_witness_id)) {
-        summary.canonical_extra_shell_witness_id = id;
-      }
-    } else {
-      ++summary.exterior_count;
-    }
+  // An intrinsically above-rank support carries no relevant closed ball,
+  // exactly as the host generator's leaf preflight requires.
+  if (SupportSize > maximum_relevant_closed_rank) {
+    return summary;
   }
+  hierarchy::ExactHigherSupportClosedBallClassification classification =
+      hierarchy::ExactHigherSupportIndexedClosedBallQuery::classify(
+          index,
+          cloud,
+          support_ids,
+          SupportSize,
+          summary.center,
+          summary.squared_level,
+          maximum_relevant_closed_rank - SupportSize,
+          hierarchy::ExactHigherSupportIndexedClosedBallQuery::
+              proved_traversal_frontier_bound(index));
+  summary.queried = true;
+  summary.counters = classification.counters;
+  if (classification.outcome !=
+      hierarchy::ExactHigherSupportClosedBallOutcome::complete) {
+    return summary;
+  }
+  summary.within_relevant_rank = true;
+  summary.interior_ids = std::move(classification.interior_ids);
+  summary.shell_count = classification.shell_count;
+  summary.exterior_count = classification.exterior_count;
+  summary.canonical_extra_shell_witness_id =
+      classification.canonical_extra_shell_witness_id;
   return summary;
 }
 
 [[nodiscard]] ClosedBallSummary closed_ball_summary(
+    const MortonLbvhIndex& index,
     const CanonicalPointCloud& cloud,
-    const SupportKey& key) {
+    const SupportKey& key,
+    std::size_t maximum_relevant_closed_rank) {
   return key.support_size == 3U
-      ? closed_ball_summary_sized<3U>(cloud, key.support_ids)
-      : closed_ball_summary_sized<4U>(cloud, key.support_ids);
+      ? closed_ball_summary_sized<3U>(
+            index, cloud, key.support_ids, maximum_relevant_closed_rank)
+      : closed_ball_summary_sized<4U>(
+            index, cloud, key.support_ids, maximum_relevant_closed_rank);
 }
 
 [[nodiscard]] std::size_t saturating_double(std::size_t value) noexcept {
@@ -1149,16 +1173,16 @@ void Phase15HigherSupportDeviceTiledSessionBridgeState::cross_validate_tile(
     }
   }
   for (const SupportKey& key : minimal_terminals) {
-    const ClosedBallSummary summary =
-        closed_ball_summary(authority->cloud(), key);
+    const ClosedBallSummary summary = closed_ball_summary(
+        authority->index(),
+        authority->cloud(),
+        key,
+        maximum_relevant_closed_rank);
     ++audit.host_closed_ball_classification_count;
     if (!summary.minimal) {
       fail("a minimal terminal record fails its host closed-ball replay");
     }
-    const bool within_window =
-        key.support_size + summary.interior_count <=
-        maximum_relevant_closed_rank;
-    if (within_window) {
+    if (summary.within_relevant_rank) {
       if (summary.shell_count == key.support_size) {
         if (candidate_events.count(key) == 0U) {
           fail("an in-window exact-shell minimal terminal is not a "
@@ -1278,21 +1302,30 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
   // Host closed-ball classification of every minimal terminal: the exact
   // consumer stage that produces the scientific records themselves.
   for (const SupportKey& key : minimal_terminals) {
-    ClosedBallSummary summary =
-        closed_ball_summary(authority->cloud(), key);
+    ClosedBallSummary summary = closed_ball_summary(
+        authority->index(),
+        authority->cloud(),
+        key,
+        maximum_relevant_closed_rank);
     ++audit.host_closed_ball_classification_count;
-    ++tile.closed_ball_query_count;
-    tile.point_classification_count += authority->cloud().size();
+    if (summary.queried) {
+      ++tile.closed_ball_query_count;
+    }
+    tile.point_classification_count +=
+        summary.counters.point_classification_count;
     if (!summary.minimal) {
       fail("a minimal terminal record fails its host closed-ball replay");
+    }
+    if (!summary.within_relevant_rank) {
+      ++tile.above_rank_leaf_count;
+      continue;
     }
     const std::size_t observed_closed_rank =
         summary.interior_ids.size() + summary.shell_count;
     const std::size_t minimum_possible_closed_rank =
         summary.interior_ids.size() + key.support_size;
     if (minimum_possible_closed_rank > maximum_relevant_closed_rank) {
-      ++tile.above_rank_leaf_count;
-      continue;
+      fail("a complete closed-ball shell escaped its exact interior cap");
     }
     if (summary.shell_count == key.support_size) {
       ExactHigherSupportEvent event;
