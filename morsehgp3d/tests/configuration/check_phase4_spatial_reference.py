@@ -441,9 +441,16 @@ def validate_cmake(cmake: str, cuda_policy: str) -> None:
                 f"target_link_libraries(\n    {CUDA_REPLAY_TARGET}\n"
                 "    PRIVATE morsehgp3d::gpu_spatial_reference"
             ),
-            'PATTERN "morsehgp3d/gpu" EXCLUDE',
+            "DIRECTORY include/morsehgp3d/exact/",
         ),
         "Phase 4 CUDA CMake target",
+    )
+    require(
+        re.search(
+            r"install\(\s*DIRECTORY\s+include/morsehgp3d/gpu", cmake
+        )
+        is None,
+        "internal GPU headers must never be installed",
     )
     target_position = target_match.start()
     cuda_block_position = cmake.rfind(

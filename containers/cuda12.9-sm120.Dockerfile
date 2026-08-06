@@ -19,6 +19,7 @@ RUN apt-get update --snapshot "${UBUNTU_SNAPSHOT}" \
         python3 \
         python3-dev \
         python3-hypothesis \
+        python3-numpy \
         python3-pytest \
     && rm -rf /var/lib/apt/lists/*
 

@@ -67,7 +67,7 @@ void check(bool condition, const std::string& message) {
       std::move(facet_key),
       birth_index,
       std::nullopt,
-      {authority_id, static_cast<std::uint64_t>(birth_index + 1U)}};
+      {authority_id, static_cast<std::uint64_t>(3U * birth_index + 1U)}};
 }
 
 [[nodiscard]] ExactDirectMorseForestNode node(
@@ -238,6 +238,66 @@ void set_success_flags(ExactDirectMorseForestJournalResult& forest) {
   forest.final_roots_cover_exactly_nonterminal_reduced_orders = true;
   forest.order_one_birth_and_node_prefix_implicit_and_unmaterialized = true;
   forest.no_partial_scientific_payload_published = true;
+}
+
+
+// 8c8fed7 provenance migration: seal the source-event projection join, the
+// arm identity digests and the terminal-birth provenance that the adjacent
+// event propagation certification now requires of a self-contained fixture.
+// Every materialized birth shares its projection index with its source
+// saddle event; each binding's terminal birth is its frozen carrier.
+void finalize_forest_event_provenance(
+    ExactDirectMorseForestJournalResult& forest) {
+  forest.source_event_projection_count =
+      forest.point_count + forest.saddle_records.size();
+  for (auto& saddle_record : forest.saddle_records) {
+    saddle_record.journal_event_projection_index =
+        forest.point_count + saddle_record.source_event_index;
+    saddle_record.source_event_arm_identity_digest =
+        morsehgp3d::contract::CanonicalId::from_lower_hex(
+            std::string(64U, '2'));
+  }
+  for (auto& arm_binding : forest.arm_root_bindings) {
+    const std::size_t carrier =
+        arm_binding.frozen_carrier_component_handle;
+    arm_binding.terminal_birth_record_index = carrier;
+    if (carrier < forest.implicit_order_one_prefix_count) {
+      ExactDirectSparseFacetKey singleton_key;
+      singleton_key.point_count = 1U;
+      singleton_key.point_ids[0U] = static_cast<PointId>(carrier);
+      arm_binding.terminal_birth_facet_key = singleton_key;
+      arm_binding.terminal_birth_binding_witness = {
+          forest.config.locator_config.external_authority_id,
+          static_cast<std::uint64_t>(3U * carrier + 1U)};
+      arm_binding.terminal_birth_exact_squared_level =
+          forest.batches.front().squared_level;
+    } else {
+      const auto& terminal_birth = forest.birth_records[
+          carrier - forest.implicit_order_one_prefix_count];
+      arm_binding.terminal_birth_facet_key = terminal_birth.facet_key;
+      arm_binding.terminal_birth_binding_witness =
+          terminal_birth.binding_witness;
+      arm_binding.terminal_birth_exact_squared_level =
+          forest.batches[terminal_birth.source_journal_batch_index]
+              .squared_level;
+    }
+    for (PointId candidate = 0U;
+         static_cast<std::size_t>(candidate) < forest.point_count;
+         ++candidate) {
+      bool candidate_in_arm_key = false;
+      for (std::size_t local = 0U;
+           local < arm_binding.strict_arm_key.point_count;
+           ++local) {
+        candidate_in_arm_key =
+            candidate_in_arm_key ||
+            arm_binding.strict_arm_key.point_ids[local] == candidate;
+      }
+      if (!candidate_in_arm_key) {
+        arm_binding.removed_support_point_id = candidate;
+        break;
+      }
+    }
+  }
 }
 
 [[nodiscard]] ExactDirectMorseForestJournalResult forest_fixture() {
@@ -439,6 +499,7 @@ void set_success_flags(ExactDirectMorseForestJournalResult& forest) {
       complete_conditional_exact_direct_morse_forest;
   forest.scope = ExactDirectMorseForestScope::
       all_orders_direct_minimum_carriers_strict_arms_recursive_positive_terminals_and_atomic_full_component_saddle_quotients_with_reduced_qr_only;
+  finalize_forest_event_provenance(forest);
   return forest;
 }
 

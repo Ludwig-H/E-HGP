@@ -3964,11 +3964,6 @@ if(UNIX)
     morsehgp3d_hierarchy_pair_support_stream_durable_tests
   )
 endif()
-foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
-  morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
-endforeach()
-unset(_morsehgp3d_cpu_test_target)
-unset(_morsehgp3d_cpu_test_targets)
 
 if(MSVC)
   target_compile_options(morsehgp3d_exact_types_tests PRIVATE /W4 /WX)
@@ -6387,3 +6382,21 @@ if(UNIX)
     COMMAND morsehgp3d_gpu_higher_support_device_tiled_tower_tests
   )
 endif()
+
+# Targets declared after the primary catalog block join the sanitizer
+# catalog here; the closure is applied once, after every declaration.
+list(
+  APPEND _morsehgp3d_cpu_test_targets
+  morsehgp3d_exact_higher_support_growth_profile
+  morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
+  morsehgp3d_gpu_higher_support_device_tiled_slot_engine_tests
+  morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests
+  morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+  morsehgp3d_hierarchy_direct_morse_tower_producer_tests
+  morsehgp3d_hierarchy_direct_morse_forest_durable_run_archive_tests
+)
+foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
+  morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
+endforeach()
+unset(_morsehgp3d_cpu_test_target)
+unset(_morsehgp3d_cpu_test_targets)

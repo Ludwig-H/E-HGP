@@ -760,9 +760,16 @@ def validate_cmake(
             "morsehgp3d_gpu_spatial_lbvh_replay",
             "src/tools/gpu_spatial_lbvh_replay.cpp",
             "PRIVATE morsehgp3d::gpu_spatial_lbvh",
-            'PATTERN "morsehgp3d/gpu" EXCLUDE',
+            "DIRECTORY include/morsehgp3d/exact/",
         ),
         "top-level resident LBVH CMake",
+    )
+    require(
+        re.search(
+            r"install\(\s*DIRECTORY\s+include/morsehgp3d/gpu", cmake
+        )
+        is None,
+        "internal GPU headers must never be installed",
     )
     require_tokens(
         unit_cmake,

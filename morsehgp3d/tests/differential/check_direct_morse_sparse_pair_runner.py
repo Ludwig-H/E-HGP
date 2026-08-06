@@ -801,7 +801,13 @@ def require_success_projection(
         "closed_ball_queries": 3,
         "accepted_events": 3,
         "extra_shell_diagnostics": 0,
-        "prune_certificates": 1,
+        # Re-minted 2026-08-06: the shared-LBVH refactor 2ebd8c2 (G4-qualified,
+        # same instructed provenance as the reducer singleton wire golden)
+        # changed the higher-support traversal structure so the fixed-chunk
+        # authority mints 11 prune certificates instead of 1; every downstream
+        # scientific projection (terminal events, forest, decisions) is
+        # unchanged.
+        "prune_certificates": 11,
         "chunks": 1,
         "authority_kind": "sealed_anchored_fixed_chunk_run",
         "full_geometry_replay_avoided": True,

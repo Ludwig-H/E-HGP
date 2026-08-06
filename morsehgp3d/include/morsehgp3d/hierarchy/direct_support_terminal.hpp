@@ -30,9 +30,10 @@ inline constexpr std::string_view direct_support_terminal_public_status =
 inline constexpr std::string_view direct_support_terminal_proof_basis =
     "exactly_one_of_fresh_exact_pair_v1_or_sealed_sparse_anchored_pair_"
     "session_v1_or_sealed_transactional_direct_pair_terminal_authority_"
-    "v1_and_either_fresh_grouped_higher_v2_replay_or_sealed_root_anchored_"
-    "fixed_chunk_higher_run_terminal_support_catalog_arities_two_through_"
-    "four_with_complete_normalized_output_digest_v5";
+    "v1_and_exactly_one_of_fresh_grouped_higher_v2_replay_or_sealed_root_"
+    "anchored_fixed_chunk_higher_run_or_anchored_session_chain_certified_"
+    "higher_stream_terminal_support_catalog_arities_two_through_four_with_"
+    "complete_normalized_output_digest_v5";
 
 // This is a certificate for the direct support catalogue only.  It does not
 // construct a hierarchy, publish forest semantics, or promote a public exact
