@@ -3610,6 +3610,35 @@ ExactHigherSupportAnchoredSession::commit_prepared(
   return verification;
 }
 
+bool ExactHigherSupportAnchoredSession::adopt_tile_certified_successor(
+    const ExactHigherSupportCheckpoint& successor) {
+  if (trusted_checkpoint_.locally_complete() ||
+      successor.manifest != trusted_checkpoint_.manifest ||
+      successor.next_chunk_sequence !=
+          trusted_checkpoint_.next_chunk_sequence + 1U ||
+      successor.pending_product.has_value() ||
+      trusted_checkpoint_.pending_product.has_value() ||
+      successor.output_record_count <
+          trusted_checkpoint_.output_record_count ||
+      successor.frontier.size() >= trusted_checkpoint_.frontier.size()) {
+    return false;
+  }
+  for (std::size_t index = 0U; index < successor.frontier.size();
+       ++index) {
+    if (successor.frontier[index] !=
+        trusted_checkpoint_.frontier[index]) {
+      return false;
+    }
+  }
+  const ExactHigherSupportCheckpointVerification verification =
+      verify_exact_higher_support_checkpoint(authority_, successor);
+  if (!verification.local_integrity_verified) {
+    return false;
+  }
+  trusted_checkpoint_ = successor;
+  return true;
+}
+
 static_assert(
     std::is_nothrow_move_constructible_v<
         ExactHigherSupportTerminalSegment>,
@@ -4604,9 +4633,17 @@ ExactHigherSupportAnchoredStreamAssembler::commit_prepared(
     const ExactHigherSupportStreamBudget& chunk_budget,
     const ExactHigherSupportCheckpoint& reinjected_source,
     const ExactHigherSupportStreamChunk& candidate) {
+  if (locked_basis_.has_value() &&
+      *locked_basis_ !=
+          ExactHigherSupportVerificationBasis::
+              fresh_cpu_replay_every_commit) {
+    return {};
+  }
   const ExactHigherSupportStreamChunkVerification verification =
       session_.commit_prepared(chunk_budget, reinjected_source, candidate);
   if (verification.chunk_transition_verified && !sealed_) {
+    locked_basis_ =
+        ExactHigherSupportVerificationBasis::fresh_cpu_replay_every_commit;
     events_.insert(
         events_.end(), candidate.events.begin(), candidate.events.end());
     diagnostics_.insert(
@@ -4616,6 +4653,237 @@ ExactHigherSupportAnchoredStreamAssembler::commit_prepared(
     ++committed_chunk_count_;
   }
   return verification;
+}
+
+exact::BigInt exact_higher_support_frontier_entry_support_count(
+    const ExactHigherSupportFrontierEntry& entry) {
+  const std::size_t support_size = entry.support_size;
+  const std::size_t group_count = entry.group_count;
+  if ((support_size != 3U && support_size != 4U) || group_count == 0U ||
+      group_count > support_size) {
+    throw std::logic_error(
+        "a higher-support frontier entry has an invalid arity");
+  }
+  std::size_t multiplicity_sum = 0U;
+  exact::BigInt coverage{1};
+  std::uint64_t previous_end = 0U;
+  for (std::size_t index = 0U; index < group_count; ++index) {
+    const ExactHigherSupportNodeGroup& group = entry.groups[index];
+    const std::size_t multiplicity = group.multiplicity;
+    const std::size_t leaf_begin = checked_size(
+        group.leaf_begin,
+        "a higher-support Morton range does not fit size_t");
+    const std::size_t leaf_end = checked_size(
+        group.leaf_end,
+        "a higher-support Morton range does not fit size_t");
+    if (multiplicity == 0U || leaf_begin >= leaf_end ||
+        leaf_end - leaf_begin < multiplicity ||
+        (index != 0U && previous_end > group.leaf_begin)) {
+      throw std::logic_error(
+          "a higher-support frontier entry has overlapping or invalid "
+          "groups");
+    }
+    previous_end = group.leaf_end;
+    multiplicity_sum = checked_add(
+        multiplicity_sum,
+        multiplicity,
+        "a higher-support multiplicity sum overflows size_t");
+    coverage *= exact_binomial(leaf_end - leaf_begin, multiplicity);
+  }
+  const ExactHigherSupportNodeGroup padding{};
+  for (std::size_t index = group_count; index < entry.groups.size();
+       ++index) {
+    if (entry.groups[index] != padding) {
+      throw std::logic_error(
+          "a higher-support frontier entry has noncanonical padding");
+    }
+  }
+  if (multiplicity_sum != support_size || coverage <= 0) {
+    throw std::logic_error(
+        "a higher-support frontier entry has invalid exact coverage");
+  }
+  return coverage;
+}
+
+ExactHigherSupportStreamChunkVerification
+ExactHigherSupportAnchoredStreamAssembler::commit_tile_certified(
+    const ExactHigherSupportCheckpoint& reinjected_source,
+    ExactHigherSupportTileCertifiedTile&& tile) {
+  ExactHigherSupportStreamChunkVerification verification;
+  const ExactHigherSupportCheckpoint& trusted =
+      session_.trusted_checkpoint();
+  if (sealed_ ||
+      (locked_basis_.has_value() &&
+       *locked_basis_ !=
+           ExactHigherSupportVerificationBasis::
+               device_search_host_exact_record_classification_bigint_closure)) {
+    return verification;
+  }
+  if (reinjected_source != trusted) {
+    return verification;
+  }
+  verification.source_checkpoint_anchored = true;
+  verification.source_checkpoint_local_integrity_verified = true;
+  if (trusted.locally_complete() ||
+      trusted.pending_product.has_value() ||
+      tile.consumed_root_count == 0U ||
+      tile.consumed_root_count > trusted.frontier.size()) {
+    return verification;
+  }
+
+  try {
+    // Device-bound mass closure over the consumed back roots.
+    exact::BigInt consumed_mass{0};
+    const std::size_t prefix_size =
+        trusted.frontier.size() - tile.consumed_root_count;
+    for (std::size_t index = prefix_size;
+         index < trusted.frontier.size();
+         ++index) {
+      consumed_mass += exact_higher_support_frontier_entry_support_count(
+          trusted.frontier[index]);
+    }
+    if (tile.well_centering_pruned_support_mass < 0 ||
+        tile.rank_pruned_support_mass < 0 ||
+        tile.leaf_classified_support_mass < 0 ||
+        tile.well_centering_pruned_support_mass +
+                tile.rank_pruned_support_mass +
+                tile.leaf_classified_support_mass !=
+            consumed_mass) {
+      return verification;
+    }
+
+    // Leaf category and record identities at single-support granularity.
+    const std::size_t classified_nonminimal = checked_add(
+        checked_add(
+            tile.affinely_dependent_leaf_count,
+            tile.boundary_reduced_leaf_count,
+            "the tile-certified leaf identity overflows size_t"),
+        tile.exterior_circumcenter_leaf_count,
+        "the tile-certified leaf identity overflows size_t");
+    const std::size_t classified_minimal = checked_add(
+        checked_add(
+            tile.above_rank_leaf_count,
+            tile.events.size(),
+            "the tile-certified minimal identity overflows size_t"),
+        tile.diagnostics.size(),
+        "the tile-certified minimal identity overflows size_t");
+    const std::size_t leaf_classified_identity = checked_add(
+        classified_nonminimal,
+        classified_minimal,
+        "the tile-certified classified identity overflows size_t");
+    if (tile.leaf_classified_support_mass !=
+        exact::BigInt{leaf_classified_identity}) {
+      return verification;
+    }
+    verification.records_individually_exact = true;
+
+    // Synthesize the successor checkpoint: strict prefix frontier, chain
+    // folded over the tile records, audit advanced by the certified
+    // deltas -- then require the complete local integrity verification.
+    ExactHigherSupportCheckpoint successor = trusted;
+    successor.frontier.resize(prefix_size);
+    successor.next_chunk_sequence = trusted.next_chunk_sequence + 1U;
+
+    ExactHigherSupportStreamAudit& audit = successor.cumulative_audit;
+    for (const ExactHigherSupportEvent& event : tile.events) {
+      successor.output_chain_digest = extend_output_chain(
+          successor.output_chain_digest, event);
+      ++audit.accepted_event_count;
+      audit.emitted_point_id_reference_count = checked_add(
+          audit.emitted_point_id_reference_count,
+          event.interior_ids.size(),
+          "the tile-certified point reference count overflows size_t");
+      ++successor.output_record_count;
+      ++audit.emitted_record_count;
+    }
+    for (const ExactHigherSupportExtraShellDiagnostic& diagnostic :
+         tile.diagnostics) {
+      successor.output_chain_digest = extend_output_chain(
+          successor.output_chain_digest, diagnostic);
+      ++audit.relevant_extra_shell_diagnostic_count;
+      audit.emitted_point_id_reference_count = checked_add(
+          audit.emitted_point_id_reference_count,
+          diagnostic.interior_ids.size(),
+          "the tile-certified point reference count overflows size_t");
+      ++successor.output_record_count;
+      ++audit.emitted_record_count;
+    }
+    for (const ExactHigherSupportPruneCertificate& certificate :
+         tile.prune_certificates) {
+      successor.output_chain_digest = extend_output_chain(
+          successor.output_chain_digest, certificate);
+      ++audit.emitted_prune_certificate_count;
+      ++successor.output_record_count;
+      ++audit.emitted_record_count;
+    }
+
+    audit.well_centering_pruned_support_count +=
+        tile.well_centering_pruned_support_mass;
+    audit.rank_pruned_support_count += tile.rank_pruned_support_mass;
+    audit.leaf_classified_support_count +=
+        tile.leaf_classified_support_mass;
+    audit.resolved_support_count += consumed_mass;
+    audit.remaining_frontier_support_count -= consumed_mass;
+    audit.affinely_dependent_leaf_count = checked_add(
+        audit.affinely_dependent_leaf_count,
+        tile.affinely_dependent_leaf_count,
+        "the tile-certified category count overflows size_t");
+    audit.boundary_reduced_leaf_count = checked_add(
+        audit.boundary_reduced_leaf_count,
+        tile.boundary_reduced_leaf_count,
+        "the tile-certified category count overflows size_t");
+    audit.exterior_circumcenter_leaf_count = checked_add(
+        audit.exterior_circumcenter_leaf_count,
+        tile.exterior_circumcenter_leaf_count,
+        "the tile-certified category count overflows size_t");
+    audit.above_rank_leaf_count = checked_add(
+        audit.above_rank_leaf_count,
+        tile.above_rank_leaf_count,
+        "the tile-certified category count overflows size_t");
+    audit.minimal_leaf_count = checked_add(
+        audit.minimal_leaf_count,
+        classified_minimal,
+        "the tile-certified minimal count overflows size_t");
+    audit.leaf_support_analysis_count = checked_add(
+        audit.leaf_support_analysis_count,
+        checked_add(
+            classified_nonminimal,
+            classified_minimal,
+            "the tile-certified analysis count overflows size_t"),
+        "the tile-certified analysis count overflows size_t");
+    audit.global_closed_ball_query_count = checked_add(
+        audit.global_closed_ball_query_count,
+        tile.closed_ball_query_count,
+        "the tile-certified query count overflows size_t");
+    audit.point_classification_count = checked_add(
+        audit.point_classification_count,
+        tile.point_classification_count,
+        "the tile-certified classification count overflows size_t");
+
+    successor.checkpoint_digest =
+        compute_exact_higher_support_checkpoint_digest(successor);
+    if (!session_.adopt_tile_certified_successor(successor)) {
+      return verification;
+    }
+    verification.next_checkpoint_local_integrity_verified = true;
+    verification.next_checkpoint_anchored = true;
+
+    events_.insert(
+        events_.end(),
+        std::make_move_iterator(tile.events.begin()),
+        std::make_move_iterator(tile.events.end()));
+    diagnostics_.insert(
+        diagnostics_.end(),
+        std::make_move_iterator(tile.diagnostics.begin()),
+        std::make_move_iterator(tile.diagnostics.end()));
+    ++committed_chunk_count_;
+    locked_basis_ = ExactHigherSupportVerificationBasis::
+        device_search_host_exact_record_classification_bigint_closure;
+    verification.chunk_transition_verified = true;
+    return verification;
+  } catch (const std::exception&) {
+    return verification;
+  }
 }
 
 ExactHigherSupportAnchoredStreamSeal
@@ -4661,6 +4929,8 @@ ExactHigherSupportAnchoredStreamAssembler::seal_terminal_stream(
       result.relevant_extra_shell_diagnostics.size();
   seal.certificate.canonical_content_digest_ = anchored_content_digest(
       result.events, result.relevant_extra_shell_diagnostics);
+  seal.certificate.verification_basis_ = locked_basis_.value_or(
+      ExactHigherSupportVerificationBasis::fresh_cpu_replay_every_commit);
   seal.certificate.minted_ = true;
   seal.result.emplace(std::move(result));
   sealed_ = true;

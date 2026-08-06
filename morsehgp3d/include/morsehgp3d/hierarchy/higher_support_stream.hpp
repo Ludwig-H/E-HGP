@@ -825,6 +825,14 @@ class ExactHigherSupportAnchoredSession {
       const ExactHigherSupportCheckpoint& reinjected_source,
       const ExactHigherSupportStreamChunk& candidate);
 
+  // Adopts a synthesized tile-certified successor without a generator
+  // rerun.  The successor must share the trusted manifest, advance the
+  // chunk sequence by exactly one, keep a frontier that is a strict
+  // prefix of the trusted frontier, and pass the complete local
+  // checkpoint verification against this session's authority.
+  [[nodiscard]] bool adopt_tile_certified_successor(
+      const ExactHigherSupportCheckpoint& successor);
+
  private:
   ExactHigherSupportAuthorityContext authority_;
   ExactHigherSupportCheckpoint trusted_checkpoint_{};
@@ -888,6 +896,42 @@ enum class ExactHigherSupportResidentAdvanceStatus : std::uint8_t {
 
 class ExactHigherSupportAnchoredStreamAssembler;
 
+// Honest declaration of how every committed transition of an anchored
+// chain was verified.  The fresh-replay basis is the historic M2 chain;
+// the tile-certified basis accepts device-searched tiles whose record
+// payloads are host-classified exactly and whose completeness is bound by
+// the BigInt universe closure -- no per-transition generator rerun.
+enum class ExactHigherSupportVerificationBasis : std::uint8_t {
+  fresh_cpu_replay_every_commit,
+  device_search_host_exact_record_classification_bigint_closure,
+};
+
+// One tile-certified transition: the resolved back suffix of the trusted
+// frontier, its host-classified records and its device-certified masses.
+// Events and diagnostics carry exact host-recomputed payloads; their
+// stream indexes are assigned by the assembler at commit.
+struct ExactHigherSupportTileCertifiedTile {
+  std::size_t consumed_root_count{};
+  std::vector<ExactHigherSupportEvent> events;
+  std::vector<ExactHigherSupportExtraShellDiagnostic> diagnostics;
+  std::vector<ExactHigherSupportPruneCertificate> prune_certificates;
+  exact::BigInt well_centering_pruned_support_mass{0};
+  exact::BigInt rank_pruned_support_mass{0};
+  exact::BigInt leaf_classified_support_mass{0};
+  std::size_t affinely_dependent_leaf_count{};
+  std::size_t boundary_reduced_leaf_count{};
+  std::size_t exterior_circumcenter_leaf_count{};
+  std::size_t above_rank_leaf_count{};
+  std::size_t closed_ball_query_count{};
+  std::size_t point_classification_count{};
+};
+
+// Combinatorial support mass of one frontier entry (the same definition
+// the checkpoint verifier and the M2 bridge induction identity use).
+[[nodiscard]] exact::BigInt
+exact_higher_support_frontier_entry_support_count(
+    const ExactHigherSupportFrontierEntry& entry);
+
 class ExactHigherSupportAnchoredStreamCertificate {
  public:
   ExactHigherSupportAnchoredStreamCertificate() noexcept = default;
@@ -903,6 +947,10 @@ class ExactHigherSupportAnchoredStreamCertificate {
   }
   [[nodiscard]] std::size_t committed_chunk_count() const noexcept {
     return committed_chunk_count_;
+  }
+  [[nodiscard]] ExactHigherSupportVerificationBasis verification_basis()
+      const noexcept {
+    return verification_basis_;
   }
   // Strict content re-digest of the presented result through the one
   // record-chain definition of this translation unit, plus count, audit,
@@ -922,6 +970,8 @@ class ExactHigherSupportAnchoredStreamCertificate {
   std::size_t committed_chunk_count_{};
   std::size_t event_count_{};
   std::size_t diagnostic_count_{};
+  ExactHigherSupportVerificationBasis verification_basis_{
+      ExactHigherSupportVerificationBasis::fresh_cpu_replay_every_commit};
   bool minted_{false};
 };
 
@@ -958,6 +1008,16 @@ class ExactHigherSupportAnchoredStreamAssembler {
       const ExactHigherSupportStreamBudget& chunk_budget,
       const ExactHigherSupportCheckpoint& reinjected_source,
       const ExactHigherSupportStreamChunk& candidate);
+  // Tile-certified commit (reduced verification): the tile's device-bound
+  // masses must exactly cover the consumed back roots, the leaf category
+  // and record identities must close, and the synthesized successor
+  // checkpoint must pass the complete local-integrity verification before
+  // adoption.  The first commit locks the chain's verification basis; a
+  // chain never mixes bases.
+  [[nodiscard]] ExactHigherSupportStreamChunkVerification
+  commit_tile_certified(
+      const ExactHigherSupportCheckpoint& reinjected_source,
+      ExactHigherSupportTileCertifiedTile&& tile);
   // At the locally-complete terminal, sorts the appropriated records under
   // the public canonical order, assembles the stream result and mints the
   // sealed certificate exactly once.
@@ -970,6 +1030,7 @@ class ExactHigherSupportAnchoredStreamAssembler {
   std::vector<ExactHigherSupportEvent> events_;
   std::vector<ExactHigherSupportExtraShellDiagnostic> diagnostics_;
   std::size_t committed_chunk_count_{};
+  std::optional<ExactHigherSupportVerificationBasis> locked_basis_;
   bool sealed_{false};
 };
 

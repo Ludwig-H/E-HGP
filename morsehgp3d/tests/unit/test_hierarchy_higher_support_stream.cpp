@@ -21,6 +21,9 @@ using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::hierarchy::ExactHigherSupportPruneReason;
 using morsehgp3d::hierarchy::ExactHigherSupportAnchoredSession;
+using morsehgp3d::hierarchy::ExactHigherSupportAnchoredStreamAssembler;
+using morsehgp3d::hierarchy::ExactHigherSupportTileCertifiedTile;
+using morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis;
 using morsehgp3d::hierarchy::ExactHigherSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactHigherSupportCheckpoint;
 using morsehgp3d::hierarchy::ExactHigherSupportPendingStage;
@@ -1069,6 +1072,213 @@ void test_terminal_root_needs_no_chunk() {
 
 }  // namespace
 
+
+// R1 (reduced verification): a tile-certified commit chain must reach the
+// same terminal science as the fresh-replay chain.  The tile payload here
+// is derived from a prepared candidate exactly as the device bridge will
+// derive it from its drained records and certified masses -- consumed root
+// count, host-classified records, category counts and BigInt masses -- and
+// nothing else crosses into the session.
+[[nodiscard]] ExactHigherSupportTileCertifiedTile tile_from_candidate(
+    const ExactHigherSupportCheckpoint& source,
+    const ExactHigherSupportStreamChunk& candidate) {
+  const auto& before = candidate.cumulative_audit_before;
+  const auto& after = candidate.cumulative_audit_after;
+  ExactHigherSupportTileCertifiedTile tile;
+  tile.consumed_root_count =
+      source.frontier.size() - candidate.next_checkpoint.frontier.size();
+  tile.events = candidate.events;
+  tile.diagnostics = candidate.relevant_extra_shell_diagnostics;
+  tile.prune_certificates = candidate.prune_certificates;
+  tile.well_centering_pruned_support_mass =
+      after.well_centering_pruned_support_count -
+      before.well_centering_pruned_support_count;
+  tile.rank_pruned_support_mass =
+      after.rank_pruned_support_count - before.rank_pruned_support_count;
+  tile.leaf_classified_support_mass =
+      after.leaf_classified_support_count -
+      before.leaf_classified_support_count;
+  tile.affinely_dependent_leaf_count =
+      after.affinely_dependent_leaf_count -
+      before.affinely_dependent_leaf_count;
+  tile.boundary_reduced_leaf_count =
+      after.boundary_reduced_leaf_count - before.boundary_reduced_leaf_count;
+  tile.exterior_circumcenter_leaf_count =
+      after.exterior_circumcenter_leaf_count -
+      before.exterior_circumcenter_leaf_count;
+  tile.above_rank_leaf_count =
+      after.above_rank_leaf_count - before.above_rank_leaf_count;
+  tile.closed_ball_query_count =
+      after.global_closed_ball_query_count -
+      before.global_closed_ball_query_count;
+  tile.point_classification_count =
+      after.point_classification_count - before.point_classification_count;
+  return tile;
+}
+
+void test_tile_certified_commit_equals_fresh_replay() {
+  CanonicalPointCloud cloud = cloud_from({
+      point(1.0, 1.0, 1.0),
+      point(1.0, -1.0, -1.0),
+      point(-1.0, 1.0, -1.0),
+      point(-1.0, -1.0, 1.0),
+      point(0.25, 0.5, -0.75)});
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactHigherSupportAuthorityContext authority{index, cloud, 10U};
+  const auto oracle = build_exact_higher_support_stream(
+      index, cloud, 10U, unlimited_budget());
+  check(oracle.stream_complete(), "the tile-certified oracle completes");
+
+  // Reference chain: fresh replay through the assembler.
+  ExactHigherSupportAnchoredStreamAssembler replay_assembler{authority};
+  ExactHigherSupportAnchoredStreamAssembler tile_assembler{authority};
+  std::size_t transitions = 0U;
+  while (!tile_assembler.trusted_checkpoint().locally_complete() &&
+         transitions < 64U) {
+    ++transitions;
+    ExactHigherSupportStreamBudget budget = unlimited_budget();
+    budget.maximum_work_unit_count = 3U * transitions;
+    const auto source = tile_assembler.trusted_checkpoint();
+    const auto candidate = tile_assembler.prepare_next(budget, source);
+    if (candidate.next_checkpoint.pending_product.has_value() ||
+        candidate.next_checkpoint.frontier.size() >=
+            source.frontier.size()) {
+      continue;
+    }
+    // The reference chain commits the same candidate by fresh replay.
+    const auto replay_source = replay_assembler.trusted_checkpoint();
+    const auto replay_candidate =
+        replay_assembler.prepare_next(budget, replay_source);
+    check(
+        replay_assembler
+            .commit_prepared(budget, replay_source, replay_candidate)
+            .chunk_transition_verified,
+        "the reference fresh-replay chain commits its candidate");
+
+    const auto verification = tile_assembler.commit_tile_certified(
+        source, tile_from_candidate(source, candidate));
+    check(
+        verification.chunk_transition_verified &&
+            verification.next_checkpoint_anchored &&
+            verification.records_individually_exact,
+        "a tile-certified transition commits without a generator rerun");
+    if (!verification.chunk_transition_verified) {
+      return;
+    }
+  }
+  check(
+      tile_assembler.trusted_checkpoint().locally_complete() &&
+          replay_assembler.trusted_checkpoint().locally_complete(),
+      "both chains reach the locally complete terminal");
+
+  const auto tile_seal =
+      tile_assembler.seal_terminal_stream(unlimited_budget());
+  const auto replay_seal =
+      replay_assembler.seal_terminal_stream(unlimited_budget());
+  check(
+      tile_seal.certified_sealed() && replay_seal.certified_sealed(),
+      "both chains seal their terminal stream");
+  if (!tile_seal.certified_sealed() || !replay_seal.certified_sealed()) {
+    return;
+  }
+  check(
+      tile_seal.result->events == oracle.events &&
+          tile_seal.result->relevant_extra_shell_diagnostics ==
+              oracle.relevant_extra_shell_diagnostics &&
+          tile_seal.result->requirements == oracle.requirements,
+      "the tile-certified chain reproduces the oracle records");
+  check(
+      tile_seal.result->audit.total_support_count ==
+              oracle.audit.total_support_count &&
+          tile_seal.result->audit.resolved_support_count ==
+              oracle.audit.resolved_support_count &&
+          tile_seal.result->audit.remaining_frontier_support_count == 0 &&
+          tile_seal.result->stream_complete() &&
+          tile_seal.result
+              ->absence_of_additional_higher_supports_certified(),
+      "the tile-certified chain closes the exact universe");
+  check(
+      tile_seal.certificate.verification_basis() ==
+              ExactHigherSupportVerificationBasis::
+                  device_search_host_exact_record_classification_bigint_closure &&
+          replay_seal.certificate.verification_basis() ==
+              ExactHigherSupportVerificationBasis::
+                  fresh_cpu_replay_every_commit,
+      "each certificate declares its own verification basis truthfully");
+  check(
+      tile_seal.certificate.certifies(*tile_seal.result),
+      "the tile-certified certificate binds its own sealed result");
+  // The scientific content is identical; only the CPU work counters
+  // differ, and on the tile-certified chain they are exactly zero -- the
+  // internal witness that no generator ran per transition.
+  check(
+      tile_seal.result->audit.work_unit_count == 0U &&
+          tile_seal.result->audit.support_product_visit_count == 0U &&
+          tile_seal.result->audit.rank_witness_node_visit_count == 0U &&
+          tile_seal.result->audit.rank_search_count == 0U &&
+          replay_seal.result->audit.work_unit_count != 0U,
+      "the tile-certified chain counts no host generator work");
+  check(
+      tile_seal.result->events == replay_seal.result->events &&
+          tile_seal.result->relevant_extra_shell_diagnostics ==
+              replay_seal.result->relevant_extra_shell_diagnostics &&
+          tile_seal.result->audit.accepted_event_count ==
+              replay_seal.result->audit.accepted_event_count &&
+          tile_seal.result->audit.resolved_support_count ==
+              replay_seal.result->audit.resolved_support_count,
+      "the two chains agree record for record and mass for mass");
+
+  // Anti-forge: a falsified mass, a dropped record and a mutated category
+  // must all fail closed before any state change.
+  ExactHigherSupportAnchoredStreamAssembler forge{authority};
+  const auto forge_source = forge.trusted_checkpoint();
+  ExactHigherSupportStreamBudget forge_budget = unlimited_budget();
+  const auto forge_candidate =
+      forge.prepare_next(forge_budget, forge_source);
+  const auto honest_tile =
+      tile_from_candidate(forge_source, forge_candidate);
+
+  auto inflated = honest_tile;
+  inflated.leaf_classified_support_mass += 1;
+  check(
+      !forge.commit_tile_certified(forge_source, std::move(inflated))
+           .chunk_transition_verified &&
+          forge.trusted_checkpoint() == forge_source,
+      "a falsified mass fails closed without advancing the chain");
+
+  auto truncated = honest_tile;
+  if (!truncated.events.empty()) {
+    truncated.events.pop_back();
+    check(
+        !forge.commit_tile_certified(forge_source, std::move(truncated))
+             .chunk_transition_verified &&
+            forge.trusted_checkpoint() == forge_source,
+        "a dropped record fails closed without advancing the chain");
+  }
+
+  auto miscategorized = honest_tile;
+  ++miscategorized.above_rank_leaf_count;
+  check(
+      !forge.commit_tile_certified(forge_source, std::move(miscategorized))
+           .chunk_transition_verified &&
+          forge.trusted_checkpoint() == forge_source,
+      "a mutated leaf category fails closed without advancing the chain");
+
+  auto wrong_root_count = honest_tile;
+  ++wrong_root_count.consumed_root_count;
+  check(
+      !forge.commit_tile_certified(forge_source, std::move(wrong_root_count))
+           .chunk_transition_verified &&
+          forge.trusted_checkpoint() == forge_source,
+      "an overstated consumed root count fails closed");
+
+  auto honest = honest_tile;
+  check(
+      forge.commit_tile_certified(forge_source, std::move(honest))
+          .chunk_transition_verified,
+      "the honest tile still commits after the rejected forgeries");
+}
+
 int main() {
   test_bigint_universe();
   test_regular_tetrahedron_complete_and_fresh_replay();
@@ -1081,6 +1291,7 @@ int main() {
   test_internal_terminal_authority_and_clean_chunk_cap();
   test_unsealed_terminal_segment_drain();
   test_terminal_root_needs_no_chunk();
+  test_tile_certified_commit_equals_fresh_replay();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";
     return 1;
