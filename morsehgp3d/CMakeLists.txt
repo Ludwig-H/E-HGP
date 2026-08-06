@@ -6976,12 +6976,15 @@ if(MORSEHGP3D_BUILD_TOOLS)
       MORSEHGP3D_RUNNER_HAS_DEVICE_TILED_HIGHER=$<BOOL:${MORSEHGP3D_ENABLE_CUDA}>
   )
   if(MORSEHGP3D_ENABLE_CUDA)
+    # The host-contract archives demand the device launcher symbols that
+    # only the CUDA production archives define; a single-pass link places
+    # transitive host-contract members after the CUDA archives, so the
+    # whole family is rescanned as one group.
     target_link_libraries(
       morsehgp3d_direct_morse_product_runner
       PRIVATE
-        morsehgp3d::gpu_higher_support_device_tiled_tower_host_contract
-        morsehgp3d::gpu_higher_support_device_tiled_frontier
-        morsehgp3d::gpu_morton_lbvh_build
+        "$<LINK_GROUP:RESCAN,morsehgp3d_gpu_higher_support_device_tiled_tower_host_contract,morsehgp3d_gpu_higher_support_device_tiled_session_bridge_host_contract,morsehgp3d_gpu_higher_support_device_tiled_frontier_host_contract,morsehgp3d_gpu_higher_support_device_tiled_frontier,morsehgp3d_gpu_morton_lbvh_build>"
+        CUDA::cudart
     )
   endif()
   morsehgp3d_apply_sanitizers(morsehgp3d_direct_morse_product_runner)
