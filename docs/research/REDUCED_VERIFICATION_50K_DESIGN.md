@@ -85,3 +85,19 @@ rejeu ≡ tuile-certifié ; (R2) mesure G4 (n=32 natif attendu en secondes,
 ventilation 50k) ; (R3) paires device-tuilées ; (R4) parallélisation aval ;
 (R5) boucle mesure→optimisation jusqu'à < 100 ms, avec le garde Delaunay
 aux jalons.
+
+## Raffinement mesuré (lecture du pont, 6/8 soir)
+
+La recherche de budget minimal du pont (doublement + dichotomie par
+transaction) appelle `anchored_prepare` — le GÉNÉRATEUR CPU de la session —
+à chaque sonde : le CPU reconstruit le chunk O(log budget) fois PAR
+transaction avant même le rejeu de commit. Le chemin tuile-certifié doit
+donc supprimer à la fois le rejeu de commit ET la recherche de frontière :
+la tuile device EST la transaction (le moteur M5b résout les racines du
+suffixe arrière et rend records + masses par racine) ; l'assembleur
+synthétise le `ExactHigherSupportStreamChunk` candidat depuis le payload
+device (frontière successeur = préfixe strict, déltas d'audit, records) et
+la session le valide par les invariants 1–5. Plus aucun appel au
+générateur hôte, plus aucune sonde de budget : les budgets par transaction
+disparaissent de ce chemin (le certificat déclare des tuiles variables,
+base `tile_certified_engine_with_exact_closure`).
