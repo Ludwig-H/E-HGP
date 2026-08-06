@@ -12,6 +12,7 @@
 #include "../cuda/phase15_higher_support_device_tiled_frontier_internal.hpp"
 #include "../cuda/phase15_higher_support_device_tiled_slot_engine.cuh"
 
+#include "morsehgp3d/exact/integer.hpp"
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
 #include "morsehgp3d/spatial/aabb.hpp"
@@ -29,13 +30,18 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 namespace {
 
+using morsehgp3d::exact::BigInt;
+using morsehgp3d::exact::canonical_integer_string;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::gpu::higher_support_device_tiled_frontier_products_per_slot;
 using morsehgp3d::gpu::
@@ -153,6 +159,68 @@ void check_cuda(cudaError_t code, const std::string& operation) {
       point(1e-200, 1e-200, 1e-200),
       point(1e-200, 0.0, 1e-200),
       point(3.0, 5.0, 7.0)};
+  return cloud_from(points);
+}
+
+// --------------------------------------------------------------------------
+// Growth-profile clouds: verbatim transcription of the generators in
+// tests/profiling/exact_higher_support_growth_profile.cpp, so the historic
+// n=32/5000 no-go cases are re-measured on the exact same points.
+// --------------------------------------------------------------------------
+
+constexpr std::array<std::string_view, 3U> growth_profile_names{
+    "uniform_dyadic", "separated_clusters", "multiscale_clusters"};
+
+[[nodiscard]] std::uint64_t growth_splitmix64(std::uint64_t value) {
+  value += 0x9e3779b97f4a7c15ULL;
+  value = (value ^ (value >> 30U)) * 0xbf58476d1ce4e5b9ULL;
+  value = (value ^ (value >> 27U)) * 0x94d049bb133111ebULL;
+  return value ^ (value >> 31U);
+}
+
+[[nodiscard]] double growth_signed_dyadic(std::uint64_t value) {
+  constexpr std::uint64_t mask = (std::uint64_t{1} << 20U) - 1U;
+  constexpr double denominator =
+      static_cast<double>(std::uint64_t{1} << 19U);
+  return static_cast<double>(value & mask) / denominator - 1.0;
+}
+
+[[nodiscard]] CanonicalPointCloud growth_profile_cloud(
+    std::string_view profile,
+    std::size_t point_count) {
+  std::vector<CertifiedPoint3> points;
+  points.reserve(point_count);
+  constexpr std::array<std::array<double, 3U>, 8U> centers{{
+      {{-0.75, -0.75, -0.75}},
+      {{0.75, -0.75, -0.75}},
+      {{-0.75, 0.75, -0.75}},
+      {{0.75, 0.75, -0.75}},
+      {{-0.75, -0.75, 0.75}},
+      {{0.75, -0.75, 0.75}},
+      {{-0.75, 0.75, 0.75}},
+      {{0.75, 0.75, 0.75}},
+  }};
+  for (std::size_t index = 0U; index < point_count; ++index) {
+    const std::uint64_t key = static_cast<std::uint64_t>(index) + 1U;
+    const double x = growth_signed_dyadic(growth_splitmix64(key * 3U));
+    const double y = growth_signed_dyadic(growth_splitmix64(key * 3U + 1U));
+    const double z = growth_signed_dyadic(growth_splitmix64(key * 3U + 2U));
+    if (profile == growth_profile_names[0]) {
+      points.push_back(point(x, y, z));
+      continue;
+    }
+    const std::size_t cluster = index % centers.size();
+    const double radius = profile == growth_profile_names[1]
+                              ? 1.0 / 64.0
+                              : 1.0 / static_cast<double>(
+                                    std::uint64_t{1}
+                                    << static_cast<unsigned int>(
+                                           6U + 2U * (cluster % 4U)));
+    points.push_back(point(
+        centers[cluster][0] + radius * x,
+        centers[cluster][1] + radius * y,
+        centers[cluster][2] + radius * z));
+  }
   return cloud_from(points);
 }
 
@@ -342,6 +410,279 @@ struct WitnessGeometry {
 }
 
 // --------------------------------------------------------------------------
+// Exact BigInt frontier accounting and the canonical host pre-expansion
+// (transposition of the sealed M2 bridge split onto the witness mirror).
+// --------------------------------------------------------------------------
+
+[[nodiscard]] BigInt bigint_binomial(std::size_t n, std::size_t k) {
+  if (k > n) {
+    return 0;
+  }
+  k = std::min(k, n - k);
+  BigInt result = 1;
+  for (std::size_t index = 1U; index <= k; ++index) {
+    result *= n - k + index;
+    result /= index;
+  }
+  return result;
+}
+
+[[nodiscard]] BigInt bigint_from_u128(std::uint64_t lo, std::uint64_t hi) {
+  return (BigInt{hi} << 64U) + lo;
+}
+
+// Authenticates every group of the entry against the witness mirror and
+// returns its exact support mass (the product of per-group binomials).
+[[nodiscard]] BigInt witness_entry_mass(
+    const WitnessGeometry& geometry,
+    const ExactHigherSupportFrontierEntry& entry) {
+  if ((entry.support_size != 3U && entry.support_size != 4U) ||
+      entry.group_count == 0U || entry.group_count > entry.support_size) {
+    throw std::logic_error("a frontier entry is not canonically formed");
+  }
+  BigInt mass = 1;
+  std::size_t multiplicity_total = 0U;
+  for (std::size_t index = 0U; index < entry.group_count; ++index) {
+    const ExactHigherSupportNodeGroup& group = entry.groups[index];
+    const auto node_index = static_cast<std::size_t>(group.node_index);
+    if (node_index >= geometry.nodes.size()) {
+      throw std::logic_error("a frontier entry group node is out of range");
+    }
+    const engine::EngineNode& node = geometry.nodes[node_index];
+    if (node.leaf_begin != group.leaf_begin ||
+        node.leaf_end != group.leaf_end || group.multiplicity == 0U) {
+      throw std::logic_error(
+          "a frontier entry group does not authenticate against the mirror");
+    }
+    const std::size_t range =
+        static_cast<std::size_t>(node.leaf_end - node.leaf_begin);
+    multiplicity_total += group.multiplicity;
+    mass *= bigint_binomial(range, group.multiplicity);
+  }
+  if (multiplicity_total != entry.support_size) {
+    throw std::logic_error(
+        "a frontier entry does not distribute its support size");
+  }
+  return mass;
+}
+
+[[nodiscard]] bool witness_entry_expandable(
+    const WitnessGeometry& geometry,
+    const ExactHigherSupportFrontierEntry& entry) {
+  for (std::size_t index = 0U; index < entry.group_count; ++index) {
+    const auto node_index =
+        static_cast<std::size_t>(entry.groups[index].node_index);
+    if (node_index < geometry.nodes.size() &&
+        !engine::engine_node_is_leaf(geometry.nodes[node_index])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Canonical split of the non-leaf group with the largest Morton range:
+// every feasible multiplicity distribution (L, a), (D, m - a), children
+// canonicalized by sorting groups by (leaf_begin, node index).  The exact
+// BigInt child coverage must re-add to the parent coverage: a true
+// partition, never a heuristic refinement.
+[[nodiscard]] std::vector<ExactHigherSupportFrontierEntry>
+expand_witness_entry(
+    const WitnessGeometry& geometry,
+    const ExactHigherSupportFrontierEntry& entry) {
+  std::size_t split_group_index = entry.group_count;
+  std::size_t largest_range = 0U;
+  for (std::size_t index = 0U; index < entry.group_count; ++index) {
+    const auto node_index =
+        static_cast<std::size_t>(entry.groups[index].node_index);
+    const engine::EngineNode& current = geometry.nodes[node_index];
+    const auto range =
+        static_cast<std::size_t>(current.leaf_end - current.leaf_begin);
+    if (!engine::engine_node_is_leaf(current) && range > largest_range) {
+      split_group_index = index;
+      largest_range = range;
+    }
+  }
+  if (split_group_index == entry.group_count) {
+    throw std::logic_error("a nonterminal product has no splittable group");
+  }
+  const ExactHigherSupportNodeGroup& split_group =
+      entry.groups[split_group_index];
+  const engine::EngineNode& parent =
+      geometry.nodes[static_cast<std::size_t>(split_group.node_index)];
+  const engine::EngineNode& left =
+      geometry.nodes[static_cast<std::size_t>(parent.left_child)];
+  const engine::EngineNode& right =
+      geometry.nodes[static_cast<std::size_t>(parent.right_child)];
+  const auto multiplicity =
+      static_cast<std::size_t>(split_group.multiplicity);
+  const auto left_size =
+      static_cast<std::size_t>(left.leaf_end - left.leaf_begin);
+  const auto right_size =
+      static_cast<std::size_t>(right.leaf_end - right.leaf_begin);
+  const std::size_t minimum_left =
+      multiplicity > right_size ? multiplicity - right_size : 0U;
+  const std::size_t maximum_left = std::min(multiplicity, left_size);
+  if (minimum_left > maximum_left) {
+    throw std::logic_error("a split has no feasible distribution");
+  }
+  std::vector<ExactHigherSupportFrontierEntry> children;
+  children.reserve(maximum_left - minimum_left + 1U);
+  BigInt child_coverage{0};
+  for (std::size_t left_multiplicity = minimum_left;
+       left_multiplicity <= maximum_left;
+       ++left_multiplicity) {
+    std::vector<std::pair<std::uint64_t, std::size_t>> groups;
+    groups.reserve(4U);
+    for (std::size_t index = 0U; index < entry.group_count; ++index) {
+      if (index != split_group_index) {
+        groups.emplace_back(
+            entry.groups[index].node_index,
+            static_cast<std::size_t>(entry.groups[index].multiplicity));
+      }
+    }
+    if (left_multiplicity != 0U) {
+      groups.emplace_back(parent.left_child, left_multiplicity);
+    }
+    const std::size_t right_multiplicity =
+        multiplicity - left_multiplicity;
+    if (right_multiplicity != 0U) {
+      groups.emplace_back(parent.right_child, right_multiplicity);
+    }
+    std::sort(
+        groups.begin(),
+        groups.end(),
+        [&geometry](const auto& lhs, const auto& rhs) {
+          const engine::EngineNode& lhs_node =
+              geometry.nodes[static_cast<std::size_t>(lhs.first)];
+          const engine::EngineNode& rhs_node =
+              geometry.nodes[static_cast<std::size_t>(rhs.first)];
+          if (lhs_node.leaf_begin != rhs_node.leaf_begin) {
+            return lhs_node.leaf_begin < rhs_node.leaf_begin;
+          }
+          return lhs.first < rhs.first;
+        });
+    if (groups.empty() || groups.size() > entry.support_size ||
+        groups.size() > 4U) {
+      throw std::logic_error("a canonical child has an invalid group count");
+    }
+    ExactHigherSupportFrontierEntry child{};
+    child.support_size = entry.support_size;
+    child.group_count = static_cast<std::uint8_t>(groups.size());
+    for (std::size_t index = 0U; index < groups.size(); ++index) {
+      const engine::EngineNode& node =
+          geometry.nodes[static_cast<std::size_t>(groups[index].first)];
+      child.groups[index] = ExactHigherSupportNodeGroup{
+          groups[index].first,
+          node.leaf_begin,
+          node.leaf_end,
+          static_cast<std::uint8_t>(groups[index].second)};
+    }
+    child_coverage += witness_entry_mass(geometry, child);
+    children.push_back(child);
+  }
+  if (child_coverage != witness_entry_mass(geometry, entry)) {
+    throw std::logic_error(
+        "a canonical split did not partition its parent coverage");
+  }
+  return children;
+}
+
+// Deterministic canonical order of a frontier: mass descending (the sealed
+// largest-mass-first device refinement), ties broken by the lexicographic
+// group structure.
+[[nodiscard]] bool frontier_entry_precedes(
+    const std::pair<BigInt, ExactHigherSupportFrontierEntry>& lhs,
+    const std::pair<BigInt, ExactHigherSupportFrontierEntry>& rhs) {
+  if (lhs.first != rhs.first) {
+    return lhs.first > rhs.first;
+  }
+  const ExactHigherSupportFrontierEntry& a = lhs.second;
+  const ExactHigherSupportFrontierEntry& b = rhs.second;
+  if (a.support_size != b.support_size) {
+    return a.support_size < b.support_size;
+  }
+  if (a.group_count != b.group_count) {
+    return a.group_count < b.group_count;
+  }
+  for (std::size_t index = 0U; index < a.group_count; ++index) {
+    if (a.groups[index].leaf_begin != b.groups[index].leaf_begin) {
+      return a.groups[index].leaf_begin < b.groups[index].leaf_begin;
+    }
+    if (a.groups[index].leaf_end != b.groups[index].leaf_end) {
+      return a.groups[index].leaf_end < b.groups[index].leaf_end;
+    }
+    if (a.groups[index].node_index != b.groups[index].node_index) {
+      return a.groups[index].node_index < b.groups[index].node_index;
+    }
+    if (a.groups[index].multiplicity != b.groups[index].multiplicity) {
+      return a.groups[index].multiplicity < b.groups[index].multiplicity;
+    }
+  }
+  return false;
+}
+
+// Largest-mass-first host pre-expansion of the root frontier up to the
+// sealed tile capacity.  Every split is a BigInt-verified partition, so the
+// returned frontier partitions C(n,3) + C(n,4) exactly; the final order is
+// the deterministic canonical order above.
+[[nodiscard]] std::vector<ExactHigherSupportFrontierEntry>
+pre_expand_frontier(
+    const WitnessGeometry& geometry,
+    std::vector<ExactHigherSupportFrontierEntry> roots,
+    std::size_t tile_capacity) {
+  std::multimap<
+      BigInt,
+      ExactHigherSupportFrontierEntry,
+      std::greater<BigInt>>
+      expandable;
+  std::vector<std::pair<BigInt, ExactHigherSupportFrontierEntry>> finished;
+  for (const ExactHigherSupportFrontierEntry& root : roots) {
+    BigInt mass = witness_entry_mass(geometry, root);
+    if (witness_entry_expandable(geometry, root)) {
+      expandable.emplace(std::move(mass), root);
+    } else {
+      finished.emplace_back(std::move(mass), root);
+    }
+  }
+  while (!expandable.empty()) {
+    const std::size_t frontier_size = expandable.size() + finished.size();
+    if (frontier_size >= tile_capacity) {
+      break;
+    }
+    const auto top = expandable.begin();
+    const ExactHigherSupportFrontierEntry parent = top->second;
+    const std::vector<ExactHigherSupportFrontierEntry> children =
+        expand_witness_entry(geometry, parent);
+    if (frontier_size - 1U + children.size() > tile_capacity) {
+      break;
+    }
+    expandable.erase(top);
+    for (const ExactHigherSupportFrontierEntry& child : children) {
+      BigInt mass = witness_entry_mass(geometry, child);
+      if (mass == 0) {
+        throw std::logic_error(
+            "a feasible canonical child cannot have zero mass");
+      }
+      if (witness_entry_expandable(geometry, child)) {
+        expandable.emplace(std::move(mass), child);
+      } else {
+        finished.emplace_back(std::move(mass), child);
+      }
+    }
+  }
+  for (auto& [mass, entry] : expandable) {
+    finished.emplace_back(mass, entry);
+  }
+  std::sort(finished.begin(), finished.end(), frontier_entry_precedes);
+  std::vector<ExactHigherSupportFrontierEntry> frontier;
+  frontier.reserve(finished.size());
+  for (const auto& [mass, entry] : finished) {
+    frontier.push_back(entry);
+  }
+  return frontier;
+}
+
+// --------------------------------------------------------------------------
 // Transcripts.
 // --------------------------------------------------------------------------
 
@@ -364,6 +705,7 @@ struct CaseSetup {
   std::size_t maximum_relevant_closed_rank{5U};
   std::size_t gate_quantum{2048U};
   std::size_t maximum_subdivision_count{4096U};
+  std::size_t maximum_chunk_count{100'000U};
 };
 
 [[nodiscard]] Phase15HigherSupportDeviceTiledRequest base_request(
@@ -396,15 +738,38 @@ struct CaseSetup {
   return request;
 }
 
-// Native seam runner: one Request per chunk against the CUDA launcher, with
-// device-to-host copies of every published record segment.
-[[nodiscard]] TileTranscript run_native_tile(
+// Native seam runner: one Request per chunk against the CUDA launcher.
+// With keep_records, every published record segment is copied
+// device-to-host and retained; without it, only the slot controls and the
+// exact running totals are kept, so unbounded-volume scale probes never
+// accumulate record memory on the host.
+struct NativeRunSummary {
+  TileTranscript transcript;
+  std::vector<Phase15HigherSupportDeviceTiledSlotControl> final_controls;
+  std::size_t chunk_count{};
+  std::size_t subdivision_total{};
+  std::uint64_t prune_record_total{};
+  std::uint64_t terminal_record_total{};
+  std::uint64_t receipt_total{};
+  std::uint64_t gate_evaluation_total{};
+  std::uint64_t expansion_total{};
+  std::uint64_t deferred_int512_total{};
+  std::uint64_t deferred_int1024_total{};
+  std::uint64_t rational_drain_total{};
+  std::uint64_t first_fatal_stop_reason{};
+  std::uint64_t first_fatal_failure_code{};
+  bool completed{false};
+  bool fatal{false};
+};
+
+[[nodiscard]] NativeRunSummary run_native_tile_summary(
     const CaseSetup& setup,
     const CanonicalPointCloud& cloud,
     std::size_t certified_depth,
     std::span<const ExactHigherSupportFrontierEntry> roots,
-    const std::string& label) {
-  TileTranscript transcript;
+    const std::string& label,
+    bool keep_records) {
+  NativeRunSummary summary;
   MortonLbvhBuildContext builder{cloud.size() + 2U};
   const auto build = builder.build(cloud);
   MortonLbvhDeviceTraversalLease lease =
@@ -413,7 +778,11 @@ struct CaseSetup {
       adopt_phase15_higher_support_device_tiled_traversal(std::move(lease));
   Phase15HigherSupportDeviceTiledFrontierContextState state;
   std::uint64_t record_buffer_epoch = 1U;
-  for (std::uint64_t chunk_sequence = 1U; chunk_sequence <= 100'000U;
+  std::vector<Phase15HigherSupportDeviceTiledPruneRecord> prune_arena;
+  std::vector<Phase15HigherSupportDeviceTiledTerminalRecord> terminal_arena;
+  std::vector<Phase15HigherSupportDeviceTiledProbeReceipt> receipt_arena;
+  for (std::uint64_t chunk_sequence = 1U;
+       chunk_sequence <= setup.maximum_chunk_count;
        ++chunk_sequence) {
     Phase15HigherSupportDeviceTiledRequest request = base_request(
         setup, adopted, certified_depth, roots.size());
@@ -429,83 +798,118 @@ struct CaseSetup {
     ChunkSnapshot snapshot;
     snapshot.controls = batch.host_slot_controls;
     snapshot.subdivision_count = batch.traversal_subdivision_count;
-    // Device record segments, copied bounded by the control counts.
-    std::vector<Phase15HigherSupportDeviceTiledPruneRecord> prune_arena(
-        roots.size() * request.prune_records_per_slot);
-    std::vector<Phase15HigherSupportDeviceTiledTerminalRecord>
-        terminal_arena(roots.size() * request.terminal_records_per_slot);
-    std::vector<Phase15HigherSupportDeviceTiledProbeReceipt> receipt_arena(
-        roots.size() * request.probe_receipts_per_slot);
-    check_cuda(
-        cudaMemcpy(
-            prune_arena.data(),
-            batch.prune_records,
-            prune_arena.size() *
-                sizeof(Phase15HigherSupportDeviceTiledPruneRecord),
-            cudaMemcpyDeviceToHost),
-        label + ": prune segment drain");
-    check_cuda(
-        cudaMemcpy(
-            terminal_arena.data(),
-            batch.terminal_records,
-            terminal_arena.size() *
-                sizeof(Phase15HigherSupportDeviceTiledTerminalRecord),
-            cudaMemcpyDeviceToHost),
-        label + ": terminal segment drain");
-    check_cuda(
-        cudaMemcpy(
-            receipt_arena.data(),
-            batch.probe_receipts,
-            receipt_arena.size() *
-                sizeof(Phase15HigherSupportDeviceTiledProbeReceipt),
-            cudaMemcpyDeviceToHost),
-        label + ": receipt segment drain");
+    ++summary.chunk_count;
+    summary.subdivision_total += batch.traversal_subdivision_count;
+    if (keep_records) {
+      // Device record segments, copied bounded by the control counts.
+      prune_arena.assign(roots.size() * request.prune_records_per_slot, {});
+      terminal_arena.assign(
+          roots.size() * request.terminal_records_per_slot, {});
+      receipt_arena.assign(
+          roots.size() * request.probe_receipts_per_slot, {});
+      check_cuda(
+          cudaMemcpy(
+              prune_arena.data(),
+              batch.prune_records,
+              prune_arena.size() *
+                  sizeof(Phase15HigherSupportDeviceTiledPruneRecord),
+              cudaMemcpyDeviceToHost),
+          label + ": prune segment drain");
+      check_cuda(
+          cudaMemcpy(
+              terminal_arena.data(),
+              batch.terminal_records,
+              terminal_arena.size() *
+                  sizeof(Phase15HigherSupportDeviceTiledTerminalRecord),
+              cudaMemcpyDeviceToHost),
+          label + ": terminal segment drain");
+      check_cuda(
+          cudaMemcpy(
+              receipt_arena.data(),
+              batch.probe_receipts,
+              receipt_arena.size() *
+                  sizeof(Phase15HigherSupportDeviceTiledProbeReceipt),
+              cudaMemcpyDeviceToHost),
+          label + ": receipt segment drain");
+    }
     bool any_fatal = false;
     bool all_complete = true;
     for (std::size_t slot = 0U; slot < snapshot.controls.size(); ++slot) {
       const Phase15HigherSupportDeviceTiledSlotControl& control =
           snapshot.controls[slot];
-      any_fatal = any_fatal ||
-          control.status ==
-              static_cast<std::uint64_t>(
-                  Phase15HigherSupportDeviceTiledSlotStatus::fatal);
+      const bool slot_fatal = control.status ==
+          static_cast<std::uint64_t>(
+              Phase15HigherSupportDeviceTiledSlotStatus::fatal);
+      if (slot_fatal && !any_fatal) {
+        summary.first_fatal_stop_reason = control.stop_reason;
+        summary.first_fatal_failure_code = control.failure_code;
+      }
+      any_fatal = any_fatal || slot_fatal;
       all_complete = all_complete &&
           control.status ==
               static_cast<std::uint64_t>(
                   Phase15HigherSupportDeviceTiledSlotStatus::complete);
-      for (std::uint64_t record = 0U;
-           record < control.prune_record_count;
-           ++record) {
-        snapshot.prunes.push_back(
-            prune_arena[slot * request.prune_records_per_slot + record]);
-      }
-      for (std::uint64_t record = 0U;
-           record < control.terminal_record_count;
-           ++record) {
-        snapshot.terminals.push_back(
-            terminal_arena
-                [slot * request.terminal_records_per_slot + record]);
-      }
-      for (std::uint64_t receipt = 0U;
-           receipt < control.probe_receipt_count;
-           ++receipt) {
-        snapshot.receipts.push_back(
-            receipt_arena
-                [slot * request.probe_receipts_per_slot + receipt]);
+      summary.prune_record_total += control.prune_record_count;
+      summary.terminal_record_total += control.terminal_record_count;
+      summary.receipt_total += control.probe_receipt_count;
+      summary.gate_evaluation_total += control.gate_evaluation_count;
+      summary.expansion_total += control.expansion_count;
+      summary.deferred_int512_total += control.deferred_int512_count;
+      summary.deferred_int1024_total += control.deferred_int1024_count;
+      summary.rational_drain_total += control.rational_drain_count;
+      if (keep_records) {
+        for (std::uint64_t record = 0U;
+             record < control.prune_record_count;
+             ++record) {
+          snapshot.prunes.push_back(
+              prune_arena[slot * request.prune_records_per_slot + record]);
+        }
+        for (std::uint64_t record = 0U;
+             record < control.terminal_record_count;
+             ++record) {
+          snapshot.terminals.push_back(
+              terminal_arena
+                  [slot * request.terminal_records_per_slot + record]);
+        }
+        for (std::uint64_t receipt = 0U;
+             receipt < control.probe_receipt_count;
+             ++receipt) {
+          snapshot.receipts.push_back(
+              receipt_arena
+                  [slot * request.probe_receipts_per_slot + receipt]);
+        }
       }
     }
-    transcript.chunks.push_back(std::move(snapshot));
+    summary.final_controls = snapshot.controls;
+    if (keep_records) {
+      summary.transcript.chunks.push_back(std::move(snapshot));
+    }
     if (any_fatal) {
-      transcript.fatal = true;
-      return transcript;
+      summary.fatal = true;
+      summary.transcript.fatal = true;
+      return summary;
     }
     if (all_complete) {
-      transcript.completed = true;
-      return transcript;
+      summary.completed = true;
+      summary.transcript.completed = true;
+      return summary;
     }
   }
-  check(false, label + ": the native tile did not settle");
-  return transcript;
+  return summary;
+}
+
+[[nodiscard]] TileTranscript run_native_tile(
+    const CaseSetup& setup,
+    const CanonicalPointCloud& cloud,
+    std::size_t certified_depth,
+    std::span<const ExactHigherSupportFrontierEntry> roots,
+    const std::string& label) {
+  NativeRunSummary summary = run_native_tile_summary(
+      setup, cloud, certified_depth, roots, label, true);
+  check(
+      summary.completed || summary.fatal,
+      label + ": the native tile did not settle");
+  return std::move(summary.transcript);
 }
 
 // Host engine driver (identical to the local parity suite driver).
@@ -978,10 +1382,232 @@ void run_scale_case(
             << native.chunks.size() << " chunks)\n";
 }
 
+// --------------------------------------------------------------------------
+// Tiled full-universe resolution (M5b): host pre-expansion up to the sealed
+// tile capacity, one native tile over the pre-expanded frontier, exact
+// BigInt closure of the universe C(n,3) + C(n,4), and optional
+// bit-identical host-engine parity on the very same tile.
+// --------------------------------------------------------------------------
+
+struct TiledCaseOutcome {
+  bool closed{false};
+  bool censored{false};
+};
+
+TiledCaseOutcome run_tiled_case(
+    const CaseSetup& setup,
+    const CanonicalPointCloud& cloud,
+    bool with_host_parity,
+    bool censure_is_failure,
+    const std::string& label) {
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const WitnessGeometry geometry = build_witness_geometry(index, cloud);
+  const std::size_t n = geometry.point_count;
+  std::vector<ExactHigherSupportFrontierEntry> roots;
+  roots.push_back(root_entry(3U, geometry));
+  roots.push_back(root_entry(4U, geometry));
+  const auto expand_begin = std::chrono::steady_clock::now();
+  const std::vector<ExactHigherSupportFrontierEntry> frontier =
+      pre_expand_frontier(
+          geometry,
+          std::move(roots),
+          morsehgp3d::gpu::
+              higher_support_device_tiled_frontier_maximum_slot_tile_capacity);
+  const double expand_seconds =
+      std::chrono::duration<double>(
+          std::chrono::steady_clock::now() - expand_begin)
+          .count();
+  const BigInt universe =
+      bigint_binomial(n, 3U) + bigint_binomial(n, 4U);
+  std::vector<BigInt> slot_masses;
+  slot_masses.reserve(frontier.size());
+  BigInt frontier_mass{0};
+  for (const ExactHigherSupportFrontierEntry& entry : frontier) {
+    slot_masses.push_back(witness_entry_mass(geometry, entry));
+    frontier_mass += slot_masses.back();
+  }
+  check(
+      frontier_mass == universe,
+      label + ": the pre-expansion partitions the universe");
+  const auto native_begin = std::chrono::steady_clock::now();
+  const NativeRunSummary native = run_native_tile_summary(
+      setup,
+      cloud,
+      index.build_counters().maximum_depth,
+      std::span<const ExactHigherSupportFrontierEntry>{frontier},
+      label,
+      with_host_parity);
+  const double native_seconds =
+      std::chrono::duration<double>(
+          std::chrono::steady_clock::now() - native_begin)
+          .count();
+  TiledCaseOutcome outcome;
+  if (native.fatal || !native.completed) {
+    outcome.censored = true;
+    std::cout << label << ": CENSORED without closure claim after "
+              << native_seconds << " s (slots " << frontier.size()
+              << ", chunks " << native.chunk_count << ", subdivisions "
+              << native.subdivision_total << ", stop_reason "
+              << native.first_fatal_stop_reason << ", failure_code "
+              << native.first_fatal_failure_code
+              << (native.fatal ? ", fatal" : ", chunk budget exhausted")
+              << ")\n";
+    check(
+        !censure_is_failure,
+        label + ": the tiled universe must resolve completely");
+    return outcome;
+  }
+  bool closure_ok = native.final_controls.size() == frontier.size();
+  check(closure_ok, label + ": one final control per slot");
+  BigInt well{0};
+  BigInt rank{0};
+  BigInt terminal{0};
+  for (std::size_t slot = 0U;
+       closure_ok && slot < native.final_controls.size();
+       ++slot) {
+    const Phase15HigherSupportDeviceTiledSlotControl& control =
+        native.final_controls[slot];
+    const BigInt slot_well = bigint_from_u128(
+        control.well_prune_mass_cumulative_lo,
+        control.well_prune_mass_cumulative_hi);
+    const BigInt slot_rank = bigint_from_u128(
+        control.rank_prune_mass_cumulative_lo,
+        control.rank_prune_mass_cumulative_hi);
+    const BigInt slot_terminal = bigint_from_u128(
+        control.terminal_mass_cumulative_lo,
+        control.terminal_mass_cumulative_hi);
+    closure_ok = closure_ok && control.unresolved_mass_lo == 0U &&
+        control.unresolved_mass_hi == 0U &&
+        slot_well + slot_rank + slot_terminal == slot_masses[slot];
+    well += slot_well;
+    rank += slot_rank;
+    terminal += slot_terminal;
+  }
+  check(closure_ok, label + ": every slot closes its exact sub-universe");
+  check(
+      well + rank + terminal == universe,
+      label + ": the universe closes exactly on device");
+  outcome.closed =
+      closure_ok && well + rank + terminal == universe;
+  std::cout << label << ": OK in " << native_seconds
+            << " s (pre-expansion " << expand_seconds << " s, slots "
+            << frontier.size() << ", chunks " << native.chunk_count
+            << ", subdivisions " << native.subdivision_total
+            << ", prune records " << native.prune_record_total
+            << ", terminal records " << native.terminal_record_total
+            << ", gates " << native.gate_evaluation_total
+            << ", expansions " << native.expansion_total
+            << ", deferred512 " << native.deferred_int512_total
+            << ", deferred1024 " << native.deferred_int1024_total
+            << ", rational drains " << native.rational_drain_total
+            << ", well " << canonical_integer_string(well) << ", rank "
+            << canonical_integer_string(rank) << ", terminal "
+            << canonical_integer_string(terminal) << ")\n";
+  if (with_host_parity) {
+    const TileTranscript host = run_engine_tile(
+        setup,
+        geometry,
+        std::span<const ExactHigherSupportFrontierEntry>{frontier},
+        label);
+    compare_transcripts(native.transcript, host, label);
+    std::cout << label << ": host parity OK (" << host.chunks.size()
+              << " chunks)\n";
+  }
+  return outcome;
+}
+
+// The historic no-go profile (audit section 8.1): three growth-profile
+// families at n=32 with 5000 bounded work units per case ended in
+// work_unit_limit for K=5 and K=10, and sizes 64 and 128 were never
+// launched.  The re-measure resolves every case completely on the native
+// tiled frontier, n-major so partial sessions still close whole sizes.
+[[nodiscard]] int run_no_go_mode(bool with_host_parity) {
+  const std::array<std::size_t, 3U> sizes{32U, 64U, 128U};
+  const std::array<std::size_t, 2U> ranks{5U, 10U};
+  try {
+    for (const std::size_t size : sizes) {
+      for (const std::string_view profile : growth_profile_names) {
+        for (const std::size_t rank : ranks) {
+          CaseSetup setup;
+          setup.maximum_relevant_closed_rank = rank;
+          const CanonicalPointCloud cloud =
+              growth_profile_cloud(profile, size);
+          const std::string label = std::string{"no-go/"} +
+              std::string{profile} + "/n" + std::to_string(size) + "/K" +
+              std::to_string(rank);
+          const TiledCaseOutcome outcome = run_tiled_case(
+              setup, cloud, with_host_parity && size == 32U, true, label);
+          if (!outcome.closed) {
+            std::cerr << failures << " no-go re-measure failures\n";
+            return 1;
+          }
+        }
+      }
+    }
+  } catch (const std::exception& error) {
+    std::cerr << "FAIL: unexpected exception: " << error.what() << '\n';
+    return 1;
+  }
+  if (failures != 0) {
+    std::cerr << failures << " no-go re-measure failures\n";
+    return 1;
+  }
+  std::cout << "higher-support device tiled frontier no-go re-measure "
+               "passed\n";
+  return 0;
+}
+
+// 50k SLO probe: the uniform_dyadic family at n=50000 on the native tiled
+// frontier, exact closure or an honest censoring report.  Exit 0 claims
+// closure of both ranks; exit 3 reports censoring without any claim.
+[[nodiscard]] int run_slo50k_mode() {
+  const std::array<std::size_t, 2U> ranks{5U, 10U};
+  bool all_closed = true;
+  try {
+    for (const std::size_t rank : ranks) {
+      CaseSetup setup;
+      setup.maximum_relevant_closed_rank = rank;
+      setup.maximum_subdivision_count = 65'536U;
+      setup.maximum_chunk_count = 10'000'000U;
+      const CanonicalPointCloud cloud =
+          growth_profile_cloud(growth_profile_names[0], 50'000U);
+      const std::string label =
+          "slo50k/uniform_dyadic/n50000/K" + std::to_string(rank);
+      const TiledCaseOutcome outcome =
+          run_tiled_case(setup, cloud, false, false, label);
+      all_closed = all_closed && outcome.closed;
+    }
+  } catch (const std::exception& error) {
+    std::cerr << "FAIL: unexpected exception: " << error.what() << '\n';
+    return 1;
+  }
+  if (failures != 0) {
+    std::cerr << failures << " 50k probe failures\n";
+    return 1;
+  }
+  if (!all_closed) {
+    std::cout << "higher-support device tiled frontier 50k probe censored "
+                 "without closure claim\n";
+    return 3;
+  }
+  std::cout << "higher-support device tiled frontier 50k probe closed\n";
+  return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
-  const bool scale_mode = argc > 1 && std::string{argv[1]} == "--scale";
+  const std::string mode = argc > 1 ? std::string{argv[1]} : std::string{};
+  if (mode == "--no-go") {
+    return run_no_go_mode(true);
+  }
+  if (mode == "--no-go-native") {
+    return run_no_go_mode(false);
+  }
+  if (mode == "--slo50k") {
+    return run_slo50k_mode();
+  }
+  const bool scale_mode = mode == "--scale";
   if (scale_mode) {
     try {
       run_scale_case(32U, true, "scale/line32/parity");
