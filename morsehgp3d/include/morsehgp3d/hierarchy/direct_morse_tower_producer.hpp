@@ -37,6 +37,7 @@ inline constexpr std::string_view
 
 enum class ExactDirectMorseTowerBackendKind : std::uint8_t {
   exhaustive_host_v1,
+  device_tiled_session_v1,
 };
 
 enum class ExactDirectMorseTowerDecision : std::uint8_t {
@@ -113,6 +114,20 @@ struct ExactDirectMorseTowerResult {
 [[nodiscard]] ExactDirectMorseTowerResult
 build_exact_direct_morse_tower_from_cloud(
     std::span<const exact::CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    ExactDirectMorseTowerBackendKind backend,
+    const ExactDirectMorseTowerBudget& budget);
+
+// Shared downstream composition consumed by every backend: seals the
+// receipt over the already-produced streams, then builds the facade and
+// both journals fail-closed.  The streams enter unmodified; the helper adds
+// sequencing and certification only.
+[[nodiscard]] ExactDirectMorseTowerResult
+finish_exact_direct_morse_tower(
+    spatial::CanonicalPointCloud&& cloud,
+    spatial::MortonLbvhIndex&& index,
+    ExactPairSupportStreamResult&& pair,
+    ExactHigherSupportStreamResult&& higher,
     std::size_t requested_maximum_order,
     ExactDirectMorseTowerBackendKind backend,
     const ExactDirectMorseTowerBudget& budget);

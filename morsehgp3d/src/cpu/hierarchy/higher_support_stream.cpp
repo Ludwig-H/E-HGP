@@ -4508,4 +4508,20 @@ ExactHigherSupportStreamVerification verify_exact_higher_support_stream(
   return verification;
 }
 
+void canonical_sort_exact_higher_support_events(
+    std::vector<ExactHigherSupportEvent>& events) {
+  std::sort(
+      events.begin(),
+      events.end(),
+      support_record_less<ExactHigherSupportEvent>);
+}
+
+void canonical_sort_exact_higher_support_extra_shell_diagnostics(
+    std::vector<ExactHigherSupportExtraShellDiagnostic>& diagnostics) {
+  std::sort(
+      diagnostics.begin(),
+      diagnostics.end(),
+      support_record_less<ExactHigherSupportExtraShellDiagnostic>);
+}
+
 }  // namespace morsehgp3d::hierarchy

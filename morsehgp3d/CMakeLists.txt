@@ -5027,6 +5027,45 @@ if(UNIX)
   )
 endif()
 
+# Device-tiled exact tower (verrou 4-b).  The higher stage runs through the
+# sealed session bridge above; every downstream stage reuses the host tower
+# helper.  The launcher seam stays unresolved exactly like the bridge host
+# contract: unit tests bind the certified scientific fake, the CUDA target
+# binds the native kernel.
+if(UNIX)
+  add_library(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_host_contract
+    STATIC
+      include/morsehgp3d/gpu/higher_support_device_tiled_tower.hpp
+      src/gpu/higher_support_device_tiled_tower.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_higher_support_device_tiled_tower_host_contract
+    ALIAS
+      morsehgp3d_gpu_higher_support_device_tiled_tower_host_contract
+  )
+  target_include_directories(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_host_contract
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_host_contract
+    PUBLIC
+      morsehgp3d::gpu_higher_support_device_tiled_session_bridge_host_contract
+      morsehgp3d::direct_morse_tower_producer
+    PRIVATE morsehgp3d::sanitizers
+  )
+  target_compile_features(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_host_contract
+    PUBLIC cxx_std_20
+  )
+  target_compile_options(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Resident exact multi-order consumer for the device-tiled frontier.  The
 # host-only target intentionally leaves the classifier launcher unresolved:
 # unit tests provide the hostile fake below, while the CUDA target provides

@@ -6342,3 +6342,48 @@ add_test(
   NAME hierarchy_direct_morse_tower_producer
   COMMAND morsehgp3d_hierarchy_direct_morse_tower_producer_tests
 )
+
+if(UNIX)
+  add_executable(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+    test_gpu_higher_support_device_tiled_tower.cpp
+    fake_gpu_higher_support_device_tiled_frontier_launchers.cpp
+    fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+    "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+  )
+  target_include_directories(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+    PRIVATE
+      "${PROJECT_SOURCE_DIR}/src/cuda"
+      "${PROJECT_SOURCE_DIR}/src/gpu"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+    PRIVATE
+      morsehgp3d::gpu_higher_support_device_tiled_tower_host_contract
+      morsehgp3d::gpu_higher_support_device_tiled_frontier_host_contract
+      morsehgp3d::sparse_higher_support_h0_chunk_run
+      morsehgp3d::higher_support
+      morsehgp3d::spatial
+      Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+    PRIVATE cxx_std_20
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+  add_test(
+    NAME gpu_higher_support_device_tiled_tower
+    COMMAND morsehgp3d_gpu_higher_support_device_tiled_tower_tests
+  )
+endif()

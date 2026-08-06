@@ -1290,6 +1290,15 @@ class ExactHigherSupportTerminalSession {
   bool sealed_{false};
 };
 
+// Public canonical record ordering of the exhaustive oracle.  The stream
+// builder sorts its result through these exact comparators; the device-tiled
+// tower assembly reuses them so result-order equality never depends on a
+// parallel definition.
+void canonical_sort_exact_higher_support_events(
+    std::vector<ExactHigherSupportEvent>& events);
+void canonical_sort_exact_higher_support_extra_shell_diagnostics(
+    std::vector<ExactHigherSupportExtraShellDiagnostic>& diagnostics);
+
 struct ExactHigherSupportStreamRunVerification {
   bool initial_checkpoint_reconstructed{false};
   std::size_t verified_chunk_count{};
