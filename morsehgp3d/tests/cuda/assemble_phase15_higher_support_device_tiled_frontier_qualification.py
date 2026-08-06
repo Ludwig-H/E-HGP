@@ -126,7 +126,7 @@ CENSORED_RE = re.compile(
     r"chunks (?P<chunks>[0-9]+), subdivisions (?P<subdivisions>[0-9]+), "
     r"stop_reason (?P<stop_reason>[0-9]+), "
     r"failure_code (?P<failure_code>[0-9]+), "
-    r"(?P<detail>fatal|chunk budget exhausted)\)$"
+    r"(?P<detail>fatal|chunk budget exhausted|deadline exceeded)\)$"
 )
 
 
@@ -487,6 +487,9 @@ def parse_arguments(arguments: Sequence[str] | None = None) -> argparse.Namespac
     parser.add_argument("--elf-log", type=Path, required=True)
     parser.add_argument("--memcheck-log", type=Path, required=True)
     parser.add_argument("--qualified-binary", type=Path, required=True)
+    parser.add_argument(
+        "--slo50k-budget-seconds", type=int, required=True
+    )
     parser.add_argument("--gcp-project", required=True)
     parser.add_argument("--gcp-zone", required=True)
     parser.add_argument("--gcp-instance", required=True)
@@ -509,6 +512,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         fail("--image-ref must bind the qualified SHA")
     if IMAGE_ID_RE.fullmatch(options.image_id) is None:
         fail("--image-id is not canonical")
+    if options.slo50k_budget_seconds <= 0:
+        fail("--slo50k-budget-seconds must be positive")
 
     logs: dict[str, str] = {}
     for name, path in {
@@ -586,7 +591,10 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "no_go": BINARY_RELATIVE_PATH + " --no-go",
             "parity": BINARY_RELATIVE_PATH,
             "scale": BINARY_RELATIVE_PATH + " --scale",
-            "slo50k": BINARY_RELATIVE_PATH + " --slo50k",
+            "slo50k": (
+                BINARY_RELATIVE_PATH
+                + f" --slo50k {options.slo50k_budget_seconds}"
+            ),
         },
         "component_only": True,
         "deployment_status": DEPLOYMENT_STATUS,

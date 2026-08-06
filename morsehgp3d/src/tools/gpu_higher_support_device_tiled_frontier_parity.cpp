@@ -27,6 +27,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <limits>
@@ -706,6 +707,10 @@ struct CaseSetup {
   std::size_t gate_quantum{2048U};
   std::size_t maximum_subdivision_count{4096U};
   std::size_t maximum_chunk_count{100'000U};
+  // Wall-clock budget of one native run, checked at chunk boundaries; zero
+  // disables the deadline.  Exceeding it is an honest censoring, never a
+  // partial claim.
+  double wall_clock_budget_seconds{0.0};
 };
 
 [[nodiscard]] Phase15HigherSupportDeviceTiledRequest base_request(
@@ -760,6 +765,7 @@ struct NativeRunSummary {
   std::uint64_t first_fatal_failure_code{};
   bool completed{false};
   bool fatal{false};
+  bool deadline_exceeded{false};
 };
 
 [[nodiscard]] NativeRunSummary run_native_tile_summary(
@@ -770,6 +776,7 @@ struct NativeRunSummary {
     const std::string& label,
     bool keep_records) {
   NativeRunSummary summary;
+  const auto run_begin = std::chrono::steady_clock::now();
   MortonLbvhBuildContext builder{cloud.size() + 2U};
   const auto build = builder.build(cloud);
   MortonLbvhDeviceTraversalLease lease =
@@ -892,6 +899,13 @@ struct NativeRunSummary {
     if (all_complete) {
       summary.completed = true;
       summary.transcript.completed = true;
+      return summary;
+    }
+    if (setup.wall_clock_budget_seconds > 0.0 &&
+        std::chrono::duration<double>(
+            std::chrono::steady_clock::now() - run_begin)
+                .count() > setup.wall_clock_budget_seconds) {
+      summary.deadline_exceeded = true;
       return summary;
     }
   }
@@ -1450,7 +1464,11 @@ TiledCaseOutcome run_tiled_case(
               << native.subdivision_total << ", stop_reason "
               << native.first_fatal_stop_reason << ", failure_code "
               << native.first_fatal_failure_code
-              << (native.fatal ? ", fatal" : ", chunk budget exhausted")
+              << (native.fatal
+                      ? ", fatal"
+                      : native.deadline_exceeded
+                          ? ", deadline exceeded"
+                          : ", chunk budget exhausted")
               << ")\n";
     check(
         !censure_is_failure,
@@ -1560,8 +1578,9 @@ TiledCaseOutcome run_tiled_case(
 // 50k SLO probe: the uniform_dyadic family at n=50000 on the native tiled
 // frontier, exact closure or an honest censoring report.  Exit 0 claims
 // closure of both ranks; exit 3 reports censoring without any claim.
-[[nodiscard]] int run_slo50k_mode() {
+[[nodiscard]] int run_slo50k_mode(double wall_clock_budget_seconds) {
   const std::array<std::size_t, 2U> ranks{5U, 10U};
+  const auto mode_begin = std::chrono::steady_clock::now();
   bool all_closed = true;
   try {
     for (const std::size_t rank : ranks) {
@@ -1569,6 +1588,14 @@ TiledCaseOutcome run_tiled_case(
       setup.maximum_relevant_closed_rank = rank;
       setup.maximum_subdivision_count = 65'536U;
       setup.maximum_chunk_count = 10'000'000U;
+      if (wall_clock_budget_seconds > 0.0) {
+        const double elapsed =
+            std::chrono::duration<double>(
+                std::chrono::steady_clock::now() - mode_begin)
+                .count();
+        setup.wall_clock_budget_seconds =
+            std::max(wall_clock_budget_seconds - elapsed, 1.0);
+      }
       const CanonicalPointCloud cloud =
           growth_profile_cloud(growth_profile_names[0], 50'000U);
       const std::string label =
@@ -1605,7 +1632,15 @@ int main(int argc, char** argv) {
     return run_no_go_mode(false);
   }
   if (mode == "--slo50k") {
-    return run_slo50k_mode();
+    double budget_seconds = 0.0;
+    if (argc > 2) {
+      budget_seconds = std::strtod(argv[2], nullptr);
+      if (!(budget_seconds > 0.0)) {
+        std::cerr << "FAIL: the 50k probe budget must be positive seconds\n";
+        return 1;
+      }
+    }
+    return run_slo50k_mode(budget_seconds);
   }
   const bool scale_mode = mode == "--scale";
   if (scale_mode) {
