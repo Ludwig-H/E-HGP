@@ -189,3 +189,45 @@ différentiel d'assemblage. Anti-forge livré : audit gonflé, événement
 supprimé, certificat d'autorité étrangère (deux directions), mintage
 pré-terminal — tous rejetés fermés. Le différentiel des six nuages n=32
 sur kernel natif accompagne la prochaine session G4 gardée.
+
+## Design ④-c : le recertifier massif réel (CLI de campagne)
+
+**But.** Un binaire outil unique (`morsehgp3d_direct_morse_campaign_runner`,
+`src/tools/`) qui déroule depuis un nuage synthétique déterministe le
+pipeline industriel COMPLET et re-certifie la reprise durable — le
+« recertifier massif réel » requalifié du verrou ③ :
+
+1. Nuage synthétique déterministe (n, graine, distribution — réutiliser le
+   générateur du harnais direct-scale paires) → `CertifiedPoint3`.
+2. `build_exact_direct_morse_tower_from_cloud` (backend scellé par drapeau :
+   `exhaustive_host_v1` local, `device_tiled_session_v1` sur G4) — tour
+   complète certifiée (façade, journaux).
+3. Plan 14C (`build_exact_direct_sparse_facet_descent_batch_plan`) +
+   `ExactDirectMorseForestReducer` en mode segmenté 15I +
+   `ExactDirectSparseFacetDescentAnchoredBatchExecutor` 14D : boucle
+   prepare_next → commit_prepared → fold par batch source, segments
+   acquittés au fil de l'eau (un segment résident à la fois).
+4. Archive durable 15L : `ExactDirectMorseForestRunArchiveWriter::open_new`
+   → `append_segment` par segment acquitté (streaming, JAMAIS de
+   matérialisation de tous les segments) → `finalize(seal)` atomique.
+5. Recertification de reprise : `recover_...` = valid_final_present, puis
+   `load_exact_direct_morse_forest_run_archive` borné un-segment-résident
+   dont le consommateur re-vérifie champ à champ chaque segment contre le
+   digest de chaîne courant (identité resident–stream–restore à l'échelle,
+   sans conserver les segments en mémoire) et l'égalité du sceau terminal.
+6. Rapport JSON fail-closed (schéma versionné, comptes par étage, décisions,
+   durées par étage, digests d'archive) — aucune promotion de statut.
+
+**Contraintes.** Étape 3-4 en flux : le run n'est PAS le test reducer (pas
+de fake provider, pas de retry artificiel) ; la mémoire de pointe est bornée
+par le segment courant + la tour résidente. La tour résidente elle-même est
+le plafond mémoire réel de cette phase (⑤ : streaming de la tour à terme).
+Budgets scellés par drapeaux avec valeurs par défaut industrielles ; tout
+dépassement = arrêt typé fail-closed dans le rapport.
+
+**Gates.** Local : n petit (tetrahedron, skewcube8) en test unitaire du
+runner (composition + rapport + rejets). G4 : 50k puis 1 M (gate du verrou
+③ requalifié) via le backend device — mesures dans le rapport JSON,
+artefact contract-validated comme pour M5b. Ensuite ⑤ : 50k < 1 s
+(préférence < 100 ms) et dizaines de millions, avec le garde-fou Delaunay
+externe minimal (jamais dans l'algorithme).
