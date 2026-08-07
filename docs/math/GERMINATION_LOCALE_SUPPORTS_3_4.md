@@ -244,13 +244,45 @@ soit $\mathbf{3{,}80\cdot10^{11}}$ et un gain de $\mathbf{6{,}85\cdot10^{5}}$ �
 contre $1{,}08\cdot10^{5}$ avec le lemme d'angle seul. **Jung vaut un facteur
 6,5, gratuitement.**
 
-**Correction honnête, maintenue.** Le chiffre de $5{,}24\cdot10^{9}$ candidats
-annoncé au §6 repose sur la minoration échantillonnée de $R(p)$ et **n'est pas
-certifié**. Le générateur certifié coûte aujourd'hui $3{,}80\cdot10^{11}$. Le
-resserrement restant ne passe plus par une meilleure constante de germe — Jung
-est optimale — mais par l'**élagage incrémentiel** que le corollaire général
-autorise : à chaque sommet ajouté, $R_{mb}(S)$ croît et la boule-test grossit.
-C'est là que se joue le travail des quadruples, qui domine tout le reste.
+#### L'énumération réelle, et l'élagage incrémentiel mesuré
+
+Les tableaux ci-dessus emploient la formule grossière
+$n\binom{\text{degré}}{m-1}/m$, qui **surestime**. L'énumération réelle part de
+l'arête diamétrale : les sommets restants doivent être dans la lentille
+$\bar B(p,D)\cap\bar B(q,D)$, et non dans le voisinage de $p$ seul. Mesurée à
+50 000 points :
+
+| grandeur | valeur |
+| --- | ---: |
+| arêtes diamétrales survivantes | $1{,}38\cdot10^{7}$ |
+| troisièmes sommets, sans élagage incrémentiel | $1{,}33\cdot10^{9}$ |
+| troisièmes sommets, **avec** | $1{,}02\cdot10^{9}$ (76,8 % retenus) |
+| travail quadruples, sans | $8{,}69\cdot10^{10}$ |
+| travail quadruples, **avec** | $\mathbf{4{,}54\cdot10^{10}}$ |
+| **gain sur l'univers** | $\mathbf{5{,}73\cdot10^{6}}$ |
+
+**Deux corrections de mes propres chiffres.** D'abord, le $3{,}80\cdot10^{11}$
+publié plus haut vient de la formule grossière et surestime d'un facteur huit :
+le générateur certifié coûte **$4{,}6\cdot10^{10}$**. Ensuite, l'écart au chiffre
+non certifié de $5{,}24\cdot10^{9}$ n'est donc pas de cinq cents mais d'environ
+**neuf** — je comparais une énumération correcte à une formule majorante. Le prix
+réel de la certification est un facteur neuf, ce qui est raisonnable.
+
+**L'élagage incrémentiel ne vaut que 1,91, et la raison est structurelle.** Un
+troisième sommet situé **à l'intérieur de la boule diamétrale** de $(p,q)$ ne
+fait pas croître $R_{mb}$ : la miniboule reste celle de l'arête, et le test est
+alors identique au test de germe. Or ces points-là sont la majorité — 76,8 %
+survivent. Le corollaire général ne mord donc que sur les sommets qui sortent de
+la boule diamétrale. C'est une limite honnête de cette forme d'élagage, et elle
+n'est pas contournable en changeant la constante.
+
+**Où en est la distance au contrat.** L'univers vaut $2{,}604\cdot10^{17}$, le
+générateur certifié $4{,}6\cdot10^{10}$, la sortie utile $1{,}8\cdot10^{7}$ :
+**2 500 candidats examinés par record émis**. Les six ordres et demi de grandeur
+gagnés sont acquis par théorème ; les quatre qui restent avant le contrat d'une
+seconde ne viendront ni d'une meilleure constante — Jung est optimale — ni de cet
+élagage, mais d'une réduction du rapport candidats/record, qui est aujourd'hui la
+seule grandeur encore très loin de son optimum.
 
 ### 5.1 La contrainte de coque n'est pas cosmétique
 

@@ -1,0 +1,275 @@
+# Recension : ce que le théorème de Jung donne aux supports trois et quatre
+
+Document mathématique. Aucun claim, aucune porte ouverte ou fermée, aucun statut
+public. Il recense systématiquement les énoncés que le théorème de Jung rend
+disponibles pour la génération locale certifiée des supports minimaux bien
+centrés de rang fermé au plus $s_{\max}$, avec pour chacun sa preuve, sa
+constante fermée, son coût et ce qu'il vaut mesuré.
+
+## 0. Pourquoi Jung s'applique ici
+
+> **Théorème (Jung, 1901).** Toute partie bornée de $\mathbb{R}^d$ de diamètre
+> $D$ est contenue dans une boule de rayon au plus $\gamma_d D$, avec
+> $\gamma_d=\sqrt{\tfrac{d}{2(d+1)}}$. La borne est atteinte exactement par les
+> ensembles contenant un $d$-simplexe régulier d'arête $D$.
+
+L'application n'est pas automatique : Jung parle de la **miniboule**, notre objet
+est la **boule circonscrite**. Les deux coïncident ici, et c'est exactement
+l'hypothèse « minimal bien centré ».
+
+> **Proposition 0.** Si $U$ est minimal bien centré, $\bar B(c_U,r_U)$ est la
+> miniboule de $U$ et $U$ en est l'ensemble de support.
+
+*Démonstration.* La miniboule d'un compact $S$ est caractérisée par : son centre
+appartient à $\operatorname{conv}(S\cap\partial B)$. Ici tout $U$ est sur la
+sphère et $c_U\in\operatorname{relint}\operatorname{conv}(U)$ par définition du
+bon centrage. $\square$
+
+D'où, pour $m=\lvert U\rvert$ :
+
+$$\boxed{\;r_U\;\le\;\gamma_m\,\operatorname{diam}(U)\;},\qquad
+\gamma_3=\tfrac1{\sqrt3}\ (\text{le triangle est plan}),\qquad
+\gamma_4=\sqrt{\tfrac38}.$$
+
+L'arité fixe la dimension à employer : un triangle vit dans un plan, donc c'est
+$\gamma_2^{\text{Jung}}=1/\sqrt3$ qui s'applique, pas $\gamma_3^{\text{Jung}}$.
+
+## 1. L'encadrement et le rapport d'aspect
+
+Avec la borne triviale $\operatorname{diam}(U)\le 2r_U$ :
+
+$$\frac{D}{2}\;\le\;r_U\;\le\;\gamma_m D,
+\qquad\text{soit}\qquad
+\frac{D}{r_U}\in\Bigl[\tfrac1{\gamma_m},\,2\Bigr]
+=\begin{cases}[1{,}7321,\;2] & m=3\\ [1{,}6330,\;2] & m=4.\end{cases}$$
+
+**J1 — Rigidité de forme.** Le rapport diamètre sur circumrayon d'un support
+accepté est confiné dans une bande de largeur relative $1{,}15$ ($m=3$) ou
+$1{,}22$ ($m=4$). C'est une contrainte forte et gratuite : elle interdit tout
+support « allongé » ou « ramassé ».
+
+**J2 — Un intervalle compact, et c'est lui qui rend tout fini.** Toutes les
+constructions qui suivent reposent sur le fait que $r_U$ vit dans un compact
+explicite dès que $D$ est connu. Sans borne supérieure sur $r_U$, aucune des
+régions ci-dessous n'est bornée. C'est la contribution structurelle de Jung, et
+elle précède toutes les constantes.
+
+**Vérification.** Sur 300 000 supports minimaux bien centrés tirés au hasard, le
+minimum observé de $D/r$ vaut $1{,}7354$ ($m=3$) contre la borne $1{,}7321$, et
+$1{,}6709$ ($m=4$) contre $1{,}6330$ : les deux bornes sont approchées, celle des
+triangles à 0,2 %. La borne antérieure $\sqrt2=1{,}4142$, obtenue par un lemme
+d'angle élémentaire, était donc loin de l'optimum.
+
+## 2. Le résultat unificateur : la cascade de dimensions
+
+C'est l'énoncé dont tout le reste découle.
+
+> **Théorème (cascade).** Soit $U$ accepté, $(p,q)$ sa paire diamétrale,
+> $D=\lvert p-q\rvert$, et $S\subseteq U$ contenant $\{p,q\}$. Le lieu des
+> centres compatibles
+> $$\mathcal{C}(S)=\bigl\{x:\ \lvert x-s\rvert \text{ constant sur } S,\
+> \lvert x-p\rvert\le\gamma_m D\bigr\}$$
+> est un **compact de dimension $3-(\lvert S\rvert-1)$**, d'extension bornée
+> explicitement par Jung :
+>
+> | $S$ | lieu | dimension | extension |
+> | --- | --- | ---: | --- |
+> | $\{p,q\}$ | disque du plan médiateur, centré en $M$ | 2 | rayon $\sqrt{\gamma_m^2-\tfrac14}\,D$ |
+> | $\{p,q,z\}$ | segment $\perp$ au plan de $S$, centré en $o_S$ | 1 | demi-longueur $\sqrt{\gamma_m^2D^2-r_\triangle^2}$ |
+> | $\{p,q,z,w\}$ | le circumcentre | 0 | — |
+>
+> où $M$ est le milieu de $pq$, $o_S$ le circumcentre du triangle $S$ et
+> $r_\triangle$ son circumrayon.
+
+*Démonstration.* L'équidistance à $k$ points affinement indépendants définit un
+sous-espace affine de dimension $3-(k-1)$ ; l'intersection avec
+$\lvert x-p\rvert\le\gamma_m D$ le rend compact. Les extensions s'obtiennent par
+Pythagore : $\lvert c_U-M\rvert^2=r_U^2-D^2/4$ et
+$\lvert c_U-o_S\rvert^2=r_U^2-r_\triangle^2$, puis $r_U\le\gamma_m D$. $\square$
+
+**Constantes fermées du disque** :
+$\sqrt{\gamma_3^2-\tfrac14}=\sqrt{\tfrac1{12}}=0{,}288675$ et
+$\sqrt{\gamma_4^2-\tfrac14}=\sqrt{\tfrac18}=0{,}353553$.
+
+**J3 — Chaque sommet ajouté fait tomber la dimension du lieu de centres d'une
+unité, et Jung en borne l'extension à chaque étage.** C'est la structure
+algorithmique : le générateur ne cherche jamais dans $\mathbb{R}^3$, mais dans un
+disque, puis dans un segment, puis en un point.
+
+## 3. Les tests dérivés, par étage
+
+Tous reposent sur la même mécanique : exhiber une boule **incluse** dans
+$\bar B(c_U,r_U)$ et dont on sache compter les points ; si elle est sur-peuplée,
+le candidat est rejeté. Aucun ne peut fabriquer un rejet abusif, car l'inclusion
+est certifiée.
+
+### 3.1 Test sans aucune requête (le plus économique)
+
+> **J4.** Si $R_{mb}(S)>\gamma_m D$ pour un $S\subseteq U$, alors $U$ n'est pas
+> accepté avec $(p,q)$ pour paire diamétrale.
+
+*Démonstration.* $R_{mb}$ est croissante pour l'inclusion, donc
+$R_{mb}(S)\le R_{mb}(U)=r_U\le\gamma_m D$. $\square$
+
+Coût : **zéro requête spatiale**. Une miniboule de $\lvert S\rvert\le4$ points et
+une comparaison. À appliquer avant tout comptage, à chaque étage.
+
+Forme rationnelle exacte : $\gamma_3^2=\tfrac13$ et $\gamma_4^2=\tfrac38$ sont
+**rationnels**, donc le test s'écrit $3R_{mb}^2\le D^2$ et $8R_{mb}^2\le 3D^2$ —
+des inégalités polynomiales dans l'arithmétique entière déjà présente, sans
+racine carrée.
+
+### 3.2 Test de germe, boule unique
+
+> **J5 (stabilité du centre de la miniboule).** Pour tout $S$ borné et toute
+> boule $\bar B(c,r)\supseteq S$ : $\ \lvert c-c_{mb}(S)\rvert^2\le r^2-R_{mb}(S)^2$.
+
+*Démonstration.* Écrire $c_{mb}=\sum_i\lambda_i s_i$ avec $\lambda_i>0$,
+$\sum\lambda_i=1$, $\lvert s_i-c_{mb}\rvert=R_{mb}$. Alors
+$\sum_i\lambda_i\lvert s_i-c\rvert^2=R_{mb}^2+\lvert c_{mb}-c\rvert^2$, le terme
+croisé s'annulant. Chaque $\lvert s_i-c\rvert\le r$. $\square$
+
+> **J6 (boule inscrite).** $\bar B\bigl(c_{mb}(S),\,\gamma_m D-\sqrt{\gamma_m^2D^2-R_{mb}(S)^2}\bigr)\subseteq\bar B(c_U,r_U)$,
+> et ce rayon **croît** avec $R_{mb}(S)$.
+
+Cas $S=\{p,q\}$ : $c_{mb}=M$, $R_{mb}=D/2$, et la constante fermée est
+
+$$\kappa_m=\gamma_m-\sqrt{\gamma_m^2-\tfrac14},\qquad
+\kappa_3=\frac{\gamma_3}{2}=\frac1{2\sqrt3}=0{,}288675,\qquad
+\kappa_4=\sin15^\circ=0{,}258819 .$$
+
+L'identité $\kappa_3=\gamma_3/2$ tient parce que $\gamma_3^2-\tfrac14=\gamma_3^2/4$.
+
+**Exactitude rationnelle.** $\kappa_3^2=\tfrac1{12}$ est **rationnel** : le test
+des triangles s'écrit exactement $12\lvert x-M\rvert^2\le D^2$. Pour les
+tétraèdres $\kappa_4^2=\tfrac{2-\sqrt3}{4}$ est irrationnel ; on emploie un
+**minorant rationnel** — par exemple $\tfrac1{15}<\kappa_4^2$ — ce qui rétrécit
+la boule-test et ne peut donc qu'affaiblir le rejet, jamais le fausser.
+
+### 3.3 Test de germe, recouvrement du disque
+
+Le test précédent n'utilise qu'un point du disque de centres. Jung en borne le
+rayon, donc on peut le **recouvrir**.
+
+> **J7.** Soit $x_1,\dots,x_N$ un recouvrement du disque $\mathcal{C}(\{p,q\})$
+> de rayon de recouvrement $\delta$. Si
+> $\lvert P\cap\bar B(x_i,\tfrac D2-\delta)\rvert>s_{\max}$ pour tout $i$, alors
+> $(p,q)$ n'est la paire diamétrale d'aucun support accepté.
+
+*Démonstration.* $c_U$ appartient au disque, donc $\lvert c_U-x_i\rvert\le\delta$
+pour un $i$ ; et $r_U\ge D/2$, donc
+$\bar B(x_i,\tfrac D2-\delta)\subseteq\bar B(c_U,r_U)$. $\square$
+
+Avec $\delta=\alpha D$, la constante effective devient $\tfrac12-\alpha$ au lieu
+de $\kappa_m$, pour $N\approx1{,}2\,\bigl(\sqrt{\gamma_m^2-\tfrac14}/\alpha\bigr)^2$
+positions. Quelques valeurs, $m=4$ :
+
+| $\alpha$ | constante $\tfrac12-\alpha$ | $N$ | rapport à $\kappa_4$ |
+| ---: | ---: | ---: | ---: |
+| $0{,}25$ | $0{,}250$ | 2 | $0{,}97$ |
+| $0{,}20$ | $0{,}300$ | 4 | $1{,}16$ |
+| $0{,}10$ | $0{,}400$ | 15 | $1{,}55$ |
+| $0{,}05$ | $0{,}450$ | 60 | $1{,}74$ |
+
+Le degré du graphe varie comme l'inverse du cube de la constante, et le travail
+des quadruples comme le cube du degré : passer de $0{,}2588$ à $0{,}400$ divise
+le degré par $3{,}7$ et le travail par plus de cinquante, au prix de quinze
+comptages par arête au lieu d'un.
+
+### 3.4 Test incrémental, recouvrement du segment
+
+Au troisième sommet, le lieu est un **segment**, dont un recouvrement coûte
+$O(1/\delta)$ positions au lieu de $O(1/\delta^2)$.
+
+> **J8.** Soit $S=\{p,q,z\}$ affinement indépendant, $o_S$ son circumcentre,
+> $r_\triangle$ son circumrayon, et $x_1,\dots,x_N$ un recouvrement à $\delta$
+> près du segment
+> $\{o_S+t\,\nu:\lvert t\rvert\le\sqrt{\gamma_m^2D^2-r_\triangle^2}\}$, $\nu$
+> normale unitaire au plan de $S$. Si
+> $\lvert P\cap\bar B(x_i,R_{mb}(S)-\delta)\rvert>s_{\max}$ pour tout $i$, alors
+> aucun support accepté de paire diamétrale $(p,q)$ ne contient $z$.
+
+*Démonstration.* $c_U$ est équidistant de $p,q,z$ donc sur la droite $o_S+\mathbb{R}\nu$,
+et $\lvert c_U-o_S\rvert^2=r_U^2-r_\triangle^2\le\gamma_m^2D^2-r_\triangle^2$ :
+il est sur le segment. Puis $r_U\ge R_{mb}(S)$ et l'inégalité triangulaire.
+$\square$
+
+**J9 — Le test se renforce à chaque sommet.** Dans J6 comme dans J8, le rayon de
+la boule-test croît avec $R_{mb}(S)$, qui croît avec $S$. La chaîne
+$\{p,q\}\subset\{p,q,z\}\subset\{p,q,z,w\}$ donne donc trois tests de puissance
+croissante, dont le dernier est la décision exacte elle-même.
+
+**Limite honnête de J9, mesurée.** Un troisième sommet situé **à l'intérieur de
+la boule diamétrale** de $(p,q)$ ne fait pas croître $R_{mb}$ : la miniboule reste
+celle de l'arête et le test incrémental à boule unique redevient le test de
+germe. Ces sommets sont la majorité — 76,8 % survivent — et l'élagage
+incrémentiel à boule unique ne vaut donc que $1{,}91$. C'est J8, par le
+recouvrement du segment, qui doit récupérer le reste : le segment est court dès
+que $r_\triangle$ approche $\gamma_m D$, indépendamment de $R_{mb}$.
+
+## 4. Confinement global d'une arête diamétrale
+
+> **J10.** Toute la géométrie utile à l'arête $(p,q)$ est contenue dans une seule
+> boule autour du milieu :
+> $$\bar B(c_U,r_U)\ \subseteq\ \bar B\bigl(M,\ (\gamma_m+\sqrt{\gamma_m^2-\tfrac14})\,D\bigr),$$
+> de rayon $\tfrac{\sqrt3}{2}D=0{,}866\,D$ pour $m=3$ et $\cos15^\circ\,D=0{,}966\,D$
+> pour $m=4$.
+
+*Démonstration.* $\lvert x-M\rvert\le\lvert x-c_U\rvert+\lvert c_U-M\rvert\le r_U+\sqrt{r_U^2-D^2/4}$,
+croissant en $r_U$, évalué en $\gamma_mD$. $\square$
+
+**Usage.** Une tuile device traitant l'arête $(p,q)$ n'a besoin d'aucun point
+au-delà de ce rayon : la localité de la mémoire est bornée explicitement, ce qui
+est directement exploitable pour le pavage et la résidence.
+
+## 5. Rigidité de l'égalité
+
+> **J11.** $r_U=\gamma_m D$ **si et seulement si** $U$ est un simplexe régulier
+> d'arête $D$ ($m-1$ étant sa dimension).
+
+C'est le cas d'égalité de Jung. Trois conséquences :
+
+- les configurations extrémales sont de mesure nulle, donc les bornes ci-dessus
+  sont serrées mais rarement atteintes — ce que confirme la mesure ($1{,}6709$
+  observé contre $1{,}6330$) ;
+- un support atteignant l'égalité est identifiable exactement et peut servir de
+  fixture de falsification permanente pour toute implémentation des tests ;
+- aucun test ci-dessus ne doit employer une inégalité stricte là où le cas
+  d'égalité est atteignable : les comparaisons sont écrites en $\le$, et la
+  simplification en $\ge$ n'est licite que sur le lieu de centres, qui est fermé.
+
+## 6. Ce que Jung ne donne pas
+
+Il faut le dire aussi nettement que le reste.
+
+- **Il ne borne pas le rang.** Jung est purement métrique ; la condition
+  $\lvert P\cap\bar B(c_U,r_U)\rvert\le s_{\max}$ reste la seule source de
+  sensibilité à la sortie. Jung sert à transformer cette condition en tests
+  locaux calculables, pas à la remplacer.
+- **Il ne borne pas le nombre de supports par arête.** Le lieu de centres est
+  compact, mais rien n'y limite le nombre de configurations acceptées.
+- **Il ne réduit pas la porte de bon centrage.** La fraction de supports bien
+  centrés reste constante en $n$ — 28 % des triples, 10 % des quadruples — et
+  aucune borne métrique ne la fait baisser.
+- **Il ne dispense pas de la classification terminale exacte.** Tous les tests
+  ci-dessus sont des rejets certifiés ; l'acceptation reste décidée par
+  `analyze_circumcenter_support_integer` puis la requête de boule fermée.
+
+## 7. Bilan des gains, mesurés et attendus
+
+À 50 000 points, $s_{\max}=11$, nuage `uniform_latin`.
+
+| énoncé | statut | effet |
+| --- | --- | --- |
+| J1 encadrement $[D/2,\gamma_mD]$ | mesuré | remplace $\sqrt2$ par l'optimum ; **facteur 6,5** sur le travail du germe |
+| J4 test sans requête | à implémenter | rejet gratuit avant tout comptage |
+| J6 germe, boule unique | mesuré | degré $546{,}4$ ($m=4$), $394{,}8$ ($m=3$) |
+| J9 incrémental, boule unique | mesuré | **facteur 1,91** sur les quadruples ; limité par les sommets internes |
+| J7 germe, disque recouvert | à mesurer | constante $0{,}2588\to0{,}400$ attendue, soit **> 50** sur les quadruples |
+| J8 incrémental, segment recouvert | à mesurer | récupère ce que J9 ne prend pas |
+| J10 confinement | à exploiter | borne de résidence par tuile device |
+
+État certifié courant : générateur à $4{,}6\cdot10^{10}$ candidats contre un
+univers de $2{,}604\cdot10^{17}$, soit un gain de $5{,}73\cdot10^{6}$ et
+2 500 candidats examinés par record émis. J7 et J8 sont les deux énoncés non
+encore mesurés, et ce sont eux qui portent l'essentiel du gain restant.
