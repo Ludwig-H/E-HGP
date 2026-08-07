@@ -161,39 +161,96 @@ repartent à l'infini, exactement comme au §5.1. Travail $3$ à $5\cdot10^{15}$
 Cette route est abandonnée au profit de la suivante, qui n'a besoin ni de
 recouvrement, ni d'enveloppe convexe.
 
-> **Lemme 4 (arête diamétrale).** Soit $U$ accepté, $(p,q)$ sa paire
-> diamétrale, $D=\lvert p-q\rvert$ et $M$ leur milieu. Le lemme d'angle donne
-> $r_U\in[D/2,\;D/\sqrt2)$, le centre $c_U$ est à distance
-> $\sqrt{r_U^2-D^2/4}$ de $M$, et
-> $$\bar B\Bigl(M,\;r_U-\sqrt{r_U^2-\tfrac{D^2}{4}}\Bigr)\;\subseteq\;\bar B(c_U,r_U).$$
-> Ce rayon est décroissant en $r_U$, donc minoré par
-> $\bigl(\tfrac1{\sqrt2}-\tfrac12\bigr)D=0{,}2071\,D$.
+#### Jung donne la constante optimale, et le lemme d'angle devient un corollaire
 
-*Démonstration.* $c_U$ est équidistant de $p$ et $q$, donc dans le plan
-médiateur, à distance $\sqrt{r_U^2-D^2/4}$ de $M$ par Pythagore; l'inclusion est
-l'inégalité triangulaire. La dérivée de $r\mapsto r-\sqrt{r^2-a}$ vaut
-$1-r/\sqrt{r^2-a}<0$. La borne inférieure est l'évaluation en $r=D/\sqrt2$, borne
-exclue par le lemme d'angle, donc la minoration est stricte et sûre. $\square$
+Le lemme d'angle du §2 majore $r_U$ par $\operatorname{diam}(U)/\sqrt2$. Ce n'est
+pas la meilleure borne : **le théorème de Jung** l'est.
 
-> **Corollaire (test certifié par arête).** Si
-> $\lvert P\cap\bar B(M,\;0{,}2071\,\lvert p-q\rvert)\rvert>s_{\max}$, alors
-> $(p,q)$ n'est la paire diamétrale d'**aucun** support accepté.
+> **Théorème (Jung).** Toute partie bornée de $\mathbb{R}^d$ de diamètre $D$ est
+> contenue dans une boule de rayon au plus $\gamma_d D$ avec
+> $\gamma_d=\sqrt{\tfrac{d}{2(d+1)}}$, soit $\gamma_2=1/\sqrt3$ et
+> $\gamma_3=\sqrt{3/8}$. La borne est atteinte par le simplexe régulier.
+
+Il s'applique ici parce qu'un support **minimal bien centré** a précisément pour
+miniboule sa boule circonscrite : $c_U$ est dans $\operatorname{conv}(U)$ et tous
+les points de $U$ sont à distance $r_U$ de $c_U$, ce qui est exactement la
+caractérisation du centre de la miniboule et de son ensemble de support. Donc
+
+$$r_U \;\le\; \gamma_m\,\operatorname{diam}(U),\qquad
+\gamma_3=\tfrac1{\sqrt3}\ (\text{triangle, plan}),\quad
+\gamma_4=\sqrt{\tfrac38}\ (\text{tétraèdre}).$$
+
+Autrement dit $\operatorname{diam}(U)\ge r_U\sqrt3$ pour $m=3$ et
+$\ge r_U\sqrt{8/3}$ pour $m=4$, contre $r_U\sqrt2$ par le lemme d'angle. Jung est
+donc strictement meilleur, **et optimal** : la vérification numérique sur 300 000
+tirages donne un minimum observé de $1{,}7354$ pour $m=3$ contre la borne
+$\sqrt3=1{,}7321$, et $1{,}6709$ pour $m=4$ contre $\sqrt{8/3}=1{,}6330$. Le
+lemme d'angle garde sa valeur — il est élémentaire, il vaut en toute dimension et
+il ne suppose rien sur $m$ — mais il n'est plus la borne employée.
+
+#### Le lemme d'arête diamétrale, dans sa forme générale
+
+> **Lemme 4 (stabilité du centre de la miniboule).** Soit $S$ borné, de
+> miniboule $\bar B(c_{mb},R_{mb})$. Pour toute boule $\bar B(c,r)\supseteq S$,
+> $$\lvert c-c_{mb}\rvert^2\;\le\;r^2-R_{mb}^2 .$$
+
+*Démonstration.* Le centre de la miniboule s'écrit $c_{mb}=\sum_i\lambda_i s_i$
+avec $\lambda_i>0$, $\sum\lambda_i=1$ et $\lvert s_i-c_{mb}\rvert=R_{mb}$. Alors
+$\sum_i\lambda_i\lvert s_i-c\rvert^2
+ =\sum_i\lambda_i\bigl(R_{mb}^2+2\langle s_i-c_{mb},\,c_{mb}-c\rangle
+   +\lvert c_{mb}-c\rvert^2\bigr)
+ =R_{mb}^2+\lvert c_{mb}-c\rvert^2$,
+le terme croisé s'annulant car $\sum_i\lambda_i(s_i-c_{mb})=0$. Chaque
+$\lvert s_i-c\rvert\le r$, donc le membre de gauche est au plus $r^2$. $\square$
+
+> **Corollaire (test certifié, forme générale).** Soit $U$ accepté, $(p,q)$ sa
+> paire diamétrale, $D=\lvert p-q\rvert$, et $S\subseteq U$ **connu**. Alors
+> $$\bar B\Bigl(c_{mb}(S),\;\gamma_m D-\sqrt{\gamma_m^2D^2-R_{mb}(S)^2}\Bigr)
+>   \;\subseteq\;\bar B(c_U,r_U),$$
+> et cette boule contient donc au plus $s_{\max}$ points. Le rayon est
+> **croissant en $R_{mb}(S)$** : le test se renforce à chaque sommet ajouté.
+
+En effet $r_U\le\gamma_m D$ par Jung et $r_U\ge R_{mb}(S)$ par monotonie de la
+miniboule ; la fonction $r\mapsto r-\sqrt{r^2-R_{mb}^2}$ est décroissante, donc
+son minimum sur l'intervalle admissible est atteint en $r=\gamma_m D$.
+
+**Le cas $S=\{p,q\}$** — le germe — donne $c_{mb}=M$, $R_{mb}=D/2$ et la
+constante fermée
+
+$$\kappa_m=\gamma_m-\sqrt{\gamma_m^2-\tfrac14},\qquad
+\kappa_3=\tfrac1{2\sqrt3}=0{,}288675,\qquad
+\kappa_4=\sin 15^\circ=0{,}258819 .$$
+
+> **Test de germe.** Si
+> $\lvert P\cap\bar B(M,\;\kappa_m\lvert p-q\rvert)\rvert>s_{\max}$, alors
+> $(p,q)$ n'est la paire diamétrale d'**aucun** support accepté de taille $m$.
 
 Une seule requête de comptage par arête. Ni recouvrement directionnel, ni
-enveloppe convexe, ni recherche non bornée : le lemme d'angle a fourni
-l'intervalle compact $[D/2,D/\sqrt2)$ qui rend tout fini.
+enveloppe convexe, ni recherche non bornée : c'est Jung qui borne $r_U$ par le
+haut, et la stabilité du centre qui transforme cette borne en une boule
+explicitement inscrite.
 
-**Mesuré à 50 000 points, $s_{\max}=11$** : le degré survivant vaut 988,6 en
-moyenne et 1 252 au maximum, pour un travail de $2{,}41\cdot10^{12}$ et un gain
-de $1{,}08\cdot10^{5}$ sur l'univers.
+**Mesuré à 50 000 points, $s_{\max}=11$** :
 
-**Correction honnête.** Le chiffre de $5{,}24\cdot10^{9}$ candidats et le gain de
-$5{,}0\cdot10^{7}$ annoncés au §6 reposent sur la minoration échantillonnée de
-$R(p)$ et **ne sont pas certifiés**. Le meilleur générateur réellement certifié
-aujourd'hui coûte $2{,}41\cdot10^{12}$, soit cinq cents fois plus. L'écart mesure
-exactement ce que la certification coûte, et le resserrer — en stratifiant $r$ et
-en couvrant le cercle des centres possibles, tous deux compacts et explicites —
-est le travail en cours.
+| constante | degré moyen | degré max | travail | gain |
+| --- | ---: | ---: | ---: | ---: |
+| lemme d'angle, $\kappa=0{,}2071$ | 1 010,4 | 1 252 | $2{,}49\cdot10^{12}$ | $1{,}05\cdot10^{5}$ |
+| Jung $m=4$, $\kappa_4=0{,}2588$ | 546,4 | 646 | $3{,}81\cdot10^{11}$ | $6{,}83\cdot10^{5}$ |
+| Jung $m=3$, $\kappa_3=0{,}2887$ | 394,8 | 456 | $1{,}41\cdot10^{11}$ | $1{,}85\cdot10^{6}$ |
+
+Avec la constante propre à chaque arité, le travail certifié du germe vaut
+$1{,}34\cdot10^{9}$ pour les triples et $3{,}79\cdot10^{11}$ pour les quadruples,
+soit $\mathbf{3{,}80\cdot10^{11}}$ et un gain de $\mathbf{6{,}85\cdot10^{5}}$ —
+contre $1{,}08\cdot10^{5}$ avec le lemme d'angle seul. **Jung vaut un facteur
+6,5, gratuitement.**
+
+**Correction honnête, maintenue.** Le chiffre de $5{,}24\cdot10^{9}$ candidats
+annoncé au §6 repose sur la minoration échantillonnée de $R(p)$ et **n'est pas
+certifié**. Le générateur certifié coûte aujourd'hui $3{,}80\cdot10^{11}$. Le
+resserrement restant ne passe plus par une meilleure constante de germe — Jung
+est optimale — mais par l'**élagage incrémentiel** que le corollaire général
+autorise : à chaque sommet ajouté, $R_{mb}(S)$ croît et la boule-test grossit.
+C'est là que se joue le travail des quadruples, qui domine tout le reste.
 
 ### 5.1 La contrainte de coque n'est pas cosmétique
 

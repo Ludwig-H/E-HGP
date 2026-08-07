@@ -2095,3 +2095,62 @@ supplémentaire de `verification_basis` nommant la base de complétude et sa
 constante ; une validation croisée du pont portant sur une identité de
 **production** et non plus de **couverture** ; et l'induction de reprise
 conservée, seule la quantité conservée changeant.
+
+## Jung remplace le lemme d'angle, et le germe gagne un facteur 6,5
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Le lemme d'angle majorait $r_U$ par $\operatorname{diam}(U)/\sqrt2$. Ce n'est pas
+la meilleure borne : **le théorème de Jung** l'est, et elle est optimale.
+
+**Pourquoi il s'applique ici.** Un support minimal bien centré a précisément pour
+miniboule sa boule circonscrite — $c_U\in\operatorname{conv}(U)$ et tous les
+points de $U$ à distance $r_U$, ce qui est la caractérisation du centre de la
+miniboule et de son ensemble de support. Jung donne donc
+$r_U\le\gamma_m\operatorname{diam}(U)$ avec $\gamma_3=1/\sqrt3$ et
+$\gamma_4=\sqrt{3/8}$, c'est-à-dire $\operatorname{diam}(U)\ge r_U\sqrt3$ pour un
+triangle et $\ge r_U\sqrt{8/3}$ pour un tétraèdre, contre $r_U\sqrt2$ auparavant.
+
+**C'est optimal, et la mesure le confirme.** Sur 300 000 tirages de supports
+minimaux bien centrés, le minimum observé de $\operatorname{diam}/r$ vaut
+$1{,}7354$ pour $m=3$ contre la borne $\sqrt3=1{,}7321$, et $1{,}6709$ pour $m=4$
+contre $\sqrt{8/3}=1{,}6330$ — les deux bornes sont approchées, celle de $m=3$ à
+0,2 %. Le lemme d'angle garde sa valeur propre : il est élémentaire, vaut en
+toute dimension et ne suppose rien sur $m$ ; il n'est simplement plus la borne
+employée.
+
+**Et le lemme d'arête diamétrale se généralise.** Le vrai énoncé est la
+**stabilité du centre de la miniboule** : pour tout $S$ borné et toute boule
+$\bar B(c,r)\supseteq S$, on a $\lvert c-c_{mb}(S)\rvert^2\le r^2-R_{mb}(S)^2$ —
+quatre lignes, en développant $\sum\lambda_i\lvert s_i-c\rvert^2$ autour de
+$c_{mb}$. Le lemme d'arête en est le cas $S=\{p,q\}$. Combiné à Jung :
+
+$$\bar B\Bigl(c_{mb}(S),\ \gamma_m D-\sqrt{\gamma_m^2D^2-R_{mb}(S)^2}\Bigr)
+  \subseteq \bar B(c_U,r_U)$$
+
+pour tout $S\subseteq U$ connu, $D$ étant la longueur de l'arête diamétrale. Ce
+rayon **croît avec $R_{mb}(S)$** : le test se renforce à chaque sommet ajouté à
+la clique. C'est un élagage incrémentiel certifié, et non plus un seul test de
+germe.
+
+**Constantes de germe fermées**, cas $S=\{p,q\}$ :
+$\kappa_m=\gamma_m-\sqrt{\gamma_m^2-1/4}$, soit
+$\kappa_3=1/(2\sqrt3)=0{,}288675$ et $\kappa_4=\sin15^\circ=0{,}258819$.
+
+**Mesuré à 50 000 points, $s_{\max}=11$** :
+
+| constante | degré moyen | degré max | travail | gain |
+| --- | ---: | ---: | ---: | ---: |
+| lemme d'angle, $0{,}2071$ | 1 010,4 | 1 252 | $2{,}49\cdot10^{12}$ | $1{,}05\cdot10^{5}$ |
+| Jung $m=4$, $0{,}2588$ | 546,4 | 646 | $3{,}81\cdot10^{11}$ | $6{,}83\cdot10^{5}$ |
+| Jung $m=3$, $0{,}2887$ | 394,8 | 456 | $1{,}41\cdot10^{11}$ | $1{,}85\cdot10^{6}$ |
+
+Avec la constante propre à chaque arité : $1{,}34\cdot10^{9}$ pour les triples et
+$3{,}79\cdot10^{11}$ pour les quadruples, soit **$3{,}80\cdot10^{11}$** et un gain
+de **$6{,}85\cdot10^{5}$**. **Jung vaut un facteur 6,5, gratuitement.**
+
+**Ce qui reste.** Le resserrement ne passe plus par une meilleure constante de
+germe — Jung est optimale — mais par l'élagage incrémentiel que le corollaire
+général autorise. C'est là que se joue le travail des quadruples, qui domine tout
+le reste d'un facteur 280.
