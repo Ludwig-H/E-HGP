@@ -2880,3 +2880,81 @@ ajoutée d'un seul côté. Les deux dataient de commits qui avaient, par ailleur
 correctement fait leur travail. Ce qui a manqué dans les deux cas est le même
 geste : **exécuter la suite complète après un changement structurel**, plutôt que
 les seules suites que l'on croit concernées.
+
+## Un exposant par étage, et l'aval est le verrou dominant
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+L'audit des bornes de travail désignait quatre étages du chemin produit qui
+bornent leur terminaison et non leur coût, dont un seul avait été mesuré.
+L'instrument est bon marché — nuage **fixe**, ordre variable, de sorte que seul
+le nombre d'événements bouge — et il a été appliqué à tous, machine au repos,
+trois exécutions par cellule, médiane par étage, **sur deux nuages indépendants**.
+
+| étage | exposant à $n=12$ | exposant à $n=16$ |
+| --- | ---: | ---: |
+| `pair_support` | 0,37 | 0,39 |
+| `higher_support` | 0,51 | 0,66 |
+| `batch_plan` | **1,15** | **1,40** |
+| `reducer_setup` | **1,23** | **1,27** |
+| **`reducer_stream`** | **2,10** | **1,81** |
+| `event_journal` | 0,67 | 0,70 |
+| `saddle_seed_journal` | 0,75 | 0,69 |
+| `terminal_facade` | 0,70 | 0,69 |
+| `forest_finish` | 0,33 | 0,65 |
+| **total** | **1,97** | **1,88** |
+
+Les exposants des deux premiers étages sont inférieurs à un et ne signifient
+rien pour l'échelle : à nuage fixe, augmenter $K$ n'ajoute aucun produit à
+examiner, il déplace seulement la fenêtre de rang. L'instrument isole la
+dépendance au **nombre d'événements**, et le coût de ces deux étages est piloté
+par l'univers, pas par la sortie. C'est précisément pour cela qu'il fallait un
+instrument séparé.
+
+**Le reste est net, et reproduit.** La fermeture de descente de facette est
+essentiellement **quadratique en nombre d'événements** — 2,10 et 1,81 sur deux
+nuages indépendants — et le plan de lots comme la préparation du réducteur sont
+franchement sur-linéaires. **Le pipeline entier est quadratique en sa propre
+sortie**, exposant total 1,97 et 1,88.
+
+### Le chiffre qui réordonne tout
+
+Le plus dur n'est pourtant pas l'exposant, c'est la **constante**. Mesurée :
+
+| | événements | `reducer_stream` | par événement |
+| --- | ---: | ---: | ---: |
+| $n=12$, $K=7$ | 39 | 3 245 ms | **83,2 ms** |
+| $n=16$, $K=7$ | 101 | 6 200 ms | **61,4 ms** |
+
+Le contrat demande $1{,}8\cdot10^{7}$ records en une seconde, soit **55 ns par
+record**. L'écart sur le seul coût unitaire est donc de **$1{,}1\cdot10^{6}$** —
+et l'exposant s'ajoute par-dessus : même parfaitement **linéaire**, cet étage
+mettrait $1{,}1\cdot10^{6}$ s à traiter la sortie du contrat.
+
+**Ce que cela change.** Toute la séquence des derniers jours a traité l'étage
+higher comme le verrou, puis l'étage paire, puis le coût unitaire du device.
+L'aval était marqué « jamais mesuré » et attendait. Il est mesuré, et il est le
+**verrou dominant, de plusieurs ordres de grandeur** — devant tout ce qui a été
+optimisé jusqu'ici. Le théorème de germination fait passer l'étage higher de
+$2{,}6\cdot10^{17}$ à $4{,}4\cdot10^{8}$ candidats ; l'aval, lui, ne sait pas
+traiter $1{,}8\cdot10^{7}$ records en moins de deux semaines.
+
+### Réserves, et elles comptent
+
+Les nuages font douze et seize points. Le recensement de la sortie a enseigné
+exactement cette leçon : **une extrapolation depuis de tout petits nuages est
+fausse**, et les constantes mesurées ici n'ont aucune raison de valoir à 50 000
+points. Elles auraient plutôt tendance à empirer, puisque les structures que
+chaque descente traverse grossissent avec le nuage — mais cela reste une
+conjecture, pas une mesure.
+
+Ce qui est **reproduit** en revanche, c'est l'exposant en nombre d'événements à
+nuage fixe, sur deux nuages et neuf points de mesure. C'est une propriété de
+l'étage, pas du nuage.
+
+**Le travail suivant est donc désigné sans ambiguïté** : demander à la fermeture
+de descente de facette une **borne de travail** — pas un plafond — et mesurer sa
+constante à nuage croissant avant toute autre optimisation. Optimiser l'amont
+d'un étage quadratique en sa sortie est exactement l'erreur qu'a été le filtre
+fp64, à une échelle plus grande.
