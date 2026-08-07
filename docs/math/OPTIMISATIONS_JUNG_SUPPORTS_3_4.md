@@ -162,19 +162,32 @@ $\bar B(x_i,\tfrac D2-\delta)\subseteq\bar B(c_U,r_U)$. $\square$
 
 Avec $\delta=\alpha D$, la constante effective devient $\tfrac12-\alpha$ au lieu
 de $\kappa_m$, pour $N\approx1{,}2\,\bigl(\sqrt{\gamma_m^2-\tfrac14}/\alpha\bigr)^2$
-positions. Quelques valeurs, $m=4$ :
+positions.
 
-| $\alpha$ | constante $\tfrac12-\alpha$ | $N$ | rapport à $\kappa_4$ |
-| ---: | ---: | ---: | ---: |
-| $0{,}25$ | $0{,}250$ | 2 | $0{,}97$ |
-| $0{,}20$ | $0{,}300$ | 4 | $1{,}16$ |
-| $0{,}10$ | $0{,}400$ | 15 | $1{,}55$ |
-| $0{,}05$ | $0{,}450$ | 60 | $1{,}74$ |
+**Mesuré à 50 000 points, $s_{\max}=11$** (anneaux hexagonaux, $N$ positions par
+arête) :
 
-Le degré du graphe varie comme l'inverse du cube de la constante, et le travail
-des quadruples comme le cube du degré : passer de $0{,}2588$ à $0{,}400$ divise
-le degré par $3{,}7$ et le travail par plus de cinquante, au prix de quinze
-comptages par arête au lieu d'un.
+| $m$ | test | $N$ | constante | degré moyen | travail |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 4 | J6, boule unique | 1 | $0{,}2588$ | 542,2 | $3{,}75\cdot10^{11}$ |
+| 4 | J7, $\alpha=0{,}20$ | 7 | $0{,}300$ | 525,7 | $3{,}42\cdot10^{11}$ |
+| 4 | J7, $\alpha=0{,}10$ | 19 | $0{,}400$ | 245,0 | $3{,}98\cdot10^{10}$ |
+| 4 | **J7, $\alpha=0{,}05$** | 61 | $0{,}450$ | **162,3** | $\mathbf{1{,}05\cdot10^{10}}$ |
+| 3 | J6, boule unique | 1 | $0{,}2887$ | 391,4 | $1{,}32\cdot10^{9}$ |
+| 3 | J7, $\alpha=0{,}10$ | 19 | $0{,}400$ | 215,1 | $3{,}89\cdot10^{8}$ |
+| 3 | **J7, $\alpha=0{,}05$** | 37 | $0{,}450$ | **138,1** | $\mathbf{1{,}58\cdot10^{8}}$ |
+
+**J7 vaut un facteur 36 sur les quadruples et 8,4 sur les triples**, au prix de
+61 et 37 comptages par arête au lieu d'un. Le compromis est très favorable :
+le degré varie comme l'inverse du cube de la constante et le travail des
+quadruples comme le cube du degré, donc chaque point de constante gagné se paie
+une fois et se récupère neuf fois.
+
+Un détail contre-intuitif mérite d'être noté : à $\alpha=0{,}20$ le degré
+**moyen** baisse à peine et le degré **maximum** augmente (964 contre 646 pour
+$m=4$). Un recouvrement trop grossier place des positions loin du milieu, où la
+boule-test est petite ; le gain n'apparaît qu'à partir de $\alpha\le0{,}10$. Le
+réglage n'est donc pas monotone en $N$ et doit être mesuré, pas supposé.
 
 ### 3.4 Test incrémental, recouvrement du segment
 
@@ -265,11 +278,22 @@ Il faut le dire aussi nettement que le reste.
 | J4 test sans requête | à implémenter | rejet gratuit avant tout comptage |
 | J6 germe, boule unique | mesuré | degré $546{,}4$ ($m=4$), $394{,}8$ ($m=3$) |
 | J9 incrémental, boule unique | mesuré | **facteur 1,91** sur les quadruples ; limité par les sommets internes |
-| J7 germe, disque recouvert | à mesurer | constante $0{,}2588\to0{,}400$ attendue, soit **> 50** sur les quadruples |
+| J7 germe, disque recouvert | **mesuré** | constante $0{,}2588\to0{,}450$ ; **facteur 36** sur les quadruples, 8,4 sur les triples |
 | J8 incrémental, segment recouvert | à mesurer | récupère ce que J9 ne prend pas |
 | J10 confinement | à exploiter | borne de résidence par tuile device |
 
-État certifié courant : générateur à $4{,}6\cdot10^{10}$ candidats contre un
-univers de $2{,}604\cdot10^{17}$, soit un gain de $5{,}73\cdot10^{6}$ et
-2 500 candidats examinés par record émis. J7 et J8 sont les deux énoncés non
-encore mesurés, et ce sont eux qui portent l'essentiel du gain restant.
+**État certifié courant.** En composant les facteurs mesurés — énumération réelle
+par lentille (÷4,4 sur la formule majorante), J7 à $\alpha=0{,}05$ (×36 sur les
+quadruples) et l'élagage incrémentiel J9 (×1,91) — le générateur descend à
+l'ordre de $\mathbf{1{,}2\cdot10^{9}}$ candidats contre un univers de
+$2{,}604\cdot10^{17}$, soit un gain de $\mathbf{2{,}2\cdot10^{8}}$ et environ
+**70 candidats examinés par record émis** — l'ordre de grandeur de l'étage paire,
+qui en dépense 5.
+
+Cette composition est un **produit de facteurs mesurés séparément**, pas une
+mesure jointe : elle doit être confirmée par une exécution unique du générateur
+complet. Elle est néanmoins meilleure que l'estimation *non certifiée* de
+$5{,}24\cdot10^{9}$ obtenue par échantillonnage du rayon tangent — le
+recouvrement du disque est plus fort que la borne par sommet, et il est prouvé.
+
+J8 reste le seul énoncé non mesuré.

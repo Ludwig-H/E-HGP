@@ -2542,8 +2542,19 @@ def main() -> int:
         "the bounded default drifted, or the sealed bounds are not a "
         "property of the build",
     )
-    # Budget echoes and durations are allowed to differ; nothing else is.
-    volatile_keys = {"budgets", "timings_ms", "completion_latency_ms"}
+    # Budget echoes, durations and the observational instrumentation of the
+    # warm end-to-end protocol are allowed to differ; nothing else is.  The
+    # peak resident set and the latency order statistics describe the RUN, not
+    # the scientific object, exactly as the timings do.
+    volatile_keys = {
+        "budgets",
+        "timings_ms",
+        "completion_latency_ms",
+        "peak_host_resident_bytes",
+        "p95_ms",
+        "warm_e2e_minimum_ms",
+        "warm_e2e_median_ms",
+    }
     budget_echo_keys = {"advance_budget", "total_capacity"}
     for key in sorted(set(success) | set(unbudgeted)):
         if key in volatile_keys:

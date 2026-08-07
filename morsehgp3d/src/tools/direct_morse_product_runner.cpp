@@ -25,13 +25,17 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <exception>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <optional>
 #include <span>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -77,6 +81,10 @@ struct Options {
   // many entries the device is fed.  Default is the slot capacity, which
   // reproduces the previous behaviour.
   std::size_t higher_tile_roots{runner_maximum_higher_tile_target};
+  // Number of TIMED iterations of the warm end-to-end protocol.  One means the
+  // historical single cold run; anything above adds a discarded warm-up
+  // iteration in front, so the samples are all warm.
+  std::size_t warm_e2e_repetitions{1U};
   // T2: how finely the anchored frontier is refined.  Host state, so it is
   // NOT bounded by the device slot capacity.
   std::size_t higher_frontier_target{runner_default_higher_tile_target};
@@ -138,9 +146,78 @@ struct Timings {
   double total_ms{};
 };
 
+// Warm end-to-end protocol.  The phase 14 exit gate asks for a p95 over a warm
+// resident service, not for one cold latency; before this, the runner published
+// `warm_e2e_protocol_executed` and `p95_ms` as hard-coded literals, so no run of
+// it could ever be opposed to the contract.  The protocol repeats the whole
+// pipeline in ONE process -- so any resident context stays warm across
+// iterations -- discards the first iteration as the warm-up, and publishes the
+// order statistics of the rest.  It observes; it never claims.
+struct WarmE2eProtocol {
+  std::size_t requested_repetitions{1U};
+  bool suppress_report{false};
+  bool warm_up_completed{false};
+  std::vector<double> samples;
+
+  [[nodiscard]] bool executed() const noexcept {
+    return requested_repetitions > 1U && warm_up_completed &&
+        !samples.empty();
+  }
+
+  // Nearest-rank p95 on the sorted samples: the smallest observation at or
+  // above the ninety-fifth percentile, which never interpolates a latency that
+  // was not measured.
+  [[nodiscard]] double p95_ms() const {
+    std::vector<double> sorted = samples;
+    std::sort(sorted.begin(), sorted.end());
+    const std::size_t rank = static_cast<std::size_t>(
+        std::ceil(0.95 * static_cast<double>(sorted.size())));
+    const std::size_t index = rank == 0U ? 0U : rank - 1U;
+    return sorted[std::min(index, sorted.size() - 1U)];
+  }
+
+  [[nodiscard]] double minimum_ms() const {
+    return *std::min_element(samples.begin(), samples.end());
+  }
+
+  [[nodiscard]] double median_ms() const {
+    std::vector<double> sorted = samples;
+    std::sort(sorted.begin(), sorted.end());
+    return sorted[sorted.size() / 2U];
+  }
+};
+
+// Peak resident set of the whole process, read from VmHWM.  getrusage's
+// ru_maxrss was rejected once already as contaminated or inherited, so the
+// high-water mark is taken from /proc, and its absence is reported as zero
+// rather than guessed.
+[[nodiscard]] std::uint64_t peak_host_resident_bytes() {
+#if defined(__linux__)
+  std::ifstream status{"/proc/self/status"};
+  if (!status) {
+    return 0U;
+  }
+  std::string line;
+  while (std::getline(status, line)) {
+    if (line.rfind("VmHWM:", 0U) != 0U) {
+      continue;
+    }
+    std::istringstream parser{line.substr(6U)};
+    std::uint64_t kibibytes = 0U;
+    if (!(parser >> kibibytes)) {
+      return 0U;
+    }
+    return kibibytes * UINT64_C(1024);
+  }
+#endif
+  return 0U;
+}
+
 struct Report {
   Options options;
   Timings timings;
+  const WarmE2eProtocol* warm_e2e{nullptr};
+  std::uint64_t peak_host_resident_bytes{};
   std::string terminal_stage{"not_started"};
   std::string stop_category{"none"};
   std::string stop_detail{"none"};
@@ -681,6 +758,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.higher_tile_roots = parse_size(value, option);
     } else if (option == "--higher-frontier-target") {
       options.higher_frontier_target = parse_size(value, option);
+    } else if (option == "--warm-e2e-repetitions") {
+      options.warm_e2e_repetitions = parse_size(value, option);
     } else if (option == "--operational-deadline-ms") {
       options.operational_deadline_ms = parse_u64(value, option);
     } else {
@@ -815,6 +894,11 @@ void parse_options(int argc, char** argv, Options& options) {
           std::numeric_limits<std::chrono::milliseconds::rep>::max())) {
     throw std::invalid_argument(
         "--operational-deadline-ms exceeds the steady-clock duration range");
+  }
+  if (options.warm_e2e_repetitions == 0U ||
+      options.warm_e2e_repetitions > 1'000U) {
+    throw std::invalid_argument(
+        "--warm-e2e-repetitions must be in [1, 1000]");
   }
 }
 
@@ -2696,10 +2780,57 @@ void emit_report(const Report& report) {
       << "  \"forest_semantics_exact\":false,\n"
       << "  \"product_architecture_claimed\":false,\n"
       << "  \"scalable_50k_claimed\":false,\n"
-      << "  \"warm_e2e_protocol_executed\":false,\n"
+      << "  \"warm_e2e_protocol_executed\":"
+      << boolean(report.warm_e2e != nullptr && report.warm_e2e->executed())
+      << ",\n"
+      << "  \"warm_e2e_requested_repetitions\":"
+      << (report.warm_e2e == nullptr
+              ? std::size_t{1U}
+              : report.warm_e2e->requested_repetitions)
+      << ",\n"
+      << "  \"warm_e2e_timed_sample_count\":"
+      << (report.warm_e2e == nullptr ? std::size_t{0U}
+                                     : report.warm_e2e->samples.size())
+      << ",\n"
+      << "  \"warm_e2e_warm_up_excluded\":"
+      << boolean(report.warm_e2e != nullptr &&
+                 report.warm_e2e->warm_up_completed)
+      << ",\n"
+      << "  \"warm_e2e_scope\":\"whole_pipeline_repeated_in_one_process_"
+         "first_iteration_discarded_as_warm_up_nearest_rank_p95\",\n"
       << "  \"warm_e2e_slo_claimed\":false,\n"
-      << "  \"warm_e2e_slo_outcome\":\"not_executed\",\n"
-      << "  \"p95_ms\":null,\n"
+      << "  \"warm_e2e_slo_outcome\":\"";
+  if (report.warm_e2e == nullptr || !report.warm_e2e->executed()) {
+    std::cout << "not_executed";
+  } else {
+    std::cout << (report.warm_e2e->p95_ms() < 100.0
+                      ? "observed_under_100ms"
+                      : "observed_at_or_above_100ms");
+  }
+  std::cout << "\",\n"
+      << "  \"p95_ms\":";
+  if (report.warm_e2e == nullptr || !report.warm_e2e->executed()) {
+    std::cout << "null";
+  } else {
+    std::cout << report.warm_e2e->p95_ms();
+  }
+  std::cout << ",\n"
+      << "  \"warm_e2e_minimum_ms\":";
+  if (report.warm_e2e == nullptr || !report.warm_e2e->executed()) {
+    std::cout << "null";
+  } else {
+    std::cout << report.warm_e2e->minimum_ms();
+  }
+  std::cout << ",\n"
+      << "  \"warm_e2e_median_ms\":";
+  if (report.warm_e2e == nullptr || !report.warm_e2e->executed()) {
+    std::cout << "null";
+  } else {
+    std::cout << report.warm_e2e->median_ms();
+  }
+  std::cout << ",\n"
+      << "  \"peak_host_resident_bytes\":"
+      << report.peak_host_resident_bytes << ",\n"
       << "  \"qualification_claimed\":false,\n"
       << "  \"complete_hierarchy_attempt_requested\":"
       << boolean(report.complete_hierarchy_attempt_requested) << ",\n"
@@ -4687,7 +4818,7 @@ bool count_reloaded_durable_segment(
   return true;
 }
 
-[[nodiscard]] int run(const Options& options) {
+[[nodiscard]] int run(const Options& options, WarmE2eProtocol& protocol) {
   Report report = make_report(options);
   const Clock::time_point total_start = Clock::now();
   const Clock::time_point operational_deadline =
@@ -6821,7 +6952,19 @@ bool count_reloaded_durable_segment(
         : "k2_to_k1_target_authority_not_attempted";
   }
   report.timings.total_ms = milliseconds(Clock::now() - total_start);
-  emit_report(report);
+  report.warm_e2e = &protocol;
+  report.peak_host_resident_bytes = peak_host_resident_bytes();
+  if (protocol.suppress_report) {
+    // A warm-up or a sampling iteration: it contributes its latency and stays
+    // silent, so exactly one report is ever emitted per process.
+    if (protocol.warm_up_completed) {
+      protocol.samples.push_back(report.timings.total_ms);
+    } else {
+      protocol.warm_up_completed = true;
+    }
+  } else {
+    emit_report(report);
+  }
   if (report.pipeline_complete) {
     return 0;
   }
@@ -6840,7 +6983,26 @@ int main(int argc, char** argv) {
   try {
     parse_options(argc, argv, options);
     options_parsed = true;
-    return run(options);
+    WarmE2eProtocol protocol;
+    protocol.requested_repetitions = options.warm_e2e_repetitions;
+    if (options.warm_e2e_repetitions <= 1U) {
+      return run(options, protocol);
+    }
+    // One discarded warm-up, then the timed samples, then the reporting run.
+    // Any non-zero return aborts the protocol: a censored or failed iteration
+    // is not a latency sample, and the reporting run then says so itself.
+    protocol.suppress_report = true;
+    for (std::size_t index = 0U; index <= options.warm_e2e_repetitions;
+         ++index) {
+      const int code = run(options, protocol);
+      if (code != 0) {
+        protocol.suppress_report = false;
+        protocol.samples.clear();
+        return run(options, protocol);
+      }
+    }
+    protocol.suppress_report = false;
+    return run(options, protocol);
   } catch (const std::exception& error) {
     Report report = make_report(options);
     report.terminal_stage =
