@@ -356,3 +356,77 @@ certifié, là où l'estimation par échantillonnage du rayon tangent — non
 certifiée — donnait $5{,}24\cdot10^{9}$, douze fois pire.
 
 Aucun énoncé de la recension ne reste non mesuré.
+
+## 8. La restriction certifiée de la boucle de germes, et ce qu'elle coûte
+
+Le §7.1 nomme l'obligation restée ouverte : la restriction certifiée est
+$D\le 2R(p)$, avec $R(p)$ le plus grand rayon d'une boule passant par $p$, de
+centre **dans un convexe contenant $P$**, contenant au plus $s_{\max}$ points.
+Deux questions se posaient, et les deux sont maintenant mesurées.
+
+### 8.1 La bissection est licite
+
+> **Lemme.** Pour une direction $u$ fixée, les boules tangentes en $p$ sont
+> **emboîtées croissantes** en leur rayon : $\bar B(p+\rho'u,\rho')\subseteq
+> \bar B(p+\rho u,\rho)$ pour $\rho'\le\rho$.
+
+*Démonstration.* $\lvert c'-c\rvert=\rho-\rho'$ et $\rho'+(\rho-\rho')=\rho$.
+$\square$
+
+Comme le convexe $C$ contient $p$, l'admissibilité $p+\rho u\in C$ est elle aussi
+héréditaire vers le bas. L'ensemble des rayons admissibles à population bornée
+est donc un **segment initial** $[0,R(p)]$, et une bissection sur $\rho$ est
+licite — ce qui n'allait pas de soi et qu'il fallait établir.
+
+### 8.2 L'enveloppe convexe n'est pas nécessaire, et parfois n'aide pas
+
+Un **sur-ensemble** convexe est sûr : il tue moins de calottes, donc majore
+$R(p)$, donc affaiblit la restriction sans jamais perdre de support. Mesuré à
+50 000 points, $s_{\max}=11$, 48 directions :
+
+| famille | région | $R/\rho_{s_{\max}}$ max | voisinage moyen | voisinage max |
+| --- | --- | ---: | ---: | ---: |
+| `uniform_latin` | AABB (6 plans) | 1,496 | 114,9 | 170 |
+| `uniform_latin` | $k$-DOP (26) | 1,421 | 114,3 | 170 |
+| `uniform_latin` | $\operatorname{conv}(P)$ | 1,348 | 113,6 | 168 |
+| `eight_clusters` | AABB (6 plans) | **347,2** | **1 375,5** | **25 026** |
+| `eight_clusters` | $k$-DOP (26) | 347,2 | 1 375,2 | 25 026 |
+| `eight_clusters` | $\operatorname{conv}(P)$ | 347,2 | 1 374,4 | 25 026 |
+
+**Deux conclusions, et la seconde est la plus importante.**
+
+D'abord, sur un nuage quasi uniforme, **l'AABB suffit** : elle coûte 11 % sur le
+pire rapport et 3 % sur le travail par rapport à l'enveloppe exacte. Or l'AABB
+est déjà disponible — c'est `root_aabb()` du LBVH. Aucune structure globale
+nouvelle n'est donc requise, ce qui écarte d'emblée la question de savoir si une
+enveloppe convexe serait un objet interdit.
+
+Ensuite, et c'est le fait dur : sur un nuage **en amas**, la borne s'effondre —
+$R/\rho$ atteint 347 — et **l'enveloppe convexe exacte n'y change rien**, au
+chiffre près. La raison est structurelle : le vide qui laisse grossir la boule
+tangente est **intérieur** à l'enveloppe, entre les amas. Aucun convexe ne peut
+l'exclure, puisqu'un convexe contenant les amas contient le vide qui les sépare.
+
+### 8.3 Ce que cela coûte réellement
+
+Il ne faut pas lire ces voisinages comme du travail de clique : ils sont le
+**vivier de paires à tester**, sur lequel la route B s'applique ensuite. Le coût
+propre de la restriction est donc un nombre de tests de germe :
+
+| famille | paires à tester | comptages de boule (19 positions) |
+| --- | ---: | ---: |
+| `uniform_latin` | $2{,}9\cdot10^{6}$ | $5{,}5\cdot10^{7}$ |
+| `eight_clusters` | $3{,}4\cdot10^{7}$ | $6{,}5\cdot10^{8}$ |
+
+Soit un facteur douze entre les deux familles sur le coût du germe — supportable,
+et sans commune mesure avec le facteur $10^5$ qu'une lecture naïve des
+voisinages suggérait.
+
+**Ce que cela impose au contrat.** Le contrat à 50 000 points n'est pas
+indépendant de la famille : les campagnes prévues comprennent huit boules
+séparées, soixante-quatre amas multi-échelles, vingt-quatre filaments et
+quatre-vingt-seize paires d'amas déséquilibrées. La restriction heuristique à six
+rayons employée dans toutes les mesures antérieures est **valide sur les nuages
+quasi uniformes et fausse sur les nuages en amas**, où le vivier certifié est
+douze fois plus grand. Toute mesure future doit déclarer la famille avec le
+chiffre.
