@@ -1249,6 +1249,35 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_local_germination_tests
+  test_hierarchy_local_germination.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_local_germination_tests
+  PRIVATE morsehgp3d::higher_support
+)
+target_compile_features(
+  morsehgp3d_hierarchy_local_germination_tests PRIVATE cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_local_germination_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_local_germination_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+add_test(
+  NAME morsehgp3d.hierarchy_local_germination
+  COMMAND morsehgp3d_hierarchy_local_germination_tests
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_local_germination PROPERTIES TIMEOUT 600
+)
+
+add_executable(
   morsehgp3d_exact_higher_support_output_census
   ../profiling/exact_higher_support_output_census.cpp
 )
@@ -6426,6 +6455,7 @@ list(
   APPEND _morsehgp3d_cpu_test_targets
   morsehgp3d_exact_higher_support_growth_profile
   morsehgp3d_exact_higher_support_output_census
+  morsehgp3d_hierarchy_local_germination_tests
   morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
   morsehgp3d_gpu_higher_support_device_tiled_slot_engine_tests
   morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests

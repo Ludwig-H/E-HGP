@@ -2226,3 +2226,71 @@ réfutation du filtre fp64, obtenue par un chemin indépendant.
 d'échelle, aucun statut public. Le générateur n'est pas implémenté : ces chiffres
 mesurent le **travail qu'il aurait à faire**, sur le vrai nuage et avec les
 vrais prédicats de rang, pas une exécution du produit.
+
+## Le générateur de germination locale existe, et sa complétude est certifiée
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+`morsehgp3d/src/cpu/hierarchy/local_germination.cpp` implémente en référence
+hôte l'énumération que la mathématique des jours précédents autorise : germe sur
+la paire diamétrale, test J7 par recouvrement du disque, lentille, test libre
+sur le circumrayon, test J8 par recouvrement du segment.
+
+**La discipline de sûreté, en une phrase.** Les positions de recouvrement sont
+calculées en binary64, puis chaque rayon de boule-test est **rétréci** d'une
+marge certifiée qui domine à la fois le rayon de recouvrement et l'erreur
+flottante, et le comptage ne compte que les points **prouvés** intérieurs. Les
+deux approximations ne peuvent que sous-compter et sous-rejeter : une
+approximation peut coûter du travail, jamais un verdict. C'est la règle des
+filtres par intervalles, appliquée telle quelle.
+
+**Ce que le générateur ne prétend pas.** Il émet des candidats, il ne décide
+rien : `analyze_circumcenter_support_integer` puis la requête de boule fermée
+indexée restent l'unique autorité d'acceptation, inchangées. Et il ne garantit
+**pas l'unicité** : quand le diamètre d'un support est atteint par plusieurs
+paires, chacune le possède et l'émet. Départager demanderait une égalité de
+distances en binary64 — exactement la décision fragile que ce projet refuse hors
+arithmétique exacte ; la déduplication revient au consommateur, qui voit le
+support de toute façon.
+
+### Le certificat
+
+`morsehgp3d.hierarchy_local_germination` falsifie la seule chose que le
+générateur affirme, de la seule manière qui ait un sens : contre l'énumération
+**exhaustive** de $\binom n3+\binom n4$ classifiée par les mêmes primitives
+exactes. Un seul support accepté manquant fait échouer le test et le nomme.
+
+Neuf cellules, deux familles, deux arités, deux ordres, deux tailles —
+`eight_clusters` est obligatoire ici, puisque `uniform_latin` ne contient aucun
+quadruple minimal bien centré et n'exercerait jamais l'arité quatre :
+
+| famille | $n$ | $K$ | $m$ | acceptés | émis | manquants |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `uniform_latin` | 24 | 5 | 3 | 128 | 1 280 | **0** |
+| `eight_clusters` | 24 | 5 | 3 | 243 | 1 767 | **0** |
+| `eight_clusters` | 24 | 5 | 4 | 43 | 9 423 | **0** |
+| `eight_clusters` | 40 | 5 | 3 | 450 | 8 394 | **0** |
+| `eight_clusters` | 40 | 5 | 4 | 114 | 78 839 | **0** |
+
+**Zéro support manquant partout.**
+
+### Ce que la sélectivité dit, et ne dit pas
+
+À ces tailles le rapport candidats/accepté vaut 7 à 700, et le test de germe ne
+rejette presque aucune paire — 276 sur 276 retenues à $n=24$. C'est attendu et
+cohérent : les tests rejettent en constatant qu'une boule est **sur-peuplée**, ce
+qui exige une densité locale suffisante. À vingt-quatre points, aucune boule
+n'atteint jamais onze points. Le seul régime où la sélectivité se mesure est
+l'échelle, et c'est là qu'elle vaut 24,4 candidats par record émis.
+
+Ces deux faits sont complémentaires et il faut les tenir ensemble : la
+**complétude** se certifie sur de tout petits nuages, où l'exhaustif est
+calculable ; la **sélectivité** ne se mesure qu'à 50 000 points, où l'exhaustif
+ne l'est pas. Aucune des deux mesures ne remplace l'autre.
+
+**Ce que cela ne dit pas.** Aucune mesure G4, aucun run 50k, aucune porte
+d'échelle, aucun statut public. Le générateur n'est pas branché au produit : il
+n'est ni tuilé, ni device, et il parcourt le nuage au lieu d'interroger le LBVH —
+une implémentation device doit utiliser l'index. La refondation de la
+comptabilité sur la complétude, décidée le 7 août, n'est pas écrite non plus.

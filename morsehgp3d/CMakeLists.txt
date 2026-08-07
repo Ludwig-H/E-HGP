@@ -1048,6 +1048,7 @@ add_library(
     src/cpu/hierarchy/higher_support_closed_ball.cpp
     src/cpu/hierarchy/higher_support_product.cpp
     src/cpu/hierarchy/higher_support_stream.cpp
+    src/cpu/hierarchy/local_germination.cpp
 )
 add_library(morsehgp3d::higher_support ALIAS morsehgp3d_higher_support)
 set_target_properties(

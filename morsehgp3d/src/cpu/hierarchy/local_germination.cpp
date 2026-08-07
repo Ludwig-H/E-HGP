@@ -1,0 +1,344 @@
+#include "morsehgp3d/hierarchy/local_germination.hpp"
+
+#include "morsehgp3d/exact/point.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <numbers>
+#include <stdexcept>
+#include <vector>
+
+namespace morsehgp3d::hierarchy {
+
+namespace {
+
+using spatial::PointId;
+
+struct Vec3 {
+  double x{};
+  double y{};
+  double z{};
+};
+
+[[nodiscard]] Vec3 operator-(const Vec3& left, const Vec3& right) noexcept {
+  return Vec3{left.x - right.x, left.y - right.y, left.z - right.z};
+}
+
+[[nodiscard]] Vec3 operator+(const Vec3& left, const Vec3& right) noexcept {
+  return Vec3{left.x + right.x, left.y + right.y, left.z + right.z};
+}
+
+[[nodiscard]] Vec3 operator*(const Vec3& value, double scale) noexcept {
+  return Vec3{value.x * scale, value.y * scale, value.z * scale};
+}
+
+[[nodiscard]] double dot(const Vec3& left, const Vec3& right) noexcept {
+  return left.x * right.x + left.y * right.y + left.z * right.z;
+}
+
+[[nodiscard]] Vec3 cross(const Vec3& left, const Vec3& right) noexcept {
+  return Vec3{
+      left.y * right.z - left.z * right.y,
+      left.z * right.x - left.x * right.z,
+      left.x * right.y - left.y * right.x};
+}
+
+[[nodiscard]] double norm(const Vec3& value) noexcept {
+  return std::sqrt(dot(value, value));
+}
+
+[[nodiscard]] Vec3 point_of(
+    const spatial::CanonicalPointCloud& cloud, PointId id) {
+  const exact::CertifiedPoint3& point = cloud.point(id);
+  return Vec3{
+      point.binary64_coordinate(0U),
+      point.binary64_coordinate(1U),
+      point.binary64_coordinate(2U)};
+}
+
+// Jung's constant squared, rational: 1/3 for a planar triangle, 3/8 for a
+// tetrahedron.  Kept squared because every comparison below is on squares.
+[[nodiscard]] double jung_squared(std::size_t support_size) {
+  return support_size == 3U ? 1.0 / 3.0 : 3.0 / 8.0;
+}
+
+// The certified margin.  Positions are computed in binary64 from quantities of
+// magnitude at most a few times D, through a bounded number of operations, so
+// their error is far below 2^-40 D; the margin is taken orders of magnitude
+// above that, and it is SUBTRACTED from every test radius.  Shrinking a test
+// ball can only lose a rejection, never invent one.
+constexpr double certified_margin_scale = 1.0 / 1048576.0;  // 2^-20
+
+// Counts the points PROVED strictly inside the ball, stopping as soon as the
+// cap is exceeded.  A point whose squared distance is within the margin of the
+// radius is skipped: under-counting is safe, since the caller only ever uses
+// "the count exceeds s_max" as a reason to reject.
+[[nodiscard]] bool population_exceeds(
+    const std::vector<Vec3>& points,
+    const Vec3& centre,
+    double radius,
+    std::size_t cap,
+    double margin) {
+  if (radius <= 0.0) {
+    return false;
+  }
+  const double inner = radius - margin;
+  if (inner <= 0.0) {
+    return false;
+  }
+  const double inner_squared = inner * inner;
+  std::size_t count = 0U;
+  for (const Vec3& point : points) {
+    const Vec3 offset = point - centre;
+    if (dot(offset, offset) < inner_squared) {
+      ++count;
+      if (count > cap) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// An orthonormal pair spanning the plane perpendicular to `axis`.
+void perpendicular_basis(const Vec3& axis, Vec3& first, Vec3& second) {
+  const Vec3 seed = std::fabs(axis.x) < 0.9 ? Vec3{1.0, 0.0, 0.0}
+                                            : Vec3{0.0, 1.0, 0.0};
+  first = cross(axis, seed);
+  const double first_norm = norm(first);
+  first = first * (1.0 / first_norm);
+  second = cross(axis, first);
+  second = second * (1.0 / norm(second));
+}
+
+// Hexagonal covering of the unit disc: the centre, then `rings` rings whose
+// spacing gives a covering radius of 1 / (rings + 1/2) once scaled.
+struct DiscCover {
+  std::vector<std::pair<double, double>> offsets;  // in units of the radius
+  double covering_radius{};                        // in units of the radius
+};
+
+[[nodiscard]] DiscCover build_disc_cover(std::size_t rings) {
+  DiscCover cover;
+  cover.offsets.emplace_back(0.0, 0.0);
+  if (rings == 0U) {
+    cover.covering_radius = 1.0;
+    return cover;
+  }
+  const double step = 1.0 / static_cast<double>(rings);
+  for (std::size_t ring = 1U; ring <= rings; ++ring) {
+    const double radius = step * static_cast<double>(ring);
+    const std::size_t count = 6U * ring;
+    for (std::size_t index = 0U; index < count; ++index) {
+      const double angle = 2.0 * std::numbers::pi *
+          static_cast<double>(index) / static_cast<double>(count);
+      cover.offsets.emplace_back(radius * std::cos(angle),
+                                 radius * std::sin(angle));
+    }
+  }
+  // A ring spacing of `step` and an angular spacing of 2 pi / (6 ring) leave
+  // every point of the disc within `step` of a sample, which is the bound used
+  // below; it is deliberately conservative.
+  cover.covering_radius = step;
+  return cover;
+}
+
+}  // namespace
+
+LocalGerminationCounters generate_local_germination_candidates(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t support_size,
+    const LocalGerminationConfig& config,
+    const LocalGerminationSink& sink) {
+  static_cast<void>(index);
+  if (support_size != 3U && support_size != 4U) {
+    throw std::invalid_argument("a germinated support has size three or four");
+  }
+  if (config.maximum_relevant_closed_rank < support_size) {
+    return LocalGerminationCounters{};
+  }
+  if (config.segment_position_count == 0U) {
+    throw std::invalid_argument(
+        "the segment covering needs at least one position");
+  }
+
+  const std::size_t point_count = cloud.size();
+  std::vector<Vec3> points;
+  points.reserve(point_count);
+  for (PointId id = 0U; id < static_cast<PointId>(point_count); ++id) {
+    points.push_back(point_of(cloud, id));
+  }
+
+  const double gamma_squared = jung_squared(support_size);
+  const double gamma = std::sqrt(gamma_squared);
+  const double disc_radius_coefficient = std::sqrt(gamma_squared - 0.25);
+  const DiscCover cover = build_disc_cover(config.seed_disc_ring_count);
+  const std::size_t cap = config.maximum_relevant_closed_rank;
+
+  LocalGerminationCounters counters;
+  std::array<PointId, 4> support{};
+  std::vector<PointId> retained;
+
+  for (PointId first = 0U; first + 1U < static_cast<PointId>(point_count);
+       ++first) {
+    for (PointId second = first + 1U;
+         second < static_cast<PointId>(point_count);
+         ++second) {
+      ++counters.pairs_examined;
+      const Vec3& p = points[first];
+      const Vec3& q = points[second];
+      const Vec3 edge = q - p;
+      const double diameter = norm(edge);
+      if (!(diameter > 0.0)) {
+        continue;
+      }
+      const double margin = certified_margin_scale * diameter;
+      const Vec3 midpoint = p + edge * 0.5;
+
+      // J7 -- the seed.  The circumcentre lies in the disc of radius
+      // sqrt(gamma^2 - 1/4) D around the midpoint, in the bisector plane, and
+      // the circumradius is at least D/2, so a ball of radius D/2 minus the
+      // covering radius around any sample of a covering is inside it.
+      const Vec3 axis = edge * (1.0 / diameter);
+      Vec3 basis_first{};
+      Vec3 basis_second{};
+      perpendicular_basis(axis, basis_first, basis_second);
+      const double disc_radius = disc_radius_coefficient * diameter;
+      const double seed_test_radius =
+          0.5 * diameter - cover.covering_radius * disc_radius;
+      bool seed_rejected = seed_test_radius > 0.0;
+      if (seed_rejected) {
+        for (const auto& offset : cover.offsets) {
+          const Vec3 centre = midpoint +
+              basis_first * (offset.first * disc_radius) +
+              basis_second * (offset.second * disc_radius);
+          ++counters.population_queries;
+          if (!population_exceeds(points, centre, seed_test_radius, cap,
+                                  margin)) {
+            seed_rejected = false;
+            break;
+          }
+        }
+      }
+      if (seed_rejected) {
+        continue;
+      }
+      ++counters.pairs_retained;
+
+      // The remaining vertices lie in the lens: the diameter pair bounds every
+      // distance in the support.
+      retained.clear();
+      for (PointId candidate = 0U;
+           candidate < static_cast<PointId>(point_count);
+           ++candidate) {
+        if (candidate == first || candidate == second) {
+          continue;
+        }
+        const Vec3& z = points[candidate];
+        const double to_first = norm(z - p);
+        const double to_second = norm(z - q);
+        if (to_first > diameter || to_second > diameter) {
+          continue;
+        }
+        ++counters.third_vertices_examined;
+
+        // J4' -- the free test.  Any point equidistant from the three vertices
+        // sits at distance sqrt(rho^2 - r_triangle^2) from the triangle's
+        // circumcentre, so r >= r_triangle; a circumradius above gamma D is
+        // impossible and needs no query at all.
+        const Vec3 u = q - p;
+        const Vec3 v = z - p;
+        const Vec3 normal = cross(u, v);
+        const double normal_norm = norm(normal);
+        if (!(normal_norm > 0.0)) {
+          // Affinely dependent: the classifier will resolve it, keep it.
+          retained.push_back(candidate);
+          ++counters.third_vertices_retained;
+          continue;
+        }
+        const double uu = dot(u, u);
+        const double vv = dot(v, v);
+        const Vec3 to_centre =
+            cross(u * vv - v * uu, normal) * (1.0 / (2.0 * normal_norm * normal_norm));
+        const Vec3 circumcentre = p + to_centre;
+        const double triangle_radius = norm(to_centre);
+        if (triangle_radius > gamma * diameter) {
+          ++counters.third_vertices_free_rejected;
+          continue;
+        }
+
+        // J8 -- the segment.  The circumcentre lies on the line through the
+        // triangle's circumcentre along its normal, within
+        // sqrt(gamma^2 D^2 - r_triangle^2), and the circumradius is at least
+        // r_triangle.
+        const double half_length = std::sqrt(std::max(
+            gamma_squared * diameter * diameter -
+                triangle_radius * triangle_radius,
+            0.0));
+        const std::size_t positions = config.segment_position_count;
+        const double covering =
+            positions <= 1U
+                ? half_length
+                : half_length / static_cast<double>(positions - 1U);
+        const double segment_test_radius = triangle_radius - covering;
+        bool rejected = segment_test_radius > 0.0;
+        if (rejected) {
+          const Vec3 unit_normal = normal * (1.0 / normal_norm);
+          for (std::size_t position = 0U; position < positions; ++position) {
+            const double parameter = positions <= 1U
+                ? 0.0
+                : -half_length +
+                    2.0 * half_length * static_cast<double>(position) /
+                        static_cast<double>(positions - 1U);
+            const Vec3 centre = circumcentre + unit_normal * parameter;
+            ++counters.population_queries;
+            if (!population_exceeds(points, centre, segment_test_radius, cap,
+                                    margin)) {
+              rejected = false;
+              break;
+            }
+          }
+        }
+        if (rejected) {
+          continue;
+        }
+        retained.push_back(candidate);
+        ++counters.third_vertices_retained;
+      }
+
+      if (support_size == 3U) {
+        support[3] = 0U;
+        for (const PointId third : retained) {
+          std::array<PointId, 3> ids{first, second, third};
+          std::sort(ids.begin(), ids.end());
+          support[0] = ids[0];
+          support[1] = ids[1];
+          support[2] = ids[2];
+          ++counters.triple_candidates;
+          sink(support, 3U);
+        }
+        continue;
+      }
+
+      for (std::size_t left = 0U; left < retained.size(); ++left) {
+        for (std::size_t right = left + 1U; right < retained.size(); ++right) {
+          const Vec3& z = points[retained[left]];
+          const Vec3& w = points[retained[right]];
+          if (norm(w - z) > diameter) {
+            continue;
+          }
+          std::array<PointId, 4> ids{
+              first, second, retained[left], retained[right]};
+          std::sort(ids.begin(), ids.end());
+          support = ids;
+          ++counters.quadruple_candidates;
+          sink(support, 4U);
+        }
+      }
+    }
+  }
+  return counters;
+}
+
+}  // namespace morsehgp3d::hierarchy
