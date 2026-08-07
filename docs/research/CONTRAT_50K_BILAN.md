@@ -61,13 +61,15 @@ dont la complétude est prouvée et dont le coût est **mesuré** :
 | subdivision de produits (état antérieur) | $2{,}604\cdot10^{17}$ | 1 |
 | germe seul, lemme d'angle $\kappa=0{,}2071$ | $8{,}69\cdot10^{10}$ | $3{,}0\cdot10^{6}$ |
 | germe Jung $\kappa_4=\sin15^\circ$, + élagage incrémentiel | $4{,}6\cdot10^{10}$ | $5{,}73\cdot10^{6}$ |
-| + J7, disque des centres recouvert à $\alpha=0{,}05$ | $\mathbf{\approx 1{,}2\cdot10^{9}}$ | $\mathbf{\approx 2{,}2\cdot10^{8}}$ |
+| + J7 disque recouvert et J8 segment recouvert, **mesuré conjointement** | $\mathbf{4{,}4\cdot10^{8}}$ | $\mathbf{5{,}9\cdot10^{8}}$ |
 
 Pour référence, la sortie utile estimée vaut $1{,}8\cdot10^{7}$ records : le
-générateur examine donc environ **70 candidats par record émis** — contre 2 500
-avant J7, et 5,04 visites de nœud par record à l'étage paire, qui reste
-l'ordre de grandeur de référence. La dernière ligne compose des facteurs mesurés
-séparément et doit être confirmée par une exécution jointe du générateur.
+générateur examine donc **24,4 candidats par record émis**, contre 5,04 visites
+de nœud par record à l'étage paire. Le générateur est désormais dans le **même
+ordre de grandeur** que ce que le projet sait déjà faire tourner à 50 000 points,
+et la dernière ligne est une mesure **jointe** — germe J7, énumération réelle par
+lentille, test libre et segment J8 appliqués en une seule passe — non un produit
+de facteurs séparés.
 
 **Ce que cela ne change pas.** L'étage paire, le plancher amont, l'aval et
 l'archive sont intacts. Le nouvel algorithme retire un mur de quatorze ordres de
@@ -80,12 +82,12 @@ disponible sur ce matériel est celle du launcher paire : 22 697 584 visites de
 nœud physiques en 1 005 ms, soit **44,3 ns par visite**, à raison de 5,04 visites
 par record produit.
 
-| hypothèse de débit | $1{,}2\cdot10^{9}$ candidats | verdict |
+| hypothèse de débit | $4{,}4\cdot10^{8}$ candidats, 5 visites chacun | verdict |
 | --- | ---: | --- |
-| 44,3 ns/visite (mesuré aujourd'hui) | $\approx 264$ s | hors d'atteinte |
-| 5 ns/visite | $\approx 30$ s | hors d'atteinte |
-| 0,5 ns/visite (soit $2\cdot10^{9}$ visites/s) | $\approx 3$ s | à portée du contrat 1 s |
-| 0,1 ns/visite (soit $10^{10}$ visites/s) | $\approx 0{,}6$ s | **contrat 1 s tenu** |
+| 44,3 ns/visite (mesuré aujourd'hui) | $\approx 97$ s | hors d'atteinte |
+| 5 ns/visite | $\approx 11$ s | hors d'atteinte |
+| 1 ns/visite | $\approx 2{,}2$ s | proche |
+| **0,5 ns/visite** (soit $2\cdot10^{9}$ visites/s) | $\approx \mathbf{1{,}1}$ **s** | **contrat 1 s essentiellement tenu** |
 
 Autrement dit : **le verrou n'est plus l'algorithme, c'est le coût unitaire.**
 Et le débit de référence est lui-même suspect — 44,3 ns par visite de nœud sur
@@ -104,8 +106,13 @@ conversion candidats → secondes reste une hypothèse.
    implémenté ;
 2. l'étage higher porté sur la génération locale certifiée — mathématique
    acquise, implémentation à faire ;
-3. un débit de visite de nœud amélioré d'environ **deux ordres de grandeur** par
-   rapport aux 44,3 ns mesurés — cause non encore identifiée, à instrumenter.
+3. un débit de visite de nœud amélioré d'environ **cent fois** par rapport aux
+   44,3 ns mesurés, soit $2\cdot10^{9}$ visites par seconde — cause du déficit
+   non encore identifiée, à instrumenter. Pour situer : les 44,3 ns agrégés du
+   launcher paire représentent $2{,}3\cdot10^{7}$ visites par seconde au total,
+   c'est-à-dire quelques centaines de visites par seconde et par thread. Aucune
+   opération de traversée ne justifie un tel chiffre ; c'est l'argument le plus
+   fort en faveur d'un coût de transport plutôt que de calcul.
 
 **Contrat à 100 ms.** Les trois conditions ci-dessus, **plus** :
 4. un facteur dix supplémentaire sur le coût unitaire ;

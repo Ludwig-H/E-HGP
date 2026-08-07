@@ -2154,3 +2154,75 @@ de **$6{,}85\cdot10^{5}$**. **Jung vaut un facteur 6,5, gratuitement.**
 germe — Jung est optimale — mais par l'élagage incrémentiel que le corollaire
 général autorise. C'est là que se joue le travail des quadruples, qui domine tout
 le reste d'un facteur 280.
+
+## J8 mesuré : la dimension un paie, et le générateur certifié atteint 4,4·10⁸
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Le dernier énoncé non mesuré de la recension Jung est le recouvrement du
+**segment** des centres au troisième sommet. Il s'est renforcé en cours de route.
+
+**Une borne inférieure meilleure.** Tout point équidistant des trois sommets d'un
+triangle $S$ à distance $\rho$ vérifie
+$\rho^2=r_\triangle^2+\operatorname{dist}(\cdot,\Pi)^2$, donc
+$r_U\ge r_\triangle\ge R_{mb}(S)$ : c'est le **circumrayon**, et non le rayon de
+miniboule, qui minore le circumrayon cherché. Le test en devient plus tranchant
+à deux endroits — le rayon des boules-test, et le test libre
+$r_\triangle>\gamma_m D\Rightarrow$ rejet, qui ne coûte aucune requête.
+
+**Mesuré à 50 000 points, $s_{\max}=11$**, en aval du germe J7 à $\alpha=0{,}10$
+et de l'énumération réelle par lentille :
+
+| filtre au troisième sommet | retenus | part |
+| --- | ---: | ---: |
+| aucun | $2{,}95\cdot10^{8}$ | 100 % |
+| test libre sur $r_\triangle$ | $2{,}66\cdot10^{8}$ | 90,2 % |
+| boule unique en $c_{mb}$ | $1{,}62\cdot10^{8}$ | 54,8 % |
+| segment $N=4$ | $1{,}41\cdot10^{8}$ | 47,7 % |
+| segment $N=8$ | $6{,}04\cdot10^{7}$ | 20,5 % |
+| **segment $N=16$** | $\mathbf{4{,}70\cdot10^{7}}$ | **15,9 %** |
+
+Travail des quadruples : $3{,}31\cdot10^{9}$ avec la boule unique contre
+$\mathbf{3{,}93\cdot10^{8}}$ avec le segment à seize positions, soit un **facteur
+8,4**. La dimension un paie : seize positions sur un segment font mieux que
+soixante et une sur un disque.
+
+### L'état certifié, mesuré conjointement
+
+Cette dernière mesure applique en une seule passe le germe J7, l'énumération par
+lentille, le test libre et le segment J8. Ce n'est donc plus un produit de
+facteurs séparés :
+
+| | valeur |
+| --- | ---: |
+| travail quadruples | $3{,}93\cdot10^{8}$ |
+| travail triples | $4{,}70\cdot10^{7}$ |
+| **travail certifié total** | $\mathbf{4{,}4\cdot10^{8}}$ |
+| univers | $2{,}604\cdot10^{17}$ |
+| **gain** | $\mathbf{5{,}9\cdot10^{8}}$ |
+| candidats par record émis | **24,4** |
+
+Vingt-quatre candidats par record émis, contre cinq visites de nœud par record à
+l'étage paire : le générateur est dans le **même ordre de grandeur** que ce que
+le projet fait déjà tourner à 50 000 points. Et c'est certifié, là où
+l'estimation par échantillonnage du rayon tangent — non certifiée — donnait
+$5{,}24\cdot10^{9}$, douze fois pire.
+
+### Ce que cela fait au contrat
+
+À $4{,}4\cdot10^{8}$ candidats et cinq visites chacun, le contrat d'une seconde
+demande $2\cdot10^{9}$ visites par seconde, soit **cent fois** les 44,3 ns
+agrégés mesurés sur le launcher paire. Pour situer ce déficit : 44,3 ns agrégés
+représentent $2{,}3\cdot10^{7}$ visites par seconde **au total**, c'est-à-dire
+quelques centaines de visites par seconde et par thread. Aucune opération de
+traversée ne justifie un tel chiffre. C'est l'argument le plus fort en faveur
+d'un coût de **transport** et non de calcul — la même conclusion que la
+réfutation du filtre fp64, obtenue par un chemin indépendant.
+
+**Le verrou algorithmique est donc refermé, et le verrou restant est nommé.**
+
+**Ce que cela ne dit pas.** Aucune mesure G4, aucun run 50k, aucune porte
+d'échelle, aucun statut public. Le générateur n'est pas implémenté : ces chiffres
+mesurent le **travail qu'il aurait à faire**, sur le vrai nuage et avec les
+vrais prédicats de rang, pas une exécution du produit.

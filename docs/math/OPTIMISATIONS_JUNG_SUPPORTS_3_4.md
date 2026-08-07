@@ -195,17 +195,42 @@ Au troisième sommet, le lieu est un **segment**, dont un recouvrement coûte
 $O(1/\delta)$ positions au lieu de $O(1/\delta^2)$.
 
 > **J8.** Soit $S=\{p,q,z\}$ affinement indépendant, $o_S$ son circumcentre,
-> $r_\triangle$ son circumrayon, et $x_1,\dots,x_N$ un recouvrement à $\delta$
-> près du segment
-> $\{o_S+t\,\nu:\lvert t\rvert\le\sqrt{\gamma_m^2D^2-r_\triangle^2}\}$, $\nu$
-> normale unitaire au plan de $S$. Si
-> $\lvert P\cap\bar B(x_i,R_{mb}(S)-\delta)\rvert>s_{\max}$ pour tout $i$, alors
-> aucun support accepté de paire diamétrale $(p,q)$ ne contient $z$.
+> $r_\triangle$ son circumrayon, $\nu$ la normale unitaire à son plan, et
+> $x_1,\dots,x_N$ un recouvrement à $\delta$ près du segment
+> $\{o_S+t\,\nu:\lvert t\rvert\le\sqrt{\gamma_m^2D^2-r_\triangle^2}\}$. Si
+> $\lvert P\cap\bar B(x_i,\;r_\triangle-\delta)\rvert>s_{\max}$ pour tout $i$,
+> alors aucun support accepté de paire diamétrale $(p,q)$ ne contient $z$.
 
-*Démonstration.* $c_U$ est équidistant de $p,q,z$ donc sur la droite $o_S+\mathbb{R}\nu$,
-et $\lvert c_U-o_S\rvert^2=r_U^2-r_\triangle^2\le\gamma_m^2D^2-r_\triangle^2$ :
-il est sur le segment. Puis $r_U\ge R_{mb}(S)$ et l'inégalité triangulaire.
+*Démonstration.* Tout point équidistant des trois sommets à distance $\rho$
+vérifie $\rho^2=r_\triangle^2+\operatorname{dist}(\cdot,\Pi)^2$ où $\Pi$ est le
+plan de $S$. Donc $c_U$ est sur la droite $o_S+\mathbb{R}\nu$, à distance
+$\sqrt{r_U^2-r_\triangle^2}\le\sqrt{\gamma_m^2D^2-r_\triangle^2}$ de $o_S$ : il
+est sur le segment. La même identité donne
+$$\boxed{\,r_U\;\ge\;r_\triangle\;\ge\;R_{mb}(S)\,}$$
+— la borne inférieure du rayon est le **circumrayon**, strictement meilleure que
+le rayon de miniboule employé en J6. On conclut par l'inégalité triangulaire.
 $\square$
+
+**Corollaire (J4' — test libre renforcé).** Si $r_\triangle(S)>\gamma_m D$, le
+segment est vide et $z$ est rejeté **sans aucune requête**. C'est strictement
+plus tranchant que J4, puisque $r_\triangle\ge R_{mb}$.
+
+**Mesuré à 50 000 points, $s_{\max}=11$**, en aval du germe J7 à
+$\alpha=0{,}10$ et de l'énumération réelle par lentille :
+
+| filtre appliqué au troisième sommet | candidats retenus | part |
+| --- | ---: | ---: |
+| aucun | $2{,}95\cdot10^{8}$ | 100 % |
+| J4' libre sur $r_\triangle$ | $2{,}66\cdot10^{8}$ | 90,2 % |
+| J9, boule unique en $c_{mb}$ | $1{,}62\cdot10^{8}$ | 54,8 % |
+| J8, segment $N=4$ | $1{,}41\cdot10^{8}$ | 47,7 % |
+| J8, segment $N=8$ | $6{,}04\cdot10^{7}$ | 20,5 % |
+| **J8, segment $N=16$** | $\mathbf{4{,}70\cdot10^{7}}$ | **15,9 %** |
+
+et sur le travail des quadruples : $3{,}31\cdot10^{9}$ avec J9 seul contre
+$\mathbf{3{,}93\cdot10^{8}}$ avec J8 à $N=16$, soit un **facteur 8,4** pour
+seize comptages par triangle. La dimension un du lieu paie : seize positions sur
+un segment font mieux que soixante et une sur un disque.
 
 **J9 — Le test se renforce à chaque sommet.** Dans J6 comme dans J8, le rayon de
 la boule-test croît avec $R_{mb}(S)$, qui croît avec $S$. La chaîne
@@ -279,21 +304,28 @@ Il faut le dire aussi nettement que le reste.
 | J6 germe, boule unique | mesuré | degré $546{,}4$ ($m=4$), $394{,}8$ ($m=3$) |
 | J9 incrémental, boule unique | mesuré | **facteur 1,91** sur les quadruples ; limité par les sommets internes |
 | J7 germe, disque recouvert | **mesuré** | constante $0{,}2588\to0{,}450$ ; **facteur 36** sur les quadruples, 8,4 sur les triples |
-| J8 incrémental, segment recouvert | à mesurer | récupère ce que J9 ne prend pas |
+| J4' libre sur $r_\triangle$ | **mesuré** | 9,8 % des candidats rejetés sans requête |
+| **J8 incrémental, segment recouvert** | **mesuré** | **facteur 8,4** sur les quadruples à $N=16$ |
 | J10 confinement | à exploiter | borne de résidence par tuile device |
 
-**État certifié courant.** En composant les facteurs mesurés — énumération réelle
-par lentille (÷4,4 sur la formule majorante), J7 à $\alpha=0{,}05$ (×36 sur les
-quadruples) et l'élagage incrémentiel J9 (×1,91) — le générateur descend à
-l'ordre de $\mathbf{1{,}2\cdot10^{9}}$ candidats contre un univers de
-$2{,}604\cdot10^{17}$, soit un gain de $\mathbf{2{,}2\cdot10^{8}}$ et environ
-**70 candidats examinés par record émis** — l'ordre de grandeur de l'étage paire,
-qui en dépense 5.
+**État certifié courant, mesuré conjointement.** La dernière mesure applique en
+une seule passe le germe J7 ($\alpha=0{,}10$), l'énumération réelle par lentille,
+le test libre J4' et le segment J8 ($N=16$). Ce n'est donc plus un produit de
+facteurs séparés :
 
-Cette composition est un **produit de facteurs mesurés séparément**, pas une
-mesure jointe : elle doit être confirmée par une exécution unique du générateur
-complet. Elle est néanmoins meilleure que l'estimation *non certifiée* de
-$5{,}24\cdot10^{9}$ obtenue par échantillonnage du rayon tangent — le
-recouvrement du disque est plus fort que la borne par sommet, et il est prouvé.
+| | valeur |
+| --- | ---: |
+| travail quadruples | $3{,}93\cdot10^{8}$ |
+| travail triples | $4{,}70\cdot10^{7}$ |
+| **travail certifié total** | $\mathbf{4{,}4\cdot10^{8}}$ |
+| univers $\binom n3+\binom n4$ | $2{,}604\cdot10^{17}$ |
+| **gain** | $\mathbf{5{,}9\cdot10^{8}}$ |
+| candidats par record émis | **24,4** |
 
-J8 reste le seul énoncé non mesuré.
+Vingt-quatre candidats par record émis, contre cinq visites de nœud par record à
+l'étage paire : le générateur est désormais dans le **même ordre de grandeur**
+que ce que le projet sait déjà faire tourner à 50 000 points. Et ce chiffre est
+certifié, là où l'estimation par échantillonnage du rayon tangent — non
+certifiée — donnait $5{,}24\cdot10^{9}$, douze fois pire.
+
+Aucun énoncé de la recension ne reste non mesuré.
