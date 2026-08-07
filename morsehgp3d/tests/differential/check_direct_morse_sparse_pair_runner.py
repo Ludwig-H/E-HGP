@@ -829,6 +829,7 @@ def require_success_projection(
         "verification_basis": "fresh_cpu_replay_every_commit",
         "requested_tile_target": 16,
         "requested_tile_roots": 1024,
+        "requested_frontier_target": 16,
         "full_geometry_replay_avoided": True,
         # R2-c: the higher-stage progress ventilation, published by both
         # backends.  This fixture is n=5, so the universe it must close is
@@ -951,6 +952,7 @@ def require_capacity_stop(report: dict[str, object]) -> None:
         "verification_basis": "not_run",
         "requested_tile_target": 16,
         "requested_tile_roots": 1024,
+        "requested_frontier_target": 16,
         "full_geometry_replay_avoided": False,
         # R2-c: the stage never ran, so its ventilation must be entirely
         # dormant -- in particular a zero universe, which is what
@@ -2578,6 +2580,12 @@ def main() -> int:
         run_case(
             binary,
             ("--point-count", "5", "--K", "4", "--higher-tile-roots", bad),
+            4,
+        )
+    for bad in ("0", "1048577"):
+        run_case(
+            binary,
+            ("--point-count", "5", "--K", "4", "--higher-frontier-target", bad),
             4,
         )
     run_case(

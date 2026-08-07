@@ -148,6 +148,7 @@ def run_one_cell(
     higher_backend: str,
     verification_basis: str,
     tile_roots: int,
+    frontier_target: int,
     cell_deadline_ms: int,
     kill_after_seconds: int,
 ) -> dict[str, Any]:
@@ -180,6 +181,11 @@ def run_one_cell(
         # censored cell still reports committed progress instead of zero.
         "--higher-tile-roots",
         str(tile_roots),
+        # T2: the frontier is host state, so it is refined independently of
+        # what a tile feeds the device -- and the G4 measurement showed the
+        # refinement is what decides whether a tile terminates at all.
+        "--higher-frontier-target",
+        str(frontier_target),
     ]
     # The runner's cooperative deadline is the first line of defence; GNU
     # timeout is the second, and a cell killed by it is an observation, not
@@ -206,6 +212,7 @@ def run_one_cell(
         "higher_backend": higher_backend,
         "requested_verification_basis": verification_basis,
         "tile_roots": tile_roots,
+        "frontier_target": frontier_target,
         "cell_deadline_ms": cell_deadline_ms,
         "command": command,
         "return_code": completed.returncode,
@@ -384,6 +391,7 @@ def main() -> int:
     parser.add_argument("--higher-backend", default="device_tiled_session")
     parser.add_argument("--verification-basis", default="tile_certified")
     parser.add_argument("--tile-roots", type=int, default=1024)
+    parser.add_argument("--frontier-target", type=int, default=16)
     parser.add_argument(
         "--cell-deadline-ms",
         type=int,
@@ -451,6 +459,7 @@ def main() -> int:
             higher_backend=arguments.higher_backend,
             verification_basis=arguments.verification_basis,
             tile_roots=arguments.tile_roots,
+            frontier_target=arguments.frontier_target,
             cell_deadline_ms=arguments.cell_deadline_ms,
             kill_after_seconds=arguments.kill_after_seconds,
         )
@@ -487,6 +496,7 @@ def main() -> int:
             "higher_backend": arguments.higher_backend,
             "requested_verification_basis": arguments.verification_basis,
             "tile_roots": arguments.tile_roots,
+            "frontier_target": arguments.frontier_target,
             "cell_deadline_ms": arguments.cell_deadline_ms,
         },
         "cells": cells,

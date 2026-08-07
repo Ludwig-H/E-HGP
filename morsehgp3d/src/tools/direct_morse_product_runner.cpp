@@ -77,6 +77,9 @@ struct Options {
   // many entries the device is fed.  Default is the slot capacity, which
   // reproduces the previous behaviour.
   std::size_t higher_tile_roots{runner_maximum_higher_tile_target};
+  // T2: how finely the anchored frontier is refined.  Host state, so it is
+  // NOT bounded by the device slot capacity.
+  std::size_t higher_frontier_target{runner_default_higher_tile_target};
   bool point_count_supplied{false};
   // SPECIFICATION_MORSEHGP3D.md 1.1: the exact industrial version carries no
   // configured budget at all.  `bounded` keeps the fail-fast diagnostic caps
@@ -264,6 +267,7 @@ struct Report {
   std::string higher_verification_basis{"not_run"};
   std::size_t higher_requested_tile_target{};
   std::size_t higher_requested_tile_roots{};
+  std::size_t higher_requested_frontier_target{};
   // R2-c progress ventilation of the device-tiled assembly.  Published on
   // every outcome, including a censored one, so that a run which does not
   // reach the terminal still says exactly how far it got.  The three
@@ -550,6 +554,7 @@ conditional_adjacent_event_vertical_propagation_qualification(
       complete_resident_diagnostic(options);
   report.higher_requested_tile_target = options.higher_tile_target;
   report.higher_requested_tile_roots = options.higher_tile_roots;
+  report.higher_requested_frontier_target = options.higher_frontier_target;
   report.effective_higher_chunk_limit =
       complete_resident_diagnostic(options)
           ? std::numeric_limits<std::size_t>::max()
@@ -613,6 +618,9 @@ void print_usage(std::ostream& output) {
          " device tile; 1 <= N <= 1024)\n"
       << "  --higher-tile-roots N (frontier roots one tile transaction"
          " consumes; 1 <= N <= 1024, default 1024)\n"
+      << "  --higher-frontier-target N (how finely the anchored frontier is"
+         " refined; host state, so not bounded by the slot capacity;"
+         " 1 <= N <= 1048576)\n"
       << "  --budget-profile bounded|unbudgeted_industrial (unbudgeted "
          "rejects every explicit --*-budget option and is the only profile "
          "a product measurement may be taken on)\n"
@@ -671,6 +679,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.higher_tile_target = parse_size(value, option);
     } else if (option == "--higher-tile-roots") {
       options.higher_tile_roots = parse_size(value, option);
+    } else if (option == "--higher-frontier-target") {
+      options.higher_frontier_target = parse_size(value, option);
     } else if (option == "--operational-deadline-ms") {
       options.operational_deadline_ms = parse_u64(value, option);
     } else {
@@ -744,6 +754,11 @@ void parse_options(int argc, char** argv, Options& options) {
       options.higher_tile_roots > runner_maximum_higher_tile_target) {
     throw std::invalid_argument(
         "--higher-tile-roots must be in [1, 1024]");
+  }
+  if (options.higher_frontier_target == 0U ||
+      options.higher_frontier_target > (1U << 20U)) {
+    throw std::invalid_argument(
+        "--higher-frontier-target must be in [1, 1048576]");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -3177,6 +3192,8 @@ void emit_report(const Report& report) {
       << report.higher_requested_tile_target
       << ",\"requested_tile_roots\":"
       << report.higher_requested_tile_roots
+      << ",\"requested_frontier_target\":"
+      << report.higher_requested_frontier_target
       << ",\"full_geometry_replay_avoided\":"
       << boolean(
              report.higher_authority_kind ==
@@ -5198,6 +5215,8 @@ bool count_reloaded_durable_segment(
     bridge_config.pre_expansion_target_entry_count =
         options.higher_tile_target;
     bridge_config.maximum_tile_root_count = options.higher_tile_roots;
+    bridge_config.frontier_refinement_target_entry_count =
+        options.higher_frontier_target;
     // R2-c: the operational deadline now reaches INSIDE the assembly.
     // Before this, it was only tested at the stage boundaries, so a 50k
     // device-tiled run that did not converge returned nothing at all --

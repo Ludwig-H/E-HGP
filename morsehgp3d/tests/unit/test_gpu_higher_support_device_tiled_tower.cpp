@@ -990,6 +990,84 @@ void run_bounded_tile_root_differential(
       label + ": the capped chain closes the same exact universe");
 }
 
+// T2: the frontier target and the tile feed are now separate knobs, and
+// only the second is bounded by the device slot capacity -- the frontier
+// is host state.  Refining the frontier far past what a tile is fed must
+// change nothing about the result.
+void run_split_target_differential(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    std::size_t tile_feed,
+    std::size_t frontier_target,
+    const std::string& label) {
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+
+  const auto reference = assemble_tile_certified(
+      cloud, index, requested_maximum_order, {});
+  gpu::HigherSupportDeviceTiledSessionBridgeConfig split;
+  split.tile_certified_commit = true;
+  split.pre_expansion_target_entry_count = tile_feed;
+  split.frontier_refinement_target_entry_count = frontier_target;
+  split.maximum_tile_root_count = 1U;
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      index, cloud);
+  const auto refined =
+      gpu::assemble_exact_higher_support_stream_device_tiled(
+          cloud,
+          index,
+          requested_maximum_order,
+          unlimited_higher_budget(),
+          split);
+
+  check(
+      reference.certified_assembled() && refined.certified_assembled(),
+      label + ": both the reference and the finely refined assemblies seal");
+  if (!reference.certified_assembled() || !refined.certified_assembled()) {
+    return;
+  }
+  check(
+      refined.higher->events == reference.higher->events &&
+          refined.higher->relevant_extra_shell_diagnostics ==
+              reference.higher->relevant_extra_shell_diagnostics &&
+          refined.higher->requirements == reference.higher->requirements,
+      label + ": refining the frontier changes no scientific record");
+  check(
+      refined.progress_audit.total_support_count ==
+              reference.progress_audit.total_support_count &&
+          refined.progress_audit.resolved_support_count ==
+              reference.progress_audit.resolved_support_count &&
+          refined.progress_audit.remaining_frontier_support_count == 0U,
+      label + ": the finely refined chain closes the same exact universe");
+  check(
+      refined.bridge_audit.committed_expansion_transition_count >=
+          reference.bridge_audit.committed_expansion_transition_count,
+      label + ": a higher frontier target commits at least as many "
+              "expansions");
+}
+
+void test_split_target_differentials() {
+  const std::array<CertifiedPoint3, 8U> sphere{
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(0.0, 0.0, -1.0),
+      point(0.5773502691896258, 0.5773502691896258, 0.5773502691896257),
+      point(-0.5773502691896258, -0.5773502691896258, 0.5773502691896258),
+  };
+  // A tile fed two entries while the frontier is refined to sixty-four:
+  // the two knobs are genuinely independent.
+  run_split_target_differential(
+      sphere, 3U, 2U, 64U, "split 2/64 sphere8/K3");
+  run_split_target_differential(
+      sphere, 3U, 1U, 256U, "split 1/256 sphere8/K3");
+}
+
 void test_bounded_tile_root_differentials() {
   const std::array<CertifiedPoint3, 8U> sphere{
       point(1.0, 0.0, 0.0),
@@ -1075,6 +1153,7 @@ int main() {
     test_assembly_differentials();
     test_tile_certified_assembly_differentials();
     test_bounded_tile_root_differentials();
+    test_split_target_differentials();
     test_operational_guard_differentials();
     test_failed_assembly_publishes_its_transcript();
     test_tower_differentials();

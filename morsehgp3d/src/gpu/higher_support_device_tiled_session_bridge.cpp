@@ -1016,6 +1016,16 @@ void Phase15HigherSupportDeviceTiledSessionBridgeState::
     throw std::invalid_argument(
         "the tile root cap must be in [1, slot_tile_capacity]");
   }
+  // Deliberately NOT bounded by slot_tile_capacity: the frontier is host
+  // state.  The upper bound is a fail-closed input-domain check on an
+  // option value, not a budget on the computation -- one million entries
+  // of a few dozen bytes each is already far past anything the quadratic
+  // per-expansion commit cost makes usable.
+  if (config.frontier_refinement_target_entry_count == 0U ||
+      config.frontier_refinement_target_entry_count > (1U << 20U)) {
+    throw std::invalid_argument(
+        "the frontier refinement target must be in [1, 1048576]");
+  }
   if (config.maximum_session_pre_expansion_transition_count == 0U) {
     throw std::invalid_argument(
         "the session pre-expansion backstop must be at least one");
@@ -1490,7 +1500,7 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
     // and a single tile then had to carry the whole universe.
     std::size_t expansion_index = cur_frontier.size();
     exact::BigInt expansion_mass{0};
-    if (cur_frontier.size() < config.pre_expansion_target_entry_count) {
+    if (cur_frontier.size() < config.effective_frontier_target()) {
       for (std::size_t index = 0U; index < cur_frontier.size(); ++index) {
         if (!entry_expandable(geometry, cur_frontier[index])) {
           continue;

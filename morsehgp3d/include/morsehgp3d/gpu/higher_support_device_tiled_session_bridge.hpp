@@ -126,6 +126,28 @@ struct HigherSupportDeviceTiledSessionBridgeConfig {
   // behaviour exactly.
   std::size_t maximum_tile_root_count{
       higher_support_device_tiled_frontier_maximum_slot_tile_capacity};
+  // T2: how finely the session refines the ANCHORED FRONTIER, which is a
+  // different thing from how many entries a tile feeds the device.
+  //
+  // The frontier lives in the anchored checkpoint, host-side; it has no
+  // reason whatsoever to fit in the engine's slots.  Only the TILE entries
+  // must, and pre_expand already clamps those to slot_tile_capacity.  Until
+  // now a single knob served both, so the frontier could never be refined
+  // past 1024 entries -- and the G4 measurement showed that the refinement
+  // is precisely what decides whether a tile terminates: at n=512 with one
+  // root per tile, a target of 64 or 256 committed ZERO tiles while 1024
+  // committed one, because a coarse frontier leaves roots too heavy to
+  // resolve.  The effective target is the larger of the two, so every
+  // existing configuration behaves exactly as before.
+  std::size_t frontier_refinement_target_entry_count{
+      higher_support_device_tiled_session_bridge_default_pre_expansion_target};
+
+  [[nodiscard]] std::size_t effective_frontier_target() const noexcept {
+    return pre_expansion_target_entry_count >
+                   frontier_refinement_target_entry_count
+               ? pre_expansion_target_entry_count
+               : frontier_refinement_target_entry_count;
+  }
 
   friend bool operator==(
       const HigherSupportDeviceTiledSessionBridgeConfig&,
