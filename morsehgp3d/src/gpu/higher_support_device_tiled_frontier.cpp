@@ -1143,7 +1143,8 @@ HigherSupportDeviceTiledRecordDrainLease::
         const void* slot_controls,
         std::size_t authorized_slot_control_extent,
         int cuda_device,
-        bool host_fake)
+        bool host_fake,
+        bool record_segments_host_readable)
     : audit_(std::move(audit)),
       retained_owner_(std::move(retained_owner)),
       source_owner_authority_(std::move(source_owner_authority)),
@@ -1155,7 +1156,8 @@ HigherSupportDeviceTiledRecordDrainLease::
       slot_controls_(slot_controls),
       authorized_slot_control_extent_(authorized_slot_control_extent),
       cuda_device_(cuda_device),
-      host_fake_(host_fake) {}
+      host_fake_(host_fake),
+      record_segments_host_readable_(record_segments_host_readable) {}
 
 bool HigherSupportDeviceTiledRecordDrainLease::ready() const noexcept {
   // Independent self-audit: every expectation below is recomputed from the
@@ -1273,12 +1275,11 @@ bool HigherSupportDeviceTiledRecordDrainLease::host_fake()
 
 bool HigherSupportDeviceTiledRecordDrainLease::
     host_readable_record_segments() const noexcept {
-  // Deliberately NOT `!cuda_resident()`: an unready lease exposes nothing
-  // either.  The host fake allocates its segments in host memory; the CUDA
-  // engine allocates them with cudaMalloc and republishes those pointers
-  // unchanged, so they stay unreadable from the host until the driver
-  // stages them device-to-host.
-  return ready() && host_fake_;
+  // Deliberately NOT `!cuda_resident()` and no longer `host_fake_`: an
+  // unready lease exposes nothing either, and a CUDA batch is host-readable
+  // exactly when its producer staged the arenas.  The fact travels with the
+  // batch; it is never inferred from the execution kind.
+  return ready() && record_segments_host_readable_;
 }
 
 detail::Phase15HigherSupportDeviceTiledRecordDrainPrivateViews
@@ -1723,7 +1724,8 @@ HigherSupportDeviceTiledFrontierContext::advance() {
               batch.slot_controls,
               slot_count,
               batch.cuda_device,
-              host_fake};
+              host_fake,
+              batch.record_segments_host_readable};
           record_drain.emplace(std::move(detached_lease));
           if (!record_drain->ready()) {
             throw std::runtime_error(

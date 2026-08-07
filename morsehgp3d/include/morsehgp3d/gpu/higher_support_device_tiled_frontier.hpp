@@ -264,15 +264,14 @@ class HigherSupportDeviceTiledRecordDrainLease final {
   // R2-f.  Whether the prune, terminal and receipt SEGMENTS this lease
   // publishes may be dereferenced by the host.
   //
-  // Today only the host fake may.  In a CUDA build the segment pointers are
-  // the engine's own cudaMalloc arenas, republished verbatim: the driver
-  // stages exactly three things device-to-host -- the 16-byte control
-  // block, the rational drain tasks, and `batch.host_slot_controls` -- and
-  // the record arenas are not among them.  A consumer that walks the
-  // segments (the session bridge's record drain is the only one) would
-  // therefore be reading device memory through a host pointer.  Callers
-  // must fail closed on this predicate rather than on `host_fake()`, so
-  // that staging the segments D2H is the single change that flips it.
+  // The host fake allocates its arenas in host memory and always may.  A
+  // CUDA batch may only once the driver has staged the three record arenas
+  // device-to-host at the original per-slot stride and repointed the
+  // segments at that staging; before R2-f it republished the cudaMalloc
+  // pointers verbatim, so any host consumer -- the session bridge's record
+  // drain is the only one -- was reading device memory through a host
+  // pointer.  The producer asserts the fact, the consumer fails closed on
+  // it, and no path infers it from the execution kind.
   [[nodiscard]] bool host_readable_record_segments() const noexcept;
   [[nodiscard]] const HigherSupportDeviceTiledRecordDrainLeaseAudit& audit()
       const noexcept {
@@ -291,7 +290,8 @@ class HigherSupportDeviceTiledRecordDrainLease final {
       const void* slot_controls,
       std::size_t authorized_slot_control_extent,
       int cuda_device,
-      bool host_fake);
+      bool host_fake,
+      bool record_segments_host_readable);
 
   HigherSupportDeviceTiledRecordDrainLeaseAudit audit_{};
   std::shared_ptr<void> retained_owner_;
@@ -304,6 +304,7 @@ class HigherSupportDeviceTiledRecordDrainLease final {
   std::size_t authorized_slot_control_extent_{};
   int cuda_device_{-1};
   bool host_fake_{false};
+  bool record_segments_host_readable_{false};
 
   friend class HigherSupportDeviceTiledFrontierContext;
   friend class detail::

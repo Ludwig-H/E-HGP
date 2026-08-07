@@ -2258,6 +2258,9 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
   batch.terminal_records = storage->terminal_records.data();
   batch.probe_receipts = storage->probe_receipts.data();
   batch.slot_controls = storage->slot_controls.data();
+  // R2-f: the fake's arenas are host vectors retained by `storage`, so its
+  // segments are readable by the host without any staging.
+  batch.record_segments_host_readable = true;
   batch.metadata_digest =
       phase15_higher_support_device_tiled_metadata_digest(batch);
   if (corruption == Corruption::metadata_digest_corruption) {

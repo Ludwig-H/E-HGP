@@ -1605,3 +1605,15 @@ Le `catch (...)` de l'assemblage device-tuilé ne pouvait pas atteindre le pont 
 La boucle de transactions et le scellement terminal tournent désormais sous leur propre `catch`, à portée du pont : il prend l'instantané de progression avant de rendre la main, et marque `assembly_threw`. Le `catch` extérieur ne couvre plus que la construction de l'autorité, de l'assembleur et du lease — le seul cas où une ventilation vide est légitime, puisqu'il n'y a pas encore de pont. Le runner distingue les trois issues dans `higher_support.status` : `assembly_threw`, `bridge_poisoned`, `not_assembled`.
 
 **Certificat, une invariante universelle.** Sur quatre modes de corruption du fake — partition cassée, masse sans record, recul cumulatif, digest de racine forgé — l'assemblage échoue et, **dans tous les cas**, sa ventilation énonce l'univers exact $C(n,3)+C(n,4)$, ferme encore $R + C(F)$, ne mint aucun certificat et ne porte aucun résultat de flux. Suites pont M2 et tour device vertes, checker complet du runner vert.
+
+## R2-f : le staging device vers hôte des segments de records
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`, `public_status=not_claimed`.
+
+Le blocage identifié au préflight est levé côté contrat, et écrit côté CUDA. Le moteur publiait ses trois arènes de records comme pointeurs `cudaMalloc` bruts, que le drainage du pont parcourt en lectures hôte.
+
+**Le driver stage désormais les trois arènes.** Une copie 2D par arène, **à la foulée d'origine** : les consommateurs adressent `segment[slot * stride + index]`, donc compacter les records mésadresserait silencieusement tous les slots sauf le premier. Seul le préfixe committé d'un slot a un sens, donc la largeur de ligne copiée est le **maximum des comptes committés** sur les slots, lu dans les contrôles déjà rapatriés — puis bornée par la capacité réellement allouée, car un contrôle qui déborde son segment fixe est un défaut device que le consommateur rejette de toute façon. Le reste de chaque ligne reste initialisé à zéro et n'est jamais lu.
+
+**Un seul fait, porté par le batch.** `record_segments_host_readable` est asserté par le fake (ses arènes sont des vecteurs hôtes) et par le driver **seulement après** les trois copies et leur synchronisation. Le lease le transporte, `host_readable_record_segments()` le renvoie, et le drainage échoue fermé dessus. Aucun chemin ne l'infère du genre d'exécution : le producteur l'affirme, le consommateur s'y fie.
+
+**Ce que cela ne dit pas.** Le côté hôte est validé — suites moteur de slot, pont M2 et tour device vertes avec le fait porté de bout en bout. **Le staging CUDA lui-même n'a jamais été compilé** : il n'existe pas de `nvcc` dans l'environnement de développement. C'est le premier travail de la session G4, immédiatement suivi de la parité du pont contre le lanceur natif à n=32, qui est la seule chose capable de certifier que le staging adresse juste.

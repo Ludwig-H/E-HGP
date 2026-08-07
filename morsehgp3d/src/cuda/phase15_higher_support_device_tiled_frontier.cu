@@ -1277,10 +1277,104 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
     batch.retained_output_owner = resources;
     batch.source_cloud_identity_authority =
         traversal.source_cloud_identity;
-    batch.prune_records = resources->prunes();
-    batch.terminal_records = resources->terminals();
-    batch.probe_receipts = resources->receipts();
-    batch.slot_controls = resources->controls();
+    // R2-f: stage the three record arenas device-to-host.
+    //
+    // Everything below the driver walks these segments with host loads.
+    // The arenas are cudaMalloc allocations, so publishing them raw -- as
+    // this code did until now -- handed a host consumer a device pointer.
+    // The staging preserves the ORIGINAL per-slot stride: consumers address
+    // `segment[slot * stride + index]`, so compacting would mis-address
+    // every slot but the first.  Only the committed prefix of a slot means
+    // anything, so the copied row width is the maximum committed count over
+    // the slots, taken from the controls already staged above; the rest of
+    // each row stays value-initialised and is never read.
+    std::size_t staged_prunes_per_slot = 0U;
+    std::size_t staged_terminals_per_slot = 0U;
+    std::size_t staged_receipts_per_slot = 0U;
+    for (const Phase15HigherSupportDeviceTiledSlotControl& control :
+         batch.host_slot_controls) {
+      staged_prunes_per_slot = std::max(
+          staged_prunes_per_slot,
+          static_cast<std::size_t>(control.prune_record_count));
+      staged_terminals_per_slot = std::max(
+          staged_terminals_per_slot,
+          static_cast<std::size_t>(control.terminal_record_count));
+      staged_receipts_per_slot = std::max(
+          staged_receipts_per_slot,
+          static_cast<std::size_t>(control.probe_receipt_count));
+    }
+    // A control that overran its fixed segment is a device defect; the
+    // consumer rejects it, and clamping here only keeps the copy inside
+    // the arena that was actually allocated.
+    staged_prunes_per_slot =
+        std::min(staged_prunes_per_slot, request.prune_records_per_slot);
+    staged_terminals_per_slot = std::min(
+        staged_terminals_per_slot, request.terminal_records_per_slot);
+    staged_receipts_per_slot =
+        std::min(staged_receipts_per_slot, request.probe_receipts_per_slot);
+
+    // One strided copy per arena.  A zero row width means no slot committed
+    // a record of that kind; the destination stays empty and the published
+    // pointer stays null, which the consumer already refuses.
+    const auto stage_segment =
+        [&](void* destination,
+            const void* source,
+            std::size_t element_bytes,
+            std::size_t stride_elements,
+            std::size_t staged_elements,
+            const char* what) {
+          if (staged_elements == 0U || request.slot_count == 0U) {
+            return;
+          }
+          check_cuda(
+              cudaMemcpy2DAsync(
+                  destination,
+                  stride_elements * element_bytes,
+                  source,
+                  stride_elements * element_bytes,
+                  staged_elements * element_bytes,
+                  request.slot_count,
+                  cudaMemcpyDeviceToHost,
+                  resources->stream()),
+              what);
+        };
+
+    batch.host_prune_records.assign(
+        prune_capacity, Phase15HigherSupportDeviceTiledPruneRecord{});
+    batch.host_terminal_records.assign(
+        terminal_capacity, Phase15HigherSupportDeviceTiledTerminalRecord{});
+    batch.host_probe_receipts.assign(
+        receipt_capacity, Phase15HigherSupportDeviceTiledProbeReceipt{});
+    stage_segment(
+        batch.host_prune_records.data(),
+        resources->prunes(),
+        sizeof(Phase15HigherSupportDeviceTiledPruneRecord),
+        request.prune_records_per_slot,
+        staged_prunes_per_slot,
+        "cudaMemcpy2DAsync Phase 15 higher-support prune record staging");
+    stage_segment(
+        batch.host_terminal_records.data(),
+        resources->terminals(),
+        sizeof(Phase15HigherSupportDeviceTiledTerminalRecord),
+        request.terminal_records_per_slot,
+        staged_terminals_per_slot,
+        "cudaMemcpy2DAsync Phase 15 higher-support terminal record staging");
+    stage_segment(
+        batch.host_probe_receipts.data(),
+        resources->receipts(),
+        sizeof(Phase15HigherSupportDeviceTiledProbeReceipt),
+        request.probe_receipts_per_slot,
+        staged_receipts_per_slot,
+        "cudaMemcpy2DAsync Phase 15 higher-support probe receipt staging");
+    resources->synchronize();
+    ++synchronization_count;
+
+    batch.prune_records = batch.host_prune_records.data();
+    batch.terminal_records = batch.host_terminal_records.data();
+    batch.probe_receipts = batch.host_probe_receipts.data();
+    batch.slot_controls = batch.host_slot_controls.data();
+    // Asserted only after the three copies and their synchronisation.
+    batch.record_segments_host_readable = true;
     batch.physical_product_record_capacity = product_capacity;
     batch.physical_prune_record_capacity = prune_capacity;
     batch.physical_terminal_record_capacity = terminal_capacity;

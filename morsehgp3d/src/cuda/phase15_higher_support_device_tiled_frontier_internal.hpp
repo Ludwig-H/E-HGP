@@ -508,6 +508,33 @@ struct Phase15HigherSupportDeviceTiledBatch {
   const Phase15HigherSupportDeviceTiledSlotControl* slot_controls{};
   std::vector<Phase15HigherSupportDeviceTiledSlotControl>
       host_slot_controls;
+  // R2-f: host staging of the three record arenas.
+  //
+  // In CUDA execution the arenas above are the engine's own cudaMalloc
+  // allocations, so the four segment pointers are DEVICE pointers and no
+  // host consumer may walk them.  The driver therefore stages them
+  // device-to-host into these vectors and repoints prune_records,
+  // terminal_records and probe_receipts at them before publishing the
+  // batch.  The staging keeps the ORIGINAL per-slot stride -- consumers
+  // address `segment[slot * stride + index]`, so a compacted copy would
+  // silently mis-address every slot but the first.  Only the committed
+  // prefix of each slot carries meaning; the copy width is the maximum
+  // committed count over the slots, read from host_slot_controls.
+  //
+  // The host fake allocates its arenas in host memory and leaves these
+  // empty, publishing its own pointers directly.
+  std::vector<Phase15HigherSupportDeviceTiledPruneRecord>
+      host_prune_records;
+  std::vector<Phase15HigherSupportDeviceTiledTerminalRecord>
+      host_terminal_records;
+  std::vector<Phase15HigherSupportDeviceTiledProbeReceipt>
+      host_probe_receipts;
+  // The single fact the drain lease publishes.  True only when the four
+  // segment pointers may be dereferenced by the host: always for the host
+  // fake, and for CUDA only after the staging above has run.  A producer
+  // that cannot honour it must leave it false, and the consumer fails
+  // closed.
+  bool record_segments_host_readable{false};
   std::size_t physical_product_record_capacity{};
   std::size_t physical_prune_record_capacity{};
   std::size_t physical_terminal_record_capacity{};
