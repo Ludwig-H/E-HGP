@@ -425,6 +425,20 @@ void drain_record_lease(
       views.probe_receipts == nullptr || views.slot_controls == nullptr) {
     fail("a drain lease does not expose ready record views");
   }
+  // R2-f, fail-closed.  Every loop below walks the segments with host
+  // loads.  A CUDA-resident lease publishes the engine's cudaMalloc arenas
+  // verbatim, so without this refusal the drain reads device memory
+  // through a host pointer -- undefined behaviour that would surface on G4
+  // as a fault or as silent garbage, on the first tile transaction, and
+  // never locally because the fake is host-resident.  The tile-certified
+  // path is therefore NOT yet executable against the native launcher;
+  // staging the segments device-to-host is what lifts this.
+  if (!lease.host_readable_record_segments()) {
+    fail(
+        "a drain lease whose record segments are not host-readable cannot "
+        "be walked by the host: the device-resident record staging is "
+        "still missing");
+  }
   std::size_t prune_total = 0U;
   std::size_t terminal_total = 0U;
   std::size_t receipt_total = 0U;

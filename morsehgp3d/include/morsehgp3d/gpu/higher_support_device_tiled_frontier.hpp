@@ -261,6 +261,19 @@ class HigherSupportDeviceTiledRecordDrainLease final {
   [[nodiscard]] bool ready() const noexcept;
   [[nodiscard]] bool cuda_resident() const noexcept;
   [[nodiscard]] bool host_fake() const noexcept;
+  // R2-f.  Whether the prune, terminal and receipt SEGMENTS this lease
+  // publishes may be dereferenced by the host.
+  //
+  // Today only the host fake may.  In a CUDA build the segment pointers are
+  // the engine's own cudaMalloc arenas, republished verbatim: the driver
+  // stages exactly three things device-to-host -- the 16-byte control
+  // block, the rational drain tasks, and `batch.host_slot_controls` -- and
+  // the record arenas are not among them.  A consumer that walks the
+  // segments (the session bridge's record drain is the only one) would
+  // therefore be reading device memory through a host pointer.  Callers
+  // must fail closed on this predicate rather than on `host_fake()`, so
+  // that staging the segments D2H is the single change that flips it.
+  [[nodiscard]] bool host_readable_record_segments() const noexcept;
   [[nodiscard]] const HigherSupportDeviceTiledRecordDrainLeaseAudit& audit()
       const noexcept {
     return audit_;

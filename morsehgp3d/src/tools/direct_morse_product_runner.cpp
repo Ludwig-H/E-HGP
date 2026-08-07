@@ -10,6 +10,7 @@
 #if MORSEHGP3D_RUNNER_HAS_DEVICE_TILED_HIGHER
 #include "morsehgp3d/gpu/higher_support_device_tiled_tower.hpp"
 #endif
+#include "morsehgp3d/exact/integer.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
@@ -238,6 +239,25 @@ struct Report {
   // a run can never report a stronger basis than the one it actually used.
   std::string higher_verification_basis{"not_run"};
   std::size_t higher_requested_tile_target{};
+  // R2-c progress ventilation of the device-tiled assembly.  Published on
+  // every outcome, including a censored one, so that a run which does not
+  // reach the terminal still says exactly how far it got.  The three
+  // masses are canonical decimal exact::BigInt strings: their ratio is the
+  // exact fraction of C(n,3)+C(n,4) decided before the stop.
+  std::string higher_assembly_censure{"none"};
+  std::string higher_total_support_mass{"0"};
+  std::string higher_resolved_support_mass{"0"};
+  std::string higher_remaining_frontier_support_mass{"0"};
+  std::size_t higher_minimal_leaf_count{};
+  std::size_t higher_above_rank_leaf_count{};
+  std::size_t higher_leaf_support_analyses{};
+  std::size_t higher_point_classifications{};
+  std::size_t higher_closed_ball_node_visits{};
+  std::size_t higher_committed_transactions{};
+  std::size_t higher_committed_tile_transactions{};
+  std::size_t higher_committed_expansion_transitions{};
+  std::size_t higher_committed_tile_slots{};
+  std::size_t higher_frontier_entries{};
 
   bool terminal_catalog_certified{false};
   std::size_t canonical_point_count{};
@@ -928,6 +948,31 @@ make_sparse_pair_total_capacity(const Options& options) {
 
 [[nodiscard]] ExactHigherSupportStreamBudget make_higher_budget(
     const Options& options) {
+  if (complete_resident_diagnostic(options)) {
+    // R2-e.  This mode is the one that must run without artificial caps,
+    // and it already disables them on the pair axes -- but the higher
+    // budget still derived every axis from --support-work-budget, and two
+    // of those derivations are products: 8*W+2 for the frontier and W*n
+    // for the point classifications.  At n = 50 000 any W above
+    // 2^64 / 50 000 therefore made the runner throw an overflow BEFORE
+    // reaching the pipeline, so the uncapped 50k campaign was
+    // unreachable from the product binary.  Like the pair one, this value
+    // disables the caller's diagnostic stop; it is deliberately reported
+    // as a representational ceiling, never as a mathematical completion
+    // envelope, and it certifies nothing.
+    const std::size_t representational_ceiling =
+        std::numeric_limits<std::size_t>::max();
+    return {
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+    };
+  }
   const std::size_t frontier_capacity =
       make_support_frontier_capacity(options);
   const std::size_t higher_point_classification_capacity =
@@ -3014,7 +3059,32 @@ void emit_report(const Report& report) {
       << boolean(
              report.higher_authority_kind ==
              "sealed_anchored_fixed_chunk_run")
-      << "},\n"
+      << ",\"assembly_censure\":\""
+      << report.higher_assembly_censure
+      << "\",\"progress\":{\"total_support_mass\":\""
+      << report.higher_total_support_mass
+      << "\",\"resolved_support_mass\":\""
+      << report.higher_resolved_support_mass
+      << "\",\"remaining_frontier_support_mass\":\""
+      << report.higher_remaining_frontier_support_mass
+      << "\",\"minimal_leaves\":" << report.higher_minimal_leaf_count
+      << ",\"above_rank_leaves\":" << report.higher_above_rank_leaf_count
+      << ",\"leaf_support_analyses\":"
+      << report.higher_leaf_support_analyses
+      << ",\"point_classifications\":"
+      << report.higher_point_classifications
+      << ",\"closed_ball_node_visits\":"
+      << report.higher_closed_ball_node_visits
+      << ",\"committed_transactions\":"
+      << report.higher_committed_transactions
+      << ",\"committed_tile_transactions\":"
+      << report.higher_committed_tile_transactions
+      << ",\"committed_expansion_transitions\":"
+      << report.higher_committed_expansion_transitions
+      << ",\"committed_tile_slots\":"
+      << report.higher_committed_tile_slots
+      << ",\"frontier_entries\":" << report.higher_frontier_entries
+      << "}},\n"
       << "  \"pipeline_counts\":{\"terminal_catalog_certified\":"
       << boolean(report.terminal_catalog_certified)
       << ",\"terminal_events\":"
@@ -4385,6 +4455,64 @@ void emit_report(const Report& report) {
   return 6;
 }
 
+// R2-c: the higher-stage progress ventilation, published on EVERY outcome
+// and by BOTH backends.  A censored or rejected run is exactly the case
+// where these numbers matter most -- how much of C(n,3)+C(n,4) was decided,
+// how many minimal terminals were drained, how much closed-ball work the
+// host paid -- and before this the runner published none of them.  Filling
+// it from the host fixed-chunk session too is what makes the two
+// verification bases comparable inside a single report.  Nothing here is a
+// scientific claim: a censored run still carries its censure and mints no
+// certificate.
+void publish_higher_progress_audit(
+    Report& report,
+    const ExactHigherSupportStreamAudit& progress,
+    std::size_t frontier_entry_count) {
+  report.higher_total_support_mass =
+      morsehgp3d::exact::canonical_integer_string(
+          progress.total_support_count);
+  report.higher_resolved_support_mass =
+      morsehgp3d::exact::canonical_integer_string(
+          progress.resolved_support_count);
+  report.higher_remaining_frontier_support_mass =
+      morsehgp3d::exact::canonical_integer_string(
+          progress.remaining_frontier_support_count);
+  report.higher_minimal_leaf_count = progress.minimal_leaf_count;
+  report.higher_above_rank_leaf_count = progress.above_rank_leaf_count;
+  report.higher_leaf_support_analyses =
+      progress.leaf_support_analysis_count;
+  report.higher_point_classifications = progress.point_classification_count;
+  report.higher_closed_ball_node_visits =
+      progress.closed_ball_node_visit_count;
+  report.higher_frontier_entries = frontier_entry_count;
+}
+
+#if MORSEHGP3D_RUNNER_HAS_DEVICE_TILED_HIGHER
+void publish_device_tiled_assembly_progress(
+    Report& report,
+    const morsehgp3d::gpu::HigherSupportDeviceTiledStreamAssembly&
+        assembly) {
+  report.higher_assembly_censure = std::string{
+      morsehgp3d::gpu::higher_support_device_tiled_assembly_censure_text(
+          assembly.censure)};
+  publish_higher_progress_audit(
+      report,
+      assembly.progress_audit,
+      assembly.progress_frontier_entry_count);
+  // The transaction split is the bridge's own accounting, and it is the
+  // number R2 needs: expansion transitions are pure host commits, tile
+  // transactions are the only ones that reach the device.
+  report.higher_committed_transactions =
+      assembly.bridge_audit.committed_transaction_count;
+  report.higher_committed_tile_transactions =
+      assembly.bridge_audit.committed_tile_transaction_count;
+  report.higher_committed_expansion_transitions =
+      assembly.bridge_audit.committed_expansion_transition_count;
+  report.higher_committed_tile_slots =
+      assembly.bridge_audit.committed_tile_slot_count;
+}
+#endif
+
 [[nodiscard]] morsehgp3d::contract::CanonicalId durable_digest_text(
     std::string_view text) {
   morsehgp3d::contract::CanonicalSha256Builder builder;
@@ -4944,14 +5072,39 @@ bool count_reloaded_durable_segment(
         "the runner tile-target bound drifted from the device slot capacity");
     bridge_config.pre_expansion_target_entry_count =
         options.higher_tile_target;
+    // R2-c: the operational deadline now reaches INSIDE the assembly.
+    // Before this, it was only tested at the stage boundaries, so a 50k
+    // device-tiled run that did not converge returned nothing at all --
+    // not even a ventilation.  The guard is cooperative, tested between
+    // committed transitions only, and can never certify anything.
+    morsehgp3d::gpu::HigherSupportDeviceTiledAssemblyOperationalGuard
+        assembly_guard;
+    // Armed on exactly the same condition as every other deadline test in
+    // this runner: outside complete_resident_diagnostic the deadline field
+    // is total_start and would censure the assembly instantly.
+    if (complete_resident_diagnostic(options)) {
+      assembly_guard.deadline = operational_deadline;
+    }
     const auto assembly =
         morsehgp3d::gpu::assemble_exact_higher_support_stream_device_tiled(
             cloud, index, options.maximum_order, higher_budget,
-            bridge_config);
+            bridge_config, assembly_guard);
     higher_stage_end = Clock::now();
     report.timings.higher_support_ms =
         milliseconds(higher_stage_end - pair_end);
+    publish_device_tiled_assembly_progress(report, assembly);
     if (!assembly.certified_assembled()) {
+      if (assembly.censored()) {
+        report.higher_status = "censored";
+        report.higher_stop_reason =
+            std::string{
+                morsehgp3d::gpu::
+                    higher_support_device_tiled_assembly_censure_text(
+                        assembly.censure)};
+        report.higher_authority_kind = "anchored_session_chain_certificate";
+        return emit_operational_deadline(
+            report, "higher_support_device_tiled_assembly", total_start);
+      }
       report.higher_status = assembly.bridge_poisoned
                                  ? "bridge_poisoned"
                                  : "not_assembled";
@@ -5044,8 +5197,10 @@ bool count_reloaded_durable_segment(
   higher_stage_end = higher_end;
   report.timings.higher_support_ms =
       milliseconds(higher_end - pair_end);
+  const ExactHigherSupportCheckpoint& higher_trusted =
+      higher_session.trusted_checkpoint();
   const ExactHigherSupportStreamAudit& higher_audit =
-      higher_session.trusted_checkpoint().cumulative_audit;
+      higher_trusted.cumulative_audit;
   report.higher_work_units = higher_audit.work_unit_count;
   report.higher_product_visits =
       higher_audit.support_product_visit_count;
@@ -5058,6 +5213,11 @@ bool count_reloaded_durable_segment(
   report.higher_prune_certificates =
       higher_audit.emitted_prune_certificate_count;
   report.higher_chunk_count = higher_session.chunk_count();
+  // Same ventilation as the device path, from the host session's own
+  // trusted checkpoint: the two verification bases become comparable in a
+  // single report, which is what the R2 sweep reads.
+  publish_higher_progress_audit(
+      report, higher_audit, higher_trusted.frontier.size());
 
   if (report.operational_deadline_reached) {
     report.higher_status = "operational_deadline";

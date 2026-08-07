@@ -4,6 +4,7 @@
 #include "morsehgp3d/gpu/higher_support_device_tiled_tower.hpp"
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -612,6 +613,210 @@ void test_tile_certified_assembly_differentials() {
       sphere, 3U, "tile-certified sphere8/K3");
 }
 
+// R2-c differential: the operational guard is a session circuit breaker,
+// never a scientific parameter.  Three properties are certified here.
+// (i) Fidelity: an unarmed guard reproduces the unguarded assembly exactly.
+// (ii) Prefix truncation: a guard armed at k committed transitions yields
+// exactly the state the unguarded chain held after its own k-th commit --
+// same resolved mass, same terminal count, same frontier -- so the guard
+// only ever truncates a prefix of the identical chain.  (iii) Honesty: a
+// censored assembly certifies nothing, mints no certificate, and still
+// satisfies the anchored induction identity R + C(F) = C(n,3)+C(n,4) in
+// exact::BigInt, which is what makes its progress transcript a usable
+// measurement rather than a guess.
+[[nodiscard]] gpu::HigherSupportDeviceTiledStreamAssembly
+assemble_tile_certified(
+    const CanonicalPointCloud& cloud,
+    const MortonLbvhIndex& index,
+    std::size_t requested_maximum_order,
+    const gpu::HigherSupportDeviceTiledAssemblyOperationalGuard& guard) {
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      index, cloud);
+  gpu::HigherSupportDeviceTiledSessionBridgeConfig config;
+  config.tile_certified_commit = true;
+  return gpu::assemble_exact_higher_support_stream_device_tiled(
+      cloud,
+      index,
+      requested_maximum_order,
+      unlimited_higher_budget(),
+      config,
+      guard);
+}
+
+void run_operational_guard_differential(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    const std::string& label) {
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const exact::BigInt universe =
+      exact_higher_support_candidate_universe_size(cloud.size());
+
+  const auto unguarded = assemble_tile_certified(
+      cloud, index, requested_maximum_order, {});
+  check(
+      unguarded.certified_assembled(),
+      label + ": the unguarded tile-certified assembly seals");
+  if (!unguarded.certified_assembled()) {
+    return;
+  }
+  check(
+      !unguarded.censored() &&
+          unguarded.censure ==
+              gpu::HigherSupportDeviceTiledAssemblyCensure::none,
+      label + ": an unarmed guard censors nothing");
+  // The progress transcript is published on the successful path too, and
+  // it is the sealed audit itself -- not a parallel accounting.
+  check(
+      unguarded.progress_audit.resolved_support_count ==
+              unguarded.higher->audit.resolved_support_count &&
+          unguarded.progress_audit.total_support_count == universe &&
+          unguarded.progress_audit.remaining_frontier_support_count == 0U &&
+          unguarded.progress_frontier_entry_count == 0U,
+      label + ": the terminal progress transcript is the sealed audit");
+  const std::size_t terminal_transaction_count =
+      unguarded.progress_committed_transaction_count;
+  check(
+      terminal_transaction_count != 0U,
+      label + ": the chain committed at least one transition");
+
+  // (iii) Zero-transaction censure: nothing decided, the whole universe
+  // still on the frontier, no certificate.
+  gpu::HigherSupportDeviceTiledAssemblyOperationalGuard immediate;
+  immediate.maximum_committed_transaction_count = 0U;
+  const auto censored_at_zero = assemble_tile_certified(
+      cloud, index, requested_maximum_order, immediate);
+  check(
+      censored_at_zero.censored() &&
+          censored_at_zero.censure ==
+              gpu::HigherSupportDeviceTiledAssemblyCensure::
+                  committed_transaction_ceiling &&
+          !censored_at_zero.certified_assembled() &&
+          !censored_at_zero.certificate.minted() &&
+          !censored_at_zero.higher.has_value(),
+      label + ": a zero-transaction ceiling censors and certifies nothing");
+  check(
+      censored_at_zero.progress_audit.resolved_support_count == 0U &&
+          censored_at_zero.progress_audit
+                  .remaining_frontier_support_count == universe &&
+          censored_at_zero.progress_audit.total_support_count == universe &&
+          censored_at_zero.progress_committed_transaction_count == 0U,
+      label + ": the censored-at-zero transcript holds the whole universe");
+
+  // (ii) Prefix truncation, and (iii) the induction identity at every stop.
+  exact::BigInt previous_resolved{0};
+  for (std::size_t ceiling = 1U; ceiling <= terminal_transaction_count;
+       ++ceiling) {
+    gpu::HigherSupportDeviceTiledAssemblyOperationalGuard guard;
+    guard.maximum_committed_transaction_count = ceiling;
+    const auto truncated =
+        assemble_tile_certified(cloud, index, requested_maximum_order, guard);
+    const std::string at = label + " @" + std::to_string(ceiling);
+    const bool reaches_terminal = ceiling >= terminal_transaction_count;
+    check(
+        truncated.censored() != reaches_terminal,
+        at + ": the ceiling censors exactly below the terminal");
+    check(
+        truncated.progress_audit.resolved_support_count +
+                truncated.progress_audit
+                    .remaining_frontier_support_count ==
+            universe,
+        at + ": R + C(F) == C(n,3)+C(n,4) holds at the stop");
+    check(
+        truncated.progress_audit.total_support_count == universe,
+        at + ": the censored transcript still knows the exact universe");
+    check(
+        truncated.progress_audit.resolved_support_count >= previous_resolved,
+        at + ": resolved mass never decreases as the ceiling rises");
+    previous_resolved = truncated.progress_audit.resolved_support_count;
+    if (reaches_terminal) {
+      // The truncation is a prefix of the identical chain: at or above the
+      // real transaction count the guard is invisible.
+      check(
+          truncated.certified_assembled() &&
+              truncated.higher->events == unguarded.higher->events &&
+              truncated.higher->relevant_extra_shell_diagnostics ==
+                  unguarded.higher->relevant_extra_shell_diagnostics &&
+              truncated.higher->audit == unguarded.higher->audit &&
+              truncated.certificate.verification_basis() ==
+                  ExactHigherSupportVerificationBasis::
+                      device_search_host_exact_record_classification_bigint_closure,
+          at + ": a non-binding ceiling reproduces the unguarded assembly");
+    } else {
+      check(
+          !truncated.certified_assembled() &&
+              !truncated.certificate.minted() &&
+              !truncated.higher.has_value() &&
+              truncated.progress_committed_transaction_count == ceiling &&
+              truncated.progress_frontier_entry_count != 0U,
+          at + ": a binding ceiling stops on a live frontier and seals nothing");
+      check(
+          truncated.progress_audit.minimal_leaf_count <=
+                  unguarded.higher->audit.minimal_leaf_count &&
+              truncated.progress_audit.resolved_support_count < universe,
+          at + ": the censored transcript is a prefix of the terminal one");
+    }
+  }
+
+  // (i) and the deadline axis: a deadline already in the past censors with
+  // the deadline reason before any transition; a deadline that cannot be
+  // reached is invisible.
+  gpu::HigherSupportDeviceTiledAssemblyOperationalGuard elapsed;
+  elapsed.deadline =
+      std::chrono::steady_clock::now() - std::chrono::hours{1};
+  const auto censored_by_deadline = assemble_tile_certified(
+      cloud, index, requested_maximum_order, elapsed);
+  check(
+      censored_by_deadline.censored() &&
+          censored_by_deadline.censure ==
+              gpu::HigherSupportDeviceTiledAssemblyCensure::
+                  operational_deadline &&
+          !censored_by_deadline.certified_assembled() &&
+          !censored_by_deadline.certificate.minted() &&
+          censored_by_deadline.progress_committed_transaction_count == 0U &&
+          censored_by_deadline.progress_audit
+                  .remaining_frontier_support_count == universe,
+      label + ": an elapsed deadline censors before any transition");
+
+  gpu::HigherSupportDeviceTiledAssemblyOperationalGuard distant;
+  distant.deadline =
+      std::chrono::steady_clock::now() + std::chrono::hours{24};
+  const auto unreachable_deadline = assemble_tile_certified(
+      cloud, index, requested_maximum_order, distant);
+  check(
+      unreachable_deadline.certified_assembled() &&
+          !unreachable_deadline.censored() &&
+          unreachable_deadline.higher->events == unguarded.higher->events &&
+          unreachable_deadline.higher->audit == unguarded.higher->audit,
+      label + ": an unreachable deadline reproduces the unguarded assembly");
+}
+
+void test_operational_guard_differentials() {
+  const std::array<CertifiedPoint3, 4U> tetrahedron{
+      point(1.0, 1.0, 1.0),
+      point(-1.0, -1.0, 1.0),
+      point(-1.0, 1.0, -1.0),
+      point(1.0, -1.0, -1.0),
+  };
+  run_operational_guard_differential(
+      tetrahedron, 1U, "guard tetrahedron/K1");
+
+  const std::array<CertifiedPoint3, 8U> sphere{
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(0.0, 0.0, -1.0),
+      point(0.5773502691896258, 0.5773502691896258, 0.5773502691896257),
+      point(-0.5773502691896258, -0.5773502691896258, 0.5773502691896258),
+  };
+  run_operational_guard_differential(sphere, 3U, "guard sphere8/K3");
+}
+
 void test_assembly_differentials() {
   const std::array<CertifiedPoint3, 4U> tetrahedron{
       point(1.0, 1.0, 1.0),
@@ -648,6 +853,7 @@ int main() {
   try {
     test_assembly_differentials();
     test_tile_certified_assembly_differentials();
+    test_operational_guard_differentials();
     test_tower_differentials();
     test_scalable_lanes_differentials();
     test_anchored_certificate_anti_forge();

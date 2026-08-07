@@ -1271,6 +1271,16 @@ bool HigherSupportDeviceTiledRecordDrainLease::host_fake()
   return ready() && host_fake_;
 }
 
+bool HigherSupportDeviceTiledRecordDrainLease::
+    host_readable_record_segments() const noexcept {
+  // Deliberately NOT `!cuda_resident()`: an unready lease exposes nothing
+  // either.  The host fake allocates its segments in host memory; the CUDA
+  // engine allocates them with cudaMalloc and republishes those pointers
+  // unchanged, so they stay unreadable from the host until the driver
+  // stages them device-to-host.
+  return ready() && host_fake_;
+}
+
 detail::Phase15HigherSupportDeviceTiledRecordDrainPrivateViews
 detail::Phase15HigherSupportDeviceTiledRecordDrainPrivateViewAccess::
     inspect(

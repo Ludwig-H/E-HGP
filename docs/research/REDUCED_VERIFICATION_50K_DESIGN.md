@@ -178,3 +178,68 @@ suites (toutes sur de tout petits nuages) ni dans le profil G4 (qui
 attribuait 99,8 % à « le CPU », sans dire que le CPU passait son temps
 dans un PGCD). Toute cible d'échelle future doit commencer par le coût
 unitaire mesuré des étages exacts.
+
+## Le préflight de R2, et le blocage qu'il a trouvé (7/8)
+
+R2 — la mesure G4 — a été précédé d'un préflight local dont le seul but
+était de ne pas dépenser une VM facturable à découvrir un défaut lisible
+dans le dépôt. Trois manques opérationnels étaient anticipés, un
+quatrième ne l'était pas.
+
+- **R2-c, la censure coopérative.** `assemble_..._device_tiled` était
+  appelé une fois, et `--operational-deadline-ms` n'était testé qu'aux
+  frontières d'étage. Un run 50k qui ne converge pas ne rendait **rien**.
+  Un garde opérationnel — délai et plafond de transactions — est désormais
+  testé strictement **entre** transitions committées, donc un arrêt gardé
+  laisse toujours la chaîne ancrée sur un checkpoint vérifié, et
+  l'assemblage censuré publie les masses BigInt du checkpoint : la
+  fraction exacte de $C(n,3)+C(n,4)$ décidée, et le nombre exact de
+  terminaux minimaux drainés. Le garde vit **hors** de la configuration de
+  pont (dont l'égalité définit l'identité scellée) : ce n'est pas un
+  paramètre scientifique, et il ne peut jamais certifier.
+- **R2-e, le budget qui refusait la campagne.** `complete_resident_diagnostic`
+  est le mode sans caps artificiels, mais `make_higher_budget` dérivait
+  encore chaque axe de `--support-work-budget` par deux produits ($8W+2$ et
+  $W \cdot n$). À $n = 50\,000$, tout $W$ au-dessus de $2^{64}/50\,000$
+  levait un overflow **avant** le pipeline. Le mode rend maintenant le
+  plafond représentationnel sur tous les axes, exactement comme la voie
+  paire le faisait déjà.
+- **R2-d, l'escalier.** Sauter de $n=32$ à $n=50\,000$ ne dit pas *où* ça
+  casse. Un harnais de profilage parcourt la grille (comptes de points ×
+  cibles de tuile), revérifie l'identité d'induction **hors** du binaire,
+  publie la fraction résolue exacte de chaque cellule y compris censurée,
+  et exclut les censures de toute pente d'échelle — leur durée est le
+  délai, pas le coût.
+
+### Le blocage : le chemin tuile-certifié n'est pas exécutable sous CUDA
+
+Le moteur publie `batch.prune_records`, `terminal_records`,
+`probe_receipts` et `slot_controls` comme **ses propres arènes
+`cudaMalloc`, telles quelles**. Le driver ne rapatrie que trois choses :
+le bloc de contrôle de 16 octets, les tâches de drainage rationnel, et
+`batch.host_slot_controls`. Les arènes de records n'en font pas partie.
+Or le lease est construit à partir des pointeurs **device**, et
+`drain_record_lease` — son unique consommateur — parcourt les quatre
+segments en lectures hôte.
+
+La première transaction de tuile sur G4 lirait donc de la mémoire device
+à travers un pointeur hôte. Cela n'apparaît jamais localement (le fake est
+résident hôte) et n'est jamais apparu dans la qualification native M5b :
+ce run publie des comptes et des masses lus depuis les slot controls
+**mirroités**, et ne passe pas par le pont.
+
+Conséquence : le chemin tuile-certifié n'a jamais été exécuté contre le
+lanceur natif. Une garde fail-closed est posée dès maintenant — le lease
+porte `host_readable_record_segments()` et le drainage refuse tout lease
+qui ne la satisfait pas —, ce qui transforme un comportement indéfini en
+refus typé. **Le staging device→hôte des segments, borné par les compteurs
+des slot controls, est le premier travail de la prochaine session CUDA**,
+et c'est lui qui fait basculer le prédicat.
+
+### Ordre révisé
+
+R2-f (staging D2H + parité du pont contre le lanceur natif) précède
+désormais R2 (mesure). R3, R4, R5 sont inchangés, et R6 — la
+classification closed-ball on-device, `terminal_classification_native_cuda`
+— entre dans la route : si la mesure donne au moins $10^5$ terminaux
+minimaux, la parallélisation aval seule ne suffit pas à tenir 100 ms.

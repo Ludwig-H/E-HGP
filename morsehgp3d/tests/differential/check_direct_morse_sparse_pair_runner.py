@@ -816,6 +816,28 @@ def require_success_projection(
         "verification_basis": "fresh_cpu_replay_every_commit",
         "requested_tile_target": 16,
         "full_geometry_replay_avoided": True,
+        # R2-c: the higher-stage progress ventilation, published by both
+        # backends.  This fixture is n=5, so the universe it must close is
+        # C(5,3) + C(5,4) = 10 + 5 = 15, entirely resolved with an empty
+        # frontier.  The three transaction counters stay zero because they
+        # are the device bridge's own accounting and this run is the host
+        # fixed-chunk session.
+        "assembly_censure": "none",
+        "progress": {
+            "total_support_mass": "15",
+            "resolved_support_mass": "15",
+            "remaining_frontier_support_mass": "0",
+            "minimal_leaves": 3,
+            "above_rank_leaves": 0,
+            "leaf_support_analyses": 3,
+            "point_classifications": 15,
+            "closed_ball_node_visits": 27,
+            "committed_transactions": 0,
+            "committed_tile_transactions": 0,
+            "committed_expansion_transitions": 0,
+            "committed_tile_slots": 0,
+            "frontier_entries": 0,
+        },
     }
     expected_pipeline = {
         "terminal_catalog_certified": True,
@@ -914,6 +936,25 @@ def require_capacity_stop(report: dict[str, object]) -> None:
         "verification_basis": "not_run",
         "requested_tile_target": 16,
         "full_geometry_replay_avoided": False,
+        # R2-c: the stage never ran, so its ventilation must be entirely
+        # dormant -- in particular a zero universe, which is what
+        # distinguishes "not run" from "ran and resolved nothing".
+        "assembly_censure": "none",
+        "progress": {
+            "total_support_mass": "0",
+            "resolved_support_mass": "0",
+            "remaining_frontier_support_mass": "0",
+            "minimal_leaves": 0,
+            "above_rank_leaves": 0,
+            "leaf_support_analyses": 0,
+            "point_classifications": 0,
+            "closed_ball_node_visits": 0,
+            "committed_transactions": 0,
+            "committed_tile_transactions": 0,
+            "committed_expansion_transitions": 0,
+            "committed_tile_slots": 0,
+            "frontier_entries": 0,
+        },
     }
     require(
         report.get("higher_support") == expected_higher,
