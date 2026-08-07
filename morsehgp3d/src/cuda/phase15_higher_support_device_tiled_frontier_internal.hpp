@@ -521,14 +521,9 @@ struct Phase15HigherSupportDeviceTiledBatch {
   // prefix of each slot carries meaning; the copy width is the maximum
   // committed count over the slots, read from host_slot_controls.
   //
-  // The host fake allocates its arenas in host memory and leaves these
-  // empty, publishing its own pointers directly.
-  std::vector<Phase15HigherSupportDeviceTiledPruneRecord>
-      host_prune_records;
-  std::vector<Phase15HigherSupportDeviceTiledTerminalRecord>
-      host_terminal_records;
-  std::vector<Phase15HigherSupportDeviceTiledProbeReceipt>
-      host_probe_receipts;
+  // The staging storage itself belongs to the retained output owner, not
+  // to this batch: the drain lease retains that owner precisely so the
+  // storage outlives the lease, while the batch is a transient.
   // The single fact the drain lease publishes.  True only when the four
   // segment pointers may be dereferenced by the host: always for the host
   // fake, and for CUDA only after the staging above has run.  A producer

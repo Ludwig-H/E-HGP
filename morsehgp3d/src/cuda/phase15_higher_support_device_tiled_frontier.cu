@@ -633,6 +633,21 @@ class Phase15HigherSupportDeviceTiledCudaResources final {
       rational_tasks_;
   DeviceBuffer<std::uint8_t> verdicts_;
   DeviceBuffer<unsigned long long> control_block_;
+
+ public:
+  // R2-f: host staging of the record segments and the slot controls.
+  //
+  // These MUST live here and not in the batch.  The drain lease retains
+  // `retained_output_owner` -- this object -- precisely so the storage it
+  // publishes outlives it; the batch is a transient the caller drops.
+  // Staging into the batch instead made the lease point at freed vectors,
+  // which read back as plausible-looking garbage (a slot control claiming
+  // tile_epoch 49 and 4.4e12 terminals) rather than crashing at once.
+  // Allocated once at the tile arena, reused by every chunk.
+  std::vector<Phase15HigherSupportDeviceTiledPruneRecord> host_prunes;
+  std::vector<Phase15HigherSupportDeviceTiledTerminalRecord> host_terminals;
+  std::vector<Phase15HigherSupportDeviceTiledProbeReceipt> host_receipts;
+  std::vector<Phase15HigherSupportDeviceTiledSlotControl> host_controls;
 };
 
 // Host resolution of one staged rational-drain task through the exact
@@ -1347,28 +1362,29 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
               "size_t");
         };
 
-    batch.host_prune_records.assign(
+    resources->host_prunes.assign(
         prune_capacity, Phase15HigherSupportDeviceTiledPruneRecord{});
-    batch.host_terminal_records.assign(
+    resources->host_terminals.assign(
         terminal_capacity, Phase15HigherSupportDeviceTiledTerminalRecord{});
-    batch.host_probe_receipts.assign(
+    resources->host_receipts.assign(
         receipt_capacity, Phase15HigherSupportDeviceTiledProbeReceipt{});
+    resources->host_controls = batch.host_slot_controls;
     stage_segment(
-        batch.host_prune_records.data(),
+        resources->host_prunes.data(),
         resources->prunes(),
         sizeof(Phase15HigherSupportDeviceTiledPruneRecord),
         request.prune_records_per_slot,
         staged_prunes_per_slot,
         "cudaMemcpy2DAsync Phase 15 higher-support prune record staging");
     stage_segment(
-        batch.host_terminal_records.data(),
+        resources->host_terminals.data(),
         resources->terminals(),
         sizeof(Phase15HigherSupportDeviceTiledTerminalRecord),
         request.terminal_records_per_slot,
         staged_terminals_per_slot,
         "cudaMemcpy2DAsync Phase 15 higher-support terminal record staging");
     stage_segment(
-        batch.host_probe_receipts.data(),
+        resources->host_receipts.data(),
         resources->receipts(),
         sizeof(Phase15HigherSupportDeviceTiledProbeReceipt),
         request.probe_receipts_per_slot,
@@ -1383,10 +1399,10 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
     batch.record_staging_device_to_host_count = staging_copy_count;
     batch.record_staging_device_to_host_byte_count = staging_byte_count;
 
-    batch.prune_records = batch.host_prune_records.data();
-    batch.terminal_records = batch.host_terminal_records.data();
-    batch.probe_receipts = batch.host_probe_receipts.data();
-    batch.slot_controls = batch.host_slot_controls.data();
+    batch.prune_records = resources->host_prunes.data();
+    batch.terminal_records = resources->host_terminals.data();
+    batch.probe_receipts = resources->host_receipts.data();
+    batch.slot_controls = resources->host_controls.data();
     // Asserted only after the three copies and their synchronisation.
     batch.record_segments_host_readable = true;
     batch.physical_product_record_capacity = product_capacity;
