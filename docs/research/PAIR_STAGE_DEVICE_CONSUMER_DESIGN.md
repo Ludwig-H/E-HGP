@@ -99,6 +99,35 @@ C'est la même inversion de flux que R1 : aujourd'hui le producteur hôte fait
 tout le travail et le device ne sert qu'à la validation croisée ; demain le
 payload device est le candidat et l'hôte valide par invariants.
 
+## 3 bis. Correction du 7 août : le consommateur existe, et l'écart est un plafond
+
+La lecture initiale disait « il manque le consommateur exact ». C'est faux, et il
+faut le corriger : `gpu::ExactClosedRank23PairTerminalCatalog`
+(`exact_closed_rank23_pair_terminal_catalog.{hpp,cpp}`, 454 lignes) **est** le
+consommateur de la frontière Yao-48 device-tuilée, et il produit bien l'autorité
+paire neutre.
+
+Le vrai écart est un **plafond de rang scellé**, et il est net :
+
+| composant | rang fermé maximal |
+| --- | ---: |
+| frontière Yao-48 device-tuilée | **11** |
+| catalogue terminal paire, variante générale | **6** |
+| catalogue terminal paire, variante « rank23 » | **3** |
+| **contrat produit** ($K=10$) | **11** |
+
+La frontière atteint donc déjà le rang du contrat ; c'est son consommateur qui
+s'arrête à 6, soit $K=5$. Toutes les mesures device à 50 000 points que le dépôt
+possède sont d'ailleurs à rang fermé 6 — ce n'est pas une coïncidence, c'est ce
+plafond.
+
+**Ce que cela change à la feuille de route.** B1 n'est ni une réécriture ni un
+branchement : c'est **lever un plafond scellé de 6 à 11 dans le catalogue
+terminal paire**, avec ce que cela implique de capacités linéaires par point, de
+largeurs d'arithmétique et de recertification. Les incréments B1-a à B1-f
+ci-dessous restent valides dans leur ordre, mais leur contenu se recentre sur ce
+plafond plutôt que sur une construction ex nihilo.
+
 ## 4. Les six incréments, dans l'ordre
 
 **B1-a — le classifieur device de rang diamétral, qualifié à l'échelle.**
