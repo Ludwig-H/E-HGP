@@ -491,3 +491,88 @@ device puisse saturer.
 4. **B** — paralléliser la fermeture sur les événements.
 5. **C** — cure R1-d sur le résidu, guidée par un nouveau profil.
 6. **Ordre $k$** pour l'étage higher, en parallèle de tout ce qui précède.
+
+
+---
+
+# 10. A1 exécuté : la prémisse était fausse, la mesure l'a corrigée
+
+## 10.1 Ce que la mesure a démenti dans le §9
+
+Le §9.4 ordonnait A1 « vérifier le journal de graines une fois » sur la foi de
+34,6 % inclusifs et de huit sites d'appel trouvés au grep. Le comptage réel dit
+**trois appels**, pas huit : le plafond d'A1 tel qu'écrit valait 1,3 ×, pas un
+ordre. La feuille de route se trompait de fonction.
+
+Le comptage a dit où était le vrai terme. À $n=16$, pour 213 nœuds de
+fermeture :
+
+| appelé | appels | par nœud |
+| --- | ---: | ---: |
+| `CanonicalSha256Builder::update` | 3 109 276 | 14 600 |
+| `ExactRational::canonical_key` | 498 630 | 2 341 |
+| `DigestWriter::center(ExactRational3)` | 122 627 | 576 |
+| `normalized_terminal_output_digest` | **823** | — |
+| `pair_terminal_output_digest` | **823** | — |
+
+**823 recalculs du digest de la sortie entière**, sur une sortie qui est une
+*entrée* de l'aval et ne change pas. Attribution : `terminal_catalog_certified()`
+les re-dérive à chaque appel, et sur 822 appels **812 viennent de
+`reconstruct_exact_direct_saddle_arm_facet`** — 609 depuis la vérification en
+flux, 203 depuis la sélection de bras de l'exécuteur de lots. Deux boucles sur
+les graines de bras, re-certifiant une façade inchangée à chaque itération.
+
+**C'est là qu'était le quadratique en événements.** Pas dans la fermeture : le
+coût vaut $O(\text{graines} \times \text{sortie})$.
+
+## 10.2 Pourquoi la mémoïsation aurait été fausse
+
+Le premier réflexe — mettre en cache `terminal_catalog_certified()` — détruit
+une propriété réelle : ce prédicat **est** le test anti-forge, il re-dérive les
+digests depuis les enregistrements précisément pour détecter qu'on les a
+touchés. Un cache le rendrait aveugle.
+
+La correction saine sépare deux choses que le prédicat confond sous un seul
+nom : six comparaisons $O(1)$ qui **lient** la façade au journal, et
+l'auto-certification $O(\text{sortie})$ de la façade. Le nouveau
+`ExactDirectSaddleArmFacetReconstructor` exécute le prédicat **entier** une fois
+dans son constructeur — en levant exactement ce que levait la fonction
+mono-coup, pour les mêmes raisons — puis reconstruit par indice. Le point
+d'entrée mono-coup est **inchangé**, donc tous les contrats anti-forge existants
+testent encore ce qu'ils testaient, et une façade falsifiée échoue toujours,
+avant la première facette au lieu d'à la première. Refaire une dérivation sur
+les mêmes octets ne peut rien découvrir que la première ait manqué.
+
+## 10.3 Le résultat, falsifié sur les deux critères
+
+| $n$ | ms/nœud avant | ms/nœud après | gain |
+| ---: | ---: | ---: | ---: |
+| 12 | 3,68 | 2,232 | 1,65 × |
+| 16 | 4,29 | 2,056 | 2,09 × |
+| 20 | 6,41 | 2,314 | 2,77 × |
+| 24 | 7,57 | 2,996 | 2,53 × |
+| 28 | 8,40 | 3,474 | 2,42 × |
+
+Sortie scientifique **identique à toutes les tailles**, 22 suites vertes dont
+les anti-forge du journal de graines et de la descente de facette.
+
+**Mais le gain qui compte est l'exposant**, parce que le contrat est à 50 000
+points :
+
+| | loi ajustée | ms/nœud à 50 000 | aval $K=5$, 48 cœurs |
+| --- | --- | ---: | ---: |
+| avant | $0{,}257\,n^{1{,}054}$ | 23 018 | $9{,}5\cdot10^{6}$ s |
+| **après** | $0{,}491\,n^{0{,}559}$ | **208,9** | $8{,}7\cdot10^{4}$ s |
+
+**Facteur 110 à la taille du contrat, pour un changement qui vaut 2,4 × à
+$n=28$.** C'est la démonstration que le levier est bien l'exposant et non la
+constante — et que mesurer sur de petits nuages sous-estime les gains
+structurels autant qu'elle surestime les coûts.
+
+## 10.4 Ce qui reste
+
+L'exposant résiduel $n^{0{,}559}$ dit qu'**un autre terme de même nature est
+encore là**. La suite est la même méthode : profiler, compter les appels,
+trouver la dérivation refaite, la hisser. Il reste $8{,}7\cdot10^{4}$ à
+gagner sur l'aval à $K=5$, dont 48 × de parallélisation et ≤ 12,8 × de cure
+R1-d — soit encore un facteur ~140 à trouver dans les exposants.

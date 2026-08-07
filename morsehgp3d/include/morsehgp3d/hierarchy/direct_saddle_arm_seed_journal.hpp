@@ -199,6 +199,19 @@ class ExactDirectSaddleArmFacetReconstructor {
       const ExactDirectSupportTerminalFacade& source_facade,
       const ExactDirectSaddleArmSeedJournalResult& seed_journal);
 
+  // It borrows both sources for its whole life, so binding either to a
+  // temporary would dangle at the first facet.  Refused at compile time
+  // rather than diagnosed later.
+  ExactDirectSaddleArmFacetReconstructor(
+      ExactDirectSupportTerminalFacade&&,
+      const ExactDirectSaddleArmSeedJournalResult&) = delete;
+  ExactDirectSaddleArmFacetReconstructor(
+      const ExactDirectSupportTerminalFacade&,
+      ExactDirectSaddleArmSeedJournalResult&&) = delete;
+  ExactDirectSaddleArmFacetReconstructor(
+      ExactDirectSupportTerminalFacade&&,
+      ExactDirectSaddleArmSeedJournalResult&&) = delete;
+
   [[nodiscard]] ExactDirectSaddleArmFacet facet(
       std::size_t arm_seed_index) const;
 
