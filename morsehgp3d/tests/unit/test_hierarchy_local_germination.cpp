@@ -154,7 +154,8 @@ void check_family(
     std::string_view family,
     const std::vector<CertifiedPoint3>& input,
     std::size_t maximum_order,
-    std::size_t support_size) {
+    std::size_t support_size,
+    std::size_t tangent_direction_count = 0U) {
   const CanonicalPointCloud cloud = CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{input});
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
@@ -205,6 +206,7 @@ void check_family(
   config.maximum_relevant_closed_rank = rank;
   config.seed_disc_ring_count = 2U;
   config.segment_position_count = 8U;
+  config.tangent_direction_count = tangent_direction_count;
   std::set<Support> emitted;
   // Tallied by the CONSUMER, deliberately separate from the dedup set, so that
   // the production identity compares two independent accountings.
@@ -252,7 +254,16 @@ void check_family(
       missing == 0U,
       std::string{family} + ": the germination generator missed an accepted "
                             "support of arity " +
-          std::to_string(support_size));
+          std::to_string(support_size) +
+          (tangent_direction_count == 0U
+               ? " (exhaustive seed loop)"
+               : " (certified tangent restriction)"));
+  // Completeness is guaranteed by exhaustion or by the certified bound, and the
+  // certificate must say which -- a restricted run that lost the guarantee would
+  // be exactly the silent failure this whole contract exists to prevent.
+  require(
+      certificate.completeness_guaranteed(),
+      std::string{family} + ": the certificate did not guarantee completeness");
 
   std::cout << "  " << family << " n=" << point_count
             << " K=" << maximum_order << " m=" << support_size
@@ -351,8 +362,13 @@ void check_certificate_falsification() {
   // but it may not also claim to be exhaustive.  The certified restriction is
   // D <= 2 R(p), which this basis does not carry.
   LocalGerminationCertificate honest_cutoff = fresh();
+  honest_cutoff.seed_restriction =
+      LocalGerminationCertificate::SeedRestriction::declared_heuristic_cutoff;
   honest_cutoff.seed_neighbourhood_cutoff_multiple = 6U;
   honest_cutoff.seed_loop_exhaustive_over_pairs = false;
+  require(
+      !honest_cutoff.completeness_guaranteed(),
+      "a heuristic cutoff claimed to guarantee completeness");
   require(
       local_germination_certificate_admissible(honest_cutoff, reason),
       "an honestly declared seed restriction was refused");
@@ -395,6 +411,10 @@ void check_certificate_falsification() {
       "a sealed covering radius rounds below its exact value");
 
   LocalGerminationCertificate proved_axes = fresh();
+  proved_axes.seed_restriction =
+      LocalGerminationCertificate::SeedRestriction::declared_heuristic_cutoff;
+  proved_axes.seed_loop_exhaustive_over_pairs = false;
+  proved_axes.seed_neighbourhood_cutoff_multiple = 6U;
   proved_axes.tangent_direction_count = 6U;
   proved_axes.tangent_covering_radius_millidegrees = 54736U;
   proved_axes.tangent_covering_radius_proved = true;
@@ -413,7 +433,34 @@ void check_certificate_falsification() {
 
   // A finer set may be used -- it is measurably far better -- but it may not
   // claim a proof that is not on record.
+  // The certified regime: a restricted seed loop that DOES guarantee
+  // completeness, because its covering radius is proved.
+  LocalGerminationCertificate certified = fresh();
+  certified.seed_restriction =
+      LocalGerminationCertificate::SeedRestriction::certified_tangent_bound;
+  certified.seed_loop_exhaustive_over_pairs = false;
+  certified.tangent_direction_count = 26U;
+  certified.tangent_covering_radius_millidegrees = 27570U;
+  certified.tangent_covering_radius_proved = true;
+  require(
+      local_germination_certificate_admissible(certified, reason) &&
+          certified.completeness_guaranteed(),
+      "the certified tangent regime was refused");
+
+  LocalGerminationCertificate unproved_certified = certified;
+  unproved_certified.tangent_direction_count = 48U;
+  unproved_certified.tangent_covering_radius_proved = false;
+  require(
+      !local_germination_certificate_admissible(unproved_certified, reason) &&
+          reason ==
+              "a_certified_tangent_bound_without_a_proved_covering_radius",
+      "a certified regime without a proved covering radius was admitted");
+
   LocalGerminationCertificate proved_26 = fresh();
+  proved_26.seed_restriction =
+      LocalGerminationCertificate::SeedRestriction::declared_heuristic_cutoff;
+  proved_26.seed_loop_exhaustive_over_pairs = false;
+  proved_26.seed_neighbourhood_cutoff_multiple = 6U;
   proved_26.tangent_direction_count = 26U;
   proved_26.tangent_covering_radius_millidegrees = 27570U;
   proved_26.tangent_covering_radius_proved = true;
@@ -422,6 +469,10 @@ void check_certificate_falsification() {
       "the proved twenty-six-direction declaration was refused");
 
   LocalGerminationCertificate estimated = fresh();
+  estimated.seed_restriction =
+      LocalGerminationCertificate::SeedRestriction::declared_heuristic_cutoff;
+  estimated.seed_loop_exhaustive_over_pairs = false;
+  estimated.seed_neighbourhood_cutoff_multiple = 6U;
   estimated.tangent_direction_count = 48U;
   estimated.tangent_covering_radius_millidegrees = 24000U;
   estimated.tangent_covering_radius_proved = false;
@@ -444,6 +495,8 @@ void check_certificate_falsification() {
       "a proof without a direction set was admitted");
 
   LocalGerminationCertificate lying_cutoff = fresh();
+  lying_cutoff.seed_restriction =
+      LocalGerminationCertificate::SeedRestriction::declared_heuristic_cutoff;
   lying_cutoff.seed_neighbourhood_cutoff_multiple = 6U;
   lying_cutoff.seed_loop_exhaustive_over_pairs = true;
   require(
@@ -797,6 +850,15 @@ int main() {
     // One larger cloud on the family that actually produces quadruples.
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 4U);
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 3U);
+    // The certified tangent restriction must lose NOTHING: the same clouds,
+    // now with the seed loop bounded by D <= 2 R(p) at both endpoints, under
+    // the twenty-six-direction set whose covering radius is proved.
+    std::cout << "with the certified tangent restriction (26 directions)\n";
+    for (const std::size_t size : {3U, 4U}) {
+      check_family("uniform_latin", uniform_latin_points(24U), 5U, size, 26U);
+      check_family("eight_clusters", eight_clusters_points(24U), 5U, size, 26U);
+    }
+    check_family("eight_clusters", eight_clusters_points(40U), 5U, 4U, 26U);
     check_certificate_falsification();
     check_verification_basis_contract();
     check_production_identity_falsification();

@@ -141,6 +141,123 @@ struct DiscCover {
   return cover;
 }
 
+
+// The direction sets whose covering radius is sealed with a proof: the face,
+// vertex and edge normals of the cube.
+[[nodiscard]] std::vector<Vec3> cube_directions(std::size_t count) {
+  std::vector<Vec3> directions;
+  const auto push = [&](double x, double y, double z) {
+    const double length = std::sqrt(x * x + y * y + z * z);
+    directions.push_back(Vec3{x / length, y / length, z / length});
+  };
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    for (const double sign : {1.0, -1.0}) {
+      push(axis == 0U ? sign : 0.0, axis == 1U ? sign : 0.0,
+           axis == 2U ? sign : 0.0);
+    }
+  }
+  if (count >= 14U) {
+    for (const double x : {1.0, -1.0}) {
+      for (const double y : {1.0, -1.0}) {
+        for (const double z : {1.0, -1.0}) {
+          push(x, y, z);
+        }
+      }
+    }
+  }
+  if (count >= 26U) {
+    for (const double a : {1.0, -1.0}) {
+      for (const double b : {1.0, -1.0}) {
+        push(0.0, a, b);
+        push(a, 0.0, b);
+        push(a, b, 0.0);
+      }
+    }
+  }
+  return directions;
+}
+
+struct AxisAlignedBox {
+  Vec3 lower{};
+  Vec3 upper{};
+};
+
+// Squared distance from a point to the box, zero inside.
+[[nodiscard]] double squared_distance_to_box(
+    const AxisAlignedBox& box, const Vec3& point) noexcept {
+  const auto axis_gap = [](double value, double low, double high) {
+    if (value < low) {
+      return low - value;
+    }
+    if (value > high) {
+      return value - high;
+    }
+    return 0.0;
+  };
+  const double dx = axis_gap(point.x, box.lower.x, box.upper.x);
+  const double dy = axis_gap(point.y, box.lower.y, box.upper.y);
+  const double dz = axis_gap(point.z, box.lower.z, box.upper.z);
+  return dx * dx + dy * dy + dz * dz;
+}
+
+// Certified upper bound on the tangent radius R(p).
+//
+// A radius is ADMISSIBLE when some direction still permits a ball through p of
+// that radius holding at most s_max points.  For a direction covering a cap of
+// half-angle theta, the cap's image lies in the ball of radius rho sin(theta)
+// around p + rho cos(theta) u, so a cap whose image misses the convex region is
+// dead; and the offset ball of radius rho (1 - sin theta) around the same centre
+// is inside every tangent ball of the cap, so an over-populated offset ball
+// kills the whole cap.
+//
+// Admissibility is a DOWN-SET in rho -- tangent balls in a fixed direction are
+// nested increasing, and the region is convex and contains p -- so a bisection
+// converges, and returning the upper end of the bracket gives an upper bound.
+[[nodiscard]] double certified_tangent_radius_bound(
+    const std::vector<Vec3>& points,
+    const std::vector<Vec3>& directions,
+    const AxisAlignedBox& box,
+    const Vec3& p,
+    std::size_t cap,
+    double covering_radius_radians,
+    double ceiling,
+    std::size_t& population_queries) {
+  const double sine = std::sin(covering_radius_radians);
+  const double cosine = std::cos(covering_radius_radians);
+  const double factor = 1.0 - sine;
+  if (factor <= 0.0) {
+    return ceiling;
+  }
+  const auto admissible = [&](double radius) {
+    for (const Vec3& direction : directions) {
+      const Vec3 centre = p + direction * (radius * cosine);
+      const double reach = radius * sine;
+      if (squared_distance_to_box(box, centre) > reach * reach) {
+        continue;
+      }
+      ++population_queries;
+      if (!population_exceeds(points, centre, radius * factor, cap, 0.0)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  if (admissible(ceiling)) {
+    return ceiling;
+  }
+  double low = 0.0;
+  double high = ceiling;
+  for (int step = 0; step < 40; ++step) {
+    const double middle = 0.5 * (low + high);
+    if (admissible(middle)) {
+      low = middle;
+    } else {
+      high = middle;
+    }
+  }
+  return high;
+}
+
 }  // namespace
 
 std::size_t sealed_tangent_covering_radius_millidegrees(
@@ -236,14 +353,39 @@ bool local_germination_certificate_admissible(
     return false;
   }
 
-  // A restricted seed loop and a claim of exhaustiveness cannot both be true.
-  // Completeness under a cutoff needs the certified restriction D <= 2 R(p),
-  // which this basis does not carry, so the claim is refused rather than
-  // believed.
-  if (certificate.seed_neighbourhood_cutoff_multiple != 0U &&
-      certificate.seed_loop_exhaustive_over_pairs) {
-    reason = "a_restricted_seed_loop_claimed_to_be_exhaustive";
-    return false;
+  // The three regimes must be internally consistent, and only two of them
+  // guarantee completeness.
+  using Restriction = LocalGerminationCertificate::SeedRestriction;
+  switch (certificate.seed_restriction) {
+    case Restriction::exhaustive_over_pairs:
+      if (!certificate.seed_loop_exhaustive_over_pairs ||
+          certificate.seed_neighbourhood_cutoff_multiple != 0U) {
+        reason = "an_exhaustive_seed_loop_declared_a_restriction";
+        return false;
+      }
+      break;
+    case Restriction::certified_tangent_bound:
+      if (certificate.seed_loop_exhaustive_over_pairs) {
+        reason = "a_restricted_seed_loop_claimed_to_be_exhaustive";
+        return false;
+      }
+      // The certified bound is only certified when its covering radius is.
+      if (certificate.tangent_direction_count == 0U ||
+          !certificate.tangent_covering_radius_proved) {
+        reason = "a_certified_tangent_bound_without_a_proved_covering_radius";
+        return false;
+      }
+      break;
+    case Restriction::declared_heuristic_cutoff:
+      if (certificate.seed_loop_exhaustive_over_pairs) {
+        reason = "a_restricted_seed_loop_claimed_to_be_exhaustive";
+        return false;
+      }
+      if (certificate.seed_neighbourhood_cutoff_multiple == 0U) {
+        reason = "a_heuristic_cutoff_without_a_multiple";
+        return false;
+      }
+      break;
   }
   if (certificate.mass_partition_identity_available) {
     reason = "mass_partition_identity_is_not_available_under_this_basis";
@@ -366,6 +508,10 @@ bool local_germination_resume_induction_holds(
     reason = "seed_loop_restriction_changed";
     return false;
   }
+  if (previous.seed_restriction != successor.seed_restriction) {
+    reason = "seed_restriction_kind_changed";
+    return false;
+  }
   if (previous.tangent_direction_count != successor.tangent_direction_count ||
       previous.tangent_covering_radius_millidegrees !=
           successor.tangent_covering_radius_millidegrees ||
@@ -440,7 +586,8 @@ LocalGerminationCertificate generate_local_germination_candidates(
     empty.seed_neighbourhood_cutoff_multiple =
         config.seed_neighbourhood_cutoff_multiple;
     empty.seed_loop_exhaustive_over_pairs =
-        config.seed_neighbourhood_cutoff_multiple == 0U;
+        config.seed_neighbourhood_cutoff_multiple == 0U &&
+        config.tangent_direction_count == 0U;
     return empty;
   }
   if (config.segment_position_count == 0U) {
@@ -491,9 +638,63 @@ LocalGerminationCertificate generate_local_germination_candidates(
   certificate.certified_margin_exponent = config.certified_margin_exponent;
   certificate.seed_neighbourhood_cutoff_multiple =
       config.seed_neighbourhood_cutoff_multiple;
-  certificate.seed_loop_exhaustive_over_pairs =
-      config.seed_neighbourhood_cutoff_multiple == 0U;
+  certificate.tangent_direction_count = config.tangent_direction_count;
+  certificate.tangent_covering_radius_millidegrees =
+      sealed_tangent_covering_radius_millidegrees(
+          config.tangent_direction_count);
+  certificate.tangent_covering_radius_proved =
+      config.tangent_direction_count != 0U &&
+      certificate.tangent_covering_radius_millidegrees != 0U;
+  if (config.tangent_direction_count != 0U) {
+    certificate.seed_restriction =
+        LocalGerminationCertificate::SeedRestriction::certified_tangent_bound;
+    certificate.seed_loop_exhaustive_over_pairs = false;
+  } else if (config.seed_neighbourhood_cutoff_multiple != 0U) {
+    certificate.seed_restriction = LocalGerminationCertificate::
+        SeedRestriction::declared_heuristic_cutoff;
+    certificate.seed_loop_exhaustive_over_pairs = false;
+  } else {
+    certificate.seed_restriction =
+        LocalGerminationCertificate::SeedRestriction::exhaustive_over_pairs;
+    certificate.seed_loop_exhaustive_over_pairs = true;
+  }
   LocalGerminationCounters& counters = certificate.counters;
+
+  // The certified seed restriction: pairs must satisfy D <= 2 R(p) at BOTH
+  // endpoints, which is the graph of the corollary.  Zero directions leaves the
+  // loop exhaustive.
+  std::vector<double> tangent_bound;
+  if (config.tangent_direction_count != 0U) {
+    const std::size_t sealed = sealed_tangent_covering_radius_millidegrees(
+        config.tangent_direction_count);
+    if (sealed == 0U) {
+      throw std::invalid_argument(
+          "the declared direction count has no sealed covering radius");
+    }
+    const double theta = static_cast<double>(sealed) / 1000.0 *
+        std::numbers::pi / 180.0;
+    const std::vector<Vec3> directions =
+        cube_directions(config.tangent_direction_count);
+    AxisAlignedBox box{points.front(), points.front()};
+    for (const Vec3& point : points) {
+      box.lower.x = std::min(box.lower.x, point.x);
+      box.lower.y = std::min(box.lower.y, point.y);
+      box.lower.z = std::min(box.lower.z, point.z);
+      box.upper.x = std::max(box.upper.x, point.x);
+      box.upper.y = std::max(box.upper.y, point.y);
+      box.upper.z = std::max(box.upper.z, point.z);
+    }
+    const Vec3 extent = box.upper - box.lower;
+    const double ceiling = norm(extent);
+    tangent_bound.reserve(points.size());
+    for (const Vec3& point : points) {
+      tangent_bound.push_back(2.0 * certified_tangent_radius_bound(
+                                        points, directions, box, point, cap,
+                                        theta, ceiling,
+                                        counters.population_queries));
+    }
+  }
+
   std::array<PointId, 4> support{};
   std::vector<PointId> retained;
 
@@ -508,6 +709,11 @@ LocalGerminationCertificate generate_local_germination_candidates(
       const Vec3 edge = q - p;
       const double diameter = norm(edge);
       if (!(diameter > 0.0)) {
+        continue;
+      }
+      // The certified restriction, applied at both endpoints.
+      if (!tangent_bound.empty() &&
+          (diameter > tangent_bound[first] || diameter > tangent_bound[second])) {
         continue;
       }
       const double margin = certified_margin_scale * diameter;

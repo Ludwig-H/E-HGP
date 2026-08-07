@@ -68,6 +68,12 @@ struct LocalGerminationConfig {
   // Certified margin subtracted from every test radius, as 2^exponent times the
   // diameter.  Must be at most zero, so the margin never exceeds the diameter.
   int certified_margin_exponent{-20};
+  // Direction set used to bound the tangent radius R(p).  Zero leaves the seed
+  // loop exhaustive; 6, 14 or 26 select a set whose covering radius is sealed
+  // with a proof, and the loop is then restricted to pairs satisfying the
+  // CERTIFIED bound D <= 2 R(p) -- complete by theorem rather than by
+  // exhaustion.
+  std::size_t tangent_direction_count{};
   // Restriction of the seed loop to pairs closer than this multiple of the
   // local s_max-nearest-neighbour radius.  Zero means NO restriction: the seed
   // loop is exhaustive over pairs, which is what makes the enumeration complete
@@ -115,6 +121,14 @@ struct LocalGerminationCertificate {
   std::size_t segment_position_count{};
   int certified_margin_exponent{};
   std::size_t seed_neighbourhood_cutoff_multiple{};
+  // How the seed loop was restricted, and therefore what its completeness rests
+  // on.  Only the first two guarantee it.
+  enum class SeedRestriction : std::uint8_t {
+    exhaustive_over_pairs = 0U,
+    certified_tangent_bound = 1U,
+    declared_heuristic_cutoff = 2U,
+  };
+  SeedRestriction seed_restriction{SeedRestriction::exhaustive_over_pairs};
   // The direction set used to bound the tangent radius R(p), and the covering
   // radius claimed for it in millidegrees.  A covering radius that is too small
   // would leave a direction untested and could lose a support, so the verifier
@@ -129,6 +143,15 @@ struct LocalGerminationCertificate {
   // restricted it owes a completeness argument the theorem does not supply, and
   // the verifier refuses a certificate that claims otherwise.
   bool seed_loop_exhaustive_over_pairs{true};
+
+  // Completeness is guaranteed by exhaustion or by the certified bound, and by
+  // nothing else.  A heuristic cutoff may be honest and useful, but it does not
+  // guarantee completeness and must never be read as if it did.
+  [[nodiscard]] bool completeness_guaranteed() const noexcept {
+    return seed_restriction == SeedRestriction::exhaustive_over_pairs ||
+        (seed_restriction == SeedRestriction::certified_tangent_bound &&
+         tangent_covering_radius_proved);
+  }
   // The mass partition identity does NOT survive this basis: the generator
   // never enumerates the universe, so unexamined mass is excluded by the
   // theorem rather than resolved by pruning.  Declaring it available would be

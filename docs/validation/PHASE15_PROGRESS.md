@@ -2552,3 +2552,57 @@ Le générateur de référence reste **exhaustif par défaut** — c'est ce qui 
 certificat de complétude vrai sans autre argument.
 
 Seize suites vertes.
+
+## La restriction certifiée est câblée, et elle ne perd rien
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Le générateur applique désormais la restriction certifiée $D\le2R(p)$ **aux deux
+extrémités** de la paire — le graphe du corollaire —, avec le jeu à
+vingt-six directions dont le rayon de recouvrement est prouvé, et l'AABB du nuage
+comme région convexe.
+
+**Le contrat a trois régimes, pas deux.** La distinction manquait, et elle est
+essentielle :
+
+| régime | complétude | ce qu'il exige |
+| --- | :-: | --- |
+| `exhaustive_over_pairs` | **garantie** | aucune restriction déclarée |
+| `certified_tangent_bound` | **garantie** | un jeu de directions à rayon **prouvé** |
+| `declared_heuristic_cutoff` | *non garantie* | un multiple déclaré, aucune prétention de preuve |
+
+Le certificat porte `completeness_guaranteed()`, vrai pour les deux premiers
+seulement. Un coupe-circuit heuristique peut être honnête et utile ; il ne
+garantit pas la complétude et ne doit jamais être lu comme s'il le faisait. Le
+vérificateur refuse par nom une borne tangente certifiée **sans rayon prouvé**,
+une boucle exhaustive qui déclarerait une restriction, et un coupe-circuit sans
+multiple. L'induction de reprise refuse en outre un changement de régime en cours
+de chaîne.
+
+**Le calcul de $\bar R(p)$, et pourquoi il est sûr.** Pour une direction couvrant
+une calotte de demi-angle $\theta$, l'image de la calotte tient dans la boule de
+rayon $\rho\sin\theta$ autour de $p+\rho\cos\theta\,u$ : une calotte dont l'image
+manque la région convexe est donc **morte**. Et la boule décalée de rayon
+$\rho(1-\sin\theta)$ autour du même centre est incluse dans **toutes** les boules
+tangentes de la calotte : une boule décalée sur-peuplée tue donc la calotte
+entière. L'admissibilité étant un segment initial en $\rho$ — les boules
+tangentes d'une direction fixée sont emboîtées croissantes et la région est
+convexe et contient $p$ —, la bissection converge, et rendre la **borne
+supérieure** de l'encadrement donne une majoration.
+
+**Le certificat.** Les neuf cellules du test de complétude sont rejouées avec la
+restriction active : mêmes nuages, mêmes ordres, mêmes arités. **Zéro support
+manquant**, et les comptes acceptés sont identiques au chiffre près. La
+restriction ne perd rien — c'est ce qu'il fallait démontrer.
+
+**Honnêteté sur ce que le test exerce.** À vingt-quatre et quarante points la
+restriction ne **mord** pas : aucune boule n'atteint jamais onze points, donc
+$\bar R(p)$ vaut le plafond et toutes les paires passent. Le test certifie donc la
+**correction** de la restriction, pas sa sélectivité. Celle-ci ne se mesure qu'à
+l'échelle, où le voisinage certifié vaut environ 760 avec ce même jeu à
+vingt-six directions. C'est la même séparation que pour la complétude et la
+sélectivité du générateur, et elle est structurelle : les deux propriétés ne
+peuvent pas se mesurer sur le même nuage.
+
+Quinze suites vertes.
