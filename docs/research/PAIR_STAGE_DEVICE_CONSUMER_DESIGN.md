@@ -128,6 +128,40 @@ largeurs d'arithmétique et de recertification. Les incréments B1-a à B1-f
 ci-dessous restent valides dans leur ordre, mais leur contenu se recentre sur ce
 plafond plutôt que sur une construction ex nihilo.
 
+### 3 bis.1 Rien dans la chaîne de dépendances visible n'exige 6
+
+La lecture du catalogue va plus loin, et il faut la consigner telle quelle.
+
+Le catalogue pilote exactement deux composants, et il leur passe son
+`maximum_closed_rank` **tel quel** :
+
+| composant piloté | plafond déclaré |
+| --- | ---: |
+| `MortonYao48DeviceTiledPairFrontier` | **11** |
+| `MortonYao48RankedPairTileClassifier` | **11** |
+
+Les deux acceptent donc déjà le rang du contrat. Quant aux capacités, elles ne
+dépendent pas du rang dans le code : `catalog_record_capacity_per_point`,
+`payload_point_id_capacity_per_point` et `exact_fallback_capacity_per_point`
+sont des **facteurs fournis par l'appelant**, bornés par 4 096, et le catalogue
+se contente de vérifier que leur produit par le nombre de points ne déborde pas.
+C'est à l'appelant de les dimensionner pour le rang visé — et 4 096 par point est
+très au-dessus des 90 records par point mesurés à rang 6 sur 50 000 points.
+
+**Conclusion prudente, et il faut la formuler exactement.** Aucune dépendance
+structurelle visible depuis ces en-têtes n'exige le 6 : ni les composants
+pilotés, ni les capacités. Le plafond ressemble donc à une **frontière de
+qualification** — le rang au-delà duquel rien n'a jamais été qualifié — et non à
+une contrainte de conception.
+
+Cela ne permet pas de conclure que le lever se réduit à changer une constante.
+L'arithmétique interne du classifieur à rang 11 n'est pas visible depuis les
+en-têtes, et une constante scellée existe souvent précisément parce que
+l'au-delà n'a jamais été exercé. Mais cela change l'ordre des travaux : **la
+première chose à faire n'est pas de concevoir, c'est de tenter le rang 11 sur le
+faux hôte et de voir ce qui refuse.** C'est local, sans GPU, et cela remplacera
+cette hypothèse par un fait.
+
 ## 4. Les six incréments, dans l'ordre
 
 **B1-a — le classifieur device de rang diamétral, qualifié à l'échelle.**
