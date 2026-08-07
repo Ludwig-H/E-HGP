@@ -5427,12 +5427,11 @@ bool count_reloaded_durable_segment(
     report.higher_status = "complete";
     report.higher_stop_reason = "none";
     report.higher_authority_kind = "anchored_session_chain_certificate";
-    report.higher_verification_basis =
-        assembly.certificate.verification_basis() ==
-            morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis::
-                device_search_host_exact_record_classification_bigint_closure
-        ? "device_search_host_exact_record_classification_bigint_closure"
-        : "fresh_cpu_replay_every_commit";
+    // Never a ternary here: a two-way choice silently reports any future
+    // basis as the fresh-replay one, which is a lie the report cannot afford.
+    report.higher_verification_basis = std::string{
+        morsehgp3d::hierarchy::canonical_name(
+            assembly.certificate.verification_basis())};
     facade_storage.emplace(build_exact_direct_support_terminal_facade(
         index,
         cloud,

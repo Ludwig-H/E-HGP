@@ -15,6 +15,7 @@
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/support.hpp"
 #include "morsehgp3d/hierarchy/higher_support_closed_ball.hpp"
+#include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/hierarchy/local_germination.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
@@ -46,6 +47,10 @@ using morsehgp3d::hierarchy::LocalGerminationCounters;
 using morsehgp3d::hierarchy::generate_local_germination_candidates;
 using morsehgp3d::hierarchy::local_germination_certificate_admissible;
 using morsehgp3d::hierarchy::local_germination_proof_basis;
+using morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis;
+using morsehgp3d::hierarchy::canonical_name;
+using morsehgp3d::hierarchy::verification_basis_consumable_by_mass_partition;
+using morsehgp3d::hierarchy::verification_basis_guarantees;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
@@ -322,6 +327,72 @@ void check_certificate_falsification() {
       "an empty segment covering was admitted");
 }
 
+// The contract of the three verification bases.  What each one guarantees is a
+// table, and the table is the contract: a consumer branches on it instead of
+// re-reading prose, so a wrong entry is a wrong guarantee.
+void check_verification_basis_contract() {
+  using Basis = ExactHigherSupportVerificationBasis;
+
+  const auto replay =
+      verification_basis_guarantees(Basis::fresh_cpu_replay_every_commit);
+  require(
+      replay.mass_partition_identity_available &&
+          replay.fresh_replay_every_commit &&
+          !replay.requires_local_germination_completeness_certificate,
+      "the fresh-replay basis lost a guarantee");
+
+  const auto tile = verification_basis_guarantees(
+      Basis::device_search_host_exact_record_classification_bigint_closure);
+  require(
+      tile.mass_partition_identity_available &&
+          !tile.fresh_replay_every_commit &&
+          !tile.requires_local_germination_completeness_certificate,
+      "the tile-certified basis lost a guarantee");
+
+  // The germination basis is the only one that does NOT partition the universe,
+  // and the only one whose completeness rests on an external certificate.
+  const auto germination = verification_basis_guarantees(
+      Basis::local_germination_completeness_with_exact_terminal_classification);
+  require(
+      !germination.mass_partition_identity_available &&
+          !germination.fresh_replay_every_commit &&
+          germination.requires_local_germination_completeness_certificate,
+      "the germination basis misdeclares what it provides");
+
+  // Fail-closed: every consumer of an anchored chain requires the mass
+  // partition identity today, so the germination basis must be refused by name
+  // until the production identity replaces the coverage one on the bridge.
+  require(
+      verification_basis_consumable_by_mass_partition(
+          Basis::fresh_cpu_replay_every_commit),
+      "the fresh-replay basis became unconsumable");
+  require(
+      verification_basis_consumable_by_mass_partition(
+          Basis::device_search_host_exact_record_classification_bigint_closure),
+      "the tile-certified basis became unconsumable");
+  require(
+      !verification_basis_consumable_by_mass_partition(
+          Basis::local_germination_completeness_with_exact_terminal_classification),
+      "the germination basis was admitted by a mass-partition consumer");
+
+  // The canonical names are part of the certificate wire and must stay stable
+  // and distinct.
+  require(
+      canonical_name(Basis::fresh_cpu_replay_every_commit) ==
+          "fresh_cpu_replay_every_commit",
+      "the fresh-replay basis name drifted");
+  require(
+      canonical_name(
+          Basis::device_search_host_exact_record_classification_bigint_closure) ==
+          "device_search_host_exact_record_classification_bigint_closure",
+      "the tile-certified basis name drifted");
+  require(
+      canonical_name(
+          Basis::local_germination_completeness_with_exact_terminal_classification) ==
+          "local_germination_completeness_with_exact_terminal_classification",
+      "the germination basis name drifted");
+}
+
 }  // namespace
 
 int main() {
@@ -338,6 +409,7 @@ int main() {
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 4U);
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 3U);
     check_certificate_falsification();
+    check_verification_basis_contract();
   } catch (const std::exception& error) {
     std::cerr << "local germination test threw: " << error.what() << '\n';
     return 1;

@@ -911,7 +911,76 @@ class ExactHigherSupportAnchoredStreamAssembler;
 enum class ExactHigherSupportVerificationBasis : std::uint8_t {
   fresh_cpu_replay_every_commit,
   device_search_host_exact_record_classification_bigint_closure,
+  // The local germination basis.  Its completeness does NOT come from a
+  // partition of the universe -- the generator never enumerates it -- but from
+  // the theorem of docs/math/OPTIMISATIONS_JUNG_SUPPORTS_3_4.md together with
+  // the admissibility of the constant it declares.  Unexamined mass is
+  // therefore EXCLUDED BY THE THEOREM rather than resolved by pruning, and the
+  // mass partition identity R + C(F) = C(n,3) + C(n,4) is neither produced nor
+  // available under it.
+  //
+  // It is introduced FAIL-CLOSED: no commit path mints it, and every path that
+  // requires the mass identity refuses a chain locked to it.  The value exists
+  // so that the contract can be written and checked before the integration
+  // exists, exactly as the record-staging guard was posed before the staging.
+  local_germination_completeness_with_exact_terminal_classification,
 };
+
+// What each basis actually guarantees.  This is the contract the anchored
+// chain is verified against, and it is a table rather than a comment because a
+// consumer must be able to branch on it without re-reading the prose.
+struct ExactHigherSupportVerificationBasisGuarantees {
+  // The chain produces and checks R + C(F) = C(n,3) + C(n,4).
+  bool mass_partition_identity_available{};
+  // Every committed transition is re-derived by the host generator.
+  bool fresh_replay_every_commit{};
+  // Completeness rests on an external certificate whose declared constant must
+  // be verified admissible before the chain means anything.
+  bool requires_local_germination_completeness_certificate{};
+};
+
+[[nodiscard]] inline ExactHigherSupportVerificationBasisGuarantees
+verification_basis_guarantees(
+    ExactHigherSupportVerificationBasis basis) noexcept {
+  switch (basis) {
+    case ExactHigherSupportVerificationBasis::fresh_cpu_replay_every_commit:
+      return ExactHigherSupportVerificationBasisGuarantees{true, true, false};
+    case ExactHigherSupportVerificationBasis::
+        device_search_host_exact_record_classification_bigint_closure:
+      return ExactHigherSupportVerificationBasisGuarantees{true, false, false};
+    case ExactHigherSupportVerificationBasis::
+        local_germination_completeness_with_exact_terminal_classification:
+      return ExactHigherSupportVerificationBasisGuarantees{false, false, true};
+  }
+  // An unknown basis guarantees nothing, which is the fail-closed answer.
+  return ExactHigherSupportVerificationBasisGuarantees{};
+}
+
+[[nodiscard]] inline std::string_view canonical_name(
+    ExactHigherSupportVerificationBasis basis) noexcept {
+  switch (basis) {
+    case ExactHigherSupportVerificationBasis::fresh_cpu_replay_every_commit:
+      return "fresh_cpu_replay_every_commit";
+    case ExactHigherSupportVerificationBasis::
+        device_search_host_exact_record_classification_bigint_closure:
+      return "device_search_host_exact_record_classification_bigint_closure";
+    case ExactHigherSupportVerificationBasis::
+        local_germination_completeness_with_exact_terminal_classification:
+      return "local_germination_completeness_with_exact_terminal_"
+             "classification";
+  }
+  return "unknown_verification_basis";
+}
+
+// A chain may only be sealed under a basis whose guarantees the consumer is
+// prepared to honour.  Today every consumer of an anchored chain requires the
+// mass partition identity, so this refuses the germination basis by name --
+// and will keep refusing it until the production identity replaces the
+// coverage one on the bridge.
+[[nodiscard]] inline bool verification_basis_consumable_by_mass_partition(
+    ExactHigherSupportVerificationBasis basis) noexcept {
+  return verification_basis_guarantees(basis).mass_partition_identity_available;
+}
 
 // One tile-certified transition: the resolved back suffix of the trusted
 // frontier, its host-classified records and its device-certified masses.

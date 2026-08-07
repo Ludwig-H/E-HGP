@@ -2347,3 +2347,53 @@ supplémentaire de `verification_basis` du certificat de chaîne, la validation
 croisée du pont portant sur une identité de production, et l'induction de reprise
 — restent à écrire côté session. Aucune mesure G4, aucun run 50k, aucune porte
 d'échelle, aucun statut public.
+
+## La troisième base de vérification, posée fail-closed
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Première des trois conséquences de contrat nommées le 7 août :
+`ExactHigherSupportVerificationBasis` gagne
+`local_germination_completeness_with_exact_terminal_classification`.
+
+**Ce qu'elle déclare, et ce qu'elle refuse de déclarer.** Sa complétude ne vient
+pas d'une partition de l'univers — le générateur ne l'énumère jamais — mais du
+théorème et de l'admissibilité de la constante qu'il déclare. La masse non
+examinée est **exclue par le théorème**, pas résolue par élagage, et l'identité
+$R+C(F)=\binom n3+\binom n4$ n'est donc **ni produite ni disponible** sous cette
+base.
+
+**Le contrat est une table, pas un commentaire.**
+`verification_basis_guarantees(basis)` rend trois faits par base —
+partition de masse disponible, rejeu frais à chaque commit, certificat de
+complétude externe exigé — pour qu'un consommateur puisse brancher dessus au
+lieu de relire de la prose. Un défaut d'entrée est un défaut de garantie, et le
+test l'énonce base par base.
+
+| base | partition de masse | rejeu frais | certificat exigé |
+| --- | :-: | :-: | :-: |
+| `fresh_cpu_replay_every_commit` | oui | oui | non |
+| `device_search_..._bigint_closure` | oui | non | non |
+| `local_germination_completeness_...` | **non** | non | **oui** |
+
+**Elle est posée fail-closed.** Aucun chemin de commit ne la mint, et
+`verification_basis_consumable_by_mass_partition` la refuse par nom : tous les
+consommateurs actuels d'une chaîne ancrée exigent l'identité de partition, et ils
+continueront de la refuser jusqu'à ce que l'identité de **production** remplace
+celle de **couverture** sur le pont. La valeur existe pour que le contrat puisse
+être écrit et vérifié avant que l'intégration existe — exactement comme la garde
+de drainage avait été posée avant le staging.
+
+**Un mensonge silencieux, supprimé au passage.** Le runner rendait sa base par
+une ternaire à deux branches, qui aurait rapporté toute base future comme
+`fresh_cpu_replay_every_commit`. Elle est remplacée par le nom canonique, et les
+trois noms sont épinglés par le test : ils appartiennent au fil du certificat et
+ne doivent pas dériver.
+
+Seize suites vertes.
+
+**Ce que cela ne dit pas.** Les deux autres conséquences restent à écrire : la
+validation croisée du pont portant sur une identité de production, et l'induction
+de reprise sous la nouvelle quantité conservée. Aucune mesure G4, aucun run 50k,
+aucune porte d'échelle, aucun statut public.
