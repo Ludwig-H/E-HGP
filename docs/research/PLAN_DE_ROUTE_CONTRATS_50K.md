@@ -67,6 +67,38 @@ $n$. Ce n'est pas un verrou d'optimisation : même rendu parfaitement linéaire 
 parfaitement parallèle, il coûterait $2{,}3\cdot10^{4}$ s. Il demande une **borne
 de travail** — donc une conception, pas un réglage.
 
+> **Ce que le profil a changé à ce diagnostic.** À $n=40$, univers fermé,
+> l'aval coûte 10 217 ms pour **663 nœuds de fermeture** — 15,4 ms le nœud.
+> La fermeture n'est donc **pas grosse, elle est lente** : la borne
+> structurelle de 1 048 576 nœuds n'est jamais approchée. Un profil callgrind
+> à $n=16$ nomme le coût, et ce n'est pas la science :
+>
+> | poste (inclusif) | part du run |
+> | --- | ---: |
+> | `verify_exact_direct_saddle_arm_seed_journal_streaming` (rejeu de vérification) | 34,6 % |
+> | `CanonicalSha256Builder::update` | 21,7 % |
+> | `ExactRational::canonical_key()` (rendu **décimal** des rationnels) | 14,3 % |
+> | constructeur du reducer, ~tout en `build_..._forest_source_manifest` | 11,8 % |
+> | constructeur de l'exécuteur de lots | 11,6 % |
+> | boost multiprecision (gcd, resize, divide, multiply), exclusif | ~45 % |
+>
+> La chaîne chaude est **rationnel non borné → chaîne décimale → SHA-256**, et
+> c'est la couche de **provenance**. Deux médecines déjà éprouvées dans ce
+> dépôt s'y appliquent telles quelles : celle de R1-c/R1-d (déterminants
+> entiers au lieu de rationnels normalisés, 864 × sur l'étage higher) et celle
+> de R1 tout court (remplacer un rejeu de vérification par des invariants
+> $O(\text{sortie})$ — ici les 34,6 % du rejeu de journal de graines).
+>
+> Premier acompte pris et mesuré : le SHA-256 vidé de sa boucle octet par
+> octet et de son brassage de registres rend `reducer_setup` **1,48 ×**,
+> `reducer_stream` **1,37 ×** et le run entier **1,25 ×**, à **empreintes
+> bit-à-bit identiques** (zéro champ scientifique différent, vecteurs connus
+> verts).
+>
+> V1 reste le verrou dominant et garde son ordre de grandeur, mais il cesse
+> d'être opaque : il est fait de trois postes nommés et chiffrés, dont deux
+> ont déjà leur remède dans l'histoire du dépôt.
+
 **V2 — La recherche higher, non terminante.** C'est le seul verrou dont la
 solution est **déjà démontrée et pas câblée** : la germination locale certifiée
 ramène $2{,}604\cdot10^{17}$ à $4{,}4\cdot10^{8}$ candidats, et le budget devient
@@ -194,21 +226,54 @@ travail décroissant, le dépassement décroît proportionnellement.
 Pourquoi d'abord : sans lui, **toute mesure bornée de l'étage higher est sans
 valeur**, et chaque minute de G4 dépensée dessus est perdue.
 
-### I2 — Câbler la germination locale certifiée dans la recherche higher · *local puis G4*
+### I2 — La germination locale certifiée · **MESURÉE, ET RÉFUTÉE À L'ÉCHELLE**
 
-Entrée : I1.
-C'est le verrou V2, et sa mathématique est faite : restriction certifiée
-$D \le 2R(p)$, région AABB, jeu de 26 directions de rayon de couverture prouvé
-27,569276°. Ce qui manque est le câblage dans le chemin de recherche, hôte
-d'abord — le device ensuite, une fois le gain établi.
-Sortie falsifiable, en deux temps :
-1. *complétude* — à petit nuage, l'énumération germée rend **exactement** les
-   mêmes supports acceptés que l'énumération exhaustive, sur toutes les familles
-   du recensement (zéro manquant, zéro en trop) ;
-2. *sélectivité* — à $n=512$, $K=5$, l'univers **ferme complètement**, là où le
-   chemin actuel résout 0,02 % par 150 s, et le nombre de candidats visités est
-   au plus la borne de germination.
-Mesure à 50 000 points : G4, une seule exécution, sous le garde-fou d'I1.
+La restriction certifiée existe déjà dans le générateur : $D \le 2R(p)$ sous le
+jeu de 26 directions de rayon de couverture prouvé 27,569276°. Elle a été
+mesurée, à $n=512$, $K=10$, sur les triples :
+
+| famille | directions | paires retenues | candidats |
+| --- | ---: | ---: | ---: |
+| uniform_latin | 0 | 47 783 / 130 816 | 480 847 |
+| uniform_latin | **26** | 42 164 / 130 816 | **404 713** (−16 %) |
+| eight_clusters | 0 | 130 617 / 130 816 | 18 143 332 |
+| eight_clusters | **26** | **130 617 / 130 816** | **18 143 332** (−0 %) |
+
+**La restriction certifiée retire 16 % sur nuage uniforme et exactement rien sur
+nuage aggloméré.** La raison est structurelle : $R(p)$ est un maximum sur les
+orientations de boules passant par $p$, et pour un point au bord d'un amas une
+boule qui s'étend vers le vide est énorme tout en restant pauvre. Le chiffre de
+$4{,}4\cdot10^{8}$ candidats venait du cutoff **non certifié**, et la route
+certifiée ne le reproduit pas : sur `eight_clusters` les candidats valent 81,6 %
+de $\binom{512}{3}$.
+
+**Une route de remplacement a été essayée et rejetée pour cause d'exactitude.**
+Construire les triples sur la sortie de l'étage paire — déjà exacte et complète à
+50 000 points en 2,434 s — supposerait que les arêtes d'un triple accepté soient
+des arêtes de Gabriel d'ordre borné. La mesure dit que c'est presque vrai et pas
+vrai : à $K=10$, 99,0 % des arêtes ont un rang fermé $\le 11$ en uniforme, 86,9 %
+en aggloméré, mais la queue monte à 16 et 38. Et la géométrie explique
+exactement pourquoi il ne peut pas en être autrement : pour un triangle acutangle
+de circumcentre $O$ et de rayon $R$, la boule diamétrale d'un côté est contenue
+dans $B(O, \sqrt2 R)$ et **jamais** dans $B(O,R)$ — son point le plus éloigné est
+à $R(\cos\gamma + \sin\gamma)$, qui vaut $R\sqrt2$ au pire et $1{,}366\,R$ même en
+se restreignant à l'arête du diamètre. Un pré-filtre par rang d'arête est donc
+**prouvablement incomplet**, quel que soit le seuil.
+
+**Ce qui reste, et c'est la seule route exacte connue** : produire les supports
+depuis la **structure d'ordre $k$** au lieu de filtrer l'univers. Un support
+minimal bien centré de rang fermé $\rho$ est, par définition même, un simplexe de
+**Gabriel d'ordre $\rho - |S|$** ; l'ensemble cherché est donc exactement les
+triangles de Gabriel d'ordre $\le K-2$ et les tétraèdres d'ordre $\le K-3$. Cette
+reformulation ne change pas l'objet — elle change le coût, en le rendant
+proportionnel à la **sortie** ($1{,}8\cdot10^{7}$ à $K=10$, $2{,}2\cdot10^{6}$ à
+$K=5$) et non à l'univers ($2{,}6\cdot10^{17}$), soit **dix ordres de grandeur**.
+Corroboration déjà au dépôt : à l'ordre 0, 334 979 tétraèdres de Delaunay mesurés
+à 50 000 points, et 8,36 triangles de Gabriel par point mesurés contre 9,5
+projetés par le recensement — 13 % d'écart.
+
+Le dépôt ne contient aucune construction de Delaunay. C'est le travail à faire,
+et c'est un travail de fond, pas un câblage.
 
 ### I3 — Paralléliser la recertification paire · *local, mesuré G4*
 
