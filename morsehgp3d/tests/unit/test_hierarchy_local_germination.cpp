@@ -835,6 +835,45 @@ void check_germination_chain() {
   require(!refused.seal().sealed, "a chain with an inadmissible genesis sealed");
 }
 
+// A measurement, not an assertion: at these sizes the exhaustive reference is
+// out of reach, so what is reported is the generator's own accounting.  It
+// exists to see whether the certified restriction BITES, which is the one thing
+// the completeness cells cannot show.
+void report_selectivity(
+    std::string_view family,
+    const std::vector<CertifiedPoint3>& input,
+    std::size_t maximum_order,
+    std::size_t support_size,
+    std::size_t tangent_direction_count) {
+  const CanonicalPointCloud cloud = CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{input});
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  LocalGerminationConfig config;
+  config.maximum_relevant_closed_rank =
+      std::min(maximum_order + 1U, cloud.size());
+  config.seed_disc_ring_count = 2U;
+  config.segment_position_count = 8U;
+  config.tangent_direction_count = tangent_direction_count;
+  const LocalGerminationCertificate certificate =
+      generate_local_germination_candidates(
+          index, cloud, support_size, config,
+          [](const Support&, std::size_t) {});
+  std::string reason;
+  require(
+      local_germination_certificate_admissible(certificate, reason),
+      std::string{"the selectivity run produced an inadmissible certificate: "} +
+          reason);
+  const LocalGerminationCounters& counters = certificate.counters;
+  std::cout << "  " << family << " n=" << cloud.size() << " K=" << maximum_order
+            << " m=" << support_size << " directions="
+            << tangent_direction_count << " | pairs "
+            << counters.pairs_retained << '/' << counters.pairs_examined
+            << " | third " << counters.third_vertices_retained << '/'
+            << counters.third_vertices_examined << " | candidates "
+            << counters.candidates() << " | queries "
+            << counters.population_queries << '\n';
+}
+
 }  // namespace
 
 int main() {
@@ -859,6 +898,13 @@ int main() {
       check_family("eight_clusters", eight_clusters_points(24U), 5U, size, 26U);
     }
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 4U, 26U);
+    std::cout << "selectivity, where the restriction can bite\n";
+    for (const std::size_t directions : {0U, 26U}) {
+      report_selectivity("uniform_latin", uniform_latin_points(512U), 10U, 3U,
+                         directions);
+      report_selectivity("eight_clusters", eight_clusters_points(512U), 10U, 3U,
+                         directions);
+    }
     check_certificate_falsification();
     check_verification_basis_contract();
     check_production_identity_falsification();

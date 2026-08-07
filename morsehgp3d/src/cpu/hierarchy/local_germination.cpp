@@ -67,12 +67,124 @@ struct Vec3 {
                             : std::pair<std::uint64_t, std::uint64_t>{3U, 8U};
 }
 
+// A uniform grid over the binary64 points, local to this reference and built
+// once per run.
+//
+// It is an ACCELERATION, not a decision: it changes which points are looked at,
+// never which are counted, because a ball is compared against the cells it
+// actually meets and every point of those cells is then tested exactly as
+// before.  The product path does not use it -- a device implementation queries
+// the LBVH -- but it lets this reference reach the sizes where the certified
+// restriction begins to bite, which is where its selectivity can be seen at all.
+class UniformGrid {
+ public:
+  UniformGrid(const std::vector<Vec3>& points, double cell)
+      : cell_(cell) {
+    origin_ = points.front();
+    Vec3 upper = points.front();
+    for (const Vec3& point : points) {
+      origin_.x = std::min(origin_.x, point.x);
+      origin_.y = std::min(origin_.y, point.y);
+      origin_.z = std::min(origin_.z, point.z);
+      upper.x = std::max(upper.x, point.x);
+      upper.y = std::max(upper.y, point.y);
+      upper.z = std::max(upper.z, point.z);
+    }
+    const auto span = [&](double low, double high) {
+      const double extent = high - low;
+      const double count = std::floor(extent / cell_) + 1.0;
+      return static_cast<std::size_t>(std::max(1.0, count));
+    };
+    dims_[0] = span(origin_.x, upper.x);
+    dims_[1] = span(origin_.y, upper.y);
+    dims_[2] = span(origin_.z, upper.z);
+    const std::size_t cells = dims_[0] * dims_[1] * dims_[2];
+    std::vector<std::size_t> counts(cells + 1U, 0U);
+    std::vector<std::size_t> cell_of;
+    cell_of.reserve(points.size());
+    for (const Vec3& point : points) {
+      const std::size_t index = linear(cell_index(point));
+      cell_of.push_back(index);
+      ++counts[index + 1U];
+    }
+    for (std::size_t index = 0U; index < cells; ++index) {
+      counts[index + 1U] += counts[index];
+    }
+    starts_ = counts;
+    items_.assign(points.size(), 0U);
+    std::vector<std::size_t> cursor = counts;
+    for (std::size_t point = 0U; point < points.size(); ++point) {
+      items_[cursor[cell_of[point]]++] = point;
+    }
+  }
+
+  // Calls `visit(point_index)` for every point of every cell the ball meets.
+  template <typename Visitor>
+  void for_each_candidate(
+      const Vec3& centre, double radius, Visitor&& visit) const {
+    std::array<std::size_t, 3> low{};
+    std::array<std::size_t, 3> high{};
+    const double coordinates[3] = {centre.x, centre.y, centre.z};
+    const double origins[3] = {origin_.x, origin_.y, origin_.z};
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      const double relative_low = (coordinates[axis] - radius - origins[axis]) / cell_;
+      const double relative_high = (coordinates[axis] + radius - origins[axis]) / cell_;
+      const double clamped_low = std::max(0.0, std::floor(relative_low));
+      const double clamped_high = std::min(
+          static_cast<double>(dims_[axis] - 1U), std::floor(relative_high));
+      if (clamped_high < clamped_low) {
+        return;
+      }
+      low[axis] = static_cast<std::size_t>(clamped_low);
+      high[axis] = static_cast<std::size_t>(clamped_high);
+    }
+    for (std::size_t x = low[0]; x <= high[0]; ++x) {
+      for (std::size_t y = low[1]; y <= high[1]; ++y) {
+        for (std::size_t z = low[2]; z <= high[2]; ++z) {
+          const std::size_t index = linear({x, y, z});
+          for (std::size_t slot = starts_[index]; slot < starts_[index + 1U];
+               ++slot) {
+            visit(items_[slot]);
+          }
+        }
+      }
+    }
+  }
+
+ private:
+  [[nodiscard]] std::array<std::size_t, 3> cell_index(
+      const Vec3& point) const noexcept {
+    const double coordinates[3] = {point.x, point.y, point.z};
+    const double origins[3] = {origin_.x, origin_.y, origin_.z};
+    std::array<std::size_t, 3> cell{};
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      const double relative = std::floor((coordinates[axis] - origins[axis]) / cell_);
+      const double clamped =
+          std::min(std::max(0.0, relative), static_cast<double>(dims_[axis] - 1U));
+      cell[axis] = static_cast<std::size_t>(clamped);
+    }
+    return cell;
+  }
+
+  [[nodiscard]] std::size_t linear(
+      const std::array<std::size_t, 3>& cell) const noexcept {
+    return (cell[0] * dims_[1] + cell[1]) * dims_[2] + cell[2];
+  }
+
+  Vec3 origin_{};
+  double cell_{};
+  std::array<std::size_t, 3> dims_{};
+  std::vector<std::size_t> starts_;
+  std::vector<std::size_t> items_;
+};
+
 // Counts the points PROVED strictly inside the ball, stopping as soon as the
 // cap is exceeded.  A point whose squared distance is within the margin of the
 // radius is skipped: under-counting is safe, since the caller only ever uses
 // "the count exceeds s_max" as a reason to reject.
 [[nodiscard]] bool population_exceeds(
     const std::vector<Vec3>& points,
+    const UniformGrid& grid,
     const Vec3& centre,
     double radius,
     std::size_t cap,
@@ -86,16 +198,20 @@ struct Vec3 {
   }
   const double inner_squared = inner * inner;
   std::size_t count = 0U;
-  for (const Vec3& point : points) {
-    const Vec3 offset = point - centre;
+  bool exceeded = false;
+  grid.for_each_candidate(centre, inner, [&](std::size_t point) {
+    if (exceeded) {
+      return;
+    }
+    const Vec3 offset = points[point] - centre;
     if (dot(offset, offset) < inner_squared) {
       ++count;
       if (count > cap) {
-        return true;
+        exceeded = true;
       }
     }
-  }
-  return false;
+  });
+  return exceeded;
 }
 
 // An orthonormal pair spanning the plane perpendicular to `axis`.
@@ -215,6 +331,7 @@ struct AxisAlignedBox {
 // converges, and returning the upper end of the bracket gives an upper bound.
 [[nodiscard]] double certified_tangent_radius_bound(
     const std::vector<Vec3>& points,
+    const UniformGrid& grid,
     const std::vector<Vec3>& directions,
     const AxisAlignedBox& box,
     const Vec3& p,
@@ -236,7 +353,7 @@ struct AxisAlignedBox {
         continue;
       }
       ++population_queries;
-      if (!population_exceeds(points, centre, radius * factor, cap, 0.0)) {
+      if (!population_exceeds(points, grid, centre, radius * factor, cap, 0.0)) {
         return true;
       }
     }
@@ -609,6 +726,28 @@ LocalGerminationCertificate generate_local_germination_candidates(
     jung_numerator = theorem.first;
     jung_denominator = theorem.second;
   }
+  // Cell size aimed at a handful of points per cell; the grid is an
+  // acceleration and its tuning changes no verdict.
+  Vec3 span = Vec3{0.0, 0.0, 0.0};
+  {
+    Vec3 low = points.front();
+    Vec3 high = points.front();
+    for (const Vec3& point : points) {
+      low.x = std::min(low.x, point.x);
+      low.y = std::min(low.y, point.y);
+      low.z = std::min(low.z, point.z);
+      high.x = std::max(high.x, point.x);
+      high.y = std::max(high.y, point.y);
+      high.z = std::max(high.z, point.z);
+    }
+    span = high - low;
+  }
+  const double longest =
+      std::max(span.x, std::max(span.y, std::max(span.z, 1.0e-300)));
+  const double cell = longest /
+      std::max(1.0, std::cbrt(static_cast<double>(point_count) / 4.0));
+  const UniformGrid grid{points, cell};
+
   const double gamma_squared = static_cast<double>(jung_numerator) /
       static_cast<double>(jung_denominator);
   if (!(gamma_squared > 0.25)) {
@@ -689,7 +828,7 @@ LocalGerminationCertificate generate_local_germination_candidates(
     tangent_bound.reserve(points.size());
     for (const Vec3& point : points) {
       tangent_bound.push_back(2.0 * certified_tangent_radius_bound(
-                                        points, directions, box, point, cap,
+                                        points, grid, directions, box, point, cap,
                                         theta, ceiling,
                                         counters.population_queries));
     }
@@ -737,7 +876,7 @@ LocalGerminationCertificate generate_local_germination_candidates(
               basis_first * (offset.first * disc_radius) +
               basis_second * (offset.second * disc_radius);
           ++counters.population_queries;
-          if (!population_exceeds(points, centre, seed_test_radius, cap,
+          if (!population_exceeds(points, grid, centre, seed_test_radius, cap,
                                   margin)) {
             seed_rejected = false;
             break;
@@ -816,8 +955,8 @@ LocalGerminationCertificate generate_local_germination_candidates(
                         static_cast<double>(positions - 1U);
             const Vec3 centre = circumcentre + unit_normal * parameter;
             ++counters.population_queries;
-            if (!population_exceeds(points, centre, segment_test_radius, cap,
-                                    margin)) {
+            if (!population_exceeds(points, grid, centre, segment_test_radius,
+                                    cap, margin)) {
               rejected = false;
               break;
             }

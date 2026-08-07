@@ -2606,3 +2606,62 @@ sélectivité du générateur, et elle est structurelle : les deux propriétés 
 peuvent pas se mesurer sur le même nuage.
 
 Quinze suites vertes.
+
+## Le générateur atteint n=512, et une famille lui résiste
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+La référence disposait d'un parcours de nuage à chaque comptage, ce qui la
+bornait à quelques dizaines de points. Elle a maintenant sa **grille uniforme
+locale** — une accélération, jamais une décision : elle change quels points sont
+regardés, jamais lesquels sont comptés, puisqu'une boule est confrontée aux
+cellules qu'elle rencontre et que chaque point de ces cellules est ensuite testé
+exactement comme avant. Aucun verdict ne bouge, les seize cellules de complétude
+le confirment. Le chemin produit ne s'en sert pas : une implémentation device
+interrogera le LBVH.
+
+`lbvh_closed_ball` a été écarté pour ce rôle après lecture : il matérialise la
+partition **entière**, exterior compris, ce qui convient à la classification
+terminale — une requête par support accepté — et pas du tout à un filtre appelé
+dix-neuf fois par paire.
+
+### Première mesure de sélectivité, $n=512$, $K=10$, arité trois
+
+| famille | régime | paires retenues | candidats | part de $\binom{512}{3}$ |
+| --- | --- | ---: | ---: | ---: |
+| `uniform_latin` | exhaustif | 47 783 / 130 816 | 480 847 | 2,16 % |
+| `uniform_latin` | **certifié, 26 directions** | **42 164** / 130 816 | **404 713** | **1,82 %** |
+| `eight_clusters` | exhaustif | 130 617 / 130 816 | 18 143 332 | 81,6 % |
+| `eight_clusters` | certifié, 26 directions | 130 617 / 130 816 | 18 143 332 | 81,6 % |
+
+**Deux lectures, et la seconde est un avertissement.**
+
+Sur `uniform_latin`, la restriction certifiée **mord** pour la première fois :
+elle retire 11,8 % des paires et 16 % des candidats, et l'ensemble ne retient que
+1,82 % de l'univers des triplets. C'est le premier chiffre de sélectivité mesuré
+dans l'implémentation certifiée elle-même, et non dans un harnais Python à
+coupe-circuit heuristique.
+
+Sur `eight_clusters`, **la restriction ne retire rigoureusement rien** — 130 617
+paires retenues dans les deux régimes — et le test de germe lui-même n'en rejette
+que 0,2 %. Le générateur examine alors 81,6 % de l'univers des triplets : il n'est
+presque pas meilleur qu'une énumération exhaustive.
+
+**La raison est structurelle et il faut la nommer.** Cette famille place huit
+amas de rayon $\approx6\cdot10^{-5}$ à une distance de $0{,}5$ les uns des
+autres : ce sont huit grumeaux quasi ponctuels dans un vide immense. Toute boule
+tendue entre deux amas est vide, donc toute paire inter-amas passe le test de
+germe, et $R(p)$ vaut le plafond. Ce n'est pas un défaut de la borne : c'est la
+vérité géométrique de ce nuage, et aucun convexe ni aucun raffinement de
+constante n'y changera quoi que ce soit.
+
+**Ce que cela impose.** La germination locale est **complète partout** et
+**sélective seulement là où la densité locale contraint les boules**. Un nuage
+dont les vides dominent les grumeaux annule la sélectivité sans annuler la
+complétude. Le contrat à 50 000 points doit donc être énoncé par famille, et les
+familles de campagne — huit boules séparées, soixante-quatre amas multi-échelles,
+vingt-quatre filaments, quatre-vingt-seize paires déséquilibrées — doivent être
+mesurées une à une avant toute promesse.
+
+Seize suites vertes.
