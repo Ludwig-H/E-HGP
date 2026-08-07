@@ -17,9 +17,21 @@ approchera.
 
 ## Les trois questions, dans l'ordre de valeur
 
-**Attention : l'ordre de valeur n'est pas l'ordre d'exécution.** Q1 est la plus
-importante et elle est la dernière exécutable, parce qu'elle dépend de Q3. La
-session s'exécute donc **Q3, puis Q1, puis Q2**.
+**Attention : l'ordre de valeur n'est pas l'ordre d'exécution.**
+
+Une sonde bon marché passe avant tout le reste. Le mur de l'étage paire à 50 000
+points est la session **hôte** P8l, mesurée à rang fermé 6 : 5,78 % de couverture
+en 299,9 s. Son coût est dominé par le nombre de candidats admis, qui s'effondre
+avec le rang. À $K=2$ — rang fermé 3 — il y en a des ordres de grandeur moins.
+
+**Q1′ — sonde : le pipeline atteint-il l'aval à 50 000 points avec $K=2$ ?** Une
+seule exécution, profil sans budget, délai généreux. Si elle passe, elle rend le
+coût par événement de la fermeture de descente **à la taille contractuelle**,
+sans dépendre de Q3 — c'est-à-dire la réponse au verrou dominant pour le prix
+d'un run. Si elle ne passe pas, la ventilation dit où elle s'est arrêtée, ce qui
+est déjà une information.
+
+L'ordre d'exécution est donc **Q1′, Q3, Q1, Q2**.
 
 ### Q1 — L'aval passe-t-il l'échelle ? (verrou dominant)
 
