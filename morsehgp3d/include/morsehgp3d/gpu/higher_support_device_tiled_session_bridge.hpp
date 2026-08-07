@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -230,6 +231,11 @@ struct HigherSupportDeviceTiledSessionBridgeAdvance {
   // R2-h: set only when this censure is the operational guard tripping,
   // never when the engine itself censored or failed.
   bool operational_deadline_censure{false};
+  // R2-j: why the tile was abandoned.  The bridge used to swallow the
+  // exception that censored a tile, which left a native failure with no
+  // way to tell an engine fault from a cross-validation refusal from a
+  // fail-closed guard.  Empty unless this advance is a censure.
+  std::string censure_detail;
   std::size_t tile_root_count{};
   std::size_t tile_slot_count{};
   std::size_t minimal_work_unit_budget{};

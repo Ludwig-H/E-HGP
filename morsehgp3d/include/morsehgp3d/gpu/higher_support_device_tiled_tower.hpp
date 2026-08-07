@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <string>
 #include <span>
 
 namespace morsehgp3d::gpu {
@@ -88,6 +89,8 @@ struct HigherSupportDeviceTiledStreamAssembly {
   // The transcript above is still filled in that case; it is empty only
   // when the bridge itself could not be constructed.
   bool assembly_threw{false};
+  // R2-j: verbatim reason of the last censured tile, empty otherwise.
+  std::string censure_detail;
 
   [[nodiscard]] bool censored() const noexcept {
     return censure != HigherSupportDeviceTiledAssemblyCensure::none;

@@ -118,6 +118,7 @@ assemble_exact_higher_support_stream_device_tiled(
                   transaction_committed ||
           bridge.poisoned()) {
         snapshot_progress();
+        output.censure_detail = std::move(advance.censure_detail);
         output.bridge_poisoned = bridge.poisoned();
         return output;
       }

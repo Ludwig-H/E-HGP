@@ -265,6 +265,7 @@ struct Report {
   // masses are canonical decimal exact::BigInt strings: their ratio is the
   // exact fraction of C(n,3)+C(n,4) decided before the stop.
   std::string higher_assembly_censure{"none"};
+  std::string higher_censure_detail{};
   std::string higher_total_support_mass{"0"};
   std::string higher_resolved_support_mass{"0"};
   std::string higher_remaining_frontier_support_mass{"0"};
@@ -3165,6 +3166,8 @@ void emit_report(const Report& report) {
              "sealed_anchored_fixed_chunk_run")
       << ",\"assembly_censure\":\""
       << report.higher_assembly_censure
+      << "\",\"censure_detail\":\""
+      << json_escape(report.higher_censure_detail)
       << "\",\"progress\":{\"total_support_mass\":\""
       << report.higher_total_support_mass
       << "\",\"resolved_support_mass\":\""
@@ -4599,6 +4602,7 @@ void publish_device_tiled_assembly_progress(
   report.higher_assembly_censure = std::string{
       morsehgp3d::gpu::higher_support_device_tiled_assembly_censure_text(
           assembly.censure)};
+  report.higher_censure_detail = assembly.censure_detail;
   publish_higher_progress_audit(
       report,
       assembly.progress_audit,

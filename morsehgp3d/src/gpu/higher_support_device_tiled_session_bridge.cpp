@@ -1548,12 +1548,24 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
               "the device tile was censored before completion");
         }
       }
+    } catch (const std::exception& error) {
+      rebind_required = true;
+      audit.frontier_context_rebind_required = true;
+      ++audit.censored_without_commit_count;
+      advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
+          censored_without_commit;
+      advance.censure_detail = error.what();
+      advance.tile_root_count = tile_roots.size();
+      advance.tile_slot_count = tile_entries.size();
+      advance.audit = audit;
+      return advance;
     } catch (...) {
       rebind_required = true;
       audit.frontier_context_rebind_required = true;
       ++audit.censored_without_commit_count;
       advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
           censored_without_commit;
+      advance.censure_detail = "unknown_nonstandard_exception";
       advance.tile_root_count = tile_roots.size();
       advance.tile_slot_count = tile_entries.size();
       advance.audit = audit;
@@ -1873,12 +1885,24 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
               "the device tile was censored before completion");
         }
       }
+    } catch (const std::exception& error) {
+      rebind_required = true;
+      audit.frontier_context_rebind_required = true;
+      ++audit.censored_without_commit_count;
+      advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
+          censored_without_commit;
+      advance.censure_detail = error.what();
+      advance.tile_root_count = tile_roots.size();
+      advance.tile_slot_count = tile_entries.size();
+      advance.audit = audit;
+      return advance;
     } catch (...) {
       rebind_required = true;
       audit.frontier_context_rebind_required = true;
       ++audit.censored_without_commit_count;
       advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
           censored_without_commit;
+      advance.censure_detail = "unknown_nonstandard_exception";
       advance.tile_root_count = tile_roots.size();
       advance.tile_slot_count = tile_entries.size();
       advance.audit = audit;
