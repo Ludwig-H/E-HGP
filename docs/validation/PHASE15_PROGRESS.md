@@ -1692,3 +1692,23 @@ La mesure avait isolé le verrou : la transaction de tuile est indivisible. La c
 Le différentiel a trouvé au passage une chose qu'il fallait énoncer : **la répartition de la masse élaguée entre « bien centré » et « rang » n'est pas invariante**. Une tuile grossière peut écarter tout un sous-arbre comme non bien centré là où une tuile fine y descend et en élague des parties par le rang. Leur **somme** est invariante, et c'est la seule chose que la partition affirme. L'assertion a été resserrée sur l'énoncé vrai plutôt que relâchée : ce qui décrit le *résultat* est invariant, ce qui décrit le *parcours* ne l'est pas.
 
 **Ce que cela ne dit pas.** Aucune mesure G4 de cet incrément : il reste à vérifier que des tuiles bornées font effectivement progresser la fraction résolue à n=512 et au-delà, ce que la tuile globale ne faisait pas. Si la progression reste nulle avec une seule racine par tuile, alors une racine unique est elle-même irréductible et le changement de contrat — résolution partielle et résidu — redevient nécessaire.
+
+### T1 mesuré : la tuile bornée committe, et la vraie variable est la masse de la racine
+
+Troisième session gardée du 7/8 (`maxRunDuration=3600 s`, arrêt invité 50 min, clé 65 min, cible relue `TERMINATED`, clé révoquée). n=512, K=5, profil sans budget, délai coopératif 120 s.
+
+**Une tuile bornée committe là où la tuile globale ne committait rien.** Avec `--higher-tile-roots 1` et une cible de tuile de 1024, l'étage higher commit **une transaction de tuile** et résout **0,020885 %** de $C(512,3)+C(512,4)$, frontière ramenée de 1024 à 1023. La tuile globale, elle, restait à zéro après 21 minutes. T1 convertit donc « rien, indéfiniment » en progrès committé et mesurable — c'est exactement ce qu'on lui demandait.
+
+**Et la mesure réfute l'hypothèse qui semblait naturelle.** On pouvait croire que la phase de pré-expansion, en $O(\text{cible}^2)$, était devenue le coût dominant. Trois cibles à une racine par tuile :
+
+| cible de tuile | expansions | tuiles committées | univers résolu |
+| ---: | ---: | ---: | --- |
+| 64 | 38 | **0** | 0 % |
+| 256 | 157 | **0** | 0 % |
+| 1024 | 800 | **1** | **0,0209 %** |
+
+Moins d'expansions n'améliore rien : cela empire. Le coût n'est pas la phase d'expansion, c'est **la masse de la racine consommée**. Une frontière grossière laisse des racines lourdes dont la tuile ne termine jamais ; une frontière fine donne des racines légères dont la tuile termine. La règle d'expansion par plus grande masse rend d'ailleurs les entrées de queue — celles que la tuile consomme — les plus fines de toutes.
+
+**Ce que cela désigne.** La finesse atteignable de la frontière est aujourd'hui plafonnée par `slot_tile_capacity = 1024`, parce que la validation du pont impose `pre_expansion_target_entry_count <= slot_tile_capacity`. Cette contrainte confond deux choses distinctes : la frontière vit dans le checkpoint ancré, côté hôte, et n'a aucune raison de tenir dans les slots du device ; seules les entrées **de la tuile** doivent y tenir. Lever cette confusion — laisser la cible de frontière dépasser la capacité de slots, tout en bornant la tuile à 1024 — est le prochain incrément, et il est petit.
+
+**Ce que cela ne dit pas.** Aucun run complet à n=512, aucune mesure à 50k, aucun gate d'échelle, aucun statut public. Le taux mesuré — une tuile pour 0,02 % en 120 s d'étage higher — ne se projette pas : les masses de racines sont très inégales, et rien ne dit que les suivantes coûteront autant.
