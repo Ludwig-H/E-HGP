@@ -6,6 +6,8 @@
 #include <cmath>
 #include <numbers>
 #include <stdexcept>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
@@ -56,18 +58,14 @@ struct Vec3 {
       point.binary64_coordinate(2U)};
 }
 
-// Jung's constant squared, rational: 1/3 for a planar triangle, 3/8 for a
-// tetrahedron.  Kept squared because every comparison below is on squares.
-[[nodiscard]] double jung_squared(std::size_t support_size) {
-  return support_size == 3U ? 1.0 / 3.0 : 3.0 / 8.0;
+// Jung's constant squared, as an exact rational: 1/3 for a planar triangle,
+// 3/8 for a tetrahedron.  Kept squared because every comparison is on squares,
+// and kept rational because that is what makes the certificate checkable.
+[[nodiscard]] std::pair<std::uint64_t, std::uint64_t> theorem_jung_squared(
+    std::size_t support_size) {
+  return support_size == 3U ? std::pair<std::uint64_t, std::uint64_t>{1U, 3U}
+                            : std::pair<std::uint64_t, std::uint64_t>{3U, 8U};
 }
-
-// The certified margin.  Positions are computed in binary64 from quantities of
-// magnitude at most a few times D, through a bounded number of operations, so
-// their error is far below 2^-40 D; the margin is taken orders of magnitude
-// above that, and it is SUBTRACTED from every test radius.  Shrinking a test
-// ball can only lose a rejection, never invent one.
-constexpr double certified_margin_scale = 1.0 / 1048576.0;  // 2^-20
 
 // Counts the points PROVED strictly inside the ball, stopping as soon as the
 // cap is exceeded.  A point whose squared distance is within the margin of the
@@ -145,7 +143,66 @@ struct DiscCover {
 
 }  // namespace
 
-LocalGerminationCounters generate_local_germination_candidates(
+bool local_germination_certificate_admissible(
+    const LocalGerminationCertificate& certificate, std::string& reason) {
+  reason.clear();
+  if (certificate.proof_basis != local_germination_proof_basis) {
+    reason = "proof_basis";
+    return false;
+  }
+  if (certificate.support_size != 3U && certificate.support_size != 4U) {
+    reason = "support_size";
+    return false;
+  }
+  if (certificate.maximum_relevant_closed_rank < certificate.support_size) {
+    reason = "maximum_relevant_closed_rank";
+    return false;
+  }
+  if (certificate.jung_squared_denominator == 0U) {
+    reason = "jung_squared_denominator";
+    return false;
+  }
+  // The declared constant must be AT LEAST the theorem's.  A larger one only
+  // enlarges the locus and shrinks the test balls, so it weakens rejection and
+  // stays complete; a smaller one would move the locus and could lose an
+  // accepted support.  Compared by cross-multiplication, exactly.
+  const auto theorem = theorem_jung_squared(certificate.support_size);
+  const __uint128_t left =
+      static_cast<__uint128_t>(certificate.jung_squared_numerator) *
+      static_cast<__uint128_t>(theorem.second);
+  const __uint128_t right = static_cast<__uint128_t>(theorem.first) *
+      static_cast<__uint128_t>(certificate.jung_squared_denominator);
+  if (left < right) {
+    reason = "jung_squared_below_the_theorem";
+    return false;
+  }
+  // The disc of centres must be real: gamma^2 must exceed one quarter.
+  if (static_cast<__uint128_t>(4U) *
+          static_cast<__uint128_t>(certificate.jung_squared_numerator) <=
+      static_cast<__uint128_t>(certificate.jung_squared_denominator)) {
+    reason = "jung_squared_leaves_no_disc";
+    return false;
+  }
+  if (certificate.segment_position_count == 0U) {
+    reason = "segment_position_count";
+    return false;
+  }
+  if (certificate.certified_margin_exponent > 0) {
+    reason = "certified_margin_exponent";
+    return false;
+  }
+  if (certificate.mass_partition_identity_available) {
+    reason = "mass_partition_identity_is_not_available_under_this_basis";
+    return false;
+  }
+  if (!certificate.completeness_basis_declared) {
+    reason = "completeness_basis_declared";
+    return false;
+  }
+  return true;
+}
+
+LocalGerminationCertificate generate_local_germination_candidates(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::size_t support_size,
@@ -156,7 +213,17 @@ LocalGerminationCounters generate_local_germination_candidates(
     throw std::invalid_argument("a germinated support has size three or four");
   }
   if (config.maximum_relevant_closed_rank < support_size) {
-    return LocalGerminationCounters{};
+    LocalGerminationCertificate empty;
+    empty.proof_basis = std::string{local_germination_proof_basis};
+    empty.support_size = support_size;
+    empty.maximum_relevant_closed_rank = config.maximum_relevant_closed_rank;
+    const auto theorem = theorem_jung_squared(support_size);
+    empty.jung_squared_numerator = theorem.first;
+    empty.jung_squared_denominator = theorem.second;
+    empty.seed_disc_ring_count = config.seed_disc_ring_count;
+    empty.segment_position_count = config.segment_position_count;
+    empty.certified_margin_exponent = config.certified_margin_exponent;
+    return empty;
   }
   if (config.segment_position_count == 0U) {
     throw std::invalid_argument(
@@ -170,13 +237,41 @@ LocalGerminationCounters generate_local_germination_candidates(
     points.push_back(point_of(cloud, id));
   }
 
-  const double gamma_squared = jung_squared(support_size);
+  std::uint64_t jung_numerator = config.jung_squared_numerator;
+  std::uint64_t jung_denominator = config.jung_squared_denominator;
+  if (jung_denominator == 0U) {
+    const auto theorem = theorem_jung_squared(support_size);
+    jung_numerator = theorem.first;
+    jung_denominator = theorem.second;
+  }
+  const double gamma_squared = static_cast<double>(jung_numerator) /
+      static_cast<double>(jung_denominator);
+  if (!(gamma_squared > 0.25)) {
+    throw std::invalid_argument(
+        "the declared squared Jung constant leaves no disc of centres");
+  }
+  if (config.certified_margin_exponent > 0) {
+    throw std::invalid_argument(
+        "the certified margin must not exceed the diameter");
+  }
+  const double certified_margin_scale =
+      std::ldexp(1.0, config.certified_margin_exponent);
   const double gamma = std::sqrt(gamma_squared);
   const double disc_radius_coefficient = std::sqrt(gamma_squared - 0.25);
   const DiscCover cover = build_disc_cover(config.seed_disc_ring_count);
   const std::size_t cap = config.maximum_relevant_closed_rank;
 
-  LocalGerminationCounters counters;
+  LocalGerminationCertificate certificate;
+  certificate.proof_basis = std::string{local_germination_proof_basis};
+  certificate.support_size = support_size;
+  certificate.maximum_relevant_closed_rank =
+      config.maximum_relevant_closed_rank;
+  certificate.jung_squared_numerator = jung_numerator;
+  certificate.jung_squared_denominator = jung_denominator;
+  certificate.seed_disc_ring_count = config.seed_disc_ring_count;
+  certificate.segment_position_count = config.segment_position_count;
+  certificate.certified_margin_exponent = config.certified_margin_exponent;
+  LocalGerminationCounters& counters = certificate.counters;
   std::array<PointId, 4> support{};
   std::vector<PointId> retained;
 
@@ -338,7 +433,7 @@ LocalGerminationCounters generate_local_germination_candidates(
       }
     }
   }
-  return counters;
+  return certificate;
 }
 
 }  // namespace morsehgp3d::hierarchy

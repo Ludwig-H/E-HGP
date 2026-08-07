@@ -5,7 +5,10 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
+#include <string>
+#include <string_view>
 
 namespace morsehgp3d::hierarchy {
 
@@ -54,6 +57,16 @@ struct LocalGerminationConfig {
   // Positions covering the segment of compatible centres (J8).  One means the
   // single-ball incremental test.
   std::size_t segment_position_count{16U};
+  // The squared Jung constant actually used, as an EXACT rational.  Zero means
+  // "take the theorem's value": 1/3 for a triangle, 3/8 for a tetrahedron.
+  // It is a configuration field precisely so that a caller can declare a
+  // different one and have the certificate refuse it -- a completeness claim
+  // must be falsifiable at its constant.
+  std::uint64_t jung_squared_numerator{};
+  std::uint64_t jung_squared_denominator{};
+  // Certified margin subtracted from every test radius, as 2^exponent times the
+  // diameter.  Must be at most zero, so the margin never exceeds the diameter.
+  int certified_margin_exponent{-20};
 };
 
 struct LocalGerminationCounters {
@@ -71,6 +84,42 @@ struct LocalGerminationCounters {
   }
 };
 
+// The sealed identifier of the proof basis this generator relies upon.  It
+// names a COMPLETENESS argument, not a coverage one: nothing here partitions
+// the universe, so the mass identity R + C(F) = C(n,3) + C(n,4) is neither
+// produced nor available, and the certificate says so in the affirmative.
+inline constexpr std::string_view local_germination_proof_basis =
+    "jung_diameter_seed_disc_and_segment_covering_completeness_v1";
+
+// What a run relied upon, in a form a verifier can refuse.
+struct LocalGerminationCertificate {
+  std::string proof_basis;
+  std::size_t support_size{};
+  std::size_t maximum_relevant_closed_rank{};
+  std::uint64_t jung_squared_numerator{};
+  std::uint64_t jung_squared_denominator{};
+  std::size_t seed_disc_ring_count{};
+  std::size_t segment_position_count{};
+  int certified_margin_exponent{};
+  // The mass partition identity does NOT survive this basis: the generator
+  // never enumerates the universe, so unexamined mass is excluded by the
+  // theorem rather than resolved by pruning.  Declaring it available would be
+  // a false claim, and the verifier refuses a certificate that does.
+  bool mass_partition_identity_available{false};
+  bool completeness_basis_declared{true};
+  LocalGerminationCounters counters;
+};
+
+// Re-derives the admissibility of a certificate from its declared constants.
+// It does not trust the producer: it checks that the declared squared Jung
+// constant is at least the theorem's value -- a LARGER one only shrinks the
+// test balls and weakens rejection, a smaller one would move the centre locus
+// and could lose an accepted support -- that the disc stays real, that the
+// margin is a proper fraction of the diameter, and that the basis claims
+// completeness rather than coverage.  On refusal `reason` names the field.
+[[nodiscard]] bool local_germination_certificate_admissible(
+    const LocalGerminationCertificate& certificate, std::string& reason);
+
 // Receives every emitted candidate: the support ids in strictly increasing
 // order, and its size.
 using LocalGerminationSink =
@@ -87,7 +136,7 @@ using LocalGerminationSink =
 // equality in binary64, which is exactly the kind of fragile decision this
 // project refuses to take outside exact arithmetic; the exact tie-break belongs
 // with the exact classifier, which sees the support anyway.
-[[nodiscard]] LocalGerminationCounters generate_local_germination_candidates(
+[[nodiscard]] LocalGerminationCertificate generate_local_germination_candidates(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::size_t support_size,

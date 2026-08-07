@@ -40,9 +40,12 @@ using morsehgp3d::exact::analyze_circumcenter_support_integer;
 using morsehgp3d::hierarchy::ExactHigherSupportClosedBallClassification;
 using morsehgp3d::hierarchy::ExactHigherSupportClosedBallOutcome;
 using morsehgp3d::hierarchy::ExactHigherSupportIndexedClosedBallQuery;
+using morsehgp3d::hierarchy::LocalGerminationCertificate;
 using morsehgp3d::hierarchy::LocalGerminationConfig;
 using morsehgp3d::hierarchy::LocalGerminationCounters;
 using morsehgp3d::hierarchy::generate_local_germination_candidates;
+using morsehgp3d::hierarchy::local_germination_certificate_admissible;
+using morsehgp3d::hierarchy::local_germination_proof_basis;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
@@ -189,7 +192,7 @@ void check_family(
   config.seed_disc_ring_count = 2U;
   config.segment_position_count = 8U;
   std::set<Support> emitted;
-  const LocalGerminationCounters counters =
+  const LocalGerminationCertificate certificate =
       generate_local_germination_candidates(
           index,
           cloud,
@@ -199,6 +202,12 @@ void check_family(
             require(size == support_size, "the sink received the wrong arity");
             emitted.insert(candidate);
           });
+
+  const LocalGerminationCounters& counters = certificate.counters;
+  std::string reason;
+  require(
+      local_germination_certificate_admissible(certificate, reason),
+      std::string{"a legitimate certificate was refused on "} + reason);
 
   std::size_t missing = 0U;
   for (const Support& support : reference) {
@@ -236,6 +245,83 @@ void check_family(
   std::cout << '\n';
 }
 
+// A completeness claim must be falsifiable at its constant.  Each forgery below
+// is exactly the kind that would silently lose accepted supports, and each must
+// be refused by name.
+void check_certificate_falsification() {
+  const auto fresh = []() {
+    LocalGerminationCertificate certificate;
+    certificate.proof_basis = std::string{local_germination_proof_basis};
+    certificate.support_size = 4U;
+    certificate.maximum_relevant_closed_rank = 11U;
+    certificate.jung_squared_numerator = 3U;
+    certificate.jung_squared_denominator = 8U;
+    certificate.seed_disc_ring_count = 2U;
+    certificate.segment_position_count = 16U;
+    certificate.certified_margin_exponent = -20;
+    return certificate;
+  };
+  std::string reason;
+  require(
+      local_germination_certificate_admissible(fresh(), reason),
+      "the theorem's own constants were refused");
+
+  // A SMALLER Jung constant shrinks the locus of centres and would lose
+  // supports: it must be refused, where a larger one is merely conservative.
+  LocalGerminationCertificate smaller = fresh();
+  smaller.jung_squared_numerator = 1U;
+  smaller.jung_squared_denominator = 3U;  // 1/3 < 3/8 for a tetrahedron
+  require(
+      !local_germination_certificate_admissible(smaller, reason) &&
+          reason == "jung_squared_below_the_theorem",
+      "a squared Jung constant below the theorem was admitted");
+
+  LocalGerminationCertificate larger = fresh();
+  larger.jung_squared_numerator = 1U;
+  larger.jung_squared_denominator = 2U;  // 1/2 > 3/8, conservative
+  require(
+      local_germination_certificate_admissible(larger, reason),
+      "a conservative squared Jung constant was refused");
+
+  LocalGerminationCertificate flat = fresh();
+  flat.jung_squared_numerator = 1U;
+  flat.jung_squared_denominator = 4U;
+  require(
+      !local_germination_certificate_admissible(flat, reason),
+      "a squared Jung constant leaving no disc was admitted");
+
+  LocalGerminationCertificate forged = fresh();
+  forged.proof_basis = "some_other_basis";
+  require(
+      !local_germination_certificate_admissible(forged, reason) &&
+          reason == "proof_basis",
+      "a forged proof basis was admitted");
+
+  LocalGerminationCertificate coverage = fresh();
+  coverage.mass_partition_identity_available = true;
+  require(
+      !local_germination_certificate_admissible(coverage, reason),
+      "a certificate claiming the mass partition identity was admitted");
+
+  LocalGerminationCertificate silent = fresh();
+  silent.completeness_basis_declared = false;
+  require(
+      !local_germination_certificate_admissible(silent, reason),
+      "a certificate declaring no basis at all was admitted");
+
+  LocalGerminationCertificate wide = fresh();
+  wide.certified_margin_exponent = 1;
+  require(
+      !local_germination_certificate_admissible(wide, reason),
+      "a margin exceeding the diameter was admitted");
+
+  LocalGerminationCertificate empty_segment = fresh();
+  empty_segment.segment_position_count = 0U;
+  require(
+      !local_germination_certificate_admissible(empty_segment, reason),
+      "an empty segment covering was admitted");
+}
+
 }  // namespace
 
 int main() {
@@ -251,6 +337,7 @@ int main() {
     // One larger cloud on the family that actually produces quadruples.
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 4U);
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 3U);
+    check_certificate_falsification();
   } catch (const std::exception& error) {
     std::cerr << "local germination test threw: " << error.what() << '\n';
     return 1;

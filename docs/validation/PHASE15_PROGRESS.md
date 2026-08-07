@@ -2294,3 +2294,56 @@ d'échelle, aucun statut public. Le générateur n'est pas branché au produit :
 n'est ni tuilé, ni device, et il parcourt le nuage au lieu d'interroger le LBVH —
 une implémentation device doit utiliser l'index. La refondation de la
 comptabilité sur la complétude, décidée le 7 août, n'est pas écrite non plus.
+
+## La comptabilité refondée : un certificat de complétude, et il est falsifiable
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+La décision du 7 août — certifier « tout support accepté a été produit » plutôt
+que « toute la masse a été partitionnée » — est maintenant écrite dans le code,
+et de la seule manière qui vaille : sous une forme qu'un vérificateur peut
+**refuser**.
+
+**Le certificat déclare ce dont la complétude dépend.** `proof_basis` nomme la
+base scellée `jung_diameter_seed_disc_and_segment_covering_completeness_v1` ; le
+carré de la constante de Jung réellement employée est déclaré comme un
+**rationnel exact**, avec le nombre d'anneaux du disque, le nombre de positions
+du segment et l'exposant de la marge certifiée. Et deux drapeaux disent ce que
+cette base n'offre pas :
+`mass_partition_identity_available = false` et
+`completeness_basis_declared = true`.
+
+**Le vérificateur ne fait pas confiance au producteur : il redérive.** Il refuse
+un `proof_basis` forgé, une arité hors {3,4}, un rang inférieur à l'arité, un
+segment vide, une marge dépassant le diamètre, un certificat qui prétendrait
+disposer de l'identité de partition de masse, et un certificat qui ne déclarerait
+aucune base. Surtout, il compare le carré de Jung déclaré à celui du théorème par
+**multiplication croisée exacte** en 128 bits, et il refuse tout ce qui lui est
+**inférieur**.
+
+**L'asymétrie est le cœur de l'argument.** Une constante de Jung *plus grande*
+agrandit le lieu des centres et rétrécit les boules-test : elle affaiblit le
+rejet et reste complète, donc elle est admise. Une constante *plus petite*
+déplacerait le lieu et pourrait perdre un support accepté : elle est refusée par
+nom. C'est exactement la même logique que le rétrécissement des rayons de test —
+une approximation peut coûter du travail, jamais un verdict — appliquée cette
+fois à la déclaration elle-même.
+
+**Falsifications exercées**, chacune refusée par nom : base forgée ; $\gamma^2$
+égal à $1/3$ pour un tétraèdre, c'est-à-dire sous le $3/8$ du théorème ;
+$\gamma^2=1/4$, qui ne laisse aucun disque ; identité de partition revendiquée ;
+aucune base déclarée ; marge supérieure au diamètre ; recouvrement de segment
+vide. Et une admission positive : $\gamma^2=1/2$, conservateur, est **accepté** —
+un vérificateur qui refuserait le conservatisme serait aussi faux qu'un
+vérificateur qui admettrait l'insuffisance.
+
+Le générateur produit désormais ce certificat, et le test de complétude exige
+qu'il soit admissible en plus d'être complet. Quinze suites vertes.
+
+**Ce que cela ne dit pas.** Le certificat couvre le générateur, pas la chaîne
+ancrée : les trois conséquences de contrat nommées le 7 août — la valeur
+supplémentaire de `verification_basis` du certificat de chaîne, la validation
+croisée du pont portant sur une identité de production, et l'induction de reprise
+— restent à écrire côté session. Aucune mesure G4, aucun run 50k, aucune porte
+d'échelle, aucun statut public.
