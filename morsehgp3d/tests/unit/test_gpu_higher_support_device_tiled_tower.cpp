@@ -10,6 +10,7 @@
 #include <limits>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -794,6 +795,85 @@ void run_operational_guard_differential(
       label + ": an unreachable deadline reproduces the unguarded assembly");
 }
 
+// R2-i: a report of failure must always say how far the run got.  Whatever
+// makes the assembly fail -- a censored engine, a poisoned bridge, an
+// exception escaping the transaction loop -- the transcript must still
+// state the exact universe and a mass partition that closes.  The only
+// admissible empty transcript is the one where the bridge itself could not
+// be constructed, which no fake reaches.
+void run_failed_assembly_transcript_case(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    gpu::test_support::FakeHigherSupportDeviceTiledFrontierCorruption
+        corruption,
+    const std::string& label) {
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const exact::BigInt universe =
+      exact_higher_support_candidate_universe_size(cloud.size());
+
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      index, cloud);
+  gpu::test_support::
+      set_fake_gpu_higher_support_device_tiled_frontier_corruption(
+          corruption);
+  gpu::HigherSupportDeviceTiledSessionBridgeConfig config;
+  config.tile_certified_commit = true;
+  const auto assembly =
+      gpu::assemble_exact_higher_support_stream_device_tiled(
+          cloud,
+          index,
+          requested_maximum_order,
+          unlimited_higher_budget(),
+          config);
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+
+  check(
+      !assembly.certified_assembled(),
+      label + ": a corrupted engine must never certify");
+  if (assembly.certified_assembled()) {
+    return;
+  }
+  check(
+      assembly.progress_audit.total_support_count == universe,
+      label + ": the failure transcript states the exact universe");
+  check(
+      assembly.progress_audit.resolved_support_count +
+              assembly.progress_audit.remaining_frontier_support_count ==
+          universe,
+      label + ": the failure transcript still closes R + C(F)");
+  check(
+      !assembly.certificate.minted() && !assembly.higher.has_value(),
+      label + ": a failed assembly mints nothing and holds no stream");
+}
+
+void test_failed_assembly_publishes_its_transcript() {
+  using Corruption =
+      gpu::test_support::FakeHigherSupportDeviceTiledFrontierCorruption;
+  const std::array<CertifiedPoint3, 8U> sphere{
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(0.0, 0.0, -1.0),
+      point(0.5773502691896258, 0.5773502691896258, 0.5773502691896257),
+      point(-0.5773502691896258, -0.5773502691896258, 0.5773502691896258),
+  };
+  for (const auto& [corruption, name] :
+       std::array<std::pair<Corruption, const char*>, 4U>{
+           {{Corruption::broken_partition, "broken_partition"},
+            {Corruption::mass_without_record, "mass_without_record"},
+            {Corruption::cumulative_rollback, "cumulative_rollback"},
+            {Corruption::forged_root_digest, "forged_root_digest"}}}) {
+    run_failed_assembly_transcript_case(
+        sphere, 3U, corruption, std::string{"failed/"} + name);
+  }
+}
+
 void test_operational_guard_differentials() {
   const std::array<CertifiedPoint3, 4U> tetrahedron{
       point(1.0, 1.0, 1.0),
@@ -854,6 +934,7 @@ int main() {
     test_assembly_differentials();
     test_tile_certified_assembly_differentials();
     test_operational_guard_differentials();
+    test_failed_assembly_publishes_its_transcript();
     test_tower_differentials();
     test_scalable_lanes_differentials();
     test_anchored_certificate_anti_forge();

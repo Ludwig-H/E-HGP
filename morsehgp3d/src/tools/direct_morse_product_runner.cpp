@@ -5209,9 +5209,10 @@ bool count_reloaded_durable_segment(
         return emit_operational_deadline(
             report, "higher_support_device_tiled_assembly", total_start);
       }
-      report.higher_status = assembly.bridge_poisoned
-                                 ? "bridge_poisoned"
-                                 : "not_assembled";
+      report.higher_status = assembly.assembly_threw
+          ? "assembly_threw"
+          : (assembly.bridge_poisoned ? "bridge_poisoned"
+                                      : "not_assembled");
       report.higher_stop_reason = "device_tiled_assembly_rejected";
       report.higher_authority_kind = "anchored_session_chain_certificate";
       report.terminal_stage = "higher_support";

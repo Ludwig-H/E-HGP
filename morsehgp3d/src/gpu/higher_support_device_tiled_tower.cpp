@@ -61,6 +61,13 @@ assemble_exact_higher_support_stream_device_tiled(
           output.bridge_audit.committed_transaction_count;
     };
 
+    // R2-i.  The transaction loop and the seal run under their own catch,
+    // because the outer one cannot reach the bridge -- it is declared
+    // inside the try -- and would therefore have returned a report of
+    // failure with an empty transcript.  At 50k a std::bad_alloc here is
+    // the likeliest failure of all, and it is exactly the case where the
+    // question "how far did it get" has to be answerable.
+    try {
     std::size_t committed_transaction_count = 0U;
     while (!bridge.session_terminal()) {
       // Both guard tests sit strictly between committed transitions: the
@@ -133,9 +140,20 @@ assemble_exact_higher_support_stream_device_tiled(
     output.higher = std::move(seal.result);
     output.certificate = seal.certificate;
     return output;
+    } catch (...) {
+      output.higher.reset();
+      output.certificate = {};
+      snapshot_progress();
+      output.assembly_threw = true;
+      return output;
+    }
   } catch (...) {
+    // Construction of the authority, the assembler or the lease failed, so
+    // there is no bridge and no transcript to publish; the caller sees an
+    // uncertified assembly whose transcript is legitimately empty.
     output.higher.reset();
     output.certificate = {};
+    output.assembly_threw = true;
     return output;
   }
 }

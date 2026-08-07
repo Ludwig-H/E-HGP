@@ -84,6 +84,10 @@ struct HigherSupportDeviceTiledStreamAssembly {
   hierarchy::ExactHigherSupportStreamAudit progress_audit{};
   std::size_t progress_frontier_entry_count{};
   std::size_t progress_committed_transaction_count{};
+  // R2-i: an exception escaped the transaction loop or the terminal seal.
+  // The transcript above is still filled in that case; it is empty only
+  // when the bridge itself could not be constructed.
+  bool assembly_threw{false};
 
   [[nodiscard]] bool censored() const noexcept {
     return censure != HigherSupportDeviceTiledAssemblyCensure::none;

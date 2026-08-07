@@ -1595,3 +1595,13 @@ R2-c rendait l'assemblage interruptible **entre** transitions committées, ce qu
 **Ce que cela change pour la mesure.** La chaîne d'observation est désormais complète : l'étage paire est interruptible, l'assemblage higher l'est entre transactions (R2-c) et à l'intérieur d'une tuile (R2-h). Une session 50k rendra donc une ventilation par étage et une fraction exacte de $C(n,3)+C(n,4)$ quel que soit l'endroit où le délai tombe — au lieu de rien.
 
 **Ce que cela ne dit pas.** Aucune mesure G4, aucun run 50k, aucun build CUDA, aucun gate d'échelle, aucun statut public. R2-f — le staging device→hôte des segments de records — reste le blocage : le chemin tuile-certifié n'est toujours pas exécutable contre le lanceur natif.
+
+## R2-i : un rapport d'échec dit toujours jusqu'où le run est allé
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`, `public_status=not_claimed`. GCP non utilisé.
+
+Le `catch (...)` de l'assemblage device-tuilé ne pouvait pas atteindre le pont — celui-ci est déclaré **dans** le `try` — et rendait donc un rapport d'échec à ventilation **vide**. À 50 000 points, un `std::bad_alloc` dans la synthèse du payload ou dans le commit est le mode de défaillance le plus probable de tous, et c'est exactement le cas où la question « jusqu'où est-il allé ? » doit avoir une réponse.
+
+La boucle de transactions et le scellement terminal tournent désormais sous leur propre `catch`, à portée du pont : il prend l'instantané de progression avant de rendre la main, et marque `assembly_threw`. Le `catch` extérieur ne couvre plus que la construction de l'autorité, de l'assembleur et du lease — le seul cas où une ventilation vide est légitime, puisqu'il n'y a pas encore de pont. Le runner distingue les trois issues dans `higher_support.status` : `assembly_threw`, `bridge_poisoned`, `not_assembled`.
+
+**Certificat, une invariante universelle.** Sur quatre modes de corruption du fake — partition cassée, masse sans record, recul cumulatif, digest de racine forgé — l'assemblage échoue et, **dans tous les cas**, sa ventilation énonce l'univers exact $C(n,3)+C(n,4)$, ferme encore $R + C(F)$, ne mint aucun certificat et ne porte aucun résultat de flux. Suites pont M2 et tour device vertes, checker complet du runner vert.
