@@ -1876,27 +1876,48 @@ $1{,}8\cdot10^{7}$, le rapport est de $1{,}4\cdot10^{10}$ : **le potentiel d'une
 facteur constant. C'est ce qui rend la question digne d'un théorème plutôt que
 d'un réglage.
 
-Le débit de référence n'est pas hypothétique. L'étage paire produit
-**4 500 332 records exacts en 1,005 s de launcher** à 50 000 points et rang
-fermé 6, en 5,04 visites de nœud par record. À ce débit démontré,
-$1{,}8\cdot10^{7}$ records coûtent **4,0 s**, auxquels s'ajoute l'étage paire
-lui-même, dont la seule mesure complète à $K=10$ donne un launcher de 2,979 s
-(13,875 s à froid tout compris).
+**Correction du 7 août, même jour.** Une première rédaction de ce paragraphe
+empruntait à l'étage paire ses 5,04 visites de nœud par record et concluait
+« environ sept secondes ». C'est faux, et le recensement lui-même donne les deux
+raisons. D'abord il mesure **26,4 à 34,4 visites de nœud par requête de boule
+fermée** sur les supports trois et quatre, pas 5,04 — l'emprunt était illégitime.
+Ensuite et surtout, la requête de boule n'est pas le coût dominant : le
+recensement mesure **34,5 à 96,9 µs par support** sur un cœur, et la ligne
+`uniform_latin` arité quatre — 43,0 µs par support pour **une seule** requête de
+boule sur 10 668 000 supports — isole ce coût comme celui de la **porte
+géométrique seule**, c'est-à-dire du circumcentre entier et des signes
+barycentriques.
 
-**Verdict chiffré.** Même en supposant résolu le problème ouvert — un générateur
-sensible à la sortie, exact, prouvé complet — et même en supposant qu'il atteigne
-exactement l'efficacité que l'étage paire démontre aujourd'hui, 50 000 points à
-$K=10$ atterrit **autour de sept secondes**. Le contrat d'une seconde demande
-donc le théorème **et** un facteur sept sur le coût par record ; le contrat de
-100 ms demande le théorème **et** un facteur soixante-dix. Ce second facteur
-n'est pas absurde : le launcher paire tourne à 44 ns par visite de nœud sur une
-Blackwell, soit deux ordres de grandeur au-dessus de ce que le matériel permet.
-Mais il doit être énoncé, et il doit être gagné séparément du théorème.
+Le chiffre honnête est donc : le coût unitaire aujourd'hui est de l'ordre de
+$4\cdot10^{-5}$ s par candidat sur un cœur, et le facteur qui sépare du contrat
+d'une seconde se compte en **deux à trois ordres de grandeur**, pas en unités.
 
-C'est le premier énoncé du projet qui chiffre la distance au contrat sans
-supposer l'algorithme actuel : la distance n'est plus de quatorze ordres de
-grandeur, elle est d'un facteur sept — **conditionnée à un théorème qui n'existe
-pas**.
+**Et ce facteur a un levier identifié, non spéculatif.** Le moteur higher device
+ne contient **aucun flottant** — zéro occurrence de `double` ou `float` dans les
+2 159 lignes de `phase15_higher_support_device_tiled_slot_engine.cuh` — alors que
+l'étage paire filtre **97,8 %** de ses prédicats exacts en fp64 et qu'une
+infrastructure de filtre certifiée existe depuis la phase 2B. Toutes les
+décisions du moteur tombent d'ailleurs à la largeur la plus étroite : les
+compteurs `deferred512`, `deferred1024` et `rational_drains` valent zéro sur les
+six cas $n=32$. Les 40 µs sont donc du coût int256 pur, **pas un prix de
+l'exactitude**. Deux autres leviers n'ont jamais été mesurés : le lancement est à
+un thread par slot avec `kThreadsPerBlock = 128` et un nombre de slots plafonné à
+1 024 par une constante de schéma — aucune mesure du dépôt n'a jamais fait varier
+le nombre de threads explorateurs — et la coopération intra-warp sur le plan de
+sonde est explicitement différée dans l'en-tête du `.cu`.
+
+La distance au contrat n'est donc plus de quatorze ordres de grandeur, mais elle
+n'est pas d'un facteur sept : elle est de **deux à trois ordres de grandeur de
+coût unitaire**, conditionnée à un théorème de génération qui, lui, apporte les
+huit ordres de grandeur de travail (voir
+[`docs/math/GERMINATION_LOCALE_SUPPORTS_3_4.md`](../math/GERMINATION_LOCALE_SUPPORTS_3_4.md)).
+
+**Ce qu'aucun de ces chiffres ne couvre.** L'aval entier — façade, journaux,
+`batch_plan`, reducer, forêt, pipeline vertical, archive durable 15L, API
+publique — est absent de toutes ces estimations. La seule mesure existante est de
+**18 923,7 ms à $n=32$ pour 171 événements**, et l'entrée de l'aval passerait de
+171 à $1{,}8\cdot10^{7}$ records : cinq ordres de grandeur d'inconnu, sur un
+étage dont aucune mesure n'existe entre $n=4$ et $n=32$.
 
 **Ce que cela ne dit pas.** Aucune mesure G4 pour cet incrément, aucun run 50 k,
 aucune porte d'échelle, aucun statut public. La projection repose sur une loi de

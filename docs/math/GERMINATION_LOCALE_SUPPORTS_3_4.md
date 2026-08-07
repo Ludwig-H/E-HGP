@@ -192,26 +192,75 @@ distincte (§8).
 Le contrat de la porte de sortie de la phase 14 est : $n=50\,000$, $K_{\max}=10$,
 p95 `warm_e2e` sous 100 ms, objectif secondaire sous 1 s.
 
-Avec $6\cdot10^{8}$ à $5{,}2\cdot10^{9}$ candidats selon la finesse de $\tau$, et
-un coût par candidat de l'ordre du filtre par intervalles fp64 suivi d'un test de
-signes barycentriques — l'entier ne servant qu'en repli, comme R1-e l'a installé
-—, l'étage higher se situe entre **quelques secondes et quelques minutes** au
-coût par opération d'aujourd'hui. L'étage paire ajoute son launcher de 2,979 s à
-$K=10$.
+Le coût unitaire d'un candidat est **mesuré**, et il ne faut pas l'emprunter à
+l'étage paire. Le recensement exhaustif donne 34,5 à 96,9 µs par support sur un
+cœur, et sa ligne `uniform_latin` arité quatre — 43,0 µs par support pour **une
+seule** requête de boule fermée sur 10 668 000 supports — isole le coût de la
+**porte géométrique seule** : circumcentre entier et signes barycentriques. La
+requête de boule, quand elle a lieu, coûte 26,4 à 34,4 visites de nœud.
 
+Avec $6\cdot10^{8}$ candidats (majoration serrée) et $4\cdot10^{-5}$ s par
+candidat, l'étage higher coûte de l'ordre de $2{,}5\cdot10^{4}$ s sur un cœur.
 L'énoncé honnête est donc :
 
 - le passage de $2{,}604\cdot10^{17}$ à $\sim10^{9}$ est **acquis par un
   théorème**, et c'est huit ordres de grandeur ;
-- il reste un facteur de l'ordre de **dix à trente** pour le contrat d'une
-  seconde, et de **cent à trois cents** pour celui de 100 ms ;
-- ce facteur résiduel est un problème de coût unitaire, pas de complexité : le
-  launcher paire tourne à 44 ns par visite de nœud sur Blackwell, deux ordres de
-  grandeur au-dessus de ce que le matériel permet.
+- il reste **deux à trois ordres de grandeur de coût unitaire** pour le contrat
+  d'une seconde, davantage pour celui de 100 ms ;
+- ce résidu est un problème de coût par opération, pas de complexité, et son
+  levier principal est identifié.
+
+### 8.1 Le levier de coût unitaire, identifié et non spéculatif
+
+Le moteur higher device ne contient **aucun flottant** : zéro occurrence de
+`double` ou `float` dans les 2 159 lignes de
+`phase15_higher_support_device_tiled_slot_engine.cuh`. L'étage paire, lui, filtre
+**97,8 %** de ses prédicats exacts en fp64, et une infrastructure de filtre par
+intervalles certifiée existe depuis la phase 2B. Toutes les décisions du moteur
+tombent par ailleurs à la largeur la plus étroite — `deferred512`,
+`deferred1024` et `rational_drains` valent zéro sur les six cas $n=32$ : les
+40 µs sont donc du coût int256 pur, **pas un prix de l'exactitude**.
+
+Deux autres leviers n'ont jamais été mesurés : le lancement est à un thread par
+slot avec `kThreadsPerBlock = 128` et un nombre de slots plafonné à 1 024 par une
+constante de schéma que ni T1 ni T2 ne touchent — aucune mesure du dépôt n'a fait
+varier le nombre de threads explorateurs — et la coopération intra-warp sur le
+plan de sonde (au plus 91 positions, 182 évaluations) est explicitement différée
+dans l'en-tête du `.cu`.
+
+Ces trois points sont de l'implémentation, pas de la recherche, et ils précèdent
+toute nouvelle mesure G4 de l'étage higher.
+
+### 8.2 Pourquoi la porte géométrique ne peut pas suffire
+
+Le recensement établit que la fraction de supports bien centrés est
+**constante en $n$** : 28,0 à 28,9 % des triples et 9,7 à 11,3 % des quadruples,
+à $n = 32$, 64 et 128. À 50 000 points cela ferait de l'ordre de
+$5{,}8\cdot10^{12}$ triples et $2{,}5\cdot10^{16}$ quadruples bien centrés. La
+porte de bon centrage — exactement ce que certifient $\Delta$ et les numérateurs
+barycentriques — **ne peut donc jamais**, à elle seule, donner la sensibilité à
+la sortie. Seul le rang fermé la donne.
+
+C'est précisément ce que fait le théorème du §5 : $\tau$ dérive du rang, pas de
+la géométrie, et le générateur énumère $5{,}2\cdot10^{9}$ cliques au lieu des
+$2{,}5\cdot10^{16}$ supports bien centrés. La contrainte de rang est appliquée
+**sans énumérer l'ensemble bien centré**, ce qui était l'exigence.
+
+### 8.3 Ce que ces chiffres ne couvrent pas
+
+L'aval entier — façade, journaux, `batch_plan`, reducer, forêt, pipeline
+vertical, archive durable 15L, API publique — est absent de toute estimation. La
+seule mesure existante vaut **18 923,7 ms à $n=32$ pour 171 événements**, et
+l'entrée de l'aval passerait à $1{,}8\cdot10^{7}$ records. Aucune mesure n'existe
+entre $n=4$ et $n=32$.
 
 Le contrat de 100 ms exige en outre, indépendamment de cet étage, un service
 résident chaud — la seule création du contexte CUDA coûte 1,242 s à froid — et le
 portage device de la canonicalisation et du LBVH, qui consomment 18,5 ms sur CPU.
+Enfin, aucun instrument du dépôt ne peut produire le nombre contractuel :
+`warm_e2e_protocol_executed` est un littéral `false`, `p95_ms` un littéral
+`null`, et le runner ne porte aucune instrumentation mémoire alors que la porte
+exige un pic sous 80 % de la VRAM.
 
 ## 9. Route d'implémentation
 
