@@ -1726,3 +1726,21 @@ La cible effective de la session est le **maximum** des deux, si bien que toute 
 **Certificat.** Sur sphere8/K3, avec une tuile nourrie de deux entrées pendant que la frontière est raffinée à soixante-quatre, puis une entrée pour deux cent cinquante-six, et une seule racine consommée par tuile : mêmes événements, mêmes diagnostics, mêmes requirements, même clôture exacte de l'univers, et au moins autant de transitions d'expansion. Les deux boutons sont donc réellement indépendants et le raffinement ne change aucun enregistrement scientifique. Checker complet du runner vert, avec les deux rejets typés de la nouvelle option.
 
 **Ce que cela ne dit pas.** Aucune mesure G4 de cet incrément. La question ouverte est exactement celle que T1 a posée : à n=512, une frontière raffinée bien au-delà de 1024 rend-elle les racines assez légères pour que les tuiles s'enchaînent — et le coût quadratique de la phase d'expansion, $O(\text{cible}^2)$ puisque chaque scission est une transaction committée en $O(|F|)$, mord-il avant ? Si c'est le cas, l'incrément suivant est de committer plusieurs scissions par transaction, ce qui demande d'élargir la règle de forme de « exactement une entrée remplacée » à « raffinement préservant l'ordre ».
+
+### T2 mesuré : les boutons sont épuisés, le coût total est invariant
+
+Quatrième session gardée du 7/8 (`maxRunDuration=3600 s`, arrêt invité 50 min, cible relue `TERMINATED`, clé révoquée). n=512, K=5, sans budget, une racine par tuile, tuile nourrie de 1024 entrées, délai 150 s.
+
+| cible de frontière | expansions | tuiles committées | univers résolu |
+| ---: | ---: | ---: | --- |
+| 1 024 | 801 | 1 | 0,020885 % |
+| 4 096 | 3 338 | **2** | 0,026450 % |
+| 16 384 | 14 573 | 2 | **0,006652 %** |
+
+Raffiner la frontière enchaîne bien un peu plus de tuiles, et rend chaque tuile moins chère — d'environ 150 s à environ 77 s. Mais chaque tuile résout alors proportionnellement **moins** de masse, et à 16 384 le résultat net est quatre fois **pire** qu'à 1 024. Les expansions, elles, coûtent environ une milliseconde pièce : 2 537 expansions supplémentaires n'ont ajouté que trois secondes. Ce n'est donc pas la phase d'expansion qui borne, et le raffinement ne fait pas ce qu'on espérait.
+
+**La signature est celle d'un coût proportionnel au travail exploré, pas à la masse découpée.** Le découpage change la granularité des commits ; il ne change pas le total. Quelle que soit la combinaison de boutons, l'étage higher résout de l'ordre de **0,02 % de $C(512,3)+C(512,4)$ par 150 secondes**. Fermer l'univers à n=512 demanderait, à ce rythme, de l'ordre de la semaine — à K=5, et à 512 points.
+
+**Conclusion, à énoncer sans détour : les paramètres sont épuisés.** T1 et T2 ont fait exactement ce qu'ils promettaient — la tuile committe, la frontière se raffine librement, le device est à 100 % — et le contrat produit reste hors d'atteinte de plusieurs ordres de grandeur. Ce qui reste n'est pas un réglage mais l'algorithme d'exploration lui-même : le moteur examine un nombre de produits essentiellement indépendant de la façon dont on découpe la frontière, et c'est ce nombre qu'il faut réduire. Aucun incrément de partitionnement, de parallélisation ou d'occupation ne le fera.
+
+**Ce que cela ne dit pas.** Rien sur K=10, rien sur 50 000 points — où l'étage paire reste de toute façon le mur —, aucun gate d'échelle, aucun statut public. Et rien de négatif sur l'exactitude : la parité scientifique reste certifiée, l'univers ferme exactement partout où il ferme.
