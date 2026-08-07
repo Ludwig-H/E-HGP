@@ -1249,6 +1249,29 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_exact_higher_support_output_census
+  ../profiling/exact_higher_support_output_census.cpp
+)
+target_link_libraries(
+  morsehgp3d_exact_higher_support_output_census
+  PRIVATE morsehgp3d::higher_support
+)
+target_compile_features(
+  morsehgp3d_exact_higher_support_output_census
+  PRIVATE cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_exact_higher_support_output_census PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_exact_higher_support_output_census
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_support_differential_tests
   test_hierarchy_direct_support_differential.cpp
 )
@@ -4913,6 +4936,20 @@ set_tests_properties(
   morsehgp3d.exact_higher_support_growth_profile_contract
   PROPERTIES TIMEOUT 20
 )
+# The census is falsified by a sealed product run, not by a self-consistent
+# assertion: the exhaustive enumeration of C(32,3)+C(32,4) must reproduce the
+# 171 accepted events and zero extra-shell diagnostics that the certified
+# host fresh-replay and tile-certified device paths both published at closed
+# rank five.  It also closes the exact partition identity of its five terminal
+# categories against the exact binomial universe on every run.
+add_test(
+  NAME morsehgp3d.exact_higher_support_output_census_contract
+  COMMAND morsehgp3d_exact_higher_support_output_census --contract-test
+)
+set_tests_properties(
+  morsehgp3d.exact_higher_support_output_census_contract
+  PROPERTIES TIMEOUT 120
+)
 
 add_test(
   NAME morsehgp3d.hierarchy_direct_support_differential
@@ -6388,6 +6425,7 @@ endif()
 list(
   APPEND _morsehgp3d_cpu_test_targets
   morsehgp3d_exact_higher_support_growth_profile
+  morsehgp3d_exact_higher_support_output_census
   morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
   morsehgp3d_gpu_higher_support_device_tiled_slot_engine_tests
   morsehgp3d_gpu_higher_support_device_tiled_session_bridge_tests

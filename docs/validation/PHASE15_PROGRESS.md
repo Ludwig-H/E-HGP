@@ -1744,3 +1744,205 @@ Raffiner la frontière enchaîne bien un peu plus de tuiles, et rend chaque tuil
 **Conclusion, à énoncer sans détour : les paramètres sont épuisés.** T1 et T2 ont fait exactement ce qu'ils promettaient — la tuile committe, la frontière se raffine librement, le device est à 100 % — et le contrat produit reste hors d'atteinte de plusieurs ordres de grandeur. Ce qui reste n'est pas un réglage mais l'algorithme d'exploration lui-même : le moteur examine un nombre de produits essentiellement indépendant de la façon dont on découpe la frontière, et c'est ce nombre qu'il faut réduire. Aucun incrément de partitionnement, de parallélisation ou d'occupation ne le fera.
 
 **Ce que cela ne dit pas.** Rien sur K=10, rien sur 50 000 points — où l'étage paire reste de toute façon le mur —, aucun gate d'échelle, aucun statut public. Et rien de négatif sur l'exactitude : la parité scientifique reste certifiée, l'univers ferme exactement partout où il ferme.
+
+## Étape 0 : le registre rattrape la mesure, et la roadmap distingue composant et échelle
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Six commits — la règle d'expansion par plus grande masse, les deuxième,
+troisième et quatrième sessions gardées du 7 août, T1 et T2 — n'avaient laissé
+aucune trace dans `docs/implementation_status.toml`, dont le champ `updated_at`
+annonçait encore le 3 août. AGENTS.md n'exige formellement la mise à jour du
+registre que pour l'ouverture ou la fermeture d'une phase, donc il n'y avait pas
+de violation ; mais le fichier se déclare autorité opérationnelle, et il était en
+retard de six commits sur l'état réel. Quatre blocs de clés le rattrapent
+(`phase15_largest_mass_expansion_*`, `phase15_bounded_tile_t1_*`,
+`phase15_unbounded_frontier_t2_*`, `phase15_output_census_*`), avec leurs
+mesures, leurs nonclaims et leurs preuves. Le vérificateur passe : « Validated
+20 implementation phases and their gates. »
+
+Un nonclaim est explicitement consigné parce qu'il ne peut plus être réparé :
+les deuxième, troisième et quatrième sessions gardées du 7 août **n'ont publié
+aucun artefact lisible par machine**. Les pourcentages 0,020885 %, 0,026450 % et
+0,006652 % ne sont attestés que par ce journal.
+
+**La roadmap distingue désormais deux énoncés qu'elle confondait.** La ligne
+2685 déclarait le verrou ① « fermé au niveau composant » sur la foi de la
+qualification M5b. C'est vrai de ce que cela affirme — à $n=32$ la frontière
+tuilée ferme exactement ce que l'hôte censurait — et cela ne dit rien de $n$ plus
+grand. Les quatre sessions du 7 août ont mesuré le reste, et la roadmap porte
+maintenant la révision : le verrou ① est **rouvert au niveau échelle**, il ne se
+referme par aucun incrément de partitionnement, de parallélisation ou
+d'occupation — les trois axes sont mesurés et épuisés —, et ce qui doit baisser
+est le nombre de produits examinés. C'est aussi ce que la conception avait
+déclaré d'avance : `FRONTIERE_DIRECTE_SUPPORTS_3_4.md` §7 énonce que le nombre
+$V$ de produits visités n'est borné par rien et « peut encore être de l'ordre de
+$\binom{n}{m}$ ». La mesure établit que le cas défavorable est le nuage uniforme
+ordinaire.
+
+## A1 : combien de records la réponse contient-elle vraiment
+
+Le suivi reste `phase=15`, `deployment_status=profiling_only` pour cet outil,
+`public_status=not_claimed`. GCP non utilisé.
+
+Toutes les mesures du projet portaient jusqu'ici sur la **vitesse** de la
+frontière. Aucune ne portait sur la **taille de la réponse**, et c'est pourtant
+elle qui décide si une énumération sensible à la sortie peut tenir le contrat.
+`morsehgp3d/tests/profiling/exact_higher_support_output_census.cpp` la mesure.
+
+**Il n'utilise pas la frontière du tout.** Il énumère la partition canonique
+exhaustivement et classifie chaque support avec les deux primitives exactes que
+le chemin produit emploie à un terminal : `analyze_circumcenter_support_integer`
+pour la porte géométrique, puis `ExactHigherSupportIndexedClosedBallQuery::classify`
+pour le rang fermé. Ces deux primitives sont partagées par les deux bases de
+vérification — c'est écrit dans l'en-tête de `higher_support_closed_ball.hpp` —
+donc un compte produit ici est par construction le compte que le produit
+émettrait, pas une approximation. La requête tourne une fois par support au plus
+grand ordre demandé et le rang fermé observé est histogrammé : un support de rang
+observé $r$ est accepté à l'ordre $K$ exactement quand
+$r \le \min(K+1,n)$, donc **une seule passe exhaustive donne le compte exact pour
+tous les ordres**.
+
+**Falsifiable, pas auto-cohérent.** Le contrat n'est pas une assertion interne :
+à $n=32$, $K=5$, famille `uniform_latin`, le recensement doit reproduire les
+**171 événements acceptés et zéro diagnostic d'extra-shell** que le chemin hôte
+`fresh_cpu_replay` et le chemin device tuile-certifié ont tous deux publiés le
+7 août. Il les reproduit. Chaque exécution ferme en outre l'identité de partition
+exacte de ses cinq catégories terminales contre l'univers binomial exact.
+Enregistré en CTest (`morsehgp3d.exact_higher_support_output_census_contract`).
+
+### Ce que le recensement mesure
+
+| famille | $n$ | univers | triples acceptés | quadruples acceptés | records $K{=}10$ | /point | $K{=}5$ | $K{=}2$ |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `eight_clusters` | 32 | 40 920 | 1 241 | 735 | 1 976 | 61,8 | 417 | 51 |
+| `eight_clusters` | 64 | 677 040 | 2 896 | 1 617 | 4 513 | 70,5 | 997 | 104 |
+| `eight_clusters` | 128 | 11 009 376 | 6 701 | 4 380 | 11 081 | 86,6 | 2 177 | 174 |
+| `uniform_latin` | 32 | 40 920 | 594 | **0** | 594 | 18,6 | 171 | 17 |
+| `uniform_latin` | 64 | 677 040 | 1 651 | **0** | 1 651 | 25,8 | 468 | 64 |
+| `uniform_latin` | 128 | 11 009 376 | 4 115 | **0** | 4 115 | 32,1 | 975 | 117 |
+
+**Premier fait, et il concerne la validation, pas la performance.** La famille
+`uniform_latin` — celle du runner par défaut, celle de la parité certifiée du
+7 août — ne contient **aucun quadruple minimal bien centré**, à aucune taille
+mesurée : 35 796 des 35 960 quadruples ont un circumcentre extérieur et les 164
+autres sont affinement dépendants, si bien que la requête de boule fermée n'est
+jamais appelée pour l'arité quatre. Les 171 événements de la parité device–hôte
+sont donc **exclusivement des triples**. Une arité entière du chemin
+tuile-certifié n'a jamais été exercée en parité produit. `eight_clusters` la
+produit (735 quadruples à $n=32$, $K=10$) : c'est sur elle que le différentiel
+de parité doit être rejoué.
+
+**Second fait : la loi d'échelle se valide contre une mesure indépendante à
+50 000 points.** À $K=2$ — rang fermé 3, c'est-à-dire exactement les triangles de
+Gabriel d'ordre zéro — le recensement sur `uniform_latin` donne 17, 64 puis 117
+records pour $n = 32$, 64, 128, soit un exposant empirique $n^{1{,}391}$. Projeté
+à 50 000 points, cela vaut **473 000 records, soit 9,5 par point**. La valeur
+*mesurée* sur un vrai nuage de 50 000 points, par un chemin entièrement
+indépendant, est **417 869 triangles de Gabriel binary64, soit 8,36 par point**
+(`phase14_geogram_low_order_g4_16d8308.json`). L'écart est de 13 %. Cette
+concordance n'était garantie par rien : elle valide à la fois le recensement et
+l'usage d'une loi de puissance calée sur trois décades de $n$ pour la famille
+uniforme.
+
+La famille `eight_clusters` donne au contraire $n^{0{,}885}$ à $K=2$ et une
+projection douze fois trop basse. C'est attendu et instructif : à 50 000 points
+huit amas seraient denses, sa densité de Gabriel n'a aucune raison d'égaler celle
+d'un nuage uniforme, et l'ancrage mesuré porte sur un nuage uniforme. Le
+croisement n'est légitime qu'entre objets comparables.
+
+### La projection, et le fait qu'elle converge
+
+À l'ordre visé, les deux familles convergent malgré leurs $K=2$ divergents :
+
+| famille | exposant à $K{=}10$ | projection à 50 000 points | par point |
+| --- | --- | ---: | ---: |
+| `uniform_latin` | $n^{1{,}396}$ | $1{,}71\cdot10^{7}$ | 342 |
+| `eight_clusters` | $n^{1{,}244}$ | $1{,}85\cdot10^{7}$ | 371 |
+
+$$\boxed{N_{\text{out}}(50\,000,\ K{=}10)\ \approx\ 1{,}8\cdot10^{7}\ \text{records}}$$
+
+soit de l'ordre de 350 records par point. À resserrer par un recensement à
+$n=256$ puis $n=512$ — l'énumération est en $O(n^4)$ et trivialement
+parallélisable, donc $n=256$ coûte quelques heures d'un cœur et $n=512$ quelques
+dizaines.
+
+### L'arithmétique que cela permet enfin
+
+L'univers à 50 000 points vaut $2{,}604\cdot10^{17}$. Contre une sortie de
+$1{,}8\cdot10^{7}$, le rapport est de $1{,}4\cdot10^{10}$ : **le potentiel d'une
+énumération sensible à la sortie est de dix ordres de grandeur**, pas d'un
+facteur constant. C'est ce qui rend la question digne d'un théorème plutôt que
+d'un réglage.
+
+Le débit de référence n'est pas hypothétique. L'étage paire produit
+**4 500 332 records exacts en 1,005 s de launcher** à 50 000 points et rang
+fermé 6, en 5,04 visites de nœud par record. À ce débit démontré,
+$1{,}8\cdot10^{7}$ records coûtent **4,0 s**, auxquels s'ajoute l'étage paire
+lui-même, dont la seule mesure complète à $K=10$ donne un launcher de 2,979 s
+(13,875 s à froid tout compris).
+
+**Verdict chiffré.** Même en supposant résolu le problème ouvert — un générateur
+sensible à la sortie, exact, prouvé complet — et même en supposant qu'il atteigne
+exactement l'efficacité que l'étage paire démontre aujourd'hui, 50 000 points à
+$K=10$ atterrit **autour de sept secondes**. Le contrat d'une seconde demande
+donc le théorème **et** un facteur sept sur le coût par record ; le contrat de
+100 ms demande le théorème **et** un facteur soixante-dix. Ce second facteur
+n'est pas absurde : le launcher paire tourne à 44 ns par visite de nœud sur une
+Blackwell, soit deux ordres de grandeur au-dessus de ce que le matériel permet.
+Mais il doit être énoncé, et il doit être gagné séparément du théorème.
+
+C'est le premier énoncé du projet qui chiffre la distance au contrat sans
+supposer l'algorithme actuel : la distance n'est plus de quatorze ordres de
+grandeur, elle est d'un facteur sept — **conditionnée à un théorème qui n'existe
+pas**.
+
+**Ce que cela ne dit pas.** Aucune mesure G4 pour cet incrément, aucun run 50 k,
+aucune porte d'échelle, aucun statut public. La projection repose sur une loi de
+puissance calée sur trois tailles, validée à 13 % contre un unique ancrage mesuré
+et à un seul ordre ($K=2$) ; elle n'est pas validée à $K=10$, où aucun ancrage
+indépendant n'existe. Elle doit être resserrée avant de dimensionner quoi que ce
+soit d'irréversible.
+
+## B1 : le consommateur exact manquant derrière la frontière paire device
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+L'intitulé historique « R3 : paires device-tuilées » désignait un portage. La
+relecture du code dit que ce n'est pas le travail restant, et
+`docs/research/PAIR_STAGE_DEVICE_CONSUMER_DESIGN.md` le reformule.
+
+**Les deux chemins ne calculent pas le même objet.** La frontière device
+`MortonYao48DeviceTiledPairFrontier` produit une **partition de couverture
+syntaxique** de l'espace des paires, et son enveloppe scellée **rejette** tout
+lot qui aurait évalué le rang diamétral, publié un catalogue scientifique ou
+rapatrié ses candidats (`morton_yao48_device_tiled_pair_frontier.cpp:485-495`
+et `:1058-1068`). C'est voulu : le composant compte de l'espace, il ne décide pas
+de science. La session `ExactSparseAnchoredPairSession` du runner, elle, doit
+classifier exactement chaque candidat et fermer huit identités certifiées.
+Brancher l'une sur l'autre est donc impossible ; il manque le consommateur exact
+entre les deux.
+
+**Ce que coûte cette absence, mesuré.** À 50 000 points et $K=5$, l'étage paire
+du runner couvre 140 167 566 paires élaguées plus 4 219 369 candidats admis sur
+un univers dirigé de 2 500 000 000, soit **5,7755 % en 299,929 s**, avec
+`maximum_live_candidates = 1`. L'extrapolation linéaire donne **≈ 5 190 s**, soit
+environ 5 200 fois le contrat d'une seconde. Le moteur n'est pas lent par
+opération — 574 183 630 prédicats exacts en 300 s sur un cœur — il en exécute
+beaucoup trop et strictement en séquence.
+
+**Les six incréments** sont ordonnés dans le design : (a) qualifier le
+classifieur device de rang à 50 000 points et rang 11, (b) le pont D2H du
+catalogue candidat sous une enveloppe distincte qui l'autorise — en ne refaisant
+pas le défaut de R2-f, le staging possédé par un transitoire au lieu du lease,
+(c) le producteur d'autorité paire depuis le payload device, (d) la septième
+surcharge de façade, (e) l'option `--pair-backend` du runner, en dernier, (f) le
+différentiel device ≡ P8l qui conditionne la bascule du défaut.
+
+**Ce que B1 promet, et rien de plus.** Après B1, l'étage paire coûte de l'ordre
+de la seconde au lieu de l'heure et demie, et le premier chiffre honnête sur
+l'étage higher à la taille contractuelle devient possible — aujourd'hui il n'est
+jamais atteint. B1 ne tient ni le contrat 1 s ni le contrat 100 ms, et ne
+prétend rien sur l'étage higher.

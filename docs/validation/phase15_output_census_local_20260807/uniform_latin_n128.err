@@ -1,0 +1,11 @@
+census: n=128 family=uniform_latin maximum_order=10 maximum_relevant_closed_rank=11
+  arity 4: 1048576 enumerated, 0 accepted
+  arity 4: 2097152 enumerated, 0 accepted
+  arity 4: 3145728 enumerated, 0 accepted
+  arity 4: 4194304 enumerated, 0 accepted
+  arity 4: 5242880 enumerated, 0 accepted
+  arity 4: 6291456 enumerated, 0 accepted
+  arity 4: 7340032 enumerated, 0 accepted
+  arity 4: 8388608 enumerated, 0 accepted
+  arity 4: 9437184 enumerated, 0 accepted
+  arity 4: 10485760 enumerated, 0 accepted
