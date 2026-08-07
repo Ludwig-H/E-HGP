@@ -376,3 +376,118 @@ Discipline de taille scellée, rappelée : **tout petits nuages, puis directemen
 - Le filtre fp64 devant les portes du moteur higher. Réfuté par la mesure, et
   Q2 explique pourquoi : le coût n'est pas l'arithmétique.
 - Les tailles de nuage intermédiaires. Interdites par la discipline scellée.
+
+---
+
+# 9. Le facteur manquant : d'où il vient et où le prendre
+
+## 9.1 Pourquoi c'est lent sur une G4 — la réponse est mesurée
+
+Trois faits, chacun mesuré, se composent.
+
+**La G4 est inutilisée à 98 %.** Le pipeline exact ne porte **aucun
+multithread** : il tourne sur un cœur sur quarante-huit. Le noyau higher est à
+un thread par slot pour une capacité de 1 024, soit **au plus 8 blocs sur les
+188 SM** du Blackwell. La machine n'est pas lente ; on ne lui demande presque
+rien.
+
+**Des instructions qu'on exécute, 92 % ne sont pas de la géométrie.** Profil
+callgrind d'un univers fermé à $n=16$, coûts exclusifs :
+
+| catégorie | part | plafond d'Amdahl |
+| --- | ---: | ---: |
+| rationnel non borné (boost multiprecision) | **49,01 %** | 1,96 × |
+| churn d'allocation de `cpp_int` | 18,86 % | 1,23 × |
+| SHA-256 canonique | 17,47 % | 1,21 × |
+| rendu texte / chaînes | 6,84 % | 1,07 × |
+| **géométrie et reste** | **7,81 %** | — |
+| provenance seule (SHA + texte) | 24,31 % | 1,32 × |
+| rationnel + son churn | 67,88 % | 3,11 × |
+| **les deux ensemble** | **92,19 %** | **12,80 ×** |
+
+**Et le coût d'un nœud de fermeture est linéaire en $n$.** C'est le fait
+décisif, et il n'avait jamais été isolé parce qu'on regardait le coût par
+*événement* :
+
+| $n$ | événements | nœuds | nœuds/événement | ms/nœud |
+| ---: | ---: | ---: | ---: | ---: |
+| 12 | 12 | 119 | 9,92 | 3,68 |
+| 16 | 27 | 213 | 7,89 | 4,29 |
+| 20 | 36 | 294 | 8,17 | 6,41 |
+| 24 | 43 | 379 | 8,81 | 7,57 |
+| 28 | 48 | 446 | 9,29 | 8,40 |
+
+Le nombre de nœuds par événement est **constant** — la fermeture est déjà
+locale, elle ne grossit pas. Toute la croissance est dans le coût d'un nœud, en
+$n^{0{,}974}$, de pente **0,318 ms par nœud et par point**. L'ordonnée à
+l'origine n'est pas résolue à ces tailles (l'ajustement la rend négative), donc
+le plancher indépendant de $n$ est **inférieur à la résolution** de la mesure et
+devra être remesuré.
+
+Ce terme linéaire n'est pas de la géométrie : c'est le **re-digest du manifeste**
+— qui hache le nuage — et le **rejeu du journal de graines**, appelé depuis huit
+sites distincts, chacun replaçant `..._freshly_replayed = true`.
+
+À 50 000 points cela donne 15 900 ms par nœud, dont **100 %** de terme linéaire.
+Le chiffre honnête pour l'aval devient donc bien pire que les 2 832 × annoncés
+plus haut, qui reposaient sur une constante par événement mesurée sur de tout
+petits nuages : à $K=5$, $9 \times 15\,900\ \text{ms} \times 2{,}21\cdot10^{6}
+= 3{,}16\cdot10^{8}$ s, soit $6{,}6\cdot10^{6}$ s sur 48 cœurs.
+
+## 9.2 Le budget de facteurs
+
+Le déficit est de $6{,}6\cdot10^{6}$ sur 48 cœurs à $K=5$. Voici ce qui est
+disponible, chaque ligne étant mesurée ou déjà obtenue dans ce dépôt.
+
+| levier | facteur | statut |
+| --- | ---: | --- |
+| **A. Supprimer le terme $O(n)$ par nœud** (manifeste mémoïsé, journal vérifié une fois) | jusqu'à $\sim n$ | structurel, la pente 0,318 ms/nœud/point le mesure |
+| **B. Paralléliser sur les événements** | 48 × | la fermeture est locale et par événement : indépendante par construction |
+| **C. Cure R1-d sur ce qui reste** (déterminants entiers, plus de normalisation) | ≤ 12,8 × | plafond d'Amdahl mesuré ; 864 × déjà obtenu sur la requête closed-ball |
+| **D. Occupation GPU** | ~20 × | 8 blocs sur 188 SM aujourd'hui |
+
+**A est le facteur cent — et davantage.** C'est le seul qui soit structurel :
+B, C et D sont des constantes, A est un ordre. Composés, B × C valent 614 ×, ce
+qui ne suffit jamais seul ; A × B × C suffit dès que le plancher par nœud tombe
+sous la milliseconde.
+
+Chiffrage, en prenant pour le plancher la borne supérieure que la mesure
+autorise (0,3 ms par nœud, non résolu, donc à remesurer) :
+
+| étape | aval à $K=5$, sur 48 cœurs |
+| --- | ---: |
+| aujourd'hui | $6{,}6\cdot10^{6}$ s |
+| **A** — plus de terme $O(n)$ | 124 s |
+| **A + C** | 9,7 s |
+| **A + C + D** | **0,49 s** — contrat A tenu |
+
+La conclusion à retenir est que **l'aval n'est pas un problème d'algorithme** :
+sa fermeture est déjà locale et de taille constante. C'est un problème de
+redondance de provenance, et il se paie une fois par nœud et par point.
+
+## 9.3 Ce que cela ne règle pas
+
+L'étage higher reste entier. Sa recherche explore $2{,}6\cdot10^{17}$ candidats
+pour $2{,}2\cdot10^{6}$ sorties, et **aucun des quatre leviers ci-dessus n'y
+change un ordre** : 614 × ne rattrape pas $10^{10}$. Pour lui, la seule route
+exacte connue reste la construction d'ordre $k$ du §I2 — produire les simplexes
+de Gabriel d'ordre $\le K-2$ au lieu de filtrer l'univers.
+
+Le plan complet est donc : **A, B, C sur l'aval** (structurel puis constantes,
+tout mesurable localement), **la construction d'ordre $k$ sur l'étage higher**
+(travail de fond), et **D** en dernier, quand il reste quelque chose que le
+device puisse saturer.
+
+## 9.4 Ordre révisé
+
+1. **A1** — vérifier le journal de graines **une fois**, sceller un jeton lié à
+   l'identité des cinq sources, et faire accepter le jeton aux huit
+   consommateurs au lieu du rejeu. Falsifiable : sortie scientifique identique,
+   et la pente ms/nœud/point doit **chuter**.
+2. **A2** — mémoïser le manifeste de source de forêt, qui hache le nuage à
+   chaque construction. Même critère de falsification.
+3. **A3** — remesurer la pente. Le plancher par nœud devient enfin résolu, et
+   il décide de la suite.
+4. **B** — paralléliser la fermeture sur les événements.
+5. **C** — cure R1-d sur le résidu, guidée par un nouveau profil.
+6. **Ordre $k$** pour l'étage higher, en parallèle de tout ce qui précède.
