@@ -321,20 +321,38 @@ void test_censored_frontier_never_reaches_classifier() {
       "publishes no candidate-derived catalog");
 }
 
-void test_rank6_parameter_reaches_both_resident_stages_without_claims() {
+// The rank six window is the one that has ever been qualified natively, and a
+// run there must say so.
+void test_rank6_window_is_declared_natively_qualified() {
+  reset_transcripts();
+  auto traversal = traversal_lease(3U);
+  configure_classifier_transcripts({exact_launch(3U, 0U, 0U, 0U)});
+  auto result = build_exact_closed_rank_pair_terminal_catalog(
+      std::move(traversal),
+      ExactClosedRankPairTerminalCatalogConfig{2U, 1U, 0U, 0U, 6U});
+  check(
+      result.audit.maximum_closed_rank == 6U &&
+          result.audit.closed_rank_window_natively_qualified,
+      "the qualified rank window must declare itself qualified");
+}
+
+void test_rank11_parameter_reaches_both_resident_stages_without_claims() {
   reset_transcripts();
   auto traversal = traversal_lease(3U);
   configure_classifier_transcripts({exact_launch(3U, 0U, 0U, 0U)});
 
   const ExactClosedRankPairTerminalCatalogConfig config{
-      2U, 1U, 0U, 0U, 6U};
+      2U, 1U, 0U, 0U, 11U};
   auto result = build_exact_closed_rank_pair_terminal_catalog(
       std::move(traversal), config);
   check(
       result.status == ExactClosedRank23PairTerminalCatalogStatus::
                            non_authoritative_host_fake &&
           !result.complete() && !result.catalog.has_value() &&
-          result.audit.maximum_closed_rank == 6U &&
+          result.audit.maximum_closed_rank == 11U &&
+          // Accepted, and honestly declared UNQUALIFIED: the contract layer
+          // carries eleven, no native run ever has.
+          !result.audit.closed_rank_window_natively_qualified &&
           result.audit.fixed_rank_window_enforced &&
           !result.audit.fixed_rank23_window_enforced &&
           result.audit.frontier_closed &&
@@ -374,7 +392,7 @@ void test_rank23_facade_rejects_rank6_configuration() {
 }
 
 void test_parameterized_terminal_rejects_ranks_outside_2_to_6() {
-  for (const std::size_t maximum_closed_rank : {1U, 7U}) {
+  for (const std::size_t maximum_closed_rank : {1U, 12U}) {
     reset_transcripts();
     auto traversal = traversal_lease(3U);
     bool rejected = false;
@@ -399,7 +417,8 @@ int main() {
   test_fake_treated_fallback_is_still_unresolved();
   test_linear_catalog_capacity_exhaustion_withholds_output();
   test_censored_frontier_never_reaches_classifier();
-  test_rank6_parameter_reaches_both_resident_stages_without_claims();
+  test_rank6_window_is_declared_natively_qualified();
+  test_rank11_parameter_reaches_both_resident_stages_without_claims();
   test_rank23_facade_rejects_rank6_configuration();
   test_parameterized_terminal_rejects_ranks_outside_2_to_6();
   if (failures != 0) {

@@ -2665,3 +2665,218 @@ vingt-quatre filaments, quatre-vingt-seize paires déséquilibrées — doivent 
 mesurées une à une avant toute promesse.
 
 Seize suites vertes.
+
+## Le plafond de rang de l'étage paire : accepté à onze, qualifié à six
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Le design B1 disait qu'il manquait le consommateur exact derrière la frontière
+paire device. C'est faux, et la correction change ce qu'est B1 :
+`gpu::ExactClosedRank23PairTerminalCatalog` **est** ce consommateur, et il
+produit bien l'autorité paire neutre. Le vrai écart était un **plafond de rang
+scellé à six**, contre le onze du contrat.
+
+**L'expérience, plutôt que la conception.** Plutôt que de concevoir une levée de
+plafond, le plafond a été levé et la question posée au code : qu'est-ce qui
+refuse ? Réponse : **rien**. Le catalogue à rang onze traverse ses deux étages
+résidents, ferme sa frontière, réconcilie ses masses et certifie ses zéros,
+exactement comme à rang six. Ce n'était pas garanti : les deux composants qu'il
+pilote — la frontière Yao-48 device-tuilée et le classifieur de tuiles paires
+ordonnées — déclarent tous deux onze, et les capacités sont des facteurs par
+point fournis par l'appelant, sans dépendance au rang dans le code.
+
+**Mais accepter un rang n'est pas le qualifier**, et c'est toute la distinction
+que le dépôt doit porter. Le test qui vient de passer emploie un **faux hôte** et
+un nuage de **trois points** : il démontre que la couche de contrat transporte
+onze, pas que l'arithmétique native s'y comporte. Toutes les mesures device à
+50 000 points du dépôt sont à rang fermé six — ce n'était pas une commodité,
+c'était ce plafond.
+
+**Deux constantes, donc, et non une.** Le catalogue déclare désormais ce qu'il
+**accepte** — onze, aligné sur ses deux composants — et séparément ce qui a été
+**qualifié nativement** — six. L'audit publie
+`closed_rank_window_natively_qualified`, faux dès que la fenêtre demandée
+dépasse six. Une exécution à $K=10$ devient donc possible, et son rapport dit
+exactement ce qu'elle est : portée par le contrat, non qualifiée nativement.
+Deux cas de test épinglent les deux côtés, et le rejet typé passe de sept à
+douze.
+
+C'est la même discipline que l'écart VRAM et que la restriction de germe : lever
+ce qui peut l'être, nommer ce qui ne l'est pas, et refuser qu'une acceptation se
+lise comme une qualification.
+
+**Ce que cela débloque.** L'étage paire peut maintenant être exercé à la taille
+et au rang du contrat — ce qui était impossible hier — et la session G4 qui
+qualifiera le rang onze a désormais un objet précis au lieu d'une conception à
+faire.
+
+## Première isolation de l'aval : le flux du réducteur est sur-linéaire en événements
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+L'aval était le seul poste du bilan de contrat marqué « jamais mesuré ». Il l'est
+maintenant, au moins dans sa dépendance — et l'indication est mauvaise.
+
+**Le protocole isole la bonne variable.** Comparer deux tailles de nuage ne dit
+rien, puisque l'aval dépend à la fois des points et des événements. À nuage
+**fixe** — $n=12$ — et ordre variable, seul le nombre d'événements bouge :
+
+| $K$ | événements | `batch_plan` | `reducer_setup` | `reducer_stream` |
+| ---: | ---: | ---: | ---: | ---: |
+| 2 | 4 | 71,7 ms | 179,2 ms | 135,2 ms |
+| 3 | 12 | 236,4 | 422,2 | 268,0 |
+| 4 | 19 | 589,0 | 902,8 | 875,5 |
+| 5 | 28 | 660,9 | 1 264,2 | 1 796,7 |
+| 6 | 33 | 841,3 | 1 813,7 | **5 083,3** |
+
+De 4 à 33 événements, soit un facteur 8,25 : `batch_plan` croît en
+$\text{événements}^{1{,}17}$, `reducer_setup` en $^{1{,}10}$ — tous deux
+essentiellement linéaires — et `reducer_stream` en $^{1{,}72}$. Le dernier pas
+est le plus net : **1,18 fois plus d'événements coûtent 2,83 fois plus de temps**.
+
+**Ce que cela signifierait pour le contrat.** L'entrée de l'aval à 50 000 points
+serait de l'ordre de $1{,}8\cdot10^{7}$ records. Un flux de réducteur seulement
+quadratique en cette entrée est hors de question, et même l'exposant global de
+1,72 mesuré ici le serait. Si cette dépendance se confirme, l'aval devient le
+verrou dominant du contrat — devant l'étage paire et devant le coût unitaire.
+
+**Réserves, et elles sont sérieuses.** La mesure a été prise sur deux cœurs
+pendant qu'une compilation complète tournait, les durées absolues sont de
+quelques centaines de millisecondes, et les exposants locaux vont de 0,62 à 6,33
+— c'est-à-dire que le bruit est du même ordre que le signal. Le nuage est de
+douze points, donc les structures de tour sont minuscules et rien ne dit que le
+régime observé soit celui de l'échelle. Aucune conclusion ferme ne peut être
+tirée de ce tableau.
+
+Ce qu'il établit, en revanche, c'est **la question et la façon de la poser** :
+l'aval doit être mesuré à nuage fixe et ordre variable, sur une machine au repos,
+sur au moins une décade d'événements. C'est local, sans GPU, et cela doit être
+fait avant de dimensionner quoi que ce soit d'aval.
+
+### Et la mesure est cohérente avec ce que le dépôt déclarait déjà
+
+`reducer_stream` n'est pas un réducteur : c'est la boucle de l'exécuteur de lots
+de **descente de facette**, celui-là même qui porte la borne scellée de
+1 048 576 nœuds. Son document mathématique,
+`FERMETURE_DESCENTE_FACETTE_SPARSE_PHASE10.md`, dit deux choses qu'il faut
+rapprocher de la mesure.
+
+D'abord, la façon dont son travail est borné : « les plafonds de confiance de la
+fermeture, le budget commun de chaque pas et le plafond du nombre d'appels
+bornent le travail total ». Le travail est donc borné **par des plafonds**, pas
+par une complexité dans la taille de l'entrée — exactement la forme d'énoncé qui
+a déjà coûté cher à l'étage higher, dont la conception bornait la mémoire et pas
+$V$.
+
+Ensuite, sa propre section de limites, écrite bien avant cette mesure : « pour
+environ 50 000 points, 10.5c évite le travail top-$k$ répété sur les suffixes
+partagés, mais **une requête LBVH, un shell ou une longue chaîne peuvent encore
+être linéaires**. Ni le SLO principal strictement inférieur à 100 ms, ni
+l'objectif secondaire strictement inférieur à une seconde ne sont revendiqués. »
+
+Un coût par événement qui peut être linéaire en un shell ou une chaîne, multiplié
+par le nombre d'événements, donne précisément un total sur-linéaire. La mesure
+bruitée ci-dessus n'est donc pas une surprise : elle est la première observation
+empirique de ce que le document annonçait, et elle en donne un premier exposant.
+
+**Ce que cela recentre.** L'aval n'a pas de borne de temps, il a des plafonds. Le
+projet a déjà rencontré exactement cette situation à l'étage higher, où le mot
+« sparse » désignait une propriété à mesurer et non une conséquence. La leçon est
+la même et elle est maintenant explicite : **avant de dimensionner l'aval, il
+faut lui demander une borne de travail, pas un plafond.**
+
+## Un contrat de configuration rouge depuis plusieurs jours, et ce qu'il gardait
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+En exécutant la suite **complète** — ce qui n'avait pas été fait depuis un
+moment —, `morsehgp3d.phase9_pair_support_configuration` est apparu rouge. Il
+l'était **avant** cette session.
+
+**La cause, datée.** Le contrat de configuration épingle des jetons que
+l'implémentation doit contenir, et il exigeait
+`minimum_squared_distance_to_node(` et `maximum_squared_distance_to_node(` dans
+la source du flux higher. Ces jetons ont quitté ce fichier au commit
+**`7f2f55e` — « one indexed closed ball, and exact decisions in integer form »**,
+c'est-à-dire la factorisation R1 qui a sorti la requête de boule fermée du flux
+pour en faire l'implémentation unique partagée par les deux bases de
+vérification. Le test est rouge depuis, sans que personne le voie.
+
+**La première question était : la science a-t-elle régressé ?** Non. Les deux
+décisions en bloc sont intactes, et elles sont même meilleures : elles se
+prennent désormais sur la sphère homogène entière —
+`box_minimum_squared_distance_exceeds_level` et
+`box_maximum_squared_distance_is_below_level` — au lieu de l'index, ce qui est la
+même décision **sans division**. C'est précisément le gain de R1-c. Un sous-arbre
+est toujours résolu en bloc dans les deux directions, et les compteurs
+`bulk_exterior_subtree_count` et `bulk_interior_subtree_count` le comptent
+toujours.
+
+**Le correctif porte sur le contrat, pas sur le code.** Le fichier de la boule
+fermée rejoint l'ensemble scruté, et les deux jetons exigés deviennent
+l'orthographe actuelle des mêmes décisions. La propriété gardée est inchangée —
+un sous-arbre résolu en bloc dans les deux directions ; seule son adresse a
+changé, et le commentaire le dit pour que la prochaine factorisation n'ait pas à
+redécouvrir la même chose.
+
+**Ce que cet épisode enseigne.** Un contrat de configuration qui épingle des
+**adresses** plutôt que des **propriétés** se périme au premier refactor, et il
+se périme en silence : rouge, il ne dit plus rien, ni sur la propriété qu'il
+gardait ni sur celles des autres. Le coût réel n'est pas le test cassé, c'est
+que pendant plusieurs jours ce contrat ne vérifiait **plus rien du tout**.
+
+### Les vingt-trois autres
+
+La question suivante s'imposait : combien d'autres se sont périmés ? Les
+vingt-quatre contrats de configuration ont donc été exécutés un par un.
+**Tous verts**, celui-ci réparé compris.
+
+Le risque n'était pourtant pas théorique : `check_phase4_spatial_lbvh` épingle
+87 jetons d'adresse, `check_phase9_pair_support` 72,
+`check_phase7_h_polytope_proposal` 58. La fragilité est bien là, elle n'a
+simplement frappé qu'une fois.
+
+Et la raison est instructive : le contrat qui s'est périmé est celui qui épingle
+les fichiers du support higher — c'est-à-dire **exactement ceux que R1 et R2 ont
+refactorisés cette semaine**. Les autres épinglent du code qui n'a pas bougé.
+
+**La règle à en tirer** : un contrat par adresses se périme précisément là où le
+code est activement remanié, donc là où l'on en a le plus besoin. Ce n'est pas un
+argument pour les supprimer — ils gardent des propriétés réelles — mais pour
+exécuter la suite **complète** après chaque refactor structurel, et pour écrire
+le jeton avec un commentaire disant quelle propriété il garde, afin que le
+prochain déplacement soit un ajustement et non une redécouverte.
+
+### Un second contrat rouge, et le premier ne l'avait pas vu
+
+La suite complète en a révélé un autre, également antérieur à cette session :
+`morsehgp3d.phase3_build_configuration`. Le contrat exige que les deux presets
+CUDA — `cuda-release` et `cuda-audit` — compilent **le même** catalogue de
+cibles gardées. Le commit `92881d9`, celui du préflight de la mesure 50k, avait
+ajouté deux cibles à `cuda-release` seulement :
+`morsehgp3d_gpu_higher_support_device_tiled_frontier_parity` et
+`morsehgp3d_direct_morse_product_runner` — précisément l'outil de parité natif et
+le runner produit, c'est-à-dire ce qu'une session G4 doit pouvoir construire.
+
+Deux divergences, donc : le catalogue du contrat ne les nommait pas, et le preset
+d'audit ne les compilait pas.
+
+**Le correctif restaure l'invariant plutôt que de l'affaiblir.** Le catalogue les
+nomme désormais, avec le commentaire qui dit d'où elles viennent, et le preset
+d'audit les compile comme le preset de release. Un preset qui compile **plus** que
+le contrat n'énonce est exactement aussi peu vérifié qu'un preset qui en compile
+moins : dans les deux cas, ce qui est construit n'est pas ce qui est déclaré. Et
+un preset d'audit qui ne construit pas ce que la release construit ne l'audite
+pas.
+
+Vingt-trois contrats de configuration, tous verts.
+
+**Ce que les deux épisodes ont en commun.** Aucun des deux n'était un défaut de
+code : dans un cas un jeton avait déménagé, dans l'autre une cible avait été
+ajoutée d'un seul côté. Les deux dataient de commits qui avaient, par ailleurs,
+correctement fait leur travail. Ce qui a manqué dans les deux cas est le même
+geste : **exécuter la suite complète après un changement structurel**, plutôt que
+les seules suites que l'on croit concernées.

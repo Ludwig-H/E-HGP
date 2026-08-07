@@ -37,7 +37,7 @@ résident. Cela doit être écrit dans le contrat, pas supposé.
 | LBVH | 15,4 ms (CPU) ; 18,2 ms (CUDA chaud) | idem | **15–18 %** |
 | étage paire, runner produit | **≥ 299 929 ms, censuré** à 5,78 % | escalier R2-d, cellule 50 000 | ≥ 299 929 % |
 | étage paire, composant device $K{=}5$ | 1 005 ms de launcher | `phase15_product_floor_diag_g4_68f656b/full50k.json` | 1 005 % |
-| étage paire, composant device $K{=}10$ | 2 979 ms de launcher (13 875 ms à froid) | qualification rang 11 | 2 979 % |
+| étage paire, composant device $K{=}10$ | 2 979 ms de launcher ; 7 962 604 records candidats ; couverture complète | `phase15_device_frontier_50k_g4_cb5f2d3.json`, rang fermé 11 | 2 979 % |
 | étage higher | jamais atteint à 50 000 | l'étage paire consomme tout le délai | — |
 | aval complet | **18 923,7 ms à $n=32$** pour 171 événements | escalier R2-d, cellule 32 | — |
 | réducteur seul, tour synthétique | 2 792 ms | `point_hierarchy_projection_50k_local_20260803.json` | 2 792 % |
@@ -46,6 +46,23 @@ résident. Cela doit être écrit dans le contrat, pas supposé.
 **Le plancher incompressible mesuré** — canonicalisation plus LBVH, à chaud —
 vaut **18,5 à 23,6 ms**, soit **18 à 24 % du budget de 100 ms**, avant le premier
 calcul scientifique.
+
+### 2 bis. Ce que l'étage paire fait déjà au rang du contrat
+
+Une précision qui change la lecture de la ligne précédente. La **frontière**
+Yao-48 device-tuilée est mesurée **au rang du contrat** : à 50 000 points et rang
+fermé 11, elle ferme une couverture complète — `coverage_partition_complete`,
+`complete_anchor_count = 50000` — pour **2,979 s de launcher** et **7 962 604
+records candidats**, contre 4 500 332 à rang 6, soit 1,77 fois plus. Les deux
+autres postes du même artefact, 1,248 s de construction à froid et 8,454 s de
+recertification hôte, appartiennent au harnais de qualification.
+
+Ce n'est donc pas la frontière qui manque au contrat : c'est son **consommateur**.
+Le catalogue terminal paire acceptait le rang six ; il accepte désormais onze,
+mais il n'a **jamais été qualifié nativement** au-delà de six, et son audit le
+déclare (`closed_rank_window_natively_qualified`). L'écart restant de l'étage
+paire est donc entièrement circonscrit : une qualification native du
+consommateur au rang onze, sur une frontière qui y est déjà mesurée.
 
 ## 3. Ce que le nouvel algorithme change, et ce qu'il ne change pas
 

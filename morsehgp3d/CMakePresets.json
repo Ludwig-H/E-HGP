@@ -149,7 +149,9 @@
         "morsehgp3d_gpu_exact_closed_rank23_pair_terminal_catalog",
         "morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification",
         "morsehgp3d_gpu_morton_yao48_seed_work_profile",
-        "morsehgp3d_massive_sparse_pair_prefix_smoke"
+        "morsehgp3d_massive_sparse_pair_prefix_smoke",
+        "morsehgp3d_gpu_higher_support_device_tiled_frontier_parity",
+        "morsehgp3d_direct_morse_product_runner"
       ],
       "jobs": 8
     }

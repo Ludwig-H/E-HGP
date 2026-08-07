@@ -124,6 +124,14 @@ def validate(
     higher_stream_source = read_text(
         project / "src/cpu/hierarchy/higher_support_stream.cpp"
     )
+    # The indexed closed-ball query was factored out of the stream into its own
+    # implementation, shared by the fresh-replay and tile-certified bases so the
+    # two cannot drift on the geometry they record.  The bounded-traversal
+    # tokens this contract pins moved with it, so the file joins the scanned
+    # set: the property checked is unchanged, only its address is.
+    higher_closed_ball_source = read_text(
+        project / "src/cpu/hierarchy/higher_support_closed_ball.cpp"
+    )
     terminal_header = read_text(
         project / "include/morsehgp3d/hierarchy/direct_support_terminal.hpp"
     )
@@ -442,6 +450,7 @@ def validate(
             higher_product_source,
             higher_stream_header,
             higher_stream_source,
+            higher_closed_ball_source,
         )
     )
     for forbidden in (
@@ -476,8 +485,14 @@ def validate(
         "remaining_frontier",
         "ExactHigherSupportStreamStatus::budget_exhausted",
         "analyze_circumcenter_support(",
-        "minimum_squared_distance_to_node(",
-        "maximum_squared_distance_to_node(",
+        # The bulk exterior and bulk interior decisions of the closed-ball
+        # traversal.  They used to be taken against the index; since the
+        # homogeneous integer sphere landed they are taken against it, which is
+        # the same decision without a division.  Pinning the current spelling
+        # keeps the contract on the PROPERTY -- a subtree resolved wholesale in
+        # both directions -- rather than on an address.
+        "box_minimum_squared_distance_exceeds_level(",
+        "box_maximum_squared_distance_is_below_level(",
         "canonical_extra_shell_witness_id",
         "grouped_partition_accounting_certified",
         "no_forbidden_global_structure_materialized = true",

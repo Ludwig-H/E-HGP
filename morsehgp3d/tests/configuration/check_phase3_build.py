@@ -50,6 +50,13 @@ CUDA_TARGETS = [
     "morsehgp3d_gpu_morton_yao48_ranked_pair_tile_classifier_qualification",
     "morsehgp3d_gpu_morton_yao48_seed_work_profile",
     "morsehgp3d_massive_sparse_pair_prefix_smoke",
+    # Added to the guarded CUDA build by 92881d9, when the 50k measurement
+    # preflight needed both the native parity tool and the product runner
+    # buildable on the session VM.  The catalogue is the contract on what that
+    # build compiles, so it must name them: a preset that compiles more than the
+    # contract says is exactly as unverified as one that compiles less.
+    "morsehgp3d_gpu_higher_support_device_tiled_frontier_parity",
+    "morsehgp3d_direct_morse_product_runner",
 ]
 CUDA_BUILD_JOBS = 8
 

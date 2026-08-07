@@ -13,8 +13,20 @@ inline constexpr std::uint32_t
     exact_closed_rank23_pair_terminal_catalog_schema_version = 2U;
 inline constexpr std::size_t
     exact_closed_rank_pair_terminal_catalog_minimum_closed_rank = 2U;
+// The rank window the catalogue ACCEPTS.  It matches the two components it
+// drives, both of which declare eleven: the Yao-48 device tiled pair frontier
+// and the ranked pair tile classifier.
 inline constexpr std::size_t
-    exact_closed_rank_pair_terminal_catalog_maximum_closed_rank = 6U;
+    exact_closed_rank_pair_terminal_catalog_maximum_closed_rank = 11U;
+// The rank window that has ever been QUALIFIED NATIVELY.  Everything the
+// repository measures on device is at closed rank six, and that is not a
+// coincidence -- it was the accepted ceiling until the contract layer was shown
+// to carry eleven without refusing.  Accepting a rank is not qualifying it, so
+// the two numbers are separate fields and the audit publishes which one a run
+// stands on.
+inline constexpr std::size_t
+    exact_closed_rank_pair_terminal_catalog_natively_qualified_maximum_closed_rank =
+        6U;
 inline constexpr std::size_t
     exact_closed_rank23_pair_terminal_catalog_maximum_closed_rank = 3U;
 inline constexpr std::size_t
@@ -66,6 +78,10 @@ struct ExactClosedRank23PairTerminalCatalogAudit {
       exact_closed_rank23_pair_terminal_catalog_schema_version};
   std::size_t point_count{};
   std::size_t maximum_closed_rank{};
+  // False as soon as the requested window exceeds what has been qualified
+  // natively.  A run may proceed -- the contract layer carries it -- but its
+  // report must never let that pass for a qualified result.
+  bool closed_rank_window_natively_qualified{};
   std::size_t anchor_tile_capacity{};
   std::size_t catalog_record_capacity_per_point{};
   std::size_t payload_point_id_capacity_per_point{};

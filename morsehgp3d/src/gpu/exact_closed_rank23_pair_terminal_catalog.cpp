@@ -247,6 +247,9 @@ build_exact_closed_rank_pair_terminal_catalog(
   ExactClosedRank23PairTerminalCatalogAudit audit;
   audit.point_count = traversal_lease.audit().point_count;
   audit.maximum_closed_rank = config.maximum_closed_rank;
+  audit.closed_rank_window_natively_qualified =
+      config.maximum_closed_rank <=
+      exact_closed_rank_pair_terminal_catalog_natively_qualified_maximum_closed_rank;
   audit.anchor_tile_capacity = config.anchor_tile_capacity;
   audit.catalog_record_capacity_per_point =
       config.catalog_record_capacity_per_point;
