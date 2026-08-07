@@ -114,15 +114,59 @@ C'est pourquoi c'est la première action du plan : elle re-chiffre tout le reste
 Chacun porte une condition d'entrée, un critère de sortie **falsifiable**, et le
 lieu de sa mesure. Les incréments locaux ne consomment pas de VM.
 
-### I0 — Chiffrer $N_{\text{out}}(K)$ par le recensement · *local, immédiat*
+### I0 — Chiffrer $N_{\text{out}}(K)$ par le recensement · **RENDU**
 
-Entrée : rien, l'outil existe (`exact_higher_support_output_census`).
-Travail : publier $N_{\text{out}}$ pour $K = 1\ldots10$ aux tailles recensables,
-et l'extrapolation à 50 000 points par famille, puis recalculer la grille du §1
-pour chaque $K$.
-Sortie : la décision $K=10$ contre $K=5$ est prise sur $N_{\text{out}}$ et pas
-sur le seul étage paire. Falsifiable : le recensement doit reproduire les 171
-événements scellés à $n{=}32/K{=}5$.
+Les recensements exhaustifs à $n = 32, 64, 128$ sur les deux familles portent
+déjà l'histogramme du rang fermé observé ; $N_{\text{out}}(K)$ s'en déduit sans
+nouvelle exécution. Ajustement en loi de puissance sur $n=32 \to 128$, moyenne
+des deux familles :
+
+| $K$ | $N_{\text{out}}(50\,000)$ | budget/record, contrat A, 48 cœurs | contre $K{=}10$ | écart des deux familles |
+| ---: | ---: | ---: | ---: | ---: |
+| 2 | $2{,}53\cdot10^{5}$ | 189 398 ns | 70,3 × moins | **13,8 ×** |
+| 3 | $5{,}48\cdot10^{5}$ | 87 536 ns | 32,5 × | 4,9 × |
+| 4 | $1{,}42\cdot10^{6}$ | 33 750 ns | 12,5 × | 2,1 × |
+| **5** | $2{,}21\cdot10^{6}$ | **21 680 ns** | **8,05 ×** | 1,5 × |
+| 6 | $4{,}09\cdot10^{6}$ | 11 726 ns | 4,35 × | 1,4 × |
+| 8 | $1{,}01\cdot10^{7}$ | 4 738 ns | 1,76 × | 1,2 × |
+| **10** | $1{,}78\cdot10^{7}$ | **2 694 ns** | 1,00 × | 1,1 × |
+
+L'écart entre familles est la mesure d'incertitude de l'extrapolation : il vaut
+13,8 × à $K=2$ et **1,1 × à $K=10$**. Les valeurs à bas $K$ sont donc des ordres
+de grandeur, celles à haut $K$ sont fiables.
+
+**La décision $K$ est prise, et elle est mesurée.** Passer de $K=10$ à $K=5$
+divise la sortie par **8,05** alors que l'étage paire ne coûte que **2,03** fois
+moins. Le dénominateur commande : c'est la sortie, pas l'étage paire, qui fixe
+tous les budgets.
+
+Grille complète des écarts au contrat A, recalculée, tous étages sur 48 cœurs :
+
+| $K$ | recertification | classification | lanceur paire | **aval** |
+| ---: | ---: | ---: | ---: | ---: |
+| 5 | 0,101 s (**0,10 ×**) | 3,03 s (3,0 ×) | 3,100 s (3,1 ×) | 2 832 s (**2 832 ×**) |
+| 10 | 0,182 s (**0,18 ×**) | 24,4 s (24 ×) | 7,480 s (7,5 ×) | 22 790 s (**22 790 ×**) |
+
+À $K=5$, **tous les étages sauf l'aval tiennent à un facteur 3 près du contrat
+A**, et le lanceur y est donné dans sa version pessimiste : le rang 6 mesuré à
+3,100 s l'a été en régime soutenu, et le rapport isolé/soutenu de 3,07 établi par
+Q2 le ramène à **≈1,0 s**.
+
+**Et l'aval reste le contrat à tout $K$** :
+
+| $K$ | 2 | 3 | 4 | 5 | 6 | 8 | 10 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| aval, 48 cœurs | 324 s | 701 s | 1 819 s | 2 832 s | 5 236 s | 12 960 s | 22 790 s |
+| écart contrat A | 324 × | 701 × | 1 819 × | 2 832 × | 5 236 × | 12 960 × | 22 790 × |
+
+Même à $K=2$ — un ordre où la sortie est 70 fois plus petite — l'aval est encore
+**324 fois** au-dessus. Aucun choix de $K$ ne le sauve. C'est la justification
+quantitative de V1 : l'aval n'est pas un étage à optimiser, c'est le contrat.
+
+**Conclusion d'I0, portée au plan** : viser **$K=5$** pour le contrat A. Ce n'est
+plus une capitulation devant $K=10$ mais un arbitrage chiffré — 8,05 × de sortie
+en moins contre 2,03 × de coût paire en plus. $K=10$ redevient une cible dès que
+l'aval et la classification passent l'échelle.
 
 ### I1 — Rendre le coupe-circuit effectif dans l'étage higher · *local*
 

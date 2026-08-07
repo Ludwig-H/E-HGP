@@ -60,6 +60,13 @@ constexpr std::uint64_t locator_authority_id =
 // them against the real ones.
 inline constexpr std::size_t runner_default_higher_tile_target = 16U;
 inline constexpr std::size_t runner_maximum_higher_tile_target = 1024U;
+// I1.  Default resident-chunk quantum, in work units.  Calibrated on the
+// measurement that isolated the defect: 232 us per work unit at n=40, K=3,
+// so 4 096 units is a chunk of roughly one second there.  The unit cost is
+// not a constant of the algorithm -- it grows with the cloud -- so the
+// guarantee this axis buys is stated in units, never in time: the deadline
+// is honoured to within one quantum, and the quantum is published.
+inline constexpr std::size_t runner_default_higher_operational_quantum = 4'096U;
 
 struct Options {
   std::string family{"uniform_latin"};
@@ -88,6 +95,23 @@ struct Options {
   // T2: how finely the anchored frontier is refined.  Host state, so it is
   // NOT bounded by the device slot capacity.
   std::size_t higher_frontier_target{runner_default_higher_tile_target};
+  // I1.  Work units one resident chunk consumes before returning to the
+  // caller.  This is NOT a budget and it bounds no computation: the axis is
+  // compared against the chunk origin, so exhausting it ends a chunk and the
+  // next chunk resumes from the committed checkpoint -- the run still
+  // explores the whole universe.  It exists because the operational
+  // circuit-breaker can only act between chunks, and before this axis the
+  // two mechanisms were wired to the same condition with opposite effects:
+  // complete_resident_diagnostic is exactly the mode that arms the deadline
+  // AND the mode that raised every higher axis to the representational
+  // ceiling, so one chunk was the entire universe and the deadline could
+  // only fire before the first chunk or after the last.  Measured at n=40,
+  // K=3: one chunk, 195 119 work units, 45 309 ms -- a 5 000 ms deadline
+  // overshot by 9.07x.  The pair stage never had this defect because it
+  // already carries a per-call resumable quantum with the clock held by the
+  // caller, which is the shape reproduced here.
+  std::size_t higher_operational_quantum{
+      runner_default_higher_operational_quantum};
   bool point_count_supplied{false};
   // SPECIFICATION_MORSEHGP3D.md 1.1: the exact industrial version carries no
   // configured budget at all.  `bounded` keeps the fail-fast diagnostic caps
@@ -698,6 +722,10 @@ void print_usage(std::ostream& output) {
       << "  --higher-frontier-target N (how finely the anchored frontier is"
          " refined; host state, so not bounded by the slot capacity;"
          " 1 <= N <= 1048576)\n"
+      << "  --higher-operational-quantum N (work units one resident chunk"
+         " consumes; NOT a budget -- it ends a chunk, not the run, so the"
+         " operational deadline is honoured to within one quantum;"
+         " default 4096)\n"
       << "  --budget-profile bounded|unbudgeted_industrial (unbudgeted "
          "rejects every explicit --*-budget option and is the only profile "
          "a product measurement may be taken on)\n"
@@ -758,6 +786,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.higher_tile_roots = parse_size(value, option);
     } else if (option == "--higher-frontier-target") {
       options.higher_frontier_target = parse_size(value, option);
+    } else if (option == "--higher-operational-quantum") {
+      options.higher_operational_quantum = parse_size(value, option);
     } else if (option == "--warm-e2e-repetitions") {
       options.warm_e2e_repetitions = parse_size(value, option);
     } else if (option == "--operational-deadline-ms") {
@@ -838,6 +868,10 @@ void parse_options(int argc, char** argv, Options& options) {
       options.higher_frontier_target > (1U << 20U)) {
     throw std::invalid_argument(
         "--higher-frontier-target must be in [1, 1048576]");
+  }
+  if (options.higher_operational_quantum == 0U) {
+    throw std::invalid_argument(
+        "--higher-operational-quantum must be strictly positive");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -1148,8 +1182,20 @@ make_sparse_pair_total_capacity(const Options& options) {
     // envelope, and it certifies nothing.
     const std::size_t representational_ceiling =
         std::numeric_limits<std::size_t>::max();
+    // I1.  Every axis stays at the representational ceiling EXCEPT the work
+    // one, which becomes the resumable operational quantum.  The two differ
+    // in kind, and that distinction is the whole point of
+    // SPECIFICATION_MORSEHGP3D.md 1.1.  A budget bounds the computation and
+    // is forbidden here; a quantum bounds one CHUNK -- it is compared
+    // against the chunk origin (higher_support_stream.cpp,
+    // consume_work_unit), so exhausting it ends that chunk and the next
+    // resumes from the committed checkpoint.  The run still explores the
+    // whole universe, which the falsifiable test pins down by requiring
+    // bit-identical scientific output across quanta.  Without it this branch
+    // made one chunk the entire universe, and the operational
+    // circuit-breaker armed by this very mode could never act.
     return {
-        representational_ceiling,
+        options.higher_operational_quantum,
         representational_ceiling,
         representational_ceiling,
         representational_ceiling,
@@ -2892,6 +2938,18 @@ void emit_report(const Report& report) {
               : "caller_diagnostic_caps")
       << "\",\n"
       << "  \"support_budgets_are_resumable_chunk_quanta\":true,\n"
+      // I1.  Published next to the ceiling certificate rather than hidden
+      // inside it, because a reader must be able to see that one higher
+      // axis is NOT at the ceiling and why that leaves the unbudgeted claim
+      // intact: the axis is compared against the chunk origin, so it ends a
+      // chunk instead of the run.  The guarantee it buys is stated in work
+      // units, never in time -- the cost of a work unit grows with the
+      // cloud.
+      << "  \"higher_operational_quantum_work_units\":"
+      << report.options.higher_operational_quantum << ",\n"
+      << "  \"higher_operational_quantum_semantics\":"
+         "\"resumable_chunk_quantum_bounding_one_chunk_not_the_run_so_the_"
+         "operational_deadline_is_honoured_to_within_one_quantum\",\n"
       << "  \"downstream_static_confidence_caps_enabled\":"
       << boolean(report.downstream_static_confidence_caps_enabled) << ",\n"
       << "  \"operational_deadline_ms\":"
