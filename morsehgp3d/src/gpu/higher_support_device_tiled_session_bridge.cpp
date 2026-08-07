@@ -1475,19 +1475,44 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
     // replaced by its canonical children.  No record, no resolved mass;
     // the session's complete checkpoint verification recomputes the
     // frontier mass and so certifies the conservation.
-    if (cur_frontier.size() < config.pre_expansion_target_entry_count &&
-        entry_expandable(geometry, cur_frontier.back())) {
+    // Sealed v1 rule, now applied here too: expand the entry of LARGEST
+    // exact mass, ties broken by the lowest position -- exactly what
+    // pre_expand already does inside the tile path.  Looking only at the
+    // back entry made this a depth-first descent that stopped dead the
+    // moment the back reached a leaf, which is why the G4 escalier saw
+    // the frontier freeze at 30 and 43 entries against a target of 1024
+    // and a single tile then had to carry the whole universe.
+    std::size_t expansion_index = cur_frontier.size();
+    exact::BigInt expansion_mass{0};
+    if (cur_frontier.size() < config.pre_expansion_target_entry_count) {
+      for (std::size_t index = 0U; index < cur_frontier.size(); ++index) {
+        if (!entry_expandable(geometry, cur_frontier[index])) {
+          continue;
+        }
+        const exact::BigInt mass =
+            authenticated_entry_mass(geometry, cur_frontier[index]);
+        if (expansion_index == cur_frontier.size() || mass > expansion_mass) {
+          expansion_index = index;
+          expansion_mass = mass;
+        }
+      }
+    }
+    if (expansion_index != cur_frontier.size()) {
       if (consecutive_expansion_transitions >=
           config.maximum_session_pre_expansion_transition_count) {
         fail("the session pre-expansion backstop was exhausted");
       }
       const std::vector<ExactHigherSupportFrontierEntry> children =
-          expand_entry_canonically(geometry, cur_frontier.back());
+          expand_entry_canonically(geometry, cur_frontier[expansion_index]);
       hierarchy::ExactHigherSupportCheckpoint successor = source_checkpoint;
-      successor.frontier.pop_back();
-      for (std::size_t index = children.size(); index > 0U; --index) {
-        successor.frontier.push_back(children[index - 1U]);
-      }
+      successor.frontier.erase(
+          successor.frontier.begin() +
+          static_cast<std::ptrdiff_t>(expansion_index));
+      successor.frontier.insert(
+          successor.frontier.begin() +
+              static_cast<std::ptrdiff_t>(expansion_index),
+          children.begin(),
+          children.end());
       successor.next_chunk_sequence =
           source_checkpoint.next_chunk_sequence + 1U;
       successor.cumulative_audit.maximum_frontier_entry_count = std::max(

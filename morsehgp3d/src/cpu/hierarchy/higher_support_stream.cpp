@@ -3553,12 +3553,41 @@ bool ExactHigherSupportAnchoredSession::adopt_expansion_successor(
           trusted_checkpoint_.cumulative_audit.emitted_record_count) {
     return false;
   }
-  for (std::size_t index = 0U;
-       index + 1U < trusted_checkpoint_.frontier.size();
-       ++index) {
-    if (successor.frontier[index] != trusted_checkpoint_.frontier[index]) {
-      return false;
-    }
+  // Shape of a canonical expansion, generalised from the back entry to an
+  // arbitrary position.
+  //
+  // The successor must replace EXACTLY ONE source entry by a contiguous,
+  // nonempty window of entries, leaving everything outside that window
+  // identical and in the same order.  Restricting the position to the back
+  // was never a mathematical requirement -- mass conservation is enforced
+  // below, because the complete verification recomputes C(F) from the
+  // successor frontier and this adoption already demands an unchanged
+  // remaining_frontier_support_count -- but it made the session-visible
+  // expansion a depth-first descent that stalls the instant the back entry
+  // reaches a leaf.  Measured on G4: the frontier froze at 30 and 43
+  // entries for n=512 and n=4096 against a target of 1024, so a single
+  // tile then had to swallow the whole universe.
+  //
+  // The window rule keeps the anti-forge property that matters: a caller
+  // still cannot reorder, drop or substitute any other entry, and a
+  // successor that changes two separate positions is refused.
+  const std::vector<ExactHigherSupportFrontierEntry>& before =
+      trusted_checkpoint_.frontier;
+  const std::vector<ExactHigherSupportFrontierEntry>& after =
+      successor.frontier;
+  std::size_t head = 0U;
+  while (head < before.size() && head < after.size() &&
+         before[head] == after[head]) {
+    ++head;
+  }
+  std::size_t tail = 0U;
+  while (head + tail + 1U < before.size() && head + tail + 1U < after.size() &&
+         before[before.size() - 1U - tail] ==
+             after[after.size() - 1U - tail]) {
+    ++tail;
+  }
+  if (before.size() - head - tail != 1U || after.size() - head - tail < 1U) {
+    return false;
   }
   const ExactHigherSupportCheckpointVerification verification =
       verify_exact_higher_support_checkpoint(authority_, successor);

@@ -1408,6 +1408,68 @@ void check_indexed_closed_ball_equals_linear_reference(
       label + ": the differential actually exercised minimal supports");
 }
 
+// The canonical-expansion adoption was generalised from the back entry to
+// an arbitrary position, so the shape rule it now relies on needs its own
+// anti-forge guard.  The decisive case is a MASS-PRESERVING reorder: the
+// frontier keeps its size, its multiset and therefore its exact mass, so
+// the complete checkpoint verification passes and only the shape rule can
+// refuse it.  Were that rule dropped in favour of "mass is conserved", a
+// caller could permute the frontier freely between commits.
+void test_canonical_expansion_shape_antiforge() {
+  CanonicalPointCloud cloud = cloud_from({
+      point(1.0, 1.0, 1.0),
+      point(1.0, -1.0, -1.0),
+      point(-1.0, 1.0, -1.0),
+      point(-1.0, -1.0, 1.0)});
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactHigherSupportAuthorityContext authority{index, cloud, 10U};
+  ExactHigherSupportAnchoredStreamAssembler assembler{authority};
+  const ExactHigherSupportCheckpoint source = assembler.trusted_checkpoint();
+  check(
+      source.frontier.size() == 2U,
+      "expansion anti-forge: the initial checkpoint carries two roots");
+  if (source.frontier.size() != 2U) {
+    return;
+  }
+
+  ExactHigherSupportCheckpoint swapped = source;
+  std::swap(swapped.frontier[0], swapped.frontier[1]);
+  swapped.next_chunk_sequence = source.next_chunk_sequence + 1U;
+  swapped.checkpoint_digest =
+      compute_exact_higher_support_checkpoint_digest(swapped);
+  check(
+      verify_exact_higher_support_checkpoint(authority, swapped)
+          .local_integrity_verified,
+      "expansion anti-forge: the reordered frontier still passes the "
+      "complete integrity verification, so only the shape rule catches it");
+  check(
+      !assembler.commit_canonical_expansion(source, swapped),
+      "expansion anti-forge: a mass-preserving reorder is refused");
+  check(
+      assembler.trusted_checkpoint() == source,
+      "expansion anti-forge: the refused reorder left the chain untouched");
+
+  ExactHigherSupportCheckpoint unchanged = source;
+  unchanged.next_chunk_sequence = source.next_chunk_sequence + 1U;
+  unchanged.checkpoint_digest =
+      compute_exact_higher_support_checkpoint_digest(unchanged);
+  check(
+      !assembler.commit_canonical_expansion(source, unchanged),
+      "expansion anti-forge: an expansion that expands nothing is refused");
+
+  ExactHigherSupportCheckpoint shrunk = source;
+  shrunk.frontier.pop_back();
+  shrunk.next_chunk_sequence = source.next_chunk_sequence + 1U;
+  shrunk.checkpoint_digest =
+      compute_exact_higher_support_checkpoint_digest(shrunk);
+  check(
+      !assembler.commit_canonical_expansion(source, shrunk),
+      "expansion anti-forge: a frontier that loses mass is refused");
+  check(
+      assembler.trusted_checkpoint() == source,
+      "expansion anti-forge: no refused successor advanced the chain");
+}
+
 void test_indexed_closed_ball_differential() {
   std::mt19937_64 rng{20260806U};
   std::uniform_real_distribution<double> axis{0.0, 1.0};
@@ -1463,6 +1525,7 @@ void test_indexed_closed_ball_differential() {
 }
 
 int main() {
+  test_canonical_expansion_shape_antiforge();
   test_indexed_closed_ball_differential();
   test_bigint_universe();
   test_regular_tetrahedron_complete_and_fresh_replay();
