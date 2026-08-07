@@ -1720,7 +1720,10 @@ void test_backpressure_is_reversible() {
       numerator >= (UINT64_C(1) << 53U)) {
     return false;
   }
-  const int shift = std::bit_width(denominator) - 1;
+  // std::bit_width returns int per the standard, but the width type differs
+  // across libstdc++ versions and the G4 toolchain rejects the narrowing
+  // under -Werror=conversion.  The value is at most 64, so the cast is exact.
+  const int shift = static_cast<int>(std::bit_width(denominator)) - 1;
   const double magnitude =
       std::ldexp(static_cast<double>(numerator), -shift);
   out = negative ? -magnitude : magnitude;
