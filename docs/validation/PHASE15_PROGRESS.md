@@ -1617,3 +1617,44 @@ Le blocage identifié au préflight est levé côté contrat, et écrit côté C
 **Un seul fait, porté par le batch.** `record_segments_host_readable` est asserté par le fake (ses arènes sont des vecteurs hôtes) et par le driver **seulement après** les trois copies et leur synchronisation. Le lease le transporte, `host_readable_record_segments()` le renvoie, et le drainage échoue fermé dessus. Aucun chemin ne l'infère du genre d'exécution : le producteur l'affirme, le consommateur s'y fie.
 
 **Ce que cela ne dit pas.** Le côté hôte est validé — suites moteur de slot, pont M2 et tour device vertes avec le fait porté de bout en bout. **Le staging CUDA lui-même n'a jamais été compilé** : il n'existe pas de `nvcc` dans l'environnement de développement. C'est le premier travail de la session G4, immédiatement suivi de la parité du pont contre le lanceur natif à n=32, qui est la seule chose capable de certifier que le staging adresse juste.
+
+## Session G4 du 7 août : le chemin tuile-certifié s'exécute nativement pour la première fois
+
+Session gardée du 7/8 (cible `europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, `maxRunDuration=10800 s`, arrêt invité 165 min, clé OS Login éphémère TTL 189 min dans la fenêtre exigée).
+
+**R2-f compile du premier coup sous `nvcc`**, puis trois défauts réels, tous trouvés par les instruments construits juste avant.
+
+**Défaut 1 — l'enveloppe scellée comptait mal les synchronisations.** Le contrat CUDA asserte `synchronization_count == lancements + 1`, et le staging en ajoute une : il ne peut pas partager celle du drainage des contrôles, puisque ses largeurs de ligne par slot sont lues *dans* ces contrôles. Plutôt que la dissimuler, le batch déclare `record_staging_device_to_host_{count,byte_count}`, le driver ne synchronise que si une copie a réellement été émise — les deux comptes restent ainsi solidaires —, et l'enveloppe attend `+1` ou `+2` en conséquence, borne le nombre de copies à trois, exige que compte et octets s'annulent ensemble, et exige le fait `record_segments_host_readable`. **C'est la ventilation R2-i qui l'a trouvé** : 6 expansions committées, **zéro** transaction de tuile, frontière vivante à 13.
+
+**Défaut 2 — le pont avalait la raison de la censure.** Un échec natif ne permettait pas de distinguer une faute moteur d'un refus de validation croisée d'une garde fail-closed. L'avance porte désormais le texte de l'exception, la tour le remonte, le runner publie `higher_support.censure_detail`, et le refus de drainage nomme le champ fautif et ses valeurs.
+
+**Défaut 3, le vrai — le staging appartenait au mauvais objet.** Le lease de drainage retient `retained_output_owner` précisément pour que le stockage qu'il publie lui survive ; R2-f stageait dans le **batch**, un transitoire que l'appelant relâche. Le lease pointait donc sur des vecteurs libérés — et la mémoire libérée se relit en valeurs plausibles plutôt que de planter tout de suite : le premier drainage natif a rapporté un contrôle de slot annonçant `tile_epoch=49` contre 1 attendu et **4 415 243 223 297** records terminaux contre une foulée de 256 ; à `--higher-tile-target 1024`, la même lecture pendante produisait un *core dump*. Les quatre miroirs hôtes vivent maintenant dans l'objet de ressources, alloués à l'arène de tuile et réutilisés par chaque chunk.
+
+**Premier résultat natif du chemin tuile-certifié, n=32 K=5 uniform, profil sans budget.** L'univers ferme exactement : 40 920 = C(32,3)+C(32,4), `pipeline_complete=true`, une transaction de tuile précédée de six pré-expansions — la lecture structurelle est confirmée à l'exécution. Étage higher : **114,7 s à `--higher-tile-target 16`** contre **22,4 s à 1024**, soit **5,1×** d'un seul paramètre. La lecture R2-b — le défaut affamait le device — est donc vérifiée par la mesure.
+
+**Parité scientifique certifiée.** Contre le chemin hôte `fresh_cpu_replay` sur le même nuage : **171 événements acceptés des deux côtés**, zéro diagnostic de shell des deux côtés, `resolved == total == 40 920` des deux côtés, et **aucun champ de premier niveau du rapport ne diffère** hors options, budgets, temps et bloc `higher_support`. Si le staging device→hôte mésadressait d'un seul octet, les événements ne pourraient pas coïncider. Comme annoncé en R1-a, les compteurs d'audit diffèrent par construction entre bases : 350 contre 390 feuilles minimales analysées, 36 537 contre 0 certificats de prune émis — le chemin device consomme les prunes en masses, pas en records.
+
+**Mesure honnête qui dérange.** À n=32 K=5, l'étage higher coûte **8,7 s sur le chemin hôte** contre **22,4 s sur le chemin device tuile-certifié** : le device est aujourd'hui **2,6× plus lent** que l'hôte à cette taille. n=32 est le pire cas par support pour le device — l'arbre est trop plat pour que l'élagage en masse serve — mais c'est une mesure, pas une excuse, et elle interdit toute extrapolation favorable depuis cette taille.
+
+**Ce que cela ne dit pas.** Aucun run 50k complet, aucun gate d'échelle, aucun statut public, aucun p95, aucune famille de campagne P0.
+
+### L'escalier R2-d, mesuré : la tuile unique ne passe pas l'échelle
+
+Balayage sur la version **sans budget**, `--higher-backend device_tiled_session --higher-verification-basis tile_certified --higher-tile-target 1024`, K=5, famille `uniform_latin`, délai coopératif de 300 s par cellule ([manifeste](phase15_r2d_device_tile_certified_escalier_k5_g4_67facb1.json)).
+
+| n | issue | paires (ms) | higher (ms) | univers résolu | tuiles | expansions | frontière |
+| ---: | --- | ---: | ---: | --- | ---: | ---: | ---: |
+| 32 | complet | 14 | 22 224 | **40 920 / 40 920** | 1 | 6 | 0 |
+| 512 | censuré | 2 008 | 305 400 | **0** / 2 852 115 840 | 0 | 10 | 30 |
+| 4 096 | censuré | 68 795 | 233 548 | **0** / 11 722 396 707 840 | 0 | 14 | 43 |
+| 50 000 | censuré | **299 929** | — | étage jamais atteint | — | — | — |
+
+Trois conclusions, toutes mesurées et aucune extrapolée.
+
+**① La transaction de tuile unique ne passe pas l'échelle.** Dès n=512, l'étage higher commit ses pré-expansions puis entre dans **une** transaction de tuile qu'il ne termine jamais : au bout de 300 s, la fraction de $C(n,3)+C(n,4)$ décidée est **exactement zéro**. Ce n'est pas de la lenteur, c'est une granularité fausse : la tuile porte tout l'univers, donc elle ne peut que réussir en entier ou ne rien rendre. La question ouverte de R1 — `commit_tile_certified` doit-il accepter la résolution **partielle** d'une racine de frontière — cesse d'être une question de conception : c'est le verrou mesuré.
+
+**② À 50 000 points, l'étage paire est le mur, et l'étage higher n'est jamais atteint.** 299,9 s sans terminer, ce qui recoupe la mesure P8l historique (2,5 % de $C(n,2)$ en 300 s). R3 n'est pas une optimisation parmi d'autres : sans elle, aucune mesure du chemin higher à la taille contractuelle n'est possible.
+
+**③ La frontière n'est pas constante en n.** La note de coût de R2-b supposait qu'elle oscille autour de la cible de pré-expansion, donc indépendamment de n ; la mesure donne 0, 30 et 43 entrées à n=32, 512 et 4 096. L'expansion s'arrête quand l'entrée de queue n'est plus scindable, pas quand la cible est atteinte.
+
+Ces trois lectures n'étaient possibles que parce que R2-c, R2-h et R2-i existaient : sans la censure coopérative dans la tuile et sans la ventilation publiée sur tous les dénouements, ces quatre cellules auraient rendu quatre échecs muets.
