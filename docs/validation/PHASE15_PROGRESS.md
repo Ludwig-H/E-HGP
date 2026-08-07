@@ -1967,3 +1967,61 @@ de la seconde au lieu de l'heure et demie, et le premier chiffre honnête sur
 l'étage higher à la taille contractuelle devient possible — aujourd'hui il n'est
 jamais atteint. B1 ne tient ni le contrat 1 s ni le contrat 100 ms, et ne
 prétend rien sur l'étage higher.
+
+## Le filtre fp64 du moteur higher : construit, mesuré, réfuté
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Le moteur higher device ne contenait aucun flottant — zéro occurrence de `double`
+ou `float` dans les 2 159 lignes du slot engine — là où l'étage paire filtre
+97,8 % de ses prédicats exacts en fp64. L'hypothèse était que ce barreau manquant
+portait une grande part de l'écart de débit de 894× entre les deux étages. Elle a
+été implémentée et elle est **fausse**.
+
+**Ce qui est livré.** `phase15_higher_support_product_fp64_filter.cuh` place un
+barreau d'intervalles binary64 devant l'échelle entière aux deux portes de
+produit. Il miroite terme pour terme `evaluate_support` et
+`barycentric_numerators` — directions, matrice de Gram, déterminant, numérateurs
+de Cramer — et chaque opération élémentaire est élargie d'un ulp vers l'extérieur,
+si bien que l'intervalle calculé est un sur-ensemble garanti de l'intervalle
+exact. Il ne répond donc que lorsque son intervalle est **strictement signé** :
+un sur-ensemble strictement positif prouve la positivité stricte de l'exact, un
+sur-ensemble négatif ou nul prouve la négativité ou nullité. Partout ailleurs il
+défère, et l'entier reste l'autorité. Pour un support à trois points il refuse en
+outre de répondre `refuted`, parce que le chemin entier possède une
+spécialisation triangle plus serrée que le filtre ne reproduit pas.
+
+**Certificat de neutralité.** Les treize suites `higher_support` passent, dont
+les quatre du chemin tuile-certifié — frontier, slot engine, session bridge,
+tower — et la fixture permanente `phase9_higher_support_aabb_corner_regression`,
+qui est précisément le contre-exemple interdisant de décider par les coins des
+boîtes support. Aucun verdict ne bouge.
+
+**Et la mesure réfute l'hypothèse.** A/B sur la suite de frontière hôte, trois
+exécutions de chaque côté : **23,74 / 24,54 / 24,72 s avec le filtre** contre
+**24,33 / 25,07 / 25,65 s sans**. Médianes 24,54 contre 25,07, soit environ 2 % —
+du bruit sur deux cœurs.
+
+**La raison, et elle vaut d'être écrite.** Un filtre fp64 est rentable contre une
+arithmétique **rationnelle non bornée** : c'est exactement le repli de l'étage
+paire, `prepared_witness_aabb_minimum_sign` en BigInt, où il filtre 97,8 %. Le
+repli du moteur higher est un intervalle **entier de largeur fixe à quatre
+membres**, déjà bon marché, et la discipline d'arrondi extérieur coûte un
+`nextafter` par opération élémentaire, du même ordre de grandeur. L'écart de
+débit entre les deux étages n'est donc pas expliqué par ce que l'on croyait.
+
+**Ce que la réfutation laisse, et qui est plus intéressant.** Retirer du travail
+arithmétique aux portes n'a rien déplacé. C'est un argument pour une hypothèse
+plus forte : **les ~40 µs par support ne seraient pas de l'arithmétique.** Si le
+coût est dans l'aller-retour de lancement et de drainage plutôt que dans les
+portes, le correctif est entièrement différent — et aucune mesure hôte ne peut le
+trancher. Il faut un profil natif publiant le nombre de lancements et le temps par
+lancement. C'est la première chose à instrumenter sur la prochaine session G4,
+avant d'écrire quoi que ce soit d'autre sur cet étage.
+
+**Statut du code.** Conservé, et étiqueté pour ce qu'il est : sûr, neutre en
+verdict, **non justifié par une mesure**. Sa valeur éventuelle est propre au
+device — la structure de coût de l'int256 sur GPU n'est pas celle de l'hôte — et
+seule une session native peut la décider. Le retirer est un `git revert` d'un
+seul commit.

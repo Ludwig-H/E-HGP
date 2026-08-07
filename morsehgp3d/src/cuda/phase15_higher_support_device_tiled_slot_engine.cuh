@@ -5,6 +5,7 @@
 #include "phase15_exact_higher_support_product_fixed.cuh"
 #include "phase15_exact_higher_support_product_fixed256.cuh"
 #include "phase15_exact_higher_support_product_fixed512.cuh"
+#include "phase15_higher_support_product_fp64_filter.cuh"
 
 #include "morsehgp3d/spatial/lbvh.hpp"
 
@@ -24,10 +25,17 @@
 // evaluation overflow, so the ladder reproduces the host decisions bit for
 // bit while counting its escalations in the sealed slot-control counters.
 //
-// The engine never allocates, never throws and never touches a floating
-// point value: errors the fake surfaces as host exceptions become fail-closed
-// fatal failure codes that poison the owning context through the sealed
-// slot-control validation.
+// The engine never allocates and never throws: errors the fake surfaces as
+// host exceptions become fail-closed fatal failure codes that poison the
+// owning context through the sealed slot-control validation.
+//
+// Floating point appears in exactly one place, and never as an authority: a
+// binary64 interval rung sits in front of the integer ladder at the two
+// product gates (phase15_higher_support_product_fp64_filter.cuh).  It answers
+// only when its outward-rounded interval is strictly signed, which proves the
+// same sign for the exact interval, and defers in every other case.  It can
+// therefore move work off the integer widths but cannot move a verdict, which
+// is what the parity suite asserts case by case.
 
 namespace morsehgp3d::gpu::detail::higher_support_slot_engine {
 
@@ -40,6 +48,8 @@ namespace morsehgp3d::gpu::detail::higher_support_slot_engine {
 namespace fixed256 = exact_higher_support_product_fixed256;
 namespace fixed512 = exact_higher_support_product_fixed512;
 namespace fixed1024 = exact_higher_support_product_fixed;
+namespace fp64_filter =
+    morsehgp3d::gpu::detail::phase15_higher_support_fp64_filter;
 
 using EngineU128 = Phase15HigherSupportDeviceTiledUnsigned128;
 using EngineBox = fixed1024::Binary64Aabb3;
@@ -1045,6 +1055,19 @@ engine_ladder_no_well_centered(
     const EngineBox boxes[4],
     std::size_t support_size) noexcept {
   EngineLadderGate outcome;
+  // Binary64 rung.  It answers only when its outward-rounded interval is
+  // strictly signed, which proves the same sign for the exact interval the
+  // integer widths would compute; every other case falls through unchanged.
+  switch (fp64_filter::no_well_centered(boxes, support_size)) {
+    case fp64_filter::Verdict::certified:
+      outcome.verdict = EngineGateVerdict::certified;
+      return outcome;
+    case fp64_filter::Verdict::refuted:
+      outcome.verdict = EngineGateVerdict::exact_false;
+      return outcome;
+    case fp64_filter::Verdict::defer:
+      break;
+  }
   outcome.verdict = engine_no_well_centered_256(boxes, support_size);
   if (outcome.verdict != EngineGateVerdict::overflow) {
     return outcome;
@@ -1069,6 +1092,16 @@ engine_ladder_all_well_centered(
     const EngineBox boxes[4],
     std::size_t support_size) noexcept {
   EngineLadderGate outcome;
+  switch (fp64_filter::all_well_centered(boxes, support_size)) {
+    case fp64_filter::Verdict::certified:
+      outcome.verdict = EngineGateVerdict::certified;
+      return outcome;
+    case fp64_filter::Verdict::refuted:
+      outcome.verdict = EngineGateVerdict::exact_false;
+      return outcome;
+    case fp64_filter::Verdict::defer:
+      break;
+  }
   outcome.verdict = engine_all_well_centered_256(boxes, support_size);
   if (outcome.verdict != EngineGateVerdict::overflow) {
     return outcome;

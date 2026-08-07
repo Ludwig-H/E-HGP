@@ -210,26 +210,55 @@ L'énoncé honnête est donc :
 - ce résidu est un problème de coût par opération, pas de complexité, et son
   levier principal est identifié.
 
-### 8.1 Le levier de coût unitaire, identifié et non spéculatif
+### 8.1 Le filtre fp64 : hypothèse construite, mesurée, et réfutée
 
-Le moteur higher device ne contient **aucun flottant** : zéro occurrence de
+Le moteur higher device ne contenait **aucun flottant** — zéro occurrence de
 `double` ou `float` dans les 2 159 lignes de
-`phase15_higher_support_device_tiled_slot_engine.cuh`. L'étage paire, lui, filtre
-**97,8 %** de ses prédicats exacts en fp64, et une infrastructure de filtre par
-intervalles certifiée existe depuis la phase 2B. Toutes les décisions du moteur
-tombent par ailleurs à la largeur la plus étroite — `deferred512`,
-`deferred1024` et `rational_drains` valent zéro sur les six cas $n=32$ : les
-40 µs sont donc du coût int256 pur, **pas un prix de l'exactitude**.
+`phase15_higher_support_device_tiled_slot_engine.cuh` — alors que l'étage paire
+filtre **97,8 %** de ses prédicats exacts en fp64. L'hypothèse naturelle était
+que ce filtre manquant expliquait une grande part de l'écart de débit entre les
+deux étages. Elle a été implémentée
+(`phase15_higher_support_product_fp64_filter.cuh`, barreau fp64 devant l'échelle
+entière aux deux portes de produit) et **elle est fausse**.
 
-Deux autres leviers n'ont jamais été mesurés : le lancement est à un thread par
+Le filtre est correct : il ne répond que lorsque son intervalle à arrondi
+extérieur est strictement signé, ce qui prouve le même signe pour l'intervalle
+exact, et défère partout ailleurs. Les treize suites `higher_support` passent
+sans qu'un seul verdict bouge, fixture permanente des coins de boîte comprise.
+Mais l'A/B sur la suite de frontière hôte, trois exécutions de chaque côté, donne
+23,74 / 24,54 / 24,72 s avec le filtre contre 24,33 / 25,07 / 25,65 s sans :
+**environ 2 %, c'est-à-dire du bruit.**
+
+La raison est structurelle et vaut d'être écrite. Un filtre fp64 est rentable
+contre une arithmétique **rationnelle non bornée** — exactement le repli de
+l'étage paire (`prepared_witness_aabb_minimum_sign` en BigInt), où il filtre
+97,8 %. Le repli du moteur higher est un intervalle **entier de largeur fixe à
+quatre membres**, déjà bon marché ; et la discipline d'arrondi extérieur coûte un
+`nextafter` par opération élémentaire, du même ordre. L'écart de débit de 894×
+entre les deux étages **n'est donc pas expliqué** par l'absence de filtre fp64.
+
+Le code est conservé, étiqueté pour ce qu'il est : sûr, neutre en verdict, et
+**non justifié par une mesure**. Sa valeur éventuelle est propre au device — la
+structure de coût de l'int256 sur GPU n'est pas celle de l'hôte — et seule une
+session native peut la trancher.
+
+### 8.2 Ce que la réfutation laisse
+
+Deux leviers restent, tous deux jamais mesurés : le lancement est à un thread par
 slot avec `kThreadsPerBlock = 128` et un nombre de slots plafonné à 1 024 par une
 constante de schéma que ni T1 ni T2 ne touchent — aucune mesure du dépôt n'a fait
 varier le nombre de threads explorateurs — et la coopération intra-warp sur le
 plan de sonde (au plus 91 positions, 182 évaluations) est explicitement différée
 dans l'en-tête du `.cu`.
 
-Ces trois points sont de l'implémentation, pas de la recherche, et ils précèdent
-toute nouvelle mesure G4 de l'étage higher.
+Et surtout, l'A/B ci-dessus soutient une hypothèse plus forte : **les ~40 µs par
+support ne seraient pas de l'arithmétique du tout.** Retirer du travail
+arithmétique aux portes n'a rien déplacé. Si le coût est dans l'aller-retour de
+lancement et de drainage plutôt que dans les portes, le correctif est entièrement
+différent, et aucune mesure hôte ne peut le décider : il faut un profil natif,
+sur une session G4, avec le nombre de lancements et le temps par lancement
+publiés. C'est la première chose à instrumenter avant d'écrire quoi que ce soit
+d'autre sur cet étage.
 
 ### 8.2 Pourquoi la porte géométrique ne peut pas suffire
 
