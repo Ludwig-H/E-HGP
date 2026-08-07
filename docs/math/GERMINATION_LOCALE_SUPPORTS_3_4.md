@@ -123,6 +123,78 @@ finesse de $\tau$. C'est exactement le partage que le projet assume déjà pour
 l'étage paire, et que `FRONTIERE_DIRECTE_SUPPORTS_3_4.md` §7 énonce comme règle :
 « sparse » désigne une propriété à mesurer, jamais une conséquence automatique.
 
+### 5.0 La majoration certifiée : ce qui échoue, et ce qui marche
+
+Le corollaire n'est un algorithme que si l'on sait produire un $\tau$ **certifié**.
+Les mesures du §5.1 et du §6 utilisent une **minoration échantillonnée** de
+$R(p)$ — 48 directions et une dichotomie — qui ne certifie rien. Voici ce que
+l'on peut réellement prouver.
+
+> **Lemme 2 (l'emboîtement directionnel n'existe pas).** Pour $u\ne u'$, aucune
+> boule tangente en $p$ de direction $u'$ et de rayon $\rho'\le\rho$ n'est
+> contenue dans la boule tangente de direction $u$ et de rayon $\rho$, sauf si
+> $u=u'$.
+
+*Démonstration.* La condition d'inclusion est
+$\sqrt{\rho'^2+\rho^2-2\rho\rho'\cos\theta}\le\rho-\rho'$ avec
+$\theta=\angle(u,u')$. En élevant au carré, elle se réduit à
+$-2\rho\rho'\cos\theta\le-2\rho\rho'$, c'est-à-dire $\cos\theta\ge1$. $\square$
+
+Un recouvrement directionnel naïf est donc impossible. Il faut décentrer.
+
+> **Lemme 3 (boule-test décalée).** Si $\angle(u,u_i)\le\theta$, la plus grande
+> boule incluse dans $\bar B(p+\rho u,\rho)$ et centrée sur le rayon
+> $p+t\,u_i$ est obtenue en $t=\rho\cos\theta$ et a pour rayon
+> $\rho\,(1-\sin\theta)$.
+
+*Démonstration.* $|p+t u_i-(p+\rho u)|^2=t^2-2t\rho\cos\theta+\rho^2$ est
+minimal en $t=\rho\cos\theta$, où il vaut $\rho^2\sin^2\theta$; le rayon
+admissible est $\rho$ moins cette distance. $\square$
+
+**Route A, mesurée et écartée.** Le Lemme 3 donne un test certifié : si, pour
+toutes les directions d'un recouvrement, la boule-test est sur-peuplée, aucune
+direction ne convient. Mais **sans la contrainte de coque il est vide**, et
+l'imposer demande un test de vivacité de calotte contre les demi-espaces de
+l'enveloppe convexe. Mesuré à 50 000 points sans ce test : voisinage moyen 4 432
+à 6 958 et maximum 23 743 à 25 498 selon la finesse — les points de coque
+repartent à l'infini, exactement comme au §5.1. Travail $3$ à $5\cdot10^{15}$.
+Cette route est abandonnée au profit de la suivante, qui n'a besoin ni de
+recouvrement, ni d'enveloppe convexe.
+
+> **Lemme 4 (arête diamétrale).** Soit $U$ accepté, $(p,q)$ sa paire
+> diamétrale, $D=\lvert p-q\rvert$ et $M$ leur milieu. Le lemme d'angle donne
+> $r_U\in[D/2,\;D/\sqrt2)$, le centre $c_U$ est à distance
+> $\sqrt{r_U^2-D^2/4}$ de $M$, et
+> $$\bar B\Bigl(M,\;r_U-\sqrt{r_U^2-\tfrac{D^2}{4}}\Bigr)\;\subseteq\;\bar B(c_U,r_U).$$
+> Ce rayon est décroissant en $r_U$, donc minoré par
+> $\bigl(\tfrac1{\sqrt2}-\tfrac12\bigr)D=0{,}2071\,D$.
+
+*Démonstration.* $c_U$ est équidistant de $p$ et $q$, donc dans le plan
+médiateur, à distance $\sqrt{r_U^2-D^2/4}$ de $M$ par Pythagore; l'inclusion est
+l'inégalité triangulaire. La dérivée de $r\mapsto r-\sqrt{r^2-a}$ vaut
+$1-r/\sqrt{r^2-a}<0$. La borne inférieure est l'évaluation en $r=D/\sqrt2$, borne
+exclue par le lemme d'angle, donc la minoration est stricte et sûre. $\square$
+
+> **Corollaire (test certifié par arête).** Si
+> $\lvert P\cap\bar B(M,\;0{,}2071\,\lvert p-q\rvert)\rvert>s_{\max}$, alors
+> $(p,q)$ n'est la paire diamétrale d'**aucun** support accepté.
+
+Une seule requête de comptage par arête. Ni recouvrement directionnel, ni
+enveloppe convexe, ni recherche non bornée : le lemme d'angle a fourni
+l'intervalle compact $[D/2,D/\sqrt2)$ qui rend tout fini.
+
+**Mesuré à 50 000 points, $s_{\max}=11$** : le degré survivant vaut 988,6 en
+moyenne et 1 252 au maximum, pour un travail de $2{,}41\cdot10^{12}$ et un gain
+de $1{,}08\cdot10^{5}$ sur l'univers.
+
+**Correction honnête.** Le chiffre de $5{,}24\cdot10^{9}$ candidats et le gain de
+$5{,}0\cdot10^{7}$ annoncés au §6 reposent sur la minoration échantillonnée de
+$R(p)$ et **ne sont pas certifiés**. Le meilleur générateur réellement certifié
+aujourd'hui coûte $2{,}41\cdot10^{12}$, soit cinq cents fois plus. L'écart mesure
+exactement ce que la certification coûte, et le resserrer — en stratifiant $r$ et
+en couvrant le cercle des centres possibles, tous deux compacts et explicites —
+est le travail en cours.
+
 ### 5.1 La contrainte de coque n'est pas cosmétique
 
 Sans la condition $c\in\operatorname{conv}(P)$, $R(p)=+\infty$ pour tout point de
@@ -310,8 +382,45 @@ exige un pic sous 80 % de la VRAM.
    et sur la famille `eight_clusters` — `uniform_latin` ne contient aucun
    quadruple minimal bien centré et n'exerce donc pas l'arité quatre.
 
-L'identité de clôture $R_j+C(F_j)=\binom n3+\binom n4$ ne survit pas telle quelle
-à ce changement : le générateur n'énumère plus l'univers, donc la masse non
-examinée n'est plus « résolue par élagage » mais « exclue par le théorème ». La
-comptabilité doit être refondée sur la complétude du corollaire, et c'est le
-point de contrat le plus délicat de toute la route.
+## 10. La comptabilité, refondée sur la complétude (décision du 7 août 2026)
+
+L'identité de clôture $R_j+C(F_j)=\binom n3+\binom n4$ ne survit pas à ce
+changement : le générateur n'énumère plus l'univers, donc la masse non examinée
+n'est plus « résolue par élagage » mais « exclue par le théorème ». Deux options
+existaient — refonder la comptabilité, ou conserver l'identité en comptant
+explicitement la masse exclue comme une troisième catégorie munie de son propre
+certificat.
+
+**La décision est prise : refonder.** La seconde option reconstruirait une
+comptabilité d'univers pour un algorithme qui a précisément cessé de le
+parcourir, et son certificat de complétude serait de toute façon le véritable
+porteur de la preuve ; on paierait un objet de preuve supplémentaire pour une
+identité devenue décorative.
+
+Ce que la chaîne ancrée certifiera désormais n'est plus « toute la masse a été
+partitionnée » mais **« tout support accepté a été produit »**, adossé à trois
+choses et à elles seules :
+
+1. le **théorème** du §5 — tout support accepté a ses sommets dans le graphe
+   engendré par $\tau$ ;
+2. la **certification de $\tau$** — la majoration employée est prouvée
+   supérieure ou égale à $2R(p)$, ou, dans la route retenue au §5.0, le rejet
+   d'arête est prouvé par le Lemme 4 ;
+3. la **classification terminale exacte** inchangée, qui décide chaque candidat
+   produit.
+
+Trois conséquences de contrat, à traiter comme telles :
+
+- le champ `verification_basis` du certificat gagne une valeur, distincte de
+  `fresh_cpu_replay_every_commit` et de
+  `tile_certified_engine_with_exact_closure`, qui nomme la base de complétude et
+  la constante certifiée employée ;
+- la validation croisée BigInt du pont ne peut plus vérifier une partition de
+  masse ; elle vérifie que le graphe engendré et le rejet d'arête sont ceux que
+  la constante déclarée impose, ce qui est une identité de **production**, pas de
+  **couverture** ;
+- l'induction de reprise demeure : le successeur reste une fonction déterministe
+  du checkpoint de confiance, seule la quantité conservée change.
+
+Cette refondation est le point de contrat le plus délicat de la route, et elle
+doit être écrite **avant** le générateur, pas après.

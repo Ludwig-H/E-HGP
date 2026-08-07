@@ -2025,3 +2025,73 @@ verdict, **non justifié par une mesure**. Sa valeur éventuelle est propre au
 device — la structure de coût de l'int256 sur GPU n'est pas celle de l'hôte — et
 seule une session native peut la décider. Le retirer est un `git revert` d'un
 seul commit.
+
+## Le τ certifié : deux lemmes, une route écartée, une route retenue
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Le corollaire de germination n'est un algorithme que si l'on sait produire une
+majoration **certifiée**. Les chiffres du 7 août — $5{,}24\cdot10^{9}$ candidats,
+gain $5{,}0\cdot10^{7}$ — reposaient sur une **minoration échantillonnée** de
+$R(p)$, 48 directions et une dichotomie, qui ne certifie rien. Voici ce qui est
+réellement prouvé.
+
+**Ce qui échoue, et pourquoi c'est utile de le savoir.** Un recouvrement
+directionnel naïf est impossible : deux boules tangentes en $p$ de directions
+distinctes ne sont **jamais** emboîtées, la condition d'inclusion se réduisant à
+$\cos\theta\ge1$. Il faut décentrer, et le décalage optimal est explicite : pour
+$\angle(u,u_i)\le\theta$, la plus grande boule incluse dans $\bar B(p+\rho u,\rho)$
+et centrée sur le rayon $p+t\,u_i$ est en $t=\rho\cos\theta$, de rayon
+$\rho(1-\sin\theta)$.
+
+Cette route A est certifiée mais **vide sans la contrainte de coque**, et
+l'imposer demande un test de vivacité de calotte contre les demi-espaces de
+l'enveloppe convexe. Mesurée à 50 000 points sans ce test, à 48, 192 et 768
+directions : voisinage moyen 6 958, 5 535 puis 4 432, maximum 25 498, 25 498 puis
+23 743 — les points de coque repartent à l'infini. Travail $4{,}98$, $3{,}98$
+puis $3{,}03\cdot10^{15}$. Écartée.
+
+**Ce qui marche, et ne demande ni recouvrement ni enveloppe convexe.** Pour la
+paire diamétrale $(p,q)$ d'un support accepté, le lemme d'angle borne le rayon
+dans l'intervalle **compact** $[D/2,\,D/\sqrt2)$ avec $D=\lvert p-q\rvert$. Le
+centre est alors à distance $\sqrt{r^2-D^2/4}$ du milieu $M$, et
+$\bar B\bigl(M,\ r-\sqrt{r^2-D^2/4}\bigr)\subseteq\bar B(c,r)$ ; ce rayon décroît
+en $r$, donc il vaut au moins $(1/\sqrt2-1/2)D=0{,}2071\,D$. D'où le test :
+
+> si $\lvert P\cap\bar B(M,\ 0{,}2071\,\lvert p-q\rvert)\rvert>s_{\max}$, alors
+> $(p,q)$ n'est la paire diamétrale d'aucun support accepté.
+
+**Une seule requête de comptage par arête.** C'est le lemme d'angle qui rend tout
+fini, en fournissant l'intervalle compact que la formulation par sommet n'avait
+pas.
+
+**Mesuré à 50 000 points, $s_{\max}=11$** : degré survivant 988,6 en moyenne,
+1 252 au maximum ; travail $2{,}41\cdot10^{12}$ ; gain $1{,}08\cdot10^{5}$ sur
+l'univers de $2{,}604\cdot10^{17}$.
+
+**Correction honnête, et elle est sévère.** Le meilleur générateur **certifié**
+coûte cinq cents fois plus que l'estimation non certifiée du matin. L'écart
+mesure exactement le prix de la certification. Le resserrer est un travail
+borné et explicite — stratifier $r$ sur son intervalle compact et couvrir le
+cercle des centres possibles, tous deux compacts — et il est en cours.
+
+## Décision de contrat : la comptabilité est refondée sur la complétude
+
+Le générateur n'énumère plus l'univers, donc l'identité
+$R_j+C(F_j)=\binom n3+\binom n4$ ne survit pas : la masse non examinée cesse
+d'être « résolue par élagage » et devient « exclue par le théorème ». Des deux
+options — refonder la comptabilité, ou conserver l'identité en comptant la masse
+exclue comme une troisième catégorie munie de son propre certificat — la
+**première est retenue**. La seconde reconstruirait une comptabilité d'univers
+pour un algorithme qui a cessé de le parcourir, et son certificat de complétude
+serait de toute façon le vrai porteur de la preuve.
+
+La chaîne ancrée certifiera désormais « tout support accepté a été produit », et
+non plus « toute la masse a été partitionnée », adossé au théorème, à la
+certification de la constante employée, et à la classification terminale exacte
+inchangée. Trois conséquences sont à écrire avant le générateur : une valeur
+supplémentaire de `verification_basis` nommant la base de complétude et sa
+constante ; une validation croisée du pont portant sur une identité de
+**production** et non plus de **couverture** ; et l'induction de reprise
+conservée, seule la quantité conservée changeant.
