@@ -2546,10 +2546,17 @@ def main() -> int:
     # warm end-to-end protocol are allowed to differ; nothing else is.  The
     # peak resident set and the latency order statistics describe the RUN, not
     # the scientific object, exactly as the timings do.
+    # `diagnostic_100ms_outcome` is a THRESHOLD ON A DURATION -- it is a
+    # function of `pipeline_complete`, which is compared on its own, and of
+    # `total_ms`, which is volatile by construction.  It sat in the scientific
+    # set only because both profiles happened to land on the same side of the
+    # hundred-millisecond mark; that is an accident, not an invariant.
     volatile_keys = {
         "budgets",
         "timings_ms",
         "completion_latency_ms",
+        "diagnostic_100ms_outcome",
+        "memory_instrumentation",
         "peak_host_resident_bytes",
         "p95_ms",
         "warm_e2e_minimum_ms",

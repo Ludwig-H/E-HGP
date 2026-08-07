@@ -2829,6 +2829,21 @@ void emit_report(const Report& report) {
     std::cout << report.warm_e2e->median_ms();
   }
   std::cout << ",\n"
+      << "  \"memory_instrumentation\":{"
+      << "\"host_peak_resident_bytes\":"
+      << report.peak_host_resident_bytes
+      << ",\"host_peak_source\":\"proc_self_status_vmhwm\""
+      // The phase 14 exit gate demands a VRAM peak below eighty percent.  This
+      // binary links no device memory accounting, so the ceiling cannot be
+      // checked from this report -- and saying so is the only honest field.  A
+      // reader must never mistake the absence of a VRAM number for a gate that
+      // passed.
+      << ",\"device_peak_instrumented\":false"
+      << ",\"device_peak_absent_reason\":\"the_runner_links_no_cuda_memory_"
+         "accounting_so_the_eighty_percent_vram_ceiling_of_the_phase_14_exit_"
+         "gate_cannot_be_evaluated_from_this_report\""
+      << ",\"gate_vram_ceiling_evaluable\":false"
+      << "},\n"
       << "  \"peak_host_resident_bytes\":"
       << report.peak_host_resident_bytes << ",\n"
       << "  \"qualification_claimed\":false,\n"
