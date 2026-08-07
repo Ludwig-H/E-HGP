@@ -5,9 +5,11 @@
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/hierarchy/sparse_higher_support_h0_chunk_run.hpp"
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -115,6 +117,32 @@ enum class HigherSupportDeviceTiledSessionBridgeStatus : std::uint8_t {
   censored_without_commit,
 };
 
+// R2-h: cooperative interruption of a tile transaction.
+//
+// R2-c made the ASSEMBLY interruptible between committed transitions, which
+// is not enough: a tile consumes the whole frontier and commit_tile_certified
+// then empties the successor prefix, so the tile-certified path resolves the
+// entire universe inside ONE tile transaction.  A guard tested only between
+// transactions therefore has no purchase on the transaction that carries the
+// computation.  This guard is tested inside the device advance loop, at the
+// points where the engine yields, and its trip abandons the tile the same way
+// a censored engine does: nothing is committed, the anchored checkpoint is
+// untouched, and the engine must be rebound before any retry.
+//
+// It is an operational session guard, exactly like the GCP circuit breakers,
+// so it lives OUTSIDE HigherSupportDeviceTiledSessionBridgeConfig -- whose
+// equality defines the sealed scientific identity -- and it is passed per
+// call rather than stored.  It can only make the bridge stop earlier; it
+// never alters a committed transition, a record, a mass or a digest.
+struct HigherSupportDeviceTiledSessionBridgeOperationalGuard {
+  std::optional<std::chrono::steady_clock::time_point> deadline{};
+
+  [[nodiscard]] bool expired() const noexcept {
+    return deadline.has_value() &&
+           std::chrono::steady_clock::now() >= *deadline;
+  }
+};
+
 struct HigherSupportDeviceTiledSessionBridgeAudit {
   std::uint32_t schema_version{
       higher_support_device_tiled_session_bridge_schema_version};
@@ -124,6 +152,11 @@ struct HigherSupportDeviceTiledSessionBridgeAudit {
   std::size_t committed_tile_transaction_count{};
   std::size_t committed_expansion_transition_count{};
   std::size_t censored_without_commit_count{};
+  // R2-h.  A subset of censored_without_commit_count, kept separate because
+  // the two mean opposite things: a deadline censure is an operational stop
+  // on a healthy engine, an engine censure is a defect.  Conflating them
+  // would let a measurement session look like a broken device.
+  std::size_t censored_by_operational_deadline_count{};
   std::size_t committed_tile_root_count{};
   std::size_t committed_tile_slot_count{};
   std::size_t device_pre_expansion_count{};
@@ -194,6 +227,9 @@ struct HigherSupportDeviceTiledSessionBridgeAdvance {
   // records) or one whole-root tile transaction; expansion_transition
   // distinguishes them.
   bool expansion_transition{false};
+  // R2-h: set only when this censure is the operational guard tripping,
+  // never when the engine itself censored or failed.
+  bool operational_deadline_censure{false};
   std::size_t tile_root_count{};
   std::size_t tile_slot_count{};
   std::size_t minimal_work_unit_budget{};
@@ -281,8 +317,13 @@ class HigherSupportDeviceTiledSessionBridge final {
   // through its own fresh-replay verification.  A censored tile returns
   // censored_without_commit with the anchored checkpoint unchanged; the
   // caller must rebind a fresh frontier engine before retrying.
+  // R2-h: the guard defaults to unarmed, so every existing caller is
+  // unchanged.  An armed guard that trips inside the device loop returns
+  // censored_without_commit with operational_deadline_censure set.
   [[nodiscard]] HigherSupportDeviceTiledSessionBridgeAdvance
-  advance_one_tile_transaction();
+  advance_one_tile_transaction(
+      const HigherSupportDeviceTiledSessionBridgeOperationalGuard& guard =
+          {});
 
   // Installs a fresh device engine over a new traversal lease after a
   // censored or poisoned engine.  The lease is revalidated against the

@@ -84,10 +84,27 @@ assemble_exact_higher_support_stream_device_tiled(
         output.bridge_poisoned = bridge.poisoned();
         return output;
       }
-      auto advance = bridge.advance_one_tile_transaction();
+      // R2-h: the same deadline also reaches INSIDE the transaction.  A
+      // tile consumes the whole frontier, so without this the guard above
+      // would have no purchase on the one transaction that carries the
+      // computation.
+      HigherSupportDeviceTiledSessionBridgeOperationalGuard bridge_guard;
+      bridge_guard.deadline = guard.deadline;
+      auto advance = bridge.advance_one_tile_transaction(bridge_guard);
       if (advance.status ==
           HigherSupportDeviceTiledSessionBridgeStatus::session_terminal) {
         break;
+      }
+      if (advance.operational_deadline_censure) {
+        // Nothing was committed and the anchored chain is untouched, so
+        // this is a censure and not a rejection: the assembly certifies
+        // nothing either way, but the transcript must say which one.
+        output.censure =
+            HigherSupportDeviceTiledAssemblyCensure::operational_deadline;
+        snapshot_progress();
+        output.session_terminal = bridge.session_terminal();
+        output.bridge_poisoned = bridge.poisoned();
+        return output;
       }
       if (advance.status !=
               HigherSupportDeviceTiledSessionBridgeStatus::

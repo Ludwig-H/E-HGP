@@ -884,9 +884,11 @@ class Phase15HigherSupportDeviceTiledSessionBridgeState final {
   }
 
   [[nodiscard]] HigherSupportDeviceTiledSessionBridgeAdvance
-  advance_one_tile_transaction();
+  advance_one_tile_transaction(
+      const HigherSupportDeviceTiledSessionBridgeOperationalGuard& guard);
   [[nodiscard]] HigherSupportDeviceTiledSessionBridgeAdvance
-  advance_one_tile_certified_transaction();
+  advance_one_tile_certified_transaction(
+      const HigherSupportDeviceTiledSessionBridgeOperationalGuard& guard);
   void rebind(MortonLbvhDeviceTraversalLease&& traversal_lease);
 
   const hierarchy::ExactHigherSupportAuthorityContext* authority;
@@ -1408,7 +1410,9 @@ void Phase15HigherSupportDeviceTiledSessionBridgeState::
 
 HigherSupportDeviceTiledSessionBridgeAdvance
 Phase15HigherSupportDeviceTiledSessionBridgeState::
-    advance_one_tile_certified_transaction() {
+    advance_one_tile_certified_transaction(
+        const HigherSupportDeviceTiledSessionBridgeOperationalGuard&
+            guard) {
   if (poisoned) {
     throw std::runtime_error(
         "the higher-support session bridge is poisoned by a prior "
@@ -1504,6 +1508,7 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
 
     DrainedRecords records;
     std::optional<HigherSupportDeviceTiledFrontierAudit> device_audit;
+    bool deadline_censured = false;
     try {
       frontier->open_tile(
           std::span<const ExactHigherSupportFrontierEntry>{
@@ -1514,6 +1519,13 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
               (config.frontier_config.slot_tile_capacity + 16U);
       std::size_t tile_advance_count = 0U;
       while (!device_audit.has_value()) {
+        // R2-h.  The engine yields here, so this is the cooperative point:
+        // nothing has been committed, the drained records of this tile are
+        // simply discarded, and the anchored checkpoint is untouched.
+        if (guard.expired()) {
+          deadline_censured = true;
+          break;
+        }
         if (++tile_advance_count > maximum_tile_advance_count) {
           throw std::runtime_error(
               "the device tile did not converge within its advance "
@@ -1542,6 +1554,23 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
       ++audit.censored_without_commit_count;
       advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
           censored_without_commit;
+      advance.tile_root_count = tile_roots.size();
+      advance.tile_slot_count = tile_entries.size();
+      advance.audit = audit;
+      return advance;
+    }
+    // R2-h.  Same fail-closed exit as an engine censure -- no commit, the
+    // anchored checkpoint retained, a rebind demanded before any retry --
+    // but counted and flagged apart, because a deadline on a healthy
+    // engine is an operational stop and not a defect.
+    if (deadline_censured) {
+      rebind_required = true;
+      audit.frontier_context_rebind_required = true;
+      ++audit.censored_without_commit_count;
+      ++audit.censored_by_operational_deadline_count;
+      advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
+          censored_without_commit;
+      advance.operational_deadline_censure = true;
       advance.tile_root_count = tile_roots.size();
       advance.tile_slot_count = tile_entries.size();
       advance.audit = audit;
@@ -1608,7 +1637,9 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
 
 HigherSupportDeviceTiledSessionBridgeAdvance
 Phase15HigherSupportDeviceTiledSessionBridgeState::
-    advance_one_tile_transaction() {
+    advance_one_tile_transaction(
+        const HigherSupportDeviceTiledSessionBridgeOperationalGuard&
+            guard) {
   if (poisoned) {
     throw std::runtime_error(
         "the higher-support session bridge is poisoned by a prior "
@@ -1799,6 +1830,7 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
     // and commit failures below poison the bridge itself.
     DrainedRecords records;
     std::optional<HigherSupportDeviceTiledFrontierAudit> device_audit;
+    bool deadline_censured = false;
     try {
       frontier->open_tile(
           std::span<const ExactHigherSupportFrontierEntry>{
@@ -1812,6 +1844,13 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
               (config.frontier_config.slot_tile_capacity + 16U);
       std::size_t tile_advance_count = 0U;
       while (!device_audit.has_value()) {
+        // R2-h.  The engine yields here, so this is the cooperative point:
+        // nothing has been committed, the drained records of this tile are
+        // simply discarded, and the anchored checkpoint is untouched.
+        if (guard.expired()) {
+          deadline_censured = true;
+          break;
+        }
         if (++tile_advance_count > maximum_tile_advance_count) {
           throw std::runtime_error(
               "the device tile did not converge within its advance "
@@ -1840,6 +1879,23 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
       ++audit.censored_without_commit_count;
       advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
           censored_without_commit;
+      advance.tile_root_count = tile_roots.size();
+      advance.tile_slot_count = tile_entries.size();
+      advance.audit = audit;
+      return advance;
+    }
+    // R2-h.  Same fail-closed exit as an engine censure -- no commit, the
+    // anchored checkpoint retained, a rebind demanded before any retry --
+    // but counted and flagged apart, because a deadline on a healthy
+    // engine is an operational stop and not a defect.
+    if (deadline_censured) {
+      rebind_required = true;
+      audit.frontier_context_rebind_required = true;
+      ++audit.censored_without_commit_count;
+      ++audit.censored_by_operational_deadline_count;
+      advance.status = HigherSupportDeviceTiledSessionBridgeStatus::
+          censored_without_commit;
+      advance.operational_deadline_censure = true;
       advance.tile_root_count = tile_roots.size();
       advance.tile_slot_count = tile_entries.size();
       advance.audit = audit;
@@ -1968,10 +2024,11 @@ HigherSupportDeviceTiledSessionBridge::
     ~HigherSupportDeviceTiledSessionBridge() noexcept = default;
 
 HigherSupportDeviceTiledSessionBridgeAdvance
-HigherSupportDeviceTiledSessionBridge::advance_one_tile_transaction() {
+HigherSupportDeviceTiledSessionBridge::advance_one_tile_transaction(
+    const HigherSupportDeviceTiledSessionBridgeOperationalGuard& guard) {
   return state_->config.tile_certified_commit
-      ? state_->advance_one_tile_certified_transaction()
-      : state_->advance_one_tile_transaction();
+      ? state_->advance_one_tile_certified_transaction(guard)
+      : state_->advance_one_tile_transaction(guard);
 }
 
 void HigherSupportDeviceTiledSessionBridge::rebind_frontier_context(

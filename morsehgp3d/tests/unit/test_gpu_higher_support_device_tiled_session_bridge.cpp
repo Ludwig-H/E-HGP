@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -630,6 +631,158 @@ void test_bridge_censure_never_commits_and_retry_reproduces() {
 }
 
 // ---------------------------------------------------------------------------
+// 3bis. R2-h: the operational deadline reaches inside a tile transaction.
+//
+// R2-c made the assembly interruptible BETWEEN committed transitions, which
+// has no purchase on the tile-certified path: a tile consumes the whole
+// frontier and the successor prefix is then empty, so one tile carries the
+// entire computation.  The guard must therefore be honoured inside the
+// device advance loop.  Three properties are certified here.
+//   (i)   An elapsed guard censors the first genuine TILE transaction, and
+//         only that kind: expansion transitions never touch the engine, so
+//         they still commit.  The censure is flagged and counted apart from
+//         an engine censure, because a deadline on a healthy engine is an
+//         operational stop and not a defect.
+//   (ii)  The censure is free of consequence: no commit, the anchored
+//         checkpoint Q_j retained bit for bit, no poison, a rebind demanded.
+//   (iii) It costs nothing but time: after a rebind, the resumed session
+//         commits exactly the records the uninterrupted reference committed.
+// ---------------------------------------------------------------------------
+
+void test_bridge_operational_deadline_censures_inside_the_tile() {
+  const CanonicalPointCloud cloud = cluster_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactHigherSupportAuthorityContext authority{index, cloud, 5U};
+
+  reset_fake_gpu_higher_support_device_tiled_frontier();
+  auto reference_lease = traversal_lease(cloud);
+  bind_fake_higher_support_device_tiled_geometry(index, cloud);
+  HigherSupportDeviceTiledSessionBridge reference_bridge{
+      authority, std::move(reference_lease), bridge_config()};
+  const BridgeRun reference =
+      run_bridge_to_terminal(reference_bridge, "deadline-reference");
+  check(
+      reference.terminal &&
+          reference.audit.censored_by_operational_deadline_count == 0U,
+      "deadline-reference: an unguarded session never reports a deadline "
+      "censure");
+
+  reset_fake_gpu_higher_support_device_tiled_frontier();
+  auto lease = traversal_lease(cloud);
+  bind_fake_higher_support_device_tiled_geometry(index, cloud);
+  HigherSupportDeviceTiledSessionBridge bridge{
+      authority, std::move(lease), bridge_config()};
+
+  morsehgp3d::gpu::HigherSupportDeviceTiledSessionBridgeOperationalGuard
+      elapsed;
+  elapsed.deadline = std::chrono::steady_clock::now() -
+                     std::chrono::hours{1};
+  check(elapsed.expired(), "deadline: an elapsed guard reports expired");
+
+  std::vector<ExactHigherSupportEvent> events;
+  std::vector<ExactHigherSupportExtraShellDiagnostic> diagnostics;
+  auto checkpoint_before_censure = bridge.trusted_checkpoint();
+  bool censored_seen = false;
+  for (std::size_t iteration = 0U; iteration < 1'000U && !censored_seen;
+       ++iteration) {
+    checkpoint_before_censure = bridge.trusted_checkpoint();
+    auto attempt = bridge.advance_one_tile_transaction(elapsed);
+    if (attempt.status == BridgeStatus::censored_without_commit) {
+      check(
+          attempt.operational_deadline_censure &&
+              attempt.audit.censored_by_operational_deadline_count == 1U &&
+              attempt.audit.censored_without_commit_count == 1U &&
+              attempt.committed_events.empty() &&
+              attempt.committed_extra_shell_diagnostics.empty() &&
+              attempt.audit.no_commit_performed_on_censure,
+          "deadline: the tile is censored, flagged and counted as an "
+          "operational stop, with nothing committed");
+      censored_seen = true;
+      break;
+    }
+    check(
+        attempt.status == BridgeStatus::transaction_committed &&
+            attempt.expansion_transition &&
+            !attempt.operational_deadline_censure,
+        "deadline: only device-free expansion transitions commit under an "
+        "elapsed guard");
+    for (auto& event : attempt.committed_events) {
+      events.push_back(std::move(event));
+    }
+    for (auto& diagnostic : attempt.committed_extra_shell_diagnostics) {
+      diagnostics.push_back(std::move(diagnostic));
+    }
+  }
+  check(
+      censored_seen,
+      "deadline: an elapsed guard censors the first tile transaction");
+  check(
+      bridge.trusted_checkpoint() == checkpoint_before_censure,
+      "deadline: the anchored checkpoint Q_j is retained unchanged");
+  check(
+      !bridge.poisoned() && bridge.frontier_context_rebind_required(),
+      "deadline: the bridge survives and demands a fresh engine rebind");
+
+  reset_fake_gpu_higher_support_device_tiled_frontier();
+  auto retry_lease = traversal_lease(cloud);
+  bind_fake_higher_support_device_tiled_geometry(index, cloud);
+  bridge.rebind_frontier_context(std::move(retry_lease));
+  const BridgeRun resumed =
+      run_bridge_to_terminal(bridge, "deadline-retry");
+  check(resumed.terminal, "deadline-retry: the resumed session terminates");
+  for (const auto& event : resumed.events) {
+    events.push_back(event);
+  }
+  for (const auto& diagnostic : resumed.diagnostics) {
+    diagnostics.push_back(diagnostic);
+  }
+  check(
+      events == reference.events && diagnostics == reference.diagnostics,
+      "deadline-retry: the interrupted and reference sessions commit "
+      "identical transition records");
+
+  // An unreachable guard is invisible.
+  reset_fake_gpu_higher_support_device_tiled_frontier();
+  auto distant_lease = traversal_lease(cloud);
+  bind_fake_higher_support_device_tiled_geometry(index, cloud);
+  HigherSupportDeviceTiledSessionBridge distant_bridge{
+      authority, std::move(distant_lease), bridge_config()};
+  morsehgp3d::gpu::HigherSupportDeviceTiledSessionBridgeOperationalGuard
+      distant;
+  distant.deadline =
+      std::chrono::steady_clock::now() + std::chrono::hours{24};
+  BridgeRun unreachable;
+  for (std::size_t iteration = 0U; iteration < 10'000U; ++iteration) {
+    auto advance = distant_bridge.advance_one_tile_transaction(distant);
+    if (advance.status == BridgeStatus::session_terminal) {
+      unreachable.audit = advance.audit;
+      unreachable.terminal = true;
+      break;
+    }
+    check(
+        advance.status == BridgeStatus::transaction_committed,
+        "deadline-unreachable: every transaction commits");
+    if (advance.status != BridgeStatus::transaction_committed) {
+      break;
+    }
+    for (auto& event : advance.committed_events) {
+      unreachable.events.push_back(std::move(event));
+    }
+    for (auto& diagnostic : advance.committed_extra_shell_diagnostics) {
+      unreachable.diagnostics.push_back(std::move(diagnostic));
+    }
+  }
+  check(
+      unreachable.terminal &&
+          unreachable.events == reference.events &&
+          unreachable.diagnostics == reference.diagnostics &&
+          unreachable.audit.censored_by_operational_deadline_count == 0U,
+      "deadline-unreachable: an unreachable guard reproduces the "
+      "unguarded session exactly");
+  reset_fake_gpu_higher_support_device_tiled_frontier();
+}
+
+// ---------------------------------------------------------------------------
 // 4. Terminal idempotence.
 // ---------------------------------------------------------------------------
 
@@ -1130,6 +1283,7 @@ int main() {
     test_bridge_differential_matches_exact_stream();
     test_bridge_rejects_invalid_configurations();
     test_bridge_censure_never_commits_and_retry_reproduces();
+    test_bridge_operational_deadline_censures_inside_the_tile();
     test_bridge_terminal_is_idempotent();
     test_hartigan_triangle_fixture_through_bridge();
     test_tetrahedron_face_filter_fixture_through_bridge();
