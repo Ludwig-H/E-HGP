@@ -74,7 +74,27 @@ struct Options {
   std::string higher_verification_basis{"fresh_cpu_replay"};
   std::size_t higher_tile_target{runner_default_higher_tile_target};
   bool point_count_supplied{false};
+  // SPECIFICATION_MORSEHGP3D.md 1.1: the exact industrial version carries no
+  // configured budget at all.  `bounded` keeps the fail-fast diagnostic caps
+  // above; `unbudgeted_industrial` replaces every one of the six axes with
+  // the representational ceiling and is the ONLY profile a product
+  // measurement may be taken on.
+  std::string budget_profile{"bounded"};
+  bool support_work_budget_supplied{false};
+  bool support_record_budget_supplied{false};
+  bool higher_chunk_limit_supplied{false};
+  bool downstream_record_budget_supplied{false};
+  bool descent_work_budget_supplied{false};
+  bool chunk_byte_budget_supplied{false};
 };
+
+[[nodiscard]] bool unbudgeted_industrial(const Options& options) noexcept {
+  return options.budget_profile == "unbudgeted_industrial";
+}
+
+[[nodiscard]] constexpr std::size_t representational_ceiling() noexcept {
+  return std::numeric_limits<std::size_t>::max();
+}
 
 struct Timings {
   double generation_ms{};
@@ -584,6 +604,9 @@ void print_usage(std::ostream& output) {
          " (tile_certified requires the device backend)\n"
       << "  --higher-tile-target N (frontier entries pre-expanded before a"
          " device tile; 1 <= N <= 1024)\n"
+      << "  --budget-profile bounded|unbudgeted_industrial (unbudgeted "
+         "rejects every explicit --*-budget option and is the only profile "
+         "a product measurement may be taken on)\n"
       << "Default caps are fail-fast diagnostics, not a 50k "
          "qualification envelope.\n";
 }
@@ -611,16 +634,24 @@ void parse_options(int argc, char** argv, Options& options) {
       options.maximum_order = parse_size(value, option);
     } else if (option == "--support-work-budget") {
       options.support_work_budget = parse_size(value, option);
+      options.support_work_budget_supplied = true;
     } else if (option == "--support-record-budget") {
       options.support_record_budget = parse_size(value, option);
+      options.support_record_budget_supplied = true;
     } else if (option == "--higher-chunk-limit") {
       options.higher_chunk_limit = parse_size(value, option);
+      options.higher_chunk_limit_supplied = true;
     } else if (option == "--downstream-record-budget") {
       options.downstream_record_budget = parse_size(value, option);
+      options.downstream_record_budget_supplied = true;
     } else if (option == "--descent-work-budget") {
       options.descent_work_budget = parse_size(value, option);
+      options.descent_work_budget_supplied = true;
     } else if (option == "--chunk-byte-budget") {
       options.chunk_byte_budget = parse_u64(value, option);
+      options.chunk_byte_budget_supplied = true;
+    } else if (option == "--budget-profile") {
+      options.budget_profile = value;
     } else if (option == "--archive-directory") {
       options.archive_directory = value;
     } else if (option == "--higher-backend") {
@@ -703,6 +734,36 @@ void parse_options(int argc, char** argv, Options& options) {
           higher_support_maximum_requested_order) {
     throw std::invalid_argument(
         "--maximum-order must be in [1, 10]");
+  }
+  if (options.budget_profile != "bounded" &&
+      options.budget_profile != "unbudgeted_industrial") {
+    throw std::invalid_argument(
+        "--budget-profile must be bounded or unbudgeted_industrial");
+  }
+  if (unbudgeted_industrial(options)) {
+    // No half-uncapping.  A run that carried one explicit cap while
+    // declaring the unbudgeted profile could not honestly claim that no
+    // configured budget bounded it, so the combination is a caller error.
+    if (options.support_work_budget_supplied ||
+        options.support_record_budget_supplied ||
+        options.higher_chunk_limit_supplied ||
+        options.downstream_record_budget_supplied ||
+        options.descent_work_budget_supplied ||
+        options.chunk_byte_budget_supplied) {
+      throw std::invalid_argument(
+          "--budget-profile unbudgeted_industrial rejects every explicit "
+          "budget option; the exact industrial version carries none");
+    }
+    // The six axes become the representational ceiling.  Every downstream
+    // capacity is a copy, a minimum or a small-factor product of these, so
+    // the three products that would wrap are guarded at their factory.
+    options.support_work_budget = representational_ceiling();
+    options.support_record_budget = representational_ceiling();
+    options.higher_chunk_limit = representational_ceiling();
+    options.downstream_record_budget = representational_ceiling();
+    options.descent_work_budget = representational_ceiling();
+    options.chunk_byte_budget =
+        std::numeric_limits<std::uint64_t>::max();
   }
   if (options.support_work_budget == 0U ||
       options.support_record_budget == 0U ||
@@ -854,6 +915,9 @@ empty_proposal_transcript(
 
 [[nodiscard]] std::size_t make_support_frontier_capacity(
     const Options& options) {
+  if (unbudgeted_industrial(options)) {
+    return representational_ceiling();
+  }
   return checked_add(
       checked_multiply(
           8U,
@@ -865,6 +929,9 @@ empty_proposal_transcript(
 
 [[nodiscard]] std::size_t make_higher_point_reference_capacity(
     const Options& options) {
+  if (unbudgeted_industrial(options)) {
+    return representational_ceiling();
+  }
   return checked_multiply(
       options.support_record_budget,
       checked_add(
@@ -889,6 +956,9 @@ make_sparse_pair_schedule_config() {
 
 [[nodiscard]] std::size_t make_sparse_pair_point_reference_capacity(
     const Options& options) {
+  if (unbudgeted_industrial(options)) {
+    return representational_ceiling();
+  }
   return checked_multiply(
       options.support_record_budget,
       checked_add(
@@ -948,7 +1018,8 @@ make_sparse_pair_total_capacity(const Options& options) {
 
 [[nodiscard]] ExactHigherSupportStreamBudget make_higher_budget(
     const Options& options) {
-  if (complete_resident_diagnostic(options)) {
+  if (complete_resident_diagnostic(options) ||
+      unbudgeted_industrial(options)) {
     // R2-e.  This mode is the one that must run without artificial caps,
     // and it already disables them on the pair axes -- but the higher
     // budget still derived every axis from --support-work-budget, and two
@@ -2738,7 +2809,40 @@ void emit_report(const Report& report) {
       << ",\"descent_work\":"
       << report.options.descent_work_budget
       << ",\"chunk_bytes\":"
-      << report.options.chunk_byte_budget << "},\n"
+      << report.options.chunk_byte_budget
+      // SPECIFICATION_MORSEHGP3D.md 1.1.  `profile` is the requested
+      // selector, but `all_axes_at_representational_ceiling` is recomputed
+      // from the budgets actually INSTALLED above, so a run can never
+      // declare a weaker bound than the one it ran under -- nor a stronger
+      // one.  `sealed_structural_bounds` names what still bounds the run
+      // although it is not a budget: an unenumerated structural ceiling
+      // would make the unbudgeted claim false.
+      << ",\"profile\":\"" << report.options.budget_profile
+      << "\",\"all_axes_at_representational_ceiling\":"
+      << boolean(
+             report.options.support_work_budget ==
+                 std::numeric_limits<std::size_t>::max() &&
+             report.options.support_record_budget ==
+                 std::numeric_limits<std::size_t>::max() &&
+             report.options.higher_chunk_limit ==
+                 std::numeric_limits<std::size_t>::max() &&
+             report.options.downstream_record_budget ==
+                 std::numeric_limits<std::size_t>::max() &&
+             report.options.descent_work_budget ==
+                 std::numeric_limits<std::size_t>::max() &&
+             report.options.chunk_byte_budget ==
+                 std::numeric_limits<std::uint64_t>::max())
+      << ",\"no_configured_budget_stop\":"
+      << boolean(!report.budget_exhausted)
+      << ",\"sealed_structural_bounds\":{"
+      << "\"facet_descent_closure_maximum_nodes\":"
+      << direct_sparse_facet_descent_closure_maximum_node_count
+      << ",\"higher_support_maximum_requested_order\":"
+      << higher_support_maximum_requested_order
+      << ",\"interactive_resident_maximum_point_count\":"
+      << direct_morse_interactive_resident_maximum_point_count
+      << ",\"device_tile_slot_capacity\":"
+      << runner_maximum_higher_tile_target << "}},\n"
       << "  \"timings_ms\":{\"generation\":" << std::fixed
       << std::setprecision(3) << report.timings.generation_ms
       << ",\"canonicalization\":"

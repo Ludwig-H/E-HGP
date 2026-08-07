@@ -183,6 +183,8 @@ Les trois familles à 50 000 points sont `affine_uniform_binary64`, `jittered_dy
 
 Le seuil de 1 s est une **porte de progression secondaire**, pas un résultat acquis. Le plan de test conserve un objectif produit primaire de p95 inférieur à 100 ms, lui aussi non démontré. Un échec à P0 interdit P1 ; un échec à P1 interdit P2 ; un échec à P2 interdit P3.
 
+**Le binaire mesuré est le binaire sans budget (directive normative du 7 août 2026, `SPECIFICATION_MORSEHGP3D.md` §1.1).** Les quatre portes P0 à P3 s'exécutent sur la version industrielle exacte, dont aucun axe de budget n'est configuré. Une exécution qui porte un plafond réglable, **même non atteint**, est inadmissible comme résultat de campagne : elle ne prouve pas que ce plafond n'aurait pas mordu sur un autre nuage de la même famille. Le reçu doit publier, dérivé de ce qui a réellement été installé et jamais de ce qui a été demandé, que tous les axes valent le plafond représentationnel, qu'aucun arrêt n'a été causé par un budget, et l'inventaire des bornes structurelles scellées encore en vigueur sur le chemin parcouru. Un `budget_exhausted` dans ce profil est un défaut, pas une observation censurée recevable.
+
 ### Frontière du chronométrage
 
 Le champ de référence est `timings_ns.warm_e2e` :

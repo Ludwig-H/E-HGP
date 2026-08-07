@@ -341,6 +341,29 @@ class NanosecondClockReader {
   return left * right;
 }
 
+// Saturating product, admissible for an UPPER BOUND and nowhere else.
+//
+// The bounds below are used exclusively as `observed <= queries * cap`.  When
+// the true product exceeds SIZE_MAX the comparison is vacuously true, because
+// `observed` is itself a std::size_t and therefore at most SIZE_MAX, which is
+// strictly below the true product.  Replacing the unrepresentable bound by
+// SIZE_MAX is thus EXACTLY equivalent to the arithmetic it stands for -- it
+// weakens nothing.  Failing the batch instead, as the checked product did,
+// conflated "this bound is too large to write down" with "the audit exceeded
+// its bound", which is how a per-query cap at the representational ceiling
+// -- the exact industrial version, SPECIFICATION_MORSEHGP3D.md 1.1 -- made
+// the reducer reject a perfectly valid batch.  Never use this for a product
+// compared by equality.
+[[nodiscard]] std::size_t saturating_bound_product(
+    std::size_t queries,
+    std::size_t cap_per_query) noexcept {
+  if (queries != 0U &&
+      cap_per_query > std::numeric_limits<std::size_t>::max() / queries) {
+    return std::numeric_limits<std::size_t>::max();
+  }
+  return queries * cap_per_query;
+}
+
 [[nodiscard]] std::optional<std::uint64_t> checked_add_duration(
     std::uint64_t left,
     std::uint64_t right) noexcept {
@@ -442,20 +465,23 @@ class NanosecondClockReader {
           delta.source_facet_cardinality);
   const auto& top_k_budget =
       delta.requested_closure_budget.step_budget.top_k_query;
-  const std::optional<std::size_t> maximum_node_visit_count =
-      checked_multiply(
+  // Saturating, not checked: these four are upper bounds only, and their
+  // operand is a caller-configured per-query cap that the unbudgeted
+  // industrial profile legitimately sets to the representational ceiling.
+  const std::size_t maximum_node_visit_count =
+      saturating_bound_product(
           audit.top_k_query_count,
           top_k_budget.maximum_node_visit_count);
-  const std::optional<std::size_t>
-      maximum_internal_node_expansion_count = checked_multiply(
+  const std::size_t maximum_internal_node_expansion_count =
+      saturating_bound_product(
           audit.top_k_query_count,
           top_k_budget.maximum_internal_node_expansion_count);
-  const std::optional<std::size_t>
-      maximum_exact_aabb_bound_evaluation_count = checked_multiply(
+  const std::size_t maximum_exact_aabb_bound_evaluation_count =
+      saturating_bound_product(
           audit.top_k_query_count,
           top_k_budget.maximum_exact_aabb_bound_evaluation_count);
-  const std::optional<std::size_t>
-      maximum_exact_point_distance_evaluation_count = checked_multiply(
+  const std::size_t maximum_exact_point_distance_evaluation_count =
+      saturating_bound_product(
           audit.top_k_query_count,
           top_k_budget.maximum_exact_point_distance_evaluation_count);
   if (!classified_query_count.has_value() ||
@@ -464,10 +490,6 @@ class NanosecondClockReader {
       !terminal_query_count.has_value() ||
       !expected_baseline_reference_count.has_value() ||
       !maximum_transcript_candidate_count.has_value() ||
-      !maximum_node_visit_count.has_value() ||
-      !maximum_internal_node_expansion_count.has_value() ||
-      !maximum_exact_aabb_bound_evaluation_count.has_value() ||
-      !maximum_exact_point_distance_evaluation_count.has_value() ||
       audit.deduplicated_point_reference_count >
           *combined_pool_reference_count) {
     return false;
@@ -518,13 +540,13 @@ class NanosecondClockReader {
              audit.union_point_reference_count &&
          audit.exact_point_distance_evaluation_count >=
              audit.exact_seed_distance_evaluation_count &&
-         audit.node_visit_count <= *maximum_node_visit_count &&
+         audit.node_visit_count <= maximum_node_visit_count &&
          audit.internal_node_expansion_count <=
-             *maximum_internal_node_expansion_count &&
+             maximum_internal_node_expansion_count &&
          audit.exact_aabb_bound_evaluation_count <=
-             *maximum_exact_aabb_bound_evaluation_count &&
+             maximum_exact_aabb_bound_evaluation_count &&
          audit.exact_point_distance_evaluation_count <=
-             *maximum_exact_point_distance_evaluation_count;
+             maximum_exact_point_distance_evaluation_count;
 }
 
 [[nodiscard]] bool key_less(

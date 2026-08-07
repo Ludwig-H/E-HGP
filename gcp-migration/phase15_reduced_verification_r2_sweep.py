@@ -158,9 +158,15 @@ def run_one_cell(
         str(maximum_order),
         "--family",
         family,
-        # The only mode that disables the artificial caps on both routes.
         "--mode",
         "complete_resident_diagnostic",
+        # SPECIFICATION_MORSEHGP3D.md 1.1: the exact industrial version
+        # carries no configured budget, and no other profile may be
+        # measured.  Note that this harness passes NO --*-budget option --
+        # the runner rejects the combination, and rightly so: a cap that is
+        # merely large is still a cap.
+        "--budget-profile",
+        "unbudgeted_industrial",
         "--operational-deadline-ms",
         str(cell_deadline_ms),
         "--higher-backend",

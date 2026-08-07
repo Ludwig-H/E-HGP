@@ -29,6 +29,20 @@ Chaque sous-arbre de candidats omis doit porter un certificat d'exclusion rejoua
 
 Une seconde représentation combinatoire est désormais démontrée sur le papier : la [tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) engendre exactement le complexe de Čech, puis les composantes de Gamma, au moyen de simplexes implicites et d'une forêt d'intersections seuillée. Elle constitue une voie candidate indépendante, non un backend ni une base de preuve du contrat v2. Son prototype, sa persistance et son éventuelle migration contractuelle suivent une piste de recherche séparée; la chaîne active ci-dessus et la cible $K_{\max}=10$ restent inchangées.
 
+### 1.1 La version industrielle exacte est sans budget (directive normative du 7 août 2026)
+
+La version industrielle exacte de MorseHGP3D **ne comporte aucune limite de budget configurée**. Aucun plafond réglable — unités de travail, records émis, références `PointId`, chunks, octets de chunk, travail de descente, entrées de frontière — ne peut arrêter un calcul industriel. Le résultat d'une exécution industrielle est l'objet exact complet, ou un échec sur une ressource réelle, jamais un `budgeted` ni un `budget_exhausted`.
+
+Trois notions doivent rester distinctes, et une seule est interdite :
+
+1. **Budget configuré** — un nombre arbitraire fourni à l'exécution, dont l'épuisement censure le calcul et produit un résultat partiel sans assertion d'absence. **Interdit dans la version industrielle.** Il ne survit que dans les modes de diagnostic borné, qui ne sont pas la version industrielle et ne peuvent rien mesurer pour le contrat.
+2. **Borne structurelle scellée** — une constante d'architecture d'un composant, qui plafonne sa capacité indépendamment de toute option. Elle n'est pas un budget, mais elle borne quand même le calcul : toute exécution industrielle doit **énumérer celles qui la concernent** et le cahier des charges doit les lever ou les justifier une à une. Une borne scellée non énumérée rend la revendication « sans budget » fausse.
+3. **Coupe-circuit opérationnel** — délai mural, arrêt invité, `maxRunDuration` GCE. C'est une garde de session, pas un test et pas un budget; il subsiste, et une exécution qu'il interrompt est une observation censurée explicitement déclarée comme telle, jamais un résultat.
+
+La frontière de travail reste un état durable autorisé et reste explicitement dimensionnée en mémoire; ce qui disparaît est le plafond qui l'aurait fait censurer. La seule borne restante d'une exécution industrielle est donc la mémoire réellement disponible, ce qui est cohérent avec §15 : on ne garantit pas simultanément sortie exacte complète, temps quasi linéaire, mémoire bornée et latence sous 100 ms pour tout nuage. Le contrat porte sur le régime volumique sparse, et les tailles intermédiaires doivent être publiées.
+
+**Conséquence de mesure, sans exception** : les objectifs produit — 50 000 points à $K_{\max}=10$, p95 `warm_e2e` sous 100 ms, la seconde n'étant que secondaire, puis les paliers massifs — se mesurent **sur la version sans budget et sur elle seule**. Une mesure obtenue sous un plafond configuré, même non atteint, ne qualifie rien : elle ne prouve pas que le plafond n'aurait pas mordu sur un autre nuage. Une exécution ne peut déclarer le profil sans budget que si elle publie, dérivé de ce qui a réellement été installé et non de ce qui a été demandé, que tous ses axes valent le plafond représentationnel et qu'aucun arrêt n'a été causé par un budget.
+
 ## 2. Entrée et sémantique numérique
 
 L'entrée mathématique initiale est un ensemble fini non vide de points distincts

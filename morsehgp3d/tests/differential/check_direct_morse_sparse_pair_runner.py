@@ -495,7 +495,15 @@ def require_vertical_not_attempted(report: dict[str, object]) -> None:
 
 
 def require_success_projection(
-    report: dict[str, object], *, authority_required: bool = False
+    report: dict[str, object],
+    *,
+    authority_required: bool = False,
+    # The bounded defaults W and R.  Under the unbudgeted industrial profile
+    # every configured axis is the representational ceiling instead, so the
+    # caller passes it: the assertion still checks that the runner installed
+    # the SAME value on every axis, which is its actual purpose.
+    work_axis_budget: int = 20000,
+    output_record_budget: int = 4096,
 ) -> None:
     require(
         report.get("schema") == "morsehgp3d.direct-morse-product-run.v7",
@@ -581,7 +589,7 @@ def require_success_projection(
         "classification_node_visits",
     ):
         require(
-            advance_budget.get(work_axis) == 20000,
+            advance_budget.get(work_axis) == work_axis_budget,
             f"P8l advance axis {work_axis} is not capped by W",
         )
     for work_axis in (
@@ -594,12 +602,17 @@ def require_success_projection(
         "classification_node_visits",
     ):
         require(
-            total_capacity.get(work_axis) == 20000,
+            total_capacity.get(work_axis) == work_axis_budget,
             f"P8l total axis {work_axis} is not capped by W",
         )
     require(
-        total_capacity.get("output_records") == 4096
-        and total_capacity.get("output_point_id_references") == 24576,
+        total_capacity.get("output_records") == output_record_budget
+        and total_capacity.get("output_point_id_references")
+        == (
+            output_record_budget
+            if output_record_budget == 2**64 - 1
+            else output_record_budget * 6
+        ),
         "P8l total output capacity is not (R,R*(K+2))",
     )
     require(audit.get("directed_pair_universe") == 25, "wrong directed universe")
@@ -2456,6 +2469,121 @@ def main() -> int:
 
     success = run_case(binary, ("--point-count", "5", "--K", "4"), 0)
     require_success_projection(success)
+
+    # SPECIFICATION_MORSEHGP3D.md 1.1 -- the exact industrial version carries
+    # no configured budget, and it is the only profile a product measurement
+    # may be taken on.  The certificate is an identity: removing every cap
+    # changes the budget echo and the durations, and NOTHING else.  If
+    # unbudgeting moved a single scientific field, either the caps had been
+    # silently shaping the result or the profile is not doing what it says.
+    unbudgeted = run_case(
+        binary,
+        (
+            "--point-count",
+            "5",
+            "--K",
+            "4",
+            "--budget-profile",
+            "unbudgeted_industrial",
+        ),
+        0,
+    )
+    ceiling = 2**64 - 1
+    require_success_projection(
+        unbudgeted,
+        work_axis_budget=ceiling,
+        output_record_budget=ceiling,
+    )
+    budgets = unbudgeted.get("budgets")
+    require(
+        isinstance(budgets, dict)
+        and budgets.get("profile") == "unbudgeted_industrial"
+        # Recomputed by the runner from what it INSTALLED, never from the
+        # requested selector.
+        and budgets.get("all_axes_at_representational_ceiling") is True
+        and budgets.get("no_configured_budget_stop") is True
+        and all(
+            budgets.get(axis) == ceiling
+            for axis in (
+                "support_work",
+                "support_records",
+                "higher_chunks",
+                "effective_higher_chunks",
+                "downstream_records",
+                "descent_work",
+                "chunk_bytes",
+            )
+        ),
+        "the unbudgeted run did not install the representational ceiling",
+    )
+    sealed = budgets.get("sealed_structural_bounds")
+    require(
+        isinstance(sealed, dict)
+        and sealed
+        and all(
+            isinstance(value, int) and value > 0 for value in sealed.values()
+        ),
+        "an unbudgeted run must enumerate the sealed structural bounds that "
+        "still bound it; an unenumerated one makes the claim false",
+    )
+    bounded_budgets = success.get("budgets")
+    require(
+        isinstance(bounded_budgets, dict)
+        and bounded_budgets.get("profile") == "bounded"
+        and bounded_budgets.get("all_axes_at_representational_ceiling")
+        is False
+        and bounded_budgets.get("sealed_structural_bounds") == sealed,
+        "the bounded default drifted, or the sealed bounds are not a "
+        "property of the build",
+    )
+    # Budget echoes and durations are allowed to differ; nothing else is.
+    volatile_keys = {"budgets", "timings_ms", "completion_latency_ms"}
+    budget_echo_keys = {"advance_budget", "total_capacity"}
+    for key in sorted(set(success) | set(unbudgeted)):
+        if key in volatile_keys:
+            continue
+        left = success.get(key)
+        right = unbudgeted.get(key)
+        if key == "pair_support":
+            require(
+                isinstance(left, dict) and isinstance(right, dict),
+                "pair_support must be an object in both profiles",
+            )
+            # The per-advance record and point-reference caps are structural
+            # constants of the session (one record per advance, K+2
+            # references), not configured budgets: they must NOT move.
+            for structural in ("emitted_records", "emitted_point_id_references"):
+                require(
+                    left["advance_budget"][structural]
+                    == right["advance_budget"][structural],
+                    f"unbudgeting moved the structural per-advance {structural}",
+                )
+            left = {k: v for k, v in left.items() if k not in budget_echo_keys}
+            right = {k: v for k, v in right.items() if k not in budget_echo_keys}
+        require(
+            left == right,
+            f"unbudgeting changed the scientific projection {key!r}",
+        )
+    # Two typed rejections: an unknown profile, and any half-uncapping.
+    run_case(
+        binary,
+        ("--point-count", "5", "--K", "4", "--budget-profile", "wide_open"),
+        4,
+    )
+    run_case(
+        binary,
+        (
+            "--point-count",
+            "5",
+            "--K",
+            "4",
+            "--budget-profile",
+            "unbudgeted_industrial",
+            "--descent-work-budget",
+            "65536",
+        ),
+        4,
+    )
     with tempfile.TemporaryDirectory(prefix="mh3d-durable-") as archive_dir:
         durable = run_case(
             binary,
