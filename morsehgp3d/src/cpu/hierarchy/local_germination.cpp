@@ -145,12 +145,27 @@ struct DiscCover {
 
 std::size_t sealed_tangent_covering_radius_millidegrees(
     std::size_t direction_count) noexcept {
-  // arccos(1/sqrt(3)) = 54.735610317... degrees, rounded UP so the sealed value
-  // is never below the truth.
-  if (direction_count == 6U) {
-    return 54736U;
+  // Exact covering radii of the cube's direction sets, each rounded UP so the
+  // sealed value is never below the truth.  Their derivation is recorded in
+  // docs/math/OPTIMISATIONS_JUNG_SUPPORTS_3_4.md section 8.5: the sets are
+  // invariant under the full octahedral group, so it suffices to minimise the
+  // largest cosine on the fundamental domain x >= y >= z >= 0, where it is the
+  // maximum of three linear forms, and the minimum is the interior
+  // equioscillation point -- the three domain boundaries all give strictly
+  // larger values.
+  switch (direction_count) {
+    case 6U:
+      // arccos(1/sqrt(3)) = 54.735610 degrees.
+      return 54736U;
+    case 14U:
+      // arccos(1/sqrt(5 - 2 sqrt(3))) = 36.206023 degrees.
+      return 36207U;
+    case 26U:
+      // arccos(1/sqrt(9 - 2 sqrt(2) - 2 sqrt(6))) = 27.569276 degrees.
+      return 27570U;
+    default:
+      return 0U;
   }
-  return 0U;
 }
 
 bool local_germination_certificate_admissible(

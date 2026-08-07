@@ -22,6 +22,8 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <numbers>
 #include <cstddef>
 #include <exception>
 #include <iostream>
@@ -361,8 +363,36 @@ void check_certificate_falsification() {
       sealed_tangent_covering_radius_millidegrees(6U) == 54736U,
       "the sealed covering radius of the six axes drifted");
   require(
+      sealed_tangent_covering_radius_millidegrees(14U) == 36207U,
+      "the sealed covering radius of the fourteen directions drifted");
+  require(
+      sealed_tangent_covering_radius_millidegrees(26U) == 27570U,
+      "the sealed covering radius of the twenty-six directions drifted");
+  require(
       sealed_tangent_covering_radius_millidegrees(48U) == 0U,
       "a covering radius was sealed without a proof");
+
+  // The sealed values must round the exact radii UP: a sealed value below the
+  // truth would admit an understated covering and lose a direction.
+  const double exact_6 =
+      std::acos(1.0 / std::sqrt(3.0)) * 180.0 / std::numbers::pi;
+  const double exact_14 =
+      std::acos(1.0 / std::sqrt(5.0 - 2.0 * std::sqrt(3.0))) * 180.0 /
+      std::numbers::pi;
+  const double exact_26 =
+      std::acos(1.0 / std::sqrt(9.0 - 2.0 * std::sqrt(2.0) -
+                                2.0 * std::sqrt(6.0))) *
+      180.0 / std::numbers::pi;
+  require(
+      static_cast<double>(sealed_tangent_covering_radius_millidegrees(6U)) >=
+              exact_6 * 1000.0 &&
+          static_cast<double>(
+              sealed_tangent_covering_radius_millidegrees(14U)) >=
+              exact_14 * 1000.0 &&
+          static_cast<double>(
+              sealed_tangent_covering_radius_millidegrees(26U)) >=
+              exact_26 * 1000.0,
+      "a sealed covering radius rounds below its exact value");
 
   LocalGerminationCertificate proved_axes = fresh();
   proved_axes.tangent_direction_count = 6U;
@@ -383,6 +413,14 @@ void check_certificate_falsification() {
 
   // A finer set may be used -- it is measurably far better -- but it may not
   // claim a proof that is not on record.
+  LocalGerminationCertificate proved_26 = fresh();
+  proved_26.tangent_direction_count = 26U;
+  proved_26.tangent_covering_radius_millidegrees = 27570U;
+  proved_26.tangent_covering_radius_proved = true;
+  require(
+      local_germination_certificate_admissible(proved_26, reason),
+      "the proved twenty-six-direction declaration was refused");
+
   LocalGerminationCertificate estimated = fresh();
   estimated.tangent_direction_count = 48U;
   estimated.tangent_covering_radius_millidegrees = 24000U;

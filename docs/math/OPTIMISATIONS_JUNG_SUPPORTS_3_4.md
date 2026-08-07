@@ -471,3 +471,51 @@ vérificateur refuse par nom un rayon **inférieur au scellé**, une preuve
 **revendiquée sans scellé**, et une preuve **sans jeu de directions**. Un jeu
 fin honnêtement déclaré comme estimé est admis — c'est ainsi qu'on avance en
 attendant la preuve — mais il ne peut pas se dire prouvé.
+
+### 8.5 Les rayons de recouvrement exacts des jeux du cube
+
+L'obligation du §8.4 est levée pour trois jeux, et le calcul est fermé.
+
+**Réduction au domaine fondamental.** Les trois jeux — 6 normales de face,
+14 = 6 + 8 normales de sommet, 26 = 6 + 12 + 8 — sont invariants sous le groupe
+octaédral complet. Il suffit donc de borner sur le domaine fondamental
+$x\ge y\ge z\ge0$. Sur ce domaine, le cosinus maximal à chaque type est atteint
+tous signes positifs et composantes décroissantes :
+
+$$\text{face}\to x,\qquad \text{arête}\to\frac{x+y}{\sqrt2},\qquad
+\text{sommet}\to\frac{x+y+z}{\sqrt3}.$$
+
+Le rayon de recouvrement est $\arccos$ du **minimum du maximum** de ces formes.
+
+**Le minimum est le point d'équioscillation intérieur.** En un minimiseur où une
+forme dépasse strictement les autres, on peut se déplacer sur la sphère en la
+diminuant ; le minimum est donc soit à l'équioscillation, soit au bord. Les trois
+bords donnent des valeurs strictement plus grandes (jeu 26) :
+
+| bord | valeur |
+| --- | ---: |
+| $z=0$ | $0{,}923880$ |
+| $y=z$ | $0{,}888074$ |
+| $x=y$ | $0{,}953021$ |
+| **intérieur** | $\mathbf{0{,}886452}$ |
+
+**Les trois valeurs fermées.**
+
+| jeu | $\cos\theta$ | $\theta$ | $1-\sin\theta$ | scellé (millidegrés) |
+| ---: | --- | ---: | ---: | ---: |
+| 6 | $1/\sqrt3$ | $54{,}735610^\circ$ | $0{,}183503$ | 54 736 |
+| 14 | $1/\sqrt{5-2\sqrt3}$ | $36{,}206023^\circ$ | $0{,}409310$ | 36 207 |
+| **26** | $\mathbf{1/\sqrt{9-2\sqrt2-2\sqrt6}}$ | $\mathbf{27{,}569276^\circ}$ | $\mathbf{0{,}537179}$ | **27 570** |
+
+Pour le jeu 26, l'équioscillation donne $x=t$, $y=(\sqrt2-1)t$,
+$z=(\sqrt3-\sqrt2)t$ et la normalisation $t^2\,(9-2\sqrt2-2\sqrt6)=1$. Une
+recherche brute sur quatre millions de directions du domaine confirme les trois
+valeurs à $2\cdot10^{-5}$ près — et par en dessous, comme il se doit puisqu'un
+échantillon ne tombe pas exactement dans le trou profond.
+
+**Ce que cela débloque.** Le facteur de la boule-test décalée passe de $0{,}1835$
+— le seul jeu prouvé jusqu'ici — à $\mathbf{0{,}5372}$, à comparer au $0{,}6001$
+du jeu à 48 directions qui, lui, reste estimé. Le voisinage certifié mesuré à
+50 000 points tombe de **10 292 à environ 760**, soit un facteur **treize**, et il
+est désormais **prouvé**. Les valeurs scellées arrondissent vers le haut, de sorte
+qu'aucune ne peut être inférieure à la vérité.
