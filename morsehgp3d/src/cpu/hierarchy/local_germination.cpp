@@ -581,4 +581,74 @@ LocalGerminationCertificate generate_local_germination_candidates(
   return certificate;
 }
 
+ExactLocalGerminationChain::ExactLocalGerminationChain(
+    LocalGerminationCertificate genesis)
+    : trusted_(std::move(genesis)) {
+  std::string reason;
+  genesis_admissible_ =
+      local_germination_certificate_admissible(trusted_, reason);
+}
+
+bool ExactLocalGerminationChain::commit(
+    const LocalGerminationCertificate& successor,
+    const LocalGerminationProductionAudit& audit,
+    std::vector<ExactHigherSupportEvent> events,
+    std::vector<ExactHigherSupportExtraShellDiagnostic> diagnostics,
+    std::string& reason) {
+  reason.clear();
+  if (sealed_) {
+    reason = "the_chain_is_sealed";
+    return false;
+  }
+  if (!genesis_admissible_) {
+    reason = "the_genesis_certificate_was_not_admissible";
+    return false;
+  }
+  // Everything is verified before anything is mutated: the three contracts, in
+  // the order in which they can fail cheapest first.
+  if (!local_germination_certificate_admissible(successor, reason)) {
+    return false;
+  }
+  if (!local_germination_production_identity_holds(successor, audit, reason)) {
+    return false;
+  }
+  if (!local_germination_resume_induction_holds(trusted_, successor, reason)) {
+    return false;
+  }
+  events_.insert(
+      events_.end(),
+      std::make_move_iterator(events.begin()),
+      std::make_move_iterator(events.end()));
+  diagnostics_.insert(
+      diagnostics_.end(),
+      std::make_move_iterator(diagnostics.begin()),
+      std::make_move_iterator(diagnostics.end()));
+  trusted_ = successor;
+  ++committed_batch_count_;
+  return true;
+}
+
+ExactLocalGerminationChain::Seal ExactLocalGerminationChain::seal() {
+  Seal seal;
+  if (!genesis_admissible_) {
+    return seal;
+  }
+  std::string reason;
+  seal.completeness_certificate_verified =
+      local_germination_certificate_admissible(trusted_, reason);
+  if (!seal.completeness_certificate_verified) {
+    return seal;
+  }
+  seal.sealed = true;
+  seal.certificate = trusted_;
+  seal.committed_batch_count = committed_batch_count_;
+  seal.event_count = events_.size();
+  seal.diagnostic_count = diagnostics_.size();
+  seal.mass_partition_identity_available =
+      verification_basis_guarantees(seal.basis)
+          .mass_partition_identity_available;
+  sealed_ = true;
+  return seal;
+}
+
 }  // namespace morsehgp3d::hierarchy

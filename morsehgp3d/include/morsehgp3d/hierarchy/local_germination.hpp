@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
@@ -188,5 +189,71 @@ using LocalGerminationSink =
     std::size_t support_size,
     const LocalGerminationConfig& config,
     const LocalGerminationSink& sink);
+
+// The anchored chain of the germination basis.
+//
+// It is a SEPARATE object rather than a new mode of the frontier-based session,
+// and deliberately so: that session's whole state is a frontier and a mass
+// partition, neither of which exists here, and bending it would put the two
+// already certified bases at risk for no gain.  What is kept is the discipline,
+// not the state -- one trusted certificate, a deterministic successor, and a
+// refusal that leaves the trusted state exactly as it was.
+//
+// A commit is admitted only when all three contracts hold at once: the
+// successor certificate is admissible, its production identity holds against
+// the consumer's own tally, and it extends the trusted certificate rather than
+// revising it.  Everything is checked BEFORE anything is mutated, so a refusal
+// cannot leave a half-applied state and the chain never needs poisoning.
+class ExactLocalGerminationChain {
+ public:
+  struct Seal {
+    bool sealed{};
+    ExactHigherSupportVerificationBasis basis{
+        ExactHigherSupportVerificationBasis::
+            local_germination_completeness_with_exact_terminal_classification};
+    LocalGerminationCertificate certificate;
+    std::size_t committed_batch_count{};
+    std::size_t event_count{};
+    std::size_t diagnostic_count{};
+    // Restated on the seal so a consumer never has to infer it: this basis
+    // provides no mass partition, and its completeness rests on the declared
+    // constant having been verified admissible.
+    bool mass_partition_identity_available{false};
+    bool completeness_certificate_verified{};
+  };
+
+  explicit ExactLocalGerminationChain(LocalGerminationCertificate genesis);
+
+  // Returns false and leaves the chain untouched when any contract fails;
+  // `reason` then names the contract and its field.
+  [[nodiscard]] bool commit(
+      const LocalGerminationCertificate& successor,
+      const LocalGerminationProductionAudit& audit,
+      std::vector<ExactHigherSupportEvent> events,
+      std::vector<ExactHigherSupportExtraShellDiagnostic> diagnostics,
+      std::string& reason);
+
+  [[nodiscard]] const LocalGerminationCertificate& trusted() const noexcept {
+    return trusted_;
+  }
+  [[nodiscard]] std::size_t committed_batch_count() const noexcept {
+    return committed_batch_count_;
+  }
+  [[nodiscard]] const std::vector<ExactHigherSupportEvent>& events()
+      const noexcept {
+    return events_;
+  }
+  [[nodiscard]] bool sealed() const noexcept { return sealed_; }
+
+  [[nodiscard]] Seal seal();
+
+ private:
+  LocalGerminationCertificate trusted_;
+  std::vector<ExactHigherSupportEvent> events_;
+  std::vector<ExactHigherSupportExtraShellDiagnostic> diagnostics_;
+  std::size_t committed_batch_count_{};
+  bool genesis_admissible_{};
+  bool sealed_{};
+};
 
 }  // namespace morsehgp3d::hierarchy

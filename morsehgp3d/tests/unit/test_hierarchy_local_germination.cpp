@@ -50,7 +50,10 @@ using morsehgp3d::hierarchy::local_germination_certificate_admissible;
 using morsehgp3d::hierarchy::local_germination_production_identity_holds;
 using morsehgp3d::hierarchy::local_germination_resume_induction_holds;
 using morsehgp3d::hierarchy::local_germination_proof_basis;
+using morsehgp3d::hierarchy::ExactHigherSupportEvent;
+using morsehgp3d::hierarchy::ExactHigherSupportExtraShellDiagnostic;
 using morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis;
+using morsehgp3d::hierarchy::ExactLocalGerminationChain;
 using morsehgp3d::hierarchy::canonical_name;
 using morsehgp3d::hierarchy::verification_basis_consumable_by_mass_partition;
 using morsehgp3d::hierarchy::verification_basis_guarantees;
@@ -556,6 +559,114 @@ void check_resume_induction() {
       "a resumption changing its declared guarantees was admitted");
 }
 
+// The chain: the discipline of the anchored session, on a state that has no
+// frontier and no mass.  A refusal must leave the trusted certificate exactly
+// as it was, and the chain must keep working afterwards -- the innocuity the
+// tile-certified path had to prove too.
+void check_germination_chain() {
+  const auto certificate_at = [](std::size_t pairs, std::size_t quadruples,
+                                 std::size_t third_retained) {
+    LocalGerminationCertificate certificate;
+    certificate.proof_basis = std::string{local_germination_proof_basis};
+    certificate.support_size = 4U;
+    certificate.maximum_relevant_closed_rank = 11U;
+    certificate.jung_squared_numerator = 3U;
+    certificate.jung_squared_denominator = 8U;
+    certificate.seed_disc_ring_count = 2U;
+    certificate.segment_position_count = 16U;
+    certificate.certified_margin_exponent = -20;
+    certificate.counters.pairs_examined = pairs;
+    certificate.counters.pairs_retained = pairs / 2U;
+    certificate.counters.third_vertices_examined = third_retained * 2U;
+    certificate.counters.third_vertices_retained = third_retained;
+    certificate.counters.quadruple_candidates = quadruples;
+    certificate.counters.population_queries = pairs * 3U;
+    return certificate;
+  };
+  const auto audit_for = [](std::size_t quadruples, std::size_t accepted) {
+    LocalGerminationProductionAudit audit;
+    audit.observed_quadruple_emissions = quadruples;
+    audit.accepted_supports = accepted;
+    return audit;
+  };
+
+  ExactLocalGerminationChain chain{certificate_at(100U, 200U, 60U)};
+  std::string reason;
+
+  require(
+      chain.commit(certificate_at(200U, 400U, 120U), audit_for(400U, 10U), {},
+                   {}, reason),
+      std::string{"a legitimate first batch was refused on "} + reason);
+  require(chain.committed_batch_count() == 1U, "the first batch did not count");
+
+  // A successor that revises its production downwards must be refused, and the
+  // trusted certificate must not move.
+  const LocalGerminationCertificate before_refusal = chain.trusted();
+  require(
+      !chain.commit(certificate_at(300U, 399U, 130U), audit_for(399U, 10U), {},
+                    {}, reason) &&
+          reason == "quadruple_candidates_went_backwards",
+      "a production revised downwards was committed");
+  require(
+      chain.trusted().counters.quadruple_candidates ==
+          before_refusal.counters.quadruple_candidates,
+      "a refused commit moved the trusted certificate");
+
+  // A successor whose consumer tally disagrees with its counters is refused by
+  // the production identity, not by the induction.
+  require(
+      !chain.commit(certificate_at(300U, 600U, 130U), audit_for(599U, 10U), {},
+                    {}, reason) &&
+          reason == "observed_quadruple_emissions",
+      "a disagreeing tally was committed");
+
+  // A successor under another constant is a different producer.
+  LocalGerminationCertificate reconstant = certificate_at(300U, 600U, 130U);
+  reconstant.jung_squared_numerator = 1U;
+  reconstant.jung_squared_denominator = 2U;
+  require(
+      !chain.commit(reconstant, audit_for(600U, 10U), {}, {}, reason) &&
+          reason == "jung_squared_changed",
+      "a resumption under another constant was committed");
+
+  // Innocuity: after three refusals the chain still commits.
+  require(
+      chain.commit(certificate_at(300U, 600U, 130U), audit_for(600U, 10U), {},
+                   {}, reason),
+      std::string{"the chain stopped working after a refusal: "} + reason);
+  require(chain.committed_batch_count() == 2U, "the second batch did not count");
+
+  const ExactLocalGerminationChain::Seal seal = chain.seal();
+  require(seal.sealed, "a legitimate chain refused to seal");
+  require(
+      seal.basis ==
+          ExactHigherSupportVerificationBasis::
+              local_germination_completeness_with_exact_terminal_classification,
+      "the seal declared the wrong basis");
+  require(
+      seal.completeness_certificate_verified,
+      "the seal did not verify its completeness certificate");
+  // The seal restates what this basis does NOT provide, so no consumer has to
+  // infer it.
+  require(
+      !seal.mass_partition_identity_available &&
+          !verification_basis_consumable_by_mass_partition(seal.basis),
+      "the seal claimed a mass partition it does not have");
+  require(seal.committed_batch_count == 2U, "the seal miscounted its batches");
+
+  // A chain whose genesis is inadmissible commits nothing and seals nothing.
+  LocalGerminationCertificate bad_genesis = certificate_at(10U, 10U, 5U);
+  bad_genesis.jung_squared_numerator = 1U;
+  bad_genesis.jung_squared_denominator = 3U;  // below 3/8 for a tetrahedron
+  ExactLocalGerminationChain refused{bad_genesis};
+  require(
+      !refused.commit(certificate_at(20U, 20U, 10U), audit_for(20U, 1U), {},
+                      {}, reason) &&
+          reason == "the_genesis_certificate_was_not_admissible",
+      "a chain with an inadmissible genesis committed");
+  require(!refused.seal().sealed, "a chain with an inadmissible genesis sealed");
+}
+
 }  // namespace
 
 int main() {
@@ -575,6 +686,7 @@ int main() {
     check_verification_basis_contract();
     check_production_identity_falsification();
     check_resume_induction();
+    check_germination_chain();
   } catch (const std::exception& error) {
     std::cerr << "local germination test threw: " << error.what() << '\n';
     return 1;

@@ -2459,3 +2459,50 @@ Seize suites vertes. Les trois conséquences de contrat nommées le 7 août sont
 encore branchées dans la session ancrée : aucun chemin de commit ne mint la base
 de germination, et tous les consommateurs actuels la refusent par nom. Aucune
 mesure G4, aucun run 50k, aucune porte d'échelle, aucun statut public.
+
+## La chaîne ancrée de la base de germination
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+Les trois contrats existaient ; il leur manquait un objet qui les fasse tenir
+ensemble à chaque commit. `ExactLocalGerminationChain` est cet objet.
+
+**C'est un objet séparé, et délibérément.** La session ancrée existante a pour
+état une frontière et une partition de masse — dont aucune n'existe ici. La
+plier aurait mis en risque les deux bases déjà certifiées pour aucun gain. Ce qui
+est repris est la **discipline**, pas l'état : un certificat de confiance unique,
+un successeur déterministe, et un refus qui laisse l'état de confiance
+exactement où il était.
+
+**Un commit n'est admis que si les trois contrats tiennent en même temps** : le
+certificat successeur est admissible, son identité de production tient contre le
+décompte propre du consommateur, et il **étend** le certificat de confiance au
+lieu de le réviser. Tout est vérifié **avant** toute mutation, donc un refus ne
+peut pas laisser un état à moitié appliqué et la chaîne n'a jamais besoin d'être
+empoisonnée.
+
+**Certificat, quatre propriétés.**
+
+- *Sélectivité par contrat* — une production révisée à la baisse est refusée par
+  l'induction, un décompte de consommateur qui diverge l'est par l'identité de
+  production, et une constante changée en cours de route l'est par l'induction :
+  trois refus, trois noms différents, chacun désignant le contrat qui a mordu.
+- *Immobilité* — après un refus, le certificat de confiance n'a pas bougé d'un
+  compteur.
+- *Innocuité* — après trois refus consécutifs, la chaîne commit encore. C'est la
+  même propriété que le chemin tuile-certifié avait dû démontrer.
+- *Honnêteté du sceau* — le sceau redit ce que cette base **n'offre pas** :
+  `mass_partition_identity_available = false`, et
+  `verification_basis_consumable_by_mass_partition` le refuse. Aucun
+  consommateur n'a à l'inférer.
+
+Et une chaîne dont la **genèse** est inadmissible ne commit rien et ne scelle
+rien : la constante fautive est refusée à l'entrée, pas découverte au sceau.
+
+Seize suites vertes.
+
+**Ce que cela ne dit pas.** La chaîne n'est pas branchée au runner produit :
+aucune option ne la sélectionne, et le générateur qui l'alimenterait parcourt
+encore le nuage au lieu d'interroger le LBVH. Aucune mesure G4, aucun run 50k,
+aucune porte d'échelle, aucun statut public.
