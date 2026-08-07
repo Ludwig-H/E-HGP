@@ -455,7 +455,34 @@ void drain_record_lease(
         prune_count > views.prune_record_stride ||
         terminal_count > views.terminal_record_stride ||
         receipt_count > views.probe_receipt_stride) {
-      fail("a drained slot control escapes its fixed segments");
+      // R2-j: name the offending field and its values.  A single opaque
+      // message here cost a whole diagnostic round trip on G4.
+      std::string detail =
+          "a drained slot control escapes its fixed segments (slot=" +
+          std::to_string(slot);
+      if (control.tile_epoch != lease.audit().tile_epoch) {
+        detail += ", tile_epoch=" + std::to_string(control.tile_epoch) +
+            " expected=" + std::to_string(lease.audit().tile_epoch);
+      }
+      if (control.chunk_sequence != lease.audit().chunk_sequence) {
+        detail +=
+            ", chunk_sequence=" + std::to_string(control.chunk_sequence) +
+            " expected=" + std::to_string(lease.audit().chunk_sequence);
+      }
+      if (prune_count > views.prune_record_stride) {
+        detail += ", prunes=" + std::to_string(prune_count) +
+            " stride=" + std::to_string(views.prune_record_stride);
+      }
+      if (terminal_count > views.terminal_record_stride) {
+        detail += ", terminals=" + std::to_string(terminal_count) +
+            " stride=" + std::to_string(views.terminal_record_stride);
+      }
+      if (receipt_count > views.probe_receipt_stride) {
+        detail += ", receipts=" + std::to_string(receipt_count) +
+            " stride=" + std::to_string(views.probe_receipt_stride);
+      }
+      detail += ")";
+      fail(detail);
     }
     for (std::size_t index = 0U; index < prune_count; ++index) {
       DrainedPrune drained;
