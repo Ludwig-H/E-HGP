@@ -2506,3 +2506,49 @@ Seize suites vertes.
 aucune option ne la sélectionne, et le générateur qui l'alimenterait parcourt
 encore le nuage au lieu d'interroger le LBVH. Aucune mesure G4, aucun run 50k,
 aucune porte d'échelle, aucun statut public.
+
+## Correction : toutes les mesures portaient une restriction non certifiée
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+En préparant le portage du générateur sur l'index, une relecture de mes propres
+harnais a trouvé ceci : **toutes** les mesures de degré et de travail publiées
+ces derniers jours restreignent les paires candidates aux voisins situés à moins
+de **six fois** le rayon $s_{\max}$-plus-proche-voisin du point. Cette
+restriction n'est pas une conséquence des lemmes. Elle est un substitut mesuré.
+
+**Conséquence directe** : le $4{,}4\cdot10^{8}$ et le gain de $5{,}9\cdot10^{8}$
+sont des **minorants** du travail réellement certifié, pas sa valeur. Ils
+restent la meilleure estimation disponible, et ils cessent d'être une borne
+supérieure.
+
+**Ce que le théorème donne réellement**, et c'est une jolie fermeture : la
+restriction certifiée de la boucle de germes est $D\le 2R(p)$, où $R(p)$ est le
+plus grand rayon d'une boule passant par $p$, **de centre dans l'enveloppe
+convexe**, contenant au plus $s_{\max}$ points. C'est exactement la **route A**
+écartée le 7 août — écartée parce que la certifier demande un recouvrement
+directionnel décalé et un test de vivacité de calotte contre les demi-espaces de
+la coque.
+
+Les deux routes sont donc **complémentaires**, et il fallait les tenir ensemble
+plutôt que choisir : la route B rejette une paire donnée pour presque rien, la
+route A dit lesquelles il faut seulement considérer. Sans elle la boucle de
+germes est exhaustive en $O(n^2)$, ce qui est complet mais ne passe pas
+l'échelle ; avec la restriction heuristique elle passe l'échelle mais n'est plus
+prouvée complète. Le travail restant est donc nommé, et il n'est pas nouveau :
+c'est la certification de $R(p)$.
+
+**Rendu machine-lisible.** Le certificat porte
+`seed_neighbourhood_cutoff_multiple` et `seed_loop_exhaustive_over_pairs`, et le
+vérificateur **refuse par nom** — `a_restricted_seed_loop_claimed_to_be_exhaustive`
+— une exécution restreinte qui prétendrait être exhaustive. Une restriction
+honnêtement déclarée est admise ; une restriction déguisée ne l'est pas.
+L'induction de reprise refuse en outre qu'une chaîne change de restriction en
+cours de route. C'est la même discipline que l'écart VRAM : nommer l'absence
+plutôt que la laisser passer pour un résultat.
+
+Le générateur de référence reste **exhaustif par défaut** — c'est ce qui rend son
+certificat de complétude vrai sans autre argument.
+
+Seize suites vertes.

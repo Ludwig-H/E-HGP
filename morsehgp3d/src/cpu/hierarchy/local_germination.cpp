@@ -191,6 +191,15 @@ bool local_germination_certificate_admissible(
     reason = "certified_margin_exponent";
     return false;
   }
+  // A restricted seed loop and a claim of exhaustiveness cannot both be true.
+  // Completeness under a cutoff needs the certified restriction D <= 2 R(p),
+  // which this basis does not carry, so the claim is refused rather than
+  // believed.
+  if (certificate.seed_neighbourhood_cutoff_multiple != 0U &&
+      certificate.seed_loop_exhaustive_over_pairs) {
+    reason = "a_restricted_seed_loop_claimed_to_be_exhaustive";
+    return false;
+  }
   if (certificate.mass_partition_identity_available) {
     reason = "mass_partition_identity_is_not_available_under_this_basis";
     return false;
@@ -305,6 +314,13 @@ bool local_germination_resume_induction_holds(
     reason = "certified_margin_exponent_changed";
     return false;
   }
+  if (previous.seed_neighbourhood_cutoff_multiple !=
+          successor.seed_neighbourhood_cutoff_multiple ||
+      previous.seed_loop_exhaustive_over_pairs !=
+          successor.seed_loop_exhaustive_over_pairs) {
+    reason = "seed_loop_restriction_changed";
+    return false;
+  }
   if (previous.mass_partition_identity_available !=
           successor.mass_partition_identity_available ||
       previous.completeness_basis_declared !=
@@ -368,6 +384,10 @@ LocalGerminationCertificate generate_local_germination_candidates(
     empty.seed_disc_ring_count = config.seed_disc_ring_count;
     empty.segment_position_count = config.segment_position_count;
     empty.certified_margin_exponent = config.certified_margin_exponent;
+    empty.seed_neighbourhood_cutoff_multiple =
+        config.seed_neighbourhood_cutoff_multiple;
+    empty.seed_loop_exhaustive_over_pairs =
+        config.seed_neighbourhood_cutoff_multiple == 0U;
     return empty;
   }
   if (config.segment_position_count == 0U) {
@@ -416,6 +436,10 @@ LocalGerminationCertificate generate_local_germination_candidates(
   certificate.seed_disc_ring_count = config.seed_disc_ring_count;
   certificate.segment_position_count = config.segment_position_count;
   certificate.certified_margin_exponent = config.certified_margin_exponent;
+  certificate.seed_neighbourhood_cutoff_multiple =
+      config.seed_neighbourhood_cutoff_multiple;
+  certificate.seed_loop_exhaustive_over_pairs =
+      config.seed_neighbourhood_cutoff_multiple == 0U;
   LocalGerminationCounters& counters = certificate.counters;
   std::array<PointId, 4> support{};
   std::vector<PointId> retained;

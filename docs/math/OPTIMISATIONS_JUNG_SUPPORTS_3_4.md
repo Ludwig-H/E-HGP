@@ -308,6 +308,33 @@ Il faut le dire aussi nettement que le reste.
 | **J8 incrémental, segment recouvert** | **mesuré** | **facteur 8,4** sur les quadruples à $N=16$ |
 | J10 confinement | à exploiter | borne de résidence par tuile device |
 
+### 7.1 Correction : toutes les mesures portent une restriction non certifiée
+
+Toutes les mesures de degré et de travail de ce document, sans exception,
+restreignent les paires candidates aux voisins situés à moins de **six fois** le
+rayon $s_{\max}$-plus-proche-voisin du point. **Cette restriction n'est pas
+certifiée par les lemmes ci-dessus.** Les chiffres publiés sont donc des
+**minorants** du travail réellement certifié, et il faut les lire comme tels.
+
+Ce que le théorème donne réellement comme restriction de la boucle de germes est
+$$D\;\le\;2\,R(p),$$
+où $R(p)$ est le plus grand rayon d'une boule passant par $p$, **de centre dans
+l'enveloppe convexe**, contenant au plus $s_{\max}$ points — c'est exactement la
+route A du §5.0, écartée parce que la certifier demande un recouvrement
+directionnel décalé **et** un test de vivacité de calotte contre les demi-espaces
+de la coque.
+
+Les deux routes sont donc complémentaires, et il faut les tenir ensemble : la
+route B rejette une paire donnée pour un coût dérisoire, la route A dit
+lesquelles il faut seulement considérer. La boucle de germes est exhaustive en
+$O(n^2)$ sans elle, et la restriction employée dans les mesures en est un
+substitut mesuré, pas prouvé.
+
+Le générateur déclare désormais cette restriction dans son certificat —
+`seed_neighbourhood_cutoff_multiple` et `seed_loop_exhaustive_over_pairs` — et le
+vérificateur **refuse par nom** une exécution restreinte qui prétendrait être
+exhaustive. L'écart est machine-lisible, comme celui du pic VRAM.
+
 **État certifié courant, mesuré conjointement.** La dernière mesure applique en
 une seule passe le germe J7 ($\alpha=0{,}10$), l'énumération réelle par lentille,
 le test libre J4' et le segment J8 ($N=16$). Ce n'est donc plus un produit de

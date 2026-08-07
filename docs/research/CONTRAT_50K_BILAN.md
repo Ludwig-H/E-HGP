@@ -71,6 +71,15 @@ et la dernière ligne est une mesure **jointe** — germe J7, énumération rée
 lentille, test libre et segment J8 appliqués en une seule passe — non un produit
 de facteurs séparés.
 
+**Réserve, et elle est importante.** Toutes ces mesures restreignent les paires
+candidates aux voisins situés à moins de six fois le rayon $s_{\max}$-plus-proche-
+voisin. Cette restriction n'est **pas certifiée** : les chiffres sont donc des
+**minorants** du travail certifié. La restriction que le théorème fournit
+réellement est $D\le 2R(p)$, avec $R(p)$ le rayon tangent maximal à centre dans
+l'enveloppe convexe — la route A, écartée pour son coût de certification. Le
+certificat du générateur déclare désormais la restriction employée, et un
+vérificateur refuse une exécution restreinte qui se dirait exhaustive.
+
 **Ce que cela ne change pas.** L'étage paire, le plancher amont, l'aval et
 l'archive sont intacts. Le nouvel algorithme retire un mur de quatorze ordres de
 grandeur ; il ne touche à aucun des autres postes.

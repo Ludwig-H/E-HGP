@@ -68,6 +68,18 @@ struct LocalGerminationConfig {
   // Certified margin subtracted from every test radius, as 2^exponent times the
   // diameter.  Must be at most zero, so the margin never exceeds the diameter.
   int certified_margin_exponent{-20};
+  // Restriction of the seed loop to pairs closer than this multiple of the
+  // local s_max-nearest-neighbour radius.  Zero means NO restriction: the seed
+  // loop is exhaustive over pairs, which is what makes the enumeration complete
+  // without further argument.
+  //
+  // Any positive value is a DATA-DEPENDENT restriction that the theorem does
+  // not supply.  The certified restriction is D <= 2 R(p), where R(p) is the
+  // largest radius of a ball through p, centred inside the convex hull, holding
+  // at most s_max points -- and computing it is the directional covering route
+  // that was measured and set aside.  Until that route is implemented, a
+  // positive cutoff must be declared and must NOT claim to be justified.
+  std::size_t seed_neighbourhood_cutoff_multiple{};
 };
 
 struct LocalGerminationCounters {
@@ -102,6 +114,11 @@ struct LocalGerminationCertificate {
   std::size_t seed_disc_ring_count{};
   std::size_t segment_position_count{};
   int certified_margin_exponent{};
+  std::size_t seed_neighbourhood_cutoff_multiple{};
+  // True only when the seed loop was exhaustive over pairs.  A run that
+  // restricted it owes a completeness argument the theorem does not supply, and
+  // the verifier refuses a certificate that claims otherwise.
+  bool seed_loop_exhaustive_over_pairs{true};
   // The mass partition identity does NOT survive this basis: the generator
   // never enumerates the universe, so unexamined mass is excluded by the
   // theorem rather than resolved by pruning.  Declaring it available would be

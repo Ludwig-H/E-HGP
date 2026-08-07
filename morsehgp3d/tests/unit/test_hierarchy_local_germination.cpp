@@ -343,6 +343,24 @@ void check_certificate_falsification() {
   require(
       !local_germination_certificate_admissible(empty_segment, reason),
       "an empty segment covering was admitted");
+
+  // A restricted seed loop is allowed -- it is how the enumeration scales --
+  // but it may not also claim to be exhaustive.  The certified restriction is
+  // D <= 2 R(p), which this basis does not carry.
+  LocalGerminationCertificate honest_cutoff = fresh();
+  honest_cutoff.seed_neighbourhood_cutoff_multiple = 6U;
+  honest_cutoff.seed_loop_exhaustive_over_pairs = false;
+  require(
+      local_germination_certificate_admissible(honest_cutoff, reason),
+      "an honestly declared seed restriction was refused");
+
+  LocalGerminationCertificate lying_cutoff = fresh();
+  lying_cutoff.seed_neighbourhood_cutoff_multiple = 6U;
+  lying_cutoff.seed_loop_exhaustive_over_pairs = true;
+  require(
+      !local_germination_certificate_admissible(lying_cutoff, reason) &&
+          reason == "a_restricted_seed_loop_claimed_to_be_exhaustive",
+      "a restricted seed loop claiming exhaustiveness was admitted");
 }
 
 // The contract of the three verification bases.  What each one guarantees is a
@@ -536,6 +554,14 @@ void check_resume_induction() {
       !local_germination_resume_induction_holds(previous, reconstant, reason) &&
           reason == "jung_squared_changed",
       "a resumption under another Jung constant was admitted");
+
+  LocalGerminationCertificate restricted = extended;
+  restricted.seed_neighbourhood_cutoff_multiple = 6U;
+  restricted.seed_loop_exhaustive_over_pairs = false;
+  require(
+      !local_germination_resume_induction_holds(previous, restricted, reason) &&
+          reason == "seed_loop_restriction_changed",
+      "a resumption that restricted its seed loop mid-chain was admitted");
 
   LocalGerminationCertificate recovered = extended;
   recovered.segment_position_count = 8U;
