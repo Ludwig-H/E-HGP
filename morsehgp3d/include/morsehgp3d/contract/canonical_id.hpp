@@ -49,6 +49,10 @@ class CanonicalSha256Builder {
 
  private:
   void compress_buffer();
+  // Compresses one 64-byte block read straight from the caller's memory.
+  // Exists so a bulk update never copies through buffer_ first: the digest
+  // is bit-identical either way, only the copy disappears.
+  void compress_block(const std::uint8_t* block);
 
   std::array<std::uint32_t, 8U> state_{};
   std::array<std::uint8_t, 64U> buffer_{};

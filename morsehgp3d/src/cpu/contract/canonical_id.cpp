@@ -1,9 +1,11 @@
 #include "morsehgp3d/contract/canonical_id.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <span>
 #include <stdexcept>
@@ -56,14 +58,19 @@ CanonicalSha256Builder::CanonicalSha256Builder() noexcept
           0x5be0cd19U} {}
 
 void CanonicalSha256Builder::compress_buffer() {
+  compress_block(buffer_.data());
+  buffered_byte_count_ = 0U;
+}
+
+void CanonicalSha256Builder::compress_block(const std::uint8_t* block) {
   std::array<std::uint32_t, 64U> schedule{};
   for (std::size_t word = 0U; word < 16U; ++word) {
     const std::size_t offset = word * 4U;
     schedule[word] =
-        (static_cast<std::uint32_t>(buffer_[offset]) << 24U) |
-        (static_cast<std::uint32_t>(buffer_[offset + 1U]) << 16U) |
-        (static_cast<std::uint32_t>(buffer_[offset + 2U]) << 8U) |
-        static_cast<std::uint32_t>(buffer_[offset + 3U]);
+        (static_cast<std::uint32_t>(block[offset]) << 24U) |
+        (static_cast<std::uint32_t>(block[offset + 1U]) << 16U) |
+        (static_cast<std::uint32_t>(block[offset + 2U]) << 8U) |
+        static_cast<std::uint32_t>(block[offset + 3U]);
   }
   for (std::size_t word = 16U; word < schedule.size(); ++word) {
     const std::uint32_t previous_15 = schedule[word - 15U];
@@ -86,24 +93,37 @@ void CanonicalSha256Builder::compress_buffer() {
   std::uint32_t f = state_[5];
   std::uint32_t g = state_[6];
   std::uint32_t h = state_[7];
-  for (std::size_t round = 0U; round < schedule.size(); ++round) {
+  // Same round function, written so the eight working words are ROTATED BY
+  // NAME instead of by assignment.  The textbook form shuffles all eight
+  // registers every round, which is seven moves per round that carry no
+  // information; unrolling by eight makes the shuffle vanish into the
+  // argument order.  Bit-for-bit the same state transition -- the falsifiable
+  // check is that every sealed digest in the repository is unchanged.
+  const auto step = [&schedule](
+                        std::uint32_t va, std::uint32_t vb, std::uint32_t vc,
+                        std::uint32_t& vd, std::uint32_t ve, std::uint32_t vf,
+                        std::uint32_t vg, std::uint32_t& vh,
+                        std::size_t round) noexcept {
     const std::uint32_t sum1 =
-        std::rotr(e, 6) ^ std::rotr(e, 11) ^ std::rotr(e, 25);
-    const std::uint32_t choice = (e & f) ^ ((~e) & g);
+        std::rotr(ve, 6) ^ std::rotr(ve, 11) ^ std::rotr(ve, 25);
+    const std::uint32_t choice = (ve & vf) ^ ((~ve) & vg);
     const std::uint32_t temporary1 =
-        h + sum1 + choice + round_constants[round] + schedule[round];
+        vh + sum1 + choice + round_constants[round] + schedule[round];
     const std::uint32_t sum0 =
-        std::rotr(a, 2) ^ std::rotr(a, 13) ^ std::rotr(a, 22);
-    const std::uint32_t majority = (a & b) ^ (a & c) ^ (b & c);
-    const std::uint32_t temporary2 = sum0 + majority;
-    h = g;
-    g = f;
-    f = e;
-    e = d + temporary1;
-    d = c;
-    c = b;
-    b = a;
-    a = temporary1 + temporary2;
+        std::rotr(va, 2) ^ std::rotr(va, 13) ^ std::rotr(va, 22);
+    const std::uint32_t majority = (va & vb) ^ (va & vc) ^ (vb & vc);
+    vd += temporary1;
+    vh = temporary1 + sum0 + majority;
+  };
+  for (std::size_t round = 0U; round < schedule.size(); round += 8U) {
+    step(a, b, c, d, e, f, g, h, round);
+    step(h, a, b, c, d, e, f, g, round + 1U);
+    step(g, h, a, b, c, d, e, f, round + 2U);
+    step(f, g, h, a, b, c, d, e, round + 3U);
+    step(e, f, g, h, a, b, c, d, round + 4U);
+    step(d, e, f, g, h, a, b, c, round + 5U);
+    step(c, d, e, f, g, h, a, b, round + 6U);
+    step(b, c, d, e, f, g, h, a, round + 7U);
   }
   state_[0] += a;
   state_[1] += b;
@@ -113,7 +133,6 @@ void CanonicalSha256Builder::compress_buffer() {
   state_[5] += f;
   state_[6] += g;
   state_[7] += h;
-  buffered_byte_count_ = 0U;
 }
 
 void CanonicalSha256Builder::update(std::span<const std::uint8_t> bytes) {
@@ -130,12 +149,32 @@ void CanonicalSha256Builder::update(std::span<const std::uint8_t> bytes) {
     throw std::length_error("the SHA-256 input bit length overflows uint64");
   }
   total_byte_count_ += static_cast<std::uint64_t>(bytes.size());
-  for (const std::uint8_t byte : bytes) {
-    buffer_[buffered_byte_count_] = byte;
-    ++buffered_byte_count_;
+  // The byte-at-a-time loop this replaces cost a bounds test and a branch per
+  // byte, and it was 22 % of a whole product run at n=16 because the
+  // downstream authenticates canonical rational KEYS -- decimal text, so
+  // thousands of bytes per record.  Three phases now: top up a partial
+  // block, compress whole blocks straight from the caller's memory, keep the
+  // tail.  Byte for byte the same message, so digest for digest the same
+  // result.
+  std::size_t offset = 0U;
+  if (buffered_byte_count_ != 0U) {
+    const std::size_t room = buffer_.size() - buffered_byte_count_;
+    const std::size_t taken = std::min(room, bytes.size());
+    std::memcpy(buffer_.data() + buffered_byte_count_, bytes.data(), taken);
+    buffered_byte_count_ += taken;
+    offset = taken;
     if (buffered_byte_count_ == buffer_.size()) {
       compress_buffer();
     }
+  }
+  while (bytes.size() - offset >= buffer_.size()) {
+    compress_block(bytes.data() + offset);
+    offset += buffer_.size();
+  }
+  const std::size_t remaining = bytes.size() - offset;
+  if (remaining != 0U) {
+    std::memcpy(buffer_.data(), bytes.data() + offset, remaining);
+    buffered_byte_count_ = remaining;
   }
 }
 
