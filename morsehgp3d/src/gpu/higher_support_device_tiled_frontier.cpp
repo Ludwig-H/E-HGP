@@ -689,6 +689,8 @@ void validate_batch_envelope(
           batch.slot_controls == nullptr ||
           batch.slot_control_device_to_host_count != 0U ||
           batch.slot_control_device_to_host_byte_count != 0U ||
+          batch.record_staging_device_to_host_count != 0U ||
+          batch.record_staging_device_to_host_byte_count != 0U ||
           batch.resume_control_device_to_host_count != 0U ||
           batch.resume_control_device_to_host_byte_count != 0U ||
           batch.kernel_launch_count != 0U ||
@@ -739,11 +741,19 @@ void validate_batch_envelope(
           batch.slot_control_device_to_host_byte_count !=
               expected_control_bytes ||
           batch.kernel_launch_count != expected_launch_count ||
+          // R2-f: one synchronisation for the control drain, plus one for
+          // the record staging when any copy was issued.  The staging
+          // cannot share the control one because its per-slot row widths
+          // are read from the controls themselves.
           batch.synchronization_count !=
               checked_size_sum(
                   expected_launch_count,
-                  1U,
+                  batch.record_staging_device_to_host_count == 0U ? 1U : 2U,
                   "the Phase 15 synchronization count overflows size_t") ||
+          batch.record_staging_device_to_host_count > 3U ||
+          (batch.record_staging_device_to_host_count == 0U) !=
+              (batch.record_staging_device_to_host_byte_count == 0U) ||
+          !batch.record_segments_host_readable ||
           batch.resume_control_device_to_host_count !=
               expected_launch_count ||
           batch.resume_control_device_to_host_byte_count !=

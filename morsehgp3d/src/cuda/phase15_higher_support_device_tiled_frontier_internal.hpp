@@ -547,6 +547,15 @@ struct Phase15HigherSupportDeviceTiledBatch {
   std::size_t physical_device_arena_capacity_bytes{};
   std::size_t slot_control_device_to_host_count{};
   std::size_t slot_control_device_to_host_byte_count{};
+  // R2-f: the record-arena staging is a declared transfer, exactly like the
+  // control and rational-task ones.  It cannot ride on the control copy's
+  // synchronisation, because its per-slot row widths are read FROM the
+  // controls; it therefore costs one further stream synchronisation, and
+  // the sealed envelope accounts for it rather than tolerating a drift.
+  // Zero copies means no slot committed a record of any kind, and then no
+  // extra synchronisation is performed either.
+  std::size_t record_staging_device_to_host_count{};
+  std::size_t record_staging_device_to_host_byte_count{};
   std::size_t resume_control_device_to_host_count{};
   std::size_t resume_control_device_to_host_byte_count{};
   std::size_t kernel_launch_count{};
@@ -688,6 +697,8 @@ phase15_higher_support_device_tiled_metadata_digest(
   hash_size(batch.physical_device_arena_capacity_bytes);
   hash_size(batch.slot_control_device_to_host_count);
   hash_size(batch.slot_control_device_to_host_byte_count);
+  hash_size(batch.record_staging_device_to_host_count);
+  hash_size(batch.record_staging_device_to_host_byte_count);
   hash_size(batch.resume_control_device_to_host_count);
   hash_size(batch.resume_control_device_to_host_byte_count);
   hash_size(batch.kernel_launch_count);

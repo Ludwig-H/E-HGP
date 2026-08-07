@@ -1316,6 +1316,8 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
     // One strided copy per arena.  A zero row width means no slot committed
     // a record of that kind; the destination stays empty and the published
     // pointer stays null, which the consumer already refuses.
+    std::size_t staging_copy_count = 0U;
+    std::size_t staging_byte_count = 0U;
     const auto stage_segment =
         [&](void* destination,
             const void* source,
@@ -1337,6 +1339,12 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
                   cudaMemcpyDeviceToHost,
                   resources->stream()),
               what);
+          ++staging_copy_count;
+          staging_byte_count += checked_product(
+              staged_elements * element_bytes,
+              request.slot_count,
+              "the Phase 15 record staging transfer extent overflows "
+              "size_t");
         };
 
     batch.host_prune_records.assign(
@@ -1366,8 +1374,14 @@ build_phase15_higher_support_device_tiled_frontier_on_device(
         request.probe_receipts_per_slot,
         staged_receipts_per_slot,
         "cudaMemcpy2DAsync Phase 15 higher-support probe receipt staging");
-    resources->synchronize();
-    ++synchronization_count;
+    // Only synchronise when something was actually issued, so the declared
+    // synchronisation count and the declared copy count stay in lockstep.
+    if (staging_copy_count != 0U) {
+      resources->synchronize();
+      ++synchronization_count;
+    }
+    batch.record_staging_device_to_host_count = staging_copy_count;
+    batch.record_staging_device_to_host_byte_count = staging_byte_count;
 
     batch.prune_records = batch.host_prune_records.data();
     batch.terminal_records = batch.host_terminal_records.data();
