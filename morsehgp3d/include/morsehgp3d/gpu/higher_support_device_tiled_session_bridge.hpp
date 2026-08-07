@@ -106,6 +106,26 @@ struct HigherSupportDeviceTiledSessionBridgeConfig {
   // boundary search and the fresh-replay commit are both retired on this
   // path, and the sealed certificate declares the tile-certified basis.
   bool tile_certified_commit{false};
+  // T1: how many frontier ROOTS one tile transaction consumes.
+  //
+  // Distinct from pre_expansion_target_entry_count, which says how many
+  // entries the device is fed.  The bridge used to take
+  // min(|frontier|, slot_tile_capacity) roots, so once the frontier
+  // reached the slot capacity a single transaction swallowed it whole --
+  // and a transaction resolves its roots entirely or commits nothing.
+  // Measured on G4: with the frontier at its 1024 target and the GPU at
+  // 100%, one such tile at n=512 was still unfinished after 21 minutes,
+  // having committed exactly zero of the universe.
+  //
+  // Capping the roots bounds the mass of one transaction without touching
+  // the anchored chain contract: the unconsumed roots simply stay on the
+  // frontier, which is what a strict-prefix successor already means.  The
+  // tile is still fed pre_expansion_target_entry_count entries, so the
+  // device stays saturated while the commit granularity shrinks.  The
+  // default is the slot capacity, which reproduces the previous
+  // behaviour exactly.
+  std::size_t maximum_tile_root_count{
+      higher_support_device_tiled_frontier_maximum_slot_tile_capacity};
 
   friend bool operator==(
       const HigherSupportDeviceTiledSessionBridgeConfig&,

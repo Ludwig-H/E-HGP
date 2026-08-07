@@ -1010,6 +1010,12 @@ void Phase15HigherSupportDeviceTiledSessionBridgeState::
     throw std::invalid_argument(
         "the pre-expansion target must be in [1, slot_tile_capacity]");
   }
+  if (config.maximum_tile_root_count == 0U ||
+      config.maximum_tile_root_count >
+          config.frontier_config.slot_tile_capacity) {
+    throw std::invalid_argument(
+        "the tile root cap must be in [1, slot_tile_capacity]");
+  }
   if (config.maximum_session_pre_expansion_transition_count == 0U) {
     throw std::invalid_argument(
         "the session pre-expansion backstop must be at least one");
@@ -1547,8 +1553,14 @@ Phase15HigherSupportDeviceTiledSessionBridgeState::
     // Tile transaction: the frontier's back suffix, bounded by the slot
     // tile capacity, is resolved wholly by the device.  No host generator
     // runs and no work-unit boundary is searched.
+    // T1: bounded by the configured tile-root cap as well as by the slot
+    // capacity.  The unconsumed roots stay on the frontier untouched, so
+    // the successor is still a strict prefix and no contract changes.
     const std::size_t root_count = std::min(
-        cur_frontier.size(), config.frontier_config.slot_tile_capacity);
+        cur_frontier.size(),
+        std::min(
+            config.frontier_config.slot_tile_capacity,
+            config.maximum_tile_root_count));
     std::vector<ExactHigherSupportFrontierEntry> tile_roots;
     for (std::size_t index = cur_frontier.size();
          index > cur_frontier.size() - root_count;

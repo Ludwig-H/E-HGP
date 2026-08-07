@@ -828,6 +828,7 @@ def require_success_projection(
         # host, so its declared basis is the fresh replay.
         "verification_basis": "fresh_cpu_replay_every_commit",
         "requested_tile_target": 16,
+        "requested_tile_roots": 1024,
         "full_geometry_replay_avoided": True,
         # R2-c: the higher-stage progress ventilation, published by both
         # backends.  This fixture is n=5, so the universe it must close is
@@ -836,6 +837,7 @@ def require_success_projection(
         # are the device bridge's own accounting and this run is the host
         # fixed-chunk session.
         "assembly_censure": "none",
+        "censure_detail": "",
         "progress": {
             "total_support_mass": "15",
             "resolved_support_mass": "15",
@@ -948,11 +950,13 @@ def require_capacity_stop(report: dict[str, object]) -> None:
         "authority_kind": "not_run",
         "verification_basis": "not_run",
         "requested_tile_target": 16,
+        "requested_tile_roots": 1024,
         "full_geometry_replay_avoided": False,
         # R2-c: the stage never ran, so its ventilation must be entirely
         # dormant -- in particular a zero universe, which is what
         # distinguishes "not run" from "ran and resolved nothing".
         "assembly_censure": "none",
+        "censure_detail": "",
         "progress": {
             "total_support_mass": "0",
             "resolved_support_mass": "0",
@@ -2570,6 +2574,12 @@ def main() -> int:
         ("--point-count", "5", "--K", "4", "--budget-profile", "wide_open"),
         4,
     )
+    for bad in ("0", "1025"):
+        run_case(
+            binary,
+            ("--point-count", "5", "--K", "4", "--higher-tile-roots", bad),
+            4,
+        )
     run_case(
         binary,
         (

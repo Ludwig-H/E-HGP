@@ -147,6 +147,7 @@ def run_one_cell(
     family: str,
     higher_backend: str,
     verification_basis: str,
+    tile_roots: int,
     cell_deadline_ms: int,
     kill_after_seconds: int,
 ) -> dict[str, Any]:
@@ -175,6 +176,10 @@ def run_one_cell(
         verification_basis,
         "--higher-tile-target",
         str(tile_target),
+        # T1: bound how many frontier roots one transaction consumes, so a
+        # censored cell still reports committed progress instead of zero.
+        "--higher-tile-roots",
+        str(tile_roots),
     ]
     # The runner's cooperative deadline is the first line of defence; GNU
     # timeout is the second, and a cell killed by it is an observation, not
@@ -200,6 +205,7 @@ def run_one_cell(
         "family": family,
         "higher_backend": higher_backend,
         "requested_verification_basis": verification_basis,
+        "tile_roots": tile_roots,
         "cell_deadline_ms": cell_deadline_ms,
         "command": command,
         "return_code": completed.returncode,
@@ -377,6 +383,7 @@ def main() -> int:
     parser.add_argument("--family", default="uniform_latin")
     parser.add_argument("--higher-backend", default="device_tiled_session")
     parser.add_argument("--verification-basis", default="tile_certified")
+    parser.add_argument("--tile-roots", type=int, default=1024)
     parser.add_argument(
         "--cell-deadline-ms",
         type=int,
@@ -443,6 +450,7 @@ def main() -> int:
             family=arguments.family,
             higher_backend=arguments.higher_backend,
             verification_basis=arguments.verification_basis,
+            tile_roots=arguments.tile_roots,
             cell_deadline_ms=arguments.cell_deadline_ms,
             kill_after_seconds=arguments.kill_after_seconds,
         )
@@ -478,6 +486,7 @@ def main() -> int:
             "family": arguments.family,
             "higher_backend": arguments.higher_backend,
             "requested_verification_basis": arguments.verification_basis,
+            "tile_roots": arguments.tile_roots,
             "cell_deadline_ms": arguments.cell_deadline_ms,
         },
         "cells": cells,

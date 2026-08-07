@@ -874,6 +874,147 @@ void test_failed_assembly_publishes_its_transcript() {
   }
 }
 
+// T1: bounding how many frontier roots one tile consumes must change the
+// GRANULARITY of the chain and nothing else.  A capped tile commits more,
+// smaller transactions -- which is the whole point, since a transaction
+// resolves its roots entirely or commits nothing -- and must still reach
+// the identical terminal: same events, same diagnostics, same audit, same
+// exact universe closure, same declared basis.
+void run_bounded_tile_root_differential(
+    std::span<const CertifiedPoint3> points,
+    std::size_t requested_maximum_order,
+    std::size_t tile_root_cap,
+    const std::string& label) {
+  CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(points);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+
+  const auto whole = assemble_tile_certified(
+      cloud, index, requested_maximum_order, {});
+  gpu::HigherSupportDeviceTiledSessionBridgeConfig capped;
+  capped.tile_certified_commit = true;
+  capped.maximum_tile_root_count = tile_root_cap;
+  gpu::test_support::reset_fake_gpu_phase14_morton_lbvh_build();
+  gpu::test_support::reset_fake_gpu_higher_support_device_tiled_frontier();
+  gpu::test_support::bind_fake_higher_support_device_tiled_geometry(
+      index, cloud);
+  const auto bounded =
+      gpu::assemble_exact_higher_support_stream_device_tiled(
+          cloud,
+          index,
+          requested_maximum_order,
+          unlimited_higher_budget(),
+          capped);
+
+  check(
+      whole.certified_assembled() && bounded.certified_assembled(),
+      label + ": both the whole-frontier and the capped tile assemblies "
+              "seal");
+  if (!whole.certified_assembled() || !bounded.certified_assembled()) {
+    return;
+  }
+  check(
+      bounded.higher->events == whole.higher->events,
+      label + ": same events");
+  check(
+      bounded.higher->relevant_extra_shell_diagnostics ==
+          whole.higher->relevant_extra_shell_diagnostics,
+      label + ": same diagnostics");
+  check(
+      bounded.higher->requirements == whole.higher->requirements,
+      label + ": same requirements");
+  // The audit is NOT expected to match in full, and must not be asserted
+  // to: cutting the chain into more transactions legitimately changes the
+  // expansion counts, the child-product counts and the peak frontier size.
+  // What must be invariant is everything that describes the RESULT -- the
+  // six exact masses and every per-support category count -- because those
+  // are properties of the universe, not of how it was sliced.
+  const auto& b = bounded.higher->audit;
+  const auto& w = whole.higher->audit;
+  check(
+      b.total_support_count == w.total_support_count &&
+          b.resolved_support_count == w.resolved_support_count &&
+          b.remaining_frontier_support_count ==
+              w.remaining_frontier_support_count &&
+          b.leaf_classified_support_count ==
+              w.leaf_classified_support_count,
+      label + ": universe, resolved, remaining and classified mass are "
+              "invariant under the cut");
+  // The split of the PRUNED mass between well-centering and rank is a
+  // property of the traversal, not of the universe: a coarser tile can
+  // discard a whole subtree as not well centred where a finer one descends
+  // into it and rank-prunes the parts.  Their SUM is invariant, and that is
+  // the statement the partition actually makes.
+  check(
+      b.well_centering_pruned_support_count + b.rank_pruned_support_count ==
+          w.well_centering_pruned_support_count +
+              w.rank_pruned_support_count,
+      label + ": the total pruned mass is invariant under the cut");
+  check(
+      b.well_centering_pruned_support_count +
+              b.rank_pruned_support_count +
+              b.leaf_classified_support_count ==
+          b.total_support_count,
+      label + ": the capped chain's own mass partition closes");
+  check(
+      b.minimal_leaf_count == w.minimal_leaf_count &&
+          b.above_rank_leaf_count == w.above_rank_leaf_count &&
+          b.affinely_dependent_leaf_count ==
+              w.affinely_dependent_leaf_count &&
+          b.boundary_reduced_leaf_count == w.boundary_reduced_leaf_count &&
+          b.exterior_circumcenter_leaf_count ==
+              w.exterior_circumcenter_leaf_count &&
+          b.leaf_support_analysis_count == w.leaf_support_analysis_count,
+      label + ": every per-support category count is invariant");
+  check(
+      b.accepted_event_count == w.accepted_event_count &&
+          b.relevant_extra_shell_diagnostic_count ==
+              w.relevant_extra_shell_diagnostic_count &&
+          b.emitted_record_count == w.emitted_record_count &&
+          b.exact_bigint_universe_certified &&
+          b.grouped_partition_accounting_certified,
+      label + ": the emitted record accounting is invariant and certified");
+  check(
+      bounded.certificate.verification_basis() ==
+          ExactHigherSupportVerificationBasis::
+              device_search_host_exact_record_classification_bigint_closure,
+      label + ": the capped chain still declares the tile-certified basis");
+  check(
+      bounded.bridge_audit.committed_tile_transaction_count >=
+          whole.bridge_audit.committed_tile_transaction_count,
+      label + ": a capped tile commits at least as many tile transactions");
+  check(
+      bounded.progress_audit.resolved_support_count ==
+              whole.progress_audit.resolved_support_count &&
+          bounded.progress_audit.remaining_frontier_support_count == 0U,
+      label + ": the capped chain closes the same exact universe");
+}
+
+void test_bounded_tile_root_differentials() {
+  const std::array<CertifiedPoint3, 8U> sphere{
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(0.0, 0.0, -1.0),
+      point(0.5773502691896258, 0.5773502691896258, 0.5773502691896257),
+      point(-0.5773502691896258, -0.5773502691896258, 0.5773502691896258),
+  };
+  // One root per tile is the finest granularity the contract allows and
+  // the strongest form of the property.
+  run_bounded_tile_root_differential(sphere, 3U, 1U, "tile-roots=1 sphere8/K3");
+  run_bounded_tile_root_differential(sphere, 3U, 2U, "tile-roots=2 sphere8/K3");
+
+  std::vector<CertifiedPoint3> line12;
+  for (std::size_t index = 0U; index < 12U; ++index) {
+    const double coordinate = static_cast<double>(index);
+    line12.push_back(
+        point(coordinate, coordinate / 8.0, coordinate / 64.0));
+  }
+  run_bounded_tile_root_differential(line12, 2U, 1U, "tile-roots=1 line12/K2");
+}
+
 void test_operational_guard_differentials() {
   const std::array<CertifiedPoint3, 4U> tetrahedron{
       point(1.0, 1.0, 1.0),
@@ -933,6 +1074,7 @@ int main() {
   try {
     test_assembly_differentials();
     test_tile_certified_assembly_differentials();
+    test_bounded_tile_root_differentials();
     test_operational_guard_differentials();
     test_failed_assembly_publishes_its_transcript();
     test_tower_differentials();
