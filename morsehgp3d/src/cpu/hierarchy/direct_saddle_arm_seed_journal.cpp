@@ -471,6 +471,40 @@ build_exact_direct_saddle_arm_seed_journal(
   return result;
 }
 
+namespace {
+
+// The per-index half of the reconstruction: everything that depends on which
+// arm seed is asked for, and nothing that depends only on the facade.
+[[nodiscard]] ExactDirectSaddleArmFacet reconstruct_bound_facet(
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectSaddleArmSeedJournalResult& seed_journal,
+    std::size_t arm_seed_index);
+
+}  // namespace
+
+ExactDirectSaddleArmFacetReconstructor::
+    ExactDirectSaddleArmFacetReconstructor(
+        const ExactDirectSupportTerminalFacade& source_facade,
+        const ExactDirectSaddleArmSeedJournalResult& seed_journal)
+    : source_facade_{&source_facade}, seed_journal_{&seed_journal} {
+  if (!source_facade_authority_matches_seed_journal(
+          source_facade, seed_journal)) {
+    throw std::invalid_argument(
+        "a direct saddle arm reconstruction facade has a different authority");
+  }
+}
+
+ExactDirectSaddleArmFacet ExactDirectSaddleArmFacetReconstructor::facet(
+    std::size_t arm_seed_index) const {
+  return reconstruct_bound_facet(
+      *source_facade_, *seed_journal_, arm_seed_index);
+}
+
+std::size_t ExactDirectSaddleArmFacetReconstructor::arm_seed_count()
+    const noexcept {
+  return seed_journal_->arm_seeds.size();
+}
+
 ExactDirectSaddleArmFacet reconstruct_exact_direct_saddle_arm_facet(
     const ExactDirectSupportTerminalFacade& source_facade,
     const ExactDirectSaddleArmSeedJournalResult& seed_journal,
@@ -480,6 +514,16 @@ ExactDirectSaddleArmFacet reconstruct_exact_direct_saddle_arm_facet(
     throw std::invalid_argument(
         "a direct saddle arm reconstruction facade has a different authority");
   }
+  return reconstruct_bound_facet(
+      source_facade, seed_journal, arm_seed_index);
+}
+
+namespace {
+
+ExactDirectSaddleArmFacet reconstruct_bound_facet(
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectSaddleArmSeedJournalResult& seed_journal,
+    std::size_t arm_seed_index) {
   if (arm_seed_index >= seed_journal.arm_seeds.size()) {
     throw std::out_of_range(
         "a direct saddle arm seed index is outside the journal");
@@ -521,6 +565,8 @@ ExactDirectSaddleArmFacet reconstruct_exact_direct_saddle_arm_facet(
   }
   return facet;
 }
+
+}  // namespace
 
 ExactDirectSaddleArmSeedVerification
 verify_exact_direct_saddle_arm_seed_journal(
@@ -732,6 +778,13 @@ verify_exact_direct_saddle_arm_seed_journal_streaming(
   bool seeds_match = true;
   bool facets_match = true;
   try {
+    // The facade's authority is certified once for the whole scan instead of
+    // once per arm seed.  The constructor throws invalid_argument, which is a
+    // logic_error, so the catch below still turns a bad facade into the same
+    // three false flags it always did -- only before the first facet instead
+    // of at the first facet.
+    const ExactDirectSaddleArmFacetReconstructor reconstructor{
+        source_facade, observed};
     const ExactDirectMorseEventJournalView source_view{source_journal};
     for (const ExactDirectMorseH0RoleRecord& role :
          source_view.materialized_direct_role_records()) {
@@ -802,8 +855,7 @@ verify_exact_direct_saddle_arm_seed_journal_streaming(
               reconstruct_facet(
                   event, expected_seed.removed_support_point_id);
           const ExactDirectSaddleArmFacet observed_facet =
-              reconstruct_exact_direct_saddle_arm_facet(
-                  source_facade, observed, seed_index);
+              reconstructor.facet(seed_index);
           if (expected_facet != observed_facet ||
               expected_facet.point_count != expected_family.order) {
             facets_match = false;

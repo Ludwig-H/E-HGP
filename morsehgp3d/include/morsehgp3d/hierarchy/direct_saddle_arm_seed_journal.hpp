@@ -172,6 +172,43 @@ build_exact_direct_saddle_arm_seed_journal(
     const ExactDirectMorseEventJournalResult& source_journal,
     const ExactDirectSaddleArmSeedBudget& budget);
 
+// Reconstructs many facets of ONE journal against ONE facade, certifying the
+// facade exactly once.
+//
+// The single-shot function below re-certifies the whole terminal facade on
+// every call, and its authority check is two different things wearing one
+// name: six O(1) comparisons that BIND the facade to the journal, and
+// terminal_catalog_certified(), which re-derives both whole-output digests
+// from the records and is therefore O(output).  Callers reconstruct in a
+// loop, so an unchanged facade was being re-certified once per arm seed --
+// measured at n=16, that was 812 re-certifications and 122 627 exact centres
+// re-rendered to decimal, which is where the closure's quadratic in events
+// actually lived.  It was never the closure: the closure visits a constant
+// number of nodes per event.
+//
+// Certifying once loses no guarantee.  A tampered facade still fails, in the
+// constructor, before a single facet is produced; repeating the same
+// derivation on the same bytes cannot discover anything the first one
+// missed.  The single-shot entry point is left exactly as it was, so every
+// existing anti-forge contract keeps testing what it tested.
+class ExactDirectSaddleArmFacetReconstructor {
+ public:
+  // Throws exactly what the single-shot function throws, for exactly the same
+  // reasons, so a caller that swaps one for the other cannot become laxer.
+  ExactDirectSaddleArmFacetReconstructor(
+      const ExactDirectSupportTerminalFacade& source_facade,
+      const ExactDirectSaddleArmSeedJournalResult& seed_journal);
+
+  [[nodiscard]] ExactDirectSaddleArmFacet facet(
+      std::size_t arm_seed_index) const;
+
+  [[nodiscard]] std::size_t arm_seed_count() const noexcept;
+
+ private:
+  const ExactDirectSupportTerminalFacade* source_facade_;
+  const ExactDirectSaddleArmSeedJournalResult* seed_journal_;
+};
+
 // Reconstructs F_u in sorted PointId order without a heap allocation.  This
 // is an identity projection only: it computes no miniball, component, root or
 // attachment.

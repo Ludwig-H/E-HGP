@@ -1796,6 +1796,12 @@ build_batch_execution(
       result.required_selected_lane_count;
 
   try {
+    // Certify the facade's authority once for the whole batch rather than
+    // once per arm seed.  The single-shot reconstruction re-derives both
+    // whole-output digests on every call, so a loop over the batch's arm
+    // seeds paid O(output) per seed for an answer that cannot change.
+    const ExactDirectSaddleArmFacetReconstructor arm_facet_reconstructor{
+        source_facade, source_arm_seed_journal};
     std::vector<SelectedArm> selected_arms;
     selected_arms.reserve(required_arm_seed_count);
     std::array<std::size_t, 5U> actual_family_counts{};
@@ -1835,10 +1841,7 @@ build_batch_execution(
               std::move(result), BuildFailure::source_join_inconsistent);
         }
         const ExactDirectSaddleArmFacet facet =
-            reconstruct_exact_direct_saddle_arm_facet(
-                source_facade,
-                source_arm_seed_journal,
-                arm_seed_cursor);
+            arm_facet_reconstructor.facet(arm_seed_cursor);
         selected_arms.push_back(
             {arm_seed_cursor,
              family_index,
