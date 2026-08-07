@@ -2958,3 +2958,74 @@ de descente de facette une **borne de travail** — pas un plafond — et mesure
 constante à nuage croissant avant toute autre optimisation. Optimiser l'amont
 d'un étage quadratique en sa sortie est exactement l'erreur qu'a été le filtre
 fp64, à une échelle plus grande.
+
+## Session G4 du 7 août 2026 — l'étage paire tombe, l'étage higher devient le mur
+
+Quarante-quatre minutes sur `g4-standard-48` SPOT, RTX PRO 6000 Blackwell, CUDA
+12.9, deux coupe-circuits armés, arrêt certifié par relecture indépendante. Le
+compte rendu complet et les six JSON sont dans
+`docs/validation/phase15_session_g4_20260807/`.
+
+**Q3 répond oui.** Le lanceur natif certifie la partition **complète** des
+1 249 975 000 paires de 50 000 points au rang fermé 11 en **2,434 s** :
+7 962 604 candidats plus 1 242 012 396 élagages certifiés, dont la somme vaut
+exactement l'univers. Le plafond de six était une frontière de qualification, pas
+une contrainte. Le balayage de tous les rangs termine partout et **chiffre le
+contrat** : $K=10$ coûte **2,03 fois** $K=5$ pour l'étage paire, pas un ordre de
+grandeur — la question « $K=10$ ou $K=5$ » est tranchée en faveur de $K=10$.
+
+**Q1′ répond non, et réfute son propre pari.** À 50 000 points avec $K=2$,
+l'étage paire hôte consomme 899 936 ms sur 900 000 et n'atteint jamais l'étage
+higher. Sa couverture croît comme $t^{0,786}$ — 1,52 % à 60 s, 12,76 % à 900 s —
+ce qui extrapole à **3 h 26** pour la partition complète. Interpolée à 299,9 s la
+courbe donne 5,38 %, contre 5,78 % scellés au rang 6 : **le mur hôte est
+indépendant de l'ordre**. Baisser $K$ ne débloque rien.
+
+**Ce que les deux mesures disent ensemble.** L'hôte paie 407 ns par prédicat
+exact et 57 prédicats par visite de nœud, soit 23,2 µs la visite contre 74 ns sur
+le device — un facteur **5 078**. Mais le même hôte recertifie les 7 962 604
+records du device à **1,08 µs le record**. L'hôte est lent à **chercher**, pas à
+**certifier**. L'étage paire complet et certifié vaut donc **11,06 s** (2,434 s
+device + 8,628 s recertification mono-thread), au lieu de 3 h 26.
+
+**Q2 est répondu sans son instrument.** Le rang 11 pris isolément et comme
+dixième d'un balayage publie des compteurs de travail **bit-à-bit identiques**
+— 32 875 936 visites, 7 962 604 records, 13 tuiles, 27 chunks — et un temps hôte
+égal à 1,5 % près, pour un temps de lanceur qui varie d'un **facteur 3,07**. Le
+coût du lanceur n'est pas déterminé par le travail qu'il effectue : il vit dans
+l'occupation, non dans l'arithmétique. La réfutation du filtre fp64 était donc le
+bon verdict.
+
+### Le verrou dominant se déplace, encore
+
+L'étage higher **ne termine pas** : zéro événement accepté en 240 s à $n=400$ et
+à $n=1000$ sur le backend device-tiled, alors que l'étage paire y finit en moins
+de trois secondes ; et le backend hôte n'a pas rendu la main en 420 s à $n=100$
+et $n=400$. Ce n'est pas un mur d'implémentation mais de **volume de travail
+exploré** — à quatre cents points il y a déjà $\binom{400}{4}\approx 1{,}05\cdot
+10^{9}$ quadruples.
+
+La fermeture de descente de facette, désignée verrou dominant à l'entrée de cette
+session, ne l'est plus : elle reste quadratique et sa constante croît, mais elle
+ne se paie que sur des événements qui n'existent pas encore. Le travail suivant
+est de câbler la **restriction certifiée de germination locale** — $2{,}6\cdot
+10^{17}$ ramené à $4{,}4\cdot10^{8}$ candidats — dans le chemin device de l'étage
+higher, et de faire emprunter au runner le lanceur natif que Q3 vient de
+qualifier.
+
+### Deux réserves et un défaut à confirmer
+
+`every_prune_fully_recertified` reste faux : 12 620 élagages intégralement
+recertifiés et 4 096 échantillonnés sur 8 102 972 régions. Aucun run n'est une
+exécution de bout en bout ; la qualification se déclare elle-même
+`component_only` et `not_claimed`.
+
+Et un **défaut confirmé localement** du garde-fou opérationnel. Le délai est armé
+dans l'étage paire au millimètre — deux runs s'arrêtent à 60 000 ms et
+900 000 ms exactement. Il est armé aussi dans l'étage higher, mais son **quantum
+n'est pas borné** : à $n=40$, $K=3$, backend hôte, un délai annoncé de 5 000 ms
+rend `stop_category = operational_deadline` à **45 354 ms**, soit un dépassement
+de **9,07×**, dont 45 309 ms passés dans `higher_support` ; à $n=60$ le même
+délai de 5 000 ms n'a pas rendu la main en 120 s, soit plus de 24×. Un délai qui
+déborde d'un facteur non borné n'est pas un délai : l'étage higher doit
+subdiviser son unité de travail pour que le garde-fou reprenne la main.

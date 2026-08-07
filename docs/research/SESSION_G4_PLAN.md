@@ -1,5 +1,17 @@
 # Plan de la prochaine session G4
 
+> **Exécuté le 7 août 2026.** Résultats et mesures :
+> `docs/validation/phase15_session_g4_20260807/RESULTATS.md`. Q3 répond oui,
+> Q1′ répond non et réfute son propre pari, Q2 est répondu sans son instrument
+> par une comparaison à travail constant, Q1 reste sans réponse pour la raison
+> que la session a établie. Le plan ci-dessous est conservé tel qu'il était à
+> l'allumage, pour que ses prédictions restent confrontables.
+>
+> Deux leçons pour la prochaine session : `nvcc` est présent sur l'hôte de
+> l'image G4, donc ni conteneur ni spécification CDI ne sont nécessaires ; et le
+> `cmake` de l'image est en 3.22 alors que les presets exigent la version 6 du
+> schéma, il faut installer un cmake récent et lui désigner `nvcc` explicitement.
+
 Statut : plan opérationnel. Aucun claim, aucune porte. À exécuter tel quel, dans
 l'ordre, et à interrompre plutôt qu'à improviser si un préflight refuse.
 
