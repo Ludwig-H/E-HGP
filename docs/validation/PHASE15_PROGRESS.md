@@ -2397,3 +2397,65 @@ Seize suites vertes.
 validation croisée du pont portant sur une identité de production, et l'induction
 de reprise sous la nouvelle quantité conservée. Aucune mesure G4, aucun run 50k,
 aucune porte d'échelle, aucun statut public.
+
+## Les deux conséquences restantes : l'identité de production, et l'induction de reprise
+
+Le suivi reste `phase=15`, `deployment_status=architecture_only`,
+`public_status=not_claimed`. GCP non utilisé.
+
+La refondation de la comptabilité décidée le 7 août est complète.
+
+### L'identité de production remplace celle de couverture
+
+Sous les bases de couverture, un commit vérifie une **partition de l'univers** :
+résolu plus restant vaut $\binom n3+\binom n4$. La base de germination n'a pas
+de telle partition — l'univers n'est jamais énuméré. Ce qu'un commit peut encore
+vérifier, c'est que les records qu'il porte sont **exactement ce que la
+configuration déclarée a produit**, et que l'acceptation est un **sous-ensemble**
+de la production.
+
+Ce qui rend l'énoncé non tautologique : `LocalGerminationProductionAudit` est
+tallié par le **consommateur**, au bord du sink, indépendamment des compteurs du
+producteur. L'accord entre les deux est une vraie validation croisée — l'analogue
+direct de la validation croisée BigInt des masses que le pont effectue sous les
+bases de couverture.
+
+Les identités vérifiées : l'arité d'une exécution est exclusive ; le décompte du
+consommateur égale celui du producteur, arité par arité ; l'acceptation ne
+dépasse jamais la production — c'est précisément la défaillance que la complétude
+doit exclure, un support accepté que le générateur n'aurait pas émis ; et la
+monotonie interne de la comptabilité, rien de retenu sans avoir été examiné,
+aucun troisième sommet sans paire retenue, aucun candidat sans troisième sommet
+retenu.
+
+Huit falsifications exercées, chacune refusée **par nom**, dont l'acceptation
+supérieure à la production et l'exécution d'arité mixte. Et l'identité est
+vérifiée sur **chaque cellule réelle** du test de complétude, où le compte
+accepté est celui de l'énumération exhaustive.
+
+### L'induction de reprise conserve une comptabilité, pas une masse
+
+Sous les bases de couverture, la reprise conserve la masse : le successeur
+satisfait la même identité que son prédécesseur. Sous la base de germination,
+elle conserve une **comptabilité** : une exécution reprise ne peut qu'**étendre**
+ce qui avait été produit, jamais le réviser.
+
+Deux exigences, donc. Le successeur déclare les **mêmes constantes** — une
+exécution qui aurait changé son carré de Jung, ses recouvrements ou sa marge en
+cours de chaîne est un **producteur différent**, et ses records ne peuvent pas
+être ajoutés aux premiers, même si sa constante est plus conservatrice. Et chaque
+compteur est **non décroissant**.
+
+Falsifications exercées, chacune refusée par nom : constante de Jung changée en
+cours de route, même pour une valeur conservatrice ; recouvrement de segment
+changé ; production révisée à la baisse ; garanties déclarées modifiées. Et deux
+admissions positives : une extension légitime, et une reprise oisive qui n'ajoute
+rien.
+
+Seize suites vertes. Les trois conséquences de contrat nommées le 7 août sont
+écrites.
+
+**Ce que cela ne dit pas.** Elles sont écrites **du côté du générateur**, pas
+encore branchées dans la session ancrée : aucun chemin de commit ne mint la base
+de germination, et tous les consommateurs actuels la refusent par nom. Aucune
+mesure G4, aucun run 50k, aucune porte d'échelle, aucun statut public.

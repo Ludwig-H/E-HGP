@@ -202,6 +202,151 @@ bool local_germination_certificate_admissible(
   return true;
 }
 
+bool local_germination_production_identity_holds(
+    const LocalGerminationCertificate& certificate,
+    const LocalGerminationProductionAudit& audit,
+    std::string& reason) {
+  reason.clear();
+  const LocalGerminationCounters& counters = certificate.counters;
+
+  // The arity of a run is exclusive: a run for triples emits no quadruple and
+  // conversely.  A mixed emission means the sink saw a support the run did not
+  // generate.
+  if (certificate.support_size == 3U && counters.quadruple_candidates != 0U) {
+    reason = "a_triple_run_produced_quadruples";
+    return false;
+  }
+  if (certificate.support_size == 4U && counters.triple_candidates != 0U) {
+    reason = "a_quadruple_run_produced_triples";
+    return false;
+  }
+
+  // The cross-check that carries the identity: the consumer's own tally must
+  // equal the producer's counters, arity by arity.
+  if (audit.observed_triple_emissions != counters.triple_candidates) {
+    reason = "observed_triple_emissions";
+    return false;
+  }
+  if (audit.observed_quadruple_emissions != counters.quadruple_candidates) {
+    reason = "observed_quadruple_emissions";
+    return false;
+  }
+
+  // Acceptance is decided downstream, by the exact terminal classification, and
+  // it can only ever retain a subset of what was produced.  An acceptance count
+  // above the production count means a support was accepted that the generator
+  // never emitted, which is precisely the failure completeness must exclude.
+  if (audit.accepted_supports > counters.candidates()) {
+    reason = "accepted_supports_exceed_production";
+    return false;
+  }
+
+  // Internal monotonicity of the accounting: nothing retained without being
+  // examined, and no stage inventing work.
+  if (counters.pairs_retained > counters.pairs_examined) {
+    reason = "pairs_retained_exceed_pairs_examined";
+    return false;
+  }
+  if (counters.third_vertices_retained + counters.third_vertices_free_rejected >
+      counters.third_vertices_examined) {
+    reason = "third_vertex_accounting_exceeds_its_examination";
+    return false;
+  }
+  // A retained pair is a necessary condition for examining a third vertex, so a
+  // run that examined third vertices without retaining a pair is incoherent.
+  if (counters.third_vertices_examined != 0U && counters.pairs_retained == 0U) {
+    reason = "third_vertices_without_a_retained_pair";
+    return false;
+  }
+  // Likewise no candidate can exist without a retained third vertex.
+  if (counters.candidates() != 0U && counters.third_vertices_retained == 0U) {
+    reason = "candidates_without_a_retained_third_vertex";
+    return false;
+  }
+  return true;
+}
+
+bool local_germination_resume_induction_holds(
+    const LocalGerminationCertificate& previous,
+    const LocalGerminationCertificate& successor,
+    std::string& reason) {
+  reason.clear();
+  // A resumed run is the same run.  Any declared constant that moved makes the
+  // successor a different producer, whose records may not be appended.
+  if (previous.proof_basis != successor.proof_basis) {
+    reason = "proof_basis_changed";
+    return false;
+  }
+  if (previous.support_size != successor.support_size) {
+    reason = "support_size_changed";
+    return false;
+  }
+  if (previous.maximum_relevant_closed_rank !=
+      successor.maximum_relevant_closed_rank) {
+    reason = "maximum_relevant_closed_rank_changed";
+    return false;
+  }
+  if (previous.jung_squared_numerator != successor.jung_squared_numerator ||
+      previous.jung_squared_denominator !=
+          successor.jung_squared_denominator) {
+    reason = "jung_squared_changed";
+    return false;
+  }
+  if (previous.seed_disc_ring_count != successor.seed_disc_ring_count) {
+    reason = "seed_disc_ring_count_changed";
+    return false;
+  }
+  if (previous.segment_position_count != successor.segment_position_count) {
+    reason = "segment_position_count_changed";
+    return false;
+  }
+  if (previous.certified_margin_exponent !=
+      successor.certified_margin_exponent) {
+    reason = "certified_margin_exponent_changed";
+    return false;
+  }
+  if (previous.mass_partition_identity_available !=
+          successor.mass_partition_identity_available ||
+      previous.completeness_basis_declared !=
+          successor.completeness_basis_declared) {
+    reason = "declared_guarantees_changed";
+    return false;
+  }
+
+  // The conserved quantity: a resumed run extends the accounting, it never
+  // revises it.  Every counter is non-decreasing.
+  const LocalGerminationCounters& before = previous.counters;
+  const LocalGerminationCounters& after = successor.counters;
+  const auto monotone = [&](std::size_t left, std::size_t right,
+                            const char* field) {
+    if (left > right) {
+      reason = field;
+      return false;
+    }
+    return true;
+  };
+  if (!monotone(before.pairs_examined, after.pairs_examined,
+                "pairs_examined_went_backwards") ||
+      !monotone(before.pairs_retained, after.pairs_retained,
+                "pairs_retained_went_backwards") ||
+      !monotone(before.third_vertices_examined, after.third_vertices_examined,
+                "third_vertices_examined_went_backwards") ||
+      !monotone(before.third_vertices_free_rejected,
+                after.third_vertices_free_rejected,
+                "third_vertices_free_rejected_went_backwards") ||
+      !monotone(before.third_vertices_retained, after.third_vertices_retained,
+                "third_vertices_retained_went_backwards") ||
+      !monotone(before.triple_candidates, after.triple_candidates,
+                "triple_candidates_went_backwards") ||
+      !monotone(before.quadruple_candidates, after.quadruple_candidates,
+                "quadruple_candidates_went_backwards") ||
+      !monotone(before.population_queries, after.population_queries,
+                "population_queries_went_backwards")) {
+    return false;
+  }
+  return true;
+}
+
 LocalGerminationCertificate generate_local_germination_candidates(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,

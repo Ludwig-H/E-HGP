@@ -44,8 +44,11 @@ using morsehgp3d::hierarchy::ExactHigherSupportIndexedClosedBallQuery;
 using morsehgp3d::hierarchy::LocalGerminationCertificate;
 using morsehgp3d::hierarchy::LocalGerminationConfig;
 using morsehgp3d::hierarchy::LocalGerminationCounters;
+using morsehgp3d::hierarchy::LocalGerminationProductionAudit;
 using morsehgp3d::hierarchy::generate_local_germination_candidates;
 using morsehgp3d::hierarchy::local_germination_certificate_admissible;
+using morsehgp3d::hierarchy::local_germination_production_identity_holds;
+using morsehgp3d::hierarchy::local_germination_resume_induction_holds;
 using morsehgp3d::hierarchy::local_germination_proof_basis;
 using morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis;
 using morsehgp3d::hierarchy::canonical_name;
@@ -197,6 +200,9 @@ void check_family(
   config.seed_disc_ring_count = 2U;
   config.segment_position_count = 8U;
   std::set<Support> emitted;
+  // Tallied by the CONSUMER, deliberately separate from the dedup set, so that
+  // the production identity compares two independent accountings.
+  LocalGerminationProductionAudit audit;
   const LocalGerminationCertificate certificate =
       generate_local_germination_candidates(
           index,
@@ -205,14 +211,23 @@ void check_family(
           config,
           [&](const Support& candidate, std::size_t size) {
             require(size == support_size, "the sink received the wrong arity");
+            if (size == 3U) {
+              ++audit.observed_triple_emissions;
+            } else {
+              ++audit.observed_quadruple_emissions;
+            }
             emitted.insert(candidate);
           });
+  audit.accepted_supports = reference.size();
 
   const LocalGerminationCounters& counters = certificate.counters;
   std::string reason;
   require(
       local_germination_certificate_admissible(certificate, reason),
       std::string{"a legitimate certificate was refused on "} + reason);
+  require(
+      local_germination_production_identity_holds(certificate, audit, reason),
+      std::string{"the production identity failed on "} + reason);
 
   std::size_t missing = 0U;
   for (const Support& support : reference) {
@@ -393,6 +408,154 @@ void check_verification_basis_contract() {
       "the germination basis name drifted");
 }
 
+// The identity of production replaces the identity of coverage, so it must be
+// as refusable as the mass partition it stands in for.  Each forgery below is a
+// way the accounting could drift from what was really emitted.
+void check_production_identity_falsification() {
+  LocalGerminationCertificate certificate;
+  certificate.proof_basis = std::string{local_germination_proof_basis};
+  certificate.support_size = 4U;
+  certificate.maximum_relevant_closed_rank = 11U;
+  certificate.jung_squared_numerator = 3U;
+  certificate.jung_squared_denominator = 8U;
+  certificate.seed_disc_ring_count = 2U;
+  certificate.segment_position_count = 16U;
+  certificate.certified_margin_exponent = -20;
+  certificate.counters.pairs_examined = 100U;
+  certificate.counters.pairs_retained = 40U;
+  certificate.counters.third_vertices_examined = 300U;
+  certificate.counters.third_vertices_free_rejected = 100U;
+  certificate.counters.third_vertices_retained = 150U;
+  certificate.counters.quadruple_candidates = 500U;
+
+  LocalGerminationProductionAudit audit;
+  audit.observed_quadruple_emissions = 500U;
+  audit.accepted_supports = 12U;
+
+  std::string reason;
+  require(
+      local_germination_production_identity_holds(certificate, audit, reason),
+      "a coherent production accounting was refused");
+
+  // The consumer saw fewer emissions than the producer counted.
+  LocalGerminationProductionAudit short_tally = audit;
+  short_tally.observed_quadruple_emissions = 499U;
+  require(
+      !local_germination_production_identity_holds(
+          certificate, short_tally, reason) &&
+          reason == "observed_quadruple_emissions",
+      "a tally below the producer's count was admitted");
+
+  // Acceptance above production is exactly the failure completeness excludes:
+  // a support accepted that the generator never emitted.
+  LocalGerminationProductionAudit over_accepted = audit;
+  over_accepted.accepted_supports = 501U;
+  require(
+      !local_germination_production_identity_holds(
+          certificate, over_accepted, reason) &&
+          reason == "accepted_supports_exceed_production",
+      "an acceptance above production was admitted");
+
+  LocalGerminationCertificate mixed = certificate;
+  mixed.counters.triple_candidates = 1U;
+  require(
+      !local_germination_production_identity_holds(mixed, audit, reason) &&
+          reason == "a_quadruple_run_produced_triples",
+      "a mixed-arity run was admitted");
+
+  LocalGerminationCertificate inflated = certificate;
+  inflated.counters.pairs_retained = 101U;
+  require(
+      !local_germination_production_identity_holds(inflated, audit, reason) &&
+          reason == "pairs_retained_exceed_pairs_examined",
+      "more pairs retained than examined was admitted");
+
+  LocalGerminationCertificate impossible = certificate;
+  impossible.counters.third_vertices_retained = 250U;  // 250 + 100 > 300
+  require(
+      !local_germination_production_identity_holds(impossible, audit, reason) &&
+          reason == "third_vertex_accounting_exceeds_its_examination",
+      "a third-vertex accounting above its examination was admitted");
+
+  LocalGerminationCertificate orphan = certificate;
+  orphan.counters.pairs_retained = 0U;
+  require(
+      !local_germination_production_identity_holds(orphan, audit, reason) &&
+          reason == "third_vertices_without_a_retained_pair",
+      "third vertices without a retained pair were admitted");
+
+  LocalGerminationCertificate barren = certificate;
+  barren.counters.third_vertices_retained = 0U;
+  require(
+      !local_germination_production_identity_holds(barren, audit, reason),
+      "candidates without a retained third vertex were admitted");
+}
+
+// The resume induction conserves an accounting instead of a mass: a resumed run
+// may extend what was produced, never revise it, and never under another
+// constant.
+void check_resume_induction() {
+  LocalGerminationCertificate previous;
+  previous.proof_basis = std::string{local_germination_proof_basis};
+  previous.support_size = 4U;
+  previous.maximum_relevant_closed_rank = 11U;
+  previous.jung_squared_numerator = 3U;
+  previous.jung_squared_denominator = 8U;
+  previous.seed_disc_ring_count = 2U;
+  previous.segment_position_count = 16U;
+  previous.certified_margin_exponent = -20;
+  previous.counters.pairs_examined = 100U;
+  previous.counters.pairs_retained = 40U;
+  previous.counters.third_vertices_examined = 300U;
+  previous.counters.third_vertices_retained = 150U;
+  previous.counters.quadruple_candidates = 500U;
+  previous.counters.population_queries = 900U;
+
+  std::string reason;
+  LocalGerminationCertificate extended = previous;
+  extended.counters.pairs_examined = 180U;
+  extended.counters.quadruple_candidates = 700U;
+  extended.counters.population_queries = 1500U;
+  require(
+      local_germination_resume_induction_holds(previous, extended, reason),
+      std::string{"a legitimate resumption was refused on "} + reason);
+
+  require(
+      local_germination_resume_induction_holds(previous, previous, reason),
+      "an idle resumption was refused");
+
+  // A run that changed its constant is a different producer, and appending its
+  // records to the first would silently mix two completeness arguments.
+  LocalGerminationCertificate reconstant = extended;
+  reconstant.jung_squared_numerator = 1U;
+  reconstant.jung_squared_denominator = 2U;  // conservative, but DIFFERENT
+  require(
+      !local_germination_resume_induction_holds(previous, reconstant, reason) &&
+          reason == "jung_squared_changed",
+      "a resumption under another Jung constant was admitted");
+
+  LocalGerminationCertificate recovered = extended;
+  recovered.segment_position_count = 8U;
+  require(
+      !local_germination_resume_induction_holds(previous, recovered, reason) &&
+          reason == "segment_position_count_changed",
+      "a resumption under another segment covering was admitted");
+
+  LocalGerminationCertificate rewound = extended;
+  rewound.counters.quadruple_candidates = 499U;
+  require(
+      !local_germination_resume_induction_holds(previous, rewound, reason) &&
+          reason == "quadruple_candidates_went_backwards",
+      "a resumption revising its production downwards was admitted");
+
+  LocalGerminationCertificate relaxed = extended;
+  relaxed.mass_partition_identity_available = true;
+  require(
+      !local_germination_resume_induction_holds(previous, relaxed, reason) &&
+          reason == "declared_guarantees_changed",
+      "a resumption changing its declared guarantees was admitted");
+}
+
 }  // namespace
 
 int main() {
@@ -410,6 +573,8 @@ int main() {
     check_family("eight_clusters", eight_clusters_points(40U), 5U, 3U);
     check_certificate_falsification();
     check_verification_basis_contract();
+    check_production_identity_falsification();
+    check_resume_induction();
   } catch (const std::exception& error) {
     std::cerr << "local germination test threw: " << error.what() << '\n';
     return 1;

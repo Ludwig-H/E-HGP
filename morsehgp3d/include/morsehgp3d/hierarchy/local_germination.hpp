@@ -120,6 +120,52 @@ struct LocalGerminationCertificate {
 [[nodiscard]] bool local_germination_certificate_admissible(
     const LocalGerminationCertificate& certificate, std::string& reason);
 
+// What an INDEPENDENT observer counted at the sink boundary.  The point of the
+// production identity is that these numbers are tallied by the consumer, not by
+// the generator, so agreeing with the certificate's own counters is a genuine
+// cross-check -- the direct analogue of the BigInt mass cross-validation the
+// bridge performs under the coverage bases.
+struct LocalGerminationProductionAudit {
+  std::size_t observed_triple_emissions{};
+  std::size_t observed_quadruple_emissions{};
+  // Emissions the exact terminal classification accepted.  Acceptance is a
+  // subset of production; this is what makes the identity say something.
+  std::size_t accepted_supports{};
+};
+
+// The identity of PRODUCTION, which replaces the identity of COVERAGE under the
+// germination basis.
+//
+// Under the coverage bases the chain checks a partition of the universe:
+// resolved plus remaining equals C(n,3) + C(n,4).  The germination basis has no
+// such partition -- the universe is never enumerated -- so what a commit can
+// still check is that the records it carries are exactly what the declared
+// configuration produced, and that acceptance is a subset of production.  That
+// is an identity on the accounting itself, cross-checked against a consumer's
+// independent tally.
+//
+// On refusal `reason` names the identity that failed.
+[[nodiscard]] bool local_germination_production_identity_holds(
+    const LocalGerminationCertificate& certificate,
+    const LocalGerminationProductionAudit& audit,
+    std::string& reason);
+
+// The resume induction, under the new conserved quantity.
+//
+// Under the coverage bases the induction conserves a mass: the successor
+// checkpoint satisfies R + C(F) = C(n,3) + C(n,4) exactly as its predecessor
+// did.  The germination basis conserves an ACCOUNTING instead: a resumed run
+// may only extend what the interrupted one had produced, never revise it.
+//
+// So the successor must declare the SAME constants -- a run that changed its
+// squared Jung constant, its coverings or its margin mid-chain is a different
+// run and its records may not be appended to the first -- and every counter
+// must be non-decreasing.  On refusal `reason` names the field.
+[[nodiscard]] bool local_germination_resume_induction_holds(
+    const LocalGerminationCertificate& previous,
+    const LocalGerminationCertificate& successor,
+    std::string& reason);
+
 // Receives every emitted candidate: the support ids in strictly increasing
 // order, and its size.
 using LocalGerminationSink =
