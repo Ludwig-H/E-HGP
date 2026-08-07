@@ -143,6 +143,16 @@ struct DiscCover {
 
 }  // namespace
 
+std::size_t sealed_tangent_covering_radius_millidegrees(
+    std::size_t direction_count) noexcept {
+  // arccos(1/sqrt(3)) = 54.735610317... degrees, rounded UP so the sealed value
+  // is never below the truth.
+  if (direction_count == 6U) {
+    return 54736U;
+  }
+  return 0U;
+}
+
 bool local_germination_certificate_admissible(
     const LocalGerminationCertificate& certificate, std::string& reason) {
   reason.clear();
@@ -191,6 +201,26 @@ bool local_germination_certificate_admissible(
     reason = "certified_margin_exponent";
     return false;
   }
+  // A declared tangent bound must name a direction set whose covering radius is
+  // proved, and must not understate it: a covering radius below the truth
+  // leaves a direction untested and can lose a support.
+  if (certificate.tangent_direction_count != 0U) {
+    const std::size_t sealed = sealed_tangent_covering_radius_millidegrees(
+        certificate.tangent_direction_count);
+    if (sealed == 0U) {
+      if (certificate.tangent_covering_radius_proved) {
+        reason = "tangent_covering_radius_claimed_proved_without_a_seal";
+        return false;
+      }
+    } else if (certificate.tangent_covering_radius_millidegrees < sealed) {
+      reason = "tangent_covering_radius_below_the_sealed_proof";
+      return false;
+    }
+  } else if (certificate.tangent_covering_radius_proved) {
+    reason = "tangent_covering_radius_proved_without_a_direction_set";
+    return false;
+  }
+
   // A restricted seed loop and a claim of exhaustiveness cannot both be true.
   // Completeness under a cutoff needs the certified restriction D <= 2 R(p),
   // which this basis does not carry, so the claim is refused rather than
@@ -319,6 +349,14 @@ bool local_germination_resume_induction_holds(
       previous.seed_loop_exhaustive_over_pairs !=
           successor.seed_loop_exhaustive_over_pairs) {
     reason = "seed_loop_restriction_changed";
+    return false;
+  }
+  if (previous.tangent_direction_count != successor.tangent_direction_count ||
+      previous.tangent_covering_radius_millidegrees !=
+          successor.tangent_covering_radius_millidegrees ||
+      previous.tangent_covering_radius_proved !=
+          successor.tangent_covering_radius_proved) {
+    reason = "tangent_direction_declaration_changed";
     return false;
   }
   if (previous.mass_partition_identity_available !=

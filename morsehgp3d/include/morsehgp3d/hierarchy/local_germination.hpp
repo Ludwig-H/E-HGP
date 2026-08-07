@@ -115,6 +115,16 @@ struct LocalGerminationCertificate {
   std::size_t segment_position_count{};
   int certified_margin_exponent{};
   std::size_t seed_neighbourhood_cutoff_multiple{};
+  // The direction set used to bound the tangent radius R(p), and the covering
+  // radius claimed for it in millidegrees.  A covering radius that is too small
+  // would leave a direction untested and could lose a support, so the verifier
+  // refuses any value below the sealed proved one for the declared count.
+  std::size_t tangent_direction_count{};
+  std::size_t tangent_covering_radius_millidegrees{};
+  // True only when the declared covering radius is a PROVED value for the
+  // declared direction set, not an estimate.  Today exactly one entry is
+  // sealed with a proof.
+  bool tangent_covering_radius_proved{};
   // True only when the seed loop was exhaustive over pairs.  A run that
   // restricted it owes a completeness argument the theorem does not supply, and
   // the verifier refuses a certificate that claims otherwise.
@@ -127,6 +137,25 @@ struct LocalGerminationCertificate {
   bool completeness_basis_declared{true};
   LocalGerminationCounters counters;
 };
+
+// The sealed covering radius of a direction set, in millidegrees, or zero when
+// no proof is on record for that count.
+//
+// Six signed axes: for any unit u, the identity sum u_i^2 = 1 forces
+// max_i |u_i| >= 1/sqrt(3), so the nearest signed axis is within
+// arccos(1/sqrt(3)) = 54.7356 degrees, and (1,1,1)/sqrt(3) attains it.  That is
+// a one-line proof and it is the only one on record.
+//
+// Finer sets are measurably far better -- the offset factor 1 - sin(theta) goes
+// from 0.1835 at six directions to 0.6001 at forty-eight, and the certified
+// neighbourhood at fifty thousand points from 10 292 to 515 -- but their
+// covering radius is only ESTIMATED here.  The obligation is finite and
+// mechanical rather than open: the covering radius of a fixed finite set on the
+// sphere is attained at a vertex of its spherical Voronoi diagram, so it is an
+// exactly computable algebraic number for any concrete set.  It simply has to
+// be computed once, offline, and sealed here.
+[[nodiscard]] std::size_t sealed_tangent_covering_radius_millidegrees(
+    std::size_t direction_count) noexcept;
 
 // Re-derives the admissibility of a certificate from its declared constants.
 // It does not trust the producer: it checks that the declared squared Jung

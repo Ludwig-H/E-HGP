@@ -50,6 +50,7 @@ using morsehgp3d::hierarchy::local_germination_certificate_admissible;
 using morsehgp3d::hierarchy::local_germination_production_identity_holds;
 using morsehgp3d::hierarchy::local_germination_resume_induction_holds;
 using morsehgp3d::hierarchy::local_germination_proof_basis;
+using morsehgp3d::hierarchy::sealed_tangent_covering_radius_millidegrees;
 using morsehgp3d::hierarchy::ExactHigherSupportEvent;
 using morsehgp3d::hierarchy::ExactHigherSupportExtraShellDiagnostic;
 using morsehgp3d::hierarchy::ExactHigherSupportVerificationBasis;
@@ -353,6 +354,56 @@ void check_certificate_falsification() {
   require(
       local_germination_certificate_admissible(honest_cutoff, reason),
       "an honestly declared seed restriction was refused");
+
+  // The six signed axes are the only direction set with a proof on record, and
+  // the sealed value rounds arccos(1/sqrt(3)) UP so it is never below the truth.
+  require(
+      sealed_tangent_covering_radius_millidegrees(6U) == 54736U,
+      "the sealed covering radius of the six axes drifted");
+  require(
+      sealed_tangent_covering_radius_millidegrees(48U) == 0U,
+      "a covering radius was sealed without a proof");
+
+  LocalGerminationCertificate proved_axes = fresh();
+  proved_axes.tangent_direction_count = 6U;
+  proved_axes.tangent_covering_radius_millidegrees = 54736U;
+  proved_axes.tangent_covering_radius_proved = true;
+  require(
+      local_germination_certificate_admissible(proved_axes, reason),
+      "the proved six-axis declaration was refused");
+
+  // Understating the covering radius leaves a direction untested and can lose a
+  // support: refused by name.
+  LocalGerminationCertificate understated = proved_axes;
+  understated.tangent_covering_radius_millidegrees = 54735U;
+  require(
+      !local_germination_certificate_admissible(understated, reason) &&
+          reason == "tangent_covering_radius_below_the_sealed_proof",
+      "a covering radius below the sealed proof was admitted");
+
+  // A finer set may be used -- it is measurably far better -- but it may not
+  // claim a proof that is not on record.
+  LocalGerminationCertificate estimated = fresh();
+  estimated.tangent_direction_count = 48U;
+  estimated.tangent_covering_radius_millidegrees = 24000U;
+  estimated.tangent_covering_radius_proved = false;
+  require(
+      local_germination_certificate_admissible(estimated, reason),
+      "an honestly estimated covering radius was refused");
+
+  LocalGerminationCertificate pretending = estimated;
+  pretending.tangent_covering_radius_proved = true;
+  require(
+      !local_germination_certificate_admissible(pretending, reason) &&
+          reason == "tangent_covering_radius_claimed_proved_without_a_seal",
+      "an unproved covering radius claimed as proved was admitted");
+
+  LocalGerminationCertificate orphan_proof = fresh();
+  orphan_proof.tangent_covering_radius_proved = true;
+  require(
+      !local_germination_certificate_admissible(orphan_proof, reason) &&
+          reason == "tangent_covering_radius_proved_without_a_direction_set",
+      "a proof without a direction set was admitted");
 
   LocalGerminationCertificate lying_cutoff = fresh();
   lying_cutoff.seed_neighbourhood_cutoff_multiple = 6U;

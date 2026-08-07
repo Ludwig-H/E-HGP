@@ -430,3 +430,44 @@ rayons employée dans toutes les mesures antérieures est **valide sur les nuage
 quasi uniformes et fausse sur les nuages en amas**, où le vivier certifié est
 douze fois plus grand. Toute mesure future doit déclarer la famille avec le
 chiffre.
+
+### 8.4 Le jeu de directions, et la seule preuve dont on dispose
+
+Le test de §5.0 (Lemme 3) exige un **rayon de recouvrement** $\theta$ du jeu de
+directions : un $\theta$ sous-estimé laisserait une direction non testée et
+pourrait perdre un support. Il faut donc un jeu dont le rayon soit **démontré**,
+pas estimé.
+
+> **Six axes signés, rayon $\arccos(1/\sqrt3)$.** Pour tout $u$ unitaire,
+> $\sum_i u_i^2=1$ force $\max_i\lvert u_i\rvert\ge1/\sqrt3$, donc l'axe signé le
+> plus proche est à au plus $\arccos(1/\sqrt3)=54{,}7356^\circ$ ; et
+> $(1,1,1)/\sqrt3$ atteint cette borne, qui est donc exacte.
+
+C'est une preuve d'une ligne, et c'est **la seule dont on dispose**. Voici ce
+qu'elle coûte, mesuré à 50 000 points, $s_{\max}=11$, sur `uniform_latin`, la
+région étant l'AABB :
+
+| jeu | $\theta$ | facteur $1-\sin\theta$ | $R/\rho_{s_{\max}}$ médian | voisinage moyen |
+| --- | ---: | ---: | ---: | ---: |
+| **6 axes — prouvé** | $54{,}74^\circ$ | $0{,}1835$ | $5{,}75$ | **10 292** |
+| 14 — estimé | $37{,}98^\circ$ | $0{,}3846$ | $2{,}72$ | 1 583 |
+| 26 — estimé | $28{,}91^\circ$ | $0{,}5165$ | $2{,}07$ | 764 |
+| 48 — estimé | $23{,}57^\circ$ | $0{,}6001$ | $1{,}80$ | **515** |
+
+**Le jeu prouvé est vingt fois trop faible.** Et le prix de la certification est
+lisible sur la dernière ligne : le voisinage passe de 114 — l'estimation
+échantillonnée non certifiée — à 515 avec la boule-test décalée, soit un facteur
+4,5 rien que pour rendre le test valide.
+
+**L'obligation restante est finie et mécanique, pas ouverte.** Le rayon de
+recouvrement d'un ensemble fini fixé de la sphère est atteint en un **sommet de
+son diagramme de Voronoï sphérique** ; c'est donc un nombre algébrique exactement
+calculable pour tout jeu concret. Il suffit de le calculer une fois, hors ligne,
+et de le sceller. Rien dans cette étape ne dépend des données.
+
+Le certificat porte donc `tangent_direction_count`,
+`tangent_covering_radius_millidegrees` et `tangent_covering_radius_proved`, et le
+vérificateur refuse par nom un rayon **inférieur au scellé**, une preuve
+**revendiquée sans scellé**, et une preuve **sans jeu de directions**. Un jeu
+fin honnêtement déclaré comme estimé est admis — c'est ainsi qu'on avance en
+attendant la preuve — mais il ne peut pas se dire prouvé.
