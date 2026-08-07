@@ -1658,3 +1658,21 @@ Trois conclusions, toutes mesurées et aucune extrapolée.
 **③ La frontière n'est pas constante en n.** La note de coût de R2-b supposait qu'elle oscille autour de la cible de pré-expansion, donc indépendamment de n ; la mesure donne 0, 30 et 43 entrées à n=32, 512 et 4 096. L'expansion s'arrête quand l'entrée de queue n'est plus scindable, pas quand la cible est atteinte.
 
 Ces trois lectures n'étaient possibles que parce que R2-c, R2-h et R2-i existaient : sans la censure coopérative dans la tuile et sans la ventilation publiée sur tous les dénouements, ces quatre cellules auraient rendu quatre échecs muets.
+
+### Seconde session G4 : la frontière est réparée, la tuile ne l'est pas
+
+Session gardée du 7/8 après-midi (`maxRunDuration=5400 s`, arrêt invité 80 min, clé éphémère 95 min, cible arrêtée et relue `TERMINATED`, clé révoquée). Piège consigné : `/tmp` est purgé au reboot — source et build disparaissent, seules les couches Docker survivent ; la reconstruction complète du runner coûte 4 minutes.
+
+Escalier repris avec la règle d'expansion par plus grande masse, K=5, tuile 1024, 300 s par cellule :
+
+| n | frontière avant | frontière après | expansions | tuiles | univers résolu |
+| ---: | ---: | ---: | ---: | ---: | --- |
+| 32 | 0 | 0 | 6 → **824** | 1 | 40 920 / 40 920 |
+| 512 | 30 | **1024** | 10 → **800** | 0 | **0** |
+| 4 096 | 43 | **1024** | 14 → **797** | 0 | **0** |
+
+**La correction fait exactement ce qu'elle devait faire** : la frontière atteint la cible de 1024 au lieu de geler à 30 et 43, et le device passe à **100 % d'utilisation** avec 10,8 Go de VRAM — là où le profil c3 ne voyait que « des rafales quasi inactives ». À n=32, le coût de l'étage higher est inchangé (22,2 s) malgré 824 expansions au lieu de 6 : les pré-expansions sont bon marché.
+
+**Et la tuile ne converge toujours pas.** Avec les 1024 slots pleins et le GPU saturé, n=512 et n=4 096 décident encore **exactement zéro** de leur univers en 300 s. Une mesure dédiée, sans plafond de cellule, laisse **une seule tuile à n=512 inachevée après plus de 21 minutes** — contre 22 secondes pour l'univers *entier* à n=32.
+
+Cela isole la cause de façon définitive : **ce n'est ni le parallélisme, ni l'occupation, ni la forme de la frontière. C'est que la transaction de tuile est indivisible.** Elle porte tout ce qu'on lui donne et ne rend rien tant qu'elle n'a pas tout fini. Le verrou est le contrat de la chaîne ancrée : `commit_tile_certified` n'accepte que des racines de frontière **entièrement** consommées (`prefix_size = |F| - consumed_root_count`, masses couvrant exactement les racines consommées). Tant qu'une tuile ne peut pas committer une résolution **partielle** avec réintroduction du résidu sur la frontière, aucune taille au-delà de la centaine de points n'est atteignable, quel que soit le matériel.
