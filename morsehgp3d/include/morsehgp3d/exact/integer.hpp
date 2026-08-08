@@ -27,6 +27,27 @@ inline BigInt greatest_common_divisor(BigInt left, BigInt right) {
       magnitude(std::move(left)), magnitude(std::move(right)));
 }
 
+// True when value is a strictly positive power of two.  One bit scan, no
+// division.
+inline bool is_power_of_two(const BigInt& value) {
+  return value > 0 &&
+         boost::multiprecision::lsb(value) ==
+             boost::multiprecision::msb(value);
+}
+
+// value * factor, taking the shift when factor is a power of two.  Exactly
+// the same integer in both branches.  This is the multiplication that every
+// normalized rational operation performs against a denominator, and every
+// quantity built from binary64 coordinates by addition, subtraction and
+// multiplication carries a power-of-two denominator -- so on the support
+// product the general branch is never taken.
+inline BigInt scaled_by(const BigInt& value, const BigInt& factor) {
+  if (is_power_of_two(factor)) {
+    return value << boost::multiprecision::lsb(factor);
+  }
+  return value * factor;
+}
+
 inline BigInt power_of_two(unsigned int exponent) {
   BigInt result = 1;
   return result << exponent;

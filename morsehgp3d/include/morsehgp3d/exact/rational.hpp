@@ -5,6 +5,7 @@
 
 #include <bit>
 #include <compare>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
@@ -106,7 +107,8 @@ class ExactRational {
 
   friend std::strong_ordering operator<=>(const ExactRational& left, const ExactRational& right) {
     const BigInt difference =
-        left.numerator_ * right.denominator_ - right.numerator_ * left.denominator_;
+        scaled_by(left.numerator_, right.denominator_) -
+        scaled_by(right.numerator_, left.denominator_);
     if (difference < 0) {
       return std::strong_ordering::less;
     }
@@ -122,8 +124,9 @@ class ExactRational {
 
   friend ExactRational operator+(const ExactRational& left, const ExactRational& right) {
     return ExactRational{
-        left.numerator_ * right.denominator_ + right.numerator_ * left.denominator_,
-        left.denominator_ * right.denominator_};
+        scaled_by(left.numerator_, right.denominator_) +
+            scaled_by(right.numerator_, left.denominator_),
+        scaled_by(left.denominator_, right.denominator_)};
   }
 
   friend ExactRational operator-(const ExactRational& left, const ExactRational& right) {
@@ -132,7 +135,8 @@ class ExactRational {
 
   friend ExactRational operator*(const ExactRational& left, const ExactRational& right) {
     return ExactRational{
-        left.numerator_ * right.numerator_, left.denominator_ * right.denominator_};
+        left.numerator_ * right.numerator_,
+        scaled_by(left.denominator_, right.denominator_)};
   }
 
   friend ExactRational operator/(const ExactRational& left, const ExactRational& right) {
@@ -140,7 +144,8 @@ class ExactRational {
       throw std::domain_error("division by an exact zero is undefined");
     }
     return ExactRational{
-        left.numerator_ * right.denominator_, left.denominator_ * right.numerator_};
+        scaled_by(left.numerator_, right.denominator_),
+        left.denominator_ * right.numerator_};
   }
 
  private:
@@ -154,6 +159,29 @@ class ExactRational {
     }
     if (numerator_ == 0) {
       denominator_ = 1;
+      return;
+    }
+    // A dyadic denominator reduces by a bit scan instead of a Euclidean
+    // descent: gcd(n, 2^k) = 2^min(k, ctz(n)), and both divisions become
+    // exact right shifts.  This is not a special case of convenience -- the
+    // support-product analysis builds every intermediate from binary64 box
+    // coordinates by addition, subtraction and multiplication only, and each
+    // of those keeps the denominator a power of two.  Same canonical value in
+    // every branch, so no digest, certificate or comparison can observe which
+    // one ran.
+    if (is_power_of_two(denominator_)) {
+      const std::size_t denominator_bit =
+          boost::multiprecision::lsb(denominator_);
+      const std::size_t numerator_bit =
+          boost::multiprecision::lsb(magnitude(numerator_));
+      const std::size_t shift =
+          denominator_bit < numerator_bit ? denominator_bit : numerator_bit;
+      if (shift != 0U) {
+        // Exact by construction: shift <= ctz of both operands, so no bit is
+        // discarded and the sign convention of the shift cannot matter.
+        numerator_ >>= shift;
+        denominator_ >>= shift;
+      }
       return;
     }
     const BigInt divisor = greatest_common_divisor(numerator_, denominator_);
