@@ -95,8 +95,10 @@ famille, et la porte l'impose.**
 
 1. **La suite complète n'a jamais tourné sur G4 depuis les quatre correctifs de narrowing** (`fad3bb9`) :
    obligation explicitement laissée ouverte faute de temps de session. Record actuel : 252/254.
-2. **`check_scope.py` échoue à HEAD** — `docs/math/AUDIT_PROBE_LOCAL_MORTON_SUPPORTS_3_4.md:28-30`,
-   scope périmé `Perg-HGP`. Dette préexistante, vérifiée aujourd'hui.
+2. **`check_scope.py` échoue à HEAD** — trois lignes de
+   `docs/math/AUDIT_PROBE_LOCAL_MORTON_SUPPORTS_3_4.md` (28 à 30) citent un identifiant de prototype
+   supplanté que le vérificateur interdit dans la documentation active. Dette préexistante, revérifiée
+   aujourd'hui. *(Ne pas recopier l'identifiant en clair : le vérificateur le refuserait aussi ici.)*
 3. **L'arité 4 n'a jamais été exercée en parité produit.** `uniform_latin` — famille par défaut du
    runner et famille de la parité device–hôte certifiée du 7/8 — ne contient **aucun quadruple minimal
    bien centré** à $n=32/64/128$. Les 171 événements de cette parité sont exclusivement des triples.
