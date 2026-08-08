@@ -246,7 +246,13 @@ void push(Emit* e, const Sphere& s, const i32* sup, int nsup, int rank,
   c.sph = s;
   c.beta = sphere_beta(s);
   c.members_begin = static_cast<i32>(e->members.size());
-  e->members.insert(e->members.end(), members.begin(), members.end());
+  // Le contrat public (mhgp.hpp) annonce la tranche I u U TRIEE. classify
+  // insere l'ancre puis les voisins par distance : sans ce tri, le contrat est
+  // faux par construction, ce qu'aucun test ne voyait -- O1 ne lit jamais
+  // cat.members et O2 trie avant de comparer.
+  std::vector<i32> ordered(members.begin(), members.end());
+  std::sort(ordered.begin(), ordered.end());
+  e->members.insert(e->members.end(), ordered.begin(), ordered.end());
   e->spheres.push_back(c);
 }
 

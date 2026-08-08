@@ -1,0 +1,22 @@
+{
+  "schema": "morsehgp3d.v3.oracle.campaign.v1",
+  "subject": "morsehgp3D_v2 build_catalogue + run",
+  "oracle_arithmetic": "arbitrary precision sign-magnitude base 2^32",
+  "oracle_geometry": "gauss elimination, not cramer",
+  "oracle_structure": "merge forest rebuilt from gamma_k",
+  "seed": 4242,
+  "clouds_requested": 40,
+  "points": [8, 11],
+  "maximum_order": 3,
+  "coordinate_maximum": 65535,
+  "declared_grid_maximum": 65535,
+  "attempted": 40,
+  "decided": 40,
+  "rejected_domain": 0,
+  "identity_closed": true,
+  "catalogue_spheres_compared": 1850,
+  "forests_compared": 82,
+  "canonical_nodes_compared": 1909,
+  "widest_exact_level_bits": 158,
+  "failures": 0
+}

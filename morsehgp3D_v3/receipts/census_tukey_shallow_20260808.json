@@ -1,0 +1,250 @@
+{
+ "schema": "morsehgp3d.v3.census.tukey_shallow.v2",
+ "measures": "MINORANT de { p : tau_non_contrainte(p) = +infini }",
+ "does_not_measure": "l'ensemble ou la borne a centre convexe R echoue ; cet ensemble est VIDE car R <= diam(X)",
+ "half_space": "ouvert, <x-p,e> > 0 ; p non compte ; frontiere non comptee",
+ "direction_set": {
+  "count": 4096,
+  "law": "gaussienne normalisee",
+  "generator": "numpy default_rng",
+  "seed": 1
+ },
+ "decimation": {
+  "algorithm": "choice sans remise",
+  "seed": 7
+ },
+ "provenance": {
+  "git_commit": "unavailable",
+  "python": "3.12.1",
+  "numpy": "2.5.1",
+  "platform": "Linux-6.8.0-1052-azure-x86_64-with-glibc2.39",
+  "processor": "x86_64"
+ },
+ "sources": {
+  "bunny_zipper": {
+   "origin": "https://graphics.stanford.edu/pub/3Dscanrep/bunny.tar.gz",
+   "file": "bunny/reconstruction/bun_zipper.ply",
+   "points": 35947,
+   "digest_sha256": "0ca7b924a6c6d8d1a6867e552d13474a00c75b5ecff2299cf03a1f7377f12369",
+   "nature": "reconstruction fusionnee d'un scan reel"
+  },
+  "bunny_multi_10_captations": {
+   "origin": "https://graphics.stanford.edu/pub/3Dscanrep/bunny.tar.gz",
+   "assembly": "bun.conf, x -> R(quaternion) x + translation",
+   "meshes": [
+    {
+     "mesh": "bun000.ply",
+     "points": 40256
+    },
+    {
+     "mesh": "bun045.ply",
+     "points": 40097
+    },
+    {
+     "mesh": "bun090.ply",
+     "points": 30379
+    },
+    {
+     "mesh": "bun180.ply",
+     "points": 40251
+    },
+    {
+     "mesh": "bun270.ply",
+     "points": 31701
+    },
+    {
+     "mesh": "top2.ply",
+     "points": 38298
+    },
+    {
+     "mesh": "top3.ply",
+     "points": 36023
+    },
+    {
+     "mesh": "bun315.ply",
+     "points": 35336
+    },
+    {
+     "mesh": "chin.ply",
+     "points": 37738
+    },
+    {
+     "mesh": "ear_back.ply",
+     "points": 32193
+    }
+   ],
+   "points": 362272,
+   "digest_sha256": "d37efd26acc3b281930501a82c35702cc6b156ea9321337a63c0aded33ffd41f",
+   "nature": "dix captations brutes recalees, avec recouvrement"
+  },
+  "uniform_cube_volumetrique": {
+   "origin": "numpy default_rng(3).random",
+   "nature": "temoin volumetrique"
+  }
+ },
+ "campaign": {
+  "attempted": 18,
+  "decided": 16,
+  "skipped_cloud_smaller_than_target": 2,
+  "identity_closed": true
+ },
+ "elapsed_seconds": 88.834,
+ "rows": [
+  {
+   "cloud": "bunny_zipper",
+   "n": 5000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "76594ba4efbe39d846a79818fd16876b5d74b8ef6db40668ddaa8216dae5d9aa",
+   "shallow_witnesses": 542,
+   "percent": 10.84
+  },
+  {
+   "cloud": "bunny_zipper",
+   "n": 5000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "76594ba4efbe39d846a79818fd16876b5d74b8ef6db40668ddaa8216dae5d9aa",
+   "shallow_witnesses": 1002,
+   "percent": 20.04
+  },
+  {
+   "cloud": "bunny_zipper",
+   "n": 20000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "97071c416671a8e2dbb051569c76b06fa54f90a3b35048b630e2afd54acb722e",
+   "shallow_witnesses": 1171,
+   "percent": 5.855
+  },
+  {
+   "cloud": "bunny_zipper",
+   "n": 20000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "97071c416671a8e2dbb051569c76b06fa54f90a3b35048b630e2afd54acb722e",
+   "shallow_witnesses": 2085,
+   "percent": 10.425
+  },
+  {
+   "cloud": "bunny_zipper",
+   "n": 50000,
+   "s_max": 3,
+   "status": "skipped_cloud_smaller_than_target"
+  },
+  {
+   "cloud": "bunny_zipper",
+   "n": 50000,
+   "s_max": 11,
+   "status": "skipped_cloud_smaller_than_target"
+  },
+  {
+   "cloud": "bunny_multi_10_captations",
+   "n": 5000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "1fd0aee1f3ba4e550865510bcf3d98af92b8c20be08fcbeba5823a32a2fee43c",
+   "shallow_witnesses": 223,
+   "percent": 4.46
+  },
+  {
+   "cloud": "bunny_multi_10_captations",
+   "n": 5000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "1fd0aee1f3ba4e550865510bcf3d98af92b8c20be08fcbeba5823a32a2fee43c",
+   "shallow_witnesses": 459,
+   "percent": 9.18
+  },
+  {
+   "cloud": "bunny_multi_10_captations",
+   "n": 20000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "4ea9d0fad343985c7fb8f54cab68ecb33e1973301e42b42781ce3bd6b31875ed",
+   "shallow_witnesses": 359,
+   "percent": 1.795
+  },
+  {
+   "cloud": "bunny_multi_10_captations",
+   "n": 20000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "4ea9d0fad343985c7fb8f54cab68ecb33e1973301e42b42781ce3bd6b31875ed",
+   "shallow_witnesses": 776,
+   "percent": 3.88
+  },
+  {
+   "cloud": "bunny_multi_10_captations",
+   "n": 50000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "420b24d7bbdc2c12ddcdb5329881a4713508685b772cf4153d3709676b306899",
+   "shallow_witnesses": 530,
+   "percent": 1.06
+  },
+  {
+   "cloud": "bunny_multi_10_captations",
+   "n": 50000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "420b24d7bbdc2c12ddcdb5329881a4713508685b772cf4153d3709676b306899",
+   "shallow_witnesses": 1106,
+   "percent": 2.212
+  },
+  {
+   "cloud": "uniform_cube_volumetrique",
+   "n": 5000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "67b00593b34847eb88d6e912a6e176bf34d822f317cebbb02342a6ca2428d838",
+   "shallow_witnesses": 176,
+   "percent": 3.52
+  },
+  {
+   "cloud": "uniform_cube_volumetrique",
+   "n": 5000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "67b00593b34847eb88d6e912a6e176bf34d822f317cebbb02342a6ca2428d838",
+   "shallow_witnesses": 432,
+   "percent": 8.64
+  },
+  {
+   "cloud": "uniform_cube_volumetrique",
+   "n": 20000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "5eef540862b45ebca2d88ddfc20dddfdcf47c96b8093ebdf3511a31adba1df61",
+   "shallow_witnesses": 189,
+   "percent": 0.945
+  },
+  {
+   "cloud": "uniform_cube_volumetrique",
+   "n": 20000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "5eef540862b45ebca2d88ddfc20dddfdcf47c96b8093ebdf3511a31adba1df61",
+   "shallow_witnesses": 566,
+   "percent": 2.83
+  },
+  {
+   "cloud": "uniform_cube_volumetrique",
+   "n": 50000,
+   "s_max": 3,
+   "status": "decided",
+   "sample_digest_sha256": "1ab4c910756f75d5af162be252eb6c5b756833caf361c44bb28c4605b4f8d93a",
+   "shallow_witnesses": 241,
+   "percent": 0.482
+  },
+  {
+   "cloud": "uniform_cube_volumetrique",
+   "n": 50000,
+   "s_max": 11,
+   "status": "decided",
+   "sample_digest_sha256": "1ab4c910756f75d5af162be252eb6c5b756833caf361c44bb28c4605b4f8d93a",
+   "shallow_witnesses": 661,
+   "percent": 1.322
+  }
+ ]
+}
