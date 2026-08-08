@@ -5,6 +5,7 @@
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -144,13 +145,26 @@ struct LocalGerminationCertificate {
   // the verifier refuses a certificate that claims otherwise.
   bool seed_loop_exhaustive_over_pairs{true};
 
+  // An operational deadline interrupted the seed loop.  This is an observation
+  // censored by a session guard, not a defect and not a budget -- but a seed
+  // loop that stopped early has not visited every seed, so whatever the
+  // restriction regime was, the run is NOT complete.  Recording it in the
+  // certificate is what stops a censored measurement being read as a
+  // completeness claim.
+  bool censored_by_operational_deadline{false};
+  // Pairs the seed loop had left to examine when the deadline bit.  Zero on
+  // every uncensored run, and the honest measure of how far a censored one got.
+  std::size_t unexamined_seed_pair_count{};
+
   // Completeness is guaranteed by exhaustion or by the certified bound, and by
   // nothing else.  A heuristic cutoff may be honest and useful, but it does not
-  // guarantee completeness and must never be read as if it did.
+  // guarantee completeness and must never be read as if it did -- and neither
+  // must a run the deadline cut short.
   [[nodiscard]] bool completeness_guaranteed() const noexcept {
-    return seed_restriction == SeedRestriction::exhaustive_over_pairs ||
-        (seed_restriction == SeedRestriction::certified_tangent_bound &&
-         tangent_covering_radius_proved);
+    return !censored_by_operational_deadline &&
+        (seed_restriction == SeedRestriction::exhaustive_over_pairs ||
+         (seed_restriction == SeedRestriction::certified_tangent_bound &&
+          tangent_covering_radius_proved));
   }
   // The mass partition identity does NOT survive this basis: the generator
   // never enumerates the universe, so unexamined mass is excluded by the
@@ -252,12 +266,39 @@ using LocalGerminationSink =
 // equality in binary64, which is exactly the kind of fragile decision this
 // project refuses to take outside exact arithmetic; the exact tie-break belongs
 // with the exact classifier, which sees the support anyway.
+// An operational guard, passed BY CALL and never sealed into the config, on
+// the model the device bridge has carried since R2-h.  It bounds how long a
+// measurement may run; it is not a budget, and its firing censors an
+// observation rather than reporting a defect.  A default-constructed guard is
+// disarmed.
+//
+// The deadline is tested between seed pairs, so it is honoured to within one
+// pair's worth of work -- the same shape as the higher stage's operational
+// quantum.
+struct LocalGerminationGuard {
+  bool armed{false};
+  std::chrono::steady_clock::time_point deadline{};
+  // Seed pairs between two deadline tests, which bounds the overshoot to that
+  // many pairs' work.
+  //
+  // The default is small on purpose.  At arity four one seed pair carries its
+  // whole third-and-fourth-vertex cascade, so an interval of 4096 was measured
+  // to turn a 12 s deadline into 63.8 s -- a factor 5.3, and exactly the defect
+  // 9d72726 named in the higher stage: a deadline that overshoots by an
+  // unbounded factor is not a deadline.  A clock read costs tens of
+  // nanoseconds against a pair costing milliseconds, so testing often is
+  // cheap; the field stays configurable for a caller who has measured
+  // otherwise.
+  std::size_t seed_pairs_per_deadline_test{64U};
+};
+
 [[nodiscard]] LocalGerminationCertificate generate_local_germination_candidates(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::size_t support_size,
     const LocalGerminationConfig& config,
-    const LocalGerminationSink& sink);
+    const LocalGerminationSink& sink,
+    const LocalGerminationGuard& guard = LocalGerminationGuard{});
 
 // The anchored chain of the germination basis.
 //

@@ -684,8 +684,13 @@ LocalGerminationCertificate generate_local_germination_candidates(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t support_size,
     const LocalGerminationConfig& config,
-    const LocalGerminationSink& sink) {
+    const LocalGerminationSink& sink,
+    const LocalGerminationGuard& guard) {
   static_cast<void>(index);
+  if (guard.armed && guard.seed_pairs_per_deadline_test == 0U) {
+    throw std::invalid_argument(
+        "an armed germination guard needs a positive test interval");
+  }
   if (support_size != 3U && support_size != 4U) {
     throw std::invalid_argument("a germinated support has size three or four");
   }
@@ -837,11 +842,33 @@ LocalGerminationCertificate generate_local_germination_candidates(
   std::array<PointId, 4> support{};
   std::vector<PointId> retained;
 
-  for (PointId first = 0U; first + 1U < static_cast<PointId>(point_count);
+  // Total seed pairs, so a censured run can say how far it got rather than
+  // merely that it stopped.
+  const std::size_t seed_pair_total = point_count < 2U
+      ? 0U
+      : point_count * (point_count - 1U) / 2U;
+  std::size_t pairs_since_deadline_test = 0U;
+  bool censored = false;
+
+  for (PointId first = 0U;
+       first + 1U < static_cast<PointId>(point_count) && !censored;
        ++first) {
     for (PointId second = first + 1U;
          second < static_cast<PointId>(point_count);
          ++second) {
+      // Tested between pairs, so the deadline is honoured to within one pair's
+      // work.  Reading the clock on every pair of a large cloud would itself be
+      // the cost under measurement.
+      if (guard.armed) {
+        ++pairs_since_deadline_test;
+        if (pairs_since_deadline_test >= guard.seed_pairs_per_deadline_test) {
+          pairs_since_deadline_test = 0U;
+          if (std::chrono::steady_clock::now() >= guard.deadline) {
+            censored = true;
+            break;
+          }
+        }
+      }
       ++counters.pairs_examined;
       const Vec3& p = points[first];
       const Vec3& q = points[second];
@@ -1000,6 +1027,9 @@ LocalGerminationCertificate generate_local_germination_candidates(
       }
     }
   }
+  certificate.censored_by_operational_deadline = censored;
+  certificate.unexamined_seed_pair_count =
+      seed_pair_total - std::min(seed_pair_total, counters.pairs_examined);
   return certificate;
 }
 

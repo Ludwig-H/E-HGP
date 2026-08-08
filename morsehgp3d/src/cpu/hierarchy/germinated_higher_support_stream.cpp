@@ -142,7 +142,8 @@ GerminatedHigherSupportResult build_germinated_higher_support_stream(
     const MortonLbvhIndex& index,
     const CanonicalPointCloud& cloud,
     std::size_t maximum_relevant_closed_rank,
-    LocalGerminationConfig config) {
+    LocalGerminationConfig config,
+    const LocalGerminationGuard& guard) {
   // One s_max for the generator and the classifier, so the two cannot disagree
   // about which supports are relevant.
   config.maximum_relevant_closed_rank = maximum_relevant_closed_rank;
@@ -188,7 +189,14 @@ GerminatedHigherSupportResult build_germinated_higher_support_stream(
         };
 
     result.certificates[arity_index] = generate_local_germination_candidates(
-        index, cloud, support_size, config, sink);
+        index, cloud, support_size, config, sink, guard);
+    if (result.certificates[arity_index].censored_by_operational_deadline) {
+      // The guard bit on this arity, so the next one would be censured at its
+      // first test anyway.  Stopping here keeps the report honest about which
+      // arities were attempted.
+      result.censored_by_operational_deadline = true;
+      break;
+    }
   }
 
   // The generator owns a support once per pair realising its diameter, so an

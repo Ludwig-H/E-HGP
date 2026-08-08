@@ -55,6 +55,7 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::hierarchy::GerminatedHigherSupportResult;
 using morsehgp3d::hierarchy::LocalGerminationCertificate;
 using morsehgp3d::hierarchy::LocalGerminationConfig;
+using morsehgp3d::hierarchy::LocalGerminationGuard;
 using morsehgp3d::hierarchy::build_germinated_higher_support_stream;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -72,6 +73,10 @@ struct Options {
   std::size_t tangent_direction_count{26U};
   std::size_t seed_disc_ring_count{2U};
   std::size_t segment_position_count{16U};
+  // Zero disarms the guard.  A censured run is an observation cut short by a
+  // session guard, never a budget and never a defect -- and its certificate
+  // stops claiming completeness, which is the whole point of recording it.
+  std::size_t operational_deadline_ms{};
   std::string output_path;
 };
 
@@ -117,6 +122,8 @@ struct Options {
       options.seed_disc_ring_count = parse_size(next(), argument);
     } else if (argument == "--segment-positions") {
       options.segment_position_count = parse_size(next(), argument);
+    } else if (argument == "--operational-deadline-ms") {
+      options.operational_deadline_ms = parse_size(next(), argument);
     } else if (argument == "--output") {
       options.output_path = std::string{next()};
     } else {
@@ -167,6 +174,11 @@ void emit_certificate(
       << restriction_name(certificate.seed_restriction) << "\","
       << "\"completeness_guaranteed\":"
       << (certificate.completeness_guaranteed() ? "true" : "false") << ','
+      << "\"censored_by_operational_deadline\":"
+      << (certificate.censored_by_operational_deadline ? "true" : "false")
+      << ','
+      << "\"unexamined_seed_pair_count\":"
+      << certificate.unexamined_seed_pair_count << ','
       << "\"tangent_direction_count\":"
       << certificate.tangent_direction_count << ','
       << "\"tangent_covering_radius_millidegrees\":"
@@ -218,9 +230,17 @@ int main(int argc, char** argv) {
         ? options.tangent_direction_count
         : 0U;
 
+    LocalGerminationGuard guard;
+    if (options.operational_deadline_ms != 0U) {
+      guard.armed = true;
+      guard.deadline = Clock::now() +
+          std::chrono::milliseconds(
+              static_cast<long long>(options.operational_deadline_ms));
+    }
+
     const GerminatedHigherSupportResult result =
         build_germinated_higher_support_stream(
-            index, cloud, maximum_relevant_closed_rank, config);
+            index, cloud, maximum_relevant_closed_rank, config, guard);
     const Clock::time_point finish = Clock::now();
 
     const auto milliseconds = [](Clock::time_point from,
@@ -247,6 +267,12 @@ int main(int argc, char** argv) {
         << milliseconds(generation_start, index_start)
         << ",\"lbvh\":" << milliseconds(index_start, germination_start)
         << ",\"germination_and_classification\":" << germination_ms << "},\n"
+        << "  \"stop_category\":\""
+        << (result.censored_by_operational_deadline ? "operational_deadline"
+                                                    : "none")
+        << "\",\n"
+        << "  \"operational_deadline_ms\":"
+        << options.operational_deadline_ms << ",\n"
         << "  \"production_identity_holds\":"
         << (result.production_identity_holds ? "true" : "false") << ",\n"
         << "  \"refusal_reason\":\"" << result.refusal_reason << "\",\n"

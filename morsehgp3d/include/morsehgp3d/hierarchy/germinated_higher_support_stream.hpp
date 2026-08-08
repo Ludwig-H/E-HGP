@@ -109,6 +109,12 @@ struct GerminatedHigherSupportResult {
   // naming the contract that bit.
   bool production_identity_holds{};
   std::string refusal_reason;
+  // True when the operational guard cut a seed loop short.  The events below
+  // are then a PREFIX of what the configuration produces, not its whole
+  // output, and no completeness claim survives -- the certificates say so
+  // themselves.  The production identity still holds: it is an identity on the
+  // accounting, and a censured run accounts for exactly what it produced.
+  bool censored_by_operational_deadline{};
 };
 
 // Runs the generator for arity three and arity four, classifies every emission
@@ -122,7 +128,8 @@ build_germinated_higher_support_stream(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::size_t maximum_relevant_closed_rank,
-    LocalGerminationConfig config);
+    LocalGerminationConfig config,
+    const LocalGerminationGuard& guard = LocalGerminationGuard{});
 
 // The exhaustive reference: every subset of size three and four, classified by
 // the same `classify_exact_higher_support`.  Its only purpose is to be the
