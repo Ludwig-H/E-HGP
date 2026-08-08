@@ -1249,6 +1249,35 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_germinated_higher_support_stream_tests
+  test_hierarchy_germinated_higher_support_stream.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_germinated_higher_support_stream_tests
+  PRIVATE morsehgp3d::higher_support
+)
+target_compile_features(
+  morsehgp3d_hierarchy_germinated_higher_support_stream_tests PRIVATE cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_germinated_higher_support_stream_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_germinated_higher_support_stream_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+add_test(
+  NAME morsehgp3d.hierarchy_germinated_higher_support_stream
+  COMMAND morsehgp3d_hierarchy_germinated_higher_support_stream_tests
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_germinated_higher_support_stream PROPERTIES TIMEOUT 900
+)
+
+add_executable(
   morsehgp3d_hierarchy_local_germination_tests
   test_hierarchy_local_germination.cpp
 )
