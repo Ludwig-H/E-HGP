@@ -405,6 +405,45 @@ seulement la géométrie terminale bornée : le classifieur terminal complet, le
 catalogue, la hiérarchie, le SLO 50 k, les campagnes 10 M/30 M et tout statut
 public restent hors de son périmètre.
 
+Le prototype `P15-HOCUDA-P0` Jung-chord possède une route G4 dédiée afin de ne
+pas réexécuter les qualifications historiques ni une suite de petits paliers :
+
+```bash
+GCP_ZONE=europe-west4-ai1a \
+GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
+./gcp-migration/run_phase15_jung_chord_csr_tile_qualification.sh \
+  --yes \
+  --result-dir /tmp/morsehgp3d-phase15-jung-chord
+```
+
+Après un unique configure et un build de la seule cible
+`morsehgp3d_gpu_jung_chord_csr_tile_qualification`, le worker exécute exactement
+trois unités, dans cet ordre : l'oracle all-pairs à 32 points sous
+`compute-sanitizer --tool memcheck`, puis directement `uniform_latin` à 50 000
+points et `eight_clusters` à 50 000 points. Les deux nuages 50k utilisent une
+fenêtre Morton 8, des supports de taille 4 et le rang fermé maximal 11. Aucun
+palier intermédiaire, warmup répété, tuning en boucle ou nouvel essai après une
+saturation n'est autorisé.
+
+La capacité par défaut est de 67 108 864 PointIds de corde, soit environ
+576 Mio pour les PointIds u64 et leurs flags, hors CSR et espace de travail.
+Elle peut être fixée avant la session sans changer le plan de test :
+
+```bash
+MORSEHGP3D_PHASE15_JUNG_CHORD_CAPACITY=134217728 \
+./gcp-migration/run_phase15_jung_chord_csr_tile_qualification.sh \
+  --yes \
+  --result-dir /tmp/morsehgp3d-phase15-jung-chord
+```
+
+La valeur choisie est enregistrée dans l'artefact. Un
+`capacity_exhausted` est conservé sans retry, l'artefact est finalisé après
+`TERMINATED`, puis l'orchestrateur renvoie le code 3. Le JSON final et son
+répertoire compagnon conservent séparément les stdout JSON, stderr, journaux de
+build, preflight et memcheck avec leurs SHA-256. Cette route reste strictement
+`component_only=true`, `slo_eligible=false`, sans complétude de la source
+d'ancres, hiérarchie exacte, scalabilité ou statut scientifique revendiqué.
+
 Pour la cible de capacité explicitement autorisée :
 
 ```bash

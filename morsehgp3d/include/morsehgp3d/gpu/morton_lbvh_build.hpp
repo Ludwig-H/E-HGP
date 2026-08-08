@@ -14,6 +14,7 @@ namespace morsehgp3d::gpu {
 
 class DirectSparseFacetTopKProposalContext;
 class ExactHigherSupportProductCudaContext;
+class JungChordCsrTileContext;
 class AnchoredPairCandidateProposalContext;
 class MortonLbvhDeviceTraversalLease;
 class MortonYao48PairFrontierContext;
@@ -369,6 +370,7 @@ class MortonLbvhDeviceTraversalLease final {
   friend class MortonYao48PairFrontierContext;
   friend class RankedDiametralPairCatalogContext;
   friend class ExactHigherSupportProductCudaContext;
+  friend class JungChordCsrTileContext;
   friend class detail::Phase15ExactPairBlockWitnessCudaTraversalAccess;
   friend class detail::
       Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess;

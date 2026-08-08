@@ -4943,6 +4943,44 @@ else()
   )
 endif()
 
+# Proposal-only Phase 15 Jung-chord CSR tile contract.  The host archive
+# deliberately leaves its launcher unresolved: unit tests provide a fake and
+# the CUDA target below provides the resident count/scan/emit implementation.
+add_library(
+  morsehgp3d_gpu_jung_chord_csr_tile_host_contract
+  STATIC
+    include/morsehgp3d/gpu/jung_chord_csr_tile.hpp
+    src/cuda/phase15_jung_chord_csr_tile_internal.hpp
+    src/gpu/jung_chord_csr_tile.cpp
+)
+add_library(
+  morsehgp3d::gpu_jung_chord_csr_tile_host_contract
+  ALIAS morsehgp3d_gpu_jung_chord_csr_tile_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_jung_chord_csr_tile_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_jung_chord_csr_tile_host_contract
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_jung_chord_csr_tile_host_contract PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_jung_chord_csr_tile_host_contract PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_jung_chord_csr_tile_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Device-resident Phase 15 higher-support supports-3/4 slot-tile contract.
 # The host-only archive intentionally leaves traversal adoption and the
 # launcher unresolved; unit tests provide the scientific host fake, and no
@@ -6300,6 +6338,51 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_library(
+    morsehgp3d_gpu_jung_chord_csr_tile
+    STATIC
+      include/morsehgp3d/gpu/jung_chord_csr_tile.hpp
+      src/cuda/phase15_jung_chord_csr_tile_internal.hpp
+      src/cuda/phase15_jung_chord_csr_tile.cu
+      src/gpu/jung_chord_csr_tile.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_jung_chord_csr_tile
+    ALIAS morsehgp3d_gpu_jung_chord_csr_tile
+  )
+  target_include_directories(
+    morsehgp3d_gpu_jung_chord_csr_tile
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_jung_chord_csr_tile
+    PUBLIC morsehgp3d::gpu_morton_lbvh_build morsehgp3d::spatial
+  )
+  target_compile_features(
+    morsehgp3d_gpu_jung_chord_csr_tile PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(morsehgp3d_gpu_jung_chord_csr_tile)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_jung_chord_csr_tile
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_jung_chord_csr_tile
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
   # Native CUDA backend of the Phase 15 higher-support device tiled
   # frontier.  The scientific slot engine is shared verbatim with the
   # host-compiled parity suite; this target contributes the resident arena,
@@ -6559,6 +6642,36 @@ if(MORSEHGP3D_ENABLE_CUDA)
   else()
     target_compile_options(
       morsehgp3d_gpu_morton_yao48_device_tiled_pair_frontier_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_jung_chord_csr_tile_qualification
+    src/tools/gpu_jung_chord_csr_tile_qualification.cpp
+  )
+  target_include_directories(
+    morsehgp3d_gpu_jung_chord_csr_tile_qualification
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_jung_chord_csr_tile_qualification
+    PRIVATE morsehgp3d::gpu_jung_chord_csr_tile CUDA::cudart
+  )
+  target_compile_features(
+    morsehgp3d_gpu_jung_chord_csr_tile_qualification PRIVATE cxx_std_20
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_jung_chord_csr_tile_qualification
+    PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_jung_chord_csr_tile_qualification PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_jung_chord_csr_tile_qualification
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()

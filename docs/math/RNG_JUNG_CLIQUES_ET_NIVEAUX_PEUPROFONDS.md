@@ -1,7 +1,7 @@
 # RNG, Jung, cliques et niveaux peu profonds pour les supports 3D
 
 > [!IMPORTANT]
-> Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=exact_rational_obstruction_and_shallow_arrangement_theorem`. La porte d'entrée est satisfaite pour une preuve et un oracle borné, pas pour un chemin produit GPU. Ce document ne ferme aucune phase et ne modifie ni `deployment_status=architecture_only`, ni `public_status=not_claimed`.
+> L'autorité mathématique reste en Phase 15, `backend=reference_cpu`, `profile=hgp_reduced`, `mode=exact_rational_obstruction_and_shallow_arrangement_theorem`. La sous-porte `P15-HOCUDA-P0` autorise uniquement un prototype GPU de proposition et de mesure; elle n'ouvre ni source complète, ni décision scientifique, ni réducteur, ni SLO. Ce document ne ferme aucune phase et maintient `public_status=not_claimed`.
 
 ## 1. Verdict
 
@@ -219,7 +219,25 @@ Une architecture hybride est plus forte que l'énumération brute des 4-cliques 
 
 La construction exacte du RNG initial ne doit pas elle-même passer par Delaunay : elle doit devenir une requête LBVH de lunes et un flux CSR borné. Son coût produit sera $T_{\mathrm{RNG}}+T_{\mathrm{growth}}$ et non gratuitement $O(n)$; un RNG de petite sortie peut encore être cher à certifier si la recherche visite des couples quadratiques.
 
-### 5.5 Conséquence pour le contrat
+### 5.5 Complément exact des ancres par blocs de centres
+
+Le graphe RNG--Jung peut rester un excellent producteur de propositions, mais le Théorème 1 interdit de lui déléguer la complétude. La cible GPU complète donc ses arêtes par un self-join dual-tree du LBVH, sans développer d'abord les paires de points. Un état de la file contient deux nœuds d'extrémités disjoints $A,B$ et représente implicitement toutes leurs paires. Les blocs diagonaux sont divisés canoniquement; un bloc hors diagonale est soit rejeté par certificat, soit subdivisé, soit développé seulement lorsqu'il est devenu assez petit.
+
+Soit $H$ la plus grande séparation coordonnée possible entre les boîtes de $A$ et $B$. Pour toute paire $p\in A,q\in B$, on a $D\leq\sqrt{3}H$ et le déplacement du centre par rapport au milieu est au plus $D/\sqrt{8}$. Comme $\sqrt{3/8}<5/8$, tous les centres de Jung possibles du bloc sont contenus dans la boîte des milieux, élargie de $5H/8$ sur chaque axe. Cette boîte est divisée en un nombre fixe $R$ de patches dyadiques; ces patches sont un recouvrement transitoire de centres, pas des cellules géométriques persistantes.
+
+Pour un patch $C$ et un nœud témoin $W$ disjoint de $A\cup B$, la borne dirigée suivante suffit :
+
+$$\min_{c\in C,\ p\in A,\ x\in W}\left(\lVert c-p\rVert^{2}-\lVert c-x\rVert^{2}\right)>0.$$
+
+Elle certifie que tous les points de $W$ sont strictement intérieurs à toute sphère pertinente dont le centre est dans $C$. Les nœuds témoins comptés pour un même patch forment une antichaîne disjointe. Si chaque patch possède au moins $s_{\max}-3$ témoins pour un support quatre — huit au rang fermé 11 — le bloc entier est impossible, car deux extrémités, deux futurs carriers et ces témoins imposeraient un rang au moins égal à 12. Le seuil correspondant pour un support trois est $s_{\max}-2$, donc neuf. Toute borne ambiguë subdivise le témoin ou le bloc d'extrémités et ne rejette jamais.
+
+Avec $Q$ blocs d'extrémités visités, $V_c$ visites de nœuds témoins, $R$ fixe, $a$ ancres résiduelles, $M=\sum_em_e$ lignes actives et $Z=\sum_eZ_e$, le coût cible est
+
+$$O\!\left(n\log n+E_{\mathrm{prop}}+Q+RV_c+\sum_eV_e+\sum_e\left[m_e\log m_e+m_e(\kappa_e+1)\right]+Z+T_{\mathrm{exact}}+T_{\mathrm{sink}}\right).$$
+
+Dans le régime favorable $E_{\mathrm{prop}},Q,M=O(n\,p(K))$, ce coût est quasi linéaire en $n$ à $K$ fixé. Le pire cas reste explicitement dense : $Q=\Theta(n^{2})$, $V_c=\Theta(n^{3})$ et $M=\Theta(n^{3})$ sont possibles; le cœur shallow vaut alors $O(n^{3}\log n)$ à $K$ fixé et peut redevenir quartique lorsque $K=\Theta(n)$. Une capacité épuisée doit donc publier un résidu ou un arrêt budgétaire honnête, jamais basculer vers une mosaïque, une matrice de paires ou un catalogue global de cofaces.
+
+### 5.6 Conséquence pour le contrat
 
 Même un générateur d'arité quatre parfait ne suffit pas au chemin actuel. Le diagnostic direct frais sur G4 mesure la seule frontière paire à 50 000 points et rang fermé 11 à 2,395883 s dans sa fenêtre `frontier_ns`, et 3,927585 s depuis le début froid du processus, avant supports trois--quatre, classification exacte et réduction. La sonde de germination lancée sur cette VM n'est pas un kernel : elle exécute le prototype CPU séquentiel et ne parcourt que 0,363834 % des paires `uniform_latin` en 120 s. Le contrat sous la seconde exige donc un pipeline fusionné qui évite la recertification et la matérialisation intermédiaires actuelles, pas seulement un remplacement de la boucle quadratique d'arité quatre.
 
@@ -251,6 +269,16 @@ Le point le moins GPU-friendly est l'énumération exacte des niveaux peu profon
 
 Le prototype CPU actuel de germination n'est pas encore cette implémentation exacte. Plusieurs rejets de `local_germination.cpp` reposent directement sur des normes et comparaisons binary64 pour la borne tangente, la porte triangulaire de Jung et la distance entre les deux tiers. Aucun différentiel n'a encore exhibé une perte à ces endroits, mais l'absence d'intervalle extérieur ou de repli exact laisse un trou de preuve. Ces décisions doivent devenir des propositions fail-open, avec fixtures `nextafter` et reprise entière ou rationnelle, avant qu'un graphe ou un arrangement puisse porter `public_status=exact`.
 
+### 6.1 Première tranche CUDA : cordes résidentes, pas encore supports
+
+`P15-HOCUDA-P0` implémente une première primitive bornée `JungChordCsrTile`. Elle consomme une tuile explicite d'ancres et une lease LBVH authentifiée, puis produit sur le device un CSR de lignes actives. Pour $d=q-p$, $A=2x-p-q$, $D^{2}=d\cdot d$, $B=A\cdot A-D^{2}$ et $G=\lVert d\times A\rVert^{2}$, les filtres sont $Q_3=4G-3B^{2}$ pour l'arité trois et $Q_4=2G-B^{2}$ pour l'arité quatre. Un intervalle certifiant $Q<0,B<0$ compte un témoin intérieur constant; $Q<0,B>0$ certifie un extérieur constant; toute autre incertitude descend le LBVH puis émet la feuille `fail_open`.
+
+Le range-prune rationnel emploie $\lVert x-M\rVert^{2}>3D^{2}/4$ pour l'arité trois et la borne sûre $\lVert x-M\rVert^{2}>15D^{2}/16$ pour l'arité quatre. Toutes les lignes actives restent dans le CSR parce qu'un point hors de la lentille diamètre peut encore changer la profondeur. Un bit séparé `support_eligible` autorise comme carrier seulement un point vérifiant $\lVert x-p\rVert\leq D$ et $\lVert x-q\rVert\leq D$, avec égalité ou ambiguïté conservée. Le chemin `count--scan--emit` ne parcourt jamais les $\binom{m_e}{2}$ intersections; il publie cette masse uniquement comme baseline analytique non exécutée.
+
+Pour $a$ ancres, $V$ visites de nœuds, $W$ feuilles testées et $M$ lignes émises, cette tranche coûte $\Theta(V+W+M)$ par passe, avec deux parcours LBVH, et retient $O(a+M)$ mots en plus du LBVH résident. Dans un régime spatial favorable, $V=O(a\log n+M)$; au pire $V=\Theta(an)$. La dépendance directe à $K$ se limite ici au cutoff $c_e>s_{\max}-4$ ou $c_e>s_{\max}-3$, donc à un compteur borné par $O(K)$; la source d'ancres et le futur constructeur shallow portent les dépendances globales restantes.
+
+Cette tranche ne calcule encore aucun $Z_e$, aucun support trois ou quatre, aucun rang terminal et aucune réduction. Sa source de qualification `morton_window_proposal_only` est volontairement incomplète; une capacité de CSR peut retourner `capacity_exhausted`. Elle mesure donc le coût du range-report et la distribution des lignes, mais ne peut qualifier ni le contrat 50 k, ni une complexité globale, même si son kernel isolé est rapide. La prochaine tranche produit le complément d'ancres par blocs décrit en 5.5, puis construit les niveaux peu profonds sans travail en $\sum_em_e^{2}$.
+
 ## 7. Ne pas confondre les deux RNG
 
 Le RNG du graphe pondéré des facettes déjà découvertes est une réduction de connectivité valide : remplacer une arête par un chemin strictement plus léger préserve les composantes à tous les seuils. Il peut donc réduire un flux après génération.
@@ -263,10 +291,10 @@ Il ne découvre pas ses propres sommets ni arêtes. Construire naïvement le gra
 2. Implémenter un census CPU séparant les degrés et la dégénérescence du RNG, du graphe épaissi et de $G_\tau$, leurs arêtes manquantes contre l'oracle, puis $a$, $m_e$, $M$, profondeurs par niveau, $Z_e$, intersections brutes évitées, doublons, largeurs exactes et fallbacks, sur les trois familles de la porte P0 à $n=32$.
 3. Refuser comme autorité tout graphe épaissi qui omet une arête de support; refuser aussi la route shallow si le travail du constructeur de niveaux reste proportionnel à $\sum_e m_e^{2}$ ou si sa sortie n'est pas bit-à-bit identique à l'oracle.
 4. Fermer les rejets binary64 du prototype par intervalles extérieurs et repli exact, avec corpus ULP/`nextafter`; aucune comparaison flottante ne peut omettre un candidat.
-5. Après seulement, livrer un backend device borné, son différentiel, les builds Release/audit et compute-sanitizer. La prochaine session G4 du nouveau composant commence à $n=32$, puis va directement à 50 000 si les compteurs de croissance sont favorables.
+5. La sous-porte `P15-HOCUDA-P0` autorise avant cette promotion un backend device strictement `proposal_only`, destiné à mesurer le range-report, les demi-plans et le travail shallow avec résidu explicite. Après différentiel, builds Release/audit et compute-sanitizer, seulement, il peut devenir candidat à une autorité. La prochaine session G4 du nouveau composant commence à $n=32$, puis va directement à 50 000 si les compteurs de croissance sont favorables.
 6. Les dizaines de millions restent interdites tant que le pipeline exact complet à 50 000 points n'a pas terminé sous le contrat, avec reprise, mémoire et sortie aval réelles.
 
-La preuve seule ne justifiait aucun kernel de niveaux peu profonds. La campagne directe demandée par l'utilisateur a donc mesuré uniquement les composants existants : elle confirme la frontière paire à 2,396 s, révèle que la germination de 120 s est CPU et archive l'arrêt ciblé des VM dans [`phase15_rng_jung_g4_20260808/RESULTATS.md`](../validation/phase15_rng_jung_g4_20260808/RESULTATS.md). Elle ne remplace aucun différentiel du futur composant shallow et n'ouvre aucun SLO.
+La preuve seule ne justifie toujours aucun kernel autoritaire de niveaux peu profonds. `P15-HOCUDA-P0` autorise uniquement un falsificateur de travail CUDA dont les sorties ne sont pas consommables scientifiquement. La campagne directe précédente confirme la frontière paire à 2,396 s, révèle que la germination de 120 s est CPU et archive l'arrêt ciblé des VM dans [`phase15_rng_jung_g4_20260808/RESULTATS.md`](../validation/phase15_rng_jung_g4_20260808/RESULTATS.md). Ni cette campagne ni le prototype ne remplacent le différentiel exact et aucun SLO n'est ouvert.
 
 ## 9. Références externes
 
