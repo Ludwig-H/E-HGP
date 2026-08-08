@@ -123,9 +123,8 @@ inline bool diameter_squared_at_most(const mhgp::Sphere& sphere, mhgp::i128 squa
 }  // namespace detail
 
 // Enumere tous les supports minimaux bien centres contenant `anchor`, de rang
-// ferme au plus `s_max`. Renvoie faux si le certificat de localite n'a pas pu
-// etre etabli (le voisinage a absorbe le nuage sans le satisfaire) — dans ce cas
-// le resultat reste complet, mais l'ancre est declaree `exhausted`.
+// ferme au plus `s_max`, DANS SA FENETRE. Renvoie vrai seulement si la fenetre
+// etait le nuage entier : c'est la seule completude disponible.
 inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anchor, int s_max,
                               int seed_neighbours, Regime regime,
                               std::vector<AnchoredSupport>* out, AnchorStatistics* statistics) {
@@ -134,8 +133,9 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
   *statistics = AnchorStatistics{};
   statistics->anchor = anchor;
 
-  // Voisins tries par distance croissante a l'ancre : c'est l'ordre dans lequel
-  // le certificat se ferme.
+  // Voisins tries par distance croissante a l'ancre. Cet ordre ne certifie
+  // rien : il ne sert qu'a definir la fenetre du regime `assumed_window` et a
+  // calculer la fenetre suffisante a posteriori.
   std::vector<std::pair<mhgp::i128, mhgp::i32>> ordered;
   ordered.reserve(static_cast<std::size_t>(n - 1));
   for (mhgp::i32 z = 0; z < n; ++z) {

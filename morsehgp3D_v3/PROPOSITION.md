@@ -31,13 +31,14 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## 0 bis. Le plan, en cinq lignes
 
-1. **M1, le juge** — un oracle indépendant en précision arbitraire, à campagne
+1. **V3-O, le juge** — un oracle indépendant en précision arbitraire, à campagne
    fermée, sur le domaine déclaré ; et les reçus des mesures déjà faites.
-2. **M2, le prototype qui décide** — un seul programme CPU exact qui construit
-   $V_k(p)$ pour une ancre, et qui **règle à lui seul PEL-1 à PEL-4** et mesure
-   A1-source gratuitement.
-3. **M3, le census** — les compteurs de M2 à l'échelle, sur de vrais nuages, y
-   compris multi-captation, avec le ledger complet.
+2. **V3-P, le falsificateur CPU** — un programme exact qui construit, pour une
+   ancre, le sous-complexe shallow **stratifié** de l'arrangement. Il peut réfuter
+   PEL-1 à PEL-4 et mesurer leurs coûts sur corpus ; une campagne finie ne peut ni
+   démontrer leur portée universelle, ni rendre A1-source « gratuit ».
+3. **V3-C, le census** — les compteurs de V3-P à l'échelle, sur de vrais nuages,
+   y compris multi-captation, avec le ledger complet.
 4. **Décision** à deux branches, puis seulement : descente indexée, tri externe
    et réducteur, GPU, reçu produit.
 5. Rien de ce qui suit n'est un produit tant que M2 n'a pas parlé.
@@ -74,7 +75,7 @@ sur 48 cœurs — l'intervalle est donné, pas un point.
 
 | configuration | $\lvert W\rvert$ | quadruples | temps (48 cœurs) |
 | --- | ---: | ---: | ---: |
-| code actuel | $n-1$ | $1{,}04\cdot10^{18}$ | 77 à 214 ans |
+| code actuel | $n-1$ | $1{,}04\cdot10^{18}$ | 77 à 215 ans |
 | croissance réparée, $\theta$ du dépôt | 17 578 | $4{,}53\cdot10^{16}$ | 3,4 à 9,3 ans |
 | + golden angle corrigé | 5 764 | $1{,}59\cdot10^{15}$ | 43 à 120 jours |
 | + 2 000 cônes | 252 | $1{,}32\cdot10^{11}$ | 309 à 859 s |

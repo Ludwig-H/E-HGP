@@ -242,6 +242,11 @@ struct ReferenceNode {
   int parent = -1;
   std::vector<int> children;
   std::vector<int> minima_closure;  // indices de minima du sous-arbre, tries
+  // Pour une naissance : le k-sous-ensemble du minimum. Pour une multifusion :
+  // les (k+1)-sous-ensembles qui ont EFFECTIVEMENT contribue au lot de cette
+  // composante. Sans cette liste, une source etrangere de bon rang et de bon
+  // niveau passe le juge (audit du 8 aout, §6).
+  std::vector<std::vector<int>> admissible_sources;
 };
 
 struct DisjointSets {
@@ -332,6 +337,7 @@ ReferenceForest reference_forest(const std::vector<mhgp::P3>& points, int k) {
         node.kind = 0;
         node.level = level;
         node.minima_closure = {minimum_of_face[i]};
+        node.admissible_sources = {faces[i]};
         forest.nodes.push_back(node);
         node_of_component[static_cast<std::size_t>(sets.find(static_cast<int>(i)))] =
             static_cast<int>(forest.nodes.size()) - 1;
@@ -340,6 +346,7 @@ ReferenceForest reference_forest(const std::vector<mhgp::P3>& points, int k) {
     // 2. cofaces du meme niveau : on collecte les unions AVANT de les appliquer,
     //    puis on contracte, pour obtenir une multifusion et non une chaine.
     std::vector<std::vector<int>> hyperedges;
+    std::vector<std::vector<int>> hyperedge_source;
     for (std::size_t c = 0; c < cofaces.size(); ++c) {
       if (compare(coface_level[c], level) != 0) continue;
       std::vector<int> roots;
@@ -353,7 +360,10 @@ ReferenceForest reference_forest(const std::vector<mhgp::P3>& points, int k) {
       }
       std::sort(roots.begin(), roots.end());
       roots.erase(std::unique(roots.begin(), roots.end()), roots.end());
-      if (roots.size() >= 2) hyperedges.push_back(std::move(roots));
+      if (roots.size() >= 2) {
+        hyperedges.push_back(std::move(roots));
+        hyperedge_source.push_back(cofaces[c]);
+      }
     }
     if (hyperedges.empty()) continue;
 
@@ -397,6 +407,11 @@ ReferenceForest reference_forest(const std::vector<mhgp::P3>& points, int k) {
         ReferenceNode node;
         node.kind = 1;
         node.level = level;
+        for (std::size_t hi = 0; hi < hyperedges.size(); ++hi) {
+          const int representative = batch.find(local[hyperedges[hi][0]]);
+          if (representative == group.first) node.admissible_sources.push_back(hyperedge_source[hi]);
+        }
+        std::sort(node.admissible_sources.begin(), node.admissible_sources.end());
         for (int child : child_nodes) {
           forest.nodes[static_cast<std::size_t>(child)].parent =
               static_cast<int>(forest.nodes.size());
@@ -470,6 +485,7 @@ struct CanonicalNode {
   Rational level;
   int arity = 0;
   bool is_root = false;
+  std::vector<int> source_members;  // membres tries de la sphere source
 };
 
 void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subject,
@@ -493,6 +509,10 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     }
     if (node.kind != 0 && node.kind != 1) {
       campaign->fail("STRUCTURE genre inconnu" + tag); return;
+    }
+    // Sentinelle STRICTE : le contrat reserve -1 ; -2 et au-dela doivent rougir.
+    if (node.parent < -1 || node.first_child < -1 || node.next_sibling < -1) {
+      campaign->fail("STRUCTURE sentinelle de lien invalide" + tag); return;
     }
     if (node.parent >= static_cast<mhgp::i32>(subject.nodes.size())) {
       campaign->fail("STRUCTURE parent hors bornes" + tag); return;
@@ -573,6 +593,14 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
         catalogue.spheres[static_cast<std::size_t>(subject.nodes[t].source)].sph);
     canonical.arity = subject_arity[t];
     canonical.is_root = subject.nodes[t].parent < 0;
+    {
+      const mhgp::CriticalSphere& source =
+          catalogue.spheres[static_cast<std::size_t>(subject.nodes[t].source)];
+      for (mhgp::i32 i = 0; i < source.rank; ++i)
+        canonical.source_members.push_back(static_cast<int>(
+            catalogue.members[static_cast<std::size_t>(source.members_begin + i)]));
+      std::sort(canonical.source_members.begin(), canonical.source_members.end());
+    }
     campaign->widest_bits =
         std::max(campaign->widest_bits, canonical.level.widest_bit_length());
     if (!subject_map.emplace(subject_closure[t], canonical).second) {
@@ -613,6 +641,18 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
                      + std::to_string(entry.second.arity) + " " + set_to_text(entry.first) + tag);
     if (it->second.is_root != entry.second.is_root)
       campaign->fail("STRUCTURE racine " + set_to_text(entry.first) + tag);
+  }
+  // La source doit avoir CONTRIBUE, pas seulement avoir le bon rang et le bon
+  // niveau : une sphere etrangere passait ce garde.
+  for (std::size_t t = 0; t < reference.nodes.size(); ++t) {
+    auto it = subject_map.find(reference.nodes[t].minima_closure);
+    if (it == subject_map.end()) continue;
+    const std::vector<std::vector<int>>& admissible = reference.nodes[t].admissible_sources;
+    if (std::find(admissible.begin(), admissible.end(), it->second.source_members)
+        == admissible.end())
+      campaign->fail("STRUCTURE source non contributrice "
+                     + set_to_text(it->second.source_members) + " pour "
+                     + set_to_text(reference.nodes[t].minima_closure) + tag);
   }
   for (const auto& entry : subject_map)
     if (reference_map.find(entry.first) == reference_map.end())
@@ -705,7 +745,10 @@ bool subject_record_is_readable(const mhgp::Catalogue& catalogue,
   return true;
 }
 
-void compare_catalogues(const mhgp::Catalogue& subject,
+// Renvoie faux si le sujet est illisible : AUCUNE lecture aval ne doit alors
+// avoir lieu, sinon une mutation censee faire rougir le juge le ferait sortir de
+// ses propres tableaux.
+bool compare_catalogues(const mhgp::Catalogue& subject,
                         const std::vector<ReferenceSphere>& reference, int s_max, int point_count,
                         int trial, Campaign* campaign) {
   const std::string tag = " trial=" + std::to_string(trial);
@@ -713,7 +756,7 @@ void compare_catalogues(const mhgp::Catalogue& subject,
     std::string why;
     if (!subject_record_is_readable(subject, sphere, s_max, point_count, &why)) {
       campaign->fail("LECTURE " + why + tag);
-      return;
+      return false;
     }
   }
   std::map<std::vector<int>, const mhgp::CriticalSphere*> by_support;
@@ -767,6 +810,7 @@ void compare_catalogues(const mhgp::Catalogue& subject,
     if (!present)
       campaign->fail("CATALOGUE support superflu " + set_to_text(entry.first) + tag);
   }
+  return true;
 }
 
 }  // namespace
@@ -783,6 +827,7 @@ int main(int argc, char** argv) {
   int fixed_points = 0;
   int seed_neighbours = 16;
   std::string regime = "exhaustive";
+  std::string injection;
 
   for (int i = 1; i < argc; ++i) {
     const std::string argument = argv[i];
@@ -807,6 +852,7 @@ int main(int argc, char** argv) {
     else if (argument == "--points") fixed_points = std::atoi(next("--points"));
     else if (argument == "--seed-neighbours") seed_neighbours = std::atoi(next("--seed-neighbours"));
     else if (argument == "--regime") regime = next("--regime");
+    else if (argument == "--inject") injection = next("--inject");
     else {
       std::printf("ECHEC : option inconnue %s\n", argument.c_str());
       return 2;
@@ -971,7 +1017,57 @@ int main(int argc, char** argv) {
       continue;
     }
 
-    compare_catalogues(catalogue, reference, s_max, n, trial, &campaign);
+    // ---- CAMPAGNE NEGATIVE ------------------------------------------------
+    // Un garde qui ne se declenche jamais ne vaut rien : chaque faute injectee
+    // DOIT etre attrapee, sinon la porte est vide.
+    if (!injection.empty()) {
+      if (injection == "member_unsorted") {
+        for (mhgp::CriticalSphere& sphere : catalogue.spheres)
+          if (sphere.rank >= 2) {
+            std::swap(catalogue.members[static_cast<std::size_t>(sphere.members_begin)],
+                      catalogue.members[static_cast<std::size_t>(sphere.members_begin + 1)]);
+            break;
+          }
+      } else if (injection == "rotated_centre") {
+        for (mhgp::CriticalSphere& sphere : catalogue.spheres)
+          if (sphere.sph.nx != sphere.sph.ny) { std::swap(sphere.sph.nx, sphere.sph.ny); break; }
+      } else if (injection == "sentinel") {
+        for (std::vector<mhgp::Forest>::iterator f = forests.begin(); f != forests.end(); ++f)
+          if (!f->nodes.empty()) { f->nodes.front().parent = -2; break; }
+      } else if (injection == "n_children") {
+        for (std::vector<mhgp::Forest>::iterator f = forests.begin(); f != forests.end(); ++f)
+          for (mhgp::ForestNode& node : f->nodes)
+            if (node.n_children > 0) { node.n_children = 0; goto injected; }
+        injected:;
+      } else if (injection == "roots") {
+        for (std::vector<mhgp::Forest>::iterator f = forests.begin(); f != forests.end(); ++f)
+          if (!f->roots.empty()) { f->roots.pop_back(); break; }
+      } else if (injection == "merge_source_foreign") {
+        // Une sphere de rang k+1 ETRANGERE a la composante fusionnee : rang et
+        // niveau peuvent rester coherents, la participation non.
+        for (std::size_t fi = 0; fi < forests.size(); ++fi) {
+          const int k = static_cast<int>(fi) + 1;
+          for (mhgp::ForestNode& node : forests[fi].nodes) {
+            if (node.kind != 1) continue;
+            for (std::size_t si = 0; si < catalogue.spheres.size(); ++si) {
+              if (catalogue.spheres[si].rank != k + 1) continue;
+              if (static_cast<mhgp::i32>(si) == node.source) continue;
+              node.source = static_cast<mhgp::i32>(si);
+              goto injected_source;
+            }
+          }
+        }
+        injected_source:;
+      } else {
+        std::printf("ECHEC : injection inconnue %s\n", injection.c_str());
+        return 2;
+      }
+    }
+
+    if (!compare_catalogues(catalogue, reference, s_max, n, trial, &campaign)) {
+      if (!injection.empty()) { ++campaign.decided; continue; }
+      continue;
+    }
     for (int k = 1; k <= order; ++k) {
       const ReferenceForest expected = reference_forest(points, k);
       compare_forests(catalogue, forests[static_cast<std::size_t>(k - 1)], expected, k, trial,
@@ -1026,7 +1122,9 @@ int main(int argc, char** argv) {
         "  \"oracle_arithmetic\": \"arbitrary precision sign-magnitude base 2^32\",\n"
         "  \"oracle_geometry\": \"gauss elimination, not cramer\",\n"
         "  \"oracle_structure\": \"merge forest rebuilt from gamma_k\",\n"
-        "  \"regime\": \"%s\",\n"
+        "  \"regime\": \"%s\",\n  \"seed_neighbours\": %d,\n"
+        "  \"compiler\": \"" __VERSION__ "\",\n"
+        "  \"built\": \"" __DATE__ " " __TIME__ "\",\n"
         "  \"seed\": %llu,\n  \"clouds_requested\": %d,\n"
         "  \"points\": [%d, %d],\n  \"maximum_order\": %d,\n"
         "  \"coordinate_maximum\": %lld,\n  \"declared_grid_maximum\": %lld,\n"
@@ -1037,7 +1135,8 @@ int main(int argc, char** argv) {
         "  \"canonical_nodes_compared\": %lld,\n"
         "  \"widest_exact_level_bits\": %zu,\n  \"failures\": %lld\n}\n",
         subject == "v2" ? "morsehgp3D_v2 build_catalogue + run" : "mhgp3v anchored_catalogue",
-        regime.c_str(), seed, clouds, minimum_points, maximum_points, maximum_order,
+        regime.c_str(), seed_neighbours, seed, clouds, minimum_points, maximum_points,
+        maximum_order,
         static_cast<long long>(coordinate_maximum), static_cast<long long>(mhgp::kCoordMax),
         campaign.attempted, campaign.decided, campaign.rejected_domain,
         closed ? "true" : "false", minimum_clouds_decided, minimum_nodes,
@@ -1046,6 +1145,16 @@ int main(int argc, char** argv) {
     std::fclose(file);
   }
 
+  // En campagne negative, la reussite est d'AVOIR ROUGI.
+  if (!injection.empty()) {
+    if (campaign.failures == 0) {
+      std::printf("ECHEC : la faute injectee \"%s\" n'a PAS ete attrapee\n", injection.c_str());
+      return 1;
+    }
+    std::printf("OK : faute \"%s\" attrapee (%lld echecs)\n", injection.c_str(),
+                campaign.failures);
+    return 0;
+  }
   if (campaign.failures != 0) {
     std::printf("ECHEC : %lld\n", campaign.failures);
     return 1;

@@ -90,6 +90,10 @@ Le mode `measure-only` est `exhaustive` par défaut. C'est le seul régime où `
 
 Des commentaires aux lignes de l'ancienne fonction parlent encore d'un certificat qui « se ferme » et d'un retour faux après épuisement. Ils sont désormais contraires au code et doivent être corrigés pour éviter une réintroduction du raisonnement réfuté.
 
+Le helper inverse `diameter_squared_at_most` n'est plus utilisé depuis le retrait du certificat. Il devrait disparaître : conserver côte à côte les deux sens d'inégalité, dont celui de l'ancien arrêt invalide, augmente inutilement le risque d'une réintroduction accidentelle.
+
+Enfin, le scan des témoins s'arrête dès que le nombre de membres dépasse `s_max`. Une cosphéricité située après ce point peut ne jamais incrémenter `degenerate_shells`. Le différentiel exhaustif peut encore voir le désaccord de domaine grâce à sa référence, mais `measure-only` sous-compte les dégénérescences et ne doit pas publier ce compteur comme une identité complète.
+
 ## 6. P0 — la source d'une multifusion n'est pas réellement comparée
 
 M1 exige maintenant qu'une naissance pointe vers une sphère de rang $k$ et qu'une multifusion pointe vers une sphère de rang $k+1$. Ce garde ne prouve pas que la source a contribué au lot ou à la composante fusionnée.

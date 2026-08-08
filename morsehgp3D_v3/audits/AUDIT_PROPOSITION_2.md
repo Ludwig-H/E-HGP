@@ -1,13 +1,13 @@
 # Second audit actualisé et journal continu — A2pe, peeling local et oracle M1
 
 > [!IMPORTANT]
-> Base figée sur le commit `9628038b5958524c085182bada2e7b97734863a4`. La version auditée de [`PROPOSITION.md`](../PROPOSITION.md) compte 688 lignes et porte l'empreinte SHA-256 `ce77ac51d22d5a13cb128b819b080bbf4ac734607cdfad1bcea75a8285a06c89`; elle a été introduite au commit `495463bd443cdcafd843023623ca403fe2929a43`. Le journal continu inclut aussi le delta de développement `oracle_main.cpp` SHA-256 `7787b24804ce79d5f1fa4013e12dff46e2f062c00c5692bdf26e9ad4f4c14a7d` et `prototype/anchored_catalogue.hpp` SHA-256 `ba5ef6aeb7e5384c9a825d0138fd37967bf9559457347164c78229013b00eeb5`. Ce rapport remplace le contenu périmé du **second** audit, mais conserve le [premier audit](AUDIT_PROPOSITION.md) comme historique.
+> Snapshot mathématique courant figé sur le commit `8ac683ad1e167937fe7f9e964860f6be374a48d0`. La version auditée de [`PROPOSITION.md`](../PROPOSITION.md) compte 700 lignes, 39 500 octets et porte l'empreinte SHA-256 `af94886fec1d83bc671eefdd4c605ca6f4d939ff3a1ce0298e49c719aed03386`. Son noyau A2pe a été introduit au commit `495463bd443cdcafd843023623ca403fe2929a43`, puis sa définition de l'objet stratifié partiellement corrigée par `8ac683a`. L'oracle et le prototype évoluant indépendamment dans le worktree, leur suivi précis est désormais séparé dans [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md). Le [premier audit](AUDIT_PROPOSITION.md) reste historique.
 
 > [!NOTE]
 > Contexte : `phase=exploration_v3_hors_registre`, `backend=cpu_reference_oracle_under_audit`, `profile=quantized_u16_input_only`, `mode=a2pe_and_oracle_reaudit_v3`, `public_status=not_claimed`. Aucune porte de produit, aucun SLO et aucun statut exact ne sont ouverts ici.
 
 > [!CAUTION]
-> **Verdict : GO pour formaliser et falsifier A2pe; NO-GO pour en faire maintenant l'architecture recommandée; oracle M1 prometteur mais pas encore qualifiant; prototype M2.1 incomplet.** La réduction A2e par arête reste mathématiquement solide. L'idée A2pe peut supprimer une source séparée d'ancres, mais `V_k(p)` perd ses strates internes lorsqu'il est traité comme un simple ensemble, et son arrêt local échoue sur les parties non bornées. Le delta live a déjà fermé les deux voies vacues les plus directes de M1 et renforcé ses comparaisons; il reste des champs et reçus à fermer. Le nouveau certificat M2.1 donne en revanche un faux positif concret et omet un support de rang 2.
+> **Verdict : GO pour formaliser et falsifier A2pe; NO-GO pour en faire maintenant l'architecture recommandée; oracle M1 prometteur mais pas encore qualifiant.** La réduction A2e par arête reste mathématiquement solide. La correction de `8ac683a` reconnaît enfin que le bon objet est un sous-complexe stratifié, mais plusieurs sections continuent de confondre une strate avec son plan porteur ou avec la frontière de $V_k(p)$. Le certificat local M2.1 commité a produit un faux positif et omis un support de rang 2; le delta live l'a depuis retiré et assume correctement l'exhaustivité comme seule complétude disponible.
 
 ## 1. Progrès réels de la nouvelle révision
 
@@ -184,6 +184,9 @@ Trois choix sont excellents : entier signe--magnitude à taille variable au lieu
 
 Ces qualités en font une bonne base de juge. Elles ne suffisent pas encore à faire de son `OK` une porte.
 
+> [!WARNING]
+> Les §§5.2 à 5.7 conservent les défauts observés sur le premier snapshot de M1 afin de documenter les régressions qui doivent rester fermées. Le delta live a depuis corrigé les planchers vacus, les rationnels nuls, le centre exact, plusieurs champs de forêt et l'absence de GMP. Le statut courant et les défauts résiduels sont synthétisés au §5.11 et détaillés dans l'[audit autonome M1/M2.1](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md).
+
 ### 5.2 P0 — une campagne entièrement vide peut rendre `OK`
 
 Les arguments `--min-decided` et `--min-nodes` ne sont pas validés. Avec des planchers nuls ou négatifs, une campagne dont tous les nuages sont rejetés satisfait l'identité de fermeture et sort avec le code 0.
@@ -290,6 +293,19 @@ Sur les hashes indiqués en tête, le build CMake échoue : `oracle_main.cpp` in
 Le nouveau mode `--measure-only` ignore aussi `--receipt` et retourne 0 même en présence d'ancres non certifiées ou de dégénérescences; cela peut convenir à un diagnostic seulement s'il publie explicitement `status=diagnostic_only` et une identité de campagne. Dans le mode `--subject anchored`, le JSON conserve la chaîne codée en dur `morsehgp3D_v2 build_catalogue + run`, donc un reçu peut annoncer le mauvais sujet.
 
 Enfin, les forêts du sujet `anchored` sont encore construites par `mhgp::build_forest` de la v2. C'est acceptable pour isoler le catalogue dans un différentiel, mais cela ne qualifie ni une forêt v3 ni le pipeline HGP proposé.
+
+### 5.11 Delta live — corrections acquises et verrous restants
+
+Le delta courant retire explicitement le faux certificat, sépare `exhaustive` de `assumed_window`, départage les distances égales par `PointId`, corrige la mesure fermée $d^2\leq4r^2$, répare l'include CMake et ajoute un CTest ancré exhaustif. Les planchers de campagne, le dénominateur rationnel, le centre exact et les champs publics majeurs de la forêt sont également contrôlés. Ces corrections sont substantielles.
+
+Quatre verrous demeurent prioritaires :
+
+1. une source de multifusion étrangère mais de même rang et niveau passe encore;
+2. un record catalogue illisible fait échouer `compare_catalogues`, mais le `main` poursuit la lecture de la forêt au lieu d'échouer atomiquement;
+3. le CTest ancré ne couvre que `s_max=2`, donc pas les supports trois et quatre;
+4. les reçus ne scellent ni le binaire, ni la toolchain, ni les digests des nuages, et `measure-only` ignore encore `--receipt`.
+
+Le nouveau `sufficient_neighbours` est une mesure a posteriori honnête uniquement sous régime exhaustif. Il ne constitue pas une coupure en ligne et son calcul exhaustif conserve la cascade combinatoire. Sous `assumed_window`, il est seulement un minorant diagnostique.
 
 ## 6. Portes recommandées avant M2
 

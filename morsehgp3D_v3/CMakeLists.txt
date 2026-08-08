@@ -54,3 +54,16 @@ add_test(NAME mhgp3v_oracle COMMAND mhgp3v_oracle
 add_test(NAME mhgp3v_oracle_anchored COMMAND mhgp3v_oracle --subject anchored
          --regime exhaustive --clouds 6 --seed 4242 --min-points 20 --max-points 22
          --max-order 1 --min-decided 5 --min-nodes 30)
+# Et sur les arites TROIS et QUATRE, qui dominent la cascade : l'ordre 1 seul
+# n'exerce que les singletons et les paires.
+add_test(NAME mhgp3v_oracle_anchored_high_arity COMMAND mhgp3v_oracle --subject anchored
+         --regime exhaustive --clouds 8 --seed 90210 --min-points 9 --max-points 12
+         --max-order 3 --min-decided 6 --min-nodes 60)
+
+# Campagne NEGATIVE : chaque faute injectee doit etre attrapee. Un garde qui ne
+# se declenche jamais ne vaut rien.
+foreach(fault member_unsorted rotated_centre sentinel n_children roots merge_source_foreign)
+  add_test(NAME mhgp3v_oracle_inject_${fault} COMMAND mhgp3v_oracle
+           --inject ${fault} --clouds 4 --seed 4242 --min-points 8 --max-points 10
+           --max-order 2 --min-decided 1 --min-nodes 1)
+endforeach()
