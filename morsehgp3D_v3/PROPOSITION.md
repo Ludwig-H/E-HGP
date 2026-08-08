@@ -1,30 +1,45 @@
 # MorseHGP3D v3 — proposition d'architecture
 
-> **Statut : proposition, pas une conception arrêtée.** Révision du 8 août 2026
-> au soir, après l'audit indépendant [`AUDIT_PROPOSITION.md`](AUDIT_PROPOSITION.md),
-> qui a rendu un **NO-GO** sur la recommandation précédente (cascade A1) et
-> proposé une meilleure architecture. Cette révision l'accepte, et y ajoute les
-> conclusions de l'investigation instrumentée close le même soir.
+> **Ce document est une proposition, pas une autorité.** L'autorité mathématique
+> reste [`SPECIFICATION_MORSEHGP3D.md`](../docs/SPECIFICATION_MORSEHGP3D.md) et
+> [`STATUT_PREUVES_ET_HEURISTIQUES.md`](../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md).
+> Les audits [`AUDIT_PROPOSITION.md`](AUDIT_PROPOSITION.md) et
+> [`AUDIT_PROPOSITION_2.md`](AUDIT_PROPOSITION_2.md) **motivent** cette révision ;
+> ils ne la certifient pas. Aucune porte, aucun statut public, aucun SLO n'est
+> ouvert ici.
 >
-> Les erreurs de la version précédente sont conservées et nommées au §13 : une
-> proposition qui efface ses erreurs ne s'audite plus.
+> Réécriture complète du 8 août 2026 au soir, après le second audit et son
+> contre-audit. Le journal des affirmations retirées est au §14.
 
-## 1. Pourquoi une v3, et ce qui n'est pas en cause
+## 0. Convention de statut
+
+Chaque énoncé chiffré porte l'une de ces étiquettes, et rien n'est promu sans
+reçu :
+
+| étiquette | sens |
+| --- | --- |
+| **[théorème]** | démontré ici ou dans une note du dépôt, avec sa preuve |
+| **[mesuré]** | produit par une exécution, avec sa commande |
+| **[extrapolé]** | calculé depuis une mesure sous un modèle explicite |
+| **[diagnostic]** | observation utile, sans reçu reproductible — ne qualifie rien |
+| **[obligation]** | à prouver ou à mesurer avant toute décision qui s'y appuie |
+
+**[obligation] générale** : aucune des mesures citées ci-dessous ne possède
+aujourd'hui de sidecar complet (schéma, commit, binaire, compilateur, machine,
+digest d'entrée, graine, compteurs de campagne fermés, sortie brute). Tant que
+ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer.
+
+## 1. Pourquoi une v3
 
 La v2 n'a pas une conception fausse. Elle a un **substitut de force brute posé à
 la place de sa conception**, qui n'a jamais été écrite : `DESIGN.md` §7 budgète un
 peeling local sensible à la sortie et une descente indexée ; `src/catalogue.cpp`
 énumère exhaustivement tous les quadruples du voisinage et
-`src/forest.cpp::descend` balaie le nuage entier à chaque bras.
+`src/forest.cpp::descend` balaie le nuage à chaque bras.
 
-Mesure du 8 août (2 vCPU, Release) :
-
-| $n$ | $K$ | quadruples candidats | temps |
-| ---: | ---: | ---: | ---: |
-| 200 | 10 | $258\,739\,800 = 200\cdot\binom{199}{3}$ | 26,3 s |
-| 500 | 2 | — | > 300 s |
-
-$W_p$ vaut le nuage entier, à tout $K$.
+**[mesuré]** (2 vCPU, Release) : $n=200$, $K=10$ →
+$258\,739\,800=200\cdot\binom{199}{3}$ quadruples en 26,3 s ; $n=500$, $K=2$ →
+plus de 300 s. $W_p$ vaut le nuage entier, à tout $K$.
 
 ### 1.1 La cause racine, lue dans le code
 
@@ -32,158 +47,166 @@ $W_p$ vaut le nuage entier, à tout $K$.
 `vals.size() < s_max`. La relaxation conique n'admet que les points à moins de
 $49{,}7^\circ$ de l'axe — $17{,}7\ \%$ de la sphère ; il suffit qu'**un** cône sur
 42 contienne moins de $s_{\max}$ points admissibles. Alors `diam_cut = +infini`
-(`:290`), `std::isfinite` est faux (`:296`), toutes les paires sont vivantes, et
-la triple boucle visite $\binom{\lvert W\rvert}{3}$ triplets.
+(`:290`), `std::isfinite` est faux (`:296`), toutes les paires restent vivantes,
+et la triple boucle visite $\binom{\lvert W\rvert}{3}$ triplets.
 
 ### 1.2 Même le théorème 4 exact ne sauve pas l'énumération locale
 
-Escalier mesuré à $n=50\,000$, $K=10$, 48 cœurs (débit mesuré
-$3{,}2$–$8{,}9\cdot10^{6}$ quadruples/s/cœur) :
+**[mesuré]** $\lvert W\rvert_{\text{cert}}$ à $n=50\,000$, $K=10$, par bissection
+sur le plus petit $\rho$ vérifiant $2\tau\leq\rho$ ; **[extrapolé]** les temps, à
+partir du débit **[mesuré]** de $3{,}2$ à $8{,}9\cdot10^{6}$ quadruples/s/cœur
+sur 48 cœurs — l'intervalle est donné, pas un point.
 
-| configuration | $\lvert W\rvert$ | quadruples | temps |
+| configuration | $\lvert W\rvert$ | quadruples | temps (48 cœurs) |
 | --- | ---: | ---: | ---: |
-| code actuel | $n-1$ | $1{,}04\cdot10^{18}$ | 69 ans |
-| croissance réparée, $\theta$ du dépôt | 17 578 | $4{,}53\cdot10^{16}$ | 3,0 ans |
-| + golden angle corrigé | 5 764 | $1{,}59\cdot10^{15}$ | 38 jours |
-| + 2 000 cônes | 252 | $1{,}32\cdot10^{11}$ | 275 s |
-| **théorème 4 exact, $\theta=0$** | **175** | $4{,}39\cdot10^{10}$ | **91 s** |
-| oracle de voisinage parfait | 130 | $1{,}79\cdot10^{10}$ | 37 s |
-| *ce qu'il faudrait* | — | $4{,}08\cdot10^{7}$ | 0,085 s |
+| code actuel | $n-1$ | $1{,}04\cdot10^{18}$ | 77 à 214 ans |
+| croissance réparée, $\theta$ du dépôt | 17 578 | $4{,}53\cdot10^{16}$ | 3,4 à 9,3 ans |
+| + golden angle corrigé | 5 764 | $1{,}59\cdot10^{15}$ | 43 à 120 jours |
+| + 2 000 cônes | 252 | $1{,}32\cdot10^{11}$ | 309 à 859 s |
+| **théorème 4 exact, $\theta=0$** | **175** | $4{,}39\cdot10^{10}$ | **103 à 286 s** |
+| voisinage parfait observé | 130 | $1{,}79\cdot10^{10}$ | 42 à 117 s |
+| *ce qu'il faudrait pour 100 ms* | — | $1{,}5$ à $4{,}3\cdot10^{7}$ | 0,1 s |
 
 avec le modèle fermé
-$\lvert W\rvert_{\text{cert}} = 8\,s_{\max}\cos\theta/(\cos\theta-\sin\theta)^4$.
+$\lvert W\rvert_{\text{cert}}=8\,s_{\max}\cos\theta/(\cos\theta-\sin\theta)^4$
+**[extrapolé, vérifié contre la mesure]**.
 
-Le budget de 100 ms impose $\binom{\lvert W\rvert}{3}\leq960$, soit
-$\lvert W\rvert\leq18$ ; une seconde impose $\lvert W\rvert\leq39$. Or
-$\lvert W\rvert\geq130$ est **géométriquement nécessaire** à $K=10$ : le support
-le plus lointain d'une sphère critique émise est le 89ᵉ à 165ᵉ voisin, et il faut
-le 189ᵉ pour compter les rangs. Rendement mesuré :
-$1{,}5$–$2{,}4\cdot10^{-3}$ sphère par quadruple testé, soit **400 à 650
-candidats jetés par sphère gardée**.
+Le budget de 100 ms impose $\binom{\lvert W\rvert}{3}\lesssim10^{3}$, soit
+$\lvert W\rvert\leq18$ ; une seconde impose $\lvert W\rvert\leq39$. **[mesuré,
+sur le corpus testé]** le support le plus lointain d'une sphère critique émise
+est le 89ᵉ à 165ᵉ voisin, et il faut le 189ᵉ pour compter les rangs — donc
+$\lvert W\rvert\geq130$ **sur ce corpus**, ce qui n'est pas une borne universelle
+de la géométrie à $K=10$. **[mesuré]** rendement : $1{,}5$ à
+$2{,}4\cdot10^{-3}$ sphère par quadruple testé, soit 400 à 650 candidats jetés
+par sphère gardée.
 
-**L'énumération locale exhaustive des quadruples est condamnée, quels que soient
-$\theta$, le nombre de cônes et la qualité de la borne.**
+**Conclusion, robuste à tout l'intervalle : l'énumération locale exhaustive des
+quadruples est condamnée**, quels que soient $\theta$, le nombre de cônes et la
+qualité de la borne.
 
-### 1.3 Le second mur, dans la forêt
+### 1.3 Le second mur : la descente de la forêt
 
-`build_forest::descend` (`src/forest.cpp:69-89`) balaie **tout le nuage** à
-chaque pas, pour chacun des $\leq4$ bras de chaque sphère de rang $k+1$. À
-$K=10$, environ $2{,}3\cdot10^{7}$ sphères dont $\approx21\ \%$ de rang $k+1$ :
-$\approx4\cdot10^{6}\times4\times5\cdot10^{4}\approx10^{12}$ prédicats
-`sphere_side` **par ordre**, soit $\approx20$ s/ordre et $\approx200$ s pour la
-tour — le même ordre de grandeur que le plancher du catalogue. S'y ajoute
-l'indexation des minima par `std::map<std::vector<i32>,i32>` sur
-$2{,}3\cdot10^{7}$ clés.
+`build_forest::descend` (`forest.cpp:69-89`) cherche un intrus en parcourant les
+points du nuage, avec **sortie au premier intrus** (`:80`, `break`). Son coût
+réel est donc l'**indice du premier intrus**, pas $n$ — un balayage complet n'a
+lieu que lorsque les intrus se raréfient, c'est-à-dire près des minima et sur les
+bras qui échouent.
 
-**Remplacer le générateur sans remplacer la forêt ne gagne rien.**
+**[extrapolé, pire cas, non qualifiant]** $\approx10^{12}$ prédicats par ordre.
+**[obligation]** la bonne mesure est la **distribution de l'indice du premier
+intrus par pas**, par ordre, avec le nombre de bras, de pas, de plateaux et de
+censures — pas un produit de cardinaux.
 
-Et le lemme qui la répare : si $F'\subset F$ et $(c,r)$ est la sphère de
-l'événement, le centre du miniball de $F'$ est dans
-$\mathrm{conv}(F')\subseteq\bar B(c,r)$ et son rayon est $\leq r$, donc **tout
-intrus est dans $\bar B(c,2r)$**. La recherche d'intrus est une **requête de
-boule**, jamais un balayage du nuage.
+Le remède, lui, est un énoncé propre :
 
-### 1.4 Le mur de mémoire : ne jamais matérialiser le catalogue
+> **[théorème] Lemme de localité de la descente.** Si $F'\subseteq F$ et si
+> $(c,r)$ est la sphère de l'événement avec $F\subseteq\bar B(c,r)$, alors le
+> centre $c'$ de la miniboule de $F'$ vérifie
+> $c'\in\mathrm{conv}(F')\subseteq\bar B(c,r)$ et son rayon $r'\leq r$ ; donc tout
+> $x\in\bar B(c',r')$ vérifie
+> $\lVert x-c\rVert\leq r'+r\leq 2r$.
 
-Mesuré : $\approx450$ à $510$ sphères critiques distinctes par point en régime
-intérieur, **stable de $n=5\,000$ à $200\,000$** — donc
-$\approx2{,}3\cdot10^{7}$ sphères à $n=50\,000$. À
-`sizeof(CriticalSphere) = 160` octets plus $\approx32$ octets de membres, cela
-fait **4,4 Go**.
+**Tout intrus est dans $\bar B(c,2r)$** : la recherche est une requête de boule,
+jamais un balayage. **[obligation]** ce lemme ne prouve ni la terminaison, ni
+l'unicité du minimum atteint, ni le traitement des plateaux, ni le caractère
+canonique du choix de la victime (`forest.cpp:84` prend `mb.support[0]`, un choix
+arbitraire), ni la complétude des incidences silencieuses.
 
-Conséquences : le catalogue complet ne doit **jamais** être matérialisé, la
-sortie est consommée **en flux** par le réducteur, et le budget est
-$\approx200$ ns par sphère produite (48 cœurs, 100 ms), atteignable seulement
-pour un producteur amorti $O(1)$ par sortie.
+### 1.4 Le troisième mur : la mémoire
 
-### 1.5 Les points peu profonds — énoncé corrigé
+**[diagnostic]** $\approx450$ à $510$ sphères critiques distinctes par point en
+régime intérieur, stable de $n=5\,000$ à $200\,000$ — donc
+$\approx2{,}3\cdot10^{7}$ sphères à $n=50\,000$, soit $\approx4{,}4$ Go à
+$160+32$ octets. Ces chiffres viennent d'une source v2 dont la complétude, la
+canonicité et le domaine ne sont pas certifiés : ils ne qualifient rien.
 
-La version précédente affirmait : « $\tau(p)=+\infty$ dès que $p$ est de
-profondeur de \textsc{Tukey} $\leq K$, donc il existe de grandes sphères
-**critiques** tangentes en $p$ ». **La seconde moitié est fausse**, et l'audit a
-raison de la refuser (§3.2).
+**Ce qui doit rester quel que soit le chiffre** : l'architecture v3 **ne doit
+exiger aucune matérialisation globale du catalogue**, le sink est consommé en
+flux par le réducteur, et le high-water mémoire est publié.
 
-Trois quantités doivent être distinguées :
+### 1.5 Trois quantités à ne jamais confondre
 
-1. la **boule tangente non contrainte**, dont le centre peut sortir de
-   $\mathrm{conv}(X)$ — c'est celle que calcule `radius_bound` de la v2 ;
+1. la **boule tangente non contrainte** — centre libre, c'est ce que calcule
+   `radius_bound` de la v2, et c'est elle qui vaut $+\infty$ sur les points de
+   faible profondeur ;
 2. $R(p)$, **supremum** des rayons de boules passant par $p$, **de centre dans
    $\mathrm{conv}(X)$**, de contenu $\leq s_{\max}$ — celle de la germination ;
-3. la **sphère critique**, qui exige de surcroît
+3. la **sphère critique**, qui exige de plus
    $c\in\mathrm{relint}\,\mathrm{conv}(U)$.
 
-Une énorme boule vide posée sur une surface a tous ses points d'appui du même
-côté : son centre n'est pas dans leur enveloppe, elle n'est **pas** critique. Ce
-qui subsiste — et qui suffit à condamner la v2 — est que **sa borne, non
-contrainte, est infinie sur ces points**, donc son voisinage ne peut pas être
-dimensionné. Le fait mesuré : $\geq615$ points sur 50 000 à $K=10$ (1,23 %) ne
-sont certifiables par aucun $\theta$ ni aucun nombre de cônes, et imposent à eux
-seuls $1{,}28\cdot10^{16}$ quadruples.
+**[théorème]** $R(p)\leq\mathrm{diam}(X)$ **pour tout $p$** : si
+$c\in\mathrm{conv}(X)$ et $p\in X$, alors $r=\lVert c-p\rVert\leq\mathrm{diam}(X)$.
+**$R$ n'est donc jamais infinie.**
 
-La convention de profondeur (leave-one-out ou non, points sur le plan frontière)
-doit être fixée explicitement : à $K\leq10$, un décalage d'une unité compte.
+Deux conséquences, et elles sont importantes :
 
-### 1.6 Mesure sur nuages réels — l'alarme « surface » est levée
+- une énorme boule vide posée sur une surface a tous ses appuis du même côté :
+  son centre n'est pas dans leur enveloppe, **ce n'est pas une sphère critique**.
+  L'inférence « $\tau=+\infty$ donc grandes sphères critiques » de la version
+  précédente est fausse ;
+- la restriction $D\leq2R(p)$ **ne peut jamais mordre par finitude**, seulement
+  par la *valeur* de $R(p)$. Tout le cadrage « points peu profonds » est donc
+  hors sujet pour la germination ; **la seule mesure qui compte est la
+  distribution de $R(p)$** — **[obligation]**, elle n'a pas été faite.
 
-Minorant de $\lbrace p:\tau(p)=+\infty\rbrace$, critère **non contraint**, 4 096
-directions, donc **majorant** de l'ensemble où la borne à centre convexe échoue :
+Ce qui subsiste, et qui suffit à condamner la v2 : **sa** borne, non contrainte,
+est infinie sur ces points, donc son voisinage ne peut pas être dimensionné.
+
+**[diagnostic]** census du 8 août sur le Stanford bunny (dix captations brutes
+recalées par `bun.conf`, 362 272 points ; et sa reconstruction fusionnée
+`bun_zipper`, 35 947 points), critère **non contraint**, 4 096 directions,
+`census_tukey_shallow_20260808.json` :
 
 | nuage | $n$ | $s_{\max}=3$ | $s_{\max}=11$ |
 | --- | ---: | ---: | ---: |
-| bunny, 10 captations recalées | 50 000 | 1,06 % | **2,21 %** |
+| bunny, 10 captations recalées | 50 000 | 1,06 % | 2,21 % |
 | cube uniforme volumétrique | 50 000 | 0,48 % | 1,32 % |
 | bunny, 10 captations recalées | 20 000 | 1,80 % | 3,88 % |
 | bunny, reconstruction fusionnée | 20 000 | 5,86 % | 10,43 % |
 | cube uniforme volumétrique | 20 000 | 0,95 % | 2,83 % |
 
-Nuages : Stanford bunny, dix captations brutes recalées par `bun.conf`
-(362 272 points), et sa reconstruction fusionnée `bun_zipper` (35 947 points).
+Ce census mesure la quantité **non contrainte**, donc il diagnostique la v2 et
+**rien d'autre** : la version précédente en tirait un majorant de l'ensemble où
+la borne convexe échoue, ce qui est **vacue** puisque cet ensemble est vide. La
+première observation sur un vrai nuage multi-captation est intéressante — le
+nuage multi-captation est *moins* peu profond que la reconstruction fusionnée,
+ce qui est cohérent avec l'épaisseur donnée par l'erreur de recalage — mais le
+transfert à SemanticKITTI et aux familles sanctionnées reste **ouvert**, et la
+causalité n'est pas démontrée.
 
-Deux faits : un vrai nuage de surface multi-captation à 50 k donne $2{,}2\ \%$,
-soit $1{,}7\times$ l'uniforme volumétrique et non « presque partout » ; et le
-nuage **multi-captation est moins peu profond que la reconstruction fusionnée**
-($3{,}88\ \%$ contre $10{,}43\ \%$ à $n$ égal) — l'erreur de recalage lui donne
-une épaisseur, donc un caractère localement volumétrique. La crainte de la
-version précédente est réfutée deux fois, par l'argument de centre convexe et par
-la mesure. Ce n'est pas pour autant un théorème dans l'autre sens : ces chiffres
-sont un **census**, pas une propriété du domaine.
+### 1.6 Deux défauts v2 à ne pas perdre
 
-### 1.7 Deux trouvailles annexes, à ne pas perdre
-
-- **`certified` est un faux positif de diagnostic** : `catalogue.cpp:471`, `:480`,
-  `:484` mettent tous `ok = true`, y compris les deux sorties par épuisement, et
-  `:500` écrit `certified[i] = 1`. Le reçu annonce 100 % de certification pendant
-  que $\lvert W_p\rvert=n-1$. Il faut trois drapeaux distincts :
-  `certified_by_bound`, `certified_by_exhaustion_W_eq_X`,
-  `certified_by_exhaustion_diameter`.
+- **`certified` est un faux positif** : `catalogue.cpp:471`, `:480`, `:484`
+  mettent tous `ok = true`, y compris les deux sorties par épuisement, et `:500`
+  écrit `certified[i] = 1`. Le reçu annonce 100 % de certification pendant que
+  $\lvert W_p\rvert=n-1$. Trois drapeaux distincts sont nécessaires.
 - **Trou de correction latent, non gardé** : `classify` compte le rang dans $W$
-  seulement ; une boule candidate de rayon $r>\rho/2$ verrait ses membres hors de
-  $W_\rho$ invisibles, donc un rang sous-compté. Mesuré inactif (0 sur 8 770),
-  non gardé. Une ligne : rejeter toute sphère telle que $4\beta(s)>\rho^2$.
+  seulement ; une boule de rayon $r>\rho/2$ verrait ses membres hors de $W_\rho$
+  invisibles. **[mesuré]** inactif (0 sur 8 770), non gardé. Une ligne : rejeter
+  toute sphère telle que $4\beta(s)>\rho^2$.
 
-## 2. Le contrat, et comment il doit être compté
+## 2. Le contrat, et son ledger
 
-Hiérarchie de HARTIGAN **exacte** jusqu'à $K=10$ sur $n=50\,000$ points réels,
-en moins d'une seconde, cible 100 ms.
+Hiérarchie de HARTIGAN **exacte** jusqu'à $K=10$ sur $n=50\,000$ points réels, en
+moins d'une seconde, cible 100 ms.
 
-La version précédente en tirait « $267$ ns par objet émis ». L'audit refuse ce
-raccourci (§10.13), et il a raison : le budget doit être un **ledger de bout en
-bout** — candidats rejetés, octets, tri, replis exacts, sink et réduction
-comprises — pas un quotient sur la seule sortie. La cible chiffrée reste utile
-comme ordre de grandeur ; elle ne remplace pas le ledger.
+Le budget ne se compte **pas** en nanosecondes par objet émis. Il se compte en
+**ledger de bout en bout** : candidats rejetés, requêtes d'index, octets écrits,
+tris, replis exacts, sink, réduction, synchronisations, high-water mémoire. Un
+quotient sur la seule sortie masque exactement les postes qui tuent.
 
-## 3. Domaine : deux profils, jamais confondus
+## 3. Domaine
 
-La spécification principale interprète chaque binary64 d'entrée comme un
-**dyadique exact**. Quantifier sur une grille $2^{16}$ est donc un **autre
-problème** : la quantification peut changer l'ordre des distances, le rang fermé,
-les égalités d'arêtes, les cosphéricités et la topologie des lots simultanés.
-Compter zéro collision **ne prouve pas** l'équivalence géométrique.
+### 3.1 Deux profils, jamais confondus
 
-D'où deux profils nommés et disjoints :
+La spécification interprète chaque binary64 d'entrée comme un **dyadique exact**.
+Quantifier sur une grille $2^{16}$ est un **autre problème** : la quantification
+peut changer l'ordre des distances, le rang fermé, les égalités d'arêtes, les
+cosphéricités et la topologie des lots simultanés. **Zéro collision ne prouve pas
+l'équivalence géométrique.**
 
 1. **`exact_dyadic_input`** — autorité sur les binary64 originaux, filtres
-   d'intervalles dirigés et repli multiprécision ;
+   d'intervalles dirigés, repli multiprécision ;
 2. **`quantized_u16_input`** — autorité sur le nuage entier produit *seulement*,
    avec transformation, origine, échelle, écrêtages, collisions, multiplicités et
    digest source→cible au reçu.
@@ -191,342 +214,372 @@ D'où deux profils nommés et disjoints :
 Une sortie du second ne porte **jamais** `public_status=exact` relativement au
 premier.
 
-Hypothèses admises, liste close : ensemble fini de points ; position générale au
-sens de l'absence de coquille cosphérique, **détectée et déclarée**. Et rien
-d'autre — ni surface, ni volume, ni densité, ni forme étoilée, ni origine
-capteur, ni image de distance. Ces structures peuvent **proposer** du travail ;
-le complément exact doit rendre la même sortie sans elles.
+### 3.2 `RelevantGP` par référence, pas par raccourci
 
-## 4. Le générateur : trois objets, pas deux
+`RelevantGP` **n'est pas** « absence de coquille cosphérique ». Sa définition
+normative (spécification §12) exige au moins : points distincts, support unique
+et affinement indépendant, centre dans l'intérieur relatif, barycentriques non
+nulles, shell complet sans point extérieur, prédicats et égalités exacts. Cette
+proposition l'emploie **par référence** ; un balayage des événements acceptés ne
+suffit pas à établir `relevant_gp_complete`.
 
-L'alternative « A1 cascade contre A2 peeling » de la version précédente était une
-fausse dichotomie (audit §3.3). Il faut séparer :
+### 3.3 Ce qu'on n'a pas le droit de supposer
 
-| | rôle | décision |
+Ni surface, ni volume, ni densité, ni forme étoilée, ni origine capteur, ni image
+de distance. Certains nuages sont **recomposés de plusieurs captations** : il n'y
+a ni paramétrisation commune, ni visibilité mono-retour. Ces structures peuvent
+**proposer** du travail ; le complément exact doit rendre la même sortie sans
+elles.
+
+Corollaire de conception : **la correction est inconditionnelle, la sélectivité
+est data-dépendante et doit être publiée par exécution.** Un nuage sur lequel les
+coupes ne mordent pas doit produire un résultat *lent*, pas faux.
+
+## 4. Le générateur : quatre objets
+
+| | rôle | statut |
 | --- | --- | --- |
-| **A1-source** | source complète d'**ancres diamétrales** | **nécessaire**, et c'est la pièce ouverte |
-| **A2e** | peeling **2D** ancré par une **arête** | **recommandé** pour le produit |
-| **A2p** | peeling **3D** ancré par un **point** (dual inversif) | **oracle** indépendant ; second candidat |
-| Delaunay d'ordre supérieur global | — | no-go produit ; oracle externe borné |
+| **A1-source** | source complète d'ancres diamétrales | **pièce ouverte** |
+| **A2e** | peeling **2D** ancré par une **arête** | cœur algorithmique, complet *si* A1-source l'est |
+| **A2p** | peeling **3D** ancré par un **point** (dual inversif) | complet par construction ; oracle, et candidat |
+| **A2pe** | **l'unification** : A2e est la 2-face de A2p | **recommandé, sous trois obligations (§6)** |
 
-### 4.1 A1-source — la pièce difficile, et elle n'est pas fermée
+### 4.1 A2e — la réduction de dimension
 
-JUNG et la cascade prouvent qu'un support accepté possède une paire diamétrale et
-confinent ses centres **une fois cette paire connue**. Ils ne fournissent **pas**
-une énumération sparse et complète des paires utiles. Trois voies seulement :
+Ancre diamétrale $e=pq$, $d=q-p$, $D^2=d\cdot d$, $M=(p+q)/2$, deux vecteurs
+entiers indépendants $b_1,b_2\perp d$, $B=[b_1\ b_2]$, centre $c=M+Bt$.
 
-- balayer $\binom{n}{2}$ — complet, incompatible avec le produit
-  (v1 mesure $1{,}92\ \mu$s/paire, soit 2 400 s à 50 k) ;
-- un RNG ou un catalogue de paires de rang borné — **réfuté** comme autorité
-  complète par `RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`, théorème 1 : pour
-  tout $q$ fini il existe un support de rang fermé 11 dont le RNG d'ordre $q$
-  n'est pas une clique ;
-- le complément **fail-open par self-join du LBVH et center-cover**, voie
-  `P15-HOCUDA-P1`, dont la parcimonie et le débit ne sont **pas** qualifiés.
+JUNG donne l'ellipse exacte
+$J_e^{(4)}=\lbrace t: t^{\mathsf{T}}(B^{\mathsf{T}}B)t\leq D^2/8\rbrace$, et
+chaque point $x\notin\lbrace p,q\rbrace$ la forme **affine**
 
-Donc : **complétude conditionnelle à une source complète d'ancres ; parcimonie
-non prouvée.** L'observation de 4,5 M paires retenues à une seule taille
-n'établit pas $\Theta(n)$ — et plusieurs mesures historiques employaient des
-restrictions non certifiées.
+$$h_x(t)=2(Bt)\cdot(x-M)-\left(\lVert x-M\rVert^2-\frac{D^2}{4}\right)
+= r^2-\lVert x-c\rVert^2 .$$
 
-### 4.2 A2e — la réduction de dimension, et pourquoi c'est le vrai saut
-
-Ancre diamétrale $e=pq$, $d=q-p$, $D^2=d\cdot d$, $M=(p+q)/2$. Deux vecteurs
-entiers indépendants $b_1,b_2$ orthogonaux à $d$, $B=[b_1\ b_2]$, centre
-$c=M+Bt$ avec $t\in\mathbb{R}^2$. JUNG donne l'ellipse exacte
-
-$$J_e^{(4)}=\left\lbrace t: t^{\mathsf{T}}\left(B^{\mathsf{T}}B\right)t\leq\frac{D^2}{8}\right\rbrace,$$
-
-et chaque point $x\notin\lbrace p,q\rbrace$ définit la forme **affine**
-
-$$h_x(t)=2(Bt)\cdot(x-M)-\left(\lVert x-M\rVert^2-\frac{D^2}{4}\right),$$
-
-dont l'identité de puissance donne exactement
-$h_x(t)=r^2-\lVert x-c\rVert^2$. Intérieur strict, shell et extérieur sont donc
-les **signes d'une droite**. Aucune base orthonormale, aucune racine carrée : les
-signes sont entiers ou rationnels exacts.
+Intérieur strict, shell et extérieur sont donc les **signes d'une droite** :
+aucune base orthonormale, aucune racine carrée, tous les signes entiers ou
+rationnels exacts.
 
 Sur l'ellipse, chaque point est intérieur constant (compté dans $c_e$), extérieur
-constant (éliminé), ou **droite active** (comptée dans $m_e$). Si
-$c_e>s_{\max}-4$, l'ancre ne porte aucun support quatre utile. Sinon le budget de
-profondeur est $\kappa_e=s_{\max}-4-c_e$, et
+constant (éliminé), ou **droite active** ($m_e$). Si $c_e>s_{\max}-4$, l'ancre ne
+porte aucun support quatre. Sinon, avec $\kappa_e=s_{\max}-4-c_e$ :
 
-$$\mathrm{rang}_{\text{ferm\'e}}(p,q,z,w)=4+c_e+\delta_e(t)$$
+$$\textbf{[théorème]}\qquad \mathrm{rang}_{\text{ferm\'e}}(p,q,z,w)=4+c_e+\delta_e(t),$$
 
-où $\delta_e(t)$ est le nombre de demi-plans actifs strictement positifs au
-sommet $t$. **Le rang est une profondeur d'arrangement 2D.** Il suffit d'énumérer
-les sommets de profondeur $\leq\kappa_e$, pas les $\binom{m_e}{2}$
-intersections, avec la borne locale du dépôt
+$\delta_e(t)$ étant le nombre de demi-plans actifs strictement positifs au sommet
+$t$. **Le rang est une profondeur d'arrangement 2D.** Et **[théorème classique]**
+le $\leq\kappa$-level de $m$ droites a $\Theta(m(\kappa+1))$ sommets, d'où
 
-$$Z_e\leq m_e\left(\kappa_e+1\right),$$
+$$Z_e\leq m_e(\kappa_e+1),\qquad Z_e\leq 8m_e \text{ pour } s_{\max}=11,\ c_e=0 .$$
 
-soit $Z_e\leq 8m_e$ pour $s_{\max}=11$ et $c_e=0$.
+C'est le saut : la cascade développe des tuples *puis* interroge leur rang ; A2e
+**calcule le rang pendant la génération**, ce qui retire la requête de boule
+fermée du chemin chaud.
 
-**C'est le saut.** La cascade développe des tuples *puis* interroge leur rang ;
-A2e **calcule le rang pendant la génération**. C'est ce qui supprime la requête
-de boule fermée comme coût dominant (§5).
+**[obligation] une borne de sortie n'est pas un constructeur.** Un prototype qui
+forme toutes les intersections puis filtre reste en $\Theta(m_e^2)$ même s'il
+respecte $Z_e$. Restent à fermer : coefficients rationnels larges, clipping
+elliptique exact, droites parallèles, concurrences, ordre total et
+reproductibilité, graphe de conflits, scratch borné, ordonnancement des ancres
+lourdes, mapping GPU sans phase sérielle dominante.
 
-Les quatre arités se traitent séparément, avec des ellipses, des $c_e$ et des
-seuils différents : support un (rayon nul, multiplicités), support deux (centre
-$M$, profondeur en $t=0$), support trois (circumcentre = point de la droite
-$h_z=0$ minimisant $t^{\mathsf{T}}(B^{\mathsf{T}}B)t$, rang $3+c_e+\delta_e$),
-support quatre (sommets shallow). Au rang fermé 11, réfuter tout support trois
-demande **neuf** témoins stricts et tout support quatre **huit** : un profiler
-qui ne couvre que le second ne peut pas servir de source complète.
+**Les quatre arités sont quatre problèmes.** Support un : rayon nul,
+multiplicités. Support deux : centre $M$, profondeur en $t=0$, shell complet
+malgré tout. Support trois : circumcentre = point de $h_z=0$ minimisant
+$t^{\mathsf{T}}(B^{\mathsf{T}}B)t$, rang $3+c_e+\delta_e$, **ellipse et seuils
+différents**. Support quatre : sommets shallow. Au rang fermé 11, réfuter tout
+support trois demande **neuf** témoins stricts, tout support quatre **huit** :
+une preuve d'arité quatre ne se propage jamais à l'arité trois.
 
-Ce que « peeling » doit signifier ici : construire **directement** le préfixe de
-profondeur $\leq\kappa_e$, avec un travail lié à $m_e$, $\kappa_e$ et $Z_e$. Ce
-n'est *pas* former toutes les intersections puis filtrer, ni perturber
-symboliquement les égalités, ni matérialiser l'arrangement. Le brute-force
-$m_e^2$ reste un **oracle local borné** — jamais le prototype qu'on chronomètre.
+### 4.2 A1-source — la pièce ouverte, et pourquoi elle est dure
 
-### 4.3 A2p — le dual inversif, et les cinq propriétés à prouver
+JUNG confine les centres **une fois la paire connue**. Il ne fournit pas
+l'énumération sparse et complète des paires utiles. Trois voies :
 
-Variante ancrée par point, nommée par `DESIGN.md` §3 : pour chaque $p$, parcourir
-le $\leq(s_{\max}-1)$-level de l'arrangement des $n-1$ **plans duaux**
+- balayer $\binom{n}{2}$ — complet, incompatible avec le produit
+  (**[mesuré]** $1{,}92\ \mu$s/paire, soit 2 400 s à 50 k) ;
+- RNG ou catalogue de paires de rang borné — **[théorème négatif]** réfuté :
+  pour tout $q$ fini il existe un support de rang fermé 11 dont le RNG d'ordre
+  $q$ n'est pas une clique (`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md` th. 1) ;
+- complément **fail-open par self-join du LBVH et center-cover**, voie
+  `P15-HOCUDA-P1` — parcimonie et débit **non qualifiés**.
 
-$$H_u=\left\lbrace x: 2\langle x,\,u-p\rangle=\lVert u-p\rVert^2\right\rbrace$$
+Donc : **complétude de A2e conditionnelle à A1-source ; parcimonie non prouvée.**
+L'observation de 4,5 M paires retenues à une seule taille n'établit pas
+$\Theta(n)$.
 
-dont les coefficients sont **entiers** sur la grille 16 bits. Dictionnaire :
-sommet $\leftrightarrow\lvert U\rvert=4$, arête $\leftrightarrow\lvert U\rvert=3$,
-face $\leftrightarrow\lvert U\rvert=2$, chaque cellule portant son point le plus
-proche de l'origine, donc $(c,r)$.
+Et l'ellipse compacte de A2e ne supprime pas le problème des grandes sphères,
+**elle le déplace** : un grand $D$ donne une grande ellipse, donc un grand $m_e$
+(**[mesuré]** jusqu'à 25 026 points de voisinage sur `eight_clusters`). Ce qui
+serait une cellule non bornée chez A2p devient une charge chez A2e, et elle
+atterrit intégralement dans A1-source.
 
-Cinq propriétés, aucune acquise, et **elles valent pour tout peeling, A2e
-compris** :
+## 5. A2p — le dual inversif, complet par construction
 
-- **M1 — dictionnaire exact.** Cellule de dimension $j$ du level
-  $\leftrightarrow$ sphère critique de support $4-j$ et de rang fermé
-  $1+\text{niveau}$. Sans M1, on produit un autre objet.
-- **M2 — atteignabilité.** Toute cellule de niveau $\leq s_{\max}-1$ est atteinte
-  depuis le niveau 0 par franchissement d'un plan. `DESIGN.md` §3.1 bis documente
-  déjà un élagage **réfuté** faute exactement de cette preuve : sans M2, on
-  remplace un algorithme trop cher par un algorithme **incomplet**.
-- **M3 — sensibilité à la sortie.** Cellules visitées $=O(\text{sortie})$, et non
-  $O(\text{sortie}\times\lvert W\rvert)$ : c'est le facteur 400–650 mesuré qu'on
-  récupère.
-- **M4 — localité.** Le peeling **ne supprime pas** le besoin de $\rho$ : il faut
-  toujours charger les plans de $W_\rho$ avec $\rho$ certifié. Il supprime le
-  $\binom{\lvert W\rvert}{3}$, pas le $\lvert W\rvert$.
-- **M5 — points de faible profondeur.** Dans le dual, ces sphères sont exactement
-  les **cellules non bornées** du level. À prouver : « cellule non bornée
-  $\leftrightarrow$ pas de sphère critique finie ». Si elle tient, le peeling
-  traite ces points **sans cas particulier** — c'est son second argument décisif
-  après M3.
+Ancrons en $p$ ; pour tout autre $u$, poser
 
-L'audit place A2p en **oracle** plutôt qu'en produit : sa complexité globale, sa
-duplication entre les $n$ ancres et son mapping GPU ne sont pas compatibles avec
-une décision produit, et l'ancrage par arête gagne une dimension. Cette révision
-suit l'audit — mais A2p garde une vraie valeur différentielle, ancrage et
-structure étant distincts du chemin produit, et M5 lui donne un argument que A2e
-doit encore reproduire.
+$$H_u=\left\lbrace c:\ 2\langle c-p,\ u-p\rangle=\lVert u-p\rVert^2\right\rbrace,$$
 
-### 4.4 Le contrat du générateur n'est pas le contrat HGP
+à coefficients **entiers** sur la grille. Alors $u$ est strictement dans la
+sphère passant par $p$ centrée en $c$ ssi $c$ est du côté positif, donc
 
-Émettre « tous les supports minimaux bien centrés de rang fermé utile » est un
-composant géométrique, **pas** la frontière scientifique. La sortie normative
-(`SPECIFICATION_MORSEHGP3D.md` §§5, 13, 17) exige aussi les facettes et cofaces
-utiles, les incidences **actives et silencieuses**, les attachements et
-remplacements de la descente, les lots de niveau exactement égal, les
-`coverage_delta` et le `coverage_log`, et les applications verticales entre
-ordres avec leurs carrés de naturalité.
+$$\mathrm{niveau}(c)=\#\lbrace u:\lVert u-c\rVert<\lVert p-c\rVert\rbrace=\mathrm{rang}_{\text{ferm\'e}}-1 ,$$
 
-La phrase « le point dur n'est ni le générateur ni la forêt » est **retirée** :
-la source complète, les incidences silencieuses et les verticales sont des points
-durs indépendants — et le §1.3 montre que la forêt en est un aussi.
+et la région utile est
+$V_k(p)=\lbrace c:\ p\ \text{est parmi les}\ k+1\ \text{plus proches de}\ c\rbrace$,
+dont le treillis de faces donne **toutes** les sphères critiques contenant $p$ :
+sommet $\leftrightarrow\lvert U\rvert=4$, arête $\leftrightarrow3$, face
+$\leftrightarrow2$.
 
-## 5. Où passe le coût, une fois A2e retenu
+C'est la cellule de VORONOÏ d'ordre $\leq k$ de $p$ — objet classique.
+**[théorème classique]** le $\leq k$-level de $m$ plans de $\mathbb{R}^3$ a une
+complexité $\Theta(mk^2)$ ; **[diagnostic]** la mesure donne 450 à 510 cellules
+par point, soit un comportement constant en $n$ et compatible avec $\Theta(k^2)$
+par point — donc une sortie totale $\Theta(nk^2)$.
 
-La requête de boule fermée répétée était le point dur **de la cascade**. Avec
-A2e, la profondeur du sommet d'arrangement *est* le nombre d'intérieurs stricts,
-et les identifiants de conflit peu profonds se transportent avec le transcript :
-le chemin produit ne refait pas une descente LBVH complète par support émis.
+**Deux propriétés qu'A2e n'a pas.**
 
-La décision terminale vérifie encore exactement : éligibilité de diamètre et
-propriétaire, bon centrage et indépendance affine, shell complet ou statut
-`RelevantGP`, cohérence profondeur/conflits/rang, niveau rationnel canonique. Une
-requête de boule fermée indépendante reste excellente comme **vérificateur
-différentiel ou repli d'ambiguïté** — plus comme coût imposé à chaque candidat.
+1. **L'ancrage est complet sans rien à prouver** : tout support contient au moins
+   un point, donc ancrer en chaque point est exhaustif. Il n'y a pas de A1-source.
+2. **La localité devient un certificat *a posteriori*.** Comme
+   $\mathrm{dist}(p,H_u)=\tfrac12\lVert u-p\rVert$, en insérant les points par
+   distance croissante on peut s'arrêter dès que la demi-distance du prochain
+   point dépasse le rayon de la région courante : **aucun point restant ne peut
+   plus la couper**. C'est exact, entier, sans relaxation conique — donc sans le
+   $+\infty$ qui a tué la v2. C'est une recherche par file de priorité sur le
+   LBVH, avec condition d'arrêt certifiée.
 
-## 6. La coupe $R(z)\geq D/2$ — conservée, corrigée
+**Le prix** : arrangement 3D au lieu de 2D, prédicats plus lourds, cellules non
+bornées à traiter, et duplication $\leq4$ (chaque support est vu depuis chacun de
+ses $\leq4$ sommets), réduite à l'émission par le propriétaire canonique mais pas
+en travail.
 
-> **Proposition.** $U$ support minimal bien centré, circumboule $\bar B(c,r)$ de
+## 6. A2pe — l'unification, et ce qu'elle demande
+
+**L'observation.** Une 2-face de $V_k(p)$ portée par $H_u$ est exactement le plan
+médiateur de $(p,u)$, et les traces $H_u\cap H_v$ sont exactement les droites
+$h_v$ du §4.1. **A2e n'est pas une alternative à A2p : c'est sa restriction à une
+face.**
+
+**La conséquence.** Les 2-faces de $V_k(p)$ **sont** les ancres de A2e, complètes
+et par construction — A1-source disparaît. Et le théorème négatif du §4.2 ne s'y
+oppose pas : il réfute « paire de rang fermé $\leq s_{\max}$ » (boule diamétrale),
+alors que la 2-face signifie « il existe une boule par $p$ et $u$ de contenu
+$\leq s_{\max}$ ». **[théorème]** ces deux conditions diffèrent : pour un support,
+$c$ est sur le plan médiateur donc $r^2=\lVert M-c\rVert^2+D^2/4$, et l'inclusion
+de la boule diamétrale dans la circumboule exigerait $r\leq D/2$, c'est-à-dire
+l'égalité. La réfutation ne transporte donc pas.
+
+**L'architecture recommandée** en découle :
+
+> ancrer en chaque point ; construire $V_k(p)$ par insertion en distance
+> croissante avec arrêt certifié ; lire les supports par dimension de cellule, la
+> 2D de A2e servant de sous-routine sur chaque face ; n'émettre qu'au
+> propriétaire canonique ; descendre la forêt par requête de boule
+> $\bar B(c,2r)$ ; consommer en flux.
+
+**[obligation] — trois, et elles conditionnent tout le §6 :**
+
+1. **O1 — les 2-faces donnent exactement les arêtes utiles.** L'argument
+   ci-dessus est une double inclusion informelle ; il faut une preuve propre, en
+   particulier sur les faces non bornées et les égalités.
+2. **O2 — sensibilité à la sortie du parcours.** Cellules visitées
+   $=O(\text{sortie})$ et non $O(\text{sortie}\times m)$. **[à noter]** l'écart
+   entre la borne classique $\Theta(mk^2)$ (soit $1{,}75\cdot10^4$ par point à
+   $m=175$, $k=10$) et la mesure (450 à 510) est d'un facteur $\approx38$ : le
+   pire cas n'est pas atteint, mais rien ne le garantit.
+3. **O3 — cellules non bornées.** Correspondance exacte avec les directions où
+   aucune sphère critique finie n'existe, et terminaison du parcours.
+
+**[obligation] O4 — le coût du prédicat exact en 3D contre 2D.** C'est
+l'arbitrage central entre A2pe et A2e seule : A2pe supprime A1-source au prix
+d'un arrangement de dimension supérieure. Il faut le mesurer avant de trancher.
+
+## 7. La coupe $R(z)\geq D/2$
+
+> **[théorème]** $U$ support minimal bien centré, circumboule $\bar B(c,r)$ de
 > contenu $\leq s_{\max}$, $D=\mathrm{diam}(U)$. Alors pour tout $z\in U$ :
-> $R(z)\geq r\geq D/2$, où $R(z)$ est le **supremum** des rayons de boules
-> passant par $z$, de centre dans $\mathrm{conv}(X)$, de contenu $\leq s_{\max}$.
+> $R(z)\geq r\geq D/2$, avec $R$ le **supremum** des rayons de boules passant par
+> $z$, de centre dans $\mathrm{conv}(X)$, de contenu $\leq s_{\max}$.
 
-*Démonstration.* $z\in U\subseteq\partial B$ donc $\bar B$ est une telle boule ;
-son centre est dans $\mathrm{relint}\,\mathrm{conv}(U)\subseteq\mathrm{conv}(X)$.
-D'où $R(z)\geq r$. Et $U\subseteq\bar B$ donne $D\leq 2r$. $\square$
+*Preuve.* $z\in U\subseteq\partial B$ donc $\bar B$ est une telle boule, de centre
+dans $\mathrm{relint}\,\mathrm{conv}(U)\subseteq\mathrm{conv}(X)$ : $R(z)\geq r$.
+Et $U\subseteq\bar B$ donne $D\leq2r$. $\square$
 
-Trois précisions imposées par l'audit :
+Trois précisions :
 
-1. $R$ est un **supremum**, pas « le plus grand rayon » : avec des boules
-   fermées la population saute quand un point atteint le shell, la borne peut ne
-   pas être atteinte ;
-2. ce $R$, contraint par $\mathrm{conv}(X)$, **n'est pas** la quantité tangente
-   non contrainte du §1.5 ;
-3. surtout — **le gain n'existe que si le seuil entre dans le range-report**.
-   Ajouter `if (2R(z) < D) continue` après avoir balayé la lentille ne réduit pas
-   les visites, seulement les candidats aval. Il faut augmenter chaque nœud LBVH
-   d'un majorant extérieur `max_tau_hi` et n'élaguer un nœud que si
+1. $R$ est un **supremum** : avec des boules fermées la population saute quand un
+   point atteint le shell, la borne peut ne pas être atteinte ;
+2. ce $R$ n'est **pas** la quantité tangente non contrainte du §1.5, et il est
+   **toujours fini** — la coupe ne mord que par sa valeur ;
+3. **le gain n'existe que si le seuil entre dans le range-report.** Un test placé
+   après le balayage de la lentille ne réduit que les candidats aval. Il faut
+   augmenter chaque nœud LBVH d'un majorant `max_tau_hi` et n'élaguer que si
    `max_tau_hi < D` est certifié ; non fini, sous-normal, débordement ou
    intervalle traversant le seuil restent **fail-open**.
 
-Le $1{,}2\cdot10^{8}$ annoncé précédemment était une hypothèse de mesure, pas une
-conséquence du lemme. Il est retiré tant que le range-report indexé et les
-distributions p95/p99/max n'existent pas.
+Dans A2pe, cette coupe joue un rôle différent et plus utile : elle **sépare les
+régimes** (petites ancres traitées en flux, grandes ancres mises en file) plutôt
+qu'elle n'élague.
 
-## 7. Architecture GPU
+## 8. Canonicité, égalités, arithmétique
 
-**J10 borne un rayon spatial, pas une cardinalité.** Les mesures du dépôt
-atteignent un voisinage maximal de **25 026 points** sur `eight_clusters` :
-« une arête, sa boule en mémoire partagée, quelques dizaines de points » n'est
-donc pas une architecture sûre, et cette phrase de la version précédente est
-retirée.
+**Propriétaire canonique** : la plus petite paire lexicographique parmi les arêtes
+de longueur **maximale** du support, sur des `PointId` stables, testée **avant**
+le sink. Sur une grille entière l'égalité de deux longueurs d'arête n'est pas
+rare : la règle de départage est obligatoire.
+
+**Égalités** : une concurrence exacte de $t$ droites est **un lot unique**, pas
+$\binom{t}{2}$ sommets perturbés. Shell complet compté avant émission ; hors
+`RelevantGP`, l'autorité est retirée ou une voie dégénérée explicitement
+certifiée est prise. Sortie exigée byte-à-byte identique sous permutation
+d'entrée, nombre de fils et ordonnancement GPU. **[mesuré]** en v2, $55\ \%$ des
+sphères sont conservées chez un propriétaire non canonique même en mono-thread,
+et aucun digest reproductible n'est possible.
+
+**Arithmétique de production** : entière, sans allocation, largeur auditée.
+**[extrapolé, dérivation symbolique à reprendre au registre]** majorants pour
+$M=65535$ : $\lvert\mathrm{num}_i\rvert<2^{84{,}96}$, $\mathrm{den}<2^{68{,}17}$,
+$\mathrm{num2}<2^{169{,}93}$, $\mathrm{den}^2<2^{136{,}35}$, comparaison de deux
+niveaux $<2^{306{,}28}$. `sphere.hpp` de la v2 y est compatible
+(`BigInt<4>`/`BigInt<6>`) et **[mesuré]** son `sphere_cmp_beta` est d'accord avec
+GMP sur 18 601 paires — c'est un **candidat à reprendre après audit prédicat par
+prédicat**, pas un composant qualifié.
+
+**Oracle** : précision **arbitraire**, représentation *différente* de la
+production. **[mesuré]** seule option qui décide la grille déclarée : $40/40$
+nuages contre $0/40$ aujourd'hui, UBSan propre.
+
+## 9. Ce que la v2 fournit, et ce qu'elle ne fournit pas
+
+Elle fournit une **sémantique candidate** (lots exacts, multifusion contractée,
+censure atomique, source exacte par nœud), des **fixtures** et des
+**contre-exemples**. Elle ne fournit **aucune certification** : l'oracle qui a
+produit « 1 462 nuages, 89 247 cas » déborde en arithmétique signée avant son
+garde, saute des nuages en silence, accepte une campagne vide ou censurée, ne
+compare ni arités, ni enfants, ni racines, ni sources, et tire ses coordonnées
+dans $[0,120]$ — **[mesuré]** sur la grille déclarée il décide zéro nuage sur
+quarante en annonçant `OK`.
+
+## 10. Architecture GPU
+
+**J10 borne un rayon spatial, pas une cardinalité** — **[mesuré]** voisinage
+maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
+« quelques dizaines de points en mémoire partagée ».
 
 | étage résident | rôle | structure globale évitée |
 | --- | --- | --- |
 | canonicalisation | `PointId`, domaine, digest, `RelevantGP` | copie ambiguë de l'entrée |
-| LBVH | range-report et self-join | matrice paire–point |
+| LBVH | range-report, self-join, `max_tau_hi` | matrice paire–point |
 | propositions | RNG, image de distance, heuristiques | aucune autorité au proposeur |
-| center-cover | source complète d'ancres | tableau des $\binom{n}{2}$ paires |
-| cordes | classification constante/active | tous les $W_e$ persistants |
-| shallow 2D | niveaux peu profonds | $\sum_e\binom{m_e}{2}$ |
+| ancres | 2-faces de $V_k(p)$, ou center-cover | tableau des $\binom{n}{2}$ paires |
+| shallow | niveaux peu profonds, rang = profondeur | $\sum_e\binom{m_e}{2}$ |
 | décision exacte | diamètre, shell, bon centrage, owner | rescans globaux par candidat |
 | source HGP | facettes, cofaces, silences, couverture | $\Gamma$ global |
 | réduction | lots, attaches, forêts, verticales | mosaïque d'ordre supérieur |
 
-Ancres traitées par classes de charge : warp pour les petites, CTA sous-tuilé
-pour les moyennes, file persistante pour les lourdes. Le sink est consommé **au
-fil de l'eau** par le réducteur — le §1.4 l'impose : 4,4 Go de catalogue ne
-peuvent pas être accumulés.
+Ancres par classes de charge : warp, CTA sous-tuilé, file persistante. Sink
+consommé **au fil de l'eau**.
 
-**Sur la contradiction CPU/GPU** de la version précédente (« GPU dès la première
-ligne » puis « pas de CUDA avant la référence CPU ») : les deux pistes sont
-**parallèles**. CPU multiprécision indépendant pour l'autorité et les petits
-différentiels ; CUDA `proposal_only` très tôt pour falsifier masses, divergence
-et mémoire ; aucune promotion scientifique avant parité avec l'oracle.
+**Les deux pistes sont parallèles** : oracle CPU multiprécision indépendant pour
+l'autorité ; CUDA `proposal_only` très tôt pour falsifier masses, divergence et
+mémoire ; aucune promotion avant parité.
 
-## 8. Canonicité et égalités
+## 11. Le contrat du générateur n'est pas le contrat HGP
 
-Le propriétaire canonique est la plus petite paire lexicographique parmi les
-arêtes de longueur **maximale** du support, sur des `PointId` stables — testé
-**avant** le sink. Sur une grille entière l'égalité de deux longueurs d'arête
-n'est pas rare : la règle de départage est obligatoire, pas cosmétique.
+Émettre les supports est un composant géométrique. La sortie normative exige
+aussi les facettes et cofaces utiles, les incidences **actives et silencieuses**,
+les attachements et remplacements de la descente, les lots de niveau exactement
+égal, `coverage_delta` et `coverage_log`, et les applications verticales entre
+ordres avec leurs carrés de naturalité. **La source complète, les incidences
+silencieuses, les verticales et la descente sont des points durs indépendants du
+générateur.**
 
-L'hypothèse de position générale n'autorise pas à ignorer les égalités
-rencontrées : une concurrence exacte de $t$ droites est **un lot unique**, pas
-$\binom{t}{2}$ sommets artificiels. Shell complet compté avant émission ; une
-forme hors `RelevantGP` retire l'autorité ou prend une voie dégénérée
-explicitement certifiée. Sortie exigée byte-à-byte identique sous permutation
-d'entrée, nombre de fils et ordonnancement GPU.
+## 12. Portes
 
-Rappel de la mesure v2 : $55\ \%$ des sphères sont conservées chez un
-propriétaire non canonique même en mono-thread, le filtre annoncé ne contient que
-des commentaires, et aucun digest reproductible n'est possible.
+**Gate A — autorité documentaire.** Reprendre A2e, le lemme $2r$, la coupe
+$R(z)\geq D/2$, $R\leq\mathrm{diam}(X)$ et les profils d'entrée dans la
+spécification et le registre ; classer chaque énoncé `proved_here`,
+`conditional_theorem`, `proof_obligation` ou `experimental_target`.
 
-## 9. Arithmétique
+**Gate B — reçus.** Sidecars complets pour chaque mesure de ce document ; digests
+des entrées, binaires et sorties ; identité de campagne fermée ; distinction
+stricte mesure / extrapolation / théorème. Le census bunny devient une fixture
+reproductible, puis SemanticKITTI et les familles sanctionnées.
 
-**Production** — entière, sans allocation, largeur auditée. Majorants prouvés
-pour $M=65535$ : $\lvert\mathrm{num}_i\rvert<2^{84{,}96}$,
-$\mathrm{den}<2^{68{,}17}$, $\mathrm{num2}<2^{169{,}93}$,
-$\mathrm{den}^2<2^{136{,}35}$, comparaison de deux niveaux $<2^{306{,}28}$. Le
-`sphere.hpp` de la v2 y est conforme et son `sphere_cmp_beta` est d'accord avec
-GMP sur 18 601 paires : composant sain, à reprendre en resserrant ses constantes
-d'en-tête, lâches d'un facteur $\approx2^{11}$.
+**Gate C — oracle indépendant.** Multiprécision, représentation distincte,
+exhaustif à petit $n$, campagne fermée
+(`attempted = decided + rejected_domain`), comparaison structurelle complète
+(arités, enfants, racines, sources, nombre canonique de nœuds).
 
-**Oracle** — précision **arbitraire**, représentation *différente* de celle de
-production (jamais `exact.hpp`, dont un défaut se compenserait des deux côtés).
-Mesuré : c'est la seule option qui décide la grille déclarée, $40/40$ nuages
-contre $0/40$ aujourd'hui, UBSan propre.
+**Gate D — census de charge.** Distribution de $R(p)$ ; $\Sigma_e m_e$,
+$\Sigma_e Z_e$, $c_e$ ; p50/p95/p99/max de $\lvert W_e\rvert$, $m_e$, $Z_e$ ;
+rétention de chaque porte ; taille de la sortie canonique acceptée ; queues,
+replis, high-water. **À $n$ de plusieurs milliers** — ce n'est pas la même
+campagne que Gate C, et l'une ne tient pas lieu de l'autre.
+**Décision à deux branches** : sortie énorme ⇒ réviser le SLO ; sortie sparse
+mais intermédiaires denses ⇒ **architecture no-go**.
 
-## 10. La v2 n'est pas une autorité réutilisable
+**Gate E — shallow CPU exact.** Constructeur sans travail en $\sum_e m_e^2$ ;
+comparaison à l'oracle exhaustif et au brute-force local ; permutations,
+égalités, parallèles, concurrences, limites de l'ellipse ; transcript de conflits
+et sortie canonique. Obligations propres à A2e (couverture des ancres,
+classification exacte, préfixe shallow, clipping, profondeur et conflits,
+concurrences groupées, arités deux à quatre, shell/centrage/owner, transcript) —
+et, **séparément**, obligations propres à A2p (dictionnaire, atteignabilité, coût
+global sur $n$ ancres, cellules non bornées, duplication). Les deux listes ne
+s'impliquent pas.
 
-La version précédente affirmait la sémantique de `forest.cpp` « certifiée sur
-1 462 nuages et 89 247 cas ». **Retiré.** L'oracle qui a produit ces chiffres
-déborde en arithmétique signée avant son garde, saute des nuages en silence,
-accepte une campagne vide ou censurée, ne compare ni arités, ni enfants, ni
-racines, ni sources, ni nombre canonique de nœuds, et sa campagne tire des
-coordonnées dans $[0,120]$ — sur la grille déclarée elle décide **zéro nuage sur
-quarante** en annonçant `OK`.
+**Gate F — descente indexée.** Fixture permanente du lemme $\bar B(c,2r)$ ;
+différentiel balayage global contre requête ; terminaison, décroissance stricte,
+victime canonique, plateaux ; compteurs **par ordre**, jamais extrapolés du
+total.
 
-La v2 fournit une **sémantique candidate**, des fixtures et des contre-exemples.
-Pas une certification. Et le §1.3 ajoute que sa descente est, en plus, un mur de
-performance à part entière.
+**Gate G — source HGP et réduction**, puis **Gate H — publication,
+déterminisme, et produit sans budget configuré** : qualifier d'abord la seconde,
+puis seulement 100 ms, **par famille sanctionnée**.
 
-## 11. Recommandation et portes
+## 13. Ordre des travaux
 
-> **V3 = source complète fail-open de paires diamétrales + arrangement shallow
-> exact par paire + descente par requête de boule + émission canonique en flux
-> + réduction HGP résidente.**
+1. **Gate B d'abord sur ce qui existe déjà** — rendre reproductibles les mesures
+   citées ici. C'est peu de travail et cela change leur statut.
+2. **Gate C**, l'oracle : rien ne doit se construire au-dessus d'une porte qui
+   décide zéro nuage en annonçant `OK`.
+3. **O1 et O3** (§6) : la preuve de l'unification. C'est court, c'est
+   mathématique, et cela décide entre A2pe et A2e + A1-source.
+4. **Gate E** sur la voie retenue, avec son oracle brute-force local.
+5. **Gate D** à l'échelle, sur de vrais nuages, y compris multi-captation.
+6. **Gate F**, la descente.
+7. Puis seulement source HGP, GPU, publication.
 
-Ordre des travaux, aligné sur les portes falsifiables de l'audit :
+**GO immédiat** : preuves O1/O3, prototype CPU exact du shallow, reçus.
+**NO-GO immédiat** : produit v3 avant O1–O4 ; toute revendication `exact`, tout
+SLO, toute autorité publique ; et présenter une mesure de ce document comme une
+qualification.
 
-0. **V3-0 — domaine et objet public.** Choisir `exact_dyadic_input` ou
-   `quantized_u16_input` ; définir $K_{\mathrm{eff}}$, `RelevantGP`, profils,
-   statuts, source HGP, couverture et verticales.
-1. **V3-1 — oracle indépendant et largeurs.** Multiprécision indépendante,
-   exhaustif jusqu'à $n\leq14$, campagne fermée
-   (`attempted = decided + rejected_domain`, zéro skip, zéro débordement
-   silencieux), comparaison structurelle complète, fixtures des trois warnings.
-2. **V3-2 — census avant architecture.** Sur `uniform_latin`, `eight_clusters`,
-   multiscale, filaments, déséquilibrés **et vrais scans mono/multi-captations** :
-   collisions, écrêtages, multiplicités, `RelevantGP` ; $Q$, $V_W$, $a$,
-   $C=\sum_e c_e$, $M=\sum_e m_e$, $Z=\sum_e Z_e$ ; p50/p95/p99/max de
-   $\lvert W_e\rvert$, $m_e$, $Z_e$ ; rétention de chaque porte ; taille de la
-   sortie canonique acceptée ; queues lourdes, replis, mémoire.
-   **Décision à deux branches** : sortie énorme $\Rightarrow$ réviser le SLO ;
-   sortie sparse mais intermédiaires denses $\Rightarrow$ **architecture no-go**.
-3. **V3-3 — source center-cover complète** (§4.1), arités trois et quatre
-   séparées, aucune matrice de paires.
-4. **V3-4 — shallow CPU exact** (§4.2) avec M1 à M5 démontrées ou explicitement
-   ouvertes ; comparé au brute-force local et au catalogue global ; no-go si le
-   travail reste en $\sum_e m_e^2$.
-5. **V3-5 — descente par requête de boule** (§1.3) : intrus cherchés dans
-   $\bar B(c,2r)$, jamais par balayage ; index des minima sans `std::map` sur
-   $2{,}3\cdot10^{7}$ clés.
-6. **V3-6 — shallow GPU et décision exacte**, parité byte-à-byte, aucun scan
-   global par support, sink consommé en flux.
-7. **V3-7 — source HGP et réduction** : incidences silencieuses, attaches, lots
-   égaux, `coverage_log`, forêt, verticales, naturalité.
-8. **V3-8 — publication et déterminisme**, puis **produit sans budget
-   configuré** : qualifier d'abord la seconde, puis seulement la cible 100 ms,
-   **par famille sanctionnée**.
+## 14. Journal des affirmations retirées
 
-**GO immédiat** : preuve constructive et prototype CPU exact du peeling 2D ancré
-par arête ; census LiDAR ; center-cover.
-**NO-GO immédiat** : implémenter la cascade A1 comme architecture produit,
-annoncer la forêt v2 certifiée, ouvrir un statut exact ou un SLO.
-
-## 12. Ce qui reste à mesurer
-
-1. le census du §11 V3-2, sur de vrais nuages, y compris multi-captation ;
-2. le coût unitaire de la décision terminale exacte en arithmétique entière ;
-3. $\sum_e m_e$ et $\sum_e Z_e$ réels — ce sont eux, et non la sortie, qui
-   décident si A2e tient ;
-4. la validité de M1 à M5.
-
-## 13. Ce que cette révision corrige, nommément
-
-| erreur de la version précédente | correction |
+| affirmation | sort |
 | --- | --- |
-| « complétude A1 = théorème » | conditionnelle à une source complète d'ancres (§4.1) |
-| $\tau=+\infty \Rightarrow$ grandes sphères critiques | faux : trois quantités distinctes (§1.5) |
-| « surface $\Rightarrow$ faible profondeur presque partout » | census, pas théorème ; mesuré à 2,2 % (§1.6) |
-| A1 contre A2, dichotomie | trois objets : A1-source, A2e, A2p (§4) |
-| gain $9{,}5\cdot10^9\to1{,}2\cdot10^8$ | invalide sans range-report indexé (§6) |
-| « J10 rend la tuile GPU sûre » | borne spatiale, pas cardinale ; max 25 026 points (§7) |
-| « le point dur n'est ni le générateur ni la forêt » | retiré ; la forêt est un mur à part (§1.3) |
-| forêt v2 et O2 « certifiés » | sémantique candidate seulement (§10) |
+| « complétude A1 = théorème » | conditionnelle à A1-source (§4.2) |
+| $\tau=+\infty\Rightarrow$ grandes sphères critiques | faux (§1.5) |
+| « surface ⇒ faible profondeur presque partout » | census, pas théorème (§1.5) |
+| census = majorant de l'échec de $R$ convexe | **vacu** : cet ensemble est vide (§1.5) |
+| A1 contre A2, dichotomie | quatre objets (§4) |
+| gain $9{,}5\cdot10^9\to1{,}2\cdot10^8$ | invalide sans range-report indexé (§7) |
+| « J10 rend la tuile GPU sûre » | borne spatiale, 25 026 points mesurés (§10) |
+| « le point dur n'est ni le générateur ni la forêt » | retiré (§1.3, §11) |
+| forêt v2 et O2 « certifiés » | sémantique candidate (§9) |
 | $267$ ns par objet | ledger de bout en bout (§2) |
-| grille $2^{16}$ comme domaine | deux profils disjoints (§3) |
-| 4,5 M paires $\Rightarrow\Theta(n)$ | retiré (§4.1) |
-| « si la sélectivité tombe, réénoncer le SLO » | décision à deux branches (§11, V3-2) |
-| « GPU dès la première ligne » vs « pas de CUDA avant » | deux pistes parallèles (§7) |
-| catalogue matérialisable | 4,4 Go : flux obligatoire (§1.4) |
-
-L'audit [`AUDIT_PROPOSITION.md`](AUDIT_PROPOSITION.md) est l'autorité de cette
-révision ; la réduction 2D vient de
-`docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md` ; les murs de la forêt et
-de la mémoire viennent de l'investigation instrumentée du 8 août.
+| grille $2^{16}$ comme domaine | deux profils disjoints (§3.1) |
+| `RelevantGP` = absence de cosphéricité | définition normative par référence (§3.2) |
+| 4,5 M paires $\Rightarrow\Theta(n)$ | retiré (§4.2) |
+| « GPU dès la première ligne » vs « pas de CUDA avant » | deux pistes parallèles (§10) |
+| catalogue matérialisable | flux obligatoire ; 4,4 Go en diagnostic (§1.4) |
+| 69 ans / 91 s | intervalle de débit publié : 77–214 ans, 103–286 s (§1.2) |
+| $\lvert W\rvert\geq130$ « géométriquement nécessaire » | observé sur le corpus mesuré (§1.2) |
+| `std::map` sur $2{,}3\cdot10^{7}$ clés | carte **par ordre**, rang $=k$ seulement (§1.3) |
+| $10^{12}$ prédicats de descente | pire cas ; `descend` sort au premier intrus (§1.3) |
+| « `sphere.hpp` sain » | candidat, audit prédicat par prédicat à faire (§8) |
+| M1–M5 imposées à A2e | deux listes disjointes (§12, Gate E) |
+| « l'audit est l'autorité » | spécification + registre des preuves (en-tête) |
