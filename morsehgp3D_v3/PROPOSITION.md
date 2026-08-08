@@ -36,12 +36,83 @@ L'égalité $258\,739\,800 = 200\cdot\binom{199}{3}$ dit tout : $W_p$ vaut le nu
 entier, à tout $K$. Le coût est en $\Theta(n^5)$, conformément à
 `WARNING_AUDIT_IMPLEMENTATION_2.md` §5, qui l'annonçait.
 
-**Et une réparation de la croissance ne suffirait pas.** Même avec la borne que
-le théorème 4 autorise ($\lvert W_p\rvert\approx 88$ pour $s_{\max}=11$ sur un
-nuage uniforme), l'énumération exhaustive donne $5{,}5\cdot10^{9}$ quadruples,
-soit environ 11 s à 50 k sur 48 cœurs. On passerait d'« impossible » à
-« quelques secondes », jamais à 100 ms. Remplacer le générateur *est* la seule
-route — c'est-à-dire faire une v3.
+### 1.1 La cause racine, lue dans le code
+
+`src/catalogue.cpp:380` : `radius_bound` rend `+infini` dès que
+`vals.size() < s_max`. La relaxation conique n'admet que les points à moins de
+$49{,}7^\circ$ de l'axe du cône — $17{,}7\ \%$ de la sphère ; il suffit qu'**un**
+cône sur 42 contienne moins de $s_{\max}$ points admissibles. Alors
+`diam_cut = +infini` (`:290`), `std::isfinite` est faux (`:296`), **toutes** les
+paires sont marquées vivantes, et la triple boucle visite
+$\binom{\lvert W\rvert}{3}$ triplets. C'est le $\Theta(n^4)$, à l'unité près :
+`candidate_quads` $= n\binom{n-1}{3}$ pour tout $K$ mesuré.
+
+### 1.2 Même le théorème 4 exact ne sauve pas l'énumération locale
+
+Mesure directe à $n=50\,000$, $K=10$, du plus petit $\rho$ vérifiant
+$2\tau\leq\rho$ (bissection ; le prédicat est monotone) :
+
+| configuration | $\theta$ | $\lvert W\rvert_{\text{cert}}$ mesuré (moy) |
+| --- | ---: | ---: |
+| dépôt, 42 cônes | 0,5765 | 17 578 |
+| golden angle corrigé | 0,5028 | 5 764 |
+| 512 cônes | 0,1553 | 355 |
+| **borne exacte $\theta=0$ (théorème 4 lui-même)** | 0 | **175** |
+
+Modèle fermé vérifié par la mesure :
+$$\lvert W\rvert_{\text{cert}}\;=\;\frac{8\,s_{\max}\cos\theta}{\left(\cos\theta-\sin\theta\right)^4}.$$
+
+Le facteur $8=2^3$ est intrinsèque : le critère borne le **diamètre** $2r$ d'une
+boule tangente qui contient déjà $s_{\max}$ points, donc le voisinage certifié
+contient au moins huit fois le contenu de la plus grosse boule critique.
+
+Conséquence chiffrée : à $\lvert W\rvert=175$, l'énumération exhaustive donne
+$n\binom{175}{3}=4{,}4\cdot10^{10}$ quadruples, soit **environ 92 s sur
+48 cœurs**. Le générateur de la v2 est condamné **même dans son meilleur cas
+théorique**.
+
+### 1.3 L'obstruction est mathématique : les points peu profonds
+
+$\tau_e(p)=+\infty$ **si et seulement si** le demi-espace ouvert
+$\lbrace x:\langle x-p,e\rangle>0\rbrace$ contient moins de $s_{\max}$ points —
+la boule tangente tend vers ce demi-espace quand $r\to\infty$. Donc
+
+$$\tau(p)=+\infty \iff p \text{ est de profondeur de \textsc{Tukey} } \leq K,$$
+
+et cela **reste vrai avec $W=X$**. Ce n'est pas un défaut d'implémentation : il
+existe alors réellement des sphères critiques de rang $\leq K+1$ tangentes en
+$p$, de rayon comparable au diamètre du nuage.
+
+Minorant mesuré (4096 directions, témoin exact), $n=50\,000$ uniforme :
+
+| $K$ | points non certifiables | part | quadruples qu'ils imposent seuls |
+| ---: | ---: | ---: | ---: |
+| 2 | $\geq 229$ | 0,46 % | $4{,}77\cdot10^{15}$ |
+| 4 | $\geq 340$ | 0,68 % | $7{,}08\cdot10^{15}$ |
+| 10 | $\geq 615$ | 1,23 % | $\mathbf{1{,}28\cdot10^{16}}$ |
+
+Un seul point de la coque force $\binom{49\,999}{3}=2{,}08\cdot10^{13}$
+quadruples, soit $\approx 12$ h$\cdot$cœur.
+
+**C'est le fait qui décide de l'architecture.** Aucun générateur fondé sur un
+voisinage $W_p$ ne peut survivre aux points peu profonds. Remplacer le
+générateur *est* la seule route — c'est-à-dire faire une v3.
+
+### 1.4 Deux trouvailles annexes, à ne pas perdre
+
+- **`certified` est un faux positif de diagnostic.** `catalogue.cpp:475-486` :
+  sortir par épuisement ($W=X$ ou $\rho\geq$ diamètre) met `ok = true`, et
+  `:500` écrit `certified[i] = 1`. Le reçu annonce donc 100 % de certification
+  pendant que $\lvert W_p\rvert = n-1$. Correctif minimal : deux drapeaux
+  distincts, `certified_by_bound` et `certified_by_exhaustion`, et publier la
+  moyenne de $\lvert W_p\rvert/n$.
+- **Trou de correction latent, non gardé.** Si la boucle sortait par la borne,
+  `classify` (`:202-227`) compte le rang **dans $W$ seulement**, en s'arrêtant à
+  $\text{cut}=(2r)^2$. Pour une boule candidate de rayon $r>\rho/2$, les membres
+  hors de $W_\rho$ sont invisibles : rang sous-compté, **sphère émise à tort**.
+  Mesuré inactif (0 sur 8 770 au point de fonctionnement $\theta=0$), mais non
+  gardé. Une ligne dans `enumerate_point` : rejeter toute sphère telle que
+  $4\,\beta(s)>\rho^2$.
 
 **Ce qui n'est pas en cause**, et se réutilise tel quel : l'arithmétique exacte
 entière, la sémantique de la forêt, et l'oracle structurel (§6).
@@ -86,6 +157,7 @@ est environ 54 fois cet objet, pour onze ordres.
 | | A1 germination sur l'arête diamétrale | A2 peeling local | A3 Delaunay d'ordre $k$ | A4 reprendre la v1 |
 | --- | --- | --- | --- | --- |
 | complétude | **théorème** (JUNG + cascade) | conjecturée | classique | héritée |
+| **points peu profonds** | **survit** (deux bornes, §4.2) | ancré sur un point : **meurt** | global, sans objet | survit |
 | travail mesuré à 50 k | $\approx4{,}4\cdot10^{8}$ candidats | — | — | 110 µs/support |
 | écrit ? | oui (v1), portes en binary64 | **non** | non | oui, mais lourd |
 | localité mémoire | **bornée explicitement** (J10) | à établir | globale | tuilée |
@@ -130,6 +202,17 @@ atteignent la longueur maximale, le propriétaire est *la plus petite paire
 lexicographique parmi elles* — règle totale, à écrire explicitement, et non
 optionnelle sur une grille entière.
 
+**Pourquoi A1 survit aux points peu profonds, et pas A2 ni la v2.** C'est
+l'argument structurel décisif du §1.3. Le germe est une **arête**, dont les deux
+extrémités sont sur la sphère : la restriction certifiée $D\leq 2R(\cdot)$
+s'applique donc **aux deux**. Un point peu profond apparié à un point profond est
+rejeté par la borne du profond ; seules survivent les paires peu-profond –
+peu-profond, soit $\binom{615}{2}\approx1{,}9\cdot10^{5}$ à 50 k, $K=10$. Un
+générateur ancré sur **un** point n'a qu'une borne et n'a pas cette protection —
+c'est exactement pourquoi la v2 meurt sur $1{,}23\ \%$ de ses points. Ce que la
+v1 mesure confirme le mécanisme : 4,5 M paires retenues à 50 k, soit
+$\Theta(n)$.
+
 **Ce que JUNG ne donne pas** (§6 du document, à citer tel quel) : il ne borne ni
 le rang, ni le nombre de supports par arête ; il ne réduit pas la porte de bon
 centrage (28 % des triples, 10 % des quadruples, **constant en $n$**) ; il ne
@@ -144,6 +227,12 @@ balaie $\binom{n}{2}$ paires (1,92 µs/paire mesuré à 50 k, soit 2 400 s), alo
 que les paires retenues sont $\Theta(n)$ et doivent être énumérées par l'index.
 
 ### 4.3 A2 — peeling local
+
+**Il hérite de l'obstruction du §1.3.** Étant ancré sur un point, il n'a qu'une
+borne de restriction, donc les $1{,}23\ \%$ de points de profondeur de \textsc{Tukey}
+$\leq K$ lui imposent le même mur qu'à la v2 — à moins d'un traitement séparé,
+qui reste entièrement à concevoir. C'est une objection nouvelle, qui ne figure
+dans aucun des trois audits.
 
 L'intention de `DESIGN.md` §7 : $\Theta\left(\lvert W_p\rvert\log\lvert W_p\rvert+Z_p\right)$
 par point, soit $\approx4{,}7\cdot10^{7}$ opérations à 50 k — environ **dix fois
@@ -257,8 +346,12 @@ découpage possible.
 2. **La largeur réellement nécessaire** pour les niveaux exacts sur la grille
    16 bits (audit 3 §2.1) : elle décide de la forme de `exact.hpp`.
 3. **Le débit réel par candidat** des portes de la cascade, une fois exactes.
-4. La cause exacte du non-élagage du voisinage v2 — utile même si on abandonne
-   ce générateur, parce que la même borne sert à dimensionner la tuile.
+4. ~~La cause exacte du non-élagage du voisinage v2~~ — **fermée** le 8 août,
+   voir §1.1 à §1.3. La borne conique reste utile pour dimensionner la tuile :
+   elle vaut $\lvert W\rvert_{\text{cert}} = 8\,s_{\max}\cos\theta/(\cos\theta-\sin\theta)^4$,
+   soit 175 en moyenne à $\theta=0$, $n=50\,000$, $K=10$.
+5. **Le nombre de paires germes retenues sur un nuage réel**, et la part qui
+   provient des points peu profonds : c'est ce qui dimensionne A1.
 
 ## 9. Obligations de preuve ouvertes
 
