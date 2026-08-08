@@ -1,0 +1,25 @@
+{
+  "schema":"morsehgp3d.germinated_higher_support.scale_probe.v1",
+  "deployment_status":"profiling_only",
+  "public_status":"not_claimed",
+  "point_count":4096,
+  "family":"eight_clusters",
+  "maximum_order":5,
+  "maximum_relevant_closed_rank":6,
+  "seed_regime":"certified",
+  "timings_ms":{"generation":3.807,"lbvh":1.172,"germination_and_classification":1200072.637},
+  "stop_category":"operational_deadline",
+  "operational_deadline_ms":1200000,
+  "production_identity_holds":true,
+  "refusal_reason":"",
+  "accepted_events":647,
+  "duplicate_accepted_emissions":0,
+  "classification":{"classified":123693912,"affinely_dependent":992,"boundary_reduced":0,"exterior_circumcenter":70385392,"above_rank":53306881,"extra_shell":0,"accepted":647,"closed_ball_query_count":53307528,"closed_ball_node_visit_count":1474387804},
+  "certificates":{
+    "arity3":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":3,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":false,"censored_by_operational_deadline":true,"unexamined_seed_pair_count":8270529,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":116031,"pairs_retained":105947,"third_vertices_examined":158966515,"third_vertices_retained":123693912,"triple_candidates":123693912,"quadruple_candidates":0,"population_queries":276081600},
+    "arity4":{"proof_basis":"","support_size":0,"seed_restriction":"exhaustive_over_pairs","completeness_guaranteed":true,"censored_by_operational_deadline":false,"unexamined_seed_pair_count":0,"tangent_direction_count":0,"tangent_covering_radius_millidegrees":0,"tangent_covering_radius_proved":false,"pairs_examined":0,"pairs_retained":0,"third_vertices_examined":0,"third_vertices_retained":0,"triple_candidates":0,"quadruple_candidates":0,"population_queries":0}
+  },
+  "candidates_per_record":191180.699,
+  "microseconds_per_classified_support":9.702,
+  "microseconds_per_record":1854826.332
+}

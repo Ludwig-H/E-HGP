@@ -1,0 +1,25 @@
+{
+  "schema":"morsehgp3d.germinated_higher_support.scale_probe.v1",
+  "deployment_status":"profiling_only",
+  "public_status":"not_claimed",
+  "point_count":16384,
+  "family":"uniform_latin",
+  "maximum_order":5,
+  "maximum_relevant_closed_rank":6,
+  "seed_regime":"certified",
+  "timings_ms":{"generation":14.246,"lbvh":4.706,"germination_and_classification":1208074.547},
+  "stop_category":"operational_deadline",
+  "operational_deadline_ms":1200000,
+  "production_identity_holds":true,
+  "refusal_reason":"",
+  "accepted_events":762984,
+  "duplicate_accepted_emissions":0,
+  "classification":{"classified":38860670,"affinely_dependent":17829,"boundary_reduced":0,"exterior_circumcenter":24527772,"above_rank":13552085,"extra_shell":0,"accepted":762984,"closed_ball_query_count":14315069,"closed_ball_node_visit_count":738173636},
+  "certificates":{
+    "arity3":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":3,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":true,"censored_by_operational_deadline":false,"unexamined_seed_pair_count":0,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":134209536,"pairs_retained":1535092,"third_vertices_examined":66117126,"third_vertices_retained":14489179,"triple_candidates":14489179,"quadruple_candidates":0,"population_queries":953455225},
+    "arity4":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":4,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":false,"censored_by_operational_deadline":true,"unexamined_seed_pair_count":134190785,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":18751,"pairs_retained":570,"third_vertices_examined":142025,"third_vertices_retained":101743,"triple_candidates":0,"quadruple_candidates":24371491,"population_queries":11966583}
+  },
+  "candidates_per_record":50.932,
+  "microseconds_per_classified_support":31.087,
+  "microseconds_per_record":1583.355
+}

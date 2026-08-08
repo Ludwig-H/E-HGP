@@ -1,0 +1,25 @@
+{
+  "schema":"morsehgp3d.germinated_higher_support.scale_probe.v1",
+  "deployment_status":"profiling_only",
+  "public_status":"not_claimed",
+  "point_count":50000,
+  "family":"eight_clusters",
+  "maximum_order":5,
+  "maximum_relevant_closed_rank":6,
+  "seed_regime":"certified",
+  "timings_ms":{"generation":46.471,"lbvh":15.057,"germination_and_classification":2402307.458},
+  "stop_category":"operational_deadline",
+  "operational_deadline_ms":2400000,
+  "production_identity_holds":true,
+  "refusal_reason":"",
+  "accepted_events":50,
+  "duplicate_accepted_emissions":0,
+  "classification":{"classified":147195716,"affinely_dependent":62,"boundary_reduced":0,"exterior_circumcenter":89643883,"above_rank":57551721,"extra_shell":0,"accepted":50,"closed_ball_query_count":57551771,"closed_ball_node_visit_count":1012398808},
+  "certificates":{
+    "arity3":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":3,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":false,"censored_by_operational_deadline":true,"unexamined_seed_pair_count":1249953305,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":21695,"pairs_retained":16517,"third_vertices_examined":247894285,"third_vertices_retained":147195716,"triple_candidates":147195716,"quadruple_candidates":0,"population_queries":198545294},
+    "arity4":{"proof_basis":"","support_size":0,"seed_restriction":"exhaustive_over_pairs","completeness_guaranteed":true,"censored_by_operational_deadline":false,"unexamined_seed_pair_count":0,"tangent_direction_count":0,"tangent_covering_radius_millidegrees":0,"tangent_covering_radius_proved":false,"pairs_examined":0,"pairs_retained":0,"third_vertices_examined":0,"third_vertices_retained":0,"triple_candidates":0,"quadruple_candidates":0,"population_queries":0}
+  },
+  "candidates_per_record":2943914.320,
+  "microseconds_per_classified_support":16.320,
+  "microseconds_per_record":48046149.153
+}

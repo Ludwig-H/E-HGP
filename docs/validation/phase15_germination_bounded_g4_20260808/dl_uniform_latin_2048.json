@@ -1,0 +1,25 @@
+{
+  "schema":"morsehgp3d.germinated_higher_support.scale_probe.v1",
+  "deployment_status":"profiling_only",
+  "public_status":"not_claimed",
+  "point_count":2048,
+  "family":"uniform_latin",
+  "maximum_order":5,
+  "maximum_relevant_closed_rank":6,
+  "seed_regime":"certified",
+  "timings_ms":{"generation":1.797,"lbvh":0.548,"germination_and_classification":1200003.672},
+  "stop_category":"operational_deadline",
+  "operational_deadline_ms":1200000,
+  "production_identity_holds":true,
+  "refusal_reason":"",
+  "accepted_events":36961,
+  "duplicate_accepted_emissions":0,
+  "classification":{"classified":74039004,"affinely_dependent":11272,"boundary_reduced":0,"exterior_circumcenter":73009825,"above_rank":980946,"extra_shell":0,"accepted":36961,"closed_ball_query_count":1017907,"closed_ball_node_visit_count":41312403},
+  "certificates":{
+    "arity3":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":3,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":true,"censored_by_operational_deadline":false,"unexamined_seed_pair_count":0,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":2096128,"pairs_retained":201517,"third_vertices_examined":9406213,"third_vertices_retained":1103180,"triple_candidates":1103180,"quadruple_candidates":0,"population_queries":101857496},
+    "arity4":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":4,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":false,"censored_by_operational_deadline":true,"unexamined_seed_pair_count":1838465,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":257663,"pairs_retained":77170,"third_vertices_examined":11927503,"third_vertices_retained":1682300,"triple_candidates":0,"quadruple_candidates":72935824,"population_queries":115864698}
+  },
+  "candidates_per_record":2003.166,
+  "microseconds_per_classified_support":16.208,
+  "microseconds_per_record":32466.753
+}
