@@ -380,7 +380,8 @@ try_align_bounded_exact_dyadics(
     const std::array<
         Binary64DyadicWord,
         maximum_bounded_endpoint_count>& words,
-    std::size_t word_count) {
+    std::size_t word_count,
+    int* alignment_exponent) {
   if (word_count > words.size()) {
     throw std::logic_error(
         "a bounded higher-support alignment exceeds its fixed word count");
@@ -401,6 +402,9 @@ try_align_bounded_exact_dyadics(
   std::array<
       BoundedExactInteger,
       maximum_bounded_endpoint_count> aligned{};
+  if (alignment_exponent != nullptr) {
+    *alignment_exponent = minimum_exponent;
+  }
   if (!exponent_initialized) {
     return aligned;
   }
@@ -446,6 +450,11 @@ struct BoundedProductCoordinates {
   std::size_t support_size{};
   std::array<BoundedBoxCoordinates, 4> support_boxes{};
   std::optional<BoundedBoxCoordinates> query_box;
+  // Every aligned coordinate is the rational coordinate divided by
+  // 2^alignment_exponent.  The whole product shares one exponent, so a
+  // quantity homogeneous of degree d in the coordinates is recovered exactly
+  // by multiplying the bounded integer by 2^(d * alignment_exponent).
+  int alignment_exponent{};
 };
 
 [[nodiscard]] BoundedInterval bounded_singleton(
@@ -615,15 +624,18 @@ try_bounded_product_coordinates(
     word_count += 6U;
   }
 
+  int alignment_exponent = 0;
   const std::optional<std::array<
       BoundedExactInteger,
       maximum_bounded_endpoint_count>> aligned =
-      try_align_bounded_exact_dyadics(words, word_count);
+      try_align_bounded_exact_dyadics(
+          words, word_count, &alignment_exponent);
   if (!aligned.has_value()) {
     return std::nullopt;
   }
 
   BoundedProductCoordinates result;
+  result.alignment_exponent = alignment_exponent;
   result.support_size = support_boxes.size();
   for (std::size_t index = 0U;
        index < support_boxes.size();
@@ -1046,10 +1058,114 @@ query_strictly_inside_every_independent_sphere_certified() const {
          query_scaled_power->upper.sign() < 0;
 }
 
+namespace {
+
+// A bounded integer that is the exact quantity divided by 2^scale_exponent,
+// restored to the rational the unbounded backend would have produced.  The
+// unbounded and bounded evaluations traverse the same interval DAG operation
+// for operation, and the scale is a strictly positive constant, so it maps
+// interval endpoints monotonically: both backends select the same corner and
+// agree on the value, not merely on its sign.
+[[nodiscard]] exact::ExactRational restore_scaled_rational(
+    const BoundedExactInteger& value,
+    int scale_exponent) {
+  exact::BigInt integer{value};
+  if (scale_exponent >= 0) {
+    return exact::ExactRational{
+        integer << static_cast<unsigned int>(scale_exponent)};
+  }
+  return exact::ExactRational{
+      std::move(integer),
+      exact::power_of_two(static_cast<unsigned int>(-scale_exponent))};
+}
+
+[[nodiscard]] ExactRationalInterval restore_scaled_interval(
+    const BoundedInterval& value,
+    int scale_exponent) {
+  return ExactRationalInterval{
+      restore_scaled_rational(value.lower, scale_exponent),
+      restore_scaled_rational(value.upper, scale_exponent)};
+}
+
+// The whole analysis on the fixed-width backend, which never reaches the
+// allocator.  Declines exactly when the coordinates do not align inside the
+// bounded width, and the caller then evaluates the identical DAG on the
+// unbounded backend.
+[[nodiscard]] std::optional<ExactHigherSupportProductAabbAnalysis>
+try_bounded_product_aabb_analysis(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    const spatial::ExactDyadicAabb3* query_box) {
+  const std::optional<BoundedProductCoordinates> coordinates =
+      try_bounded_product_coordinates(support_boxes, query_box);
+  if (!coordinates.has_value()) {
+    return std::nullopt;
+  }
+  const BoundedSupportIntervalEvaluation support =
+      bounded_evaluate_support(*coordinates);
+
+  const int exponent = coordinates->alignment_exponent;
+  const int dimension = static_cast<int>(support.dimension);
+  // Gram entries are quadratic in the coordinates, so a dimension-sized
+  // determinant of them -- and every Cramer numerator built by replacing one
+  // of its columns -- is homogeneous of degree 2 * dimension.  The query
+  // power multiplies such a determinant by one more squared length.
+  const int determinant_scale = 2 * dimension * exponent;
+  const int query_scale = (2 * dimension + 2) * exponent;
+
+  ExactHigherSupportProductAabbAnalysis result;
+  result.support_size = support.support_size;
+  result.gram_determinant =
+      restore_scaled_interval(support.gram_determinant, determinant_scale);
+
+  const std::array<BoundedInterval, 4> barycentric =
+      bounded_barycentric_numerators(support);
+  for (std::size_t index = 0U; index < barycentric.size(); ++index) {
+    result.barycentric_numerators[index] =
+        restore_scaled_interval(barycentric[index], determinant_scale);
+  }
+
+  if (support.support_size == 3U) {
+    const std::array<BoundedExactInteger, 3> dot_bounds =
+        bounded_triangle_vertex_dot_upper_bounds(
+            std::span<const BoundedBoxCoordinates>{
+                support.boxes.data(), support.support_size});
+    std::array<exact::ExactRational, 3> restored{};
+    for (std::size_t index = 0U; index < restored.size(); ++index) {
+      restored[index] =
+          restore_scaled_rational(dot_bounds[index], 2 * exponent);
+    }
+    result.triangle_vertex_dot_upper_bounds = restored;
+  }
+
+  if (query_box != nullptr) {
+    if (!coordinates->query_box.has_value()) {
+      throw std::logic_error(
+          "a bounded higher-support query product lost its query box");
+    }
+    result.query_scaled_power = restore_scaled_interval(
+        bounded_query_scaled_power(support, *coordinates->query_box),
+        query_scale);
+  }
+  return result;
+}
+
+}  // namespace
+
 ExactHigherSupportProductAabbAnalysis
 exact_higher_support_product_aabb_analysis(
     std::span<const spatial::ExactDyadicAabb3> support_boxes,
     std::optional<spatial::ExactDyadicAabb3> query_box) {
+  if (support_boxes.size() != 3U && support_boxes.size() != 4U) {
+    throw std::invalid_argument(
+        "a higher-support AABB product requires three or four boxes");
+  }
+  const std::optional<ExactHigherSupportProductAabbAnalysis> bounded =
+      try_bounded_product_aabb_analysis(
+          support_boxes,
+          query_box.has_value() ? &*query_box : nullptr);
+  if (bounded.has_value()) {
+    return *bounded;
+  }
   const SupportIntervalEvaluation support = evaluate_support(support_boxes);
   ExactHigherSupportProductAabbAnalysis result;
   result.support_size = support.support_size;
