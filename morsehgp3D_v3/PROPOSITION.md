@@ -72,7 +72,13 @@ $\lvert W\rvert_{\text{cert}}=8\,s_{\max}\cos\theta/(\cos\theta-\sin\theta)^4$
 **[extrapolé, vérifié contre la mesure]**.
 
 Le budget de 100 ms impose $\binom{\lvert W\rvert}{3}\lesssim10^{3}$, soit
-$\lvert W\rvert\leq18$ ; une seconde impose $\lvert W\rvert\leq39$. **[mesuré,
+$\lvert W\rvert\leq18$ ; une seconde impose $\lvert W\rvert\leq38$ au meilleur
+débit publié. **[obligation]** ces lignes remplacent le coût réel
+$\sum_p\binom{\lvert W_p\rvert}{3}$ par $n\binom{\overline{\lvert W\rvert}}{3}$ :
+par convexité c'est une **sous-estimation**, et les queues peuvent gouverner le
+temps. La distribution complète de $\lvert W_p\rvert$ doit accompagner le tableau,
+et chaque ligne doit dire si son $\lvert W\rvert$ est une moyenne, un quantile ou
+un maximum. **[mesuré,
 sur le corpus testé]** le support le plus lointain d'une sphère critique émise
 est le 89ᵉ à 165ᵉ voisin, et il faut le 189ᵉ pour compter les rangs — donc
 $\lvert W\rvert\geq130$ **sur ce corpus**, ce qui n'est pas une borne universelle
@@ -92,10 +98,13 @@ réel est donc l'**indice du premier intrus**, pas $n$ — un balayage complet n
 lieu que lorsque les intrus se raréfient, c'est-à-dire près des minima et sur les
 bras qui échouent.
 
-**[extrapolé, pire cas, non qualifiant]** $\approx10^{12}$ prédicats par ordre.
-**[obligation]** la bonne mesure est la **distribution de l'indice du premier
-intrus par pas**, par ordre, avec le nombre de bras, de pas, de plateaux et de
-censures — pas un produit de cardinaux.
+**[diagnostic, pire cas, non qualifiant]** $\approx10^{12}$ prédicats par ordre.
+Ce chiffre est en outre trop agrégé : les événements de rang $k+1$ se
+**répartissent** entre les ordres, donc appliquer « 21 % du catalogue » à chacun
+des dix ordres dépasserait le catalogue total. **[obligation]** publier
+l'histogramme $S_k$, le maximum de la carte des minima, le nombre de bras, de
+pas, de visites d'index, de plateaux et de censures **par ordre**, ainsi que la
+distribution de l'indice du premier intrus — pas un produit de cardinaux.
 
 Le remède, lui, est un énoncé propre :
 
@@ -106,11 +115,23 @@ Le remède, lui, est un énoncé propre :
 > $x\in\bar B(c',r')$ vérifie
 > $\lVert x-c\rVert\leq r'+r\leq 2r$.
 
-**Tout intrus est dans $\bar B(c,2r)$** : la recherche est une requête de boule,
-jamais un balayage. **[obligation]** ce lemme ne prouve ni la terminaison, ni
-l'unicité du minimum atteint, ni le traitement des plateaux, ni le caractère
-canonique du choix de la victime (`forest.cpp:84` prend `mb.support[0]`, un choix
-arbitraire), ni la complétude des incidences silencieuses.
+**Mais ce lemme ne vaut que pour le PREMIER pas.** Après un remplacement,
+$F_{i+1}$ contient l'intrus et n'est plus inclus dans $F$. On a seulement
+$F_{i+1}\subseteq\bar B(c_i,r_i)$, donc $c_{i+1}\in\bar B(c_i,r_i)$ et
+$\bar B(c_{i+1},r_{i+1})\subseteq\bar B(c_i,2r_i)$ : l'enveloppe centrée en $c_0$
+croît comme $R_{i+1}\leq R_i+r_0$, soit $R_i\leq(i+1)\,r_0$ — **linéaire en
+nombre de pas, jamais bornée par $2r$**. Employer $\bar B(c,2r)$ pour toute la
+chaîne serait une troncature non prouvée.
+
+**La référence est donc la requête dans la miniboule COURANTE
+$\bar B(c_i,r_i)$ à chaque pas** — une requête d'existence à sortie anticipée,
+qui ne demande aucun lemme. Le lemme reste un bon accélérateur du premier pas.
+
+**[obligation]** ni le lemme ni la requête ne prouvent la terminaison, l'unicité
+du minimum atteint, le traitement des plateaux, le caractère canonique du choix
+de la victime (`forest.cpp:84` prend `mb.support[0]`, un choix arbitraire), ni la
+complétude des incidences silencieuses. L'identité byte-à-byte avec le balayage
+exhaustif reste à établir.
 
 ### 1.4 Le troisième mur : la mémoire
 
@@ -323,9 +344,17 @@ $$H_u=\left\lbrace c:\ 2\langle c-p,\ u-p\rangle=\lVert u-p\rVert^2\right\rbrace
 à coefficients **entiers** sur la grille. Alors $u$ est strictement dans la
 sphère passant par $p$ centrée en $c$ ssi $c$ est du côté positif, donc
 
-$$\mathrm{niveau}(c)=\#\lbrace u:\lVert u-c\rVert<\lVert p-c\rVert\rbrace=\mathrm{rang}_{\text{ferm\'e}}-1 ,$$
+$$\mathrm{niveau}(c)=\#\lbrace u:\lVert u-c\rVert<\lVert p-c\rVert\rbrace,$$
 
-et la région utile est
+et **sur une face de dimension $j$** de l'arrangement, les porteurs sont au
+nombre de $4-j$, d'où la formule générale
+
+$$\mathrm{rang}_{\text{ferm\'e}}=(4-j)+\mathrm{profondeur}.$$
+
+L'écriture « $1+\mathrm{niveau}$ » n'est que le cas $j=3$ (intérieur d'une
+cellule) et ne doit pas être employée sans sa convention de porteurs.
+
+La région utile est
 $V_k(p)=\lbrace c:\ p\ \text{est parmi les}\ k+1\ \text{plus proches de}\ c\rbrace$,
 dont le treillis de faces donne **toutes** les sphères critiques contenant $p$ :
 sommet $\leftrightarrow\lvert U\rvert=4$, arête $\leftrightarrow3$, face
@@ -378,20 +407,26 @@ l'égalité. La réfutation ne transporte donc pas.
 > propriétaire canonique ; descendre la forêt par requête de boule
 > $\bar B(c,2r)$ ; consommer en flux.
 
-**[obligation] — trois, et elles conditionnent tout le §6 :**
+**[obligation] — quatre, et elles conditionnent tout le §6.** Elles sont
+étiquetées `PEL-*` et non `M*`, pour ne pas entrer en collision avec
+l'obligation normative M.1 du registre.
 
-1. **O1 — les 2-faces donnent exactement les arêtes utiles.** L'argument
+1. **PEL-1 — les 2-faces donnent exactement les arêtes utiles.** L'argument
    ci-dessus est une double inclusion informelle ; il faut une preuve propre, en
    particulier sur les faces non bornées et les égalités.
-2. **O2 — sensibilité à la sortie du parcours.** Cellules visitées
+2. **PEL-2 — sensibilité à la sortie du parcours.** Cellules visitées
    $=O(\text{sortie})$ et non $O(\text{sortie}\times m)$. **[à noter]** l'écart
    entre la borne classique $\Theta(mk^2)$ (soit $1{,}75\cdot10^4$ par point à
    $m=175$, $k=10$) et la mesure (450 à 510) est d'un facteur $\approx38$ : le
    pire cas n'est pas atteint, mais rien ne le garantit.
-3. **O3 — cellules non bornées.** Correspondance exacte avec les directions où
-   aucune sphère critique finie n'existe, et terminaison du parcours.
+3. **PEL-3 — cellules non bornées.** L'énoncé « cellule non bornée $\Rightarrow$
+   pas de sphère critique finie » est **probablement faux tel quel** : une
+   cellule polyédrique fermée non vide, même non bornée, possède une projection
+   finie de l'origine. Il faut une condition supplémentaire portant sur le bon
+   centrage, le support et le rang — et la terminaison du parcours dans ces
+   directions.
 
-**[obligation] O4 — le coût du prédicat exact en 3D contre 2D.** C'est
+**[obligation] PEL-4 — le coût du prédicat exact en 3D contre 2D.** C'est
 l'arbitrage central entre A2pe et A2e seule : A2pe supprime A1-source au prix
 d'un arrangement de dimension supérieure. Il faut le mesurer avant de trancher.
 
@@ -412,15 +447,31 @@ Trois précisions :
    point atteint le shell, la borne peut ne pas être atteinte ;
 2. ce $R$ n'est **pas** la quantité tangente non contrainte du §1.5, et il est
    **toujours fini** — la coupe ne mord que par sa valeur ;
-3. **le gain n'existe que si le seuil entre dans le range-report.** Un test placé
-   après le balayage de la lentille ne réduit que les candidats aval. Il faut
-   augmenter chaque nœud LBVH d'un majorant `max_tau_hi` et n'élaguer que si
-   `max_tau_hi < D` est certifié ; non fini, sous-normal, débordement ou
-   intervalle traversant le seuil restent **fail-open**.
+3. **la coupe ne peut PAS filtrer la profondeur.** Le lemme est une condition
+   nécessaire pour être **porteur**. Il ne dit rien d'un point $y\notin U$ situé à
+   l'*intérieur* de la sphère : sa forme affine $h_y$ peut rester strictement
+   positive au centre candidat et **doit** alors compter dans $c_e$, dans
+   $\delta_e$ et dans le rang fermé. Élaguer $y$ du range-report sous-compterait
+   le rang et publierait des sphères de rang $>K$.
 
-Dans A2pe, cette coupe joue un rôle différent et plus utile : elle **sépare les
-régimes** (petites ancres traitées en flux, grandes ancres mises en file) plutôt
-qu'elle n'élague.
+Il faut donc **deux flux explicitement distincts** :
+
+| flux | contenu | filtre autorisé |
+| --- | --- | --- |
+| **témoin / profondeur** | toutes les formes susceptibles de compter comme intérieures | **aucun** |
+| **`carrier_eligible`** | ce qui a le droit d'engendrer un support | $2R(z)\geq D$, certifié |
+
+Les emplois **licites** de la coupe sont donc : (i) la sélection des **ancres**,
+où les deux extrémités sont porteuses ; (ii) le masque `carrier_eligible` sur les
+droites, pieds et intersections. L'emploi **interdit** est le flux témoin.
+
+Si un agrégat d'index est employé pour (i) et (ii), il doit s'appeler
+`max_two_R_upper_hi` — **pas** `max_tau_hi`, qui réintroduirait la confusion
+$\tau$/$R$ du §1.5 — être défini comme intervalle, et rester **fail-open** sur
+non fini, sous-normal, débordement ou intervalle traversant le seuil.
+
+Dans A2pe, la coupe sert surtout à **séparer les régimes** (petites ancres en
+flux, grandes ancres en file), pas à élaguer.
 
 ## 8. Canonicité, égalités, arithmétique
 
@@ -446,9 +497,17 @@ niveaux $<2^{306{,}28}$. `sphere.hpp` de la v2 y est compatible
 GMP sur 18 601 paires — c'est un **candidat à reprendre après audit prédicat par
 prédicat**, pas un composant qualifié.
 
+Ces majorants ne concernent que **`quantized_u16_input`**. Ils ne dimensionnent
+pas `exact_dyadic_input`, dont les exposants binary64 et les produits
+intermédiaires exigent leur propre dérivation, leur propre repli et un SLO
+séparé. **[obligation]**
+
 **Oracle** : précision **arbitraire**, représentation *différente* de la
-production. **[mesuré]** seule option qui décide la grille déclarée : $40/40$
-nuages contre $0/40$ aujourd'hui, UBSan propre.
+production. **[mesuré]** elle décide la grille déclarée là où l'`i128` décide
+$0/40$ nuages. Ce n'est pas une exclusivité mathématique — une largeur fixe
+indépendante suffisamment grande déciderait aussi un domaine entier borné ; c'est
+le choix **robuste**, parce qu'il supprime la question de la largeur au lieu de
+la re-prouver à chaque site.
 
 ## 9. Ce que la v2 fournit, et ce qu'elle ne fournit pas
 
@@ -476,10 +535,27 @@ maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 | shallow | niveaux peu profonds, rang = profondeur | $\sum_e\binom{m_e}{2}$ |
 | décision exacte | diamètre, shell, bon centrage, owner | rescans globaux par candidat |
 | source HGP | facettes, cofaces, silences, couverture | $\Gamma$ global |
+| **tri et lots** | ordre global par niveau exact, groupement des égaux | catalogue géométrique global |
 | réduction | lots, attaches, forêts, verticales | mosaïque d'ordre supérieur |
 
-Ancres par classes de charge : warp, CTA sous-tuilé, file persistante. Sink
-consommé **au fil de l'eau**.
+Ancres par classes de charge : warp, CTA sous-tuilé, file persistante.
+
+**Le flux ne dispense pas du tri global exact.** Des ancres indépendantes
+produisent les événements dans un ordre arbitraire, alors que le réducteur exige,
+par ordre : un ordre global par **niveau rationnel exact**, le groupement de
+**tous** les événements de niveau égal, un instantané pré-lot, puis une
+application atomique — et déduplication, propriétaire, incidences silencieuses et
+`coverage_delta` doivent respecter ce même ordre. Aucun producteur monotone entre
+ancres indépendantes n'est énoncé ni plausible.
+
+La voie compatible avec l'invariant mémoire du §1.4 est un **tri externe** :
+produire des **runs bornés** triés par clé exacte et identifiants canoniques, les
+fusionner par un merge déterministe, **réunir les clés rationnellement égales
+avant toute mutation**, puis alimenter le réducteur. À publier : taille des runs,
+high-water RAM, octets écrits et lus, coût des comparaisons exactes, nombre et
+taille maximale des lots. Une variante entièrement résidente est acceptable si
+elle prouve les mêmes bornes. On évite le catalogue géométrique global ; on ne
+peut pas éviter l'**ordonnancement global de ses événements utiles**.
 
 **Les deux pistes sont parallèles** : oracle CPU multiprécision indépendant pour
 l'autorité ; CUDA `proposal_only` très tôt pour falsifier masses, divergence et
@@ -545,15 +621,15 @@ puis seulement 100 ms, **par famille sanctionnée**.
    citées ici. C'est peu de travail et cela change leur statut.
 2. **Gate C**, l'oracle : rien ne doit se construire au-dessus d'une porte qui
    décide zéro nuage en annonçant `OK`.
-3. **O1 et O3** (§6) : la preuve de l'unification. C'est court, c'est
+3. **PEL-1 et PEL-3** (§6) : la preuve de l'unification. C'est court, c'est
    mathématique, et cela décide entre A2pe et A2e + A1-source.
 4. **Gate E** sur la voie retenue, avec son oracle brute-force local.
 5. **Gate D** à l'échelle, sur de vrais nuages, y compris multi-captation.
 6. **Gate F**, la descente.
 7. Puis seulement source HGP, GPU, publication.
 
-**GO immédiat** : preuves O1/O3, prototype CPU exact du shallow, reçus.
-**NO-GO immédiat** : produit v3 avant O1–O4 ; toute revendication `exact`, tout
+**GO immédiat** : preuves PEL-1/PEL-3, prototype CPU exact du shallow, reçus.
+**NO-GO immédiat** : produit v3 avant PEL-1 à PEL-4 ; toute revendication `exact`, tout
 SLO, toute autorité publique ; et présenter une mesure de ce document comme une
 qualification.
 
@@ -583,3 +659,15 @@ qualification.
 | « `sphere.hpp` sain » | candidat, audit prédicat par prédicat à faire (§8) |
 | M1–M5 imposées à A2e | deux listes disjointes (§12, Gate E) |
 | « l'audit est l'autorité » | spécification + registre des preuves (en-tête) |
+| élaguer le range-report par $2R<D$ | **incorrect** : perd les témoins de profondeur (§7) |
+| `max_tau_hi` | `max_two_R_upper_hi` : $\tau\neq R$ (§7) |
+| $\bar B(c,2r)$ pour toute la descente | premier pas seulement ; enveloppe $\leq(i+1)r_0$ (§1.3) |
+| « consommé au fil de l'eau » | tri externe et groupement des niveaux égaux (§10) |
+| $\mathrm{rang}=1+\mathrm{niveau}$ | $(4-j)+\mathrm{profondeur}$ (§5) |
+| PEL-3 « non bornée ⇒ pas de sphère finie » | probablement faux tel quel (§6) |
+| M1–M5 | `PEL-1` à `PEL-4`, pour ne pas heurter M.1 du registre (§6) |
+| $\lvert W\rvert\leq39$ à une seconde | 38 au meilleur débit publié (§1.2) |
+| $n\binom{\overline{\lvert W\rvert}}{3}$ | sous-estime $\sum_p\binom{\lvert W_p\rvert}{3}$ par convexité (§1.2) |
+| « 21 % de 23 M par ordre » | les rangs $k+1$ se répartissent entre ordres (§1.3) |
+| largeurs prouvées = arithmétique du produit | valent pour `quantized_u16_input` seul (§8) |
+| multiprécision « seule option » | choix robuste, pas exclusivité (§8) |
