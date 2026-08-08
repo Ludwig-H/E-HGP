@@ -556,23 +556,55 @@ les mêmes octets ne peut rien découvrir que la première ait manqué.
 Sortie scientifique **identique à toutes les tailles**, 22 suites vertes dont
 les anti-forge du journal de graines et de la descente de facette.
 
-**Mais le gain qui compte est l'exposant**, parce que le contrat est à 50 000
-points :
+### Correction : l'exposant n'a pas bougé
 
-| | loi ajustée | ms/nœud à 50 000 | aval $K=5$, 48 cœurs |
-| --- | --- | ---: | ---: |
-| avant | $0{,}257\,n^{1{,}054}$ | 23 018 | $9{,}5\cdot10^{6}$ s |
-| **après** | $0{,}491\,n^{0{,}559}$ | **208,9** | $8{,}7\cdot10^{4}$ s |
+Un ajustement local sur ces cinq tailles seulement donnait $n^{0{,}559}$, et
+j'en avais conclu un facteur 110 à la taille du contrat. **C'était un artefact
+de plage.** Cinq points sur une plage de 2,3 × ne déterminent pas un exposant.
 
-**Facteur 110 à la taille du contrat, pour un changement qui vaut 2,4 × à
-$n=28$.** C'est la démonstration que le levier est bien l'exposant et non la
-constante — et que mesurer sur de petits nuages sous-estime les gains
-structurels autant qu'elle surestime les coûts.
+La G4 a refait la mesure sur **onze tailles de $n=12$ à $n=56$**, chacune sur
+son propre cœur :
 
-## 10.4 Ce qui reste
+| $n$ | 12 | 16 | 20 | 24 | 28 | 32 | 36 | 40 | 44 | 48 | 56 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| nœuds/événement | 9,92 | 7,89 | 8,17 | 8,81 | 9,29 | 10,16 | 10,62 | 8,39 | 7,46 | 7,24 | 7,47 |
+| ms/nœud | 0,437 | 0,616 | 0,813 | 0,984 | 1,056 | 1,088 | 1,207 | 1,408 | 1,612 | 1,794 | 3,046 |
 
-L'exposant résiduel $n^{0{,}559}$ dit qu'**un autre terme de même nature est
-encore là**. La suite est la même méthode : profiler, compter les appels,
-trouver la dérivation refaite, la hisser. Il reste $8{,}7\cdot10^{4}$ à
-gagner sur l'aval à $K=5$, dont 48 × de parallélisation et ≤ 12,8 × de cure
-R1-d — soit encore un facteur ~140 à trouver dans les exposants.
+$$\text{ms/nœud} = 0{,}0313\ n^{1{,}060} \qquad (n = 12 \ldots 56)$$
+
+**L'exposant reste linéaire.** A1 a gagné une **constante** — 1,65 × à 2,42 ×,
+mesurée sur matériel identique à sortie identique — et n'a pas touché le terme
+$O(n)$. Extrapolé, cela donne 2 995 ms par nœud à 50 000 points, soit encore
+$1{,}1\cdot10^{6}$ s sur 48 cœurs à $K=5$. Le facteur 110 annoncé plus haut
+n'existe pas.
+
+Ce que la G4 confirme en revanche, et sur une plage de 4,7 ×, c'est que
+**nœuds par événement reste constant** — entre 7,2 et 10,6, sans tendance. La
+fermeture est bien locale, et de l'ordre de $p+1$ et non de $K+1$.
+
+## 10.4 Où est le terme résiduel — profil après correctif
+
+Le profil callgrind refait à $n=24$ **après** A1 nomme le résidu, et ce n'est
+plus la provenance :
+
+| poste, exclusif | part |
+| --- | ---: |
+| boost multiprécision, comparaison de grands entiers | **33,25 %** |
+| boost multiprécision, `subtract_unsigned` | **29,12 %** |
+
+**62 % dans deux fonctions d'arithmétique entière non bornée.** Le SHA-256 et
+le rendu décimal ont quitté le sommet : A1 les a bien retirés du chemin chaud,
+et ce qui reste est exactement ce que la table du §9.1 annonçait à 49 %.
+
+La cause probable est identifiée mais pas encore prouvée :
+`ExactRational::operator<=>` compare par produit croisé
+$n_1 d_2 - n_2 d_1$ sur des entiers non bornés — une multiplication, une
+soustraction et deux allocations **par comparaison**. C'est exactement la
+maladie que R1-d a guérie ailleurs en passant aux signes de déterminants en
+largeur fixe (154 × sur `analyze_circumcenter_support`, 864 × sur la requête
+closed-ball).
+
+**Prochain incrément désigné par la mesure** : cure R1-d sur les comparaisons
+de niveaux exacts de l'aval. Critère de sortie inchangé : sortie scientifique
+identique, et **la pente ms/nœud/point doit baisser** — c'est elle, et pas la
+constante, qui décide à 50 000 points.
