@@ -400,12 +400,23 @@ en travail.
 
 ## 6. A2pe — l'unification, et ce qu'elle demande
 
-**L'observation.** Une 2-face de $V_k(p)$ portée par $H_u$ est exactement le plan
-médiateur de $(p,u)$, et les traces $H_u\cap H_v$ sont exactement les droites
+**Correction de formulation, imposée par l'audit 2 §2.1.** L'objet n'est **pas**
+$V_k(p)$ vu comme un sous-ensemble de $\mathbb{R}^3$ : pris comme ensemble, il
+efface les hyperplans intérieurs séparant deux cellules toutes deux de profondeur
+$\leq k$. Contre-exemple minimal : $X=\lbrace p,u\rbrace$, $k=1$ donne
+$V_1(p)=\mathbb{R}^3$, dont la frontière n'a aucune 2-face — alors que $H_u$
+existe et que son milieu porte la sphère critique de support $\lbrace p,u\rbrace$.
+
+L'objet correct est le **sous-complexe stratifié** : les faces de
+l'**arrangement** des $H_u$ dont la profondeur est $\leq k$, chacune avec sa
+dimension. Tout ce qui suit s'entend ainsi.
+
+**L'observation.** Une 2-face de l'arrangement portée par $H_u$ est exactement le
+plan médiateur de $(p,u)$, et les traces $H_u\cap H_v$ sont exactement les droites
 $h_v$ du §4.1. **A2e n'est pas une alternative à A2p : c'est sa restriction à une
 face.**
 
-**La conséquence.** Les 2-faces de $V_k(p)$ **sont** les ancres de A2e, complètes
+**La conséquence.** Ces 2-faces **sont** les ancres de A2e, complètes
 et par construction — A1-source disparaît. Et le théorème négatif du §4.2 ne s'y
 oppose pas : il réfute « paire de rang fermé $\leq s_{\max}$ » (boule diamétrale),
 alors que la 2-face signifie « il existe une boule par $p$ et $u$ de contenu
@@ -674,6 +685,7 @@ qualification.
 | « `sphere.hpp` sain » | candidat, audit prédicat par prédicat à faire (§8) |
 | M1–M5 imposées à A2e | deux listes disjointes (§12, Gate E) |
 | « l'audit est l'autorité » | spécification + registre des preuves (en-tête) |
+| « les 2-faces de $V_k(p)$ » | faces de l'**arrangement** à profondeur $\leq k$ ; $V_k(p)$ comme ensemble efface les strates (§6) |
 | élaguer le range-report par $2R<D$ | **incorrect** : perd les témoins de profondeur (§7) |
 | `max_tau_hi` | `max_two_R_upper_hi` : $\tau\neq R$ (§7) |
 | $\bar B(c,2r)$ pour toute la descente | premier pas seulement ; enveloppe $\leq(i+1)r_0$ (§1.3) |

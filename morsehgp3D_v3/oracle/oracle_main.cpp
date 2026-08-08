@@ -31,6 +31,7 @@
 #include "rational.hpp"
 
 #include "mhgp/mhgp.hpp"  // le SUJET, jamais l'autorite
+#include "prototype/anchored_catalogue.hpp"
 
 namespace {
 
@@ -190,6 +191,7 @@ bool exact_miniball(const std::vector<mhgp::P3>& points, const std::vector<int>&
 struct ReferenceSphere {
   std::vector<int> support;   // trie
   std::vector<int> members;   // trie, I union U
+  Vec3 centre;                // centre EXACT : le niveau seul ne l'identifie pas
   Rational squared_radius;
   int rank = 0;
 };
@@ -219,6 +221,7 @@ std::vector<ReferenceSphere> reference_catalogue(const std::vector<mhgp::P3>& po
       if (on_shell != size) return;
       if (static_cast<int>(reference.members.size()) > s_max) return;
       reference.support = support;
+      reference.centre = sphere.centre;
       reference.squared_radius = sphere.squared_radius;
       reference.rank = static_cast<int>(reference.members.size());
       out.push_back(std::move(reference));
@@ -481,12 +484,54 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
   std::vector<std::vector<int>> subject_closure(subject.nodes.size());
   std::vector<int> subject_arity(subject.nodes.size(), 0);
 
+  // Lecture hostile de la foret AVANT tout usage.
   for (std::size_t t = 0; t < subject.nodes.size(); ++t) {
     const mhgp::ForestNode& node = subject.nodes[t];
     if (node.source < 0 || node.source >= static_cast<mhgp::i32>(catalogue.spheres.size())) {
       campaign->fail("STRUCTURE noeud sans sphere source" + tag);
       return;
     }
+    if (node.kind != 0 && node.kind != 1) {
+      campaign->fail("STRUCTURE genre inconnu" + tag); return;
+    }
+    if (node.parent >= static_cast<mhgp::i32>(subject.nodes.size())) {
+      campaign->fail("STRUCTURE parent hors bornes" + tag); return;
+    }
+    if (node.first_child >= static_cast<mhgp::i32>(subject.nodes.size())
+        || node.next_sibling >= static_cast<mhgp::i32>(subject.nodes.size())) {
+      campaign->fail("STRUCTURE lien d'adjacence hors bornes" + tag); return;
+    }
+    // La sphere source d'une multifusion doit etre de rang k+1, celle d'une
+    // naissance de rang k : une source de meme niveau mais sans rapport passait.
+    const mhgp::CriticalSphere& source =
+        catalogue.spheres[static_cast<std::size_t>(node.source)];
+    const int wanted_rank = node.kind == 0 ? order : order + 1;
+    if (source.rank != wanted_rank) {
+      campaign->fail("STRUCTURE rang de la sphere source " + std::to_string(source.rank)
+                     + " contre " + std::to_string(wanted_rank) + tag);
+      return;
+    }
+  }
+
+  // Les deux representations d'adjacence doivent coincider entre elles.
+  std::vector<int> children_from_links(subject.nodes.size(), 0);
+  for (std::size_t t = 0; t < subject.nodes.size(); ++t) {
+    for (mhgp::i32 child = subject.nodes[t].first_child; child >= 0;) {
+      ++children_from_links[t];
+      if (subject.nodes[static_cast<std::size_t>(child)].parent != static_cast<mhgp::i32>(t)) {
+        campaign->fail("STRUCTURE enfant dont le parent ne correspond pas" + tag);
+        return;
+      }
+      child = subject.nodes[static_cast<std::size_t>(child)].next_sibling;
+      if (children_from_links[t] > static_cast<int>(subject.nodes.size())) {
+        campaign->fail("STRUCTURE cycle dans la liste d'enfants" + tag);
+        return;
+      }
+    }
+  }
+
+  for (std::size_t t = 0; t < subject.nodes.size(); ++t) {
+    const mhgp::ForestNode& node = subject.nodes[t];
     if (node.kind != 0) continue;
     const mhgp::CriticalSphere& source = catalogue.spheres[static_cast<std::size_t>(node.source)];
     std::vector<int> members;
@@ -586,6 +631,24 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     if (node.kind == 1 && parent.kind == 1 && compare(child, above) == 0)
       campaign->fail("STRUCTURE chaine de fusions de meme niveau" + tag);
   }
+  // Champs publics annonces : ils doivent etre compares, pas recalcules en
+  // silence depuis les parents.
+  long long births = 0, merges = 0, killed = 0;
+  std::vector<mhgp::i32> roots;
+  for (std::size_t t = 0; t < subject.nodes.size(); ++t) {
+    const mhgp::ForestNode& node = subject.nodes[t];
+    if (node.kind == 0) ++births; else { ++merges; killed += subject_arity[t] - 1; }
+    if (node.n_children != children_from_links[t] || node.n_children != subject_arity[t])
+      campaign->fail("STRUCTURE n_children incoherent" + tag);
+    if (node.parent < 0) roots.push_back(static_cast<mhgp::i32>(t));
+  }
+  if (subject.order != order) campaign->fail("STRUCTURE ordre publie" + tag);
+  if (subject.births != births) campaign->fail("STRUCTURE compteur de naissances" + tag);
+  if (subject.merge_events != merges) campaign->fail("STRUCTURE compteur de fusions" + tag);
+  if (subject.killed != killed) campaign->fail("STRUCTURE compteur de morts" + tag);
+  if (subject.roots != roots) campaign->fail("STRUCTURE liste des racines" + tag);
+  if (subject.unresolved_arms != 0 || subject.censored_events != 0 || !subject.authoritative)
+    campaign->fail("STRUCTURE foret censuree dans une campagne positive" + tag);
   ++campaign->forests;
 }
 
@@ -593,10 +656,66 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
 // Comparaison du catalogue : supports, rang, membres tries, niveau exact, et
 // absence de doublon de support cote sujet.
 // ---------------------------------------------------------------------------
+// Centre exact d'une sphere sujet : base + num/den, lu comme DONNEE.
+Vec3 exact_centre_of(const mhgp::Sphere& sphere) {
+  const Rational den(BigInt::from_i128(sphere.den));
+  return Vec3{Rational(BigInt(static_cast<long long>(sphere.base.x))) +
+                  Rational(BigInt::from_i128(sphere.nx)) / den,
+              Rational(BigInt(static_cast<long long>(sphere.base.y))) +
+                  Rational(BigInt::from_i128(sphere.ny)) / den,
+              Rational(BigInt(static_cast<long long>(sphere.base.z))) +
+                  Rational(BigInt::from_i128(sphere.nz)) / den};
+}
+
+// LECTURE HOSTILE : le juge ne fait jamais confiance a la structure memoire de
+// ce qu'il juge. Tout indice, toute taille et tout denominateur sont valides
+// AVANT dereferencement, sinon un sujet fautif ferait sortir le juge de ses
+// propres tableaux au lieu de le faire rougir.
+bool subject_record_is_readable(const mhgp::Catalogue& catalogue,
+                                const mhgp::CriticalSphere& sphere, int s_max,
+                                int point_count, std::string* why) {
+  if (sphere.n_support < 1 || sphere.n_support > mhgp::kMaxSupport) {
+    *why = "n_support hors bornes"; return false;
+  }
+  for (mhgp::i32 i = 0; i < sphere.n_support; ++i) {
+    if (sphere.support[i] < 0 || sphere.support[i] >= point_count) {
+      *why = "identifiant de support hors bornes"; return false;
+    }
+    if (i > 0 && sphere.support[i] <= sphere.support[i - 1]) {
+      *why = "support non strictement croissant"; return false;
+    }
+  }
+  if (sphere.rank < sphere.n_support || sphere.rank > s_max) {
+    *why = "rang incoherent avec le support"; return false;
+  }
+  if (sphere.members_begin < 0
+      || static_cast<std::size_t>(sphere.members_begin) + static_cast<std::size_t>(sphere.rank)
+             > catalogue.members.size()) {
+    *why = "tranche de membres hors du pool"; return false;
+  }
+  for (mhgp::i32 i = 0; i < sphere.rank; ++i) {
+    const mhgp::i32 member =
+        catalogue.members[static_cast<std::size_t>(sphere.members_begin + i)];
+    if (member < 0 || member >= point_count) { *why = "membre hors bornes"; return false; }
+  }
+  if (sphere.sph.support != sphere.n_support) {
+    *why = "arite de la sphere differente du support"; return false;
+  }
+  if (sphere.sph.den <= 0) { *why = "denominateur non strictement positif"; return false; }
+  return true;
+}
+
 void compare_catalogues(const mhgp::Catalogue& subject,
-                        const std::vector<ReferenceSphere>& reference, int trial,
-                        Campaign* campaign) {
+                        const std::vector<ReferenceSphere>& reference, int s_max, int point_count,
+                        int trial, Campaign* campaign) {
   const std::string tag = " trial=" + std::to_string(trial);
+  for (const mhgp::CriticalSphere& sphere : subject.spheres) {
+    std::string why;
+    if (!subject_record_is_readable(subject, sphere, s_max, point_count, &why)) {
+      campaign->fail("LECTURE " + why + tag);
+      return;
+    }
+  }
   std::map<std::vector<int>, const mhgp::CriticalSphere*> by_support;
   for (const mhgp::CriticalSphere& sphere : subject.spheres) {
     std::vector<int> support;
@@ -635,6 +754,11 @@ void compare_catalogues(const mhgp::Catalogue& subject,
     campaign->widest_bits = std::max(campaign->widest_bits, level.widest_bit_length());
     if (compare(level, want.squared_radius) != 0)
       campaign->fail("CATALOGUE niveau exact " + set_to_text(want.support) + tag);
+    // Le niveau ne suffit pas : un numerateur tourne garde la meme norme.
+    const Vec3 centre = exact_centre_of(got.sph);
+    if (compare(centre.x, want.centre.x) != 0 || compare(centre.y, want.centre.y) != 0
+        || compare(centre.z, want.centre.z) != 0)
+      campaign->fail("CATALOGUE centre exact " + set_to_text(want.support) + tag);
   }
   for (const auto& entry : by_support) {
     bool present = false;
@@ -654,6 +778,10 @@ int main(int argc, char** argv) {
   long long coordinate_maximum = mhgp::kCoordMax;  // LA GRILLE DECLAREE
   long long minimum_clouds_decided = 1, minimum_nodes = 1;
   std::string receipt_path;
+  std::string subject = "v2";
+  bool measure_only = false;
+  int fixed_points = 0;
+  int seed_neighbours = 16;
 
   for (int i = 1; i < argc; ++i) {
     const std::string argument = argv[i];
@@ -673,6 +801,10 @@ int main(int argc, char** argv) {
     else if (argument == "--min-decided") minimum_clouds_decided = std::atoll(next("--min-decided"));
     else if (argument == "--min-nodes") minimum_nodes = std::atoll(next("--min-nodes"));
     else if (argument == "--receipt") receipt_path = next("--receipt");
+    else if (argument == "--subject") subject = next("--subject");
+    else if (argument == "--measure-only") measure_only = true;
+    else if (argument == "--points") fixed_points = std::atoi(next("--points"));
+    else if (argument == "--seed-neighbours") seed_neighbours = std::atoi(next("--seed-neighbours"));
     else {
       std::printf("ECHEC : option inconnue %s\n", argument.c_str());
       return 2;
@@ -680,16 +812,67 @@ int main(int argc, char** argv) {
   }
 
   // Refus des arguments absurdes : une campagne vide ne doit jamais rendre OK.
+  // Les planchers doivent etre STRICTEMENT positifs : avec des planchers nuls,
+  // une campagne qui ne decide rien satisfait l'identite de fermeture et sort
+  // avec le code 0 — exactement le defaut reproche a la porte de la v2.
   if (clouds <= 0 || minimum_points < 4 || maximum_points < minimum_points
       || maximum_order < 1 || coordinate_maximum < 1
+      || minimum_clouds_decided <= 0 || minimum_nodes <= 0
       || coordinate_maximum > mhgp::kCoordMax) {
-    std::printf("ECHEC : campagne absurde (clouds=%d points=[%d,%d] ordre=%d coord-max=%lld)\n",
+    std::printf("ECHEC : campagne absurde (clouds=%d points=[%d,%d] ordre=%d coord-max=%lld "
+                "min-decided=%lld min-nodes=%lld)\n",
                 clouds, minimum_points, maximum_points, maximum_order,
-                static_cast<long long>(coordinate_maximum));
+                static_cast<long long>(coordinate_maximum), minimum_clouds_decided,
+                minimum_nodes);
     return 2;
   }
 
+  if (subject != "v2" && subject != "anchored") {
+    std::printf("ECHEC : sujet inconnu %s (v2 ou anchored)\n", subject.c_str());
+    return 2;
+  }
+
+  // Mode MESURE : pas d'oracle (il est exponentiel en n), donc pas de jugement.
+  // Il ne sert qu'a publier la distribution du voisinage CERTIFIE, c'est-a-dire
+  // le chiffre que la v2 ne pouvait pas produire. Il ne qualifie rien.
+  if (measure_only) {
+    if (subject != "anchored" || fixed_points <= 0) {
+      std::printf("ECHEC : --measure-only exige --subject anchored et --points N\n");
+      return 2;
+    }
+    std::mt19937_64 measure_rng(seed);
+    std::uniform_int_distribution<long long> measure_coordinate(0, coordinate_maximum);
+    for (int trial = 0; trial < clouds; ++trial) {
+      std::vector<mhgp::P3> points(static_cast<std::size_t>(fixed_points));
+      for (int i = 0; i < fixed_points; ++i)
+        points[static_cast<std::size_t>(i)] = mhgp::P3{measure_coordinate(measure_rng),
+                                                       measure_coordinate(measure_rng),
+                                                       measure_coordinate(measure_rng)};
+      mhgp3v::AnchoredCampaign anchored;
+      const mhgp::Catalogue catalogue =
+          mhgp3v::anchored_catalogue(points, maximum_order + 1, seed_neighbours, &anchored);
+      std::vector<int> sizes;
+      for (const mhgp3v::AnchorStatistics& stat : anchored.per_anchor)
+        sizes.push_back(stat.neighbourhood);
+      std::sort(sizes.begin(), sizes.end());
+      const auto quantile = [&](double q) {
+        return sizes[static_cast<std::size_t>(q * static_cast<double>(sizes.size() - 1))];
+      };
+      std::printf("n=%d s_max=%d | spheres=%zu (%.1f/point) | |W| p50=%d p95=%d p99=%d max=%d "
+                  "moyenne=%.1f | candidats=%lld temoins=%lld | 2-faces=%lld | non certifiees=%d "
+                  "epuisees=%d | degeneres=%lld\n",
+                  fixed_points, maximum_order + 1, catalogue.spheres.size(),
+                  static_cast<double>(catalogue.spheres.size()) / fixed_points,
+                  quantile(0.50), quantile(0.95), quantile(0.99), sizes.back(),
+                  anchored.neighbourhood_mean, anchored.candidates, anchored.witness_tests,
+                  anchored.two_faces, anchored.uncertified_anchors, anchored.exhausted_anchors,
+                  anchored.degenerate_shells);
+    }
+    return 0;
+  }
+
   Campaign campaign;
+  mhgp3v::AnchoredCampaign anchored_total;
   std::mt19937_64 rng(seed);
   std::uniform_int_distribution<long long> coordinate(0, coordinate_maximum);
 
@@ -713,10 +896,37 @@ int main(int argc, char** argv) {
     options.k_max = order;
     options.threads = 1;
     options.all_orders = true;
-    const mhgp::Result result = mhgp::run(points, options);
+
+    mhgp::Catalogue catalogue;
+    std::vector<mhgp::Forest> forests;
+    bool subject_out_of_domain = false;
+    bool subject_suppressed = false;
+    if (subject == "v2") {
+      const mhgp::Result result = mhgp::run(points, options);
+      catalogue = result.catalogue;
+      forests = result.forests;
+      subject_out_of_domain = result.out_of_declared_domain;
+      subject_suppressed = result.forests_suppressed;
+    } else {
+      mhgp3v::AnchoredCampaign anchored;
+      catalogue = mhgp3v::anchored_catalogue(points, s_max, seed_neighbours, &anchored);
+      subject_out_of_domain = anchored.degenerate_shells > 0;
+      subject_suppressed = subject_out_of_domain;
+      anchored_total.candidates += anchored.candidates;
+      anchored_total.witness_tests += anchored.witness_tests;
+      anchored_total.emitted += anchored.emitted;
+      anchored_total.two_faces += anchored.two_faces;
+      anchored_total.uncertified_anchors += anchored.uncertified_anchors;
+      anchored_total.exhausted_anchors += anchored.exhausted_anchors;
+      anchored_total.neighbourhood_max =
+          std::max(anchored_total.neighbourhood_max, anchored.neighbourhood_max);
+      anchored_total.neighbourhood_mean += anchored.neighbourhood_mean;
+      if (!subject_out_of_domain)
+        for (int k = 1; k <= order; ++k) forests.push_back(mhgp::build_forest(points, catalogue, k));
+    }
 
     // ---- domaine declare, garde SYMETRIQUE --------------------------------
-    const bool subject_out = result.out_of_declared_domain;
+    const bool subject_out = subject_out_of_domain;
     const bool reference_out = reference_degenerate > 0;
     if (subject_out != reference_out) {
       campaign.fail(std::string("DOMAINE desaccord : sujet=") + (subject_out ? "hors" : "dans")
@@ -726,29 +936,29 @@ int main(int argc, char** argv) {
     }
     if (reference_out) {
       ++campaign.rejected_domain;
-      if (!result.forests_suppressed || !result.forests.empty())
+      if (!subject_suppressed || !forests.empty())
         campaign.fail("DOMAINE nuage hors domaine publie quand meme trial="
                       + std::to_string(trial));
       continue;
     }
 
     // Une censure inattendue n'est PAS un succes : la campagne est positive.
-    if (result.forests_suppressed || result.forests.empty()) {
+    if (subject_suppressed || forests.empty()) {
       campaign.fail("CENSURE inattendue dans une campagne positive trial="
                     + std::to_string(trial));
       continue;
     }
-    if (static_cast<int>(result.forests.size()) != order) {
-      campaign.fail("CENSURE nombre de forets " + std::to_string(result.forests.size())
+    if (static_cast<int>(forests.size()) != order) {
+      campaign.fail("CENSURE nombre de forets " + std::to_string(forests.size())
                     + " contre " + std::to_string(order) + " trial=" + std::to_string(trial));
       continue;
     }
 
-    compare_catalogues(result.catalogue, reference, trial, &campaign);
+    compare_catalogues(catalogue, reference, s_max, n, trial, &campaign);
     for (int k = 1; k <= order; ++k) {
       const ReferenceForest expected = reference_forest(points, k);
-      compare_forests(result.catalogue, result.forests[static_cast<std::size_t>(k - 1)],
-                      expected, k, trial, &campaign);
+      compare_forests(catalogue, forests[static_cast<std::size_t>(k - 1)], expected, k, trial,
+                      &campaign);
     }
     ++campaign.decided;
   }
@@ -770,8 +980,17 @@ int main(int argc, char** argv) {
   for (const std::string& message : campaign.first_failures)
     std::printf("  %s\n", message.c_str());
 
-  std::printf("attempted=%lld decided=%lld rejected_domain=%lld | spheres=%lld forets=%lld "
-              "noeuds=%lld | largeur max=%zu bits | grille=[0,%lld]\n",
+  if (subject == "anchored" && campaign.decided > 0)
+    std::printf("ancre : candidats=%lld temoins=%lld emis=%lld 2-faces=%lld | voisinage moyen=%.1f "
+                "max=%d | ancres non certifiees=%d epuisees=%d\n",
+                anchored_total.candidates, anchored_total.witness_tests, anchored_total.emitted,
+                anchored_total.two_faces,
+                anchored_total.neighbourhood_mean / static_cast<double>(campaign.decided),
+                anchored_total.neighbourhood_max, anchored_total.uncertified_anchors,
+                anchored_total.exhausted_anchors);
+
+  std::printf("sujet=%s | attempted=%lld decided=%lld rejected_domain=%lld | spheres=%lld forets=%lld "
+              "noeuds=%lld | largeur max=%zu bits | grille=[0,%lld]\n", subject.c_str(),
               campaign.attempted, campaign.decided, campaign.rejected_domain,
               campaign.catalogue_spheres, campaign.forests, campaign.nodes,
               campaign.widest_bits, static_cast<long long>(coordinate_maximum));

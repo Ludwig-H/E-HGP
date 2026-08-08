@@ -164,6 +164,20 @@ int main(int argc, char** argv) {
   const char* gmp = "NON (temoin large absent)";
 #endif
   std::printf("verifications : %lld ; temoin gmp : %s\n", checks, gmp);
+#if !defined(MHGP3V_HAVE_GMP)
+  // FAIL-CLOSED : une qualification de largeur arbitraire ne peut pas devenir
+  // verte sans son temoin large. `--dev` autorise explicitement le mode de
+  // developpement, et il est alors dit dans la sortie.
+  bool development = false;
+  for (int i = 1; i < argc; ++i)
+    if (std::string(argv[i]) == "--dev") development = true;
+  if (!development) {
+    std::printf("ECHEC : temoin large absent ; la qualification exige GMP "
+                "(ou --dev pour un passage de developpement, non qualifiant)\n");
+    return 3;
+  }
+  std::printf("AVERTISSEMENT : passage de developpement, NON qualifiant\n");
+#endif
   if (failures != 0) {
     std::printf("ECHEC : %d\n", failures);
     return 1;

@@ -13,6 +13,8 @@
 //   - aucune operation ne peut deborder, la precision etant arbitraire.
 #pragma once
 
+#include <cstdio>
+#include <cstdlib>
 #include <utility>
 
 #include "bigint.hpp"
@@ -24,6 +26,13 @@ class Rational {
   Rational() : numerator_(0), denominator_(1) {}
   explicit Rational(BigInt n) : numerator_(std::move(n)), denominator_(1) {}
   Rational(BigInt n, BigInt d) : numerator_(std::move(n)), denominator_(std::move(d)) {
+    // FAIL-CLOSED. Un juge ne normalise pas une entree impossible : 0/0 devenait
+    // silencieusement 0/1 et 1/0 gardait un denominateur de signe nul, si bien
+    // qu'une sphere sujet malformee pouvait se lire comme un niveau valide.
+    if (denominator_.is_zero()) {
+      std::fprintf(stderr, "ECHEC ORACLE : rationnel de denominateur nul\n");
+      std::abort();
+    }
     normalise_sign_and_powers_of_two();
   }
 
@@ -43,9 +52,13 @@ class Rational {
   friend Rational operator*(const Rational& a, const Rational& b) {
     return Rational(a.numerator_ * b.numerator_, a.denominator_ * b.denominator_);
   }
-  // Division = multiplication croisee. Le diviseur nul est une faute d'appel :
-  // l'appelant teste `is_zero()` avant.
+  // Division = multiplication croisee, avec garde : le diviseur nul est une
+  // faute, pas une convention.
   friend Rational operator/(const Rational& a, const Rational& b) {
+    if (b.numerator_.is_zero()) {
+      std::fprintf(stderr, "ECHEC ORACLE : division rationnelle par zero\n");
+      std::abort();
+    }
     return Rational(a.numerator_ * b.denominator_, a.denominator_ * b.numerator_);
   }
 
@@ -74,7 +87,7 @@ class Rational {
       numerator_ = -numerator_;
       denominator_ = -denominator_;
     }
-    if (numerator_.is_zero()) { denominator_ = BigInt(1); return; }
+    if (numerator_.is_zero()) { denominator_ = BigInt(1); return; }  // 0/d == 0/1
     const std::size_t shift = std::min(numerator_.trailing_zero_bits(),
                                        denominator_.trailing_zero_bits());
     if (shift != 0) {
