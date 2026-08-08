@@ -1,13 +1,32 @@
 # Second audit actualisé et journal continu — A2pe, peeling local et oracle M1
 
 > [!IMPORTANT]
-> Snapshot mathématique courant figé sur le commit `8ac683ad1e167937fe7f9e964860f6be374a48d0`. La version auditée de [`PROPOSITION.md`](../PROPOSITION.md) compte 700 lignes, 39 500 octets et porte l'empreinte SHA-256 `af94886fec1d83bc671eefdd4c605ca6f4d939ff3a1ce0298e49c719aed03386`. Son noyau A2pe a été introduit au commit `495463bd443cdcafd843023623ca403fe2929a43`, puis sa définition de l'objet stratifié partiellement corrigée par `8ac683a`. L'oracle et le prototype évoluant indépendamment dans le worktree, leur suivi précis est désormais séparé dans [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md). Le [premier audit](AUDIT_PROPOSITION.md) reste historique.
+> Base historique de cet audit : commit `8ac683ad1e167937fe7f9e964860f6be374a48d0`, 700 lignes, SHA-256 `af94886fec1d83bc671eefdd4c605ca6f4d939ff3a1ce0298e49c719aed03386`. Réaudit différentiel courant : commit `ae08c9fbfa33246187e95a87977c8c671601f040`, 738 lignes, 42 665 octets, SHA-256 `615935ad798ce5afb3eb3280a54a3bfd8306eed9d7570ff474866c7a3255d912`. Les sections historiques sont conservées comme justification des corrections; le verdict sur le texte courant est donné au §0 ci-dessous. Le suivi de l'oracle et du prototype est séparé dans [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md).
 
 > [!NOTE]
 > Contexte : `phase=exploration_v3_hors_registre`, `backend=cpu_reference_oracle_under_audit`, `profile=quantized_u16_input_only`, `mode=a2pe_and_oracle_reaudit_v3`, `public_status=not_claimed`. Aucune porte de produit, aucun SLO et aucun statut exact ne sont ouverts ici.
 
 > [!CAUTION]
-> **Verdict : GO pour formaliser et falsifier A2pe; NO-GO pour en faire maintenant l'architecture recommandée; oracle M1 prometteur mais pas encore qualifiant.** La réduction A2e par arête reste mathématiquement solide. La correction de `8ac683a` reconnaît enfin que le bon objet est un sous-complexe stratifié, mais plusieurs sections continuent de confondre une strate avec son plan porteur ou avec la frontière de $V_k(p)$. Le certificat local M2.1 commité a produit un faux positif et omis un support de rang 2; le delta live l'a depuis retiré et assume correctement l'exhaustivité comme seule complétude disponible.
+> **Verdict courant : GO pour formaliser et falsifier A2pe; NO-GO pour en faire une architecture produit ou publier un statut exact.** Le texte `ae08c9f` a intégré les principales corrections mathématiques de cet audit. Les obligations décisives PEL-1 à PEL-4 restent explicitement ouvertes; aucun constructeur sparse, certificat de localité ou coût produit n'est encore établi.
+
+## 0. Réaudit différentiel du texte `ae08c9f`
+
+La proposition courante ferme correctement les contradictions textuelles suivantes :
+
+- l'objet est le sous-complexe shallow stratifié, jamais l'ensemble sous-jacent d'un unique $V_K(p)$;
+- une strate fournit au plus la projection de $p$ sur son enveloppe affine, suivie des tests de centrage, shell, profondeur, rang et propriétaire;
+- les budgets de profondeur sont séparés pour supports deux, trois et quatre;
+- une 2-face vérifie seulement $mathrm{aff}(F)=H_u$ et A2e s'exécute une fois sur le plan canonique;
+- PEL-3 est déclarée fausse dès deux points et les composantes non bornées restent une obligation de terminaison;
+- le coût publié est maintenant un worst-case par ancre, potentiellement quadratique sur toutes les ancres sans arrêt certifié;
+- le masque carrier est fail-open et ne filtre jamais les témoins de profondeur;
+- la descente réinterroge la miniboule courante;
+- les runs sont triés et les niveaux rationnels égaux groupés avant réduction;
+- les gates distinguent générateur géométrique, source HGP, couverture, incidences silencieuses et verticales.
+
+Les verrous actuels ne sont donc plus des erreurs de formulation, mais les quatre obligations reconnues par le document : complétude des plans porteurs, sensibilité à la sortie avec terme d'entrée, traitement exact des strates non bornées et coût réel du prédicat 3D face à A2e. Tant qu'elles sont ouvertes, A2pe reste une hypothèse de recherche.
+
+Le scan KaTeX du snapshot courant ne trouve ni bloc `$$` sur plusieurs lignes physiques, ni macro `\operatorname`, ni délimiteur interdit, ni commande à accolades manquantes parmi les motifs imposés par `AGENTS.md`.
 
 ## 1. Progrès réels de la nouvelle révision
 

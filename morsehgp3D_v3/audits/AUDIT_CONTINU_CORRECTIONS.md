@@ -135,3 +135,129 @@ Le meilleur résultat utile à viser ensuite n'est pas un nouveau claim de compl
 5. seulement ensuite prototyper le peeling stratifié éphémère et mesurer son coût intermédiaire complet.
 
 GCP non utilisé pour cet audit et ces corrections.
+
+## Snapshot 2026-08-08 — `5be91d6`, passage en audit-only
+
+À partir de ce snapshot, Codex ne modifie plus l'implémentation v3 : Claude en garde seul la responsabilité. Les seules écritures ultérieures de Codex sont dans `morsehgp3D_v3/audits/`. Les builds et reproductions sont effectués hors dépôt sous `/tmp`.
+
+### Corrections observées dans le snapshot commité
+
+Le commit courant intègre notamment :
+
+- parsing entier intégral et borne de `maximum_order` avant addition;
+- séparation entre campagne support positive et probe hostile;
+- injection comptée, garde attendu typé et refus des campagnes négatives vacues;
+- fixture permanente de l'ancien faux certificat local;
+- contrôle de l'écriture et de la fermeture du reçu;
+- séparation entre coquilles critiques et ties portés par un support non bien centré;
+- renommage des faux compteurs de `strata` en incidences support--ancre;
+- protections contre les divisions par zéro dans le census diagnostic;
+- wrapper CMake qui exige simultanément un code non nul et le diagnostic attendu.
+
+Le build Release propre sous `/tmp/mhgp3v-codex-release.PlhHV6` a produit :
+
+```text
+18/18 CTests mhgp3v passés, 0 échec, temps total 27,59 s
+```
+
+Les tests comprennent les arités hautes, l'ancien certificat local, le débordement CLI, les six gardes hostiles, la vacuité, la coquille non critique, le token entier partiel, `/dev/full` et l'incompatibilité `measure-only + receipt`.
+
+### Delta non commité présent au moment du changement de périmètre
+
+Deux fichiers d'implémentation restent modifiés dans le worktree :
+
+- `oracle/oracle_main.cpp`;
+- `CMakeLists.txt`.
+
+Ce delta a été écrit avant la consigne audit-only. Il ajoute le contrôle du contrat public v2 suivant : une multifusion doit publier la plus petite sphère contributrice par index, et pas seulement une source contributrice quelconque. La fixture littérale emploie le triangle entier équilatéral `{(0,0,0),(1,1,0),(1,0,1)}` et un quatrième point lointain; les trois arêtes ont même niveau exact et contribuent au même lot. Remplacer la source minimale par une autre contributrice doit déclencher uniquement `forest_source_nonminimal`.
+
+Le delta passe dans la matrice Release 18/18. Il appartient désormais à Claude de le conserver, le réécrire ou le retirer. Codex ne le modifiera plus.
+
+### Portes toujours ouvertes malgré le vert local
+
+- La v3 n'est toujours pas intégrée au workflow CI racine.
+- Le CMake v3 importe inconditionnellement la v2 et ses quatre CTests; le nombre total annoncé dans le README doit donc distinguer tests `mhgp3v_*` et tests transitifs v2. Le snapshot courant possède 18 tests v3 et 4 tests v2, pas « 14 tests » au total.
+- L'oracle qualifie seulement `quantized_u16_input`, pas `exact_dyadic_input`.
+- Les reçus ne scellent pas encore les digests canoniques de chaque nuage, du binaire et de toutes les sources.
+- `assumed_window` reste un falsificateur diagnostique incomplet; son vert ne prouve jamais la complétude.
+- Les incidences support--ancre ne sont pas des strates de l'arrangement shallow et ne permettent aucune conclusion de complexité A2p.
+- Le véritable peeling stratifié, ses projections, les composantes non bornées, les lots HGP, la couverture et les applications verticales restent à construire et à juger.
+
+Verdict du snapshot : **GO pour continuer l'instrumentation et le juge borné; NO-GO pour une revendication d'exactitude produit ou de complexité du peeling.**
+
+## P0 publication — un run rouge peut laisser un reçu apparemment vert
+
+Le snapshot `5be91d6` écrit le JSON avant d'évaluer les postconditions finales de `--inject` et de `--require-incomplete-anchors`. Le code de sortie reste correctement non nul, mais le reçu ne porte ni verdict final, ni code de sortie, ni champ `qualified`.
+
+Reproduction en lecture seule avec le binaire Release :
+
+```text
+mhgp3v_oracle --inject merge_source_foreign --clouds 1 --seed 123 --min-points 4 --max-points 4 --max-order 1 --coord-max 65535 --min-decided 1 --min-nodes 1 --receipt receipt.json
+```
+
+Résultat observé : code 1, car aucune injection applicable n'a été trouvée. Le reçu existe néanmoins avec `identity_closed=true`, `failures=0`, `injections_applied=0` et `injection_escapes=0`. Un consommateur qui ne possède que le JSON peut donc interpréter comme vert un run explicitement rouge.
+
+Artefact de reproduction local : `/tmp/mhgp3v-receipt-audit.MBvfWT`.
+
+Obligation : calculer le verdict complet avant sérialisation et publier au minimum `status`, `exit_code`, `baseline_passed`, `probe_passed`, `qualified=false/true` et la raison non qualifiante. Une écriture atomique ne suffit pas si le contenu précède encore le verdict.
+
+Statut : **ouvert; bloquant pour toute utilisation des reçus comme preuve**.
+
+### Variante plus grave — `require_incomplete_anchors` rend 0 avec des mismatches
+
+Commande reproduite sur les empreintes `oracle=9e0359b1…`, `prototype=28b18507…` :
+
+```text
+mhgp3v_oracle --subject anchored --regime assumed_window --seed-neighbours 16 --clouds 1 --seed 4242 --min-points 22 --max-points 22 --max-order 1 --min-decided 1 --min-nodes 1 --require-incomplete-anchors 22 --receipt false.json
+```
+
+Le programme imprime `CATALOGUE cardinal 69 contre 70` et `support manquant {6,10}`, écrit un reçu contenant `"failures": 2`, puis rend pourtant le code 0 avec le message indiquant que 22 ancres se déclarent incomplètes. La propriété locale « le sujet avoue son incomplétude » écrase ainsi le verdict rouge de la campagne différentielle.
+
+Le reçu ne publie ni `require_incomplete_anchors`, ni `incomplete_anchors`, ni un scope `diagnostic_property_test`. Cette commande peut donc être prise à tort pour une qualification verte à la fois par son code de sortie et par l'absence de statut explicite.
+
+Obligation : séparer ce property-test de la campagne de qualification. Soit il possède un exécutable/schéma `diagnostic_only` distinct qui n'affirme jamais la complétude, soit le programme conserve un code non nul dès que `campaign.failures != 0`. Un succès de la propriété attendue ne doit jamais annuler des mismatches du catalogue.
+
+Statut : **P0 protocole, ouvert**.
+
+## P0/P1 documentation — le README contredit la proposition corrigée
+
+Le README courant n'est pas un simple résumé périmé; il réintroduit plusieurs affirmations que `PROPOSITION.md` a explicitement retirées.
+
+### P0 — coût du peeling annoncé sans peeling
+
+Aux lignes 46–64, le README affirme que « le coût d'un parcours sensible à la sortie est mesuré, et il est constant », puis extrapole des gains de 19, 70 et 208. Les compteurs sont pourtant des incidences support--ancre produites par la cascade exhaustive; le prototype ne construit aucune strate, aucune subdivision d'hyperplans et aucun parcours shallow.
+
+Une incidence de support n'est ni une cellule visitée, ni un prédicat payé par le futur constructeur. Trois tailles finies, avec un ratio voisin de 14, ne démontrent ni constance en $n$, ni coût output-sensitive, ni gain du peeling. Cette phrase contredit directement PEL-2/PEL-4, toujours ouvertes dans la proposition.
+
+### P0 — borne A2p indépendante du nombre de plans
+
+La ligne 101 publie « $\Theta(k^2)$ par point, classique » comme borne de sortie A2p. La proposition courante donne correctement un worst-case en $O(m_pK^2)$ par ancre, plus construction et transcripts. Supprimer $m_p$ est précisément le saut non démontré; sans certificat local, $m_p=n-1$.
+
+### P1 — PEL anciennes réintroduites
+
+Les lignes 113–115 demandent encore :
+
+- que les 2-faces soient « exactement » les arêtes utiles, alors que seule l'inclusion de complétude est requise et que des plans superflus sont permis;
+- un parcours en `O(sortie)`, alors que le terme d'entrée est obligatoire;
+- un traitement d'un énoncé « probablement faux », alors que PEL-3 est déjà réfutée par deux points.
+
+### P1 — commandes et compteurs stales
+
+- La ligne 207 annonce 14 tests; le snapshot courant possède 18 tests `mhgp3v_*` plus quatre tests v2 transitifs.
+- La commande d'injection des lignes 216–218 n'emploie pas la fixture de même niveau. Sur des nuages génériques, aucune source alternative de niveau exactement égal n'existe souvent; la commande peut échouer parce qu'aucune injection n'est applicable, pas parce que le garde a rougi.
+- Le texte dit encore « appliquée au moins une fois » alors que la correction actuelle exige exactement une application.
+
+Verdict documentaire : **le README ne doit pas servir de résumé décisionnel tant que ces contradictions ne sont pas retirées**. La proposition et les audits sont plus prudents et plus exacts que sa page d'accueil.
+
+## P1 reçu census — « complet » est trop fort
+
+Le README qualifie `census_tukey_shallow.py` de reçu complet. Le sidecar `census_tukey_shallow_20260808.json` contient des éléments utiles — digests des nuages assemblés et des échantillons, seeds, version Python/NumPy, convention de demi-espace et identité de campagne — mais il n'est pas scellé comme preuve reproductible :
+
+- `provenance.git_commit` vaut `unavailable`;
+- aucun digest du script ou du binaire Python n'est publié;
+- le tableau des 4096 directions n'a pas de digest, seulement seed, loi et version de NumPy;
+- l'archive source, `bun.conf` et chaque maillage brut n'ont pas leur digest;
+- la commande exacte, le répertoire d'entrée, le digest du reçu et le statut `diagnostic_only/not_claimed` sont absents;
+- `decimate` traite `len(points) == target` comme « cloud plus petit » parce qu'il retourne `None` pour `len(points) <= target`; une entrée exactement à la taille cible serait donc sautée à tort.
+
+Le census reste un diagnostic correctement borné comme **minorant** du cas tangentiel non contraint. Il n'est ni un certificat de $R$, ni un reçu complet au sens du plan de test.

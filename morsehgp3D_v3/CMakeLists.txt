@@ -83,6 +83,13 @@ mhgp3v_add_expected_failure_test(mhgp3v_cli_order_overflow "campagne absurde"
   --subject anchored --measure-only --regime exhaustive --points 1 --clouds 1
   --max-order 2147483647)
 
+# M2.2 — le rang est calcule PAR LA PROFONDEUR, jamais en comptant la boule.
+# Le vert de ce test EST la verification du dictionnaire rang = 4 + c_e + delta_e
+# contre la verite exhaustive.
+add_test(NAME mhgp3v_edge_shallow_depth_dictionary COMMAND mhgp3v_oracle
+         --subject edge_shallow --clouds 20 --seed 4242 --min-points 8 --max-points 12
+         --max-order 3 --min-decided 15 --min-nodes 200)
+
 # Campagne NEGATIVE : chaque faute injectee doit etre attrapee. Un garde qui ne
 # se declenche jamais ne vaut rien.
 foreach(fault member_unsorted rotated_centre sentinel n_children roots)
@@ -101,6 +108,17 @@ add_test(NAME mhgp3v_oracle_inject_merge_source_foreign COMMAND mhgp3v_oracle
          --subject v2 --clouds 1 --min-points 4 --max-points 4 --max-order 1
          --coord-max 2 --min-decided 1 --min-nodes 7)
 set_tests_properties(mhgp3v_oracle_inject_merge_source_foreign PROPERTIES
+  PASS_REGULAR_EXPRESSION "appliquee exactement une fois.*garde vise declenche exactement une fois")
+
+# Trois arêtes contributrices au meme lot : remplacer la source minimale par
+# une autre contributrice conserve rang, niveau et incidence, mais viole le
+# contrat public de serialisation de la v2.
+add_test(NAME mhgp3v_oracle_inject_merge_source_nonminimal COMMAND mhgp3v_oracle
+         --inject merge_source_nonminimal_contributor
+         --fixture nonminimal_contributor_same_level --subject v2 --clouds 1
+         --min-points 4 --max-points 4 --max-order 1 --coord-max 10
+         --min-decided 1 --min-nodes 6)
+set_tests_properties(mhgp3v_oracle_inject_merge_source_nonminimal PROPERTIES
   PASS_REGULAR_EXPRESSION "appliquee exactement une fois.*garde vise declenche exactement une fois")
 
 # Une campagne ou aucun sujet n'est admissible ne doit jamais devenir verte par

@@ -35,6 +35,7 @@
 
 #include "mhgp/mhgp.hpp"  // le SUJET, jamais l'autorite
 #include "prototype/anchored_catalogue.hpp"
+#include "prototype/edge_shallow.hpp"
 
 namespace {
 
@@ -471,6 +472,7 @@ struct Campaign {
     forest_n_children,
     forest_roots,
     forest_source_noncontributory,
+    forest_source_nonminimal,
   };
   std::map<FailureCode, long long> failures_by_code;
 
@@ -518,6 +520,7 @@ struct CanonicalNode {
   Rational level;
   int arity = 0;
   bool is_root = false;
+  mhgp::i32 source_index = -1;
   std::vector<int> source_members;  // membres tries de la sphere source
 };
 
@@ -628,6 +631,7 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
         catalogue.spheres[static_cast<std::size_t>(subject.nodes[t].source)].sph);
     canonical.arity = subject_arity[t];
     canonical.is_root = subject.nodes[t].parent < 0;
+    canonical.source_index = subject.nodes[t].source;
     {
       const mhgp::CriticalSphere& source =
           catalogue.spheres[static_cast<std::size_t>(subject.nodes[t].source)];
@@ -683,12 +687,39 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     auto it = subject_map.find(reference.nodes[t].minima_closure);
     if (it == subject_map.end()) continue;
     const std::vector<std::vector<int>>& admissible = reference.nodes[t].admissible_sources;
-    if (std::find(admissible.begin(), admissible.end(), it->second.source_members)
-        == admissible.end())
+    const bool contributes =
+        std::find(admissible.begin(), admissible.end(), it->second.source_members)
+        != admissible.end();
+    if (!contributes) {
       campaign->fail(Campaign::FailureCode::forest_source_noncontributory,
                      "STRUCTURE source non contributrice "
                          + set_to_text(it->second.source_members) + " pour "
                          + set_to_text(reference.nodes[t].minima_closure) + tag);
+      continue;
+    }
+    if (reference.nodes[t].kind != 1) continue;
+
+    mhgp::i32 canonical_source = -1;
+    for (std::size_t si = 0; si < catalogue.spheres.size(); ++si) {
+      const mhgp::CriticalSphere& sphere = catalogue.spheres[si];
+      if (sphere.rank != order + 1) continue;
+      std::vector<int> members;
+      for (mhgp::i32 i = 0; i < sphere.rank; ++i)
+        members.push_back(static_cast<int>(
+            catalogue.members[static_cast<std::size_t>(sphere.members_begin + i)]));
+      std::sort(members.begin(), members.end());
+      if (std::find(admissible.begin(), admissible.end(), members) == admissible.end()) continue;
+      canonical_source = static_cast<mhgp::i32>(si);
+      break;
+    }
+    if (canonical_source < 0) {
+      campaign->fail("STRUCTURE aucune source contributrice dans le catalogue" + tag);
+    } else if (it->second.source_index != canonical_source) {
+      campaign->fail(Campaign::FailureCode::forest_source_nonminimal,
+                     "STRUCTURE source contributrice non minimale index="
+                         + std::to_string(it->second.source_index) + " attendu="
+                         + std::to_string(canonical_source) + tag);
+    }
   }
   for (const auto& entry : subject_map)
     if (reference_map.find(entry.first) == reference_map.end())
@@ -868,6 +899,8 @@ bool injection_failure_code(const std::string& injection, Campaign::FailureCode*
     *code = Campaign::FailureCode::forest_roots;
   } else if (injection == "merge_source_foreign") {
     *code = Campaign::FailureCode::forest_source_noncontributory;
+  } else if (injection == "merge_source_nonminimal_contributor") {
+    *code = Campaign::FailureCode::forest_source_nonminimal;
   } else {
     return false;
   }
@@ -953,7 +986,8 @@ InjectionProbe exercise_injection(const std::string& injection,
       return result;
     }
 
-    if (injection == "merge_source_foreign") {
+    if (injection == "merge_source_foreign"
+        || injection == "merge_source_nonminimal_contributor") {
       for (std::size_t ni = 0; ni < clean_forests[fi].nodes.size(); ++ni) {
         const mhgp::ForestNode& node = clean_forests[fi].nodes[ni];
         if (node.kind != 1 || node.source < 0
@@ -969,9 +1003,10 @@ InjectionProbe exercise_injection(const std::string& injection,
             continue;
           if (compare(exact_level_of(candidate.sph), original_level) != 0) continue;
 
-          // La fixture dediee fournit deux VRAIES spheres du catalogue, de
-          // meme rang et de meme niveau exact, dans deux composantes disjointes.
-          // On ne fabrique donc aucun record hybride pour aider le garde teste.
+          // Les fixtures dediees fournissent deux VRAIES sphères du catalogue,
+          // de meme rang et de meme niveau exact : disjointes pour la source
+          // etrangere, contributrices au meme lot pour la source non minimale.
+          // Aucun record hybride n'est fabrique pour aider le garde teste.
           mhgp::Forest mutated_forest = clean_forests[fi];
           mutated_forest.nodes[ni].source = static_cast<mhgp::i32>(si);
           result.applied = true;
@@ -1108,11 +1143,12 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : regime inconnu %s (exhaustive ou assumed_window)\n", regime.c_str());
     return 2;
   }
-  if (subject != "v2" && subject != "anchored") {
-    std::printf("ECHEC : sujet inconnu %s (v2 ou anchored)\n", subject.c_str());
+  if (subject != "v2" && subject != "anchored" && subject != "edge_shallow") {
+    std::printf("ECHEC : sujet inconnu %s (v2, anchored ou edge_shallow)\n", subject.c_str());
     return 2;
   }
   if (!fixture.empty() && fixture != "foreign_source_same_level"
+      && fixture != "nonminimal_contributor_same_level"
       && fixture != "noncritical_shell_tie") {
     std::printf("ECHEC : fixture inconnue %s\n", fixture.c_str());
     return 2;
@@ -1132,6 +1168,13 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : la fixture noncritical_shell_tie exige --subject anchored "
                 "--regime exhaustive --clouds 1 --min-points 4 --max-points 4 "
                 "--max-order 2 --coord-max 2000\n");
+    return 2;
+  }
+  if (fixture == "nonminimal_contributor_same_level"
+      && (measure_only || subject != "v2" || clouds != 1 || minimum_points != 4
+          || maximum_points != 4 || maximum_order != 1 || coordinate_maximum != 10)) {
+    std::printf("ECHEC : la fixture nonminimal_contributor_same_level exige --subject v2 "
+                "--clouds 1 --min-points 4 --max-points 4 --max-order 1 --coord-max 10\n");
     return 2;
   }
 
@@ -1222,6 +1265,7 @@ int main(int argc, char** argv) {
   Campaign campaign;
   long long injections_applied = 0, injection_escapes = 0;
   mhgp3v::AnchoredCampaign anchored_total;
+  mhgp3v::EdgeShallowStatistics edge_shallow_total;
   std::mt19937_64 rng(seed);
   std::uniform_int_distribution<long long> coordinate(0, coordinate_maximum);
 
@@ -1246,6 +1290,12 @@ int main(int argc, char** argv) {
                 {1060, 1025, 100}, {1056, 1033, 100}};
       n = static_cast<int>(points.size());
       order = 2;
+    } else if (fixture == "nonminimal_contributor_same_level") {
+      // Triangle entier equilateral (distances au carre egales a 2) : ses
+      // trois arêtes contribuent au meme lot. Le point 3 est lointain.
+      points = {{0, 0, 0}, {1, 1, 0}, {1, 0, 1}, {10, 10, 10}};
+      n = static_cast<int>(points.size());
+      order = 1;
     } else {
       points.resize(static_cast<std::size_t>(n));
       for (int i = 0; i < n; ++i)
@@ -1273,6 +1323,23 @@ int main(int argc, char** argv) {
       forests = result.forests;
       subject_out_of_domain = result.out_of_declared_domain;
       subject_suppressed = result.forests_suppressed;
+    } else if (subject == "edge_shallow") {
+      mhgp3v::AnchoredCampaign anchored;
+      mhgp3v::EdgeShallowStatistics shallow;
+      catalogue = mhgp3v::edge_shallow_catalogue(points, s_max, &shallow, &anchored);
+      subject_out_of_domain = anchored.degenerate_shells > 0;
+      subject_suppressed = subject_out_of_domain;
+      edge_shallow_total.edges_examined += shallow.edges_examined;
+      edge_shallow_total.edges_retained += shallow.edges_retained;
+      edge_shallow_total.lines_active += shallow.lines_active;
+      edge_shallow_total.lines_constant_inside += shallow.lines_constant_inside;
+      edge_shallow_total.vertices_examined += shallow.vertices_examined;
+      edge_shallow_total.vertices_shallow += shallow.vertices_shallow;
+      edge_shallow_total.emitted_arity_four += shallow.emitted_arity_four;
+      edge_shallow_total.depth_tests += shallow.depth_tests;
+      edge_shallow_total.dictionary_refuted += shallow.dictionary_refuted;
+      if (!subject_out_of_domain)
+        for (int k = 1; k <= order; ++k) forests.push_back(mhgp::build_forest(points, catalogue, k));
     } else {
       mhgp3v::AnchoredCampaign anchored;
       catalogue = mhgp3v::anchored_catalogue(points, s_max, seed_neighbours,
@@ -1378,6 +1445,16 @@ int main(int argc, char** argv) {
                 anchored_total.sufficient_mean / static_cast<double>(campaign.decided),
                 anchored_total.sufficient_max, anchored_total.incomplete_anchors);
 
+  if (subject == "edge_shallow" && campaign.decided > 0)
+    std::printf("arete[profondeur] : aretes=%lld dont retenues=%lld | droites actives=%lld "
+                "constantes interieures=%lld | sommets examines=%lld dont peu profonds=%lld "
+                "| arite4 emise=%lld | tests de profondeur=%lld | DICTIONNAIRE REFUTE=%lld\n",
+                edge_shallow_total.edges_examined, edge_shallow_total.edges_retained,
+                edge_shallow_total.lines_active, edge_shallow_total.lines_constant_inside,
+                edge_shallow_total.vertices_examined, edge_shallow_total.vertices_shallow,
+                edge_shallow_total.emitted_arity_four, edge_shallow_total.depth_tests,
+                edge_shallow_total.dictionary_refuted);
+
   std::printf("sujet=%s | attempted=%lld decided=%lld rejected_domain=%lld | spheres=%lld forets=%lld "
               "noeuds=%lld | largeur max=%zu bits | grille=[0,%lld]\n", subject.c_str(),
               campaign.attempted, campaign.decided, campaign.rejected_domain,
@@ -1450,6 +1527,14 @@ int main(int argc, char** argv) {
     std::printf("OK : %d ancres se declarent incompletes sous fenetre supposee "
                 "(la completude n'est pas jugee ici)\n", anchored_total.incomplete_anchors);
     return 0;
+  }
+
+  // Le dictionnaire de profondeur est l'enonce central mis a l'epreuve ici :
+  // une seule refutation invalide la campagne, meme si tout le reste concorde.
+  if (subject == "edge_shallow" && edge_shallow_total.dictionary_refuted != 0) {
+    std::printf("ECHEC : dictionnaire rang = 4 + c_e + delta_e REFUTE %lld fois\n",
+                edge_shallow_total.dictionary_refuted);
+    return 1;
   }
 
   if (!injection.empty()) {

@@ -63,7 +63,27 @@ gain attendu est donc $\approx19\times$ à $n=60$, $70\times$ à 100 et
 $208\times$ à 150. C'est l'argument chiffré pour construire le constructeur de
 strates, et c'est la cible que PEL-2 doit atteindre.
 
-**Fixtures permanentes** (18 tests) : la non-régression du faux certificat — sous
+**Le dictionnaire de profondeur est vérifié.** C'est l'énoncé central de
+l'architecture, et il ne l'avait jamais été. Le sujet `edge_shallow` calcule le
+rang fermé des supports de taille quatre **exclusivement** par
+
+$$\mathrm{rang} = 4 + c_e + \delta_e(t),$$
+
+sans jamais compter les points de la boule : dans le plan médiateur de l'arête
+d'ancrage, chaque point devient une forme **affine à coefficients entiers**
+($a_x = b_1\cdot X$, $b_x = b_2\cdot X$, $c_x = \lVert X\rVert^2 - D^2$ avec
+$X = 2x-p-q$), et la profondeur d'un sommet est un comptage de signes. Tout tient
+dans un `i128` sans allocation — les largeurs sont bornées au §fichier.
+
+Le vert du juge exhaustif **est** la vérification : 20 nuages, ordre 3, grille
+déclarée, `DICTIONNAIRE REFUTE=0`. Une réfutation est comptée et fait échouer la
+campagne, plutôt que d'omettre le support en silence.
+
+Les arités 1 à 3 empruntent encore le chemin exhaustif : elles ont leurs propres
+régions et leurs propres seuils, et une preuve d'arité quatre ne s'y propage
+pas. C'est le prochain incrément, pas une omission.
+
+**Fixtures permanentes** (23 tests) : la non-régression du faux certificat — sous
 une fenêtre supposée trop étroite, le générateur doit se **déclarer incomplet**,
 sans quoi un certificat erroné aurait été réintroduit ; le refus des campagnes
 négatives vacues ; les bornes sémantiques du CLI, `--max-order 2147483647`
