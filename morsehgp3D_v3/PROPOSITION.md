@@ -205,13 +205,70 @@ optionnelle sur une grille entière.
 **Pourquoi A1 survit aux points peu profonds, et pas A2 ni la v2.** C'est
 l'argument structurel décisif du §1.3. Le germe est une **arête**, dont les deux
 extrémités sont sur la sphère : la restriction certifiée $D\leq 2R(\cdot)$
-s'applique donc **aux deux**. Un point peu profond apparié à un point profond est
+s'applique donc **aux deux** — et la v1 le fait déjà
+(`local_germination.cpp:968-972`). Un point peu profond apparié à un point profond est
 rejeté par la borne du profond ; seules survivent les paires peu-profond –
 peu-profond, soit $\binom{615}{2}\approx1{,}9\cdot10^{5}$ à 50 k, $K=10$. Un
 générateur ancré sur **un** point n'a qu'une borne et n'a pas cette protection —
 c'est exactement pourquoi la v2 meurt sur $1{,}23\ \%$ de ses points. Ce que la
 v1 mesure confirme le mécanisme : 4,5 M paires retenues à 50 k, soit
 $\Theta(n)$.
+
+### 4.2 bis La coupe manquante : $R(z)\geq D/2$ à **tous** les sommets
+
+> **Proposition.** Soit $U$ un support minimal bien centré, de circumboule
+> $\bar B(c,r)$ avec $\lvert X\cap\bar B\rvert\leq s_{\max}$, et $D=\mathrm{diam}(U)$.
+> Alors pour **tout** $z\in U$ :
+> $$R(z)\;\geq\;r\;\geq\;\frac{D}{2},$$
+> où $R(z)$ est le plus grand rayon d'une boule passant par $z$, centrée dans
+> l'enveloppe convexe, de contenu $\leq s_{\max}$.
+
+*Démonstration.* $z\in U\subseteq\partial B$, donc $\bar B$ **est** une boule
+passant par $z$, de rayon $r$, de contenu $\leq s_{\max}$ ; son centre est dans
+$\mathrm{relint}\,\mathrm{conv}(U)\subseteq\mathrm{conv}(X)$ puisque $U$ est bien
+centré. D'où $R(z)\geq r$. Et $U\subseteq\bar B$ donne
+$D\leq\mathrm{diam}(\bar B)=2r$. $\square$
+
+Les trois hypothèses employées — sommets sur la sphère, rang fermé
+$\leq s_{\max}$, bon centrage — sont exactement la définition de la cible du
+générateur : la proposition ne suppose rien de plus.
+
+**Audit de la proposition, cinq points.**
+
+1. *Sens de l'inégalité.* Rejeter demande $R_{\text{utilisé}}(z)<D/2$ ; la sûreté
+   exige donc que $R_{\text{utilisé}}$ **majore** $R$. C'est bien le sens de la
+   borne tangente (elle majore le rayon de toute sphère critique de rang
+   $\leq s_{\max}$ passant par $z$). Sens correct.
+2. *Constante serrée.* Pour un triangle bien centré de plus grand côté $D$
+   opposé à $A<90^\circ$, $r=D/(2\sin A)>D/2$, et $r\to D/2$ quand
+   $A\to 90^\circ$ : l'infimum est $D/2$, non atteint. On ne peut pas améliorer
+   la constante sans hypothèse supplémentaire.
+3. *Applicabilité.* La boucle du troisième sommet énumère bien des candidats
+   **sommets de $U$**, et la condition $\lvert z-p\rvert\leq D$,
+   $\lvert z-q\rvert\leq D$ (plus $\lvert w-z\rvert\leq D$ à l'arité 4) garantit
+   $\mathrm{diam}(U)=D$. La proposition s'applique donc avec le bon $D$.
+4. *Nouveauté, vérifiée dans le code.* `local_germination.cpp:968-972` applique
+   déjà la restriction **aux deux extrémités du germe**
+   (`diameter > tangent_bound[first] || diameter > tangent_bound[second]`), et
+   `tangent_bound` est rempli **pour tous les points** (`:920-925`, il stocke
+   $2R$). La boucle du troisième sommet (`:1007-1035`) ne le teste **jamais**.
+   La proposition se réduit donc à *la clause existante, appliquée à un sommet
+   auquel elle ne l'était pas* — une disjonction sur un tableau déjà calculé.
+   Elle hérite exactement de la certification de la clause existante.
+5. *Réserves.* La *force* de la coupe dépend de la finesse du jeu de directions :
+   un majorant lâche laisse passer, sans jamais rejeter à tort. Et
+   `tangent_bound` est en binary64 « proposal-only » — obligation de la clause
+   existante, pas une obligation nouvelle.
+
+**Pourquoi elle est décisive.** Sans elle, une paire germe peu profonde a un $D$
+comparable au diamètre du nuage, donc une lentille qui contient presque tout :
+$1{,}9\cdot10^{5}$ paires $\times\ 5\cdot10^{4}$ points $\approx9{,}5\cdot10^{9}$
+troisièmes sommets examinés. Avec elle, les candidats doivent eux-mêmes vérifier
+$2R(z)\geq D$, donc être peu profonds : $\approx1{,}2\cdot10^{8}$. **Ordre de
+grandeur attendu, pas encore mesuré** — la mesure demande de reconstruire la v1.
+
+C'est ce qui rend le régime des points peu profonds du §1.3 traitable au lieu
+d'être seulement *rare*.
 
 **Ce que JUNG ne donne pas** (§6 du document, à citer tel quel) : il ne borne ni
 le rang, ni le nombre de supports par arête ; il ne réduit pas la porte de bon
@@ -352,6 +409,10 @@ découpage possible.
    soit 175 en moyenne à $\theta=0$, $n=50\,000$, $K=10$.
 5. **Le nombre de paires germes retenues sur un nuage réel**, et la part qui
    provient des points peu profonds : c'est ce qui dimensionne A1.
+6. **Le gain réel de la coupe du §4.2 bis**, dont seul l'ordre de grandeur est
+   estimé.
+7. **La sélectivité sur un nuage-SURFACE**, et non volumétrique (§10). C'est la
+   mesure la plus urgente : elle peut invalider le modèle de coût entier.
 
 ## 9. Obligations de preuve ouvertes
 
@@ -364,3 +425,33 @@ découpage possible.
   égale : à énoncer et à prouver total.
 - **Traitement complet des coquilles cosphériques** : hors modèle par hypothèse,
   mais l'obligation reste ouverte (`morsehgp3D_v2/DESIGN.md` §6.4).
+
+## 10. Le risque qui domine tous les autres : le nuage réel est une surface
+
+Tous les chiffres de ce document — 615 points peu profonds, paires retenues en
+$\Theta(n)$, $1{,}8\cdot10^{7}$ objets — sont mesurés sur des nuages **uniformes
+volumétriques**. Or le nuage réel de référence du projet est un relevé LiDAR
+(`HGP-old/tests/SemanticKITTI`) : une **surface**.
+
+Sur une surface, un demi-espace appuyé sur le plan tangent en $p$ ne contient
+presque aucun point. Par le critère du §1.3, $\tau(p)=+\infty$ **presque
+partout**, et non sur $1{,}23\ \%$ des points. La restriction $D\leq 2R$ — donc
+aussi la coupe du §4.2 bis, qui est la même inégalité — cesserait alors de mordre.
+La v1 l'a déjà observé sur `eight_clusters` : $79{,}55\ \%$ de l'univers retenu à
+$n=256$, « le vide entre amas est intérieur à l'enveloppe, aucun majorant convexe
+de $R(p)$ ne l'exclut ».
+
+Cela ne casse pas la complétude de A1, qui reste un théorème, ni la validité de
+la coupe, qui reste prouvée. Cela casserait sa **sélectivité**, donc le budget.
+
+Et cela pose une question antérieure à toute implémentation : **sur un
+nuage-surface, à quoi ressemble la sortie elle-même ?** Il existe réellement
+d'énormes sphères critiques posées sur la surface par l'extérieur, et elles font
+partie de la hiérarchie exacte. Le $1{,}8\cdot10^{7}$ du §2 n'a jamais été mesuré
+là.
+
+**Mesure à faire avant d'écrire une ligne de v3** — trois nombres sur un scan
+SemanticKITTI décimé à 50 k : combien de points de profondeur de \textsc{Tukey}
+$\leq K$, combien de paires germes retenues, combien d'objets en sortie. Si la
+surface fait tomber la sélectivité, ce n'est pas l'architecture qu'il faut
+changer, c'est le contrat de 100 ms qu'il faut réénoncer.
