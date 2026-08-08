@@ -64,6 +64,12 @@ struct AnchorStatistics {
   long long anchor_member_pairs = 0;
   long long degenerate_shells = 0;
   long long by_size[5] = {0, 0, 0, 0, 0};
+  // STRATES : candidats affinement independants dont le point canonique a une
+  // profondeur au plus s_max - m, par arite m. C'est ce qu'un parcours sensible
+  // a la sortie devrait visiter. `strata_centred` en est la part bien centree,
+  // c'est-a-dire ce qui peut etre emis.
+  long long strata[5] = {0, 0, 0, 0, 0};
+  long long strata_centred[5] = {0, 0, 0, 0, 0};
 };
 
 struct AnchoredSupport {
@@ -80,22 +86,29 @@ inline mhgp::i128 squared_distance(const mhgp::P3& a, const mhgp::P3& b) {
   return mhgp::p3_norm2(d);
 }
 
-// Construit la sphere portee par `support` et dit si elle est bien centree.
+// Construit la sphere portee par `support`. Renvoie faux si le support est
+// affinement dependant — auquel cas il ne definit AUCUNE strate. Le bon centrage
+// est rendu separement : une strate de l'arrangement existe qu'elle soit bien
+// centree ou non, et c'est precisement le rapport entre les deux que l'on veut
+// mesurer.
 inline bool build_sphere(const std::vector<mhgp::P3>& points,
-                         const std::vector<mhgp::i32>& support, mhgp::Sphere* out) {
+                         const std::vector<mhgp::i32>& support, mhgp::Sphere* out,
+                         bool* centred) {
   const std::size_t m = support.size();
   const mhgp::P3& a = points[static_cast<std::size_t>(support[0])];
-  if (m == 1) { *out = mhgp::sphere1(a); return true; }
+  if (m == 1) { *out = mhgp::sphere1(a); *centred = true; return true; }
   const mhgp::P3& b = points[static_cast<std::size_t>(support[1])];
-  if (m == 2) { *out = mhgp::sphere2(a, b); return true; }
+  if (m == 2) { *out = mhgp::sphere2(a, b); *centred = true; return true; }
   const mhgp::P3& c = points[static_cast<std::size_t>(support[2])];
   if (m == 3) {
     if (!mhgp::sphere3(a, b, c, out)) return false;
-    return mhgp::well_centered3(a, b, c);
+    *centred = mhgp::well_centered3(a, b, c);
+    return true;
   }
   const mhgp::P3& d = points[static_cast<std::size_t>(support[3])];
   if (!mhgp::sphere4(a, b, c, d, out)) return false;
-  return mhgp::well_centered4(*out, a, b, c, d);
+  *centred = mhgp::well_centered4(*out, a, b, c, d);
+  return true;
 }
 
 // Vrai si la distance au carre donnee est AU PLUS le diametre au carre de la
@@ -165,6 +178,8 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
 
     std::vector<AnchoredSupport> found;
     long long candidates = 0, witness_tests = 0, degenerate = 0;
+    long long strata[5] = {0, 0, 0, 0, 0};
+    long long strata_centred[5] = {0, 0, 0, 0, 0};
     mhgp::i128 largest_diameter_squared = 0;
     bool largest_valid = false;
     mhgp::Sphere largest{};
@@ -185,7 +200,8 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
         ++candidates;
 
         mhgp::Sphere sphere{};
-        if (detail::build_sphere(points, support, &sphere)) {
+        bool centred = false;
+        if (detail::build_sphere(points, support, &sphere, &centred)) {
           AnchoredSupport emitted;
           int on_shell = 0;
           bool extra_on_shell = false;
@@ -201,8 +217,14 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
             emitted.members.push_back(z);
             if (static_cast<int>(emitted.members.size()) > s_max) { too_many = true; break; }
           }
+          // Comptage des strates : le rang ferme est au plus s_max, que la
+          // strate soit bien centree ou non.
+          if (!too_many) {
+            ++strata[size];
+            if (centred) ++strata_centred[size];
+          }
           if (extra_on_shell) ++degenerate;
-          if (!too_many && !extra_on_shell && on_shell == size) {
+          if (centred && !too_many && !extra_on_shell && on_shell == size) {
             std::sort(emitted.members.begin(), emitted.members.end());
             emitted.support = support;
             emitted.sphere = sphere;
@@ -256,6 +278,10 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
     std::sort(pairs.begin(), pairs.end());
     pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
     statistics->anchor_member_pairs = static_cast<long long>(pairs.size());
+    for (int m = 1; m <= 4; ++m) {
+      statistics->strata[m] += strata[m];
+      statistics->strata_centred[m] += strata_centred[m];
+    }
     *out = std::move(found);
     // La completude n'est vraie QUE par exhaustivite.
     return exhausted;
@@ -275,6 +301,8 @@ struct AnchoredCampaign {
   int sufficient_max = 0;
   double sufficient_mean = 0.0;
   long long degenerate_shells = 0;
+  long long strata[5] = {0, 0, 0, 0, 0};
+  long long strata_centred[5] = {0, 0, 0, 0, 0};
   int incomplete_anchors = 0;   // ancres non exhaustives : resultat NON complet
   int exhaustive_anchors = 0;
   std::vector<AnchorStatistics> per_anchor;
@@ -299,6 +327,10 @@ inline mhgp::Catalogue anchored_catalogue(const std::vector<mhgp::P3>& points, i
     campaign->witness_tests += statistics.witness_tests;
     campaign->anchor_member_pairs += statistics.anchor_member_pairs;
     campaign->degenerate_shells += statistics.degenerate_shells;
+    for (int m = 1; m <= 4; ++m) {
+      campaign->strata[m] += statistics.strata[m];
+      campaign->strata_centred[m] += statistics.strata_centred[m];
+    }
     campaign->neighbourhood_max = std::max(campaign->neighbourhood_max, statistics.neighbourhood);
     campaign->sufficient_max = std::max(campaign->sufficient_max, statistics.sufficient_neighbours);
     total_neighbourhood += statistics.neighbourhood;

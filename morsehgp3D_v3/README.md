@@ -43,6 +43,24 @@ $s_{\max}=11$, calculée *a posteriori* depuis le vrai $r_{\max}$) :
 
 Elle **croît encore** : rien n'en est extrapolé.
 
+**Le coût d'un parcours sensible à la sortie est mesuré, et il est constant.**
+En comptant les **strates** — candidats affinement indépendants dont le point
+canonique a une profondeur $\leq s_{\max}-m$, c'est-à-dire ce qu'un parcours
+devrait visiter — contre ce qui est réellement émis (régime exhaustif,
+$s_{\max}=11$) :
+
+| $n$ | strates | bien centrées | émises | **strates / émise** | candidats / émise |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 60 | 108 960 | 22,2 % | 7 520 | **14,49** | 273 |
+| 100 | 232 544 | 23,5 % | 16 767 | **13,87** | 965 |
+| 150 | 398 999 | 23,5 % | 28 637 | **13,93** | 2 889 |
+
+Un parcours visiterait $\approx14$ strates par sphère émise, **constant en $n$**,
+là où la cascade en visite 273, 965 puis 2 889 — **croissant linéairement**. Le
+gain attendu est donc $\approx19\times$ à $n=60$, $70\times$ à 100 et
+$208\times$ à 150. C'est l'argument chiffré pour construire le constructeur de
+strates, et c'est la cible que PEL-2 doit atteindre.
+
 ---
 
 ## 2. La voie la plus pertinente pour la v3
@@ -131,9 +149,15 @@ effective** de la sphère source d'une multifusion à son lot.
 positifs, arguments absurdes refusés (code 2), censure inattendue = échec, garde
 de domaine symétrique, lecture **hostile** et **atomique** du sujet.
 
-**Campagne négative** : six fautes injectées, chacune devant être attrapée —
-membres non triés, numérateur tourné (même norme donc même niveau), sentinelle
-invalide, `n_children` nul, racine supprimée, source de fusion étrangère.
+**Campagne négative, fail-closed** : six fautes injectées sur une **copie d'un
+sujet déjà vert**, avec une comptabilité distincte de la campagne positive — un
+plancher ou un rejet de domaine ne peut donc pas tenir lieu de preuve. Chaque
+faute doit être **appliquée au moins une fois** et déclencher **exactement une
+fois son garde**, sans aucun diagnostic étranger : membres non triés, numérateur
+tourné (même norme, donc même niveau), sentinelle invalide, `n_children` nul,
+racine supprimée, et source de fusion étrangère **de même rang et de même niveau
+exact** — sans cette égalité, c'est le garde de niveau qui rougirait et le garde
+de contribution ne serait pas exercé.
 
 Résultat du 8 août, grille déclarée $[0,65535]$ : `attempted=40 decided=40
 rejected_domain=0 | spheres=1850 forets=82 noeuds=1909 | largeur max=158 bits`.

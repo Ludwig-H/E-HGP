@@ -714,14 +714,14 @@ qualification.
 | 4,5 M paires $\Rightarrow\Theta(n)$ | retiré (§4.2) |
 | « GPU dès la première ligne » vs « pas de CUDA avant » | deux pistes parallèles (§10) |
 | catalogue matérialisable | flux obligatoire ; 4,4 Go en diagnostic (§1.4) |
-| 69 ans / 91 s | intervalle de débit publié : 77–214 ans, 103–286 s (§1.2) |
+| 69 ans / 91 s | intervalle de débit publié : 77–215 ans, 103–286 s (§1.2) |
 | $\lvert W\rvert\geq130$ « géométriquement nécessaire » | observé sur le corpus mesuré (§1.2) |
 | `std::map` sur $2{,}3\cdot10^{7}$ clés | carte **par ordre**, rang $=k$ seulement (§1.3) |
 | $10^{12}$ prédicats de descente | pire cas ; `descend` sort au premier intrus (§1.3) |
 | « `sphere.hpp` sain » | candidat, audit prédicat par prédicat à faire (§8) |
 | M1–M5 imposées à A2e | deux listes disjointes (§12, Gate E) |
 | « l'audit est l'autorité » | spécification + registre des preuves (en-tête) |
-| « les 2-faces de $V_k(p)$ » | faces de l'**arrangement** à profondeur $\leq k$ ; $V_k(p)$ comme ensemble efface les strates (§6) |
+| « les 2-faces de $V_k(p)$ » | sous-complexe stratifié ; une face $F$ vérifie seulement $\mathrm{aff}(F)=H_u$, et A2e s'exécute une fois sur $H_u$ (§5–6) |
 | certificat de localité M2.1 « $2r_{\max}\leq d_{M+1}$ » | **faux** : un support inconnu employant un point exclu vérifie $2r\geq d_{M+1}$ ; réfuté par le juge, support $\lbrace6,10\rbrace$ manquant (§12) |
 | $\lvert W\rvert$ « certifié » 128/256 à $n=200$–$1000$ | retiré ; mesure honnête = **fenêtre suffisante** en régime exhaustif (§12) |
 | élaguer le range-report par $2R<D$ | **incorrect** : perd les témoins de profondeur (§7) |
@@ -729,7 +729,7 @@ qualification.
 | $\bar B(c,2r)$ pour toute la descente | premier pas seulement ; enveloppe $\leq(i+1)r_0$ (§1.3) |
 | « consommé au fil de l'eau » | tri externe et groupement des niveaux égaux (§10) |
 | $\mathrm{rang}=1+\mathrm{niveau}$ | $(4-j)+\mathrm{profondeur}$ (§5) |
-| PEL-3 « non bornée ⇒ pas de sphère finie » | probablement faux tel quel (§6) |
+| PEL-3 « non bornée ⇒ pas de sphère finie » | **faux** dès deux points ; reste la terminaison des strates non bornées (§5–6) |
 | M1–M5 | `PEL-1` à `PEL-4`, pour ne pas heurter M.1 du registre (§6) |
 | $\lvert W\rvert\leq39$ à une seconde | 38 au meilleur débit publié (§1.2) |
 | $n\binom{\overline{\lvert W\rvert}}{3}$ | sous-estime $\sum_p\binom{\lvert W_p\rvert}{3}$ par convexité (§1.2) |
