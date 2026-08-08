@@ -237,7 +237,7 @@ constexpr std::uint64_t kFnvPrime = UINT64_C(1099511628211);
     const std::uint64_t difference =
         leaves[begin].morton_code ^ leaves[end - 1U].morton_code;
     if (difference != 0U) {
-      const int width = std::bit_width(difference);
+      const int width = static_cast<int>(std::bit_width(difference));
       const unsigned int highest_bit = static_cast<unsigned int>(
           width - 1);
       const std::uint64_t mask = UINT64_C(1) << highest_bit;
