@@ -1,21 +1,30 @@
-// MorseHGP3D v3 — M2.1, generateur ancre par point, avec certificat de localite
-// A POSTERIORI.
+// MorseHGP3D v3 — M2.1, SUJET DIFFERENTIEL ancre par point.
 //
-// Ce que ce composant change par rapport a la v2, et c'est le point :
+// AVERTISSEMENT — ce composant N'EST PAS un prototype de peeling, et il ne porte
+// aucun certificat de localite. Il enumere tous les supports de taille au plus
+// quatre dans une fenetre de voisins : c'est la cascade locale en
+// somme_p C(|W_p|,3) que la proposition condamne. Il sert de SUJET borne pour le
+// juge, et de mesure du travail reellement paye. Rien d'autre.
 //
-//   la v2 dimensionne son voisinage par une borne A PRIORI (relaxation conique
-//   du theoreme 4), qui vaut +infini des qu'un cone est trop pauvre — d'ou
-//   |W_p| = n et le mur en Theta(n^5) ;
+// UN CERTIFICAT FAUX A ETE RETIRE ICI (audit du 8 aout, §5.8). Il affirmait :
+// « si 2*r_max des supports DEJA TROUVES n'atteint pas le premier voisin exclu,
+// aucun support n'a pu etre manque ». L'implication est invalide : un support
+// inconnu employant un point exclu verifie precisement 2r >= d_{M+1}, donc le
+// maximum observe ne le borne pas. Contre-exemple reproduit par le juge, 22
+// points, graine 4242 : 69 spheres au lieu de 70, support {6,10} manquant, et
+// les 22 ancres se declaraient certifiees.
 //
-//   ici, aucune borne a priori. On travaille sur les M plus proches voisins,
-//   puis on CERTIFIE : tout support U contenant p a sa circumboule passant par
-//   p, donc tous ses membres sont a distance au plus 2r de p. Si 2*r_max des
-//   supports emis est au plus la distance du premier voisin exclu, aucun support
-//   n'a pu etre manque. Sinon on double M et on recommence.
+// Il n'existe pas de regle d'arret valide fondee sur les seules distances : la
+// completude d'un generateur ancre exige soit l'EXHAUSTIVITE, soit un majorant
+// de R(p) — le supremum des rayons de boules passant par p, de centre dans
+// conv(X), de contenu au plus s_max, qui est fini (<= diam(X)) mais qu'il reste
+// a calculer. C'est exactement l'obligation ouverte du plan.
 //
-// Le certificat est exact (comparaison entiere), il ne peut pas valoir l'infini,
-// et le nombre de voisins reellement necessaire devient une MESURE au lieu d'une
-// hypothese. C'est precisement le chiffre que les audits reclament.
+// Deux regimes, nommes et jamais confondus :
+//   - `exhaustive`      : la fenetre est le nuage entier ; le resultat est
+//                         complet, et c'est la seule completude disponible ;
+//   - `assumed_window`  : fenetre bornee ; le resultat est une HYPOTHESE
+//                         declaree, jamais une certification.
 //
 // Deux flux, jamais confondus (audit 2 §2.2) :
 //   - le flux TEMOIN, qui compte le rang ferme, porte sur TOUS les points du
@@ -35,18 +44,25 @@
 
 namespace mhgp3v {
 
+enum class Regime { exhaustive, assumed_window };
+
 struct AnchorStatistics {
   int anchor = -1;
-  int neighbourhood = 0;        // |W_p| finalement certifie
-  int growth_rounds = 0;        // doublements
-  bool certified = false;       // 2 r_max <= distance du premier exclu
-  bool exhausted = false;       // W_p a absorbe le nuage entier
-  long long candidates = 0;     // sous-ensembles examines
-  long long witness_tests = 0;  // tests de position (flux temoin)
-  long long emitted = 0;        // supports emis, proprietaire canonique compris
-  long long owned = 0;          // supports dont p est le proprietaire canonique
-  long long two_faces = 0;      // paires {p,u} portant au moins un support
-  long long degenerate_shells = 0;  // cospheries rencontrees : hors domaine declare
+  int neighbourhood = 0;        // |W_p| employe
+  bool exhaustive = false;      // la fenetre EST le nuage : seule completude
+  // Fenetre qui aurait SUFFI, calculee a posteriori depuis les supports
+  // reellement emis : nombre de voisins a distance au plus 2 r_max. Ce n'est
+  // une mesure honnete que sous le regime exhaustif, ou r_max est le vrai
+  // maximum. Sous fenetre supposee, elle est un minorant.
+  int sufficient_neighbours = 0;
+  long long candidates = 0;     // sous-ensembles examines, CUMULE
+  long long witness_tests = 0;  // tests de position (flux temoin), CUMULE
+  long long emitted = 0;
+  long long owned = 0;
+  // Paires ancre-membre rencontrees. Ce ne sont PAS les 2-faces de A2p : le
+  // prototype ne construit aucun arrangement.
+  long long anchor_member_pairs = 0;
+  long long degenerate_shells = 0;
   long long by_size[5] = {0, 0, 0, 0, 0};
 };
 
@@ -82,8 +98,19 @@ inline bool build_sphere(const std::vector<mhgp::P3>& points,
   return mhgp::well_centered4(*out, a, b, c, d);
 }
 
-// Comparaison exacte de 4 * beta(s) contre une distance au carre entiere :
-// 4 * |num|^2 / den^2 <= d2, soit 4 |num|^2 <= d2 * den^2, en BigInt<6>.
+// Vrai si la distance au carre donnee est AU PLUS le diametre au carre de la
+// sphere : d2 <= 4 beta, soit d2 * den^2 <= 4 |num|^2. C'est le test « ce voisin
+// est-il assez proche pour pouvoir appartenir a cette boule ».
+inline bool within_diameter(const mhgp::Sphere& sphere, mhgp::i128 squared_distance_) {
+  const mhgp::BigInt<4> numerator = mhgp::sphere_num2(sphere);
+  const mhgp::BigInt<6> right = mhgp::big_mul_i128<6, 4>(numerator, 4);
+  mhgp::BigInt<6> left = mhgp::big_mul_i128<6, 2>(
+      mhgp::big_from_i128<2>(squared_distance_), sphere.den);
+  left = mhgp::big_mul_i128<6, 6>(left, sphere.den);
+  return mhgp::big_cmp(left, right) <= 0;
+}
+
+// Conserve pour memoire : 4 * beta(s) <= d2.
 inline bool diameter_squared_at_most(const mhgp::Sphere& sphere, mhgp::i128 squared_distance_) {
   const mhgp::BigInt<4> numerator = mhgp::sphere_num2(sphere);
   mhgp::BigInt<6> left = mhgp::big_mul_i128<6, 4>(numerator, 4);
@@ -100,8 +127,8 @@ inline bool diameter_squared_at_most(const mhgp::Sphere& sphere, mhgp::i128 squa
 // etre etabli (le voisinage a absorbe le nuage sans le satisfaire) — dans ce cas
 // le resultat reste complet, mais l'ancre est declaree `exhausted`.
 inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anchor, int s_max,
-                              int seed_neighbours, std::vector<AnchoredSupport>* out,
-                              AnchorStatistics* statistics) {
+                              int seed_neighbours, Regime regime,
+                              std::vector<AnchoredSupport>* out, AnchorStatistics* statistics) {
   const int n = static_cast<int>(points.size());
   out->clear();
   *statistics = AnchorStatistics{};
@@ -116,12 +143,17 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
     ordered.emplace_back(detail::squared_distance(points[static_cast<std::size_t>(z)],
                                                   points[static_cast<std::size_t>(anchor)]), z);
   }
-  std::sort(ordered.begin(), ordered.end(),
-            [](const auto& a, const auto& b) { return a.first < b.first; });
+  // Les distances egales sont departagees par PointId : sans cela l'ordre, donc
+  // la fenetre, dependrait de l'implementation du tri.
+  std::sort(ordered.begin(), ordered.end(), [](const auto& a, const auto& b) {
+    if (a.first != b.first) return a.first < b.first;
+    return a.second < b.second;
+  });
 
-  int budget = std::max(seed_neighbours, s_max + 1);
-  while (true) {
-    ++statistics->growth_rounds;
+  {
+    const int budget = regime == Regime::exhaustive
+                           ? static_cast<int>(ordered.size())
+                           : std::max(seed_neighbours, s_max + 1);
     const int available = std::min<int>(budget, static_cast<int>(ordered.size()));
     const bool exhausted = available == static_cast<int>(ordered.size());
 
@@ -194,44 +226,39 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
     }
     (void)largest_diameter_squared;
 
-    // ---- certificat de localite -----------------------------------------
-    // Aucun support n'a pu etre manque si le diametre de la plus grande sphere
-    // emise n'atteint pas le premier voisin exclu.
-    bool certified = true;
-    if (!exhausted && largest_valid) {
-      const mhgp::i128 first_excluded = ordered[static_cast<std::size_t>(available)].first;
-      certified = detail::diameter_squared_at_most(largest, first_excluded);
+    // ---- PAS DE CERTIFICAT ------------------------------------------------
+    // On publie seulement la fenetre qui aurait SUFFI : le nombre de voisins a
+    // distance au plus 2 r_max des supports emis. Sous le regime exhaustif,
+    // r_max est le vrai maximum et ce nombre est la mesure recherchee.
+    int sufficient = available;
+    if (largest_valid) {
+      sufficient = 0;
+      for (int i = 0; i < static_cast<int>(ordered.size()); ++i) {
+        if (!detail::within_diameter(largest, ordered[static_cast<std::size_t>(i)].first)) break;
+        ++sufficient;
+      }
     }
 
-    if (certified || exhausted) {
-      statistics->neighbourhood = available;
-      statistics->certified = certified;
-      statistics->exhausted = exhausted;
-      statistics->candidates = candidates;
-      statistics->witness_tests = witness_tests;
-      statistics->degenerate_shells = degenerate;
-      statistics->emitted = static_cast<long long>(found.size());
-      std::vector<std::pair<mhgp::i32, mhgp::i32>> faces;
-      for (const AnchoredSupport& item : found) {
-        ++statistics->by_size[item.support.size()];
-        // Proprietaire canonique : le plus petit identifiant du support.
-        if (item.support.front() == anchor) ++statistics->owned;
-        for (mhgp::i32 u : item.support)
-          if (u != anchor) faces.emplace_back(std::min(anchor, u), std::max(anchor, u));
-      }
-      std::sort(faces.begin(), faces.end());
-      faces.erase(std::unique(faces.begin(), faces.end()), faces.end());
-      statistics->two_faces = static_cast<long long>(faces.size());
-      *out = std::move(found);
-      return certified;
+    statistics->neighbourhood = available;
+    statistics->exhaustive = exhausted;
+    statistics->sufficient_neighbours = sufficient;
+    statistics->candidates += candidates;
+    statistics->witness_tests += witness_tests;
+    statistics->degenerate_shells += degenerate;
+    statistics->emitted = static_cast<long long>(found.size());
+    std::vector<std::pair<mhgp::i32, mhgp::i32>> pairs;
+    for (const AnchoredSupport& item : found) {
+      ++statistics->by_size[item.support.size()];
+      if (item.support.front() == anchor) ++statistics->owned;
+      for (mhgp::i32 u : item.support)
+        if (u != anchor) pairs.emplace_back(std::min(anchor, u), std::max(anchor, u));
     }
-    if (budget >= static_cast<int>(ordered.size())) {
-      statistics->neighbourhood = available;
-      statistics->exhausted = true;
-      *out = std::move(found);
-      return false;
-    }
-    budget *= 2;
+    std::sort(pairs.begin(), pairs.end());
+    pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
+    statistics->anchor_member_pairs = static_cast<long long>(pairs.size());
+    *out = std::move(found);
+    // La completude n'est vraie QUE par exhaustivite.
+    return exhausted;
   }
 }
 
@@ -242,35 +269,40 @@ struct AnchoredCampaign {
   long long candidates = 0;
   long long witness_tests = 0;
   long long emitted = 0;
-  long long two_faces = 0;
+  long long anchor_member_pairs = 0;
   int neighbourhood_max = 0;
   double neighbourhood_mean = 0.0;
+  int sufficient_max = 0;
+  double sufficient_mean = 0.0;
   long long degenerate_shells = 0;
-  int uncertified_anchors = 0;
-  int exhausted_anchors = 0;
+  int incomplete_anchors = 0;   // ancres non exhaustives : resultat NON complet
+  int exhaustive_anchors = 0;
   std::vector<AnchorStatistics> per_anchor;
 };
 
 inline mhgp::Catalogue anchored_catalogue(const std::vector<mhgp::P3>& points, int s_max,
-                                          int seed_neighbours, AnchoredCampaign* campaign) {
+                                          int seed_neighbours, Regime regime,
+                                          AnchoredCampaign* campaign) {
   mhgp::Catalogue catalogue;
   *campaign = AnchoredCampaign{};
   const int n = static_cast<int>(points.size());
-  long long total_neighbourhood = 0;
+  long long total_neighbourhood = 0, total_sufficient = 0;
 
   std::vector<AnchoredSupport> supports;
   AnchorStatistics statistics;
   for (mhgp::i32 anchor = 0; anchor < n; ++anchor) {
-    const bool certified =
-        anchored_supports(points, anchor, s_max, seed_neighbours, &supports, &statistics);
-    if (!certified) ++campaign->uncertified_anchors;
-    if (statistics.exhausted) ++campaign->exhausted_anchors;
+    const bool complete =
+        anchored_supports(points, anchor, s_max, seed_neighbours, regime, &supports, &statistics);
+    if (!complete) ++campaign->incomplete_anchors;
+    if (statistics.exhaustive) ++campaign->exhaustive_anchors;
     campaign->candidates += statistics.candidates;
     campaign->witness_tests += statistics.witness_tests;
-    campaign->two_faces += statistics.two_faces;
+    campaign->anchor_member_pairs += statistics.anchor_member_pairs;
     campaign->degenerate_shells += statistics.degenerate_shells;
     campaign->neighbourhood_max = std::max(campaign->neighbourhood_max, statistics.neighbourhood);
+    campaign->sufficient_max = std::max(campaign->sufficient_max, statistics.sufficient_neighbours);
     total_neighbourhood += statistics.neighbourhood;
+    total_sufficient += statistics.sufficient_neighbours;
     campaign->per_anchor.push_back(statistics);
 
     for (const AnchoredSupport& item : supports) {
@@ -291,16 +323,16 @@ inline mhgp::Catalogue anchored_catalogue(const std::vector<mhgp::P3>& points, i
     }
   }
   campaign->neighbourhood_mean = n > 0 ? static_cast<double>(total_neighbourhood) / n : 0.0;
+  campaign->sufficient_mean = n > 0 ? static_cast<double>(total_sufficient) / n : 0.0;
   catalogue.neighbourhood_size.assign(static_cast<std::size_t>(n), 0);
   catalogue.growth_rounds.assign(static_cast<std::size_t>(n), 0);
   catalogue.certified.assign(static_cast<std::size_t>(n), 1u);
   for (int i = 0; i < n; ++i) {
     catalogue.neighbourhood_size[static_cast<std::size_t>(i)] =
         campaign->per_anchor[static_cast<std::size_t>(i)].neighbourhood;
-    catalogue.growth_rounds[static_cast<std::size_t>(i)] =
-        campaign->per_anchor[static_cast<std::size_t>(i)].growth_rounds;
+    catalogue.growth_rounds[static_cast<std::size_t>(i)] = 0;
     catalogue.certified[static_cast<std::size_t>(i)] =
-        campaign->per_anchor[static_cast<std::size_t>(i)].certified ? 1u : 0u;
+        campaign->per_anchor[static_cast<std::size_t>(i)].exhaustive ? 1u : 0u;
   }
   std::sort(catalogue.spheres.begin(), catalogue.spheres.end(),
             [](const mhgp::CriticalSphere& a, const mhgp::CriticalSphere& b) {

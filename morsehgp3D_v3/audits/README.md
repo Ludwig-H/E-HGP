@@ -4,5 +4,6 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 
 - [`AUDIT_PROPOSITION.md`](AUDIT_PROPOSITION.md) : audit historique de la première voie proposée.
 - [`AUDIT_PROPOSITION_2.md`](AUDIT_PROPOSITION_2.md) : second audit actualisé et journal continu de la proposition, de l'oracle, des prototypes, des reçus et des portes.
+- [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md) : audit dynamique du juge M1, réfutation du certificat M2.1 commité et suivi de son retrait dans le delta live.
 
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.

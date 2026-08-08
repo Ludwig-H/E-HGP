@@ -686,6 +686,8 @@ qualification.
 | M1–M5 imposées à A2e | deux listes disjointes (§12, Gate E) |
 | « l'audit est l'autorité » | spécification + registre des preuves (en-tête) |
 | « les 2-faces de $V_k(p)$ » | faces de l'**arrangement** à profondeur $\leq k$ ; $V_k(p)$ comme ensemble efface les strates (§6) |
+| certificat de localité M2.1 « $2r_{\max}\leq d_{M+1}$ » | **faux** : un support inconnu employant un point exclu vérifie $2r\geq d_{M+1}$ ; réfuté par le juge, support $\lbrace6,10\rbrace$ manquant (§12) |
+| $\lvert W\rvert$ « certifié » 128/256 à $n=200$–$1000$ | retiré ; mesure honnête = **fenêtre suffisante** en régime exhaustif (§12) |
 | élaguer le range-report par $2R<D$ | **incorrect** : perd les témoins de profondeur (§7) |
 | `max_tau_hi` | `max_two_R_upper_hi` : $\tau\neq R$ (§7) |
 | $\bar B(c,2r)$ pour toute la descente | premier pas seulement ; enveloppe $\leq(i+1)r_0$ (§1.3) |

@@ -782,6 +782,7 @@ int main(int argc, char** argv) {
   bool measure_only = false;
   int fixed_points = 0;
   int seed_neighbours = 16;
+  std::string regime = "exhaustive";
 
   for (int i = 1; i < argc; ++i) {
     const std::string argument = argv[i];
@@ -805,6 +806,7 @@ int main(int argc, char** argv) {
     else if (argument == "--measure-only") measure_only = true;
     else if (argument == "--points") fixed_points = std::atoi(next("--points"));
     else if (argument == "--seed-neighbours") seed_neighbours = std::atoi(next("--seed-neighbours"));
+    else if (argument == "--regime") regime = next("--regime");
     else {
       std::printf("ECHEC : option inconnue %s\n", argument.c_str());
       return 2;
@@ -827,6 +829,10 @@ int main(int argc, char** argv) {
     return 2;
   }
 
+  if (regime != "exhaustive" && regime != "assumed_window") {
+    std::printf("ECHEC : regime inconnu %s (exhaustive ou assumed_window)\n", regime.c_str());
+    return 2;
+  }
   if (subject != "v2" && subject != "anchored") {
     std::printf("ECHEC : sujet inconnu %s (v2 ou anchored)\n", subject.c_str());
     return 2;
@@ -850,22 +856,27 @@ int main(int argc, char** argv) {
                                                        measure_coordinate(measure_rng)};
       mhgp3v::AnchoredCampaign anchored;
       const mhgp::Catalogue catalogue =
-          mhgp3v::anchored_catalogue(points, maximum_order + 1, seed_neighbours, &anchored);
+          mhgp3v::anchored_catalogue(points, maximum_order + 1, seed_neighbours,
+                                     regime == "exhaustive" ? mhgp3v::Regime::exhaustive
+                                                            : mhgp3v::Regime::assumed_window,
+                                     &anchored);
       std::vector<int> sizes;
       for (const mhgp3v::AnchorStatistics& stat : anchored.per_anchor)
-        sizes.push_back(stat.neighbourhood);
+        sizes.push_back(stat.sufficient_neighbours);
       std::sort(sizes.begin(), sizes.end());
       const auto quantile = [&](double q) {
         return sizes[static_cast<std::size_t>(q * static_cast<double>(sizes.size() - 1))];
       };
-      std::printf("n=%d s_max=%d | spheres=%zu (%.1f/point) | |W| p50=%d p95=%d p99=%d max=%d "
-                  "moyenne=%.1f | candidats=%lld temoins=%lld | 2-faces=%lld | non certifiees=%d "
-                  "epuisees=%d | degeneres=%lld\n",
+      std::printf("status=diagnostic_only regime=%s n=%d s_max=%d | spheres=%zu (%.1f/point) | "
+                  "fenetre SUFFISANTE p50=%d p95=%d p99=%d max=%d moyenne=%.1f | fenetre employee "
+                  "moyenne=%.1f | candidats=%lld temoins=%lld | paires=%lld | non exhaustives=%d "
+                  "| degeneres=%lld\n", regime.c_str(),
                   fixed_points, maximum_order + 1, catalogue.spheres.size(),
                   static_cast<double>(catalogue.spheres.size()) / fixed_points,
                   quantile(0.50), quantile(0.95), quantile(0.99), sizes.back(),
-                  anchored.neighbourhood_mean, anchored.candidates, anchored.witness_tests,
-                  anchored.two_faces, anchored.uncertified_anchors, anchored.exhausted_anchors,
+                  anchored.sufficient_mean, anchored.neighbourhood_mean,
+                  anchored.candidates, anchored.witness_tests,
+                  anchored.anchor_member_pairs, anchored.incomplete_anchors,
                   anchored.degenerate_shells);
     }
     return 0;
@@ -909,15 +920,21 @@ int main(int argc, char** argv) {
       subject_suppressed = result.forests_suppressed;
     } else {
       mhgp3v::AnchoredCampaign anchored;
-      catalogue = mhgp3v::anchored_catalogue(points, s_max, seed_neighbours, &anchored);
+      catalogue = mhgp3v::anchored_catalogue(points, s_max, seed_neighbours,
+                                             regime == "exhaustive" ? mhgp3v::Regime::exhaustive
+                                                                    : mhgp3v::Regime::assumed_window,
+                                             &anchored);
       subject_out_of_domain = anchored.degenerate_shells > 0;
       subject_suppressed = subject_out_of_domain;
       anchored_total.candidates += anchored.candidates;
       anchored_total.witness_tests += anchored.witness_tests;
       anchored_total.emitted += anchored.emitted;
-      anchored_total.two_faces += anchored.two_faces;
-      anchored_total.uncertified_anchors += anchored.uncertified_anchors;
-      anchored_total.exhausted_anchors += anchored.exhausted_anchors;
+      anchored_total.anchor_member_pairs += anchored.anchor_member_pairs;
+      anchored_total.incomplete_anchors += anchored.incomplete_anchors;
+      anchored_total.exhaustive_anchors += anchored.exhaustive_anchors;
+      anchored_total.sufficient_max = std::max(anchored_total.sufficient_max,
+                                               anchored.sufficient_max);
+      anchored_total.sufficient_mean += anchored.sufficient_mean;
       anchored_total.neighbourhood_max =
           std::max(anchored_total.neighbourhood_max, anchored.neighbourhood_max);
       anchored_total.neighbourhood_mean += anchored.neighbourhood_mean;
@@ -981,13 +998,15 @@ int main(int argc, char** argv) {
     std::printf("  %s\n", message.c_str());
 
   if (subject == "anchored" && campaign.decided > 0)
-    std::printf("ancre : candidats=%lld temoins=%lld emis=%lld 2-faces=%lld | voisinage moyen=%.1f "
-                "max=%d | ancres non certifiees=%d epuisees=%d\n",
+    std::printf("ancre[%s] : candidats=%lld temoins=%lld emis=%lld paires=%lld | fenetre "
+                "moyenne=%.1f max=%d | fenetre SUFFISANTE moyenne=%.1f max=%d | ancres non "
+                "exhaustives=%d\n", regime.c_str(),
                 anchored_total.candidates, anchored_total.witness_tests, anchored_total.emitted,
-                anchored_total.two_faces,
+                anchored_total.anchor_member_pairs,
                 anchored_total.neighbourhood_mean / static_cast<double>(campaign.decided),
-                anchored_total.neighbourhood_max, anchored_total.uncertified_anchors,
-                anchored_total.exhausted_anchors);
+                anchored_total.neighbourhood_max,
+                anchored_total.sufficient_mean / static_cast<double>(campaign.decided),
+                anchored_total.sufficient_max, anchored_total.incomplete_anchors);
 
   std::printf("sujet=%s | attempted=%lld decided=%lld rejected_domain=%lld | spheres=%lld forets=%lld "
               "noeuds=%lld | largeur max=%zu bits | grille=[0,%lld]\n", subject.c_str(),
@@ -1003,22 +1022,26 @@ int main(int argc, char** argv) {
     }
     std::fprintf(file,
         "{\n  \"schema\": \"morsehgp3d.v3.oracle.campaign.v1\",\n"
-        "  \"subject\": \"morsehgp3D_v2 build_catalogue + run\",\n"
+        "  \"subject\": \"%s\",\n"
         "  \"oracle_arithmetic\": \"arbitrary precision sign-magnitude base 2^32\",\n"
         "  \"oracle_geometry\": \"gauss elimination, not cramer\",\n"
         "  \"oracle_structure\": \"merge forest rebuilt from gamma_k\",\n"
+        "  \"regime\": \"%s\",\n"
         "  \"seed\": %llu,\n  \"clouds_requested\": %d,\n"
         "  \"points\": [%d, %d],\n  \"maximum_order\": %d,\n"
         "  \"coordinate_maximum\": %lld,\n  \"declared_grid_maximum\": %lld,\n"
         "  \"attempted\": %lld,\n  \"decided\": %lld,\n  \"rejected_domain\": %lld,\n"
         "  \"identity_closed\": %s,\n"
+        "  \"minimum_clouds_decided\": %lld,\n  \"minimum_nodes\": %lld,\n"
         "  \"catalogue_spheres_compared\": %lld,\n  \"forests_compared\": %lld,\n"
         "  \"canonical_nodes_compared\": %lld,\n"
         "  \"widest_exact_level_bits\": %zu,\n  \"failures\": %lld\n}\n",
-        seed, clouds, minimum_points, maximum_points, maximum_order,
+        subject == "v2" ? "morsehgp3D_v2 build_catalogue + run" : "mhgp3v anchored_catalogue",
+        regime.c_str(), seed, clouds, minimum_points, maximum_points, maximum_order,
         static_cast<long long>(coordinate_maximum), static_cast<long long>(mhgp::kCoordMax),
         campaign.attempted, campaign.decided, campaign.rejected_domain,
-        closed ? "true" : "false", campaign.catalogue_spheres, campaign.forests,
+        closed ? "true" : "false", minimum_clouds_decided, minimum_nodes,
+        campaign.catalogue_spheres, campaign.forests,
         campaign.nodes, campaign.widest_bits, campaign.failures);
     std::fclose(file);
   }

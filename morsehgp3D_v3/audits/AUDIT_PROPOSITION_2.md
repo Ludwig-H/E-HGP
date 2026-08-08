@@ -1,13 +1,13 @@
 # Second audit actualisé et journal continu — A2pe, peeling local et oracle M1
 
 > [!IMPORTANT]
-> Base figée sur le commit `9628038b5958524c085182bada2e7b97734863a4`. La version auditée de [`PROPOSITION.md`](../PROPOSITION.md) compte 688 lignes et porte l'empreinte SHA-256 `ce77ac51d22d5a13cb128b819b080bbf4ac734607cdfad1bcea75a8285a06c89`; elle a été introduite au commit `495463bd443cdcafd843023623ca403fe2929a43`. Le journal continu inclut aussi le delta de développement `oracle_main.cpp` SHA-256 `ccf1a35f5e34fe119899c8f58cc55e18d8fb28c71ad2ac6d6f18ae6a01cfcf92` et `prototype/anchored_catalogue.hpp` SHA-256 `ba5ef6aeb7e5384c9a825d0138fd37967bf9559457347164c78229013b00eeb5`. Ce rapport remplace le contenu périmé du **second** audit, mais conserve le [premier audit](AUDIT_PROPOSITION.md) comme historique.
+> Base figée sur le commit `9628038b5958524c085182bada2e7b97734863a4`. La version auditée de [`PROPOSITION.md`](../PROPOSITION.md) compte 688 lignes et porte l'empreinte SHA-256 `ce77ac51d22d5a13cb128b819b080bbf4ac734607cdfad1bcea75a8285a06c89`; elle a été introduite au commit `495463bd443cdcafd843023623ca403fe2929a43`. Le journal continu inclut aussi le delta de développement `oracle_main.cpp` SHA-256 `7787b24804ce79d5f1fa4013e12dff46e2f062c00c5692bdf26e9ad4f4c14a7d` et `prototype/anchored_catalogue.hpp` SHA-256 `ba5ef6aeb7e5384c9a825d0138fd37967bf9559457347164c78229013b00eeb5`. Ce rapport remplace le contenu périmé du **second** audit, mais conserve le [premier audit](AUDIT_PROPOSITION.md) comme historique.
 
 > [!NOTE]
 > Contexte : `phase=exploration_v3_hors_registre`, `backend=cpu_reference_oracle_under_audit`, `profile=quantized_u16_input_only`, `mode=a2pe_and_oracle_reaudit_v3`, `public_status=not_claimed`. Aucune porte de produit, aucun SLO et aucun statut exact ne sont ouverts ici.
 
 > [!CAUTION]
-> **Verdict : GO pour formaliser et falsifier A2pe; NO-GO pour en faire maintenant l'architecture recommandée; oracle M1 prometteur mais pas encore fail-closed; prototype M2.1 incomplet.** La réduction A2e par arête reste mathématiquement solide. L'idée A2pe peut supprimer une source séparée d'ancres, mais `V_k(p)` perd ses strates internes lorsqu'il est traité comme un simple ensemble, et son arrêt local échoue sur les parties non bornées. L'oracle apporte une vraie indépendance arithmétique et géométrique, mais accepte encore une campagne entièrement vide et ne compare pas plusieurs champs structurels qu'il annonce couvrir. Le nouveau certificat M2.1 donne en outre un faux positif concret et omet un support de rang 2.
+> **Verdict : GO pour formaliser et falsifier A2pe; NO-GO pour en faire maintenant l'architecture recommandée; oracle M1 prometteur mais pas encore qualifiant; prototype M2.1 incomplet.** La réduction A2e par arête reste mathématiquement solide. L'idée A2pe peut supprimer une source séparée d'ancres, mais `V_k(p)` perd ses strates internes lorsqu'il est traité comme un simple ensemble, et son arrêt local échoue sur les parties non bornées. Le delta live a déjà fermé les deux voies vacues les plus directes de M1 et renforcé ses comparaisons; il reste des champs et reçus à fermer. Le nouveau certificat M2.1 donne en revanche un faux positif concret et omet un support de rang 2.
 
 ## 1. Progrès réels de la nouvelle révision
 
@@ -175,9 +175,9 @@ Ce n'est pas une réfutation du théorème center-cover. C'est une falsification
 | fichier | SHA-256 |
 | --- | --- |
 | [`bigint.hpp`](../oracle/bigint.hpp) | `ce6227b962d39fdc680adb123c3d44a81acf5ee2f8862ba396634a9e4fa00a05` |
-| [`rational.hpp`](../oracle/rational.hpp) | `0bbecfb75c0f6d9e303b059da707ba2185e5a194ca2749ab844ba32358749761` |
-| [`bigint_selftest.cpp`](../oracle/bigint_selftest.cpp) | `0dd163be25ad662bda46e3cf9fe62972e41b34e8e14df25872c3710a275e90ae` |
-| [`oracle_main.cpp`](../oracle/oracle_main.cpp) | `ccf1a35f5e34fe119899c8f58cc55e18d8fb28c71ad2ac6d6f18ae6a01cfcf92` |
+| [`rational.hpp`](../oracle/rational.hpp) | `51e30daeb0f00db2b5ee98c3b1bd212246287c27bbf32244134572f619b0f71e` |
+| [`bigint_selftest.cpp`](../oracle/bigint_selftest.cpp) | `4ede41cd234c47eb9f8da02ff94763086d4c8d0f7083318ae04874140f3f1727` |
+| [`oracle_main.cpp`](../oracle/oracle_main.cpp) | `7787b24804ce79d5f1fa4013e12dff46e2f062c00c5692bdf26e9ad4f4c14a7d` |
 | [`anchored_catalogue.hpp`](../prototype/anchored_catalogue.hpp) | `ba5ef6aeb7e5384c9a825d0138fd37967bf9559457347164c78229013b00eeb5` |
 
 Trois choix sont excellents : entier signe--magnitude à taille variable au lieu du complément à deux fixe du sujet; sphères résolues par élimination de Gauss au lieu de Cramer; forêt reconstruite depuis tous les $k$- et $(k+1)$-sous-ensembles de $\Gamma_k$. La campagne utilise enfin toute la grille u16, publie l'identité `attempted = decided + rejected_domain` et a trouvé un vrai défaut de tri des membres dans la v2.

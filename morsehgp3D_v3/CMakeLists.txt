@@ -37,7 +37,8 @@ else()
 endif()
 
 add_executable(mhgp3v_oracle oracle/oracle_main.cpp)
-target_include_directories(mhgp3v_oracle PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/oracle)
+target_include_directories(mhgp3v_oracle
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/oracle ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_oracle PRIVATE mhgp)
 target_compile_options(mhgp3v_oracle PRIVATE -Wall -Wextra -Wpedantic)
 
@@ -48,3 +49,8 @@ add_test(NAME mhgp3v_arith_selftest COMMAND mhgp3v_arith_selftest 20000)
 add_test(NAME mhgp3v_oracle COMMAND mhgp3v_oracle
          --clouds 12 --seed 4242 --min-points 8 --max-points 10 --max-order 2
          --min-decided 10 --min-nodes 200)
+# Le sujet ancre doit etre juge lui aussi, sur des nuages PLUS GRANDS que la
+# fenetre : c'est ce que l'ancienne porte n'exercait jamais.
+add_test(NAME mhgp3v_oracle_anchored COMMAND mhgp3v_oracle --subject anchored
+         --regime exhaustive --clouds 6 --seed 4242 --min-points 20 --max-points 22
+         --max-order 1 --min-decided 5 --min-nodes 30)
