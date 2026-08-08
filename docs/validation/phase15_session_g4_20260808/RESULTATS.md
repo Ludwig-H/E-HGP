@@ -202,7 +202,69 @@ déterminants : leurs dénominateurs ne sont **pas** des puissances de deux, don
 la voie rapide dyadique ne les attrape pas et le PGCD reste. C'est le prochain
 incrément, il est local, et il ne demande pas de GPU.
 
-## 7. Ce que la session ne prétend pas
+## 7. Le fait structurel : la subdivision de produit n'élague pas
+
+Les artefacts ci-dessus contiennent, sans aucun code supplémentaire, la mesure
+qui commande toute la suite. Pour chaque taille, l'univers $U =
+\binom n3 + \binom n4$ est le nombre de feuilles, et
+$(U - \text{événements} - \text{feuilles au-dessus du rang})/\text{certificats de prune}$
+est le **nombre moyen de tuples qu'un certificat de prune couvre**.
+
+| n | 12 | 24 | 32 | 64 | 96 | 128 |
+|---:|---:|---:|---:|---:|---:|---:|
+| tuples par prune | 1,127 | 1,094 | 1,110 | 1,119 | 1,110 | **1,105** |
+| visites / U | 2,01 | 1,95 | 1,89 | 1,83 | 1,83 | **1,83** |
+
+**Un certificat de prune couvre 1,1 tuple, à toutes les tailles.** Un arbre
+binaire à $U$ feuilles compte $2U-1$ nœuds : à 1,83 $U$ visites, la traversée
+se déploie jusqu'aux feuilles à peu près partout. La porte de bon centrage, la
+porte de rang strict-intérieur, la subdivision de produit, le tuilage T1/T2 et
+la frontière device **élaguent en moyenne un tuple à la fois**. C'est un
+classifieur de feuilles portant les habits d'une hiérarchie.
+
+**Ce n'est pas un défaut d'implémentation.** Les portes sont bien évaluées à
+chaque nœud interne (`analyze_product` appelle
+`no_well_centered_support_certified` puis `all_well_centered_support_certified`
+sur tout produit visité). Elles sont **unilatérales** : l'une ne tranche que si
+*tous* les tuples du produit sont non bien centrés, l'autre que s'ils le sont
+tous. Or le dépôt a déjà scellé que la fraction bien centrée est **constante en
+n** — 28 % des triples, 10 % des quadruples. Un produit grossier contient donc
+les deux espèces avec une probabilité qui tend vers un, et aucune des deux
+portes ne peut trancher. **La subdivision de produit ne peut pas être sensible
+à la sortie, par exactement l'argument qui avait déjà tué la porte de bon
+centrage comme source de sensibilité.**
+
+Cela explique d'un seul chiffre tous les résultats négatifs accumulés : pourquoi
+T1 et T2 n'ont rien changé (il n'y a pas de sous-arbre à couper), pourquoi « les
+boutons sont épuisés », pourquoi le coût suit exactement l'univers, et pourquoi
+la frontière device rend zéro événement en 240 s à $n=400$.
+
+### 7 bis. Ce que cela fait à la réfutation I2
+
+`PLAN_DE_ROUTE_CONTRATS_50K.md` §I2 a réfuté que la restriction certifiée
+$D\le 2R(p)$ livre les $4{,}4\cdot10^{8}$ candidats espérés. **C'est exact et
+cela reste acquis.** Mais I2 comparait la germination locale à une cible
+espérée, jamais au générateur réellement en place. Contre lui :
+
+| à $n=512$, arité 3, $\binom{512}{3} = 22\,331\,840$ | candidats examinés | part de l'univers |
+|---|---:|---:|
+| germination certifiée, `uniform_latin` | 404 713 | **1,81 %** |
+| germination certifiée, `eight_clusters` | 18 143 332 | 81,24 % |
+| **subdivision de produit, mesurée ici** | ~1,83 $U$ | **183 %** |
+
+**La germination certifiée examine 101 fois moins que le pipeline actuel sur
+nuage uniforme, et 2,3 fois moins sur nuage aggloméré.** Elle ne résout pas le
+contrat — la sélectivité reste gouvernée par la densité locale, et sur amas elle
+s'effondre. Mais elle est déjà implémentée
+(`hierarchy/local_germination.{hpp,cpp}`, commit `77554b2`), **certifiée
+complète** contre l'énumération exhaustive (9 cellules, 2 familles, 2 arités,
+2 ordres, zéro support manquant), et **elle n'est branchée nulle part**. Ses
+trois conséquences de contrat sont écrites et fail-closed : base de vérification
+`local_germination_completeness_with_exact_terminal_classification` (`c656053`),
+identité de production tallée par le consommateur (`355621e`), chaîne ancrée
+(`c742a0e`).
+
+## 8. Ce que la session ne prétend pas
 
 - Aucun run n'est de bout en bout à 50 000 points. L'étage paire hôte n'y rend
   toujours pas la main, donc l'étage higher n'y est toujours pas atteignable.
