@@ -35,6 +35,20 @@ Le nouveau module de points ne remplace pas cette source. Il consomme une tour s
 
 À ce jour, la tentative HGP de référence à 50 000 points est censurée après au moins 300,000014 s sans hiérarchie complète. Les mesures à 10 M et 30 M concernent seulement une frontière partielle de composant. Le p95 historique de 95,791070 ms appartient à un point-MST rejeté et archivé; ce n'est pas une mesure de MorseHGP3D.
 
+### Où en est l'écart au contrat 50 000 points
+
+Trois postes le composent, et un seul domine. Le détail et ses certificats sont dans le [rapport de session du 8 août 2026](docs/research/RAPPORT_SESSION_20260808.md); le tableau se lit en secondes sur 48 cœurs contre un contrat de 1 s, à $K=5$.
+
+| poste | état | écart |
+|---|---|---:|
+| étage paire, chemin device | partition complète et certifiée des 1 249 975 000 paires au rang 11 en 2,377 s, reproduite au bit | ~2,6 × |
+| étage higher, coût unitaire | 204,78 → 25,49 µs par visite, à sortie bit-à-bit identique | **1,18 ×** |
+| étage higher, génération arité 3 | 12,02 candidats par record à 50 000 points, régime certifié | 12,4 s |
+| étage higher, génération arité 4 | aucun test géométrique dans la boucle; ~2 300 candidats par record | ~2 083 s |
+| **aval, fermeture de descente de facette** | **non traité** | **$1{,}2\cdot10^{6}$ ×** |
+
+Deux réserves normatives accompagnent ces chiffres. Aucune mesure à 50 000 points n'est complète : toutes sont censurées par un garde opérationnel et leurs certificats le déclarent. Et la sélectivité du générateur dépend de la famille : sur `balanced_multiscale_clusters`, l'une des trois familles de la porte P0, la borne certifiée ne mord pas du tout.
+
 ## Construction locale
 
 ```bash

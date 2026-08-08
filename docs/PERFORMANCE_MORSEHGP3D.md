@@ -41,6 +41,55 @@ La fixture contient 50 000 simplexes ponctuels, 99 999 nœuds source et 99 998 a
 
 Ce diagnostic n'est pas un p95 et ne couvre ni le nuage brut, ni la construction de la source HGP, ni la forêt complète de $T_1$ à $T_K$, ni les applications verticales, ni le streaming, ni CUDA, ni GCP. Il ne qualifie donc pas la cible produit 50 k et ne permet aucune extrapolation vers dix ou trente millions de points. `PointHierarchyBudget::large_resident_30m()` ne fait qu'ouvrir explicitement des plafonds fail-closed pour un processus disposant de la mémoire correspondante; ce profil n'est pas une preuve que la charge tient en mémoire ou termine.
 
+## Coût unitaire et génération de l'étage higher (8 août 2026)
+
+Deux mesures G4 du 8 août, avec artefacts sous
+[`validation/phase15_session_g4_20260808/`](validation/phase15_session_g4_20260808/RESULTATS.md),
+[`validation/phase15_germination_scale_g4_20260808/`](validation/phase15_germination_scale_g4_20260808/RESULTATS.md)
+et [`validation/phase15_germination_bounded_g4_20260808/`](validation/phase15_germination_bounded_g4_20260808/RESULTATS.md).
+Le récit complet est le [rapport de session](research/RAPPORT_SESSION_20260808.md).
+Tout y est `profiling_only` / `not_claimed`.
+
+**Coût unitaire.** Sur 18 tailles $n = 12\ldots128$, une par cœur, contre la
+ligne scellée du 7 août sur la même machine, le coût par visite de produit passe
+de **192 à 208 µs — plat sur toute la plage** — à $63{,}97\,n^{-0{,}197}$, soit
+**25,49 µs à $n=128$**. L'étage higher à $n=64$ passe de 257,2 s à 34,1 s.
+L'identité est certifiée : **9 660 champs scientifiques comparés sur douze
+tailles, zéro différent**, comptes de visites égaux au chiffre près. Contre le
+budget de 21 680 ns par record à $K=5$ sur 48 cœurs, l'écart passe de **9,45× à
+1,18×**; à $K=10$, de 76,01× à 9,46×.
+
+**La subdivision de produit n'élague pas.** La même série donne, sans code
+supplémentaire, $(U - \text{événements} - \text{feuilles au-dessus du rang})
+/ \text{certificats de prune} = 1{,}05$ à $1{,}13$ à **toutes** les tailles, avec
+$\text{visites}/U \in [1{,}83,\ 2{,}04]$ quand un arbre binaire à $U$ feuilles a
+$2U-1$ nœuds. Les deux portes de bloc sont **unilatérales** et la fraction bien
+centrée est constante en $n$, donc un produit grossier contient les deux espèces
+presque sûrement et aucune porte ne peut décider. Cette architecture ne peut pas
+être sensible à la sortie.
+
+**Génération par germination certifiée.** Régime `certified_tangent_bound`,
+26 directions de rayon de recouvrement prouvé, $K=5$. Les paires retenues sont
+$\Theta(n)$ — 98,4 / 107,4 / 95,7 / 93,7 / 90,5 par point à
+$n = 2048 / 4096 / 8192 / 16384 / 50000$ — donc la fraction retenue tombe comme
+$1/n$. À 50 000 points et pour l'**arité 3**, la boucle de germes parcourt
+99,92 % des paires, en retient 0,362 % et produit 29 842 507 triples pour
+2 482 617 supports acceptés, soit **12,02 candidats par record**.
+
+**Deux réserves qui font partie de la mesure.** Toutes les cellules à 50 000
+points sont **censurées** par un garde opérationnel et leurs certificats posent
+`completeness_guaranteed = false`. Et l'**arité 4**, qui est 98,4 % de
+l'univers, n'a été mesurée à aucune échelle : sa boucle ne porte aucun test
+géométrique et produit $\binom{|\text{tiers retenus}|}{2}$ candidats par paire,
+soit environ $10^5$ par point aux tailles où elle termine, ce qui projette
+~2 300 candidats par record à 50 000 points.
+
+Sur `balanced_multiscale_clusters`, la borne certifiée ne mord pas : 21 695
+paires examinées sur 1 249 975 000 en 2 400 s à 50 000 points, 76 % retenues.
+Le vide qui laisse grossir la boule tangente est intérieur à l'enveloppe, donc
+aucun majorant convexe ne peut l'exclure. **Le contrat 50 000 points doit rester
+énoncé par famille**, et cette famille est l'une des trois de la porte P0.
+
 ## Profil local des supports trois et quatre
 
 Le binaire de profil [`exact_higher_support_growth_profile.cpp`](../morsehgp3d/tests/profiling/exact_higher_support_growth_profile.cpp) mesure séparément la frontière exacte des triplets et quadruplets. Il utilise trois nuages dyadiques — uniforme, amas séparés et amas multi-échelles — pour $n\in\left\lbrace32,64,128\right\rbrace$ et $K\in\left\lbrace1,5,10\right\rbrace$. Le cas $K=1$ est explicitement non applicable aux arités trois et quatre. Chaque série s'arrête dès que le run précédent ne termine pas dans 5 000 unités ou dépasse une frontière de $8n$ entrées; ce coupe-circuit évite de transformer un profil négatif en campagne combinatoire.

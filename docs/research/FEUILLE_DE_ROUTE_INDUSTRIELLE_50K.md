@@ -265,7 +265,7 @@ facteur $\sim 10$ du coût unitaire de l'étage higher, et **se mesure sans GPU*
 exhaustif existant, à classification identique au record près. Critère : le coût **par candidat rejeté**
 doit baisser d'un ordre, sinon on l'écrit et on abandonne.
 
-**α6 — Le rapport $|\operatorname{RNG}^{\mathrm{HGP}}_K| / |\operatorname{Gab}_K|$**, sur le même
+**α6 — Le rapport $|\mathrm{RNG}^{\mathrm{HGP}}_K| / |\mathrm{Gab}_K|$**, sur le même
 recensement, famille `eight_clusters` **obligatoire**. Quelques heures. C'est la seule grandeur qui
 déciderait si le critère RNG-HGP vaut quelque chose pour l'aval ; personne ne l'a mesurée.
 

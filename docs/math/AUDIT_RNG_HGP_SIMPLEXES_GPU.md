@@ -21,20 +21,20 @@ descente termine. Correcte. C'est la **propriété de cycle** des arbres couvran
 transposée au graphe des facettes — la note l'énonce elle-même au §3.4. Le résultat est juste,
 il n'est pas nouveau dans son mécanisme.
 
-**§5 — $\operatorname{Sep}_K \subseteq \operatorname{RNG}^{\mathrm{HGP}}_K \subseteq \operatorname{Gab}_K$.**
+**§5 — $\mathrm{Sep}_K \subseteq \mathrm{RNG}^{\mathrm{HGP}}_K \subseteq \mathrm{Gab}_K$.**
 La première inclusion est immédiate par contraposée ; la seconde utilise le théorème 4 du
 manuscrit (un point $z$ intérieur à la miniball fait baisser $\rho$ pour *tout* $s \in S_\sigma$),
 donc $z$ appartient à toutes les lunes et rend $\mathcal B_\sigma$ **complet**, donc connexe.
 Correctes toutes les deux.
 
 **§6 — l'inclusion dans Gabriel est stricte.** Contre-exemple recalculé au chiffre près :
-$A=(-1,0)$, $B=(1,0)$, $C=(0;0,1)$, $z=(0;1,1)$ dans $\mathbb R^2$.
+$A=(-1,0)$, $B=(1,0)$, $C=(0;0,1)$, $z=(0;1,1)$ dans $\mathbb{R}^2$.
 Miniball de $\{A,B,C\}$ = boule diamétrale de $A,B$ (car $|C| = 0{,}1 < 1$), donc $r = 1$ et
 $S_\sigma = \{A,B\}$ ; $|z| = 1{,}1 > 1$ donc $\sigma$ est de Gabriel.
 Miniball de $\{B,C,z\}$ : $|B-z|^2 = 2{,}21$, milieu $(0{,}5;0{,}55)$, rayon $\sqrt{2{,}21}/2 = 0{,}74330$,
 et $|C - \text{milieu}|^2 = 0{,}4525$ donc $0{,}67268 < 0{,}74330$ — la boule diamétrale **est** la miniball,
 de rayon $0{,}743 < 1$. Idem par symétrie pour $\{A,C,z\}$. Donc $z \in \Lambda_{A,B}(\sigma)$,
-$\mathcal B_\sigma$ est connexe, $\sigma \notin \operatorname{RNG}^{\mathrm{HGP}}_2$. **Correct.**
+$\mathcal B_\sigma$ est connexe, $\sigma \notin \mathrm{RNG}^{\mathrm{HGP}}_2$. **Correct.**
 
 **§9.5 — la condition nécessaire $\lVert z-x\rVert < 2r$ pour tout $x\in\sigma$.**
 Énoncée sans preuve dans la note ; elle est vraie et **elle exige les deux conditions de lune à la fois** :
@@ -124,7 +124,7 @@ l'empreinte par record décide de la porte. Le §9.8 fournit le minimum théoriq
 l'empreinte réelle. **Action : auditer l'empreinte par record de sortie contre ce minimum**, avant
 d'instrumenter le pic device — c'est plus rapide et cela dit d'avance si la porte est atteignable.
 
-### 3.3 Le rapport $|\operatorname{RNG}^{\mathrm{HGP}}_K| / |\operatorname{Gab}_K|$ (§13.2) — une expérience à quelques heures
+### 3.3 Le rapport $|\mathrm{RNG}^{\mathrm{HGP}}_K| / |\mathrm{Gab}_K|$ (§13.2) — une expérience à quelques heures
 
 La note liste ce rapport comme travail à mener et **ne le mesure pas**. C'est la seule grandeur qui
 déciderait si le critère RNG-HGP vaut quelque chose pour le contrat, et le dépôt a déjà l'instrument :
