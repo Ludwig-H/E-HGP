@@ -346,7 +346,8 @@ void append_id(
       const std::size_t low_bit = 8U * (byte_count - 1U - byte_index);
       std::uint8_t byte = 0U;
       for (std::size_t bit = 0U; bit < 8U; ++bit) {
-        if (boost::multiprecision::bit_test(value, low_bit + bit)) {
+        if (boost::multiprecision::bit_test(
+                value, static_cast<unsigned>(low_bit + bit))) {
           byte |= static_cast<std::uint8_t>(std::uint8_t{1U} << bit);
         }
       }
