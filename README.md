@@ -41,13 +41,19 @@ Trois postes le composent, et un seul domine. Le détail et ses certificats sont
 
 | poste | état | écart |
 |---|---|---:|
-| étage paire, chemin device | partition complète et certifiée des 1 249 975 000 paires au rang 11 en 2,377 s, reproduite au bit | ~2,6 × |
+| étage paire, chemin device | diagnostic direct frais : frontière seule 2,396 s, processus froid 3,928 s; aucune classification exacte aval | **au moins 2,69 ×** avant l'aval exact |
 | étage higher, coût unitaire | 204,78 → 25,49 µs par visite, à sortie bit-à-bit identique | **1,18 ×** |
 | étage higher, génération arité 3 | 12,02 candidats par record à 50 000 points, régime certifié | 12,4 s |
 | étage higher, génération arité 4 | aucun test géométrique dans la boucle; ~2 300 candidats par record | ~2 083 s |
 | **aval, fermeture de descente de facette** | **non traité** | **$1{,}2\cdot10^{6}$ ×** |
 
-Deux réserves normatives accompagnent ces chiffres. Aucune mesure à 50 000 points n'est complète : toutes sont censurées par un garde opérationnel et leurs certificats le déclarent. Et la sélectivité du générateur dépend de la famille : sur `balanced_multiscale_clusters`, l'une des trois familles de la porte P0, la borne certifiée ne mord pas du tout.
+Deux réserves normatives accompagnent ces chiffres. Aucune mesure higher à 50 000 points n'est complète : toutes sont censurées par un garde opérationnel. Cinq artefacts historiques `scale_probe.v1` portent cependant un placeholder d'arité quatre jamais exécuté avec `completeness_guaranteed=true`; ce champ ne certifie rien et les artefacts restent immuables. Le schéma v2 ajoute `applicable`, `executed` et `floating_rejections_certified`. Le dernier reste faux : l'implémentation actuelle n'a pas encore d'intervalles extérieurs et de repli exact pour tous ses rejets `binary64`. La chaîne de reprise reste elle aussi volontairement non scellable tant qu'elle ne porte ni curseur contigu des paires, ni identité entre audit et payload. Enfin, la sélectivité dépend de la famille : sur `balanced_multiscale_clusters`, l'une des trois familles de la porte P0, la borne tangente ne mord pas du tout.
+
+### Piste sparse RNG--Jung
+
+L'[audit mathématique exact](docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md) distingue l'objet sparse souhaité de deux raccourcis invalides. Un RNG ponctuel suivi de la cascade bornée $\alpha_2$ puis $\alpha_3$ depuis la plus grande arête incidente reste incomplet sur une fixture rationnelle de rang fermé 11, même avec la règle généreuse au maximum des extrémités. Continuer cette règle jusqu'au point fixe récupère la fixture mais peut propager les grandes échelles et n'a aucune borne sparse prouvée. Le surgraphe local $G_\tau$ est en revanche complet si ses rayons sont majorés par un certificat de rang; il se représente par un CSR de points et ne matérialise aucune mosaïque de Delaunay d'ordre supérieur.
+
+Pour l'arité quatre, une paire diamètre transforme chaque troisième point en un demi-plan dans un disque de Jung. Le rang fermé 11 limite les centres recherchés aux profondeurs zéro à sept : une ancre ayant $m$ droites produit au plus $8m$ sommets candidats, contre $\binom{m}{2}$ actuellement. La construction théorique coûte $O(m\log m)$ en temps espéré par ancre à rang fixé. La complexité globale reste conditionnelle au nombre d'ancres et à la somme de leurs voisinages; au pire elle peut redevenir cubique, puis quartique si $K$ croît avec $n$. Le [diagnostic direct G4 à 50 k](docs/validation/phase15_rng_jung_g4_20260808/RESULTATS.md) explique pourquoi la frontière GPU reste à 2,396 s et pourquoi la sonde higher de 120 s est en réalité séquentielle sur CPU. Aucun contrat G4 n'est revendiqué.
 
 ## Construction locale
 

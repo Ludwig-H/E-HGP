@@ -1,0 +1,25 @@
+{
+  "schema":"morsehgp3d.germinated_higher_support.scale_probe.v1",
+  "deployment_status":"profiling_only",
+  "public_status":"not_claimed",
+  "point_count":50000,
+  "family":"uniform_latin",
+  "maximum_order":10,
+  "maximum_relevant_closed_rank":11,
+  "seed_regime":"certified",
+  "timings_ms":{"generation":41.393,"lbvh":15.188,"germination_and_classification":120006.670},
+  "stop_category":"operational_deadline",
+  "operational_deadline_ms":120000,
+  "production_identity_holds":true,
+  "refusal_reason":"",
+  "accepted_events":19775,
+  "duplicate_accepted_emissions":0,
+  "classification":{"classified":2211043,"affinely_dependent":26,"boundary_reduced":0,"exterior_circumcenter":628917,"above_rank":1562325,"extra_shell":0,"accepted":19775,"closed_ball_query_count":1582100,"closed_ball_node_visit_count":97861305},
+  "certificates":{
+    "arity3":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":3,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":false,"censored_by_operational_deadline":true,"unexamined_seed_pair_count":1245427161,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":4547839,"pairs_retained":33176,"third_vertices_examined":4426866,"third_vertices_retained":2211043,"triple_candidates":2211043,"quadruple_candidates":0,"population_queries":68485364},
+    "arity4":{"proof_basis":"","support_size":0,"seed_restriction":"exhaustive_over_pairs","completeness_guaranteed":true,"censored_by_operational_deadline":false,"unexamined_seed_pair_count":0,"tangent_direction_count":0,"tangent_covering_radius_millidegrees":0,"tangent_covering_radius_proved":false,"pairs_examined":0,"pairs_retained":0,"third_vertices_examined":0,"third_vertices_retained":0,"triple_candidates":0,"quadruple_candidates":0,"population_queries":0}
+  },
+  "candidates_per_record":111.810,
+  "microseconds_per_classified_support":54.276,
+  "microseconds_per_record":6068.605
+}

@@ -231,6 +231,10 @@ void check_family(
   const LocalGerminationCounters& counters = certificate.counters;
   std::string reason;
   require(
+      certificate.applicable && certificate.executed,
+      std::string{family} +
+          ": an executed applicable arity lost its lifecycle state");
+  require(
       local_germination_certificate_admissible(certificate, reason),
       std::string{"a legitimate certificate was refused on "} + reason);
   require(
@@ -258,12 +262,15 @@ void check_family(
           (tangent_direction_count == 0U
                ? " (exhaustive seed loop)"
                : " (certified tangent restriction)"));
-  // Completeness is guaranteed by exhaustion or by the certified bound, and the
-  // certificate must say which -- a restricted run that lost the guarantee would
-  // be exactly the silent failure this whole contract exists to prevent.
+  // This finite exact differential establishes equality on the fixture, but it
+  // does not certify every binary64 rejection on arbitrary inputs.  The current
+  // producer must therefore remain structurally admissible yet publicly
+  // incomplete until outward intervals and exact fail-open fallbacks exist.
   require(
-      certificate.completeness_guaranteed(),
-      std::string{family} + ": the certificate did not guarantee completeness");
+      !certificate.floating_rejections_certified &&
+          !certificate.completeness_guaranteed(),
+      std::string{family} +
+          ": a finite differential promoted floating proposals to a proof");
 
   std::cout << "  " << family << " n=" << point_count
             << " K=" << maximum_order << " m=" << support_size
@@ -286,8 +293,31 @@ void check_family(
 // is exactly the kind that would silently lose accepted supports, and each must
 // be refused by name.
 void check_certificate_falsification() {
+  std::string reason;
+  LocalGerminationCertificate default_certificate;
+  require(
+      !default_certificate.completeness_guaranteed(),
+      "a default-constructed certificate claimed completeness");
+  require(
+      !local_germination_certificate_admissible(
+          default_certificate, reason) &&
+          reason == "certificate_not_applicable",
+      "a default-constructed certificate was admissible");
+
+  LocalGerminationCertificate pending = default_certificate;
+  pending.applicable = true;
+  pending.support_size = 4U;
+  pending.maximum_relevant_closed_rank = 11U;
+  require(
+      !pending.completeness_guaranteed() &&
+          !local_germination_certificate_admissible(pending, reason) &&
+          reason == "certificate_not_executed",
+      "an applicable but unexecuted certificate claimed a guarantee");
+
   const auto fresh = []() {
     LocalGerminationCertificate certificate;
+    certificate.applicable = true;
+    certificate.executed = true;
     certificate.proof_basis = std::string{local_germination_proof_basis};
     certificate.support_size = 4U;
     certificate.maximum_relevant_closed_rank = 11U;
@@ -298,10 +328,46 @@ void check_certificate_falsification() {
     certificate.certified_margin_exponent = -20;
     return certificate;
   };
-  std::string reason;
   require(
       local_germination_certificate_admissible(fresh(), reason),
       "the theorem's own constants were refused");
+  require(
+      !fresh().completeness_guaranteed(),
+      "structural constants alone certified binary64 rejections");
+
+  LocalGerminationCertificate forged_floating_proof = fresh();
+  forged_floating_proof.floating_rejections_certified = true;
+  require(
+      !local_germination_certificate_admissible(
+          forged_floating_proof, reason) &&
+          reason ==
+              "floating_rejections_claimed_certified_without_interval_proof",
+      "an unimplemented floating rejection proof was admitted");
+
+  LocalGerminationCertificate dangling_remainder = fresh();
+  dangling_remainder.unexamined_seed_pair_count = 1U;
+  require(
+      !dangling_remainder.completeness_guaranteed() &&
+          !local_germination_certificate_admissible(
+              dangling_remainder, reason) &&
+          reason == "operational_deadline_accounting",
+      "an uncensored certificate retained an unexamined seed pair");
+
+  LocalGerminationCertificate empty_censor = fresh();
+  empty_censor.censored_by_operational_deadline = true;
+  require(
+      !empty_censor.completeness_guaranteed() &&
+          !local_germination_certificate_admissible(empty_censor, reason) &&
+          reason == "operational_deadline_accounting",
+      "a censored certificate claimed that no seed pair remained");
+
+  LocalGerminationCertificate honest_censor = fresh();
+  honest_censor.censored_by_operational_deadline = true;
+  honest_censor.unexamined_seed_pair_count = 1U;
+  require(
+      local_germination_certificate_admissible(honest_censor, reason) &&
+          !honest_censor.completeness_guaranteed(),
+      "an honest censored invocation was confused with a complete one");
 
   // A SMALLER Jung constant shrinks the locus of centres and would lose
   // supports: it must be refused, where a larger one is merely conservative.
@@ -433,8 +499,8 @@ void check_certificate_falsification() {
 
   // A finer set may be used -- it is measurably far better -- but it may not
   // claim a proof that is not on record.
-  // The certified regime: a restricted seed loop that DOES guarantee
-  // completeness, because its covering radius is proved.
+  // The tangent restriction is geometrically certified, but the complete
+  // producer is not: binary64 rejection predicates remain proposal-only.
   LocalGerminationCertificate certified = fresh();
   certified.seed_restriction =
       LocalGerminationCertificate::SeedRestriction::certified_tangent_bound;
@@ -444,8 +510,9 @@ void check_certificate_falsification() {
   certified.tangent_covering_radius_proved = true;
   require(
       local_germination_certificate_admissible(certified, reason) &&
-          certified.completeness_guaranteed(),
-      "the certified tangent regime was refused");
+          !certified.floating_rejections_certified &&
+          !certified.completeness_guaranteed(),
+      "the certified tangent regime promoted uncertified floating rejections");
 
   LocalGerminationCertificate unproved_certified = certified;
   unproved_certified.tangent_direction_count = 48U;
@@ -503,6 +570,46 @@ void check_certificate_falsification() {
       !local_germination_certificate_admissible(lying_cutoff, reason) &&
           reason == "a_restricted_seed_loop_claimed_to_be_exhaustive",
       "a restricted seed loop claiming exhaustiveness was admitted");
+}
+
+// A request whose rank ceiling excludes an arity is not a zero-work complete
+// run.  The producer returns an identified non-applicable lifecycle slot and
+// neither invokes the sink nor publishes a proof basis.
+void check_non_applicable_producer_state() {
+  const CanonicalPointCloud cloud = CanonicalPointCloud::rejecting_duplicates(
+      uniform_latin_points(8U));
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  LocalGerminationConfig config;
+  config.maximum_relevant_closed_rank = 3U;
+  bool sink_called = false;
+  const LocalGerminationCertificate certificate =
+      generate_local_germination_candidates(
+          index,
+          cloud,
+          4U,
+          config,
+          [&](const Support&, std::size_t) { sink_called = true; });
+
+  require(!sink_called, "a non-applicable arity invoked its sink");
+  require(
+      !certificate.applicable && !certificate.executed &&
+          certificate.support_size == 4U &&
+          certificate.maximum_relevant_closed_rank == 3U &&
+          certificate.proof_basis.empty() &&
+          certificate.counters.candidates() == 0U &&
+          !certificate.completeness_guaranteed(),
+      "the producer misreported a non-applicable arity");
+
+  std::string reason;
+  require(
+      !local_germination_certificate_admissible(certificate, reason) &&
+          reason == "certificate_not_applicable",
+      "a non-applicable lifecycle slot was accepted as a certificate");
+  require(
+      !local_germination_production_identity_holds(
+          certificate, LocalGerminationProductionAudit{}, reason) &&
+          reason == "certificate_not_applicable",
+      "a non-applicable lifecycle slot acquired a production identity");
 }
 
 // The contract of the three verification bases.  What each one guarantees is a
@@ -576,6 +683,8 @@ void check_verification_basis_contract() {
 // way the accounting could drift from what was really emitted.
 void check_production_identity_falsification() {
   LocalGerminationCertificate certificate;
+  certificate.applicable = true;
+  certificate.executed = true;
   certificate.proof_basis = std::string{local_germination_proof_basis};
   certificate.support_size = 4U;
   certificate.maximum_relevant_closed_rank = 11U;
@@ -599,6 +708,14 @@ void check_production_identity_falsification() {
   require(
       local_germination_production_identity_holds(certificate, audit, reason),
       "a coherent production accounting was refused");
+
+  LocalGerminationCertificate unexecuted = certificate;
+  unexecuted.executed = false;
+  require(
+      !local_germination_production_identity_holds(
+          unexecuted, audit, reason) &&
+          reason == "certificate_not_executed",
+      "an unexecuted certificate acquired a production identity");
 
   // The consumer saw fewer emissions than the producer counted.
   LocalGerminationProductionAudit short_tally = audit;
@@ -659,6 +776,8 @@ void check_production_identity_falsification() {
 // constant.
 void check_resume_induction() {
   LocalGerminationCertificate previous;
+  previous.applicable = true;
+  previous.executed = true;
   previous.proof_basis = std::string{local_germination_proof_basis};
   previous.support_size = 4U;
   previous.maximum_relevant_closed_rank = 11U;
@@ -673,12 +792,15 @@ void check_resume_induction() {
   previous.counters.third_vertices_retained = 150U;
   previous.counters.quadruple_candidates = 500U;
   previous.counters.population_queries = 900U;
+  previous.censored_by_operational_deadline = true;
+  previous.unexamined_seed_pair_count = 100U;
 
   std::string reason;
   LocalGerminationCertificate extended = previous;
   extended.counters.pairs_examined = 180U;
   extended.counters.quadruple_candidates = 700U;
   extended.counters.population_queries = 1500U;
+  extended.unexamined_seed_pair_count = 20U;
   require(
       local_germination_resume_induction_holds(previous, extended, reason),
       std::string{"a legitimate resumption was refused on "} + reason);
@@ -686,6 +808,55 @@ void check_resume_induction() {
   require(
       local_germination_resume_induction_holds(previous, previous, reason),
       "an idle resumption was refused");
+
+  LocalGerminationCertificate completed = extended;
+  completed.counters.pairs_examined = 200U;
+  completed.censored_by_operational_deadline = false;
+  completed.unexamined_seed_pair_count = 0U;
+  require(
+      local_germination_resume_induction_holds(extended, completed, reason),
+      std::string{"a legitimate completion was refused on "} + reason);
+
+  LocalGerminationCertificate forged_completion = previous;
+  forged_completion.censored_by_operational_deadline = false;
+  forged_completion.unexamined_seed_pair_count = 0U;
+  require(
+      !local_germination_resume_induction_holds(
+          previous, forged_completion, reason) &&
+          reason == "seed_pair_total_changed",
+      "a censored run discarded its remaining seed pairs without work");
+
+  LocalGerminationCertificate drifting_remainder = extended;
+  drifting_remainder.unexamined_seed_pair_count = 19U;
+  require(
+      !local_germination_resume_induction_holds(
+          previous, drifting_remainder, reason) &&
+          reason == "seed_pair_total_changed",
+      "a resumption changed the total seed-pair universe");
+
+  LocalGerminationCertificate premature_uncensor = extended;
+  premature_uncensor.censored_by_operational_deadline = false;
+  require(
+      !local_germination_resume_induction_holds(
+          previous, premature_uncensor, reason) &&
+          reason == "successor_operational_deadline_accounting",
+      "a resumption hid a non-zero unexamined remainder");
+
+  LocalGerminationCertificate complete_extension = completed;
+  complete_extension.counters.population_queries += 1U;
+  require(
+      !local_germination_resume_induction_holds(
+          completed, complete_extension, reason) &&
+          reason == "a_complete_seed_loop_was_extended",
+      "a complete seed loop acquired new work");
+
+  LocalGerminationCertificate execution_state_changed = extended;
+  execution_state_changed.executed = false;
+  require(
+      !local_germination_resume_induction_holds(
+          previous, execution_state_changed, reason) &&
+          reason == "execution_state_changed",
+      "a resumption changed whether its producer had executed");
 
   // A run that changed its constant is a different producer, and appending its
   // records to the first would silently mix two completeness arguments.
@@ -733,8 +904,11 @@ void check_resume_induction() {
 // tile-certified path had to prove too.
 void check_germination_chain() {
   const auto certificate_at = [](std::size_t pairs, std::size_t quadruples,
-                                 std::size_t third_retained) {
+                                 std::size_t third_retained,
+                                 std::size_t unexamined) {
     LocalGerminationCertificate certificate;
+    certificate.applicable = true;
+    certificate.executed = true;
     certificate.proof_basis = std::string{local_germination_proof_basis};
     certificate.support_size = 4U;
     certificate.maximum_relevant_closed_rank = 11U;
@@ -749,6 +923,8 @@ void check_germination_chain() {
     certificate.counters.third_vertices_retained = third_retained;
     certificate.counters.quadruple_candidates = quadruples;
     certificate.counters.population_queries = pairs * 3U;
+    certificate.censored_by_operational_deadline = unexamined != 0U;
+    certificate.unexamined_seed_pair_count = unexamined;
     return certificate;
   };
   const auto audit_for = [](std::size_t quadruples, std::size_t accepted) {
@@ -758,21 +934,29 @@ void check_germination_chain() {
     return audit;
   };
 
-  ExactLocalGerminationChain chain{certificate_at(100U, 200U, 60U)};
+  ExactLocalGerminationChain chain{certificate_at(100U, 200U, 60U, 200U)};
   std::string reason;
 
   require(
-      chain.commit(certificate_at(200U, 400U, 120U), audit_for(400U, 10U), {},
-                   {}, reason),
+      chain.commit(
+          certificate_at(200U, 400U, 120U, 100U),
+          audit_for(400U, 10U), {}, {}, reason),
       std::string{"a legitimate first batch was refused on "} + reason);
   require(chain.committed_batch_count() == 1U, "the first batch did not count");
+  const ExactLocalGerminationChain::Seal censored_seal = chain.seal();
+  require(
+      !censored_seal.sealed &&
+          !censored_seal.completeness_certificate_verified &&
+          !chain.sealed(),
+      "a censored germination chain was sealed as complete");
 
   // A successor that revises its production downwards must be refused, and the
   // trusted certificate must not move.
   const LocalGerminationCertificate before_refusal = chain.trusted();
   require(
-      !chain.commit(certificate_at(300U, 399U, 130U), audit_for(399U, 10U), {},
-                    {}, reason) &&
+      !chain.commit(
+          certificate_at(300U, 399U, 130U, 0U),
+          audit_for(399U, 10U), {}, {}, reason) &&
           reason == "quadruple_candidates_went_backwards",
       "a production revised downwards was committed");
   require(
@@ -783,13 +967,15 @@ void check_germination_chain() {
   // A successor whose consumer tally disagrees with its counters is refused by
   // the production identity, not by the induction.
   require(
-      !chain.commit(certificate_at(300U, 600U, 130U), audit_for(599U, 10U), {},
-                    {}, reason) &&
+      !chain.commit(
+          certificate_at(300U, 600U, 130U, 0U),
+          audit_for(599U, 10U), {}, {}, reason) &&
           reason == "observed_quadruple_emissions",
       "a disagreeing tally was committed");
 
   // A successor under another constant is a different producer.
-  LocalGerminationCertificate reconstant = certificate_at(300U, 600U, 130U);
+  LocalGerminationCertificate reconstant =
+      certificate_at(300U, 600U, 130U, 0U);
   reconstant.jung_squared_numerator = 1U;
   reconstant.jung_squared_denominator = 2U;
   require(
@@ -799,21 +985,27 @@ void check_germination_chain() {
 
   // Innocuity: after three refusals the chain still commits.
   require(
-      chain.commit(certificate_at(300U, 600U, 130U), audit_for(600U, 10U), {},
-                   {}, reason),
+      chain.commit(
+          certificate_at(300U, 600U, 130U, 0U),
+          audit_for(600U, 10U), {}, {}, reason),
       std::string{"the chain stopped working after a refusal: "} + reason);
   require(chain.committed_batch_count() == 2U, "the second batch did not count");
 
   const ExactLocalGerminationChain::Seal seal = chain.seal();
-  require(seal.sealed, "a legitimate chain refused to seal");
+  require(
+      !seal.sealed && !chain.sealed(),
+      "a transcript without cursor, payload or floating proof sealed");
   require(
       seal.basis ==
           ExactHigherSupportVerificationBasis::
               local_germination_completeness_with_exact_terminal_classification,
       "the seal declared the wrong basis");
   require(
-      seal.completeness_certificate_verified,
-      "the seal did not verify its completeness certificate");
+      !seal.contiguous_seed_pair_prefix_verified &&
+          !seal.accepted_payload_identity_verified &&
+          !seal.floating_rejections_verified &&
+          !seal.completeness_certificate_verified,
+      "the diagnostic transcript forged a missing sealing obligation");
   // The seal restates what this basis does NOT provide, so no consumer has to
   // infer it.
   require(
@@ -821,18 +1013,41 @@ void check_germination_chain() {
           !verification_basis_consumable_by_mass_partition(seal.basis),
       "the seal claimed a mass partition it does not have");
   require(seal.committed_batch_count == 2U, "the seal miscounted its batches");
+  require(
+      seal.event_count == 0U,
+      "the empty payload fixture unexpectedly acquired events");
 
   // A chain whose genesis is inadmissible commits nothing and seals nothing.
-  LocalGerminationCertificate bad_genesis = certificate_at(10U, 10U, 5U);
+  LocalGerminationCertificate bad_genesis =
+      certificate_at(10U, 10U, 5U, 0U);
   bad_genesis.jung_squared_numerator = 1U;
   bad_genesis.jung_squared_denominator = 3U;  // below 3/8 for a tetrahedron
   ExactLocalGerminationChain refused{bad_genesis};
   require(
-      !refused.commit(certificate_at(20U, 20U, 10U), audit_for(20U, 1U), {},
-                      {}, reason) &&
+      !refused.commit(
+          certificate_at(20U, 20U, 10U, 0U),
+          audit_for(20U, 1U), {}, {}, reason) &&
           reason == "the_genesis_certificate_was_not_admissible",
       "a chain with an inadmissible genesis committed");
   require(!refused.seal().sealed, "a chain with an inadmissible genesis sealed");
+
+  LocalGerminationCertificate honest_heuristic =
+      certificate_at(10U, 10U, 5U, 0U);
+  honest_heuristic.seed_restriction =
+      LocalGerminationCertificate::SeedRestriction::declared_heuristic_cutoff;
+  honest_heuristic.seed_loop_exhaustive_over_pairs = false;
+  honest_heuristic.seed_neighbourhood_cutoff_multiple = 6U;
+  require(
+      local_germination_certificate_admissible(honest_heuristic, reason) &&
+          !honest_heuristic.completeness_guaranteed(),
+      "an honest heuristic certificate lost its structural admissibility");
+  ExactLocalGerminationChain heuristic_chain{honest_heuristic};
+  const ExactLocalGerminationChain::Seal heuristic_seal =
+      heuristic_chain.seal();
+  require(
+      !heuristic_seal.sealed &&
+          !heuristic_seal.completeness_certificate_verified,
+      "an honest heuristic invocation was sealed as complete");
 }
 
 // A measurement, not an assertion: at these sizes the exhaustive reference is
@@ -906,6 +1121,7 @@ int main() {
                          directions);
     }
     check_certificate_falsification();
+    check_non_applicable_producer_state();
     check_verification_basis_contract();
     check_production_identity_falsification();
     check_resume_induction();

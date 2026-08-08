@@ -149,6 +149,21 @@ GerminatedHigherSupportResult build_germinated_higher_support_stream(
   config.maximum_relevant_closed_rank = maximum_relevant_closed_rank;
 
   GerminatedHigherSupportResult result;
+  // Populate both lifecycle slots before any work.  This is essential when an
+  // operational deadline censors arity three: arity four is then applicable
+  // but deliberately not executed, rather than a value-initialised object that
+  // can be mistaken for an exhaustive certificate.  It also gives an
+  // inapplicable arity its explicit identity.
+  for (std::size_t arity_index = 0U; arity_index < 2U; ++arity_index) {
+    LocalGerminationCertificate& certificate =
+        result.certificates[arity_index];
+    certificate.support_size = arity_index + 3U;
+    certificate.maximum_relevant_closed_rank =
+        maximum_relevant_closed_rank;
+    certificate.applicable =
+        maximum_relevant_closed_rank >= certificate.support_size;
+    certificate.executed = false;
+  }
   const std::size_t traversal_frontier_bound =
       ExactHigherSupportIndexedClosedBallQuery::proved_traversal_frontier_bound(
           index);
@@ -211,12 +226,28 @@ GerminatedHigherSupportResult build_germinated_higher_support_stream(
       accepted_emissions - result.events.size();
 
   result.production_identity_holds = true;
+  bool earlier_execution_was_censored = false;
   for (std::size_t arity_index = 0U; arity_index < 2U; ++arity_index) {
     const LocalGerminationCertificate& certificate =
         result.certificates[arity_index];
-    if (certificate.proof_basis.empty()) {
-      // This arity was never generated; there is nothing to certify and
-      // nothing to claim.
+    if (!certificate.applicable) {
+      // The requested closed-rank ceiling excludes this arity.  It carries no
+      // production and no completeness claim.
+      if (certificate.executed) {
+        result.production_identity_holds = false;
+        result.refusal_reason = "a_non_applicable_arity_was_executed";
+        return result;
+      }
+      continue;
+    }
+    if (!certificate.executed) {
+      // The only legitimate applicable-but-unexecuted slot is the arity after
+      // an earlier execution was censored by the shared operational guard.
+      if (!earlier_execution_was_censored) {
+        result.production_identity_holds = false;
+        result.refusal_reason = "an_applicable_arity_was_not_executed";
+        return result;
+      }
       continue;
     }
     std::string reason;
@@ -231,6 +262,8 @@ GerminatedHigherSupportResult build_germinated_higher_support_stream(
       result.refusal_reason = std::move(reason);
       return result;
     }
+    earlier_execution_was_censored =
+        certificate.censored_by_operational_deadline;
   }
   return result;
 }

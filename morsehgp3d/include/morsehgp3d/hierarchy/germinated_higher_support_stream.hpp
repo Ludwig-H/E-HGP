@@ -1,7 +1,7 @@
 #pragma once
 
-// The higher-support stream driven by the certified local germination
-// generator instead of by a subdivision of the product universe.
+// The higher-support stream driven by the local germination proposal generator
+// instead of by a subdivision of the product universe.
 //
 // WHY THIS EXISTS.  The product subdivision does not prune.  Measured on the
 // sealed sweep of 8 August 2026, a prune certificate covers 1.105 support
@@ -15,9 +15,9 @@
 // gate as a source of sensitivity.
 //
 // WHAT REPLACES IT.  `generate_local_germination_candidates` emits candidate
-// supports keyed on a diametral pair, with completeness guaranteed by the Jung
-// disc-and-segment covering theorem and NOT uniqueness.  This component is its
-// consumer: it classifies every emission with the same exact terminal
+// supports keyed on a diametral pair.  Jung proves the disc-and-segment geometry
+// but the current binary64 rejection path does not yet certify completeness.
+// This component is its consumer: it classifies every emission with the same exact terminal
 // classification the exhaustive stream uses, tallies the production audit
 // independently of the producer's own counters, and deduplicates the accepted
 // events.
@@ -104,9 +104,12 @@ struct GerminatedHigherSupportResult {
   // support once per pair realising its diameter, so this is expected to be
   // small and non-zero, and it is published rather than hidden.
   std::size_t duplicate_accepted_emissions{};
-  // True only when both arities carry an admissible certificate whose
-  // production identity holds against `audits`.  False leaves `refusal_reason`
-  // naming the contract that bit.
+  // True only when every EXECUTED arity carries an admissible certificate whose
+  // production identity holds against `audits`.  A non-applicable arity has no
+  // production to certify.  An applicable arity skipped after an earlier
+  // operational deadline is explicitly `executed=false`; it likewise has no
+  // production identity, and its certificate cannot claim completeness.
+  // False leaves `refusal_reason` naming the contract that bit.
   bool production_identity_holds{};
   std::string refusal_reason;
   // True when the operational guard cut a seed loop short.  The events below

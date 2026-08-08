@@ -14,12 +14,12 @@
 
 namespace morsehgp3d::hierarchy {
 
-// Reference host generator of the certified local germination of minimal
-// well-centred supports of size three and four.
+// Reference host generator of local proposals for minimal well-centred
+// supports of size three and four.
 //
 // It replaces the product subdivision, whose cost is measured proportional to
 // C(n,3)+C(n,4), by an enumeration seeded on the DIAMETER PAIR of each support.
-// Completeness rests on two proved statements, both recorded with their proofs
+// Its candidate locus rests on two proved statements, both recorded with their proofs
 // in docs/math/OPTIMISATIONS_JUNG_SUPPORTS_3_4.md:
 //
 //   * Jung -- a minimal well-centred support has its circumball AS its
@@ -32,21 +32,17 @@ namespace morsehgp3d::hierarchy {
 //     perpendicular bisector plane, and adding a third vertex reduces it to a
 //     segment of half-length sqrt(gamma^2 D^2 - r_triangle^2).
 //
-// Every rejection exhibits a ball PROVED INSIDE the circumball and finds it
-// over-populated, so no accepted support can be lost.  The generator emits
-// candidates; it decides nothing.  The exact terminal classification --
-// analyze_circumcenter_support_integer then the indexed closed-ball query --
+// The geometric lemmas above are exact, but this prototype does not yet turn
+// every rejection into a certified decision.  Covering positions, range
+// queries and several gates still use binary64 without a complete outward
+// interval and exact fallback.  The generator therefore emits proposals and
+// its bounded differentials are useful falsifiers, but its current executable
+// certificate MUST NOT claim completeness.  The exact terminal classification
+// -- analyze_circumcenter_support_integer then the indexed closed-ball query --
 // remains the sole authority on acceptance, unchanged.
 //
-// Safety discipline.  Covering positions are computed in binary64 and their
-// test radii are then shrunk by a certified margin that dominates both the
-// covering radius and the floating-point error, and the population count only
-// counts points PROVED inside.  Both approximations can only under-count and
-// under-reject, never fabricate a rejection.  This is the same rule the
-// interval filters follow: an approximation may cost work, never a verdict.
-//
 // This host reference deliberately scans the cloud for its neighbourhoods
-// instead of traversing the LBVH.  It exists to certify completeness against
+// instead of traversing the LBVH.  It exists to compare finite fixtures against
 // the exhaustive census and to count the work an implementation would do; a
 // device implementation must use the index.
 
@@ -71,14 +67,13 @@ struct LocalGerminationConfig {
   int certified_margin_exponent{-20};
   // Direction set used to bound the tangent radius R(p).  Zero leaves the seed
   // loop exhaustive; 6, 14 or 26 select a set whose covering radius is sealed
-  // with a proof, and the loop is then restricted to pairs satisfying the
-  // CERTIFIED bound D <= 2 R(p) -- complete by theorem rather than by
-  // exhaustion.
+  // with a proof.  The geometric restriction is D <= 2 R(p); the current
+  // binary64 implementation of R(p) is still proposal-only.
   std::size_t tangent_direction_count{};
   // Restriction of the seed loop to pairs closer than this multiple of the
   // local s_max-nearest-neighbour radius.  Zero means NO restriction: the seed
-  // loop is exhaustive over pairs, which is what makes the enumeration complete
-  // without further argument.
+  // loop is exhaustive over pairs.  Exhaustion closes the seed identity, not
+  // the still-uncertified floating rejections inside each seed.
   //
   // Any positive value is a DATA-DEPENDENT restriction that the theorem does
   // not supply.  The certified restriction is D <= 2 R(p), where R(p) is the
@@ -104,15 +99,24 @@ struct LocalGerminationCounters {
   }
 };
 
-// The sealed identifier of the proof basis this generator relies upon.  It
-// names a COMPLETENESS argument, not a coverage one: nothing here partitions
-// the universe, so the mass identity R + C(F) = C(n,3) + C(n,4) is neither
-// produced nor available, and the certificate says so in the affirmative.
+// Historical identifier of the geometric proof basis.  The name is preserved
+// for wire compatibility, but the executable must additionally certify its
+// floating rejections before it can turn that argument into completeness.
 inline constexpr std::string_view local_germination_proof_basis =
     "jung_diameter_seed_disc_and_segment_covering_completeness_v1";
 
 // What a run relied upon, in a form a verifier can refuse.
 struct LocalGerminationCertificate {
+  // Lifecycle is explicit.  `applicable` says that the requested closed-rank
+  // ceiling admits this arity; `executed` says that the generator was actually
+  // invoked and returned a certificate for it.  In particular, an applicable
+  // arity skipped after an earlier operational deadline is distinct from an
+  // arity that the request did not contain at all.
+  //
+  // Both default to false so a value-initialised slot can never accidentally
+  // claim completeness merely because SeedRestriction defaults to exhaustive.
+  bool applicable{false};
+  bool executed{false};
   std::string proof_basis;
   std::size_t support_size{};
   std::size_t maximum_relevant_closed_rank{};
@@ -140,6 +144,11 @@ struct LocalGerminationCertificate {
   // declared direction set, not an estimate.  Today exactly one entry is
   // sealed with a proof.
   bool tangent_covering_radius_proved{};
+  // True only after every floating-point rejection that can omit a candidate
+  // has an outward interval or an exact fail-open fallback.  The current host
+  // prototype has no such proof and always leaves this false.  The structural
+  // verifier rejects a producer that tries to set it under the v1 basis.
+  bool floating_rejections_certified{false};
   // True only when the seed loop was exhaustive over pairs.  A run that
   // restricted it owes a completeness argument the theorem does not supply, and
   // the verifier refuses a certificate that claims otherwise.
@@ -156,12 +165,13 @@ struct LocalGerminationCertificate {
   // every uncensored run, and the honest measure of how far a censored one got.
   std::size_t unexamined_seed_pair_count{};
 
-  // Completeness is guaranteed by exhaustion or by the certified bound, and by
-  // nothing else.  A heuristic cutoff may be honest and useful, but it does not
-  // guarantee completeness and must never be read as if it did -- and neither
-  // must a run the deadline cut short.
+  // Completeness additionally requires certified rejection predicates.  The
+  // current implementation deliberately returns false even for an uncensored
+  // exhaustive run: the exact differential validates its finite fixtures, not
+  // every binary64 decision on every input.
   [[nodiscard]] bool completeness_guaranteed() const noexcept {
-    return !censored_by_operational_deadline &&
+    return applicable && executed && !censored_by_operational_deadline &&
+        unexamined_seed_pair_count == 0U && floating_rejections_certified &&
         (seed_restriction == SeedRestriction::exhaustive_over_pairs ||
          (seed_restriction == SeedRestriction::certified_tangent_bound &&
           tangent_covering_radius_proved));
@@ -194,8 +204,12 @@ struct LocalGerminationCertificate {
 [[nodiscard]] std::size_t sealed_tangent_covering_radius_millidegrees(
     std::size_t direction_count) noexcept;
 
-// Re-derives the admissibility of a certificate from its declared constants.
-// It does not trust the producer: it checks that the declared squared Jung
+// Re-derives the structural admissibility of a certificate from its declared
+// constants and deadline accounting.  Admissible does NOT mean complete: a
+// censored, floating-proposal or honestly heuristic invocation can be
+// admissible while
+// `completeness_guaranteed()` remains false.  It does not trust the producer:
+// it checks that the declared squared Jung
 // constant is at least the theorem's value -- a LARGER one only shrinks the
 // test balls and weakens rejection, a smaller one would move the centre locus
 // and could lose an accepted support -- that the disc stays real, that the
@@ -243,8 +257,12 @@ struct LocalGerminationProductionAudit {
 //
 // So the successor must declare the SAME constants -- a run that changed its
 // squared Jung constant, its coverings or its margin mid-chain is a different
-// run and its records may not be appended to the first -- and every counter
-// must be non-decreasing.  On refusal `reason` names the field.
+// run and its records may not be appended to the first -- every counter must be
+// non-decreasing, and `pairs_examined + unexamined_seed_pair_count` must be
+// conserved exactly.  This is only a necessary accounting invariant: the
+// certificate carries no ordinal cursor or prefix digest, so it does not prove
+// that the newly examined pairs form the missing contiguous suffix.  On
+// refusal `reason` names the field.
 [[nodiscard]] bool local_germination_resume_induction_holds(
     const LocalGerminationCertificate& previous,
     const LocalGerminationCertificate& successor,
@@ -309,11 +327,14 @@ struct LocalGerminationGuard {
 // not the state -- one trusted certificate, a deterministic successor, and a
 // refusal that leaves the trusted state exactly as it was.
 //
-// A commit is admitted only when all three contracts hold at once: the
+// A commit is admitted only when all three structural contracts hold at once: the
 // successor certificate is admissible, its production identity holds against
 // the consumer's own tally, and it extends the trusted certificate rather than
 // revising it.  Everything is checked BEFORE anything is mutated, so a refusal
-// cannot leave a half-applied state and the chain never needs poisoning.
+// cannot leave a half-applied state and the chain never needs poisoning.  The
+// current API cannot bind a resumed interval to a contiguous seed-pair cursor
+// and does not bind accepted audit counts to the event payload vectors.  It is
+// therefore deliberately UNSEALABLE until both identities are implemented.
 class ExactLocalGerminationChain {
  public:
   struct Seal {
@@ -326,9 +347,12 @@ class ExactLocalGerminationChain {
     std::size_t event_count{};
     std::size_t diagnostic_count{};
     // Restated on the seal so a consumer never has to infer it: this basis
-    // provides no mass partition, and its completeness rests on the declared
-    // constant having been verified admissible.
+    // provides no mass partition, and its completeness rests on both the
+    // declared constant being admissible and the seed loop being complete.
     bool mass_partition_identity_available{false};
+    bool contiguous_seed_pair_prefix_verified{};
+    bool accepted_payload_identity_verified{};
+    bool floating_rejections_verified{};
     bool completeness_certificate_verified{};
   };
 

@@ -1,9 +1,9 @@
-# Germination locale certifiée des supports trois et quatre
+# Théorème de germination locale et prototype des supports trois et quatre
 
 Objet : remplacer la subdivision globale de produits — dont le coût est mesuré
 proportionnel au travail exploré, c'est-à-dire à $\binom n3+\binom n4$ — par une
-génération **locale à complétude prouvée**. Le document énonce ce qui est
-démontré, ce qui est mesuré, et deux résultats négatifs qui ferment
+génération **locale dont la complétude peut être prouvée sous des rayons certifiés**. Le document énonce ce qui est
+démontré, ce qui est mesuré, ce que le prototype flottant ne certifie pas encore, et deux résultats négatifs qui ferment
 définitivement deux familles d'approches.
 
 Aucun claim, aucune porte ouverte ou fermée, aucun statut public.
@@ -122,6 +122,28 @@ La complétude est **inconditionnelle** ; seul le coût dépend des données et 
 finesse de $\tau$. C'est exactement le partage que le projet assume déjà pour
 l'étage paire, et que `FRONTIERE_DIRECTE_SUPPORTS_3_4.md` §7 énonce comme règle :
 « sparse » désigne une propriété à mesurer, jamais une conséquence automatique.
+
+> [!CAUTION]
+> **Clarification RNG--Jung du 8 août 2026.** Le théorème sur $G_\tau$ reste
+> valide, mais poser $\tau(p)=\alpha\lambda_q(p)$ avec $\lambda_q(p)$ la plus
+> grande arête RNG incidente n'en satisfait pas l'hypothèse. La fixture exacte
+> de rang fermé 11 obtient $\lambda_{11}^{2}=801/256$ face à des arêtes de
+> support de carré 8; la cascade globale $\alpha_2$ puis $\alpha_3$ reste
+> incomplète même avec le maximum des extrémités. Poursuivre cette dernière
+> règle jusqu'au point fixe récupère la fixture par propagation des échelles,
+> sans fournir de preuve universelle ni de borne sparse; la règle mutuelle au
+> minimum atteint un point fixe incomplet. Voir
+> [`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md).
+> Le RNG épaissi reste une source de propositions GPU-friendly, jamais la
+> majoration certifiée $\tau(p)\geq2R(p)$.
+
+> [!WARNING]
+> Dans le prototype actuel, « borne tangente certifiée » désigne la preuve de la
+> constante géométrique, pas une certification de toutes les décisions du code.
+> Les comparaisons `binary64` qui peuvent rejeter un germe ou un tiers n'ont pas
+> encore toutes un intervalle extérieur et un repli exact. Le schéma v2 publie
+> donc `floating_rejections_certified=false`, et la chaîne de reprise reste non
+> scellable sans curseur contigu ni identité entre audit et payload.
 
 ### 5.0 La majoration certifiée : ce qui échoue, et ce qui marche
 
@@ -460,9 +482,12 @@ exige un pic sous 80 % de la VRAM.
    contrainte de coque se réduit à un jeu de demi-espaces exacts.
 2. **Construction de $G_\tau$** par requêtes de boule sur le LBVH existant, sans
    arithmétique exacte : c'est une relation de distance.
-3. **Énumération des $m$-cliques** par tuiles device, sur le modèle du chemin
-   tuile-certifié déjà en place — la chaîne ancrée, ses invariants et sa clôture
-   BigInt sont réutilisés tels quels, seule la source des candidats change.
+3. **Énumération locale** par tuiles device. Les triangles peuvent employer les
+   intersections d'adjacences de $G_\tau$; pour l'arité quatre, la route
+   privilégiée énumère les sommets de profondeur au plus $s_{\max}-4$ dans le
+   disque de Jung de chaque ancre, au lieu de matérialiser toutes les 4-cliques.
+   La chaîne ancrée, ses invariants et sa clôture BigInt sont réutilisés; aucune
+   mosaïque de Delaunay d'ordre supérieur ni liste globale de cliques n'apparaît.
 4. **Classification terminale inchangée** :
    `analyze_circumcenter_support_integer` puis
    `ExactHigherSupportIndexedClosedBallQuery::classify`, les deux primitives que
@@ -486,7 +511,7 @@ parcourir, et son certificat de complétude serait de toute façon le véritable
 porteur de la preuve ; on paierait un objet de preuve supplémentaire pour une
 identité devenue décorative.
 
-Ce que la chaîne ancrée certifiera désormais n'est plus « toute la masse a été
+L'objectif du contrat futur n'est plus « toute la masse a été
 partitionnée » mais **« tout support accepté a été produit »**, adossé à trois
 choses et à elles seules :
 
@@ -513,3 +538,8 @@ Trois conséquences de contrat, à traiter comme telles :
 
 Cette refondation est le point de contrat le plus délicat de la route, et elle
 doit être écrite **avant** le générateur, pas après.
+
+L'API livrée n'atteint pas encore cet objectif. Sa conservation de compteurs ne
+porte pas de curseur contigu, son audit accepté n'est pas lié aux payloads et
+ses rejets flottants ne sont pas certifiés. Son `seal()` reste donc faux; cette
+section décrit les obligations du futur certificat, pas l'état du prototype.

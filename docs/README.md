@@ -8,7 +8,7 @@ La documentation distingue trois couches : la source géométrique HGP sur les s
 ## Parcours conseillé
 
 1. Lire les Parties I et II du [manuscrit de thèse](references/MANUSCRIT_THESE_HAUSEUX.pdf), pages PDF 35 à 134, puis la [spécification](SPECIFICATION_MORSEHGP3D.md).
-2. Pour la source, lire la [définition HGP 3D](math/DEFINITION_HGP_3D.md), le [catalogue exact des paires diamétrales](math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md), la [frontière des supports trois et quatre](math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md), les [incidences silencieuses](math/INCIDENCES_SILENCIEUSES_GAMMA.md) et les [attaches par miniball](math/ATTACHES_DESCENTE_MINIBALL.md).
+2. Pour la source, lire la [définition HGP 3D](math/DEFINITION_HGP_3D.md), le [catalogue exact des paires diamétrales](math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md), la [frontière des supports trois et quatre](math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md), l'[audit RNG--Jung et niveaux peu profonds](math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md), les [incidences silencieuses](math/INCIDENCES_SILENCIEUSES_GAMMA.md) et les [attaches par miniball](math/ATTACHES_DESCENTE_MINIBALL.md).
 3. Pour la sortie sur les points, lire la [hiérarchie laminaire multi-ordres](math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md), puis le [contrat C++ public](../morsehgp3d/include/morsehgp3d/api/point_hierarchy.hpp).
 4. Pour la qualification, lire le [plan de tests](TEST_PLAN_MORSEHGP3D.md) et le [rapport de performances et déploiement](PERFORMANCE_MORSEHGP3D.md).
 5. Vérifier enfin le [registre des preuves](math/STATUT_PREUVES_ET_HEURISTIQUES.md), la [roadmap](ROADMAP_IMPLEMENTATION_MORSEHGP3D.md) et le [registre des phases](implementation_status.toml).

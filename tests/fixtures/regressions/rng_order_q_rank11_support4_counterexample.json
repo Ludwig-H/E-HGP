@@ -1,0 +1,68 @@
+{
+  "schema": "morsehgp3d.regression.rng_order_q_rank11_support4_counterexample.v1",
+  "description": "A closed-rank-11 well-centred tetrahedral support whose edge AD is absent from the open-lune order-11 RNG although all added lune witnesses lie strictly outside the support circumball.",
+  "rng_order": 11,
+  "rng_convention": "retain pq iff the open lune contains at most q points other than p and q",
+  "support": {
+    "A": ["0", "0", "0"],
+    "B": ["-2", "-2", "-1"],
+    "C": ["-2", "1", "0"],
+    "D": ["0", "-1", "-1"]
+  },
+  "circumball": {
+    "center": ["-3/2", "-1/2", "-1/2"],
+    "squared_radius": "11/4",
+    "barycentric_weights_ABCD": ["1/8", "3/8", "3/8", "1/8"]
+  },
+  "strict_interior_points": [
+    ["-3/2", "-1/2", "-1/2"],
+    ["-23/16", "-1/2", "-1/2"],
+    ["-25/16", "-1/2", "-1/2"],
+    ["-3/2", "-7/16", "-1/2"],
+    ["-3/2", "-9/16", "-1/2"],
+    ["-3/2", "-1/2", "-7/16"],
+    ["-3/2", "-1/2", "-9/16"]
+  ],
+  "open_lune_edge": ["A", "D"],
+  "external_open_lune_witnesses": [
+    ["257/256", "-1/2", "-1/2"],
+    ["258/256", "-1/2", "-1/2"],
+    ["259/256", "-1/2", "-1/2"],
+    ["260/256", "-1/2", "-1/2"],
+    ["261/256", "-1/2", "-1/2"],
+    ["262/256", "-1/2", "-1/2"],
+    ["263/256", "-1/2", "-1/2"],
+    ["264/256", "-1/2", "-1/2"],
+    ["265/256", "-1/2", "-1/2"],
+    ["266/256", "-1/2", "-1/2"],
+    ["267/256", "-1/2", "-1/2"],
+    ["268/256", "-1/2", "-1/2"]
+  ],
+  "expected": {
+    "affine_determinant_ABCD": "4",
+    "closed_rank": 11,
+    "strict_interior_count": 7,
+    "diameter_edge": ["B", "C"],
+    "strict_halfplane_depth_at_support_center": 7,
+    "support_center_inside_tetrahedral_jung_disc": true,
+    "symmetric_family_removes_every_diameter_edge": true,
+    "symmetric_family_order_q_rng_edge_count": 1003,
+    "one_stage_alpha3_endpoint_max_edge_count": 2101,
+    "first_stage_alpha2_endpoint_max_edge_count": 2053,
+    "two_stage_alpha2_alpha3_endpoint_max_edge_count": 2965,
+    "fixed_point_endpoint_max_edge_count": 3403,
+    "fixed_point_mutual_min_edge_count": 1285,
+    "one_stage_endpoint_max_jung_grown_q11_support_is_four_clique": false,
+    "one_stage_endpoint_max_jung_grown_q11_support_edge_count": 0,
+    "two_stage_alpha2_alpha3_endpoint_max_jung_grown_q11_support_is_four_clique": false,
+    "two_stage_alpha2_alpha3_endpoint_max_jung_grown_q11_support_edge_count": 0,
+    "fixed_point_endpoint_max_jung_grown_q11_support_is_four_clique": true,
+    "fixed_point_endpoint_max_jung_grown_q11_support_edge_count": 6,
+    "fixed_point_mutual_min_jung_grown_q11_support_is_four_clique": false,
+    "fixed_point_mutual_min_jung_grown_q11_support_edge_count": 0,
+    "shell_count": 4,
+    "external_open_lune_witness_count": 12,
+    "edge_AD_present_in_order_q_rng": false,
+    "support_is_four_clique": false
+  }
+}

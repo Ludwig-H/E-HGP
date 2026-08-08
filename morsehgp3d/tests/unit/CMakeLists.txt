@@ -5550,6 +5550,23 @@ add_test(
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
 add_test(
+  NAME morsehgp3d.rng_jung_clique_obstruction_exact
+  COMMAND
+    "${CMAKE_COMMAND}"
+    -E env
+    "PYTHONDONTWRITEBYTECODE=1"
+    "${Python3_EXECUTABLE}"
+    -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/check_rng_jung_clique_obstruction.py"
+    --fixture
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../tests/fixtures/regressions/rng_order_q_rank11_support4_counterexample.json"
+    --orders 0 1 7 11 1000
+)
+set_tests_properties(
+  morsehgp3d.rng_jung_clique_obstruction_exact
+  PROPERTIES TIMEOUT 30
+)
+add_test(
   NAME morsehgp3d.point_hierarchy_sklearn_differential
   COMMAND
     "${CMAKE_COMMAND}"
@@ -6506,6 +6523,8 @@ list(
   APPEND _morsehgp3d_cpu_test_targets
   morsehgp3d_exact_higher_support_growth_profile
   morsehgp3d_exact_higher_support_output_census
+  morsehgp3d_germinated_higher_support_scale_probe
+  morsehgp3d_hierarchy_germinated_higher_support_stream_tests
   morsehgp3d_hierarchy_local_germination_tests
   morsehgp3d_gpu_morton_lbvh_sequential_product_traversal_tests
   morsehgp3d_gpu_higher_support_device_tiled_slot_engine_tests

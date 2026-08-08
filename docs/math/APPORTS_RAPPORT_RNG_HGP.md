@@ -12,6 +12,17 @@ et ce qui **ne répond pas au problème mesuré**.
 > [`AUDIT_RNG_HGP_SIMPLEXES_GPU.md`](AUDIT_RNG_HGP_SIMPLEXES_GPU.md), **qui corrige
 > l'objection 3 du §4 ci-dessous**.
 
+> [!IMPORTANT]
+> L'audit ultérieur [`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md)
+> traite explicitement la variante où le RNG ponctuel est épaissi par le facteur
+> de Jung depuis sa plus grande arête incidente. La cascade bornée $\alpha_2$
+> puis $\alpha_3$ reste incomplète sur une fixture rationnelle de rang fermé 11;
+> une fermeture au maximum jusqu'au point fixe la récupère, mais sans preuve de
+> complétude ni borne sparse. Le surgraphe certifié $G_\tau$
+> et les arrangements locaux de faible profondeur sont les deux objets à
+> conserver. Aucun de ces objets ne matérialise une mosaïque de Delaunay d'ordre
+> supérieur.
+
 ---
 
 ## 1. Ce qui corrige une conclusion du dépôt

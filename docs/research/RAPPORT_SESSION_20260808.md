@@ -1,7 +1,7 @@
 # Rapport de session — 8 août 2026
 
 > **Statut : rapport.** Aucun claim, aucune porte ouverte ou fermée, aucun
-> `public_status` modifié. Trois sessions G4 gardées, toutes closes VM
+> `public_status` modifié. Cinq démarrages G4 gardés, tous clos sur une VM
 > `TERMINATED` et clé de session révoquée.
 
 Journée entière sur l'étage higher, à la demande de Louis : d'abord le coût
@@ -115,6 +115,20 @@ compte : **une boucle de germes coupée n'a pas visité tous les germes, donc
 4 096 paires transformait un délai de 12 s en 63,8 s (×5,3) — exactement le
 défaut que `9d72726` avait nommé ; à 64 les délais tombent à ×1,00.
 
+**Erratum de sérialisation v1.** Cette phrase vaut pour un générateur réellement
+exécuté. Cinq artefacts ont aussi sérialisé le slot d'arité quatre jamais lancé,
+initialisé par défaut, avec `completeness_guaranteed=true` malgré une base de
+preuve vide et des compteurs nuls. Le schéma v2 distingue désormais
+`applicable` et `executed`; ces artefacts historiques restent immuables et leur
+placeholder ne constitue pas un certificat.
+
+Le correctif v2 ne promeut pas davantage les runs terminés. Il publie aussi
+`floating_rejections_certified=false`, car les rejets `binary64` du prototype
+n'ont pas tous un intervalle extérieur et un repli exact. La conservation
+`pairs_examined + unexamined_seed_pair_count` est nécessaire à une reprise,
+mais aucun curseur ne prouve encore un suffixe contigu et l'audit accepté n'est
+pas lié aux payloads. La chaîne demeure donc volontairement non scellable.
+
 **Mesure 50 k (`uniform_latin`, arité 3, régime certifié) :** boucle de germes
 parcourue à **99,92 %**, **4 525 888 paires retenues = 0,362 % = 90,5 par
 point**, **29 842 507 triples = 0,000143 % de $\binom{50000}{3}$**, 2 482 617
@@ -178,6 +192,45 @@ non diagnostiquée**, et c'est le premier travail si on la reprend.
 Ce qui est acquis quand même : **le différentiel fait exactement son travail.**
 Une idée fausse a été arrêtée en une exécution, sur le critère qui compte.
 
+### 5.1 Addendum exact après audit RNG--Jung
+
+L'audit postérieur sépare maintenant trois affirmations que la session avait
+mélangées. Premièrement, la borne de Jung sur un tétraèdre complété est une
+condition nécessaire démontrée; les quatre pertes observées signalent donc un
+défaut de calcul, d'autorité flottante ou d'identifiants dans cette tentative,
+pas une réfutation du théorème. Deuxièmement, la cascade bornée $\alpha_2$ puis
+$\alpha_3$ d'un RNG épaissi depuis sa plus grande arête incidente reste
+incomplète : une fixture rationnelle de rang fermé 11 garde absentes les six
+arêtes du support, même avec le maximum des extrémités. La poursuivre jusqu'au
+point fixe récupère cette fixture par propagation d'échelles, sans donner de
+preuve universelle ni de borne sparse. Troisièmement, le rang donne une réduction plus forte :
+pour une paire diamètre, les centres des supports quatre sont les sommets de
+profondeur au plus sept d'un arrangement de demi-plans dans le disque de Jung,
+avec au plus huit sommets par droite.
+
+Le détail, les preuves, la complexité en $n$ et $K$, puis l'architecture GPU
+sans mosaïque de Delaunay d'ordre supérieur sont dans
+[`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md).
+Cette analyse ne requalifie aucune mesure G4 et ne rend pas la tentative refusée
+acceptable rétroactivement.
+
+### 5.2 Addendum de mesure directe et audit de lenteur
+
+La campagne explicitement demandée ensuite est archivée dans
+[`phase15_rng_jung_g4_20260808/RESULTATS.md`](../validation/phase15_rng_jung_g4_20260808/RESULTATS.md).
+La frontière paire CUDA fraîche reste stable avec les campagnes précédentes :
+2,395883 s pour la frontière, 3,927585 s à froid, 40 kernels et 66
+synchronisations pour 7 835 403 candidats et 8 025 397 régions de prune. Les
+deux exécutions higher de 120 s ne sollicitent pas la carte : le binaire est le
+prototype CPU séquentiel. Il parcourt 4 547 839 paires `uniform_latin` et 191
+paires `eight_clusters`; dans les deux cas, l'arité quatre ne démarre pas.
+
+Le verdict est donc causal, pas seulement chronométrique : le frontend GPU est
+piloté par des retours de contrôle, des banques de témoins et une sortie de
+millions d'objets, tandis que l'étage combinatoire dominant est encore sur CPU.
+Il n'existe aucun indice d'une G4 dégradée; les temps de frontière antérieurs à
+2,434407 s et 2,377329 s encadrent le nouveau à moins de 1,6 %.
+
 ---
 
 ## 6. L'état du contrat, sans complaisance
@@ -213,10 +266,11 @@ aucun majorant convexe de $R(p)$ ne peut l'exclure. Et
    `local_germination.hpp` dit depuis `77554b2` que ce host reference balaie
    délibérément le nuage et qu'une implémentation device doit interroger
    l'index.
-3. **L'arité 4**, une fois (1) et (2) faits : diagnostiquer la porte refusée du
-   §5, et balayer les constantes de recouvrement J7 et J8 — puisque quadruples
-   $\propto |\text{retenus}|^2$, diviser les tiers retenus par deux divise les
-   quadruples par quatre.
+3. **L'arité 4**, une fois (1) et (2) faits : construire l'oracle des niveaux
+   peu profonds dans le disque de Jung, mesurer $m_e$, $Z_e$ et les
+   dégénérescences, puis comparer au surgraphe certifié $G_\tau$. Un parcours
+   de toutes les paires de tiers, même précédé d'un épaississement RNG, conserve
+   le verrou quadratique local.
 
 ---
 

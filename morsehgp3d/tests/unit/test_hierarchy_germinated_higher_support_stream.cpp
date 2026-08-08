@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <iostream>
 #include <sstream>
@@ -40,6 +41,7 @@ using morsehgp3d::hierarchy::GerminatedHigherSupportEvent;
 using morsehgp3d::hierarchy::GerminatedHigherSupportResult;
 using morsehgp3d::hierarchy::LocalGerminationCertificate;
 using morsehgp3d::hierarchy::LocalGerminationConfig;
+using morsehgp3d::hierarchy::LocalGerminationGuard;
 using morsehgp3d::hierarchy::build_germinated_higher_support_stream;
 using morsehgp3d::hierarchy::enumerate_exhaustive_higher_support_events;
 using morsehgp3d::spatial::CanonicalPointCloud;
@@ -124,9 +126,9 @@ void check_cell(
   const std::string cell = label.str();
 
   LocalGerminationConfig config;
-  // The seed loop stays exhaustive over pairs: that is what makes the
-  // enumeration complete without any further argument, and completeness is
-  // exactly what this differential is testing.
+  // The seed loop stays exhaustive over pairs so this finite differential
+  // isolates the internal proposal gates; it does not promote their binary64
+  // decisions to a universal certificate.
   config.seed_neighbourhood_cutoff_multiple = 0U;
   config.tangent_direction_count = 0U;
 
@@ -143,6 +145,17 @@ void check_cell(
       germinated.production_identity_holds,
       cell + " : l'identite de production tient (" +
           germinated.refusal_reason + ')');
+  for (const LocalGerminationCertificate& certificate :
+       germinated.certificates) {
+    if (certificate.applicable) {
+      require(
+          certificate.executed &&
+              !certificate.floating_rejections_certified &&
+              !certificate.completeness_guaranteed(),
+          cell +
+              " : une arite applicable a forge une preuve binary64 absente");
+    }
+  }
 
   // The property that decides everything: the same accepted set.
   require(
@@ -242,6 +255,63 @@ void check_deduplication_and_containment() {
   }
 }
 
+// The two certificate slots have three distinct states: executed, excluded by
+// the requested rank, and applicable but skipped after an earlier operational
+// deadline.  None may be inferred from a zero counter payload.
+void check_certificate_lifecycle_states() {
+  const CanonicalPointCloud cloud = CanonicalPointCloud::rejecting_duplicates(
+      uniform_latin_points(12U));
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  LocalGerminationConfig config;
+  config.seed_neighbourhood_cutoff_multiple = 0U;
+  config.tangent_direction_count = 0U;
+
+  const GerminatedHigherSupportResult rank_three =
+      build_germinated_higher_support_stream(index, cloud, 3U, config);
+  const LocalGerminationCertificate& executed = rank_three.certificates[0];
+  const LocalGerminationCertificate& not_applicable =
+      rank_three.certificates[1];
+  require(
+      rank_three.production_identity_holds && executed.applicable &&
+          executed.executed && executed.support_size == 3U &&
+          !executed.floating_rejections_certified &&
+          !executed.completeness_guaranteed(),
+      "an executed arity-three certificate lost its lifecycle state");
+  require(
+      !not_applicable.applicable && !not_applicable.executed &&
+          not_applicable.support_size == 4U &&
+          not_applicable.maximum_relevant_closed_rank == 3U &&
+          !not_applicable.completeness_guaranteed(),
+      "a rank-excluded arity-four slot was not explicitly non-applicable");
+
+  LocalGerminationGuard expired_guard;
+  expired_guard.armed = true;
+  expired_guard.deadline = std::chrono::steady_clock::now();
+  expired_guard.seed_pairs_per_deadline_test = 1U;
+  const GerminatedHigherSupportResult censored =
+      build_germinated_higher_support_stream(
+          index, cloud, 4U, config, expired_guard);
+  const LocalGerminationCertificate& censored_arity_three =
+      censored.certificates[0];
+  const LocalGerminationCertificate& skipped_arity_four =
+      censored.certificates[1];
+  require(
+      censored.censored_by_operational_deadline &&
+          censored.production_identity_holds &&
+          censored_arity_three.applicable && censored_arity_three.executed &&
+          censored_arity_three.censored_by_operational_deadline &&
+          !censored_arity_three.completeness_guaranteed(),
+      "the censored executed arity was not reported honestly");
+  require(
+      skipped_arity_four.applicable && !skipped_arity_four.executed &&
+          skipped_arity_four.support_size == 4U &&
+          skipped_arity_four.maximum_relevant_closed_rank == 4U &&
+          skipped_arity_four.proof_basis.empty() &&
+          !skipped_arity_four.censored_by_operational_deadline &&
+          !skipped_arity_four.completeness_guaranteed(),
+      "the post-deadline arity was mistaken for a complete certificate");
+}
+
 }  // namespace
 
 int main() {
@@ -252,6 +322,7 @@ int main() {
   check_cell("eight_clusters", eight_clusters_points(24U), 5U);
   check_cell("eight_clusters", eight_clusters_points(32U), 9U);
   check_deduplication_and_containment();
+  check_certificate_lifecycle_states();
 
   if (failures != 0) {
     std::cerr << failures << " verification(s) en echec\n";

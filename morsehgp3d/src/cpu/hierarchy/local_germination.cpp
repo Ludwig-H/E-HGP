@@ -316,7 +316,7 @@ struct AxisAlignedBox {
   return dx * dx + dy * dy + dz * dz;
 }
 
-// Certified upper bound on the tangent radius R(p).
+// Binary64 proposal for the geometrically certified upper bound on R(p).
 //
 // A radius is ADMISSIBLE when some direction still permits a ball through p of
 // that radius holding at most s_max points.  For a direction covering a cap of
@@ -405,6 +405,17 @@ std::size_t sealed_tangent_covering_radius_millidegrees(
 bool local_germination_certificate_admissible(
     const LocalGerminationCertificate& certificate, std::string& reason) {
   reason.clear();
+  // This verifier certifies a generator invocation that returned.  Lifecycle
+  // placeholders (whether non-applicable or merely not executed yet) are
+  // honest stream state, but they are not completeness certificates.
+  if (!certificate.applicable) {
+    reason = "certificate_not_applicable";
+    return false;
+  }
+  if (!certificate.executed) {
+    reason = "certificate_not_executed";
+    return false;
+  }
   if (certificate.proof_basis != local_germination_proof_basis) {
     reason = "proof_basis";
     return false;
@@ -470,8 +481,8 @@ bool local_germination_certificate_admissible(
     return false;
   }
 
-  // The three regimes must be internally consistent, and only two of them
-  // guarantee completeness.
+  // The three regimes must be internally consistent.  The first two can close
+  // the seed-source argument, but neither certifies the floating rejection path.
   using Restriction = LocalGerminationCertificate::SeedRestriction;
   switch (certificate.seed_restriction) {
     case Restriction::exhaustive_over_pairs:
@@ -512,6 +523,19 @@ bool local_germination_certificate_admissible(
     reason = "completeness_basis_declared";
     return false;
   }
+  // This proof basis seals the geometric constants, not the binary64
+  // implementation of every rejection.  Until outward intervals and exact
+  // fallbacks exist, a producer may honestly report false but may not forge a
+  // certified floating path.
+  if (certificate.floating_rejections_certified) {
+    reason = "floating_rejections_claimed_certified_without_interval_proof";
+    return false;
+  }
+  if (certificate.censored_by_operational_deadline ==
+      (certificate.unexamined_seed_pair_count == 0U)) {
+    reason = "operational_deadline_accounting";
+    return false;
+  }
   return true;
 }
 
@@ -520,6 +544,14 @@ bool local_germination_production_identity_holds(
     const LocalGerminationProductionAudit& audit,
     std::string& reason) {
   reason.clear();
+  if (!certificate.applicable) {
+    reason = "certificate_not_applicable";
+    return false;
+  }
+  if (!certificate.executed) {
+    reason = "certificate_not_executed";
+    return false;
+  }
   const LocalGerminationCounters& counters = certificate.counters;
 
   // The arity of a run is exclusive: a run for triples emits no quadruple and
@@ -586,6 +618,22 @@ bool local_germination_resume_induction_holds(
   reason.clear();
   // A resumed run is the same run.  Any declared constant that moved makes the
   // successor a different producer, whose records may not be appended.
+  if (previous.applicable != successor.applicable) {
+    reason = "applicability_changed";
+    return false;
+  }
+  if (previous.executed != successor.executed) {
+    reason = "execution_state_changed";
+    return false;
+  }
+  if (!previous.applicable) {
+    reason = "resume_certificate_not_applicable";
+    return false;
+  }
+  if (!previous.executed) {
+    reason = "resume_certificate_not_executed";
+    return false;
+  }
   if (previous.proof_basis != successor.proof_basis) {
     reason = "proof_basis_changed";
     return false;
@@ -645,6 +693,37 @@ bool local_germination_resume_induction_holds(
     return false;
   }
 
+  if (previous.censored_by_operational_deadline ==
+      (previous.unexamined_seed_pair_count == 0U)) {
+    reason = "previous_operational_deadline_accounting";
+    return false;
+  }
+  if (successor.censored_by_operational_deadline ==
+      (successor.unexamined_seed_pair_count == 0U)) {
+    reason = "successor_operational_deadline_accounting";
+    return false;
+  }
+
+  // This scalar conservation is necessary but not sufficient for coverage.
+  // No cursor or prefix digest currently identifies WHICH pairs were examined,
+  // so sealing stays disabled below even when this arithmetic holds.  Wide
+  // addition prevents a forged size_t wraparound from satisfying the equality.
+  const __uint128_t previous_seed_pair_total =
+      static_cast<__uint128_t>(previous.counters.pairs_examined) +
+      static_cast<__uint128_t>(previous.unexamined_seed_pair_count);
+  const __uint128_t successor_seed_pair_total =
+      static_cast<__uint128_t>(successor.counters.pairs_examined) +
+      static_cast<__uint128_t>(successor.unexamined_seed_pair_count);
+  if (previous_seed_pair_total != successor_seed_pair_total) {
+    reason = "seed_pair_total_changed";
+    return false;
+  }
+  if (successor.unexamined_seed_pair_count >
+      previous.unexamined_seed_pair_count) {
+    reason = "unexamined_seed_pair_count_increased";
+    return false;
+  }
+
   // The conserved quantity: a resumed run extends the accounting, it never
   // revises it.  Every counter is non-decreasing.
   const LocalGerminationCounters& before = previous.counters;
@@ -676,6 +755,19 @@ bool local_germination_resume_induction_holds(
                 "population_queries_went_backwards")) {
     return false;
   }
+  if (!previous.censored_by_operational_deadline &&
+      (before.pairs_examined != after.pairs_examined ||
+       before.pairs_retained != after.pairs_retained ||
+       before.third_vertices_examined != after.third_vertices_examined ||
+       before.third_vertices_free_rejected !=
+           after.third_vertices_free_rejected ||
+       before.third_vertices_retained != after.third_vertices_retained ||
+       before.triple_candidates != after.triple_candidates ||
+       before.quadruple_candidates != after.quadruple_candidates ||
+       before.population_queries != after.population_queries)) {
+    reason = "a_complete_seed_loop_was_extended";
+    return false;
+  }
   return true;
 }
 
@@ -696,20 +788,13 @@ LocalGerminationCertificate generate_local_germination_candidates(
   }
   if (config.maximum_relevant_closed_rank < support_size) {
     LocalGerminationCertificate empty;
-    empty.proof_basis = std::string{local_germination_proof_basis};
     empty.support_size = support_size;
     empty.maximum_relevant_closed_rank = config.maximum_relevant_closed_rank;
-    const auto theorem = theorem_jung_squared(support_size);
-    empty.jung_squared_numerator = theorem.first;
-    empty.jung_squared_denominator = theorem.second;
-    empty.seed_disc_ring_count = config.seed_disc_ring_count;
-    empty.segment_position_count = config.segment_position_count;
-    empty.certified_margin_exponent = config.certified_margin_exponent;
-    empty.seed_neighbourhood_cutoff_multiple =
-        config.seed_neighbourhood_cutoff_multiple;
-    empty.seed_loop_exhaustive_over_pairs =
-        config.seed_neighbourhood_cutoff_multiple == 0U &&
-        config.tangent_direction_count == 0U;
+    // No generator invocation took place and no proof basis was relied upon.
+    // The arity identity is still carried so callers can distinguish this
+    // canonical non-applicable slot from a default-constructed object.
+    empty.applicable = false;
+    empty.executed = false;
     return empty;
   }
   if (config.segment_position_count == 0U) {
@@ -771,6 +856,8 @@ LocalGerminationCertificate generate_local_germination_candidates(
   const std::size_t cap = config.maximum_relevant_closed_rank;
 
   LocalGerminationCertificate certificate;
+  certificate.applicable = true;
+  certificate.executed = true;
   certificate.proof_basis = std::string{local_germination_proof_basis};
   certificate.support_size = support_size;
   certificate.maximum_relevant_closed_rank =
@@ -1085,13 +1172,6 @@ ExactLocalGerminationChain::Seal ExactLocalGerminationChain::seal() {
   if (!genesis_admissible_) {
     return seal;
   }
-  std::string reason;
-  seal.completeness_certificate_verified =
-      local_germination_certificate_admissible(trusted_, reason);
-  if (!seal.completeness_certificate_verified) {
-    return seal;
-  }
-  seal.sealed = true;
   seal.certificate = trusted_;
   seal.committed_batch_count = committed_batch_count_;
   seal.event_count = events_.size();
@@ -1099,7 +1179,18 @@ ExactLocalGerminationChain::Seal ExactLocalGerminationChain::seal() {
   seal.mass_partition_identity_available =
       verification_basis_guarantees(seal.basis)
           .mass_partition_identity_available;
-  sealed_ = true;
+  // Three independent obligations remain unavailable in this API:
+  //   * a cursor or digest proving that resumes cover a contiguous suffix;
+  //   * an identity between accepted audit deltas and appended event payloads;
+  //   * certified outward intervals / exact fallbacks for every floating
+  //     rejection in the producer.
+  // A structurally admissible transcript is still useful diagnostically, but
+  // none of these facts may be inferred from its monotone counters.  The seal
+  // therefore stays explicitly false until the API can compute all three.
+  seal.contiguous_seed_pair_prefix_verified = false;
+  seal.accepted_payload_identity_verified = false;
+  seal.floating_rejections_verified = false;
+  seal.completeness_certificate_verified = false;
   return seal;
 }
 

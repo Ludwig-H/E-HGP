@@ -34,10 +34,24 @@ certifié**, tandis que celui-ci est produit par le régime dont la complétude
 est un théorème.
 
 > **Ce que la cellule ne dit pas.** Elle est **censurée** : la boucle de germes
-> s'est arrêtée à 99,92 %, donc `completeness_guaranteed` est faux et le run
-> n'est pas une énumération complète. Et elle ne couvre que l'**arité 3** :
-> l'arité 4 n'a jamais démarré, et elle représente 98,4 % de l'univers. Les
-> deux réserves sont dans les artefacts, pas seulement dans ce texte.
+> d'arité trois s'est arrêtée à 99,92 %, donc son
+> `completeness_guaranteed` est faux et le run n'est pas une énumération
+> complète. L'arité quatre n'a jamais démarré, alors qu'elle représente 98,4 %
+> de l'univers.
+
+> [!CAUTION]
+> **Erratum du schéma v1.** `dl_uniform_latin_50000.json` et les quatre cellules
+> `dl_eight_clusters_{1024,2048,4096,50000}.json` ont sérialisé pour cette arité
+> quatre non exécutée un objet initialisé par défaut : `proof_basis` vide,
+> `support_size=0`, tous les compteurs nuls, mais
+> `completeness_guaranteed=true`. Ce dernier champ est faux et ne doit pas être
+> lu comme un certificat. Les artefacts historiques restent immuables. Le
+> schéma `scale_probe.v2` ajoute `applicable`, `executed` et
+> `floating_rejections_certified`, ce qui rend ce placeholder non certifiant.
+> Ce dernier champ reste faux pour le prototype actuel. La conservation
+> scalaire des paires examinées et restantes ne prouve pas l'identité d'un
+> suffixe repris; sans curseur contigu, liaison audit--payload et replis exacts,
+> la chaîne reste volontairement non scellable.
 
 ## 2. Ce que la borne certifiée fait quand la densité monte
 

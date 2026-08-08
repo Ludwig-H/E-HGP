@@ -68,7 +68,7 @@ centrée est constante en $n$, donc un produit grossier contient les deux espèc
 presque sûrement et aucune porte ne peut décider. Cette architecture ne peut pas
 être sensible à la sortie.
 
-**Génération par germination certifiée.** Régime `certified_tangent_bound`,
+**Génération par germination à borne tangente certifiée.** Régime `certified_tangent_bound`,
 26 directions de rayon de recouvrement prouvé, $K=5$. Les paires retenues sont
 $\Theta(n)$ — 98,4 / 107,4 / 95,7 / 93,7 / 90,5 par point à
 $n = 2048 / 4096 / 8192 / 16384 / 50000$ — donc la fraction retenue tombe comme
@@ -77,12 +77,37 @@ $1/n$. À 50 000 points et pour l'**arité 3**, la boucle de germes parcourt
 2 482 617 supports acceptés, soit **12,02 candidats par record**.
 
 **Deux réserves qui font partie de la mesure.** Toutes les cellules à 50 000
-points sont **censurées** par un garde opérationnel et leurs certificats posent
-`completeness_guaranteed = false`. Et l'**arité 4**, qui est 98,4 % de
-l'univers, n'a été mesurée à aucune échelle : sa boucle ne porte aucun test
+points sont **censurées** par un garde opérationnel. Erratum de schéma : cinq
+artefacts historiques `scale_probe.v1` sérialisent pour l'arité quatre jamais
+exécutée un objet par défaut avec `completeness_guaranteed = true`. Leur
+`proof_basis` vide, leur `support_size = 0` et leurs compteurs nuls montrent
+qu'il s'agit d'un placeholder, pas d'un certificat; ces artefacts restent
+immuables. Le schéma v2 publie désormais `applicable`, `executed` et
+`floating_rejections_certified`. Le dernier reste faux : ni le différentiel
+borné ni la preuve de la constante tangente ne certifie les rejets `binary64`
+du producteur sur tout nuage. La chaîne de reprise reste non scellable sans
+curseur contigu, identité audit--payload et repli exact des comparaisons
+flottantes. L'**arité 4**, qui est 98,4 % de
+l'univers, n'a été mesurée à aucune échelle 50 k : sa boucle ne porte aucun test
 géométrique et produit $\binom{|\text{tiers retenus}|}{2}$ candidats par paire,
 soit environ $10^5$ par point aux tailles où elle termine, ce qui projette
 ~2 300 candidats par record à 50 000 points.
+
+L'audit RNG--Jung postérieur ne modifie aucune mesure. Il prouve que la cascade
+bornée $\alpha_2$ puis $\alpha_3$ d'un RNG épaissi depuis sa plus grande arête
+incidente reste incomplète, mais que l'arrangement des demi-plans ancré par une paire diamètre
+possède au rang fermé 11 au plus huit sommets peu profonds par droite. Ce gain
+est local; nombre d'ancres, voisinages, construction exacte et kernel GPU
+restent à mesurer avant une nouvelle qualification. Voir
+[`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md).
+
+La campagne directe demandée ensuite est archivée dans
+[`phase15_rng_jung_g4_20260808/RESULTATS.md`](validation/phase15_rng_jung_g4_20260808/RESULTATS.md).
+La frontière paire CUDA y prend 2,395883 s seule et 3,927585 s à froid. Les
+deux sondes higher de 120 s ne sont pas des kernels G4 : l'exécutable lie le
+prototype `reference_cpu`, séquentiel, et l'arité quatre ne démarre jamais.
+L'audit sépare donc un composant GPU piloté par 66 synchronisations et environ
+15,9 millions de descripteurs, d'une germination qui laisse la G4 inactive.
 
 Sur `balanced_multiscale_clusters`, la borne certifiée ne mord pas : 21 695
 paires examinées sur 1 249 975 000 en 2 400 s à 50 000 points, 76 % retenues.

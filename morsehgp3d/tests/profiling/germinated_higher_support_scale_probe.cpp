@@ -1,4 +1,4 @@
-// What the certified germination generator costs at the contract's scale.
+// What the local germination proposal generator costs at the contract's scale.
 //
 // The question this answers has never been asked.  Selectivity was measured at
 // n=512 -- 1.81 % of the arity-three universe on uniform_latin, 81.24 % on
@@ -16,11 +16,10 @@
 //
 // The seed regime matters and is a command-line choice, because the two are
 // not the same claim:
-//   --seed-regime exhaustive   O(n^2) pairs, complete without further argument
+//   --seed-regime exhaustive   O(n^2) pairs, exhaustive seed source
 //   --seed-regime certified    D <= 2 R(p) under a direction set whose covering
-//                              radius is sealed with a proof; complete by
-//                              theorem, and the only regime that can run at
-//                              50 000 points
+//                              radius is sealed with a proof; the current
+//                              binary64 evaluation is still proposal-only
 //
 // Everything published here is profiling_only / not_claimed.  A probe measures
 // what an enumeration costs; it certifies no pipeline, closes no gate and
@@ -63,7 +62,7 @@ using morsehgp3d::spatial::MortonLbvhIndex;
 using Clock = std::chrono::steady_clock;
 
 constexpr std::string_view schema =
-    "morsehgp3d.germinated_higher_support.scale_probe.v1";
+    "morsehgp3d.germinated_higher_support.scale_probe.v2";
 
 struct Options {
   std::size_t point_count{50000U};
@@ -74,8 +73,8 @@ struct Options {
   std::size_t seed_disc_ring_count{2U};
   std::size_t segment_position_count{16U};
   // Zero disarms the guard.  A censured run is an observation cut short by a
-  // session guard, never a budget and never a defect -- and its certificate
-  // stops claiming completeness, which is the whole point of recording it.
+  // session guard, never a budget and never a defect.  The lifecycle fields
+  // distinguish this additional incompleteness from the floating proof gap.
   std::size_t operational_deadline_ms{};
   std::string output_path;
 };
@@ -168,8 +167,14 @@ void emit_certificate(
     std::string_view key,
     const LocalGerminationCertificate& certificate) {
   out << "    \"" << key << "\":{"
+      << "\"applicable\":"
+      << (certificate.applicable ? "true" : "false") << ','
+      << "\"executed\":" << (certificate.executed ? "true" : "false")
+      << ','
       << "\"proof_basis\":\"" << certificate.proof_basis << "\","
       << "\"support_size\":" << certificate.support_size << ','
+      << "\"maximum_relevant_closed_rank\":"
+      << certificate.maximum_relevant_closed_rank << ','
       << "\"seed_restriction\":\""
       << restriction_name(certificate.seed_restriction) << "\","
       << "\"completeness_guaranteed\":"
@@ -185,6 +190,9 @@ void emit_certificate(
       << certificate.tangent_covering_radius_millidegrees << ','
       << "\"tangent_covering_radius_proved\":"
       << (certificate.tangent_covering_radius_proved ? "true" : "false") << ','
+      << "\"floating_rejections_certified\":"
+      << (certificate.floating_rejections_certified ? "true" : "false")
+      << ','
       << "\"pairs_examined\":" << certificate.counters.pairs_examined << ','
       << "\"pairs_retained\":" << certificate.counters.pairs_retained << ','
       << "\"third_vertices_examined\":"
@@ -255,6 +263,10 @@ int main(int argc, char** argv) {
     out << std::fixed << std::setprecision(3);
     out << "{\n"
         << "  \"schema\":\"" << schema << "\",\n"
+        << "  \"backend\":\"reference_cpu\",\n"
+        << "  \"profile\":\"hgp_reduced\",\n"
+        << "  \"mode\":\"single_thread_host_local_germination_with_exact_terminal_classification\",\n"
+        << "  \"cuda_execution_performed\":false,\n"
         << "  \"deployment_status\":\"profiling_only\",\n"
         << "  \"public_status\":\"not_claimed\",\n"
         << "  \"point_count\":" << cloud.size() << ",\n"

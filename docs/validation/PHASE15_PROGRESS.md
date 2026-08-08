@@ -2580,6 +2580,20 @@ une boucle exhaustive qui déclarerait une restriction, et un coupe-circuit sans
 multiple. L'induction de reprise refuse en outre un changement de régime en cours
 de chaîne.
 
+Le schéma de sonde v2 ajoute deux préconditions de cycle de vie : l'arité doit
+être `applicable` et son générateur `executed`. Cela corrige le placeholder v1
+non exécuté qui héritait du régime exhaustif par défaut et pouvait sérialiser
+`completeness_guaranteed=true` avec une base de preuve vide. Les artefacts v1
+restent historiques; seul leur champ de placeholder est déclaré non certifiant.
+Le même raccord ferme seulement l'ambiguïté de cycle de vie : le bit de censure
+équivaut à un reste de paires strictement positif et la somme des paires
+examinées et restantes est conservée entre deux certificats. Cette égalité est
+nécessaire, pas suffisante : aucun curseur ne prouve encore que la reprise
+couvre un suffixe contigu, et l'audit des supports acceptés n'est pas lié aux
+payloads ajoutés. En outre, les rejets `binary64` n'ont pas tous un intervalle
+extérieur ou un repli exact. `floating_rejections_certified` reste donc faux et
+`ExactLocalGerminationChain::seal()` refuse délibérément tout scellement.
+
 **Le calcul de $\bar R(p)$, et pourquoi il est sûr.** Pour une direction couvrant
 une calotte de demi-angle $\theta$, l'image de la calotte tient dans la boule de
 rayon $\rho\sin\theta$ autour de $p+\rho\cos\theta\,u$ : une calotte dont l'image

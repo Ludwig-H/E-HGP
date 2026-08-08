@@ -10,6 +10,7 @@ Le parcours normatif est volontairement court. Les notes de jalons antérieurs r
 | [Catalogue critique 3D](CATALOGUE_CRITIQUE_3D.md) | quels événements de Morse de support au plus quatre peuvent modifier $H_0$ ? |
 | [Catalogue exact des paires diamétrales](CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) | comment énumérer les rangs fermés deux à $K_{\max}+1$ avec payload complet et cutoff Yao48 exact ? |
 | [Frontière directe des supports trois et quatre](FRONTIERE_DIRECTE_SUPPORTS_3_4.md) | pourquoi les triangles aigus gardent-ils une frontière indépendante et quels tétraèdres restent ensuite ? |
+| [RNG, croissance de Jung et niveaux peu profonds](RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md) | quel graphe local peut rester sparse, pourquoi l'épaississement incident du RNG n'est pas une preuve, et comment le rang rend l'arité quatre linéaire par ancre à $K$ fixé ? |
 | [Incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) | pourquoi le flot Gabriel brut peut-il manquer une liaison hiérarchique ? |
 | [Attaches par miniball](ATTACHES_DESCENTE_MINIBALL.md) | comment rattacher un bras connu à sa composante globale ? |
 | [Hiérarchie de points multi-ordres](HIERARCHIE_DE_POINTS_MULTI_ORDRES.md) | comment réduire une tour certifiée en une hiérarchie laminaire de points, pondérer les contributions et produire les rendus lambda, DBSCAN et EOM ? |
@@ -22,8 +23,8 @@ Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$ et $s_{\max}=\min(K_{\mathrm{eff}}+1,
 1. injecter les événements ponctuels de rang un;
 2. exécuter une passe exacte multi-ordre des paires jusqu'au rang $s_{\max}$;
 3. fermer directement tous les candidats dont le support minimal est une paire;
-4. rechercher indépendamment les triangles affinement indépendants et aigus, en rejetant les cas de support deux;
-5. fermer séparément les tétraèdres portés par des supports inférieurs, puis rechercher indépendamment les quadruplets affinement indépendants dont le centre circonscrit est strictement intérieur;
+4. rechercher indépendamment les triangles affinement indépendants et aigus, au moyen d'un surgraphe local certifié ou d'une frontière fail-open, en rejetant les cas de support deux;
+5. fermer séparément les tétraèdres portés par des supports inférieurs, puis rechercher indépendamment les quadruplets affinement indépendants dont le centre circonscrit est strictement intérieur; la route de recherche à étudier emploie les niveaux peu profonds des demi-plans dans chaque disque de Jung, jamais une mosaïque de Delaunay d'ordre supérieur;
 6. classer le rang fermé et le shell complet de chaque support survivant;
 7. réduire les événements par lots de niveau exact, avec incidences silencieuses et attaches requises par le profil;
 8. publier seulement après fermeture des frontières et rejeu des certificats.
