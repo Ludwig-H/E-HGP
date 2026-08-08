@@ -164,10 +164,16 @@ $n_1d_2 - n_2d_1$ — **vérifié dans `include/morsehgp3d/exact/rational.hpp:10
 comparaisons à zéro, par comparaison.
 
 **Le plan de route existant désigne comme suite immédiate la cure R1-d sur ces comparaisons. C'est le
-levier C, plafonné par Amdahl à $\le 12{,}8\times$, et il ne touche pas l'exposant par construction —
-alors que le critère écrit dans le même document est « la pente doit baisser ».** Le faire avant
-d'attribuer le terme $O(n)$, ce serait répéter exactement l'erreur d'A1 : optimiser la fonction que le
-profil met en tête sans avoir compté ses appels.
+levier C, et il ne touche pas l'exposant par construction — alors que le critère écrit dans le même
+document est « la pente doit baisser ».** Le faire avant d'attribuer le terme $O(n)$, ce serait répéter
+exactement l'erreur d'A1 : optimiser la fonction que le profil met en tête sans avoir compté ses appels.
+
+> **Et son plafond est plus bas qu'annoncé.** Le $\le 12{,}8\times$ cité par le plan de route est le
+> plafond d'Amdahl de *rationnel $+$ churn $+$ provenance $=$ 92,19 %*, mesuré à $n=16$ **avant** A1.
+> A1 a retiré la provenance du sommet et en a déjà encaissé une part (1,65 $\times$ à 2,42 $\times$).
+> Sur le profil **post-A1** à $n=24$, la cure ne peut viser que les 62 % restants, soit
+> $1/(1-0{,}62) = \mathbf{2{,}63\times}$ au mieux. Les deux nombres sont justes et portent sur des
+> ensembles différents ; ne pas dépenser le 12,8 une seconde fois.
 
 ### 3.3 V-C — l'étage higher : deux facteurs indépendants, dont un seul est de la recherche
 
@@ -226,7 +232,7 @@ opérandes en fonction de $n$. Trois issues, trois correctifs **différents** :
   les niveaux seuls ne peuvent pas croître). Correctif **représentationnel** (dénominateur commun,
   largeur fixe). **Fait tomber la pente.**
 - **H3 — ni l'un ni l'autre** : les 62 % sont une constante, la cure R1-d est plafonnée à
-  $\le 12{,}8\times$ et **ne fera pas tomber la pente** ; le terme $O(n)$ est ailleurs, et **A2**
+  $\le 2{,}63\times$ et **ne fera pas tomber la pente** ; le terme $O(n)$ est ailleurs, et **A2**
   (mémoïsation du manifeste de source de forêt, qui hache le nuage) reste le candidat nommé et
   jamais exécuté.
 
