@@ -62,7 +62,44 @@ L'étage higher à n=64 passe de **257,2 s à 34,1 s**.
 > **Ce que cette mesure n'autorise pas.** Extrapoler $n^{-0{,}217}$ de 64 à
 > 50 000 serait refaire l'erreur de l'exposant $n^{0{,}559}$ du 7 août : un
 > ajustement sur 5,3× de plage ne détermine pas un comportement sur trois
-> décades. La tendance est mesurée sur $n \le 64$ et rien de plus.
+> décades.
+
+### 2 bis. La plage étendue à plus d'une décade — et la courbe s'aplatit
+
+Six tailles de plus, `ext_{72,80,88,96,112,128}.json`, protocole identique.
+Toutes rendent `pipeline_complete = true`. Le recensement du 7 août employait
+déjà $n=128$ ; il s'agit ici de profilage de coût unitaire, pas d'une échelle
+de validation.
+
+| n | 72 | 80 | 88 | 96 | 112 | 128 |
+|---:|---:|---:|---:|---:|---:|---:|
+| µs/visite | 27,34 | 27,01 | 26,15 | 26,12 | 25,55 | **25,49** |
+
+Sur les **18 points, $n = 12 \ldots 128$, soit 10,7× de plage** :
+$\text{µs/visite} = 63{,}97\,n^{-0{,}197}$.
+
+**Mais la loi n'est pas une droite, et il faut le dire.** De 64 à 128 le coût ne
+perd que 7,3 %, soit $n^{-0{,}085}$ localement, contre $n^{-0{,}23}$ sur le bas
+de la plage. **Le coût tend vers un plancher, il ne s'effondre pas.** Aucune
+extrapolation vers 50 000 n'est faite ici, et la pente locale au sommet de la
+plage est le seul chiffre qu'on ait le droit d'employer pour en discuter.
+
+### 2 ter. Ce que cela fait au contrat
+
+Le budget du contrat A est de **21 680 ns par record** à $K{=}5$ sur 48 cœurs,
+**2 694 ns** à $K{=}10$. Avec un générateur parfait — une visite par record —
+le coût unitaire se compare directement :
+
+| | µs/visite | contre budget K=5 | contre budget K=10 |
+|---|---:|---:|---:|
+| scellé du 7 août | 204,78 | **9,45 ×** | **76,01 ×** |
+| mesuré ici, n=64 | 27,50 | **1,27 ×** | 10,21 × |
+| mesuré ici, n=128 | 25,49 | **1,18 ×** | 9,46 × |
+
+Le facteur de **coût unitaire** que le plan de route chiffrait à « ~10× à K=5,
+~75× à K=10 » vaut désormais **1,18×** et **9,46×**. Ce qui reste de l'écart au
+contrat sur cet étage est **entièrement** le nombre de visites par record, donc
+le générateur. C'est le seul résultat de fond de cette session.
 
 ---
 
@@ -116,7 +153,56 @@ les coordonnées ne tiennent pas dans la largeur bornée.
 
 ---
 
-## 5. Ce que la session ne prétend pas
+## 5. La réaction GPU à l'échelle du contrat, et le mur qui n'a pas bougé
+
+**La frontière paire device à 50 000 points, rang fermé 11, se reproduit au bit
+près** (`gpu_pair_50k_r11.json`, build CUDA sur l'hôte en 3 min 31) :
+
+| | 7 août scellé | 8 août |
+|---|---:|---:|
+| candidats | 7 962 604 | **7 962 604** |
+| masse élaguée certifiée | 1 242 012 396 | **1 242 012 396** |
+| visites de nœud physiques | 32 875 936 | **32 875 936** |
+| tuiles / chunks | 13 / 27 | **13 / 27** |
+| `output_digest_fnv1a` | 5926722894454807801 | **5926722894454807801** |
+| lanceur | 2,434 s | 2,377 s |
+| recertification hôte | 8,628 s | 8,447 s |
+
+Fermeture exacte : $7\,962\,604 + 1\,242\,012\,396 = 1\,249\,975\,000 = \binom{50000}{2}$,
+`unresolved_pair_mass = 0`, 50 000 ancres complètes. Les 2 % d'écart sur les
+durées sont de la variation entre exécutions : **cet étage est déjà borné
+dyadique** (`exact_dyadic_anchor_phi`) et le travail de cette session ne le
+touche pas. `every_prune_fully_recertified` reste `false`.
+
+**L'étage higher device-tiled n'a pas bougé** : `--higher-backend
+device_tiled_session --higher-verification-basis tile_certified`, 240 s de
+délai, **zéro événement accepté à $n=400$ et à $n=1000$**, exactement comme le
+7 août. C'est cohérent et il faut l'écrire : le facteur gagné porte sur
+l'analyse **hôte**, et ce chemin-là est borné par le **nombre de produits
+explorés**, pas par le coût de chacun.
+
+## 6. Le prochain incrément, désigné par le profil
+
+Profil callgrind refait sur G4 à $n=32$ après correctifs (45,2 Gi instructions,
+l'étage higher pèse 96 % du run), coûts **exclusifs** :
+
+| poste | part |
+|---|---:|
+| `subtract_unsigned` (non borné) | **18,81 %** |
+| `gcd` (non borné) | **15,42 %** |
+| `eval_multiply` **int1024 borné** | 12,20 % |
+| SHA-256 canonique | 7,38 % |
+| `memset` | 4,23 % |
+| autres bornés int1024 | ~9,4 % |
+
+**34,2 % restent de l'arithmétique rationnelle non bornée**, contre 12,2 % pour
+la voie bornée. Ce n'est plus l'analyse de produit — c'est la **classification
+terminale**, dont les centres et niveaux exacts sont des rapports de
+déterminants : leurs dénominateurs ne sont **pas** des puissances de deux, donc
+la voie rapide dyadique ne les attrape pas et le PGCD reste. C'est le prochain
+incrément, il est local, et il ne demande pas de GPU.
+
+## 7. Ce que la session ne prétend pas
 
 - Aucun run n'est de bout en bout à 50 000 points. L'étage paire hôte n'y rend
   toujours pas la main, donc l'étage higher n'y est toujours pas atteignable.

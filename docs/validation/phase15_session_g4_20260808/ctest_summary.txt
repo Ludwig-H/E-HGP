@@ -1,0 +1,5 @@
+99% tests passed, 2 tests failed out of 245
+Total Test time (real) = 126.85 sec
+	181 - morsehgp3d.point_hierarchy_sklearn_differential (Skipped)
+	182 - morsehgp3d.point_hierarchy_quality_campaign_contract (Failed)
+	228 - morsehgp3d.predicate_campaign_differential (Failed)
