@@ -135,17 +135,28 @@ même nuage compte $334\,979$ tétraèdres
 (`docs/validation/phase14_geogram_low_order_g4_16d8308.json`) : la sortie visée
 est environ 54 fois cet objet, pour onze ordres.
 
-## 3. Hypothèses de domaine, explicites
+## 3. Hypothèses de domaine : n'en prendre que le strict minimum
 
-- **Position générale pour la filtration de ČECH** : aucune coquille
-  cosphérique. Accordée par l'utilisateur le 8 août pour les nuages réels visés.
-  Elle reste **détectée et déclarée**, jamais supposée en silence — la v2 a
-  montré ce que coûte le silence (une hiérarchie incomplète publiée comme
-  autoritaire).
-- **Grille entière** $[0,2^{16})^3$. Toutes les largeurs sont bornées
-  statiquement à partir de là, et la borne doit être *vérifiée*, pas supposée :
+**Principe.** La correction du générateur doit être **inconditionnelle** ; seule
+sa *sélectivité* a le droit de dépendre des données, et elle doit alors être
+**mesurée et publiée**, jamais supposée. C'est la même discipline que la v2 a
+apprise à ses dépens sur les coquilles cosphériques : ce qui n'est pas déclaré
+sort quand même, en se disant autoritaire.
+
+Liste close des hypothèses admises :
+
+- **Un ensemble fini de points de $\mathbb{R}^3$, quantifié sur la grille
+  entière** $[0,2^{16})^3$. Toutes les largeurs sont bornées statiquement à
+  partir de là, et la borne doit être *vérifiée*, pas supposée :
   `WARNING_AUDIT_PUBLICATION_3.md` §2.1 exhibe un triangle entier dont le
   numérateur carré ne tient pas dans un `i128`.
+- **Position générale pour la filtration de ČECH** : aucune coquille
+  cosphérique. Accordée par l'utilisateur le 8 août pour les nuages réels visés.
+  Elle reste **détectée et déclarée**, jamais supposée en silence.
+
+Et rien d'autre. En particulier **ni surface, ni volume, ni densité, ni forme
+étoilée, ni origine capteur** — voir §10, où ces tentations sont examinées puis
+écartées.
 - **L'égalité de deux longueurs d'arête n'est PAS écartée.** Contrairement à la
   cosphéricité, elle est fréquente sur une grille entière. C'est une contrainte
   de conception, pas une hypothèse (§4.2).
@@ -426,7 +437,56 @@ découpage possible.
 - **Traitement complet des coquilles cosphériques** : hors modèle par hypothèse,
   mais l'obligation reste ouverte (`morsehgp3D_v2/DESIGN.md` §6.4).
 
-## 10. Le risque qui domine tous les autres : le nuage réel est une surface
+## 10. Le nuage cible, et les hypothèses qu'il est tentant de prendre
+
+### 10.0 Ce qu'on sait du nuage cible
+
+Le nuage de référence du projet est un relevé LiDAR
+(`HGP-old/tests/SemanticKITTI`), et l'utilisateur a précisé le 8 août que
+**certains nuages sont recomposés à partir de plusieurs captations**. Il faut
+donc traiter, sous le même code : un balayage unique, une accumulation le long
+d'une trajectoire, et un assemblage de poses recalées.
+
+**Trois hypothèses tentantes, toutes écartées.**
+
+| tentation | ce qu'elle donnerait | pourquoi elle est écartée |
+| --- | --- | --- |
+| forme étoilée depuis le capteur | vacuité gratuite derrière la surface | fausse dès deux captations |
+| image de distance $64\times2048$ | voisinages $O(1)$, tuile GPU naturelle | pas de paramétrisation commune à plusieurs poses |
+| « le nuage est une surface » | dimension intrinsèque 2 | l'erreur de recalage donne une **épaisseur**, donc un régime *localement volumétrique* sous l'échelle du bruit |
+
+Le troisième point est le plus instructif : le régime **dépend de l'échelle** —
+volumétrique sous le bruit de recalage, surfacique au-dessus, espace libre
+au-delà. Toute borne qui suppose une dimension intrinsèque est donc fausse à au
+moins une échelle. C'est un argument de plus pour un générateur **paramétré par
+le diamètre $D$**, comme la cascade de JUNG, dont les lemmes sont métriques et
+ne supposent rien.
+
+L'image de distance reste admissible comme **accélérateur optionnel**, jamais
+comme support de la correction : si l'entrée déclare cette structure, on peut
+l'utiliser pour produire des germes plus vite, mais le résultat doit être
+identique sans elle.
+
+### 10.1 Les collisions de quantification deviennent une condition de validité
+
+Deux captations de la même surface donnent des points distants de quelques
+millimètres ; la grille $2^{16}$ sur 100 m a un pas de $1{,}5$ mm. Des points
+**distincts peuvent donc fusionner**. Un doublon exact crée une sphère de rayon
+nul à deux points, et surtout des **cosphéricités que la donnée ne contient
+pas** : la quantification *fabrique* la dégénérescence que le §3 autorise à
+écarter dans le réel.
+
+`WARNING_AUDIT_PUBLICATION_3.md` §3 notait déjà qu'« aucune couche ne compte les
+collisions ». Sur un nuage multi-captation, cela cesse d'être un défaut de reçu
+pour devenir une **condition de validité** : le nombre de collisions doit être
+compté, publié, et non nul doit retirer l'autorité — exactement comme une
+coquille cosphérique.
+
+### 10.2 La sélectivité doit être publiée, pas supposée
+
+Tous les chiffres de ce document — 615 points peu profonds, paires retenues en
+$\Theta(n)$, $1{,}8\cdot10^{7}$ objets — sont mesurés sur des nuages **uniformes
+volumétriques**, et rien ne dit qu'ils transfèrent.
 
 Tous les chiffres de ce document — 615 points peu profonds, paires retenues en
 $\Theta(n)$, $1{,}8\cdot10^{7}$ objets — sont mesurés sur des nuages **uniformes
@@ -444,14 +504,38 @@ de $R(p)$ ne l'exclut ».
 Cela ne casse pas la complétude de A1, qui reste un théorème, ni la validité de
 la coupe, qui reste prouvée. Cela casserait sa **sélectivité**, donc le budget.
 
+**Conception qui en découle.** Un nuage sur lequel la coupe ne mord pas ne doit
+pas produire un résultat faux : il doit produire un résultat *lent*, et le reçu
+doit le dire. Le reçu publie donc, par exécution : la distribution de $\tau$, le
+taux de rétention à chaque étage de la cascade, la part du travail passée en
+régime « grand $D$ », et le nombre de collisions de quantification. C'est la
+seule façon honnête de tenir un contrat de temps sur une famille de nuages qu'on
+ne maîtrise pas.
+
 Et cela pose une question antérieure à toute implémentation : **sur un
 nuage-surface, à quoi ressemble la sortie elle-même ?** Il existe réellement
 d'énormes sphères critiques posées sur la surface par l'extérieur, et elles font
 partie de la hiérarchie exacte. Le $1{,}8\cdot10^{7}$ du §2 n'a jamais été mesuré
 là.
 
-**Mesure à faire avant d'écrire une ligne de v3** — trois nombres sur un scan
-SemanticKITTI décimé à 50 k : combien de points de profondeur de \textsc{Tukey}
-$\leq K$, combien de paires germes retenues, combien d'objets en sortie. Si la
-surface fait tomber la sélectivité, ce n'est pas l'architecture qu'il faut
-changer, c'est le contrat de 100 ms qu'il faut réénoncer.
+### 10.3 Ce qui reste vrai quoi qu'il arrive
+
+La sélectivité de la coupe $D\leq 2R$ est data-dépendante, mais **ce n'est pas
+elle qui porte la sélectivité du germe** : c'est **J7**, le test de vacuité du
+disque, qui ne fait aucun usage de $R$. Pour une paire $(p,q)$, il rejette dès
+que toute boule de rayon $\approx D/2$ centrée dans le disque médiateur est
+sur-peuplée. Cela ne suppose rien sur le nuage. Ce qui varie d'un nuage à
+l'autre, c'est **combien** il rejette — donc, encore, une quantité à mesurer et
+à publier.
+
+**Mesures à faire avant d'écrire une ligne de v3**, sur de vrais nuages, y
+compris multi-captation, décimés à 50 k :
+
+1. le taux de rétention de J7 par étage — c'est **la** mesure ;
+2. la distribution de $\tau$, donc la part du travail en régime « grand $D$ » ;
+3. le nombre d'objets en sortie, jamais mesuré hors du volumétrique uniforme ;
+4. le nombre de collisions de quantification (§10.1) ;
+5. la taille de la triangulation de DELAUNAY, qui décide du sort de A3.
+
+Si la sélectivité tombe, ce n'est pas l'architecture qu'il faut changer, c'est le
+contrat de 100 ms qu'il faut réénoncer — et le dire.
