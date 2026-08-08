@@ -1307,6 +1307,28 @@ set_tests_properties(
 )
 
 add_executable(
+  morsehgp3d_germinated_higher_support_scale_probe
+  ../profiling/germinated_higher_support_scale_probe.cpp
+)
+target_link_libraries(
+  morsehgp3d_germinated_higher_support_scale_probe
+  PRIVATE morsehgp3d::higher_support
+)
+target_compile_features(
+  morsehgp3d_germinated_higher_support_scale_probe PRIVATE cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_germinated_higher_support_scale_probe PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_germinated_higher_support_scale_probe
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_exact_higher_support_output_census
   ../profiling/exact_higher_support_output_census.cpp
 )
