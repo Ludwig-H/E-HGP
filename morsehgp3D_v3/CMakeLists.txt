@@ -43,6 +43,15 @@ target_link_libraries(mhgp3v_oracle PRIVATE mhgp)
 target_compile_options(mhgp3v_oracle PRIVATE -Wall -Wextra -Wpedantic)
 
 enable_testing()
+
+function(mhgp3v_add_expected_failure_test name expected)
+  add_test(NAME ${name} COMMAND ${CMAKE_COMMAND}
+           "-DPROGRAM=$<TARGET_FILE:mhgp3v_oracle>"
+           "-DEXPECTED=${expected}"
+           "-DARGUMENTS=${ARGN}"
+           -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
+endfunction()
+
 add_test(NAME mhgp3v_arith_selftest COMMAND mhgp3v_arith_selftest 20000)
 # La porte par defaut tire ses coordonnees sur la GRILLE DECLAREE, et impose des
 # planchers : une campagne vide ou censuree ne peut pas rendre OK.
@@ -60,10 +69,67 @@ add_test(NAME mhgp3v_oracle_anchored_high_arity COMMAND mhgp3v_oracle --subject 
          --regime exhaustive --clouds 8 --seed 90210 --min-points 9 --max-points 12
          --max-order 3 --min-decided 6 --min-nodes 60)
 
+# Non-regression PERMANENTE du faux certificat local : sous une fenetre supposee
+# de 16 voisins sur 22 points, le generateur doit se declarer incomplet. La
+# version fautive annonçait les 22 ancres certifiees et omettait un support.
+add_test(NAME mhgp3v_false_certificate_regression COMMAND mhgp3v_oracle --subject anchored
+         --regime assumed_window --seed-neighbours 16 --clouds 1 --seed 4242
+         --min-points 22 --max-points 22 --max-order 1 --min-decided 1 --min-nodes 1
+         --require-incomplete-anchors 22)
+
+# Bornes semantiques du CLI : une valeur syntaxiquement valide mais hors contrat
+# doit rendre 2 AVANT toute arithmetique.
+mhgp3v_add_expected_failure_test(mhgp3v_cli_order_overflow "campagne absurde"
+  --subject anchored --measure-only --regime exhaustive --points 1 --clouds 1
+  --max-order 2147483647)
+
 # Campagne NEGATIVE : chaque faute injectee doit etre attrapee. Un garde qui ne
 # se declenche jamais ne vaut rien.
-foreach(fault member_unsorted rotated_centre sentinel n_children roots merge_source_foreign)
+foreach(fault member_unsorted rotated_centre sentinel n_children roots)
   add_test(NAME mhgp3v_oracle_inject_${fault} COMMAND mhgp3v_oracle
            --inject ${fault} --clouds 4 --seed 4242 --min-points 8 --max-points 10
            --max-order 2 --min-decided 1 --min-nodes 1)
+  set_tests_properties(mhgp3v_oracle_inject_${fault} PROPERTIES
+    PASS_REGULAR_EXPRESSION "appliquee exactement une fois.*garde vise declenche exactement une fois")
 endforeach()
+
+# Deux vraies sources de rang 2 et de meme niveau exact, mais contributrices a
+# deux composantes disjointes : ce test isole le garde de contribution sans que
+# le rang, le niveau ou la monotonie puissent le faire rougir a sa place.
+add_test(NAME mhgp3v_oracle_inject_merge_source_foreign COMMAND mhgp3v_oracle
+         --inject merge_source_foreign --fixture foreign_source_same_level
+         --subject v2 --clouds 1 --min-points 4 --max-points 4 --max-order 1
+         --coord-max 2 --min-decided 1 --min-nodes 7)
+set_tests_properties(mhgp3v_oracle_inject_merge_source_foreign PROPERTIES
+  PASS_REGULAR_EXPRESSION "appliquee exactement une fois.*garde vise declenche exactement une fois")
+
+# Une campagne ou aucun sujet n'est admissible ne doit jamais devenir verte par
+# les seuls echecs de plancher.
+#
+mhgp3v_add_expected_failure_test(
+  mhgp3v_oracle_inject_vacuity_guard
+  "campagne SUPPORT doit etre verte avant tout probe hostile"
+  --inject member_unsorted --clouds 1 --seed 4242 --min-points 8 --max-points 8
+  --max-order 1 --coord-max 1 --min-decided 1 --min-nodes 1)
+
+# Une cocyclicite portee uniquement par des triangles non bien centres ne met
+# pas le domaine des sphères critiques hors RelevantGP. L'ancienne mesure de
+# census censurait a tort tout le nuage ancre.
+add_test(NAME mhgp3v_oracle_noncritical_shell_tie COMMAND mhgp3v_oracle
+         --fixture noncritical_shell_tie --subject anchored --regime exhaustive
+         --clouds 1 --min-points 4 --max-points 4 --max-order 2 --coord-max 2000
+         --min-decided 1 --min-nodes 1)
+
+# Interface fail-closed : token entier partiel, reçu non ecrit et option ignoree
+# doivent tous fournir un code non nul ET le diagnostic attendu.
+mhgp3v_add_expected_failure_test(mhgp3v_cli_reject_integer_suffix
+  "valeur entiere invalide" --clouds 1junk)
+mhgp3v_add_expected_failure_test(mhgp3v_receipt_write_failure
+  "ecriture du recu incomplete"
+  --fixture foreign_source_same_level --subject v2 --clouds 1 --min-points 4
+  --max-points 4 --max-order 1 --coord-max 2 --min-decided 1 --min-nodes 1
+  --receipt /dev/full)
+mhgp3v_add_expected_failure_test(mhgp3v_measure_receipt_rejected
+  "measure-only ne prend encore ni --receipt ni --inject"
+  --subject anchored --measure-only --regime exhaustive --points 4 --clouds 1
+  --max-order 1 --receipt ignored.json)

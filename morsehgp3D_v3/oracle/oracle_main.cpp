@@ -537,11 +537,11 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
   for (std::size_t t = 0; t < subject.nodes.size(); ++t) {
     const mhgp::ForestNode& node = subject.nodes[t];
     if (node.source < 0 || node.source >= static_cast<mhgp::i32>(catalogue.spheres.size())) {
-      campaign->fail("STRUCTURE STRUCTURE noeud sans sphere source" + tag);
+      campaign->fail("STRUCTURE noeud sans sphere source" + tag);
       return;
     }
     if (node.kind != 0 && node.kind != 1) {
-      campaign->fail("STRUCTURE STRUCTURE genre inconnu" + tag); return;
+      campaign->fail("STRUCTURE genre inconnu" + tag); return;
     }
     // Sentinelle STRICTE : le contrat reserve -1 ; -2 et au-dela doivent rougir.
     if (node.parent < -1 || node.first_child < -1 || node.next_sibling < -1) {
@@ -550,11 +550,11 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
       return;
     }
     if (node.parent >= static_cast<mhgp::i32>(subject.nodes.size())) {
-      campaign->fail("STRUCTURE STRUCTURE parent hors bornes" + tag); return;
+      campaign->fail("STRUCTURE parent hors bornes" + tag); return;
     }
     if (node.first_child >= static_cast<mhgp::i32>(subject.nodes.size())
         || node.next_sibling >= static_cast<mhgp::i32>(subject.nodes.size())) {
-      campaign->fail("STRUCTURE STRUCTURE lien d'adjacence hors bornes" + tag); return;
+      campaign->fail("STRUCTURE lien d'adjacence hors bornes" + tag); return;
     }
     // La sphere source d'une multifusion doit etre de rang k+1, celle d'une
     // naissance de rang k : une source de meme niveau mais sans rapport passait.
@@ -562,7 +562,7 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
         catalogue.spheres[static_cast<std::size_t>(node.source)];
     const int wanted_rank = node.kind == 0 ? order : order + 1;
     if (source.rank != wanted_rank) {
-      campaign->fail("STRUCTURE STRUCTURE rang de la sphere source " + std::to_string(source.rank)
+      campaign->fail("STRUCTURE rang de la sphere source " + std::to_string(source.rank)
                      + " contre " + std::to_string(wanted_rank) + tag);
       return;
     }
@@ -574,12 +574,12 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     for (mhgp::i32 child = subject.nodes[t].first_child; child >= 0;) {
       ++children_from_links[t];
       if (subject.nodes[static_cast<std::size_t>(child)].parent != static_cast<mhgp::i32>(t)) {
-        campaign->fail("STRUCTURE STRUCTURE enfant dont le parent ne correspond pas" + tag);
+        campaign->fail("STRUCTURE enfant dont le parent ne correspond pas" + tag);
         return;
       }
       child = subject.nodes[static_cast<std::size_t>(child)].next_sibling;
       if (children_from_links[t] > static_cast<int>(subject.nodes.size())) {
-        campaign->fail("STRUCTURE STRUCTURE cycle dans la liste d'enfants" + tag);
+        campaign->fail("STRUCTURE cycle dans la liste d'enfants" + tag);
         return;
       }
     }
@@ -596,7 +596,7 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     std::sort(members.begin(), members.end());
     auto it = minimum_index.find(members);
     if (it == minimum_index.end()) {
-      campaign->fail("STRUCTURE STRUCTURE minimum inconnu de la reference " + set_to_text(members) + tag);
+      campaign->fail("STRUCTURE minimum inconnu de la reference " + set_to_text(members) + tag);
       return;
     }
     subject_closure[t] = {it->second};
@@ -608,7 +608,7 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     const mhgp::ForestNode& node = subject.nodes[t];
     if (node.parent < 0) continue;
     if (node.parent <= static_cast<mhgp::i32>(t)) {
-      campaign->fail("STRUCTURE STRUCTURE parent d'index inferieur au sien" + tag);
+      campaign->fail("STRUCTURE parent d'index inferieur au sien" + tag);
       return;
     }
     std::vector<int>& target = subject_closure[static_cast<std::size_t>(node.parent)];
@@ -639,7 +639,7 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     campaign->widest_bits =
         std::max(campaign->widest_bits, canonical.level.widest_bit_length());
     if (!subject_map.emplace(subject_closure[t], canonical).second) {
-      campaign->fail("STRUCTURE STRUCTURE deux noeuds du sujet de meme fermeture" + tag);
+      campaign->fail("STRUCTURE deux noeuds du sujet de meme fermeture" + tag);
       return;
     }
   }
@@ -652,30 +652,30 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     canonical.arity = static_cast<int>(reference.nodes[t].children.size());
     canonical.is_root = reference.nodes[t].parent < 0;
     if (!reference_map.emplace(reference.nodes[t].minima_closure, canonical).second) {
-      campaign->fail("STRUCTURE STRUCTURE deux noeuds de reference de meme fermeture" + tag);
+      campaign->fail("STRUCTURE deux noeuds de reference de meme fermeture" + tag);
       return;
     }
   }
 
   if (subject_map.size() != reference_map.size())
-    campaign->fail("STRUCTURE STRUCTURE nombre canonique de noeuds " + std::to_string(subject_map.size())
+    campaign->fail("STRUCTURE nombre canonique de noeuds " + std::to_string(subject_map.size())
                    + " contre " + std::to_string(reference_map.size()) + tag);
 
   for (const auto& entry : reference_map) {
     auto it = subject_map.find(entry.first);
     if (it == subject_map.end()) {
-      campaign->fail("STRUCTURE STRUCTURE noeud absent du sujet " + set_to_text(entry.first) + tag);
+      campaign->fail("STRUCTURE noeud absent du sujet " + set_to_text(entry.first) + tag);
       continue;
     }
     ++campaign->nodes;
-    if (it->second.kind != entry.second.kind) campaign->fail("STRUCTURE STRUCTURE genre" + tag);
+    if (it->second.kind != entry.second.kind) campaign->fail("STRUCTURE genre" + tag);
     if (compare(it->second.level, entry.second.level) != 0)
-      campaign->fail("STRUCTURE STRUCTURE niveau exact " + set_to_text(entry.first) + tag);
+      campaign->fail("STRUCTURE niveau exact " + set_to_text(entry.first) + tag);
     if (it->second.arity != entry.second.arity)
-      campaign->fail("STRUCTURE STRUCTURE arite " + std::to_string(it->second.arity) + " contre "
+      campaign->fail("STRUCTURE arite " + std::to_string(it->second.arity) + " contre "
                      + std::to_string(entry.second.arity) + " " + set_to_text(entry.first) + tag);
     if (it->second.is_root != entry.second.is_root)
-      campaign->fail("STRUCTURE STRUCTURE racine " + set_to_text(entry.first) + tag);
+      campaign->fail("STRUCTURE racine " + set_to_text(entry.first) + tag);
   }
   // La source doit avoir CONTRIBUE, pas seulement avoir le bon rang et le bon
   // niveau : une sphere etrangere passait ce garde.
@@ -692,7 +692,7 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
   }
   for (const auto& entry : subject_map)
     if (reference_map.find(entry.first) == reference_map.end())
-      campaign->fail("STRUCTURE STRUCTURE noeud superflu du sujet " + set_to_text(entry.first) + tag);
+      campaign->fail("STRUCTURE noeud superflu du sujet " + set_to_text(entry.first) + tag);
 
   for (std::size_t t = 0; t < subject.nodes.size(); ++t) {
     const mhgp::ForestNode& node = subject.nodes[t];
@@ -703,9 +703,9 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
     const Rational above = exact_level_of(
         catalogue.spheres[static_cast<std::size_t>(parent.source)].sph);
     if (compare(child, above) > 0)
-      campaign->fail("STRUCTURE STRUCTURE niveau decroissant vers le parent" + tag);
+      campaign->fail("STRUCTURE niveau decroissant vers le parent" + tag);
     if (node.kind == 1 && parent.kind == 1 && compare(child, above) == 0)
-      campaign->fail("STRUCTURE STRUCTURE chaine de fusions de meme niveau" + tag);
+      campaign->fail("STRUCTURE chaine de fusions de meme niveau" + tag);
   }
   // Champs publics annonces : ils doivent etre compares, pas recalcules en
   // silence depuis les parents.
@@ -719,15 +719,15 @@ void compare_forests(const mhgp::Catalogue& catalogue, const mhgp::Forest& subje
                      "STRUCTURE n_children incoherent" + tag);
     if (node.parent < 0) roots.push_back(static_cast<mhgp::i32>(t));
   }
-  if (subject.order != order) campaign->fail("STRUCTURE STRUCTURE ordre publie" + tag);
-  if (subject.births != births) campaign->fail("STRUCTURE STRUCTURE compteur de naissances" + tag);
-  if (subject.merge_events != merges) campaign->fail("STRUCTURE STRUCTURE compteur de fusions" + tag);
-  if (subject.killed != killed) campaign->fail("STRUCTURE STRUCTURE compteur de morts" + tag);
+  if (subject.order != order) campaign->fail("STRUCTURE ordre publie" + tag);
+  if (subject.births != births) campaign->fail("STRUCTURE compteur de naissances" + tag);
+  if (subject.merge_events != merges) campaign->fail("STRUCTURE compteur de fusions" + tag);
+  if (subject.killed != killed) campaign->fail("STRUCTURE compteur de morts" + tag);
   if (subject.roots != roots)
     campaign->fail(Campaign::FailureCode::forest_roots,
                    "STRUCTURE liste des racines" + tag);
   if (subject.unresolved_arms != 0 || subject.censored_events != 0 || !subject.authoritative)
-    campaign->fail("STRUCTURE STRUCTURE foret censuree dans une campagne positive" + tag);
+    campaign->fail("STRUCTURE foret censuree dans une campagne positive" + tag);
   ++campaign->forests;
 }
 
@@ -794,7 +794,7 @@ bool compare_catalogues(const mhgp::Catalogue& subject,
   for (const mhgp::CriticalSphere& sphere : subject.spheres) {
     std::string why;
     if (!subject_record_is_readable(subject, sphere, s_max, point_count, &why)) {
-      campaign->fail("LECTURE LECTURE " + why + tag);
+      campaign->fail("LECTURE " + why + tag);
       return false;
     }
   }
@@ -804,24 +804,24 @@ bool compare_catalogues(const mhgp::Catalogue& subject,
     for (mhgp::i32 i = 0; i < sphere.n_support; ++i)
       support.push_back(static_cast<int>(sphere.support[i]));
     if (!by_support.emplace(support, &sphere).second)
-      campaign->fail("CATALOGUE CATALOGUE support en double " + set_to_text(support) + tag);
+      campaign->fail("CATALOGUE support en double " + set_to_text(support) + tag);
   }
   if (by_support.size() != subject.spheres.size())
-    campaign->fail("CATALOGUE CATALOGUE doublons de support" + tag);
+    campaign->fail("CATALOGUE doublons de support" + tag);
   if (by_support.size() != reference.size())
-    campaign->fail("CATALOGUE CATALOGUE cardinal " + std::to_string(by_support.size()) + " contre "
+    campaign->fail("CATALOGUE cardinal " + std::to_string(by_support.size()) + " contre "
                    + std::to_string(reference.size()) + tag);
 
   for (const ReferenceSphere& want : reference) {
     auto it = by_support.find(want.support);
     if (it == by_support.end()) {
-      campaign->fail("CATALOGUE CATALOGUE support manquant " + set_to_text(want.support) + tag);
+      campaign->fail("CATALOGUE support manquant " + set_to_text(want.support) + tag);
       continue;
     }
     ++campaign->catalogue_spheres;
     const mhgp::CriticalSphere& got = *it->second;
     if (got.rank != want.rank)
-      campaign->fail("CATALOGUE CATALOGUE rang " + set_to_text(want.support) + tag);
+      campaign->fail("CATALOGUE rang " + set_to_text(want.support) + tag);
     std::vector<int> members;
     for (mhgp::i32 i = 0; i < got.rank; ++i)
       members.push_back(static_cast<int>(
@@ -829,7 +829,7 @@ bool compare_catalogues(const mhgp::Catalogue& subject,
     std::vector<int> sorted = members;
     std::sort(sorted.begin(), sorted.end());
     if (sorted != want.members)
-      campaign->fail("CATALOGUE CATALOGUE membres " + set_to_text(want.support) + tag);
+      campaign->fail("CATALOGUE membres " + set_to_text(want.support) + tag);
     if (members != sorted)
       campaign->fail(Campaign::FailureCode::catalogue_members_unsorted,
                      "CATALOGUE tranche de membres non triee "
@@ -837,7 +837,7 @@ bool compare_catalogues(const mhgp::Catalogue& subject,
     const Rational level = exact_level_of(got.sph);
     campaign->widest_bits = std::max(campaign->widest_bits, level.widest_bit_length());
     if (compare(level, want.squared_radius) != 0)
-      campaign->fail("CATALOGUE CATALOGUE niveau exact " + set_to_text(want.support) + tag);
+      campaign->fail("CATALOGUE niveau exact " + set_to_text(want.support) + tag);
     // Le niveau ne suffit pas : un numerateur tourne garde la meme norme.
     const Vec3 centre = exact_centre_of(got.sph);
     if (compare(centre.x, want.centre.x) != 0 || compare(centre.y, want.centre.y) != 0
@@ -850,7 +850,7 @@ bool compare_catalogues(const mhgp::Catalogue& subject,
     for (const ReferenceSphere& want : reference)
       if (want.support == entry.first) { present = true; break; }
     if (!present)
-      campaign->fail("CATALOGUE CATALOGUE support superflu " + set_to_text(entry.first) + tag);
+      campaign->fail("CATALOGUE support superflu " + set_to_text(entry.first) + tag);
   }
   return true;
 }
@@ -961,34 +961,23 @@ InjectionProbe exercise_injection(const std::string& injection,
           continue;
         const mhgp::CriticalSphere& original =
             clean_catalogue.spheres[static_cast<std::size_t>(node.source)];
+        const Rational original_level = exact_level_of(original.sph);
         for (std::size_t si = 0; si < clean_catalogue.spheres.size(); ++si) {
           const mhgp::CriticalSphere& candidate = clean_catalogue.spheres[si];
           if (candidate.rank != forest_order + 1
               || static_cast<mhgp::i32>(si) == node.source)
             continue;
+          if (compare(exact_level_of(candidate.sph), original_level) != 0) continue;
 
-          // Le record hostile conserve les membres d'une sphere etrangere,
-          // mais recoit exactement le niveau de la vraie source. Le catalogue
-          // propre a deja ete juge : ce probe forestier isole donc le garde de
-          // contribution, sans pouvoir etre capture par le rang ou le niveau.
-          mhgp::Catalogue mutated_catalogue = clean_catalogue;
-          mhgp::CriticalSphere foreign = candidate;
-          foreign.sph = original.sph;
-          mutated_catalogue.spheres.push_back(foreign);
+          // La fixture dediee fournit deux VRAIES spheres du catalogue, de
+          // meme rang et de meme niveau exact, dans deux composantes disjointes.
+          // On ne fabrique donc aucun record hybride pour aider le garde teste.
           mhgp::Forest mutated_forest = clean_forests[fi];
-          mutated_forest.nodes[ni].source =
-              static_cast<mhgp::i32>(mutated_catalogue.spheres.size() - 1);
-
-          Campaign attempt;
-          compare_forests(mutated_catalogue, mutated_forest, expected, forest_order, trial,
-                          &attempt);
-          if (attempt.failures == 1
-              && attempt.failure_count(
-                     Campaign::FailureCode::forest_source_noncontributory) == 1) {
-            result.applied = true;
-            result.observed = std::move(attempt);
-            return result;
-          }
+          mutated_forest.nodes[ni].source = static_cast<mhgp::i32>(si);
+          result.applied = true;
+          compare_forests(clean_catalogue, mutated_forest, expected, forest_order, trial,
+                          &result.observed);
+          return result;
         }
       }
     }
@@ -1001,6 +990,8 @@ InjectionProbe exercise_injection(const std::string& injection,
 }  // namespace
 
 int main(int argc, char** argv) {
+  constexpr int kMaximumOraclePoints = 64;
+  constexpr int kMaximumDiagnosticPoints = 1'000'000;
   int clouds = 40;
   unsigned long long seed = 4242ULL;
   int minimum_points = 8, maximum_points = 11, maximum_order = 3;
@@ -1013,6 +1004,8 @@ int main(int argc, char** argv) {
   int seed_neighbours = 16;
   std::string regime = "exhaustive";
   std::string injection;
+  long long require_incomplete_anchors = -1;
+  std::string fixture;
 
   for (int i = 1; i < argc; ++i) {
     const std::string argument = argv[i];
@@ -1054,6 +1047,13 @@ int main(int argc, char** argv) {
     }
     else if (argument == "--regime") regime = next("--regime");
     else if (argument == "--inject") injection = next("--inject");
+    else if (argument == "--fixture") fixture = next("--fixture");
+    else if (argument == "--require-incomplete-anchors") {
+      if (!parse_decimal_option("--require-incomplete-anchors",
+                                next("--require-incomplete-anchors"),
+                                &require_incomplete_anchors)) return 2;
+    }
+    else if (argument == "--fixture") fixture = next("--fixture");
     else {
       std::printf("ECHEC : option inconnue %s\n", argument.c_str());
       return 2;
@@ -1065,7 +1065,8 @@ int main(int argc, char** argv) {
   // une campagne qui ne decide rien satisfait l'identite de fermeture et sort
   // avec le code 0 — exactement le defaut reproche a la porte de la v2.
   if (clouds <= 0 || minimum_points < 4 || maximum_points < minimum_points
-      || maximum_order < 1 || coordinate_maximum < 1
+      || maximum_points > kMaximumOraclePoints || maximum_order < 1
+      || maximum_order >= mhgp::kMaxRank || coordinate_maximum < 1
       || minimum_clouds_decided <= 0 || minimum_nodes <= 0 || fixed_points < 0
       || seed_neighbours <= 0
       || coordinate_maximum > mhgp::kCoordMax) {
@@ -1077,12 +1078,60 @@ int main(int argc, char** argv) {
     return 2;
   }
 
+  // Le parsing integral ne suffit pas : une valeur syntaxiquement valide mais
+  // hors contrat doit rendre 2 AVANT toute arithmetique. `maximum_order + 1`
+  // debordait sur 2147483647.
+  if (maximum_order > mhgp::kMaxRank - 1) {
+    std::printf("ECHEC : --max-order %d hors contrat (au plus %d, car s_max = ordre + 1 "
+                "et kMaxRank = %d)\n", maximum_order, mhgp::kMaxRank - 1, mhgp::kMaxRank);
+    return 2;
+  }
+  if (maximum_points > 4096) {
+    std::printf("ECHEC : --max-points %d hors contrat pour un oracle exhaustif\n",
+                maximum_points);
+    return 2;
+  }
+  if (fixed_points < 0 || fixed_points > 1000000) {
+    std::printf("ECHEC : --points %d hors contrat\n", fixed_points);
+    return 2;
+  }
+  if (seed_neighbours < 1 || seed_neighbours > 1000000) {
+    std::printf("ECHEC : --seed-neighbours %d hors contrat\n", seed_neighbours);
+    return 2;
+  }
+  if (clouds > 1000000) {
+    std::printf("ECHEC : --clouds %d hors contrat\n", clouds);
+    return 2;
+  }
+
   if (regime != "exhaustive" && regime != "assumed_window") {
     std::printf("ECHEC : regime inconnu %s (exhaustive ou assumed_window)\n", regime.c_str());
     return 2;
   }
   if (subject != "v2" && subject != "anchored") {
     std::printf("ECHEC : sujet inconnu %s (v2 ou anchored)\n", subject.c_str());
+    return 2;
+  }
+  if (!fixture.empty() && fixture != "foreign_source_same_level"
+      && fixture != "noncritical_shell_tie") {
+    std::printf("ECHEC : fixture inconnue %s\n", fixture.c_str());
+    return 2;
+  }
+  if (!fixture.empty()
+      && fixture == "foreign_source_same_level"
+      && (measure_only || subject != "v2" || clouds != 1 || minimum_points != 4
+          || maximum_points != 4 || maximum_order != 1 || coordinate_maximum != 2)) {
+    std::printf("ECHEC : la fixture foreign_source_same_level exige --subject v2 --clouds 1 "
+                "--min-points 4 --max-points 4 --max-order 1 --coord-max 2\n");
+    return 2;
+  }
+  if (fixture == "noncritical_shell_tie"
+      && (measure_only || subject != "anchored" || regime != "exhaustive" || clouds != 1
+          || minimum_points != 4 || maximum_points != 4 || maximum_order != 2
+          || coordinate_maximum != 2000)) {
+    std::printf("ECHEC : la fixture noncritical_shell_tie exige --subject anchored "
+                "--regime exhaustive --clouds 1 --min-points 4 --max-points 4 "
+                "--max-order 2 --coord-max 2000\n");
     return 2;
   }
 
@@ -1096,7 +1145,8 @@ int main(int argc, char** argv) {
   // Il ne sert qu'a publier la distribution du voisinage CERTIFIE, c'est-a-dire
   // le chiffre que la v2 ne pouvait pas produire. Il ne qualifie rien.
   if (measure_only) {
-    if (subject != "anchored" || fixed_points <= 0) {
+    if (subject != "anchored" || fixed_points <= 0
+        || fixed_points > kMaximumDiagnosticPoints || maximum_order >= fixed_points) {
       std::printf("ECHEC : --measure-only exige --subject anchored et --points N\n");
       return 2;
     }
@@ -1126,22 +1176,34 @@ int main(int argc, char** argv) {
       const auto quantile = [&](double q) {
         return sizes[static_cast<std::size_t>(q * static_cast<double>(sizes.size() - 1))];
       };
-      long long strata_total = 0, centred_total = 0;
+      long long incidence_total = 0, centred_incidence_total = 0;
       for (int m = 1; m <= 4; ++m) {
-        strata_total += anchored.strata[m];
-        centred_total += anchored.strata_centred[m];
+        incidence_total += anchored.canonical_support_incidence[m];
+        centred_incidence_total += anchored.centred_support_incidence[m];
       }
-      std::printf("  strates par arite (candidat / bien centre / emis) :");
+      std::printf("  incidences support-ancre par arite (candidate / bien centree) :");
       for (int m = 1; m <= 4; ++m)
-        std::printf("  m=%d %lld/%lld", m, anchored.strata[m], anchored.strata_centred[m]);
-      std::printf("\n  strates totales=%lld bien centrees=%lld (%.1f %%) | emises=%zu "
-                  "| strates par sphere emise=%.2f | candidats par sphere emise=%.1f\n",
-                  strata_total, centred_total,
-                  100.0 * static_cast<double>(centred_total) / static_cast<double>(strata_total),
-                  catalogue.spheres.size(),
-                  static_cast<double>(strata_total) / static_cast<double>(catalogue.spheres.size()),
-                  static_cast<double>(anchored.candidates)
-                      / static_cast<double>(catalogue.spheres.size()));
+        std::printf("  m=%d %lld/%lld", m, anchored.canonical_support_incidence[m],
+                    anchored.centred_support_incidence[m]);
+      const double centred_percent =
+          incidence_total > 0
+              ? 100.0 * static_cast<double>(centred_incidence_total)
+                    / static_cast<double>(incidence_total)
+              : 0.0;
+      const double incidences_per_emitted =
+          catalogue.spheres.empty()
+              ? 0.0
+              : static_cast<double>(incidence_total)
+                    / static_cast<double>(catalogue.spheres.size());
+      const double candidates_per_emitted =
+          catalogue.spheres.empty()
+              ? 0.0
+              : static_cast<double>(anchored.candidates)
+                    / static_cast<double>(catalogue.spheres.size());
+      std::printf("\n  incidences totales=%lld bien centrees=%lld (%.1f %%) | emises=%zu "
+                  "| incidences par sphere emise=%.2f | candidats par sphere emise=%.1f\n",
+                  incidence_total, centred_incidence_total, centred_percent,
+                  catalogue.spheres.size(), incidences_per_emitted, candidates_per_emitted);
       std::printf("status=diagnostic_only regime=%s n=%d s_max=%d | spheres=%zu (%.1f/point) | "
                   "fenetre SUFFISANTE p50=%d p95=%d p99=%d max=%d moyenne=%.1f | fenetre employee "
                   "moyenne=%.1f | candidats=%lld temoins=%lld | paires=%lld | non exhaustives=%d "
@@ -1165,15 +1227,32 @@ int main(int argc, char** argv) {
 
   for (int trial = 0; trial < clouds; ++trial) {
     ++campaign.attempted;
-    const int n = minimum_points
-                + static_cast<int>(rng() % static_cast<unsigned long long>(
-                      maximum_points - minimum_points + 1));
-    const int order = 1 + static_cast<int>(rng() % static_cast<unsigned long long>(maximum_order));
+    int n = minimum_points
+          + static_cast<int>(rng() % static_cast<unsigned long long>(
+                maximum_points - minimum_points + 1));
+    int order = 1 + static_cast<int>(rng() % static_cast<unsigned long long>(maximum_order));
+    std::vector<mhgp::P3> points;
+    if (fixture == "foreign_source_same_level") {
+      // Deux arêtes disjointes de longueur 1. Leurs sphères de rang 2 ont le
+      // même niveau exact 1/4 et déclenchent deux multifusions distinctes.
+      points = {{0, 0, 2}, {2, 0, 0}, {0, 0, 1}, {1, 0, 0}};
+      n = static_cast<int>(points.size());
+      order = 1;
+    } else if (fixture == "noncritical_shell_tie") {
+      // Quatre points entiers cocycliques sur un arc court. Les triples portent
+      // une coquille supplementaire mais ne sont pas bien centres : ce tie est
+      // diagnostic, pas une degenerescence de sphère critique.
+      points = {{1065, 1000, 100}, {1063, 1016, 100},
+                {1060, 1025, 100}, {1056, 1033, 100}};
+      n = static_cast<int>(points.size());
+      order = 2;
+    } else {
+      points.resize(static_cast<std::size_t>(n));
+      for (int i = 0; i < n; ++i)
+        points[static_cast<std::size_t>(i)] =
+            mhgp::P3{coordinate(rng), coordinate(rng), coordinate(rng)};
+    }
     const int s_max = std::min(order + 1, n);
-    std::vector<mhgp::P3> points(static_cast<std::size_t>(n));
-    for (int i = 0; i < n; ++i)
-      points[static_cast<std::size_t>(i)] =
-          mhgp::P3{coordinate(rng), coordinate(rng), coordinate(rng)};
 
     int reference_degenerate = 0;
     const std::vector<ReferenceSphere> reference =
@@ -1230,19 +1309,19 @@ int main(int argc, char** argv) {
     if (reference_out) {
       ++campaign.rejected_domain;
       if (!subject_suppressed || !forests.empty())
-        campaign.fail("DOMAINE DOMAINE nuage hors domaine publie quand meme trial="
+        campaign.fail("DOMAINE nuage hors domaine publie quand meme trial="
                       + std::to_string(trial));
       continue;
     }
 
     // Une censure inattendue n'est PAS un succes : la campagne est positive.
     if (subject_suppressed || forests.empty()) {
-      campaign.fail("CENSURE CENSURE inattendue dans une campagne positive trial="
+      campaign.fail("CENSURE inattendue dans une campagne positive trial="
                     + std::to_string(trial));
       continue;
     }
     if (static_cast<int>(forests.size()) != order) {
-      campaign.fail("CENSURE CENSURE nombre de forets " + std::to_string(forests.size())
+      campaign.fail("CENSURE nombre de forets " + std::to_string(forests.size())
                     + " contre " + std::to_string(order) + " trial=" + std::to_string(trial));
       continue;
     }
@@ -1259,7 +1338,7 @@ int main(int argc, char** argv) {
     // vert, sur une copie, et sa comptabilite est distincte de la campagne
     // positive — un plancher ou un rejet de domaine ne peut donc pas servir de
     // preuve qu'une faute a ete attrapee.
-    if (!injection.empty() && campaign.failures == 0) {
+    if (!injection.empty() && injections_applied == 0 && campaign.failures == 0) {
       const InjectionProbe probe =
           exercise_injection(injection, catalogue, forests, reference, points, s_max, order, trial);
       if (probe.applied) {
@@ -1274,15 +1353,15 @@ int main(int argc, char** argv) {
   // ---- identite de fermeture ---------------------------------------------
   const bool closed = (campaign.attempted == campaign.decided + campaign.rejected_domain);
   if (!closed)
-    campaign.fail("CAMPAGNE CAMPAGNE identite non fermee : attempted="
+    campaign.fail("CAMPAGNE identite non fermee : attempted="
                   + std::to_string(campaign.attempted) + " decided="
                   + std::to_string(campaign.decided) + " rejected_domain="
                   + std::to_string(campaign.rejected_domain));
   if (campaign.decided < minimum_clouds_decided)
-    campaign.fail("CAMPAGNE CAMPAGNE plancher de nuages decides non atteint ("
+    campaign.fail("CAMPAGNE plancher de nuages decides non atteint ("
                   + std::to_string(campaign.decided) + ")");
   if (campaign.nodes < minimum_nodes)
-    campaign.fail("CAMPAGNE CAMPAGNE plancher de noeuds compares non atteint ("
+    campaign.fail("CAMPAGNE plancher de noeuds compares non atteint ("
                   + std::to_string(campaign.nodes) + ")");
 
   for (const std::string& message : campaign.first_failures)
@@ -1311,13 +1390,15 @@ int main(int argc, char** argv) {
       std::printf("ECHEC : recu non ecrit (%s)\n", receipt_path.c_str());
       return 1;
     }
-    std::fprintf(file,
+    const int written = std::fprintf(file,
         "{\n  \"schema\": \"morsehgp3d.v3.oracle.campaign.v1\",\n"
         "  \"subject\": \"%s\",\n"
         "  \"oracle_arithmetic\": \"arbitrary precision sign-magnitude base 2^32\",\n"
         "  \"oracle_geometry\": \"gauss elimination, not cramer\",\n"
         "  \"oracle_structure\": \"merge forest rebuilt from gamma_k\",\n"
-        "  \"regime\": \"%s\",\n  \"seed_neighbours\": %d,\n"
+        "  \"regime\": \"%s\",\n  \"fixture\": \"%s\",\n"
+        "  \"injection\": \"%s\",\n  \"injections_applied\": %lld,\n"
+        "  \"injection_escapes\": %lld,\n  \"seed_neighbours\": %d,\n"
         "  \"compiler\": \"" __VERSION__ "\",\n"
         "  \"built\": \"" __DATE__ " " __TIME__ "\",\n"
         "  \"seed\": %llu,\n  \"clouds_requested\": %d,\n"
@@ -1330,14 +1411,45 @@ int main(int argc, char** argv) {
         "  \"canonical_nodes_compared\": %lld,\n"
         "  \"widest_exact_level_bits\": %zu,\n  \"failures\": %lld\n}\n",
         subject == "v2" ? "morsehgp3D_v2 build_catalogue + run" : "mhgp3v anchored_catalogue",
-        regime.c_str(), seed_neighbours, seed, clouds, minimum_points, maximum_points,
+        regime.c_str(), fixture.c_str(), injection.c_str(), injections_applied,
+        injection_escapes, seed_neighbours, seed, clouds, minimum_points, maximum_points,
         maximum_order,
         static_cast<long long>(coordinate_maximum), static_cast<long long>(mhgp::kCoordMax),
         campaign.attempted, campaign.decided, campaign.rejected_domain,
         closed ? "true" : "false", minimum_clouds_decided, minimum_nodes,
         campaign.catalogue_spheres, campaign.forests,
         campaign.nodes, campaign.widest_bits, campaign.failures);
-    std::fclose(file);
+    if (written < 0 || std::fflush(file) != 0 || std::ferror(file) != 0) {
+      std::fclose(file);
+      std::printf("ECHEC : ecriture du recu incomplete (%s)\n", receipt_path.c_str());
+      return 1;
+    }
+    if (std::fclose(file) != 0) {
+      std::printf("ECHEC : fermeture du recu en erreur (%s)\n", receipt_path.c_str());
+      return 1;
+    }
+  }
+
+  // Non-regression du faux certificat local : sous une fenetre supposee trop
+  // etroite, le generateur DOIT se declarer incomplet. Si un certificat errone
+  // etait reintroduit, ce compteur retomberait a zero.
+  if (require_incomplete_anchors >= 0) {
+    if (subject != "anchored") {
+      std::printf("ECHEC : --require-incomplete-anchors exige --subject anchored\n");
+      return 2;
+    }
+    if (anchored_total.incomplete_anchors < require_incomplete_anchors) {
+      std::printf("ECHEC : %d ancres incompletes declarees, au moins %lld attendues — un "
+                  "certificat de localite errone a-t-il ete reintroduit ?\n",
+                  anchored_total.incomplete_anchors, require_incomplete_anchors);
+      return 1;
+    }
+    // Cette fixture ne juge PAS la completude : sous fenetre supposee le
+    // catalogue est legitimement incomplet, et les echecs ci-dessus le disent.
+    // Elle verifie une seule chose : que le generateur le DECLARE.
+    std::printf("OK : %d ancres se declarent incompletes sous fenetre supposee "
+                "(la completude n'est pas jugee ici)\n", anchored_total.incomplete_anchors);
+    return 0;
   }
 
   if (!injection.empty()) {
@@ -1346,9 +1458,9 @@ int main(int argc, char** argv) {
                   "(%lld echecs)\n", campaign.failures);
       return 1;
     }
-    if (injections_applied == 0) {
-      std::printf("ECHEC : aucune injection \"%s\" appliquee — campagne negative VACUE\n",
-                  injection.c_str());
+    if (injections_applied != 1) {
+      std::printf("ECHEC : l'injection \"%s\" devait etre appliquee exactement une fois, "
+                  "observe=%lld\n", injection.c_str(), injections_applied);
       return 1;
     }
     if (injection_escapes != 0) {
@@ -1356,9 +1468,8 @@ int main(int argc, char** argv) {
                   injection_escapes, injection.c_str());
       return 1;
     }
-    std::printf("OK : faute \"%s\" appliquee %lld fois, garde vise declenche exactement une "
-                "fois a chaque fois, aucun diagnostic etranger\n",
-                injection.c_str(), injections_applied);
+    std::printf("OK : faute \"%s\" appliquee exactement une fois, garde vise declenche "
+                "exactement une fois, aucun diagnostic etranger\n", injection.c_str());
     return 0;
   }
   if (campaign.failures != 0) {

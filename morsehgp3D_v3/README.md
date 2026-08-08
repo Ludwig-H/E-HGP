@@ -44,22 +44,32 @@ $s_{\max}=11$, calculée *a posteriori* depuis le vrai $r_{\max}$) :
 Elle **croît encore** : rien n'en est extrapolé.
 
 **Le coût d'un parcours sensible à la sortie est mesuré, et il est constant.**
-En comptant les **strates** — candidats affinement indépendants dont le point
-canonique a une profondeur $\leq s_{\max}-m$, c'est-à-dire ce qu'un parcours
-devrait visiter — contre ce qui est réellement émis (régime exhaustif,
+En comptant les **incidences de supports à l'ancre** — candidats affinement
+indépendants de rang fermé $\leq s_{\max}$, c'est-à-dire ce qu'un parcours
+devrait toucher ; ce ne sont pas des strates d'arrangement, le prototype n'en
+construit aucun — contre ce qui est réellement émis (régime exhaustif,
 $s_{\max}=11$) :
 
-| $n$ | strates | bien centrées | émises | **strates / émise** | candidats / émise |
+| $n$ | incidences | bien centrées | émises | **incidences / émise** | candidats / émise |
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 60 | 108 960 | 22,2 % | 7 520 | **14,49** | 273 |
 | 100 | 232 544 | 23,5 % | 16 767 | **13,87** | 965 |
 | 150 | 398 999 | 23,5 % | 28 637 | **13,93** | 2 889 |
 
-Un parcours visiterait $\approx14$ strates par sphère émise, **constant en $n$**,
+Un parcours toucherait $\approx14$ incidences par sphère émise, **constant en
+$n$**,
 là où la cascade en visite 273, 965 puis 2 889 — **croissant linéairement**. Le
 gain attendu est donc $\approx19\times$ à $n=60$, $70\times$ à 100 et
 $208\times$ à 150. C'est l'argument chiffré pour construire le constructeur de
 strates, et c'est la cible que PEL-2 doit atteindre.
+
+**Fixtures permanentes** (18 tests) : la non-régression du faux certificat — sous
+une fenêtre supposée trop étroite, le générateur doit se **déclarer incomplet**,
+sans quoi un certificat erroné aurait été réintroduit ; le refus des campagnes
+négatives vacues ; les bornes sémantiques du CLI, `--max-order 2147483647`
+débordant dans `maximum_order + 1` ; et une **cocyclicité portée uniquement par
+des triangles non bien centrés**, qui ne met pas le domaine hors `RelevantGP` —
+le prototype la comptait à tort comme dégénérescence et censurait le nuage.
 
 ---
 

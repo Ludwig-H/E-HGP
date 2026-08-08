@@ -64,12 +64,11 @@ struct AnchorStatistics {
   long long anchor_member_pairs = 0;
   long long degenerate_shells = 0;
   long long by_size[5] = {0, 0, 0, 0, 0};
-  // STRATES : candidats affinement independants dont le point canonique a une
-  // profondeur au plus s_max - m, par arite m. C'est ce qu'un parcours sensible
-  // a la sortie devrait visiter. `strata_centred` en est la part bien centree,
-  // c'est-a-dire ce qui peut etre emis.
-  long long strata[5] = {0, 0, 0, 0, 0};
-  long long strata_centred[5] = {0, 0, 0, 0, 0};
+  // INCIDENCES support--ancre : chaque support affinement independant est
+  // compte une fois pour chacune de ses ancres. Ce ne sont PAS des strates de
+  // l'arrangement A2p : aucun hyperplan n'est subdivise ici.
+  long long canonical_support_incidence[5] = {0, 0, 0, 0, 0};
+  long long centred_support_incidence[5] = {0, 0, 0, 0, 0};
 };
 
 struct AnchoredSupport {
@@ -178,8 +177,8 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
 
     std::vector<AnchoredSupport> found;
     long long candidates = 0, witness_tests = 0, degenerate = 0;
-    long long strata[5] = {0, 0, 0, 0, 0};
-    long long strata_centred[5] = {0, 0, 0, 0, 0};
+    long long canonical_support_incidence[5] = {0, 0, 0, 0, 0};
+    long long centred_support_incidence[5] = {0, 0, 0, 0, 0};
     mhgp::i128 largest_diameter_squared = 0;
     bool largest_valid = false;
     mhgp::Sphere largest{};
@@ -215,15 +214,20 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
               if (!std::binary_search(support.begin(), support.end(), z)) extra_on_shell = true;
             }
             emitted.members.push_back(z);
-            if (static_cast<int>(emitted.members.size()) > s_max) { too_many = true; break; }
+            if (static_cast<int>(emitted.members.size()) > s_max) too_many = true;
           }
-          // Comptage des strates : le rang ferme est au plus s_max, que la
-          // strate soit bien centree ou non.
+          // Incidence du support a cette ancre, avant deduplication globale.
+          // Le rang ferme est au plus s_max, bien centre ou non.
           if (!too_many) {
-            ++strata[size];
-            if (centred) ++strata_centred[size];
+            ++canonical_support_incidence[size];
+            if (centred) ++centred_support_incidence[size];
           }
-          if (extra_on_shell) ++degenerate;
+          // Une coquille supplementaire portee par un candidat NON bien centre
+          // n'est pas une degenerescence du domaine : ce candidat n'est de toute
+          // facon pas une sphere critique. La reference et la v2 ne comptent la
+          // cospherie qu'apres le test de bon centrage ; le prototype le faisait
+          // avant, et declarait donc des nuages hors domaine a tort.
+          if (centred && extra_on_shell) ++degenerate;
           if (centred && !too_many && !extra_on_shell && on_shell == size) {
             std::sort(emitted.members.begin(), emitted.members.end());
             emitted.support = support;
@@ -279,8 +283,8 @@ inline bool anchored_supports(const std::vector<mhgp::P3>& points, mhgp::i32 anc
     pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
     statistics->anchor_member_pairs = static_cast<long long>(pairs.size());
     for (int m = 1; m <= 4; ++m) {
-      statistics->strata[m] += strata[m];
-      statistics->strata_centred[m] += strata_centred[m];
+      statistics->canonical_support_incidence[m] += canonical_support_incidence[m];
+      statistics->centred_support_incidence[m] += centred_support_incidence[m];
     }
     *out = std::move(found);
     // La completude n'est vraie QUE par exhaustivite.
@@ -301,8 +305,8 @@ struct AnchoredCampaign {
   int sufficient_max = 0;
   double sufficient_mean = 0.0;
   long long degenerate_shells = 0;
-  long long strata[5] = {0, 0, 0, 0, 0};
-  long long strata_centred[5] = {0, 0, 0, 0, 0};
+  long long canonical_support_incidence[5] = {0, 0, 0, 0, 0};
+  long long centred_support_incidence[5] = {0, 0, 0, 0, 0};
   int incomplete_anchors = 0;   // ancres non exhaustives : resultat NON complet
   int exhaustive_anchors = 0;
   std::vector<AnchorStatistics> per_anchor;
@@ -328,8 +332,8 @@ inline mhgp::Catalogue anchored_catalogue(const std::vector<mhgp::P3>& points, i
     campaign->anchor_member_pairs += statistics.anchor_member_pairs;
     campaign->degenerate_shells += statistics.degenerate_shells;
     for (int m = 1; m <= 4; ++m) {
-      campaign->strata[m] += statistics.strata[m];
-      campaign->strata_centred[m] += statistics.strata_centred[m];
+      campaign->canonical_support_incidence[m] += statistics.canonical_support_incidence[m];
+      campaign->centred_support_incidence[m] += statistics.centred_support_incidence[m];
     }
     campaign->neighbourhood_max = std::max(campaign->neighbourhood_max, statistics.neighbourhood);
     campaign->sufficient_max = std::max(campaign->sufficient_max, statistics.sufficient_neighbours);
