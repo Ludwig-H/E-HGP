@@ -1,0 +1,23 @@
+{
+  "schema":"morsehgp3d.germinated_higher_support.scale_probe.v1",
+  "deployment_status":"profiling_only",
+  "public_status":"not_claimed",
+  "point_count":1024,
+  "family":"uniform_latin",
+  "maximum_order":5,
+  "maximum_relevant_closed_rank":6,
+  "seed_regime":"certified",
+  "timings_ms":{"generation":0.846,"lbvh":0.278,"germination_and_classification":1671628.978},
+  "production_identity_holds":true,
+  "refusal_reason":"",
+  "accepted_events":10922,
+  "duplicate_accepted_emissions":0,
+  "classification":{"classified":104071398,"affinely_dependent":37578,"boundary_reduced":0,"exterior_circumcenter":103819554,"above_rank":203344,"extra_shell":0,"accepted":10922,"closed_ball_query_count":214266,"closed_ball_node_visit_count":8488345},
+  "certificates":{
+    "arity3":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":3,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":true,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":523776,"pairs_retained":74550,"third_vertices_examined":2474365,"third_vertices_retained":279945,"triple_candidates":279945,"quadruple_candidates":0,"population_queries":25868657},
+    "arity4":{"proof_basis":"jung_diameter_seed_disc_and_segment_covering_completeness_v1","support_size":4,"seed_restriction":"certified_tangent_bound","completeness_guaranteed":true,"tangent_direction_count":26,"tangent_covering_radius_millidegrees":27570,"tangent_covering_radius_proved":true,"pairs_examined":523776,"pairs_retained":188672,"third_vertices_examined":18864061,"third_vertices_retained":2401767,"triple_candidates":0,"quadruple_candidates":103791453,"population_queries":173437500}
+  },
+  "candidates_per_record":9528.603,
+  "microseconds_per_classified_support":16.062,
+  "microseconds_per_record":153051.545
+}
