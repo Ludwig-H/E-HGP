@@ -5,6 +5,13 @@ voisinage relatif au graphe pondéré des facettes $\Gamma_K$. On sépare ici ce
 qui est **utilisable tout de suite**, ce qui **corrige une conclusion du dépôt**,
 et ce qui **ne répond pas au problème mesuré**.
 
+> **Portée de ce document.** Il porte sur les §1–§6 du rapport. La note complète
+> (`morsehgp3d/RNG_HGP_simplexes_interet_GPU.md`, 1 009 lignes) contient en outre
+> §8 génération sans mosaïque, §9 pipeline GPU, §10 exactitude et limites, §11–§13.
+> Ces sections sont auditées séparément dans
+> [`AUDIT_RNG_HGP_SIMPLEXES_GPU.md`](AUDIT_RNG_HGP_SIMPLEXES_GPU.md), **qui corrige
+> l'objection 3 du §4 ci-dessous**.
+
 ---
 
 ## 1. Ce qui corrige une conclusion du dépôt
@@ -96,11 +103,16 @@ Trois raisons de ne pas l'engager pour le contrat 50 000 points :
    témoins puis deux tests exacts de miniball. Le budget mesuré est de 2 667 ns
    par record sur 48 cœurs à $K=10$ ; six recherches de voisinage n'y tiennent
    pas.
-3. **Elle casse les masses du chapitre 9.** Le rapport le signale lui-même :
-   l'équivalence porte sur $\pi_0$, pas sur une fonctionnelle décorant le
-   complexe. Supprimer un simplexe de Gabriel redondant avant d'accumuler sa
-   contribution modifie $S_\tau = \sum_{\sigma \supset \tau} \psi(\rho(\sigma))$,
-   donc la condensation et le vote pondéré.
+3. ~~**Elle casse les masses du chapitre 9.**~~ **Objection retirée** — voir
+   [`AUDIT_RNG_HGP_SIMPLEXES_GPU.md`](AUDIT_RNG_HGP_SIMPLEXES_GPU.md) §5. Le §10.5 de la
+   note complète traite explicitement le point et le résout : on accumule la contribution
+   de **chaque** simplexe de Gabriel, et on ne filtre que les arêtes du graphe de fusion.
+   $S_\tau = \sum_{\sigma \supset \tau} \psi(\rho(\sigma))$ est préservé exactement.
+
+   **Mais la correction renforce l'objection 1 au lieu de l'affaiblir** : puisque les masses
+   exigent de toute façon *tous* les simplexes de Gabriel, RNG-HGP ne peut **structurellement
+   pas** réduire l'énumération — qui est le coût dominant à $2{,}604\cdot10^{17}$. Ce n'est
+   plus un argument de séquencement, c'est une impossibilité.
 
 Elle reste un objet à considérer **si l'on veut une représentation plus mince à
 hiérarchie identique**, une fois le contrat tenu — pas pour le tenir.
