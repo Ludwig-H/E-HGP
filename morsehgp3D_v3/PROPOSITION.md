@@ -5,8 +5,8 @@
 > était encore en cours. Aucun code n'existe dans ce dossier. Toute mesure citée
 > ci-dessous porte sa provenance ; ce qui est conjecturé est marqué comme tel.
 >
-> Ce document doit être relu quand les mesures en attente (§8) seront tombées :
-> elles peuvent invalider le §5.
+> Mise à jour du 8 août au soir : l'investigation a rendu quatre axes sur cinq.
+> Le §1 et le §11 en portent les conclusions. La recommandation est au **§11**.
 
 ## 1. Pourquoi une v3, et ce qui n'est pas en cause
 
@@ -539,3 +539,139 @@ compris multi-captation, décimés à 50 k :
 
 Si la sélectivité tombe, ce n'est pas l'architecture qu'il faut changer, c'est le
 contrat de 100 ms qu'il faut réénoncer — et le dire.
+
+
+## 11. Recommandation
+
+Onze décisions, chacune adossée à une mesure ou à une preuve de ce document.
+
+### D1. Faire la v3
+
+Le générateur de la v2 n'est pas lent, il est **condamné** : $\Theta(n^5)$ mesuré
+(§1.1), $\approx 92$ s à 50 k même avec le théorème 4 exact (§1.2), et une
+obstruction que nulle borne ne franchit — $1{,}23\ \%$ des points ont
+$\tau=+\infty$ **par définition du nuage** (§1.3). Le réparer serait le remplacer.
+
+### D2. Générateur : germination sur l'arête diamétrale, derrière une interface
+
+A1 (§4.2), pour trois raisons dans cet ordre : sa complétude est un **théorème**
+et ses rejets sont certifiés ; elle **ne suppose rien** du nuage, ce qui est
+exigible ici (§10) ; et son germe étant une **arête**, elle survit aux points peu
+profonds là où tout générateur ancré sur un point meurt (§4.2, §1.3).
+
+Mais on l'écrit **derrière une interface** au contrat certifié — « émettre tous
+les supports minimaux bien centrés de rang fermé $\leq s_{\max}$, chaque rejet
+certifié, chaque support une fois par son propriétaire canonique » — pour que A2
+ou A3 puissent la remplacer sans toucher à l'aval, et pour que l'oracle teste
+l'**interface**. C'est la décision la plus structurante du document.
+
+Y ajouter la coupe $R(z)\geq D/2$ **à tous les sommets** (§4.2 bis) : prouvée,
+auditée, et réductible à une disjonction sur un tableau déjà calculé.
+
+### D3. Ne rien supposer du nuage ; publier la sélectivité
+
+Correction **inconditionnelle**, sélectivité **mesurée et publiée** par exécution
+(§10.2). Un nuage sur lequel les coupes ne mordent pas doit être *lent*, pas
+faux, et le reçu doit le dire : distribution de $\tau$, rétention par étage,
+part du travail en régime « grand $D$ », collisions de quantification.
+
+### D4. Deux arithmétiques, jamais confondues
+
+**Production** — entière, sans allocation, largeur fixe, avec les majorants
+**prouvés** pour $M=65535$ : $\lvert\mathrm{num}_i\rvert<2^{84{,}96}$,
+$\mathrm{den}<2^{68{,}17}$, $\mathrm{num2}<2^{169{,}93}$,
+$\mathrm{den}^2<2^{136{,}35}$, comparaison de deux niveaux $<2^{306{,}28}$. Le
+`sphere.hpp` de la v2 est **conforme** (`BigInt<4>` = 256 bits, `BigInt<6>` =
+384) et son `sphere_cmp_beta` est d'accord avec GMP sur 18 601 paires : c'est un
+composant sain, à reprendre en resserrant ses constantes d'en-tête, lâches d'un
+facteur $\approx2^{11}$.
+
+**Oracle** — précision **arbitraire** (GMP, ou un bignum autonome dans `tests/`
+avec une représentation *différente* de celle de production : limbes base
+$2^{32}$, signe-magnitude). Jamais `exact.hpp`, dont un défaut se compenserait
+des deux côtés. Mesuré : c'est la **seule** option qui décide la grille déclarée
+— $40/40$ nuages contre $0/40$ aujourd'hui, UBSan propre, 26 s utilisateur.
+
+### D5. La porte avant tout le reste
+
+Aujourd'hui `mhgp_oracle2` **décide zéro nuage sur la grille déclarée et annonce
+`OK` avec `exit=0`** ; il rend aussi `OK` avec 93 forêts censurées et 0 cas O2,
+et `OK` sur `-1 1`. Une porte qui ne peut pas rougir ne certifie rien. À fermer
+d'abord :
+
+1. refus des arguments absurdes (code $\neq0$) ;
+2. identité `attempted == compared + rejected_domain + rejected_width` publiée ;
+3. aucun cas planifié non décidé — le `continue` silencieux devient un échec ;
+4. planchers durs sur le nombre de nuages **et** de cas O2 ;
+5. zéro censure dans une campagne positive ; la censure se teste séparément
+   comme résultat négatif ;
+6. garde de domaine **symétrique** (aujourd'hui un faux positif de v2 saute O1
+   et O2 en entier) ;
+7. coordonnées tirées dans $[0,\texttt{kCoordMax}]$, pas dans $[0,120]$.
+
+Et O2 doit enfin comparer la structure qu'il annonce : arité, enfants, racines,
+sources, nombre canonique de nœuds — aujourd'hui, mettre tous les `n_children`
+à zéro laisse la porte verte.
+
+### D6. Canonicité imposée à la source, jamais par filtre
+
+Mesuré : $55\ \%$ des sphères sont conservées chez un propriétaire non canonique
+même en mono-thread ; le payload diffère entre 1, 4 et `hardware_concurrency`
+fils ; aucun digest reproductible n'est possible. Le filtre annoncé
+(`catalogue.cpp:520-524`) ne contient que des commentaires.
+
+En v3 le propriétaire est un **théorème**, pas un filtre : l'arête diamétrale,
+départagée par la plus petite paire lexicographique parmi les arêtes de longueur
+maximale (§4.2). Membres triés par identifiant à l'émission ; déduplication par
+support **et** niveau exact. Digest byte à byte testé sur plusieurs nombres de
+fils et plusieurs permutations d'entrée.
+
+### D7. Le reçu est fail-closed dès la première ligne
+
+Statut non ambigu, code de retour non nul quand aucune hiérarchie autoritaire
+n'est produite, sérialisation canonique de la forêt (niveau rationnel exact en
+numérateur/dénominateur décimaux — 170 et 137 bits, donc pas de `double`),
+parents, enfants, arités, racines, sources, et reçu de quantification complet.
+
+**Et le CLI doit pouvoir LIRE un nuage** : `tools/mhgp_cli.cpp` n'a aucune option
+d'entrée et ne sait que générer, alors que son en-tête annonce « génère ou lit ».
+C'est un bloquant dur pour l'objectif LiDAR.
+
+### D8. Les collisions de quantification retirent l'autorité
+
+$\texttt{collision\_lost\_points}>0 \Rightarrow$ refus déclaré (§10.1). Un
+doublon viole la définition 1 — il est sur le bord de la boule de rayon nul de
+son jumeau sans appartenir à son support. Coût mesuré $\approx1\ \%$ de la cible
+100 ms sur CPU, et **nul** sur GPU en repliant le comptage dans la passe de
+MORTON déjà prévue. Idem pour les points écrêtés, qui sont déplacés sans trace.
+
+### D9. Réénoncer le contrat de temps, honnêtement
+
+$\approx1$ s sur 48 cœurs est le contrat CPU réaliste ; **100 ms est un contrat
+GPU**, et il exige le pipeline GPU de bout en bout (§6). Et il doit être énoncé
+**par famille de nuages**, parce que la sélectivité est data-dépendante (§10.2) —
+la v1 l'a déjà établi en refusant de promettre sur `eight_clusters`.
+
+### D10. Ordre des travaux
+
+0. **Mesurer avant d'écrire.** Charger un vrai nuage (LiDAR, y compris
+   multi-captation) décimé à 50 k, et lui passer la **sonde de germination de la
+   v1, qui existe déjà** : rétention de J7 par étage, distribution de $\tau$,
+   nombre d'objets en sortie, collisions de quantification, taille de la
+   Delaunay. Aucun code de v3 n'est requis. Si la sélectivité tombe, c'est le
+   contrat qu'il faut réénoncer, pas l'architecture.
+1. La porte (D5) et l'oracle en précision arbitraire (D4) — rien ne doit se
+   construire au-dessus d'une porte qui ne peut pas rougir.
+2. La couche arithmétique de production, avec ses majorants prouvés écrits.
+3. Le générateur (D2) : portes exactes, germes indexés, coupe $R(z)\geq D/2$.
+4. La forêt : sémantique de la v2, **descente indexée**.
+5. Reçu fail-closed et canonicité (D6, D7, D8).
+6. CI stricte, Release et ASan/UBSan.
+7. **Seulement ensuite** le GPU.
+
+### D11. Ce qu'on ne fait pas
+
+Pas de CUDA avant que la référence CPU soit exacte et que la porte qualifie la
+grille déclarée. Aucune revendication de temps avant qu'un vrai nuage ait été
+chargé. Et aucune hypothèse de forme sur le nuage, jamais — la v2 est morte de
+n'avoir pas mesuré la sienne.
