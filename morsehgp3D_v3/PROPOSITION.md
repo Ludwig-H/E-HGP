@@ -1,0 +1,273 @@
+# MorseHGP3D v3 — proposition d'architecture
+
+> **Statut : proposition, pas une conception arrêtée.** Écrit le 8 août 2026, à la
+> demande de Louis, pendant qu'une investigation instrumentée de `morsehgp3D_v2`
+> était encore en cours. Aucun code n'existe dans ce dossier. Toute mesure citée
+> ci-dessous porte sa provenance ; ce qui est conjecturé est marqué comme tel.
+>
+> Ce document doit être relu quand les mesures en attente (§8) seront tombées :
+> elles peuvent invalider le §5.
+
+## 1. Pourquoi une v3, et ce qui n'est pas en cause
+
+La v2 n'a pas une conception fausse. Elle a un **substitut de force brute posé à
+la place de sa conception**, qui n'a jamais été écrite.
+
+`morsehgp3D_v2/DESIGN.md` §7 budgète deux étages dominants :
+
+| étage prévu | travail annoncé | cible |
+| --- | --- | --- |
+| peeling local par point | $\Theta\left(\sum_{p} \left(\lvert W_p\rvert\log\lvert W_p\rvert+Z_p\right)\right)$ | 20–60 ms |
+| descente des bras | $\Theta\left(\text{fusions}\times\lvert U\rvert\times d_T\right)$ | 10–30 ms |
+
+Le premier est **sensible à la sortie** — $Z_p$ compte les sphères réellement
+émises en $p$. Or `src/catalogue.cpp` énumère exhaustivement tous les quadruples
+du voisinage, et `src/forest.cpp::descend` **balaie le nuage entier à chaque
+bras**. Les deux étages qui font le budget sont absents.
+
+Mesure du 8 août (codespace, 2 vCPU, Release) :
+
+| $n$ | $K$ | quadruples candidats | temps |
+| ---: | ---: | ---: | ---: |
+| 200 | 10 | $258\,739\,800 = 200\cdot\binom{199}{3}$ | 26,3 s |
+| 500 | 2 | — | > 300 s |
+
+L'égalité $258\,739\,800 = 200\cdot\binom{199}{3}$ dit tout : $W_p$ vaut le nuage
+entier, à tout $K$. Le coût est en $\Theta(n^5)$, conformément à
+`WARNING_AUDIT_IMPLEMENTATION_2.md` §5, qui l'annonçait.
+
+**Et une réparation de la croissance ne suffirait pas.** Même avec la borne que
+le théorème 4 autorise ($\lvert W_p\rvert\approx 88$ pour $s_{\max}=11$ sur un
+nuage uniforme), l'énumération exhaustive donne $5{,}5\cdot10^{9}$ quadruples,
+soit environ 11 s à 50 k sur 48 cœurs. On passerait d'« impossible » à
+« quelques secondes », jamais à 100 ms. Remplacer le générateur *est* la seule
+route — c'est-à-dire faire une v3.
+
+**Ce qui n'est pas en cause**, et se réutilise tel quel : l'arithmétique exacte
+entière, la sémantique de la forêt, et l'oracle structurel (§6).
+
+## 2. Le contrat, et le seul chiffre qui en découle
+
+Hiérarchie de HARTIGAN **exacte** jusqu'à $K=10$ sur $n=50\,000$ points réels,
+en moins d'une seconde, cible 100 ms.
+
+Cible mesurée du dépôt (`morsehgp3D_v2/DESIGN.md` §7) : $\approx1{,}8\cdot10^{7}$
+objets utiles à $n=50\,000$, $K=10$, tous rangs $\leq 11$ confondus.
+
+$$\frac{100\ \text{ms}\times 48\ \text{cœurs}}{1{,}8\cdot10^{7}} \approx 267\ \text{ns par objet émis},$$
+
+tout compris. À une seconde : $2{,}7\ \mu\text{s}$. Toute décision d'architecture
+ci-dessous se juge contre ces deux nombres.
+
+Pour référence, à 50 k, la triangulation de DELAUNAY d'ordre 0 mesurée sur le
+même nuage compte $334\,979$ tétraèdres
+(`docs/validation/phase14_geogram_low_order_g4_16d8308.json`) : la sortie visée
+est environ 54 fois cet objet, pour onze ordres.
+
+## 3. Hypothèses de domaine, explicites
+
+- **Position générale pour la filtration de ČECH** : aucune coquille
+  cosphérique. Accordée par l'utilisateur le 8 août pour les nuages réels visés.
+  Elle reste **détectée et déclarée**, jamais supposée en silence — la v2 a
+  montré ce que coûte le silence (une hiérarchie incomplète publiée comme
+  autoritaire).
+- **Grille entière** $[0,2^{16})^3$. Toutes les largeurs sont bornées
+  statiquement à partir de là, et la borne doit être *vérifiée*, pas supposée :
+  `WARNING_AUDIT_PUBLICATION_3.md` §2.1 exhibe un triangle entier dont le
+  numérateur carré ne tient pas dans un `i128`.
+- **L'égalité de deux longueurs d'arête n'est PAS écartée.** Contrairement à la
+  cosphéricité, elle est fréquente sur une grille entière. C'est une contrainte
+  de conception, pas une hypothèse (§4.2).
+
+## 4. Le générateur : quatre possibilités
+
+### 4.1 Comparaison
+
+| | A1 germination sur l'arête diamétrale | A2 peeling local | A3 Delaunay d'ordre $k$ | A4 reprendre la v1 |
+| --- | --- | --- | --- | --- |
+| complétude | **théorème** (JUNG + cascade) | conjecturée | classique | héritée |
+| travail mesuré à 50 k | $\approx4{,}4\cdot10^{8}$ candidats | — | — | 110 µs/support |
+| écrit ? | oui (v1), portes en binary64 | **non** | non | oui, mais lourd |
+| localité mémoire | **bornée explicitement** (J10) | à établir | globale | tuilée |
+| propriétaire canonique | **par construction** | à définir | à définir | filtre |
+| risque | faible | élevé, durée inconnue | élevé | dette |
+
+### 4.2 A1 — germination sur l'arête diamétrale
+
+Deux énoncés prouvés (`docs/math/OPTIMISATIONS_JUNG_SUPPORTS_3_4.md`) :
+
+- **JUNG.** Un support minimal bien centré a sa circumboule *pour* miniboule,
+  donc $r\leq\gamma_m D$ avec $\gamma_3=1/\sqrt{3}$ et $\gamma_4=\sqrt{3/8}$ ;
+  avec $D\leq 2r$, le circumrayon est confiné à $\left[D/2,\ \gamma_m D\right]$
+  dès que l'arête diamétrale est fixée.
+- **La cascade.** L'arête fixée, le lieu des circumcentres compatibles est un
+  **disque** de rayon $\sqrt{\gamma_m^2-1/4}\,D$ dans le plan médiateur ; un
+  troisième sommet le réduit à un **segment** de demi-longueur
+  $\sqrt{\gamma_m^2D^2-r_\triangle^2}$.
+
+Mesuré à $n=50\,000$, $s_{\max}=11$ (§3.4 du même document) :
+
+| filtre au troisième sommet | retenus | part |
+| --- | ---: | ---: |
+| aucun | $2{,}95\cdot10^{8}$ | 100 % |
+| J4′ libre sur $r_\triangle$ | $2{,}66\cdot10^{8}$ | 90,2 % |
+| J8, segment $N=16$ | $\mathbf{4{,}70\cdot10^{7}}$ | **15,9 %** |
+
+et le travail des quadruples passe de $3{,}31\cdot10^{9}$ à
+$\mathbf{3{,}93\cdot10^{8}}$, soit un facteur 8,4.
+
+**J10** borne la localité : toute la géométrie utile à l'arête $(p,q)$ tient dans
+$\bar B\left(M,\ \left(\gamma_m+\sqrt{\gamma_m^2-1/4}\right)D\right)$, de rayon
+$0{,}866\,D$ pour $m=3$ et $0{,}966\,D$ pour $m=4$. C'est directement une **tuile
+GPU** : une arête par bloc, sa boule en mémoire partagée, rien au-delà.
+
+**Le propriétaire canonique devient un théorème.** La v2 émet chaque sphère
+depuis *chacun* de ses points de support puis déduplique — d'où le filtre de
+propriétaire vide, les membres non triés et le payload dépendant du nombre de
+fils (`WARNING_AUDIT_PUBLICATION_3.md` §4). Germer sur l'arête diamétrale émet
+chaque support **une fois**. Réserve obligatoire : quand plusieurs arêtes
+atteignent la longueur maximale, le propriétaire est *la plus petite paire
+lexicographique parmi elles* — règle totale, à écrire explicitement, et non
+optionnelle sur une grille entière.
+
+**Ce que JUNG ne donne pas** (§6 du document, à citer tel quel) : il ne borne ni
+le rang, ni le nombre de supports par arête ; il ne réduit pas la porte de bon
+centrage (28 % des triples, 10 % des quadruples, **constant en $n$**) ; il ne
+dispense pas de la classification terminale exacte. La condition
+$\lvert P\cap\bar B(c_U,r_U)\rvert\leq s_{\max}$ **reste la seule source de
+sensibilité à la sortie**.
+
+**Manques à combler** : les portes sont en binary64 sans intervalle extérieur
+complet ni repli exact — l'en-tête de `local_germination.hpp` interdit
+explicitement d'en revendiquer la complétude ; et la boucle de germes de la v1
+balaie $\binom{n}{2}$ paires (1,92 µs/paire mesuré à 50 k, soit 2 400 s), alors
+que les paires retenues sont $\Theta(n)$ et doivent être énumérées par l'index.
+
+### 4.3 A2 — peeling local
+
+L'intention de `DESIGN.md` §7 : $\Theta\left(\lvert W_p\rvert\log\lvert W_p\rvert+Z_p\right)$
+par point, soit $\approx4{,}7\cdot10^{7}$ opérations à 50 k — environ **dix fois
+mieux que A1**. Mais `WARNING_AUDIT_IMPLEMENTATION_2.md` §5 est net : ce n'est
+pas encore un algorithme sensible à la sortie démontré, et avant d'en faire le
+chemin produit il faut borner **séparément en $n$ et en $K$** les plans, faces,
+cellules et sorties visités, la mémoire, et la **duplication entre ancres**.
+Rien n'est écrit.
+
+### 4.4 A3 — Delaunay d'ordre supérieur
+
+Par relèvement, les sphères critiques de rang $\leq k$ sont le $\leq k$-level
+d'un arrangement de $n$ hyperplans de $\mathbb{R}^4$, de complexité
+$\Theta\left(n^2k^2\right)$ au pire, soit $\approx3\cdot10^{11}$ ici. Le pire cas
+n'est pas atteint (sortie mesurée $1{,}8\cdot10^{7}$), mais un algorithme
+sensible à la sortie ramène à A2 ; et matérialiser une structure globale viole
+l'invariant d'architecture du dépôt.
+
+### 4.5 A4 — repartir de la v1
+
+Elle a le LBVH, les prédicats exacts, le pipeline G4 qualifié. Mais son chemin
+exact mesure $\approx110\ \mu\text{s}$ par support terminal (dont $\approx46\
+\mu\text{s}$ de normalisation canonique finale) et sa cérémonie est
+considérable. À **emprunter par morceaux** — la germination, l'index — pas à
+reprendre.
+
+### 4.6 Recommandation
+
+**A1 pour le chemin produit ; A2 gardé comme piste de recherche.**
+
+Et surtout : faire du générateur une **interface** au contrat certifié —
+
+> émettre tous les supports minimaux bien centrés de rang fermé $\leq s_{\max}$,
+> chaque rejet étant certifié, chaque support émis une seule fois par son
+> propriétaire canonique
+
+— afin qu'A2 puisse remplacer A1 **sans toucher à l'aval**, et que l'oracle teste
+l'*interface*, pas l'implémentation. C'est la décision d'architecture la plus
+importante de ce document.
+
+## 5. Le point dur, nommé
+
+Ce n'est ni le générateur ni la forêt : c'est la **classification terminale**.
+
+Les portes bon marché sont peu coûteuses en entier : bon centrage (signes de
+déterminants), construction de la circumsphère (quelques produits `i128`), de
+l'ordre de la centaine de cycles. Le coût réel est la requête
+$\lvert P\cap\bar B(c_U,r_U)\rvert\leq s_{\max}$, à sortie anticipée dès
+$s_{\max}+1$.
+
+J10 est ce qui la rend tenable : les points utiles à l'arête sont **déjà
+chargés**, donc la requête est un balayage linéaire sur quelques dizaines de
+points, pas une descente d'arbre. C'est ce qui rend 267 ns concevable.
+
+Le chiffre manquant, et c'est **le** chiffre : le coût unitaire de cette
+classification en arithmétique entière v2, contre les $110\ \mu\text{s}$ de la
+multiprécision v1. Un facteur 400 sépare la mesure v1 du budget. Tant qu'il
+n'est pas mesuré, aucune promesse de 100 ms n'est fondée.
+
+## 6. Répartition CPU / GPU, honnête
+
+Plancher amont mesuré côté v1 à 50 k : canonicalisation 3,1 ms + LBVH CPU
+15,4 ms = **18,5 ms**, avant la première paire. Avec $\approx4{,}4\cdot10^{8}$
+candidats à quelques dizaines de nanosecondes de portes, on est déjà à
+$\approx0{,}3$ s sur 48 cœurs **avant** les requêtes.
+
+- **$\approx1$ s sur 48 cœurs** : contrat réaliste du chemin CPU ;
+- **100 ms : contrat GPU**, et il exige le pipeline GPU **de bout en bout**, LBVH
+  compris. C'est d'ailleurs ce que dit `DESIGN.md` §7 (« un bloc CUDA traite un
+  point »).
+
+**Conséquence de conception : v3 doit être taillée GPU dès la première ligne**,
+le CPU servant de référence exacte et non de cible. J10 est ce qui rend ce
+découpage possible.
+
+## 7. Ce qui se réutilise, ce qui s'écrit
+
+**Repris de la v2, tel quel ou presque**
+
+- `include/mhgp/exact.hpp` — `i128`, `BigInt<N>`, bornes statiques, aucune
+  allocation. **À élargir** selon `WARNING_AUDIT_PUBLICATION_3.md` §2.1 avant
+  toute réutilisation.
+- `include/mhgp/sphere.hpp` — `sphere1..4`, `sphere_side`, `well_centered3/4`,
+  `sphere_cmp_beta`, avec l'audit de largeur refait pour la grille 16 bits.
+- La **sémantique** de `src/forest.cpp` : regroupement des lots par égalité
+  rationnelle, contraction de l'hypergraphe du lot en une multifusion, censure
+  atomique d'un événement à bras non résolu, source exacte par nœud. C'est la
+  partie que l'oracle O2 a certifiée sur 1 462 nuages et 89 247 cas.
+- `tests/oracle2.cpp` comme porte structurelle, **après** réparation de son
+  arithmétique (§2.1 de l'audit 3 : ses `i128` signés sont testés *après* le
+  débordement qu'ils prétendent détecter).
+- La discipline fail-closed : domaine déclaré, retrait d'autorité, refus de
+  publier.
+
+**À écrire à neuf**
+
+- Le générateur germé, avec portes **exactes** (intervalle flottant dirigé puis
+  repli entier) et boucle de germes **indexée**.
+- La requête de boule fermée à sortie anticipée, sur la tuile J10.
+- La descente des bras **indexée** (la v2 balaie le nuage par bras).
+- Le reçu **fail-closed** : statut non ambigu, sérialisation canonique de la
+  forêt avec niveaux rationnels exacts, reçu de quantification (échelle,
+  origine, collisions), codes de retour. Dès le premier jour, pas après.
+- Une CI stricte, Release et ASan/UBSan. La v2 n'en a aucune.
+
+## 8. Ce qui reste à mesurer avant d'arrêter cette proposition
+
+1. **Le coût unitaire de la classification terminale exacte en arithmétique
+   entière.** C'est le §5. Sans lui, le choix CPU/GPU du §6 n'est qu'une
+   estimation.
+2. **La largeur réellement nécessaire** pour les niveaux exacts sur la grille
+   16 bits (audit 3 §2.1) : elle décide de la forme de `exact.hpp`.
+3. **Le débit réel par candidat** des portes de la cascade, une fois exactes.
+4. La cause exacte du non-élagage du voisinage v2 — utile même si on abandonne
+   ce générateur, parce que la même borne sert à dimensionner la tuile.
+
+## 9. Obligations de preuve ouvertes
+
+- **Terminaison et unicité de la descente** (`morsehgp3D_v2/DESIGN.md` §4) :
+  aujourd'hui seulement empirique, sur 89 247 cas. C'est le cœur du modèle
+  d'appariement ; il faut une preuve.
+- **Exactitude des portes de germination** une fois le binary64 remplacé : les
+  lemmes géométriques sont exacts, leur *implémentation* ne l'est pas encore.
+- **Propriétaire canonique** avec départage des arêtes diamétrales de longueur
+  égale : à énoncer et à prouver total.
+- **Traitement complet des coquilles cosphériques** : hors modèle par hypothèse,
+  mais l'obligation reste ouverte (`morsehgp3D_v2/DESIGN.md` §6.4).

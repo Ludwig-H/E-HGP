@@ -472,7 +472,12 @@ $\lvert W_p\rvert$ et du nombre de doublements) au lieu de le supposer absent.
 - Elle ne matérialise aucune mosaïque de DELAUNAY d'ordre supérieur. Le
   $\leq(K)$-level local en est la trace, mais il est consommé en flux et jamais
   assemblé globalement.
-- Elle ne suppose pas la position générale.
+- Elle **suppose la position générale** pour la filtration de ČECH, au sens
+  précis du §6.4 : aucune coquille cosphérique. Une version antérieure de cette
+  liste affirmait le contraire, en contradiction avec le §6.4 — c'est le §6.4
+  qui fait foi. L'hypothèse est licite sur les nuages visés (nuages réels), elle
+  est **détectée et déclarée** plutôt que supposée en silence, et son traitement
+  complet reste une obligation de preuve ouverte.
 
 ## 9. Correspondance avec le vocabulaire de la v1
 
