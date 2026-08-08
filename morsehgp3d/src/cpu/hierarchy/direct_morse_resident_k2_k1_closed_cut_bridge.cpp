@@ -317,7 +317,11 @@ void append_id(
       const std::size_t low_bit = 8U * (byte_count - 1U - byte_index);
       std::uint8_t byte = 0U;
       for (std::size_t bit = 0U; bit < 8U; ++bit) {
-        if (boost::multiprecision::bit_test(value, low_bit + bit)) {
+        // bit_test takes unsigned; the index is bounded by byte_count*8 and
+        // cannot overflow it, so the narrowing is exact.  The G4 toolchain
+        // rejects it implicitly under -Werror=conversion.
+        if (boost::multiprecision::bit_test(
+                value, static_cast<unsigned>(low_bit + bit))) {
           byte |= static_cast<std::uint8_t>(std::uint8_t{1U} << bit);
         }
       }
