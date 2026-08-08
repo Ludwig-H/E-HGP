@@ -29,6 +29,21 @@ aujourd'hui de sidecar complet (schéma, commit, binaire, compilateur, machine,
 digest d'entrée, graine, compteurs de campagne fermés, sortie brute). Tant que
 ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer.
 
+## 0 bis. Le plan, en cinq lignes
+
+1. **M1, le juge** — un oracle indépendant en précision arbitraire, à campagne
+   fermée, sur le domaine déclaré ; et les reçus des mesures déjà faites.
+2. **M2, le prototype qui décide** — un seul programme CPU exact qui construit
+   $V_k(p)$ pour une ancre, et qui **règle à lui seul PEL-1 à PEL-4** et mesure
+   A1-source gratuitement.
+3. **M3, le census** — les compteurs de M2 à l'échelle, sur de vrais nuages, y
+   compris multi-captation, avec le ledger complet.
+4. **Décision** à deux branches, puis seulement : descente indexée, tri externe
+   et réducteur, GPU, reçu produit.
+5. Rien de ce qui suit n'est un produit tant que M2 n'a pas parlé.
+
+Le détail et la justification de l'ordre sont au **§13**.
+
 ## 1. Pourquoi une v3
 
 La v2 n'a pas une conception fausse. Elle a un **substitut de force brute posé à
