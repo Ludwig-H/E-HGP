@@ -278,8 +278,8 @@ coupes ne mordent pas doit produire un résultat *lent*, pas faux.
 | --- | --- | --- |
 | **A1-source** | source complète d'ancres diamétrales | **pièce ouverte** |
 | **A2e** | peeling **2D** ancré par une **arête** | cœur algorithmique, complet *si* A1-source l'est |
-| **A2p** | peeling **3D** ancré par un **point** (dual inversif) | complet par construction ; oracle, et candidat |
-| **A2pe** | **l'unification** : A2e est la 2-face de A2p | **recommandé, sous trois obligations (§6)** |
+| **A2p** | arrangement shallow **3D stratifié** ancré par un **point** | complet comme oracle exhaustif si projections et shells sont rejoués ; coût produit ouvert |
+| **A2pe** | extraire des plans porteurs de A2p, puis exécuter A2e une fois par paire canonique | **candidat sous quatre obligations (§6)** |
 
 ### 4.1 A2e — la réduction de dimension
 
@@ -290,8 +290,7 @@ JUNG donne l'ellipse exacte
 $J_e^{(4)}=\lbrace t: t^{\mathsf{T}}(B^{\mathsf{T}}B)t\leq D^2/8\rbrace$, et
 chaque point $x\notin\lbrace p,q\rbrace$ la forme **affine**
 
-$$h_x(t)=2(Bt)\cdot(x-M)-\left(\lVert x-M\rVert^2-\frac{D^2}{4}\right)
-= r^2-\lVert x-c\rVert^2 .$$
+$$h_x(t)=2(Bt)\cdot(x-M)-\left(\lVert x-M\rVert^2-\frac{D^2}{4}\right)=r^2-\lVert x-c\rVert^2.$$
 
 Intérieur strict, shell et extérieur sont donc les **signes d'une droite** :
 aucune base orthonormale, aucune racine carrée, tous les signes entiers ou
@@ -301,11 +300,14 @@ Sur l'ellipse, chaque point est intérieur constant (compté dans $c_e$), extér
 constant (éliminé), ou **droite active** ($m_e$). Si $c_e>s_{\max}-4$, l'ancre ne
 porte aucun support quatre. Sinon, avec $\kappa_e=s_{\max}-4-c_e$ :
 
-$$\textbf{[théorème]}\qquad \mathrm{rang}_{\text{ferm\'e}}(p,q,z,w)=4+c_e+\delta_e(t),$$
+$$\text{\textbf{[théorème conditionnel]}}\qquad \mathrm{rang}_{\text{ferme}}(p,q,z,w)=4+c_e+\delta_e(t).$$
 
-$\delta_e(t)$ étant le nombre de demi-plans actifs strictement positifs au sommet
-$t$. **Le rang est une profondeur d'arrangement 2D.** Et **[théorème classique]**
-le $\leq\kappa$-level de $m$ droites a $\Theta(m(\kappa+1))$ sommets, d'où
+$\delta_e(t)$ est le nombre de demi-plans actifs strictement positifs au sommet
+$t$. La formule exige `RelevantGP` et les deux seules droites porteuses du support
+quatre ; une concurrence ou un extra-shell reconstruit d'abord le shell complet.
+**Le rang est alors une profondeur d'arrangement 2D.** La preuve élémentaire de
+[`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md)
+donne, en position générale, la borne exacte
 
 $$Z_e\leq m_e(\kappa_e+1),\qquad Z_e\leq 8m_e \text{ pour } s_{\max}=11,\ c_e=0 .$$
 
@@ -351,7 +353,7 @@ Et l'ellipse compacte de A2e ne supprime pas le problème des grandes sphères,
 serait une cellule non bornée chez A2p devient une charge chez A2e, et elle
 atterrit intégralement dans A1-source.
 
-## 5. A2p — le dual inversif, complet par construction
+## 5. A2p — le dual inversif stratifié
 
 Ancrons en $p$ ; pour tout autre $u$, poser
 
@@ -362,42 +364,55 @@ sphère passant par $p$ centrée en $c$ ssi $c$ est du côté positif, donc
 
 $$\mathrm{niveau}(c)=\#\lbrace u:\lVert u-c\rVert<\lVert p-c\rVert\rbrace,$$
 
-et **sur une face de dimension $j$** de l'arrangement, les porteurs sont au
-nombre de $4-j$, d'où la formule générale
+Pour une strate relativement ouverte $F$ de dimension $j$, soient
+$H_{u_1},\ldots,H_{u_{3-j}}$ ses hyperplans porteurs et
+$U_F=\lbrace p,u_1,\ldots,u_{3-j}\rbrace$. La strate ne constitue pas à elle
+seule un événement. Elle fournit **au plus un** centre candidat :
 
-$$\mathrm{rang}_{\text{ferm\'e}}=(4-j)+\mathrm{profondeur}.$$
+$$c_F=\mathrm{proj}_{\mathrm{aff}(F)}(p).$$
 
-L'écriture « $1+\mathrm{niveau}$ » n'est que le cas $j=3$ (intérieur d'une
-cellule) et ne doit pas être employée sans sa convention de porteurs.
+Il faut ensuite vérifier, exactement et dans cet ordre : $c_F\in F$ ;
+$c_F\in\mathrm{relint}\,\mathrm{conv}(U_F)$ ; indépendance affine ; shell global
+complet ; profondeur stricte ; rang fermé ; propriétaire canonique. Sous
+`RelevantGP` et arrangement simple seulement,
 
-La région utile est
-$V_k(p)=\lbrace c:\ p\ \text{est parmi les}\ k+1\ \text{plus proches de}\ c\rbrace$,
-dont le treillis de faces donne **toutes** les sphères critiques contenant $p$ :
-sommet $\leftrightarrow\lvert U\rvert=4$, arête $\leftrightarrow3$, face
-$\leftrightarrow2$.
+$$\mathrm{rang}_{\text{ferme}}(c_F)=(4-j)+\mathrm{profondeur}(F).$$
 
-C'est la cellule de VORONOÏ d'ordre $\leq k$ de $p$ — objet classique.
-**[théorème classique]** le $\leq k$-level de $m$ plans de $\mathbb{R}^3$ a une
-complexité $\Theta(mk^2)$ ; **[diagnostic]** la mesure donne 450 à 510 cellules
-par point, soit un comportement constant en $n$ et compatible avec $\Theta(k^2)$
-par point — donc une sortie totale $\Theta(nk^2)$.
+En dégénérescence, le membre $4-j$ est remplacé par la cardinalité du shell
+complet. Les quatre dimensions donnent respectivement : singleton $p$, milieu
+d'une paire, circumcentre d'un triangle et sommet support quatre.
 
-**Deux propriétés qu'A2e n'a pas.**
+Le bon objet est le **sous-complexe stratifié et étiqueté** de l'arrangement des
+$H_u$, jamais l'ensemble sous-jacent d'un unique $V_k(p)$. Le budget de profondeur
+dépend de l'arité $q=4-j$ :
 
-1. **L'ancrage est complet sans rien à prouver** : tout support contient au moins
-   un point, donc ancrer en chaque point est exhaustif. Il n'y a pas de A1-source.
-2. **La localité devient un certificat *a posteriori*.** Comme
-   $\mathrm{dist}(p,H_u)=\tfrac12\lVert u-p\rVert$, en insérant les points par
-   distance croissante on peut s'arrêter dès que la demi-distance du prochain
-   point dépasse le rayon de la région courante : **aucun point restant ne peut
-   plus la couper**. C'est exact, entier, sans relaxation conique — donc sans le
-   $+\infty$ qui a tué la v2. C'est une recherche par file de priorité sur le
-   LBVH, avec condition d'arrêt certifiée.
+$$\mathrm{profondeur}(F)\leq s_{\max}-q.$$
 
-**Le prix** : arrangement 3D au lieu de 2D, prédicats plus lourds, cellules non
-bornées à traiter, et duplication $\leq4$ (chaque support est vu depuis chacun de
-ses $\leq4$ sommets), réduite à l'émission par le propriétaire canonique mais pas
-en travail.
+À $s_{\max}=11$, les maxima sont 9, 8 et 7 pour les supports deux, trois et
+quatre ; le singleton est injecté séparément. Un complexe uniforme de profondeur
+au plus 10 est un sur-ensemble de travail, pas la sortie utile exacte.
+
+**Complétude théorique.** Si l'arrangement stratifié complet est construit pour
+chaque ancre, tout support critique contenant $p$ apparaît à la strate portant
+ses égalités, puis passe les tests ci-dessus. Cette exhaustivité fait d'A2p un bon
+oracle de recherche ; elle ne fournit ni constructeur sparse ni coût produit.
+
+**Complexité ouverte.** Pour $m_p$ plans effectivement insérés, la borne
+worst-case du préfixe shallow est $O(m_pK^2)$ par ancre, à laquelle s'ajoutent
+construction, projections, conflits et transcripts. Sans arrêt certifié,
+$m_p=n-1$ et la somme peut atteindre $O(n^2K^2)$. Les 450 à 510 sphères v2 et le
+voisinage A2e de 175 points ne mesurent ni $m_p$, ni les strates A2p.
+
+**Aucun certificat local n'est acquis.** Un point exposé de $\mathrm{conv}(X)$
+possède des directions extérieures de profondeur zéro ; le sous-complexe shallow
+y est non borné. Une coupure de carrier est sûre seulement si un majorant certifié
+$R_{\mathrm{hi}}(p)$ prouve $\lVert u-p\rVert>2R_{\mathrm{hi}}(p)$. Sans un tel
+majorant sélectif, le repli exact insère les $n-1$ plans. Les témoins de profondeur
+ne sont jamais élagués par cette coupure.
+
+**Le prix** reste un arrangement 3D, des prédicats plus lourds, des strates non
+bornées et une duplication de travail pouvant atteindre quatre ancres par support.
+Le propriétaire canonique réduit seulement l'émission.
 
 ## 6. A2pe — l'unification, et ce qu'elle demande
 
@@ -412,46 +427,50 @@ L'objet correct est le **sous-complexe stratifié** : les faces de
 l'**arrangement** des $H_u$ dont la profondeur est $\leq k$, chacune avec sa
 dimension. Tout ce qui suit s'entend ainsi.
 
-**L'observation.** Une 2-face de l'arrangement portée par $H_u$ est exactement le
-plan médiateur de $(p,u)$, et les traces $H_u\cap H_v$ sont exactement les droites
-$h_v$ du §4.1. **A2e n'est pas une alternative à A2p : c'est sa restriction à une
-face.**
+**L'observation.** Une 2-face $F$ portée par $H_u$ est une région relativement
+ouverte de ce plan ; elle n'est pas le plan lui-même. Seule l'identité
+$\mathrm{aff}(F)=H_u$ est vraie. La restriction de l'arrangement entier à
+$H_u$ produit exactement les droites $H_u\cap H_v$ du §4.1. **A2e doit donc être
+exécuté une fois sur le plan porteur canonique de la paire $(p,u)$, jamais une
+fois par 2-face.**
 
-**La conséquence.** Ces 2-faces **sont** les ancres de A2e, complètes
-et par construction — A1-source disparaît. Et le théorème négatif du §4.2 ne s'y
-oppose pas : il réfute « paire de rang fermé $\leq s_{\max}$ » (boule diamétrale),
-alors que la 2-face signifie « il existe une boule par $p$ et $u$ de contenu
-$\leq s_{\max}$ ». **[théorème]** ces deux conditions diffèrent : pour un support,
-$c$ est sur le plan médiateur donc $r^2=\lVert M-c\rVert^2+D^2/4$, et l'inclusion
-de la boule diamétrale dans la circumboule exigerait $r\leq D/2$, c'est-à-dire
-l'égalité. La réfutation ne transporte donc pas.
+**La conséquence conditionnelle.** Le sous-complexe stratifié A2p peut proposer
+les plans porteurs rencontrés à faible profondeur, puis A2e peut construire leurs
+niveaux 2D. Ce raccord ne supprime A1-source qu'après preuve que toute paire
+diamétrale canonique utile apparaît parmi ces plans. Les faces supplémentaires
+sont permises : projection, diamètre, Jung, shell et rang les filtrent.
 
-**L'architecture recommandée** en découle :
+Le théorème négatif du §4.2 ne se transporte pas directement. Pour un centre
+$c\in H_u$, on a $r^2=\lVert c-M\rVert^2+D^2/4$. La boule diamétrale est incluse
+dans la circumboule seulement si $\lVert c-M\rVert+D/2\leq r$ ; après élévation
+au carré, cette condition force $c=M$ et $r=D/2$. Hors de ce cas, le rang de la
+boule diamétrale ne décide pas celui de la circumboule.
 
-> ancrer en chaque point ; construire $V_k(p)$ par insertion en distance
-> croissante avec arrêt certifié ; lire les supports par dimension de cellule, la
-> 2D de A2e servant de sous-routine sur chaque face ; n'émettre qu'au
-> propriétaire canonique ; descendre la forêt par requête de boule
-> $\bar B(c,2r)$ ; consommer en flux.
+**L'architecture candidate**, encore conditionnelle, est donc :
+
+> ancrer en chaque point ; construire transitoirement le sous-complexe shallow
+> stratifié ou une source équivalente de plans porteurs ; dédupliquer les paires
+> canoniques ; exécuter A2e une fois par plan ; appliquer projection, shell, rang
+> et owner exacts ; produire des runs bornés, les trier et les fusionner par niveau
+> rationnel exact ; grouper tous les niveaux égaux avant réduction ; descendre par
+> requête dans la miniboule **courante** à chaque remplacement.
 
 **[obligation] — quatre, et elles conditionnent tout le §6.** Elles sont
 étiquetées `PEL-*` et non `M*`, pour ne pas entrer en collision avec
 l'obligation normative M.1 du registre.
 
-1. **PEL-1 — les 2-faces donnent exactement les arêtes utiles.** L'argument
-   ci-dessus est une double inclusion informelle ; il faut une preuve propre, en
-   particulier sur les faces non bornées et les égalités.
-2. **PEL-2 — sensibilité à la sortie du parcours.** Cellules visitées
-   $=O(\text{sortie})$ et non $O(\text{sortie}\times m)$. **[à noter]** l'écart
-   entre la borne classique $\Theta(mk^2)$ (soit $1{,}75\cdot10^4$ par point à
-   $m=175$, $k=10$) et la mesure (450 à 510) est d'un facteur $\approx38$ : le
-   pire cas n'est pas atteint, mais rien ne le garantit.
-3. **PEL-3 — cellules non bornées.** L'énoncé « cellule non bornée $\Rightarrow$
-   pas de sphère critique finie » est **probablement faux tel quel** : une
-   cellule polyédrique fermée non vide, même non bornée, possède une projection
-   finie de l'origine. Il faut une condition supplémentaire portant sur le bon
-   centrage, le support et le rang — et la terminaison du parcours dans ces
-   directions.
+1. **PEL-1 — complétude des plans porteurs.** Prouver l'inclusion « toute paire
+   diamétrale canonique utile apparaît parmi les plans proposés ». L'égalité avec
+   les 2-faces est fausse ; les plans superflus sont acceptables s'ils sont filtrés
+   sans omission.
+2. **PEL-2 — sensibilité à la sortie du parcours.** Établir un coût comprenant
+   au moins un terme d'entrée, par exemple $O(m_p\,\mathrm{polylog}(m_p)+Z_p)$,
+   puis publier plans, strates, projections, rejets et sorties. `O(sortie)` seul
+   est impossible lorsque la sortie est vide.
+3. **PEL-3 — strates non bornées.** L'énoncé « non bornée implique aucune sphère
+   critique finie » est **faux**, déjà pour deux points : le plan médiateur non
+   borné contient leur milieu critique. Il faut prouver finalisation, projection
+   canonique et terminaison, ou déclarer le repli exhaustif.
 
 **[obligation] PEL-4 — le coût du prédicat exact en 3D contre 2D.** C'est
 l'arbitrage central entre A2pe et A2e seule : A2pe supprime A1-source au prix
@@ -486,7 +505,7 @@ Il faut donc **deux flux explicitement distincts** :
 | flux | contenu | filtre autorisé |
 | --- | --- | --- |
 | **témoin / profondeur** | toutes les formes susceptibles de compter comme intérieures | **aucun** |
-| **`carrier_eligible`** | ce qui a le droit d'engendrer un support | $2R(z)\geq D$, certifié |
+| **`carrier_eligible`** | tout point non exclu par une preuve sûre | retirer seulement si un majorant certifié prouve $2R_{\mathrm{hi}}(z)<D$ |
 
 Les emplois **licites** de la coupe sont donc : (i) la sélection des **ancres**,
 où les deux extrémités sont porteuses ; (ii) le masque `carrier_eligible` sur les
@@ -556,9 +575,9 @@ maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 | étage résident | rôle | structure globale évitée |
 | --- | --- | --- |
 | canonicalisation | `PointId`, domaine, digest, `RelevantGP` | copie ambiguë de l'entrée |
-| LBVH | range-report, self-join, `max_tau_hi` | matrice paire–point |
+| LBVH | range-report, self-join, `max_two_R_upper_hi` fail-open | matrice paire–point |
 | propositions | RNG, image de distance, heuristiques | aucune autorité au proposeur |
-| ancres | 2-faces de $V_k(p)$, ou center-cover | tableau des $\binom{n}{2}$ paires |
+| ancres | plans $H_u$ canoniques du complexe stratifié, ou center-cover | tableau des $\binom{n}{2}$ paires |
 | shallow | niveaux peu profonds, rang = profondeur | $\sum_e\binom{m_e}{2}$ |
 | décision exacte | diamètre, shell, bon centrage, owner | rescans globaux par candidat |
 | source HGP | facettes, cofaces, silences, couverture | $\Gamma$ global |
@@ -600,10 +619,12 @@ générateur.**
 
 ## 12. Portes
 
-**Gate A — autorité documentaire.** Reprendre A2e, le lemme $2r$, la coupe
-$R(z)\geq D/2$, $R\leq\mathrm{diam}(X)$ et les profils d'entrée dans la
-spécification et le registre ; classer chaque énoncé `proved_here`,
-`conditional_theorem`, `proof_obligation` ou `experimental_target`.
+**Gate A — autorité documentaire.** Reprendre A2e, A2p/A2pe stratifiés, le
+dictionnaire strate--projection--support, le lemme $2r$, la coupe
+$R(z)\geq D/2$, $R\leq\mathrm{diam}(X)$, la fixture à deux points et les profils
+d'entrée dans la spécification et le registre ; classer chaque énoncé
+`proved_here`, `conditional_theorem`, `proof_obligation`, `experimental_target`
+ou `false_in_general`.
 
 **Gate B — reçus.** Sidecars complets pour chaque mesure de ce document ; digests
 des entrées, binaires et sorties ; identité de campagne fermée ; distinction
@@ -612,14 +633,17 @@ reproductible, puis SemanticKITTI et les familles sanctionnées.
 
 **Gate C — oracle indépendant.** Multiprécision, représentation distincte,
 exhaustif à petit $n$, campagne fermée
-(`attempted = decided + rejected_domain`), comparaison structurelle complète
-(arités, enfants, racines, sources, nombre canonique de nœuds).
+(`attempted = decided + rejected_domain`), lecture hostile fail-fast et
+comparaison structurelle complète : arités, enfants, racines, coface source
+réellement contributrice et canonique, nombre canonique de nœuds, censure et
+diagnostics publics.
 
-**Gate D — census de charge.** Distribution de $R(p)$ ; $\Sigma_e m_e$,
-$\Sigma_e Z_e$, $c_e$ ; p50/p95/p99/max de $\lvert W_e\rvert$, $m_e$, $Z_e$ ;
-rétention de chaque porte ; taille de la sortie canonique acceptée ; queues,
-replis, high-water. **À $n$ de plusieurs milliers** — ce n'est pas la même
-campagne que Gate C, et l'une ne tient pas lieu de l'autre.
+**Gate D — census de charge.** Distribution de $R(p)$ ; pour A2e,
+$\Sigma_e m_e$, $\Sigma_e Z_e$, $c_e$ et les quantiles de
+$\lvert W_e\rvert,m_e,Z_e$ ; pour A2p, $m_p$, strates par dimension/profondeur,
+composantes non bornées, projections, rejets et transcripts ; objets HGP aval,
+runs, octets et high-water. **À $n$ de plusieurs milliers** — ce n'est pas la
+même campagne que Gate C, et l'une ne tient pas lieu de l'autre.
 **Décision à deux branches** : sortie énorme ⇒ réviser le SLO ; sortie sparse
 mais intermédiaires denses ⇒ **architecture no-go**.
 
@@ -633,29 +657,40 @@ et, **séparément**, obligations propres à A2p (dictionnaire, atteignabilité,
 global sur $n$ ancres, cellules non bornées, duplication). Les deux listes ne
 s'impliquent pas.
 
-**Gate F — descente indexée.** Fixture permanente du lemme $\bar B(c,2r)$ ;
-différentiel balayage global contre requête ; terminaison, décroissance stricte,
-victime canonique, plateaux ; compteurs **par ordre**, jamais extrapolés du
-total.
+**Gate F — descente indexée.** La boule $\bar B(c,2r)$ ne certifie que la première
+recherche issue de la facette initiale. Chaque remplacement interroge la
+miniboule **courante**, sauf nouvelle preuve d'enveloppe globale. Différentiel
+contre balayage exhaustif, terminaison, décroissance stricte, victime canonique,
+plateaux et compteurs **par ordre** sont obligatoires.
 
-**Gate G — source HGP et réduction**, puis **Gate H — publication,
-déterminisme, et produit sans budget configuré** : qualifier d'abord la seconde,
-puis seulement 100 ms, **par famille sanctionnée**.
+**Gate G — source HGP et réduction.** Fixer `hgp_reduced` ou `full_pi0`, produire
+facettes, cofaces, incidences actives et silencieuses, attaches, M.1 si le profil
+l'exige, `coverage_delta`, `coverage_log`, runs triés, lots atomiques et
+verticales ; comparer le transcript complet à l'oracle.
+
+**Gate H — publication, déterminisme et produit sans budget configuré.** Exiger
+reçus complets, sorties byte-à-byte sous permutations et ordonnancements, aucune
+censure silencieuse et aucune structure globale interdite ; seulement ensuite
+qualifier 100 ms, **par famille sanctionnée**.
 
 ## 13. Ordre des travaux
 
-1. **Gate B d'abord sur ce qui existe déjà** — rendre reproductibles les mesures
+1. **Gate A**, puis **Gate B** sur ce qui existe déjà — classer les nouveaux
+   énoncés et rendre reproductibles les mesures
    citées ici. C'est peu de travail et cela change leur statut.
 2. **Gate C**, l'oracle : rien ne doit se construire au-dessus d'une porte qui
    décide zéro nuage en annonçant `OK`.
-3. **PEL-1 et PEL-3** (§6) : la preuve de l'unification. C'est court, c'est
-   mathématique, et cela décide entre A2pe et A2e + A1-source.
-4. **Gate E** sur la voie retenue, avec son oracle brute-force local.
-5. **Gate D** à l'échelle, sur de vrais nuages, y compris multi-captation.
+3. **PEL-1 et PEL-3** (§6) : formalisation, preuves ou contre-exemples de
+   l'unification. Elles ne décident pas seules du produit.
+4. **Gate E** et mesures PEL-2/PEL-4 sur la voie retenue, avec oracle local.
+5. **Gate D** à l'échelle, sur de vrais nuages, y compris multi-captation ; une
+   sortie sparse avec intermédiaires denses est un no-go.
 6. **Gate F**, la descente.
 7. Puis seulement source HGP, GPU, publication.
 
-**GO immédiat** : preuves PEL-1/PEL-3, prototype CPU exact du shallow, reçus.
+**GO immédiat** : formalisation PEL-1/PEL-3, falsificateur CPU exact du shallow,
+reçus et ledgers. Une campagne finie peut falsifier les PEL et mesurer leurs
+coûts ; elle ne démontre pas leur portée universelle.
 **NO-GO immédiat** : produit v3 avant PEL-1 à PEL-4 ; toute revendication `exact`, tout
 SLO, toute autorité publique ; et présenter une mesure de ce document comme une
 qualification.
