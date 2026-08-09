@@ -779,18 +779,23 @@ rester en $\Theta(\text{sortie})$. Le high-water live compte les entrées de
 $\Theta(m^4+m^3\lvert B_U\rvert)$ dans le code; le réducteur exact en un scan
 est prouvé mais non intégré, et le harvest total d'arité trois reste ouvert.
 
-Le relevé live mesure maintenant coquille et intérieur au point d'admission et
-porte la capacité intérieure à 32, cohérente avec la borne contractuelle 30. La
-campagne `smax=19` passe donc avec un intérieur 17/32. Le nouveau microkernel
-exerce aussi 27 refus de flats. Mais le harness fait `continue` avant l'oracle
-sur chacun d'eux : il prouve l'activation du statut, pas le replay ni la
-conservation. Un mutant qui refuse tous les sommets reste vert. Les refus
-d'admission sont, eux, omis du batch et du compteur.
+Le relevé live mesure coquille et intérieur au point d'admission et porte
+maintenant la capacité intérieure à la borne contractuelle 30. Le delta replay
+post-`8481b67` compte les refus d'admission, sépare les planchers et tue le mutant
+qui refuse tous les sommets. Sa campagne exerce 27 refus de flats et crédite 27
+rejeux avec une identité de masse correcte sur les **comptes**.
+
+Le replay structurel reste pourtant absent : `reference_vertex` précalcule
+l'oracle avant admission, puis le refus additionne seulement ses nombres de
+flats/couples. Aucun suffixe ordonné n'est émis. Le FNV64 compare base, taille et
+bits mais omet les identifiants de fermeture; il ne prouve pas une égalité
+exacte. Un statut hors enum est en outre traité comme `kOk`. Ce delta ferme la
+vacuité du juge, pas encore la conservation du payload.
 
 Sept points cosphériques génériques portent déjà 35 flats contre la capacité
 32. Une voie industrielle doit réduire les flats par pages ou rejouer le sommet
-entier, avec un ledger par raison et l'égalité du parcours CPU avec l'union
-device+replay. `neighbour_along` reste CPU; le `.cu` ne produit ni voisins ni
+entier, avec un ledger par raison et l'égalité structurelle du parcours CPU avec
+l'union device+replay. `neighbour_along` reste CPU; le `.cu` ne produit ni voisins ni
 verdicts de parent. Le kernel cible doit fermer le minimum global du pinceau et
 le lot complet des ex æquo, partitionner la reverse-search en tâches disjointes
 et stager des runs exacts; aucune de ces opérations n'est reçue par le live.

@@ -131,65 +131,72 @@ restent convertibles vers `int`. Elles tuent le mutant exact observé, sans cré
 un type fort garantissant que l'argument appartient à `{-1,0,1}`. L'identité du
 sommet owner signé demeure par ailleurs une porte distincte non fermée.
 
-## P0 — le refus du microkernel n'est ni jugé ni rejoué
+## Delta replay post-`8481b67` — anti-vacuité fermée, payload exact toujours NO-GO
 
-Le CTest `mhgp3v_device_wavefront_refusal` publie :
+Verdict épinglé au worktree `device_wavefront_job.hpp` de SHA-256
+`351e25957117b68cb9da729b7802ce80cc0b84f61a12643670bcb40e9b592b1e`,
+`device_wavefront_qualification.cpp` de SHA-256
+`dfc146e841c30c151bec007dbeca6f8f307f880216d70142eb0af475a90fb401`
+et `order_k_device_core.hpp` de SHA-256
+`8d8c34031df8a3b4108ae366c6db17074b97a8e0aab1e133f8d754fae990fd6d`.
+Ce delta n'est pas encore committé au moment de l'audit.
 
-```text
-sommets=2542 flats=15346 couples admissibles=7109 refuses=27
-flats/sommet max=32 (capacite 32)
-0 desaccords
-OK
-```
+Le progrès est réel. Les planchers sont séparés, les refus d'admission sont
+comptés, le mutant `--force-refuse-all` rougit, le job reçoit des contrôles
+structurels nommés et les statuts de capacité/invariant sont séparés. Les cinq
+CTest wavefront CPU passent. La campagne de refus rend 2 542 sommets présentés,
+2 515 acceptés, 27 `kFlatOverflow` et 27 rejeux comptés, zéro fatal :
+`15346+1403=16749` flats et `7109+224=7333` couples concordent avec les totaux de
+référence. La fixture 32/35 et son masque `0x940800000009` sont sensibles.
 
-Ce `OK` ne porte que sur les sommets `kOk`. La boucle de référence exécute
-`continue` pour chaque `kFlatOverflow`; `summarise` compte ensuite le refus mais
-écarte ses flats et son masque. Le plancher `--min-refused 10` prouve donc que
-la branche a été prise, pas que son résultat a été conservé.
+Cela ferme la **vacuité du juge**, pas encore le replay structurel. L'oracle
+`reference_vertex` est calculé pour tous les sommets avant l'admission; lors
+d'un refus, le code n'émet ni ne conserve le suffixe. Il additionne seulement
+`reference[index].flats`, `reference[index].couples` et `replayed++`.
+`mass_identity()` compare donc deux totaux scalaires. Une permutation,
+substitution, perte et duplication compensées dans les trois flats 32--34 de la
+fixture restent invisibles. Les champs nommés `committed_*` et `replayed_*` sont
+des compteurs, pas un commit/replay de payload.
 
-La session G4 ne change pas ce fait. Elle compare le même `VertexVerdict` borné
-entre hôte et device, y compris son statut de refus; elle n'exécute ensuite
-aucune référence non bornée pour les refus. Le README et le message de commit
-affirment pourtant que les 27 sommets sont « rejoués par l'hôte ». Aucun appel,
-compteur ou résultat de replay n'existe dans le source.
+La nouvelle `signature` ne ferme pas ce trou. C'est un FNV-1a 64 bits de la
+position, des trois identifiants de base, de la **taille** de fermeture et des
+deux bits; les identifiants de la fermeture ne sont jamais repliés. Un mutant
+qui remplace un membre à taille, base et bits constants passe, et une empreinte
+64 bits collisionnable ne peut établir une égalité exacte. L'exigence demeure
+une séquence canonique complète `(closure,base,slot,verdict)` avec multiplicité,
+ou une comparaison structurelle équivalente qui échoue fermée.
 
-Contre-exemple géométrique permanent : sept points entiers sur la sphère de
-centre `(100,100,100)` et de rayon 25, sans quadruplet coplanaire :
+Enfin les statuts sont fail-open : `summarise_into` traite toute valeur autre
+que les deux enums connues comme `kOk`. Une sonde `status=777, flat_count=1,
+mask=1` est comptée acceptée et peut satisfaire ledger et masse. Tout statut
+inconnu doit être fatal et une mutation permanente doit le prouver. `pending`
+n'est alimenté par aucun chemin; le commentaire inclut les fatals dans
+`refusés=rejoués+pending+fatals`, tandis que `total_refused()` et
+`ledger_balances()` les excluent. Le high-water dit « tous les sommets » exclut
+également les refus à l'admission.
 
-```text
-(75,100,100) (76,93,100) (76,100,93) (76,100,107)
-(80,85,100) (80,88,91) (80,91,112)
-```
+Deux incohérences de statut complètent le NO-GO. `pending` est décrit comme un
+trou, mais la porte autorise toute valeur telle que
+`refused == replayed + pending`; elle n'exige jamais `pending==0`. Et
+`Admission::kInteriorAboveContract`, documenté comme entrée malformée, est rangé
+par la qualification parmi les refus rejouables et crédité dans la masse. Comme
+`admit` teste la coquille avant l'intérieur, `shell=33, interior=31` masque même
+l'invalidité intérieure sous `kShellOverflow`. Le job ne transporte enfin pas
+`smax`, donc il ne peut vérifier la borne de campagne
+$\lvert B(v)\rvert\leq s_{\max}-2$, seulement le plafond global 30. Il manque
+aussi une identité de nombre de sommets : un sommet sans flat peut disparaître
+sans modifier les deux masses comparées.
 
-Avec le centre comme point intérieur, le sommet est valide de niveau 1. Le CPU
-non borné rend exactement $\binom{7}{3}=35$ flats. Le sujet s'arrête à 32,
-rend `kFlatOverflow` et le masque partiel `0x940800000009`; le juge ne compare
-jamais les trois flats restants. À coquille 32, le maximum générique vaut 4 960.
-
-La vacuité a été confirmée par mutation hors dépôt : forcer
-`kFlatOverflow` après chaque évaluation laisse vertes les trois campagnes, avec
-respectivement `3318/3318`, `661/661` et `573/573` sommets refusés, zéro flat,
-zéro couple et zéro désaccord. Il faut au minimum :
-
-1. des planchers séparés de nuages traités, sommets acceptés, flats, couples,
-   kernels lancés et décisions;
-2. un oracle non borné exécuté pour chaque statut;
-3. le ledger `refused = replayed + pending + fatal` par raison;
-4. l'égalité exacte, avec multiplicité, entre le CPU complet et l'union des
-   résultats committés et rejoués.
-
-Les refus d'`admit`, notamment `shell>32`, sont encore plus silencieux : ils sont
-omis du batch et de `total_refused`. `kClosureOverflow` est au contraire
-impossible après admission puisque toute fermeture est incluse dans une
-coquille de taille au plus 32; ce statut doit être une violation d'invariant,
-pas un fallback normal.
-
-Le reçu agrège en outre `vertices=count`, refus compris, sans publier
-`accepted`; son champ `mismatches` n'est jamais alimenté par `summarise`.
-`flat_high_water` exclut les refus et les statistiques d'admission
-`samples/accepted/reasons` sont perdues. Enfin, un intérieur de 31 ou 32 points
-est accepté par le format alors que la coupe produit prouve la borne 30 : ces
-valeurs doivent être `invalid_contract`, pas des admissions ordinaires.
+L'authentification du nuage reste elle aussi partielle. Un sixième point qui
+duplique exactement une coordonnée existante, inutilisé par la racine et le
+sommet, reçoit son digest correct puis `validate_job` rend `valid`. Le chemin
+produit classe pourtant ce domaine `kDuplicateCoordinates`. Le digest
+authentifie les octets fournis; il ne remplace pas la validation du profil.
+De même, un shell trié contenant un point hors de la sphère du tétraèdre, avec
+un intérieur plausible et `level=1`, est déclaré valide : cosphéricité, census
+et niveau géométrique ne sont pas recertifiés. `validate_job` est donc un
+validateur **structurel** sous précondition d'un payload CPU déjà certifié, pas
+une authentification scientifique autonome du lot.
 
 ## P1 — ce kernel ne décide pas encore la reverse-search
 

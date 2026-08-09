@@ -235,16 +235,26 @@ interieur optionnel=(100,100,100)
 
 Le chemin CPU non borné énumère 35 flats. Le microkernel rend
 `kFlatOverflow`, `flat_count=32`; avec l'intérieur, son masque partiel vaut
-`0x940800000009`. La qualification exécute `continue` avant l'oracle pour ce
-statut, puis `summarise` compte un refus mais zéro flat. La campagne permanente
-à 27 refus reste donc verte sans comparer ni rejouer aucun des 27 préfixes.
-Un lot entièrement refusé satisfait même la seule garde `total_vertices>0`.
+`0x940800000009`. Le delta replay post-`8481b67` compare maintenant ce préfixe,
+compte les refus d'admission, sépare les planchers et tue le mutant qui refuse
+tout. La campagne à 27 refus crédite aussi 27 rejeux et conserve exactement les
+masses scalaires de flats et de couples. C'est une fermeture positive de la
+vacuité antérieure.
+
+Ce n'est pas encore le replay exigé ici. `reference_vertex` précalcule l'oracle
+avant admission; sur refus, aucun item du suffixe n'est conservé ou émis, seuls
+deux comptes sont additionnés. Les flats 32--34 de la fixture peuvent être
+permutés ou substitués à masse constante sans rougir. `pending>0` est autorisé,
+un statut inconnu est traité comme `kOk`, et le statut intérieur « hors contrat »
+est rejoué au lieu d'être fatal.
 
 Le masque ne certifie pas non plus l'ordre des flats lorsqu'il ne porte aucun
 bit. Retirer le septième point ci-dessus donne 20 flats et un masque nul; une
-permutation arbitraire de ces 20 flats conserve exactement `(count,mask)`. La
-porte du parent doit comparer les items structurels `(closure,base,slot,verdict)`
-ou, mieux, réduire la plus petite clef admissible et comparer cette clef exacte.
+permutation arbitraire de ces 20 flats conserve exactement `(count,mask)`. Le
+nouveau FNV64 ordonne base, taille et bits, mais omet les identifiants de
+fermeture et reste collisionnable. La porte du parent doit comparer les items
+structurels `(closure,base,slot,verdict)` ou, mieux, réduire la plus petite clef
+admissible et comparer cette clef exacte.
 
 Enfin, admissibilité retour ne signifie pas filiation. La fixture permanente
 du différentiel possède un retour admissible mais un couple antérieur
@@ -529,9 +539,9 @@ Exiger séparément : kernels lancés, nuages traités, sommets admis, flats et
 couples décidés, tâches commencées/committées/rollbackées, décisions parent,
 voisins produits, refus coquille/flats, drains arithmétiques, runs et replays
 CPU. Une suppression complète du bloc GPU ou un mutant qui refuse tous les
-sommets doit faire rougir la porte. Sur le snapshot, ce mutant passe encore les
-trois campagnes : le plancher de refus sans plancher d'acceptation ni replay
-rend la vacuité plus facile, pas plus difficile.
+sommets doit faire rougir la porte. Le delta post-`8481b67` tue désormais ce
+mutant par des planchers séparés. Il ne ferme pas encore la seconde moitié :
+aucun payload de replay ou de tâche n'est publié.
 
 ### 10.2 Fixtures minimales
 

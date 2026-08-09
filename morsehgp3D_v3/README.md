@@ -754,7 +754,7 @@ tous les sommets sur CPU, puis un thread calcule seulement le masque des couples
 run ou transaction. C'est un microkernel borné concordant hôte/device sur les
 entrées acceptées, pas encore le parcours.
 
-#### Le refus était compté, il n'était pas jugé — et c'est fermé
+#### Le refus n'est plus vacuable; le replay structurel reste à fermer
 
 Une coquille cosphérique peut avoir $\Theta(n)$ points : aucune capacité fixe
 n'est universellement suffisante, et prétendre le contraire serait faux. Le refus
@@ -767,21 +767,31 @@ résultat avait été conservé — et les refus d'admission, dont `shell>32`,
 n'entraient même pas dans le compteur. Conséquence directe : un mutant qui refuse
 **tous** les sommets restait vert, avec zéro flat, zéro couple, zéro désaccord.
 
-Quatre choses le ferment, et il faut les quatre.
+Le delta post-`8481b67` met en place quatre contrôles utiles :
 
 1. **Des planchers séparés** : nuages décidés, sommets acceptés, flats, couples,
    noyaux lancés et rejeux. Un plancher agrégé se satisfait d'un seul chiffre.
 2. **Un oracle non borné exécuté pour chaque statut**, refus d'admission compris.
 3. **Le ledger $\text{refusés}=\text{rejoués}+\text{en attente}$**, publié par
    raison. Une raison sans rejeu est un trou, pas une statistique.
-4. **L'identité de masse** : le CPU complet sur *tous* les sommets doit égaler
-   l'union des résultats committés et rejoués, flat par flat et couple par couple.
+4. **Une identité de masse agrégée** entre les comptes du CPU complet et la
+   somme des comptes dits committés/rejoués.
 
 Le mutant vit maintenant **dans le binaire**, sous `--force-refuse-all`, et une
 porte négative exige qu'il rougisse. Il est instructif : sous mutation le ledger
 balance encore et la masse est encore conservée — rejouer tout est *correct*,
 simplement inutile — et ce sont les planchers d'acceptation, de flats et de
 couples qui le tuent. Aucune des deux moitiés ne suffisait seule.
+
+**[audit]** Cela ferme la vacuité, pas encore le replay exact. L'oracle non borné
+est pré-calculé pour chaque sommet avant l'admission; un refus ne rejoue ensuite
+aucun objet et ne conserve aucun suffixe, il crédite seulement les deux compteurs
+`reference[index].flats/couples`. L'identité ne compare donc ni séquence, ni
+multiplicité, ni absence de perte/duplication compensée. Les noms
+`committed_*`/`replayed_*` désignent ici des masses, pas un flux transactionnel.
+La porte accepte en outre `pending>0` alors que ce champ signifie un trou, et ne
+porte aucune identité du nombre de sommets; une sortie zéro-flat peut disparaître
+sans changer les deux masses.
 
 **[mesuré]** sur la campagne de refus `--clouds 4 --points 20 --coord 3
 --smax 12 --seed 11` : 2 542 sommets présentés, 2 515 acceptés, 27 refusés pour
@@ -794,10 +804,12 @@ moyenne 52 flats, pas 32 : additionner les préfixes aurait sous-compté de 539.
 
 Un masque nul ne certifie pas l'ordre : sur six points cosphériques un sommet
 porte vingt flats et un masque nul, et **toute** permutation des vingt conserve
-`(flat_count, mask)`. Chaque verdict porte maintenant un digest **ordonné** —
-base, taille de fermeture et bits d'admissibilité, repliés à la position de
-livraison — recalculé indépendamment par le chemin non borné et comparé pour
-chaque statut, refus compris.
+`(flat_count, mask)`. Chaque verdict porte maintenant un digest ordonné de la
+position, de la base, de la taille de fermeture et des bits d'admissibilité.
+C'est un détecteur de régression positif, pas une signature exacte : les
+identifiants de fermeture sont absents et FNV-1a 64 bits peut collisionner. Le
+payload complet `(closure,base,slot,verdict)` doit encore être comparé avec sa
+multiplicité, notamment pour le suffixe refusé.
 
 #### Le lot est authentifié avant lancement
 
@@ -805,12 +817,26 @@ chaque statut, refus compris.
 `root_size = 0, root_base = nullptr` obtenait encore `kOk`, `point_count`
 n'était jamais lu, et une entrée malformée devenait un accès hors limites
 **device** au lieu d'un refus avant lancement. `validate_job` vérifie maintenant
-vingt champs et rend une raison nommée : nuage non nul et dans la grille u16,
+les principaux champs structurels et rend une raison nommée : nuage non nul et dans la grille u16,
 digest déclaré recalculé, base racine de taille quatre et affinement
 indépendante, identifiants dans le nuage, coquille et intérieur strictement
 triés et disjoints, $\ell(v)=\lvert B(v)\rvert$, capacités, et exactitude des
-multiplications de tailles avant allocation. Onze formes de lot malformé sont
-des fixtures permanentes.
+multiplications de tailles avant allocation. La fixture exerce un lot conforme
+et dix formes malformées; plusieurs raisons de `JobVerdict` restent sans témoin.
+
+Deux gardes restent à fermer. Le lanceur CUDA ne rappelle pas lui-même
+`validate_job`, donc la sûreté dépend encore de son appelant et de l'absence de
+mutation entre validation et copie. Et un `VertexVerdict::status` hors enum est
+traité comme `kOk` par `summarise_into`; la sonde `status=777` est acceptée. Les
+deux frontières doivent échouer fermées avant de parler de lot authentifié. Le
+job ne porte pas non plus `smax` et ne peut donc vérifier que le plafond global
+30, pas $\lvert B(v)\rvert\leq s_{\max}-2$ pour la campagne courante. Enfin un
+nuage contenant une coordonnée dupliquée, avec digest recalculé, est déclaré
+`valid` alors que le chemin produit refuse ce domaine : le digest authentifie
+les octets, pas le profil. Cosphéricité de la coquille et classification exacte
+de l'intérieur ne sont pas revérifiées non plus. Cette fonction valide la
+structure d'un payload CPU déjà certifié; elle n'authentifie pas seule sa
+géométrie.
 
 Les queues des deux tableaux de `BoundedVertex` n'étaient jamais initialisées
 avant la copie : la structure n'avait donc aucune représentation stable en
@@ -828,12 +854,19 @@ maintenant exactement la borne du contrat, et son dépassement porte le statut
 bornée par l'admission, donc ce statut est impossible et il est traité comme
 fatal au lieu d'être rejoué.
 
+**[audit]** La qualification ne suit pas encore cette sémantique : elle classe
+`kInteriorAboveContract` parmi les refus rejouables. Et `admit` teste d'abord la
+coquille, si bien que `shell=33, interior=31` masque l'entrée malformée sous
+`kShellOverflow`. La priorité des erreurs et le ledger doivent rendre ce cas
+fatal.
+
 Le cap de 32 flats est atteint bien avant le cap de coquille, et il a maintenant
 sa fixture permanente. Sept points entiers cosphériques sans quadruplet
 coplanaire — la sphère de centre `(100,100,100)` et de rayon 25 — portent 35
-flats. Le noyau garde le préfixe 32 et le marque refusé; la porte exige que ce
-préfixe concorde **bit à bit** avec le préfixe du chemin non borné, masque
-`0x940800000009` compris, et que le rejeu retrouve les 35. À coquille 32, le
+flats. Le noyau garde le préfixe 32 et le marque refusé; la porte vérifie son
+masque `0x940800000009` et son digest incomplet contre le préfixe de référence,
+puis crédite le compte total 35. Elle ne transporte pas encore les trois flats
+du suffixe et ne peut donc pas certifier leur rejeu. À coquille 32, le
 maximum générique est 4 960 : la voie produit devra paginer la réduction parent
 ou rejouer le sommet entier, avec multiplicité et clef exactes.
 
