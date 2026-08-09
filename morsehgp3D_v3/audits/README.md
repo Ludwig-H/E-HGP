@@ -6,5 +6,6 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 - [`AUDIT_PROPOSITION_2.md`](AUDIT_PROPOSITION_2.md) : second audit actualisé et journal continu de la proposition, de l'oracle, des prototypes, des reçus et des portes.
 - [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md) : audit dynamique du juge M1, réfutation du certificat M2.1 commité et suivi de son retrait dans le delta live.
 - [`AUDIT_CONTINU_CORRECTIONS.md`](AUDIT_CONTINU_CORRECTIONS.md) : journal vivant des snapshots, reproductions, corrections en cours et portes restantes; c'est le point d'entrée à lire pendant le développement concurrent.
+- [`REPONSE_README_50K_K10.md`](REPONSE_README_50K_K10.md) : réponse quantitative à la question du README sur 50 000 points, $K=10$ et la seconde, avec conditions GO/NO-GO et audit des largeurs des arités trois et quatre.
 
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.

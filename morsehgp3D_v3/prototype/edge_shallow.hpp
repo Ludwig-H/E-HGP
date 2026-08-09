@@ -110,6 +110,21 @@ inline int compare_products(mhgp::i128 left_a, mhgp::i128 left_b,
   return mhgp::big_cmp(mhgp::mul128(left_a, left_b), mhgp::mul128(right_a, right_b));
 }
 
+// Comparaison exacte de deux positions N/D le long d'une droite, sans division.
+// N < 2^106,8 et D < 2^70,2, donc le produit croise < 2^177 : au-dela de l'i128,
+// mais tres en deca des 256 bits de mul128.
+inline int compare_positions(mhgp::i128 na, mhgp::i128 da, mhgp::i128 nb, mhgp::i128 db) {
+  int order = mhgp::big_cmp(mhgp::mul128(na, db), mhgp::mul128(nb, da));
+  const bool opposite = (da > 0) != (db > 0);
+  return opposite ? -order : order;
+}
+
+struct Crossing {
+  mhgp::i128 numerator = 0;    // position = numerator / determinant
+  mhgp::i128 determinant = 0;
+  std::size_t line = 0;
+};
+
 }  // namespace detail
 
 // Enumere, pour l'arete (p,q) prise comme arete diametrale, les supports de
@@ -270,34 +285,68 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
   const int depth_budget = s_max - 4 - constant_inside;
   if (depth_budget < 0) return;  // l'ancre ne peut porter aucun support quatre
 
+  // ---- BALAYAGE PAR DROITE ----------------------------------------------
+  //
+  // Compter la profondeur de chaque sommet independamment coute O(m) par
+  // sommet, donc O(m^3) par arete. Le long d'une droite, la profondeur est en
+  // revanche une fonction en escalier qui ne varie que de +-1 a chaque
+  // croisement : un tri puis un balayage donnent TOUS ses sommets avec leur
+  // profondeur en O(m log m), soit O(m^2 log m) par arete.
+  //
+  // Sur l'ancre parametree par w = (-b_i, a_i), la forme de la droite j vaut
+  // form_j(tau) = D_ij (tau - tau_j) avec D_ij = a_i b_j - a_j b_i. En
+  // -infini elle est donc positive SSI D_ij < 0 : la profondeur initiale est un
+  // comptage de signes de determinants. Au sommet lui-meme form_j = 0, donc la
+  // profondeur y vaut la profondeur courante moins [D_ij < 0].
   bool retained = false;
+  std::vector<detail::Crossing> crossings;
   for (std::size_t i = 0; i < active.size(); ++i) {
-    for (std::size_t j = i + 1; j < active.size(); ++j) {
-      const detail::Line& lx = active[i];
-      const detail::Line& ly = active[j];
-      const mhgp::i128 determinant = lx.a * ly.b - ly.a * lx.b;
-      if (determinant == 0) continue;  // droites paralleles : aucun sommet
-      ++statistics->vertices_examined;
-      // s = (T1, T2) / determinant
-      const mhgp::i128 t1 = lx.c * ly.b - ly.c * lx.b;
-      const mhgp::i128 t2 = lx.a * ly.c - ly.a * lx.c;
-
-      // PROFONDEUR : nombre de droites actives strictement positives au sommet.
-      // a_z s1 + b_z s2 > c_z, multiplie par le determinant en respectant son
-      // signe. Tout est entier.
-      int depth = 0;
-      bool exceeded = false;
-      for (std::size_t k = 0; k < active.size() && !exceeded; ++k) {
-        if (k == i || k == j) continue;
-        ++statistics->depth_tests;
-        const mhgp::i128 value = active[k].a * t1 + active[k].b * t2;
-        const mhgp::i128 threshold = active[k].c * determinant;
-        const bool strictly_inside =
-            determinant > 0 ? (value > threshold) : (value < threshold);
-        if (strictly_inside && ++depth > depth_budget) exceeded = true;
+    const detail::Line& li = active[i];
+    crossings.clear();
+    int running_depth = 0;
+    for (std::size_t j = 0; j < active.size(); ++j) {
+      if (j == i) continue;
+      const detail::Line& lj = active[j];
+      const mhgp::i128 determinant = li.a * lj.b - lj.a * li.b;
+      if (determinant == 0) {
+        // Paralleles : la forme est CONSTANTE le long de l'ancre. Son signe se
+        // lit sans point temoin, en eliminant le parametre.
+        const mhgp::i128 value = li.a != 0 ? (lj.a * li.c - li.a * lj.c) * (li.a > 0 ? 1 : -1)
+                                           : (lj.b * li.c - li.b * lj.c) * (li.b > 0 ? 1 : -1);
+        if (value > 0) ++running_depth;
+        continue;
       }
-      if (exceeded) continue;
+      if (determinant < 0) ++running_depth;  // positive en -infini
+      const mhgp::i128 t1 = li.c * lj.b - lj.c * li.b;
+      const mhgp::i128 t2 = li.a * lj.c - lj.a * li.c;
+      detail::Crossing crossing;
+      crossing.numerator = -li.b * t1 + li.a * t2;   // w . s, au facteur D pres
+      crossing.determinant = determinant;
+      crossing.line = j;
+      crossings.push_back(crossing);
+    }
+    std::sort(crossings.begin(), crossings.end(),
+              [](const detail::Crossing& x, const detail::Crossing& y) {
+                return detail::compare_positions(x.numerator, x.determinant,
+                                                 y.numerator, y.determinant) < 0;
+              });
+    statistics->depth_tests += static_cast<long long>(active.size());
+
+    for (std::size_t t = 0; t < crossings.size(); ++t) {
+      const detail::Crossing& crossing = crossings[t];
+      const std::size_t j = crossing.line;
+      const detail::Line& lx = li;
+      const detail::Line& ly = active[j];
+      const mhgp::i128 determinant = crossing.determinant;
+      // Profondeur AU sommet : la droite franchie y est nulle, donc exclue.
+      const int depth = running_depth - (determinant < 0 ? 1 : 0);
+      // Apres le croisement, elle bascule.
+      running_depth = depth + (determinant > 0 ? 1 : 0);
+      if (j < i) continue;                  // chaque sommet n'est emis qu'une fois
+      ++statistics->vertices_examined;
+      if (depth > depth_budget) continue;
       ++statistics->vertices_shallow;
+      {
 
       // Le rang est LU sur la profondeur, jamais compte dans la boule.
       const int rank = 4 + constant_inside + depth;
@@ -338,6 +387,7 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
       out->push_back(std::move(emitted));
       ++statistics->emitted_arity_four;
       retained = true;
+      }
     }
   }
   if (retained) ++statistics->edges_retained;

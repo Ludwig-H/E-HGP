@@ -20,6 +20,7 @@
 #include <charconv>
 #include <cstdio>
 #include <cstdlib>
+#include <chrono>
 #include <cstring>
 #include <functional>
 #include <map>
@@ -1188,9 +1189,10 @@ int main(int argc, char** argv) {
   // Il ne sert qu'a publier la distribution du voisinage CERTIFIE, c'est-a-dire
   // le chiffre que la v2 ne pouvait pas produire. Il ne qualifie rien.
   if (measure_only) {
-    if (subject != "anchored" || fixed_points <= 0
+    if ((subject != "anchored" && subject != "edge_shallow") || fixed_points <= 0
         || fixed_points > kMaximumDiagnosticPoints || maximum_order >= fixed_points) {
-      std::printf("ECHEC : --measure-only exige --subject anchored et --points N\n");
+      std::printf("ECHEC : --measure-only exige --subject anchored ou edge_shallow, "
+                  "et --points N dans le contrat\n");
       return 2;
     }
     if (!receipt_path.empty() || !injection.empty()) {
@@ -1206,6 +1208,30 @@ int main(int argc, char** argv) {
         points[static_cast<std::size_t>(i)] = mhgp::P3{measure_coordinate(measure_rng),
                                                        measure_coordinate(measure_rng),
                                                        measure_coordinate(measure_rng)};
+      if (subject == "edge_shallow") {
+        mhgp3v::AnchoredCampaign unused;
+        mhgp3v::EdgeShallowStatistics shallow;
+        const auto started = std::chrono::steady_clock::now();
+        const mhgp::Catalogue catalogue =
+            mhgp3v::edge_shallow_catalogue(points, maximum_order + 1, &shallow, &unused);
+        const double elapsed = std::chrono::duration<double>(
+            std::chrono::steady_clock::now() - started).count();
+        const double lines_per_edge =
+            static_cast<double>(shallow.lines_active) / static_cast<double>(shallow.edges_examined);
+        std::printf("status=diagnostic_only n=%d s_max=%d | spheres=%zu | aretes=%lld "
+                    "m_e moyen=%.1f | sommets=%lld peu profonds=%lld | tests de profondeur=%lld "
+                    "(%.1f par arete, %.2f par m_e^2) | %.2f s\n",
+                    fixed_points, maximum_order + 1, catalogue.spheres.size(),
+                    shallow.edges_examined, lines_per_edge, shallow.vertices_examined,
+                    shallow.vertices_shallow, shallow.depth_tests,
+                    static_cast<double>(shallow.depth_tests)
+                        / static_cast<double>(shallow.edges_examined),
+                    static_cast<double>(shallow.depth_tests)
+                        / (static_cast<double>(shallow.edges_examined) * lines_per_edge
+                           * lines_per_edge),
+                    elapsed);
+        continue;
+      }
       mhgp3v::AnchoredCampaign anchored;
       const mhgp::Catalogue catalogue =
           mhgp3v::anchored_catalogue(points, maximum_order + 1, seed_neighbours,

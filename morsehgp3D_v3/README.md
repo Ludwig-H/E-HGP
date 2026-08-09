@@ -273,13 +273,28 @@ sommet de profondeur $\leq\kappa$, donc qu'on peut l'écarter avant de trier ses
 croisements ? Dans le dual, cela revient à écarter un point dual dont aucun plan
 support à $\leq\kappa$ points au-dessus ne passe par lui.
 
-### Ce que coûte le prototype actuel, pour situer
+### Ce que coûte le prototype, et ce que le $k$-niveau économiserait
 
-Il forme **toutes** les paires de droites et compte la profondeur de chacune sur
-toutes les autres : $O(m_e^3)$ par arête, et $O(n^2)$ arêtes. Un balayage par
-droite descendrait déjà à $O(m_e^2\log m_e)$, et un vrai $k$-niveau à
-$O(m_e\log m_e + m_e\kappa)$. C'est ce dernier saut, et lui seul, qui rend la
-question du §2 bis décidable.
+**Le balayage par droite est implémenté.** Le long d'une droite la profondeur est
+une fonction en escalier qui ne varie que de $\pm1$ à chaque croisement : un tri
+puis un balayage donnent tous ses sommets avec leur profondeur, au lieu de
+recompter $O(m_e)$ droites par sommet. Le coût par arête passe de $O(m_e^3)$ à
+$O(m_e^2\log m_e)$, et le juge est resté vert avec des compteurs **identiques**.
+
+**[mesuré]** $s_{\max}=11$, un nuage par taille :
+
+| $n$ | $m_e$ moyen | sommets examinés | dont peu profonds | part | tests / $m_e^2$ | temps |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 40 | 38 | 548 340 | 65 760 | 12 % | 1,75 | 0,28 s |
+| 80 | 78 | 9 489 480 | 203 904 | **2,1 %** | 1,48 | 6,1 s |
+| 160 | 158 | 157 766 160 | 521 034 | **0,33 %** | 1,29 | 165 s |
+
+Deux lectures. Les tests de profondeur sont bien en $\Theta(m_e^2)$ et non
+$\Theta(m_e^3)$ : le balayage tient sa promesse. Mais **la part des sommets
+réellement peu profonds s'effondre en $\approx 1/m_e$** — à $n=160$ on énumère
+300 fois plus de sommets qu'on n'en garde. C'est exactement ce que Q1–Q3
+économiseraient, et cela chiffre l'enjeu : le balayage gagne un facteur $m_e$, un
+vrai $k$-niveau en gagnerait un second.
 
 ---
 
