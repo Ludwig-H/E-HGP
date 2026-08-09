@@ -9,20 +9,19 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. L'audit couvre les
-deltas jusqu'à `70ead99`; ce commit conserve les sources wavefront de `04555bd`, ajoute les résultats G4
-documentaires de `78583f1`, leur interprétation à 100 ms dans `444b851`, puis un
-profileur CPU à densité fixe et quatre points d'échelle. Aucun artefact brut de
-la session G4 n'est versionné avec ces commits.
+n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot de code
+audité est `40ad152` : il conserve les sources wavefront, ajoute le profileur à
+densité fixe, puis committe le probe de paires et ses claims d'échelle. Le delta
+worktree k-NN `130e316e...` est épinglé séparément. Aucun artefact brut de la
+session G4 n'est versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| dernier commit modifiant le code v3 | `f851374cb628f88eafd9a2efaf7e293eb62e1d62` |
-| dernier delta documentaire audité | `70ead9947102a5ad827b8b3bcd2913b17f7cf32d` |
-| `CMakeLists.txt` | `7c770bcc16ed57410b7b6cda32854e8029f7e4ee06b6722cfa0a256bb67817ef` |
+| snapshot de code et de claims audité | `40ad1522356e8ca0c5c144b441ad6dc0367810fe` |
+| `CMakeLists.txt` | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
-| `CMakeLists.txt` live avec probe | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
-| `prototype/admissible_pair_probe.cpp` live | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
+| `prototype/admissible_pair_probe.cpp` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
+| `prototype/admissible_pair_probe.cpp` worktree postérieur | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
@@ -33,7 +32,8 @@ la session G4 n'est versionné avec ces commits.
 
 ## Verdict
 
-**NO-GO de justesse owner, NO-GO F0, et NO-GO de qualification GPU/replay.**
+**NO-GO de justesse owner, NO-GO du probe de paires, NO-GO F0, et NO-GO de
+qualification GPU/replay.**
 
 Le premier `.cu` est un progrès réel : il définit un lancement CUDA optionnel
 et un même corps source pour CPU/device. Les quatre portes hôte, dont une
@@ -45,6 +45,13 @@ Le kernel ne constitue pas encore une wavefront. `navigate_shallow` construit
 et mémorise d'abord tous les sommets sur CPU; le kernel calcule ensuite seulement
 un masque d'admissibilité des couples. Il ne produit ni voisin, ni parent, ni
 enfant, ni tâche, ni run.
+
+Le commit `40ad152` revendique en plus un univers de paires admissibles
+$O(n\log n)$ et projette 7,5 millions de candidates à 50 k. Son
+`minimum_halfplane_count` est pourtant réfuté par une fixture entière : il rend
+5 au lieu de 2 et supprime une paire critique. Les masses publiées sont des
+sous-estimations du vrai filtre; quatre tailles finies ne prouvent de toute
+façon aucun `Big-O`. Cette conclusion d'échelle est retirée de l'état courant.
 
 Le commit rapporte une compilation `nvcc` et quatre exécutions sur G4 avec zéro
 écart CPU/device. C'est un résultat positif ciblé pour le préfixe borné, mais pas
@@ -189,12 +196,11 @@ ni version patch du toolkit corrigée pour `__int128`, ni architecture exactemen
 120, ni politique d'avertissements CUDA. Le temps publié est kernel-only; il
 exclut allocations, copies et surtout la construction CPU de tout le lot.
 
-Les commentaires du nouveau CMake et des unités wavefront invoquent encore une
-ancienne implémentation comme discipline. La consultation était autorisée pour
-conseiller Claude, mais le contrat v3 doit être écrit intrinsèquement : aucun
-ancien kernel, statut ou résultat ne constitue une preuve du live.
+Le contrat v3 doit rester intrinsèque : seules les invariants, sources et reçus
+du snapshot v3 peuvent qualifier ce kernel. Un commentaire d'intention ne
+remplace ni la garde CMake ni le reçu device.
 
-Un probe Clang 18 device-only antérieur produisait 144 octets de local par
+La compilation Clang 18 device-only du header v3 produisait 144 octets de local par
 thread et une forte pression de registres virtuels. La session G4 rapportée ne
 conserve aucun diagnostic `ptxas`, spill, stack, registre ou occupation; elle ne
 permet donc toujours pas de relier le débit observé aux ressources du cubin.
@@ -344,13 +350,14 @@ Sous l'hypothèse non validée de 19 millions de sorties, `100 ms / 19 M` donne
 bien 5,3 ns par sortie; cette division ne transforme ni les 19 millions en borne
 ni un compteur d'appels/admissions du microkernel en budget de prédicats aval.
 
-## P0 live — le minimum de demi-plan du probe de paires est faux
+## P0 `40ad152` — le minimum de demi-plan du probe de paires est faux
 
-Le delta live postérieur à `70ead99` ajoute
+Le commit `40ad152` ajoute
 `prototype/admissible_pair_probe.cpp` (`SHA-256 8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8`)
-et un branchement CMake live (`SHA-256 f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3`).
+et son branchement CMake (`SHA-256 f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3`).
 L'objectif est positif : mesurer la masse des paires laissées par un lemme
-nécessaire exact. Son oracle angulaire est toutefois faux.
+nécessaire exact. Son oracle angulaire et la conclusion quasi linéaire du commit
+sont toutefois faux.
 
 `minimum_halfplane_count` ne teste que les directions portées par les points,
 puis compte la frontière avec `cross>=0`. Le minimum d'un demi-plan **fermé**
@@ -373,6 +380,15 @@ deux extrémités, donc le minimum exact vaut 2. Le live rend 5 et incrémente
 `missing=1` pour une paire vraie. Le programme peut ainsi imprimer `ECHEC` contre
 un lemme correct.
 
+La fixture est auto-certifiante : les quatre vecteurs support relatifs au centre
+sont `(13,0,-5),(13,0,5),(-13,5,0),(-13,-5,0)`, tous de norme carrée 194,
+affinement indépendants et de moyenne nulle. Le centre est donc strictement
+intérieur à leur convexe et la sphère est bien la miniboule de support quatre.
+Le probe complet temporaire qui produit `status=ok`, `truth01=1`,
+`live_least=5` et `missing=1` a le SHA-256 source
+`d084861fe9ec13ed26674d374df630a992345b5151e026b20a0a3b1a5bd9246d`
+et le binaire `9517fb9c...`.
+
 Les campagnes aléatoires restent un diagnostic utile : à `n=20/50/100/200`,
 elles publient respectivement `190/1176/3885/10706` paires admises contre
 `180/812/2113/5171` paires dites vraies, avec `missing=0`; le filtre seul prend
@@ -382,6 +398,13 @@ sous-estimations de l'univers conforme, jamais un crédit de parcimonie. Quatre
 tailles et une graine ne distinguent pas davantage une croissance linéaire d'une
 croissance quadratique à 50 k.
 
+Les quatre lignes publiées ne partagent pas non plus le même estimateur :
+`n=100` correspond à deux répétitions, les tailles suivantes à une seule.
+Le « zéro sur 424 250 paires » additionne une fois chaque $\binom{n}{2}$ alors
+que l'exécution a effectivement testé deux nuages à 100 points, soit 429 200
+couples nuage--paire. Même après correction du sweep, ces quatre observations
+ne peuvent prouver un `Big-O` ni une masse à 50 k.
+
 La réparation mathématique est un sweep exact par groupes de rayons primitifs :
 calculer le maximum de points dans un demi-plan **ouvert** par fenêtre circulaire
 et deux pointeurs, puis utiliser
@@ -390,13 +413,46 @@ points à l'origine ont des fixtures distinctes; le contre-exemple ci-dessus est
 permanent. Une porte de mutation remplace le sweep par les seules directions
 live et doit rougir.
 
-Même corrigé, ce probe ne décide pas seul la source industrielle : sa vérité
-vient de `flat_catalogue(...,s_max)`, donc du catalogue de rang fermé et non de
-la source Gabriel ouverte à extra-shell; elle marque en outre toutes les paires
-d'une coquille, pas seulement les supports nécessaires. Le calcul exhaustif
-balaye toutes les paires, tous les points, puis jusqu'au carré des projections;
-son pire cas est quartique et sa cible `n<=5000` n'est pas une enveloppe de
-performance. Il reste un census CPU de sélectivité à protocole borné.
+Résultat positif distinct : pour la source Gabriel ouverte, employer la boule
+diamétrale **ouverte** $D_{pu}^{\circ}$ et
+$A(p,u)=2+\min_H\lvert(X\setminus\{p,u\})\cap D_{pu}^{\circ}\cap H\rvert$.
+Si `p,u` sont sur une sphère de support `q`, le demi-espace dirigé vers son
+centre ne contient, dans $D_{pu}^{\circ}$, que des points strictement intérieurs.
+Ainsi $A(p,u)\leq2+\lvert I\rvert\leq q+\lvert I\rvert\leq s_{\max}$, sans
+hypothèse sur l'extra-shell. Une vérification indépendante confirme la preuve,
+y compris le centre diamétral, les projections nulles et les points de
+frontière. La micro-fixture
+`p=(99,100,100),u=(101,100,100),w=(100,100,100)` avec deux extra-shells
+orthogonaux rend `open_A=3`, `closed_exact_A=4` et `closed_live_A=5`
+(source temporaire SHA-256
+`9311a2a163e4f77b2ed15f5d6c706ff34cf96da463bbe21923f1c8cfca4014c3`).
+
+Même corrigé, ce probe ne décide pas seul la source industrielle. Sa « vérité »
+vient de `flat_catalogue(...,s_max,...,verify_census=false,use_index=true)` :
+elle partage les prédicats du sujet, porte sur le catalogue de rang fermé et
+n'est pas un oracle indépendant de la source Gabriel ouverte à extra-shell.
+Un mutant catalogue vide donne `truth=0,missing=0,OK`, car aucun plancher
+`min_true` n'existe. Les statuts non `kOk` sont ignorés, `decided>0` suffit,
+et ni seed, répétitions demandées, densité, digest ni CTest ne scellent le reçu.
+
+Le calcul exhaustif balaye toutes les paires et tous les points, puis jusqu'au
+carré des projections; son pire cas est quartique et sa cible `n<=5000` n'est
+pas une enveloppe de performance. À 50 k, le seul census point--boule ferait
+`n*binom(n,2)=62 498 750 000 000` tests avant le sweep. `ball_points` ne
+publie pas ce nombre de tests, seulement les points retenus dans les boules.
+Ce programme reste un diagnostic CPU borné; il ne génère pas la source.
+
+Le delta worktree `130e316e...` ajoute des rangs k-NN sans corriger le sweep.
+Ses maxima et histogrammes sont donc calculés sur un ensemble `ADMIS` déjà
+tronqué par le P0. La construction `rank_of` matérialise $n^2$ entiers et trie
+$n$ listes **avant** `t0` : son coût $O(n^2\log n)$ et sa mémoire $O(n^2)$
+sont exclus du temps affiché. `min(rank_a(b),rank_b(a))` qualifie seulement
+l'union symétrisée des k-NN avec tie-break PointId; les ex æquo géométriques ne
+sont pas groupés. Les buckets sont enfin décalés : la classe imprimée `2`
+contient le rang 1, et `rank_max_true` ignore toute paire vraie que le filtre a
+déjà supprimée. Ce diagnostic ne devient interprétable qu'après réparation du
+filtre ouvert, chrono séparé de la construction, sémantique des ex æquo et
+calcul de la vérité indépendamment d'`ADMIS`.
 
 ## NO-GO F0 inchangé
 
@@ -424,6 +480,12 @@ remplacer les 27 obligations basées sur `assert` par des échecs explicites.
   l'absence de compilateur.
 - Le masque 64 bits ne décale jamais de 64 : les deux slots du flat 31 occupent
   les bits 62 et 63.
+- Le lemme de paire diamétrale ouverte a été vérifié indépendamment, puis sur
+  59 154 incidences support--paire sans écart; la micro-fixture
+  `open_A/closed_exact_A/closed_live_A=3/4/5` sépare les trois contrats.
+- Le théorème `center-cover + degree` a été contrôlé sur 4 105 supports propres
+  aléatoires et dix oracles `RelevantGP` bornés sans contre-exemple. Il reste
+  conditionnel à sa capability et non implémenté.
 - L'inventaire GCE en lecture seule confirme les cibles labellisées arrêtées.
 - `git diff --check` est vert sur le snapshot documenté.
 
@@ -478,29 +540,53 @@ donnent ensemble le minimum `t=1`. Le voisin attendu est
 transfert intérieur. Elle contient aussi une arête parent positive et une autre
 arête à retour admissible mais rejetée par un parent antérieur.
 
-### 3. Tester la source critique directe comme hypothèse, pas comme acquis
+### 3. Source directe certifiée : verrou mathématique désormais formulé
 
-La nouvelle piste « sphères critiques directement » exige une source terminale
-de supports `U` d'arité au plus quatre et de rang fermé au plus `s_max`, sans
-propriétaire obtenu en parcourant d'abord le terrain. Une surgénération est
-acceptable si chaque branche élaguée fournit un certificat entier
-`rank > s_max` et si chaque émission porte miniboule, census global complet
-`(I,S)`, support canonique, propriétaire et clef de déduplication exacts.
+Une voie exacte sans propriétaire shallow est maintenant démontrée sous une
+capability séparée `center-cover + degree`. Pour chaque arité
+$q\in\{2,3,4\}$, poser $t_q=s_{\max}-q+1$. Une partition canonique de la boîte
+du nuage authentifie, dans chaque feuille fermée, $t_q$ PointId distincts dont
+la distance carrée maximale à tout centre de la feuille est strictement
+inférieure à un entier $Q_q$.
 
-La note de source directe ferme actuellement `sphère certifiée -> cofaces`; elle
-ne construit pas encore le stream de sphères certifiées sans partir d'un
-propriétaire visité. C'est ce verrou de complétude et de coût qu'il faut fermer
-avant de remplacer la reverse-search. Sous la propre hypothèse du README d'un
-pipeline coûtant dix à trente fois le microkernel, un filtre par 6,5 laisserait
-encore 1,54 à 4,62 budgets; il ne peut donc pas être « exactement » le facteur
-manquant.
+Si une miniboule propre $B_U$ vérifie $q+\lvert I(B_U)\rvert\leq s_{\max}$,
+son rayon carré est strictement inférieur à $Q_q$; sinon les $t_q$ témoins de
+la feuille de son centre seraient tous intérieurs. Dès lors, pour une ancre
+$p\in U$, tout point de la boule fermée appartient au voisinage exact
+$N_q(p)=\{x\neq p:\lVert x-p\rVert^2<4Q_q\}$. Énumérer une fois chaque support
+par $p=\min U$, tester le bien-centrage, puis effectuer le census dans ce
+voisinage est complet sans sommet d'arrangement ni mosaïque.
 
-Le compteur profilé porte en outre sur `flat_catalogue(...,s_max)`, donc sur le
-rang **fermé** au plus `s_max`. La source Gabriel **ouverte** doit encore traiter
-les supports à peu d'intérieurs stricts mais grand extra-shell. Un élagage de la
-source directe doit compter des témoins distincts strictement intérieurs ou
-produire la coquille complète; le ratio du profileur porte sur un autre univers
-scientifique et ne mesure pas la masse de cette source.
+L'ordre non circulaire est essentiel : localiser le centre rationnel, tester
+d'abord la banque de témoins; tous intérieurs donnent
+`AboveInteriorWindow`. Sinon un témoin non intérieur prouve
+$\mathrm{beta}<Q_q$ **avant** le census local. Le fallback racine
+$Q_q=\sum_i\mathrm{span}_i^2+1$ rend la méthode totale, mais peut donner
+$N_q(p)=X$ et ne prouve aucun SLO.
+
+La vérification indépendante n'a trouvé aucun écart sur 4 105 supports propres
+aléatoires, dont 4 085 dans la fenêtre, ni sur dix comparaisons exhaustives du
+critère `RelevantGP`. Ce crédit porte sur les lemmes, pas sur une implémentation.
+La porte de coût doit recevoir le cover et sa construction, le degré complet,
+les CSR, les masses combinadiques, les pas du locator, le tri/groupement et les
+replays. Avec $d_q(p)=\lvert N_q(p)\rvert$ et $d_q^+(p)$ le degré vers les
+identifiants supérieurs, elle publie au moins
+$C_q=\sum_p\binom{d_q^+(p)}{q-1}$,
+$T_q=\sum_p d_q(p)\binom{d_q^+(p)}{q-1}$ et
+$H_q\leq T_q+t_qC_q$.
+
+Cette voie sépare deux univers : le catalogue fermé exige
+$\lvert I\rvert+\lvert S\rvert\leq s_{\max}$; la source Gabriel ouverte exige
+seulement $q+\lvert I\rvert\leq s_{\max}$ et doit grouper tous les supports
+par `SphereKey` avant de développer l'extra-shell. Le profileur fermé et son
+ratio de 6,5 ne dimensionnent donc pas cette source.
+
+Il reste une incompatibilité contractuelle explicite à résoudre avant
+implémentation : la norme courante exige encore un shell complet pour tout
+support rencontré avec $\lvert I\rvert\leq s_{\max}-2$. Le terminal
+`AboveInteriorWindow` par arité est mathématiquement suffisant pour rendre
+l'antécédent utile impossible, mais il doit être versionné dans le contrat; il
+ne peut pas être déclaré conforme par simple optimisation.
 
 ### 4. Fermer les tâches avant le débit
 

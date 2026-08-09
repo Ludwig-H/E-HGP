@@ -96,12 +96,24 @@ et les temps qui en découlent restent des scénarios conditionnels. Le tableau
 mélange en outre deux répétitions à `n=100` et une à `n=200`; ses incréments ne
 forment pas encore une série statistique homogène.
 
-Le probe live de sélectivité des paires contient un P0 indépendant : il cherche
+Le probe de sélectivité committé dans `40ad152` contient un P0 indépendant : il cherche
 le minimum d'un demi-plan fermé seulement sur les directions des points et
 compte les points de frontière. Trois projections sur un même rayon suffisent à
 faire rendre 5 au lieu de 2 et à réfuter une paire critique `RelevantGP`. Le
 lemme de demi-boule n'est pas réfuté; son oracle doit devenir un sweep circulaire
 exact du demi-plan ouvert complémentaire avant toute mesure de sélectivité.
+Les quatre tailles ne prouvent donc ni `O(n log n)` ni 7,5 millions de
+candidates à 50 k. Le delta k-NN `130e316e...` mesure encore l'ensemble fautif,
+avec une matrice et $n$ tris hors chrono; il ne ferme pas cette porte.
+
+Une voie constructive distincte est maintenant formulée sous la capability
+`center-cover + degree` : banque de témoins stricte par cellule, preuve de rayon
+avant census local, voisinages complets de rayon `4Q`, groupement cross-lane par
+`SphereKey` et replay de tout cap. Elle est mathématiquement exacte et ne
+construit aucun arrangement; son SLO reste conditionné aux degrés, masses
+combinadiques, locator, construction, tri et sortie reçus. Le terminal
+`AboveInteriorWindow` doit être versionné explicitement, car la norme active
+demande encore un shell complet sur une fenêtre uniforme.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

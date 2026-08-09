@@ -9,20 +9,21 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Les constructions mathématiques de cette note sont indépendantes du live. Les
-constats d'implémentation sont épinglés au snapshot suivant :
+constats d'implémentation distinguent le snapshot committé du delta worktree :
 
 | objet | empreinte |
 | --- | --- |
-| dernier commit modifiant le code v3 | `f851374cb628f88eafd9a2efaf7e293eb62e1d62` |
-| dernier delta documentaire audité | `70ead9947102a5ad827b8b3bcd2913b17f7cf32d` |
+| snapshot de code et de claims audité | `40ad1522356e8ca0c5c144b441ad6dc0367810fe` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
 | `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
 | `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
-| `CMakeLists.txt` | `7c770bcc16ed57410b7b6cda32854e8029f7e4ee06b6722cfa0a256bb67817ef` |
+| `CMakeLists.txt` | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
+| `prototype/admissible_pair_probe.cpp` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
+| `prototype/admissible_pair_probe.cpp` worktree postérieur | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
 
 > [!IMPORTANT]
 > Cette note aide Claude à construire la voie GPU; elle ne modifie aucun
@@ -114,9 +115,9 @@ $w=p-\mathrm{base}$, le signe point--sphère est celui de :
 
 $$H_B(p)=d\left\Vert w\right\Vert^2-2n\mathbin{\cdot}w.$$
 
-Pour les supports u16 d'arité au plus quatre, une borne conservatrice donne
-$\lvert H_B(p)\rvert<216M^6<2^{104}$. Le census exact tient donc lui aussi en
-`i128`.
+Pour les supports u16 d'arité au plus quatre, la borne conservatrice auditée
+reste inférieure à $2^{108.2}<2^{109}$. Le census exact tient donc lui aussi
+dans un `i128` signé.
 
 Une clef primitive de sphère évite les produits croisés larges. Former :
 
@@ -612,6 +613,50 @@ actuelle ne prouve que l'une est mathématiquement nécessaire.
 
 ### 10.5 Premier jalon direct falsifiable : les supports d'arité deux
 
+Le probe de paires du commit `40ad152` ne qualifie pas encore ce jalon. Son
+`minimum_halfplane_count` teste seulement les rayons portés par les points et
+compte leur frontière; une fixture entière lui fait rendre 5 au lieu du vrai
+minimum 2 et supprimer une paire critique. Les masses `ADMIS` publiées sont
+donc des sous-estimations. Quatre tailles et une graine ne prouvent en outre ni
+$O(n\log n)$ ni une masse à 50 k.
+
+Le delta k-NN `130e316e...` ne change pas ce verdict : il bâtit une matrice
+$n^2$ et $n$ tris hors chrono, puis mesure les rangs seulement dans le `ADMIS`
+fautif. Le rang symétrisé minimal ne définit pas une frontière canonique et les
+ex æquo géométriques ne sont pas groupés. Réparer et muter le sweep précède
+toute interprétation des maxima ou histogrammes de voisinage.
+
+Le lemme peut néanmoins être renforcé proprement pour la source **ouverte**.
+Pour une paire `(p,u)`, soit $D_{pu}^{\circ}$ la boule diamétrale ouverte et
+définir $A(p,u)=2+\min_H\lvert(X\setminus\{p,u\})\cap D_{pu}^{\circ}\cap H\rvert$,
+où $H$ parcourt les demi-espaces fermés dont le plan contient la droite
+`(p,u)`. Si `p` et `u` appartiennent à une sphère `B(c,R)`, poser
+$m=(p+u)/2$ et $v=c-m$. Alors $v\perp(u-p)$ et
+$R^2=\rho^2+\lVert v\rVert^2$. En choisissant le demi-espace du côté de `v`,
+tout $y\in D_{pu}^{\circ}\cap H$ satisfait
+$\lVert y-c\rVert^2<\rho^2+\lVert v\rVert^2=R^2$; si `v=0`, tout demi-espace
+convient. Donc, pour toute paire d'un support utile d'arité
+$q\in\{2,3,4\}$, $A(p,u)\leq2+\lvert I\rvert\leq q+\lvert I\rvert\leq s_{\max}$.
+L'ouverture de $D_{pu}^{\circ}$ est essentielle : un extra-shell sur sa
+frontière ne devient pas un faux témoin intérieur.
+
+Le sweep entier exact groupe les rayons primitifs et calcule le maximum de
+masse dans un demi-plan **ouvert**; si `m` est la masse projetée non nulle et
+`always` celle de la droite, le résultat est
+`minimum_closed=always+m-maximum_open`. Les rayons confondus, antipodes,
+points sur la droite et frontière diamétrale ont des fixtures séparées. Une
+sonde exhaustive rationnelle sur 200 nuages de dix points a vérifié 59 154
+inégalités $A(p,u)\leq q+\lvert I\rvert$ sans écart; la preuve ci-dessus reste
+l'autorité.
+
+Ce lemme n'impose aucune longueur maximale à une paire : l'autre demi-boule
+peut être arbitrairement peuplée et un grand vide peut produire une paire longue.
+Il ne fournit donc pas, seul, un rayon de voisinage ni une borne de degré. Après
+un `center-cover` certifié, il peut filtrer le graphe de rayon; tout vrai support
+de taille trois ou quatre y induit alors un triangle ou un `K4`. L'énumération
+par intersections est exacte mais reste conditionnelle à ses propres caps et
+replays.
+
 Pour une paire `(u,v)`, la fonction exacte
 $\Phi_{u,v}(x)=(x-u)\mathbin{\cdot}(x-v)$ est strictement négative exactement à
 l'intérieur de la boule de diamètre `[u,v]`. Une tâche spatiale portant des
@@ -638,13 +683,18 @@ mesuré par `flat_catalogue(...,s_max)`.
 ### 10.6 Source directe arités deux à quatre sous `center-cover + degree`
 
 Voici une porte exacte qui retire réellement le propriétaire shallow de l'entrée.
-Soit `X` un nuage u16 à coordonnées distinctes et `s_max=11`. Pour
+Soit `X` un nuage u16 à coordonnées distinctes. Pour
 `q` dans `{2,3,4}`, poser :
 
-$$t_q=12-q.$$
+$$t_q=s_{\max}-q+1.$$
 
-Choisir un entier positif `Q_q` et une subdivision canonique de la boîte de `X`
-en AABB à bornes entières. Chaque feuille `C` authentifie `t_q` PointId distincts
+Le profil produit `s_max=11` donne donc `t_q=12-q`. Choisir un entier `Q_q`
+et une subdivision canonique de la boîte de `X` en AABB à bornes entières.
+Avant toute multiplication, valider
+`1<=Q_q<=Q_root=sum(span_i^2)+1` puis calculer `4*Q_q` en `u64` checked.
+Cette restriction ne retire aucune totalité : le cover racine avec `Q_root`
+est toujours disponible lorsque `n>=t_q`. Chaque feuille `C` authentifie
+`t_q` PointId distincts
 `W_C` tels que, pour tout `w` de `W_C`, le maximum aux huit coins vérifie :
 
 $$\sum_{i=1}^{3}\max\left\lbrace (w_i-C_i^-)^2,(w_i-C_i^+)^2\right\rbrace<Q_q.$$
@@ -654,8 +704,8 @@ half-open et déterministe. Un centre de miniboule propre appartient à
 `conv(U)`, donc à la boîte couverte.
 
 **Lemme de rayon.** Toute circumboule propre de support `q` qui satisfait
-`q+|I|<=11` a `beta<Q_q`. Sinon, les `t_q` témoins de sa feuille sont tous
-strictement intérieurs et donnent `q+|I|>=12`, contradiction. Par conséquent,
+`q+|I|<=s_max` a `beta<Q_q`. Sinon, les `t_q` témoins de sa feuille sont tous
+strictement intérieurs et donnent `q+|I|>=s_max+1`, contradiction. Par conséquent,
 pour `p` dans `U` et tout membre fermé `x` de la boule :
 
 $$\lVert x-p\rVert^2\leq4\,\mathrm{beta}(U)<4Q_q.$$
@@ -675,18 +725,25 @@ dans sa feuille et classifier ses `t_q` témoins par `sphere_side` en `i128` :
   scan de `N_q(p)` est un census global complet.
 
 Ainsi un grand candidat localement visible ne peut pas être accepté par omission.
-Comparer directement `beta<Q_q` pour les arités trois et quatre demanderait des
-produits plus larges; la banque garde ce hot path sous 128 bits. Les distances
-u16 du cover tiennent sous $2^{34}$ et `4Q_q` sous $2^{36}$ avec le fallback
-racine; il faut élargir avant soustraction et carré. L'inégalité du cover est
+Comparer directement `beta<Q_q` pour l'arité quatre peut dépasser `i128` :
+une fixture u16 extrême produit déjà des carrés de numérateur sur 132 bits.
+La banque garde le hot path point--sphère sous 128 bits. Les distances u16 du
+cover tiennent sous $2^{34}$ et `4Q_q` sous $2^{36}$ avec le fallback racine;
+il faut élargir avant soustraction et carré. L'inégalité du cover est
 strictement `<Q_q`; `<=` est faux au bord.
 
-La capability minimale scelle digest/epoch du nuage, `q`, `Q_q`, boîte,
+La capability minimale scelle digest/epoch du nuage, `q`, `s_max`, `Q_q`, boîte,
 topologie et digest du cover, témoins et maxima par feuille, puis digest CSR des
-voisinages, degré complet maximal et compteurs de construction. Les verdicts
-terminaux sont `NotProper`, `AboveInteriorWindow`, `CompleteSphere`,
-`UnsupportedDegeneracy`, `OutsidePerformanceEnvelope`, `IncompleteResume`,
-`InvalidContract` et `ArithmeticFailure`. Aucun cap ne tronque une liste, un
+voisinages, degré complet maximal, profondeur du locator et compteurs de
+construction. Le reçu publie `locator_steps_total/max`; sans locator à profondeur
+contractuelle, le coût porte explicitement le terme `C_q*L_q(P_q)`.
+`CandidateDecision` vaut seulement `NotProper`,
+`AboveInteriorWindow{witnesses}` ou
+`CompleteSphere{SphereKey,U,I,S,census_digest}`. `SourceOutcome` porte
+séparément `Complete`, `UnsupportedInput/Degeneracy`,
+`OutsidePerformanceEnvelope{resume_token}`, `IncompleteResume`,
+`InvalidContract` ou `ArithmeticFailure`. Les deux états de reprise ne sont ni
+des verdicts scientifiques ni une absence. Aucun cap ne tronque une liste, un
 census ou un segment publié.
 
 Avec `d_q(p)=|N_q(p)|` et `d_q^+(p)` le degré vers les PointId supérieurs, publier
@@ -695,14 +752,19 @@ en `u128` :
 $$C_q=\sum_p\binom{d_q^+(p)}{q-1},\qquad T_q=\sum_p d_q(p)\binom{d_q^+(p)}{q-1},\qquad H_q\leq T_q+t_qC_q.$$
 
 `C_q` compte les candidats, `T_q` borne les classifications locales et le terme
-`t_q C_q` les prétests de banque. Tests de distance de construction, octets,
-high-waters et queue maximale par ancre restent séparés. Sous une capability
-reçue `P_q=O(n)` et degré complet contractuellement capé, le travail vaut
-`O(P_q+n*D_q^q+sortie)`. Sans cette porte, une feuille racine avec
+`t_q C_q` les prétests de banque. Tests de distance et nœuds de construction du
+cover, octets, high-waters, locator, groupement/tri et queue maximale par ancre
+restent séparés. Sous une capability reçue `P_q=O(n)`, degré complet capé et
+locator de profondeur constante scellée, le travail géométrique vaut
+`O(P_q+n*D_q^q+sortie)`; sinon ajouter `C_q*L_q(P_q)` et les coûts de
+construction, tri, sortie et replay. Sans cette porte, une feuille racine avec
 `Q_q=sum(span_i^2)+1` donne le repli exhaustif exact; elle ne donne aucun SLO.
 Si `n<t_q`, l'énumération directe est déjà bornée et remplace la banque.
 `RelevantGP` n'implique ni ce cap de degré ni une sortie linéaire, même pour les
-paires.
+paires. À 50 k, `C_q/T_q/H_q` tiennent dans `u128` pour `q<=4`, mais le nombre
+d'expansions Gabriel ouvertes peut dépasser 128 bits; les compteurs de sortie
+hors porte régulière sont donc multiprécision ou saturés avec statut typé, jamais
+tronqués.
 
 La construction des voisinages possède elle aussi une borne simple. Prendre `a`
 égal à la plus grande puissance de deux telle que `a*a<=Q_q`, puis trier les
@@ -714,15 +776,41 @@ minimale est au moins `4*Q_q` sont rejetés exactement. Le plafond de constructi
 est ainsi `729*n*(D_q+1)` tests de distance avant déduplication, avec radix sur
 des clefs fixes; ce compteur reste distinct de `H_q`.
 
-Le census d'une `CompleteSphere` agrège les occurrences par `SphereKey`. Pour le
-catalogue fermé, il impose `|I|+|S|<=11`. Pour Gabriel ouvert, il conserve tout
+Le census d'une `CompleteSphere` agrège les occurrences par `SphereKey`. Depuis
+une sphère `base=a,num=n,den=d>0`, former
+`(A,Bx,By,Bz,C)=(d,-2*(d*a+n),d*|a|^2+2*n.a)`, diviser les cinq coefficients
+par leur gcd positif et imposer `A>0`. Cette clef primitive `i128` est commune
+aux lanes deux, trois et quatre; les supports et provenances restent séparés.
+Pour le catalogue fermé, le census impose `|I|+|S|<=s_max`. Pour Gabriel ouvert, il conserve tout
 extra-shell et développe les cofaces contenant au moins un support. La source
 certifie elle-même `RelevantGP` : après census terminal et vérification
-`q+|I|<=11`, un support admissible avec `S\U` non vide est exactement un témoin
+`q+|I|<=s_max`, un support admissible avec `S\U` non vide est exactement un témoin
 de violation. Les trois lanes `q=2,3,4` sont obligatoires; les singletons sont
 traités séparément et les coordonnées dupliquées restent hors de cette capability.
-`flat_catalogue(...,11)` ne mesure ni ces
+`flat_catalogue(...,s_max)` ne mesure ni ces
 témoins au-delà du rang fermé ni leur expansion ouverte.
+
+Deux contrôles indépendants renforcent la preuve sans la remplacer : 4 105
+supports propres aléatoires, dont 4 085 dans la fenêtre, n'ont produit aucune
+violation du cover/rayon; dix petits nuages ont donné le même verdict
+`RelevantGP` entre la définition exhaustive et le critère par supports. Le
+lemme de paire ouverte de la section précédente a en outre passé 59 154
+inégalités sur 200 nuages bornés.
+
+La norme active doit toutefois être raffinée avant de déclarer cette voie
+conforme. Elle exige actuellement la coquille complète de tout support rencontré
+dès que `|I|<=s_max-2`. Pour `q=3/4`, le terminal
+`AboveInteriorWindow{t_q witnesses}` peut conclure plus tôt tout en prouvant que
+`q+|I|>s_max`. Il est mathématiquement suffisant pour l'antécédent produit,
+mais interdit littéralement par le contrat uniforme. Claude doit versionner ce
+terminal certifié ou conserver un census global; une optimisation ne peut pas
+modifier silencieusement la norme.
+
+Les plafonds illustrent enfin le verrou restant. À 50 k et degré uniforme
+`D=8/12/16/24`, la borne `H=sum_q H_q` vaut respectivement environ
+`75,8 M / 302,5 M / 842,8 M / 3,735 G` appels point--sphère, avant construction
+des voisins, tests `Proper`, locator, tri et sortie. Ce ne sont ni des mesures ni
+des caps recommandés : chaque débit exact doit être reçu sur le kernel concerné.
 
 La résidence cible se limite à `X`, trois covers et leurs banques, trois CSR de
 voisinage, des offsets combinadiques par ancre, un chunk de candidats et des runs
@@ -731,8 +819,26 @@ combinadiques le streament. Aucun sommet ou flat d'arrangement, cellule/coface
 order-k, `Gamma` ou mosaïque n'est construit. Le high-water autoritaire porte sur
 `n + sum(P_q) + sum(L_q) + chunk + run`, puis sépare la sortie persistante.
 
-Fixtures prioritaires : les trois frontières `q+|I|=11/12`, leur variante
-extra-shell, le cube à six supports minimaux, un grand candidat rejeté par la
+Fixtures prioritaires pour `s_max=11` :
+
+```text
+centre c=(10,10,10)
+q2 U={(0,10,10),(20,10,10)}, beta=100, I={c, six voisins axiaux unitaires,
+    (12,10,10),(8,10,10)}
+q3 U={(15,10,10),(7,14,10),(7,6,10)}, beta=25,
+    bary=(3/8,5/16,5/16), I={c, six voisins axiaux unitaires,(12,10,10)}
+q4 U={(9,9,9),(9,11,11),(11,9,11),(11,11,9)}, beta=3,
+    bary=(1/4,1/4,1/4,1/4), I={c, six voisins axiaux unitaires}
+```
+
+Ces bases portent respectivement neuf, huit et sept intérieurs, donc
+`q+|I|=11`. Ajouter `(10,12,10)` aux deux premières ou `(11,11,10)` à la
+troisième donne la frontière 12 et doit rendre `AboveInteriorWindow`. Ajouter
+respectivement `(10,20,10)`, `(10,10,15)` ou `(9,9,11)` sans l'intérieur
+supplémentaire donne un extra-shell et une violation `RelevantGP`; ajouter les
+deux doit rester `AboveInteriorWindow`.
+
+Compléter par le cube à six supports minimaux, un grand candidat rejeté par la
 banque avant census local, une cellule dont seul le coin le plus lointain atteint
 `Q_q`, un témoin dupliqué, un centre sur split-plane, un voisinage au cap puis
 replay, et permutation du stockage à PointId stables. Les mutants `<` vers `<=`,

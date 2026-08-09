@@ -1145,7 +1145,7 @@ alimenter le harvest certifié des supports, la source directe, le fold pré-lot
 la couverture et les verticales, qui n'existent pas comme pipeline. Le NO-GO
 tient.
 
-### L'univers admissible est quasi linéaire, et c'est ce qui rouvre la route
+### Le lemme de demi-boule est utile; son probe n'est pas encore fiable
 
 Le lemme du demi-boule donne une condition **nécessaire, exacte et entière**, sans
 aucune hypothèse de régularité : si $p$ et $u$ sont sur la coquille d'une sphère
@@ -1156,12 +1156,16 @@ où $D_{pu}$ est la boule diamétrale. La preuve tient en trois lignes : le cent
 $y$ du demi-boule côté centre,
 $\lVert y-c\rVert^2=\lVert y-m\rVert^2-2(y-m)\cdot(c-m)+d^2\le R^2$.
 
-Le minimum sur les demi-espaces se calcule **exactement** : les points de la boule
-diamétrale se projettent sur le plan perpendiculaire à $(u-p)$, un demi-espace
-devient un demi-plan, et le minimum est atteint sur une direction délimitée par les
-points eux-mêmes. Aucun angle — que des signes de déterminants entiers.
+La réduction au plan perpendiculaire à $(u-p)$ est exacte. En revanche, le
+`minimum_halfplane_count` du commit `40ad152` ne calcule pas encore le minimum
+d'un demi-plan fermé : il teste seulement les directions portées par les points
+et compte les points de frontière. Le vrai minimum peut être atteint entre deux
+rayons. Un sweep correct groupe les rayons primitifs, maximise la masse dans le
+demi-plan **ouvert** complémentaire, puis applique
+`minimum_closed=always_inside+m-maximum_open`.
 
-**[mesuré]** cube à densité fixe $10^{-3}$, $s_{\max}=11$ :
+**[diagnostic du sujet fautif]** cube à densité fixe $10^{-3}$,
+$s_{\max}=11$ :
 
 | $n$ | paires totales | admises | % du total | vraies | admises/pt | vraies/pt | admises/vraies |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -1170,30 +1174,51 @@ points eux-mêmes. Aucun angle — que des signes de déterminants entiers.
 | 400 | 79 800 | 26 584 | 33,3 % | 11 689 | 66,5 | 29,2 | 2,27 |
 | 800 | 319 600 | 62 997 | 19,7 % | 25 868 | 78,7 | 32,3 | 2,44 |
 
-**Le lemme n'a réfuté aucune paire réelle** — zéro sur les 424 250 paires des quatre
-tailles. Il est nécessaire comme le dit sa preuve, et la mesure le confirme au lieu
-de le supposer.
+Le zéro aléatoire annoncé ne protège pas cette faute. La fixture entière
+suivante possède une sphère critique `RelevantGP` de centre `(100,100,100)`,
+rayon carré 194 et support
+`{(113,100,95),(113,100,105),(87,105,100),(87,95,100)}`. En ajoutant
+`(114,100,100),(115,100,100),(116,100,100)`, le demi-espace `x<=113`
+contient la paire des deux premiers supports et aucun extra : le minimum exact
+vaut 2. Le sujet rend 5 et réfute cette paire vraie à `s_max=4`.
 
-**Et l'univers admissible est quasi linéaire.** Sa part de $\binom{n}{2}$ s'effondre
-— 78 % puis 20 % — tandis que le nombre par point croît lentement : 38,8 → 53,5 →
-66,5 → 78,7, avec des incréments par doublement de 14,7 puis 12,9 puis 12,3.
-**Des incréments quasi constants signent une croissance en $\log n$**, pas
-géométrique et pas un plateau ; les vraies paires suivent la même loi, incrément
-environ 3,2. En lisant $a+b\log_2 n$ — quatre points, donc une lecture et non une
-asymptote —, les six doublements qui séparent $n=800$ de 50 000 donnent de l'ordre
-de **150 paires admises et 50 vraies par point**, soit $7{,}5\cdot10^6$ candidates
-pour $2{,}5\cdot10^6$ réelles.
+L'erreur surestime le minimum et rejette trop de paires; corriger le sweep ne
+peut donc qu'augmenter `ADMIS`. Les quatre lignes sont des **bornes inférieures
+du sujet fautif**, pas une mesure de l'univers conforme. Elles ne démontrent ni
+$O(n\log n)$, ni les projections `150/50` paires par point, ni les masses
+`7,5e6/2,5e6` à 50 k. Le protocole mélange en outre deux nuages à `n=100`
+et un seul aux autres tailles. Même avec un oracle réparé, quatre tailles et une
+graine ne distingueraient pas une loi logarithmique d'une puissance lente ou
+d'une transition ultérieure; `RelevantGP` n'impose aucune borne de degré et le
+cas général peut rester quadratique dès l'arité deux.
 
-C'est **$O(n\log n)$ et non $O(n^2)$** : la première quantité de ce projet dont la
-loi d'échelle soit compatible avec le contrat.
+Le lemme ne prouve pas non plus qu'une paire admise est courte : il borne un
+minimum sur les deux demi-boules, tandis que l'autre côté peut contenir
+arbitrairement beaucoup de points. Aucun rayon de voisinage ne s'en déduit.
+Le binaire est un oracle exhaustif de diagnostic, pas un générateur : il visite
+tous les points pour chaque paire. À 50 k, cela représente
+`62 498 750 000 000` tests point--boule avant même le sweep angulaire.
 
-**Ce que cela ne résout pas.** Il reste à *trouver* ces $7{,}5\cdot10^6$ paires sans
-en tester $1{,}25\cdot10^9$. La condition dit qu'une paire admissible a peu de points
-dans sa boule diamétrale, donc qu'elle est courte relativement à la densité locale —
-exactement ce qu'une frontière de paires par ancre sait énumérer, et le projet
-`morsehgp3d` en porte déjà une, `morton_yao48_pair_frontier`, avec ses certificats
-d'élagage. Le lemme lui fournirait le filtre exact qui lui manque. Rien n'est écrit,
-et la borne de travail de cette énumération n'est pas démontrée.
+La voie produit doit construire implicitement des voisinages avec un certificat
+de couverture, publier degrés et masses combinadiques, et conserver toute
+frontière non résolue pour replay. La porte `center-cover + degree` formulée
+dans la note mathématique GPU donne maintenant un énoncé exact et falsifiable;
+son SLO reste conditionnel aux caps reçus, jamais déduit de cette table. Son
+terminal `AboveInteriorWindow` par arité doit aussi être versionné dans le
+contrat avant implémentation : la norme active exige encore un shell complet
+sur une fenêtre uniforme plus large.
+
+Pour la source Gabriel **ouverte**, le filtre utile emploie l'intérieur
+$D_{pu}^{\circ}$ de la boule diamétrale, ajoute manuellement les deux extrémités
+et cherche le même demi-espace fermé. Toute paire d'un support `U` vérifiant
+$\lvert U\rvert+\lvert I\rvert\leq s_{\max}$ passe alors, même avec un
+extra-shell arbitraire. Ce renforcement exact a été vérifié sans écart sur
+59 154 inégalités bornées; il ne fournit toujours ni rayon ni borne de degré.
+
+Le delta k-NN worktree `130e316e...` ne répare pas le sweep. Il construit une
+matrice $n^2$ et $n$ tris hors chrono, puis mesure seulement les rangs du
+`ADMIS` déjà sous-estimé; ses maxima et histogrammes ne qualifient donc aucune
+frontière. Le filtre exact et sa fixture permanente viennent avant ce diagnostic.
 
 ### Le terrain à densité fixe : quatre diagnostics, aucune asymptote encore
 
@@ -1249,7 +1274,7 @@ construit aucun sommet d'arrangement ni mosaïque. Son exactitude est démontrab
 son SLO reste conditionné aux degrés complets, masses combinadiques et replays
 publiés dans le reçu.
 
-Le probe live du lemme de demi-boule n'est pas encore un juge de cette voie. Son
+Le probe de `40ad152` et son delta k-NN ne sont pas encore un juge de cette voie. Leur
 `minimum_halfplane_count` teste seulement les directions des points et compte
 les égalités sur la frontière; une fixture entière `RelevantGP` lui donne 5 au
 lieu du minimum exact 2 et lui fait réfuter une paire critique. Le lemme reste
