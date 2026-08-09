@@ -37,6 +37,7 @@
 #include "mhgp/mhgp.hpp"  // le SUJET, jamais l'autorite
 #include "prototype/anchored_catalogue.hpp"
 #include "prototype/edge_shallow.hpp"
+#include "prototype/order_k_bfs.hpp"
 
 namespace {
 
@@ -1162,7 +1163,8 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : regime inconnu %s (exhaustive ou assumed_window)\n", regime.c_str());
     return 2;
   }
-  if (subject != "v2" && subject != "anchored" && subject != "edge_shallow") {
+  if (subject != "v2" && subject != "anchored" && subject != "edge_shallow"
+      && subject != "order_k") {
     std::printf("ECHEC : sujet inconnu %s (v2, anchored ou edge_shallow)\n", subject.c_str());
     return 2;
   }
@@ -1312,6 +1314,7 @@ int main(int argc, char** argv) {
   long long injections_applied = 0, injection_escapes = 0;
   mhgp3v::AnchoredCampaign anchored_total;
   mhgp3v::EdgeShallowStatistics edge_shallow_total;
+  mhgp3v::OrderKStatistics order_k_total;
   std::mt19937_64 rng(seed);
   std::uniform_int_distribution<long long> coordinate(0, coordinate_maximum);
 
@@ -1417,6 +1420,15 @@ int main(int argc, char** argv) {
       forests = result.forests;
       subject_out_of_domain = result.out_of_declared_domain;
       subject_suppressed = result.forests_suppressed;
+    } else if (subject == "order_k") {
+      mhgp3v::OrderKStatistics order_k;
+      bool ood = false;
+      catalogue = mhgp3v::order_k_catalogue(points, s_max, &order_k, &ood);
+      subject_out_of_domain = ood;
+      subject_suppressed = ood;
+      order_k_total.absorb(order_k);
+      if (!subject_out_of_domain)
+        for (int k = 1; k <= order; ++k) forests.push_back(mhgp::build_forest(points, catalogue, k));
     } else if (subject == "edge_shallow") {
       mhgp3v::AnchoredCampaign anchored;
       mhgp3v::EdgeShallowStatistics shallow;

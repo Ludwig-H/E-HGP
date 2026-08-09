@@ -2,6 +2,9 @@
 
 Date de l'audit : 2026-08-09 UTC.
 
+> [!NOTE]
+> **Suivi mathématique : le finding de connectivité est fermé sous arrangement simple.** [AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md](AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md) prouve que le vrai 1-squelette induit par les sommets de niveau au plus $k$ est connexe et qu'un seul germe de niveau zéro suffit sans excursion au-dessus de $k$. Le NO-GO du présent audit reste inchangé : RelevantGP ne garantit pas la simplicité globale utilisée par la représentation à quatre identifiants, le germe et les témoins constants sont encore faux sur la fixture coplanaire, les arités basses exigent un lemme d'attachement distinct, et le coût reste en $\Theta(nV)$.
+
 ## Verdict
 
 **NO-GO comme générateur produit M3.** Le relevé et l'ordre exact d'un pinceau sont une piste mathématique sérieuse, mais le prototype courant ne calcule pas encore le catalogue MorseHGP3D. Un contre-exemple entier, bien centré et sans extra-shell critique fait publier un niveau 0 à la place du niveau 1. Ce défaut subsiste après la correction du signe `InSphere`.
@@ -13,7 +16,7 @@ Le parcours matérialise en outre le squelette global des sommets shallow de l'a
 | P0 | les témoins coplanaires au triangle du pinceau sont ignorés alors que leur signe est constant et peut être intérieur | **ouvert, reproduit exactement** |
 | P0 | les sommets d'arrangement d'arité quatre ne sont pas le catalogue Morse stratifié d'arités un à quatre | **ouvert** |
 | P0 architecture | `seen` et `visited` matérialisent globalement un squelette shallow de mosaïque d'ordre supérieur, avec un rescan de `n` par voisin | **ouvert** |
-| P0 preuve | aucune preuve de connexité du graphe de sous-niveau, tandis que le code coupe tout voisin au-dessus du plafond avant de le traverser | **ouvert** |
+| Clos conditionnel | connectivité du vrai 1-squelette sous arrangement simple | **prouvée dans [AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md](AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md) ; non applicable telle quelle à `RelevantGP` ou au code courant** |
 | P1 | domaine plus fort que `RelevantGP`, métriques mortes ou trompeuses, clé 16 bits non gardée, sortie non canonique | **ouvert** |
 | Clos dans ce delta | convention de signe `InSphere` inversée au premier snapshot | **corrigé par Claude dans `a8111f0`** |
 
@@ -165,7 +168,7 @@ Inversement, les points coplanaires sont sautés silencieusement sans incrément
 
 Le domaine doit rester celui défini par référence, avec décision locale sur les événements effectivement critiques.
 
-## 5. Complétude du parcours : signal expérimental positif, preuve toujours absente
+## 5. Complétude du parcours : connectivité désormais prouvée conditionnellement
 
 Après correction du signe, une campagne différentielle a comparé le parcours à l'énumération de tous les `C(n,4)` tétraèdres sur des nuages strictement simples : aucune coplanarité de quadruplet, aucune cosphéricité de quintuplet, `n` entre 5 et 9 et plafond aléatoire entre 4 et `n`.
 
@@ -173,12 +176,9 @@ Après correction du signe, une campagne différentielle a comparé le parcours 
 OK checked=19864 rejected_as_nongeneric=136
 ```
 
-Ce résultat soutient l'ordre du pinceau et le transport dans ce domaine **beaucoup plus fort**, mais ne prouve pas que le sous-graphe induit par les sommets de niveau au plus `k` soit connexe en toute dimension et pour tout arrangement.
+Cette campagne soutient l'ordre du pinceau et le transport dans ce domaine **beaucoup plus fort**, mais ne constituait pas une preuve universelle. Le suivi [AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md](AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md) ferme désormais le point mathématique : le vrai 1-squelette induit par les sommets de niveau au plus `k` est connexe, et sous arrangement simple ses arêtes sont les voisinages consécutifs partageant trois hyperplans.
 
-Le code refuse d'enfiler un voisin dont le niveau dépasse le plafond. Par conséquent, si deux composantes shallow ne sont reliées dans le squelette que par un sommet de niveau supérieur, une seule sera visitée. Un oracle fini peut falsifier cette hypothèse, pas la certifier universellement. Il faut avant promotion :
-
-- soit un théorème de connexité du squelette de sous-niveau avec preuve applicable à cet arrangement orienté ;
-- soit une méthode complète de découverte des composantes ou des germes, elle-même sans énumération globale interdite.
+La coupe avant `enqueue` est donc sûre **si** le germe, les niveaux, les constantes de pinceau et les voisinages sont exacts dans ce domaine simple. Ces préconditions ne sont pas satisfaites par la fixture coplanaire, et `RelevantGP` n'implique pas la simplicité globale. La preuve ferme la connectivité abstraite ; elle ne ferme pas l'application de ce théorème au code courant.
 
 Le commentaire « le niveau du voisin vaut le niveau courant plus ou moins un » est aussi trop fort : la variation 0 est possible lorsque l'apex et le nouveau point compensent leurs changements d'état. La formule du code autorise déjà `-1`, `0` et `+1`; le commentaire doit refléter cet invariant exact.
 
@@ -246,12 +246,12 @@ Sous le profil effectivement vérifié `quantized_u16_input`, la borne annoncée
 3. Compter les témoins constants sur chaque pinceau et construire un germe Delaunay certifié sur une face coplanaire.
 4. Séparer explicitement `arrangement_vertex`, `critical_sphere_candidate`, `well_centred`, `closed_rank` et `public_event`.
 5. Implémenter et juger les quatre arités; `n=1`, `n=2` et `n=3` doivent déjà produire leurs catalogues exacts.
-6. Fournir une preuve de connexité du squelette shallow ou un mécanisme complet multi-germe.
+6. Appliquer la preuve de connectivité en certifiant son domaine simple, ou traiter canoniquement les multiplicités permises par `RelevantGP`.
 7. Remplacer le rescan `n` par voisin et publier une borne de temps et de mémoire mesurée au profil 50 k.
 8. Garder cette voie au statut d'oracle/prototype tant que les points 1 à 7 ne sont pas fermés; aucun benchmark ni accord moyen ne peut promouvoir `public_status=exact`.
 
 ## Conclusion
 
-La bonne idée à conserver est l'encodage exact de l'ordre d'un pinceau par `orient3d` et `InSphere`; la campagne strictement simple montre qu'elle mérite d'être poursuivie. Ce n'est cependant pas encore une voie complète vers MorseHGP3D v3 : le domaine réel comporte des strates coplanaires autorisées, les arités basses manquent, le bon centrage n'est pas séparé de la navigation, la connexité est ouverte et le facteur `n` reste payé huit fois par sommet.
+La bonne idée à conserver est l'encodage exact de l'ordre d'un pinceau par `orient3d` et `InSphere`; la campagne strictement simple et la preuve polyédrique montrent qu'elle mérite d'être poursuivie. Ce n'est cependant pas encore une voie complète vers MorseHGP3D v3 : le domaine réel comporte des strates coplanaires autorisées, les arités basses manquent, le bon centrage n'est pas séparé de la navigation, l'application du théorème au code reste ouverte et le facteur `n` reste payé huit fois par sommet.
 
 La décision d'audit est donc : **conserver `order_k_bfs.hpp` comme oracle expérimental borné, ne pas l'intégrer comme remplacement produit d'A1-source au snapshot `a8111f0`.**

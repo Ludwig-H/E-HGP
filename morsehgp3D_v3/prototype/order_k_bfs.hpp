@@ -68,6 +68,29 @@
 // de cette arete.
 //
 // ---------------------------------------------------------------------------
+// Les degenerescences sont TRAITEES, pas exclues
+// ---------------------------------------------------------------------------
+//
+// Sur un nuage LIDAR quantifie de 500 points, le parcours rencontre deja une
+// cospherie a cinq points DANS le <=k-niveau. Le germe est propre et compare_t
+// ne rend zero que si un cinquieme point est exactement sur la sphere : c'est
+// une vraie degenerescence, pas un defaut de predicat. A 50 000 points sur une
+// grille u16 elle est certaine. L'exactitude etant contractuelle, on ne peut
+// pas s'en debarrasser par un rejet de domaine.
+//
+// Un sommet ne porte donc pas quatre points mais sa COQUILLE entiere : quand m
+// hyperplans se rencontrent, le sommet est degenere et ses aretes incidentes
+// sont indexees par les 3-sous-ensembles de la coquille. Le cas non degenere,
+// m = 4, redonne exactement les quatre faces d'un tetraedre. Les points a
+// parametre egal le long d'un pinceau entrent donc ENSEMBLE, en un seul lot.
+//
+// Le critere de criticite devient uniforme et se lit sans cas particulier :
+// une boule est critique si et seulement si elle EST la miniboule de sa
+// coquille. Le support HGP est alors celui de cette miniboule, d'au plus quatre
+// points, et le rang ferme compte tous les membres, coquille surnumeraire
+// comprise.
+//
+// ---------------------------------------------------------------------------
 // Ce que ce fichier ne pretend PAS
 // ---------------------------------------------------------------------------
 //
@@ -87,6 +110,7 @@
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
+#include "mhgp/miniball.hpp"
 #include "prototype/anchored_catalogue.hpp"
 
 namespace mhgp3v {
@@ -195,8 +219,8 @@ inline unsigned long long key4(mhgp::i32 a, mhgp::i32 b, mhgp::i32 c, mhgp::i32 
 }
 
 struct Vertex {
-  mhgp::i32 s[4];
-  int level;
+  std::vector<mhgp::i32> shell;   // TOUS les points sur la sphère, tries
+  int level;                      // points strictement interieurs
 };
 
 // --------------------------------------------------------------------------
@@ -235,7 +259,22 @@ struct Pencil {
 
 // ---------------------------------------------------------------------------
 // Le parcours. Renvoie les sommets visites de rang ferme au plus rank_ceiling.
+// Un sommet porte sa COQUILLE entiere : le cas degenere n'est pas un cas
+// particulier, c'est le cas general avec |coquille| > 4.
 // ---------------------------------------------------------------------------
+
+namespace bfs {
+
+struct ShellHash {
+  std::size_t operator()(const std::vector<mhgp::i32>& v) const {
+    std::size_t h = 1469598103934665603ULL;
+    for (mhgp::i32 x : v) { h ^= static_cast<std::size_t>(x) + 0x9e3779b9; h *= 1099511628211ULL; }
+    return h;
+  }
+};
+
+}  // namespace bfs
+
 inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& points,
                                                  int rank_ceiling,
                                                  OrderKStatistics* statistics,
@@ -246,17 +285,12 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
   if (n < 4) return visited;
 
   // ---- GERME : une face de l'enveloppe convexe -----------------------------
-  // p0 lex-min est un sommet de l'enveloppe.
   mhgp::i32 p0 = 0;
   for (mhgp::i32 i = 1; i < n; ++i) {
     const mhgp::P3& u = points[static_cast<std::size_t>(i)];
     const mhgp::P3& v = points[static_cast<std::size_t>(p0)];
     if (u.x < v.x || (u.x == v.x && (u.y < v.y || (u.y == v.y && u.z < v.z)))) p0 = i;
   }
-  ++statistics->seed_scans;
-
-  // Arete du contour 2D dans la projection (x,y) : le plan vertical qui la
-  // porte appuie l'enveloppe 3D, donc (p0,p1) en est une arete.
   mhgp::i32 p1 = -1;
   for (mhgp::i32 z = 0; z < n; ++z) {
     if (z == p0) continue;
@@ -266,40 +300,36 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
     const mhgp::i128 bx = points[static_cast<std::size_t>(z)].x - points[static_cast<std::size_t>(p0)].x;
     const mhgp::i128 by = points[static_cast<std::size_t>(z)].y - points[static_cast<std::size_t>(p0)].y;
     const mhgp::i128 cross = ax * by - ay * bx;
-    if (cross < 0) p1 = z;                        // z tourne plus a droite
+    if (cross < 0) p1 = z;
     else if (cross == 0 && (bx * bx + by * by) > (ax * ax + ay * ay)) p1 = z;
   }
-  ++statistics->seed_scans;
-
-  // Rotation autour de (p0,p1) : le premier point rencontre ferme une face.
   mhgp::i32 p2 = -1;
   for (mhgp::i32 z = 0; z < n; ++z) {
     if (z == p0 || z == p1) continue;
     if (p2 < 0) { p2 = z; continue; }
-    const mhgp::i128 o = bfs::orient3d_exact(points[static_cast<std::size_t>(p0)],
-                                       points[static_cast<std::size_t>(p1)],
-                                       points[static_cast<std::size_t>(p2)],
-                                       points[static_cast<std::size_t>(z)]);
-    if (o < 0) p2 = z;
+    if (bfs::orient3d_exact(points[static_cast<std::size_t>(p0)],
+                            points[static_cast<std::size_t>(p1)],
+                            points[static_cast<std::size_t>(p2)],
+                            points[static_cast<std::size_t>(z)]) < 0) p2 = z;
   }
-  ++statistics->seed_scans;
+  statistics->seed_scans += 3;
   if (p2 < 0) { *out_of_domain = true; return visited; }
 
   bfs::Pencil face{&points, p0, p1, p2};
-  // Verification que la face appuie bien : tous les points d'un meme cote.
   int supporting = 0;
   for (mhgp::i32 z = 0; z < n; ++z) {
     if (z == p0 || z == p1 || z == p2) continue;
     const int o = face.orient(z);
-    if (o == 0) continue;                          // coplanaire : neutre ici
+    if (o == 0) continue;
     if (supporting == 0) supporting = o;
     else if (supporting != o) { *out_of_domain = true; return visited; }
   }
   ++statistics->seed_scans;
   if (supporting == 0) { *out_of_domain = true; return visited; }
 
-  // En t = -oo la boule est le demi-espace VIDE ; le premier point atteint en
-  // augmentant t donne un tetraedre de DELAUNAY, donc de niveau 0.
+  // En t = -oo la boule est le demi-espace VIDE. Le premier LOT rencontre — un
+  // lot, car plusieurs points peuvent partager le meme parametre — donne un
+  // sommet de niveau zero.
   mhgp::i32 seed = -1;
   int seed_orient = 0;
   for (mhgp::i32 z = 0; z < n; ++z) {
@@ -308,76 +338,237 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
     if (oz == 0) continue;
     if (seed < 0) { seed = z; seed_orient = oz; continue; }
     const int cmp = face.compare_t(seed, seed_orient, z, oz);
-    if (cmp == 0) { ++statistics->cocircular_pencil; *out_of_domain = true; return visited; }
-    if (cmp > 0) { seed = z; seed_orient = oz; }   // t_seed > t_z : z arrive avant
+    if (cmp > 0) { seed = z; seed_orient = oz; }
   }
   ++statistics->seed_scans;
   if (seed < 0) { *out_of_domain = true; return visited; }
-  ++statistics->level_recomputed;                  // le SEUL niveau calcule
+
+  std::vector<mhgp::i32> root_shell{p0, p1, p2, seed};
+  for (mhgp::i32 z = 0; z < n; ++z) {
+    if (z == p0 || z == p1 || z == p2 || z == seed) continue;
+    const int oz = face.orient(z);
+    if (oz == 0) {
+      // Coplanaire avec la face : son etat ne depend pas du parametre, car
+      // toute sphère du pinceau coupe ce plan selon le MEME cercle. S'il est
+      // dessus, il appartient a toutes les coquilles du pinceau.
+      if (face.side(seed, z, seed_orient) == 0) {
+        root_shell.push_back(z);
+        ++statistics->cocircular_pencil;
+      }
+      continue;
+    }
+    if (face.compare_t(seed, seed_orient, z, oz) == 0) {   // meme parametre : meme sphère
+      root_shell.push_back(z);
+      ++statistics->cocircular_pencil;
+    }
+  }
+  std::sort(root_shell.begin(), root_shell.end());
+  ++statistics->level_recomputed;
 
   // ---- PARCOURS -----------------------------------------------------------
-  std::unordered_set<unsigned long long> seen;
+  std::unordered_set<std::vector<mhgp::i32>, bfs::ShellHash> seen;
   std::vector<bfs::Vertex> frontier;
-  bfs::Vertex root{{p0, p1, p2, seed}, 0};
-  std::sort(root.s, root.s + 4);
-  seen.insert(bfs::key4(root.s[0], root.s[1], root.s[2], root.s[3]));
-  frontier.push_back(root);
+  seen.insert(root_shell);
+  frontier.push_back(bfs::Vertex{root_shell, 0});
 
+  std::vector<mhgp::i32> tied;
   while (!frontier.empty()) {
     const bfs::Vertex v = frontier.back();
     frontier.pop_back();
-    if (4 + v.level > rank_ceiling) { ++statistics->vertices_beyond; continue; }
+    const int shell_size = static_cast<int>(v.shell.size());
+    if (shell_size + v.level > rank_ceiling) { ++statistics->vertices_beyond; continue; }
     visited.push_back(v);
     ++statistics->vertices_visited;
 
-    for (int drop = 0; drop < 4; ++drop) {
-      mhgp::i32 tri[3];
-      int w = 0;
-      for (int i = 0; i < 4; ++i) if (i != drop) tri[w++] = v.s[i];
-      const mhgp::i32 apex = v.s[drop];
+    // Les aretes incidentes sont indexees par les 3-sous-ensembles de la
+    // coquille : quatre pour un sommet simple, C(m,3) pour un sommet degenere.
+    for (int i = 0; i < shell_size; ++i)
+    for (int j = i + 1; j < shell_size; ++j)
+    for (int k = j + 1; k < shell_size; ++k) {
+      const mhgp::i32 tri[3] = {v.shell[static_cast<std::size_t>(i)],
+                                v.shell[static_cast<std::size_t>(j)],
+                                v.shell[static_cast<std::size_t>(k)]};
       bfs::Pencil pencil{&points, tri[0], tri[1], tri[2]};
-      const int orient_apex = pencil.orient(apex);
-      if (orient_apex == 0) continue;              // support degenere
+      mhgp::i32 apex = -1;
+      int orient_apex = 0;
+      for (int t = 0; t < shell_size; ++t) {
+        if (t == i || t == j || t == k) continue;
+        const mhgp::i32 z = v.shell[static_cast<std::size_t>(t)];
+        const int oz = pencil.orient(z);
+        if (oz != 0) { apex = z; orient_apex = oz; break; }
+      }
+      if (apex < 0) continue;                        // triangle degenere
 
-      // Les deux voisins : le point suivant en t croissant et en t decroissant.
       for (int direction = -1; direction <= 1; direction += 2) {
         ++statistics->pencil_queries;
         mhgp::i32 best = -1;
         int best_orient = 0;
         for (mhgp::i32 z = 0; z < n; ++z) {
-          if (z == tri[0] || z == tri[1] || z == tri[2] || z == apex) continue;
+          if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
           const int oz = pencil.orient(z);
-          if (oz == 0) continue;
+          if (oz == 0) continue;     // coplanaire : etat constant le long du pinceau
           ++statistics->pencil_candidates;
-          // Ne garder que ce qui est du bon cote de l'apex.
-          const int vs_apex = pencil.compare_t(z, oz, apex, orient_apex);
-          if (vs_apex == 0) { ++statistics->cocircular_pencil; *out_of_domain = true; return visited; }
-          // compare_t(z, apex) = signe(t_z - t_apex) : on veut ce signe egal a
-          // la direction demandee.
-          if (vs_apex != direction) continue;
+          if (pencil.compare_t(z, oz, apex, orient_apex) != direction) continue;
           if (best < 0) { best = z; best_orient = oz; continue; }
-          const int cmp = pencil.compare_t(z, oz, best, best_orient);
-          if (cmp == 0) { ++statistics->cocircular_pencil; *out_of_domain = true; return visited; }
-          // On veut le PLUS PROCHE de l'apex dans cette direction : en t
-          // croissant le t minimal, en t decroissant le t maximal.
-          if (cmp == -direction) { best = z; best_orient = oz; }
+          if (pencil.compare_t(z, oz, best, best_orient) == -direction) { best = z; best_orient = oz; }
         }
         if (best < 0) { ++statistics->unbounded_stops; continue; }
 
-        // Transport du niveau : un seul point change d'etat.
-        const int apex_in_new = pencil.side(best, apex, best_orient);
-        const int best_in_old = pencil.side(apex, best, orient_apex);
-        const int level = v.level + (apex_in_new < 0 ? 1 : 0) - (best_in_old < 0 ? 1 : 0);
-        if (level < 0 || 4 + level > rank_ceiling) continue;
+        // Le LOT : tout ce qui partage le parametre du meilleur candidat entre
+        // en meme temps. C'est ici que la degenerescence est absorbee.
+        tied.assign(1, best);
+        for (mhgp::i32 z = 0; z < n; ++z) {
+          if (z == best) continue;
+          if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
+          const int oz = pencil.orient(z);
+          if (oz == 0) {
+            // Sur le cercle du triangle : present dans TOUTE coquille du
+            // pinceau, donc aussi dans la nouvelle.
+            if (pencil.side(best, z, best_orient) == 0) {
+              tied.push_back(z);
+              ++statistics->cocircular_pencil;
+            }
+            continue;
+          }
+          if (pencil.compare_t(z, oz, best, best_orient) == 0) {
+            tied.push_back(z);
+            ++statistics->cocircular_pencil;
+          }
+        }
 
-        bfs::Vertex next{{tri[0], tri[1], tri[2], best}, level};
-        std::sort(next.s, next.s + 4);
-        const unsigned long long k = bfs::key4(next.s[0], next.s[1], next.s[2], next.s[3]);
-        if (seen.insert(k).second) frontier.push_back(next);
+        // Transport du niveau : ce qui entre, ce qui sort. Rien d'autre ne
+        // change d'etat entre les deux parametres.
+        int level = v.level;
+        for (mhgp::i32 z : tied)
+          if (pencil.side(apex, z, orient_apex) < 0) --level;      // etait dedans
+        for (int t = 0; t < shell_size; ++t) {
+          if (t == i || t == j || t == k) continue;
+          const mhgp::i32 z = v.shell[static_cast<std::size_t>(t)];
+          if (pencil.side(best, z, best_orient) < 0) ++level;      // entre dedans
+        }
+        if (level < 0) { *out_of_domain = true; return visited; }
+
+        std::vector<mhgp::i32> shell(tri, tri + 3);
+        shell.insert(shell.end(), tied.begin(), tied.end());
+        std::sort(shell.begin(), shell.end());
+        if (static_cast<int>(shell.size()) + level > rank_ceiling) continue;
+        if (seen.insert(shell).second) frontier.push_back(bfs::Vertex{shell, level});
       }
     }
   }
   return visited;
+}
+
+}  // namespace mhgp3v
+
+namespace mhgp3v {
+
+// ---------------------------------------------------------------------------
+// Du parcours au CATALOGUE.
+//
+// Le critere est unifie et sans cas particulier : une boule est CRITIQUE si et
+// seulement si elle est la MINIBOULE de sa coquille. Cela couvre d'un coup le
+// bien-centrage des arites deux, trois et quatre, et les coquilles
+// surnumeraires — une sphère portant cinq points reste UNE boule, dont le
+// support HGP est celui de sa miniboule et dont le rang compte les cinq.
+//
+// Completude des arites basses. Une arete (a,b) de rang r se relie a un sommet
+// en deux pas : grossir la sphère diametrale jusqu'au premier troisieme point
+// donne le rang r+1, puis suivre le pinceau jusqu'au premier quatrieme donne
+// r+2. Un triangle ne demande qu'un pas. Il faut donc parcourir jusqu'au rang
+// s_max + 2 pour ne rien perdre en arite deux.
+// ---------------------------------------------------------------------------
+
+inline mhgp::Catalogue order_k_catalogue(const std::vector<mhgp::P3>& points, int s_max,
+                                         OrderKStatistics* statistics,
+                                         bool* out_of_domain) {
+  *statistics = OrderKStatistics{};
+  mhgp::Catalogue catalogue;
+  const int n = static_cast<int>(points.size());
+  *out_of_domain = false;
+
+  std::vector<mhgp::CriticalSphere> kept;
+  std::vector<mhgp::i32> members_pool;
+  std::unordered_set<std::vector<mhgp::i32>, bfs::ShellHash> emitted;
+
+  // Emet la boule portee par un support candidat, si elle est critique.
+  auto try_emit = [&](const mhgp::i32* candidate, int m) {
+    const mhgp::MiniballResult mb = mhgp::miniball_of(points, candidate, m);
+    if (!mb.ok) return;
+    // La miniboule doit passer par TOUT le candidat : sinon la sphère de ce
+    // support n'est pas minimale, donc n'est pas une sphère critique. Sa
+    // sous-sphère, elle, sera recoltee ailleurs.
+    for (int i = 0; i < m; ++i)
+      if (mhgp::sphere_side(mb.sph, points[static_cast<std::size_t>(candidate[i])]) != 0) return;
+
+    std::vector<mhgp::i32> members, shell;
+    for (mhgp::i32 z = 0; z < n; ++z) {
+      const int side = mhgp::sphere_side(mb.sph, points[static_cast<std::size_t>(z)]);
+      if (side > 0) continue;
+      if (side == 0) shell.push_back(z);
+      members.push_back(z);
+    }
+    if (static_cast<int>(members.size()) > s_max) return;
+    if (!emitted.insert(shell).second) return;      // clef canonique : la coquille
+
+    mhgp::CriticalSphere critical;
+    for (int i = 0; i < mhgp::kMaxSupport; ++i)
+      critical.support[i] = i < mb.n_support ? mb.support[i] : -1;
+    critical.n_support = mb.n_support;
+    critical.rank = static_cast<int>(members.size());
+    critical.sph = mb.sph;
+    critical.beta = mhgp::sphere_beta(mb.sph);
+    critical.members_begin = static_cast<mhgp::i32>(members_pool.size());
+    members_pool.insert(members_pool.end(), members.begin(), members.end());
+    kept.push_back(critical);
+    ++statistics->emitted_arity[mb.n_support];
+  };
+
+  for (mhgp::i32 p = 0; p < n; ++p) try_emit(&p, 1);
+
+  const auto vertices = order_k_vertices(points, s_max + 2, statistics, out_of_domain);
+  if (*out_of_domain) return catalogue;
+
+  std::unordered_set<std::vector<mhgp::i32>, bfs::ShellHash> seen_sub;
+  for (const bfs::Vertex& v : vertices) {
+    try_emit(v.shell.data(), static_cast<int>(v.shell.size()));
+    const int m = static_cast<int>(v.shell.size());
+    for (int i = 0; i < m; ++i)
+      for (int j = i + 1; j < m; ++j) {
+        const mhgp::i32 e[2] = {v.shell[static_cast<std::size_t>(i)],
+                                v.shell[static_cast<std::size_t>(j)]};
+        if (seen_sub.insert(std::vector<mhgp::i32>(e, e + 2)).second) {
+          ++statistics->harvest_edges;
+          try_emit(e, 2);
+        }
+        for (int k = j + 1; k < m; ++k) {
+          const mhgp::i32 f[3] = {e[0], e[1], v.shell[static_cast<std::size_t>(k)]};
+          if (!seen_sub.insert(std::vector<mhgp::i32>(f, f + 3)).second) continue;
+          ++statistics->harvest_faces;
+          try_emit(f, 3);
+        }
+      }
+  }
+
+  std::vector<int> order(kept.size());
+  for (std::size_t i = 0; i < order.size(); ++i) order[i] = static_cast<int>(i);
+  std::sort(order.begin(), order.end(), [&](int x, int y) {
+    const mhgp::CriticalSphere& u = kept[static_cast<std::size_t>(x)];
+    const mhgp::CriticalSphere& w = kept[static_cast<std::size_t>(y)];
+    if (u.n_support != w.n_support) return u.n_support < w.n_support;
+    for (int i = 0; i < u.n_support; ++i)
+      if (u.support[i] != w.support[i]) return u.support[i] < w.support[i];
+    return false;
+  });
+  for (int idx : order) {
+    mhgp::CriticalSphere critical = kept[static_cast<std::size_t>(idx)];
+    const int begin = critical.members_begin;
+    critical.members_begin = static_cast<mhgp::i32>(catalogue.members.size());
+    for (int i = 0; i < critical.rank; ++i)
+      catalogue.members.push_back(members_pool[static_cast<std::size_t>(begin + i)]);
+    catalogue.spheres.push_back(critical);
+  }
+  return catalogue;
 }
 
 }  // namespace mhgp3v
