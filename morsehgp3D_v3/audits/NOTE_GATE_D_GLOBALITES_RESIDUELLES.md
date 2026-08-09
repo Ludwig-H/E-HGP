@@ -42,7 +42,8 @@ Le mot **local** qualifie donc le choix scientifique au sommet. Il ne signifie n
 
 ## 2. Factorisation constructive sans mosaïque globale
 
-Sous une source finie et complète, le pipeline exact minimal est le suivant.
+Sous une source finie et complète, une factorisation exacte candidate est la
+suivante.
 
 1. La reverse search émet chaque événement critique auprès de son propriétaire,
    sans table de sommets globale.
@@ -94,8 +95,9 @@ suivante :
 > produire, avec certificat de complétude, toutes les premières incidences utiles
 > de chaque facette ou un quotient prouvé équivalent à $H_0$.
 
-C'était le verrou mathématique aval principal après le parent. Il est désormais
-**fermé conditionnellement** pour la sémantique horizontale normalisée : le
+C'était le verrou mathématique aval principal après le parent. Le théorème de
+réduction est désormais **fermé conditionnellement** pour la sémantique
+horizontale normalisée : le
 corollaire 4.1 prouve que les cofaces directes et toutes les premières incidences
 des facettes du cœur suffisent sous l'autorité régulière; le théorème de fenêtre
 rend les blocs saturés de haut rang inertes; enfin, la dichotomie boule fermée /
@@ -183,8 +185,9 @@ par composante égale. Le contrat complet, son oracle borné et ses mutations so
 décrits dans la
 [`note de fold pré-lot`](NOTE_GATE_D_FOLD_PRELOT_EXACT.md).
 
-Le cas $q_R=1$ est décisif. Même sans nœud public, toute nouvelle facette doit
-laisser une attache ou version interne vers la racine continuée. Sinon un lot
+Le cas $q_R=1$ est décisif. Même sans nœud public, toute nouvelle facette
+incidente à cette continuation doit laisser une attache ou version interne vers
+la racine continuée. Sinon un lot
 futur ne peut plus distinguer une facette encore latente d'une facette déjà
 rattachée. Le locator résident est ainsi une optimisation de débit, pas une
 nécessité mathématique. Le journal externe retire sa résidence, jamais son
@@ -243,7 +246,8 @@ effectuer cette migration implicitement.
 
 ## 7. État résident minimal et compteurs Gate D
 
-L'état simultané visé se factorise en
+Hors payload de couverture, provenances, reçus et sorties, la cible d'état
+simultané du noyau se factorise en
 
 $$M_{\mathrm{resident}}=O(n)+M_{\mathrm{locator\_buffer}}+M_{\mathrm{batch}}+M_{\mathrm{run}}+M_{\mathrm{scheduler}}.$$
 

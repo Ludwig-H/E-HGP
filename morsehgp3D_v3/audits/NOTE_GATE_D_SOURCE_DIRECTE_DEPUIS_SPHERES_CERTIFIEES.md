@@ -175,6 +175,126 @@ propriété, puis à dédupliquer les supports multiples d'une même boule. Le p
 de navigation est donc **prouvé**; la borne de travail du harvest et la
 terminalité du stream restent ouvertes.
 
+Il faut récolter **tous** les flats fermés incidents, pas seulement les rayons du
+cône de parent ou les arêtes qui possèdent un voisin fini. La fixture u16
+
+```text
+A=(8,4,2) B=(0,8,2) C=(0,0,2) p=(7,5,0) y=(8,5,3)
+```
+
+le montre déjà en rang trois. Sur le pinceau `ABC`, paramétré par le centre
+`(3,4,2+t)`, le rayon carré vaut $25+t^2$, et les puissances de `p` et `y`
+valent respectivement $-4+4t$ et $2-2t$. À $t=0$, la sphère critique a
+$S=U=\lbrace A,B,C\rbrace$, $I=\lbrace p\rbrace$ et porte la coface directe
+`ABCp` à l'ordre trois. Son propriétaire est l'unique sommet $t=1$, de coquille
+`ABCpy` et de niveau zéro. Les pentes opposées de `p` et `y` interdisent pourtant
+toute orientation non nulle dans le cône de chambre, et les deux côtés du
+pinceau sont sans voisin fini. Une récolte branchée après le filtre du parent
+omettrait donc cette sphère exacte.
+
+L'arité deux ne se récupère pas non plus depuis les seuls extrema de rang trois.
+Avec
+
+```text
+A=(0,0,0) B=(4,0,0) z=(2,1,0) C=(0,10,0) D=(0,0,10)
+```
+
+le flat `AB` s'écrit par les centres `(2,y,w)`. La boule diamètre source est son
+minimum `(y,w)=(0,0)` et porte `ABz`. Son propriétaire est le sommet
+`ABCD`, en `(y,w)=(5,5)`, avec `z` strictement intérieur. Les deux flats de rang
+trois contenant `AB` atteignent leurs propres minima en `(5,0)` et `(0,5)`;
+aucun ne redonne la boule diamètre. La source doit donc traiter le flat de rang
+deux lui-même, et non espérer reconstruire toutes les paires depuis les seuls
+plans extrêmes.
+
+### 3.2 Borne de sortie par propriétaire sous zéro-extra-shell
+
+La difficulté précédente n'impose pas pour autant l'énumération brute de toutes
+les paires ou de tous les triplets. Soit $v$ un propriétaire shallow,
+$m=\lvert S(v)\rvert$, et fixons un plafond $h$ sur le nombre de points de
+$S(v)$ strictement intérieurs à la sphère cible. Tous les points de $S(v)$ sont
+sur une même sphère strictement convexe $V$.
+
+Pour une paire cible $U$ possédée par $v$, le plan radical de sa boule diamètre
+et de $V$ contient exactement les deux points de $U$ sous zéro-extra-shell. Le
+côté intérieur contient au plus $h$ points de $S(v)$. Si
+chaque point de $S(v)$ est gardé indépendamment avec probabilité $p$, l'événement
+« les deux supports sont gardés et tous ces intérieurs sont omis » a probabilité
+au moins $p^2(1-p)^h$. Dans cet événement, $U$ est une arête exposée de
+l'enveloppe convexe de l'échantillon. Or un polyèdre convexe à $r$ sommets a au
+plus $3r$ arêtes. Si $N_2(v,h)$ est le nombre de telles paires, alors
+
+$$N_2(v,h)p^2(1-p)^h\leq3pm.$$
+
+Pour un support cible de rang trois, le même plan contient exactement son
+triangle; après omission des intérieurs, il devient une face triangulaire
+exposée. Un polyèdre convexe à $r$ sommets a au plus $2r$ faces, d'où
+
+$$N_3(v,h)p^3(1-p)^h\leq2pm.$$
+
+Pour $h\geq1$, prendre $p=1/(h+1)$ et utiliser
+$(1-p)^h\geq1/4$ donne les bornes explicites
+$N_2(v,h)\leq12m(h+1)$ et $N_3(v,h)\leq8m(h+1)^2$. Pour $h=0$, prendre
+$p=1$ donne les bornes plus fortes $N_2(v,0)\leq3m$ et
+$N_3(v,0)\leq2m$.
+
+Au vrai propriétaire, les deux inclusions du certificat donnent l'identité
+$I(B)=B(v)\mathbin{\dot\cup}(I(B)\cap S(v))$. Pour toutes les sources d'ordre au
+plus $K$, le plafond local exact est donc $h_q(v)=K+1-q-\ell(v)$; s'il est
+négatif, $v$ ne possède aucune source de rang $q$. Les bornes utiles deviennent
+$N_2(v)\leq12m(K-\ell(v))$ et
+$N_3(v)\leq8m(K-1-\ell(v))^2$, avec la branche $h=0$ ci-dessus. Soustraire le
+niveau sans avoir vérifié les deux inclusions du propriétaire serait en revanche
+une censure. À $K\leq10$, la masse possédée par un sommet est donc linéaire en
+$m$ sous la porte régulière, avec une constante dépendant de $K$, pas
+quadratique ou cubique en $m$. Le rang quatre contribue au plus une sphère et
+impose alors $m=4$. Si la sphère cible est $V$ elle-même, zéro-extra-shell donne
+directement $m=q$ et le cas est trivial.
+
+Ce résultat est une borne de sortie, pas encore un algorithme. Il suggère de
+construire sur $S(v)$ le graphe de Gabriel sphérique $h$-shallow pour le rang
+deux et les faces triangulaires bien centrées de calottes sphériques
+$h$-shallow pour le rang trois, puis de recertifier miniboule, census, support
+canonique et owner. Ces objets sont des sous-ensembles des arêtes et faces d'une
+Delaunay sphérique d'ordre au plus $h$; les identifier sans convention sur les
+ex aequo serait trop fort. La construction déterministe, son coût, ses
+multiplicités et son oracle restent un verrou mathématique/algorithmique. Hors
+zéro-extra-shell, d'autres points peuvent rester sur le plan exposé et
+l'argument ne donne pas cette borne sans quotient supplémentaire.
+
+Un objet unificateur exact est le complexe de coques sphériques jusqu'à $h$
+suppressions
+
+$$\mathcal{C}_h(S(v))=\bigcup_{D\subseteq S(v),\,\lvert D\rvert\leq h}\mathrm{skel}_{1,2}\!\left(\mathrm{conv}(S(v)\setminus D)\right).$$
+
+Toute paire cible avec $t\leq h$ est une arête du convexe obtenu en supprimant
+ses $t$ intérieurs, et tout triple cible est une face triangulaire du même
+convexe. Énumérer directement les arêtes et faces $h$-shallow de
+$\mathcal{C}_h$, sans reconstruire tous les ensembles supprimés, est donc le
+verrou combinatoire précis. En dégénérescence, une face polygonale et ses vraies
+arêtes doivent rester telles quelles; une triangulation arbitraire ne peut pas
+servir d'autorité.
+
+Une porte de mutation doit notamment refuser : le rang fermé à la place des
+intérieurs stricts; l'oubli du cas $h=0$; un point extérieur supplémentaire sur
+le plan radical; un support triangulaire qui n'est pas bien centré; la confusion
+entre les intérieurs globaux de $B$ et ceux de $S(v)$; le cas cible $B=V$; et
+une récolte limitée aux rayons du cône de parent ou aux voisins finis.
+
+La fixture entière reproductible
+[`check_gate_d_shallow_source_bound.py`](check_gate_d_shallow_source_bound.py)
+place 36 points sur le cercle équatorial et deux pôles d'une sphère u16 de centre
+`(65,65,65)` et rayon 65. Son unique sommet de niveau zéro possède une coquille
+de 38 points : tous les sites sont sur cette sphère et leur dimension affine
+trois rend le système de normales relevées de rang quatre. Le script compte
+exactement **432** sphères régulières de rang deux
+avec au plus neuf intérieurs et **648** sphères régulières de rang trois avec au
+plus huit intérieurs, exclusivement par signes entiers. Il décompose aussi les
+comptes par profondeur : 108 puis neuf fois 36 pour le rang deux, et neuf fois
+72 pour le rang trois; les dix-neuf diamètres porteurs d'extra-shell sont
+explicitement exclus. Cette fixture exerce une masse linéaire non triviale; elle
+ne prétend pas saturer les constantes des bornes.
+
 ## 4. Hors régularité : l'extra-shell est une masse réelle
 
 Supposons pour commencer que $B$ possède un support minimal unique $U$, mais une
@@ -186,6 +306,15 @@ $$\binom{s-\lvert U\rvert}{r-\lvert U\rvert}.$$
 Avec plusieurs supports minimaux, la famille est l'union des sous-ensembles de
 taille $r$ qui contiennent au moins l'un d'eux; elle doit être dédupliquée par
 l'identité canonique de $T$, pas par le premier support rencontré.
+
+Si $\mathcal{U}(B)$ est la famille complète des supports, son cardinal exact est
+donné par l'inclusion-exclusion
+
+$$N_B(r)=\sum_{\varnothing\neq A\subseteq\mathcal{U}(B)}(-1)^{\lvert A\rvert+1}\binom{\lvert S(B)\rvert-\left\lvert\bigcup_{U\in A}U\right\rvert}{r-\left\lvert\bigcup_{U\in A}U\right\rvert}.$$
+
+On adopte la convention que le binomial vaut zéro hors domaine. Cette identité
+est un oracle de comptage, pas une stratégie produit lorsque la famille des
+supports est elle-même grande.
 
 Le cube u16 $\lbrace0,2\rbrace^3$ est une fixture compacte. Sa sphère
 circonscrite a huit points de coquille, aucun point intérieur et **six** supports
@@ -232,7 +361,7 @@ supprimer cette masse si leurs identités restent contractuelles.
 ## 5. Ce que le résultat retire, et ce qu'il laisse global
 
 Le théorème retire la recherche suivante : « pour une sphère certifiée, quelles
-cofaces ouvertes porte-t-elle ? » Cette décision n'a besoin ni de $Gamma_k$, ni
+cofaces ouvertes porte-t-elle ? » Cette décision n'a besoin ni de $\Gamma_k$, ni
 d'un locator de composantes, ni d'une mosaïque d'ordre supérieur.
 
 Il laisse quatre obligations séparées.
@@ -286,12 +415,14 @@ cofaces du cube; et committer un préfixe après budget.
 - plafond de navigation strict $k-1$ pour rencontrer un propriétaire de toute
   sphère source : **prouvé sous dimension affine trois et coordonnées
   distinctes**;
+- nombre de sources de rang deux/trois possédées par un sommet : **borné par
+  $O(mK)$ et $O(mK^2)$ sous zéro-extra-shell, avec constantes explicites**;
 - identification de la sphère critique à la sphère brute du sommet propriétaire :
   **réfutée par les arités basses et la fixture mal centrée**;
 - suppression de la masse extra-shell hors porte : **réfutée si les identités
   de cofaces restent contractuelles**;
-- harvest borné des flats/supports, stream terminal de toutes les sphères, fold
-  et contrat 50 k : **ouverts**.
+- algorithme output-sensitive de harvest des flats/supports, stream terminal de
+  toutes les sphères, fold et contrat 50 k : **ouverts**.
 
 Ce résultat est CPU/GPU agnostique. Il ne justifie aucun benchmark et aucune G4.
 GCP non utilisé.

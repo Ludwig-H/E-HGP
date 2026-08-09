@@ -89,9 +89,11 @@ $\alpha_F$ précédente.
 
 **Théorème.** Sous les hypothèses du §1, $\mathcal{C}_k$ et
 $\mathcal{A}_k$ induisent, à toute coupe ouverte ou fermée, la même partition
-sur les facettes de cœur, les mêmes unions de points et, après normalisation des
-continuations omises, les mêmes $q_R$, parents et nœuds de la forêt horizontale
-$H_0$.
+sur les facettes de cœur **actives**, les mêmes unions de points et, après
+normalisation des continuations omises, les mêmes $q_R$, parents et signatures
+récursives canoniques des nœuds de la forêt horizontale $H_0$. Il ne revendique
+ni égalité byte-à-byte d'identifiants alloués, ni restitution des facettes Gamma
+omises.
 
 ### 3.1 Un co-minimiseur silencieux possède un apex strict unique
 
@@ -142,9 +144,11 @@ contracté avant le lot.
 ### 3.3 Quotient du lot complet
 
 Après contraction de l'état strict, chaque composante de la partie silencieuse
-$(\bigcup_{F\in D_k}M(F))\setminus\mathcal{G}_k$ devient, par confluence des contacts
-égaux, une étoile dont le centre est un unique apex antérieur et dont les
-feuilles pertinentes sont les facettes de cœur nouvelles. La famille des
+$(\bigcup_{F\in D_k}M(F))\setminus\mathcal{G}_k$ induit, par confluence des
+contacts égaux, la même relation d'équivalence qu'une étoile dont le centre est
+un unique apex antérieur et dont les feuilles pertinentes sont les facettes de
+cœur nouvelles. Le graphe réel peut contenir des cycles et des arêtes
+supplémentaires. La famille des
 $\alpha_F$ conserve exactement une arête de ce centre vers chacune de ces
 feuilles. Les cofaces directes sont identiques dans $\mathcal{A}_k$ et
 $\mathcal{C}_k$ et participent au même quotient atomique. Les deux sources
@@ -303,7 +307,8 @@ Avant toute autorité produit, il faut graver :
 
 - tous les $M(F)$ comme sortie matérielle : **non nécessaires pour $H_0$
   normalisé sous la porte régulière**;
-- une attache par facette cœur avec au moins deux intrus : **théorème prouvé ici**;
+- une attache par facette cœur avec au moins deux intrus : **théorème prouvé ici,
+  conditionnel à la porte régulière forte du §1**;
 - cible strictement locale $T_F$ : **réfutée**;
 - target `Resolve_{<a_F}(T_F)` : **nécessaire et suffisante sous les hypothèses**;
 - état global résident : **non requis**;

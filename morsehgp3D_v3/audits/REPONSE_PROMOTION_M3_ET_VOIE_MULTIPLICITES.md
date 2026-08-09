@@ -905,13 +905,58 @@ sept à onze, et l'adressage par plan n'attaquerait que ce facteur-là. Je le di
 parce que c'est exactement le genre d'inférence que vous auriez réfutée, et qu'elle
 aurait orienté deux semaines de travail.
 
-**Ce qui reste devant est un problème de débit, et c'est mesurable.** Les deux
+**Le noyau reverse est un problème de débit mesurable; le contrat complet ne se
+réduit pas à lui.** Les deux
 colonnes croissent encore — 772 → 999 → 1 097 sommets par point et 171 → 210 → 235
 sphères par point entre $n=100$ et $n=300$ —, donc rien n'est extrapolable
-proprement. Mais la **forme** est maintenant connue : de l'ordre de 65 prédicats
-entiers par sommet, sans table de visitation dans la décision, sans sortie
-matérialisée, avec un high-water publié. Ce sont les trois conditions d'un front
-d'onde device, et c'est pourquoi les 48 cœurs ne suffisent pas là où le GPU
-pourrait. Le kernel n'est pas écrit, la croissance n'est pas stabilisée, et le
-Kruskal $K$-MST qui doit consommer le flux n'existe pas : le NO-GO tient.
+proprement. Mais la forme du **noyau** est connue : de l'ordre de 65 prédicats
+entiers par sommet en position générale, sans table de visitation dans la
+décision et avec une API streamée. C'est un candidat de front d'onde device, pas
+une qualification : le high-water est partiel, le sink indexé et la transaction
+manquent, et aucun facteur CPU/GPU n'est démontré. Le kernel, le harvest certifié
+des supports, la source directe, le fold pré-lot, la couverture et les verticales
+n'existent pas comme pipeline : le NO-GO tient.
 
+---
+
+## 20. Un essai négatif transitoire que je note pour éviter le détour
+
+La reverse search revient sur un sommet autant de fois qu'il a de fils et
+**reconstruisait** à chaque retour les fermetures de tous les triplets déjà
+consommés, pour retrouver sa place avec un compteur linéaire. La reprise à un
+curseur — l'adresse du triplet et la fente de direction — est licite, puisque le
+test de base canonique ne dépend que du triplet et de la coquille.
+
+J'attendais un facteur trois, en raisonnant sur les 5,9 fils **testés** par
+sommet. C'est faux : le curseur n'avance que sur les fils **acceptés**, et un
+arbre couvrant en a un par sommet en moyenne. Un sommet est ré-entré deux fois, et
+la première reprise part d'un curseur qui est presque toujours le premier triplet.
+
+**[mesuré dans un essai transitoire]** générique, grille saturée et cosphérique :
+**308 832 triplets avec le curseur, 308 832 sans, au triplet près.** Zéro.
+
+Le helper est présent dans le worktree courant, mais la reverse search appelle
+encore le wrapper qui recommence au premier triplet; aucun frame ne transporte le
+curseur. La réduction de pire cas vers $\text{flats}+\text{fils}$ n'est donc pas
+encore intégrée. Je ne revendique aucun gain; les nombres ci-dessus documentent
+une expérience, pas la capability live.
+
+Ce qui reste dominant est mesurable et localisé : **5,9 requêtes de parent par
+sommet, à 2,9 fermetures chacune**, contre une seule énumération pour la descente.
+La sortie précoce a déjà pris un facteur 2,6 sur ce poste. Le reste de la marge y
+est, et la question précise est : peut-on **refuser** un fils sans calculer son
+parent ? Le couple $(G,-\delta)$ — le même plan vu depuis $w$ — est testable en
+$O(m)$, et un candidat dont ce couple n'est pas admissible n'est pas notre fils.
+J'ai mesuré plutôt que promettre, et le chiffre est bon.
+
+**[mesuré]** grille cosphérique, 40 nuages : sur 107 114 fils testés, **65 044 —
+61 % — sont refusés par ce seul test en $O(m)$**, et 24 580 seulement par la
+comparaison de coquille. Les requêtes de parent tombent de 105 172 à **42 070**,
+les fermetures de 308 832 à **192 570**, les nœuds d'index visités de 3 322 180 à
+2 905 996. Zéro désaccord sur 521 cas.
+
+Cumulé, sur la campagne générique à onze points : **335 314 → 171 856 → 108 856
+fermetures**, soit 31,6 → 16,2 → **10,2 par sommet**. Un facteur trois sur le poste
+de coût, en deux corrections dont aucune ne change la sortie — et les deux viennent
+de la même remarque : la reverse search n'a pas besoin de **calculer** $\pi(w)$,
+seulement de **décider** si $\pi(w)=v$.

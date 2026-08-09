@@ -131,6 +131,11 @@ Le terminal $R_F$ remplace le token opaque
 $\mathrm{Resolve}_{<a_F}(T_F)$. Au lot $a_F$, le fold exécute seulement
 `find_<a_F(R_F)>`, puis attache $F$ à cette composante.
 
+La descente seule certifie que $R_F$ et $T_F$ appartiennent à la même composante
+stricte. L'enracinement de cette composante et la couverture ci-dessous viennent
+du certificat **combiné** de l'attache, notamment des ponts construits avec les
+deux intrus canoniques.
+
 Cette composante couvre déjà $F\cup\lbrace z_F\rbrace$. Posons
 $Q_F=F\cup\lbrace z_F\rbrace$. Pour chaque $u\in U_F$, le bras
 $A_u=Q_F\setminus\lbrace u\rbrace$ et la coface
@@ -184,8 +189,9 @@ une obligation si un DSU ou un locator externe adressable conserve l'information
 
 La descente locale permet de ne donner des handles qu'aux facettes cœur.
 
-1. Chaque producteur émet `(ordre,a,F,R,certificat)` dans un run trié, sans
-   résoudre la racine de $R$.
+1. Chaque producteur d'attache émet `(ordre,a,F,R,certificat)` dans un run trié,
+   sans résoudre la racine de $R$; les activations et cofaces directes suivent
+   leurs propres records.
 2. Le merger ferme tous les records de même niveau exact et forme le snapshot
    strict du lot.
 3. Une jointure résout chaque handle $R$ dans un journal de versions de
@@ -232,7 +238,9 @@ fermé au lieu de l'état strict; perdre une continuation $q_R=1$ du journal; et
 publier un préfixe après budget moins un.
 
 La fixture u16 à dix points de la note d'attache, dont les trois bras immédiats
-sont hors de $D_3$, doit forcer au moins une vraie descente ou un refus fermé.
+sont hors de $D_3$, doit forcer au moins une vraie descente et être acceptée avec
+un budget suffisant. Budget moins un ou autorité absente doivent refuser sans
+payload.
 La fixture rationnelle à sept points, mise à l'échelle u16 ci-dessous, possède
 `F=016`, `T=126` et le chemin strict `126--1246--124--0124--024`, où les deux
 cofaces intermédiaires ne sont pas directes. Elle réfute le lookup immédiat et
@@ -266,8 +274,9 @@ puis find externe`.
   **toujours globaux logiquement**;
 - borne 50 k, mémoire et débit : **ouverts**.
 
-Le parcours est local. Le carrier peut être ramené localement au cœur. Le seul
-`find` qui reste global est celui du cœur dans l'histoire horizontale — et c'est
+Le parcours est local. Le carrier peut être ramené localement au cœur. Dans la
+**résolution de ce carrier**, le seul `find` qui reste global est celui du cœur
+dans l'histoire horizontale — et c'est
 précisément l'information que le fold doit conserver.
 
 GCP non utilisé.

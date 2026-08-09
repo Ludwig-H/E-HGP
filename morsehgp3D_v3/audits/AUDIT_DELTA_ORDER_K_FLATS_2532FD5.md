@@ -203,9 +203,9 @@ sont explicitement qualifiés comme transitoires ci-dessous.
 | singletons en $O(n^2)$ | **fermé dans le chemin indexé** | publication directe sous points distincts |
 | census et pinceau rescannant toujours $X$ | **fermé comme scan systématique** | `closed_ball` et désaccord ternaire indexés; visite $O(n)$ encore possible au pire |
 | propriété de l'index | **partiel** | appel interne propriétaire correct; pointeur public étranger ou périmé encore non authentifié |
-| propriétaire et déduplication | **ouvert** | live : premier préfiltre seulement, puis `emitted`; seconde inclusion, cône signé et support canonique avant owner non implémentés |
+| propriétaire et déduplication | **théorème fermé, live ouvert** | les deux inclusions, le cône signé et le support canonique donnent un owner local unique; le live garde seulement le premier préfiltre puis `emitted` |
 | parent local multiplicitaire | **prouvé, substitué dans un endpoint différentiel** | commit `969db5c` : décision sans `seen/frontier`, parité BFS; sortie encore matérialisée, catalogue non substitué |
-| source HGP complète | **théorème conditionnel fermé, produit ouvert** | `directes + M(F)` suffit horizontalement et $M(F)$ se factorise sans étoile; source directe terminale, capability commune, lots, couverture et verticales absents |
+| source HGP complète | **théorèmes conditionnels fermés, produit ouvert** | les cofaces d'une sphère certifiée sont caractérisées, leur owner est shallow et `directes + attaches` suffit horizontalement; harvest output-sensitive, stream terminal, lots, couverture et verticales absents |
 | profils produit | **ouverts** | doublons refusés, dyadique absent, oracle encore relatif aux primitives v2 |
 
 Le P0 de l'ancien §4.6 est donc fermé au commit `1a0a1f8`. Les phrases du §5
@@ -213,8 +213,8 @@ affirmant encore un census global pour chaque singleton, chaque direction et
 chaque émission sont historiques et désormais fausses. Le NO-GO 50 k demeure,
 mais pour les raisons actuelles : volume $V_k$ sans borne utile au SLO,
 énumération des flats et queue lourde des coquilles, index sans borne
-sous-linéaire universelle, sortie reverse encore résidente, propriétaire
-incomplet et pipeline HGP aval absent.
+sous-linéaire universelle, sink non composé au catalogue et high-water partiel,
+propriétaire non intégré et pipeline HGP aval absent.
 
 ### 7.3 Parent local : crédit et dettes exactes
 
@@ -662,7 +662,11 @@ Cette réponse constructive ne ferme pas encore l'autorité pour cinq raisons.
    points. Les campagnes ordinaires appellent toutefois `descend_to_core` avec
    `receipt=nullptr` : elles ne gardent que des compteurs. Surtout, la coface est
    cherchée dans `truth_direct`, carte exhaustive globale; ce reçu juge le
-   théorème mais n'est pas le chemin produit.
+   théorème mais n'est pas le chemin produit. L'objet n'est pas remis à zéro à
+   l'entrée et la fonction le remplit même après un terminal hors cœur, une
+   coface absente ou un niveau trop tardif : un appelant qui réutilise un reçu
+   peut donc observer un payload périmé ou invalide. Il faut un statut typé, un
+   objet temporaire vierge et une affectation unique après toutes les portes.
 3. `truth_direct`, `gabriel_open` et la force brute partagent encore
    `miniball_of` et `sphere_side`; une panne de miniboule peut devenir
    silencieusement « non-Gabriel » dans la construction de la source ou être
@@ -774,13 +778,78 @@ mais sept limites empêchent de convertir le chiffre 85 en claim mémoire produi
    mémoire complet, l'élagage propre aux requêtes reverse et la forme device
    restent ceux du §7.12.
 
-### 7.14 Porte de reprise courante
+### 7.14 Parent au premier admissible, commit `35a8d01`
+
+Le commit `35a8d0116893d949450289758847c8a0559ec084` est épinglé par :
+
+| objet | SHA-256 |
+| --- | --- |
+| `prototype/order_k_flats.hpp` | `b9718460232eaca054102a5d906bafcf9c946f576e919b1928ef1c81da52df24` |
+| `prototype/flats_differential.cpp` | `bf9b0fc34ebe9cb7c5caf6a4cb5fbc6bb29b45fc9c2d856bff3644320445df5` |
+| `CMakeLists.txt` | `c148e5c59ebd36c5bbcaaa0298752eb6357b943a35ed15924364f287a407d48b` |
+
+La simplification est mathématiquement valide. La preuve du parent n'exige pas
+le minimum du tuple : toute direction admissible améliore strictement le
+potentiel, et tout sommet non-germe en possède une. Le premier admissible dans un
+ordre déterministe donne donc encore une fonction, une racine unique et aucun
+cycle. Sous points distincts et coquilles triées, trois points d'une sphère non
+nulle ne sont pas collinéaires; la base canonique d'un flat est alors formée de
+ses trois plus petits identifiants. L'ordre des triplets canoniques est bien
+l'ordre lexicographique des fermetures, et la direction négative précède la
+positive : le premier admissible coïncide aussi avec l'ancien minimum.
+
+Le différentiel compare le balayage précoce et complet sur chaque sommet accepté.
+Le commit publie 50/50 CTests verts et, sur sa campagne générique, une baisse de
+335 314 à 171 856 fermetures reconstruites. Une relance locale postérieure des
+cinq portes flats, sur le wrapper encore compatible, passe 5/5 en 60,48 s.
+
+Ce gain ne ferme ni le pire cas ni la source directe. Une racine ou un parent
+admissible tardif peut encore parcourir tous les flats; une coquille de taille
+$m$ garde jusqu'à $\binom{m}{3}$ triplets candidats. Surtout, la source de
+sphères doit récolter **tous** les flats incidents, y compris ceux qu'aucune
+direction de parent n'admet. La fixture `ABCpy` de
+[`NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md`](NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md)
+réfute explicitement toute source branchée seulement après ce premier filtre.
+
+### 7.15 Snapshots de curseur `234ae9ef` puis `26c66aa3` : toujours non intégrés
+
+Un premier header worktree transitoire
+`order_k_flats.hpp=234ae9ef937040ddc8b1e185264eab8c25820354cadd6d32a518180affceae2f`
+ajoute `for_each_flat_from(i0,j0,k0)`, mais la reverse search ne l'appelle pas
+encore. Les cinq portes flats restent vertes parce que le wrapper historique
+repart de `(0,1,2)`; elles ne mesurent aucun gain de reprise.
+
+Ce delta a d'abord disparu avant commit. Au rehash suivant, le worktree courant
+`order_k_flats.hpp=26c66aa301cb3803bfff8d0104b36e7ba34de3e265461a155695a2c3a19a032e`
+réintroduit le helper et des commentaires de mesure, mais conserve exactement la
+même frontière : `reverse_search_stream` appelle `for_each_flat`, et ce wrapper
+appelle toujours `for_each_flat_from(...,0,1,2,...)`. Aucun frame ne stocke ni ne
+réinjecte un curseur. Le chemin live ne peut donc pas bénéficier de la reprise;
+les nombres 308 832/308 832 restent le journal d'un essai transitoire, pas une
+capability qualifiée par le code et les CTests présents.
+
+Le contrat du curseur est en outre ambigu au snapshot épinglé. Le callback reçoit
+le triplet **courant**, puis un retour `false` quitte la fonction avant
+l'incrément. Réappeler `for_each_flat_from` avec ce triplet le rejoue. Il faut
+publier le successeur canonique, ou graver explicitement une convention
+`last_consumed` avec avancement contrôlé et tests aux frontières. Les mutations
+doivent couvrir premier/dernier triplet, triplet collinéaire, fermeture non
+canonique, arrêt puis reprise après chaque position, et concaténation exacte des
+segments contre un balayage intégral.
+
+Verdict : **GO pour la simplification du parent; diagnostic seulement pour le
+curseur tant qu'il n'est ni consommé ni différencié.** Le HEAD `a5adde7` ne
+contient aucun curseur; le helper du worktree `26c66aa3` n'est pas encore relié à
+la reverse search.
+
+### 7.16 Porte de reprise courante
 
 1. Intégrer le sink au catalogue derrière un segment transactionnel et un statut
    typé; mesurer son high-water complet en octets. Remplacer le digest 64 bits par
    une comparaison exacte et ajouter les mutations fail-closed.
 2. Implémenter et différencier « support canonique puis owner » avant de retirer
-   `emitted`.
+   `emitted`. Récolter tous les flats incidents, pas seulement les directions de
+   parent; qualifier le curseur de reprise sans omission ni répétition.
 3. Étendre la porte d'équivariance au payload intérieur et aux multiplicités de
    sortie, en conservant le BFS comme oracle borné.
 4. Transformer l'oracle ouvert maintenant corrigé en source terminale sans
@@ -788,8 +857,9 @@ mais sept limites empêchent de convertir le chiffre 85 en claim mémoire produi
    saturé et la descente locale de carrier. La porte régulière globale doit
    couvrir les objets silencieux, et chaque échec de primitive dans la source ou
    la vérité doit être distingué d'une décision « non-Gabriel ».
-5. Construire runs, fermeture des ex æquo, locator horizontal, couverture et
-   jointure verticale avant toute mesure du contrat 50 k.
+5. Construire et différencier le fold pré-lot typé
+   $R^{-}\sqcup L^{-}\sqcup N_a$, puis les runs, la couverture et la jointure
+   verticale avant toute mesure du contrat 50 k.
 
 Ce chemin reste CPU-only tant qu'aucun kernel CUDA de reverse search et aucun
 pipeline aval device n'existent. Aucune G4 ne doit être utilisée pour exécuter

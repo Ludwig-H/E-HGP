@@ -264,6 +264,8 @@ struct Coverage {
   long long sink_interruptions = 0;
   long long parent_early_closures = 0;
   long long parent_full_closures = 0;
+  long long reject_backward = 0;
+  long long reject_by_parent = 0;
 };
 static Coverage coverage;
 
@@ -592,6 +594,8 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       }
       coverage.reverse_flats += ist.reverse_flats_enumerated;
       coverage.reverse_parent_queries += ist.reverse_parent_queries;
+      coverage.reject_backward += ist.reverse_reject_backward;
+      coverage.reject_by_parent += ist.reverse_reject_by_parent;
       coverage.reverse_triplets += ist.reverse_triplets_scanned;
       coverage.reverse_closures += ist.reverse_closures_built;
       coverage.index_nodes_visited += tree.nodes_visited;
@@ -1310,6 +1314,8 @@ int main(int argc, char** argv) {
          coverage.sink_vertices, coverage.sink_high_water, coverage.sink_interruptions);
   // Le GAIN de la sortie precoce du parent, mesure sur les memes sommets : ce
   // rapport est la seule chose qui autorise a parler de gain.
+  printf("        : refus par le couple de retour=%lld (O(m), sans fermeture)"
+         "  refus par le parent=%lld\n", coverage.reject_backward, coverage.reject_by_parent);
   printf("        : parent precoce=%lld fermetures  balayage complet=%lld  rapport %.2f\n",
          coverage.parent_early_closures, coverage.parent_full_closures,
          coverage.parent_early_closures

@@ -517,6 +517,49 @@ dont 472 443 feuilles, profondeur 19. `box` avait de plus un chemin fail-open �
 pile saturée, sous-arbre **omis en silence** là où les deux autres requêtes
 retombaient sur une descente récursive ; il retombe désormais comme elles.
 
+### Refuser un fils sans calculer son parent : un facteur 1,6 de plus
+
+Le poste dominant restait les 5,9 requêtes de parent par sommet. La question n'est
+pourtant pas « quel est le parent de $w$ » mais « $v$ est-il le parent de $w$ », et
+cette question a une **condition nécessaire en $O(m)$**.
+
+Si $w$ est notre fils, $\pi(w)$ emprunte le **même plan** en direction opposée.
+Tester l'admissibilité de ce seul couple $(G,-\delta)$ coûte un `orient3d` par point
+de la coquille de $w$ — aucune fermeture, aucune énumération. S'il échoue,
+$\pi(w)\neq v$ est **certifié**, et le candidat est refusé pour rien.
+
+**[mesuré]** grille cosphérique, 40 nuages : sur 107 114 fils testés, **65 044 —
+61 % — sont refusés par ce seul test en $O(m)$**, et 24 580 seulement par la
+comparaison de coquille qui vient après. Les requêtes de parent tombent de
+105 172 à **42 070**, les fermetures reconstruites de 308 832 à **192 570**, et les
+nœuds d'index visités de 3 322 180 à 2 905 996. Zéro désaccord sur 521 cas.
+
+Cumulé avec la sortie précoce du parent, sur la campagne générique à onze points :
+**335 314 → 171 856 → 108 856 fermetures**, soit 31,6 → 16,2 → **10,2 par
+sommet**. Un facteur trois sur le poste de coût, en deux corrections dont aucune ne
+change la sortie.
+
+### Un résultat négatif transitoire : la reprise à un curseur n'a montré aucun gain
+
+Je note l'essai parce qu'il évite de confondre une piste plausible avec un gain
+déjà qualifié. La reverse search
+revient sur un sommet autant de fois qu'il a de fils et **reconstruisait** à chaque
+retour les fermetures de tous les triplets déjà consommés pour retrouver sa place.
+J'attendais un facteur trois, en raisonnant sur les 5,9 fils **testés** par sommet.
+
+C'était faux : le curseur n'avance que sur les fils **acceptés**, et un arbre
+couvrant en a un par sommet en moyenne. Un sommet est donc ré-entré deux fois, et
+la première reprise part d'un curseur qui est presque toujours le premier triplet.
+**[mesuré dans un essai transitoire]** sur trois régimes — générique, grille
+saturée, cosphérique —
+**308 832 triplets avec le curseur, 308 832 sans, au triplet près.**
+
+Le worktree courant contient un helper `for_each_flat_from`, mais la reverse
+search appelle encore le wrapper qui repart de `(0,1,2)`; aucun frame ne conserve
+le curseur. La borne espérée $\text{flats}+\text{fils}$ sur un sommet de haut
+degré n'est donc pas une propriété du chemin live. Aucune campagne permanente
+n'exerce ce cas, et aucun gain n'est revendiqué.
+
 ### La sortie est bornée, et le high-water est mesuré
 
 C'était la dette la plus lourde : tant que l'endpoint rendait un
@@ -742,6 +785,16 @@ La
 ferme donc la partie géométrique sous ses hypothèses; ce prototype en est un bon
 falsificateur borné, pas encore le resolver ni le fold produit.
 
+La
+[`note de source depuis les sphères certifiées`](audits/NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md)
+ferme aussi une partie amont : toute sphère directe d'ordre $k$ possède un
+propriétaire rencontré au niveau strict au plus $k-1$, puis son census $I,S$
+détermine exactement ses cofaces. Sous zéro-extra-shell, un argument
+d'échantillonnage borne même, pour une coquille propriétaire de taille $m$, les
+sources possédées de rang deux et trois par $O(mK)$ et $O(mK^2)$. Le harvest
+output-sensitive de ces arêtes/faces shallow n'est toutefois ni construit ni
+jugé; récolter seulement les directions du parent est faux.
+
 Deux mises en garde qui subsistent : les co-minimiseurs observés sont petits mais
 **sans borne générale** — une facette peut en avoir $\Theta(n)$ — et le rapport de
 $k+1$ records par coface est une identité de construction du flux, qui le
@@ -829,7 +882,7 @@ donc un facteur sept à onze, pas deux ordres de grandeur, et adresser
 l'énumération par plan plutôt que par sommet — ce que je croyais être le levier —
 n'attaquerait que ce facteur-là.
 
-### Ce qui reste vraiment devant, et pourquoi c'est un problème de débit
+### Le noyau de parcours ressemble à un problème de débit; le contrat complet non
 
 Les deux colonnes qui comptent croissent encore : 772 → 999 → 1 097 sommets par
 point, et 171 → 210 → 235 sphères par point, entre $n=100$ et $n=300$. **Rien
@@ -837,24 +890,27 @@ n'est stabilisé, donc rien n'est extrapolable proprement** — et la borne de
 Clarkson--Shor pour le $\le k$-niveau de $n$ hyperplans de $\mathbb{R}^4$,
 $O(n^2k^2)$, n'interdit pas que cette croissance continue.
 
-Ce que la mesure permet en revanche de dire, c'est la **forme** du problème. Le
+Ce que la mesure permet en revanche de dire, c'est la **forme du noyau reverse**. Le
 travail par sommet est maintenant instrumenté — **[mesuré]** sur la campagne
-générique à onze points, 16,2 fermetures reconstruites par sommet, chacune un
-`orient3d` par point de coquille, soit de l'ordre de 65 prédicats exacts par
+générique à onze points, 10,2 fermetures reconstruites par sommet, chacune un
+`orient3d` par point de coquille, soit de l'ordre de 40 prédicats exacts par
 sommet, et la structure de ce compte ne dépend que de la taille des coquilles,
 qui reste quatre en position générale. Le contrat n'est donc pas un problème de structure de
-données résiduelle — c'est un problème de **débit de prédicats entiers**, sur un
-terrain de $10^8$ sommets, sans écriture partagée et sans sortie matérialisée.
+données de visitation résidente pour **cette décision** : son coût dominant est
+un débit de prédicats entiers. Le nombre de sommets 50 k, lui, n'est pas mesuré;
+$10^8$ serait une extrapolation d'une croissance encore non stabilisée.
 
-Ces trois conditions sont désormais réunies : pas de table de visitation dans la
-décision, sortie streamée à high-water publié, et prédicats entiers purs. C'est
-exactement le profil d'un front d'onde device, et cela explique pourquoi les 48
-cœurs de la G4 ne suffisent pas là où son GPU pourrait : un facteur cent entre les
-deux est de l'ordre du manque.
+Trois propriétés en font un **candidat** de front d'onde device : pas de table de
+visitation dans la décision, API de sortie streamée et prédicats entiers. Elles
+ne qualifient pas encore ce chemin : le high-water publié ne compte qu'une partie
+des identifiants de pile, le sink n'est pas composé à l'index, la transaction de
+sortie manque et aucun kernel n'existe. Aucun facteur CPU/GPU n'est donc revendiqué.
 
 **Ce que je ne dis pas** : que le compte y est. Un kernel n'est pas écrit, la
 croissance de 1 097 par point n'est pas stabilisée, et la sortie streamée doit
-encore être consommée par un Kruskal $K$-MST qui n'existe pas. Le NO-GO tient.
+encore alimenter le harvest certifié des supports, la source directe, le fold
+pré-lot, la couverture et les verticales, qui n'existent pas comme pipeline. Le
+NO-GO tient.
 
 ### La taille du terrain n'est pas garantie
 

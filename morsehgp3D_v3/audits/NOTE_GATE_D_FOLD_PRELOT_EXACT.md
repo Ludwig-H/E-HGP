@@ -14,7 +14,9 @@ Cadre : `backend=architecture_math`, `profile=hgp_reduced_quantized_u16`,
 > union disjointe, puis seulement il compte les racines. Cette information peut
 > vivre dans un journal externe; elle ne peut pas être supprimée.
 
-Cette note spécialise la
+Cette note traite le fold supérieur $2\leq k<n$. À l'ordre un, les singletons
+sont immédiatement des racines publiques et exigent une branche distincte de
+type EMST; à $k=n$, aucune coface n'existe. Dans ce domaine, la note spécialise la
 [`frontière des globalités résiduelles`](NOTE_GATE_D_GLOBALITES_RESIDUELLES.md)
 et reçoit les clefs cœur produites par la
 [`descente locale`](NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md).
@@ -69,14 +71,16 @@ du lot est une contradiction. Le tag d'époque empêche un `find_<a` d'accepter
 une activation anticipée.
 
 La distinction n'est pas décorative. Avec deux racines strictes $R_1,R_2$, un
-latent strict ou neuf $L$ et les deux hyperarêtes $\lbrace R_1,L\rbrace$ et
-$\lbrace L,R_2\rbrace$, supprimer $L$ avant la fermeture laisserait deux
+sommet $Z\in L^{-}\cup N_a$ et les deux hyperarêtes
+$\lbrace R_1,Z\rbrace$ et $\lbrace Z,R_2\rbrace$, supprimer $Z$ avant la
+fermeture laisserait deux
 continuations. La fermeture correcte donne une seule composante contenant deux
 racines : c'est une multifusion.
 
 ## 3. Sémantique exacte d'un lot
 
-Pour chaque niveau rationnel maximal $a$ :
+Pour chaque classe maximale de records de même niveau rationnel $a$, traitée en
+ordre strictement croissant :
 
 1. figer le locator et les versions de la coupe ouverte $<a$;
 2. résoudre tous les endpoints stricts dans ce snapshot et créer les sommets
@@ -90,10 +94,17 @@ Pour chaque niveau rationnel maximal $a$ :
    provenances;
 7. valider le staging entier, puis effectuer un unique commit logique.
 
+Une **arête logique** est un record source présent, même si plusieurs de ses
+endpoints se projettent sur un seul sommet typé. Une hyperarête entièrement
+redondante reste donc une continuation attestée; elle ne disparaît pas sous
+prétexte que sa projection est unaire.
+
 Soit $q_R$ ce nombre de racines strictes distinctes.
 
-- $q_R=0$ : les arêtes du lot rendent la composante non triviale; elles créent
-  une naissance réduite et une nouvelle racine publique.
+- $q_R=0$ : une naissance réduite est autorisée seulement si la composante
+  contient une `DirectHyperedge`. Une composante constituée uniquement
+  d'attaches est une contradiction : toute attache certifiée doit viser une
+  cible $R^{-}$.
 - $q_R=1$ : le lot prolonge l'unique racine sans créer de nœud public.
 - $q_R\geq2$ : le lot crée une multifusion unique dont les racines strictes sont
   les enfants.
@@ -107,9 +118,11 @@ Tous les carriers de la composante temporaire reçoivent la même version fermé
 y compris pour $q_R=1$. Omettre cette version silencieuse perdrait l'information
 nécessaire à un futur `find`.
 
-La couverture ne se déduit pas de $q_R$. Le fold doit aussi conserver l'union
-exacte des facettes et des `PointId`, puis calculer son delta contre l'union des
-parents stricts. Une attache issue du théorème régulier annonce
+La couverture ne se déduit pas de $q_R$. Dans le contrat quotienté, le fold doit
+aussi conserver l'union exacte des **facettes cœur $D_k$ actives** et des
+`PointId`, puis calculer son delta contre l'union des parents stricts. Il ne
+prétend pas rétablir les facettes Gamma omises. Une attache issue du théorème
+régulier annonce
 `added_points=empty`; le fold doit pouvoir le vérifier, pas seulement lui faire
 confiance.
 
@@ -121,6 +134,8 @@ argument de couverture, prouve en plus que cette composante est non triviale et
 couvre déjà $F\cup\lbrace z_F\rbrace$.
 Par conséquent :
 
+- la facette $F$ doit se projeter sur le sommet neuf $N_{a_F}(F)$ engagé par son
+  activation au même niveau;
 - `find_<a_F(R_F)>` doit réussir;
 - sa disposition doit être enracinée, jamais latente;
 - le stamp du résultat doit être celui du snapshot strict du lot;
@@ -145,6 +160,16 @@ version immuable $V$.
 - Un même lot ne crée aucune chaîne interne de successors : il crée directement
   une version par composante temporaire complète.
 
+Une activation isolée crée au commit sa propre version latente sans successor
+entrant. Elle n'est ni oubliée, ni classée par $q_R$ avant qu'une arête logique ne
+la touche.
+
+Les liens historiques sont immuables. Avec `V0->V1@a` puis `V1->V2@b`, une
+compression destructive en `V0->V2` détruirait les requêtes dont le cutoff se
+situe entre $a$ et $b$. Pointer-jumping ajoute des raccourcis versionnés avec leur
+domaine de validité, ou produit une table dérivée; il ne réécrit jamais
+l'autorité historique.
+
 Alors `find_<a(h)` refuse d'abord tout handle dont `activation_level>=a`, puis
 suit exactement les liens de niveau strictement inférieur à $a$.
 `find_<=a(h)` accepte l'activation au niveau $a$ et suit aussi les liens de ce
@@ -164,8 +189,27 @@ conséquence du seul pointer-jumping.
 ### F0 — sémantique en mémoire
 
 Un oracle borné reconstruit depuis zéro, à chaque niveau, l'hypergraphe complet
-aux coupes ouverte et fermée. Un sujet DSU résident consomme les mêmes records
-par lots gelés. Après chaque lot, le différentiel compare :
+aux coupes ouverte et fermée. Pour rester indépendant du sujet, sa vérité emploie
+une matrice booléenne d'incidence puis une fermeture de Warshall, jamais le DSU.
+Un sujet DSU résident consomme les mêmes records par lots gelés. Un premier
+domaine exhaustif suffisant possède au plus trois niveaux, six handles stricts,
+quatre activations courantes et cinq records par lot; des fixtures ciblées
+couvrent ensuite les arités produit jusqu'à onze. L'oracle applique les règles
+suivantes :
+
+- `activation_level(h)<a` : la classe stricte de `h` devient $R^{-}$ ou
+  $L^{-}$ selon sa racine partielle;
+- `activation_level(h)=a` : `h` devient $N_a(h)$;
+- handle absent ou activé après $a$ : rejet;
+- attache `(F,R)` : $F$ doit être $N_a(F)$ et $R$ doit être $R^{-}$;
+- fermeture transitive de chaque hyperarête directe et paire d'attache sur la
+  matrice typée, puis seulement classification par $q_R$.
+
+La fonction racine de la vérité est constante sur chaque classe stricte et
+injective entre les classes enracinées. Les signatures récursives de naissance
+et multifusion, et non ses identifiants denses, définissent son égalité.
+
+Après chaque lot, le différentiel compare :
 
 - partition complète des handles actifs;
 - disposition latente ou enracinée de chaque composante;
@@ -176,6 +220,9 @@ par lots gelés. Après chaque lot, le différentiel compare :
 
 La comparaison doit porter sur les clefs complètes et la structure normalisée,
 pas sur les représentants accidentels du DSU ni sur une somme de hachages.
+F0 certifie seulement le fold relativement au multiensemble scellé reçu. Un
+oracle exhaustif $\Gamma$ séparé reste nécessaire pour juger la complétude de la
+source `directes + attaches`.
 
 ### F1 — runs scellés
 
@@ -220,10 +267,14 @@ avant commit produit zéro mutation et aucun reçu scientifique valide.
 
 ## 8. Fixtures et mutations obligatoires
 
-1. `R1--L--R2` dans un lot unique : le latent réalise une multifusion $q_R=2$.
-2. Plusieurs hyperarêtes reliées uniquement par des latents : une seule naissance
-   $q_R=0$, jamais une racine par facette.
-3. Trois racines reliées au même niveau par plusieurs runs : une multifusion
+1. Collision numérique `R(7)` contre `L(7)`, puis `R1--L--R2` dans un lot
+   unique : les namespaces restent disjoints et le latent réalise une
+   multifusion $q_R=2$.
+2. Plusieurs hyperarêtes reliées uniquement par $L^{-}$ et $N_a$ : une seule
+   naissance $q_R=0$, jamais une racine par facette.
+3. Deux handles stricts distincts déjà projetés sur la même racine comptent
+   $q_R=1$, pas deux. Trois racines reliées au même niveau par plusieurs runs
+   donnent une multifusion
    ternaire, jamais deux fusions binaires.
 4. Une continuation $q_R=1$, puis un lot futur qui réutilise sa nouvelle facette :
    oublier le successor doit rendre le second lot rouge.
@@ -233,10 +284,18 @@ avant commit produit zéro mutation et aucun reçu scientifique valide.
    visible à la coupe fermée et jamais confondue avec $L^{-}$.
 7. Deux fractions égales encodées différemment, puis deux fractions distinctes
    arrondies au même `double`.
-8. Duplicat identique avec provenances agrégées; duplicat contradictoire rejeté.
-9. Successor omis, niveau d'activation omis, cycle de versions, lien de même
+8. Attache forgée vers $L^{-}$, rejetée atomiquement au lieu de créer une
+   naissance; hyperarête directe devenue unaire après projection, toujours
+   conservée comme record logique.
+9. Duplicat identique avec provenances agrégées; duplicat contradictoire rejeté.
+10. Successor omis, niveau d'activation omis, cycle de versions, lien de même
    niveau et lien postérieur suivi par une requête stricte.
-10. Échec injecté après chaque étape du staging, avec digests de partition,
+11. Chaîne `V0->V1@a`, `V1->V2@b`, puis requête entre $a$ et $b$ : une
+    compression destructive vers `V2` doit être réfutée.
+12. `DirectHyperedge` de onze endpoints à $k=10$, dont plusieurs se projettent
+    sur les mêmes $R^{-}$, $L^{-}$ et $N_a$ : cardinal frontière et racines
+    **distinctes** sont contrôlés.
+13. Échec injecté après chaque étape du staging, avec digests de partition,
     forêt et couverture inchangés.
 
 Les mutations de projection des latents avant fermeture, activation anticipée,
@@ -253,6 +312,10 @@ $V$ le nombre de versions et $P_a$ la masse du plus grand lot.
 - runs externes : coût d'un tri externe sur $H+P$;
 - journal : $O(H+V)$ informations sur disque;
 - lot courant : jusqu'à $\Theta(P_a)$ avant segmentation externe.
+
+Ces bornes décrivent seulement le noyau de connectivité. Les identités et DAG de
+couverture, provenances, reçus, clefs de dictionnaire, entrées et sorties
+scientifiques s'ajoutent séparément.
 
 Le seul $n=50\,000$ ne borne ni $H$, ni $P$, ni $P_a$. Aucun SLO ne découle de
 la localité du parent ou de la descente du carrier.

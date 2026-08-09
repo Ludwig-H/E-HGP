@@ -313,9 +313,15 @@ struct FlatStatistics {
   long long reverse_triplets_scanned = 0;
   long long reverse_closures_built = 0;
   long long reverse_live_high_water = 0;   // slots vifs du chemin, sortie exclue
+  // POURQUOI un fils candidat est refuse. Le couple (G,-delta) — le meme plan vu
+  // depuis w — est testable en O(m) ; s'il n'est pas admissible, pi(w) != v et le
+  // refus ne coute aucune enumeration. Le second compteur est le refus qui exige
+  // quand meme le parent : couple admissible mais non minimal.
+  long long reverse_reject_backward = 0;
+  long long reverse_reject_by_parent = 0;
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 36 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 38 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
@@ -349,6 +355,8 @@ struct FlatStatistics {
     reverse_triplets_scanned += o.reverse_triplets_scanned;
     reverse_closures_built += o.reverse_closures_built;
     reverse_live_high_water = std::max(reverse_live_high_water, o.reverse_live_high_water);
+    reverse_reject_backward += o.reverse_reject_backward;
+    reverse_reject_by_parent += o.reverse_reject_by_parent;
   }
 };
 
@@ -1242,57 +1250,122 @@ struct FlatAtVertex {
 // de trouver son fils continuait d'enumerer les triplets restants et de
 // reconstruire leurs fermetures : le `return` du lambda ne sortait que du
 // callback. C'etait a la fois du travail jete et un compteur trompeur.
+// REPRISE A UN CURSEUR, ET UN GAIN MESURE NUL — LE RESULTAT EST NEGATIF.
+//
+// La reverse search revient sur un sommet autant de fois qu'il a de fils, et elle
+// RECONSTRUISAIT a chaque retour les fermetures de tous les triplets deja
+// consommes pour retrouver sa place. Le test de base canonique ne depend que du
+// triplet et de la coquille, jamais des triplets precedents, donc reprendre
+// directement au curseur est licite.
+//
+// J'attendais un facteur de l'ordre de trois, en raisonnant sur les 5,9 fils
+// TESTES par sommet. C'etait faux : le curseur n'avance que sur les fils
+// ACCEPTES, et un arbre couvrant en a un par sommet en moyenne. Un sommet est donc
+// re-entre deux fois, et la premiere reprise part d'un curseur qui est presque
+// toujours le premier triplet. Mesure sur trois regimes — generique, grille
+// saturee, cospherique — : 308 832 triplets avec le curseur, 308 832 sans, AU
+// TRIPLET PRES.
+//
+// Le curseur est conserve pour une raison de pire cas, pas de regime : un sommet
+// de haut degre sortant coutait `fils x flats` avec le compteur lineaire et coute
+// `flats + fils` avec le curseur. Aucune campagne n'exerce ce cas, et aucun gain
+// n'est revendique.
+//
+// Le callback recoit la position (i,j,k) du triplet, qui EST l'adresse de reprise.
+template <class Fn>
+inline void for_each_flat_from(const std::vector<P3>& points, const Vertex& v, int i0, int j0,
+                               int k0, Fn&& visit, long long* triplets = nullptr,
+                               long long* closures = nullptr) {
+  const int m = (int)v.shell.size();
+  if (m < 3) return;
+  int i = i0, j = j0, k = k0;
+  if (i < 0 || j <= i || k <= j || k >= m || j >= m - 1 || i >= m - 2) return;
+  std::vector<i32> closure;
+  for (;;) {
+    bool deliver = false;
+    FlatAtVertex flat;
+    do {
+      const i32 ta = v.shell[(std::size_t)i], tb = v.shell[(std::size_t)j],
+                tc = v.shell[(std::size_t)k];
+      if (triplets != nullptr) ++*triplets;
+      {
+        const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)tb], points[(std::size_t)ta]);
+        const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)tc], points[(std::size_t)ta]);
+        const mhgp::P3 x = mhgp::p3_cross(u, w);
+        if (x.x == 0 && x.y == 0 && x.z == 0) break;
+      }
+      closure.clear();
+      if (closures != nullptr) ++*closures;
+      for (int t = 0; t < m; ++t) {
+        const i32 z = v.shell[(std::size_t)t];
+        if (orient3d_exact(points[(std::size_t)ta], points[(std::size_t)tb],
+                           points[(std::size_t)tc], points[(std::size_t)z]) == 0)
+          closure.push_back(z);
+      }
+      i32 canonical[3] = {-1, -1, -1};
+      {
+        const int q = (int)closure.size();
+        bool found = false;
+        for (int x = 0; x < q && !found; ++x)
+        for (int y = x + 1; y < q && !found; ++y)
+        for (int z = y + 1; z < q && !found; ++z) {
+          const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)closure[(std::size_t)y]],
+                                          points[(std::size_t)closure[(std::size_t)x]]);
+          const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)closure[(std::size_t)z]],
+                                          points[(std::size_t)closure[(std::size_t)x]]);
+          const mhgp::P3 cr = mhgp::p3_cross(u, w);
+          if (cr.x == 0 && cr.y == 0 && cr.z == 0) continue;
+          canonical[0] = closure[(std::size_t)x];
+          canonical[1] = closure[(std::size_t)y];
+          canonical[2] = closure[(std::size_t)z];
+          found = true;
+        }
+        if (!found) break;
+      }
+      if (!(canonical[0] == ta && canonical[1] == tb && canonical[2] == tc)) break;
+      flat.base[0] = ta; flat.base[1] = tb; flat.base[2] = tc;
+      flat.closure = closure;
+      deliver = true;
+    } while (false);
+    if (deliver && !visit(flat, i, j, k)) return;
+    if (++k >= m) {
+      if (++j >= m - 1) { if (++i >= m - 2) return; j = i + 1; }
+      k = j + 1;
+    }
+  }
+}
+
 template <class Fn>
 inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& visit,
                           long long* triplets = nullptr, long long* closures = nullptr) {
-  const int m = (int)v.shell.size();
-  std::vector<i32> closure;
-  for (int i = 0; i < m; ++i)
-  for (int j = i + 1; j < m; ++j)
-  for (int k = j + 1; k < m; ++k) {
-    const i32 ta = v.shell[(std::size_t)i], tb = v.shell[(std::size_t)j],
-              tc = v.shell[(std::size_t)k];
-    if (triplets != nullptr) ++*triplets;
-    {
-      const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)tb], points[(std::size_t)ta]);
-      const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)tc], points[(std::size_t)ta]);
-      const mhgp::P3 x = mhgp::p3_cross(u, w);
-      if (x.x == 0 && x.y == 0 && x.z == 0) continue;
-    }
-    closure.clear();
-    if (closures != nullptr) ++*closures;
-    for (int t = 0; t < m; ++t) {
-      const i32 z = v.shell[(std::size_t)t];
-      if (orient3d_exact(points[(std::size_t)ta], points[(std::size_t)tb],
-                         points[(std::size_t)tc], points[(std::size_t)z]) == 0)
-        closure.push_back(z);
-    }
-    i32 canonical[3] = {-1, -1, -1};
-    {
-      const int q = (int)closure.size();
-      bool found = false;
-      for (int x = 0; x < q && !found; ++x)
-      for (int y = x + 1; y < q && !found; ++y)
-      for (int z = y + 1; z < q && !found; ++z) {
-        const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)closure[(std::size_t)y]],
-                                        points[(std::size_t)closure[(std::size_t)x]]);
-        const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)closure[(std::size_t)z]],
-                                        points[(std::size_t)closure[(std::size_t)x]]);
-        const mhgp::P3 cr = mhgp::p3_cross(u, w);
-        if (cr.x == 0 && cr.y == 0 && cr.z == 0) continue;
-        canonical[0] = closure[(std::size_t)x];
-        canonical[1] = closure[(std::size_t)y];
-        canonical[2] = closure[(std::size_t)z];
-        found = true;
-      }
-      if (!found) continue;
-    }
-    if (!(canonical[0] == ta && canonical[1] == tb && canonical[2] == tc)) continue;
-    FlatAtVertex flat;
-    flat.base[0] = ta; flat.base[1] = tb; flat.base[2] = tc;
-    flat.closure = closure;
-    if (!visit(flat)) return;
-  }
+  for_each_flat_from(points, v, 0, 1, 2,
+                     [&](const FlatAtVertex& flat, int, int, int) { return visit(flat); },
+                     triplets, closures);
+}
+
+// LE COUPLE DE RETOUR, teste en O(m) et sans aucune fermeture.
+//
+// On descend de v vers w le long du plan de `base`, dans la direction `forward`.
+// Si w est notre fils, alors pi(w) emprunte le MEME plan en direction opposee.
+// Tester l'admissibilite de ce seul couple coute un `orient3d` par point de la
+// coquille de w ; s'il echoue, pi(w) != v est certifie et le refus n'a coute
+// aucune enumeration de flats. C'est une condition NECESSAIRE, pas suffisante : un
+// couple admissible peut ne pas etre le premier dans l'ordre.
+inline bool backward_pair_admissible(const std::vector<P3>& points, const Vertex& w,
+                                     const i32 base[3], int forward,
+                                     const std::vector<i32>& root_base) {
+  Pencil pencil{&points, base[0], base[1], base[2]};
+  const int back = -forward;
+  for (i32 z : w.shell)
+    if (tangent_sign(pencil.orient_of(z), back) < 0) return false;
+  const i32 site = w.interior.empty() ? -1 : w.interior.front();
+  if (site >= 0) return tangent_sign(pencil.orient_of(site), back) > 0;
+  mhgp::i128 total = 0;
+  for (i32 z : root_base)
+    total += orient3d_exact(points[(std::size_t)base[0]], points[(std::size_t)base[1]],
+                            points[(std::size_t)base[2]], points[(std::size_t)z]);
+  const mhgp::i128 derivative = (back > 0) ? -total : total;
+  return derivative < 0;
 }
 
 // La direction canonique du parent, ou `false` si aucune orientation n'est
@@ -2019,11 +2092,18 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
         if (!neighbour_along(points, top.vertex, flat, direction, index, st, &candidate)) continue;
         if (candidate.level > level_ceiling) continue;
         ++st->reverse_children_tested;
+        if (!backward_pair_admissible(points, candidate, flat.base, direction, root_base)) {
+          ++st->reverse_reject_backward;
+          continue;                          // pi(candidate) != v, certifie en O(m)
+        }
         Vertex mother;
         const ParentOutcome outcome = parent_of(candidate, &mother);
         if (outcome == ParentOutcome::kBroken) { broken = true; return false; }
         if (outcome == ParentOutcome::kIsRoot) continue;   // la racine n'est fille de personne
-        if (mother.shell != top.vertex.shell) continue;    // ce n'est pas notre fils
+        if (mother.shell != top.vertex.shell) {            // ce n'est pas notre fils
+          ++st->reverse_reject_by_parent;
+          continue;
+        }
         top.next_child = here + 1;
         child = candidate;
         descended = true;
@@ -2059,8 +2139,6 @@ inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp:
   if (*status != CloudStatus::kOk) visited.clear();
   return visited;
 }
-
-
 
 // ---------------------------------------------------------------------------
 // DU PARCOURS AU CATALOGUE.
