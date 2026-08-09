@@ -197,22 +197,26 @@ add_test(NAME mhgp3v_oracle_order_k COMMAND mhgp3v_oracle
 # Les fixtures aux coordonnees exactes des audits, a tous les ordres 2..8, plus
 # leur equivariance. Le plancher interdit une campagne vide.
 add_test(NAME mhgp3v_flats_fixtures COMMAND mhgp3v_flats_differential
-         --clouds 0 --min-cases 150)
+         --clouds 0 --min-cases 150 --min-navigated 100 --min-vertices 500
+         --min-multiple-shells 20 --min-quotiented 20)
 
 # Nuages generiques : c'est la porte de completude ordinaire.
 add_test(NAME mhgp3v_flats_generic COMMAND mhgp3v_flats_differential
-         --clouds 150 --points 11 --coord 24 --smax 6 --seed 4242 --min-cases 1000)
+         --clouds 150 --points 11 --coord 24 --smax 6 --seed 4242 --min-cases 1000
+         --min-navigated 700 --min-vertices 50000)
 
 # Grille SATUREE : dix points dans une boite de cote cinq. Presque tous les
 # nuages y portent des cospheries, des coplanarites et des alignements. C'est le
 # regime que l'ancien parcours censurait, et celui que celui-ci doit traverser.
 add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
-         --clouds 120 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 1000)
+         --clouds 120 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 1000
+         --min-navigated 500 --min-multiple-shells 300 --min-quotiented 300)
 
 # Nuages enrichis en points d'une meme sphere entiere : coquilles de taille
 # arbitraire et lots entrants multiples.
 add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential
-         --clouds 240 --points 8 --coord 40 --smax 7 --seed 90210 --min-cases 1400)
+         --clouds 240 --points 8 --coord 40 --smax 7 --seed 90210 --min-cases 1400
+         --min-navigated 1000 --min-multiple-shells 200)
 
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
@@ -221,6 +225,17 @@ mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
   mhgp3v_flats_reject_absurd_campaign "campagne absurde" --clouds 1 --smax 1)
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
   mhgp3v_flats_reject_empty_campaign "plancher non atteint" --clouds 0 --min-cases 100000)
+# `atoi` acceptait « 0junk » et rendait zero : la campagne devenait vide et verte.
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_integer_suffix "valeur entiere invalide" --clouds 0junk --min-cases 1)
+# La grille declaree est u16 ; hors d'elle les bornes des predicats ne tiennent plus.
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_coord_outside_grid "campagne absurde"
+  --clouds 1 --points 11 --coord 2147483647 --smax 2 --min-cases 1)
+# Une campagne qui ne navigue jamais ne peut pas rendre OK.
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_no_navigation "plancher de couverture non atteint"
+  --clouds 0 --min-cases 1 --min-navigated 100000)
 
 # Interface fail-closed : token entier partiel, reçu non ecrit et option ignoree
 # doivent tous fournir un code non nul ET le diagnostic attendu.

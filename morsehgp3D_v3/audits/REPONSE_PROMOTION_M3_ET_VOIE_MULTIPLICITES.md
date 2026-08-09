@@ -48,7 +48,7 @@ Référence : `AUDIT_PROMOTION_M3_2E3FA7B.md` §9 et `AUDIT_DELTA_…` §7.
 | P2 — fixtures permanentes : cube, pont, coplanaire, coquille constante, `n=2/3`, u16 extrême | **fermée** | 19 fixtures aux coordonnées exactes des audits, ordres 2 à 8, dans `mhgp3v_flats_differential` |
 | P4 — navigation multiplicitaire sans coupe par rang fermé, `(coquille, niveau)` comparés | **fermée** | `prototype/order_k_flats.hpp` ; la coupe est $\ell\le s_{\max}-2$ et le rang fermé n'apparaît que dans `try_emit` |
 | D1 — fixture du germe à cinq points, `(shell, exact_level)` avant propagation | **fermée** | census exact à chaque sommet, compteurs `census_mismatch_shell` et `census_mismatch_level` |
-| D2 — vrai germe de niveau zéro sur une face non triangulaire | **fermée** | triangle de Delaunay du sous-nuage coplanaire, par descente de rayon exacte |
+| D2 — vrai germe de niveau zéro sur une face non triangulaire | **fermée après correction** | la première construction, par descente de rayon, était fausse et l'audit `9c587e6` l'a réfutée ; voir §8 |
 | D3 — non-régression de `468635c` (coquille constante) | **fermée** | fixture `constant_shell_members` |
 | D6 — niveaux et coquilles comparés à un oracle indépendant sur coplanarités, cosphéricités, limites u16 | **fermée** pour cette vérité ; **ouverte** pour l'oracle rationnel M1 | voir §5 |
 | P3 — `Grid::ball` fail-open | **non fermée, contournée** : aucun accélérateur n'est branché, la requête balaie le nuage | — |
@@ -178,3 +178,53 @@ silencieusement l'oracle et passait pour la mauvaise raison. Corrigé.
 GCP non utilisé. Toutes les mesures viennent du codespace, deux vCPU, `-O3
 -march=native`, un seul cœur — et c'est délibéré : ce sont des charges CPU, elles
 n'ont rien à faire sur la G4.
+
+---
+
+## 8. Delta après `AUDIT_ORDER_K_FLATS_9C587E6`
+
+L'audit du parcours par flats est arrivé pendant l'écriture de ce document. Son
+verdict est accepté, son P0 est réel, et il a été reproduit avant d'être corrigé.
+
+**P0 — la descente stricte du rayon est fausse.** Reproduit exactement :
+
+```text
+in_circle_coplanar(A,B,C,P) = -72
+  R2(ABC) = 2.5   R2(ABP) = 2.5   R2(BCP) = 2.5   R2(CAP) = 2.5
+statut=germe_non_certifie etape=6 spheres=0
+```
+
+Le bon potentiel de 	extsc{Delaunay} n'a jamais été le rayon, c'est le vecteur
+des angles ; mon argument confondait les deux. **La correction supprime la
+boucle** : sur une arête de l'enveloppe du sous-nuage coplanaire, le troisième
+point de 	extsc{Delaunay} maximise l'angle inscrit, et « $d$ intérieur au cercle
+de $(a,b,c)$ » équivaut à « angle en $d$ supérieur à l'angle en $c$ ». C'est un
+ordre **total**, donc une passe suffit et il n'y a plus rien à faire terminer.
+L'arête d'enveloppe s'obtient de même en une passe depuis le point lex-min du
+sous-nuage, où aucune paire de directions n'est antipodale ; à angle égal on
+prend le plus proche, sans quoi un point du segment resterait entre les
+extrémités. Le garde `q*q+8` disparaît avec la boucle, et avec lui son propre
+débordement `int` au-delà de 46 341 points coplanaires.
+
+La fixture est permanente sous `descente_rayon_refutee`, rejouée sur ses **120
+permutations** avec exigence de zéro refus et de signature unique.
+
+**Les autres points, tous fermés dans ce delta.**
+
+| point | correction |
+| --- | --- |
+| §3.1 — la vérité partage `sphere4` et `miniball_of` | l'autorité du juge est désormais **bornée par écrit** dans le fichier, le README et le commentaire CMake : « portée de navigation et catalogue concordants relativement à ces primitives », pas « catalogue critique exact » |
+| §3.2 — payload incomplet | doublons publiés, tranche de membres, contiguïté de `members_begin`, appartenance exacte des membres à la boule fermée, queue de `support` à $-1$ et ordre lexicographique strict sont désormais comparés |
+| §3.3 — la porte peut devenir exhaustive sans le signaler | planchers de couverture par campagne : nuages réellement navigués, sommets, coquilles multiples, triplets quotientés, publiés dans le rapport et exigés par CTest |
+| §3.4 — équivariance trop étroite | elle est appelée aussi sur les nuages génériques, saturés et cosphériques, avec le **statut** dans la signature et le census actif |
+| §3.4 — doublons de coordonnées | statut `kDuplicateCoordinates` : le sujet **refuse** au lieu de publier `ok`, la garde de domaine est symétrique, et le refus est transactionnel |
+| §3.5 — CLI non fail-closed | lecture entière **intégrale** (`0junk` rejeté) et borne sémantique u16 sur `--coord` ; trois nouveaux CTests négatifs |
+| §3.6 — deux énoncés | la variation de niveau n'est **pas** bornée par un, elle vaut $\lvert D_-\rvert-\lvert A_{\text{int}}\rvert$ ; et la chaîne $s_{\max}-q\le s_{\max}-2$ ne vaut que pour $q\ge2$ |
+
+**Ce que ce delta ne ferme pas**, et je ne le prétends pas : la référence
+rationnelle multiplicitaire de l'oracle M1, l'index *fail-open*, la règle de
+propriétaire, le reverse search, les forêts, et le §4 entier de l'audit — les
+$2{,}5\cdot10^9$ appels à `sphere_side` des singletons avant le germe, les tables
+globales `seen`/`frontier`/`visited`, le census en $O(n)$ par tentative. Ce sont
+des portes d'architecture avant toute mesure à l'échelle, exactement comme
+l'audit le dit. Le statut reste `exploration/diagnostic_only`.

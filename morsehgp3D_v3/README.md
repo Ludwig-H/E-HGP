@@ -71,15 +71,20 @@ ne suppose jamais qu'un seul point change d'état :
 
 $$B_e=B(v)\cup\lbrace i\in S(v)\setminus C:\ i\ \text{intérieur sur l'arête}\rbrace,\qquad B(w)=B_e\setminus\lbrace i\in A:\ i\ \text{intérieur sur l'arête}\rbrace.$$
 
-Le niveau d'un voisin varie donc de $-1$, **$0$** ou $+1$. La variation nulle est
-réelle ; l'ancien commentaire « $\pm1$ » était faux.
+La variation du niveau d'un voisin **n'est pas bornée par un**. Elle vaut
+exactement $\lvert D_-\rvert-\lvert A_{\text{int}}\rvert$, et chacun des deux
+termes peut être grand dès que plusieurs hyperplans coïncident sur l'événement.
+L'énoncé « $\pm1$ » vient du cas simple et n'a jamais été vrai ailleurs ; je
+l'avais d'abord corrigé en « $-1$, $0$ ou $+1$ », ce qui était encore faux.
 
 ### Le plafond est le niveau STRICT $s_{\max}-2$
 
 C'est le **théorème de propriétaire** de
 [`AUDIT_VOIE_MULTIPLICITES_ORDER_K.md`](audits/AUDIT_VOIE_MULTIPLICITES_ORDER_K.md) §6 :
 en dimension affine trois, tout support indépendant $U$ d'arité $q$ est contenu
-dans un sommet $o(U)$ avec $B(o(U))\subseteq B_U$, donc $\ell(o(U))\le d_U\le s_{\max}-q\le s_{\max}-2$.
+dans un sommet $o(U)$ avec $B(o(U))\subseteq B_U$, donc $\ell(o(U))\le d_U\le s_{\max}-q$.
+La chaîne $s_{\max}-q\le s_{\max}-2$ ne vaut **que pour** $q\ge2$ : les singletons ne
+relèvent pas de la navigation et sont publiés à part, directement.
 Naviguer selon $\ell\le s_{\max}-2$ et récolter les sous-ensembles de taille 2 et
 3 des coquilles visitées suffit donc — un propriétaire peut porter une coquille
 de taille huit ou cinquante, il est traversé quel que soit son rang fermé.
@@ -111,10 +116,52 @@ circonscrit vide dans ce plan. Toute sphère du pinceau coupe ce plan selon ce
 cercle : aucun point coplanaire n'est jamais intérieur, et le premier lot
 rencontré depuis le demi-espace vide est de niveau zéro **par construction**.
 
-Deux prédicats nouveaux, tous deux entiers exacts :
+Le prédicat qui le permet est entier et exact : la **cocircularité coplanaire**,
+déterminant $4\times4$ dont les lignes sont $(b-a,\lVert b-a\rVert^2)$,
+$(c-a,\lVert c-a\rVert^2)$, $(u,0)$ et $(d-a,\lVert d-a\rVert^2)$ avec
+$u=(b-a)\times(c-a)$. La ligne $(u,0)$ force le centre dans le plan ; le signe
+est invariant par échange de $b$ et $c$, et négatif signifie strictement
+intérieur au cercle. Borne $2^{108,8}$, donc `i128`.
 
-- **cocircularité coplanaire** : déterminant $4\times4$ dont les lignes sont $(b-a,\lVert b-a\rVert^2)$, $(c-a,\lVert c-a\rVert^2)$, $(u,0)$ et $(d-a,\lVert d-a\rVert^2)$ avec $u=(b-a)\times(c-a)$. La ligne $(u,0)$ force le centre dans le plan ; le signe est invariant par échange de $b$ et $c$ et négatif signifie strictement intérieur au cercle. Borne $2^{108,8}$, donc `i128`.
-- **descente de rayon** : si $d$ est intérieur au cercle de $(a,b,c)$, l'un des trois triangles $(a,b,d)$, $(b,c,d)$, $(c,a,d)$ a un cercle strictement plus petit. Prendre le minimum exact — `sphere_cmp_beta` — fait décroître strictement une quantité prise dans un ensemble fini : la boucle termine et s'arrête quand le cercle est vide.
+### La première construction du triangle était fausse, et l'audit l'a réfutée
+
+J'avais écrit une **descente de rayon** : si $d$ est intérieur au cercle de
+$(a,b,c)$, l'un des trois triangles obtenus en remplaçant un sommet aurait un
+cercle strictement plus petit. C'est faux.
+[`AUDIT_ORDER_K_FLATS_9C587E6.md`](audits/AUDIT_ORDER_K_FLATS_9C587E6.md) §2 le
+montre sur cinq points de la grille u16 :
+
+```text
+A=(0,0,0)  B=(0,3,0)  C=(2,1,0)  P=(1,1,0)  Q=(1,1,2)
+```
+
+$P$ est strictement intérieur au cercle de $ABC$ — le prédicat entier rend $-72$
+— et pourtant les quatre rayons carrés valent exactement $5/2$. Aucune descente
+n'existe : le germe rendait `germe_non_certifie` étape 6 et le catalogue sortait
+vide, et 30 des 120 permutations échouaient là où 90 réussissaient. Le bon
+potentiel de Delaunay n'a jamais été le rayon, c'est le vecteur des angles.
+
+**La correction supprime la boucle.** Sur une **arête de l'enveloppe** du
+sous-nuage coplanaire, le troisième point de Delaunay est celui qui maximise
+l'angle inscrit, et « $d$ strictement intérieur au cercle de $(a,b,c)$ » équivaut
+à « l'angle en $d$ dépasse l'angle en $c$ » : c'est un ordre **total** sur les
+points d'un même côté de la droite, donc une seule passe suffit et il n'y a
+aucune terminaison à prouver. Le cercle obtenu est vide — un intrus du même côté
+contredirait la maximalité, il n'y a personne de l'autre côté puisque l'arête est
+sur l'enveloppe, et un point de la droite hors du segment est extérieur à tout
+cercle passant par ses extrémités.
+
+L'arête d'enveloppe s'obtient elle aussi en une passe : le point lex-min du
+sous-nuage coplanaire est extrême pour la forme « $x$ puis $y$ puis $z$ », donc
+sommet de son enveloppe, et depuis lui aucune paire de directions n'est
+antipodale — l'ordre angulaire est total. À angle égal on prend le point le plus
+**proche**, sans quoi un point du segment resterait entre les deux extrémités et
+serait intérieur à tout cercle passant par elles.
+
+Les 120 permutations de cette fixture sont un test permanent : zéro refus,
+signature unique. Le garde quadratique `q*q+8` de la boucle a disparu avec elle,
+et avec lui son propre P0 — `q` converti en `int` débordait dès 46 341 points
+coplanaires, ce qu'un nuage de 50 000 points peut atteindre.
 
 **Un piège trouvé en chemin, et il n'était pas prévu par les audits.** La
 rotation d'emballage autour de l'axe $(p_0,p_1)$ ne peut pas se décider au seul
@@ -165,23 +212,56 @@ d'indices différents, et `ForestNode::source` est un indice.
 ## 4. Ce qui est jugé, et par quoi
 
 `mhgp3v_flats_differential` compare le sujet à une vérité écrite dans le même
-fichier mais qui ne partage avec lui **que** `mhgp::sphere_side` : ni germe, ni
-prédicat de pinceau, ni transport. Trois portes, et il faut les trois :
+fichier, qui n'appelle ni le germe, ni les prédicats de pinceau, ni le transport.
+
+**Portée exacte de son autorité, et elle est plus étroite que ce que j'avais
+écrit.** La vérité partage avec le sujet trois primitives de la v2 :
+`mhgp::sphere_side`, `mhgp::sphere4` pour construire les sommets exhaustifs, et
+`mhgp::miniball_of` pour décider les candidats et relire le support canonique.
+Une faute commune de miniboule, de bon centrage ou de convention de support
+serait donc **invisible** ici. Ce juge établit « portée de navigation et
+catalogue concordants **relativement à ces primitives** », pas « catalogue
+critique exact ». L'autorité indépendante manquante est une référence
+rationnelle multiplicitaire dans l'oracle M1, qui n'existe pas.
+
+Trois portes, et il faut les trois :
 
 1. **le sommet** — tous les sommets d'arrangement énumérés en force brute, groupés par coquille, filtrés au niveau strict, comparés sur le couple (coquille, **niveau**) ;
 2. **le catalogue** — tous les sous-ensembles de taille au plus quatre, miniboule, census exact, déduplication par coquille, support canonique ;
 3. **l'équivariance** — renuméroter le nuage ne doit rien changer.
 
 Le census exact par sommet est actif pendant toute la campagne : le transport
-n'est jamais autorité, il est confirmé ou réfuté à chaque sommet.
+n'est jamais autorité, il est confirmé ou réfuté à chaque sommet. Le **payload
+entier** est comparé — doublons publiés, tranche de membres et contiguïté de
+`members_begin`, appartenance exacte des membres à la boule fermée publiée,
+queue de `support` remplie de $-1$, ordre lexicographique strict de
+sérialisation — et non plus le seul ensemble des couples support–rang.
 
-**[mesuré]** trois campagnes, `-O2`, coordonnées entières :
+**Planchers de couverture.** Chaque campagne exige un minimum de nuages
+réellement navigués, de sommets, de coquilles multiples et de triplets
+quotientés. Sans eux, une régression qui classerait tous les nuages en dimension
+affine inférieure ferait comparer l'exhaustif du sujet à l'exhaustif de la
+vérité et garderait toute la porte verte sans jamais exercer la navigation.
+
+**Domaine déclaré, garde symétrique.** Deux observations confondues sont hors
+contrat : le sujet doit refuser, et refuser exactement dans ce cas. La convention
+de support canonique par ordre des coordonnées ne sépare pas deux points de même
+coordonnée, et échanger leurs identifiants changeait quatre supports publiés.
+
+**[mesuré]** deux campagnes après correction du germe, `-O2`, coordonnées
+entières distinctes :
 
 | campagne | nuages | points | grille | $s_{\max}$ | cas | désaccords |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| générique | 2 500 | 12 | $[0,26)$ | 2 à 7 | 18 902 | **0** |
-| grille saturée | 1 500 | 10 | $[0,5)$ | 2 à 8 | 13 277 | **0** |
-| fixtures + cosphéricités forcées | — | 4 à 12 | — | 2 à 8 | 902 | **0** |
+| générique | 2 500 | 12 | $[0,26)$ | 2 à 7 | **19 544** | **0** |
+| grille saturée | 1 500 | 10 | $[0,5)$ | 2 à 8 | **13 669** | **0** |
+
+Couverture réellement exercée, publiée par le juge et exigée par CTest :
+
+| campagne | nuages navigués | sommets | coquilles $>4$ | triplets quotientés | lots $>1$ | équivariances |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| générique | 18 819 | 3 359 381 | 11 863 | 51 578 | 171 246 | 646 |
+| grille saturée | 13 209 | 1 331 410 | 58 393 | 125 574 | 751 805 | 396 |
 
 La grille saturée est le régime qui compte : dix points dans une boîte de côté
 cinq, donc presque tous les nuages portent des cosphéricités, des coplanarités
@@ -193,8 +273,10 @@ et des alignements. C'est ce que l'ancien parcours censurait.
 `non_well_centred_vertex`, `regular_tetrahedron`, `giant_centre_det1`,
 `radius2_of_P0`, `well_centred_not_small`, `Q1_decisive`,
 `partial_catalogue_on_reject`, `base_n2`, `base_n3`, `coplanaire_pur`,
-`germe_demi_tour`, `germe_arete_traversee` — chacune à tous les ordres 2 à 8,
-plus son équivariance.
+`germe_demi_tour`, `germe_arete_traversee`, `descente_rayon_refutee`,
+`coordonnees_dupliquees` — chacune à tous les ordres 2 à 8, plus son
+équivariance ; `descente_rayon_refutee` est en outre rejouée sur ses **120
+permutations**, avec exigence de zéro refus et de signature unique.
 
 ### Ce qui n'est PAS jugé
 
@@ -252,10 +334,111 @@ $3\cdot10^6$ sphères et $3\cdot10^7$ identifiants de membres, et aucun de ces
 deux nombres n'est mesuré — ils sont extrapolés d'une croissance non stabilisée,
 et je les donne comme tels.
 
+### La taille du terrain n'est pas garantie
+
+Le $\leq k$-niveau parcouru **est** le squelette de la mosaïque de Delaunay
+d'ordre supérieur : c'est un théorème classique — le diagramme de Voronoï
+d'ordre $k$ est la projection du $k$-niveau de l'arrangement relevé. Le parcours
+ne visite donc pas un objet plus petit qu'elle, il visite **le même**. Il faut
+dire précisément ce qui est gagné et ce qui ne l'est pas :
+
+| | mosaïque d'ordre $\leq k$ matérialisée | parcours |
+| --- | --- | --- |
+| nombre de sommets | $V$ | **$V$, identique** |
+| étiquette par sommet | le $k$-sous-ensemble, $O(k)$ entiers | coquille et compteur de niveau |
+| cellules de dimension 1, 2, 3 ; incidences ; dual | construites et stockées | jamais formées |
+| résident simultanément | tout | **tout aussi, aujourd'hui** |
+
+Le gain acquis est donc la charge utile par sommet et l'absence des cellules de
+dimension supérieure — de l'ordre d'un facteur cinq à dix en octets, **pas un
+ordre de grandeur**. Le gain qui compterait, ne pas tout retenir, n'est pas
+obtenu : `seen` et le vecteur des sommets visités retiennent l'ensemble.
+
+**Et $V$ lui-même n'est borné par aucun théorème utilisable ici.** La borne
+classique de Clarkson--Shor pour le $\leq k$-niveau de $n$ hyperplans de
+$\mathbb{R}^4$ est **quadratique en $n$ et en $k$**. Les mesures ci-dessus sont
+plusieurs ordres de grandeur en dessous, parce qu'un relevé est localement une
+surface, donc très loin d'une configuration adverse. C'est une propriété du
+**régime**, pas un théorème — et le §14 de [`PROPOSITION.md`](PROPOSITION.md) a
+déjà retiré l'énoncé voisin « surface $\Rightarrow$ faible profondeur presque
+partout » comme census et non comme théorème.
+
+**Le multi-captation est le contre-exemple attendu, et il est déjà mesuré.** Le
+census du 8 août, publié au §1.5 de `PROPOSITION.md`, donne le nuage à dix
+captations recalées **moins peu profond** que la reconstruction fusionnée. Deux
+relevés superposés créent des couches quasi dupliquées et la profondeur y monte
+localement. C'est exactement ce que la porte Gate D doit trancher, et sa branche
+« sortie sparse avec intermédiaires denses » est un **no-go d'architecture**
+déclaré à l'avance.
+
 **[obligation]** avant toute mesure à l'échelle : l'index *fail-open*, la règle
 de propriétaire, le census local, puis un reçu séquentiel avec pic mémoire. Et
 la mesure n'ira **pas** sur la G4 : c'est une charge CPU, elle n'a rien à faire
 sur un GPU.
+
+---
+
+## 5 bis. Mémoire et GPU sont le même problème, pas deux
+
+C'est le point qui commande l'ordre des travaux, et il n'était écrit nulle part.
+
+La structure qui coûte la mémoire est `seen`, la table des coquilles déjà
+visitées. C'est **exactement** celle qui interdit le GPU : une table de hachage
+globale, à clefs de longueur variable, écrite par tous les fils. Il n'y a pas un
+verrou mémoire et un verrou GPU ; il y en a **un seul**.
+
+La technique qui l'élimine est connue — la *reverse search* d'Avis et Fukuda.
+Une règle locale et déterministe désigne, depuis tout sommet, l'unique voisin
+par lequel on y serait arrivé ; l'arbre de parcours devient implicite et un
+sommet n'est publié que par son parent. Trois conséquences d'un seul coup :
+
+1. la mémoire de navigation tombe à $O(\text{profondeur})$ au lieu du nombre de sommets ;
+2. le parcours devient **parallèle sans communication** — deux fils sur deux sous-arbres n'ont rien à échanger, ce qui est la forme que réclame un GPU ;
+3. le déterminisme devient gratuit, ce que la porte de publication exige de toute façon.
+
+Le dépôt en possède déjà une preuve constructive,
+[`AUDIT_REVERSE_SEARCH_ORDER_K_CF9374.md`](audits/AUDIT_REVERSE_SEARCH_ORDER_K_CF9374.md),
+**sous hypothèse d'arrangement simple**. Le parent multiplicitaire n'est
+qu'esquissé.
+
+### Ce qui portera, et ce qui devra être restructuré
+
+Les prédicats sont déjà de la forme idéale : entiers, bornés, sans division,
+sans rationnel, sans branchement sur la précision. Cette partie ne demande
+aucune recherche. Le reste demande une restructuration explicite :
+
+| point dur | forme actuelle | forme visée |
+| --- | --- | --- |
+| travail par sommet très irrégulier | une seule boucle | classes de charge : coquille de taille quatre en régime dense, coquilles plus grandes routées vers une file séparée |
+| requête de pinceau | balayage $8(n-4)$ | requête indexée bornée, cas non concluants **différés dans une file de seconde passe** au lieu d'un repli en $O(n)$ dans le fil |
+| census de la récolte | $O(n)$ par candidat | requête de portée sur la boule connue |
+| tri global par $\beta$ exact | non écrit | étage **barrière** : runs triés puis fusion déterministe, clefs rationnellement égales réunies avant toute mutation |
+
+**Ce qu'un GPU n'achètera pas.** Il multiplie le débit ; il ne réduit pas le
+nombre de sommets visités, qui est celui de la mosaïque. La question de fond
+n'est donc pas « aller plus vite sur ce terrain » mais « peut-on éviter d'en
+traverser la plus grande part ». Aucun portage n'y répond.
+
+---
+
+## 5 ter. Commencer sous hypothèse de non-cosphéricité
+
+**Décision de séquencement.** Le premier algorithme complet sera écrit pour un
+arrangement **simple** — aucune cosphéricité, aucune coplanarité portante — et
+le traitement des dégénérescences est reporté à l'une des **dernières phases**
+du projet.
+
+La raison n'est pas le confort. C'est que la *reverse search* n'est démontrée
+que dans ce cas : c'est donc le seul domaine où la mémoire de navigation et la
+forme parallèle peuvent être obtenues **et prouvées** aujourd'hui. On y règle
+l'architecture — index, propriétaire, streaming, tri, forme GPU — sur un terrain
+où chaque pièce a sa preuve, puis on rouvre les multiplicités en dernier.
+
+Trois conditions, sans lesquelles cette décision serait une régression :
+
+1. **Le domaine est déclaré et gardé fail-closed.** Un nuage portant une cosphéricité doit être **refusé avec sa raison nommée**, jamais traité comme s'il était simple. La règle du dépôt tient : un refus nomme sa cause, un compteur muet est une branche morte.
+2. **Le travail multiplicitaire déjà fait est conservé, pas jeté.** `order_k_flats.hpp`, ses fixtures `cube`, `constant_shell_members`, `bridge_shell5`, `coplanaire_pur` et la campagne à grille saturée restent au dépôt et restent vertes ; elles deviennent la porte d'entrée de la phase finale.
+3. **Aucune mesure à l'échelle sur donnée réelle ne peut être revendiquée depuis cette version.** La cible u16 quantifiée **n'est pas** dans ce domaine : un nuage LiDAR de cinq cents points porte déjà une cosphéricité à cinq points, et la campagne à grille saturée du §4 est précisément le régime qui compte. Les chiffres obtenus sous hypothèse simple qualifient l'architecture, jamais le contrat.
 
 ---
 
@@ -285,12 +468,16 @@ code non nul avec son diagnostic ; trois tests négatifs le vérifient.
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | non écrit ; les P0 de `Grid::ball` restent ouverts |
 | 2 | règle de propriétaire pour les arités 2 et 3, et census local | non écrite ; 43 % de la récolte est redondante |
-| 3 | reverse search, pour supprimer `seen` et `frontier` | non écrit ; la mémoire de navigation reste proportionnelle au nombre de sommets |
+| 3 | reverse search, pour supprimer `seen` et `frontier` | non écrite ; **c'est le même verrou que le GPU** (§5 bis), et elle n'est démontrée que sous arrangement simple — d'où la décision de séquencement du §5 ter |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | forêts, tri global par $\beta$ exact, lots atomiques | non écrits |
 | 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |
+| 6 bis | sémantique quotientée des observations confondues | ouverte ; le prototype les **refuse** explicitement plutôt que de publier un support dépendant de la numérotation |
 | 7 | `sphere.hpp` au bord produit : paire de points confondus acceptée comme support d'arité deux, sentinelle `den==0` sans garde | ouverts, hors de ce fichier |
 | 8 | le contrat 50 k / $K=10$ / 1 s | **non atteint, non mesuré, et les deux ratios qui le décident croissent encore à $n=300$** |
+| 9 | les $n$ singletons passent par `try_emit` avant le germe, soit $2{,}5\cdot10^9$ appels à `sphere_side` à 50 k | ouverte ; c'est une porte d'architecture, pas une constante |
+| 9 | la taille $V$ du $\leq k$-niveau en général | **non bornée utilement** : Clarkson--Shor est quadratique en $n$ et en $k$, et les mesures ne valent que pour le régime de surface (§5) |
+| 10 | le régime multi-captation | mesuré **moins peu profond** que la reconstruction fusionnée ; c'est la branche no-go de Gate D |
 
 Le détail, les budgets et le journal des affirmations retirées sont dans
 [`PROPOSITION.md`](PROPOSITION.md).

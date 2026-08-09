@@ -1,8 +1,18 @@
 // MorseHGP3D v3 — JUGE DIFFERENTIEL du parcours multiplicitaire `order_k_flats`.
 //
 // Ce binaire n'est pas un test unitaire : c'est la porte. Il compare le sujet a
-// une verite ecrite ici, qui n'appelle ni le germe, ni les prédicats de pinceau,
-// ni le transport du sujet — elle ne partage avec lui que `mhgp::sphere_side`.
+// une verite ecrite ici, qui n'appelle ni le germe, ni les predicats de pinceau,
+// ni le transport du sujet.
+//
+// PORTEE EXACTE DE SON AUTORITE, et elle est plus etroite que ce que j'avais
+// ecrit. La verite partage avec le sujet trois primitives de `morsehgp3D_v2` :
+// `mhgp::sphere_side`, `mhgp::sphere4` pour construire les sommets exhaustifs,
+// et `mhgp::miniball_of` pour decider les candidats et relire le support
+// canonique. Une faute commune de miniboule, de bon centrage ou de convention
+// de support serait donc INVISIBLE ici. Ce juge etablit « portee de navigation
+// et catalogue concordants RELATIVEMENT a ces primitives », pas « catalogue
+// critique exact ». L'autorite independante manquante est une reference
+// rationnelle multiplicitaire dans l'oracle M1, qui n'existe pas.
 //
 // Trois comparaisons, pas une seule :
 //
@@ -30,6 +40,8 @@
 // Les fixtures portent les coordonnees EXACTES publiees par les audits de
 // `audits/`. Chacune a refute une affirmation ; la liste est dans le README.
 #include <algorithm>
+#include <array>
+#include <charconv>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -131,14 +143,68 @@ static void dump(const std::vector<P3>& pts) {
   printf("\n");
 }
 
+// Couverture reellement exercee. Sans plancher, une regression qui classerait
+// tous les nuages en dimension affine inferieure ferait comparer l'exhaustif du
+// sujet a l'exhaustif de la verite et garderait toute la porte verte SANS
+// jamais exercer la navigation. Chaque campagne doit donc exiger un minimum de
+// nuages navigues, de sommets, de coquilles multiples et de triplets quotientes.
+struct Coverage {
+  long long navigated_clouds = 0;
+  long long direct_clouds = 0;
+  long long refused_clouds = 0;
+  long long vertices = 0;
+  long long census = 0;
+  long long multiple_shells = 0;
+  long long quotiented = 0;
+  long long multiple_batches = 0;
+  long long equivariance_runs = 0;
+};
+static Coverage coverage;
+
+static bool has_duplicates(const std::vector<P3>& pts) {
+  std::vector<std::array<long long, 3>> v;
+  for (const P3& p : pts) v.push_back({(long long)p.x, (long long)p.y, (long long)p.z});
+  std::sort(v.begin(), v.end());
+  return std::adjacent_find(v.begin(), v.end()) != v.end();
+}
+
 static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool verbose) {
   mhgp3v::FlatStatistics st{};
   mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
   const mhgp::Catalogue cat = mhgp3v::flat_catalogue(pts, s_max, &st, &status, true);
 
+  // GARDE DE DOMAINE SYMETRIQUE. Deux observations confondues sont hors contrat :
+  // le sujet doit REFUSER, et refuser exactement dans ce cas. Un refus sur un
+  // nuage sain, ou une publication sur un nuage a doublon, est un echec.
+  const bool duplicated = has_duplicates(pts);
+  if (duplicated != (status == mhgp3v::CloudStatus::kDuplicateCoordinates)) {
+    printf("[%s] s_max=%2d DOMAINE desaccord : doublons=%d statut=%s\n", tag, s_max,
+           (int)duplicated, mhgp3v::cloud_status_name(status));
+    return false;
+  }
+  if (duplicated) {
+    if (!cat.spheres.empty() || !cat.members.empty()) {
+      printf("[%s] s_max=%2d REFUS NON TRANSACTIONNEL : %zu spheres publiees\n", tag, s_max,
+             cat.spheres.size());
+      return false;
+    }
+    ++coverage.refused_clouds;
+    return true;
+  }
+
   bool ok = st.census_mismatch_shell == 0 && st.census_mismatch_level == 0 &&
             status != mhgp3v::CloudStatus::kSeedFailed &&
             status != mhgp3v::CloudStatus::kInvariantViolated;
+  if (status == mhgp3v::CloudStatus::kOk && (int)pts.size() >= 4) ++coverage.navigated_clouds;
+  else if (status == mhgp3v::CloudStatus::kSeedFailed ||
+           status == mhgp3v::CloudStatus::kInvariantViolated ||
+           status == mhgp3v::CloudStatus::kDuplicateCoordinates) ++coverage.refused_clouds;
+  else ++coverage.direct_clouds;
+  coverage.vertices += st.vertices_visited;
+  coverage.census += st.census_checks;
+  coverage.multiple_shells += st.shells_multiple;
+  coverage.quotiented += st.triples_quotiented;
+  coverage.multiple_batches += st.batches_multiple;
 
   int missing_vertices = 0, extra_vertices = 0, wrong_level = 0;
   if (status == mhgp3v::CloudStatus::kOk && (int)pts.size() >= 4) {
@@ -169,6 +235,49 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
   }
   if (got != t.spheres) ok = false;
 
+  // PAYLOAD, et pas seulement l'ensemble (support, rang) : doublons, tranche de
+  // membres, contiguite de `members_begin`, geometrie exacte de la sphere, et
+  // ordre de serialisation. Sans cela une mutation de ces champs laisserait la
+  // porte verte, et `ForestNode::source` est un indice dans cet ordre.
+  int payload_faults = 0;
+  {
+    std::set<std::vector<i32>> seen_support;
+    std::size_t cursor = 0;
+    std::vector<mhgp::CriticalSphere> previous;
+    for (const mhgp::CriticalSphere& sph : cat.spheres) {
+      std::vector<i32> sup(sph.support, sph.support + sph.n_support);
+      if (!seen_support.insert(sup).second) ++payload_faults;       // doublon publie
+      for (int i = sph.n_support; i < mhgp::kMaxSupport; ++i)
+        if (sph.support[i] != -1) ++payload_faults;                 // queue non remplie de -1
+      if ((std::size_t)sph.members_begin != cursor) ++payload_faults;   // tranche non contigue
+      cursor += (std::size_t)sph.rank;
+      std::vector<i32> members;
+      for (int i = 0; i < sph.rank; ++i)
+        members.push_back(cat.members[(size_t)(sph.members_begin + i)]);
+      if (!std::is_sorted(members.begin(), members.end())) ++payload_faults;
+      // les membres sont exactement la boule fermee de la sphere publiee
+      std::vector<i32> expected;
+      for (i32 z = 0; z < (i32)pts.size(); ++z)
+        if (mhgp::sphere_side(sph.sph, pts[(size_t)z]) <= 0) expected.push_back(z);
+      if (members != expected) ++payload_faults;
+      // la sphere publiee passe par tout son support et est la miniboule de sa coquille
+      for (int i = 0; i < sph.n_support; ++i)
+        if (mhgp::sphere_side(sph.sph, pts[(size_t)sph.support[i]]) != 0) ++payload_faults;
+      if (!previous.empty()) {
+        const mhgp::CriticalSphere& q = previous.back();
+        bool ordered = false, equal = true;
+        for (int i = 0; i < mhgp::kMaxSupport && equal; ++i) {
+          if (q.support[i] < sph.support[i]) { ordered = true; equal = false; }
+          else if (q.support[i] > sph.support[i]) { equal = false; }
+        }
+        if (!ordered) ++payload_faults;             // ordre lexicographique strict
+      }
+      previous.push_back(sph);
+    }
+    if (cursor != cat.members.size()) ++payload_faults;   // membres orphelins
+  }
+  if (payload_faults) ok = false;
+
   if (!ok || verbose) {
     printf("[%s] s_max=%2d statut=%-34s  catalogue %zu/%zu  arites %d/%d/%d/%d contre %d/%d/%d/%d\n",
            tag, s_max, mhgp3v::cloud_status_name(status), got.size(), t.spheres.size(),
@@ -182,6 +291,7 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
            st.batches_multiple, st.census_checks, st.census_mismatch_shell,
            st.census_mismatch_level, st.emit_attempts, st.emit_duplicate_shell,
            st.vertices_over_level, st.seed_failure_stage);
+    if (payload_faults) printf("        FAUTES DE PAYLOAD = %d\n", payload_faults);
   }
   if (!ok) {
     printf("        points :");
@@ -209,8 +319,14 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
   auto signature = [&](const std::vector<P3>& q, const std::vector<int>& back) {
     mhgp3v::FlatStatistics st{};
     mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
-    const mhgp::Catalogue cat = mhgp3v::flat_catalogue(q, s_max, &st, &status, false);
+    const mhgp::Catalogue cat = mhgp3v::flat_catalogue(q, s_max, &st, &status, true);
     std::set<std::pair<std::vector<i32>, int>> out;
+    // Le STATUT fait partie de la signature : un germe qui reussit sur une
+    // numerotation et echoue sur une autre est une non-equivariance, meme si les
+    // deux catalogues publies sont vides.
+    out.insert({std::vector<i32>{(i32)(-1000 - (int)status)}, 0});
+    if (st.census_mismatch_shell || st.census_mismatch_level)
+      out.insert({std::vector<i32>{-2000}, 0});
     for (const mhgp::CriticalSphere& s : cat.spheres) {
       std::vector<i32> sup;
       for (int i = 0; i < s.n_support; ++i) sup.push_back((i32)back[(size_t)s.support[i]]);
@@ -222,6 +338,7 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
   std::vector<int> identity((size_t)pts.size());
   for (size_t i = 0; i < identity.size(); ++i) identity[i] = (int)i;
   const auto reference = signature(pts, identity);
+  ++coverage.equivariance_runs;
   for (int t = 0; t < trials; ++t) {
     std::vector<int> perm = identity;
     std::shuffle(perm.begin(), perm.end(), rng);
@@ -238,27 +355,66 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
 
 int main(int argc, char** argv) {
   int clouds = 400, npoints = 11, coord = 24, smax_hi = 6, min_cases = 1;
-  unsigned seed = 4242;
+  int min_navigated = 0, min_vertices = 0, min_multiple_shells = 0, min_quotiented = 0;
+  long long seed = 4242;
+  // `atoi` acceptait « 0junk » et rendait zero : une campagne vide passait pour
+  // verte. Lecture INTEGRALE stricte, sinon code 2 avant tout calcul.
+  auto integer = [&](const char* text, long long* out) {
+    const char* first = text;
+    const char* last = text + strlen(text);
+    if (first == last) return false;
+    const bool negative = (*first == '-');
+    if (negative) ++first;
+    if (first == last) return false;
+    unsigned long long magnitude = 0;
+    const auto result = std::from_chars(first, last, magnitude);
+    if (result.ec != std::errc{} || result.ptr != last) return false;
+    if (magnitude > 4611686018427387903ULL) return false;
+    *out = negative ? -(long long)magnitude : (long long)magnitude;
+    return true;
+  };
   for (int i = 1; i < argc; ++i) {
     const bool has_value = (i + 1 < argc);
-    if (!strcmp(argv[i], "--clouds") && has_value) clouds = atoi(argv[++i]);
-    else if (!strcmp(argv[i], "--points") && has_value) npoints = atoi(argv[++i]);
-    else if (!strcmp(argv[i], "--coord") && has_value) coord = atoi(argv[++i]);
-    else if (!strcmp(argv[i], "--smax") && has_value) smax_hi = atoi(argv[++i]);
-    else if (!strcmp(argv[i], "--seed") && has_value) seed = (unsigned)atoi(argv[++i]);
-    else if (!strcmp(argv[i], "--min-cases") && has_value) min_cases = atoi(argv[++i]);
-    else {
+    long long value = 0;
+    auto take = [&](int* target) {
+      if (!has_value || !integer(argv[i + 1], &value)) return false;
+      ++i;
+      *target = (int)value;
+      return true;
+    };
+    bool ok_argument = false;
+    if (!strcmp(argv[i], "--clouds")) ok_argument = take(&clouds);
+    else if (!strcmp(argv[i], "--points")) ok_argument = take(&npoints);
+    else if (!strcmp(argv[i], "--coord")) ok_argument = take(&coord);
+    else if (!strcmp(argv[i], "--smax")) ok_argument = take(&smax_hi);
+    else if (!strcmp(argv[i], "--min-cases")) ok_argument = take(&min_cases);
+    else if (!strcmp(argv[i], "--min-navigated")) ok_argument = take(&min_navigated);
+    else if (!strcmp(argv[i], "--min-vertices")) ok_argument = take(&min_vertices);
+    else if (!strcmp(argv[i], "--min-multiple-shells")) ok_argument = take(&min_multiple_shells);
+    else if (!strcmp(argv[i], "--min-quotiented")) ok_argument = take(&min_quotiented);
+    else if (!strcmp(argv[i], "--seed")) {
+      if (has_value && integer(argv[i + 1], &value) && value >= 0) { ++i; seed = value; ok_argument = true; }
+    } else {
       printf("ECHEC : argument inconnu %s\n", argv[i]);
       return 2;
     }
+    if (!ok_argument) {
+      printf("ECHEC : valeur entiere invalide ou manquante pour %s\n", argv[i]);
+      return 2;
+    }
   }
-  if (clouds < 0 || npoints < 1 || coord < 2 || smax_hi < 2 || min_cases < 1) {
-    printf("ECHEC : campagne absurde (clouds<0, points<1, coord<2, smax<2 ou min-cases<1)\n");
+  // La GRILLE DECLAREE est u16 : les bornes des predicats entiers en dependent,
+  // et un `--coord` hors grille produit un depassement signe dans `in_sphere_side`.
+  if (clouds < 0 || npoints < 1 || coord < 2 || coord > 65536 || smax_hi < 2
+      || min_cases < 1 || min_navigated < 0 || min_vertices < 0
+      || min_multiple_shells < 0 || min_quotiented < 0) {
+    printf("ECHEC : campagne absurde (clouds<0, points<1, coord hors [2,65536], "
+           "smax<2, min-cases<1 ou plancher negatif)\n");
     return 2;
   }
 
   int failures = 0, cases = 0;
-  std::mt19937 rng(seed);
+  std::mt19937 rng((unsigned)seed);
 
   struct Fix { const char* name; std::vector<P3> pts; };
   std::vector<Fix> fixtures;
@@ -306,8 +462,51 @@ int main(int argc, char** argv) {
   fixtures.push_back({"germe_demi_tour",
                       {pt(26, 30, 33), pt(27, 30, 34), pt(27, 30, 26), pt(34, 30, 33),
                        pt(30, 33, 26), pt(25, 30, 25), pt(35, 31, 30)}});
+  // Refutation de la « descente stricte du rayon » : P est strictement interieur
+  // au cercle de ABC et pourtant les quatre rayons carres valent 5/2.
+  fixtures.push_back({"descente_rayon_refutee",
+                      {pt(0, 0, 0), pt(0, 3, 0), pt(2, 1, 0), pt(1, 1, 0), pt(1, 1, 2)}});
+  // Deux observations confondues : le sujet doit REFUSER, pas publier `ok`.
+  fixtures.push_back({"coordonnees_dupliquees",
+                      {pt(0, 0, 0), pt(0, 0, 0), pt(2, 0, 0), pt(0, 2, 0), pt(0, 0, 2)}});
   fixtures.push_back({"germe_arete_traversee",
                       {pt(0, 0, 0), pt(2, 0, 0), pt(4, 0, 0), pt(2, 4, 0), pt(2, 2, 6), pt(1, 3, 2)}});
+
+  // Les 120 permutations de la fixture qui a refute la descente : c'est la seule
+  // maniere de voir une non-equivariance qui ne touche que 30 numerotations.
+  {
+    const std::vector<P3> witness{pt(0, 0, 0), pt(0, 3, 0), pt(2, 1, 0), pt(1, 1, 0),
+                                  pt(1, 1, 2)};
+    std::vector<int> perm{0, 1, 2, 3, 4};
+    std::sort(perm.begin(), perm.end());
+    std::set<std::set<std::pair<std::vector<i32>, int>>> signatures;
+    int refused = 0;
+    do {
+      std::vector<P3> q(5);
+      std::vector<int> back(5);
+      for (int i = 0; i < 5; ++i) { q[(size_t)i] = witness[(size_t)perm[(size_t)i]]; back[(size_t)i] = perm[(size_t)i]; }
+      mhgp3v::FlatStatistics st{};
+      mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
+      const mhgp::Catalogue cat = mhgp3v::flat_catalogue(q, 5, &st, &status, true);
+      if (status != mhgp3v::CloudStatus::kOk) ++refused;
+      std::set<std::pair<std::vector<i32>, int>> sig;
+      for (const mhgp::CriticalSphere& sp : cat.spheres) {
+        std::vector<i32> sup;
+        for (int i = 0; i < sp.n_support; ++i) sup.push_back((i32)back[(size_t)sp.support[i]]);
+        std::sort(sup.begin(), sup.end());
+        sig.insert({sup, sp.rank});
+      }
+      signatures.insert(sig);
+    } while (std::next_permutation(perm.begin(), perm.end()));
+    ++cases;
+    if (refused != 0 || signatures.size() != 1) {
+      printf("[descente_rayon_refutee] 120 PERMUTATIONS : %d refus, %zu signatures distinctes"
+             " (attendu 0 et 1)\n", refused, signatures.size());
+      ++failures;
+    } else {
+      printf("[descente_rayon_refutee] 120 permutations : 0 refus, signature unique\n");
+    }
+  }
 
   printf("=== fixtures ===\n");
   for (const Fix& f : fixtures) {
@@ -319,13 +518,28 @@ int main(int argc, char** argv) {
   printf("=== nuages generiques (%d nuages, %d points, coord < %d) ===\n", clouds, npoints, coord);
   std::uniform_int_distribution<int> dist(0, coord - 1);
   for (int c = 0; c < clouds; ++c) {
+    // Points DISTINCTS : les doublons sont hors contrat et ont leur fixture
+    // dediee. Les tirer ici ferait refuser la moitie d'une campagne saturee et
+    // n'exercerait plus la navigation qu'elle est censee couvrir.
     std::vector<P3> pts;
-    for (int i = 0; i < npoints; ++i) pts.push_back(pt(dist(rng), dist(rng), dist(rng)));
+    for (int guard = 0; (int)pts.size() < npoints && guard < 100 * npoints; ++guard) {
+      const P3 q = pt(dist(rng), dist(rng), dist(rng));
+      bool seen_point = false;
+      for (const P3& r : pts) if (r.x == q.x && r.y == q.y && r.z == q.z) seen_point = true;
+      if (!seen_point) pts.push_back(q);
+    }
+    if ((int)pts.size() < npoints) continue;
     for (int s = 2; s <= smax_hi; ++s) {
       ++cases;
       char tag[64];
       snprintf(tag, sizeof tag, "alea#%d", c);
       if (!compare(tag, pts, s, false)) ++failures;
+    }
+    if (c % 5 == 0) {                       // l'equivariance n'est plus reservee aux fixtures
+      ++cases;
+      char tag[64];
+      snprintf(tag, sizeof tag, "alea#%d", c);
+      if (!permutation_equivariant(tag, pts, smax_hi, 8, rng)) ++failures;
     }
   }
 
@@ -347,9 +561,30 @@ int main(int argc, char** argv) {
       snprintf(tag, sizeof tag, "cospherique#%d", c);
       if (!compare(tag, pts, s, false)) ++failures;
     }
+    if (c % 5 == 0) {
+      ++cases;
+      char tag[64];
+      snprintf(tag, sizeof tag, "cospherique#%d", c);
+      if (!permutation_equivariant(tag, pts, smax_hi, 8, rng)) ++failures;
+    }
   }
 
+  printf("\ncouverture : nuages navigues=%lld directs=%lld refuses=%lld | sommets=%lld"
+         " census=%lld coquilles>4=%lld triplets quotientes=%lld lots>1=%lld"
+         " equivariances=%lld\n",
+         coverage.navigated_clouds, coverage.direct_clouds, coverage.refused_clouds,
+         coverage.vertices, coverage.census, coverage.multiple_shells,
+         coverage.quotiented, coverage.multiple_batches, coverage.equivariance_runs);
   printf("\n%d cas, %d desaccords\n", cases, failures);
+  if (coverage.navigated_clouds < min_navigated || coverage.vertices < min_vertices
+      || coverage.multiple_shells < min_multiple_shells
+      || coverage.quotiented < min_quotiented) {
+    printf("ECHEC : plancher de couverture non atteint — navigues %lld/%d, sommets %lld/%d, "
+           "coquilles multiples %lld/%d, triplets quotientes %lld/%d\n",
+           coverage.navigated_clouds, min_navigated, coverage.vertices, min_vertices,
+           coverage.multiple_shells, min_multiple_shells, coverage.quotiented, min_quotiented);
+    return 3;
+  }
   if (cases < min_cases) {
     printf("ECHEC : plancher non atteint, %d cas pour %d exiges — une campagne vide "
            "ou censuree ne peut pas rendre OK\n", cases, min_cases);

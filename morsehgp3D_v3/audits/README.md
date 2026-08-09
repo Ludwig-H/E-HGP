@@ -36,4 +36,6 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 
 - [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md) : audit hostile du premier parcours par flats et de son juge différentiel : contre-exemple u16 à la descente stricte du rayon, statut et catalogue dépendants de la permutation, limites d'indépendance et de couverture du juge, CLI non fermé et NO-GO architectural pour 50 k.
 
+- [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md) : réaudit positif du nouveau germe par segment support et angle maximal, avec 120 permutations et oracle planaire hostile; garde ciblée fermée, mais narrowing CLI, profil u16 à l'API, indépendance du payload et architecture 50 k toujours ouverts.
+
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.

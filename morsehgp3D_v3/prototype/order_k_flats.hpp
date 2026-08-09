@@ -66,7 +66,9 @@
 // interieur de la sphere minimale de U. En particulier l(o(U)) <= d_U.
 //
 // Si la sphere de U est de rang ferme au plus s_max, sa coquille contient au
-// moins les q points de U, donc d_U <= s_max - q <= s_max - 2. Naviguer selon
+// moins les q points de U, donc d_U <= s_max - q. La chaine s_max - q <= s_max - 2
+// ne vaut QUE pour q >= 2 : les singletons ne relevent pas de la navigation et
+// sont publies a part, directement. Naviguer selon
 //
 //     l(v) <= k_nav,   k_nav = s_max - 2,
 //
@@ -96,11 +98,16 @@
 //     P_vide = { x : L_j(x) >= 0 pour tout j }, pointe, donc de graphe connexe.
 //
 // Ce que ce fichier en tire, et rien de plus : un parcours depuis UN germe de
-// niveau zero visite tout { l <= k }. Deux consequences a ne pas oublier :
-// le niveau d'un voisin varie de -1, 0 OU +1 — la variation nulle est reelle,
-// et le transport par lots ci-dessus ne suppose jamais le contraire ; et
-// l'arete ouverte peut etre de niveau k+1 alors que ses deux extremites sont de
-// niveau k, ce qui ne casse pas la connexite mais interdit de confondre le
+// niveau zero visite tout { l <= k }. Deux consequences a ne pas oublier.
+//
+// La variation du niveau d'un voisin N'EST PAS bornee par un. Elle vaut
+// exactement |D_-(d)| - |{ i dans A : i interieur sur l'arete }|, et chacun des
+// deux termes peut etre grand des que plusieurs hyperplans coincident sur
+// l'evenement. L'enonce « +-1 » vient du cas simple et n'a jamais ete vrai
+// ailleurs ; le transport par lots ci-dessus ne le suppose nulle part.
+//
+// Et l'arete ouverte peut etre de niveau k+1 alors que ses deux extremites sont
+// de niveau k : cela ne casse pas la connexite, mais interdit de confondre le
 // graphe induit par les etiquettes et le sous-complexe geometrique.
 //
 // ---------------------------------------------------------------------------
@@ -311,6 +318,7 @@ enum class CloudStatus {
   kTooFewPoints,                // n < 4 : voie directe exhaustive
   kSeedFailed,                  // germe non certifiable : refus explicite
   kInvariantViolated,           // un census a contredit le transport
+  kDuplicateCoordinates,        // deux observations confondues : hors contrat
 };
 
 inline const char* cloud_status_name(CloudStatus s) {
@@ -320,6 +328,7 @@ inline const char* cloud_status_name(CloudStatus s) {
     case CloudStatus::kTooFewPoints: return "moins_de_quatre_points";
     case CloudStatus::kSeedFailed: return "germe_non_certifie";
     case CloudStatus::kInvariantViolated: return "invariant_de_transport_viole";
+    case CloudStatus::kDuplicateCoordinates: return "coordonnees_dupliquees";
   }
   return "inconnu";
 }
@@ -329,6 +338,28 @@ inline const char* cloud_status_name(CloudStatus s) {
 // et seulement si le nuage est de dimension affine trois ; c'est l'hypothese
 // du theoreme de proprietaire et la condition pour que P_vide soit pointe.
 // ---------------------------------------------------------------------------
+// DOUBLONS DE COORDONNEES. Le profil quantifie autorise deux observations a
+// tomber sur le meme point de grille. La convention de support canonique par
+// ordre des coordonnees ne les separe alors plus, et echanger les deux
+// identifiants change quatre supports publies sans rien changer a la geometrie
+// — mesure de l'audit `AUDIT_ORDER_K_FLATS_9C587E6.md` §3.4 sur la fixture
+// (0,0,0) (0,0,0) (2,0,0) (0,2,0) (0,0,2). Tant qu'une semantique quotientee
+// n'est pas definie, le prototype REFUSE explicitement, il ne publie pas `ok`.
+inline bool has_duplicate_coordinates(const std::vector<mhgp::P3>& points) {
+  std::vector<const mhgp::P3*> sorted;
+  sorted.reserve(points.size());
+  for (const mhgp::P3& p : points) sorted.push_back(&p);
+  std::sort(sorted.begin(), sorted.end(), [](const mhgp::P3* a, const mhgp::P3* b) {
+    if (a->x != b->x) return a->x < b->x;
+    if (a->y != b->y) return a->y < b->y;
+    return a->z < b->z;
+  });
+  for (std::size_t i = 1; i < sorted.size(); ++i)
+    if (sorted[i]->x == sorted[i - 1]->x && sorted[i]->y == sorted[i - 1]->y &&
+        sorted[i]->z == sorted[i - 1]->z) return true;
+  return false;
+}
+
 inline bool affine_dimension_is_three(const std::vector<mhgp::P3>& points) {
   const int n = (int)points.size();
   if (n < 4) return false;
@@ -462,82 +493,99 @@ inline CloudStatus seed_level_zero(const std::vector<mhgp::P3>& points,
       { st->seed_failure_stage = 3; return CloudStatus::kSeedFailed; }   // rotation
   ++st->seed_scans;
 
-  // (4) TRIANGLE DE DELAUNAY dans le plan de la face support.
+  // (4) TRIANGLE DE DELAUNAY dans le plan de la face support, EN DEUX PASSES
+  //     TOTALES, sans boucle et donc sans potentiel de terminaison a prouver.
   //
-  // On n'exige plus que (p0,p1) soit une arete de l'enveloppe du sous-nuage
-  // coplanaire — c'est faux des qu'un point est aligne entre p0 et p1, et cette
-  // hypothese cachait le vrai argument. On descend a la place le RAYON :
-  // si d est strictement interieur au cercle de (a,b,c), alors l'un des trois
-  // triangles (a,b,d), (b,c,d), (c,a,d) a un cercle strictement plus petit.
-  // Prendre a chaque tour le minimum exact de ces rayons fait donc decroitre
-  // strictement une quantite prise dans un ensemble fini : la boucle termine, et
-  // s'arrete precisement quand le cercle est vide.
+  // La version precedente faisait DECROITRE LE RAYON : si un point est
+  // strictement interieur au cercle de (a,b,c), l'un des trois triangles
+  // obtenus en remplacant un sommet aurait un cercle strictement plus petit.
+  // C'EST FAUX, et l'audit `AUDIT_ORDER_K_FLATS_9C587E6.md` §2 le montre sur
+  // cinq points u16 :
+  //
+  //     A=(0,0,0)  B=(0,3,0)  C=(2,1,0)  P=(1,1,0)  Q=(1,1,2)
+  //
+  // `P` est strictement interieur au cercle de `ABC` — le predicat entier rend
+  // -72 — et pourtant les quatre rayons carres valent exactement 5/2. Aucune
+  // descente n'existe, le germe rendait `germe_non_certifie` etape 6, et le
+  // catalogue sortait vide. Pire, la reussite dependait de la numerotation :
+  // 90 permutations sur 120 passaient. Le bon potentiel de DELAUNAY n'a jamais
+  // ete le rayon, c'est le vecteur des angles.
+  //
+  // On n'a de toute facon pas besoin d'un potentiel. Sur une ARETE DE
+  // L'ENVELOPPE du sous-nuage coplanaire, le troisieme point de DELAUNAY est
+  // celui qui MAXIMISE l'angle inscrit, et « d est strictement interieur au
+  // cercle de (a,b,c) » equivaut a « l'angle en d depasse l'angle en c ». C'est
+  // un ordre TOTAL sur les points d'un meme cote de la droite : une passe
+  // suffit, les ex aequo cocirculaires sont tous des choix valides. Et le
+  // cercle obtenu est vide : un intrus du meme cote contredirait la maximalite,
+  // il n'y a personne de l'autre cote puisque l'arete est sur l'enveloppe, et un
+  // point de la droite hors du segment est exterieur a tout cercle par a et b.
+  //
+  // Reste a produire cette arete d'enveloppe, exactement et en une passe. Le
+  // point lex-min du sous-nuage coplanaire est extreme pour la forme lineaire
+  // « x puis y puis z », donc sommet de son enveloppe. Depuis lui, toutes les
+  // directions verifient w_x >= 0, et w_x = 0 force w_y >= 0 puis w_z >= 0 : il
+  // n'existe aucune paire antipodale, l'ordre angulaire est total, et une passe
+  // d'emballage donne l'arete. A egalite d'angle on prend le point le PLUS
+  // PROCHE, sans quoi un point du segment resterait entre les deux extremites et
+  // serait interieur a tout cercle par elles.
   std::vector<mhgp::i32> plane_points;
   for (mhgp::i32 z = 0; z < n; ++z)
     if (flats::orient3d_exact(points[(std::size_t)p0], points[(std::size_t)p1],
                         points[(std::size_t)p2], points[(std::size_t)z]) == 0)
       plane_points.push_back(z);
   ++st->seed_scans;
+  if (plane_points.size() < 3) { st->seed_failure_stage = 4; return CloudStatus::kSeedFailed; }
 
-  auto non_degenerate = [&](mhgp::i32 a, mhgp::i32 b, mhgp::i32 c) {
-    const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)b], points[(std::size_t)a]);
-    const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)c], points[(std::size_t)a]);
-    const mhgp::P3 x = mhgp::p3_cross(u, w);
-    return x.x != 0 || x.y != 0 || x.z != 0;
-  };
-  auto circum = [&](mhgp::i32 a, mhgp::i32 b, mhgp::i32 c, mhgp::Sphere* s) {
-    return mhgp::sphere3(points[(std::size_t)a], points[(std::size_t)b],
-                         points[(std::size_t)c], s);
-  };
+  // Normale du plan support, orientee comme (p0,p1,p2).
+  const mhgp::P3 face_u = mhgp::p3_cross(mhgp::p3_sub(points[(std::size_t)p1],
+                                                      points[(std::size_t)p0]),
+                                         mhgp::p3_sub(points[(std::size_t)p2],
+                                                      points[(std::size_t)p0]));
 
-  mhgp::i32 tri[3] = {-1, -1, -1};
-  {
-    const int q = (int)plane_points.size();
-    bool found = false;
-    for (int x = 0; x < q && !found; ++x)
-      for (int y = x + 1; y < q && !found; ++y)
-        for (int z = y + 1; z < q && !found; ++z)
-          if (non_degenerate(plane_points[(std::size_t)x], plane_points[(std::size_t)y],
-                             plane_points[(std::size_t)z])) {
-            tri[0] = plane_points[(std::size_t)x];
-            tri[1] = plane_points[(std::size_t)y];
-            tri[2] = plane_points[(std::size_t)z];
-            found = true;
-          }
-    if (!found) { st->seed_failure_stage = 4; return CloudStatus::kSeedFailed; }
+  mhgp::i32 ha = plane_points[0];
+  for (mhgp::i32 z : plane_points) {
+    const mhgp::P3& u = points[(std::size_t)z];
+    const mhgp::P3& w = points[(std::size_t)ha];
+    if (u.x < w.x || (u.x == w.x && (u.y < w.y || (u.y == w.y && u.z < w.z)))) ha = z;
   }
-  for (int guard = 0; guard <= (int)plane_points.size() * (int)plane_points.size() + 8; ++guard) {
-    mhgp::i32 intruder = -1;
-    for (mhgp::i32 z : plane_points) {
-      if (z == tri[0] || z == tri[1] || z == tri[2]) continue;
-      if (flats::in_circle_coplanar(points[(std::size_t)tri[0]], points[(std::size_t)tri[1]],
-                                    points[(std::size_t)tri[2]], points[(std::size_t)z]) < 0) {
-        intruder = z;
-        break;
-      }
-    }
-    ++st->seed_scans;
-    if (intruder < 0) break;
-    mhgp::Sphere current{};
-    if (!circum(tri[0], tri[1], tri[2], &current)) { st->seed_failure_stage = 5; return CloudStatus::kSeedFailed; }
-    mhgp::i32 best_tri[3] = {-1, -1, -1};
-    mhgp::Sphere best_sphere{};
-    for (int drop = 0; drop < 3; ++drop) {
-      mhgp::i32 cand[3];
-      int w = 0;
-      for (int t = 0; t < 3; ++t) if (t != drop) cand[w++] = tri[t];
-      cand[2] = intruder;
-      if (!non_degenerate(cand[0], cand[1], cand[2])) continue;
-      mhgp::Sphere s{};
-      if (!circum(cand[0], cand[1], cand[2], &s)) continue;
-      if (mhgp::sphere_cmp_beta(s, current) >= 0) continue;      // pas de descente
-      if (best_tri[0] >= 0 && mhgp::sphere_cmp_beta(s, best_sphere) >= 0) continue;
-      best_tri[0] = cand[0]; best_tri[1] = cand[1]; best_tri[2] = cand[2];
-      best_sphere = s;
-    }
-    if (best_tri[0] < 0) { st->seed_failure_stage = 6; return CloudStatus::kSeedFailed; }   // descente impossible
-    tri[0] = best_tri[0]; tri[1] = best_tri[1]; tri[2] = best_tri[2];
+  // Cote, dans le plan, de z par rapport a la droite (ha,hb).
+  auto plane_side = [&](mhgp::i32 hb, mhgp::i32 z) {
+    const mhgp::P3 d = mhgp::p3_sub(points[(std::size_t)hb], points[(std::size_t)ha]);
+    const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)z], points[(std::size_t)ha]);
+    const mhgp::P3 c = mhgp::p3_cross(d, w);
+    const mhgp::i128 v = (mhgp::i128)c.x * face_u.x + (mhgp::i128)c.y * face_u.y
+                       + (mhgp::i128)c.z * face_u.z;
+    return flats::sign_of(v);
+  };
+  auto squared_from_ha = [&](mhgp::i32 z) {
+    const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)z], points[(std::size_t)ha]);
+    return (mhgp::i128)w.x * w.x + (mhgp::i128)w.y * w.y + (mhgp::i128)w.z * w.z;
+  };
+  mhgp::i32 hb = -1;
+  for (mhgp::i32 z : plane_points) {
+    if (z == ha) continue;
+    if (hb < 0) { hb = z; continue; }
+    const int side = plane_side(hb, z);
+    if (side < 0) hb = z;
+    else if (side == 0 && squared_from_ha(z) < squared_from_ha(hb)) hb = z;
   }
+  ++st->seed_scans;
+  if (hb < 0) { st->seed_failure_stage = 4; return CloudStatus::kSeedFailed; }
+  for (mhgp::i32 z : plane_points)
+    if (plane_side(hb, z) < 0) { st->seed_failure_stage = 5; return CloudStatus::kSeedFailed; }
+  ++st->seed_scans;
+
+  mhgp::i32 apex = -1;
+  for (mhgp::i32 z : plane_points) {
+    if (z == ha || z == hb || plane_side(hb, z) == 0) continue;
+    if (apex < 0) { apex = z; continue; }
+    if (flats::in_circle_coplanar(points[(std::size_t)ha], points[(std::size_t)hb],
+                                  points[(std::size_t)apex], points[(std::size_t)z]) < 0) apex = z;
+  }
+  ++st->seed_scans;
+  if (apex < 0) { st->seed_failure_stage = 6; return CloudStatus::kSeedFailed; }
+  mhgp::i32 tri[3] = {ha, hb, apex};
   for (mhgp::i32 z : plane_points) {
     if (z == tri[0] || z == tri[1] || z == tri[2]) continue;
     if (flats::in_circle_coplanar(points[(std::size_t)tri[0]], points[(std::size_t)tri[1]],
@@ -654,6 +702,10 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
   std::vector<Vertex> visited;
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
+  if (has_duplicate_coordinates(points)) {
+    *status = CloudStatus::kDuplicateCoordinates;
+    return visited;
+  }
   if (n < 4) { *status = CloudStatus::kTooFewPoints; return visited; }
   if (!affine_dimension_is_three(points)) {
     *status = CloudStatus::kAffineDimensionBelowThree;
@@ -822,6 +874,11 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
   mhgp::Catalogue catalogue;
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
+
+  if (has_duplicate_coordinates(points)) {
+    *status = CloudStatus::kDuplicateCoordinates;
+    return catalogue;
+  }
 
   std::vector<mhgp::CriticalSphere> kept;
   std::vector<mhgp::i32> members_pool;

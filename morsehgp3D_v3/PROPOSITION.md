@@ -34,10 +34,15 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 **Le plan en cinq lignes ci-dessous a été exécuté jusqu'à sa branche de
 décision, et la décision est prise.** Elle n'est pas celle qui était anticipée :
 ni A1-source, ni A2e, ni A2p. Le générateur retenu ne s'ancre nulle part — il
-**navigue** dans le $\leq k$-niveau de l'arrangement relevé, où le rang vaut
-$4+\text{niveau}$ et où le niveau se transporte en $\pm1$ le long d'un pinceau au
-lieu de se recalculer. Le détail est au §0 du `README.md`, avec la preuve
-d'exactitude par confrontation à la force brute et au juge M1.
+**navigue** dans le $\leq k$-niveau de l'arrangement relevé, où le rang fermé
+vaut $\ell+\lvert S\rvert$ et où le niveau se transporte le long d'un pinceau au
+lieu de se recalculer. Le détail est au `README.md`.
+
+**Deux énoncés de ce paragraphe ont été réfutés depuis, et corrigés là-bas** :
+le transport n'est pas en $\pm1$ mais en $-1$, $0$ ou $+1$, le lot pouvant
+laisser le niveau inchangé ; et la coupe du graphe ne porte pas sur le rang
+fermé mais sur le **niveau strict**, plafonné à $s_{\max}-2$ — couper sur le
+rang fermé supprime des sommets de niveau zéro et rompt la connectivité.
 
 Ce que cela **retire** de la présente proposition :
 
@@ -48,20 +53,64 @@ Ce que cela **retire** de la présente proposition :
 - La question de la cosphéricité change de statut : elle n'est plus un rejet de
   domaine mais un **cas traité**, la coquille entière étant l'objet porté.
 
-Ce que cela **déplace** — et c'est désormais la seule question ouverte :
+Ce que cela **déplace**. Le facteur **100** entre travail et sortie, annoncé ici
+comme la seule question restante, était un **artefact** : il comparait les
+sommets visités à une récolte défaillante qui perdait l'essentiel des arités
+deux et trois. Mesuré sur le catalogue complet et vérifié contre la force brute,
+le rapport réel est d'environ **17:1**. La sortie est six fois plus grosse
+qu'annoncé ; le travail total, lui, n'a pas bougé.
 
-> Le parcours visite $\approx700$ sommets par point pour n'en retenir que $7$ à
-> $11$. Le facteur **100** entre le travail et la sortie est ce qui sépare du
-> contrat 50 k, et il est spécifique au LiDAR : un relevé est localement une
-> surface, donc ses tétraèdres sont massivement des slivers, jamais bien centrés.
+Le mur restant est double, et il est désormais chiffré au §5 du `README.md` :
+la requête de pinceau balaie exactement $8(n-4)$ candidats faute d'index, et la
+récolte paie un census en $O(n)$ par candidat dont 43 % sont des doublons.
+Aucune des deux n'est une propriété du problème.
 
-Une coupe en rayon ne le réduit pas — elle n'ôte que 35 % des sommets, car ces
-slivers ne sont pas gros mais **plats**. Une énumération locale directe est
-exclue dans le pire cas : un amas juste à l'extérieur d'une sphère vide écarte
-arbitrairement loin, dans l'ordre des plus proches voisins, deux points d'un même
-support. Elle est en revanche mesurée bonne en pratique — rang NN médian 35,
-maximum 88 — ce qui désigne une architecture **à chemin rapide certifié et repli
-fail-closed**, exactement celle déjà retenue pour la requête de pinceau.
+## 0 quater. Trois réserves qui n'étaient écrites nulle part
+
+**(a) Le terrain parcouru n'est pas plus petit que la mosaïque d'ordre
+supérieur — c'est le même objet.** Le diagramme de Voronoï d'ordre $k$ est la
+projection du $k$-niveau de l'arrangement relevé : le nombre de sommets est
+**identique**. Ce que le parcours économise est la charge utile par sommet et
+l'absence des cellules de dimension supérieure, du dual et des incidences —
+soit un facteur cinq à dix en octets, **pas un ordre de grandeur**. Le gain qui
+compterait, ne pas tout retenir, n'est pas obtenu aujourd'hui.
+
+**(b) La taille de ce terrain n'est bornée par aucun théorème utilisable.** La
+borne de Clarkson--Shor pour le $\leq k$-niveau de $n$ hyperplans de
+$\mathbb{R}^4$ est quadratique en $n$ et en $k$ ; les mesures publiées sont
+plusieurs ordres de grandeur en dessous parce qu'un relevé est localement une
+surface. C'est un **régime**, pas un théorème — cohérent avec le retrait déjà
+acté au §14 de « surface $\Rightarrow$ faible profondeur presque partout ». Le
+census multi-captation du §1.5, qui donne le nuage à dix captations recalées
+*moins* peu profond que la reconstruction fusionnée, est le contre-exemple
+attendu et il est déjà mesuré. C'est la branche no-go de **Gate D**.
+
+**(c) La mémoire et le GPU sont un seul verrou, pas deux.** La table `seen` des
+coquilles visitées est à la fois ce qui coûte la mémoire de navigation et ce qui
+interdit le device — table de hachage globale à clefs de longueur variable,
+écrite par tous les fils. La *reverse search* d'Avis et Fukuda les supprime tous
+les deux d'un coup et rend le déterminisme gratuit ; elle n'est démontrée au
+dépôt que **sous arrangement simple**. Un GPU, lui, multiplie le débit sans
+réduire le nombre de sommets visités : il ne répond pas à la question de fond.
+
+## 0 quinquies. Séquencement : le cas simple d'abord, les dégénérescences en dernier
+
+**Décision.** Le premier algorithme complet est écrit sous hypothèse
+d'arrangement **simple** — aucune cosphéricité, aucune coplanarité portante — et
+le traitement des multiplicités est reporté à l'une des **dernières phases** du
+projet.
+
+C'est le seul domaine où la *reverse search*, donc la borne mémoire et la forme
+parallèle, sont démontrables aujourd'hui. On y règle l'architecture — index
+fail-open, règle de propriétaire, streaming, tri global, forme device — sur un
+terrain où chaque pièce a sa preuve, avant de rouvrir les multiplicités.
+
+Trois conditions, faute de quoi la décision serait une régression : le domaine
+est **déclaré et gardé fail-closed**, un nuage cosphérique étant refusé avec sa
+raison nommée et jamais traité comme simple ; le travail multiplicitaire déjà
+fait est **conservé et reste vert**, et devient la porte d'entrée de la phase
+finale ; et **aucune mesure à l'échelle sur donnée réelle** n'est revendiquée
+depuis cette version, la cible u16 quantifiée n'étant pas dans ce domaine.
 
 ## 0 bis. Le plan, en cinq lignes
 
@@ -602,6 +651,16 @@ quarante en annonçant `OK`.
 
 ## 10. Architecture GPU
 
+> **[périmé en partie]** Le tableau d'étages ci-dessous décrit la voie **par
+> ancres**, abandonnée au §0 ter : son étage `ancres` n'a plus d'objet et son
+> étage `shallow` ne désigne plus des niveaux peu profonds par ancre mais le
+> parcours de l'arrangement. Ce qui reste valide sans réserve : la contrainte
+> J10, l'obligation de tri global exact, le tri externe par runs bornés et la
+> règle des deux pistes parallèles. La réécriture de ce paragraphe sur la voie
+> retenue est une **[obligation]** avant tout portage. La forme device propre au
+> parcours — verrou unique `seen`, classes de charge, file de seconde passe,
+> étage barrière de tri — est au §5 bis du `README.md`.
+
 **J10 borne un rayon spatial, pas une cardinalité** — **[mesuré]** voisinage
 maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 « quelques dizaines de points en mémoire partagée ».
@@ -733,6 +792,11 @@ qualification.
 
 | affirmation | sort |
 | --- | --- |
+| facteur **100** entre travail et sortie | **artefact** d'une récolte défaillante ; le rapport réel est $\approx17$ (§0 ter) |
+| transport du niveau « en $\pm1$ » | faux : $-1$, $0$ ou $+1$, un lot pouvant le laisser inchangé (§0 ter) |
+| coupe du parcours sur le rang fermé | faux : supprime des sommets de niveau zéro ; couper sur le **niveau strict** (§0 ter) |
+| « objet beaucoup plus léger que la mosaïque d'ordre supérieur » | **retiré** : nombre de sommets identique ; seuls la charge utile et les cellules supérieures sont économisées (§0 quater a) |
+| taille du $\leq k$-niveau tenue pour linéaire | régime de surface mesuré, non borné : Clarkson--Shor est quadratique en $n$ et en $k$ (§0 quater b) |
 | « complétude A1 = théorème » | conditionnelle à A1-source (§4.2) |
 | $\tau=+\infty\Rightarrow$ grandes sphères critiques | faux (§1.5) |
 | « surface ⇒ faible profondeur presque partout » | census, pas théorème (§1.5) |
