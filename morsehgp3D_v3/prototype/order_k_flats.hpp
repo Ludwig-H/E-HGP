@@ -305,7 +305,9 @@ struct FlatStatistics {
   long long owner_rejected_support = 0;  // U different du support canonique
   long long owner_rejected_vertex = 0;   // support canonique, mais un autre sommet possede
   long long owner_emitted = 0;
-  long long dedup_table_size = 0;        // taille FINALE de `emitted` : la preuve du gain
+  // HIGH-WATER de la table, releve a chaque INSERTION. La taille finale ne prouve
+  // rien : une mutation qui viderait la table en fin de calcul tromperait la porte.
+  long long dedup_table_high_water = 0;
   long long reverse_depth_max = 0;        // profondeur maximale de la pile
   long long reverse_children_tested = 0;  // voisins soumis au test de parent
   long long reverse_backtracks = 0;
@@ -355,7 +357,7 @@ struct FlatStatistics {
     owner_rejected_support += o.owner_rejected_support;
     owner_rejected_vertex += o.owner_rejected_vertex;
     owner_emitted += o.owner_emitted;
-    dedup_table_size = std::max(dedup_table_size, o.dedup_table_size);
+    dedup_table_high_water = std::max(dedup_table_high_water, o.dedup_table_high_water);
     reverse_depth_max = std::max(reverse_depth_max, o.reverse_depth_max);
     reverse_children_tested += o.reverse_children_tested;
     reverse_backtracks += o.reverse_backtracks;
@@ -2371,7 +2373,9 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
   // minimaux pour une seule boule —, le second ceux entre sommets. Les deux
   // chemins coexistent tant que le differentiel n'a pas juge leur egalite.
   std::unordered_set<std::vector<mhgp::i32>, flats::ShellHash> emitted;
-  const flats::OwnerContext owner_ctx = flats::owner_context(points);
+  // Le contexte ne balaye les points que si le proprietaire est demande.
+  const flats::OwnerContext owner_ctx =
+      use_owner ? flats::owner_context(points) : flats::OwnerContext{};
 
   CertifiedIndex grid;
   const bool indexed = use_index && n >= 1;
@@ -2409,9 +2413,11 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
     // un tetraedre, dont les quatre singletons disparaissaient sans index, et sur
     // un triangle de dimension affine deux, dont tout le catalogue disparaissait.
     const bool owned_path = (use_owner && owner_vertex != nullptr);
-    if (!owned_path && !emitted.insert(shell).second) {
-      ++st->emit_duplicate_shell;
-      return;
+    if (!owned_path) {
+      const bool fresh = emitted.insert(shell).second;
+      st->dedup_table_high_water =
+          std::max(st->dedup_table_high_water, (long long)emitted.size());
+      if (!fresh) { ++st->emit_duplicate_shell; return; }
     }
 
     // SUPPORT CANONIQUE.
@@ -2501,8 +2507,9 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
     ++st->emitted_arity[canonical_mb.n_support];
   };
 
-  // Voie directe exhaustive : aucun sommet ne la porte, donc aucun proprietaire.
-  // Elle garde `emitted`, et le differentiel ne l'oppose jamais a la voie owner.
+  // Voie directe exhaustive : aucun sommet ne la porte, donc aucune notion de
+  // propriete. Elle garde `emitted`, et la fixture de domaine la confronte
+  // desormais au mode owner dans les quatre quadrants index x proprietaire.
   auto try_emit = [&](const mhgp::i32* candidate, int m) {
     const mhgp::MiniballResult mb = mhgp::miniball_of(points, candidate, m);
     if (!mb.ok) return;
@@ -2525,7 +2532,12 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
         // nul centree en p a pour coquille {p}, et toute recolte part d'un support
         // d'au moins deux points, donc d'une coquille d'au moins deux points. Sous
         // proprietaire, la table n'a donc plus aucun role ici non plus.
-        if (!use_owner && !emitted.insert(one).second) { ++st->emit_duplicate_shell; continue; }
+        if (!use_owner) {
+          const bool fresh = emitted.insert(one).second;
+          st->dedup_table_high_water =
+              std::max(st->dedup_table_high_water, (long long)emitted.size());
+          if (!fresh) { ++st->emit_duplicate_shell; continue; }
+        }
         ++st->emit_attempts;
         mhgp::CriticalSphere critical{};
         critical.support[0] = p;
@@ -2623,10 +2635,6 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
         }
     }
   }
-
-  // La taille FINALE de la table est publiee : c'est la seule facon de montrer
-  // qu'elle a disparu, plutot que de l'affirmer.
-  st->dedup_table_size = (long long)emitted.size();
 
   // ORDRE CANONIQUE DE SERIALISATION. Lexicographique sur les QUATRE cases de
   // `support`, remplies de -1 en queue — jamais par arite d'abord. Deux

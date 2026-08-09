@@ -564,15 +564,16 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
     }
     // LA TABLE DOIT ETRE VIDE. Dans le quadrant navigue et indexe, plus rien n'y
     // entre : ni les non-singletons, qui passent par le proprietaire, ni les
-    // singletons, qui ne peuvent entrer en collision avec rien. La taille FINALE
-    // est publiee par le sujet et exigee nulle ici.
-    if (ost.dedup_table_size != 0 && ostatus == mhgp3v::CloudStatus::kOk &&
+    // singletons, qui ne peuvent entrer en collision avec rien. C'est le HIGH-WATER
+    // releve a chaque insertion qui est exige nul, et non la taille finale : une
+    // mutation qui viderait la table a la fin tromperait cette seconde.
+    if (ost.dedup_table_high_water != 0 && ostatus == mhgp3v::CloudStatus::kOk &&
         (int)pts.size() >= 4) {
       printf("[%s] s_max=%2d TABLE NON VIDE sous proprietaire : %lld entrees\n", tag, s_max,
-             ost.dedup_table_size);
+             ost.dedup_table_high_water);
       ok = false;
     }
-    coverage.dedup_table_max = std::max(coverage.dedup_table_max, ost.dedup_table_size);
+    coverage.dedup_table_max = std::max(coverage.dedup_table_max, ost.dedup_table_high_water);
     coverage.owner_rejected_support += ost.owner_rejected_support;
     coverage.owner_rejected_vertex += ost.owner_rejected_vertex;
     coverage.owner_emitted += ost.owner_emitted;
@@ -980,6 +981,25 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
 
 // Équivariance par permutation : renuméroter les points ne doit rien changer au
 // catalogue, une fois les supports ramenés aux identifiants d'origine.
+// EGALITE COMPLETE de deux catalogues : statut a part, puis support, arite, rang,
+// beta ET membres. Comparer un couple (nombre, histogramme d'arites) laisse passer
+// deux catalogues differents de meme profil — et mon message annonçait « meme
+// catalogue » pour ce seul profil.
+static bool same_catalogue(const mhgp::Catalogue& a, const mhgp::Catalogue& b) {
+  if (a.spheres.size() != b.spheres.size()) return false;
+  for (size_t i = 0; i < a.spheres.size(); ++i) {
+    const mhgp::CriticalSphere& x = a.spheres[i];
+    const mhgp::CriticalSphere& y = b.spheres[i];
+    if (x.n_support != y.n_support || x.rank != y.rank) return false;
+    for (int j = 0; j < 4; ++j) if (x.support[j] != y.support[j]) return false;
+    if (mhgp::sphere_cmp_beta(x.sph, y.sph) != 0) return false;
+    for (int j = 0; j < x.rank; ++j)
+      if (a.members[(size_t)(x.members_begin + j)] != b.members[(size_t)(y.members_begin + j)])
+        return false;
+  }
+  return true;
+}
+
 static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts, int s_max,
                                     int trials, std::mt19937& rng) {
   auto signature = [&](const std::vector<P3>& q, const std::vector<int>& back) {
@@ -1007,12 +1027,24 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
       const mhgp::Catalogue owned =
           mhgp3v::flat_catalogue(q, s_max, &owner_st, &owner_status, false, true, true);
       out.insert({std::vector<i32>{(i32)(-5000 - (int)owner_status)}, 0});
+      // La signature transporte les MEMBRES et un indice d'occurrence : un `set` de
+      // (support, rang) masquerait les multiplicites et ne verrait pas un membre
+      // perdu.
+      std::map<std::vector<i32>, int> seen_support;
       for (const mhgp::CriticalSphere& sphere : owned.spheres) {
-        std::vector<i32> sup{-6000};
+        std::vector<i32> key{-6000};
         for (int i = 0; i < sphere.n_support; ++i)
-          sup.push_back((i32)back[(size_t)sphere.support[i]]);
-        std::sort(sup.begin() + 1, sup.end());
-        out.insert({sup, sphere.rank});
+          key.push_back((i32)back[(size_t)sphere.support[i]]);
+        std::sort(key.begin() + 1, key.end());
+        std::vector<i32> members;
+        for (int i = 0; i < sphere.rank; ++i)
+          members.push_back((i32)back[(size_t)owned.members[(size_t)(sphere.members_begin + i)]]);
+        std::sort(members.begin(), members.end());
+        const int occurrence = seen_support[key]++;
+        key.push_back(-7000);
+        key.push_back((i32)occurrence);
+        key.insert(key.end(), members.begin(), members.end());
+        out.insert({key, sphere.rank});
       }
     }
 
@@ -1391,6 +1423,52 @@ int main(int argc, char** argv) {
              " exhaustif verifies\n");
   }
 
+  // LES DEUX FIXTURES QUE LA NOTE EXIGE POUR LE PROPRIETAIRE.
+  //
+  // `owner_signed_cone` : support U = {(0,0,2),(4,0,2),(1,3,2)} et deux points
+  // additionnels (2,1,1),(2,1,3). B_U contient ces deux points, P_U est le segment
+  // des centres (2,1,z) pour 0 <= z <= 4, et G_U y est CONSTANT. Le tie-break
+  // lexicographique choisit z = 0. Le cone de chambre NON SIGNE rejetterait a tort
+  // cette orientation ; le cone SIGNE l'accepte. C'est la seule fixture qui separe
+  // les deux cones, donc la seule qui protege le choix de eps_s = -1 sur B_U.
+  //
+  // `owner_multiple_supports` : le cube u16, dont les quatre paires antipodales
+  // portent la meme boule et le meme proprietaire. Sans le rejet U != U_can,
+  // l'owner seul emettrait quatre fois.
+  {
+    ++cases;
+    int cone_faults = 0;
+    const std::vector<P3> cone{pt(0, 0, 2), pt(4, 0, 2), pt(1, 3, 2), pt(2, 1, 1), pt(2, 1, 3)};
+    {
+      mhgp3v::FlatStatistics a{}, b{};
+      mhgp3v::CloudStatus sa = mhgp3v::CloudStatus::kOk, sb = mhgp3v::CloudStatus::kOk;
+      const mhgp::Catalogue plain = mhgp3v::flat_catalogue(cone, 5, &a, &sa, false, true, false);
+      const mhgp::Catalogue owned = mhgp3v::flat_catalogue(cone, 5, &b, &sb, false, true, true);
+      if (sa != sb || !same_catalogue(plain, owned)) ++cone_faults;
+      if (a.dedup_table_high_water == 0 || b.dedup_table_high_water != 0) ++cone_faults;
+    }
+    {
+      // Le cube : quatre supports de CARDINALITE minimale pour une seule boule, et
+      // six minimaux pour l'INCLUSION. Le catalogue owner doit etre identique.
+      std::vector<P3> cube;
+      for (int x = 0; x < 2; ++x) for (int y = 0; y < 2; ++y) for (int z = 0; z < 2; ++z)
+        cube.push_back(pt(2 * x, 2 * y, 2 * z));
+      mhgp3v::FlatStatistics a{}, b{};
+      mhgp3v::CloudStatus sa = mhgp3v::CloudStatus::kOk, sb = mhgp3v::CloudStatus::kOk;
+      const mhgp::Catalogue plain = mhgp3v::flat_catalogue(cube, 8, &a, &sa, false, true, false);
+      const mhgp::Catalogue owned = mhgp3v::flat_catalogue(cube, 8, &b, &sb, false, true, true);
+      if (sa != sb || !same_catalogue(plain, owned)) ++cone_faults;
+      if (b.dedup_table_high_water != 0) ++cone_faults;
+    }
+    if (cone_faults) {
+      printf("[owner cone signe] %d faute(s)\n", cone_faults);
+      failures += cone_faults;
+    } else {
+      printf("[owner cone signe] segment des centres et cube u16 : catalogues identiques,"
+             " table vide sous proprietaire\n");
+    }
+  }
+
   // DOMAINE COMPLET DU PROPRIETAIRE, contre-exemple exact de l'audit.
   //
   // Le proprietaire ne couvre que la recolte NAVIGUEE. La voie directe exhaustive
@@ -1405,38 +1483,62 @@ int main(int argc, char** argv) {
   // le meme catalogue, sur les deux nuages exacts de l'audit.
   {
     ++cases;
-    const std::vector<std::pair<const char*, std::vector<P3>>> probes{
-        {"tetraedre", {pt(0, 0, 0), pt(2, 0, 0), pt(0, 2, 0), pt(0, 0, 2)}},
-        {"triangle", {pt(0, 0, 0), pt(4, 0, 0), pt(1, 3, 0)}}};
+    struct Probe {
+      const char* name;
+      std::vector<P3> pts;
+      int expected_spheres;
+      mhgp3v::CloudStatus expected_status;
+    };
+    // Le triangle a trois points exerce `kTooFewPoints`, PAS la dimension affine :
+    // il faut un nuage d'au moins quatre points COPLANAIRES pour l'autre branche.
+    const std::vector<Probe> probes{
+        {"tetraedre", {pt(0, 0, 0), pt(2, 0, 0), pt(0, 2, 0), pt(0, 0, 2)}, 11,
+         mhgp3v::CloudStatus::kOk},
+        {"triangle", {pt(0, 0, 0), pt(4, 0, 0), pt(1, 3, 0)}, 7,
+         mhgp3v::CloudStatus::kTooFewPoints},
+        {"coplanaire", {pt(0, 0, 0), pt(4, 0, 0), pt(1, 3, 0), pt(5, 3, 0), pt(2, 1, 0)}, -1,
+         mhgp3v::CloudStatus::kAffineDimensionBelowThree}};
     int domain_faults = 0;
     for (const auto& probe : probes) {
-      std::vector<std::pair<size_t, std::array<long long, 5>>> profiles;
+      mhgp::Catalogue reference;
+      mhgp3v::CloudStatus reference_status = mhgp3v::CloudStatus::kOk;
       for (int indexed = 0; indexed < 2; ++indexed)
         for (int owner = 0; owner < 2; ++owner) {
           mhgp3v::FlatStatistics pst{};
           mhgp3v::CloudStatus pstatus = mhgp3v::CloudStatus::kOk;
           const mhgp::Catalogue got = mhgp3v::flat_catalogue(
-              probe.second, 4, &pst, &pstatus, false, indexed != 0, owner != 0);
-          std::array<long long, 5> arity{};
-          for (const auto& sphere : got.spheres)
-            if (sphere.n_support >= 1 && sphere.n_support <= 4) ++arity[sphere.n_support];
-          profiles.push_back({got.spheres.size(), arity});
-        }
-      for (size_t i = 1; i < profiles.size(); ++i)
-        if (profiles[i] != profiles[0]) {
-          printf("[domaine owner] %s : combinaison %zu rend %zu spheres (arites %lld/%lld/%lld/"
-                 "%lld) contre %zu (%lld/%lld/%lld/%lld)\n", probe.first, i,
-                 profiles[i].first, profiles[i].second[1], profiles[i].second[2],
-                 profiles[i].second[3], profiles[i].second[4], profiles[0].first,
-                 profiles[0].second[1], profiles[0].second[2], profiles[0].second[3],
-                 profiles[0].second[4]);
-          ++domain_faults;
+              probe.pts, 6, &pst, &pstatus, false, indexed != 0, owner != 0);
+          if (indexed == 0 && owner == 0) {
+            reference = got;
+            reference_status = pstatus;
+            // VERITE ATTENDUE, et non seulement coherence interne : deux catalogues
+            // faux mais identiques passeraient sinon.
+            if ((probe.expected_spheres >= 0 &&
+                 (int)got.spheres.size() != probe.expected_spheres) ||
+                pstatus != probe.expected_status) {
+              printf("[domaine owner] %s : reference %zu spheres statut %s, attendu %d et %s\n",
+                     probe.name, got.spheres.size(), mhgp3v::cloud_status_name(pstatus),
+                     probe.expected_spheres, mhgp3v::cloud_status_name(probe.expected_status));
+              ++domain_faults;
+            }
+            continue;
+          }
+          // Le STATUT fait partie de la comparaison, et les catalogues sont
+          // compares en ENTIER — support, arite, rang, beta et membres.
+          if (pstatus != reference_status || !same_catalogue(got, reference)) {
+            printf("[domaine owner] %s : index=%d owner=%d rend %zu spheres statut %s, contre"
+                   " %zu et %s\n", probe.name, indexed, owner, got.spheres.size(),
+                   mhgp3v::cloud_status_name(pstatus), reference.spheres.size(),
+                   mhgp3v::cloud_status_name(reference_status));
+            ++domain_faults;
+          }
         }
     }
     if (domain_faults) failures += domain_faults;
     else
-      printf("[domaine owner] tetraedre et triangle affine deux : les quatre combinaisons"
-             " index x proprietaire rendent le meme catalogue\n");
+      printf("[domaine owner] tetraedre navigable, triangle a trois points (kTooFewPoints) et"
+             " nuage coplanaire a cinq points (dimension affine deux) : les quatre combinaisons"
+             " index x proprietaire rendent le meme catalogue ENTIER, statut compris\n");
   }
 
   // FIXTURE ENTIERE DES DEUX POTENTIELS, coordonnees de l'audit.
