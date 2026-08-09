@@ -1298,10 +1298,44 @@ inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& v
 // La direction canonique du parent, ou `false` si aucune orientation n'est
 // admissible — ce qui n'arrive qu'a la racine. Deux filtres exacts, comme au
 // BFS : rester dans la chambre, et faire croitre L_h ou decroitre Q_r.
+//
+// ---------------------------------------------------------------------------
+// LE PREMIER ADMISSIBLE SUFFIT, ET LE MINIMUM N'ETAIT PAS L'HYPOTHESE UTILE
+// ---------------------------------------------------------------------------
+//
+// Cette requete dominait le cout. Le parcours n'enumere qu'une fois les flats du
+// sommet courant, mais CHAQUE fils candidat payait ensuite une enumeration
+// COMPLETE des flats de son propre sommet — environ 5,7 par sommet visite. C'est
+// la, et pas dans la descente, que passait le travail.
+//
+// Ce qu'Avis--Fukuda demande de pi n'est pas d'etre un minimum : c'est d'etre une
+// fonction DETERMINISTE du sommet seul, acyclique, a racine unique. Les deux
+// dernieres proprietes viennent du POTENTIEL et valent pour n'importe quel choix
+// admissible — toute direction admissible fait strictement croitre L_h a ensemble
+// interieur egal, ou strictement decroitre Q_r au niveau zero, donc pi decroit
+// strictement un potentiel et ne peut pas cycler ; et le seul sommet sans
+// direction admissible est le germe. Prendre le PREMIER couple admissible dans un
+// ordre d'enumeration fixe est donc un parent legitime, et l'arret est immediat.
+//
+// Il se trouve en outre que ce premier admissible EST l'ancien minimum. Trois
+// points distincts d'une meme sphere ne sont jamais alignes — une droite coupe
+// une sphere en au plus deux points —, donc la base canonique d'un flat de
+// coquille est exactement le triplet des TROIS PLUS PETITS elements de sa
+// fermeture ; deux flats distincts ont des bases distinctes, leurs fermetures se
+// separent des les trois premiers elements, et comparer les fermetures revient a
+// comparer les bases. Comme `for_each_flat` balaye les triplets de la coquille
+// TRIEE dans l'ordre lexicographique et ne livre que des bases canoniques, il
+// livre les flats dans l'ordre strictement croissant de leur clef, et la direction
+// -1 precede +1. La semantique du parent est donc inchangee, et non seulement
+// valide.
+//
+// Cette derniere affirmation n'est pas une evidence : le differentiel verifie la
+// monotonie clef par clef sur chaque sommet, et compare le parent a sortie
+// precoce au balayage complet.
 inline bool canonical_parent(const std::vector<P3>& points, const Vertex& v,
                              const std::vector<i32>& root_base, FlatAtVertex* flat_out,
                              int* orientation_out, long long* triplets = nullptr,
-                             long long* closures = nullptr) {
+                             long long* closures = nullptr, bool full_scan = false) {
   const i32 site = v.interior.empty() ? -1 : v.interior.front();
   std::vector<i32> best_key;
   bool found = false;
@@ -1331,8 +1365,9 @@ inline bool canonical_parent(const std::vector<P3>& points, const Vertex& v,
         *orientation_out = direction;
         found = true;
       }
+      if (!full_scan) return false;  // premier admissible = minimum
     }
-    return true;                     // le parent exige TOUS les flats
+    return true;
   }, triplets, closures);
   return found;
 }

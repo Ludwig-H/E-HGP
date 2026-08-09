@@ -11,6 +11,8 @@ Ce dossier conserve les audits indépendants et les réponses chronologiques exp
 - [`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md) : théorème et pipeline streamé qui reconstruisent toutes les premières incidences du cœur par requête de boule fermée ou minimum direct, sans étoile globale; oracle LBVH général conservé comme juge et repli.
 - [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md) : compression prouvée des premiers incidents silencieux à une attache par facette cœur sous la porte régulière; contre-exemple à la cible brute et nécessité exacte du carrier strict résolu.
 - [`NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md`](NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md) : élimination de la boîte noire `ResolveStrictCarrier` par descente locale strictement décroissante jusqu'à une facette cœur; dans la résolution du carrier, seul le `find` dans la partition horizontale antérieure reste global, avec fold externe et certificat.
+- [`NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md`](NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md) : caractérisation exacte des cofaces Gabriel ouvertes portées par une sphère certifiée; émission unique sous régularité, obstruction combinatoire extra-shell et séparation nette entre décision locale et complétude du stream de sphères.
+- [`NOTE_GATE_D_FOLD_PRELOT_EXACT.md`](NOTE_GATE_D_FOLD_PRELOT_EXACT.md) : contrat mathématique du quotient horizontal sur snapshot strict; fermeture obligatoire sur racines et carriers latents, oracle borné F0, runs scellés F1 et journal externe de versions F2.
 
 ## Archives épinglées et réponses chronologiques
 

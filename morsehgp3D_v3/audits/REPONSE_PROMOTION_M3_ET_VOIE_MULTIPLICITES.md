@@ -811,7 +811,10 @@ dette la plus lourde et elle était juste : tant que l'endpoint rendait un
 vifs. La porte le juge avec un consommateur qui ne tient **rien** — il compte et
 replie un hachage indépendant de l'ordre —, et exige que l'interruption stoppe le
 parcours avec un statut non `kOk`. Ce dernier test a attrapé mon trou sur-le-champ :
-le refus du **germe** revenait avec `kOk`. **[mesuré]** vingt points, cinq
+le refus du **germe** revenait avec `kOk`. Il refuse encore le germe au premier
+callback; l'arrêt après un préfixe et la branche enfant ne sont pas exercés. Le
+sink est aussi appelé sans `CertifiedIndex`, donc la composition streamée-indexée
+reste hors porte. **[mesuré]** vingt points, cinq
 nuages : 5 400 sommets rendus, **85 identifiants portés au maximum par les sommets
 du chemin**, 109 interruptions vérifiées, zéro désaccord détecté avec la sortie
 matérialisée. Le rapport $5400/85$ n'est pas un facteur mémoire : il compare des

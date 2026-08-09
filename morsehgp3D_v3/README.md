@@ -536,8 +536,10 @@ une égalité exacte en raison des collisions possibles; un curseur comparant
 chaque callback à l'oracle matérialisé fermerait cette dette sans accumuler la
 sortie côté sink. L'interruption est une porte, pas une
 politesse : un sink qui s'arrête doit stopper le parcours et rendre un statut non
-`kOk`, sans quoi une sortie tronquée passerait pour complète. Ce test a d'ailleurs
-attrapé le trou immédiatement — le refus du **germe** revenait avec `kOk`.
+`kOk`, sans quoi une sortie tronquée passerait pour complète. Le test actuel
+refuse toutefois le **germe** dès le premier callback : il a attrapé ce trou,
+mais n'exerce ni l'arrêt après un préfixe ni la branche d'interruption depuis un
+enfant.
 
 **[mesuré]** porte à vingt points, 5 nuages : 5 400 sommets rendus au sink,
 **85 identifiants de sommets actifs au maximum**, 109 interruptions vérifiées,
@@ -546,7 +548,9 @@ pas être appelé facteur mémoire : le numérateur compte des records, le
 dénominateur des identifiants, et le scratch est omis. Une coquille cosphérique
 peut être de taille $\Theta(n)$ et la profondeur n'est bornée par aucun théorème.
 Le gain acquis est l'absence de table de déduplication **dans la décision** et une
-API de sortie streamée. L'intégration devra écrire dans un segment non committé :
+API de sortie streamée. Le replay du sink est en outre lancé sans lui passer le
+`CertifiedIndex`; la composition streamée-indexée n'est pas encore qualifiée.
+L'intégration devra écrire dans un segment non committé :
 une erreur peut survenir après plusieurs callbacks, et `kInvariantViolated`
 confond encore erreur scientifique et arrêt demandé. Le high-water mémoire
 complet, l'intégration transactionnelle au catalogue et l'absence d'écriture

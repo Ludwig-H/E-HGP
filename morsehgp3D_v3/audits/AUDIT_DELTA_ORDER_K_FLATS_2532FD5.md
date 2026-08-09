@@ -743,7 +743,7 @@ indexée et des fixtures est vert. La commande diagnostique à cinq nuages publi
 109 interruptions, zéro désaccord détecté et aucun skip.
 
 Cette fermeture retire bien le vecteur $\Omega(V)$ du **producteur streamé**,
-mais cinq limites empêchent de convertir le chiffre 85 en claim mémoire produit.
+mais sept limites empêchent de convertir le chiffre 85 en claim mémoire produit.
 
 1. Le high-water additionne seulement `shell.size()+interior.size()` sur les
    frames actives. Il exclut capacité de pile, racine, candidat, parent, flat et
@@ -756,14 +756,20 @@ mais cinq limites empêchent de convertir le chiffre 85 en claim mémoire produi
    pas une égalité exacte. Puisque la sortie oracle matérialisée existe déjà, un
    curseur qui compare chaque callback au record attendu donnerait une porte
    exacte avec $O(1)$ mémoire additionnelle.
-3. Un callback peut avoir publié un préfixe avant qu'un parent cassé ou un arrêt
+3. Le sink de parité est appelé sans lui passer le `CertifiedIndex`. La
+   composition `stream + index`, qui est le chemin produit visé, n'a donc aucune
+   porte permanente.
+4. Les 109 interruptions refusent toutes le **germe** : la lambda de test rend
+   `false` au premier callback. L'arrêt après un préfixe et la branche
+   `interrupted` prise depuis un enfant ne sont pas exercés.
+5. Un callback peut avoir publié un préfixe avant qu'un parent cassé ou un arrêt
    volontaire ne rende le statut rouge. L'intégration doit écrire dans un segment
    non committé, puis engager seulement après statut final `kOk`; sinon le sink
    transforme une erreur fail-closed interne en sortie externe partielle.
-4. `kInvariantViolated` confond une contradiction scientifique et l'arrêt demandé
+6. `kInvariantViolated` confond une contradiction scientifique et l'arrêt demandé
    par le consommateur. Un résultat typé `complete / cancelled / budget /
    invariant` est nécessaire avant un reçu produit.
-5. Le catalogue appelle toujours le BFS. L'équivariance par `set`, le high-water
+7. Le catalogue appelle toujours le BFS. L'équivariance par `set`, le high-water
    mémoire complet, l'élagage propre aux requêtes reverse et la forme device
    restent ceux du §7.12.
 

@@ -176,10 +176,12 @@ reproduit le DSU résident.
 5. Ajouter atomiquement les nouveaux liens, versions, parents, provenances et
    introductions de couverture.
 
-L'induction sur les lots est immédiate : avant $a$, le pointer-jumping reconstruit
-exactement la partition stricte; le quotient complet donne donc les mêmes
-$q_R$, parents et successeurs que le DSU; les liens ajoutés représentent la
-partition fermée.
+L'induction sur les lots exige plus que le pointer-jumping : le snapshot doit
+séparer racines publiques et carriers latents, conserver les continuations sans
+nœud, cacher les activations du niveau courant et committer une unique version
+par composante égale. Le contrat complet, son oracle borné et ses mutations sont
+décrits dans la
+[`note de fold pré-lot`](NOTE_GATE_D_FOLD_PRELOT_EXACT.md).
 
 Le cas $q_R=1$ est décisif. Même sans nœud public, toute nouvelle facette doit
 laisser une attache ou version interne vers la racine continuée. Sinon un lot

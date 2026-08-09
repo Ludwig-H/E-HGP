@@ -262,6 +262,8 @@ struct Coverage {
   long long sink_vertices = 0;
   long long sink_high_water = 0;
   long long sink_interruptions = 0;
+  long long parent_early_closures = 0;
+  long long parent_full_closures = 0;
 };
 static Coverage coverage;
 
@@ -471,6 +473,80 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
                bad_closure, bad_transition, bad_potential, seen_vertices.size());
         ok = false;
       }
+    }
+  }
+
+  // (E bis) L'ENUMERATION EST-ELLE MONOTONE, ET LA SORTIE PRECOCE FIDELE ?
+  //
+  // Le parent s'arrete desormais au PREMIER couple admissible. Sa validite ne
+  // depend que du potentiel — n'importe quel choix admissible est un parent
+  // acyclique a racine unique —, mais l'en-tete affirme davantage : que ce premier
+  // admissible est l'ancien MINIMUM, parce que `for_each_flat` livre les flats
+  // dans l'ordre croissant de leur clef. Les deux affirmations sont jugees ici :
+  // la monotonie clef par clef, et l'egalite du parent precoce avec le balayage
+  // complet, sur CHAQUE sommet visite.
+  if (status == mhgp3v::CloudStatus::kOk && (int)pts.size() >= 4) {
+    mhgp3v::FlatStatistics est{};
+    mhgp3v::CloudStatus estatus = mhgp3v::CloudStatus::kOk;
+    const auto seen = mhgp3v::navigate_shallow(pts, s_max - 2, &est, &estatus, false);
+    if (estatus == mhgp3v::CloudStatus::kOk && !seen.empty()) {
+      // La base independante est reconstruite exactement comme le parcours la
+      // construit : depuis la coquille du sommet de niveau zero.
+      std::vector<i32> root_base;
+      for (const auto& v : seen) {
+        if (v.level != 0) continue;
+        for (i32 z : v.shell) {
+          if (root_base.size() >= 4) break;
+          const std::size_t have = root_base.size();
+          if (have == 1) {
+            const P3& a = pts[(size_t)root_base[0]];
+            const P3& b = pts[(size_t)z];
+            if (a.x == b.x && a.y == b.y && a.z == b.z) continue;
+          } else if (have == 2) {
+            const P3 u = mhgp::p3_sub(pts[(size_t)root_base[1]], pts[(size_t)root_base[0]]);
+            const P3 w = mhgp::p3_sub(pts[(size_t)z], pts[(size_t)root_base[0]]);
+            const P3 c = mhgp::p3_cross(u, w);
+            if (c.x == 0 && c.y == 0 && c.z == 0) continue;
+          } else if (have == 3) {
+            if (mhgp3v::flats::orient3d_exact(pts[(size_t)root_base[0]], pts[(size_t)root_base[1]],
+                                       pts[(size_t)root_base[2]], pts[(size_t)z]) == 0) continue;
+          }
+          root_base.push_back(z);
+        }
+        break;
+      }
+      int not_monotone = 0, parent_differs = 0;
+      long long early = 0, full = 0;
+      if (root_base.size() == 4) {
+        for (const auto& v : seen) {
+          std::vector<i32> previous;
+          bool first = true;
+          mhgp3v::flats::for_each_flat(pts, v, [&](const mhgp3v::flats::FlatAtVertex& flat) {
+            if (!first && !(previous < flat.closure)) ++not_monotone;
+            previous = flat.closure;
+            first = false;
+            return true;
+          });
+          mhgp3v::flats::FlatAtVertex fa, fb;
+          int da = 0, db = 0;
+          long long ta = 0, ca = 0, tb = 0, cb = 0;
+          const bool ea = mhgp3v::flats::canonical_parent(pts, v, root_base, &fa, &da, &ta, &ca,
+                                                          false);
+          const bool fb_ok = mhgp3v::flats::canonical_parent(pts, v, root_base, &fb, &db, &tb, &cb,
+                                                             true);
+          early += ca;
+          full += cb;
+          if (ea != fb_ok) ++parent_differs;
+          else if (ea && (da != db || fa.closure != fb.closure)) ++parent_differs;
+        }
+      }
+      if (root_base.size() != 4 || not_monotone || parent_differs) {
+        printf("[%s] s_max=%2d PARENT PRECOCE : base=%zu monotonie violee=%d parents"
+               " differents=%d\n", tag, s_max, root_base.size(), not_monotone, parent_differs);
+        ok = false;
+      }
+      coverage.parent_early_closures += early;
+      coverage.parent_full_closures += full;
     }
   }
 
@@ -1232,6 +1308,13 @@ int main(int argc, char** argv) {
   // Le rapporter a cote du nombre de sommets rendus est tout l'interet du sink.
   printf("        : sink sommets rendus=%lld  slots vifs maximum=%lld  interruptions=%lld\n",
          coverage.sink_vertices, coverage.sink_high_water, coverage.sink_interruptions);
+  // Le GAIN de la sortie precoce du parent, mesure sur les memes sommets : ce
+  // rapport est la seule chose qui autorise a parler de gain.
+  printf("        : parent precoce=%lld fermetures  balayage complet=%lld  rapport %.2f\n",
+         coverage.parent_early_closures, coverage.parent_full_closures,
+         coverage.parent_early_closures
+             ? (double)coverage.parent_full_closures / (double)coverage.parent_early_closures
+             : 0.0);
   printf("\n%d cas, %d desaccords\n", cases, failures);
   if (coverage.navigated_clouds < min_navigated || coverage.vertices < min_vertices
       || coverage.multiple_shells < min_multiple_shells
