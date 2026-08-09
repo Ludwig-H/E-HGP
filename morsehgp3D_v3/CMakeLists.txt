@@ -216,6 +216,13 @@ add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
          --clouds 120 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 1000
          --min-navigated 500 --min-multiple-shells 300 --min-quotiented 300)
 
+# GATE D est PARTIELLEMENT verifiee dans les quatre portes positives : parent
+# unique hors racine, inclusion des ensembles interieurs, absence de cycle,
+# racine unique et couverture identique au parcours. Ne sont PAS encore
+# verifies : le rang trois de la fermeture C(d), l'identite S(next) = C(d) union
+# A, la finitude de l'extremite et la stricte variation du potentiel. Ces quatre
+# assertions doivent preceder tout remplacement du parcours.
+
 # Nuages enrichis en points d'une meme sphere entiere : coquilles de taille
 # arbitraire et lots entrants multiples.
 add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential

@@ -1091,6 +1091,43 @@ struct CertifiedIndex {
   }
 };
 
+
+// ---------------------------------------------------------------------------
+// GATE D — PARENT LOCAL POUR LA REVERSE SEARCH
+// ---------------------------------------------------------------------------
+//
+// `NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md` demontre qu'un parent unique se
+// choisit AU SOMMET, sans `seen`, sans mosaique globale et sans enumerer tous
+// les voisins pour decider lequel est le parent. Ce bloc calcule la direction du
+// parent ; il ne remplace pas encore le parcours, il le juge.
+//
+// Le cone tangent de la chambre en v est K_v = { d : a_s . d >= 0 pour tout s
+// dans S(v) }, et ses rayons extremes sont exactement les orientations des flats
+// fermes de rang trois incidents. Il n'y a donc pas de programme lineaire a
+// resoudre dans le prototype : les rayons candidats sont deja enumeres par le
+// parcours, et il suffit de les filtrer puis d'en prendre un canonique.
+//
+// LA DIRECTION D'UN FLAT, ET SON SIGNE TANGENT, SANS AUCUN GRAND ENTIER.
+//
+// J'avais derive la direction depuis le circumcentre `sphere3`, ce qui donnait
+// des produits frolant 2^127 et m'obligeait a passer en `BigInt<4>`. La note
+// §6 donne bien plus simple. Pour une base planaire (a,b,c) et
+// u = (b-a) x (c-a), un rayon ENTIER du pinceau est directement
+//
+//     d = (u, 2 u . a),
+//
+// et comme a_i = (-2 p_i, 1),
+//
+//     a_i . d = -2 p_i . u + 2 u . a = 2 u . (a - p_i) = -2 orient3d(a,b,c,p_i).
+//
+// Les deux formes coincident : le circumcentre dans le plan verifie
+// (c_0 - a) . u = 0, donc 2 c_0 . u = 2 a . u. Le signe tangent se lit donc avec
+// le predicat entier que le pinceau evalue deja, et rien d'autre.
+inline int tangent_sign(int orient_of_site, int orientation) {
+  const int raw = -orient_of_site;          // signe de a_i . d
+  return orientation > 0 ? raw : -raw;
+}
+
 // ---------------------------------------------------------------------------
 // LE PARCOURS.
 //
@@ -1103,7 +1140,9 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
                                                    FlatStatistics* st,
                                                    CloudStatus* status,
                                                    bool verify_census,
-                                                   const CertifiedIndex* index = nullptr) {
+                                                   const CertifiedIndex* index = nullptr,
+                                                   std::vector<std::vector<mhgp::i32>>* parents =
+                                                       nullptr) {
   // CONTRAT DE PROPRIETE DE L'INDEX. `index` doit avoir ete construit sur CE
   // vecteur `points`, non modifie depuis : ses boites seraient sinon perimees et
   // l'elagage omettrait des points. La seule construction autorisee dans ce
@@ -1132,6 +1171,45 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
   const CloudStatus seeded = seed_level_zero(points, st, &seed);
   if (seeded != CloudStatus::kOk) { *status = seeded; return visited; }
 
+  // Base independante canonique de la coquille du germe : les quatre formes
+  // dont la somme est Q_r. Le germe en est l'unique minimum sur P_vide, MAIS
+  // seulement si les quatre formes a_s = (-2 p_s, 1) sont independantes,
+  // c'est-a-dire si les quatre points sont affinement independants. Prendre les
+  // quatre premiers de la coquille ne suffit pas : sur une grille saturee une
+  // coquille de cinq points en contient quatre COPLANAIRES, Q_r cesse d'avoir
+  // le germe pour unique minimum, et un sommet de niveau zero se retrouve sans
+  // direction admissible. Mesure : un nuage sur six cents, mais a tous les
+  // ordres, avec exactement une racine surnumeraire.
+  std::vector<i32> root_potential_base;
+  for (i32 z : seed.shell) {
+    if ((int)root_potential_base.size() >= 4) break;
+    const int have = (int)root_potential_base.size();
+    if (have == 1) {
+      const mhgp::P3& u = points[(std::size_t)root_potential_base[0]];
+      const mhgp::P3& w = points[(std::size_t)z];
+      if (u.x == w.x && u.y == w.y && u.z == w.z) continue;
+    } else if (have == 2) {
+      const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)root_potential_base[1]],
+                                      points[(std::size_t)root_potential_base[0]]);
+      const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)z],
+                                      points[(std::size_t)root_potential_base[0]]);
+      const mhgp::P3 c = mhgp::p3_cross(u, w);
+      if (c.x == 0 && c.y == 0 && c.z == 0) continue;
+    } else if (have == 3) {
+      if (orient3d_exact(points[(std::size_t)root_potential_base[0]],
+                         points[(std::size_t)root_potential_base[1]],
+                         points[(std::size_t)root_potential_base[2]],
+                         points[(std::size_t)z]) == 0) continue;
+    }
+    root_potential_base.push_back(z);
+  }
+  if ((int)root_potential_base.size() < 4) {
+    // La coquille du germe engendre R^4 par construction : ne pas y trouver
+    // quatre formes independantes serait une contradiction, pas un cas limite.
+    *status = CloudStatus::kInvariantViolated;
+    return visited;
+  }
+
   std::unordered_set<std::vector<i32>, ShellHash> seen;
   std::vector<Vertex> frontier;
   seen.insert(seed.shell);
@@ -1144,8 +1222,22 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
     frontier.pop_back();
     const int m = (int)v.shell.size();
     visited.push_back(v);
+    if (parents != nullptr) parents->push_back(std::vector<i32>{});
     ++st->vertices_visited;
     if (m > 4) ++st->shells_multiple;
+
+    // GATE D. Le rayon du parent se choisit ICI, parmi les orientations
+    // admissibles des flats incidents — les rayons extremes du cone tangent —
+    // et non parmi les voisins deja construits. Deux filtres exacts :
+    // l'orientation doit rester dans la chambre, c'est-a-dire ne rendre aucun
+    // membre de coquille interieur, et elle doit faire croitre L_h pour
+    // h = min B(v), ou decroitre Q_r au niveau zero. Le choix canonique parmi
+    // les admissibles est le plus petit couple (fermeture, orientation) ; toute
+    // regle deterministe convient, la preuve n'exige que les deux filtres.
+    const i32 potential_site = v.interior.empty() ? -1 : v.interior.front();
+    std::vector<i32> parent_key;
+    int parent_orientation = 0;
+    std::vector<i32> parent_closure;
 
     if (verify_census) {
       // Ne pas pouvoir reconstruire la sphere d'un sommet EST une contradiction :
@@ -1240,7 +1332,44 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
       }
       if (apex < 0) continue;
 
+      // Admissibilite de cette orientation comme rayon de parent.
       for (int direction = -1; direction <= 1; direction += 2) {
+        bool admissible = false;
+        if (parents != nullptr) {
+          admissible = true;
+          for (int t = 0; t < m && admissible; ++t) {
+            const i32 z = v.shell[(std::size_t)t];
+            if (tangent_sign(pencil.orient_of(z), direction) < 0) admissible = false;
+          }
+          if (admissible) {
+            if (potential_site >= 0) {
+              if (tangent_sign(pencil.orient_of(potential_site), direction) <= 0)
+                admissible = false;
+            } else {
+              // Niveau zero : Q_r doit STRICTEMENT decroitre. Sa derivee est la
+              // somme des a_s . d sur la base independante du germe, soit
+              // -2 fois la somme des orient3d, orientee. On somme donc les
+              // VALEURS de orient3d, jamais leurs signes.
+              mhgp::i128 total = 0;
+              for (i32 z : root_potential_base)
+                total += orient3d_exact(points[(std::size_t)base[0]],
+                                        points[(std::size_t)base[1]],
+                                        points[(std::size_t)base[2]],
+                                        points[(std::size_t)z]);
+              const mhgp::i128 derivative = (direction > 0) ? -total : total;
+              if (derivative >= 0) admissible = false;
+            }
+          }
+          if (admissible) {
+            std::vector<i32> key = closure;
+            key.push_back(direction > 0 ? 1 : 0);
+            if (parent_key.empty() || key < parent_key) {
+              parent_key = key;
+              parent_orientation = direction;
+              parent_closure = closure;
+            }
+          }
+        }
         ++st->pencil_queries;
         i32 best = -1;
         int best_orient = 0;
@@ -1391,6 +1520,9 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
           visited.clear();
           return visited;
         }
+        if (parents != nullptr && admissible && direction == parent_orientation &&
+            closure == parent_closure && !parent_key.empty())
+          parents->back() = shell;
         if (level > level_ceiling) { ++st->vertices_over_level; continue; }
         if (seen.insert(shell).second) frontier.push_back(Vertex{shell, interior, level});
       }

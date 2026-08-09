@@ -162,6 +162,8 @@ struct Coverage {
   long long bootstrap = 0;
   long long full_sweeps = 0;
   long long indexed_runs = 0;
+  long long parent_vertices = 0;
+  long long parent_roots = 0;
 };
 static Coverage coverage;
 
@@ -259,6 +261,63 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
     coverage.bootstrap += ist.bootstrap_rounds;
     coverage.full_sweeps += ist.full_grid_sweeps;
     coverage.indexed_runs += 1;
+  }
+
+  // (E) GATE D — LE PARENT LOCAL. Le parent est choisi au sommet, parmi les
+  // orientations admissibles des flats incidents, sans regarder les voisins
+  // deja construits. On verifie ici les proprietes que la note exige avant
+  // toute integration : parent unique et fini hors racine, inclusion des
+  // ensembles interieurs, absence de cycle, racine unique, et couverture
+  // identique a celle du parcours.
+  if (status == mhgp3v::CloudStatus::kOk && (int)pts.size() >= 4) {
+    mhgp3v::FlatStatistics pst{};
+    mhgp3v::CloudStatus pstatus = mhgp3v::CloudStatus::kOk;
+    std::vector<std::vector<i32>> parents;
+    const auto seen_vertices =
+        mhgp3v::navigate_shallow(pts, s_max - 2, &pst, &pstatus, false, nullptr, &parents);
+    // FAIL-CLOSED. Sauter le bloc quand le second parcours echoue ou quand le
+    // vecteur de parents n'a pas la bonne taille rendrait la porte muette
+    // exactement dans les cas ou elle doit rougir.
+    if (pstatus != mhgp3v::CloudStatus::kOk || parents.size() != seen_vertices.size()) {
+      printf("[%s] s_max=%2d GATE D INEXPLOITABLE : statut=%s parents=%zu sommets=%zu\n", tag,
+             s_max, mhgp3v::cloud_status_name(pstatus), parents.size(), seen_vertices.size());
+      ok = false;
+    } else {
+      std::map<std::vector<i32>, size_t> position;
+      for (size_t i = 0; i < seen_vertices.size(); ++i) position[seen_vertices[i].shell] = i;
+      int roots = 0, missing_parent = 0, unknown_parent = 0, not_included = 0, cyclic = 0;
+      for (size_t i = 0; i < seen_vertices.size(); ++i) {
+        if (parents[i].empty()) { ++roots; continue; }
+        const auto it = position.find(parents[i]);
+        if (it == position.end()) { ++unknown_parent; continue; }
+        // inclusion des ensembles interieurs
+        const auto& child = seen_vertices[i].interior;
+        const auto& mother = seen_vertices[it->second].interior;
+        for (i32 z : mother)
+          if (!std::binary_search(child.begin(), child.end(), z)) { ++not_included; break; }
+        // remontee jusqu'a la racine, sans cycle
+        size_t cursor = i;
+        int steps = 0;
+        while (!parents[cursor].empty() && steps <= (int)seen_vertices.size()) {
+          const auto next = position.find(parents[cursor]);
+          if (next == position.end()) break;
+          cursor = next->second;
+          ++steps;
+        }
+        if (steps > (int)seen_vertices.size()) ++cyclic;
+      }
+      for (size_t i = 0; i < seen_vertices.size(); ++i)
+        if (parents[i].empty() && seen_vertices[i].shell != seen_vertices[0].shell)
+          ++missing_parent;
+      coverage.parent_vertices += (long long)seen_vertices.size();
+      coverage.parent_roots += roots;
+      if (roots != 1 || missing_parent || unknown_parent || not_included || cyclic) {
+        printf("[%s] s_max=%2d GATE D : racines=%d sans_parent=%d parent_inconnu=%d"
+               " inclusion_violee=%d cycles=%d (sur %zu sommets)\n", tag, s_max, roots,
+               missing_parent, unknown_parent, not_included, cyclic, seen_vertices.size());
+        ok = false;
+      }
+    }
   }
 
   const Truth t = brute_catalogue(pts, s_max);
@@ -514,6 +573,26 @@ int main(int argc, char** argv) {
   // au cercle de ABC et pourtant les quatre rayons carres valent 5/2.
   // Sphere u16 a centre tres eloigne : la marge flottante de l'index elaguait
   // la RACINE et rendait zero point au lieu des quatre supports.
+  // Témoins de Gate D, coordonnées exactes de la note.
+  // La coquille du germe est {0,2,3,4,5} et ses quatre premiers membres sont
+  // COPLANAIRES dans x+z=1 : prendre les quatre premiers sans vérifier leur
+  // indépendance donnait deux racines.
+  fixtures.push_back({"germe_base_non_independante",
+                      {pt(0, 0, 1), pt(0, 1, 0), pt(0, 1, 1), pt(1, 0, 0), pt(1, 1, 0),
+                       pt(2, 0, 0)}});
+  // Choisir seulement le voisin admissible de coquille minimale crée un cycle
+  // de longueur deux ; c'est le signe STRICT de L_h qui le coupe.
+  fixtures.push_back({"lex_admissible_cycle",
+                      {pt(14, 6, 1), pt(7, 10, 8), pt(3, 5, 11), pt(3, 8, 5), pt(7, 7, 3),
+                       pt(14, 3, 14)}});
+  fixtures.push_back({"lp_optimum_tie",
+                      {pt(1, 1, 7), pt(7, 9, 4), pt(1, 2, 6), pt(9, 2, 10), pt(0, 3, 5),
+                       pt(0, 2, 6)}});
+  // Un choix lexicographique sans Q_r crée un cycle de longueur deux au niveau
+  // zéro.
+  fixtures.push_back({"level_zero_lex_cycle",
+                      {pt(0, 4, 0), pt(1, 4, 15), pt(10, 7, 2), pt(11, 15, 0), pt(6, 14, 14),
+                       pt(9, 6, 5), pt(14, 11, 0)}});
   fixtures.push_back({"centre_lointain_elagage_refute",
                       {pt(32767, 32767, 0), pt(57863, 57862, 0), pt(7672, 7673, 0),
                        pt(60104, 30135, 1)}});
@@ -729,6 +808,8 @@ int main(int argc, char** argv) {
   printf("index : executions=%lld points touches=%lld amorces=%lld balayages complets=%lld\n",
          coverage.indexed_runs, coverage.grid_touched, coverage.bootstrap,
          coverage.full_sweeps);
+  printf("gate D : sommets avec parent teste=%lld  racines=%lld\n",
+         coverage.parent_vertices, coverage.parent_roots);
   printf("\n%d cas, %d desaccords\n", cases, failures);
   if (coverage.navigated_clouds < min_navigated || coverage.vertices < min_vertices
       || coverage.multiple_shells < min_multiple_shells
