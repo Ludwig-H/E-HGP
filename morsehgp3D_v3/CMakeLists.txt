@@ -68,7 +68,10 @@ target_compile_options(mhgp3v_first_incidence PRIVATE -Wall -Wextra -Werror)
 add_executable(mhgp3v_device_wavefront prototype/device_wavefront_qualification.cpp)
 target_include_directories(mhgp3v_device_wavefront PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_device_wavefront PRIVATE mhgp)
-target_compile_options(mhgp3v_device_wavefront PRIVATE -Wall -Wextra -Werror)
+# Les avertissements C++ ne doivent pas fuir dans la compilation CUDA : nvcc
+# recoit -Werror comme une option a valeur et refuse alors --fmad=false.
+target_compile_options(mhgp3v_device_wavefront PRIVATE
+  $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror>)
 
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)

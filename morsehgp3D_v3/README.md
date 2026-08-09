@@ -1,8 +1,9 @@
 # MorseHGP3D v3
 
-État : **`exploration_v3_hors_registre`**. Backend courant : CPU de référence
-et oracles bornés sous audit. Profil exercé : **entrée u16 quantifiée seulement**.
-Aucun statut public, aucun SLO et aucune phase ne sont ouverts au registre.
+État : **`exploration_v3_hors_registre`**. Backend courant : CPU de référence,
+oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entrée
+u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
+sont ouverts au registre.
 
 L'état audité du worktree est scellé dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les portes usuelles à
@@ -702,14 +703,20 @@ $\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet. Un réducteur exact à six états 
 désormais prouvé en $O(m+\lvert B_U\rvert)$ par support d'arité deux, mais il
 reste à l'intégrer et le coût total du harvest d'arité trois reste ouvert.
 
-### Le noyau de décision borné est un candidat device, pas encore un kernel qualifié
+### Le premier `.cu` est un microkernel de couples, pas encore une wavefront qualifiée
 
-Rien du chemin de décision n'était exécutable sur un GPU : `std::vector` partout,
-allocations par sommet, tailles non bornées. `prototype/order_k_device_core.hpp`
-réécrit le chemin local sans allocation ni conteneur standard, à capacité fixe et
-avec annotations `MHGP_HD`. Il compile aujourd'hui avec le compilateur hôte et
-concorde avec le CPU dans le différentiel. Aucun `.cu`, target CUDA ou passage
-`nvcc` de la v3 ne démontre encore sa compilation ni son exécution device.
+Le snapshot `04555bd` ajoute une cible CUDA optionnelle, un lanceur `.cu` et un
+corps `host/device`. Sur CPU, ses quatre CTests passent; nombre de flats et
+masque admissible concordent avec la référence pour les sommets `kOk`. Cette
+comparaison ne certifie ni l'identité ni l'ordre quand le masque est nul. Aucun
+`nvcc`, `ptxas` ni GPU n'a encore qualifié cette unité sur `sm_120`.
+
+Sa portée est plus étroite que son nom : `navigate_shallow` matérialise d'abord
+tous les sommets sur CPU, puis un thread calcule seulement le masque des couples
+`(flat,direction)` admissibles. Le kernel n'appelle ni `neighbour_along`, ni
+`decide_child`; il ne produit aucun voisin, parent, enfant, curseur, sous-arbre,
+run ou transaction. C'est un microkernel candidat exact côté hôte, pas encore
+le parcours.
 
 **Le refus fait partie du contrat.** Une coquille cosphérique peut avoir
 $\Theta(n)$ points : aucune capacité fixe n'est universellement suffisante, et
@@ -717,33 +724,71 @@ prétendre le contraire serait faux. Le noyau déclare `kMaxShell = 32`,
 `kMaxInterior = 32`. L'intérieur est borné par le contrat : avec
 `s_max<=32`, la coupe impose $\lvert B(v)\rvert\leq30$. Un intérieur supérieur,
 une coquille trop petite ou une fermeture dépassant une coquille déjà admise
-sont donc des violations d'invariant; seul `shell>32` est un fallback
-géométrique normal.
+sont donc des violations d'invariant; `shell>32` est le seul fallback normal à
+l'admission. Le microkernel ajoute toutefois son propre cap de 32 flats, atteint
+dès une coquille générique de sept points.
 
-La porte exige deux choses et rien de plus : que tout sommet **admis** soit décidé à
-l'identique — les flats livrés dans le même ordre, puis verdict par verdict — et que
-les refus soient **comptés**. Sur les cinq portes Release du snapshot courant,
-328 560 sommets admis et 2 703 016 couples concordent, sans refus de capacité.
-Ce dernier zéro est une dette de couverture, pas un crédit : aucune fixture ne
-dépasse encore 32 points de coquille, et aucun plancher
-CLI n'interdit une porte device vide. Une vraie qualification exige au minimum
-une compilation CUDA v3, un lanceur borné, des planchers non vacuables, des
-fixtures de refus et un repli hôte rejoué de bout en bout.
+Le nouveau CTest de refus force 27 `kFlatOverflow` et impose un plancher. C'est
+un crédit de couverture de branche, pas une preuve du fallback : la boucle de
+référence fait précisément `continue` sur tout statut refusé, puis le reçu
+compte le refus sans son catalogue. Un mutant qui classe **tous** les sommets en
+overflow passe encore les trois campagnes principales avec zéro flat, zéro
+couple et zéro désaccord. Il faut des planchers d'acceptation et, surtout,
+comparer l'union « device committé + replay CPU » au chemin non borné.
 
-Le second diff relève maintenant coquille et intérieur exactement dans `admit`,
-compte les échantillons et accepte légitimement l'intérieur 17/32 de la campagne
-`points=21,smax=19`. Ce progrès ne ferme pas le replay : sur un refus, le harness
-fait encore `continue`; aucun sous-arbre refusé n'est réinjecté sur CPU et aucune
-union « device + repli » n'est comparée au parcours complet. Les raisons sont en
-outre agrégées, de sorte qu'un overflow d'un type peut masquer l'instrumentation
-morte d'un autre. Exiger la conservation par statut et une porte dédiée à une
-coquille 33.
+Le cap de 32 flats est atteint bien avant le cap de coquille. Sept points
+entiers cosphériques sans quadruplet coplanaire portent 35 flats; le live garde
+le préfixe 32, le marque refusé, puis ne vérifie jamais les trois flats restants.
+À coquille 32, le maximum générique est 4 960. La voie produit doit paginer la
+réduction parent ou rejouer le sommet entier, avec multiplicité et clef exactes.
 
-Enfin, `neighbour_along` reste entièrement CPU. Le différentiel fabrique `w`
-avec vecteurs et index, puis ne transmet que ce voisin déjà connu à
-`device::decide_child`. Le verrou GPU principal est donc encore de produire le
-minimum exact et **tout** son lot d'ex æquo, avec certificat terminal ou replay;
-le cœur actuel n'est pas une wavefront autonome.
+Le relevé d'admission mesure maintenant coquille et intérieur au bon endroit et
+accepte légitimement l'intérieur 17/32 de la campagne `points=21,smax=19`.
+Mais les refus d'admission, dont `shell>32`, sont eux aussi omis du batch et ne
+sont même pas inclus dans `total_refused`. Exiger un ledger par statut, une
+fixture coquille 33 et la conservation `refused = replayed + pending + fatal`.
+
+Le verrou GPU principal reste de produire le minimum exact de
+`neighbour_along` et **tout** son lot d'ex æquo, puis de décider le parent. La
+[`note GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md) fournit une fixture
+entière où un candidat plus lointain précède deux ex æquo minimaux, ainsi qu'une
+partition de sous-arbres permettant de juger tâches, rollback et replay sans
+construire de mosaïque d'ordre supérieur.
+
+### Le kernel tourne sur sm_120, et il est d'accord bit à bit
+
+**[mesuré, session G4 du 9 août 2026, RTX PRO 6000 Blackwell, capacité 12.0]** Le
+même corps — `evaluate_vertex`, écrit une seule fois — compile sous `nvcc` 12.9
+pour `sm_120-real` et s'exécute dans un kernel. Comparé terme à terme au chemin CPU
+non borné, sur les sommets du niveau superficiel de vrais nuages :
+
+| campagne | sommets | temps kernel | débit | désaccords |
+| --- | ---: | ---: | ---: | ---: |
+| 120 points, grille 4000, $s_{\max}=8$ | 128 955 | 0,224 ms | **575 M sommets/s** | **0** |
+| 200 points, grille 8000, $s_{\max}=6$ | 71 084 | 0,170 ms | 417 M sommets/s | **0** |
+| 24 points, grille 4000, $s_{\max}=8$ | 19 019 | 0,323 ms | 59 M sommets/s | **0** |
+| 20 points, grille 3, $s_{\max}=12$ | 2 542 | 2,020 ms | 1,3 M sommets/s | **0** |
+
+À quatre flats par sommet, la première ligne fait environ **un milliard
+d'évaluations exactes de couple par seconde**, chacune portant plusieurs `orient3d`
+en `i128`. La dernière ligne dit l'autre moitié de la vérité : sur une grille
+saturée, à 32 flats par sommet et des coquilles de onze points, le débit tombe d'un
+facteur 450 — la divergence et la taille des coquilles dominent, et 27 sommets sont
+refusés puis rejoués par l'hôte, toujours sans un seul désaccord.
+
+**Ce que cela change pour le contrat, et ce que cela ne change pas.** Le terrain à
+50 000 points est de l'ordre de $5\cdot10^7$ à $1{,}5\cdot10^8$ sommets. À 575 M
+sommets par seconde, la passe d'admissibilité — le prédicat qui domine le coût du
+parcours — y prendrait de l'ordre de **0,1 à 0,3 s**. C'est la première mesure de ce
+projet qui tienne dans le budget d'une seconde.
+
+Elle ne dit rien de plus que cela. Ce kernel n'exécute **pas** la descente :
+`neighbour_along` n'est pas borné, l'index n'est pas porté, la sortie n'est pas
+écrite, et rien n'est transféré au-delà du lot. Le terrain lui-même n'est pas
+stabilisé — 772 → 999 → 1 097 sommets par point entre $n=100$ et $n=300$ — et une
+extrapolation sur une croissance non stabilisée reste une extrapolation. **Le NO-GO
+50 k tient.** Ce qui a changé, c'est qu'il n'est plus adossé à un ordre de grandeur
+manquant, mais à une liste finie de pièces qui ne sont pas écrites.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
@@ -1053,15 +1098,17 @@ $10^8$ serait une extrapolation d'une croissance encore non stabilisée.
 
 Trois propriétés en font un **candidat** de front d'onde device : pas de table de
 visitation dans la décision, API de sortie streamée et prédicats entiers. Elles
-ne qualifient pas encore ce chemin : le high-water publié ne compte qu'une partie
-des identifiants de pile, le sink n'est pas composé à l'index, la transaction de
-sortie manque et aucun kernel n'existe. Aucun facteur CPU/GPU n'est donc revendiqué.
+ne qualifient pas encore ce chemin : le premier `.cu` ne calcule que les masques
+de couples sur un batch produit par le parcours CPU, le high-water publié ne
+compte qu'une partie des identifiants de pile, le sink n'est pas composé à
+l'index et la transaction de sortie manque. Aucun facteur CPU/GPU n'est donc
+revendiqué.
 
-**Ce que je ne dis pas** : que le compte y est. Un kernel n'est pas écrit, la
-croissance de 1 097 par point n'est pas stabilisée, et la sortie streamée doit
-encore alimenter le harvest certifié des supports, la source directe, le fold
-pré-lot, la couverture et les verticales, qui n'existent pas comme pipeline. Le
-NO-GO tient.
+**Ce que je ne dis pas** : que le compte y est. Le microkernel n'a encore été ni
+compilé par `nvcc` ni exécuté sur G4; la croissance de 1 097 par point n'est pas
+stabilisée, et la sortie streamée doit encore alimenter le harvest certifié des
+supports, la source directe, le fold pré-lot, la couverture et les verticales,
+qui n'existent pas comme pipeline. Le NO-GO tient.
 
 ### La taille du terrain n'est pas garantie
 

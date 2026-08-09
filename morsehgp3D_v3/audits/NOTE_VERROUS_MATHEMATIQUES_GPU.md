@@ -13,31 +13,42 @@ constats d'implémentation sont épinglés au snapshot suivant :
 
 | objet | empreinte |
 | --- | --- |
-| `HEAD` | `fbfb2c0425a5b5a3c062b5eac92019075126c21d` |
+| `HEAD` | `04555bdd6ff67810bd8db35c4baf18b9eae0063b` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
-| `CMakeLists.txt` | `fdc00942cc8aed26f46c40ad3a95ef7be040d968ff819fd1ffb9368f171946c4` |
+| `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
+| `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
+| `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
+| `CMakeLists.txt` live post-commit | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
 
 > [!IMPORTANT]
-> Cette note aide Claude à construire la voie GPU; elle n'implémente aucun
-> kernel. Les anciennes implémentations CUDA ont été consultées, avec
-> l'autorisation de l'utilisateur, uniquement pour récupérer des contrats
-> d'ingénierie. Ni leur géométrie, ni leurs mesures, ni leur statut ne prouvent
-> quoi que ce soit sur la v3.
+> Cette note aide Claude à construire la voie GPU; elle ne modifie aucun
+> prototype. Le snapshot possède maintenant un premier fichier `.cu`, audité
+> ci-dessous comme candidat v3. Les exigences d'ingénierie sont formulées
+> directement pour la v3; aucune mesure extérieure à ce snapshot ne lui sert de
+> preuve.
 
 ## 1. Verdict et ordre des verrous
 
-Le live possède un **cœur hôte à forme device**, pas encore une voie GPU. Il n'y
-a aucun fichier `.cu`, aucune cible CUDA, aucun lancement de kernel et aucun
-passage `nvcc` dans la v3. Surtout, `neighbour_along` reste exécuté sur CPU : le
-différentiel construit chaque voisin dynamique avec des vecteurs, puis transmet
-seulement le voisin déjà connu à `device::decide_child`.
+Le live possède désormais un `.cu`, une cible CUDA optionnelle et un lanceur.
+Ce premier kernel calcule seulement un masque d'admissibilité
+`(flat,direction)` sur des sommets que `navigate_shallow` a déjà entièrement
+produits et matérialisés sur CPU. Il n'appelle ni `neighbour_along`, ni
+`decide_child`; il ne construit aucun parent, enfant, curseur, sous-arbre ou
+lot transactionnel. C'est donc un **microkernel de prédicat**, pas encore une
+wavefront de reverse-search.
+
+La porte hôte est positive sur ses sommets admis, mais rouge sur son contrat de
+refus. Sa campagne permanente force 27 `kFlatOverflow`, puis saute exactement
+ces 27 éléments avant la référence non bornée. Le compteur et le plancher
+prouvent que le cap a été atteint; ils ne prouvent ni les 35 flats attendus du
+premier contre-exemple, ni un replay, ni la conservation de la sortie.
 
 L'ordre utile est donc :
 
 1. corriger le P0 CPU `i128 -> int` du signe owner;
-2. fermer un vrai kernel de **verdict parent** en arithmétique 64 bits;
+2. fermer la porte de refus du microkernel, puis un vrai kernel de **verdict parent** en arithmétique 64 bits;
 3. produire `next(v,d)` sur device avec certificat terminal ou replay;
 4. partitionner la reverse-search en tâches transactionnelles disjointes;
 5. intégrer owner puis le census exact cappé;
@@ -72,9 +83,21 @@ imposer `root_size==4`, coordonnées u16 authentifiées, indices valides et
 `i128` sur ce hot path et `backward_pair_admissible` évalue `-forward` avant la
 validation; `INT_MIN` y reste un comportement indéfini.
 
+Le `WavefrontJob` live n'authentifie aucun de ces invariants : `point_count`
+n'est jamais lu par l'évaluateur, `root_size=0` avec pointeur nul rend encore
+`kOk`, et tailles, indices, ordre/unicité/disjonction de coquille/intérieur ainsi
+que `level==interior_size` sont supposés. Un validateur hôte doit rendre
+`invalid_contract` avant toute multiplication de tailles, allocation ou copie.
+
 Conclusion pratique : séparer un kernel parent 64 bits du kernel plus large de
 génération du voisin. Employer `i128` partout est exact, mais paie inutilement
-son coût sur la décision la plus fréquente.
+son coût sur la décision la plus fréquente. Les deux directions d'une base se
+décident en un seul scan : chaque orientation met à jour `allow_minus` et
+`allow_plus`, puis le site intérieur ou la somme des quatre racines conclut les
+deux bits. Un probe indépendant sur les trois campagnes permanentes a comparé
+25 118 sommets admis au format borné, dont les 27 ensuite refusés par le cap de
+flats, et leurs 108 177 flats non plafonnés sans écart avec les deux appels
+actuels. Le live rescane aujourd'hui la coquille pour chaque direction.
 
 ### 2.2 Voisin, owner et census : 128 bits
 
@@ -155,9 +178,12 @@ en itérant les bits actifs, puisque leurs positions et les identifiants de
 points ont le même ordre.
 
 Pour une fermeture de rang trois, la base canonique est exactement : les deux
-premiers membres, puis le premier membre non collinéaire avec eux. Si aucun
-membre ne convient, toute la fermeture est collinéaire. Cela remplace la boucle
-cubique de recherche de base par un scan $O(m)$.
+premiers membres, puis le premier membre non collinéaire avec eux. Mieux encore,
+sur une coquille authentifiée de points distincts, une droite coupe la sphère en
+au plus deux points : les trois premiers membres sont donc automatiquement non
+collinéaires. Le scan général ne reste utile qu'au validateur hostile. Cela
+remplace la boucle cubique de recherche de base par un accès constant après
+construction du masque.
 
 Ces deux identités ont été vérifiées indépendamment sur 20 000 fermetures
 aléatoires : masque/vecteur et base rapide/triple boucle concordent sans écart.
@@ -183,6 +209,53 @@ Ce résultat est plus adapté au GPU que copier littéralement le DFS local dans
 chaque thread. Les atomiques ne doivent jamais choisir le premier verdict; la
 réduction booléenne puis la clef canonique rendent le résultat indépendant du
 scheduling.
+
+### 3.3 Ce que le premier microkernel prouve réellement
+
+Le source du snapshot prévoit un même corps `host/device`; son exécution hôte
+compare le masque terme à terme pour les sommets dont le nombre de flats ne
+dépasse pas 32. Les quatre CTests hôte passent; la campagne nominale publie
+19 019 sommets, 76 076 flats, 49 785 couples admissibles et zéro désaccord. Ce
+crédit est strictement CPU : le transport CUDA n'est pas encore reçu.
+
+Le cap 32 n'est pas cohérent avec la capacité de coquille 32. Sans quatre points
+coplanaires, le nombre de flats d'une coquille de taille $m$ vaut
+$\binom{m}{3}$ : il atteint déjà 35 pour $m=7$ et peut atteindre 4 960 pour
+$m=32$. La fixture entière suivante est cosphérique, sans quadruplet coplanaire :
+
+```text
+centre=(100,100,100), rayon=25
+(75,100,100) (76,93,100) (76,100,93) (76,100,107)
+(80,85,100) (80,88,91) (80,91,112)
+interieur optionnel=(100,100,100)
+```
+
+Le chemin CPU non borné énumère 35 flats. Le microkernel rend
+`kFlatOverflow`, `flat_count=32`; avec l'intérieur, son masque partiel vaut
+`0x940800000009`. La qualification exécute `continue` avant l'oracle pour ce
+statut, puis `summarise` compte un refus mais zéro flat. La campagne permanente
+à 27 refus reste donc verte sans comparer ni rejouer aucun des 27 préfixes.
+Un lot entièrement refusé satisfait même la seule garde `total_vertices>0`.
+
+Le masque ne certifie pas non plus l'ordre des flats lorsqu'il ne porte aucun
+bit. Retirer le septième point ci-dessus donne 20 flats et un masque nul; une
+permutation arbitraire de ces 20 flats conserve exactement `(count,mask)`. La
+porte du parent doit comparer les items structurels `(closure,base,slot,verdict)`
+ou, mieux, réduire la plus petite clef admissible et comparer cette clef exacte.
+
+Enfin, admissibilité retour ne signifie pas filiation. La fixture permanente
+du différentiel possède un retour admissible mais un couple antérieur
+admissible, donc `decide_child=Reject`. Dans la fixture du futur voisin décrite
+au paragraphe 6, le même sommet `w` est atteint depuis son vrai parent `v` et
+depuis un autre sommet `u`; le retour est admissible dans les deux cas, mais
+seule l'arête issue de `v` est acceptée. Un kernel limité aux bits locaux
+dupliquerait `w`.
+
+Pour fermer ce jalon, remplacer le masque fixe par une réduction paginée de la
+plus petite clef admissible, ou implémenter un fallback entier reçu. Chaque
+refus doit satisfaire `refused = replayed + pending + fatal`, et l'union des
+résultats committés et rejoués doit égaler la séquence CPU complète avec sa
+multiplicité.
 
 ## 4. Reverse-search : théorème de partition en sous-arbres
 
@@ -226,6 +299,14 @@ revanche provoquer rollback et repartition. La porte doit comparer ce parcours
 sans pile au parcours de référence, notamment sur des backtracks répétés et une
 mutation de la clef inverse.
 
+La fixture entière des sept points du paragraphe 3.3 donne une partition
+géométrique permanente : le catalogue borné au niveau 3 contient 18 sommets;
+les six enfants canoniques de la racine portent des sous-arbres de tailles
+`1,1,2,6,1,6`, disjoints et de somme 17. L'ordre de `navigate_shallow` n'est pas
+topologique pour cet arbre : un descendant apparaît avant son parent canonique.
+L'indice du batch live ne peut donc servir ni de `task_id`, ni de preuve d'ordre;
+la clef de tâche doit être structurelle et authentifiée.
+
 La mémoire constante est **par work item**, pas pour toute la vague. Une
 frontière parallèle peut avoir une largeur $\Theta(\lvert V\rvert)$ et deux
 buffers BFS peuvent donc être proportionnels à la sortie. Publier capacité,
@@ -242,7 +323,12 @@ $$N_{\mathrm{begin}}=N_{\mathrm{commit}}+N_{\mathrm{rollback}}.$$
 
 Un rollback invalide tout le segment de sortie de la tâche. Le CPU rejoue la
 tâche depuis une source authentifiée, ou la repartitionne en une nouvelle
-antichaîne. Cela évite les doublons et les préfixes partiellement publiés.
+antichaîne. Cela évite les doublons et les préfixes partiellement publiés. Deux
+modèles de donation sont licites : soit les racines actives forment une
+antichaîne de sous-arbres complets, soit une continuation d'ancêtre retire
+atomiquement de son domaine le sous-arbre donné. Dans le second modèle, les
+racines ne forment plus une antichaîne, mais les **domaines de travail** restent
+disjoints.
 
 Reçu minimal :
 
@@ -260,6 +346,15 @@ de transférer une coquille de taille $\Theta(n)$. Pour un refus rencontré depu
 un parent borné, `(task_id,parent_key,edge_cursor)` permet au CPU de recomputer
 le voisin, son census et tout son sous-arbre.
 
+Chaque slot d'adjacence reçoit exactement une classe terminale : `no_neighbor`,
+`outside_cut`, `reject_backward`, `reject_parent`, `descended`, `delegated`,
+`fallback` ou `fatal`. Au point de donation, classification du slot, transfert
+d'ownership et convention d'émission sont atomiques : soit le donneur émet la
+racine et la tâche porte `emit_root=false`, soit seul le receveur l'émet. Une
+sortie partielle publiée avant rollback dupliquerait le même préfixe au replay;
+elle reste donc task-local jusqu'au commit, ou porte un identifiant de tentative
+dont seules les tentatives committées sont compactées.
+
 Statuts à distinguer :
 
 | statut | sens |
@@ -273,13 +368,16 @@ Statuts à distinguer :
 
 Sous `s_max<=32`, un sommet validé satisfait $\lvert B(v)\rvert\leq30$.
 `interior>30`, `shell<3` et une fermeture dépassant une coquille déjà admise ne
-sont donc pas des fallbacks produit : ce sont des violations de contrat. Seul
-`shell>32` est ici un refus géométrique normal.
+sont donc pas des fallbacks produit : ce sont des violations de contrat.
+`shell>32` est un refus géométrique normal. Dans le design live, `flat_count>32`
+est un second refus normal, mais il apparaît dès une coquille générique de sept
+points; la voie cible doit plutôt paginer les flats ou rejouer le sommet entier.
 
 Le live mesure désormais les admissions au bon endroit et porte
-`kMaxInterior=32`, mais le différentiel fait encore `continue` sur un refus. Il
-ne compare donc pas l'union « device committé + replay CPU » au parcours de
-référence.
+`kMaxInterior=32`, mais le différentiel et le nouveau qualificateur font encore
+`continue` sur les refus. Les refus d'admission disparaissent même avant le
+compteur du microkernel. Aucun des deux ne compare donc l'union « device
+committé + replay CPU » au parcours de référence.
 
 ## 6. Produire réellement le voisin sur GPU
 
@@ -292,16 +390,39 @@ Première voie exacte, sans promesse de débit : un bloc par
 `(sommet,fermeture,direction)`, scan tuilé de tout $X$, réduction exacte du
 minimum rationnel, puis second passage pour le lot complet. Cette baseline est
 $O(n)$ par couple mais constitue un vrai kernel différentiel et ne matérialise
-aucune mosaïque.
+aucune mosaïque. La première passe réduit `Pencil.compare_t` en `i128`; la
+seconde rescane les identifiants croissants et compacte **tous** les ex æquo
+`compare_t==0` par prefix-sum. Le représentant du minimum ne remplace jamais le
+lot. La largeur 384 bits reste nécessaire au tri global des niveaux, pas à cette
+comparaison locale sur un même rayon.
+
+Fixture entière minimale pour cette porte :
+
+```text
+0=(0,0,0) 1=(4,0,0) 2=(0,4,0) 3=(0,2,2)
+4=(0,0,4) 5=(0,0,2) 6=(4,4,2)
+v: shell={0,1,2,3}, interior={}, flat={0,1,2}, direction=+1
+```
+
+Le long des centres `(2,2,t)`, le point 4, rencontré avant 5 et 6 dans l'ordre
+des identifiants, donne l'événement plus lointain `t=2`; les points 5 et 6
+donnent ensemble le vrai minimum `t=1`. Le voisin exact est
+`shell={0,1,2,5,6}`, `interior={3}`, `level=1`. Le lot compte deux ex æquo. La
+direction opposée est non bornée. Cette fixture tue `first-valid-wins`, la perte
+d'un ex æquo, le mauvais sens et l'oubli de transférer l'apex 3 vers l'intérieur.
+Elle donne aussi un enfant positif : le retour est admissible et
+`decide_child=Accept` depuis `v`; depuis un autre voisin incident au même `w`, le
+retour reste admissible mais `decide_child=Reject` à cause d'un couple antérieur.
 
 Le live contient déjà un travail supprimable avant portage : lorsque la boîte
 indexée atteint une demi-largeur 65 535 autour d'une ancre u16, elle couvre
 toute la grille déclarée et `touched` contient déjà tous les points. Si aucun
 événement n'a été trouvé, le second `for z in X: absorb(z)` est un no-op exact.
-Les cinq portes courantes comptent 424 150 de ces `exhaustive_scans`. Certifier
-« boîte = grille entière » permet de conclure le rayon non borné sans ce second
-balayage; une mutation qui omet des points de la première couverture doit faire
-rougir la porte.
+Une campagne locale des cinq portes a compté 424 150 de ces
+`exhaustive_scans`; ce nombre reste un diagnostic local, pas un reçu de débit.
+Certifier « boîte = grille entière » permet de conclure le rayon non borné sans
+ce second balayage; une mutation qui omet des points de la première couverture
+doit faire rougir la porte.
 
 Voie indexée : le reçu transporte une antichaîne de couverture de l'index, les
 feuilles examinées, le minimum exact et le lot. Chaque prune est recertifiée par
@@ -371,9 +492,9 @@ composantes indépendantes; faute injectée dans la dernière après staging de 
 première; permutations des blocs. Toutes rendent le même transcript ou zéro
 mutation sur faute.
 
-## 9. Patterns récupérables des implémentations CUDA précédentes
+## 9. Exigences d'ingénierie propres à la v3
 
-Les éléments suivants sont réutilisables comme ingénierie v3 :
+La voie v3 conserve les exigences suivantes :
 
 - vue d'index immuable authentifiée par epoch et digest;
 - moteur exact `host/device` unique et faux launcher hôte distinct;
@@ -381,20 +502,33 @@ Les éléments suivants sont réutilisables comme ingénierie v3 :
 - échelle de largeurs fixes avec drain rationnel CPU;
 - double buffer de frontière, compteurs de masse et rollback de vague complète;
 - staging des sorties, commit atomique, reçus de transaction et digest final;
-- contrôle hôte de tous les compteurs device avant toute allocation ou copie.
+- contrôle hôte de tous les compteurs device avant toute allocation ou copie;
+- enveloppe CUDA fail-closed : compilateur NVIDIA et version reçus, architecture
+  exactement `120-real`, aucune option inconnue transmise implicitement;
+- validation des tailles avant multiplication/allocation, puis contrôle de
+  chaque retour CUDA, y compris événements et copies;
+- zéro-initialisation des structures copiées afin que queues et padding ne
+  transportent ni octets indéterminés ni faux digest.
 
-Le pattern de vague transactionnelle est visible, par exemple, dans
-[`phase15_exact_pair_block_transactional_frontier_resident_cuda.cu`](../../morsehgp3d/src/cuda/phase15_exact_pair_block_transactional_frontier_resident_cuda.cu).
-Il faut reprendre le **ledger**, pas sa géométrie de paires ni ses mesures.
+Le delta CMake live filtre maintenant correctement `-Wall -Wextra -Werror` sur
+le seul C++; son rebuild hôte est vert. L'enveloppe reste ouverte : elle accepte
+une architecture surchargée, initialise CUDA avant de fixer éventuellement
+`120-real`, n'impose ni compilateur NVIDIA, ni toolkit corrigé pour `__int128`,
+ni politique d'avertissements CUDA. La première session G4 doit venir après une
+configuration locale non vacuable et une enveloppe qui échoue avant lancement
+si l'un de ces invariants manque.
 
 ## 10. Porte permanente GPU v3
 
 ### 10.1 Non-vacuité
 
-Exiger séparément : kernels lancés, tâches commencées/committées/rollbackées,
-sommets admis, décisions parent, voisins produits, refus coquille, drains
-arithmétiques, runs et replays CPU. Une suppression complète du bloc GPU doit
-faire rougir la porte.
+Exiger séparément : kernels lancés, nuages traités, sommets admis, flats et
+couples décidés, tâches commencées/committées/rollbackées, décisions parent,
+voisins produits, refus coquille/flats, drains arithmétiques, runs et replays
+CPU. Une suppression complète du bloc GPU ou un mutant qui refuse tous les
+sommets doit faire rougir la porte. Sur le snapshot, ce mutant passe encore les
+trois campagnes : le plancher de refus sans plancher d'acceptation ni replay
+rend la vacuité plus facile, pas plus difficile.
 
 ### 10.2 Fixtures minimales
 
@@ -402,13 +536,16 @@ faire rougir la porte.
 | --- | --- |
 | déterminants owner 1290/1291 et alternés 1023/1024/1025 | même signe CPU/device, UBSan vert, mutant de troncature tué |
 | coquille 33 sur sphère entière | rollback device puis replay du sous-arbre, aucune perte ni duplication |
+| sept points cosphériques ci-dessus | 35 flats CPU, `flat_overflow` puis replay 35/35; mutant all-refused tué |
 | centre `(100,100,100)`, coquille des six axes de rayon 50, trente intérieurs | admission, high-water intérieur 30, aucun faux overflow |
 | fermeture masque, 20 000 cas générés | même base, même ordre et même multiplicité que le vecteur CPU |
 | réduction `decide_child` | même verdict sur scan séquentiel, permutations et mutations d'ordre |
+| voisin 0--6 du paragraphe 6 | minimum `t=1`, lot `{5,6}`, voisin et parent exacts; faux premier candidat tué |
 | deux niveaux séparés de `3/4` mais même `double` | deux lots exacts distincts |
 | owner signed cone | un claim exact et identité attendue, mutant first-wins/non signé tué |
 | census dense | `RankOverflow` avec témoins exacts, jamais faux `CompleteCensus` |
 | capacité de sortie tardive | rollback total puis replay, aucun préfixe publié |
+| jobs hostiles | `root_size!=4`, coordonnées hors u16, indices/tailles invalides, shell non triée ou niveau incohérent donnent `invalid_contract` avant allocation |
 
 Une coquille entière de taille 33 se construit autour de
 `(32768,32768,32768)`, rayon 25 : six points axiaux, les 24 permutations signées
@@ -422,8 +559,10 @@ driver, modèle/architecture GPU, digest du binaire, digest du nuage, paramètre
 d'admission/refus/replay/commit, mutations, concordance byte-à-byte sous
 répétitions et arrêt GCP certifié.
 
-Le débit seul ne qualifie rien. La première campagne G4 utile vient après une
-cible `.cu` réelle et une porte locale non vacuable; avant cela, démarrer une VM
-ne mesurerait aucun chemin GPU v3.
+Le débit seul ne qualifie rien. La cible `.cu` existe maintenant, mais sa porte
+de refus reste vacuable et aucun `nvcc`, `ptxas` ou GPU ne l'a encore exécutée.
+La première campagne G4 utile vient après replay exact, planchers acceptés et
+enveloppe CUDA fermée; avant cela elle ne mesurerait qu'un préfixe censuré du
+microkernel.
 
 GCP non utilisé pour cette note.

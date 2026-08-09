@@ -3,321 +3,275 @@
 Date du snapshot : 9 août 2026 UTC.
 
 Cadre annoncé : `phase=exploration_v3_hors_registre`,
-`backend=cpu_reference_oracle_under_audit`,
+`backend=cpu_reference_oracle_and_gpu_candidate_under_audit`,
 `profile=quantized_u16_input_only`,
-`mode=order_k_flats_owner_differential_and_gate_d_f0`,
+`mode=math_locks_plus_gpu_differential`,
 `public_status=not_claimed`.
 
-Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype
-et ne vaut ni promotion produit, ni ouverture de phase. Les fichiers source
-étaient non commités pendant l'audit; le verdict est donc rattaché au commit de
-base et aux empreintes live suivantes :
+Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
+n'ouvre aucune phase et ne promeut aucun résultat public. Les sources sont celles
+du commit `04555bd`, sauf le filtrage des options C++ dans `CMakeLists.txt`,
+présent comme delta live de Claude au moment du scellement.
 
-| objet | empreinte |
+| objet | empreinte SHA-256 |
 | --- | --- |
-| `HEAD` | `fbfb2c0425a5b5a3c062b5eac92019075126c21d` |
+| `HEAD` | `04555bdd6ff67810bd8db35c4baf18b9eae0063b` |
+| `CMakeLists.txt` live | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
-| `prototype/flats_differential.cpp` | `5dc937b205503b9c88cd7f75206b7dc4fec6770eca3a94f74c35ffadf6b4665f` |
-| `prototype/order_k_device_core.hpp` | `e9e0c713a6c957aa3779ac20077e921725d7936eeece05d4557a9b8b95a66606` |
-| `CMakeLists.txt` | `fdc00942cc8aed26f46c40ad3a95ef7be040d968ff819fd1ffb9368f171946c4` |
+| `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
+| `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
+| `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
+| `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
+| `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
 | `audits/check_gate_d_fold_f0.py` | `34149092cd1b06762085800ac9d575c0cb8022e3a1c273c7d1955d2f4e768294` |
 
 ## Verdict
 
-**NO-GO de justesse owner sur le profil u16, NO-GO F0, et noyau device encore
-candidat hôte sous audit.**
+**NO-GO de justesse owner, NO-GO F0, et NO-GO de qualification GPU/replay.**
 
-Un P0 entier invalide le précédent GO ciblé owner : `owner_rays_ok` transmet un
-déterminant exact `i128` à `tangent_sign(int, ...)`. La conversion implicite
-tronque le déterminant, perd des sphères, peut en dupliquer une autre et atteint
-un cas de négation de `INT_MIN` détecté par UBSan. Les cinq campagnes usuelles
-restent vertes parce que leurs coordonnées ne franchissent pas cette frontière.
+Le premier `.cu` est un progrès réel : il définit un lancement CUDA optionnel
+et un même corps source pour CPU/device. Les quatre portes hôte, dont une
+campagne forçant 27 refus, sont vertes. Cette avancée ne ferme toutefois pas le
+contrat annoncé : les refus sont précisément exclus de l'oracle et ne sont
+jamais rejoués. Un mutant qui refuse tous les sommets reste vert.
 
-Les avancées restent utiles : la porte compare beaucoup mieux le payload, la
-signature de permutation conserve membres et multiplicités, le high-water de
-`emitted` est relevé aux insertions, les high-waters du parcours sont exposés et
-la borne publique de `s_max` est alignée sur `kMaxRank`. Aucun de ces crédits ne
-compense le P0.
+Le kernel ne constitue pas encore une wavefront. `navigate_shallow` construit
+et mémorise d'abord tous les sommets sur CPU; le kernel calcule ensuite seulement
+un masque d'admissibilité des couples. Il ne produit ni voisin, ni parent, ni
+enfant, ni tâche, ni run. Aucun `nvcc`, `ptxas` ou GPU G4 n'a encore qualifié le
+code.
 
-## P0 — le déterminant exact est tronqué avant le signe tangent
+Deux défauts antérieurs restent bloquants : le chemin owner tronque un
+déterminant `i128`, et les deux modèles F0 rejettent ensemble une naissance
+autorisée par leur contrat écrit.
 
-### Cause exacte
+## P0 — troncature du signe owner toujours présente
 
-`orient3d_exact` rend un `i128`. `tangent_sign` accepte un `int` qui représente
-déjà `-1`, `0` ou `+1`. L'appel live lui passe pourtant la valeur brute :
+`owner_rays_ok` passe encore la valeur brute de `orient3d_exact`, de type
+`i128`, à `tangent_sign(int, ...)`. La conversion implicite perd les bits hauts;
+à la valeur `INT_MIN`, la négation suivante est un comportement indéfini.
 
-```cpp
-tangent_sign(orient3d_exact(a, b, c, s), delta)
-```
+Fixtures reproduites :
 
-La faute se situe donc à l'interface valeur/signe. Ce n'est ni un dépassement
-de `i128`, ni une limite du théorème owner. La correction locale testée hors
-dépôt est de passer `sign_of(orient3d_exact(...))`, ou de donner à
-`tangent_sign` une entrée `i128` qu'elle réduit elle-même.
+| fixture | catalogue normal | catalogue owner | observation |
+| --- | ---: | ---: | --- |
+| tétraèdre axial, échelle 1290 | 7 | 7 | déterminant encore sous `INT_MAX` |
+| tétraèdre axial, échelle 1291 | 7 | **4** | trois paires perdues |
+| tétraèdre alterné, échelle 1024 | 10 | 10 en Release | UBSan signale `-INT_MIN` |
+| tétraèdre alterné, échelle 1025 | 10 | **4** | six paires perdues |
 
-### Deux fixtures minimales
-
-Pour le tétraèdre axial
-`(0,0,0),(L,0,0),(0,L,0),(0,0,L)`, `s_max=2` :
-
-| `L` | déterminant | catalogue normal | catalogue owner |
-| ---: | ---: | ---: | ---: |
-| 1290 | 2 146 689 000 | 7 | 7 |
-| 1291 | 2 151 685 171 | 7 | **4** |
-
-À 1291, les supports `{0,1}`, `{0,2}` et `{0,3}` disparaissent. La frontière
-est exactement celle de `INT_MAX`.
-
-Pour le tétraèdre alterné
-`(0,0,0),(L,0,L),(L,L,0),(0,L,L)`, le déterminant vaut $2L^3$ :
-
-| `L` | fait observé |
-| ---: | --- |
-| 1023 | déterminant encore représentable et catalogues concordants |
-| 1024 | déterminant $2^{31}$; conversion en `INT_MIN`, puis `-INT_MIN` signalé par UBSan |
-| 1025 | catalogue normal 10, owner **4**; six paires perdues |
-
-La sortie Release de 1024 peut paraître correcte par accident; seule la porte
-UBSan empêche d'en faire un crédit.
-
-### Contre-exemple u16 déterministe
-
-Commande :
+La campagne u16 déterministe suivante rend encore un désaccord, owner 16 contre
+19 enregistrements normaux :
 
 ```sh
 mhgp3v_flats_differential --clouds 1 --points 8 --coord 65536 --smax 2 --seed 20260809
 ```
 
-Points :
+`-Wconversion` désigne exactement l'appel fautif. La correction testée hors
+dépôt est de réduire par `sign_of` avant l'appel, puis de graver les frontières
+1290/1291 et 1023/1024/1025, le mutant de troncature, UBSan et l'unicité du
+propriétaire.
+
+## P0 — le refus du microkernel n'est ni jugé ni rejoué
+
+Le CTest `mhgp3v_device_wavefront_refusal` publie :
 
 ```text
-(36710,43342,56661) (44151,42733,3225)
-(32173,25451,115)   (33771,34375,37708)
-(35086,39924,50732) (52589,30461,40720)
-(18842,305,53369)   (61180,45472,62312)
+sommets=2542 flats=15346 couples admissibles=7109 refuses=27
+flats/sommet max=32 (capacite 32)
+0 desaccords
+OK
 ```
 
-Le catalogue normal rend 19 sphères. Owner rend 16 enregistrements mais
-seulement 15 sphères distinctes : `{0,4}`, `{0,7}`, `{4,5}` et `{5,7}` manquent,
-tandis que `{1,3}` est émise deux fois. Un probe ne changeant que la réduction
-du signe restaure un propriétaire unique pour chacune des onze paires et les 19
-sphères attendues.
+Ce `OK` ne porte que sur les sommets `kOk`. La boucle de référence exécute
+`continue` pour chaque `kFlatOverflow`; `summarise` compte ensuite le refus mais
+écarte ses flats et son masque. Le plancher `--min-refused 10` prouve donc que
+la branche a été prise, pas que son résultat a été conservé.
 
-### Porte exigée
-
-La correction n'est fermée que si le dépôt conserve :
-
-1. les frontières axiales 1290/1291 et alternées 1023/1024/1025;
-2. le cas 1024 sous UBSan;
-3. une compilation de ce site avec `-Wconversion`;
-4. un mutant qui retire `sign_of` et doit rougir;
-5. la comparaison du catalogue et de l'unicité du propriétaire, pas seulement
-   un nombre total.
-
-## Verrous mathématiques transmis à Claude
-
-La construction complète, avec preuves et fixtures, est dans
-[`NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
-
-### F0 : naissance générale et source régulière sont distinctes
-
-Le fold général doit accepter une composante avec `q_R=0` dès qu'elle porte une
-`DirectHyperedge`. Une coface non régulière peut réellement avoir toutes ses
-facettes activées au même niveau : le carré coplanaire, protégé par un cinquième
-point extérieur à sa miniboule, en donne une fixture géométrique d'arité quatre.
-
-Sous la porte régulière forte, une hyperarête directe possède au contraire
-exactement $\lvert U(B)\rvert\geq2$ facettes strictes. Cet invariant se valide
-**par record source avant projection**, avec le reçu de miniboule et le census
-terminal. La garde live « au moins un `R` ou `L` dans la composante » ne prouve
-pas cet invariant : un record direct tout `N` est accepté s'il est relié à un
-second record portant un `L`.
-
-Le script rend encore `PASS` pour Warshall et DSU parce que les deux chemins
-partagent la même garde fautive. Une vérité indépendante doit repartir du
-`RawBatch`, énumérer les partitions bornées et appliquer directement la table
-`q_R`/record direct. Les contrôles contractuels doivent être explicites, car
-`python3 -O` désactive encore une partie des obligations basées sur `assert`.
-
-### Owner : les rayons d'une paire se réduisent en un scan exact
-
-Pour $U=\lbrace p_0,p_1\rbrace$, les contraintes du cône signé se ramènent à des
-demi-plans centraux sur $e^\perp$. Un automate exact à six états
-`FULL/HALF/LINE/RAY/WEDGE/ZERO` maintient leur intersection en
-$O(\lvert S(v)\rvert+\lvert B_U\rvert)$ et mémoire $O(1)$. Il rend au plus deux
-rayons extrêmes et évite l'énumération puis le rescannage de chaque triplet.
-
-Cette réduction abaisse le terme owner des paires de
-$O(m^4+m^3\lvert B_U\rvert)$ à $O(m^3+m^2\lvert B_U\rvert)$. Elle ne ferme pas
-le harvest des triples, qui peut encore garder un terme $O(m^4)$. Elle ne doit
-être intégrée qu'après le P0 de largeur, avec un oracle exhaustif des rayons et
-des permutations de contraintes.
-
-### Census terminal : report exact de demi-espace en dimension quatre
-
-Pour `Sphere{base,n,d}`, poser $C=d\,\mathrm{base}+n$ et
-$N=\left\Vert n\right\Vert^2$. Le signe exact contre un point $p$ est celui de
-$F_B(p)=d^2\left\Vert p\right\Vert^2-2dC\mathbin{\cdot}p+\left\Vert C\right\Vert^2-N$.
-Après le relèvement $\varphi(p)=(p,\left\Vert p\right\Vert^2)$, le census fermé
-est donc un report de demi-espace affine dans $\mathbb{R}^{4}$.
-
-Cette construction évite toute mosaïque de Delaunay d'ordre supérieur. Le
-chemin produit doit regrouper les sphères rationnelles identiques, interroger
-une structure de report exacte une fois par sphère et rendre un statut cappé
-fail-closed. Un scan `cpp_int` borné reste l'oracle, pas l'architecture produit.
-
-## Audit des portes owner permanentes
-
-### Progrès crédités
-
-- La matrice index × owner compare maintenant statut et payload sémantique; les
-  vérités 11 du tétraèdre et 7 du triangle sont imposées.
-- La signature de permutation conserve les occurrences, les membres et les
-  multiplicités au lieu de les écraser dans un `set`.
-- `owner_signed_cone` et le cube multi-support sont permanents.
-- `dedup_table_high_water` est relevé à chaque insertion; une remise à zéro en
-  fin de calcul ne trompe plus ce compteur.
-- Le chemin owner+index+navigable garde effectivement cette table à zéro sur les
-  cinq campagnes usuelles.
-
-### Couverture encore insuffisante
-
-- `owner_signed_cone` compare la sortie, pas l'identité du sommet propriétaire.
-  Le mutant non signé échange le propriétaire de l'extrémité `z=0` avec celui de
-  `z=4`, sans changer le catalogue ni le high-water. Le commentaire source qui
-  affirme que cette fixture protège seule `eps=-1` est donc faux.
-- `same_catalogue` ne compare pas `CriticalSphere::beta`, la représentation
-  complète de la sphère, `members_begin` ni d'éventuels membres orphelins. Un
-  mutant qui décale seulement `CriticalSphere::beta` passe la porte usuelle.
-  Le message « catalogue entier » dépasse ainsi le contrat réellement testé.
-- La vérité de cardinalité du nuage coplanaire à cinq points n'est pas imposée.
-- Le différentiel owner partage navigation, census, miniboule et support
-  canonique avec sa référence. Il prouve une équivalence de déduplication
-  relative à ces primitives, pas leur exactitude géométrique indépendante.
-
-Le mode reste hybride : sans index, les singletons gardent $O(n)$ clefs; sur la
-voie directe, `emitted` peut rester en $\Theta(\text{sortie})$. Le high-water
-publié compte des entrées, pas les octets, les buckets, `kept`, `members_pool`
-ou les sommets.
-
-## Audit du noyau borné candidat device
-
-### Résultats positifs
-
-Le cœur borné concorde avec le chemin CPU sur tous les sommets admis des cinq
-portes : 328 560 sommets et 2 703 016 couples, sans divergence observée. Un
-probe séparé a pu instancier `decide_child` et produire du PTX avec Clang 18;
-c'est un signal de portabilité structurelle, pas une qualification CUDA.
-
-Le diff live sépare utilement `exhaustive_scans` de l'amorce ayant seulement
-couvert toute la grille et aligne l'API `flat_catalogue` sur la borne dure
-`kMaxRank=32`. Il tente aussi de publier des high-waters de coquille, fermeture,
-points touchés, lot et intérieur. L'intention est correcte, mais le point de
-mesure et la condition de porte ne le sont pas encore.
-
-### P1 de qualification
-
-- La porte reste vacuable : aucun plancher n'exige un nombre minimal de sommets
-  admis, de couples ou de décisions device. Si tout le bloc device disparaît,
-  `device_admitted=0` saute aussi la nouvelle vérification des high-waters.
-- Les cinq campagnes rendent zéro refus de capacité. Il manque au minimum une
-  coquille de taille 33 et un intérieur de taille 17.
-- Lors d'un refus de voisin, le harness fait `continue`; le repli hôte annoncé
-  n'est ni exécuté ni comparé de bout en bout.
-- `device_pairs` compte les tests d'admissibilité, pas les appels à
-  `device::decide_child`. L'affirmation « verdict par verdict » n'a donc pas son
-  propre compteur ni son plancher.
-- Le build v3 reste C++ hôte : aucune cible `.cu`, aucun passage `nvcc` et aucun
-  kernel exécuté ne qualifient encore le device.
-- Avec `s_max<=32`, la borne théorique de l'intérieur atteint 30, supérieure à
-  `kMaxInterior=16`. Cette capacité est licite seulement si le refus et le repli
-  hôte sont permanents et reçus.
-- La commande `--clouds 1 --points 21 --coord 100 --smax 19 --seed 1
-  --min-cases 1` rend 233 cas et zéro désaccord, avec 94 refus de capacité et un
-  high-water intérieur 17/16, puis échoue uniquement parce que la nouvelle porte
-  impose `high_water<=capacity`. Elle transforme donc un refus explicite réussi
-  en échec. La propriété utile est « tout dépassement est refusé puis rejoué sans
-  troncature », pas « aucun dépassement n'existe ».
-- Les high-waters coquille et intérieur sont relevés dans `neighbour_along`, pas
-  à chaque tentative `admit(v)` ou `admit(w)`. Sous gdb, le cube atteint `admit`
-  avec coquille 8 et intérieur 0, mais laisse ces compteurs locaux à zéro. Le
-  maximum global non nul masque cette sous-mesure.
-- `touched_high_water` est relevé après une branche de retour; sur le cube, un
-  vecteur a été rempli puis le compteur reste zéro. L'affirmation « à chaque
-  écriture » n'est donc pas satisfaite.
-- L'interface API refuse bien `s_max>32` avant la soustraction signée, mais le
-  parseur CLI accepte encore jusqu'à 4096. Avec `--clouds 0`, une demande
-  `--smax 33` peut même sortir avec succès parce que seules les fixtures fixes
-  sont exécutées. Le CLI doit partager la borne et posséder une fixture négative.
-
-Deux risques API secondaires restent à fermer : `backward_pair_admissible`
-calcule `-forward` avant de valider le domaine, donc `INT_MIN` est un overflow
-signé; et les tailles/indices publics supposent que `admit` n'est jamais
-contourné.
-
-La règle live qui traite `interior_high_water==0` comme un compteur mort peut
-également refuser un jeu parfaitement légitime dont tous les sommets admis ont
-un intérieur vide. Il faut relever les tailles exactement à chaque tentative
-d'admission et compter les échantillons; une sentinelle ou un compteur
-d'événements sépare « zéro légitime » de « instrumentation jamais exécutée ».
-
-## Résultats reproductibles du snapshot
-
-### Cinq portes usuelles Release
-
-Commande :
-
-```sh
-ctest --test-dir /tmp/mhgp3v-live-v7HQX0 --output-on-failure -R '^mhgp3v_flats_(fixtures|generic|indexed_tree|degenerate|cospherical)$' -j2
-```
-
-Résultat : **5/5**, 78,07 s de temps mur, 4 990 cas et zéro désaccord sur les
-distributions de ces portes.
-
-| porte | cas | high-water coquille / fermeture / intérieur | device admis / couples | owner émises |
-| --- | ---: | ---: | ---: | ---: |
-| fixtures | 214 | 5 / 4 / 5 | 1 578 / 13 244 | 2 405 |
-| generic | 1 187 | 8 / 5 / 7 | 110 873 / 895 952 | 63 757 |
-| indexed tree | 221 | 5 / 4 / 5 | 3 062 / 25 116 | 3 027 |
-| degenerate | 1 294 | 8 / 6 / 8 | 111 170 / 937 586 | 70 874 |
-| cospherical | 2 074 | 8 / 6 / 8 | 101 877 / 831 118 | 80 410 |
-
-Toutes rendent `refuses par capacite=0` et un high-water `emitted=0` dans le
-quadrant owner+index+navigable. Elles restent insuffisantes puisque le probe u16
-ci-dessus produit **216 cas, un désaccord** sur le même binaire.
-
-### Noyau F0
-
-L'exécution normale et l'exécution `python3 -O` impriment encore toutes deux :
+Contre-exemple géométrique permanent : sept points entiers sur la sphère de
+centre `(100,100,100)` et de rayon 25, sans quadruplet coplanaire :
 
 ```text
-exhaustive=2168 accepted=1703 rejected=465
-targeted=11 invalid=8 permutations=11 arity11=PASS
-mutations=10 rollback_faults=5 allocator_mutant_killed=True
-Gate_D_F0_kernel=PASS
+(75,100,100) (76,93,100) (76,100,93) (76,100,107)
+(80,85,100) (80,88,91) (80,91,112)
 ```
 
-Une sonde `RawBatch` du carré tout `N_a` rend pourtant `error` dans les deux
-classificateurs, tandis que `regular_smuggling` rend `ok`. Le texte `PASS` ne
-ferme donc ni la sémantique F0 ni l'indépendance de sa vérité.
+Avec le centre comme point intérieur, le sommet est valide de niveau 1. Le CPU
+non borné rend exactement $\binom{7}{3}=35$ flats. Le sujet s'arrête à 32,
+rend `kFlatOverflow` et le masque partiel `0x940800000009`; le juge ne compare
+jamais les trois flats restants. À coquille 32, le maximum générique vaut 4 960.
 
-## Ordre de fermeture recommandé à Claude
+La vacuité a été confirmée par mutation hors dépôt : forcer
+`kFlatOverflow` après chaque évaluation laisse vertes les trois campagnes, avec
+respectivement `3318/3318`, `661/661` et `573/573` sommets refusés, zéro flat,
+zéro couple et zéro désaccord. Il faut au minimum :
 
-1. Corriger la réduction `i128` vers signe et graver les deux frontières avec
-   UBSan, `-Wconversion`, unicité owner et mutant de troncature.
-2. Aligner F0 sur la naissance générale tout `N_a`; déplacer la régularité dans
-   un validateur par record authentifiant aussi miniboule et census terminal.
-3. Rendre l'oracle F0 indépendant depuis le `RawBatch` et remplacer les
-   obligations contractuelles basées sur `assert`.
-4. Tester directement l'identité owner signée et compléter le contrat de
-   comparaison du catalogue.
-5. Intégrer le réducteur linéaire des rayons, puis seulement mesurer de grandes
-   coquilles et traiter le terme d'arité trois.
-6. Rendre la porte device non vacuable, exercer les deux refus de capacité et
-   le repli hôte, puis compiler et exécuter un vrai kernel v3.
-7. Construire le census terminal exact 4D avec statuts cappés et oracle borné.
+1. des planchers séparés de nuages traités, sommets acceptés, flats, couples,
+   kernels lancés et décisions;
+2. un oracle non borné exécuté pour chaque statut;
+3. le ledger `refused = replayed + pending + fatal` par raison;
+4. l'égalité exacte, avec multiplicité, entre le CPU complet et l'union des
+   résultats committés et rejoués.
 
-Tant que les points 1 à 4 ne sont pas fermés, les résultats positifs restent
-des validations ciblées et non une autorisation de promotion.
+Les refus d'`admit`, notamment `shell>32`, sont encore plus silencieux : ils sont
+omis du batch et de `total_refused`. `kClosureOverflow` est au contraire
+impossible après admission puisque toute fermeture est incluse dans une
+coquille de taille au plus 32; ce statut doit être une violation d'invariant,
+pas un fallback normal.
 
-GCP non utilisé.
+## P1 — ce kernel ne décide pas encore la reverse-search
+
+`evaluate_vertex` énumère les flats et met deux bits d'admissibilité par flat.
+Il n'appelle ni `neighbour_along`, ni `backward_pair_admissible`, ni
+`decide_child`. Une admissibilité de retour positive ne suffit pas : un couple
+antérieur peut être admissible et imposer `Reject`.
+
+Un masque nul ne certifie même pas l'ordre. Les six premiers points de la
+fixture précédente portent 20 flats et un masque nul; toute permutation des 20
+flats conserve `(flat_count,mask)`. La porte actuelle ne voit donc pas une
+régression de clef canonique sur ce cas.
+
+Le batch n'est pas un découpage de tâches : il est la sortie matérialisée du
+parcours CPU avec `seen`. Sur la fixture à sept points, le vrai arbre parent
+possède 18 sommets et six sous-arbres racine disjoints de tailles
+`1,1,2,6,1,6`; un descendant apparaît pourtant dans le batch avant son parent
+canonique. L'indice du batch n'est ni un `task_id` structurel ni un ordre
+topologique.
+
+## P1 — contrat de job et enveloppe CUDA ouverts
+
+`WavefrontJob` transporte des pointeurs et tailles bruts sans authentifier :
+
+- le profil u16 et le digest du nuage;
+- `root_size==4` et l'indépendance de la base;
+- les bornes des identifiants;
+- coquille/intérieur triés, uniques et disjoints;
+- `level==interior_size` et les capacités;
+- les multiplications de tailles avant allocation.
+
+`point_count` n'est jamais lu par l'évaluateur. Un job
+`root_size=0, root_base=nullptr` obtient encore `kOk`; une entrée malformée peut
+donc devenir un accès hors limites device au lieu d'un `invalid_contract` avant
+lancement. Les queues et le padding de `BoundedVertex`/`WavefrontJob` ne sont
+pas initialisés avant leur copie, ce qui interdit aussi tout digest byte-stable.
+
+Le delta CMake live filtre maintenant `-Wall -Wextra -Werror` sur le seul C++ :
+c'est une correction utile. Restent à fermer avant G4 : compilateur NVIDIA et
+toolkit corrigé pour `__int128`, architecture exactement `120-real` avant
+`enable_language`, contrôle runtime du device, tous les retours CUDA, et reçu
+`nvcc/ptxas/PTX/cubin`. Le temps publié est kernel-only; il exclut allocations,
+copies et surtout la construction CPU de tout le lot.
+
+Les commentaires du nouveau CMake et des unités wavefront invoquent encore une
+ancienne implémentation comme discipline. La consultation était autorisée pour
+conseiller Claude, mais le contrat v3 doit être écrit intrinsèquement : aucun
+ancien kernel, statut ou résultat ne constitue une preuve du live.
+
+Un probe Clang 18 device-only produit du PTX structurel, mais pas pour `sm_120`;
+il déclare 144 octets de local par thread et une forte pression de registres
+virtuels. Ce résultat prouve seulement une forme compilable par Clang. Seul
+`ptxas` puis l'exécution sur G4 donneront les ressources et le débit réels.
+
+## NO-GO F0 inchangé
+
+Le script imprime encore `PASS` en exécution normale et sous `python3 -O`, mais
+Warshall et DSU partagent la même garde fautive. Une composante tout $N_a$ avec
+une `DirectHyperedge` doit créer une naissance sous le contrat général; les deux
+chemins rendent `error`. Inversement, un record direct tout $N_a$ peut être
+masqué par un second record portant un `L` dans la même composante.
+
+La solution mathématique est déjà fournie dans
+[`NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md) :
+garder le fold source-agnostique, valider la régularité par record brut avant
+projection, reconstruire une vérité indépendante depuis `RawBatch`, et
+remplacer les 27 obligations basées sur `assert` par des échecs explicites.
+
+## Résultats positifs conservés
+
+- Les cinq portes flats Release passent : 4 990 cas, 328 560 sommets admis,
+  2 703 016 couples concordants et zéro désaccord sur leur petit domaine.
+- Les quatre portes `device_wavefront` hôte passent en Release.
+- Les mêmes quatre portes passent sous ASan/UBSan; aucune alerte n'est observée
+  sur les chemins CPU exécutés.
+- Le lancement `.cu` est séparé et l'option CUDA échoue fermée en l'absence de
+  compilateur.
+- Le masque 64 bits ne décale jamais de 64 : les deux slots du flat 31 occupent
+  les bits 62 et 63.
+- `git diff --check` est vert sur le snapshot documenté.
+
+Ces crédits ne prouvent ni les refus, ni le parent, ni le voisin, ni une
+exécution device.
+
+## Aide mathématique et ordre d'implémentation transmis à Claude
+
+### 1. Réduire le microkernel exact
+
+Sous u16, chaque `orient3d` est strictement inférieur à $2^{51}$ et la somme des
+quatre orientations racine à $2^{53}$. Le microkernel entier tient donc en
+`int64_t`; `i128` reste nécessaire à `next`, pas à ce hot path.
+
+Les deux directions se calculent en un seul scan. Si
+`o_z=orient(base,z)`, la direction moins exige tous les `o_z>=0`, puis
+`o_h>0` au niveau positif ou la somme racine négative au niveau zéro; la
+direction plus emploie les inégalités opposées. Un probe CPU indépendant a
+reproduit les deux appels live sans désaccord sur les campagnes permanentes.
+
+Sur une coquille sphérique authentifiée de points distincts, trois points ne
+sont jamais collinéaires. La base canonique d'un flat est donc simplement ses
+trois plus petits identifiants. L'ordre des flats est l'ordre de ces triples.
+Pour décider le parent, chaque page réduit sa plus petite clef admissible; une
+réduction lexicographique entre pages remplace le masque fixe et reste exacte
+au-delà de 32 flats.
+
+### 2. Construire le premier vrai `next` GPU exact
+
+Baseline sans mosaïque : un bloc par `(v,closure,direction)`, premier scan de
+tout le nuage pour réduire le paramètre extrême exact en `i128`, puis second
+scan pour compacter **tous** les ex æquo du minimum en ordre d'identifiants.
+
+Fixture permanente :
+
+```text
+0=(0,0,0) 1=(4,0,0) 2=(0,4,0) 3=(0,2,2)
+4=(0,0,4) 5=(0,0,2) 6=(4,4,2)
+v: shell={0,1,2,3}, flat={0,1,2}, direction=+1
+```
+
+Le point 4, rencontré d'abord, donne l'événement plus lointain `t=2`; 5 et 6
+donnent ensemble le minimum `t=1`. Le voisin attendu est
+`shell={0,1,2,5,6}`, `interior={3}`, `level=1`. Cette fixture tue
+`first-valid-wins`, la perte d'un ex æquo, le mauvais sens et l'oubli du
+transfert intérieur. Elle contient aussi une arête parent positive et une autre
+arête à retour admissible mais rejetée par un parent antérieur.
+
+### 3. Fermer les tâches avant le débit
+
+Une tâche porte snapshot/digest, racine structurelle, sommet, curseur exact et
+segment de sortie. Ses slots d'adjacence sont tous classés; donation du
+sous-arbre, convention d'émission de sa racine et retrait du domaine du donneur
+sont un seul point de linéarisation. Le segment ne devient public qu'au commit;
+sinon un replay duplique son préfixe.
+
+Ensuite seulement viennent owner par supports, census exact cappé, runs à clef
+de niveau 384 bits, fold de lots complets et reçus 50 k/G4. La construction
+détaillée est dans
+[`NOTE_VERROUS_MATHEMATIQUES_GPU.md`](NOTE_VERROUS_MATHEMATIQUES_GPU.md).
+
+## Porte exigée avant une session G4 qualifiante
+
+La présence du `.cu` rend une future session utile, mais la porte actuelle est
+encore censurée. Avant de facturer G4 :
+
+1. fermer le replay des 35 flats et le mutant all-refused;
+2. authentifier le job et l'enveloppe CUDA;
+3. imposer des planchers acceptés/refusés/rejoués et kernels lancés;
+4. comparer les signatures complètes, pas seulement compte et masque;
+5. sceller commit, diff, toolkit, driver, architecture, binaire, PTX/cubin,
+   ressources `ptxas`, digest d'entrée et répétitions.
+
+Le reçu 50 k final doit en plus publier temps bout-en-bout par étage, octets et
+high-waters par conteneur, ledger des tâches, drains CPU, concordance exacte des
+runs et arrêt ciblé GCP certifié. Le débit kernel-only du microkernel ne peut pas
+valider le contrat industriel.
+
+GCP non utilisé pour cet audit.

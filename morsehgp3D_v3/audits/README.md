@@ -4,7 +4,7 @@ Ce dossier conserve les audits indépendants et les réponses chronologiques exp
 
 ## Lectures courantes
 
-- [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : **autorité d'audit du worktree v3 courant**, scellée par empreintes; P0 de troncature `i128` dans le signe owner avec frontières 1023/1024/1025 et 1290/1291, limites des portes owner/device, décision mathématique F0, résultats Release et ordre de fermeture destiné à Claude.
+- [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : **autorité d'audit du worktree v3 courant**, scellée sur `04555bd` et le delta CMake live; P0 owner `i128`, refus/replay censuré du premier microkernel `.cu`, NO-GO F0, résultats positifs CPU et ordre mathématique de fermeture vers `next`, parent, tâches et reçu 50 k/G4.
 - [`NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md) : aide constructive courante à Claude : distinction entre naissance F0 générale et invariant régulier par record, réducteur exact à six états des rayons owner en un scan, relèvement du census en halfspace-report 4D, preuves, fixtures et mutants.
 - [`NOTE_VERROUS_MATHEMATIQUES_GPU.md`](NOTE_VERROUS_MATHEMATIQUES_GPU.md) : architecture mathématique GPU courante : étages exacts 64/128/384 bits, décision parent parallélisable, reverse-search partitionnée sans `seen`, production terminale du voisin, owner/census, tâches transactionnelles avec replay, runs exacts et porte 50 k/G4.
 - [`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md) : résultat constructif pour le chemin rapide : classifications exactes boîte--boule en `BigInt<4>`, preuve du désaccord ternaire, contrat de propriété et porte à nœuds internes.

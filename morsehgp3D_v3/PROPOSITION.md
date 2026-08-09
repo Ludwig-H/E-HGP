@@ -29,7 +29,8 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le worktree reste `exploration_v3_hors_registre`, sur CPU et sur le profil
+Le worktree reste `exploration_v3_hors_registre`, avec CPU de référence et
+microkernel GPU candidat sous audit, sur le profil
 `quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
@@ -37,7 +38,9 @@ petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
 sans diagnostic, et les gardes de filiation distinguent maintenant les
 directions invalides et les cibles incohérentes. `kSinkStopped` sépare aussi
 l'arrêt volontaire d'une erreur scientifique. Ces campagnes ne couvrent pas la
-frontière entière u16 décrite ci-dessous.
+frontière entière u16 décrite ci-dessous. Les quatre nouvelles portes du
+microkernel passent également sur CPU; elles n'ont encore ni compilation CUDA
+ni replay des refus.
 
 Quatre verrous priment sur tout travail d'échelle; leurs constructions sont
 réunies dans la
@@ -76,7 +79,9 @@ parent u16 tient exactement en 64 bits; voisin, owner et census demandent 128
 bits; l'ordre exact des niveaux demande 384 bits ou un merge CPU. La
 reverse-search se partitionne en sous-arbres disjoints, mais chaque tâche doit
 commit ou rollback entièrement et tout refus doit rejouer le sous-arbre. Le live
-n'a encore ni `.cu`, ni kernel lancé, ni production device de `neighbour_along`.
+possède maintenant un `.cu` et un lanceur optionnel; aucun `nvcc`, kernel G4 ni
+`neighbour_along` device n'est encore reçu. Le kernel candidat ne calcule que
+les masques d'admissibilité sur des sommets déjà produits par CPU.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 
@@ -743,16 +748,19 @@ est prouvé mais non intégré, et le harvest total d'arité trois reste ouvert.
 
 Le relevé live mesure maintenant coquille et intérieur au point d'admission et
 porte la capacité intérieure à 32, cohérente avec la borne contractuelle 30. La
-campagne `smax=19` passe donc avec un intérieur 17/32. Mais la porte reste
-vacuable et n'exerce aucun refus produit : le harness fait toujours `continue`
-au lieu de rejouer le sous-arbre. Il faut une coquille 33, un ledger séparé par
-raison et l'égalité du parcours CPU avec l'union device+replay.
+campagne `smax=19` passe donc avec un intérieur 17/32. Le nouveau microkernel
+exerce aussi 27 refus de flats. Mais le harness fait `continue` avant l'oracle
+sur chacun d'eux : il prouve l'activation du statut, pas le replay ni la
+conservation. Un mutant qui refuse tous les sommets reste vert. Les refus
+d'admission sont, eux, omis du batch et du compteur.
 
-Le noyau borné ne produit pas encore ses voisins : `neighbour_along` tourne sur
-CPU, puis le résultat est copié dans la structure bornée avant le seul verdict
-de parent. Un kernel industriel doit fermer le minimum global du pinceau et le
-lot complet des ex æquo, partitionner la reverse-search en tâches disjointes et
-stager des runs exacts; aucune de ces opérations n'est reçue par le live.
+Sept points cosphériques génériques portent déjà 35 flats contre la capacité
+32. Une voie industrielle doit réduire les flats par pages ou rejouer le sommet
+entier, avec un ledger par raison et l'égalité du parcours CPU avec l'union
+device+replay. `neighbour_along` reste CPU; le `.cu` ne produit ni voisins ni
+verdicts de parent. Le kernel cible doit fermer le minimum global du pinceau et
+le lot complet des ex æquo, partitionner la reverse-search en tâches disjointes
+et stager des runs exacts; aucune de ces opérations n'est reçue par le live.
 
 Le noyau F0 matérialise volontairement Warshall et DSU pour juger un lot borné.
 Son contrat de naissance est actuellement contredit par une garde commune aux
