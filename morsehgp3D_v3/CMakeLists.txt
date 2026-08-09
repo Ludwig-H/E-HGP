@@ -42,11 +42,29 @@ target_include_directories(mhgp3v_oracle
 target_link_libraries(mhgp3v_oracle PRIVATE mhgp)
 target_compile_options(mhgp3v_oracle PRIVATE -Wall -Wextra -Wpedantic)
 
+# M3' — le juge differentiel du parcours MULTIPLICITAIRE. Il ne partage avec le
+# sujet que `mhgp::sphere_side` : ni germe, ni pinceau, ni transport.
+add_executable(mhgp3v_flats_differential prototype/flats_differential.cpp)
+target_include_directories(mhgp3v_flats_differential PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_flats_differential PRIVATE mhgp)
+target_compile_options(mhgp3v_flats_differential PRIVATE -Wall -Wextra -Werror)
+
 enable_testing()
 
 function(mhgp3v_add_expected_failure_test name expected)
   add_test(NAME ${name} COMMAND ${CMAKE_COMMAND}
            "-DPROGRAM=$<TARGET_FILE:mhgp3v_oracle>"
+           "-DEXPECTED=${expected}"
+           "-DARGUMENTS=${ARGN}"
+           -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
+endfunction()
+
+# Meme porte, mais pour un autre binaire que l'oracle. La version precedente
+# codait la cible en dur, si bien qu'un test negatif ecrit pour un autre juge
+# interrogeait silencieusement l'oracle et passait pour la mauvaise raison.
+function(mhgp3v_add_expected_failure_test_for program name expected)
+  add_test(NAME ${name} COMMAND ${CMAKE_COMMAND}
+           "-DPROGRAM=$<TARGET_FILE:${program}>"
            "-DEXPECTED=${expected}"
            "-DARGUMENTS=${ARGN}"
            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
@@ -164,6 +182,45 @@ add_test(NAME mhgp3v_oracle_order_k COMMAND mhgp3v_oracle
          --subject order_k --clouds 30 --seed 777
          --min-points 8 --max-points 14 --max-order 6
          --min-decided 10 --min-nodes 100)
+
+# ---------------------------------------------------------------------------
+# M3' — le parcours MULTIPLICITAIRE contre la verite exhaustive.
+#
+# Trois portes dans le meme binaire, et il faut les trois : le SOMMET
+# (coquille ET niveau strict), le CATALOGUE (supports canoniques et rangs) et
+# l'EQUIVARIANCE par permutation. La troisieme n'est pas cosmetique : sans elle,
+# la convention de support canonique « plus petit sous-ensemble par identifiant »
+# passe les deux premieres et publie pourtant un support different selon la
+# numerotation des points, des qu'une miniboule a plusieurs supports minimaux.
+# ---------------------------------------------------------------------------
+
+# Les fixtures aux coordonnees exactes des audits, a tous les ordres 2..8, plus
+# leur equivariance. Le plancher interdit une campagne vide.
+add_test(NAME mhgp3v_flats_fixtures COMMAND mhgp3v_flats_differential
+         --clouds 0 --min-cases 150)
+
+# Nuages generiques : c'est la porte de completude ordinaire.
+add_test(NAME mhgp3v_flats_generic COMMAND mhgp3v_flats_differential
+         --clouds 150 --points 11 --coord 24 --smax 6 --seed 4242 --min-cases 1000)
+
+# Grille SATUREE : dix points dans une boite de cote cinq. Presque tous les
+# nuages y portent des cospheries, des coplanarites et des alignements. C'est le
+# regime que l'ancien parcours censurait, et celui que celui-ci doit traverser.
+add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
+         --clouds 120 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 1000)
+
+# Nuages enrichis en points d'une meme sphere entiere : coquilles de taille
+# arbitraire et lots entrants multiples.
+add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential
+         --clouds 240 --points 8 --coord 40 --smax 7 --seed 90210 --min-cases 1400)
+
+# Interface fail-closed du juge lui-meme.
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_unknown_argument "argument inconnu" --clouds 1 --sujet-inexistant)
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_absurd_campaign "campagne absurde" --clouds 1 --smax 1)
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_empty_campaign "plancher non atteint" --clouds 0 --min-cases 100000)
 
 # Interface fail-closed : token entier partiel, reçu non ecrit et option ignoree
 # doivent tous fournir un code non nul ET le diagnostic attendu.

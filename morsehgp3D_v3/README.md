@@ -1,611 +1,296 @@
 # MorseHGP3D v3
 
-État : **M1 (le juge), M2 (le dictionnaire de profondeur) et M3 (le générateur
-par navigation)**. Le générateur M3 passe le juge exhaustif ; ce qui reste ouvert
-n'est plus l'exactitude mais le COÛT, et le §0 dit exactement où.
+État : **`exploration_v3`**. Aucun statut public, aucun SLO, aucune phase
+ouverte au registre. La promotion « M3 » annoncée au commit `2e3fa7b` est
+**retirée** : l'audit [`AUDIT_PROMOTION_M3_2E3FA7B.md`](audits/AUDIT_PROMOTION_M3_2E3FA7B.md)
+la déclare invalide, et j'ai reproduit ses quatre P0 moi-même, sur le header
+committé, contre ma propre force brute. Ils sont réels.
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
-[`audits/`](audits/) motivent les corrections ; ils ne certifient rien. Aucun
-statut public, aucun SLO n'est ouvert.
+[`audits/`](audits/) motivent les corrections ; ils ne certifient rien.
 
 ---
 
-## 0. La voie retenue : NAVIGUER dans l'arrangement, pas énumérer des ancres
+## 0. Ce qui a changé, et pourquoi ce n'était pas un détail
 
-**Décision d'architecture, prise sur mesure.** Le chemin par ancres est
-abandonné. Le clipping de Jung, une fois implémenté, a bien donné 40× moins de
-sommets à $n=160$, mais $m_e$ reste $\approx 0{,}45\,n$ : un grand facteur
-constant, **pas un ordre**. Le verrou n'était jamais le constructeur local,
-c'était les $\binom{n}{2}$ ancres — $1{,}25\cdot10^9$ paires à 50 000 points
-avant tout travail utile.
+Le parcours `order_k_bfs.hpp` coupait le graphe sur le **rang fermé**
+$\rho(v)=\ell(v)+\lvert S(v)\rvert$ et forçait le niveau du germe à zéro. Les
+deux sont faux hors position simple. Reproduit ici, sans rien modifier au
+header committé :
 
-**On change d'objet.** Par le relèvement $\varphi(p)=(p,\lVert p\rVert^2)$, une
-sphère devient un hyperplan et « intérieur » devient « en dessous ». Un sommet de
-l'arrangement des $n$ hyperplans de $\mathbb{R}^4$ est une sphère passant par
-quatre points, et son **niveau** est le nombre de points strictement intérieurs :
+| fixture | ce que le parcours committé rend | la vérité exhaustive |
+| --- | --- | --- |
+| cube cosphérique, $s_{\max}=2$ | 8 sphères (les singletons) | **20** — les 12 boules diamétrales d'arêtes manquent |
+| coquille constante, $s_{\max}=2$ | 6 | **15** |
+| témoin coplanaire, tout $s_{\max}$ | 0, nuage déclaré hors domaine | 12 à 23 selon l'ordre |
+| $n=2$ / $n=3$ | 2 / 3 | **3** / **6** |
 
-$$\text{catalogue de rang fermé} \leq s_{\max}\ =\ \text{le } \leq k\text{-niveau},
-\qquad \text{rang} = 4 + \text{niveau}.$$
+Le cube dit tout en une ligne : coquille 8, niveau 0, rang fermé 8. Le sommet
+est de **niveau zéro** — il ne peut pas être plus superficiel — et la coupe par
+rang fermé le supprimait avant toute navigation, emportant avec lui les douze
+arêtes du cube. Une grande coquille ne peut jamais être coupée : elle porte la
+connectivité.
 
-On ne l'énumère pas, on le **parcourt**. Deux sommets voisins partagent trois
-points ; l'arête qui les joint est le pinceau des sphères passant par ce
-triangle, et le long de ce pinceau **un seul point change d'état**. Le niveau ne
-se recalcule donc jamais : il se transporte en $\pm1$. C'est ce qui rend le coût
-proportionnel à la sortie et non à $n^2$.
+Le témoin coplanaire dit l'autre moitié : un point coplanaire à la face
+d'enveloppe et strictement **intérieur** à son cercle circonscrit est intérieur
+à toutes les sphères du pinceau. Le germe stockait 0 là où le census exact donne
+1 ; le niveau transporté finissait par passer sous zéro, et le nuage entier
+partait « hors domaine ». C'est l'explication locale et permanente des sorties
+G4 à 8 000 et 20 000 points.
 
-Tout l'ordre du pinceau se lit en prédicats InSphere entiers, sous $2^{91,2}$ sur
-la grille u16 — aucun centre rationnel, aucune division :
-$$\mathrm{sgn}(t_z-t_w)=o(w)\cdot\bigl[\,w\ \text{intérieur à}\ \mathrm{sph}(a,b,c,z)\,\bigr]^{\pm}.$$
-Le germe est une **face de l'enveloppe convexe**, où le pinceau part d'un
-demi-espace vide : le premier point rencontré donne un tétraèdre de Delaunay, de
-niveau zéro par construction.
+**Le nouveau fichier est [`prototype/order_k_flats.hpp`](prototype/order_k_flats.hpp).**
+`order_k_bfs.hpp` est conservé tel quel : les audits le référencent par
+empreinte, et le réécrire effacerait leurs constats.
 
-**Les dégénérescences sont traitées, pas exclues.** Un nuage LiDAR quantifié de
-500 points contient déjà une cosphéricité à cinq points *dans* le
-$\leq k$-niveau. Un sommet porte donc sa **coquille entière** : les points de même
-paramètre entrent ensemble, et les arêtes incidentes d'un sommet dégénéré sont
-indexées par les 3-sous-ensembles de sa coquille. Le critère de criticité devient
-alors uniforme et sans cas particulier : **une boule est critique si et seulement
-si elle est la miniboule de sa coquille**, et son support HGP est celui de cette
-miniboule.
+---
 
-### Ce qui est établi
+## 1. Les quatre grandeurs, et ce que chacune a le droit de décider
 
-- Le parcours **coïncide exactement avec la force brute** sur 275 nuages,
-  $s_{\max}$ de 4 à 18, profils uniforme et LiDAR, zéro désaccord.
-- Le catalogue complet — arités 1 à 4, forêts, niveaux exacts — passe le **juge
-  exhaustif** de M1.
-- Le chemin rapide (grille + certification par union de deux boules) est jugé
-  **différentiellement contre la référence**, lui est identique partout où la
-  référence est calculable, et se replie sur un balayage exhaustif plutôt que de
-  rendre un faux vert.
+Pour $x=(c,t)\in\mathbb{R}^4$ et le relèvement $\varphi(p)=(p,\lVert p\rVert^2)$, posons $L_i(x)=t-2c\cdot p_i+\lVert p_i\rVert^2$.
 
-### Ce que la mesure dit du contrat 50 k
+| grandeur | définition | seul usage autorisé |
+| --- | --- | --- |
+| niveau strict $\ell(v)$ | $\lvert\lbrace i:L_i(v)<0\rbrace\rvert$ | coupe du graphe, potentiel de parcours |
+| coquille $S(v)$ | $\lbrace i:L_i(v)=0\rbrace$, taille variable | clef géométrique du sommet, fermetures de flats |
+| rang fermé $\rho(v)$ | $\ell(v)+\lvert S(v)\rvert$ | **filtre de publication seulement** |
+| support HGP $U^\star$ | $\subseteq S(v)$, $1\le\lvert U^\star\rvert\le4$ | arité, forêt, sérialisation |
 
-**[mesuré]** $s_{\max}=11$, profil LiDAR à densité fixe et emprise
-$\propto\sqrt n$ (garder l'emprise fixe rendrait le nuage quasi coplanaire aux
-petits $n$ et mesurerait un régime dégénéré) :
+### Les arêtes sont des flats fermés de rang trois, pas des triplets
 
-| grandeur | valeur | conséquence à 50 k |
-| --- | ---: | --- |
-| sommets du $\leq k$-niveau | **700 à 740 par point** | $3{,}5\cdot10^7$ |
-| dont **critiques** | **7,3 à 10,6 par point** (1,1 %) | $\approx4\cdot10^5$ |
-| tétraèdres de Delaunay | 6,3 par point | conforme |
-| rayon des sphères | médiane 77, critique max 90 | pour un pas de 25 |
-| candidats par requête (rapide) | 18 à 24 ($n\leq400$) | contre $n-4$ auparavant |
+Une arête de l'arrangement est une droite $F$, intersection de trois hyperplans
+indépendants ; sa fermeture $C(F)=\lbrace i:F\subseteq H_i\rbrace$ est, dans la
+géométrie des points, l'ensemble des points de la coquille situés dans un même
+**plan** — donc sur un même cercle de la sphère. Les arêtes incidentes à $v$
+sont en bijection avec les **plans distincts** engendrés par au moins trois
+points non alignés de $S(v)$, et non avec les $\binom{m}{3}$ triplets.
 
-Deux lectures, et elles ne vont pas dans le même sens.
+La transition est $S(w)=C(F)\cup A$, où $A$ est le lot des points atteignant
+simultanément le paramètre suivant. Le transport du niveau se fait par lots et
+ne suppose jamais qu'un seul point change d'état :
 
-**La sortie est petite** : environ $4\cdot10^5$ sphères critiques à 50 000 points.
-Rien là-dedans n'interdit la seconde, ni même les 100 ms.
+$$B_e=B(v)\cup\lbrace i\in S(v)\setminus C:\ i\ \text{intérieur sur l'arête}\rbrace,\qquad B(w)=B_e\setminus\lbrace i\in A:\ i\ \text{intérieur sur l'arête}\rbrace.$$
 
-**Mais le parcours visite 100× la sortie.** C'est le fait central, et il est
-propre au LiDAR : un relevé est localement une surface, donc ses tétraèdres sont
-massivement des *slivers*, jamais bien centrés — 98,9 % du parcours est jeté. Une
-coupe en rayon n'y change rien, elle n'ôte que 35 % des sommets : ces slivers ne
-sont pas gros, ils sont **plats**. Et l'énumération de la Delaunay d'ordre
-$\leq k$ reste à ce jour le seul chemin exact connu vers ces sphères critiques.
-La localité qui autoriserait une énumération directe est **fausse dans le pire
-cas** — un amas juste à l'extérieur d'une sphère vide écarte arbitrairement loin,
-dans l'ordre des plus proches voisins, deux points d'un même support — même si
-elle est mesurée bonne en pratique : rang NN médian 35, maximum 88.
+Le niveau d'un voisin varie donc de $-1$, **$0$** ou $+1$. La variation nulle est
+réelle ; l'ancien commentaire « $\pm1$ » était faux.
 
-### Le contrat, chiffré
+### Le plafond est le niveau STRICT $s_{\max}-2$
 
-**[mesuré]** chemin rapide, un cœur, profil LiDAR, `g++ -O3 -march=native` sur
-G4 (48 vCPU, un seul utilisé) :
+C'est le **théorème de propriétaire** de
+[`AUDIT_VOIE_MULTIPLICITES_ORDER_K.md`](audits/AUDIT_VOIE_MULTIPLICITES_ORDER_K.md) §6 :
+en dimension affine trois, tout support indépendant $U$ d'arité $q$ est contenu
+dans un sommet $o(U)$ avec $B(o(U))\subseteq B_U$, donc $\ell(o(U))\le d_U\le s_{\max}-q\le s_{\max}-2$.
+Naviguer selon $\ell\le s_{\max}-2$ et récolter les sous-ensembles de taille 2 et
+3 des coquilles visitées suffit donc — un propriétaire peut porter une coquille
+de taille huit ou cinquante, il est traversé quel que soit son rang fermé.
 
-| $n$ | $s_{\max}$ | sommets | candidats/requête | temps |
-| ---: | ---: | ---: | ---: | ---: |
-| 2 000 | 11 | 1 477 918 | 48 | 54 s |
-| 8 000 | 11 | 6 217 704 (777/pt) | 95 | **390 s** |
-| 50 000 | 5 | 1 320 545 (26/pt) | 275 | **180 s** |
+Les 4-sous-ensembles ne sont **pas** récoltés, et c'est démontrable : si le
+support canonique a quatre points il est affinement indépendant, sa sphère est
+le sommet lui-même et sa coquille est $S(v)$, que `try_emit(v.shell)` publie ;
+si quatre points de la coquille sont coplanaires, leur miniboule a un support
+d'au plus trois points et la récolte d'arité trois la publie.
 
-Il faut le dire nettement : **le contrat 50 000 points / $K=10$ / une seconde
-n'est pas atteint, et l'écart n'est pas un facteur d'implémentation.** En
-extrapolant $n=8\,000$ — $777$ sommets par point, coût par requête croissant —
-un cœur demanderait quelques heures à $K=10$, et 48 cœurs quelques minutes. À
-$K=4$ le même nuage de 50 000 points prend 180 s sur un cœur, donc de l'ordre de
-5 s sur 48 : le contrat devient plausible aux petits ordres, pas à $K=10$.
+### La connexité de $\lbrace\ell\le k\rbrace$ est acquise, et pas par ce dépôt
 
-Trois faits expliquent l'écart, et aucun n'est un défaut de codage :
+Elle est démontrée dans
+[`AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md`](audits/AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md),
+pour un arrangement fini d'hyperplans non verticaux possédant au moins un
+sommet — ni le relèvement parabolique, ni la simplicité ne sont requis. Le
+parcours en tire le droit de partir d'un **seul** germe de niveau zéro.
+L'ancien fichier disait explicitement ne pas la démontrer ; ce n'est plus
+l'oracle qui porte cette charge.
 
-1. le $\leq k$-niveau croît vite en $s_{\max}$ — 26 sommets par point à
-   $s_{\max}=5$, 777 à $s_{\max}=11$ ;
-2. le parcours en jette 98,9 % (les slivers de surface ne sont jamais bien
-   centrés) ;
-3. le coût d'une requête de pinceau croît encore avec $n$ (18 à $n=400$, 95 à
-   $n=8\,000$), parce que l'amorce doit balayer la sphère balayée tant qu'aucun
-   candidat n'est trouvé.
+---
 
-**[obligation]** ramener le facteur 100 entre travail et sortie, ou démontrer
-qu'il est incompressible. C'est désormais la seule question qui sépare du
-contrat, et elle est mathématique avant d'être technique.
+## 2. Le germe est certifié, il ne l'est plus par décret
 
+La correction n'est pas de compter les points coplanaires intérieurs : c'est de
+les rendre **impossibles**. On prend une face support de l'enveloppe, puis dans
+son plan un triangle **de Delaunay** du sous-nuage coplanaire — cercle
+circonscrit vide dans ce plan. Toute sphère du pinceau coupe ce plan selon ce
+cercle : aucun point coplanaire n'est jamais intérieur, et le premier lot
+rencontré depuis le demi-espace vide est de niveau zéro **par construction**.
 
-## 1. Ce qui est établi, et par quelle mesure
+Deux prédicats nouveaux, tous deux entiers exacts :
 
-**Le générateur de la v2 est condamné**, pas lent. Son voisinage est dimensionné
-par une borne *a priori* (relaxation conique du théorème 4) qui vaut $+\infty$
-dès qu'un cône est trop pauvre : $\lvert W_p\rvert = n-1$ à tout $K$, mesuré, et
-un coût en $\Theta(n^5)$. Même le théorème 4 exact ($\theta=0$) demanderait encore
-175 voisins à $n=50\,000$, soit $4{,}4\cdot10^{10}$ quadruples.
+- **cocircularité coplanaire** : déterminant $4\times4$ dont les lignes sont $(b-a,\lVert b-a\rVert^2)$, $(c-a,\lVert c-a\rVert^2)$, $(u,0)$ et $(d-a,\lVert d-a\rVert^2)$ avec $u=(b-a)\times(c-a)$. La ligne $(u,0)$ force le centre dans le plan ; le signe est invariant par échange de $b$ et $c$ et négatif signifie strictement intérieur au cercle. Borne $2^{108,8}$, donc `i128`.
+- **descente de rayon** : si $d$ est intérieur au cercle de $(a,b,c)$, l'un des trois triangles $(a,b,d)$, $(b,c,d)$, $(c,a,d)$ a un cercle strictement plus petit. Prendre le minimum exact — `sphere_cmp_beta` — fait décroître strictement une quantité prise dans un ensemble fini : la boucle termine et s'arrête quand le cercle est vide.
 
-**Le rang est une profondeur d'arrangement.** C'est l'invariant qui a survécu à
-tous les audits, sous ses deux formes : ancré par arête, dans le plan médiateur,
-$\mathrm{rang}=4+c_e+\delta_e(t)$ avec $Z_e\leq m_e(\kappa_e+1)$ ; ancré par
-point, dans le dual inversif, $\mathrm{rang}=(4-j)+\mathrm{profondeur}$ sur une
-face de dimension $j$. C'est ce qui permet de calculer le rang **pendant** la
-génération au lieu de l'interroger après.
-
-**Il n'existe aucune règle d'arrêt valide fondée sur les seules distances.** Un
-certificat de localité a été proposé, puis **réfuté par le juge** : un support
-inconnu employant un point exclu vérifie précisément $2r\geq d_{M+1}$, donc le
-maximum des rayons déjà trouvés ne le borne pas. La complétude d'un générateur
-ancré exige soit l'**exhaustivité**, soit un majorant de $R(p)$ — fini
-($R\leq\mathrm{diam}(X)$) mais qu'il reste à calculer.
-
-**Mesure honnête de la fenêtre qui aurait suffi** (régime exhaustif,
-$s_{\max}=11$, calculée *a posteriori* depuis le vrai $r_{\max}$) :
-
-| $n$ | p50 | p95 | max | sphères/point |
-| ---: | ---: | ---: | ---: | ---: |
-| 100 | 53 | 77 | 96 | 167,7 |
-| 150 | 64 | 97 | 124 | 190,9 |
-| 200 | 73 | 125 | 141 | 210,3 |
-
-Elle **croît encore** : rien n'en est extrapolé.
-
-**Un majorant du travail d'un parcours, et rien de plus.** En comptant les
-**incidences support–ancre** — candidats affinement indépendants de rang fermé
-$\leq s_{\max}$, produits par la cascade exhaustive — contre ce qui est émis
-(régime exhaustif, $s_{\max}=11$) :
-
-| $n$ | incidences | bien centrées | émises | **incidences / émise** | candidats / émise |
-| ---: | ---: | ---: | ---: | ---: | ---: |
-| 60 | 108 960 | 22,2 % | 7 520 | **14,49** | 273 |
-| 100 | 232 544 | 23,5 % | 16 767 | **13,87** | 965 |
-| 150 | 398 999 | 23,5 % | 28 637 | **13,93** | 2 889 |
-
-Un parcours toucherait $\approx14$ incidences par sphère émise, **constant en
-$n$**,
-là où la cascade en visite 273, 965 puis 2 889 — **croissant linéairement**. Le
-gain attendu est donc $\approx19\times$ à $n=60$, $70\times$ à 100 et
-$208\times$ à 150. C'est l'argument chiffré pour construire le constructeur de
-strates, et c'est la cible que PEL-2 doit atteindre.
-
-**Le dictionnaire de profondeur est vérifié.** C'est l'énoncé central de
-l'architecture, et il ne l'avait jamais été. Le sujet `edge_shallow` calcule le
-rang fermé des supports de taille quatre **exclusivement** par
-
-$$\mathrm{rang} = 4 + c_e + \delta_e(t),$$
-
-sans jamais compter les points de la boule : dans le plan médiateur de l'arête
-d'ancrage, chaque point devient une forme **affine à coefficients entiers**
-($a_x = b_1\cdot X$, $b_x = b_2\cdot X$, $c_x = \lVert X\rVert^2 - D^2$ avec
-$X = 2x-p-q$), et la profondeur d'un sommet est un comptage de signes. Tout tient
-dans un `i128` sans allocation — les largeurs sont bornées au §fichier.
-
-Le vert du juge exhaustif **est** la vérification — mais seulement si le test
-exerce autre chose que le cas trivial, et la première version ne le faisait pas.
-`--max-order 3` tire l'ordre **uniformément**, donc la plupart des nuages avaient
-$s_{\max}\leq3$, où tout support d'arité 4 accepté force $c_e=0$ et
-$\delta_e=0$ : le vert ne prouvait que $\mathrm{rang}=\text{arité}$.
-
-La porte impose désormais un ordre élevé **et** un plancher d'émissions à
-profondeur strictement positive. **[mesuré]** 12 nuages, ordres 5–6, grille
-déclarée :
+**Un piège trouvé en chemin, et il n'était pas prévu par les audits.** La
+rotation d'emballage autour de l'axe $(p_0,p_1)$ ne peut pas se décider au seul
+signe de `orient3d` : ce prédicat ne voit un plan qu'à $\pi$ près, donc deux
+candidats situés **dans** le plan vertical support mais de part et d'autre de
+l'axe sont déclarés à égalité alors que leurs angles valent $0$ et $\pi$. La
+passe partait du mauvais côté. Le nuage qui l'a exhibé, sur 3 000 tirés :
 
 ```text
-rangs emis par profondeur : rang2=500 rang3=756 rang4=965 rang5=1053
-                            rang6=983 rang7=522
-profondeur>0 : 3619 | constante interieure>0 : 0 | DICTIONNAIRE REFUTE=0
+(26,30,33) (27,30,34) (27,30,26) (34,30,33) (30,33,26) (25,30,25) (35,31,30)
 ```
 
-Une réfutation est comptée et fait échouer la campagne, plutôt que d'omettre le
-support en silence. La colonne « constante intérieure » reste nulle : elle exige
-un point **colinéaire** à l'arête d'ancrage et intérieur à la boule diamétrale,
-de mesure nulle sur une grille aléatoire — il faudra une fixture dédiée, et
-jusque-là cette branche n'est **pas** exercée.
+La correction classe l'angle explicitement : avec $e=p_1-p_0$, $g=(-e_y,e_x,0)$
+la normale intérieure du plan vertical support et $f=g\times e$, l'angle vaut
+$0$ si $(w\cdot g=0,\ w\cdot f>0)$, $\pi$ si $(w\cdot g=0,\ w\cdot f<0)$, et il
+est dans l'intervalle ouvert sinon, où `orient3d` redevient un ordre total. La
+fixture est permanente sous le nom `germe_demi_tour`.
 
-**Les quatre arités**, désormais, et donc **tout le catalogue** :
-
-| arité | point canonique dans le plan médiateur | rang |
-| ---: | --- | --- |
-| 1 | sans objet, sphère de rayon nul en $p$ | $1$ |
-| 2 | $s=0$, la boule diamétrale ; $\delta_e$ compte les $c<0$ | $2+c_e+\delta_e$ |
-| 3 | $s = c\,\mathrm{adj}(G)\,n / Q$, $Q=n^{\mathsf{T}}\mathrm{adj}(G)\,n>0$ | $3+c_e+\delta_e$ |
-| 4 | intersection de deux droites actives | $4+c_e+\delta_e$ |
-
-Le chemin exhaustif a entièrement disparu du sujet `edge_shallow` : **aucun rang
-n'y est obtenu en comptant une boule.**
-
-Deux obstacles de largeur ont été réglés en chemin, sans quitter les entiers
-natifs. La base orthogonale naturelle $b_2=d\times b_1$ porte un facteur
-$\lVert d\rVert$ de trop et faisait monter $Q$ à $2^{136{,}4}$ ; on prend donc
-$b_1=d\times e_1$, $b_2=d\times e_2$ avec $e_1,e_2$ les deux axes **autres** que
-la composante dominante de $d$ — indépendants car
-$d\cdot(e_1\times e_2)=\pm d_{e_3}\neq0$, tous deux de taille $\lVert d\rVert$,
-au prix d'une matrice de GRAM non diagonale. $Q$ retombe alors sous $2^{104}$,
-et seul le test de profondeur de l'arité 3, à $2^{140{,}4}$, demande 256 bits —
-fournis par `mul128`, sans allocation.
-
-**Fixtures permanentes** (23 tests, dont 4 hérités de la v2) : la non-régression du faux certificat — sous
-une fenêtre supposée trop étroite, le générateur doit se **déclarer incomplet**,
-sans quoi un certificat erroné aurait été réintroduit ; le refus des campagnes
-négatives vacues ; les bornes sémantiques du CLI, `--max-order 2147483647`
-débordant dans `maximum_order + 1` ; et une **cocyclicité portée uniquement par
-des triangles non bien centrés**, qui ne met pas le domaine hors `RelevantGP` —
-le prototype la comptait à tort comme dégénérescence et censurait le nuage.
+Un échec de germe rend `germe_non_certifie` avec son **étape**, jamais un germe
+faux. `CloudStatus` remplace le booléen `out_of_domain` : dimension affine
+inférieure à trois et moins de quatre points ne sont plus des erreurs mais une
+**voie directe exhaustive**, exacte et déclarée.
 
 ---
 
-## 2. La voie la plus pertinente pour la v3
+## 3. Le support canonique n'est pas unique, et la convention naturelle est fausse
 
-> **Construire le sous-complexe shallow stratifié, et y lire le rang comme une
-> profondeur.** Tout le reste en découle, et rien d'autre n'a survécu aux audits.
+Une miniboule peut avoir **plusieurs** supports minimaux : le cube cosphérique
+en a quatre, ses quatre paires antipodales. Trois conventions, mesurées :
 
-### Ce que cela veut dire précisément
-
-L'objet **n'est pas** $V_k(p)$ vu comme un sous-ensemble de $\mathbb{R}^3$ :
-pris comme ensemble, il efface les hyperplans intérieurs séparant deux cellules
-toutes deux de profondeur $\leq k$. Contre-exemple minimal : $X=\lbrace p,u\rbrace$
-et $k=1$ donnent $V_1(p)=\mathbb{R}^3$, dont la frontière n'a aucune 2-face —
-alors que le plan médiateur $H_u$ existe et que son milieu porte la sphère
-critique de support $\lbrace p,u\rbrace$.
-
-L'objet est le **sous-complexe stratifié** : les faces de l'**arrangement** dont
-la profondeur est $\leq k$, chacune avec sa dimension, et les quatre arités
-traitées **séparément** (une preuve d'arité quatre ne se propage jamais à
-l'arité trois).
-
-### Les deux ancrages, et ce qui les sépare
-
-| | ancré par **arête** (A2e) | ancré par **point** (A2p) |
-| --- | --- | --- |
-| dimension de l'arrangement | 2 | 3 |
-| complétude de l'ancrage | **conditionnelle** à une source complète de paires diamétrales | **par construction** |
-| borne de sortie | $Z_e\leq m_e(\kappa_e+1)$, classique | $O(m_p K^2)$ par ancre ; sans certificat local $m_p=n-1$ |
-| coût du prédicat exact | plus faible | plus élevé |
-
-A2e est le cœur algorithmique ; sa complétude est otage de **A1-source**, que le
-RNG d'ordre borné ne peut pas fournir (théorème négatif du dépôt). A2p n'a pas ce
-problème et pourrait fournir ces ancres — c'est l'hypothèse **A2pe** — mais elle
-n'est pas démontrée.
-
-### Ce qui tranche, et rien d'autre
-
-| obligation | ce qu'elle décide |
+| convention | résultat |
 | --- | --- |
-| **PEL-1** | les 2-faces de l'arrangement **contiennent-elles** toutes les arêtes utiles ? L'inclusion suffit — des plans superflus sont permis. Si oui, A1-source disparaît. |
-| **PEL-2** | le parcours est-il en $O(\text{entrée} + \text{sortie})$, et non $O(\text{sortie}\times m)$ ? Le terme d'entrée est obligatoire. |
-| **PEL-3** | traitement exact des strates non bornées. L'énoncé « non bornée $\Rightarrow$ pas de sphère finie » est **réfuté** par la fixture à deux points ; l'obligation est le traitement, pas l'énoncé. |
-| **PEL-4** | que coûte le prédicat exact en 3D contre 2D ? C'est l'arbitrage A2pe / A2e. |
+| lire le support sur le candidat qui a servi à découvrir la sphère | la force brute annonce $\lbrace2,5\rbrace$, la navigation $\lbrace0,7\rbrace$, pour la même sphère |
+| le lire sur la coquille triée par **identifiant** | équivariant mais **pas invariant** : une seule permutation suffit à changer la sortie sur `cube`, `constant_shell_members`, `coplanaire_pur` et `germe_demi_tour` |
+| le lire sur la coquille triée par **coordonnées** | invariant ; c'est la convention retenue |
 
-Le prochain artefact décisif est donc **un constructeur exact du sous-complexe
-stratifié, comparé exhaustivement à petit $n$** — pas un pipeline, pas de CUDA,
-pas de réducteur. Écrire un pipeline avant de savoir si le parcours est sensible
-à la sortie, ce serait refaire exactement l'erreur de la v2 : construire un
-substitut, puis mesurer.
+C'est la porte ouverte n°10 du contrat d'audit. La convention retenue ne dépend
+plus que de l'ensemble de points ; reste hors contrat le cas de deux points de
+coordonnées identiques, dégénérescence déclarée à part.
 
-### Ce que la v3 ne fera pas
-
-Aucune mosaïque de Delaunay d'ordre supérieur, aucun $\Gamma$ global, aucune
-matrice paire–point, aucun catalogue géométrique matérialisé. En revanche le tri
-global exact et le groupement des niveaux égaux sont **inévitables** : des ancres
-indépendantes n'émettent pas en ordre monotone, et le réducteur exige un lot
-atomique par niveau rationnel.
-
-Le détail, les budgets et le journal des affirmations retirées sont dans
-[`PROPOSITION.md`](PROPOSITION.md) ; le plan est à son §13.
+L'ordre de sérialisation est désormais **lexicographique sur les quatre cases**
+de `support`, queue remplie de $-1$ — jamais par arité d'abord. Deux générateurs
+qui trient différemment produisent des catalogues sémantiquement égaux mais
+d'indices différents, et `ForestNode::source` est un indice.
 
 ---
 
-## 2 bis. La question ouverte : 50 000 points, $K=10$, une seconde
+## 4. Ce qui est jugé, et par quoi
 
-**Question posée aux audits.** Le contrat est-il atteignable, et sous quelles
-conditions ? Je ne peux pas encore répondre, et c'est un progrès : la question
-est enfin bien posée.
+`mhgp3v_flats_differential` compare le sujet à une vérité écrite dans le même
+fichier mais qui ne partage avec lui **que** `mhgp::sphere_side` : ni germe, ni
+prédicat de pinceau, ni transport. Trois portes, et il faut les trois :
 
-### Ce qui est acquis
+1. **le sommet** — tous les sommets d'arrangement énumérés en force brute, groupés par coquille, filtrés au niveau strict, comparés sur le couple (coquille, **niveau**) ;
+2. **le catalogue** — tous les sous-ensembles de taille au plus quatre, miniboule, census exact, déduplication par coquille, support canonique ;
+3. **l'équivariance** — renuméroter le nuage ne doit rien changer.
 
-L'énoncé central n'est plus une conjecture : **le rang est une profondeur**,
-vérifié contre la vérité exhaustive sur la grille déclarée, en arithmétique
-entière tenant dans un `i128`. C'est la brique sur laquelle tout repose.
-$Z_e\leq m_e(\kappa_e+1)$ est une **borne classique**, pas une hypothèse.
+Le census exact par sommet est actif pendant toute la campagne : le transport
+n'est jamais autorité, il est confirmé ou réfuté à chaque sommet.
 
-### Ce qui manque, et ce n'est pas un détail
+**[mesuré]** trois campagnes, `-O2`, coordonnées entières :
 
-Le prototype forme encore **toutes les paires de droites**, $O(m_e^2)$ par arête.
-Il vérifie le dictionnaire ; il ne réalise pas le parcours. Or c'est le parcours
-qui décide du contrat, et il n'existe pas.
+| campagne | nuages | points | grille | $s_{\max}$ | cas | désaccords |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| générique | 2 500 | 12 | $[0,26)$ | 2 à 7 | 18 902 | **0** |
+| grille saturée | 1 500 | 10 | $[0,5)$ | 2 à 8 | 13 277 | **0** |
+| fixtures + cosphéricités forcées | — | 4 à 12 | — | 2 à 8 | 902 | **0** |
 
-### Les trois inconnues qui trancheraient
+La grille saturée est le régime qui compte : dix points dans une boîte de côté
+cinq, donc presque tous les nuages portent des cosphéricités, des coplanarités
+et des alignements. C'est ce que l'ancien parcours censurait.
 
-| inconnue | pourquoi elle décide | statut |
-| --- | --- | --- |
-| $\sum_e m_e$ et $\sum_e Z_e$ sur un vrai nuage à l'échelle | c'est le travail réel du parcours | **non mesuré** |
-| coût du prédicat de profondeur par candidat | convertit le travail en secondes | non mesuré |
-| volume **aval** : incidences silencieuses, tri global, lots, verticales | jamais chiffré, et il peut dominer | non mesuré |
+**Fixtures permanentes**, aux coordonnées exactes publiées par les audits :
+`coplanar_constant_witness`, `cube`, `constant_shell_members`, `bridge_shell5`,
+`unreachable_extra_shell`, `noncritical_shell_tie`, `unit_increment_refutation`,
+`non_well_centred_vertex`, `regular_tetrahedron`, `giant_centre_det1`,
+`radius2_of_P0`, `well_centred_not_small`, `Q1_decisive`,
+`partial_catalogue_on_reject`, `base_n2`, `base_n3`, `coplanaire_pur`,
+`germe_demi_tour`, `germe_arete_traversee` — chacune à tous les ordres 2 à 8,
+plus son équivariance.
 
-À quoi s'ajoutent deux verrous indépendants du parcours : **A1-source**, dont
-aucune version complète et sparse n'est démontrée — le RNG d'ordre borné en est
-exclu par théorème — et le **tri global exact** par niveau rationnel, inévitable
-parce que des ancres indépendantes n'émettent pas en ordre monotone.
+### Ce qui n'est PAS jugé
 
-### Mon estimation, donnée comme telle
-
-Une seconde sur 48 cœurs me paraît **plausible mais non acquise** ; 100 ms
-exigerait le GPU de bout en bout. Ce n'est pas une mesure, et aucune décision ne
-doit s'y appuyer.
-
-### Un obstacle concret trouvé en route, pour les arités 2 et 3
-
-Le dictionnaire n'est vérifié qu'à l'**arité 4**, et il ne s'y propage pas
-automatiquement (les arités ont leurs propres régions et seuils). En dérivant
-l'arité 3, un obstacle précis apparaît. Le circumcentre du triangle est le point
-de la droite $h_z=0$ situé dans le plan du triangle ; comme
-$b_1\cdot b_2 = b_1\cdot(d\times b_1) = 0$, la matrice de \textsc{Gram} est
-**diagonale**, ce qui donne une direction entière
-$v=(a\lVert b_2\rVert^2,\ b\lVert b_1\rVert^2)$ et le paramètre $c/Q$ avec
-$Q=a^2\lVert b_2\rVert^2+b^2\lVert b_1\rVert^2$.
-
-Mais $Q<2^{136{,}4}$ sur la grille déclarée : **l'arité 3 ne tient pas dans un
-`i128`**, là où l'arité 4 y tient ($<2^{123{,}6}$). Il faudra soit un grand
-entier borné, soit une base $b_2$ mieux échelonnée. C'est un fait de largeur, pas
-une difficulté de principe — et c'est exactement le genre de chose qu'il vaut
-mieux savoir avant d'écrire le code.
+- L'oracle M1 n'a **pas** été étendu à ce sujet. Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. L'étendre aux multiplicités est un travail à part, et il doit être audité.
+- Aucun accélérateur spatial n'est branché : la requête de pinceau balaie le nuage entier. Le contrat *fail-open* de [`AUDIT_FILTRAGE_SPATIAL_NUMERIQUE_ORDER_K_4EF89A1.md`](audits/AUDIT_FILTRAGE_SPATIAL_NUMERIQUE_ORDER_K_4EF89A1.md) s'appliquera quand il le sera ; les P0 de `Grid::ball` restent donc **ouverts et non contournés**, simplement hors du chemin.
+- Pas de forêts, pas de reverse search, pas de propriétaire calculé : la récolte déduplique encore par une table globale de coquilles.
 
 ---
 
-## 2 ter. Question mathématique ouverte : construire le préfixe shallow
+## 5. Le contrat 50 000 points, $K=10$, une seconde
 
-**Adressée aux audits.** Le dictionnaire est acquis ; le **parcours** ne l'est
-pas, et c'est lui qui décide du contrat. Voici la question exactement, avec sa
-réduction.
+### Une correction qui change l'arithmétique de la question
 
-### La réduction au dual
+**Le rapport 100:1 entre travail et sortie était un artefact.** Il comparait les
+sommets visités à un compteur de sphères critiques produit par la récolte
+défaillante, qui omettait l'essentiel des arités deux et trois. Mesuré sur le
+catalogue complet et vérifié contre la force brute, le rapport réel est
+d'environ **17:1**.
 
-Pour une arête d'ancrage, chaque point donne une droite $a s_1 + b s_2 = c$ à
-coefficients entiers, et « strictement intérieur » s'écrit
-$(s_1,s_2,-1)\cdot(a,b,c) > 0$. En envoyant la droite sur le point dual
-$(a,b,c)\in\mathbb{Z}^3$ :
+Ce n'est pas une bonne nouvelle déguisée : la sortie est six fois plus grosse
+qu'annoncé. Le travail total, lui, n'a pas bougé.
 
-$$\delta_e(s) \;=\; \#\lbrace\, \text{points duaux dans le demi-espace ouvert de normale } (s_1,s_2,-1)\,\rbrace,$$
+**[mesuré]** profil LiDAR à densité fixe, emprise $\propto\sqrt n$, $s_{\max}=11$
+(donc $K=10$, plafond de niveau strict 9), un cœur, `g++ -O3 -march=native`,
+codespace 2 vCPU, **sans aucune accélération spatiale** :
 
-et un **sommet** de l'arrangement est un plan par l'origine contenant exactement
-deux points duaux. Chercher le préfixe $\delta_e\leq\kappa$ est donc un problème
-de **$k$-ensembles** dans $\mathbb{R}^3$, avec $\kappa\leq s_{\max}-4\leq 7$.
+| $n$ | sommets | sommets/point | critiques | critiques/point | travail/sortie | candidats/sommet |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 100 | 77 692 | 776,9 | 4 940 | 49,4 | 15,7 | 768 |
+| 200 | 187 095 | 935,5 | 11 144 | 55,7 | 16,8 | 1 568 |
+| 300 | 308 151 | 1 027,2 | 18 207 | 60,7 | 16,9 | 2 368 |
 
-Le cas $\kappa=0$ est clair : ce sont les arêtes de l'enveloppe convexe conique
-des points duaux, en $O(m\log m)$.
+Arités à $n=300$ : 300 / 5 242 / 11 593 / 1 072. Les **triangles dominent** —
+c'est la moitié du catalogue, et c'est exactement ce que l'ancienne récolte
+perdait.
 
-### Q0 — un certificat de localité correct, et ce qu'il exige
+Les 777 sommets par point à $n=100$ retrouvent la mesure publiée précédemment,
+ce qui rend les deux profils comparables. Les deux colonnes de droite disent
+ensuite l'essentiel :
 
-Le certificat réfuté bornait un support **inconnu** par le rayon des supports
-**déjà émis**. Le bon objet n'est pas la sortie mais la **région**.
+- **`candidats/sommet` vaut exactement $8(n-4)$**. Quatre flats, deux directions, un balayage complet du nuage à chaque fois. Tout le temps est là, et c'est une absence d'index, pas une propriété du problème.
+- **`sommets/point` et `critiques/point` croissent encore** — 777 → 1 027 et 49,4 → 60,7 entre $n=100$ et $n=300$. **Rien n'est extrapolé à 50 000 points**, et l'extrapolation naïve de l'ancien README était déjà de cette nature.
 
-> **Proposition.** Soit $V^{(M)}$ le $\leq k$-level des $M$ plans les plus proches
-> de $p$, et $d_{M+1}$ la distance au premier point exclu. Si
-> $$\sup_{c\in V^{(M)}}\lVert c-p\rVert\ <\ \frac{d_{M+1}}{2}\qquad\text{(STRICT)},$$
-> alors $V^{(M)}=V^{(\infty)}$ : aucun support n'a pu être manqué.
+### Ce que cela laisse comme question
 
-*Démonstration.* Ajouter un plan ne peut qu'augmenter la profondeur, donc
-$V^{(\infty)}\subseteq V^{(M)}$. Réciproquement, soit $\rho<d_{M+1}/2$ le sup et
-$u$ un point non traité, donc $\lVert u-p\rVert\geq d_{M+1}$. Pour tout
-$c\in V^{(M)}$,
-$$\lVert c-u\rVert\ \geq\ \lVert u-p\rVert-\lVert c-p\rVert\ \geq\ d_{M+1}-\rho\ >\ \frac{d_{M+1}}{2}\ >\ \rho\ \geq\ \lVert c-p\rVert,$$
-donc $u$ est **strictement** extérieur à toute sphère centrée dans $V^{(M)}$
-passant par $p$ : il ne peut ni entrer dans un shell ni changer un rang fermé.
-$\square$
+Le mur n'est plus « le parcours jette 98,9 % de son travail » : il en jette 94 %,
+et le facteur est de 17, pas de 100. Le mur est ailleurs, et il est double.
 
-**La version fermée est fausse, et je l'avais écrite.** J'avais énoncé
-$V^{(M)}\subseteq B(p,d_{M+1}/2)$ avec la boule **fermée**, et ma contradiction
-opposait $\lVert c-p\rVert\geq d_{M+1}/2$ à $\lVert c-p\rVert\leq d_{M+1}/2$ —
-deux inégalités **compatibles à l'égalité**. Le témoin est explicite : si $c$ est
-un point extrême de $V^{(M)}$ avec $\lVert c-p\rVert=d_{M+1}/2$, poser
-$u=2c-p$. Alors $\lVert u-p\rVert=d_{M+1}$, le médiateur $H_u$ passe exactement
-par $c$, et la sphère centrée en $c$ passant par $p$ passe **aussi** par $u$ : le
-support fermé $\lbrace p,u\rbrace$ est manqué. L'égalité de l'ensemble
-sous-jacent ne suffit pas — le produit transporte shells, supports et lots égaux,
-qu'un contact tangent modifie sans toucher l'intérieur.
+1. **La requête de pinceau est en $O(n)$.** À 50 000 points, un index qui la ramène à une vingtaine de candidats vaut un facteur de l'ordre de $10^3$. C'est le seul endroit où un accélérateur peut encore rendre autant — et il devra le faire *fail-open*, sous le contrat de l'audit numérique, sinon il rendra un faux vert.
+2. **La récolte paie un census en $O(n)$ par candidat, et 43 % de ses tentatives sont des doublons.** C'est la règle de propriétaire qui les supprime, et un census local qui supprime le $O(n)$. Aucune des deux n'est écrite.
 
-**Ce que l'égalité coûte vraiment.** $V^{(M)}$ est une union finie de cellules
-fermées d'un arrangement de plans ; si elle est bornée, le sup est atteint en un
-**sommet** de l'arrangement, donc en un point équidistant de $p$ et d'au moins
-trois points traités. L'égalité $\lVert c-u\rVert=\lVert c-p\rVert$ y ajoute $u$ :
-elle force **cinq points cosphériques**. Dans le domaine déclaré sans
-cosphéricité, le cas d'égalité est donc exclu — mais cela reste une *hypothèse à
-vérifier*, jamais un droit à décider. La décision porte sur les carrés et doit
-rester strictement $4\rho^2<d_{M+1}^2$ : égalité, intervalle qui la contient ou
-overflow rendent le certificat **non concluant** et poursuivent l'insertion.
+**Ce que je ne dis pas :** que le contrat est atteignable. Les deux ratios
+croissent encore à $n=300$, la sortie à 50 000 points serait de l'ordre de
+$3\cdot10^6$ sphères et $3\cdot10^7$ identifiants de membres, et aucun de ces
+deux nombres n'est mesuré — ils sont extrapolés d'une croissance non stabilisée,
+et je les donne comme tels.
 
-**Ce qu'il donne** : une règle d'arrêt valide pour l'insertion par distance
-croissante, donc une réponse à l'objection « A2p insère $n-1$ plans par ancre ».
-La quantité $M(p)=\min\lbrace M : V^{(M)}\subseteq B(p,d_{M+1}/2)\rbrace$ devient
-une mesure honnête.
-
-**Ce qu'il n'ôte pas** : le test exige de connaître la région, donc le
-$k$-niveau — c'est-à-dire Q1 à Q3 ci-dessous. Et pour un point de faible
-profondeur $V_k(p)$ est non bornée et la règle ne se déclenche jamais, ce qui est
-cohérent avec le reste. **[obligation]** vérifier la proposition contre l'oracle
-exhaustif, mesurer $M(p)$, et faire précéder tout usage d'une **fixture tangente**
-$u=2c-p$ qui doit rendre le certificat non concluant.
-
-### Q1 — RÉPONDUE : l'épluchage en couches n'est pas exact
-
-**Non**, et le contre-exemple est minimal. Prenons quatre points duaux en
-**position convexe**, par exemple $(1,0,1)$, $(0,1,1)$, $(-1,0,1)$, $(0,-1,1)$.
-La couche 0 est le nuage entier, donc la couche 1 est **vide**. Or les deux
-« diagonales » $\lbrace0,2\rbrace$ et $\lbrace1,3\rbrace$ sont de profondeur 1 —
-vérifié exactement.
-
-Un sommet de profondeur 1 peut donc avoir ses **deux** extrémités sur la couche 0,
-qui disparaissent à l'épluchage. Aucune hypothèse ne sauve l'énoncé : c'est la
-définition même des couches qui retire les points, alors que le $k$-niveau les
-garde comme porteurs.
-
-**Conséquence** : construire le préfixe shallow par épluchage est exclu.
-
-### Q2 — précisée : la profondeur n'est PAS un niveau
-
-Une précision trouvée en dérivant : le long d'une verticale, la profondeur
-**monte** de 1 en franchissant une droite d'orientation $b>0$ et **descend** en
-franchissant $b<0$. C'est une marche, pas une fonction monotone, et
-$\lbrace\delta_e\leq\kappa\rbrace$ est une union d'intervalles et non un
-intervalle. Le balayage classique du $k$-niveau ne s'applique donc **pas**
-directement : le problème est celui des **$k$-ensembles signés**, plus dur.
-
-### Q2 — quel algorithme, à $\kappa$ petit et en exact ?
-
-À $\kappa\leq 7$ et $m$ de l'ordre de la centaine, quel constructeur atteint
-$O(m\log m + m\kappa)$ **sans quitter l'arithmétique entière** ? Le tri des
-croisements le long d'une droite demande de comparer des rationnels de
-$\approx2^{105}$, donc des produits de $\approx2^{210}$ : un `BigInt<4>` suffit,
-mais y a-t-il une formulation qui reste dans l'`i128` ?
-
-### Q3 — un critère de rejet d'une droite, avant tout tri ?
-
-Existe-t-il un test **exact et en $O(1)$** disant qu'une droite ne porte aucun
-sommet de profondeur $\leq\kappa$, donc qu'on peut l'écarter avant de trier ses
-croisements ? Dans le dual, cela revient à écarter un point dual dont aucun plan
-support à $\leq\kappa$ points au-dessus ne passe par lui.
-
-### Ce que coûte le prototype, et ce que le $k$-niveau économiserait
-
-**Le balayage par droite est implémenté.** Le long d'une droite la profondeur est
-une fonction en escalier qui ne varie que de $\pm1$ à chaque croisement : un tri
-puis un balayage donnent tous ses sommets avec leur profondeur, au lieu de
-recompter $O(m_e)$ droites par sommet. Le coût par arête passe de $O(m_e^3)$ à
-$O(m_e^2\log m_e)$, et le juge est resté vert avec des compteurs **identiques**.
-
-**Le clipping de JUNG est implémenté**, et c'était le vrai gisement. Une droite
-qui ne coupe pas l'ellipse est **constante** sur elle : intérieure, elle grossit
-$c_e$ ; extérieure, elle disparaît. Seules les actives demandent un travail par
-sommet. S'y ajoute le masque **porteur** de la lentille — un sommet du support est
-à distance $\leq D$ de $p$ **et** de $q$, sinon $(p,q)$ ne serait pas l'arête
-maximale — qui ne filtre **jamais** le flux témoin.
-
-**[mesuré]** $s_{\max}=11$, un nuage par taille, avec et sans clipping :
-
-| $n$ | $m_e$ sans / avec | sommets sans / avec | temps sans / avec |
-| ---: | ---: | ---: | ---: |
-| 40 | 38 / **17,8** | 548 340 / **70 349** | 0,28 / **0,14** s |
-| 80 | 78 / **35,9** | 9 489 480 / **710 795** | 6,1 / **1,15** s |
-| 160 | 158 / **72,3** | 157 766 160 / **3 907 965** | 165 / **7,5** s |
-| 320 | — / 144,3 | — / 12 816 876 | — / 18,4 s |
-
-À $n=160$ : **40× moins de sommets, 22× plus rapide**, catalogue identique. Et le
-rapport sommets peu profonds / sphères émises tombe à **2,4** contre $\approx300$
-auparavant — le prototype ne gaspille presque plus.
-
-**Mais $m_e\approx0{,}45\,n$ croît encore linéairement** : pour une arête
-quelconque, la lentille contient une fraction constante du nuage. Le clipping
-gagne un grand facteur constant, **pas un ordre**. Le mur restant n'est donc ni le
-clipping ni le $k$-niveau : ce sont les $\binom{n}{2}$ **ancres**. À $n=320$ le
-coût est déjà de 1 442 tests par arête ; à 50 k il faudrait $1{,}25\cdot10^9$
-arêtes. **A1-source est le verrou, et la mesure le confirme.**
+**[obligation]** avant toute mesure à l'échelle : l'index *fail-open*, la règle
+de propriétaire, le census local, puis un reçu séquentiel avec pic mémoire. Et
+la mesure n'ira **pas** sur la G4 : c'est une charge CPU, elle n'a rien à faire
+sur un GPU.
 
 ---
 
-## 3. M1 — le juge
-
-Indépendant du chemin jugé sur les trois couches qui comptent :
-
-| couche | choix | pourquoi |
-| --- | --- | --- |
-| arithmétique | signe-magnitude, chiffres de 32 bits, précision arbitraire | représentation *différente* du complément à deux de largeur fixe de la production |
-| géométrie | élimination de **Gauss** | jamais les formules de Cramer du chemin jugé |
-| structure | forêt reconstruite **depuis $\Gamma_k$** | tous les $k$- et $(k+1)$-sous-ensembles, jamais le catalogue jugé |
-
-Ni division entière ni PGCD : les rationnels ne sont pas normalisés, la division
-est une multiplication croisée et la comparaison un produit croisé — la partie
-risquée d'un grand entier n'existe pas ici. Validé contre `__int128` **et** GMP ;
-sans témoin large, le selftest **échoue** au lieu de rendre `OK`.
-
-**Ce qu'il compare** : cardinal, doublons de support, rang, membres, tranche
-triée, **niveau et centre rationnels exacts** ; par ordre, genre, arité, racines,
-nombre canonique de nœuds, généalogie, les deux représentations d'adjacence
-confrontées l'une à l'autre, tous les compteurs publics — et la **participation
-effective** de la sphère source d'une multifusion à son lot.
-
-**Fermeture** : `attempted = decided + rejected_domain`, planchers strictement
-positifs, arguments absurdes refusés (code 2), censure inattendue = échec, garde
-de domaine symétrique, lecture **hostile** et **atomique** du sujet.
-
-**Campagne négative, fail-closed** : six fautes injectées sur une **copie d'un
-sujet déjà vert**, avec une comptabilité distincte de la campagne positive — un
-plancher ou un rejet de domaine ne peut donc pas tenir lieu de preuve. Chaque
-faute doit être **appliquée exactement une fois** et déclencher **exactement une
-fois son garde**, sans aucun diagnostic étranger : membres non triés, numérateur
-tourné (même norme, donc même niveau), sentinelle invalide, `n_children` nul,
-racine supprimée, et source de fusion étrangère **de même rang et de même niveau
-exact** — sans cette égalité, c'est le garde de niveau qui rougirait et le garde
-de contribution ne serait pas exercé.
-
-Résultat du 8 août, grille déclarée $[0,65535]$ : `attempted=40 decided=40
-rejected_domain=0 | spheres=1850 forets=82 noeuds=1909 | largeur max=158 bits`.
-Reçus dans [`receipts/`](receipts/).
-
-Deux faits produits par ce juge : il a trouvé que les tranches `I ∪ U` n'étaient
-pas triées alors que le contrat l'exige (corrigé en v2), et les niveaux exacts
-atteignent **158 bits** sur cette grille — donc au-delà de `__int128`, ce qui est
-la raison pour laquelle la porte précédente y décidait *zéro nuage sur quarante*
-en annonçant `OK`.
-
-**Ouvert** : différentiel `Rational` contre `mpq_class`, compteurs de
-vérifications réellement exécutées, provenance complète du reçu (digests des
-nuages — la graine seule n'est pas un format portable), et le profil
-`exact_dyadic_input`.
-
----
-
-## 4. M2.1 — falsificateur borné, pas prototype
-
-Générateur ancré par point qui énumère tous les supports de taille $\leq4$ dans
-sa fenêtre. **C'est la cascade locale que le §1 condamne** : il sert de sujet
-différentiel et de mesure du travail payé, jamais de voie produit, et il ne
-construit ni arrangement, ni complexe stratifié, ni peeling.
-
-Deux régimes nommés, jamais confondus : `exhaustive` — la seule complétude
-disponible — et `assumed_window` — hypothèse **déclarée**, jugée séparément et
-non qualifiante.
-
----
-
-## 5. Construire et exécuter
+## 6. Construire et exécuter
 
 ```sh
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v3 -j
-cd build/v3 && ctest --output-on-failure     # 14 tests
-
-./mhgp3v_arith_selftest 20000                        # __int128 et GMP
-./mhgp3v_oracle --clouds 40 --seed 4242 --min-points 8 --max-points 11 \
-                --max-order 3 --min-decided 30 --min-nodes 500 \
-                --receipt receipts/oracle_campaign.json
-./mhgp3v_oracle --subject anchored --regime exhaustive --clouds 8 --seed 90210 \
-                --min-points 9 --max-points 12 --max-order 3 \
-                --min-decided 6 --min-nodes 60
-./mhgp3v_oracle --subject edge_shallow --clouds 20 --seed 4242 --min-points 8 \
-                --max-points 12 --max-order 3 --min-decided 15 --min-nodes 200
-# Le probe hostile exige la fixture de meme niveau : sur un nuage generique il
-# n'existe souvent aucune source alternative de niveau exactement egal, et le
-# run echouerait faute d'injection applicable, pas parce qu'un garde a rougi.
-./mhgp3v_oracle --inject merge_source_foreign --fixture foreign_source_same_level \
-                --subject v2 --clouds 1 --seed 4242 --min-points 4 --max-points 4 \
-                --max-order 1 --min-decided 1 --min-nodes 1
+cd build/v3 && ctest --output-on-failure
 ```
 
-GMP n'est pas une dépendance de l'oracle : il n'intervient que comme second
-témoin de la validation arithmétique.
+Le juge multiplicitaire seul, avec ses planchers :
 
-`census_tukey_shallow.py` produit un reçu complet (provenance, digests, jeu de
-directions, convention de demi-espace, identité de campagne). Il mesure un
-minorant de l'ensemble où la borne tangente **non contrainte** de la v2 vaut
-$+\infty$, et **rien d'autre** : l'ensemble où la borne à centre convexe échoue
-est vide, puisque $R\leq\mathrm{diam}(X)$. Nuages : Stanford bunny, reconstruction
-fusionnée et **dix captations brutes recalées** — le cas multi-captation que la
-proposition doit traiter. Les données ne sont pas versionnées ; le reçu porte
-leur origine et leur digest.
+```sh
+./mhgp3v_flats_differential --clouds 0 --min-cases 150
+./mhgp3v_flats_differential --clouds 1500 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 10000
+```
+
+Une campagne vide, un argument inconnu ou un plancher non atteint rendent un
+code non nul avec son diagnostic ; trois tests négatifs le vérifient.
+
+---
+
+## 7. Ce qui reste ouvert, sans ordre de facilité
+
+| # | question | statut |
+| --- | --- | --- |
+| 1 | index spatial *fail-open* pour la requête de pinceau | non écrit ; les P0 de `Grid::ball` restent ouverts |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | non écrite ; 43 % de la récolte est redondante |
+| 3 | reverse search, pour supprimer `seen` et `frontier` | non écrit ; la mémoire de navigation reste proportionnelle au nombre de sommets |
+| 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
+| 5 | forêts, tri global par $\beta$ exact, lots atomiques | non écrits |
+| 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |
+| 7 | `sphere.hpp` au bord produit : paire de points confondus acceptée comme support d'arité deux, sentinelle `den==0` sans garde | ouverts, hors de ce fichier |
+| 8 | le contrat 50 k / $K=10$ / 1 s | **non atteint, non mesuré, et les deux ratios qui le décident croissent encore à $n=300$** |
+
+Le détail, les budgets et le journal des affirmations retirées sont dans
+[`PROPOSITION.md`](PROPOSITION.md).

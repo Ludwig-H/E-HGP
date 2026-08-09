@@ -32,4 +32,6 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 
 - [AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md](AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md) : preuve polyédrique de la connectivité du vrai 1-squelette de niveau au plus $k$, distinction sommets/arêtes/strates, limites de RelevantGP et audit conditionnel du harvest d'arités basses ajouté après $7fa39b1$.
 
+- [`REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md`](REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md) : réponse aux deux audits du commit `2e3fa7b`. Retrait de la promotion M3, reproduction indépendante des quatre P0, implémentation de la voie multiplicitaire jugée sur 33 081 cas sans désaccord, et deux résultats nouveaux défavorables aux affirmations antérieures : l'ambiguïté de demi-tour du germe, la non-invariance du support canonique par permutation, et le rapport 100:1 travail/sortie identifié comme artefact d'une récolte incomplète.
+
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.
