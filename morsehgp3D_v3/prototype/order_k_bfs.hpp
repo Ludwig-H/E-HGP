@@ -104,6 +104,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
@@ -275,15 +276,15 @@ struct ShellHash {
 
 }  // namespace bfs
 
-inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& points,
-                                                 int rank_ceiling,
-                                                 OrderKStatistics* statistics,
-                                                 bool* out_of_domain) {
+// Germe partage : une face de l'enveloppe convexe, ou le pinceau part d'un
+// demi-espace VIDE. Le premier lot rencontre est donc de niveau zero. Ce
+// balayage global est paye UNE fois, quel que soit le parcours qui suit.
+inline bool seed_shell(const std::vector<mhgp::P3>& points, OrderKStatistics* statistics,
+                       std::vector<mhgp::i32>* root_shell_out) {
   const int n = static_cast<int>(points.size());
+  bool dead = false;
+  bool* out_of_domain = &dead;
   std::vector<bfs::Vertex> visited;
-  *out_of_domain = false;
-  if (n < 4) return visited;
-
   // ---- GERME : une face de l'enveloppe convexe -----------------------------
   mhgp::i32 p0 = 0;
   for (mhgp::i32 i = 1; i < n; ++i) {
@@ -313,7 +314,7 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
                             points[static_cast<std::size_t>(z)]) < 0) p2 = z;
   }
   statistics->seed_scans += 3;
-  if (p2 < 0) { *out_of_domain = true; return visited; }
+  if (p2 < 0) { *out_of_domain = true; return false; }
 
   bfs::Pencil face{&points, p0, p1, p2};
   int supporting = 0;
@@ -322,10 +323,10 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
     const int o = face.orient(z);
     if (o == 0) continue;
     if (supporting == 0) supporting = o;
-    else if (supporting != o) { *out_of_domain = true; return visited; }
+    else if (supporting != o) { *out_of_domain = true; return false; }
   }
   ++statistics->seed_scans;
-  if (supporting == 0) { *out_of_domain = true; return visited; }
+  if (supporting == 0) { *out_of_domain = true; return false; }
 
   // En t = -oo la boule est le demi-espace VIDE. Le premier LOT rencontre — un
   // lot, car plusieurs points peuvent partager le meme parametre — donne un
@@ -341,7 +342,7 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
     if (cmp > 0) { seed = z; seed_orient = oz; }
   }
   ++statistics->seed_scans;
-  if (seed < 0) { *out_of_domain = true; return visited; }
+  if (seed < 0) { *out_of_domain = true; return false; }
 
   std::vector<mhgp::i32> root_shell{p0, p1, p2, seed};
   for (mhgp::i32 z = 0; z < n; ++z) {
@@ -363,6 +364,21 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
     }
   }
   std::sort(root_shell.begin(), root_shell.end());
+  *root_shell_out = root_shell;
+  return !dead;
+}
+
+inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& points,
+                                                 int rank_ceiling,
+                                                 OrderKStatistics* statistics,
+                                                 bool* out_of_domain) {
+  const int n = static_cast<int>(points.size());
+  std::vector<bfs::Vertex> visited;
+  *out_of_domain = false;
+  if (n < 4) return visited;
+
+  std::vector<mhgp::i32> root_shell;
+  if (!seed_shell(points, statistics, &root_shell)) { *out_of_domain = true; return visited; }
   ++statistics->level_recomputed;
 
   // ---- PARCOURS -----------------------------------------------------------
@@ -401,36 +417,30 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
 
       for (int direction = -1; direction <= 1; direction += 2) {
         ++statistics->pencil_queries;
+        // UN SEUL balayage : le meilleur candidat et son lot d'ex aequo sont
+        // maintenus ensemble. Deux passes couteraient le double pour rien.
         mhgp::i32 best = -1;
         int best_orient = 0;
+        tied.clear();
         for (mhgp::i32 z = 0; z < n; ++z) {
           if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
           const int oz = pencil.orient(z);
-          if (oz == 0) continue;     // coplanaire : etat constant le long du pinceau
+          if (oz == 0) continue;   // coplanaire : etat constant le long du pinceau
           ++statistics->pencil_candidates;
           if (pencil.compare_t(z, oz, apex, orient_apex) != direction) continue;
-          if (best < 0) { best = z; best_orient = oz; continue; }
-          if (pencil.compare_t(z, oz, best, best_orient) == -direction) { best = z; best_orient = oz; }
+          if (best < 0) { best = z; best_orient = oz; tied.assign(1, z); continue; }
+          const int cmp = pencil.compare_t(z, oz, best, best_orient);
+          if (cmp == 0) { tied.push_back(z); ++statistics->cocircular_pencil; }
+          else if (cmp == -direction) { best = z; best_orient = oz; tied.assign(1, z); }
         }
         if (best < 0) { ++statistics->unbounded_stops; continue; }
 
-        // Le LOT : tout ce qui partage le parametre du meilleur candidat entre
-        // en meme temps. C'est ici que la degenerescence est absorbee.
-        tied.assign(1, best);
+        // Les points du plan du triangle qui sont sur son cercle circonscrit
+        // appartiennent a TOUTE sphère du pinceau, donc a cette coquille aussi.
         for (mhgp::i32 z = 0; z < n; ++z) {
-          if (z == best) continue;
           if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
-          const int oz = pencil.orient(z);
-          if (oz == 0) {
-            // Sur le cercle du triangle : present dans TOUTE coquille du
-            // pinceau, donc aussi dans la nouvelle.
-            if (pencil.side(best, z, best_orient) == 0) {
-              tied.push_back(z);
-              ++statistics->cocircular_pencil;
-            }
-            continue;
-          }
-          if (pencil.compare_t(z, oz, best, best_orient) == 0) {
+          if (pencil.orient(z) != 0) continue;
+          if (pencil.side(best, z, best_orient) == 0) {
             tied.push_back(z);
             ++statistics->cocircular_pencil;
           }
@@ -569,6 +579,329 @@ inline mhgp::Catalogue order_k_catalogue(const std::vector<mhgp::P3>& points, in
     catalogue.spheres.push_back(critical);
   }
   return catalogue;
+}
+
+}  // namespace mhgp3v
+
+namespace mhgp3v {
+
+// ---------------------------------------------------------------------------
+// CHEMIN RAPIDE : la meme navigation, mais sans balayer le nuage entier.
+//
+// La requete « point suivant sur le pinceau » coutait O(n) : c'est elle, et
+// elle seule, qui empeche d'atteindre 50 000 points. Or la mesure dit que
+// toutes les spheres du <=k-niveau sont PETITES — rayon median 77 pour un pas
+// d'echantillonnage de 25, rayon critique maximal 90 — parce qu'une boule qui
+// ne contient qu'une douzaine de points ne peut pas etre grande dans un nuage
+// dense. Une grille uniforme suffit donc.
+//
+// La CERTIFICATION est le point delicat, et elle doit rester exacte. Entre le
+// parametre courant et celui du candidat, aucun point ne change d'etat ; tout
+// concurrent est donc dans la difference symetrique des deux boules, elle-meme
+// incluse dans leur union. Il suffit d'avoir balaye cette union. Les deux
+// spheres sont calculees EXACTEMENT en i128 puis converties en flottant avec
+// arrondi vers l'exterieur : le flottant ne sert qu'a balayer TROP, jamais a
+// decider. Un balayage trop large reste correct ; un balayage trop etroit
+// serait faux, et c'est la seule chose que la marge interdit.
+// ---------------------------------------------------------------------------
+
+struct Grid {
+  double origin[3] = {0, 0, 0};
+  double cell = 1.0;
+  int dim[3] = {1, 1, 1};
+  std::vector<int> start;              // CSR : debut de chaque cellule
+  std::vector<mhgp::i32> item;
+  const std::vector<mhgp::P3>* points_ = nullptr;
+
+  void build(const std::vector<mhgp::P3>& points, double target_per_cell) {
+    points_ = &points;
+    const int n = static_cast<int>(points.size());
+    double lo[3] = {1e300, 1e300, 1e300}, hi[3] = {-1e300, -1e300, -1e300};
+    for (const mhgp::P3& p : points) {
+      const double c[3] = {(double)p.x, (double)p.y, (double)p.z};
+      for (int d = 0; d < 3; ++d) { lo[d] = std::min(lo[d], c[d]); hi[d] = std::max(hi[d], c[d]); }
+    }
+    double volume = 1.0;
+    for (int d = 0; d < 3; ++d) volume *= std::max(1.0, hi[d] - lo[d]);
+    cell = std::max(1.0, std::cbrt(volume * target_per_cell / std::max(1, n)));
+    for (int d = 0; d < 3; ++d) {
+      origin[d] = lo[d];
+      dim[d] = std::max(1, (int)std::floor((hi[d] - lo[d]) / cell) + 1);
+    }
+    const long long cells = (long long)dim[0] * dim[1] * dim[2];
+    std::vector<int> count((std::size_t)cells + 1, 0);
+    std::vector<long long> where((std::size_t)n);
+    for (int i = 0; i < n; ++i) { where[(std::size_t)i] = index_of(points[(std::size_t)i]); ++count[(std::size_t)where[(std::size_t)i] + 1]; }
+    for (long long c = 0; c < cells; ++c) count[(std::size_t)c + 1] += count[(std::size_t)c];
+    start = count;
+    item.resize((std::size_t)n);
+    std::vector<int> fill(start.begin(), start.end() - 1);
+    for (int i = 0; i < n; ++i) item[(std::size_t)fill[(std::size_t)where[(std::size_t)i]]++] = i;
+  }
+
+  long long index_of(const mhgp::P3& p) const {
+    const double c[3] = {(double)p.x, (double)p.y, (double)p.z};
+    long long ix[3];
+    for (int d = 0; d < 3; ++d) {
+      long long v = (long long)std::floor((c[d] - origin[d]) / cell);
+      ix[d] = std::min((long long)dim[d] - 1, std::max(0LL, v));
+    }
+    return (ix[2] * dim[1] + ix[1]) * dim[0] + ix[0];
+  }
+
+  // Balaie la boule (centre, rayon) ELARGIE : sur-balayer est sans danger.
+  // Le pave englobant d'une grande sphère plate contient enormement de points
+  // que la BOULE ne contient pas. Sans ce filtre par distance, la requete
+  // ramene le pave et l'acceleration disparait.
+  template <class Fn>
+  void ball(const double* centre, double radius, Fn&& visit) const {
+    const double r2 = radius * radius;
+    int lo[3], hi[3];
+    for (int d = 0; d < 3; ++d) {
+      lo[d] = (int)std::floor((centre[d] - radius - origin[d]) / cell);
+      hi[d] = (int)std::floor((centre[d] + radius - origin[d]) / cell);
+      lo[d] = std::max(0, std::min(dim[d] - 1, lo[d]));
+      hi[d] = std::max(0, std::min(dim[d] - 1, hi[d]));
+    }
+    for (int z = lo[2]; z <= hi[2]; ++z)
+      for (int y = lo[1]; y <= hi[1]; ++y) {
+        const long long base = ((long long)z * dim[1] + y) * dim[0];
+        const int b = start[(std::size_t)(base + lo[0])];
+        const int e = start[(std::size_t)(base + hi[0] + 1)];
+        for (int t = b; t < e; ++t) {
+          const mhgp::i32 id = item[(std::size_t)t];
+          const double dx = (double)(*points_)[(std::size_t)id].x - centre[0];
+          const double dy = (double)(*points_)[(std::size_t)id].y - centre[1];
+          const double dz = (double)(*points_)[(std::size_t)id].z - centre[2];
+          if (dx * dx + dy * dy + dz * dz <= r2) visit(id);
+        }
+      }
+  }
+};
+
+namespace bfs {
+
+// Centre et rayon d'une sphère exacte, convertis en flottant AVEC MARGE. La
+// marge n'est pas cosmetique : elle est ce qui garantit qu'on balaie trop.
+inline void outward_ball(const mhgp::Sphere& s, double* centre, double* radius) {
+  const double den = (double)s.den;
+  const double rx = (double)s.nx / den, ry = (double)s.ny / den, rz = (double)s.nz / den;
+  centre[0] = (double)s.base.x + rx;
+  centre[1] = (double)s.base.y + ry;
+  centre[2] = (double)s.base.z + rz;
+  *radius = std::sqrt(rx * rx + ry * ry + rz * rz) * 1.0000001 + 1e-6;
+}
+
+}  // namespace bfs
+}  // namespace mhgp3v
+
+namespace mhgp3v {
+
+// Parcours accelere : identique au precedent, sauf que la requete de pinceau
+// n'examine plus que les points de l'union des deux boules.
+inline std::vector<bfs::Vertex> order_k_vertices_fast(const std::vector<mhgp::P3>& points,
+                                                      int rank_ceiling,
+                                                      OrderKStatistics* statistics,
+                                                      bool* out_of_domain) {
+  const int n = static_cast<int>(points.size());
+  std::vector<bfs::Vertex> visited;
+  *out_of_domain = false;
+  if (n < 4) return visited;
+
+  Grid grid;
+  grid.build(points, 1.0);
+
+  // Le germe reste global : il est paye une fois.
+  std::vector<mhgp::i32> root_shell;
+  if (!seed_shell(points, statistics, &root_shell)) { *out_of_domain = true; return visited; }
+  ++statistics->level_recomputed;
+
+  std::unordered_set<std::vector<mhgp::i32>, bfs::ShellHash> seen;
+  std::vector<bfs::Vertex> frontier;
+  seen.insert(root_shell);
+  frontier.push_back(bfs::Vertex{root_shell, 0});
+
+  std::vector<mhgp::i32> tied, candidates;
+  std::vector<char> mark(static_cast<std::size_t>(n), 0);
+  while (!frontier.empty()) {
+    const bfs::Vertex v = frontier.back();
+    frontier.pop_back();
+    const int shell_size = static_cast<int>(v.shell.size());
+    if (shell_size + v.level > rank_ceiling) { ++statistics->vertices_beyond; continue; }
+    visited.push_back(v);
+    ++statistics->vertices_visited;
+
+    for (int i = 0; i < shell_size; ++i)
+    for (int j = i + 1; j < shell_size; ++j)
+    for (int k = j + 1; k < shell_size; ++k) {
+      const mhgp::i32 tri[3] = {v.shell[static_cast<std::size_t>(i)],
+                                v.shell[static_cast<std::size_t>(j)],
+                                v.shell[static_cast<std::size_t>(k)]};
+      bfs::Pencil pencil{&points, tri[0], tri[1], tri[2]};
+      mhgp::i32 apex = -1;
+      int orient_apex = 0;
+      for (int t = 0; t < shell_size; ++t) {
+        if (t == i || t == j || t == k) continue;
+        const mhgp::i32 z = v.shell[static_cast<std::size_t>(t)];
+        const int oz = pencil.orient(z);
+        if (oz != 0) { apex = z; orient_apex = oz; break; }
+      }
+      if (apex < 0) continue;
+
+      std::vector<mhgp::i32> apex_support{tri[0], tri[1], tri[2], apex};
+      std::sort(apex_support.begin(), apex_support.end());
+      mhgp::Sphere apex_sphere{};
+      bool apex_centred = false;
+      if (!detail::build_sphere(points, apex_support, &apex_sphere, &apex_centred)) continue;
+      double apex_centre[3], apex_radius = 0;
+      bfs::outward_ball(apex_sphere, apex_centre, &apex_radius);
+
+      for (int direction = -1; direction <= 1; direction += 2) {
+        ++statistics->pencil_queries;
+        mhgp::i32 best = -1;
+        int best_orient = 0;
+        candidates.clear();
+        std::size_t tested = 0;
+
+        // Teste les candidats pas encore examines et met a jour le meilleur.
+        auto absorb = [&]() {
+          for (std::size_t ci = tested; ci < candidates.size(); ++ci) {
+            const mhgp::i32 z = candidates[ci];
+            if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
+            const int oz = pencil.orient(z);
+            if (oz == 0) continue;
+            ++statistics->pencil_candidates;
+            if (pencil.compare_t(z, oz, apex, orient_apex) != direction) continue;
+            if (best < 0) { best = z; best_orient = oz; continue; }
+            if (pencil.compare_t(z, oz, best, best_orient) == -direction) { best = z; best_orient = oz; }
+          }
+          tested = candidates.size();
+        };
+        auto collect = [&](const double* centre, double radius) {
+          grid.ball(centre, radius, [&](mhgp::i32 z) {
+            if (mark[static_cast<std::size_t>(z)]) return;
+            mark[static_cast<std::size_t>(z)] = 1;
+            candidates.push_back(z);
+          });
+        };
+        auto ball_of = [&](mhgp::i32 fourth, double* centre, double* radius) {
+          std::vector<mhgp::i32> sup{tri[0], tri[1], tri[2], fourth};
+          std::sort(sup.begin(), sup.end());
+          mhgp::Sphere sp{};
+          bool centred = false;
+          if (!detail::build_sphere(points, sup, &sp, &centred)) return false;
+          bfs::outward_ball(sp, centre, radius);
+          return true;
+        };
+
+        // AMORCE. Un candidat est hors de la boule courante seulement dans le
+        // sens qui GROSSIT la sphère : dans l'autre il y est deja. On balaie
+        // donc d'abord la boule courante — gratuite, elle ne contient qu'une
+        // douzaine de points — puis, si rien n'est trouve, on avance LE LONG
+        // DU PINCEAU. Dilater le rayon autour du centre courant ratisserait
+        // une region qui n'a rien a voir avec le chemin suivi.
+        collect(apex_centre, apex_radius);
+        absorb();
+        if (best < 0) {
+          const double ux = (double)(points[(std::size_t)tri[1]].x - points[(std::size_t)tri[0]].x);
+          const double uy = (double)(points[(std::size_t)tri[1]].y - points[(std::size_t)tri[0]].y);
+          const double uz = (double)(points[(std::size_t)tri[1]].z - points[(std::size_t)tri[0]].z);
+          const double vx = (double)(points[(std::size_t)tri[2]].x - points[(std::size_t)tri[0]].x);
+          const double vy = (double)(points[(std::size_t)tri[2]].y - points[(std::size_t)tri[0]].y);
+          const double vz = (double)(points[(std::size_t)tri[2]].z - points[(std::size_t)tri[0]].z);
+          double nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          const double norm = std::sqrt(nx * nx + ny * ny + nz * nz);
+          if (norm > 0) {
+            nx /= norm; ny /= norm; nz /= norm;
+            const double ax = (double)points[(std::size_t)tri[0]].x;
+            const double ay = (double)points[(std::size_t)tri[0]].y;
+            const double az = (double)points[(std::size_t)tri[0]].z;
+            // Parametre signe du centre courant le long de la normale.
+            const double t0 = (apex_centre[0] - ax) * nx + (apex_centre[1] - ay) * ny
+                            + (apex_centre[2] - az) * nz;
+            // Rayon dans le plan : invariant du pinceau.
+            const double plane2 = std::max(0.0, apex_radius * apex_radius - t0 * t0);
+            double step = grid.cell;
+            for (int round = 0; round < 40 && best < 0; ++round) {
+              const double t = t0 + direction * step;
+              const double swept[3] = {ax + t * nx, ay + t * ny, az + t * nz};
+              collect(swept, std::sqrt(plane2 + t * t) * 1.0000001 + 1e-6);
+              absorb();
+              step *= 2.0;
+            }
+          }
+        }
+
+        // CERTIFICATION : entre les deux parametres aucun point ne change
+        // d'etat, donc tout concurrent est dans la difference symetrique des
+        // deux boules — incluse dans leur UNION. Balayer les deux petites
+        // boules, et non une grande qui les enferme, est ce qui rend la
+        // requete locale. Chaque meilleur candidat successif a son parametre
+        // ENTRE les deux precedents, donc sa boule est deja dans la region
+        // balayee : l'iteration converge sans jamais elargir.
+        for (int round = 0; round < 8 && best >= 0; ++round) {
+          const mhgp::i32 previous = best;
+          double bc[3], br = 0;
+          if (!ball_of(best, bc, &br)) break;
+          collect(apex_centre, apex_radius);
+          collect(bc, br);
+          absorb();
+          if (best == previous) break;
+        }
+
+        if (best < 0) {           // repli EXHAUSTIF : jamais un faux vert
+          ++statistics->level_recomputed;
+          for (mhgp::i32 z = 0; z < n; ++z) {
+            if (mark[static_cast<std::size_t>(z)]) continue;
+            mark[static_cast<std::size_t>(z)] = 1;
+            candidates.push_back(z);
+          }
+          absorb();
+        }
+        for (mhgp::i32 z : candidates) mark[static_cast<std::size_t>(z)] = 0;
+        if (best < 0) { ++statistics->unbounded_stops; continue; }
+
+        // Le lot d'ex aequo et les points du cercle du triangle, sur la boule
+        // du meilleur candidat : tout cela est LOCAL a cette boule.
+        tied.assign(1, best);
+        {
+          std::vector<mhgp::i32> bs{tri[0], tri[1], tri[2], best};
+          std::sort(bs.begin(), bs.end());
+          mhgp::Sphere bsp{};
+          bool c2 = false;
+          if (detail::build_sphere(points, bs, &bsp, &c2)) {
+            double bc[3], br = 0;
+            bfs::outward_ball(bsp, bc, &br);
+            grid.ball(bc, br, [&](mhgp::i32 z) {
+              if (z == best) return;
+              if (std::binary_search(v.shell.begin(), v.shell.end(), z)) return;
+              if (mhgp::sphere_side(bsp, points[static_cast<std::size_t>(z)]) != 0) return;
+              tied.push_back(z);
+              ++statistics->cocircular_pencil;
+            });
+          }
+        }
+
+        int level = v.level;
+        for (mhgp::i32 z : tied)
+          if (pencil.side(apex, z, orient_apex) < 0) --level;
+        for (int t = 0; t < shell_size; ++t) {
+          if (t == i || t == j || t == k) continue;
+          const mhgp::i32 z = v.shell[static_cast<std::size_t>(t)];
+          if (pencil.side(best, z, best_orient) < 0) ++level;
+        }
+        if (level < 0) { *out_of_domain = true; return visited; }
+
+        std::vector<mhgp::i32> shell(tri, tri + 3);
+        shell.insert(shell.end(), tied.begin(), tied.end());
+        std::sort(shell.begin(), shell.end());
+        shell.erase(std::unique(shell.begin(), shell.end()), shell.end());
+        if (static_cast<int>(shell.size()) + level > rank_ceiling) continue;
+        if (seen.insert(shell).second) frontier.push_back(bfs::Vertex{shell, level});
+      }
+    }
+  }
+  return visited;
 }
 
 }  // namespace mhgp3v
