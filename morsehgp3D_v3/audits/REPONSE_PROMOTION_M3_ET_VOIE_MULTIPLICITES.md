@@ -856,3 +856,62 @@ acquis est un **oracle local nettement mieux falsifié**; le resolver et le fold
 committé : le callback peut déjà avoir émis un préfixe quand une erreur ultérieure
 rend le statut rouge, et `kInvariantViolated` confond actuellement contradiction
 scientifique et arrêt demandé par le consommateur.
+
+---
+
+## 19. Le poste de coût, et une inférence de ma part qui était fausse
+
+Vous allez regarder le coût de votre côté ; voici ce que j'ai trouvé du mien, y
+compris ce que j'ai dû retirer.
+
+**Le coût n'était pas là où le compteur le montrait.** Le parcours n'énumère
+qu'une fois les flats du sommet courant, mais chaque fils candidat payait une
+énumération **complète** des flats de son propre sommet — 5,7 par sommet visité.
+C'était la requête de parent, pas la descente.
+
+Et le minimum n'était pas l'hypothèse utile. Ce qu'Avis--Fukuda demande de $\pi$
+est d'être une fonction déterministe du sommet **seul**, acyclique, à racine
+unique ; les deux dernières viennent du potentiel et valent pour **n'importe
+quel** choix admissible, puisque toute direction admissible fait strictement
+croître $L_h$ à intérieur égal ou décroître $Q_r$ au niveau zéro. Le **premier**
+couple admissible est donc un parent légitime, et l'arrêt est immédiat.
+
+Il se trouve en plus que ce premier admissible **est** l'ancien minimum, et cela
+tient au même petit fait que le reste : trois points distincts d'une même sphère
+ne sont jamais alignés. La base canonique d'un flat de coquille est donc le
+triplet de ses trois plus petits éléments, deux flats distincts se séparent dès
+les trois premiers, et comparer les fermetures revient à comparer les bases —
+`for_each_flat` balayant la coquille **triée**, il livre les flats en ordre
+croissant de clef. Cette affirmation-là n'étant pas une évidence, une porte
+vérifie la monotonie clef par clef sur **chaque** sommet et compare le parent
+précoce au balayage complet. Zéro désaccord.
+
+**[mesuré]** générique à onze points : 335 314 → **171 856** fermetures, soit
+31,6 → 16,2 par sommet ; sur la requête de parent isolée, 44 036 → 16 981,
+rapport 2,59.
+
+**Et voici l'inférence que j'ai retirée avant de la publier.** J'avais rapproché
+deux colonnes du README — 1 027 sommets par point et 1 072 sphères d'arité quatre —
+et conclu qu'un sommet sur 285 seulement portait de la sortie, donc qu'adresser
+l'énumération par **plan** plutôt que par sommet valait deux ordres de grandeur.
+C'était faux deux fois : les sommets sont comptés sur le niveau strict
+$\le s_{\max}-2$ et les critiques sur le rang fermé $\le s_{\max}$, et les deux
+lignes ne venaient pas du même profil de nuage.
+
+Mesuré sur une seule fenêtre et un seul profil, cube uniforme, $s_{\max}=11$ :
+**un sommet sur 6,5 à 6,9** porte une sphère critique d'arité quatre — 113,7 puis
+145,7 puis 167,5 par point pour $n=100,200,300$. Le filtre de criticité vaut donc
+sept à onze, et l'adressage par plan n'attaquerait que ce facteur-là. Je le dis
+parce que c'est exactement le genre d'inférence que vous auriez réfutée, et qu'elle
+aurait orienté deux semaines de travail.
+
+**Ce qui reste devant est un problème de débit, et c'est mesurable.** Les deux
+colonnes croissent encore — 772 → 999 → 1 097 sommets par point et 171 → 210 → 235
+sphères par point entre $n=100$ et $n=300$ —, donc rien n'est extrapolable
+proprement. Mais la **forme** est maintenant connue : de l'ordre de 65 prédicats
+entiers par sommet, sans table de visitation dans la décision, sans sortie
+matérialisée, avec un high-water publié. Ce sont les trois conditions d'un front
+d'onde device, et c'est pourquoi les 48 cœurs ne suffisent pas là où le GPU
+pourrait. Le kernel n'est pas écrit, la croissance n'est pas stabilisée, et le
+Kruskal $K$-MST qui doit consommer le flux n'existe pas : le NO-GO tient.
+

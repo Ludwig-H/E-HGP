@@ -278,8 +278,9 @@ mais encore dix déduplications par `emitted`.
 
 La règle complète, prouvée dans la note, est : census fermé, rang, support
 canonique de la coquille, rejet des supports non canoniques, puis optimalité
-locale dans le cône signé de $P_U$. Le cube u16 possède quatre supports
-antipodaux de la même boule : appliquer seulement un owner par support émettrait
+locale dans le cône signé de $P_U$. Le cube u16 possède six supports minimaux de
+la même boule — quatre paires antipodales et deux tétraèdres de parité : appliquer
+seulement un owner par support émettrait
 encore quatre fois. La composition « support canonique puis owner » est donc la
 condition exacte pour supprimer `emitted`.
 

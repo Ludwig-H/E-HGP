@@ -85,6 +85,15 @@ Enfin tous les points strictement intérieurs à $B$ appartiennent à
 $I(B)\subseteq Q$. Tout point omis est sur la coquille ou à l'extérieur; $Q$ est
 donc de Gabriel ouverte. La construction est réciproque de celle du §2.1.
 
+Une forme équivalente évite de matérialiser la famille entière des supports. Pour
+$T\subseteq S(B)$, la miniboule de $T$ est $B$ si et seulement si le centre
+$c_B$ appartient à l'enveloppe convexe de $T$. La caractérisation de la
+miniboule donne le sens nécessaire; Carathéodory extrait dans l'autre sens un
+support positif d'au plus quatre points. L'expansion peut donc certifier chaque
+$T$ par un test exact $c_B\in\mathrm{conv}(T)$, ou authentifier la famille
+complète des supports minimaux. Elle ne peut se contenter du premier support
+rencontré.
+
 ## 3. Corollaire régulier : une coface au plus par sphère
 
 Sous la porte régulière forte, le support minimal est unique et essentiel, et
@@ -104,15 +113,67 @@ sommet de l'arrangement relevé. Ces arités doivent provenir du producteur loca
 certifié et de son propriétaire, ou d'une autre source terminale. Les confondre
 avec les seuls sommets de rang quatre perdrait des cofaces directes.
 
-Fixture minimale d'arité deux, rendue affine trois par deux points extérieurs :
+Fixture d'arité deux non collinéaire, rendue affine trois par un point extérieur :
 
 ```text
-A=(0,0,0) B=(2,0,0) z=(1,0,0) C=(0,10,0) D=(0,0,10)
+A=(0,0,0) B=(4,0,0) z=(2,1,0) D=(1,2,10)
 ```
 
-La boule de diamètre `AB` a $I=\lbrace z\rbrace$, $S=\lbrace A,B\rbrace$ et
-porte l'unique coface directe `ABz` à l'ordre deux. Elle n'autorise pas à réduire
-la source aux seuls sommets pleins de l'arrangement.
+La boule de diamètre `AB` a $I=\lbrace z\rbrace$, $S=U=\lbrace A,B\rbrace$ et
+porte l'unique coface directe `ABz` à l'ordre deux. Le simplex `ABz` n'est pas
+collinéaire, mais sa miniboule a toujours un support de rang deux.
+
+L'arité trois est tout aussi réelle :
+
+```text
+A=(0,0,0) B=(4,0,0) C=(2,3,0) D=(0,0,10)
+```
+
+Le cercle de `ABC`, de centre `(2,5/6,0)` et rayon carré `169/36`, porte la
+coface directe `ABC` à l'ordre deux. Son record vit sur un flat de rang trois,
+pas sur un sommet de rang quatre.
+
+Enfin, une sphère brute d'arrangement ne remplace pas la miniboule. Pour
+`A=(0,0,0), B=(4,0,0), C=(1,1,0), D=(1,0,1), P=(2,1,1)`, la sphère passant par
+`ABCD` a pour centre `(2,-1,-1)` et rayon carré 6, mais la miniboule de `ABCD`
+est le diamètre `AB`, de rayon carré 4, qui contient `P` strictement. Interpréter
+directement le sommet brut comme coface ouverte serait faux. La fixture positive
+de rang quatre
+`A=(0,0,0), B=(0,2,2), C=(2,0,2), D=(2,2,0), P=(1,1,1)` a au contraire
+$S=U=\lbrace A,B,C,D\rbrace$, $I=\lbrace P\rbrace$, centre `P` et rayon carré 3;
+elle porte l'unique coface `ABCDP` à l'ordre quatre.
+
+### 3.1 Plafond shallow positif pour le producteur
+
+Le théorème de propriétaire de la
+[`note de parent local`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md) ferme une
+partie importante du verrou de complétude. Soit $Q$ une coface ouverte d'ordre
+$k$, $B=B_Q$, $d=\lvert I(B)\rvert$, et $U$ un support minimal de cardinal
+$q$ contenu dans sa partie de coquille. Comme $Q$ contient $I(B)\cup U$ et a
+cardinal $k+1$, on a $d+q\leq k+1$.
+
+Sous dimension affine trois, le propriétaire canonique $o(U)$ est un vrai
+sommet d'arrangement contenant $U$ et son intérieur strict est inclus dans
+$I(B)$. Son niveau vérifie donc $\ell(o(U))\leq d\leq k+1-q$. Dans le profil à
+coordonnées distinctes et pour $k\geq1$, une coface non triviale a $q\geq2$.
+Par conséquent, un reverse search jusqu'au niveau strict $k-1$ rencontre un
+propriétaire de **toute** sphère source pertinente : plafond $k-1$ pour les
+paires, $k-2$ pour les flats de rang trois et $k-3$ pour les supports de rang
+quatre. La taille d'une extra-coquille ne change pas ce plafond.
+
+Ce corollaire ne dit pas que la sphère du propriétaire est la sphère critique.
+Le flux exact est :
+
+```text
+sommet shallow -> support/flat canonique U -> miniboule x_U
+                -> census global I,S -> expansion locale T -> coface Q
+```
+
+Il reste à énumérer les supports ou flats canoniques incidents sans retomber sur
+tous les sous-ensembles d'une grande coquille, à appliquer le critère local de
+propriété, puis à dédupliquer les supports multiples d'une même boule. Le plafond
+de navigation est donc **prouvé**; la borne de travail du harvest et la
+terminalité du stream restent ouvertes.
 
 ## 4. Hors régularité : l'extra-shell est une masse réelle
 
@@ -146,6 +207,27 @@ Cette fixture réfute trois raccourcis :
 Si le contrat expose les identités de ces cofaces, leurs 56 records sont une
 sortie scientifique. Un quotient horizontal plus petit demanderait un théorème
 et un contrat versionné distincts; il ne peut pas les supprimer implicitement.
+
+La masse devient déjà grande sur une petite fixture u16 à support unique. Prendre
+le centre `c=(20,20,20)`, le rayon 13, la paire antipodale
+`U={c+(-13,0,0),c+(13,0,0)}` et ajouter à la coquille les dix-neuf vecteurs
+relatifs suivants :
+
+```text
+(-5,12,0) (5,12,0) (0,12,-5) (0,12,5)
+(-12,5,0) (12,5,0) (0,5,-12) (0,5,12)
+(4,12,3) (4,12,-3) (-4,12,3) (-4,12,-3)
+(3,12,4) (3,12,-4) (-3,12,4) (-3,12,-4)
+(12,4,3) (-12,4,3) (12,4,-3)
+```
+
+Tous ont norme carrée 169 et une coordonnée relative `y` positive. Toute
+combinaison convexe donnant le centre met donc un poids nul sur ces dix-neuf
+points : la paire $U$ est l'unique support minimal. À $k=10$, chaque choix de
+neuf points parmi les dix-neuf extras complète $U$ en une coface ouverte
+distincte. Une seule sphère porte ainsi
+$\binom{19}{9}=92\,378$ records de sortie. Aucune localité du parent ne peut
+supprimer cette masse si leurs identités restent contractuelles.
 
 ## 5. Ce que le résultat retire, et ce qu'il laisse global
 
@@ -181,7 +263,8 @@ globalité de fold.
 Un record `OpenGabrielCofaceFromCertifiedSphere` doit engager :
 
 - digest du nuage, de l'index et du record de sphère;
-- niveau exact, $I(B)$, $S(B)$ et supports minimaux, avec leurs autorités;
+- niveau exact, $I(B)$, $S(B)$ et soit la famille des supports minimaux, soit le
+  certificat exact $c_B\in\mathrm{conv}(T)$, avec leurs autorités;
 - ordre $k$, valeur $r$ et décision vide/non vide;
 - identité canonique de $T$ et preuve qu'il contient un support minimal;
 - identité $Q=I(B)\cup T$, cardinal $k+1$ et politique d'extra-shell;
@@ -200,11 +283,15 @@ cofaces du cube; et committer un préfixe après budget.
 - caractérisation locale des cofaces ouvertes d'une sphère certifiée :
   **prouvée sans régularité**;
 - émission unique sous $S(B)=U(B)$ : **prouvée**;
-- réduction du producteur aux seuls sommets d'arrangement : **réfutée par les
-  arités basses**;
+- plafond de navigation strict $k-1$ pour rencontrer un propriétaire de toute
+  sphère source : **prouvé sous dimension affine trois et coordonnées
+  distinctes**;
+- identification de la sphère critique à la sphère brute du sommet propriétaire :
+  **réfutée par les arités basses et la fixture mal centrée**;
 - suppression de la masse extra-shell hors porte : **réfutée si les identités
   de cofaces restent contractuelles**;
-- stream terminal de toutes les sphères, fold et contrat 50 k : **ouverts**.
+- harvest borné des flats/supports, stream terminal de toutes les sphères, fold
+  et contrat 50 k : **ouverts**.
 
 Ce résultat est CPU/GPU agnostique. Il ne justifie aucun benchmark et aucune G4.
 GCP non utilisé.

@@ -807,6 +807,55 @@ $3\cdot10^6$ sphères et $3\cdot10^7$ identifiants de membres, et aucun de ces
 deux nombres n'est mesuré — ils sont extrapolés d'une croissance non stabilisée,
 et je les donne comme tels.
 
+### Où passe vraiment le travail, mesuré sur une seule fenêtre
+
+J'ai d'abord déduit un rapport de 285 entre sommets visités et sphères d'arité
+quatre, en rapprochant deux colonnes du tableau ci-dessus. C'était faux deux fois :
+les sommets sont comptés sur le niveau strict $\le s_{\max}-2$ et les critiques sur
+le rang fermé $\le s_{\max}$, et les deux profils de nuage n'étaient pas le même.
+Mesuré sur **une seule** fenêtre et **un seul** profil — cube uniforme, emprise
+$\propto\sqrt{n}$ en chaque coordonnée, $s_{\max}=11$, index actif :
+
+| $n$ | sommets/pt | dont boule = miniboule de leur coquille | catalogue/pt | arités 2/3/4 par point |
+| ---: | ---: | ---: | ---: | --- |
+| 100 | 771,8 | 113,7 (1 sur 6,8) | 171,2 | 21,0 / 82,3 / 67,0 |
+| 200 | 999,2 | 145,7 (1 sur 6,9) | 209,8 | 24,0 / 101,1 / 83,7 |
+| 300 | 1 096,8 | 167,5 (1 sur 6,5) | 235,4 | 25,8 / 112,5 / 96,1 |
+
+Un sommet d'arrangement porte une sphère critique d'arité quatre si et seulement si
+sa boule est la miniboule de sa coquille — son centre dans l'enveloppe de sa
+coquille. C'est **un sommet sur 6,5**, pas un sur 285. Le filtre de criticité vaut
+donc un facteur sept à onze, pas deux ordres de grandeur, et adresser
+l'énumération par plan plutôt que par sommet — ce que je croyais être le levier —
+n'attaquerait que ce facteur-là.
+
+### Ce qui reste vraiment devant, et pourquoi c'est un problème de débit
+
+Les deux colonnes qui comptent croissent encore : 772 → 999 → 1 097 sommets par
+point, et 171 → 210 → 235 sphères par point, entre $n=100$ et $n=300$. **Rien
+n'est stabilisé, donc rien n'est extrapolable proprement** — et la borne de
+Clarkson--Shor pour le $\le k$-niveau de $n$ hyperplans de $\mathbb{R}^4$,
+$O(n^2k^2)$, n'interdit pas que cette croissance continue.
+
+Ce que la mesure permet en revanche de dire, c'est la **forme** du problème. Le
+travail par sommet est maintenant instrumenté — **[mesuré]** sur la campagne
+générique à onze points, 16,2 fermetures reconstruites par sommet, chacune un
+`orient3d` par point de coquille, soit de l'ordre de 65 prédicats exacts par
+sommet, et la structure de ce compte ne dépend que de la taille des coquilles,
+qui reste quatre en position générale. Le contrat n'est donc pas un problème de structure de
+données résiduelle — c'est un problème de **débit de prédicats entiers**, sur un
+terrain de $10^8$ sommets, sans écriture partagée et sans sortie matérialisée.
+
+Ces trois conditions sont désormais réunies : pas de table de visitation dans la
+décision, sortie streamée à high-water publié, et prédicats entiers purs. C'est
+exactement le profil d'un front d'onde device, et cela explique pourquoi les 48
+cœurs de la G4 ne suffisent pas là où son GPU pourrait : un facteur cent entre les
+deux est de l'ordre du manque.
+
+**Ce que je ne dis pas** : que le compte y est. Un kernel n'est pas écrit, la
+croissance de 1 097 par point n'est pas stabilisée, et la sortie streamée doit
+encore être consommée par un Kruskal $K$-MST qui n'existe pas. Le NO-GO tient.
+
 ### La taille du terrain n'est pas garantie
 
 Le parcours énumère les sommets géométriques de l'arrangement relevé dont le

@@ -113,6 +113,7 @@ struct Regularity {
   bool shell_outside_support = false;
   bool primitive_failed = false;
   bool unsupported_size = false;  // énumération des sous-ensembles hors domaine
+  int essential = 0;              // nombre de supports essentiels, tous cardinaux
   bool regular() const {
     return !outside_equality && !ambiguous_support && !shell_outside_support &&
            !primitive_failed && !unsupported_size;
@@ -154,14 +155,13 @@ static Regularity facet_regularity(const std::vector<P3>& pts, const std::vector
       if (mhgp::sphere_side(candidate, pts[(std::size_t)x]) > 0) encloses = false;
     if (encloses) realisers.push_back(mask);
   }
-  int essential = 0;
   for (unsigned mask : realisers) {
     bool minimal = true;
     for (unsigned other : realisers)
       if (other != mask && (other & mask) == other) minimal = false;
-    if (minimal) ++essential;
+    if (minimal) ++reg.essential;
   }
-  if (essential != 1) reg.ambiguous_support = true;
+  if (reg.essential != 1) reg.ambiguous_support = true;
   return reg;
 }
 
@@ -884,6 +884,33 @@ int main(int argc, char** argv) {
     }
     printf("[fixture deux supports] paire antipodale et triangle realisent la meme boule :"
            " support ambigu detecte tous cardinaux confondus\n");
+  }
+
+  // FIXTURE DU CUBE u16 : SIX SUPPORTS MINIMAUX POUR UNE SEULE BOULE.
+  // L'audit annonçait d'abord quatre paires antipodales, puis a corrige en six.
+  // Mon predicat compte les supports essentiels — minimaux pour l'inclusion, tous
+  // cardinaux confondus — donc il peut verifier ce compte au lieu de le croire :
+  // les quatre diagonales, plus les DEUX tetraedres de parite, dont aucune face ni
+  // aucune arete ne realise la boule.
+  {
+    std::vector<P3> cube;
+    for (int x = 0; x < 2; ++x) for (int y = 0; y < 2; ++y) for (int z = 0; z < 2; ++z)
+      cube.push_back(pt(2 * x, 2 * y, 2 * z));
+    std::vector<i32> all;
+    for (i32 i = 0; i < 8; ++i) all.push_back(i);
+    mhgp::Sphere ball{};
+    int faults = 0;
+    if (!miniball_of_set(cube, all, &ball)) ++faults;
+    for (i32 x : all) if (mhgp::sphere_side(ball, cube[(std::size_t)x]) != 0) ++faults;
+    const Regularity reg = facet_regularity(cube, all, ball);
+    if (reg.essential != 6 || !reg.ambiguous_support) ++faults;
+    if (faults) {
+      printf("[fixture cube u16] %d faute(s) : supports essentiels=%d (attendu 6)\n", faults,
+             reg.essential);
+      return 1;
+    }
+    printf("[fixture cube u16] %d supports minimaux pour une seule boule : quatre diagonales"
+           " et deux tetraedres de parite — le compte de l'audit est verifie\n", reg.essential);
   }
 
   // FIXTURE E5 — LA BRANCHE SANS INTRUS ET SON TEMOIN. beta(F=AC)=33/2,
