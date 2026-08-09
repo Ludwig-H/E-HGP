@@ -665,18 +665,14 @@ compare ni arités, ni enfants, ni racines, ni sources, et tire ses coordonnées
 dans $[0,120]$ — **[mesuré]** sur la grille déclarée il décide zéro nuage sur
 quarante en annonçant `OK`.
 
-## 10. Architecture GPU
+## 10. Architecture cible, non encore implémentée
 
-> **[périmé en partie]** Le tableau d'étages ci-dessous décrit la voie **par
-> ancres**, abandonnée au §0 ter : son étage `ancres` n'a plus d'objet et son
-> étage `shallow` ne désigne plus des niveaux peu profonds par ancre mais le
-> parcours de l'arrangement. Ce qui reste valide sans réserve : la contrainte
-> J10, l'obligation de tri global exact, le tri externe par runs bornés et la
-> règle des deux pistes parallèles. La réécriture de ce paragraphe sur la voie
-> retenue est une **[obligation]** avant tout portage. La forme device propre au
-> parcours — verrou de visitation `seen`, classes de charge et file de seconde
-> passe — est au §5 bis du `README.md`; le tri, le locator horizontal et les
-> verticales sont des étages globaux distincts.
+Le DFS CPU courant conserve `seen`, `frontier` et `visited`. Le théorème de
+parent local vise précisément à les supprimer par reverse search; cette
+substitution n'est pas encore intégrée ni certifiée au premier endpoint. De
+même, `mhgp3v_first_incidence` emploie délibérément
+`flat_catalogue(pts,n)`, des maps et une vérité combinatoire : c'est un oracle
+borné, pas l'étage de production décrit ci-dessous.
 
 **J10 borne un rayon spatial, pas une cardinalité** — **[mesuré]** voisinage
 maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
@@ -686,16 +682,13 @@ maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 | --- | --- | --- |
 | canonicalisation | `PointId`, domaine, digest, `RelevantGP` | copie ambiguë de l'entrée |
 | LBVH | range-report, self-join, `max_two_R_upper_hi` fail-open | matrice paire–point |
-| propositions | RNG, image de distance, heuristiques | aucune autorité au proposeur |
-| ancres | plans $H_u$ canoniques du complexe stratifié, ou center-cover | tableau des $\binom{n}{2}$ paires |
-| shallow | niveaux peu profonds, rang = profondeur | $\sum_e\binom{m_e}{2}$ |
-| décision exacte | diamètre, shell, bon centrage, owner | rescans globaux par candidat |
-| source HGP | facettes, cofaces, silences, couverture | $\Gamma$ résident complet; les identités contractuelles restent streamées |
+| reverse search | parent, enfants, propriétaire local, pile bornée | `seen/frontier/visited` globaux |
+| source directe ouverte | cofaces Gabriel et facettes du cœur streamées | catalogue critique global; le prototype exhaustif n'est que l'oracle |
+| première incidence | census fermé, attache propriétaire, `ResolveStrictCarrier` | $\mathrm{Star}(D_k)$ et matérialisation de tous les $M(F)$ sous la porte régulière |
 | **tri et lots** | ordre global par niveau exact, groupement des égaux | catalogue géométrique global |
-| réduction horizontale | locator, partition, couverture et forêt append-only | snapshots complets et mosaïque d'ordre supérieur |
+| réduction horizontale | fold de partition, locator externalisable, forêt append-only | snapshots complets et mosaïque d'ordre supérieur |
+| couverture | DAG ou journal exact de provenance | matérialisation répétée des unions de points |
 | jointure verticale | requêtes vers l'ordre adjacent et sweep à coupe fermée | matrice tous ordres contre tous ordres |
-
-Ancres par classes de charge : warp, CTA sous-tuilé, file persistante.
 
 **Le flux ne dispense pas du tri global exact.** Des producteurs indépendants
 produisent les événements dans un ordre arbitraire, alors que le réducteur exige,
@@ -703,7 +696,7 @@ par ordre : un ordre global par **niveau rationnel exact**, le groupement de
 **tous** les événements de niveau égal, un état pré-lot logiquement gelé, puis
 une application atomique — et déduplication, propriétaire, incidences silencieuses et
 `coverage_delta` doivent respecter ce même ordre. Aucun producteur monotone entre
-ancres indépendantes n'est énoncé ni plausible.
+sous-arbres indépendants n'est énoncé ni plausible.
 
 La voie compatible avec l'invariant mémoire du §1.4 est un **tri externe** :
 produire des **runs bornés** triés par clé exacte et identifiants canoniques, les
@@ -711,8 +704,9 @@ fusionner par un merge déterministe, **réunir les clés rationnellement égale
 avant toute mutation**, puis alimenter le réducteur. À publier : taille des runs,
 high-water RAM, octets écrits et lus, coût des comparaisons exactes, nombre et
 taille maximale des lots. Une variante entièrement résidente est acceptable si
-elle prouve les mêmes bornes. On évite le catalogue géométrique global ; on ne
-peut pas éviter l'**ordonnancement global de ses événements utiles**.
+elle prouve les mêmes bornes. Le produit visé évite le catalogue géométrique
+global; le falsificateur `first_incidence` le matérialise encore volontairement.
+On ne peut pas éviter l'**ordonnancement global des événements utiles**.
 
 **Les deux pistes sont parallèles** : oracle CPU multiprécision indépendant pour
 l'autorité ; CUDA `proposal_only` très tôt pour falsifier masses, divergence et
@@ -720,19 +714,21 @@ mémoire ; aucune promotion avant parité.
 
 ## 11. Le contrat du générateur n'est pas le contrat HGP
 
-Émettre les supports est un composant géométrique. La sortie normative exige
-aussi les facettes et cofaces utiles, les incidences **actives et silencieuses**,
-les attachements et remplacements de la descente, les lots de niveau exactement
-égal, `coverage_delta` et `coverage_log`, et les applications verticales entre
-ordres avec leurs carrés de naturalité. **La source complète, les incidences
-silencieuses, les verticales et la descente sont des points durs indépendants du
-générateur.**
+Émettre les supports est un composant géométrique. La décision locale de
+$\lambda(F)$ et $M(F)$ est maintenant démontrée sous une source Gabriel ouverte
+terminale; sous la porte régulière, un census saturé et une attache résolue par
+facette cœur suffisent même au quotient $H_0$. Restent des points durs distincts
+du générateur : produire cette source sans catalogue global, authentifier la
+régularité, fermer les lots et les déduplications, résoudre les carriers stricts,
+conserver `coverage_delta` et `coverage_log`, puis construire les applications
+verticales et leurs carrés de naturalité.
 
 Le contrat v2 exige en outre des identités exhaustives de facettes, cofaces,
 groupes et provenance. Elles peuvent être streamées, mais pas supprimées comme
 une optimisation interne. Un quotient $H_0$ normalisé plus compact demanderait
 un profil public versionné, sa propre preuve de complétude, ses verticales et ses
-digests. La factorisation précise est dans
+digests. Le streaming décrit ici n'est pas encore implémenté par le prototype en
+mémoire. La factorisation précise est dans
 [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](audits/NOTE_GATE_D_GLOBALITES_RESIDUELLES.md).
 
 ## 12. Portes
