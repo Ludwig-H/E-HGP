@@ -237,19 +237,32 @@ add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential
          --clouds 240 --points 8 --coord 40 --smax 7 --seed 90210 --min-cases 1400
          --min-navigated 1000 --min-multiple-shells 200)
 
-# La dichotomie doit reproduire lambda(F) et M(F) exactement, sur les deux
-# branches. Trois ordres, pour que la branche fermee et la branche vide soient
-# toutes deux reellement exercees.
-add_test(NAME mhgp3v_first_incidence_k2 COMMAND mhgp3v_first_incidence
-         --clouds 25 --points 10 --coord 20 --k 2 --seed 4242)
-add_test(NAME mhgp3v_first_incidence_k3 COMMAND mhgp3v_first_incidence
-         --clouds 25 --points 11 --coord 22 --k 3 --seed 777)
-add_test(NAME mhgp3v_first_incidence_k4 COMMAND mhgp3v_first_incidence
-         --clouds 20 --points 11 --coord 18 --k 4 --seed 90210)
+# La dichotomie doit reproduire l'UNIVERS DES COFACES, l'UNIVERS DES FACETTES,
+# lambda(F) et M(F). La verite enumere elle-meme toutes les cofaces de cardinal
+# k+1 a vacuite OUVERTE : une coface omise par le sujet est donc un desaccord, et
+# non une facette qui n'est jamais soumise au juge.
+#
+# Trois regimes, avec planchers : une grille de cote deux ou la branche fermee
+# est totale et les extra-shells partout ; un nuage assez grand pour exercer les
+# noeuds internes de l'index ; un ordre plus haut.
+add_test(NAME mhgp3v_first_incidence_extra_shell COMMAND mhgp3v_first_incidence
+         --clouds 20 --points 8 --coord 2 --k 3 --seed 7
+         --min-closed 1000 --min-internal-nodes 15)
+add_test(NAME mhgp3v_first_incidence_internal_nodes COMMAND mhgp3v_first_incidence
+         --clouds 12 --points 20 --coord 20 --k 3 --seed 11
+         --min-closed 800 --min-empty 400 --min-internal-nodes 80)
+add_test(NAME mhgp3v_first_incidence_high_order COMMAND mhgp3v_first_incidence
+         --clouds 12 --points 9 --coord 3 --k 4 --seed 13
+         --min-closed 400 --min-empty 80 --min-internal-nodes 20)
 mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
   mhgp3v_first_incidence_reject_absurd "campagne absurde" --clouds 0)
 mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
   mhgp3v_first_incidence_reject_unknown "argument inconnu" --sujet-inexistant)
+mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_suffix "valeur entiere invalide" --clouds 1junk)
+mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_floor "plancher de couverture non atteint"
+  --clouds 2 --points 8 --coord 20 --k 3 --min-closed 1000000)
 
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential

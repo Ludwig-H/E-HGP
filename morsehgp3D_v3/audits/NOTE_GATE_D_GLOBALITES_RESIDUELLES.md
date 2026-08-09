@@ -48,8 +48,12 @@ Sous une source finie et complète, le pipeline exact minimal est le suivant.
 2. Une source directe terminale développe ses facettes du cœur, puis la
    dichotomie de
    [`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md)
-   émet toutes leurs premières incidences. Chaque record possède une identité
-   canonique et une preuve de complétude relative à cette source.
+   décide leurs premières incidences. Pour un payload qui exige $M(F)$, elle les
+   émet toutes. Pour le seul quotient $H_0$ régulier, la
+   [`note d'attache unique`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)
+   remplace les familles silencieuses par au plus une attache par facette cœur,
+   vers un carrier strict résolu. Chaque record possède une identité canonique
+   et une preuve de complétude relative à cette source.
 3. Les producteurs écrivent des runs bornés triés par la clef
    `(ordre, beta_exact, type, identite)`.
 4. Une fusion externe déduplique les identités et forme les groupes maximaux de
@@ -97,8 +101,11 @@ directe est terminale et sa convention d'extra-shell explicite.
 Le résiduel v3 est donc un verrou **de production et de capability**, plus une
 preuve nouvelle à découvrir : fermer la source directe, développer exactement
 $D_k$, terminer toutes les requêtes fermées, authentifier l'autorité de fenêtre,
-lier leurs watermarks et alimenter le fold. Une source seulement plausible ou
-un préfixe Gabriel direct ne suffit toujours pas. Les contre-exemples et
+lier leurs watermarks et alimenter le fold. Pour le quotient régulier, il n'est
+même plus nécessaire de matérialiser tous les $M(F)$ : une attache propriétaire
+vers `ResolveStrictCarrier` suffit. Cette résolution rappelle toutefois que la
+partition stricte reste une information globale. Une source seulement plausible
+ou un préfixe Gabriel direct ne suffit toujours pas. Les contre-exemples et
 obligations sont recensés dans
 [`INCIDENCES_SILENCIEUSES_GAMMA.md`](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
 et dans la [spécification](../../docs/SPECIFICATION_MORSEHGP3D.md). Le contrat
@@ -264,6 +271,7 @@ donc pas le contrat 50 k.
   propriétaire locaux**;
 - lecture globale du nuage : **intrinsèque, $O(n)$ et immuable**;
 - complétude sparse des incidences silencieuses : **théorème conditionnel fermé;
+  tous les $M(F)$ compressibles à une attache résolue par facette cœur;
   producteur v3 terminal et capability commune encore ouverts**;
 - tri exact et fermeture des lots : **intrinsèques mais externalisables**;
 - partition horizontale et provenance de couverture : **information intrinsèque

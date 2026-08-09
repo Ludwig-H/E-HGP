@@ -485,33 +485,74 @@ recherche de voisinage** :
 - **branche fermée**, $E_F\neq\varnothing$ : alors $\lambda(F)=b_F$ et $M(F)=\lbrace F\cup\lbrace x\rbrace:x\in E_F\rbrace$. La preuve tient en deux lignes et n'exige **aucune** hypothèse de régularité ;
 - **branche vide**, $E_F=\varnothing$ : alors $\lambda(F)$ est le minimum des niveaux des cofaces **directes** contenant $F$, et $M(F)$ en est le groupe d'ex æquo — tout minimiseur est de Gabriel au sens ouvert, sinon un intrus strict fournirait une incidence strictement moins chère.
 
-`mhgp3v_first_incidence` mesure cette dichotomie et la **juge** contre une vérité
-exhaustive écrite dans le même fichier : pour chaque facette, le minimum de
-$\beta$ sur tous les points extérieurs et l'ensemble complet de ses ex æquo.
+### Ma première source était fausse, et le juge ne pouvait pas le voir
 
-**[mesuré]** 60 nuages de 11 points par ordre, grille $[0,22)$, coordonnées
-distinctes :
+La première version filtrait les cofaces de rang fermé $k+1$, c'est-à-dire la
+vacuité **fermée**, là où le théorème exige la vacuité **intérieure** avec une
+politique explicite pour les points extérieurs exactement sur la coquille. Sur
+cinq points
 
-| $k$ | cofaces directes | records/coface | facettes du cœur | branche fermée | co-minimiseurs (moy./max) | points touchés/facette | désaccords |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2 | 1 457 | 3,00 | 1 952 | 40,5 % | 1,02 / 3 | 11,0 | **0** |
-| 3 | 1 543 | 4,00 | 3 447 | 57,7 % | 1,02 / 3 | 11,0 | **0** |
-| 4 | 1 438 | 5,00 | 4 597 | 66,4 % | 1,02 / 3 | 11,0 | **0** |
-| 5 | 1 222 | 6,00 | 5 101 | 71,8 % | 1,02 / 3 | 11,0 | **0** |
+```text
+(0,0,0) (0,2,2) (2,0,2) (2,2,0) (0,0,2)
+```
 
-Quatre lectures, et elles vont toutes dans le même sens :
+les quatre premiers forment un tétraèdre régulier et le cinquième est sur sa
+sphère : la vérité Gabriel ouverte compte **cinq** cofaces de taille quatre, la
+fermée **une**. J'en gardais une, j'en omettais quatre — et j'affichais zéro
+désaccord, parce que l'univers des facettes jugées était dérivé de ma propre
+source. Une coface omise faisait disparaître aussi la facette qui l'aurait
+révélée. **Le juge était circulaire.**
 
-- l'**identité de masse** est exacte à tous les ordres — exactement $k+1$ records de suppression par coface directe, ce qui rend le flux dimensionnable ;
-- la **branche fermée** domine et croît avec $k$ ; elle ne coûte qu'une requête de boule fermée ;
-- les **co-minimiseurs** sont minuscules — moyenne 1,02, maximum 3 — donc les lots atomiques de première incidence sont petits ;
-- la requête certifiée ne touche que **onze points par facette**, et ce nombre ne bouge pas avec $k$.
+Deux corrections, et la seconde compte plus que la première.
 
-**Ce que cela ne ferme pas.** Ce binaire ne remplace pas l'oracle général, qui
-reste le juge hostile et le repli hors porte. Le regroupement est en mémoire :
-ce sont les **volumes** qui sont publiés, pas un tri externe. Et la dichotomie
-produit $M(F)$ ; elle ne produit ni l'autorité de régularité qui autorise la
-rétraction vers la forêt $H_0$ normalisée, ni le réducteur, ni les verticales,
-ni l'identité de sortie.
+La source **développe** les extra-shells. Toute coface de Gabriel ouverte $Q$ de
+cardinal $k+1$ a pour miniboule une sphère critique $B$, avec
+$I(B)\subseteq Q\subseteq I(B)\cup S(B)$ ; donc $Q=I\cup T$ pour un
+$T\subseteq S$ de cardinal $k+1-\lvert I\rvert$. Énumérer les sphères critiques
+puis ces $T$ est complet — à condition que le catalogue contienne $B$, ce que
+$s_{\max}=n$ garantit, et non un plafond de rang.
+
+La vérité **énumère son propre univers** : toutes les cofaces de cardinal $k+1$ à
+vacuité ouverte, puis ses propres facettes. Les deux univers sont comparés
+**avant** $\lambda$ et $M$, donc une coface omise est désormais un désaccord. Le
+niveau $\lambda(F)$ est comparé lui aussi, pas seulement l'ensemble $M(F)$. Le
+parseur lit les entiers en entier, un statut non `kOk` fait échouer au lieu de
+censurer, et les planchers portent sur les deux branches et sur les nœuds internes
+de l'index.
+
+**[mesuré]** trois régimes, coordonnées distinctes, tout jugé contre l'univers
+indépendant :
+
+| régime | $n$ | grille | $k$ | cofaces (manq./surn.) | facettes (manq./surn.) | branche fermée | co-min. moy./max | désaccords |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| extra-shells partout | 8 | $[0,2)$ | 3 | 2 800 (0/0) | 2 240 (0/0) | **100 %** | 2,71 / 5 | **0** |
+| nœuds internes | 20 | $[0,20)$ | 3 | 2 496 (0/0) | 5 103 (0/0) | 62,4 % | 1,05 / 4 | **0** |
+| ordre plus haut | 9 | $[0,3)$ | 4 | 593 (0/0) | 1 605 (0/0) | 81,1 % | 1,75 / 5 | **0** |
+
+La grille de côté deux est le régime qui compte : huit points dans un cube, donc
+des cosphéricités partout, une branche fermée totale et des extra-shells sur
+chaque facette. Le nuage de vingt points exerce 210 nœuds internes de l'index,
+ce que les campagnes précédentes ne faisaient pas. Les deux déduplications sont
+comptées séparément : facettes portées par plusieurs cofaces, cofaces proposées
+par plusieurs facettes.
+
+Et la reproduction hostile de l'audit,
+`--clouds 1 --points 7 --coord 2 --k 2 --seed 1`, qui rendait six désaccords,
+rend maintenant 31 cofaces et 21 facettes sans manquante ni surnuméraire.
+
+Deux mises en garde qui subsistent : les co-minimiseurs observés sont petits mais
+**sans borne générale** — une facette peut en avoir $\Theta(n)$ — et le rapport de
+$k+1$ records par coface est une identité de construction du flux, qui le
+dimensionne sans certifier la terminalité de la source.
+
+**Ce que cela ne ferme pas.** Il faut d'abord authentifier indépendamment la
+source directe ouverte, l'univers de facettes, les extra-shells, les statuts et
+les budgets. Le balayage exhaustif local partage encore `miniball_of` et
+`sphere_cmp_beta` avec le sujet ; l'oracle général reste donc le juge hostile et
+le repli hors porte. Le regroupement est en mémoire : ce sont les **volumes**
+qui sont publiés, pas un tri externe. Enfin, la dichotomie produit $M(F)$ ; elle
+ne produit ni l'autorité de régularité qui autorise la rétraction vers la forêt
+$H_0$ normalisée, ni le réducteur, ni les verticales, ni l'identité de sortie.
 
 ---
 

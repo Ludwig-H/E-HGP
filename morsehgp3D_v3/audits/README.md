@@ -9,6 +9,7 @@ Ce dossier conserve les audits indépendants et les réponses chronologiques exp
 - [`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md) : parent local exact sur le vrai graphe multiplicitaire, propriétaire canonique par cône signé, garde multi-support, suppression mathématique de `seen/frontier/visited` et de `emitted`, fixtures et review live.
 - [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](NOTE_GATE_D_GLOBALITES_RESIDUELLES.md) : factorisation de ce qui reste global par nécessité scientifique : source silencieuse, tri et lots, état horizontal, couverture, verticales et masse contractuelle.
 - [`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md) : théorème et pipeline streamé qui reconstruisent toutes les premières incidences du cœur par requête de boule fermée ou minimum direct, sans étoile globale; oracle LBVH général conservé comme juge et repli.
+- [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md) : compression prouvée des premiers incidents silencieux à une attache par facette cœur sous la porte régulière; contre-exemple à la cible brute et nécessité exacte du carrier strict résolu.
 
 ## Archives épinglées et réponses chronologiques
 

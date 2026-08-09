@@ -40,6 +40,14 @@ $$\lambda(F)=\min_{x\in X\setminus F}\beta(F\cup\lbrace x\rbrace),\qquad M(F)=\l
 Le but n'est pas de matérialiser $\mathrm{Star}(D_k)$, ni toutes les facettes de
 cardinal $k$, mais seulement de publier exactement $D_k$ et tous les $M(F)$.
 
+Pour le contrat intermédiaire qui publie exactement $M(F)$, cet objet est
+minimal. Pour la seule forêt horizontale $H_0$ normalisée sous la porte
+régulière, une réduction ultérieure est possible :
+[`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)
+prouve qu'une seule attache vers le carrier strict résolu suffit par facette
+cœur ayant au moins deux intrus. Cette réduction ne préserve pas le payload de
+première incidence ni le contrat Gamma/v2.
+
 ## 2. Branche fermée : résultat sans hypothèse de régularité
 
 **Lemme de la boule fermée.** Si $E_F\neq\varnothing$, alors

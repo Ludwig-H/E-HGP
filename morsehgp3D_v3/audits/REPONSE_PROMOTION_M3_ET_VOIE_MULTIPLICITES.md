@@ -441,11 +441,18 @@ l'inverse — le parent est **moins profond**. Le témoin
 **[mesuré]** grille saturée, 5 611 cas, zéro désaccord avec les quatre
 assertions actives.
 
-**La dichotomie de `NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR` est implémentée et
-jugée.** `mhgp3v_first_incidence` produit la source directe, son flux de
-suppressions, le regroupement par facette, puis décide par branche fermée ou
-minimum direct — et confronte le résultat à une vérité exhaustive qui balaie tous
-les points extérieurs de chaque facette.
+> **Rectification après audit indépendant du snapshot `9eee050`.** Le théorème
+> de dichotomie est intact, mais la phrase chronologique « implémentée et jugée »
+> était trop forte. `mhgp3v_first_incidence` exerce la factorisation sur les
+> facettes qu'il reçoit ; il n'authentifie pas encore une source Gabriel ouverte
+> terminale ni un univers indépendant de facettes.
+
+Le prototype produit une source de rang fermé, son flux de suppressions, le
+regroupement par facette, puis décide par branche fermée ou minimum direct. Pour
+chaque facette ainsi sélectionnée, il confronte le résultat à un balayage de tous
+les points extérieurs. Cette comparaison locale est utile, mais elle partage les
+primitives `miniball_of` et `sphere_cmp_beta` avec le sujet et ne juge pas les
+facettes que la source omet.
 
 | $k$ | cofaces directes | records/coface | facettes | branche fermée | co-min. moy./max | points touchés/facette | désaccords |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -454,18 +461,90 @@ les points extérieurs de chaque facette.
 | 4 | 1 438 | 5,00 | 4 597 | 66,4 % | 1,02 / 3 | 11,0 | **0** |
 | 5 | 1 222 | 6,00 | 5 101 | 71,8 % | 1,02 / 3 | 11,0 | **0** |
 
-Ce que ces chiffres disent, et c'est votre §9 qui les demandait : l'identité de
-masse est exacte à tous les ordres, la branche fermée domine et croît avec $k$,
-les co-minimiseurs sont minuscules — moyenne 1,02, maximum 3, donc les lots
-atomiques de première incidence sont petits — et la requête certifiée ne touche
-que **onze points par facette**, sans dépendance en $k$.
+Ces chiffres disent seulement ceci sur les campagnes génériques acceptées : le
+flux construit porte $k+1$ suppressions par coface, la branche fermée y domine,
+et les co-minimiseurs observés ont une moyenne de 1,02 et un maximum de 3. Ils ne
+donnent aucune borne : $M(F)$ peut avoir taille $\Theta(n)$. Les onze points
+touchés par facette sont le nuage entier, puisque $n=11$ est inférieur à la
+taille de feuille 16 ; aucun nœud interne ni élagage de l'index n'est exercé.
 
-**Ce que je ne prétends pas.** Le regroupement est en mémoire : ce sont les
-volumes qui sont publiés, pas un tri externe. L'oracle général reste le juge
-hostile et le repli hors porte. Et la dichotomie produit $M(F)$, pas l'autorité
-de régularité qui autorise la rétraction vers $H_0$, ni le réducteur, ni les
-verticales, ni l'identité de sortie. Les fixtures de votre §8 — les deux intrus
-de niveau $33/2$, le point exactement sur le shell, les deux minimums directs ex
-æquo, les deux déduplications, la permutation des runs, le budget moins un — ne
-sont pas encore gravées ; la campagne ci-dessus est aléatoire et exhaustive, pas
-adverse.
+**Frontière exacte.** Un tétraèdre régulier avec un cinquième point sur sa sphère
+possède cinq cofaces Gabriel ouvertes de taille quatre ; la source live n'en
+conserve qu'une et peut néanmoins annoncer zéro désaccord parce que les facettes
+omises ne sont jamais jugées. La commande
+`--clouds 1 --points 7 --coord 2 --k 2 --seed 1` rend six désaccords, tandis que
+`--no-judge` laisse le même domaine sortir avec succès et une conclusion
+« exacte ». La source ouverte, les extra-shells, le CLI fail-closed, les
+planchers et les budgets sont donc encore des portes.
+
+Le regroupement reste en mémoire : ce sont les volumes qui sont publiés, pas un
+tri externe. La dichotomie produit $M(F)$ sous ses préconditions ; elle ne
+produit ni l'autorité de régularité qui autorise la rétraction vers $H_0$, ni le
+réducteur, ni les verticales, ni l'identité de sortie. Les fixtures de la note —
+les deux intrus de niveau $33/2$, le point exactement sur le shell, les deux
+minimums directs ex æquo, les deux déduplications, la permutation des runs et le
+budget moins un — restent à graver.
+
+---
+
+## 13. La source directe corrigée — réponse au §7.6
+
+Le verdict est accepté : mon claim de source complète était faux, et le
+mécanisme que vous décrivez est le bon. Je filtrais le rang fermé $k+1$, donc la
+vacuité **fermée**, là où le théorème demande la vacuité **intérieure**. Vérifié
+sur vos cinq points :
+
+```text
+Gabriel OUVERT {0,1,2,3}  extra-shell
+Gabriel OUVERT {0,1,2,4}  (aussi ferme)
+Gabriel OUVERT {0,1,3,4}  extra-shell
+Gabriel OUVERT {0,2,3,4}  extra-shell
+Gabriel OUVERT {1,2,3,4}  extra-shell
+vacuite OUVERTE : 5 cofaces  |  vacuite FERMEE : 1
+```
+
+**Et vous avez mis le doigt sur le vrai défaut, qui n'est pas le filtre.** Le
+juge dérivait son univers de facettes de ma propre source : une coface omise
+faisait disparaître aussi la facette qui l'aurait révélée. Le juge était
+circulaire, et aucun renforcement du filtre seul ne l'aurait corrigé.
+
+**Les deux corrections.** La source développe les extra-shells : toute coface de
+Gabriel ouverte $Q$ de cardinal $k+1$ a pour miniboule une sphère critique $B$
+avec $I(B)\subseteq Q\subseteq I(B)\cup S(B)$, donc $Q=I\cup T$ avec
+$T\subseteq S$ ; énumérer les sphères critiques puis ces $T$ est complet, à
+condition que le catalogue contienne $B$ — d'où $s_{\max}=n$ et non un plafond de
+rang. Et la vérité énumère **son propre** univers de cofaces à vacuité ouverte,
+puis ses propres facettes, comparés aux miens avant $\lambda$ et $M$.
+
+**Les autres dettes du §7.6, fermées.** $\lambda(F)$ est comparé et plus
+seulement $M(F)$ — `truth_level` n'est plus calculé pour rien. Un statut non
+`kOk` fait échouer au lieu de censurer. Le parseur est intégral :
+`--clouds 1junk` et `4294967297` sont refusés. Les planchers portent sur les deux
+branches et sur les **nœuds internes** de l'index, avec des feuilles de taille 4
+et un nuage de vingt points : 210 nœuds internes exercés, là où les CTests
+précédents n'en touchaient aucun. Les deux déduplications sont comptées
+séparément. `deletion_bytes`, qui n'était ni `sizeof(Record)` ni un wire défini,
+a été retiré.
+
+**[mesuré]** trois régimes, tout jugé contre l'univers indépendant :
+
+| régime | $n$ | grille | $k$ | cofaces (manq./surn.) | facettes (manq./surn.) | fermée | co-min. moy./max | désaccords |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| extra-shells partout | 8 | $[0,2)$ | 3 | 2 800 (0/0) | 2 240 (0/0) | 100 % | 2,71 / 5 | **0** |
+| nœuds internes | 20 | $[0,20)$ | 3 | 2 496 (0/0) | 5 103 (0/0) | 62,4 % | 1,05 / 4 | **0** |
+| ordre plus haut | 9 | $[0,3)$ | 4 | 593 (0/0) | 1 605 (0/0) | 81,1 % | 1,75 / 5 | **0** |
+
+Votre reproduction hostile `--clouds 1 --points 7 --coord 2 --k 2 --seed 1`, qui
+rendait six désaccords, rend maintenant 31 cofaces et 21 facettes sans manquante
+ni surnuméraire.
+
+**Ce que je ne prétends toujours pas.** La vérité partage encore `miniball_of` et
+`sphere_cmp_beta` avec le sujet : l'oracle général reste le juge hostile et le
+repli hors porte. Le regroupement est en mémoire, donc ce sont des volumes, pas
+un tri externe. Les co-minimiseurs observés sont petits mais **sans borne
+générale** — $\Theta(n)$ reste possible — et l'identité $k+1$ records par coface
+est une identité de construction, qui dimensionne le flux sans certifier la
+terminalité. Enfin la dichotomie produit $M(F)$, jamais l'autorité de régularité,
+le réducteur, les verticales ou l'identité de sortie. Vos fixtures adverses du §8
+— les deux intrus de niveau $33/2$, le budget moins un, la permutation des runs —
+ne sont pas gravées.
