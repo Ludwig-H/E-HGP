@@ -539,6 +539,14 @@ Cumulé avec la sortie précoce du parent, sur la campagne générique à onze p
 sommet**. Un facteur trois sur le poste de coût, en deux corrections dont aucune ne
 change la sortie.
 
+La preuve locale confirme que ce préfiltre est une censure nécessaire correcte,
+mais sa qualification permanente reste indirecte : reverse et BFS concordent,
+sans rejouer chaque refus contre le parent complet, et aucun plancher n'interdit
+le mutant « préfiltre toujours vrai ». Le corollaire est même plus fort : après
+un retour admissible, l'adjacence du pinceau rend la seconde requête de voisin
+inutile; chercher seulement un couple admissible antérieur suffit à décider le
+parent. Cette dernière suppression n'est pas encore intégrée.
+
 ### Un résultat négatif transitoire : la reprise à un curseur n'a montré aucun gain
 
 Je note l'essai parce qu'il évite de confondre une piste plausible avec un gain

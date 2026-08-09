@@ -811,7 +811,7 @@ direction de parent n'admet. La fixture `ABCpy` de
 [`NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md`](NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md)
 réfute explicitement toute source branchée seulement après ce premier filtre.
 
-### 7.15 Snapshots de curseur `234ae9ef` puis `26c66aa3` : toujours non intégrés
+### 7.15 Snapshots de curseur `234ae9ef`, `26c66aa3` puis `deb6858a` : toujours non intégrés
 
 Un premier header worktree transitoire
 `order_k_flats.hpp=234ae9ef937040ddc8b1e185264eab8c25820354cadd6d32a518180affceae2f`
@@ -819,7 +819,7 @@ ajoute `for_each_flat_from(i0,j0,k0)`, mais la reverse search ne l'appelle pas
 encore. Les cinq portes flats restent vertes parce que le wrapper historique
 repart de `(0,1,2)`; elles ne mesurent aucun gain de reprise.
 
-Ce delta a d'abord disparu avant commit. Au rehash suivant, le worktree courant
+Ce delta a d'abord disparu avant commit. Au rehash suivant, le worktree
 `order_k_flats.hpp=26c66aa301cb3803bfff8d0104b36e7ba34de3e265461a155695a2c3a19a032e`
 réintroduit le helper et des commentaires de mesure, mais conserve exactement la
 même frontière : `reverse_search_stream` appelle `for_each_flat`, et ce wrapper
@@ -827,6 +827,13 @@ appelle toujours `for_each_flat_from(...,0,1,2,...)`. Aucun frame ne stocke ni n
 réinjecte un curseur. Le chemin live ne peut donc pas bénéficier de la reprise;
 les nombres 308 832/308 832 restent le journal d'un essai transitoire, pas une
 capability qualifiée par le code et les CTests présents.
+
+Le commit `6a13b64` conserve ce helper sous l'empreinte finale
+`deb6858a4433806c801be2281a505ee08e06c1e50fd938aa4ed68d465b819270`
+sans changer cette frontière. Aucun appel de `for_each_flat_from` ne lui fournit
+un curseur non nul. Un probe tétraédrique confirme en outre qu'arrêter au triplet
+`(0,1,2)` puis reprendre au même triplet le rejoue; l'état de reprise doit donc
+porter aussi la convention de consommation et la direction.
 
 Le contrat du curseur est en outre ambigu au snapshot épinglé. Le callback reçoit
 le triplet **courant**, puis un retour `false` quitte la fonction avant
@@ -838,26 +845,70 @@ canonique, arrêt puis reprise après chaque position, et concaténation exacte 
 segments contre un balayage intégral.
 
 Verdict : **GO pour la simplification du parent; diagnostic seulement pour le
-curseur tant qu'il n'est ni consommé ni différencié.** Le HEAD `a5adde7` ne
-contient aucun curseur; le helper du worktree `26c66aa3` n'est pas encore relié à
-la reverse search.
+curseur tant qu'il n'est ni consommé ni différencié.** Le HEAD `6a13b64`
+contient le helper, mais ne le relie toujours pas à la reverse search.
 
-### 7.16 Porte de reprise courante
+### 7.16 Commit `6a13b64` : préfiltre de retour sûr, qualification partielle
+
+Le même commit ajoute `backward_pair_admissible`. Pour un candidat $w$ obtenu
+depuis $v$ le long du flat fermé $C$ et de la direction $d$, il teste si le
+couple retour $(C,-d)$ reste dans la chambre de $w$ et améliore le potentiel du
+parent. C'est une condition **nécessaire**, pas suffisante.
+
+Le calcul est mathématiquement fidèle à `canonical_parent` : mêmes signes
+`tangent_sign`, même hausse stricte de $L_h$ au niveau positif et même baisse de
+$Q_r$ au niveau zéro. La fermeture et sa base canonique sont identiques au
+retour, car les nouveaux membres du lot ont une orientation non nulle et
+n'agrandissent pas le plan. La base ordonnée et le signe `forward` forment
+toutefois un contrat indivisible : permuter la base sans retourner l'orientation
+peut censurer un vrai fils.
+
+Un build Release isolé des empreintes
+`order_k_flats.hpp=deb6858a4433806c801be2281a505ee08e06c1e50fd938aa4ed68d465b819270`,
+`flats_differential.cpp=c777ad9cd49498fb8de2ce1c812035da6232d50f71333068d87f85e619ced0e7`
+et
+`CMakeLists.txt=c148e5c59ebd36c5bbcaaa0298752eb6357b943a35ed15924364f287a407d48b`
+passe les cinq CTests flats ciblés en 83,31 s. Fixtures, générique, dégénéré et
+cosphérique refusent respectivement 5 265, 400 520, 451 359 et 372 968 candidats
+par le couple retour, avec zéro désaccord. Les identités de compteurs
+$N_{\mathrm{cand}}=N_{\mathrm{reject\_back}}+N_{\mathrm{parent\_queries}}$
+et
+$N_{\mathrm{parent\_queries}}=N_{\mathrm{reject\_parent}}+N_{\mathrm{vertices}}-N_{\mathrm{roots}}$
+sont exactes sur ces campagnes.
+
+La porte permanente reste incomplète. Elle ne rejoue pas chaque `false` contre
+le parent complet et n'impose aucun plancher sur les deux nouveaux compteurs; le
+mutant « toujours `true` » garderait toute la suite verte. Un probe transitoire
+plus direct sur 30 nuages, 149 968 candidats et 93 824 refus compare chaque
+refus au parent complet : zéro faux négatif et zéro contradiction. Ce résultat
+crédite le filtre, mais doit encore devenir une fixture/mutation permanente.
+
+Le résultat positif plus fort est formalisé au §12 de la
+[`note de parent local`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md) : une fois
+le couple retour admissible, l'adjacence du pinceau rend la seconde requête
+`neighbour_along` redondante. Il suffit de chercher un couple admissible
+strictement antérieur à la clef retour. Cette décision supprimerait les requêtes
+de voisin-parent restantes; elle n'est pas encore intégrée au commit.
+
+### 7.17 Porte de reprise courante
 
 1. Intégrer le sink au catalogue derrière un segment transactionnel et un statut
    typé; mesurer son high-water complet en octets. Remplacer le digest 64 bits par
    une comparaison exacte et ajouter les mutations fail-closed.
-2. Implémenter et différencier « support canonique puis owner » avant de retirer
+2. Remplacer le `parent_of` survivant par le décideur de préfixe du §7.16;
+   graver la fixture six points, le rejeu direct de chaque refus et des planchers
+   qui tuent le mutant « toujours vrai ».
+3. Implémenter et différencier « support canonique puis owner » avant de retirer
    `emitted`. Récolter tous les flats incidents, pas seulement les directions de
    parent; qualifier le curseur de reprise sans omission ni répétition.
-3. Étendre la porte d'équivariance au payload intérieur et aux multiplicités de
+4. Étendre la porte d'équivariance au payload intérieur et aux multiplicités de
    sortie, en conservant le BFS comme oracle borné.
-4. Transformer l'oracle ouvert maintenant corrigé en source terminale sans
+5. Transformer l'oracle ouvert maintenant corrigé en source terminale sans
    `flat_catalogue(s_max=n)`, puis composer l'autorité de fenêtre avec le census
    saturé et la descente locale de carrier. La porte régulière globale doit
    couvrir les objets silencieux, et chaque échec de primitive dans la source ou
    la vérité doit être distingué d'une décision « non-Gabriel ».
-5. Construire et différencier le fold pré-lot typé
+6. Construire et différencier le fold pré-lot typé
    $R^{-}\sqcup L^{-}\sqcup N_a$, puis les runs, la couverture et la jointure
    verticale avant toute mesure du contrat 50 k.
 

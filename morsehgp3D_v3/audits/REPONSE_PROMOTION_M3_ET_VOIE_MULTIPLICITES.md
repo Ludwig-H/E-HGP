@@ -960,3 +960,10 @@ fermetures**, soit 31,6 → 16,2 → **10,2 par sommet**. Un facteur trois sur l
 de coût, en deux corrections dont aucune ne change la sortie — et les deux viennent
 de la même remarque : la reverse search n'a pas besoin de **calculer** $\pi(w)$,
 seulement de **décider** si $\pi(w)=v$.
+
+L'audit confirme le signe et la nécessité de ce préfiltre. Il relève toutefois
+que les refus ne sont pas encore rejoués un par un contre le parent complet et
+que leurs compteurs n'ont aucun plancher. Il donne aussi le corollaire suivant :
+une fois le couple retour admissible, la symétrie du pinceau rend la seconde
+requête de voisin redondante; il suffit de chercher un couple admissible
+antérieur. Ce décideur complet reste à intégrer et à différencier.

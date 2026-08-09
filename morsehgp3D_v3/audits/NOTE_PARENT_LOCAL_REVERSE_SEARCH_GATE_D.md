@@ -491,8 +491,12 @@ non bornée et le tie-break ne possède plus nécessairement de minimum.
 - extension aux sommets multiples du vrai graphe quotienté : **prouvée sous
   oracle exact des flats et des lots**;
 - choix direct du parent par LP local et une requête `next` : **prouvé ici**;
-- suppression de `seen/frontier/visited` dans le prototype : **non implémentée**;
-- coût de l'énumération des enfants et contrat 50 k : **ouverts, Gate D**.
+- reverse search streamée sans `seen/frontier` dans sa décision : **implémentée
+  et différenciée dans les deltas postérieurs décrits par le ledger continu**;
+- décision « ce sommet courant est-il le parent ? » sans seconde requête `next` :
+  **corollaire prouvé au §12, non encore intégré**;
+- harvest de la source, coût de l'énumération des enfants et contrat 50 k :
+  **ouverts, Gate D**.
 
 ## 11. Review du premier delta live de Claude
 
@@ -571,5 +575,74 @@ rend 39/39 tests verts en 676,03 s, dont les quatre portes flats.
   germe, l'extrémité finie, la stricte variation du potentiel, le rang trois de
   $C(d)$ ni l'identité $S(\mathrm{next})=C(d)\cup A$. Ces assertions doivent
   devenir fail-closed avant le remplacement effectif du BFS.
+
+## 12. Corollaire post-`6a13b64` : décider le parent sans requête de retour
+
+Le commit `6a13b64`, épinglé par
+`order_k_flats.hpp=deb6858a4433806c801be2281a505ee08e06c1e50fd938aa4ed68d465b819270`
+et
+`flats_differential.cpp=c777ad9cd49498fb8de2ce1c812035da6232d50f71333068d87f85e619ced0e7`,
+ajoute un préfiltre exact avant le calcul complet du parent. Soit un candidat
+$w=\mathrm{next}(v,C,d)$ obtenu depuis $v$ sur le flat fermé $C$ dans la
+direction $d$. Si $\pi(w)=v$, le couple retour $(C,-d)$ doit :
+
+- rester dans le cône de chambre de $w$;
+- faire croître strictement $L_{h(w)}$ lorsque $B(w)$ est non vide;
+- faire décroître strictement $Q_r$ au niveau zéro.
+
+`backward_pair_admissible` teste exactement ces trois conditions avec les mêmes
+signes entiers que `canonical_parent`. La base ordonnée et l'orientation doivent
+être transportées **ensemble** : une permutation impaire de la base sans
+inversion de l'orientation changerait le signe et rendrait le filtre faux. La
+fermeture reste la même aux deux extrémités; les nouveaux membres du lot ont un
+`orient3d` non nul et n'agrandissent donc pas le plan. Un résultat `false`
+certifie bien $\pi(w)\neq v$. Un résultat `true` n'est que nécessaire : un autre
+couple admissible peut précéder le retour dans l'ordre canonique.
+
+Un build Release isolé du commit passe les cinq CTests flats ciblés en 83,31 s.
+Les campagnes fixtures, générique, dégénérée et cosphérique refusent
+respectivement 5 265, 400 520, 451 359 et 372 968 candidats par le préfiltre,
+avec zéro désaccord. Elles vérifient empiriquement les identités
+
+$$N_{\mathrm{cand}}=N_{\mathrm{reject\_back}}+N_{\mathrm{parent\_queries}},\qquad N_{\mathrm{parent\_queries}}=N_{\mathrm{reject\_parent}}+N_{\mathrm{vertices}}-N_{\mathrm{roots}}.$$
+
+La qualification reste partielle : aucun plancher ne porte sur les refus, et
+chaque `false` n'est pas rejoué directement contre
+`canonical_parent(...,full_scan=true)`. Le mutant « toujours `true` » laisserait
+l'optimisation morte tout en gardant la porte verte. La comparaison finale
+reverse--BFS détecte indirectement une censure sur les campagnes exécutées, sans
+constituer la mutation ciblée.
+
+Le même raisonnement donne un corollaire plus fort que le commit. L'adjacence du
+pinceau est symétrique : puisque $w$ est le prochain événement depuis $v$ le long
+de $(C,d)$, le prochain événement depuis $w$ le long de $(C,-d)$ est déjà connu,
+c'est $v$. Après un préfiltre positif, il est donc inutile d'appeler une seconde
+fois `neighbour_along`. Il suffit d'énumérer les couples de $w$ **jusqu'à** la
+clef canonique $(C,-d)$ :
+
+1. si un couple admissible strictement antérieur apparaît, rejeter $w$;
+2. si la clef retour est atteinte et admissible, accepter $w$ comme fils de $v$;
+3. si la fermeture manque, si l'ordre régresse ou si la clef retour n'est pas
+   admissible, échouer fermé.
+
+Cette décision supprime toutes les requêtes de voisin-parent restantes; elle ne
+supprime pas les fermetures du préfixe canonique. Le sujet doit recevoir la
+fermeture complète $C$ avec la base et l'orientation, puis conserver l'ancien
+`parent_of` comme oracle différentiel de symétrie, jamais comme autorité partagée.
+
+Fixture entière compacte pour les deux potentiels :
+
+```text
+A=(0,0,1) B=(1,0,1) C=(0,1,1)
+E=(0,0,0) D=(0,0,2) F=(0,0,3)
+```
+
+Avec `base=[A,B,C]` et `root_base=[A,B,C,D]`, les orientations exactes valent
+`orient(E)=-1`, `orient(D)=1`, `orient(F)=2`. Les sommets `ABCE` et `ABCD`
+sont de niveau zéro, tandis que `ABCF` a `D` intérieur. La porte doit accepter
+le retour niveau zéro `ABCE -> ABCD`, refuser son sens opposé, accepter le retour
+niveau positif `ABCF -> ABCD` et refuser le retour qui quitte la chambre. Les
+mutations signe inversé, base permutée seule, membre de coquille omis, couple
+antérieur ignoré et target absente doivent toutes rougir.
 
 GCP non utilisé.

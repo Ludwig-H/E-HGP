@@ -240,7 +240,7 @@ $N_3(v,0)\leq2m$.
 
 Au vrai propriétaire, les deux inclusions du certificat donnent l'identité
 $I(B)=B(v)\mathbin{\dot\cup}(I(B)\cap S(v))$. Pour toutes les sources d'ordre au
-plus $K$, le plafond local exact est donc $h_q(v)=K+1-q-\ell(v)$; s'il est
+plus $K$, un plafond local certifié est donc $h_q(v)=K+1-q-\ell(v)$; s'il est
 négatif, $v$ ne possède aucune source de rang $q$. Les bornes utiles deviennent
 $N_2(v)\leq12m(K-\ell(v))$ et
 $N_3(v)\leq8m(K-1-\ell(v))^2$, avec la branche $h=0$ ci-dessus. Soustraire le
@@ -262,18 +262,21 @@ multiplicités et son oracle restent un verrou mathématique/algorithmique. Hors
 zéro-extra-shell, d'autres points peuvent rester sur le plan exposé et
 l'argument ne donne pas cette borne sans quotient supplémentaire.
 
-Un objet unificateur exact est le complexe de coques sphériques jusqu'à $h$
-suppressions
+Un univers couvrant certifié est la famille de squelettes de coques sphériques
+jusqu'à $h$ suppressions
 
 $$\mathcal{C}_h(S(v))=\bigcup_{D\subseteq S(v),\,\lvert D\rvert\leq h}\mathrm{skel}_{1,2}\!\left(\mathrm{conv}(S(v)\setminus D)\right).$$
 
 Toute paire cible avec $t\leq h$ est une arête du convexe obtenu en supprimant
 ses $t$ intérieurs, et tout triple cible est une face triangulaire du même
-convexe. Énumérer directement les arêtes et faces $h$-shallow de
-$\mathcal{C}_h$, sans reconstruire tous les ensembles supprimés, est donc le
-verrou combinatoire précis. En dégénérescence, une face polygonale et ses vraies
-arêtes doivent rester telles quelles; une triangulation arbitraire ne peut pas
-servir d'autorité.
+convexe. Ainsi $\mathcal{C}_h$ couvre toutes les candidates, mais ne les
+caractérise pas : diamètre, bon centrage, census et owner restent à vérifier.
+Les squelettes provenant de suppressions différentes peuvent même se croiser;
+$\mathcal{C}_h$ n'est pas nécessairement un complexe géométrique. Énumérer cet
+univers sans reconstruire tous les ensembles supprimés est le verrou
+combinatoire précis. En dégénérescence, une face polygonale et ses vraies arêtes
+doivent rester telles quelles; une triangulation arbitraire ne peut pas servir
+d'autorité.
 
 Une porte de mutation doit notamment refuser : le rang fermé à la place des
 intérieurs stricts; l'oubli du cas $h=0$; un point extérieur supplémentaire sur
