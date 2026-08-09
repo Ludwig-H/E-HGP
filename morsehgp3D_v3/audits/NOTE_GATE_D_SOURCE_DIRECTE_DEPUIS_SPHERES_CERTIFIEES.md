@@ -251,14 +251,15 @@ quadratique ou cubique en $m$. Le rang quatre contribue au plus une sphère et
 impose alors $m=4$. Si la sphère cible est $V$ elle-même, zéro-extra-shell donne
 directement $m=q$ et le cas est trivial.
 
-Ce résultat est une borne de sortie, pas encore un algorithme. Il suggère de
-construire sur $S(v)$ le graphe de Gabriel sphérique $h$-shallow pour le rang
-deux et les faces triangulaires bien centrées de calottes sphériques
-$h$-shallow pour le rang trois, puis de recertifier miniboule, census, support
-canonique et owner. Ces objets sont des sous-ensembles des arêtes et faces d'une
-Delaunay sphérique d'ordre au plus $h$; les identifier sans convention sur les
-ex aequo serait trop fort. La construction déterministe, son coût, ses
-multiplicités et son oracle restent un verrou mathématique/algorithmique. Hors
+Ce résultat est une borne de sortie, pas encore à lui seul un algorithme produit.
+Il suggère de construire sur $S(v)$ le graphe de Gabriel sphérique $h$-shallow
+pour le rang deux et les faces triangulaires bien centrées de calottes
+sphériques $h$-shallow pour le rang trois, puis de recertifier miniboule,
+census, support canonique et owner. Ces objets sont des sous-ensembles des
+arêtes et faces d'une Delaunay sphérique d'ordre au plus $h$; les identifier
+sans convention sur les ex aequo serait trop fort. Le §3.3 donne désormais un
+générateur déterministe complet de candidates. Le census exact terminal en
+batch, ses multiplicités et son oracle restent le verrou algorithmique. Hors
 zéro-extra-shell, d'autres points peuvent rester sur le plan exposé et
 l'argument ne donne pas cette borne sans quotient supplémentaire.
 
@@ -297,6 +298,107 @@ comptes par profondeur : 108 puis neuf fois 36 pour le rang deux, et neuf fois
 72 pour le rang trois; les dix-neuf diamètres porteurs d'extra-shell sont
 explicitement exclus. Cette fixture exerce une masse linéaire non triviale; elle
 ne prétend pas saturer les constantes des bornes.
+
+### 3.3 Générateur déterministe par familles universelles
+
+La randomisation employée dans la preuve du §3.2 se dérandomise sans énumérer
+tous les ensembles supprimés. Posons $S=S(v)$, $m=\lvert S\rvert$, fixons un
+support cible $U$ de cardinal $q\in\lbrace2,3\rbrace$, et notons
+$D=I(B_U)\cap(S\setminus U)$. Sous zéro-extra-shell, le plan radical de $B_U$ et
+de la sphère de $v$ contient exactement $U$, les points de $D$ sont dans son
+demi-espace intérieur strict et tous les autres points de $S\setminus U$ dans
+son demi-espace extérieur strict.
+
+Avant toute preuve de propriété, prendre le plafond conservateur
+$h=K+1-q$, qui découle seulement de l'ordre de la source cherchée. Si le reçu
+complet de propriétaire est déjà disponible, il est permis de réutiliser le
+plafond plus fin $h=K+1-q-\ell(v)$ du §3.2; le déduire après coup serait
+circulaire et pourrait censurer une vraie source. Posons $s=q+h$. Une famille
+$(m,s)$-universelle est une famille $\mathcal{F}\subseteq\lbrace0,1\rbrace^S$
+telle que, sur tout ensemble d'au plus $s$ identifiants, chaque motif binaire
+est réalisé par au moins un masque. Pour $m\geq s$, la définition usuelle sur
+les ensembles de taille exactement $s$ implique cette version en complétant les
+identifiants testés. Il existe donc $f\in\mathcal{F}$ tel que
+$f=1$ sur $U$ et $f=0$ sur $D$. Dans l'échantillon
+$S_f=\lbrace x\in S:f(x)=1\rbrace$, le plan radical expose exactement
+$\mathrm{conv}(U)$ : $U$ est une vraie arête si $q=2$, ou une face triangulaire
+si $q=3$. L'extraction doit distinguer les dimensions. En dimension trois, elle
+garde les vraies arêtes et les seules facettes maximales triangulaires; en
+dimension deux, les arêtes du polygone et le triple entier seulement si le hull
+possède exactement trois sommets; en dimension un, la paire d'extrémités. Une
+triangulation d'une facette polygonale peut servir de surgénérateur, jamais
+d'autorité. Si $m<s$, énumérer les au plus $2^m\leq2^s$ masques est déjà un cas
+constant pour $K$ fixé.
+
+Les familles universelles explicites de Naor, Schulman et Srinivasan donnent une
+taille $2^s s^{O(\log s)}\log(2m)$ et un listage déterministe. Voir
+[« Splitters and near-optimal derandomization », FOCS 1995](https://authors.library.caltech.edu/records/wq91j-3w168).
+Ici $s\leq K+1\leq11$, avec le raffinement $s\leq K+1-\ell(v)$ seulement sous
+reçu de propriété préalable. En construisant une enveloppe convexe
+tridimensionnelle exacte par masque, le nombre total d'arêtes et faces candidates
+est $2^s s^{O(\log s)}m\log(2m)$, et le temps de construction naïf des hulls est
+$2^s s^{O(\log s)}m\log^2(2m)$. Les masques et les hulls peuvent être streamés avec
+$O(m)$ espace vif, puis les candidates dédupliquées par runs externes. Les
+constantes cachées dépendent fortement de $K$; aucune praticabilité à 50 k ni
+aucun SLO n'est revendiqué.
+
+Le filtre **local** ne requiert pas non plus un rescan de $S$ par candidate. Une
+paire distincte définit automatiquement son support diamètre. Un triple doit en
+revanche être non collinéaire et strictement bien centré — son circumcentre est
+strictement dans $\mathrm{conv}(U)$ — pour que les trois points soient le support
+minimal positif de $B_U$; ce prédicat constant doit être exact et précéder la
+requête. Si
+$V$ est la sphère de $v$, la différence de puissances
+$g_U(x)=\pi_{B_U}(x)-\pi_V(x)$ est affine et, sur $S\subseteq\partial V$, le
+demi-espace fermé $g_U\leq0$ contient exactement les intérieurs stricts, le
+support $U$ et les éventuelles égalités extérieures de $B_U$. Après un
+prétraitement de halfspace-reporting tridimensionnel, lancer cette requête avec
+un cap $h+q+1$ suffit. Le résultat typé `overfull`, muni de $h+q+1$ témoins,
+rejette la candidate; le résultat typé `complete`, obtenu avant le cap, doit
+donner par signes exacts au plus $h$ valeurs négatives et exactement $U$ à zéro.
+Un préfixe interrompu avant l'un de ces deux terminaux n'est aucune preuve.
+Chan et Tsakalidis donnent un prétraitement déterministe en $O(m\log m)$, espace
+$O(m)$ et requête $O(\log m+r)$; voir
+[« Optimal Deterministic Algorithms for 2-d and 3-d Shallow Cuttings », SoCG 2015](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.SOCG.2015.719).
+Le contrat doit exiger un reporter streaming réellement interruptible après le
+cap et rejouer les signes en arithmétique exacte; la seule complexité abstraite
+d'une boîte noire ne certifie pas ces deux propriétés. Sous ces obligations, les
+hulls, le filtre local et la déduplication restent en
+$2^s s^{O(\log s)}m\log^2(2m)$ temps déterministe.
+
+Dans le profil u16, le hull n'a besoin d'aucune normalisation flottante. Après
+élargissement **avant** soustraction et multiplication, un déterminant
+`orient3d` sur différences u16 a une valeur absolue inférieure à
+$6\cdot65535^3<2^{51}$; les distances et produits scalaires des tests diamètre
+et triangle aigu tiennent en entier signé 64 bits. Le demi-espace radical hérite
+en revanche des sphères rationnelles exactes : ses coefficients doivent être
+comparés sous forme homogène avec les gardes `i128` déjà prouvées, puis en grand
+entier si ces gardes ne s'appliquent pas. Un centre ou un rayon converti en
+`double` annulerait le caractère certifié du reporter.
+
+Cette construction ferme l'**existence d'un générateur déterministe complet de
+tuples candidats et de son filtre de profondeur local** sous la porte régulière;
+elle ne transforme pas une face de hull en record scientifique. Chaque candidate
+doit encore prouver, contre le nuage global : miniboule exacte; census complet
+$I(B),S(B)$; support canonique; propriétaire; et déduplication inter-sommets. Le
+halfspace-reporting ci-dessus ne voit que $S(v)$ et ne remplace pas une requête de
+boule sur $X$. Un index certifié peut beaucoup élaguer cette requête globale sans
+fournir une borne sub-linéaire au pire. Le verrou suivant est donc un **census de
+boules exact en batch**, ou une autre preuve output-sensitive de recertification;
+il n'est plus l'énumération des suppressions ni le comptage local du niveau.
+
+Les portes de mutation doivent refuser : une famille non universelle; le mauvais
+paramètre $s=h$ au lieu de $s=q+h$; un masque qui ne force pas tous les points de
+$U$ ou n'exclut pas tous ceux de $D$; la soustraction de $\ell(v)$ sans reçu de
+propriété; un triple droit ou obtus traité comme support de rang trois; l'oubli
+des branches de basse dimension; une triangulation arbitraire d'une face
+polygonale prise comme autorité; un préfixe halfspace non terminal; et
+l'acceptation d'une arête ou face échantillonnée sans census final. Le cube
+antipodal doit exercer $g_U=0$ sur des extra-shells, et une candidate rendue face
+seulement parce que le masque a supprimé plus de $h$ points doit être rejetée par
+le report cappé. Hors
+zéro-extra-shell, le plan radical peut porter d'autres points : le même schéma
+n'autorise alors aucune émission sans quotient dégénéré séparé.
 
 ## 4. Hors régularité : l'extra-shell est une masse réelle
 
@@ -381,20 +483,27 @@ Il laisse quatre obligations séparées.
 4. **Fold aval.** Les cofaces émises doivent encore être triées par niveau exact,
    groupées en lots, puis réduites contre la partition horizontale pré-lot.
 
-Ainsi la source directe n'est plus une boîte noire unique. Elle se factorise en
+Ainsi la source directe n'est plus une boîte noire unique. Sous la porte
+régulière, elle se factorise plus précisément en
 
 ```text
-stream terminal de sphères -> census exact -> expansion locale -> runs triés
+reverse shallow -> hulls de masques universels -> filtre halfspace local
+                -> census global/owner -> sphères terminales -> runs triés
 ```
 
-Le premier étage reste le verrou mathématique/producteur; le dernier reste une
-globalité de fold.
+Les trois premiers étages ont désormais une construction mathématique
+déterministe; ils ne sont pas implémentés ni reçus. Le census global de boules,
+la déduplication des propriétaires et la terminalité du stream restent le
+verrou producteur; le dernier étage reste une globalité de fold.
 
 ## 6. Reçu minimal et portes de mutation
 
 Un record `OpenGabrielCofaceFromCertifiedSphere` doit engager :
 
 - digest du nuage, de l'index et du record de sphère;
+- propriétaire shallow, niveau, manifeste de la famille universelle, masque
+  témoin, face exposée et reçu du report halfspace local lorsqu'ils produisent
+  la sphère;
 - niveau exact, $I(B)$, $S(B)$ et soit la famille des supports minimaux, soit le
   certificat exact $c_B\in\mathrm{conv}(T)$, avec leurs autorités;
 - ordre $k$, valeur $r$ et décision vide/non vide;
@@ -407,8 +516,10 @@ Un record `OpenGabrielCofaceFromCertifiedSphere` doit engager :
 Les mutations permanentes minimales sont : omettre un point de $I(B)$; utiliser
 la boule ouverte au lieu de la coquille pour $S(B)$; accepter un $T$ sans
 support; ne garder que les quatre diamètres ou le premier support du cube;
-émettre `ABz` sans la source d'arité deux; arrêter l'expansion avant les 56
-cofaces du cube; et committer un préfixe après budget.
+émettre `ABz` sans la source d'arité deux; retirer d'une famille universelle le
+seul masque qui sépare une cible de ses intérieurs; accepter un report halfspace
+interrompu sans avoir atteint son cap; arrêter l'expansion avant les 56 cofaces
+du cube; et committer un préfixe après budget.
 
 ## 7. Décision
 
@@ -420,12 +531,15 @@ cofaces du cube; et committer un préfixe après budget.
   distinctes**;
 - nombre de sources de rang deux/trois possédées par un sommet : **borné par
   $O(mK)$ et $O(mK^2)$ sous zéro-extra-shell, avec constantes explicites**;
+- génération déterministe de toutes leurs paires/triples candidates et filtre
+  local du niveau : **prouvés sous zéro-extra-shell par familles universelles,
+  hulls exacts et halfspace-reporting interruptible; non implémentés**;
 - identification de la sphère critique à la sphère brute du sommet propriétaire :
   **réfutée par les arités basses et la fixture mal centrée**;
 - suppression de la masse extra-shell hors porte : **réfutée si les identités
   de cofaces restent contractuelles**;
-- algorithme output-sensitive de harvest des flats/supports, stream terminal de
-  toutes les sphères, fold et contrat 50 k : **ouverts**.
+- census global exact des boules, propriétaire/déduplication terminale, stream
+  terminal de toutes les sphères, fold et contrat 50 k : **ouverts**.
 
 Ce résultat est CPU/GPU agnostique. Il ne justifie aucun benchmark et aucune G4.
 GCP non utilisé.

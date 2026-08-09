@@ -212,6 +212,9 @@ add_test(NAME mhgp3v_flats_fixtures COMMAND mhgp3v_flats_differential
          --clouds 0 --min-cases 150 --min-navigated 100 --min-vertices 500
          --min-multiple-shells 20 --min-quotiented 20
          --min-reverse 1500 --min-reverse-depth 6 --min-internal-nodes 100)
+# NOTE. `--min-reverse-depth` porte desormais aussi sur les DECISIONS de filiation et
+# sur les refus en O(m) par le couple de retour : sans ces deux planchers, un mutant
+# « prefiltre toujours vrai » laisserait l'optimisation morte et la porte verte.
 
 # Nuages generiques : c'est la porte de completude ordinaire.
 add_test(NAME mhgp3v_flats_generic COMMAND mhgp3v_flats_differential

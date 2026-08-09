@@ -919,51 +919,77 @@ n'existent pas comme pipeline : le NO-GO tient.
 
 ---
 
-## 20. Un essai négatif transitoire que je note pour éviter le détour
+## 20. Le « résultat négatif » du curseur était une erreur de méthode, pas un résultat
 
-La reverse search revient sur un sommet autant de fois qu'il a de fils et
-**reconstruisait** à chaque retour les fermetures de tous les triplets déjà
-consommés, pour retrouver sa place avec un compteur linéaire. La reprise à un
-curseur — l'adresse du triplet et la fente de direction — est licite, puisque le
-test de base canonique ne dépend que du triplet et de la coquille.
+Vous avez relevé que le curseur était **défini mais non relié** à la reverse
+search, et que mes nombres documentaient une expérience et non la capability live.
+C'est exact, et c'est plus grave que cela : sur cette base j'avais publié un
+*résultat négatif*, en affirmant que la reprise ne gagnait rien, sur la foi de deux
+mesures **identiques au triplet près**.
 
-J'attendais un facteur trois, en raisonnant sur les 5,9 fils **testés** par
-sommet. C'est faux : le curseur n'avance que sur les fils **acceptés**, et un
-arbre couvrant en a un par sommet en moyenne. Un sommet est ré-entré deux fois, et
-la première reprise part d'un curseur qui est presque toujours le premier triplet.
+Elles l'étaient parce que l'appel d'outil qui devait brancher le curseur avait
+échoué et que je n'avais rebuildé que le binaire : les deux mesures comparaient le
+même code à lui-même. J'avais même écrit qu'une identité exacte était impossible si
+un triplet était sauté — puis je l'ai expliquée par une histoire algorithmique
+plausible (« le curseur n'avance que sur les fils acceptés ») au lieu de vérifier
+que la modification était active. La bonne lecture est l'inverse : **une identité
+exacte de compteurs est le signe qu'un code neuf ne s'exécute pas.**
 
-**[mesuré dans un essai transitoire]** générique, grille saturée et cosphérique :
-**308 832 triplets avec le curseur, 308 832 sans, au triplet près.** Zéro.
+Branché et remesuré, il gagne. **[mesuré]** cosphérique, 40 nuages : 192 570 →
+**151 708** fermetures, 126 661 → 90 818 flats livrés. Générique à onze points :
+108 856 → **89 130**. Environ **1,2×** — ni les trois que j'attendais, ni le zéro
+que j'ai publié.
 
-Le helper est présent dans le worktree courant, mais la reverse search appelle
-encore le wrapper qui recommence au premier triplet; aucun frame ne transporte le
-curseur. La réduction de pire cas vers $\text{flats}+\text{fils}$ n'est donc pas
-encore intégrée. Je ne revendique aucun gain; les nombres ci-dessus documentent
-une expérience, pas la capability live.
+Le poste de coût, lui, a bien cédé, mais par les deux autres corrections : le refus
+en $O(m)$ par le couple de retour — **61 % des candidats**, 65 044 sur 107 114 —,
+et votre corollaire ci-dessous.
 
-Ce qui reste dominant est mesurable et localisé : **5,9 requêtes de parent par
-sommet, à 2,9 fermetures chacune**, contre une seule énumération pour la descente.
-La sortie précoce a déjà pris un facteur 2,6 sur ce poste. Le reste de la marge y
-est, et la question précise est : peut-on **refuser** un fils sans calculer son
-parent ? Le couple $(G,-\delta)$ — le même plan vu depuis $w$ — est testable en
-$O(m)$, et un candidat dont ce couple n'est pas admissible n'est pas notre fils.
-J'ai mesuré plutôt que promettre, et le chiffre est bon.
+---
 
-**[mesuré]** grille cosphérique, 40 nuages : sur 107 114 fils testés, **65 044 —
-61 % — sont refusés par ce seul test en $O(m)$**, et 24 580 seulement par la
-comparaison de coquille. Les requêtes de parent tombent de 105 172 à **42 070**,
-les fermetures de 308 832 à **192 570**, les nœuds d'index visités de 3 322 180 à
-2 905 996. Zéro désaccord sur 521 cas.
+## 21. Votre corollaire du §12 est intégré, et vos deux trous de porte sont fermés
 
-Cumulé, sur la campagne générique à onze points : **335 314 → 171 856 → 108 856
-fermetures**, soit 31,6 → 16,2 → **10,2 par sommet**. Un facteur trois sur le poste
-de coût, en deux corrections dont aucune ne change la sortie — et les deux viennent
-de la même remarque : la reverse search n'a pas besoin de **calculer** $\pi(w)$,
-seulement de **décider** si $\pi(w)=v$.
+**La requête de voisin de retour a disparu.** `decide_child` énumère les couples du
+candidat **jusqu'à** la clef de retour : un couple admissible strictement antérieur
+réfute, la clef de retour atteinte et admissible accepte, et fermeture manquante,
+ordre qui régresse ou retour inadmissible échouent **fermé**. Votre remarque sur
+l'identité des fermetures aux deux extrémités rend le transport de signe inutile —
+et comme la base canonique est une fonction de la seule fermeture, les deux bases
+coïncident : c'est **vérifié**, pas supposé, et une divergence est `kBroken`.
 
-L'audit confirme le signe et la nécessité de ce préfiltre. Il relève toutefois
-que les refus ne sont pas encore rejoués un par un contre le parent complet et
-que leurs compteurs n'ont aucun plancher. Il donne aussi le corollaire suivant :
-une fois le couple retour admissible, la symétrie du pinceau rend la seconde
-requête de voisin redondante; il suffit de chercher un couple admissible
-antérieur. Ce décideur complet reste à intégrer et à différencier.
+**[mesuré]** requêtes de parent : **42 070 → 0**. Nœuds d'index visités 2 905 996 →
+**2 662 267**. Le germe ne peut pas y arriver : n'ayant aucune direction admissible,
+son couple de retour est refusé par le préfiltre en $O(m)$.
+
+**Un seul test d'admissibilité** sert maintenant au choix du parent, au préfiltre et
+à la décision — vos « mêmes signes entiers » ne sont plus une coïncidence de
+relecture mais une seule fonction.
+
+**Vos deux trous de qualification.** (1) Chaque couple est désormais jugé **deux
+fois** : par la décision, et par le chemin complet — parent canonique en balayage
+intégral, requête de retour, comparaison de coquille. Un `false` du préfiltre doit
+impliquer un refus de l'ancien chemin. Sur une campagne : **28 492 couples jugés,
+4 735 acceptés, 17 525 préfiltrés, zéro divergence, zéro `kBroken`.** Le mutant
+« toujours vrai » diverge donc immédiatement. (2) Des planchers portent sur les
+décisions **et** sur les refus en $O(m)$ : l'optimisation ne peut plus être morte en
+restant verte. Et vos **deux identités de comptage** sont vérifiées **par nuage**,
+non observées en fin de campagne.
+
+**Votre fixture six points est gravée**, quinze verdicts entiers exacts sur
+$A=(0,0,1)$, $B=(1,0,1)$, $C=(0,1,1)$, $E=(0,0,0)$, $D=(0,0,2)$, $F=(0,0,3)$ :
+$\mathrm{orient}(E)=-1$, $\mathrm{orient}(D)=1$, $\mathrm{orient}(F)=2$ ; $ABCE$
+exerce la décroissance de $Q_r$ au niveau zéro et $ABCF$ la croissance de $L_h$ au
+niveau un ; la **base permutée seule** inverse les quatre verdicts, ce qui grave
+votre contrat indivisible base–direction.
+
+Une nuance sur votre mutation « membre de coquille omis » : en $ABCF$ elle est
+**invisible**, parce que la direction $+1$ y est refusée deux fois, par la chambre
+et par $L_h$, et le booléen ne bouge pas. Il faut un sommet où la coquille est le
+seul blocage. En $ABCD$ les deux directions sont refusées chacune par un seul
+filtre — $+1$ par la coquille via $D$, $-1$ par $Q_r$ — et omettre $D$ rend $+1$
+admissible. C'est cette configuration que la fixture grave.
+
+**Ce que je ne prétends pas.** Le cumul sur le poste de coût est de **335 314 →
+171 856 → 108 856 → 89 130** fermetures, soit 31,6 → **8,4 par sommet**, facteur
+3,8 — sur un terrain qui croît encore. Votre point 3, « support canonique puis
+owner » avant de retirer `emitted`, reste ouvert : c'est la prochaine globalité à
+tomber, et la dernière qui soit $\Theta(\text{sortie})$.

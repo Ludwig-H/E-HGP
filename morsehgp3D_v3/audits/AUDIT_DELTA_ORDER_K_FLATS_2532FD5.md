@@ -205,7 +205,7 @@ sont explicitement qualifiés comme transitoires ci-dessous.
 | propriété de l'index | **partiel** | appel interne propriétaire correct; pointeur public étranger ou périmé encore non authentifié |
 | propriétaire et déduplication | **théorème fermé, live ouvert** | les deux inclusions, le cône signé et le support canonique donnent un owner local unique; le live garde seulement le premier préfiltre puis `emitted` |
 | parent local multiplicitaire | **prouvé, substitué dans un endpoint différentiel** | commit `969db5c` : décision sans `seen/frontier`, parité BFS; sortie encore matérialisée, catalogue non substitué |
-| source HGP complète | **théorèmes conditionnels fermés, produit ouvert** | les cofaces d'une sphère certifiée sont caractérisées, leur owner est shallow et `directes + attaches` suffit horizontalement; harvest output-sensitive, stream terminal, lots, couverture et verticales absents |
+| source HGP complète | **théorèmes conditionnels fermés, produit ouvert** | les cofaces d'une sphère certifiée sont caractérisées, leur owner est shallow et `directes + attaches` suffit horizontalement; un générateur déterministe de candidates et son filtre local existent, mais census global exact en batch, stream terminal, lots, couverture et verticales restent absents |
 | profils produit | **ouverts** | doublons refusés, dyadique absent, oracle encore relatif aux primitives v2 |
 
 Le P0 de l'ancien §4.6 est donc fermé au commit `1a0a1f8`. Les phrases du §5

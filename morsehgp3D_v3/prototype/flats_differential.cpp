@@ -251,7 +251,7 @@ struct Coverage {
   long long reverse_depth = 0;
   long long reverse_children = 0;
   long long reverse_flats = 0;
-  long long reverse_parent_queries = 0;
+  long long reverse_decisions = 0;
   long long reverse_skipped = 0;
   long long reverse_indexed_vertices = 0;
   long long reverse_triplets = 0;
@@ -266,6 +266,9 @@ struct Coverage {
   long long parent_full_closures = 0;
   long long reject_backward = 0;
   long long reject_by_parent = 0;
+  long long pairs_judged = 0;
+  long long pairs_accepted = 0;
+  long long pairs_prefiltered = 0;
 };
 static Coverage coverage;
 
@@ -519,7 +522,56 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       }
       int not_monotone = 0, parent_differs = 0;
       long long early = 0, full = 0;
+      // (E ter) LA DECISION DE FILIATION, REJOUEE CONTRE L'ANCIEN CHEMIN.
+      //
+      // `decide_child` n'appelle plus aucune requete de voisin de retour, et le
+      // prefiltre en O(m) refuse 61 % des candidats. Sans rejeu direct, un mutant
+      // « prefiltre toujours vrai » laisserait l'optimisation morte et la porte
+      // verte, et un mutant « decision toujours accepter » ne serait vu
+      // qu'indirectement. Chaque couple est donc juge deux fois : par la decision,
+      // et par le chemin complet parent canonique + requete de retour + comparaison
+      // de coquille. Les deux verdicts doivent coincider, et un `false` du
+      // prefiltre doit impliquer un refus de l'ancien chemin.
+      int decision_differs = 0, prefilter_wrong = 0, decision_broken = 0;
+      long long pairs_judged = 0, accepted = 0, prefiltered = 0;
       if (root_base.size() == 4) {
+        for (const auto& v : seen) {
+          mhgp3v::FlatStatistics qst{};
+          mhgp3v::flats::for_each_flat(pts, v, [&](const mhgp3v::flats::FlatAtVertex& flat) {
+            for (int direction = -1; direction <= 1; direction += 2) {
+              mhgp3v::flats::Vertex w;
+              if (!mhgp3v::flats::neighbour_along(pts, v, flat, direction, nullptr, &qst, &w))
+                continue;
+              if (w.level > s_max - 2) continue;
+              ++pairs_judged;
+              // Ancien chemin, integralement : parent canonique par BALAYAGE
+              // COMPLET, requete de retour, comparaison de coquille.
+              mhgp3v::flats::FlatAtVertex g;
+              int orientation = 0;
+              bool old_accept = false;
+              if (mhgp3v::flats::canonical_parent(pts, w, root_base, &g, &orientation, nullptr,
+                                                  nullptr, true)) {
+                mhgp3v::flats::Vertex mother;
+                if (mhgp3v::flats::neighbour_along(pts, w, g, orientation, nullptr, &qst, &mother))
+                  old_accept = (mother.shell == v.shell);
+              }
+              const bool prefilter = mhgp3v::flats::backward_pair_admissible(
+                  pts, w, flat.base, direction, root_base);
+              if (!prefilter) {
+                ++prefiltered;
+                if (old_accept) ++prefilter_wrong;    // refus certifie et pourtant fils
+                continue;
+              }
+              const mhgp3v::flats::ChildOutcome outcome =
+                  mhgp3v::flats::decide_child(pts, w, flat, direction, root_base);
+              if (outcome == mhgp3v::flats::ChildOutcome::kBroken) { ++decision_broken; continue; }
+              const bool now_accept = (outcome == mhgp3v::flats::ChildOutcome::kAccept);
+              if (now_accept) ++accepted;
+              if (now_accept != old_accept) ++decision_differs;
+            }
+            return true;
+          });
+        }
         for (const auto& v : seen) {
           std::vector<i32> previous;
           bool first = true;
@@ -542,11 +594,18 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
           else if (ea && (da != db || fa.closure != fb.closure)) ++parent_differs;
         }
       }
-      if (root_base.size() != 4 || not_monotone || parent_differs) {
+      if (root_base.size() != 4 || not_monotone || parent_differs || decision_differs ||
+          prefilter_wrong || decision_broken) {
         printf("[%s] s_max=%2d PARENT PRECOCE : base=%zu monotonie violee=%d parents"
-               " differents=%d\n", tag, s_max, root_base.size(), not_monotone, parent_differs);
+               " differents=%d | decisions differentes=%d prefiltre faux=%d decision cassee=%d"
+               " (%lld couples juges, %lld acceptes, %lld prefiltres)\n", tag, s_max,
+               root_base.size(), not_monotone, parent_differs, decision_differs, prefilter_wrong,
+               decision_broken, pairs_judged, accepted, prefiltered);
         ok = false;
       }
+      coverage.pairs_judged += pairs_judged;
+      coverage.pairs_accepted += accepted;
+      coverage.pairs_prefiltered += prefiltered;
       coverage.parent_early_closures += early;
       coverage.parent_full_closures += full;
     }
@@ -593,7 +652,21 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
         ok = false;
       }
       coverage.reverse_flats += ist.reverse_flats_enumerated;
-      coverage.reverse_parent_queries += ist.reverse_parent_queries;
+      coverage.reverse_decisions += ist.reverse_decisions;
+      // LES DEUX IDENTITES DE COMPTAGE, exigees par nuage et non observees en fin
+      // de campagne : tout candidat est refuse en O(m) ou decide, et toute decision
+      // refuse ou accepte — un accept par sommet non racine, puisque l'arbre en a
+      // exactement un par sommet visite sauf la racine.
+      if (ist.reverse_children_tested !=
+              ist.reverse_reject_backward + ist.reverse_decisions ||
+          ist.reverse_decisions !=
+              ist.reverse_reject_by_parent + (long long)by_indexed.size() - 1) {
+        printf("[%s] s_max=%2d IDENTITE DE COMPTAGE : candidats=%lld refus O(m)=%lld"
+               " decisions=%lld refus decision=%lld sommets=%zu\n", tag, s_max,
+               ist.reverse_children_tested, ist.reverse_reject_backward, ist.reverse_decisions,
+               ist.reverse_reject_by_parent, by_indexed.size());
+        ok = false;
+      }
       coverage.reject_backward += ist.reverse_reject_backward;
       coverage.reject_by_parent += ist.reverse_reject_by_parent;
       coverage.reverse_triplets += ist.reverse_triplets_scanned;
@@ -1182,6 +1255,74 @@ int main(int argc, char** argv) {
              " exhaustif verifies\n");
   }
 
+  // FIXTURE ENTIERE DES DEUX POTENTIELS, coordonnees de l'audit.
+  //
+  //   A=(0,0,1) B=(1,0,1) C=(0,1,1)   E=(0,0,0) D=(0,0,2) F=(0,0,3)
+  //
+  // Avec base=[A,B,C] la normale est (0,0,1) et orient3d(A,B,C,X) = z_X - 1, donc
+  // orient(E)=-1, orient(D)=1, orient(F)=2. Le sommet ABCE est de niveau zero et
+  // ABCF a D interieur : la fixture exerce donc les DEUX potentiels — la decroissance
+  // de Q_r au niveau zero, et la croissance de L_h au niveau positif — sur les memes
+  // six points, avec des verdicts entiers exacts.
+  //
+  // Elle grave surtout la mutation que l'audit signale : la base ordonnee et la
+  // direction se transportent ENSEMBLE. Permuter deux points de la base sans
+  // inverser la direction change le signe de `orient3d` et inverse les quatre
+  // verdicts — c'est verifie, pas commente.
+  {
+    ++cases;
+    const std::vector<P3> six{pt(0, 0, 1), pt(1, 0, 1), pt(0, 1, 1),
+                              pt(0, 0, 0), pt(0, 0, 2), pt(0, 0, 3)};
+    const i32 base[3] = {0, 1, 2};
+    const i32 swapped[3] = {1, 0, 2};              // permutation IMPAIRE de la base
+    const std::vector<i32> root_base{0, 1, 2, 4};
+    int faults = 0;
+    if (mhgp3v::flats::orient3d_exact(six[0], six[1], six[2], six[3]) != -1) ++faults;
+    if (mhgp3v::flats::orient3d_exact(six[0], six[1], six[2], six[4]) != 1) ++faults;
+    if (mhgp3v::flats::orient3d_exact(six[0], six[1], six[2], six[5]) != 2) ++faults;
+
+    mhgp3v::flats::Vertex abce;                    // niveau zero : Q_r doit decroitre
+    abce.shell = {0, 1, 2, 3};
+    abce.level = 0;
+    mhgp3v::flats::Vertex abcf;                    // niveau un : L_h doit croitre
+    abcf.shell = {0, 1, 2, 5};
+    abcf.interior = {4};
+    abcf.level = 1;
+
+    if (!mhgp3v::flats::pair_admissible(six, abce, base, 1, root_base)) ++faults;
+    if (mhgp3v::flats::pair_admissible(six, abce, base, -1, root_base)) ++faults;
+    if (!mhgp3v::flats::pair_admissible(six, abcf, base, -1, root_base)) ++faults;
+    if (mhgp3v::flats::pair_admissible(six, abcf, base, 1, root_base)) ++faults;
+    // Base permutee SEULE : les quatre verdicts s'inversent.
+    if (mhgp3v::flats::pair_admissible(six, abce, swapped, 1, root_base)) ++faults;
+    if (!mhgp3v::flats::pair_admissible(six, abce, swapped, -1, root_base)) ++faults;
+    if (mhgp3v::flats::pair_admissible(six, abcf, swapped, -1, root_base)) ++faults;
+    if (!mhgp3v::flats::pair_admissible(six, abcf, swapped, 1, root_base)) ++faults;
+    // MEMBRE DE COQUILLE OMIS. Il faut un sommet ou la coquille est le SEUL
+    // blocage, sinon la mutation reste invisible : en ABCF la direction +1 est
+    // refusee deux fois, par la chambre et par L_h, et omettre F ne change pas le
+    // booleen. En ABCD au contraire les deux directions sont refusees chacune par un
+    // seul filtre — +1 par la coquille via D, -1 par Q_r — et omettre D de la
+    // coquille rend +1 admissible. C'est cette configuration qui grave la mutation.
+    mhgp3v::flats::Vertex abcd;
+    abcd.shell = {0, 1, 2, 4};
+    abcd.level = 0;
+    if (mhgp3v::flats::pair_admissible(six, abcd, base, 1, root_base)) ++faults;
+    if (mhgp3v::flats::pair_admissible(six, abcd, base, -1, root_base)) ++faults;
+    {
+      mhgp3v::flats::Vertex truncated = abcd;
+      truncated.shell = {0, 1, 2};
+      if (!mhgp3v::flats::pair_admissible(six, truncated, base, 1, root_base)) ++faults;
+    }
+    if (faults) {
+      printf("[deux potentiels] %d faute(s) sur les verdicts entiers exacts\n", faults);
+      ++failures;
+    } else {
+      printf("[deux potentiels] Q_r au niveau zero, L_h au niveau un, base permutee et"
+             " coquille tronquee : quinze verdicts entiers exacts\n");
+    }
+  }
+
   // FRONTIERE DE DOMAINE u16, verifiee a l'API et non au CLI. Les bornes de
   // largeur des predicats en dependent : un appelant qui n'est pas ce juge
   // obtiendrait sinon un depassement signe `__int128` avant tout predicat.
@@ -1297,9 +1438,9 @@ int main(int argc, char** argv) {
   printf("gate D : sommets avec parent teste=%lld  racines=%lld\n",
          coverage.parent_vertices, coverage.parent_roots);
   printf("reverse : sommets=%lld  indexes=%lld  profondeur max=%lld  fils testes=%lld"
-         "  flats livres=%lld  requetes de parent=%lld  portes sautees=%lld\n",
+         "  flats livres=%lld  decisions=%lld  portes sautees=%lld\n",
          coverage.reverse_vertices, coverage.reverse_indexed_vertices, coverage.reverse_depth,
-         coverage.reverse_children, coverage.reverse_flats, coverage.reverse_parent_queries,
+         coverage.reverse_children, coverage.reverse_flats, coverage.reverse_decisions,
          coverage.reverse_skipped);
   // TRAVAIL TOTAL, et non les seuls flats livres. Un triplet ecarte a paye sa
   // fermeture : publier « flats par sommet » sans ces deux colonnes flatte le
@@ -1315,7 +1456,9 @@ int main(int argc, char** argv) {
   // Le GAIN de la sortie precoce du parent, mesure sur les memes sommets : ce
   // rapport est la seule chose qui autorise a parler de gain.
   printf("        : refus par le couple de retour=%lld (O(m), sans fermeture)"
-         "  refus par le parent=%lld\n", coverage.reject_backward, coverage.reject_by_parent);
+         "  refus par la decision=%lld\n", coverage.reject_backward, coverage.reject_by_parent);
+  printf("        : couples juges deux fois=%lld  acceptes=%lld  prefiltres=%lld\n",
+         coverage.pairs_judged, coverage.pairs_accepted, coverage.pairs_prefiltered);
   printf("        : parent precoce=%lld fermetures  balayage complet=%lld  rapport %.2f\n",
          coverage.parent_early_closures, coverage.parent_full_closures,
          coverage.parent_early_closures
@@ -1329,17 +1472,19 @@ int main(int argc, char** argv) {
       || coverage.reverse_indexed_vertices < min_reverse
       || coverage.index_internal_nodes < min_internal_nodes
       || coverage.index_nodes_visited < min_internal_nodes
-      || coverage.reverse_parent_queries < min_reverse
-      || coverage.sink_vertices < min_reverse || coverage.sink_interruptions < min_reverse_depth) {
+      || coverage.sink_vertices < min_reverse || coverage.sink_interruptions < min_reverse_depth
+      || coverage.reverse_decisions < min_reverse_depth
+      || coverage.reject_backward < min_reverse_depth) {
     printf("ECHEC : plancher de couverture non atteint — navigues %lld/%d, sommets %lld/%d, "
            "coquilles multiples %lld/%d, triplets quotientes %lld/%d\n",
            coverage.navigated_clouds, min_navigated, coverage.vertices, min_vertices,
            coverage.multiple_shells, min_multiple_shells, coverage.quotiented, min_quotiented);
-    printf("        reverse %lld/%d, indexes %lld/%d, requetes de parent %lld/%d,"
+    printf("        reverse %lld/%d, indexes %lld/%d, decisions %lld/%d, refus O(m) %lld/%d,"
            " profondeur %lld/%d, noeuds internes %lld/%d\n", coverage.reverse_vertices,
            min_reverse, coverage.reverse_indexed_vertices, min_reverse,
-           coverage.reverse_parent_queries, min_reverse, coverage.reverse_depth,
-           min_reverse_depth, coverage.index_internal_nodes, min_internal_nodes);
+           coverage.reverse_decisions, min_reverse_depth, coverage.reject_backward,
+           min_reverse_depth, coverage.reverse_depth, min_reverse_depth,
+           coverage.index_internal_nodes, min_internal_nodes);
     return 3;
   }
   // Une porte SAUTEE n'est pas une porte passee : le plancher l'interdit.

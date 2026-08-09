@@ -305,7 +305,6 @@ struct FlatStatistics {
   long long reverse_children_tested = 0;  // voisins soumis au test de parent
   long long reverse_backtracks = 0;
   long long reverse_flats_enumerated = 0;   // flats CANONIQUES livres au callback
-  long long reverse_parent_queries = 0;     // requetes de voisin du calcul de parent
   // Travail TOTAL de l'enumeration, et non les seuls flats livres : un triplet
   // ecarte parce qu'il n'est pas la base canonique de sa fermeture a quand meme
   // paye sa fermeture. Sans ces deux compteurs la queue multiplicitaire reste
@@ -319,6 +318,7 @@ struct FlatStatistics {
   // quand meme le parent : couple admissible mais non minimal.
   long long reverse_reject_backward = 0;
   long long reverse_reject_by_parent = 0;
+  long long reverse_decisions = 0;         // decisions de filiation, sans requete de retour
 
   void absorb(const FlatStatistics& o) {
     static_assert(sizeof(FlatStatistics) == 38 * sizeof(long long),
@@ -351,12 +351,12 @@ struct FlatStatistics {
     reverse_children_tested += o.reverse_children_tested;
     reverse_backtracks += o.reverse_backtracks;
     reverse_flats_enumerated += o.reverse_flats_enumerated;
-    reverse_parent_queries += o.reverse_parent_queries;
     reverse_triplets_scanned += o.reverse_triplets_scanned;
     reverse_closures_built += o.reverse_closures_built;
     reverse_live_high_water = std::max(reverse_live_high_water, o.reverse_live_high_water);
     reverse_reject_backward += o.reverse_reject_backward;
     reverse_reject_by_parent += o.reverse_reject_by_parent;
+    reverse_decisions += o.reverse_decisions;
   }
 };
 
@@ -1250,26 +1250,22 @@ struct FlatAtVertex {
 // de trouver son fils continuait d'enumerer les triplets restants et de
 // reconstruire leurs fermetures : le `return` du lambda ne sortait que du
 // callback. C'etait a la fois du travail jete et un compteur trompeur.
-// REPRISE A UN CURSEUR, ET UN GAIN MESURE NUL — LE RESULTAT EST NEGATIF.
+// REPRISE A UN CURSEUR.
 //
 // La reverse search revient sur un sommet autant de fois qu'il a de fils, et elle
-// RECONSTRUISAIT a chaque retour les fermetures de tous les triplets deja
-// consommes pour retrouver sa place. Le test de base canonique ne depend que du
-// triplet et de la coquille, jamais des triplets precedents, donc reprendre
-// directement au curseur est licite.
+// RECONSTRUISAIT a chaque retour les fermetures de tous les triplets deja consommes
+// pour retrouver sa place. Le test de base canonique ne depend que du triplet et de
+// la coquille, jamais des triplets precedents, donc reprendre directement au curseur
+// est licite — et les triplets sautes ne sont plus touches du tout.
 //
-// J'attendais un facteur de l'ordre de trois, en raisonnant sur les 5,9 fils
-// TESTES par sommet. C'etait faux : le curseur n'avance que sur les fils
-// ACCEPTES, et un arbre couvrant en a un par sommet en moyenne. Un sommet est donc
-// re-entre deux fois, et la premiere reprise part d'un curseur qui est presque
-// toujours le premier triplet. Mesure sur trois regimes — generique, grille
-// saturee, cospherique — : 308 832 triplets avec le curseur, 308 832 sans, AU
-// TRIPLET PRES.
+// J'ai d'abord publie que ce changement ne gagnait RIEN, sur deux mesures identiques
+// au triplet pres. Elles l'etaient parce que le curseur n'etait pas branche : l'appel
+// qui devait le relier avait echoue et je n'avais rebuilde que le binaire. Une
+// identite exacte de compteurs est le signe qu'un code neuf ne s'execute pas, pas
+// celui d'une optimisation inutile.
 //
-// Le curseur est conserve pour une raison de pire cas, pas de regime : un sommet
-// de haut degre sortant coutait `fils x flats` avec le compteur lineaire et coute
-// `flats + fils` avec le curseur. Aucune campagne n'exerce ce cas, et aucun gain
-// n'est revendique.
+// Branche et remesure : 192 570 -> 151 708 fermetures sur la campagne cospherique,
+// 108 856 -> 89 130 sur la generique. Environ 1,2x.
 //
 // Le callback recoit la position (i,j,k) du triplet, qui EST l'adresse de reprise.
 template <class Fn>
@@ -1351,21 +1347,77 @@ inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& v
 // coquille de w ; s'il echoue, pi(w) != v est certifie et le refus n'a coute
 // aucune enumeration de flats. C'est une condition NECESSAIRE, pas suffisante : un
 // couple admissible peut ne pas etre le premier dans l'ordre.
-inline bool backward_pair_admissible(const std::vector<P3>& points, const Vertex& w,
-                                     const i32 base[3], int forward,
-                                     const std::vector<i32>& root_base) {
+// L'admissibilite d'UN couple (base ordonnee, direction), ecrite UNE fois et
+// partagee par le choix du parent, le prefiltre de retour et la decision de
+// filiation. La base ordonnee et la direction se transportent ENSEMBLE : une
+// permutation impaire de la base sans inversion de la direction changerait le
+// signe de `orient3d` et rendrait le test faux.
+inline bool pair_admissible(const std::vector<P3>& points, const Vertex& w, const i32 base[3],
+                            int direction, const std::vector<i32>& root_base) {
   Pencil pencil{&points, base[0], base[1], base[2]};
-  const int back = -forward;
   for (i32 z : w.shell)
-    if (tangent_sign(pencil.orient_of(z), back) < 0) return false;
+    if (tangent_sign(pencil.orient_of(z), direction) < 0) return false;
   const i32 site = w.interior.empty() ? -1 : w.interior.front();
-  if (site >= 0) return tangent_sign(pencil.orient_of(site), back) > 0;
+  if (site >= 0) return tangent_sign(pencil.orient_of(site), direction) > 0;
   mhgp::i128 total = 0;
   for (i32 z : root_base)
     total += orient3d_exact(points[(std::size_t)base[0]], points[(std::size_t)base[1]],
                             points[(std::size_t)base[2]], points[(std::size_t)z]);
-  const mhgp::i128 derivative = (back > 0) ? -total : total;
+  const mhgp::i128 derivative = (direction > 0) ? -total : total;
   return derivative < 0;
+}
+
+inline bool backward_pair_admissible(const std::vector<P3>& points, const Vertex& w,
+                                     const i32 base[3], int forward,
+                                     const std::vector<i32>& root_base) {
+  return pair_admissible(points, w, base, -forward, root_base);
+}
+
+// ---------------------------------------------------------------------------
+// DECIDER LA FILIATION SANS AUCUNE REQUETE DE VOISIN DE RETOUR
+// ---------------------------------------------------------------------------
+//
+// Corollaire de l'auditeur, plus fort que le prefiltre. L'adjacence du pinceau est
+// SYMETRIQUE : puisque w est le prochain evenement depuis v le long de (C,d), le
+// prochain evenement depuis w le long de (C,-d) est deja connu — c'est v. Apres un
+// prefiltre positif, rappeler `neighbour_along` depuis w ne fait que recalculer v.
+//
+// Il suffit donc d'enumerer les couples de w JUSQU'A la clef canonique (C,-d) :
+//   * un couple admissible strictement anterieur refute la filiation ;
+//   * la clef de retour atteinte et admissible l'accepte ;
+//   * fermeture manquante, ordre qui regresse ou retour inadmissible : ECHEC FERME.
+//
+// La fermeture est la MEME aux deux extremites : les nouveaux membres du lot ont un
+// `orient3d` non nul et n'agrandissent pas le plan, et les partants disparaissent
+// du plan sans le changer. Comme la base canonique est une fonction de la seule
+// fermeture, les deux bases coincident — ce qui est verifie, non suppose, et rend
+// inutile tout transport de signe entre les deux reperes.
+enum class ChildOutcome { kAccept, kReject, kBroken };
+
+inline ChildOutcome decide_child(const std::vector<P3>& points, const Vertex& w,
+                                 const FlatAtVertex& flat_at_v, int direction,
+                                 const std::vector<i32>& root_base, long long* triplets = nullptr,
+                                 long long* closures = nullptr) {
+  const int back_slot = (-direction > 0) ? 1 : 0;
+  ChildOutcome verdict = ChildOutcome::kBroken;   // jamais atteint = echec ferme
+  for_each_flat(points, w, [&](const FlatAtVertex& g) {
+    if (g.closure > flat_at_v.closure) return false;      // depasse : echec ferme
+    const bool is_return = (g.closure == flat_at_v.closure);
+    if (is_return && !(g.base[0] == flat_at_v.base[0] && g.base[1] == flat_at_v.base[1] &&
+                       g.base[2] == flat_at_v.base[2]))
+      return false;                                       // bases disjointes : echec ferme
+    for (int slot = 0; slot < 2; ++slot) {
+      const int dir = slot == 0 ? -1 : 1;
+      const bool admissible = pair_admissible(points, w, g.base, dir, root_base);
+      if (is_return && slot == back_slot) {
+        verdict = admissible ? ChildOutcome::kAccept : ChildOutcome::kBroken;
+        return false;
+      }
+      if (admissible) { verdict = ChildOutcome::kReject; return false; }
+    }
+    return true;
+  }, triplets, closures);
+  return verdict;
 }
 
 // La direction canonique du parent, ou `false` si aucune orientation n'est
@@ -1412,24 +1464,10 @@ inline bool canonical_parent(const std::vector<P3>& points, const Vertex& v,
   const i32 site = v.interior.empty() ? -1 : v.interior.front();
   std::vector<i32> best_key;
   bool found = false;
+  (void)site;
   for_each_flat(points, v, [&](const FlatAtVertex& flat) {
-    Pencil pencil{&points, flat.base[0], flat.base[1], flat.base[2]};
     for (int direction = -1; direction <= 1; direction += 2) {
-      bool admissible = true;
-      for (i32 z : v.shell)
-        if (tangent_sign(pencil.orient_of(z), direction) < 0) { admissible = false; break; }
-      if (!admissible) continue;
-      if (site >= 0) {
-        if (tangent_sign(pencil.orient_of(site), direction) <= 0) continue;
-      } else {
-        mhgp::i128 total = 0;
-        for (i32 z : root_base)
-          total += orient3d_exact(points[(std::size_t)flat.base[0]],
-                                  points[(std::size_t)flat.base[1]],
-                                  points[(std::size_t)flat.base[2]], points[(std::size_t)z]);
-        const mhgp::i128 derivative = (direction > 0) ? -total : total;
-        if (derivative >= 0) continue;
-      }
+      if (!pair_admissible(points, v, flat.base, direction, root_base)) continue;
       std::vector<i32> key = flat.closure;
       key.push_back(direction > 0 ? 1 : 0);
       if (!found || key < best_key) {
@@ -2032,31 +2070,22 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
   }
   if (root_base.size() < 4) { *status = CloudStatus::kInvariantViolated; return; }
 
-  // Le parent d'un sommet, recalcule localement : une direction canonique puis
-  // UNE requete de voisin.
-  // Deux issues a ne pas confondre. Aucune orientation admissible signifie que w
-  // EST la racine — c'est certifie. Une orientation admissible dont la requete de
-  // voisin echoue est en revanche une contradiction : le theoreme demontre que
-  // l'arete du parent est bornee. On la remonte comme telle.
-  enum class ParentOutcome { kFound, kIsRoot, kBroken };
-  auto parent_of = [&](const Vertex& w, Vertex* mother) {
-    FlatAtVertex flat;
-    int orientation = 0;
-    if (!canonical_parent(points, w, root_base, &flat, &orientation,
-                          &st->reverse_triplets_scanned, &st->reverse_closures_built)) {
-      // Et le certificat de racine doit etre EXHIBE. Classer « aucune direction
-      // admissible » en `kIsRoot` sans verifier que w est le germe laissait un
-      // non-germe sans direction filer avec `kOk` : c'est une contradiction, pas
-      // un sommet a ignorer.
-      return w.shell == seed.shell ? ParentOutcome::kIsRoot : ParentOutcome::kBroken;
-    }
-    ++st->reverse_parent_queries;
-    if (!neighbour_along(points, w, flat, orientation, index, st, mother))
-      return ParentOutcome::kBroken;
-    return ParentOutcome::kFound;
-  };
-
-  struct Level { Vertex vertex; std::size_t next_child = 0; };
+  // Aucune requete de parent dans le parcours. La decision de filiation est
+  // `decide_child`, qui enumere les couples du candidat jusqu'a la clef de retour
+  // et n'appelle jamais `neighbour_along`. `canonical_parent` et `neighbour_along`
+  // restent publics pour le JUGE, qui rejoue la symetrie du pinceau contre eux —
+  // oracle differentiel, jamais autorite partagee.
+  //
+  // Le germe ne peut pas etre atteint ici : n'ayant aucune direction admissible, son
+  // couple de retour est refuse par le prefiltre en O(m), donc `decide_child` n'est
+  // jamais appele sur lui. Toute autre issue `kBroken` est une contradiction — clef
+  // de retour depassee, bases disjointes, ou retour inadmissible apres un prefiltre
+  // positif — et remonte comme telle.
+  // LE CURSEUR DE REPRISE, et non un compteur lineaire. Avec un compteur il fallait
+  // re-enumerer — donc reconstruire les fermetures — de tous les triplets deja
+  // consommes pour retrouver sa place. Le curseur est l'adresse du triplet et la
+  // fente de direction, donc la reprise ne touche plus rien avant elle.
+  struct Level { Vertex vertex; int i = 0, j = 1, k = 2, dir = 0; };
   std::vector<Level> stack;
   // SLOTS VIFS : la somme des tailles des sommets du chemin. C'est la borne de
   // memoire que le parcours revendique, donc celle qu'il doit publier.
@@ -2064,7 +2093,7 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
   auto push = [&](const Vertex& v) {
     live += (long long)(v.shell.size() + v.interior.size());
     st->reverse_live_high_water = std::max(st->reverse_live_high_water, live);
-    stack.push_back(Level{v, 0});
+    stack.push_back(Level{v, 0, 1, 2, 0});
   };
   bool interrupted = false;
   // Le germe passe par le MEME contrat que les autres : un sink qui le refuse
@@ -2079,15 +2108,18 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
     // Les voisins dans l'ordre deterministe (flat, direction). L'indice du fils
     // est donc reproductible au retour, ce qui est toute la mecanique
     // d'AVIS--FUKUDA.
-    std::size_t seen_index = 0;
     bool descended = false;
     bool broken = false;
     Vertex child;
-    for_each_flat(points, top.vertex, [&](const FlatAtVertex& flat) {
+    int next_i = top.i, next_j = top.j, next_k = top.k, next_dir = top.dir;
+    for_each_flat_from(points, top.vertex, top.i, top.j, top.k,
+                       [&](const FlatAtVertex& flat, int fi, int fj, int fk) {
       ++st->reverse_flats_enumerated;
-      for (int direction = -1; direction <= 1; direction += 2) {
-        const std::size_t here = seen_index++;
-        if (here < top.next_child) continue;
+      const bool resumed = (fi == top.i && fj == top.j && fk == top.k);
+      const int first_slot = resumed ? top.dir : 0;
+      if (first_slot >= 2) return true;              // triplet deja epuise
+      for (int slot = first_slot; slot < 2; ++slot) {
+        const int direction = slot == 0 ? -1 : 1;
         Vertex candidate;
         if (!neighbour_along(points, top.vertex, flat, direction, index, st, &candidate)) continue;
         if (candidate.level > level_ceiling) continue;
@@ -2096,15 +2128,19 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
           ++st->reverse_reject_backward;
           continue;                          // pi(candidate) != v, certifie en O(m)
         }
-        Vertex mother;
-        const ParentOutcome outcome = parent_of(candidate, &mother);
-        if (outcome == ParentOutcome::kBroken) { broken = true; return false; }
-        if (outcome == ParentOutcome::kIsRoot) continue;   // la racine n'est fille de personne
-        if (mother.shell != top.vertex.shell) {            // ce n'est pas notre fils
+        // Plus aucune requete de voisin de retour : l'adjacence du pinceau etant
+        // symetrique, il suffit d'enumerer les couples du candidat JUSQU'A la clef
+        // de retour. Le juge rejoue la symetrie contre `canonical_parent`.
+        ++st->reverse_decisions;
+        const ChildOutcome outcome =
+            decide_child(points, candidate, flat, direction, root_base,
+                         &st->reverse_triplets_scanned, &st->reverse_closures_built);
+        if (outcome == ChildOutcome::kBroken) { broken = true; return false; }
+        if (outcome == ChildOutcome::kReject) {
           ++st->reverse_reject_by_parent;
           continue;
         }
-        top.next_child = here + 1;
+        next_i = fi; next_j = fj; next_k = fk; next_dir = slot + 1;
         child = candidate;
         descended = true;
         return false;                                     // ARRET : plus rien a enumerer
@@ -2114,6 +2150,7 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
     if (broken) { *status = CloudStatus::kInvariantViolated; return; }
 
     if (descended) {
+      top.i = next_i; top.j = next_j; top.k = next_k; top.dir = next_dir;
       if (!sink(child)) { interrupted = true; break; }
       push(child);
       continue;

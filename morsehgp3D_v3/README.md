@@ -799,9 +799,14 @@ ferme aussi une partie amont : toute sphère directe d'ordre $k$ possède un
 propriétaire rencontré au niveau strict au plus $k-1$, puis son census $I,S$
 détermine exactement ses cofaces. Sous zéro-extra-shell, un argument
 d'échantillonnage borne même, pour une coquille propriétaire de taille $m$, les
-sources possédées de rang deux et trois par $O(mK)$ et $O(mK^2)$. Le harvest
-output-sensitive de ces arêtes/faces shallow n'est toutefois ni construit ni
-jugé; récolter seulement les directions du parent est faux.
+sources possédées de rang deux et trois par $O(mK)$ et $O(mK^2)$. Une famille
+universelle explicite donne maintenant un générateur déterministe complet de
+candidates par coques échantillonnées, sans énumérer toutes les suppressions;
+un halfspace-reporting déterministe filtre aussi leur profondeur locale. Ce
+générateur n'est ni implémenté ni jugé. Le census global de chaque boule contre
+$X$, la propriété et la déduplication inter-sommets restent sans borne produit;
+leur recertification exacte en batch est le verrou suivant. Récolter seulement
+les directions du parent est faux.
 
 Deux mises en garde qui subsistent : les co-minimiseurs observés sont petits mais
 **sans borne générale** — une facette peut en avoir $\Theta(n)$ — et le rapport de

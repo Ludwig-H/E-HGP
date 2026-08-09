@@ -107,7 +107,9 @@ Soit $q_R$ ce nombre de racines strictes distinctes.
   cible $R^{-}$.
 - $q_R=1$ : le lot prolonge l'unique racine sans créer de nœud public.
 - $q_R\geq2$ : le lot crée une multifusion unique dont les racines strictes sont
-  les enfants.
+  les enfants. Cette composante doit contenir une `DirectHyperedge`; une
+  composante multiracine constituée uniquement d'attaches contredit l'unicité de
+  la cible attachée à chaque facette neuve.
 
 Une simple `FacetActivate` non incidente à une arête égale ne passe pas par cette
 classification : elle reste latente. Inversement, une composante composée
@@ -191,11 +193,16 @@ conséquence du seul pointer-jumping.
 Un oracle borné reconstruit depuis zéro, à chaque niveau, l'hypergraphe complet
 aux coupes ouverte et fermée. Pour rester indépendant du sujet, sa vérité emploie
 une matrice booléenne d'incidence puis une fermeture de Warshall, jamais le DSU.
-Un sujet DSU résident consomme les mêmes records par lots gelés. Un premier
-domaine exhaustif suffisant possède au plus trois niveaux, six handles stricts,
-quatre activations courantes et cinq records par lot; des fixtures ciblées
-couvrent ensuite les arités produit jusqu'à onze. L'oracle applique les règles
-suivantes :
+Un sujet DSU résident consomme les mêmes records par lots gelés. Le premier
+palier **réellement exhaustif et conservé** porte sur au plus cinq sommets
+projetés et deux records logiques distincts dans un lot. L'enveloppe de trois
+niveaux, six handles stricts, quatre activations courantes et cinq records par
+lot reste une cible de génération canonique et de tests ciblés, pas un domaine
+qu'un petit script peut honnêtement appeler exhaustif : à un ordre fixé, dix
+handles donnent déjà plus de $10^{10}$ multisets bruts d'au plus cinq records
+au pire des arités, avant même les états stricts et les historiques. Des
+fixtures séparées couvrent les arités
+produit jusqu'à onze. L'oracle applique les règles suivantes :
 
 - `activation_level(h)<a` : la classe stricte de `h` devient $R^{-}$ ou
   $L^{-}$ selon sa racine partielle;
@@ -215,14 +222,62 @@ Après chaque lot, le différentiel compare :
 - disposition latente ou enracinée de chaque composante;
 - signatures récursives canoniques des naissances et multifusions;
 - racine héritée des continuations;
+- ledger canonique de chaque arête logique et de ses provenances, y compris si
+  sa projection est unaire;
 - unions et deltas exacts de facettes et de points;
-- état inchangé après chaque faute injectée.
+- état autoritatif entier inchangé après chaque faute injectée, compteurs
+  d'allocation, journal, chaîne de reçus et prochain identifiant compris.
 
 La comparaison doit porter sur les clefs complètes et la structure normalisée,
 pas sur les représentants accidentels du DSU ni sur une somme de hachages.
 F0 certifie seulement le fold relativement au multiensemble scellé reçu. Un
 oracle exhaustif $\Gamma$ séparé reste nécessaire pour juger la complétude de la
 source `directes + attaches`.
+
+#### F0-A exécutable — noyau de quotient typé
+
+[`check_gate_d_fold_f0.py`](check_gate_d_fold_f0.py) conserve le premier noyau
+indépendant. Sa vérité exécute exactement le pseudo-code suivant; le sujet
+emploie une union--recherche distincte.
+
+```text
+resolve every handle with activation<a to R-/L-, activation=a to N_a, reject future
+prevalidate every attachment as N_a -> R^-, with at most one target per fresh facet
+prevalidate every raw direct arity in [2,11]
+set M[i,i]=true; connect one pivot to every endpoint of every logical record
+Warshall(M)
+for every closed component C containing a logical record:
+    roots = distinct R^- values in C
+    q = size(roots)
+    decide birth iff q=0 and C has a direct record; continuation iff q=1; multifusion iff q>=2 and C has a direct record
+compare partition, disposition, recursive root and complete logical-record ledger
+commit the prepared value only after every check succeeds
+```
+
+La campagne conservée décide 2 168 lots abstraits, dont 1 916 acceptés et 252
+rejetés, sur tous les sous-ensembles de cinq sommets typés et zéro, un ou deux
+records distincts. Huit fixtures ciblées couvrent collision `R(7)`/`L(7)`, pont
+latent, les trois classes de $q_R$, attache stricte, projection unaire et une
+`DirectHyperedge` de onze endpoints. Six entrées forgées sont rejetées, dont une
+facette neuve visant deux racines distinctes. Six
+mutations sont tuées : effacement du namespace, suppression des latents avant
+fermeture, comptage des occurrences de racine, perte d'une source projetée
+unaire, commit record par record et `find` fermé au lieu de strict. Quatre
+fautes de staging plus une entrée invalide laissent l'état inchangé; une mutation
+qui consomme l'identifiant de commit avant validation est détectée.
+
+Deux contre-exemples précisent le contrat de test. Premièrement, supprimer une
+`DirectHyperedge` déjà unaire après projection ne change ni partition, ni racine,
+ni couverture : sans comparaison du ledger logique, cette mutation passe.
+Deuxièmement, une faute qui incrémente seulement `next_commit_id` laisse les trois
+digests partition--forêt--couverture inchangés mais modifie le prochain résultat;
+le rollback doit donc comparer tout l'état autoritatif.
+
+Ce vert est celui de **F0-A, noyau combinatoire d'un lot fourni**. Le script ne
+rejoue ni la complétude géométrique de la source, ni les unions de couverture,
+ni un historique multilevel complet de successors. Ces extensions, les runs F1
+et le journal externe F2 restent des portes séparées; le script ne doit jamais
+être déplacé dans le chemin produit.
 
 ### F1 — runs scellés
 
