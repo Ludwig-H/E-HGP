@@ -80,6 +80,14 @@ target_include_directories(mhgp3v_scale_profile PRIVATE ${CMAKE_CURRENT_SOURCE_D
 target_link_libraries(mhgp3v_scale_profile PRIVATE mhgp)
 target_compile_options(mhgp3v_scale_profile PRIVATE -Wall -Wextra -Werror)
 
+# LA SELECTIVITE DU LEMME DU DEMI-BOULE. Le budget du generateur direct depend d'une
+# quantite que sa propre specification declare NON BORNEE : la taille de l'univers
+# admissible. Ce probe la mesure, et verifie que le lemme ne refute aucune paire reelle.
+add_executable(mhgp3v_admissible_pair_probe prototype/admissible_pair_probe.cpp)
+target_include_directories(mhgp3v_admissible_pair_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_admissible_pair_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_admissible_pair_probe PRIVATE -Wall -Wextra -Werror)
+
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)

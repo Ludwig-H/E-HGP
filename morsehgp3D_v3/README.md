@@ -1145,64 +1145,121 @@ alimenter le harvest certifié des supports, la source directe, le fold pré-lot
 la couverture et les verticales, qui n'existent pas comme pipeline. Le NO-GO
 tient.
 
-### Le terrain, mesuré à densité fixe : il converge, et il est trop grand
+### L'univers admissible est quasi linéaire, et c'est ce qui rouvre la route
 
-C'est la mesure qui décide, et elle manquait. Mes profils précédents tiraient les
-points dans un cube d'emprise $\propto\sqrt{n}$ **par coordonnée**, donc de volume
-$\propto n^{3/2}$ : la densité décroissait en $n^{-1/2}$, et aucune extrapolation à
-50 000 points n'était licite. `mhgp3v_scale_profile` tient la densité **fixe** —
-emprise $\propto n^{1/3}$ pour le cube, aire $\propto n$ et épaisseur bornée pour la
-nappe LiDAR.
+Le lemme du demi-boule donne une condition **nécessaire, exacte et entière**, sans
+aucune hypothèse de régularité : si $p$ et $u$ sont sur la coquille d'une sphère
+critique de rang $\le s_{\max}$, alors il existe un demi-espace fermé $H$ dont le
+plan contient la droite $(p,u)$ avec $\lvert X\cap D_{pu}\cap H\rvert\le s_{\max}$,
+où $D_{pu}$ est la boule diamétrale. La preuve tient en trois lignes : le centre est
+équidistant de $p$ et $u$, donc $(c-m)\perp(u-p)$ et $R^2=\rho^2+d^2$ ; pour tout
+$y$ du demi-boule côté centre,
+$\lVert y-c\rVert^2=\lVert y-m\rVert^2-2(y-m)\cdot(c-m)+d^2\le R^2$.
 
-**[mesuré]** $s_{\max}=11$, densité $10^{-3}$, un cœur :
+Le minimum sur les demi-espaces se calcule **exactement** : les points de la boule
+diamétrale se projettent sur le plan perpendiculaire à $(u-p)$, un demi-espace
+devient un demi-plan, et le minimum est atteint sur une direction délimitée par les
+points eux-mêmes. Aucun angle — que des signes de déterminants entiers.
 
-| $n$ | sommets/pt | incrément | catalogue/pt | incrément | catalogue / sommets |
-| ---: | ---: | ---: | ---: | ---: | ---: |
-| 100 | 805,5 | — | 159,3 | — | 0,198 |
-| 200 | 1 011,5 | +206,0 | 219,8 | +60,5 | 0,217 |
-| 400 | 1 171,9 | +160,4 | 266,3 | +46,5 | 0,227 |
-| 800 | 1 271,9 | +100,0 | 299,9 | +33,7 | 0,236 |
+**[mesuré]** cube à densité fixe $10^{-3}$, $s_{\max}=11$ :
 
-La nappe LiDAR donne la même chose à 2 % près — 806,7 / 1 013,6 / 1 162,1 / 1 250,2
-sommets par point. Le profil ne décide donc rien ; la densité, si.
+| $n$ | paires totales | admises | % du total | vraies | admises/pt | vraies/pt | admises/vraies |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 100 | 4 950 | 3 882 | 78,4 % | 2 133 | 38,8 | 21,3 | 1,82 |
+| 200 | 19 900 | 10 706 | 53,8 % | 5 171 | 53,5 | 25,9 | 2,07 |
+| 400 | 79 800 | 26 584 | 33,3 % | 11 689 | 66,5 | 29,2 | 2,27 |
+| 800 | 319 600 | 62 997 | 19,7 % | 25 868 | 78,7 | 32,3 | 2,44 |
 
-**Le terrain croît encore, mais il converge.** Les incréments par doublement
-décroissent d'un facteur 0,78 puis 0,62 ; ceux du catalogue, 0,77 puis 0,72. Une
-extrapolation géométrique — **une projection sur trois incréments, pas une mesure**
-— donne une asymptote de l'ordre de **1 430 sommets par point** et **390 sphères par
-point**. À 50 000 points : **≈ 7,1·10⁷ sommets** et **≈ 1,9·10⁷ sphères**.
+**Le lemme n'a réfuté aucune paire réelle** — zéro sur les 424 250 paires des quatre
+tailles. Il est nécessaire comme le dit sa preuve, et la mesure le confirme au lieu
+de le supposer.
 
-### Ce que ces deux nombres font au contrat de 100 ms
+**Et l'univers admissible est quasi linéaire.** Sa part de $\binom{n}{2}$ s'effondre
+— 78 % puis 20 % — tandis que le nombre par point croît lentement : 38,8 → 53,5 →
+66,5 → 78,7, avec des incréments par doublement de 14,7 puis 12,9 puis 12,3.
+**Des incréments quasi constants signent une croissance en $\log n$**, pas
+géométrique et pas un plateau ; les vraies paires suivent la même loi, incrément
+environ 3,2. En lisant $a+b\log_2 n$ — quatre points, donc une lecture et non une
+asymptote —, les six doublements qui séparent $n=800$ de 50 000 donnent de l'ordre
+de **150 paires admises et 50 vraies par point**, soit $7{,}5\cdot10^6$ candidates
+pour $2{,}5\cdot10^6$ réelles.
 
-Le débit mesuré sur RTX PRO 6000 est de 575 M sommets par seconde pour la **seule**
-passe d'admissibilité. Sur $7{,}1\cdot10^7$ sommets, cette passe seule prend
-**0,124 s** — soit déjà plus que le budget entier. Le parcours complet coûte dix à
-trente fois cette passe. **L'écart est d'un facteur quinze à quarante, et ce n'est
-plus une constante d'implémentation.**
+C'est **$O(n\log n)$ et non $O(n^2)$** : la première quantité de ce projet dont la
+loi d'échelle soit compatible avec le contrat.
 
-**Et le générateur direct ne retire pas le terrain : il le présuppose.** J'avais
-espéré l'inverse. La note de source pose $S=S(v)$ : c'est un générateur **par
-propriétaire shallow**, qui ferme le harvest et le niveau *locaux* en
-$O_s(m\log^2 2m)$ et consomme le plafond de navigation prouvé au §3.1. Sa propre
-conclusion est explicite — « ce théorème ne construit pas le stream terminal de
-sphères; il isole exactement le verrou qui lui reste ». Ce qu'il apporte est réel :
-sous la porte régulière forte, la décision d'une coface devient un test de
-cardinalité sans énumération, et les sorties par propriétaire sont bornées par
-$N_2\leq12m(h+1)$ et $N_3\leq8m(h+1)^2$. Autrement dit il attaque le facteur dix à
-trente, pas le facteur $7{,}1\cdot10^7$.
+**Ce que cela ne résout pas.** Il reste à *trouver* ces $7{,}5\cdot10^6$ paires sans
+en tester $1{,}25\cdot10^9$. La condition dit qu'une paire admissible a peu de points
+dans sa boule diamétrale, donc qu'elle est courte relativement à la densité locale —
+exactement ce qu'une frontière de paires par ancre sait énumérer, et le projet
+`morsehgp3d` en porte déjà une, `morton_yao48_pair_frontier`, avec ses certificats
+d'élagage. Le lemme lui fournirait le filtre exact qui lui manque. Rien n'est écrit,
+et la borne de travail de cette énumération n'est pas démontrée.
 
-**La borne que cela laisse.** Même une énumération parfaitement sensible à la
-sortie — ne touchant que ce qu'elle émet — devrait produire $1{,}9\cdot10^7$ sphères
-en 100 ms, soit **5,3 ns par sphère pour toute la chaîne**, census, propriétaire,
-niveau, émission et fold compris. À un milliard d'évaluations exactes par seconde,
-cela laisse **environ cinq prédicats exacts par sphère émise**. C'est le vrai
-énoncé du problème, et il est maintenant chiffré des deux côtés.
+### Le terrain à densité fixe : quatre diagnostics, aucune asymptote encore
 
-**Je ne dis donc pas que le contrat est hors d'atteinte ; je dis qu'aucune route
-démontrée ne l'atteint aujourd'hui**, que l'écart est mesuré et non supposé, et que
-la seule direction compatible avec ces nombres est une énumération dont le travail
-soit proportionnel à la sortie — ce que ni la navigation actuelle, ni le générateur
-local de la note, ne fournissent encore.
+Le protocole précédent tirait les points dans un cube d'emprise
+$\propto\sqrt{n}$ **par coordonnée**, donc de volume $\propto n^{3/2}$ : la densité
+décroissait en $n^{-1/2}$ et son extrapolation à 50 000 points n'était pas
+licite. `mhgp3v_scale_profile` corrige ce point avec une emprise
+$\propto n^{1/3}$ pour le cube, et une aire $\propto n$ à épaisseur bornée pour
+la nappe synthétique.
+
+**[diagnostic publié, protocole encore hétérogène]** $s_{\max}=11$, densité
+$10^{-3}$, un cœur :
+
+| $n$ | sommets/pt | catalogue/pt | répétitions reçues |
+| ---: | ---: | ---: | ---: |
+| 100 | 805,5 | 159,3 | 2 |
+| 200 | 1 011,5 | 219,8 | 1 |
+| 400 | 1 171,9 | 266,3 | 1 |
+| 800 | 1 271,9 | 299,9 | 1 |
+
+Les commandes `--points 400/800 --smax 11 --repeats 1 --seed 20260809` ont
+été reproduites au binaire Release et retrouvent exactement ces masses; leurs
+sorties brutes ne sont toutefois pas versionnées.
+
+La ligne cube `n=100` agrège deux nuages, mais `n=200` un seul; au même binaire
+et avec deux répétitions, `n=200` donne plutôt `1 013,5/216,80`. Les incréments
+publiés comparent donc des estimateurs différents. La nappe synthétique donne
+806,7 / 1 013,6 / 1 162,1 / 1 250,2 sommets par point, sans dispersion scellée.
+Son catalogue vaut 240,47 puis 257,00 par point à `n=400/800`, contre
+266,28 puis 299,94 pour le cube : l'écart de sortie atteint 9,7 % puis 14,3 % et
+augmente sur cette fenêtre.
+Même avec un protocole homogène, trois incréments n'identifieraient ni une loi
+géométrique ni une fonction bornée. Les valeurs 1 430 sommets/point et 390
+sphères/point obtenues en prolongeant les derniers incréments sont un scénario
+de modèle, pas des asymptotes.
+
+### Ce que ce scénario ferait au contrat de 100 ms
+
+Sous les hypothèses `1 430 sommets/point` et `575 M sommets/s`, la seule passe
+d'admissibilité de 71,5 millions de sommets prendrait environ 0,124 s. Sous
+l'hypothèse supplémentaire de 19 millions de sphères, 100 ms donneraient 5,3 ns
+par sortie. Ces divisions sont correctes; les masses, le transport du débit et
+le facteur dix à trente du pipeline ne sont ni bornés ni reçus. Elles ne donnent
+donc pas un écart mesuré de quinze à quarante.
+
+Le générateur local de la note actuelle présuppose bien un propriétaire shallow;
+il ne peut pas, à lui seul, retirer le terrain. Cela n'exclut pas une **autre**
+source directe. La note d'audit GPU formule un premier jalon falsifiable pour
+les supports d'arités deux à quatre : une couverture certifiée de l'espace des
+centres borne le rayon de toute sortie admissible, puis un voisinage exact de
+rayon prouvé contient support, intérieur et coquille complets. Cette voie ne
+construit aucun sommet d'arrangement ni mosaïque. Son exactitude est démontrable;
+son SLO reste conditionné aux degrés complets, masses combinadiques et replays
+publiés dans le reçu.
+
+Le probe live du lemme de demi-boule n'est pas encore un juge de cette voie. Son
+`minimum_halfplane_count` teste seulement les directions des points et compte
+les égalités sur la frontière; une fixture entière `RelevantGP` lui donne 5 au
+lieu du minimum exact 2 et lui fait réfuter une paire critique. Le lemme reste
+correct; le probe doit employer un sweep circulaire exact par groupes de rayons
+et comparer son demi-plan fermé au complément ouvert.
+
+**Conclusion actuelle :** aucune route démontrée n'atteint le contrat, et aucune
+de ces quatre tailles ne prouve qu'il est impossible. Le prochain résultat
+décisionnel est soit un théorème de borne, soit une campagne multi-graines avec
+quantiles jusqu'à 50 k et pipeline complet, pas l'extrapolation d'une asymptote.
 
 ### La taille du terrain n'est pas garantie
 

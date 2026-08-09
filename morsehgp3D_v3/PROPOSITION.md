@@ -90,6 +90,18 @@ densité et une graine synthétiques, une moyenne qui ignore les statuts non `kO
 et deux étages partiels ne décident ni les 100 ms primaires ni la seconde
 secondaire. La source critique directe est une hypothèse prioritaire; sa
 complétude, son census terminal et son coût output-sensitive restent à prouver.
+Le delta `70ead99` ajoute quatre tailles utiles, mais trois incréments décroissants
+ne prouvent ni convergence ni asymptote : les projections `1 430/390` par point
+et les temps qui en découlent restent des scénarios conditionnels. Le tableau
+mélange en outre deux répétitions à `n=100` et une à `n=200`; ses incréments ne
+forment pas encore une série statistique homogène.
+
+Le probe live de sélectivité des paires contient un P0 indépendant : il cherche
+le minimum d'un demi-plan fermé seulement sur les directions des points et
+compte les points de frontière. Trois projections sur un même rayon suffisent à
+faire rendre 5 au lieu de 2 et à réfuter une paire critique `RelevantGP`. Le
+lemme de demi-boule n'est pas réfuté; son oracle doit devenir un sweep circulaire
+exact du demi-plan ouvert complémentaire avant toute mesure de sélectivité.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

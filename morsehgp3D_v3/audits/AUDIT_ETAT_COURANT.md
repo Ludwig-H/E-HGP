@@ -9,17 +9,20 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot courant
-`f851374` conserve les sources wavefront de `04555bd`, ajoute les résultats G4
+n'ouvre aucune phase et ne promeut aucun résultat public. L'audit couvre les
+deltas jusqu'à `70ead99`; ce commit conserve les sources wavefront de `04555bd`, ajoute les résultats G4
 documentaires de `78583f1`, leur interprétation à 100 ms dans `444b851`, puis un
-profileur CPU à densité fixe. Aucun artefact brut de la session G4 n'est
-versionné avec ces commits.
+profileur CPU à densité fixe et quatre points d'échelle. Aucun artefact brut de
+la session G4 n'est versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| `HEAD` | `f851374cb628f88eafd9a2efaf7e293eb62e1d62` |
+| dernier commit modifiant le code v3 | `f851374cb628f88eafd9a2efaf7e293eb62e1d62` |
+| dernier delta documentaire audité | `70ead9947102a5ad827b8b3bcd2913b17f7cf32d` |
 | `CMakeLists.txt` | `7c770bcc16ed57410b7b6cda32854e8029f7e4ee06b6722cfa0a256bb67817ef` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
+| `CMakeLists.txt` live avec probe | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
+| `prototype/admissible_pair_probe.cpp` live | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
@@ -134,6 +137,13 @@ impossible après admission puisque toute fermeture est incluse dans une
 coquille de taille au plus 32; ce statut doit être une violation d'invariant,
 pas un fallback normal.
 
+Le reçu agrège en outre `vertices=count`, refus compris, sans publier
+`accepted`; son champ `mismatches` n'est jamais alimenté par `summarise`.
+`flat_high_water` exclut les refus et les statistiques d'admission
+`samples/accepted/reasons` sont perdues. Enfin, un intérieur de 31 ou 32 points
+est accepté par le format alors que la coupe produit prouve la borne 30 : ces
+valeurs doivent être `invalid_contract`, pas des admissions ordinaires.
+
 ## P1 — ce kernel ne décide pas encore la reverse-search
 
 `evaluate_vertex` énumère les flats et met deux bits d'admissibilité par flat.
@@ -196,6 +206,14 @@ Le README rapporte quatre mesures kernel-only : 128 955 sommets en 0,224 ms,
 écart CPU/device sur le `VertexVerdict` borné. En l'absence des sorties brutes,
 elles sont conservées comme **diagnostics déclarés**, pas comme reçus
 reproductibles.
+
+Le journal local externe permet de retrouver les paramètres des deux grandes
+campagnes : `clouds=3,points=120,coord=4000,smax=8,seed=5` et
+`clouds=2,points=200,coord=8000,smax=6,seed=9`. Le chemin hôte reconstruit au
+même snapshot reproduit exactement `128955/515820/340781` puis
+`71084/284336/186885` pour sommets/flats/admissions, avec zéro écart sur `kOk`.
+C'est un renforcement positif de la provenance des masses; le timing device et
+le binaire restent non reçus tant que ce journal n'est pas scellé dans le dépôt.
 
 Le transport hôte/device est un résultat positif ciblé. Son interprétation
 quantitative doit toutefois distinguer les appels, les résultats admissibles et
@@ -260,6 +278,43 @@ par point, 159,28 sphères par point et les arités
 `1,00/20,11/77,36/60,80`. C'est un nouveau diagnostic positif et reproductible
 côté CPU.
 
+Le commit `70ead99` publie ensuite quatre tailles `n=100/200/400/800`. Les
+valeurs de sommets par point `805,5/1 011,5/1 171,9/1 271,9` et de catalogue par
+point `159,3/219,8/266,3/299,9` sont utiles : les incréments observés diminuent
+sur cette fenêtre. Elles ne prouvent toutefois aucune convergence. Les nuages
+sont indépendants, une seule densité et trop peu de graines sont publiées, et
+trois incréments n'identifient ni une asymptote géométrique ni même une fonction
+bornée. Une loi logarithmique, une puissance lente ou une nouvelle transition
+au-delà de 800 restent compatibles avec ces quatre points.
+
+Le tableau ne suit même pas un protocole homogène. Au binaire Release identique
+et à la graine `20260809`, la ligne cube `n=100` publiée correspond à
+`repeats=2` (`805,5/159,28`), tandis que `n=200` correspond à `repeats=1`
+(`1011,5/219,78`); avec `repeats=2`, cette dernière vaut
+`1013,5/216,80`. Le premier incrément catalogue et les ratios qui en découlent
+comparent donc des estimateurs différents. Commande, nombre de répétitions et
+dispersion doivent apparaître par ligne avant toute régression.
+
+Les lignes cube `n=400/800` ont été recertifiées avec une répétition et la même
+graine; elles retrouvent exactement `1171,9/266,28` puis `1271,9/299,94`. La
+nappe correspondante rend `1162,1/240,47` puis `1250,2/257,00`. Si les sommets
+diffèrent de moins de 2 %, les sorties diffèrent de 9,7 % puis 14,3 % : une seule
+densité ne permet pas d'attribuer causalement la masse au seul paramètre densité,
+et les deux familles n'ont pas de limite commune prouvée.
+
+Dans le modèle cube uniforme continu, une homothétie globale préserve d'ailleurs
+la combinatoire Delaunay/order-k : la densité absolue n'agit sur ces ratios que
+par quantification et effets de bord. La nappe à épaisseur `z=40` n'est pas une
+homothétie lorsque `n` croît. Dire que « la densité décide » n'est donc ni une
+conclusion causale de la table ni un invariant commun aux deux profils.
+
+Les asymptotes `1 430` sommets/point et `390` sphères/point sont donc les sorties
+d'un modèle choisi après observation, sans ajustement documenté, intervalle ni
+validation hors échantillon. Les masses `7,1e7/1,9e7` à 50 k, les `0,124 s` et
+le facteur `15--40` qui en découlent sont des scénarios conditionnels, pas un
+écart « mesuré ». Le facteur `10--30` du pipeline reste lui-même sans pipeline
+GPU complet ni reçu.
+
 Il ne peut cependant être « le seul chiffre qui décide » les 100 ms :
 
 - la densité `1e-3` est codée en dur et le profil LiDAR est une nappe uniforme
@@ -269,8 +324,13 @@ Il ne peut cependant être « le seul chiffre qui décide » les 100 ms :
 - la déduplication du générateur emploie `std::find` dans un vecteur et coûte
   $O(n^2)$ hors chrono;
 - le temps navigation exclut `CertifiedIndex::build`, le temps catalogue
-  reconstruit son propre parcours, et la sortie « sans accélérateur » est
-  ambiguë puisque l'index est actif;
+  contient un second parcours via `flat_catalogue`, et la sortie « sans
+  accélérateur » est ambiguë puisque l'index est actif;
+- le catalogue emploie `use_index=true,use_owner=false`; il ne mesure donc ni le
+  chemin owner actuellement faux sur u16, ni une source critique directe;
+- `std::uniform_int_distribution` n'est pas une spécification de flux portable
+  entre bibliothèques standard; une graine sans digest du nuage ne suffit pas à
+  un reçu inter-machine;
 - ni source directe, ni fold, ni forêts, ni couverture, ni verticales, ni
   octets, ni pipeline GPU ne sont mesurés.
 - la cible n'a ni CTest permanent, ni plancher de nuages décidés, ni reçu
@@ -280,6 +340,63 @@ La porte propre publie toutes les graines et tous les statuts, sépare taille du
 terrain, taille de sortie et travail par étage, puis mesure des quantiles sur les
 familles enregistrées. Un ratio observé reste un diagnostic; il ne devient une
 borne à 50 k qu'après un théorème ou une exécution effectivement à 50 k.
+Sous l'hypothèse non validée de 19 millions de sorties, `100 ms / 19 M` donne
+bien 5,3 ns par sortie; cette division ne transforme ni les 19 millions en borne
+ni un compteur d'appels/admissions du microkernel en budget de prédicats aval.
+
+## P0 live — le minimum de demi-plan du probe de paires est faux
+
+Le delta live postérieur à `70ead99` ajoute
+`prototype/admissible_pair_probe.cpp` (`SHA-256 8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8`)
+et un branchement CMake live (`SHA-256 f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3`).
+L'objectif est positif : mesurer la masse des paires laissées par un lemme
+nécessaire exact. Son oracle angulaire est toutefois faux.
+
+`minimum_halfplane_count` ne teste que les directions portées par les points,
+puis compte la frontière avec `cross>=0`. Le minimum d'un demi-plan **fermé**
+peut être atteint entre deux directions : en plaçant la frontière juste après un
+groupe collinéaire, ce groupe appartient au demi-plan ouvert complémentaire,
+alors que tous les tests live le remettent sur la frontière et le comptent.
+
+Fixture entière, statut `kOk` et `RelevantGP` :
+
+```text
+centre=(100,100,100), rayon^2=194
+support={(113,100,95),(113,100,105),(87,105,100),(87,95,100)}
+extras={(114,100,100),(115,100,100),(116,100,100)}
+paire testee={0,1}, s_max=4
+```
+
+Les trois extras sont dans la boule diamétrale de la paire, hors de la sphère
+critique et sur le même rayon projeté. Le demi-espace `x<=113` ne compte que les
+deux extrémités, donc le minimum exact vaut 2. Le live rend 5 et incrémente
+`missing=1` pour une paire vraie. Le programme peut ainsi imprimer `ECHEC` contre
+un lemme correct.
+
+Les campagnes aléatoires restent un diagnostic utile : à `n=20/50/100/200`,
+elles publient respectivement `190/1176/3885/10706` paires admises contre
+`180/812/2113/5171` paires dites vraies, avec `missing=0`; le filtre seul prend
+0,91 s à `n=200`. Mais l'erreur live **surestime** le minimum et rejette trop de
+paires. Le sweep corrigé ne peut qu'augmenter `ADMIS`; ces masses sont donc des
+sous-estimations de l'univers conforme, jamais un crédit de parcimonie. Quatre
+tailles et une graine ne distinguent pas davantage une croissance linéaire d'une
+croissance quadratique à 50 k.
+
+La réparation mathématique est un sweep exact par groupes de rayons primitifs :
+calculer le maximum de points dans un demi-plan **ouvert** par fenêtre circulaire
+et deux pointeurs, puis utiliser
+`minimum_closed=always_inside+m-maximum_open`. Antipodes, rayons confondus et
+points à l'origine ont des fixtures distinctes; le contre-exemple ci-dessus est
+permanent. Une porte de mutation remplace le sweep par les seules directions
+live et doit rougir.
+
+Même corrigé, ce probe ne décide pas seul la source industrielle : sa vérité
+vient de `flat_catalogue(...,s_max)`, donc du catalogue de rang fermé et non de
+la source Gabriel ouverte à extra-shell; elle marque en outre toutes les paires
+d'une coquille, pas seulement les supports nécessaires. Le calcul exhaustif
+balaye toutes les paires, tous les points, puis jusqu'au carré des projections;
+son pire cas est quartique et sa cible `n<=5000` n'est pas une enveloppe de
+performance. Il reste un census CPU de sélectivité à protocole borné.
 
 ## NO-GO F0 inchangé
 
