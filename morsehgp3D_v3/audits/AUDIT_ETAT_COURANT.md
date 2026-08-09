@@ -9,14 +9,15 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. Les sources sont celles
-du commit `04555bd`, sauf le filtrage des options C++ dans `CMakeLists.txt`,
-présent comme delta live de Claude au moment du scellement.
+n'ouvre aucune phase et ne promeut aucun résultat public. Le commit `78583f1`
+conserve les sources wavefront de `04555bd`, committe le filtrage CMake et ajoute
+des résultats G4 documentaires. Aucun artefact brut de cette session n'est
+versionné avec le commit.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| `HEAD` | `04555bdd6ff67810bd8db35c4baf18b9eae0063b` |
-| `CMakeLists.txt` live | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
+| `HEAD` | `78583f1950c4c514828c523ba3ad2aa03676bfb0` |
+| `CMakeLists.txt` | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
@@ -38,8 +39,14 @@ jamais rejoués. Un mutant qui refuse tous les sommets reste vert.
 Le kernel ne constitue pas encore une wavefront. `navigate_shallow` construit
 et mémorise d'abord tous les sommets sur CPU; le kernel calcule ensuite seulement
 un masque d'admissibilité des couples. Il ne produit ni voisin, ni parent, ni
-enfant, ni tâche, ni run. Aucun `nvcc`, `ptxas` ou GPU G4 n'a encore qualifié le
-code.
+enfant, ni tâche, ni run.
+
+Le commit rapporte une compilation `nvcc` et quatre exécutions sur G4 avec zéro
+écart CPU/device. C'est un résultat positif ciblé pour le préfixe borné, mais pas
+un reçu qualifiant : commandes, sorties brutes, version patch du toolkit, hash
+du binaire, PTX/cubin, rapport `ptxas`, digest d'entrée et répétitions ne sont pas
+conservés. Surtout, les refus restent exclus de l'oracle; le texte « rejoués par
+l'hôte » contredit le code.
 
 Deux défauts antérieurs restent bloquants : le chemin owner tronque un
 déterminant `i128`, et les deux modèles F0 rejettent ensemble une naissance
@@ -87,6 +94,12 @@ Ce `OK` ne porte que sur les sommets `kOk`. La boucle de référence exécute
 `continue` pour chaque `kFlatOverflow`; `summarise` compte ensuite le refus mais
 écarte ses flats et son masque. Le plancher `--min-refused 10` prouve donc que
 la branche a été prise, pas que son résultat a été conservé.
+
+La session G4 ne change pas ce fait. Elle compare le même `VertexVerdict` borné
+entre hôte et device, y compris son statut de refus; elle n'exécute ensuite
+aucune référence non bornée pour les refus. Le README et le message de commit
+affirment pourtant que les 27 sommets sont « rejoués par l'hôte ». Aucun appel,
+compteur ou résultat de replay n'existe dans le source.
 
 Contre-exemple géométrique permanent : sept points entiers sur la sphère de
 centre `(100,100,100)` et de rayon 25, sans quadruplet coplanaire :
@@ -155,22 +168,67 @@ donc devenir un accès hors limites device au lieu d'un `invalid_contract` avant
 lancement. Les queues et le padding de `BoundedVertex`/`WavefrontJob` ne sont
 pas initialisés avant leur copie, ce qui interdit aussi tout digest byte-stable.
 
-Le delta CMake live filtre maintenant `-Wall -Wextra -Werror` sur le seul C++ :
-c'est une correction utile. Restent à fermer avant G4 : compilateur NVIDIA et
-toolkit corrigé pour `__int128`, architecture exactement `120-real` avant
-`enable_language`, contrôle runtime du device, tous les retours CUDA, et reçu
-`nvcc/ptxas/PTX/cubin`. Le temps publié est kernel-only; il exclut allocations,
-copies et surtout la construction CPU de tout le lot.
+Le CMake filtre maintenant `-Wall -Wextra -Werror` sur le seul C++ : c'est une
+correction utile. L'enveloppe reste ouverte. `enable_language(CUDA)` précède le
+fallback `CMAKE_CUDA_ARCHITECTURES=120-real`; CMake initialise normalement la
+variable pendant cet appel, si bien que le fallback peut ne jamais agir. Une
+surcharge arbitraire reste acceptée. Le build n'impose ni compilateur NVIDIA,
+ni version patch du toolkit corrigée pour `__int128`, ni architecture exactement
+120, ni politique d'avertissements CUDA. Le temps publié est kernel-only; il
+exclut allocations, copies et surtout la construction CPU de tout le lot.
 
 Les commentaires du nouveau CMake et des unités wavefront invoquent encore une
 ancienne implémentation comme discipline. La consultation était autorisée pour
 conseiller Claude, mais le contrat v3 doit être écrit intrinsèquement : aucun
 ancien kernel, statut ou résultat ne constitue une preuve du live.
 
-Un probe Clang 18 device-only produit du PTX structurel, mais pas pour `sm_120`;
-il déclare 144 octets de local par thread et une forte pression de registres
-virtuels. Ce résultat prouve seulement une forme compilable par Clang. Seul
-`ptxas` puis l'exécution sur G4 donneront les ressources et le débit réels.
+Un probe Clang 18 device-only antérieur produisait 144 octets de local par
+thread et une forte pression de registres virtuels. La session G4 rapportée ne
+conserve aucun diagnostic `ptxas`, spill, stack, registre ou occupation; elle ne
+permet donc toujours pas de relier le débit observé aux ressources du cubin.
+
+## Audit du diagnostic G4 publié par `78583f1`
+
+Le README rapporte quatre mesures kernel-only : 128 955 sommets en 0,224 ms,
+71 084 en 0,170 ms, 19 019 en 0,323 ms et 2 542 en 2,020 ms, toutes avec zéro
+écart CPU/device sur le `VertexVerdict` borné. En l'absence des sorties brutes,
+elles sont conservées comme **diagnostics déclarés**, pas comme reçus
+reproductibles.
+
+Trois extrapolations du commit ne sont pas autorisées par ces nombres :
+
+1. « environ un milliard de couples par seconde » n'est pas accompagné du
+   nombre exact de flats/couples de la campagne 120 points; avec quatre flats et
+   deux directions, l'arithmétique nominale donnerait plutôt 4,6 milliards de
+   couples par seconde;
+2. le terrain 50 k de 50 à 150 millions de sommets extrapole des ratios encore
+   croissants mesurés seulement entre 100 et 300 points; il n'est ni mesuré ni
+   borné;
+3. multiplier ce terrain hypothétique par 575 M sommets/s suppose que la
+   distribution de coquilles/flats reste celle de la ligne la plus favorable,
+   alors que la propre campagne dégénérée tombe à 1,3 M sommets/s.
+
+Le chrono entoure seulement le kernel. Chaque `BoundedVertex` occupe 268 octets
+et chaque verdict 16 octets. La ligne 128 955 transfère donc environ 34,6 Mo de
+vertices et 2,1 Mo de verdicts hors de la fenêtre 0,224 ms. Un terrain
+hypothétique de 50 à 150 millions demanderait environ 14,2 à 42,6 Go pour ces
+deux flux, sans compter le nuage, les allocations ni la représentation CPU à
+vecteurs. Le live matérialise en outre tout `seen_vertices` avant le lancement.
+
+La phrase « première mesure qui tienne dans le budget d'une seconde » est donc
+fausse pour le contrat produit. Seul le temps de calcul d'un microkernel isolé,
+sur une entrée déjà produite et copiée, est inférieur à une projection d'une
+seconde. `neighbour_along`, parent, source, census, owner, tri, fold, couverture,
+verticales, copies, mémoire et sortie ne sont ni inclus ni bornés. Dire que ce
+prédicat « domine » le pipeline avant d'avoir mesuré ces étages inverse la charge
+de la preuve.
+
+Le contrôle GCP de l'auditeur a été strictement en lecture seule. Les deux VM
+labellisées `project=e-hgp`, dont `ehgp-blackwell-spot-ai1a` démarrée à l'heure
+compatible avec la session, sont actuellement `TERMINATED`, de type
+`g4-standard-48`, `SPOT`, action `STOP`. Cela crédite l'état final GCE observé;
+le dépôt ne contient toutefois ni handoff de génération, ni log du double
+coupe-circuit, ni reçu de révocation de la clé pour cette session.
 
 ## NO-GO F0 inchangé
 

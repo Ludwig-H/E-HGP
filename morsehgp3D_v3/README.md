@@ -776,11 +776,25 @@ saturée, à 32 flats par sommet et des coquilles de onze points, le débit tomb
 facteur 450 — la divergence et la taille des coquilles dominent, et 27 sommets sont
 refusés puis rejoués par l'hôte, toujours sans un seul désaccord.
 
-**Ce que cela change pour le contrat, et ce que cela ne change pas.** Le terrain à
-50 000 points est de l'ordre de $5\cdot10^7$ à $1{,}5\cdot10^8$ sommets. À 575 M
-sommets par seconde, la passe d'admissibilité — le prédicat qui domine le coût du
-parcours — y prendrait de l'ordre de **0,1 à 0,3 s**. C'est la première mesure de ce
-projet qui tienne dans le budget d'une seconde.
+**Le contrat est 100 ms pour TOUTE la chaîne, et cela renverse la conclusion.**
+J'avais d'abord lu ce débit contre un budget d'une seconde, et conclu que la passe
+tenait. La barre est dix fois plus basse, et l'arithmétique dit alors le contraire.
+
+Le terrain à 50 000 points est d'au moins $5{,}5\cdot10^7$ sommets — 1 097 par point
+mesurés à $n=300$, et la valeur croît encore. À 575 M sommets par seconde, la seule
+passe d'admissibilité y prend **environ 0,1 s**, c'est-à-dire **la totalité du
+budget**, alors qu'elle n'est qu'un prédicat parmi les pièces du parcours : la
+descente, les requêtes d'index, la sortie et le fold s'y ajoutent, pour un facteur
+mesuré de dix à trente. Le parcours complet est donc de l'ordre de **quinze fois
+trop lent**, sur ce GPU, avec ce terrain.
+
+**Conséquence structurelle, et c'est un renversement.** J'avais écarté le filtre de
+criticité en mesurant qu'un sommet sur 6,5 seulement porte une sphère d'arité
+quatre, et en concluant « sept à onze, pas deux ordres de grandeur ». Contre un
+budget d'une seconde c'était juste ; contre 100 ms, ce facteur est **exactement
+celui qui manque**. À 100 ms, la route ne doit pas énumérer le niveau superficiel de
+l'arrangement du tout — elle doit énumérer les sphères critiques directement. Ce
+n'est plus une optimisation, c'est la condition.
 
 Elle ne dit rien de plus que cela. Ce kernel n'exécute **pas** la descente :
 `neighbour_along` n'est pas borné, l'index n'est pas porté, la sortie n'est pas
