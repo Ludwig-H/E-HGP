@@ -14,8 +14,9 @@ borné.** La troncature `i128` du chemin `use_owner` est réduite par
 demi-plan du filtre de paires est calculé par un balayage exact au lieu des
 seules directions vives, et ses masses sont republiées; le noyau F0 accepte
 enfin la naissance tout $N_a$ que son contrat écrit autorisait, sous un
-troisième oracle qui ne ferme rien transitivement. Le quatrième — le refus du
-microkernel ni jugé ni rejoué — reste ouvert et c'est le chantier courant.
+troisième oracle qui ne ferme rien transitivement. Pour le quatrième, le delta
+replay ferme maintenant la vacuité et tue le mutant qui refuse tout, mais ne
+rejoue encore aucun payload : il crédite seulement des masses scalaires.
 
 L'audit conserve trois réserves de garde : les surcharges owner supprimées ne
 forment pas encore un type fort fermé à toutes les petites conversions entières;
@@ -28,6 +29,17 @@ Le passage GPU est spécifié séparément dans la
 [`note des verrous mathématiques GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md) :
 largeurs exactes 64/128/384 bits, voisin terminal, sous-arbres transactionnels,
 owner/census, runs et porte 50 k/G4.
+
+Le premier prototype `direct_source.cpp` est un résultat mathématique positif,
+pas encore une source certifiée. Des oracles indépendants valident son
+cover--rayon et ses voisinages bornés sans écart, et sa partie candidate évite
+bien arrangement et mosaïque. Le palier `9edf150d...` sépare désormais les
+modes, compare les listes de membres, tue les doubles émissions, applique les
+fallbacks et publie les masses en `u128`; sept CTests Release et quatre ciblés
+ASan/UBSan sont verts. Les gates positives omettent toutefois `--judge 1`, la
+CLI échoue encore pour `s_max=2/3`, et le coût/mémoire 50 k reste ouvert. Le
+verdict épinglé est dans
+[`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](audits/AUDIT_SOURCE_DIRECTE_24AD3D37.md).
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -800,6 +812,14 @@ flats et 7 109 couples, la masse rejouée 1 403 flats et 224 couples, et la
 référence complète exactement 16 749 et 7 333. Les 27 refusés portent donc en
 moyenne 52 flats, pas 32 : additionner les préfixes aurait sous-compté de 539.
 
+**Ce que cela ne ferme pas.** Le refus est désormais jugé, mais le rejeu ne
+transporte encore que deux masses scalaires : le suffixe au-delà du trente-
+deuxième flat n'est comparé à rien d'indépendant, faute d'une seconde écriture
+du chemin non borné. Ce qui est établi est donc l'égalité bit à bit du préfixe
+committé, l'identité de masse de l'union, et rien de plus sur le suffixe. La
+voie produit devra le matérialiser — pagination de la réduction parent, ou
+rejeu du sommet entier avec multiplicité et clef exactes.
+
 #### Compte et masque ne sont pas une signature
 
 Un masque nul ne certifie pas l'ordre : sur six points cosphériques un sommet
@@ -1162,6 +1182,196 @@ $H_0$ normalisée, ni le réducteur, ni les verticales, ni l'identité de sortie
 
 ---
 
+## 4 quinquies. La source directe est écrite, exacte, et elle déplace le verrou
+
+C'est la première voie de ce dépôt qui produit le catalogue **sans énumérer un
+seul sommet d'arrangement**. Elle énumère directement les supports, chacun
+exactement une fois, depuis son ancre $p=\min U$, dans un voisinage dont la
+complétude est un théorème.
+
+### Le lemme de rayon, et l'ordre non circulaire qui le rend utilisable
+
+Pour $q\in\{2,3,4\}$ poser $t_q=s_{\max}-q+1$. La boîte du nuage est subdivisée
+en feuilles à bornes entières; chaque feuille authentifie $t_q$ PointId distincts
+dont la distance carrée au coin le **plus éloigné** de la feuille est strictement
+inférieure à $Q_q$. Si une miniboule propre de support $q$ vérifie
+$q+\lvert I\rvert\le s_{\max}$, son centre est dans $\mathrm{conv}(U)$ donc dans
+une feuille, et $\beta\ge Q_q$ rendrait les $t_q$ témoins tous strictement
+intérieurs, donc $q+\lvert I\rvert\ge s_{\max}+1$. Donc $\beta<Q_q$, donc tout
+membre de la boule fermée est à distance carrée $<4Q_q$ de $p$.
+
+L'ordre compte, et c'est le point délicat : le lemme conclut **sous** l'hypothèse
+$q+\lvert I\rvert\le s_{\max}$, or c'est $\lvert I\rvert$ que le census doit
+calculer. La banque de témoins brise le cercle dans le bon sens — tous les
+témoins strictement intérieurs donnent `AboveInteriorWindow` et un refus **sans
+census**; un seul témoin non intérieur prouve $\beta<Q_q$ **avant** le census,
+qui devient alors global et complet dans $N_q(p)$.
+
+### Accord relatif complet avec le catalogue fermé, cosphéricités comprises
+
+Le mot « certifiée » n'est pas employé : ce prototype partage avec la référence
+`mhgp::sphere_*` et `mhgp::miniball_of`, donc ce qu'il établit est un **accord
+relatif** à ces primitives sur les campagnes exercées.
+
+**[mesuré]** clef par coquille : même ensemble de sphères, même support
+canonique, même rang, même niveau rationnel exact et **même pool de membres**.
+
+| campagne | nuages | sphères | candidats | émissions | doublons | désaccords |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| générique `40 pts / 160³ / s_max=8` | 6 | 12 124 | 612 300 | 12 124 | 0 | **0** |
+| grille saturée `12 pts / 5³ / s_max=8` | 12 | 2 072 | 9 372 | 2 072 | 0 | **0** |
+| petit nuage `5 pts / s_max=32` | 6 | 30+ | — | = | 0 | **0** |
+
+La grille saturée est la campagne qui compte : c'est là que les cosphéricités
+donnent plusieurs supports minimaux pour une même boule, et la source n'émet
+qu'une fois parce qu'elle applique la **même** convention canonique que la
+référence — coquille triée par coordonnées, puis `miniball_of`, puis rejet de
+tout candidat qui n'est pas ce support.
+
+### Quatre défauts que l'audit a trouvés, et qui étaient tous le même défaut
+
+[`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](audits/AUDIT_SOURCE_DIRECTE_24AD3D37.md) a
+réfuté le premier palier sur quatre points, et ils avaient tous la même forme :
+le programme **affirmait plus que ce qu'il vérifiait**.
+
+`--judge 0` imprimait quand même « rend exactement le catalogue fermé ». Une
+exactitude annoncée en l'absence d'oracle est pire qu'un silence. Les trois
+modes sont maintenant exclusifs — `--cover-only 1 --judge 1` est **refusé** —, et
+seul le mode jugé a le droit de conclure; les deux autres impriment
+`AUCUNE EXACTITUDE N'EST AFFIRMÉE`.
+
+La map de sortie était indexée par la coquille et l'affectation **écrasait** les
+doublons. Un mutant retirant la restriction $z>p$ émettait 126 fois au lieu de
+56 sans qu'aucun compteur ne bouge, et le différentiel restait vert. Les
+émissions sont maintenant comptées à part de la taille de la map; le mutant vit
+dans le binaire sous `--force-both-directions` et une porte négative exige qu'il
+rougisse — il rend 651 doublons et sort 3.
+
+Le payload jetait `members` après en avoir pris la taille : deux sorties de même
+rang et d'intérieurs différents étaient indiscernables. Le pool ordonné complet
+est maintenant construit **et** comparé.
+
+`n<t_q` et le plafond de cellules sortaient sur un message générique. Ce sont
+maintenant des statuts typés — `petit_nuage_direct` et `plafond_cellules` — avec
+repli racine réellement appliqué, et le petit nuage a sa porte permanente.
+
+Deux bornes annoncées étaient fausses. La dernière cellule nominale dépasse le
+maximum du nuage, donc la distance brute au coin n'est pas bornée par
+$3\cdot65535^2$ mais par $3(2\cdot65535)^2<2^{36}$. Et `bound_t` en `u64` déborde
+silencieusement dès $n\approx13\,500$ : les compteurs de preuve sont passés en
+128 bits non signés. Enfin un clamp du locator est devenu une **violation
+d'invariant** : sur un support bien centré le centre est dans l'enveloppe convexe
+du support, donc dans la boîte, et clamper masquerait une faute.
+
+### La forêt des K arbres est produite et jugée, bout en bout
+
+Le catalogue n'est que la moitié du contrat : ce que le projet doit produire est
+la **forêt des arbres de niveaux de densité**, pour $k=1..K$. Elle l'est
+maintenant depuis la source directe, et elle est jugée contre la forêt construite
+depuis la référence.
+
+La comparaison ne porte surtout pas sur des indices. `ForestNode::source` d'une
+multifusion est, par contrat, « la plus petite **par index** des sphères de rang
+$k+1$ du lot » : cet indice dépend du générateur, et
+[`AUDIT_CONTRAT_CATALOGUE_FORET_ORDER_K_CF9374`](audits/AUDIT_CONTRAT_CATALOGUE_FORET_ORDER_K_CF9374.md)
+l'avait déjà dit. La première version de cette signature a d'ailleurs signalé une
+« divergence » qui n'en était pas une : deux forêts identiques nommant un
+représentant différent pour le même événement de fusion.
+
+La signature canonique est donc récursive : une **naissance** est identifiée par
+l'ensemble de membres de son minimum de rang $k$, une **multifusion** par le
+**rang exact** de son niveau dans l'ordre `sphere_cmp_beta` — pas par un double,
+pas par un indice —, et un nœud par le multiensemble trié des signatures de ses
+enfants.
+
+**[mesuré]** `--clouds 6 --points 14 --coord 12 --smax 6 --forest 5` : 30 forêts
+comparées, 1 647 nœuds, 32 racines, **zéro différente**, naissances, multifusions,
+tués, bras non résolus, événements censurés et drapeau d'autorité compris.
+
+C'est la première fois que la chaîne complète — nuage, source sans arrangement,
+catalogue, tri exact par niveau rationnel, fold, forêt des $K$ arbres — est
+produite et jugée de bout en bout. Elle l'est sur de petits nuages, en accord
+relatif aux primitives partagées, et sans aucune prétention d'échelle.
+
+### Et maintenant le verrou a bougé de place, ce qui est le vrai résultat
+
+La complétude n'est plus le problème. Le problème est le nombre de **candidats**,
+et il se mesure.
+
+**[mesuré, densité fixe $10^{-3}$, $s_{\max}=11$, côté de feuille 8]**
+
+| $n$ | emprise | $Q_4$ | rayon $2\sqrt{Q_4}$ | degré moyen | degré max |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 400 | $74^3$ | 1 198 | 69,2 | 353,7 | 399 |
+| 1 600 | $117^3$ | 1 231 | 70,2 | 674,0 | 1 363 |
+
+$Q_q$ **converge** : 1 198 puis 1 231. C'est le bon signe — le rayon de
+voisinage est une quantité *locale*, indépendante de $n$, et le degré tend donc
+vers une constante. Mais cette constante vaut, à cette densité,
+$\rho\cdot\tfrac43\pi(2\sqrt{Q})^3\approx1\,450$, et non les 8 à 24 que la note
+GPU emploie dans ses plafonds. Les degrés mesurés 354 et 674 sont encore sous
+l'asymptote uniquement parce que le rayon 70 déborde la boîte.
+
+Avec $d^{+}\approx d/2$, l'énumération combinadique donne alors, à 50 000 points :
+
+$$C_2\approx3{,}6\cdot10^{7},\qquad C_3\approx1{,}3\cdot10^{10},\qquad C_4\approx3{,}2\cdot10^{12}.$$
+
+Le budget primaire est 100 ms. **La lane d'arité quatre est donc réfutée comme
+énumérateur**, non par une extrapolation mais par une constante mesurée : le
+balayage aveugle des $(q-1)$-sous-ensembles du voisinage est quartique en degré,
+et aucun débit ne rattrape $3{,}2\cdot10^{12}$.
+
+Un gain réel existe et il est chiffré. $Q_q$ est le **maximum** sur les feuilles :
+il est fixé par la région la plus vide du nuage, pas par la région typique. Les
+$Q$ **effectifs**, sur toutes les feuilles de tous les nuages, valent
+
+| $n$ | feuilles | min | médiane | max | rayon min | rayon médian | rayon max |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 400 | 1 000 | 202 | 406 | 1 198 | 28,4 | 40,3 | 69,2 |
+| 1 600 | 3 375 | 194 | 370 | 1 231 | 27,9 | 38,5 | 70,2 |
+
+Le lemme de rayon vaut **feuille par feuille** : un cover adaptatif diviserait le
+rayon typique par 1,8, donc le degré par environ six, donc $C_4$ par $6^3$. Cela
+ramènerait $C_4$ à $1{,}4\cdot10^{10}$ — un facteur 230 gagné, et toujours deux
+ordres de grandeur au-dessus du budget. L'adaptativité est nécessaire; elle n'est
+pas suffisante.
+
+### Question ouverte à l'auditeur
+
+Le cover et la fenêtre ferment la **complétude**, et le prototype le prouve à
+zéro désaccord y compris sur cosphéricités. Ce qu'ils ne ferment pas est le
+**générateur de candidats** : $C_q=\sum_p\binom{d_q^{+}(p)}{q-1}$ avec
+$d\approx1\,450$ mesuré au profil produit, contre $D=8$ à $24$ supposé dans les
+plafonds de la note.
+
+Trois questions précises, dans l'ordre où elles bloquent :
+
+1. le cover adaptatif par feuille est-il déjà couvert par la capability
+   `center-cover + degree` telle qu'elle est écrite, ou faut-il en versionner une
+   variante ? Le lemme est local, mais le `Q_q` publié est global ;
+2. existe-t-il une condition nécessaire **par paire** — analogue au lemme de
+   demi-boule ouvert, mais qui borne le degré — permettant de filtrer les arêtes
+   d'un support avant de développer les triples et les quadruples ? Le probe
+   mesure `admises/vraies` entre 1,4 et 2,6 : si les supports d'arité trois et
+   quatre ne se construisent que sur des paires admissibles, $C_4$ tombe de
+   $\binom{d^{+}}{3}$ à quelque chose de proportionnel au nombre de triangles du
+   graphe admissible ;
+3. sinon, quelle structure remplace le balayage aveugle ? Les supports d'arité
+   quatre sont les tétraèdres d'une Delaunay d'ordre supérieur et il n'y en a
+   qu'$O(\text{sortie})$ : les énumérer par sous-ensembles est nécessairement le
+   mauvais algorithme, et la note interdit explicitement de construire la
+   mosaïque. Quelle est la troisième voie ?
+
+Une quatrième question, plus petite mais bloquante pour le coût : la
+construction du cover est aujourd'hui $F\cdot n$ tests, $F$ étant le nombre de
+feuilles — donc quasi quadratique au côté par défaut. L'audit le note. Une
+construction par grille à deux niveaux, ou une recherche des $t_q$ témoins par
+anneaux croissants autour de chaque feuille, ramènerait ce terme à
+$O(n+F\cdot t_q)$ ; faut-il la sceller dans la capability, ou le cover
+est-il destiné à être calculé une fois hors chrono et scellé par digest ?
+
+---
+
 ## 5. Le contrat 50 000 points, $K=10$ : 100 ms primaire, une seconde secondaire
 
 ### Une correction qui change l'arithmétique de la question
@@ -1392,8 +1602,37 @@ frontière non résolue pour replay. La porte `center-cover + degree` formulée
 dans la note mathématique GPU donne maintenant un énoncé exact et falsifiable;
 son SLO reste conditionnel aux caps reçus, jamais déduit de cette table. Son
 terminal `AboveInteriorWindow` par arité doit aussi être versionné dans le
-contrat avant implémentation : la norme active exige encore un shell complet
-sur une fenêtre uniforme plus large.
+contrat avant conformité : la norme active exige encore un shell complet sur
+une fenêtre uniforme plus large.
+
+**[audit du prototype live `9edf150d...`]** Le résultat est scindé et largement
+positif. Le lemme, la localisation rationnelle et les `9^3` cellules passent
+des oracles indépendants : 33 914 voisinages et 15 360 supports propres, zéro
+écart. La partie candidate ne construit ni sommet d'arrangement ni mosaïque.
+Elle transporte maintenant les listes triées de membres par coquille, compare
+leur identité, refuse toute double émission et tue le mutant intégré. Les modes
+jugé, mesure et cover sont exclusifs; seul le premier conclut. Petit nuage et
+cap de cellules replient exactement à la racine; la dispersion porte sur tous
+les `Q` effectifs; `C_q/T_q/H_q` sont calculés avant énumération et stockés en
+`u128`. Sept CTests Release et quatre ciblés ASan/UBSan passent.
+
+Deux gates restent immédiatement à corriger. CMake ne passe pas `--judge 1`
+explicitement : la campagne générique satisfait exactement les mêmes planchers
+avec `--judge 0`, `reference=0` et code zéro. La sortie dit honnêtement qu'elle
+n'est pas jugée, mais une mutation du défaut rendrait les CTests verts sans
+oracle. Ensuite la CLI accepte `s_max=2/3` tout en appelant toujours les lanes
+jusqu'à l'arité quatre; ces entrées sortent 3 sur un faux diagnostic
+arithmétique. Les lanes `q>s_max` doivent être sautées ou le domaine resserré.
+
+Le coût produit reste NO-GO. Le cover rescane tous les points dans chaque
+feuille, le CSR peut être dense, les high-waters omettent plusieurs buffers,
+sorties et vérité, et une allocation sous `cell-cap` n'a aucun statut de reprise.
+Le target s'arrête à 20 000 points. Les campagnes positives ont des voisinages
+complets et ne reçoivent ni la frontière sélective, ni `candidates==C_q`, ni un
+mutant de membre ou un digest attendu. Enfin les « pools » comparés sont des
+listes par coquille, pas un `Catalogue` global sérialisé. Le label correct reste
+donc **prototype CPU candidat, accord relatif au catalogue fermé partagé**; la
+source Gabriel ouverte streamée et la porte 50 k ne sont pas implémentées.
 
 Pour la source Gabriel **ouverte**, le filtre utile emploie l'intérieur
 $D_{pu}^{\circ}$ de la boule diamétrale, ajoute manuellement les deux extrémités

@@ -764,9 +764,11 @@ dans sa feuille et classifier ses `t_q` témoins par `sphere_side` en `i128` :
 Ainsi un grand candidat localement visible ne peut pas être accepté par omission.
 Comparer directement `beta<Q_q` pour l'arité quatre peut dépasser `i128` :
 une fixture u16 extrême produit déjà des carrés de numérateur sur 132 bits.
-La banque garde le hot path point--sphère sous 128 bits. Les distances u16 du
-cover tiennent sous $2^{34}$ et `4Q_q` sous $2^{36}$ avec le fallback racine;
-il faut élargir avant soustraction et carré. L'inégalité du cover est
+La banque garde le hot path point--sphère sous 128 bits. Le `Q_root` u16 tient
+sous $2^{34}$ et `4Q_root` sous $2^{36}$; la distance brute au coin nominal de
+la dernière feuille, qui peut dépasser la boîte, tient seulement sous
+$2^{36}$. Les deux restent sûres en `i64`, mais il faut élargir avant
+soustraction et carré. L'inégalité du cover est
 strictement `<Q_q`; `<=` est faux au bord.
 
 La capability minimale scelle digest/epoch du nuage, `q`, `s_max`, `Q_q`, boîte,
@@ -833,6 +835,40 @@ violation du cover/rayon; dix petits nuages ont donné le même verdict
 `RelevantGP` entre la définition exhaustive et le critère par supports. Le
 lemme de paire ouverte de la section précédente a en outre passé 59 154
 inégalités sur 200 nuages bornés.
+
+#### Réaudit du premier prototype CPU `2b47247e`
+
+Le live crédite la partie mathématique de cette section, pas encore sa
+capability. Des oracles indépendants ont comparé 33 914 voisinages CSR au scan
+quadratique et 15 360 supports propres au cover/rayon, sans écart. Le chemin
+candidat stream les combinaisons et ne construit aucun sommet d'arrangement ni
+mosaïque. Le juge par défaut appelle néanmoins `flat_catalogue`; ce dernier
+reste une vérité exhaustive partagée, pas l'architecture produit.
+
+Le payload `CompleteSphere` exigé ici n'existe pas encore : l'intérieur est
+calculé puis jeté, aucun pool de membres n'est produit et les maps par coquille
+écrasent les doubles émissions. Le mutant qui retire l'ancre unique émet 126
+fois au lieu de 56 et reste vert. `--judge 0` annonce l'exactitude sans oracle;
+`--cover-only` revient avant désaccords et planchers. Quatre CTests relatifs ont
+ensuite passé avec des planchers sensibles aux trois lanes, mais aucun ne force
+le juge ni ne compare le payload/multiplicité. `n<t_q` et le cap de quatre
+millions de cellules n'atteignent aucun fallback/replay typé. Après ces
+passages, le source a disparu tandis que CMake le référence encore; le live ne
+se configure plus.
+
+La capability de coût est également absente. La construction live teste chaque
+point dans chaque feuille, donc devient quasi quadratique à densité fixe; le
+CSR est quadratique au pire et aucun high-water en octets n'est publié. Les
+compteurs `T_q`/census en 64 bits débordent dès `n=13 468` dans le cas dense,
+alors que la CLI autorise 20 000 points et refuse encore le palier 50 k. Le mode
+`cover-only` saute précisément la boucle qui calcule `C_q/T_q/H_q`.
+
+La dispersion de `Q` ajoutée au palier courant est correcte pour un nuage sans
+fallback. Sur plusieurs nuages, son champ `médiane` est le maximum des médianes;
+après fallback, min/médiane sont antérieurs au repli tandis que `max` est le
+`Q_root` effectif. La reproduction `mediane=991, max=843` interdit d'en faire un
+reçu. Séparer les statistiques `Q_grid_raw`/`Q_effectif`, les agréger selon un
+contrat nommé et recevoir leur mémoire avant toute conclusion de gain adaptatif.
 
 La norme active doit toutefois être raffinée avant de déclarer cette voie
 conforme. Elle exige actuellement la coquille complète de tout support rencontré

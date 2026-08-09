@@ -88,6 +88,16 @@ target_include_directories(mhgp3v_admissible_pair_probe PRIVATE ${CMAKE_CURRENT_
 target_link_libraries(mhgp3v_admissible_pair_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_admissible_pair_probe PRIVATE -Wall -Wextra -Werror)
 
+# PROTOTYPE DE SOURCE DIRECTE. Il n'enumere aucun sommet d'arrangement : il
+# enumere les SUPPORTS depuis leur ancre, dans un voisinage dont la completude
+# est un theoreme. Ce qu'il etablit est un ACCORD RELATIF aux primitives
+# `mhgp::sphere_*` et `mhgp::miniball_of` qu'il partage avec la reference, sur
+# les campagnes exercees — ni une certification, ni un SLO.
+add_executable(mhgp3v_direct_source prototype/direct_source.cpp)
+target_include_directories(mhgp3v_direct_source PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_direct_source PRIVATE mhgp)
+target_compile_options(mhgp3v_direct_source PRIVATE -Wall -Wextra -Werror)
+
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)
@@ -305,6 +315,65 @@ add_test(NAME mhgp3v_flats_u16_owner COMMAND mhgp3v_flats_differential
          --min-navigated 200 --min-vertices 10000
          --min-reverse 10000 --min-reverse-depth 8 --min-internal-nodes 500 --min-owner 8000)
 
+# LA SOURCE DIRECTE, JUGEE CONTRE LE CATALOGUE FERME.
+#
+# La porte exige l'accord RELATIF complet, clef par coquille : meme ensemble de
+# spheres, meme support canonique, meme rang, meme niveau rationnel et meme POOL
+# DE MEMBRES. Sans ce dernier, deux payloads de meme rang et d'interieurs
+# differents etaient indiscernables.
+#
+# Elle exige aussi l'UNICITE. La map de sortie ecrasait ses doublons : un mutant
+# retirant la restriction `z > p` emettait 126 fois au lieu de 56 sans qu'aucun
+# compteur ne bouge. Les emissions sont maintenant comptees a part.
+add_test(NAME mhgp3v_direct_source_generic COMMAND mhgp3v_direct_source
+         --clouds 6 --points 40 --coord 160 --smax 8 --seed 20260810
+         --min-clouds 6 --min-emitted 10000 --min-candidates 500000 --min-windowed 8000)
+# La grille SATUREE : cospheries, coplanarites et alignements partout. C'est la
+# ou la convention de support canonique decide, et ou une source directe naive
+# emettrait plusieurs fois la meme sphere. Le cover y tombe en repli racine, ce
+# qui est correct et doit rester exact : aucun plancher de fenetre ici.
+add_test(NAME mhgp3v_direct_source_degenerate COMMAND mhgp3v_direct_source
+         --clouds 12 --points 12 --coord 5 --smax 8 --seed 31337
+         --min-clouds 12 --min-emitted 1800 --min-candidates 8000)
+# `n < t_q` : la banque ne peut jamais conclure, elle est OTEE et le voisinage
+# racine est exact. C'etait une sortie generique; c'est un statut, et il doit
+# rester juste.
+add_test(NAME mhgp3v_direct_source_small_cloud COMMAND mhgp3v_direct_source
+         --clouds 6 --points 5 --coord 10 --smax 32 --seed 7
+         --min-clouds 6 --min-emitted 30)
+# LA FORET DES K ARBRES, BOUT EN BOUT.
+#
+# Le catalogue n'est que la moitie du contrat. Cette porte construit la foret
+# depuis LA SOURCE et depuis LA REFERENCE pour k = 1..5, puis compare des
+# signatures RECURSIVES canoniques.
+#
+# Elle ne compare surtout pas des indices : `ForestNode::source` d'une
+# multifusion est « la plus petite PAR INDEX des spheres du lot », donc dependant
+# du generateur. Une naissance est identifiee par les membres de son minimum, une
+# multifusion par le RANG EXACT de son niveau dans l'ordre `sphere_cmp_beta`.
+add_test(NAME mhgp3v_direct_source_forest COMMAND mhgp3v_direct_source
+         --clouds 6 --points 14 --coord 12 --smax 6 --seed 20260810 --forest 5
+         --min-clouds 6 --min-emitted 1000 --min-forest-nodes 1000)
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_forest_without_judge "ne se juge que sous"
+  --clouds 1 --points 12 --coord 5 --smax 8 --seed 31337 --judge 0 --forest 3)
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_unknown "argument inconnu" --sujet-inexistant)
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_floor "plancher"
+  --clouds 1 --points 12 --coord 5 --smax 8 --seed 31337 --min-emitted 100000000)
+# LES TROIS MODES SONT EXCLUSIFS. Demander un jugement en sautant l'enumeration
+# imprimait des spheres manquantes, ignorait les planchers et sortait zero.
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_cover_and_judge "ne peut pas juger"
+  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 1)
+# LE MUTANT DE DOUBLE EMISSION DOIT ROUGIR. Il est instructif : le differentiel
+# par coquille reste vert, parce que la map ecrase; c'est le compteur d'unicite
+# qui le tue.
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_double_emission "en double"
+  --clouds 2 --points 12 --coord 5 --smax 8 --seed 31337 --force-both-directions 1)
+
 # LE NOYAU F0 DU FOLD HORIZONTAL, EN PORTE PERMANENTE.
 #
 # Le script n'etait lance qu'a la main : rien n'empechait une regression de
@@ -412,16 +481,38 @@ mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
 # rendre exactement les verdicts du chemin CPU non borne, sommet par sommet et bit
 # par bit. C'est la porte qui rend la session GPU courte : elle n'aura plus qu'a
 # montrer que le MEME corps donne les MEMES bits sur sm_120.
+#
+# LES PLANCHERS SONT SEPARES, ET C'EST LA CORRECTION DU P0.
+#
+# Un plancher agrege se satisfait d'un seul chiffre. La porte precedente n'avait
+# que `--min-refused`, qui prouvait que la BRANCHE de refus avait ete prise, et
+# jamais que son resultat avait ete conserve : un mutant refusant TOUS les
+# sommets rendait zero flat, zero couple, zero desaccord et `OK`.
 add_test(NAME mhgp3v_device_wavefront_host COMMAND mhgp3v_device_wavefront
-         --clouds 6 --points 24 --coord 4000 --smax 8 --seed 20260809)
+         --clouds 6 --points 24 --coord 4000 --smax 8 --seed 20260809
+         --min-clouds 6 --min-accepted 15000 --min-flats 60000 --min-couples 40000
+         --min-kernels 6)
 add_test(NAME mhgp3v_device_wavefront_degenerate COMMAND mhgp3v_device_wavefront
-         --clouds 6 --points 14 --coord 5 --smax 8 --seed 31337)
-# Le chemin de REFUS doit etre exerce : une capacite dont le depassement n'arrive
-# jamais n'est pas prouvee bornee, elle est seulement jamais atteinte.
+         --clouds 6 --points 14 --coord 5 --smax 8 --seed 31337
+         --min-clouds 6 --min-accepted 3000 --min-flats 12000 --min-couples 7000
+         --min-kernels 6)
+# Le chemin de REFUS doit etre exerce ET REJOUE. Le plancher de rejeu est le
+# nouveau : sans lui, un refus reste une statistique et non un jugement.
 add_test(NAME mhgp3v_device_wavefront_refusal COMMAND mhgp3v_device_wavefront
-         --clouds 4 --points 20 --coord 3 --smax 12 --seed 11 --min-refused 10)
+         --clouds 4 --points 20 --coord 3 --smax 12 --seed 11
+         --min-refused 10 --min-replayed 10 --min-clouds 4 --min-accepted 2000
+         --min-flats 12000 --min-couples 5000 --min-kernels 4)
 mhgp3v_add_expected_failure_test_for(mhgp3v_device_wavefront
   mhgp3v_device_wavefront_reject_absurd "campagne absurde" --points 2)
+# LE MUTANT VIT DANS LE BINAIRE, ET IL DOIT ROUGIR. `--force-refuse-all` refuse
+# chaque sommet a l'admission : le ledger balance encore et la masse est encore
+# conservee — rejouer TOUT est correct, simplement inutile — mais les planchers
+# d'acceptation, de flats et de couples tombent a zero.
+mhgp3v_add_expected_failure_test_for(mhgp3v_device_wavefront
+  mhgp3v_device_wavefront_reject_all_refused "sommets acceptes"
+  --clouds 4 --points 20 --coord 3 --smax 12 --seed 11 --force-refuse-all 1
+  --min-refused 10 --min-replayed 10 --min-clouds 4 --min-accepted 2000
+  --min-flats 12000 --min-couples 5000 --min-kernels 4)
 
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential

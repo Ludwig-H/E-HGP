@@ -86,8 +86,9 @@ Le profileur à densité fixe de `f851374` corrige une faute du protocole cube
 antérieur et fournit un diagnostic CPU reproductible. Il ne borne pas 50 k : une
 densité et une graine synthétiques, une moyenne qui ignore les statuts non `kOk`
 et deux étages partiels ne décident ni les 100 ms primaires ni la seconde
-secondaire. La source critique directe est une hypothèse prioritaire; sa
-complétude, son census terminal et son coût output-sensitive restent à prouver.
+secondaire. Le lemme de source critique directe est maintenant exercé par un
+prototype prioritaire; sa gate, son payload terminal et son coût
+output-sensitive restent à fermer.
 Le delta `70ead99` ajoute quatre tailles utiles, mais trois incréments décroissants
 ne prouvent ni convergence ni asymptote : les projections `1 430/390` par point
 et les temps qui en découlent restent des scénarios conditionnels. Le tableau
@@ -114,6 +115,23 @@ construit aucun arrangement; son SLO reste conditionné aux degrés, masses
 combinadiques, locator, construction, tri et sortie reçus. Le terminal
 `AboveInteriorWindow` doit être versionné explicitement, car la norme active
 demande encore un shell complet sur une fenêtre uniforme.
+
+Le prototype live `9edf150d...` crédite ce lemme sur des oracles bornés, sans
+créditer le statut produit. Sa partie candidate évite arrangement et mosaïque;
+elle compare maintenant les listes complètes de membres par coquille, reçoit
+l'unicité, sépare les trois modes, replie petit nuage/cap, agrège les `Q`
+effectifs et élargit les masses en `u128`. Sept CTests Release et quatre ciblés
+ASan/UBSan sont verts.
+
+Les gates restent néanmoins fail-open vis-à-vis d'une mutation du défaut
+`judge` : CMake n'impose pas `--judge 1` et les mêmes planchers passent en mesure
+avec `reference=0`. La CLI accepte aussi `s_max=2/3` puis appelle des lanes
+`q>s_max` et échoue. Le cover rescane tous les points par feuille et peut être
+quasi quadratique; CSR et allocations restent non bornés en octets, les
+high-waters sont partiels et aucun reçu 50 k ne ferme cette route. Le payload
+est une map du catalogue fermé relatif à `flat_catalogue`, pas encore un pool
+global sérialisé ni la source Gabriel ouverte streamée. Les labels « certifiée »,
+« exacte produit » et « seule voie » restent donc prématurés.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

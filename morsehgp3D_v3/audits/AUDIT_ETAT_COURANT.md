@@ -9,16 +9,20 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot committé
-audité est `180975e`; il comprend le correctif owner de `d1666f4`, puis le sweep
-de paires et la correction F0 de `180975e`. Le worktree v3 était propre au
-moment du verdict. Aucun artefact brut des campagnes de taille ni de la session
-G4 n'est versionné avec ces commits.
+n'ouvre aucune phase et ne promeut aucun résultat public. Le dernier snapshot
+committé du produit audité est `180975e`; il comprend le correctif owner de
+`d1666f4`, puis le sweep de paires et la correction F0 de `180975e`. Deux deltas
+non committés sont maintenant épinglés séparément : refus/replay post-`8481b67`
+et première source directe post-`c0df579`. Le worktree v3 n'est donc plus propre.
+Aucun artefact brut des campagnes de taille ni de la session G4 n'est versionné
+avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
 | snapshot committé de code et de claims audité | `180975e4a967475067961d4f215ab2f2a4f9760a` |
+| dernier commit d'audit sur `main` | `c0df579ca0f5a6a6330294b8aa4fd80d372fb6ce` |
 | `CMakeLists.txt` | `e8ddd3c21eafa361d5c37cd8a585905db2a4bf8404639b8eefc72bd9df803c9f` |
+| `CMakeLists.txt` avec deltas replay/source directe et sept CTests | `4530a8c4817fbfc1e399f0dff628f374b89d2d1d2117fa964c448ce72efec431` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 | `prototype/admissible_pair_probe.cpp` à `40ad152` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
 | `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
@@ -30,23 +34,44 @@ G4 n'est versionné avec ces commits.
 | `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
 | `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
 | `audits/check_gate_d_fold_f0.py` | `3c23497f0227147d35505df5275a20b000a5704a5c862527d3409e9828ebfdc2` |
+| `prototype/direct_source.cpp`, premier palier | `24ad3d37aedbf74c4b126fae30453a74d1f2a675eea572e6b92678b27c27258e` |
+| `prototype/direct_source.cpp`, palier dispersion historique | `2b47247e9d1ecd6e1a8a573f4597bab9bb19e10a4a3d2ab4295c524d2d1ee68c` |
+| `prototype/direct_source.cpp`, palier courant | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
 
 ## Verdict
 
-**GO fonctionnel borné pour les trois P0 owner, sweep et naissance F0; NO-GO
-maintenu pour la qualification produit, GPU/replay et les claims auxiliaires
-non fermés.**
+**GO fonctionnel borné pour owner, sweep, naissance F0 et la source directe
+fermée relative; NO-GO maintenu pour la qualification produit, GPU/replay,
+totalité bas ordre, coût/mémoire 50 k et source Gabriel ouverte.**
 
 Le premier `.cu` est un progrès réel : il définit un lancement CUDA optionnel
-et un même corps source pour CPU/device. Les quatre portes hôte, dont une
-campagne forçant 27 refus, sont vertes. Cette avancée ne ferme toutefois pas le
-contrat annoncé : les refus sont précisément exclus de l'oracle et ne sont
-jamais rejoués. Un mutant qui refuse tous les sommets reste vert.
+et un même corps source pour CPU/device. Le delta replay rend maintenant cinq
+portes hôte vertes, force 27 refus et tue le mutant qui refuse tous les sommets.
+Cette avancée ferme la vacuité, pas le contrat de replay : les refus ne
+transportent aucun suffixe et créditent seulement deux masses scalaires.
 
 Le kernel ne constitue pas encore une wavefront. `navigate_shallow` construit
 et mémorise d'abord tous les sommets sur CPU; le kernel calcule ensuite seulement
 un masque d'admissibilité des couples. Il ne produit ni voisin, ni parent, ni
 enfant, ni tâche, ni run.
+
+La première `direct_source.cpp` apporte un deuxième progrès architectural : sa
+partie candidate énumère les supports sans sommet d'arrangement ni mosaïque.
+Trois oracles indépendants valident le cover, le lemme de rayon et les
+voisinages sur 33 914 listes et 15 360 supports propres sans écart. Le palier
+`9edf150d...` corrige ensuite les claims CMake, sépare les modes, compare les
+listes complètes de membres, reçoit l'unicité, applique les fallbacks petit
+nuage/cap, agrège les `Q` effectifs et passe les masses en `u128`. Sept CTests
+Release et quatre ciblés ASan/UBSan sont verts. C'est un GO relatif borné réel.
+
+La promotion reste interdite. Les gates positives omettent `--judge 1` : les
+mêmes planchers passent en mode mesure avec `reference=0`. La CLI accepte
+`s_max=2/3` puis échoue sur les lanes `q>s_max`. Le cover rescane tous les
+points par feuille, le CSR peut être dense, les high-waters sont partiels et le
+target refuse plus de 20 000 points. Le prototype compare un catalogue fermé
+partagé, pas la source Gabriel ouverte streamée du produit. Le détail
+reproductible est dans
+[`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
 
 Le commit `180975e` remplace le minimum échantillonné par le complément exact du
 maximum en demi-plan ouvert. Un oracle indépendant a comparé 74 613 multisets
@@ -631,7 +656,7 @@ donnent ensemble le minimum `t=1`. Le voisin attendu est
 transfert intérieur. Elle contient aussi une arête parent positive et une autre
 arête à retour admissible mais rejetée par un parent antérieur.
 
-### 3. Source directe certifiée : verrou mathématique désormais formulé
+### 3. Source directe : lemme formulé, premier prototype non certifié
 
 Une voie exacte sans propriétaire shallow est maintenant démontrée sous une
 capability séparée `center-cover + degree`. Pour chaque arité
@@ -651,9 +676,10 @@ voisinage est complet sans sommet d'arrangement ni mosaïque.
 L'ordre non circulaire est essentiel : localiser le centre rationnel, tester
 d'abord la banque de témoins; tous intérieurs donnent
 `AboveInteriorWindow`. Sinon un témoin non intérieur prouve
-$\mathrm{beta}<Q_q$ **avant** le census local. Le fallback racine
-$Q_q=\sum_i\mathrm{span}_i^2+1$ rend la méthode totale, mais peut donner
-$N_q(p)=X$ et ne prouve aucun SLO.
+$\mathrm{beta}<Q_q$ **avant** le census local. Le fallback racine, complété par
+l'énumération directe lorsque `n<t_q`, rend la méthode mathématique totale;
+$Q_q=\sum_i\mathrm{span}_i^2+1$ peut toutefois donner $N_q(p)=X$ et ne prouve
+aucun SLO.
 
 La vérification indépendante n'a trouvé aucun écart sur 4 105 supports propres
 aléatoires, dont 4 085 dans la fenêtre, ni sur dix comparaisons exhaustives du
@@ -672,8 +698,27 @@ seulement $q+\lvert I\rvert\leq s_{\max}$ et doit grouper tous les supports
 par `SphereKey` avant de développer l'extra-shell. Le profileur fermé et son
 ratio de 6,5 ne dimensionnent donc pas cette source.
 
+Le prototype `9edf150d...` valide positivement la banque, la localisation et le
+voisinage sur les oracles bornés. Il compare maintenant les listes complètes de
+membres par coquille, reçoit les doubles émissions, sépare jugement/mesure/cover,
+applique les replis racine et publie `C_q/T_q/H_q` en `u128`. La dispersion
+porte sur toutes les feuilles effectives. Sept CTests Release et quatre ciblés
+ASan/UBSan passent. Le résultat est un accord relatif borné crédible avec le
+catalogue fermé partagé.
+
+La porte de coût reste ouverte. Le cover rescane `n` points dans chaque feuille,
+donc devient quasi quadratique à densité fixe; le CSR peut être dense et les
+high-waters omettent plusieurs buffers, la vérité et la sortie. Le target refuse
+`n>20 000`. Les gates positives n'imposent pas `--judge 1` et passent encore en
+mesure sans oracle; `s_max=2/3` est accepté puis échoue sur les lanes d'arité
+supérieure. Enfin le prototype matérialise un catalogue **fermé**, pas la source
+Gabriel ouverte streamée. Ces défauts ne réfutent pas le lemme, mais interdisent
+toute promotion produit ou 50 k. Voir
+[`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
+
 Il reste une incompatibilité contractuelle explicite à résoudre avant
-implémentation : la norme courante exige encore un shell complet pour tout
+conformité de l'implémentation : la norme courante exige encore un shell complet
+pour tout
 support rencontré avec $\lvert I\rvert\leq s_{\max}-2$. Le terminal
 `AboveInteriorWindow` par arité est mathématiquement suffisant pour rendre
 l'antécédent utile impossible, mais il doit être versionné dans le contrat; il

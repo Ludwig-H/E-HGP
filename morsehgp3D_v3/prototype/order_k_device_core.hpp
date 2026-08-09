@@ -57,27 +57,56 @@ using mhgp::P3;
 using mhgp::i32;
 
 inline constexpr int kMaxShell = 32;
-inline constexpr int kMaxInterior = mhgp::kMaxRank;
+// L'INTERIEUR N'EST PAS UNE CAPACITE, C'EST LE CONTRAT LUI-MEME.
+//
+// La coupe du parcours est le niveau strict `l <= s_max - 2`, et l'ordre est
+// refuse au-dela de `kMaxRank`. Donc `|B(v)| <= s_max - 2 <= kMaxRank - 2 = 30`,
+// et c'est un theoreme, pas une marge.
+//
+// La capacite valait `kMaxRank`. Elle acceptait donc, comme des admissions
+// ORDINAIRES, des interieurs de 31 et 32 points que le contrat declare
+// impossibles : au lieu de denoncer une entree malformee, le noyau borne la
+// traitait et rendait un verdict. La capacite est desormais EXACTEMENT la borne
+// du contrat, et son depassement porte un statut distinct de violation, jamais
+// un refus de capacite rejouable.
+inline constexpr int kMaxInterior = mhgp::kMaxRank - 2;
 inline constexpr int kMaxClosure = kMaxShell;
-static_assert(kMaxInterior >= mhgp::kMaxRank - 2,
+static_assert(kMaxInterior == mhgp::kMaxRank - 2,
               "l'interieur est borne par le contrat : |B(v)| <= s_max - 2 <= kMaxRank - 2");
 
 // Statut d'admission d'un sommet dans le noyau borné. Un refus n'est pas une
 // erreur : c'est une demande de rejeu hôte.
 enum class Admission {
   kOk = 0,
-  kShellOverflow,
-  kInteriorOverflow,
-  kShellTooSmall,
+  kShellOverflow,          // capacite depassee : refus rejouable, c'est le contrat
+  kInteriorAboveContract,  // |B(v)| > s_max - 2 : ENTREE MALFORMEE, pas un refus
+  kShellTooSmall,          // moins de trois points : aucun flat de rang trois
 };
 
+MHGP_HD inline const char* admission_name(Admission a) {
+  switch (a) {
+    case Admission::kOk: return "ok";
+    case Admission::kShellOverflow: return "shell_overflow";
+    case Admission::kInteriorAboveContract: return "interior_above_contract";
+    case Admission::kShellTooSmall: return "shell_too_small";
+  }
+  return "unknown";
+}
+
+// LE REMPLISSAGE EST ECRIT, PAS LAISSE. Les queues des deux tableaux n'etaient
+// jamais initialisees avant la copie vers le device : la structure n'avait donc
+// aucune representation stable en octets, ce qui interdit tout digest d'entree et
+// laisse un lecteur egare lire une valeur indeterminee. Les cases inutilisees
+// portent maintenant `-1`, qui n'est jamais un PointId.
 struct BoundedVertex {
-  i32 shell[kMaxShell];
-  i32 interior[kMaxInterior];
+  i32 shell[kMaxShell] = {};
+  i32 interior[kMaxInterior] = {};
   int shell_size = 0;
   int interior_size = 0;
   int level = 0;
 };
+static_assert(sizeof(BoundedVertex) == sizeof(i32) * (kMaxShell + kMaxInterior) + 3 * sizeof(int),
+              "le sommet borne doit rester sans remplissage pour etre digerable");
 
 struct BoundedFlat {
   i32 base[3] = {-1, -1, -1};
@@ -95,7 +124,7 @@ struct AdmissionStats {
   long long samples = 0;
   long long accepted = 0;
   long long shell_overflow = 0;
-  long long interior_overflow = 0;
+  long long interior_above_contract = 0;
   long long shell_too_small = 0;
   long long shell_high_water = 0;
   long long interior_high_water = 0;
@@ -118,8 +147,8 @@ inline Admission admit(const flats::Vertex& v, BoundedVertex* out,
     return Admission::kShellOverflow;
   }
   if ((int)v.interior.size() > kMaxInterior) {
-    if (stats != nullptr) ++stats->interior_overflow;
-    return Admission::kInteriorOverflow;
+    if (stats != nullptr) ++stats->interior_above_contract;
+    return Admission::kInteriorAboveContract;
   }
   if (v.shell.size() < 3) {
     if (stats != nullptr) ++stats->shell_too_small;
@@ -129,8 +158,10 @@ inline Admission admit(const flats::Vertex& v, BoundedVertex* out,
   out->shell_size = (int)v.shell.size();
   out->interior_size = (int)v.interior.size();
   out->level = v.level;
-  for (int i = 0; i < out->shell_size; ++i) out->shell[i] = v.shell[(std::size_t)i];
-  for (int i = 0; i < out->interior_size; ++i) out->interior[i] = v.interior[(std::size_t)i];
+  for (int i = 0; i < kMaxShell; ++i)
+    out->shell[i] = i < out->shell_size ? v.shell[(std::size_t)i] : (i32)-1;
+  for (int i = 0; i < kMaxInterior; ++i)
+    out->interior[i] = i < out->interior_size ? v.interior[(std::size_t)i] : (i32)-1;
   return Admission::kOk;
 }
 

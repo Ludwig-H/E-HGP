@@ -672,7 +672,7 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       coverage.interior_high_water =
           std::max(coverage.interior_high_water, astats.interior_high_water);
       coverage.admission_samples += astats.samples;
-      coverage.admission_overflow += astats.shell_overflow + astats.interior_overflow;
+      coverage.admission_overflow += astats.shell_overflow + astats.interior_above_contract;
       coverage.closure_high_water = std::max(coverage.closure_high_water, dst.closure_high_water);
       coverage.touched_high_water = std::max(coverage.touched_high_water, dst.touched_high_water);
       coverage.batch_high_water = std::max(coverage.batch_high_water, dst.batch_high_water);
