@@ -9,19 +9,20 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot de code
-audité est `40ad152` : il conserve les sources wavefront, ajoute le profileur à
-densité fixe, puis committe le probe de paires et ses claims d'échelle. Le delta
-worktree k-NN `130e316e...` est épinglé séparément. Aucun artefact brut de la
-session G4 n'est versionné avec ces commits.
+n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot committé
+audité est `5d9159a`; il inclut `40ad152`, sa réfutation documentaire dans
+`762cfae`, puis le probe de rang k-NN auparavant identifié par son empreinte de
+worktree `130e316e...`. Les deltas produit non committés sont épinglés et jugés
+séparément lorsqu'ils sont stables. Aucun artefact brut de la session G4 ni des
+campagnes k-NN n'est versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| snapshot de code et de claims audité | `40ad1522356e8ca0c5c144b441ad6dc0367810fe` |
+| snapshot committé de code et de claims audité | `5d9159abfda52bae8b209d0a22ea834d3beb2f53` |
 | `CMakeLists.txt` | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
-| `prototype/admissible_pair_probe.cpp` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
-| `prototype/admissible_pair_probe.cpp` worktree postérieur | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
+| `prototype/admissible_pair_probe.cpp` à `40ad152` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
+| `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
@@ -63,6 +64,51 @@ l'hôte » contredit le code.
 Deux défauts antérieurs restent bloquants : le chemin owner tronque un
 déterminant `i128`, et les deux modèles F0 rejettent ensemble une naissance
 autorisée par leur contrat écrit.
+
+## Réaudit de `5d9159a` — conclusion générale correcte, mesure surinterprétée
+
+Le commit intègre le probe de SHA-256 `130e316e...` et ajoute dans le README un
+bloc **[mesuré]** qui contredit directement l'audit placé huit lignes plus haut.
+La commande CPU Release suivante est reproductible :
+
+```sh
+mhgp3v_admissible_pair_probe --points 200 --smax 11 --repeats 1 --seed 20260809
+```
+
+Elle rend 10 706 paires `ADMIS`, 5 171 paires dites vraies, les maxima 177/85,
+le cumul `128:0.990` et zéro paire dite vraie rejetée sur ce nuage. Le build
+strict du target passe aussi. Ce sont deux résultats positifs : le diagnostic
+committé est reproductible et son maximum 177 a une interprétation limitée mais
+valide. Comme le P0 angulaire surestime le minimum, toute paire qu'il admet est
+bien admissible pour le filtre exact; 177 est donc une **borne inférieure** du
+maximum conforme sur cette entrée et réfute déjà tout cap inférieur qui n'aurait
+aucun complément exact.
+
+Le reste du paragraphe n'est pas reçu. Trois tailles ne démontrent pas que le
+maximum « croît linéairement ». Les distributions 83/98/99,9 % portent sur un
+sous-ensemble censuré de l'univers admissible. Le tri des distances départage
+les ex æquo par `PointId`, et non par une classe géométrique. La classe imprimée
+`128` couvre les rangs 64 à 127, car le label est la borne supérieure
+**exclusive**. `rank_max_true` est mis à jour seulement à l'intérieur de la
+branche admise par le filtre fautif et sa vérité partage les primitives de
+`flat_catalogue`; les maxima 85/109/147 ne peuvent donc être attribués à « la
+réalité ». Enfin, aucun de ces nombres n'impose une frontière par ancre : il
+exclut seulement un k-NN borné employé seul, sans complément certifié.
+
+Le bon résultat positif est mathématique et plus fort que l'histogramme. Sur
+exactement 50 000 points u16, prendre `p=(0,0,0)`, `u=(65535,0,0)` et, pour
+`1<=i<=24999`, les points `(0,0,i)` et `(65535,0,i)`. Chaque extra est
+strictement hors de la boule diamétrale ouverte puisque sa distance carrée au
+centre vaut `R^2+i^2`; ainsi `A(p,u)=2`. Chaque extrémité possède pourtant
+24 999 points strictement plus proches que l'autre, donc le rang croisé vaut
+25 000. Cette fixture ferme proprement un k-NN fixe sans complément au palier
+produit, mais ne sélectionne aucune architecture particulière.
+
+La contradiction `minimum_halfplane_count` n'est toujours ni une fixture source
+versionnée ni un CTest; le binaire n'a aucun sidecar de campagne. Les sources
+temporaires citées plus bas ne sont accessibles que par empreinte et le hash du
+binaire `9517fb9c...` est tronqué. Claude doit graver fixture, mutant, CTest et
+reçu; l'auditeur ne les implémente pas à sa place.
 
 ## P0 — troncature du signe owner toujours présente
 
@@ -442,17 +488,18 @@ pas une enveloppe de performance. À 50 k, le seul census point--boule ferait
 publie pas ce nombre de tests, seulement les points retenus dans les boules.
 Ce programme reste un diagnostic CPU borné; il ne génère pas la source.
 
-Le delta worktree `130e316e...` ajoute des rangs k-NN sans corriger le sweep.
-Ses maxima et histogrammes sont donc calculés sur un ensemble `ADMIS` déjà
-tronqué par le P0. La construction `rank_of` matérialise $n^2$ entiers et trie
+Le commit `5d9159a` ajoute des rangs k-NN sans corriger le sweep. Ses maxima et
+histogrammes sont donc calculés sur un ensemble `ADMIS` déjà tronqué par le P0.
+La construction `rank_of` matérialise $n^2$ entiers et trie
 $n$ listes **avant** `t0` : son coût $O(n^2\log n)$ et sa mémoire $O(n^2)$
 sont exclus du temps affiché. `min(rank_a(b),rank_b(a))` qualifie seulement
 l'union symétrisée des k-NN avec tie-break PointId; les ex æquo géométriques ne
 sont pas groupés. Les buckets sont enfin décalés : la classe imprimée `2`
 contient le rang 1, et `rank_max_true` ignore toute paire vraie que le filtre a
-déjà supprimée. Ce diagnostic ne devient interprétable qu'après réparation du
-filtre ouvert, chrono séparé de la construction, sémantique des ex æquo et
-calcul de la vérité indépendamment d'`ADMIS`.
+déjà supprimée. Les distributions ne deviennent interprétables qu'après
+réparation du filtre ouvert, chrono séparé de la construction, sémantique des ex
+æquo et calcul de la vérité indépendamment d'`ADMIS`; les maxima sur le
+sous-ensemble restent seulement des bornes inférieures ponctuelles.
 
 Surtout, aucun petit `k` ne découle mathématiquement de l'admissibilité. Pour
 `K=16000` sur la grille u16, prendre
@@ -466,6 +513,10 @@ Le probe externe (source SHA-256
 reproduit `n=32002,max_coord=64003,min_cross_rank=16001,A=2`. Un k-NN peut
 rester un filtre reçu ou une heuristique de priorité; il ne remplace jamais une
 frontière complète avec certificats et replay.
+
+La construction tangente à 50 000 points donnée dans le réaudit ci-dessus porte
+le même résultat au palier produit, avec rang croisé 25 000 et sans dépasser
+u16.
 
 ## NO-GO F0 inchangé
 

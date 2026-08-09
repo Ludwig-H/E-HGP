@@ -1245,6 +1245,17 @@ inline int tangent_sign(int orient_of_site, int orientation) {
   return orientation > 0 ? raw : -raw;
 }
 
+// LA TRONCATURE NE PEUT PLUS REVENIR PAR INADVERTANCE.
+//
+// L'argument attendu est un SIGNE dans {-1,0,+1}, pas un determinant. Le chemin
+// proprietaire passait la valeur brute de `orient3d_exact`, de type `i128` : la
+// conversion implicite gardait les 32 bits bas, ce qui rendait un signe faux
+// des l'echelle u16 1291 et laissait `-INT_MIN` indefini a l'echelle 1025.
+// La surcharge supprimee transforme cette faute en erreur de compilation ; les
+// appelants doivent ecrire `tangent_sign(sign_of(det), direction)`.
+int tangent_sign(mhgp::i128 orient_of_site, int orientation) = delete;
+int tangent_sign(long long orient_of_site, int orientation) = delete;
+
 // ---------------------------------------------------------------------------
 // LE PARCOURS.
 //
@@ -1549,9 +1560,13 @@ inline bool owner_rays_ok(const std::vector<P3>& points, const OwnerContext& ctx
       for (int i = 0; i < q; ++i) if (support[i] == s) in_support = true;
       if (in_support) continue;
       const int eps = std::binary_search(b_u.begin(), b_u.end(), s) ? -1 : 1;
-      const int t = tangent_sign(orient3d_exact(a, points[(std::size_t)base[1]],
-                                                points[(std::size_t)base[2]],
-                                                points[(std::size_t)s]), delta);
+      // Le predicat rend un `i128`. Le passer directement a `tangent_sign(int,...)`
+      // tronquait les bits hauts : sur u16 le determinant depasse `INT_MAX` des
+      // l'echelle 1291, le signe devenait arbitraire et `-INT_MIN` etait un
+      // comportement indefini. On reduit AVANT l'appel.
+      const int t = tangent_sign(sign_of(orient3d_exact(a, points[(std::size_t)base[1]],
+                                                        points[(std::size_t)base[2]],
+                                                        points[(std::size_t)s])), delta);
       if (eps * t < 0) { admissible = false; break; }
     }
     if (!admissible) continue;

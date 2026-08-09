@@ -1627,6 +1627,91 @@ int main(int argc, char** argv) {
     }
   }
 
+  // LA FRONTIERE u16 DU SIGNE OWNER, GRAVEE.
+  //
+  // `owner_rays_ok` passait la valeur BRUTE de `orient3d_exact`, un `i128`, a
+  // `tangent_sign(int, int)`. La conversion implicite ne conservait que les
+  // trente-deux bits bas. Ce n'etait pas une perte de precision : c'etait une
+  // perte de SIGNE, donc un cone tangent faux, donc un proprietaire faux, donc
+  // des spheres supprimees du catalogue.
+  //
+  // Les deux echelles ne sont pas choisies : elles sont les deux frontieres
+  // arithmetiques du predicat sur la grille u16.
+  //
+  //   tetraedre axial d'arete s        det = s^3       franchit 2^31 entre 1290 et 1291
+  //   tetraedre alterne d'arete s      det = -2 s^3    vaut EXACTEMENT INT_MIN a s = 1024
+  //
+  // A s = 1024 le mal n'etait meme pas un signe faux : `tangent_sign` niait
+  // `INT_MIN`, ce qui est un comportement indefini, et Release rendait le bon
+  // catalogue par accident pendant qu'UBSan criait.
+  //
+  // La porte est double, et le second temps est le plus important. Exiger
+  // l'egalite des catalogues ne prouverait rien si les echelles cessaient
+  // d'atteindre la frontiere — une fixture peut devenir muette sans jamais
+  // rougir. On exige donc AUSSI un temoin : sur ces nuages, au moins un
+  // determinant reellement evalue doit changer de signe par troncature. La
+  // fixture certifie ainsi qu'elle mord encore.
+  {
+    ++cases;
+    int u16_faults = 0;
+    long long truncation_witnesses = 0;
+    struct ScaledTetra { const char* name; int scale; bool alternating; };
+    const ScaledTetra tetras[] = {
+        {"axial", 1290, false},   {"axial", 1291, false},   {"axial", 2048, false},
+        {"alterne", 1023, true},  {"alterne", 1024, true},  {"alterne", 1025, true},
+        {"alterne", 1626, true},
+    };
+    for (const ScaledTetra& t : tetras) {
+      const int s = t.scale;
+      std::vector<P3> cloud;
+      if (t.alternating)
+        cloud = {pt(0, 0, 0), pt(s, s, 0), pt(s, 0, s), pt(0, s, s)};
+      else
+        cloud = {pt(0, 0, 0), pt(s, 0, 0), pt(0, s, 0), pt(0, 0, s)};
+      // Le temoin de troncature, mesure sur les memes quadruplets que le cone
+      // tangent parcourt : tous les triplets ordonnes du nuage, contre le
+      // quatrieme point.
+      for (std::size_t a = 0; a < cloud.size(); ++a)
+        for (std::size_t b = 0; b < cloud.size(); ++b)
+          for (std::size_t c = 0; c < cloud.size(); ++c)
+            for (std::size_t d = 0; d < cloud.size(); ++d) {
+              if (a == b || a == c || b == c || d == a || d == b || d == c) continue;
+              const mhgp::i128 det =
+                  mhgp3v::flats::orient3d_exact(cloud[a], cloud[b], cloud[c], cloud[d]);
+              const int exact = mhgp3v::flats::sign_of(det);
+              const int truncated = (int)det > 0 ? 1 : ((int)det < 0 ? -1 : 0);
+              if (exact != truncated) ++truncation_witnesses;
+            }
+      for (int s_max = 2; s_max <= 4; ++s_max) {
+        for (int index = 0; index < 2; ++index) {
+          mhgp3v::FlatStatistics a{}, b{};
+          mhgp3v::CloudStatus sa = mhgp3v::CloudStatus::kOk, sb = mhgp3v::CloudStatus::kOk;
+          const mhgp::Catalogue plain =
+              mhgp3v::flat_catalogue(cloud, s_max, &a, &sa, false, index != 0, false);
+          const mhgp::Catalogue owned =
+              mhgp3v::flat_catalogue(cloud, s_max, &b, &sb, false, index != 0, true);
+          if (sa != sb || !same_catalogue(plain, owned)) {
+            printf("[frontiere u16 owner] %s echelle %d s_max=%d index=%d : %zu spheres"
+                   " normales contre %zu sous proprietaire\n",
+                   t.name, s, s_max, index, plain.spheres.size(), owned.spheres.size());
+            ++u16_faults;
+          }
+        }
+      }
+    }
+    // Sans temoin, la porte serait verte sans rien exercer.
+    if (truncation_witnesses == 0) {
+      printf("[frontiere u16 owner] ECHEC : aucune troncature 32 bits ne change de signe sur"
+             " ces echelles — la fixture ne mord plus\n");
+      ++u16_faults;
+    }
+    if (u16_faults) failures += u16_faults;
+    else
+      printf("[frontiere u16 owner] echelles 1290/1291/2048 et 1023/1024/1025/1626 :"
+             " catalogues identiques sous proprietaire, %lld signes retournes par troncature\n",
+             truncation_witnesses);
+  }
+
   // DOMAINE COMPLET DU PROPRIETAIRE, contre-exemple exact de l'audit.
   //
   // Le proprietaire ne couvre que la recolte NAVIGUEE. La voie directe exhaustive

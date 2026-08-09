@@ -653,24 +653,48 @@ fois, les termes de $U$ s'annulent sur le cône, et $|B_U|\leq s_{\max}-|U|$. To
 lit avec le même prédicat entier que le pinceau, par l'identité
 $a_i\cdot d=-2\,\mathrm{orient3d}$.
 
-**[P0 reproductible sur le snapshot courant]** cette identité exacte est
-actuellement rompue à son appel : `owner_rays_ok` passe le déterminant `i128`
-brut à `tangent_sign(int, ...)`. Le tétraèdre axial d'échelle 1290 rend 7
-sphères dans les deux modes; à 1291, le catalogue normal en rend encore 7 et
-owner seulement 4, car $1291^3>\mathrm{INT\_MAX}$. Sur le tétraèdre alterné
-d'échelle 1024, le déterminant vaut exactement $2^{31}$ et UBSan détecte la
-négation de `INT_MIN`. La fermeture locale est de réduire d'abord le prédicat
-par `sign_of`, puis de rendre permanentes les frontières 1023/1024/1025 et
-1290/1291 avec un mutant de troncature. Tant que cette porte n'est pas verte,
-les accords owner à petites coordonnées ne constituent plus un GO de justesse
-sur le profil u16 déclaré.
+#### Le P0 de troncature est fermé, et il ne pouvait pas être fermé par une campagne
 
-**[mesuré sur les campagnes usuelles à petites coordonnées]** les cinq portes Release
-`fixtures`, `generic`, `indexed_tree`, `degenerate` et `cospherical` passent en
-78,07 s de temps mur avec deux tests en parallèle : 4 990 cas, zéro désaccord,
-et table résiduelle owner-indexée maximale nulle. Deux campagnes ASan/UBSan ne
-déclenchent aucun diagnostic sur leurs entrées. Ces campagnes ne franchissent
-pas la frontière de conversion précédente et ne la qualifient donc pas.
+Cette identité exacte était rompue à son appel : `owner_rays_ok` passait le
+déterminant `i128` brut à `tangent_sign(int, ...)`. Ce n'était pas une perte de
+précision mais une perte de **signe**, donc un cône tangent faux, donc un
+propriétaire faux, donc des sphères supprimées du catalogue.
+
+Les deux échelles qui le révèlent ne sont pas choisies : ce sont les deux
+frontières arithmétiques du prédicat sur la grille déclarée.
+
+| nuage | déterminant | frontière | catalogue normal | catalogue owner avant |
+| --- | --- | --- | ---: | ---: |
+| tétraèdre axial d'arête $s$ | $s^3$ | franchit $2^{31}$ entre 1290 et 1291 | 7 / 10 / 11 | 7 puis **4** |
+| tétraèdre alterné d'arête $s$ | $-2s^3$ | vaut exactement `INT_MIN` à 1024 | 10 / 14 / 15 | 10 puis **4** |
+
+À 1024 le mal n'était même pas un signe faux : `tangent_sign` niait `INT_MIN`,
+comportement indéfini, et Release rendait le bon catalogue par accident pendant
+qu'UBSan criait. C'est la raison pour laquelle **aucune campagne ne pouvait
+fermer cette porte** : toutes les portes permanentes tenaient dans une boîte de
+côté au plus quarante, où le déterminant reste très en dessous de $2^{31}$.
+
+La correction réduit le prédicat par `sign_of` **avant** l'appel. Pour que la
+faute ne puisse pas revenir par inadvertance, les surcharges `i128` et
+`long long` de `tangent_sign` sont maintenant **supprimées** : passer un
+déterminant là où un signe est attendu est devenu une erreur de compilation.
+
+Deux portes permanentes la gardent. La fixture `[frontière u16 owner]` grave les
+sept échelles 1290/1291/2048 et 1023/1024/1025/1626, aux ordres 2 à 4 et dans
+les deux modes d'index, et exige en plus un **témoin** : au moins un déterminant
+réellement évalué doit changer de signe par troncature 32 bits — sans ce second
+temps, la fixture pourrait devenir muette sans jamais rougir. Elle en compte 84.
+Le mutant de troncature réintroduit rend exactement les nombres de l'audit :
+**18 désaccords**, 7 contre 4 à l'échelle 1291 et 10 contre 4 à 1025.
+
+La campagne `mhgp3v_flats_u16_owner` navigue enfin sur la grille entière —
+60 nuages, `coord=65536` — là où le contrat u16 est réellement exercé.
+
+**[mesuré]** les 54 CTests Release passent en 756,75 s de temps mur avec deux
+tests en parallèle, planchers de couverture compris. La campagne u16 déterministe
+que l'audit citait en contre-exemple, `--clouds 1 --points 8 --coord 65536
+--smax 2 --seed 20260809`, rendait `OWNER != EMITTED : 16 sphères contre 19`;
+elle rend maintenant 216 cas et zéro désaccord.
 
 La frontière est explicite : **le propriétaire couvre seulement la récolte
 naviguée**. Les singletons sans index et la voie directe n'ont aucun sommet de
@@ -1215,29 +1239,39 @@ $\lvert U\rvert+\lvert I\rvert\leq s_{\max}$ passe alors, même avec un
 extra-shell arbitraire. Ce renforcement exact a été vérifié sans écart sur
 59 154 inégalités bornées; il ne fournit toujours ni rayon ni borne de degré.
 
-Le delta k-NN worktree `130e316e...` ne répare pas le sweep. Il construit une
+Le commit k-NN `5d9159a` (`prototype/admissible_pair_probe.cpp` de SHA-256
+`130e316e...`) ne répare pas le sweep. Il construit une
 matrice $n^2$ et $n$ tris hors chrono, puis mesure seulement les rangs du
 `ADMIS` déjà sous-estimé; ses maxima et histogrammes ne qualifient donc aucune
 frontière. Plus profondément, une paire Gabriel vide peut avoir un rang croisé
-arbitraire : sur une fixture u16 de 32 002 points, `A=2` mais le rang minimal
-vaut 16 001. Aucun petit `k` contractuel ne suit donc du lemme. Le filtre exact,
-une frontière certifiée et le replay viennent avant ce diagnostic.
+arbitrairement grand avec la taille du nuage. À la taille produit, prendre
+`p=(0,0,0)`, `u=(65535,0,0)` et, pour `1<=i<=24999`, les points
+`(0,0,i)` et `(65535,0,i)` donne exactement 50 000 points u16. Tous les extras
+sont strictement hors de la boule diamétrale ouverte, donc `A=2`, tandis que
+chaque extrémité a 24 999 points strictement plus proches que l'autre : le rang
+croisé vaut 25 000. Aucun petit `k` contractuel ne suit donc du lemme. Le filtre
+exact, un complément certifié et le replay viennent avant ce diagnostic.
 
-### Le k-NN tronqué est réfuté comme énumérateur, et la mesure dit pourquoi
+### Un k-NN borné sans complément est réfuté; l'histogramme ne qualifie rien
 
-Pour chaque paire admissible j'ai relevé le plus petit de ses deux rangs de
-voisinage. **[mesuré]** le maximum croît linéairement avec $n$ — **177, 347, 682**
-pour $n=200,400,800$, soit environ 85 % du nuage. Une énumération par $k$ plus
-proches voisins à $k$ borné **manquerait donc des paires**, et la complétude n'est
-pas négociable : cette route est fermée.
+**[diagnostic reproductible du sujet fautif]** La commande
+`mhgp3v_admissible_pair_probe --points 200 --smax 11 --repeats 1 --seed 20260809`
+rend bien 10 706 paires `ADMIS`, les maxima 177/85 et le cumul imprimé
+`128:0.990`. C'est un résultat positif de reproductibilité. Comme l'erreur du
+sweep rejette trop de paires, le maximum 177 reste une borne inférieure valable
+sur le véritable univers admissible de ce nuage; il suffit déjà à réfuter un
+cap plus petit sur cette seule entrée. Il ne démontre toutefois aucune loi de
+croissance à partir de trois tailles.
 
-La distribution est en revanche très concentrée. À $n=800$ : 83 % des paires
-admissibles sont dans le rang 128, 98 % dans 256, 99,9 % dans 512. Et les paires
-**vraies** ont un maximum bien plus petit — 85, 109, 147 — qui croît nettement moins
-vite que $n$. La queue longue est donc faite de candidates que le lemme admet et que
-la réalité rejette : c'est exactement le régime où une frontière par ancre avec
-**certificats d'élagage** est nécessaire, et où un $k$-NN tronqué serait faux sans
-qu'aucune mesure moyenne ne le montre.
+Les pourcentages 83/98/99,9 %, les maxima 85/109/147 dits « vrais » et
+l'interprétation de la queue sont retirés. L'histogramme porte sur le sous-ensemble
+`ADMIS` censuré, les ex æquo sont départagés par `PointId`, la classe affichée
+`128` contient en réalité les rangs au plus 127, et `rank_max_true` est mis à jour
+seulement après admission par le filtre fautif. La « vérité » partage en outre les
+primitives de `flat_catalogue`. Un k-NN peut rester une priorité ou un filtre,
+mais toute masse omise exige un complément exact certifié et rejouable. Le binaire
+n'a ni fixture permanente du P0, ni CTest, ni sidecar de campagne : ses nombres
+restent des diagnostics.
 
 ### Le terrain à densité fixe : quatre diagnostics, aucune asymptote encore
 
@@ -1293,7 +1327,7 @@ construit aucun sommet d'arrangement ni mosaïque. Son exactitude est démontrab
 son SLO reste conditionné aux degrés complets, masses combinadiques et replays
 publiés dans le reçu.
 
-Le probe de `40ad152` et son delta k-NN ne sont pas encore un juge de cette voie. Leur
+Le probe de `40ad152`, y compris son commit k-NN `5d9159a`, n'est pas encore un juge de cette voie. Son
 `minimum_halfplane_count` teste seulement les directions des points et compte
 les égalités sur la frontière; une fixture entière `RelevantGP` lui donne 5 au
 lieu du minimum exact 2 et lui fait réfuter une paire critique. Le lemme reste

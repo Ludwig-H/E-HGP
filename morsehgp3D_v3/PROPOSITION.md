@@ -103,10 +103,12 @@ faire rendre 5 au lieu de 2 et à réfuter une paire critique `RelevantGP`. Le
 lemme de demi-boule n'est pas réfuté; son oracle doit devenir un sweep circulaire
 exact du demi-plan ouvert complémentaire avant toute mesure de sélectivité.
 Les quatre tailles ne prouvent donc ni `O(n log n)` ni 7,5 millions de
-candidates à 50 k. Le delta k-NN `130e316e...` mesure encore l'ensemble fautif,
-avec une matrice et $n$ tris hors chrono; il ne ferme pas cette porte. Une
-fixture u16 de 32 002 points donne même une paire Gabriel vide avec `A=2` et
-rang croisé minimal 16 001 : aucun petit `k` ne découle de l'admissibilité.
+candidates à 50 k. Le commit k-NN `5d9159a` (probe `130e316e...`) mesure encore
+l'ensemble fautif, avec une matrice et $n$ tris hors chrono; son maximum reste
+seulement une borne inférieure ponctuelle et son histogramme ne ferme pas cette
+porte. Une construction u16 de 50 000 points donne même une paire Gabriel vide
+avec `A=2` et rang croisé 25 000 : aucun petit `k` ne découle de
+l'admissibilité, et tout filtre k-NN exige un complément exact certifié.
 
 Une voie constructive distincte est maintenant formulée sous la capability
 `center-cover + degree` : banque de témoins stricte par cellule, preuve de rayon

@@ -9,11 +9,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Les constructions mathématiques de cette note sont indépendantes du live. Les
-constats d'implémentation distinguent le snapshot committé du delta worktree :
+constats d'implémentation sont épinglés au snapshot committé suivant; les deltas
+produit non committés sont réaudités séparément lorsqu'ils sont stables :
 
 | objet | empreinte |
 | --- | --- |
-| snapshot de code et de claims audité | `40ad1522356e8ca0c5c144b441ad6dc0367810fe` |
+| snapshot de code et de claims audité | `5d9159abfda52bae8b209d0a22ea834d3beb2f53` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
@@ -22,8 +23,7 @@ constats d'implémentation distinguent le snapshot committé du delta worktree :
 | `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
 | `CMakeLists.txt` | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
-| `prototype/admissible_pair_probe.cpp` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
-| `prototype/admissible_pair_probe.cpp` worktree postérieur | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
+| `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
 
 > [!IMPORTANT]
 > Cette note aide Claude à construire la voie GPU; elle ne modifie aucun
@@ -620,7 +620,7 @@ minimum 2 et supprimer une paire critique. Les masses `ADMIS` publiées sont
 donc des sous-estimations. Quatre tailles et une graine ne prouvent en outre ni
 $O(n\log n)$ ni une masse à 50 k.
 
-Le delta k-NN `130e316e...` ne change pas ce verdict : il bâtit une matrice
+Le commit k-NN `5d9159a` (`130e316e...`) ne change pas ce verdict : il bâtit une matrice
 $n^2$ et $n$ tris hors chrono, puis mesure les rangs seulement dans le `ADMIS`
 fautif. Le rang symétrisé minimal ne définit pas une frontière canonique et les
 ex æquo géométriques ne sont pas groupés. Réparer et muter le sweep précède
@@ -656,6 +656,24 @@ points sur la droite et frontière diamétrale ont des fixtures séparées. Une
 sonde exhaustive rationnelle sur 200 nuages de dix points a vérifié 59 154
 inégalités $A(p,u)\leq q+\lvert I\rvert$ sans écart; la preuve ci-dessus reste
 l'autorité.
+
+La représentation device peut rester étroite. Pour une paire de points distincts,
+poser $d=u-p\neq0$, $e=2z-p-u$ et $r=d\times e$. Si $q$ est la projection
+orthogonale de $e$ sur $d^\perp$, alors $r=d\times q$; l'identité
+$d\times(d\times q)=-\lVert d\rVert^2q$ montre que $r=0$ si et seulement si
+$q=0$. Choisir une fois par paire un axe canonique $k$ tel que $d_k\neq0$, fixer
+l'ordre des deux autres coordonnées et conserver ces deux composantes de $r$ :
+la restriction de $\pi_k:x\mapsto(x_i)_{i\neq k}$ à $d^\perp$ est injective,
+donc cet isomorphisme préserve rayons, antipodes et demi-plans centraux, à une
+orientation globale fixée près.
+
+Sous u16, $r=2(u-p)\times(z-p)$ donne
+$\lvert r_i\rvert\leq2\times65535^2<2^{33}$; un déterminant angulaire de deux
+rayons vérifie donc une borne stricte $<2^{67}$. `i64` suffit aux composantes et
+`i128` à leurs déterminants, à condition de convertir les opérandes vers `i64`
+**avant** chaque produit du cross, puis vers `i128` **avant** les produits du
+déterminant. Cette construction est une recommandation auditée, pas le live :
+le probe committé construit encore une base entière plus large en `i128`.
 
 Ce lemme n'impose aucune longueur maximale à une paire : l'autre demi-boule
 peut être arbitrairement peuplée et un grand vide peut produire une paire longue.
