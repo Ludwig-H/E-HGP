@@ -43,12 +43,10 @@ $s_{\max}=11$, calculée *a posteriori* depuis le vrai $r_{\max}$) :
 
 Elle **croît encore** : rien n'en est extrapolé.
 
-**Le coût d'un parcours sensible à la sortie est mesuré, et il est constant.**
-En comptant les **incidences de supports à l'ancre** — candidats affinement
-indépendants de rang fermé $\leq s_{\max}$, c'est-à-dire ce qu'un parcours
-devrait toucher ; ce ne sont pas des strates d'arrangement, le prototype n'en
-construit aucun — contre ce qui est réellement émis (régime exhaustif,
-$s_{\max}=11$) :
+**Un majorant du travail d'un parcours, et rien de plus.** En comptant les
+**incidences support–ancre** — candidats affinement indépendants de rang fermé
+$\leq s_{\max}$, produits par la cascade exhaustive — contre ce qui est émis
+(régime exhaustif, $s_{\max}=11$) :
 
 | $n$ | incidences | bien centrées | émises | **incidences / émise** | candidats / émise |
 | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -83,7 +81,7 @@ Les arités 1 à 3 empruntent encore le chemin exhaustif : elles ont leurs propr
 régions et leurs propres seuils, et une preuve d'arité quatre ne s'y propage
 pas. C'est le prochain incrément, pas une omission.
 
-**Fixtures permanentes** (23 tests) : la non-régression du faux certificat — sous
+**Fixtures permanentes** (23 tests, dont 4 hérités de la v2) : la non-régression du faux certificat — sous
 une fenêtre supposée trop étroite, le générateur doit se **déclarer incomplet**,
 sans quoi un certificat erroné aurait été réintroduit ; le refus des campagnes
 négatives vacues ; les bornes sémantiques du CLI, `--max-order 2147483647`
@@ -118,7 +116,7 @@ l'arité trois).
 | --- | --- | --- |
 | dimension de l'arrangement | 2 | 3 |
 | complétude de l'ancrage | **conditionnelle** à une source complète de paires diamétrales | **par construction** |
-| borne de sortie | $Z_e\leq m_e(\kappa_e+1)$, classique | $\Theta(k^2)$ par point, classique |
+| borne de sortie | $Z_e\leq m_e(\kappa_e+1)$, classique | $O(m_p K^2)$ par ancre ; sans certificat local $m_p=n-1$ |
 | coût du prédicat exact | plus faible | plus élevé |
 
 A2e est le cœur algorithmique ; sa complétude est otage de **A1-source**, que le
@@ -130,9 +128,9 @@ n'est pas démontrée.
 
 | obligation | ce qu'elle décide |
 | --- | --- |
-| **PEL-1** | les 2-faces de l'arrangement sont-elles exactement les arêtes utiles ? Si oui, A1-source disparaît. |
-| **PEL-2** | le parcours est-il en $O(\text{sortie})$, et non $O(\text{sortie}\times m)$ ? |
-| **PEL-3** | traitement exact des strates non bornées (l'énoncé actuel est probablement faux). |
+| **PEL-1** | les 2-faces de l'arrangement **contiennent-elles** toutes les arêtes utiles ? L'inclusion suffit — des plans superflus sont permis. Si oui, A1-source disparaît. |
+| **PEL-2** | le parcours est-il en $O(\text{entrée} + \text{sortie})$, et non $O(\text{sortie}\times m)$ ? Le terme d'entrée est obligatoire. |
+| **PEL-3** | traitement exact des strates non bornées. L'énoncé « non bornée $\Rightarrow$ pas de sphère finie » est **réfuté** par la fixture à deux points ; l'obligation est le traitement, pas l'énoncé. |
 | **PEL-4** | que coûte le prédicat exact en 3D contre 2D ? C'est l'arbitrage A2pe / A2e. |
 
 Le prochain artefact décisif est donc **un constructeur exact du sous-complexe
@@ -182,7 +180,7 @@ de domaine symétrique, lecture **hostile** et **atomique** du sujet.
 **Campagne négative, fail-closed** : six fautes injectées sur une **copie d'un
 sujet déjà vert**, avec une comptabilité distincte de la campagne positive — un
 plancher ou un rejet de domaine ne peut donc pas tenir lieu de preuve. Chaque
-faute doit être **appliquée au moins une fois** et déclencher **exactement une
+faute doit être **appliquée exactement une fois** et déclencher **exactement une
 fois son garde**, sans aucun diagnostic étranger : membres non triés, numérateur
 tourné (même norme, donc même niveau), sentinelle invalide, `n_children` nul,
 racine supprimée, et source de fusion étrangère **de même rang et de même niveau
@@ -233,9 +231,14 @@ cd build/v3 && ctest --output-on-failure     # 14 tests
 ./mhgp3v_oracle --subject anchored --regime exhaustive --clouds 8 --seed 90210 \
                 --min-points 9 --max-points 12 --max-order 3 \
                 --min-decided 6 --min-nodes 60
-./mhgp3v_oracle --inject merge_source_foreign --clouds 4 --seed 4242 \
-                --min-points 8 --max-points 10 --max-order 2 \
-                --min-decided 1 --min-nodes 1        # doit ROUGIR
+./mhgp3v_oracle --subject edge_shallow --clouds 20 --seed 4242 --min-points 8 \
+                --max-points 12 --max-order 3 --min-decided 15 --min-nodes 200
+# Le probe hostile exige la fixture de meme niveau : sur un nuage generique il
+# n'existe souvent aucune source alternative de niveau exactement egal, et le
+# run echouerait faute d'injection applicable, pas parce qu'un garde a rougi.
+./mhgp3v_oracle --inject merge_source_foreign --fixture foreign_source_same_level \
+                --subject v2 --clouds 1 --seed 4242 --min-points 4 --max-points 4 \
+                --max-order 1 --min-decided 1 --min-nodes 1
 ```
 
 GMP n'est pas une dépendance de l'oracle : il n'intervient que comme second

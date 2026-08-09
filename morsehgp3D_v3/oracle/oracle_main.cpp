@@ -1393,6 +1393,11 @@ int main(int argc, char** argv) {
       continue;
     }
 
+    // Property-test : il ne juge PAS la completude, donc il ne compare pas. Sans
+    // cela, un catalogue legitimement incomplet sous fenetre supposee produirait
+    // des mismatches qui n'ont rien a voir avec la propriete testee.
+    if (require_incomplete_anchors >= 0) { ++campaign.decided; continue; }
+
     if (!compare_catalogues(catalogue, reference, s_max, n, trial, &campaign)) continue;
     for (int k = 1; k <= order; ++k) {
       const ReferenceForest expected = reference_forest(points, k);
@@ -1427,7 +1432,9 @@ int main(int argc, char** argv) {
   if (campaign.decided < minimum_clouds_decided)
     campaign.fail("CAMPAGNE plancher de nuages decides non atteint ("
                   + std::to_string(campaign.decided) + ")");
-  if (campaign.nodes < minimum_nodes)
+  // Un property-test ne compare pas, donc il ne peut pas atteindre un plancher
+  // de noeuds compares : ce plancher ne s'applique qu'aux campagnes de jugement.
+  if (require_incomplete_anchors < 0 && campaign.nodes < minimum_nodes)
     campaign.fail("CAMPAGNE plancher de noeuds compares non atteint ("
                   + std::to_string(campaign.nodes) + ")");
 
@@ -1461,6 +1468,30 @@ int main(int argc, char** argv) {
               campaign.catalogue_spheres, campaign.forests, campaign.nodes,
               campaign.widest_bits, static_cast<long long>(coordinate_maximum));
 
+  // Le verdict est calcule AVANT toute serialisation : un recu ecrit en amont du
+  // verdict peut etre lu comme vert alors que le run est rouge.
+  const bool baseline_passed = campaign.failures == 0 && closed;
+  bool probe_passed = true;
+  std::string disqualifying_reason;
+  if (!baseline_passed) disqualifying_reason = "campagne de base rouge";
+  if (!injection.empty()) {
+    if (injections_applied == 0) {
+      probe_passed = false;
+      disqualifying_reason = "aucune injection appliquee";
+    } else if (injection_escapes != 0) {
+      probe_passed = false;
+      disqualifying_reason = "le garde vise n'a pas rougi exactement";
+    }
+  }
+  if (subject == "edge_shallow" && edge_shallow_total.dictionary_refuted != 0) {
+    probe_passed = false;
+    disqualifying_reason = "dictionnaire de profondeur refute";
+  }
+  // Un property-test n'est jamais une qualification.
+  const bool diagnostic_only = require_incomplete_anchors >= 0 || !fixture.empty();
+  const bool qualified = baseline_passed && probe_passed && !diagnostic_only;
+  const int exit_code = (baseline_passed && probe_passed) ? 0 : 1;
+
   if (!receipt_path.empty()) {
     std::FILE* file = std::fopen(receipt_path.c_str(), "w");
     if (file == nullptr) {
@@ -1483,6 +1514,12 @@ int main(int argc, char** argv) {
         "  \"coordinate_maximum\": %lld,\n  \"declared_grid_maximum\": %lld,\n"
         "  \"attempted\": %lld,\n  \"decided\": %lld,\n  \"rejected_domain\": %lld,\n"
         "  \"identity_closed\": %s,\n"
+        "  \"status\": \"%s\",\n  \"exit_code\": %d,\n"
+        "  \"baseline_passed\": %s,\n  \"probe_passed\": %s,\n"
+        "  \"qualified\": %s,\n  \"disqualifying_reason\": \"%s\",\n"
+        "  \"injection\": \"%s\",\n  \"injections_applied\": %lld,\n"
+        "  \"injection_escapes\": %lld,\n"
+        "  \"require_incomplete_anchors\": %lld,\n  \"incomplete_anchors\": %d,\n"
         "  \"minimum_clouds_decided\": %lld,\n  \"minimum_nodes\": %lld,\n"
         "  \"catalogue_spheres_compared\": %lld,\n  \"forests_compared\": %lld,\n"
         "  \"canonical_nodes_compared\": %lld,\n"
@@ -1493,7 +1530,13 @@ int main(int argc, char** argv) {
         maximum_order,
         static_cast<long long>(coordinate_maximum), static_cast<long long>(mhgp::kCoordMax),
         campaign.attempted, campaign.decided, campaign.rejected_domain,
-        closed ? "true" : "false", minimum_clouds_decided, minimum_nodes,
+        closed ? "true" : "false",
+        qualified ? "qualified" : (diagnostic_only ? "diagnostic_only" : "not_qualified"),
+        exit_code, baseline_passed ? "true" : "false", probe_passed ? "true" : "false",
+        qualified ? "true" : "false", disqualifying_reason.c_str(),
+        injection.empty() ? "none" : injection.c_str(), injections_applied, injection_escapes,
+        require_incomplete_anchors, anchored_total.incomplete_anchors,
+        minimum_clouds_decided, minimum_nodes,
         campaign.catalogue_spheres, campaign.forests,
         campaign.nodes, campaign.widest_bits, campaign.failures);
     if (written < 0 || std::fflush(file) != 0 || std::ferror(file) != 0) {
@@ -1515,6 +1558,14 @@ int main(int argc, char** argv) {
       std::printf("ECHEC : --require-incomplete-anchors exige --subject anchored\n");
       return 2;
     }
+    // Un property-test local ne peut pas annuler le verdict differentiel : la
+    // propriete « le sujet avoue son incompletude » et l'accord du catalogue
+    // sont deux choses, et la seconde reste bloquante.
+    if (campaign.failures != 0) {
+      std::printf("ECHEC : %lld mismatches — meme un property-test doit rougir dessus\n",
+                  campaign.failures);
+      return 1;
+    }
     if (anchored_total.incomplete_anchors < require_incomplete_anchors) {
       std::printf("ECHEC : %d ancres incompletes declarees, au moins %lld attendues — un "
                   "certificat de localite errone a-t-il ete reintroduit ?\n",
@@ -1524,8 +1575,9 @@ int main(int argc, char** argv) {
     // Cette fixture ne juge PAS la completude : sous fenetre supposee le
     // catalogue est legitimement incomplet, et les echecs ci-dessus le disent.
     // Elle verifie une seule chose : que le generateur le DECLARE.
-    std::printf("OK : %d ancres se declarent incompletes sous fenetre supposee "
-                "(la completude n'est pas jugee ici)\n", anchored_total.incomplete_anchors);
+    std::printf("OK [diagnostic_only] : %d ancres se declarent incompletes sous fenetre "
+                "supposee ; ce test ne juge PAS la completude et ne qualifie rien\n",
+                anchored_total.incomplete_anchors);
     return 0;
   }
 
