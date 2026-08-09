@@ -2,6 +2,12 @@
 
 Date : 9 août 2026 UTC.
 
+> [!NOTE]
+> **Snapshot historique supersédé.** Le contre-exemple de descente de rayon reste
+> une fixture permanente, mais le germe et plusieurs gardes ont été corrigés.
+> Le ledger courant est
+> [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md).
+
 > [!CAUTION]
 > **Verdict : NO-GO pour fermer la correction du germe, promouvoir la navigation multiplicitaire ou relier ce prototype au contrat 50 k.** Un nuage u16 valide de cinq points réfute la « descente stricte du rayon » : le sujet rend `germe_non_certifie`, étape 6, puis un catalogue vide. Le même nuage réussit ou échoue selon sa renumérotation. Les collisions de quantification produisent une seconde non-invariance sans être déclarées par le statut. Les campagnes vertes restent utiles comme falsificateur borné, mais leur vérité partage des primitives décisives avec le sujet et leur payload ne couvre ni la géométrie complète du catalogue, ni sa sérialisation, ni les forêts.
 

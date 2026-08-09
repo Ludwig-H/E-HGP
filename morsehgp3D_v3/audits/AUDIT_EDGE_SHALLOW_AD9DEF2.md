@@ -1,7 +1,7 @@
 # Audit intégral de `edge_shallow` au commit `ad9def2`
 
-Date de l'audit : 2026-08-09  
-Périmètre principal : commit `ad9def2258c91e61f26a674de10f1850017f1a35`  
+Date de l'audit : 2026-08-09
+Périmètre principal : commit `ad9def2258c91e61f26a674de10f1850017f1a35`
 Mode : audit seul ; builds, mutations hostiles et probes exclusivement sous `/tmp` ; aucune mutation Git ou GCP.
 
 ## Verdict exécutif
@@ -359,7 +359,7 @@ Build observé : GCC 13.3.0, succès ; CTest ciblé : succès en 15,41 s. L'arbr
 
 ### 9.3 Probe géométrique
 
-Source temporaire : `/tmp/edge_shallow_geometry_probe.cpp`, SHA-256 `cd01c530b79999d6d2c1bba85c41e7e7a74bec443e759001f68367a3d91268ab`.  
+Source temporaire : `/tmp/edge_shallow_geometry_probe.cpp`, SHA-256 `cd01c530b79999d6d2c1bba85c41e7e7a74bec443e759001f68367a3d91268ab`.
 Binaire : SHA-256 `0367eb9037295a2835ba8d76574718a8f32752d1deb599f8baa9d07a5ccce424`.
 
 ```bash

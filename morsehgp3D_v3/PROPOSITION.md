@@ -94,12 +94,15 @@ C'est la branche no-go de **Gate D**.
 
 Références primaires : [Edelsbrunner--Osang, proposition 1](https://pub.ista.ac.at/~edels/Papers/2020-J-07-SimpleAlgorithm.pdf) pour la dualité et les tranches; [Clarkson--Shor, corollaire 3.3](https://link.springer.com/content/pdf/10.1007/BF02187740.pdf) pour la borne shallow.
 
-**(c) La mémoire et le GPU sont un seul verrou, pas deux.** La table `seen` des
-coquilles visitées est à la fois ce qui coûte la mémoire de navigation et ce qui
-interdit le device — table de hachage globale à clefs de longueur variable,
-écrite par tous les fils. La *reverse search* d'Avis et Fukuda les supprime tous
-les deux d'un coup et rend le déterminisme gratuit ; elle n'est démontrée au
-dépôt que **sous arrangement simple**. Un GPU, lui, multiplie le débit sans
+**(c) La mémoire de navigation et le GPU ont un verrou commun.** La table `seen`
+des coquilles visitées est à la fois ce qui coûte la mémoire du parcours et ce
+qui interdit une expansion device sans communication — table de hachage globale
+à clefs de longueur variable, écrite par tous les fils. La *reverse search*
+d'Avis et Fukuda supprime ce verrou de visitation. Le parent est désormais
+prouvé sur le vrai graphe multiplicitaire sous coquille, intérieur et oracle
+`next` exacts; son premier juge live ne remplace pas encore le BFS. Le
+déterminisme de sortie, le tri en $\beta$, la partition horizontale, la couverture
+et les verticales restent des globalités séparées. Un GPU multiplie le débit sans
 réduire le nombre de sommets visités : il ne répond pas à la question de fond.
 
 ## 0 quinquies. Séquencement : le cas simple d'abord, les dégénérescences en dernier
@@ -109,10 +112,12 @@ d'arrangement **simple** — aucune cosphéricité, aucune coplanarité portante
 le traitement des multiplicités est reporté à l'une des **dernières phases** du
 projet.
 
-C'est le seul domaine où la *reverse search*, donc la borne mémoire et la forme
-parallèle, sont démontrables aujourd'hui. On y règle l'architecture — index
-fail-open, règle de propriétaire, streaming, tri global, forme device — sur un
-terrain où chaque pièce a sa preuve, avant de rouvrir les multiplicités.
+Ce séquencement n'est plus imposé par l'existence du parent : son extension
+multiplicitaire est prouvée. Il reste justifié comme ordre d'implémentation tant
+que l'énumération des flats multiples, leur propriétaire canonique et l'oracle
+rationnel ne sont pas qualifiés. On règle d'abord l'architecture — index,
+propriétaire, streaming, tri global, forme device — sur le terrain simple, avant
+de rouvrir ces coûts multiplicataires.
 
 Trois conditions, faute de quoi la décision serait une régression : le domaine
 est **déclaré et gardé fail-closed**, un nuage cosphérique étant refusé avec sa
@@ -250,8 +255,10 @@ $160+32$ octets. Ces chiffres viennent d'une source v2 dont la complétude, la
 canonicité et le domaine ne sont pas certifiés : ils ne qualifient rien.
 
 **Ce qui doit rester quel que soit le chiffre** : l'architecture v3 **ne doit
-exiger aucune matérialisation globale du catalogue**, le sink est consommé en
-flux par le réducteur, et le high-water mémoire est publié.
+exiger aucune matérialisation globale du catalogue**. Le sink alimente des runs
+bornés; le réducteur consomme leur fusion après fermeture de chaque groupe de
+$\beta$ exactement égal. Les high-water du producteur, du merge, du lot, du
+locator horizontal et de la couture verticale sont publiés séparément.
 
 ### 1.5 Trois quantités à ne jamais confondre
 
@@ -667,8 +674,9 @@ quarante en annonçant `OK`.
 > J10, l'obligation de tri global exact, le tri externe par runs bornés et la
 > règle des deux pistes parallèles. La réécriture de ce paragraphe sur la voie
 > retenue est une **[obligation]** avant tout portage. La forme device propre au
-> parcours — verrou unique `seen`, classes de charge, file de seconde passe,
-> étage barrière de tri — est au §5 bis du `README.md`.
+> parcours — verrou de visitation `seen`, classes de charge et file de seconde
+> passe — est au §5 bis du `README.md`; le tri, le locator horizontal et les
+> verticales sont des étages globaux distincts.
 
 **J10 borne un rayon spatial, pas une cardinalité** — **[mesuré]** voisinage
 maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
@@ -682,17 +690,18 @@ maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 | ancres | plans $H_u$ canoniques du complexe stratifié, ou center-cover | tableau des $\binom{n}{2}$ paires |
 | shallow | niveaux peu profonds, rang = profondeur | $\sum_e\binom{m_e}{2}$ |
 | décision exacte | diamètre, shell, bon centrage, owner | rescans globaux par candidat |
-| source HGP | facettes, cofaces, silences, couverture | $\Gamma$ global |
+| source HGP | facettes, cofaces, silences, couverture | $\Gamma$ résident complet; les identités contractuelles restent streamées |
 | **tri et lots** | ordre global par niveau exact, groupement des égaux | catalogue géométrique global |
-| réduction | lots, attaches, forêts, verticales | mosaïque d'ordre supérieur |
+| réduction horizontale | locator, partition, couverture et forêt append-only | snapshots complets et mosaïque d'ordre supérieur |
+| jointure verticale | requêtes vers l'ordre adjacent et sweep à coupe fermée | matrice tous ordres contre tous ordres |
 
 Ancres par classes de charge : warp, CTA sous-tuilé, file persistante.
 
-**Le flux ne dispense pas du tri global exact.** Des ancres indépendantes
+**Le flux ne dispense pas du tri global exact.** Des producteurs indépendants
 produisent les événements dans un ordre arbitraire, alors que le réducteur exige,
 par ordre : un ordre global par **niveau rationnel exact**, le groupement de
-**tous** les événements de niveau égal, un instantané pré-lot, puis une
-application atomique — et déduplication, propriétaire, incidences silencieuses et
+**tous** les événements de niveau égal, un état pré-lot logiquement gelé, puis
+une application atomique — et déduplication, propriétaire, incidences silencieuses et
 `coverage_delta` doivent respecter ce même ordre. Aucun producteur monotone entre
 ancres indépendantes n'est énoncé ni plausible.
 
@@ -719,6 +728,13 @@ ordres avec leurs carrés de naturalité. **La source complète, les incidences
 silencieuses, les verticales et la descente sont des points durs indépendants du
 générateur.**
 
+Le contrat v2 exige en outre des identités exhaustives de facettes, cofaces,
+groupes et provenance. Elles peuvent être streamées, mais pas supprimées comme
+une optimisation interne. Un quotient $H_0$ normalisé plus compact demanderait
+un profil public versionné, sa propre preuve de complétude, ses verticales et ses
+digests. La factorisation précise est dans
+[`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](audits/NOTE_GATE_D_GLOBALITES_RESIDUELLES.md).
+
 ## 12. Portes
 
 **Gate A — autorité documentaire.** Reprendre A2e, A2p/A2pe stratifiés, le
@@ -740,12 +756,14 @@ comparaison structurelle complète : arités, enfants, racines, coface source
 réellement contributrice et canonique, nombre canonique de nœuds, censure et
 diagnostics publics.
 
-**Gate D — census de charge.** Distribution de $R(p)$ ; pour A2e,
-$\Sigma_e m_e$, $\Sigma_e Z_e$, $c_e$ et les quantiles de
-$\lvert W_e\rvert,m_e,Z_e$ ; pour A2p, $m_p$, strates par dimension/profondeur,
-composantes non bornées, projections, rejets et transcripts ; objets HGP aval,
-runs, octets et high-water. **À $n$ de plusieurs milliers** — ce n'est pas la
-même campagne que Gate C, et l'une ne tient pas lieu de l'autre.
+**Gate D — census de charge.** Pour la voie retenue : sommets shallow, flats,
+enfants et profondeur; événements propriétaires; incidences directes et
+silencieuses; niveaux et lot égal maximal; carriers/racines actifs; locator,
+partition et couverture; nœuds et enfants; requêtes verticales; runs, octets et
+high-water par étage. Les anciens compteurs $R(p)$, A2e et A2p ne concernent que
+les voies abandonnées et ne qualifient pas le parcours courant. **À $n$ de
+plusieurs milliers** — ce n'est pas la même campagne que Gate C, et l'une ne
+tient pas lieu de l'autre.
 **Décision à deux branches** : sortie énorme ⇒ réviser le SLO ; sortie sparse
 mais intermédiaires denses ⇒ **architecture no-go**.
 

@@ -1,0 +1,230 @@
+# Gate D — ce qui reste global après le parent local
+
+Date : 9 août 2026 UTC.
+
+Cadre : `backend=architecture_math`, `profile=hgp_reduced_quantized_u16`,
+`mode=residual_global_state_factorization`, `public_status=not_claimed`.
+
+> [!IMPORTANT]
+> Le parent local et le propriétaire canonique peuvent retirer l'état global du
+> **parcours de l'arrangement**. Ils ne retirent pas les dépendances globales de
+> la **hiérarchie HGP** : complétude des incidences silencieuses, ordre exact en
+> $\beta$, fermeture atomique des ex æquo, partition horizontale vivante,
+> provenance de couverture et jointure verticale. Ces dépendances peuvent être
+> externalisées et segmentées; elles ne peuvent pas être remplacées par des
+> décisions indépendantes par sommet.
+
+Cette note répond à la question architecturale laissée ouverte par
+[`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md).
+Elle suppose le parent local exact et, pour chaque record scientifique, une
+clef canonique et un propriétaire unique. Elle ne suppose ni catalogue résident,
+ni mosaïque de Delaunay d'ordre supérieur, ni $\Gamma$ global matérialisé.
+
+## 1. La frontière exacte
+
+| objet | globalité | doit résider en RAM ? | raison |
+| --- | --- | --- | --- |
+| nuage $X$ et index certifié | lecture globale | oui, ou stockage adressable en $O(n)$ | `next`, coquilles, rangs et lots doivent rester décidés contre tout $X$ |
+| racine et somme $A_X$ | réduction globale unique | non au-delà de $O(1)$ | canonisent parent et propriétaire |
+| `seen/frontier/visited` | accidentelle | non | le parent de reverse search les remplace |
+| table `emitted` | accidentelle sous propriétaire complet | non | support canonique puis propriétaire unique donnent l'émission unique |
+| source d'incidences silencieuses | autorité globale | non, si elle est complète et streamée | les événements critiques seuls ne déterminent pas tout $\Gamma_k$ |
+| ordre exact et lots égaux en $\beta$ | barrière globale | non, tri externe autorisé | aucune mutation n'est sûre avant le dernier record de même niveau |
+| partition horizontale active | état global logique | pas nécessairement; cache et stockage externe permis | une incidence future doit retrouver la composante de ses carriers |
+| `coverage_delta` et provenance | historique global append-only | non | une incidence silencieuse peut modifier un futur lot sans créer de nœud |
+| applications verticales | jointure globale adjacente | non, sweep externe permis | la cible dépend de l'état fermé de l'ordre inférieur à la même coupe |
+| forêt et journaux terminés | sortie globale | non | segments immuables, runs et checkpoints suffisent |
+
+Le mot **local** qualifie donc le choix scientifique au sommet. Il ne signifie ni
+« sans lecture du nuage », ni « sans tri », ni « sans état de composantes », ni
+« sans sortie globale ».
+
+## 2. Factorisation constructive sans mosaïque globale
+
+Sous une source finie et complète, le pipeline exact minimal est le suivant.
+
+1. La reverse search émet chaque événement critique auprès de son propriétaire,
+   sans table de sommets globale.
+2. Une source séparée émet toutes les incidences directes et silencieuses exigées
+   par le profil. Chaque record possède une identité canonique et une preuve de
+   complétude relative à cette source.
+3. Les producteurs écrivent des runs bornés triés par la clef
+   `(ordre, beta_exact, type, identite)`.
+4. Une fusion externe déduplique les identités et forme les groupes maximaux de
+   même $\beta$ exact.
+5. Le réducteur horizontal fige l'état pré-lot, résout toutes les composantes du
+   groupe égal, puis commet le lot atomiquement.
+6. La forêt horizontale et `coverage_log` sont écrits en segments append-only;
+   seuls le locator et la partition actifs restent logiquement vivants.
+7. Les requêtes verticales sont écrites, triées et jointes par sweep avec
+   l'histoire fermée de l'ordre inférieur.
+8. Une seconde jointure ordonnée vérifie les carrés de naturalité et ferme les
+   compteurs de masse, de couverture et de provenance.
+
+Cette factorisation évite simultanément le catalogue critique résident, le
+graphe d'arrangement résident, les snapshots complets du DSU, une matrice
+verticale tous ordres contre tous ordres et toute mosaïque de Delaunay d'ordre
+supérieur. Un batch d'I/O n'est toutefois pas un lot sémantique : un même niveau
+exact peut traverser plusieurs runs et plusieurs fenêtres.
+
+## 3. Pourquoi les quatre barrières principales sont intrinsèques
+
+### 3.1 Complétude de la source silencieuse
+
+Un événement critique donne une information positive locale. Il ne prouve pas
+que toutes les cofaces nécessaires à la connectivité ont été vues. Une coface
+non critique peut n'ajouter aucun point, ne créer aucun nœud public et pourtant
+attacher une facette qui sera décisive lors d'un lot ultérieur. C'est exactement
+la fonction des incidences silencieuses dans le contrat `hgp_reduced`.
+
+Le parent et le propriétaire ne résolvent donc pas la question suivante :
+
+> produire, avec certificat de complétude, toutes les premières incidences utiles
+> de chaque facette ou un quotient prouvé équivalent à $H_0$.
+
+C'est le verrou mathématique aval principal après le parent. Une source sparse
+est permise; une source seulement plausible ou un catalogue Gabriel direct ne
+l'est pas. Les contre-exemples et obligations sont recensés dans
+[`INCIDENCES_SILENCIEUSES_GAMMA.md`](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
+et dans la [spécification](../../docs/SPECIFICATION_MORSEHGP3D.md).
+
+### 3.2 Aucun commit en $\beta$ sans watermark
+
+Deux exécutions peuvent partager exactement le même préfixe de records observés,
+puis différer par un record futur de niveau $\beta'<\beta$ ou
+$\beta'=\beta$. Le premier cas change l'état strict antérieur; le second change
+le lot atomique courant. Sans producteur monotone accompagné d'un watermark
+certifié, seule la terminalité de la source ou une fusion globale permet de
+committer $\beta$.
+
+Le tri externe retire cette globalité de la RAM, pas de la sémantique. Le merger
+doit conserver la dernière clef ouverte jusqu'à la preuve qu'aucun autre run ne
+contient la même valeur rationnelle.
+
+### 3.3 Un lot égal ne se réduit pas record par record
+
+Considérons deux racines pré-lot $R_1,R_2$, un carrier nouveau $F$, et au même
+niveau les incidences $\left\lbrace R_1,F\right\rbrace$ et
+$\left\lbrace F,R_2\right\rbrace$. Prise seule, chacune ressemble à une
+continuation avec une racine antérieure. Leur quotient commun est pourtant une
+multifusion à deux racines. Une chaîne de ce type peut avoir une longueur
+arbitraire.
+
+Le lot peut être calculé avec des composantes connexes externes et un staging
+borné, mais la mutation publique ne devient visible qu'après fermeture de toute
+sa composante égale.
+
+### 3.4 La partition horizontale contient une information irréductible
+
+Une incidence future entre deux carriers doit distinguer « déjà dans la même
+composante » de « encore séparés ». Dans le modèle abstrait sans théorème
+géométrique supplémentaire, un historique peut induire toute partition de $m$
+handles actifs. Encoder cette réponse demande l'équivalent de la partition —
+jusqu'à $\log_2 B_m=\Omega(m\log m)$ bits, où $B_m$ est le nombre de Bell — ou
+la relecture d'un journal permettant de la reconstruire.
+
+Un locator externalisé et un cache borné sont acceptables. Supprimer
+l'information de composante ne l'est pas. La forêt publique seule est
+insuffisante : une continuation silencieuse peut modifier locator et couverture
+sans créer de nouveau nœud.
+
+## 4. Couverture : la vue seuil n'est pas l'autorité source
+
+Un résumé plafonné à vingt identifiants suffit pour décider la vue
+`relation=at_least, min_cluster_size=20`; il ne suffit pas pour produire le
+`coverage_delta` exact. Les couvertures
+$\left\lbrace1,\ldots,20,100\right\rbrace$ et
+$\left\lbrace1,\ldots,20,101\right\rbrace$ ont la même visibilité au seuil.
+Ajouter ensuite le point $100$ produit un delta vide dans le premier cas et non
+vide dans le second.
+
+Le résumé plafonné est donc un consommateur aval. L'autorité doit conserver soit
+les identités exactes de couverture, soit un DAG append-only dont l'union et la
+différence sont rejouables exactement. Les couvertures n'ont pas besoin d'être
+matérialisées à chaque coupe.
+
+## 5. La jointure verticale est globale, pas quadratique
+
+Les dix ordres ne doivent pas devenir dix arbres indépendants. Une composante de
+l'ordre $k+1$ doit rejoindre la composante de l'ordre $k$ qui contient ses
+carriers à la même coupe fermée. L'union des `PointId` ne suffit pas : deux
+composantes de $\Gamma_k$ peuvent se recouvrir en observations tout en restant
+distinctes, et les births latentes doivent rester adressables.
+
+Une matrice verticale résidente n'est pas nécessaire. Pour chaque source, on
+peut émettre des requêtes `(ordre_cible, beta, carrier, composante_source)`, les
+trier extérieurement, puis rejouer une fois la forêt cible en ordre de $\beta$.
+Chaque lot cible est appliqué en entier avant les requêtes à coupe fermée. Les
+réponses sont ensuite jointes aux sources, et une seconde passe vérifie les
+carrés de naturalité.
+
+La globalité verticale est ainsi une jointure adjacente ordonnée. Pour
+$K_{\max}=10$, elle n'autorise ni dix MST sur les points, ni une matrice de toutes
+les paires d'ordres, ni une mosaïque globale.
+
+## 6. Le contrat v2 rend une partie de la masse inévitable
+
+Le profil exact v2 définit `hgp_reduced` à partir de toutes les facettes et
+cofaces de $\Gamma_k$, de leurs incidences, des lots exacts et de leurs deltas.
+Tant que les identités de facettes, cofaces, groupes et provenances font partie
+du payload public ou de son reçu rejouable, leurs octets sont une borne de sortie
+et non un défaut de l'algorithme. Ils peuvent être streamés; ils doivent être
+encodés quelque part.
+
+Un quotient $H_0$ normalisé pourrait être beaucoup plus petit. Il ne serait pas
+byte-compatible avec un contrat qui expose `batch_id`, identités de cofaces
+Gamma, snapshots ou journaux exhaustifs. L'adopter demanderait une révision
+contractuelle versionnée, un théorème de complétude de la source quotientée, la
+validation des verticales et de nouveaux oracles. Une optimisation ne peut pas
+effectuer cette migration implicitement.
+
+## 7. État résident minimal et compteurs Gate D
+
+L'état simultané visé se factorise en
+
+$$M_{\mathrm{resident}}=O(n)+M_{\mathrm{locator}}+M_{\mathrm{batch}}+M_{\mathrm{run}}+M_{\mathrm{scheduler}}.$$
+
+- $O(n)$ couvre l'entrée immuable, l'index, la racine et $A_X$;
+- $M_{\mathrm{locator}}$ encode la partition horizontale active, éventuellement
+  hors RAM;
+- $M_{\mathrm{batch}}$ est le staging du lot égal courant, segmentable par
+  composantes externes mais committé atomiquement;
+- $M_{\mathrm{run}}$ est une fenêtre bornée de tri et de fusion;
+- $M_{\mathrm{scheduler}}$ est une pile de reverse search ou une file GPU
+  explicitement bornée, jamais une table de tous les sommets.
+
+Gate D doit mesurer au minimum, par ordre et au total :
+
+- sommets shallow, flats incidents, enfants et profondeur de l'arbre;
+- événements critiques proposés, propriétaires, doublons évités et octets;
+- incidences directes **et silencieuses**, carriers distincts et première
+  incidence;
+- nombre de niveaux, taille maximale d'un lot égal et composantes temporaires du
+  lot;
+- handles actifs, taille et I/O du locator, unions utiles et silencieuses;
+- facettes et points de `coverage_delta`, nœuds, enfants et segments de forêt;
+- requêtes verticales, réponses, résidus, carrés de naturalité et octets de
+  jointure;
+- runs, high-water hôte/device, octets écrits et lus, reprises et temps par
+  étage.
+
+Mesurer seulement les sommets d'arrangement ou le catalogue critique ne qualifie
+donc pas le contrat 50 k.
+
+## 8. Décision
+
+- état global du parcours d'arrangement : **supprimable par parent et
+  propriétaire locaux**;
+- lecture globale du nuage : **intrinsèque, $O(n)$ et immuable**;
+- complétude sparse des incidences silencieuses : **ouverte, verrou mathématique
+  aval prioritaire**;
+- tri exact et fermeture des lots : **intrinsèques mais externalisables**;
+- partition horizontale et provenance de couverture : **intrinsèques mais
+  segmentables**;
+- jointure verticale adjacente : **intrinsèque mais streamable**;
+- identités exhaustives du contrat v2 : **masse de sortie obligatoire jusqu'à
+  migration contractuelle explicite**;
+- mosaïque de Delaunay d'ordre supérieur, $\Gamma$ résident complet et catalogue
+  global en RAM : **toujours interdits et non nécessaires**.
+
+GCP non utilisé.

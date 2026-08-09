@@ -1,10 +1,17 @@
 # Audit continu et journal des corrections v3
 
+> [!CAUTION]
+> **Archive figée des snapshots `314f7d3` à `dd6f47d`.** Ce fichier n'est plus le
+> journal live ni le point d'entrée du développement courant. Pour le parcours
+> `order_k_flats`, lire
+> [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md),
+> puis les notes Gate D indexées dans [`README.md`](README.md).
+
 > [!IMPORTANT]
-> Ce journal suit le développement concurrent de `morsehgp3D_v3`. Chaque entrée est liée à un snapshot; une correction n'est déclarée fermée qu'après fixture permanente, build propre et exécution Release ainsi qu'ASan/UBSan. L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`.
+> Ce journal suivait le développement concurrent de `morsehgp3D_v3`. Chaque entrée est liée à un snapshot; une correction n'y est déclarée fermée qu'après fixture permanente, build propre et exécution Release ainsi qu'ASan/UBSan. L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`.
 
 > [!NOTE]
-> Contexte courant : `phase=exploration_v3_hors_registre`, `backend=cpu_reference_oracle_under_audit`, `profile=quantized_u16_input_only`, `mode=m1_hostile_judge_and_m2_1_anchored_falsifier`, `public_status=not_claimed`. Aucun résultat de ce dossier n'ouvre une porte produit.
+> Contexte des snapshots : `phase=exploration_v3_hors_registre`, `backend=cpu_reference_oracle_under_audit`, `profile=quantized_u16_input_only`, `mode=m1_hostile_judge_and_m2_1_anchored_falsifier`, `public_status=not_claimed`. Aucun résultat de ce dossier n'ouvre une porte produit.
 
 ## Snapshot 2026-08-08 — `314f7d329f9017a327a6a4442d69fe0f2ebdbe97`
 

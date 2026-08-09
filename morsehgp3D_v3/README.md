@@ -259,15 +259,26 @@ entières distinctes :
 
 | campagne | nuages | points | grille | $s_{\max}$ | cas | désaccords |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| générique | 1 200 | 11 | $[0,24)$ | 2 à 6 | **7 979** | **0** |
-| grille saturée | 900 | 10 | $[0,5)$ | 2 à 8 | **8 279** | **0** |
+| générique | 700 | 11 | $[0,24)$ | 2 à 6 | **4 761** | **0** |
+| grille saturée | 600 | 10 | $[0,5)$ | 2 à 8 | **5 611** | **0** |
 
 Couverture réellement exercée, publiée par le juge et exigée par CTest :
 
 | campagne | nuages navigués | sommets | coquilles $>4$ | triplets quotientés | lots $>1$ | équivariances |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| générique | 7 597 | 876 313 | 3 805 | 15 621 | 52 248 | 322 |
-| grille saturée | 7 952 | 797 645 | 33 978 | 71 644 | 437 989 | 247 |
+| générique | 4 510 | 510 154 | 2 055 | 9 324 | 28 835 | 201 |
+| grille saturée | 5 383 | 530 197 | 23 823 | 51 274 | 303 598 | 176 |
+
+Le premier juge local du parent est exercé sur ces mêmes campagnes : **510 154**
+et **530 197** sommets ont reçu un parent, avec une racine par nuage et zéro
+violation parmi les contrôles actuellement gravés — inclusion des intérieurs et
+absence de cycle. Ce n'est pas encore Gate D entière : la porte doit devenir
+fail-closed si le second parcours échoue, puis graver rang de la base, variation
+stricte du potentiel, fermeture du flat et identité du lot suivant.
+
+Ces deux campagnes n'ont pas encore de commande, graine, log brut et sidecar
+versionnés dans le dépôt. Elles sont des diagnostics rapportés, pas un reçu de
+qualification reproductible.
 
 Les totaux diffèrent de ceux publiés précédemment : les campagnes ont été
 rejouées après la fermeture du P0 d'élagage, et le compte de cas a changé avec
@@ -351,10 +362,12 @@ $B(v)$ n'est plus un simple cardinal : c'est un ensemble, transporté par
 $B_e=B(v)\cup D_-(d)$ puis $B(w)=B_e\setminus\lbrace i\in A:\ i\in B_e\rbrace$, et
 le census de contrôle compare désormais l'**ensemble**, pas sa taille. Trois
 conséquences : les événements « sortants » d'une requête sont exactement les
-membres de $B(v)$, donc gratuits ; la récolte dispose d'un **test de propriété**
-local — un sommet ne peut posséder un support que si tout son intérieur est
-strictement dans la boule de ce support — qui écarte **88,6 %** des tentatives à
-$s_{\max}=11$ sans payer de census ; et les singletons se publient en temps
+membres de $B(v)$, donc gratuits ; la récolte dispose d'un **préfiltre nécessaire
+de propriété** — un sommet propriétaire doit avoir tout son intérieur dans la
+boule de ce support, mais ce test ne l'unicise pas — qui écarte **88,6 %** des tentatives à
+$s_{\max}=11$ sans payer de census — c'est un préfiltre **nécessaire**, pas une
+reconnaissance du propriétaire canonique, et la table globale `emitted` reste
+donc indispensable ; et les singletons se publient en temps
 constant, ce qui supprime les $2{,}5\cdot10^9$ classifications que l'audit
 comptait avant le germe.
 
@@ -381,8 +394,83 @@ contrat reste à deux ordres de grandeur.**
 
 L'index est donc une brique positive et un P0 fermé, pas l'architecture. Ce qu'il
 ne touche pas est inchangé : `seen`, `frontier` et les sommets visités résident
-tous ; les flats sont énumérés depuis les triplets ; il n'y a ni règle de
-propriétaire calculée, ni reverse search, ni streaming, ni forêts.
+tous ; les flats sont énumérés depuis les triplets ; le propriétaire n'est pas
+encore implémenté et il n'y a ni parcours reverse-search, ni streaming aval, ni
+forêts.
+
+---
+
+## 4 ter. Gate D — le parent est local, et c'est ce qui ouvre la voie GPU
+
+[`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](audits/NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md)
+démontre qu'un parent unique se choisit **au sommet**, sans `seen`, sans mosaïque
+globale, et sans énumérer les voisins pour décider lequel est le parent. Le cône
+tangent de la chambre en $v$ est $K_v=\lbrace d:a_s\cdot d\ge0\ \forall s\in S(v)\rbrace$
+et ses rayons extrêmes sont exactement les orientations des flats incidents.
+Le premier juge réutilise ceux que le parcours énumère déjà : il filtre, puis
+choisit canoniquement. La variante par petit programme linéaire exact évite aussi
+d'énumérer tous ces flats pour calculer le parent.
+
+**Le signe tangent ne coûte rien.** Pour une base planaire $(a,b,c)$ et
+$u=(b-a)\times(c-a)$, un rayon entier du pinceau est $d=(u,2u\cdot a)$, et avec
+$a_i=(-2p_i,1)$ on a l'identité $a_i\cdot d=-2\,\mathrm{orient3d}(a,b,c,p_i)$.
+J'avais d'abord dérivé la direction depuis le circumcentre, ce qui frôlait
+$2^{127}$ et m'obligeait à passer en `BigInt<4>` ; les deux formes coïncident,
+puisque $(c_0-a)\cdot u=0$. Le filtre se lit donc avec le prédicat entier que le
+pinceau évalue déjà.
+
+Deux filtres, et la preuve n'exige rien d'autre : l'orientation doit rester dans
+la chambre — aucun membre de coquille ne devient intérieur — et elle doit faire
+croître $L_h$ pour $h=\min B(v)$, ou décroître $Q_r$ au niveau zéro.
+
+**Un P0 trouvé et corrigé, et c'est le même que l'audit a levé.** La base du
+potentiel du germe doit être **affinement indépendante**. Prendre les quatre
+premiers membres de la coquille ne suffit pas : sur
+
+```text
+(0,0,1) (0,1,0) (0,1,1) (1,0,0) (1,1,0) (2,0,0)
+```
+
+la coquille du germe est $\lbrace0,2,3,4,5\rbrace$ et ses quatre premiers membres
+sont coplanaires dans $x+z=1$ ; $Q_r$ perd le germe pour unique zéro et un
+second sommet de niveau zéro devient une **seconde racine**. Mesuré avant
+correction : un nuage sur six cents, mais à tous les ordres. L'extraction est
+maintenant gloutonne et vérifiée, et un échec rend `kInvariantViolated`.
+
+**[mesuré]** un rejeu exact externe sur le snapshot du parent couvre 5 623
+nuages, 146 729 sommets et 15 258 sommets multiples. Il vérifie le rang quatre
+de la base, une racine unique, $B(\pi(v))\subseteq B(v)$, 123 240 hausses
+rationnelles strictes de $L_h$, 17 866 baisses rationnelles strictes de $Q_r$ et
+l'absence de cycle : **zéro échec**. La porte permanente en vérifie actuellement
+un sous-ensemble. Les quatre témoins de la note sont des fixtures permanentes —
+`germe_base_non_independante`, `lex_admissible_cycle`, `lp_optimum_tie`,
+`level_zero_lex_cycle`.
+
+### Pourquoi c'est la route du GPU, et pas les 48 cœurs
+
+Le parent local transforme l'énumération en test **sans état global de
+visitation** : on descend de $v$ vers $w$ si et seulement si $\pi(w)=v$. Il n'y
+a plus de `seen` à partager, donc plus de déduplication atomique des sommets ni
+de table résidente proportionnelle au nombre visité. Des sous-arbres deviennent
+traitables indépendamment, ce qui est une condition favorable au GPU.
+
+Ce résultat ne chiffre aucun facteur d'accélération et ne supprime pas les
+écritures globales de sortie. Les workers doivent encore produire des runs, le
+merge doit fermer les ex æquo en $\beta$, et le réducteur horizontal puis les
+verticales doivent communiquer. Le parent ouvre la voie device; seul un kernel
+mesuré sur la G4 pourra en établir le débit.
+
+**Ce que cela ne ferme pas**, et la note le dit avant moi : les **enfants**
+exigent toujours tous les flats incidents réels, une grande coquille peut en
+avoir un nombre combinatoire, et le parent local ne borne aucun temps. Le
+prototype garde `seen`, `frontier` et `visited` : la porte juge le parent, elle
+ne l'a pas encore substitué au parcours. Avant de le faire il faut encore, selon
+la note, vérifier le rang trois de $C(d)$, l'identité
+$S(\mathrm{next})=C(d)\cup A$, la finitude de l'extrémité et la stricte variation
+du potentiel. Même après cette substitution resteront la source complète des
+incidences silencieuses, le tri et les lots exacts, la partition horizontale,
+`coverage_log` et la jointure verticale. Leur factorisation est dans
+[`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](audits/NOTE_GATE_D_GLOBALITES_RESIDUELLES.md).
 
 ---
 
@@ -425,8 +513,8 @@ ensuite l'essentiel :
 Le mur n'est plus « le parcours jette 98,9 % de son travail » : il en jette 94 %,
 et le facteur est de 17, pas de 100. Le mur est ailleurs, et il est double.
 
-1. **La requête de pinceau est en $O(n)$.** À 50 000 points, un index qui la ramène à une vingtaine de candidats vaut un facteur de l'ordre de $10^3$. C'est le seul endroit où un accélérateur peut encore rendre autant — et il devra le faire *fail-open*, sous le contrat de l'audit numérique, sinon il rendra un faux vert.
-2. **La récolte paie un census en $O(n)$ par candidat, et 43 % de ses tentatives sont des doublons.** C'est la règle de propriétaire qui les supprime, et un census local qui supprime le $O(n)$. Aucune des deux n'est écrite.
+1. **La requête de pinceau était en $O(n)$.** L'index exact de `1a0a1f8` retire ce scan systématique, sans promettre une visite sous-linéaire au pire. À l'ordre du contrat, le facteur CPU mesuré reste seulement 2,8.
+2. **La récolte payait un census en $O(n)$ par candidat, et 43 % de ses tentatives étaient des doublons.** Le census fermé indexé est écrit. Le préfiltre de propriété écarte une part réelle du travail, mais seul le couple « support canonique puis propriétaire exact » supprimera les duplications restantes et la table `emitted`.
 
 **Ce que je ne dis pas :** que le contrat est atteignable. Les deux ratios
 croissent encore à $n=300$, la sortie à 50 000 points serait de l'ordre de
@@ -492,28 +580,32 @@ sur un GPU.
 
 ---
 
-## 5 bis. Mémoire et GPU sont le même problème, pas deux
+## 5 bis. Pour la navigation, mémoire et GPU ont le même verrou
 
 C'est le point qui commande l'ordre des travaux, et il n'était écrit nulle part.
 
-La structure qui coûte la mémoire est `seen`, la table des coquilles déjà
-visitées. C'est **exactement** celle qui interdit le GPU : une table de hachage
-globale, à clefs de longueur variable, écrite par tous les fils. Il n'y a pas un
-verrou mémoire et un verrou GPU ; il y en a **un seul**.
+La structure qui coûte la mémoire de navigation est `seen`, la table des
+coquilles déjà visitées. C'est aussi celle qui interdit une expansion GPU sans
+communication : une table de hachage globale, à clefs de longueur variable,
+écrite par tous les fils. Pour le **parcours de l'arrangement**, c'est un verrou
+unique. Le pipeline HGP aval conserve d'autres globalités indépendantes.
 
 La technique qui l'élimine est connue — la *reverse search* d'Avis et Fukuda.
 Une règle locale et déterministe désigne, depuis tout sommet, l'unique voisin
 par lequel on y serait arrivé ; l'arbre de parcours devient implicite et un
 sommet n'est publié que par son parent. Trois conséquences d'un seul coup :
 
-1. la mémoire de navigation tombe à $O(\text{profondeur})$ au lieu du nombre de sommets ;
-2. le parcours devient **parallèle sans communication** — deux fils sur deux sous-arbres n'ont rien à échanger, ce qui est la forme que réclame un GPU ;
-3. le déterminisme devient gratuit, ce que la porte de publication exige de toute façon.
+1. la mémoire privée de navigation tombe à $O(\text{profondeur})$ au lieu du nombre de sommets ;
+2. deux sous-arbres n'échangent plus d'état de visitation, ce qui permet leur expansion parallèle ;
+3. l'arbre devient déterministe sous une clef canonique, tandis que le déterminisme byte-à-byte de sortie reste celui du tri secondaire et des lots.
 
 Le dépôt en possède déjà une preuve constructive,
 [`AUDIT_REVERSE_SEARCH_ORDER_K_CF9374.md`](audits/AUDIT_REVERSE_SEARCH_ORDER_K_CF9374.md),
-**sous hypothèse d'arrangement simple**. Le parent multiplicitaire n'est
-qu'esquissé.
+pour l'arrangement simple. Son extension au vrai graphe multiplicitaire et une
+règle qui choisit directement un rayon du parent sont maintenant prouvées dans
+[`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](audits/NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md).
+L'implémentation de reverse search reste ouverte : le live ne fait encore que
+juger le parent depuis le BFS avec `seen`.
 
 ### Ce qui portera, et ce qui devra être restructuré
 
@@ -527,6 +619,9 @@ aucune recherche. Le reste demande une restructuration explicite :
 | requête de pinceau | balayage $8(n-4)$ | requête indexée bornée, cas non concluants **différés dans une file de seconde passe** au lieu d'un repli en $O(n)$ dans le fil |
 | census de la récolte | $O(n)$ par candidat | requête de portée sur la boule connue |
 | tri global par $\beta$ exact | non écrit | étage **barrière** : runs triés puis fusion déterministe, clefs rationnellement égales réunies avant toute mutation |
+| état horizontal | non écrit | locator et partition actifs, couverture append-only, stockage externe autorisé |
+| couture verticale | non écrite | requêtes vers l'ordre adjacent, tri puis sweep à coupe fermée |
+| identités du contrat v2 | non produites | facettes, cofaces et provenances streamées, ou migration quotientée explicitement versionnée |
 
 **Ce qu'un GPU n'achètera pas.** Il multiplie le débit ; il ne réduit pas le
 nombre de sommets d'arrangement visités. La question de fond n'est donc pas
@@ -542,11 +637,13 @@ arrangement **simple** — aucune cosphéricité, aucune coplanarité portante �
 le traitement des dégénérescences est reporté à l'une des **dernières phases**
 du projet.
 
-La raison n'est pas le confort. C'est que la *reverse search* n'est démontrée
-que dans ce cas : c'est donc le seul domaine où la mémoire de navigation et la
-forme parallèle peuvent être obtenues **et prouvées** aujourd'hui. On y règle
-l'architecture — index, propriétaire, streaming, tri, forme GPU — sur un terrain
-où chaque pièce a sa preuve, puis on rouvre les multiplicités en dernier.
+La raison n'est pas une impossibilité mathématique du parent multiplicitaire :
+celui-ci est désormais prouvé sous coquille, intérieur et oracle `next` exacts.
+Le cas simple reste un séquencement d'implémentation parce que l'énumérateur de
+flats multiples, le propriétaire des basses arités et leur oracle indépendant
+ne sont pas encore qualifiés. On y règle l'architecture — index, propriétaire,
+streaming, tri, forme GPU — avant de rouvrir ces coûts et contrats
+multiplicataires.
 
 Trois conditions, sans lesquelles cette décision serait une régression :
 
@@ -583,16 +680,16 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 
 | # | question | statut |
 | --- | --- | --- |
-| 1 | index spatial *fail-open* pour la requête de pinceau | non écrit ; les P0 de `Grid::ball` restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | non écrite ; 43 % de la récolte est redondante |
-| 3 | reverse search, pour supprimer `seen` et `frontier` | non écrite ; **c'est le même verrou que le GPU** (§5 bis), et elle n'est démontrée que sous arrangement simple — d'où la décision de séquencement du §5 ter |
+| 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | existence et propriétaire canonique prouvés; le live n'a qu'un préfiltre nécessaire, puis conserve `emitted` |
+| 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé; premier juge live en cours, parcours reverse-search et streaming non écrits |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
-| 5 | forêts, tri global par $\beta$ exact, lots atomiques | non écrits |
+| 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |
 | 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |
 | 6 bis | sémantique quotientée des observations confondues | ouverte ; le prototype les **refuse** explicitement plutôt que de publier un support dépendant de la numérotation |
 | 7 | `sphere.hpp` au bord produit : paire de points confondus acceptée comme support d'arité deux, sentinelle `den==0` sans garde | ouverts, hors de ce fichier |
 | 8 | le contrat 50 k / $K=10$ / 1 s | **non atteint, non mesuré, et les deux ratios qui le décident croissent encore à $n=300$** |
-| 9 | les $n$ singletons passent par `try_emit` avant le germe, soit $2{,}5\cdot10^9$ appels à `sphere_side` à 50 k | ouverte ; c'est une porte d'architecture, pas une constante |
+| 9 | publication directe des $n$ singletons | fermée dans le chemin indexé de `1a0a1f8`; le différentiel conserve le census du chemin lent comme oracle relatif |
 | 10 | la taille $V$ du $\leq k$-niveau en général | **non bornée utilement** : Clarkson--Shor est quadratique en $n$ et en $k$, et les mesures ne valent que pour le régime de surface (§5) |
 | 11 | le régime multi-captation | mesuré **moins peu profond** que la reconstruction fusionnée ; c'est la branche no-go de Gate D |
 

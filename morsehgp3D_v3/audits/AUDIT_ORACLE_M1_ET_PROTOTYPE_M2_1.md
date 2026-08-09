@@ -1,4 +1,10 @@
-# Audit continu de l'oracle M1 et du prototype M2.1
+# Audit historique de l'oracle M1 et du prototype M2.1
+
+> [!CAUTION]
+> **Archive figée aux snapshots `8ac683a` et delta B.** Ce fichier conserve
+> l'audit hostile du premier oracle et la réfutation de M2.1; il ne décrit plus
+> le live ni l'ordre courant des travaux. Le point d'entrée actuel est
+> [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md).
 
 > [!IMPORTANT]
 > Snapshot A, commité : `8ac683ad1e167937fe7f9e964860f6be374a48d0`, daté du 8 août 2026 à 23:09:18 UTC; [`oracle_main.cpp`](../oracle/oracle_main.cpp) avait l'empreinte `7787b24804ce79d5f1fa4013e12dff46e2f062c00c5692bdf26e9ad4f4c14a7d` et [`anchored_catalogue.hpp`](../prototype/anchored_catalogue.hpp) `ba5ef6aeb7e5384c9a825d0138fd37967bf9559457347164c78229013b00eeb5`. Snapshot B, delta non commité relu après stabilisation : `oracle_main.cpp` `91d234f53c44e6d2a3977746c3cc714325507722a247349e1988d17a7251a18f`, `anchored_catalogue.hpp` `014da1b9963b36b20779fb17ae3a4705370a0ea5b6fec0c27b562316eb7ef500`, [`CMakeLists.txt`](../CMakeLists.txt) `86a16a6d2ad76eb5614605c1c19b4c6c15791f639beb17722c7d30a6607a0c9a`. Le delta B corrige déjà plusieurs findings du snapshot A; les deux états sont distingués ci-dessous.

@@ -1,9 +1,9 @@
-# Audit continu de `order_k_flats` — `2532fd5` puis `fefa573`
+# Audit continu de `order_k_flats` — de `2532fd5` à `1a0a1f8` et Gate D
 
 Date : 9 août 2026 UTC.
 
 > [!IMPORTANT]
-> **Verdict courant : GO ciblé pour le nouveau germe et son durcissement u16; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Claude a remplacé la fausse descente de rayon par deux ordres totaux, puis fermé les trois reproductions hostiles du CLI, la frontière u16 des deux entrées C++ et le census contradictoire au niveau du statut. Les portes restantes concernent le contrat complet de ces API, l'indépendance du juge, les multiplicités et surtout l'architecture globale.
+> **Verdict courant : GO ciblé pour le germe, les gardes u16, l'index k-d exact et la règle mathématique de parent; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Le commit `1a0a1f8` ferme le P0 d'élagage par classifications boîte--boule entières et retire les scans systématiques des singletons, du census et du pinceau. Le delta live juge un parent local multiplicitaire. Restent ouverts l'implémentation live du propriétaire complet, la reverse search effective, la source silencieuse, les lots, l'état horizontal, les verticales et le contrat de sortie.
 
 Cadre : `backend=reference_cpu_local`, `profile=quantized_u16_order_k_prototype`, `mode=exploration/diagnostic_only`, `public_status=not_claimed`. Aucun de ces libellés n'ouvre une phase officielle.
 
@@ -20,7 +20,13 @@ Cadre : `backend=reference_cpu_local`, `profile=quantized_u16_order_k_prototype`
 | `prototype/flats_differential.cpp` réaudité | `dfa1f0a5686468af373967c0b0fc59a683a41844893b2841c62fd14c600fd963` |
 | `CMakeLists.txt` réaudité | `66bbea1bf48fe09b736d456a6b5dbf88a46332da34631f85b5437a9e7c17f7dd` |
 
-Ce rapport prolonge [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md). Le commit `7cb176f` conserve la provenance du premier réaudit et `7397cc2` scelle son durcissement; les statuts « courant » ci-dessous portent sur ce second commit. Toute nouvelle empreinte demande un rejeu ciblé, pas la conservation mécanique d'un ancien finding.
+Ce rapport prolonge [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md). Le commit `7cb176f` conserve la provenance du premier réaudit et `7397cc2` scelle son durcissement. Le ledger du §7 porte l'état courant au-delà de ces deux snapshots. Toute nouvelle empreinte demande un rejeu ciblé, pas la conservation mécanique d'un ancien finding.
+
+> [!NOTE]
+> Les §§2 à 6 conservent l'historique des snapshots `2532fd5` et `fefa573`.
+> Plusieurs formulations devenues fausses après `1a0a1f8` — notamment le P0 de
+> l'index et les scans globaux systématiques — sont supersédées par le ledger
+> courant du §7; elles ne doivent plus être lues comme état live.
 
 ## 2. Le P0 de la descente de rayon est fermé
 
@@ -161,6 +167,119 @@ Ce chemin est CPU-only : aucune G4 ne doit être utilisée pour ses tests ou mes
 6. Conserver ce BFS comme oracle structurel borné; développer séparément la source streamée/reverse-search qui évite la matérialisation globale.
 7. Ne tenter 50 k qu'après suppression des census globaux, preuve de la règle de propriétaire et sortie complète avec forêts et incidences.
 
-Décision : créditer pleinement le nouveau germe, la garde u16, le CLI fermé et le progrès du census. Maintenir `exploration/diagnostic_only` et le NO-GO exact/50 k.
+Décision historique : créditer pleinement le nouveau germe, la garde u16, le CLI fermé et le progrès du census. Maintenir `exploration/diagnostic_only` et le NO-GO exact/50 k.
+
+## 7. Ledger courant après `1a0a1f8` et premier juge Gate D
+
+### 7.1 Snapshots réaudités
+
+| objet | SHA-256 ou identité |
+| --- | --- |
+| commit index exact et census local | `1a0a1f8446d980f9b4068ee331eeee8228ff1089` |
+| header committé | `b71fda051a190e90b3541827d167b8c8de5d350dac0f7be5696f3d363b6903cf` |
+| différentiel committé | `c6a75ba9bbdd038e6f26f1df3cc334a39af607735f395062162bc1c5481987c7` |
+| header live Gate D | `ce9244647c3bbead6332a70ada325995e4004c1ccdc36d618e2164d26b20a27d` |
+| différentiel live Gate D | `0168d33d514483c408834b5570e9c63c4d54e2843ad07482d8ba77722218ffcf` |
+| CMake live | `4baf8410ac2b26d74f99430471e671cea96ac64f4e935db2da5ccded9031b826` |
+
+Le live est un delta non committé sur le parent Git `1a0a1f8`. Build réussi;
+CTest rend 39/39 tests verts en 676,03 s. Les résultats plus forts du parent
+proviennent d'un harnais exact externe et sont explicitement qualifiés comme
+transitoires ci-dessous.
+
+### 7.2 Matrice de clôture
+
+| finding antérieur | état courant | preuve ou dette résiduelle |
+| --- | --- | --- |
+| ordre `s_max`, census impossible, préfixe partiel | **fermé en code** | garde avant soustraction, `kInvariantViolated`, `visited.clear()`; injections directes des deux API encore à graver |
+| P0 d'élagage k-d à centre lointain | **fermé** | boîte--boule entière, fixture quatre points et nœuds internes permanents |
+| header sans `<cmath>` | **fermé** | include committé |
+| singletons en $O(n^2)$ | **fermé dans le chemin indexé** | publication directe sous points distincts |
+| census et pinceau rescannant toujours $X$ | **fermé comme scan systématique** | `closed_ball` et désaccord ternaire indexés; visite $O(n)$ encore possible au pire |
+| propriété de l'index | **partiel** | appel interne propriétaire correct; pointeur public étranger ou périmé encore non authentifié |
+| propriétaire et déduplication | **ouvert** | live : premier préfiltre seulement, puis `emitted`; seconde inclusion, cône signé et support canonique avant owner non implémentés |
+| parent local multiplicitaire | **prouvé et jugé, non substitué** | live calcule le parent depuis le BFS; reverse search garde `seen/frontier/visited` |
+| source HGP complète | **ouverte** | incidences silencieuses, lots, locator horizontal, couverture et verticales absents |
+| profils produit | **ouverts** | doublons refusés, dyadique absent, oracle encore relatif aux primitives v2 |
+
+Le P0 de l'ancien §4.6 est donc fermé au commit `1a0a1f8`. Les phrases du §5
+affirmant encore un census global pour chaque singleton, chaque direction et
+chaque émission sont historiques et désormais fausses. Le NO-GO 50 k demeure,
+mais pour les raisons actuelles : volume $V_k$ sans borne utile au SLO,
+énumération des flats et queue lourde des coquilles, index sans borne
+sous-linéaire universelle, parcours encore résident, propriétaire incomplet et
+pipeline HGP aval absent.
+
+### 7.3 Parent local : crédit et dettes exactes
+
+Le delta live implémente le corollaire constructif de
+[`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md) :
+signes tangents par `orient3d_exact`, contraintes de coquille, croissance de
+$L_h$ ou décroissance de $Q_r$, puis clef déterministe de flat. Le premier delta
+prenait quatre membres coplanaires pour la base de $Q_r$ et produisait deux
+racines sur six points. L'extraction gloutonne indépendante ferme ce P0 et la
+fixture `germe_base_non_independante` est permanente.
+
+Un rejeu externe exact couvre 5 623 nuages, 146 729 sommets et 15 258 sommets
+multiples. Il vérifie 123 240 hausses rationnelles strictes de $L_h$, 17 866
+baisses strictes de $Q_r$, le rang quatre de la base, l'inclusion des intérieurs,
+une racine et zéro cycle : zéro échec.
+
+Les deux grandes campagnes du README annoncent 4 761 et 5 611 cas, puis 510 154
+et 530 197 sommets avec parent. Elles sont cohérentes avec les compteurs du juge,
+mais aucune commande complète, graine, sortie brute ni sidecar versionné n'est
+conservé dans le dépôt. Elles restent des mesures diagnostiques non reçues, pas
+une porte reproductible.
+
+La porte du dépôt est plus faible : si le second parcours échoue ou si le
+vecteur de parents a une mauvaise taille, le bloc est sauté au lieu de rougir.
+Elle ne compare pas directement les potentiels, le rang trois de la fermeture,
+l'adjacence ni $S(\mathrm{next})=C\cup A$. Le commentaire CMake « Gate D est
+vérifiée » dépasse donc la porte actuelle. Dans le header, l'ancien paragraphe
+`sphere3`/`BigInt<4>` précède encore la nouvelle identité sans grand entier et
+doit être supprimé comme narration obsolète.
+
+### 7.4 Le propriétaire complet est local, mais pas encore live
+
+Le préfiltre $B(v)\subseteq B_U$ accélère réellement la récolte; il ne certifie
+ni $v\in P_U$, ni l'unicité. La fixture minimale à cinq points de la note laisse
+trois sommets passer : un échoue $B_U\subseteq B(v)\cup S(v)$, puis deux ont le
+même $G_U$ et exigent le tie-break. Sur le live, elle conserve un catalogue exact
+mais encore dix déduplications par `emitted`.
+
+La règle complète, prouvée dans la note, est : census fermé, rang, support
+canonique de la coquille, rejet des supports non canoniques, puis optimalité
+locale dans le cône signé de $P_U$. Le cube u16 possède quatre supports
+antipodaux de la même boule : appliquer seulement un owner par support émettrait
+encore quatre fois. La composition « support canonique puis owner » est donc la
+condition exacte pour supprimer `emitted`.
+
+### 7.5 Ce qui reste global
+
+La suppression de `seen` ne rend pas le contrat HGP local. La
+[`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](NOTE_GATE_D_GLOBALITES_RESIDUELLES.md)
+sépare cinq classes : lecture immuable de $X$, tri et lots exacts
+externalisables, partition horizontale vivante, jointure verticale adjacente et
+identités exhaustives éventuellement imposées par le contrat v2. Le verrou aval
+mathématique prioritaire est maintenant la source complète et sparse des
+incidences silencieuses. Les autres globalités peuvent être streamées; elles ne
+peuvent pas être supprimées sémantiquement.
+
+### 7.6 Porte de reprise courante
+
+1. Rendre le juge parent fail-closed et graver rang, potentiels, fermeture et
+   identité du lot.
+2. Implémenter et différencier « support canonique puis owner » avant de retirer
+   `emitted`.
+3. Remplacer le BFS par la reverse search en conservant le BFS comme oracle
+   borné; publier profondeur, enfants, flats et high-water.
+4. Établir une source complète des incidences silencieuses ou ouvrir une
+   migration contractuelle quotientée explicitement versionnée.
+5. Construire runs, fermeture des ex æquo, locator horizontal, couverture et
+   jointure verticale avant toute mesure du contrat 50 k.
+
+Ce chemin reste CPU-only tant qu'aucun kernel CUDA de reverse search et aucun
+pipeline aval device n'existent. Aucune G4 ne doit être utilisée pour exécuter
+les CTests ou les harnais CPU ci-dessus.
 
 GCP non utilisé.

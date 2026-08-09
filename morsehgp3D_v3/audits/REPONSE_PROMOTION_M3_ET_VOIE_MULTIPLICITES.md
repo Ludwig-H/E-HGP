@@ -4,10 +4,18 @@ Date : 9 août 2026 UTC. Objet : la promotion M3 est retirée, la voie
 multiplicitaire est implémentée et jugée, et deux résultats nouveaux sont
 versés au dossier — dont un qui corrige l'arithmétique de la question 50 k.
 
+> [!NOTE]
+> **Réponse chronologique, pas autorité d'audit.** Les §§1 à 10 documentent les
+> snapshots qui ont mené à `1a0a1f8`; plusieurs limites y sont historiques. Le
+> §11 répond au premier delta Gate D. L'état courant et les findings indépendants
+> sont dans [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md)
+> et les deux notes Gate D.
+
 > [!IMPORTANT]
 > **Le verdict des deux audits est accepté sans réserve.** Les quatre P0 ont été
-> reproduits ici, sur le header committé `a6d0a3e…`/`47ee376…`, contre une force
-> brute écrite indépendamment. Ils sont réels. Le README est revenu à
+> reproduits ici, sur le header committé `a6d0a3e…`/`47ee376…`, contre une
+> énumération exhaustive indépendante du parcours mais relative aux primitives
+> géométriques v2 partagées. Ils sont réels. Le README est revenu à
 > `exploration_v3`.
 >
 > **Deux faits nouveaux, tous deux défavorables à mes propres affirmations
@@ -18,7 +26,7 @@ versés au dossier — dont un qui corrige l'arithmétique de la question 50 k.
 > **non invariante par permutation** ; une seule renumérotation suffit à changer
 > la sortie sur le cube.
 
-## 1. Reproduction indépendante des P0
+## 1. Reproduction exhaustive indépendante du parcours
 
 Sonde écrite pour cet audit, incluant `prototype/order_k_bfs.hpp` **sans
 modification**, avec une vérité exhaustive locale (tous les sous-ensembles de
@@ -50,7 +58,7 @@ Référence : `AUDIT_PROMOTION_M3_2E3FA7B.md` §9 et `AUDIT_DELTA_…` §7.
 | D1 — fixture du germe à cinq points, `(shell, exact_level)` avant propagation | **fermée** | census exact à chaque sommet, compteurs `census_mismatch_shell` et `census_mismatch_level` |
 | D2 — vrai germe de niveau zéro sur une face non triangulaire | **fermée après correction** | la première construction, par descente de rayon, était fausse et l'audit `9c587e6` l'a réfutée ; voir §8 |
 | D3 — non-régression de `468635c` (coquille constante) | **fermée** | fixture `constant_shell_members` |
-| D6 — niveaux et coquilles comparés à un oracle indépendant sur coplanarités, cosphéricités, limites u16 | **fermée** pour cette vérité ; **ouverte** pour l'oracle rationnel M1 | voir §5 |
+| D6 — niveaux et coquilles comparés à une énumération indépendante du parcours sur coplanarités, cosphéricités, limites u16 | **fermée relativement aux primitives v2 partagées**; **ouverte** pour l'oracle rationnel M1 | voir §5 |
 | P3 — `Grid::ball` fail-open | **non fermée, contournée** : aucun accélérateur n'est branché, la requête balaie le nuage | — |
 | P5 — intégration au catalogue complet et aux forêts, injection de fautes | **partielle** : catalogue oui, forêts non, injection non | — |
 | P6 — porte M3 définie dans la spécification et le registre | **non fermée** ; aucune phase n'est ouverte, donc rien à mettre à jour | — |
@@ -114,7 +122,8 @@ reste hors contrat.
 C'est le point qui déplace la question 50 k. Le rapport comparait les sommets
 visités à un compteur de sphères critiques produit par la récolte défaillante —
 celle-là même qui omettait l'essentiel des arités deux et trois. Mesuré sur le
-catalogue **complet**, vérifié contre la force brute :
+catalogue complet **selon cette vérité relative**, confronté à l'énumération
+exhaustive :
 
 | $n$ | sommets/point | critiques/point | travail/sortie |
 | ---: | ---: | ---: | ---: |
@@ -353,3 +362,53 @@ cœurs. **Le NO-GO 50 k n'est pas entamé**, et je ne prétends pas l'entamer :
 l'index est une brique, `seen`/`frontier`/`visited` résident toujours, les flats
 sortent encore des triplets, et il n'y a ni propriétaire calculé, ni reverse
 search, ni forêts.
+
+---
+
+## 11. Gate D — parent local implémenté et jugé
+
+La règle de parent de `NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D` est implémentée
+comme **porte**, pas comme parcours : le BFS avec `seen` reste en place, et la
+porte recalcule le parent de chaque sommet pour le juger.
+
+**Votre identité §6 remplace ma dérivation.** J'avais construit la direction du
+pinceau depuis le circumcentre `sphere3`, ce qui frôlait $2^{127}$ et m'imposait
+`BigInt<4>`. Avec $d=(u,2u\cdot a)$ et $a_i\cdot d=-2\,\mathrm{orient3d}(a,b,c,p_i)$,
+le signe tangent se lit avec le prédicat que le pinceau évalue déjà. Les deux
+formes coïncident puisque $(c_0-a)\cdot u=0$. Tout le grand entier a disparu.
+
+**Votre P0 §11.2 est réel et je l'avais rencontré une heure plus tôt sans en
+comprendre la cause.** Sur la grille saturée, un nuage sur six cents produisait
+exactement une racine surnuméraire, à tous les ordres. C'était bien la base du
+potentiel du germe prise sans vérifier son indépendance. L'extraction est
+maintenant gloutonne — un point, un deuxième distinct, un troisième non
+colinéaire, un quatrième d'`orient3d_exact` non nul — et un échec rend
+`kInvariantViolated`. Votre fixture à six points est permanente, ainsi que
+`lex_admissible_cycle`, `lp_optimum_tie` et `level_zero_lex_cycle`.
+
+**[mesuré]** deux campagnes après correction : **510 154** et **530 197** sommets
+ont vu leur parent recalculé localement. Une racine par nuage, aucun parent
+manquant, aucune inclusion $B(\pi(v))\subseteq B(v)$ violée, aucun cycle, zéro
+désaccord sur 4 761 et 5 611 cas.
+
+**Vos deux qualifications §11.3 sont acceptées et inscrites.** Le test
+$B(v)\subseteq B_U$ est un préfiltre **nécessaire**, pas une reconnaissance du
+propriétaire canonique : la table `emitted` reste indispensable, et le README le
+dit maintenant. Et la porte ne vérifie pas encore le rang trois de $C(d)$,
+l'identité $S(\mathrm{next})=C(d)\cup A$, la finitude de l'extrémité ni la
+stricte variation du potentiel — ces quatre assertions doivent précéder le
+remplacement effectif du BFS, et il n'a pas eu lieu. Le bloc doit aussi échouer
+si le second parcours ou la taille du vecteur de parents est incohérent; il les
+saute encore silencieusement.
+
+**Sur la route GPU, votre note des globalités résiduelles corrige ce que
+j'allais écrire.** Le parent local rend le **parcours** sans état partagé de
+visitation : plus de déduplication atomique des sommets, plus de table résidente
+proportionnelle au nombre visité. Les sorties des workers doivent encore être
+fusionnées et ne constituent pas un front GPU qualifié. Le parent ne touche à
+aucune des
+dépendances globales de la hiérarchie — complétude des incidences silencieuses,
+ordre exact en $\beta$, fermeture atomique des ex æquo, partition horizontale
+vivante, provenance de couverture, jointure verticale. Le verrou mathématique
+aval prioritaire n'est donc plus le parcours : c'est la source complète et sparse
+des premières incidences utiles. Je ne prétends pas l'avoir entamée.

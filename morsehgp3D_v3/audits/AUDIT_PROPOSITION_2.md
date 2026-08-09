@@ -1,4 +1,10 @@
-# Second audit actualisé et journal continu — A2pe, peeling local et oracle M1
+# Second audit historique — A2pe, peeling local et oracle M1
+
+> [!CAUTION]
+> **Archive figée aux commits `8ac683a` puis `ae08c9f`.** Les voies par ancres
+> A2pe et peeling restent documentées ici comme alternatives réfutables; ce
+> fichier n'est plus le journal courant de la v3. La voie retenue et son état
+> live sont indexés dans [`README.md`](README.md).
 
 > [!IMPORTANT]
 > Base historique de cet audit : commit `8ac683ad1e167937fe7f9e964860f6be374a48d0`, 700 lignes, SHA-256 `af94886fec1d83bc671eefdd4c605ca6f4d939ff3a1ce0298e49c719aed03386`. Réaudit différentiel courant : commit `ae08c9fbfa33246187e95a87977c8c671601f040`, 738 lignes, 42 665 octets, SHA-256 `615935ad798ce5afb3eb3280a54a3bfd8306eed9d7570ff474866c7a3255d912`. Les sections historiques sont conservées comme justification des corrections; le verdict sur le texte courant est donné au §0 ci-dessous. Le suivi de l'oracle et du prototype est séparé dans [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md).
@@ -16,7 +22,7 @@ La proposition courante ferme correctement les contradictions textuelles suivant
 - l'objet est le sous-complexe shallow stratifié, jamais l'ensemble sous-jacent d'un unique $V_K(p)$;
 - une strate fournit au plus la projection de $p$ sur son enveloppe affine, suivie des tests de centrage, shell, profondeur, rang et propriétaire;
 - les budgets de profondeur sont séparés pour supports deux, trois et quatre;
-- une 2-face vérifie seulement $mathrm{aff}(F)=H_u$ et A2e s'exécute une fois sur le plan canonique;
+- une 2-face vérifie seulement $\mathrm{aff}(F)=H_u$ et A2e s'exécute une fois sur le plan canonique;
 - PEL-3 est déclarée fausse dès deux points et les composantes non bornées restent une obligation de terminaison;
 - le coût publié est maintenant un worst-case par ancre, potentiellement quadratique sur toutes les ancres sans arrêt certifié;
 - le masque carrier est fail-open et ne filtre jamais les témoins de profondeur;

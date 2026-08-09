@@ -1,11 +1,20 @@
 # Audits de MorseHGP3D v3
 
-Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être rattaché à un commit ou à des empreintes SHA-256; un fichier modifié pendant sa lecture est réaudité sur un nouveau snapshot avant verdict.
+Ce dossier conserve les audits indépendants et les réponses chronologiques explicitement étiquetées de la v3. Chaque finding doit être rattaché à un commit ou à des empreintes SHA-256; un fichier modifié pendant sa lecture est réaudité sur un nouveau snapshot avant verdict.
+
+## Lectures courantes
+
+- [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md) : ledger courant du parcours par flats, du germe historique au commit d'index exact `1a0a1f8` puis au premier juge Gate D; matrice de clôture, dettes live et NO-GO 50 k actualisés.
+- [`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md) : résultat constructif pour le chemin rapide : classifications exactes boîte--boule en `BigInt<4>`, preuve du désaccord ternaire, contrat de propriété et porte à nœuds internes.
+- [`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md) : parent local exact sur le vrai graphe multiplicitaire, propriétaire canonique par cône signé, garde multi-support, suppression mathématique de `seen/frontier/visited` et de `emitted`, fixtures et review live.
+- [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](NOTE_GATE_D_GLOBALITES_RESIDUELLES.md) : factorisation de ce qui reste global par nécessité scientifique : source silencieuse, tri et lots, état horizontal, couverture, verticales et masse contractuelle.
+
+## Archives épinglées et réponses chronologiques
 
 - [`AUDIT_PROPOSITION.md`](AUDIT_PROPOSITION.md) : audit historique de la première voie proposée.
-- [`AUDIT_PROPOSITION_2.md`](AUDIT_PROPOSITION_2.md) : second audit actualisé et journal continu de la proposition, de l'oracle, des prototypes, des reçus et des portes.
-- [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md) : audit dynamique du juge M1, réfutation du certificat M2.1 commité et suivi de son retrait dans le delta live.
-- [`AUDIT_CONTINU_CORRECTIONS.md`](AUDIT_CONTINU_CORRECTIONS.md) : journal vivant des snapshots, reproductions, corrections en cours et portes restantes; c'est le point d'entrée à lire pendant le développement concurrent.
+- [`AUDIT_PROPOSITION_2.md`](AUDIT_PROPOSITION_2.md) : archive figée du second audit de la voie A2pe aux commits `8ac683a` puis `ae08c9f`; utile pour ses contre-exemples, mais plus journal courant.
+- [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md) : archive figée de l'audit dynamique du premier juge M1 et de la réfutation du certificat M2.1.
+- [`AUDIT_CONTINU_CORRECTIONS.md`](AUDIT_CONTINU_CORRECTIONS.md) : archive figée du journal des snapshots `314f7d3` à `dd6f47d`; ne décrit plus le live.
 - [`AUDIT_EDGE_SHALLOW_AD9DEF2.md`](AUDIT_EDGE_SHALLOW_AD9DEF2.md) : audit dynamique historique du premier dictionnaire `edge_shallow`, de ses fixtures et de son coût.
 - [`AUDIT_LIVE_1216D16.md`](AUDIT_LIVE_1216D16.md) : audit reproductible du prototype et du juge aux commits `1216d16` puis `389a742`, avec résultats Release/sanitizers, reçus hostiles, domaine `RelevantGP`, compteurs et portes 50 k.
 - [`AUDIT_QUESTIONS_README_389A742.md`](AUDIT_QUESTIONS_README_389A742.md) : réponses au README courant, dont la fermeture conditionnelle de PEL-1 sous `RelevantGP`, l'audit Q0--Q3 et les deux fixtures Q1 invalides publiées.
@@ -32,12 +41,8 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 
 - [AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md](AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md) : preuve polyédrique de la connectivité du vrai 1-squelette de niveau au plus $k$, distinction sommets/arêtes/strates, limites de RelevantGP et audit conditionnel du harvest d'arités basses ajouté après $7fa39b1$.
 
-- [`REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md`](REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md) : réponse aux deux audits du commit `2e3fa7b`. Retrait de la promotion M3, reproduction indépendante des quatre P0, implémentation de la voie multiplicitaire jugée sur 33 081 cas sans désaccord, et deux résultats nouveaux défavorables aux affirmations antérieures : l'ambiguïté de demi-tour du germe, la non-invariance du support canonique par permutation, et le rapport 100:1 travail/sortie identifié comme artefact d'une récolte incomplète.
+- [`REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md`](REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md) : réponse chronologique, non autorité d'audit, aux deux audits du commit `2e3fa7b`, prolongée jusqu'au premier delta Gate D; elle conserve le retrait de M3 et les corrections acceptées.
 
-- [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md) : audit hostile du premier parcours par flats et de son juge différentiel : contre-exemple u16 à la descente stricte du rayon, statut et catalogue dépendants de la permutation, limites d'indépendance et de couverture du juge, CLI non fermé et NO-GO architectural pour 50 k.
-
-- [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md) : audit continu du germe par sous-segment support et apex maximal, puis de ses durcissements : P0 du rayon, narrowing CLI, censure de campagne, frontière u16 et fausse identité arrangement--Delaunay corrigés; contrat C++ résiduel, indépendance du juge, certificat de l'index k-d, multiplicités et architecture 50 k encore ouverts.
-
-- [`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md) : résultat constructif pour le chemin rapide : classifications exactes boîte--boule en `BigInt<4>`, preuve que le désaccord ternaire des signes terminaux contient tous les événements non constants, contrat de propriété et porte de validation à nœuds internes.
+- [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md) : snapshot historique du premier parcours par flats; ses contre-exemples ont déclenché les corrections suivies dans l'audit continu courant.
 
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.
