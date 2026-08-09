@@ -107,6 +107,14 @@ struct Dichotomy {
   long long index_internal_nodes = 0;
   long long wrong_level = 0;
   long long wrong_set = 0;
+  // Attache resolue par facette coeur : classification des intrus STRICTS.
+  long long intruders_zero = 0;
+  long long intruders_one = 0;
+  long long intruders_many = 0;
+  long long attachments = 0;
+  long long attachment_cominimisers = 0;
+  long long attachment_target_not_smaller = 0;
+  long long attachment_target_outside_core = 0;
   long long disagreements = 0;
 };
 
@@ -291,6 +299,51 @@ static bool run_cloud(const std::vector<P3>& pts, int k, Dichotomy* out) {
     out->cominimisers_max = std::max(out->cominimisers_max, (long long)decided.size());
     for (const auto& coface : decided) ++coface_provenance[coface];
 
+    // ------------------------------------------------------------------------
+    // UNE ATTACHE RESOLUE PAR FACETTE COEUR.
+    //
+    // `NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md` montre que sous la porte
+    // reguliere il suffit d'une attache canonique par facette ayant au moins
+    // DEUX intrus STRICTS — J_F, la boule OUVERTE, distincte de E_F qui decide
+    // la branche. Avec z_F = min J_F et u_F = min U_F, la cible locale est
+    // T_F = (F \ {u_F}) union {z_F}, et le lemme garantit beta(T_F) < a_F.
+    //
+    // La cible BRUTE est refutee : T_F peut ne pas appartenir a D_k, et il faut
+    // alors viser le carrier strict RESOLU. Ce prototype verifie donc le lemme
+    // de descente et MESURE combien de fois la cible brute sort du coeur ; il ne
+    // resout rien, faute de reducteur horizontal.
+    const mhgp::MiniballResult facet_mb =
+        mhgp::miniball_of(pts, facet.data(), (int)facet.size());
+    std::vector<i32> strict_intruders;
+    for (i32 z = 0; z < n; ++z) {
+      if (std::binary_search(facet.begin(), facet.end(), z)) continue;
+      if (mhgp::sphere_side(facet_ball, pts[(std::size_t)z]) < 0) strict_intruders.push_back(z);
+    }
+    if (strict_intruders.empty()) ++out->intruders_zero;
+    else if (strict_intruders.size() == 1) ++out->intruders_one;
+    else {
+      ++out->intruders_many;
+      ++out->attachments;
+      out->attachment_cominimisers += (long long)decided.size();
+      if (facet_mb.ok) {
+        const i32 z_f = strict_intruders.front();
+        const i32 u_f = facet_mb.support[0];
+        std::vector<i32> target;
+        for (i32 x : facet) if (x != u_f) target.push_back(x);
+        target.push_back(z_f);
+        std::sort(target.begin(), target.end());
+        mhgp::Sphere target_ball{};
+        if (!miniball_of_set(pts, target, &target_ball) ||
+            mhgp::sphere_cmp_beta(target_ball, facet_ball) >= 0) {
+          ++out->attachment_target_not_smaller;
+          ++out->disagreements;                 // le lemme de descente est faux
+        }
+        if (grouped.find(target) == grouped.end() &&
+            truth_facets.find(target) == truth_facets.end())
+          ++out->attachment_target_outside_core;
+      }
+    }
+
     bool truth_have = false;
     mhgp::Sphere truth_level{};
     std::set<std::vector<i32>> truth_set;
@@ -319,7 +372,7 @@ static bool run_cloud(const std::vector<P3>& pts, int k, Dichotomy* out) {
 int main(int argc, char** argv) {
   int clouds = 60, npoints = 20, coord = 22, k = 3;
   long long seed = 4242;
-  int min_closed = 0, min_empty = 0, min_internal = 0;
+  int min_closed = 0, min_empty = 0, min_internal = 0, min_attachments = 0;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -345,6 +398,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--min-closed")) target = &min_closed;
     else if (!strcmp(argv[i], "--min-empty")) target = &min_empty;
     else if (!strcmp(argv[i], "--min-internal-nodes")) target = &min_internal;
+    else if (!strcmp(argv[i], "--min-attachments")) target = &min_attachments;
     else if (!strcmp(argv[i], "--seed")) {
       if (!has || value < 0) { printf("ECHEC : valeur entiere invalide pour --seed\n"); return 2; }
       ++i;
@@ -362,7 +416,7 @@ int main(int argc, char** argv) {
     *target = (int)value;
   }
   if (clouds < 1 || npoints < 2 || npoints > 64 || coord < 2 || coord > 65536 || k < 1 ||
-      k >= npoints || min_closed < 0 || min_empty < 0 || min_internal < 0) {
+      k >= npoints || min_closed < 0 || min_empty < 0 || min_internal < 0 || min_attachments < 0) {
     printf("ECHEC : campagne absurde\n");
     return 2;
   }
@@ -406,6 +460,13 @@ int main(int argc, char** argv) {
          "  proposes par plusieurs facettes=%lld\n", total.cominimisers,
          total.core_facets ? (double)total.cominimisers / (double)total.core_facets : 0.0,
          total.cominimisers_max, total.cofaces_from_several_facets);
+  printf("attache        : intrus stricts 0/1/>=2 = %lld/%lld/%lld  attaches=%lld"
+         "  co-minimiseurs remplaces=%lld (facteur %.2f)\n", total.intruders_zero,
+         total.intruders_one, total.intruders_many, total.attachments,
+         total.attachment_cominimisers,
+         total.attachments ? (double)total.attachment_cominimisers / (double)total.attachments : 0.0);
+  printf("               : lemme de descente viole=%lld  cible brute hors coeur=%lld\n",
+         total.attachment_target_not_smaller, total.attachment_target_outside_core);
   printf("index          : points touches=%lld (%.1f par facette)  noeuds internes=%lld\n",
          total.closed_ball_touched,
          total.core_facets ? (double)total.closed_ball_touched / (double)total.core_facets : 0.0,
@@ -417,10 +478,11 @@ int main(int argc, char** argv) {
     return 3;
   }
   if (total.closed_nonempty < min_closed || total.closed_empty < min_empty ||
-      total.index_internal_nodes < min_internal) {
+      total.index_internal_nodes < min_internal || total.attachments < min_attachments) {
     printf("ECHEC : plancher de couverture non atteint — fermee %lld/%d, vide %lld/%d,"
-           " noeuds internes %lld/%d\n", total.closed_nonempty, min_closed, total.closed_empty,
-           min_empty, total.index_internal_nodes, min_internal);
+           " noeuds internes %lld/%d, attaches %lld/%d\n", total.closed_nonempty, min_closed,
+           total.closed_empty, min_empty, total.index_internal_nodes, min_internal,
+           total.attachments, min_attachments);
     return 3;
   }
   if (total.disagreements == 0 && failures == 0) {

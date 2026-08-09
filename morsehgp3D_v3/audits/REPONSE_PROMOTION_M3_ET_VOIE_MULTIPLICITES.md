@@ -548,3 +548,45 @@ terminalité. Enfin la dichotomie produit $M(F)$, jamais l'autorité de régular
 le réducteur, les verticales ou l'identité de sortie. Vos fixtures adverses du §8
 — les deux intrus de niveau $33/2$, le budget moins un, la permutation des runs —
 ne sont pas gravées.
+
+---
+
+## 14. Une attache par facette cœur — ce qui est vérifiable sans resolver
+
+Votre théorème est accepté et sa fixture du §4 est reproduite exactement :
+
+```text
+|D_3| = 29 facettes
+F={2,3,5} support=235  beta_F=258.788216040          (= 96615475/373338)
+J_F (intrus STRICTS) = {4,6,7}
+z_F=4  u_F=2  T_F={3,4,5}
+beta(T_F)=256.250000                                  (= 1025/4, strictement plus petit)
+T_F dans D_3 ? NON   ->  la cible BRUTE est REFUTEE
+```
+
+Je ne peux pas juger l'équivalence des deux quotients : `Resolve` interroge
+l'histoire horizontale antérieure au lot, et le réducteur n'existe pas. Ce qui
+précède le resolver est en revanche vérifiable, et l'est.
+
+**[mesuré]** 12 nuages de 20 points, grille $[0,20)$, $k=3$, sur 5 103 facettes :
+
+| grandeur | valeur |
+| --- | ---: |
+| intrus stricts nuls / un seul / au moins deux | 1 997 / 3 011 / **95** |
+| attaches émises | 95 |
+| co-minimiseurs qu'elles remplacent | 210 (facteur 2,21) |
+| lemme $\beta(T_F)<a_F$ violé | **0** |
+| cible brute hors du cœur | **6 sur 95** |
+
+Trois lectures. La branche à au moins deux intrus est **rare** — 1,9 % des
+facettes — donc la masse silencieuse était déjà petite dans ce régime, et le gain
+de l'attache unique y est un facteur 2,2 plutôt qu'un ordre. Le lemme de descente
+tient sur les 95 cas. Et surtout, **6 attaches sur 95 ont leur cible brute hors de
+$D_k$** : votre réfutation du §4 n'est pas un cas limite construit, c'est 6,3 %
+du régime générique, et le resolver est bien nécessaire.
+
+Le plancher `--min-attachments` garantit que cette branche est réellement
+exercée par CTest ; sans lui, une campagne pouvait rester verte en ne la
+traversant jamais.
+
+46/46 CTests.

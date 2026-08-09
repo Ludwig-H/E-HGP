@@ -474,16 +474,17 @@ incidences silencieuses, le tri et les lots exacts, la partition horizontale,
 
 ---
 
-## 4 quater. La source silencieuse n'est plus une inconnue mathématique
+## 4 quater. La première incidence est décidée; sa source produit reste ouverte
 
 [`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](audits/NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md)
-retire du dossier le verrou que je venais de désigner comme prioritaire. Pour une
-facette $F$ du cœur, de miniboule fermée $B_F$ et de niveau $b_F$, en posant
-$E_F=(B_F\cap X)\setminus F$, la première incidence se décide **sans aucune
-recherche de voisinage** :
+retire le verrou mathématique de la décision locale, pas celui de sa production
+terminale. Pour une facette $F$ du cœur, de miniboule fermée $B_F$ et de niveau
+$b_F$, en posant $E_F=(B_F\cap X)\setminus F$, la première incidence se décide
+par une requête `closed_ball` complète ou par le minimum d'une source directe;
+aucune étoile de voisinage n'est nécessaire :
 
 - **branche fermée**, $E_F\neq\varnothing$ : alors $\lambda(F)=b_F$ et $M(F)=\lbrace F\cup\lbrace x\rbrace:x\in E_F\rbrace$. La preuve tient en deux lignes et n'exige **aucune** hypothèse de régularité ;
-- **branche vide**, $E_F=\varnothing$ : alors $\lambda(F)$ est le minimum des niveaux des cofaces **directes** contenant $F$, et $M(F)$ en est le groupe d'ex æquo — tout minimiseur est de Gabriel au sens ouvert, sinon un intrus strict fournirait une incidence strictement moins chère.
+- **branche vide**, $E_F=\varnothing$ : si la source contient toutes les cofaces de Gabriel ouvertes et développe ou refuse explicitement les égalités extérieures, alors $\lambda(F)$ est le minimum de leurs niveaux parmi celles qui contiennent $F$, et $M(F)$ en est le groupe d'ex æquo — tout minimiseur est de Gabriel au sens ouvert, sinon un intrus strict fournirait une incidence strictement moins chère.
 
 ### Ma première source était fausse, et le juge ne pouvait pas le voir
 
@@ -505,52 +506,90 @@ révélée. **Le juge était circulaire.**
 
 Deux corrections, et la seconde compte plus que la première.
 
-La source **développe** les extra-shells. Toute coface de Gabriel ouverte $Q$ de
+Dans le falsificateur borné, la source **développe** les extra-shells. Toute coface de Gabriel ouverte $Q$ de
 cardinal $k+1$ a pour miniboule une sphère critique $B$, avec
 $I(B)\subseteq Q\subseteq I(B)\cup S(B)$ ; donc $Q=I\cup T$ pour un
 $T\subseteq S$ de cardinal $k+1-\lvert I\rvert$. Énumérer les sphères critiques
-puis ces $T$ est complet — à condition que le catalogue contienne $B$, ce que
-$s_{\max}=n$ garantit, et non un plafond de rang.
+puis ces $T$ est complet relativement à un catalogue critique complet. Le
+prototype obtient cette prémisse par `flat_catalogue(pts,n)` : il matérialise le
+catalogue entier et développe combinatoirement les coquilles. C'est une bonne
+référence bornée, pas l'architecture produit 50 k.
 
-La vérité **énumère son propre univers** : toutes les cofaces de cardinal $k+1$ à
+La vérité **énumère son propre univers vis-à-vis de la source** : toutes les cofaces de cardinal $k+1$ à
 vacuité ouverte, puis ses propres facettes. Les deux univers sont comparés
 **avant** $\lambda$ et $M$, donc une coface omise est désormais un désaccord. Le
 niveau $\lambda(F)$ est comparé lui aussi, pas seulement l'ensemble $M(F)$. Le
-parseur lit les entiers en entier, un statut non `kOk` fait échouer au lieu de
-censurer, et les planchers portent sur les deux branches et sur les nœuds internes
-de l'index.
+parseur lit les entiers en entier et un statut non `kOk` fait échouer au lieu de
+censurer. Cette énumération partage encore `miniball_of`, `sphere_side` et
+`sphere_cmp_beta` avec le sujet : elle est indépendante de la source, pas des
+primitives arithmétiques. Les planchers couvrent les deux branches. Le compteur
+dit « nœuds internes » mesure actuellement les nœuds construits par l'index, pas
+ceux visités par les requêtes.
 
-**[mesuré]** trois régimes, coordonnées distinctes, tout jugé contre l'univers
-indépendant :
+**[mesuré sur `dcd19178`]** trois régimes, coordonnées distinctes, tout jugé
+contre l'univers énuméré séparément mais relativement aux primitives partagées :
 
 | régime | $n$ | grille | $k$ | cofaces (manq./surn.) | facettes (manq./surn.) | branche fermée | co-min. moy./max | désaccords |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| extra-shells partout | 8 | $[0,2)$ | 3 | 2 800 (0/0) | 2 240 (0/0) | **100 %** | 2,71 / 5 | **0** |
+| cube cosphérique | 8 | $[0,2)$ | 3 | 2 800 (0/0) | 2 240 (0/0) | **100 %** | 2,71 / 5 | **0** |
 | nœuds internes | 20 | $[0,20)$ | 3 | 2 496 (0/0) | 5 103 (0/0) | 62,4 % | 1,05 / 4 | **0** |
 | ordre plus haut | 9 | $[0,3)$ | 4 | 593 (0/0) | 1 605 (0/0) | 81,1 % | 1,75 / 5 | **0** |
 
-La grille de côté deux est le régime qui compte : huit points dans un cube, donc
-des cosphéricités partout, une branche fermée totale et des extra-shells sur
-chaque facette. Le nuage de vingt points exerce 210 nœuds internes de l'index,
-ce que les campagnes précédentes ne faisaient pas. Les deux déduplications sont
-comptées séparément : facettes portées par plusieurs cofaces, cofaces proposées
-par plusieurs facettes.
+Les commandes utilisent respectivement 40, 30 et 25 nuages, avec les seeds 7,
+11 et 13. La grille de côté deux exerce un régime cosphérique contenant des
+extra-shells et une branche fermée totale; aucun compteur ne prouve
+« extra-shell sur chaque facette ». Le run à vingt points construit 210 nœuds
+internes et touche 9,3 points par facette contre $n=20$, ce qui montre au moins
+un élagage sans mesurer la visite des nœuds. Les deux multiplicités de provenance
+sont comptées séparément; aucune déduplication terminale ni aucun plancher ne les
+certifie encore.
 
 Et la reproduction hostile de l'audit,
 `--clouds 1 --points 7 --coord 2 --k 2 --seed 1`, qui rendait six désaccords,
 rend maintenant 31 cofaces et 21 facettes sans manquante ni surnuméraire.
+
+### Une attache par facette, et la cible brute est réfutée en pratique aussi
+
+[`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](audits/NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)
+montre que sous la porte régulière il n'est pas nécessaire de publier tous les
+$M(F)$ : une **unique attache canonique** par facette ayant au moins deux intrus
+**stricts** suffit à la forêt $H_0$ normalisée. Les intrus stricts $J_F$ sont la
+boule **ouverte**, à ne pas confondre avec $E_F$ qui décide la branche. Avec
+$z_F=\min J_F$ et $u_F=\min U_F$, la cible locale est
+$T_F=(F\setminus\lbrace u_F\rbrace)\cup\lbrace z_F\rbrace$, et le lemme donne
+$\beta(T_F)<a_F$.
+
+La note réfute la cible **brute** : $T_F$ peut ne pas appartenir à $D_k$, et il
+faut alors viser le carrier strict **résolu**. Sa fixture u16 renforcée possède
+dix points et $F=289$, avec $J_F=\lbrace1,5,7\rbrace$. Pour $z_F=1$, chacun des
+trois bras obtenus en retirant 2, 8 ou 9 a un niveau strictement plus petit mais
+reste hors de $D_3$. Aucun choix local de $u_F$ ne remplace donc le resolver.
+
+**[diagnostic hors autorité régulière]** 12 nuages de 20 points, grille $[0,20)$, $k=3$ : sur 5 103 facettes,
+les intrus stricts se répartissent en 1 997 / 3 011 / **95** pour zéro, un et au
+moins deux. Ce sont **95 candidats d'attache**; le run observe 210 co-minimiseurs
+fermés sur ces facettes, aucune cible de niveau non strict et **6 cibles brutes
+hors du cœur**. Comme il n'authentifie ni support unique essentiel ni absence
+d'extra-shell, il ne peut pas encore conclure que 95 attaches remplacent ces 210
+co-minimiseurs. Il confirme néanmoins que le resolver n'est pas un cas limite.
+
+Ce que ce prototype ne fait pas, et ne peut pas faire : il ne **résout** rien.
+`Resolve` interroge l'histoire horizontale antérieure au lot, qui n'existe pas
+ici. Ce qui est vérifié s'arrête donc à la classification des intrus et au lemme
+de descente ; l'équivalence des deux quotients reste non jugée.
 
 Deux mises en garde qui subsistent : les co-minimiseurs observés sont petits mais
 **sans borne générale** — une facette peut en avoir $\Theta(n)$ — et le rapport de
 $k+1$ records par coface est une identité de construction du flux, qui le
 dimensionne sans certifier la terminalité de la source.
 
-**Ce que cela ne ferme pas.** Il faut d'abord authentifier indépendamment la
+**Ce que cela ne ferme pas.** Il faut d'abord authentifier séparément la
 source directe ouverte, l'univers de facettes, les extra-shells, les statuts et
 les budgets. Le balayage exhaustif local partage encore `miniball_of` et
-`sphere_cmp_beta` avec le sujet ; l'oracle général reste donc le juge hostile et
-le repli hors porte. Le regroupement est en mémoire : ce sont les **volumes**
-qui sont publiés, pas un tri externe. Enfin, la dichotomie produit $M(F)$ ; elle
+`sphere_cmp_beta` avec le sujet; l'oracle général doit encore être appelé comme
+juge hostile et repli hors porte. Le regroupement est en mémoire : le prototype
+publie des comptes logiques, sans tri externe, wire exact, budget ni high-water.
+Enfin, la dichotomie produit $M(F)$ sous ses prémisses; elle
 ne produit ni l'autorité de régularité qui autorise la rétraction vers la forêt
 $H_0$ normalisée, ni le réducteur, ni les verticales, ni l'identité de sortie.
 

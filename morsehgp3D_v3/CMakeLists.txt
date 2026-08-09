@@ -250,7 +250,7 @@ add_test(NAME mhgp3v_first_incidence_extra_shell COMMAND mhgp3v_first_incidence
          --min-closed 1000 --min-internal-nodes 15)
 add_test(NAME mhgp3v_first_incidence_internal_nodes COMMAND mhgp3v_first_incidence
          --clouds 12 --points 20 --coord 20 --k 3 --seed 11
-         --min-closed 800 --min-empty 400 --min-internal-nodes 80)
+         --min-closed 800 --min-empty 400 --min-internal-nodes 80 --min-attachments 20)
 add_test(NAME mhgp3v_first_incidence_high_order COMMAND mhgp3v_first_incidence
          --clouds 12 --points 9 --coord 3 --k 4 --seed 13
          --min-closed 400 --min-empty 80 --min-internal-nodes 20)

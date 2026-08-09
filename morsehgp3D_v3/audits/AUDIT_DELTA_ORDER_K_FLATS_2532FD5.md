@@ -348,7 +348,64 @@ NO-GO comme capability de source jusqu'à la fixture extra-shell, une vérité
 directe exhaustive indépendante, les planchers, le CLI fermé, les budgets
 atomiques et les permutations exigés par la note.
 
-### 7.7 Porte de reprise courante
+### 7.7 Correction de la source ouverte au commit `b9b5b4c` et delta d'attache
+
+Le commit `b9b5b4c` répond correctement au P0 principal du §7.6. Le prototype
+de première incidence y possède l'empreinte
+`dcd19178bd84391b5aa5a4135575d235ee8669ae477ff05c55d9720d1ddd02d3`
+et CMake l'empreinte
+`1425f0bf75a88bfdd7a3d312c092f415fc21fddc2d31a2b9395fe8b5e3704737`.
+
+Crédit : la source développe maintenant chaque sphère critique en
+$I(B)\cup T$, où $I(B)$ contient tous les intérieurs et $T$ parcourt les
+sous-ensembles de coquille du cardinal requis. Relativement à un catalogue
+critique complet, cette construction énumère toutes les cofaces de Gabriel à
+vacuité ouverte. La vérité énumère séparément tous les $(k+1)$-sous-ensembles,
+construit son propre univers de facettes, puis compare source, facettes,
+$\lambda(F)$ et $M(F)$. Le CLI est strict, les statuts non `kOk` rougissent et
+les niveaux sont comparés. Les sept CTests passent; les trois portes positives
+rendent respectivement 1 400/1 120, 995/2 045 et 311/816 cofaces/facettes, zéro
+manquante, zéro surnuméraire et zéro désaccord. L'ancien témoin
+`--clouds 1 --points 7 --coord 2 --k 2 --seed 1` est désormais vert avec 31
+cofaces et 21 facettes; `--no-judge` et le suffixe `1junk` sont refusés.
+
+Cette fermeture qualifie un **oracle borné relatif aux primitives partagées**,
+pas une source produit. Le sujet appelle `flat_catalogue(pts,n)`, matérialise le
+catalogue complet puis développe combinatoirement les coquilles; la vérité
+énumère $\binom{n}{k+1}$. Cette architecture est précisément celle que le
+contrat 50 k interdit. `miniball_of`, `sphere_side` et `sphere_cmp_beta` restent
+communs. De plus, un échec de `miniball_of_set` est encore converti en simple
+« non-Gabriel » dans `gabriel_open`, et en `continue` dans la vérité de première
+incidence : une erreur géométrique peut donc censurer scientifiquement une
+coface au lieu de faire échouer la porte.
+
+Le plancher `--min-internal-nodes` ne compte pas les nœuds visités par les
+requêtes : il additionne tous les nœuds internes **construits** par l'index. Le
+run à vingt points touche 9,2 points par facette, ce qui établit un élagage
+empirique, mais pas le nombre de nœuds parcourus. Les deux multiplicités de
+provenance sont comptées sans déduplication terminale ni plancher. Budgets,
+rollback, permutations de runs, wire exact, high-water et oracle 10.6 appelé
+restent absents.
+
+Le delta live suivant, épinglé par les empreintes
+`81d0d18fc19468e13fa8d4fe975f14b643922445104c6ecd83ef36e9383866c7`
+et `e1e6764321243df997bc9d00e82d7bccdffb0a0504fa43827d1f84a61eda75d1`,
+instrumente la règle d'une attache par facette. Il crédite utilement les classes
+d'intrus stricts, la descente $\beta(T_F)<\beta(F)$ et les cibles brutes hors du
+cœur. Il ne vérifie toutefois ni la porte régulière, ni le support unique
+essentiel, ni l'absence d'extra-shell; il choisit `support[0]`, compte le
+payload fermé `decided` comme masse remplacée et ne résout aucun carrier. Une
+violation de descente hors domaine régulier ne doit pas réfuter la dichotomie,
+et une campagne verte ne juge pas encore l'équivalence des quotients.
+
+Le résultat mathématique exact est maintenant plus fort :
+[`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)
+prouve qu'un census régulier saturé à deux et une unique attache vers
+`ResolveStrictCarrier` suffisent. Sa fixture u16 à dix points rend les trois
+bras immédiats hors de $D_3$; aucun choix alternatif du support supprimé ne
+remplace donc le resolver global pré-lot.
+
+### 7.8 Porte de reprise courante
 
 1. Fermer le contrat de l'out-paramètre parent, comparer la couverture au BFS
    certifié et graver l'adjacence orientée au premier événement.
@@ -356,9 +413,10 @@ atomiques et les permutations exigés par la note.
    `emitted`.
 3. Remplacer le BFS par la reverse search en conservant le BFS comme oracle
    borné; publier profondeur, enfants, flats et high-water.
-4. Corriger la source directe du prototype de première incidence : extra-shell
-   développée ou refusée, univers de facettes jugé indépendamment, puis
-   capability terminale commune avec $M(F)$ et l'autorité de fenêtre.
+4. Transformer l'oracle ouvert maintenant corrigé en source terminale sans
+   `flat_catalogue(s_max=n)`, puis composer l'autorité de fenêtre avec le census
+   saturé et `ResolveStrictCarrier`; toute erreur de primitive doit échouer
+   fermée.
 5. Construire runs, fermeture des ex æquo, locator horizontal, couverture et
    jointure verticale avant toute mesure du contrat 50 k.
 

@@ -11,7 +11,7 @@ Cadre : `backend=architecture_math`, `profile=hgp_reduced_quantized_u16`,
 > cœur ayant au moins deux intrus suffit à la forêt horizontale $H_0$
 > normalisée. Cette attache doit viser le **carrier strict déjà résolu**, pas une
 > simple facette stricte : celle-ci peut être absente du cœur direct. La masse
-> silencieuse publiée tombe ainsi à au plus $lvert D_kvert$ attaches, mais
+> silencieuse publiée tombe ainsi à au plus $\lvert D_k\rvert$ attaches, mais
 > l'information globale de partition pré-lot ne disparaît pas.
 
 Cette note renforce la factorisation de
@@ -27,8 +27,8 @@ cofaces de Gabriel ouvertes de cardinal $k+1$ et $D_k$ l'ensemble de leurs
 facettes. On suppose toutes les hypothèses de la porte régulière du théorème 4 :
 
 - support minimal unique et essentiel pour chaque objet requis;
-- tout point hors support strictement intérieur et aucune égalité extérieure
-  pertinente;
+- tout sommet de l'objet considéré hors support strictement intérieur à sa
+  miniboule, et aucune égalité extérieure pertinente;
 - catalogues directs et requêtes top-$k$ exacts et terminaux;
 - descentes strictes et resolver de carriers complets;
 - niveaux rationnels exacts et lots égaux contractés atomiquement.
@@ -50,8 +50,9 @@ $M(F)$ par zéro ou une attache interne.
 Si $\lvert J_F\rvert\leq1$, aucune attache supplémentaire n'est émise : le
 théorème de première incidence montre que $M(F)\subseteq\mathcal{G}_k$.
 
-Si $\lvert J_F\rvert\geq2$, choisissons canoniquement
-$z_F=\min J_F$ et $u_F=\min U_F$, selon les `PointId` canoniques, puis posons
+Si $\lvert J_F\rvert\geq2$, choisissons canoniquement $z_F$ et $w_F$ comme les
+deux plus petits éléments distincts de $J_F$, et $u_F=\min U_F$, selon les
+`PointId` canoniques, puis posons
 
 $$T_F=\bigl(F\setminus\lbrace u_F\rbrace\bigr)\cup\lbrace z_F\rbrace.$$
 
@@ -65,9 +66,12 @@ Notons
 
 $$P_F=\mathrm{Resolve}_{<a_F}(T_F)$$
 
-le token de composante du carrier de $T_F$ dans l'état strictement antérieur au
-lot $a_F$. L'attache $\alpha_F$ porte le propriétaire `facet_key=F`, le niveau
-$a_F$ et l'arête logique $F\leftrightarrow P_F$.
+le token de composante du carrier de $T_F$ dans l'état de $\mathcal{C}_k$ déjà
+fermé aux niveaux strictement inférieurs à $a_F$. L'attache $\alpha_F$ porte le
+propriétaire `facet_key=F`, le niveau $a_F$ et l'arête logique
+$F\leftrightarrow P_F$. Cette définition n'est pas circulaire : par induction,
+l'état strict de $\mathcal{C}_k$ coïncide avec celui de $\mathcal{A}_k$, et
+$\beta(T_F)<a_F$ rend le resolver disponible avant le lot courant.
 
 Le mot `Resolve` est essentiel. Il peut être implémenté par une descente locale
 certifiée suivie d'une jointure vers le locator externe, ou par un handle de
@@ -88,21 +92,31 @@ $H_0$.
 
 ### 3.1 Un co-minimiseur silencieux possède un apex strict unique
 
-Pour $Q=F\cup\lbrace z\rbrace\in M(F)$ avec $\lvert J_F\rvert\geq2$, un autre
-point de $J_F$ reste strictement intérieur : $Q$ n'est pas direct. Le lemme des
-attaches silencieuses place toutes ses facettes strictes dans une unique
-composante antérieure $P(Q)$, laquelle couvre déjà tous les points de $Q$.
+Posons $Q_F=F\cup\lbrace z_F\rbrace$. Le point $w_F$ reste strictement
+intérieur à $B_{Q_F}=B_F$, donc $Q_F$ n'est pas direct. Pour chaque $u\in U_F$,
+la facette $A_u=Q_F\setminus\lbrace u\rbrace$ et la coface de remplacement
+$A_u\cup\lbrace w_F\rbrace$ ont un niveau strictement inférieur à $a_F$. Pour
+$u\neq v$, ces remplacements relient $A_u$ et $A_v$ par leur facette commune
+$(Q_F\setminus\lbrace u,v\rbrace)\cup\lbrace w_F\rbrace$. Toutes les facettes
+strictes $A_u$ appartiennent donc à une unique composante antérieure $P(Q_F)$.
 
-La facette $T_F$ est l'une de ces facettes strictes. Par conséquent,
-$P_F=P(Q)$ et $P_F$ couvre déjà $F\cup\lbrace z_F\rbrace$. L'attache
-$\alpha_F$ installe donc $F$ dans le bon apex sans ajouter de point et sans
-créer de racine ou de fusion.
+Comme $\lvert U_F\rvert\geq2$, on a
+$\bigcup_{u\in U_F}A_u=Q_F$. La composante $P(Q_F)$ couvre ainsi
+$F\cup\lbrace z_F\rbrace$. La facette $T_F=A_{u_F}$ est l'un de ses bras;
+le resolver donne donc $P_F=P(Q_F)$. Pour tout autre
+$z\in J_F$, la coface $F\cup\lbrace z\rbrace$ conflue avec $Q_F$ par leur
+facette égale commune $F$, donc possède le même apex. L'attache $\alpha_F$
+installe finalement $F$ dans le bon apex, sans ajouter de point et sans créer de
+racine ou de fusion.
 
 ### 3.2 Les autres facettes égales ne transportent pas une autre racine
 
-Une facette égale de $Q$ distincte de $F$ s'obtient en remplaçant dans $F$ un
-point intérieur par $z$. Elle conserve $U_F$, la même boule et le même nombre
-d'intrus. Si cette facette $H$ appartient à $D_k$, sa propre attache
+Pour $z\in J_F$, posons $Q_z=F\cup\lbrace z\rbrace$. Une facette égale
+$H=Q_z\setminus\lbrace x\rbrace$ distincte de $F$ remplace nécessairement un
+point intérieur $x\in F\setminus U_F$ par $z$. Elle conserve $U_F$, la même
+boule et vérifie
+$J_H=(J_F\setminus\lbrace z\rbrace)\cup\lbrace x\rbrace$. On a donc
+$\lvert J_H\rvert=\lvert J_F\rvert\geq2$. Si $H$ appartient à $D_k$, sa propre attache
 $\alpha_H$ l'installe, et la confluence du plateau silencieux donne
 $P_H=P_F$. Si $H\notin D_k$, elle n'est réutilisée par aucune coface directe et
 peut disparaître du quotient normalisé.
@@ -115,50 +129,56 @@ contracté avant le lot.
 
 ### 3.3 Quotient du lot complet
 
-Après contraction de l'état strict, chaque composante du lot formé par tous les
-$M(F)$ est une étoile dont le centre est un unique apex antérieur et dont les
+Après contraction de l'état strict, chaque composante de la partie silencieuse
+$(\bigcup_{F\in D_k}M(F))\setminus\mathcal{G}_k$ devient, par confluence des contacts
+égaux, une étoile dont le centre est un unique apex antérieur et dont les
 feuilles pertinentes sont les facettes de cœur nouvelles. La famille des
 $\alpha_F$ conserve exactement une arête de ce centre vers chacune de ces
-feuilles. Elle induit donc la même relation d'équivalence après projection sur
-$D_k$.
+feuilles. Les cofaces directes sont identiques dans $\mathcal{A}_k$ et
+$\mathcal{C}_k$ et participent au même quotient atomique. Les deux sources
+induisent donc la même relation d'équivalence après projection sur $D_k$.
 
-L'argument vaut pour le **lot complet**. Appliquer les attaches une par une sur
-un état déjà muté réintroduirait le défaut de quotient que la fermeture des ex
-æquo interdit. L'induction par niveaux, puis le corollaire qui élimine les
-cofaces tardives, donnent la conclusion à toutes les coupes. $\square$
+L'argument vaut pour le **lot complet**. Une implémentation peut effectuer ses
+unions internes séquentiellement, mais elle ne doit calculer ni publier $q_R$,
+parents, deltas ou nœuds depuis un état partiellement muté. L'induction par
+niveaux, puis le corollaire qui élimine les cofaces tardives, donnent la
+conclusion à toutes les coupes. $\square$
 
 ## 4. Pourquoi la cible brute est fausse
 
 La règle tentante « attacher $F$ directement à $T_F$ dans le cœur » est
-réfutée, même sous régularité. Une fixture entière exacte d'ordre trois prend
-les huit points, dans l'ordre des identifiants :
+réfutée, même sous régularité. Plus fortement, aucun choix du support supprimé
+ne garantit que le bras immédiat appartienne au cœur. Une fixture u16 exacte
+d'ordre trois prend les dix points, dans l'ordre des identifiants :
 
 ```text
-(0,23,6) (0,26,17) (9,23,10) (17,32,18)
-(18,28,26) (28,2,20) (30,25,11) (30,25,21)
+(0,1,4) (18,6,24) (38,4,17) (12,22,29) (20,40,11)
+(22,5,24) (4,25,10) (17,6,21) (15,31,6) (8,21,14)
 ```
 
-Il s'agit de la translation de $(16,16,16)$ de la fixture entière d'origine;
-elle est donc dans la grille u16 et conserve toutes les miniboules et tous les
-niveaux.
+Les 120 triplets et 210 quadruplets ont un support positif minimal unique; tout
+sommet hors support est strictement intérieur, aucun point extérieur n'est sur
+la coquille, et les 210 quadruplets sont affinement indépendants avec
+$\min\lvert\det\rvert=8$. La facette $F=289$ appartient à $D_3$ par la coface
+directe `2489`. Elle vérifie
+$a_F=893109/2588$, $U_F=289$ et
+$J_F=\lbrace1,5,7\rbrace$, avec des marges strictes positives.
 
-Toutes les miniboules de cardinal trois et quatre requises ont une coquille
-globale égale à leur support. Pour $F=235$,
-$a_F=96615475/373338$, $U_F=235$ et $J_F=\lbrace4,6,7\rbrace$. Le choix canonique
-donne $z_F=4$, $u_F=2$ et $T_F=345$, avec
-$\beta(T_F)=1025/4<a_F$.
+Le choix canonique $z_F=1$ donne trois bras possibles, tous stricts et tous hors
+$D_3$ :
 
-Mais $T_F\notin D_3$. Une attache brute `235 -> 345` laisse au niveau $a_F$ une
-composante cœur isolée couvrant seulement $\lbrace2,3,4,5\rbrace$, alors que le
-quotient par tous les co-minimiseurs place `235` dans l'apex antérieur qui couvre
-les huit points et contient vingt-quatre facettes cœur. Le chemin strict
+| support supprimé | bras | niveau exact |
+| ---: | ---: | ---: |
+| 2 | `189` | $479/2$ |
+| 8 | `129` | $599/2$ |
+| 9 | `128` | $299225073/867436$ |
 
-```text
-345 --[3456, niveau 1025/4]-- 346
-```
-
-atteint `346`, qui appartient à $D_3$. La cible résolue est donc correcte; la
-clef stricte brute ne l'est pas.
+Tous ces niveaux sont strictement inférieurs à $893109/2588$. Les trois
+co-minimiseurs silencieux sont `1289`, `2589` et `2789`. Leurs bras rejoignent
+la même composante stricte, laquelle rencontre trente-sept facettes de $D_3$;
+mais aucun lookup immédiat dans $D_3$, ni aucun autre choix de $u_F$, ne peut
+identifier cette composante. La cible résolue est correcte; la clef stricte
+brute ne l'est pas.
 
 Cette fixture montre précisément ce qui reste global : le choix de $T_F$ est
 local, mais la question « dans quelle composante stricte vit $T_F$ ? » dépend de
@@ -172,34 +192,69 @@ comparé Gamma exhaustif, `directes + tous M(F)` et
 
 - La fixture `E5`, $n=5$, $k=2$, passe avec une attache au lieu des deux
   cofaces silencieuses de `AC`.
-- Sur 200 nuages entiers de cinq à huit points aux ordres deux et trois, 152
+- Avec le seed `9374`, 25 tirages par couple $(n,k)$, $5\leq n\leq8$,
+  $2\leq k\leq\min(3,n-1)$, sur la grille entière $[-10,10]^3$, 152 nuages
   satisfont la porte régulière forte et 48 sont refusés. Les cas acceptés
-  totalisent 2 317 facettes cœur, 1 175 cofaces directes, 1 194 cofaces dans la
-  source avec tous les premiers incidents, dix branches à au moins deux intrus
-  et vingt intrus correspondants.
+  totalisent 2 317 facettes cœur, 1 175 cofaces directes et 1 194 cofaces
+  logiques distinctes dans $\mathcal{G}_k\cup\bigcup_{F\in D_k}M(F)$, après
+  déduplication séparée par nuage. Dix branches ont au moins deux intrus, pour
+  vingt co-minimiseurs comptés avec leur propriétaire de facette.
 - Aucune divergence n'est observée entre Gamma et la source complète, ni entre
   celle-ci et l'attache unique résolue.
+- Une seconde exploration avec le seed `381990`, 7 000 tirages plans rationnels
+  de cinq à sept points aux ordres deux et trois, ne trouve pas non plus de
+  divergence entre tous les $M(F)$ et l'attache résolue.
 
-Ce contrôle falsifie une erreur simple, mais ne remplace ni un harnais conservé,
-ni les fixtures permanentes, ni un oracle indépendant du resolver sujet.
+Ces deux explorations étaient des heredocs transitoires sans fichier, hash ni
+sortie durable. Elles falsifient une erreur simple, mais ne remplacent ni un
+harnais conservé, ni les fixtures permanentes, ni un oracle indépendant du
+resolver sujet.
 
-## 6. Capability et coût
+## 6. Un census saturé à deux suffit
+
+La branche régulière n'a pas besoin de matérialiser $J_F$ ni tous les $M(F)$.
+Une requête certifiée peut rendre seulement
+`count_class in {0,1,at_least_2}`, $z_F$ et, dans la troisième classe, $w_F$.
+La classe zéro choisit le minimum direct; la classe un désigne une coface déjà
+présente dans $\mathcal{G}_k$; la troisième produit l'unique attache.
+
+Pour $k\leq10$, un nœud AABB entièrement et strictement intérieur peut être
+agrégé par un compteur saturé à $k+2$ et ses $k+2$ plus petits `PointId`. Cette
+marge permet d'exclure les au plus $k$ identifiants de $F$ tout en conservant les
+deux plus petits intrus. Un nœud strictement extérieur est élagué; toute
+intersection ou égalité descend jusqu'aux points et doit soit confirmer
+l'autorité zéro extra-shell, soit échouer fermée.
+
+Ce census borne le payload, pas le temps. Deux intrus stricts distincts prouvent
+déjà la classe `at_least_2`; sous une autorité régulière acquise, il n'est pas
+nécessaire de visiter le reste pour cette seule décision. Il faut néanmoins
+prouver que $z_F,w_F$ sont les deux plus petits identifiants. Un parcours
+best-first muni du plus petit `PointId` de chaque sous-arbre peut s'arrêter dès
+que toute borne restante dépasse $w_F$. Les classes zéro et un exigent, elles,
+une partition complète des nœuds. Sans autorité séparée sur les égalités, deux
+témoins stricts ne certifient pas la porte régulière. Le pire cas reste
+$\Theta(n)$.
+
+## 7. Capability et coût
 
 Un reçu `ResolvedCoreFacetAttachment` doit engager au minimum :
 
 - `facet_key=F`, sa provenance $F\in D_k$, $a_F$, $B_F$ et $U_F$;
-- le census fermé complet et la classification terminale
-  $\lvert J_F\rvert\in\lbrace0,1,\geq2\rbrace$;
-- pour la troisième branche, $z_F$, $u_F$, $T_F$ et la preuve
-  $\beta(T_F)<a_F$;
+- un census terminal authentifié, saturé en
+  $\lvert J_F\rvert\in\lbrace0,1,\geq2\rbrace$, et l'autorité séparée qui exclut
+  les extra-shells pertinents;
+- pour la troisième branche, $z_F$, $w_F$, $u_F$, $T_F$, la preuve
+  $\beta(T_F)<a_F$ et le certificat de couverture du §3.1;
 - un certificat `ResolveStrictCarrier` lié au watermark $<a_F$, son token
   $P_F$ et la preuve que $P_F$ couvre $F\cup\lbrace z_F\rbrace$;
 - `added_core_facet=F`, `added_points=empty`, le lot exact complet et le digest
   de toutes les provenances agrégées.
 
-Plusieurs attaches peuvent avoir le même apex ou la même arête logique. Le
-stockage peut les agréger, mais le reçu doit conserver le digest de chaque
-propriétaire de facette.
+Plusieurs attaches de facettes différentes peuvent partager le même apex, mais
+leurs arêtes logiques restent distinctes parce que leur propriétaire $F$ est
+distinct. Une même facette peut avoir plusieurs provenances directes : elles
+doivent être groupées avant de produire un unique $\alpha_F$, avec liste ou
+digest de toutes les provenances.
 
 La sortie silencieuse passe de
 $\Theta\bigl(\sum_{F\in D_k}\lvert M(F)\rvert\bigr)$ records potentiels à au
@@ -208,13 +263,17 @@ régularité, le tri par niveau et la résolution stricte restent nécessaires. 
 range-report peut toucher $\Theta(n)$ points et le resolver reste une jointure
 globale logique : aucune borne 50 k ou SLO ne découle de ce théorème.
 
-## 7. Portes de falsification
+## 8. Portes de falsification
 
 Avant toute autorité produit, il faut graver :
 
-- la fixture régulière du §4, qui doit refuser une cible brute hors $D_k$ et
-  accepter sa cible résolue;
+- la fixture régulière du §4, dont les trois bras immédiats sont hors $D_k$ :
+  elle doit refuser tout lookup brut et accepter la cible résolue;
 - `E5`, avec égalité du quotient complet et du quotient à une attache;
+- le cas $\lvert J_F\rvert=1$, dont la coface est déjà directe et ne doit pas
+  produire d'attache;
+- une coquille à supports multiples où retirer le support choisi laisse
+  $\beta(T_F)=\beta(F)$, qui doit échouer hors de la porte régulière;
 - deux facettes cœur égales du même plateau, qui doivent viser le même apex;
 - une facette égale non-cœur, omise sans changement de partition ou de
   couverture;
@@ -226,7 +285,7 @@ Avant toute autorité produit, il faut graver :
   fermées, avec comparaison de la partition sur $D_k$, des couvertures, $q_R$,
   parents et nœuds.
 
-## 8. Décision
+## 9. Décision
 
 - tous les $M(F)$ comme sortie matérielle : **non nécessaires pour $H_0$
   normalisé sous la porte régulière**;
