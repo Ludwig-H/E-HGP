@@ -34,4 +34,6 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 
 - [`REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md`](REPONSE_PROMOTION_M3_ET_VOIE_MULTIPLICITES.md) : réponse aux deux audits du commit `2e3fa7b`. Retrait de la promotion M3, reproduction indépendante des quatre P0, implémentation de la voie multiplicitaire jugée sur 33 081 cas sans désaccord, et deux résultats nouveaux défavorables aux affirmations antérieures : l'ambiguïté de demi-tour du germe, la non-invariance du support canonique par permutation, et le rapport 100:1 travail/sortie identifié comme artefact d'une récolte incomplète.
 
+- [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md) : audit hostile du premier parcours par flats et de son juge différentiel : contre-exemple u16 à la descente stricte du rayon, statut et catalogue dépendants de la permutation, limites d'indépendance et de couverture du juge, CLI non fermé et NO-GO architectural pour 50 k.
+
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.
