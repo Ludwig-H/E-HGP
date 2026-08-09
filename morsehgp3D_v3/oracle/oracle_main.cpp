@@ -1168,7 +1168,9 @@ int main(int argc, char** argv) {
   }
   if (!fixture.empty() && fixture != "foreign_source_same_level"
       && fixture != "nonminimal_contributor_same_level"
-      && fixture != "noncritical_shell_tie") {
+      && fixture != "noncritical_shell_tie"
+      && fixture != "convex_layer_refutation"
+      && fixture != "constant_inside_witness") {
     std::printf("ECHEC : fixture inconnue %s\n", fixture.c_str());
     return 2;
   }
@@ -1336,6 +1338,52 @@ int main(int argc, char** argv) {
                 {1060, 1025, 100}, {1056, 1033, 100}};
       n = static_cast<int>(points.size());
       order = 2;
+    } else if (fixture == "convex_layer_refutation") {
+      // REFUTATION PERMANENTE de l'epluchage en couches convexes (Q1).
+      //
+      // Ancre (p,q) de longueur au carre 100 ; les quatre autres points ont
+      // pour formes duales (60,80), (-60,80), (-80,-60), (80,-60) a constante
+      // commune : dans la section affine ce sont les quatre sommets d'un
+      // quadrilatere STRICTEMENT convexe, pris dans cet ordre. La couche 0 les
+      // contient donc tous les quatre et la couche 1 est VIDE.
+      //
+      // Pourtant les droites de x1 et x3 — une DIAGONALE, arete d'aucune
+      // couche — se croisent en (-61/20, 61/20) ou les quatre formes valent
+      // 0, 366, 0, -488 : profondeur stricte 1. Le support {p,q,x1,x3} a pour
+      // centre (19/2,19/2,15), rayon carre 51/2, et rang ferme 5 (x2 est
+      // strictement interieur, x4 strictement exterieur).
+      //
+      // Ce n'est pas un artefact hors produit : pq est bien diametrale (100
+      // contre 98 au maximum des autres) et JUNG est satisfait a l'arite
+      // quatre (51/2 <= 3*100/8 = 75/2). Un sommet de profondeur 1 peut donc
+      // avoir ses DEUX extremites sur la couche 0, que l'epluchage retire.
+      // Le x4 de l'audit valait (13,14,16) : les quatre x etaient alors tous a
+      // distance 5 de (10,10,16), donc CONCYCLIQUES, donc cospheriques avec p
+      // et avec q. La fixture exhibait le bon phenomene dans un nuage que le
+      // domaine declare rejette. Le decaler d'une unite en z tue les huit
+      // cospheries sans rien changer au support {p,q,x1,x3}, dont x4 est absent
+      // — meme centre (19/2,19/2,15), meme rayon carre 51/2.
+      points = {{10, 10, 10}, {10, 10, 20}, {6, 13, 16},
+                {6, 7, 16}, {13, 6, 16}, {13, 14, 17}};
+      n = static_cast<int>(points.size());
+      order = 4;                                   // s_max = 5, le rang vise
+    } else if (fixture == "constant_inside_witness") {
+      // Exerce le terme c_e du dictionnaire, que les tirages aleatoires
+      // atteignent rarement. L'ancre est (p,q) = (100,100,100)-(110,100,100) ;
+      // le cinquieme point (101,100,100) est SUR la droite pq, donc sa forme
+      // duale est CONSTANTE sur tout le plan mediateur, et il est strictement
+      // interieur a la sphère de support {p,q,x,y} : c_e = 1 et le rang ferme
+      // vaut 5 sans aucune profondeur.
+      //
+      // Le tetraedre regulier + milieu d'arete essaye d'abord etait hors
+      // domaine : le milieu tombait exactement sur QUATRE sphères-diamètres.
+      // Cette configuration-ci est sans aucune cospherie, verifiee sur tous
+      // les sous-ensembles de taille 2, 3 et 4.
+      //   centre = (105, 298/3, 805/8), rayon carre = 14881/576.
+      points = {{100, 100, 100}, {110, 100, 100}, {102, 97, 104},
+                {103, 100, 96}, {101, 100, 100}};
+      n = static_cast<int>(points.size());
+      order = 4;                                   // s_max = 5
     } else if (fixture == "nonminimal_contributor_same_level") {
       // Triangle entier equilateral (distances au carre egales a 2) : ses
       // trois arêtes contribuent au meme lot. Le point 3 est lointain.
@@ -1375,19 +1423,7 @@ int main(int argc, char** argv) {
       catalogue = mhgp3v::edge_shallow_catalogue(points, s_max, &shallow, &anchored);
       subject_out_of_domain = shallow.degenerate_shells > 0;
       subject_suppressed = subject_out_of_domain;
-      edge_shallow_total.edges_examined += shallow.edges_examined;
-      edge_shallow_total.edges_retained += shallow.edges_retained;
-      edge_shallow_total.lines_active += shallow.lines_active;
-      edge_shallow_total.lines_constant_inside += shallow.lines_constant_inside;
-      edge_shallow_total.vertices_examined += shallow.vertices_examined;
-      edge_shallow_total.vertices_shallow += shallow.vertices_shallow;
-      edge_shallow_total.emitted_arity_two += shallow.emitted_arity_two;
-      edge_shallow_total.emitted_arity_three += shallow.emitted_arity_three;
-      edge_shallow_total.emitted_arity_four += shallow.emitted_arity_four;
-      edge_shallow_total.depth_tests += shallow.depth_tests;
-      edge_shallow_total.dictionary_refuted += shallow.dictionary_refuted;
-      edge_shallow_total.emitted_positive_depth += shallow.emitted_positive_depth;
-      edge_shallow_total.emitted_positive_constant += shallow.emitted_positive_constant;
+      edge_shallow_total.absorb(shallow);
       for (int r = 0; r < 16; ++r)
         edge_shallow_total.rank_histogram[r] += shallow.rank_histogram[r];
       if (!subject_out_of_domain)
@@ -1571,14 +1607,34 @@ int main(int argc, char** argv) {
         "  \"status\": \"%s\",\n  \"exit_code\": %d,\n"
         "  \"baseline_passed\": %s,\n  \"probe_passed\": %s,\n"
         "  \"qualified\": %s,\n  \"disqualifying_reason\": \"%s\",\n"
-        "  \"injection\": \"%s\",\n  \"injections_applied\": %lld,\n"
-        "  \"injection_escapes\": %lld,\n"
         "  \"require_incomplete_anchors\": %lld,\n  \"incomplete_anchors\": %d,\n"
         "  \"minimum_clouds_decided\": %lld,\n  \"minimum_nodes\": %lld,\n"
         "  \"catalogue_spheres_compared\": %lld,\n  \"forests_compared\": %lld,\n"
         "  \"canonical_nodes_compared\": %lld,\n"
-        "  \"widest_exact_level_bits\": %zu,\n  \"failures\": %lld\n}\n",
-        subject == "v2" ? "morsehgp3D_v2 build_catalogue + run" : "mhgp3v anchored_catalogue",
+        "  \"widest_exact_level_bits\": %zu,\n  \"failures\": %lld,\n"
+        "  \"edge_shallow\": {\n"
+        "    \"edges_examined\": %lld,\n"
+        "    \"edges_retained\": %lld,\n"
+        "    \"lines_total\": %lld,\n"
+        "    \"lines_active\": %lld,\n"
+        "    \"lines_outside_lens\": %lld,\n"
+        "    \"lines_constant_outside\": %lld,\n"
+        "    \"lines_constant_inside_clip\": %lld,\n"
+        "    \"lines_constant_inside\": %lld,\n"
+        "    \"vertices_examined\": %lld,\n"
+        "    \"vertices_shallow\": %lld,\n"
+        "    \"emitted_arity_two\": %lld,\n"
+        "    \"emitted_arity_three\": %lld,\n"
+        "    \"emitted_arity_four\": %lld,\n"
+        "    \"emitted_positive_depth\": %lld,\n"
+        "    \"emitted_positive_constant\": %lld,\n"
+        "    \"degenerate_shells\": %lld,\n"
+        "    \"depth_tests\": %lld,\n"
+        "    \"dictionary_refuted\": %lld\n"
+        "  }\n}\n",
+        subject == "v2" ? "morsehgp3D_v2 build_catalogue + run"
+            : subject == "edge_shallow" ? "mhgp3v edge_shallow depth dictionary"
+                                        : "mhgp3v anchored_catalogue",
         regime.c_str(), fixture.c_str(), injection.c_str(), injections_applied,
         injection_escapes, seed_neighbours, seed, clouds, minimum_points, maximum_points,
         maximum_order,
@@ -1588,11 +1644,28 @@ int main(int argc, char** argv) {
         qualified ? "qualified" : (diagnostic_only ? "diagnostic_only" : "not_qualified"),
         exit_code, baseline_passed ? "true" : "false", probe_passed ? "true" : "false",
         qualified ? "true" : "false", disqualifying_reason.c_str(),
-        injection.empty() ? "none" : injection.c_str(), injections_applied, injection_escapes,
         require_incomplete_anchors, anchored_total.incomplete_anchors,
         minimum_clouds_decided, minimum_nodes,
         campaign.catalogue_spheres, campaign.forests,
-        campaign.nodes, campaign.widest_bits, campaign.failures);
+        campaign.nodes, campaign.widest_bits, campaign.failures,
+        edge_shallow_total.edges_examined,
+        edge_shallow_total.edges_retained,
+        edge_shallow_total.lines_total,
+        edge_shallow_total.lines_active,
+        edge_shallow_total.lines_outside_lens,
+        edge_shallow_total.lines_constant_outside,
+        edge_shallow_total.lines_constant_inside_clip,
+        edge_shallow_total.lines_constant_inside,
+        edge_shallow_total.vertices_examined,
+        edge_shallow_total.vertices_shallow,
+        edge_shallow_total.emitted_arity_two,
+        edge_shallow_total.emitted_arity_three,
+        edge_shallow_total.emitted_arity_four,
+        edge_shallow_total.emitted_positive_depth,
+        edge_shallow_total.emitted_positive_constant,
+        edge_shallow_total.degenerate_shells,
+        edge_shallow_total.depth_tests,
+        edge_shallow_total.dictionary_refuted);
     if (written < 0 || std::fflush(file) != 0 || std::ferror(file) != 0) {
       std::fclose(file);
       std::printf("ECHEC : ecriture du recu incomplete (%s)\n", receipt_path.c_str());

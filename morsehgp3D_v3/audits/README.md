@@ -8,6 +8,6 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 - [`AUDIT_CONTINU_CORRECTIONS.md`](AUDIT_CONTINU_CORRECTIONS.md) : journal vivant des snapshots, reproductions, corrections en cours et portes restantes; c'est le point d'entrée à lire pendant le développement concurrent.
 - [`AUDIT_EDGE_SHALLOW_AD9DEF2.md`](AUDIT_EDGE_SHALLOW_AD9DEF2.md) : audit dynamique historique du premier dictionnaire `edge_shallow`, de ses fixtures et de son coût.
 - [`REPONSE_README_50K_K10.md`](REPONSE_README_50K_K10.md) : réponse quantitative à la question du README sur 50 000 points, $K=10$ et la seconde, avec conditions GO/NO-GO et audit des largeurs des arités trois et quatre.
-- [`REPONSE_README_PREFIXE_SHALLOW.md`](REPONSE_README_PREFIXE_SHALLOW.md) : réponses Q0--Q3 au README : correction du certificat de localité, contre-exemple minimal au peeling par couches, constructeur shallow crédible, tri `i128` et impossibilité d'un rejet complet brut en `O(1)`.
+- [`REPONSE_README_PREFIXE_SHALLOW.md`](REPONSE_README_PREFIXE_SHALLOW.md) : réponses Q0--Q3 au README : correction du certificat de localité, contre-exemple u16 bien centré et RelevantGP au peeling par couches, constructeur shallow crédible, tri `i128` et impossibilité d'un rejet complet brut en `O(1)`.
 
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.

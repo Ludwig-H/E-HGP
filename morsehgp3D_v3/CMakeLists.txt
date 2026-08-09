@@ -144,6 +144,20 @@ add_test(NAME mhgp3v_oracle_noncritical_shell_tie COMMAND mhgp3v_oracle
          --clouds 1 --min-points 4 --max-points 4 --max-order 2 --coord-max 2000
          --min-decided 1 --min-nodes 1)
 
+# REFUTATION PERMANENTE de l'epluchage en couches convexes. Le sommet de
+# profondeur 1 y est porte par une DIAGONALE du quadrilatere dual : ses deux
+# extremites sont sur la couche 0, que l'epluchage retire. Une implementation
+# fondee sur les couches manquerait le support de rang ferme 5.
+add_test(NAME mhgp3v_oracle_convex_layer_refutation COMMAND mhgp3v_oracle
+         --fixture convex_layer_refutation --subject edge_shallow
+         --clouds 1 --min-decided 1 --min-nodes 1)
+
+# Exerce le terme c_e : un point SUR la droite de l'ancre est une forme
+# constante interieure. Sans lui, un vert ne prouve que rang = arite.
+add_test(NAME mhgp3v_oracle_constant_inside_witness COMMAND mhgp3v_oracle
+         --fixture constant_inside_witness --subject edge_shallow
+         --clouds 1 --min-decided 1 --min-nodes 1)
+
 # Interface fail-closed : token entier partiel, reçu non ecrit et option ignoree
 # doivent tous fournir un code non nul ET le diagnostic attendu.
 mhgp3v_add_expected_failure_test(mhgp3v_cli_reject_integer_suffix

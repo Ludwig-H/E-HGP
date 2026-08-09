@@ -75,6 +75,34 @@ struct EdgeShallowStatistics {
   long long lines_outside_lens = 0;   // hors lentille : inelig. comme PORTEUR
   long long lines_constant_outside = 0;  // ne coupent pas l'ellipse, exterieures
   long long lines_constant_inside_clip = 0;  // ne coupent pas, interieures
+
+  // Un compteur oublie ici est un compteur qui reste a zero dans le recu : le
+  // reviewer lit alors « branche non exercee » la ou elle l'etait. C'est ce qui
+  // vient d'arriver aux quatre compteurs de clipping. Le static_assert casse
+  // donc le build des qu'un champ est ajoute sans etre somme ci-dessous.
+  void absorb(const EdgeShallowStatistics& other) {
+    static_assert(sizeof(EdgeShallowStatistics) == 18 * sizeof(long long) + 16 * sizeof(long long),
+                  "champ ajoute a EdgeShallowStatistics : le sommer dans absorb()");
+    edges_examined += other.edges_examined;
+    edges_retained += other.edges_retained;
+    lines_active += other.lines_active;
+    lines_constant_inside += other.lines_constant_inside;
+    vertices_examined += other.vertices_examined;
+    vertices_shallow += other.vertices_shallow;
+    emitted_arity_two += other.emitted_arity_two;
+    emitted_arity_three += other.emitted_arity_three;
+    emitted_arity_four += other.emitted_arity_four;
+    depth_tests += other.depth_tests;
+    dictionary_refuted += other.dictionary_refuted;
+    degenerate_shells += other.degenerate_shells;
+    emitted_positive_depth += other.emitted_positive_depth;
+    emitted_positive_constant += other.emitted_positive_constant;
+    lines_total += other.lines_total;
+    lines_outside_lens += other.lines_outside_lens;
+    lines_constant_outside += other.lines_constant_outside;
+    lines_constant_inside_clip += other.lines_constant_inside_clip;
+    for (int i = 0; i < 16; ++i) rank_histogram[i] += other.rank_histogram[i];
+  }
 };
 
 namespace detail {
@@ -128,6 +156,41 @@ inline int compare_positions(mhgp::i128 na, mhgp::i128 da, mhgp::i128 nb, mhgp::
   int order = mhgp::big_cmp(mhgp::mul128(na, db), mhgp::mul128(nb, da));
   const bool opposite = (da > 0) != (db > 0);
   return opposite ? -order : order;
+}
+
+// Ordre des croisements le long d'une droite, SANS multiplication croisee.
+//
+// La droite i porte le parametre tau selon (-b_i, a_i). Le croisement avec j est
+// en tau_ij = N_ij / (G_i D_ij) avec G_i = a_i^2 + b_i^2 > 0, D_ij = a_i b_j -
+// a_j b_i et N_ij = c_j G_i - c_i (a_i a_j + b_i b_j). La difference tau_ij -
+// tau_ik a donc pour numerateur N_ij D_ik - N_ik D_ij, et l'identite de LAGRANGE
+//
+//   |u_i|^2 (u_j ^ u_k) = (u_i . u_j)(u_i ^ u_k) - (u_i . u_k)(u_i ^ u_j)
+//
+// y factorise exactement G_i > 0. Il reste le determinant homogene des trois
+// droites ecrites lambda = (a, b, -c) :
+//
+//   sgn(tau_ij - tau_ik) = sgn(det(lambda_i, lambda_j, lambda_k)) sgn(D_ij) sgn(D_ik).
+//
+// Le produit croise naif demandait environ 210 bits ; ce determinant reste sous
+// 2^107,4 sur la grille u16 (|a|,|b| < 2^34,6 et |c| < 2^35,6 donnent |D| <
+// 2^70,2, puis trois termes |c D| < 2^105,8). Le tri tient donc en i128 pur.
+inline mhgp::i128 line_determinant(const Line& li, const Line& lj, const Line& lk) {
+  const mhgp::i128 djk = lj.a * lk.b - lk.a * lj.b;
+  const mhgp::i128 dik = li.a * lk.b - lk.a * li.b;
+  const mhgp::i128 dij = li.a * lj.b - lj.a * li.b;
+  return -li.c * djk + lj.c * dik - lk.c * dij;
+}
+
+inline int chirotope_order(const Line& li, const Line& lj, const Line& lk) {
+  const mhgp::i128 det = line_determinant(li, lj, lk);
+  if (det == 0) return 0;                       // concurrence : positions egales
+  const mhgp::i128 dij = li.a * lj.b - lj.a * li.b;
+  const mhgp::i128 dik = li.a * lk.b - lk.a * li.b;
+  int sign = det > 0 ? 1 : -1;
+  if (dij < 0) sign = -sign;
+  if (dik < 0) sign = -sign;
+  return sign;
 }
 
 // La droite n.t = c/4 coupe-t-elle l'ellipse de JUNG t^T G t <= R^2 ?
@@ -387,9 +450,8 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
       crossings.push_back(crossing);
     }
     std::sort(crossings.begin(), crossings.end(),
-              [](const detail::Crossing& x, const detail::Crossing& y) {
-                return detail::compare_positions(x.numerator, x.determinant,
-                                                 y.numerator, y.determinant) < 0;
+              [&active, &li](const detail::Crossing& x, const detail::Crossing& y) {
+                return detail::chirotope_order(li, active[x.line], active[y.line]) < 0;
               });
     statistics->depth_tests += static_cast<long long>(active.size());
 

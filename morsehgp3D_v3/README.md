@@ -274,19 +274,38 @@ Le certificat réfuté bornait un support **inconnu** par le rayon des supports
 
 > **Proposition.** Soit $V^{(M)}$ le $\leq k$-level des $M$ plans les plus proches
 > de $p$, et $d_{M+1}$ la distance au premier point exclu. Si
-> $$V^{(M)}\subseteq B\left(p,\ \frac{d_{M+1}}{2}\right),$$
+> $$\sup_{c\in V^{(M)}}\lVert c-p\rVert\ <\ \frac{d_{M+1}}{2}\qquad\text{(STRICT)},$$
 > alors $V^{(M)}=V^{(\infty)}$ : aucun support n'a pu être manqué.
 
 *Démonstration.* Ajouter un plan ne peut qu'augmenter la profondeur, donc
-$V^{(\infty)}\subseteq V^{(M)}$. Et $\mathrm{dist}(p,H_u)=\frac12\lVert u-p\rVert
-\geq\frac{d_{M+1}}{2}$ pour tout $u$ non traité : aucun plan restant ne coupe la
-boule ouverte de rayon $d_{M+1}/2$, donc aucun ne coupe $V^{(M)}$. $\square$
+$V^{(\infty)}\subseteq V^{(M)}$. Réciproquement, soit $\rho<d_{M+1}/2$ le sup et
+$u$ un point non traité, donc $\lVert u-p\rVert\geq d_{M+1}$. Pour tout
+$c\in V^{(M)}$,
+$$\lVert c-u\rVert\ \geq\ \lVert u-p\rVert-\lVert c-p\rVert\ \geq\ d_{M+1}-\rho\ >\ \frac{d_{M+1}}{2}\ >\ \rho\ \geq\ \lVert c-p\rVert,$$
+donc $u$ est **strictement** extérieur à toute sphère centrée dans $V^{(M)}$
+passant par $p$ : il ne peut ni entrer dans un shell ni changer un rang fermé.
+$\square$
 
-Il résiste au contre-exemple qui a tué le précédent. Si un support employait un
-point exclu $z$, son centre $c$ aurait $z$ intérieur ou sur la sphère, donc $c$
-serait du côté positif de $H_z$ ou dessus, d'où
-$\lVert c-p\rVert\geq\mathrm{dist}(p,H_z)\geq\frac{d_{M+1}}{2}$ — alors que
-$c\in V^{(\infty)}\subseteq V^{(M)}\subseteq B(p,d_{M+1}/2)$.
+**La version fermée est fausse, et je l'avais écrite.** J'avais énoncé
+$V^{(M)}\subseteq B(p,d_{M+1}/2)$ avec la boule **fermée**, et ma contradiction
+opposait $\lVert c-p\rVert\geq d_{M+1}/2$ à $\lVert c-p\rVert\leq d_{M+1}/2$ —
+deux inégalités **compatibles à l'égalité**. Le témoin est explicite : si $c$ est
+un point extrême de $V^{(M)}$ avec $\lVert c-p\rVert=d_{M+1}/2$, poser
+$u=2c-p$. Alors $\lVert u-p\rVert=d_{M+1}$, le médiateur $H_u$ passe exactement
+par $c$, et la sphère centrée en $c$ passant par $p$ passe **aussi** par $u$ : le
+support fermé $\lbrace p,u\rbrace$ est manqué. L'égalité de l'ensemble
+sous-jacent ne suffit pas — le produit transporte shells, supports et lots égaux,
+qu'un contact tangent modifie sans toucher l'intérieur.
+
+**Ce que l'égalité coûte vraiment.** $V^{(M)}$ est une union finie de cellules
+fermées d'un arrangement de plans ; si elle est bornée, le sup est atteint en un
+**sommet** de l'arrangement, donc en un point équidistant de $p$ et d'au moins
+trois points traités. L'égalité $\lVert c-u\rVert=\lVert c-p\rVert$ y ajoute $u$ :
+elle force **cinq points cosphériques**. Dans le domaine déclaré sans
+cosphéricité, le cas d'égalité est donc exclu — mais cela reste une *hypothèse à
+vérifier*, jamais un droit à décider. La décision porte sur les carrés et doit
+rester strictement $4\rho^2<d_{M+1}^2$ : égalité, intervalle qui la contient ou
+overflow rendent le certificat **non concluant** et poursuivent l'insertion.
 
 **Ce qu'il donne** : une règle d'arrêt valide pour l'insertion par distance
 croissante, donc une réponse à l'objection « A2p insère $n-1$ plans par ancre ».
@@ -297,7 +316,8 @@ une mesure honnête.
 $k$-niveau — c'est-à-dire Q1 à Q3 ci-dessous. Et pour un point de faible
 profondeur $V_k(p)$ est non bornée et la règle ne se déclenche jamais, ce qui est
 cohérent avec le reste. **[obligation]** vérifier la proposition contre l'oracle
-exhaustif, et mesurer $M(p)$.
+exhaustif, mesurer $M(p)$, et faire précéder tout usage d'une **fixture tangente**
+$u=2c-p$ qui doit rendre le certificat non concluant.
 
 ### Q1 — RÉPONDUE : l'épluchage en couches n'est pas exact
 

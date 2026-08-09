@@ -3,17 +3,23 @@
 > [!IMPORTANT]
 > Snapshot Q1--Q3 audité : commit `463d0758ad832995040f472d451d7838ad0a1a80`, `README.md` SHA-256 `3dc4db928f18e30b183a629b903c962e9d8571b300d49ad36c02c2c0253fd31e`. Q0 a ensuite été auditée au commit `95a009c0b4b1c8c1a8f0adf103de6fb9a4098989`, `README.md` SHA-256 `0cc8d51ec39aaab81995aef5a0bd93865adf8d78732a30a6826e5bd82f6e8c01`. Le dépôt a continué d'évoluer pendant la rédaction. Les résultats mathématiques ci-dessous ne dépendent pas des changements ultérieurs du prototype. `public_status=not_claimed`.
 
+> [!WARNING]
+> Correction du 9 août 2026 : la première fixture Q1 des sections 2--2.2 n'est pas bien centrée et ne suffisait pas. La section 2.4 la remplace par une fixture exacte, bien centrée, dans RelevantGP et rejouée par le prototype. Q1 est donc désormais réfutée même pour les événements Morse utiles. La section 2.3 corrige séparément le carré dual invalide ajouté au README au commit `1216d16`.
+
+> [!NOTE]
+> La fixture définitive a été retrouvée et certifiée par deux recherches rationnelles indépendantes. Un rejeu complet contre l'oracle multiprécision et le sujet `edge_shallow` donne une campagne décidée, zéro rejet de domaine, zéro réfutation du dictionnaire et une fermeture structurelle complète à $s_{\max}=5$. Les scripts et binaires de vérification sont restés sous `/tmp`.
+
 ## Verdict court
 
 | question | réponse |
 | --- | --- |
 | Q0 — certificat de localité | **Incomplet à l'égalité.** L'inclusion dans une boule fermée ne permet pas d'ignorer un plan tangent à sa frontière. Il faut une marge stricte ou traiter exactement toute la bande d'égalité. |
-| Q1 — couches convexes | **Non.** Faux dès quatre lignes actives, à profondeur 1, dans une fixture Morse exacte et clippée par Jung. |
+| Q1 — couches convexes | **Non, même après bon centrage et RelevantGP.** Une fixture u16 de six points contient un événement Morse de rang 5 porté par une diagonale de la première couche conique; l'onion peeling le perd. |
 | Q2 — constructeur | La bonne voie est le sous-complexe de profondeur au plus $\kappa$ d'un arrangement de demi-plans, construit par incrémentation randomisée Las Vegas avec listes de conflits. Le coût théorique espéré est compatible avec $O(m\log m+m(\kappa+1))$ sous les hypothèses usuelles; son transfert exact au produit reste à réaliser et à juger. |
 | Q2 — largeur du tri | Les produits croisés d'environ 210 bits sont évitables : l'ordre de deux croisements sur une droite se réduit au signe d'un déterminant homogène $3\times3$, inférieur à $2^{107{,}4}$ sur le profil u16 équilibré. Le tri peut donc rester en `i128`. |
 | Q3 — rejet `O(1)` | **Aucun test complet brut en `O(1)`.** La propriété dépend globalement des autres demi-plans. Seuls des rejets suffisants, ou une requête après un prétraitement qui a déjà payé le problème, sont possibles. |
 
-La conséquence architecturale est nette : **ne pas implémenter un onion peeling du nuage dual**. Il manquerait des sommets utiles, même en position générale et même dans la région de Jung.
+La conséquence sûre est : **ne pas présenter un onion peeling comme constructeur du complexe shallow ni comme générateur complet des événements Morse**. La fixture bien centrée de la section 2.4 montre que la restriction au sous-ensemble utile ne répare pas l'identité.
 
 ## 1. Q0 : le certificat proposé a un trou d'égalité
 
@@ -46,7 +52,7 @@ Une variante moins conservatrice peut accepter la frontière seulement si elle :
 
 Q0 devient donc **une voie de certificat valide après correction**, mais la proposition telle qu'écrite n'est pas démontrée. Une fixture d'égalité $u=2c-p$ doit précéder tout claim de localité.
 
-## 2. Q1 est fausse : contre-exemple Morse minimal
+## 2. Q1 : première fixture brute insuffisante, puis contre-exemple Morse décisif
 
 Prenons l'ancre
 
@@ -77,9 +83,9 @@ $$0,\ 24,\ 0,\ -32.$$
 
 Le sommet porté par $(1,3)$ a donc une profondeur stricte égale à 1. Il appartient au préfixe $\delta\leq1$ tout en étant absent des deux premières couches convexes.
 
-### 2.1 Ce n'est pas un artefact hors produit
+### 2.1 Ce que la fixture établit — et ce qu'elle n'établit pas
 
-Le contre-exemple satisfait les contraintes qui comptent ici :
+Le contre-exemple satisfait plusieurs contraintes fortes :
 
 - aucune paire de droites n'est parallèle;
 - aucun triplet n'est concurrent : les quatre déterminants triples valent, à signe près, `67200`, `67200`, `89600`, `89600`;
@@ -89,21 +95,69 @@ Le contre-exemple satisfait les contraintes qui comptent ici :
 - le bound de Jung vaut $\frac{3D^2}{8}=\frac{75}{2}$, donc $r^2=\frac{51}{2}<\frac{75}{2}$;
 - $x_2$ est strictement intérieur à la sphère et $x_4$ strictement extérieur.
 
-La sphère critique de support $\lbrace p,q,x_1,x_3\rbrace$ a ainsi un rang fermé 5. Elle est exactement le type d'événement que le peeling proposé doit conserver.
+Cependant, les coordonnées barycentriques exactes du centre dans le tétraèdre ordonné $(p,q,x_1,x_3)$ sont $(\frac{1}{10},-\frac{1}{10},\frac{1}{2},\frac{1}{2})$. Le coefficient de $q$ est négatif : le centre n'appartient pas à $\mathrm{relint}\,\mathrm{conv}\lbrace p,q,x_1,x_3\rbrace$. Le support n'est donc pas bien centré et la sphère n'est pas un événement critique Morse.
 
-Le contre-exemple est minimal en nombre de lignes actives : avec au plus trois points duaux en position générale, toute paire est une arête de leur enveloppe. Pour $\kappa=0$, la correspondance avec l'enveloppe conique reste la bonne base. Dès $\kappa=1$, ni la position générale, ni la stricte convexité, ni la réalisabilité Morse, ni le clipping de Jung ne sauvent l'épluchage par couches.
+Le contre-exemple est minimal en nombre de lignes actives pour l'identité combinatoire brute : avec au plus trois points duaux en position générale, toute paire est une arête de leur enveloppe. Pour $\kappa=0$, la correspondance avec l'enveloppe conique reste la bonne base. Dès $\kappa=1$, la position générale, la stricte convexité, la réalisabilité des formes et le clipping de Jung ne sauvent pas l'épluchage comme constructeur de **tout** le préfixe shallow. Le bon centrage pourrait encore restreindre le sous-ensemble utile; cette question doit être tranchée séparément.
 
 ### 2.2 Fixture permanente recommandée
 
-Cette configuration doit devenir une fixture littérale, avec les assertions suivantes :
+Cette configuration reste une fixture négative utile, avec les assertions suivantes :
 
 1. les quatre formes exactes ci-dessus sont construites depuis les six points 3D;
 2. le sommet $(1,3)$ est présent avec profondeur 1;
 3. la paire $(1,3)$ n'est pas une arête de la couche convexe duale;
-4. le centre, le rayon, le support, le shell et le point intérieur sont rejoués exactement;
-5. toute implémentation fondée uniquement sur les couches convexes est explicitement réfutée.
+4. le centre, le rayon, le support, le shell, le point intérieur et les barycentriques sont rejoués exactement;
+5. le support est explicitement marqué `well_centred=false`;
+6. toute revendication « couches convexes = complexe shallow complet » est réfutée.
 
-La fixture ne prouve pas le constructeur retenu; elle interdit définitivement le constructeur faux.
+Cette première fixture doit rester enregistrée comme historique du contre-exemple combinatoire, avec `well_centred=false`. Elle ne doit plus servir seule au verdict produit : la section 2.4 fournit la fixture décisive manquante.
+
+### 2.3 Le contre-exemple ajouté au README au commit `1216d16` n'est pas un sommet fini
+
+Le README emploie les quatre points duaux $(1,0,1)$, $(0,1,1)$, $(-1,0,1)$, $(0,-1,1)$ et présente les deux diagonales comme des sommets de profondeur 1. Or chaque diagonale relie une paire de droites parallèles :
+
+- $(1,0,1)$ et $(-1,0,1)$ donnent $s_1=1$ et $s_1=-1$;
+- $(0,1,1)$ et $(0,-1,1)$ donnent $s_2=1$ et $s_2=-1$.
+
+Le produit vectoriel de chaque paire duale possède une troisième composante nulle; le plan porteur par l'origine ne peut donc pas être normalisé sous la forme $(s_1,s_2,-1)$. L'intersection est à l'infini, pas un sommet du plan de paramètres et encore moins un centre dans Jung.
+
+Ce carré ne réfute donc pas Q1. La fixture des sections 2--2.2 réfute l'arrangement brut, mais reste non bien centrée. La fixture suivante ferme en revanche la question Morse avec des intersections finies et des barycentriques strictement positives.
+
+### 2.4 Contre-exemple exact bien centré dans RelevantGP
+
+La fixture suivante est plus forte que la première : ses quatre formes ont le même coefficient `c`. La diagonale est donc absente aussi bien de l'onion affine coplanaire que de l'onion conique, sans ambiguïté projective. Une translation positive place les six points dans le profil u16 :
+
+- ancre $p=(10,10,1)$ et $q=(10,10,9)$;
+- porteurs choisis $z=(13,13,5)$ et $w=(13,7,5)$;
+- témoins $u=(14,9,6)$ et $v=(11,6,6)$.
+
+Avant translation, les coordonnées sont $p=(0,0,-4)$, $q=(0,0,4)$, $z=(3,3,0)$, $w=(3,-3,0)$, $u=(4,-1,1)$ et $v=(1,-4,1)$. Pour $d=q-p=(0,0,8)$, la base du prototype vaut $b_1=(0,8,0)$ et $b_2=(-8,0,0)$. Les formes duales, dans l'ordre $(z,w,u,v)$, sont
+
+$$ (48,-48,8),\quad(-48,-48,8),\quad(-16,-64,8),\quad(-64,-16,8). $$
+
+Elles appartiennent toutes au plan $c=8$. Leur ordre convexe est $(u,z,v,w)$; le segment $(z,w)$ est une diagonale, coupée intérieurement par l'autre diagonale $(u,v)$. Les quatre points sont retirés à la première couche et la paire $(z,w)$ n'est arête d'aucune couche ultérieure.
+
+Les droites de $z$ et $w$ se coupent pourtant au point fini $s=(0,-1/6)$. Les résidus $a_i s_1+b_i s_2-c_i$, dans l'ordre $(z,w,u,v)$, valent exactement
+
+$$ 0,\quad0,\quad8/3,\quad-16/3. $$
+
+La profondeur stricte est donc 1. Le centre physique avant translation est $C=(1/3,0,0)$ et son rayon carré vaut $145/9$. Ses coordonnées barycentriques dans le tétraèdre ordonné $(p,q,z,w)$ sont
+
+$$ (4/9,\quad4/9,\quad1/18,\quad1/18). $$
+
+Elles sont toutes strictement positives : le support est bien centré. Le point $u$ est strictement intérieur avec distance carrée $139/9$, le point $v$ est strictement extérieur avec distance carrée $157/9$, et le shell contient exactement $p,q,z,w$. Le rang fermé est donc $4+1=5$.
+
+Les autres contrôles exacts ferment les échappatoires usuelles :
+
+- $r^2=145/9<24$, donc le centre est strictement dans Jung;
+- toutes les distances carrées du nuage sont au plus 64 et celle de $(p,q)$ vaut 64, maximum unique;
+- le support est affinement indépendant;
+- aucun couple de formes n'est parallèle;
+- les quatre déterminants homogènes triples valent `-12288`, `24576`, `30720` et `-6144`, donc aucune concurrence triple;
+- une vérification rationnelle exhaustive de tous les sous-ensembles de tailles 2 à 6 trouve zéro ambiguïté et zéro violation de RelevantGP;
+- le prototype live à $s_{\max}=5$ rejoue le support `{0,1,2,3}` au rang 5 avec les membres `{0,1,2,3,4}`, `degenerate_shells=0` et `dictionary_refuted=0`.
+
+Cette fixture réfute donc Q1 au niveau exact requis par le produit : **un événement Morse bien centré, dans RelevantGP et strictement dans Jung peut être porté par une diagonale absente de toutes les couches onion**. Le test permanent doit encoder les coordonnées, la diagonale, la profondeur, le centre, les barycentriques, le shell, le rang et l'absence de dégénérescence.
 
 ## 3. Q2 : la voie algorithmique crédible
 
@@ -202,7 +256,7 @@ Ces tests doivent être fail-open. Une ambiguïté, une égalité ou un overflow
 ## 5. Décision proposée
 
 1. Corriger Q0 par une marge stricte ou par un traitement exact de toute la bande d'égalité; ajouter la fixture tangente.
-2. Fermer Q1 comme **réfutée**, enregistrer la fixture six-points ci-dessus et interdire l'onion peeling comme architecture.
+2. Fermer l'identité « onion = complexe shallow » comme **réfutée**, y compris après restriction aux événements bien centrés; conserver l'ancienne fixture avec `well_centred=false` comme historique et promouvoir la fixture de la section 2.4 en régression permanente.
 3. Remplacer le comparateur rationnel du sweep par le chirotope `i128` seulement après une preuve de largeur dans le code et des fixtures de parallèle, concurrence et ordre inversé.
 4. Construire un premier RIC shallow CPU exact, borné et différentiel; ne pas commencer par le GPU.
 5. Garder le sweep dense comme oracle local et générateur de fixtures, jamais comme chemin produit.
@@ -210,6 +264,6 @@ Ces tests doivent être fail-open. Une ambiguïté, une égalité ou un overflow
 
 ## Conclusion
 
-La nouvelle réduction duale du README est utile, mais elle conduit au **problème des niveaux peu profonds de demi-plans**, pas à un épluchage de couches convexes. Q0 devient sûr avec une marge stricte; un contre-exemple produit minimal ferme définitivement Q1; le déterminant homogène triple retire l'obstacle de 210 bits du tri u16. La difficulté restante est algorithmique et globale : construire exactement le sous-complexe shallow et ses conflits sans matérialiser toutes les intersections.
+La nouvelle réduction duale du README est utile, mais elle conduit au **problème des niveaux peu profonds de demi-plans**, pas à une identité générale avec les couches convexes. Q0 devient sûr avec une marge stricte; Q1 est réfutée même après bon centrage et RelevantGP; le déterminant homogène triple retire l'obstacle de 210 bits du tri u16. La difficulté restante est algorithmique et globale : construire exactement le sous-complexe utile et ses conflits sans matérialiser toutes les intersections.
 
 GCP non utilisé.
