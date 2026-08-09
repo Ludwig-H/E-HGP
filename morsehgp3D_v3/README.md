@@ -5,13 +5,13 @@ et oracles bornés sous audit. Profil exercé : **entrée u16 quantifiée seulem
 Aucun statut public, aucun SLO et aucune phase ne sont ouverts au registre.
 
 L'état audité du worktree est scellé dans
-[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les cinq portes flats
-Release et les campagnes sanitizers y sont vertes. La correction de justesse
-`use_owner` est créditée sur les quatre quadrants. Sa porte compare désormais
-le statut et le catalogue sémantique, mais la fixture du cône signé ne protège
-pas encore l'identité du propriétaire. Le noyau F0 reste rouge : il rejette une
-naissance autorisée par son contrat écrit. Les fermetures constructives sont
-dans la
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les portes usuelles à
+petites coordonnées sont vertes, mais une frontière u16 révèle un défaut P0 du
+chemin `use_owner` : un déterminant exact `i128` est implicitement tronqué en
+`int`, ce qui perd des sphères et peut déclencher `-INT_MIN`. Le noyau F0 reste
+également rouge : il rejette une naissance autorisée par son contrat écrit. La
+fixture du cône signé ne protège pas encore l'identité du propriétaire. Les
+fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
@@ -624,7 +624,7 @@ un préfixe de trois sommets. Le high-water
 mémoire complet, l'intégration transactionnelle au catalogue et l'absence
 d'écriture partagée d'un kernel réel restent à obtenir.
 
-### Le propriétaire est positif, mais son intégration reste incomplète
+### La règle owner est constructive, mais le chemin u16 reste NO-GO
 
 Streamer les sommets ne suffit pas tant que le **catalogue** garde `emitted`, une
 table de déduplication proportionnelle à la sortie. La note d'audit prouve la
@@ -648,11 +648,24 @@ fois, les termes de $U$ s'annulent sur le cône, et $|B_U|\leq s_{\max}-|U|$. To
 lit avec le même prédicat entier que le pinceau, par l'identité
 $a_i\cdot d=-2\,\mathrm{orient3d}$.
 
-**[mesuré, snapshot scellé dans l'audit courant]** les cinq portes Release
+**[P0 reproductible sur le snapshot courant]** cette identité exacte est
+actuellement rompue à son appel : `owner_rays_ok` passe le déterminant `i128`
+brut à `tangent_sign(int, ...)`. Le tétraèdre axial d'échelle 1290 rend 7
+sphères dans les deux modes; à 1291, le catalogue normal en rend encore 7 et
+owner seulement 4, car $1291^3>\mathrm{INT\_MAX}$. Sur le tétraèdre alterné
+d'échelle 1024, le déterminant vaut exactement $2^{31}$ et UBSan détecte la
+négation de `INT_MIN`. La fermeture locale est de réduire d'abord le prédicat
+par `sign_of`, puis de rendre permanentes les frontières 1023/1024/1025 et
+1290/1291 avec un mutant de troncature. Tant que cette porte n'est pas verte,
+les accords owner à petites coordonnées ne constituent plus un GO de justesse
+sur le profil u16 déclaré.
+
+**[mesuré sur les campagnes usuelles à petites coordonnées]** les cinq portes Release
 `fixtures`, `generic`, `indexed_tree`, `degenerate` et `cospherical` passent en
-222,60 s de temps mur avec deux tests en parallèle : 4 985 cas, zéro désaccord,
+78,07 s de temps mur avec deux tests en parallèle : 4 990 cas, zéro désaccord,
 et table résiduelle owner-indexée maximale nulle. Deux campagnes ASan/UBSan ne
-déclenchent aucun diagnostic.
+déclenchent aucun diagnostic sur leurs entrées. Ces campagnes ne franchissent
+pas la frontière de conversion précédente et ne la qualifient donc pas.
 
 La frontière est explicite : **le propriétaire couvre seulement la récolte
 naviguée**. Les singletons sans index et la voie directe n'ont aucun sommet de
@@ -685,55 +698,44 @@ $\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet. Un réducteur exact à six états 
 désormais prouvé en $O(m+\lvert B_U\rvert)$ par support d'arité deux, mais il
 reste à l'intégrer et le coût total du harvest d'arité trois reste ouvert.
 
-### Le noyau de décision est maintenant portable device
+### Le noyau de décision borné est un candidat device, pas encore un kernel qualifié
 
 Rien du chemin de décision n'était exécutable sur un GPU : `std::vector` partout,
 allocations par sommet, tailles non bornées. `prototype/order_k_device_core.hpp`
-écrit le **même** chemin sans allocation, sans conteneur standard, à capacité fixe
-et annoté `MHGP_HD` — donc compilable par `nvcc` pour l'hôte et le device.
+réécrit le chemin local sans allocation ni conteneur standard, à capacité fixe et
+avec annotations `MHGP_HD`. Il compile aujourd'hui avec le compilateur hôte et
+concorde avec le CPU dans le différentiel. Aucun `.cu`, target CUDA ou passage
+`nvcc` de la v3 ne démontre encore sa compilation ni son exécution device.
 
 **Le refus fait partie du contrat.** Une coquille cosphérique peut avoir
 $\Theta(n)$ points : aucune capacité fixe n'est universellement suffisante, et
 prétendre le contraire serait faux. Le noyau déclare `kMaxShell = 32`,
 `kMaxInterior = 16` et **refuse** au-delà, avec un statut distinct. L'intérieur,
-lui, est borné par le contrat — la coupe est $\ell\leq s_{\max}-2$, donc neuf à
-$s_{\max}=11$ ; la coquille ne l'est pas, et c'est pourquoi son dépassement est un
-refus compté et non une troncature.
-
-C'est exactement la discipline du projet `morsehgp3d`, dont **toutes** les requêtes
-device sont des propositions rejouées exactement sur CPU. Un sommet refusé remonte
-à l'hôte, qui le décide avec le chemin non borné.
+lui, est borné par le contrat — la coupe est $\ell\leq s_{\max}-2$. Le live
+accepte désormais `s_max` jusqu'à 32, donc cette borne atteint 30 et dépasse la
+capacité device 16. Ce n'est correct qu'avec un refus explicite puis un repli
+hôte réellement rejoué; la coquille, elle, reste non bornée par `s_max`.
 
 La porte exige deux choses et rien de plus : que tout sommet **admis** soit décidé à
 l'identique — les flats livrés dans le même ordre, puis verdict par verdict — et que
-les refus soient **comptés**. **[mesuré]** fixtures 1 578 sommets et 13 244 couples,
-cosphérique 6 324 et 51 710, grille saturée 8 752 et 74 006 : zéro divergence, zéro
-refus de capacité dans ces régimes.
+les refus soient **comptés**. Sur les cinq portes Release du snapshot courant,
+328 560 sommets admis et 2 703 016 couples concordent, sans refus de capacité.
+Ce dernier zéro est une dette de couverture, pas un crédit : aucune fixture ne
+dépasse encore 32 points de coquille ou 16 points intérieurs, et aucun plancher
+CLI n'interdit une porte device vide. Une vraie qualification exige au minimum
+une compilation CUDA v3, un lanceur borné, des planchers non vacuables, des
+fixtures de refus et un repli hôte rejoué de bout en bout.
 
-### Ce que la reconnaissance de l'infrastructure GPU a établi
-
-Le projet `morsehgp3d` porte déjà un constructeur Morton/LBVH CUDA et une discipline
-de build stricte, et la découverte qui compte est celle-ci : **ses kernels se testent
-sans GPU**. Chaque kernel est scindé en trois — un `_internal.hpp` qui déclare un
-unique symbole de lancement, un hôte qui l'appelle sans le définir, un `.cu` qui le
-définit. Les tests unitaires exploitent le trou de lien et résolvent le symbole avec
-un **faux lanceur** qui refuse toute requête non marquée `host_fake`, pendant que le
-vrai `.cu` refuse symétriquement les requêtes `host_fake`. Les 249 CTests sont donc
-intégralement CPU, et seul l'outil de qualification exige un vrai sm_120.
-
-Trois contraintes dures en découlent, et il vaut mieux les connaître avant la G4 :
-CUDA 12.9.x exactement, `sm_120-real` sans PTX — donc aucun repli JIT —, et un
-**worktree git propre** exigé à la configuration, sans quoi le build échoue avant
-de compiler quoi que ce soit.
-
-Ce qui manque pour un index device exact est précis, et ce n'est pas le calcul : le
-device ne détient que des mots binary64 axis-major, l'AABB d'un nœud LBVH est encodée
-par six identifiants témoins et non par des bornes, il n'existe aucun prédicat
-boîte–boule entier, aucun `sphere_side`, et toutes les requêtes existantes sont
-**propositionnelles** avec rejeu CPU obligatoire — alors que le contrat du
-`CertifiedIndex` est l'inverse : la requête est exacte et terminale. La largeur, elle,
-n'est pas le problème : sur la grille u16 déclarée, $W=16$ tient dans le palier
-256 bits le plus étroit, avec treize bits de marge.
+Le premier diff de high-waters ne ferme pas encore cette dette. Il relève
+coquille et intérieur dans `neighbour_along`, pas à chaque tentative
+`admit(v/w)`, et peut donc sous-mesurer un sommet réellement présenté au noyau.
+Il interprète aussi un maximum supérieur à la capacité comme un échec, alors
+qu'un dépassement correctement **refusé puis rejoué** est précisément le contrat
+d'une capacité bornée. La campagne `points=21, smax=19, seed=1` observe un
+intérieur de 17, compte 94 refus sans désaccord, puis échoue seulement sur cette
+mauvaise condition. La porte correcte mesure chaque admission tentée, exige le
+refus et compare le repli; un maximum nul se distingue par un compteur
+d'échantillons, car zéro intérieur est une valeur géométrique légitime.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
@@ -1230,7 +1232,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | # | question | statut |
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | correction de justesse et payload de domaine renforcés; identité du propriétaire signé non protégée, table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` sur u16; payload de domaine renforcé mais identité signée non protégée; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |

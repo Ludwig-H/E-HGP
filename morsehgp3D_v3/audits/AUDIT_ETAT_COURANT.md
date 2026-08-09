@@ -8,215 +8,287 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `mode=order_k_flats_owner_differential_and_gate_d_f0`,
 `public_status=not_claimed`.
 
-Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype et
-ne vaut ni promotion produit, ni ouverture de phase. Les résultats concernent
-le worktree courant construit sur le commit de base suivant :
+Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype
+et ne vaut ni promotion produit, ni ouverture de phase. Les fichiers source
+étaient non commités pendant l'audit; le verdict est donc rattaché au commit de
+base et aux empreintes live suivantes :
 
 | objet | empreinte |
 | --- | --- |
-| `HEAD` | `f3682632c490599aa6d74dae42e69038ac65f9b9` |
-| `prototype/order_k_flats.hpp` | `76ab24712d77beb336caef6cbb63137ccfa3f5f81ec58cd5499a59889e7f1de1` |
-| `prototype/flats_differential.cpp` | `a1d5f842407a09f68c948fe21653a83b38a60e5f046f62432a8997589ad1fd90` |
+| `HEAD` | `fbfb2c0425a5b5a3c062b5eac92019075126c21d` |
+| `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
+| `prototype/flats_differential.cpp` | `5dc937b205503b9c88cd7f75206b7dc4fec6770eca3a94f74c35ffadf6b4665f` |
+| `prototype/order_k_device_core.hpp` | `e9e0c713a6c957aa3779ac20077e921725d7936eeece05d4557a9b8b95a66606` |
 | `CMakeLists.txt` | `fdc00942cc8aed26f46c40ad3a95ef7be040d968ff819fd1ffb9368f171946c4` |
 | `audits/check_gate_d_fold_f0.py` | `34149092cd1b06762085800ac9d575c0cb8022e3a1c273c7d1955d2f4e768294` |
 
 ## Verdict
 
-**GO ciblé pour la correction de justesse du domaine `use_owner`; NO-GO pour
-présenter la porte permanente comme un certificat complet, NO-GO pour un mode
-globalement sans table, et NO-GO pour déclarer F0-A mathématiquement validée.**
+**NO-GO de justesse owner sur le profil u16, NO-GO F0, et noyau device encore
+candidat hôte sous audit.**
 
-La suppression silencieuse des chemins sans sommet propriétaire est corrigée.
-Aucun contre-exemple n'a été trouvé sur 174 444 exécutions indépendantes qui
-comparent statuts et payloads complets dans les quatre quadrants
-`use_index` × `use_owner`. Le chemin owner indexé navigable garde désormais
-`emitted` vide.
+Un P0 entier invalide le précédent GO ciblé owner : `owner_rays_ok` transmet un
+déterminant exact `i128` à `tangent_sign(int, ...)`. La conversion implicite
+tronque le déterminant, perd des sphères, peut en dupliquer une autre et atteint
+un cas de négation de `INT_MIN` détecté par UBSan. Les cinq campagnes usuelles
+restent vertes parce que leurs coordonnées ne franchissent pas cette frontière.
 
-Deux verrous restent prioritaires :
+Les avancées restent utiles : la porte compare beaucoup mieux le payload, la
+signature de permutation conserve membres et multiplicités, le high-water de
+`emitted` est relevé aux insertions, les high-waters du parcours sont exposés et
+la borne publique de `s_max` est alignée sur `kMaxRank`. Aucun de ces crédits ne
+compense le P0.
 
-1. la fixture permanente de domaine ne compare que le nombre de sphères et leur
-   histogramme d'arités; son message « même catalogue » dépasse ce qu'elle
-   vérifie ;
-2. le juge F0 rejette une naissance composée de facettes activées dans le lot,
-   alors que son contrat écrit l'autorise. La vérité Warshall et le sujet DSU
-   partagent ce rejet, donc leur accord ne le révèle pas.
+## P0 — le déterminant exact est tronqué avant le signe tangent
 
-## Résultat positif — correction du domaine `use_owner`
+### Cause exacte
 
-Le live définit maintenant `owned_path` seulement si `use_owner` est demandé et
-si l'émission est portée par un vrai sommet navigué. Les singletons sans index et
-la voie directe n'ont pas de sommet de $P_U$ : ils utilisent légitimement le
-repli `emitted`. La voie directe et la navigation sont exclusives; sous refus des
-coordonnées dupliquées, une coquille singleton ne peut pas entrer en collision
-avec une émission owner d'arité au moins deux.
+`orient3d_exact` rend un `i128`. `tangent_sign` accepte un `int` qui représente
+déjà `-1`, `0` ou `+1`. L'appel live lui passe pourtant la valeur brute :
 
-Les sorties minimales sont rétablies dans les quatre quadrants :
+```cpp
+tangent_sign(orient3d_exact(a, b, c, s), delta)
+```
 
-| nuage | sortie attendue et obtenue | table `emitted` sans index / owner sans index / index / owner+index |
-| --- | --- | --- |
-| tétraèdre affine 3D | 11 sphères, arités 4 / 6 / 1 / 0 | 11 / 4 / 11 / **0** |
-| triangle direct | 7 sphères, arités 3 / 3 / 1 / 0 | 7 / 7 / 7 / 4 |
-| cône signé à cinq points | 22 sphères | 22 / 5 / 22 / **0** |
+La faute se situe donc à l'interface valeur/signe. Ce n'est ni un dépassement
+de `i128`, ni une limite du théorème owner. La correction locale testée hors
+dépôt est de passer `sign_of(orient3d_exact(...))`, ou de donner à
+`tangent_sign` une entrée `i128` qu'elle réduit elle-même.
 
-Une sonde indépendante a étendu la matrice au triangle, à quatre points
-alignés, à cinq points coplanaires, au tétraèdre et au cône signé, avec ordres
-hostiles et statuts de domaine. Sur une campagne plus large : 2 181 nuages,
-174 444 exécutions, 5 821 968 records et 41 430 permutations, dont 40 320 du
-cube et 120 du cône signé. Statut, ordre, support complet, arité, rang,
-`members_begin`, membres, `beta` et classifications exactes concordent. Aucun
-contre-exemple n'est trouvé.
+### Deux fixtures minimales
 
-Une mutation temporaire qui rétablit `owned_path=use_owner` est tuée : code
-non nul, quatre singletons perdus sur le tétraèdre et non-singletons perdus sur
-le triangle. Le correctif de justesse est donc crédité sur les empreintes de cet
-audit.
+Pour le tétraèdre axial
+`(0,0,0),(L,0,0),(0,L,0),(0,0,L)`, `s_max=2` :
 
-## P1 — F0 rejette une naissance autorisée par son contrat
+| `L` | déterminant | catalogue normal | catalogue owner |
+| ---: | ---: | ---: | ---: |
+| 1290 | 2 146 689 000 | 7 | 7 |
+| 1291 | 2 151 685 171 | 7 | **4** |
 
-La note F0 définit une naissance par `q_R=0` dès que la composante porte une
-`DirectHyperedge`. Elle précise qu'une composante de latents reliés par une
-hyperarête relève bien de ce cas. Deux facettes `n0` et `n1` activées exactement
-au niveau `a`, reliées par `DirectHyperedge(n0,n1)`, doivent donc produire une
-naissance.
+À 1291, les supports `{0,1}`, `{0,2}` et `{0,3}` disparaissent. La frontière
+est exactement celle de `INT_MAX`.
 
-Le script courant ajoute au contraire la précondition « au moins un sommet
-`R` ou `L` » dans `_truth_classify` et `_subject_classify`. La fixture ciblée
-attend le rejet du cas `N_a--N_a`, puis la campagne de mutation considère son
-acceptation comme une faute. Warshall et DSU rendent ainsi tous deux `error` :
-l'accord est corrélé et le `PASS` final ne valide pas le contrat publié.
+Pour le tétraèdre alterné
+`(0,0,0),(L,0,L),(L,L,0),(0,L,L)`, le déterminant vaut $2L^3$ :
 
-Deux fermetures sont possibles, mais elles ne sont pas interchangeables :
+| `L` | fait observé |
+| ---: | --- |
+| 1023 | déterminant encore représentable et catalogues concordants |
+| 1024 | déterminant $2^{31}$; conversion en `INT_MIN`, puis `-INT_MIN` signalé par UBSan |
+| 1025 | catalogue normal 10, owner **4**; six paires perdues |
 
-1. retirer la précondition partagée et conserver la sémantique écrite ;
-2. démontrer qu'un invariant amont interdit toute hyperarête sans carrier
-   strict, le documenter, puis le vérifier indépendamment avant la projection.
+La sortie Release de 1024 peut paraître correcte par accident; seule la porte
+UBSan empêche d'en faire un crédit.
 
-En l'état, aucun tel invariant n'est formulé. F0-A reste donc rouge malgré la
-sortie `Gate_D_F0_kernel=PASS`.
-
-## P1 de qualification — la porte owner permanente est trop faible
-
-- La fixture « domaine owner » calcule `pstatus` mais ne le compare pas. Elle
-  confronte seulement `(nombre de sphères, histogramme d'arités)`, sans imposer
-  les vérités attendues 11 et 7, ni supports, rangs ou membres. Deux catalogues
-  différents de même profil passent; le message « même catalogue » est donc
-  abusif. Le triangle à trois points exerce en outre `kTooFewPoints`, pas
-  `kAffineDimensionBelowThree` avec au moins quatre points.
-- La nouvelle équivariance owner est positive, mais sa signature est un `set` de
-  `(support, rang)`. Elle masque les multiplicités et ne transporte pas les
-  membres. La sonde externe ferme ces cas sur le snapshot, pas la porte
-  permanente.
-- La fixture `owner_signed_cone` exigée par la note reste externe. Elle doit
-  devenir permanente avec ses deux sommets candidats et son propriétaire
-  attendu.
-- Le différentiel owner partage avec sa référence la navigation, le census, la
-  miniboule et la canonicalisation. Il établit une équivalence de
-  déduplication relative à ces primitives, pas une exactitude géométrique
-  indépendante.
-
-## P2 — architecture, mémoire et coût
-
-- `emitted` est réellement vide pour owner+index+navigable. Sans index, les
-  singletons conservent $O(n)$ clefs; sur la voie directe, le repli peut rester
-  en $\Theta(\text{sortie})$. `use_owner` est donc un mode hybride, pas une
-  garantie globale sans table.
-- `dedup_table_size` publie la taille finale, pas un high-water ni les octets
-  alloués. La table ne décroît pas aujourd'hui, mais une mutation qui la vide en
-  fin de calcul tromperait cette porte. Il faut mesurer le maximum lors des
-  insertions et la mémoire complète.
-- Pour les arités deux et trois, les scans imbriqués peuvent coûter
-  $\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet. La note demande de sélectionner
-  directement les deux rayons extrêmes de l'intersection de demi-plans. Aucune
-  porte à grande coquille ne borne encore ce coût.
-- `owner_context` balaie encore les points même lorsque `use_owner=false`.
-- La terminologie du cube est clarifiée dans le README et la note : quatre
-  supports de cardinalité minimale, six supports inclusion-minimaux. Quelques
-  commentaires du différentiel et du header emploient encore « minimal » sans
-  préciser la notion. Le commentaire de la voie directe affirme aussi que le
-  différentiel ne l'oppose jamais au mode owner, alors que la nouvelle fixture
-  les confronte désormais, quoique partiellement.
-
-### Sink et décisions de filiation — crédits
-
-- `kSinkStopped` distingue l'arrêt volontaire d'une violation d'invariant. Le
-  test exerce maintenant l'arrêt au germe et après un préfixe de trois sommets;
-  l'intégration transactionnelle de ce préfixe au catalogue reste ouverte.
-- Les directions hors `{-1,+1}`, une clef retour dépassée et une base divergente
-  sont couvertes. `judge_admissible` recalcule les signes sans appeler le
-  `pair_admissible` du sujet; cette indépendance locale est créditée.
-
-### Oracle F0
-
-- Normalisation, validation projetée, construction des stamps et résolution des
-  racines sont communes à Warshall et DSU. Un `Record` direct incohérent avec
-  `raw_arity=11` et aucune source est accepté par les deux chemins. La nouvelle
-  identité complète n'est donc pas oracle-vérifiée indépendamment.
-- Une large part des obligations ciblées et des mutants repose sur `assert`.
-  Sous `python3 -O`, ces contrôles disparaissent mais le script imprime encore
-  `Gate_D_F0_kernel=PASS` avec les mêmes compteurs annoncés.
-- L'exhaustivité porte sur le pool structurel fixe
-  `{R0,R1,L0,N0,N1}` et au plus deux records du générateur. Elle n'est pas
-  exhaustive sur les namespaces, provenances, arités, handles source ou records
-  parallèles.
-- Le mini-sujet transactionnel photographie seulement `next_commit_id` et
-  `commits`. Il teste utilement son atomicité propre, mais pas encore le locator,
-  la partition, la forêt, la couverture et les journaux revendiqués par
-  l'architecture cible.
-
-## Résultats positifs reproductibles
-
-### Cinq portes flats Release
+### Contre-exemple u16 déterministe
 
 Commande :
 
 ```sh
-cmake --build /tmp/mhgp3v-audit-release-2E6oBp -j2
-ctest --test-dir /tmp/mhgp3v-audit-release-2E6oBp --output-on-failure -R '^mhgp3v_flats_(fixtures|generic|indexed_tree|degenerate|cospherical)$' -j2
+mhgp3v_flats_differential --clouds 1 --points 8 --coord 65536 --smax 2 --seed 20260809
 ```
 
-Compilateur `g++ 13.3.0`, build `Release`. Résultat : **5/5**, 222,60 s de
-temps mur avec deux tests en parallèle, 4 985 cas et zéro désaccord. La table
-résiduelle maximale vaut zéro dans les cinq campagnes owner indexées.
+Points :
 
-| porte | cas | owner émises | refus support | refus autre sommet |
+```text
+(36710,43342,56661) (44151,42733,3225)
+(32173,25451,115)   (33771,34375,37708)
+(35086,39924,50732) (52589,30461,40720)
+(18842,305,53369)   (61180,45472,62312)
+```
+
+Le catalogue normal rend 19 sphères. Owner rend 16 enregistrements mais
+seulement 15 sphères distinctes : `{0,4}`, `{0,7}`, `{4,5}` et `{5,7}` manquent,
+tandis que `{1,3}` est émise deux fois. Un probe ne changeant que la réduction
+du signe restaure un propriétaire unique pour chacune des onze paires et les 19
+sphères attendues.
+
+### Porte exigée
+
+La correction n'est fermée que si le dépôt conserve :
+
+1. les frontières axiales 1290/1291 et alternées 1023/1024/1025;
+2. le cas 1024 sous UBSan;
+3. une compilation de ce site avec `-Wconversion`;
+4. un mutant qui retire `sign_of` et doit rougir;
+5. la comparaison du catalogue et de l'unicité du propriétaire, pas seulement
+   un nombre total.
+
+## Verrous mathématiques transmis à Claude
+
+La construction complète, avec preuves et fixtures, est dans
+[`NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
+
+### F0 : naissance générale et source régulière sont distinctes
+
+Le fold général doit accepter une composante avec `q_R=0` dès qu'elle porte une
+`DirectHyperedge`. Une coface non régulière peut réellement avoir toutes ses
+facettes activées au même niveau : le carré coplanaire, protégé par un cinquième
+point extérieur à sa miniboule, en donne une fixture géométrique d'arité quatre.
+
+Sous la porte régulière forte, une hyperarête directe possède au contraire
+exactement $\lvert U(B)\rvert\geq2$ facettes strictes. Cet invariant se valide
+**par record source avant projection**, avec le reçu de miniboule et le census
+terminal. La garde live « au moins un `R` ou `L` dans la composante » ne prouve
+pas cet invariant : un record direct tout `N` est accepté s'il est relié à un
+second record portant un `L`.
+
+Le script rend encore `PASS` pour Warshall et DSU parce que les deux chemins
+partagent la même garde fautive. Une vérité indépendante doit repartir du
+`RawBatch`, énumérer les partitions bornées et appliquer directement la table
+`q_R`/record direct. Les contrôles contractuels doivent être explicites, car
+`python3 -O` désactive encore une partie des obligations basées sur `assert`.
+
+### Owner : les rayons d'une paire se réduisent en un scan exact
+
+Pour $U=\lbrace p_0,p_1\rbrace$, les contraintes du cône signé se ramènent à des
+demi-plans centraux sur $e^\perp$. Un automate exact à six états
+`FULL/HALF/LINE/RAY/WEDGE/ZERO` maintient leur intersection en
+$O(\lvert S(v)\rvert+\lvert B_U\rvert)$ et mémoire $O(1)$. Il rend au plus deux
+rayons extrêmes et évite l'énumération puis le rescannage de chaque triplet.
+
+Cette réduction abaisse le terme owner des paires de
+$O(m^4+m^3\lvert B_U\rvert)$ à $O(m^3+m^2\lvert B_U\rvert)$. Elle ne ferme pas
+le harvest des triples, qui peut encore garder un terme $O(m^4)$. Elle ne doit
+être intégrée qu'après le P0 de largeur, avec un oracle exhaustif des rayons et
+des permutations de contraintes.
+
+### Census terminal : report exact de demi-espace en dimension quatre
+
+Pour `Sphere{base,n,d}`, poser $C=d\,\mathrm{base}+n$ et
+$N=\left\Vert n\right\Vert^2$. Le signe exact contre un point $p$ est celui de
+$F_B(p)=d^2\left\Vert p\right\Vert^2-2dC\mathbin{\cdot}p+\left\Vert C\right\Vert^2-N$.
+Après le relèvement $\varphi(p)=(p,\left\Vert p\right\Vert^2)$, le census fermé
+est donc un report de demi-espace affine dans $\mathbb{R}^{4}$.
+
+Cette construction évite toute mosaïque de Delaunay d'ordre supérieur. Le
+chemin produit doit regrouper les sphères rationnelles identiques, interroger
+une structure de report exacte une fois par sphère et rendre un statut cappé
+fail-closed. Un scan `cpp_int` borné reste l'oracle, pas l'architecture produit.
+
+## Audit des portes owner permanentes
+
+### Progrès crédités
+
+- La matrice index × owner compare maintenant statut et payload sémantique; les
+  vérités 11 du tétraèdre et 7 du triangle sont imposées.
+- La signature de permutation conserve les occurrences, les membres et les
+  multiplicités au lieu de les écraser dans un `set`.
+- `owner_signed_cone` et le cube multi-support sont permanents.
+- `dedup_table_high_water` est relevé à chaque insertion; une remise à zéro en
+  fin de calcul ne trompe plus ce compteur.
+- Le chemin owner+index+navigable garde effectivement cette table à zéro sur les
+  cinq campagnes usuelles.
+
+### Couverture encore insuffisante
+
+- `owner_signed_cone` compare la sortie, pas l'identité du sommet propriétaire.
+  Le mutant non signé échange le propriétaire de l'extrémité `z=0` avec celui de
+  `z=4`, sans changer le catalogue ni le high-water. Le commentaire source qui
+  affirme que cette fixture protège seule `eps=-1` est donc faux.
+- `same_catalogue` ne compare pas `CriticalSphere::beta`, la représentation
+  complète de la sphère, `members_begin` ni d'éventuels membres orphelins. Un
+  mutant qui décale seulement `CriticalSphere::beta` passe la porte usuelle.
+  Le message « catalogue entier » dépasse ainsi le contrat réellement testé.
+- La vérité de cardinalité du nuage coplanaire à cinq points n'est pas imposée.
+- Le différentiel owner partage navigation, census, miniboule et support
+  canonique avec sa référence. Il prouve une équivalence de déduplication
+  relative à ces primitives, pas leur exactitude géométrique indépendante.
+
+Le mode reste hybride : sans index, les singletons gardent $O(n)$ clefs; sur la
+voie directe, `emitted` peut rester en $\Theta(\text{sortie})$. Le high-water
+publié compte des entrées, pas les octets, les buckets, `kept`, `members_pool`
+ou les sommets.
+
+## Audit du noyau borné candidat device
+
+### Résultats positifs
+
+Le cœur borné concorde avec le chemin CPU sur tous les sommets admis des cinq
+portes : 328 560 sommets et 2 703 016 couples, sans divergence observée. Un
+probe séparé a pu instancier `decide_child` et produire du PTX avec Clang 18;
+c'est un signal de portabilité structurelle, pas une qualification CUDA.
+
+Le diff live sépare utilement `exhaustive_scans` de l'amorce ayant seulement
+couvert toute la grille et aligne l'API `flat_catalogue` sur la borne dure
+`kMaxRank=32`. Il tente aussi de publier des high-waters de coquille, fermeture,
+points touchés, lot et intérieur. L'intention est correcte, mais le point de
+mesure et la condition de porte ne le sont pas encore.
+
+### P1 de qualification
+
+- La porte reste vacuable : aucun plancher n'exige un nombre minimal de sommets
+  admis, de couples ou de décisions device. Si tout le bloc device disparaît,
+  `device_admitted=0` saute aussi la nouvelle vérification des high-waters.
+- Les cinq campagnes rendent zéro refus de capacité. Il manque au minimum une
+  coquille de taille 33 et un intérieur de taille 17.
+- Lors d'un refus de voisin, le harness fait `continue`; le repli hôte annoncé
+  n'est ni exécuté ni comparé de bout en bout.
+- `device_pairs` compte les tests d'admissibilité, pas les appels à
+  `device::decide_child`. L'affirmation « verdict par verdict » n'a donc pas son
+  propre compteur ni son plancher.
+- Le build v3 reste C++ hôte : aucune cible `.cu`, aucun passage `nvcc` et aucun
+  kernel exécuté ne qualifient encore le device.
+- Avec `s_max<=32`, la borne théorique de l'intérieur atteint 30, supérieure à
+  `kMaxInterior=16`. Cette capacité est licite seulement si le refus et le repli
+  hôte sont permanents et reçus.
+- La commande `--clouds 1 --points 21 --coord 100 --smax 19 --seed 1
+  --min-cases 1` rend 233 cas et zéro désaccord, avec 94 refus de capacité et un
+  high-water intérieur 17/16, puis échoue uniquement parce que la nouvelle porte
+  impose `high_water<=capacity`. Elle transforme donc un refus explicite réussi
+  en échec. La propriété utile est « tout dépassement est refusé puis rejoué sans
+  troncature », pas « aucun dépassement n'existe ».
+- Les high-waters coquille et intérieur sont relevés dans `neighbour_along`, pas
+  à chaque tentative `admit(v)` ou `admit(w)`. Sous gdb, le cube atteint `admit`
+  avec coquille 8 et intérieur 0, mais laisse ces compteurs locaux à zéro. Le
+  maximum global non nul masque cette sous-mesure.
+- `touched_high_water` est relevé après une branche de retour; sur le cube, un
+  vecteur a été rempli puis le compteur reste zéro. L'affirmation « à chaque
+  écriture » n'est donc pas satisfaite.
+- L'interface API refuse bien `s_max>32` avant la soustraction signée, mais le
+  parseur CLI accepte encore jusqu'à 4096. Avec `--clouds 0`, une demande
+  `--smax 33` peut même sortir avec succès parce que seules les fixtures fixes
+  sont exécutées. Le CLI doit partager la borne et posséder une fixture négative.
+
+Deux risques API secondaires restent à fermer : `backward_pair_admissible`
+calcule `-forward` avant de valider le domaine, donc `INT_MIN` est un overflow
+signé; et les tailles/indices publics supposent que `admit` n'est jamais
+contourné.
+
+La règle live qui traite `interior_high_water==0` comme un compteur mort peut
+également refuser un jeu parfaitement légitime dont tous les sommets admis ont
+un intérieur vide. Il faut relever les tailles exactement à chaque tentative
+d'admission et compter les échantillons; une sentinelle ou un compteur
+d'événements sépare « zéro légitime » de « instrumentation jamais exécutée ».
+
+## Résultats reproductibles du snapshot
+
+### Cinq portes usuelles Release
+
+Commande :
+
+```sh
+ctest --test-dir /tmp/mhgp3v-live-v7HQX0 --output-on-failure -R '^mhgp3v_flats_(fixtures|generic|indexed_tree|degenerate|cospherical)$' -j2
+```
+
+Résultat : **5/5**, 78,07 s de temps mur, 4 990 cas et zéro désaccord sur les
+distributions de ces portes.
+
+| porte | cas | high-water coquille / fermeture / intérieur | device admis / couples | owner émises |
 | --- | ---: | ---: | ---: | ---: |
-| fixtures | 213 | 2 405 | 537 | 2 394 |
-| generic | 1 186 | 63 757 | 3 148 | 153 640 |
-| indexed tree | 220 | 3 027 | 540 | 4 610 |
-| degenerate | 1 293 | 70 874 | 26 489 | 140 992 |
-| cospherical | 2 073 | 80 410 | 3 542 | 167 775 |
+| fixtures | 214 | 5 / 4 / 5 | 1 578 / 13 244 | 2 405 |
+| generic | 1 187 | 8 / 5 / 7 | 110 873 / 895 952 | 63 757 |
+| indexed tree | 221 | 5 / 4 / 5 | 3 062 / 25 116 | 3 027 |
+| degenerate | 1 294 | 8 / 6 / 8 | 111 170 / 937 586 | 70 874 |
+| cospherical | 2 074 | 8 / 6 / 8 | 101 877 / 831 118 | 80 410 |
 
-Les planchers owner sont atteints dans ce snapshot. Ils restent couplés à une
-seule option `--min-owner`, avec un seuil dérivé `min_owner/32` pour les refus
-de support ; des minima séparés rendraient l'intention de couverture explicite.
+Toutes rendent `refuses par capacite=0` et un high-water `emitted=0` dans le
+quadrant owner+index+navigable. Elles restent insuffisantes puisque le probe u16
+ci-dessus produit **216 cas, un désaccord** sur le même binaire.
 
-### ASan et UBSan
+### Noyau F0
 
-Build temporaire `Debug -O1` avec
-`-fsanitize=address,undefined -fno-omit-frame-pointer` :
-
-| campagne | résultat |
-| --- | --- |
-| fixtures | 213 cas, zéro désaccord, aucun diagnostic |
-| petite campagne | 226 cas, zéro désaccord, aucun diagnostic |
-
-Trois petites campagnes Release supplémentaires rendent 343, 368 et 277 cas,
-toutes avec zéro désaccord. Aucun diagnostic ASan, UBSan ou LeakSanitizer n'est
-présent sur les deux campagnes instrumentées.
-
-### Cône signé minimal
-
-Sur les points
-`[(0,0,2),(4,0,2),(1,3,2),(2,1,1),(2,1,3)]`, le probe trouve deux sommets
-candidats et exactement un propriétaire : coquille `{0,1,2,4}`, intérieur
-`{3}`. Le catalogue owner indexé est identique à la référence, avec 22 sphères,
-et aucun sanitizer ne se déclenche. Les 120 permutations de la sonde externe
-concordent. Ce résultat crédite la formule locale; il doit encore devenir une
-fixture permanente du différentiel.
-
-### Noyau F0, crédits limités
-
-L'exécution normale rend :
+L'exécution normale et l'exécution `python3 -O` impriment encore toutes deux :
 
 ```text
 exhaustive=2168 accepted=1703 rejected=465
@@ -225,28 +297,27 @@ mutations=10 rollback_faults=5 allocator_mutant_killed=True
 Gate_D_F0_kernel=PASS
 ```
 
-Les clefs `RootSig` sont structurelles, les provenances identiques sont
-agrégées, les duplicats contradictoires sont rejetés, les records parallèles
-sont conservés, la double-attache vers deux racines est refusée et dix mutants
-sont tués en exécution normale. Ces résultats restent utiles une fois le P1 de
-sémantique corrigé.
+Une sonde `RawBatch` du carré tout `N_a` rend pourtant `error` dans les deux
+classificateurs, tandis que `regular_smuggling` rend `ok`. Le texte `PASS` ne
+ferme donc ni la sémantique F0 ni l'indépendance de sa vérité.
 
 ## Ordre de fermeture recommandé à Claude
 
-1. Aligner F0 sur la naissance `q_R=0`, ou publier et prouver la nouvelle
-   précondition amont ; ajouter une vérité indépendante pour ce cas.
-2. Renforcer la porte owner avec statut, payload complet, vérités 11/7, un vrai
-   nuage affine de dimension basse avec au moins quatre points et des
-   multiplicités conservées sous permutation.
-3. Rendre permanente `owner_signed_cone` avec propriétaire attendu.
-4. Remplacer les vérifications F0 contractuelles basées sur `assert` et
-   séparer les primitives communes de l'oracle.
-5. Implémenter la sélection linéaire des rayons owner et mesurer les grandes
-   coquilles avant tout discours de passage à l'échelle.
-6. Documenter le domaine hybride du repli, puis intégrer le sink au catalogue
-   transactionnel et mesurer le high-water complet plutôt que la taille finale.
+1. Corriger la réduction `i128` vers signe et graver les deux frontières avec
+   UBSan, `-Wconversion`, unicité owner et mutant de troncature.
+2. Aligner F0 sur la naissance générale tout `N_a`; déplacer la régularité dans
+   un validateur par record authentifiant aussi miniboule et census terminal.
+3. Rendre l'oracle F0 indépendant depuis le `RawBatch` et remplacer les
+   obligations contractuelles basées sur `assert`.
+4. Tester directement l'identité owner signée et compléter le contrat de
+   comparaison du catalogue.
+5. Intégrer le réducteur linéaire des rayons, puis seulement mesurer de grandes
+   coquilles et traiter le terme d'arité trois.
+6. Rendre la porte device non vacuable, exercer les deux refus de capacité et
+   le repli hôte, puis compiler et exécuter un vrai kernel v3.
+7. Construire le census terminal exact 4D avec statuts cappés et oracle borné.
 
-Tant que les points 1 et 2 ne sont pas fermés, les résultats positifs restent
+Tant que les points 1 à 4 ne sont pas fermés, les résultats positifs restent
 des validations ciblées et non une autorisation de promotion.
 
 GCP non utilisé.

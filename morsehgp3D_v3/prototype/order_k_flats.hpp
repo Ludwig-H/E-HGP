@@ -297,7 +297,12 @@ struct FlatStatistics {
   long long seed_failure_stage = 0;      // etape exacte d'un refus de germe
   long long grid_points_touched = 0;     // points visites par l'index, avant tout test
   long long bootstrap_rounds = 0;        // doublements de pave a l'amorce
+  // DEUX evenements distincts, longtemps confondus sous un seul compteur : une
+  // amorce qui a du elargir sa boite jusqu'a couvrir la grille declaree, et un
+  // BALAYAGE effectif des n points. Seul le second est un obstacle device — un
+  // balayage O(n) par thread y serait inadmissible — et il faut donc le voir seul.
   long long full_grid_sweeps = 0;        // amorces ayant du couvrir toute la grille
+  long long exhaustive_scans = 0;        // balayages effectifs des n points
   long long disagreement_sweeps = 0;     // balayages de certification par desaccord de signe
   long long harvest_prefiltered = 0;     // supports ecartes par le test de propriete
   long long harvest_censused = 0;        // supports ayant paye un census complet
@@ -308,6 +313,15 @@ struct FlatStatistics {
   // HIGH-WATER de la table, releve a chaque INSERTION. La taille finale ne prouve
   // rien : une mutation qui viderait la table en fin de calcul tromperait la porte.
   long long dedup_table_high_water = 0;
+  // HIGH-WATERS VRAIS, releves a chaque ecriture. `shells_multiple` et
+  // `batches_multiple` comptent des EVENEMENTS au-dessus d'un seuil et
+  // `grid_points_touched` est une SOMME : aucun des trois ne dit quelle capacite
+  // un noyau borne devrait declarer. Ceux-ci le disent.
+  long long shell_high_water = 0;
+  long long closure_high_water = 0;
+  long long touched_high_water = 0;
+  long long batch_high_water = 0;
+  long long interior_high_water = 0;
   long long reverse_depth_max = 0;        // profondeur maximale de la pile
   long long reverse_children_tested = 0;  // voisins soumis au test de parent
   long long reverse_backtracks = 0;
@@ -328,7 +342,7 @@ struct FlatStatistics {
   long long reverse_decisions = 0;         // decisions de filiation, sans requete de retour
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 42 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 48 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
@@ -351,6 +365,7 @@ struct FlatStatistics {
     grid_points_touched += o.grid_points_touched;
     bootstrap_rounds += o.bootstrap_rounds;
     full_grid_sweeps += o.full_grid_sweeps;
+    exhaustive_scans += o.exhaustive_scans;
     disagreement_sweeps += o.disagreement_sweeps;
     harvest_prefiltered += o.harvest_prefiltered;
     harvest_censused += o.harvest_censused;
@@ -358,6 +373,11 @@ struct FlatStatistics {
     owner_rejected_vertex += o.owner_rejected_vertex;
     owner_emitted += o.owner_emitted;
     dedup_table_high_water = std::max(dedup_table_high_water, o.dedup_table_high_water);
+    shell_high_water = std::max(shell_high_water, o.shell_high_water);
+    closure_high_water = std::max(closure_high_water, o.closure_high_water);
+    touched_high_water = std::max(touched_high_water, o.touched_high_water);
+    batch_high_water = std::max(batch_high_water, o.batch_high_water);
+    interior_high_water = std::max(interior_high_water, o.interior_high_water);
     reverse_depth_max = std::max(reverse_depth_max, o.reverse_depth_max);
     reverse_children_tested += o.reverse_children_tested;
     reverse_backtracks += o.reverse_backtracks;
@@ -1288,7 +1308,7 @@ struct FlatAtVertex {
 template <class Fn>
 inline void for_each_flat_from(const std::vector<P3>& points, const Vertex& v, int i0, int j0,
                                int k0, Fn&& visit, long long* triplets = nullptr,
-                               long long* closures = nullptr) {
+                               long long* closures = nullptr, long long* closure_high = nullptr) {
   const int m = (int)v.shell.size();
   if (m < 3) return;
   int i = i0, j = j0, k = k0;
@@ -1315,6 +1335,8 @@ inline void for_each_flat_from(const std::vector<P3>& points, const Vertex& v, i
                            points[(std::size_t)tc], points[(std::size_t)z]) == 0)
           closure.push_back(z);
       }
+      if (closure_high != nullptr && (long long)closure.size() > *closure_high)
+        *closure_high = (long long)closure.size();
       i32 canonical[3] = {-1, -1, -1};
       {
         const int q = (int)closure.size();
@@ -1350,10 +1372,11 @@ inline void for_each_flat_from(const std::vector<P3>& points, const Vertex& v, i
 
 template <class Fn>
 inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& visit,
-                          long long* triplets = nullptr, long long* closures = nullptr) {
+                          long long* triplets = nullptr, long long* closures = nullptr,
+                          long long* closure_high = nullptr) {
   for_each_flat_from(points, v, 0, 1, 2,
                      [&](const FlatAtVertex& flat, int, int, int) { return visit(flat); },
-                     triplets, closures);
+                     triplets, closures, closure_high);
 }
 
 // LE COUPLE DE RETOUR, teste en O(m) et sans aucune fermeture.
@@ -1706,7 +1729,7 @@ inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
       if (best == previous) break;
     }
     if (best < 0) {
-      ++st->full_grid_sweeps;
+      ++st->exhaustive_scans;
       for (i32 z = 0; z < n; ++z) absorb(z);
     }
   }
@@ -1720,6 +1743,8 @@ inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
     if (pencil.compare_t(z, oz, best, best_orient) == 0) batch.push_back(z);
   }
   std::sort(batch.begin(), batch.end());
+  st->batch_high_water = std::max(st->batch_high_water, (long long)batch.size());
+  st->touched_high_water = std::max(st->touched_high_water, (long long)touched.size());
   if (batch.size() > 1) ++st->batches_multiple;
 
   std::vector<i32> shell = flat.closure;
@@ -1740,6 +1765,8 @@ inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
   std::sort(interior.begin(), interior.end());
   interior.erase(std::unique(interior.begin(), interior.end()), interior.end());
 
+  st->shell_high_water = std::max(st->shell_high_water, (long long)shell.size());
+  st->interior_high_water = std::max(st->interior_high_water, (long long)interior.size());
   out->shell = shell;
   out->interior = interior;
   out->level = (int)interior.size();
@@ -2294,7 +2321,7 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
         return false;                                     // ARRET : plus rien a enumerer
       }
       return true;
-    }, &st->reverse_triplets_scanned, &st->reverse_closures_built);
+    }, &st->reverse_triplets_scanned, &st->reverse_closures_built, &st->closure_high_water);
     if (broken) { *status = CloudStatus::kInvariantViolated; return; }
 
     if (descended) {
@@ -2349,9 +2376,15 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
   *status = CloudStatus::kOk;
 
   // L'ORDRE se valide avant tout : `s_max - 2` est un calcul signe, et
-  // `s_max = INT_MIN` le faisait deborder avant meme les singletons. Le contrat
-  // borne l'ordre par la grille declaree, donc par le nombre de points.
-  if (s_max < 0 || s_max > (int)kDeclaredGridMaximum) {
+  // `s_max = INT_MIN` le faisait deborder avant meme les singletons.
+  //
+  // LA BORNE EST `mhgp::kMaxRank`, PAS LA GRILLE. J'acceptais jusqu'a 65535 alors
+  // que `mhgp.hpp` documente 32 comme « borne dure sur s_max supportee », et que
+  // l'oracle, lui, la respecte deja. La contradiction n'etait pas theorique : elle
+  // rend indefinie toute capacite derivee du contrat, a commencer par
+  // |B(v)| <= s_max - 2, dont le noyau device a besoin pour dimensionner son
+  // ensemble interieur. Sous cette borne, |B(v)| <= 30 est un THEOREME du contrat.
+  if (s_max < 0 || s_max > mhgp::kMaxRank) {
     *status = CloudStatus::kOrderOutsideContract;
     return catalogue;
   }

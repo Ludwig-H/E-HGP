@@ -32,37 +32,43 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 Le worktree reste `exploration_v3_hors_registre`, sur CPU et sur le profil
 `quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
 
-Résultats positifs scellés : les cinq portes flats Release passent sur 4 985 cas
-avec zéro désaccord, deux campagnes ASan/UBSan passent sans diagnostic, le cône
-signé choisit le bon propriétaire sur la fixture minimale, et les gardes de
-filiation distinguent maintenant les directions invalides et les cibles
-incohérentes. `kSinkStopped` sépare aussi l'arrêt volontaire d'une erreur
-scientifique.
+Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
+petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
+sans diagnostic, et les gardes de filiation distinguent maintenant les
+directions invalides et les cibles incohérentes. `kSinkStopped` sépare aussi
+l'arrêt volontaire d'une erreur scientifique. Ces campagnes ne couvrent pas la
+frontière entière u16 décrite ci-dessous.
 
-Trois verrous priment sur tout travail d'échelle; leurs constructions sont
+Quatre verrous priment sur tout travail d'échelle; leurs constructions sont
 réunies dans la
 [`note mathématique courante`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md) :
 
-1. La sémantique F0 est maintenant décidée : le fold général doit accepter une
+1. Le chemin owner tronque actuellement un déterminant `i128` en le transmettant
+   à `tangent_sign(int, ...)`. Un tétraèdre d'échelle 1291 rend 7 sphères dans
+   le catalogue normal et seulement 4 en owner; une seconde frontière déclenche
+   `-INT_MIN` sous UBSan. Il faut réduire par `sign_of` avant toute optimisation.
+2. La sémantique F0 est maintenant décidée : le fold général doit accepter une
    naissance directe tout $N_a$. L'invariant régulier d'au moins deux facettes
    strictes est conditionnel et se valide par record avant projection; Warshall
    et DSU partagent encore le garde contraire.
-2. La correction `use_owner` concorde sur 174 444 exécutions externes et sa
+3. Hors de cette frontière entière, la correction `use_owner` concorde sur
+   174 444 exécutions externes et sa
    porte permanente compare désormais le catalogue sémantique. Elle ne protège
    cependant pas l'identité du propriétaire signé : le mutant non signé échange
    les deux extrémités sans changer la sortie. La table est nulle seulement pour
    owner+index+navigable et le high-water publié compte des entrées, pas des
    octets.
-3. Le census terminal de la source est une requête exacte de demi-espace après
+4. Le census terminal de la source est une requête exacte de demi-espace après
    relèvement en dimension quatre. Cette existence mathématique est fermée;
    l'index certifié, les statuts cappés, la terminalité et les constantes restent
    à implémenter et recevoir.
 
 Conséquence d'architecture : le propriétaire exact et le fold externe restent
-les directions proposées. Le propriétaire reçoit un GO ciblé de justesse, pas
-encore un certificat permanent ni une garantie sans table. La porte owner et la
-sémantique de naissance F0 se ferment avant les optimisations, le GPU ou une
-revendication mémoire.
+les directions proposées. Le propriétaire est NO-GO sur le profil u16 tant que
+la troncature et sa fixture permanente ne sont pas fermées; il ne possède pas
+davantage de garantie globale sans table. La porte owner et la sémantique de
+naissance F0 se ferment avant les optimisations, le GPU ou une revendication
+mémoire.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 
@@ -715,7 +721,9 @@ Le propriétaire local est branché à titre expérimental sur la récolte navig
 Les chemins sans sommet propriétaire utilisent un repli exact. Une sonde
 indépendante de 174 444 exécutions valide statuts et payloads complets dans les
 quatre quadrants; les cinq portes permanentes donnent aussi zéro désaccord et
-une table owner-indexée vide. La fixture de domaine compare désormais statut,
+une table owner-indexée vide sur leurs coordonnées basses. Elles ratent le P0
+u16 où `orient3d_exact` est tronqué avant `tangent_sign`, avec pertes et doublon
+de sphères. La fixture de domaine compare désormais statut,
 support, arité, rang, niveau et membres; l'équivariance conserve membres et
 multiplicités, le cône signé et le cube sont permanents. Mais le test du cône ne
 compare pas l'identité du sommet owner et laisse passer le mutant non signé.
@@ -724,6 +732,15 @@ rester en $\Theta(\text{sortie})$. Le high-water live compte les entrées de
 `emitted`, pas les octets résidents. Le coût owner reste
 $\Theta(m^4+m^3\lvert B_U\rvert)$ dans le code; le réducteur exact en un scan
 est prouvé mais non intégré, et le harvest total d'arité trois reste ouvert.
+
+Le premier relevé des capacités device est lui aussi encore en réparation :
+coquille et intérieur sont mesurés dans certaines sorties de voisinage, pas à
+chaque tentative d'admission. Il sous-estime donc le cube permanent. Surtout,
+la porte échoue si un high-water dépasse la capacité, même lorsque le noyau a
+correctement refusé l'entrée : une campagne `smax=19` compte 94 refus, zéro
+désaccord, puis échoue sur un intérieur 17/16. Le contrat cible doit au contraire
+certifier le refus et le repli hôte, avec nombre d'échantillons distinct du
+maximum observé.
 
 Le noyau F0 matérialise volontairement Warshall et DSU pour juger un lot borné.
 Son contrat de naissance est actuellement contredit par une garde commune aux
@@ -822,12 +839,12 @@ tient pas lieu de l'autre.
 **Décision à deux branches** : sortie énorme ⇒ réviser le SLO ; sortie sparse
 mais intermédiaires denses ⇒ **architecture no-go**.
 
-**État live de Gate D : NO-GO.** Le census borné des flats, la correction de
-justesse owner et le nouveau high-water d'entrées sont positifs. La porte owner
-ne protège pas encore l'identité signée, et F0 contredit sa sémantique de
-naissance. Le census global possède maintenant une construction 4D exacte, mais
-aucune capability terminale reçue. Les compteurs verts ne compensent pas ces
-écarts.
+**État live de Gate D : NO-GO.** Le census borné des flats et le nouveau
+high-water d'entrées sont positifs sur leurs campagnes. Mais owner tronque un
+déterminant exact sur le profil u16, sa porte ne protège pas l'identité signée,
+et F0 contredit sa sémantique de naissance. Le census global possède maintenant
+une construction 4D exacte, mais aucune capability terminale reçue. Les
+compteurs verts ne compensent pas ces écarts.
 
 **Gate E — shallow CPU exact.** Constructeur sans travail en $\sum_e m_e^2$ ;
 comparaison à l'oracle exhaustif et au brute-force local ; permutations,
@@ -857,25 +874,28 @@ qualifier 100 ms, **par famille sanctionnée**.
 
 ## 13. Ordre des travaux
 
-1. **F0 source-agnostique** : accepter le carré direct tout $N_a$, retirer la
+1. **Largeur owner** : réduire explicitement chaque `orient3d_exact` par
+   `sign_of` avant `tangent_sign`; rendre permanents 1023/1024/1025 et
+   1290/1291, UBSan, `-Wconversion` et le mutant de troncature.
+2. **F0 source-agnostique** : accepter le carré direct tout $N_a$, retirer la
    garde corrélée et construire la vérité par énumération de partitions depuis
    le `RawBatch`.
-2. **Capability régulière séparée** : vérifier chaque `DirectHyperedge` brute,
+3. **Capability régulière séparée** : vérifier chaque `DirectHyperedge` brute,
    ses niveaux de facettes et son reçu; tuer le mutant de validation par
    composante.
-3. **Identité owner** : tester directement les deux sommets du cône signé et
+4. **Identité owner** : tester directement les deux sommets du cône signé et
    tuer $\varepsilon=-1\mapsto+1$; graver aussi la vérité 19 du cas coplanaire.
-4. **Coût owner** : intégrer le réducteur `FULL/HALF/LINE/RAY/WEDGE/ZERO`, le
+5. **Coût owner** : intégrer le réducteur `FULL/HALF/LINE/RAY/WEDGE/ZERO`, le
    comparer à l'oracle exhaustif de rayons, puis mesurer les grandes coquilles.
-5. **Census terminal** : implémenter le halfspace-report 4D exact avec statuts
+6. **Census terminal** : implémenter le halfspace-report 4D exact avec statuts
    cappés et scan `cpp_int` borné comme vérité; trier les sphères rationnelles
    avant census.
-6. **Flux transactionnel** : intégrer sink et propriétaire au catalogue,
+7. **Flux transactionnel** : intégrer sink et propriétaire au catalogue,
    documenter le repli direct et publier les octets high-water de tous les
    conteneurs, pas seulement le nombre d'entrées de `emitted`.
-7. **F1/F2 et source HGP** : runs scellés, versions externes, couverture,
+8. **F1/F2 et source HGP** : runs scellés, versions externes, couverture,
    verticales et reçus complets contre l'oracle indépendant.
-8. Puis seulement données réelles à grande échelle, GPU et publication.
+9. Puis seulement données réelles à grande échelle, GPU et publication.
 
 **GO immédiat** : preuves, contre-exemples, fixtures CPU bornées et reçus des
 points 1 à 4. **NO-GO immédiat** : optimisation GPU avant leur fermeture, toute

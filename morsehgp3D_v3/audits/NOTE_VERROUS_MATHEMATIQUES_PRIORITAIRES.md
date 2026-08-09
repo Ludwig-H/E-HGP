@@ -8,6 +8,16 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=constructive_math_locks_for_claude`,
 `public_status=not_claimed`.
 
+Les théorèmes et constructions ci-dessous ne dépendent pas d'un snapshot. Les
+constats sur les fixtures live sont épinglés au snapshot audité suivant :
+
+| objet | empreinte |
+| --- | --- |
+| `HEAD` | `fbfb2c0425a5b5a3c062b5eac92019075126c21d` |
+| `prototype/order_k_flats.hpp` | `bce770192058b260326df2c44055d14ebe3f8be33c752dcd48ca370a34eef0df` |
+| `prototype/flats_differential.cpp` | `070e23f25b6c7f8ce784a69338b6173bbd6577bc12190a04a379f82dea15f593` |
+| `audits/check_gate_d_fold_f0.py` | `34149092cd1b06762085800ac9d575c0cb8022e3a1c273c7d1955d2f4e768294` |
+
 > [!IMPORTANT]
 > Cette note aide Claude à implémenter les prochaines fermetures; elle
 > n'implémente rien à sa place. Elle sépare trois résultats : la décision F0
@@ -18,15 +28,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 | verrou | décision mathématique | résiduel d'implémentation et de preuve |
 | --- | --- | --- |
+| signe owner sur tout u16 | `tangent_sign` reçoit un signe dans `{-1,0,+1}`, jamais le déterminant `i128` brut | insérer `sign_of`, ajouter les frontières 1023/1024/1025 et 1290/1291, puis tuer le mutant de troncature |
 | naissance F0 sans carrier strict | une composante `q_R=0` portant une `DirectHyperedge` est une naissance; la garde par composante doit disparaître du fold général | oracle indépendant depuis le `RawBatch`, fixture géométrique d'arité quatre et mutations |
 | capability régulière | chaque hyperarête directe régulière possède exactement $\lvert U\rvert\geq2$ facettes strictes | validation **par record avant projection**, distincte du fold |
 | owner d'arité deux | les rayons extrêmes du cône signé se calculent en $O(\lvert S(v)\rvert+\lvert B_U\rvert)$ et mémoire $O(1)$ | intégrer le réducteur, comparer ses rayons à un oracle et mesurer le harvest total |
 | owner d'arité trois | les deux orientations se décident par un seul scan signé | garder une garde de rang et tester les deux orientations |
 | census d'une sphère | c'est un report exact de demi-espace en dimension quatre après relèvement paraboloïde | structure de report certifiée, statuts cappés fail-closed, terminalité et reçus |
 
-L'ordre utile à Claude est : corriger d'abord la sémantique F0 et sa vérité,
-intégrer ensuite le réducteur de rayons, puis construire le census terminal. F1,
-F2, couverture et verticales ne peuvent pas réparer une source incomplète.
+L'ordre utile à Claude est : fermer d'abord la troncature entière du chemin
+owner, corriger ensuite la sémantique F0 et sa vérité, intégrer le réducteur de
+rayons, puis construire le census terminal. F1, F2, couverture et verticales ne
+peuvent pas réparer une source incomplète.
 
 ## 2. F0 : naissance générale et invariant régulier sont deux théorèmes différents
 
@@ -57,7 +69,9 @@ $\beta(Q\setminus\lbrace x\rbrace)=a$.
 Une `DirectHyperedge` régulière possède ainsi exactement $\lvert U(B)\rvert$
 facettes strictes. Pour des points distincts et une coface non triviale,
 $\lvert U(B)\rvert\geq2$. Cet invariant est réel, mais il appartient au
-**validateur de source régulière**, pas au classificateur F0 général.
+**validateur de source régulière**, pas au classificateur F0 général. Le reçu de
+ce validateur doit aussi authentifier le census terminal qui établit
+$S(B)=U(B)$; les seuls niveaux de facettes ne certifient pas la porte forte.
 
 La fixture régulière qui atteint la borne est :
 
@@ -152,6 +166,42 @@ Fixtures et mutations minimales :
 | attaches seules avec $q_R=0$ | erreur | naissance sans record direct |
 
 ## 3. Owner : réducteur exact des rayons sans énumérer les triplets
+
+### 3.0 Préverrou : conserver le domaine du prédicat exact
+
+Le snapshot épinglé appelle `tangent_sign(orient3d_exact(...), delta)`, alors
+que `tangent_sign` accepte un `int` qui représente déjà un signe. La conversion
+implicite `i128` vers `int` tronque donc un déterminant exact avant de décider le
+cône. Ce n'est ni un dépassement de `i128`, ni une difficulté du théorème :
+l'interface mélange la valeur d'un prédicat et son signe.
+
+La frontière entière minimale est reproductible sur le tétraèdre axial
+`(0,0,0),(L,0,0),(0,L,0),(0,0,L)` avec `s_max=2` :
+
+| échelle | déterminant | catalogue normal / owner | verdict |
+| ---: | ---: | ---: | --- |
+| 1290 | 2 146 689 000 | 7 / 7 | sous `INT_MAX` |
+| 1291 | 2 151 685 171 | 7 / 4 | trois supports diamétraux perdus |
+
+Un second témoin rend aussi le comportement indéfini visible. Pour
+`(0,0,0),(L,0,L),(L,L,0),(0,L,L)`, le déterminant vaut $2L^3$. À `L=1024`, il
+vaut exactement 2 147 483 648; la conversion produit `INT_MIN` sur la chaîne
+testée, puis `tangent_sign` évalue `-INT_MIN`. UBSan signale l'erreur même si la
+sortie Release paraît concordante par accident. À `L=1025`, le catalogue normal
+rend 10 sphères et owner seulement 4.
+
+Le contrat local doit être explicite : soit appeler
+`tangent_sign(sign_of(orient3d_exact(...)), delta)`, soit donner à
+`tangent_sign` une entrée `i128` qu'il réduit elle-même. La première forme rend
+visible que la fonction consomme un signe. La porte permanente doit inclure les
+deux côtés de chaque frontière, exécuter le cas `L=1024` sous UBSan, compiler ce
+site avec `-Wconversion` et tuer un mutant qui retire `sign_of`. Sur le nuage
+u16 déterministe de graine `20260809`, cette seule correction restaure les 19
+sphères, attribue un propriétaire unique aux onze paires et supprime le doublon
+de support `{1,3}`.
+
+Ce verrou de justesse précède l'optimisation ci-dessous : accélérer un signe
+tronqué ne ferait que rendre le mauvais propriétaire plus rapide.
 
 ### 3.1 Réduction intrinsèque de l'arité deux
 

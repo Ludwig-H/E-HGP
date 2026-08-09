@@ -277,6 +277,14 @@ struct Coverage {
   long long device_admitted = 0;
   long long device_refused = 0;
   long long device_pairs = 0;
+  long long shell_high_water = 0;
+  long long closure_high_water = 0;
+  long long touched_high_water = 0;
+  long long batch_high_water = 0;
+  long long interior_high_water = 0;
+  long long exhaustive_scans = 0;
+  long long admission_samples = 0;
+  long long admission_overflow = 0;
 };
 static Coverage coverage;
 
@@ -575,20 +583,26 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       }
       int device_differs = 0, admitted = 0, refused = 0, capacity_refused = 0;
       long long pairs = 0;
+      mhgp3v::device::AdmissionStats astats;
       if (root_base.size() == 4) {
         for (const auto& v : seen) {
           mhgp3v::device::BoundedVertex bv;
-          if (mhgp3v::device::admit(v, &bv) != mhgp3v::device::Admission::kOk) {
+          if (mhgp3v::device::admit(v, &bv, &astats) != mhgp3v::device::Admission::kOk) {
+            // REFUS = CONTRAT. Le sommet est rejoue sur le chemin non borne, et c'est
+            // ce rejeu qui doit etre exige, non l'absence de depassement.
             ++refused;
             continue;
           }
           ++admitted;
           // Les flats livres doivent etre les MEMES, dans le MEME ordre.
           std::vector<std::vector<i32>> cpu_flats;
+          // Le high-water de FERMETURE se releve ici, la ou les fermetures sont
+          // reellement construites : le BFS n'appelle pas `for_each_flat`, donc le
+          // lire dans ses statistiques donnait un compteur MORT — zero en permanence.
           mhgp3v::flats::for_each_flat(pts, v, [&](const mhgp3v::flats::FlatAtVertex& f) {
             cpu_flats.push_back(f.closure);
             return true;
-          });
+          }, nullptr, nullptr, &dst.closure_high_water);
           size_t seen_flats = 0;
           bool order_ok = true;
           mhgp3v::device::for_each_flat_from(pts.data(), bv, 0, 1, 2,
@@ -621,7 +635,7 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
                 continue;
               if (w.level > s_max - 2) continue;
               mhgp3v::device::BoundedVertex bw;
-              if (mhgp3v::device::admit(w, &bw) != mhgp3v::device::Admission::kOk) {
+              if (mhgp3v::device::admit(w, &bw, &astats) != mhgp3v::device::Admission::kOk) {
                 ++capacity_refused;
                 continue;
               }
@@ -649,6 +663,25 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       coverage.device_admitted += admitted;
       coverage.device_refused += refused + capacity_refused;
       coverage.device_pairs += pairs;
+      // LES CAPACITES SONT MESUREES, PAS DEVINEES. J'avais fige kMaxShell = 32 et
+      // kMaxInterior = 16 sans jamais relever les high-waters correspondants : la
+      // porte ne disait donc rien sur la marge reelle.
+      // Les high-waters de coquille et d'interieur se relevent A L'ADMISSION, la ou
+      // le noyau borne recoit reellement le sommet.
+      coverage.shell_high_water = std::max(coverage.shell_high_water, astats.shell_high_water);
+      coverage.interior_high_water =
+          std::max(coverage.interior_high_water, astats.interior_high_water);
+      coverage.admission_samples += astats.samples;
+      coverage.admission_overflow += astats.shell_overflow + astats.interior_overflow;
+      coverage.closure_high_water = std::max(coverage.closure_high_water, dst.closure_high_water);
+      coverage.touched_high_water = std::max(coverage.touched_high_water, dst.touched_high_water);
+      coverage.batch_high_water = std::max(coverage.batch_high_water, dst.batch_high_water);
+      // Les balayages complets se comptent sur le chemin INDEXE : c'est le seul ou
+      // ils sont un defaut. Un balayage O(n) par thread serait inadmissible sur
+      // device, et il faut donc savoir s'il survient.
+      // NE PAS lire ce compteur ici : `dst` vient d'un parcours SANS index, ou le
+      // balayage exhaustif n'existe pas comme repli mais comme chemin normal. Il est
+      // accumule dans le bloc indexe, seul endroit ou il signifie quelque chose.
     }
   }
 
@@ -897,6 +930,7 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       coverage.reject_by_parent += ist.reverse_reject_by_parent;
       coverage.reverse_triplets += ist.reverse_triplets_scanned;
       coverage.reverse_closures += ist.reverse_closures_built;
+      coverage.exhaustive_scans += ist.exhaustive_scans;
       coverage.index_nodes_visited += tree.nodes_visited;
       coverage.index_leaves_visited += tree.leaves_visited;
       // LE SINK BORNE, juge par un consommateur qui ne tient RIEN : il compte et
@@ -1906,6 +1940,13 @@ int main(int argc, char** argv) {
          coverage.pairs_judged, coverage.pairs_accepted, coverage.pairs_prefiltered);
   printf("device : sommets admis=%lld  refuses par capacite=%lld  couples juges=%lld\n",
          coverage.device_admitted, coverage.device_refused, coverage.device_pairs);
+  printf("       : high-water coquille=%lld fermeture=%lld touches=%lld lot=%lld interieur=%lld"
+         "  (capacites %d / %d)  balayages exhaustifs=%lld\n", coverage.shell_high_water,
+         coverage.closure_high_water, coverage.touched_high_water, coverage.batch_high_water,
+         coverage.interior_high_water, mhgp3v::device::kMaxShell, mhgp3v::device::kMaxInterior,
+         coverage.exhaustive_scans);
+  printf("       : tentatives d'admission=%lld  dont refusees pour capacite=%lld\n",
+         coverage.admission_samples, coverage.admission_overflow);
   printf("owner  : emises=%lld  refus support non canonique=%lld  refus autre proprietaire=%lld"
          "  table residuelle maximum=%lld\n", coverage.owner_emitted,
          coverage.owner_rejected_support, coverage.owner_rejected_vertex,
@@ -1945,6 +1986,39 @@ int main(int argc, char** argv) {
            coverage.index_internal_nodes, min_internal_nodes);
     return 3;
   }
+  // LES CAPACITES DU NOYAU DEVICE SONT JUGEES, pas declarees. Un high-water au-dela
+  // de la capacite est un refus non compte ; un high-water nul alors que des sommets
+  // ont ete admis est un compteur MORT, ce qui est pire qu'une capacite fausse.
+  //
+  // Ma premiere version traitait un depassement de capacite comme un ECHEC. C'est
+  // faux : un depassement correctement REFUSE puis rejoue est precisement le
+  // contrat d'une capacite bornee, et l'audit l'a montre sur une campagne a
+  // `points=21 smax=19` ou un interieur de 17 etait refuse 94 fois sans aucun
+  // desaccord — et ou ma porte echouait quand meme. Ce qui doit etre exige est
+  // l'ACCORD des sommets admis, deja verifie couple par couple, et la coherence du
+  // refus : tout depassement observe doit etre compte comme refus.
+  //
+  // Et un maximum NUL n'est pas un compteur mort : un sommet de niveau zero a un
+  // interieur vide, c'est une valeur geometrique legitime. Seul un nombre
+  // d'ECHANTILLONS nul denonce l'instrumentation.
+  if (coverage.device_admitted > 0 && coverage.admission_samples == 0) {
+    printf("ECHEC : le noyau device a admis %lld sommets mais n'a enregistre aucune"
+           " tentative d'admission — compteur mort\n", coverage.device_admitted);
+    return 3;
+  }
+  if (coverage.shell_high_water > mhgp3v::device::kMaxShell &&
+      coverage.admission_overflow == 0) {
+    printf("ECHEC : coquille %lld au-dela de la capacite %d sans aucun refus compte\n",
+           coverage.shell_high_water, mhgp3v::device::kMaxShell);
+    return 3;
+  }
+  if (coverage.interior_high_water > mhgp3v::device::kMaxInterior &&
+      coverage.admission_overflow == 0) {
+    printf("ECHEC : interieur %lld au-dela de la capacite %d sans aucun refus compte\n",
+           coverage.interior_high_water, mhgp3v::device::kMaxInterior);
+    return 3;
+  }
+
   // Une porte SAUTEE n'est pas une porte passee : le plancher l'interdit.
   if (min_reverse > 0 && coverage.reverse_skipped > 0) {
     printf("ECHEC : %lld portes reverse sautees pour statut non kOk — un plancher reverse"

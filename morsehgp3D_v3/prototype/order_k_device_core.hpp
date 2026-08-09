@@ -28,13 +28,23 @@
 // D'OÙ VIENNENT LES CAPACITÉS
 // ---------------------------------------------------------------------------
 //
-// L'ensemble INTÉRIEUR est borné par le contrat : la coupe du parcours est le
-// niveau strict $\ell\leq s_{\max}-2$, donc $|B(v)|\leq s_{\max}-2$. À
-// $s_{\max}=11$ cela fait neuf, et `kMaxInterior = 16` couvre le contrat avec
-// marge. La COQUILLE, elle, n'a pas de borne de contrat : quatre points en
-// position générale, mais $n$ en cosphéricité totale. `kMaxShell = 32` est un
-// choix de capacité, pas un théorème, et c'est pourquoi le dépassement est un
-// refus explicite et compté.
+// L'ensemble INTÉRIEUR est borné par le CONTRAT, et cette borne est un théorème,
+// pas une mesure : la coupe du parcours est le niveau strict
+// $\ell\leq s_{\max}-2$, donc $|B(v)|\leq s_{\max}-2$, et l'ordre est refusé
+// au-delà de `mhgp::kMaxRank`. La capacité est donc liée au contrat par un
+// `static_assert`, et non choisie.
+//
+// Ma première version disait « à $s_{\max}=11$ cela fait neuf, donc seize suffit ».
+// C'était faux comme justification : le catalogue acceptait alors n'importe quel
+// ordre jusqu'à 65535, si bien qu'aucune borne ne découlait du contrat. Trancher le
+// contrat à `kMaxRank` a rendu la borne vraie — et a montré du même coup que seize
+// ne suffisait pas.
+//
+// La COQUILLE, elle, n'a AUCUNE borne de contrat : quatre points en position
+// générale, mais $n$ en cosphéricité totale. `kMaxShell` est un choix de capacité,
+// pas un théorème, et c'est pourquoi son dépassement est un refus explicite et
+// compté. Les high-waters observés sont publiés par le différentiel : la marge est
+// mesurée, jamais supposée.
 #pragma once
 
 #include "mhgp/mhgp.hpp"
@@ -47,8 +57,10 @@ using mhgp::P3;
 using mhgp::i32;
 
 inline constexpr int kMaxShell = 32;
-inline constexpr int kMaxInterior = 16;
+inline constexpr int kMaxInterior = mhgp::kMaxRank;
 inline constexpr int kMaxClosure = kMaxShell;
+static_assert(kMaxInterior >= mhgp::kMaxRank - 2,
+              "l'interieur est borne par le contrat : |B(v)| <= s_max - 2 <= kMaxRank - 2");
 
 // Statut d'admission d'un sommet dans le noyau borné. Un refus n'est pas une
 // erreur : c'est une demande de rejeu hôte.
@@ -73,12 +85,47 @@ struct BoundedFlat {
   int closure_size = 0;
 };
 
+// Statistiques d'ADMISSION. C'est ici, et nulle part ailleurs, que se mesure ce
+// que le noyau borné reçoit réellement : relever les tailles dans
+// `neighbour_along` sous-mesure, puisqu'un sommet peut être présenté au noyau sans
+// passer par là. Et le compteur d'ECHANTILLONS est indispensable : un maximum nul
+// est une valeur géométrique légitime — un sommet de niveau zéro a un intérieur
+// vide — donc seul `samples == 0` dénonce un compteur mort.
+struct AdmissionStats {
+  long long samples = 0;
+  long long accepted = 0;
+  long long shell_overflow = 0;
+  long long interior_overflow = 0;
+  long long shell_too_small = 0;
+  long long shell_high_water = 0;
+  long long interior_high_water = 0;
+};
+
 // Conversion depuis le sommet non borné. Elle ne modifie rien et ne tronque
-// JAMAIS : au-delà de la capacité elle refuse.
-inline Admission admit(const flats::Vertex& v, BoundedVertex* out) {
-  if ((int)v.shell.size() > kMaxShell) return Admission::kShellOverflow;
-  if ((int)v.interior.size() > kMaxInterior) return Admission::kInteriorOverflow;
-  if (v.shell.size() < 3) return Admission::kShellTooSmall;
+// JAMAIS : au-delà de la capacité elle refuse, et le refus est le CONTRAT — pas
+// un échec. L'appelant rejoue alors le sommet sur le chemin non borné.
+inline Admission admit(const flats::Vertex& v, BoundedVertex* out,
+                       AdmissionStats* stats = nullptr) {
+  if (stats != nullptr) {
+    ++stats->samples;
+    if ((long long)v.shell.size() > stats->shell_high_water)
+      stats->shell_high_water = (long long)v.shell.size();
+    if ((long long)v.interior.size() > stats->interior_high_water)
+      stats->interior_high_water = (long long)v.interior.size();
+  }
+  if ((int)v.shell.size() > kMaxShell) {
+    if (stats != nullptr) ++stats->shell_overflow;
+    return Admission::kShellOverflow;
+  }
+  if ((int)v.interior.size() > kMaxInterior) {
+    if (stats != nullptr) ++stats->interior_overflow;
+    return Admission::kInteriorOverflow;
+  }
+  if (v.shell.size() < 3) {
+    if (stats != nullptr) ++stats->shell_too_small;
+    return Admission::kShellTooSmall;
+  }
+  if (stats != nullptr) ++stats->accepted;
   out->shell_size = (int)v.shell.size();
   out->interior_size = (int)v.interior.size();
   out->level = v.level;
