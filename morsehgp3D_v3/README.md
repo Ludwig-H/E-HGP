@@ -13,6 +13,10 @@ chemin `use_owner` : un déterminant exact `i128` est implicitement tronqué en
 fixture du cône signé ne protège pas encore l'identité du propriétaire. Les
 fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
+Le passage GPU est spécifié séparément dans la
+[`note des verrous mathématiques GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md) :
+largeurs exactes 64/128/384 bits, voisin terminal, sous-arbres transactionnels,
+owner/census, runs et porte 50 k/G4.
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -710,32 +714,36 @@ concorde avec le CPU dans le différentiel. Aucun `.cu`, target CUDA ou passage
 **Le refus fait partie du contrat.** Une coquille cosphérique peut avoir
 $\Theta(n)$ points : aucune capacité fixe n'est universellement suffisante, et
 prétendre le contraire serait faux. Le noyau déclare `kMaxShell = 32`,
-`kMaxInterior = 16` et **refuse** au-delà, avec un statut distinct. L'intérieur,
-lui, est borné par le contrat — la coupe est $\ell\leq s_{\max}-2$. Le live
-accepte désormais `s_max` jusqu'à 32, donc cette borne atteint 30 et dépasse la
-capacité device 16. Ce n'est correct qu'avec un refus explicite puis un repli
-hôte réellement rejoué; la coquille, elle, reste non bornée par `s_max`.
+`kMaxInterior = 32`. L'intérieur est borné par le contrat : avec
+`s_max<=32`, la coupe impose $\lvert B(v)\rvert\leq30$. Un intérieur supérieur,
+une coquille trop petite ou une fermeture dépassant une coquille déjà admise
+sont donc des violations d'invariant; seul `shell>32` est un fallback
+géométrique normal.
 
 La porte exige deux choses et rien de plus : que tout sommet **admis** soit décidé à
 l'identique — les flats livrés dans le même ordre, puis verdict par verdict — et que
 les refus soient **comptés**. Sur les cinq portes Release du snapshot courant,
 328 560 sommets admis et 2 703 016 couples concordent, sans refus de capacité.
 Ce dernier zéro est une dette de couverture, pas un crédit : aucune fixture ne
-dépasse encore 32 points de coquille ou 16 points intérieurs, et aucun plancher
+dépasse encore 32 points de coquille, et aucun plancher
 CLI n'interdit une porte device vide. Une vraie qualification exige au minimum
 une compilation CUDA v3, un lanceur borné, des planchers non vacuables, des
 fixtures de refus et un repli hôte rejoué de bout en bout.
 
-Le premier diff de high-waters ne ferme pas encore cette dette. Il relève
-coquille et intérieur dans `neighbour_along`, pas à chaque tentative
-`admit(v/w)`, et peut donc sous-mesurer un sommet réellement présenté au noyau.
-Il interprète aussi un maximum supérieur à la capacité comme un échec, alors
-qu'un dépassement correctement **refusé puis rejoué** est précisément le contrat
-d'une capacité bornée. La campagne `points=21, smax=19, seed=1` observe un
-intérieur de 17, compte 94 refus sans désaccord, puis échoue seulement sur cette
-mauvaise condition. La porte correcte mesure chaque admission tentée, exige le
-refus et compare le repli; un maximum nul se distingue par un compteur
-d'échantillons, car zéro intérieur est une valeur géométrique légitime.
+Le second diff relève maintenant coquille et intérieur exactement dans `admit`,
+compte les échantillons et accepte légitimement l'intérieur 17/32 de la campagne
+`points=21,smax=19`. Ce progrès ne ferme pas le replay : sur un refus, le harness
+fait encore `continue`; aucun sous-arbre refusé n'est réinjecté sur CPU et aucune
+union « device + repli » n'est comparée au parcours complet. Les raisons sont en
+outre agrégées, de sorte qu'un overflow d'un type peut masquer l'instrumentation
+morte d'un autre. Exiger la conservation par statut et une porte dédiée à une
+coquille 33.
+
+Enfin, `neighbour_along` reste entièrement CPU. Le différentiel fabrique `w`
+avec vecteurs et index, puis ne transmet que ce voisin déjà connu à
+`device::decide_child`. Le verrou GPU principal est donc encore de produire le
+minimum exact et **tout** son lot d'ex æquo, avec certificat terminal ou replay;
+le cœur actuel n'est pas une wavefront autonome.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 

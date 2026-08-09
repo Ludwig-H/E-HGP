@@ -70,6 +70,14 @@ davantage de garantie globale sans table. La porte owner et la sémantique de
 naissance F0 se ferment avant les optimisations, le GPU ou une revendication
 mémoire.
 
+La voie GPU suit un contrat distinct, détaillé dans la
+[`note mathématique GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md). Le verdict
+parent u16 tient exactement en 64 bits; voisin, owner et census demandent 128
+bits; l'ordre exact des niveaux demande 384 bits ou un merge CPU. La
+reverse-search se partitionne en sous-arbres disjoints, mais chaque tâche doit
+commit ou rollback entièrement et tout refus doit rejouer le sous-arbre. Le live
+n'a encore ni `.cu`, ni kernel lancé, ni production device de `neighbour_along`.
+
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 
 **Le plan en cinq lignes ci-dessous a été exécuté jusqu'à sa branche de
@@ -733,14 +741,18 @@ rester en $\Theta(\text{sortie})$. Le high-water live compte les entrées de
 $\Theta(m^4+m^3\lvert B_U\rvert)$ dans le code; le réducteur exact en un scan
 est prouvé mais non intégré, et le harvest total d'arité trois reste ouvert.
 
-Le premier relevé des capacités device est lui aussi encore en réparation :
-coquille et intérieur sont mesurés dans certaines sorties de voisinage, pas à
-chaque tentative d'admission. Il sous-estime donc le cube permanent. Surtout,
-la porte échoue si un high-water dépasse la capacité, même lorsque le noyau a
-correctement refusé l'entrée : une campagne `smax=19` compte 94 refus, zéro
-désaccord, puis échoue sur un intérieur 17/16. Le contrat cible doit au contraire
-certifier le refus et le repli hôte, avec nombre d'échantillons distinct du
-maximum observé.
+Le relevé live mesure maintenant coquille et intérieur au point d'admission et
+porte la capacité intérieure à 32, cohérente avec la borne contractuelle 30. La
+campagne `smax=19` passe donc avec un intérieur 17/32. Mais la porte reste
+vacuable et n'exerce aucun refus produit : le harness fait toujours `continue`
+au lieu de rejouer le sous-arbre. Il faut une coquille 33, un ledger séparé par
+raison et l'égalité du parcours CPU avec l'union device+replay.
+
+Le noyau borné ne produit pas encore ses voisins : `neighbour_along` tourne sur
+CPU, puis le résultat est copié dans la structure bornée avant le seul verdict
+de parent. Un kernel industriel doit fermer le minimum global du pinceau et le
+lot complet des ex æquo, partitionner la reverse-search en tâches disjointes et
+stager des runs exacts; aucune de ces opérations n'est reçue par le live.
 
 Le noyau F0 matérialise volontairement Warshall et DSU pour juger un lot borné.
 Son contrat de naissance est actuellement contredit par une garde commune aux

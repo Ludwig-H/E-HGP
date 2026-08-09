@@ -61,6 +61,37 @@ target_include_directories(mhgp3v_first_incidence PRIVATE ${CMAKE_CURRENT_SOURCE
 target_link_libraries(mhgp3v_first_incidence PRIVATE mhgp)
 target_compile_options(mhgp3v_first_incidence PRIVATE -Wall -Wextra -Werror)
 
+# LE FRONT D'ONDE. Le meme corps est compile pour l'hote et, si CUDA est demande,
+# pour sm_120. Sans CUDA le binaire qualifie le lot, le recu et la comparaison au
+# chemin non borne ; avec CUDA il exige EN PLUS l'egalite bit a bit avec le kernel.
+# Tout ce qui peut etre falsifie sans GPU l'est sans GPU.
+add_executable(mhgp3v_device_wavefront prototype/device_wavefront_qualification.cpp)
+target_include_directories(mhgp3v_device_wavefront PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_device_wavefront PRIVATE mhgp)
+target_compile_options(mhgp3v_device_wavefront PRIVATE -Wall -Wextra -Werror)
+
+option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
+if(MHGP3V_ENABLE_CUDA)
+  enable_language(CUDA)
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 120-real)
+  endif()
+  target_sources(mhgp3v_device_wavefront PRIVATE prototype/device_wavefront_kernel.cu)
+  target_compile_definitions(mhgp3v_device_wavefront PRIVATE MHGP3V_WAVEFRONT_CUDA)
+  set_target_properties(mhgp3v_device_wavefront PROPERTIES
+    CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}"
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_EXTENSIONS OFF
+    CUDA_SEPARABLE_COMPILATION OFF)
+  # Meme hygiene numerique que morsehgp3d : aucun FMA contracte, aucun
+  # flush-to-zero, division et racine exactes. Le chemin est entier, mais la
+  # discipline reste la meme et le rend reproductible face a l'oracle CPU.
+  target_compile_options(mhgp3v_device_wavefront PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false;--ftz=false;--prec-div=true;--prec-sqrt=true>)
+  message(STATUS "mhgp3v : kernel de front d'onde active pour ${CMAKE_CUDA_ARCHITECTURES}")
+endif()
+
 enable_testing()
 
 function(mhgp3v_add_expected_failure_test name expected)
@@ -306,6 +337,21 @@ mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
 mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
   mhgp3v_first_incidence_reject_descent_floor "plancher de descente non atteint"
   --clouds 2 --points 8 --coord 20 --k 3 --min-descent-steps 1000000)
+
+# LE LOT DU FRONT D'ONDE, qualifie sans GPU. Le corps evalue par le noyau borne doit
+# rendre exactement les verdicts du chemin CPU non borne, sommet par sommet et bit
+# par bit. C'est la porte qui rend la session GPU courte : elle n'aura plus qu'a
+# montrer que le MEME corps donne les MEMES bits sur sm_120.
+add_test(NAME mhgp3v_device_wavefront_host COMMAND mhgp3v_device_wavefront
+         --clouds 6 --points 24 --coord 4000 --smax 8 --seed 20260809)
+add_test(NAME mhgp3v_device_wavefront_degenerate COMMAND mhgp3v_device_wavefront
+         --clouds 6 --points 14 --coord 5 --smax 8 --seed 31337)
+# Le chemin de REFUS doit etre exerce : une capacite dont le depassement n'arrive
+# jamais n'est pas prouvee bornee, elle est seulement jamais atteinte.
+add_test(NAME mhgp3v_device_wavefront_refusal COMMAND mhgp3v_device_wavefront
+         --clouds 4 --points 20 --coord 3 --smax 12 --seed 11 --min-refused 10)
+mhgp3v_add_expected_failure_test_for(mhgp3v_device_wavefront
+  mhgp3v_device_wavefront_reject_absurd "campagne absurde" --points 2)
 
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
