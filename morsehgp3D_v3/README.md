@@ -565,13 +565,20 @@ dix points et $F=289$, avec $J_F=\lbrace1,5,7\rbrace$. Pour $z_F=1$, chacun des
 trois bras obtenus en retirant 2, 8 ou 9 a un niveau strictement plus petit mais
 reste hors de $D_3$. Aucun choix local de $u_F$ ne remplace donc le resolver.
 
-**[diagnostic hors autorité régulière]** 12 nuages de 20 points, grille $[0,20)$, $k=3$ : sur 5 103 facettes,
+**[diagnostic hors autorité régulière]** 30 nuages de 20 points, grille $[0,20)$, $k=3$ : sur 5 103 facettes,
 les intrus stricts se répartissent en 1 997 / 3 011 / **95** pour zéro, un et au
 moins deux. Ce sont **95 candidats d'attache**; le run observe 210 co-minimiseurs
 fermés sur ces facettes, aucune cible de niveau non strict et **6 cibles brutes
 hors du cœur**. Comme il n'authentifie ni support unique essentiel ni absence
 d'extra-shell, il ne peut pas encore conclure que 95 attaches remplacent ces 210
 co-minimiseurs. Il confirme néanmoins que le resolver n'est pas un cas limite.
+La campagne compte 3 184 branches fermées mais seulement 3 106 facettes ayant
+au moins un intrus strict : au moins 78 facettes portent donc une égalité
+extérieure sans intrus. Le domaine régulier est effectivement violé, et non
+simplement non vérifié.
+Le CTest committé utilise 12 nuages : il exerce 39 candidats, porte 88
+co-minimiseurs fermés et observe 5 cibles brutes hors du cœur. Son plancher
+prouve l'exercice de la branche, pas l'autorité de l'attache.
 
 Ce que ce prototype ne fait pas, et ne peut pas faire : il ne **résout** rien.
 `Resolve` interroge l'histoire horizontale antérieure au lot, qui n'existe pas

@@ -387,7 +387,7 @@ provenance sont comptées sans déduplication terminale ni plancher. Budgets,
 rollback, permutations de runs, wire exact, high-water et oracle 10.6 appelé
 restent absents.
 
-Le delta live suivant, épinglé par les empreintes
+Le commit suivant `bf53620`, épinglé par les empreintes
 `81d0d18fc19468e13fa8d4fe975f14b643922445104c6ecd83ef36e9383866c7`
 et `e1e6764321243df997bc9d00e82d7bccdffb0a0504fa43827d1f84a61eda75d1`,
 instrumente la règle d'une attache par facette. Il crédite utilement les classes
@@ -397,6 +397,16 @@ essentiel, ni l'absence d'extra-shell; il choisit `support[0]`, compte le
 payload fermé `decided` comme masse remplacée et ne résout aucun carrier. Une
 violation de descente hors domaine régulier ne doit pas réfuter la dichotomie,
 et une campagne verte ne juge pas encore l'équivalence des quotients.
+
+La provenance publiée a dû être rectifiée : les nombres 5 103 facettes,
+1 997/3 011/95 classes d'intrus et 210 co-minimiseurs viennent de 30 nuages,
+pas des 12 du CTest. Cette campagne compte 3 184 branches fermées mais seulement
+3 106 facettes avec au moins un intrus strict; elle contient donc au moins 78
+égalités extérieures sans intrus et **échoue effectivement** la porte régulière.
+Les 95 objets sont des candidats locaux, pas des attaches autorisées. Le CTest
+à 12 nuages exerce 39 candidats, 88 co-minimiseurs fermés et 5 cibles brutes
+hors du cœur; son plancher certifie uniquement que cette branche de diagnostic
+n'est pas vacante.
 
 Le résultat mathématique exact est maintenant plus fort :
 [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)

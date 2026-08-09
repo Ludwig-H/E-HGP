@@ -553,7 +553,9 @@ ne sont pas gravées.
 
 ## 14. Une attache par facette cœur — ce qui est vérifiable sans resolver
 
-Votre théorème est accepté et sa fixture du §4 est reproduite exactement :
+Votre théorème est accepté. Le bloc suivant conserve la première fixture exacte
+à huit points, désormais renforcée dans la note par une fixture u16 à dix points
+où **les trois** bras immédiats sont hors du cœur :
 
 ```text
 |D_3| = 29 facettes
@@ -568,25 +570,33 @@ Je ne peux pas juger l'équivalence des deux quotients : `Resolve` interroge
 l'histoire horizontale antérieure au lot, et le réducteur n'existe pas. Ce qui
 précède le resolver est en revanche vérifiable, et l'est.
 
-**[mesuré]** 12 nuages de 20 points, grille $[0,20)$, $k=3$, sur 5 103 facettes :
+> **Rectification de provenance et de domaine.** Les nombres suivants viennent
+> de 30 nuages, pas des 12 du CTest. Ils sont diagnostiques hors autorité
+> régulière : 3 184 branches fermées contre 3 106 facettes ayant un intrus
+> strict prouvent au moins 78 égalités extérieures sans intrus.
+
+**[diagnostic]** 30 nuages de 20 points, grille $[0,20)$, $k=3$, sur 5 103 facettes :
 
 | grandeur | valeur |
 | --- | ---: |
 | intrus stricts nuls / un seul / au moins deux | 1 997 / 3 011 / **95** |
-| attaches émises | 95 |
-| co-minimiseurs qu'elles remplacent | 210 (facteur 2,21) |
+| candidats locaux à une attache | 95 |
+| co-minimiseurs fermés portés par ces facettes | 210 (masse potentielle, non remplacée ici) |
 | lemme $\beta(T_F)<a_F$ violé | **0** |
 | cible brute hors du cœur | **6 sur 95** |
 
-Trois lectures. La branche à au moins deux intrus est **rare** — 1,9 % des
-facettes — donc la masse silencieuse était déjà petite dans ce régime, et le gain
-de l'attache unique y est un facteur 2,2 plutôt qu'un ordre. Le lemme de descente
-tient sur les 95 cas. Et surtout, **6 attaches sur 95 ont leur cible brute hors de
-$D_k$** : votre réfutation du §4 n'est pas un cas limite construit, c'est 6,3 %
-du régime générique, et le resolver est bien nécessaire.
+Deux lectures sont autorisées. Le lemme de descente est observé sur les 95
+candidats, et **6 cibles brutes sur 95 sont hors de $D_k$** : le resolver est
+bien nécessaire. En revanche, support unique essentiel et absence d'extra-shell
+ne sont pas authentifiés; on ne peut appeler ces objets des attaches autorisées,
+ni affirmer qu'ils remplacent les 210 co-minimiseurs, ni extrapoler un facteur de
+gain.
 
-Le plancher `--min-attachments` garantit que cette branche est réellement
-exercée par CTest ; sans lui, une campagne pouvait rester verte en ne la
-traversant jamais.
+Le plancher `--min-attachments` garantit seulement que la branche candidate est
+exercée par CTest; il ne transforme pas la campagne en porte régulière et ne
+juge toujours pas `Resolve` ni l'équivalence des quotients.
+Avec ses 12 nuages, ce CTest rend 39 candidats, 88 co-minimiseurs fermés et 5
+cibles brutes hors du cœur; ces nombres ne sont pas ceux de la table à 30
+nuages.
 
 46/46 CTests.
