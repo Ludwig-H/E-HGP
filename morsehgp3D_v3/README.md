@@ -77,9 +77,21 @@ Le vert du juge exhaustif **est** la vérification : 20 nuages, ordre 3, grille
 déclarée, `DICTIONNAIRE REFUTE=0`. Une réfutation est comptée et fait échouer la
 campagne, plutôt que d'omettre le support en silence.
 
-Les arités 1 à 3 empruntent encore le chemin exhaustif : elles ont leurs propres
-régions et leurs propres seuils, et une preuve d'arité quatre ne s'y propage
-pas. C'est le prochain incrément, pas une omission.
+**L'arité 3 aussi**, désormais : le circumcentre du triangle est le point de la
+droite $h_z=0$ dont le déplacement est parallèle à la projection de $X_z$, soit
+$s = c\,\mathrm{adj}(G)\,n / Q$ avec $Q = n^{\mathsf{T}}\mathrm{adj}(G)\,n>0$, et
+$\mathrm{rang}=3+c_e+\delta_e$. Seules les arités 1 et 2 empruntent encore le
+chemin exhaustif.
+
+Deux obstacles de largeur ont été réglés en chemin, sans quitter les entiers
+natifs. La base orthogonale naturelle $b_2=d\times b_1$ porte un facteur
+$\lVert d\rVert$ de trop et faisait monter $Q$ à $2^{136{,}4}$ ; on prend donc
+$b_1=d\times e_1$, $b_2=d\times e_2$ avec $e_1,e_2$ les deux axes **autres** que
+la composante dominante de $d$ — indépendants car
+$d\cdot(e_1\times e_2)=\pm d_{e_3}\neq0$, tous deux de taille $\lVert d\rVert$,
+au prix d'une matrice de GRAM non diagonale. $Q$ retombe alors sous $2^{104}$,
+et seul le test de profondeur de l'arité 3, à $2^{140{,}4}$, demande 256 bits —
+fournis par `mul128`, sans allocation.
 
 **Fixtures permanentes** (23 tests, dont 4 hérités de la v2) : la non-régression du faux certificat — sous
 une fenêtre supposée trop étroite, le générateur doit se **déclarer incomplet**,

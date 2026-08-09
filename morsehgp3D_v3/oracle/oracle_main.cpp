@@ -1335,6 +1335,7 @@ int main(int argc, char** argv) {
       edge_shallow_total.lines_constant_inside += shallow.lines_constant_inside;
       edge_shallow_total.vertices_examined += shallow.vertices_examined;
       edge_shallow_total.vertices_shallow += shallow.vertices_shallow;
+      edge_shallow_total.emitted_arity_three += shallow.emitted_arity_three;
       edge_shallow_total.emitted_arity_four += shallow.emitted_arity_four;
       edge_shallow_total.depth_tests += shallow.depth_tests;
       edge_shallow_total.dictionary_refuted += shallow.dictionary_refuted;
@@ -1455,11 +1456,12 @@ int main(int argc, char** argv) {
   if (subject == "edge_shallow" && campaign.decided > 0)
     std::printf("arete[profondeur] : aretes=%lld dont retenues=%lld | droites actives=%lld "
                 "constantes interieures=%lld | sommets examines=%lld dont peu profonds=%lld "
-                "| arite4 emise=%lld | tests de profondeur=%lld | DICTIONNAIRE REFUTE=%lld\n",
+                "| arite3 emise=%lld arite4 emise=%lld | tests de profondeur=%lld | DICTIONNAIRE REFUTE=%lld\n",
                 edge_shallow_total.edges_examined, edge_shallow_total.edges_retained,
                 edge_shallow_total.lines_active, edge_shallow_total.lines_constant_inside,
                 edge_shallow_total.vertices_examined, edge_shallow_total.vertices_shallow,
-                edge_shallow_total.emitted_arity_four, edge_shallow_total.depth_tests,
+                edge_shallow_total.emitted_arity_three, edge_shallow_total.emitted_arity_four,
+                edge_shallow_total.depth_tests,
                 edge_shallow_total.dictionary_refuted);
 
   std::printf("sujet=%s | attempted=%lld decided=%lld rejected_domain=%lld | spheres=%lld forets=%lld "

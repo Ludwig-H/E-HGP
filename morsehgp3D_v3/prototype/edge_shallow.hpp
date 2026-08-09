@@ -54,6 +54,7 @@ struct EdgeShallowStatistics {
   long long lines_constant_inside = 0;   // somme des c_e
   long long vertices_examined = 0;   // paires de droites actives
   long long vertices_shallow = 0;    // profondeur au plus s_max - 4 - c_e
+  long long emitted_arity_three = 0;
   long long emitted_arity_four = 0;
   long long depth_tests = 0;
   // Le rang lu sur la profondeur contredit le nombre de membres reellement
@@ -65,23 +66,47 @@ struct EdgeShallowStatistics {
 
 namespace detail {
 
-// Base entiere du plan mediateur : b1 = d x e, b2 = d x b1, avec e l'axe le
-// moins aligne avec d. Aucune normalisation, donc aucune racine.
+// Base entiere du plan mediateur, EQUILIBREE.
+//
+// Le choix naturel b2 = d x b1 est orthogonal — donc de matrice de GRAM
+// diagonale — mais il porte un facteur |d| de trop : |b2| = |d| |b1| ~ |d|^2.
+// A l'arite quatre cela passe encore ; a l'arite trois le denominateur
+// Q = a^2|b2|^2 + b^2|b1|^2 monte a 2^136,4 et ne tient plus dans un i128.
+//
+// On prend donc b1 = d x e1 et b2 = d x e2, ou e1 et e2 sont les deux axes
+// AUTRES que la composante dominante de d. Les deux sont orthogonaux a d et de
+// taille au plus |d| ; ils sont independants car (d x e1) x (d x e2) =
+// d (d . (e1 x e2)) = +- d_{e3} d, non nul par construction. On perd
+// l'orthogonalite — la GRAM n'est plus diagonale — mais elle reste un 2x2
+// entier, et Q redescend sous 2^104.
 inline void bisector_basis(const mhgp::P3& d, mhgp::P3* b1, mhgp::P3* b2) {
   const mhgp::i64 ax = d.x < 0 ? -d.x : d.x;
   const mhgp::i64 ay = d.y < 0 ? -d.y : d.y;
   const mhgp::i64 az = d.z < 0 ? -d.z : d.z;
-  mhgp::P3 axis{1, 0, 0};
-  if (ay <= ax && ay <= az) axis = mhgp::P3{0, 1, 0};
-  else if (az <= ax && az <= ay) axis = mhgp::P3{0, 0, 1};
-  *b1 = mhgp::p3_cross(d, axis);
-  *b2 = mhgp::p3_cross(d, *b1);
+  if (ax >= ay && ax >= az) {          // composante dominante : x
+    *b1 = mhgp::p3_cross(d, mhgp::P3{0, 1, 0});
+    *b2 = mhgp::p3_cross(d, mhgp::P3{0, 0, 1});
+  } else if (ay >= az) {               // y
+    *b1 = mhgp::p3_cross(d, mhgp::P3{1, 0, 0});
+    *b2 = mhgp::p3_cross(d, mhgp::P3{0, 0, 1});
+  } else {                             // z
+    *b1 = mhgp::p3_cross(d, mhgp::P3{1, 0, 0});
+    *b2 = mhgp::p3_cross(d, mhgp::P3{0, 1, 0});
+  }
 }
 
 struct Line {
   mhgp::i128 a = 0, b = 0, c = 0;
   mhgp::i32 point = -1;
 };
+
+// Comparaison exacte de deux produits de trois facteurs, en 256 bits sans
+// allocation : le test de profondeur de l'arite trois monte a 2^140,4, au-dela
+// de l'i128, mais reste tres en deca des 256 bits de BigInt<4>.
+inline int compare_products(mhgp::i128 left_a, mhgp::i128 left_b,
+                            mhgp::i128 right_a, mhgp::i128 right_b) {
+  return mhgp::big_cmp(mhgp::mul128(left_a, left_b), mhgp::mul128(right_a, right_b));
+}
 
 }  // namespace detail
 
@@ -125,6 +150,75 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
   statistics->lines_constant_inside += constant_inside;
   statistics->lines_active += static_cast<long long>(active.size());
 
+  // ---- ARITE TROIS ------------------------------------------------------
+  // Le circumcentre du triangle (p,q,z) est le point de la droite h_z = 0 situe
+  // dans le plan du triangle, c'est-a-dire celui dont le deplacement est
+  // parallele a la projection de X_z. En coordonnees s, cette direction est
+  // adj(G) n ; le parametre vaut alors c / Q avec Q = n^T adj(G) n > 0.
+  const mhgp::i128 g11 = mhgp::p3_norm2(b1);
+  const mhgp::i128 g12 = mhgp::p3_dot(b1, b2);
+  const mhgp::i128 g22 = mhgp::p3_norm2(b2);
+  const int depth_budget_three = s_max - 3 - constant_inside;
+  if (depth_budget_three >= 0) {
+    for (std::size_t i = 0; i < active.size(); ++i) {
+      const detail::Line& lz = active[i];
+      const mhgp::i128 v1 = g22 * lz.a - g12 * lz.b;
+      const mhgp::i128 v2 = g11 * lz.b - g12 * lz.a;
+      const mhgp::i128 denominator = lz.a * v1 + lz.b * v2;   // > 0 si n != 0
+      if (denominator <= 0) continue;
+
+      int depth = 0;
+      bool exceeded = false;
+      for (std::size_t k = 0; k < active.size() && !exceeded; ++k) {
+        if (k == i) continue;
+        ++statistics->depth_tests;
+        // a' s1 + b' s2 > c'  <=>  c (a' v1 + b' v2) > c' Q, avec Q > 0.
+        const mhgp::i128 combined = active[k].a * v1 + active[k].b * v2;
+        if (detail::compare_products(lz.c, combined, active[k].c, denominator) > 0
+            && ++depth > depth_budget_three)
+          exceeded = true;
+      }
+      if (exceeded) continue;
+
+      const int rank = 3 + constant_inside + depth;
+      std::vector<mhgp::i32> support{first, second, lz.point};
+      std::sort(support.begin(), support.end());
+      mhgp::Sphere sphere{};
+      bool centred = false;
+      if (!detail::build_sphere(points, support, &sphere, &centred)) continue;
+      if (!centred) continue;
+
+      AnchoredSupport emitted;
+      int on_shell = 0;
+      bool extra_on_shell = false;
+      for (mhgp::i32 z = 0; z < n; ++z) {
+        const int side = mhgp::sphere_side(sphere, points[static_cast<std::size_t>(z)]);
+        if (side > 0) continue;
+        if (side == 0) {
+          ++on_shell;
+          if (!std::binary_search(support.begin(), support.end(), z)) extra_on_shell = true;
+        }
+        emitted.members.push_back(z);
+      }
+      if (extra_on_shell || on_shell != 3) continue;
+      if (static_cast<int>(emitted.members.size()) != rank) {
+        ++statistics->dictionary_refuted;
+        continue;
+      }
+      std::sort(emitted.members.begin(), emitted.members.end());
+      emitted.support = support;
+      emitted.sphere = sphere;
+      emitted.rank = rank;
+      out->push_back(std::move(emitted));
+      ++statistics->emitted_arity_three;
+    }
+  }
+
+  // ---- ARITE QUATRE -----------------------------------------------------
+  // La sortie anticipee ci-dessous ne vaut QUE pour l'arite quatre : a
+  // s_max = 3 aucun support quatre n'existe, mais les triangles, eux, existent.
+  // Le bloc d'arite trois doit donc la preceder — il ne le faisait pas, et les
+  // triangles disparaissaient silencieusement.
   const int depth_budget = s_max - 4 - constant_inside;
   if (depth_budget < 0) return;  // l'ancre ne peut porter aucun support quatre
 
@@ -215,7 +309,7 @@ inline mhgp::Catalogue edge_shallow_catalogue(const std::vector<mhgp::P3>& point
   std::vector<mhgp::CriticalSphere> kept;
   std::vector<mhgp::i32> members;
   for (const mhgp::CriticalSphere& sphere : catalogue.spheres) {
-    if (sphere.n_support == 4) continue;
+    if (sphere.n_support >= 3) continue;
     mhgp::CriticalSphere copy = sphere;
     copy.members_begin = static_cast<mhgp::i32>(members.size());
     members.insert(members.end(),
@@ -224,7 +318,7 @@ inline mhgp::Catalogue edge_shallow_catalogue(const std::vector<mhgp::P3>& point
     kept.push_back(copy);
   }
 
-  // Arite 4 : par profondeur, sur toutes les aretes (source d'ancres exhaustive,
+  // Arites 3 et 4 : par profondeur, sur toutes les aretes (source d'ancres exhaustive,
   // volontairement : ce prototype isole le constructeur, pas A1-source).
   std::vector<AnchoredSupport> found;
   for (mhgp::i32 a = 0; a < n; ++a)
@@ -245,7 +339,7 @@ inline mhgp::Catalogue edge_shallow_catalogue(const std::vector<mhgp::P3>& point
     mhgp::CriticalSphere critical;
     for (std::size_t i = 0; i < item.support.size(); ++i)
       critical.support[i] = item.support[i];
-    critical.n_support = 4;
+    critical.n_support = static_cast<mhgp::i32>(item.support.size());
     critical.rank = item.rank;
     critical.sph = item.sphere;
     critical.beta = mhgp::sphere_beta(item.sphere);
