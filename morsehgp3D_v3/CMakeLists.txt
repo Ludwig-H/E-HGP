@@ -86,9 +86,15 @@ mhgp3v_add_expected_failure_test(mhgp3v_cli_order_overflow "campagne absurde"
 # M2.2 — le rang est calcule PAR LA PROFONDEUR, jamais en comptant la boule.
 # Le vert de ce test EST la verification du dictionnaire rang = 4 + c_e + delta_e
 # contre la verite exhaustive.
+# --max-order 3 seul ne suffisait PAS : l'ordre est tire uniformement, donc la
+# plupart des nuages avaient s_max <= 3, et tout support quatre accepte y force
+# profondeur nulle. Le vert ne prouvait alors que rang = arite, le cas trivial.
+# On impose donc un ordre eleve ET un plancher d'emissions a profondeur
+# strictement positive.
 add_test(NAME mhgp3v_edge_shallow_depth_dictionary COMMAND mhgp3v_oracle
-         --subject edge_shallow --clouds 20 --seed 4242 --min-points 8 --max-points 12
-         --max-order 3 --min-decided 15 --min-nodes 200)
+         --subject edge_shallow --clouds 12 --seed 4242 --min-points 10 --max-points 12
+         --min-order 5 --max-order 6 --min-decided 10 --min-nodes 100
+         --min-positive-depth 500)
 
 # Campagne NEGATIVE : chaque faute injectee doit etre attrapee. Un garde qui ne
 # se declenche jamais ne vaut rien.

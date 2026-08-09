@@ -1030,7 +1030,8 @@ int main(int argc, char** argv) {
   constexpr int kMaximumDiagnosticPoints = 1'000'000;
   int clouds = 40;
   unsigned long long seed = 4242ULL;
-  int minimum_points = 8, maximum_points = 11, maximum_order = 3;
+  int minimum_points = 8, maximum_points = 11, maximum_order = 3, minimum_order = 1;
+  long long minimum_positive_depth = 0;
   long long coordinate_maximum = mhgp::kCoordMax;  // LA GRILLE DECLAREE
   long long minimum_clouds_decided = 1, minimum_nodes = 1;
   std::string receipt_path;
@@ -1084,12 +1085,24 @@ int main(int argc, char** argv) {
     else if (argument == "--regime") regime = next("--regime");
     else if (argument == "--inject") injection = next("--inject");
     else if (argument == "--fixture") fixture = next("--fixture");
+    else if (argument == "--min-order") {
+      if (!parse_decimal_option("--min-order", next("--min-order"), &minimum_order)) return 2;
+    } else if (argument == "--min-positive-depth") {
+      if (!parse_decimal_option("--min-positive-depth", next("--min-positive-depth"),
+                                &minimum_positive_depth)) return 2;
+    }
     else if (argument == "--require-incomplete-anchors") {
       if (!parse_decimal_option("--require-incomplete-anchors",
                                 next("--require-incomplete-anchors"),
                                 &require_incomplete_anchors)) return 2;
     }
     else if (argument == "--fixture") fixture = next("--fixture");
+    else if (argument == "--min-order") {
+      if (!parse_decimal_option("--min-order", next("--min-order"), &minimum_order)) return 2;
+    } else if (argument == "--min-positive-depth") {
+      if (!parse_decimal_option("--min-positive-depth", next("--min-positive-depth"),
+                                &minimum_positive_depth)) return 2;
+    }
     else {
       std::printf("ECHEC : option inconnue %s\n", argument.c_str());
       return 2;
@@ -1117,6 +1130,11 @@ int main(int argc, char** argv) {
   // Le parsing integral ne suffit pas : une valeur syntaxiquement valide mais
   // hors contrat doit rendre 2 AVANT toute arithmetique. `maximum_order + 1`
   // debordait sur 2147483647.
+  if (minimum_order < 1 || minimum_order > maximum_order) {
+    std::printf("ECHEC : --min-order %d hors contrat (1 a --max-order %d)\n",
+                minimum_order, maximum_order);
+    return 2;
+  }
   if (maximum_order > mhgp::kMaxRank - 1) {
     std::printf("ECHEC : --max-order %d hors contrat (au plus %d, car s_max = ordre + 1 "
                 "et kMaxRank = %d)\n", maximum_order, mhgp::kMaxRank - 1, mhgp::kMaxRank);
@@ -1300,7 +1318,9 @@ int main(int argc, char** argv) {
     int n = minimum_points
           + static_cast<int>(rng() % static_cast<unsigned long long>(
                 maximum_points - minimum_points + 1));
-    int order = 1 + static_cast<int>(rng() % static_cast<unsigned long long>(maximum_order));
+    int order = minimum_order
+              + static_cast<int>(rng() % static_cast<unsigned long long>(
+                    maximum_order - minimum_order + 1));
     std::vector<mhgp::P3> points;
     if (fixture == "foreign_source_same_level") {
       // Deux arêtes disjointes de longueur 1. Leurs sphères de rang 2 ont le
@@ -1366,6 +1386,10 @@ int main(int argc, char** argv) {
       edge_shallow_total.emitted_arity_four += shallow.emitted_arity_four;
       edge_shallow_total.depth_tests += shallow.depth_tests;
       edge_shallow_total.dictionary_refuted += shallow.dictionary_refuted;
+      edge_shallow_total.emitted_positive_depth += shallow.emitted_positive_depth;
+      edge_shallow_total.emitted_positive_constant += shallow.emitted_positive_constant;
+      for (int r = 0; r < 16; ++r)
+        edge_shallow_total.rank_histogram[r] += shallow.rank_histogram[r];
       if (!subject_out_of_domain)
         for (int k = 1; k <= order; ++k) forests.push_back(mhgp::build_forest(points, catalogue, k));
     } else {
@@ -1613,6 +1637,26 @@ int main(int argc, char** argv) {
 
   // Le dictionnaire de profondeur est l'enonce central mis a l'epreuve ici :
   // une seule refutation invalide la campagne, meme si tout le reste concorde.
+  // Un vert qui n'exerce que profondeur nulle ne prouve que rang = arite, le cas
+  // trivial : l'ordre etant tire uniformement, la plupart des nuages avaient
+  // s_max <= 3 et tout support quatre y force une profondeur nulle. Ce plancher
+  // exige que le dictionnaire GENERAL ait ete exerce.
+  if (subject == "edge_shallow" && campaign.decided > 0) {
+    std::printf("  rangs emis par profondeur :");
+    for (int r = 1; r < 16; ++r)
+      if (edge_shallow_total.rank_histogram[r] != 0)
+        std::printf(" rang%d=%lld", r, edge_shallow_total.rank_histogram[r]);
+    std::printf(" | profondeur>0 : %lld | constante interieure>0 : %lld\n",
+                edge_shallow_total.emitted_positive_depth,
+                edge_shallow_total.emitted_positive_constant);
+    if (edge_shallow_total.emitted_positive_depth < minimum_positive_depth) {
+      std::printf("ECHEC : %lld emissions de profondeur strictement positive, au moins %lld "
+                  "attendues — le dictionnaire general n'est pas exerce\n",
+                  edge_shallow_total.emitted_positive_depth, minimum_positive_depth);
+      return 1;
+    }
+  }
+
   if (subject == "edge_shallow" && edge_shallow_total.dictionary_refuted != 0) {
     std::printf("ECHEC : dictionnaire rang = 4 + c_e + delta_e REFUTE %lld fois\n",
                 edge_shallow_total.dictionary_refuted);

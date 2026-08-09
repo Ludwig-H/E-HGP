@@ -64,6 +64,12 @@ struct EdgeShallowStatistics {
   // masquer la refutation.
   long long dictionary_refuted = 0;
   long long degenerate_shells = 0;  // cospheries sur un candidat bien centre
+  // Sans ces deux compteurs, un vert ne prouve que le cas trivial rang = arite :
+  // profondeur nulle et aucune constante interieure. Ce sont eux qui disent que
+  // le dictionnaire GENERAL a ete exerce.
+  long long emitted_positive_depth = 0;
+  long long emitted_positive_constant = 0;
+  long long rank_histogram[16] = {};
 };
 
 namespace detail {
@@ -206,6 +212,12 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
             emitted.rank = rank;
             out->push_back(std::move(emitted));
             ++statistics->emitted_arity_two;
+      if (depth > 0) ++statistics->emitted_positive_depth;
+      if (constant_inside > 0) ++statistics->emitted_positive_constant;
+      if (rank < 16) ++statistics->rank_histogram[rank];
+            if (depth > 0) ++statistics->emitted_positive_depth;
+            if (constant_inside > 0) ++statistics->emitted_positive_constant;
+            if (rank < 16) ++statistics->rank_histogram[rank];
           }
         }
       }
@@ -274,6 +286,9 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
       emitted.rank = rank;
       out->push_back(std::move(emitted));
       ++statistics->emitted_arity_three;
+      if (depth > 0) ++statistics->emitted_positive_depth;
+      if (constant_inside > 0) ++statistics->emitted_positive_constant;
+      if (rank < 16) ++statistics->rank_histogram[rank];
     }
   }
 
@@ -386,6 +401,9 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
       emitted.rank = rank;
       out->push_back(std::move(emitted));
       ++statistics->emitted_arity_four;
+      if (depth > 0) ++statistics->emitted_positive_depth;
+      if (constant_inside > 0) ++statistics->emitted_positive_constant;
+      if (rank < 16) ++statistics->rank_histogram[rank];
       retained = true;
       }
     }

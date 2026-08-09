@@ -73,9 +73,27 @@ d'ancrage, chaque point devient une forme **affine à coefficients entiers**
 $X = 2x-p-q$), et la profondeur d'un sommet est un comptage de signes. Tout tient
 dans un `i128` sans allocation — les largeurs sont bornées au §fichier.
 
-Le vert du juge exhaustif **est** la vérification : 20 nuages, ordre 3, grille
-déclarée, `DICTIONNAIRE REFUTE=0`. Une réfutation est comptée et fait échouer la
-campagne, plutôt que d'omettre le support en silence.
+Le vert du juge exhaustif **est** la vérification — mais seulement si le test
+exerce autre chose que le cas trivial, et la première version ne le faisait pas.
+`--max-order 3` tire l'ordre **uniformément**, donc la plupart des nuages avaient
+$s_{\max}\leq3$, où tout support d'arité 4 accepté force $c_e=0$ et
+$\delta_e=0$ : le vert ne prouvait que $\mathrm{rang}=\text{arité}$.
+
+La porte impose désormais un ordre élevé **et** un plancher d'émissions à
+profondeur strictement positive. **[mesuré]** 12 nuages, ordres 5–6, grille
+déclarée :
+
+```text
+rangs emis par profondeur : rang2=500 rang3=756 rang4=965 rang5=1053
+                            rang6=983 rang7=522
+profondeur>0 : 3619 | constante interieure>0 : 0 | DICTIONNAIRE REFUTE=0
+```
+
+Une réfutation est comptée et fait échouer la campagne, plutôt que d'omettre le
+support en silence. La colonne « constante intérieure » reste nulle : elle exige
+un point **colinéaire** à l'arête d'ancrage et intérieur à la boule diamétrale,
+de mesure nulle sur une grille aléatoire — il faudra une fixture dédiée, et
+jusque-là cette branche n'est **pas** exercée.
 
 **Les quatre arités**, désormais, et donc **tout le catalogue** :
 
