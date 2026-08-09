@@ -9,15 +9,17 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. Le commit `78583f1`
-conserve les sources wavefront de `04555bd`, committe le filtrage CMake et ajoute
-des résultats G4 documentaires. Aucun artefact brut de cette session n'est
-versionné avec le commit.
+n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot courant
+`f851374` conserve les sources wavefront de `04555bd`, ajoute les résultats G4
+documentaires de `78583f1`, leur interprétation à 100 ms dans `444b851`, puis un
+profileur CPU à densité fixe. Aucun artefact brut de la session G4 n'est
+versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| `HEAD` | `78583f1950c4c514828c523ba3ad2aa03676bfb0` |
-| `CMakeLists.txt` | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
+| `HEAD` | `f851374cb628f88eafd9a2efaf7e293eb62e1d62` |
+| `CMakeLists.txt` | `7c770bcc16ed57410b7b6cda32854e8029f7e4ee06b6722cfa0a256bb67817ef` |
+| `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
@@ -187,7 +189,7 @@ thread et une forte pression de registres virtuels. La session G4 rapportée ne
 conserve aucun diagnostic `ptxas`, spill, stack, registre ou occupation; elle ne
 permet donc toujours pas de relier le débit observé aux ressources du cubin.
 
-## Audit du diagnostic G4 publié par `78583f1`
+## Audit du diagnostic G4 et de son interprétation à 100 ms
 
 Le README rapporte quatre mesures kernel-only : 128 955 sommets en 0,224 ms,
 71 084 en 0,170 ms, 19 019 en 0,323 ms et 2 542 en 2,020 ms, toutes avec zéro
@@ -195,16 +197,19 @@ Le README rapporte quatre mesures kernel-only : 128 955 sommets en 0,224 ms,
 elles sont conservées comme **diagnostics déclarés**, pas comme reçus
 reproductibles.
 
-Trois extrapolations du commit ne sont pas autorisées par ces nombres :
+Le transport hôte/device est un résultat positif ciblé. Son interprétation
+quantitative doit toutefois distinguer les appels, les résultats admissibles et
+le pipeline :
 
-1. « environ un milliard de couples par seconde » n'est pas accompagné du
-   nombre exact de flats/couples de la campagne 120 points; avec quatre flats et
-   deux directions, l'arithmétique nominale donnerait plutôt 4,6 milliards de
-   couples par seconde;
-2. le terrain 50 k de 50 à 150 millions de sommets extrapole des ratios encore
-   croissants mesurés seulement entre 100 et 300 points; il n'est ni mesuré ni
-   borné;
-3. multiplier ce terrain hypothétique par 575 M sommets/s suppose que la
+1. la première campagne a 515 820 flats et donc 1 031 640 appels directionnels;
+   `0,224 ms` correspond à environ 4,61 milliards d'appels par seconde, tandis
+   que les 340 781 résultats admissibles correspondent à 1,52 milliard par
+   seconde. « Un milliard d'évaluations » mélange ces deux métriques;
+2. le maximum 32 de la campagne de refus n'est pas une moyenne : les 15 346
+   flats publiés plus les 27 préfixes de 32 donnent 16 210 flats évalués, soit
+   6,38 par sommet. Le facteur 450 confond aussi de petits lancements sous-remplis,
+   la charge par sommet et la divergence; aucune de ces causes n'est isolée;
+3. multiplier un terrain hypothétique par 575 M sommets/s suppose que la
    distribution de coquilles/flats reste celle de la ligne la plus favorable,
    alors que la propre campagne dégénérée tombe à 1,3 M sommets/s.
 
@@ -215,13 +220,27 @@ hypothétique de 50 à 150 millions demanderait environ 14,2 à 42,6 Go pour ces
 deux flux, sans compter le nuage, les allocations ni la représentation CPU à
 vecteurs. Le live matérialise en outre tout `seen_vertices` avant le lancement.
 
-La phrase « première mesure qui tienne dans le budget d'une seconde » est donc
-fausse pour le contrat produit. Seul le temps de calcul d'un microkernel isolé,
-sur une entrée déjà produite et copiée, est inférieur à une projection d'une
-seconde. `neighbour_along`, parent, source, census, owner, tri, fold, couverture,
+Le commit `444b851` corrige ensuite le budget primaire à 100 ms, mais sa nouvelle
+conclusion ne découle toujours pas de la mesure. Les 1 096,8 sommets par point à
+`n=300` ne sont pas une borne inférieure à `n=50 000`; ce profil avait en outre
+une densité décroissante, faute que `f851374` reconnaît explicitement. Diviser
+55 millions par 575 millions donne bien 95,7 ms **sous ces deux hypothèses**, pas
+une mesure du terrain ni du pipeline. Aucun parcours GPU complet n'existe pour
+recevoir le facteur « dix à trente » ou le verdict « quinze fois trop lent ».
+
+Le ratio 6,5 ne ferme pas davantage une décision d'architecture. À `n=300`, il
+compare les sommets visités aux sommets bien centrés; le rapport au catalogue
+complet publié vaut environ 4,66 et ce catalogue est dominé par les arités deux
+et trois. « Énumérer directement les sphères critiques » est une piste
+constructive importante, mais aucune borne inférieure n'exclut encore
+élagage, sauts, compression ou requêtes groupées du parcours. Elle devient une
+obligation à prouver, pas une condition déjà démontrée.
+
+Le chrono G4 entoure seulement un microkernel sur une entrée déjà produite et
+copiée. `neighbour_along`, parent, source, census, owner, tri, fold, couverture,
 verticales, copies, mémoire et sortie ne sont ni inclus ni bornés. Dire que ce
-prédicat « domine » le pipeline avant d'avoir mesuré ces étages inverse la charge
-de la preuve.
+prédicat domine le pipeline avant d'avoir mesuré ces étages inverse la charge de
+la preuve.
 
 Le contrôle GCP de l'auditeur a été strictement en lecture seule. Les deux VM
 labellisées `project=e-hgp`, dont `ehgp-blackwell-spot-ai1a` démarrée à l'heure
@@ -229,6 +248,38 @@ compatible avec la session, sont actuellement `TERMINATED`, de type
 `g4-standard-48`, `SPOT`, action `STOP`. Cela crédite l'état final GCE observé;
 le dépôt ne contient toutefois ni handoff de génération, ni log du double
 coupe-circuit, ni reçu de révocation de la clé pour cette session.
+
+## P1 — le profileur à densité fixe est utile, pas décisionnel seul
+
+Le commit `f851374` corrige une faute de protocole réelle : le profil cube
+antérieur faisait croître chaque côté comme `sqrt(n)` et diminuait donc la
+densité. `scale_profile.cpp` propose maintenant un cube à volume proportionnel
+à `n` et une nappe synthétique d'épaisseur bornée. En Release, la commande
+`--points 100 --smax 11 --repeats 2 --seed 20260809` reproduit 805,5 sommets
+par point, 159,28 sphères par point et les arités
+`1,00/20,11/77,36/60,80`. C'est un nouveau diagnostic positif et reproductible
+côté CPU.
+
+Il ne peut cependant être « le seul chiffre qui décide » les 100 ms :
+
+- la densité `1e-3` est codée en dur et le profil LiDAR est une nappe uniforme
+  synthétique, sans famille sanctionnée, digest d'entrée ni quantile;
+- les nuages de statut non `kOk` sont retirés de la moyenne; `decided>0` permet
+  donc une moyenne partielle sans ledger des refus;
+- la déduplication du générateur emploie `std::find` dans un vecteur et coûte
+  $O(n^2)$ hors chrono;
+- le temps navigation exclut `CertifiedIndex::build`, le temps catalogue
+  reconstruit son propre parcours, et la sortie « sans accélérateur » est
+  ambiguë puisque l'index est actif;
+- ni source directe, ni fold, ni forêts, ni couverture, ni verticales, ni
+  octets, ni pipeline GPU ne sont mesurés.
+- la cible n'a ni CTest permanent, ni plancher de nuages décidés, ni reçu
+  canonique des paramètres et compteurs.
+
+La porte propre publie toutes les graines et tous les statuts, sépare taille du
+terrain, taille de sortie et travail par étage, puis mesure des quantiles sur les
+familles enregistrées. Un ratio observé reste un diagnostic; il ne devient une
+borne à 50 k qu'après un théorème ou une exécution effectivement à 50 k.
 
 ## NO-GO F0 inchangé
 
@@ -288,6 +339,12 @@ au-delà de 32 flats.
 Baseline sans mosaïque : un bloc par `(v,closure,direction)`, premier scan de
 tout le nuage pour réduire le paramètre extrême exact en `i128`, puis second
 scan pour compacter **tous** les ex æquo du minimum en ordre d'identifiants.
+Cette baseline est une vérité de qualification, pas encore l'architecture 50 k :
+en position générale, quatre flats et deux directions donnent environ `16*n*V`
+visites de points pour deux passes. Sous la seule hypothèse diagnostique
+`V=50` à `150` millions à `n=50 000`, cela ferait $4\cdot10^{13}$ à
+$1,2\cdot10^{14}$ visites. Il faut donc certifier un index terminal
+output-sensitive, ou une fusion prouvée des requêtes, avant toute extrapolation.
 
 Fixture permanente :
 
@@ -304,7 +361,31 @@ donnent ensemble le minimum `t=1`. Le voisin attendu est
 transfert intérieur. Elle contient aussi une arête parent positive et une autre
 arête à retour admissible mais rejetée par un parent antérieur.
 
-### 3. Fermer les tâches avant le débit
+### 3. Tester la source critique directe comme hypothèse, pas comme acquis
+
+La nouvelle piste « sphères critiques directement » exige une source terminale
+de supports `U` d'arité au plus quatre et de rang fermé au plus `s_max`, sans
+propriétaire obtenu en parcourant d'abord le terrain. Une surgénération est
+acceptable si chaque branche élaguée fournit un certificat entier
+`rank > s_max` et si chaque émission porte miniboule, census global complet
+`(I,S)`, support canonique, propriétaire et clef de déduplication exacts.
+
+La note de source directe ferme actuellement `sphère certifiée -> cofaces`; elle
+ne construit pas encore le stream de sphères certifiées sans partir d'un
+propriétaire visité. C'est ce verrou de complétude et de coût qu'il faut fermer
+avant de remplacer la reverse-search. Sous la propre hypothèse du README d'un
+pipeline coûtant dix à trente fois le microkernel, un filtre par 6,5 laisserait
+encore 1,54 à 4,62 budgets; il ne peut donc pas être « exactement » le facteur
+manquant.
+
+Le compteur profilé porte en outre sur `flat_catalogue(...,s_max)`, donc sur le
+rang **fermé** au plus `s_max`. La source Gabriel **ouverte** doit encore traiter
+les supports à peu d'intérieurs stricts mais grand extra-shell. Un élagage de la
+source directe doit compter des témoins distincts strictement intérieurs ou
+produire la coquille complète; le ratio du profileur porte sur un autre univers
+scientifique et ne mesure pas la masse de cette source.
+
+### 4. Fermer les tâches avant le débit
 
 Une tâche porte snapshot/digest, racine structurelle, sommet, curseur exact et
 segment de sortie. Ses slots d'adjacence sont tous classés; donation du

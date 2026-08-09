@@ -38,9 +38,10 @@ petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
 sans diagnostic, et les gardes de filiation distinguent maintenant les
 directions invalides et les cibles incohérentes. `kSinkStopped` sépare aussi
 l'arrêt volontaire d'une erreur scientifique. Ces campagnes ne couvrent pas la
-frontière entière u16 décrite ci-dessous. Les quatre nouvelles portes du
-microkernel passent également sur CPU; elles n'ont encore ni compilation CUDA
-ni replay des refus.
+frontière entière u16 décrite ci-dessous. Les quatre portes du microkernel
+passent sur CPU; une session G4 rapporte aussi zéro écart du payload borné
+hôte/device. Aucun reçu brut n'est versionné et les refus ne sont toujours pas
+rejoués.
 
 Quatre verrous priment sur tout travail d'échelle; leurs constructions sont
 réunies dans la
@@ -79,9 +80,16 @@ parent u16 tient exactement en 64 bits; voisin, owner et census demandent 128
 bits; l'ordre exact des niveaux demande 384 bits ou un merge CPU. La
 reverse-search se partitionne en sous-arbres disjoints, mais chaque tâche doit
 commit ou rollback entièrement et tout refus doit rejouer le sous-arbre. Le live
-possède maintenant un `.cu` et un lanceur optionnel; aucun `nvcc`, kernel G4 ni
-`neighbour_along` device n'est encore reçu. Le kernel candidat ne calcule que
-les masques d'admissibilité sur des sommets déjà produits par CPU.
+possède un `.cu`; son exécution G4 déclarée ne calcule que les masques
+d'admissibilité sur des sommets déjà produits par CPU. `neighbour_along`, replay
+et reçu qualifiant restent absents.
+
+Le profileur à densité fixe de `f851374` corrige une faute du protocole cube
+antérieur et fournit un diagnostic CPU reproductible. Il ne borne pas 50 k : une
+densité et une graine synthétiques, une moyenne qui ignore les statuts non `kOk`
+et deux étages partiels ne décident ni les 100 ms primaires ni la seconde
+secondaire. La source critique directe est une hypothèse prioritaire; sa
+complétude, son census terminal et son coût output-sensitive restent à prouver.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

@@ -707,16 +707,18 @@ reste à l'intégrer et le coût total du harvest d'arité trois reste ouvert.
 
 Le snapshot `04555bd` ajoute une cible CUDA optionnelle, un lanceur `.cu` et un
 corps `host/device`. Sur CPU, ses quatre CTests passent; nombre de flats et
-masque admissible concordent avec la référence pour les sommets `kOk`. Cette
-comparaison ne certifie ni l'identité ni l'ordre quand le masque est nul. Aucun
-`nvcc`, `ptxas` ni GPU n'a encore qualifié cette unité sur `sm_120`.
+masque admissible concordent avec la référence pour les sommets `kOk`. Le commit
+`78583f1` rapporte ensuite quatre lancements G4 `sm_120` sans écart sur le même
+payload borné. Aucun stdout brut, binaire, PTX/cubin ou rapport `ptxas` n'est
+versionné; ce diagnostic ne certifie ni l'identité ni l'ordre des flats quand le
+masque est nul.
 
 Sa portée est plus étroite que son nom : `navigate_shallow` matérialise d'abord
 tous les sommets sur CPU, puis un thread calcule seulement le masque des couples
 `(flat,direction)` admissibles. Le kernel n'appelle ni `neighbour_along`, ni
 `decide_child`; il ne produit aucun voisin, parent, enfant, curseur, sous-arbre,
-run ou transaction. C'est un microkernel candidat exact côté hôte, pas encore
-le parcours.
+run ou transaction. C'est un microkernel borné concordant hôte/device sur les
+entrées acceptées, pas encore le parcours.
 
 **Le refus fait partie du contrat.** Une coquille cosphérique peut avoir
 $\Theta(n)$ points : aucune capacité fixe n'est universellement suffisante, et
@@ -755,12 +757,15 @@ entière où un candidat plus lointain précède deux ex æquo minimaux, ainsi q
 partition de sous-arbres permettant de juger tâches, rollback et replay sans
 construire de mosaïque d'ordre supérieur.
 
-### Le kernel tourne sur sm_120, et il est d'accord bit à bit
+### Diagnostic G4 `sm_120` du microkernel borné
 
-**[mesuré, session G4 du 9 août 2026, RTX PRO 6000 Blackwell, capacité 12.0]** Le
-même corps — `evaluate_vertex`, écrit une seule fois — compile sous `nvcc` 12.9
-pour `sm_120-real` et s'exécute dans un kernel. Comparé terme à terme au chemin CPU
-non borné, sur les sommets du niveau superficiel de vrais nuages :
+**[diagnostic déclaré, session G4 du 9 août 2026, RTX PRO 6000 Blackwell,
+capacité 12.0]** Le même corps — `evaluate_vertex`, écrit une seule fois — a
+été compilé sous le `nvcc` de `/usr/local/cuda-12.9` pour `sm_120-real` et
+exécuté dans un kernel. La comparaison porte sur le `VertexVerdict` borné hôte
+et device; elle n'appelle la référence non bornée que pour les sommets `kOk`.
+Le dépôt ne contient ni stdout brut, ni version patch du toolkit, ni hash du
+binaire, PTX/cubin, rapport `ptxas`, digest d'entrée ou répétitions :
 
 | campagne | sommets | temps kernel | débit | désaccords |
 | --- | ---: | ---: | ---: | ---: |
@@ -769,40 +774,55 @@ non borné, sur les sommets du niveau superficiel de vrais nuages :
 | 24 points, grille 4000, $s_{\max}=8$ | 19 019 | 0,323 ms | 59 M sommets/s | **0** |
 | 20 points, grille 3, $s_{\max}=12$ | 2 542 | 2,020 ms | 1,3 M sommets/s | **0** |
 
-À quatre flats par sommet, la première ligne fait environ **un milliard
-d'évaluations exactes de couple par seconde**, chacune portant plusieurs `orient3d`
-en `i128`. La dernière ligne dit l'autre moitié de la vérité : sur une grille
-saturée, à 32 flats par sommet et des coquilles de onze points, le débit tombe d'un
-facteur 450 — la divergence et la taille des coquilles dominent, et 27 sommets sont
-refusés puis rejoués par l'hôte, toujours sans un seul désaccord.
+À quatre flats par sommet, la première ligne représente 1 031 640 appels
+directionnels, soit environ **4,61 milliards d'appels par seconde**; les 340 781
+résultats admissibles représentent 1,52 milliard par seconde. La dernière ligne
+atteint 32 flats au maximum, pas en moyenne. Ses 27 `kFlatOverflow` sont comptés
+mais **jamais rejoués** : la boucle oracle les saute. Son faible nombre de blocs,
+la charge par sommet et la divergence sont confondus; le facteur 450 n'isole
+aucune de ces causes.
 
-**Le contrat est 100 ms pour TOUTE la chaîne, et cela renverse la conclusion.**
-J'avais d'abord lu ce débit contre un budget d'une seconde, et conclu que la passe
-tenait. La barre est dix fois plus basse, et l'arithmétique dit alors le contraire.
+**La cible primaire reste 100 ms pour toute la chaîne; moins d'une seconde est
+une porte secondaire.** Cette session ne tranche aucune des deux. Les 1 096,8
+sommets par point observés à `n=300` ne sont pas une borne inférieure à 50 k;
+le profil cube concerné avait en outre une densité décroissante. Diviser
+55 millions de sommets hypothétiques par 575 millions par seconde donne 95,7 ms,
+mais seulement sous l'hypothèse que terrain, distribution de coquilles et débit
+se transportent. Aucun parcours GPU complet ne mesure un facteur dix à trente
+ni un retard de quinze fois.
 
-Le terrain à 50 000 points est d'au moins $5{,}5\cdot10^7$ sommets — 1 097 par point
-mesurés à $n=300$, et la valeur croît encore. À 575 M sommets par seconde, la seule
-passe d'admissibilité y prend **environ 0,1 s**, c'est-à-dire **la totalité du
-budget**, alors qu'elle n'est qu'un prédicat parmi les pièces du parcours : la
-descente, les requêtes d'index, la sortie et le fold s'y ajoutent, pour un facteur
-mesuré de dix à trente. Le parcours complet est donc de l'ordre de **quinze fois
-trop lent**, sur ce GPU, avec ce terrain.
-
-**Conséquence structurelle, et c'est un renversement.** J'avais écarté le filtre de
-criticité en mesurant qu'un sommet sur 6,5 seulement porte une sphère d'arité
-quatre, et en concluant « sept à onze, pas deux ordres de grandeur ». Contre un
-budget d'une seconde c'était juste ; contre 100 ms, ce facteur est **exactement
-celui qui manque**. À 100 ms, la route ne doit pas énumérer le niveau superficiel de
-l'arrangement du tout — elle doit énumérer les sphères critiques directement. Ce
-n'est plus une optimisation, c'est la condition.
+**La source critique directe est donc une hypothèse prioritaire à tester, pas une
+nécessité démontrée.** Le ratio 6,5 compare les sommets visités aux sommets bien
+centrés d'arité quatre; à `n=300`, le rapport au catalogue complet publié est
+environ 4,66 et les arités deux et trois dominent. Plus profondément, ce catalogue
+est coupé par le rang fermé, tandis que la source Gabriel ouverte peut devoir
+traiter un grand extra-shell. Une voie directe doit encore prouver la complétude
+de son stream de supports, un census terminal et un coût output-sensitive; elle
+ne se déduit pas de ce ratio.
 
 Elle ne dit rien de plus que cela. Ce kernel n'exécute **pas** la descente :
 `neighbour_along` n'est pas borné, l'index n'est pas porté, la sortie n'est pas
 écrite, et rien n'est transféré au-delà du lot. Le terrain lui-même n'est pas
 stabilisé — 772 → 999 → 1 097 sommets par point entre $n=100$ et $n=300$ — et une
-extrapolation sur une croissance non stabilisée reste une extrapolation. **Le NO-GO
-50 k tient.** Ce qui a changé, c'est qu'il n'est plus adossé à un ordre de grandeur
-manquant, mais à une liste finie de pièces qui ne sont pas écrites.
+extrapolation sur une croissance non stabilisée reste une extrapolation. **Le
+NO-GO 50 k tient.** Exactitude owner/F0, replay, taille du terrain, source
+critique, voisin terminal, parent, tâches et pipeline aval restent ouverts.
+
+### Le profileur à densité fixe corrige le protocole, pas la borne 50 k
+
+Le commit `f851374` remplace positivement le cube d'emprise `sqrt(n)` par un
+cube de volume proportionnel à `n`, et fournit aussi une nappe synthétique
+d'épaisseur bornée. En Release, la commande
+`mhgp3v_scale_profile --points 100 --smax 11 --repeats 2 --seed 20260809`
+reproduit 805,5 sommets par point, 159,28 sphères par point et les arités
+`1,00/20,11/77,36/60,80`.
+
+Ce point ne décide pas seul les 100 ms. La densité est codée en dur, la nappe
+n'est pas un nuage LiDAR enregistré, les statuts non `kOk` sont retirés de la
+moyenne, la déduplication du générateur est quadratique hors chrono, et les temps
+n'incluent ni tout le pipeline ni ses octets. La porte d'échelle doit publier
+toutes les graines et tous les statuts, des quantiles par famille sanctionnée,
+les temps et high-waters par étage, puis un vrai point 50 k ou une borne prouvée.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
@@ -1022,7 +1042,7 @@ $H_0$ normalisée, ni le réducteur, ni les verticales, ni l'identité de sortie
 
 ---
 
-## 5. Le contrat 50 000 points, $K=10$, une seconde
+## 5. Le contrat 50 000 points, $K=10$ : 100 ms primaire, une seconde secondaire
 
 ### Une correction qui change l'arithmétique de la question
 
@@ -1118,11 +1138,71 @@ compte qu'une partie des identifiants de pile, le sink n'est pas composé à
 l'index et la transaction de sortie manque. Aucun facteur CPU/GPU n'est donc
 revendiqué.
 
-**Ce que je ne dis pas** : que le compte y est. Le microkernel n'a encore été ni
-compilé par `nvcc` ni exécuté sur G4; la croissance de 1 097 par point n'est pas
-stabilisée, et la sortie streamée doit encore alimenter le harvest certifié des
-supports, la source directe, le fold pré-lot, la couverture et les verticales,
-qui n'existent pas comme pipeline. Le NO-GO tient.
+**Ce que je ne dis pas** : que le compte y est. Le microkernel a été exécuté
+sur G4, mais seulement sur un batch produit par CPU et sans reçu brut versionné;
+la croissance par point n'est pas stabilisée. La sortie streamée doit encore
+alimenter le harvest certifié des supports, la source directe, le fold pré-lot,
+la couverture et les verticales, qui n'existent pas comme pipeline. Le NO-GO
+tient.
+
+### Le terrain, mesuré à densité fixe : il converge, et il est trop grand
+
+C'est la mesure qui décide, et elle manquait. Mes profils précédents tiraient les
+points dans un cube d'emprise $\propto\sqrt{n}$ **par coordonnée**, donc de volume
+$\propto n^{3/2}$ : la densité décroissait en $n^{-1/2}$, et aucune extrapolation à
+50 000 points n'était licite. `mhgp3v_scale_profile` tient la densité **fixe** —
+emprise $\propto n^{1/3}$ pour le cube, aire $\propto n$ et épaisseur bornée pour la
+nappe LiDAR.
+
+**[mesuré]** $s_{\max}=11$, densité $10^{-3}$, un cœur :
+
+| $n$ | sommets/pt | incrément | catalogue/pt | incrément | catalogue / sommets |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 100 | 805,5 | — | 159,3 | — | 0,198 |
+| 200 | 1 011,5 | +206,0 | 219,8 | +60,5 | 0,217 |
+| 400 | 1 171,9 | +160,4 | 266,3 | +46,5 | 0,227 |
+| 800 | 1 271,9 | +100,0 | 299,9 | +33,7 | 0,236 |
+
+La nappe LiDAR donne la même chose à 2 % près — 806,7 / 1 013,6 / 1 162,1 / 1 250,2
+sommets par point. Le profil ne décide donc rien ; la densité, si.
+
+**Le terrain croît encore, mais il converge.** Les incréments par doublement
+décroissent d'un facteur 0,78 puis 0,62 ; ceux du catalogue, 0,77 puis 0,72. Une
+extrapolation géométrique — **une projection sur trois incréments, pas une mesure**
+— donne une asymptote de l'ordre de **1 430 sommets par point** et **390 sphères par
+point**. À 50 000 points : **≈ 7,1·10⁷ sommets** et **≈ 1,9·10⁷ sphères**.
+
+### Ce que ces deux nombres font au contrat de 100 ms
+
+Le débit mesuré sur RTX PRO 6000 est de 575 M sommets par seconde pour la **seule**
+passe d'admissibilité. Sur $7{,}1\cdot10^7$ sommets, cette passe seule prend
+**0,124 s** — soit déjà plus que le budget entier. Le parcours complet coûte dix à
+trente fois cette passe. **L'écart est d'un facteur quinze à quarante, et ce n'est
+plus une constante d'implémentation.**
+
+**Et le générateur direct ne retire pas le terrain : il le présuppose.** J'avais
+espéré l'inverse. La note de source pose $S=S(v)$ : c'est un générateur **par
+propriétaire shallow**, qui ferme le harvest et le niveau *locaux* en
+$O_s(m\log^2 2m)$ et consomme le plafond de navigation prouvé au §3.1. Sa propre
+conclusion est explicite — « ce théorème ne construit pas le stream terminal de
+sphères; il isole exactement le verrou qui lui reste ». Ce qu'il apporte est réel :
+sous la porte régulière forte, la décision d'une coface devient un test de
+cardinalité sans énumération, et les sorties par propriétaire sont bornées par
+$N_2\leq12m(h+1)$ et $N_3\leq8m(h+1)^2$. Autrement dit il attaque le facteur dix à
+trente, pas le facteur $7{,}1\cdot10^7$.
+
+**La borne que cela laisse.** Même une énumération parfaitement sensible à la
+sortie — ne touchant que ce qu'elle émet — devrait produire $1{,}9\cdot10^7$ sphères
+en 100 ms, soit **5,3 ns par sphère pour toute la chaîne**, census, propriétaire,
+niveau, émission et fold compris. À un milliard d'évaluations exactes par seconde,
+cela laisse **environ cinq prédicats exacts par sphère émise**. C'est le vrai
+énoncé du problème, et il est maintenant chiffré des deux côtés.
+
+**Je ne dis donc pas que le contrat est hors d'atteinte ; je dis qu'aucune route
+démontrée ne l'atteint aujourd'hui**, que l'écart est mesuré et non supposé, et que
+la seule direction compatible avec ces nombres est une énumération dont le travail
+soit proportionnel à la sortie — ce que ni la navigation actuelle, ni le générateur
+local de la note, ne fournissent encore.
 
 ### La taille du terrain n'est pas garantie
 
@@ -1308,7 +1388,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |
 | 6 bis | sémantique quotientée des observations confondues | ouverte ; le prototype les **refuse** explicitement plutôt que de publier un support dépendant de la numérotation |
 | 7 | `sphere.hpp` au bord produit : paire de points confondus acceptée comme support d'arité deux, sentinelle `den==0` sans garde | ouverts, hors de ce fichier |
-| 8 | le contrat 50 k / $K=10$ / 1 s | **non atteint, non mesuré, et les deux ratios qui le décident croissent encore à $n=300$** |
+| 8 | le contrat 50 k / $K=10$ / 100 ms primaire, 1 s secondaire | **non atteint, non mesuré; les ratios observés ne bornent pas 50 k et le pipeline complet n'existe pas** |
 | 9 | publication directe des $n$ singletons | fermée dans le chemin indexé de `1a0a1f8`; le différentiel conserve le census du chemin lent comme oracle relatif |
 | 10 | la taille $V$ du $\leq k$-niveau en général | **non bornée utilement** : Clarkson--Shor est quadratique en $n$ et en $k$, et les mesures ne valent que pour le régime de surface (§5) |
 | 11 | le régime multi-captation | mesuré **moins peu profond** que la reconstruction fusionnée ; c'est la branche no-go de Gate D |

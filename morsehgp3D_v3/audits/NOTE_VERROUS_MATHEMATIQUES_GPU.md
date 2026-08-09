@@ -13,14 +13,15 @@ constats d'implémentation sont épinglés au snapshot suivant :
 
 | objet | empreinte |
 | --- | --- |
-| `HEAD` | `78583f1950c4c514828c523ba3ad2aa03676bfb0` |
+| `HEAD` | `f851374cb628f88eafd9a2efaf7e293eb62e1d62` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
 | `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
 | `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
-| `CMakeLists.txt` | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
+| `CMakeLists.txt` | `7c770bcc16ed57410b7b6cda32854e8029f7e4ee06b6722cfa0a256bb67817ef` |
+| `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 
 > [!IMPORTANT]
 > Cette note aide Claude à construire la voie GPU; elle ne modifie aucun
@@ -559,10 +560,68 @@ driver, modèle/architecture GPU, digest du binaire, digest du nuage, paramètre
 d'admission/refus/replay/commit, mutations, concordance byte-à-byte sous
 répétitions et arrêt GCP certifié.
 
-Le débit seul ne qualifie rien. La cible `.cu` existe maintenant, mais sa porte
-de refus reste vacuable et aucun `nvcc`, `ptxas` ou GPU ne l'a encore exécutée.
-La première campagne G4 utile vient après replay exact, planchers acceptés et
-enveloppe CUDA fermée; avant cela elle ne mesurerait qu'un préfixe censuré du
-microkernel.
+Le débit seul ne qualifie rien. Le commit `78583f1` rapporte bien une compilation
+`nvcc` et quatre exécutions G4 `sm_120` sans écart entre les `VertexVerdict`
+bornés hôte/device. C'est un crédit positif pour le transport du microkernel.
+La porte de refus reste pourtant vacuable : les 27 refus ne sont jamais comparés
+à la vérité non bornée ni rejoués. Aucun stdout brut, commande complète, version
+patch du toolkit, hash binaire, PTX/cubin, rapport `ptxas`, digest d'entrée ou
+répétition n'est versionné. Les temps sont kernel-only et excluent production
+CPU du batch, allocations et transferts.
 
-GCP non utilisé pour cette note.
+La première campagne représente 1 031 640 appels directionnels en `0,224 ms`,
+soit environ 4,61 milliards d'appels par seconde, et non un milliard. Le débit
+575 M sommets/s ne se transporte ni aux coquilles dégénérées, ni à un terrain
+50 k non borné, ni aux étages absents. Une nouvelle session qualifiante vient
+après replay exact, planchers acceptés/rejoués, enveloppe CUDA fermée et reçu
+versionné.
+
+### 10.4 Profil d'échelle et source critique directe
+
+Le profileur `f851374` corrige positivement la densité décroissante du profil
+cube antérieur. Il reste un diagnostic CPU sur une densité codée en dur et une
+nappe synthétique; il ignore les nuages non `kOk`, déduplique en $O(n^2)$ hors
+chrono, exclut la construction d'index du temps navigation et ne mesure aucun
+aval. Ni une graine, ni un ratio `n<=400` ne borne 50 k.
+
+Si Claude choisit la voie directe, le verrou n'est pas « filtrer 6,5 fois » mais
+produire de façon complète et output-sensitive les supports critiques
+`U`, `|U|<=4`, sans les obtenir depuis un propriétaire du terrain. Chaque
+élagage doit fournir un certificat exact `rank > s_max`; chaque émission doit
+porter miniboule, census terminal complet, support canonique, propriétaire et
+clef de déduplication. La note de source directe ferme le passage d'une sphère
+déjà certifiée vers ses cofaces, pas encore la production du stream initial.
+
+Pour la voie reverse, la baseline `next` exacte à deux passes est une vérité de
+qualification. En position générale elle coûte environ `16*n*V` visites de points;
+elle doit donc être remplacée par un index terminal certifié ou des requêtes
+groupées prouvées avant 50 k. Les deux voies restent ouvertes; aucune mesure
+actuelle ne prouve que l'une est mathématiquement nécessaire.
+
+### 10.5 Premier jalon direct falsifiable : les supports d'arité deux
+
+Pour une paire `(u,v)`, la fonction exacte
+$\Phi_{u,v}(x)=(x-u)\mathbin{\cdot}(x-v)$ est strictement négative exactement à
+l'intérieur de la boule de diamètre `[u,v]`. Une tâche spatiale portant des
+paires peut donc être rejetée si elle fournit `s_max-1` témoins distincts, hors
+support, dont l'inégalité stricte est certifiée pour **toutes** les paires de la
+tâche. L'égalité reste sur la coquille et ne compte jamais comme témoin strict.
+Sous u16, ce prédicat et ses bornes de boîte doivent être redémontrés en largeur
+entière avant device.
+
+Le ledger autoritaire partitionne toute la masse des paires :
+$M_{\mathrm{candidate}}+M_{\mathrm{pruned}}+M_{\mathrm{unresolved}}=\binom{n}{2}$.
+Les splits sont disjoints, les saturations produisent une frontière reprenable,
+et aucune publication n'est permise tant que `M_unresolved != 0`. Chaque paire
+survivante passe ensuite par un census global terminal, la coquille complète,
+la canonicalisation et la déduplication exactes.
+
+Ce jalon teste immédiatement si un flux direct sparse est plausible sans
+construire cellule, coface ou incidence. Il ne prouve rien pour les arités trois
+et quatre, dont les frontières restent indépendantes. Il doit aussi compter les
+témoins **strictement** intérieurs : filtrer seulement par rang fermé censure les
+cofaces Gabriel ouvertes à grand extra-shell, précisément hors de l'univers
+mesuré par `flat_catalogue(...,s_max)`.
+
+GCP utilisé uniquement en lecture seule pour l'audit d'état final; aucune VM
+créée, démarrée, arrêtée ou modifiée par l'auditeur.
