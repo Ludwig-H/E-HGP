@@ -227,6 +227,62 @@ mieux savoir avant d'écrire le code.
 
 ---
 
+## 2 ter. Question mathématique ouverte : construire le préfixe shallow
+
+**Adressée aux audits.** Le dictionnaire est acquis ; le **parcours** ne l'est
+pas, et c'est lui qui décide du contrat. Voici la question exactement, avec sa
+réduction.
+
+### La réduction au dual
+
+Pour une arête d'ancrage, chaque point donne une droite $a s_1 + b s_2 = c$ à
+coefficients entiers, et « strictement intérieur » s'écrit
+$(s_1,s_2,-1)\cdot(a,b,c) > 0$. En envoyant la droite sur le point dual
+$(a,b,c)\in\mathbb{Z}^3$ :
+
+$$\delta_e(s) \;=\; \#\lbrace\, \text{points duaux dans le demi-espace ouvert de normale } (s_1,s_2,-1)\,\rbrace,$$
+
+et un **sommet** de l'arrangement est un plan par l'origine contenant exactement
+deux points duaux. Chercher le préfixe $\delta_e\leq\kappa$ est donc un problème
+de **$k$-ensembles** dans $\mathbb{R}^3$, avec $\kappa\leq s_{\max}-4\leq 7$.
+
+Le cas $\kappa=0$ est clair : ce sont les arêtes de l'enveloppe convexe conique
+des points duaux, en $O(m\log m)$.
+
+### Q1 — l'épluchage en couches est-il exact ?
+
+Est-il vrai que les sommets de profondeur $\leq\kappa$ correspondent exactement
+aux arêtes des $\kappa+1$ premières **couches convexes** du nuage dual ? Je
+soupçonne que **non** — couches convexes et $k$-niveaux ne coïncident pas en
+général — mais je ne veux pas construire dessus sans le savoir. Si c'est faux, un
+contre-exemple minimal serait précieux ; si c'est vrai sous une hypothèse
+supplémentaire, laquelle ?
+
+### Q2 — quel algorithme de $k$-niveau, à $\kappa$ petit et en exact ?
+
+À $\kappa\leq 7$ et $m$ de l'ordre de la centaine, quel constructeur atteint
+$O(m\log m + m\kappa)$ **sans quitter l'arithmétique entière** ? Le tri des
+croisements le long d'une droite demande de comparer des rationnels de
+$\approx2^{105}$, donc des produits de $\approx2^{210}$ : un `BigInt<4>` suffit,
+mais y a-t-il une formulation qui reste dans l'`i128` ?
+
+### Q3 — un critère de rejet d'une droite, avant tout tri ?
+
+Existe-t-il un test **exact et en $O(1)$** disant qu'une droite ne porte aucun
+sommet de profondeur $\leq\kappa$, donc qu'on peut l'écarter avant de trier ses
+croisements ? Dans le dual, cela revient à écarter un point dual dont aucun plan
+support à $\leq\kappa$ points au-dessus ne passe par lui.
+
+### Ce que coûte le prototype actuel, pour situer
+
+Il forme **toutes** les paires de droites et compte la profondeur de chacune sur
+toutes les autres : $O(m_e^3)$ par arête, et $O(n^2)$ arêtes. Un balayage par
+droite descendrait déjà à $O(m_e^2\log m_e)$, et un vrai $k$-niveau à
+$O(m_e\log m_e + m_e\kappa)$. C'est ce dernier saut, et lui seul, qui rend la
+question du §2 bis décidable.
+
+---
+
 ## 3. M1 — le juge
 
 Indépendant du chemin jugé sur les trois couches qui comptent :
