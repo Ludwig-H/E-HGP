@@ -454,6 +454,19 @@ déjà supprimée. Ce diagnostic ne devient interprétable qu'après réparation
 filtre ouvert, chrono séparé de la construction, sémantique des ex æquo et
 calcul de la vérité indépendamment d'`ADMIS`.
 
+Surtout, aucun petit `k` ne découle mathématiquement de l'admissibilité. Pour
+`K=16000` sur la grille u16, prendre
+`p=(16001,0,0)`, `u=(48003,0,0)`, puis les `K` points distincts
+`p-(i,0,0)` et les `K` points `u+(i,0,0)`, `1<=i<=K`. Tous les extras sont
+hors de la boule diamétrale ouverte de `(p,u)`; cette boule a support deux,
+zéro intérieur et `A(p,u)=2`. Pourtant chaque extrémité possède `K` points
+strictement plus proches que l'autre : le rang croisé minimal vaut 16 001.
+Le probe externe (source SHA-256
+`e6f2fc7b9a1fc64514c64e284455ba07600e6fa3f497e9a3fef87e5f53ca5317`)
+reproduit `n=32002,max_coord=64003,min_cross_rank=16001,A=2`. Un k-NN peut
+rester un filtre reçu ou une heuristique de priorité; il ne remplace jamais une
+frontière complète avec certificats et replay.
+
 ## NO-GO F0 inchangé
 
 Le script imprime encore `PASS` en exécution normale et sous `python3 -O`, mais

@@ -1218,7 +1218,26 @@ extra-shell arbitraire. Ce renforcement exact a été vérifié sans écart sur
 Le delta k-NN worktree `130e316e...` ne répare pas le sweep. Il construit une
 matrice $n^2$ et $n$ tris hors chrono, puis mesure seulement les rangs du
 `ADMIS` déjà sous-estimé; ses maxima et histogrammes ne qualifient donc aucune
-frontière. Le filtre exact et sa fixture permanente viennent avant ce diagnostic.
+frontière. Plus profondément, une paire Gabriel vide peut avoir un rang croisé
+arbitraire : sur une fixture u16 de 32 002 points, `A=2` mais le rang minimal
+vaut 16 001. Aucun petit `k` contractuel ne suit donc du lemme. Le filtre exact,
+une frontière certifiée et le replay viennent avant ce diagnostic.
+
+### Le k-NN tronqué est réfuté comme énumérateur, et la mesure dit pourquoi
+
+Pour chaque paire admissible j'ai relevé le plus petit de ses deux rangs de
+voisinage. **[mesuré]** le maximum croît linéairement avec $n$ — **177, 347, 682**
+pour $n=200,400,800$, soit environ 85 % du nuage. Une énumération par $k$ plus
+proches voisins à $k$ borné **manquerait donc des paires**, et la complétude n'est
+pas négociable : cette route est fermée.
+
+La distribution est en revanche très concentrée. À $n=800$ : 83 % des paires
+admissibles sont dans le rang 128, 98 % dans 256, 99,9 % dans 512. Et les paires
+**vraies** ont un maximum bien plus petit — 85, 109, 147 — qui croît nettement moins
+vite que $n$. La queue longue est donc faite de candidates que le lemme admet et que
+la réalité rejette : c'est exactement le régime où une frontière par ancre avec
+**certificats d'élagage** est nécessaire, et où un $k$-NN tronqué serait faux sans
+qu'aucune mesure moyenne ne le montre.
 
 ### Le terrain à densité fixe : quatre diagnostics, aucune asymptote encore
 

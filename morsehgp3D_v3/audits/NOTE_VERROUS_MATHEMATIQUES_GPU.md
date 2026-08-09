@@ -626,6 +626,14 @@ fautif. Le rang symétrisé minimal ne définit pas une frontière canonique et 
 ex æquo géométriques ne sont pas groupés. Réparer et muter le sweep précède
 toute interprétation des maxima ou histogrammes de voisinage.
 
+Aucune borne petite sur ce rang n'est implicite. Pour `K=16000`, la fixture u16
+`p=(16001,0,0)`, `u=(48003,0,0)` et les points
+`p-(i,0,0),u+(i,0,0)`, `1<=i<=K`, a une boule diamétrale ouverte vide :
+`A(p,u)=2`. Les deux extrémités ont pourtant chacune `K` voisins strictement
+plus proches, donc le rang croisé minimal vaut 16 001. Une frontière k-NN
+bornée n'est jamais complète sans un certificat distinct couvrant sa masse
+écartée.
+
 Le lemme peut néanmoins être renforcé proprement pour la source **ouverte**.
 Pour une paire `(p,u)`, soit $D_{pu}^{\circ}$ la boule diamétrale ouverte et
 définir $A(p,u)=2+\min_H\lvert(X\setminus\{p,u\})\cap D_{pu}^{\circ}\cap H\rvert$,

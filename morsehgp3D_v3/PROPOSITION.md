@@ -104,7 +104,9 @@ lemme de demi-boule n'est pas réfuté; son oracle doit devenir un sweep circula
 exact du demi-plan ouvert complémentaire avant toute mesure de sélectivité.
 Les quatre tailles ne prouvent donc ni `O(n log n)` ni 7,5 millions de
 candidates à 50 k. Le delta k-NN `130e316e...` mesure encore l'ensemble fautif,
-avec une matrice et $n$ tris hors chrono; il ne ferme pas cette porte.
+avec une matrice et $n$ tris hors chrono; il ne ferme pas cette porte. Une
+fixture u16 de 32 002 points donne même une paire Gabriel vide avec `A=2` et
+rang croisé minimal 16 001 : aucun petit `k` ne découle de l'admissibilité.
 
 Une voie constructive distincte est maintenant formulée sous la capability
 `center-cover + degree` : banque de témoins stricte par cellule, preuve de rayon

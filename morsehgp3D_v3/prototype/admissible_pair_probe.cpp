@@ -123,6 +123,14 @@ int main(int argc, char** argv) {
 
   long long sum_true = 0, sum_admitted = 0, sum_total = 0, sum_missing = 0;
   long long sum_ball_points = 0;
+  // LE RANG k-NN D'UNE PAIRE ADMISSIBLE. Si les paires admissibles sont toujours
+  // proches au sens du voisinage, une enumeration par k plus proches voisins les
+  // trouve toutes et le cout d'enumeration devient O(nk). Sinon il faut une
+  // frontiere par ancre. C'est cette question, et pas le nombre de paires, qui
+  // decide du COUT de l'enumeration.
+  int rank_max_admitted = 0, rank_max_true = 0;
+  std::vector<long long> rank_histogram(64, 0);
+  long long rank_samples = 0;
   double sum_seconds = 0;
   int decided = 0;
 
@@ -162,6 +170,26 @@ int main(int argc, char** argv) {
     }
 
     // LE FILTRE : le lemme du demi-boule, sur toutes les paires.
+    // Rang de chaque point dans l'ordre des distances depuis chaque autre : calcule
+    // une fois, exactement, sur les carres de distance entiers.
+    std::vector<std::vector<int>> rank_of((std::size_t)n, std::vector<int>((std::size_t)n, 0));
+    {
+      std::vector<std::pair<i128, i32>> order;
+      for (i32 a = 0; a < n; ++a) {
+        order.clear();
+        for (i32 z = 0; z < n; ++z) {
+          if (z == a) continue;
+          const i128 ddx = (i128)pts[(std::size_t)z].x - pts[(std::size_t)a].x;
+          const i128 ddy = (i128)pts[(std::size_t)z].y - pts[(std::size_t)a].y;
+          const i128 ddz = (i128)pts[(std::size_t)z].z - pts[(std::size_t)a].z;
+          order.push_back({ddx * ddx + ddy * ddy + ddz * ddz, z});
+        }
+        std::sort(order.begin(), order.end());
+        for (std::size_t i = 0; i < order.size(); ++i)
+          rank_of[(std::size_t)a][(std::size_t)order[i].second] = (int)i + 1;
+      }
+    }
+
     const auto t0 = std::chrono::steady_clock::now();
     long long admitted = 0, missing = 0, ball_points = 0;
     std::vector<std::pair<i128, i128>> projected;
@@ -204,6 +232,16 @@ int main(int argc, char** argv) {
         const int least = minimum_halfplane_count(projected, inside_line + 2);
         if (least <= smax) {
           ++admitted;
+          // Le rang d'une paire est le PLUS PETIT des deux rangs croises : une
+          // enumeration par k-NN la trouve des que k atteint ce rang.
+          const int rank = std::min(rank_of[(std::size_t)a][(std::size_t)b],
+                                    rank_of[(std::size_t)b][(std::size_t)a]);
+          rank_max_admitted = std::max(rank_max_admitted, rank);
+          if (truth.count({a, b}) != 0) rank_max_true = std::max(rank_max_true, rank);
+          int bucket = 0;
+          while (bucket < 62 && (1 << (bucket + 1)) <= rank) ++bucket;
+          ++rank_histogram[(std::size_t)bucket];
+          ++rank_samples;
         } else if (truth.count({a, b}) != 0) {
           ++missing;                 // le lemme aurait refute une paire VRAIE
         }
@@ -232,6 +270,18 @@ int main(int argc, char** argv) {
          sum_missing / d);
   printf("  points de boule diametrale visites=%.0f  secondes=%.2f\n", sum_ball_points / d,
          sum_seconds / d);
+  printf("  rang k-NN maximum : admises=%d  vraies=%d  (sur %lld paires admises)\n",
+         rank_max_admitted, rank_max_true, rank_samples);
+  {
+    long long cumulative = 0;
+    printf("  histogramme des rangs (borne superieure de la classe : part cumulee) :");
+    for (int i = 0; i < 20 && (1 << i) <= n; ++i) {
+      cumulative += rank_histogram[(std::size_t)i];
+      if (rank_samples > 0)
+        printf(" %d:%.3f", 1 << (i + 1), (double)cumulative / (double)rank_samples);
+    }
+    printf("\n");
+  }
   if (sum_missing != 0) {
     printf("ECHEC : le lemme du demi-boule a refute %lld paires reelles — il est FAUX\n",
            sum_missing);
