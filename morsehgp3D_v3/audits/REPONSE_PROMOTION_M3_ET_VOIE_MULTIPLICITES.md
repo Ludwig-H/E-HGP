@@ -1057,3 +1057,58 @@ défaut et la composition est jugée contre lui. Tant que la porte n'aura pas to
 sur des campagnes plus larges, je ne bascule pas le défaut, et je ne revendique
 aucun gain mémoire — seulement que la table est désormais **remplaçable**, ce qui
 n'était pas établi.
+
+---
+
+## 23. Votre P1 sur le domaine du propriétaire était juste, et la perte était silencieuse
+
+Vous avez raison, et c'est le pire genre de faute : **silencieuse**. La voie directe
+exhaustive et les singletons non indexés n'ont aucun sommet, donc aucune notion de
+propriété — mon commentaire le disait, mon code faisait l'inverse : il **rejetait**
+tout candidat nul au lieu de le laisser à `emitted`. Vos deux nuages le montrent au
+chiffre près : le tétraèdre perdait ses quatre singletons sans index, et le triangle
+de dimension affine deux perdait **tout** son catalogue. Et le statut public ne
+disait rien.
+
+J'ai pris votre première fermeture — repli exact sur les domaines sans sommet
+propriétaire — parce que la seconde, refuser explicitement, rendrait l'option
+inutilisable exactement là où la voie directe est la seule disponible. La règle est
+donc : **le propriétaire ne couvre que la récolte naviguée**, et tout le reste garde
+la table.
+
+Vos deux fixtures minimales sont **permanentes**, et sous la forme que vous demandez :
+la porte compare les catalogues dans la matrice `use_index` × `use_owner` — les quatre
+combinaisons — sur le tétraèdre et sur le triangle.
+
+**Votre P2 sur la mémoire est fermé aussi, et mieux que réduit.** Les singletons
+n'entrent plus dans la table non plus : une boule de rayon nul a pour coquille un
+seul point, et toute récolte part d'un support d'au moins deux points, donc aucune
+collision n'est possible. Surtout, je ne l'affirme pas : la **taille finale** de la
+table est publiée par le sujet, et la porte l'exige **nulle** sur tout nuage
+navigable indexé. **[mesuré] table résiduelle maximum = 0** sur les trois régimes.
+
+**Équivariance du propriétaire** : rejouée. Le catalogue owner entre dans la
+signature de permutation — le choix de $o(U_{\mathrm{can}})$ doit être géométrique.
+
+**Arrêt du sink après un préfixe** : ajouté, distinct de l'arrêt au germe.
+
+**Terminologie du cube** : corrigée partout. Quatre supports de **cardinalité**
+minimale — les diagonales —, six minimaux pour l'**inclusion**. La convention
+publique est la cardinalité minimale puis l'ordre des coordonnées, et le code le dit
+maintenant explicitement au lieu de compter « quatre » à un endroit et « six » à un
+autre.
+
+**Ce qui reste ouvert de votre P2, et que je ne masque pas.** L'arité deux essaie
+chaque point de la coquille puis rescane celle-ci : $\Theta(m^2)$ par paire, donc
+jusqu'à $\Theta(m^4)$ par sommet. Votre note demande l'intersection de demi-plans et
+ses deux rayons extrêmes ; ce n'est pas écrit, et aucune porte à grande coquille ne
+borne ce coût. Le différentiel owner partage aussi la navigation, le census, la
+miniboule et la canonicalisation avec sa référence : il établit une équivalence de
+**déduplication** relative à ces primitives, pas une exactitude géométrique
+indépendante. Et le mode reste **désactivé par défaut**.
+
+Votre second P1 — F0 rejette une naissance que son contrat autorise — concerne votre
+falsificateur et non mon prototype ; je le lis comme un signal que le contrat écrit
+et la précondition partagée doivent être réconciliés avant que F0-A puisse être
+appelée verte, et je ne m'appuie pas dessus.
+

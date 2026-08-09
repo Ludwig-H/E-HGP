@@ -6,9 +6,10 @@ Aucun statut public, aucun SLO et aucune phase ne sont ouverts au registre.
 
 L'état audité du worktree est scellé dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les cinq portes flats
-Release et les campagnes sanitizers y sont vertes, mais deux P1 interdisent une
-promotion : le mode `use_owner` est incomplet hors du chemin indexé affine 3D,
-et le noyau F0 rejette une naissance autorisée par son contrat écrit.
+Release et les campagnes sanitizers y sont vertes. La correction de justesse
+`use_owner` est créditée sur les quatre quadrants, mais sa porte permanente ne
+compare pas encore le payload complet. Le noyau F0 reste rouge : il rejette une
+naissance autorisée par son contrat écrit.
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -193,8 +194,10 @@ inférieure à trois et moins de quatre points ne sont plus des erreurs mais une
 
 ## 3. Le support canonique n'est pas unique, et la convention naturelle est fausse
 
-Une miniboule peut avoir **plusieurs** supports minimaux : le cube cosphérique
-en a quatre, ses quatre paires antipodales. Trois conventions, mesurées :
+Une miniboule peut avoir **plusieurs** supports. Le cube cosphérique en a six au
+sens inclusion-minimal : quatre paires antipodales et deux tétraèdres de parité.
+Les quatre paires sont les seuls supports de cardinalité minimale; c'est parmi
+elles que la convention canonique tranche d'abord. Trois conventions, mesurées :
 
 | convention | résultat |
 | --- | --- |
@@ -309,9 +312,9 @@ permutations**, avec exigence de zéro refus et de signature unique.
 - L'oracle M1 n'a **pas** été étendu à ce sujet. Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. L'étendre aux multiplicités est un travail à part, et il doit être audité.
 - Les forêts ne sont pas construites, et le centre rationnel, le rayon et $\beta$ ne sont pas confrontés à une vérité distincte. Ce qui est comparé est listé au §4 ; « payload entier » serait faux.
 - Pas de forêts ni de reverse search **dans le catalogue**. Un propriétaire exact
-  expérimental est calculé pour les non-singletons du seul chemin indexé affine
-  3D; il est désactivé par défaut, n'est pas rejoué sous permutation et n'a pas
-  encore de fixture permanente `owner_signed_cone`.
+  expérimental est calculé sur la récolte naviguée et rejoué sous permutation,
+  mais cette signature omet membres et multiplicités. Il est désactivé par défaut
+  et n'a pas encore de fixture permanente `owner_signed_cone`.
 
 ---
 
@@ -374,8 +377,9 @@ membres de $B(v)$, donc gratuits ; la récolte dispose d'un **préfiltre nécess
 de propriété** — un sommet propriétaire doit avoir tout son intérieur dans la
 boule de ce support. Le live ajoute ensuite « support canonique puis
 propriétaire » sur son chemin expérimental. `emitted` reste la référence du
-différentiel et conserve encore les `n` clefs singleton dans ce chemin; et les
-singletons se publient en temps
+différentiel, mais sa table est vide dans le chemin owner+index+navigable; les
+voies sans index ou directes gardent le repli hybride. Les singletons se publient
+en temps
 constant, ce qui supprime les $2{,}5\cdot10^9$ classifications que l'audit
 comptait avant le germe.
 
@@ -612,8 +616,8 @@ API de sortie streamée. Le replay du sink est en outre lancé sans lui passer l
 `CertifiedIndex`; la composition streamée-indexée n'est pas encore qualifiée.
 L'intégration devra écrire dans un segment non committé : une erreur peut
 survenir après plusieurs callbacks. `kSinkStopped` distingue désormais l'arrêt
-volontaire d'une violation d'invariant, mais le test interrompt dès le germe et
-n'exerce ni un préfixe non vide ni l'arrêt depuis un enfant. Le high-water
+volontaire d'une violation d'invariant; le test interrompt au germe puis après
+un préfixe de trois sommets. Le high-water
 mémoire complet, l'intégration transactionnelle au catalogue et l'absence
 d'écriture partagée d'un kernel réel restent à obtenir.
 
@@ -622,8 +626,9 @@ d'écriture partagée d'un kernel réel restent à obtenir.
 Streamer les sommets ne suffit pas tant que le **catalogue** garde `emitted`, une
 table de déduplication proportionnelle à la sortie. La note d'audit prouve la
 règle candidate, et le cube u16 dit pourquoi un propriétaire par support ne
-suffit pas : $\lbrace0,2\rbrace^3$ a **six** supports minimaux pour une seule
-boule — quatre diagonales et deux tétraèdres de parité. Il faut donc canoniser
+suffit pas : $\lbrace0,2\rbrace^3$ a **six** supports inclusion-minimaux pour une
+seule boule — quatre diagonales, seules de cardinalité minimale, et deux
+tétraèdres de parité. Il faut donc canoniser
 **d'abord**, posséder **ensuite** :
 
 1. recenser exactement la boule fermée et refuser son rang s'il dépasse le contrat ;
@@ -642,24 +647,30 @@ $a_i\cdot d=-2\,\mathrm{orient3d}$.
 
 **[mesuré, snapshot scellé dans l'audit courant]** les cinq portes Release
 `fixtures`, `generic`, `indexed_tree`, `degenerate` et `cospherical` passent en
-204,28 s de temps mur avec deux tests en parallèle : 4 980 cas, zéro désaccord
-de catalogue. Le probe `owner_signed_cone` trouve exactement un propriétaire
-parmi deux candidats et 22 sphères identiques à la référence. Ce probe positif
-n'est pas encore une fixture permanente et l'équivalence owner n'est pas
-rejouée sous permutation.
+222,60 s de temps mur avec deux tests en parallèle : 4 985 cas, zéro désaccord,
+et table résiduelle owner-indexée maximale nulle. Deux campagnes ASan/UBSan ne
+déclenchent aucun diagnostic.
 
-Le domaine de l'API n'est pas fermé. Le juge active owner seulement avec index
-et seulement sur les nuages affines 3D navigables. Sans index, un tétraèdre perd
-ses quatre singletons; sur un triangle traité par la voie directe, owner rend
-zéro sphère sans index et seulement les trois singletons avec index, au lieu de
-sept. Le mode est donc **expérimental et désactivé par défaut**. Même dans le
-quadrant vert, `emitted` conserve encore les `n` clefs singleton : la table est
-réduite au mieux à $O(n)$, sans high-water mesuré, pas supprimée.
+La frontière est explicite : **le propriétaire couvre seulement la récolte
+naviguée**. Les singletons sans index et la voie directe n'ont aucun sommet de
+$P_U$ et conservent le repli exact `emitted`. Une sonde indépendante sur les
+quatre combinaisons index × propriétaire, couvrant 174 444 exécutions et
+41 430 permutations, trouve les mêmes statuts, supports, rangs, membres et
+niveaux exacts. Le tétraèdre rend 11 sphères partout, le triangle direct 7, et
+`owner_signed_cone` 22 avec exactement un propriétaire parmi deux candidats.
 
-Enfin, l'implémentation des supports d'arité deux essaie chaque point de la
-coquille puis rescane celle-ci. Elle paie $\Theta(m^2)$ par paire, donc jusqu'à
-$\Theta(m^4)$ pour les $\Theta(m^2)$ paires d'un sommet. La sélection des deux
-rayons extrêmes par intersection de demi-plans et une porte à grande coquille
+La porte permanente de domaine est plus faible : elle compare seulement nombre
+de sphères et histogramme d'arités, sans statut ni payload. Son triangle à trois
+points ne couvre pas la branche affine basse avec au moins quatre points. La
+signature de permutation owner emploie un `set` de `(support, rang)`, donc masque
+multiplicités et membres; le cône signé reste une fixture externe.
+
+La disparition de table est acquise uniquement dans le quadrant
+owner+index+navigable. Sans index il reste $O(n)$ clefs singleton; sur la voie
+directe, le repli peut rester en $\Theta(\text{sortie})$. La taille publiée est
+finale, pas un high-water mémoire. Enfin, les scans owner des arités deux et
+trois peuvent coûter $\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet. La sélection
+des deux rayons extrêmes, une porte à grande coquille et un vrai high-water
 restent nécessaires avant toute revendication d'échelle.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
@@ -1153,7 +1164,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | # | question | statut |
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | existence et propriétaire canonique prouvés; voie live expérimentale exacte seulement dans le quadrant indexé affine 3D testé, fausse dans les voies directe et sans index; `emitted` conserve les singletons et le coût peut atteindre $\Theta(m^4)$ par sommet |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | correction de justesse validée dans les quatre quadrants par sonde externe; porte permanente encore partielle, table nulle seulement pour owner+index+navigable, coût jusqu'à $\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |

@@ -375,12 +375,12 @@ systématique n'est requis, sans promesse sous-linéaire au pire.
 
 #### Le propriétaire de $U$ ne suffit pas lorsque la même boule a plusieurs supports
 
-Deux supports minimaux distincts peuvent porter la même miniboule. Appliquer
+Deux supports inclusion-minimaux distincts peuvent porter la même miniboule. Appliquer
 séparément le propriétaire à chacun émettrait encore plusieurs fois la même
 sphère. Le cube u16 $\left\lbrace0,2\right\rbrace^3$ possède par exemple six
-supports minimaux pour une seule boule et un seul sommet propriétaire : quatre
-paires antipodales et deux tétraèdres de parité. La règle complète d'émission est
-donc :
+supports inclusion-minimaux pour une seule boule et un seul sommet propriétaire :
+quatre paires antipodales, seules de cardinalité minimale, et deux tétraèdres de
+parité. La règle complète d'émission est donc :
 
 1. recenser exactement la boule fermée du candidat et refuser son rang s'il
    dépasse le contrat;

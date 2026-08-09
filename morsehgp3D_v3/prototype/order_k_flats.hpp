@@ -305,6 +305,7 @@ struct FlatStatistics {
   long long owner_rejected_support = 0;  // U different du support canonique
   long long owner_rejected_vertex = 0;   // support canonique, mais un autre sommet possede
   long long owner_emitted = 0;
+  long long dedup_table_size = 0;        // taille FINALE de `emitted` : la preuve du gain
   long long reverse_depth_max = 0;        // profondeur maximale de la pile
   long long reverse_children_tested = 0;  // voisins soumis au test de parent
   long long reverse_backtracks = 0;
@@ -325,7 +326,7 @@ struct FlatStatistics {
   long long reverse_decisions = 0;         // decisions de filiation, sans requete de retour
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 41 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 42 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
@@ -354,6 +355,7 @@ struct FlatStatistics {
     owner_rejected_support += o.owner_rejected_support;
     owner_rejected_vertex += o.owner_rejected_vertex;
     owner_emitted += o.owner_emitted;
+    dedup_table_size = std::max(dedup_table_size, o.dedup_table_size);
     reverse_depth_max = std::max(reverse_depth_max, o.reverse_depth_max);
     reverse_children_tested += o.reverse_children_tested;
     reverse_backtracks += o.reverse_backtracks;
@@ -2400,15 +2402,25 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
       }
     }
     if ((int)members.size() > s_max) return;
-    if (!use_owner && !emitted.insert(shell).second) {
+    // LE PROPRIETAIRE NE COUVRE QUE LA RECOLTE NAVIGUEE. La voie directe
+    // exhaustive et les singletons non indexes n'ont aucun sommet, donc aucune
+    // notion de propriete : ils gardent `emitted`. Ma premiere version rejetait
+    // tout candidat nul, ce qui les SUPPRIMAIT en silence — l'audit le montre sur
+    // un tetraedre, dont les quatre singletons disparaissaient sans index, et sur
+    // un triangle de dimension affine deux, dont tout le catalogue disparaissait.
+    const bool owned_path = (use_owner && owner_vertex != nullptr);
+    if (!owned_path && !emitted.insert(shell).second) {
       ++st->emit_duplicate_shell;
       return;
     }
 
     // SUPPORT CANONIQUE.
     //
-    // Une miniboule peut avoir PLUSIEURS supports minimaux : le cube
-    // cospherique en a quatre, ses quatre paires antipodales. Lire le support
+    // Une miniboule peut avoir PLUSIEURS supports minimaux, et les deux notions
+    // different : le cube cospherique a QUATRE supports de cardinalite minimale —
+    // ses quatre diagonales — mais SIX supports minimaux pour l'INCLUSION, les
+    // quatre diagonales et les deux tetraedres de parite. La convention publique
+    // porte sur la cardinalite minimale puis l'ordre des coordonnees. Lire le support
     // sur le candidat qui a servi a la decouvrir rendrait l'arite publique
     // dependante du chemin — la force brute annonce {2,5}, la navigation {0,7}
     // pour la meme sphere.
@@ -2440,7 +2452,7 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
                                                                 (int)by_coordinate.size());
     if (!canonical_mb.ok) return;
 
-    if (use_owner) {
+    if (owned_path) {
       // (3) REJET DE TOUT SUPPORT NON CANONIQUE. Sans lui, l'owner seul emettrait
       // une fois par support minimal : six fois sur le cube u16.
       //
@@ -2451,7 +2463,6 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
       // par nuage disparaissait. La note traite ce cas a part : on canonise la
       // coquille une fois, et on n'emprunte cette voie QUE si le support canonique a
       // bien arite quatre. La sphere est alors le sommet lui-meme.
-      if (candidate == nullptr) { ++st->owner_rejected_support; return; }
       if (from_shell) {
         if (canonical_mb.n_support != 4) { ++st->owner_rejected_support; return; }
       } else {
@@ -2510,7 +2521,11 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
       for (mhgp::i32 p = 0; p < n; ++p) {
         const mhgp::Sphere sphere = mhgp::sphere1(points[(std::size_t)p]);
         std::vector<mhgp::i32> one{p};
-        if (!emitted.insert(one).second) { ++st->emit_duplicate_shell; continue; }
+        // Un singleton ne peut entrer en collision avec rien : la boule de rayon
+        // nul centree en p a pour coquille {p}, et toute recolte part d'un support
+        // d'au moins deux points, donc d'une coquille d'au moins deux points. Sous
+        // proprietaire, la table n'a donc plus aucun role ici non plus.
+        if (!use_owner && !emitted.insert(one).second) { ++st->emit_duplicate_shell; continue; }
         ++st->emit_attempts;
         mhgp::CriticalSphere critical{};
         critical.support[0] = p;
@@ -2608,6 +2623,10 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
         }
     }
   }
+
+  // La taille FINALE de la table est publiee : c'est la seule facon de montrer
+  // qu'elle a disparu, plutot que de l'affirmer.
+  st->dedup_table_size = (long long)emitted.size();
 
   // ORDRE CANONIQUE DE SERIALISATION. Lexicographique sur les QUATRE cases de
   // `support`, remplies de -1 en queue — jamais par arite d'abord. Deux

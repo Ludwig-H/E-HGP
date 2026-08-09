@@ -32,7 +32,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 Le worktree reste `exploration_v3_hors_registre`, sur CPU et sur le profil
 `quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
 
-Résultats positifs scellés : les cinq portes flats Release passent sur 4 980 cas
+Résultats positifs scellés : les cinq portes flats Release passent sur 4 985 cas
 avec zéro désaccord, deux campagnes ASan/UBSan passent sans diagnostic, le cône
 signé choisit le bon propriétaire sur la fixture minimale, et les gardes de
 filiation distinguent maintenant les directions invalides et les cibles
@@ -41,19 +41,20 @@ scientifique.
 
 Deux verrous priment sur tout travail d'échelle :
 
-1. `use_owner` n'est équivalent à la référence que dans le quadrant indexé,
-   affine 3D, que le juge exerce. Sans index, il perd les singletons; sur la voie
-   directe il perd les arités supérieures à un. Même dans le quadrant vert,
-   `emitted` conserve les `n` clefs singleton et aucun high-water complet n'est
-   mesuré.
+1. La correction de justesse `use_owner` concorde dans les quatre quadrants sur
+   174 444 exécutions externes, mais la porte permanente ne compare encore que
+   nombres et arités. La table est nulle seulement pour owner+index+navigable;
+   le repli direct reste potentiellement proportionnel à la sortie et aucun
+   high-water complet n'est mesuré.
 2. Le noyau F0 rejette une `DirectHyperedge` entre deux facettes activées dans
    le lot, alors que le contrat `q_R=0` la classe comme naissance. Warshall et
    DSU partagent le garde fautif, donc leur `PASS` est corrélé.
 
 Conséquence d'architecture : le propriétaire exact et le fold externe restent
-les directions proposées, mais aucun des deux n'est actuellement une brique
-promouvable. La matrice de domaine owner et la sémantique de naissance F0 se
-ferment avant les optimisations, le GPU ou une revendication mémoire.
+les directions proposées. Le propriétaire reçoit un GO ciblé de justesse, pas
+encore un certificat permanent ni une garantie sans table. La porte owner et la
+sémantique de naissance F0 se ferment avant les optimisations, le GPU ou une
+revendication mémoire.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 
@@ -702,13 +703,16 @@ matérialise encore la sortie et le catalogue continue d'appeler le BFS. Le
 high-water mémoire complet, l'intégration produit, la transaction du préfixe et
 la forme device ne sont donc pas acquis.
 
-Le propriétaire local est branché à titre expérimental pour les non-singletons
-du chemin indexé affine 3D. Les cinq portes bornées y donnent le même catalogue,
-mais la voie sans index et la voie directe ont des omissions silencieuses;
-`emitted` conserve en outre les singletons. Ce composant ne remplace donc pas
-encore la table au sens de l'architecture cible. Son coût d'arité deux peut
-atteindre $\Theta(m^4)$ par sommet tant que les deux rayons extrêmes ne sont pas
-sélectionnés directement.
+Le propriétaire local est branché à titre expérimental sur la récolte naviguée.
+Les chemins sans sommet propriétaire utilisent un repli exact. Une sonde
+indépendante de 174 444 exécutions valide statuts et payloads complets dans les
+quatre quadrants; les cinq portes permanentes donnent aussi zéro désaccord et
+une table owner-indexée vide. Leur fixture de domaine ne compare cependant que
+taille et arités, et leur équivariance masque membres et multiplicités dans un
+`set`. Sans index il reste $O(n)$ clefs singleton; sur la voie directe la table
+peut rester en $\Theta(\text{sortie})$. Le coût owner peut atteindre
+$\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet tant que les deux rayons extrêmes
+ne sont pas sélectionnés directement.
 
 Le noyau F0 matérialise volontairement Warshall et DSU pour juger un lot borné.
 Son contrat de naissance est actuellement contredit par une garde commune aux
@@ -807,9 +811,10 @@ tient pas lieu de l'autre.
 **Décision à deux branches** : sortie énorme ⇒ réviser le SLO ; sortie sparse
 mais intermédiaires denses ⇒ **architecture no-go**.
 
-**État live de Gate D : NO-GO.** Le census borné des flats est positif, mais la
-matrice de domaine owner n'est pas fermée et F0 contredit sa sémantique de
-naissance. Les compteurs verts ne compensent pas ces deux défauts de correction.
+**État live de Gate D : NO-GO.** Le census borné des flats et la correction de
+justesse owner sont positifs. La porte owner permanente reste incomplète, et F0
+contredit sa sémantique de naissance. Les compteurs verts ne compensent pas ce
+défaut mathématique.
 
 **Gate E — shallow CPU exact.** Constructeur sans travail en $\sum_e m_e^2$ ;
 comparaison à l'oracle exhaustif et au brute-force local ; permutations,
@@ -841,16 +846,17 @@ qualifier 100 ms, **par famille sanctionnée**.
 
 1. **Sémantique F0** : décider si `N_a--N_a` est une naissance ou prouver son
    impossibilité amont, puis séparer cette obligation de la vérité et du sujet.
-2. **Contrat owner** : fermer la matrice index/non-index et navigable/direct,
-   avec refus explicite ou repli exact, jamais un catalogue partiel.
-3. **Fixtures et indépendance** : rendre permanents le cône signé, le tétraèdre
-   sans index et le triangle direct; rejouer owner sous permutations et retirer
-   des primitives partagées aux oracles.
+2. **Contrat owner** : promouvoir dans la porte permanente la comparaison du
+   statut et du payload complet, les vérités 11/7 et un vrai cas affine bas avec
+   au moins quatre points.
+3. **Fixtures et indépendance** : rendre permanent le cône signé; conserver
+   membres et multiplicités sous permutation et retirer des primitives partagées
+   aux oracles.
 4. **Coût mathématique** : sélectionner directement les rayons extrêmes du cône
    signé, puis mesurer des coquilles croissantes avant un census à l'échelle.
-5. **Flux transactionnel** : intégrer sink et propriétaire au catalogue, fermer
-   l'arrêt après préfixe, retirer réellement la table résiduelle et publier le
-   high-water complet.
+5. **Flux transactionnel** : intégrer sink et propriétaire au catalogue,
+   documenter le repli direct et publier le high-water complet plutôt que la
+   taille finale de table.
 6. **F1/F2 et source HGP** : runs scellés, versions externes, couverture,
    verticales et reçus complets contre l'oracle indépendant.
 7. Puis seulement données réelles à grande échelle, GPU et publication.

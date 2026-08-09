@@ -272,6 +272,7 @@ struct Coverage {
   long long owner_rejected_support = 0;
   long long owner_rejected_vertex = 0;
   long long owner_emitted = 0;
+  long long dedup_table_max = 0;
 };
 static Coverage coverage;
 
@@ -561,6 +562,17 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
              ost.owner_rejected_vertex, ost.owner_emitted);
       ok = false;
     }
+    // LA TABLE DOIT ETRE VIDE. Dans le quadrant navigue et indexe, plus rien n'y
+    // entre : ni les non-singletons, qui passent par le proprietaire, ni les
+    // singletons, qui ne peuvent entrer en collision avec rien. La taille FINALE
+    // est publiee par le sujet et exigee nulle ici.
+    if (ost.dedup_table_size != 0 && ostatus == mhgp3v::CloudStatus::kOk &&
+        (int)pts.size() >= 4) {
+      printf("[%s] s_max=%2d TABLE NON VIDE sous proprietaire : %lld entrees\n", tag, s_max,
+             ost.dedup_table_size);
+      ok = false;
+    }
+    coverage.dedup_table_max = std::max(coverage.dedup_table_max, ost.dedup_table_size);
     coverage.owner_rejected_support += ost.owner_rejected_support;
     coverage.owner_rejected_vertex += ost.owner_rejected_vertex;
     coverage.owner_emitted += ost.owner_emitted;
@@ -811,6 +823,23 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
                                         [&](const mhgp3v::flats::Vertex&) {
             return ++seen < 1;
           });
+          // ARRET APRES UN PREFIXE, et pas seulement au germe : la branche issue
+          // d'un enfant doit elle aussi remonter `kSinkStopped`.
+          if (want_count > 3) {
+            mhgp3v::FlatStatistics ist3{};
+            mhgp3v::CloudStatus istatus3 = mhgp3v::CloudStatus::kOk;
+            long long prefix = 0;
+            mhgp3v::reverse_search_stream(pts, s_max - 2, &ist3, &istatus3,
+                                          [&](const mhgp3v::flats::Vertex&) {
+              return ++prefix < 3;
+            });
+            if (prefix != 3 || istatus3 != mhgp3v::CloudStatus::kSinkStopped) {
+              printf("[%s] s_max=%2d SINK PREFIXE : %lld sommets, statut %s\n", tag, s_max,
+                     prefix, mhgp3v::cloud_status_name(istatus3));
+              ok = false;
+            }
+            ++coverage.sink_interruptions;
+          }
           if (seen != 1 || istatus2 != mhgp3v::CloudStatus::kSinkStopped) {
             printf("[%s] s_max=%2d SINK INTERROMPU : %lld sommets, statut %s\n", tag, s_max,
                    seen, mhgp3v::cloud_status_name(istatus2));
@@ -970,6 +999,23 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
       std::sort(sup.begin(), sup.end());
       out.insert({sup, s.rank});
     }
+    // L'EQUIVARIANCE DU PROPRIETAIRE. Le choix de o(U) doit etre geometrique : une
+    // renumerotation ne peut pas changer quel sommet possede un support.
+    {
+      mhgp3v::FlatStatistics owner_st{};
+      mhgp3v::CloudStatus owner_status = mhgp3v::CloudStatus::kOk;
+      const mhgp::Catalogue owned =
+          mhgp3v::flat_catalogue(q, s_max, &owner_st, &owner_status, false, true, true);
+      out.insert({std::vector<i32>{(i32)(-5000 - (int)owner_status)}, 0});
+      for (const mhgp::CriticalSphere& sphere : owned.spheres) {
+        std::vector<i32> sup{-6000};
+        for (int i = 0; i < sphere.n_support; ++i)
+          sup.push_back((i32)back[(size_t)sphere.support[i]]);
+        std::sort(sup.begin() + 1, sup.end());
+        out.insert({sup, sphere.rank});
+      }
+    }
+
     // L'EQUIVARIANCE DE LA REVERSE SEARCH, et pas seulement celle du catalogue.
     // Ce qui est geometrique est l'ENSEMBLE visite : le germe, l'arbre et l'ordre
     // des fils dependent de la numerotation, puisque la direction canonique du
@@ -1345,6 +1391,54 @@ int main(int argc, char** argv) {
              " exhaustif verifies\n");
   }
 
+  // DOMAINE COMPLET DU PROPRIETAIRE, contre-exemple exact de l'audit.
+  //
+  // Le proprietaire ne couvre que la recolte NAVIGUEE. La voie directe exhaustive
+  // et les singletons non indexes n'ont aucun sommet, donc aucune notion de
+  // propriete. Ma premiere version rejetait tout candidat nul et les supprimait en
+  // SILENCE : quatre singletons perdus sur un tetraedre sans index, et la totalite
+  // du catalogue perdue sur un triangle de dimension affine deux. Le differentiel
+  // ne le voyait pas parce qu'il n'active le proprietaire que sur `kOk` et
+  // toujours avec index.
+  //
+  // La porte exige donc que les QUATRE combinaisons index x proprietaire rendent
+  // le meme catalogue, sur les deux nuages exacts de l'audit.
+  {
+    ++cases;
+    const std::vector<std::pair<const char*, std::vector<P3>>> probes{
+        {"tetraedre", {pt(0, 0, 0), pt(2, 0, 0), pt(0, 2, 0), pt(0, 0, 2)}},
+        {"triangle", {pt(0, 0, 0), pt(4, 0, 0), pt(1, 3, 0)}}};
+    int domain_faults = 0;
+    for (const auto& probe : probes) {
+      std::vector<std::pair<size_t, std::array<long long, 5>>> profiles;
+      for (int indexed = 0; indexed < 2; ++indexed)
+        for (int owner = 0; owner < 2; ++owner) {
+          mhgp3v::FlatStatistics pst{};
+          mhgp3v::CloudStatus pstatus = mhgp3v::CloudStatus::kOk;
+          const mhgp::Catalogue got = mhgp3v::flat_catalogue(
+              probe.second, 4, &pst, &pstatus, false, indexed != 0, owner != 0);
+          std::array<long long, 5> arity{};
+          for (const auto& sphere : got.spheres)
+            if (sphere.n_support >= 1 && sphere.n_support <= 4) ++arity[sphere.n_support];
+          profiles.push_back({got.spheres.size(), arity});
+        }
+      for (size_t i = 1; i < profiles.size(); ++i)
+        if (profiles[i] != profiles[0]) {
+          printf("[domaine owner] %s : combinaison %zu rend %zu spheres (arites %lld/%lld/%lld/"
+                 "%lld) contre %zu (%lld/%lld/%lld/%lld)\n", probe.first, i,
+                 profiles[i].first, profiles[i].second[1], profiles[i].second[2],
+                 profiles[i].second[3], profiles[i].second[4], profiles[0].first,
+                 profiles[0].second[1], profiles[0].second[2], profiles[0].second[3],
+                 profiles[0].second[4]);
+          ++domain_faults;
+        }
+    }
+    if (domain_faults) failures += domain_faults;
+    else
+      printf("[domaine owner] tetraedre et triangle affine deux : les quatre combinaisons"
+             " index x proprietaire rendent le meme catalogue\n");
+  }
+
   // FIXTURE ENTIERE DES DEUX POTENTIELS, coordonnees de l'audit.
   //
   //   A=(0,0,1) B=(1,0,1) C=(0,1,1)   E=(0,0,0) D=(0,0,2) F=(0,0,3)
@@ -1584,8 +1678,10 @@ int main(int argc, char** argv) {
          "  refus par la decision=%lld\n", coverage.reject_backward, coverage.reject_by_parent);
   printf("        : couples juges deux fois=%lld  acceptes=%lld  prefiltres=%lld\n",
          coverage.pairs_judged, coverage.pairs_accepted, coverage.pairs_prefiltered);
-  printf("owner  : emises=%lld  refus support non canonique=%lld  refus autre proprietaire=%lld\n",
-         coverage.owner_emitted, coverage.owner_rejected_support, coverage.owner_rejected_vertex);
+  printf("owner  : emises=%lld  refus support non canonique=%lld  refus autre proprietaire=%lld"
+         "  table residuelle maximum=%lld\n", coverage.owner_emitted,
+         coverage.owner_rejected_support, coverage.owner_rejected_vertex,
+         coverage.dedup_table_max);
   printf("        : parent precoce=%lld fermetures  balayage complet=%lld  rapport %.2f\n",
          coverage.parent_early_closures, coverage.parent_full_closures,
          coverage.parent_early_closures
