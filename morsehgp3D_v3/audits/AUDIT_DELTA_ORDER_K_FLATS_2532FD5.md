@@ -3,7 +3,7 @@
 Date : 9 août 2026 UTC.
 
 > [!IMPORTANT]
-> **Verdict courant : GO ciblé pour le germe, les gardes u16, l'index k-d exact et la règle mathématique de parent; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Le commit `1a0a1f8` ferme le P0 d'élagage par classifications boîte--boule entières et retire les scans systématiques des singletons, du census et du pinceau. Le commit `6fa7e9d` juge un parent local multiplicitaire, renforcé dans le worktree courant. Restent ouverts l'implémentation live du propriétaire complet, la reverse search effective, le producteur terminal `directes + premières incidences`, les lots, l'état horizontal, les verticales et le contrat de sortie.
+> **Verdict courant : GO ciblé pour le germe, les gardes u16, l'index k-d exact, la règle mathématique de parent, un endpoint reverse différencié et une API sink diagnostique; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Le commit `1a0a1f8` ferme le P0 d'élagage par classifications boîte--boule entières et retire les scans systématiques des singletons, du census et du pinceau. Les commits `6fa7e9d` et `969db5c` jugent le parent puis la reverse search. Restent ouverts l'implémentation live du propriétaire complet, l'intégration transactionnelle du sink au catalogue, le producteur terminal `directes + premières incidences`, les lots, l'état horizontal, les verticales et le contrat de sortie.
 
 Cadre : `backend=reference_cpu_local`, `profile=quantized_u16_order_k_prototype`, `mode=exploration/diagnostic_only`, `public_status=not_claimed`. Aucun de ces libellés n'ouvre une phase officielle.
 
@@ -188,7 +188,7 @@ Décision historique : créditer pleinement le nouveau germe, la garde u16, le C
 | prototype de première incidence | `9eee050171267eb7213e51214b5864d52aa533048a405294094f4a47a7ac6fee` |
 
 Les trois premières empreintes live de la table décrivent le delta qui a précédé
-`6fa7e9d`; elles sont conservées comme provenance. Le worktree courant ajoute le
+`6fa7e9d`; elles sont conservées comme provenance. Le worktree alors courant ajoutait le
 payload `ParentEdge`, un juge de potentiel et un prototype de première incidence.
 Les résultats plus forts du parent proviennent d'un harnais exact externe et
 sont explicitement qualifiés comme transitoires ci-dessous.
@@ -410,10 +410,11 @@ n'est pas vacante.
 
 Le résultat mathématique exact est maintenant plus fort :
 [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)
-prouve qu'un census régulier saturé à deux et une unique attache vers
-`ResolveStrictCarrier` suffisent. Sa fixture u16 à dix points rend les trois
-bras immédiats hors de $D_3$; aucun choix alternatif du support supprimé ne
-remplace donc le resolver global pré-lot.
+prouve qu'un census régulier saturé à deux et une unique attache suffisent. La
+descente locale transforme son bras en une clef cœur $R_F\in D_k$. Sa fixture u16
+à dix points rend les trois bras immédiats hors de $D_3$; aucun choix alternatif
+du support supprimé ne remplace cette descente. Seul le `find_<a_F(R_F)>` dans la
+partition du cœur reste global dans la résolution du carrier.
 
 ### 7.8 Reverse search live au commit `969db5c`
 
@@ -452,7 +453,7 @@ profondeur 21 des CTests et l'ancienne valeur publiée 18 ne sont donc que des
 observations de campagnes, jamais des bornes.
 
 Le claim exact est donc **absence de table globale de visitation dans la
-décision du parcours**, pas encore mémoire de sortie bornée. Six dettes restent.
+décision du parcours**, pas encore mémoire de sortie bornée. Sept dettes restent.
 
 1. L'endpoint retourne un `std::vector<Vertex> visited` et y pousse chaque
    sommet. Ce vecteur n'influence pas le parcours, mais matérialise encore
@@ -483,25 +484,303 @@ décision du parcours**, pas encore mémoire de sortie bornée. Six dettes reste
    et les fermetures sont ordonnés par les indices d'entrée. Le prototype suppose
    la canonicalisation `PointId` amont, mais sa porte ne grave pas encore
    l'équivariance de l'arbre ni de l'ordre des enfants.
+7. `reverse_children_tested` compte les candidats qui atteignent le calcul de
+   parent, pas le travail complet. Après avoir trouvé un enfant,
+   `for_each_flat` continue d'énumérer les triplets restants et de reconstruire
+   leurs fermetures : le `return` ne sort que du callback. Les voisins non
+   bornés ou hors coupe ne sont pas inclus non plus dans le ratio publié. « Six
+   parents par sommet » n'est donc ni une borne, ni une mesure totale des flats
+   et prédicats exécutés.
 
 Ces réserves ne remettent pas en cause le théorème de parent ni la parité bornée.
 Elles bornent honnêtement la promotion : le **parcours décisionnel** est local;
 son endpoint produit, sa mémoire et son intégration au catalogue restent
 ouverts.
 
-### 7.9 Porte de reprise courante
+#### Delta live après `2c395d3`
 
-1. Remplacer le vecteur de sortie de reverse search par un sink borné,
-   différencier aussi le chemin indexé, publier son high-water et rendre toute
-   absence de parent non racine fail-closed.
+Le worktree suivant, épinglé par
+`order_k_flats.hpp=35f3d5108cf88f0c858b4f24d6ade3cc6777f991336da6323ce899228a9491f9`,
+`flats_differential.cpp=3937261a076a389953038123265bfe5e5652fa99f3d8457c6dcc51e5c995fd01`
+et `CMakeLists.txt=705e526c6266b35155bdc28229c340d8a23be121785758f5f049f4ef24123fec`, répond
+positivement à plusieurs findings : arrêt réel de `for_each_flat` après le fils,
+échec atomique si la requête du parent prouvé casse, compteurs de flats et de
+requêtes, planchers reverse sur les portes générique/saturée et second rejeu par
+l'API indexée. Les treize CTests restent verts. Avec les deux parcours par cas,
+ils durent 154,38 s; la porte générique rend 110 873 sorties, profondeur 21,
+737 895 flats canoniques, 665 099 requêtes de parent et zéro skip.
+
+Le crédit ne ferme pas encore six résiduels.
+
+1. `!canonical_parent` est toujours classé `kIsRoot` sans vérifier que le
+   candidat égale le germe. Un non-germe dont la direction manque reste ignoré
+   avec `kOk`; seule la panne du `next` est maintenant `kBroken`.
+2. L'index est construit avec des feuilles de 16, tandis que tous les nuages
+   permanents ont au plus 13 points et les fixtures au plus 9. Le rejeu indexé
+   traverse donc une feuille unique. L'auto-test à 48 points ne juge que
+   `closed_ball`, pas `box` ni `sign_disagreement` utilisés par le pinceau. Une
+   campagne transitoire à vingt points est verte, mais n'est pas une porte.
+3. La sortie indexée est projetée dans une `map` sans vérifier que sa taille
+   égale le nombre de records. Des doublons indexés peuvent être masqués.
+4. `reverse_skipped` est imprimé mais jamais exigé nul. Les planchers ne portent
+   ni sur les sorties indexées, ni sur les nœuds internes visités, ni sur les
+   requêtes de parent; fixtures et cosphérique n'ont pas de plancher reverse.
+5. L'équivariance et le sink restent inchangés. L'endpoint matérialise toujours
+   tous les `Vertex`, sa pile copie les coquilles et son scratch reste $O(n)$.
+6. `reverse_flats_enumerated` ne compte que les flats canoniques parvenus au
+   callback. Les triplets non canoniques dont la fermeture a déjà été
+   reconstruite restent hors compteur; la queue multiplicitaire est encore
+   sous-instrumentée.
+
+Commande transitoire qui exerce réellement un arbre interne, zéro désaccord :
+
+```text
+./build/v3/mhgp3v_flats_differential --clouds 2 --points 20 --coord 40 --smax 4 --seed 20260809 --min-cases 1 --min-navigated 1 --min-vertices 1 --min-reverse 1
+```
+
+Elle rend 218 cas, 3 062 sorties reverse, profondeur 19, 20 043 flats et 16 070
+requêtes de parent. Il faut la rendre permanente avec une feuille de taille
+quatre et un compteur de nœuds **visités**, puis injecter doublon, faux germe et
+skip non `kOk`.
+
+### 7.9 Filtre de régularité du worktree après `969db5c`
+
+Le delta worktree épinglé par
+`first_incidence_dichotomy.cpp=45ad067227ac573e02b9193533dc07541d36223f53bbb0d28c5846a88e0d225a`
+et `CMakeLists.txt=d9c07ce78b844c965c1aa43fc93cc98ff96418742bed7de01244005c439ee79d`
+améliore réellement le diagnostic : provenance complète, séparation
+`attachment_candidates`, compteurs d'égalités et supports, fixture u16 des trois
+bras hors cœur, mode `--require-regular` et deux CTests dédiés. Les neuf CTests
+de première incidence passent en 11,9 s; le positif régulier exerce 26 candidats.
+
+Le mode n'est pourtant pas encore une autorité régulière. Le compteur
+`outside_equalities` n'est incrémenté que si la boule fermée contient un outsider
+**et** que `strict_intruders` est vide. Une égalité extérieure mixte à un intrus
+strict est donc censurée. Fixture exacte à cinq points, $k=3$ :
+
+```text
+(3,9,13) (4,9,2) (10,2,14) (4,6,3) (1,9,11)
+```
+
+Pour $F=012$, la miniboule a le support unique essentiel `12`. Les signes exacts
+des points 0 à 4 sont `-1,0,0,-1,0` : 3 est un intrus strict et 4 un outsider
+sur la coquille. La coface `0123` est de Gabriel ouverte, avec 4 en extra-shell.
+Le live rend néanmoins `outside_equalities=0`, `ambiguous_support=0`, zéro
+désaccord et classerait cette campagne régulière. Toute égalité
+`z not in F && sphere_side(B_F,z)==0` doit être comptée indépendamment des
+intrus.
+
+Le test des supports ne compare en outre que les sous-ensembles de la cardinalité
+`facet_mb.n_support`. Il ne contrôle ni `shell(F)\setminus U_F=empty`, ni un
+support essentiel alternatif d'une autre cardinalité. Exemple local : sur la
+sphère de centre `(5,5,5)` et rayon 5, la paire antipodale
+`(0,5,5),(10,5,5)` est un support positif, et le triangle
+`(5,10,5),(5,2,9),(5,2,1)` en est un second, positif, de cardinalité trois. Un
+énumérateur limité aux paires annonce une réalisation unique.
+
+Enfin, `attachment_candidates` est incrémenté même si la miniboule de facette
+échoue, et son plancher compte des candidats, pas des cibles validées. Toute
+erreur de miniboule dans l'autorité doit rendre un statut distinct. La fixture
+u16 permanente vérifie son cœur et ses trois bras; elle ne recertifie pas dans
+le C++ toutes les obligations de régularité décrites par son commentaire.
+
+Verdict : bon filtre et bonne fixture de réfutation du lookup brut; **NO-GO pour
+nommer les candidats attaches autorisées** jusqu'à la fixture mixte, au contrôle
+de toute la coquille hors support et au fail-closed des primitives.
+
+### 7.10 Première exécution historique de la descente locale de carrier
+
+Le worktree `first_incidence_dichotomy.cpp=da3d12d37fff2e88305bc52b3de0a98d1c735810db8fb5b2cf3807390a20ad4d`,
+supersédé par le §7.11,
+implémente le squelette du nouveau théorème : témoin initial
+$W_0=T_F\cup\lbrace w_F\rbrace$, remplacement canonique de `support[0]` par le
+plus petit intrus strict, comparaison stricte des niveaux et arrêt sur une clef
+du cœur exhaustif. C'est une réponse constructive importante, pas seulement un
+commentaire.
+
+Les neuf CTests de première incidence passent. La porte appelée régulière
+observe 26 descentes, quatre pas au total et une longueur maximale de deux; la
+campagne irrégulière observe 39 descentes, huit pas et le même maximum. Aucune
+non-baisse, aucun témoin trop haut et aucun terminal hors cœur ne sont observés.
+
+Le différentiel reste toutefois diagnostic pour cinq raisons.
+
+1. La descente s'exécute même hors porte régulière et ne réauthentifie sur aucun
+   descendant le support unique positif essentiel, l'absence de membre de
+   coquille hors support et les extra-shells. Une non-baisse hors domaine devient
+   un désaccord scientifique au lieu d'un refus `unsupported`.
+2. Le terminal ne sérialise que `truth_facets.find(current)`. Le témoin transporté
+   et le théorème prouvent bien l'existence d'une coface directe sous le cutoff;
+   il ne s'agit pas d'une erreur mathématique. Le reçu logiciel doit néanmoins
+   engager cette coface — ou le groupe direct minimal de la branche vide — et
+   son niveau $<a_F$, au lieu d'une appartenance au cœur tous niveaux.
+3. Le cap `n*n+16` n'est pas démontré. La seule borne immédiate est
+   combinatoire. Au domaine CLI $n\leq64$, il échoue fermé mais peut refuser une
+   chaîne légitime; transplanté tel quel à 50 k, le produit `int*int` déborde.
+   L'épuisement est confondu avec `terminal hors cœur` au lieu d'un statut budget.
+4. Aucun plancher n'impose une étape, une branche terminale zéro/un, une longueur
+   ou un budget. Supprimer le bloc peut laisser les CTests verts.
+5. La fixture permanente à dix points vérifie le bras initial mais ne traverse
+   pas ce bloc de descente. Elle doit forcer une chaîne non vide, puis les
+   fixtures `E5` et sept points doivent graver la branche vide et les relais
+   non directs.
+
+Le résultat mathématique, lui, est positif et désormais isolé dans
+[`NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md`](NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md) :
+le locator non-cœur disparaît; seul `find_<a_F(R_F)>` dans la partition du cœur
+reste global. Le prototype ne juge encore ni ce `find`, ni l'équivalence des
+quotients, ni le fold.
+
+### 7.11 Delta live `b0741d4e` : porte locale renforcée
+
+Le worktree suivant répond directement à l'audit précédent :
+
+| objet | SHA-256 |
+| --- | --- |
+| `prototype/first_incidence_dichotomy.cpp` | `b0741d4edcc9839ad4ab12bb58867b8c125fc83f9ab127708dcd15a91e640c17` |
+| `CMakeLists.txt` | `c148e5c59ebd36c5bbcaaa0298752eb6357b943a35ed15924364f287a407d48b` |
+
+Crédit complet : égalité extérieure mixte, supports essentiels tous cardinaux,
+coquille hors support, réauthentification des descendants, statuts de descente,
+fixtures `E5` et sept points, reçu direct sous cutoff et planchers des deux
+terminaux sont écrits. Le delta suivant rend en outre les échecs de primitive
+fail-closed dans le contrôle de support et la descente, ne soustrait plus les
+refus au plancher et interdit refus ou panne sous `--require-regular`. Les dix
+CTests de première incidence passent en 3,41 s sur un build frais.
+La campagne à quatorze points rend 26 descentes, quatre pas, maximum deux, neuf
+terminaux sans intrus, dix-sept avec un intrus, 26 reçus et zéro désaccord.
+
+Cette réponse constructive ne ferme pas encore l'autorité pour cinq raisons.
+
+1. La porte globale du théorème d'attache concerne aussi les objets silencieux
+   omis. Le binaire contrôle les facettes cœur et les chaînes choisies, pas tout
+   le plateau. La fixture dix points ne rejoue pas elle-même les 120 triplets et
+   210 quadruplets annoncés.
+2. Le type `Receipt` matérialise désormais le terminal, la chaîne courte, la
+   branche, la coface directe et son niveau dans les fixtures `E5` et sept
+   points. Les campagnes ordinaires appellent toutefois `descend_to_core` avec
+   `receipt=nullptr` : elles ne gardent que des compteurs. Surtout, la coface est
+   cherchée dans `truth_direct`, carte exhaustive globale; ce reçu juge le
+   théorème mais n'est pas le chemin produit.
+3. `truth_direct`, `gabriel_open` et la force brute partagent encore
+   `miniball_of` et `sphere_side`; une panne de miniboule peut devenir
+   silencieusement « non-Gabriel » dans la construction de la source ou être
+   sautée dans la force brute.
+4. Il n'existe toujours ni `find_<a_F(R_F)>`, ni fold, ni comparaison aux
+   coupes, couvertures et $q_R$. La source et les groupements sont matérialisés
+   en maps après `flat_catalogue(s_max=n)`.
+5. Le cap saturé à $2^{40}$ est un budget d'échec fermé, pas la borne
+   combinatoire complète lorsque $\binom{n}{k}>2^{40}$, et encore moins une
+   borne SLO.
+
+Verdict : **GO pour le falsificateur local renforcé; NO-GO pour nommer l'attache
+autorisée, le resolver, Gate D complète ou le chemin 50 k.**
+
+### 7.12 Delta reverse live `67e562a7` : les objections retirées et celles qui restent
+
+Le snapshot suivant répond directement aux six résiduels du §7.8 :
+
+| objet | SHA-256 |
+| --- | --- |
+| `prototype/order_k_flats.hpp` | `67e562a75856f08463779b02a8bbe298c56c436afa553167b4079c4dc5877398` |
+| `prototype/flats_differential.cpp` | `74b731152cee18047d52cb6f6013ee30dd6ca6de13e3bdc9f64afb00fc84e5e1` |
+| `CMakeLists.txt` | `c148e5c59ebd36c5bbcaaa0298752eb6357b943a35ed15924364f287a407d48b` |
+
+Les corrections sont réelles : un sommet sans direction n'est racine que si sa
+coquille est celle du germe; sinon la sortie devient atomiquement
+`kInvariantViolated`. Le replay indexé emploie des feuilles de quatre et une
+porte permanente à vingt points; les doublons indexés, les skips, les sorties
+indexées, les requêtes de parent et les visites internes sont gardés par des
+postconditions. Les triplets balayés et les fermetures reconstruites sont
+comptés intégralement. `box` et le désaccord ternaire ont un auto-test interne,
+et l'équivariance appelle enfin la reverse search.
+
+Le build frais et les 24 CTests `mhgp3v_flats_*` ou
+`mhgp3v_first_incidence_*` passent en 135,56 s. Deux portes reverse utiles :
+
+- fixtures : 211 cas, 1 578 sorties indexées et non indexées, profondeur 7,
+  7 981 requêtes de parent, zéro skip;
+- arbre indexé : 218 cas, 3 062 sorties de chaque chemin, profondeur 19,
+  16 070 requêtes de parent, 89 045 triplets et autant de fermetures, zéro
+  désaccord.
+
+Les anciens findings « fausse racine », « feuille unique », « doublon masqué »,
+« skip sans plancher », « queue de triplets non mesurée » et « équivariance BFS
+seulement » sont donc **fermés sur ce snapshot**. Quatre réserves demeurent.
+
+1. `reverse_search_shallow` retourne encore un `std::vector<Vertex>` contenant
+   tous les sommets. La pile copie coquille et intérieur, et chaque voisin garde
+   un bitmap/listes de scratch $O(n)$. Le catalogue appelle toujours le BFS : il
+   n'existe ni sink, ni high-water, ni gain mémoire produit.
+2. Les compteurs prouvent la traversée de nœuds internes. La preuve d'élagage
+   vient d'une requête synthétique `box`, pas d'une postcondition propre aux
+   requêtes `box`/désaccord effectivement lancées par la reverse search.
+   `CertifiedIndex::build` ne remet en outre pas ses compteurs à zéro lorsqu'un
+   objet est rebâti.
+3. L'équivariance projette la sortie reverse dans un `set`; elle peut donc
+   masquer un doublon propre à une permutation et ne transporte pas l'ensemble
+   intérieur. La porte identité voit les doublons, pas chaque permutation.
+4. Les branches fail-closed nouvelles n'ont pas encore de mutations ciblées
+   « non-germe sans parent » et « doublon indexé ». Aucun kernel, sink ou
+   partage device n'est écrit.
+
+### 7.13 Delta sink live `e641518d` : sortie streamée, mémoire complète non mesurée
+
+Le worktree poursuit immédiatement le snapshot précédent :
+
+| objet | SHA-256 |
+| --- | --- |
+| `prototype/order_k_flats.hpp` | `e641518d0e7dd40296d4126fa7c6f23c3bb9811157e1b787f0ceda352df0a541` |
+| `prototype/flats_differential.cpp` | `ef19fa735b09120c456b43599258b08510066d61bb9d8cbef60b6ab50a619a78` |
+| `CMakeLists.txt` | `c148e5c59ebd36c5bbcaaa0298752eb6357b943a35ed15924364f287a407d48b` |
+
+Crédit : `reverse_search_stream` appelle un consommateur sommet par sommet et
+ne conserve plus la sortie complète. L'ancienne API devient une simple enveloppe
+qui accumule ces callbacks pour l'oracle. Le sink peut interrompre le parcours,
+et le différentiel vérifie un statut non `kOk`. Un rejeu frais de la porte
+indexée et des fixtures est vert. La commande diagnostique à cinq nuages publie
+5 400 sommets, 85 identifiants portés au maximum par les sommets du chemin,
+109 interruptions, zéro désaccord détecté et aucun skip.
+
+Cette fermeture retire bien le vecteur $\Omega(V)$ du **producteur streamé**,
+mais cinq limites empêchent de convertir le chiffre 85 en claim mémoire produit.
+
+1. Le high-water additionne seulement `shell.size()+interior.size()` sur les
+   frames actives. Il exclut capacité de pile, racine, candidat, parent, flat et
+   fermeture temporaires, bitmap `seen_candidate`, listes `touched`, index,
+   allocateur et sink. Il mesure des identifiants, pas des octets. Le ratio
+   `5400/85` compare des records émis à des identifiants actifs; ce n'est pas un
+   facteur mémoire.
+2. La parité du consommateur est réduite à un compte et à une somme de hachages
+   64 bits. Une collision est possible : cette porte est un bon falsificateur,
+   pas une égalité exacte. Puisque la sortie oracle matérialisée existe déjà, un
+   curseur qui compare chaque callback au record attendu donnerait une porte
+   exacte avec $O(1)$ mémoire additionnelle.
+3. Un callback peut avoir publié un préfixe avant qu'un parent cassé ou un arrêt
+   volontaire ne rende le statut rouge. L'intégration doit écrire dans un segment
+   non committé, puis engager seulement après statut final `kOk`; sinon le sink
+   transforme une erreur fail-closed interne en sortie externe partielle.
+4. `kInvariantViolated` confond une contradiction scientifique et l'arrêt demandé
+   par le consommateur. Un résultat typé `complete / cancelled / budget /
+   invariant` est nécessaire avant un reçu produit.
+5. Le catalogue appelle toujours le BFS. L'équivariance par `set`, le high-water
+   mémoire complet, l'élagage propre aux requêtes reverse et la forme device
+   restent ceux du §7.12.
+
+### 7.14 Porte de reprise courante
+
+1. Intégrer le sink au catalogue derrière un segment transactionnel et un statut
+   typé; mesurer son high-water complet en octets. Remplacer le digest 64 bits par
+   une comparaison exacte et ajouter les mutations fail-closed.
 2. Implémenter et différencier « support canonique puis owner » avant de retirer
    `emitted`.
-3. Intégrer ce sink au catalogue en conservant le BFS comme oracle borné;
-   graver des planchers et mutations de reverse search.
+3. Étendre la porte d'équivariance au payload intérieur et aux multiplicités de
+   sortie, en conservant le BFS comme oracle borné.
 4. Transformer l'oracle ouvert maintenant corrigé en source terminale sans
    `flat_catalogue(s_max=n)`, puis composer l'autorité de fenêtre avec le census
-   saturé et la descente locale de carrier; toute erreur de primitive doit
-   échouer fermée.
+   saturé et la descente locale de carrier. La porte régulière globale doit
+   couvrir les objets silencieux, et chaque échec de primitive dans la source ou
+   la vérité doit être distingué d'une décision « non-Gabriel ».
 5. Construire runs, fermeture des ex æquo, locator horizontal, couverture et
    jointure verticale avant toute mesure du contrat 50 k.
 

@@ -89,6 +89,156 @@ static bool gabriel_open(const std::vector<P3>& pts, const std::vector<i32>& cof
   return true;
 }
 
+// ---------------------------------------------------------------------------
+// LA PORTE RÉGULIÈRE EST UNE PROPRIÉTÉ DE LA FACETTE, PAS UNE MOYENNE DE CAMPAGNE
+// ---------------------------------------------------------------------------
+//
+// Mon premier compteur d'égalité extérieure ne s'incrémentait que si la liste
+// d'intrus stricts était VIDE. L'audit le réfute au chiffre près sur cinq
+// points : pour F = {0,1,2}, le point 3 est un intrus strict et le point 4 un
+// extérieur exactement sur la coquille, et le compteur rendait zéro. Une égalité
+// extérieure est une égalité extérieure, qu'un intrus l'accompagne ou non.
+//
+// Trois autres obligations manquaient :
+//   * un support essentiel est minimal pour l'INCLUSION, tous cardinaux
+//     confondus. Comparer les seuls sous-ensembles du cardinal rendu laisse
+//     passer une paire antipodale et un triangle réalisant la même boule.
+//   * tout point de F hors du support doit être STRICTEMENT intérieur, sinon la
+//     coquille de F elle-même est dégénérée et u_F reste ambigu.
+//   * une panne de primitive dans l'AUTORITÉ doit rendre un statut distinct, pas
+//     laisser filer la facette.
+struct Regularity {
+  bool outside_equality = false;
+  bool ambiguous_support = false;
+  bool shell_outside_support = false;
+  bool primitive_failed = false;
+  bool unsupported_size = false;  // énumération des sous-ensembles hors domaine
+  bool regular() const {
+    return !outside_equality && !ambiguous_support && !shell_outside_support &&
+           !primitive_failed && !unsupported_size;
+  }
+};
+
+// Un support S de F est un sous-ensemble dont la miniboule ENFERME F avec le
+// même beta : par unicité de la boule englobante minimale, elle EST alors B_F.
+// L'essentialité est la minimalité pour l'inclusion, indépendante du cardinal.
+static Regularity facet_regularity(const std::vector<P3>& pts, const std::vector<i32>& facet,
+                                   const mhgp::Sphere& ball) {
+  Regularity reg;
+  const int n = (int)pts.size();
+  const int m = (int)facet.size();
+  for (i32 z = 0; z < n; ++z) {
+    if (std::binary_search(facet.begin(), facet.end(), z)) continue;
+    if (mhgp::sphere_side(ball, pts[(std::size_t)z]) == 0) reg.outside_equality = true;
+  }
+  const mhgp::MiniballResult mb = mhgp::miniball_of(pts, facet.data(), m);
+  if (!mb.ok) { reg.primitive_failed = true; return reg; }
+  for (i32 x : facet) {
+    if (mhgp::sphere_side(ball, pts[(std::size_t)x]) != 0) continue;
+    bool in_support = false;
+    for (int i = 0; i < mb.n_support; ++i) if (mb.support[i] == x) in_support = true;
+    if (!in_support) reg.shell_outside_support = true;
+  }
+  if (m > 12) { reg.unsupported_size = true; return reg; }
+  std::vector<unsigned> realisers;
+  for (unsigned mask = 1; mask < (1u << m); ++mask) {
+    std::vector<i32> subset;
+    for (int i = 0; i < m; ++i) if (mask & (1u << i)) subset.push_back(facet[(std::size_t)i]);
+    mhgp::Sphere candidate{};
+    // FAIL-CLOSED. Un `continue` sur une panne de primitive pouvait faire manquer
+    // une realisation, donc declarer unique un support qui ne l'est pas.
+    if (!miniball_of_set(pts, subset, &candidate)) { reg.primitive_failed = true; return reg; }
+    if (mhgp::sphere_cmp_beta(candidate, ball) != 0) continue;
+    bool encloses = true;
+    for (i32 x : facet)
+      if (mhgp::sphere_side(candidate, pts[(std::size_t)x]) > 0) encloses = false;
+    if (encloses) realisers.push_back(mask);
+  }
+  int essential = 0;
+  for (unsigned mask : realisers) {
+    bool minimal = true;
+    for (unsigned other : realisers)
+      if (other != mask && (other & mask) == other) minimal = false;
+    if (minimal) ++essential;
+  }
+  if (essential != 1) reg.ambiguous_support = true;
+  return reg;
+}
+
+static std::vector<i32> strict_intruders_of(const std::vector<P3>& pts,
+                                            const std::vector<i32>& set,
+                                            const mhgp::Sphere& ball) {
+  std::vector<i32> out;
+  for (i32 z = 0; z < (i32)pts.size(); ++z) {
+    if (std::binary_search(set.begin(), set.end(), z)) continue;
+    if (mhgp::sphere_side(ball, pts[(std::size_t)z]) < 0) out.push_back(z);
+  }
+  return out;
+}
+
+// BUDGET DÉMONTRÉ. Chaque pas de la descente fait STRICTEMENT décroître beta sur
+// des sous-ensembles de cardinal fixe, donc la chaîne est plus courte que leur
+// nombre. `n*n+16` n'était ni démontré, ni transplantable : à 50 000 points le
+// produit `int*int` déborde. Ici le calcul sature en 64 bits.
+static long long binomial_saturated(int n, int k) {
+  if (k < 0 || k > n) return 0;
+  const long long kCap = 1LL << 40;
+  long long value = 1;
+  for (int i = 1; i <= k; ++i) {
+    value = value * (long long)(n - k + i);
+    if (value >= kCap) return kCap;
+    value /= (long long)i;
+  }
+  return value < 1 ? 1 : value;
+}
+
+// beta = |num|^2 / den^2, comparé à la fraction EXACTE p/q. Les fixtures ont des
+// coordonnées minuscules ; toute magnitude qui sortirait du domaine sûr est un
+// échec, pas un silence.
+static bool beta_equals(const mhgp::Sphere& s, long long p, long long q) {
+  const mhgp::i128 kBound = (mhgp::i128)1 << 40;
+  if (s.den <= 0 || s.den >= kBound || q <= 0) return false;
+  if (s.nx >= kBound || s.nx <= -kBound || s.ny >= kBound || s.ny <= -kBound ||
+      s.nz >= kBound || s.nz <= -kBound) return false;
+  const mhgp::i128 num = s.nx * s.nx + s.ny * s.ny + s.nz * s.nz;
+  return num * (mhgp::i128)q == (mhgp::i128)p * s.den * s.den;
+}
+
+// Univers exhaustif des cofaces directes, et le cœur D_k qu'il engendre. Réservé
+// aux fixtures : le coût est celui de tous les (k+1)-sous-ensembles.
+static std::map<std::vector<i32>, mhgp::Sphere> direct_cofaces_of(const std::vector<P3>& pts,
+                                                                 int k) {
+  std::map<std::vector<i32>, mhgp::Sphere> out;
+  const int n = (int)pts.size();
+  if (n > 24 || k + 1 > n) return out;
+  std::vector<int> choose((std::size_t)(k + 1));
+  for (int i = 0; i <= k; ++i) choose[(std::size_t)i] = i;
+  while (true) {
+    std::vector<i32> coface;
+    for (int i = 0; i <= k; ++i) coface.push_back((i32)choose[(std::size_t)i]);
+    mhgp::Sphere sphere{};
+    if (gabriel_open(pts, coface, &sphere)) out.emplace(coface, sphere);
+    int i = k;
+    while (i >= 0 && choose[(std::size_t)i] == n - (k + 1) + i) --i;
+    if (i < 0) break;
+    ++choose[(std::size_t)i];
+    for (int j = i + 1; j <= k; ++j) choose[(std::size_t)j] = choose[(std::size_t)j - 1] + 1;
+  }
+  return out;
+}
+
+static std::set<std::vector<i32>> core_facets_of(const std::vector<P3>& pts, int k) {
+  std::set<std::vector<i32>> out;
+  for (const auto& entry : direct_cofaces_of(pts, k))
+    for (std::size_t drop = 0; drop < entry.first.size(); ++drop) {
+      std::vector<i32> facet;
+      for (std::size_t i = 0; i < entry.first.size(); ++i)
+        if (i != drop) facet.push_back(entry.first[i]);
+      out.insert(facet);
+    }
+  return out;
+}
+
 struct Dichotomy {
   long long clouds_decided = 0;
   long long direct_cofaces = 0;
@@ -118,13 +268,157 @@ struct Dichotomy {
   // exterieure : le domaine regulier l'interdit. Le compter est la seule facon
   // de savoir si une campagne a le droit d'appeler ses candidats des attaches.
   long long outside_equalities = 0;
-  // Support minimal UNIQUE : deux sous-ensembles de meme cardinal donnant la meme
-  // miniboule rendraient u_F ambigu, donc le choix canonique de l'attache aussi.
+  // Support essentiel UNIQUE, minimal pour l'INCLUSION et tous cardinaux
+  // confondus : deux realisations rendraient u_F ambigu, donc le choix canonique
+  // de l'attache aussi.
   long long ambiguous_support = 0;
+  // Un point de F sur la coquille mais hors du support rend la coquille de F
+  // elle-meme degeneree.
+  long long shell_outside_support = 0;
+  // Panne de primitive dans l'AUTORITE : fail-closed, statut distinct.
+  long long authority_primitive_failed = 0;
+  // Facettes a >= 2 intrus stricts REFUSEES parce que hors porte reguliere.
+  long long attachment_unsupported = 0;
+  // DESCENTE LOCALE DU CARRIER. Tant que la facette a au moins deux intrus
+  // stricts, remplacer min U_H par min J_H fait STRICTEMENT decroitre beta ; les
+  // branches a un intrus et sans intrus terminent dans le coeur. Seul le `find`
+  // final de cette clef coeur dans la partition anterieure reste global.
+  long long descent_runs = 0;
+  long long descent_steps = 0;
+  long long descent_steps_max = 0;
+  long long descent_not_strict = 0;
+  long long descent_terminal_outside_core = 0;
+  long long descent_witness_not_below = 0;
+  long long descent_terminal_empty = 0;
+  long long descent_terminal_single = 0;
+  // RECU du terminal : une coface DIRECTE engagee, de niveau < a_F. Une
+  // appartenance au coeur tous niveaux ne dit rien sur la DATE.
+  long long descent_receipts = 0;
+  long long descent_receipt_missing = 0;
+  long long descent_receipt_not_below = 0;
+  // Sorties non concluantes, chacune nommee : epuisement de budget et refus hors
+  // domaine ne sont pas le meme evenement qu'un terminal hors coeur.
+  long long descent_budget_exhausted = 0;
+  long long descent_unsupported = 0;
+  long long descent_broken = 0;
   long long attachment_target_not_smaller = 0;
   long long attachment_target_outside_core = 0;
   long long disagreements = 0;
 };
+
+// ---------------------------------------------------------------------------
+// DESCENTE LOCALE DU CARRIER, RÉAUTHENTIFIÉE À CHAQUE PAS ET AVEC REÇU
+// ---------------------------------------------------------------------------
+//
+// Tant que la facette courante a au moins deux intrus STRICTS, remplacer
+// min U_H par min J_H fait strictement décroître beta. La chaîne s'arrête sur une
+// facette à un intrus — sa première incidence est sa propre boule — ou sans
+// intrus, où le témoin transporté prouve qu'une coface directe arrive avant a_F.
+//
+// Trois exigences que ma première version n'honorait pas :
+//   * le théorème n'est démontré que sous la porte régulière. Un descendant hors
+//     domaine doit être un REFUS, pas un désaccord scientifique.
+//   * le reçu doit ENGAGER une coface directe et son niveau < a_F. Une
+//     appartenance au cœur tous niveaux ne dit rien sur la date.
+//   * l'épuisement du budget est un statut propre, distinct d'un terminal hors
+//     cœur, et le budget est démontré.
+struct Receipt {
+  std::vector<i32> terminal;   // la facette du coeur atteinte
+  std::vector<i32> coface;     // la coface DIRECTE engagee, identite comprise
+  long long steps = 0;
+  mhgp::Sphere level{};        // son niveau, qui doit etre < a_F
+  bool has_level = false;
+  bool branch_empty = false;
+};
+
+static void descend_to_core(const std::vector<P3>& pts, const std::vector<i32>& target,
+                            const mhgp::Sphere& cutoff,
+                            const std::set<std::vector<i32>>& truth_facets,
+                            const std::map<std::vector<i32>, mhgp::Sphere>& truth_direct,
+                            Dichotomy* out, Receipt* receipt = nullptr) {
+  const int n = (int)pts.size();
+  const long long budget = binomial_saturated(n, (int)target.size());
+  enum class End { kBudget, kSingle, kEmpty, kUnsupported, kBroken };
+  End end = End::kBudget;
+  std::vector<i32> current = target;
+  long long steps = 0;
+  ++out->descent_runs;
+  while (steps <= budget) {
+    mhgp::Sphere ball{};
+    if (!miniball_of_set(pts, current, &ball)) { end = End::kBroken; break; }
+    const Regularity here = facet_regularity(pts, current, ball);
+    if (here.primitive_failed) { end = End::kBroken; break; }
+    if (!here.regular()) { end = End::kUnsupported; break; }
+    const std::vector<i32> intruders = strict_intruders_of(pts, current, ball);
+    if (intruders.size() < 2) {
+      end = intruders.empty() ? End::kEmpty : End::kSingle;
+      break;
+    }
+    const mhgp::MiniballResult mb = mhgp::miniball_of(pts, current.data(), (int)current.size());
+    if (!mb.ok) { end = End::kBroken; break; }
+    std::vector<i32> next;
+    for (i32 x : current) if (x != mb.support[0]) next.push_back(x);
+    next.push_back(intruders.front());
+    std::sort(next.begin(), next.end());
+    mhgp::Sphere next_ball{};
+    if (!miniball_of_set(pts, next, &next_ball) ||
+        mhgp::sphere_cmp_beta(next_ball, ball) >= 0) {
+      ++out->descent_not_strict;
+      ++out->disagreements;
+      end = End::kBroken;
+      break;
+    }
+    current = next;
+    ++steps;
+  }
+  out->descent_steps += steps;
+  out->descent_steps_max = std::max(out->descent_steps_max, steps);
+  if (end == End::kBudget) { ++out->descent_budget_exhausted; ++out->disagreements; return; }
+  if (end == End::kUnsupported) { ++out->descent_unsupported; return; }
+  // Une panne de primitive DANS la descente ne peut pas etre un simple compteur :
+  // elle est fail-closed comme toutes les autres.
+  if (end == End::kBroken) { ++out->descent_broken; ++out->disagreements; return; }
+  if (end == End::kEmpty) ++out->descent_terminal_empty;
+  else ++out->descent_terminal_single;
+  if (truth_facets.find(current) == truth_facets.end()) {
+    ++out->descent_terminal_outside_core;
+    ++out->disagreements;
+  }
+  bool have = false;
+  mhgp::Sphere best{};
+  std::vector<i32> best_coface;
+  for (i32 x = 0; x < n; ++x) {
+    if (std::binary_search(current.begin(), current.end(), x)) continue;
+    std::vector<i32> coface = current;
+    coface.push_back(x);
+    std::sort(coface.begin(), coface.end());
+    const auto it = truth_direct.find(coface);
+    if (it == truth_direct.end()) continue;
+    if (!have || mhgp::sphere_cmp_beta(it->second, best) < 0) {
+      best = it->second;
+      best_coface = coface;
+      have = true;
+    }
+  }
+  if (!have) { ++out->descent_receipt_missing; ++out->disagreements; }
+  else if (mhgp::sphere_cmp_beta(best, cutoff) >= 0) {
+    ++out->descent_receipt_not_below;
+    ++out->disagreements;
+  } else {
+    ++out->descent_receipts;
+  }
+  // LE RECU EST SERIALISE, et pas seulement compte : le terminal, la longueur de
+  // la chaine, l'IDENTITE de la coface directe engagee et son niveau. Un compteur
+  // ne permet a personne de rejouer ce qui a ete conclu.
+  if (receipt != nullptr) {
+    receipt->terminal = current;
+    receipt->coface = best_coface;
+    receipt->steps = steps;
+    receipt->level = best;
+    receipt->has_level = have;
+    receipt->branch_empty = (end == End::kEmpty);
+  }
+}
 
 // Vérité indépendante de lambda(F) et M(F) : balayage de tous les points
 // extérieurs, avec le niveau conservé pour être comparé lui aussi.
@@ -322,60 +616,58 @@ static bool run_cloud(const std::vector<P3>& pts, int k, Dichotomy* out) {
     // resout rien, faute de reducteur horizontal.
     const mhgp::MiniballResult facet_mb =
         mhgp::miniball_of(pts, facet.data(), (int)facet.size());
-    std::vector<i32> strict_intruders;
-    for (i32 z = 0; z < n; ++z) {
-      if (std::binary_search(facet.begin(), facet.end(), z)) continue;
-      if (mhgp::sphere_side(facet_ball, pts[(std::size_t)z]) < 0) strict_intruders.push_back(z);
+    const Regularity reg = facet_regularity(pts, facet, facet_ball);
+    if (reg.outside_equality) ++out->outside_equalities;
+    if (reg.ambiguous_support) ++out->ambiguous_support;
+    if (reg.shell_outside_support) ++out->shell_outside_support;
+    if (reg.primitive_failed || reg.unsupported_size) {
+      ++out->authority_primitive_failed;
+      ++out->disagreements;
     }
-    if (!outside_in_ball.empty() && strict_intruders.empty()) ++out->outside_equalities;
-    if (facet_mb.ok) {
-      int realisations = 0;
-      const int q = facet_mb.n_support;
-      std::vector<int> choose((std::size_t)q);
-      for (int i = 0; i < q; ++i) choose[(std::size_t)i] = i;
-      const int size = (int)facet.size();
-      while (q <= size) {
-        std::vector<i32> subset;
-        for (int i = 0; i < q; ++i) subset.push_back(facet[(std::size_t)choose[(std::size_t)i]]);
-        mhgp::Sphere candidate_ball{};
-        if (miniball_of_set(pts, subset, &candidate_ball) &&
-            mhgp::sphere_cmp_beta(candidate_ball, facet_ball) == 0) {
-          bool covers = true;
-          for (i32 z : facet)
-            if (mhgp::sphere_side(candidate_ball, pts[(std::size_t)z]) > 0) covers = false;
-          if (covers) ++realisations;
-        }
-        int i = q - 1;
-        while (i >= 0 && choose[(std::size_t)i] == size - q + i) --i;
-        if (i < 0) break;
-        ++choose[(std::size_t)i];
-        for (int j = i + 1; j < q; ++j) choose[(std::size_t)j] = choose[(std::size_t)j - 1] + 1;
-      }
-      if (realisations > 1) ++out->ambiguous_support;
-    }
+    const std::vector<i32> strict_intruders = strict_intruders_of(pts, facet, facet_ball);
     if (strict_intruders.empty()) ++out->intruders_zero;
     else if (strict_intruders.size() == 1) ++out->intruders_one;
-    else {
+    else if (!reg.regular() || !facet_mb.ok) {
+      // Hors porte reguliere le theoreme n'est pas demontre : la facette est
+      // REFUSEE, elle ne compte pas comme candidate et rien n'en est conclu.
+      ++out->intruders_many;
+      ++out->attachment_unsupported;
+    } else {
       ++out->intruders_many;
       ++out->attachment_candidates;
       out->attachment_cominimisers += (long long)decided.size();
-      if (facet_mb.ok) {
-        const i32 z_f = strict_intruders.front();
-        const i32 u_f = facet_mb.support[0];
-        std::vector<i32> target;
-        for (i32 x : facet) if (x != u_f) target.push_back(x);
-        target.push_back(z_f);
-        std::sort(target.begin(), target.end());
-        mhgp::Sphere target_ball{};
-        if (!miniball_of_set(pts, target, &target_ball) ||
-            mhgp::sphere_cmp_beta(target_ball, facet_ball) >= 0) {
-          ++out->attachment_target_not_smaller;
-          ++out->disagreements;                 // le lemme de descente est faux
-        }
-        if (grouped.find(target) == grouped.end() &&
-            truth_facets.find(target) == truth_facets.end())
-          ++out->attachment_target_outside_core;
+      const i32 z_f = strict_intruders.front();
+      const i32 u_f = facet_mb.support[0];
+      std::vector<i32> target;
+      for (i32 x : facet) if (x != u_f) target.push_back(x);
+      target.push_back(z_f);
+      std::sort(target.begin(), target.end());
+      mhgp::Sphere target_ball{};
+      if (!miniball_of_set(pts, target, &target_ball) ||
+          mhgp::sphere_cmp_beta(target_ball, facet_ball) >= 0) {
+        ++out->attachment_target_not_smaller;
+        ++out->disagreements;                 // le lemme de descente est faux
       }
+      if (grouped.find(target) == grouped.end() &&
+          truth_facets.find(target) == truth_facets.end())
+        ++out->attachment_target_outside_core;
+
+      // Le temoin W_0 = T_F union {w_F}, ou w_F est le second intrus strict.
+      // L'essentialite de u_F donne beta(W_0) < a_F, et sans lui la branche
+      // sans intrus ne prouverait pas que la premiere coface arrive avant a_F.
+      {
+        std::vector<i32> witness = target;
+        witness.push_back(strict_intruders[1]);
+        std::sort(witness.begin(), witness.end());
+        mhgp::Sphere witness_ball{};
+        if (!miniball_of_set(pts, witness, &witness_ball) ||
+            mhgp::sphere_cmp_beta(witness_ball, facet_ball) >= 0) {
+          ++out->descent_witness_not_below;
+          ++out->disagreements;
+        }
+      }
+
+      descend_to_core(pts, target, facet_ball, truth_facets, truth_direct, out);
     }
 
     bool truth_have = false;
@@ -407,6 +699,7 @@ int main(int argc, char** argv) {
   int clouds = 60, npoints = 20, coord = 22, k = 3;
   long long seed = 4242;
   int min_closed = 0, min_empty = 0, min_internal = 0, min_attachments = 0, require_regular = 0;
+  int min_descent = 0, min_steps = 0, min_terminal_empty = 0, min_terminal_single = 0;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -433,6 +726,10 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--min-empty")) target = &min_empty;
     else if (!strcmp(argv[i], "--min-internal-nodes")) target = &min_internal;
     else if (!strcmp(argv[i], "--min-attachments")) target = &min_attachments;
+    else if (!strcmp(argv[i], "--min-descent")) target = &min_descent;
+    else if (!strcmp(argv[i], "--min-descent-steps")) target = &min_steps;
+    else if (!strcmp(argv[i], "--min-terminal-empty")) target = &min_terminal_empty;
+    else if (!strcmp(argv[i], "--min-terminal-single")) target = &min_terminal_single;
     else if (!strcmp(argv[i], "--require-regular")) { require_regular = 1; continue; }
     else if (!strcmp(argv[i], "--seed")) {
       if (!has || value < 0) { printf("ECHEC : valeur entiere invalide pour --seed\n"); return 2; }
@@ -451,7 +748,9 @@ int main(int argc, char** argv) {
     *target = (int)value;
   }
   if (clouds < 1 || npoints < 2 || npoints > 64 || coord < 2 || coord > 65536 || k < 1 ||
-      k >= npoints || min_closed < 0 || min_empty < 0 || min_internal < 0 || min_attachments < 0) {
+      k >= npoints || min_closed < 0 || min_empty < 0 || min_internal < 0 ||
+      min_attachments < 0 || min_descent < 0 || min_steps < 0 || min_terminal_empty < 0 ||
+      min_terminal_single < 0) {
     printf("ECHEC : campagne absurde\n");
     return 2;
   }
@@ -520,6 +819,151 @@ int main(int argc, char** argv) {
            " ET hors du coeur : la cible brute est refutee sous regularite\n");
   }
 
+  // FIXTURE DE L'EGALITE EXTERIEURE MIXTE. Mon compteur ne s'incrementait que si
+  // la liste d'intrus stricts etait VIDE ; l'audit le refute sur ces cinq points.
+  // Pour F = {0,1,2} le point 3 est un intrus STRICT et le point 4 un exterieur
+  // exactement sur la coquille : l'ancienne version rendait zero et aurait appele
+  // cette campagne reguliere. La fixture exige les deux a la fois.
+  {
+    const std::vector<P3> five{pt(3, 9, 13), pt(4, 9, 2), pt(10, 2, 14), pt(4, 6, 3),
+                              pt(1, 9, 11)};
+    const std::vector<i32> facet{0, 1, 2};
+    mhgp::Sphere ball{};
+    int faults = 0;
+    if (!miniball_of_set(five, facet, &ball)) ++faults;
+    const int expect[5] = {-1, 0, 0, -1, 0};
+    for (i32 z = 0; z < 5 && !faults; ++z) {
+      const int side = mhgp::sphere_side(ball, five[(std::size_t)z]);
+      const int sign = side < 0 ? -1 : (side > 0 ? 1 : 0);
+      if (sign != expect[(std::size_t)z]) {
+        printf("[fixture egalite mixte] signe %d attendu %d pour le point %d\n", sign,
+               expect[(std::size_t)z], z);
+        ++faults;
+      }
+    }
+    const mhgp::MiniballResult mb = mhgp::miniball_of(five, facet.data(), 3);
+    if (!mb.ok || mb.n_support != 2 || mb.support[0] != 1 || mb.support[1] != 2) ++faults;
+    mhgp::Sphere coface_ball{};
+    if (!gabriel_open(five, std::vector<i32>{0, 1, 2, 3}, &coface_ball)) ++faults;
+    const Regularity reg = facet_regularity(five, facet, ball);
+    const std::vector<i32> intruders = strict_intruders_of(five, facet, ball);
+    if (!reg.outside_equality || intruders.size() != 1 || intruders.front() != 3) ++faults;
+    if (reg.regular()) ++faults;
+    if (faults) {
+      printf("[fixture egalite mixte] %d faute(s) : egalite=%d intrus=%zu reguliere=%d\n", faults,
+             reg.outside_equality ? 1 : 0, intruders.size(), reg.regular() ? 1 : 0);
+      return 1;
+    }
+    printf("[fixture egalite mixte] egalite exterieure ET intrus strict simultanes :"
+           " la facette est REFUSEE, pas comptee candidate\n");
+  }
+
+  // FIXTURE DES DEUX SUPPORTS ESSENTIELS DE CARDINAUX DIFFERENTS. Sur la sphere de
+  // centre (5,5,5) et de rayon 5, la paire antipodale et le triangle realisent la
+  // MEME boule. Un enumerateur limite au cardinal rendu annonce une realisation
+  // unique ; la minimalite pour l'inclusion en voit deux.
+  {
+    const std::vector<P3> six{pt(0, 5, 5), pt(10, 5, 5), pt(5, 10, 5), pt(5, 2, 9), pt(5, 2, 1)};
+    const std::vector<i32> facet{0, 1, 2, 3, 4};
+    mhgp::Sphere ball{};
+    int faults = 0;
+    if (!miniball_of_set(six, facet, &ball)) ++faults;
+    for (i32 x : facet)
+      if (mhgp::sphere_side(ball, six[(std::size_t)x]) != 0) ++faults;
+    mhgp::Sphere pair_ball{}, triangle_ball{};
+    if (!miniball_of_set(six, std::vector<i32>{0, 1}, &pair_ball) ||
+        !miniball_of_set(six, std::vector<i32>{2, 3, 4}, &triangle_ball) ||
+        mhgp::sphere_cmp_beta(pair_ball, ball) != 0 ||
+        mhgp::sphere_cmp_beta(triangle_ball, ball) != 0) ++faults;
+    const Regularity reg = facet_regularity(six, facet, ball);
+    if (!reg.ambiguous_support || !reg.shell_outside_support || reg.regular()) ++faults;
+    if (faults) {
+      printf("[fixture deux supports] %d faute(s) : ambigu=%d coquille hors support=%d\n", faults,
+             reg.ambiguous_support ? 1 : 0, reg.shell_outside_support ? 1 : 0);
+      return 1;
+    }
+    printf("[fixture deux supports] paire antipodale et triangle realisent la meme boule :"
+           " support ambigu detecte tous cardinaux confondus\n");
+  }
+
+  // FIXTURE E5 — LA BRANCHE SANS INTRUS ET SON TEMOIN. beta(F=AC)=33/2,
+  // beta(T=CD)=9/2, J_T vide, et la coface temoin CDE est de niveau 162/25 < 33/2.
+  // Sans le temoin, J_T vide ne dirait RIEN sur la date de la premiere coface.
+  {
+    const std::vector<P3> e5{pt(0, 0, 7), pt(0, 9, 6), pt(1, 4, 0), pt(0, 0, 1), pt(4, 1, 2)};
+    const std::vector<i32> facet{0, 2}, target{2, 3}, witness{2, 3, 4};
+    mhgp::Sphere a_f{}, t_ball{}, w_ball{};
+    int faults = 0;
+    if (!miniball_of_set(e5, facet, &a_f) || !beta_equals(a_f, 33, 2)) ++faults;
+    if (!miniball_of_set(e5, target, &t_ball) || !beta_equals(t_ball, 9, 2)) ++faults;
+    if (!miniball_of_set(e5, witness, &w_ball) || !beta_equals(w_ball, 162, 25)) ++faults;
+    if (!strict_intruders_of(e5, target, t_ball).empty()) ++faults;
+    if (mhgp::sphere_cmp_beta(w_ball, a_f) >= 0) ++faults;
+    const std::set<std::vector<i32>> core = core_facets_of(e5, 2);
+    std::map<std::vector<i32>, mhgp::Sphere> direct2 = direct_cofaces_of(e5, 2);
+    if (core.find(target) == core.end()) ++faults;
+    Dichotomy probe;
+    Receipt receipt;
+    descend_to_core(e5, target, a_f, core, direct2, &probe, &receipt);
+    if (probe.descent_terminal_empty != 1 || probe.descent_receipts != 1 ||
+        probe.descent_steps != 0 || probe.disagreements != 0) ++faults;
+    // L'IDENTITE de la coface engagee, et non un compteur : le recu doit nommer
+    // CDE, avec son niveau exact et la branche dont il provient.
+    if (receipt.terminal != target || receipt.coface != witness || receipt.steps != 0 ||
+        !receipt.has_level || !receipt.branch_empty || !beta_equals(receipt.level, 162, 25))
+      ++faults;
+    if (faults) {
+      printf("[fixture E5] %d faute(s) : terminal vide=%lld recus=%lld etapes=%lld"
+             " desaccords=%lld coface engagee={", faults, probe.descent_terminal_empty,
+             probe.descent_receipts, probe.descent_steps, probe.disagreements);
+      for (std::size_t i = 0; i < receipt.coface.size(); ++i)
+        printf("%s%d", i ? "," : "", receipt.coface[i]);
+      printf("}\n");
+      return 1;
+    }
+    printf("[fixture E5] branche sans intrus : T=CD est dans D_2 et son recu engage");
+    for (std::size_t i = 0; i < receipt.coface.size(); ++i)
+      printf("%s%d", i ? "," : " {", receipt.coface[i]);
+    printf("} de niveau 162/25 < 33/2\n");
+  }
+
+  // FIXTURE DES SEPT POINTS — LE LOOKUP IMMEDIAT ECHOUE, LA DESCENTE ABOUTIT.
+  // A l'ordre trois, F = {0,1,6} est dans D_3 mais sa cible brute T = {1,2,6}
+  // n'y est PAS : chercher T dans la partition anterieure echouerait. La descente
+  // canonique, elle, atteint le coeur avec un recu.
+  {
+    const std::vector<P3> seven{pt(0, 400, 275), pt(600, 100, 324), pt(0, 200, 294),
+                                pt(600, 600, 271), pt(500, 0, 276), pt(200, 0, 301),
+                                pt(300, 600, 320)};
+    const std::vector<i32> facet{0, 1, 6}, target{1, 2, 6};
+    const std::set<std::vector<i32>> core = core_facets_of(seven, 3);
+    std::map<std::vector<i32>, mhgp::Sphere> direct3 = direct_cofaces_of(seven, 3);
+    mhgp::Sphere a_f{};
+    int faults = 0;
+    if (!miniball_of_set(seven, facet, &a_f)) ++faults;
+    if (core.find(facet) == core.end()) ++faults;
+    if (core.find(target) != core.end()) ++faults;
+    Dichotomy probe;
+    Receipt receipt;
+    descend_to_core(seven, target, a_f, core, direct3, &probe, &receipt);
+    if (probe.descent_receipts != 1 || probe.descent_steps < 1 || probe.disagreements != 0)
+      ++faults;
+    // Le terminal atteint doit etre DANS le coeur, la coface engagee le contenir,
+    // et son niveau etre strictement sous le cutoff.
+    if (core.find(receipt.terminal) == core.end() || !receipt.has_level ||
+        receipt.coface.size() != receipt.terminal.size() + 1 ||
+        mhgp::sphere_cmp_beta(receipt.level, a_f) >= 0) ++faults;
+    if (faults) {
+      printf("[fixture sept points] %d faute(s) : F dans le coeur=%d, T dans le coeur=%d,"
+             " etapes=%lld recus=%lld desaccords=%lld\n", faults,
+             core.find(facet) != core.end() ? 1 : 0, core.find(target) != core.end() ? 1 : 0,
+             probe.descent_steps, probe.descent_receipts, probe.disagreements);
+      return 1;
+    }
+    printf("[fixture sept points] T={1,2,6} est hors de D_3 : le lookup brut echoue,"
+           " la descente atteint le coeur en %lld pas avec recu\n", probe.descent_steps);
+  }
+
   Dichotomy total;
   std::mt19937 rng((unsigned)seed);
   std::uniform_int_distribution<int> pick(0, coord - 1);
@@ -563,10 +1007,27 @@ int main(int argc, char** argv) {
   // Le domaine regulier interdit une egalite exterieure pertinente. Tant que ce
   // compteur n'est pas nul, les objets ci-dessus sont des CANDIDATS locaux, pas
   // des attaches autorisees, et ils ne remplacent rien.
-  const bool regular = (total.outside_equalities == 0 && total.ambiguous_support == 0);
-  printf("porte regul.   : egalites exterieures sans intrus strict=%lld  supports ambigus=%lld"
+  const bool regular = (total.outside_equalities == 0 && total.ambiguous_support == 0 &&
+                        total.shell_outside_support == 0 &&
+                        total.authority_primitive_failed == 0);
+  printf("porte regul.   : egalites exterieures=%lld  supports ambigus=%lld"
+         "  coquille hors support=%lld  primitive en panne=%lld  refus d'attache=%lld"
          "  -> campagne %s\n", total.outside_equalities, total.ambiguous_support,
+         total.shell_outside_support, total.authority_primitive_failed,
+         total.attachment_unsupported,
          regular ? "DANS le domaine regulier" : "HORS domaine regulier (candidats seulement)");
+  printf("descente       : executions=%lld  etapes=%lld (moyenne %.2f, max %lld)"
+         "  non stricte=%lld  terminal hors coeur=%lld  temoin non inferieur=%lld\n",
+         total.descent_runs, total.descent_steps,
+         total.descent_runs ? (double)total.descent_steps / (double)total.descent_runs : 0.0,
+         total.descent_steps_max, total.descent_not_strict,
+         total.descent_terminal_outside_core, total.descent_witness_not_below);
+  printf("               : terminal sans intrus=%lld  a un intrus=%lld  RECUS=%lld"
+         "  recu absent=%lld  recu non inferieur=%lld  budget epuise=%lld"
+         "  refus=%lld  primitive=%lld\n", total.descent_terminal_empty,
+         total.descent_terminal_single, total.descent_receipts, total.descent_receipt_missing,
+         total.descent_receipt_not_below, total.descent_budget_exhausted,
+         total.descent_unsupported, total.descent_broken);
   printf("index          : points touches=%lld (%.1f par facette)  noeuds internes=%lld\n",
          total.closed_ball_touched,
          total.core_facets ? (double)total.closed_ball_touched / (double)total.core_facets : 0.0,
@@ -585,8 +1046,29 @@ int main(int argc, char** argv) {
            total.attachment_candidates, min_attachments);
     return 3;
   }
+  // PLANCHERS DE LA DESCENTE. Sans eux, supprimer le bloc de descente laisse les
+  // CTests verts : un plancher sur les executions ne suffit pas, il faut au moins
+  // un PAS effectif, les deux branches terminales et un recu.
+  if (total.descent_runs < min_descent || total.descent_steps < min_steps ||
+      total.descent_terminal_empty < min_terminal_empty ||
+      total.descent_terminal_single < min_terminal_single ||
+      (min_descent > 0 && total.descent_receipts < min_descent)) {
+    printf("ECHEC : plancher de descente non atteint — executions %lld/%d, etapes %lld/%d,"
+           " terminal vide %lld/%d, terminal un intrus %lld/%d, recus %lld (refus %lld)\n",
+           total.descent_runs, min_descent, total.descent_steps, min_steps,
+           total.descent_terminal_empty, min_terminal_empty, total.descent_terminal_single,
+           min_terminal_single, total.descent_receipts, total.descent_unsupported);
+    return 3;
+  }
   if (require_regular && !regular) {
     printf("ECHEC : --require-regular exige zero egalite exterieure et zero support ambigu\n");
+    return 3;
+  }
+  // Une campagne qui se DECLARE reguliere ne peut pas contenir de descendant
+  // refuse : le refus signifie precisement que le theoreme n'y est pas demontre.
+  if (require_regular && (total.descent_unsupported != 0 || total.descent_broken != 0)) {
+    printf("ECHEC : --require-regular exige zero refus et zero panne dans la descente"
+           " (refus=%lld panne=%lld)\n", total.descent_unsupported, total.descent_broken);
     return 3;
   }
   if (total.disagreements == 0 && failures == 0) {

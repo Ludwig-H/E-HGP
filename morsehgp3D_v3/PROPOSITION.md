@@ -669,9 +669,10 @@ quarante en annonçant `OK`.
 
 Le commit `969db5c` possède un endpoint CPU de reverse search qui décide le
 parcours sans `seen` ni `frontier` et rend le même ensemble que le BFS dans les
-portes bornées. Cet endpoint conserve encore tous ses résultats dans un vecteur
-`visited`; le catalogue continue d'appeler le BFS. Le sink streaming, le chemin
-indexé, le high-water et la forme device ne sont donc pas intégrés. De même,
+portes bornées. Le delta live ajoute une API sink et mesure les identifiants des
+sommets du chemin; le catalogue continue toutefois d'appeler le BFS. Le
+high-water mémoire complet, l'intégration produit et la forme device ne sont donc
+pas acquis. De même,
 `mhgp3v_first_incidence` emploie délibérément
 `flat_catalogue(pts,n)`, des maps et une vérité combinatoire : c'est un oracle
 borné, pas l'étage de production décrit ci-dessous.
@@ -684,7 +685,7 @@ maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 | --- | --- | --- |
 | canonicalisation | `PointId`, domaine, digest, `RelevantGP` | copie ambiguë de l'entrée |
 | LBVH | range-report, self-join, `max_two_R_upper_hi` fail-open | matrice paire–point |
-| reverse search | parent, enfants, propriétaire local, pile bornée | `seen/frontier/visited` globaux |
+| reverse search | parent, enfants, propriétaire local, pile active sans borne produit démontrée | `seen/frontier/visited` globaux |
 | source directe ouverte | cofaces Gabriel et facettes du cœur streamées | catalogue critique global; le prototype exhaustif n'est que l'oracle |
 | première incidence | census fermé $E_F$, census strict $J_F$ saturé, attache propriétaire, descente locale vers $R_F\in D_k$, puis `find` pré-lot | $\mathrm{Star}(D_k)$, locator non-cœur et matérialisation de tous les $M(F)$ sous la porte régulière |
 | **tri et lots** | ordre global par niveau exact, groupement des égaux | catalogue géométrique global |

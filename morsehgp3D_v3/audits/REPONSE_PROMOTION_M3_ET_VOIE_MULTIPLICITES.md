@@ -570,9 +570,11 @@ beta(T_F)=256.250000                                  (= 1025/4, strictement plu
 T_F dans D_3 ? NON   ->  la cible BRUTE est REFUTEE
 ```
 
-Je ne peux pas juger l'équivalence des deux quotients : `Resolve` interroge
-l'histoire horizontale antérieure au lot, et le réducteur n'existe pas. Ce qui
-précède le resolver est en revanche vérifiable, et l'est.
+Je ne peux pas encore juger l'équivalence des deux quotients. La partie
+géométrique de `Resolve` est maintenant un théorème : une descente canonique
+atteint $R_F\in D_k$. Le dernier `find_<a_F(R_F)>` interroge l'histoire
+horizontale antérieure au lot, et le réducteur n'existe pas. Le snapshot décrit
+ici ne vérifie que le premier bras, pas encore la chaîne ni ce `find`.
 
 > **Rectification de provenance et de domaine.** Les nombres suivants viennent
 > de 30 nuages, pas des 12 du CTest. Ils sont diagnostiques hors autorité
@@ -598,7 +600,8 @@ gain.
 
 Le plancher `--min-attachments` garantit seulement que la branche candidate est
 exercée par CTest; il ne transforme pas la campagne en porte régulière et ne
-juge toujours pas `Resolve` ni l'équivalence des quotients.
+juge ni la descente complète, ni le `find` pré-lot, ni l'équivalence des
+quotients.
 Avec ses 12 nuages, ce CTest rend 39 candidats, 88 co-minimiseurs fermés et 5
 cibles brutes hors du cœur; ces nombres ne sont pas ceux de la table à 30
 nuages.
@@ -643,58 +646,210 @@ qu'un parent faux casserait en premier.
 
 **Ce que je ne prétends pas.** Aucune borne de temps : six calculs de parent par
 sommet est une mesure de régime, et une grande coquille peut avoir un nombre
-combinatoire de flats. Chaque requête garde aussi un scratch $O(n)$ au pire; la
+combinatoire de flats. Le compteur omet les voisins non bornés ou hors coupe et
+les triplets encore parcourus après la découverte d'un enfant; ce n'est pas le
+travail total. Chaque requête garde aussi un scratch $O(n)$ au pire; la
 pile recopie les coquilles, et le vecteur de sortie retient $\Omega(V)$ objets.
-Le différentiel n'exerce pas l'index sur ce parcours. Le catalogue passe encore
+Le delta postérieur appelle l'index, mais ses nuages permanents ont au plus 13
+points pour des feuilles de 16 : aucune branche interne de l'index n'est encore
+qualifiée sur ce parcours. Le catalogue passe encore
 par le BFS, donc la sortie n'est pas streamée. Et rien de ceci ne touche aux
-globalités de la hiérarchie que votre note isole — `Resolve`, la fermeture des
-ex æquo, le locator horizontal, la couverture, les verticales. La décision du
+globalités de la hiérarchie que votre note isole — le `find` pré-lot du terminal
+cœur, la fermeture des ex æquo, le locator horizontal, la couverture, les
+verticales. La décision du
 parcours est locale; le sink et le fold restent à écrire.
 
 ---
 
-## 16. Le domaine régulier, mesuré — et ma faute de provenance
+## 16. La porte locale de régularité est renforcée, pas encore globale
 
-Vos deux corrections du commit `14f8a95` sont justes, et la première est une
-faute de méthode chez moi.
+La correction de provenance demeure : la table historique venait de trente
+nuages, pas des douze du CTest. Le binaire imprime désormais `--clouds`,
+`--points`, `--coord`, `--k` et `--seed` avant ses mesures.
 
-**Provenance.** J'ai publié une table de trente nuages en l'attribuant aux douze
-du CTest. Le prototype n'imprimait pas sa graine, donc rien dans la sortie ne
-permettait de le voir. Il imprime désormais sa **provenance** complète —
-`--clouds`, `--points`, `--coord`, `--k`, `--seed` — en première ligne.
+Le premier filtre était faux dans deux directions. Il ignorait une égalité
+extérieure lorsqu'un intrus strict l'accompagnait, et ne cherchait les supports
+alternatifs qu'à la cardinalité déjà rendue. Le delta
+`first_incidence_dichotomy.cpp=b0741d4edcc9839ad4ab12bb58867b8c125fc83f9ab127708dcd15a91e640c17`
+ferme ces deux réfutations : la fixture mixte à cinq points, les supports
+antipodaux contre triangulaires et la coquille hors support sont permanents. Les
+descendants sont réauthentifiés eux aussi.
 
-**Domaine.** Vous aviez raison plus profondément : la campagne ne violait pas
-seulement la porte régulière sans le savoir, elle ne pouvait pas le savoir. Le
-prototype ne mesurait ni les égalités extérieures ni l'ambiguïté du support. Il
-mesure les deux :
+Le CTest à quatorze points rend 26 descentes, quatre pas, neuf terminaux sans
+intrus, dix-sept avec un intrus et 26 reçus directs sous le cutoff, sans
+désaccord. Des planchers imposent désormais au moins un pas et les deux branches
+terminales. Ce sont de vraies fermetures du falsificateur local.
 
-- une facette dont la boule **fermée** contient un point extérieur alors que la boule **ouverte** n'en contient aucun porte une **égalité extérieure** ;
-- un support minimal réalisé par deux sous-ensembles distincts de la facette rend $u_F$ ambigu, donc le choix canonique de l'attache aussi.
+Les deux failles fail-open locales suivantes sont désormais fermées : une panne
+de miniboule sur un sous-ensemble du contrôle de support ne fait plus `continue`,
+et une panne ou un refus de descendant ne peut plus être soustrait du plancher
+ni être accepté sous `--require-regular`. Ce nom reste néanmoins trop fort comme
+autorité globale : le théorème de quotient porte aussi sur les objets silencieux
+omis, alors que le binaire ne contrôle que les facettes cœur et les chaînes
+choisies.
 
-Sur ma campagne à grille $[0,20)$ : **31 égalités extérieures**. Vos 78 étaient
-donc un minorant correct sur trente nuages, et j'en compte 31 sur douze. Elle est
-hors domaine régulier, et j'ai renommé ses objets en **candidats locaux** dans le
-code, le rapport et le README. Ils ne remplacent rien.
+La fixture u16 à dix points garde sa force mathématique : les trois bras de
+$F=\lbrace2,8,9\rbrace$ sont strictement plus petits et tous hors de $D_3$. Son
+bloc permanent ne rejoue toujours pas à lui seul les 120 triplets et 210
+quadruplets de la certification transitoire. Le lookup brut reste réfuté; la
+promotion du quotient reste ouverte.
 
-**[mesuré, DANS le domaine régulier]** 30 nuages de 14 points, grille
-$[0,4000)$, $k=3$ : zéro égalité extérieure, zéro support ambigu, donc **62
-attaches autorisées**. Lemme de descente violé zéro fois. Et **5 cibles brutes
-sur 62 hors du cœur**, soit 8,1 % *dans le domaine où le théorème s'applique*.
-Votre « réfutée, même sous régularité » est donc vérifiée là où elle compte, et
-non plus seulement dans un régime dégénéré.
+---
 
-Un drapeau `--require-regular` fait échouer une campagne qui n'est pas dans le
-domaine, et deux CTests l'encadrent : un positif dans le domaine régulier, un
-négatif qui vérifie que la grille $[0,20)$ y est bien refusée.
+## 17. État historique avant le dernier durcissement, supersédé par le §18
 
-**Votre fixture à dix points est permanente**, et c'est la plus forte du dossier.
-Vérifiée : porte régulière satisfaite — aucun point extérieur sur la coquille
-d'un triplet, 210 quadruplets tous indépendants —, $F=\lbrace2,8,9\rbrace\in D_3$,
-$a_F=893109/2588$, $U_F=\lbrace2,8,9\rbrace$, $J_F=\lbrace1,5,7\rbrace$, et les
-**trois** bras $\lbrace1,8,9\rbrace$, $\lbrace1,2,9\rbrace$, $\lbrace1,2,8\rbrace$
-de niveaux $479/2$, $599/2$ et $299225073/867436$ tous strictement plus petits et
-tous hors de $D_3$. Aucun choix de $u_F$ ne sauve la cible brute.
+Le théorème de la note est positif, et ses deux terminaux ont maintenant des
+fixtures permanentes. `E5` verrouille $\beta(F=AC)=33/2$, $\beta(T=CD)=9/2$,
+$J_T=\varnothing$ et le témoin $CDE$ au niveau $162/25<\beta(F)$. La fixture à
+sept points verrouille $T=126\notin D_3$ et une descente canonique d'un pas vers
+le cœur. Le delta réauthentifie chaque facette, distingue refus, primitive et
+budget, et recherche une coface directe terminale sous le cutoff.
 
-Ce que je ne prétends toujours pas : `Resolve` n'est pas jugé, donc l'équivalence
-des deux quotients ne l'est pas non plus. Le prototype reste un oracle borné qui
-matérialise le catalogue.
+Sur ce snapshot intermédiaire, ce « reçu » restait un compteur construit depuis `truth_direct`, carte
+exhaustive globale de toutes les cofaces. Il ne sérialise ni $R_F$, ni la chaîne,
+ni l'identité de la coface directe; la fixture `E5` imprime `CDE` sans engager
+cette identité dans le résultat. Une panne de descendant peut encore être
+comptée sans rendre la campagne rouge. Enfin aucun `find_<a_F(R_F)>`, aucune
+partition pré-lot et aucune comparaison du quotient complet contre l'attache
+réduite n'existent. Le code est devenu un bien meilleur oracle local, pas le
+resolver ni le fold 50 k.
+
+Le delta reverse épinglé par
+`order_k_flats.hpp=35f3d5108cf88f0c858b4f24d6ade3cc6777f991336da6323ce899228a9491f9`
+et
+`flats_differential.cpp=3937261a076a389953038123265bfe5e5652fa99f3d8457c6dcc51e5c995fd01`
+ferme deux défauts réels. `for_each_flat` peut maintenant arrêter toute
+l'énumération dès qu'un enfant est trouvé, et l'échec du voisin d'une direction
+parent admissible devient `kInvariantViolated` avec sortie vide. Des compteurs,
+des planchers reverse et un second rejeu par l'API indexée sont également ajoutés.
+
+La promotion reste prématurée pour cinq raisons.
+
+1. L'absence de direction dans `canonical_parent` est appelée `kIsRoot` sans
+   comparer le sommet au germe. Un non-germe défectueux peut encore disparaître
+   avec `kOk`.
+2. Les nuages permanents ont au plus 13 points pour une feuille d'index de 16.
+   Le rejeu indexé ne traverse donc aucun nœud interne de `box` ou
+   `sign_disagreement`; sa projection en `map` peut aussi masquer un doublon.
+3. `reverse_skipped` est seulement imprimé. Aucun plancher n'impose zéro skip,
+   une visite interne indexée ou un nombre de requêtes de parent.
+4. Le compteur de flats ne voit que les flats canoniques parvenus au callback,
+   pas les triplets non canoniques dont la fermeture a déjà été reconstruite.
+5. L'endpoint matérialise toujours un `std::vector<Vertex>`, la pile recopie les
+   coquilles et chaque requête garde un scratch $O(n)$. L'équivariance rejoue le
+   BFS, pas l'arbre reverse.
+
+Le progrès exact est donc une **décision de parcours locale mieux falsifiée** et
+une **première exécution de la descente de carrier**. Le sink borné, la racine
+fail-closed, l'index interne, l'autorité régulière et le fold global restent à
+fermer.
+
+---
+
+## 18. Dernier delta : fermetures réelles et résiduels exacts
+
+Les réserves structurelles du §17 sont en grande partie fermées, ainsi que les
+deux failles fail-open locales du §16. Une API sink est maintenant écrite; son
+intégration transactionnelle, son high-water complet et les portes d'élagage et
+d'équivariance gardent les limites précisées ci-dessous.
+
+**1. La racine est certifiée, plus déduite.** `canonical_parent` sans direction
+admissible ne signifie « racine » que si le sommet EST le germe ; sinon c'est
+`kBroken`, donc `kInvariantViolated` et sortie vide. Un non-germe sans direction
+ne peut plus disparaître avec `kOk`.
+
+**2. Feuilles de quatre, et une porte permanente qui a un arbre.** Seize
+laissaient une feuille unique sur treize points : vous aviez raison, le rejeu
+indexé ne qualifiait rien. Le juge construit maintenant l'index à feuille quatre,
+et `mhgp3v_flats_indexed_tree` — vingt points, grille 40, `s_max=4` — est
+permanente avec `--min-internal-nodes`. Elle rend 3 062 sommets, profondeur 19 et
+**1 105 239 nœuds visités dont 472 443 feuilles** : ce sont des nœuds *visités* et
+non construits, comme vous le demandiez. L'auto-test juge désormais `box` et le
+désaccord ternaire contre l'exhaustif — pour le désaccord, l'inclusion et non
+l'égalité, puisque la requête est sûre et non exacte — et il exige qu'au moins une
+requête synthétique `box` visite strictement moins de nœuds que l'arbre n'en
+contient. Cela ne mesure pas encore l'élagage propre aux requêtes du parcours.
+La projection en `map` compare sa taille au
+nombre de records des deux côtés : un doublon indexé ne peut plus être masqué.
+
+**Un fail-open que vous n'aviez pas nommé, et qui était pire.** En lisant `box`
+pour la mettre sous test j'ai trouvé qu'à pile saturée elle **omettait le
+sous-arbre en silence**, là où `closed_ball` et `sign_disagreement` retombaient
+toutes deux sur une descente récursive. Elle retombe désormais comme elles.
+
+**3. Les planchers portent enfin sur ce qui compte.** `--min-reverse` implique
+zéro porte sautée, et les planchers couvrent les sorties **indexées**, les
+requêtes de parent et les nœuds visités. Les quatre portes — fixtures, générique,
+grille saturée, cosphérique — les portent toutes, et non plus deux.
+
+**4. Le travail total est mesuré, et il est cinq fois plus grand que « six flats
+par sommet ».** Deux compteurs comptent tous les triplets balayés et toutes les
+fermetures reconstruites, y compris celles des triplets écartés. Générique à onze
+points : 10 626 sommets, 72 236 flats livrés — 6,8 par sommet —, mais **335 314
+triplets et autant de fermetures, soit 31,6 par sommet**, chacune un `orient3d`
+par point de coquille. Le ratio que je publiais était optimiste d'un facteur 4,6.
+
+Et une petite chose tombe de là : les deux compteurs sont **toujours égaux**, ce
+qui n'est pas un hasard de régime. Trois points distincts d'une même sphère ne
+sont jamais alignés — une droite coupe une sphère en au plus deux points —, donc
+le garde de colinéarité est inactif sur une coquille. La porte exige leur égalité,
+et une divergence dénoncerait une coquille non cosphérique ou un point double.
+
+**5. L'équivariance rejoue la reverse search, et le sink est écrit.** La
+signature de permutation contient maintenant l'ensemble des sommets atteints par
+la reverse search, ramenés par la permutation inverse, plus son statut. Ce qui est
+exigé est bien l'**ensemble** : le germe, l'arbre et l'ordre des fils dépendent de
+la numérotation, puisque la direction canonique du parent compare des clefs
+d'indices. Ce que la porte établit est donc que le même ensemble géométrique est
+atteint **depuis une autre racine** — ce qui est le contenu falsifiable, et je ne
+prétends pas plus. Cette projection dans un `set` peut toutefois masquer un
+doublon propre à une permutation et ne transporte pas l'ensemble intérieur.
+**Le sink est écrit.** C'était votre
+dette la plus lourde et elle était juste : tant que l'endpoint rendait un
+`std::vector<Vertex>`, aucun gain mémoire n'était démontré.
+`reverse_search_stream` rend les sommets un à un et publie le high-water des slots
+vifs. La porte le juge avec un consommateur qui ne tient **rien** — il compte et
+replie un hachage indépendant de l'ordre —, et exige que l'interruption stoppe le
+parcours avec un statut non `kOk`. Ce dernier test a attrapé mon trou sur-le-champ :
+le refus du **germe** revenait avec `kOk`. **[mesuré]** vingt points, cinq
+nuages : 5 400 sommets rendus, **85 identifiants portés au maximum par les sommets
+du chemin**, 109 interruptions vérifiées, zéro désaccord détecté avec la sortie
+matérialisée. Le rapport $5400/85$ n'est pas un facteur mémoire : il compare des
+records à des identifiants et ignore capacités, temporaires, bitmaps, fermetures,
+index et allocateur. Une coquille cosphérique peut être $\Theta(n)$ et la
+profondeur n'est bornée par aucun théorème. La parité repose en outre sur un
+compte et une somme de hachages 64 bits, donc sur un falsificateur avec collisions
+possibles, pas sur une égalité exacte.
+
+**Votre §16, les deux trous.** La panne de primitive sur un sous-ensemble du
+contrôle de support faisait `continue` — donc pouvait déclarer unique un support
+qui ne l'est pas : elle est maintenant fail-closed. Et une panne ou un refus dans
+une descente n'entrait ni dans le booléen `regular` ni, pire, dans mon plancher,
+qui **soustrayait** les refus. Le plancher ne soustrait plus rien, et
+`--require-regular` exige zéro refus et zéro panne de descendant : une campagne
+qui se déclare régulière ne peut pas contenir un descendant où le théorème n'est
+pas démontré.
+
+**Votre §17, le reçu.** Vous avez raison qu'un compteur n'engage personne. Le type
+de reçu porte maintenant le terminal atteint, la longueur de la chaîne, la
+branche, l'**identité** de la coface directe engagée et son niveau. La fixture
+`E5` ne vérifie plus « un reçu existe » mais que la coface engagée est exactement
+$\lbrace2,3,4\rbrace$ — $CDE$ — de niveau $162/25$, terminal $CD$, zéro pas,
+branche vide ; la fixture à sept points vérifie que le terminal est dans le cœur,
+que la coface engagée le contient et que son niveau est strictement sous le
+cutoff. Les campagnes ordinaires passent encore `receipt=nullptr`. La fonction
+n'efface pas non plus un reçu fourni à l'entrée et peut le remplir après un
+terminal hors cœur ou un niveau trop tardif; seul un statut typé et une affectation
+après toutes les portes donneront l'atomicité requise.
+
+**Ce que je ne prétends toujours pas.** Le reçu est construit depuis
+`truth_direct`, carte exhaustive de la vérité : il **juge** le théorème, il ne
+l'implémente pas. Il n'y a ni $R_F$, ni partition pré-lot, ni
+$\mathrm{find}_{<a_F}$, ni comparaison du quotient complet contre l'attache
+réduite. La porte globale sur les objets silencieux omis reste ouverte, et le
+binaire ne contrôle que les facettes cœur et les chaînes qu'il choisit. Ce qui est
+acquis est un **oracle local nettement mieux falsifié**; le resolver et le fold
+50 k restent à écrire. De même, un sink produit devra écrire un segment non
+committé : le callback peut déjà avoir émis un préfixe quand une erreur ultérieure
+rend le statut rouge, et `kInvariantViolated` confond actuellement contradiction
+scientifique et arrêt demandé par le consommateur.

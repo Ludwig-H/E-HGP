@@ -224,7 +224,7 @@ catalogue concordants **relativement à ces primitives** », pas « catalogue
 critique exact ». L'autorité indépendante manquante est une référence
 rationnelle multiplicitaire dans l'oracle M1, qui n'existe pas.
 
-Trois portes, et il faut les trois :
+Quatre portes, et il faut les quatre :
 
 1. **le sommet** — tous les sommets d'arrangement énumérés en force brute, groupés par coquille, filtrés au niveau strict, comparés sur le couple (coquille, **niveau**) ;
 2. **le catalogue** — tous les sous-ensembles de taille au plus quatre, miniboule, census exact, déduplication par coquille, support canonique ;
@@ -271,10 +271,11 @@ Couverture réellement exercée, publiée par le juge et exigée par CTest :
 
 Le premier juge local du parent est exercé sur ces mêmes campagnes : **510 154**
 et **530 197** sommets ont reçu un parent, avec une racine par nuage et zéro
-violation parmi les contrôles actuellement gravés — inclusion des intérieurs et
-absence de cycle. Ce n'est pas encore Gate D entière : la porte doit devenir
-fail-closed si le second parcours échoue, puis graver rang de la base, variation
-stricte du potentiel, fermeture du flat et identité du lot suivant.
+violation dans le snapshot de ces mesures. Le juge live a depuis ajouté le rang
+de la base, la variation exacte du potentiel, la fermeture du flat et plusieurs
+contradictions fail-closed. Ce n'est toujours pas Gate D entière : il ne prouve
+pas que le sommet rendu est le premier événement orienté, et les mutations qui
+suppriment ou tronquent la porte ne sont pas toutes gravées.
 
 Ces deux campagnes n'ont pas encore de commande, graine, log brut et sidecar
 versionnés dans le dépôt. Elles sont des diagnostics rapportés, pas un reçu de
@@ -303,7 +304,7 @@ permutations**, avec exigence de zéro refus et de signature unique.
 
 - L'oracle M1 n'a **pas** été étendu à ce sujet. Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. L'étendre aux multiplicités est un travail à part, et il doit être audité.
 - Les forêts ne sont pas construites, et le centre rationnel, le rayon et $\beta$ ne sont pas confrontés à une vérité distincte. Ce qui est comparé est listé au §4 ; « payload entier » serait faux.
-- Pas de forêts, pas de reverse search, pas de propriétaire calculé : la récolte déduplique encore par une table globale de coquilles.
+- Pas de forêts, pas de reverse search **dans le catalogue**, pas de propriétaire calculé : le différentiel possède un endpoint reverse séparé, mais la récolte déduplique encore par une table globale de coquilles.
 
 ---
 
@@ -462,11 +463,11 @@ L'état qui décide la navigation est désormais la **pile** : par niveau, le
 sommet courant et l'indice du fils. Il ne contient ni `seen` ni `frontier`. Les
 voisins sont énumérés dans un ordre déterministe — flats de la coquille, puis
 les deux orientations — sans quoi l'indice du fils ne serait pas reproductible
-au retour, ce qui est toute la mécanique d'Avis–Fukuda. Le prototype de
-différentiel conserve encore un `std::vector<Vertex> visited` uniquement pour
-comparer la sortie au BFS; ce vecteur n'intervient dans aucune décision, mais il
-retient bien $\Omega(V)$ objets et doit être remplacé par un sink pour obtenir le
-gain mémoire produit.
+au retour, ce qui est toute la mécanique d'Avis–Fukuda. L'enveloppe de
+comparaison conserve encore un `std::vector<Vertex> visited` pour se confronter
+au BFS; ce vecteur n'intervient dans aucune décision. Le delta live ajoute plus
+bas un endpoint sink qui ne matérialise pas cette sortie, sans encore l'intégrer
+au catalogue.
 
 **[reproductible]** les quatre portes CTest positives du commit `969db5c`, tout
 comparé au BFS :
@@ -485,14 +486,71 @@ pas des bornes. Une grande coquille peut rendre le nombre de flats combinatoire.
 **Ce que cela ne rend pas.** Aucune borne de temps. Chaque fils testé coûte un
 calcul de parent, donc une énumération de flats et une requête de voisin ; une
 grande coquille peut avoir un nombre combinatoire de flats, et six par sommet est
-une mesure de régime, pas un théorème. Chaque requête alloue aussi un bitmap et
-une liste de candidats de taille $O(n)$ au pire; la pile recopie les coquilles
-des sommets sur le chemin. Le différentiel appelle enfin la reverse search sans
-index : il qualifie le balayage exhaustif, pas encore le chemin indexé. Le gain
-acquis est l'absence de table de déduplication **dans la décision**. Le gain de
-mémoire, le high-water et l'absence d'écriture partagée d'un kernel restent à
-obtenir avec un sink borné. Le BFS reste en place comme oracle et comme chemin
-du catalogue.
+une mesure de régime, pas un théorème. Au commit `969db5c`, ce compteur
+n'incluait ni les voisins non bornés ou hors coupe, ni la queue de triplets que
+`for_each_flat` continuait à examiner après avoir trouvé le prochain enfant.
+
+Le travail réel est maintenant mesuré, et **il est cinq fois plus grand que ce que
+« six flats par sommet » laissait croire**. `for_each_flat` est interruptible, et
+deux compteurs comptent désormais tous les triplets balayés et toutes les
+fermetures reconstruites, y compris celles des triplets écartés parce qu'ils ne
+sont pas la base canonique de leur fermeture. Sur la campagne générique à 11
+points : 10 626 sommets, 72 236 flats **livrés** — 6,8 par sommet — mais
+**335 314 triplets balayés et autant de fermetures reconstruites**, soit **31,6
+par sommet**, chacune coûtant un `orient3d` par point de la coquille.
+
+Ces deux compteurs sont d'ailleurs toujours égaux, et ce n'est pas un hasard de
+régime : trois points **distincts** d'une même sphère ne sont jamais alignés,
+puisqu'une droite coupe une sphère en au plus deux points. Le garde de
+colinéarité est donc inactif sur une coquille, et la porte exige leur égalité —
+une divergence dénoncerait une coquille non cosphérique ou un point double.
+
+Chaque requête alloue aussi un bitmap et une liste de candidats de taille $O(n)$
+au pire; la pile recopie les coquilles des sommets sur le chemin. Le commit
+`969db5c` n'appelait que le balayage exhaustif. Le rejeu indexé le double
+désormais avec des feuilles de **quatre** — seize laissait une feuille unique sur
+des nuages de treize points, donc aucun élagage interne —, une porte permanente à
+vingt points, des compteurs de nœuds **visités** et non seulement construits, et
+l'auto-test juge maintenant `box` et le désaccord ternaire contre l'exhaustif, pas
+seulement `closed_ball`. Sur la porte à vingt points : 1 105 239 nœuds visités
+dont 472 443 feuilles, profondeur 19. `box` avait de plus un chemin fail-open —
+pile saturée, sous-arbre **omis en silence** là où les deux autres requêtes
+retombaient sur une descente récursive ; il retombe désormais comme elles.
+
+### La sortie est bornée, et le high-water est mesuré
+
+C'était la dette la plus lourde : tant que l'endpoint rendait un
+`std::vector<Vertex>`, la sortie était $\Omega(V)$ et **aucun** gain mémoire
+n'était démontré, quelle que fût l'absence de table de visitation.
+
+`reverse_search_stream` rend maintenant les sommets **un à un** à un sink, et
+publie le high-water des identifiants portés par les sommets du chemin, sortie
+exclue. Cette métrique ne compte ni la capacité de la pile, ni le candidat et son
+parent temporaires, ni les fermetures, bitmaps et listes de scratch d'une requête.
+L'enveloppe qui matérialise reste le sujet du différentiel; le catalogue ne
+consomme pas encore le sink.
+
+La porte le juge avec un consommateur qui ne tient **rien** : il compte et replie
+un hachage 64 bits indépendant de l'ordre. C'est un falsificateur compact, pas
+une égalité exacte en raison des collisions possibles; un curseur comparant
+chaque callback à l'oracle matérialisé fermerait cette dette sans accumuler la
+sortie côté sink. L'interruption est une porte, pas une
+politesse : un sink qui s'arrête doit stopper le parcours et rendre un statut non
+`kOk`, sans quoi une sortie tronquée passerait pour complète. Ce test a d'ailleurs
+attrapé le trou immédiatement — le refus du **germe** revenait avec `kOk`.
+
+**[mesuré]** porte à vingt points, 5 nuages : 5 400 sommets rendus au sink,
+**85 identifiants de sommets actifs au maximum**, 109 interruptions vérifiées,
+zéro désaccord détecté avec la sortie matérialisée. Le rapport $5400/85$ ne peut
+pas être appelé facteur mémoire : le numérateur compte des records, le
+dénominateur des identifiants, et le scratch est omis. Une coquille cosphérique
+peut être de taille $\Theta(n)$ et la profondeur n'est bornée par aucun théorème.
+Le gain acquis est l'absence de table de déduplication **dans la décision** et une
+API de sortie streamée. L'intégration devra écrire dans un segment non committé :
+une erreur peut survenir après plusieurs callbacks, et `kInvariantViolated`
+confond encore erreur scientifique et arrêt demandé. Le high-water mémoire
+complet, l'intégration transactionnelle au catalogue et l'absence d'écriture
+partagée d'un kernel réel restent à obtenir.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
@@ -506,19 +564,24 @@ Ce résultat ne chiffre aucun facteur d'accélération et ne supprime pas les
 écritures globales de sortie. Les workers doivent encore produire des runs, le
 merge doit fermer les ex æquo en $\beta$, et le réducteur horizontal puis les
 verticales doivent communiquer. Le parent ouvre la voie device; seul un kernel
-mesuré sur la G4 pourra en établir le débit.
+GPU effectif, exécutant autre chose qu'un test CPU, pourra ensuite en établir le
+débit sur la G4.
 
 **Ce que cela ne ferme pas**, et la note le dit avant moi : les **enfants**
 exigent toujours tous les flats incidents réels, une grande coquille peut en
 avoir un nombre combinatoire, et le parent local ne borne aucun temps. Le
 nouvel endpoint a bien substitué la reverse search au BFS pour le parcours
-différentiel, mais pas pour le catalogue; il matérialise encore sa sortie et ne
-teste pas la variante indexée. Le juge permanent confronte les coquilles, les
-intérieurs et les potentiels sur son domaine borné, sans constituer encore un
-reçu de premier événement orienté ni une mesure de mémoire. Même avec un sink,
-resteront la source complète des incidences silencieuses, le tri et les lots
-exacts, la partition horizontale, `coverage_log` et la jointure verticale. Leur
-factorisation est dans
+différentiel, mais pas pour le catalogue; son enveloppe d'oracle matérialise
+encore la sortie. Le
+delta live confronte aussi l'API indexée au balayage avec des feuilles de quatre
+et une porte permanente à vingt points. Il prouve la traversée de nœuds internes;
+la preuve d'élagage reste celle de l'auto-test synthétique, pas une métrique propre
+aux requêtes de la reverse search. Le juge confronte les coquilles, les intérieurs
+et les potentiels sur son domaine borné, sans constituer encore un reçu de
+premier événement orienté ni une mesure de mémoire. Même avec un
+sink, resteront la source complète des incidences silencieuses, le tri et les
+lots exacts, la partition horizontale, `coverage_log` et la jointure verticale.
+Leur factorisation est dans
 [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](audits/NOTE_GATE_D_GLOBALITES_RESIDUELLES.md).
 
 ---
@@ -612,7 +675,8 @@ La note réfute la cible **brute** : $T_F$ peut ne pas appartenir à $D_k$, et i
 faut alors viser le carrier strict **résolu**. Sa fixture u16 renforcée possède
 dix points et $F=289$, avec $J_F=\lbrace1,5,7\rbrace$. Pour $z_F=1$, chacun des
 trois bras obtenus en retirant 2, 8 ou 9 a un niveau strictement plus petit mais
-reste hors de $D_3$. Aucun choix local de $u_F$ ne remplace donc le resolver.
+reste hors de $D_3$. Aucun choix local de $u_F$ ne rend donc la cible immédiate
+valide : il faut la descente vers le cœur, puis le `find` pré-lot.
 
 **[diagnostic hors autorité régulière]** 30 nuages de 20 points, grille $[0,20)$, $k=3$ : sur 5 103 facettes,
 les intrus stricts se répartissent en 1 997 / 3 011 / **95** pour zéro, un et au
@@ -620,55 +684,59 @@ moins deux. Ce sont **95 candidats d'attache**; le run observe 210 co-minimiseur
 fermés sur ces facettes, aucune cible de niveau non strict et **6 cibles brutes
 hors du cœur**. Comme il n'authentifie ni support unique essentiel ni absence
 d'extra-shell, il ne peut pas encore conclure que 95 attaches remplacent ces 210
-co-minimiseurs. Il confirme néanmoins que le resolver n'est pas un cas limite.
+co-minimiseurs. Il confirme néanmoins que la cible brute hors cœur n'est pas un
+cas limite.
 La campagne compte 3 184 branches fermées mais seulement 3 106 facettes ayant
 au moins un intrus strict : au moins 78 facettes portent donc une égalité
 extérieure sans intrus. Le domaine régulier est effectivement violé, et non
 simplement non vérifié.
-Le CTest committé utilise 12 nuages : il exerce 39 candidats, porte 88
+Le CTest du snapshot `2c395d3` utilise 12 nuages : il exerce 39 candidats, porte 88
 co-minimiseurs fermés et observe 5 cibles brutes hors du cœur. Son plancher
 prouve l'exercice de la branche, pas l'autorité de l'attache.
 
-### Le domaine régulier est maintenant mesuré, et la réfutation y tient
+### La porte locale est beaucoup plus forte; l'autorité globale reste ouverte
 
-Ma table précédente était **hors** autorité régulière, et je ne le savais pas : le
-prototype ne le mesurait pas. Il le mesure désormais. Une facette dont la boule
-**fermée** contient un point extérieur alors que la boule **ouverte** n'en
-contient aucun porte une **égalité extérieure**, que le domaine régulier
-interdit ; et un support minimal réalisé par deux sous-ensembles distincts rend
-$u_F$ ambigu, donc le choix canonique de l'attache aussi. Les deux sont comptés,
-et le rapport dit à quel domaine la campagne appartient.
+Le delta live épinglé par
+`first_incidence_dichotomy.cpp=b0741d4edcc9839ad4ab12bb58867b8c125fc83f9ab127708dcd15a91e640c17`
+ferme les deux réfutations précédentes. Il compte toute égalité extérieure,
+intrus strict présent ou non; cherche les supports essentiels tous cardinaux
+confondus; refuse un membre de coquille hors support; et réauthentifie chaque
+facette de la descente. Les fixtures permanentes couvrent désormais l'égalité
+mixte, les supports 2 contre 3, `E5` et le lookup brut hors cœur à sept points.
 
-Sur la campagne à grille $[0,20)$ que j'avais publiée : **31 égalités
-extérieures**. Elle est donc hors du domaine régulier, et ses 95 objets sont des
-**candidats locaux**, pas des attaches autorisées — ils ne remplacent rien et
-n'autorisent aucun facteur de gain.
+Le CTest à quatorze points observe 26 descentes, quatre pas, une longueur maximale
+de deux, neuf terminaux sans intrus, dix-sept à un intrus et 26 reçus directs
+sous le cutoff, sans désaccord. Des planchers exigent les deux branches et au
+moins un pas. C'est une correction constructive importante.
 
-**[mesuré, dans le domaine régulier]** 30 nuages de 14 points, grille $[0,4000)$,
-$k=3$ : zéro égalité extérieure, zéro support ambigu, donc **62 attaches
-autorisées**. Le lemme de descente n'est violé aucune fois. Et **5 cibles brutes
-sur 62 restent hors du cœur** — soit 8,1 % *dans le domaine où le théorème
-s'applique*, ce qui est exactement ce que la note affirme : la cible brute est
-réfutée même sous régularité.
+Le fail-closed local est maintenant nettement plus fort. Une
+panne de miniboule sur un sous-ensemble du contrôle de support est fail-closed —
+un `continue` pouvait déclarer unique un support qui ne l'est pas ; une panne
+pendant la descente est un désaccord ; le plancher ne **soustrait** plus les
+refus ; et `--require-regular` exige zéro refus et zéro panne de descendant,
+puisqu'une campagne qui se déclare régulière ne peut pas contenir un descendant où
+le théorème n'est pas démontré. Le type de reçu porte le terminal, la longueur de
+la chaîne, la branche, l'identité de la coface directe engagée et son niveau; les
+fixtures lui passent effectivement une sortie et `E5` exige la coface
+$\lbrace2,3,4\rbrace$ de niveau $162/25$. Les campagnes ordinaires appellent
+encore la descente sans sortie de reçu et n'en conservent que les agrégats.
 
-La fixture à dix points de la note est permanente, et c'est la plus forte : elle
-satisfait la porte régulière — aucun point extérieur sur la coquille d'un
-triplet, les 210 quadruplets affinement indépendants — et pourtant **les trois**
-bras immédiats de $F=\lbrace2,8,9\rbrace$ sont strictement plus petits et tous
-hors de $D_3$. Aucun choix du support supprimé ne sauve la cible brute.
+Deux limites empêchent encore d'appeler `--require-regular` une autorité de
+quotient.
 
-Une leçon de méthode, aussi : j'avais publié une table de trente nuages en
-l'attribuant aux douze du CTest, et rien dans la sortie ne permettait de le voir.
-Le rapport imprime maintenant sa **provenance** complète, graine incluse.
+1. La porte globale du théorème d'attache concerne aussi les objets silencieux
+   omis du quotient. Le binaire contrôle les facettes cœur et les chaînes
+   choisies, pas tout ce plateau. Sa fixture u16 à dix points vérifie toujours le
+   cœur et les trois bras, pas seule les 120 triplets et 210 quadruplets annoncés.
+2. Le reçu est construit depuis `truth_direct`, carte exhaustive globale de la
+   vérité : il **juge** le théorème, il ne l'implémente pas. Le dernier
+   $\mathrm{find}_{<a_F}(R_F)$, la partition pré-lot et l'équivalence des
+   quotients ne sont ni implémentés ni jugés.
 
-Ce que ce prototype ne fait pas : il ne **résout** rien. La
+La
 [`note de descente locale`](audits/NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md)
-ferme désormais la partie géométrique : une baisse canonique de $\beta$ mène de
-$T_F$ à une facette cœur $R_F\in D_k$. Le dernier `find_<a_F(R_F)>` interroge
-toujours l'histoire horizontale antérieure au lot, absente ici. Le prototype
-s'arrête donc à la classification et à l'inégalité du premier bras; il ne juge
-ni la descente complète, ni la partition pré-lot, ni l'équivalence des deux
-quotients.
+ferme donc la partie géométrique sous ses hypothèses; ce prototype en est un bon
+falsificateur borné, pas encore le resolver ni le fold produit.
 
 Deux mises en garde qui subsistent : les co-minimiseurs observés sont petits mais
 **sans borne générale** — une facette peut en avoir $\Theta(n)$ — et le rapport de
@@ -818,8 +886,10 @@ pour l'arrangement simple. Son extension au vrai graphe multiplicitaire et une
 règle qui choisit directement un rayon du parent sont maintenant prouvées dans
 [`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](audits/NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md).
 Le commit `969db5c` implémente la reverse search dans un endpoint différentiel et
-la confronte au BFS. Restent ouverts son sink streaming, son chemin indexé, son
-high-water, son intégration au catalogue et sa forme device.
+la confronte au BFS. Le delta live ajoute une porte indexée à nœuds internes et
+une API sink avec high-water partiel des payloads du chemin. Restent ouverts la
+mesure de l'élagage propre aux requêtes reverse, le high-water mémoire complet,
+l'intégration du sink au catalogue et sa forme device.
 
 ### Ce qui portera, et ce qui devra être restructuré
 
@@ -896,7 +966,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
 | 2 | règle de propriétaire pour les arités 2 et 3, et census local | existence et propriétaire canonique prouvés; le live n'a qu'un préfiltre nécessaire, puis conserve `emitted` |
-| 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours écrit et différencié contre le BFS** ; le catalogue passe encore par le BFS, et le streaming de la sortie n'est pas écrit |
+| 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |
 | 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |

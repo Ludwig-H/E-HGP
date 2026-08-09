@@ -107,10 +107,16 @@ Comme $\lvert U_F\rvert\geq2$, on a
 $\bigcup_{u\in U_F}A_u=Q_F$. La composante $P(Q_F)$ couvre ainsi
 $F\cup\lbrace z_F\rbrace$. La facette $T_F=A_{u_F}$ est l'un de ses bras;
 le resolver donne donc $P_F=P(Q_F)$. Pour tout autre
-$z\in J_F$, la coface $F\cup\lbrace z\rbrace$ conflue avec $Q_F$ par leur
-facette égale commune $F$, donc possède le même apex. L'attache $\alpha_F$
-installe finalement $F$ dans le bon apex, sans ajouter de point et sans créer de
-racine ou de fusion.
+$z\in J_F$, choisir $u\in U_F$. La coface-pont
+$(F\setminus\lbrace u\rbrace)\cup\lbrace z_F,z\rbrace$ a un niveau strictement
+inférieur à $a_F$ : on a retiré le support essentiel $u$ et ajouté seulement des
+intrus stricts de $B_F$. Elle relie un bras strict de $Q_F$ à un bras strict de
+$F\cup\lbrace z\rbrace$. En faisant varier $u$, chacun des bras stricts de cette
+dernière coface rejoint ainsi un bras de $Q_F$ déjà dans $P(Q_F)$. Toutes les
+cofaces silencieuses $F\cup\lbrace z\rbrace$ possèdent donc le même apex par un
+**pont strict**, et non par leur seule facette égale commune $F$. L'attache
+$\alpha_F$ installe finalement $F$ dans le bon apex, sans ajouter de point et
+sans créer de racine ou de fusion.
 
 ### 3.2 Les autres facettes égales ne transportent pas une autre racine
 
@@ -120,9 +126,12 @@ point intérieur $x\in F\setminus U_F$ par $z$. Elle conserve $U_F$, la même
 boule et vérifie
 $J_H=(J_F\setminus\lbrace z\rbrace)\cup\lbrace x\rbrace$. On a donc
 $\lvert J_H\rvert=\lvert J_F\rvert\geq2$. Si $H$ appartient à $D_k$, sa propre attache
-$\alpha_H$ l'installe, et la confluence du plateau silencieux donne
-$P_H=P_F$. Si $H\notin D_k$, elle n'est réutilisée par aucune coface directe et
-peut disparaître du quotient normalisé.
+$\alpha_H$ l'installe. Plus précisément, pour $u\in U_F=U_H$, le point $x$ est
+un intrus strict de $H$ et le bras
+$(H\setminus\lbrace u\rbrace)\cup\lbrace x\rbrace=(F\setminus\lbrace u\rbrace)\cup\lbrace z\rbrace$
+appartient déjà à $P_F$ par le pont strict du §3.1. La preuve des bras appliquée
+à $H$ impose donc $P_H=P_F$. Si $H\notin D_k$, elle n'est réutilisée par aucune
+coface directe et peut disparaître du quotient normalisé.
 
 Deux cofaces non directes partageant une telle facette égale ont le même apex
 par le même lemme de confluence. Une facette égale ne peut donc pas cacher une

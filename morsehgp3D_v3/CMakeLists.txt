@@ -210,19 +210,32 @@ add_test(NAME mhgp3v_oracle_order_k COMMAND mhgp3v_oracle
 # leur equivariance. Le plancher interdit une campagne vide.
 add_test(NAME mhgp3v_flats_fixtures COMMAND mhgp3v_flats_differential
          --clouds 0 --min-cases 150 --min-navigated 100 --min-vertices 500
-         --min-multiple-shells 20 --min-quotiented 20)
+         --min-multiple-shells 20 --min-quotiented 20
+         --min-reverse 1500 --min-reverse-depth 6 --min-internal-nodes 100)
 
 # Nuages generiques : c'est la porte de completude ordinaire.
 add_test(NAME mhgp3v_flats_generic COMMAND mhgp3v_flats_differential
          --clouds 150 --points 11 --coord 24 --smax 6 --seed 4242 --min-cases 1000
-         --min-navigated 700 --min-vertices 50000)
+         --min-navigated 700 --min-vertices 50000
+         --min-reverse 50000 --min-reverse-depth 8 --min-internal-nodes 1000)
+
+# NUAGE ASSEZ GRAND POUR QUE L'INDEX AIT UN ARBRE. Tous les autres nuages
+# permanents ont au plus treize points : avec des feuilles de quatre ils ont deja
+# des noeuds internes, mais vingt points et un ordre bas donnent un arbre profond
+# et un rejeu indexe qui elague vraiment. Sans cette porte, le chemin indexe
+# n'etait qualifie que sur une feuille unique.
+add_test(NAME mhgp3v_flats_indexed_tree COMMAND mhgp3v_flats_differential
+         --clouds 2 --points 20 --coord 40 --smax 4 --seed 20260809 --min-cases 200
+         --min-navigated 100 --min-vertices 3000 --min-reverse 3000 --min-reverse-depth 15
+         --min-internal-nodes 100)
 
 # Grille SATUREE : dix points dans une boite de cote cinq. Presque tous les
 # nuages y portent des cospheries, des coplanarites et des alignements. C'est le
 # regime que l'ancien parcours censurait, et celui que celui-ci doit traverser.
 add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
          --clouds 120 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 1000
-         --min-navigated 500 --min-multiple-shells 300 --min-quotiented 300)
+         --min-navigated 500 --min-multiple-shells 300 --min-quotiented 300
+         --min-reverse 30000 --min-reverse-depth 8 --min-internal-nodes 1000)
 
 # La REVERSE SEARCH est comparee au BFS dans les quatre portes positives : meme
 # ensemble de sommets, memes coquilles, memes ensembles interieurs, sans `seen`,
@@ -241,7 +254,8 @@ add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
 # arbitraire et lots entrants multiples.
 add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential
          --clouds 240 --points 8 --coord 40 --smax 7 --seed 90210 --min-cases 1400
-         --min-navigated 1000 --min-multiple-shells 200)
+         --min-navigated 1000 --min-multiple-shells 200
+         --min-reverse 100000 --min-reverse-depth 12 --min-internal-nodes 2000)
 
 # La dichotomie doit reproduire l'UNIVERS DES COFACES, l'UNIVERS DES FACETTES,
 # lambda(F) et M(F). La verite enumere elle-meme toutes les cofaces de cardinal
@@ -260,13 +274,20 @@ add_test(NAME mhgp3v_first_incidence_internal_nodes COMMAND mhgp3v_first_inciden
 add_test(NAME mhgp3v_first_incidence_high_order COMMAND mhgp3v_first_incidence
          --clouds 12 --points 9 --coord 3 --k 4 --seed 13
          --min-closed 400 --min-empty 80 --min-internal-nodes 20)
-# Une campagne DANS le domaine regulier : zero egalite exterieure, zero support
-# ambigu. C'est la seule ou les candidats a une attache sont des attaches
-# AUTORISEES — et la cible brute y echoue quand meme, ce qui est precisement ce
-# que la note affirme.
+# Une campagne DANS le domaine regulier : zero egalite exterieure (comptee pour
+# TOUT point exterieur sur la coquille, intrus present ou non), zero support
+# essentiel ambigu tous cardinaux confondus, zero point de F sur la coquille hors
+# du support, zero panne de primitive. C'est la seule ou les candidats a une
+# attache sont des attaches AUTORISEES — et la cible brute y echoue quand meme.
+#
+# Les planchers de DESCENTE sont indispensables : sans un plancher d'ETAPES et un
+# plancher sur les DEUX branches terminales, supprimer le bloc de descente laisse
+# les CTests verts.
 add_test(NAME mhgp3v_first_incidence_regular COMMAND mhgp3v_first_incidence
          --clouds 12 --points 14 --coord 4000 --k 3 --seed 11
-         --require-regular --min-attachments 15 --min-closed 400 --min-empty 200)
+         --require-regular --min-attachments 15 --min-closed 400 --min-empty 200
+         --min-descent 20 --min-descent-steps 3 --min-terminal-empty 5
+         --min-terminal-single 10)
 mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
   mhgp3v_first_incidence_reject_irregular "--require-regular exige zero egalite"
   --clouds 12 --points 20 --coord 20 --k 3 --seed 11 --require-regular)
@@ -279,6 +300,9 @@ mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
 mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
   mhgp3v_first_incidence_reject_floor "plancher de couverture non atteint"
   --clouds 2 --points 8 --coord 20 --k 3 --min-closed 1000000)
+mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_descent_floor "plancher de descente non atteint"
+  --clouds 2 --points 8 --coord 20 --k 3 --min-descent-steps 1000000)
 
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential

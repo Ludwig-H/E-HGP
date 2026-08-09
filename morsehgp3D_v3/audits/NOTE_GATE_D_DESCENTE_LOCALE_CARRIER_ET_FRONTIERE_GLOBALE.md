@@ -10,17 +10,18 @@ Cadre : `backend=architecture_math`, `profile=hgp_reduced_quantized_u16`,
 > `ResolveStrictCarrier` n'a pas besoin d'être une boîte noire géométrique
 > globale. Sous la porte régulière, une descente canonique, strictement
 > décroissante en $\beta$, transforme toute facette stricte munie d'un témoin en
-> une facette du cœur $D_k$. Ce qui reste global est exactement le dernier
-> `find` de cette facette dans la partition horizontale antérieure au lot. On
-> supprime ainsi le locator des facettes non-cœur, jamais l'information de
-> composante du cœur.
+> une facette du cœur $D_k$. Dans la **résolution de ce carrier**, ce qui reste
+> global est exactement le dernier `find` de cette facette dans la partition
+> horizontale antérieure au lot. On supprime ainsi le locator des facettes
+> non-cœur, jamais l'information de composante du cœur; la source terminale, les
+> lots, la couverture et les verticales conservent leurs propres globalités.
 
 Cette note affine la cible `ResolveStrictCarrier` de
 [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)
 et répond à la question : une fois le parcours d'arrangement local, quelle
 information ne peut toujours pas être décidée localement ?
 
-## 1. Hypothèses et facet témoin
+## 1. Hypothèses et facette témoin
 
 Fixons un ordre $2\leq k<n$, un niveau de lot $a$ et la source directe ouverte
 $\mathcal{G}_k$. Son cœur $D_k$ est l'ensemble des facettes de ses cofaces. Pour
@@ -36,6 +37,13 @@ La porte est la porte régulière forte, sur **chaque** objet rencontré :
   rationnels exacts;
 - toute erreur, tout budget épuisé et toute sortie hors domaine échouent sans
   résultat partiel.
+
+Ces hypothèses locales suffisent au théorème de descente du §3. Le corollaire
+d'attache et l'assertion `added_points=empty` héritent en plus de la porte
+globale du théorème d'attache unique : elle doit authentifier tous les objets
+nécessaires du plateau silencieux, y compris ceux que le quotient omet. Une
+certification limitée à la seule chaîne parcourue ne promeut donc pas le quotient
+horizontal.
 
 Une *facette témoin sous $a$* est une paire $(H,W)$ telle que $H\subset W$,
 $\lvert H\rvert=k$, $\lvert W\rvert=k+1$ et $\beta(W)<a$. Le témoin ne doit pas
@@ -80,10 +88,18 @@ La descente termine sur $R=H$.
 
 Si $J_H=\varnothing$, l'autorité zéro extra-shell donne aussi
 $(B_H\cap X)\setminus H=\varnothing$. Le témoin $W$ impose
-$\lambda(H)\leq\beta(W)<a$. Le théorème de première incidence dans sa branche
-vide affirme que tous les minimiseurs de $H$ sont des cofaces directes. Une de
-ces cofaces appartient à $\mathcal{G}_k$, donc $H\in D_k$ et la descente termine
-encore sur $R=H$.
+$\lambda(H)\leq\beta(W)<a$. Le lemme de première incidence s'étend ici à tout
+$k$-ensemble, sans supposer déjà $H\in D_k$. En effet, soit
+$Q=H\cup\lbrace x\rbrace$ un minimiseur. On a
+$\beta(Q)>\beta(H)$. Si un outsider $y$ était strictement intérieur à $B_Q$,
+$B_Q$ couvrirait $H\cup\lbrace y\rbrace$. L'égalité
+$\beta(H\cup\lbrace y\rbrace)=\beta(Q)$ ferait de $B_Q$ son unique miniboule;
+comme $y$ n'est pas sur sa frontière, un support positif correspondant serait
+contenu dans $H$ et ferait aussi de $B_Q$ une miniboule de $H$, contradiction.
+Ainsi $\beta(H\cup\lbrace y\rbrace)<\beta(Q)$, ce qui contredit la minimalité de
+$Q$. Le minimiseur est donc de Gabriel ouverte et appartient à la source
+terminale $\mathcal{G}_k$.
+Par conséquent $H\in D_k$ et la descente termine encore sur $R=H$.
 
 Le témoin est indispensable dans cette dernière branche : $J_H=\varnothing$
 seul ne prouve pas que la première coface de $H$ arrive avant le cutoff $a$.
@@ -143,7 +159,8 @@ $q_R=1$ peut attacher une facette à une composante sans créer de nœud public 
 sans ajouter de point; la forêt publique et la seule couverture ne suffisent
 donc pas à reconstruire le locator. Abstraitement, $m$ handles de cœur peuvent
 porter une partition parmi $B_m$ partitions possibles. La représenter ou la
-reconstruire demande jusqu'à $\log_2 B_m=\Theta(m\log m)$ bits d'information.
+reconstruire demande au pire au moins $\log_2 B_m=\Theta(m\log m)$ bits
+d'information.
 C'est une borne du modèle du fold, pas l'affirmation que toute partition de Bell
 est réalisée par une famille u16 particulière.
 
@@ -184,12 +201,14 @@ différée doit engager le cutoff strict : résoudre contre l'état fermé au ni
 $a$ au lieu de l'état strictement antérieur peut changer une multifusion en
 continuation.
 
-Si $\ell_F$ est la longueur de la descente et $L=\sum_F\ell_F$, un scan complet
-du nuage à chaque census donne un coût $O(nL)$ au pire. Le chemin ou son reçu
-demande $O(kL)$ identifiants, plus les niveaux rationnels; l'état courant de la
-descente peut rester $O(n)+O(k)$ hors index et runs. Le fold conserve au total
-$O(H)$ informations de handles ou de versions en RAM ou sur disque. Aucune borne
-utile sur $L$ n'est démontrée.
+Si $A$ est le nombre de descentes, $\ell_F$ leur nombre de pas et
+$L=\sum_F\ell_F$, chaque descente visite $\ell_F+1$ facettes. Un scan complet du
+nuage à chaque census donne donc un coût $O(n(A+L))$ au pire. Le chemin ou son
+reçu demande $O(k(A+L))$ identifiants, plus les niveaux rationnels; l'état
+courant de la descente peut rester $O(n)+O(k)$ hors index et runs. Si
+$N_{\mathrm{ver}}$ désigne le nombre total de handles et versions de composante,
+le fold conserve $O(N_{\mathrm{ver}})$ informations en RAM ou sur disque.
+Aucune borne utile sur $L$ n'est démontrée.
 
 ## 6. Certificat minimal et portes de mutation
 
@@ -216,9 +235,10 @@ La fixture u16 à dix points de la note d'attache, dont les trois bras immédiat
 sont hors de $D_3$, doit forcer au moins une vraie descente ou un refus fermé.
 La fixture rationnelle à sept points, mise à l'échelle u16 ci-dessous, possède
 `F=016`, `T=126` et le chemin strict `126--1246--124--0124--024`, où les deux
-cofaces intermédiaires ne sont pas directes. Elle réfute un lookup immédiat ou
-un resolver artificiellement borné à un relais; elle ne prétend pas mesurer la
-longueur de la descente canonique.
+cofaces intermédiaires ne sont pas directes. Elle réfute le lookup immédiat et
+illustre un chemin strict passant par des relais non directs; elle ne borne pas
+la longueur de la descente canonique, qui atteint ici une autre clef cœur en une
+étape.
 
 ```text
 (0,400,275) (600,100,324) (0,200,294) (600,600,271)

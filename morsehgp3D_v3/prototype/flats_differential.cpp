@@ -250,6 +250,18 @@ struct Coverage {
   long long reverse_vertices = 0;
   long long reverse_depth = 0;
   long long reverse_children = 0;
+  long long reverse_flats = 0;
+  long long reverse_parent_queries = 0;
+  long long reverse_skipped = 0;
+  long long reverse_indexed_vertices = 0;
+  long long reverse_triplets = 0;
+  long long reverse_closures = 0;
+  long long index_internal_nodes = 0;
+  long long index_nodes_visited = 0;
+  long long index_leaves_visited = 0;
+  long long sink_vertices = 0;
+  long long sink_high_water = 0;
+  long long sink_interruptions = 0;
 };
 static Coverage coverage;
 
@@ -472,11 +484,122 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
     mhgp3v::CloudStatus bstatus = mhgp3v::CloudStatus::kOk, rstatus = mhgp3v::CloudStatus::kOk;
     const auto by_bfs = mhgp3v::navigate_shallow(pts, s_max - 2, &bst, &bstatus, false);
     const auto by_reverse = mhgp3v::reverse_search_shallow(pts, s_max - 2, &rst, &rstatus);
+    // Le chemin INDEXE doit etre juge lui aussi : sans cela la porte ne qualifie
+    // que les balayages exhaustifs du pinceau, pas celui qui servira au produit.
+    {
+      // FEUILLE DE QUATRE, et non seize : tous les nuages permanents ont au plus
+      // treize points, donc un arbre a feuilles de seize n'a qu'une feuille et le
+      // rejeu indexe ne qualifiait aucun elagage interne.
+      mhgp3v::CertifiedIndex tree;
+      tree.build(pts, 4);
+      for (const auto& node : tree.nodes) if (node.left >= 0) ++coverage.index_internal_nodes;
+      mhgp3v::FlatStatistics ist{};
+      mhgp3v::CloudStatus istatus = mhgp3v::CloudStatus::kOk;
+      const auto by_indexed =
+          mhgp3v::reverse_search_shallow(pts, s_max - 2, &ist, &istatus, &tree);
+      std::map<std::vector<i32>, std::vector<i32>> a, b;
+      for (const auto& v : by_reverse) a[v.shell] = v.interior;
+      for (const auto& v : by_indexed) b[v.shell] = v.interior;
+      // La projection dans une `map` masquerait un doublon indexe : la taille est
+      // donc comparee au nombre de RECORDS, des deux cotes.
+      if (b.size() != by_indexed.size()) {
+        printf("[%s] s_max=%2d REVERSE INDEXE : %zu sommets pour %zu coquilles distinctes"
+               " — un doublon indexe etait masque par la projection\n", tag, s_max,
+               by_indexed.size(), b.size());
+        ok = false;
+      }
+      if (istatus != rstatus || a != b) {
+        printf("[%s] s_max=%2d REVERSE INDEXE != REVERSE : statut %s contre %s, %zu contre %zu\n",
+               tag, s_max, mhgp3v::cloud_status_name(istatus),
+               mhgp3v::cloud_status_name(rstatus), b.size(), a.size());
+        ok = false;
+      }
+      coverage.reverse_flats += ist.reverse_flats_enumerated;
+      coverage.reverse_parent_queries += ist.reverse_parent_queries;
+      coverage.reverse_triplets += ist.reverse_triplets_scanned;
+      coverage.reverse_closures += ist.reverse_closures_built;
+      coverage.index_nodes_visited += tree.nodes_visited;
+      coverage.index_leaves_visited += tree.leaves_visited;
+      // LE SINK BORNE, juge par un consommateur qui ne tient RIEN : il compte et
+      // replie un hachage independant de l'ordre. Si le compte et le repli egalent
+      // ceux de la sortie materialisee, le parcours a bien rendu la meme chose
+      // sans qu'aucun consommateur ne l'accumule. Le high-water des slots vifs est
+      // publie par le parcours lui-meme.
+      {
+        mhgp3v::FlatStatistics sst{};
+        mhgp3v::CloudStatus sstatus = mhgp3v::CloudStatus::kOk;
+        long long count = 0;
+        unsigned long long fold = 0;
+        mhgp3v::reverse_search_stream(pts, s_max - 2, &sst, &sstatus,
+                                      [&](const mhgp3v::flats::Vertex& v) {
+          ++count;
+          unsigned long long h = 1469598103934665603ULL;
+          for (i32 z : v.shell) h = (h ^ (unsigned long long)(z + 1)) * 1099511628211ULL;
+          h = (h ^ 0x9e37ULL) * 1099511628211ULL;
+          for (i32 z : v.interior) h = (h ^ (unsigned long long)(z + 1)) * 1099511628211ULL;
+          fold += h;                            // somme : independante de l'ordre
+          return true;
+        });
+        long long want_count = 0;
+        unsigned long long want_fold = 0;
+        for (const auto& v : by_reverse) {
+          ++want_count;
+          unsigned long long h = 1469598103934665603ULL;
+          for (i32 z : v.shell) h = (h ^ (unsigned long long)(z + 1)) * 1099511628211ULL;
+          h = (h ^ 0x9e37ULL) * 1099511628211ULL;
+          for (i32 z : v.interior) h = (h ^ (unsigned long long)(z + 1)) * 1099511628211ULL;
+          want_fold += h;
+        }
+        if (sstatus != rstatus || count != want_count || fold != want_fold) {
+          printf("[%s] s_max=%2d SINK != MATERIALISE : statut %s contre %s, %lld contre %lld\n",
+                 tag, s_max, mhgp3v::cloud_status_name(sstatus),
+                 mhgp3v::cloud_status_name(rstatus), count, want_count);
+          ok = false;
+        }
+        coverage.sink_vertices += count;
+        coverage.sink_high_water = std::max(coverage.sink_high_water, sst.reverse_live_high_water);
+        // L'INTERRUPTION est une porte, pas une politesse : un sink qui s'arrete
+        // doit stopper le parcours et rendre un statut non `kOk`, sans quoi une
+        // sortie tronquee passerait pour complete.
+        if (want_count > 1) {
+          mhgp3v::FlatStatistics ist2{};
+          mhgp3v::CloudStatus istatus2 = mhgp3v::CloudStatus::kOk;
+          long long seen = 0;
+          mhgp3v::reverse_search_stream(pts, s_max - 2, &ist2, &istatus2,
+                                        [&](const mhgp3v::flats::Vertex&) {
+            return ++seen < 1;
+          });
+          if (seen != 1 || istatus2 != mhgp3v::CloudStatus::kInvariantViolated) {
+            printf("[%s] s_max=%2d SINK INTERROMPU : %lld sommets, statut %s\n", tag, s_max,
+                   seen, mhgp3v::cloud_status_name(istatus2));
+            ok = false;
+          }
+          ++coverage.sink_interruptions;
+        }
+      }
+      // Trois points DISTINCTS d'une meme sphere ne sont jamais alignes : une
+      // droite coupe une sphere en au plus deux points. Le garde de colinearite de
+      // `for_each_flat` est donc inactif sur une coquille, et les deux compteurs
+      // doivent etre EGAUX. Une divergence signifierait une coquille non
+      // cospherique ou un point double, c'est-a-dire un invariant rompu en amont.
+      if (ist.reverse_triplets_scanned != ist.reverse_closures_built) {
+        printf("[%s] s_max=%2d COQUILLE : %lld triplets pour %lld fermetures — trois points"
+               " alignes sur une sphere\n", tag, s_max, ist.reverse_triplets_scanned,
+               ist.reverse_closures_built);
+        ok = false;
+      }
+      if (istatus == mhgp3v::CloudStatus::kOk)
+        coverage.reverse_indexed_vertices += (long long)by_indexed.size();
+    }
     if (bstatus != rstatus) {
       printf("[%s] s_max=%2d REVERSE : statut %s contre %s\n", tag, s_max,
              mhgp3v::cloud_status_name(rstatus), mhgp3v::cloud_status_name(bstatus));
       ok = false;
-    } else if (bstatus == mhgp3v::CloudStatus::kOk) {
+    } else if (bstatus != mhgp3v::CloudStatus::kOk) {
+      // Deux statuts egaux mais non `kOk` ne doivent pas faire sauter la porte en
+      // silence : on compte ce cas pour qu'un plancher puisse l'interdire.
+      ++coverage.reverse_skipped;
+    } else {
       std::map<std::vector<i32>, std::vector<i32>> from_bfs, from_reverse;
       for (const auto& v : by_bfs) from_bfs[v.shell] = v.interior;
       for (const auto& v : by_reverse) from_reverse[v.shell] = v.interior;
@@ -605,6 +728,24 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
       std::sort(sup.begin(), sup.end());
       out.insert({sup, s.rank});
     }
+    // L'EQUIVARIANCE DE LA REVERSE SEARCH, et pas seulement celle du catalogue.
+    // Ce qui est geometrique est l'ENSEMBLE visite : le germe, l'arbre et l'ordre
+    // des fils dependent de la numerotation, puisque la direction canonique du
+    // parent compare des clefs d'indices. Ce que la signature exige est donc que
+    // le meme ensemble de sommets soit atteint depuis une AUTRE racine.
+    if ((int)q.size() >= 4) {
+      mhgp3v::FlatStatistics rst{};
+      mhgp3v::CloudStatus rstatus = mhgp3v::CloudStatus::kOk;
+      const auto by_reverse = mhgp3v::reverse_search_shallow(q, s_max - 2, &rst, &rstatus);
+      out.insert({std::vector<i32>{(i32)(-3000 - (int)rstatus)}, 0});
+      for (const auto& v : by_reverse) {
+        std::vector<i32> shell;
+        for (i32 z : v.shell) shell.push_back((i32)back[(size_t)z]);
+        std::sort(shell.begin(), shell.end());
+        shell.insert(shell.begin(), -4000);
+        out.insert({shell, v.level});
+      }
+    }
     return out;
   };
   std::vector<int> identity((size_t)pts.size());
@@ -628,6 +769,7 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
 int main(int argc, char** argv) {
   int clouds = 400, npoints = 11, coord = 24, smax_hi = 6, min_cases = 1;
   int min_navigated = 0, min_vertices = 0, min_multiple_shells = 0, min_quotiented = 0;
+  int min_reverse = 0, min_reverse_depth = 0, min_internal_nodes = 0;
   long long seed = 4242;
   // `atoi` acceptait « 0junk » et rendait zero : une campagne vide passait pour
   // verte. Lecture INTEGRALE stricte, sinon code 2 avant tout calcul.
@@ -669,6 +811,9 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--min-vertices")) ok_argument = take(&min_vertices, 0, 2000000000);
     else if (!strcmp(argv[i], "--min-multiple-shells")) ok_argument = take(&min_multiple_shells, 0, 1000000000);
     else if (!strcmp(argv[i], "--min-quotiented")) ok_argument = take(&min_quotiented, 0, 1000000000);
+    else if (!strcmp(argv[i], "--min-reverse")) ok_argument = take(&min_reverse, 0, 2000000000);
+    else if (!strcmp(argv[i], "--min-reverse-depth")) ok_argument = take(&min_reverse_depth, 0, 100000);
+    else if (!strcmp(argv[i], "--min-internal-nodes")) ok_argument = take(&min_internal_nodes, 0, 2000000000);
     else if (!strcmp(argv[i], "--seed")) {
       if (has_value && integer(argv[i + 1], &value) && value >= 0 && value <= 4294967295LL) {
         ++i; seed = value; ok_argument = true;
@@ -869,8 +1014,92 @@ int main(int argc, char** argv) {
         }
       }
     }
+    {   // (c) `box` ET `sign_disagreement`, les deux requetes du pinceau, jugees
+        // elles aussi. L'auto-test ne portait que sur `closed_ball` : les deux
+        // primitives qui elaguent reellement le balayage du pinceau n'etaient
+        // qualifiees par rien.
+      std::vector<P3> cube;
+      for (int x = 0; x < 5; ++x) for (int y = 0; y < 4; ++y) for (int z = 0; z < 3; ++z)
+        cube.push_back(pt(x * 6, y * 9, z * 4));
+      mhgp3v::CertifiedIndex tree;
+      tree.build(cube, 4);
+      std::mt19937 local(777);
+      std::uniform_int_distribution<int> coordinate(-4, 32);
+      std::uniform_int_distribution<int> pick(0, (int)cube.size() - 1);
+      for (int trial = 0; trial < 200 && index_faults == 0; ++trial) {
+        long long lo[3], hi[3];
+        for (int d = 0; d < 3; ++d) {
+          const int u = coordinate(local), v = coordinate(local);
+          lo[d] = std::min(u, v);
+          hi[d] = std::max(u, v);
+        }
+        std::set<i32> by_index, by_scan;
+        long long touched = 0;
+        tree.box(lo, hi, &touched, [&](i32 id) { by_index.insert(id); });
+        for (i32 z = 0; z < (i32)cube.size(); ++z) {
+          const P3& p = cube[(size_t)z];
+          const long long c[3] = {(long long)p.x, (long long)p.y, (long long)p.z};
+          bool in = true;
+          for (int d = 0; d < 3; ++d) if (c[d] < lo[d] || c[d] > hi[d]) in = false;
+          if (in) by_scan.insert(z);
+        }
+        if (by_index != by_scan) {
+          printf("[index] boite : %zu contre %zu par balayage\n", by_index.size(),
+                 by_scan.size());
+          ++index_faults;
+        }
+      }
+      for (int trial = 0; trial < 300 && index_faults == 0; ++trial) {
+        mhgp::Sphere a{}, b{};
+        const int i0 = pick(local), i1 = pick(local), i2 = pick(local), i3 = pick(local);
+        const int j0 = pick(local), j1 = pick(local), j2 = pick(local), j3 = pick(local);
+        if (!mhgp::sphere4(cube[(size_t)i0], cube[(size_t)i1], cube[(size_t)i2],
+                           cube[(size_t)i3], &a)) continue;
+        if (!mhgp::sphere4(cube[(size_t)j0], cube[(size_t)j1], cube[(size_t)j2],
+                           cube[(size_t)j3], &b)) continue;
+        std::set<i32> by_index, by_scan;
+        long long touched = 0;
+        tree.sign_disagreement(a, b, &touched, [&](i32 id) { by_index.insert(id); });
+        for (i32 z = 0; z < (i32)cube.size(); ++z) {
+          const int sa = mhgp::sphere_side(a, cube[(size_t)z]);
+          const int sb = mhgp::sphere_side(b, cube[(size_t)z]);
+          const int na = sa < 0 ? -1 : (sa > 0 ? 1 : 0);
+          const int nb = sb < 0 ? -1 : (sb > 0 ? 1 : 0);
+          if (na != nb) by_scan.insert(z);
+        }
+        // La requete est SURE, pas exacte : elle peut rendre des points d'accord,
+        // jamais en omettre un de desaccord. C'est cette inclusion qui est jugee.
+        for (i32 z : by_scan)
+          if (by_index.find(z) == by_index.end()) {
+            printf("[index] desaccord ternaire : le point %d manque\n", z);
+            ++index_faults;
+          }
+      }
+      // ELAGAGE REELLEMENT EXERCE. Un arbre a feuille unique donnerait les memes
+      // resultats en visitant TOUT : la porte exige donc qu'au moins une requete
+      // visite strictement moins de noeuds que l'arbre n'en contient.
+      {
+        long long best = (long long)tree.nodes.size();
+        bool pruned = false;
+        for (int trial = 0; trial < 100 && !pruned; ++trial) {
+          long long lo[3], hi[3];
+          for (int d = 0; d < 3; ++d) { lo[d] = trial; hi[d] = trial + 2; }
+          tree.nodes_visited = 0;
+          long long touched = 0;
+          tree.box(lo, hi, &touched, [](i32) {});
+          if (tree.nodes_visited < best) { best = tree.nodes_visited; pruned = true; }
+        }
+        if (!pruned || (int)tree.nodes.size() < 3) {
+          printf("[index] aucun elagage exerce : %lld noeuds visites pour %zu noeuds\n", best,
+                 tree.nodes.size());
+          ++index_faults;
+        }
+      }
+    }
     if (index_faults) failures += index_faults;
-    else printf("[index] grande sphere, noeuds internes et accord exhaustif verifies\n");
+    else
+      printf("[index] grande sphere, noeuds internes, boite, desaccord ternaire et accord"
+             " exhaustif verifies\n");
   }
 
   // FRONTIERE DE DOMAINE u16, verifiee a l'API et non au CLI. Les bornes de
@@ -987,16 +1216,47 @@ int main(int argc, char** argv) {
          coverage.full_sweeps);
   printf("gate D : sommets avec parent teste=%lld  racines=%lld\n",
          coverage.parent_vertices, coverage.parent_roots);
-  printf("reverse : sommets=%lld  profondeur max=%lld  fils testes=%lld\n",
-         coverage.reverse_vertices, coverage.reverse_depth, coverage.reverse_children);
+  printf("reverse : sommets=%lld  indexes=%lld  profondeur max=%lld  fils testes=%lld"
+         "  flats livres=%lld  requetes de parent=%lld  portes sautees=%lld\n",
+         coverage.reverse_vertices, coverage.reverse_indexed_vertices, coverage.reverse_depth,
+         coverage.reverse_children, coverage.reverse_flats, coverage.reverse_parent_queries,
+         coverage.reverse_skipped);
+  // TRAVAIL TOTAL, et non les seuls flats livres. Un triplet ecarte a paye sa
+  // fermeture : publier « flats par sommet » sans ces deux colonnes flatte le
+  // ratio d'un facteur qui est ici mesure, pas suppose.
+  printf("        : triplets balayes=%lld  fermetures reconstruites=%lld"
+         "  noeuds de l'index construits=%lld visites=%lld dont feuilles=%lld\n",
+         coverage.reverse_triplets, coverage.reverse_closures, coverage.index_internal_nodes,
+         coverage.index_nodes_visited, coverage.index_leaves_visited);
+  // Le HIGH-WATER est la borne revendiquee : slots vifs du chemin, sortie exclue.
+  // Le rapporter a cote du nombre de sommets rendus est tout l'interet du sink.
+  printf("        : sink sommets rendus=%lld  slots vifs maximum=%lld  interruptions=%lld\n",
+         coverage.sink_vertices, coverage.sink_high_water, coverage.sink_interruptions);
   printf("\n%d cas, %d desaccords\n", cases, failures);
   if (coverage.navigated_clouds < min_navigated || coverage.vertices < min_vertices
       || coverage.multiple_shells < min_multiple_shells
-      || coverage.quotiented < min_quotiented) {
+      || coverage.quotiented < min_quotiented || coverage.reverse_vertices < min_reverse
+      || coverage.reverse_depth < min_reverse_depth
+      || coverage.reverse_indexed_vertices < min_reverse
+      || coverage.index_internal_nodes < min_internal_nodes
+      || coverage.index_nodes_visited < min_internal_nodes
+      || coverage.reverse_parent_queries < min_reverse
+      || coverage.sink_vertices < min_reverse || coverage.sink_interruptions < min_reverse_depth) {
     printf("ECHEC : plancher de couverture non atteint — navigues %lld/%d, sommets %lld/%d, "
            "coquilles multiples %lld/%d, triplets quotientes %lld/%d\n",
            coverage.navigated_clouds, min_navigated, coverage.vertices, min_vertices,
            coverage.multiple_shells, min_multiple_shells, coverage.quotiented, min_quotiented);
+    printf("        reverse %lld/%d, indexes %lld/%d, requetes de parent %lld/%d,"
+           " profondeur %lld/%d, noeuds internes %lld/%d\n", coverage.reverse_vertices,
+           min_reverse, coverage.reverse_indexed_vertices, min_reverse,
+           coverage.reverse_parent_queries, min_reverse, coverage.reverse_depth,
+           min_reverse_depth, coverage.index_internal_nodes, min_internal_nodes);
+    return 3;
+  }
+  // Une porte SAUTEE n'est pas une porte passee : le plancher l'interdit.
+  if (min_reverse > 0 && coverage.reverse_skipped > 0) {
+    printf("ECHEC : %lld portes reverse sautees pour statut non kOk — un plancher reverse"
+           " exige zero saut\n", coverage.reverse_skipped);
     return 3;
   }
   if (cases < min_cases) {

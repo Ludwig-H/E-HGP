@@ -304,9 +304,18 @@ struct FlatStatistics {
   long long reverse_depth_max = 0;        // profondeur maximale de la pile
   long long reverse_children_tested = 0;  // voisins soumis au test de parent
   long long reverse_backtracks = 0;
+  long long reverse_flats_enumerated = 0;   // flats CANONIQUES livres au callback
+  long long reverse_parent_queries = 0;     // requetes de voisin du calcul de parent
+  // Travail TOTAL de l'enumeration, et non les seuls flats livres : un triplet
+  // ecarte parce qu'il n'est pas la base canonique de sa fermeture a quand meme
+  // paye sa fermeture. Sans ces deux compteurs la queue multiplicitaire reste
+  // sous-instrumentee et tout ratio publie est optimiste.
+  long long reverse_triplets_scanned = 0;
+  long long reverse_closures_built = 0;
+  long long reverse_live_high_water = 0;   // slots vifs du chemin, sortie exclue
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 31 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 36 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
@@ -335,6 +344,11 @@ struct FlatStatistics {
     reverse_depth_max = std::max(reverse_depth_max, o.reverse_depth_max);
     reverse_children_tested += o.reverse_children_tested;
     reverse_backtracks += o.reverse_backtracks;
+    reverse_flats_enumerated += o.reverse_flats_enumerated;
+    reverse_parent_queries += o.reverse_parent_queries;
+    reverse_triplets_scanned += o.reverse_triplets_scanned;
+    reverse_closures_built += o.reverse_closures_built;
+    reverse_live_high_water = std::max(reverse_live_high_water, o.reverse_live_high_water);
   }
 };
 
@@ -772,6 +786,11 @@ struct CertifiedIndex {
   std::vector<mhgp::i32> order;
   const std::vector<mhgp::P3>* points = nullptr;
   int leaf_size = 16;
+  // NOEUDS REELLEMENT VISITES. « Points touches » ne dit pas si l'arbre elague :
+  // un arbre a feuille unique touche tout le nuage en une descente et affiche le
+  // meme compteur qu'un arbre profond qui coupe. Celui-ci mesure la descente.
+  mutable long long nodes_visited = 0;
+  mutable long long leaves_visited = 0;
 
   void build(const std::vector<mhgp::P3>& cloud, int leaf = 16) {
     points = &cloud;
@@ -937,8 +956,10 @@ struct CertifiedIndex {
     stack[top++] = 0;
     while (top > 0) {
       const Node& node = nodes[(std::size_t)stack[--top]];
+      ++nodes_visited;
       if (!node_may_touch(node, ball)) continue;
       if (node.left < 0) {
+        ++leaves_visited;
         for (int t = node.begin; t < node.end; ++t) {
           const mhgp::i32 id = order[(std::size_t)t];
           ++(*touched);
@@ -958,8 +979,10 @@ struct CertifiedIndex {
   void descend_all(int index, const mhgp::Sphere& sphere, const LooseBall& ball,
                    long long* touched, Fn&& visit) const {
     const Node& node = nodes[(std::size_t)index];
+    ++nodes_visited;
     if (!node_may_touch(node, ball)) return;
     if (node.left < 0) {
+      ++leaves_visited;
       for (int t = node.begin; t < node.end; ++t) {
         const mhgp::i32 id = order[(std::size_t)t];
         ++(*touched);
@@ -1033,10 +1056,12 @@ struct CertifiedIndex {
     while (top > 0) {
       const int self = stack[--top];
       const Node& node = nodes[(std::size_t)self];
+      ++nodes_visited;
       const Straddle sa = classify(node, la), sb = classify(node, lb);
       if ((sa.certainly_inside && sb.certainly_inside) ||
           (sa.certainly_outside && sb.certainly_outside)) continue;
       if (node.left < 0) {
+        ++leaves_visited;
         for (int t = node.begin; t < node.end; ++t) {
           const mhgp::i32 id = order[(std::size_t)t];
           ++(*touched);
@@ -1060,6 +1085,7 @@ struct CertifiedIndex {
                                const LooseBall& la, const LooseBall& lb,
                                long long* touched, Fn&& visit) const {
     const Node& node = nodes[(std::size_t)index];
+    ++nodes_visited;
     const Straddle sa = classify(node, la), sb = classify(node, lb);
     if ((sa.certainly_inside && sb.certainly_inside) ||
         (sa.certainly_outside && sb.certainly_outside)) return;
@@ -1085,11 +1111,13 @@ struct CertifiedIndex {
     stack[top++] = 0;
     while (top > 0) {
       const Node& node = nodes[(std::size_t)stack[--top]];
+      ++nodes_visited;
       bool disjoint = false;
       for (int d = 0; d < 3; ++d)
         if ((long long)node.hi[d] < lo[d] || (long long)node.lo[d] > hi[d]) disjoint = true;
       if (disjoint) continue;
       if (node.left < 0) {
+        ++leaves_visited;
         for (int t = node.begin; t < node.end; ++t) {
           const mhgp::i32 id = order[(std::size_t)t];
           const mhgp::P3& p = (*points)[(std::size_t)id];
@@ -1101,8 +1129,37 @@ struct CertifiedIndex {
       } else if (top + 2 <= 128) {
         stack[top++] = node.left;
         stack[top++] = node.right;
+      } else {
+        // PILE SATUREE : les deux autres requetes retombaient sur une descente
+        // recursive, celle-ci OMETTAIT le sous-arbre en silence. Une requete
+        // d'index n'a pas le droit de perdre un point.
+        box_at(node.left, lo, hi, touched, visit);
+        box_at(node.right, lo, hi, touched, visit);
       }
     }
+  }
+
+  template <class Fn>
+  void box_at(int index, const long long* lo, const long long* hi, long long* touched,
+              Fn&& visit) const {
+    const Node& node = nodes[(std::size_t)index];
+    ++nodes_visited;
+    for (int d = 0; d < 3; ++d)
+      if ((long long)node.hi[d] < lo[d] || (long long)node.lo[d] > hi[d]) return;
+    if (node.left < 0) {
+      ++leaves_visited;
+      for (int t = node.begin; t < node.end; ++t) {
+        const mhgp::i32 id = order[(std::size_t)t];
+        const mhgp::P3& p = (*points)[(std::size_t)id];
+        if (p.x < lo[0] || p.x > hi[0] || p.y < lo[1] || p.y > hi[1] ||
+            p.z < lo[2] || p.z > hi[2]) continue;
+        ++(*touched);
+        visit(id);
+      }
+      return;
+    }
+    box_at(node.left, lo, hi, touched, visit);
+    box_at(node.right, lo, hi, touched, visit);
   }
 };
 
@@ -1180,8 +1237,14 @@ struct FlatAtVertex {
 // Enumere les flats fermes de rang trois incidents a v, chacun UNE fois, dans
 // l'ordre des triplets de la coquille. Le quotient est le meme que celui du
 // BFS : un triplet qui n'est pas la base canonique de sa fermeture est ecarte.
+//
+// Le callback rend `false` pour ARRETER. Sans cela, une reverse search qui vient
+// de trouver son fils continuait d'enumerer les triplets restants et de
+// reconstruire leurs fermetures : le `return` du lambda ne sortait que du
+// callback. C'etait a la fois du travail jete et un compteur trompeur.
 template <class Fn>
-inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& visit) {
+inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& visit,
+                          long long* triplets = nullptr, long long* closures = nullptr) {
   const int m = (int)v.shell.size();
   std::vector<i32> closure;
   for (int i = 0; i < m; ++i)
@@ -1189,6 +1252,7 @@ inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& v
   for (int k = j + 1; k < m; ++k) {
     const i32 ta = v.shell[(std::size_t)i], tb = v.shell[(std::size_t)j],
               tc = v.shell[(std::size_t)k];
+    if (triplets != nullptr) ++*triplets;
     {
       const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)tb], points[(std::size_t)ta]);
       const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)tc], points[(std::size_t)ta]);
@@ -1196,6 +1260,7 @@ inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& v
       if (x.x == 0 && x.y == 0 && x.z == 0) continue;
     }
     closure.clear();
+    if (closures != nullptr) ++*closures;
     for (int t = 0; t < m; ++t) {
       const i32 z = v.shell[(std::size_t)t];
       if (orient3d_exact(points[(std::size_t)ta], points[(std::size_t)tb],
@@ -1226,7 +1291,7 @@ inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& v
     FlatAtVertex flat;
     flat.base[0] = ta; flat.base[1] = tb; flat.base[2] = tc;
     flat.closure = closure;
-    visit(flat);
+    if (!visit(flat)) return;
   }
 }
 
@@ -1235,7 +1300,8 @@ inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& v
 // BFS : rester dans la chambre, et faire croitre L_h ou decroitre Q_r.
 inline bool canonical_parent(const std::vector<P3>& points, const Vertex& v,
                              const std::vector<i32>& root_base, FlatAtVertex* flat_out,
-                             int* orientation_out) {
+                             int* orientation_out, long long* triplets = nullptr,
+                             long long* closures = nullptr) {
   const i32 site = v.interior.empty() ? -1 : v.interior.front();
   std::vector<i32> best_key;
   bool found = false;
@@ -1266,7 +1332,8 @@ inline bool canonical_parent(const std::vector<P3>& points, const Vertex& v,
         found = true;
       }
     }
-  });
+    return true;                     // le parent exige TOUS les flats
+  }, triplets, closures);
   return found;
 }
 
@@ -1801,30 +1868,39 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
 // de parent, donc une enumeration de flats et une requete de voisin ; une grande
 // coquille peut avoir un nombre combinatoire de flats. Ce que cela rend, c'est la
 // memoire — et l'absence d'ecriture partagee.
-inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp::P3>& points,
-                                                         int level_ceiling,
-                                                         FlatStatistics* st,
-                                                         CloudStatus* status,
-                                                         const CertifiedIndex* index = nullptr) {
+//
+// SORTIE BORNEE. Le parcours ne materialise plus ses sommets : il les REND un a un
+// a un sink, et sa memoire vive est la PILE — par niveau, l'indice du fils et la
+// coquille du parent — plus le scratch d'une requete. Ce n'etait pas le cas tant
+// que l'endpoint rendait un `std::vector<Vertex>` : la sortie etait alors
+// Omega(V), et aucun gain memoire n'etait demontre. Le high-water des slots vifs
+// est PUBLIE, pas suppose.
+//
+// Le sink rend `false` pour interrompre. Une sortie interrompue n'est pas une
+// sortie complete : le statut devient `kInvariantViolated` seulement si le sink
+// n'a jamais demande l'arret, sinon l'appelant sait ce qu'il a fait.
+template <class Sink>
+inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
+                                  int level_ceiling, FlatStatistics* st, CloudStatus* status,
+                                  Sink&& sink, const CertifiedIndex* index = nullptr) {
   using namespace flats;
-  std::vector<Vertex> visited;
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
-  if (n < 4) { *status = CloudStatus::kTooFewPoints; return visited; }
-  if (!inside_declared_grid(points)) { *status = CloudStatus::kOutsideDeclaredGrid; return visited; }
+  if (n < 4) { *status = CloudStatus::kTooFewPoints; return; }
+  if (!inside_declared_grid(points)) { *status = CloudStatus::kOutsideDeclaredGrid; return; }
   if (has_duplicate_coordinates(points)) {
     *status = CloudStatus::kDuplicateCoordinates;
-    return visited;
+    return;
   }
   if (!affine_dimension_is_three(points)) {
     *status = CloudStatus::kAffineDimensionBelowThree;
-    return visited;
+    return;
   }
-  if (level_ceiling < 0) return visited;
+  if (level_ceiling < 0) return;
 
   Vertex seed;
   const CloudStatus seeded = seed_level_zero(points, st, &seed);
-  if (seeded != CloudStatus::kOk) { *status = seeded; return visited; }
+  if (seeded != CloudStatus::kOk) { *status = seeded; return; }
 
   std::vector<i32> root_base;
   for (i32 z : seed.shell) {
@@ -1846,21 +1922,47 @@ inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp:
     }
     root_base.push_back(z);
   }
-  if (root_base.size() < 4) { *status = CloudStatus::kInvariantViolated; return visited; }
+  if (root_base.size() < 4) { *status = CloudStatus::kInvariantViolated; return; }
 
   // Le parent d'un sommet, recalcule localement : une direction canonique puis
   // UNE requete de voisin.
+  // Deux issues a ne pas confondre. Aucune orientation admissible signifie que w
+  // EST la racine — c'est certifie. Une orientation admissible dont la requete de
+  // voisin echoue est en revanche une contradiction : le theoreme demontre que
+  // l'arete du parent est bornee. On la remonte comme telle.
+  enum class ParentOutcome { kFound, kIsRoot, kBroken };
   auto parent_of = [&](const Vertex& w, Vertex* mother) {
     FlatAtVertex flat;
     int orientation = 0;
-    if (!canonical_parent(points, w, root_base, &flat, &orientation)) return false;
-    return neighbour_along(points, w, flat, orientation, index, st, mother);
+    if (!canonical_parent(points, w, root_base, &flat, &orientation,
+                          &st->reverse_triplets_scanned, &st->reverse_closures_built)) {
+      // Et le certificat de racine doit etre EXHIBE. Classer « aucune direction
+      // admissible » en `kIsRoot` sans verifier que w est le germe laissait un
+      // non-germe sans direction filer avec `kOk` : c'est une contradiction, pas
+      // un sommet a ignorer.
+      return w.shell == seed.shell ? ParentOutcome::kIsRoot : ParentOutcome::kBroken;
+    }
+    ++st->reverse_parent_queries;
+    if (!neighbour_along(points, w, flat, orientation, index, st, mother))
+      return ParentOutcome::kBroken;
+    return ParentOutcome::kFound;
   };
 
   struct Level { Vertex vertex; std::size_t next_child = 0; };
   std::vector<Level> stack;
-  stack.push_back(Level{seed, 0});
-  visited.push_back(seed);
+  // SLOTS VIFS : la somme des tailles des sommets du chemin. C'est la borne de
+  // memoire que le parcours revendique, donc celle qu'il doit publier.
+  long long live = 0;
+  auto push = [&](const Vertex& v) {
+    live += (long long)(v.shell.size() + v.interior.size());
+    st->reverse_live_high_water = std::max(st->reverse_live_high_water, live);
+    stack.push_back(Level{v, 0});
+  };
+  bool interrupted = false;
+  // Le germe passe par le MEME contrat que les autres : un sink qui le refuse
+  // interrompt le parcours, et l'interruption doit se voir dans le statut.
+  if (!sink(seed)) { *status = CloudStatus::kInvariantViolated; return; }
+  push(seed);
 
   while (!stack.empty()) {
     st->reverse_depth_max = std::max(st->reverse_depth_max, (long long)stack.size());
@@ -1871,10 +1973,11 @@ inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp:
     // d'AVIS--FUKUDA.
     std::size_t seen_index = 0;
     bool descended = false;
+    bool broken = false;
     Vertex child;
     for_each_flat(points, top.vertex, [&](const FlatAtVertex& flat) {
-      if (descended) return;
-      for (int direction = -1; direction <= 1 && !descended; direction += 2) {
+      ++st->reverse_flats_enumerated;
+      for (int direction = -1; direction <= 1; direction += 2) {
         const std::size_t here = seen_index++;
         if (here < top.next_child) continue;
         Vertex candidate;
@@ -1882,24 +1985,47 @@ inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp:
         if (candidate.level > level_ceiling) continue;
         ++st->reverse_children_tested;
         Vertex mother;
-        if (!parent_of(candidate, &mother)) continue;      // la racine n'est fille de personne
+        const ParentOutcome outcome = parent_of(candidate, &mother);
+        if (outcome == ParentOutcome::kBroken) { broken = true; return false; }
+        if (outcome == ParentOutcome::kIsRoot) continue;   // la racine n'est fille de personne
         if (mother.shell != top.vertex.shell) continue;    // ce n'est pas notre fils
         top.next_child = here + 1;
         child = candidate;
         descended = true;
+        return false;                                     // ARRET : plus rien a enumerer
       }
-    });
+      return true;
+    }, &st->reverse_triplets_scanned, &st->reverse_closures_built);
+    if (broken) { *status = CloudStatus::kInvariantViolated; return; }
 
     if (descended) {
-      visited.push_back(child);
-      stack.push_back(Level{child, 0});
+      if (!sink(child)) { interrupted = true; break; }
+      push(child);
       continue;
     }
     ++st->reverse_backtracks;
+    live -= (long long)(stack.back().vertex.shell.size() + stack.back().vertex.interior.size());
     stack.pop_back();
   }
+  if (interrupted) *status = CloudStatus::kInvariantViolated;
+}
+
+// Enveloppe qui MATERIALISE la sortie. Elle reste le sujet du differentiel, parce
+// que comparer deux ensembles demande de les tenir ; elle n'est pas le chemin que
+// le produit doit prendre, et son cout memoire est celui qu'elle affiche.
+inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp::P3>& points,
+                                                        int level_ceiling,
+                                                        FlatStatistics* st,
+                                                        CloudStatus* status,
+                                                        const CertifiedIndex* index = nullptr) {
+  std::vector<flats::Vertex> visited;
+  reverse_search_stream(points, level_ceiling, st, status,
+                        [&](const flats::Vertex& v) { visited.push_back(v); return true; }, index);
+  if (*status != CloudStatus::kOk) visited.clear();
   return visited;
 }
+
+
 
 // ---------------------------------------------------------------------------
 // DU PARCOURS AU CATALOGUE.
