@@ -37,8 +37,9 @@ Résultats positifs scellés sur leurs entrées : les cinq portes flats Release 
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
 sans diagnostic, et les gardes de filiation distinguent maintenant les
 directions invalides et les cibles incohérentes. `kSinkStopped` sépare aussi
-l'arrêt volontaire d'une erreur scientifique. Ces campagnes ne couvrent pas la
-frontière entière u16 décrite ci-dessous. Les quatre portes du microkernel
+l'arrêt volontaire d'une erreur scientifique. La nouvelle porte owner couvre
+les frontières entières u16; les portes sweep et F0 normal/optimisé passent
+également sur un build Release frais. Les quatre portes du microkernel
 passent sur CPU; une session G4 rapporte aussi zéro écart du payload borné
 hôte/device. Aucun reçu brut n'est versionné et les refus ne sont toujours pas
 rejoués.
@@ -47,32 +48,29 @@ Quatre verrous priment sur tout travail d'échelle; leurs constructions sont
 réunies dans la
 [`note mathématique courante`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md) :
 
-1. Le chemin owner tronque actuellement un déterminant `i128` en le transmettant
-   à `tangent_sign(int, ...)`. Un tétraèdre d'échelle 1291 rend 7 sphères dans
-   le catalogue normal et seulement 4 en owner; une seconde frontière déclenche
-   `-INT_MIN` sous UBSan. Il faut réduire par `sign_of` avant toute optimisation.
-2. La sémantique F0 est maintenant décidée : le fold général doit accepter une
-   naissance directe tout $N_a$. L'invariant régulier d'au moins deux facettes
-   strictes est conditionnel et se valide par record avant projection; Warshall
-   et DSU partagent encore le garde contraire.
-3. Hors de cette frontière entière, la correction `use_owner` concorde sur
-   174 444 exécutions externes et sa
-   porte permanente compare désormais le catalogue sémantique. Elle ne protège
-   cependant pas l'identité du propriétaire signé : le mutant non signé échange
-   les deux extrémités sans changer la sortie. La table est nulle seulement pour
-   owner+index+navigable et le high-water publié compte des entrées, pas des
-   octets.
+1. Le P0 owner est fermé : `sign_of` réduit le déterminant avant
+   `tangent_sign`, les frontières 1290/1291 et 1023/1024/1025 sont permanentes
+   et 84 témoins rendent le mutant sensible. La garde d'API bloque le mutant
+   `i128` exact, pas toutes les petites conversions entières.
+2. Le fold général accepte maintenant la naissance directe tout $N_a$; trois
+   calculs concordent sur 2 168 hypergraphes et le refus est devenu un mutant.
+   Le vérificateur régulier séparé accepte encore un handle strict dupliqué, et
+   ses CTests sont fail-open si Python manque.
+3. La correction `use_owner` concorde sur les campagnes bornées et sa porte
+   compare le catalogue sémantique. Elle ne protège cependant pas l'identité du
+   propriétaire signé : le mutant non signé échange les deux extrémités sans
+   changer la sortie. La table est nulle seulement pour owner+index+navigable et
+   le high-water publié compte des entrées, pas des octets.
 4. Le census terminal de la source est une requête exacte de demi-espace après
    relèvement en dimension quatre. Cette existence mathématique est fermée;
    l'index certifié, les statuts cappés, la terminalité et les constantes restent
    à implémenter et recevoir.
 
 Conséquence d'architecture : le propriétaire exact et le fold externe restent
-les directions proposées. Le propriétaire est NO-GO sur le profil u16 tant que
-la troncature et sa fixture permanente ne sont pas fermées; il ne possède pas
-davantage de garantie globale sans table. La porte owner et la sémantique de
-naissance F0 se ferment avant les optimisations, le GPU ou une revendication
-mémoire.
+les directions proposées. Le défaut arithmétique owner et la naissance F0 sont
+fermés dans les oracles bornés; cela ne fournit ni garantie globale sans table,
+ni identité owner signée, ni réduction horizontale de production. Ces portes et
+le refus/replay se ferment avant une revendication GPU ou mémoire.
 
 La voie GPU suit un contrat distinct, détaillé dans la
 [`note mathématique GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md). Le verdict
@@ -96,19 +94,17 @@ et les temps qui en découlent restent des scénarios conditionnels. Le tableau
 mélange en outre deux répétitions à `n=100` et une à `n=200`; ses incréments ne
 forment pas encore une série statistique homogène.
 
-Le probe de sélectivité committé dans `40ad152` contient un P0 indépendant : il cherche
-le minimum d'un demi-plan fermé seulement sur les directions des points et
-compte les points de frontière. Trois projections sur un même rayon suffisent à
-faire rendre 5 au lieu de 2 et à réfuter une paire critique `RelevantGP`. Le
-lemme de demi-boule n'est pas réfuté; son oracle doit devenir un sweep circulaire
-exact du demi-plan ouvert complémentaire avant toute mesure de sélectivité.
-Les quatre tailles ne prouvent donc ni `O(n log n)` ni 7,5 millions de
-candidates à 50 k. Le commit k-NN `5d9159a` (probe `130e316e...`) mesure encore
-l'ensemble fautif, avec une matrice et $n$ tris hors chrono; son maximum reste
-seulement une borne inférieure ponctuelle et son histogramme ne ferme pas cette
-porte. Une construction u16 de 50 000 points donne même une paire Gabriel vide
-avec `A=2` et rang croisé 25 000 : aucun petit `k` ne découle de
-l'admissibilité, et tout filtre k-NN exige un complément exact certifié.
+Le P0 de sélectivité de `40ad152` est fermé à `180975e` : un sweep exact calcule
+le complément ouvert, six fixtures gardent les dégénérescences et le mutant
+historique 2/5, et un oracle indépendant a rendu zéro écart sur 84 206 cas
+planaires ou 3D. Les rangs sont maintenant de compétition et calculés sur la
+vérité entière. Le probe reste cependant exhaustif et sa vérité partage
+`flat_catalogue`; son CTest n'asserte ni les rangs, ni les valeurs des tables, ni
+un digest attendu. Son chrono inclut par défaut le mutant quadratique. Les
+campagnes finies ne prouvent donc ni `O(n log n)` ni une masse à 50 k. Une
+construction u16 de 50 000 points donne une paire Gabriel vide avec `A=2` et
+rang croisé 25 000 : elle réfute tout `k<=24999` sur cette entrée, et tout filtre
+k-NN plus petit exige un complément exact certifié.
 
 Une voie constructive distincte est maintenant formulée sous la capability
 `center-cover + degree` : banque de témoins stricte par cellule, preuve de rayon
@@ -769,10 +765,11 @@ la forme device ne sont donc pas acquis.
 Le propriétaire local est branché à titre expérimental sur la récolte naviguée.
 Les chemins sans sommet propriétaire utilisent un repli exact. Une sonde
 indépendante de 174 444 exécutions valide statuts et payloads complets dans les
-quatre quadrants; les cinq portes permanentes donnent aussi zéro désaccord et
-une table owner-indexée vide sur leurs coordonnées basses. Elles ratent le P0
-u16 où `orient3d_exact` est tronqué avant `tangent_sign`, avec pertes et doublon
-de sphères. La fixture de domaine compare désormais statut,
+quatre quadrants; les portes permanentes donnent aussi zéro désaccord et une
+table owner-indexée vide. Le P0 u16 est fermé par la réduction `sign_of` avant
+`tangent_sign`, les frontières arithmétiques et 84 témoins de mutation. La garde
+de type ne bloque toutefois pas toutes les petites conversions entières. La
+fixture de domaine compare désormais statut,
 support, arité, rang, niveau et membres; l'équivariance conserve membres et
 multiplicités, le cône signé et le cube sont permanents. Mais le test du cône ne
 compare pas l'identité du sommet owner et laisse passer le mutant non signé.
@@ -799,9 +796,11 @@ le lot complet des ex æquo, partitionner la reverse-search en tâches disjointe
 et stager des runs exacts; aucune de ces opérations n'est reçue par le live.
 
 Le noyau F0 matérialise volontairement Warshall et DSU pour juger un lot borné.
-Son contrat de naissance est actuellement contredit par une garde commune aux
-deux chemins; il reste un falsificateur en réparation, pas la réduction
-horizontale de production. De même, `mhgp3v_first_incidence` emploie
+Son contrat de naissance tout $N_a$ est maintenant respecté et un oracle de
+partitions contrôle indépendamment la fermeture. Le validateur régulier brut
+accepte encore un handle strict dupliqué, et les deux CTests disparaissent sans
+Python; ce noyau reste donc un falsificateur borné, pas la réduction horizontale
+de production. De même, `mhgp3v_first_incidence` emploie
 délibérément `flat_catalogue(pts,n)`, des maps et une vérité combinatoire : c'est
 un oracle borné, pas l'étage de production décrit ci-dessous.
 
@@ -896,11 +895,12 @@ tient pas lieu de l'autre.
 mais intermédiaires denses ⇒ **architecture no-go**.
 
 **État live de Gate D : NO-GO.** Le census borné des flats et le nouveau
-high-water d'entrées sont positifs sur leurs campagnes. Mais owner tronque un
-déterminant exact sur le profil u16, sa porte ne protège pas l'identité signée,
-et F0 contredit sa sémantique de naissance. Le census global possède maintenant
-une construction 4D exacte, mais aucune capability terminale reçue. Les
-compteurs verts ne compensent pas ces écarts.
+high-water d'entrées sont positifs sur leurs campagnes. La troncature owner et
+la naissance F0 sont corrigées dans leurs oracles bornés, mais la porte owner ne
+protège pas l'identité signée, le validateur régulier F0 n'est pas autonome et
+la gate Python est fail-open. Le census global possède une construction 4D
+exacte, mais aucune capability terminale reçue. Les compteurs verts ne ferment
+ni le pipeline ni ces écarts.
 
 **Gate E — shallow CPU exact.** Constructeur sans travail en $\sum_e m_e^2$ ;
 comparaison à l'oracle exhaustif et au brute-force local ; permutations,
@@ -930,15 +930,14 @@ qualifier 100 ms, **par famille sanctionnée**.
 
 ## 13. Ordre des travaux
 
-1. **Largeur owner** : réduire explicitement chaque `orient3d_exact` par
-   `sign_of` avant `tangent_sign`; rendre permanents 1023/1024/1025 et
-   1290/1291, UBSan, `-Wconversion` et le mutant de troncature.
-2. **F0 source-agnostique** : accepter le carré direct tout $N_a$, retirer la
-   garde corrélée et construire la vérité par énumération de partitions depuis
-   le `RawBatch`.
-3. **Capability régulière séparée** : vérifier chaque `DirectHyperedge` brute,
-   ses niveaux de facettes et son reçu; tuer le mutant de validation par
-   composante.
+1. **Largeur owner — fermée fonctionnellement** : conserver `sign_of`, les
+   frontières et le mutant; remplacer la garde partielle par un type de signe
+   fort si le contrat veut interdire toute conversion implicite.
+2. **F0 source-agnostique — naissance fermée** : conserver le carré tout $N_a$
+   et l'oracle de partitions; rendre ses CTests obligatoires dans la gate.
+3. **Capability régulière séparée** : centraliser la validation structurelle du
+   `RawBatch`, compter des handles distincts et tuer le duplicat strict avant de
+   qualifier chaque `DirectHyperedge` brute.
 4. **Identité owner** : tester directement les deux sommets du cône signé et
    tuer $\varepsilon=-1\mapsto+1$; graver aussi la vérité 19 du cas coplanaire.
 5. **Coût owner** : intégrer le réducteur `FULL/HALF/LINE/RAY/WEDGE/ZERO`, le

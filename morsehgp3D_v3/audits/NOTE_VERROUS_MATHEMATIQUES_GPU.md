@@ -14,16 +14,16 @@ produit non committés sont réaudités séparément lorsqu'ils sont stables :
 
 | objet | empreinte |
 | --- | --- |
-| snapshot de code et de claims audité | `5d9159abfda52bae8b209d0a22ea834d3beb2f53` |
-| `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
-| `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
+| snapshot de code et de claims audité | `180975e4a967475067961d4f215ab2f2a4f9760a` |
+| `prototype/order_k_flats.hpp` | `b3ba750d938e3c4fa52453730011e2f8ed06e477b40ae971562c15aed07b65f5` |
+| `prototype/flats_differential.cpp` | `6271f26ab8782fed0e46dd1200fa030d68d3036257c57f9f73320ca4f2ec1cb4` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
 | `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
 | `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
-| `CMakeLists.txt` | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
+| `CMakeLists.txt` | `e8ddd3c21eafa361d5c37cd8a585905db2a4bf8404639b8eefc72bd9df803c9f` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
-| `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
+| `prototype/admissible_pair_probe.cpp` à `180975e` | `fa3e464c422839f0485a032016831d3727fb42cbf1a9bd5be7a9427da3fe55fd` |
 
 > [!IMPORTANT]
 > Cette note aide Claude à construire la voie GPU; elle ne modifie aucun
@@ -613,18 +613,19 @@ actuelle ne prouve que l'une est mathématiquement nécessaire.
 
 ### 10.5 Premier jalon direct falsifiable : les supports d'arité deux
 
-Le probe de paires du commit `40ad152` ne qualifie pas encore ce jalon. Son
-`minimum_halfplane_count` teste seulement les rayons portés par les points et
-compte leur frontière; une fixture entière lui fait rendre 5 au lieu du vrai
-minimum 2 et supprimer une paire critique. Les masses `ADMIS` publiées sont
-donc des sous-estimations. Quatre tailles et une graine ne prouvent en outre ni
-$O(n\log n)$ ni une masse à 50 k.
+Le P0 du probe de `40ad152` est fermé à `180975e` (`fa3e464c...`) : le minimum
+fermé est le complément exact du maximum ouvert, la projection étroite reste
+dans `i128`, six fixtures et le mutant 2/5 sont permanents. Un oracle indépendant
+en multiprécision donne zéro écart sur 74 613 multisets planaires et 9 593 paires
+3D. Ce résultat qualifie le sweep borné, pas encore ce jalon industriel : la
+« vérité » partage `flat_catalogue`, porte seulement sur le catalogue fermé et
+les tables finies ne prouvent ni $O(n\log n)$ ni une masse à 50 k.
 
-Le commit k-NN `5d9159a` (`130e316e...`) ne change pas ce verdict : il bâtit une matrice
-$n^2$ et $n$ tris hors chrono, puis mesure les rangs seulement dans le `ADMIS`
-fautif. Le rang symétrisé minimal ne définit pas une frontière canonique et les
-ex æquo géométriques ne sont pas groupés. Réparer et muter le sweep précède
-toute interprétation des maxima ou histogrammes de voisinage.
+Les rangs k-NN sont maintenant de compétition, leurs ex æquo sont groupés, le
+maximum vrai est indépendant de l'admission et leur coût est chronométré à part.
+Le CTest n'asserte toutefois aucun rang ni histogramme, et le chrono du filtre
+inclut par défaut le mutant quadratique. Ces mesures restent un diagnostic; elles
+ne définissent aucune frontière complète sans certificat de la masse écartée.
 
 Aucune borne petite sur ce rang n'est implicite. Pour `K=16000`, la fixture u16
 `p=(16001,0,0)`, `u=(48003,0,0)` et les points

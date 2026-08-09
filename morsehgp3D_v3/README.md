@@ -8,16 +8,20 @@ sont ouverts au registre.
 L'état audité du worktree est scellé dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
-**Trois des quatre P0 de cet audit sont fermés, chacun avec sa porte permanente
-et son mutant.** La troncature `i128` du chemin `use_owner` est réduite par
-`sign_of` et la surcharge fautive est supprimée du langage; le minimum en
+**Trois des quatre P0 de cet audit sont fonctionnellement fermés sur leur domaine
+borné.** La troncature `i128` du chemin `use_owner` est réduite par
+`sign_of` et les appels bruts `i128`/`long long` sont interdits; le minimum en
 demi-plan du filtre de paires est calculé par un balayage exact au lieu des
 seules directions vives, et ses masses sont republiées; le noyau F0 accepte
 enfin la naissance tout $N_a$ que son contrat écrit autorisait, sous un
 troisième oracle qui ne ferme rien transitivement. Le quatrième — le refus du
 microkernel ni jugé ni rejoué — reste ouvert et c'est le chantier courant.
 
-La fixture du cône signé ne protège toujours pas l'identité du propriétaire. Les
+L'audit conserve trois réserves de garde : les surcharges owner supprimées ne
+forment pas encore un type fort fermé à toutes les petites conversions entières;
+le validateur régulier F0 accepte un handle strict dupliqué; ses deux CTests ne
+sont pas enregistrés si Python est absent. La fixture du cône signé ne protège
+toujours pas l'identité du propriétaire. Les
 fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
 Le passage GPU est spécifié séparément dans la
@@ -750,35 +754,88 @@ tous les sommets sur CPU, puis un thread calcule seulement le masque des couples
 run ou transaction. C'est un microkernel borné concordant hôte/device sur les
 entrées acceptées, pas encore le parcours.
 
-**Le refus fait partie du contrat.** Une coquille cosphérique peut avoir
-$\Theta(n)$ points : aucune capacité fixe n'est universellement suffisante, et
-prétendre le contraire serait faux. Le noyau déclare `kMaxShell = 32`,
-`kMaxInterior = 32`. L'intérieur est borné par le contrat : avec
-`s_max<=32`, la coupe impose $\lvert B(v)\rvert\leq30$. Un intérieur supérieur,
-une coquille trop petite ou une fermeture dépassant une coquille déjà admise
-sont donc des violations d'invariant; `shell>32` est le seul fallback normal à
-l'admission. Le microkernel ajoute toutefois son propre cap de 32 flats, atteint
-dès une coquille générique de sept points.
+#### Le refus était compté, il n'était pas jugé — et c'est fermé
 
-Le nouveau CTest de refus force 27 `kFlatOverflow` et impose un plancher. C'est
-un crédit de couverture de branche, pas une preuve du fallback : la boucle de
-référence fait précisément `continue` sur tout statut refusé, puis le reçu
-compte le refus sans son catalogue. Un mutant qui classe **tous** les sommets en
-overflow passe encore les trois campagnes principales avec zéro flat, zéro
-couple et zéro désaccord. Il faut des planchers d'acceptation et, surtout,
-comparer l'union « device committé + replay CPU » au chemin non borné.
+Une coquille cosphérique peut avoir $\Theta(n)$ points : aucune capacité fixe
+n'est universellement suffisante, et prétendre le contraire serait faux. Le refus
+est donc une pièce du contrat. Mais le contrat n'était pas tenu.
 
-Le cap de 32 flats est atteint bien avant le cap de coquille. Sept points
-entiers cosphériques sans quadruplet coplanaire portent 35 flats; le live garde
-le préfixe 32, le marque refusé, puis ne vérifie jamais les trois flats restants.
-À coquille 32, le maximum générique est 4 960. La voie produit doit paginer la
-réduction parent ou rejouer le sommet entier, avec multiplicité et clef exactes.
+La boucle de référence exécutait `continue` sur chaque statut refusé, et
+`summarise` comptait le refus puis écartait ses flats et son masque. Le plancher
+`--min-refused` prouvait que la **branche** avait été prise, jamais que son
+résultat avait été conservé — et les refus d'admission, dont `shell>32`,
+n'entraient même pas dans le compteur. Conséquence directe : un mutant qui refuse
+**tous** les sommets restait vert, avec zéro flat, zéro couple, zéro désaccord.
 
-Le relevé d'admission mesure maintenant coquille et intérieur au bon endroit et
-accepte légitimement l'intérieur 17/32 de la campagne `points=21,smax=19`.
-Mais les refus d'admission, dont `shell>32`, sont eux aussi omis du batch et ne
-sont même pas inclus dans `total_refused`. Exiger un ledger par statut, une
-fixture coquille 33 et la conservation `refused = replayed + pending + fatal`.
+Quatre choses le ferment, et il faut les quatre.
+
+1. **Des planchers séparés** : nuages décidés, sommets acceptés, flats, couples,
+   noyaux lancés et rejeux. Un plancher agrégé se satisfait d'un seul chiffre.
+2. **Un oracle non borné exécuté pour chaque statut**, refus d'admission compris.
+3. **Le ledger $\text{refusés}=\text{rejoués}+\text{en attente}$**, publié par
+   raison. Une raison sans rejeu est un trou, pas une statistique.
+4. **L'identité de masse** : le CPU complet sur *tous* les sommets doit égaler
+   l'union des résultats committés et rejoués, flat par flat et couple par couple.
+
+Le mutant vit maintenant **dans le binaire**, sous `--force-refuse-all`, et une
+porte négative exige qu'il rougisse. Il est instructif : sous mutation le ledger
+balance encore et la masse est encore conservée — rejouer tout est *correct*,
+simplement inutile — et ce sont les planchers d'acceptation, de flats et de
+couples qui le tuent. Aucune des deux moitiés ne suffisait seule.
+
+**[mesuré]** sur la campagne de refus `--clouds 4 --points 20 --coord 3
+--smax 12 --seed 11` : 2 542 sommets présentés, 2 515 acceptés, 27 refusés pour
+capacité de flats, 27 rejoués, zéro en attente. La masse committée vaut 15 346
+flats et 7 109 couples, la masse rejouée 1 403 flats et 224 couples, et la
+référence complète exactement 16 749 et 7 333. Les 27 refusés portent donc en
+moyenne 52 flats, pas 32 : additionner les préfixes aurait sous-compté de 539.
+
+#### Compte et masque ne sont pas une signature
+
+Un masque nul ne certifie pas l'ordre : sur six points cosphériques un sommet
+porte vingt flats et un masque nul, et **toute** permutation des vingt conserve
+`(flat_count, mask)`. Chaque verdict porte maintenant un digest **ordonné** —
+base, taille de fermeture et bits d'admissibilité, repliés à la position de
+livraison — recalculé indépendamment par le chemin non borné et comparé pour
+chaque statut, refus compris.
+
+#### Le lot est authentifié avant lancement
+
+`WavefrontJob` transportait des pointeurs et des tailles bruts. Un job
+`root_size = 0, root_base = nullptr` obtenait encore `kOk`, `point_count`
+n'était jamais lu, et une entrée malformée devenait un accès hors limites
+**device** au lieu d'un refus avant lancement. `validate_job` vérifie maintenant
+vingt champs et rend une raison nommée : nuage non nul et dans la grille u16,
+digest déclaré recalculé, base racine de taille quatre et affinement
+indépendante, identifiants dans le nuage, coquille et intérieur strictement
+triés et disjoints, $\ell(v)=\lvert B(v)\rvert$, capacités, et exactitude des
+multiplications de tailles avant allocation. Onze formes de lot malformé sont
+des fixtures permanentes.
+
+Les queues des deux tableaux de `BoundedVertex` n'étaient jamais initialisées
+avant la copie : la structure n'avait donc aucune représentation stable en
+octets. Elles portent maintenant `-1`, qui n'est jamais un PointId, et deux
+`static_assert` interdisent tout remplissage.
+
+#### L'intérieur 31 et 32 était accepté alors que le contrat le rend impossible
+
+`kMaxInterior` valait `kMaxRank = 32`. La coupe du parcours impose pourtant
+$\lvert B(v)\rvert\leq s_{\max}-2\leq30$ : un intérieur de 31 ou 32 est une
+**entrée malformée**, pas un dépassement de capacité rejouable. La capacité est
+maintenant exactement la borne du contrat, et son dépassement porte le statut
+`kInteriorAboveContract`. Symétriquement, `kClosureOverflow` est devenu
+`kInvariantViolation` : toute fermeture est incluse dans une coquille déjà
+bornée par l'admission, donc ce statut est impossible et il est traité comme
+fatal au lieu d'être rejoué.
+
+Le cap de 32 flats est atteint bien avant le cap de coquille, et il a maintenant
+sa fixture permanente. Sept points entiers cosphériques sans quadruplet
+coplanaire — la sphère de centre `(100,100,100)` et de rayon 25 — portent 35
+flats. Le noyau garde le préfixe 32 et le marque refusé; la porte exige que ce
+préfixe concorde **bit à bit** avec le préfixe du chemin non borné, masque
+`0x940800000009` compris, et que le rejeu retrouve les 35. À coquille 32, le
+maximum générique est 4 960 : la voie produit devra paginer la réduction parent
+ou rejouer le sommet entier, avec multiplicité et clef exactes.
 
 Le verrou GPU principal reste de produire le minimum exact de
 `neighbour_along` et **tout** son lot d'ex æquo, puis de décider le parent. La
@@ -1175,7 +1232,7 @@ alimenter le harvest certifié des supports, la source directe, le fold pré-lot
 la couverture et les verticales, qui n'existent pas comme pipeline. Le NO-GO
 tient.
 
-### Le lemme de demi-boule est utile; son probe n'est pas encore fiable
+### Le lemme de demi-boule et son sweep sont exacts; le probe reste diagnostique
 
 Le lemme du demi-boule donne une condition **nécessaire, exacte et entière**, sans
 aucune hypothèse de régularité : si $p$ et $u$ sont sur la coquille d'une sphère
@@ -1273,6 +1330,14 @@ peut rester quadratique dès l'arité deux. Le rapport `admises/vraies` croît
 lentement et régulièrement — 1,44 à 2,63 — donc le filtre ne devient pas plus
 sélectif avec la taille : c'est le fait le plus contraignant de cette table.
 
+L'audit a reproduit exactement les lignes 50 et 100; les tailles supérieures ne
+possèdent toujours ni sidecar brut, ni coordonnées, ni digests attendus publiés.
+Le CTest impose des planchers anti-vacuité, mais aucune valeur de cette table,
+aucun rang et aucun histogramme. `secondes filtre` inclut en outre par défaut le
+mutant par directions vives : à `n=200`, `--ranks 0`, le même nuage passe de
+0,70 s avec `--mutant 1` à 0,16 s avec `--mutant 0`. Ce champ est un chrono
+diagnostique combiné, pas le coût isolé du sweep exact.
+
 Le zéro aléatoire annoncé au commit `40ad152` ne protégeait pas la faute. La
 fixture entière suivante possède une sphère critique `RelevantGP` de centre
 `(100,100,100)`, rayon carré 194 et support
@@ -1341,14 +1406,15 @@ vérité entière et non plus sur le seul `ADMIS` :
 
 Le rang maximum des paires **vraies** croît donc encore à $n=800$, et il vaut
 presque le cinquième du nuage. Le rang maximum des paires **admises** reste, lui,
-entre $0{,}85\,n$ et $0{,}96\,n$ à toutes les tailles : le filtre n'induit
-strictement aucun cap de voisinage. Sur les
+entre $0{,}85\,n$ et $0{,}96\,n$ sur ces cinq tailles : aucun petit cap de
+voisinage n'apparaît dans cette campagne. Sur les
 seules paires admises, la queue reste épaisse — 79,6 % des rangs sont sous 128 à
 $n=800$, donc plus d'un cinquième au-delà.
 
-Ces nombres sont des diagnostics, pas une loi. Ils suffisent néanmoins à réfuter
-un énumérateur par k-NN tronqué à cap fixe, et la construction adversariale
-ci-dessus le réfute inconditionnellement. La « vérité » partage en outre les
+Ces nombres sont des diagnostics, pas une loi. Ils réfutent les caps inférieurs
+aux maxima observés sur ces seules entrées; la construction adversariale à
+50 000 points réfute inconditionnellement tout `k<=24999` sur son entrée u16,
+pas tout entier borné imaginable. La « vérité » partage en outre les
 primitives de `flat_catalogue` : ce n'est pas un oracle indépendant. Un k-NN peut
 rester une priorité ou un filtre, mais toute masse omise exige un complément
 exact certifié et rejouable.
@@ -1407,12 +1473,12 @@ construit aucun sommet d'arrangement ni mosaïque. Son exactitude est démontrab
 son SLO reste conditionné aux degrés complets, masses combinadiques et replays
 publiés dans le reçu.
 
-Le probe de `40ad152`, y compris son commit k-NN `5d9159a`, n'est pas encore un juge de cette voie. Son
-`minimum_halfplane_count` teste seulement les directions des points et compte
-les égalités sur la frontière; une fixture entière `RelevantGP` lui donne 5 au
-lieu du minimum exact 2 et lui fait réfuter une paire critique. Le lemme reste
-correct; le probe doit employer un sweep circulaire exact par groupes de rayons
-et comparer son demi-plan fermé au complément ouvert.
+Le P0 des probes historiques `40ad152`/`5d9159a` est corrigé à `180975e` par un
+sweep circulaire exact, des fixtures et un mutant permanent. Cela n'en fait pas
+encore un juge de cette voie : sa vérité partage `flat_catalogue`, décrit le
+catalogue fermé et non la source Gabriel ouverte, tandis que l'énumération reste
+exhaustive en paires et points. Il falsifie et mesure le lemme borné; il ne
+construit ni le voisinage certifié ni le stream produit.
 
 **Conclusion actuelle :** aucune route démontrée n'atteint le contrat, et aucune
 de ces quatre tailles ne prouve qu'il est impossible. Le prochain résultat
@@ -1575,23 +1641,32 @@ ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_flats_(fixtures|generi
 ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(gate_d_fold_f0|gate_d_fold_f0_optimised|admissible_pair_sweep)$'
 ```
 
-Le noyau F0 est maintenant un CTest, en mode normal **et** sous `python3 -O` :
-c'est ce drapeau qui effaçait les vingt-sept obligations portées par `assert` et
-laissait imprimer un `PASS` vide. Elles passent toutes par un contrôle explicite.
+Quand Python est trouvé, le noyau F0 est maintenant un CTest en mode normal
+**et** sous `python3 -O` : c'est ce drapeau qui effaçait les vingt-sept
+obligations portées par `assert` et laissait imprimer un `PASS` vide. Elles
+passent désormais par des contrôles explicites. La configuration reste toutefois
+fail-open sans interpréteur, car `find_package(Python3 ...)` n'est pas
+`REQUIRED` : dans ce cas les deux CTests disparaissent sans faire échouer CMake.
 
 Trois choses ont été intégrées depuis l'audit. Le carré géométrique tout $N_a$
 d'arité quatre est une fixture permanente, et il **est** une naissance : la garde
 de carrier qui le refusait est retirée de la vérité comme du sujet, et la
 refuser est devenue le mutant `reject_carrierless_birth`. L'invariant régulier
-« au moins deux facettes strictes » est implémenté comme un validateur séparé,
-qui juge chaque record **brut avant projection**; son mutant par composante est
+« au moins deux facettes strictes » possède un vérificateur séparé par record
+brut avant projection; son mutant par composante est
 tué par le lot de contrebande `bad_all_new` / `good_with_strict`, où un record
 parfaitement régulier masque un record sans aucune facette stricte. Enfin un
 troisième oracle énumère les partitions de Bell et exige que la partition
 respectant les records et raffinant toutes les autres soit unique : Warshall et
 le DSU ferment tous deux transitivement et peuvent partager une erreur de
 fermeture, celui-ci ne ferme rien. Il juge les 2 168 hypergraphes du domaine
-exhaustif.
+exhaustif, mais partage encore la classification des composantes.
+
+Le vérificateur régulier n'est pas encore autonome : il compte les occurrences
+de handles stricts sans en vérifier l'unicité. Un record qui répète deux fois le
+même handle strict est accepté, alors que `resolve_batch` le refuse comme
+`duplicate raw endpoint`. Son contrat doit donc imposer un lot déjà validé ou
+réutiliser les contrôles structurels communs, avec une fixture négative.
 
 Une campagne vide, un argument inconnu ou un plancher non atteint rendent un
 code non nul avec son diagnostic ; **neuf** tests négatifs le vérifient — argument
@@ -1606,7 +1681,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | # | question | statut |
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` sur u16; payload de domaine renforcé mais identité signée non protégée; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` fermé sur u16; garde de type encore partielle et identité signée non protégée; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |

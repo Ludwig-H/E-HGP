@@ -10,31 +10,32 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot committé
-audité est `5d9159a`; il inclut `40ad152`, sa réfutation documentaire dans
-`762cfae`, puis le probe de rang k-NN auparavant identifié par son empreinte de
-worktree `130e316e...`. Les deltas produit non committés sont épinglés et jugés
-séparément lorsqu'ils sont stables. Aucun artefact brut de la session G4 ni des
-campagnes k-NN n'est versionné avec ces commits.
+audité est `180975e`; il comprend le correctif owner de `d1666f4`, puis le sweep
+de paires et la correction F0 de `180975e`. Le worktree v3 était propre au
+moment du verdict. Aucun artefact brut des campagnes de taille ni de la session
+G4 n'est versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| snapshot committé de code et de claims audité | `5d9159abfda52bae8b209d0a22ea834d3beb2f53` |
-| `CMakeLists.txt` | `f6650252fde309be1e2a81d15b1254383bdff7af0e8c805e6bc233c56b0d2db3` |
+| snapshot committé de code et de claims audité | `180975e4a967475067961d4f215ab2f2a4f9760a` |
+| `CMakeLists.txt` | `e8ddd3c21eafa361d5c37cd8a585905db2a4bf8404639b8eefc72bd9df803c9f` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 | `prototype/admissible_pair_probe.cpp` à `40ad152` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
 | `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
-| `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
+| `prototype/admissible_pair_probe.cpp` à `180975e` | `fa3e464c422839f0485a032016831d3727fb42cbf1a9bd5be7a9427da3fe55fd` |
+| `prototype/order_k_flats.hpp` | `b3ba750d938e3c4fa52453730011e2f8ed06e477b40ae971562c15aed07b65f5` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
-| `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
+| `prototype/flats_differential.cpp` | `6271f26ab8782fed0e46dd1200fa030d68d3036257c57f9f73320ca4f2ec1cb4` |
 | `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
 | `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
 | `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
-| `audits/check_gate_d_fold_f0.py` | `34149092cd1b06762085800ac9d575c0cb8022e3a1c273c7d1955d2f4e768294` |
+| `audits/check_gate_d_fold_f0.py` | `3c23497f0227147d35505df5275a20b000a5704a5c862527d3409e9828ebfdc2` |
 
 ## Verdict
 
-**NO-GO de justesse owner, NO-GO du probe de paires, NO-GO F0, et NO-GO de
-qualification GPU/replay.**
+**GO fonctionnel borné pour les trois P0 owner, sweep et naissance F0; NO-GO
+maintenu pour la qualification produit, GPU/replay et les claims auxiliaires
+non fermés.**
 
 Le premier `.cu` est un progrès réel : il définit un lancement CUDA optionnel
 et un même corps source pour CPU/device. Les quatre portes hôte, dont une
@@ -47,12 +48,12 @@ et mémorise d'abord tous les sommets sur CPU; le kernel calcule ensuite seuleme
 un masque d'admissibilité des couples. Il ne produit ni voisin, ni parent, ni
 enfant, ni tâche, ni run.
 
-Le commit `40ad152` revendique en plus un univers de paires admissibles
-$O(n\log n)$ et projette 7,5 millions de candidates à 50 k. Son
-`minimum_halfplane_count` est pourtant réfuté par une fixture entière : il rend
-5 au lieu de 2 et supprime une paire critique. Les masses publiées sont des
-sous-estimations du vrai filtre; quatre tailles finies ne prouvent de toute
-façon aucun `Big-O`. Cette conclusion d'échelle est retirée de l'état courant.
+Le commit `180975e` remplace le minimum échantillonné par le complément exact du
+maximum en demi-plan ouvert. Un oracle indépendant a comparé 74 613 multisets
+planaires et 9 593 paires 3D, y compris les dégénérescences et la frontière u16,
+sans écart. Le P0 algorithmique est fermé. Les nouvelles masses restent des
+diagnostics finis : elles ne prouvent aucun `Big-O` et ne dimensionnent pas la
+source Gabriel ouverte.
 
 Le commit rapporte une compilation `nvcc` et quatre exécutions sur G4 avec zéro
 écart CPU/device. C'est un résultat positif ciblé pour le préfixe borné, mais pas
@@ -61,9 +62,12 @@ du binaire, PTX/cubin, rapport `ptxas`, digest d'entrée et répétitions ne son
 conservés. Surtout, les refus restent exclus de l'oracle; le texte « rejoués par
 l'hôte » contredit le code.
 
-Deux défauts antérieurs restent bloquants : le chemin owner tronque un
-déterminant `i128`, et les deux modèles F0 rejettent ensemble une naissance
-autorisée par leur contrat écrit.
+Le correctif owner réduit désormais le déterminant par `sign_of` avant
+`tangent_sign`, et F0 laisse naître le carré tout $N_a$. Les quatre CTests ciblés
+owner/paires/F0 passent sur un build Release frais. Deux réserves empêchent
+toute formule plus large : le validateur régulier F0 accepte encore un même
+handle strict répété comme deux facettes, et ses deux CTests disparaissent sans
+erreur si Python est absent. Le refus/replay du microkernel reste, lui, bloquant.
 
 ## Réaudit de `5d9159a` — conclusion générale correcte, mesure surinterprétée
 
@@ -101,41 +105,31 @@ exactement 50 000 points u16, prendre `p=(0,0,0)`, `u=(65535,0,0)` et, pour
 strictement hors de la boule diamétrale ouverte puisque sa distance carrée au
 centre vaut `R^2+i^2`; ainsi `A(p,u)=2`. Chaque extrémité possède pourtant
 24 999 points strictement plus proches que l'autre, donc le rang croisé vaut
-25 000. Cette fixture ferme proprement un k-NN fixe sans complément au palier
-produit, mais ne sélectionne aucune architecture particulière.
+25 000. Cette fixture réfute tout `k<=24999` sans complément sur cette entrée au
+palier produit, mais ne sélectionne aucune architecture particulière.
 
-La contradiction `minimum_halfplane_count` n'est toujours ni une fixture source
-versionnée ni un CTest; le binaire n'a aucun sidecar de campagne. Les sources
-temporaires citées plus bas ne sont accessibles que par empreinte et le hash du
-binaire `9517fb9c...` est tronqué. Claude doit graver fixture, mutant, CTest et
-reçu; l'auditeur ne les implémente pas à sa place.
+À `5d9159a`, la contradiction `minimum_halfplane_count` n'était ni une fixture
+source versionnée ni un CTest et le binaire n'avait aucun sidecar. `180975e`
+grave désormais fixture, mutant et CTest; le sidecar de campagne et l'oracle
+indépendant permanent restent absents.
 
-## P0 — troncature du signe owner toujours présente
+## GO fonctionnel owner à `d1666f4`, avec garde de type encore partielle
 
-`owner_rays_ok` passe encore la valeur brute de `orient3d_exact`, de type
-`i128`, à `tangent_sign(int, ...)`. La conversion implicite perd les bits hauts;
-à la valeur `INT_MIN`, la négation suivante est un comportement indéfini.
+`owner_rays_ok` réduit maintenant la valeur `i128` de `orient3d_exact` par
+`sign_of` avant `tangent_sign`. Les frontières axiales 1290/1291 et alternées
+1023/1024/1025, plus 2048 et 1626, rendent les catalogues owner et normal
+identiques. La fixture directe produit 215 cas, zéro désaccord et 84 témoins
+dont le signe aurait été inversé par la troncature. GCC, Clang et une exécution
+ASan/UBSan ciblée sont verts; remettre l'appel `i128` brut échoue à compiler.
 
-Fixtures reproduites :
-
-| fixture | catalogue normal | catalogue owner | observation |
-| --- | ---: | ---: | --- |
-| tétraèdre axial, échelle 1290 | 7 | 7 | déterminant encore sous `INT_MAX` |
-| tétraèdre axial, échelle 1291 | 7 | **4** | trois paires perdues |
-| tétraèdre alterné, échelle 1024 | 10 | 10 en Release | UBSan signale `-INT_MIN` |
-| tétraèdre alterné, échelle 1025 | 10 | **4** | six paires perdues |
-
-La campagne u16 déterministe suivante rend encore un désaccord, owner 16 contre
-19 enregistrements normaux :
-
-```sh
-mhgp3v_flats_differential --clouds 1 --points 8 --coord 65536 --smax 2 --seed 20260809
-```
-
-`-Wconversion` désigne exactement l'appel fautif. La correction testée hors
-dépôt est de réduire par `sign_of` avant l'appel, puis de graver les frontières
-1290/1291 et 1023/1024/1025, le mutant de troncature, UBSan et l'unicité du
-propriétaire.
+Le CTest `mhgp3v_flats_u16_owner` est désormais committé et passe. Le P0
+fonctionnel est donc fermé sur le profil u16 audité. Deux réserves restent
+documentaires et d'API : le commentaire source attribue encore `-INT_MIN` à
+l'échelle 1025 alors que l'égalité arrive à 1024; les surcharges supprimées
+bloquent `i128` et `long long`, mais plusieurs petits types entiers et enums
+restent convertibles vers `int`. Elles tuent le mutant exact observé, sans créer
+un type fort garantissant que l'argument appartient à `{-1,0,1}`. L'identité du
+sommet owner signé demeure par ailleurs une porte distincte non fermée.
 
 ## P0 — le refus du microkernel n'est ni jugé ni rejoué
 
@@ -396,7 +390,7 @@ Sous l'hypothèse non validée de 19 millions de sorties, `100 ms / 19 M` donne
 bien 5,3 ns par sortie; cette division ne transforme ni les 19 millions en borne
 ni un compteur d'appels/admissions du microkernel en budget de prédicats aval.
 
-## P0 `40ad152` — le minimum de demi-plan du probe de paires est faux
+## P0 historique de `40ad152` — fermé par le sweep exact de `180975e`
 
 Le commit `40ad152` ajoute
 `prototype/admissible_pair_probe.cpp` (`SHA-256 8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8`)
@@ -451,13 +445,14 @@ que l'exécution a effectivement testé deux nuages à 100 points, soit 429 200
 couples nuage--paire. Même après correction du sweep, ces quatre observations
 ne peuvent prouver un `Big-O` ni une masse à 50 k.
 
-La réparation mathématique est un sweep exact par groupes de rayons primitifs :
-calculer le maximum de points dans un demi-plan **ouvert** par fenêtre circulaire
-et deux pointeurs, puis utiliser
-`minimum_closed=always_inside+m-maximum_open`. Antipodes, rayons confondus et
-points à l'origine ont des fixtures distinctes; le contre-exemple ci-dessus est
-permanent. Une porte de mutation remplace le sweep par les seules directions
-live et doit rougir.
+La réparation de `180975e` calcule le maximum de points dans un demi-plan
+**ouvert** par fenêtre circulaire et deux pointeurs, puis utilise
+`minimum_closed=always_inside+m-maximum_open`. Antipodes, rayons confondus,
+points de la droite, contrats ouvert/fermé/vif et contre-exemple 2/5 sont des
+fixtures permanentes; le calcul par seules directions vives est conservé comme
+mutant. Un oracle indépendant en multiprécision, avec une autre projection et
+un calcul quadratique sans tri partagé, donne zéro écart sur 74 613 multisets
+planaires et 9 593 paires 3D. Release, ASan/UBSan et le CTest permanent passent.
 
 Résultat positif distinct : pour la source Gabriel ouverte, employer la boule
 diamétrale **ouverte** $D_{pu}^{\circ}$ et
@@ -477,9 +472,13 @@ Même corrigé, ce probe ne décide pas seul la source industrielle. Sa « véri
 vient de `flat_catalogue(...,s_max,...,verify_census=false,use_index=true)` :
 elle partage les prédicats du sujet, porte sur le catalogue de rang fermé et
 n'est pas un oracle indépendant de la source Gabriel ouverte à extra-shell.
-Un mutant catalogue vide donne `truth=0,missing=0,OK`, car aucun plancher
-`min_true` n'existe. Les statuts non `kOk` sont ignorés, `decided>0` suffit,
-et ni seed, répétitions demandées, densité, digest ni CTest ne scellent le reçu.
+Le CTest possède maintenant des planchers `min_true` et `min_admitted`, refuse
+les statuts non `kOk` et empêche un juge vide. Il n'impose toutefois ni valeur
+attendue, ni borne supérieure, ni digest, ni assertion sur les rangs, les
+histogrammes ou un écart ouvert/fermé en campagne. L'oracle indépendant de
+l'audit n'est pas une fixture versionnée. Une graine et un digest 64 bits ne
+permettent pas de rejouer un flux `std::uniform_int_distribution` sur toute
+bibliothèque standard; les grandes tables n'ont ni coordonnées ni sidecar brut.
 
 Le calcul exhaustif balaye toutes les paires et tous les points, puis jusqu'au
 carré des projections; son pire cas est quartique et sa cible `n<=5000` n'est
@@ -488,18 +487,21 @@ pas une enveloppe de performance. À 50 k, le seul census point--boule ferait
 publie pas ce nombre de tests, seulement les points retenus dans les boules.
 Ce programme reste un diagnostic CPU borné; il ne génère pas la source.
 
-Le commit `5d9159a` ajoute des rangs k-NN sans corriger le sweep. Ses maxima et
-histogrammes sont donc calculés sur un ensemble `ADMIS` déjà tronqué par le P0.
-La construction `rank_of` matérialise $n^2$ entiers et trie
-$n$ listes **avant** `t0` : son coût $O(n^2\log n)$ et sa mémoire $O(n^2)$
-sont exclus du temps affiché. `min(rank_a(b),rank_b(a))` qualifie seulement
-l'union symétrisée des k-NN avec tie-break PointId; les ex æquo géométriques ne
-sont pas groupés. Les buckets sont enfin décalés : la classe imprimée `2`
-contient le rang 1, et `rank_max_true` ignore toute paire vraie que le filtre a
-déjà supprimée. Les distributions ne deviennent interprétables qu'après
-réparation du filtre ouvert, chrono séparé de la construction, sémantique des ex
-æquo et calcul de la vérité indépendamment d'`ADMIS`; les maxima sur le
-sous-ensemble restent seulement des bornes inférieures ponctuelles.
+Le commit `180975e` corrige aussi les quatre défauts du diagnostic k-NN : rangs
+de compétition avec ex æquo géométriques, maximum vrai calculé avant admission,
+classes `[1,1]`, `[2,3]`, `[4,7]` exactes et horloge séparée pour la matrice
+$n^2$ et les $n$ tris. La matrice est refusée au-delà de 2 000 points. Le CTest
+n'asserte cependant aucun de ces résultats, et « rang des admises » désigne les
+seules paires admises par le filtre **ouvert**.
+
+Le libellé `secondes filtre` n'est pas encore un chrono isolé du sweep : par
+défaut `--mutant 1` y ajoute le mutant quadratique. À `n=200`, `--ranks 0` et
+digest identique `9105fff8aa83bbf0`, il affiche 0,70 s avec mutant contre 0,16 s
+avec `--mutant 0`. Il inclut aussi les deux sweeps ouvert et fermé, le census et
+le bookkeeping. Toute campagne de coût doit donc imposer au minimum
+`--mutant 0 --ranks 0` et nommer ce temps diagnostic combiné. Avec le mutant
+désactivé, chaque ligne imprime encore `vif=0`, valeur qui signifie « non
+mesuré » seulement dans le résumé.
 
 Surtout, aucun petit `k` ne découle mathématiquement de l'admissibilité. Pour
 `K=16000` sur la grille u16, prendre
@@ -518,22 +520,40 @@ La construction tangente à 50 000 points donnée dans le réaudit ci-dessus por
 le même résultat au palier produit, avec rang croisé 25 000 et sans dépasser
 u16.
 
-## NO-GO F0 inchangé
+## GO sémantique F0, deux P1 sur le validateur et la permanence de la porte
 
-Le script imprime encore `PASS` en exécution normale et sous `python3 -O`, mais
-Warshall et DSU partagent la même garde fautive. Une composante tout $N_a$ avec
-une `DirectHyperedge` doit créer une naissance sous le contrat général; les deux
-chemins rendent `error`. Inversement, un record direct tout $N_a$ peut être
-masqué par un second record portant un `L` dans la même composante.
+Le carré tout $N_a$ donne maintenant une naissance avec zéro racine, quatre
+nœuds `N` et un record direct d'arité quatre. Refuser une composante sans carrier
+strict est devenu un mutant tué. Warshall, DSU et un oracle borné qui énumère les
+partitions concordent sur 2 168 hypergraphes; 13 fixtures, 11 mutants et cinq
+injections de rollback passent avec la même sortie en mode normal et sous
+`python3 -O`. Les deux CTests F0 passent sur le build frais. Le P0 du fold
+général est fermé.
 
-La solution mathématique est déjà fournie dans
-[`NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md) :
-garder le fold source-agnostique, valider la régularité par record brut avant
-projection, reconstruire une vérité indépendante depuis `RawBatch`, et
-remplacer les 27 obligations basées sur `assert` par des échecs explicites.
+Le nouveau `validate_regular_source` ne constitue pas encore, seul, un
+validateur brut complet. Il compte les occurrences de handles stricts sans
+vérifier leur unicité : un unique binding strict répété deux fois dans un record
+direct est accepté avec le compte 1, alors que `resolve_batch` refuse ce lot par
+`duplicate raw endpoint`. Il ne centralise pas non plus les contrôles d'arité et
+de kind. Il faut soit faire passer le lot par un validateur structurel commun,
+soit documenter la précondition et graver les négatifs correspondants.
+
+Enfin, `find_package(Python3 COMPONENTS Interpreter)` n'est pas `REQUIRED`.
+Avec `-DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE`, la configuration réussit et
+les deux tests F0 ne sont pas enregistrés. La correction sémantique reste vraie,
+mais le claim « porte permanente » est fail-open jusqu'à rendre Python
+obligatoire pour cette configuration ou à garantir explicitement la gate CI.
 
 ## Résultats positifs conservés
 
+- Le build Release frais de `180975e` passe les quatre portes ciblées
+  `flats_u16_owner`, `gate_d_fold_f0`, `gate_d_fold_f0_optimised` et
+  `admissible_pair_sweep` en 15 s.
+- Le sweep exact et sa projection étroite donnent zéro écart contre l'oracle
+  indépendant sur 84 206 cas cumulés; le sens
+  `A_open <= A_closed`, donc `admises_open >= admises_closed`, est confirmé.
+- Le P0 owner passe ses frontières arithmétiques et 84 témoins de troncature;
+  le P0 F0 passe sa naissance tout $N_a$ sous trois calculs de fermeture.
 - Les cinq portes flats Release passent : 4 990 cas, 328 560 sommets admis,
   2 703 016 couples concordants et zéro désaccord sur leur petit domaine.
 - Les quatre portes `device_wavefront` hôte passent en Release.
@@ -682,5 +702,6 @@ high-waters par conteneur, ledger des tâches, drains CPU, concordance exacte de
 runs et arrêt ciblé GCP certifié. Le débit kernel-only du microkernel ne peut pas
 valider le contrat industriel.
 
-GCP utilisé uniquement en lecture seule pour vérifier l'état final des cibles;
+Les audits historiques ont utilisé GCP uniquement en lecture seule pour vérifier
+l'état final de cibles. Pour le réaudit de `180975e`, **GCP non utilisé** :
 aucune VM créée, démarrée, arrêtée ou modifiée par l'auditeur.
