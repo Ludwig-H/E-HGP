@@ -11,6 +11,36 @@
 // (c-m) est perpendiculaire à (u-p) ; d'où R² = rho² + d² ; et pour tout y du
 // demi-boule du côté du centre, ||y-c||² = ||y-m||² - 2(y-m).(c-m) + d² <= R².
 //
+// LA VERSION OUVERTE N'EST PAS UN MEILLEUR FILTRE : C'EST LE FILTRE D'UN AUTRE
+// UNIVERS, ET LA DISTINCTION EST TOUT LE SUJET.
+//
+// La même preuve, avec la boule diamétrale OUVERTE, donne une inégalité stricte :
+// tout y de D°_pu inter H est STRICTEMENT intérieur à la sphère critique, donc
+// appartient à I. Avec
+//
+//   A(p,u) = 2 + min_H |(X \ {p,u}) inter D°_pu inter H|,
+//
+// on obtient A(p,u) <= 2 + |I| <= q + |I| <= s_max, où q est l'ARITÉ du support.
+//
+// Les deux lemmes ne bornent donc pas la même chose :
+//
+//   fermé   |X inter D_pu inter H|  <= |S| + |I|   le RANG FERMÉ
+//   ouvert  2 + |X° inter D° inter H| <= q + |I|   l'arité plus l'intérieur
+//
+// Le catalogue de rang fermé exige |S| + |I| <= s_max ; la source Gabriel
+// ouverte n'exige que q + |I| <= s_max et laisse l'extra-shell |S| - q libre.
+// Sur le catalogue fermé, le lemme fermé est donc valide ET plus sélectif, car
+// D° est inclus dans D donne A_ouvert <= A_ferme, donc {A_ouvert <= s_max}
+// CONTIENT {A_ferme <= s_max} : l'ouvert admet PLUS de paires. Sur la source
+// ouverte, en revanche, le lemme fermé n'est pas valide du tout — une sphère à
+// grand extra-shell a |S| + |I| > s_max sans violer q + |I| <= s_max — et seul
+// le lemme ouvert survit.
+//
+// Les deux sont mesurés ici, contre la vérité du catalogue FERMÉ, pour laquelle
+// les deux sont nécessaires ; c'est la seule vérité dont ce programme dispose.
+// Le nombre `ADMISES ouvert` ne dimensionne donc PAS la source ouverte, dont la
+// vérité n'est pas énumérée ici.
+//
 // ---------------------------------------------------------------------------
 // CE QUE CE PROGRAMME MESURE, ET POURQUOI C'EST LUI QUI DÉCIDE
 // ---------------------------------------------------------------------------
@@ -28,12 +58,49 @@
 // La sélectivité utile est ADMIS/VRAI — le facteur de travail gaspillé —, et
 // ADMIS/n dit si l'univers est linéaire ou quadratique.
 //
-// Le minimum sur les demi-espaces se calcule exactement : les points de la boule
-// diamétrale se projettent sur le plan perpendiculaire à (u-p), et un demi-espace
-// dont le plan contient la droite devient un demi-plan de cette projection. Le
-// minimum sur les demi-plans est donc un minimum de fenêtre circulaire, atteint sur
-// l'une des directions délimitées par les points eux-mêmes. Aucun angle n'est
-// calculé : les comparaisons sont des signes de déterminants entiers.
+// ---------------------------------------------------------------------------
+// LE MINIMUM SUR LES DEMI-PLANS FERMÉS N'EST PAS ATTEINT SUR UNE DIRECTION VIVE
+// ---------------------------------------------------------------------------
+//
+// C'était le P0 de ce fichier, et il RENVERSAIT sa conclusion. La première
+// version ne testait que les directions portées par les points eux-mêmes, puis
+// comptait la frontière avec `cross >= 0`. En plaçant la frontière juste APRÈS
+// un groupe colinéaire, ce groupe passe dans le demi-plan ouvert complémentaire
+// alors que toute direction vive le remet sur la frontière et le compte. Le
+// minimum rendu était donc TROP GRAND, le filtre rejetait des paires vraies, et
+// les masses `ADMIS` publiées étaient des sous-estimations.
+//
+// La réparation est une identité, pas une heuristique. Un demi-plan fermé et le
+// demi-plan ouvert opposé partitionnent le plan privé de l'origine :
+//
+//   min_H |P inter H_ferme| = |P| - max_H |P inter H_ouvert|.
+//
+// Le maximum sur les demi-plans OUVERTS, lui, est atteint sur un arc semi-ouvert
+// [theta_i, theta_i + pi) porté par un point : si l'arc ouvert optimal contient
+// des points, soit theta_i l'angle du premier d'entre eux ; tous les autres sont
+// dans [theta_i, theta_i + pi), et cet arc semi-ouvert est réalisable par un
+// demi-plan ouvert en reculant la frontière d'un epsilon sans point. Un balayage
+// à deux pointeurs sur les angles triés le calcule exactement, sans jamais
+// évaluer un angle : l'appartenance à [theta_i, theta_i + pi) s'écrit
+// `cross(d,y) > 0 ou (cross(d,y) == 0 et dot(d,y) > 0)`.
+//
+// ---------------------------------------------------------------------------
+// LA PROJECTION RESTE ÉTROITE, ET C'EST DÉMONTRABLE
+// ---------------------------------------------------------------------------
+//
+// L'ancienne base entière du plan multipliait `d x e` par `d x (d x e)` et
+// produisait des coordonnées jusqu'à 2^73 : le produit croisé de deux telles
+// coordonnées atteint 2^147 et DÉBORDE `i128`. Ce n'était invisible que parce
+// que l'emprise mesurée était minuscule devant la grille déclarée.
+//
+// On prend donc directement r = d x e, qui est déjà dans d^perp, avec
+// r = 2 (u-p) x (z-p) donc |r_i| < 2^34 sur u16. `r = 0` caractérise exactement
+// les points de la droite (p,u) : avec q la projection de e sur d^perp on a
+// r = d x q et d x (d x q) = -||d||^2 q. On choisit ensuite l'axe canonique k
+// le plus petit tel que d_k != 0 et on garde les deux autres composantes dans
+// l'ordre : la restriction à d^perp de cette projection est un isomorphisme
+// linéaire, donc elle envoie droites sur droites et demi-plans sur demi-plans,
+// et le minimum cherché est inchangé. Les déterminants restent sous 2^69.
 #include <algorithm>
 #include <charconv>
 #include <chrono>
@@ -51,39 +118,292 @@ using mhgp::P3;
 using mhgp::i32;
 using mhgp::i128;
 
-// Le minimum, sur les demi-plans fermés bordés par une droite passant par
-// l'origine, du nombre de points d'un ensemble planaire. Les points sont donnés par
-// leurs coordonnées entières dans une base du plan ; un point à l'origine est dans
-// TOUS les demi-plans et se compte à part.
-static int minimum_halfplane_count(const std::vector<std::pair<i128, i128>>& projected,
-                                   int always_inside) {
-  const int m = (int)projected.size();
-  if (m == 0) return always_inside;
-  // Pour chaque direction candidate d (celle d'un point, et son opposée), compter
-  // les points y tels que d.y >= 0 au sens du produit croisé : le demi-plan bordé
-  // par la droite portée par d, du côté positif.
-  int best = m + always_inside;
+namespace {
+
+struct Planar {
+  i128 x = 0, y = 0;
+};
+
+inline i128 cross2(const Planar& a, const Planar& b) { return a.x * b.y - a.y * b.x; }
+inline i128 dot2(const Planar& a, const Planar& b) { return a.x * b.x + a.y * b.y; }
+
+// L'ordre angulaire, sans angle : d'abord le demi-tour (y > 0, ou y == 0 et
+// x > 0) contre l'autre, puis le signe du produit croisé. Deux points du même
+// rayon sont égaux pour cet ordre — c'est exactement ce qu'exige le balayage.
+inline int angular_half(const Planar& a) {
+  if (a.y > 0) return 0;
+  if (a.y < 0) return 1;
+  return a.x > 0 ? 0 : 1;
+}
+
+inline bool angular_less(const Planar& a, const Planar& b) {
+  const int ha = angular_half(a), hb = angular_half(b);
+  if (ha != hb) return ha < hb;
+  return cross2(a, b) > 0;
+}
+
+// `y` est-il dans l'arc semi-ouvert [angle(d), angle(d) + pi) ?
+inline bool in_half_open_arc(const Planar& d, const Planar& y) {
+  const i128 c = cross2(d, y);
+  if (c > 0) return true;
+  if (c < 0) return false;
+  return dot2(d, y) > 0;                    // même rayon : oui ; antipode : non
+}
+
+// Le maximum, sur les demi-plans OUVERTS bordés par une droite passant par
+// l'origine, du nombre de points. Balayage à deux pointeurs sur l'ordre
+// angulaire ; les points doivent être non nuls.
+int maximum_open_halfplane(std::vector<Planar>& points) {
+  const int m = (int)points.size();
+  if (m == 0) return 0;
+  std::sort(points.begin(), points.end(), angular_less);
+  int best = 0, j = 0;
   for (int i = 0; i < m; ++i) {
-    for (int flip = 0; flip < 2; ++flip) {
-      const i128 dx = flip ? -projected[(std::size_t)i].first : projected[(std::size_t)i].first;
-      const i128 dy = flip ? -projected[(std::size_t)i].second : projected[(std::size_t)i].second;
-      if (dx == 0 && dy == 0) continue;
-      int count = 0;
-      for (int j = 0; j < m; ++j) {
-        // Demi-plan { y : cross(d, y) >= 0 }, fermé.
-        const i128 cross = dx * projected[(std::size_t)j].second -
-                           dy * projected[(std::size_t)j].first;
-        if (cross >= 0) ++count;
-      }
-      best = std::min(best, count + always_inside);
-    }
+    if (j < i) j = i;
+    while (j < i + m && in_half_open_arc(points[(std::size_t)i], points[(std::size_t)(j % m)]))
+      ++j;
+    best = std::max(best, j - i);
   }
   return best;
 }
 
+// Le minimum, sur les demi-plans FERMÉS, du nombre de points ; `always_inside`
+// compte les points de la droite frontière, qui appartiennent à tous.
+int minimum_closed_halfplane(std::vector<Planar>& points, int always_inside) {
+  return always_inside + (int)points.size() - maximum_open_halfplane(points);
+}
+
+// LE MUTANT. C'est la version réfutée : seules les directions vives, frontière
+// comptée. Elle n'est conservée que pour que la fixture puisse PROUVER qu'elle
+// sépare encore les deux calculs. Un `min` sur un sur-ensemble de directions ne
+// peut que baisser, donc `naive >= exact` toujours.
+int minimum_closed_halfplane_live_directions(const std::vector<Planar>& points,
+                                             int always_inside) {
+  const int m = (int)points.size();
+  if (m == 0) return always_inside;
+  int best = m + always_inside;
+  for (int i = 0; i < m; ++i)
+    for (int flip = 0; flip < 2; ++flip) {
+      Planar d = points[(std::size_t)i];
+      if (flip) { d.x = -d.x; d.y = -d.y; }
+      if (d.x == 0 && d.y == 0) continue;
+      int count = 0;
+      for (int j = 0; j < m; ++j)
+        if (cross2(d, points[(std::size_t)j]) >= 0) ++count;
+      best = std::min(best, count + always_inside);
+    }
+  return best;
+}
+
+// ---------------------------------------------------------------------------
+// LA PROJECTION D'UNE PAIRE
+// ---------------------------------------------------------------------------
+//
+// Rend le nombre minimal exact de points dans un demi-espace fermé bordé par un
+// plan contenant la droite (p,u), pour la boule diamétrale fermée puis ouverte.
+struct PairMinima {
+  int closed_exact = 0;                 // 2 + points de D_pu fermee, minimises
+  int closed_live = 0;                  // le mutant, sur les memes donnees
+  int open_exact = 0;                   // 2 + points de D°_pu, minimises
+  long long ball_points = 0;            // points visites dans la boule fermee
+};
+
+PairMinima pair_minima(const std::vector<P3>& pts, i32 a, i32 b, bool want_live) {
+  PairMinima out;
+  const P3& pa = pts[(std::size_t)a];
+  const P3& pb = pts[(std::size_t)b];
+  const i128 dx = (i128)pb.x - pa.x, dy = (i128)pb.y - pa.y, dz = (i128)pb.z - pa.z;
+  const i128 diameter2 = dx * dx + dy * dy + dz * dz;
+  // L'axe canonique : le plus petit indice ou d ne s'annule pas. La paire est
+  // faite de deux points DISTINCTS, donc il existe.
+  const int axis = (dx != 0) ? 0 : ((dy != 0) ? 1 : 2);
+  std::vector<Planar> closed, open;
+  int line_closed = 0, line_open = 0;
+  const int n = (int)pts.size();
+  for (i32 z = 0; z < n; ++z) {
+    if (z == a || z == b) continue;
+    const P3& pz = pts[(std::size_t)z];
+    const i128 ex = 2 * (i128)pz.x - pa.x - pb.x;
+    const i128 ey = 2 * (i128)pz.y - pa.y - pb.y;
+    const i128 ez = 2 * (i128)pz.z - pa.z - pb.z;
+    const i128 norm = ex * ex + ey * ey + ez * ez;
+    if (norm > diameter2) continue;                       // hors de la boule fermee
+    const bool strictly_inside = norm < diameter2;
+    ++out.ball_points;
+    const i128 rx = dy * ez - dz * ey;
+    const i128 ry = dz * ex - dx * ez;
+    const i128 rz = dx * ey - dy * ex;
+    if (rx == 0 && ry == 0 && rz == 0) {                  // sur la droite (p,u)
+      ++line_closed;
+      if (strictly_inside) ++line_open;
+      continue;
+    }
+    Planar q{};
+    if (axis == 0) { q.x = ry; q.y = rz; }
+    else if (axis == 1) { q.x = rx; q.y = rz; }
+    else { q.x = rx; q.y = ry; }
+    closed.push_back(q);
+    if (strictly_inside) open.push_back(q);
+  }
+  out.ball_points += 2;
+  if (want_live) out.closed_live = minimum_closed_halfplane_live_directions(closed, line_closed + 2);
+  out.open_exact = minimum_closed_halfplane(open, line_open + 2);
+  out.closed_exact = minimum_closed_halfplane(closed, line_closed + 2);
+  return out;
+}
+
+P3 pt(int x, int y, int z) {
+  P3 p{};
+  p.x = (i32)x; p.y = (i32)y; p.z = (i32)z;
+  return p;
+}
+
+// ---------------------------------------------------------------------------
+// LES FIXTURES PERMANENTES DU BALAYAGE
+// ---------------------------------------------------------------------------
+//
+// La première est le contre-exemple entier de l'audit : le minimum exact vaut 2,
+// la version par directions vives rend 5. Sans elle, la réparation du balayage
+// n'aurait aucun témoin, et une régression la rendrait silencieusement.
+//
+// La seconde sépare les TROIS contrats : boule ouverte, boule fermée exacte,
+// boule fermée par directions vives, sur 3 / 4 / 5.
+//
+// Les trois suivantes couvrent les dégénérescences que le balayage doit traiter
+// nommément : un groupe antipodal exact, des rayons confondus en nombre, et des
+// points de la droite (qui sont dans tous les demi-plans).
+int run_fixtures() {
+  int faults = 0;
+
+  {
+    // centre=(100,100,100), rayon^2=194 ; les quatre supports sont a distance
+    // carree 194 du centre, affinement independants et de moyenne nulle, donc le
+    // centre est strictement interieur a leur convexe. Les trois extras sont
+    // dans la boule diametrale de la paire {0,1}, hors de la sphere critique, et
+    // portes par un MEME rayon projete : c'est ce qui piege les directions vives.
+    const std::vector<P3> cloud{pt(113, 100, 95), pt(113, 100, 105), pt(87, 105, 100),
+                                pt(87, 95, 100),  pt(114, 100, 100), pt(115, 100, 100),
+                                pt(116, 100, 100)};
+    const PairMinima m = pair_minima(cloud, 0, 1, true);
+    if (m.closed_exact != 2 || m.closed_live != 5) {
+      printf("[fixture demi-plan] contre-exemple de l'audit : exact=%d (attendu 2)"
+             "  directions vives=%d (attendu 5)\n", m.closed_exact, m.closed_live);
+      ++faults;
+    } else {
+      printf("[fixture demi-plan] contre-exemple de l'audit : exact=2, directions vives=5,"
+             " la paire critique est conservee\n");
+    }
+  }
+
+  {
+    // p, u, un point de la droite au centre, et deux extra-shells orthogonaux
+    // exactement sur la sphere diametrale.
+    const std::vector<P3> cloud{pt(99, 100, 100), pt(101, 100, 100), pt(100, 100, 100),
+                                pt(100, 101, 100), pt(100, 99, 100)};
+    const PairMinima m = pair_minima(cloud, 0, 1, true);
+    if (m.open_exact != 3 || m.closed_exact != 4 || m.closed_live != 5) {
+      printf("[fixture demi-plan] trois contrats : ouvert=%d (3) ferme exact=%d (4)"
+             " ferme vif=%d (5)\n", m.open_exact, m.closed_exact, m.closed_live);
+      ++faults;
+    } else {
+      printf("[fixture demi-plan] trois contrats separes : ouvert=3, ferme exact=4,"
+             " ferme par directions vives=5\n");
+    }
+  }
+
+  {
+    // ANTIPODES EXACTS. Deux points diametralement opposes dans la projection :
+    // aucun demi-plan ferme ne peut les exclure tous les deux, mais un seul
+    // suffit. Le maximum ouvert vaut 1, donc le minimum ferme vaut 2 + 1.
+    const std::vector<P3> cloud{pt(0, 0, 0), pt(0, 0, 20), pt(4, 0, 10), pt(-4, 0, 10)};
+    const PairMinima m = pair_minima(cloud, 0, 1, true);
+    if (m.closed_exact != 3) {
+      printf("[fixture demi-plan] antipodes : ferme exact=%d (attendu 3)\n", m.closed_exact);
+      ++faults;
+    } else {
+      printf("[fixture demi-plan] antipodes exacts : un seul des deux est evitable\n");
+    }
+  }
+
+  {
+    // RAYONS CONFONDUS. Cinq points sur un meme rayon projete : la frontiere
+    // placee juste apres le groupe les exclut TOUS. Le minimum ferme vaut donc
+    // exactement 2, quel que soit le cardinal du groupe.
+    std::vector<P3> cloud{pt(0, 0, 0), pt(0, 0, 40)};
+    for (int i = 1; i <= 5; ++i) cloud.push_back(pt(i, 0, 20));
+    const PairMinima m = pair_minima(cloud, 0, 1, true);
+    if (m.closed_exact != 2 || m.closed_live != 7) {
+      printf("[fixture demi-plan] rayons confondus : exact=%d (2) vifs=%d (7)\n",
+             m.closed_exact, m.closed_live);
+      ++faults;
+    } else {
+      printf("[fixture demi-plan] cinq rayons confondus : exact=2, vifs=7 — l'ecart croit"
+             " avec le groupe\n");
+    }
+  }
+
+  {
+    // POINTS DE LA DROITE. Ils sont dans TOUS les demi-espaces bordes par un plan
+    // qui contient cette droite : ils ne peuvent jamais etre evites.
+    const std::vector<P3> cloud{pt(0, 0, 0), pt(0, 0, 60), pt(0, 0, 10), pt(0, 0, 20),
+                                pt(0, 0, 50)};
+    const PairMinima m = pair_minima(cloud, 0, 1, true);
+    if (m.closed_exact != 5 || m.open_exact != 5) {
+      printf("[fixture demi-plan] droite : ferme=%d ouvert=%d (attendu 5 et 5)\n",
+             m.closed_exact, m.open_exact);
+      ++faults;
+    } else {
+      printf("[fixture demi-plan] trois points de la droite : inevitables, ferme=ouvert=5\n");
+    }
+  }
+
+  {
+    // LE MUTANT DOIT ETRE DOMINE PARTOUT, JAMAIS EN DESSOUS. Un balayage qui
+    // rendrait un minimum plus PETIT que le vrai admettrait des paires a tort et
+    // ne serait pas non plus le bon filtre. On verifie l'inegalite sur un nuage
+    // pseudo-aleatoire deterministe, et on exige au moins un ecart strict.
+    std::mt19937 rng(20260810U);
+    std::uniform_int_distribution<int> pick(0, 30);
+    std::vector<P3> cloud;
+    for (int i = 0; i < 24; ++i) cloud.push_back(pt(pick(rng), pick(rng), pick(rng)));
+    std::sort(cloud.begin(), cloud.end(), [](const P3& x, const P3& y) {
+      if (x.x != y.x) return x.x < y.x;
+      if (x.y != y.y) return x.y < y.y;
+      return x.z < y.z;
+    });
+    cloud.erase(std::unique(cloud.begin(), cloud.end(),
+                            [](const P3& x, const P3& y) {
+                              return x.x == y.x && x.y == y.y && x.z == y.z;
+                            }),
+                cloud.end());
+    long long strict = 0, order_faults = 0, open_faults = 0;
+    for (i32 a = 0; a + 1 < (i32)cloud.size(); ++a)
+      for (i32 b = a + 1; b < (i32)cloud.size(); ++b) {
+        const PairMinima m = pair_minima(cloud, a, b, true);
+        if (m.closed_live < m.closed_exact) ++order_faults;
+        if (m.open_exact > m.closed_exact) ++open_faults;
+        if (m.closed_live > m.closed_exact) ++strict;
+      }
+    if (order_faults || open_faults || strict == 0) {
+      printf("[fixture demi-plan] ordre des trois contrats : %lld inversions vif<exact,"
+             " %lld inversions ouvert>ferme, %lld ecarts stricts\n",
+             order_faults, open_faults, strict);
+      ++faults;
+    } else {
+      printf("[fixture demi-plan] ordre verifie sur %zu points : ouvert <= ferme <= vif,"
+             " %lld ecarts stricts\n", cloud.size(), strict);
+    }
+  }
+
+  return faults;
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
-  int n = 200, smax = 11, repeats = 1;
+  int n = 200, smax = 11, repeats = 1, ranks = 1, mutant = 1;
   long long seed = 20260809;
+  long long min_true = 0, min_admitted = 0;
   const double density = 1.0e-3;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
@@ -100,20 +420,40 @@ int main(int argc, char** argv) {
     long long value = 0;
     const bool has = (i + 1 < argc) && integer(argv[i + 1], &value);
     int* target = nullptr;
+    long long* wide = nullptr;
     if (!strcmp(argv[i], "--points")) target = &n;
     else if (!strcmp(argv[i], "--smax")) target = &smax;
     else if (!strcmp(argv[i], "--repeats")) target = &repeats;
+    else if (!strcmp(argv[i], "--ranks")) target = &ranks;
+    else if (!strcmp(argv[i], "--mutant")) target = &mutant;
+    else if (!strcmp(argv[i], "--min-true")) wide = &min_true;
+    else if (!strcmp(argv[i], "--min-admitted")) wide = &min_admitted;
     else if (!strcmp(argv[i], "--seed")) {
       if (!has) { printf("ECHEC : --seed invalide\n"); return 2; }
       ++i; seed = value; continue;
     } else { printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { printf("ECHEC : valeur invalide pour %s\n", argv[i]); return 2; }
     ++i;
-    *target = (int)value;
+    if (wide != nullptr) *wide = value;
+    else *target = (int)value;
   }
-  if (n < 8 || n > 5000 || smax < 3 || smax > mhgp::kMaxRank || repeats < 1 || repeats > 20) {
+  if (n < 8 || n > 5000 || smax < 3 || smax > mhgp::kMaxRank || repeats < 1 || repeats > 20 ||
+      ranks < 0 || ranks > 1 || mutant < 0 || mutant > 1) {
     printf("ECHEC : campagne absurde\n");
     return 2;
+  }
+  // La matrice des rangs est en O(n^2) : elle est explicitement plafonnee, et son
+  // absence est DITE, jamais silencieuse.
+  if (ranks == 1 && n > 2000) {
+    printf("ECHEC : --ranks 1 au-dela de 2000 points demanderait une matrice n^2 ;"
+           " passer --ranks 0\n");
+    return 2;
+  }
+
+  const int fixture_faults = run_fixtures();
+  if (fixture_faults != 0) {
+    printf("ECHEC : %d fixture(s) du balayage en demi-plan\n", fixture_faults);
+    return 1;
   }
 
   const double volume = (double)n / density;
@@ -121,40 +461,63 @@ int main(int argc, char** argv) {
   std::mt19937 rng((unsigned)seed);
   std::uniform_int_distribution<int> pick(0, span - 1);
 
-  long long sum_true = 0, sum_admitted = 0, sum_total = 0, sum_missing = 0;
+  long long sum_true = 0, sum_admitted_closed = 0, sum_admitted_open = 0, sum_admitted_live = 0;
+  long long sum_total = 0, sum_missing_closed = 0, sum_missing_open = 0, sum_missing_live = 0;
   long long sum_ball_points = 0;
-  // LE RANG k-NN D'UNE PAIRE ADMISSIBLE. Si les paires admissibles sont toujours
-  // proches au sens du voisinage, une enumeration par k plus proches voisins les
-  // trouve toutes et le cout d'enumeration devient O(nk). Sinon il faut une
-  // frontiere par ancre. C'est cette question, et pas le nombre de paires, qui
-  // decide du COUT de l'enumeration.
+  // LE RANG k-NN D'UNE PAIRE. Si les paires admissibles etaient toujours proches
+  // au sens du voisinage, une enumeration par k plus proches voisins les
+  // trouverait toutes et le cout deviendrait O(nk). C'est cette question, et pas
+  // le nombre de paires, qui decide du COUT de l'enumeration.
+  //
+  // LE RANG EST DE COMPETITION, pas d'insertion : rang(a,b) = 1 + le nombre de
+  // points STRICTEMENT plus proches de a que b. Un tri stable avec depart par
+  // PointId faisait dependre le rang de la numerotation des ex aequo.
+  //
+  // Et il est mesure sur les paires VRAIES independamment de l'admission : un
+  // rang maximum calcule dans le seul ensemble admis ne dit rien d'un filtre qui
+  // aurait deja supprime la paire genante.
   int rank_max_admitted = 0, rank_max_true = 0;
   std::vector<long long> rank_histogram(64, 0);
   long long rank_samples = 0;
-  double sum_seconds = 0;
+  double sum_seconds = 0, sum_rank_seconds = 0;
   int decided = 0;
+  int refused_status = 0;
 
   for (int r = 0; r < repeats; ++r) {
     std::vector<P3> pts;
     {
-      std::vector<long long> keys;
+      std::set<long long> keys;
       for (int guard = 0; (int)pts.size() < n && guard < 60 * n; ++guard) {
         P3 q{};
         q.x = (i32)pick(rng); q.y = (i32)pick(rng); q.z = (i32)pick(rng);
         const long long key = ((long long)q.x << 34) | ((long long)q.y << 17) | (long long)q.z;
-        if (std::find(keys.begin(), keys.end(), key) != keys.end()) continue;
-        keys.push_back(key);
+        if (!keys.insert(key).second) continue;
         pts.push_back(q);
       }
     }
     if ((int)pts.size() < n) { printf("ECHEC : nuage non genere\n"); return 3; }
+    // LE DIGEST DU NUAGE. Une graine ne suffit pas a un recu inter-machine :
+    // `std::uniform_int_distribution` n'est pas un flux portable. Le digest, lui,
+    // identifie l'entree effectivement mesuree.
+    unsigned long long digest = 1469598103934665603ULL;
+    for (const P3& q : pts)
+      for (int c = 0; c < 3; ++c) {
+        const unsigned long long v =
+            (unsigned long long)(c == 0 ? q.x : (c == 1 ? q.y : q.z));
+        for (int byte = 0; byte < 4; ++byte) {
+          digest ^= (v >> (8 * byte)) & 0xFFULL;
+          digest *= 1099511628211ULL;
+        }
+      }
 
     // LA VÉRITÉ : les paires qui apparaissent dans une coquille critique.
     mhgp3v::FlatStatistics st{};
     mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
     const mhgp::Catalogue cat = mhgp3v::flat_catalogue(pts, smax, &st, &status, false, true);
     if (status != mhgp3v::CloudStatus::kOk) {
-      printf("  statut %s : nuage ignore\n", mhgp3v::cloud_status_name(status));
+      printf("  nuage %d digest=%016llx statut %s : REFUSE\n", r, digest,
+             mhgp3v::cloud_status_name(status));
+      ++refused_status;
       continue;
     }
     std::set<std::pair<i32, i32>> truth;
@@ -169,11 +532,13 @@ int main(int argc, char** argv) {
           truth.insert({shell[a], shell[b]});
     }
 
-    // LE FILTRE : le lemme du demi-boule, sur toutes les paires.
-    // Rang de chaque point dans l'ordre des distances depuis chaque autre : calcule
-    // une fois, exactement, sur les carres de distance entiers.
-    std::vector<std::vector<int>> rank_of((std::size_t)n, std::vector<int>((std::size_t)n, 0));
-    {
+    // Rang de competition de chaque point depuis chaque autre. Le cout de cette
+    // construction est CHRONOMETRE A PART : c'est un diagnostic, il n'a pas le
+    // droit de se cacher dans le temps du filtre.
+    std::vector<int> rank_of;
+    if (ranks == 1) {
+      const auto rt0 = std::chrono::steady_clock::now();
+      rank_of.assign((std::size_t)n * (std::size_t)n, 0);
       std::vector<std::pair<i128, i32>> order;
       for (i32 a = 0; a < n; ++a) {
         order.clear();
@@ -184,109 +549,136 @@ int main(int argc, char** argv) {
           const i128 ddz = (i128)pts[(std::size_t)z].z - pts[(std::size_t)a].z;
           order.push_back({ddx * ddx + ddy * ddy + ddz * ddz, z});
         }
-        std::sort(order.begin(), order.end());
-        for (std::size_t i = 0; i < order.size(); ++i)
-          rank_of[(std::size_t)a][(std::size_t)order[i].second] = (int)i + 1;
+        std::sort(order.begin(), order.end(),
+                  [](const std::pair<i128, i32>& x, const std::pair<i128, i32>& y) {
+                    return x.first < y.first;
+                  });
+        // Ex aequo GEOMETRIQUES groupes : meme distance carree, meme rang.
+        std::size_t i = 0;
+        while (i < order.size()) {
+          std::size_t j = i;
+          while (j < order.size() && order[j].first == order[i].first) ++j;
+          for (std::size_t t = i; t < j; ++t)
+            rank_of[(std::size_t)a * (std::size_t)n + (std::size_t)order[t].second] = (int)i + 1;
+          i = j;
+        }
+      }
+      sum_rank_seconds +=
+          std::chrono::duration<double>(std::chrono::steady_clock::now() - rt0).count();
+      for (const auto& pair : truth) {
+        const int rank = std::min(rank_of[(std::size_t)pair.first * (std::size_t)n +
+                                          (std::size_t)pair.second],
+                                  rank_of[(std::size_t)pair.second * (std::size_t)n +
+                                          (std::size_t)pair.first]);
+        rank_max_true = std::max(rank_max_true, rank);
       }
     }
 
     const auto t0 = std::chrono::steady_clock::now();
-    long long admitted = 0, missing = 0, ball_points = 0;
-    std::vector<std::pair<i128, i128>> projected;
+    long long admitted_closed = 0, admitted_open = 0, admitted_live = 0;
+    long long missing_closed = 0, missing_open = 0, missing_live = 0, ball_points = 0;
     for (i32 a = 0; a < n; ++a)
       for (i32 b = a + 1; b < n; ++b) {
-        const P3& pa = pts[(std::size_t)a];
-        const P3& pb = pts[(std::size_t)b];
-        // Boule diametrale exacte : centre (pa+pb)/2, rayon |pb-pa|/2. Le test
-        // « z dedans » s'ecrit sans division : |2z - pa - pb|^2 <= |pb - pa|^2.
-        const i128 dx = (i128)pb.x - pa.x, dy = (i128)pb.y - pa.y, dz = (i128)pb.z - pa.z;
-        const i128 diameter2 = dx * dx + dy * dy + dz * dz;
-        projected.clear();
-        int inside_line = 0;
-        for (i32 z = 0; z < n; ++z) {
-          if (z == a || z == b) continue;
-          const P3& pz = pts[(std::size_t)z];
-          const i128 ex = 2 * (i128)pz.x - pa.x - pb.x;
-          const i128 ey = 2 * (i128)pz.y - pa.y - pb.y;
-          const i128 ez = 2 * (i128)pz.z - pa.z - pb.z;
-          if (ex * ex + ey * ey + ez * ez > diameter2) continue;
-          // Projection sur le plan perpendiculaire a (pb - pa) : deux coordonnees
-          // entieres obtenues par produits croises, sans division.
-          const i128 cx = dy * ez - dz * ey;
-          const i128 cy = dz * ex - dx * ez;
-          const i128 cz = dx * ey - dy * ex;
-          if (cx == 0 && cy == 0 && cz == 0) { ++inside_line; continue; }
-          // Base entiere du plan : (u, v) avec u = d x e0 pour un axe e0 non
-          // colineaire a d, et v = d x u. Les coordonnees du point projete sont
-          // (c.u, c.v) ou c est le produit croise ci-dessus.
-          i128 ux, uy, uz;
-          if (dx != 0 || dy != 0) { ux = -dy; uy = dx; uz = 0; }
-          else { ux = 1; uy = 0; uz = 0; }
-          const i128 vx = dy * uz - dz * uy;
-          const i128 vy = dz * ux - dx * uz;
-          const i128 vz = dx * uy - dy * ux;
-          projected.push_back({cx * ux + cy * uy + cz * uz, cx * vx + cy * vy + cz * vz});
+        const PairMinima m = pair_minima(pts, a, b, mutant == 1);
+        ball_points += m.ball_points;
+        const bool is_true = truth.count({a, b}) != 0;
+        if (m.closed_exact <= smax) ++admitted_closed; else if (is_true) ++missing_closed;
+        if (m.open_exact <= smax) ++admitted_open; else if (is_true) ++missing_open;
+        if (mutant == 1) {
+          if (m.closed_live <= smax) ++admitted_live; else if (is_true) ++missing_live;
         }
-        ball_points += (long long)projected.size() + inside_line + 2;
-        // Les deux extremites sont dans TOUS les demi-espaces bordes par leur droite.
-        const int least = minimum_halfplane_count(projected, inside_line + 2);
-        if (least <= smax) {
-          ++admitted;
-          // Le rang d'une paire est le PLUS PETIT des deux rangs croises : une
-          // enumeration par k-NN la trouve des que k atteint ce rang.
-          const int rank = std::min(rank_of[(std::size_t)a][(std::size_t)b],
-                                    rank_of[(std::size_t)b][(std::size_t)a]);
+        if (ranks == 1 && m.open_exact <= smax) {
+          const int rank = std::min(rank_of[(std::size_t)a * (std::size_t)n + (std::size_t)b],
+                                    rank_of[(std::size_t)b * (std::size_t)n + (std::size_t)a]);
           rank_max_admitted = std::max(rank_max_admitted, rank);
-          if (truth.count({a, b}) != 0) rank_max_true = std::max(rank_max_true, rank);
           int bucket = 0;
           while (bucket < 62 && (1 << (bucket + 1)) <= rank) ++bucket;
           ++rank_histogram[(std::size_t)bucket];
           ++rank_samples;
-        } else if (truth.count({a, b}) != 0) {
-          ++missing;                 // le lemme aurait refute une paire VRAIE
         }
       }
     const auto t1 = std::chrono::steady_clock::now();
 
+    printf("  nuage %d digest=%016llx statut ok  vraies=%zu admises ouvert=%lld ferme=%lld"
+           "  vif=%lld\n", r, digest, truth.size(), admitted_open, admitted_closed,
+           admitted_live);
     ++decided;
     sum_true += (long long)truth.size();
-    sum_admitted += admitted;
+    sum_admitted_closed += admitted_closed;
+    sum_admitted_open += admitted_open;
+    sum_admitted_live += admitted_live;
     sum_total += (long long)n * (n - 1) / 2;
-    sum_missing += missing;
+    sum_missing_closed += missing_closed;
+    sum_missing_open += missing_open;
+    sum_missing_live += missing_live;
     sum_ball_points += ball_points;
     sum_seconds += std::chrono::duration<double>(t1 - t0).count();
   }
 
   if (decided == 0) { printf("ECHEC : aucun nuage decide\n"); return 3; }
   const double d = (double)decided;
-  printf("n=%d smax=%d emprise=%d^3 nuages=%d\n", n, smax, span, decided);
-  printf("  paires totales=%.0f  ADMISES=%.0f (%.3f%%)  VRAIES=%.0f (%.3f%%)\n",
-         sum_total / d, sum_admitted / d, 100.0 * (double)sum_admitted / (double)sum_total,
-         sum_true / d, 100.0 * (double)sum_true / (double)sum_total);
-  printf("  admises/vraies=%.2f   admises/point=%.1f   vraies/point=%.1f\n",
-         sum_true ? (double)sum_admitted / (double)sum_true : 0.0,
-         sum_admitted / d / n, sum_true / d / n);
-  printf("  vraies REFUTEES par le lemme=%.0f  (doit etre ZERO : le lemme est necessaire)\n",
-         sum_missing / d);
-  printf("  points de boule diametrale visites=%.0f  secondes=%.2f\n", sum_ball_points / d,
-         sum_seconds / d);
-  printf("  rang k-NN maximum : admises=%d  vraies=%d  (sur %lld paires admises)\n",
-         rank_max_admitted, rank_max_true, rank_samples);
-  {
+  printf("n=%d smax=%d emprise=%d^3 graine=%lld nuages demandes=%d decides=%d refuses=%d\n",
+         n, smax, span, seed, repeats, decided, refused_status);
+  printf("  paires totales=%.0f  ADMISES ouvert=%.0f (%.3f%%)  ferme=%.0f (%.3f%%)"
+         "  VRAIES=%.0f (%.3f%%)\n",
+         sum_total / d, sum_admitted_open / d,
+         100.0 * (double)sum_admitted_open / (double)sum_total, sum_admitted_closed / d,
+         100.0 * (double)sum_admitted_closed / (double)sum_total, sum_true / d,
+         100.0 * (double)sum_true / (double)sum_total);
+  printf("  admises/vraies ouvert=%.2f ferme=%.2f   admises/point ouvert=%.1f ferme=%.1f"
+         "   vraies/point=%.1f\n",
+         sum_true ? (double)sum_admitted_open / (double)sum_true : 0.0,
+         sum_true ? (double)sum_admitted_closed / (double)sum_true : 0.0,
+         sum_admitted_open / d / n, sum_admitted_closed / d / n, sum_true / d / n);
+  if (mutant == 1)
+    printf("  le MUTANT par directions vives admet %.0f paires et en REFUTE %.0f de vraies\n",
+           sum_admitted_live / d, sum_missing_live / d);
+  else
+    printf("  le mutant par directions vives n'est PAS evalue en campagne (--mutant 0) ;"
+           " il reste juge par les fixtures\n");
+  printf("  vraies REFUTEES : ouvert=%.0f  ferme=%.0f  (doivent etre ZERO : les deux"
+         " lemmes sont necessaires)\n", sum_missing_open / d, sum_missing_closed / d);
+  printf("  points de boule diametrale visites=%.0f  secondes filtre=%.2f"
+         "  secondes matrice des rangs=%.2f\n",
+         sum_ball_points / d, sum_seconds / d, sum_rank_seconds / d);
+  if (ranks == 1) {
+    printf("  rang k-NN maximum : admises=%d  vraies=%d  (sur %lld paires admises)\n",
+           rank_max_admitted, rank_max_true, rank_samples);
     long long cumulative = 0;
-    printf("  histogramme des rangs (borne superieure de la classe : part cumulee) :");
+    printf("  histogramme des rangs (classe = rangs de a a b : part cumulee) :");
     for (int i = 0; i < 20 && (1 << i) <= n; ++i) {
       cumulative += rank_histogram[(std::size_t)i];
       if (rank_samples > 0)
-        printf(" %d:%.3f", 1 << (i + 1), (double)cumulative / (double)rank_samples);
+        printf(" [%d,%d]:%.3f", 1 << i, (1 << (i + 1)) - 1,
+               (double)cumulative / (double)rank_samples);
     }
     printf("\n");
+  } else {
+    printf("  rangs k-NN NON mesures (--ranks 0)\n");
   }
-  if (sum_missing != 0) {
-    printf("ECHEC : le lemme du demi-boule a refute %lld paires reelles — il est FAUX\n",
-           sum_missing);
+
+  // LES PLANCHERS. Sans eux, un catalogue vide rendait `vraies=0, refutees=0, OK` :
+  // la porte etait verte precisement quand le juge etait mort.
+  if (sum_true < min_true) {
+    printf("ECHEC : plancher de verite non atteint, %lld paires vraies pour %lld exigees\n",
+           sum_true, min_true);
+    return 3;
+  }
+  if (sum_admitted_open < min_admitted) {
+    printf("ECHEC : plancher d'admission non atteint, %lld pour %lld exigees\n",
+           sum_admitted_open, min_admitted);
+    return 3;
+  }
+  if (refused_status != 0) {
+    printf("ECHEC : %d nuage(s) au statut non kOk — une moyenne partielle n'est pas un recu\n",
+           refused_status);
+    return 3;
+  }
+  if (sum_missing_open != 0 || sum_missing_closed != 0) {
+    printf("ECHEC : le lemme du demi-boule a refute %lld (ouvert) et %lld (ferme) paires"
+           " reelles — il est FAUX\n", sum_missing_open, sum_missing_closed);
     return 1;
   }
-  printf("OK : aucune paire reelle refutee\n");
+  printf("OK : aucune paire reelle refutee par le balayage exact\n");
   return 0;
 }

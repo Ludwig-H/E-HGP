@@ -289,6 +289,58 @@ add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
          --min-navigated 500 --min-multiple-shells 300 --min-quotiented 300
          --min-reverse 30000 --min-reverse-depth 8 --min-internal-nodes 1000 --min-owner 30000)
 
+# LA GRILLE u16 ENTIERE, ET PAS SEULEMENT DE PETITES COORDONNEES.
+#
+# Toutes les portes ci-dessus tiennent dans une boite de cote au plus quarante.
+# Le determinant d'orientation y reste tres en dessous de 2^31, si bien qu'une
+# TRONCATURE 32 bits du signe owner ne s'y voyait pas : le catalogue restait
+# juste par accident d'echelle. Le defaut n'apparaissait qu'a coordonnee pleine.
+#
+# Cette porte navigue donc sur la grille declaree, la seule ou le contrat u16 est
+# reellement exerce. Elle est le pendant en campagne de la fixture
+# `[frontiere u16 owner]`, qui grave les deux frontieres exactes 1290/1291 et
+# 1023/1024/1025.
+add_test(NAME mhgp3v_flats_u16_owner COMMAND mhgp3v_flats_differential
+         --clouds 60 --points 10 --coord 65536 --smax 4 --seed 20260809 --min-cases 400
+         --min-navigated 200 --min-vertices 10000
+         --min-reverse 10000 --min-reverse-depth 8 --min-internal-nodes 500 --min-owner 8000)
+
+# LE NOYAU F0 DU FOLD HORIZONTAL, EN PORTE PERMANENTE.
+#
+# Le script n'etait lance qu'a la main : rien n'empechait une regression de
+# passer inapercue entre deux audits. Il est desormais un CTest, sous
+# `python3 -O` en plus du mode normal — c'est precisement ce drapeau qui
+# effacait les vingt-sept obligations portees par `assert` et rendait un `PASS`
+# vide. Elles passent maintenant par un controle explicite.
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+  add_test(NAME mhgp3v_gate_d_fold_f0 COMMAND ${Python3_EXECUTABLE}
+           ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_gate_d_fold_f0.py)
+  set_tests_properties(mhgp3v_gate_d_fold_f0 PROPERTIES
+                       PASS_REGULAR_EXPRESSION "Gate_D_F0_kernel=PASS")
+  add_test(NAME mhgp3v_gate_d_fold_f0_optimised COMMAND ${Python3_EXECUTABLE} -O
+           ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_gate_d_fold_f0.py)
+  set_tests_properties(mhgp3v_gate_d_fold_f0_optimised PROPERTIES
+                       PASS_REGULAR_EXPRESSION "Gate_D_F0_kernel=PASS")
+else()
+  message(STATUS "mhgp3v : interprete Python absent, porte F0 non enregistree")
+endif()
+
+# LE BALAYAGE EN DEMI-PLAN DU FILTRE DE PAIRES, EN PORTE PERMANENTE.
+#
+# Le probe n'avait aucun CTest : sa conclusion d'echelle a donc pu etre publiee
+# alors que son oracle angulaire etait faux. Il en a maintenant un, avec ses
+# PLANCHERS — sans `--min-true`, un catalogue vide rendait `vraies=0,
+# refutees=0, OK`, c'est-a-dire vert precisement quand le juge etait mort.
+#
+# Les six fixtures du balayage tournent AVANT toute campagne : le contre-exemple
+# entier de l'audit (exact 2 contre 5 par directions vives), la separation des
+# trois contrats ouvert/ferme/vif sur 3-4-5, les antipodes, les rayons
+# confondus, les points de la droite, et l'ordre `ouvert <= ferme <= vif` sur un
+# nuage entier avec au moins un ecart strict.
+add_test(NAME mhgp3v_admissible_pair_sweep COMMAND mhgp3v_admissible_pair_probe
+         --points 30 --smax 8 --repeats 3 --seed 424242 --min-true 900 --min-admitted 1200)
+
 # La REVERSE SEARCH est comparee au BFS dans les quatre portes positives : meme
 # ensemble de sommets, memes coquilles, memes ensembles interieurs, sans `seen`,
 # `frontier` ni `visited`. C'est la porte qui autorise a retirer les tables

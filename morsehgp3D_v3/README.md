@@ -6,12 +6,18 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 L'état audité du worktree est scellé dans
-[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les portes usuelles à
-petites coordonnées sont vertes, mais une frontière u16 révèle un défaut P0 du
-chemin `use_owner` : un déterminant exact `i128` est implicitement tronqué en
-`int`, ce qui perd des sphères et peut déclencher `-INT_MIN`. Le noyau F0 reste
-également rouge : il rejette une naissance autorisée par son contrat écrit. La
-fixture du cône signé ne protège pas encore l'identité du propriétaire. Les
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
+
+**Trois des quatre P0 de cet audit sont fermés, chacun avec sa porte permanente
+et son mutant.** La troncature `i128` du chemin `use_owner` est réduite par
+`sign_of` et la surcharge fautive est supprimée du langage; le minimum en
+demi-plan du filtre de paires est calculé par un balayage exact au lieu des
+seules directions vives, et ses masses sont republiées; le noyau F0 accepte
+enfin la naissance tout $N_a$ que son contrat écrit autorisait, sous un
+troisième oracle qui ne ferme rien transitivement. Le quatrième — le refus du
+microkernel ni jugé ni rejoué — reste ouvert et c'est le chantier courant.
+
+La fixture du cône signé ne protège toujours pas l'identité du propriétaire. Les
 fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
 Le passage GPU est spécifié séparément dans la
@@ -1181,40 +1187,99 @@ $y$ du demi-boule côté centre,
 $\lVert y-c\rVert^2=\lVert y-m\rVert^2-2(y-m)\cdot(c-m)+d^2\le R^2$.
 
 La réduction au plan perpendiculaire à $(u-p)$ est exacte. En revanche, le
-`minimum_halfplane_count` du commit `40ad152` ne calcule pas encore le minimum
-d'un demi-plan fermé : il teste seulement les directions portées par les points
-et compte les points de frontière. Le vrai minimum peut être atteint entre deux
-rayons. Un sweep correct groupe les rayons primitifs, maximise la masse dans le
-demi-plan **ouvert** complémentaire, puis applique
-`minimum_closed=always_inside+m-maximum_open`.
+`minimum_halfplane_count` du commit `40ad152` ne calculait pas le minimum d'un
+demi-plan fermé : il testait seulement les directions portées par les points et
+comptait les points de frontière. Le vrai minimum peut être atteint **entre**
+deux rayons.
 
-**[diagnostic du sujet fautif]** cube à densité fixe $10^{-3}$,
-$s_{\max}=11$ :
+#### Le sweep est réparé, et par une identité plutôt que par une heuristique
 
-| $n$ | paires totales | admises | % du total | vraies | admises/pt | vraies/pt | admises/vraies |
+Un demi-plan fermé et le demi-plan **ouvert** opposé partitionnent le plan privé
+de l'origine, donc
+
+$$\min_H\lvert P\cap H_{\text{fermé}}\rvert=\lvert P\rvert-\max_H\lvert P\cap H_{\text{ouvert}}\rvert.$$
+
+Et le maximum sur les demi-plans ouverts, lui, **est** atteint sur un arc
+semi-ouvert porté par un point. Si l'arc ouvert optimal contient des points,
+soit $\theta_i$ l'angle du premier ; tous les autres sont dans
+$[\theta_i,\theta_i+\pi)$, et cet arc semi-ouvert est réalisable en reculant la
+frontière d'un $\varepsilon$ sans point. Un balayage à deux pointeurs sur les
+angles triés le calcule exactement, **sans jamais évaluer un angle** :
+l'appartenance à $[\theta_i,\theta_i+\pi)$ s'écrit
+`cross(d,y) > 0 ou (cross(d,y) == 0 et dot(d,y) > 0)`.
+
+La projection a été resserrée en même temps, et ce n'était pas cosmétique.
+L'ancienne base entière multipliait $d\times e$ par $d\times(d\times e)$ et
+produisait des coordonnées jusqu'à $2^{73}$ : leur produit croisé atteint
+$2^{147}$ et **déborde** `i128`. Ce n'était invisible que parce que l'emprise
+mesurée est minuscule devant la grille déclarée. On prend maintenant directement
+$r=d\times e=2(u-p)\times(z-p)$, déjà dans $d^{\perp}$, avec
+$\lvert r_i\rvert<2^{34}$ sur u16 ; $r=0$ caractérise exactement les points de
+la droite. On garde les deux composantes autres que l'axe canonique le plus
+petit tel que $d_k\neq0$ : la restriction de cette projection à $d^{\perp}$ est
+un isomorphisme linéaire, donc elle envoie demi-plans sur demi-plans et le
+minimum est inchangé. Les déterminants restent sous $2^{69}$.
+
+Six fixtures permanentes gardent le sweep, et le mutant par directions vives est
+conservé dans le binaire **pour qu'elles puissent prouver qu'elles mordent** :
+
+| fixture | exact | par directions vives |
+| --- | ---: | ---: |
+| contre-exemple entier de l'audit | **2** | 5 |
+| trois contrats : ouvert / fermé / vif | 3 | 4 puis 5 |
+| antipodes exacts | 3 | — |
+| cinq rayons confondus | **2** | 7 |
+| trois points de la droite | 5 | — |
+| ordre sur un nuage de 24 points | 225 écarts stricts, zéro inversion | — |
+
+#### Les deux lemmes ne bornent pas la même chose
+
+Le lemme **fermé** borne $\lvert X\cap D_{pu}\cap H\rvert$ par le rang fermé
+$\lvert S\rvert+\lvert I\rvert$. Le lemme **ouvert** borne
+$2+\lvert X\cap D_{pu}^{\circ}\cap H\rvert$ par $q+\lvert I\rvert$, où $q$ est
+l'arité du support. Comme $D^{\circ}\subset D$, on a
+$A_{\text{ouvert}}\le A_{\text{fermé}}$ : sur le catalogue de rang fermé,
+l'ouvert admet donc **plus** de paires et le fermé est le filtre le plus
+sélectif. Ce n'est pas un défaut de l'ouvert : sur la source Gabriel ouverte,
+qui n'exige que $q+\lvert I\rvert\le s_{\max}$ et laisse l'extra-shell libre, le
+lemme fermé n'est pas valide du tout et seul l'ouvert survit. Les deux sont
+mesurés ici contre la vérité du catalogue **fermé**, la seule dont ce programme
+dispose ; le nombre `ADMISES ouvert` ne dimensionne donc pas la source ouverte.
+
+**[mesuré, sweep exact, protocole homogène — cube à densité fixe $10^{-3}$,
+$s_{\max}=11$, graine 20260809, deux nuages par ligne]**
+
+| $n$ | paires totales | admises (fermé) | % du total | vraies | admises/pt | vraies/pt | admises/vraies |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100 | 4 950 | 3 882 | 78,4 % | 2 133 | 38,8 | 21,3 | 1,82 |
-| 200 | 19 900 | 10 706 | 53,8 % | 5 171 | 53,5 | 25,9 | 2,07 |
-| 400 | 79 800 | 26 584 | 33,3 % | 11 689 | 66,5 | 29,2 | 2,27 |
-| 800 | 319 600 | 62 997 | 19,7 % | 25 868 | 78,7 | 32,3 | 2,44 |
+| 50 | 1 225 | 1 190 | 97,1 % | 828 | 23,8 | 16,6 | 1,44 |
+| 100 | 4 950 | 4 042 | 81,6 % | 2 133 | 40,4 | 21,3 | 1,89 |
+| 200 | 19 900 | 11 312 | 56,8 % | 5 156 | 56,6 | 25,8 | 2,19 |
+| 400 | 79 800 | 28 718 | 36,0 % | 11 768 | 71,8 | 29,4 | 2,44 |
+| 800 | 319 600 | 67 690 | 21,2 % | 25 734 | 84,6 | 32,2 | 2,63 |
 
-Le zéro aléatoire annoncé ne protège pas cette faute. La fixture entière
-suivante possède une sphère critique `RelevantGP` de centre `(100,100,100)`,
-rayon carré 194 et support
+Le sujet fautif rendait 10 697 admises à $n=200$ contre 11 312 : la correction
+augmente bien `ADMIS`, d'environ 6 %, exactement comme l'audit l'avait prédit.
+Sur ces nuages aléatoires, le mutant ne réfute d'ailleurs **aucune** paire
+vraie : le contre-exemple est adversarial, pas typique — ce qui est précisément
+pourquoi une campagne aléatoire ne pouvait pas le trouver.
+
+**Ces cinq lignes ne prouvent toujours aucun `Big-O`.** Les incréments de
+`admises/pt` par doublement valent 16,6 puis 16,2 puis 15,2 puis 12,8, et ceux
+de `vraies/pt` 4,7 puis 4,5 puis 3,6 puis 2,8 : les deux suites **décroissent**,
+ce qui est compatible avec $n\log n$, avec une puissance lente, et aussi avec
+une saturation. Une graine, une densité et cinq tailles ne choisissent pas entre
+ces familles, et `RelevantGP` n'impose aucune borne de degré : le cas général
+peut rester quadratique dès l'arité deux. Le rapport `admises/vraies` croît
+lentement et régulièrement — 1,44 à 2,63 — donc le filtre ne devient pas plus
+sélectif avec la taille : c'est le fait le plus contraignant de cette table.
+
+Le zéro aléatoire annoncé au commit `40ad152` ne protégeait pas la faute. La
+fixture entière suivante possède une sphère critique `RelevantGP` de centre
+`(100,100,100)`, rayon carré 194 et support
 `{(113,100,95),(113,100,105),(87,105,100),(87,95,100)}`. En ajoutant
 `(114,100,100),(115,100,100),(116,100,100)`, le demi-espace `x<=113`
 contient la paire des deux premiers supports et aucun extra : le minimum exact
-vaut 2. Le sujet rend 5 et réfute cette paire vraie à `s_max=4`.
-
-L'erreur surestime le minimum et rejette trop de paires; corriger le sweep ne
-peut donc qu'augmenter `ADMIS`. Les quatre lignes sont des **bornes inférieures
-du sujet fautif**, pas une mesure de l'univers conforme. Elles ne démontrent ni
-$O(n\log n)$, ni les projections `150/50` paires par point, ni les masses
-`7,5e6/2,5e6` à 50 k. Le protocole mélange en outre deux nuages à `n=100`
-et un seul aux autres tailles. Même avec un oracle réparé, quatre tailles et une
-graine ne distingueraient pas une loi logarithmique d'une puissance lente ou
-d'une transition ultérieure; `RelevantGP` n'impose aucune borne de degré et le
-cas général peut rester quadratique dès l'arité deux.
+vaut 2. Le sujet rendait 5 et réfutait cette paire vraie à `s_max=4`.
 
 Le lemme ne prouve pas non plus qu'une paire admise est courte : il borne un
 minimum sur les deux demi-boules, tandis que l'autre côté peut contenir
@@ -1239,11 +1304,20 @@ $\lvert U\rvert+\lvert I\rvert\leq s_{\max}$ passe alors, même avec un
 extra-shell arbitraire. Ce renforcement exact a été vérifié sans écart sur
 59 154 inégalités bornées; il ne fournit toujours ni rayon ni borne de degré.
 
-Le commit k-NN `5d9159a` (`prototype/admissible_pair_probe.cpp` de SHA-256
-`130e316e...`) ne répare pas le sweep. Il construit une
-matrice $n^2$ et $n$ tris hors chrono, puis mesure seulement les rangs du
-`ADMIS` déjà sous-estimé; ses maxima et histogrammes ne qualifient donc aucune
-frontière. Plus profondément, une paire Gabriel vide peut avoir un rang croisé
+Le diagnostic k-NN du commit `5d9159a` était lui aussi cassé de quatre façons,
+et les quatre sont corrigées. La matrice $n^2$ et les $n$ tris étaient construits
+**hors chrono** : ils ont maintenant leur propre horloge, publiée à côté de celle
+du filtre. Les rangs étaient d'insertion, donc départagés par `PointId` ; ils
+sont maintenant de **compétition**, ex æquo géométriques groupés, ce qui les rend
+indépendants de la numérotation. `rank_max_true` n'était mis à jour qu'après
+admission, donc aveugle à toute paire vraie que le filtre avait déjà supprimée ;
+il balaye maintenant la vérité entière, indépendamment du filtre. Et la classe
+imprimée `128` contenait les rangs au plus 127 : les bornes affichées sont
+désormais `[2^i, 2^{i+1}-1]`. Enfin la matrice est plafonnée à 2 000 points et
+son absence est **dite**, jamais silencieuse.
+
+Rien de tout cela ne sauve le k-NN comme énumérateur. Une paire Gabriel vide
+peut avoir un rang croisé
 arbitrairement grand avec la taille du nuage. À la taille produit, prendre
 `p=(0,0,0)`, `u=(65535,0,0)` et, pour `1<=i<=24999`, les points
 `(0,0,i)` et `(65535,0,i)` donne exactement 50 000 points u16. Tous les extras
@@ -1254,24 +1328,30 @@ exact, un complément certifié et le replay viennent avant ce diagnostic.
 
 ### Un k-NN borné sans complément est réfuté; l'histogramme ne qualifie rien
 
-**[diagnostic reproductible du sujet fautif]** La commande
-`mhgp3v_admissible_pair_probe --points 200 --smax 11 --repeats 1 --seed 20260809`
-rend bien 10 706 paires `ADMIS`, les maxima 177/85 et le cumul imprimé
-`128:0.990`. C'est un résultat positif de reproductibilité. Comme l'erreur du
-sweep rejette trop de paires, le maximum 177 reste une borne inférieure valable
-sur le véritable univers admissible de ce nuage; il suffit déjà à réfuter un
-cap plus petit sur cette seule entrée. Il ne démontre toutefois aucune loi de
-croissance à partir de trois tailles.
+**[mesuré, sweep exact et rangs de compétition]** rang croisé maximum, sur la
+vérité entière et non plus sur le seul `ADMIS` :
 
-Les pourcentages 83/98/99,9 %, les maxima 85/109/147 dits « vrais » et
-l'interprétation de la queue sont retirés. L'histogramme porte sur le sous-ensemble
-`ADMIS` censuré, les ex æquo sont départagés par `PointId`, la classe affichée
-`128` contient en réalité les rangs au plus 127, et `rank_max_true` est mis à jour
-seulement après admission par le filtre fautif. La « vérité » partage en outre les
-primitives de `flat_catalogue`. Un k-NN peut rester une priorité ou un filtre,
-mais toute masse omise exige un complément exact certifié et rejouable. Le binaire
-n'a ni fixture permanente du P0, ni CTest, ni sidecar de campagne : ses nombres
-restent des diagnostics.
+| $n$ | rang max admises | rang max **vraies** | rang max vraies / $n$ |
+| ---: | ---: | ---: | ---: |
+| 50 | 48 | 38 | 0,76 |
+| 100 | 90 | 63 | 0,63 |
+| 200 | 180 | 88 | 0,44 |
+| 400 | 362 | 109 | 0,27 |
+| 800 | 682 | 154 | 0,19 |
+
+Le rang maximum des paires **vraies** croît donc encore à $n=800$, et il vaut
+presque le cinquième du nuage. Le rang maximum des paires **admises** reste, lui,
+entre $0{,}85\,n$ et $0{,}96\,n$ à toutes les tailles : le filtre n'induit
+strictement aucun cap de voisinage. Sur les
+seules paires admises, la queue reste épaisse — 79,6 % des rangs sont sous 128 à
+$n=800$, donc plus d'un cinquième au-delà.
+
+Ces nombres sont des diagnostics, pas une loi. Ils suffisent néanmoins à réfuter
+un énumérateur par k-NN tronqué à cap fixe, et la construction adversariale
+ci-dessus le réfute inconditionnellement. La « vérité » partage en outre les
+primitives de `flat_catalogue` : ce n'est pas un oracle indépendant. Un k-NN peut
+rester une priorité ou un filtre, mais toute masse omise exige un complément
+exact certifié et rejouable.
 
 ### Le terrain à densité fixe : quatre diagnostics, aucune asymptote encore
 
@@ -1491,17 +1571,27 @@ Le juge multiplicitaire seul, avec ses planchers :
 Le sous-ensemble scellé par l'audit courant et le noyau F0 :
 
 ```sh
-ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_flats_(fixtures|generic|indexed_tree|degenerate|cospherical)$' -j2
-python3 morsehgp3D_v3/audits/check_gate_d_fold_f0.py
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_flats_(fixtures|generic|indexed_tree|degenerate|cospherical|u16_owner)$' -j2
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(gate_d_fold_f0|gate_d_fold_f0_optimised|admissible_pair_sweep)$'
 ```
 
-Attention : la sortie `Gate_D_F0_kernel=PASS` ne ferme pas la porte
-mathématique tant que le carré tout neuf d'arité quatre et la vérité indépendante
-de la
-[`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md)
-ne sont pas intégrés. L'invariant régulier « au moins deux facettes strictes »
-est conditionnel et se valide par record avant projection; il ne répare pas la
-garde par composante du fold général.
+Le noyau F0 est maintenant un CTest, en mode normal **et** sous `python3 -O` :
+c'est ce drapeau qui effaçait les vingt-sept obligations portées par `assert` et
+laissait imprimer un `PASS` vide. Elles passent toutes par un contrôle explicite.
+
+Trois choses ont été intégrées depuis l'audit. Le carré géométrique tout $N_a$
+d'arité quatre est une fixture permanente, et il **est** une naissance : la garde
+de carrier qui le refusait est retirée de la vérité comme du sujet, et la
+refuser est devenue le mutant `reject_carrierless_birth`. L'invariant régulier
+« au moins deux facettes strictes » est implémenté comme un validateur séparé,
+qui juge chaque record **brut avant projection**; son mutant par composante est
+tué par le lot de contrebande `bad_all_new` / `good_with_strict`, où un record
+parfaitement régulier masque un record sans aucune facette stricte. Enfin un
+troisième oracle énumère les partitions de Bell et exige que la partition
+respectant les records et raffinant toutes les autres soit unique : Warshall et
+le DSU ferment tous deux transitivement et peuvent partager une erreur de
+fermeture, celui-ci ne ferme rien. Il juge les 2 168 hypergraphes du domaine
+exhaustif.
 
 Une campagne vide, un argument inconnu ou un plancher non atteint rendent un
 code non nul avec son diagnostic ; **neuf** tests négatifs le vérifient — argument

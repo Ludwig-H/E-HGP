@@ -19,6 +19,22 @@ class FoldError(ValueError):
     """Lot refusé avant commit."""
 
 
+class GateFailure(AssertionError):
+    """Obligation de la porte non tenue.
+
+    Les obligations étaient portées par `assert`. Sous `python3 -O` elles
+    disparaissent toutes et le script imprime `PASS` sans rien avoir vérifié :
+    une porte qui peut être désactivée par un drapeau d'interpréteur n'est pas
+    une porte. Chaque obligation passe donc par `_require`, qui lève
+    inconditionnellement.
+    """
+
+
+def _require(condition: object, message: str) -> None:
+    if not condition:
+        raise GateFailure(message)
+
+
 @dataclass(frozen=True, order=True)
 class Node:
     kind: str
@@ -259,8 +275,22 @@ def _truth_classify(
         if q == 1:
             return Component(nodes, 1, "untouched_root", decision_roots[0], ())
         raise FoldError("invalid strict snapshot: several roots already connected")
-    if not any(node.kind in {"R", "L"} for node in nodes):
-        raise FoldError("record-bearing component without a strict carrier")
+    # LA GARDE DE CARRIER EST RETIRÉE, ET C'ÉTAIT UN P0.
+    #
+    # L'ancienne ligne refusait toute composante portant un record sans `R` ni
+    # `L`. Elle contredisait la table du fold général : une composante à zéro
+    # racine stricte portant une `DirectHyperedge` DOIT créer une naissance. Le
+    # carré tout `N_a` (ABCD de la note §2.3) est exactement ce cas, et il est
+    # géométrique — quatre facettes de même miniboule, deux supports diagonaux.
+    # La vérité et le sujet le rejetaient ENSEMBLE, si bien que le différentiel
+    # ne pouvait pas le voir : deux implémentations d'une règle fausse
+    # concordent parfaitement.
+    #
+    # L'invariant « au moins deux facettes strictes » existe bien, mais il
+    # appartient au validateur de source RÉGULIÈRE, qui juge chaque record BRUT
+    # avant projection. Une garde posée après fermeture, au niveau de la
+    # composante, ne valide même pas cet invariant : un second record porteur
+    # d'un `L` masque le premier record malformé.
     has_direct = any(record.kind == "direct" for record in records)
     if q == 0:
         if not has_direct:
@@ -291,7 +321,7 @@ def _subject_classify(
     q_override: int | None = None,
     roots_override: tuple[RootSig, ...] | None = None,
     ledger_override: tuple[RecordStamp, ...] | None = None,
-    allow_carrierless: bool = False,
+    reject_carrierless: bool = False,
 ) -> Component:
     """Décision du sujet, volontairement séparée de la vérité."""
 
@@ -308,7 +338,8 @@ def _subject_classify(
         if root_count == 1:
             return Component(nodes, 1, "untouched_root", decision_roots[0], ())
         raise FoldError("subject found several roots in an untouched component")
-    if not allow_carrierless and not any(node.kind in {"R", "L"} for node in nodes):
+    # LA POLARITÉ EST INVERSÉE : refuser est désormais LE MUTANT.
+    if reject_carrierless and not any(node.kind in {"R", "L"} for node in nodes):
         raise FoldError("subject found a record-bearing component without a strict carrier")
     if root_count == 0:
         direct_sources = tuple(
@@ -373,6 +404,140 @@ def fold_warshall(batch: ProjectedBatch) -> BatchResult:
     )
 
 
+def _set_partitions(items: tuple[Node, ...]) -> Iterable[tuple[tuple[Node, ...], ...]]:
+    """Toutes les partitions d'un petit ensemble, par récurrence de Bell."""
+
+    if not items:
+        yield ()
+        return
+    head, rest = items[0], items[1:]
+    for partition in _set_partitions(rest):
+        for i in range(len(partition)):
+            yield partition[:i] + ((head,) + partition[i],) + partition[i + 1 :]
+        yield ((head,),) + partition
+
+
+PARTITION_ORACLE_MAX_NODES = 5
+
+
+def fold_partitions(batch: ProjectedBatch) -> BatchResult:
+    """Troisième vérité, sans fermeture transitive du tout.
+
+    Warshall et le DSU calculent tous les deux une fermeture transitive : ils
+    peuvent partager une erreur de FERMETURE et concorder. Cet oracle ne ferme
+    rien. Il énumère toutes les partitions de l'ensemble des sommets projetés,
+    retient celles dont chaque bloc contient entièrement les endpoints de chaque
+    record, puis exige qu'il en existe une, et une seule, qui RAFFINE toutes les
+    autres. C'est cette partition-là qui est la bonne, par définition du
+    quotient, et son unicité est vérifiée et non supposée.
+
+    Le domaine est explicitement borné : au-delà de cinq sommets, Bell explose
+    et l'oracle se déclare inapplicable au lieu de mentir par omission.
+    """
+
+    nodes, records = _validate_projected(batch)
+    if len(nodes) > PARTITION_ORACLE_MAX_NODES:
+        raise FoldError("partition oracle outside its declared domain")
+
+    valid: list[tuple[frozenset[Node], ...]] = []
+    for partition in _set_partitions(nodes):
+        blocks = tuple(frozenset(block) for block in partition)
+        ok = True
+        for record in records:
+            endpoints = set(record.endpoints)
+            if not any(endpoints <= block for block in blocks):
+                ok = False
+                break
+        if ok:
+            valid.append(blocks)
+    if not valid:
+        raise FoldError("no partition keeps every record inside one block")
+
+    def refines(fine: tuple[frozenset[Node], ...], coarse: tuple[frozenset[Node], ...]) -> bool:
+        return all(any(block <= other for other in coarse) for block in fine)
+
+    finest = [candidate for candidate in valid if all(refines(candidate, other) for other in valid)]
+    if len(finest) != 1:
+        raise GateFailure(
+            f"the finest record-respecting partition is not unique: {len(finest)} candidates"
+        )
+
+    components = []
+    for block in finest[0]:
+        ordered = tuple(sorted(block, key=_node_key))
+        member = set(ordered)
+        local = tuple(
+            sorted(
+                (record for record in records if set(record.endpoints) <= member),
+                key=_record_key,
+            )
+        )
+        components.append(
+            _truth_classify(batch.level, ordered, local, _root_from_nodes(ordered))
+        )
+    return BatchResult(
+        tuple(sorted(components, key=lambda component: tuple(map(_node_key, component.nodes))))
+    )
+
+
+# ---------------------------------------------------------------------------
+# LE VALIDATEUR DE SOURCE RÉGULIÈRE, QUI N'EST PAS LE CLASSIFICATEUR F0
+# ---------------------------------------------------------------------------
+#
+# Sous la porte régulière forte, Q = I(B) union U(B) avec support unique
+# essentiel. Retirer un u de U(B) fait tomber le rayon, retirer un x de I(B) le
+# laisse : une `DirectHyperedge` régulière a donc EXACTEMENT |U(B)| facettes
+# strictes, et |U(B)| >= 2 pour des points distincts.
+#
+# Cet invariant est réel, mais il appartient au validateur de source, PAS au
+# fold. Et il est LOCAL À CHAQUE RECORD BRUT. Une garde posée après fermeture,
+# au niveau de la composante, ne le valide même pas :
+#
+#     bad_all_new      = DirectHyperedge(N0, N1)
+#     good_with_strict = DirectHyperedge(L0, N1)
+#
+# les deux records deviennent connexes par N1, et le L0 du second masque le
+# premier. Le validateur ci-dessous juge donc record par record, sur le lot
+# BRUT, avant toute projection.
+def validate_regular_source(raw: RawBatch) -> int:
+    """Vérifie l'invariant régulier par record brut. Rend le nombre de records jugés."""
+
+    by_handle: dict[str, Binding] = {}
+    for binding in raw.bindings:
+        if binding.handle in by_handle:
+            raise FoldError(f"duplicate activation manifest: {binding.handle}")
+        by_handle[binding.handle] = binding
+    judged = 0
+    for record in raw.records:
+        if record.kind != "direct":
+            continue
+        if any(handle not in by_handle for handle in record.handles):
+            raise FoldError(f"unknown raw handle: {record.key}")
+        strict = sum(1 for handle in record.handles if by_handle[handle].activation < raw.level)
+        if strict < 2:
+            raise FoldError(
+                f"irregular source: {record.key} carries {strict} strict facet(s), two are required"
+            )
+        judged += 1
+    return judged
+
+
+def validate_regular_source_by_component_mutant(raw: RawBatch) -> int:
+    """Mutation : la même exigence, mais après projection et fermeture."""
+
+    batch = resolve_batch(raw)
+    truth = fold_warshall(batch)
+    judged = 0
+    for component in truth.components:
+        if not component.logical_records:
+            continue
+        strict = sum(1 for node in component.nodes if node.kind in {"R", "L"})
+        if strict < 2:
+            raise FoldError("irregular component")
+        judged += len(component.logical_records)
+    return judged
+
+
 class _Dsu:
     def __init__(self, values: Iterable[object]) -> None:
         self.parent = {value: value for value in values}
@@ -402,7 +567,7 @@ def fold_dsu(
     drop_projected_unary_ledger: bool = False,
     drop_record_provenances: bool = False,
     retain_record_keys_only: bool = False,
-    allow_carrierless: bool = False,
+    reject_carrierless: bool = False,
 ) -> BatchResult:
     """Sujet DSU; les options sont des mutations volontairement fausses."""
 
@@ -483,7 +648,7 @@ def fold_dsu(
                 q_override=q_override,
                 roots_override=roots_override,
                 ledger_override=ledger_override,
-                allow_carrierless=allow_carrierless,
+                reject_carrierless=reject_carrierless,
             )
         )
     return BatchResult(
@@ -760,7 +925,15 @@ def _assert_differential(batch: ProjectedBatch) -> BatchResult:
     truth = _outcome(lambda: fold_warshall(batch))
     subject = _outcome(lambda: fold_dsu(batch))
     if truth != subject:
-        raise AssertionError(f"Warshall/DSU divergence:\ntruth={truth}\nsubject={subject}")
+        raise GateFailure(f"Warshall/DSU divergence:\ntruth={truth}\nsubject={subject}")
+    # Warshall et le DSU ferment tous les deux transitivement. Le troisieme
+    # oracle ne ferme rien : quand son domaine le permet, il doit concorder.
+    if len(set(batch.nodes)) <= PARTITION_ORACLE_MAX_NODES:
+        partitions = _outcome(lambda: fold_partitions(batch))
+        if partitions != truth:
+            raise GateFailure(
+                f"partition-oracle divergence:\ntruth={truth}\npartitions={partitions}"
+            )
     if truth[0] != "ok" or truth[1] is None:
         raise FoldError("fixture expected an accepted batch")
     return truth[1]
@@ -811,7 +984,12 @@ def exhaustive_small_domain() -> tuple[int, int, int]:
                 truth = _outcome(lambda batch=batch: fold_warshall(batch))
                 subject = _outcome(lambda batch=batch: fold_dsu(batch))
                 if truth != subject:
-                    raise AssertionError(f"exhaustive F0 mismatch: {batch}\n{truth}\n{subject}")
+                    raise GateFailure(f"exhaustive F0 mismatch: {batch}\n{truth}\n{subject}")
+                partitions = _outcome(lambda batch=batch: fold_partitions(batch))
+                if partitions != truth:
+                    raise GateFailure(
+                        f"exhaustive partition mismatch: {batch}\n{truth}\n{partitions}"
+                    )
                 checked += 1
                 if truth[0] == "ok":
                     accepted += 1
@@ -915,6 +1093,43 @@ def targeted_fixtures() -> dict[str, ProjectedBatch]:
         ),
     )
 
+    # LE CARRÉ TOUT N_a — LA FIXTURE QUE LA GARDE DE CARRIER SUPPRIMAIT.
+    #
+    # A=(0,0,0) B=(2,0,0) C=(2,2,0) D=(0,2,0), plus E=(0,0,10) hors du plan pour
+    # que le nuage soit de dimension affine trois. À l'ordre trois, Q=ABCD a pour
+    # miniboule le cercle de centre (1,1,0) et de rayon carré 2. Chacun des
+    # quatre triangles de Q contient encore une diagonale du carré, donc a la
+    # MÊME miniboule et le même niveau : les quatre facettes sont des N_a.
+    #
+    # Cette coface a deux supports diagonaux, elle échoue donc la porte régulière
+    # forte — mais elle reste une coface directe valide du contrat général, et
+    # elle doit créer une naissance q_R = 0. La vérité et le sujet la rejetaient
+    # ENSEMBLE, ce qu'un différentiel ne peut par construction pas voir.
+    fixtures["square_all_new"] = _raw(
+        (
+            Binding("ABC", one),
+            Binding("ABD", one),
+            Binding("ACD", one),
+            Binding("BCD", one),
+        ),
+        (RawRecord("direct", "square-coface-ABCD", ("ABC", "ABD", "ACD", "BCD")),),
+    )
+
+    # LA FIXTURE RÉGULIÈRE QUI ATTEINT LA BORNE.
+    #
+    # A=(0,0,0) B=(4,0,0) z=(2,1,0) D=(1,2,10). Pour Q=ABz à l'ordre deux,
+    # U={A,B} : les facettes Az et Bz sont STRICTES, AB est égale. Le record
+    # porte donc exactement deux endpoints stricts et un N_a — la borne
+    # |U(B)| >= 2 est atteinte, pas dépassée.
+    fixtures["regular_abz"] = _raw(
+        (
+            Binding("Az", zero, Node("L", "Az")),
+            Binding("Bz", zero, Node("L", "Bz")),
+            Binding("AB", one),
+        ),
+        (RawRecord("direct", "coface-ABz", ("Az", "Bz", "AB")),),
+    )
+
     arity_bindings = [
         Binding("h0", zero, Node("R", "1")),
         Binding("h1", zero, Node("R", "1")),
@@ -997,15 +1212,14 @@ def invalid_fixtures() -> int:
         (Node("N", "f"), Node("L", "target")),
         (Record("attach", "forged", (Node("N", "f"), Node("L", "target")), 2),),
     )
-    assert _outcome(lambda: fold_warshall(projected_attachment_only))[0] == "error"
-    assert _outcome(lambda: fold_dsu(projected_attachment_only))[0] == "error"
-
-    carrierless = _raw(
-        (Binding("n0", one), Binding("n1", one)),
-        (RawRecord("direct", "equal-only", ("n0", "n1")),),
+    _require(
+        _outcome(lambda: fold_warshall(projected_attachment_only))[0] == "error",
+        "attachment-only projected batch accepted by the truth",
     )
-    assert _outcome(lambda: fold_warshall(carrierless))[0] == "error"
-    assert _outcome(lambda: fold_dsu(carrierless))[0] == "error"
+    _require(
+        _outcome(lambda: fold_dsu(projected_attachment_only))[0] == "error",
+        "attachment-only projected batch accepted by the subject",
+    )
 
     exact_duplicate = RawBatch(
         one,
@@ -1016,9 +1230,47 @@ def invalid_fixtures() -> int:
         ),
     )
     normalized = resolve_batch(exact_duplicate)
-    assert len(normalized.records) == 1
-    assert normalized.records[0].provenances == ("certificate-A", "certificate-B")
+    _require(len(normalized.records) == 1, "exact duplicate was not merged")
+    _require(
+        normalized.records[0].provenances == ("certificate-A", "certificate-B"),
+        "duplicate merge lost a provenance",
+    )
     _assert_differential(normalized)
+
+    # LA SOURCE IRRÉGULIÈRE EST REFUSÉE PAR SON VALIDATEUR, PAS PAR LE FOLD.
+    #
+    # `bad_all_new` n'a AUCUNE facette stricte : sous la porte régulière forte
+    # elle est malformée. `good_with_strict` en a deux, elle est parfaitement
+    # régulière. Les deux records deviennent connexes par `n1`, si bien que la
+    # composante en porte deux : une garde posée sur la COMPOSANTE la déclare
+    # régulière et laisse passer le premier record. Le bon record MASQUE le
+    # mauvais, et c'est exactement ce qu'un jugement par record refuse.
+    smuggling = RawBatch(
+        one,
+        (
+            Binding("l0", zero, Node("L", "0")),
+            Binding("l1", zero, Node("L", "1")),
+            Binding("n0", one),
+            Binding("n1", one),
+        ),
+        (
+            RawRecord("direct", "bad_all_new", ("n0", "n1")),
+            RawRecord("direct", "good_with_strict", ("l0", "l1", "n1")),
+        ),
+    )
+    try:
+        validate_regular_source(smuggling)
+    except FoldError:
+        pass
+    else:
+        raise GateFailure("the regular validator accepted a record without two strict facets")
+    # Et le fold GÉNÉRAL, lui, doit l'accepter : ce lot est une naissance valide
+    # hors porte régulière. Les deux jugements sont indépendants, et c'est le
+    # point.
+    _require(
+        _outcome(lambda: fold_warshall(resolve_batch(smuggling)))[0] == "ok",
+        "the general fold refused a batch that only the regular gate may refuse",
+    )
     return len(cases) + 2
 
 
@@ -1037,8 +1289,8 @@ def permutation_campaign(fixtures: dict[str, ProjectedBatch]) -> int:
         )
         permuted = ProjectedBatch(batch.level, tuple(reversed(batch.nodes)), permuted_records)
         expected = fold_warshall(batch)
-        assert fold_warshall(permuted) == expected
-        assert fold_dsu(permuted) == expected
+        _require(fold_warshall(permuted) == expected, "the truth is not permutation-invariant")
+        _require(fold_dsu(permuted) == expected, "the subject is not permutation-invariant")
     return len(fixtures)
 
 
@@ -1105,20 +1357,67 @@ def mutation_campaign(fixtures: dict[str, ProjectedBatch]) -> tuple[str, ...]:
             RawRecord("attach", "too-late", ("facet", "target")),
         ),
     )
-    assert _outcome(lambda: fold_dsu(resolve_batch(closed_cutoff)))[0] == "error"
-    assert _outcome(
-        lambda: fold_dsu(resolve_with_closed_cutoff_mutant(closed_cutoff))
-    )[0] == "ok"
+    _require(
+        _outcome(lambda: fold_dsu(resolve_batch(closed_cutoff)))[0] == "error",
+        "the strict cutoff accepted an attachment onto a target born in the same lot",
+    )
+    _require(
+        _outcome(lambda: fold_dsu(resolve_with_closed_cutoff_mutant(closed_cutoff)))[0] == "ok",
+        "the closed-cutoff mutant did not even accept what it is built to accept",
+    )
     killed.append("find_closed_instead_of_strict")
 
-    carrierless = _raw(
-        (Binding("n0", Fraction(1)), Binding("n1", Fraction(1))),
-        (RawRecord("direct", "equal-only", ("n0", "n1")),),
+    # LE MUTANT A CHANGÉ DE CAMP. Refuser une composante sans carrier strict
+    # était la règle; c'est maintenant la mutation, et elle doit tuer le carré.
+    kill(
+        "reject_carrierless_birth",
+        fold_warshall(fixtures["square_all_new"]),
+        lambda: fold_dsu(fixtures["square_all_new"], reject_carrierless=True),
     )
-    assert _outcome(lambda: fold_warshall(carrierless))[0] == "error"
-    if _outcome(lambda: fold_dsu(carrierless, allow_carrierless=True))[0] != "ok":
-        raise AssertionError("mutation survived undetected: accept_carrierless_group")
-    killed.append("accept_carrierless_group")
+
+    # Le validateur régulier par composante laisse passer le record malformé que
+    # le validateur par record brut refuse.
+    smuggling = RawBatch(
+        Fraction(1),
+        (
+            Binding("l0", Fraction(0), Node("L", "0")),
+            Binding("l1", Fraction(0), Node("L", "1")),
+            Binding("n0", Fraction(1)),
+            Binding("n1", Fraction(1)),
+        ),
+        (
+            RawRecord("direct", "bad_all_new", ("n0", "n1")),
+            RawRecord("direct", "good_with_strict", ("l0", "l1", "n1")),
+        ),
+    )
+    try:
+        validate_regular_source(smuggling)
+    except FoldError:
+        pass
+    else:
+        raise GateFailure("mutation survived undetected: validate_regular_by_component")
+    _require(
+        validate_regular_source_by_component_mutant(smuggling) == 2,
+        "the by-component regular mutant did not accept the smuggled record",
+    )
+    killed.append("validate_regular_by_component")
+
+    # Le validateur régulier doit rester VRAI sur la fixture régulière : un
+    # validateur qui refuse tout tuerait aussi le mutant précédent sans rien
+    # valider.
+    regular = RawBatch(
+        Fraction(1),
+        (
+            Binding("Az", Fraction(0), Node("L", "Az")),
+            Binding("Bz", Fraction(0), Node("L", "Bz")),
+            Binding("AB", Fraction(1)),
+        ),
+        (RawRecord("direct", "coface-ABz", ("Az", "Bz", "AB")),),
+    )
+    _require(
+        validate_regular_source(regular) == 1,
+        "the regular validator refuses the regular fixture that attains the bound",
+    )
     return tuple(killed)
 
 
@@ -1132,7 +1431,7 @@ def rollback_campaign(batch: ProjectedBatch) -> tuple[int, bool]:
             pass
         else:
             raise AssertionError(f"failure injection did not fail: {stage}")
-        assert subject.snapshot() == before
+        _require(subject.snapshot() == before, f"a field moved before commit at stage {stage}")
 
     invalid = ProjectedBatch(
         Fraction(1),
@@ -1145,8 +1444,8 @@ def rollback_campaign(batch: ProjectedBatch) -> tuple[int, bool]:
         pass
     else:
         raise AssertionError("invalid attachment committed")
-    assert subject.snapshot() == before
-    assert subject.apply(batch) == fold_warshall(batch)
+    _require(subject.snapshot() == before, "an invalid batch moved an authoritative field")
+    _require(subject.apply(batch) == fold_warshall(batch), "the committed result is not the truth")
 
     mutant = EagerAllocatorMutant()
     mutant_before = mutant.snapshot()
@@ -1154,7 +1453,7 @@ def rollback_campaign(batch: ProjectedBatch) -> tuple[int, bool]:
         mutant.apply(batch, fail_after="resolve")
     except FoldError:
         pass
-    assert mutant.snapshot() != mutant_before
+    _require(mutant.snapshot() != mutant_before, "the eager allocator mutant survived")
     return (len(TransactionalSubject.STAGES) + 1, True)
 
 
@@ -1163,33 +1462,70 @@ def main() -> None:
     fixtures = targeted_fixtures()
     results = {name: _assert_differential(batch) for name, batch in fixtures.items()}
 
-    assert any(component.action == "birth" for component in results["q0_birth"].components)
-    assert any(component.action == "continuation" for component in results["same_root_q1"].components)
+    _require(
+        any(component.action == "birth" for component in results["q0_birth"].components),
+        "q0_birth did not produce a birth",
+    )
+    _require(
+        any(
+            component.action == "continuation"
+            for component in results["same_root_q1"].components
+        ),
+        "same_root_q1 did not produce a continuation",
+    )
+    # LE CARRÉ TOUT N_a EST UNE NAISSANCE, ET C'EST LE P0 QUI SE FERME ICI.
+    square = next(
+        component
+        for component in results["square_all_new"].components
+        if component.logical_records
+    )
+    _require(
+        square.action == "birth" and square.q_roots == 0,
+        f"the all-N_a square is {square.action}, not a birth",
+    )
+    _require(
+        len(square.nodes) == 4 and all(node.kind == "N" for node in square.nodes),
+        "the all-N_a square lost a facet or gained a carrier",
+    )
+    _require(
+        len(square.logical_records) == 1 and square.logical_records[0].raw_arity == 4,
+        "the all-N_a square did not keep one complete direct record of arity four",
+    )
+    regular_component = next(
+        component
+        for component in results["regular_abz"].components
+        if component.logical_records
+    )
+    _require(
+        sum(1 for node in regular_component.nodes if node.kind in {"R", "L"}) == 2
+        and sum(1 for node in regular_component.nodes if node.kind == "N") == 1,
+        "the regular ABz fixture no longer carries exactly two strict facets and one equal",
+    )
     q3 = next(component for component in results["q3_atomic"].components if component.logical_records)
-    assert q3.q_roots == 3 and q3.action == "multifusion"
+    _require(q3.q_roots == 3 and q3.action == "multifusion", "q3_atomic is not a multifusion")
     arity = next(component for component in results["arity_11"].components if component.logical_records)
-    assert arity.q_roots == 2 and arity.action == "multifusion"
+    _require(arity.q_roots == 2 and arity.action == "multifusion", "arity_11 is not a multifusion")
     provenance = next(
         component
         for component in results["provenance_aggregation"].components
         if component.logical_records
     )
-    assert provenance.logical_records[0].provenances == (
-        "certificate-A",
-        "certificate-B",
+    _require(
+        provenance.logical_records[0].provenances == ("certificate-A", "certificate-B"),
+        "provenance aggregation lost a certificate",
     )
     parallel = next(
         component
         for component in results["parallel_projected_records"].components
         if component.logical_records
     )
-    assert len(parallel.logical_records) == 2
+    _require(len(parallel.logical_records) == 2, "parallel projected records were deduplicated")
     delimiter_births = {
         component.active_root
         for component in results["birth_signature_delimiters"].components
         if component.action == "birth"
     }
-    assert len(delimiter_births) == 2
+    _require(len(delimiter_births) == 2, "two distinct births collapsed to one signature")
     split_children = RootSig(
         "merge",
         level=Fraction(1),
@@ -1200,17 +1536,26 @@ def main() -> None:
         level=Fraction(1),
         children=(RootSig("seed", label="a),R(b"),),
     )
-    assert split_children.key() != forged_label.key()
-    assert split_children.encode() != forged_label.encode()
+    _require(split_children.key() != forged_label.key(), "a forged label collides with a merge key")
+    _require(
+        split_children.encode() != forged_label.encode(),
+        "a forged label collides with a merge encoding",
+    )
 
     invalid_count = invalid_fixtures()
     permutation_count = permutation_campaign(fixtures)
     killed = mutation_campaign(fixtures)
     rollback_count, allocator_mutant_killed = rollback_campaign(fixtures["arity_11"])
 
-    assert Fraction(1, 2) == Fraction(2, 4)
-    assert float(Fraction(2**53 + 1, 2**53)) == float(Fraction(1, 1))
-    assert Fraction(2**53 + 1, 2**53) != Fraction(1, 1)
+    _require(Fraction(1, 2) == Fraction(2, 4), "rational equality is not canonical")
+    _require(
+        float(Fraction(2**53 + 1, 2**53)) == float(Fraction(1, 1)),
+        "the double collapse witness no longer collapses",
+    )
+    _require(
+        Fraction(2**53 + 1, 2**53) != Fraction(1, 1),
+        "the exact level comparison collapsed like a double",
+    )
 
     print(f"exhaustive={checked} accepted={accepted} rejected={rejected}")
     print(
