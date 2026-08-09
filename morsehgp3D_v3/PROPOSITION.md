@@ -116,22 +116,28 @@ combinadiques, locator, construction, tri et sortie reçus. Le terminal
 `AboveInteriorWindow` doit être versionné explicitement, car la norme active
 demande encore un shell complet sur une fenêtre uniforme.
 
-Le prototype live `9edf150d...` crédite ce lemme sur des oracles bornés, sans
+Le prototype live `1c3948c3...` crédite ce lemme sur des oracles bornés, sans
 créditer le statut produit. Sa partie candidate évite arrangement et mosaïque;
 elle compare maintenant les listes complètes de membres par coquille, reçoit
 l'unicité, sépare les trois modes, replie petit nuage/cap, agrège les `Q`
-effectifs et élargit les masses en `u128`. Sept CTests Release et quatre ciblés
-ASan/UBSan sont verts.
+effectifs et élargit les masses en `u128`. Neuf CTests Release et la gate forêt
+sous ASan/UBSan sont verts. Trente empreintes de forêts quotientées concordent
+sur six nuages, et chacun des ordres un à cinq contribue des nœuds.
 
 Les gates restent néanmoins fail-open vis-à-vis d'une mutation du défaut
 `judge` : CMake n'impose pas `--judge 1` et les mêmes planchers passent en mesure
 avec `reference=0`. La CLI accepte aussi `s_max=2/3` puis appelle des lanes
-`q>s_max` et échoue. Le cover rescane tous les points par feuille et peut être
+`q>s_max` et échoue; elle accepte également des forêts $K\ge s_{\max}$, donc
+tronquées ou vides, comme entièrement comparées. Le cover rescane tous les points par feuille et peut être
 quasi quadratique; CSR et allocations restent non bornés en octets, les
 high-waters sont partiels et aucun reçu 50 k ne ferme cette route. Le payload
-est une map du catalogue fermé relatif à `flat_catalogue`, pas encore un pool
-global sérialisé ni la source Gabriel ouverte streamée. Les labels « certifiée »,
-« exacte produit » et « seule voie » restent donc prématurés.
+par coquille concorde relativement à `flat_catalogue`, mais l'ordre canonique du
+catalogue, le pool concaténé, ses offsets et les indices publics de la forêt
+diffèrent encore. La gate prouve un quotient sémantique invariant à la
+renumérotation avec le même `build_forest`, pas l'égalité du payload public ni
+un oracle indépendant. La source Gabriel ouverte streamée reste absente. Les
+labels « certifiée », « exacte produit » et « seule voie » restent donc
+prématurés.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

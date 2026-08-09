@@ -42,6 +42,58 @@
 // vérité n'est pas énumérée ici.
 //
 // ---------------------------------------------------------------------------
+// LES SUPPORTS SONT DES CLIQUES DU GRAPHE ADMISSIBLE, ET C'EST LÀ QUE SE JOUE
+// LE COÛT DE LA SOURCE DIRECTE
+// ---------------------------------------------------------------------------
+//
+// Le lemme s'applique à CHAQUE paire d'une coquille critique. Un support d'arité
+// trois a donc ses trois paires admissibles, un support d'arité quatre ses six :
+//
+//   support d'arité 3  =>  TRIANGLE du graphe admissible G
+//   support d'arité 4  =>  K4 du graphe admissible G
+//
+// C'est une réduction structurelle, pas une heuristique, et elle est mesurable.
+// La source directe, elle, énumère aujourd'hui tous les $(q-1)$-sous-ensembles du
+// voisinage du cover, dont le degré mesuré vaut environ 1 450 au profil produit :
+// $C_4=\sum_p\binom{d^{+}}{3}$ y vaut $3{,}2\cdot10^{12}$ à 50 k, ce qui la
+// réfute. Le degré de $G$, lui, est presque un ordre de grandeur plus petit.
+//
+// Ce programme compte donc les triangles et les K4 de $G$, et les compare aux
+// vrais supports d'arité trois et quatre du catalogue. Le rapport est le facteur
+// de travail gaspillé d'un générateur par cliques; sa croissance décide si cette
+// voie tient à 50 k.
+//
+// ---------------------------------------------------------------------------
+// LE LEMME DE TRIPLE, ET POURQUOI IL EST BEAUCOUP PLUS FORT QUE CELUI DE PAIRE
+// ---------------------------------------------------------------------------
+//
+// Pour une PAIRE, le plan frontière peut tourner autour de la droite $(p,u)$ :
+// le minimum porte sur une famille continue de demi-espaces, et il faut un
+// balayage angulaire. Pour un TRIPLE non aligné, le plan est FIXÉ — c'est le
+// plan de $T$ — et il ne reste que **deux** demi-espaces à tester.
+//
+// Soit $T$ un triple de la coquille d'une sphère critique de centre $c_0$ et de
+// rayon $R$, avec $\lvert S\rvert+\lvert I\rvert\leq s_{\max}$. Soit $\pi$ le
+// plan de $T$, $m$ le circumcentre de $T$ — qui est la projection orthogonale de
+// $c_0$ sur $\pi$ —, $\rho$ son circumrayon et $d=\lVert m-c_0\rVert$. En
+// coordonnées où $\pi=\{y_3=0\}$, $m=0$ et $c_0=(0,0,d)$ avec $d\geq0$ :
+//
+//   $y\in D_T$ donne $\lVert y\rVert^2\leq\rho^2$, et
+//   $\lVert y-c_0\rVert^2=\lVert y\rVert^2-2y_3d+d^2\leq\rho^2+d^2=R^2$
+//   dès que $y_3\geq0$.
+//
+// Donc tout point de la circumboule fermée $D_T$ situé **du côté du centre**
+// appartient à la boule critique, et
+//
+//   $A_3(T)=\min\left(\lvert X\cap D_T\cap H^{+}\rvert,
+//                      \lvert X\cap D_T\cap H^{-}\rvert\right)\leq s_{\max}$.
+//
+// Aucune hypothèse de bon centrage n'est requise : $m$ est le circumcentre, pas
+// la miniboule. Le prédicat est entier et déjà écrit — `sphere_side` de la
+// sphère de support $T$ pour l'appartenance, `orient3d` pour le côté —, et les
+// points du plan comptent des deux côtés.
+//
+// ---------------------------------------------------------------------------
 // CE QUE CE PROGRAMME MESURE, ET POURQUOI C'EST LUI QUI DÉCIDE
 // ---------------------------------------------------------------------------
 //
@@ -108,6 +160,7 @@
 #include <cstdio>
 #include <cstring>
 #include <random>
+#include <array>
 #include <set>
 #include <vector>
 
@@ -250,6 +303,25 @@ PairMinima pair_minima(const std::vector<P3>& pts, i32 a, i32 b, bool want_live)
   out.open_exact = minimum_closed_halfplane(open, line_open + 2);
   out.closed_exact = minimum_closed_halfplane(closed, line_closed + 2);
   return out;
+}
+
+// Le filtre de triple : deux demi-espaces, bornés par le plan de T.
+bool triple_admissible(const std::vector<P3>& pts, i32 a, i32 b, i32 c, int smax,
+                       long long* tests) {
+  mhgp::Sphere sph{};
+  if (!mhgp::sphere3(pts[(std::size_t)a], pts[(std::size_t)b], pts[(std::size_t)c], &sph))
+    return true;                     // alignés : aucun plan, le lemme ne dit rien
+  int plus = 0, minus = 0;
+  const int n = (int)pts.size();
+  for (i32 z = 0; z < n; ++z) {
+    ++*tests;
+    if (mhgp::sphere_side(sph, pts[(std::size_t)z]) > 0) continue;
+    const i128 orient = mhgp3v::flats::orient3d_exact(
+        pts[(std::size_t)a], pts[(std::size_t)b], pts[(std::size_t)c], pts[(std::size_t)z]);
+    if (orient >= 0) ++plus;
+    if (orient <= 0) ++minus;        // le plan compte des DEUX côtés
+  }
+  return (plus < minus ? plus : minus) <= smax;
 }
 
 P3 pt(int x, int y, int z) {
@@ -479,9 +551,13 @@ int main(int argc, char** argv) {
   int rank_max_admitted = 0, rank_max_true = 0;
   std::vector<long long> rank_histogram(64, 0);
   long long rank_samples = 0;
-  double sum_seconds = 0, sum_rank_seconds = 0;
+  double sum_seconds = 0, sum_rank_seconds = 0, sum_clique_seconds = 0;
   int decided = 0;
   int refused_status = 0;
+  long long sum_triangles = 0, sum_k4 = 0, sum_true_arity3 = 0, sum_true_arity4 = 0;
+  long long sum_edges = 0, degree_g_max = 0, sum_triangle_probes = 0, sum_k4_probes = 0;
+  long long sum_triples_kept = 0, sum_k4_kept = 0, sum_triple_tests = 0;
+  long long sum_triple_missing = 0;
 
   for (int r = 0; r < repeats; ++r) {
     std::vector<P3> pts;
@@ -521,6 +597,7 @@ int main(int argc, char** argv) {
       continue;
     }
     std::set<std::pair<i32, i32>> truth;
+    long long true_arity3 = 0, true_arity4 = 0;
     for (const auto& sphere : cat.spheres) {
       std::vector<i32> shell;
       for (int i = 0; i < sphere.rank; ++i) {
@@ -530,7 +607,11 @@ int main(int argc, char** argv) {
       for (std::size_t a = 0; a < shell.size(); ++a)
         for (std::size_t b = a + 1; b < shell.size(); ++b)
           truth.insert({shell[a], shell[b]});
+      if (sphere.n_support == 3) ++true_arity3;
+      if (sphere.n_support == 4) ++true_arity4;
     }
+    sum_true_arity3 += true_arity3;
+    sum_true_arity4 += true_arity4;
 
     // Rang de competition de chaque point depuis chaque autre. Le cout de cette
     // construction est CHRONOMETRE A PART : c'est un diagnostic, il n'a pas le
@@ -575,6 +656,10 @@ int main(int argc, char** argv) {
     }
 
     const auto t0 = std::chrono::steady_clock::now();
+    // LE GRAPHE ADMISSIBLE, en listes de voisins SUPÉRIEURS. Le filtre fermé est
+    // le plus sélectif des deux sur le catalogue fermé, donc c'est lui qui sert
+    // de générateur de candidats.
+    std::vector<std::vector<i32>> forward_edges((std::size_t)n);
     long long admitted_closed = 0, admitted_open = 0, admitted_live = 0;
     long long missing_closed = 0, missing_open = 0, missing_live = 0, ball_points = 0;
     for (i32 a = 0; a < n; ++a)
@@ -582,7 +667,10 @@ int main(int argc, char** argv) {
         const PairMinima m = pair_minima(pts, a, b, mutant == 1);
         ball_points += m.ball_points;
         const bool is_true = truth.count({a, b}) != 0;
-        if (m.closed_exact <= smax) ++admitted_closed; else if (is_true) ++missing_closed;
+        if (m.closed_exact <= smax) {
+          ++admitted_closed;
+          forward_edges[(std::size_t)a].push_back(b);
+        } else if (is_true) ++missing_closed;
         if (m.open_exact <= smax) ++admitted_open; else if (is_true) ++missing_open;
         if (mutant == 1) {
           if (m.closed_live <= smax) ++admitted_live; else if (is_true) ++missing_live;
@@ -599,9 +687,73 @@ int main(int argc, char** argv) {
       }
     const auto t1 = std::chrono::steady_clock::now();
 
+    // LES CLIQUES. Un triangle se teste en cherchant l'arête (u,v) parmi les
+    // voisins supérieurs de u; un K4 en intersectant les voisins supérieurs des
+    // trois sommets d'un triangle. Les SONDES sont comptées à part du résultat :
+    // c'est le travail, pas la sortie.
+    const auto c0 = std::chrono::steady_clock::now();
+    long long triangles = 0, k4 = 0, triangle_probes = 0, k4_probes = 0;
+    long long triples_kept = 0, k4_kept = 0, triple_tests = 0, triple_missing = 0;
+    // LA VÉRITÉ DES TRIPLES : les 3-sous-ensembles d'une coquille critique. Le
+    // lemme de triple doit tous les conserver, sinon il est FAUX.
+    std::set<std::array<i32, 3>> truth_triples;
+    for (const auto& sphere : cat.spheres) {
+      std::vector<i32> shell;
+      for (int i = 0; i < sphere.rank; ++i) {
+        const i32 z = cat.members[(std::size_t)(sphere.members_begin + i)];
+        if (mhgp::sphere_side(sphere.sph, pts[(std::size_t)z]) == 0) shell.push_back(z);
+      }
+      std::sort(shell.begin(), shell.end());
+      for (std::size_t x = 0; x < shell.size(); ++x)
+        for (std::size_t y = x + 1; y < shell.size(); ++y)
+          for (std::size_t w = y + 1; w < shell.size(); ++w)
+            truth_triples.insert({shell[x], shell[y], shell[w]});
+    }
+    {
+      std::vector<char> incident((std::size_t)n, 0);
+      for (i32 p = 0; p < n; ++p) {
+        const std::vector<i32>& up = forward_edges[(std::size_t)p];
+        sum_edges += (long long)up.size();
+        degree_g_max = std::max(degree_g_max, (long long)up.size());
+        for (i32 z : up) incident[(std::size_t)z] = 1;
+        for (std::size_t i = 0; i < up.size(); ++i) {
+          const i32 u = up[i];
+          for (i32 v : forward_edges[(std::size_t)u]) {
+            ++triangle_probes;
+            if (!incident[(std::size_t)v]) continue;
+            ++triangles;
+            const bool keep = triple_admissible(pts, p, u, v, smax, &triple_tests);
+            if (keep) ++triples_kept;
+            else if (truth_triples.count({p, u, v}) != 0) ++triple_missing;
+            // K4 : un quatrième sommet w > v adjacent à p, u et v.
+            for (i32 w : forward_edges[(std::size_t)v]) {
+              ++k4_probes;
+              if (!incident[(std::size_t)w]) continue;
+              if (!std::binary_search(forward_edges[(std::size_t)u].begin(),
+                                      forward_edges[(std::size_t)u].end(), w)) continue;
+              ++k4;
+              if (keep) ++k4_kept;
+            }
+          }
+        }
+        for (i32 z : up) incident[(std::size_t)z] = 0;
+      }
+    }
+    sum_clique_seconds +=
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - c0).count();
+    sum_triangles += triangles;
+    sum_k4 += k4;
+    sum_triples_kept += triples_kept;
+    sum_k4_kept += k4_kept;
+    sum_triple_tests += triple_tests;
+    sum_triple_missing += triple_missing;
+    sum_triangle_probes += triangle_probes;
+    sum_k4_probes += k4_probes;
+
     printf("  nuage %d digest=%016llx statut ok  vraies=%zu admises ouvert=%lld ferme=%lld"
-           "  vif=%lld\n", r, digest, truth.size(), admitted_open, admitted_closed,
-           admitted_live);
+           "  vif=%lld  triangles=%lld K4=%lld contre arites 3/4 vraies=%lld/%lld\n", r, digest,
+           truth.size(), admitted_open, admitted_closed, admitted_live, triangles, k4,
+           true_arity3, true_arity4);
     ++decided;
     sum_true += (long long)truth.size();
     sum_admitted_closed += admitted_closed;
@@ -639,8 +791,29 @@ int main(int argc, char** argv) {
   printf("  vraies REFUTEES : ouvert=%.0f  ferme=%.0f  (doivent etre ZERO : les deux"
          " lemmes sont necessaires)\n", sum_missing_open / d, sum_missing_closed / d);
   printf("  points de boule diametrale visites=%.0f  secondes filtre=%.2f"
-         "  secondes matrice des rangs=%.2f\n",
-         sum_ball_points / d, sum_seconds / d, sum_rank_seconds / d);
+         "  secondes matrice des rangs=%.2f  secondes cliques=%.2f\n",
+         sum_ball_points / d, sum_seconds / d, sum_rank_seconds / d, sum_clique_seconds / d);
+  printf("  GRAPHE ADMISSIBLE : aretes=%.0f  degre moyen=%.1f  degre max=%lld\n",
+         sum_edges / d, 2.0 * (double)sum_edges / d / (double)n, degree_g_max);
+  printf("  CLIQUES : triangles=%.0f pour %.0f supports d'arite 3 vrais (facteur %.1f)"
+         "   K4=%.0f pour %.0f supports d'arite 4 vrais (facteur %.1f)\n",
+         sum_triangles / d, sum_true_arity3 / d,
+         sum_true_arity3 ? (double)sum_triangles / (double)sum_true_arity3 : 0.0,
+         sum_k4 / d, sum_true_arity4 / d,
+         sum_true_arity4 ? (double)sum_k4 / (double)sum_true_arity4 : 0.0);
+  printf("  par point : triangles=%.1f  K4=%.1f  sondes triangle=%.1f  sondes K4=%.1f\n",
+         sum_triangles / d / n, sum_k4 / d / n, sum_triangle_probes / d / n,
+         sum_k4_probes / d / n);
+  printf("  LEMME DE TRIPLE : %.0f triangles retenus sur %.0f (%.1f%%), %.0f pour un support"
+         " d'arite 3 vrai (facteur %.1f)   K4 dont le triple survit=%.0f (facteur %.1f)\n",
+         sum_triples_kept / d, sum_triangles / d,
+         sum_triangles ? 100.0 * (double)sum_triples_kept / (double)sum_triangles : 0.0,
+         sum_true_arity3 / d,
+         sum_true_arity3 ? (double)sum_triples_kept / (double)sum_true_arity3 : 0.0,
+         sum_k4_kept / d,
+         sum_true_arity4 ? (double)sum_k4_kept / (double)sum_true_arity4 : 0.0);
+  printf("  triples VRAIS refutes par le lemme=%lld  (doit etre ZERO)  tests=%.0f\n",
+         sum_triple_missing, sum_triple_tests / d);
   if (ranks == 1) {
     printf("  rang k-NN maximum : admises=%d  vraies=%d  (sur %lld paires admises)\n",
            rank_max_admitted, rank_max_true, rank_samples);
@@ -673,6 +846,11 @@ int main(int argc, char** argv) {
     printf("ECHEC : %d nuage(s) au statut non kOk — une moyenne partielle n'est pas un recu\n",
            refused_status);
     return 3;
+  }
+  if (sum_triple_missing != 0) {
+    printf("ECHEC : le lemme de triple a refute %lld triples reels — il est FAUX\n",
+           sum_triple_missing);
+    return 1;
   }
   if (sum_missing_open != 0 || sum_missing_closed != 0) {
     printf("ECHEC : le lemme du demi-boule a refute %lld (ouvert) et %lld (ferme) paires"

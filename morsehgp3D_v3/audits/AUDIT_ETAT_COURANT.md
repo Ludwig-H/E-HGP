@@ -22,7 +22,7 @@ avec ces commits.
 | snapshot committé de code et de claims audité | `180975e4a967475067961d4f215ab2f2a4f9760a` |
 | dernier commit d'audit sur `main` | `c0df579ca0f5a6a6330294b8aa4fd80d372fb6ce` |
 | `CMakeLists.txt` | `e8ddd3c21eafa361d5c37cd8a585905db2a4bf8404639b8eefc72bd9df803c9f` |
-| `CMakeLists.txt` avec deltas replay/source directe et sept CTests | `4530a8c4817fbfc1e399f0dff628f374b89d2d1d2117fa964c448ce72efec431` |
+| `CMakeLists.txt` avec deltas replay/source directe et neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 | `prototype/admissible_pair_probe.cpp` à `40ad152` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
 | `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
@@ -36,7 +36,8 @@ avec ces commits.
 | `audits/check_gate_d_fold_f0.py` | `3c23497f0227147d35505df5275a20b000a5704a5c862527d3409e9828ebfdc2` |
 | `prototype/direct_source.cpp`, premier palier | `24ad3d37aedbf74c4b126fae30453a74d1f2a675eea572e6b92678b27c27258e` |
 | `prototype/direct_source.cpp`, palier dispersion historique | `2b47247e9d1ecd6e1a8a573f4597bab9bb19e10a4a3d2ab4295c524d2d1ee68c` |
-| `prototype/direct_source.cpp`, palier courant | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
+| `prototype/direct_source.cpp`, palier fonctionnel sans forêt | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
+| `prototype/direct_source.cpp`, palier courant avec forêt | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
 
 ## Verdict
 
@@ -62,14 +63,21 @@ voisinages sur 33 914 listes et 15 360 supports propres sans écart. Le palier
 `9edf150d...` corrige ensuite les claims CMake, sépare les modes, compare les
 listes complètes de membres, reçoit l'unicité, applique les fallbacks petit
 nuage/cap, agrège les `Q` effectifs et passe les masses en `u128`. Sept CTests
-Release et quatre ciblés ASan/UBSan sont verts. C'est un GO relatif borné réel.
+Release et quatre ciblés ASan/UBSan sont verts. Le palier `1c3948c3...` assemble
+ensuite un catalogue source et compare 30 forêts abstraites sur six nuages :
+1 647 nœuds, zéro divergence; neuf CTests Release passent. C'est un GO relatif
+borné réel.
 
 La promotion reste interdite. Les gates positives omettent `--judge 1` : les
 mêmes planchers passent en mode mesure avec `reference=0`. La CLI accepte
 `s_max=2/3` puis échoue sur les lanes `q>s_max`. Le cover rescane tous les
 points par feuille, le CSR peut être dense, les high-waters sont partiels et le
 target refuse plus de 20 000 points. Le prototype compare un catalogue fermé
-partagé, pas la source Gabriel ouverte streamée du produit. Le détail
+partagé, pas la source Gabriel ouverte streamée du produit. La signature forêt
+ignore volontairement les indices publics : une sonde trouve 4 016 champs
+`ForestNode::source` différents malgré 120 digests égaux. `--forest` accepte en
+outre des ordres au-delà de `s_max-1` et proclame des forêts vides qualifiées.
+Le détail
 reproductible est dans
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
 

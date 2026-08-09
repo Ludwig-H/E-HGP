@@ -407,6 +407,11 @@ endif()
 # trois contrats ouvert/ferme/vif sur 3-4-5, les antipodes, les rayons
 # confondus, les points de la droite, et l'ordre `ouvert <= ferme <= vif` sur un
 # nuage entier avec au moins un ecart strict.
+#
+# La porte couvre aussi le LEMME DE TRIPLE et les cliques : un support d'arite
+# trois est un triangle du graphe admissible, un support d'arite quatre un K4.
+# Le lemme de triple doit refuter ZERO triple reel — il est necessaire, ou il est
+# faux.
 add_test(NAME mhgp3v_admissible_pair_sweep COMMAND mhgp3v_admissible_pair_probe
          --points 30 --smax 8 --repeats 3 --seed 424242 --min-true 900 --min-admitted 1200)
 
