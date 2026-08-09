@@ -367,7 +367,10 @@ garde de support canonique suivante.
 
 Plus précisément, pour une paire le cône relatif pointé de dimension deux a au
 plus deux rayons; une intersection exacte de demi-plans sur les restrictions
-signées de $S(v)$ les trouve sans énumérer les triplets. Pour une arité trois,
+signées de $S(v)$ les trouve sans énumérer les triplets. Le réducteur exact à
+six états, sa preuve, ses gardes de rang et ses mutants sont donnés dans la
+[`note des verrous mathématiques prioritaires`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md)
+§3. Pour une arité trois,
 un scan de $S(v)$ teste les deux orientations de la droite et au plus une est
 admissible. L'arité quatre n'a aucun rayon. Ces coûts sont locaux en
 $\lvert S(v)\rvert$, mais une coquille peut avoir taille $n$ : aucun scan global

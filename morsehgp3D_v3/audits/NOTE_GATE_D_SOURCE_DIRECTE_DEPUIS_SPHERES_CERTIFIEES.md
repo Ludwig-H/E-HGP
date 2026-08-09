@@ -494,7 +494,13 @@ reverse shallow -> hulls de masques universels -> filtre halfspace local
 Les trois premiers étages ont désormais une construction mathématique
 déterministe; ils ne sont pas implémentés ni reçus. Le census global de boules,
 la déduplication des propriétaires et la terminalité du stream restent le
-verrou producteur; le dernier étage reste une globalité de fold.
+verrou producteur; le dernier étage reste une globalité de fold. La primitive
+géométrique du census est toutefois isolée : après relèvement paraboloïde, une
+boule rationnelle est un demi-espace exact de $\mathbb{R}^{4}$. La construction,
+les statuts cappés et la porte CPU sont donnés dans la
+[`note des verrous mathématiques prioritaires`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md)
+§4. Restent ouverts son implémentation certifiée, ses constantes et la
+terminalité des runs, non son existence mathématique.
 
 ## 6. Reçu minimal et portes de mutation
 

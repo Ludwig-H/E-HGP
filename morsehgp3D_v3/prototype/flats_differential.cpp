@@ -52,6 +52,7 @@
 
 #include "mhgp/mhgp.hpp"
 #include "mhgp/miniball.hpp"
+#include "prototype/order_k_device_core.hpp"
 #include "prototype/order_k_flats.hpp"
 
 using mhgp::P3;
@@ -273,6 +274,9 @@ struct Coverage {
   long long owner_rejected_vertex = 0;
   long long owner_emitted = 0;
   long long dedup_table_max = 0;
+  long long device_admitted = 0;
+  long long device_refused = 0;
+  long long device_pairs = 0;
 };
 static Coverage coverage;
 
@@ -525,6 +529,126 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
                bad_closure, bad_transition, bad_potential, seen_vertices.size());
         ok = false;
       }
+    }
+  }
+
+  // (H) LE NOYAU DEVICE-PORTABLE CONTRE LE CHEMIN CPU.
+  //
+  // Rien du chemin de decision de `order_k_flats.hpp` n'est executable sur un GPU :
+  // `std::vector` partout, allocations par sommet, tailles non bornees. Le noyau de
+  // `order_k_device_core.hpp` ecrit le MEME chemin sans allocation, a capacite
+  // FIXE, et REFUSE ce qui la depasse — une coquille cospherique peut avoir
+  // Theta(n) points, donc aucune capacite fixe n'est universellement suffisante, et
+  // pretendre le contraire serait faux.
+  //
+  // La porte exige deux choses, et rien de plus : que tout sommet ADMIS soit decide
+  // a l'identique — couple par couple, verdict par verdict — et que les refus
+  // soient COMPTES, jamais silencieux.
+  if (status == mhgp3v::CloudStatus::kOk && (int)pts.size() >= 4) {
+    mhgp3v::FlatStatistics dst{};
+    mhgp3v::CloudStatus dstatus = mhgp3v::CloudStatus::kOk;
+    const auto seen = mhgp3v::navigate_shallow(pts, s_max - 2, &dst, &dstatus, false);
+    if (dstatus == mhgp3v::CloudStatus::kOk && !seen.empty()) {
+      std::vector<i32> root_base;
+      for (const auto& v : seen) {
+        if (v.level != 0) continue;
+        for (i32 z : v.shell) {
+          if (root_base.size() >= 4) break;
+          const std::size_t have = root_base.size();
+          if (have == 1) {
+            const P3& a = pts[(size_t)root_base[0]];
+            const P3& b = pts[(size_t)z];
+            if (a.x == b.x && a.y == b.y && a.z == b.z) continue;
+          } else if (have == 2) {
+            const P3 u = mhgp::p3_sub(pts[(size_t)root_base[1]], pts[(size_t)root_base[0]]);
+            const P3 w = mhgp::p3_sub(pts[(size_t)z], pts[(size_t)root_base[0]]);
+            const P3 c = mhgp::p3_cross(u, w);
+            if (c.x == 0 && c.y == 0 && c.z == 0) continue;
+          } else if (have == 3) {
+            if (mhgp3v::flats::orient3d_exact(pts[(size_t)root_base[0]], pts[(size_t)root_base[1]],
+                                              pts[(size_t)root_base[2]], pts[(size_t)z]) == 0)
+              continue;
+          }
+          root_base.push_back(z);
+        }
+        break;
+      }
+      int device_differs = 0, admitted = 0, refused = 0, capacity_refused = 0;
+      long long pairs = 0;
+      if (root_base.size() == 4) {
+        for (const auto& v : seen) {
+          mhgp3v::device::BoundedVertex bv;
+          if (mhgp3v::device::admit(v, &bv) != mhgp3v::device::Admission::kOk) {
+            ++refused;
+            continue;
+          }
+          ++admitted;
+          // Les flats livres doivent etre les MEMES, dans le MEME ordre.
+          std::vector<std::vector<i32>> cpu_flats;
+          mhgp3v::flats::for_each_flat(pts, v, [&](const mhgp3v::flats::FlatAtVertex& f) {
+            cpu_flats.push_back(f.closure);
+            return true;
+          });
+          size_t seen_flats = 0;
+          bool order_ok = true;
+          mhgp3v::device::for_each_flat_from(pts.data(), bv, 0, 1, 2,
+                                             [&](const mhgp3v::device::BoundedFlat& g, int, int,
+                                                 int) {
+            if (seen_flats >= cpu_flats.size()) { order_ok = false; return false; }
+            const std::vector<i32>& want = cpu_flats[seen_flats];
+            if ((int)want.size() != g.closure_size) { order_ok = false; return false; }
+            for (int i = 0; i < g.closure_size; ++i)
+              if (want[(size_t)i] != g.closure[i]) order_ok = false;
+            ++seen_flats;
+            return order_ok;
+          });
+          if (!order_ok || seen_flats != cpu_flats.size()) { ++device_differs; continue; }
+          // Puis les VERDICTS, couple par couple.
+          mhgp3v::flats::for_each_flat(pts, v, [&](const mhgp3v::flats::FlatAtVertex& f) {
+            mhgp3v::device::BoundedFlat g;
+            g.base[0] = f.base[0]; g.base[1] = f.base[1]; g.base[2] = f.base[2];
+            g.closure_size = (int)f.closure.size();
+            for (int i = 0; i < g.closure_size; ++i) g.closure[i] = f.closure[(size_t)i];
+            for (int direction = -1; direction <= 1; direction += 2) {
+              ++pairs;
+              const bool cpu_pair =
+                  mhgp3v::flats::pair_admissible(pts, v, f.base, direction, root_base);
+              const bool dev_pair = mhgp3v::device::pair_admissible(
+                  pts.data(), bv, g.base, direction, root_base.data(), (int)root_base.size());
+              if (cpu_pair != dev_pair) { ++device_differs; return false; }
+              mhgp3v::flats::Vertex w;
+              if (!mhgp3v::flats::neighbour_along(pts, v, f, direction, nullptr, &dst, &w))
+                continue;
+              if (w.level > s_max - 2) continue;
+              mhgp3v::device::BoundedVertex bw;
+              if (mhgp3v::device::admit(w, &bw) != mhgp3v::device::Admission::kOk) {
+                ++capacity_refused;
+                continue;
+              }
+              if (!mhgp3v::flats::backward_pair_admissible(pts, w, f.base, direction, root_base))
+                continue;
+              const mhgp3v::flats::ChildOutcome cpu_out =
+                  mhgp3v::flats::decide_child(pts, w, f, direction, root_base);
+              bool capacity_ok = true;
+              const mhgp3v::flats::ChildOutcome dev_out = mhgp3v::device::decide_child(
+                  pts.data(), bw, g, direction, root_base.data(), (int)root_base.size(),
+                  &capacity_ok);
+              if (!capacity_ok) { ++capacity_refused; continue; }
+              if (cpu_out != dev_out) { ++device_differs; return false; }
+            }
+            return true;
+          });
+        }
+      }
+      if (root_base.size() != 4 || device_differs) {
+        printf("[%s] s_max=%2d NOYAU DEVICE != CPU : base=%zu divergences=%d (admis=%d refuses=%d"
+               " couples=%lld)\n", tag, s_max, root_base.size(), device_differs, admitted,
+               refused, pairs);
+        ok = false;
+      }
+      coverage.device_admitted += admitted;
+      coverage.device_refused += refused + capacity_refused;
+      coverage.device_pairs += pairs;
     }
   }
 
@@ -1780,6 +1904,8 @@ int main(int argc, char** argv) {
          "  refus par la decision=%lld\n", coverage.reject_backward, coverage.reject_by_parent);
   printf("        : couples juges deux fois=%lld  acceptes=%lld  prefiltres=%lld\n",
          coverage.pairs_judged, coverage.pairs_accepted, coverage.pairs_prefiltered);
+  printf("device : sommets admis=%lld  refuses par capacite=%lld  couples juges=%lld\n",
+         coverage.device_admitted, coverage.device_refused, coverage.device_pairs);
   printf("owner  : emises=%lld  refus support non canonique=%lld  refus autre proprietaire=%lld"
          "  table residuelle maximum=%lld\n", coverage.owner_emitted,
          coverage.owner_rejected_support, coverage.owner_rejected_vertex,

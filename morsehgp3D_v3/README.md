@@ -7,9 +7,12 @@ Aucun statut public, aucun SLO et aucune phase ne sont ouverts au registre.
 L'état audité du worktree est scellé dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les cinq portes flats
 Release et les campagnes sanitizers y sont vertes. La correction de justesse
-`use_owner` est créditée sur les quatre quadrants, mais sa porte permanente ne
-compare pas encore le payload complet. Le noyau F0 reste rouge : il rejette une
-naissance autorisée par son contrat écrit.
+`use_owner` est créditée sur les quatre quadrants. Sa porte compare désormais
+le statut et le catalogue sémantique, mais la fixture du cône signé ne protège
+pas encore l'identité du propriétaire. Le noyau F0 reste rouge : il rejette une
+naissance autorisée par son contrat écrit. Les fermetures constructives sont
+dans la
+[`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -659,19 +662,78 @@ quatre combinaisons index × propriétaire, couvrant 174 444 exécutions et
 niveaux exacts. Le tétraèdre rend 11 sphères partout, le triangle direct 7, et
 `owner_signed_cone` 22 avec exactement un propriétaire parmi deux candidats.
 
-La porte permanente de domaine est plus faible : elle compare seulement nombre
-de sphères et histogramme d'arités, sans statut ni payload. Son triangle à trois
-points ne couvre pas la branche affine basse avec au moins quatre points. La
-signature de permutation owner emploie un `set` de `(support, rang)`, donc masque
-multiplicités et membres; le cône signé reste une fixture externe.
+La porte permanente de domaine compare maintenant statut, support, arité, rang,
+niveau et membres dans les quatre quadrants. Elle impose 11 sphères au
+tétraèdre, 7 au triangle et ajoute un nuage coplanaire de cinq points; la vérité
+de cardinalité 19 de ce dernier n'est toutefois pas gravée. La signature de
+permutation owner transporte aussi membres et multiplicités, et le cône signé
+ainsi que le cube multi-support sont devenus permanents.
+
+Une dette mathématique subsiste dans cette nouvelle fixture. Sur le segment des
+centres du cône signé, remplacer $\varepsilon=-1$ par $+1$ échange seulement le
+propriétaire de $z=0$ vers $z=4$. Le catalogue reste identique et la porte passe.
+Il faut comparer directement l'identité des deux sommets candidats ou tuer le
+mutant du signe; l'égalité de sortie ne protège pas le théorème local.
 
 La disparition de table est acquise uniquement dans le quadrant
 owner+index+navigable. Sans index il reste $O(n)$ clefs singleton; sur la voie
-directe, le repli peut rester en $\Theta(\text{sortie})$. La taille publiée est
-finale, pas un high-water mémoire. Enfin, les scans owner des arités deux et
-trois peuvent coûter $\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet. La sélection
-des deux rayons extrêmes, une porte à grande coquille et un vrai high-water
-restent nécessaires avant toute revendication d'échelle.
+directe, le repli peut rester en $\Theta(\text{sortie})$. Le sujet publie
+maintenant le high-water du **nombre d'entrées** de `emitted`, relevé à chaque
+insertion; ce n'est toujours ni le nombre d'octets, ni le RSS, ni la mémoire de
+`kept`, `members_pool` et des sommets. Les scans owner live peuvent encore coûter
+$\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet. Un réducteur exact à six états est
+désormais prouvé en $O(m+\lvert B_U\rvert)$ par support d'arité deux, mais il
+reste à l'intégrer et le coût total du harvest d'arité trois reste ouvert.
+
+### Le noyau de décision est maintenant portable device
+
+Rien du chemin de décision n'était exécutable sur un GPU : `std::vector` partout,
+allocations par sommet, tailles non bornées. `prototype/order_k_device_core.hpp`
+écrit le **même** chemin sans allocation, sans conteneur standard, à capacité fixe
+et annoté `MHGP_HD` — donc compilable par `nvcc` pour l'hôte et le device.
+
+**Le refus fait partie du contrat.** Une coquille cosphérique peut avoir
+$\Theta(n)$ points : aucune capacité fixe n'est universellement suffisante, et
+prétendre le contraire serait faux. Le noyau déclare `kMaxShell = 32`,
+`kMaxInterior = 16` et **refuse** au-delà, avec un statut distinct. L'intérieur,
+lui, est borné par le contrat — la coupe est $\ell\leq s_{\max}-2$, donc neuf à
+$s_{\max}=11$ ; la coquille ne l'est pas, et c'est pourquoi son dépassement est un
+refus compté et non une troncature.
+
+C'est exactement la discipline du projet `morsehgp3d`, dont **toutes** les requêtes
+device sont des propositions rejouées exactement sur CPU. Un sommet refusé remonte
+à l'hôte, qui le décide avec le chemin non borné.
+
+La porte exige deux choses et rien de plus : que tout sommet **admis** soit décidé à
+l'identique — les flats livrés dans le même ordre, puis verdict par verdict — et que
+les refus soient **comptés**. **[mesuré]** fixtures 1 578 sommets et 13 244 couples,
+cosphérique 6 324 et 51 710, grille saturée 8 752 et 74 006 : zéro divergence, zéro
+refus de capacité dans ces régimes.
+
+### Ce que la reconnaissance de l'infrastructure GPU a établi
+
+Le projet `morsehgp3d` porte déjà un constructeur Morton/LBVH CUDA et une discipline
+de build stricte, et la découverte qui compte est celle-ci : **ses kernels se testent
+sans GPU**. Chaque kernel est scindé en trois — un `_internal.hpp` qui déclare un
+unique symbole de lancement, un hôte qui l'appelle sans le définir, un `.cu` qui le
+définit. Les tests unitaires exploitent le trou de lien et résolvent le symbole avec
+un **faux lanceur** qui refuse toute requête non marquée `host_fake`, pendant que le
+vrai `.cu` refuse symétriquement les requêtes `host_fake`. Les 249 CTests sont donc
+intégralement CPU, et seul l'outil de qualification exige un vrai sm_120.
+
+Trois contraintes dures en découlent, et il vaut mieux les connaître avant la G4 :
+CUDA 12.9.x exactement, `sm_120-real` sans PTX — donc aucun repli JIT —, et un
+**worktree git propre** exigé à la configuration, sans quoi le build échoue avant
+de compiler quoi que ce soit.
+
+Ce qui manque pour un index device exact est précis, et ce n'est pas le calcul : le
+device ne détient que des mots binary64 axis-major, l'AABB d'un nœud LBVH est encodée
+par six identifiants témoins et non par des bornes, il n'existe aucun prédicat
+boîte–boule entier, aucun `sphere_side`, et toutes les requêtes existantes sont
+**propositionnelles** avec rejeu CPU obligatoire — alors que le contrat du
+`CertifiedIndex` est l'inverse : la requête est exacte et terminale. La largeur, elle,
+n'est pas le problème : sur la grille u16 déclarée, $W=16$ tient dans le palier
+256 bits le plus étroit, avec treize bits de marge.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
@@ -1148,8 +1210,12 @@ python3 morsehgp3D_v3/audits/check_gate_d_fold_f0.py
 ```
 
 Attention : la sortie `Gate_D_F0_kernel=PASS` ne ferme pas la porte
-mathématique tant que le contre-exemple `N_a--N_a` de
-[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) n'est pas résolu.
+mathématique tant que le carré tout neuf d'arité quatre et la vérité indépendante
+de la
+[`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md)
+ne sont pas intégrés. L'invariant régulier « au moins deux facettes strictes »
+est conditionnel et se valide par record avant projection; il ne répare pas la
+garde par composante du fold général.
 
 Une campagne vide, un argument inconnu ou un plancher non atteint rendent un
 code non nul avec son diagnostic ; **neuf** tests négatifs le vérifient — argument
@@ -1164,7 +1230,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | # | question | statut |
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | correction de justesse validée dans les quatre quadrants par sonde externe; porte permanente encore partielle, table nulle seulement pour owner+index+navigable, coût jusqu'à $\Theta(m^4+m^3\lvert B_U\rvert)$ par sommet |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | correction de justesse et payload de domaine renforcés; identité du propriétaire signé non protégée, table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |

@@ -11,7 +11,16 @@ Cadre : `backend=architecture_math`, `profile=hgp_reduced_quantized_u16`,
 > sa vérité Warshall et son sujet DSU rejettent ensemble une composante
 > `N_a--N_a` portée par une `DirectHyperedge`. Ce rejet contredit les §3 et §8
 > ci-dessous, qui classent ce cas comme une naissance `q_R=0`. Le détail et la
-> fixture minimale sont dans [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
+> fixture géométrique d'arité quatre sont dans la
+> [`note des verrous mathématiques prioritaires`](NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md)
+> §2.
+
+> [!NOTE]
+> Sous la porte régulière forte seulement, chaque `DirectHyperedge` possède
+> exactement $\lvert U\rvert\geq2$ facettes strictes. Ce résultat conditionnel
+> se valide **par record brut avant projection**; il ne justifie pas une garde
+> par composante dans le fold source-agnostique. Une autre hyperarête portant un
+> latent peut sinon masquer un record entièrement neuf malformé.
 
 > [!IMPORTANT]
 > Après la descente locale vers une facette cœur, la dernière décision globale
