@@ -261,3 +261,70 @@ Le README qualifie `census_tukey_shallow.py` de reçu complet. Le sidecar `censu
 - `decimate` traite `len(points) == target` comme « cloud plus petit » parce qu'il retourne `None` pour `len(points) <= target`; une entrée exactement à la taille cible serait donc sautée à tort.
 
 Le census reste un diagnostic correctement borné comme **minorant** du cas tangentiel non contraint. Il n'est ni un certificat de $R$, ni un reçu complet au sens du plan de test.
+
+## Snapshot 2026-08-09 — `dd6f47d21a2a50de5d77e48dfd47b8c768fb5ead`, M2.2 `edge_shallow`
+
+Empreintes de cette passe :
+
+- `PROPOSITION.md` : `615935ad798ce5afb3eb3280a54a3bfd8306eed9d7570ff474866c7a3255d912`;
+- `prototype/edge_shallow.hpp` : `badc8100a700669b56accd68f3362fdef2517d8b4e63ce0b3a303ff29b0f0627`;
+- `oracle/oracle_main.cpp` : `2324a92e4ad2c120cb7cfb9e7669aca0610ab5de9c6eb4824d53f65b3d8f9c32`;
+- `CMakeLists.txt` : `720984024e19566b7dfbacb4a6a09d71d9a4ee276cf880ff417869990858c269`;
+- `README.md` : `efd7c7d8c929cf0b0ec0fd03a664d62fedacfb9f2092e49d4a72981b129ab628`.
+
+Le nouveau composant est un bon falsificateur incrémental : pour l'arité quatre, il obtient le rang depuis le signe des formes affines dans le plan médiateur, puis laisse l'oracle indépendant comparer le catalogue et la forêt. L'algèbre du changement de variables et le traitement du signe du déterminant sont cohérents sur ce snapshot. Ce constat positif ne transforme toutefois pas la campagne bornée en preuve universelle ni le constructeur dense en peeling.
+
+### P0 protocole — le reçu ne décrit ni le bon sujet ni le verdict final
+
+Quatre défauts distincts se composent dans le schéma `morsehgp3d.v3.oracle.campaign.v1` :
+
+1. un run `--subject edge_shallow` est sérialisé comme `"subject": "mhgp3v anchored_catalogue"`;
+2. le même falsificateur hybride et borné est publié avec `"status": "qualified"` et `"qualified": true`;
+3. le reçu est encore écrit avant les validations finales de `--require-incomplete-anchors`; un seuil impossible peut donc rendre le code 1 après avoir écrit `"exit_code": 0`, `"baseline_passed": true` et `"probe_passed": true`, et employer cette option avec le mauvais sujet peut rendre le code 2 après le même faux verdict;
+4. les clés `injection`, `injections_applied` et `injection_escapes` sont émises deux fois dans le même objet JSON. Les parseurs qui gardent la première ou la dernière occurrence peuvent donc lire des sens différents.
+
+Reproductions Release :
+
+```text
+mhgp3v_oracle --subject edge_shallow --clouds 20 --seed 4242 --min-points 8 --max-points 12 --max-order 3 --min-decided 15 --min-nodes 200 --receipt edge.json
+mhgp3v_oracle --subject anchored --regime assumed_window --seed-neighbours 16 --clouds 1 --seed 4242 --min-points 22 --max-points 22 --max-order 1 --min-decided 1 --min-nodes 1 --require-incomplete-anchors 23 --receipt impossible.json
+```
+
+La première commande rend 0 mais ment sur le sujet et la portée. La seconde observe 22 ancres incomplètes, rend 1 parce que 23 étaient exigées, mais son reçu annonce encore un `exit_code` nul. Artefacts temporaires : `/tmp/mhgp3v-receipts-live-VDGv0y` et `/tmp/mhgp3v-edge-commit.CaVvdo/edge_receipt.json`.
+
+Obligation : construire un objet de verdict unique **après** toutes les postconditions, puis en dériver à la fois le code de sortie et la sérialisation. Le sujet doit être une valeur fermée exacte (`v2`, `anchored`, `edge_shallow`), chaque clé ne doit apparaître qu'une fois, et le vert borné doit être nommé `bounded_differential_passed` ou `diagnostic_only`, jamais `qualified` sans profil, autorité et porte documentaire explicites.
+
+Statut : **P0 ouvert; aucun reçu v3 courant ne doit servir de preuve de qualification**.
+
+### P1 couverture — campagne non vacue, mais plusieurs branches centrales restent à zéro
+
+Exécution exacte du CTest M2.2 sur un export propre du commit :
+
+```text
+aretes=924 dont retenues=48
+droites actives=7848, constantes interieures=0
+sommets examines=3996 dont peu profonds=420
+arite4 emise=66, tests de profondeur=9432, DICTIONNAIRE REFUTE=0
+attempted=20, decided=20, rejected_domain=0
+spheres=948, forets=39, noeuds=956, largeur max=157 bits
+```
+
+Le test exerce donc réellement des sommets, des profondeurs et des émissions d'arité quatre. En revanche `c_e` vaut zéro sur toute la campagne. Aucun plancher ne porte sur les arêtes retenues, sommets shallow, émissions d'arité quatre, formes constantes, parallèles, concurrences, égalités de profondeur ou valeurs proches de la borne `i128`; seul le nombre global de nuages et de nœuds est exigé.
+
+Un sweep diagnostic trouve `seed=235`, grille `[0,20]`, cinq points et ordre maximal quatre avec `constantes interieures=1`, `arite4 emise=6` et un catalogue vert. Une graine issue de `std::uniform_int_distribution` n'est toutefois pas une fixture inter-toolchain. Une fixture littérale plus claire est le tétraèdre `(2,2,2),(0,0,2),(0,2,0),(2,0,0)` avec le point intérieur de l'arête `(1,1,2)` : elle force une forme constante intérieure pour l'ancre correspondante et un rang fermé cinq. Il faut en plus des fixtures séparées pour droites parallèles ou concourantes, shell supplémentaire, frontière stricte et coordonnées extrêmes.
+
+Statut : **preuve bornée non vacue pour une partie du dictionnaire; couverture de branche et de largeur ouverte**.
+
+### P1 architecture — `edge_shallow` n'est pas encore le peeling A2e
+
+Le prototype parcourt toutes les $\binom{n}{2}$ paires de points. Pour chaque paire, il forme toutes les paires de droites actives puis rescane les droites pour calculer la profondeur : dans le pire cas, cela reste en $O(n^5)$. Il appelle en outre `anchored_catalogue` en régime exhaustif pour les arités un à trois et calcule d'abord aussi ses arités quatre avant de les jeter. C'est acceptable pour un juge borné qui isole le dictionnaire; ce n'est ni une source A1, ni un parcours shallow sensible à la sortie, ni une architecture produit.
+
+Le commentaire `edges_retained` parle d'« arête diamétrale », mais aucune condition de diamètre maximal, aucun clipping de Jung et aucun propriétaire A1 canonique ne sont testés. L'énumération de toutes les paires reste complète pour ce falsificateur, car le centre d'une sphère de support quatre appartient au plan médiateur de chacune de ses paires; la statistique ne qualifie simplement pas la source d'ancres proposée pour A2e.
+
+### P0 documentaire — vingt nuages ne sont pas une preuve du dictionnaire
+
+Le README dit encore que « le dictionnaire de profondeur est vérifié » et que le vert de vingt nuages « est la vérification ». Le résultat est une **absence de réfutation sur une campagne bornée**, utile et non vacue; il ne démontre pas l'identité pour toute configuration de la grille. La preuve algébrique doit vivre dans l'autorité mathématique, avec ses hypothèses de position générale et ses conventions de frontière, tandis que le CTest en devient la falsification permanente.
+
+Le README a retiré plusieurs anciens surclaims, mais conserve aussi aux lignes 57–62 l'extrapolation « constant en $n$ » et les gains `19x/70x/208x` depuis trois ratios d'incidences support--ancre. Ces incidences ne sont toujours pas les strates ni le coût du futur parcours. Le titre plus prudent « majorant du travail » ne rend pas l'extrapolation valide.
+
+Verdict M2.2 sur ce snapshot : **GO pour garder le falsificateur exact et ajouter des fixtures ciblées; NO-GO pour fermer le dictionnaire par le seul CTest, publier un reçu qualifiant, revendiquer A1-source, PEL-2 ou une complexité de peeling**.

@@ -152,6 +152,63 @@ Le détail, les budgets et le journal des affirmations retirées sont dans
 
 ---
 
+## 2 bis. La question ouverte : 50 000 points, $K=10$, une seconde
+
+**Question posée aux audits.** Le contrat est-il atteignable, et sous quelles
+conditions ? Je ne peux pas encore répondre, et c'est un progrès : la question
+est enfin bien posée.
+
+### Ce qui est acquis
+
+L'énoncé central n'est plus une conjecture : **le rang est une profondeur**,
+vérifié contre la vérité exhaustive sur la grille déclarée, en arithmétique
+entière tenant dans un `i128`. C'est la brique sur laquelle tout repose.
+$Z_e\leq m_e(\kappa_e+1)$ est une **borne classique**, pas une hypothèse.
+
+### Ce qui manque, et ce n'est pas un détail
+
+Le prototype forme encore **toutes les paires de droites**, $O(m_e^2)$ par arête.
+Il vérifie le dictionnaire ; il ne réalise pas le parcours. Or c'est le parcours
+qui décide du contrat, et il n'existe pas.
+
+### Les trois inconnues qui trancheraient
+
+| inconnue | pourquoi elle décide | statut |
+| --- | --- | --- |
+| $\sum_e m_e$ et $\sum_e Z_e$ sur un vrai nuage à l'échelle | c'est le travail réel du parcours | **non mesuré** |
+| coût du prédicat de profondeur par candidat | convertit le travail en secondes | non mesuré |
+| volume **aval** : incidences silencieuses, tri global, lots, verticales | jamais chiffré, et il peut dominer | non mesuré |
+
+À quoi s'ajoutent deux verrous indépendants du parcours : **A1-source**, dont
+aucune version complète et sparse n'est démontrée — le RNG d'ordre borné en est
+exclu par théorème — et le **tri global exact** par niveau rationnel, inévitable
+parce que des ancres indépendantes n'émettent pas en ordre monotone.
+
+### Mon estimation, donnée comme telle
+
+Une seconde sur 48 cœurs me paraît **plausible mais non acquise** ; 100 ms
+exigerait le GPU de bout en bout. Ce n'est pas une mesure, et aucune décision ne
+doit s'y appuyer.
+
+### Un obstacle concret trouvé en route, pour les arités 2 et 3
+
+Le dictionnaire n'est vérifié qu'à l'**arité 4**, et il ne s'y propage pas
+automatiquement (les arités ont leurs propres régions et seuils). En dérivant
+l'arité 3, un obstacle précis apparaît. Le circumcentre du triangle est le point
+de la droite $h_z=0$ situé dans le plan du triangle ; comme
+$b_1\cdot b_2 = b_1\cdot(d\times b_1) = 0$, la matrice de \textsc{Gram} est
+**diagonale**, ce qui donne une direction entière
+$v=(a\lVert b_2\rVert^2,\ b\lVert b_1\rVert^2)$ et le paramètre $c/Q$ avec
+$Q=a^2\lVert b_2\rVert^2+b^2\lVert b_1\rVert^2$.
+
+Mais $Q<2^{136{,}4}$ sur la grille déclarée : **l'arité 3 ne tient pas dans un
+`i128`**, là où l'arité 4 y tient ($<2^{123{,}6}$). Il faudra soit un grand
+entier borné, soit une base $b_2$ mieux échelonnée. C'est un fait de largeur, pas
+une difficulté de principe — et c'est exactement le genre de chose qu'il vaut
+mieux savoir avant d'écrire le code.
+
+---
+
 ## 3. M1 — le juge
 
 Indépendant du chemin jugé sur les trois couches qui comptent :
