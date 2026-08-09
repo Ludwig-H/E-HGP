@@ -299,16 +299,31 @@ profondeur $V_k(p)$ est non bornée et la règle ne se déclenche jamais, ce qui
 cohérent avec le reste. **[obligation]** vérifier la proposition contre l'oracle
 exhaustif, et mesurer $M(p)$.
 
-### Q1 — l'épluchage en couches est-il exact ?
+### Q1 — RÉPONDUE : l'épluchage en couches n'est pas exact
 
-Est-il vrai que les sommets de profondeur $\leq\kappa$ correspondent exactement
-aux arêtes des $\kappa+1$ premières **couches convexes** du nuage dual ? Je
-soupçonne que **non** — couches convexes et $k$-niveaux ne coïncident pas en
-général — mais je ne veux pas construire dessus sans le savoir. Si c'est faux, un
-contre-exemple minimal serait précieux ; si c'est vrai sous une hypothèse
-supplémentaire, laquelle ?
+**Non**, et le contre-exemple est minimal. Prenons quatre points duaux en
+**position convexe**, par exemple $(1,0,1)$, $(0,1,1)$, $(-1,0,1)$, $(0,-1,1)$.
+La couche 0 est le nuage entier, donc la couche 1 est **vide**. Or les deux
+« diagonales » $\lbrace0,2\rbrace$ et $\lbrace1,3\rbrace$ sont de profondeur 1 —
+vérifié exactement.
 
-### Q2 — quel algorithme de $k$-niveau, à $\kappa$ petit et en exact ?
+Un sommet de profondeur 1 peut donc avoir ses **deux** extrémités sur la couche 0,
+qui disparaissent à l'épluchage. Aucune hypothèse ne sauve l'énoncé : c'est la
+définition même des couches qui retire les points, alors que le $k$-niveau les
+garde comme porteurs.
+
+**Conséquence** : construire le préfixe shallow par épluchage est exclu.
+
+### Q2 — précisée : la profondeur n'est PAS un niveau
+
+Une précision trouvée en dérivant : le long d'une verticale, la profondeur
+**monte** de 1 en franchissant une droite d'orientation $b>0$ et **descend** en
+franchissant $b<0$. C'est une marche, pas une fonction monotone, et
+$\lbrace\delta_e\leq\kappa\rbrace$ est une union d'intervalles et non un
+intervalle. Le balayage classique du $k$-niveau ne s'applique donc **pas**
+directement : le problème est celui des **$k$-ensembles signés**, plus dur.
+
+### Q2 — quel algorithme, à $\kappa$ petit et en exact ?
 
 À $\kappa\leq 7$ et $m$ de l'ordre de la centaine, quel constructeur atteint
 $O(m\log m + m\kappa)$ **sans quitter l'arithmétique entière** ? Le tri des
@@ -331,20 +346,32 @@ puis un balayage donnent tous ses sommets avec leur profondeur, au lieu de
 recompter $O(m_e)$ droites par sommet. Le coût par arête passe de $O(m_e^3)$ à
 $O(m_e^2\log m_e)$, et le juge est resté vert avec des compteurs **identiques**.
 
-**[mesuré]** $s_{\max}=11$, un nuage par taille :
+**Le clipping de JUNG est implémenté**, et c'était le vrai gisement. Une droite
+qui ne coupe pas l'ellipse est **constante** sur elle : intérieure, elle grossit
+$c_e$ ; extérieure, elle disparaît. Seules les actives demandent un travail par
+sommet. S'y ajoute le masque **porteur** de la lentille — un sommet du support est
+à distance $\leq D$ de $p$ **et** de $q$, sinon $(p,q)$ ne serait pas l'arête
+maximale — qui ne filtre **jamais** le flux témoin.
 
-| $n$ | $m_e$ moyen | sommets examinés | dont peu profonds | part | tests / $m_e^2$ | temps |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 40 | 38 | 548 340 | 65 760 | 12 % | 1,75 | 0,28 s |
-| 80 | 78 | 9 489 480 | 203 904 | **2,1 %** | 1,48 | 6,1 s |
-| 160 | 158 | 157 766 160 | 521 034 | **0,33 %** | 1,29 | 165 s |
+**[mesuré]** $s_{\max}=11$, un nuage par taille, avec et sans clipping :
 
-Deux lectures. Les tests de profondeur sont bien en $\Theta(m_e^2)$ et non
-$\Theta(m_e^3)$ : le balayage tient sa promesse. Mais **la part des sommets
-réellement peu profonds s'effondre en $\approx 1/m_e$** — à $n=160$ on énumère
-300 fois plus de sommets qu'on n'en garde. C'est exactement ce que Q1–Q3
-économiseraient, et cela chiffre l'enjeu : le balayage gagne un facteur $m_e$, un
-vrai $k$-niveau en gagnerait un second.
+| $n$ | $m_e$ sans / avec | sommets sans / avec | temps sans / avec |
+| ---: | ---: | ---: | ---: |
+| 40 | 38 / **17,8** | 548 340 / **70 349** | 0,28 / **0,14** s |
+| 80 | 78 / **35,9** | 9 489 480 / **710 795** | 6,1 / **1,15** s |
+| 160 | 158 / **72,3** | 157 766 160 / **3 907 965** | 165 / **7,5** s |
+| 320 | — / 144,3 | — / 12 816 876 | — / 18,4 s |
+
+À $n=160$ : **40× moins de sommets, 22× plus rapide**, catalogue identique. Et le
+rapport sommets peu profonds / sphères émises tombe à **2,4** contre $\approx300$
+auparavant — le prototype ne gaspille presque plus.
+
+**Mais $m_e\approx0{,}45\,n$ croît encore linéairement** : pour une arête
+quelconque, la lentille contient une fraction constante du nuage. Le clipping
+gagne un grand facteur constant, **pas un ordre**. Le mur restant n'est donc ni le
+clipping ni le $k$-niveau : ce sont les $\binom{n}{2}$ **ancres**. À $n=320$ le
+coût est déjà de 1 442 tests par arête ; à 50 k il faudrait $1{,}25\cdot10^9$
+arêtes. **A1-source est le verrou, et la mesure le confirme.**
 
 ---
 

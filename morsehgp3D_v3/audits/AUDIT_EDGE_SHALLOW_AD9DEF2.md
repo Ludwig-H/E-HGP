@@ -162,7 +162,7 @@ Le chemin hybride appelle auparavant `anchored_catalogue(points, s_max, n, exhau
 
 Pour un nuage générique de taille `n`, les masses du seul chemin arête sont :
 
-$$A=inom{n}{2},qquad L=inom{n}{2}(n-2),qquad V=inom{n}{2}inom{n-2}{2}=6inom{n}{4}.$$
+$$A=\binom{n}{2},\qquad L=\binom{n}{2}(n-2),\qquad V=\binom{n}{2}\binom{n-2}{2}=6\binom{n}{4}.$$
 
 Le pire cas des tests de profondeur vaut `V(n-4)`, sans compter le second rescan des membres. Le chemin ancré ajoute `sum_{m=1..4} m C(n,m)` candidats et jusqu'à `n` témoins par candidat.
 
@@ -306,11 +306,11 @@ Cette conclusion est un audit de bornes, pas une validation de toute coordonnée
 
 À `K=10`, `s_max=11`. Pour une ancre utile, le budget support quatre est `kappa_e = 7 - c_e`. Si `c_e <= 7`, la borne annoncée donne :
 
-$$Z_eleq m_e(8-c_e),qquad sum_e Z_eleq8sum_e m_e.$$
+$$Z_e\leq m_e(8-c_e),\qquad \sum_e Z_e\leq8\sum_e m_e.$$
 
 En posant `M = sum_e m_e` et `Z = sum_e Z_e`, un vrai constructeur A2e aurait une cible de coût de la forme :
 
-$$T=T_{mathrm{A1}}+T_{mathrm{range}}+O!left(sum_eleft[m_elog m_e+Z_eight]ight)+T_{mathrm{exact}}+T_{mathrm{transcript}}+T_{mathrm{tri}}+T_{mathrm{aval}}.$$
+$$T=T_{\mathrm{A1}}+T_{\mathrm{range}}+O\!\left(\sum_e\left[m_e\log m_e+Z_e\right]\right)+T_{\mathrm{exact}}+T_{\mathrm{transcript}}+T_{\mathrm{tri}}+T_{\mathrm{aval}}.$$
 
 La borne `Z <= 8M` est utile, mais elle ne borne ni le nombre d'ancres `a`, ni `M`, ni le range-report, ni le tri, ni les incidences aval. Elle n'est pas un constructeur et ne donne aucune durée seule.
 

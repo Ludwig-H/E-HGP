@@ -36,9 +36,9 @@ Un chrono sur le seul catalogue, sur `resident_core`, sur la grille u16, sur une
 
 ## 2. Pourquoi l'implémentation courante est hors cible
 
-Pour $n=50,000$, le prototype M2.2 parcourt les $\binom{n}{2}=1,249,975,000$ ancres. Il classifie jusqu'à $n$ points par ancre, forme toutes les $\binom{m_e}{2}$ intersections, puis rescane jusqu'à $m_e$ formes par intersection. Dans le cas dense $m_e\simeq n$, cela représente environ $6{,}25\cdot10^{13}$ classifications paire--point, $1{,}56\cdot10^{18}$ intersections et jusqu'à $7{,}8\cdot10^{22}$ tests de profondeur. Le catalogue live réénumère en plus les autres arités. Le prototype isole utilement le dictionnaire; il n'est pas un algorithme de production.
+Pour $n=50,000$, le prototype M2.2 parcourt les $\binom{n}{2}=1,249,975,000$ ancres. Le snapshot initial recalculait la profondeur de chaque intersection et avait un pire cas en $\Theta(n^5)$. Depuis le commit `463d075`, un balayage par droite abaisse ce poste à $O(m_e^2\log m_e)$ par ancre, donc $O(n^4\log n)$ avec toutes les ancres. Il forme néanmoins encore exactement $\binom{50,000}{2}\binom{49,998}{2}=1,562,312,506,874,925,000$ croisements dans le cas dense, avant clipping, validation des sphères, déduplication et aval. Même un débit agrégé irréaliste d'un milliard de croisements par seconde demanderait environ 49,5 ans. Le prototype isole utilement le dictionnaire; il n'est pas un algorithme de production.
 
-Le seul test borné M2.2 du snapshot initial est réellement non vacue : 924 arêtes, 3 996 sommets examinés, 420 shallow, 66 émissions d'arité quatre et 9 432 tests de profondeur. Il porte toutefois sur 20 nuages de 8 à 12 points et ne mesure aucune loi d'échelle.
+Le test borné M2.2 du commit `ad9def2` est réellement non vacue : 924 arêtes, 3 996 sommets examinés, 420 shallow, 66 émissions d'arité quatre et 9 432 tests de profondeur. Le sweep de `463d075` garde les mêmes 3 996 sommets mais publie 36 402 tests après l'ajout des arités deux et trois. Ces campagnes portent sur 20 nuages de 8 à 12 points et ne mesurent aucune loi d'échelle.
 
 Un autre diagnostic de cette session est plus sévère : la voie P15-HOCUDA-P1a `center-cover` a compilé et passé l'oracle natif à $n=32$, puis son unique run G4 `uniform_latin` à 50 k a atteint le coupe-circuit de 600 s sans JSON; `eight_clusters` a été interrompu à la demande de l'utilisateur. Ce n'est pas un reçu de performance qualifiant, mais cela réfute sans ambiguïté l'implémentation A1 actuelle comme route sous une seconde : la source seule est déjà à plus de 600 fois le budget secondaire.
 
@@ -55,7 +55,7 @@ Posons :
 - $B$ : octets lus, écrits et déplacés sur le chemin critique;
 - $D$ : visites de descente, attaches, opérations de réduction et verticales.
 
-Le ledger à fermer est $T_{\mathrm{e2e}}=T_{\mathrm{canon}}+T_{\mathrm{index}}+T_{A1}+T_{\mathrm{shallow}}+T_{\mathrm{exact}}+T_{\mathrm{sort}}+T_{\mathrm{HGP}}+T_{\mathrm{reduce}}+T_{\mathrm{out}}$. Les compteurs doivent en outre satisfaire, avec les débits **mesurés sur la machine cible**, une inégalité du type $M/r_{\mathrm{class}}+Z/r_{\mathrm{walk}}+P/r_{\mathrm{pred}}+C/r_{\mathrm{sort}}+B/b_{\mathrm{mem}}+D/r_{\mathrm{aval}}+T_{\mathrm{vertical}}+T_{\mathrm{sync}}<1\ mathrm{s}$. Ce n'est pas un modèle de preuve; c'est la comptabilité minimale qui empêche un poste caché de disparaître dans une moyenne.
+Le ledger à fermer est $T_{\mathrm{e2e}}=T_{\mathrm{canon}}+T_{\mathrm{index}}+T_{A1}+T_{\mathrm{shallow}}+T_{\mathrm{exact}}+T_{\mathrm{sort}}+T_{\mathrm{HGP}}+T_{\mathrm{reduce}}+T_{\mathrm{out}}$. Les compteurs doivent en outre satisfaire, avec les débits **mesurés sur la machine cible**, une inégalité du type $M/r_{\mathrm{class}}+Z/r_{\mathrm{walk}}+P/r_{\mathrm{pred}}+C/r_{\mathrm{sort}}+B/b_{\mathrm{mem}}+D/r_{\mathrm{aval}}+T_{\mathrm{vertical}}+T_{\mathrm{sync}}<1\,\mathrm{s}$. Ce n'est pas un modèle de preuve; c'est la comptabilité minimale qui empêche un poste caché de disparaître dans une moyenne.
 
 ### 3.1 A1-source
 

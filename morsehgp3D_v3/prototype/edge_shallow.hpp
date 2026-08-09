@@ -70,6 +70,11 @@ struct EdgeShallowStatistics {
   long long emitted_positive_depth = 0;
   long long emitted_positive_constant = 0;
   long long rank_histogram[16] = {};
+  // Clipping de JUNG : ce que l'ellipse retire reellement.
+  long long lines_total = 0;          // points examines, toutes ancres
+  long long lines_outside_lens = 0;   // hors lentille : inelig. comme PORTEUR
+  long long lines_constant_outside = 0;  // ne coupent pas l'ellipse, exterieures
+  long long lines_constant_inside_clip = 0;  // ne coupent pas, interieures
 };
 
 namespace detail {
@@ -125,6 +130,20 @@ inline int compare_positions(mhgp::i128 na, mhgp::i128 da, mhgp::i128 nb, mhgp::
   return opposite ? -order : order;
 }
 
+// La droite n.t = c/4 coupe-t-elle l'ellipse de JUNG t^T G t <= R^2 ?
+// Le minimum de t^T G t sous la contrainte vaut (c/4)^2 det(G) / Q, donc la
+// condition est c^2 det(G) <= 16 R^2 Q. Avec R^2 = (gamma^2 - 1/4) D^2 :
+//   arite 4, gamma^2 = 3/8 : R^2 = D^2/8   ->  c^2 detG <= 2 D^2 Q ;
+//   arite 3, gamma^2 = 1/3 : R^2 = D^2/12  ->  3 c^2 detG <= 4 D^2 Q.
+// Largeurs : c^2 < 2^71,2 et detG < 2^67,2, donc 256 bits par mul128.
+inline bool crosses_jung_ellipse(mhgp::i128 c, mhgp::i128 determinant_gram, mhgp::i128 quadratic,
+                                 mhgp::i128 squared_diameter, int arity) {
+  const mhgp::i128 left = arity == 4 ? c * c : 3 * c * c;
+  const mhgp::i128 right = arity == 4 ? 2 * squared_diameter : 4 * squared_diameter;
+  return mhgp::big_cmp(mhgp::mul128(left, determinant_gram),
+                       mhgp::mul128(right, quadratic)) <= 0;
+}
+
 struct Crossing {
   mhgp::i128 numerator = 0;    // position = numerator / determinant
   mhgp::i128 determinant = 0;
@@ -150,10 +169,28 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
   mhgp::P3 b1{}, b2{};
   detail::bisector_basis(d, &b1, &b2);
 
-  // Classification exacte : constamment interieur, constamment exterieur, ou
-  // droite active. Une forme constante correspond a X parallele a d.
-  int constant_inside = 0;
-  std::vector<detail::Line> active;
+  // Classification, en deux etages distincts (audit 2 §2.2, §3.1) :
+  //
+  //   LENTILLE — un sommet du support est a distance au plus D de p ET de q,
+  //   sinon (p,q) ne serait pas l'arete de diametre maximal. C'est un masque de
+  //   PORTEUR : il dit qui peut engendrer un support, jamais qui compte dans la
+  //   profondeur.
+  //
+  //   ELLIPSE DE JUNG — une droite qui ne coupe pas l'ellipse est CONSTANTE sur
+  //   elle : interieure (elle grossit c_e) ou exterieure (elle disparait). Seules
+  //   les droites actives demandent un travail par sommet. C'est la reduction
+  //   que le prototype ne faisait pas : il ne declarait constante qu'une forme
+  //   algebriquement constante, c'est-a-dire un point colineaire a l'ancre.
+  //
+  // Les ellipses des arites trois et quatre DIFFERENT, donc les classifications
+  // aussi : une preuve d'arite quatre ne s'y propage pas.
+  const mhgp::i128 gram11 = mhgp::p3_norm2(b1);
+  const mhgp::i128 gram12 = mhgp::p3_dot(b1, b2);
+  const mhgp::i128 gram22 = mhgp::p3_norm2(b2);
+  const mhgp::i128 gram_determinant = gram11 * gram22 - gram12 * gram12;
+
+  std::vector<detail::Line> every;          // flux TEMOIN complet
+  std::vector<char> in_lens;                // masque PORTEUR
   const int n = static_cast<int>(points.size());
   for (mhgp::i32 z = 0; z < n; ++z) {
     if (z == first || z == second) continue;
@@ -164,27 +201,46 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
     line.b = mhgp::p3_dot(b2, X);
     line.c = mhgp::p3_norm2(X) - squared_diameter;
     line.point = z;
-    if (line.a == 0 && line.b == 0) {
-      if (line.c < 0) ++constant_inside;  // 0 > c
-      continue;
-    }
-    active.push_back(line);
+    every.push_back(line);
+    const bool lens = detail::squared_distance(x, p) <= squared_diameter
+                   && detail::squared_distance(x, q) <= squared_diameter;
+    in_lens.push_back(lens ? 1 : 0);
+    ++statistics->lines_total;
+    if (!lens) ++statistics->lines_outside_lens;
   }
-  statistics->lines_constant_inside += constant_inside;
-  statistics->lines_active += static_cast<long long>(active.size());
+
+  // Classification par arite : constante interieure, constante exterieure, ou
+  // active. Une forme algebriquement constante (a = b = 0) est le cas limite.
+  auto classify = [&](int arity, int* constant_inside_out,
+                      std::vector<std::size_t>* active_out) {
+    *constant_inside_out = 0;
+    active_out->clear();
+    for (std::size_t i = 0; i < every.size(); ++i) {
+      const detail::Line& line = every[i];
+      const mhgp::i128 quadratic =
+          gram22 * line.a * line.a - 2 * gram12 * line.a * line.b + gram11 * line.b * line.b;
+      const bool degenerate = line.a == 0 && line.b == 0;
+      if (degenerate || !detail::crosses_jung_ellipse(line.c, gram_determinant, quadratic,
+                                                      squared_diameter, arity)) {
+        if (line.c < 0) { ++(*constant_inside_out); ++statistics->lines_constant_inside_clip; }
+        else { ++statistics->lines_constant_outside; }
+        continue;
+      }
+      active_out->push_back(i);
+    }
+  };
 
   // ---- ARITE DEUX -------------------------------------------------------
-  // Le support {p,q} a pour sphere la boule diametrale, dont le centre est M,
-  // c'est-a-dire s = 0. La profondeur y est immediate : a.0 + b.0 = 0 > c
-  // equivaut a c < 0. Aucun quotient, aucun determinant.
-  if (s_max - 2 - constant_inside >= 0) {
+  // Le support {p,q} a pour sphere la boule diametrale, de centre M donc s = 0.
+  // La profondeur y est immediate sur le flux TEMOIN entier : 0 > c.
+  {
     int depth = 0;
-    for (const detail::Line& line : active) {
+    for (const detail::Line& line : every) {
       ++statistics->depth_tests;
       if (line.c < 0) ++depth;
     }
-    if (depth <= s_max - 2 - constant_inside) {
-      const int rank = 2 + constant_inside + depth;
+    const int rank = 2 + depth;
+    if (rank <= s_max) {
       const std::vector<mhgp::i32> support{std::min(first, second), std::max(first, second)};
       mhgp::Sphere sphere{};
       bool centred = false;
@@ -212,11 +268,7 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
             emitted.rank = rank;
             out->push_back(std::move(emitted));
             ++statistics->emitted_arity_two;
-      if (depth > 0) ++statistics->emitted_positive_depth;
-      if (constant_inside > 0) ++statistics->emitted_positive_constant;
-      if (rank < 16) ++statistics->rank_histogram[rank];
             if (depth > 0) ++statistics->emitted_positive_depth;
-            if (constant_inside > 0) ++statistics->emitted_positive_constant;
             if (rank < 16) ++statistics->rank_histogram[rank];
           }
         }
@@ -224,37 +276,36 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
     }
   }
 
+  bool retained = false;
+
   // ---- ARITE TROIS ------------------------------------------------------
-  // Le circumcentre du triangle (p,q,z) est le point de la droite h_z = 0 situe
-  // dans le plan du triangle, c'est-a-dire celui dont le deplacement est
-  // parallele a la projection de X_z. En coordonnees s, cette direction est
-  // adj(G) n ; le parametre vaut alors c / Q avec Q = n^T adj(G) n > 0.
-  const mhgp::i128 g11 = mhgp::p3_norm2(b1);
-  const mhgp::i128 g12 = mhgp::p3_dot(b1, b2);
-  const mhgp::i128 g22 = mhgp::p3_norm2(b2);
-  const int depth_budget_three = s_max - 3 - constant_inside;
+  int constant_inside_three = 0;
+  std::vector<std::size_t> active_three;
+  classify(3, &constant_inside_three, &active_three);
+  const int depth_budget_three = s_max - 3 - constant_inside_three;
   if (depth_budget_three >= 0) {
-    for (std::size_t i = 0; i < active.size(); ++i) {
-      const detail::Line& lz = active[i];
-      const mhgp::i128 v1 = g22 * lz.a - g12 * lz.b;
-      const mhgp::i128 v2 = g11 * lz.b - g12 * lz.a;
-      const mhgp::i128 denominator = lz.a * v1 + lz.b * v2;   // > 0 si n != 0
+    for (std::size_t ii = 0; ii < active_three.size(); ++ii) {
+      if (!in_lens[active_three[ii]]) continue;          // masque PORTEUR
+      const detail::Line& lz = every[active_three[ii]];
+      const mhgp::i128 v1 = gram22 * lz.a - gram12 * lz.b;
+      const mhgp::i128 v2 = gram11 * lz.b - gram12 * lz.a;
+      const mhgp::i128 denominator = lz.a * v1 + lz.b * v2;
       if (denominator <= 0) continue;
 
       int depth = 0;
       bool exceeded = false;
-      for (std::size_t k = 0; k < active.size() && !exceeded; ++k) {
-        if (k == i) continue;
+      for (std::size_t kk = 0; kk < active_three.size() && !exceeded; ++kk) {
+        if (kk == ii) continue;
         ++statistics->depth_tests;
-        // a' s1 + b' s2 > c'  <=>  c (a' v1 + b' v2) > c' Q, avec Q > 0.
-        const mhgp::i128 combined = active[k].a * v1 + active[k].b * v2;
-        if (detail::compare_products(lz.c, combined, active[k].c, denominator) > 0
+        const detail::Line& lk = every[active_three[kk]];
+        const mhgp::i128 combined = lk.a * v1 + lk.b * v2;
+        if (detail::compare_products(lz.c, combined, lk.c, denominator) > 0
             && ++depth > depth_budget_three)
           exceeded = true;
       }
       if (exceeded) continue;
 
-      const int rank = 3 + constant_inside + depth;
+      const int rank = 3 + constant_inside_three + depth;
       std::vector<mhgp::i32> support{first, second, lz.point};
       std::sort(support.begin(), support.end());
       mhgp::Sphere sphere{};
@@ -287,35 +338,32 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
       out->push_back(std::move(emitted));
       ++statistics->emitted_arity_three;
       if (depth > 0) ++statistics->emitted_positive_depth;
-      if (constant_inside > 0) ++statistics->emitted_positive_constant;
+      if (constant_inside_three > 0) ++statistics->emitted_positive_constant;
       if (rank < 16) ++statistics->rank_histogram[rank];
     }
   }
 
   // ---- ARITE QUATRE -----------------------------------------------------
-  // La sortie anticipee ci-dessous ne vaut QUE pour l'arite quatre : a
-  // s_max = 3 aucun support quatre n'existe, mais les triangles, eux, existent.
-  // Le bloc d'arite trois doit donc la preceder — il ne le faisait pas, et les
-  // triangles disparaissaient silencieusement.
+  int constant_inside = 0;
+  std::vector<std::size_t> active_index;
+  classify(4, &constant_inside, &active_index);
+  statistics->lines_active += static_cast<long long>(active_index.size());
+  statistics->lines_constant_inside += constant_inside;
   const int depth_budget = s_max - 4 - constant_inside;
-  if (depth_budget < 0) return;  // l'ancre ne peut porter aucun support quatre
+  if (depth_budget < 0) { if (retained) ++statistics->edges_retained; return; }
 
-  // ---- BALAYAGE PAR DROITE ----------------------------------------------
-  //
-  // Compter la profondeur de chaque sommet independamment coute O(m) par
-  // sommet, donc O(m^3) par arete. Le long d'une droite, la profondeur est en
-  // revanche une fonction en escalier qui ne varie que de +-1 a chaque
-  // croisement : un tri puis un balayage donnent TOUS ses sommets avec leur
-  // profondeur en O(m log m), soit O(m^2 log m) par arete.
-  //
-  // Sur l'ancre parametree par w = (-b_i, a_i), la forme de la droite j vaut
-  // form_j(tau) = D_ij (tau - tau_j) avec D_ij = a_i b_j - a_j b_i. En
-  // -infini elle est donc positive SSI D_ij < 0 : la profondeur initiale est un
-  // comptage de signes de determinants. Au sommet lui-meme form_j = 0, donc la
-  // profondeur y vaut la profondeur courante moins [D_ij < 0].
-  bool retained = false;
+  std::vector<detail::Line> active;
+  std::vector<char> active_lens;
+  for (std::size_t index : active_index) {
+    active.push_back(every[index]);
+    active_lens.push_back(in_lens[index]);
+  }
+
+  // Balayage par droite : la profondeur le long d'une droite ne varie que de +-1
+  // a chaque croisement, donc un tri puis un balayage donnent tous ses sommets.
   std::vector<detail::Crossing> crossings;
   for (std::size_t i = 0; i < active.size(); ++i) {
+    if (!active_lens[i]) continue;                        // masque PORTEUR
     const detail::Line& li = active[i];
     crossings.clear();
     int running_depth = 0;
@@ -324,18 +372,16 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
       const detail::Line& lj = active[j];
       const mhgp::i128 determinant = li.a * lj.b - lj.a * li.b;
       if (determinant == 0) {
-        // Paralleles : la forme est CONSTANTE le long de l'ancre. Son signe se
-        // lit sans point temoin, en eliminant le parametre.
         const mhgp::i128 value = li.a != 0 ? (lj.a * li.c - li.a * lj.c) * (li.a > 0 ? 1 : -1)
                                            : (lj.b * li.c - li.b * lj.c) * (li.b > 0 ? 1 : -1);
         if (value > 0) ++running_depth;
         continue;
       }
-      if (determinant < 0) ++running_depth;  // positive en -infini
+      if (determinant < 0) ++running_depth;
       const mhgp::i128 t1 = li.c * lj.b - lj.c * li.b;
       const mhgp::i128 t2 = li.a * lj.c - lj.a * li.c;
       detail::Crossing crossing;
-      crossing.numerator = -li.b * t1 + li.a * t2;   // w . s, au facteur D pres
+      crossing.numerator = -li.b * t1 + li.a * t2;
       crossing.determinant = determinant;
       crossing.line = j;
       crossings.push_back(crossing);
@@ -350,33 +396,22 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
     for (std::size_t t = 0; t < crossings.size(); ++t) {
       const detail::Crossing& crossing = crossings[t];
       const std::size_t j = crossing.line;
-      const detail::Line& lx = li;
-      const detail::Line& ly = active[j];
       const mhgp::i128 determinant = crossing.determinant;
-      // Profondeur AU sommet : la droite franchie y est nulle, donc exclue.
       const int depth = running_depth - (determinant < 0 ? 1 : 0);
-      // Apres le croisement, elle bascule.
       running_depth = depth + (determinant > 0 ? 1 : 0);
-      if (j < i) continue;                  // chaque sommet n'est emis qu'une fois
+      if (j < i || !active_lens[j]) continue;
       ++statistics->vertices_examined;
       if (depth > depth_budget) continue;
       ++statistics->vertices_shallow;
-      {
 
-      // Le rang est LU sur la profondeur, jamais compte dans la boule.
       const int rank = 4 + constant_inside + depth;
-
-      std::vector<mhgp::i32> support{first, second, lx.point, ly.point};
+      std::vector<mhgp::i32> support{first, second, active[i].point, active[j].point};
       std::sort(support.begin(), support.end());
       mhgp::Sphere sphere{};
       bool centred = false;
       if (!detail::build_sphere(points, support, &sphere, &centred)) continue;
       if (!centred) continue;
 
-      // La coquille et l'appartenance des membres restent des faits a etablir
-      // exactement : seul le RANG vient de la profondeur. Les membres sont donc
-      // relus, mais leur NOMBRE doit coincider avec le rang deja calcule — c'est
-      // exactement le dictionnaire que ce prototype met a l'epreuve.
       AnchoredSupport emitted;
       int on_shell = 0;
       bool extra_on_shell = false;
@@ -405,7 +440,6 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
       if (constant_inside > 0) ++statistics->emitted_positive_constant;
       if (rank < 16) ++statistics->rank_histogram[rank];
       retained = true;
-      }
     }
   }
   if (retained) ++statistics->edges_retained;
