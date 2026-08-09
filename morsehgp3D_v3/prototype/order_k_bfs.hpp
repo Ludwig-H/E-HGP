@@ -437,8 +437,12 @@ inline std::vector<bfs::Vertex> order_k_vertices(const std::vector<mhgp::P3>& po
 
         // Les points du plan du triangle qui sont sur son cercle circonscrit
         // appartiennent a TOUTE sphère du pinceau, donc a cette coquille aussi.
+        // Un point de l'ANCIENNE coquille peut etre sur le cercle du triangle :
+        // il est alors sur toutes les spheres du pinceau, donc aussi sur la
+        // nouvelle. L'exclure laissait une coquille incomplete, et le niveau
+        // transporte devenait faux — jusqu'a passer sous zero.
         for (mhgp::i32 z = 0; z < n; ++z) {
-          if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
+          if (z == tri[0] || z == tri[1] || z == tri[2] || z == best) continue;
           if (pencil.orient(z) != 0) continue;
           if (pencil.side(best, z, best_orient) == 0) {
             tied.push_back(z);
@@ -873,8 +877,7 @@ inline std::vector<bfs::Vertex> order_k_vertices_fast(const std::vector<mhgp::P3
             double bc[3], br = 0;
             bfs::outward_ball(bsp, bc, &br);
             grid.ball(bc, br, [&](mhgp::i32 z) {
-              if (z == best) return;
-              if (std::binary_search(v.shell.begin(), v.shell.end(), z)) return;
+              if (z == best || z == tri[0] || z == tri[1] || z == tri[2]) return;
               if (mhgp::sphere_side(bsp, points[static_cast<std::size_t>(z)]) != 0) return;
               tied.push_back(z);
               ++statistics->cocircular_pencil;

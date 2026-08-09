@@ -1,7 +1,8 @@
 # MorseHGP3D v3
 
-État : **M1 (le juge) et M2.1 (un falsificateur borné)**. Il n'y a pas de v3, et
-il ne doit pas y en avoir avant que le §2 ait été tranché.
+État : **M1 (le juge), M2 (le dictionnaire de profondeur) et M3 (le générateur
+par navigation)**. Le générateur M3 passe le juge exhaustif ; ce qui reste ouvert
+n'est plus l'exactitude mais le COÛT, et le §0 dit exactement où.
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -9,6 +10,90 @@ L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 statut public, aucun SLO n'est ouvert.
 
 ---
+
+## 0. La voie retenue : NAVIGUER dans l'arrangement, pas énumérer des ancres
+
+**Décision d'architecture, prise sur mesure.** Le chemin par ancres est
+abandonné. Le clipping de Jung, une fois implémenté, a bien donné 40× moins de
+sommets à $n=160$, mais $m_e$ reste $\approx 0{,}45\,n$ : un grand facteur
+constant, **pas un ordre**. Le verrou n'était jamais le constructeur local,
+c'était les $\binom{n}{2}$ ancres — $1{,}25\cdot10^9$ paires à 50 000 points
+avant tout travail utile.
+
+**On change d'objet.** Par le relèvement $\varphi(p)=(p,\lVert p\rVert^2)$, une
+sphère devient un hyperplan et « intérieur » devient « en dessous ». Un sommet de
+l'arrangement des $n$ hyperplans de $\mathbb{R}^4$ est une sphère passant par
+quatre points, et son **niveau** est le nombre de points strictement intérieurs :
+
+$$\text{catalogue de rang fermé} \leq s_{\max}\ =\ \text{le } \leq k\text{-niveau},
+\qquad \text{rang} = 4 + \text{niveau}.$$
+
+On ne l'énumère pas, on le **parcourt**. Deux sommets voisins partagent trois
+points ; l'arête qui les joint est le pinceau des sphères passant par ce
+triangle, et le long de ce pinceau **un seul point change d'état**. Le niveau ne
+se recalcule donc jamais : il se transporte en $\pm1$. C'est ce qui rend le coût
+proportionnel à la sortie et non à $n^2$.
+
+Tout l'ordre du pinceau se lit en prédicats InSphere entiers, sous $2^{91,2}$ sur
+la grille u16 — aucun centre rationnel, aucune division :
+$$\mathrm{sgn}(t_z-t_w)=o(w)\cdot\bigl[\,w\ \text{intérieur à}\ \mathrm{sph}(a,b,c,z)\,\bigr]^{\pm}.$$
+Le germe est une **face de l'enveloppe convexe**, où le pinceau part d'un
+demi-espace vide : le premier point rencontré donne un tétraèdre de Delaunay, de
+niveau zéro par construction.
+
+**Les dégénérescences sont traitées, pas exclues.** Un nuage LiDAR quantifié de
+500 points contient déjà une cosphéricité à cinq points *dans* le
+$\leq k$-niveau. Un sommet porte donc sa **coquille entière** : les points de même
+paramètre entrent ensemble, et les arêtes incidentes d'un sommet dégénéré sont
+indexées par les 3-sous-ensembles de sa coquille. Le critère de criticité devient
+alors uniforme et sans cas particulier : **une boule est critique si et seulement
+si elle est la miniboule de sa coquille**, et son support HGP est celui de cette
+miniboule.
+
+### Ce qui est établi
+
+- Le parcours **coïncide exactement avec la force brute** sur 275 nuages,
+  $s_{\max}$ de 4 à 18, profils uniforme et LiDAR, zéro désaccord.
+- Le catalogue complet — arités 1 à 4, forêts, niveaux exacts — passe le **juge
+  exhaustif** de M1.
+- Le chemin rapide (grille + certification par union de deux boules) est jugé
+  **différentiellement contre la référence**, lui est identique partout où la
+  référence est calculable, et se replie sur un balayage exhaustif plutôt que de
+  rendre un faux vert.
+
+### Ce que la mesure dit du contrat 50 k
+
+**[mesuré]** $s_{\max}=11$, profil LiDAR à densité fixe et emprise
+$\propto\sqrt n$ (garder l'emprise fixe rendrait le nuage quasi coplanaire aux
+petits $n$ et mesurerait un régime dégénéré) :
+
+| grandeur | valeur | conséquence à 50 k |
+| --- | ---: | --- |
+| sommets du $\leq k$-niveau | **700 à 740 par point** | $3{,}5\cdot10^7$ |
+| dont **critiques** | **7,3 à 10,6 par point** (1,1 %) | $\approx4\cdot10^5$ |
+| tétraèdres de Delaunay | 6,3 par point | conforme |
+| rayon des sphères | médiane 77, critique max 90 | pour un pas de 25 |
+| candidats par requête (rapide) | 18 à 24 | contre $n-4$ auparavant |
+
+Deux lectures, et elles ne vont pas dans le même sens.
+
+**La sortie est petite** : environ $4\cdot10^5$ sphères critiques à 50 000 points.
+Rien là-dedans n'interdit la seconde, ni même les 100 ms.
+
+**Mais le parcours visite 100× la sortie.** C'est le fait central, et il est
+propre au LiDAR : un relevé est localement une surface, donc ses tétraèdres sont
+massivement des *slivers*, jamais bien centrés — 98,9 % du parcours est jeté. Une
+coupe en rayon n'y change rien, elle n'ôte que 35 % des sommets : ces slivers ne
+sont pas gros, ils sont **plats**. Et l'énumération de la Delaunay d'ordre
+$\leq k$ reste à ce jour le seul chemin exact connu vers ces sphères critiques.
+La localité qui autoriserait une énumération directe est **fausse dans le pire
+cas** — un amas juste à l'extérieur d'une sphère vide écarte arbitrairement loin,
+dans l'ordre des plus proches voisins, deux points d'un même support — même si
+elle est mesurée bonne en pratique : rang NN médian 35, maximum 88.
+
+**[obligation]** ramener ce facteur 100, ou démontrer qu'il est incompressible.
+C'est désormais la seule question qui sépare du contrat.
+
 
 ## 1. Ce qui est établi, et par quelle mesure
 
