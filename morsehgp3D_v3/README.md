@@ -267,6 +267,38 @@ de **$k$-ensembles** dans $\mathbb{R}^3$, avec $\kappa\leq s_{\max}-4\leq 7$.
 Le cas $\kappa=0$ est clair : ce sont les arêtes de l'enveloppe convexe conique
 des points duaux, en $O(m\log m)$.
 
+### Q0 — un certificat de localité correct, et ce qu'il exige
+
+Le certificat réfuté bornait un support **inconnu** par le rayon des supports
+**déjà émis**. Le bon objet n'est pas la sortie mais la **région**.
+
+> **Proposition.** Soit $V^{(M)}$ le $\leq k$-level des $M$ plans les plus proches
+> de $p$, et $d_{M+1}$ la distance au premier point exclu. Si
+> $$V^{(M)}\subseteq B\left(p,\ \frac{d_{M+1}}{2}\right),$$
+> alors $V^{(M)}=V^{(\infty)}$ : aucun support n'a pu être manqué.
+
+*Démonstration.* Ajouter un plan ne peut qu'augmenter la profondeur, donc
+$V^{(\infty)}\subseteq V^{(M)}$. Et $\mathrm{dist}(p,H_u)=\frac12\lVert u-p\rVert
+\geq\frac{d_{M+1}}{2}$ pour tout $u$ non traité : aucun plan restant ne coupe la
+boule ouverte de rayon $d_{M+1}/2$, donc aucun ne coupe $V^{(M)}$. $\square$
+
+Il résiste au contre-exemple qui a tué le précédent. Si un support employait un
+point exclu $z$, son centre $c$ aurait $z$ intérieur ou sur la sphère, donc $c$
+serait du côté positif de $H_z$ ou dessus, d'où
+$\lVert c-p\rVert\geq\mathrm{dist}(p,H_z)\geq\frac{d_{M+1}}{2}$ — alors que
+$c\in V^{(\infty)}\subseteq V^{(M)}\subseteq B(p,d_{M+1}/2)$.
+
+**Ce qu'il donne** : une règle d'arrêt valide pour l'insertion par distance
+croissante, donc une réponse à l'objection « A2p insère $n-1$ plans par ancre ».
+La quantité $M(p)=\min\lbrace M : V^{(M)}\subseteq B(p,d_{M+1}/2)\rbrace$ devient
+une mesure honnête.
+
+**Ce qu'il n'ôte pas** : le test exige de connaître la région, donc le
+$k$-niveau — c'est-à-dire Q1 à Q3 ci-dessous. Et pour un point de faible
+profondeur $V_k(p)$ est non bornée et la règle ne se déclenche jamais, ce qui est
+cohérent avec le reste. **[obligation]** vérifier la proposition contre l'oracle
+exhaustif, et mesurer $M(p)$.
+
 ### Q1 — l'épluchage en couches est-il exact ?
 
 Est-il vrai que les sommets de profondeur $\leq\kappa$ correspondent exactement
