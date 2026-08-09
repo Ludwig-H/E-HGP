@@ -2,6 +2,12 @@
 
 Date : 9 août 2026 UTC.
 
+> [!WARNING]
+> **Archive de snapshots, plus autorité live.** Les matrices, compteurs et
+> verdicts de ce ledger décrivent les étapes qu'il scelle, pas le worktree
+> courant. Utiliser [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) pour le
+> verdict actuel et ses empreintes.
+
 > [!IMPORTANT]
 > **Verdict courant : GO ciblé pour le germe, les gardes u16, l'index k-d exact, la règle mathématique de parent, un endpoint reverse différencié et une API sink diagnostique; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Le commit `1a0a1f8` ferme le P0 d'élagage par classifications boîte--boule entières et retire les scans systématiques des singletons, du census et du pinceau. Les commits `6fa7e9d` et `969db5c` jugent le parent puis la reverse search. Restent ouverts l'implémentation live du propriétaire complet, l'intégration transactionnelle du sink au catalogue, le producteur terminal `directes + premières incidences`, les lots, l'état horizontal, les verticales et le contrat de sortie.
 
@@ -890,7 +896,11 @@ le couple retour admissible, l'adjacence du pinceau rend la seconde requête
 strictement antérieur à la clef retour. Cette décision supprimerait les requêtes
 de voisin-parent restantes; elle n'est pas encore intégrée au commit.
 
-### 7.17 Porte de reprise courante
+### 7.17 Checklist historique formulée avant `aec7439`
+
+Cette checklist décrivait le HEAD `6a13b64`. Le commit `aec7439` ferme son point
+2 et branche le curseur d'une partie du point 3; elle est conservée comme
+provenance, mais **ne décrit plus le live**. La matrice courante est au §7.18.
 
 1. Intégrer le sink au catalogue derrière un segment transactionnel et un statut
    typé; mesurer son high-water complet en octets. Remplacer le digest 64 bits par
@@ -911,6 +921,76 @@ de voisin-parent restantes; elle n'est pas encore intégrée au commit.
 6. Construire et différencier le fold pré-lot typé
    $R^{-}\sqcup L^{-}\sqcup N_a$, puis les runs, la couverture et la jointure
    verticale avant toute mesure du contrat 50 k.
+
+### 7.18 Commit `aec7439` : décision locale intégrée, portes résiduelles précises
+
+Snapshot poussé et rejoué en CPU local :
+
+- `order_k_flats.hpp=8eb0bb45c78f5c9a8d9bf410196ffcaf7f7a0eee16613984da77c5533f31238c`;
+- `flats_differential.cpp=623bd911ecadcb1a60aed5bc8ac694a0d7abb03282a229f21c19733fc56eedfa`;
+- `CMakeLists.txt=7b77b259cd0eae6fb271dcc6f6b47b4f3ed00e95fa0e29039d6df25ce40ace07`.
+
+Les cinq CTests flats passent en 108,48 s. `decide_child` remplace réellement le
+calcul du parent dans la reverse search : après le voisin aller, il énumère les
+couples du candidat jusqu'à la clef retour et n'appelle aucune seconde
+`neighbour_along`. Le différentiel rejoue chaque couple contre le parent complet
+et son voisin retour, puis exige les deux identités de compteurs par nuage. La
+porte générique supprime ainsi 269 918 requêtes de retour.
+
+Le curseur `(i,j,k,dir)` est lui aussi consommé. Sur la porte fixtures, à sorties
+et décisions identiques, il réduit les flats livrés de 10 753 à 8 060 et les
+fermetures de 15 667 à 12 736. L'ancien résultat 308 832/308 832 du §7.15
+comparait un helper non branché au même chemin; il est rétracté, pas interprété
+comme un résultat négatif.
+
+Les fermetures réelles sont : préfiltre nécessaire exact pour les directions
+internes, décision sans requête retour, rejeu direct, identités par nuage,
+planchers sur décisions/refus du parcours et reprise effective. Elles ne ferment
+pas cinq dettes de qualification.
+
+1. `direction=0` et `direction=2` aliasent `+1`; l'API interne ne refuse pas le
+   domaine hors $\lbrace-1,+1\rbrace$.
+2. Le commentaire promet un échec sur régression de clef, mais `decide_child`
+   ne mémorise pas la clef précédente. Il échoue si la cible est dépassée,
+   absente, de base divergente ou inadmissible, pas sur toute régression entre
+   deux clefs antérieures.
+3. Le juge complet partage `pair_admissible` avec le sujet. Il qualifie la
+   suppression de la seconde requête, pas indépendamment les signes. Ses
+   compteurs `pairs_judged`, `pairs_accepted`, `pairs_prefiltered` n'ont aucun
+   plancher propre; supprimer ce bloc peut rester vert si reverse et BFS
+   concordent.
+4. La fixture six points vérifie quatorze conditions tout en en annonçant
+   quinze. Elle grave les signes, la base permutée et la coquille omise, mais
+   n'appelle pas directement `decide_child` avec couple antérieur, cible absente
+   ou direction hostile.
+5. Le wrapper matérialisé vide sa sortie sur erreur, mais le sink streamé peut
+   déjà avoir livré un préfixe; interruption volontaire et contradiction interne
+   partagent encore `kInvariantViolated`.
+
+Ces dettes sont P1 de contrat/qualification, pas un contre-exemple au théorème de
+parent pour le chemin interne $\pm1$. Les verrous produit restent plus larges :
+sortie transactionnelle, census global des sphères, owner/déduplication,
+terminalité de la source, fold durable, couverture et verticales.
+
+### 7.19 Deux portes mathématiques aval deviennent exécutables
+
+La
+[`note de source`](NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md)
+prouve maintenant un générateur déterministe complet des paires/triples shallow
+sous zéro-extra-shell : familles universelles, hulls exacts et
+halfspace-reporting cappé. Il ferme le harvest et le niveau **locaux** en
+$O_s(m\log^2(2m))$; census de boule contre $X$, owner terminal et déduplication
+inter-sommets restent ouverts.
+
+Le falsificateur
+[`check_gate_d_fold_f0.py`](check_gate_d_fold_f0.py) ferme le noyau combinatoire
+F0-A du fold pré-lot fourni : 2 168 lots exhaustifs bornés, dont 1 916 acceptés
+et 252 rejetés; huit fixtures, six entrées invalides, arité onze, permutations,
+six mutations et cinq fautes de rollback. Sa vérité matrice--Warshall est
+comparée à un sujet DSU sur les namespaces disjoints
+$R^{-}\sqcup L^{-}\sqcup N_a$. Il ne certifie ni la complétude géométrique de
+la source, ni les couvertures, ni F1/F2, ni les verticales; il ne doit jamais
+devenir le chemin produit.
 
 Ce chemin reste CPU-only tant qu'aucun kernel CUDA de reverse search et aucun
 pipeline aval device n'existent. Aucune G4 ne doit être utilisée pour exécuter

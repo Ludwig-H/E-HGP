@@ -35,13 +35,28 @@ class RootSig:
     level: Fraction | None = None
     label: str = ""
     children: tuple["RootSig", ...] = ()
+    sources: tuple["RecordStamp", ...] = ()
 
-    def key(self) -> str:
-        if self.kind == "seed":
-            return f"R({self.label})"
-        if self.kind == "birth":
-            return f"B({self.level};{self.label})"
-        return "M(" + str(self.level) + ";" + ",".join(c.key() for c in self.children) + ")"
+    def key(self) -> tuple[object, ...]:
+        """Clef structurelle, jamais une concaténation ambiguë de labels libres."""
+
+        level_key = (
+            ()
+            if self.level is None
+            else (self.level.numerator, self.level.denominator)
+        )
+        return (
+            self.kind,
+            level_key,
+            self.label,
+            self.sources,
+            tuple(child.key() for child in self.children),
+        )
+
+    def encode(self) -> str:
+        """Encodage injectif lisible pour les tokens synthétiques de mutation."""
+
+        return repr(self.key())
 
 
 @dataclass(frozen=True)
@@ -50,10 +65,24 @@ class Record:
     key: str
     endpoints: tuple[Node, ...]
     raw_arity: int
+    provenances: tuple[str, ...] = ()
+    source_handles: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.kind not in {"direct", "attach"}:
             raise FoldError(f"unknown record kind: {self.kind}")
+
+
+@dataclass(frozen=True, order=True)
+class RecordStamp:
+    """Identité canonique complète d'un record logique publié."""
+
+    kind: str
+    key: str
+    endpoints: tuple[Node, ...]
+    raw_arity: int
+    provenances: tuple[str, ...]
+    source_handles: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -69,7 +98,7 @@ class Component:
     q_roots: int
     action: str
     active_root: RootSig | None
-    logical_records: tuple[str, ...]
+    logical_records: tuple[RecordStamp, ...]
 
 
 @dataclass(frozen=True)
@@ -89,6 +118,7 @@ class RawRecord:
     kind: str
     key: str
     handles: tuple[str, ...]
+    provenances: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -102,18 +132,74 @@ def _node_key(node: Node) -> tuple[str, str]:
     return (node.kind, node.token)
 
 
-def _record_key(record: Record) -> tuple[str, str, tuple[Node, ...], int]:
-    return (record.kind, record.key, record.endpoints, record.raw_arity)
+def _record_key(
+    record: Record,
+) -> tuple[str, str, tuple[Node, ...], int, tuple[str, ...], tuple[str, ...]]:
+    return (
+        record.kind,
+        record.key,
+        record.endpoints,
+        record.raw_arity,
+        record.provenances,
+        record.source_handles,
+    )
+
+
+def _record_stamp(record: Record) -> RecordStamp:
+    return RecordStamp(
+        record.kind,
+        record.key,
+        record.endpoints,
+        record.raw_arity,
+        record.provenances,
+        record.source_handles,
+    )
 
 
 def _normalize_records(records: Iterable[Record]) -> tuple[Record, ...]:
     by_key: dict[tuple[str, str], Record] = {}
     for record in records:
+        endpoints = (
+            tuple(sorted(record.endpoints, key=_node_key))
+            if record.kind == "direct"
+            else record.endpoints
+        )
+        normalized = Record(
+            record.kind,
+            record.key,
+            endpoints,
+            record.raw_arity,
+            tuple(sorted(set(record.provenances))),
+            (
+                tuple(sorted(record.source_handles))
+                if record.kind == "direct"
+                else record.source_handles
+            ),
+        )
         semantic_key = (record.kind, record.key)
         previous = by_key.get(semantic_key)
-        if previous is not None and previous != record:
-            raise FoldError(f"contradictory duplicate: {record.kind}:{record.key}")
-        by_key[semantic_key] = record
+        if previous is not None:
+            previous_payload = (
+                previous.endpoints,
+                previous.raw_arity,
+                previous.source_handles,
+            )
+            normalized_payload = (
+                normalized.endpoints,
+                normalized.raw_arity,
+                normalized.source_handles,
+            )
+            if previous_payload != normalized_payload:
+                raise FoldError(f"contradictory duplicate: {record.kind}:{record.key}")
+            normalized = Record(
+                normalized.kind,
+                normalized.key,
+                normalized.endpoints,
+                normalized.raw_arity,
+                tuple(sorted(set(previous.provenances) | set(normalized.provenances))),
+                normalized.source_handles,
+            )
+        by_key[semantic_key] = normalized
     return tuple(sorted(by_key.values(), key=_record_key))
 
 
@@ -158,12 +244,12 @@ def _truth_classify(
     *,
     q_override: int | None = None,
     roots_override: tuple[RootSig, ...] | None = None,
-    ledger_override: tuple[str, ...] | None = None,
+    ledger_override: tuple[RecordStamp, ...] | None = None,
 ) -> Component:
     q = len(roots) if q_override is None else q_override
     decision_roots = roots if roots_override is None else roots_override
     logical_records = (
-        tuple(sorted(record.key for record in records))
+        tuple(sorted(_record_stamp(record) for record in records))
         if ledger_override is None
         else ledger_override
     )
@@ -173,12 +259,16 @@ def _truth_classify(
         if q == 1:
             return Component(nodes, 1, "untouched_root", decision_roots[0], ())
         raise FoldError("invalid strict snapshot: several roots already connected")
+    if not any(node.kind in {"R", "L"} for node in nodes):
+        raise FoldError("record-bearing component without a strict carrier")
     has_direct = any(record.kind == "direct" for record in records)
     if q == 0:
         if not has_direct:
             raise FoldError("attachment-only q=0 component")
-        direct_keys = ",".join(sorted(record.key for record in records if record.kind == "direct"))
-        root = RootSig("birth", level=level, label=direct_keys)
+        direct_sources = tuple(
+            sorted(_record_stamp(record) for record in records if record.kind == "direct")
+        )
+        root = RootSig("birth", level=level, sources=direct_sources)
         return Component(nodes, 0, "birth", root, logical_records)
     if q == 1:
         return Component(nodes, 1, "continuation", decision_roots[0], logical_records)
@@ -200,14 +290,15 @@ def _subject_classify(
     *,
     q_override: int | None = None,
     roots_override: tuple[RootSig, ...] | None = None,
-    ledger_override: tuple[str, ...] | None = None,
+    ledger_override: tuple[RecordStamp, ...] | None = None,
+    allow_carrierless: bool = False,
 ) -> Component:
     """Décision du sujet, volontairement séparée de la vérité."""
 
     root_count = len(roots) if q_override is None else q_override
     decision_roots = roots if roots_override is None else roots_override
     ledger = (
-        tuple(sorted(record.key for record in records))
+        tuple(sorted(_record_stamp(record) for record in records))
         if ledger_override is None
         else ledger_override
     )
@@ -217,11 +308,15 @@ def _subject_classify(
         if root_count == 1:
             return Component(nodes, 1, "untouched_root", decision_roots[0], ())
         raise FoldError("subject found several roots in an untouched component")
+    if not allow_carrierless and not any(node.kind in {"R", "L"} for node in nodes):
+        raise FoldError("subject found a record-bearing component without a strict carrier")
     if root_count == 0:
-        direct_ids = sorted(record.key for record in records if record.kind == "direct")
-        if not direct_ids:
+        direct_sources = tuple(
+            sorted(_record_stamp(record) for record in records if record.kind == "direct")
+        )
+        if not direct_sources:
             raise FoldError("subject found an attachment-only rootless component")
-        active = RootSig("birth", level=level, label=",".join(direct_ids))
+        active = RootSig("birth", level=level, sources=direct_sources)
         return Component(nodes, 0, "birth", active, ledger)
     if root_count == 1:
         return Component(nodes, 1, "continuation", decision_roots[0], ledger)
@@ -305,6 +400,9 @@ def fold_dsu(
     drop_latents: bool = False,
     count_root_occurrences: bool = False,
     drop_projected_unary_ledger: bool = False,
+    drop_record_provenances: bool = False,
+    retain_record_keys_only: bool = False,
+    allow_carrierless: bool = False,
 ) -> BatchResult:
     """Sujet DSU; les options sont des mutations volontairement fausses."""
 
@@ -350,14 +448,32 @@ def fold_dsu(
                 q_override = len(occurrences)
                 roots_override = occurrences
         ledger_override = None
-        if drop_projected_unary_ledger:
-            ledger_override = tuple(
-                sorted(
-                    record.key
-                    for record in local_records
-                    if len({storage_key(node) for node in effective[record]}) > 1
-                )
-            )
+        if (
+            drop_projected_unary_ledger
+            or drop_record_provenances
+            or retain_record_keys_only
+        ):
+            stamps = []
+            for record in local_records:
+                if (
+                    drop_projected_unary_ledger
+                    and len({storage_key(node) for node in effective[record]}) <= 1
+                ):
+                    continue
+                stamp = _record_stamp(record)
+                if drop_record_provenances:
+                    stamp = RecordStamp(
+                        stamp.kind,
+                        stamp.key,
+                        stamp.endpoints,
+                        stamp.raw_arity,
+                        (),
+                        stamp.source_handles,
+                    )
+                if retain_record_keys_only:
+                    stamp = RecordStamp("", stamp.key, (), 0, (), ())
+                stamps.append(stamp)
+            ledger_override = tuple(sorted(stamps))
         components.append(
             _subject_classify(
                 batch.level,
@@ -367,6 +483,7 @@ def fold_dsu(
                 q_override=q_override,
                 roots_override=roots_override,
                 ledger_override=ledger_override,
+                allow_carrierless=allow_carrierless,
             )
         )
     return BatchResult(
@@ -383,7 +500,7 @@ def fold_record_by_record_mutant(batch: ProjectedBatch) -> BatchResult:
         node: RootSig("seed", label=node.token) if node.kind == "R" else None
         for node in nodes
     }
-    ledger: dict[object, set[str]] = {node: set() for node in nodes}
+    ledger: dict[object, set[RecordStamp]] = {node: set() for node in nodes}
     for record in records:
         prior_representatives = {dsu.find(endpoint) for endpoint in record.endpoints}
         roots = {
@@ -400,13 +517,17 @@ def fold_record_by_record_mutant(batch: ProjectedBatch) -> BatchResult:
         if not ordered_roots:
             if record.kind != "direct":
                 raise FoldError("recordwise attachment-only q=0")
-            new_root = RootSig("birth", level=batch.level, label=record.key)
+            new_root = RootSig(
+                "birth",
+                level=batch.level,
+                sources=(_record_stamp(record),),
+            )
         elif len(ordered_roots) == 1:
             new_root = ordered_roots[0]
         else:
             new_root = RootSig("merge", level=batch.level, children=ordered_roots)
         active_root[representative] = new_root
-        ledger[representative] = prior_ledger | {record.key}
+        ledger[representative] = prior_ledger | {_record_stamp(record)}
 
     groups: dict[object, list[Node]] = {}
     for node in nodes:
@@ -414,9 +535,9 @@ def fold_record_by_record_mutant(batch: ProjectedBatch) -> BatchResult:
     components = []
     for representative, members in groups.items():
         ordered = tuple(sorted(members, key=_node_key))
-        record_keys = tuple(sorted(ledger[representative]))
+        record_stamps = tuple(sorted(ledger[representative]))
         roots = _root_from_nodes(ordered)
-        if not record_keys:
+        if not record_stamps:
             components.append(_subject_classify(batch.level, ordered, (), roots))
             continue
         q = len(roots)
@@ -427,11 +548,26 @@ def fold_record_by_record_mutant(batch: ProjectedBatch) -> BatchResult:
         else:
             action = "multifusion"
         components.append(
-            Component(ordered, q, action, active_root[representative], record_keys)
+            Component(ordered, q, action, active_root[representative], record_stamps)
         )
     return BatchResult(
         tuple(sorted(components, key=lambda component: tuple(map(_node_key, component.nodes))))
     )
+
+
+def fold_drop_parallel_records_mutant(batch: ProjectedBatch) -> BatchResult:
+    """Mutation : déduplique à tort les records par support déjà projeté."""
+
+    nodes, records = _validate_projected(batch)
+    seen: set[tuple[str, tuple[Node, ...]]] = set()
+    kept = []
+    for record in records:
+        projected_key = (record.kind, record.endpoints)
+        if projected_key in seen:
+            continue
+        seen.add(projected_key)
+        kept.append(record)
+    return fold_dsu(ProjectedBatch(batch.level, nodes, tuple(kept)))
 
 
 def resolve_batch(raw: RawBatch) -> ProjectedBatch:
@@ -466,7 +602,16 @@ def resolve_batch(raw: RawBatch) -> ProjectedBatch:
         if record.kind == "direct":
             if not 2 <= len(record.handles) <= 11:
                 raise FoldError(f"raw direct arity outside [2,11]: {record.key}")
-            records.append(Record("direct", record.key, endpoints, len(record.handles)))
+            records.append(
+                Record(
+                    "direct",
+                    record.key,
+                    endpoints,
+                    len(record.handles),
+                    record.provenances,
+                    tuple(sorted(record.handles)),
+                )
+            )
             continue
         if len(record.handles) != 2:
             raise FoldError(f"raw attachment is not a pair: {record.key}")
@@ -475,7 +620,16 @@ def resolve_batch(raw: RawBatch) -> ProjectedBatch:
             raise FoldError(f"attachment source is not activated in current lot: {record.key}")
         if by_handle[target].activation >= raw.level or endpoints[1].kind != "R":
             raise FoldError(f"attachment target is not rooted in strict snapshot: {record.key}")
-        records.append(Record("attach", record.key, endpoints, 2))
+        records.append(
+            Record(
+                "attach",
+                record.key,
+                endpoints,
+                2,
+                record.provenances,
+                record.handles,
+            )
+        )
     batch = ProjectedBatch(
         raw.level,
         tuple(sorted(set(projected.values()), key=_node_key)),
@@ -505,7 +659,16 @@ def resolve_with_closed_cutoff_mutant(raw: RawBatch) -> ProjectedBatch:
         if record.kind != "direct":
             continue
         endpoints = tuple(open_projection[handle] for handle in record.handles)
-        direct_records.append(Record("direct", record.key, endpoints, len(record.handles)))
+        direct_records.append(
+            Record(
+                "direct",
+                record.key,
+                endpoints,
+                len(record.handles),
+                record.provenances,
+                tuple(sorted(record.handles)),
+            )
+        )
     direct_batch = ProjectedBatch(
         raw.level,
         tuple(sorted(set(open_projection.values()), key=_node_key)),
@@ -518,7 +681,7 @@ def resolve_with_closed_cutoff_mutant(raw: RawBatch) -> ProjectedBatch:
             for node in component.nodes:
                 closed_projection[node] = node
         else:
-            projected_root = Node("R", component.active_root.key())
+            projected_root = Node("R", component.active_root.encode())
             for node in component.nodes:
                 closed_projection[node] = projected_root
 
@@ -528,7 +691,20 @@ def resolve_with_closed_cutoff_mutant(raw: RawBatch) -> ProjectedBatch:
             closed_projection[open_projection[handle]]
             for handle in record.handles
         )
-        records.append(Record(record.kind, record.key, endpoints, len(record.handles)))
+        records.append(
+            Record(
+                record.kind,
+                record.key,
+                endpoints,
+                len(record.handles),
+                record.provenances,
+                (
+                    tuple(sorted(record.handles))
+                    if record.kind == "direct"
+                    else record.handles
+                ),
+            )
+        )
     return ProjectedBatch(
         raw.level,
         tuple(sorted(set(closed_projection.values()), key=_node_key)),
@@ -695,9 +871,48 @@ def targeted_fixtures() -> dict[str, ProjectedBatch]:
         (Binding("root", zero, Node("R", "1")), Binding("facet", one)),
         (RawRecord("attach", "facet-attachment", ("facet", "root")),),
     )
+    fixtures["provenance_aggregation"] = _raw(
+        (Binding("root", zero, Node("R", "1")), Binding("facet", one)),
+        (
+            RawRecord(
+                "attach",
+                "same-incidence",
+                ("facet", "root"),
+                ("certificate-A",),
+            ),
+            RawRecord(
+                "attach",
+                "same-incidence",
+                ("facet", "root"),
+                ("certificate-B",),
+            ),
+        ),
+    )
     fixtures["projected_unary"] = _raw(
         (Binding("a", zero, Node("R", "1")), Binding("b", zero, Node("R", "1"))),
         (RawRecord("direct", "unary-after-projection", ("a", "b")),),
+    )
+    fixtures["parallel_projected_records"] = _raw(
+        (Binding("a", zero, Node("R", "1")), Binding("b", zero, Node("R", "1"))),
+        (
+            RawRecord("direct", "parallel-A", ("a", "b")),
+            RawRecord("direct", "parallel-B", ("a", "b")),
+        ),
+    )
+    fixtures["birth_signature_delimiters"] = ProjectedBatch(
+        one,
+        (
+            Node("L", "1"),
+            Node("N", "1"),
+            Node("L", "2"),
+            Node("N", "2"),
+            Node("N", "3"),
+        ),
+        (
+            Record("direct", "a,b", (Node("L", "1"), Node("N", "1")), 2),
+            Record("direct", "a", (Node("L", "2"), Node("N", "2")), 2),
+            Record("direct", "b", (Node("N", "2"), Node("N", "3")), 2),
+        ),
     )
 
     arity_bindings = [
@@ -757,6 +972,18 @@ def invalid_fixtures() -> int:
                 RawRecord("attach", "owner-two", ("f", "r2")),
             ),
         ),
+        RawBatch(
+            one,
+            (
+                Binding("a", zero, Node("R", "1")),
+                Binding("b", zero, Node("R", "1")),
+                Binding("c", zero, Node("R", "1")),
+            ),
+            (
+                RawRecord("direct", "projected-conflict", ("a", "b")),
+                RawRecord("direct", "projected-conflict", ("a", "c")),
+            ),
+        ),
     )
     for raw in cases:
         try:
@@ -773,18 +1000,26 @@ def invalid_fixtures() -> int:
     assert _outcome(lambda: fold_warshall(projected_attachment_only))[0] == "error"
     assert _outcome(lambda: fold_dsu(projected_attachment_only))[0] == "error"
 
+    carrierless = _raw(
+        (Binding("n0", one), Binding("n1", one)),
+        (RawRecord("direct", "equal-only", ("n0", "n1")),),
+    )
+    assert _outcome(lambda: fold_warshall(carrierless))[0] == "error"
+    assert _outcome(lambda: fold_dsu(carrierless))[0] == "error"
+
     exact_duplicate = RawBatch(
         one,
         (Binding("a", zero, Node("R", "1")), Binding("b", one)),
         (
-            RawRecord("direct", "same", ("a", "b")),
-            RawRecord("direct", "same", ("a", "b")),
+            RawRecord("direct", "same", ("a", "b"), ("certificate-A",)),
+            RawRecord("direct", "same", ("b", "a"), ("certificate-B",)),
         ),
     )
     normalized = resolve_batch(exact_duplicate)
     assert len(normalized.records) == 1
+    assert normalized.records[0].provenances == ("certificate-A", "certificate-B")
     _assert_differential(normalized)
-    return len(cases) + 1
+    return len(cases) + 2
 
 
 def permutation_campaign(fixtures: dict[str, ProjectedBatch]) -> int:
@@ -795,6 +1030,8 @@ def permutation_campaign(fixtures: dict[str, ProjectedBatch]) -> int:
                 record.key,
                 tuple(reversed(record.endpoints)) if record.kind == "direct" else record.endpoints,
                 record.raw_arity,
+                record.provenances,
+                record.source_handles,
             )
             for record in reversed(batch.records)
         )
@@ -834,6 +1071,21 @@ def mutation_campaign(fixtures: dict[str, ProjectedBatch]) -> tuple[str, ...]:
         lambda: fold_dsu(fixtures["projected_unary"], drop_projected_unary_ledger=True),
     )
     kill(
+        "drop_record_provenances",
+        fold_warshall(fixtures["provenance_aggregation"]),
+        lambda: fold_dsu(fixtures["provenance_aggregation"], drop_record_provenances=True),
+    )
+    kill(
+        "retain_record_keys_only",
+        fold_warshall(fixtures["valid_attachment"]),
+        lambda: fold_dsu(fixtures["valid_attachment"], retain_record_keys_only=True),
+    )
+    kill(
+        "deduplicate_parallel_projected_records",
+        fold_warshall(fixtures["parallel_projected_records"]),
+        lambda: fold_drop_parallel_records_mutant(fixtures["parallel_projected_records"]),
+    )
+    kill(
         "commit_record_by_record",
         fold_warshall(fixtures["q3_atomic"]),
         lambda: fold_record_by_record_mutant(fixtures["q3_atomic"]),
@@ -858,6 +1110,15 @@ def mutation_campaign(fixtures: dict[str, ProjectedBatch]) -> tuple[str, ...]:
         lambda: fold_dsu(resolve_with_closed_cutoff_mutant(closed_cutoff))
     )[0] == "ok"
     killed.append("find_closed_instead_of_strict")
+
+    carrierless = _raw(
+        (Binding("n0", Fraction(1)), Binding("n1", Fraction(1))),
+        (RawRecord("direct", "equal-only", ("n0", "n1")),),
+    )
+    assert _outcome(lambda: fold_warshall(carrierless))[0] == "error"
+    if _outcome(lambda: fold_dsu(carrierless, allow_carrierless=True))[0] != "ok":
+        raise AssertionError("mutation survived undetected: accept_carrierless_group")
+    killed.append("accept_carrierless_group")
     return tuple(killed)
 
 
@@ -908,6 +1169,39 @@ def main() -> None:
     assert q3.q_roots == 3 and q3.action == "multifusion"
     arity = next(component for component in results["arity_11"].components if component.logical_records)
     assert arity.q_roots == 2 and arity.action == "multifusion"
+    provenance = next(
+        component
+        for component in results["provenance_aggregation"].components
+        if component.logical_records
+    )
+    assert provenance.logical_records[0].provenances == (
+        "certificate-A",
+        "certificate-B",
+    )
+    parallel = next(
+        component
+        for component in results["parallel_projected_records"].components
+        if component.logical_records
+    )
+    assert len(parallel.logical_records) == 2
+    delimiter_births = {
+        component.active_root
+        for component in results["birth_signature_delimiters"].components
+        if component.action == "birth"
+    }
+    assert len(delimiter_births) == 2
+    split_children = RootSig(
+        "merge",
+        level=Fraction(1),
+        children=(RootSig("seed", label="a"), RootSig("seed", label="b")),
+    )
+    forged_label = RootSig(
+        "merge",
+        level=Fraction(1),
+        children=(RootSig("seed", label="a),R(b"),),
+    )
+    assert split_children.key() != forged_label.key()
+    assert split_children.encode() != forged_label.encode()
 
     invalid_count = invalid_fixtures()
     permutation_count = permutation_campaign(fixtures)

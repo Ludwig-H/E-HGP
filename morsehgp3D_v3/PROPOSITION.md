@@ -3,13 +3,11 @@
 > **Ce document est une proposition, pas une autorité.** L'autorité mathématique
 > reste [`SPECIFICATION_MORSEHGP3D.md`](../docs/SPECIFICATION_MORSEHGP3D.md) et
 > [`STATUT_PREUVES_ET_HEURISTIQUES.md`](../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md).
-> Les audits [`AUDIT_PROPOSITION.md`](AUDIT_PROPOSITION.md) et
-> [`AUDIT_PROPOSITION_2.md`](AUDIT_PROPOSITION_2.md) **motivent** cette révision ;
-> ils ne la certifient pas. Aucune porte, aucun statut public, aucun SLO n'est
-> ouvert ici.
->
-> Réécriture complète du 8 août 2026 au soir, après le second audit et son
-> contre-audit. Le journal des affirmations retirées est au §14.
+> L'état live est contrôlé par
+> [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md); les autres audits sont
+> indexés comme lectures courantes ou archives dans
+> [`audits/README.md`](audits/README.md). Aucun audit ne certifie à lui seul une
+> porte, un statut public ou un SLO.
 
 ## 0. Convention de statut
 
@@ -28,6 +26,34 @@ reçu :
 aujourd'hui de sidecar complet (schéma, commit, binaire, compilateur, machine,
 digest d'entrée, graine, compteurs de campagne fermés, sortie brute). Tant que
 ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer.
+
+## État courant du prototype audité
+
+Le worktree reste `exploration_v3_hors_registre`, sur CPU et sur le profil
+`quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
+
+Résultats positifs scellés : les cinq portes flats Release passent sur 4 980 cas
+avec zéro désaccord, deux campagnes ASan/UBSan passent sans diagnostic, le cône
+signé choisit le bon propriétaire sur la fixture minimale, et les gardes de
+filiation distinguent maintenant les directions invalides et les cibles
+incohérentes. `kSinkStopped` sépare aussi l'arrêt volontaire d'une erreur
+scientifique.
+
+Deux verrous priment sur tout travail d'échelle :
+
+1. `use_owner` n'est équivalent à la référence que dans le quadrant indexé,
+   affine 3D, que le juge exerce. Sans index, il perd les singletons; sur la voie
+   directe il perd les arités supérieures à un. Même dans le quadrant vert,
+   `emitted` conserve les `n` clefs singleton et aucun high-water complet n'est
+   mesuré.
+2. Le noyau F0 rejette une `DirectHyperedge` entre deux facettes activées dans
+   le lot, alors que le contrat `q_R=0` la classe comme naissance. Warshall et
+   DSU partagent le garde fautif, donc leur `PASS` est corrélé.
+
+Conséquence d'architecture : le propriétaire exact et le fold externe restent
+les directions proposées, mais aucun des deux n'est actuellement une brique
+promouvable. La matrice de domaine owner et la sémantique de naissance F0 se
+ferment avant les optimisations, le GPU ou une revendication mémoire.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 
@@ -667,15 +693,29 @@ quarante en annonçant `OK`.
 
 ## 10. Architecture cible, non encore implémentée
 
-Le commit `969db5c` possède un endpoint CPU de reverse search qui décide le
-parcours sans `seen` ni `frontier` et rend le même ensemble que le BFS dans les
-portes bornées. Le delta live ajoute une API sink et mesure les identifiants des
-sommets du chemin; le catalogue continue toutefois d'appeler le BFS. Le
-high-water mémoire complet, l'intégration produit et la forme device ne sont donc
-pas acquis. De même,
-`mhgp3v_first_incidence` emploie délibérément
-`flat_catalogue(pts,n)`, des maps et une vérité combinatoire : c'est un oracle
-borné, pas l'étage de production décrit ci-dessous.
+Le live possède un endpoint CPU de reverse search qui décide le parcours sans
+`seen` ni `frontier`, reprend son curseur et rend le même ensemble que le BFS
+dans les portes bornées. Après le voisin aller, le préfiltre puis `decide_child`
+suppriment toute requête de voisin retour. L'API sink mesure les identifiants des
+sommets du chemin et distingue l'arrêt demandé; le wrapper différentiel
+matérialise encore la sortie et le catalogue continue d'appeler le BFS. Le
+high-water mémoire complet, l'intégration produit, la transaction du préfixe et
+la forme device ne sont donc pas acquis.
+
+Le propriétaire local est branché à titre expérimental pour les non-singletons
+du chemin indexé affine 3D. Les cinq portes bornées y donnent le même catalogue,
+mais la voie sans index et la voie directe ont des omissions silencieuses;
+`emitted` conserve en outre les singletons. Ce composant ne remplace donc pas
+encore la table au sens de l'architecture cible. Son coût d'arité deux peut
+atteindre $\Theta(m^4)$ par sommet tant que les deux rayons extrêmes ne sont pas
+sélectionnés directement.
+
+Le noyau F0 matérialise volontairement Warshall et DSU pour juger un lot borné.
+Son contrat de naissance est actuellement contredit par une garde commune aux
+deux chemins; il reste un falsificateur en réparation, pas la réduction
+horizontale de production. De même, `mhgp3v_first_incidence` emploie
+délibérément `flat_catalogue(pts,n)`, des maps et une vérité combinatoire : c'est
+un oracle borné, pas l'étage de production décrit ci-dessous.
 
 **J10 borne un rayon spatial, pas une cardinalité** — **[mesuré]** voisinage
 maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
@@ -767,6 +807,10 @@ tient pas lieu de l'autre.
 **Décision à deux branches** : sortie énorme ⇒ réviser le SLO ; sortie sparse
 mais intermédiaires denses ⇒ **architecture no-go**.
 
+**État live de Gate D : NO-GO.** Le census borné des flats est positif, mais la
+matrice de domaine owner n'est pas fermée et F0 contredit sa sémantique de
+naissance. Les compteurs verts ne compensent pas ces deux défauts de correction.
+
 **Gate E — shallow CPU exact.** Constructeur sans travail en $\sum_e m_e^2$ ;
 comparaison à l'oracle exhaustif et au brute-force local ; permutations,
 égalités, parallèles, concurrences, limites de l'ellipse ; transcript de conflits
@@ -795,25 +839,26 @@ qualifier 100 ms, **par famille sanctionnée**.
 
 ## 13. Ordre des travaux
 
-1. **Gate A**, puis **Gate B** sur ce qui existe déjà — classer les nouveaux
-   énoncés et rendre reproductibles les mesures
-   citées ici. C'est peu de travail et cela change leur statut.
-2. **Gate C**, l'oracle : rien ne doit se construire au-dessus d'une porte qui
-   décide zéro nuage en annonçant `OK`.
-3. **PEL-1 et PEL-3** (§6) : formalisation, preuves ou contre-exemples de
-   l'unification. Elles ne décident pas seules du produit.
-4. **Gate E** et mesures PEL-2/PEL-4 sur la voie retenue, avec oracle local.
-5. **Gate D** à l'échelle, sur de vrais nuages, y compris multi-captation ; une
-   sortie sparse avec intermédiaires denses est un no-go.
-6. **Gate F**, la descente.
-7. Puis seulement source HGP, GPU, publication.
+1. **Sémantique F0** : décider si `N_a--N_a` est une naissance ou prouver son
+   impossibilité amont, puis séparer cette obligation de la vérité et du sujet.
+2. **Contrat owner** : fermer la matrice index/non-index et navigable/direct,
+   avec refus explicite ou repli exact, jamais un catalogue partiel.
+3. **Fixtures et indépendance** : rendre permanents le cône signé, le tétraèdre
+   sans index et le triangle direct; rejouer owner sous permutations et retirer
+   des primitives partagées aux oracles.
+4. **Coût mathématique** : sélectionner directement les rayons extrêmes du cône
+   signé, puis mesurer des coquilles croissantes avant un census à l'échelle.
+5. **Flux transactionnel** : intégrer sink et propriétaire au catalogue, fermer
+   l'arrêt après préfixe, retirer réellement la table résiduelle et publier le
+   high-water complet.
+6. **F1/F2 et source HGP** : runs scellés, versions externes, couverture,
+   verticales et reçus complets contre l'oracle indépendant.
+7. Puis seulement données réelles à grande échelle, GPU et publication.
 
-**GO immédiat** : formalisation PEL-1/PEL-3, falsificateur CPU exact du shallow,
-reçus et ledgers. Une campagne finie peut falsifier les PEL et mesurer leurs
-coûts ; elle ne démontre pas leur portée universelle.
-**NO-GO immédiat** : produit v3 avant PEL-1 à PEL-4 ; toute revendication `exact`, tout
-SLO, toute autorité publique ; et présenter une mesure de ce document comme une
-qualification.
+**GO immédiat** : preuves, contre-exemples, fixtures CPU bornées et reçus des
+points 1 à 4. **NO-GO immédiat** : optimisation GPU avant leur fermeture, toute
+revendication `exact`, tout SLO, toute autorité publique, ou présenter une
+campagne finie comme une preuve universelle.
 
 ## 14. Journal des affirmations retirées
 

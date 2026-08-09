@@ -1,10 +1,14 @@
 # MorseHGP3D v3
 
-État : **`exploration_v3`**. Aucun statut public, aucun SLO, aucune phase
-ouverte au registre. La promotion « M3 » annoncée au commit `2e3fa7b` est
-**retirée** : l'audit [`AUDIT_PROMOTION_M3_2E3FA7B.md`](audits/AUDIT_PROMOTION_M3_2E3FA7B.md)
-la déclare invalide, et j'ai reproduit ses quatre P0 moi-même, sur le header
-committé, contre ma propre force brute. Ils sont réels.
+État : **`exploration_v3_hors_registre`**. Backend courant : CPU de référence
+et oracles bornés sous audit. Profil exercé : **entrée u16 quantifiée seulement**.
+Aucun statut public, aucun SLO et aucune phase ne sont ouverts au registre.
+
+L'état audité du worktree est scellé dans
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les cinq portes flats
+Release et les campagnes sanitizers y sont vertes, mais deux P1 interdisent une
+promotion : le mode `use_owner` est incomplet hors du chemin indexé affine 3D,
+et le noyau F0 rejette une naissance autorisée par son contrat écrit.
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -304,7 +308,10 @@ permutations**, avec exigence de zéro refus et de signature unique.
 
 - L'oracle M1 n'a **pas** été étendu à ce sujet. Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. L'étendre aux multiplicités est un travail à part, et il doit être audité.
 - Les forêts ne sont pas construites, et le centre rationnel, le rayon et $\beta$ ne sont pas confrontés à une vérité distincte. Ce qui est comparé est listé au §4 ; « payload entier » serait faux.
-- Pas de forêts, pas de reverse search **dans le catalogue**, pas de propriétaire calculé : le différentiel possède un endpoint reverse séparé, mais la récolte déduplique encore par une table globale de coquilles.
+- Pas de forêts ni de reverse search **dans le catalogue**. Un propriétaire exact
+  expérimental est calculé pour les non-singletons du seul chemin indexé affine
+  3D; il est désactivé par défaut, n'est pas rejoué sous permutation et n'a pas
+  encore de fixture permanente `owner_signed_cone`.
 
 ---
 
@@ -365,10 +372,10 @@ le census de contrôle compare désormais l'**ensemble**, pas sa taille. Trois
 conséquences : les événements « sortants » d'une requête sont exactement les
 membres de $B(v)$, donc gratuits ; la récolte dispose d'un **préfiltre nécessaire
 de propriété** — un sommet propriétaire doit avoir tout son intérieur dans la
-boule de ce support, mais ce test ne l'unicise pas — qui écarte **88,6 %** des tentatives à
-$s_{\max}=11$ sans payer de census — c'est un préfiltre **nécessaire**, pas une
-reconnaissance du propriétaire canonique, et la table globale `emitted` reste
-donc indispensable ; et les singletons se publient en temps
+boule de ce support. Le live ajoute ensuite « support canonique puis
+propriétaire » sur son chemin expérimental. `emitted` reste la référence du
+différentiel et conserve encore les `n` clefs singleton dans ce chemin; et les
+singletons se publient en temps
 constant, ce qui supprime les $2{,}5\cdot10^9$ classifications que l'audit
 comptait avant le germe.
 
@@ -394,11 +401,12 @@ points, soit près de deux heures sur un cœur et environ 130 s sur 48. **Le
 contrat reste à deux ordres de grandeur.**
 
 L'index est donc une brique positive et un P0 fermé, pas l'architecture. Il ne
-borne ni le nombre de flats ni le nombre de sommets. Depuis le commit `969db5c`,
-un endpoint séparé de reverse search n'utilise plus `seen` ni `frontier` pour
-décider le parcours; le catalogue live passe toutefois encore par le BFS, la
-sortie du nouvel endpoint est matérialisée dans un vecteur, le propriétaire
-d'émission n'est pas implémenté, et il n'y a ni streaming aval ni forêts.
+borne ni le nombre de flats ni le nombre de sommets. Un endpoint séparé de
+reverse search n'utilise plus `seen` ni `frontier` pour décider le parcours; le
+catalogue live passe toutefois encore par le BFS. L'API sink existe, et le
+propriétaire d'émission est expérimenté sur le seul chemin indexé affine 3D,
+mais ni l'un ni l'autre n'est intégré au flux transactionnel aval; il n'y a pas
+encore de forêts.
 
 ---
 
@@ -483,12 +491,15 @@ Au total : 4 757 cas, 325 498 sommets, 2 012 590 fils testés, profondeur maxima
 21 et zéro désaccord. Les valeurs six et 21 sont des mesures de ces campagnes,
 pas des bornes. Une grande coquille peut rendre le nombre de flats combinatoire.
 
-**Ce que cela ne rend pas.** Aucune borne de temps. Chaque fils testé coûte un
-calcul de parent, donc une énumération de flats et une requête de voisin ; une
-grande coquille peut avoir un nombre combinatoire de flats, et six par sommet est
-une mesure de régime, pas un théorème. Au commit `969db5c`, ce compteur
+**Ce que cela ne rend pas.** Aucune borne de temps. Au commit `aec7439`, chaque
+fils testé paie encore la requête de voisin **aller**, puis un préfiltre en
+$O(m)$; les survivants énumèrent le préfixe des couples du candidat jusqu'à la
+clef retour, mais ne paient plus de seconde requête de voisin. Une grande
+coquille peut avoir un nombre combinatoire de flats, et six fils par sommet est
+une mesure de régime, pas un théorème. Au commit `969db5c`, le compteur
 n'incluait ni les voisins non bornés ou hors coupe, ni la queue de triplets que
-`for_each_flat` continuait à examiner après avoir trouvé le prochain enfant.
+`for_each_flat` continuait à examiner après avoir trouvé le prochain enfant;
+les compteurs actuels couvrent désormais ce travail.
 
 Le travail réel est maintenant mesuré, et **il est cinq fois plus grand que ce que
 « six flats par sommet » laissait croire**. `for_each_flat` est interruptible, et
@@ -539,34 +550,32 @@ Cumulé avec la sortie précoce du parent, sur la campagne générique à onze p
 sommet**. Un facteur trois sur le poste de coût, en deux corrections dont aucune ne
 change la sortie.
 
-La preuve locale confirme que ce préfiltre est une censure nécessaire correcte,
-mais sa qualification permanente reste indirecte : reverse et BFS concordent,
-sans rejouer chaque refus contre le parent complet, et aucun plancher n'interdit
-le mutant « préfiltre toujours vrai ». Le corollaire est même plus fort : après
-un retour admissible, l'adjacence du pinceau rend la seconde requête de voisin
-inutile; chercher seulement un couple admissible antérieur suffit à décider le
-parent. Cette dernière suppression n'est pas encore intégrée.
+Le live emploie le corollaire plus fort : après un retour admissible,
+l'adjacence du pinceau rend la seconde requête de voisin inutile.
+`decide_child` cherche seulement un couple admissible antérieur à la clef
+retour. Le différentiel rejoue chaque couple contre le chemin complet — parent
+canonique, voisin retour, comparaison de coquille — et exige les identités de
+comptage par nuage. Sur la porte générique courante, **269 918 requêtes de
+retour** disparaissent.
 
-### Un résultat négatif transitoire : la reprise à un curseur n'a montré aucun gain
+La qualification a été renforcée : les directions hors
+$\lbrace-1,+1\rbrace$ sont rejetées, les compteurs `pairs_judged`,
+`pairs_accepted` et `pairs_prefiltered` ont des planchers, et les appels directs
+couvrent un couple antérieur admissible, une clef cible dépassée et une base
+divergente. Elle reste relative : le chemin complet et le décideur partagent
+`pair_admissible`, et aucune mutation n'altère encore une vraie étape
+d'énumération pour vérifier que le juge la détecte.
 
-Je note l'essai parce qu'il évite de confondre une piste plausible avec un gain
-déjà qualifié. La reverse search
-revient sur un sommet autant de fois qu'il a de fils et **reconstruisait** à chaque
-retour les fermetures de tous les triplets déjà consommés pour retrouver sa place.
-J'attendais un facteur trois, en raisonnant sur les 5,9 fils **testés** par sommet.
+### Le curseur courant reprend exactement après le fils
 
-C'était faux : le curseur n'avance que sur les fils **acceptés**, et un arbre
-couvrant en a un par sommet en moyenne. Un sommet est donc ré-entré deux fois, et
-la première reprise part d'un curseur qui est presque toujours le premier triplet.
-**[mesuré dans un essai transitoire]** sur trois régimes — générique, grille
-saturée, cosphérique —
-**308 832 triplets avec le curseur, 308 832 sans, au triplet près.**
-
-Le worktree courant contient un helper `for_each_flat_from`, mais la reverse
-search appelle encore le wrapper qui repart de `(0,1,2)`; aucun frame ne conserve
-le curseur. La borne espérée $\text{flats}+\text{fils}$ sur un sommet de haut
-degré n'est donc pas une propriété du chemin live. Aucune campagne permanente
-n'exerce ce cas, et aucun gain n'est revendiqué.
+Le frame courant conserve `(i,j,k,dir)`. Après un fils en direction négative, il
+reprend la direction positive du même flat; après la positive, il avance au
+triplet suivant. Sur la porte fixtures, à sorties et décisions identiques, le
+curseur réduit les flats livrés de **10 753 à 8 060** et les fermetures de
+**15 667 à 12 736**. Les cinq portes différentielles restent vertes. Ce gain
+mesuré ne donne toujours aucune borne sur une grande coquille; des mutations
+ciblées premier/dernier triplet, reprise après chaque slot et fermeture non
+canonique restent utiles.
 
 ### La sortie est bornée, et le high-water est mesuré
 
@@ -601,11 +610,57 @@ peut être de taille $\Theta(n)$ et la profondeur n'est bornée par aucun théor
 Le gain acquis est l'absence de table de déduplication **dans la décision** et une
 API de sortie streamée. Le replay du sink est en outre lancé sans lui passer le
 `CertifiedIndex`; la composition streamée-indexée n'est pas encore qualifiée.
-L'intégration devra écrire dans un segment non committé :
-une erreur peut survenir après plusieurs callbacks, et `kInvariantViolated`
-confond encore erreur scientifique et arrêt demandé. Le high-water mémoire
-complet, l'intégration transactionnelle au catalogue et l'absence d'écriture
-partagée d'un kernel réel restent à obtenir.
+L'intégration devra écrire dans un segment non committé : une erreur peut
+survenir après plusieurs callbacks. `kSinkStopped` distingue désormais l'arrêt
+volontaire d'une violation d'invariant, mais le test interrompt dès le germe et
+n'exerce ni un préfixe non vide ni l'arrêt depuis un enfant. Le high-water
+mémoire complet, l'intégration transactionnelle au catalogue et l'absence
+d'écriture partagée d'un kernel réel restent à obtenir.
+
+### Le propriétaire est positif, mais son intégration reste incomplète
+
+Streamer les sommets ne suffit pas tant que le **catalogue** garde `emitted`, une
+table de déduplication proportionnelle à la sortie. La note d'audit prouve la
+règle candidate, et le cube u16 dit pourquoi un propriétaire par support ne
+suffit pas : $\lbrace0,2\rbrace^3$ a **six** supports minimaux pour une seule
+boule — quatre diagonales et deux tétraèdres de parité. Il faut donc canoniser
+**d'abord**, posséder **ensuite** :
+
+1. recenser exactement la boule fermée et refuser son rang s'il dépasse le contrat ;
+2. calculer sur sa coquille le support minimal canonique $U_{\mathrm{can}}$ ;
+3. rejeter tout candidat $U\neq U_{\mathrm{can}}$ — c'est la déduplication **dans** un sommet ;
+4. tester que le sommet courant est $o(U_{\mathrm{can}})$ — c'est la déduplication **entre** sommets ;
+5. émettre une fois.
+
+Le test de propriété est local et exact : avec $\varepsilon_s=-1$ sur
+$B_U\cap S(v)$ et $+1$ ailleurs, $v=o(U)$ si et seulement si aucun rayon extrême du
+cône tangent **signé** n'a $(g_U\cdot d,d_0,d_1,d_2,d_3)$ lexicographiquement
+négatif. Le gradient ne coûte pas $O(n)$ : $A_X=\sum_i a_i$ est précalculé une
+fois, les termes de $U$ s'annulent sur le cône, et $|B_U|\leq s_{\max}-|U|$. Tout se
+lit avec le même prédicat entier que le pinceau, par l'identité
+$a_i\cdot d=-2\,\mathrm{orient3d}$.
+
+**[mesuré, snapshot scellé dans l'audit courant]** les cinq portes Release
+`fixtures`, `generic`, `indexed_tree`, `degenerate` et `cospherical` passent en
+204,28 s de temps mur avec deux tests en parallèle : 4 980 cas, zéro désaccord
+de catalogue. Le probe `owner_signed_cone` trouve exactement un propriétaire
+parmi deux candidats et 22 sphères identiques à la référence. Ce probe positif
+n'est pas encore une fixture permanente et l'équivalence owner n'est pas
+rejouée sous permutation.
+
+Le domaine de l'API n'est pas fermé. Le juge active owner seulement avec index
+et seulement sur les nuages affines 3D navigables. Sans index, un tétraèdre perd
+ses quatre singletons; sur un triangle traité par la voie directe, owner rend
+zéro sphère sans index et seulement les trois singletons avec index, au lieu de
+sept. Le mode est donc **expérimental et désactivé par défaut**. Même dans le
+quadrant vert, `emitted` conserve encore les `n` clefs singleton : la table est
+réduite au mieux à $O(n)$, sans high-water mesuré, pas supprimée.
+
+Enfin, l'implémentation des supports d'arité deux essaie chaque point de la
+coquille puis rescane celle-ci. Elle paie $\Theta(m^2)$ par paire, donc jusqu'à
+$\Theta(m^4)$ pour les $\Theta(m^2)$ paires d'un sommet. La sélection des deux
+rayons extrêmes par intersection de demi-plans et une porte à grande coquille
+restent nécessaires avant toute revendication d'échelle.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
@@ -865,7 +920,7 @@ Le mur n'est plus « le parcours jette 98,9 % de son travail » : il en jette 94
 et le facteur est de 17, pas de 100. Le mur est ailleurs, et il est double.
 
 1. **La requête de pinceau était en $O(n)$.** L'index exact de `1a0a1f8` retire ce scan systématique, sans promettre une visite sous-linéaire au pire. À l'ordre du contrat, le facteur CPU mesuré reste seulement 2,8.
-2. **La récolte payait un census en $O(n)$ par candidat, et 43 % de ses tentatives étaient des doublons.** Le census fermé indexé est écrit. Le préfiltre de propriété écarte une part réelle du travail, mais seul le couple « support canonique puis propriétaire exact » supprimera les duplications restantes et la table `emitted`.
+2. **La récolte payait un census en $O(n)$ par candidat, et 43 % de ses tentatives étaient des doublons.** Le census fermé indexé est écrit. Le couple « support canonique puis propriétaire exact » est exercé sur les non-singletons du chemin indexé affine 3D, mais son domaine direct est faux, sa fixture signée n'est pas permanente et `emitted` conserve les singletons.
 
 **Ce que je ne dis pas :** que le contrat est atteignable. Les deux ratios
 croissent encore à $n=300$, la sortie à 50 000 points serait de l'ordre de
@@ -1074,6 +1129,17 @@ Le juge multiplicitaire seul, avec ses planchers :
 ./mhgp3v_flats_differential --clouds 1500 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 10000
 ```
 
+Le sous-ensemble scellé par l'audit courant et le noyau F0 :
+
+```sh
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_flats_(fixtures|generic|indexed_tree|degenerate|cospherical)$' -j2
+python3 morsehgp3D_v3/audits/check_gate_d_fold_f0.py
+```
+
+Attention : la sortie `Gate_D_F0_kernel=PASS` ne ferme pas la porte
+mathématique tant que le contre-exemple `N_a--N_a` de
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) n'est pas résolu.
+
 Une campagne vide, un argument inconnu ou un plancher non atteint rendent un
 code non nul avec son diagnostic ; **neuf** tests négatifs le vérifient — argument
 inconnu, `--smax` hors contrat, plancher de cas, plancher de couverture, suffixe
@@ -1087,7 +1153,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | # | question | statut |
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | existence et propriétaire canonique prouvés; le live n'a qu'un préfiltre nécessaire, puis conserve `emitted` |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | existence et propriétaire canonique prouvés; voie live expérimentale exacte seulement dans le quadrant indexé affine 3D testé, fausse dans les voies directe et sans index; `emitted` conserve les singletons et le coût peut atteindre $\Theta(m^4)$ par sommet |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |

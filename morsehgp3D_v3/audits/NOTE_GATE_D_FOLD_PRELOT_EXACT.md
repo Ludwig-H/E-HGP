@@ -6,6 +6,13 @@ Cadre : `backend=architecture_math`, `profile=hgp_reduced_quantized_u16`,
 `mode=bounded_exact_horizontal_fold_then_external_versions`,
 `public_status=not_claimed`.
 
+> [!CAUTION]
+> **État audité du noyau F0-A : rouge.** Le script courant imprime `PASS`, mais
+> sa vérité Warshall et son sujet DSU rejettent ensemble une composante
+> `N_a--N_a` portée par une `DirectHyperedge`. Ce rejet contredit les §3 et §8
+> ci-dessous, qui classent ce cas comme une naissance `q_R=0`. Le détail et la
+> fixture minimale sont dans [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
+
 > [!IMPORTANT]
 > Après la descente locale vers une facette cœur, la dernière décision globale
 > horizontale est un quotient de composantes **par lot exact**. Son état strict
@@ -254,17 +261,21 @@ compare partition, disposition, recursive root and complete logical-record ledge
 commit the prepared value only after every check succeeds
 ```
 
-La campagne conservée décide 2 168 lots abstraits, dont 1 916 acceptés et 252
-rejetés, sur tous les sous-ensembles de cinq sommets typés et zéro, un ou deux
-records distincts. Huit fixtures ciblées couvrent collision `R(7)`/`L(7)`, pont
-latent, les trois classes de $q_R$, attache stricte, projection unaire et une
-`DirectHyperedge` de onze endpoints. Six entrées forgées sont rejetées, dont une
-facette neuve visant deux racines distinctes. Six
-mutations sont tuées : effacement du namespace, suppression des latents avant
-fermeture, comptage des occurrences de racine, perte d'une source projetée
-unaire, commit record par record et `find` fermé au lieu de strict. Quatre
-fautes de staging plus une entrée invalide laissent l'état inchangé; une mutation
-qui consomme l'identifiant de commit avant validation est détectée.
+La campagne courante décide 2 168 lots abstraits, dont 1 703 acceptés et 465
+rejetés, sur les sous-ensembles du pool structurel fixe
+`{R0,R1,L0,N0,N1}` et zéro, un ou deux records générés. Ce dénombrement est
+exhaustif sur ce pool précis, pas sur toutes les répartitions de namespaces ni
+sur les nouvelles dimensions provenance, handles source et arité. Onze fixtures
+ciblées, huit entrées forgées, onze permutations, une arité onze, dix mutants et
+cinq fautes de rollback sont annoncés par l'exécution normale.
+
+Ces compteurs ne rendent pas la porte verte. Le garde partagé « toute composante
+avec record doit contenir `R` ou `L` » rejette la naissance directe entre deux
+facettes activées au niveau courant. La fixture `carrierless` grave ce rejet et
+le mutant `accept_carrierless_group` grave l'acceptation comme faute : l'oracle
+et le sujet sont donc corrélés contre le pseudo-code ci-dessus. De plus, plusieurs
+obligations ciblées reposent sur `assert`; `python3 -O` les désactive tout en
+laissant le script imprimer `Gate_D_F0_kernel=PASS`.
 
 Deux contre-exemples précisent le contrat de test. Premièrement, supprimer une
 `DirectHyperedge` déjà unaire après projection ne change ni partition, ni racine,
@@ -273,11 +284,12 @@ Deuxièmement, une faute qui incrémente seulement `next_commit_id` laisse les t
 digests partition--forêt--couverture inchangés mais modifie le prochain résultat;
 le rollback doit donc comparer tout l'état autoritatif.
 
-Ce vert est celui de **F0-A, noyau combinatoire d'un lot fourni**. Le script ne
-rejoue ni la complétude géométrique de la source, ni les unions de couverture,
-ni un historique multilevel complet de successors. Ces extensions, les runs F1
-et le journal externe F2 restent des portes séparées; le script ne doit jamais
-être déplacé dans le chemin produit.
+Les accords qui subsistent qualifient seulement des sous-propriétés de **F0-A,
+noyau combinatoire d'un lot fourni**. Le script ne valide pas encore sa propre
+sémantique de naissance et ne rejoue ni la complétude géométrique de la source,
+ni les unions de couverture, ni un historique multilevel complet de successors.
+Ces corrections, les runs F1 et le journal externe F2 restent des portes
+séparées; le script ne doit jamais être déplacé dans le chemin produit.
 
 ### F1 — runs scellés
 
@@ -342,15 +354,17 @@ avant commit produit zéro mutation et aucun reçu scientifique valide.
 8. Attache forgée vers $L^{-}$, rejetée atomiquement au lieu de créer une
    naissance; hyperarête directe devenue unaire après projection, toujours
    conservée comme record logique.
-9. Duplicat identique avec provenances agrégées; duplicat contradictoire rejeté.
-10. Successor omis, niveau d'activation omis, cycle de versions, lien de même
+9. Deux attaches de la même facette neuve vers deux racines strictes distinctes :
+   rejet avant fermeture, sans fabriquer une multifusion purement résiduelle.
+10. Duplicat identique avec provenances agrégées; duplicat contradictoire rejeté.
+11. Successor omis, niveau d'activation omis, cycle de versions, lien de même
    niveau et lien postérieur suivi par une requête stricte.
-11. Chaîne `V0->V1@a`, `V1->V2@b`, puis requête entre $a$ et $b$ : une
+12. Chaîne `V0->V1@a`, `V1->V2@b`, puis requête entre $a$ et $b$ : une
     compression destructive vers `V2` doit être réfutée.
-12. `DirectHyperedge` de onze endpoints à $k=10$, dont plusieurs se projettent
+13. `DirectHyperedge` de onze endpoints à $k=10$, dont plusieurs se projettent
     sur les mêmes $R^{-}$, $L^{-}$ et $N_a$ : cardinal frontière et racines
     **distinctes** sont contrôlés.
-13. Échec injecté après chaque étape du staging, avec digests de partition,
+14. Échec injecté après chaque étape du staging, avec digests de partition,
     forêt et couverture inchangés.
 
 Les mutations de projection des latents avant fermeture, activation anticipée,

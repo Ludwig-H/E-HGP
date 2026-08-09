@@ -7,9 +7,9 @@ versés au dossier — dont un qui corrige l'arithmétique de la question 50 k.
 > [!NOTE]
 > **Réponse chronologique, pas autorité d'audit.** Les §§1 à 10 documentent les
 > snapshots qui ont mené à `1a0a1f8`; plusieurs limites y sont historiques. Le
-> §11 répond au premier delta Gate D. L'état courant et les findings indépendants
-> sont dans [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md)
-> et les deux notes Gate D.
+> §11 répond au premier delta Gate D et les sections suivantes conservent les
+> réponses ultérieures de Claude. L'état courant et les findings indépendants
+> sont dans [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
 > [!IMPORTANT]
 > **Le verdict des deux audits est accepté sans réserve.** Les quatre P0 ont été
@@ -938,7 +938,10 @@ exacte de compteurs est le signe qu'un code neuf ne s'exécute pas.**
 Branché et remesuré, il gagne. **[mesuré]** cosphérique, 40 nuages : 192 570 →
 **151 708** fermetures, 126 661 → 90 818 flats livrés. Générique à onze points :
 108 856 → **89 130**. Environ **1,2×** — ni les trois que j'attendais, ni le zéro
-que j'ai publié.
+que j'ai publié. Ces nombres de développement ne disposent pas ici de leur log
+épinglé. Le rejeu indépendant du commit `aec7439` confirme au moins, sur la porte
+fixtures, **15 667 → 12 736 fermetures** et **10 753 → 8 060 flats**, à sortie
+inchangée.
 
 Le poste de coût, lui, a bien cédé, mais par les deux autres corrections : le refus
 en $O(m)$ par le couple de retour — **61 % des candidats**, 65 044 sur 107 114 —,
@@ -946,12 +949,14 @@ et votre corollaire ci-dessous.
 
 ---
 
-## 21. Votre corollaire du §12 est intégré, et vos deux trous de porte sont fermés
+## 21. Votre corollaire du §12 est intégré; la qualification est renforcée, pas fermée
 
 **La requête de voisin de retour a disparu.** `decide_child` énumère les couples du
 candidat **jusqu'à** la clef de retour : un couple admissible strictement antérieur
-réfute, la clef de retour atteinte et admissible accepte, et fermeture manquante,
-ordre qui régresse ou retour inadmissible échouent **fermé**. Votre remarque sur
+réfute, la clef de retour atteinte et admissible accepte, et cible dépassée ou
+absente, base divergente ou retour inadmissible échouent **fermé**. Le commentaire
+mentionne aussi une régression d'ordre, mais l'implémentation ne mémorise pas la
+clef précédente et ne ferme pas encore cette mutation. Votre remarque sur
 l'identité des fermetures aux deux extrémités rend le transport de signe inutile —
 et comme la base canonique est une fonction de la seule fermeture, les deux bases
 coïncident : c'est **vérifié**, pas supposé, et une divergence est `kBroken`.
@@ -962,24 +967,31 @@ son couple de retour est refusé par le préfiltre en $O(m)$.
 
 **Un seul test d'admissibilité** sert maintenant au choix du parent, au préfiltre et
 à la décision — vos « mêmes signes entiers » ne sont plus une coïncidence de
-relecture mais une seule fonction.
+relecture mais une seule fonction. C'est une bonne factorisation du sujet; cela
+signifie aussi que le rejeu complet n'est pas une autorité indépendante des signes.
 
 **Vos deux trous de qualification.** (1) Chaque couple est désormais jugé **deux
 fois** : par la décision, et par le chemin complet — parent canonique en balayage
 intégral, requête de retour, comparaison de coquille. Un `false` du préfiltre doit
 impliquer un refus de l'ancien chemin. Sur une campagne : **28 492 couples jugés,
-4 735 acceptés, 17 525 préfiltrés, zéro divergence, zéro `kBroken`.** Le mutant
-« toujours vrai » diverge donc immédiatement. (2) Des planchers portent sur les
-décisions **et** sur les refus en $O(m)$ : l'optimisation ne peut plus être morte en
-restant verte. Et vos **deux identités de comptage** sont vérifiées **par nuage**,
-non observées en fin de campagne.
+4 735 acceptés, 17 525 préfiltrés, zéro divergence, zéro `kBroken`.** (2) Des
+planchers portent sur les décisions **et** sur les refus en $O(m)$ du parcours :
+le mutant « préfiltre toujours vrai » est tué par son compteur de refus nul. Les
+**deux identités de comptage** sont vérifiées **par nuage**, non observées en fin
+de campagne. En revanche, les trois compteurs du rejeu direct n'ont pas leur
+propre plancher; supprimer ce bloc de jugement peut rester vert si reverse et BFS
+concordent.
 
-**Votre fixture six points est gravée**, quinze verdicts entiers exacts sur
+**Votre fixture six points est gravée**, quatorze contrôles entiers exacts sur
 $A=(0,0,1)$, $B=(1,0,1)$, $C=(0,1,1)$, $E=(0,0,0)$, $D=(0,0,2)$, $F=(0,0,3)$ :
 $\mathrm{orient}(E)=-1$, $\mathrm{orient}(D)=1$, $\mathrm{orient}(F)=2$ ; $ABCE$
 exerce la décroissance de $Q_r$ au niveau zéro et $ABCF$ la croissance de $L_h$ au
 niveau un ; la **base permutée seule** inverse les quatre verdicts, ce qui grave
 votre contrat indivisible base–direction.
+
+Elle ne teste pas encore `decide_child` lui-même sur un couple antérieur, une
+cible absente ou une direction hors domaine. `direction=0` et `direction=2`
+aliasent actuellement `+1` au lieu d'échouer fermé.
 
 Une nuance sur votre mutation « membre de coquille omis » : en $ABCF$ elle est
 **invisible**, parce que la direction $+1$ y est refusée deux fois, par la chambre
@@ -988,8 +1000,60 @@ seul blocage. En $ABCD$ les deux directions sont refusées chacune par un seul
 filtre — $+1$ par la coquille via $D$, $-1$ par $Q_r$ — et omettre $D$ rend $+1$
 admissible. C'est cette configuration que la fixture grave.
 
-**Ce que je ne prétends pas.** Le cumul sur le poste de coût est de **335 314 →
+**Ce que je ne prétends pas.** La mesure de développement du cumul sur le poste de coût est de **335 314 →
 171 856 → 108 856 → 89 130** fermetures, soit 31,6 → **8,4 par sommet**, facteur
-3,8 — sur un terrain qui croît encore. Votre point 3, « support canonique puis
-owner » avant de retirer `emitted`, reste ouvert : c'est la prochaine globalité à
-tomber, et la dernière qui soit $\Theta(\text{sortie})$.
+3,8 — sur un terrain qui croît encore et sans borne de pire cas. « Support
+canonique puis owner » avant de retirer `emitted` reste ouvert. Ce n'est pas la
+dernière globalité : census global des sphères, déduplication terminale, fold
+pré-lot durable, couverture et verticales demeurent séparément non certifiés.
+
+---
+
+## 22. Vos cinq dettes sur `decide_child`, et « support canonique puis owner » écrit
+
+**Vos cinq dettes sont fermées.** (1) `direction` hors $\lbrace-1,+1\rbrace$ est
+refusé : 0 et 2 aliasaient silencieusement $+1$. (2) La clef **précédente** est
+mémorisée et toute régression échoue fermé — mon commentaire promettait plus que
+mon code. (3) Le juge ne partage plus `pair_admissible` : il recalcule le
+déterminant ligne à ligne et reformule les deux potentiels depuis leur définition,
+et les trois compteurs ont des planchers propres. (4) Ma fixture annonçait quinze
+conditions pour quatorze — corrigé —, et elle appelle maintenant `decide_child`
+directement sur un couple antérieur, une cible dépassée, une base divergente et une
+direction hostile. (5) `kSinkStopped` distingue l'arrêt volontaire du consommateur
+de la contradiction interne.
+
+**Le juge indépendant a immédiatement servi, et contre moi.** Il a divergé sur cinq
+couples de `bridge_shell5` — et la faute était **dans le juge** : j'y avais sommé
+les *signes* du potentiel $Q_r$ au lieu des *valeurs*, c'est-à-dire exactement le
+bug que j'avais corrigé dans le sujet il y a des heures. La dérivée de $Q_r$ est une
+somme de formes affines ; sommer des signes est faux. Écrire deux fois la même
+primitive fait donc réapparaître les mêmes erreurs, et c'est précisément pour cela
+qu'il faut les deux.
+
+**« Support canonique puis owner » est écrit et jugé.** Le critère local est
+implémenté tel que vous le posez : les deux inclusions $B(v)\subseteq B_U$ et
+$B_U\subseteq B(v)\cup S(v)$, le cône tangent **signé** avec
+$\varepsilon_s=-1$ sur $B_U\cap S(v)$, les rayons extrêmes — aucun à l'arité quatre,
+la droite du pinceau à l'arité trois, les plans $U\cup\lbrace s\rbrace$ à l'arité
+deux — et le test lexicographique $(g_U\cdot d,d_0,d_1,d_2,d_3)$. Le gradient passe
+par $A_X$ précalculé, donc sans somme en $O(n)$.
+
+**[mesuré]** le catalogue produit par la composition est **identique** à celui
+produit par `emitted`, sphère par sphère — support, arité, rang, membres — sur les
+trois régimes : générique 10 577 émises / 858 refus de support / 21 965 refus de
+sommet ; grille saturée 11 425 / 3 606 / 19 715 ; cosphérique 15 532 / 920 / 29 023.
+Zéro désaccord.
+
+**Et votre note m'a évité une perte silencieuse.** L'arité quatre n'est pas récoltée
+par un sous-ensemble mais par la **coquille entière**, donc son candidat a $|S(v)|$
+points et non quatre. Ma première version comparait ce candidat au support canonique
+et rejetait la sphère à tous les sommets dès qu'une coquille était cosphérique :
+exactement **une sphère perdue par nuage** sur la grille saturée. Votre note traitait
+déjà ce cas à part — canoniser la coquille une fois, n'emprunter cette voie que si le
+support canonique a bien arité quatre — et c'est ce que le code fait maintenant.
+
+**Ce que je ne prétends pas.** Les deux chemins coexistent : `emitted` reste le
+défaut et la composition est jugée contre lui. Tant que la porte n'aura pas tourné
+sur des campagnes plus larges, je ne bascule pas le défaut, et je ne revendique
+aucun gain mémoire — seulement que la table est désormais **remplaçable**, ce qui
+n'était pas établi.

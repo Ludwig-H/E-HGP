@@ -301,6 +301,10 @@ struct FlatStatistics {
   long long disagreement_sweeps = 0;     // balayages de certification par desaccord de signe
   long long harvest_prefiltered = 0;     // supports ecartes par le test de propriete
   long long harvest_censused = 0;        // supports ayant paye un census complet
+  // COMPOSITION « support canonique puis proprietaire », qui remplace `emitted`.
+  long long owner_rejected_support = 0;  // U different du support canonique
+  long long owner_rejected_vertex = 0;   // support canonique, mais un autre sommet possede
+  long long owner_emitted = 0;
   long long reverse_depth_max = 0;        // profondeur maximale de la pile
   long long reverse_children_tested = 0;  // voisins soumis au test de parent
   long long reverse_backtracks = 0;
@@ -321,7 +325,7 @@ struct FlatStatistics {
   long long reverse_decisions = 0;         // decisions de filiation, sans requete de retour
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 38 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 41 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
@@ -347,6 +351,9 @@ struct FlatStatistics {
     disagreement_sweeps += o.disagreement_sweeps;
     harvest_prefiltered += o.harvest_prefiltered;
     harvest_censused += o.harvest_censused;
+    owner_rejected_support += o.owner_rejected_support;
+    owner_rejected_vertex += o.owner_rejected_vertex;
+    owner_emitted += o.owner_emitted;
     reverse_depth_max = std::max(reverse_depth_max, o.reverse_depth_max);
     reverse_children_tested += o.reverse_children_tested;
     reverse_backtracks += o.reverse_backtracks;
@@ -372,6 +379,11 @@ enum class CloudStatus {
   kDuplicateCoordinates,        // deux observations confondues : hors contrat
   kOutsideDeclaredGrid,         // coordonnee hors de la grille u16 declaree
   kOrderOutsideContract,        // s_max hors contrat, refuse avant toute soustraction
+  // ARRET VOLONTAIRE du consommateur. Ce n'est PAS une contradiction interne : le
+  // sink a demande l'arret, et l'appelant sait donc que sa sortie est un prefixe
+  // deliberement tronque. Les confondre avec `kInvariantViolated` rendrait
+  // indistinguables une troncature choisie et un invariant rompu.
+  kSinkStopped,
 };
 
 inline const char* cloud_status_name(CloudStatus s) {
@@ -384,6 +396,7 @@ inline const char* cloud_status_name(CloudStatus s) {
     case CloudStatus::kDuplicateCoordinates: return "coordonnees_dupliquees";
     case CloudStatus::kOutsideDeclaredGrid: return "hors_grille_u16_declaree";
     case CloudStatus::kOrderOutsideContract: return "ordre_hors_contrat";
+    case CloudStatus::kSinkStopped: return "sink_arrete";
   }
   return "inconnu";
 }
@@ -1354,6 +1367,10 @@ inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& v
 // signe de `orient3d` et rendrait le test faux.
 inline bool pair_admissible(const std::vector<P3>& points, const Vertex& w, const i32 base[3],
                             int direction, const std::vector<i32>& root_base) {
+  // DOMAINE. `direction` n'a que deux valeurs licites. Les tests s'ecrivent
+  // `direction > 0`, si bien que 0 et 2 aliasaient silencieusement +1 : un appelant
+  // fautif obtenait un verdict au lieu d'un refus.
+  if (direction != -1 && direction != 1) return false;
   Pencil pencil{&points, base[0], base[1], base[2]};
   for (i32 z : w.shell)
     if (tangent_sign(pencil.orient_of(z), direction) < 0) return false;
@@ -1398,9 +1415,19 @@ inline ChildOutcome decide_child(const std::vector<P3>& points, const Vertex& w,
                                  const FlatAtVertex& flat_at_v, int direction,
                                  const std::vector<i32>& root_base, long long* triplets = nullptr,
                                  long long* closures = nullptr) {
+  if (direction != -1 && direction != 1) return ChildOutcome::kBroken;
   const int back_slot = (-direction > 0) ? 1 : 0;
   ChildOutcome verdict = ChildOutcome::kBroken;   // jamais atteint = echec ferme
+  // La clef PRECEDENTE est memorisee : le commentaire promettait un echec sur
+  // regression, mais comparer seulement a la cible ne detecte pas un desordre entre
+  // deux clefs anterieures. L'ordre strict de l'enumeration est une hypothese de la
+  // decision, donc il est verifie a chaque pas.
+  std::vector<i32> previous;
+  bool have_previous = false;
   for_each_flat(points, w, [&](const FlatAtVertex& g) {
+    if (have_previous && !(previous < g.closure)) return false;   // regression : ferme
+    previous = g.closure;
+    have_previous = true;
     if (g.closure > flat_at_v.closure) return false;      // depasse : echec ferme
     const bool is_return = (g.closure == flat_at_v.closure);
     if (is_return && !(g.base[0] == flat_at_v.base[0] && g.base[1] == flat_at_v.base[1] &&
@@ -1418,6 +1445,123 @@ inline ChildOutcome decide_child(const std::vector<P3>& points, const Vertex& w,
     return true;
   }, triplets, closures);
   return verdict;
+}
+
+// ---------------------------------------------------------------------------
+// LE PROPRIETAIRE D'UN SUPPORT — la piece qui remplace la table `emitted`
+// ---------------------------------------------------------------------------
+//
+// Pour un support independant U de sphere minimale x_U, posons
+// B_U = {i : L_i(x_U) < 0}. Le polyedre de propriete est F_U intersecte avec
+// {L_i <= 0 pour i dans B_U} et {L_j >= 0 pour j hors B_U union U}. Un sommet v
+// qui contient U appartient a ce polyedre si et seulement si
+//
+//     U inclus dans S(v),   B(v) inclus dans B_U,   B_U inclus dans B(v) union S(v).
+//
+// La premiere inclusion seule est le prefiltre vivant ; la seconde interdit qu'un
+// ancien interieur soit devenu exterieur. En minimisant G_U = somme des formes
+// positives sur ce polyedre, avec depart lexicographique exact des coordonnees, on
+// obtient un unique sommet o(U) — sans aucune table.
+//
+// CRITERE LOCAL. Avec eps_s = -1 pour s dans B_U inter S(v) et +1 sinon, le cone
+// tangent SIGNE est {d : a_u . d = 0 pour u dans U, eps_s a_s . d >= 0 sinon}.
+// Employer a sa place le cone non signe de la chambre rejetterait le vrai
+// proprietaire : un membre de B_U actif en coquille doit pouvoir devenir
+// strictement interieur. Alors v = o(U) si et seulement si aucun rayon extreme
+// admissible n'a (g_U . d, d_0, d_1, d_2, d_3) lexicographiquement negatif.
+//
+// Le gradient ne coute pas O(n) : avec A_X = somme des a_i precalculee une fois,
+// g_U = A_X - somme_{u dans U} a_u - 2 somme_{i dans B_U} a_i, et les termes de U
+// s'annulent sur le cone. Comme a_i . d = -2 orient3d(base, p_i) pour
+// d = (u, 2 u . a), tout se lit avec le meme predicat entier que le pinceau.
+//
+// Arite quatre : aucun rayon, la sphere EST le sommet. Arite trois : la droite du
+// pinceau, deux orientations. Arite deux : le cone vit dans un plan, ses rayons
+// extremes portent les droites de bord, c'est-a-dire les plans U union {s}.
+struct OwnerContext {
+  mhgp::i128 sum_x = 0, sum_y = 0, sum_z = 0;   // A_X = (-2 somme p, n)
+  mhgp::i128 count = 0;
+};
+
+inline OwnerContext owner_context(const std::vector<P3>& points) {
+  OwnerContext ctx;
+  for (const P3& p : points) {
+    ctx.sum_x += p.x;
+    ctx.sum_y += p.y;
+    ctx.sum_z += p.z;
+  }
+  ctx.count = (mhgp::i128)points.size();
+  return ctx;
+}
+
+// Rend `false` des qu'un rayon extreme admissible ameliore strictement : v n'est
+// alors pas le proprietaire.
+inline bool owner_rays_ok(const std::vector<P3>& points, const OwnerContext& ctx,
+                          const Vertex& v, const mhgp::i32* support, int q,
+                          const mhgp::i32 base[3], const std::vector<i32>& b_u) {
+  const P3& a = points[(std::size_t)base[0]];
+  const mhgp::P3 e1 = mhgp::p3_sub(points[(std::size_t)base[1]], a);
+  const mhgp::P3 e2 = mhgp::p3_sub(points[(std::size_t)base[2]], a);
+  const mhgp::P3 u = mhgp::p3_cross(e1, e2);
+  if (u.x == 0 && u.y == 0 && u.z == 0) return true;      // triplet aligne : pas un rayon
+  // A_X . d = 2 u . (n a - somme p), pour l'orientation +1.
+  const mhgp::i128 ax = ctx.count * (mhgp::i128)a.x - ctx.sum_x;
+  const mhgp::i128 ay = ctx.count * (mhgp::i128)a.y - ctx.sum_y;
+  const mhgp::i128 az = ctx.count * (mhgp::i128)a.z - ctx.sum_z;
+  const mhgp::i128 axd = 2 * ((mhgp::i128)u.x * ax + (mhgp::i128)u.y * ay + (mhgp::i128)u.z * az);
+  mhgp::i128 inside = 0;
+  for (i32 z : b_u)
+    inside += orient3d_exact(a, points[(std::size_t)base[1]], points[(std::size_t)base[2]],
+                             points[(std::size_t)z]);
+  const mhgp::i128 gd_plus = axd + 4 * inside;
+  const mhgp::i128 ua = (mhgp::i128)u.x * a.x + (mhgp::i128)u.y * a.y + (mhgp::i128)u.z * a.z;
+  for (int delta = -1; delta <= 1; delta += 2) {
+    bool admissible = true;
+    for (i32 s : v.shell) {
+      bool in_support = false;
+      for (int i = 0; i < q; ++i) if (support[i] == s) in_support = true;
+      if (in_support) continue;
+      const int eps = std::binary_search(b_u.begin(), b_u.end(), s) ? -1 : 1;
+      const int t = tangent_sign(orient3d_exact(a, points[(std::size_t)base[1]],
+                                                points[(std::size_t)base[2]],
+                                                points[(std::size_t)s]), delta);
+      if (eps * t < 0) { admissible = false; break; }
+    }
+    if (!admissible) continue;
+    const mhgp::i128 gd = (delta > 0) ? gd_plus : -gd_plus;
+    if (gd < 0) return false;
+    if (gd > 0) continue;
+    const mhgp::i128 d[4] = {(mhgp::i128)delta * u.x, (mhgp::i128)delta * u.y,
+                             (mhgp::i128)delta * u.z, (mhgp::i128)delta * 2 * ua};
+    for (int i = 0; i < 4; ++i) {
+      if (d[i] < 0) return false;
+      if (d[i] > 0) break;
+    }
+  }
+  return true;
+}
+
+inline bool is_owner(const std::vector<P3>& points, const OwnerContext& ctx, const Vertex& v,
+                     const mhgp::i32* support, int q, const std::vector<i32>& b_u) {
+  if (q < 2 || q > 4) return false;
+  for (int i = 0; i < q; ++i)
+    if (!std::binary_search(v.shell.begin(), v.shell.end(), support[i])) return false;
+  for (i32 z : v.interior)
+    if (!std::binary_search(b_u.begin(), b_u.end(), z)) return false;
+  for (i32 z : b_u)
+    if (!std::binary_search(v.interior.begin(), v.interior.end(), z) &&
+        !std::binary_search(v.shell.begin(), v.shell.end(), z)) return false;
+  if (q == 4) return true;                                 // aucun rayon
+  if (q == 3) {
+    const mhgp::i32 base[3] = {support[0], support[1], support[2]};
+    return owner_rays_ok(points, ctx, v, support, q, base, b_u);
+  }
+  for (i32 s : v.shell) {
+    if (s == support[0] || s == support[1]) continue;
+    const mhgp::i32 base[3] = {support[0], support[1], s};
+    if (!owner_rays_ok(points, ctx, v, support, q, base, b_u)) return false;
+  }
+  return true;
 }
 
 // La direction canonique du parent, ou `false` si aucune orientation n'est
@@ -2098,7 +2242,7 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
   bool interrupted = false;
   // Le germe passe par le MEME contrat que les autres : un sink qui le refuse
   // interrompt le parcours, et l'interruption doit se voir dans le statut.
-  if (!sink(seed)) { *status = CloudStatus::kInvariantViolated; return; }
+  if (!sink(seed)) { *status = CloudStatus::kSinkStopped; return; }
   push(seed);
 
   while (!stack.empty()) {
@@ -2159,7 +2303,7 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
     live -= (long long)(stack.back().vertex.shell.size() + stack.back().vertex.interior.size());
     stack.pop_back();
   }
-  if (interrupted) *status = CloudStatus::kInvariantViolated;
+  if (interrupted) *status = CloudStatus::kSinkStopped;
 }
 
 // Enveloppe qui MATERIALISE la sortie. Elle reste le sujet du differentiel, parce
@@ -2193,7 +2337,8 @@ inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp:
 // ---------------------------------------------------------------------------
 inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s_max,
                                       FlatStatistics* st, CloudStatus* status,
-                                      bool verify_census, bool use_index = false) {
+                                      bool verify_census, bool use_index = false,
+                                      bool use_owner = false) {
   *st = FlatStatistics{};
   mhgp::Catalogue catalogue;
   const int n = (int)points.size();
@@ -2218,14 +2363,21 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
 
   std::vector<mhgp::CriticalSphere> kept;
   std::vector<mhgp::i32> members_pool;
+  // `emitted` est la derniere table globale en Theta(sortie). La composition
+  // « support canonique PUIS proprietaire » la remplace exactement : le premier
+  // filtre supprime les doublons d'un meme sommet — le cube u16 a six supports
+  // minimaux pour une seule boule —, le second ceux entre sommets. Les deux
+  // chemins coexistent tant que le differentiel n'a pas juge leur egalite.
   std::unordered_set<std::vector<mhgp::i32>, flats::ShellHash> emitted;
+  const flats::OwnerContext owner_ctx = flats::owner_context(points);
 
   CertifiedIndex grid;
   const bool indexed = use_index && n >= 1;
   if (indexed) grid.build(points, 16);
 
   std::vector<mhgp::i32> members, shell;
-  auto try_emit_with = [&](const mhgp::MiniballResult& mb) {
+  auto try_emit_with = [&](const mhgp::MiniballResult& mb, const mhgp::i32* candidate, int cq,
+                           const flats::Vertex* owner_vertex, bool from_shell) {
     ++st->emit_attempts;
     members.clear();
     shell.clear();
@@ -2248,7 +2400,10 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
       }
     }
     if ((int)members.size() > s_max) return;
-    if (!emitted.insert(shell).second) { ++st->emit_duplicate_shell; return; }
+    if (!use_owner && !emitted.insert(shell).second) {
+      ++st->emit_duplicate_shell;
+      return;
+    }
 
     // SUPPORT CANONIQUE.
     //
@@ -2285,6 +2440,43 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
                                                                 (int)by_coordinate.size());
     if (!canonical_mb.ok) return;
 
+    if (use_owner) {
+      // (3) REJET DE TOUT SUPPORT NON CANONIQUE. Sans lui, l'owner seul emettrait
+      // une fois par support minimal : six fois sur le cube u16.
+      //
+      // L'ARITE QUATRE passe par une autre voie, et ma premiere version la perdait.
+      // Elle est recoltee depuis la COQUILLE ENTIERE du sommet, donc le candidat a
+      // |S(v)| points et non quatre : des qu'une coquille est cospherique, comparer
+      // le candidat au support canonique rejetait la sphere partout, et une sphere
+      // par nuage disparaissait. La note traite ce cas a part : on canonise la
+      // coquille une fois, et on n'emprunte cette voie QUE si le support canonique a
+      // bien arite quatre. La sphere est alors le sommet lui-meme.
+      if (candidate == nullptr) { ++st->owner_rejected_support; return; }
+      if (from_shell) {
+        if (canonical_mb.n_support != 4) { ++st->owner_rejected_support; return; }
+      } else {
+        if (cq != canonical_mb.n_support) { ++st->owner_rejected_support; return; }
+        for (int i = 0; i < cq; ++i) {
+          bool found = false;
+          for (int j = 0; j < canonical_mb.n_support; ++j)
+            if (canonical_mb.support[j] == candidate[i]) found = true;
+          if (!found) { ++st->owner_rejected_support; return; }
+        }
+      }
+      // (4) LE SOMMET COURANT EST-IL o(U_can) ? B_U est deja calcule : c'est
+      // l'interieur strict de la boule censee, membres moins coquille.
+      std::vector<mhgp::i32> b_u;
+      for (mhgp::i32 z : members)
+        if (!std::binary_search(shell.begin(), shell.end(), z)) b_u.push_back(z);
+      if (owner_vertex == nullptr ||
+          !flats::is_owner(points, owner_ctx, *owner_vertex, canonical_mb.support,
+                           canonical_mb.n_support, b_u)) {
+        ++st->owner_rejected_vertex;
+        return;
+      }
+      ++st->owner_emitted;
+    }
+
     mhgp::CriticalSphere critical{};
     for (int i = 0; i < mhgp::kMaxSupport; ++i)
       critical.support[i] = i < canonical_mb.n_support ? canonical_mb.support[i] : -1;
@@ -2298,12 +2490,14 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
     ++st->emitted_arity[canonical_mb.n_support];
   };
 
+  // Voie directe exhaustive : aucun sommet ne la porte, donc aucun proprietaire.
+  // Elle garde `emitted`, et le differentiel ne l'oppose jamais a la voie owner.
   auto try_emit = [&](const mhgp::i32* candidate, int m) {
     const mhgp::MiniballResult mb = mhgp::miniball_of(points, candidate, m);
     if (!mb.ok) return;
     for (int i = 0; i < m; ++i)
       if (mhgp::sphere_side(mb.sph, points[(std::size_t)candidate[i]]) != 0) return;
-    try_emit_with(mb);
+    try_emit_with(mb, nullptr, 0, nullptr, false);
   };
 
   // SINGLETONS. Sous refus des doublons, la boule fermee de rayon nul centree en
@@ -2380,7 +2574,7 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
       // La miniboule est calculee UNE fois et traverse le filtre : la recalculer
       // dans le filtre puis dans l'emission coutait plus cher que le census
       // qu'elle evitait.
-      auto guarded_emit = [&](const mhgp::i32* candidate, int q) {
+      auto guarded_emit = [&](const mhgp::i32* candidate, int q, bool from_shell = false) {
         const mhgp::MiniballResult mb = mhgp::miniball_of(points, candidate, q);
         if (!mb.ok) return;
         for (int i = 0; i < q; ++i)
@@ -2393,10 +2587,10 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
             }
         }
         ++st->harvest_censused;
-        try_emit_with(mb);
+        try_emit_with(mb, candidate, q, &v, from_shell);
       };
 
-      guarded_emit(v.shell.data(), m);
+      guarded_emit(v.shell.data(), m, true);
       for (int i = 0; i < m; ++i)
         for (int j = i + 1; j < m; ++j) {
           const mhgp::i32 e[2] = {v.shell[(std::size_t)i], v.shell[(std::size_t)j]};

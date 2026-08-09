@@ -211,7 +211,7 @@ add_test(NAME mhgp3v_oracle_order_k COMMAND mhgp3v_oracle
 add_test(NAME mhgp3v_flats_fixtures COMMAND mhgp3v_flats_differential
          --clouds 0 --min-cases 150 --min-navigated 100 --min-vertices 500
          --min-multiple-shells 20 --min-quotiented 20
-         --min-reverse 1500 --min-reverse-depth 6 --min-internal-nodes 100)
+         --min-reverse 1500 --min-reverse-depth 6 --min-internal-nodes 100 --min-owner 2000)
 # NOTE. `--min-reverse-depth` porte desormais aussi sur les DECISIONS de filiation et
 # sur les refus en O(m) par le couple de retour : sans ces deux planchers, un mutant
 # « prefiltre toujours vrai » laisserait l'optimisation morte et la porte verte.
@@ -220,7 +220,7 @@ add_test(NAME mhgp3v_flats_fixtures COMMAND mhgp3v_flats_differential
 add_test(NAME mhgp3v_flats_generic COMMAND mhgp3v_flats_differential
          --clouds 150 --points 11 --coord 24 --smax 6 --seed 4242 --min-cases 1000
          --min-navigated 700 --min-vertices 50000
-         --min-reverse 50000 --min-reverse-depth 8 --min-internal-nodes 1000)
+         --min-reverse 50000 --min-reverse-depth 8 --min-internal-nodes 1000 --min-owner 40000)
 
 # NUAGE ASSEZ GRAND POUR QUE L'INDEX AIT UN ARBRE. Tous les autres nuages
 # permanents ont au plus treize points : avec des feuilles de quatre ils ont deja
@@ -238,7 +238,7 @@ add_test(NAME mhgp3v_flats_indexed_tree COMMAND mhgp3v_flats_differential
 add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
          --clouds 120 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 1000
          --min-navigated 500 --min-multiple-shells 300 --min-quotiented 300
-         --min-reverse 30000 --min-reverse-depth 8 --min-internal-nodes 1000)
+         --min-reverse 30000 --min-reverse-depth 8 --min-internal-nodes 1000 --min-owner 30000)
 
 # La REVERSE SEARCH est comparee au BFS dans les quatre portes positives : meme
 # ensemble de sommets, memes coquilles, memes ensembles interieurs, sans `seen`,
@@ -258,7 +258,7 @@ add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
 add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential
          --clouds 240 --points 8 --coord 40 --smax 7 --seed 90210 --min-cases 1400
          --min-navigated 1000 --min-multiple-shells 200
-         --min-reverse 100000 --min-reverse-depth 12 --min-internal-nodes 2000)
+         --min-reverse 100000 --min-reverse-depth 12 --min-internal-nodes 2000 --min-owner 50000)
 
 # La dichotomie doit reproduire l'UNIVERS DES COFACES, l'UNIVERS DES FACETTES,
 # lambda(F) et M(F). La verite enumere elle-meme toutes les cofaces de cardinal

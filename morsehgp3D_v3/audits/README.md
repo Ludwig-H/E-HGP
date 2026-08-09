@@ -4,7 +4,7 @@ Ce dossier conserve les audits indépendants et les réponses chronologiques exp
 
 ## Lectures courantes
 
-- [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md) : ledger courant du parcours par flats, du germe historique au commit d'index exact `1a0a1f8` puis au premier juge Gate D; matrice de clôture, dettes live et NO-GO 50 k actualisés.
+- [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : **autorité d'audit du worktree v3 courant**, scellée par empreintes; contre-exemples minimaux du domaine `use_owner` et de la naissance F0, résultats positifs Release et sanitizers, puis ordre de fermeture destiné à Claude.
 - [`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md) : résultat constructif pour le chemin rapide : classifications exactes boîte--boule en `BigInt<4>`, preuve du désaccord ternaire, contrat de propriété et porte à nœuds internes.
 - [`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md) : parent local exact sur le vrai graphe multiplicitaire, propriétaire canonique par cône signé, garde multi-support, décision du parent sans seconde requête de voisin, théorèmes de suppression de `seen/frontier/visited` et de `emitted`, fixtures et review live.
 - [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](NOTE_GATE_D_GLOBALITES_RESIDUELLES.md) : factorisation de ce qui reste global par nécessité scientifique : source silencieuse, tri et lots, état horizontal, couverture, verticales et masse contractuelle.
@@ -12,10 +12,11 @@ Ce dossier conserve les audits indépendants et les réponses chronologiques exp
 - [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md) : compression prouvée des premiers incidents silencieux à une attache par facette cœur sous la porte régulière; contre-exemple à la cible brute et nécessité exacte du carrier strict résolu.
 - [`NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md`](NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md) : élimination de la boîte noire `ResolveStrictCarrier` par descente locale strictement décroissante jusqu'à une facette cœur; dans la résolution du carrier, seul le `find` dans la partition horizontale antérieure reste global, avec fold externe et certificat.
 - [`NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md`](NOTE_GATE_D_SOURCE_DIRECTE_DEPUIS_SPHERES_CERTIFIEES.md) : caractérisation exacte des cofaces Gabriel ouvertes portées par une sphère certifiée; propriétaire toujours rencontré au niveau au plus `k-1`, borne de sortie locale sous zéro-extra-shell, générateur déterministe par familles universelles et halfspace-reporting, fixture entière reproductible 432/648, obstruction combinatoire hors porte et verrou résiduel du census global exact en batch.
-- [`NOTE_GATE_D_FOLD_PRELOT_EXACT.md`](NOTE_GATE_D_FOLD_PRELOT_EXACT.md) et [`check_gate_d_fold_f0.py`](check_gate_d_fold_f0.py) : contrat mathématique du quotient horizontal sur snapshot strict et premier noyau F0-A exécutable; fermeture obligatoire sur racines et carriers latents, vérité Warshall contre sujet DSU, rollback, arité onze, puis runs scellés F1 et journal externe de versions F2 encore séparés.
+- [`NOTE_GATE_D_FOLD_PRELOT_EXACT.md`](NOTE_GATE_D_FOLD_PRELOT_EXACT.md) et [`check_gate_d_fold_f0.py`](check_gate_d_fold_f0.py) : contrat mathématique du quotient horizontal sur snapshot strict et noyau F0-A exécutable. Le script imprime `PASS`, mais l'audit courant maintient la porte rouge car vérité et sujet rejettent ensemble une naissance `N_a--N_a` autorisée par la note.
 
 ## Archives épinglées et réponses chronologiques
 
+- [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md) : ledger historique du parcours par flats jusqu'aux premiers deltas Gate D; ses matrices et ses compteurs ne décrivent plus le worktree courant.
 - [`AUDIT_PROPOSITION.md`](AUDIT_PROPOSITION.md) : audit historique de la première voie proposée.
 - [`AUDIT_PROPOSITION_2.md`](AUDIT_PROPOSITION_2.md) : archive figée du second audit de la voie A2pe aux commits `8ac683a` puis `ae08c9f`; utile pour ses contre-exemples, mais plus journal courant.
 - [`AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md`](AUDIT_ORACLE_M1_ET_PROTOTYPE_M2_1.md) : archive figée de l'audit dynamique du premier juge M1 et de la réfutation du certificat M2.1.

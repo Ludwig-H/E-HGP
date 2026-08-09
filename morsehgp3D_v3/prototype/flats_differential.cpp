@@ -269,6 +269,9 @@ struct Coverage {
   long long pairs_judged = 0;
   long long pairs_accepted = 0;
   long long pairs_prefiltered = 0;
+  long long owner_rejected_support = 0;
+  long long owner_rejected_vertex = 0;
+  long long owner_emitted = 0;
 };
 static Coverage coverage;
 
@@ -277,6 +280,49 @@ static bool has_duplicates(const std::vector<P3>& pts) {
   for (const P3& p : pts) v.push_back({(long long)p.x, (long long)p.y, (long long)p.z});
   std::sort(v.begin(), v.end());
   return std::adjacent_find(v.begin(), v.end()) != v.end();
+}
+
+// ADMISSIBILITE RECALCULEE PAR LE JUGE, sans emprunter `pair_admissible` au sujet.
+// Le determinant est ecrit ici, ligne par ligne, et les deux potentiels sont
+// reformules depuis la definition : partager la primitive faisait juger la
+// suppression de la seconde requete, jamais les SIGNES eux-memes.
+static __int128 judge_orient3d(const P3& a, const P3& b, const P3& c, const P3& d) {
+  const __int128 ux = (__int128)b.x - a.x, uy = (__int128)b.y - a.y, uz = (__int128)b.z - a.z;
+  const __int128 vx = (__int128)c.x - a.x, vy = (__int128)c.y - a.y, vz = (__int128)c.z - a.z;
+  const __int128 wx = (__int128)d.x - a.x, wy = (__int128)d.y - a.y, wz = (__int128)d.z - a.z;
+  return ux * (vy * wz - vz * wy) - uy * (vx * wz - vz * wx) + uz * (vx * wy - vy * wx);
+}
+
+static bool judge_admissible(const std::vector<P3>& pts, const mhgp3v::flats::Vertex& w,
+                             const i32 base[3], int direction,
+                             const std::vector<i32>& root_base) {
+  if (direction != -1 && direction != 1) return false;
+  const P3& a = pts[(size_t)base[0]];
+  const P3& b = pts[(size_t)base[1]];
+  const P3& c = pts[(size_t)base[2]];
+  // Rester dans la chambre : le signe tangent de chaque point de coquille est >= 0.
+  for (i32 z : w.shell) {
+    const __int128 o = judge_orient3d(a, b, c, pts[(size_t)z]);
+    const __int128 tangent = (direction > 0) ? -o : o;
+    if (tangent < 0) return false;
+  }
+  if (!w.interior.empty()) {
+    // Niveau positif : L_h doit croitre STRICTEMENT pour h = min B(w).
+    i32 h = w.interior.front();
+    for (i32 z : w.interior) if (z < h) h = z;
+    const __int128 o = judge_orient3d(a, b, c, pts[(size_t)h]);
+    const __int128 tangent = (direction > 0) ? -o : o;
+    return tangent > 0;
+  }
+  // Niveau zero : Q_r doit decroitre STRICTEMENT sur la base independante. Ce sont
+  // les VALEURS de `orient3d` qui se somment, pas leurs signes : la derivee de Q_r
+  // est une somme de formes affines, et sommer des signes est faux. J'avais deja
+  // commis cette faute dans le sujet et corrigee ; je l'ai reintroduite ici, et
+  // c'est ce juge independant qui l'a rendue visible sur cinq couples.
+  __int128 total = 0;
+  for (i32 z : root_base) total += judge_orient3d(a, b, c, pts[(size_t)z]);
+  const __int128 derivative = (direction > 0) ? -total : total;
+  return derivative < 0;
 }
 
 static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool verbose) {
@@ -481,6 +527,45 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
     }
   }
 
+  // (G) « SUPPORT CANONIQUE PUIS PROPRIETAIRE » CONTRE LA TABLE `emitted`.
+  //
+  // `emitted` est la derniere table globale en Theta(sortie) du catalogue : tant
+  // qu'elle est la, streamer les sommets ne sert a rien des qu'on veut le
+  // catalogue. La composition prouvee par l'auditeur la remplace exactement — le
+  // premier filtre supprime les doublons d'un meme sommet, le second ceux entre
+  // sommets. La porte exige l'egalite des DEUX catalogues, sphere par sphere :
+  // support, arite, rang et membres.
+  if (status == mhgp3v::CloudStatus::kOk) {
+    mhgp3v::FlatStatistics ost{};
+    mhgp3v::CloudStatus ostatus = mhgp3v::CloudStatus::kOk;
+    const mhgp::Catalogue owned =
+        mhgp3v::flat_catalogue(pts, s_max, &ost, &ostatus, false, true, true);
+    bool same = (ostatus == status && owned.spheres.size() == cat.spheres.size());
+    if (same)
+      for (size_t i = 0; i < owned.spheres.size(); ++i) {
+        const mhgp::CriticalSphere& a = owned.spheres[i];
+        const mhgp::CriticalSphere& b = cat.spheres[i];
+        if (a.n_support != b.n_support || a.rank != b.rank) { same = false; break; }
+        for (int j = 0; j < 4; ++j) if (a.support[j] != b.support[j]) same = false;
+        if (!same) break;
+        for (int j = 0; j < a.rank; ++j)
+          if (owned.members[(size_t)(a.members_begin + j)] !=
+              cat.members[(size_t)(b.members_begin + j)]) { same = false; break; }
+        if (!same) break;
+      }
+    if (!same) {
+      printf("[%s] s_max=%2d OWNER != EMITTED : %zu spheres contre %zu, statut %s contre %s"
+             " (refus support=%lld refus sommet=%lld emises=%lld)\n", tag, s_max,
+             owned.spheres.size(), cat.spheres.size(), mhgp3v::cloud_status_name(ostatus),
+             mhgp3v::cloud_status_name(status), ost.owner_rejected_support,
+             ost.owner_rejected_vertex, ost.owner_emitted);
+      ok = false;
+    }
+    coverage.owner_rejected_support += ost.owner_rejected_support;
+    coverage.owner_rejected_vertex += ost.owner_rejected_vertex;
+    coverage.owner_emitted += ost.owner_emitted;
+  }
+
   // (E bis) L'ENUMERATION EST-ELLE MONOTONE, ET LA SORTIE PRECOCE FIDELE ?
   //
   // Le parent s'arrete desormais au PREMIER couple admissible. Sa validite ne
@@ -532,7 +617,7 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       // et par le chemin complet parent canonique + requete de retour + comparaison
       // de coquille. Les deux verdicts doivent coincider, et un `false` du
       // prefiltre doit impliquer un refus de l'ancien chemin.
-      int decision_differs = 0, prefilter_wrong = 0, decision_broken = 0;
+      int decision_differs = 0, prefilter_wrong = 0, decision_broken = 0, signs_differ = 0;
       long long pairs_judged = 0, accepted = 0, prefiltered = 0;
       if (root_base.size() == 4) {
         for (const auto& v : seen) {
@@ -557,6 +642,9 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
               }
               const bool prefilter = mhgp3v::flats::backward_pair_admissible(
                   pts, w, flat.base, direction, root_base);
+              // Les signes eux-memes, recalcules par le juge et non empruntes.
+              if (prefilter != judge_admissible(pts, w, flat.base, -direction, root_base))
+                ++signs_differ;
               if (!prefilter) {
                 ++prefiltered;
                 if (old_accept) ++prefilter_wrong;    // refus certifie et pourtant fils
@@ -595,12 +683,13 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
         }
       }
       if (root_base.size() != 4 || not_monotone || parent_differs || decision_differs ||
-          prefilter_wrong || decision_broken) {
+          prefilter_wrong || decision_broken || signs_differ) {
         printf("[%s] s_max=%2d PARENT PRECOCE : base=%zu monotonie violee=%d parents"
                " differents=%d | decisions differentes=%d prefiltre faux=%d decision cassee=%d"
-               " (%lld couples juges, %lld acceptes, %lld prefiltres)\n", tag, s_max,
-               root_base.size(), not_monotone, parent_differs, decision_differs, prefilter_wrong,
-               decision_broken, pairs_judged, accepted, prefiltered);
+               " signes differents=%d (%lld couples juges, %lld acceptes, %lld prefiltres)\n",
+               tag, s_max, root_base.size(), not_monotone, parent_differs, decision_differs,
+               prefilter_wrong, decision_broken, signs_differ, pairs_judged, accepted,
+               prefiltered);
         ok = false;
       }
       coverage.pairs_judged += pairs_judged;
@@ -722,7 +811,7 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
                                         [&](const mhgp3v::flats::Vertex&) {
             return ++seen < 1;
           });
-          if (seen != 1 || istatus2 != mhgp3v::CloudStatus::kInvariantViolated) {
+          if (seen != 1 || istatus2 != mhgp3v::CloudStatus::kSinkStopped) {
             printf("[%s] s_max=%2d SINK INTERROMPU : %lld sommets, statut %s\n", tag, s_max,
                    seen, mhgp3v::cloud_status_name(istatus2));
             ok = false;
@@ -922,7 +1011,7 @@ static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts,
 int main(int argc, char** argv) {
   int clouds = 400, npoints = 11, coord = 24, smax_hi = 6, min_cases = 1;
   int min_navigated = 0, min_vertices = 0, min_multiple_shells = 0, min_quotiented = 0;
-  int min_reverse = 0, min_reverse_depth = 0, min_internal_nodes = 0;
+  int min_reverse = 0, min_reverse_depth = 0, min_internal_nodes = 0, min_owner = 0;
   long long seed = 4242;
   // `atoi` acceptait « 0junk » et rendait zero : une campagne vide passait pour
   // verte. Lecture INTEGRALE stricte, sinon code 2 avant tout calcul.
@@ -967,6 +1056,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--min-reverse")) ok_argument = take(&min_reverse, 0, 2000000000);
     else if (!strcmp(argv[i], "--min-reverse-depth")) ok_argument = take(&min_reverse_depth, 0, 100000);
     else if (!strcmp(argv[i], "--min-internal-nodes")) ok_argument = take(&min_internal_nodes, 0, 2000000000);
+    else if (!strcmp(argv[i], "--min-owner")) ok_argument = take(&min_owner, 0, 2000000000);
     else if (!strcmp(argv[i], "--seed")) {
       if (has_value && integer(argv[i + 1], &value) && value >= 0 && value <= 4294967295LL) {
         ++i; seed = value; ok_argument = true;
@@ -1314,12 +1404,47 @@ int main(int argc, char** argv) {
       truncated.shell = {0, 1, 2};
       if (!mhgp3v::flats::pair_admissible(six, truncated, base, 1, root_base)) ++faults;
     }
+    // TROIS APPELS DIRECTS a la decision, que la fixture n'exercait pas : un couple
+    // admissible ANTERIEUR, une cible ABSENTE, et une direction HOSTILE. Sans eux,
+    // la fixture gravait les signes mais pas le decideur.
+    {
+      mhgp3v::flats::FlatAtVertex late;          // clef {1,2,3}, la derniere de ABCE
+      late.base[0] = 1; late.base[1] = 2; late.base[2] = 3;
+      late.closure = {1, 2, 3};
+      // En ABCE le flat {0,1,2} precede et sa direction +1 est admissible : la
+      // decision doit REFUSER, sans jamais atteindre la cible.
+      if (mhgp3v::flats::decide_child(six, abce, late, -1, root_base) !=
+          mhgp3v::flats::ChildOutcome::kReject) ++faults;
+      // CIBLE ABSENTE, deux formes distinctes — et la premiere version de cette
+      // fixture se trompait. Une cible de clef POSTERIEURE ne donne pas `kBroken` :
+      // le premier couple admissible rencontre avant elle donne `kReject`, ce qui
+      // est correct. Pour exercer l'echec ferme il faut soit une clef que
+      // l'enumeration DEPASSE, soit une base divergente sur la bonne clef.
+      mhgp3v::flats::FlatAtVertex passed;        // clef {0,1} : depassee des le premier flat
+      passed.base[0] = 0; passed.base[1] = 1; passed.base[2] = 2;
+      passed.closure = {0, 1};
+      if (mhgp3v::flats::decide_child(six, abcf, passed, -1, root_base) !=
+          mhgp3v::flats::ChildOutcome::kBroken) ++faults;
+      mhgp3v::flats::FlatAtVertex diverging;     // bonne clef, base qui n'est pas la sienne
+      diverging.base[0] = 0; diverging.base[1] = 1; diverging.base[2] = 5;
+      diverging.closure = {0, 1, 2};
+      if (mhgp3v::flats::decide_child(six, abcf, diverging, -1, root_base) !=
+          mhgp3v::flats::ChildOutcome::kBroken) ++faults;
+      mhgp3v::flats::FlatAtVertex plane;
+      plane.base[0] = 0; plane.base[1] = 1; plane.base[2] = 2;
+      plane.closure = {0, 1, 2};
+      if (mhgp3v::flats::decide_child(six, abcf, plane, 0, root_base) !=
+          mhgp3v::flats::ChildOutcome::kBroken) ++faults;
+      if (mhgp3v::flats::pair_admissible(six, abce, base, 0, root_base)) ++faults;
+      if (mhgp3v::flats::pair_admissible(six, abce, base, 2, root_base)) ++faults;
+    }
     if (faults) {
       printf("[deux potentiels] %d faute(s) sur les verdicts entiers exacts\n", faults);
       ++failures;
     } else {
       printf("[deux potentiels] Q_r au niveau zero, L_h au niveau un, base permutee et"
-             " coquille tronquee : quinze verdicts entiers exacts\n");
+             " coquille tronquee : quatorze verdicts entiers exacts, plus six"
+             " appels directs a la decision\n");
     }
   }
 
@@ -1459,6 +1584,8 @@ int main(int argc, char** argv) {
          "  refus par la decision=%lld\n", coverage.reject_backward, coverage.reject_by_parent);
   printf("        : couples juges deux fois=%lld  acceptes=%lld  prefiltres=%lld\n",
          coverage.pairs_judged, coverage.pairs_accepted, coverage.pairs_prefiltered);
+  printf("owner  : emises=%lld  refus support non canonique=%lld  refus autre proprietaire=%lld\n",
+         coverage.owner_emitted, coverage.owner_rejected_support, coverage.owner_rejected_vertex);
   printf("        : parent precoce=%lld fermetures  balayage complet=%lld  rapport %.2f\n",
          coverage.parent_early_closures, coverage.parent_full_closures,
          coverage.parent_early_closures
@@ -1474,11 +1601,18 @@ int main(int argc, char** argv) {
       || coverage.index_nodes_visited < min_internal_nodes
       || coverage.sink_vertices < min_reverse || coverage.sink_interruptions < min_reverse_depth
       || coverage.reverse_decisions < min_reverse_depth
-      || coverage.reject_backward < min_reverse_depth) {
+      || coverage.reject_backward < min_reverse_depth
+      || coverage.pairs_judged < min_reverse || coverage.pairs_accepted < min_reverse_depth
+      || coverage.pairs_prefiltered < min_reverse_depth
+      || coverage.owner_emitted < min_owner || coverage.owner_rejected_vertex < min_owner
+      || coverage.owner_rejected_support < min_owner / 32) {
     printf("ECHEC : plancher de couverture non atteint — navigues %lld/%d, sommets %lld/%d, "
            "coquilles multiples %lld/%d, triplets quotientes %lld/%d\n",
            coverage.navigated_clouds, min_navigated, coverage.vertices, min_vertices,
            coverage.multiple_shells, min_multiple_shells, coverage.quotiented, min_quotiented);
+    printf("        owner emises %lld/%d, refus sommet %lld/%d, refus support %lld/%d\n",
+           coverage.owner_emitted, min_owner, coverage.owner_rejected_vertex, min_owner,
+           coverage.owner_rejected_support, min_owner / 32);
     printf("        reverse %lld/%d, indexes %lld/%d, decisions %lld/%d, refus O(m) %lld/%d,"
            " profondeur %lld/%d, noeuds internes %lld/%d\n", coverage.reverse_vertices,
            min_reverse, coverage.reverse_indexed_vertices, min_reverse,
