@@ -10,6 +10,7 @@ Ce dossier conserve les audits indépendants et les réponses chronologiques exp
 - [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](NOTE_GATE_D_GLOBALITES_RESIDUELLES.md) : factorisation de ce qui reste global par nécessité scientifique : source silencieuse, tri et lots, état horizontal, couverture, verticales et masse contractuelle.
 - [`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md) : théorème et pipeline streamé qui reconstruisent toutes les premières incidences du cœur par requête de boule fermée ou minimum direct, sans étoile globale; oracle LBVH général conservé comme juge et repli.
 - [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md) : compression prouvée des premiers incidents silencieux à une attache par facette cœur sous la porte régulière; contre-exemple à la cible brute et nécessité exacte du carrier strict résolu.
+- [`NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md`](NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md) : élimination de la boîte noire `ResolveStrictCarrier` par descente locale strictement décroissante jusqu'à une facette cœur; preuve que seul le `find` dans la partition horizontale antérieure reste global, avec fold externe et certificat.
 
 ## Archives épinglées et réponses chronologiques
 

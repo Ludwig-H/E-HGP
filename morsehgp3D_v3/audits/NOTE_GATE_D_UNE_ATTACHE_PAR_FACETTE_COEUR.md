@@ -73,10 +73,13 @@ $F\leftrightarrow P_F$. Cette définition n'est pas circulaire : par induction,
 l'état strict de $\mathcal{C}_k$ coïncide avec celui de $\mathcal{A}_k$, et
 $\beta(T_F)<a_F$ rend le resolver disponible avant le lot courant.
 
-Le mot `Resolve` est essentiel. Il peut être implémenté par une descente locale
-certifiée suivie d'une jointure vers le locator externe, ou par un handle de
-carrier déjà authentifié. Une recherche dans le seul ensemble $D_k$ ne suffit
-pas en général.
+Le mot `Resolve` est essentiel, mais sa partie géométrique n'est plus une boîte
+noire. La
+[`note de descente locale`](NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md)
+prouve qu'une suite canonique, strictement décroissante en $\beta$, transforme
+$T_F$ en une clef $R_F\in D_k$ de la même composante stricte. Le fold ne résout
+globalement que `find_<a_F(R_F)>`. Une recherche immédiate de $T_F$ dans le seul
+ensemble $D_k$ ne suffit pas en général.
 
 ## 3. Théorème de l'attache unique
 
@@ -180,9 +183,9 @@ mais aucun lookup immédiat dans $D_3$, ni aucun autre choix de $u_F$, ne peut
 identifier cette composante. La cible résolue est correcte; la clef stricte
 brute ne l'est pas.
 
-Cette fixture montre précisément ce qui reste global : le choix de $T_F$ est
-local, mais la question « dans quelle composante stricte vit $T_F$ ? » dépend de
-l'histoire horizontale antérieure.
+Cette fixture montre pourquoi la cible brute est fausse. La descente locale peut
+désormais produire une facette cœur $R_F$; ce qui reste global est la question
+« dans quelle composante stricte de l'histoire horizontale vit $R_F$ ? ».
 
 ## 5. Contrôle borné transitoire
 
@@ -245,8 +248,9 @@ Un reçu `ResolvedCoreFacetAttachment` doit engager au minimum :
   les extra-shells pertinents;
 - pour la troisième branche, $z_F$, $w_F$, $u_F$, $T_F$, la preuve
   $\beta(T_F)<a_F$ et le certificat de couverture du §3.1;
-- un certificat `ResolveStrictCarrier` lié au watermark $<a_F$, son token
-  $P_F$ et la preuve que $P_F$ couvre $F\cup\lbrace z_F\rbrace$;
+- un certificat de descente locale $T_F\leadsto R_F\in D_k$, puis le `find` de
+  $R_F$ lié au watermark $<a_F$, son token $P_F$ et la preuve que $P_F$ couvre
+  $F\cup\lbrace z_F\rbrace$;
 - `added_core_facet=F`, `added_points=empty`, le lot exact complet et le digest
   de toutes les provenances agrégées.
 
@@ -259,9 +263,10 @@ digest de toutes les provenances.
 La sortie silencieuse passe de
 $\Theta\bigl(\sum_{F\in D_k}\lvert M(F)\rvert\bigr)$ records potentiels à au
 plus $\lvert D_k\rvert$ attaches. Les requêtes de boule fermée, la preuve de
-régularité, le tri par niveau et la résolution stricte restent nécessaires. Le
-range-report peut toucher $\Theta(n)$ points et le resolver reste une jointure
-globale logique : aucune borne 50 k ou SLO ne découle de ce théorème.
+régularité, la descente vers le cœur, le tri par niveau et le `find` strict
+restent nécessaires. Le range-report peut toucher $\Theta(n)$ points, la
+descente n'a pas de longueur utile au SLO, et le `find` reste une jointure
+globale logique : aucune borne 50 k ne découle de ce théorème.
 
 ## 8. Portes de falsification
 

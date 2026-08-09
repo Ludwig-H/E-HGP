@@ -260,6 +260,16 @@ add_test(NAME mhgp3v_first_incidence_internal_nodes COMMAND mhgp3v_first_inciden
 add_test(NAME mhgp3v_first_incidence_high_order COMMAND mhgp3v_first_incidence
          --clouds 12 --points 9 --coord 3 --k 4 --seed 13
          --min-closed 400 --min-empty 80 --min-internal-nodes 20)
+# Une campagne DANS le domaine regulier : zero egalite exterieure, zero support
+# ambigu. C'est la seule ou les candidats a une attache sont des attaches
+# AUTORISEES — et la cible brute y echoue quand meme, ce qui est precisement ce
+# que la note affirme.
+add_test(NAME mhgp3v_first_incidence_regular COMMAND mhgp3v_first_incidence
+         --clouds 12 --points 14 --coord 4000 --k 3 --seed 11
+         --require-regular --min-attachments 15 --min-closed 400 --min-empty 200)
+mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_irregular "--require-regular exige zero egalite"
+  --clouds 12 --points 20 --coord 20 --k 3 --seed 11 --require-regular)
 mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
   mhgp3v_first_incidence_reject_absurd "campagne absurde" --clouds 0)
 mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence

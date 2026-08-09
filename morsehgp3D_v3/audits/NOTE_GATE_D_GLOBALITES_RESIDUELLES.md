@@ -29,6 +29,7 @@ ni mosaïque de Delaunay d'ordre supérieur, ni $\Gamma$ global matérialisé.
 | `seen/frontier/visited` | accidentelle | non | le parent de reverse search les remplace |
 | table `emitted` | accidentelle sous propriétaire complet | non | support canonique puis propriétaire unique donnent l'émission unique |
 | source d'incidences silencieuses | autorité globale | non, si elle est complète et streamée | les événements critiques seuls ne déterminent pas tout $\Gamma_k$ |
+| carrier d'un bras strict non-cœur | local jusqu'à une clef $R\in D_k$, puis global | non pour la descente; partition requise pour le dernier `find` | une baisse canonique de $\beta$ atteint le cœur, mais sa racine dépend de l'histoire stricte |
 | ordre exact et lots égaux en $\beta$ | barrière globale | non, tri externe autorisé | aucune mutation n'est sûre avant le dernier record de même niveau |
 | partition horizontale active | état global logique | pas nécessairement; cache et stockage externe permis | une incidence future doit retrouver la composante de ses carriers |
 | `coverage_delta` et provenance | historique global append-only | non | une incidence silencieuse peut modifier un futur lot sans créer de nœud |
@@ -51,8 +52,11 @@ Sous une source finie et complète, le pipeline exact minimal est le suivant.
    décide leurs premières incidences. Pour un payload qui exige $M(F)$, elle les
    émet toutes. Pour le seul quotient $H_0$ régulier, la
    [`note d'attache unique`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md)
-   remplace les familles silencieuses par au plus une attache par facette cœur,
-   vers un carrier strict résolu. Chaque record possède une identité canonique
+   remplace les familles silencieuses par au plus une attache par facette cœur.
+   La
+   [`descente locale de carrier`](NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md)
+   transforme son bras strict en clef cœur; seul le `find` de cette clef dans la
+   partition pré-lot reste global. Chaque record possède une identité canonique
    et une preuve de complétude relative à cette source.
 3. Les producteurs écrivent des runs bornés triés par la clef
    `(ordre, beta_exact, type, identite)`.
@@ -103,9 +107,12 @@ preuve nouvelle à découvrir : fermer la source directe, développer exactement
 $D_k$, terminer toutes les requêtes fermées, authentifier l'autorité de fenêtre,
 lier leurs watermarks et alimenter le fold. Pour le quotient régulier, il n'est
 même plus nécessaire de matérialiser tous les $M(F)$ : une attache propriétaire
-vers `ResolveStrictCarrier` suffit. Cette résolution rappelle toutefois que la
-partition stricte reste une information globale. Une source seulement plausible
-ou un préfixe Gabriel direct ne suffit toujours pas. Les contre-exemples et
+par facette suffit. `ResolveStrictCarrier` se factorise désormais en une
+descente locale strictement décroissante jusqu'à $R_F\in D_k$, puis un unique
+`find` de $R_F$ dans l'état strict. La boîte noire géométrique et le locator des
+facettes non-cœur disparaissent; la partition du cœur reste une information
+globale. Une source seulement plausible ou un préfixe Gabriel direct ne suffit
+toujours pas. Les contre-exemples et
 obligations sont recensés dans
 [`INCIDENCES_SILENCIEUSES_GAMMA.md`](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
 et dans la [spécification](../../docs/SPECIFICATION_MORSEHGP3D.md). Le contrat
@@ -271,8 +278,9 @@ donc pas le contrat 50 k.
   propriétaire locaux**;
 - lecture globale du nuage : **intrinsèque, $O(n)$ et immuable**;
 - complétude sparse des incidences silencieuses : **théorème conditionnel fermé;
-  tous les $M(F)$ compressibles à une attache résolue par facette cœur;
-  producteur v3 terminal et capability commune encore ouverts**;
+  tous les $M(F)$ compressibles à une attache par facette cœur, bras ramené
+  localement au cœur puis résolu par le fold; producteur v3 terminal et
+  capability commune encore ouverts**;
 - tri exact et fermeture des lots : **intrinsèques mais externalisables**;
 - partition horizontale et provenance de couverture : **information intrinsèque
   mais locator résident supprimable par fold externe multipasse**;

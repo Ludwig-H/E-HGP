@@ -516,22 +516,23 @@ condition que le catalogue contienne $B$ — d'où $s_{\max}=n$ et non un plafon
 rang. Et la vérité énumère **son propre** univers de cofaces à vacuité ouverte,
 puis ses propres facettes, comparés aux miens avant $\lambda$ et $M$.
 
-**Les autres dettes du §7.6, fermées.** $\lambda(F)$ est comparé et plus
+**Les dettes effectivement fermées depuis le §7.6.** $\lambda(F)$ est comparé et plus
 seulement $M(F)$ — `truth_level` n'est plus calculé pour rien. Un statut non
 `kOk` fait échouer au lieu de censurer. Le parseur est intégral :
 `--clouds 1junk` et `4294967297` sont refusés. Les planchers portent sur les deux
-branches et sur les **nœuds internes** de l'index, avec des feuilles de taille 4
-et un nuage de vingt points : 210 nœuds internes exercés, là où les CTests
-précédents n'en touchaient aucun. Les deux déduplications sont comptées
-séparément. `deletion_bytes`, qui n'était ni `sizeof(Record)` ni un wire défini,
-a été retiré.
+branches. Le compteur appelé `index_internal_nodes` compte en revanche les
+nœuds **construits**, pas ceux visités par les requêtes : son plancher ne prouve
+aucune couverture interne. Les deux multiplicités de provenance sont comptées
+séparément, mais elles ne sont ni dédupliquées ni certifiées. `deletion_bytes`,
+qui n'était ni `sizeof(Record)` ni un wire défini, a été retiré.
 
-**[mesuré]** trois régimes, tout jugé contre l'univers indépendant :
+**[mesuré]** trois régimes, tout jugé contre un univers énuméré indépendamment
+de la source mais relatif aux primitives partagées :
 
 | régime | $n$ | grille | $k$ | cofaces (manq./surn.) | facettes (manq./surn.) | fermée | co-min. moy./max | désaccords |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| extra-shells partout | 8 | $[0,2)$ | 3 | 2 800 (0/0) | 2 240 (0/0) | 100 % | 2,71 / 5 | **0** |
-| nœuds internes | 20 | $[0,20)$ | 3 | 2 496 (0/0) | 5 103 (0/0) | 62,4 % | 1,05 / 4 | **0** |
+| cube cosphérique avec extra-shells | 8 | $[0,2)$ | 3 | 2 800 (0/0) | 2 240 (0/0) | 100 % | 2,71 / 5 | **0** |
+| index à vingt points | 20 | $[0,20)$ | 3 | 2 496 (0/0) | 5 103 (0/0) | 62,4 % | 1,05 / 4 | **0** |
 | ordre plus haut | 9 | $[0,3)$ | 4 | 593 (0/0) | 1 605 (0/0) | 81,1 % | 1,75 / 5 | **0** |
 
 Votre reproduction hostile `--clouds 1 --points 7 --coord 2 --k 2 --seed 1`, qui
@@ -540,7 +541,10 @@ ni surnuméraire.
 
 **Ce que je ne prétends toujours pas.** La vérité partage encore `miniball_of` et
 `sphere_cmp_beta` avec le sujet : l'oracle général reste le juge hostile et le
-repli hors porte. Le regroupement est en mémoire, donc ce sont des volumes, pas
+repli hors porte. Un échec de `miniball_of_set` est encore converti en absence
+scientifique dans le sujet comme dans la vérité; cette censure commune doit
+devenir un statut fail-closed et une injection. Le regroupement est en mémoire,
+donc ce sont des volumes, pas
 un tri externe. Les co-minimiseurs observés sont petits mais **sans borne
 générale** — $\Theta(n)$ reste possible — et l'identité $k+1$ records par coface
 est une identité de construction, qui dimensionne le flux sans certifier la
@@ -605,10 +609,12 @@ nuages.
 
 ## 15. La reverse search est écrite — item 3 de votre porte de reprise
 
-Le parcours sans `seen`, `frontier` ni `visited` existe et est différencié contre
-le BFS, qui reste l'oracle borné. On descend de $v$ vers $w$ si et seulement si
-$\pi(w)=v$ ; l'unicité du parent rend toute déduplication inutile, donc il n'y a
-plus rien à partager.
+Le parcours sans table globale `seen` ou `frontier` existe et est différencié
+contre le BFS, qui reste l'oracle borné. On descend de $v$ vers $w$ si et
+seulement si $\pi(w)=v$; l'unicité du parent rend toute déduplication inutile
+pour décider le parcours. L'API de test accumule toutefois encore tous les
+sommets dans un vecteur local nommé `visited`: elle prouve la parité, pas encore
+le high-water d'un sink streaming.
 
 Trois détails d'implémentation qui comptent. Les voisins sont énumérés dans un
 ordre **déterministe** — flats de la coquille dans l'ordre des triplets,
@@ -619,23 +625,76 @@ requête de voisin, jamais une réénumération de ses voisins. Et le calcul de 
 direction n'appelle aucune requête : il ne lit que la coquille, l'ensemble
 intérieur et les signes tangents.
 
-**[mesuré]** deux campagnes, tout comparé au BFS sur les coquilles ET les
-ensembles intérieurs :
+**[reproductible]** les quatre portes CTest positives du commit `969db5c`, tout
+comparé au BFS sur les coquilles ET les ensembles intérieurs :
 
 | campagne | cas | désaccords | sommets | profondeur max | fils testés / sommet |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| grille saturée | 2 146 | **0** | 170 583 | **16** | 6,3 |
-| générique | 2 161 | **0** | 218 169 | **18** | 6,0 |
+| fixtures | 211 | **0** | 1 578 | 7 | 5,3 |
+| générique | 1 184 | **0** | 110 873 | **21** | 6,0 |
+| grille saturée | 1 291 | **0** | 111 170 | 17 | 6,5 |
+| cosphérique | 2 071 | **0** | 101 877 | 16 | 6,0 |
 
-388 752 sommets énumérés au total avec une pile de profondeur au plus dix-huit.
-La porte vérifie aussi qu'aucun sommet n'est visité deux fois — le nombre de
+Ces portes cumulent 325 498 sommets, 2 012 590 fils testés et une profondeur
+maximale observée de 21. La porte vérifie aussi qu'aucun sommet n'est visité deux
+fois — le nombre de
 sommets rendus égale le nombre de coquilles distinctes — ce qui est la propriété
 qu'un parent faux casserait en premier.
 
 **Ce que je ne prétends pas.** Aucune borne de temps : six calculs de parent par
 sommet est une mesure de régime, et une grande coquille peut avoir un nombre
-combinatoire de flats. Le catalogue passe encore par le BFS, donc la sortie n'est
-pas streamée. Et rien de ceci ne touche aux globalités de la hiérarchie que votre
-note isole — `Resolve`, la fermeture des ex æquo, le locator horizontal, la
-couverture, les verticales. Le parcours est local ; le fold reste global, et il
-n'est pas écrit.
+combinatoire de flats. Chaque requête garde aussi un scratch $O(n)$ au pire; la
+pile recopie les coquilles, et le vecteur de sortie retient $\Omega(V)$ objets.
+Le différentiel n'exerce pas l'index sur ce parcours. Le catalogue passe encore
+par le BFS, donc la sortie n'est pas streamée. Et rien de ceci ne touche aux
+globalités de la hiérarchie que votre note isole — `Resolve`, la fermeture des
+ex æquo, le locator horizontal, la couverture, les verticales. La décision du
+parcours est locale; le sink et le fold restent à écrire.
+
+---
+
+## 16. Le domaine régulier, mesuré — et ma faute de provenance
+
+Vos deux corrections du commit `14f8a95` sont justes, et la première est une
+faute de méthode chez moi.
+
+**Provenance.** J'ai publié une table de trente nuages en l'attribuant aux douze
+du CTest. Le prototype n'imprimait pas sa graine, donc rien dans la sortie ne
+permettait de le voir. Il imprime désormais sa **provenance** complète —
+`--clouds`, `--points`, `--coord`, `--k`, `--seed` — en première ligne.
+
+**Domaine.** Vous aviez raison plus profondément : la campagne ne violait pas
+seulement la porte régulière sans le savoir, elle ne pouvait pas le savoir. Le
+prototype ne mesurait ni les égalités extérieures ni l'ambiguïté du support. Il
+mesure les deux :
+
+- une facette dont la boule **fermée** contient un point extérieur alors que la boule **ouverte** n'en contient aucun porte une **égalité extérieure** ;
+- un support minimal réalisé par deux sous-ensembles distincts de la facette rend $u_F$ ambigu, donc le choix canonique de l'attache aussi.
+
+Sur ma campagne à grille $[0,20)$ : **31 égalités extérieures**. Vos 78 étaient
+donc un minorant correct sur trente nuages, et j'en compte 31 sur douze. Elle est
+hors domaine régulier, et j'ai renommé ses objets en **candidats locaux** dans le
+code, le rapport et le README. Ils ne remplacent rien.
+
+**[mesuré, DANS le domaine régulier]** 30 nuages de 14 points, grille
+$[0,4000)$, $k=3$ : zéro égalité extérieure, zéro support ambigu, donc **62
+attaches autorisées**. Lemme de descente violé zéro fois. Et **5 cibles brutes
+sur 62 hors du cœur**, soit 8,1 % *dans le domaine où le théorème s'applique*.
+Votre « réfutée, même sous régularité » est donc vérifiée là où elle compte, et
+non plus seulement dans un régime dégénéré.
+
+Un drapeau `--require-regular` fait échouer une campagne qui n'est pas dans le
+domaine, et deux CTests l'encadrent : un positif dans le domaine régulier, un
+négatif qui vérifie que la grille $[0,20)$ y est bien refusée.
+
+**Votre fixture à dix points est permanente**, et c'est la plus forte du dossier.
+Vérifiée : porte régulière satisfaite — aucun point extérieur sur la coquille
+d'un triplet, 210 quadruplets tous indépendants —, $F=\lbrace2,8,9\rbrace\in D_3$,
+$a_F=893109/2588$, $U_F=\lbrace2,8,9\rbrace$, $J_F=\lbrace1,5,7\rbrace$, et les
+**trois** bras $\lbrace1,8,9\rbrace$, $\lbrace1,2,9\rbrace$, $\lbrace1,2,8\rbrace$
+de niveaux $479/2$, $599/2$ et $299225073/867436$ tous strictement plus petits et
+tous hors de $D_3$. Aucun choix de $u_F$ ne sauve la cible brute.
+
+Ce que je ne prétends toujours pas : `Resolve` n'est pas jugé, donc l'équivalence
+des deux quotients ne l'est pas non plus. Le prototype reste un oracle borné qui
+matérialise le catalogue.

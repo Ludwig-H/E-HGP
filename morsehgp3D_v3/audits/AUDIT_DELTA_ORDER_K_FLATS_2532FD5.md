@@ -204,7 +204,7 @@ sont explicitement qualifiés comme transitoires ci-dessous.
 | census et pinceau rescannant toujours $X$ | **fermé comme scan systématique** | `closed_ball` et désaccord ternaire indexés; visite $O(n)$ encore possible au pire |
 | propriété de l'index | **partiel** | appel interne propriétaire correct; pointeur public étranger ou périmé encore non authentifié |
 | propriétaire et déduplication | **ouvert** | live : premier préfiltre seulement, puis `emitted`; seconde inclusion, cône signé et support canonique avant owner non implémentés |
-| parent local multiplicitaire | **prouvé et jugé, non substitué** | live calcule le parent depuis le BFS; reverse search garde `seen/frontier/visited` |
+| parent local multiplicitaire | **prouvé, substitué dans un endpoint différentiel** | commit `969db5c` : décision sans `seen/frontier`, parité BFS; sortie encore matérialisée, catalogue non substitué |
 | source HGP complète | **théorème conditionnel fermé, produit ouvert** | `directes + M(F)` suffit horizontalement et $M(F)$ se factorise sans étoile; source directe terminale, capability commune, lots, couverture et verticales absents |
 | profils produit | **ouverts** | doublons refusés, dyadique absent, oracle encore relatif aux primitives v2 |
 
@@ -213,8 +213,8 @@ affirmant encore un census global pour chaque singleton, chaque direction et
 chaque émission sont historiques et désormais fausses. Le NO-GO 50 k demeure,
 mais pour les raisons actuelles : volume $V_k$ sans borne utile au SLO,
 énumération des flats et queue lourde des coquilles, index sans borne
-sous-linéaire universelle, parcours encore résident, propriétaire incomplet et
-pipeline HGP aval absent.
+sous-linéaire universelle, sortie reverse encore résidente, propriétaire
+incomplet et pipeline HGP aval absent.
 
 ### 7.3 Parent local : crédit et dettes exactes
 
@@ -415,18 +415,93 @@ prouve qu'un census régulier saturé à deux et une unique attache vers
 bras immédiats hors de $D_3$; aucun choix alternatif du support supprimé ne
 remplace donc le resolver global pré-lot.
 
-### 7.8 Porte de reprise courante
+### 7.8 Reverse search live au commit `969db5c`
 
-1. Fermer le contrat de l'out-paramètre parent, comparer la couverture au BFS
-   certifié et graver l'adjacence orientée au premier événement.
+Le commit `969db5c` fige les empreintes suivantes :
+
+| objet | SHA-256 |
+| --- | --- |
+| `prototype/order_k_flats.hpp` | `2ca55c946c666c2ff91bcc49514dc48806e2586e93cf5673a31d6f7cb4e4f537` |
+| `prototype/flats_differential.cpp` | `1a4bfb96c4e16aad433e5fba1ea12ff268e3b3d65b84cea5cb990fd7d89d73d4` |
+| `CMakeLists.txt` | `4893b4c82e101b47d687b32675d58dd85eb37b933ac83a1c0ad5b9bc06a81185` |
+
+Crédit scientifique : `reverse_search_shallow` n'emploie ni `seen` ni
+`frontier` pour décider si un sommet est un fils. Il énumère les flats et les
+deux orientations dans un ordre déterministe, recalcule le parent du candidat,
+et descend exactement lorsque ce parent est le sommet courant. Le différentiel
+compare au BFS les statuts, les coquilles et les ensembles intérieurs, puis
+refuse tout doublon de coquille.
+
+Un build Release frais et les treize CTests `mhgp3v_flats_*` passent. Les quatre
+portes positives cumulent 4 757 cas, 325 498 sommets de reverse search et
+2 012 590 candidats fils testés, avec zéro désaccord et une profondeur maximale
+observée de 21. Leur détail reproductible est : fixtures 211 cas / 1 578
+sommets / profondeur 7; générique 1 184 / 110 873 / 21; grille saturée
+1 291 / 111 170 / 17; cosphérique 2 071 / 101 877 / 16.
+
+Deux fuzz supplémentaires sur le même binaire Release, SHA-256
+`0d5cbba3...`, rendent encore zéro désaccord :
+
+```text
+./build/v3/mhgp3v_flats_differential --clouds 60 --points 12 --coord 4 --smax 10 --seed 99173 --min-cases 1 --min-navigated 1 --min-vertices 1
+./build/v3/mhgp3v_flats_differential --clouds 30 --points 14 --coord 64 --smax 10 --seed 77123 --min-cases 1 --min-navigated 1 --min-vertices 1
+```
+
+Ils cumulent 262 801 sorties reverse, avec des profondeurs 17 puis **23**. La
+profondeur 21 des CTests et l'ancienne valeur publiée 18 ne sont donc que des
+observations de campagnes, jamais des bornes.
+
+Le claim exact est donc **absence de table globale de visitation dans la
+décision du parcours**, pas encore mémoire de sortie bornée. Six dettes restent.
+
+1. L'endpoint retourne un `std::vector<Vertex> visited` et y pousse chaque
+   sommet. Ce vecteur n'influence pas le parcours, mais matérialise encore
+   $\Omega(V)$ objets et leurs payloads. Aucun high-water ne prouve un gain
+   mémoire tant qu'un callback ou sink borné ne le remplace pas.
+2. Chaque requête `neighbour_along` alloue un bitmap `seen_candidate` de taille
+   $n$ et une liste `touched` de taille $O(n)$ au pire. Chaque frame de pile
+   recopie aussi la coquille et l'intérieur du sommet. Même après streaming, la
+   borne live est un scratch $O(n)$ plus la somme des tailles des sommets sur le
+   chemin, pas seulement le nombre de niveaux; une coquille cosphérique peut
+   être de taille $\Theta(n)$.
+3. Le différentiel appelle `reverse_search_shallow` avec `index=nullptr`. Il
+   qualifie donc les scans exhaustifs du pinceau, pas le chemin indexé qui sera
+   nécessaire au produit.
+4. `parent_of` confond « racine » et échec de `neighbour_along`; une absence de
+   parent fait simplement ignorer le candidat sans changer `CloudStatus`. La
+   comparaison au BFS détecte une troncature sur les nuages jugés, mais le futur
+   endpoint autonome doit distinguer le cas racine certifié d'une erreur de
+   primitive et échouer fermé.
+5. Aucun plancher CTest ne porte directement sur `reverse_vertices`, profondeur
+   ou enfants. La comparaison est forte lorsqu'elle s'exécute, mais une mutation
+   qui retire tout le bloc de qualification n'est pas elle-même gravée par un
+   test négatif. Si BFS et reverse rendent le même statut non `kOk`, le bloc
+   saute aussi toute comparaison sans rougir. La variante device, les écritures
+   de sink et la répartition de sous-arbres ne sont ni écrites ni mesurées.
+6. L'équivariance permute et rejoue seulement `flat_catalogue`, donc le BFS;
+   elle n'appelle jamais la reverse search. `interior.front()`, la base du germe
+   et les fermetures sont ordonnés par les indices d'entrée. Le prototype suppose
+   la canonicalisation `PointId` amont, mais sa porte ne grave pas encore
+   l'équivariance de l'arbre ni de l'ordre des enfants.
+
+Ces réserves ne remettent pas en cause le théorème de parent ni la parité bornée.
+Elles bornent honnêtement la promotion : le **parcours décisionnel** est local;
+son endpoint produit, sa mémoire et son intégration au catalogue restent
+ouverts.
+
+### 7.9 Porte de reprise courante
+
+1. Remplacer le vecteur de sortie de reverse search par un sink borné,
+   différencier aussi le chemin indexé, publier son high-water et rendre toute
+   absence de parent non racine fail-closed.
 2. Implémenter et différencier « support canonique puis owner » avant de retirer
    `emitted`.
-3. Remplacer le BFS par la reverse search en conservant le BFS comme oracle
-   borné; publier profondeur, enfants, flats et high-water.
+3. Intégrer ce sink au catalogue en conservant le BFS comme oracle borné;
+   graver des planchers et mutations de reverse search.
 4. Transformer l'oracle ouvert maintenant corrigé en source terminale sans
    `flat_catalogue(s_max=n)`, puis composer l'autorité de fenêtre avec le census
-   saturé et `ResolveStrictCarrier`; toute erreur de primitive doit échouer
-   fermée.
+   saturé et la descente locale de carrier; toute erreur de primitive doit
+   échouer fermée.
 5. Construire runs, fermeture des ex æquo, locator horizontal, couverture et
    jointure verticale avant toute mesure du contrat 50 k.
 

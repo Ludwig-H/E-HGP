@@ -392,11 +392,12 @@ $s_{\max}=11$ : 110 µs par sommet, environ $5{,}8\cdot10^7$ sommets à 50 000
 points, soit près de deux heures sur un cœur et environ 130 s sur 48. **Le
 contrat reste à deux ordres de grandeur.**
 
-L'index est donc une brique positive et un P0 fermé, pas l'architecture. Ce qu'il
-ne touche pas est inchangé : `seen`, `frontier` et les sommets visités résident
-tous ; les flats sont énumérés depuis les triplets ; le propriétaire n'est pas
-encore implémenté et il n'y a ni parcours reverse-search, ni streaming aval, ni
-forêts.
+L'index est donc une brique positive et un P0 fermé, pas l'architecture. Il ne
+borne ni le nombre de flats ni le nombre de sommets. Depuis le commit `969db5c`,
+un endpoint séparé de reverse search n'utilise plus `seen` ni `frontier` pour
+décider le parcours; le catalogue live passe toutefois encore par le BFS, la
+sortie du nouvel endpoint est matérialisée dans un vecteur, le propriétaire
+d'émission n'est pas implémenté, et il n'y a ni streaming aval ni forêts.
 
 ---
 
@@ -448,39 +449,50 @@ un sous-ensemble. Les quatre témoins de la note sont des fixtures permanentes �
 
 ### La reverse search est écrite, et elle visite le même ensemble
 
-Le théorème de parent rend l'énumération **sans état** : on descend de $v$ vers
-$w$ si et seulement si $\pi(w)=v$, donc aucune déduplication n'est nécessaire.
+Le théorème de parent rend l'énumération **sans table globale de visitation** :
+on descend de $v$ vers $w$ si et seulement si $\pi(w)=v$, donc aucune
+déduplication n'est nécessaire pour décider le parcours.
 `reverse_search_shallow` l'implémente, et le différentiel exige qu'elle rende
 **exactement** le même ensemble de sommets que le BFS — mêmes coquilles, mêmes
 ensembles intérieurs, même statut. C'est la porte qui autorise à retirer les
 tables globales : un parent légèrement faux produirait un sous-arbre tronqué que
 seule cette comparaison verrait.
 
-L'état de navigation est désormais la **pile** : par niveau, la coquille du parent
-et l'indice du fils courant. Ni `seen`, ni `frontier`, ni `visited`. Les voisins
-sont énumérés dans un ordre déterministe — flats de la coquille, puis les deux
-orientations — sans quoi l'indice du fils ne serait pas reproductible au retour,
-ce qui est toute la mécanique d'Avis–Fukuda.
+L'état qui décide la navigation est désormais la **pile** : par niveau, le
+sommet courant et l'indice du fils. Il ne contient ni `seen` ni `frontier`. Les
+voisins sont énumérés dans un ordre déterministe — flats de la coquille, puis
+les deux orientations — sans quoi l'indice du fils ne serait pas reproductible
+au retour, ce qui est toute la mécanique d'Avis–Fukuda. Le prototype de
+différentiel conserve encore un `std::vector<Vertex> visited` uniquement pour
+comparer la sortie au BFS; ce vecteur n'intervient dans aucune décision, mais il
+retient bien $\Omega(V)$ objets et doit être remplacé par un sink pour obtenir le
+gain mémoire produit.
 
-**[mesuré]** deux campagnes, tout comparé au BFS :
+**[reproductible]** les quatre portes CTest positives du commit `969db5c`, tout
+comparé au BFS :
 
 | campagne | cas | désaccords | sommets par reverse search | profondeur max | fils testés / sommet |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| grille saturée | 2 146 | **0** | 170 583 | **16** | 6,3 |
-| générique | 2 161 | **0** | 218 169 | **18** | 6,0 |
+| fixtures | 211 | **0** | 1 578 | 7 | 5,3 |
+| générique | 1 184 | **0** | 110 873 | **21** | 6,0 |
+| grille saturée | 1 291 | **0** | 111 170 | 17 | 6,5 |
+| cosphérique | 2 071 | **0** | 101 877 | 16 | 6,0 |
 
-Il faut lire les deux dernières colonnes ensemble. **388 752 sommets énumérés au
-total, avec une pile de profondeur au plus dix-huit** — là où le BFS retenait
-tous les sommets et toutes leurs coquilles. Et six fils testés par sommet, donc
-six calculs de parent : c'est le prix, et il est constant, pas combinatoire dans
-ce régime.
+Au total : 4 757 cas, 325 498 sommets, 2 012 590 fils testés, profondeur maximale
+21 et zéro désaccord. Les valeurs six et 21 sont des mesures de ces campagnes,
+pas des bornes. Une grande coquille peut rendre le nombre de flats combinatoire.
 
 **Ce que cela ne rend pas.** Aucune borne de temps. Chaque fils testé coûte un
 calcul de parent, donc une énumération de flats et une requête de voisin ; une
 grande coquille peut avoir un nombre combinatoire de flats, et six par sommet est
-une mesure de régime, pas un théorème. Ce qui est gagné est la **mémoire** et
-l'absence d'écriture partagée. Le BFS reste en place comme oracle borné, et le
-catalogue passe toujours par lui.
+une mesure de régime, pas un théorème. Chaque requête alloue aussi un bitmap et
+une liste de candidats de taille $O(n)$ au pire; la pile recopie les coquilles
+des sommets sur le chemin. Le différentiel appelle enfin la reverse search sans
+index : il qualifie le balayage exhaustif, pas encore le chemin indexé. Le gain
+acquis est l'absence de table de déduplication **dans la décision**. Le gain de
+mémoire, le high-water et l'absence d'écriture partagée d'un kernel restent à
+obtenir avec un sink borné. Le BFS reste en place comme oracle et comme chemin
+du catalogue.
 
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
@@ -499,13 +511,14 @@ mesuré sur la G4 pourra en établir le débit.
 **Ce que cela ne ferme pas**, et la note le dit avant moi : les **enfants**
 exigent toujours tous les flats incidents réels, une grande coquille peut en
 avoir un nombre combinatoire, et le parent local ne borne aucun temps. Le
-prototype garde `seen`, `frontier` et `visited` : la porte juge le parent, elle
-ne l'a pas encore substitué au parcours. Avant de le faire il faut encore, selon
-la note, vérifier le rang trois de $C(d)$, l'identité
-$S(\mathrm{next})=C(d)\cup A$, la finitude de l'extrémité et la stricte variation
-du potentiel. Même après cette substitution resteront la source complète des
-incidences silencieuses, le tri et les lots exacts, la partition horizontale,
-`coverage_log` et la jointure verticale. Leur factorisation est dans
+nouvel endpoint a bien substitué la reverse search au BFS pour le parcours
+différentiel, mais pas pour le catalogue; il matérialise encore sa sortie et ne
+teste pas la variante indexée. Le juge permanent confronte les coquilles, les
+intérieurs et les potentiels sur son domaine borné, sans constituer encore un
+reçu de premier événement orienté ni une mesure de mémoire. Même avec un sink,
+resteront la source complète des incidences silencieuses, le tri et les lots
+exacts, la partition horizontale, `coverage_log` et la jointure verticale. Leur
+factorisation est dans
 [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](audits/NOTE_GATE_D_GLOBALITES_RESIDUELLES.md).
 
 ---
@@ -616,10 +629,46 @@ Le CTest committé utilise 12 nuages : il exerce 39 candidats, porte 88
 co-minimiseurs fermés et observe 5 cibles brutes hors du cœur. Son plancher
 prouve l'exercice de la branche, pas l'autorité de l'attache.
 
-Ce que ce prototype ne fait pas, et ne peut pas faire : il ne **résout** rien.
-`Resolve` interroge l'histoire horizontale antérieure au lot, qui n'existe pas
-ici. Ce qui est vérifié s'arrête donc à la classification des intrus et au lemme
-de descente ; l'équivalence des deux quotients reste non jugée.
+### Le domaine régulier est maintenant mesuré, et la réfutation y tient
+
+Ma table précédente était **hors** autorité régulière, et je ne le savais pas : le
+prototype ne le mesurait pas. Il le mesure désormais. Une facette dont la boule
+**fermée** contient un point extérieur alors que la boule **ouverte** n'en
+contient aucun porte une **égalité extérieure**, que le domaine régulier
+interdit ; et un support minimal réalisé par deux sous-ensembles distincts rend
+$u_F$ ambigu, donc le choix canonique de l'attache aussi. Les deux sont comptés,
+et le rapport dit à quel domaine la campagne appartient.
+
+Sur la campagne à grille $[0,20)$ que j'avais publiée : **31 égalités
+extérieures**. Elle est donc hors du domaine régulier, et ses 95 objets sont des
+**candidats locaux**, pas des attaches autorisées — ils ne remplacent rien et
+n'autorisent aucun facteur de gain.
+
+**[mesuré, dans le domaine régulier]** 30 nuages de 14 points, grille $[0,4000)$,
+$k=3$ : zéro égalité extérieure, zéro support ambigu, donc **62 attaches
+autorisées**. Le lemme de descente n'est violé aucune fois. Et **5 cibles brutes
+sur 62 restent hors du cœur** — soit 8,1 % *dans le domaine où le théorème
+s'applique*, ce qui est exactement ce que la note affirme : la cible brute est
+réfutée même sous régularité.
+
+La fixture à dix points de la note est permanente, et c'est la plus forte : elle
+satisfait la porte régulière — aucun point extérieur sur la coquille d'un
+triplet, les 210 quadruplets affinement indépendants — et pourtant **les trois**
+bras immédiats de $F=\lbrace2,8,9\rbrace$ sont strictement plus petits et tous
+hors de $D_3$. Aucun choix du support supprimé ne sauve la cible brute.
+
+Une leçon de méthode, aussi : j'avais publié une table de trente nuages en
+l'attribuant aux douze du CTest, et rien dans la sortie ne permettait de le voir.
+Le rapport imprime maintenant sa **provenance** complète, graine incluse.
+
+Ce que ce prototype ne fait pas : il ne **résout** rien. La
+[`note de descente locale`](audits/NOTE_GATE_D_DESCENTE_LOCALE_CARRIER_ET_FRONTIERE_GLOBALE.md)
+ferme désormais la partie géométrique : une baisse canonique de $\beta$ mène de
+$T_F$ à une facette cœur $R_F\in D_k$. Le dernier `find_<a_F(R_F)>` interroge
+toujours l'histoire horizontale antérieure au lot, absente ici. Le prototype
+s'arrête donc à la classification et à l'inégalité du premier bras; il ne juge
+ni la descente complète, ni la partition pré-lot, ni l'équivalence des deux
+quotients.
 
 Deux mises en garde qui subsistent : les co-minimiseurs observés sont petits mais
 **sans borne générale** — une facette peut en avoir $\Theta(n)$ — et le rapport de
@@ -759,7 +808,7 @@ Une règle locale et déterministe désigne, depuis tout sommet, l'unique voisin
 par lequel on y serait arrivé ; l'arbre de parcours devient implicite et un
 sommet n'est publié que par son parent. Trois conséquences d'un seul coup :
 
-1. la mémoire privée de navigation tombe à $O(\text{profondeur})$ au lieu du nombre de sommets ;
+1. la mémoire de décision n'a plus de table en $O(V)$ et peut tomber à la pile plus un scratch $O(n)$, à condition de streamer la sortie ;
 2. deux sous-arbres n'échangent plus d'état de visitation, ce qui permet leur expansion parallèle ;
 3. l'arbre devient déterministe sous une clef canonique, tandis que le déterminisme byte-à-byte de sortie reste celui du tri secondaire et des lots.
 
@@ -768,8 +817,9 @@ Le dépôt en possède déjà une preuve constructive,
 pour l'arrangement simple. Son extension au vrai graphe multiplicitaire et une
 règle qui choisit directement un rayon du parent sont maintenant prouvées dans
 [`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](audits/NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md).
-L'implémentation de reverse search reste ouverte : le live ne fait encore que
-juger le parent depuis le BFS avec `seen`.
+Le commit `969db5c` implémente la reverse search dans un endpoint différentiel et
+la confronte au BFS. Restent ouverts son sink streaming, son chemin indexé, son
+high-water, son intégration au catalogue et sa forme device.
 
 ### Ce qui portera, et ce qui devra être restructuré
 

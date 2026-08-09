@@ -111,8 +111,16 @@ struct Dichotomy {
   long long intruders_zero = 0;
   long long intruders_one = 0;
   long long intruders_many = 0;
-  long long attachments = 0;
+  long long attachment_candidates = 0;
   long long attachment_cominimisers = 0;
+  // PORTE REGULIERE. Une facette dont la boule FERMEE contient un point
+  // exterieur alors que la boule OUVERTE n'en contient aucun porte une egalite
+  // exterieure : le domaine regulier l'interdit. Le compter est la seule facon
+  // de savoir si une campagne a le droit d'appeler ses candidats des attaches.
+  long long outside_equalities = 0;
+  // Support minimal UNIQUE : deux sous-ensembles de meme cardinal donnant la meme
+  // miniboule rendraient u_F ambigu, donc le choix canonique de l'attache aussi.
+  long long ambiguous_support = 0;
   long long attachment_target_not_smaller = 0;
   long long attachment_target_outside_core = 0;
   long long disagreements = 0;
@@ -319,11 +327,37 @@ static bool run_cloud(const std::vector<P3>& pts, int k, Dichotomy* out) {
       if (std::binary_search(facet.begin(), facet.end(), z)) continue;
       if (mhgp::sphere_side(facet_ball, pts[(std::size_t)z]) < 0) strict_intruders.push_back(z);
     }
+    if (!outside_in_ball.empty() && strict_intruders.empty()) ++out->outside_equalities;
+    if (facet_mb.ok) {
+      int realisations = 0;
+      const int q = facet_mb.n_support;
+      std::vector<int> choose((std::size_t)q);
+      for (int i = 0; i < q; ++i) choose[(std::size_t)i] = i;
+      const int size = (int)facet.size();
+      while (q <= size) {
+        std::vector<i32> subset;
+        for (int i = 0; i < q; ++i) subset.push_back(facet[(std::size_t)choose[(std::size_t)i]]);
+        mhgp::Sphere candidate_ball{};
+        if (miniball_of_set(pts, subset, &candidate_ball) &&
+            mhgp::sphere_cmp_beta(candidate_ball, facet_ball) == 0) {
+          bool covers = true;
+          for (i32 z : facet)
+            if (mhgp::sphere_side(candidate_ball, pts[(std::size_t)z]) > 0) covers = false;
+          if (covers) ++realisations;
+        }
+        int i = q - 1;
+        while (i >= 0 && choose[(std::size_t)i] == size - q + i) --i;
+        if (i < 0) break;
+        ++choose[(std::size_t)i];
+        for (int j = i + 1; j < q; ++j) choose[(std::size_t)j] = choose[(std::size_t)j - 1] + 1;
+      }
+      if (realisations > 1) ++out->ambiguous_support;
+    }
     if (strict_intruders.empty()) ++out->intruders_zero;
     else if (strict_intruders.size() == 1) ++out->intruders_one;
     else {
       ++out->intruders_many;
-      ++out->attachments;
+      ++out->attachment_candidates;
       out->attachment_cominimisers += (long long)decided.size();
       if (facet_mb.ok) {
         const i32 z_f = strict_intruders.front();
@@ -372,7 +406,7 @@ static bool run_cloud(const std::vector<P3>& pts, int k, Dichotomy* out) {
 int main(int argc, char** argv) {
   int clouds = 60, npoints = 20, coord = 22, k = 3;
   long long seed = 4242;
-  int min_closed = 0, min_empty = 0, min_internal = 0, min_attachments = 0;
+  int min_closed = 0, min_empty = 0, min_internal = 0, min_attachments = 0, require_regular = 0;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -399,6 +433,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--min-empty")) target = &min_empty;
     else if (!strcmp(argv[i], "--min-internal-nodes")) target = &min_internal;
     else if (!strcmp(argv[i], "--min-attachments")) target = &min_attachments;
+    else if (!strcmp(argv[i], "--require-regular")) { require_regular = 1; continue; }
     else if (!strcmp(argv[i], "--seed")) {
       if (!has || value < 0) { printf("ECHEC : valeur entiere invalide pour --seed\n"); return 2; }
       ++i;
@@ -429,6 +464,62 @@ int main(int argc, char** argv) {
     }
   }
 
+  // FIXTURE REGULIERE DES DIX POINTS. Elle satisfait la porte reguliere — aucun
+  // point exterieur sur la coquille d'un triplet, tous les quadruplets
+  // independants — et pourtant les TROIS bras immediats de F = {2,8,9} sont hors
+  // du coeur. Aucun choix du support supprime ne sauve la cible brute : le
+  // resolver du carrier strict est inevitable.
+  {
+    const std::vector<P3> ten{pt(0, 1, 4), pt(18, 6, 24), pt(38, 4, 17), pt(12, 22, 29),
+                              pt(20, 40, 11), pt(22, 5, 24), pt(4, 25, 10), pt(17, 6, 21),
+                              pt(15, 31, 6), pt(8, 21, 14)};
+    const int m = (int)ten.size();
+    std::set<std::vector<i32>> core;
+    for (int a = 0; a < m; ++a) for (int b = a + 1; b < m; ++b)
+      for (int c = b + 1; c < m; ++c) for (int d = c + 1; d < m; ++d) {
+        const std::vector<i32> coface{(i32)a, (i32)b, (i32)c, (i32)d};
+        mhgp::Sphere sphere{};
+        if (!gabriel_open(ten, coface, &sphere)) continue;
+        for (std::size_t drop = 0; drop < 4; ++drop) {
+          std::vector<i32> facet;
+          for (std::size_t i = 0; i < 4; ++i) if (i != drop) facet.push_back(coface[i]);
+          core.insert(facet);
+        }
+      }
+    const std::vector<i32> facet{2, 8, 9};
+    const mhgp::MiniballResult facet_mb = mhgp::miniball_of(ten, facet.data(), 3);
+    int faults = 0;
+    if (core.find(facet) == core.end() || !facet_mb.ok || facet_mb.n_support != 3) ++faults;
+    int arms_outside = 0, arms_smaller = 0;
+    if (facet_mb.ok) {
+      std::vector<i32> intruders;
+      for (i32 z = 0; z < m; ++z) {
+        if (std::binary_search(facet.begin(), facet.end(), z)) continue;
+        if (mhgp::sphere_side(facet_mb.sph, ten[(std::size_t)z]) < 0) intruders.push_back(z);
+      }
+      if (intruders.size() != 3) ++faults;
+      const i32 z_f = intruders.empty() ? -1 : intruders.front();
+      for (i32 dropped : facet) {
+        std::vector<i32> arm;
+        for (i32 x : facet) if (x != dropped) arm.push_back(x);
+        if (z_f >= 0) arm.push_back(z_f);
+        std::sort(arm.begin(), arm.end());
+        mhgp::Sphere arm_ball{};
+        if (!miniball_of_set(ten, arm, &arm_ball)) { ++faults; continue; }
+        if (mhgp::sphere_cmp_beta(arm_ball, facet_mb.sph) < 0) ++arms_smaller;
+        if (core.find(arm) == core.end()) ++arms_outside;
+      }
+    }
+    if (arms_smaller != 3 || arms_outside != 3) ++faults;
+    if (faults) {
+      printf("[fixture dix points] %d faute(s) : bras strictement plus petits=%d, hors coeur=%d"
+             " (attendu 3 et 3)\n", faults, arms_smaller, arms_outside);
+      return 1;
+    }
+    printf("[fixture dix points] les trois bras immediats sont strictement plus petits"
+           " ET hors du coeur : la cible brute est refutee sous regularite\n");
+  }
+
   Dichotomy total;
   std::mt19937 rng((unsigned)seed);
   std::uniform_int_distribution<int> pick(0, coord - 1);
@@ -445,8 +536,11 @@ int main(int argc, char** argv) {
     if (!run_cloud(pts, k, &total)) ++failures;
   }
 
-  printf("k=%d  nuages=%d (decides %lld)  points=%d  grille=[0,%d)\n", k, clouds,
-         total.clouds_decided, npoints, coord);
+  // PROVENANCE. La graine et les quatre parametres sont imprimes : j'ai publie
+  // une table de trente nuages en l'attribuant aux douze du CTest, et rien dans
+  // la sortie ne permettait de le voir.
+  printf("provenance : --clouds %d --points %d --coord %d --k %d --seed %lld  (decides %lld)\n",
+         clouds, npoints, coord, k, seed, total.clouds_decided);
   printf("source ouverte : cofaces=%lld  manquantes=%lld  surnumeraires=%lld\n",
          total.direct_cofaces, total.direct_missing, total.direct_extra);
   printf("facettes       : univers=%lld  manquantes=%lld  surnumeraires=%lld"
@@ -460,13 +554,19 @@ int main(int argc, char** argv) {
          "  proposes par plusieurs facettes=%lld\n", total.cominimisers,
          total.core_facets ? (double)total.cominimisers / (double)total.core_facets : 0.0,
          total.cominimisers_max, total.cofaces_from_several_facets);
-  printf("attache        : intrus stricts 0/1/>=2 = %lld/%lld/%lld  attaches=%lld"
-         "  co-minimiseurs remplaces=%lld (facteur %.2f)\n", total.intruders_zero,
-         total.intruders_one, total.intruders_many, total.attachments,
-         total.attachment_cominimisers,
-         total.attachments ? (double)total.attachment_cominimisers / (double)total.attachments : 0.0);
+  printf("attache        : intrus stricts 0/1/>=2 = %lld/%lld/%lld  CANDIDATS=%lld"
+         "  co-minimiseurs fermes portes=%lld\n", total.intruders_zero,
+         total.intruders_one, total.intruders_many, total.attachment_candidates,
+         total.attachment_cominimisers);
   printf("               : lemme de descente viole=%lld  cible brute hors coeur=%lld\n",
          total.attachment_target_not_smaller, total.attachment_target_outside_core);
+  // Le domaine regulier interdit une egalite exterieure pertinente. Tant que ce
+  // compteur n'est pas nul, les objets ci-dessus sont des CANDIDATS locaux, pas
+  // des attaches autorisees, et ils ne remplacent rien.
+  const bool regular = (total.outside_equalities == 0 && total.ambiguous_support == 0);
+  printf("porte regul.   : egalites exterieures sans intrus strict=%lld  supports ambigus=%lld"
+         "  -> campagne %s\n", total.outside_equalities, total.ambiguous_support,
+         regular ? "DANS le domaine regulier" : "HORS domaine regulier (candidats seulement)");
   printf("index          : points touches=%lld (%.1f par facette)  noeuds internes=%lld\n",
          total.closed_ball_touched,
          total.core_facets ? (double)total.closed_ball_touched / (double)total.core_facets : 0.0,
@@ -478,11 +578,15 @@ int main(int argc, char** argv) {
     return 3;
   }
   if (total.closed_nonempty < min_closed || total.closed_empty < min_empty ||
-      total.index_internal_nodes < min_internal || total.attachments < min_attachments) {
+      total.index_internal_nodes < min_internal || total.attachment_candidates < min_attachments) {
     printf("ECHEC : plancher de couverture non atteint — fermee %lld/%d, vide %lld/%d,"
            " noeuds internes %lld/%d, attaches %lld/%d\n", total.closed_nonempty, min_closed,
            total.closed_empty, min_empty, total.index_internal_nodes, min_internal,
-           total.attachments, min_attachments);
+           total.attachment_candidates, min_attachments);
+    return 3;
+  }
+  if (require_regular && !regular) {
+    printf("ECHEC : --require-regular exige zero egalite exterieure et zero support ambigu\n");
     return 3;
   }
   if (total.disagreements == 0 && failures == 0) {

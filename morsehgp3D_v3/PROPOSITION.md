@@ -667,10 +667,12 @@ quarante en annonçant `OK`.
 
 ## 10. Architecture cible, non encore implémentée
 
-Le DFS CPU courant conserve `seen`, `frontier` et `visited`. Le théorème de
-parent local vise précisément à les supprimer par reverse search; cette
-substitution n'est pas encore intégrée ni certifiée au premier endpoint. De
-même, `mhgp3v_first_incidence` emploie délibérément
+Le commit `969db5c` possède un endpoint CPU de reverse search qui décide le
+parcours sans `seen` ni `frontier` et rend le même ensemble que le BFS dans les
+portes bornées. Cet endpoint conserve encore tous ses résultats dans un vecteur
+`visited`; le catalogue continue d'appeler le BFS. Le sink streaming, le chemin
+indexé, le high-water et la forme device ne sont donc pas intégrés. De même,
+`mhgp3v_first_incidence` emploie délibérément
 `flat_catalogue(pts,n)`, des maps et une vérité combinatoire : c'est un oracle
 borné, pas l'étage de production décrit ci-dessous.
 
@@ -684,7 +686,7 @@ maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 | LBVH | range-report, self-join, `max_two_R_upper_hi` fail-open | matrice paire–point |
 | reverse search | parent, enfants, propriétaire local, pile bornée | `seen/frontier/visited` globaux |
 | source directe ouverte | cofaces Gabriel et facettes du cœur streamées | catalogue critique global; le prototype exhaustif n'est que l'oracle |
-| première incidence | census fermé $E_F$, census strict $J_F$ saturé, attache propriétaire, `ResolveStrictCarrier` | $\mathrm{Star}(D_k)$ et matérialisation de tous les $M(F)$ sous la porte régulière |
+| première incidence | census fermé $E_F$, census strict $J_F$ saturé, attache propriétaire, descente locale vers $R_F\in D_k$, puis `find` pré-lot | $\mathrm{Star}(D_k)$, locator non-cœur et matérialisation de tous les $M(F)$ sous la porte régulière |
 | **tri et lots** | ordre global par niveau exact, groupement des égaux | catalogue géométrique global |
 | réduction horizontale | fold de partition, locator externalisable, forêt append-only | snapshots complets et mosaïque d'ordre supérieur |
 | couverture | DAG ou journal exact de provenance | matérialisation répétée des unions de points |
@@ -719,9 +721,10 @@ $\lambda(F)$ et $M(F)$ est maintenant démontrée sous une source Gabriel ouvert
 terminale; sous la porte régulière, un census saturé et une attache résolue par
 facette cœur suffisent même au quotient $H_0$. Restent des points durs distincts
 du générateur : produire cette source sans catalogue global, authentifier la
-régularité, fermer les lots et les déduplications, résoudre les carriers stricts,
-conserver `coverage_delta` et `coverage_log`, puis construire les applications
-verticales et leurs carrés de naturalité.
+régularité, fermer les lots et les déduplications, certifier les descentes vers
+le cœur puis résoudre leurs handles dans la partition pré-lot, conserver
+`coverage_delta` et `coverage_log`, puis construire les applications verticales
+et leurs carrés de naturalité.
 
 Le contrat v2 exige en outre des identités exhaustives de facettes, cofaces,
 groupes et provenance. Elles peuvent être streamées, mais pas supprimées comme
