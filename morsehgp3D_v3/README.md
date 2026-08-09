@@ -446,6 +446,42 @@ un sous-ensemble. Les quatre témoins de la note sont des fixtures permanentes �
 `germe_base_non_independante`, `lex_admissible_cycle`, `lp_optimum_tie`,
 `level_zero_lex_cycle`.
 
+### La reverse search est écrite, et elle visite le même ensemble
+
+Le théorème de parent rend l'énumération **sans état** : on descend de $v$ vers
+$w$ si et seulement si $\pi(w)=v$, donc aucune déduplication n'est nécessaire.
+`reverse_search_shallow` l'implémente, et le différentiel exige qu'elle rende
+**exactement** le même ensemble de sommets que le BFS — mêmes coquilles, mêmes
+ensembles intérieurs, même statut. C'est la porte qui autorise à retirer les
+tables globales : un parent légèrement faux produirait un sous-arbre tronqué que
+seule cette comparaison verrait.
+
+L'état de navigation est désormais la **pile** : par niveau, la coquille du parent
+et l'indice du fils courant. Ni `seen`, ni `frontier`, ni `visited`. Les voisins
+sont énumérés dans un ordre déterministe — flats de la coquille, puis les deux
+orientations — sans quoi l'indice du fils ne serait pas reproductible au retour,
+ce qui est toute la mécanique d'Avis–Fukuda.
+
+**[mesuré]** deux campagnes, tout comparé au BFS :
+
+| campagne | cas | désaccords | sommets par reverse search | profondeur max | fils testés / sommet |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| grille saturée | 2 146 | **0** | 170 583 | **16** | 6,3 |
+| générique | 2 161 | **0** | 218 169 | **18** | 6,0 |
+
+Il faut lire les deux dernières colonnes ensemble. **388 752 sommets énumérés au
+total, avec une pile de profondeur au plus dix-huit** — là où le BFS retenait
+tous les sommets et toutes leurs coquilles. Et six fils testés par sommet, donc
+six calculs de parent : c'est le prix, et il est constant, pas combinatoire dans
+ce régime.
+
+**Ce que cela ne rend pas.** Aucune borne de temps. Chaque fils testé coûte un
+calcul de parent, donc une énumération de flats et une requête de voisin ; une
+grande coquille peut avoir un nombre combinatoire de flats, et six par sommet est
+une mesure de régime, pas un théorème. Ce qui est gagné est la **mémoire** et
+l'absence d'écriture partagée. Le BFS reste en place comme oracle borné, et le
+catalogue passe toujours par lui.
+
 ### Pourquoi c'est la route du GPU, et pas les 48 cœurs
 
 Le parent local transforme l'énumération en test **sans état global de
@@ -810,7 +846,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
 | 2 | règle de propriétaire pour les arités 2 et 3, et census local | existence et propriétaire canonique prouvés; le live n'a qu'un préfiltre nécessaire, puis conserve `emitted` |
-| 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé; premier juge live en cours, parcours reverse-search et streaming non écrits |
+| 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours écrit et différencié contre le BFS** ; le catalogue passe encore par le BFS, et le streaming de la sortie n'est pas écrit |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |
 | 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |

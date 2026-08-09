@@ -247,6 +247,9 @@ struct Coverage {
   long long indexed_runs = 0;
   long long parent_vertices = 0;
   long long parent_roots = 0;
+  long long reverse_vertices = 0;
+  long long reverse_depth = 0;
+  long long reverse_children = 0;
 };
 static Coverage coverage;
 
@@ -456,6 +459,41 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
                bad_closure, bad_transition, bad_potential, seen_vertices.size());
         ok = false;
       }
+    }
+  }
+
+  // (F) REVERSE SEARCH contre le BFS. Le parcours sans `seen` doit rendre
+  // EXACTEMENT le meme ensemble de sommets, avec les memes coquilles et les
+  // memes ensembles interieurs. C'est la porte qui autorise a retirer les tables
+  // globales, et rien d'autre ne la remplace : un parent legerement faux
+  // produirait un sous-arbre tronque que seule cette comparaison verrait.
+  if (status == mhgp3v::CloudStatus::kOk && (int)pts.size() >= 4) {
+    mhgp3v::FlatStatistics bst{}, rst{};
+    mhgp3v::CloudStatus bstatus = mhgp3v::CloudStatus::kOk, rstatus = mhgp3v::CloudStatus::kOk;
+    const auto by_bfs = mhgp3v::navigate_shallow(pts, s_max - 2, &bst, &bstatus, false);
+    const auto by_reverse = mhgp3v::reverse_search_shallow(pts, s_max - 2, &rst, &rstatus);
+    if (bstatus != rstatus) {
+      printf("[%s] s_max=%2d REVERSE : statut %s contre %s\n", tag, s_max,
+             mhgp3v::cloud_status_name(rstatus), mhgp3v::cloud_status_name(bstatus));
+      ok = false;
+    } else if (bstatus == mhgp3v::CloudStatus::kOk) {
+      std::map<std::vector<i32>, std::vector<i32>> from_bfs, from_reverse;
+      for (const auto& v : by_bfs) from_bfs[v.shell] = v.interior;
+      for (const auto& v : by_reverse) from_reverse[v.shell] = v.interior;
+      if (by_reverse.size() != from_reverse.size()) {
+        printf("[%s] s_max=%2d REVERSE : %zu sommets pour %zu coquilles distinctes"
+               " — un sommet a ete visite deux fois\n", tag, s_max, by_reverse.size(),
+               from_reverse.size());
+        ok = false;
+      }
+      if (from_bfs != from_reverse) {
+        printf("[%s] s_max=%2d REVERSE != BFS : %zu contre %zu sommets\n", tag, s_max,
+               from_reverse.size(), from_bfs.size());
+        ok = false;
+      }
+      coverage.reverse_vertices += (long long)by_reverse.size();
+      coverage.reverse_depth = std::max(coverage.reverse_depth, rst.reverse_depth_max);
+      coverage.reverse_children += rst.reverse_children_tested;
     }
   }
 
@@ -949,6 +987,8 @@ int main(int argc, char** argv) {
          coverage.full_sweeps);
   printf("gate D : sommets avec parent teste=%lld  racines=%lld\n",
          coverage.parent_vertices, coverage.parent_roots);
+  printf("reverse : sommets=%lld  profondeur max=%lld  fils testes=%lld\n",
+         coverage.reverse_vertices, coverage.reverse_depth, coverage.reverse_children);
   printf("\n%d cas, %d desaccords\n", cases, failures);
   if (coverage.navigated_clouds < min_navigated || coverage.vertices < min_vertices
       || coverage.multiple_shells < min_multiple_shells

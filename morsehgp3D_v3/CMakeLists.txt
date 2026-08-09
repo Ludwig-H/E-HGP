@@ -224,6 +224,12 @@ add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
          --clouds 120 --points 10 --coord 5 --smax 8 --seed 31337 --min-cases 1000
          --min-navigated 500 --min-multiple-shells 300 --min-quotiented 300)
 
+# La REVERSE SEARCH est comparee au BFS dans les quatre portes positives : meme
+# ensemble de sommets, memes coquilles, memes ensembles interieurs, sans `seen`,
+# `frontier` ni `visited`. C'est la porte qui autorise a retirer les tables
+# globales ; un parent legerement faux produirait un sous-arbre tronque que seule
+# cette comparaison verrait.
+
 # GATE D est PARTIELLEMENT verifiee dans les quatre portes positives : parent
 # unique hors racine, inclusion des ensembles interieurs, absence de cycle,
 # racine unique et couverture identique au parcours. Ne sont PAS encore

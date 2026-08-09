@@ -600,3 +600,42 @@ cibles brutes hors du cœur; ces nombres ne sont pas ceux de la table à 30
 nuages.
 
 46/46 CTests.
+
+---
+
+## 15. La reverse search est écrite — item 3 de votre porte de reprise
+
+Le parcours sans `seen`, `frontier` ni `visited` existe et est différencié contre
+le BFS, qui reste l'oracle borné. On descend de $v$ vers $w$ si et seulement si
+$\pi(w)=v$ ; l'unicité du parent rend toute déduplication inutile, donc il n'y a
+plus rien à partager.
+
+Trois détails d'implémentation qui comptent. Les voisins sont énumérés dans un
+ordre **déterministe** — flats de la coquille dans l'ordre des triplets,
+quotientés par base canonique, puis les deux orientations — sans quoi l'indice du
+fils ne serait pas reproductible au retour. Le parent d'un candidat est recalculé
+localement : une direction canonique par les deux filtres, puis **une seule**
+requête de voisin, jamais une réénumération de ses voisins. Et le calcul de la
+direction n'appelle aucune requête : il ne lit que la coquille, l'ensemble
+intérieur et les signes tangents.
+
+**[mesuré]** deux campagnes, tout comparé au BFS sur les coquilles ET les
+ensembles intérieurs :
+
+| campagne | cas | désaccords | sommets | profondeur max | fils testés / sommet |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| grille saturée | 2 146 | **0** | 170 583 | **16** | 6,3 |
+| générique | 2 161 | **0** | 218 169 | **18** | 6,0 |
+
+388 752 sommets énumérés au total avec une pile de profondeur au plus dix-huit.
+La porte vérifie aussi qu'aucun sommet n'est visité deux fois — le nombre de
+sommets rendus égale le nombre de coquilles distinctes — ce qui est la propriété
+qu'un parent faux casserait en premier.
+
+**Ce que je ne prétends pas.** Aucune borne de temps : six calculs de parent par
+sommet est une mesure de régime, et une grande coquille peut avoir un nombre
+combinatoire de flats. Le catalogue passe encore par le BFS, donc la sortie n'est
+pas streamée. Et rien de ceci ne touche aux globalités de la hiérarchie que votre
+note isole — `Resolve`, la fermeture des ex æquo, le locator horizontal, la
+couverture, les verticales. Le parcours est local ; le fold reste global, et il
+n'est pas écrit.

@@ -301,9 +301,12 @@ struct FlatStatistics {
   long long disagreement_sweeps = 0;     // balayages de certification par desaccord de signe
   long long harvest_prefiltered = 0;     // supports ecartes par le test de propriete
   long long harvest_censused = 0;        // supports ayant paye un census complet
+  long long reverse_depth_max = 0;        // profondeur maximale de la pile
+  long long reverse_children_tested = 0;  // voisins soumis au test de parent
+  long long reverse_backtracks = 0;
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 28 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 31 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
@@ -329,6 +332,9 @@ struct FlatStatistics {
     disagreement_sweeps += o.disagreement_sweeps;
     harvest_prefiltered += o.harvest_prefiltered;
     harvest_censused += o.harvest_censused;
+    reverse_depth_max = std::max(reverse_depth_max, o.reverse_depth_max);
+    reverse_children_tested += o.reverse_children_tested;
+    reverse_backtracks += o.reverse_backtracks;
   }
 };
 
@@ -1144,6 +1150,243 @@ inline int tangent_sign(int orient_of_site, int orientation) {
 // enumeres par leurs PLANS distincts et non par les C(m,3) triplets. Transition
 // par lots. Le census exact peut etre active : il ne corrige rien, il refute.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// REVERSE SEARCH — le parcours SANS `seen`, `frontier` ni `visited`
+// ---------------------------------------------------------------------------
+//
+// Le theoreme de parent local dit qu'un sommet non racine a un parent unique
+// calculable depuis lui seul. Il rend donc l'enumeration STATELESS : on descend
+// de v vers w si et seulement si pi(w) = v. Aucune deduplication n'est
+// necessaire, donc aucune table partagee, donc aucune ecriture concurrente — et
+// c'est cela, et non les quarante-huit coeurs, qui rend un front d'onde GPU
+// possible.
+//
+// La memoire de navigation devient la PILE : par niveau, l'indice du fils
+// courant et la coquille du parent. Le BFS reste en place comme oracle borne, et
+// le differentiel exige que les deux parcours visitent exactement le meme
+// ensemble de sommets.
+//
+// Les fonctions ci-dessous factorisent ce que le BFS faisait en ligne : parcourir
+// les flats d'un sommet dans un ordre DETERMINISTE — sans quoi les indices de
+// fils ne seraient pas reproductibles au retour —, puis suivre un flat dans une
+// direction.
+namespace flats {
+
+struct FlatAtVertex {
+  i32 base[3] = {-1, -1, -1};
+  std::vector<i32> closure;
+};
+
+// Enumere les flats fermes de rang trois incidents a v, chacun UNE fois, dans
+// l'ordre des triplets de la coquille. Le quotient est le meme que celui du
+// BFS : un triplet qui n'est pas la base canonique de sa fermeture est ecarte.
+template <class Fn>
+inline void for_each_flat(const std::vector<P3>& points, const Vertex& v, Fn&& visit) {
+  const int m = (int)v.shell.size();
+  std::vector<i32> closure;
+  for (int i = 0; i < m; ++i)
+  for (int j = i + 1; j < m; ++j)
+  for (int k = j + 1; k < m; ++k) {
+    const i32 ta = v.shell[(std::size_t)i], tb = v.shell[(std::size_t)j],
+              tc = v.shell[(std::size_t)k];
+    {
+      const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)tb], points[(std::size_t)ta]);
+      const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)tc], points[(std::size_t)ta]);
+      const mhgp::P3 x = mhgp::p3_cross(u, w);
+      if (x.x == 0 && x.y == 0 && x.z == 0) continue;
+    }
+    closure.clear();
+    for (int t = 0; t < m; ++t) {
+      const i32 z = v.shell[(std::size_t)t];
+      if (orient3d_exact(points[(std::size_t)ta], points[(std::size_t)tb],
+                         points[(std::size_t)tc], points[(std::size_t)z]) == 0)
+        closure.push_back(z);
+    }
+    i32 canonical[3] = {-1, -1, -1};
+    {
+      const int q = (int)closure.size();
+      bool found = false;
+      for (int x = 0; x < q && !found; ++x)
+      for (int y = x + 1; y < q && !found; ++y)
+      for (int z = y + 1; z < q && !found; ++z) {
+        const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)closure[(std::size_t)y]],
+                                        points[(std::size_t)closure[(std::size_t)x]]);
+        const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)closure[(std::size_t)z]],
+                                        points[(std::size_t)closure[(std::size_t)x]]);
+        const mhgp::P3 cr = mhgp::p3_cross(u, w);
+        if (cr.x == 0 && cr.y == 0 && cr.z == 0) continue;
+        canonical[0] = closure[(std::size_t)x];
+        canonical[1] = closure[(std::size_t)y];
+        canonical[2] = closure[(std::size_t)z];
+        found = true;
+      }
+      if (!found) continue;
+    }
+    if (!(canonical[0] == ta && canonical[1] == tb && canonical[2] == tc)) continue;
+    FlatAtVertex flat;
+    flat.base[0] = ta; flat.base[1] = tb; flat.base[2] = tc;
+    flat.closure = closure;
+    visit(flat);
+  }
+}
+
+// La direction canonique du parent, ou `false` si aucune orientation n'est
+// admissible — ce qui n'arrive qu'a la racine. Deux filtres exacts, comme au
+// BFS : rester dans la chambre, et faire croitre L_h ou decroitre Q_r.
+inline bool canonical_parent(const std::vector<P3>& points, const Vertex& v,
+                             const std::vector<i32>& root_base, FlatAtVertex* flat_out,
+                             int* orientation_out) {
+  const i32 site = v.interior.empty() ? -1 : v.interior.front();
+  std::vector<i32> best_key;
+  bool found = false;
+  for_each_flat(points, v, [&](const FlatAtVertex& flat) {
+    Pencil pencil{&points, flat.base[0], flat.base[1], flat.base[2]};
+    for (int direction = -1; direction <= 1; direction += 2) {
+      bool admissible = true;
+      for (i32 z : v.shell)
+        if (tangent_sign(pencil.orient_of(z), direction) < 0) { admissible = false; break; }
+      if (!admissible) continue;
+      if (site >= 0) {
+        if (tangent_sign(pencil.orient_of(site), direction) <= 0) continue;
+      } else {
+        mhgp::i128 total = 0;
+        for (i32 z : root_base)
+          total += orient3d_exact(points[(std::size_t)flat.base[0]],
+                                  points[(std::size_t)flat.base[1]],
+                                  points[(std::size_t)flat.base[2]], points[(std::size_t)z]);
+        const mhgp::i128 derivative = (direction > 0) ? -total : total;
+        if (derivative >= 0) continue;
+      }
+      std::vector<i32> key = flat.closure;
+      key.push_back(direction > 0 ? 1 : 0);
+      if (!found || key < best_key) {
+        best_key = key;
+        *flat_out = flat;
+        *orientation_out = direction;
+        found = true;
+      }
+    }
+  });
+  return found;
+}
+
+// Suit un flat dans une direction et rend le sommet suivant, ou `false` si le
+// pinceau est non borne de ce cote. Meme certification qu'au BFS : amorce par
+// l'ensemble interieur puis pave croissant, puis desaccord de signe entre les
+// deux spheres terminales, puis repli exhaustif.
+inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
+                            const FlatAtVertex& flat, int direction,
+                            const CertifiedIndex* index, FlatStatistics* st, Vertex* out) {
+  const int n = (int)points.size();
+  const int m = (int)v.shell.size();
+  Pencil pencil{&points, flat.base[0], flat.base[1], flat.base[2]};
+  i32 apex = -1;
+  int orient_apex = 0;
+  for (int t = 0; t < m; ++t) {
+    const i32 z = v.shell[(std::size_t)t];
+    const int oz = pencil.orient_of(z);
+    if (oz != 0) { apex = z; orient_apex = oz; break; }
+  }
+  if (apex < 0) return false;
+
+  ++st->pencil_queries;
+  i32 best = -1;
+  int best_orient = 0;
+  std::vector<char> seen_candidate((std::size_t)n, 0);
+  std::vector<i32> touched;
+  auto absorb = [&](i32 z) {
+    if (seen_candidate[(std::size_t)z]) return;
+    seen_candidate[(std::size_t)z] = 1;
+    touched.push_back(z);
+    if (std::binary_search(v.shell.begin(), v.shell.end(), z)) return;
+    const int oz = pencil.orient_of(z);
+    if (oz == 0) return;
+    ++st->pencil_candidates;
+    if (pencil.compare_t(z, oz, apex, orient_apex) != direction) return;
+    if (best < 0) { best = z; best_orient = oz; return; }
+    if (pencil.compare_t(z, oz, best, best_orient) == -direction) { best = z; best_orient = oz; }
+  };
+
+  mhgp::Sphere apex_sphere{};
+  mhgp::i32 apex_support[4] = {flat.base[0], flat.base[1], flat.base[2], apex};
+  std::sort(apex_support, apex_support + 4);
+  const bool apex_ok = mhgp::sphere4(points[(std::size_t)apex_support[0]],
+                                     points[(std::size_t)apex_support[1]],
+                                     points[(std::size_t)apex_support[2]],
+                                     points[(std::size_t)apex_support[3]], &apex_sphere);
+  if (index == nullptr) {
+    for (i32 z = 0; z < n; ++z) absorb(z);
+  } else {
+    for (i32 z : v.interior) absorb(z);
+    const mhgp::P3& anchor = points[(std::size_t)flat.base[0]];
+    long long half = 4;
+    bool covered = false;
+    while (best < 0 && !covered) {
+      ++st->bootstrap_rounds;
+      const long long lo[3] = {(long long)anchor.x - half, (long long)anchor.y - half,
+                               (long long)anchor.z - half};
+      const long long hi[3] = {(long long)anchor.x + half, (long long)anchor.y + half,
+                               (long long)anchor.z + half};
+      index->box(lo, hi, &st->grid_points_touched, absorb);
+      covered = (half >= (long long)kDeclaredGridMaximum);
+      half *= 2;
+    }
+    if (covered && best < 0) ++st->full_grid_sweeps;
+    for (int round = 0; apex_ok && round < 8 && best >= 0; ++round) {
+      const i32 previous = best;
+      mhgp::i32 bs[4] = {flat.base[0], flat.base[1], flat.base[2], best};
+      std::sort(bs, bs + 4);
+      mhgp::Sphere best_sphere{};
+      if (!mhgp::sphere4(points[(std::size_t)bs[0]], points[(std::size_t)bs[1]],
+                         points[(std::size_t)bs[2]], points[(std::size_t)bs[3]],
+                         &best_sphere)) break;
+      ++st->disagreement_sweeps;
+      index->sign_disagreement(apex_sphere, best_sphere, &st->grid_points_touched, absorb);
+      if (best == previous) break;
+    }
+    if (best < 0) {
+      ++st->full_grid_sweeps;
+      for (i32 z = 0; z < n; ++z) absorb(z);
+    }
+  }
+  if (best < 0) { ++st->unbounded_stops; return false; }
+
+  std::vector<i32> batch;
+  for (i32 z : touched) {
+    if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
+    const int oz = pencil.orient_of(z);
+    if (oz == 0) continue;
+    if (pencil.compare_t(z, oz, best, best_orient) == 0) batch.push_back(z);
+  }
+  std::sort(batch.begin(), batch.end());
+  if (batch.size() > 1) ++st->batches_multiple;
+
+  std::vector<i32> shell = flat.closure;
+  shell.insert(shell.end(), batch.begin(), batch.end());
+  std::sort(shell.begin(), shell.end());
+
+  std::vector<i32> interior = v.interior;
+  for (int t = 0; t < m; ++t) {
+    const i32 z = v.shell[(std::size_t)t];
+    if (std::binary_search(flat.closure.begin(), flat.closure.end(), z)) continue;
+    if (pencil.side(best, z, best_orient) < 0) interior.push_back(z);
+  }
+  for (i32 z : batch)
+    if (pencil.side(apex, z, orient_apex) < 0) {
+      const auto it = std::find(interior.begin(), interior.end(), z);
+      if (it != interior.end()) interior.erase(it);
+    }
+  std::sort(interior.begin(), interior.end());
+  interior.erase(std::unique(interior.begin(), interior.end()), interior.end());
+
+  out->shell = shell;
+  out->interior = interior;
+  out->level = (int)interior.size();
+  return true;
+}
+
+}  // namespace flats
+
 inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& points,
                                                    int level_ceiling,
                                                    FlatStatistics* st,
@@ -1537,6 +1780,123 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
       }
     }
     if (!any_flat) ++st->degenerate_flat_vertex;
+  }
+  return visited;
+}
+
+// ---------------------------------------------------------------------------
+// LE PARCOURS PAR REVERSE SEARCH
+// ---------------------------------------------------------------------------
+//
+// Meme ensemble de sommets que le BFS, sans `seen`, `frontier` ni `visited`. On
+// descend de v vers w si et seulement si pi(w) = v ; l'unicite du parent rend
+// toute deduplication inutile. L'etat de navigation est la PILE : par niveau, la
+// coquille du parent et l'indice du fils courant.
+//
+// Le BFS reste l'oracle : le differentiel exige que les deux parcours rendent
+// exactement le meme ensemble, et publie ici la profondeur maximale, le nombre
+// de voisins soumis au test de parent et le nombre de retours.
+//
+// Ce que cela ne rend PAS : une borne de temps. Chaque fils teste coute un calcul
+// de parent, donc une enumeration de flats et une requete de voisin ; une grande
+// coquille peut avoir un nombre combinatoire de flats. Ce que cela rend, c'est la
+// memoire — et l'absence d'ecriture partagee.
+inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp::P3>& points,
+                                                         int level_ceiling,
+                                                         FlatStatistics* st,
+                                                         CloudStatus* status,
+                                                         const CertifiedIndex* index = nullptr) {
+  using namespace flats;
+  std::vector<Vertex> visited;
+  const int n = (int)points.size();
+  *status = CloudStatus::kOk;
+  if (n < 4) { *status = CloudStatus::kTooFewPoints; return visited; }
+  if (!inside_declared_grid(points)) { *status = CloudStatus::kOutsideDeclaredGrid; return visited; }
+  if (has_duplicate_coordinates(points)) {
+    *status = CloudStatus::kDuplicateCoordinates;
+    return visited;
+  }
+  if (!affine_dimension_is_three(points)) {
+    *status = CloudStatus::kAffineDimensionBelowThree;
+    return visited;
+  }
+  if (level_ceiling < 0) return visited;
+
+  Vertex seed;
+  const CloudStatus seeded = seed_level_zero(points, st, &seed);
+  if (seeded != CloudStatus::kOk) { *status = seeded; return visited; }
+
+  std::vector<i32> root_base;
+  for (i32 z : seed.shell) {
+    if (root_base.size() >= 4) break;
+    const std::size_t have = root_base.size();
+    if (have == 1) {
+      const mhgp::P3& u = points[(std::size_t)root_base[0]];
+      const mhgp::P3& w = points[(std::size_t)z];
+      if (u.x == w.x && u.y == w.y && u.z == w.z) continue;
+    } else if (have == 2) {
+      const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)root_base[1]],
+                                      points[(std::size_t)root_base[0]]);
+      const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)z], points[(std::size_t)root_base[0]]);
+      const mhgp::P3 c = mhgp::p3_cross(u, w);
+      if (c.x == 0 && c.y == 0 && c.z == 0) continue;
+    } else if (have == 3) {
+      if (orient3d_exact(points[(std::size_t)root_base[0]], points[(std::size_t)root_base[1]],
+                         points[(std::size_t)root_base[2]], points[(std::size_t)z]) == 0) continue;
+    }
+    root_base.push_back(z);
+  }
+  if (root_base.size() < 4) { *status = CloudStatus::kInvariantViolated; return visited; }
+
+  // Le parent d'un sommet, recalcule localement : une direction canonique puis
+  // UNE requete de voisin.
+  auto parent_of = [&](const Vertex& w, Vertex* mother) {
+    FlatAtVertex flat;
+    int orientation = 0;
+    if (!canonical_parent(points, w, root_base, &flat, &orientation)) return false;
+    return neighbour_along(points, w, flat, orientation, index, st, mother);
+  };
+
+  struct Level { Vertex vertex; std::size_t next_child = 0; };
+  std::vector<Level> stack;
+  stack.push_back(Level{seed, 0});
+  visited.push_back(seed);
+
+  while (!stack.empty()) {
+    st->reverse_depth_max = std::max(st->reverse_depth_max, (long long)stack.size());
+    Level& top = stack.back();
+
+    // Les voisins dans l'ordre deterministe (flat, direction). L'indice du fils
+    // est donc reproductible au retour, ce qui est toute la mecanique
+    // d'AVIS--FUKUDA.
+    std::size_t seen_index = 0;
+    bool descended = false;
+    Vertex child;
+    for_each_flat(points, top.vertex, [&](const FlatAtVertex& flat) {
+      if (descended) return;
+      for (int direction = -1; direction <= 1 && !descended; direction += 2) {
+        const std::size_t here = seen_index++;
+        if (here < top.next_child) continue;
+        Vertex candidate;
+        if (!neighbour_along(points, top.vertex, flat, direction, index, st, &candidate)) continue;
+        if (candidate.level > level_ceiling) continue;
+        ++st->reverse_children_tested;
+        Vertex mother;
+        if (!parent_of(candidate, &mother)) continue;      // la racine n'est fille de personne
+        if (mother.shell != top.vertex.shell) continue;    // ce n'est pas notre fils
+        top.next_child = here + 1;
+        child = candidate;
+        descended = true;
+      }
+    });
+
+    if (descended) {
+      visited.push_back(child);
+      stack.push_back(Level{child, 0});
+      continue;
+    }
+    ++st->reverse_backtracks;
+    stack.pop_back();
   }
   return visited;
 }

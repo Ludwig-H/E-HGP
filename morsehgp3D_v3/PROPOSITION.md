@@ -684,7 +684,7 @@ maximal 25 026 points sur `eight_clusters`. Aucune tuile ne peut donc supposer
 | LBVH | range-report, self-join, `max_two_R_upper_hi` fail-open | matrice paire–point |
 | reverse search | parent, enfants, propriétaire local, pile bornée | `seen/frontier/visited` globaux |
 | source directe ouverte | cofaces Gabriel et facettes du cœur streamées | catalogue critique global; le prototype exhaustif n'est que l'oracle |
-| première incidence | census fermé, attache propriétaire, `ResolveStrictCarrier` | $\mathrm{Star}(D_k)$ et matérialisation de tous les $M(F)$ sous la porte régulière |
+| première incidence | census fermé $E_F$, census strict $J_F$ saturé, attache propriétaire, `ResolveStrictCarrier` | $\mathrm{Star}(D_k)$ et matérialisation de tous les $M(F)$ sous la porte régulière |
 | **tri et lots** | ordre global par niveau exact, groupement des égaux | catalogue géométrique global |
 | réduction horizontale | fold de partition, locator externalisable, forêt append-only | snapshots complets et mosaïque d'ordre supérieur |
 | couverture | DAG ou journal exact de provenance | matérialisation répétée des unions de points |
