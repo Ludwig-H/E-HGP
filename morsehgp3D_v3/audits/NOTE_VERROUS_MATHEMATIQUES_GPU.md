@@ -13,14 +13,14 @@ constats d'implémentation sont épinglés au snapshot suivant :
 
 | objet | empreinte |
 | --- | --- |
-| `HEAD` | `04555bdd6ff67810bd8db35c4baf18b9eae0063b` |
+| `HEAD` | `78583f1950c4c514828c523ba3ad2aa03676bfb0` |
 | `prototype/order_k_flats.hpp` | `02ad6f58632de60d47e0b2bbcdf6205d8a3b9d1cab1474dd9d8b566593e9e81a` |
 | `prototype/flats_differential.cpp` | `14c690031debf7214ae0fcd40ced0fd1a4169a06b34b0f035ca7103692384fa3` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
 | `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
 | `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
 | `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
-| `CMakeLists.txt` live post-commit | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
+| `CMakeLists.txt` | `6cffa15d014e2f817aa5723565a02bbeff1ea523f92fcae2a2b732400ad2ce64` |
 
 > [!IMPORTANT]
 > Cette note aide Claude à construire la voie GPU; elle ne modifie aucun
@@ -510,13 +510,13 @@ La voie v3 conserve les exigences suivantes :
 - zéro-initialisation des structures copiées afin que queues et padding ne
   transportent ni octets indéterminés ni faux digest.
 
-Le delta CMake live filtre maintenant correctement `-Wall -Wextra -Werror` sur
-le seul C++; son rebuild hôte est vert. L'enveloppe reste ouverte : elle accepte
+Le CMake filtre maintenant correctement `-Wall -Wextra -Werror` sur le seul
+C++; son rebuild hôte est vert. L'enveloppe reste ouverte : elle accepte
 une architecture surchargée, initialise CUDA avant de fixer éventuellement
 `120-real`, n'impose ni compilateur NVIDIA, ni toolkit corrigé pour `__int128`,
-ni politique d'avertissements CUDA. La première session G4 doit venir après une
-configuration locale non vacuable et une enveloppe qui échoue avant lancement
-si l'un de ces invariants manque.
+ni politique d'avertissements CUDA. Une session G4 a été lancée avant fermeture
+de cette enveloppe et de la porte de replay; elle fournit un diagnostic de
+microkernel, pas un précédent autorisant à ignorer ces invariants.
 
 ## 10. Porte permanente GPU v3
 

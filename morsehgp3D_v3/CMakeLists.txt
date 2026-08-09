@@ -73,6 +73,13 @@ target_link_libraries(mhgp3v_device_wavefront PRIVATE mhgp)
 target_compile_options(mhgp3v_device_wavefront PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror>)
 
+# LA MESURE QUI DECIDE. A densite FIXE, le terrain croit-il ? La reponse est le
+# seul chiffre qui dise si 100 ms est atteignable a 50 000 points.
+add_executable(mhgp3v_scale_profile prototype/scale_profile.cpp)
+target_include_directories(mhgp3v_scale_profile PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_scale_profile PRIVATE mhgp)
+target_compile_options(mhgp3v_scale_profile PRIVATE -Wall -Wextra -Werror)
+
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)

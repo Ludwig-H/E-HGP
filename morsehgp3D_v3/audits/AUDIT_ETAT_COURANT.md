@@ -251,14 +251,16 @@ remplacer les 27 obligations basées sur `assert` par des échecs explicites.
 - Les quatre portes `device_wavefront` hôte passent en Release.
 - Les mêmes quatre portes passent sous ASan/UBSan; aucune alerte n'est observée
   sur les chemins CPU exécutés.
-- Le lancement `.cu` est séparé et l'option CUDA échoue fermée en l'absence de
-  compilateur.
+- Le commit rapporte quatre lancements G4 `sm_120` et zéro écart bit à bit entre
+  le `VertexVerdict` hôte et device; l'option CUDA échoue fermée localement en
+  l'absence de compilateur.
 - Le masque 64 bits ne décale jamais de 64 : les deux slots du flat 31 occupent
   les bits 62 et 63.
+- L'inventaire GCE en lecture seule confirme les cibles labellisées arrêtées.
 - `git diff --check` est vert sur le snapshot documenté.
 
-Ces crédits ne prouvent ni les refus, ni le parent, ni le voisin, ni une
-exécution device.
+Ces crédits prouvent une exécution device déclarée et une égalité du payload
+borné; ils ne prouvent ni les refus, ni le parent, ni le voisin, ni le pipeline.
 
 ## Aide mathématique et ordre d'implémentation transmis à Claude
 
@@ -315,10 +317,10 @@ de niveau 384 bits, fold de lots complets et reçus 50 k/G4. La construction
 détaillée est dans
 [`NOTE_VERROUS_MATHEMATIQUES_GPU.md`](NOTE_VERROUS_MATHEMATIQUES_GPU.md).
 
-## Porte exigée avant une session G4 qualifiante
+## Porte exigée avant la prochaine session G4 qualifiante
 
-La présence du `.cu` rend une future session utile, mais la porte actuelle est
-encore censurée. Avant de facturer G4 :
+La session déclarée confirme que le microkernel se lance; sa porte reste
+censurée. Avant une nouvelle session prétendant qualifier davantage :
 
 1. fermer le replay des 35 flats et le mutant all-refused;
 2. authentifier le job et l'enveloppe CUDA;
@@ -332,4 +334,5 @@ high-waters par conteneur, ledger des tâches, drains CPU, concordance exacte de
 runs et arrêt ciblé GCP certifié. Le débit kernel-only du microkernel ne peut pas
 valider le contrat industriel.
 
-GCP non utilisé pour cet audit.
+GCP utilisé uniquement en lecture seule pour vérifier l'état final des cibles;
+aucune VM créée, démarrée, arrêtée ou modifiée par l'auditeur.
