@@ -77,11 +77,17 @@ Le vert du juge exhaustif **est** la vérification : 20 nuages, ordre 3, grille
 déclarée, `DICTIONNAIRE REFUTE=0`. Une réfutation est comptée et fait échouer la
 campagne, plutôt que d'omettre le support en silence.
 
-**L'arité 3 aussi**, désormais : le circumcentre du triangle est le point de la
-droite $h_z=0$ dont le déplacement est parallèle à la projection de $X_z$, soit
-$s = c\,\mathrm{adj}(G)\,n / Q$ avec $Q = n^{\mathsf{T}}\mathrm{adj}(G)\,n>0$, et
-$\mathrm{rang}=3+c_e+\delta_e$. Seules les arités 1 et 2 empruntent encore le
-chemin exhaustif.
+**Les quatre arités**, désormais, et donc **tout le catalogue** :
+
+| arité | point canonique dans le plan médiateur | rang |
+| ---: | --- | --- |
+| 1 | sans objet, sphère de rayon nul en $p$ | $1$ |
+| 2 | $s=0$, la boule diamétrale ; $\delta_e$ compte les $c<0$ | $2+c_e+\delta_e$ |
+| 3 | $s = c\,\mathrm{adj}(G)\,n / Q$, $Q=n^{\mathsf{T}}\mathrm{adj}(G)\,n>0$ | $3+c_e+\delta_e$ |
+| 4 | intersection de deux droites actives | $4+c_e+\delta_e$ |
+
+Le chemin exhaustif a entièrement disparu du sujet `edge_shallow` : **aucun rang
+n'y est obtenu en comptant une boule.**
 
 Deux obstacles de largeur ont été réglés en chemin, sans quitter les entiers
 natifs. La base orthogonale naturelle $b_2=d\times b_1$ porte un facteur

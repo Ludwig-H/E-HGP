@@ -54,6 +54,7 @@ struct EdgeShallowStatistics {
   long long lines_constant_inside = 0;   // somme des c_e
   long long vertices_examined = 0;   // paires de droites actives
   long long vertices_shallow = 0;    // profondeur au plus s_max - 4 - c_e
+  long long emitted_arity_two = 0;
   long long emitted_arity_three = 0;
   long long emitted_arity_four = 0;
   long long depth_tests = 0;
@@ -62,6 +63,7 @@ struct EdgeShallowStatistics {
   // rang = 4 + c_e + delta_e est refute, et l'omettre en silence reviendrait a
   // masquer la refutation.
   long long dictionary_refuted = 0;
+  long long degenerate_shells = 0;  // cospheries sur un candidat bien centre
 };
 
 namespace detail {
@@ -150,6 +152,51 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
   statistics->lines_constant_inside += constant_inside;
   statistics->lines_active += static_cast<long long>(active.size());
 
+  // ---- ARITE DEUX -------------------------------------------------------
+  // Le support {p,q} a pour sphere la boule diametrale, dont le centre est M,
+  // c'est-a-dire s = 0. La profondeur y est immediate : a.0 + b.0 = 0 > c
+  // equivaut a c < 0. Aucun quotient, aucun determinant.
+  if (s_max - 2 - constant_inside >= 0) {
+    int depth = 0;
+    for (const detail::Line& line : active) {
+      ++statistics->depth_tests;
+      if (line.c < 0) ++depth;
+    }
+    if (depth <= s_max - 2 - constant_inside) {
+      const int rank = 2 + constant_inside + depth;
+      const std::vector<mhgp::i32> support{std::min(first, second), std::max(first, second)};
+      mhgp::Sphere sphere{};
+      bool centred = false;
+      if (detail::build_sphere(points, support, &sphere, &centred) && centred) {
+        AnchoredSupport emitted;
+        int on_shell = 0;
+        bool extra_on_shell = false;
+        for (mhgp::i32 z = 0; z < n; ++z) {
+          const int side = mhgp::sphere_side(sphere, points[static_cast<std::size_t>(z)]);
+          if (side > 0) continue;
+          if (side == 0) {
+            ++on_shell;
+            if (!std::binary_search(support.begin(), support.end(), z)) extra_on_shell = true;
+          }
+          emitted.members.push_back(z);
+        }
+        if (extra_on_shell) ++statistics->degenerate_shells;
+        if (!extra_on_shell && on_shell == 2) {
+          if (static_cast<int>(emitted.members.size()) != rank) {
+            ++statistics->dictionary_refuted;
+          } else {
+            std::sort(emitted.members.begin(), emitted.members.end());
+            emitted.support = support;
+            emitted.sphere = sphere;
+            emitted.rank = rank;
+            out->push_back(std::move(emitted));
+            ++statistics->emitted_arity_two;
+          }
+        }
+      }
+    }
+  }
+
   // ---- ARITE TROIS ------------------------------------------------------
   // Le circumcentre du triangle (p,q,z) est le point de la droite h_z = 0 situe
   // dans le plan du triangle, c'est-a-dire celui dont le deplacement est
@@ -200,7 +247,8 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
         }
         emitted.members.push_back(z);
       }
-      if (extra_on_shell || on_shell != 3) continue;
+      if (extra_on_shell) { ++statistics->degenerate_shells; continue; }
+      if (on_shell != 3) continue;
       if (static_cast<int>(emitted.members.size()) != rank) {
         ++statistics->dictionary_refuted;
         continue;
@@ -277,7 +325,8 @@ inline void edge_shallow_supports(const std::vector<mhgp::P3>& points, mhgp::i32
         }
         emitted.members.push_back(z);
       }
-      if (extra_on_shell || on_shell != 4) continue;
+      if (extra_on_shell) { ++statistics->degenerate_shells; continue; }
+      if (on_shell != 4) continue;
       if (static_cast<int>(emitted.members.size()) != rank) {
         ++statistics->dictionary_refuted;
         continue;
@@ -303,22 +352,33 @@ inline mhgp::Catalogue edge_shallow_catalogue(const std::vector<mhgp::P3>& point
   *statistics = EdgeShallowStatistics{};
   const int n = static_cast<int>(points.size());
 
-  // Arites 1 a 3 : chemin ancre exhaustif, filtre a l'emission.
-  mhgp::Catalogue catalogue =
-      anchored_catalogue(points, s_max, n, Regime::exhaustive, anchored_campaign);
+  (void)anchored_campaign;
+  mhgp::Catalogue catalogue;
   std::vector<mhgp::CriticalSphere> kept;
   std::vector<mhgp::i32> members;
-  for (const mhgp::CriticalSphere& sphere : catalogue.spheres) {
-    if (sphere.n_support >= 3) continue;
-    mhgp::CriticalSphere copy = sphere;
-    copy.members_begin = static_cast<mhgp::i32>(members.size());
-    members.insert(members.end(),
-                   catalogue.members.begin() + sphere.members_begin,
-                   catalogue.members.begin() + sphere.members_begin + sphere.rank);
-    kept.push_back(copy);
+
+  // Arite 1 : la sphere de rayon nul en p. Son rang est le nombre de points
+  // confondus avec p, donc 1 dans le domaine declare ; un doublon est une
+  // degenerescence et sera vu comme coquille supplementaire.
+  for (mhgp::i32 p = 0; p < n; ++p) {
+    const mhgp::Sphere sphere = mhgp::sphere1(points[static_cast<std::size_t>(p)]);
+    int rank = 0;
+    for (mhgp::i32 z = 0; z < n; ++z)
+      if (mhgp::sphere_side(sphere, points[static_cast<std::size_t>(z)]) <= 0) ++rank;
+    if (rank != 1) { ++statistics->degenerate_shells; continue; }
+    mhgp::CriticalSphere critical;
+    critical.support[0] = p;
+    for (int i = 1; i < mhgp::kMaxSupport; ++i) critical.support[i] = -1;
+    critical.n_support = 1;
+    critical.rank = 1;
+    critical.sph = sphere;
+    critical.beta = mhgp::sphere_beta(sphere);
+    critical.members_begin = static_cast<mhgp::i32>(members.size());
+    members.push_back(p);
+    kept.push_back(critical);
   }
 
-  // Arites 3 et 4 : par profondeur, sur toutes les aretes (source d'ancres exhaustive,
+  // Arites 2, 3 et 4 : par profondeur, sur toutes les aretes (source d'ancres exhaustive,
   // volontairement : ce prototype isole le constructeur, pas A1-source).
   std::vector<AnchoredSupport> found;
   for (mhgp::i32 a = 0; a < n; ++a)
