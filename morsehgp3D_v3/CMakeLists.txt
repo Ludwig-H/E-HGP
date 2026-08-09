@@ -42,8 +42,12 @@ target_include_directories(mhgp3v_oracle
 target_link_libraries(mhgp3v_oracle PRIVATE mhgp)
 target_compile_options(mhgp3v_oracle PRIVATE -Wall -Wextra -Wpedantic)
 
-# M3' — le juge differentiel du parcours MULTIPLICITAIRE. Il ne partage avec le
-# sujet que `mhgp::sphere_side` : ni germe, ni pinceau, ni transport.
+# M3' — le juge differentiel du parcours MULTIPLICITAIRE. Il n'appelle ni le
+# germe, ni les predicats de pinceau, ni le transport du sujet, mais il PARTAGE
+# avec lui `mhgp::sphere_side`, `mhgp::sphere4` et `mhgp::miniball_of` : ce qu'il
+# etablit est un accord RELATIF a ces primitives, pas un catalogue critique
+# exact. L'autorite independante manquante est une reference rationnelle
+# multiplicitaire dans l'oracle M1.
 add_executable(mhgp3v_flats_differential prototype/flats_differential.cpp)
 target_include_directories(mhgp3v_flats_differential PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_flats_differential PRIVATE mhgp)
@@ -221,8 +225,11 @@ add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
   mhgp3v_flats_reject_unknown_argument "argument inconnu" --clouds 1 --sujet-inexistant)
+# Chaque option porte desormais sa plage semantique, verifiee AVANT le cast :
+# le diagnostic est celui de l'option fautive, pas un « campagne absurde » global.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_absurd_campaign "campagne absurde" --clouds 1 --smax 1)
+  mhgp3v_flats_reject_smax_below_contract "valeur entiere invalide"
+  --clouds 1 --smax 1)
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
   mhgp3v_flats_reject_empty_campaign "plancher non atteint" --clouds 0 --min-cases 100000)
 # `atoi` acceptait « 0junk » et rendait zero : la campagne devenait vide et verte.
@@ -230,12 +237,25 @@ mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
   mhgp3v_flats_reject_integer_suffix "valeur entiere invalide" --clouds 0junk --min-cases 1)
 # La grille declaree est u16 ; hors d'elle les bornes des predicats ne tiennent plus.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_coord_outside_grid "campagne absurde"
+  mhgp3v_flats_reject_coord_outside_grid "valeur entiere invalide"
   --clouds 1 --points 11 --coord 2147483647 --smax 2 --min-cases 1)
 # Une campagne qui ne navigue jamais ne peut pas rendre OK.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
   mhgp3v_flats_reject_no_navigation "plancher de couverture non atteint"
   --clouds 0 --min-cases 1 --min-navigated 100000)
+# Le token etait lu en entier, mais le `long long` etait ensuite tronque en
+# `int` sans controle de plage : `--clouds 4294967296` rendait zero nuage.
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_clouds_narrowing "valeur entiere invalide"
+  --clouds 4294967296 --min-cases 1)
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_coord_narrowing "valeur entiere invalide"
+  --clouds 0 --coord 4295032832 --min-cases 1)
+# Neuf points DISTINCTS dans huit positions : la demande est impossible et ne
+# doit pas etre censuree en silence par le tirage.
+mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_impossible_campaign "campagne impossible"
+  --clouds 1 --points 9 --coord 2 --smax 2 --min-cases 1)
 
 # Interface fail-closed : token entier partiel, reçu non ecrit et option ignoree
 # doivent tous fournir un code non nul ET le diagnostic attendu.

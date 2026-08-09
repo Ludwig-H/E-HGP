@@ -231,11 +231,16 @@ Trois portes, et il faut les trois :
 3. **l'équivariance** — renuméroter le nuage ne doit rien changer.
 
 Le census exact par sommet est actif pendant toute la campagne : le transport
-n'est jamais autorité, il est confirmé ou réfuté à chaque sommet. Le **payload
-entier** est comparé — doublons publiés, tranche de membres et contiguïté de
-`members_begin`, appartenance exacte des membres à la boule fermée publiée,
-queue de `support` remplie de $-1$, ordre lexicographique strict de
-sérialisation — et non plus le seul ensemble des couples support–rang.
+n'est jamais autorité : une contradiction positionne `kInvariantViolated` et
+arrête le parcours, elle n'incrémente plus seulement un compteur que ce binaire
+serait seul à lire.
+
+Ce qui est comparé au-delà des couples support–rang : doublons publiés, tranche
+de membres et contiguïté de `members_begin`, appartenance exacte des membres à
+la boule fermée publiée, queue de `support` remplie de $-1$, ordre
+lexicographique strict de sérialisation. Ce qui ne l'est **pas** : le centre
+rationnel, le rayon et $\beta$ ne sont pas confrontés à une vérité distincte, et
+les forêts ne sont pas construites. Ce n'est donc pas « le payload entier ».
 
 **Planchers de couverture.** Chaque campagne exige un minimum de nuages
 réellement navigués, de sommets, de coquilles multiples et de triplets
@@ -458,7 +463,10 @@ Le juge multiplicitaire seul, avec ses planchers :
 ```
 
 Une campagne vide, un argument inconnu ou un plancher non atteint rendent un
-code non nul avec son diagnostic ; trois tests négatifs le vérifient.
+code non nul avec son diagnostic ; **neuf** tests négatifs le vérifient — argument
+inconnu, `--smax` hors contrat, plancher de cas, plancher de couverture, suffixe
+entier, coordonnée hors grille, troncature de `--clouds`, troncature de
+`--coord`, et campagne combinatoirement impossible.
 
 ---
 
@@ -476,8 +484,8 @@ code non nul avec son diagnostic ; trois tests négatifs le vérifient.
 | 7 | `sphere.hpp` au bord produit : paire de points confondus acceptée comme support d'arité deux, sentinelle `den==0` sans garde | ouverts, hors de ce fichier |
 | 8 | le contrat 50 k / $K=10$ / 1 s | **non atteint, non mesuré, et les deux ratios qui le décident croissent encore à $n=300$** |
 | 9 | les $n$ singletons passent par `try_emit` avant le germe, soit $2{,}5\cdot10^9$ appels à `sphere_side` à 50 k | ouverte ; c'est une porte d'architecture, pas une constante |
-| 9 | la taille $V$ du $\leq k$-niveau en général | **non bornée utilement** : Clarkson--Shor est quadratique en $n$ et en $k$, et les mesures ne valent que pour le régime de surface (§5) |
-| 10 | le régime multi-captation | mesuré **moins peu profond** que la reconstruction fusionnée ; c'est la branche no-go de Gate D |
+| 10 | la taille $V$ du $\leq k$-niveau en général | **non bornée utilement** : Clarkson--Shor est quadratique en $n$ et en $k$, et les mesures ne valent que pour le régime de surface (§5) |
+| 11 | le régime multi-captation | mesuré **moins peu profond** que la reconstruction fusionnée ; c'est la branche no-go de Gate D |
 
 Le détail, les budgets et le journal des affirmations retirées sont dans
 [`PROPOSITION.md`](PROPOSITION.md).

@@ -319,6 +319,7 @@ enum class CloudStatus {
   kSeedFailed,                  // germe non certifiable : refus explicite
   kInvariantViolated,           // un census a contredit le transport
   kDuplicateCoordinates,        // deux observations confondues : hors contrat
+  kOutsideDeclaredGrid,         // coordonnee hors de la grille u16 declaree
 };
 
 inline const char* cloud_status_name(CloudStatus s) {
@@ -329,6 +330,7 @@ inline const char* cloud_status_name(CloudStatus s) {
     case CloudStatus::kSeedFailed: return "germe_non_certifie";
     case CloudStatus::kInvariantViolated: return "invariant_de_transport_viole";
     case CloudStatus::kDuplicateCoordinates: return "coordonnees_dupliquees";
+    case CloudStatus::kOutsideDeclaredGrid: return "hors_grille_u16_declaree";
   }
   return "inconnu";
 }
@@ -345,6 +347,21 @@ inline const char* cloud_status_name(CloudStatus s) {
 // — mesure de l'audit `AUDIT_ORDER_K_FLATS_9C587E6.md` §3.4 sur la fixture
 // (0,0,0) (0,0,0) (2,0,0) (0,2,0) (0,0,2). Tant qu'une semantique quotientee
 // n'est pas definie, le prototype REFUSE explicitement, il ne publie pas `ok`.
+// GRILLE DECLAREE. Toutes les bornes de largeur de ce fichier — 2^91,2 pour
+// `in_sphere_side`, 2^108,8 pour `in_circle_coplanar` — supposent des
+// coordonnees dans [0, 65535]. La garde ne peut donc pas vivre dans le CLI d'un
+// juge : un autre appelant passerait des coordonnees de l'ordre de 10^9 et
+// obtiendrait un depassement signe `__int128` avant tout predicat. Elle est ici,
+// a la frontiere des deux entrees publiques.
+inline constexpr mhgp::i32 kDeclaredGridMaximum = 65535;
+
+inline bool inside_declared_grid(const std::vector<mhgp::P3>& points) {
+  for (const mhgp::P3& p : points)
+    if (p.x < 0 || p.y < 0 || p.z < 0 || p.x > kDeclaredGridMaximum ||
+        p.y > kDeclaredGridMaximum || p.z > kDeclaredGridMaximum) return false;
+  return true;
+}
+
 inline bool has_duplicate_coordinates(const std::vector<mhgp::P3>& points) {
   std::vector<const mhgp::P3*> sorted;
   sorted.reserve(points.size());
@@ -702,6 +719,10 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
   std::vector<Vertex> visited;
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
+  if (!inside_declared_grid(points)) {
+    *status = CloudStatus::kOutsideDeclaredGrid;
+    return visited;
+  }
   if (has_duplicate_coordinates(points)) {
     *status = CloudStatus::kDuplicateCoordinates;
     return visited;
@@ -735,8 +756,14 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
       int level_exact = 0;
       if (census(points, v, &shell_check, &level_exact)) {
         ++st->census_checks;
+        // FAIL-CLOSED. Compter la contradiction sans changer le statut laissait
+        // l'API fail-open : seul le binaire du juge lisait les compteurs, tout
+        // autre appelant obtenait un catalogue construit sur un transport
+        // demenit par son propre census.
+        const bool contradicted = (shell_check != v.shell) || (level_exact != v.level);
         if (shell_check != v.shell) ++st->census_mismatch_shell;
         if (level_exact != v.level) ++st->census_mismatch_level;
+        if (contradicted) { *status = CloudStatus::kInvariantViolated; return visited; }
       }
     }
 
@@ -875,6 +902,10 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
 
+  if (!inside_declared_grid(points)) {
+    *status = CloudStatus::kOutsideDeclaredGrid;
+    return catalogue;
+  }
   if (has_duplicate_coordinates(points)) {
     *status = CloudStatus::kDuplicateCoordinates;
     return catalogue;

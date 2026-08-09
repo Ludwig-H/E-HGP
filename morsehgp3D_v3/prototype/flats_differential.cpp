@@ -376,24 +376,31 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     const bool has_value = (i + 1 < argc);
     long long value = 0;
-    auto take = [&](int* target) {
+    // Le token doit etre lu en ENTIER, puis tenir dans la plage semantique de
+    // l'option AVANT le cast. Sans ce controle, `--clouds 4294967296` rendait
+    // zero et `--coord 4295032832` rendait 65536 : la campagne devenait vide ou
+    // hors grille, et le binaire annoncait OK.
+    auto take = [&](int* target, long long low, long long high) {
       if (!has_value || !integer(argv[i + 1], &value)) return false;
+      if (value < low || value > high) return false;
       ++i;
       *target = (int)value;
       return true;
     };
     bool ok_argument = false;
-    if (!strcmp(argv[i], "--clouds")) ok_argument = take(&clouds);
-    else if (!strcmp(argv[i], "--points")) ok_argument = take(&npoints);
-    else if (!strcmp(argv[i], "--coord")) ok_argument = take(&coord);
-    else if (!strcmp(argv[i], "--smax")) ok_argument = take(&smax_hi);
-    else if (!strcmp(argv[i], "--min-cases")) ok_argument = take(&min_cases);
-    else if (!strcmp(argv[i], "--min-navigated")) ok_argument = take(&min_navigated);
-    else if (!strcmp(argv[i], "--min-vertices")) ok_argument = take(&min_vertices);
-    else if (!strcmp(argv[i], "--min-multiple-shells")) ok_argument = take(&min_multiple_shells);
-    else if (!strcmp(argv[i], "--min-quotiented")) ok_argument = take(&min_quotiented);
+    if (!strcmp(argv[i], "--clouds")) ok_argument = take(&clouds, 0, 1000000);
+    else if (!strcmp(argv[i], "--points")) ok_argument = take(&npoints, 1, 4096);
+    else if (!strcmp(argv[i], "--coord")) ok_argument = take(&coord, 2, 65536);
+    else if (!strcmp(argv[i], "--smax")) ok_argument = take(&smax_hi, 2, 4096);
+    else if (!strcmp(argv[i], "--min-cases")) ok_argument = take(&min_cases, 1, 1000000000);
+    else if (!strcmp(argv[i], "--min-navigated")) ok_argument = take(&min_navigated, 0, 1000000000);
+    else if (!strcmp(argv[i], "--min-vertices")) ok_argument = take(&min_vertices, 0, 2000000000);
+    else if (!strcmp(argv[i], "--min-multiple-shells")) ok_argument = take(&min_multiple_shells, 0, 1000000000);
+    else if (!strcmp(argv[i], "--min-quotiented")) ok_argument = take(&min_quotiented, 0, 1000000000);
     else if (!strcmp(argv[i], "--seed")) {
-      if (has_value && integer(argv[i + 1], &value) && value >= 0) { ++i; seed = value; ok_argument = true; }
+      if (has_value && integer(argv[i + 1], &value) && value >= 0 && value <= 4294967295LL) {
+        ++i; seed = value; ok_argument = true;
+      }
     } else {
       printf("ECHEC : argument inconnu %s\n", argv[i]);
       return 2;
@@ -405,15 +412,20 @@ int main(int argc, char** argv) {
   }
   // La GRILLE DECLAREE est u16 : les bornes des predicats entiers en dependent,
   // et un `--coord` hors grille produit un depassement signe dans `in_sphere_side`.
-  if (clouds < 0 || npoints < 1 || coord < 2 || coord > 65536 || smax_hi < 2
-      || min_cases < 1 || min_navigated < 0 || min_vertices < 0
-      || min_multiple_shells < 0 || min_quotiented < 0) {
-    printf("ECHEC : campagne absurde (clouds<0, points<1, coord hors [2,65536], "
-           "smax<2, min-cases<1 ou plancher negatif)\n");
-    return 2;
+  // Une demande impossible ne doit pas etre censuree en silence : neuf points
+  // distincts dans une boite de cote deux n'existent pas, et le generateur
+  // rendait alors zero nuage tandis que le plancher global etait satisfait par
+  // les seules fixtures. Le produit est calcule en `long long`, sans debordement.
+  {
+    const long long capacity = (long long)coord * (long long)coord * (long long)coord;
+    if ((long long)npoints > capacity) {
+      printf("ECHEC : campagne impossible, %d points distincts demandes dans %lld positions\n",
+             npoints, capacity);
+      return 2;
+    }
   }
 
-  int failures = 0, cases = 0;
+  int failures = 0, cases = 0, generated_generic = 0, generated_cospherical = 0;
   std::mt19937 rng((unsigned)seed);
 
   struct Fix { const char* name; std::vector<P3> pts; };
@@ -508,6 +520,37 @@ int main(int argc, char** argv) {
     }
   }
 
+  // FRONTIERE DE DOMAINE u16, verifiee a l'API et non au CLI. Les bornes de
+  // largeur des predicats en dependent : un appelant qui n'est pas ce juge
+  // obtiendrait sinon un depassement signe `__int128` avant tout predicat.
+  {
+    ++cases;
+    struct Domain { const char* name; std::vector<P3> pts; bool must_refuse; };
+    const std::vector<Domain> domains{
+        {"hors_grille_1e9",
+         {pt(0, 0, 0), pt(1000000000, 0, 0), pt(0, 1000000000, 0), pt(0, 0, 1000000000),
+          pt(999999999, 1, 2)}, true},
+        {"frontiere_65535",
+         {pt(0, 0, 0), pt(65535, 0, 0), pt(0, 65535, 0), pt(0, 0, 65535), pt(1, 2, 3)}, false},
+        {"frontiere_65536",
+         {pt(0, 0, 0), pt(65536, 0, 0), pt(0, 65535, 0), pt(0, 0, 65535), pt(1, 2, 3)}, true},
+        {"coordonnee_negative",
+         {pt(0, 0, 0), pt(-1, 0, 0), pt(0, 4, 0), pt(0, 0, 4), pt(1, 2, 3)}, true},
+    };
+    for (const Domain& d : domains) {
+      mhgp3v::FlatStatistics st{};
+      mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
+      const mhgp::Catalogue cat = mhgp3v::flat_catalogue(d.pts, 5, &st, &status, true);
+      const bool refused = (status == mhgp3v::CloudStatus::kOutsideDeclaredGrid);
+      if (refused != d.must_refuse || (refused && (!cat.spheres.empty() || !cat.members.empty()))) {
+        printf("[domaine %s] statut=%s spheres=%zu (refus attendu=%d)\n", d.name,
+               mhgp3v::cloud_status_name(status), cat.spheres.size(), (int)d.must_refuse);
+        ++failures;
+      }
+    }
+    printf("[domaine u16] quatre frontieres verifiees a l'API\n");
+  }
+
   printf("=== fixtures ===\n");
   for (const Fix& f : fixtures) {
     for (int s = 2; s <= 8; ++s) { ++cases; if (!compare(f.name, f.pts, s, false)) ++failures; }
@@ -528,7 +571,11 @@ int main(int argc, char** argv) {
       for (const P3& r : pts) if (r.x == q.x && r.y == q.y && r.z == q.z) seen_point = true;
       if (!seen_point) pts.push_back(q);
     }
-    if ((int)pts.size() < npoints) continue;
+    if ((int)pts.size() < npoints) {
+      printf("ECHEC : nuage generique %d non genere apres saturation du tirage\n", c);
+      return 3;
+    }
+    ++generated_generic;
     for (int s = 2; s <= smax_hi; ++s) {
       ++cases;
       char tag[64];
@@ -555,6 +602,7 @@ int main(int argc, char** argv) {
     const int extra = 2 + (int)(rng() % 4);
     std::uniform_int_distribution<int> d2(24, 36);
     for (int i = 0; i < extra; ++i) pts.push_back(pt(d2(rng), d2(rng), d2(rng)));
+    ++generated_cospherical;
     for (int s = 2; s <= smax_hi; ++s) {
       ++cases;
       char tag[64];
@@ -569,6 +617,12 @@ int main(int argc, char** argv) {
     }
   }
 
+  printf("\nfamilles : generiques demandes=%d generes=%d | cospheriques demandes=%d generes=%d\n",
+         clouds, generated_generic, clouds / 4, generated_cospherical);
+  if (generated_generic != clouds || generated_cospherical != clouds / 4) {
+    printf("ECHEC : accord demande/genere viole par famille\n");
+    return 3;
+  }
   printf("\ncouverture : nuages navigues=%lld directs=%lld refuses=%lld | sommets=%lld"
          " census=%lld coquilles>4=%lld triplets quotientes=%lld lots>1=%lld"
          " equivariances=%lld\n",

@@ -39,7 +39,7 @@ vaut $\ell+\lvert S\rvert$ et où le niveau se transporte le long d'un pinceau a
 lieu de se recalculer. Le détail est au `README.md`.
 
 **Deux énoncés de ce paragraphe ont été réfutés depuis, et corrigés là-bas** :
-le transport n'est pas en $\pm1$ mais en $-1$, $0$ ou $+1$, le lot pouvant
+le transport n'est pas en $\pm1$, et pas davantage en $-1$, $0$ ou $+1$ : il vaut $\lvert D_-\rvert-\lvert A_{\text{int}}\rvert$ et n'est borne par rien des que plusieurs hyperplans coincident, le lot pouvant
 laisser le niveau inchangé ; et la coupe du graphe ne porte pas sur le rang
 fermé mais sur le **niveau strict**, plafonné à $s_{\max}-2$ — couper sur le
 rang fermé supprime des sommets de niveau zéro et rompt la connectivité.
@@ -793,7 +793,7 @@ qualification.
 | affirmation | sort |
 | --- | --- |
 | facteur **100** entre travail et sortie | **artefact** d'une récolte défaillante ; le rapport réel est $\approx17$ (§0 ter) |
-| transport du niveau « en $\pm1$ » | faux : $-1$, $0$ ou $+1$, un lot pouvant le laisser inchangé (§0 ter) |
+| transport du niveau « en $\pm1$ » | faux, et « $-1$, $0$ ou $+1$ » l'est aussi : la variation vaut $\lvert D_-\rvert-\lvert A_{\text{int}}\rvert$, non bornée par un (§0 ter) |
 | coupe du parcours sur le rang fermé | faux : supprime des sommets de niveau zéro ; couper sur le **niveau strict** (§0 ter) |
 | « objet beaucoup plus léger que la mosaïque d'ordre supérieur » | **retiré** : nombre de sommets identique ; seuls la charge utile et les cellules supérieures sont économisées (§0 quater a) |
 | taille du $\leq k$-niveau tenue pour linéaire | régime de surface mesuré, non borné : Clarkson--Shor est quadratique en $n$ et en $k$ (§0 quater b) |

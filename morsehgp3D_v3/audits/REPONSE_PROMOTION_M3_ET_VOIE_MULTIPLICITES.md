@@ -122,7 +122,7 @@ catalogue **complet**, vérifié contre la force brute :
 | 200 | 935,5 | 55,7 | 16,8 |
 | 300 | 1 027,2 | 60,7 | 16,9 |
 
-Profil LiDAR à densité fixe, emprise $\propto\sqrt n$, $s_{\max}=11$, un cœur.
+Profil LiDAR à densité fixe, emprise $\propto\sqrt{n}$, $s_{\max}=11$, un cœur.
 Les 777 sommets par point à $n=100$ retrouvent la mesure publiée
 précédemment : les deux profils sont comparables.
 
@@ -140,12 +140,15 @@ que la règle de propriétaire supprimerait.
 
 ## 5. Ce qui n'est pas jugé, et pourquoi je le dis avant d'être audité
 
-- **L'oracle M1 n'a pas été étendu.** Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. Le juge utilisé ici est indépendant du germe, du pinceau et du transport, mais il partage `mhgp::sphere_side` avec le sujet et n'est pas en arithmétique rationnelle. Une référence multiplicitaire rationnelle est nécessaire, et elle devra être auditée à part.
+- **L'oracle M1 n'a pas été étendu.** Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. Le juge utilisé ici est indépendant du germe, du pinceau et du transport, mais il partage `mhgp::sphere_side`, `mhgp::sphere4` et `mhgp::miniball_of` avec le sujet et n'est pas en arithmétique rationnelle. Une référence multiplicitaire rationnelle est nécessaire, et elle devra être auditée à part.
 - **Aucun accélérateur spatial.** Les P0 de `Grid::ball` ne sont pas corrigés ; ils sont hors du chemin. Le contrat *fail-open* s'appliquera intégralement au premier index écrit.
 - **Ni forêts, ni reverse search, ni propriétaire.** La récolte déduplique encore par une table globale de coquilles ; la mémoire de navigation reste proportionnelle au nombre de sommets.
 - **Aucune mesure à l'échelle.** Les tailles mesurées vont de 4 à 300 points. Rien à 50 000, aucun pic mémoire, aucun reçu scellé.
 
 ## 6. Campagnes
+
+> [!NOTE]
+> Cette section conserve le snapshot antérieur aux audits `9c587e6` et `2532fd5`. Les campagnes et portes courantes sont décrites aux §§8--9; les nombres ci-dessous ne doivent pas être lus comme le reçu du live.
 
 `mhgp3v_flats_differential`, trois portes simultanées — le **sommet** (coquille
 et niveau strict contre l'énumération exhaustive des sommets d'arrangement), le
@@ -164,15 +167,16 @@ et des alignements.
 
 Quatre tests CTest permanents et trois tests négatifs — argument inconnu,
 campagne absurde, plancher non atteint. Le fabricant de tests négatifs codait
-l'oracle en dur ; un test écrit pour un autre juge interrogeait donc
-silencieusement l'oracle et passait pour la mauvaise raison. Corrigé.
+l'oracle en dur ; un test écrit pour un autre juge aurait donc interrogé le
+mauvais binaire et échoué sur son diagnostic au lieu de qualifier le rejet visé.
+Corrigé depuis.
 
 ## 7. Ce que je demande à l'audit suivant
 
 1. Le théorème de propriétaire est utilisé ici comme **droit de ne pas récolter les 4-sous-ensembles** et comme plafond $s_{\max}-2$. L'argument de redondance des 4-sous-ensembles est-il complet ?
 2. La convention de support canonique par ordre des coordonnées est-elle acceptable comme contrat public, sachant que l'invariance topologique reste indémontrée ?
 3. Le classement d'angle du germe est-il correct dans tous les cas, y compris quand le plan vertical support contient plus de trois points ?
-4. La vérité du différentiel partage `mhgp::sphere_side` avec le sujet. Est-ce une dépendance acceptable tant que l'oracle rationnel n'est pas étendu, ou faut-il la retirer d'abord ?
+4. La vérité du différentiel partage `mhgp::sphere_side`, `mhgp::sphere4` et `mhgp::miniball_of` avec le sujet. Est-ce une dépendance acceptable tant que l'oracle rationnel n'est pas étendu, ou faut-il la retirer d'abord ?
 5. Quelle est la bonne priorité entre l'index *fail-open* et la règle de propriétaire ? La mesure dit que l'index vaut un facteur $10^3$ et le propriétaire un facteur inférieur à 2 ; mais le propriétaire ferme aussi une porte de mémoire.
 
 GCP non utilisé. Toutes les mesures viennent du codespace, deux vCPU, `-O3
@@ -194,10 +198,10 @@ in_circle_coplanar(A,B,C,P) = -72
 statut=germe_non_certifie etape=6 spheres=0
 ```
 
-Le bon potentiel de 	extsc{Delaunay} n'a jamais été le rayon, c'est le vecteur
+Le bon potentiel de Delaunay n'a jamais été le rayon, c'est le vecteur
 des angles ; mon argument confondait les deux. **La correction supprime la
 boucle** : sur une arête de l'enveloppe du sous-nuage coplanaire, le troisième
-point de 	extsc{Delaunay} maximise l'angle inscrit, et « $d$ intérieur au cercle
+point de Delaunay maximise l'angle inscrit, et « $d$ intérieur au cercle
 de $(a,b,c)$ » équivaut à « angle en $d$ supérieur à l'angle en $c$ ». C'est un
 ordre **total**, donc une passe suffit et il n'y a plus rien à faire terminer.
 L'arête d'enveloppe s'obtient de même en une passe depuis le point lex-min du
@@ -209,7 +213,7 @@ débordement `int` au-delà de 46 341 points coplanaires.
 La fixture est permanente sous `descente_rayon_refutee`, rejouée sur ses **120
 permutations** avec exigence de zéro refus et de signature unique.
 
-**Les autres points, tous fermés dans ce delta.**
+**Les autres points de cet audit, fermés dans ce delta.** « Tous » serait faux : l'audit suivant, `AUDIT_DELTA_ORDER_K_FLATS_2532FD5`, a montré que le narrowing du CLI, la garde u16 à l'API, le census fail-open et les planchers par famille restaient ouverts. Le §9 ferme les deux premiers et une partie du troisième; les minima par branche et le contrat complet du census restent ouverts.
 
 | point | correction |
 | --- | --- |
@@ -228,3 +232,68 @@ $2{,}5\cdot10^9$ appels à `sphere_side` des singletons avant le germe, les tabl
 globales `seen`/`frontier`/`visited`, le census en $O(n)$ par tentative. Ce sont
 des portes d'architecture avant toute mesure à l'échelle, exactement comme
 l'audit le dit. Le statut reste `exploration/diagnostic_only`.
+
+---
+
+## 9. Delta après `AUDIT_DELTA_ORDER_K_FLATS_2532FD5`
+
+L'audit crédite la nouvelle construction du germe. La porte versionnée rejoue
+120 permutations à `s_max=5`; un harnais externe les a aussi rejouées aux ordres
+2 à 8. Un contrôle Python transitoire de propriétés sur grille $4\times4$ et des
+fuzz non archivés n'ont trouvé aucun contre-exemple, mais ne constituent pas un
+oracle indépendant ni une porte reproductible. Le P0 de `9c587e6` et le
+débordement `q*q+8` sont fermés; le NO-GO exact et 50 k reste inchangé. Les
+portes de narrowing et de grille u16 sont fermées ci-dessous, le census est
+durci mais encore partiel, et les planchers par branche restent ouverts.
+
+**§4.1 — narrowing entier.** Le token était lu en entier, mais le `long long`
+était tronqué en `int` sans contrôle de plage : `--clouds 4294967296` rendait
+zéro nuage et `--coord 4295032832` rendait 65536, tous deux avec code 0. Chaque
+option porte désormais sa plage sémantique, vérifiée **avant** le cast, et la
+graine a son propre contrat de largeur. La demande combinatoirement impossible —
+neuf points distincts dans huit positions — est refusée au lieu d'être censurée
+par le tirage, avec un produit calculé en `long long`. L'accord
+demandé/généré est vérifié par famille et publié.
+
+**§4.2 — la grille u16 n'était gardée qu'au CLI du juge.** C'était le point le
+plus grave, parce qu'aucun autre appelant n'était protégé. La garde est
+maintenant à la frontière des deux entrées publiques, `navigate_shallow` et
+`flat_catalogue`, avec le statut `kOutsideDeclaredGrid`. Reproduction de
+l'audit sous UBSan :
+
+```text
+hors grille 1e9 : statut=hors_grille_u16_declaree spheres=0 membres=0
+frontiere 65535 : statut=ok spheres=16
+frontiere 65536 : statut=hors_grille_u16_declaree spheres=0
+```
+
+Les quatre frontières — $10^9$, 65535, 65536 et une coordonnée négative — sont
+un test permanent de `flat_catalogue`; un probe externe a vérifié
+`navigate_shallow`. Il reste à graver cette seconde entrée.
+
+**§4.3 — le census était fail-open.** Une contradiction incrémentait un compteur
+que seul ce binaire lisait. Elle positionne désormais `kInvariantViolated`.
+`flat_catalogue` rend un résultat vide, mais `navigate_shallow` peut encore
+rendre le préfixe poussé avant le census, et un `census(...) == false` reste
+ignoré. Le statut est durci; l'atomicité et l'impossibilité de vérifier restent
+à fermer.
+
+**§4.5 — les contradictions documentaires.** `PROPOSITION.md` disait encore
+« $-1$, $0$ ou $+1$ » là où le header et le README ont corrigé en
+$\lvert D_-\rvert-\lvert A_{\text{int}}\rvert$, non borné. Le commentaire CMake
+disait encore « partage seulement `sphere_side` ». Le README annonçait « payload
+entier » alors que centre, rayon et $\beta$ ne sont pas confrontés à une vérité
+distincte, annonçait trois tests négatifs au lieu de neuf, et employait deux fois
+l'identifiant 9. Les deux `\textsc{Delaunay}` amputés viennent d'une tabulation
+avalée par mon propre script de réécriture. Tout est corrigé.
+
+**§4.4 — planchers par famille.** Partiellement fermé : l'accord
+demandé/généré est vérifié et publié par famille, mais les minima CMake restent
+agrégés par campagne et non par branche. Je le laisse ouvert plutôt que de le
+déclarer fermé.
+
+**Ce qui ne bouge pas, et ne doit pas bouger** : la référence rationnelle
+multiplicitaire, l'index *fail-open*, la règle de propriétaire, le reverse
+search, les forêts, et tout le §5 de l'audit — les $2{,}5\cdot10^9$ appels des
+singletons, `seen`/`frontier`/`visited`, le census en $O(n)$ par tentative. Le
+statut reste `exploration/diagnostic_only`, et le NO-GO 50 k est intact.
