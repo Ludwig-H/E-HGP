@@ -158,6 +158,13 @@ add_test(NAME mhgp3v_oracle_constant_inside_witness COMMAND mhgp3v_oracle
          --fixture constant_inside_witness --subject edge_shallow
          --clouds 1 --min-decided 1 --min-nodes 1)
 
+# Le generateur par NAVIGATION dans l'arrangement, juge par la verite exhaustive :
+# catalogue, forets et niveaux exacts, toutes arites, avec cospheries traitees.
+add_test(NAME mhgp3v_oracle_order_k COMMAND mhgp3v_oracle
+         --subject order_k --clouds 30 --seed 777
+         --min-points 8 --max-points 14 --max-order 6
+         --min-decided 10 --min-nodes 100)
+
 # Interface fail-closed : token entier partiel, reçu non ecrit et option ignoree
 # doivent tous fournir un code non nul ET le diagnostic attendu.
 mhgp3v_add_expected_failure_test(mhgp3v_cli_reject_integer_suffix

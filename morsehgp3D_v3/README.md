@@ -73,7 +73,7 @@ petits $n$ et mesurerait un régime dégénéré) :
 | dont **critiques** | **7,3 à 10,6 par point** (1,1 %) | $\approx4\cdot10^5$ |
 | tétraèdres de Delaunay | 6,3 par point | conforme |
 | rayon des sphères | médiane 77, critique max 90 | pour un pas de 25 |
-| candidats par requête (rapide) | 18 à 24 | contre $n-4$ auparavant |
+| candidats par requête (rapide) | 18 à 24 ($n\leq400$) | contre $n-4$ auparavant |
 
 Deux lectures, et elles ne vont pas dans le même sens.
 
@@ -91,8 +91,37 @@ cas** — un amas juste à l'extérieur d'une sphère vide écarte arbitrairemen
 dans l'ordre des plus proches voisins, deux points d'un même support — même si
 elle est mesurée bonne en pratique : rang NN médian 35, maximum 88.
 
-**[obligation]** ramener ce facteur 100, ou démontrer qu'il est incompressible.
-C'est désormais la seule question qui sépare du contrat.
+### Le contrat, chiffré
+
+**[mesuré]** chemin rapide, un cœur, profil LiDAR, `g++ -O3 -march=native` sur
+G4 (48 vCPU, un seul utilisé) :
+
+| $n$ | $s_{\max}$ | sommets | candidats/requête | temps |
+| ---: | ---: | ---: | ---: | ---: |
+| 2 000 | 11 | 1 477 918 | 48 | 54 s |
+| 8 000 | 11 | 6 217 704 (777/pt) | 95 | **390 s** |
+| 50 000 | 5 | 1 320 545 (26/pt) | 275 | **180 s** |
+
+Il faut le dire nettement : **le contrat 50 000 points / $K=10$ / une seconde
+n'est pas atteint, et l'écart n'est pas un facteur d'implémentation.** En
+extrapolant $n=8\,000$ — $777$ sommets par point, coût par requête croissant —
+un cœur demanderait quelques heures à $K=10$, et 48 cœurs quelques minutes. À
+$K=4$ le même nuage de 50 000 points prend 180 s sur un cœur, donc de l'ordre de
+5 s sur 48 : le contrat devient plausible aux petits ordres, pas à $K=10$.
+
+Trois faits expliquent l'écart, et aucun n'est un défaut de codage :
+
+1. le $\leq k$-niveau croît vite en $s_{\max}$ — 26 sommets par point à
+   $s_{\max}=5$, 777 à $s_{\max}=11$ ;
+2. le parcours en jette 98,9 % (les slivers de surface ne sont jamais bien
+   centrés) ;
+3. le coût d'une requête de pinceau croît encore avec $n$ (18 à $n=400$, 95 à
+   $n=8\,000$), parce que l'amorce doit balayer la sphère balayée tant qu'aucun
+   candidat n'est trouvé.
+
+**[obligation]** ramener le facteur 100 entre travail et sortie, ou démontrer
+qu'il est incompressible. C'est désormais la seule question qui sépare du
+contrat, et elle est mathématique avant d'être technique.
 
 
 ## 1. Ce qui est établi, et par quelle mesure

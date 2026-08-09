@@ -51,6 +51,8 @@ fast_level=0 slow_level=0 exact_level=1
 
 Le harnais écrit donc `ACCORD=oui` précisément lorsque les deux chemins partagent le même niveau faux. Le slow partage en outre `seed_shell`, les prédicats, le transport, la coupe et la reconstruction de coquille du fast; il n'est pas un oracle indépendant.
 
+La cause est encore visible dans le live : `seed_shell` ajoute un point coplanaire constant seulement si `face.side(...) == 0`, mais ne compte pas le cas strictement intérieur. Les deux parcours initialisent ensuite sans condition `Vertex{root_shell, 0}`. Le niveau du germe n'est donc pas démontré par la construction; il est forcé à zéro après avoir ignoré précisément les témoins constants qui peuvent le rendre positif.
+
 La qualification indépendante positive disponible porte sur de petits nuages simples. Elle est utile, mais ne couvre ni les limites u16, ni les coquilles multiples, ni les points constants, ni le pont cosphérique. Le claim « partout où la référence est calculable » doit être remplacé par le domaine exact, le nombre de cas et le hash du reçu.
 
 ## 4. P0 numériques et dégénérés toujours ouverts
@@ -75,6 +77,12 @@ Les fixtures indépendantes montrent encore au commit :
 
 Le patch live `47ee376...` tente de fermer seulement la perte de membres constants. Il ne constitue ni une fixture permanente, ni un résultat d'oracle, et ne répare ni le cube, ni le pont, ni la coupe par rang, ni les petites arités. Le rapport sur la [voie multiplicitaire](AUDIT_VOIE_MULTIPLICITES_ORDER_K.md) propose une construction; cette proposition n'est pas l'implémentation committée.
 
+### 4.3 L'identification mathématique du README n'est vraie qu'en position simple
+
+Les lignes 28--29 identifient le catalogue de rang fermé au bas niveau par la formule `rang = 4 + niveau`. Elle ne vaut que pour un sommet simple de coquille quatre. Pour un sommet d'arrangement portant une coquille de taille $m>4$ et $\ell$ points strictement intérieurs, le rang fermé de sa boule est $m+\ell$, pas $4+\ell$. Les supports critiques d'arité deux ou trois ne sont, quant à eux, pas des sommets de l'arrangement de quatre hyperplans : le prototype essaie de les récolter depuis un sommet propriétaire. L'égalité affichée ne prouve donc ni leur existence dans la sortie, ni la complétude de cette récolte.
+
+La ligne 33 affirme ensuite qu'« un seul point change d'état » le long d'une arête, alors que les lignes 44--48 reconnaissent les lots de points cosphériques. Hors simplicité, plusieurs points peuvent changer ensemble; transporter systématiquement le niveau par $\pm 1$ contredit précisément le modèle multiplicitaire que le paragraphe suivant revendique. Ce n'est pas une imprécision pédagogique : le témoin coplanaire, le cube et le pont montrent que cette confusion modifie niveaux et connectivité.
+
 ## 5. Le fast n'est intégré ni au catalogue ni à la porte M1
 
 L'oracle courant appelle explicitement :
@@ -94,12 +102,15 @@ Par conséquent :
 
 Avant une promotion, il faut un sujet oracle fast distinct, une vérité indépendante, des CTests permanents et un reçu liant commit, binaire, paramètres, sorties et diagnostics injectés.
 
+Le coût mémoire annoncé n'est pas davantage qualifié. Extrapoler 700 à 740 sommets visités par point donne environ 35 millions de `Vertex` à 50 k. À seulement 32 octets par objet, le stockage contigu minimal vaut déjà environ 1,12 Go, avant les allocations de coquilles, les nœuds et buckets du `seen` global, le catalogue et les forêts. Le couple `visited` plus `seen` matérialise ainsi une fraction massive du sous-complexe de Delaunay d'ordre supérieur que l'invariant d'architecture demande précisément d'éviter. Sans pic mémoire et sans mécanisme de streaming borné, ce point est une porte d'architecture, pas seulement un facteur de temps.
+
 ## 6. La porte de phase et la traçabilité ne sont pas respectées
 
 Le README live remplace l'état exploratoire par « M1, M2 et M3 » et affirme que seule la performance reste ouverte. Or :
 
 - le commit ne met pas à jour `docs/implementation_status.toml`;
 - le registre conserve `current_phase = "15"` pour le produit et ne contient aucune ouverture atomique de ce M3 expérimental;
+- ni `docs/SPECIFICATION_MORSEHGP3D.md`, ni `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` ne définissent ou ne promeuvent une phase v3/M3 correspondant à ce README;
 - aucun `backend`, `profile` et `mode` qualifiant n'accompagne la promotion;
 - aucune exécution gardée de `tools/check_implementation_status.py` n'est liée au commit;
 - le README lui-même rappelle qu'aucun statut public n'est ouvert, puis emploie quelques lignes plus loin le langage d'une exactitude fermée.
@@ -116,18 +127,28 @@ Les chiffres `7,3 à 10,6 critiques/point`, rayon critique 90 et coupe de 35 % p
 - le profil LiDAR est synthétique, à une graine par taille;
 - `98,9 % rejetés` ne signifie pas que 98,9 % des sommets sont des slivers.
 
-L'extrapolation à environ 400 000 sphères critiques à 50 k n'est donc ni une taille certifiée ni un reçu temporel. La phrase « rien n'interdit 100 ms » n'est soutenue par aucun pipeline complet.
+Le rayon critique maximal 90 ne borne pas non plus la grille du parcours : celle-ci interroge toutes les sphères d'arrangement visitées, majoritairement non critiques. Le driver de rayon mesure de surcroît la miniboule de la coquille pour ces sommets, qui peut être strictement plus petite que leur sphère d'arrangement. En déduire une coupe ou un pas de grille complet est circulaire; l'[audit de localité et de rayon](AUDIT_DIAGNOSTICS_CRITIQUES_LOCALITE_RAYON_5A6CDB1.md) donne une fixture u16 exacte où les deux rayons carrés valent respectivement 4 et 6.
 
-Les runs G4 lus dans le journal sont eux-mêmes concurrents et détachés. Sur le snapshot `4ef89a1`, ils donnent notamment :
+L'extrapolation à environ 400 000 sphères critiques à 50 k n'est donc ni une taille certifiée ni un reçu temporel. Elle prolonge un ratio observé sur une graine synthétique alors que ce ratio croît déjà entre 500 et 1 000 points. La phrase « rien n'interdit 100 ms » n'est soutenue par aucun pipeline complet.
 
-| profil | `n` | parcours seul | statut |
-|---|---:|---:|---|
-| LiDAR synthétique | 2 000 | 54,08 s | `ok` |
-| LiDAR synthétique | 8 000 | 43,25 s | `HORS DOMAINE` après préfixe |
-| LiDAR synthétique | 20 000 | 0,20 s | `HORS DOMAINE` après préfixe |
-| uniforme | 2 000 | 45,02 s | `ok` |
+Les runs G4 lus dans le journal sont eux-mêmes concurrents et détachés. Le sweep lancé sur le header committé `a6d0a3e...` donne notamment :
+
+| snapshot | profil | `n` | parcours seul | statut |
+|---|---|---:|---:|---|
+| `a6d0a3e...` | LiDAR synthétique | 2 000 | 54,08 s | `ok` |
+| `a6d0a3e...` | LiDAR synthétique | 8 000 | 43,25 s | `HORS DOMAINE` après préfixe |
+| `a6d0a3e...` | LiDAR synthétique | 20 000 | 0,20 s | `HORS DOMAINE` après préfixe |
+| `a6d0a3e...` | uniforme | 2 000 | 45,02 s | `ok` |
 
 Les temps courts à 8 k et 20 k sont des abandons sur niveau négatif, pas des accélérations. Aucun résultat 50 k n'était disponible à la promotion. Plusieurs jobs `nohup`/`setsid` de snapshots différents partageaient la même machine; aucun reçu de charge, hash de binaire distant ou arrêt ciblé n'était encore publié.
+
+### 7.1 Réponse à la question « ramener le facteur 100 »
+
+Pour **ce parcours complet**, le facteur entre sommets visités et sphères critiques n'est pas une surcharge de conteneur : ce sont les sommets que l'algorithme choisit d'énumérer. Un reverse search ou un streaming peut supprimer `seen`, réduire la mémoire et améliorer les constantes; il ne supprime pas les quelque 35 millions de visites extrapolées.
+
+Deux mesures G4 concurrentes du snapshot antérieur `4ef89a1...` donnent environ 410 184 sommets en 14 s, soit 29 000 sommets/s, et 1,478 million en 76,62 s, soit 19 000 sommets/s. Le second sweep `a6d0a3e...` annonce bien 54,08 s pour les mêmes 1 477 918 sommets, mais il change le header et s'exécute sous une autre concurrence; ce n'est pas un doublon du run de 76,62 s. Tous ces nombres sont des diagnostics, pas un reçu séquentiel qualifiant. Même en retenant la fenêtre observée de 19 000 à 29 000 sommets/s, 35 millions de visites demanderaient environ 1 200 à 1 800 s. Atteindre 1 s exige donc un facteur d'environ 1 200 à 1 800 sur le débit observé; atteindre 100 ms, environ 12 000 à 18 000. Le facteur critique/visité proche de 100 ne suffit pas à expliquer ni à fermer cet écart.
+
+Réduire réellement le nombre de visites exige un autre générateur, ou un raccourci qui atteint directement les sommets critiques avec une preuve de complétude et de connectivité. Aucun tel certificat n'est présent au commit. La réponse honnête à la question du README est donc : streaming utile pour la mémoire, optimisation locale utile pour la constante, mais contrat temporel encore architecturalement ouvert.
 
 ## 8. Le README viole aussi la règle KaTeX du dépôt
 
@@ -142,12 +163,12 @@ Les instructions du dépôt exigent que chaque équation, délimiteurs compris, 
 
 ## 9. Porte minimale avant de réouvrir M3
 
-1. Remettre le README à `exploration_v3`, avec exactitude et performance toutes deux ouvertes.
+1. Remettre le README à `exploration_v3`, avec exactitude, contrat HGP, architecture mémoire et performance tous ouverts.
 2. Garder en fixtures permanentes le cast u16 extrême, le niveau coplanaire, le cube, le pont, la coquille constante et les cas `n=2/3`.
 3. Fermer la grille en fail-open : saturation avant conversion, enveloppe prouvée, filtre de distance non excluant ou décision exacte, statut de couverture propagé même si un candidat existe.
 4. Implémenter la navigation multiplicitaire sans coupe par rang fermé, puis comparer `(shell, level)` à un oracle rationnel indépendant.
-5. Intégrer séparément fast, catalogue complet et forêts à CMake/CTest; injecter des fautes et exiger qu'elles soient détectées par le garde visé.
-6. Mettre à jour le registre de phase dans le même commit seulement après ces portes, puis exécuter son checker.
+5. Intégrer séparément fast, catalogue complet et forêts à CMake/CTest; comparer coquilles, multiplicités et niveaux, puis injecter des fautes et exiger qu'elles soient détectées par le garde visé.
+6. Définir la porte M3 dans la spécification et le registre des preuves, puis mettre à jour le registre de phase dans le même commit seulement après ces portes et exécuter son checker.
 7. Mesurer séquentiellement le pipeline complet sur des entrées scellées; publier le pic mémoire et tous les replis, abandons et ambiguïtés numériques.
 8. Certifier l'arrêt de la cible G4 démarrée par la session qui a lancé les jobs.
 

@@ -29,6 +29,40 @@ aujourd'hui de sidecar complet (schéma, commit, binaire, compilateur, machine,
 digest d'entrée, graine, compteurs de campagne fermés, sortie brute). Tant que
 ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer.
 
+## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
+
+**Le plan en cinq lignes ci-dessous a été exécuté jusqu'à sa branche de
+décision, et la décision est prise.** Elle n'est pas celle qui était anticipée :
+ni A1-source, ni A2e, ni A2p. Le générateur retenu ne s'ancre nulle part — il
+**navigue** dans le $\leq k$-niveau de l'arrangement relevé, où le rang vaut
+$4+\text{niveau}$ et où le niveau se transporte en $\pm1$ le long d'un pinceau au
+lieu de se recalculer. Le détail est au §0 du `README.md`, avec la preuve
+d'exactitude par confrontation à la force brute et au juge M1.
+
+Ce que cela **retire** de la présente proposition :
+
+- `A1-source` cesse d'être un verrou : il n'y a plus d'ancres.
+- `PEL-1` à `PEL-4` cessent d'être des obligations *bloquantes* : elles portaient
+  sur le constructeur ancré, qui n'est plus le chemin produit. Le dictionnaire de
+  profondeur reste vrai, et reste utile comme second oracle.
+- La question de la cosphéricité change de statut : elle n'est plus un rejet de
+  domaine mais un **cas traité**, la coquille entière étant l'objet porté.
+
+Ce que cela **déplace** — et c'est désormais la seule question ouverte :
+
+> Le parcours visite $\approx700$ sommets par point pour n'en retenir que $7$ à
+> $11$. Le facteur **100** entre le travail et la sortie est ce qui sépare du
+> contrat 50 k, et il est spécifique au LiDAR : un relevé est localement une
+> surface, donc ses tétraèdres sont massivement des slivers, jamais bien centrés.
+
+Une coupe en rayon ne le réduit pas — elle n'ôte que 35 % des sommets, car ces
+slivers ne sont pas gros mais **plats**. Une énumération locale directe est
+exclue dans le pire cas : un amas juste à l'extérieur d'une sphère vide écarte
+arbitrairement loin, dans l'ordre des plus proches voisins, deux points d'un même
+support. Elle est en revanche mesurée bonne en pratique — rang NN médian 35,
+maximum 88 — ce qui désigne une architecture **à chemin rapide certifié et repli
+fail-closed**, exactement celle déjà retenue pour la requête de pinceau.
+
 ## 0 bis. Le plan, en cinq lignes
 
 1. **V3-O, le juge** — un oracle indépendant en précision arbitraire, à campagne
@@ -736,3 +770,9 @@ qualification.
 | « 21 % de 23 M par ordre » | les rangs $k+1$ se répartissent entre ordres (§1.3) |
 | largeurs prouvées = arithmétique du produit | valent pour `quantized_u16_input` seul (§8) |
 | multiprécision « seule option » | choix robuste, pas exclusivité (§8) |
+| certificat de localité $V^{(M)}\subseteq B(p,d_{M+1}/2)$ **fermé** | faux à l'égalité ; il faut la marge STRICTE, témoin $u=2c-p$ |
+| épluchage en couches convexes pour le préfixe shallow | **réfuté**, fixture permanente `convex_layer_refutation` |
+| produits croisés de 210 bits pour trier le pinceau | évitables : chirotope $3\times3$ sous $2^{107,4}$ |
+| A1-source comme verrou du générateur | **caduc** : le générateur retenu n'a pas d'ancres (§0 ter) |
+| cosphéricité = rejet de domaine | **traitée** : le sommet porte sa coquille entière (§0 ter) |
+| « le clipping de Jung débloque l'échelle » | grand facteur constant, pas un ordre ; $m_e\approx0{,}45\,n$ |
