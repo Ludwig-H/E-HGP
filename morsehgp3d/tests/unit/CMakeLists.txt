@@ -3033,6 +3033,13 @@ add_executable(
   "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
 )
 add_executable(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_tests
+  test_gpu_jung_center_cover_prune_mass.cpp
+  fake_gpu_jung_center_cover_prune_mass_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+add_executable(
   morsehgp3d_gpu_higher_support_device_tiled_frontier_tests
   test_gpu_higher_support_device_tiled_frontier.cpp
   fake_gpu_higher_support_device_tiled_frontier_launchers.cpp
@@ -3309,6 +3316,36 @@ else()
       -Wconversion
       -Wsign-conversion
       -Werror
+  )
+endif()
+target_include_directories(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+    "${PROJECT_SOURCE_DIR}/src/tools"
+)
+target_link_libraries(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_tests
+  PRIVATE
+    morsehgp3d::gpu_jung_center_cover_prune_mass_host_contract
+    morsehgp3d::spatial
+    Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_tests PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
 target_include_directories(
@@ -5512,6 +5549,10 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_jung_chord_csr_tile
   COMMAND morsehgp3d_gpu_jung_chord_csr_tile_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_jung_center_cover_prune_mass
+  COMMAND morsehgp3d_gpu_jung_center_cover_prune_mass_tests
 )
 add_test(
   NAME morsehgp3d.gpu_higher_support_device_tiled_frontier

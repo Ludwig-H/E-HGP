@@ -4981,6 +4981,44 @@ else()
   )
 endif()
 
+# Proposal-only Phase 15 support-4 center-cover prune-mass profiler.  The
+# host archive leaves the launcher unresolved for one hostile fake CTest; the
+# CUDA target below owns the canonical self-join and aggregate-only path.
+add_library(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_host_contract
+  STATIC
+    include/morsehgp3d/gpu/jung_center_cover_prune_mass.hpp
+    src/cuda/phase15_jung_center_cover_prune_mass_internal.hpp
+    src/gpu/jung_center_cover_prune_mass.cpp
+)
+add_library(
+  morsehgp3d::gpu_jung_center_cover_prune_mass_host_contract
+  ALIAS morsehgp3d_gpu_jung_center_cover_prune_mass_host_contract
+)
+target_include_directories(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_host_contract
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_host_contract
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+target_compile_features(
+  morsehgp3d_gpu_jung_center_cover_prune_mass_host_contract PUBLIC cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_host_contract PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_host_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 # Device-resident Phase 15 higher-support supports-3/4 slot-tile contract.
 # The host-only archive intentionally leaves traversal adoption and the
 # launcher unresolved; unit tests provide the scientific host fake, and no
@@ -6383,6 +6421,53 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_library(
+    morsehgp3d_gpu_jung_center_cover_prune_mass
+    STATIC
+      include/morsehgp3d/gpu/jung_center_cover_prune_mass.hpp
+      src/cuda/phase15_jung_center_cover_prune_mass_internal.hpp
+      src/cuda/phase15_jung_center_cover_prune_mass.cu
+      src/gpu/jung_center_cover_prune_mass.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_jung_center_cover_prune_mass
+    ALIAS morsehgp3d_gpu_jung_center_cover_prune_mass
+  )
+  target_include_directories(
+    morsehgp3d_gpu_jung_center_cover_prune_mass
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_jung_center_cover_prune_mass
+    PUBLIC morsehgp3d::gpu_morton_lbvh_build morsehgp3d::spatial
+  )
+  target_compile_features(
+    morsehgp3d_gpu_jung_center_cover_prune_mass PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_jung_center_cover_prune_mass
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_jung_center_cover_prune_mass
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_jung_center_cover_prune_mass
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
   # Native CUDA backend of the Phase 15 higher-support device tiled
   # frontier.  The scientific slot engine is shared verbatim with the
   # host-compiled parity suite; this target contributes the resident arena,
@@ -6535,6 +6620,38 @@ if(MORSEHGP3D_ENABLE_CUDA)
         $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
         $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_qualification
+    src/tools/gpu_jung_center_cover_prune_mass_qualification.cpp
+  )
+  target_include_directories(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_qualification
+    PRIVATE
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/tools"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_qualification
+    PRIVATE morsehgp3d::gpu_jung_center_cover_prune_mass CUDA::cudart
+  )
+  target_compile_features(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_qualification PRIVATE cxx_std_20
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_jung_center_cover_prune_mass_qualification
+    PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_jung_center_cover_prune_mass_qualification PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_jung_center_cover_prune_mass_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
 

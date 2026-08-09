@@ -20,6 +20,7 @@ class MortonLbvhDeviceTraversalLease;
 class MortonYao48PairFrontierContext;
 
 namespace detail {
+class Phase15JungCenterCoverPruneMassTraversalAccess;
 class Phase14MortonLbvhBuildContextState;
 class Phase15ExactPairBlockWitnessCudaTraversalAccess;
 class Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess;
@@ -371,6 +372,7 @@ class MortonLbvhDeviceTraversalLease final {
   friend class RankedDiametralPairCatalogContext;
   friend class ExactHigherSupportProductCudaContext;
   friend class JungChordCsrTileContext;
+  friend class detail::Phase15JungCenterCoverPruneMassTraversalAccess;
   friend class detail::Phase15ExactPairBlockWitnessCudaTraversalAccess;
   friend class detail::
       Phase15ExactPairBlockTransactionalFrontierResidentCudaTraversalAccess;
