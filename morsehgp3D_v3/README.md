@@ -474,6 +474,47 @@ incidences silencieuses, le tri et les lots exacts, la partition horizontale,
 
 ---
 
+## 4 quater. La source silencieuse n'est plus une inconnue mathématique
+
+[`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](audits/NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md)
+retire du dossier le verrou que je venais de désigner comme prioritaire. Pour une
+facette $F$ du cœur, de miniboule fermée $B_F$ et de niveau $b_F$, en posant
+$E_F=(B_F\cap X)\setminus F$, la première incidence se décide **sans aucune
+recherche de voisinage** :
+
+- **branche fermée**, $E_F\neq\varnothing$ : alors $\lambda(F)=b_F$ et $M(F)=\lbrace F\cup\lbrace x\rbrace:x\in E_F\rbrace$. La preuve tient en deux lignes et n'exige **aucune** hypothèse de régularité ;
+- **branche vide**, $E_F=\varnothing$ : alors $\lambda(F)$ est le minimum des niveaux des cofaces **directes** contenant $F$, et $M(F)$ en est le groupe d'ex æquo — tout minimiseur est de Gabriel au sens ouvert, sinon un intrus strict fournirait une incidence strictement moins chère.
+
+`mhgp3v_first_incidence` mesure cette dichotomie et la **juge** contre une vérité
+exhaustive écrite dans le même fichier : pour chaque facette, le minimum de
+$\beta$ sur tous les points extérieurs et l'ensemble complet de ses ex æquo.
+
+**[mesuré]** 60 nuages de 11 points par ordre, grille $[0,22)$, coordonnées
+distinctes :
+
+| $k$ | cofaces directes | records/coface | facettes du cœur | branche fermée | co-minimiseurs (moy./max) | points touchés/facette | désaccords |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2 | 1 457 | 3,00 | 1 952 | 40,5 % | 1,02 / 3 | 11,0 | **0** |
+| 3 | 1 543 | 4,00 | 3 447 | 57,7 % | 1,02 / 3 | 11,0 | **0** |
+| 4 | 1 438 | 5,00 | 4 597 | 66,4 % | 1,02 / 3 | 11,0 | **0** |
+| 5 | 1 222 | 6,00 | 5 101 | 71,8 % | 1,02 / 3 | 11,0 | **0** |
+
+Quatre lectures, et elles vont toutes dans le même sens :
+
+- l'**identité de masse** est exacte à tous les ordres — exactement $k+1$ records de suppression par coface directe, ce qui rend le flux dimensionnable ;
+- la **branche fermée** domine et croît avec $k$ ; elle ne coûte qu'une requête de boule fermée ;
+- les **co-minimiseurs** sont minuscules — moyenne 1,02, maximum 3 — donc les lots atomiques de première incidence sont petits ;
+- la requête certifiée ne touche que **onze points par facette**, et ce nombre ne bouge pas avec $k$.
+
+**Ce que cela ne ferme pas.** Ce binaire ne remplace pas l'oracle général, qui
+reste le juge hostile et le repli hors porte. Le regroupement est en mémoire :
+ce sont les **volumes** qui sont publiés, pas un tri externe. Et la dichotomie
+produit $M(F)$ ; elle ne produit ni l'autorité de régularité qui autorise la
+rétraction vers la forêt $H_0$ normalisée, ni le réducteur, ni les verticales,
+ni l'identité de sortie.
+
+---
+
 ## 5. Le contrat 50 000 points, $K=10$, une seconde
 
 ### Une correction qui change l'arithmétique de la question

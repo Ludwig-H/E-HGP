@@ -254,6 +254,15 @@ struct Vertex {
   int level = 0;               // l(v) = |B(v)|, redondant avec interior.size()
 };
 
+// L'arete de parent telle que le juge doit pouvoir la controler : la coquille
+// du parent, la FERMETURE du flat emprunte et l'orientation. Sans la fermeture,
+// le juge ne peut verifier ni son rang trois, ni l'identite S(next) = C union A.
+struct ParentEdge {
+  std::vector<i32> shell;      // S(pi(v)), vide si v est la racine
+  std::vector<i32> closure;    // C(d)
+  int orientation = 0;
+};
+
 struct ShellHash {
   std::size_t operator()(const std::vector<i32>& v) const {
     std::size_t h = 1469598103934665603ULL;
@@ -1141,7 +1150,7 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
                                                    CloudStatus* status,
                                                    bool verify_census,
                                                    const CertifiedIndex* index = nullptr,
-                                                   std::vector<std::vector<mhgp::i32>>* parents =
+                                                   std::vector<flats::ParentEdge>* parents =
                                                        nullptr) {
   // CONTRAT DE PROPRIETE DE L'INDEX. `index` doit avoir ete construit sur CE
   // vecteur `points`, non modifie depuis : ses boites seraient sinon perimees et
@@ -1222,7 +1231,7 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
     frontier.pop_back();
     const int m = (int)v.shell.size();
     visited.push_back(v);
-    if (parents != nullptr) parents->push_back(std::vector<i32>{});
+    if (parents != nullptr) parents->push_back(flats::ParentEdge{});
     ++st->vertices_visited;
     if (m > 4) ++st->shells_multiple;
 
@@ -1522,7 +1531,7 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
         }
         if (parents != nullptr && admissible && direction == parent_orientation &&
             closure == parent_closure && !parent_key.empty())
-          parents->back() = shell;
+          parents->back() = flats::ParentEdge{shell, closure, direction};
         if (level > level_ceiling) { ++st->vertices_over_level; continue; }
         if (seen.insert(shell).second) frontier.push_back(Vertex{shell, interior, level});
       }

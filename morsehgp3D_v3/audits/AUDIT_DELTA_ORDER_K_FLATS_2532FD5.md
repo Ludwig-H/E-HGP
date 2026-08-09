@@ -3,7 +3,7 @@
 Date : 9 août 2026 UTC.
 
 > [!IMPORTANT]
-> **Verdict courant : GO ciblé pour le germe, les gardes u16, l'index k-d exact et la règle mathématique de parent; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Le commit `1a0a1f8` ferme le P0 d'élagage par classifications boîte--boule entières et retire les scans systématiques des singletons, du census et du pinceau. Le delta live juge un parent local multiplicitaire. Restent ouverts l'implémentation live du propriétaire complet, la reverse search effective, la source silencieuse, les lots, l'état horizontal, les verticales et le contrat de sortie.
+> **Verdict courant : GO ciblé pour le germe, les gardes u16, l'index k-d exact et la règle mathématique de parent; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Le commit `1a0a1f8` ferme le P0 d'élagage par classifications boîte--boule entières et retire les scans systématiques des singletons, du census et du pinceau. Le commit `6fa7e9d` juge un parent local multiplicitaire, renforcé dans le worktree courant. Restent ouverts l'implémentation live du propriétaire complet, la reverse search effective, le producteur terminal `directes + premières incidences`, les lots, l'état horizontal, les verticales et le contrat de sortie.
 
 Cadre : `backend=reference_cpu_local`, `profile=quantized_u16_order_k_prototype`, `mode=exploration/diagnostic_only`, `public_status=not_claimed`. Aucun de ces libellés n'ouvre une phase officielle.
 
@@ -181,11 +181,17 @@ Décision historique : créditer pleinement le nouveau germe, la garde u16, le C
 | header live Gate D | `ce9244647c3bbead6332a70ada325995e4004c1ccdc36d618e2164d26b20a27d` |
 | différentiel live Gate D | `0168d33d514483c408834b5570e9c63c4d54e2843ad07482d8ba77722218ffcf` |
 | CMake live | `4baf8410ac2b26d74f99430471e671cea96ac64f4e935db2da5ccded9031b826` |
+| commit du premier juge parent | `6fa7e9dd8e6b202c024f2826ac0640b0bab9a574` |
+| header worktree avec `ParentEdge` | `218aa8a76a2d5251aee0addd2bd6b217103035ddc751eda3d106da28b1fdfb27` |
+| différentiel worktree renforcé | `aec6bbf04a7ca4ca987329f0434cd9eb3daa7eddf354e4350c084abcd4ca6391` |
+| CMake worktree | `b5063a3476de98483386711ed2488a664f7d6f2700b69a9df43d036d19a5e211` |
+| prototype de première incidence | `9eee050171267eb7213e51214b5864d52aa533048a405294094f4a47a7ac6fee` |
 
-Le live est un delta non committé sur le parent Git `1a0a1f8`. Build réussi;
-CTest rend 39/39 tests verts en 676,03 s. Les résultats plus forts du parent
-proviennent d'un harnais exact externe et sont explicitement qualifiés comme
-transitoires ci-dessous.
+Les trois premières empreintes live de la table décrivent le delta qui a précédé
+`6fa7e9d`; elles sont conservées comme provenance. Le worktree courant ajoute le
+payload `ParentEdge`, un juge de potentiel et un prototype de première incidence.
+Les résultats plus forts du parent proviennent d'un harnais exact externe et
+sont explicitement qualifiés comme transitoires ci-dessous.
 
 ### 7.2 Matrice de clôture
 
@@ -199,7 +205,7 @@ transitoires ci-dessous.
 | propriété de l'index | **partiel** | appel interne propriétaire correct; pointeur public étranger ou périmé encore non authentifié |
 | propriétaire et déduplication | **ouvert** | live : premier préfiltre seulement, puis `emitted`; seconde inclusion, cône signé et support canonique avant owner non implémentés |
 | parent local multiplicitaire | **prouvé et jugé, non substitué** | live calcule le parent depuis le BFS; reverse search garde `seen/frontier/visited` |
-| source HGP complète | **ouverte** | incidences silencieuses, lots, locator horizontal, couverture et verticales absents |
+| source HGP complète | **théorème conditionnel fermé, produit ouvert** | `directes + M(F)` suffit horizontalement et $M(F)$ se factorise sans étoile; source directe terminale, capability commune, lots, couverture et verticales absents |
 | profils produit | **ouverts** | doublons refusés, dyadique absent, oracle encore relatif aux primitives v2 |
 
 Le P0 de l'ancien §4.6 est donc fermé au commit `1a0a1f8`. Les phrases du §5
@@ -231,13 +237,36 @@ mais aucune commande complète, graine, sortie brute ni sidecar versionné n'est
 conservé dans le dépôt. Elles restent des mesures diagnostiques non reçues, pas
 une porte reproductible.
 
-La porte du dépôt est plus faible : si le second parcours échoue ou si le
-vecteur de parents a une mauvaise taille, le bloc est sauté au lieu de rougir.
-Elle ne compare pas directement les potentiels, le rang trois de la fermeture,
-l'adjacence ni $S(\mathrm{next})=C\cup A$. Le commentaire CMake « Gate D est
-vérifiée » dépasse donc la porte actuelle. Dans le header, l'ancien paragraphe
-`sphere3`/`BigInt<4>` précède encore la nouvelle identité sans grand entier et
-doit être supprimé comme narration obsolète.
+Le commit `6fa7e9d` rend le second parcours fail-closed sur son statut et la
+taille du vecteur de parents. Le worktree `218aa8a` / `aec6bbf` ajoute une
+`ParentEdge`, compare exactement les potentiels $L_h$ et $Q_r$ par produits
+croisés, confronte la fermeture à l'intersection des coquilles et vérifie les
+cycles. Le build incrémental et la fixture permanente passent; une campagne
+saturée locale de 341 cas porte 11 248 sommets parentés et 265 racines, sans
+désaccord.
+
+Ces progrès ferment les anciens constats « skip silencieux » et « potentiel non
+jugé ». Cinq P1 restent précis.
+
+1. L'out-paramètre `parents` n'est ni vidé à l'entrée, ni restauré sur erreur;
+   un vecteur prérempli ou un census rouge laisse un résultat désaligné ou
+   partiel.
+2. Le producteur rend encore `kOk` lorsqu'un sommet non racine ne trouve aucun
+   parent; seul le juge global requalifie ensuite cette absence.
+3. Aucun plancher `parent_vertices` ni test négatif n'exerce
+   `GATE D INEXPLOITABLE`; retirer tout le bloc parent peut laisser les CTests
+   verts.
+4. Le second parcours emploie `verify_census=false` et n'est comparé ni au
+   parcours certifié, ni à la vérité de sommets; un sous-parcours auto-cohérent
+   peut former un arbre valide et passer.
+5. Le juge n'utilise pas `ParentEdge.orientation`. Une fermeture contenant un
+   triplet non aligné n'est pas vérifiée entièrement coplanaire, et
+   $S(v)\cap S(w)=C$ ne prouve pas que $w$ est le **premier** événement du rayon.
+   L'adjacence orientée reste donc ouverte.
+
+Le commentaire CMake est maintenant périmé dans l'autre sens : il dit que rang,
+transition et potentiel ne sont pas vérifiés, alors que le worktree les juge
+partiellement. Il faut décrire exactement les résiduels ci-dessus.
 
 ### 7.4 Le propriétaire complet est local, mais pas encore live
 
@@ -260,21 +289,76 @@ La suppression de `seen` ne rend pas le contrat HGP local. La
 [`NOTE_GATE_D_GLOBALITES_RESIDUELLES.md`](NOTE_GATE_D_GLOBALITES_RESIDUELLES.md)
 sépare cinq classes : lecture immuable de $X$, tri et lots exacts
 externalisables, partition horizontale vivante, jointure verticale adjacente et
-identités exhaustives éventuellement imposées par le contrat v2. Le verrou aval
-mathématique prioritaire est maintenant la source complète et sparse des
-incidences silencieuses. Les autres globalités peuvent être streamées; elles ne
-peuvent pas être supprimées sémantiquement.
+identités exhaustives éventuellement imposées par le contrat v2. Le théorème
+horizontal conditionnel et la dichotomie de
+[`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md)
+ferment désormais la forme mathématique de la source sparse : cofaces directes,
+facettes du cœur, puis toutes leurs premières incidences. Le résiduel est de
+produire et authentifier ce flux terminal. Les autres globalités peuvent être
+streamées; elles ne peuvent pas être supprimées sémantiquement. Même le locator
+résident est remplaçable par un journal externe de versions et du
+pointer-jumping, mais l'information de partition reste irréductible.
 
-### 7.6 Porte de reprise courante
+### 7.6 Review du prototype de première incidence `9eee050`
 
-1. Rendre le juge parent fail-closed et graver rang, potentiels, fermeture et
-   identité du lot.
+Crédit : le prototype matérialise exactement la bonne factorisation, développe
+$k+1$ suppressions par coface directe, reconstruit $E_F$ par `closed_ball`,
+conserve tous les ex æquo et se compare à un balayage exhaustif pour chaque
+facette qu'il reçoit. Ses cinq CTests passent. Les trois campagnes positives
+exercent empiriquement les deux branches et rendent respectivement 280/421,
+829/628 et 1 012/499 facettes fermées/vides, sans désaccord relatif.
+
+Le claim de **source directe complète** est toutefois faux sur ce snapshot. Le
+code filtre `sphere.rank == k+1`, c'est-à-dire la vacuité **fermée**, alors que
+le théorème demande toutes les cofaces de Gabriel à vacuité intérieure, avec une
+politique explicite des extra-shells. Sur les cinq points
+
+```text
+(0,0,0) (0,2,2) (2,0,2) (2,2,0) (0,0,2)
+```
+
+les quatre premiers forment un tétraèdre régulier et le cinquième est sur sa
+sphère. L'oracle ouvert compte cinq cofaces de Gabriel de taille quatre; le
+prototype n'en conserve qu'une et en omet quatre. Il affiche pourtant zéro
+désaccord, car les facettes disparues ne sont jamais soumises à
+`brute_first_incidence`. Le probe transitoire a pour SHA-256 source
+`f8c273fb9882bf1a3f97f7c0574a08bff73efe8d5cf29a8d493b3535cc58e111` et
+binaire `c61b62f858059b4e26e9a2499804378e93ee635fee046730cb23758d3bd079a4`.
+
+La reproduction sans harnais
+`--clouds 1 --points 7 --coord 2 --k 2 --seed 1` est plus sévère : six facettes
+ont une coface décidée contre trois co-minimiseurs exhaustifs et le binaire rend
+1. La même commande avec `--no-judge` rend 0 et imprime encore « exactement ».
+Le suffixe `--clouds 1junk` est accepté; `4294967297` est tronqué en un nuage.
+
+Autres dettes de qualification : un statut non `kOk` censure silencieusement un
+nuage; aucun plancher par branche ou source n'est imposé; la vérité partage
+`miniball_of` et `sphere_cmp_beta`, puis calcule `truth_level` sans jamais le
+comparer. L'identité de masse des suppressions est tautologique après leur
+construction et ne certifie aucune terminalité. `duplicate_cofaces` n'est pas
+une condition d'échec; aucune seconde déduplication des $M(F)$ proposés par
+plusieurs facettes n'est mesurée.
+
+Les CTests utilisent $n\leq11$ avec des feuilles d'index de taille 16 : chaque
+requête touche les $n$ points et n'exerce aucun nœud interne. Enfin,
+`deletion_bytes` n'est ni la taille de `Record`, ni celle d'un wire exact défini.
+
+Verdict : bon falsificateur borné de la dichotomie sur le domaine générique;
+NO-GO comme capability de source jusqu'à la fixture extra-shell, une vérité
+directe exhaustive indépendante, les planchers, le CLI fermé, les budgets
+atomiques et les permutations exigés par la note.
+
+### 7.7 Porte de reprise courante
+
+1. Fermer le contrat de l'out-paramètre parent, comparer la couverture au BFS
+   certifié et graver l'adjacence orientée au premier événement.
 2. Implémenter et différencier « support canonique puis owner » avant de retirer
    `emitted`.
 3. Remplacer le BFS par la reverse search en conservant le BFS comme oracle
    borné; publier profondeur, enfants, flats et high-water.
-4. Établir une source complète des incidences silencieuses ou ouvrir une
-   migration contractuelle quotientée explicitement versionnée.
+4. Corriger la source directe du prototype de première incidence : extra-shell
+   développée ou refusée, univers de facettes jugé indépendamment, puis
+   capability terminale commune avec $M(F)$ et l'autorité de fenêtre.
 5. Construire runs, fermeture des ex æquo, locator horizontal, couverture et
    jointure verticale avant toute mesure du contrat 50 k.
 

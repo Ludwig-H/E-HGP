@@ -53,6 +53,14 @@ target_include_directories(mhgp3v_flats_differential PRIVATE ${CMAKE_CURRENT_SOU
 target_link_libraries(mhgp3v_flats_differential PRIVATE mhgp)
 target_compile_options(mhgp3v_flats_differential PRIVATE -Wall -Wextra -Werror)
 
+# La DICHOTOMIE des premieres incidences du coeur. Elle ne remplace pas l'oracle
+# general : elle mesure les volumes que le tri externe devra porter, et se juge
+# contre une verite exhaustive ecrite dans le meme fichier.
+add_executable(mhgp3v_first_incidence prototype/first_incidence_dichotomy.cpp)
+target_include_directories(mhgp3v_first_incidence PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_first_incidence PRIVATE mhgp)
+target_compile_options(mhgp3v_first_incidence PRIVATE -Wall -Wextra -Werror)
+
 enable_testing()
 
 function(mhgp3v_add_expected_failure_test name expected)
@@ -228,6 +236,20 @@ add_test(NAME mhgp3v_flats_degenerate COMMAND mhgp3v_flats_differential
 add_test(NAME mhgp3v_flats_cospherical COMMAND mhgp3v_flats_differential
          --clouds 240 --points 8 --coord 40 --smax 7 --seed 90210 --min-cases 1400
          --min-navigated 1000 --min-multiple-shells 200)
+
+# La dichotomie doit reproduire lambda(F) et M(F) exactement, sur les deux
+# branches. Trois ordres, pour que la branche fermee et la branche vide soient
+# toutes deux reellement exercees.
+add_test(NAME mhgp3v_first_incidence_k2 COMMAND mhgp3v_first_incidence
+         --clouds 25 --points 10 --coord 20 --k 2 --seed 4242)
+add_test(NAME mhgp3v_first_incidence_k3 COMMAND mhgp3v_first_incidence
+         --clouds 25 --points 11 --coord 22 --k 3 --seed 777)
+add_test(NAME mhgp3v_first_incidence_k4 COMMAND mhgp3v_first_incidence
+         --clouds 20 --points 11 --coord 18 --k 4 --seed 90210)
+mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_absurd "campagne absurde" --clouds 0)
+mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_unknown "argument inconnu" --sujet-inexistant)
 
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential

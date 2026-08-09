@@ -412,3 +412,60 @@ ordre exact en $\beta$, fermeture atomique des ex æquo, partition horizontale
 vivante, provenance de couverture, jointure verticale. Le verrou mathématique
 aval prioritaire n'est donc plus le parcours : c'est la source complète et sparse
 des premières incidences utiles. Je ne prétends pas l'avoir entamée.
+
+---
+
+## 12. Gate D renforcée, et la dichotomie des premières incidences mesurée
+
+**Les quatre assertions manquantes sont ajoutées.** La porte vérifie désormais,
+en plus de la racine unique et de l'absence de cycle : le rang trois de la
+fermeture $C(d)$ — incluse dans la coquille et portant un triple non aligné —,
+l'identité $C(d)=S(v)\cap S(\pi(v))$, qui vaut parce que deux sphères distinctes
+d'un même pinceau se coupent exactement selon le cercle du flat, et la **stricte
+variation du potentiel** : niveau strictement décroissant, ou ensembles
+intérieurs égaux et $L_h$ strictement croissante, ou niveau zéro et $Q_r$
+strictement décroissante.
+
+Les deux dernières demandent de comparer des puissances portées par des sphères
+**différentes**, ce qu'un signe ne donne pas. Le juge recalcule donc le
+numérateur $\lvert w\rvert^2\mathrm{den}-2\langle w,\mathrm{num}\rangle$ — la
+quantité même dont `sphere_side` rend le signe — et compare par produit croisé en
+`BigInt<4>`. `sphere.hpp` n'est pas élargi : c'est le juge qui porte cette
+comparaison, comme votre §6 le prescrit.
+
+Une inversion m'a coûté un détour et vaut d'être notée : j'avais écrit que le bon
+cas était $\lvert B(\text{parent})\rvert>\lvert B(\text{fils})\rvert$. C'est
+l'inverse — le parent est **moins profond**. Le témoin
+`coplanar_constant_witness` l'a exhibé immédiatement, deux sommets sur trois.
+
+**[mesuré]** grille saturée, 5 611 cas, zéro désaccord avec les quatre
+assertions actives.
+
+**La dichotomie de `NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR` est implémentée et
+jugée.** `mhgp3v_first_incidence` produit la source directe, son flux de
+suppressions, le regroupement par facette, puis décide par branche fermée ou
+minimum direct — et confronte le résultat à une vérité exhaustive qui balaie tous
+les points extérieurs de chaque facette.
+
+| $k$ | cofaces directes | records/coface | facettes | branche fermée | co-min. moy./max | points touchés/facette | désaccords |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2 | 1 457 | 3,00 | 1 952 | 40,5 % | 1,02 / 3 | 11,0 | **0** |
+| 3 | 1 543 | 4,00 | 3 447 | 57,7 % | 1,02 / 3 | 11,0 | **0** |
+| 4 | 1 438 | 5,00 | 4 597 | 66,4 % | 1,02 / 3 | 11,0 | **0** |
+| 5 | 1 222 | 6,00 | 5 101 | 71,8 % | 1,02 / 3 | 11,0 | **0** |
+
+Ce que ces chiffres disent, et c'est votre §9 qui les demandait : l'identité de
+masse est exacte à tous les ordres, la branche fermée domine et croît avec $k$,
+les co-minimiseurs sont minuscules — moyenne 1,02, maximum 3, donc les lots
+atomiques de première incidence sont petits — et la requête certifiée ne touche
+que **onze points par facette**, sans dépendance en $k$.
+
+**Ce que je ne prétends pas.** Le regroupement est en mémoire : ce sont les
+volumes qui sont publiés, pas un tri externe. L'oracle général reste le juge
+hostile et le repli hors porte. Et la dichotomie produit $M(F)$, pas l'autorité
+de régularité qui autorise la rétraction vers $H_0$, ni le réducteur, ni les
+verticales, ni l'identité de sortie. Les fixtures de votre §8 — les deux intrus
+de niveau $33/2$, le point exactement sur le shell, les deux minimums directs ex
+æquo, les deux déduplications, la permutation des runs, le budget moins un — ne
+sont pas encore gravées ; la campagne ci-dessus est aléatoire et exhaustive, pas
+adverse.

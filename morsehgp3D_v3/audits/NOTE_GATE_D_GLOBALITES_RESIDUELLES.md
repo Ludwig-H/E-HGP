@@ -45,17 +45,20 @@ Sous une source finie et complète, le pipeline exact minimal est le suivant.
 
 1. La reverse search émet chaque événement critique auprès de son propriétaire,
    sans table de sommets globale.
-2. Une source séparée émet toutes les incidences directes et silencieuses exigées
-   par le profil. Chaque record possède une identité canonique et une preuve de
-   complétude relative à cette source.
+2. Une source directe terminale développe ses facettes du cœur, puis la
+   dichotomie de
+   [`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md)
+   émet toutes leurs premières incidences. Chaque record possède une identité
+   canonique et une preuve de complétude relative à cette source.
 3. Les producteurs écrivent des runs bornés triés par la clef
    `(ordre, beta_exact, type, identite)`.
 4. Une fusion externe déduplique les identités et forme les groupes maximaux de
    même $\beta$ exact.
 5. Le réducteur horizontal fige l'état pré-lot, résout toutes les composantes du
    groupe égal, puis commet le lot atomiquement.
-6. La forêt horizontale et `coverage_log` sont écrits en segments append-only;
-   seuls le locator et la partition actifs restent logiquement vivants.
+6. La forêt horizontale et `coverage_log` sont écrits en segments append-only.
+   La partition reste logiquement vivante; un journal externe de versions peut
+   remplacer le locator résident.
 7. Les requêtes verticales sont écrites, triées et jointes par sweep avec
    l'histoire fermée de l'ordre inférieur.
 8. Une seconde jointure ordonnée vérifie les carrés de naturalité et ferme les
@@ -77,16 +80,29 @@ non critique peut n'ajouter aucun point, ne créer aucun nœud public et pourtan
 attacher une facette qui sera décisive lors d'un lot ultérieur. C'est exactement
 la fonction des incidences silencieuses dans le contrat `hgp_reduced`.
 
-Le parent et le propriétaire ne résolvent donc pas la question suivante :
+Le parent et le propriétaire ne résolvent donc pas, à eux seuls, la question
+suivante :
 
 > produire, avec certificat de complétude, toutes les premières incidences utiles
 > de chaque facette ou un quotient prouvé équivalent à $H_0$.
 
-C'est le verrou mathématique aval principal après le parent. Une source sparse
-est permise; une source seulement plausible ou un catalogue Gabriel direct ne
-l'est pas. Les contre-exemples et obligations sont recensés dans
+C'était le verrou mathématique aval principal après le parent. Il est désormais
+**fermé conditionnellement** pour la sémantique horizontale normalisée : le
+corollaire 4.1 prouve que les cofaces directes et toutes les premières incidences
+des facettes du cœur suffisent sous l'autorité régulière; le théorème de fenêtre
+rend les blocs saturés de haut rang inertes; enfin, la dichotomie boule fermée /
+minimum direct reconstruit chaque $M(F)$ sans étoile globale lorsque la source
+directe est terminale et sa convention d'extra-shell explicite.
+
+Le résiduel v3 est donc un verrou **de production et de capability**, plus une
+preuve nouvelle à découvrir : fermer la source directe, développer exactement
+$D_k$, terminer toutes les requêtes fermées, authentifier l'autorité de fenêtre,
+lier leurs watermarks et alimenter le fold. Une source seulement plausible ou
+un préfixe Gabriel direct ne suffit toujours pas. Les contre-exemples et
+obligations sont recensés dans
 [`INCIDENCES_SILENCIEUSES_GAMMA.md`](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
-et dans la [spécification](../../docs/SPECIFICATION_MORSEHGP3D.md).
+et dans la [spécification](../../docs/SPECIFICATION_MORSEHGP3D.md). Le contrat
+v2 exhaustif reste hors de cette réduction.
 
 ### 3.2 Aucun commit en $\beta$ sans watermark
 
@@ -127,6 +143,37 @@ Un locator externalisé et un cache borné sont acceptables. Supprimer
 l'information de composante ne l'est pas. La forêt publique seule est
 insuffisante : une continuation silencieuse peut modifier locator et couverture
 sans créer de nouveau nœud.
+
+### 3.5 Le locator résident est supprimable
+
+L'information précédente n'impose pas une table proportionnelle aux facettes en
+RAM. Sous une source terminale exactement triée, un fold externe déterministe
+reproduit le DSU résident.
+
+1. Trier les occurrences de facettes, leur attribuer un handle stable et créer
+   une version initiale.
+2. Conserver un journal append-only `version -> successor`, chaque lien portant
+   le lot où il devient effectif; les composantes ne se scindent jamais.
+3. Avant un lot $a$, résoudre chaque handle touché vers sa version strictement
+   antérieure par jointures triées et pointer-jumping.
+4. Calculer extérieurement les composantes connexes de tout le lot égal, puis
+   compter les racines publiques distinctes et les carriers latents de chaque
+   groupe.
+5. Ajouter atomiquement les nouveaux liens, versions, parents, provenances et
+   introductions de couverture.
+
+L'induction sur les lots est immédiate : avant $a$, le pointer-jumping reconstruit
+exactement la partition stricte; le quotient complet donne donc les mêmes
+$q_R$, parents et successeurs que le DSU; les liens ajoutés représentent la
+partition fermée.
+
+Le cas $q_R=1$ est décisif. Même sans nœud public, toute nouvelle facette doit
+laisser une attache ou version interne vers la racine continuée. Sinon un lot
+futur ne peut plus distinguer une facette encore latente d'une facette déjà
+rattachée. Le locator résident est ainsi une optimisation de débit, pas une
+nécessité mathématique. Le journal externe retire sa résidence, jamais son
+information, et peut exiger plusieurs tris globaux; aucune borne de SLO n'en
+découle.
 
 ## 4. Couverture : la vue seuil n'est pas l'autorité source
 
@@ -182,11 +229,11 @@ effectuer cette migration implicitement.
 
 L'état simultané visé se factorise en
 
-$$M_{\mathrm{resident}}=O(n)+M_{\mathrm{locator}}+M_{\mathrm{batch}}+M_{\mathrm{run}}+M_{\mathrm{scheduler}}.$$
+$$M_{\mathrm{resident}}=O(n)+M_{\mathrm{locator\_buffer}}+M_{\mathrm{batch}}+M_{\mathrm{run}}+M_{\mathrm{scheduler}}.$$
 
 - $O(n)$ couvre l'entrée immuable, l'index, la racine et $A_X$;
-- $M_{\mathrm{locator}}$ encode la partition horizontale active, éventuellement
-  hors RAM;
+- $M_{\mathrm{locator\_buffer}}$ est un cache ou buffer de jointure borné; la
+  partition complète peut vivre dans le journal externe de versions;
 - $M_{\mathrm{batch}}$ est le staging du lot égal courant, segmentable par
   composantes externes mais committé atomiquement;
 - $M_{\mathrm{run}}$ est une fenêtre bornée de tri et de fusion;
@@ -216,11 +263,11 @@ donc pas le contrat 50 k.
 - état global du parcours d'arrangement : **supprimable par parent et
   propriétaire locaux**;
 - lecture globale du nuage : **intrinsèque, $O(n)$ et immuable**;
-- complétude sparse des incidences silencieuses : **ouverte, verrou mathématique
-  aval prioritaire**;
+- complétude sparse des incidences silencieuses : **théorème conditionnel fermé;
+  producteur v3 terminal et capability commune encore ouverts**;
 - tri exact et fermeture des lots : **intrinsèques mais externalisables**;
-- partition horizontale et provenance de couverture : **intrinsèques mais
-  segmentables**;
+- partition horizontale et provenance de couverture : **information intrinsèque
+  mais locator résident supprimable par fold externe multipasse**;
 - jointure verticale adjacente : **intrinsèque mais streamable**;
 - identités exhaustives du contrat v2 : **masse de sortie obligatoire jusqu'à
   migration contractuelle explicite**;

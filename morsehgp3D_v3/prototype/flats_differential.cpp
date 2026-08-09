@@ -138,6 +138,89 @@ static Truth brute_catalogue(const std::vector<P3>& pts, int s_max) {
   return t;
 }
 
+
+// ---------------------------------------------------------------------------
+// Puissance rationnelle exacte, pour le SEUL usage du juge.
+//
+// Pour une sphere `base + num/den`, la puissance d'un point z vaut
+// L(z) = |w|^2 - 2 <w, num>/den avec w = z - base, donc son NUMERATEUR sur den
+// est |w|^2 * den - 2 <w, num> : c'est exactement la quantite dont
+// `mhgp::sphere_side` rend le signe. Le parent n'en a pas besoin — il se decide
+// sur des signes tangents — mais le juge doit comparer L_h entre DEUX spheres
+// differentes, ce qu'un signe ne permet pas. On recalcule donc le numerateur
+// ici, sans elargir l'API de production.
+//
+// Largeurs : |w|^2 sous 2^35,6 et den sous 2^73 donnent 2^108,6 ; le second
+// terme est sous 2^108. Le numerateur tient dans `i128`, et le produit croise
+// de deux numerateurs par les denominateurs opposes tient dans `BigInt<4>`.
+static mhgp::i128 power_numerator(const mhgp::Sphere& sphere, const P3& z) {
+  const P3 w = mhgp::p3_sub(z, sphere.base);
+  return mhgp::p3_norm2(w) * sphere.den
+       - 2 * ((mhgp::i128)w.x * sphere.nx + (mhgp::i128)w.y * sphere.ny
+              + (mhgp::i128)w.z * sphere.nz);
+}
+
+static bool shell_sphere_of(const std::vector<P3>& pts, const std::vector<i32>& shell,
+                            mhgp::Sphere* out) {
+  const int m = (int)shell.size();
+  for (int a = 0; a < m; ++a)
+    for (int b = a + 1; b < m; ++b)
+      for (int c = b + 1; c < m; ++c)
+        for (int d = c + 1; d < m; ++d)
+          if (mhgp::sphere4(pts[(size_t)shell[(size_t)a]], pts[(size_t)shell[(size_t)b]],
+                            pts[(size_t)shell[(size_t)c]], pts[(size_t)shell[(size_t)d]], out))
+            return true;
+  return false;
+}
+
+// Signe de L_h(child) - L_h(parent), par produit croise sur les denominateurs.
+static int compare_power(const std::vector<P3>& pts, const std::vector<i32>& child_shell,
+                         const std::vector<i32>& parent_shell, i32 site) {
+  mhgp::Sphere a{}, b{};
+  if (!shell_sphere_of(pts, child_shell, &a) || !shell_sphere_of(pts, parent_shell, &b)) return 0;
+  const mhgp::BigInt<4> left = mhgp::mul128(power_numerator(a, pts[(size_t)site]), b.den);
+  const mhgp::BigInt<4> right = mhgp::mul128(power_numerator(b, pts[(size_t)site]), a.den);
+  return mhgp::big_cmp(left, right);
+}
+
+// Signe de Q_r(child) - Q_r(parent) sur la base independante du germe.
+static int compare_potential(const std::vector<P3>& pts, const std::vector<i32>& child_shell,
+                             const std::vector<i32>& parent_shell,
+                             const std::vector<i32>& base) {
+  mhgp::Sphere a{}, b{};
+  if (!shell_sphere_of(pts, child_shell, &a) || !shell_sphere_of(pts, parent_shell, &b)) return 0;
+  mhgp::i128 qa = 0, qb = 0;
+  for (i32 z : base) {
+    qa += power_numerator(a, pts[(size_t)z]);
+    qb += power_numerator(b, pts[(size_t)z]);
+  }
+  return mhgp::big_cmp(mhgp::mul128(qa, b.den), mhgp::mul128(qb, a.den));
+}
+
+// Meme extraction gloutonne que le sujet, rejouee ici par le juge.
+static void independent_base(const std::vector<P3>& pts, const std::vector<i32>& shell,
+                             std::vector<i32>* out) {
+  out->clear();
+  for (i32 z : shell) {
+    if (out->size() >= 4) break;
+    const size_t have = out->size();
+    if (have == 1) {
+      const P3& u = pts[(size_t)(*out)[0]];
+      const P3& w = pts[(size_t)z];
+      if (u.x == w.x && u.y == w.y && u.z == w.z) continue;
+    } else if (have == 2) {
+      const P3 u = mhgp::p3_sub(pts[(size_t)(*out)[1]], pts[(size_t)(*out)[0]]);
+      const P3 w = mhgp::p3_sub(pts[(size_t)z], pts[(size_t)(*out)[0]]);
+      const P3 c = mhgp::p3_cross(u, w);
+      if (c.x == 0 && c.y == 0 && c.z == 0) continue;
+    } else if (have == 3) {
+      if (mhgp3v::flats::orient3d_exact(pts[(size_t)(*out)[0]], pts[(size_t)(*out)[1]],
+                                        pts[(size_t)(*out)[2]], pts[(size_t)z]) == 0) continue;
+    }
+    out->push_back(z);
+  }
+}
+
 static void dump(const std::vector<P3>& pts) {
   for (const P3& q : pts) printf(" (%d,%d,%d)", (int)q.x, (int)q.y, (int)q.z);
   printf("\n");
@@ -263,16 +346,17 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
     coverage.indexed_runs += 1;
   }
 
-  // (E) GATE D — LE PARENT LOCAL. Le parent est choisi au sommet, parmi les
-  // orientations admissibles des flats incidents, sans regarder les voisins
-  // deja construits. On verifie ici les proprietes que la note exige avant
-  // toute integration : parent unique et fini hors racine, inclusion des
-  // ensembles interieurs, absence de cycle, racine unique, et couverture
-  // identique a celle du parcours.
+  // (E) GATE D — LE PARENT LOCAL, avec les quatre assertions que la note exige
+  // avant tout remplacement du parcours : rang trois de la fermeture C(d),
+  // identite S(next) = C union A, finitude de l'extremite, et STRICTE variation
+  // du potentiel — hausse de L_h a ensemble interieur egal, ou baisse de Q_r au
+  // niveau zero. Les trois premieres se lisent sur les ensembles ; la quatrieme
+  // demande de comparer deux puissances rationnelles portees par des spheres
+  // DIFFERENTES, donc le numerateur brut de `sphere_side` et un produit croise.
   if (status == mhgp3v::CloudStatus::kOk && (int)pts.size() >= 4) {
     mhgp3v::FlatStatistics pst{};
     mhgp3v::CloudStatus pstatus = mhgp3v::CloudStatus::kOk;
-    std::vector<std::vector<i32>> parents;
+    std::vector<mhgp3v::flats::ParentEdge> parents;
     const auto seen_vertices =
         mhgp3v::navigate_shallow(pts, s_max - 2, &pst, &pstatus, false, nullptr, &parents);
     // FAIL-CLOSED. Sauter le bloc quand le second parcours echoue ou quand le
@@ -286,20 +370,73 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       std::map<std::vector<i32>, size_t> position;
       for (size_t i = 0; i < seen_vertices.size(); ++i) position[seen_vertices[i].shell] = i;
       int roots = 0, missing_parent = 0, unknown_parent = 0, not_included = 0, cyclic = 0;
+      int bad_closure = 0, bad_transition = 0, bad_potential = 0;
       for (size_t i = 0; i < seen_vertices.size(); ++i) {
-        if (parents[i].empty()) { ++roots; continue; }
-        const auto it = position.find(parents[i]);
+        if (parents[i].shell.empty()) { ++roots; continue; }
+        const auto it = position.find(parents[i].shell);
         if (it == position.end()) { ++unknown_parent; continue; }
-        // inclusion des ensembles interieurs
-        const auto& child = seen_vertices[i].interior;
-        const auto& mother = seen_vertices[it->second].interior;
-        for (i32 z : mother)
-          if (!std::binary_search(child.begin(), child.end(), z)) { ++not_included; break; }
-        // remontee jusqu'a la racine, sans cycle
+        const auto& child = seen_vertices[i];
+        const auto& mother = seen_vertices[it->second];
+
+        // (1) rang trois de C(d) : la fermeture est incluse dans la coquille et
+        // porte un triple non aligne, donc son enveloppe affine est un plan.
+        const auto& closure = parents[i].closure;
+        bool inside_shell = true;
+        for (i32 z : closure)
+          if (!std::binary_search(child.shell.begin(), child.shell.end(), z)) inside_shell = false;
+        bool has_triangle = false;
+        for (size_t a = 0; a + 2 < closure.size() + 1 && !has_triangle; ++a)
+          for (size_t b = a + 1; b + 1 < closure.size() + 1 && !has_triangle; ++b)
+            for (size_t c = b + 1; c < closure.size() && !has_triangle; ++c) {
+              const mhgp::P3 u = mhgp::p3_sub(pts[(size_t)closure[b]], pts[(size_t)closure[a]]);
+              const mhgp::P3 w = mhgp::p3_sub(pts[(size_t)closure[c]], pts[(size_t)closure[a]]);
+              const mhgp::P3 x = mhgp::p3_cross(u, w);
+              if (x.x != 0 || x.y != 0 || x.z != 0) has_triangle = true;
+            }
+        if (!inside_shell || !has_triangle) ++bad_closure;
+
+        // (2) S(next) = C union A, et C = S(v) inter S(w) : deux spheres
+        // distinctes d'un meme pinceau se coupent exactement selon le cercle du
+        // flat, donc l'intersection des coquilles EST la fermeture.
+        std::vector<i32> common;
+        std::set_intersection(child.shell.begin(), child.shell.end(), mother.shell.begin(),
+                              mother.shell.end(), std::back_inserter(common));
+        if (common != closure) ++bad_transition;
+        for (i32 z : closure)
+          if (!std::binary_search(mother.shell.begin(), mother.shell.end(), z)) ++bad_transition;
+
+        // (3) inclusion des ensembles interieurs
+        for (i32 z : mother.interior)
+          if (!std::binary_search(child.interior.begin(), child.interior.end(), z)) {
+            ++not_included;
+            break;
+          }
+
+        // (4) STRICTE variation du potentiel.
+        // Le parent a un niveau AU PLUS egal a celui du fils : c'est
+        // |B(parent)| < |B(fils)| qui est le bon cas, pas l'inverse.
+        if (mother.interior.size() < child.interior.size()) {
+          // niveau strictement decroissant : rien de plus a prouver
+        } else if (mother.interior.size() == child.interior.size()) {
+          if (!child.interior.empty()) {
+            const i32 h = child.interior.front();     // h = min B(v)
+            if (compare_power(pts, child.shell, mother.shell, h) >= 0) ++bad_potential;
+          } else {
+            // niveau zero : Q_r doit STRICTEMENT decroitre.
+            std::vector<i32> base;
+            independent_base(pts, seen_vertices[0].shell, &base);
+            if (base.size() != 4 || compare_potential(pts, child.shell, mother.shell, base) <= 0)
+              ++bad_potential;
+          }
+        } else {
+          ++bad_potential;                            // le niveau a augmente
+        }
+
+        // (5) absence de cycle
         size_t cursor = i;
         int steps = 0;
-        while (!parents[cursor].empty() && steps <= (int)seen_vertices.size()) {
-          const auto next = position.find(parents[cursor]);
+        while (!parents[cursor].shell.empty() && steps <= (int)seen_vertices.size()) {
+          const auto next = position.find(parents[cursor].shell);
           if (next == position.end()) break;
           cursor = next->second;
           ++steps;
@@ -307,14 +444,16 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
         if (steps > (int)seen_vertices.size()) ++cyclic;
       }
       for (size_t i = 0; i < seen_vertices.size(); ++i)
-        if (parents[i].empty() && seen_vertices[i].shell != seen_vertices[0].shell)
+        if (parents[i].shell.empty() && seen_vertices[i].shell != seen_vertices[0].shell)
           ++missing_parent;
       coverage.parent_vertices += (long long)seen_vertices.size();
       coverage.parent_roots += roots;
-      if (roots != 1 || missing_parent || unknown_parent || not_included || cyclic) {
+      if (roots != 1 || missing_parent || unknown_parent || not_included || cyclic ||
+          bad_closure || bad_transition || bad_potential) {
         printf("[%s] s_max=%2d GATE D : racines=%d sans_parent=%d parent_inconnu=%d"
-               " inclusion_violee=%d cycles=%d (sur %zu sommets)\n", tag, s_max, roots,
-               missing_parent, unknown_parent, not_included, cyclic, seen_vertices.size());
+               " inclusion=%d cycles=%d fermeture=%d transition=%d potentiel=%d (%zu sommets)\n",
+               tag, s_max, roots, missing_parent, unknown_parent, not_included, cyclic,
+               bad_closure, bad_transition, bad_potential, seen_vertices.size());
         ok = false;
       }
     }
