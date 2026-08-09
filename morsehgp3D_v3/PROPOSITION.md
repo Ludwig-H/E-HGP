@@ -67,23 +67,32 @@ Aucune des deux n'est une propriété du problème.
 
 ## 0 quater. Trois réserves qui n'étaient écrites nulle part
 
-**(a) Le terrain parcouru n'est pas plus petit que la mosaïque d'ordre
-supérieur — c'est le même objet.** Le diagramme de Voronoï d'ordre $k$ est la
-projection du $k$-niveau de l'arrangement relevé : le nombre de sommets est
-**identique**. Ce que le parcours économise est la charge utile par sommet et
-l'absence des cellules de dimension supérieure, du dual et des incidences —
-soit un facteur cinq à dix en octets, **pas un ordre de grandeur**. Le gain qui
-compterait, ne pas tout retenir, n'est pas obtenu aujourd'hui.
+**(a) Le terrain parcouru et la mosaïque d'ordre supérieur sont reliés par une
+dualité et une tranche, pas identiques.** Sous position générale, le pavage de
+rhomboïdes est dual de l'arrangement relevé et sa tranche de profondeur $k$ est
+la mosaïque de Delaunay d'ordre $k$. En dimension trois, un sommet
+d'arrangement est dual d'un rhomboïde de dimension quatre, dont les tranches
+non triviales donnent des cellules Delaunay tridimensionnelles à plusieurs
+ordres; il n'est pas en bijection avec un sommet de mosaïque. Les quatre sommets
+u16 d'un tétraèdre donnent déjà un sommet d'arrangement de niveau zéro contre
+quatre sommets dans la mosaïque d'ordre un. Le parcours économise réellement
+les cellules, incidences, étiquettes par ordre et le dual matérialisé, mais
+aucun facteur mémoire cinq à dix ni aucune identité de nombres de sommets n'en
+découle. Le gain qui compterait, ne pas tout retenir, n'est pas obtenu
+aujourd'hui.
 
-**(b) La taille de ce terrain n'est bornée par aucun théorème utilisable.** La
-borne de Clarkson--Shor pour le $\leq k$-niveau de $n$ hyperplans de
-$\mathbb{R}^4$ est quadratique en $n$ et en $k$ ; les mesures publiées sont
-plusieurs ordres de grandeur en dessous parce qu'un relevé est localement une
-surface. C'est un **régime**, pas un théorème — cohérent avec le retrait déjà
-acté au §14 de « surface $\Rightarrow$ faible profondeur presque partout ». Le
-census multi-captation du §1.5, qui donne le nuage à dix captations recalées
-*moins* peu profond que la reconstruction fusionnée, est le contre-exemple
-attendu et il est déjà mesuré. C'est la branche no-go de **Gate D**.
+**(b) La borne connue ne suffit pas au contrat.** Clarkson--Shor borne le
+$\leq k$-niveau de $n$ hyperplans de $\mathbb{R}^4$ par $O(n^2k^2)$ sous ses
+hypothèses asymptotiques et de position générale; pour $K=10$ fixé, elle reste
+quadratique en $n$. Les mesures publiées sont plusieurs ordres de grandeur en
+dessous parce qu'un relevé est localement une surface. C'est un **régime**, pas
+un théorème — cohérent avec le retrait déjà acté au §14 de « surface
+$\Rightarrow$ faible profondeur presque partout ». Le census multi-captation
+du §1.5, qui donne le nuage à dix captations recalées *moins* peu profond que la
+reconstruction fusionnée, est le contre-exemple attendu et il est déjà mesuré.
+C'est la branche no-go de **Gate D**.
+
+Références primaires : [Edelsbrunner--Osang, proposition 1](https://pub.ista.ac.at/~edels/Papers/2020-J-07-SimpleAlgorithm.pdf) pour la dualité et les tranches; [Clarkson--Shor, corollaire 3.3](https://link.springer.com/content/pdf/10.1007/BF02187740.pdf) pour la borne shallow.
 
 **(c) La mémoire et le GPU sont un seul verrou, pas deux.** La table `seen` des
 coquilles visitées est à la fois ce qui coûte la mémoire de navigation et ce qui
@@ -795,8 +804,8 @@ qualification.
 | facteur **100** entre travail et sortie | **artefact** d'une récolte défaillante ; le rapport réel est $\approx17$ (§0 ter) |
 | transport du niveau « en $\pm1$ » | faux, et « $-1$, $0$ ou $+1$ » l'est aussi : la variation vaut $\lvert D_-\rvert-\lvert A_{\text{int}}\rvert$, non bornée par un (§0 ter) |
 | coupe du parcours sur le rang fermé | faux : supprime des sommets de niveau zéro ; couper sur le **niveau strict** (§0 ter) |
-| « objet beaucoup plus léger que la mosaïque d'ordre supérieur » | **retiré** : nombre de sommets identique ; seuls la charge utile et les cellules supérieures sont économisées (§0 quater a) |
-| taille du $\leq k$-niveau tenue pour linéaire | régime de surface mesuré, non borné : Clarkson--Shor est quadratique en $n$ et en $k$ (§0 quater b) |
+| « même objet » et nombre de sommets identique à la mosaïque d'ordre supérieur | **faux** : l'arrangement et la mosaïque sont duaux et leurs dimensions sont échangées; le tétraèdre donne un sommet d'arrangement contre quatre sommets Delaunay (§0 quater a) |
+| taille du $\leq k$-niveau tenue pour linéaire | régime de surface mesuré, non garanti : Clarkson--Shor donne $O(n^2k^2)$ sous position générale (§0 quater b) |
 | « complétude A1 = théorème » | conditionnelle à A1-source (§4.2) |
 | $\tau=+\infty\Rightarrow$ grandes sphères critiques | faux (§1.5) |
 | « surface ⇒ faible profondeur presque partout » | census, pas théorème (§1.5) |

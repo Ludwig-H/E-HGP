@@ -1,146 +1,166 @@
-# Audit du delta `order_k_flats` — snapshot `2532fd5`
+# Audit continu de `order_k_flats` — `2532fd5` puis `fefa573`
 
 Date : 9 août 2026 UTC.
 
 > [!IMPORTANT]
-> **Verdict ciblé : GO pour la correction du contre-exemple de germe `9c587e6`; NO-GO inchangé pour une promotion exacte, le domaine produit et le contrat 50 k.** La construction par segment support et apex d'angle maximal remplace valablement la fausse descente de rayon. Les 120 permutations du témoin passent, le garde quadratique a disparu et aucun contre-exemple n'a été trouvé par l'oracle planaire hostile. Le différentiel reste toutefois relatif à des primitives partagées, le profil u16 n'est pas gardé à l'API et l'architecture globale en $\Theta(nV)$ n'a pas changé.
+> **Verdict courant : GO ciblé pour le nouveau germe et son durcissement u16; NO-GO inchangé pour une promotion exacte, le domaine multiplicitaire produit et le contrat 50 k.** Claude a remplacé la fausse descente de rayon par deux ordres totaux, puis fermé les trois reproductions hostiles du CLI, la frontière u16 des deux entrées C++ et le census contradictoire au niveau du statut. Les portes restantes concernent le contrat complet de ces API, l'indépendance du juge, les multiplicités et surtout l'architecture globale.
 
 Cadre : `backend=reference_cpu_local`, `profile=quantized_u16_order_k_prototype`, `mode=exploration/diagnostic_only`, `public_status=not_claimed`. Aucun de ces libellés n'ouvre une phase officielle.
 
-## 1. Snapshot et portée
+## 1. Snapshots et portée
 
 | objet | SHA-256 ou identité |
 | --- | --- |
-| parent committé | `82e2851d804497294fb7e2092f91649d3d0d8bca` |
-| `prototype/order_k_flats.hpp` live | `2532fd5513b143beb55a75a34b05d286df64642bc5d47dd33876a0025ca7831c` |
-| `prototype/flats_differential.cpp` live | `a685092045bdf2288636f503e870a4a98fd528b63810ab41af63580e546c04ff` |
-| `CMakeLists.txt` live | `a879744bb73d17c25fb751fea30f99134656da0bbdf337faff294cf2087d0ca9` |
-| `README.md` live | `78fd1a882ba1a9c22ba2f6b982fcd102ad1cacf2860a730a692f599060b08dbd` |
-| `PROPOSITION.md` live | `09eac579df5a124656c04f4ff66c17310f18c19fed2c3cd57f4d34fa06ea614c` |
+| commit qui ferme le germe | `7cb176fd89568ea58b8bc945b64ab71f52fa6c2f` |
+| `prototype/order_k_flats.hpp` dans ce commit | `2532fd5513b143beb55a75a34b05d286df64642bc5d47dd33876a0025ca7831c` |
+| `prototype/flats_differential.cpp` dans ce commit | `a685092045bdf2288636f503e870a4a98fd528b63810ab41af63580e546c04ff` |
+| `CMakeLists.txt` dans ce commit | `a879744bb73d17c25fb751fea30f99134656da0bbdf337faff294cf2087d0ca9` |
+| commit qui ferme les gardes CLI/u16 | `7397cc214ebb4a03f1cc3ba4f90172cec4beb3de` |
+| `prototype/order_k_flats.hpp` réaudité | `fefa573f9e7e369461ebf243afa60d23e1aae852c91c870119108ebf987aad49` |
+| `prototype/flats_differential.cpp` réaudité | `dfa1f0a5686468af373967c0b0fc59a683a41844893b2841c62fd14c600fd963` |
+| `CMakeLists.txt` réaudité | `66bbea1bf48fe09b736d456a6b5dbf88a46332da34631f85b5437a9e7c17f7dd` |
 
-Ce rapport audite un delta live postérieur à [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md). Toute nouvelle empreinte demande un rejeu.
+Ce rapport prolonge [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md). Le commit `7cb176f` conserve la provenance du premier réaudit et `7397cc2` scelle son durcissement; les statuts « courant » ci-dessous portent sur ce second commit. Toute nouvelle empreinte demande un rejeu ciblé, pas la conservation mécanique d'un ancien finding.
 
 ## 2. Le P0 de la descente de rayon est fermé
 
-### 2.1 Pourquoi la nouvelle construction tient
+### 2.1 Justification de la nouvelle construction
 
-Sous coordonnées distinctes, le point `ha` lexicographiquement minimal du sous-nuage coplanaire est exposé par un fonctionnel linéaire suffisamment perturbé. Toutes les directions depuis `ha` appartiennent donc à un demi-plan ouvert; `plane_side` les ordonne angulairement et le tie-break par distance choisit le premier point sur un rayon collinéaire. Le segment `(ha,hb)` est support et ne contient aucune autre observation dans son intérieur.
+Supposons la face bidimensionnelle, les coordonnées u16 distinctes et un repère euclidien orthonormé obtenu par isométrie avec $A=(0,0)$, $B=(L,0)$, $L>0$. Le point `ha` lexicographiquement minimal est exposé par un fonctionnel linéaire suffisamment perturbé. Les directions depuis `ha` appartiennent à un demi-plan ouvert; `plane_side` les ordonne modulo les directions collinéaires positives, puis le tie-break de distance complète l'ordre et choisit le premier point sur chaque rayon.
 
-Fixons des coordonnées planaires avec $A=(0,0)$, $B=(L,0)$ et tous les apex du côté $y>0$. Le cercle par $A$, $B$ et $C$ s'écrit $x^2+y^2-Lx+D_Cy=0$, avec $D_C=\frac{Lx_C-x_C^2-y_C^2}{y_C}$. Un point $d$ est strictement intérieur à ce cercle si et seulement si $D_d>D_C$. Les apex sont donc totalement préordonnés par le prédicat `in_circle_coplanar`; la passe conserve exactement le maximum, et une égalité désigne le même cercle cocirculaire. Les points collinéaires au-delà de `hb` sont extérieurs; le choix du plus proche exclut ceux qui seraient dans le segment ouvert.
+Pour un apex $C$ du côté $y>0$, écrivons son cercle sous la forme $x^2+y^2-Lx+D_Cy=0$, avec $D_C=\frac{Lx_C-x_C^2-y_C^2}{y_C}$. La factorisation du déterminant employé par le code est $L^2y_C^2y_d(D_C-D_d)$. Le prédicat est donc négatif exactement lorsque $D_d>D_C$, c'est-à-dire lorsque $d$ est strictement intérieur au cercle de $ABC$. Une passe conserve le maximum de cet ordre; une égalité désigne le même cercle cocirculaire.
 
-Les contrôles finaux des étapes 5 et 7 vérifient respectivement le support du segment et l'absence d'intrus dans le cercle. Il n'existe plus de boucle, de potentiel de rayon ni de produit `q*q`; le débordement à grande face disparaît avec eux.
+Le segment obtenu n'est pas toujours une 1-face combinatoire maximale. Pour `A=(0,0,0)`, `B=(1,0,0)`, `C=(2,0,0)`, `D=(0,1,0)`, le code choisit `AB` alors que la 1-face maximale est `AC`. Le terme exact est **sous-segment support primitif**; cela ne casse pas la construction, car `C` est extérieur au cercle `ABD`.
 
-Nuance de vocabulaire : `(ha,hb)` n'est pas toujours une arête combinatoire maximale de l'enveloppe. Pour `A=(0,0,0)`, `B=(1,0,0)`, `C=(2,0,0)`, `D=(0,1,0)`, le code choisit `AB` alors que la 1-face maximale est `AC`. `AB` est un **sous-segment support primitif**; l'algorithme reste valide, car `C` est extérieur au cercle `ABD`. Les commentaires doivent employer ce terme plus précis.
+Les contrôles qui positionnent `seed_failure_stage=5` et `seed_failure_stage=7` recontrôlent le segment et le cercle avec les mêmes prédicats. Ils ferment une mauvaise sélection, mais ne constituent pas un certificat indépendant de leur signe ou de leur largeur; la factorisation ci-dessus porte cette justification.
 
 ### 2.2 Rejeux
 
-La fixture de l'audit précédent est désormais permanente :
+La fixture réfutant la descente de rayon est permanente :
 
 ```text
 A=(0,0,0) B=(0,3,0) C=(2,1,0) P=(1,1,0) Q=(1,1,2)
 ```
 
-Résultats indépendants :
+- La porte versionnée rejoue ses 120 permutations à `s_max=5` : zéro refus, signature unique.
+- Un harnais externe a rejoué les 120 permutations à `s_max=2..8`, soit 840 comparaisons : zéro statut ou census faux, germe unique de niveau 0.
+- Les catalogues ont respectivement 9, 15, 19, 20, 20, 20 et 20 records pour `s_max=2..8`; les nombres de sommets sont 3, 4, 4, 4, 4, 4 et 4.
+- Un contrôle transitoire de propriétés sur grille planaire $4\times4$ a exercé 294 040 ordres sans contre-exemple. Ce script Python n'est ni versionné, ni le C++ compilé, ni un oracle indépendant; il ne ferme aucune porte reproductible à lui seul.
+- Les fuzz structurés Release et UBSan n'ont trouvé aucun désaccord. Ils restent des diagnostics tant que leurs harnais et reçus ne sont pas conservés.
 
-- 120 permutations, chacune aux ordres `s_max=2..8`, soit 840 comparaisons exhaustives : zéro échec;
-- statut `ok`, germe de niveau 0 et coquille géométrique unique sur les 120 permutations;
-- catalogues de 9, 15, 19, 20, 20, 20 et 20 records pour `s_max=2..8`, avec respectivement 3, 4, 4, 4, 4, 4 et 4 sommets;
-- oracle planaire exact sur grille $4\times4$, sous-ensembles de 3 à 6 points, deux orientations, alignements et cocircularités : 294 040 ordres, zéro échec;
-- fuzz structuré sur des plans de coordonnées : 2 000 nuages Release et 500 nuages UBSan, zéro désaccord;
-- campagne u16 hostile supplémentaire : 6 469 cas, 543 310 sommets et census, 321 campagnes d'équivariance, zéro désaccord.
+Le faux potentiel de rayon et le débordement de `q*q+8` sont donc fermés. Le second disparaît structurellement avec la boucle, au lieu d'être seulement élargi.
 
-Le P0 exact de `9c587e6` et le débordement `q*q+8` sont donc fermés sur ce snapshot. Cette conclusion ne transforme pas le germe entier ni les primitives partagées en théorèmes produits.
+## 3. Corrections créditées après le premier réaudit
 
-## 3. Corrections supplémentaires créditées
+Le commit `7397cc2` ferme réellement les points suivants :
 
-- Les 21 fixtures comprennent maintenant `descente_rayon_refutee` et `coordonnees_dupliquees`; le témoin du rayon a un rejeu exhaustif de ses 120 permutations.
-- Deux coordonnées identiques produisent `kDuplicateCoordinates` et un catalogue transactionnellement vide, au lieu d'un `ok` dépendant des identifiants.
-- La portée du différentiel est enfin bornée dans sa source : `sphere_side`, `sphere4` et `miniball_of` sont partagés avec le sujet.
-- Le test compare maintenant membres, contiguïté, sentinelles, ordre et cohérence de la boule publiée; ce gain dépasse l'ancienne signature support--rang.
-- Les campagnes publient leurs compteurs et CMake impose des planchers de navigation, sommets, coquilles multiples et triplets quotientés.
-- L'équivariance couvre aussi un échantillon des nuages génériques et cosphériques, avec statut et census dans la signature.
-- Le suffixe entier `0junk`, la coordonnée CLI hors grille et une campagne sans navigation ont des tests négatifs dédiés.
-- Les deux énoncés `q=1` et variation de niveau par lots sont corrigés dans le header et le README.
+- `--clouds 4294967296` et `--coord 4295032832` sont bornés avant le cast et rendent 2;
+- neuf points distincts demandés dans huit positions rendent 2, et l'accord demandé/généré est vérifié par famille;
+- `flat_catalogue` et `navigate_shallow` refusent avant tout prédicat une coordonnée négative, 65536 ou d'ordre $10^9$ avec `kOutsideDeclaredGrid`;
+- la frontière 65535 demeure acceptée;
+- une contradiction effective entre transport et census positionne `kInvariantViolated`; `flat_catalogue` rend alors un catalogue transactionnellement vide;
+- CMake décrit enfin les trois primitives partagées par le juge;
+- les trois nouvelles reproductions ont des CTests négatifs permanents.
 
-Build propre et validation locale sur les empreintes ci-dessus : 10/10 CTests `mhgp3v_flats_*` verts. Les quatre portes positives annoncent respectivement 169, 1 142, 1 249 et 2 029 cas sans désaccord; les six portes négatives rendent les échecs attendus. UBSan est vert sur les fixtures, le témoin plateau et le fuzz structuré.
+Build Release propre sur les empreintes de `7397cc2` : 13/13 CTests `mhgp3v_flats_*` verts en 11,08 s. Les quatre portes positives rendent 170, 1 143, 1 250 et 2 030 cas sans désaccord. Un probe UBSan externe appelle les deux entrées avec des coordonnées d'ordre $10^9$ : statut `hors_grille_u16_declaree`, catalogue, membres et sommets vides, aucune erreur sanitizer.
 
 ## 4. Portes encore ouvertes
 
-### 4.1 P1 fail-closed — narrowing entier avant validation
+### 4.1 Le contrat C++ n'est pas encore totalement fermé
 
-Le parseur exige désormais que tout le token soit consommé, mais `take(int*)` convertit le `long long` en `int` sans vérifier sa plage. Deux commandes hostiles rendent encore 0 :
+La garde u16 est correcte pour les deux entrées réauditées; l'ancien finding « u16 gardé seulement au CLI » est **fermé**. Trois résiduels distincts restent :
+
+1. `flat_catalogue` ne valide pas `s_max`; `s_max=INT_MIN` atteint encore le calcul signé `s_max-2`. L'API doit refuser l'ordre avant les singletons et avant toute soustraction.
+2. Sous `verify_census=true`, un `census(...) == false` est ignoré. L'impossibilité de reconstruire la sphère d'un sommet doit elle-même devenir `kInvariantViolated`.
+3. `navigate_shallow` ajoute le sommet courant à `visited` avant le census et rend donc un préfixe partiel avec le statut d'erreur. `flat_catalogue` jette ce préfixe, mais l'autre entrée annoncée publique n'est pas transactionnelle.
+
+Le test permanent des quatre frontières appelle seulement `flat_catalogue`; le probe externe couvre `navigate_shallow`. Il faut graver les deux entrées, exiger `kOk` sur la frontière valide et injecter les deux branches de census.
+
+Reproduction UBSan sur le header `fefa573`, avec un nuage de cinq points de dimension affine trois dans la grille : `flat_catalogue(..., INT_MIN, ...)` échoue à `order_k_flats.hpp:1007` sur `-2147483648 - 2`, code 1. Un mutant transitoire qui remplace seulement le niveau du germe par 1 produit `kInvariantViolated` avec un sommet rendu par `navigate_shallow`, contre un catalogue et des membres vides par `flat_catalogue`.
+
+Les helpers de germe et de prédicats restent appelables sans garde. Cela est acceptable seulement s'ils sont explicitement internes avec précondition u16; ils ne doivent pas devenir une API parallèle non protégée.
+
+### 4.2 Le juge et le payload ne sont pas indépendants
+
+Le payload est nettement mieux jugé qu'au snapshot `9c587e6` : doublons, tranches de membres, contiguïté, sentinelles, ordre et appartenance à la boule publiée sont contrôlés. Le résiduel est plus étroit mais décisif avant un statut exact : centre rationnel, rayon et `beta` ne sont pas confrontés à une vérité distincte, et les forêts ne sont pas construites.
+
+La vérité partage encore `sphere4`, `sphere_side`, `miniball_of`, le bon centrage et la convention canonique. Le libellé défendable reste « portée de navigation et signature de catalogue concordantes relativement aux primitives v2 ». Une référence rationnelle multiplicitaire et des injections de centre, rayon, `beta`, membres, ordre et statut restent requises.
+
+### 4.3 Couverture et compteurs
+
+L'accord demandé/généré ferme la censure silencieuse d'une famille. Les minima demeurent agrégés par invocation : la part forcée cosphérique, les statuts accepté/refusé/décidé et toutes les branches suivies n'ont pas chacun un plancher propre.
+
+Les bornes individuelles du CLI autorisent aussi jusqu'à un million de nuages et `smax=4096`, alors que `cases` et `failures` sont des `int`. Le nombre de cas autorisé par cette combinaison dépasse `INT_MAX`; il faut soit borner la combinaison avant la boucle, soit employer des compteurs larges.
+
+Les tableaux live du README annoncent encore 19 544 et 13 669 cas. Le nouveau bloc de quatre frontières incrémente `cases` une fois sans consommer le générateur; les mêmes campagnes doivent donc être rejouées et reçues avant de republier leurs totaux, qui sont mécaniquement décalés d'une unité.
+
+### 4.4 Multiplicités et domaine produit
+
+Deux coordonnées identiques sont maintenant refusées explicitement et transactionnellement. C'est la bonne politique fail-closed pour ce prototype distinct, mais pas la sémantique du profil produit quantifié : transformation, collisions et multiplicités doivent y être conservées ou quotientées selon le contrat. Le profil dyadique exact demeure également hors de ce chemin.
+
+### 4.5 P0 documentaire fermé dans le worktree — le parcours et la mosaïque n'ont pas les mêmes sommets
+
+Le README et la proposition du commit `7397cc2` affirmaient que le parcours visite « le même objet » que la mosaïque de Delaunay d'ordre supérieur et que leurs nombres de sommets sont identiques. C'est faux, même en position simple. Les deux documents sont corrigés dans le worktree audité; ce finding sera fermé durablement avec leur prochain commit.
+
+Prenons les quatre points u16 `A=(0,0,0)`, `B=(1,0,0)`, `C=(0,1,0)`, `D=(0,0,1)`. Les quatre hyperplans relevés ont un unique sommet d'arrangement de niveau strict zéro. La mosaïque de Delaunay d'ordre 1 possède pourtant quatre sommets, un par observation, et un tétraèdre. Le sommet d'arrangement est dual du sommet de Voronoï et de la **cellule tridimensionnelle** de Delaunay; ce n'est pas un sommet de cette mosaïque.
+
+La formulation correcte est plus étroite : sous position générale, le pavage de rhomboïdes est dual de l'arrangement et sa tranche de profondeur $k$ est la mosaïque d'ordre $k$. Un sommet d'arrangement est dual d'un rhomboïde de dimension quatre; ses tranches non triviales donnent des cellules Delaunay tridimensionnelles à plusieurs ordres. La dualité et la tranche ne préservent donc ni la dimension, ni le nombre de sommets. Avec des coquilles multiples, un même record `(niveau, coquille)` se décline en plusieurs ordres et cellules, ce qui éloigne encore toute bijection naïve.
+
+La borne de Clarkson--Shor donne bien $O(n^2k^2)$ en dimension quatre sous ses hypothèses asymptotiques et de position générale; pour $K=10$ fixé, elle est quadratique en $n$. Il faut écrire « aucune borne worst-case utile au contrat », et non « aucun théorème utilisable ». Cette borne ne démontre ni l'identité de $V$, ni le facteur mémoire cinq à dix revendiqué.
+
+Références primaires : [Edelsbrunner--Osang, définition et dualité des mosaïques d'ordre supérieur](https://pub.ista.ac.at/~edels/Papers/2020-J-07-SimpleAlgorithm.pdf), pp. 2--4; [Clarkson--Shor, corollaire 3.3](https://link.springer.com/content/pdf/10.1007/BF02187740.pdf), p. 397.
+
+### 4.6 P0 live — l'index k-d n'est pas encore certifié
+
+Un delta non committé postérieur à `7397cc2` ajoute `CertifiedIndex`, un k-d tree, et confronte son catalogue au chemin de référence. Le témoin ci-dessous a été rejoué sur le header `1117793f843f3cdca4da36beebfdeac11a51a2d8a7a813ac9a40ec642cac499b` et le différentiel `f71097e4c1675e2b0a5b9805d5e16c92eb6a2d2cac76bf3fae98c163bf29721b`. Ce delta évolue rapidement; tout correctif doit être réépinglé et rejoué sur son commit éventuel.
+
+Crédit : l'appartenance finale reste décidée par `sphere_side`, le chemin indexé est comparé record par record au chemin lent, les singletons distincts passent en temps constant et le census de récolte devient local. Une itération live ultérieure remplace en outre le balayage de l'union des deux boules terminales par les points dont les signes ternaires diffèrent : c'est une amélioration mathématiquement valide, car la puissance est affine le long du pinceau et tout événement non constant change de signe entre les extrémités. Le nom live `symmetric_difference` est toutefois faux : le cas signe zéro contre négatif appartient aux deux boules fermées, mais doit être rendu et l'est par le code. Le même delta ferme aussi, au niveau statique, les trois résiduels du §4.1 : ordre gardé avant soustraction, échec de construction du census rendu invariant et préfixe de navigation vidé. Ces fermetures restent à graver par des tests directs et à sceller dans un commit. Le certificat d'élagage, en revanche, est faux dans sa forme rejouée.
+
+Le commentaire suppose que centres et rayons restent sous $2^{17}$ parce que les **points** sont u16, puis ajoute une marge flottante fixe de 0,5. Or `sphere3` et `sphere4` autorisent un numérateur de centre énorme avec un petit déterminant; la fixture permanente `giant_centre_det1` existe précisément pour ce régime. L'erreur absolue de `double(base + num/den)` et de la racine peut alors dépasser 0,5. Le test exact en feuille ne répare pas un nœud élagué à tort : un point de la boule fermée peut ne jamais atteindre la feuille.
+
+Le contre-exemple u16 minimal est :
 
 ```text
---clouds 4294967296 --min-cases 1
-=> clouds=0, 169 cas de fixtures, OK
-
---clouds 0 --coord 4295032832 --min-cases 1
-=> coord=65536, 169 cas de fixtures, OK
+a=(32767,32767,0) b=(57863,57862,0)
+c=(7672,7673,0)   d=(60104,30135,1)
 ```
 
-Chaque option doit vérifier sa plage sémantique et `INT_MIN..INT_MAX` avant le cast; la graine doit avoir un contrat de largeur distinct.
+La sphère exacte portée par ces quatre points satisfait `sphere_side==0` sur les quatre supports. Avec exactement le `leaf_size=16` du chemin produit, `closed_ball` rend `touched=0` et aucun identifiant : la boîte racine elle-même est élaguée. Le harnais transitoire final a pour SHA-256 `5a1cd210...`; la fixture et sa sortie doivent être rendues permanentes avant fermeture.
 
-Le générateur de points distincts peut aussi censurer silencieusement une demande impossible. `--clouds 1 --points 9 --coord 2 --smax 2 --min-cases 1` demande neuf points dans huit positions, ne produit aucun nuage aléatoire, puis rend 0 parce que les 169 cas fixes satisfont le plancher global. Il faut rejeter `points > coord^3` sans overflow, ou exiger un compteur `requested_clouds == generated_clouds` par famille. Le produit `100*npoints` du garde doit lui aussi être borné.
+Les campagnes courantes ont au plus 13 points. Elles exercent bien la décision `node_may_touch` sur la boîte racine; elles n'exercent en revanche ni découpe en nœuds internes, ni cas arithmétique adverse. Il faut conserver le témoin quatre-points, ajouter une fixture à au moins 17 points, puis publier des compteurs de nœuds gardés/élagués. `union_sweeps` existe dans les statistiques mais n'est ni agrégé, ni imprimé, ni planché.
 
-### 4.2 P0 de domaine — u16 n'est gardé que dans le CLI du juge
+La correction la plus directe reste entière : pour chaque axe d'une boîte, calculer exactement les distances rationnelles minimale et maximale du centre à l'intervalle, sommer les carrés avec `mul128`, puis comparer à `sphere_num2`. Un nœud n'est élagué de la requête de désaccord que s'il est strictement intérieur aux deux boules ou strictement extérieur aux deux; les égalités descendent. Le k-d tree garde ainsi son avantage sur les régions vides sans aucune conversion flottante. La preuve, les largeurs, le lemme de désaccord ternaire et le contrat de propriété sont donnés dans [`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md). À défaut, il faut une enveloppe dirigée prouvée sur les vraies largeurs de `num/den`, avec repli intégral dès que cette preuve ne conclut pas.
 
-Les largeurs `i128` supposent la grille u16, mais les API `navigate_shallow` et `flat_catalogue` acceptent encore tout `P3` sans vérifier les coordonnées ni authentifier le profil. Reproduction UBSan directe de `flat_catalogue` avec des coordonnées de l'ordre de $10^9$ :
+Le header emploie aussi `std::isfinite` et `std::sqrt` sans inclure `<cmath>`. Un TU qui inclut seulement ce header échoue; le différentiel masque la dette en incluant `<cmath>` avant lui. Cette faute d'auto-suffisance est P1, distincte du P0 d'élagage.
 
-```text
-prototype/order_k_flats.hpp:181: runtime error: signed integer overflow in __int128
-exit_code=1
-```
-
-La garde CLI ne protège aucun autre appelant. Une frontière API `quantized_u16`, avec contrôle $0\le x,y,z\le65535$ avant tout prédicat, est requise. Le profil dyadique exact demeure hors de ce prototype.
-
-Le refus des doublons est un progrès fail-closed, pas la sémantique produit : le contrat quantifié doit conserver ou quotients les multiplicités de collision. Cette porte reste ouverte et le README le reconnaît.
-
-### 4.3 L'oracle et le payload ne sont pas indépendants
-
-Le nouveau test de payload vérifie surtout l'auto-cohérence du record sujet. Il ne compare pas le centre rationnel, le rayon ou `beta` à une vérité distincte; une autre sphère passant par un support de petite arité et induisant les mêmes membres peut rester invisible. Les forêts ne sont toujours pas construites.
-
-La vérité partage encore `sphere4`, `sphere_side`, `miniball_of`, le bon centrage et la convention canonique. Le libellé défendable reste « portée de navigation et signature de catalogue concordantes relativement aux primitives v2 ». Une référence rationnelle multiplicitaire et des injections de centre, rayon, `beta`, membres, ordre et statut sont requises avant D6.
-
-Le mode `verify_census=true` incrémente toujours les compteurs en cas de contradiction sans positionner `kInvariantViolated`; seul ce binaire les lit. L'API de vérification demeure donc fail-open pour un autre appelant.
-
-### 4.4 Les planchers sont utiles mais agrégés
-
-Les minima ferment le mutant « toute dimension est basse », mais ils ne vérifient pas l'accord de dimension affine nuage par nuage contre une référence indépendante. La porte cosphérique exécute aussi une grande campagne générique; ses planchers peuvent être satisfaits sans prouver un nombre minimal de cas cosphériques forcés. `census`, lots multiples, refus/directs et nombre d'essais d'équivariance sont comptés mais n'ont pas tous un plancher CMake.
-
-Chaque famille doit publier demandé, généré, accepté, refusé et décidé, avec des minima propres à ses branches plutôt qu'un seul total global.
-
-### 4.5 La documentation live se contredit encore
-
-- `PROPOSITION.md` remplace encore `\pm1` par `-1,0,+1`, alors que le header et le README corrigent justement cette seconde affirmation : l'amplitude par lots est non bornée par 1.
-- Le commentaire CMake du différentiel dit encore « partage seulement `sphere_side` ».
-- Le README parle de « payload entier » bien que centre, rayon et `beta` ne soient pas comparés à la vérité; il annonce trois tests négatifs au lieu de six et utilise deux fois l'identifiant 9 dans sa table finale.
-- La réponse aux audits contient deux tabulations ayant amputé `\textsc{Delaunay}` en `extsc{Delaunay}`.
-- La réponse marque « tous les autres points fermés », formulation contredite par les §§4.1--4.4 ci-dessus.
-
-Ces corrections sont documentaires et évidentes; elles ne changent pas le statut scientifique.
+Enfin, `navigate_shallow` accepte un pointeur d'index construit hors de l'appel. Un index bâti sur un autre nuage, ou sur un vecteur ensuite modifié, peut avoir un CSR et des boîtes périmés tout en conservant des identifiants valides. Cette entrée doit être internalisée derrière `flat_catalogue`, ou authentifier une vue immuable; l'exactitude du chemin interne ne doit pas créer une seconde API non gardée.
 
 ## 5. Le NO-GO 50 k ne bouge pas
 
-Le delta corrige un germe et renforce son falsificateur. Il ne change aucun des coûts décisifs :
+Les durcissements ci-dessus ne changent aucun coût décisif :
 
 - les `n` singletons déclenchent encore `n` census globaux, soit 2,5 milliards de classifications avant le germe à 50 k;
-- `seen`, `frontier` et `visited` matérialisent toujours tous les sommets et leurs coquilles;
-- chaque direction de flat et chaque tentative d'émission rescannent le nuage;
+- `seen`, `frontier` et `visited` matérialisent tous les sommets et leurs coquilles;
+- chaque direction de flat et chaque tentative d'émission rescannent le nuage, ce qui conserve au moins un terme de travail en $\Omega(nV)$;
 - les triplets d'une coquille sont énumérés avant quotient;
 - propriétaire local, index fail-open, reverse search, streaming, forêts horizontales et verticales, incidences silencieuses, lots contractuels et `coverage_log` sont absents.
 
-Le nouveau §5 bis du README identifie honnêtement `seen` comme verrou mémoire et GPU commun. La décision d'étudier d'abord la reverse search sous arrangement simple est acceptable comme sous-problème d'architecture si le domaine reste refusé explicitement et si aucune mesure réelle n'est revendiquée. Elle ne qualifie pas le contrat u16 dégénéré, où les multiplicités sont normales.
+Cette correction de dualité ne rend pas le parcours actuel plus petit : son propre nombre de sommets d'arrangement reste mesuré, entièrement matérialisé et multiplié par les rescans. Elle retire seulement un faux argument d'identité et le facteur mémoire qui en était déduit.
 
-Ce chemin est CPU-only : aucune G4 ne doit être utilisée pour ces tests ou mesures. Une G4 ne sera justifiée que lorsqu'un véritable kernel CUDA du pipeline qualifié existera.
+La reverse search sous arrangement simple est un sous-problème d'architecture légitime si le domaine reste gardé fail-closed et si aucune mesure réelle n'est revendiquée. Elle ne qualifie pas le contrat u16 dégénéré, où les multiplicités sont normales.
+
+Ce chemin est CPU-only : aucune G4 ne doit être utilisée pour ses tests ou mesures. Une G4 ne sera justifiée que lorsqu'un véritable kernel CUDA du pipeline qualifié existera.
 
 ## 6. Porte de reprise
 
-1. Corriger les casts du CLI, l'accord demandé/généré et la garde u16 à l'API; ajouter les trois reproductions du §4.1 et les frontières 65535/65536.
-2. Rendre le census fail-closed et compléter les planchers par famille.
-3. Rectifier les claims documentaires et borner « payload entier » à ce qui est effectivement comparé.
-4. Construire la référence rationnelle multiplicitaire et ses injections avant toute nouvelle fermeture D6.
-5. Conserver le BFS multiplicitaire comme oracle structurel borné; développer séparément la source streamée/reverse-search qui évite la mosaïque globale avant toute tentative 50 k.
+1. Fermer `s_max`, le retour faux du census et l'atomicité de `navigate_shallow`; graver les injections.
+2. Donner des compteurs larges et des planchers propres à chaque famille et branche.
+3. Construire la référence rationnelle multiplicitaire avant toute fermeture de qualification exacte.
+4. Conserver la correction de dualité arrangement--Voronoï--Delaunay du worktree et la sceller avec l'audit.
+5. Remplacer la marge flottante du k-d tree par le test boîte--boule exact de la note positive, puis exercer la racine adverse, ses nœuds internes et fermer son contrat de propriété.
+6. Conserver ce BFS comme oracle structurel borné; développer séparément la source streamée/reverse-search qui évite la matérialisation globale.
+7. Ne tenter 50 k qu'après suppression des census globaux, preuve de la règle de propriétaire et sortie complète avec forêts et incidences.
 
-Décision : créditer pleinement le remplacement du faux potentiel de rayon, la fixture permanente et les renforcements de test. Maintenir `exploration/diagnostic_only` et le NO-GO exact/50 k.
+Décision : créditer pleinement le nouveau germe, la garde u16, le CLI fermé et le progrès du census. Maintenir `exploration/diagnostic_only` et le NO-GO exact/50 k.
 
 GCP non utilisé.

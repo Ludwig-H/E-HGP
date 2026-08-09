@@ -131,6 +131,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <unordered_set>
 #include <vector>
@@ -248,8 +249,9 @@ struct Pencil {
 };
 
 struct Vertex {
-  std::vector<i32> shell;   // S(v), trie
-  int level = 0;            // l(v) = |B(v)|
+  std::vector<i32> shell;      // S(v), trie
+  std::vector<i32> interior;   // B(v), trie — TRANSPORTE, jamais recense
+  int level = 0;               // l(v) = |B(v)|, redondant avec interior.size()
 };
 
 struct ShellHash {
@@ -284,9 +286,15 @@ struct FlatStatistics {
   long long emit_duplicate_shell = 0;    // recolte redondante mesuree
   long long degenerate_flat_vertex = 0;  // coquille entierement coplanaire
   long long seed_failure_stage = 0;      // etape exacte d'un refus de germe
+  long long grid_points_touched = 0;     // points visites par l'index, avant tout test
+  long long bootstrap_rounds = 0;        // doublements de pave a l'amorce
+  long long full_grid_sweeps = 0;        // amorces ayant du couvrir toute la grille
+  long long disagreement_sweeps = 0;     // balayages de certification par desaccord de signe
+  long long harvest_prefiltered = 0;     // supports ecartes par le test de propriete
+  long long harvest_censused = 0;        // supports ayant paye un census complet
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 22 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 28 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
@@ -306,6 +314,12 @@ struct FlatStatistics {
     emit_duplicate_shell += o.emit_duplicate_shell;
     degenerate_flat_vertex += o.degenerate_flat_vertex;
     if (o.seed_failure_stage != 0) seed_failure_stage = o.seed_failure_stage;
+    grid_points_touched += o.grid_points_touched;
+    bootstrap_rounds += o.bootstrap_rounds;
+    full_grid_sweeps += o.full_grid_sweeps;
+    disagreement_sweeps += o.disagreement_sweeps;
+    harvest_prefiltered += o.harvest_prefiltered;
+    harvest_censused += o.harvest_censused;
   }
 };
 
@@ -320,6 +334,7 @@ enum class CloudStatus {
   kInvariantViolated,           // un census a contredit le transport
   kDuplicateCoordinates,        // deux observations confondues : hors contrat
   kOutsideDeclaredGrid,         // coordonnee hors de la grille u16 declaree
+  kOrderOutsideContract,        // s_max hors contrat, refuse avant toute soustraction
 };
 
 inline const char* cloud_status_name(CloudStatus s) {
@@ -331,6 +346,7 @@ inline const char* cloud_status_name(CloudStatus s) {
     case CloudStatus::kInvariantViolated: return "invariant_de_transport_viole";
     case CloudStatus::kDuplicateCoordinates: return "coordonnees_dupliquees";
     case CloudStatus::kOutsideDeclaredGrid: return "hors_grille_u16_declaree";
+    case CloudStatus::kOrderOutsideContract: return "ordre_hors_contrat";
   }
   return "inconnu";
 }
@@ -658,6 +674,7 @@ inline CloudStatus seed_level_zero(const std::vector<mhgp::P3>& points,
   ++st->seed_scans;
   std::sort(shell.begin(), shell.end());
   seed_out->shell = shell;
+  seed_out->interior.clear();      // certifie vide par la construction ci-dessus
   seed_out->level = 0;
   return CloudStatus::kOk;
 }
@@ -688,20 +705,391 @@ inline bool shell_sphere(const std::vector<P3>& points, const std::vector<i32>& 
 // Census exact d'un sommet : recalcule la coquille et le niveau depuis la
 // sphere, sans rien emprunter au transport. C'est le juge local du prototype.
 inline bool census(const std::vector<P3>& points, const Vertex& v,
-                   std::vector<i32>* shell_out, int* level_out) {
+                   std::vector<i32>* shell_out, std::vector<i32>* interior_out) {
   mhgp::Sphere s{};
   if (!shell_sphere(points, v.shell, &s)) return false;
   shell_out->clear();
-  *level_out = 0;
+  interior_out->clear();
   for (i32 z = 0; z < (i32)points.size(); ++z) {
     const int side = mhgp::sphere_side(s, points[(std::size_t)z]);
-    if (side < 0) ++(*level_out);
+    if (side < 0) interior_out->push_back(z);
     else if (side == 0) shell_out->push_back(z);
   }
   return true;
 }
 
 }  // namespace flats
+
+// ---------------------------------------------------------------------------
+// INDEX SPATIAL CERTIFIE — le flottant ne peut qu'ajouter du travail
+// ---------------------------------------------------------------------------
+//
+// L'audit numerique exige d'un accelerateur qu'il sature avant conversion,
+// n'exclue jamais en `double` et propage un statut de couverture. La grille
+// precedente violait les trois. Une grille a maille fixe a de toute facon un
+// defaut plus profond : une boule VIDE mais grande — et le pinceau en produit,
+// puisque entre deux evenements consecutifs la region balayee ne contient par
+// definition aucun point — lui coute $(R/\text{maille})^3$ cellules pour zero
+// resultat.
+//
+// On prend donc un ARBRE k-d sur les identifiants, avec la boite entiere de
+// chaque noeud. Une region vide coute la profondeur, pas son volume.
+//
+// LE CONTRAT DE CORRECTION tient en une phrase : le flottant ne sert qu'a
+// ELAGUER un noeud, l'appartenance finale est decidee par `mhgp::sphere_side`.
+// Un elagage errone serait une omission, donc il est rendu impossible par une
+// marge. Le centre exact est `base + num/den` et le rayon `sqrt(N)/den` avec
+// `N = |num|^2`. Les conversions `big_to_double` et la racine ont une erreur
+// relative de l'ordre de $2^{-52}$ ; comme coordonnees et rayons restent sous
+// $2^{17}$ sur la grille declaree, l'erreur absolue sur le centre et sur le
+// rayon reste sous $2^{-35}$. On elargit de **un demi**, soit plus de $2^{34}$
+// fois cette borne, alors que deux points entiers distincts sont a distance au
+// moins un. Aucun point de la boule fermee ne peut donc etre elague, et un
+// noeud garde a tort ne coute qu'un test exact de plus.
+struct CertifiedIndex {
+  struct Node {
+    int lo[3] = {0, 0, 0};
+    int hi[3] = {0, 0, 0};
+    int begin = 0, end = 0;
+    int left = -1, right = -1;         // left < 0 : feuille
+  };
+  std::vector<Node> nodes;
+  std::vector<mhgp::i32> order;
+  const std::vector<mhgp::P3>* points = nullptr;
+  int leaf_size = 16;
+
+  void build(const std::vector<mhgp::P3>& cloud, int leaf = 16) {
+    points = &cloud;
+    leaf_size = std::max(1, leaf);
+    order.resize(cloud.size());
+    for (std::size_t i = 0; i < order.size(); ++i) order[i] = (mhgp::i32)i;
+    nodes.clear();
+    if (order.empty()) return;
+    nodes.reserve(2 * (order.size() / (std::size_t)leaf_size + 2));
+    build_range(0, (int)order.size());
+  }
+
+  int build_range(int begin, int end) {
+    const int self = (int)nodes.size();
+    nodes.push_back(Node{});
+    Node node{};
+    node.begin = begin;
+    node.end = end;
+    for (int d = 0; d < 3; ++d) { node.lo[d] = kDeclaredGridMaximum; node.hi[d] = 0; }
+    for (int t = begin; t < end; ++t) {
+      const mhgp::P3& p = (*points)[(std::size_t)order[(std::size_t)t]];
+      const int c[3] = {(int)p.x, (int)p.y, (int)p.z};
+      for (int d = 0; d < 3; ++d) {
+        node.lo[d] = std::min(node.lo[d], c[d]);
+        node.hi[d] = std::max(node.hi[d], c[d]);
+      }
+    }
+    if (end - begin > leaf_size) {
+      int axis = 0;
+      for (int d = 1; d < 3; ++d)
+        if (node.hi[d] - node.lo[d] > node.hi[axis] - node.lo[axis]) axis = d;
+      const int mid = begin + (end - begin) / 2;
+      std::nth_element(order.begin() + begin, order.begin() + mid, order.begin() + end,
+                       [&](mhgp::i32 a, mhgp::i32 b) {
+                         const mhgp::P3& u = (*points)[(std::size_t)a];
+                         const mhgp::P3& w = (*points)[(std::size_t)b];
+                         const mhgp::i32 ua = axis == 0 ? u.x : (axis == 1 ? u.y : u.z);
+                         const mhgp::i32 wa = axis == 0 ? w.x : (axis == 1 ? w.y : w.z);
+                         if (ua != wa) return ua < wa;
+                         return a < b;
+                       });
+      node.left = build_range(begin, mid);
+      node.right = build_range(mid, end);
+    }
+    nodes[(std::size_t)self] = node;
+    return self;
+  }
+
+  // Boule flottante ELARGIE d'un demi : elle contient strictement la boule
+  // exacte, donc elaguer sur elle ne peut rien omettre.
+  struct LooseBall {
+    double centre[3] = {0, 0, 0};
+    double radius = 0;                 // rayon DEJA elargi de la marge
+    bool usable = false;               // le chemin rapide est-il autorise ?
+    mhgp::i128 centre_num[3] = {0, 0, 0};   // base_j * den + n_j
+    mhgp::i128 den = 0;
+    mhgp::BigInt<4> radius2_num{};     // N = |num|^2
+  };
+
+  // LA MARGE FLOTTANTE A ETE REFUTEE, et il faut le dire nettement.
+  //
+  // La version precedente elargissait la boule d'un demi et pretendait que
+  // l'erreur restait sous 2^-35 « puisque coordonnees et rayons restent sous
+  // 2^17 sur la grille declaree ». C'est faux : le CENTRE d'une sphere portee
+  // par un quadruplet presque coplanaire sort arbitrairement loin de la grille.
+  // La note `NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md` §1.3 donne
+  // quatre points u16 distincts
+  //
+  //     (32767,32767,0) (57863,57862,0) (7672,7673,0) (60104,30135,1)
+  //
+  // dont la sphere exacte a `den = 2` et un rayon de l'ordre de 10^18. A cette
+  // echelle la marge d'un demi ne signifie plus rien : l'elagage supprimait LA
+  // RACINE, et la requete rendait zero point au lieu des quatre supports.
+  //
+  // Le chemin rapide est donc GARDE. Il n'est autorise que si centre et rayon
+  // tiennent sous 2^20, ou l'erreur absolue des conversions reste sous 2^-30 et
+  // la marge d'un demi la domine de plus de 2^28. Hors de cette garde, le
+  // prédicat exact ci-dessous decide, en entiers.
+  static constexpr double kFastPathBound = 1048576.0;   // 2^20
+
+  static LooseBall loosen(const mhgp::Sphere& sphere) {
+    LooseBall ball;
+    if (sphere.den <= 0) return ball;
+    ball.den = sphere.den;
+    ball.centre_num[0] = (mhgp::i128)sphere.base.x * sphere.den + sphere.nx;
+    ball.centre_num[1] = (mhgp::i128)sphere.base.y * sphere.den + sphere.ny;
+    ball.centre_num[2] = (mhgp::i128)sphere.base.z * sphere.den + sphere.nz;
+    ball.radius2_num = mhgp::sphere_num2(sphere);
+    const double den = (double)sphere.den;
+    if (!(den > 0) || !std::isfinite(den)) return ball;
+    const double rx = (double)sphere.nx / den, ry = (double)sphere.ny / den,
+                 rz = (double)sphere.nz / den;
+    if (!std::isfinite(rx) || !std::isfinite(ry) || !std::isfinite(rz)) return ball;
+    ball.centre[0] = (double)sphere.base.x + rx;
+    ball.centre[1] = (double)sphere.base.y + ry;
+    ball.centre[2] = (double)sphere.base.z + rz;
+    const double r = std::sqrt(rx * rx + ry * ry + rz * rz);
+    if (!std::isfinite(r) || r > kFastPathBound) return ball;
+    for (int d = 0; d < 3; ++d)
+      if (std::abs(ball.centre[d]) > kFastPathBound) return ball;
+    ball.radius = r + 0.5;
+    ball.usable = true;
+    return ball;
+  }
+
+  // PREDICAT EXACT boite--boule, note §1 theoreme 1. Avec
+  // C_j = base_j*den + n_j et g_j = max(l_j*den - C_j, 0, C_j - h_j*den),
+  // on a den^2 * dist(c, Q)^2 = somme des g_j^2, et le noeud est elaguable si et
+  // seulement si cette somme depasse STRICTEMENT N. L'egalite est conservee : la
+  // boule est fermee et les points de coquille sont contractuels. De meme le
+  // noeud est certainement STRICTEMENT interieur si la somme des f_j^2, avec
+  // f_j = max(|l_j*den - C_j|, |h_j*den - C_j|), est strictement sous N.
+  // Largeurs : C_j et g_j sous 2^91, leurs carres sous 2^182, la somme sous
+  // 2^184 — tres en dessous du bit de signe de `BigInt<4>`.
+  static bool exact_outside(const Node& node, const LooseBall& ball) {
+    if (ball.den <= 0) return false;
+    mhgp::BigInt<4> total{};
+    for (int d = 0; d < 3; ++d) {
+      const mhgp::i128 low = (mhgp::i128)node.lo[d] * ball.den - ball.centre_num[d];
+      const mhgp::i128 high = ball.centre_num[d] - (mhgp::i128)node.hi[d] * ball.den;
+      mhgp::i128 gap = 0;
+      if (low > gap) gap = low;
+      if (high > gap) gap = high;
+      total = mhgp::big_add(total, mhgp::mul128(gap, gap));
+    }
+    return mhgp::big_cmp(total, ball.radius2_num) > 0;
+  }
+
+  static bool exact_strictly_inside(const Node& node, const LooseBall& ball) {
+    if (ball.den <= 0) return false;
+    mhgp::BigInt<4> total{};
+    for (int d = 0; d < 3; ++d) {
+      const mhgp::i128 a = (mhgp::i128)node.lo[d] * ball.den - ball.centre_num[d];
+      const mhgp::i128 b = (mhgp::i128)node.hi[d] * ball.den - ball.centre_num[d];
+      const mhgp::i128 fa = a < 0 ? -a : a;
+      const mhgp::i128 fb = b < 0 ? -b : b;
+      const mhgp::i128 reach = fa > fb ? fa : fb;
+      total = mhgp::big_add(total, mhgp::mul128(reach, reach));
+    }
+    return mhgp::big_cmp(total, ball.radius2_num) < 0;
+  }
+
+  static bool node_may_touch(const Node& node, const LooseBall& ball) {
+    if (!ball.usable) return !exact_outside(node, ball);
+    double d2 = 0;
+    for (int d = 0; d < 3; ++d) {
+      const double c = ball.centre[d];
+      const double lo = (double)node.lo[d], hi = (double)node.hi[d];
+      const double gap = c < lo ? (lo - c) : (c > hi ? (c - hi) : 0.0);
+      d2 += gap * gap;
+    }
+    return d2 <= ball.radius * ball.radius;
+  }
+
+  // Visite tous les points du nuage dans la boule FERMEE, et rien d'autre. La
+  // decision d'appartenance est exacte et garde l'egalite, donc la coquille.
+  template <class Fn>
+  void closed_ball(const mhgp::Sphere& sphere, long long* touched, Fn&& visit) const {
+    if (nodes.empty()) return;
+    const LooseBall ball = loosen(sphere);
+    int stack[128];
+    int top = 0;
+    stack[top++] = 0;
+    while (top > 0) {
+      const Node& node = nodes[(std::size_t)stack[--top]];
+      if (!node_may_touch(node, ball)) continue;
+      if (node.left < 0) {
+        for (int t = node.begin; t < node.end; ++t) {
+          const mhgp::i32 id = order[(std::size_t)t];
+          ++(*touched);
+          if (mhgp::sphere_side(sphere, (*points)[(std::size_t)id]) <= 0) visit(id);
+        }
+      } else {
+        if (top + 2 <= 128) { stack[top++] = node.left; stack[top++] = node.right; }
+        else {                                  // pile saturee : ne rien omettre
+          descend_all(node.left, sphere, ball, touched, visit);
+          descend_all(node.right, sphere, ball, touched, visit);
+        }
+      }
+    }
+  }
+
+  template <class Fn>
+  void descend_all(int index, const mhgp::Sphere& sphere, const LooseBall& ball,
+                   long long* touched, Fn&& visit) const {
+    const Node& node = nodes[(std::size_t)index];
+    if (!node_may_touch(node, ball)) return;
+    if (node.left < 0) {
+      for (int t = node.begin; t < node.end; ++t) {
+        const mhgp::i32 id = order[(std::size_t)t];
+        ++(*touched);
+        if (mhgp::sphere_side(sphere, (*points)[(std::size_t)id]) <= 0) visit(id);
+      }
+      return;
+    }
+    descend_all(node.left, sphere, ball, touched, visit);
+    descend_all(node.right, sphere, ball, touched, visit);
+  }
+
+  // DESACCORD DE SIGNE entre deux spheres du meme pinceau.
+  //
+  // Le nom importe. Ce n'est PAS la difference symetrique des deux boules
+  // fermees : c'est le desaccord TERNAIRE de `sphere_side`, qui vaut -1, 0 ou
+  // +1. La distinction n'est pas cosmetique — elle conserve precisement le cas
+  // contractuel « sur la coquille a une extremite, strictement interieur a
+  // l'autre », que la difference des boules fermees perdrait puisque le point
+  // appartient alors aux deux. Un point du CERCLE du flat, lui, a le meme signe
+  // nul aux deux extremites : il est deja dans la fermeture et ne doit pas etre
+  // redecouvert comme evenement.
+  //
+  // C'est la requete que le lemme reclame, et pas le balayage d'une boule. Entre
+  // deux parametres la puissance d'un point est affine ; un point dont la
+  // puissance s'annule strictement entre les deux a donc des signes terminaux
+  // strictement opposes, et un point dont elle s'annule a une extremite a un
+  // signe nul d'un cote et non nul de l'autre. Balayer une boule entiere serait
+  // correct mais ruineux : la sphere d'un sliver de surface est geometriquement
+  // enorme bien qu'elle ne contienne qu'une poignee de points, et sa FRONTIERE
+  // traverse une grande partie du nuage. Le desaccord, lui, est mince des que
+  // l'evenement est proche — c'est le cas courant — et un noeud strictement
+  // interieur aux DEUX boules, ou strictement exterieur aux DEUX, est coupe.
+  //
+  // Les deux coupes sont conservatives : on n'elague que si le noeud est
+  // certainement du meme cote des deux spheres, marge d'un demi comprise. Le
+  // verdict final reste `mhgp::sphere_side`, exact, sur chaque point atteint.
+  struct Straddle { bool certainly_inside = false, certainly_outside = false; };
+
+  static Straddle classify(const Node& node, const LooseBall& ball) {
+    Straddle out;
+    if (!ball.usable) {
+      out.certainly_outside = exact_outside(node, ball);
+      out.certainly_inside = exact_strictly_inside(node, ball);
+      return out;
+    }
+    double near2 = 0, far2 = 0;
+    for (int d = 0; d < 3; ++d) {
+      const double c = ball.centre[d];
+      const double lo = (double)node.lo[d], hi = (double)node.hi[d];
+      const double gap = c < lo ? (lo - c) : (c > hi ? (c - hi) : 0.0);
+      const double reach = std::max(std::abs(c - lo), std::abs(c - hi));
+      near2 += gap * gap;
+      far2 += reach * reach;
+    }
+    // `ball.radius` porte deja la marge d'un demi ; l'interieur certain se juge
+    // donc contre le rayon DIMINUE de la meme marge.
+    const double inner = ball.radius - 1.0;
+    if (inner > 0 && far2 <= inner * inner) out.certainly_inside = true;
+    if (near2 > ball.radius * ball.radius) out.certainly_outside = true;
+    return out;
+  }
+
+  template <class Fn>
+  void sign_disagreement(const mhgp::Sphere& a, const mhgp::Sphere& b,
+                            long long* touched, Fn&& visit) const {
+    if (nodes.empty()) return;
+    const LooseBall la = loosen(a), lb = loosen(b);
+    int stack[128];
+    int top = 0;
+    stack[top++] = 0;
+    while (top > 0) {
+      const int self = stack[--top];
+      const Node& node = nodes[(std::size_t)self];
+      const Straddle sa = classify(node, la), sb = classify(node, lb);
+      if ((sa.certainly_inside && sb.certainly_inside) ||
+          (sa.certainly_outside && sb.certainly_outside)) continue;
+      if (node.left < 0) {
+        for (int t = node.begin; t < node.end; ++t) {
+          const mhgp::i32 id = order[(std::size_t)t];
+          ++(*touched);
+          const mhgp::P3& p = (*points)[(std::size_t)id];
+          const int side_a = mhgp::sphere_side(a, p);
+          const int side_b = mhgp::sphere_side(b, p);
+          if (side_a != side_b) visit(id);
+        }
+      } else if (top + 2 <= 128) {
+        stack[top++] = node.left;
+        stack[top++] = node.right;
+      } else {
+        sign_disagreement_at(node.left, a, b, la, lb, touched, visit);
+        sign_disagreement_at(node.right, a, b, la, lb, touched, visit);
+      }
+    }
+  }
+
+  template <class Fn>
+  void sign_disagreement_at(int index, const mhgp::Sphere& a, const mhgp::Sphere& b,
+                               const LooseBall& la, const LooseBall& lb,
+                               long long* touched, Fn&& visit) const {
+    const Node& node = nodes[(std::size_t)index];
+    const Straddle sa = classify(node, la), sb = classify(node, lb);
+    if ((sa.certainly_inside && sb.certainly_inside) ||
+        (sa.certainly_outside && sb.certainly_outside)) return;
+    if (node.left < 0) {
+      for (int t = node.begin; t < node.end; ++t) {
+        const mhgp::i32 id = order[(std::size_t)t];
+        ++(*touched);
+        const mhgp::P3& p = (*points)[(std::size_t)id];
+        if (mhgp::sphere_side(a, p) != mhgp::sphere_side(b, p)) visit(id);
+      }
+      return;
+    }
+    sign_disagreement_at(node.left, a, b, la, lb, touched, visit);
+    sign_disagreement_at(node.right, a, b, la, lb, touched, visit);
+  }
+
+  // Pave ENTIER, teste exactement. Sert d'amorce : aucune exactitude n'en depend.
+  template <class Fn>
+  void box(const long long* lo, const long long* hi, long long* touched, Fn&& visit) const {
+    if (nodes.empty()) return;
+    int stack[128];
+    int top = 0;
+    stack[top++] = 0;
+    while (top > 0) {
+      const Node& node = nodes[(std::size_t)stack[--top]];
+      bool disjoint = false;
+      for (int d = 0; d < 3; ++d)
+        if ((long long)node.hi[d] < lo[d] || (long long)node.lo[d] > hi[d]) disjoint = true;
+      if (disjoint) continue;
+      if (node.left < 0) {
+        for (int t = node.begin; t < node.end; ++t) {
+          const mhgp::i32 id = order[(std::size_t)t];
+          const mhgp::P3& p = (*points)[(std::size_t)id];
+          if (p.x < lo[0] || p.x > hi[0] || p.y < lo[1] || p.y > hi[1] ||
+              p.z < lo[2] || p.z > hi[2]) continue;
+          ++(*touched);
+          visit(id);
+        }
+      } else if (top + 2 <= 128) {
+        stack[top++] = node.left;
+        stack[top++] = node.right;
+      }
+    }
+  }
+};
 
 // ---------------------------------------------------------------------------
 // LE PARCOURS.
@@ -714,7 +1102,13 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
                                                    int level_ceiling,
                                                    FlatStatistics* st,
                                                    CloudStatus* status,
-                                                   bool verify_census) {
+                                                   bool verify_census,
+                                                   const CertifiedIndex* index = nullptr) {
+  // CONTRAT DE PROPRIETE DE L'INDEX. `index` doit avoir ete construit sur CE
+  // vecteur `points`, non modifie depuis : ses boites seraient sinon perimees et
+  // l'elagage omettrait des points. La seule construction autorisee dans ce
+  // fichier est celle de `flat_catalogue`, qui le batit juste avant de naviguer
+  // sur la meme vue. Passer ici un index etranger est un usage hors contrat.
   using namespace flats;
   std::vector<Vertex> visited;
   const int n = (int)points.size();
@@ -743,7 +1137,8 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
   seen.insert(seed.shell);
   frontier.push_back(seed);
 
-  std::vector<i32> closure, batch, shell_check;
+  std::vector<i32> closure, batch, shell_check, interior_check, touched_ids;
+  std::vector<char> seen_candidate((std::size_t)n, 0);
   while (!frontier.empty()) {
     const Vertex v = frontier.back();
     frontier.pop_back();
@@ -753,17 +1148,32 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
     if (m > 4) ++st->shells_multiple;
 
     if (verify_census) {
-      int level_exact = 0;
-      if (census(points, v, &shell_check, &level_exact)) {
+      // Ne pas pouvoir reconstruire la sphere d'un sommet EST une contradiction :
+      // un sommet d'arrangement a par definition quatre hyperplans independants.
+      if (!census(points, v, &shell_check, &interior_check)) {
+        ++st->census_mismatch_shell;
+        *status = CloudStatus::kInvariantViolated;
+        visited.clear();
+        return visited;
+      }
+      {
         ++st->census_checks;
         // FAIL-CLOSED. Compter la contradiction sans changer le statut laissait
         // l'API fail-open : seul le binaire du juge lisait les compteurs, tout
         // autre appelant obtenait un catalogue construit sur un transport
         // demenit par son propre census.
-        const bool contradicted = (shell_check != v.shell) || (level_exact != v.level);
+        // L'ENSEMBLE interieur est compare, pas seulement son cardinal : c'est
+        // lui qui est transporte, et deux ensembles de meme taille mais de
+        // contenu different produiraient des candidats faux sans jamais faire
+        // rougir un compteur de niveau.
+        const bool contradicted = (shell_check != v.shell) || (interior_check != v.interior);
         if (shell_check != v.shell) ++st->census_mismatch_shell;
-        if (level_exact != v.level) ++st->census_mismatch_level;
-        if (contradicted) { *status = CloudStatus::kInvariantViolated; return visited; }
+        if (interior_check != v.interior) ++st->census_mismatch_level;
+        if (contradicted) {
+          *status = CloudStatus::kInvariantViolated;
+          visited.clear();                 // ATOMIQUE : pas de prefixe partiel
+          return visited;
+        }
       }
     }
 
@@ -834,18 +1244,115 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
         ++st->pencil_queries;
         i32 best = -1;
         int best_orient = 0;
-        batch.clear();
-        for (i32 z = 0; z < n; ++z) {
-          if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
+
+        // Absorbe un candidat : garde le meilleur dans la direction demandee et
+        // son lot d'ex aequo. `seen_candidate` evite de re-tester un point deja
+        // rapporte par un balayage precedent.
+        auto absorb = [&](i32 z) {
+          if (seen_candidate[(std::size_t)z]) return;
+          seen_candidate[(std::size_t)z] = 1;
+          touched_ids.push_back(z);
+          if (std::binary_search(v.shell.begin(), v.shell.end(), z)) return;
           const int oz = pencil.orient_of(z);
-          if (oz == 0) continue;            // constant le long du pinceau
+          if (oz == 0) return;              // constant le long du pinceau
           ++st->pencil_candidates;
-          if (pencil.compare_t(z, oz, apex, orient_apex) != direction) continue;
-          if (best < 0) { best = z; best_orient = oz; batch.assign(1, z); continue; }
-          const int cmp = pencil.compare_t(z, oz, best, best_orient);
-          if (cmp == 0) batch.push_back(z);
-          else if (cmp == -direction) { best = z; best_orient = oz; batch.assign(1, z); }
+          if (pencil.compare_t(z, oz, apex, orient_apex) != direction) return;
+          if (best < 0) { best = z; best_orient = oz; return; }
+          if (pencil.compare_t(z, oz, best, best_orient) == -direction) {
+            best = z; best_orient = oz;
+          }
+        };
+
+        if (index == nullptr) {
+          for (i32 z = 0; z < n; ++z) absorb(z);
+        } else {
+          // AMORCE. Un pave entier autour d'un sommet du triangle, double
+          // jusqu'a trouver un candidat ou jusqu'a couvrir toute la grille.
+          // Aucune exactitude n'en depend : c'est le certificat par union des
+          // deux vraies boules, plus bas, qui decide.
+          // AMORCE. Les evenements « sortants » sont exactement les points de
+          // B(v), qui est TRANSPORTE et donc deja connu : aucun balayage. Il
+          // reste a chercher les « entrants », qui sont hors de la boule.
+          for (i32 z : v.interior) absorb(z);
+          mhgp::Sphere apex_sphere{};
+          mhgp::i32 apex_support[4] = {base[0], base[1], base[2], apex};
+          std::sort(apex_support, apex_support + 4);
+          const bool apex_ok = mhgp::sphere4(points[(std::size_t)apex_support[0]],
+                                             points[(std::size_t)apex_support[1]],
+                                             points[(std::size_t)apex_support[2]],
+                                             points[(std::size_t)apex_support[3]], &apex_sphere);
+
+          // AMORCE PAR PAVE, dimensionne par le RAYON DE LA SPHERE COURANTE.
+          //
+          // Deux amorces ont ete essayees et mesurees avant celle-ci. Partir de
+          // l'etendue du triangle coutait un ordre de grandeur sur les slivers
+          // de surface. Sonder le pinceau par une sphere exacte de parametre
+          // double etait geometriquement juste — la region reellement traversee
+          // EST une lentille — mais pire en pratique : a grand pas la sonde tend
+          // vers un demi-espace, et la lentille avec elle.
+          //
+          // Le bon ordre de grandeur est le rayon de la sphere du sommet : le
+          // prochain evenement est a cette echelle des que le nuage est dense.
+          // Le rayon n'est ici qu'une ESTIMATION de taille de recherche, jamais
+          // une decision : le certificat reste la lentille exacte ci-dessous, et
+          // le repli exhaustif ferme le cas ou rien n'est trouve.
+          // Mesure : partir du rayon de la sphere courante divise par quatre le
+          // nombre de tours, mais rapporte cinq fois plus de candidats, chacun
+          // paye en predicats exacts — 22,9 s contre 13,7 s a n=800. Le pave
+          // part donc PETIT et double.
+          const mhgp::P3& anchor = points[(std::size_t)base[0]];
+          long long half = 4;
+          bool covered_grid = false;
+          while (best < 0 && !covered_grid) {
+            ++st->bootstrap_rounds;
+            const long long lo[3] = {(long long)anchor.x - half, (long long)anchor.y - half,
+                                     (long long)anchor.z - half};
+            const long long hi[3] = {(long long)anchor.x + half, (long long)anchor.y + half,
+                                     (long long)anchor.z + half};
+            index->box(lo, hi, &st->grid_points_touched, absorb);
+            covered_grid = (half >= (long long)kDeclaredGridMaximum);
+            half *= 2;
+          }
+          if (covered_grid && best < 0) ++st->full_grid_sweeps;
+
+          // CERTIFICATION PAR LE DESACCORD DE SIGNE. On ne balaie pas la boule
+          // du sommet — celle d'un sliver est geometriquement enorme bien que
+          // vide — mais l'ensemble des points dont `sphere_side` DIFFERE entre
+          // les deux spheres terminales, qui est exactement l'ensemble des
+          // evenements non constants entre les deux parametres. Elle est mince des que l'evenement est proche, et elle
+          // retrecit a chaque tour puisque chaque nouveau meilleur candidat a un
+          // parametre strictement compris entre les deux precedents.
+          for (int round = 0; apex_ok && round < 8 && best >= 0; ++round) {
+            const i32 previous = best;
+            mhgp::i32 bs[4] = {base[0], base[1], base[2], best};
+            std::sort(bs, bs + 4);
+            mhgp::Sphere best_sphere{};
+            if (!mhgp::sphere4(points[(std::size_t)bs[0]], points[(std::size_t)bs[1]],
+                               points[(std::size_t)bs[2]], points[(std::size_t)bs[3]],
+                               &best_sphere)) break;
+            ++st->disagreement_sweeps;
+            index->sign_disagreement(apex_sphere, best_sphere, &st->grid_points_touched,
+                                        absorb);
+            if (best == previous) break;
+          }
         }
+
+        // Le LOT est relu sur l'ensemble deja balaye : tout point de meme
+        // parametre que `best` est sur la sphere de `best`, donc dans une boule
+        // deja couverte.
+        batch.clear();
+        if (best >= 0) {
+          for (i32 z : touched_ids) {
+            if (std::binary_search(v.shell.begin(), v.shell.end(), z)) continue;
+            const int oz = pencil.orient_of(z);
+            if (oz == 0) continue;
+            if (pencil.compare_t(z, oz, best, best_orient) == 0) batch.push_back(z);
+          }
+          std::sort(batch.begin(), batch.end());
+        }
+        for (i32 z : touched_ids) seen_candidate[(std::size_t)z] = 0;
+        touched_ids.clear();
+
         if (best < 0) { ++st->unbounded_stops; continue; }
         if (batch.size() > 1) ++st->batches_multiple;
 
@@ -861,18 +1368,31 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
         // strictement d'un cote constant : on le lit sur la sphere terminale.
         // Un membre du lot entrant etait interieur sur l'arete ouverte si et
         // seulement s'il etait interieur a la sphere de v.
-        int level = v.level;
+        // TRANSPORT DE L'ENSEMBLE, pas du seul cardinal. B_e = B(v) union les
+        // anciens membres de coquille devenus interieurs ; puis on retire du lot
+        // entrant ceux qui etaient interieurs sur l'arete ouverte.
+        std::vector<i32> interior = v.interior;
         for (int t = 0; t < m; ++t) {
           const i32 z = v.shell[(std::size_t)t];
           if (std::binary_search(closure.begin(), closure.end(), z)) continue;
-          if (pencil.side(best, z, best_orient) < 0) ++level;
+          if (pencil.side(best, z, best_orient) < 0) interior.push_back(z);
         }
         for (i32 z : batch)
-          if (pencil.side(apex, z, orient_apex) < 0) --level;
+          if (pencil.side(apex, z, orient_apex) < 0) {
+            const auto it = std::find(interior.begin(), interior.end(), z);
+            if (it != interior.end()) interior.erase(it);
+          }
+        std::sort(interior.begin(), interior.end());
+        interior.erase(std::unique(interior.begin(), interior.end()), interior.end());
+        const int level = (int)interior.size();
 
-        if (level < 0) { *status = CloudStatus::kInvariantViolated; return visited; }
+        if (level < 0) {
+          *status = CloudStatus::kInvariantViolated;
+          visited.clear();
+          return visited;
+        }
         if (level > level_ceiling) { ++st->vertices_over_level; continue; }
-        if (seen.insert(shell).second) frontier.push_back(Vertex{shell, level});
+        if (seen.insert(shell).second) frontier.push_back(Vertex{shell, interior, level});
       }
     }
     if (!any_flat) ++st->degenerate_flat_vertex;
@@ -896,11 +1416,19 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
 // ---------------------------------------------------------------------------
 inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s_max,
                                       FlatStatistics* st, CloudStatus* status,
-                                      bool verify_census) {
+                                      bool verify_census, bool use_index = false) {
   *st = FlatStatistics{};
   mhgp::Catalogue catalogue;
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
+
+  // L'ORDRE se valide avant tout : `s_max - 2` est un calcul signe, et
+  // `s_max = INT_MIN` le faisait deborder avant meme les singletons. Le contrat
+  // borne l'ordre par la grille declaree, donc par le nombre de points.
+  if (s_max < 0 || s_max > (int)kDeclaredGridMaximum) {
+    *status = CloudStatus::kOrderOutsideContract;
+    return catalogue;
+  }
 
   if (!inside_declared_grid(points)) {
     *status = CloudStatus::kOutsideDeclaredGrid;
@@ -915,20 +1443,32 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
   std::vector<mhgp::i32> members_pool;
   std::unordered_set<std::vector<mhgp::i32>, flats::ShellHash> emitted;
 
-  auto try_emit = [&](const mhgp::i32* candidate, int m) {
+  CertifiedIndex grid;
+  const bool indexed = use_index && n >= 1;
+  if (indexed) grid.build(points, 16);
+
+  std::vector<mhgp::i32> members, shell;
+  auto try_emit_with = [&](const mhgp::MiniballResult& mb) {
     ++st->emit_attempts;
-    const mhgp::MiniballResult mb = mhgp::miniball_of(points, candidate, m);
-    if (!mb.ok) return;
-    // La miniboule doit passer par TOUT le candidat, sinon la sphere de ce
-    // support n'est pas minimale : sa sous-sphere sera recoltee ailleurs.
-    for (int i = 0; i < m; ++i)
-      if (mhgp::sphere_side(mb.sph, points[(std::size_t)candidate[i]]) != 0) return;
-    std::vector<mhgp::i32> members, shell;
-    for (mhgp::i32 z = 0; z < n; ++z) {
-      const int side = mhgp::sphere_side(mb.sph, points[(std::size_t)z]);
-      if (side > 0) continue;
-      if (side == 0) shell.push_back(z);
-      members.push_back(z);
+    members.clear();
+    shell.clear();
+    if (indexed) {
+      // CENSUS LOCAL. La boule fermee exacte remplace le balayage du nuage
+      // entier : c'est le second $O(n)$ par tentative que l'audit compte, et il
+      // valait a lui seul un terme en $nV$.
+      grid.closed_ball(mb.sph, &st->grid_points_touched, [&](mhgp::i32 z) {
+        members.push_back(z);
+        if (mhgp::sphere_side(mb.sph, points[(std::size_t)z]) == 0) shell.push_back(z);
+      });
+      std::sort(members.begin(), members.end());
+      std::sort(shell.begin(), shell.end());
+    } else {
+      for (mhgp::i32 z = 0; z < n; ++z) {
+        const int side = mhgp::sphere_side(mb.sph, points[(std::size_t)z]);
+        if (side > 0) continue;
+        if (side == 0) shell.push_back(z);
+        members.push_back(z);
+      }
     }
     if ((int)members.size() > s_max) return;
     if (!emitted.insert(shell).second) { ++st->emit_duplicate_shell; return; }
@@ -981,7 +1521,42 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
     ++st->emitted_arity[canonical_mb.n_support];
   };
 
-  for (mhgp::i32 p = 0; p < n; ++p) try_emit(&p, 1);
+  auto try_emit = [&](const mhgp::i32* candidate, int m) {
+    const mhgp::MiniballResult mb = mhgp::miniball_of(points, candidate, m);
+    if (!mb.ok) return;
+    for (int i = 0; i < m; ++i)
+      if (mhgp::sphere_side(mb.sph, points[(std::size_t)candidate[i]]) != 0) return;
+    try_emit_with(mb);
+  };
+
+  // SINGLETONS. Sous refus des doublons, la boule fermee de rayon nul centree en
+  // p ne contient que p : rang un, coquille {p}. Les faire passer par un census
+  // global coutait n^2, soit 2,5 milliards de classifications a 50 000 points
+  // AVANT le germe. Le resultat est ici en temps constant, et le chemin de
+  // reference garde le census pour que le differentiel puisse les confronter.
+  if (indexed) {
+    if (s_max >= 1) {
+      for (mhgp::i32 p = 0; p < n; ++p) {
+        const mhgp::Sphere sphere = mhgp::sphere1(points[(std::size_t)p]);
+        std::vector<mhgp::i32> one{p};
+        if (!emitted.insert(one).second) { ++st->emit_duplicate_shell; continue; }
+        ++st->emit_attempts;
+        mhgp::CriticalSphere critical{};
+        critical.support[0] = p;
+        for (int i = 1; i < mhgp::kMaxSupport; ++i) critical.support[i] = -1;
+        critical.n_support = 1;
+        critical.rank = 1;
+        critical.sph = sphere;
+        critical.beta = mhgp::sphere_beta(sphere);
+        critical.members_begin = (mhgp::i32)members_pool.size();
+        members_pool.push_back(p);
+        kept.push_back(critical);
+        ++st->emitted_arity[1];
+      }
+    }
+  } else {
+    for (mhgp::i32 p = 0; p < n; ++p) try_emit(&p, 1);
+  }
 
   const bool navigable = n >= 4 && affine_dimension_is_three(points);
   if (!navigable) {
@@ -1006,24 +1581,58 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
   } else {
     const int level_ceiling = s_max - 2;
     CloudStatus nav = CloudStatus::kOk;
-    const auto vertices = navigate_shallow(points, level_ceiling, st, &nav, verify_census);
+    const auto vertices = navigate_shallow(points, level_ceiling, st, &nav, verify_census,
+                                           indexed ? &grid : nullptr);
     if (nav != CloudStatus::kOk) { *status = nav; return catalogue; }
+    // ---------------------------------------------------------------------
+    // RECOLTE, avec le TEST DE PROPRIETE local.
+    //
+    // Un sommet v ne peut posseder le support U que s'il appartient au polyedre
+    // de signes P_U — sinon un AUTRE sommet le possede, et le theoreme de
+    // proprietaire garantit que celui-la est de niveau au plus s_max - q, donc
+    // visite. Or l'appartenance a P_U se lit presque entierement sur l'ensemble
+    // INTERIEUR de v : un membre de la coquille de v satisfait L = 0 et ne
+    // contraint rien, tandis que tout point strictement interieur a la sphere de
+    // v doit etre strictement interieur a la boule de U.
+    //
+    // Le test coute donc |B(v)| comparaisons exactes par support candidat, et il
+    // remplace un census complet. B(v) se lit une seule fois par sommet.
     for (const flats::Vertex& v : vertices) {
       const int m = (int)v.shell.size();
-      try_emit(v.shell.data(), m);
+      const std::vector<mhgp::i32>& interior = v.interior;
+      // La miniboule est calculee UNE fois et traverse le filtre : la recalculer
+      // dans le filtre puis dans l'emission coutait plus cher que le census
+      // qu'elle evitait.
+      auto guarded_emit = [&](const mhgp::i32* candidate, int q) {
+        const mhgp::MiniballResult mb = mhgp::miniball_of(points, candidate, q);
+        if (!mb.ok) return;
+        for (int i = 0; i < q; ++i)
+          if (mhgp::sphere_side(mb.sph, points[(std::size_t)candidate[i]]) != 0) return;
+        if (indexed) {
+          for (mhgp::i32 z : interior)
+            if (mhgp::sphere_side(mb.sph, points[(std::size_t)z]) >= 0) {
+              ++st->harvest_prefiltered;
+              return;
+            }
+        }
+        ++st->harvest_censused;
+        try_emit_with(mb);
+      };
+
+      guarded_emit(v.shell.data(), m);
       for (int i = 0; i < m; ++i)
         for (int j = i + 1; j < m; ++j) {
           const mhgp::i32 e[2] = {v.shell[(std::size_t)i], v.shell[(std::size_t)j]};
-          try_emit(e, 2);
+          guarded_emit(e, 2);
           // Les 4-sous-ensembles sont REDONDANTS et ne sont pas recoltes. Si le
           // support canonique d'une sphere critique a quatre points, il est
           // affinement independant, sa sphere est le sommet lui-meme et sa
-          // coquille est S(v) : `try_emit(v.shell)` la publie. Si quatre points
-          // de la coquille sont coplanaires, leur miniboule a un support d'au
-          // plus trois points et la recolte d'arite trois la publie.
+          // coquille est S(v) : la recolte de la coquille la publie. Si quatre
+          // points de la coquille sont coplanaires, leur miniboule a un support
+          // d'au plus trois points et la recolte d'arite trois la publie.
           for (int k = j + 1; k < m; ++k) {
             const mhgp::i32 f[3] = {e[0], e[1], v.shell[(std::size_t)k]};
-            try_emit(f, 3);
+            guarded_emit(f, 3);
           }
         }
     }

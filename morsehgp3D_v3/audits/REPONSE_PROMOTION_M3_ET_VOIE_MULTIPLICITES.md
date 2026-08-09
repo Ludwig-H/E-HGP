@@ -297,3 +297,59 @@ multiplicitaire, l'index *fail-open*, la règle de propriétaire, le reverse
 search, les forêts, et tout le §5 de l'audit — les $2{,}5\cdot10^9$ appels des
 singletons, `seen`/`frontier`/`visited`, le census en $O(n)$ par tentative. Le
 statut reste `exploration/diagnostic_only`, et le NO-GO 50 k est intact.
+
+---
+
+## 10. Delta d'index — réponse à `NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU`
+
+La note est arrivée pendant que j'écrivais l'index, et elle a réfuté ce que
+j'étais en train d'écrire. Les deux briques sont intégrées.
+
+**Le P0 est réel et reproduit.** Sur les quatre points u16 de la note,
+`sphere4` donne `den = 2` et un rayon d'environ $10^{18}$ : le centre d'un
+quadruplet presque coplanaire sort arbitrairement loin de la grille. Mon
+argument — « l'erreur reste sous $2^{-35}$ puisque coordonnées et rayons restent
+sous $2^{17}$ » — ne parlait que des coordonnées, jamais du centre. Mesuré avant
+correction :
+
+```text
+sphere_side des quatre supports : 0 0 0 0
+den=2  |num|~1.89e18
+closed_ball : points touches=0  rendus=0  (attendu 4)
+```
+
+L'élagage supprimait **la racine**. Après le théorème 1, `points touches=4
+rendus=4`. La fixture est permanente, et la porte d'index la teste sur le
+prédicat lui-même — grande sphère, nœuds internes réellement exercés, accord avec
+une énumération exhaustive — et non seulement à travers le catalogue.
+
+**Le chemin rapide flottant subsiste mais il est gardé** : il n'est autorisé que
+si centre et rayon tiennent sous $2^{20}$, où l'erreur absolue reste sous
+$2^{-30}$ et la marge d'un demi la domine de plus de $2^{28}$. Hors de cette
+garde, le prédicat entier décide. Le header inclut désormais `<cmath>` : il
+n'était pas auto-suffisant, c'était le point 1 de votre porte.
+
+**La nuance de vocabulaire est acceptée et corrigée dans le code.** La requête
+n'est pas la différence symétrique de deux boules fermées mais le désaccord
+**ternaire** de `sphere_side` — la méthode s'appelle maintenant
+`sign_disagreement`, et le commentaire dit pourquoi : la différence des boules
+fermées perdrait le cas contractuel « sur la coquille à une extrémité,
+strictement intérieur à l'autre », et un point du cercle du flat a le même signe
+nul aux deux extrémités, donc il n'est pas redécouvert comme événement.
+
+**Ce que l'index a donné, et ce qu'il n'a pas donné.** Deux $O(n)$ disparaissent
+— la requête de pinceau et le census par tentative — et les singletons se
+publient en temps constant, ce qui supprime les $2{,}5\cdot10^9$ classifications
+d'avant le germe. S'y ajoute un résultat que la note n'attendait pas : en
+transportant l'**ensemble** intérieur au lieu de son cardinal, les événements
+sortants d'une requête deviennent gratuits et la récolte gagne un test de
+propriété local qui écarte 88,6 % des tentatives à $s_{\max}=11$ sans census.
+
+Le facteur mesuré, même binaire pour les deux colonnes : **10,7 à 12,2 à
+$s_{\max}=5$**, mais **2,8 seulement à $s_{\max}=11$**, parce que les sphères d'un
+niveau profond sont grandes et que l'arbre élague moins. Extrapolé depuis
+$n=200$ à l'ordre du contrat, 50 000 points demanderaient environ 130 s sur 48
+cœurs. **Le NO-GO 50 k n'est pas entamé**, et je ne prétends pas l'entamer :
+l'index est une brique, `seen`/`frontier`/`visited` résident toujours, les flats
+sortent encore des triplets, et il n'y a ni propriétaire calculé, ni reverse
+search, ni forêts.

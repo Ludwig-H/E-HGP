@@ -36,6 +36,8 @@ Ce dossier conserve les audits indépendants de la v3. Chaque finding doit être
 
 - [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md) : audit hostile du premier parcours par flats et de son juge différentiel : contre-exemple u16 à la descente stricte du rayon, statut et catalogue dépendants de la permutation, limites d'indépendance et de couverture du juge, CLI non fermé et NO-GO architectural pour 50 k.
 
-- [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md) : réaudit positif du nouveau germe par segment support et angle maximal, avec 120 permutations et oracle planaire hostile; garde ciblée fermée, mais narrowing CLI, profil u16 à l'API, indépendance du payload et architecture 50 k toujours ouverts.
+- [`AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md`](AUDIT_DELTA_ORDER_K_FLATS_2532FD5.md) : audit continu du germe par sous-segment support et apex maximal, puis de ses durcissements : P0 du rayon, narrowing CLI, censure de campagne, frontière u16 et fausse identité arrangement--Delaunay corrigés; contrat C++ résiduel, indépendance du juge, certificat de l'index k-d, multiplicités et architecture 50 k encore ouverts.
+
+- [`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md) : résultat constructif pour le chemin rapide : classifications exactes boîte--boule en `BigInt<4>`, preuve que le désaccord ternaire des signes terminaux contient tous les événements non constants, contrat de propriété et porte de validation à nœuds internes.
 
 Ces audits motivent les corrections; l'autorité mathématique reste la spécification et le registre des preuves.

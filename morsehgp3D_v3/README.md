@@ -228,7 +228,8 @@ Trois portes, et il faut les trois :
 
 1. **le sommet** — tous les sommets d'arrangement énumérés en force brute, groupés par coquille, filtrés au niveau strict, comparés sur le couple (coquille, **niveau**) ;
 2. **le catalogue** — tous les sous-ensembles de taille au plus quatre, miniboule, census exact, déduplication par coquille, support canonique ;
-3. **l'équivariance** — renuméroter le nuage ne doit rien changer.
+3. **l'équivariance** — renuméroter le nuage ne doit rien changer ;
+4. **l'index contre la référence** — le chemin indexé doit rendre exactement le même catalogue que le balayage complet : mêmes supports, mêmes rangs, mêmes membres, même ordre, même statut. Sans cette porte, un index qui rate un point ne se verrait qu'au désaccord avec la force brute, c'est-à-dire beaucoup plus tard et beaucoup plus mal.
 
 Le census exact par sommet est actif pendant toute la campagne : le transport
 n'est jamais autorité : une contradiction positionne `kInvariantViolated` et
@@ -258,15 +259,19 @@ entières distinctes :
 
 | campagne | nuages | points | grille | $s_{\max}$ | cas | désaccords |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| générique | 2 500 | 12 | $[0,26)$ | 2 à 7 | **19 544** | **0** |
-| grille saturée | 1 500 | 10 | $[0,5)$ | 2 à 8 | **13 669** | **0** |
+| générique | 1 200 | 11 | $[0,24)$ | 2 à 6 | **7 979** | **0** |
+| grille saturée | 900 | 10 | $[0,5)$ | 2 à 8 | **8 279** | **0** |
 
 Couverture réellement exercée, publiée par le juge et exigée par CTest :
 
 | campagne | nuages navigués | sommets | coquilles $>4$ | triplets quotientés | lots $>1$ | équivariances |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| générique | 18 819 | 3 359 381 | 11 863 | 51 578 | 171 246 | 646 |
-| grille saturée | 13 209 | 1 331 410 | 58 393 | 125 574 | 751 805 | 396 |
+| générique | 7 597 | 876 313 | 3 805 | 15 621 | 52 248 | 322 |
+| grille saturée | 7 952 | 797 645 | 33 978 | 71 644 | 437 989 | 247 |
+
+Les totaux diffèrent de ceux publiés précédemment : les campagnes ont été
+rejouées après la fermeture du P0 d'élagage, et le compte de cas a changé avec
+l'ajout des portes d'index et de domaine.
 
 La grille saturée est le régime qui compte : dix points dans une boîte de côté
 cinq, donc presque tous les nuages portent des cosphéricités, des coplanarités
@@ -286,8 +291,98 @@ permutations**, avec exigence de zéro refus et de signature unique.
 ### Ce qui n'est PAS jugé
 
 - L'oracle M1 n'a **pas** été étendu à ce sujet. Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. L'étendre aux multiplicités est un travail à part, et il doit être audité.
-- Aucun accélérateur spatial n'est branché : la requête de pinceau balaie le nuage entier. Le contrat *fail-open* de [`AUDIT_FILTRAGE_SPATIAL_NUMERIQUE_ORDER_K_4EF89A1.md`](audits/AUDIT_FILTRAGE_SPATIAL_NUMERIQUE_ORDER_K_4EF89A1.md) s'appliquera quand il le sera ; les P0 de `Grid::ball` restent donc **ouverts et non contournés**, simplement hors du chemin.
+- Les forêts ne sont pas construites, et le centre rationnel, le rayon et $\beta$ ne sont pas confrontés à une vérité distincte. Ce qui est comparé est listé au §4 ; « payload entier » serait faux.
 - Pas de forêts, pas de reverse search, pas de propriétaire calculé : la récolte déduplique encore par une table globale de coquilles.
+
+---
+
+## 4 bis. L'index : ce qu'il a coûté, et ce qu'il n'a pas donné
+
+Les deux $O(n)$ que l'audit compte — la requête de pinceau et le census de
+chaque tentative d'émission — sont remplacés par un **arbre k-d** interrogé
+exactement. Le chemin de référence, qui balaie le nuage, est conservé : c'est
+contre lui que l'index est jugé, et c'est la quatrième porte du différentiel.
+
+### Le prédicat est exact, parce que la marge flottante a été réfutée
+
+J'avais élagué un nœud par une boule flottante élargie d'un demi, en arguant que
+« coordonnées et rayons restent sous $2^{17}$ sur la grille déclarée ». C'est
+faux, et la note
+[`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](audits/NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md)
+§1.3 le montre sur quatre points u16 distincts :
+
+```text
+(32767,32767,0)  (57863,57862,0)  (7672,7673,0)  (60104,30135,1)
+```
+
+Le *centre* d'une sphère portée par un quadruplet presque coplanaire sort
+arbitrairement loin de la grille : ici $\mathrm{den}=2$ et le rayon vaut environ
+$10^{18}$. Reproduit : l'élagage supprimait **la racine** et la requête rendait
+zéro point au lieu des quatre supports.
+
+Le prédicat est donc exact, en entiers. Avec $C_j=\mathrm{base}_j d+n_j$ et
+$g_j=\max\lbrace\ell_jd-C_j,\ 0,\ C_j-h_jd\rbrace$, on a
+$d^2\,\mathrm{dist}(c,Q)^2=g_x^2+g_y^2+g_z^2$, et le nœud n'est élagué que si
+cette somme dépasse **strictement** $N=\lVert\mathrm{num}\rVert^2$ — l'égalité est
+conservée, la boule est fermée et les points de coquille sont contractuels.
+Largeurs : $C_j$ et $g_j$ sous $2^{91}$, les carrés sous $2^{182}$, la somme sous
+$2^{184}$, donc `BigInt<4>`. Un chemin rapide flottant subsiste, mais **gardé** :
+il n'est autorisé que si centre et rayon tiennent sous $2^{20}$, où l'erreur
+absolue reste sous $2^{-30}$ et la marge d'un demi la domine de plus de $2^{28}$.
+
+### La requête de pinceau teste un désaccord de signe, pas une différence de boules
+
+Entre deux paramètres du pinceau la puissance d'un point est affine, donc un
+événement non constant a des signes **strictement opposés** aux deux extrémités,
+et un événement situé à une extrémité y a un signe nul et un signe non nul à
+l'autre. La requête est donc le désaccord **ternaire** de `sphere_side`, et non
+la différence symétrique des deux boules fermées : cette dernière perdrait
+précisément le cas contractuel « sur la coquille d'un côté, strictement intérieur
+de l'autre ». Un point du cercle du flat a le même signe nul aux deux extrémités
+— il est déjà dans la fermeture et n'est pas redécouvert.
+
+Balayer une boule entière serait correct mais ruineux : la sphère d'un sliver de
+surface est géométriquement énorme bien qu'elle ne contienne qu'une poignée de
+points, et sa **frontière** traverse une grande partie du nuage.
+
+### L'ensemble intérieur est transporté, plus jamais recensé
+
+$B(v)$ n'est plus un simple cardinal : c'est un ensemble, transporté par
+$B_e=B(v)\cup D_-(d)$ puis $B(w)=B_e\setminus\lbrace i\in A:\ i\in B_e\rbrace$, et
+le census de contrôle compare désormais l'**ensemble**, pas sa taille. Trois
+conséquences : les événements « sortants » d'une requête sont exactement les
+membres de $B(v)$, donc gratuits ; la récolte dispose d'un **test de propriété**
+local — un sommet ne peut posséder un support que si tout son intérieur est
+strictement dans la boule de ce support — qui écarte **88,6 %** des tentatives à
+$s_{\max}=11$ sans payer de census ; et les singletons se publient en temps
+constant, ce qui supprime les $2{,}5\cdot10^9$ classifications que l'audit
+comptait avant le germe.
+
+### Ce que la mesure dit
+
+**[mesuré]** profil LiDAR, un cœur, `g++ -O3 -march=native`, codespace 2 vCPU,
+même binaire pour les deux colonnes :
+
+| $s_{\max}$ | $n$ | référence | indexé | facteur | candidats/sommet |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 5 | 200 | 14,3 s | **1,3 s** | 10,7 | 768 → 160 |
+| 5 | 400 | 54,4 s | **4,5 s** | 12,2 | — |
+| 5 | 800 | — | **12,5 s** | — | — |
+| 11 | 100 | 30,9 s | **11,0 s** | 2,8 | 768 → 122 |
+| 11 | 200 | — | **20,6 s** | — | 155 |
+
+Il faut lire la dernière ligne et pas la première. **À l'ordre du contrat le
+facteur tombe à 2,8**, parce que les sphères d'un niveau profond sont grandes :
+l'arbre élague moins, et le travail se déplace des prédicats exacts — divisés par
+6,3 — vers le parcours de l'arbre. Extrapolé sans prudence depuis $n=200$,
+$s_{\max}=11$ : 110 µs par sommet, environ $5{,}8\cdot10^7$ sommets à 50 000
+points, soit près de deux heures sur un cœur et environ 130 s sur 48. **Le
+contrat reste à deux ordres de grandeur.**
+
+L'index est donc une brique positive et un P0 fermé, pas l'architecture. Ce qu'il
+ne touche pas est inchangé : `seen`, `frontier` et les sommets visités résident
+tous ; les flats sont énumérés depuis les triplets ; il n'y a ni règle de
+propriétaire calculée, ni reverse search, ni streaming, ni forêts.
 
 ---
 
@@ -304,7 +399,7 @@ d'environ **17:1**.
 Ce n'est pas une bonne nouvelle déguisée : la sortie est six fois plus grosse
 qu'annoncé. Le travail total, lui, n'a pas bougé.
 
-**[mesuré]** profil LiDAR à densité fixe, emprise $\propto\sqrt n$, $s_{\max}=11$
+**[mesuré]** profil LiDAR à densité fixe, emprise $\propto\sqrt{n}$, $s_{\max}=11$
 (donc $K=10$, plafond de niveau strict 9), un cœur, `g++ -O3 -march=native`,
 codespace 2 vCPU, **sans aucune accélération spatiale** :
 
@@ -341,32 +436,46 @@ et je les donne comme tels.
 
 ### La taille du terrain n'est pas garantie
 
-Le $\leq k$-niveau parcouru **est** le squelette de la mosaïque de Delaunay
-d'ordre supérieur : c'est un théorème classique — le diagramme de Voronoï
-d'ordre $k$ est la projection du $k$-niveau de l'arrangement relevé. Le parcours
-ne visite donc pas un objet plus petit qu'elle, il visite **le même**. Il faut
-dire précisément ce qui est gagné et ce qui ne l'est pas :
+Le parcours énumère les sommets géométriques de l'arrangement relevé dont le
+niveau strict est sous le plafond. Sous position générale, le pavage de
+rhomboïdes est dual de cet arrangement et sa tranche de profondeur $k$ est la
+mosaïque de Delaunay d'ordre $k$. La dualité puis la tranche changent les
+dimensions : en dimension trois, un sommet de l'arrangement est dual d'un
+rhomboïde de dimension quatre, dont les tranches non triviales donnent des
+cellules Delaunay tridimensionnelles à plusieurs ordres. Ce n'est pas un sommet
+de mosaïque en bijection un-à-un.
 
-| | mosaïque d'ordre $\leq k$ matérialisée | parcours |
-| --- | --- | --- |
-| nombre de sommets | $V$ | **$V$, identique** |
-| étiquette par sommet | le $k$-sous-ensemble, $O(k)$ entiers | coquille et compteur de niveau |
-| cellules de dimension 1, 2, 3 ; incidences ; dual | construites et stockées | jamais formées |
-| résident simultanément | tout | **tout aussi, aujourd'hui** |
+La fixture u16 la plus petite suffit à écarter toute bijection naïve : pour les
+quatre sommets d'un tétraèdre, l'arrangement relevé possède un sommet de niveau
+zéro, tandis que la mosaïque de Delaunay d'ordre un possède quatre sommets et un
+tétraèdre. Avec les coquilles multiples, un même record `(niveau, coquille)`
+peut en outre contribuer à plusieurs ordres et cellules.
 
-Le gain acquis est donc la charge utile par sommet et l'absence des cellules de
-dimension supérieure — de l'ordre d'un facteur cinq à dix en octets, **pas un
-ordre de grandeur**. Le gain qui compterait, ne pas tout retenir, n'est pas
-obtenu : `seen` et le vecteur des sommets visités retiennent l'ensemble.
+| objet | quantité effectivement portée |
+| --- | --- |
+| parcours actuel | tous les sommets d'arrangement shallow, leur coquille et leur niveau |
+| mosaïques d'ordre supérieur | sommets, cellules de toutes dimensions, incidences et étiquettes par ordre |
+| structures évitées par le parcours | cellules Delaunay/Voronoï, incidences et dual matérialisés |
+| résident simultanément dans le prototype | `seen`, `frontier` et tous les sommets déjà visités |
 
-**Et $V$ lui-même n'est borné par aucun théorème utilisable ici.** La borne
-classique de Clarkson--Shor pour le $\leq k$-niveau de $n$ hyperplans de
-$\mathbb{R}^4$ est **quadratique en $n$ et en $k$**. Les mesures ci-dessus sont
-plusieurs ordres de grandeur en dessous, parce qu'un relevé est localement une
-surface, donc très loin d'une configuration adverse. C'est une propriété du
-**régime**, pas un théorème — et le §14 de [`PROPOSITION.md`](PROPOSITION.md) a
-déjà retiré l'énoncé voisin « surface $\Rightarrow$ faible profondeur presque
-partout » comme census et non comme théorème.
+Le gain acquis est donc réel — les cellules, incidences et étiquettes par ordre
+ne sont jamais formées — mais aucun facteur mémoire cinq à dix ne découle d'une
+identité de nombres de sommets. Le gain qui compterait, ne pas tout retenir,
+n'est pas obtenu : `seen` et le vecteur des sommets visités retiennent
+l'ensemble du terrain parcouru.
+
+La borne classique de Clarkson--Shor pour le $\leq k$-niveau de $n$
+hyperplans de $\mathbb{R}^4$ est $O(n^2k^2)$ sous ses hypothèses asymptotiques
+et de position générale; pour $K=10$ fixé, elle est quadratique en $n$. C'est
+un théorème utilisable pour situer le pire cas, mais pas une borne compatible
+avec le SLO 50 k. Les mesures ci-dessus sont plusieurs ordres de grandeur en
+dessous parce qu'un relevé est localement une surface : c'est une propriété du
+**régime**, pas un théorème. Le §14 de [`PROPOSITION.md`](PROPOSITION.md) a déjà
+retiré l'énoncé voisin « surface $\Rightarrow$ faible profondeur presque
+partout » comme census et non comme théorème. Voir
+[Edelsbrunner--Osang](https://pub.ista.ac.at/~edels/Papers/2020-J-07-SimpleAlgorithm.pdf)
+pour la dualité et [Clarkson--Shor, corollaire 3.3](https://link.springer.com/content/pdf/10.1007/BF02187740.pdf)
+pour la borne.
 
 **Le multi-captation est le contre-exemple attendu, et il est déjà mesuré.** Le
 census du 8 août, publié au §1.5 de `PROPOSITION.md`, donne le nuage à dix
@@ -420,9 +529,9 @@ aucune recherche. Le reste demande une restructuration explicite :
 | tri global par $\beta$ exact | non écrit | étage **barrière** : runs triés puis fusion déterministe, clefs rationnellement égales réunies avant toute mutation |
 
 **Ce qu'un GPU n'achètera pas.** Il multiplie le débit ; il ne réduit pas le
-nombre de sommets visités, qui est celui de la mosaïque. La question de fond
-n'est donc pas « aller plus vite sur ce terrain » mais « peut-on éviter d'en
-traverser la plus grande part ». Aucun portage n'y répond.
+nombre de sommets d'arrangement visités. La question de fond n'est donc pas
+« aller plus vite sur ce terrain » mais « peut-on éviter d'en traverser la plus
+grande part ». Aucun portage n'y répond.
 
 ---
 

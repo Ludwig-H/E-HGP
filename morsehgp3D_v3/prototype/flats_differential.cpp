@@ -158,6 +158,10 @@ struct Coverage {
   long long quotiented = 0;
   long long multiple_batches = 0;
   long long equivariance_runs = 0;
+  long long grid_touched = 0;
+  long long bootstrap = 0;
+  long long full_sweeps = 0;
+  long long indexed_runs = 0;
 };
 static Coverage coverage;
 
@@ -223,6 +227,38 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
     for (const auto& kv : got_v)
       if (truth_v.find(kv.first) == truth_v.end()) ++extra_vertices;
     if (missing_vertices || extra_vertices || wrong_level) ok = false;
+  }
+
+  // (D) INDEX CONTRE REFERENCE. Le chemin indexe doit rendre EXACTEMENT le meme
+  // catalogue que le balayage complet — mêmes supports, mêmes rangs, mêmes
+  // membres, même ordre, même statut. Un index qui rate un point produirait un
+  // catalogue plus petit, et sans cette porte seul un désaccord avec la force
+  // brute le révélerait, c'est-à-dire beaucoup plus tard et beaucoup plus mal.
+  {
+    mhgp3v::FlatStatistics ist{};
+    mhgp3v::CloudStatus istatus = mhgp3v::CloudStatus::kOk;
+    const mhgp::Catalogue icat = mhgp3v::flat_catalogue(pts, s_max, &ist, &istatus, true, true);
+    bool identical = (istatus == status) && icat.spheres.size() == cat.spheres.size() &&
+                     icat.members == cat.members;
+    for (size_t i = 0; identical && i < icat.spheres.size(); ++i) {
+      const mhgp::CriticalSphere& a = icat.spheres[i];
+      const mhgp::CriticalSphere& b = cat.spheres[i];
+      if (a.n_support != b.n_support || a.rank != b.rank ||
+          a.members_begin != b.members_begin) identical = false;
+      for (int q = 0; q < mhgp::kMaxSupport && identical; ++q)
+        if (a.support[q] != b.support[q]) identical = false;
+      if (identical && mhgp::sphere_cmp_beta(a.sph, b.sph) != 0) identical = false;
+    }
+    if (!identical) {
+      printf("[%s] s_max=%2d INDEX != REFERENCE : statut %s contre %s, %zu contre %zu spheres\n",
+             tag, s_max, mhgp3v::cloud_status_name(istatus),
+             mhgp3v::cloud_status_name(status), icat.spheres.size(), cat.spheres.size());
+      ok = false;
+    }
+    coverage.grid_touched += ist.grid_points_touched;
+    coverage.bootstrap += ist.bootstrap_rounds;
+    coverage.full_sweeps += ist.full_grid_sweeps;
+    coverage.indexed_runs += 1;
   }
 
   const Truth t = brute_catalogue(pts, s_max);
@@ -476,6 +512,11 @@ int main(int argc, char** argv) {
                        pt(30, 33, 26), pt(25, 30, 25), pt(35, 31, 30)}});
   // Refutation de la « descente stricte du rayon » : P est strictement interieur
   // au cercle de ABC et pourtant les quatre rayons carres valent 5/2.
+  // Sphere u16 a centre tres eloigne : la marge flottante de l'index elaguait
+  // la RACINE et rendait zero point au lieu des quatre supports.
+  fixtures.push_back({"centre_lointain_elagage_refute",
+                      {pt(32767, 32767, 0), pt(57863, 57862, 0), pt(7672, 7673, 0),
+                       pt(60104, 30135, 1)}});
   fixtures.push_back({"descente_rayon_refutee",
                       {pt(0, 0, 0), pt(0, 3, 0), pt(2, 1, 0), pt(1, 1, 0), pt(1, 1, 2)}});
   // Deux observations confondues : le sujet doit REFUSER, pas publier `ok`.
@@ -518,6 +559,62 @@ int main(int argc, char** argv) {
     } else {
       printf("[descente_rayon_refutee] 120 permutations : 0 refus, signature unique\n");
     }
+  }
+
+  // PORTE DE L'INDEX, testee sur le predicat lui-meme et pas seulement a
+  // travers le catalogue. Trois exigences de la note d'audit : la sphere a
+  // centre tres eloigne dont chaque support doit atteindre sa feuille, des
+  // noeuds internes reellement exerces, et l'accord du predicat exact avec une
+  // enumeration de toutes les coordonnees d'une petite boite.
+  {
+    ++cases;
+    int index_faults = 0;
+    {   // (a) grande sphere : les quatre supports doivent etre rendus
+      const std::vector<P3> far{pt(32767, 32767, 0), pt(57863, 57862, 0), pt(7672, 7673, 0),
+                                pt(60104, 30135, 1)};
+      mhgp::Sphere sphere{};
+      if (!mhgp::sphere4(far[0], far[1], far[2], far[3], &sphere)) ++index_faults;
+      else {
+        mhgp3v::CertifiedIndex tree;
+        tree.build(far, 16);
+        long long touched = 0;
+        int returned = 0;
+        tree.closed_ball(sphere, &touched, [&](i32) { ++returned; });
+        if (returned != 4) {
+          printf("[index] grande sphere : %d points rendus au lieu de 4\n", returned);
+          ++index_faults;
+        }
+      }
+    }
+    {   // (b) noeuds internes reellement exerces, et accord avec l'exhaustif
+      std::vector<P3> cube;
+      for (int x = 0; x < 4; ++x) for (int y = 0; y < 4; ++y) for (int z = 0; z < 3; ++z)
+        cube.push_back(pt(x * 7, y * 5, z * 11));
+      mhgp3v::CertifiedIndex tree;
+      tree.build(cube, 4);
+      if (tree.nodes.size() < 3) { printf("[index] arbre sans noeud interne\n"); ++index_faults; }
+      std::mt19937 local(12345);
+      std::uniform_int_distribution<int> pick(0, (int)cube.size() - 1);
+      for (int trial = 0; trial < 200; ++trial) {
+        const int a = pick(local), b = pick(local), c = pick(local), d = pick(local);
+        mhgp::Sphere sphere{};
+        if (!mhgp::sphere4(cube[(size_t)a], cube[(size_t)b], cube[(size_t)c], cube[(size_t)d],
+                           &sphere)) continue;
+        std::set<i32> by_index, by_scan;
+        long long touched = 0;
+        tree.closed_ball(sphere, &touched, [&](i32 id) { by_index.insert(id); });
+        for (i32 z = 0; z < (i32)cube.size(); ++z)
+          if (mhgp::sphere_side(sphere, cube[(size_t)z]) <= 0) by_scan.insert(z);
+        if (by_index != by_scan) {
+          printf("[index] boule fermee : %zu contre %zu par balayage\n", by_index.size(),
+                 by_scan.size());
+          ++index_faults;
+          break;
+        }
+      }
+    }
+    if (index_faults) failures += index_faults;
+    else printf("[index] grande sphere, noeuds internes et accord exhaustif verifies\n");
   }
 
   // FRONTIERE DE DOMAINE u16, verifiee a l'API et non au CLI. Les bornes de
@@ -629,6 +726,9 @@ int main(int argc, char** argv) {
          coverage.navigated_clouds, coverage.direct_clouds, coverage.refused_clouds,
          coverage.vertices, coverage.census, coverage.multiple_shells,
          coverage.quotiented, coverage.multiple_batches, coverage.equivariance_runs);
+  printf("index : executions=%lld points touches=%lld amorces=%lld balayages complets=%lld\n",
+         coverage.indexed_runs, coverage.grid_touched, coverage.bootstrap,
+         coverage.full_sweeps);
   printf("\n%d cas, %d desaccords\n", cases, failures);
   if (coverage.navigated_clouds < min_navigated || coverage.vertices < min_vertices
       || coverage.multiple_shells < min_multiple_shells
