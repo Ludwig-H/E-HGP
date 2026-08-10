@@ -225,6 +225,19 @@ la boule courante. Son support de quatre points au plus constitue le certificat
 compact vérifiable avec les primitives exactes existantes; voir
 [`NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md`](audits/NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md).
 
+**[le kernel face-owner est qualifié sur la G4]** L'étage device existe et
+est reçu par différentiel natif : `faceowner_device_kernel.cu` reproduit
+**arête par arête** le flux CPU `collect_edges` sur les cinq ordres à
+n=64/200/400 — **49 ms device pour 44,5 M d'incidences à n=400, contre 8,7 s
+de fold CPU complet** (RTX PRO 6000 Blackwell, sm_120). Mutant `drop-edge`
+tué, admission VRAM à 70 % avant tout lancement, session G4 SPOT gardée de
+~15 minutes, VM certifiée TERMINATED, clé révoquée. Le mur du join est effacé
+par le device à ces tailles ; le poste dominant devient le générateur et le
+rejeu hôte — la hiérarchie du contrat à deux étages. La qualification porte
+sur le kernel, pas sur la complétude : le verrou 50 k exact demeure la
+source-certificat sparse. Chiffres :
+[`NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md`](audits/NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md).
+
 **[mur de masse et sortie exacte proposée]** Le sweep `n=100..400` confirme
 que le join monolithique reste un NO-GO prévisionnel à 50 k; son ajustement
 `P_post ~ n^1,66` donne environ `3,7e12` occurrences, sans constituer une loi.
