@@ -701,12 +701,18 @@ mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
 # des quatre formes, la cosphere gravee ou l'identite incidences==binomiales.
 foreach(faceowner_mutant
         owner-not-minimal publish-batch-early omit-signature duplicate-signature
-        shift-k qmin-filter-partial support-facet-filter)
+        shift-k qmin-filter-partial)
   string(REPLACE "-" "_" faceowner_mutant_name ${faceowner_mutant})
   mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
     mhgp3v_faceowner_kill_${faceowner_mutant_name} "mutant tue" 4
     --faceowner-mutant ${faceowner_mutant})
 endforeach()
+# Le mutant de la refutation est CIBLE sur l'ordre refute : il ne s'applique
+# qu'a k=6 et doit mourir SUR LA COSPHERE avec un desaccord a cet ordre — pas
+# par un premier ecart sans rapport (audit 8d6516c §portes specifiques).
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_faceowner_kill_support_facet_filter "ordre k=6" 4
+  --faceowner-mutant support-facet-filter)
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_postings_gate_reject_unknown_faceowner "mutant face-owner inconnu" 2
   --faceowner-mutant inexistant)
@@ -729,6 +735,10 @@ mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_budget_global "preflight" 3
   --points 32 --smax 11 --max-order 3 --seed 20260810 --join postings-global
+  --memory-budget-mb 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
+  mhgp3v_saturated_pipeline_reject_budget_faceowner "preflight" 3
+  --points 32 --smax 11 --max-order 3 --seed 20260810 --join faceowner
   --memory-budget-mb 1)
 
 # LE NOYAU F0 DU FOLD HORIZONTAL, EN PORTE PERMANENTE.

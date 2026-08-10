@@ -43,6 +43,9 @@ struct FaceOwnerReceipt {
   std::vector<long long> deduplicated_branches_k;   // aretes (owner, M) uniques
   long long incidences_total = 0;
   long long predicted_incidences = 0;   // preflight par binomiales, u128
+  // ESTIMATION par constantes du pic du plus lourd ordre — jamais une borne
+  // dure tant qu'un allocateur plafonne ne l'impose pas (audit 8d6516c).
+  long long estimated_peak_bytes = 0;
   long long unions_attempted = 0, unions_done = 0;
   std::vector<long long> rank_histogram;      // [0..kMaxRank]
   bool identities_ok = false;
@@ -98,6 +101,25 @@ inline SaturatedFold build_saturated_fold_faceowner(
         return fold;
       }
     }
+    // LE SUPPORT GOUVERNE la garde et les marqueurs : il est VALIDE ici —
+    // cardinal dans [1, min(4, rang)], trie, inclus dans les membres (audit
+    // live 8d6516c). La certification q_min reste une provenance separee.
+    const int support_count = (int)sphere.n_support;
+    if (support_count < 1 ||
+        support_count > std::min(mhgp::kMaxSupport, (int)sphere.rank)) {
+      fold.refusal = "support hors contrat : cardinal invalide";
+      return fold;
+    }
+    for (int u = 0; u < support_count; ++u) {
+      if (u > 0 && sphere.support[u - 1] >= sphere.support[u]) {
+        fold.refusal = "support hors contrat : non trie ou duplique";
+        return fold;
+      }
+      if (!std::binary_search(members[s].begin(), members[s].end(), sphere.support[u])) {
+        fold.refusal = "support hors contrat : point hors des membres";
+        return fold;
+      }
+    }
   }
   std::vector<mhgp::i32> universe;
   for (const std::vector<mhgp::i32>& generator_members : members)
@@ -150,6 +172,7 @@ inline SaturatedFold build_saturated_fold_faceowner(
   // emission — l'identite post-hoc I reel == predit est verifiee a la fin.
   FaceOwnerReceipt out;
   const int K = maximum_order;
+  std::vector<long long> predicted_incidences_by_order((std::size_t)K, 0);
   out.generators_k.assign((std::size_t)K, 0);
   out.incidences_k.assign((std::size_t)K, 0);
   out.unique_signatures_k.assign((std::size_t)K, 0);
@@ -179,6 +202,7 @@ inline SaturatedFold build_saturated_fold_faceowner(
         }
       }
       total += order_mass;
+      predicted_incidences_by_order[(std::size_t)(k - 1)] = (long long)order_mass;
       heaviest_order = std::max(heaviest_order, order_mass);
       if (total >= ceiling) {
         fold.refusal = "preflight : incidences debordent le contrat entier";
@@ -192,12 +216,18 @@ inline SaturatedFold build_saturated_fold_faceowner(
     long long mass = 0;
     for (const std::vector<mhgp::i32>& generator_members : members)
       mass += (long long)generator_members.size();
-    const u128 peak = heaviest_order * 24 + (u128)mass * 8 +
+    // ESTIMATION PAR CONSTANTES, PAS UNE BORNE DURE (audit 8d6516c) : 32
+    // octets par incidence alignee u128 + 16 par arete d'etoile (bornee par
+    // I_k), sur le SEUL ordre le plus lourd — les ordres sont traites un par
+    // un et liberes ; etats persistants et couvertures comme les autres
+    // formes. Capacites, allocateur et sorties restent hors du modele.
+    const u128 peak = heaviest_order * 48 + (u128)mass * 8 +
                       (u128)count * 40 * (u128)K + (u128)mass * 64 * (u128)K;
     if (peak >= ceiling) {
       fold.refusal = "preflight : pic memoire predit deborde le contrat entier";
       return fold;
     }
+    out.estimated_peak_bytes = (long long)peak;
     if (memory_budget_bytes > 0 && peak > (u128)memory_budget_bytes) {
       if (receipt != nullptr) *receipt = out;
       fold.refusal = "preflight : pic memoire predit au-dessus du budget";
@@ -205,103 +235,10 @@ inline SaturatedFold build_saturated_fold_faceowner(
     }
   }
 
-  // 4. EMISSION-TRI-OWNER par ordre : signatures u128, owner = incident de
-  // rang d'activation minimal, etoile dedupliquee, aretes par lot du membre.
-  std::vector<std::vector<std::pair<std::pair<int, int>, int>>> star_edges(
-      (std::size_t)K);   // ((lot d'activation, owner), membre)
-  for (int k = 1; k <= K; ++k) {
-    using u128 = unsigned __int128;
-    const int signature_size = mutants.shift_k ? std::max(1, k - 1) : k;
-    std::vector<std::pair<u128, int>> incidences;
-    bool first_signature_seen = false;
-    for (std::size_t s = 0; s < count; ++s) {
-      if ((int)members[s].size() < k) continue;
-      ++out.generators_k[(std::size_t)(k - 1)];
-      // MUTANT qmin_filter_partial : appliquer Sigma_k sans certificat de
-      // completude — illicite, la porte differentielle doit rougir.
-      if (mutants.qmin_filter_partial &&
-          (int)catalogue.spheres[s].n_support > k + 1)
-        continue;
-      const std::vector<mhgp::i32>& gen_members = members[s];
-      // Support canonique en identifiants DENSES, pour le mutant refute.
-      std::vector<mhgp::i32> dense_support;
-      if (mutants.support_facet_filter)
-        for (int u = 0; u < (int)catalogue.spheres[s].n_support; ++u)
-          dense_support.push_back(dense_of(catalogue.spheres[s].support[u]));
-      std::vector<int> chosen((std::size_t)signature_size, 0);
-      // Enumeration canonique des sous-ensembles de taille signature_size.
-      std::vector<std::size_t> index((std::size_t)signature_size);
-      for (int i = 0; i < signature_size; ++i) index[(std::size_t)i] = (std::size_t)i;
-      const std::size_t rank = gen_members.size();
-      if ((std::size_t)signature_size > rank) continue;
-      while (true) {
-        u128 key = 0;
-        for (int i = 0; i < signature_size; ++i)
-          key = (key << 21) | (u128)(unsigned)gen_members[index[(std::size_t)i]];
-        bool emit = true;
-        if (mutants.support_facet_filter) {
-          int support_hits = 0;
-          for (int i = 0; i < signature_size; ++i)
-            for (mhgp::i32 u : dense_support)
-              if (gen_members[index[(std::size_t)i]] == u) { ++support_hits; break; }
-          if (support_hits < (int)dense_support.size() - 1) emit = false;
-        }
-        if (mutants.omit_first_signature && !first_signature_seen) emit = false;
-        if (emit) {
-          incidences.push_back({key, (int)s});
-          if (mutants.duplicate_first_signature && !first_signature_seen)
-            incidences.push_back({key, (int)s});
-        }
-        first_signature_seen = true;
-        // sous-ensemble suivant
-        int position = signature_size - 1;
-        while (position >= 0 &&
-               index[(std::size_t)position] == rank - (std::size_t)(signature_size - position))
-          --position;
-        if (position < 0) break;
-        ++index[(std::size_t)position];
-        for (int i = position + 1; i < signature_size; ++i)
-          index[(std::size_t)i] = index[(std::size_t)(i - 1)] + 1;
-      }
-      static_cast<void>(chosen);
-    }
-    out.incidences_k[(std::size_t)(k - 1)] = (long long)incidences.size();
-    out.incidences_total += (long long)incidences.size();
-    std::sort(incidences.begin(), incidences.end());
-    // Groupes par signature : owner = rang d'activation minimal (tie-break
-    // canonique par l'indice catalogue, deja dans activation_rank).
-    std::vector<std::pair<std::pair<int, int>, int>> edges;
-    for (std::size_t i = 0; i < incidences.size();) {
-      std::size_t j = i;
-      int owner = incidences[i].second;
-      while (j < incidences.size() && incidences[j].first == incidences[i].first) {
-        const int candidate = incidences[j].second;
-        const bool better =
-            mutants.owner_not_minimal
-                ? activation_rank[(std::size_t)candidate] > activation_rank[(std::size_t)owner]
-                : activation_rank[(std::size_t)candidate] < activation_rank[(std::size_t)owner];
-        if (better) owner = candidate;
-        ++j;
-      }
-      ++out.unique_signatures_k[(std::size_t)(k - 1)];
-      if (j - i == 1) ++out.multiplicity_one_k[(std::size_t)(k - 1)];
-      for (std::size_t t = i; t < j; ++t) {
-        const int member = incidences[t].second;
-        if (member == owner) continue;
-        ++out.star_branches_k[(std::size_t)(k - 1)];
-        edges.push_back({{batch_of[(std::size_t)member], owner}, member});
-      }
-      i = j;
-    }
-    std::sort(edges.begin(), edges.end());
-    edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
-    out.deduplicated_branches_k[(std::size_t)(k - 1)] = (long long)edges.size();
-    star_edges[(std::size_t)(k - 1)] = std::move(edges);
-  }
-
-  // 5. REJEU SEQUENTIEL DES LOTS — identique aux autres formes : activation,
-  // branches d'etoiles du lot, classification par capture d'epoque, transcript
-  // Gamma par marquage, records par temoin.
+  // 4. UN ORDRE A LA FOIS (audit live 8d6516c) : emission, tri, owners,
+  // etoiles PUIS rejeu complet des lots de CET ordre — les ordres sont
+  // independants, incidences et aretes sont liberees avant l'ordre suivant,
+  // et le pic est borne par le plus lourd ordre seul, jamais par leur somme.
   fold.orders.resize((std::size_t)K);
   struct OrderState {
     std::vector<int> parent;
@@ -314,7 +251,6 @@ inline SaturatedFold build_saturated_fold_faceowner(
     std::vector<std::vector<mhgp::i32>> witness;
     std::vector<std::vector<mhgp::i32>> staged_witness;
     long long next_node = 0;
-    std::size_t edge_cursor = 0;
     int find(int a) {
       while (parent[(std::size_t)a] != a) {
         parent[(std::size_t)a] = parent[(std::size_t)parent[(std::size_t)a]];
@@ -323,60 +259,53 @@ inline SaturatedFold build_saturated_fold_faceowner(
       return a;
     }
   };
-  std::vector<OrderState> states((std::size_t)K);
-  for (OrderState& st : states) {
-    st.parent.resize(count);
-    for (std::size_t s = 0; s < count; ++s) st.parent[s] = (int)s;
-    st.node_of_root.assign(count, -1);
-    st.coverage.resize(count);
-    st.touch_epoch.assign(count, -1);
-    st.staged_node.assign(count, -1);
-    st.staged_cov.assign(count, 0);
-    st.witness.resize(count);
-    st.staged_witness.resize(count);
-  }
-  long long epoch = 0;
-  for (std::size_t batch = 0; batch < batches.size(); ++batch) {
-    ++epoch;
-    const auto touch = [&](OrderState& st, int root) {
-      if (st.touch_epoch[(std::size_t)root] != epoch) {
-        st.touch_epoch[(std::size_t)root] = epoch;
-        st.staged_node[(std::size_t)root] = st.node_of_root[(std::size_t)root];
-        st.staged_cov[(std::size_t)root] = st.coverage[(std::size_t)root].size();
-        st.staged_witness[(std::size_t)root] = st.witness[(std::size_t)root];
-      }
-    };
-    std::vector<std::vector<int>> batch_touched((std::size_t)K);
-    std::vector<std::vector<std::pair<int, int>>> batch_events((std::size_t)K);
-    for (std::size_t b = batches[batch].first; b < batches[batch].second; ++b) {
-      const int m = by_level[b];
-      const int support_size = (int)catalogue.spheres[(std::size_t)m].n_support;
-      for (int k = 1; k <= K; ++k) {
+
+  const auto translated = [&universe](const std::vector<mhgp::i32>& dense) {
+    std::vector<mhgp::i32> raw;
+    for (mhgp::i32 d : dense) raw.push_back(universe[(std::size_t)d]);
+    return raw;
+  };
+
+  // Le rejeu d'UN ordre : activation, branches d'etoile du lot, capture
+  // d'epoque, transcript Gamma par marquage et records — identique aux trois
+  // formes recues, restreint a k.
+  const auto replay_order = [&](int k, OrderState& st,
+                                const std::vector<std::pair<std::pair<int, int>, int>>& edges)
+      -> bool {
+    SaturatedOrderFold& order = fold.orders[(std::size_t)(k - 1)];
+    std::size_t edge_cursor = 0;
+    for (std::size_t batch = 0; batch < batches.size(); ++batch) {
+      const long long epoch = (long long)batch + 1;
+      const auto touch = [&](int root) {
+        if (st.touch_epoch[(std::size_t)root] != epoch) {
+          st.touch_epoch[(std::size_t)root] = epoch;
+          st.staged_node[(std::size_t)root] = st.node_of_root[(std::size_t)root];
+          st.staged_cov[(std::size_t)root] = st.coverage[(std::size_t)root].size();
+          st.staged_witness[(std::size_t)root] = st.witness[(std::size_t)root];
+        }
+      };
+      std::vector<int> touched;
+      std::vector<std::pair<int, int>> events;
+      for (std::size_t b = batches[batch].first; b < batches[batch].second; ++b) {
+        const int m = by_level[b];
         if ((int)members[(std::size_t)m].size() < k) continue;
-        OrderState& st = states[(std::size_t)(k - 1)];
-        touch(st, m);
+        const int support_size = (int)catalogue.spheres[(std::size_t)m].n_support;
+        touch(m);
         st.coverage[(std::size_t)m].insert(members[(std::size_t)m].begin(),
                                            members[(std::size_t)m].end());
         st.witness[(std::size_t)m].assign(members[(std::size_t)m].begin(),
                                           members[(std::size_t)m].begin() + k);
         st.live_roots.insert(m);
-        batch_touched[(std::size_t)(k - 1)].push_back(m);
-        if (support_size <= k + 1)
-          batch_events[(std::size_t)(k - 1)].push_back({m, support_size});
+        touched.push_back(m);
+        if (support_size <= k + 1) events.push_back({m, support_size});
       }
-    }
-    for (int k = 1; k <= K; ++k) {
-      OrderState& st = states[(std::size_t)(k - 1)];
-      const std::vector<std::pair<std::pair<int, int>, int>>& edges =
-          star_edges[(std::size_t)(k - 1)];
-      while (st.edge_cursor < edges.size() &&
-             (std::size_t)edges[st.edge_cursor].first.first == batch) {
-        const int owner = edges[st.edge_cursor].first.second;
-        const int member = edges[st.edge_cursor].second;
+      while (edge_cursor < edges.size() && edges[edge_cursor].first.first == (int)batch) {
+        const int owner = edges[edge_cursor].first.second;
+        const int member = edges[edge_cursor].second;
         ++out.unions_attempted;
         int ro = st.find(owner), rm = st.find(member);
-        touch(st, ro);
-        touch(st, rm);
+        touch(ro);
+        touch(rm);
         if (ro != rm) {
           ++out.unions_done;
           if (st.coverage[(std::size_t)ro].size() > st.coverage[(std::size_t)rm].size())
@@ -388,16 +317,11 @@ inline SaturatedFold build_saturated_fold_faceowner(
           if (st.witness[(std::size_t)ro] < st.witness[(std::size_t)rm])
             st.witness[(std::size_t)rm] = st.witness[(std::size_t)ro];
           st.live_roots.erase(ro);
-          batch_touched[(std::size_t)(k - 1)].push_back(rm);
-          batch_touched[(std::size_t)(k - 1)].push_back(ro);
+          touched.push_back(rm);
+          touched.push_back(ro);
         }
-        ++st.edge_cursor;
+        ++edge_cursor;
       }
-    }
-    for (int k = 1; k <= K; ++k) {
-      OrderState& st = states[(std::size_t)(k - 1)];
-      SaturatedOrderFold& order = fold.orders[(std::size_t)(k - 1)];
-      std::vector<int>& touched = batch_touched[(std::size_t)(k - 1)];
       if (touched.empty()) continue;
       std::map<int, std::set<long long>> strict_of;
       std::map<int, std::size_t> strict_cov_of;
@@ -432,7 +356,7 @@ inline SaturatedFold build_saturated_fold_faceowner(
       }
       std::map<int, int> marked_minimum_support;
       std::map<int, std::vector<int>> marked_generators;
-      for (const std::pair<int, int>& event : batch_events[(std::size_t)(k - 1)]) {
+      for (const std::pair<int, int>& event : events) {
         const int root = st.find(event.first);
         const auto it = marked_minimum_support.find(root);
         if (it == marked_minimum_support.end())
@@ -442,11 +366,6 @@ inline SaturatedFold build_saturated_fold_faceowner(
         marked_generators[root].push_back(event.first);
       }
       long long births_here = 0, continuations_here = 0, multifusions_here = 0;
-      const auto translated = [&universe](const std::vector<mhgp::i32>& dense) {
-        std::vector<mhgp::i32> raw;
-        for (mhgp::i32 d : dense) raw.push_back(universe[(std::size_t)d]);
-        return raw;
-      };
       std::vector<GammaEventRecord> batch_records;
       for (const auto& entry : marked_minimum_support) {
         const auto it = strict_of.find(entry.first);
@@ -475,7 +394,7 @@ inline SaturatedFold build_saturated_fold_faceowner(
             ++order.event_guard_violations;
             if (enforce_event_guard) {
               fold.refusal = "garde d'evenement violee : naissance marquee sans support q<=k";
-              return fold;
+              return false;
             }
           }
         } else if (strict == 1) {
@@ -512,12 +431,115 @@ inline SaturatedFold build_saturated_fold_faceowner(
         order.closed_partitions.push_back(std::move(partition));
       }
     }
-  }
-  for (int k = 1; k <= K; ++k)
-    if (states[(std::size_t)(k - 1)].edge_cursor != star_edges[(std::size_t)(k - 1)].size()) {
+    if (edge_cursor != edges.size()) {
       fold.refusal = "rejeu incomplet : branches d'etoile non consommees";
-      return fold;
+      return false;
     }
+    return true;
+  };
+
+  // EMISSION-TRI-OWNER puis rejeu, ordre par ordre : signatures u128, owner =
+  // incident de rang d'activation minimal, etoiles dedupliquees.
+  for (int k = 1; k <= K; ++k) {
+    using u128 = unsigned __int128;
+    const int signature_size = mutants.shift_k ? std::max(1, k - 1) : k;
+    std::vector<std::pair<u128, int>> incidences;
+    if (predicted_incidences_by_order[(std::size_t)(k - 1)] > 0)
+      incidences.reserve((std::size_t)predicted_incidences_by_order[(std::size_t)(k - 1)]);
+    bool first_signature_seen = false;
+    for (std::size_t s = 0; s < count; ++s) {
+      if ((int)members[s].size() < k) continue;
+      ++out.generators_k[(std::size_t)(k - 1)];
+      // MUTANT qmin_filter_partial : appliquer Sigma_k sans certificat de
+      // completude — illicite, la porte differentielle doit rougir.
+      if (mutants.qmin_filter_partial &&
+          (int)catalogue.spheres[s].n_support > k + 1)
+        continue;
+      const std::vector<mhgp::i32>& gen_members = members[s];
+      // MUTANT support_facet_filter, CIBLE sur l'ordre refute k=6 (audit
+      // 8d6516c) : la mise a mort doit montrer les composantes perdues de la
+      // cosphere, pas un premier ecart sans rapport a k=1.
+      std::vector<mhgp::i32> dense_support;
+      if (mutants.support_facet_filter && k == 6)
+        for (int u = 0; u < (int)catalogue.spheres[s].n_support; ++u)
+          dense_support.push_back(dense_of(catalogue.spheres[s].support[u]));
+      std::vector<std::size_t> index((std::size_t)signature_size);
+      for (int i = 0; i < signature_size; ++i) index[(std::size_t)i] = (std::size_t)i;
+      const std::size_t rank = gen_members.size();
+      if ((std::size_t)signature_size > rank) continue;
+      while (true) {
+        u128 key = 0;
+        for (int i = 0; i < signature_size; ++i)
+          key = (key << 21) | (u128)(unsigned)gen_members[index[(std::size_t)i]];
+        bool emit = true;
+        if (mutants.support_facet_filter && k == 6) {
+          int support_hits = 0;
+          for (int i = 0; i < signature_size; ++i)
+            for (mhgp::i32 u : dense_support)
+              if (gen_members[index[(std::size_t)i]] == u) { ++support_hits; break; }
+          if (support_hits < (int)dense_support.size() - 1) emit = false;
+        }
+        if (mutants.omit_first_signature && !first_signature_seen) emit = false;
+        if (emit) {
+          incidences.push_back({key, (int)s});
+          if (mutants.duplicate_first_signature && !first_signature_seen)
+            incidences.push_back({key, (int)s});
+        }
+        first_signature_seen = true;
+        int position = signature_size - 1;
+        while (position >= 0 &&
+               index[(std::size_t)position] == rank - (std::size_t)(signature_size - position))
+          --position;
+        if (position < 0) break;
+        ++index[(std::size_t)position];
+        for (int i = position + 1; i < signature_size; ++i)
+          index[(std::size_t)i] = index[(std::size_t)(i - 1)] + 1;
+      }
+    }
+    out.incidences_k[(std::size_t)(k - 1)] = (long long)incidences.size();
+    out.incidences_total += (long long)incidences.size();
+    std::sort(incidences.begin(), incidences.end());
+    std::vector<std::pair<std::pair<int, int>, int>> edges;
+    for (std::size_t i = 0; i < incidences.size();) {
+      std::size_t j = i;
+      int owner = incidences[i].second;
+      while (j < incidences.size() && incidences[j].first == incidences[i].first) {
+        const int candidate = incidences[j].second;
+        const bool better =
+            mutants.owner_not_minimal
+                ? activation_rank[(std::size_t)candidate] > activation_rank[(std::size_t)owner]
+                : activation_rank[(std::size_t)candidate] < activation_rank[(std::size_t)owner];
+        if (better) owner = candidate;
+        ++j;
+      }
+      ++out.unique_signatures_k[(std::size_t)(k - 1)];
+      if (j - i == 1) ++out.multiplicity_one_k[(std::size_t)(k - 1)];
+      for (std::size_t t = i; t < j; ++t) {
+        const int member = incidences[t].second;
+        if (member == owner) continue;
+        ++out.star_branches_k[(std::size_t)(k - 1)];
+        edges.push_back({{batch_of[(std::size_t)member], owner}, member});
+      }
+      i = j;
+    }
+    std::vector<std::pair<u128, int>>().swap(incidences);
+    std::sort(edges.begin(), edges.end());
+    edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
+    out.deduplicated_branches_k[(std::size_t)(k - 1)] = (long long)edges.size();
+
+    OrderState st;
+    st.parent.resize(count);
+    for (std::size_t s = 0; s < count; ++s) st.parent[s] = (int)s;
+    st.node_of_root.assign(count, -1);
+    st.coverage.resize(count);
+    st.touch_epoch.assign(count, -1);
+    st.staged_node.assign(count, -1);
+    st.staged_cov.assign(count, 0);
+    st.witness.resize(count);
+    st.staged_witness.resize(count);
+    if (!replay_order(k, st, edges)) return fold;
+  }
+
   // IDENTITE DE PREFLIGHT : incidences reelles == binomiales predites (sauf
   // sous les mutants d'emission, que la porte tue par le differentiel).
   // L'identite de preflight TUE le doublon d'emission : un duplicata se

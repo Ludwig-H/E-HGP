@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=f2e78fadf1fa8012f2d11f35dd76392ec45683a5`, toujours sous
+`HEAD=origin/main=21d85c85c1bd6553606a0081eeb283f58699d173`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -45,7 +45,8 @@ profileur compact et sépare croissance de couverture et activation silencieuse;
 `bc2dafa` le marquage, le préflight, l'oracle de poids et la voie postings
 globale, `45c0b7b` les records par témoins et les saturés des boules
 marquantes, `acb9e7a` le sweep du mur de masse, `df984ed` les forêts candidates
-dérivées des records, puis `f2e78fa` la proposition cofaces sans paires. Leurs
+dérivées des records, `f2e78fa` la proposition cofaces sans paires, puis
+`21d85c8` l'oracle `face-owner` borné et sa réfutation permanente. Leurs
 empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
@@ -151,12 +152,13 @@ demand-driven par intersections progressives des postings, avec coupure quand
 aucune racine extérieure nouvelle ne subsiste. Preuve, masses et mutants sont
 dans
 [`REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md`](audits/REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md).
-Le premier oracle live confirme cette sémantique sur quatre formes, mais ne
-constitue pas encore le backend : son `reserve(size+1)` rend l'émission
-quadratique, son modèle mémoire compte 24 octets pour une incidence qui en vaut
-32 sur l'ABI reçue et conserve les arêtes de tous les ordres. Le correctif sûr
-est de réserver `I_k` une fois puis de traiter/rejouer/libérer un ordre entier;
-voir [`AUDIT_LIVE_FACEOWNER_8D6516C.md`](audits/AUDIT_LIVE_FACEOWNER_8D6516C.md).
+Le premier oracle live confirme cette sémantique sur quatre formes. Le delta
+`2eb2877` ferme son allocation quadratique (`n=20` : 19,188 s vers 0,146 s),
+mais le modèle mémoire compte encore 24 octets pour une incidence qui en vaut
+32 sur l'ABI reçue et conserve les arêtes de tous les ordres. Le correctif
+suivant est de réserver `I_k` une fois puis de traiter/rejouer/libérer un ordre
+entier; voir
+[`AUDIT_DELTA_FACEOWNER_2EB2877.md`](audits/AUDIT_DELTA_FACEOWNER_2EB2877.md).
 Le protocole cofaces proposé à `f2e78fa` n'est pas exact avec son seul support
 canonique : le défaut apparaît déjà à `q_min=k=4`, où une coquille u16 de six
 points perd une composante stricte sur six; à `q_min=4,k=6`, neuf composantes
@@ -169,6 +171,12 @@ le support canonique est obligatoire, puis au plus `q<=4` carriers; fallback
 `face-owner` demand-driven seulement sur les coquilles multi-supports. Son
 contrat complet est
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md).
+Le certificat local se produit sans solveur : supprimer successivement chaque
+`u` du saturé `M` et exiger que sa miniboule exacte devienne strictement plus
+petite. Le support de cette petite boule, de taille au plus quatre, suffit au
+vérificateur; égalité de niveau fournit au contraire un support alternatif et
+déclenche le fallback. Preuve et intégration source :
+[`NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md`](audits/NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

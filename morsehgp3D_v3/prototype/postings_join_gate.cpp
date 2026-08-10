@@ -534,7 +534,23 @@ int main(int argc, char** argv) {
       std::printf("ECHEC cosphere de la refutation : %s\n", why.c_str());
       return 1;
     }
-    std::printf("cosphere   : dix points cospheriques, K=6 — quatre formes en accord\n");
+    // L'ASSERTION SCIENTIFIQUE CIBLEE (audit 8d6516c) : au niveau de la
+    // grande boule, a k=6, le record de sa composante doit absorber EXACTEMENT
+    // dix-sept temoins stricts — les dix-sept composantes strictes des
+    // six-faces de la refutation. Le mutant support-facet-filter en perd neuf.
+    {
+      const mhgp3v::SaturatedFold truth =
+          mhgp3v::build_saturated_fold(catalogue, 6, true, true);
+      bool seventeen = false;
+      for (const mhgp3v::GammaEventRecord& record : truth.orders[5].gamma_records)
+        if (record.strict_witnesses.size() == 17) seventeen = true;
+      if (!truth.ok || !seventeen) {
+        std::printf("ECHEC cosphere : aucun record a dix-sept temoins stricts a k=6\n");
+        return 1;
+      }
+    }
+    std::printf("cosphere   : dix points cospheriques, K=6, record aux dix-sept temoins"
+                " stricts recu — quatre formes en accord\n");
   }
 
   // ETAGE 2 : la campagne differentielle sur nuages reels.

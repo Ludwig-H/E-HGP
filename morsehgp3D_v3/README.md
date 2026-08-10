@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=f2e78fadf1fa8012f2d11f35dd76392ec45683a5`. Le commit produit
+`HEAD=origin/main=21d85c85c1bd6553606a0081eeb283f58699d173`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -27,7 +27,9 @@ Gamma, le préflight, l'oracle de chaque poids et le troisième join global, pui
 `45c0b7b` les records par témoins et les saturés des boules marquantes dans les
 trois joins; `acb9e7a` mesure le mur de masse jusqu'à `n=400`; `df984ed`
 ajoute la projection généalogique des records en `K` forêts candidates; enfin
-`f2e78fa` formule la voie sans paires par cofaces relevées. Ces derniers
+`f2e78fa` formule la voie sans paires par cofaces relevées; `21d85c8` implémente
+ensuite l'oracle `face-owner`, grave la réfutation multi-support et ferme son
+allocation quadratique. Ces derniers
 résultats et leurs limites sont épinglés dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
@@ -196,18 +198,23 @@ préflight par binomiales, identité `incidences == binomiales`) : **quatre
 formes en accord bit à bit** sur fixtures, campagnes et cosphère de la
 réfutation gravée à `K=6`, avec 7/7 mutants tués, dont
 `support-facet-filter` qui meurt sur la cosphère même (naissances 10 ≠ 57).
-La permutation `face-owner` n'est pas encore rejouée. Le live `8d6516c` appelle
-en outre `reserve(size+1)` à chaque incidence : le coût observé devient
-quadratique, et le pic annoncé sous-compte l'ABI (32 octets par incidence) ainsi
-que les arêtes conservées de tous les ordres. Il reste un oracle scientifique,
-pas un backend d'échelle; correctifs et portes ciblées sont dans
-[`AUDIT_LIVE_FACEOWNER_8D6516C.md`](audits/AUDIT_LIVE_FACEOWNER_8D6516C.md).
+La permutation `face-owner` n'est pas encore rejouée. Le live `2eb2877` ferme
+le coût quadratique en supprimant `reserve(size+1)` : `n=20` passe de 19,188 s
+à 0,146 s de fold et `n=32` rend 247 854 incidences en 0,305 s. Le pic annoncé
+sous-compte encore l'ABI (32 octets par incidence) et les arêtes de tous les
+ordres; l'oracle n'est donc pas encore un backend d'échelle. Voir
+[`AUDIT_DELTA_FACEOWNER_2EB2877.md`](audits/AUDIT_DELTA_FACEOWNER_2EB2877.md).
 La route produit est le **fold hybride** de
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md) :
 fast path principal-support (certificat de séparateur, théorème des q
 attaches, au plus quatre lookups par générateur et par ordre via la clé
 canonique en forme quadratique primitive), fallback demand-driven sous
 coquille multi-support, jugés par cet oracle.
+Le producteur du bit principal est désormais fermé sans LP : pour chaque
+`u` du support, `miniball(M privé de u)` doit être strictement plus petite que
+la boule courante. Son support de quatre points au plus constitue le certificat
+compact vérifiable avec les primitives exactes existantes; voir
+[`NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md`](audits/NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md).
 
 **[mur de masse et sortie exacte proposée]** Le sweep `n=100..400` confirme
 que le join monolithique reste un NO-GO prévisionnel à 50 k; son ajustement

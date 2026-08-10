@@ -53,6 +53,14 @@ fast path aux coquilles `Q` strictement plus grandes que `U`. Un certificat
 fourni mais invalide refuse le lot; un certificat absent sélectionne simplement
 le fallback.
 
+La production complète ne demande finalement aucun solveur : `u` est
+obligatoire si et seulement si `miniball(M privé de u)` est strictement plus
+petite que `B`. Son support de quatre points au plus est un certificat positif
+compact; le vérificateur reconstruit cette petite boule, vérifie qu'elle couvre
+`M` privé de `u`, puis compare son niveau à `B` avec les primitives exactes
+existantes. Le contrat et sa preuve sont dans
+[`NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md`](NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md).
+
 Une fixture empêche de confondre ce premier cas suffisant avec le certificat
 complet : centre `(2,2,2)`, rayon `1`, support principal
 `U={(1,2,2),(3,2,2)}` et point de coquille supplémentaire `(2,3,2)`. Après
@@ -146,7 +154,7 @@ miniboule d'un carrier `S_u`. Il faut un sidecar v3, lié au digest de l'entrée
 qui fournisse au minimum :
 
 - une vue immuable des points et son digest;
-- pour chaque générateur, `q_min_certified`, sa coquille vérifiée ou son
+- pour chaque générateur, `q_min_certified`, ses membres vérifiés et son
   certificat principal, et sa `BallKey`;
 - un index injectif `BallKey -> generator_handle`, construit après validation
   que deux clés égales portent le même saturé;

@@ -185,11 +185,16 @@ int main(int argc, char** argv) {
                                          /*keep_partitions=*/false, enforce_guard);
   const auto t2 = std::chrono::steady_clock::now();
   if (!fold.ok) {
-    if (use_postings && receipt.predicted_peak_bytes > 0)
+    if ((join_mode == 1 || join_mode == 2) && receipt.predicted_peak_bytes > 0)
       std::printf("preflight  : P_post predit=%lld, pic conservateur=%.1f Mo, plus gros"
                   " lot=%lld occurrences — manifeste du refus\n",
                   receipt.predicted_p_post, (double)receipt.predicted_peak_bytes / 1048576.0,
                   receipt.max_batch_occurrences);
+    if (join_mode == 3 && faceowner_receipt.estimated_peak_bytes > 0)
+      std::printf("preflight  : incidences predites=%lld, pic ESTIME=%.1f Mo (constantes,"
+                  " pas une borne dure) — manifeste du refus\n",
+                  faceowner_receipt.predicted_incidences,
+                  (double)faceowner_receipt.estimated_peak_bytes / 1048576.0);
     std::printf("ECHEC : fold refuse : %s\n", fold.refusal);
     return 3;
   }
@@ -217,7 +222,8 @@ int main(int argc, char** argv) {
              a.level_representative == b.level_representative &&
              a.gamma_birth_at_level == b.gamma_birth_at_level &&
              a.gamma_continuation_at_level == b.gamma_continuation_at_level &&
-             a.gamma_multifusion_at_level == b.gamma_multifusion_at_level;
+             a.gamma_multifusion_at_level == b.gamma_multifusion_at_level &&
+             a.gamma_records == b.gamma_records;
     }
     std::printf("compare    : joins %s sur le meme catalogue — G2 %.3f s, digests"
                 " %llu/%llu\n", same ? "IDENTIQUES" : "DIVERGENTS",
