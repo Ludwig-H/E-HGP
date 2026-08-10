@@ -29,7 +29,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le snapshot courant est `HEAD=origin/main=478cfe8`, toujours sous
+Le snapshot courant est `HEAD=origin/main=23f12af`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -37,10 +37,11 @@ et ajoute les fixtures forêt/owner; `1f0db40` étend `same_catalogue` à tous l
 champs déclarés; `f3802bd` ferme le doublon de handle strict du falsificateur
 F0; `f102d42` observe la branche réellement prise, contrôle source et tranche
 de pool, borne le libellé mémoire et migre toutes les portes négatives vers un
-code exact; `ac39ac7` puis `478cfe8` écrivent et durcissent le juge Gamma. Ce
-sont des résultats CPU bornés, pas un reçu produit. Le verdict Gamma courant
-porte sur les couvertures des ordres effectivement jugés : tous les ordres
-$k=2,3$ de la campagne saturée restent censurés. Les deux coupes et l'union des
+code exact; `ac39ac7` puis `478cfe8` écrivent et durcissent le juge Gamma;
+`23f12af` ajoute son premier sujet par fold saturé. Ce sont des résultats CPU
+bornés, pas un reçu produit. Le sujet v2 par défaut censure encore tous les
+ordres $k=2,3$ de la campagne saturée, tandis que le fold candidat rend 60/60
+accords de couverture. Les deux coupes et l'union des
 niveaux sont présentes dans le code, mais des mutants qui suppriment séparément
 la coupe stricte ou les niveaux sujet passent encore toutes les portes.
 
@@ -62,7 +63,7 @@ La réception bornée du commit courant et la route par tour saturée sont
 consignées dans
 [`AUDIT_RECEPTION_GAMMA_478CFE8.md`](audits/AUDIT_RECEPTION_GAMMA_478CFE8.md).
 
-Un delta live implémente maintenant le fold S.4 sur les saturés du catalogue et
+Le commit `23f12af` implémente le fold S.4 sur les saturés du catalogue et
 obtient 90/90 accords de couverture génériques, puis 60/60 sur la grille
 saturée auparavant censurée. Ce résultat reçoit le cœur du quotient sur ces
 entrées; il ne reçoit pas encore la complétude de `flat_catalogue`, le journal
@@ -72,6 +73,23 @@ indépendante décrite dans
 Le type produit devra séparer `SaturatedGenerator` du `CriticalSphere` borné à
 `kMaxRank=32`; sinon `smax>=n` est littéralement impossible à 50 k et le fold
 reste une sous-filtration certifiée, pas une sortie exacte.
+La troisième vérité exhaustive a déjà été exécutée hors dépôt sur 470 petits
+nuages, modes normal et owner : 34 003 générateurs et leurs niveaux rationnels
+concordent avec `flat_catalogue`, sans aucun manquant, extra ou écart. Ce
+résultat positif reçoit la source bornée; la prochaine action est de graver ce
+harness, pas de le remplacer par le fold qu'il juge.
+
+Le pipeline chronométré live met déjà en évidence que les batches saturés
+silencieux ne sont pas des continuations Gamma : naissances et fusions
+concordent sur deux fixtures, l'excès de « continuations » égale exactement les
+niveaux sujet étrangers. La solution conserve ces générateurs pour les joins
+futurs, mais dérive le transcript Morse par diff strict--fermé; voir
+[`AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md`](audits/AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md).
+Le verrou d'échelle a maintenant une solution falsifiable : postings
+`PointId->GeneratorId`, tri-réduction de toutes les occurrences, DSU multi-ordre
+par lots, classification des seules racines touchées et reçu terminal. Le plan,
+ses contre-exemples et la porte G4 sont dans
+[`NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md`](audits/NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

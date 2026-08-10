@@ -111,6 +111,13 @@ target_include_directories(mhgp3v_direct_source PRIVATE ${CMAKE_CURRENT_SOURCE_D
 target_link_libraries(mhgp3v_direct_source PRIVATE mhgp)
 target_compile_options(mhgp3v_direct_source PRIVATE -Wall -Wextra -Werror)
 
+# LE PIPELINE SATURE CHRONOMETRE : nuage -> catalogue -> fold, temps par etage.
+# Binaire de MESURE (les verdicts d'exactitude vivent dans le juge Gamma).
+add_executable(mhgp3v_saturated_pipeline prototype/saturated_pipeline.cpp)
+target_include_directories(mhgp3v_saturated_pipeline PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_saturated_pipeline PRIVATE mhgp)
+target_compile_options(mhgp3v_saturated_pipeline PRIVATE -Wall -Wextra -Werror)
+
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)

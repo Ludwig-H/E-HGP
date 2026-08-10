@@ -54,10 +54,19 @@ struct SaturatedOrderFold {
   // Niveaux d'evenement croissants (indices dans le catalogue trie par niveau,
   // un representant par classe d'egalite exacte), et partition de couverture a
   // la coupe FERMEE de chaque niveau. La coupe stricte d'un niveau est la
-  // fermee du precedent.
+  // fermee du precedent. Les partitions ne sont MATERIALISEES que sur demande
+  // (juge) : les stocker a chaque lot coutait O(niveaux * G * |S|) et tuait le
+  // pipeline des n=200.
   std::vector<int> level_representative;   // indice catalogue du niveau
-  std::vector<FoldPartition> closed_partitions;
-  long long births = 0, fusions = 0, continuations = 0;
+  std::vector<FoldPartition> closed_partitions;   // vide si keep_partitions=false
+  // LE TRANSCRIPT SEPARE CE QUE L'AUDIT LIVE A SEPARE : un generateur qui
+  // s'active sans changer ni composante ni couverture est un LOT SILENCIEUX
+  // (etat interne persistant, jamais une continuation Gamma) ; une croissance
+  // de couverture sans fusion est une CROISSANCE, pas une continuation.
+  long long births = 0, fusions = 0;
+  long long coverage_growth_batches = 0, silent_generator_batches = 0;
+  // Masses de la jointure, publiees pour mesurer le mur avant de l'optimiser.
+  long long join_comparisons = 0, join_unions = 0;
 };
 
 struct SaturatedFold {
@@ -86,7 +95,8 @@ inline bool sorted_intersection_reaches(const std::vector<mhgp::i32>& a,
   return false;
 }
 
-inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int maximum_order) {
+inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int maximum_order,
+                                          bool keep_partitions = true) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   const std::size_t count = catalogue.spheres.size();
@@ -141,6 +151,8 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
     std::vector<long long> node_of_root(count, -1);
     long long next_node = 0;
     std::vector<int> active_list;
+    // Couverture par racine, entretenue par fusion du petit dans le grand.
+    std::vector<std::set<mhgp::i32>> coverage(count);
 
     std::size_t cursor = 0;
     while (cursor < count) {
@@ -152,9 +164,18 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
                  catalogue.spheres[(std::size_t)by_level[batch_end]].sph) == 0)
         ++batch_end;
 
-      // 1. FIGER la coupe stricte : le noeud de chaque generateur actif.
+      // 1. FIGER la coupe stricte : le noeud de chaque generateur actif, et la
+      // taille de couverture de chaque composante stricte (pour separer
+      // croissance et lot silencieux).
       std::vector<std::pair<int, long long>> strict_nodes;   // (generateur, noeud)
-      for (int s : active_list) strict_nodes.push_back({s, node_of_root[(std::size_t)find(s)]});
+      std::map<long long, std::size_t> strict_coverage_size;
+      for (int s : active_list) {
+        const int root = find(s);
+        strict_nodes.push_back({s, node_of_root[(std::size_t)root]});
+        if (node_of_root[(std::size_t)root] >= 0)
+          strict_coverage_size[node_of_root[(std::size_t)root]] =
+              coverage[(std::size_t)root].size();
+      }
 
       // 2. ACTIVER le lot entier (les generateurs de taille >= k seulement),
       // puis 3. joindre chaque nouveau generateur a TOUS les actifs par le
@@ -164,11 +185,29 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
         const int s = by_level[b];
         if ((int)members[(std::size_t)s].size() < k) continue;
         active[(std::size_t)s] = 1;
-        for (int t : active_list)
+        coverage[(std::size_t)s].insert(members[(std::size_t)s].begin(),
+                                        members[(std::size_t)s].end());
+        for (int t : active_list) {
+          ++order.join_comparisons;
           if (sorted_intersection_reaches(members[(std::size_t)s], members[(std::size_t)t], k)) {
-            const int rs = find(s), rt = find(t);
-            if (rs != rt) parent[(std::size_t)rs] = rt;
+            int rs = find(s), rt = find(t);
+            if (rs != rt) {
+              ++order.join_unions;
+              // Fusion du PETIT dans le GRAND : la racine survivante garde la
+              // grande couverture, l'autre est versee puis liberee.
+              if (coverage[(std::size_t)rs].size() > coverage[(std::size_t)rt].size())
+                std::swap(rs, rt);
+              coverage[(std::size_t)rt].insert(coverage[(std::size_t)rs].begin(),
+                                               coverage[(std::size_t)rs].end());
+              std::set<mhgp::i32>().swap(coverage[(std::size_t)rs]);
+              const long long keep_node = node_of_root[(std::size_t)rt] >= 0
+                                              ? node_of_root[(std::size_t)rt]
+                                              : node_of_root[(std::size_t)rs];
+              parent[(std::size_t)rs] = rt;
+              node_of_root[(std::size_t)rt] = keep_node;
+            }
           }
+        }
         active_list.push_back(s);
         batch_touched = true;
       }
@@ -196,8 +235,13 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
           ++order.births;
           node_of_root[(std::size_t)root] = next_node++;
         } else if (strict == 1) {
-          ++order.continuations;
-          node_of_root[(std::size_t)root] = *it->second.begin();
+          const long long node = *it->second.begin();
+          const auto before = strict_coverage_size.find(node);
+          const bool grew = before == strict_coverage_size.end() ||
+                            coverage[(std::size_t)root].size() > before->second;
+          if (grew) ++order.coverage_growth_batches;
+          else ++order.silent_generator_batches;
+          node_of_root[(std::size_t)root] = node;
         } else {
           ++order.fusions;
           node_of_root[(std::size_t)root] = next_node++;
@@ -205,21 +249,21 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
       }
 
       // 5. LA COUPE FERMEE : couverture par composante = union des satures
-      // (S.4). Le lot entier est committe d'un coup — jamais boule par boule.
-      FoldPartition partition;
-      for (std::size_t i = 0; i < root_of.size();) {
-        std::size_t j = i;
-        std::set<mhgp::i32> ids;
-        while (j < root_of.size() && root_of[j].first == root_of[i].first) {
-          for (mhgp::i32 z : members[(std::size_t)root_of[j].second]) ids.insert(z);
-          ++j;
-        }
-        partition.push_back(std::vector<mhgp::i32>(ids.begin(), ids.end()));
-        i = j;
-      }
-      std::sort(partition.begin(), partition.end());
+      // (S.4), lue dans les couvertures INCREMENTALES. Le lot entier est
+      // committe d'un coup — jamais boule par boule. La materialisation par
+      // niveau n'existe que pour le juge.
       order.level_representative.push_back(by_level[cursor]);
-      order.closed_partitions.push_back(std::move(partition));
+      if (keep_partitions) {
+        FoldPartition partition;
+        std::set<int> roots_seen;
+        for (const auto& entry : root_of)
+          if (roots_seen.insert(entry.first).second)
+            partition.push_back(std::vector<mhgp::i32>(
+                coverage[(std::size_t)entry.first].begin(),
+                coverage[(std::size_t)entry.first].end()));
+        std::sort(partition.begin(), partition.end());
+        order.closed_partitions.push_back(std::move(partition));
+      }
       cursor = batch_end;
     }
   }

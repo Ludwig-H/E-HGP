@@ -10,18 +10,19 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
-courante est `HEAD=origin/main=478cfe8e42303002d63594e69ce1ab2409be7d28`.
+courante est `HEAD=origin/main=23f12afb4f3896bfd16f8f1281d5f1a3d4f89f22`.
 La chaîne
 reçue est `a8b5615` pour le delta produit, `1f0db40` pour l'égalité complète des
 champs déclarés de `Catalogue`, `29c2c22` pour le ledger owner/coplanaire, puis
 `f3802bd` pour le validateur F0, `f102d42` pour l'ordre observé, les contrôles
 source/pool et la migration des codes exacts, `ac39ac7` pour le premier juge
-Gamma, puis `478cfe8` pour sa réponse fail-closed et ses deux coupes. Les
+Gamma, `478cfe8` pour sa réponse fail-closed et ses deux coupes, puis `23f12af`
+pour le premier fold saturé. Les
 sections sur `e406e1f` et les paliers live
 07:31--07:53 sont conservées plus bas comme historique daté, pas comme état du
 worktree.
 
-## Autorité courante à `478cfe8`
+## Autorité courante à `23f12af`
 
 | contrat | état reçu |
 | --- | --- |
@@ -34,7 +35,7 @@ worktree.
 | branche `build-order` | **reçue** : trace alimentée par la première lambda et mutant de branche tué |
 | travail du juge | **non reçu** : cardinal précrédité avant les recherches, mutant sans différentiel encore vert |
 | oracle Gamma exhaustif | **noyau positif, claim borné** : énumération exacte et lot atomique; le delta compare les couvertures aux coupes stricte et fermée sur l'union des niveaux, mais pas encore les partitions de facettes ni les incidences du sujet |
-| sémantique hors position générale | **NO-GO produit** : le record de coquille/support minimal n'expanse pas Gamma; sur la campagne saturée corrective, tous les ordres $k=2,3$ sont censurés et seuls les vingt ordres $k=1$ sont jugés |
+| fold saturé hors position générale | **cœur positif borné** : 60/60 accords de couverture sur la campagne saturée et mutant de seuil tué; source complète, transcript, statut, verticales et coût restent ouverts |
 | arité quatre par préfixe d'axe | **candidat réfuté dans sa forme générale** : le niveau peut monter et descendre |
 | replay, 50 k/G4, coût et mémoire | **NO-GO inchangé** |
 
@@ -126,15 +127,15 @@ une tour qui replie seulement `flat_catalogue` n'est pas la troisième vérité
 indépendante attendue : même avec `smax>=n`, la complétude de la source doit être
 comparée à une énumération exhaustive des supports de tailles un à quatre.
 
-## Delta live : premier fold saturé au-dessus de `478cfe8`
+## Réception du premier fold saturé à `23f12af`
 
-Claude a branché le quotient exact S.4 sur les saturés du catalogue. Le premier
-snapshot passe de 40 censures multiplicataires à 60/60 ordres jugés et accords
+Claude a branché le quotient exact S.4 sur les saturés du catalogue. Le snapshot
+committé passe de 40 censures multiplicataires à 60/60 ordres jugés et accords
 de couverture sur la grille saturée; la campagne générique rend 90/90. C'est
 une avancée positive majeure, détaillée dans
 [`AUDIT_LIVE_FOLD_SATURE_478CFE8.md`](AUDIT_LIVE_FOLD_SATURE_478CFE8.md).
 
-Le statut reste live : le fold consomme encore `flat_catalogue`, `smax>=n` ne
+Le statut produit reste expérimental : le fold consomme encore `flat_catalogue`, `smax>=n` ne
 certifie pas à lui seul la complétude de cette source, et ni facettes,
 incidences, verticales, persistance ni join scalable ne sont reçus. Le prochain
 palier doit comparer une tour exhaustive indépendante au catalogue puis au fold,
@@ -142,6 +143,22 @@ avant toute qualification 50 k.
 Comme `kMaxRank=32`, la précondition live `smax>=n` est impossible à 50 k. Un
 flux de générateurs saturés à membres complets, distinct du record critique
 borné, est une obligation d'architecture et non une optimisation facultative.
+
+Une troisième vérité exhaustive temporaire a déjà comparé tous les supports de
+tailles un à quatre à `flat_catalogue` sur 470 nuages `n=8/9`, génériques et
+saturés, modes normal/owner : mêmes 34 003 générateurs agrégés et niveaux
+rationnels, zéro manquant, extra ou niveau différent. C'est un résultat positif
+de complétude bornée à graver comme porte permanente; il ne change pas
+l'impossibilité de `smax>=50000` ni le besoin d'une source certifiée
+output-sensitive.
+
+Le delta suivant ajoute un pipeline chronométré. Son premier résultat
+scientifique est utile : naissances et fusions concordent avec Gamma sur deux
+fixtures, tandis que les continuations excédentaires valent exactement les
+niveaux saturés étrangers. Elles doivent être renommées batches silencieux et
+conservées pour les attaches futures, pas sérialisées comme continuations du
+`MergeForest`. Reçus et plan CPU→G4 :
+[`AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md`](AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md).
 
 ## Ledger historique de la reprise au-dessus de `f37341d`
 

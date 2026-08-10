@@ -5,7 +5,7 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état courant audité est `HEAD=origin/main=478cfe8`. Le commit produit
+L'état courant audité est `HEAD=origin/main=23f12af`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -17,7 +17,9 @@ sortie exact. Aucun de ces
 commits ne change `exploration_v3_hors_registre` ni le statut public. `ac39ac7`
 ajoute le premier juge Gamma; `478cfe8` applique son audit live, refuse les
 payloads non autoritatifs et borne le verdict à l'accord des couvertures sur les
-ordres effectivement jugés. L'autorité
+ordres effectivement jugés. `23f12af` ajoute ensuite le fold par intersections
+de saturés et remplace les
+censures multiplicataires sur les campagnes bornées. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
@@ -63,7 +65,7 @@ sujet laisse 6/6 vert. Le prochain oracle de tour saturée doit en outre énumé
 ses supports indépendamment; `smax>=n` ne transforme pas `flat_catalogue` en
 preuve de complétude de sa propre source.
 
-**[delta live positif au-dessus de `478cfe8`]** Un premier fold par
+**[commit `23f12af`, résultat positif borné]** Un premier fold par
 intersections de saturés remplace déjà les 40 censures `k=2,3` : le juge Gamma
 rend 60/60 accords de couverture sur la grille saturée et 90/90 sur la campagne
 générique. C'est la bonne direction combinatoire et elle ne développe aucune
@@ -74,6 +76,24 @@ persistant et join scalable restent ouverts dans
 Avec `kMaxRank=32`, le contrat actuel ne peut jamais satisfaire `smax>=n` à
 50 k : tout run G4 de ce chemin est partiel tant qu'un flux distinct de
 `SaturatedGenerator` à membres non tronqués n'est pas écrit et certifié.
+Résultat positif supplémentaire : une troisième vérité temporaire, indépendante
+de la navigation et du fold, énumère tous les supports de tailles 1 à 4 et
+retrouve exactement la famille et les niveaux de `flat_catalogue` sur 470
+nuages `n=8/9`, génériques/saturés, modes normal/owner : 34 003 générateurs
+comparés, zéro manquant, extra ou écart de niveau. Cette porte doit maintenant
+être rendue permanente.
+
+**[delta live de profilage]** Le pipeline chronométré révèle une distinction
+constructive : ses naissances/fusions concordent avec Gamma sur deux fixtures,
+mais ses « continuations » excédentaires sont exactement les niveaux de
+générateurs silencieux. Ces générateurs doivent rester dans l'index pour les
+attaches futures, tout en étant séparés du transcript Morse. Le détail, les
+masses manquantes et la séquence CPU→G4 sont dans
+[`AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md`](audits/AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md).
+La construction exacte proposée pour le prochain palier — CSR de postings,
+tri-réduction des overlaps, lots DSU atomiques, transcript local aux racines
+touchées et admission mémoire avant G4 — est spécifiée dans
+[`NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md`](audits/NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md).
 
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
 fold et repli multi-cœurs. La

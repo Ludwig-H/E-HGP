@@ -1,16 +1,16 @@
-# Audit live constructif — fold saturé au-dessus de `478cfe8`
+# Réception constructive — fold saturé de `478cfe8` à `23f12af`
 
 Date : 10 août 2026 UTC.
 
 Périmètre : nouveau candidat `prototype/saturated_fold.hpp` et branche
-`--subject-fold 1` du juge Gamma. Ce fichier suit un delta encore non committé;
-ses empreintes et reçus sont repincés après chaque stabilisation. Aucun fichier
-produit n'est modifié par l'auditeur.
+`--subject-fold 1` du juge Gamma, committés et poussés à
+`23f12afb4f3896bfd16f8f1281d5f1a3d4f89f22`. Aucun fichier produit n'est
+modifié par l'auditeur.
 
 Cadre : `phase=exploration_v3_hors_registre`, backend CPU candidat jugé par
 Gamma exhaustif, profil u16, `public_status=not_claimed`.
 
-Snapshot live pincé pendant la suite précédant le commit :
+Snapshot produit pincé :
 
 - `prototype/saturated_fold.hpp` SHA-256
   `1be6e58ba720b2b5cb95dc4c59bdb62a62e4ea197bdaa35cd78de95faaaf6931`;
@@ -21,6 +21,13 @@ Snapshot live pincé pendant la suite précédant le commit :
 
 Un configure/build Release frais en répertoire temporaire puis la sélection
 `^mhgp3v_gamma_judge_` passent 9/9 en 7,97 s.
+La suite complète stable affiche 97/97, zéro échec, en 466,25 s. La commande
+Claude passe encore par `ctest -j2 2>&1 | tail -3`, donc son code shell est celui
+de `tail`; le journal `LastTest.log`, SHA-256
+`fb5bf552c9fcae8993fe189dab42a2b75e7a92665fc10c3816ce4009bc8b3315`,
+contient toutefois les 97 entrées, aucune faute ni `Not Run`. Sources, CMake et
+binaire sont restés stables pendant ce run; les builds mutants de l'auditeur
+étaient isolés sous `/tmp`.
 
 ## Résultat positif majeur
 
@@ -51,6 +58,16 @@ par saturés répare les censures multiplicataires sur ces entrées.
 Ce fold ne matérialise ni mosaïque de Delaunay d'ordre supérieur, ni graphes de
 Johnson, ni tous les sous-simplexes de ses grands générateurs. C'est donc une
 direction compatible avec l'invariant d'allègement de MorseHGP3D.
+
+La sensibilité du cœur est elle aussi positive : un mutant hors dépôt remplace
+le seuil d'intersection `>=k` par `>k`. Les deux portes fold deviennent rouges,
+avec 90/90 écarts de compte sur la campagne générique et 60/60 sur la saturée.
+Le poids exact `|M intersection N|`, les unions DSU et les trois ordres
+contribuent donc réellement aux couvertures comparées.
+Un second mutant force le seuil `1` pour tous les ordres : les deux portes
+rougissent, tandis que seul `k=1` reste correct. Les seuils $k=1,2,3$ sont donc
+sémantiquement distingués par les campagnes, même si les compteurs par ordre ne
+sont pas encore publiés.
 
 ## Preuve conditionnelle du cœur actuel
 
@@ -95,6 +112,59 @@ nuage, dédupliquer les saturés, puis comparer successivement :
 
 Le header actuel est donc un **candidat produit** très utile; il ne doit pas
 être rebaptisé oracle de sa propre source.
+
+### 1 ter. La troisième vérité indépendante donne déjà un résultat positif
+
+Un harness temporaire hors dépôt a ensuite réalisé exactement la porte
+demandée : énumération indépendante de tous les sous-ensembles de tailles un à
+quatre avec `exact_geometry::exact_miniball`, classification fermée de chaque
+nuage par `side_of<=0`, déduplication par saturé, puis comparaison de la famille
+et du niveau rationnel exact à `flat_catalogue(pts,n)`.
+
+| campagne | mode source | générateurs produit | générateurs oracle | manquants | extras | niveaux différents |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 130 nuages, `n=8`, coord 40 | normal | 8 491 | 8 491 | 0 | 0 | 0 |
+| 120 nuages, `n=9`, coord 4 | normal | 9 562 | 9 562 | 0 | 0 | 0 |
+| 110 nuages, `n=8`, coord 40 | owner | 7 180 | 7 180 | 0 | 0 | 0 |
+| 110 nuages, `n=9`, coord 4 | owner | 8 770 | 8 770 | 0 | 0 | 0 |
+
+Les 470 nuages et 34 003 générateurs rendent aussi zéro statut, miniboule, record
+malformé ou doublon de niveau fautif. C'est une recertification matérielle de
+la famille complète à petite taille, indépendante de la reverse-search et du
+fold. Elle renforce fortement le résultat 90/90--60/60.
+
+Le harness est encore sous `/tmp`; il doit devenir une cible oracle permanente,
+avec permutations, carré cosphérique, E5, supports multiples et mutants
+d'omission. Il ne prouve ni la complétude universelle de `flat_catalogue`, ni sa
+capacité 50 k, mais il ferme exactement le prochain échelon expérimental.
+
+### 1 bis. Source output-sensitive certifiable
+
+La façon utile d'éviter l'allocation quartique sans prétendre supprimer son pire
+cas est une frontière de tâches sur les supports de tailles un à quatre. Chaque
+tâche représente un bloc combinadique ou un produit de nœuds spatiaux et se
+termine par l'un des reçus suivants : domaine vide, dépendance affine
+universelle, impossibilité exacte du bon centrage, borne inférieure de niveau
+au-delà de l'horizon demandé, ou feuilles explicitement évaluées.
+
+À la feuille : miniboule exacte, requête fermée complète, puis record
+`SaturatedGenerator{ball_key, exact_level, canonical_support, sorted_members,
+member_digest, source_certificate}`. La déduplication agrège tous les supports
+d'une même boule au lieu de créer plusieurs générateurs.
+
+Le reçu terminal de la source doit satisfaire sur les domaines disjoints :
+
+$$n+\binom{n}{2}+\binom{n}{3}+\binom{n}{4}=N_{\mathrm{exclus}}+N_{\mathrm{invalides}}+N_{\mathrm{feuilles}}.$$
+
+Pour streamer les lots, un watermark de niveau est obligatoire : publier le lot
+`a` seulement lorsque toute tâche résiduelle possède une borne inférieure
+strictement supérieure à `a`. Sinon un support non résolu peut encore produire
+un générateur oublié au même niveau.
+
+Cette architecture évite de matérialiser l'univers des supports et permet
+rollback/reprise. Elle ne promet pas un travail sous-quartique universel : le
+nombre de générateurs distincts peut lui-même atteindre ce régime. Sous budget,
+la frontière est sérialisée et le statut reste `partial_refinement`.
 
 ### 2. Distinguer validité structurelle et complétude scientifique
 
@@ -163,12 +233,31 @@ De même, `--require-degenerate-agreement` n'a pas encore son injection hostile 
 les positifs concordent, mais retirer le bloc qui transforme une divergence
 dégénérée en échec ne change aucune entrée actuelle. Une omission d'un overlap
 sur la fixture carrée doit produire cette divergence et exiger le code 1.
+Le mutant de seuil ci-dessus fournit déjà cette divergence dégénérée et rend le
+programme rouge; il reste à l'intégrer comme porte dédiée. Son résumé révèle un
+défaut de libellé mineur : les 60 fautes dégénérées sont conclues par
+`desaccords hors degenerescence`. Le total final doit distinguer les deux
+catégories.
 
 Le lecteur vérifie l'ordre strict des membres mais pas encore leur appartenance
 à `[0,n)`, l'unicité des générateurs, `Sphere::den>0` ni la cohérence
 rang--taille--boule. Soit ces obligations arrivent avec un certificat de
 catalogue authentifié, soit le fold les refuse lui-même; elles ne doivent pas
 rester des préconditions implicites d'un résultat dit industriel.
+
+L'API header doit aussi garder sa propre borne d'ordre : une sonde directe
+`build_saturated_fold(Catalogue{}, -1)` termine actuellement par
+`std::length_error`, car l'entier négatif est converti en taille avant
+`orders.resize`. Les CLI filtrent ce cas, mais une fonction annoncée fail-closed
+doit refuser `maximum_order<1` et toute valeur au-delà de sa borne avant toute
+allocation.
+
+Une fixture header-only donne positivement, au même niveau, `M={0,1}` et
+`N={1,2}` : une composante à `k=1`, deux couvertures chevauchantes à `k=2`.
+Elle confirme que le fold ne confond pas couverture et partition du nuage. La
+même sonde injecte ensuite le saturé `{0,1}` à deux niveaux distincts : le fold
+l'accepte et publie deux snapshots identiques avec une continuation fictive.
+L'unicité/déduplication des générateurs doit donc être reçue avant le transcript.
 
 ## Route exacte vers un join plus léger
 
@@ -202,11 +291,16 @@ forte exige un certificat préservant les intersections futures.
 ## Décision live
 
 **GO pour stabiliser ce fold CPU, construire la troisième vérité indépendante
-et graver ses mutants. NO-GO pour l'appeler déjà backend industriel exact ou
+en porte permanente et graver ses mutants. NO-GO pour l'appeler déjà backend industriel exact ou
 pour lancer un benchmark 50 k comme qualification exacte.** Un benchmark G4
 peut mesurer explicitement une sous-famille ou un flux synthétique complet,
 mais son statut doit le dire. Le résultat 60/60 est une avancée mathématique
 forte; les prochaines portes doivent convertir son
 hypothèse de source complète en certificat et mesurer le coût de sa jointure.
+
+Le message du commit parle de « sémantique industrielle démontrée »; cette
+phrase appartient au ledger de Claude, pas au verdict d'audit. Le verdict reçu
+est l'accord de couvertures borné et mutation-résistant sur le seuil, sous une
+famille catalogue encore à certifier.
 
 GCP non utilisé à ce snapshot.
