@@ -11,19 +11,20 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
 courante est
-`HEAD=origin/main=56e76c65c31fc877f7629ac8e87a8a8479efa8fb` : `405c37b`
+`HEAD=origin/main=17b70cf003ddfa7d6b2603b1799d9df279ad4148` : `405c37b`
 livre le join postings reçu, `651e47f` la porte des niveaux d'événement
 `q_min`, `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
 troisième voie postings globale, `45c0b7b` les records par témoins et les
 saturés des boules marquantes, `acb9e7a` le sweep de masse, `df984ed` les
 forêts candidates dérivées, `f2e78fa` la proposition cofaces, `21d85c8`
-l'oracle `face-owner` borné et sa réfutation permanente, puis `56e76c6` son
-rejeu ordre par ordre. Leur audit
-reproductible, avec toutes les empreintes et le correctif live immédiatement
-postérieur, est
-[`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
+l'oracle `face-owner` borné et sa réfutation permanente, `56e76c6` son rejeu
+ordre par ordre, `038bbbb` le premier fold hybride committé, puis `17b70cf` le
+nettoyage de son reporting CLI. L'audit du
+dernier palier, avec toutes les empreintes et les correctifs directement
+implémentables, est
+[`AUDIT_LIVE_HYBRID_3147BB0.md`](AUDIT_LIVE_HYBRID_3147BB0.md).
 
-## Autorité courante à `56e76c6`
+## Autorité courante à `17b70cf`
 
 | contrat | état reçu |
 | --- | --- |
@@ -37,7 +38,7 @@ postérieur, est
 | masse sans paires | **théorème et diagnostic positifs** : les étoiles `face-owner` conservent chaque coupe; `n=200/K=5` passe de `385,55 M` cooccurrences à `16,38 M` incidences; oracle borné seulement tant que les faces sont énumérées |
 | oracle `face-owner` live | **sémantique et rejeu ordre par ordre positifs à `56e76c6`** : quatre formes concordent, 7/7 mutants meurent, 18/18 portes ciblées passent; `reserve(I_k)` et libération inter-ordre sont effectifs; restent permutation propre, identités par ordre et vraie borne mémoire, car l'estimation omet capacités et sorties |
 | cofaces à support canonique | **réfuté jusque dans `q=k=4`** : une coquille u16 minimale possède six composantes strictes et le filtre n'en voit que cinq; à `q=4,k=6`, une seconde fixture en manque neuf sur dix-sept; support principal certifié ou fallback exact nécessaires |
-| solution hybride | **preuves constructives, implémentation à recevoir** : support principal certifié donne `q<=4` attaches exactes; son bit se produit sans LP par `miniball(M privé de u)<B`, avec certificat de quatre points au plus; coquilles multi-supports basculent vers le trie `face-owner` à coupures certifiées |
+| solution hybride | **cœur mathématique et différentiel positifs bornés à `038bbbb`, contrat produit non reçu** : cinq formes concordent, les chemins principal/fallback sont exercés et deux mutants meurent; restent le sidecar lié à la source, la provenance `q_min`/complétude, les carriers vérifiables, quatre mutants structurels et le budget mémoire |
 | source et provenance runtime | **ouvertes** : `n_support` est lu sans bit `q_min_certified`; `smax>=n` exclut une censure de rang mais ne certifie pas la complétude de la famille |
 | architecture légère | **préservée géométriquement** : aucun graphe de Johnson, sous-simplexe ou mosaïque d'ordre supérieur dans le chemin candidat; masse combinatoire et source complète restent les murs |
 | 50 k / GPU | **NO-GO maintenu** : runs bornés, source certifiée, arithmétique globale vérifiée, témoins/marqueurs internés et manifeste/high-water manquent; aucun kernel GPU nouveau dans ce delta |
@@ -76,6 +77,16 @@ contre une construction indépendante. Le profil public `full_pi0` contre
 
 La route directement implémentable issue de la réfutation est
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md) : un support principal est reçu par au plus quatre certificats exacts, puis `q` carriers couvrent toutes les racines strictes; les coquilles à supports alternatifs utilisent un trie de signatures. Comme le générateur courant appartient toujours à l'intersection d'un préfixe, la coupure correcte n'est pas une liste brute vide : elle exige que tous les candidats soient déjà dans la composante staging courante. Cette combinaison retire `P_post` sans transformer la conjecture `O(q+arité)` en claim.
+
+`038bbbb` implémente désormais cette combinaison et la différencie contre les
+quatre formes antérieures. Le verrou restant est une frontière de confiance,
+pas une nouvelle réduction : construire après canonisation un
+`ValidatedHybridSidecar` lié aux points, au catalogue final et au reçu de
+source. Pour le fallback, un compteur par `GeneratorId` fournit une vérité plus
+simple que le trie : le seuil `k` certifie directement
+`|M intersection N|>=k`, sans matérialiser de face, et conserve le vrai carrier
+incident. Détails, résultats et portes dans
+[`AUDIT_LIVE_HYBRID_3147BB0.md`](AUDIT_LIVE_HYBRID_3147BB0.md).
 
 Les sections `2b4801c` et antérieures sont conservées ci-dessous comme
 historique chronologique; elles ne décrivent plus le worktree courant.

@@ -661,6 +661,77 @@ int main(int argc, char** argv) {
       }
     }
 
+    // INVARIANCE PAR PERMUTATION DE LA FORME FACE-OWNER (audit 56e76c6,
+    // verrou 2) : payload semantique COMPLET — records avec saturations
+    // marquantes — aux NIVEAUX RATIONNELS EXACTS compares par sphere_cmp_beta
+    // ENTRE les deux catalogues, et les champs INVARIANTS du recu (I_k,
+    // signatures, multiplicite un, branches brutes, histogramme, predit,
+    // unions reussies). Les branches dedupliquees et les tentatives dependent
+    // legitimement du tie-break de l'owner : jamais comparees.
+    if (c == 0) {
+      mhgp::Catalogue reversed;
+      for (std::size_t s = catalogue.spheres.size(); s-- > 0;) {
+        mhgp::CriticalSphere sphere = catalogue.spheres[s];
+        const mhgp::i32 begin = sphere.members_begin;
+        sphere.members_begin = (mhgp::i32)reversed.members.size();
+        reversed.members.insert(reversed.members.end(), catalogue.members.begin() + begin,
+                                catalogue.members.begin() + begin + sphere.rank);
+        reversed.spheres.push_back(sphere);
+      }
+      mhgp3v::FaceOwnerReceipt straight, mirrored;
+      const mhgp3v::SaturatedFold a = mhgp3v::build_saturated_fold_faceowner(
+          catalogue, maximum_order, true, &straight, true, faceowner_mutants);
+      const mhgp3v::SaturatedFold b = mhgp3v::build_saturated_fold_faceowner(
+          reversed, maximum_order, true, &mirrored, true, faceowner_mutants);
+      std::string permutation_why;
+      bool invariant = a.ok && b.ok;
+      if (!invariant) permutation_why = "un des deux folds refuse";
+      for (std::size_t idx = 0; invariant && idx < a.orders.size(); ++idx) {
+        const mhgp3v::SaturatedOrderFold& oa = a.orders[idx];
+        const mhgp3v::SaturatedOrderFold& ob = b.orders[idx];
+        invariant = oa.gamma_records.size() == ob.gamma_records.size() &&
+                    oa.closed_partitions == ob.closed_partitions &&
+                    oa.gamma_births == ob.gamma_births &&
+                    oa.gamma_continuations == ob.gamma_continuations &&
+                    oa.gamma_multifusions == ob.gamma_multifusions;
+        if (!invariant) { permutation_why = "face-owner : compteurs ou partitions"; break; }
+        for (std::size_t ri = 0; ri < oa.gamma_records.size(); ++ri) {
+          const mhgp3v::GammaEventRecord& ra = oa.gamma_records[ri];
+          const mhgp3v::GammaEventRecord& rb = ob.gamma_records[ri];
+          if (mhgp::sphere_cmp_beta(
+                  catalogue.spheres[(std::size_t)ra.level_representative].sph,
+                  reversed.spheres[(std::size_t)rb.level_representative].sph) != 0 ||
+              ra.closed_witness != rb.closed_witness ||
+              ra.strict_witnesses != rb.strict_witnesses ||
+              ra.marking_saturations != rb.marking_saturations || ra.type != rb.type) {
+            invariant = false;
+            permutation_why = "face-owner : record " + std::to_string(ri) +
+                              " divergent (niveau exact ou payload)";
+            break;
+          }
+        }
+      }
+      if (invariant &&
+          (straight.incidences_k != mirrored.incidences_k ||
+           straight.unique_signatures_k != mirrored.unique_signatures_k ||
+           straight.multiplicity_one_k != mirrored.multiplicity_one_k ||
+           straight.star_branches_k != mirrored.star_branches_k ||
+           straight.rank_histogram != mirrored.rank_histogram ||
+           straight.predicted_incidences != mirrored.predicted_incidences ||
+           straight.unions_done != mirrored.unions_done)) {
+        invariant = false;
+        permutation_why = "face-owner : champs invariants du recu divergents";
+      }
+      if (!invariant) {
+        if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
+          std::printf("mutant tue par la permutation face-owner : %s\n", permutation_why.c_str());
+          return 4;
+        }
+        std::printf("ECHEC permutation face-owner : %s\n", permutation_why.c_str());
+        return 1;
+      }
+    }
+
     mhgp3v::PostingsReceipt receipt;
     const mhgp3v::SaturatedFold fold = mhgp3v::build_saturated_fold_postings(
         catalogue, maximum_order, false, &receipt, mutants);

@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=56e76c65c31fc877f7629ac8e87a8a8479efa8fb`, toujours sous
+`HEAD=origin/main=17b70cf003ddfa7d6b2603b1799d9df279ad4148`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -47,7 +47,8 @@ globale, `45c0b7b` les records par témoins et les saturés des boules
 marquantes, `acb9e7a` le sweep du mur de masse, `df984ed` les forêts candidates
 dérivées des records, `f2e78fa` la proposition cofaces sans paires, puis
 `21d85c8` l'oracle `face-owner` borné et sa réfutation permanente, puis
-`56e76c6` son rejeu ordre par ordre et sa porte `k=6` ciblée. Leurs
+`56e76c6` son rejeu ordre par ordre et sa porte `k=6` ciblée, `038bbbb` le
+premier fold hybride committé, puis `17b70cf` son nettoyage CLI. Leurs
 empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
@@ -171,8 +172,11 @@ certifiées et un lookup de boule indépendant du support choisi; voir
 [`AUDIT_COFACES_F2E78FA.md`](audits/AUDIT_COFACES_F2E78FA.md).
 La forme retenue pour falsification est hybride : certificat local prouvant que
 le support canonique est obligatoire, puis au plus `q<=4` carriers; fallback
-`face-owner` demand-driven seulement sur les coquilles multi-supports. Son
-contrat complet est
+demand-driven seulement sur les coquilles multi-supports. `038bbbb` implémente
+ce cœur et le différencie désormais comme cinquième forme. Les campagnes
+bornées et les deux mutants sont positifs, mais l'API reçoit encore
+`(points,point_count,Catalogue)` sans preuve de complétude ni de `q_min` et le
+budget hybride est ignoré. Son contrat complet est
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md).
 Le certificat local se produit sans solveur : supprimer successivement chaque
 `u` du saturé `M` et exiger que sa miniboule exacte devienne strictement plus
@@ -180,6 +184,14 @@ petite. Le support de cette petite boule, de taille au plus quatre, suffit au
 vérificateur; égalité de niveau fournit au contraire un support alternatif et
 déclenche le fallback. Preuve et intégration source :
 [`NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md`](audits/NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md).
+La frontière de confiance recommandée est une factory post-catalogue qui
+retourne seulement un `ValidatedHybridSidecar` après validation atomique des
+digests, supports, saturés, certificats et de l'index. Pour recevoir le fallback
+avant toute optimisation du trie, un compteur par `GeneratorId` atteint le
+seuil `k` exactement quand `|M intersection N|>=k`; il ne matérialise ni faces
+ni paires globales et conserve le vrai carrier. La réception détaillée et les
+mutants structurels sont dans
+[`AUDIT_LIVE_HYBRID_3147BB0.md`](audits/AUDIT_LIVE_HYBRID_3147BB0.md).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

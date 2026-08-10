@@ -125,6 +125,15 @@ target_include_directories(mhgp3v_postings_join_gate PRIVATE ${CMAKE_CURRENT_SOU
 target_link_libraries(mhgp3v_postings_join_gate PRIVATE mhgp)
 target_compile_options(mhgp3v_postings_join_gate PRIVATE -Wall -Wextra -Werror)
 
+# LA QUALIFICATION DU KERNEL FACE-OWNER : differentiel natif arete par arete
+# contre le chemin CPU collect_edges. Sans CUDA le binaire refuse proprement.
+add_executable(mhgp3v_faceowner_device_qualification
+  prototype/faceowner_device_qualification.cpp)
+target_include_directories(mhgp3v_faceowner_device_qualification
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_faceowner_device_qualification PRIVATE mhgp)
+target_compile_options(mhgp3v_faceowner_device_qualification PRIVATE
+  $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror>)
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)
@@ -133,6 +142,16 @@ if(MHGP3V_ENABLE_CUDA)
   endif()
   target_sources(mhgp3v_device_wavefront PRIVATE prototype/device_wavefront_kernel.cu)
   target_compile_definitions(mhgp3v_device_wavefront PRIVATE MHGP3V_WAVEFRONT_CUDA)
+  target_sources(mhgp3v_faceowner_device_qualification PRIVATE
+    prototype/faceowner_device_kernel.cu)
+  target_compile_definitions(mhgp3v_faceowner_device_qualification PRIVATE
+    MHGP3V_FACEOWNER_CUDA)
+  set_target_properties(mhgp3v_faceowner_device_qualification PROPERTIES
+    CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}"
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_EXTENSIONS OFF
+    CUDA_SEPARABLE_COMPILATION OFF)
   set_target_properties(mhgp3v_device_wavefront PROPERTIES
     CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}"
     CUDA_STANDARD 20
@@ -726,6 +745,10 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_postings_gate_reject_unknown_hybrid "mutant hybride inconnu" 2
   --hybrid-mutant inexistant)
+# Sans CUDA, la qualification device refuse proprement — jamais un chemin
+# device pretendu.
+mhgp3v_add_expected_code_test_for(mhgp3v_faceowner_device_qualification
+  mhgp3v_faceowner_device_reject_absent "kernel face-owner absent" 2 --points 10)
 # LE MODE COMPARE-JOINS : meme catalogue, deux joins, transcript et digest
 # compares in-process — le differentiel de l'audit au-dela des nuages du juge.
 add_test(NAME mhgp3v_saturated_pipeline_compare_joins COMMAND mhgp3v_saturated_pipeline

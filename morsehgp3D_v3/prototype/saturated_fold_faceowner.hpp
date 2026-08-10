@@ -49,6 +49,10 @@ struct FaceOwnerReceipt {
   long long unions_attempted = 0, unions_done = 0;
   std::vector<long long> rank_histogram;      // [0..kMaxRank]
   bool identities_ok = false;
+  // Le FLUX D'ARETES par ordre ((lot d'activation, owner), membre), trie et
+  // deduplique — rempli sur demande (collect_edges) : c'est l'objet exact que
+  // le kernel device doit reproduire ARETE PAR ARETE pour sa qualification.
+  std::vector<std::vector<std::pair<std::pair<int, int>, int>>> edges_k;
 };
 
 struct FaceOwnerMutants {
@@ -68,7 +72,8 @@ struct FaceOwnerMutants {
 inline SaturatedFold build_saturated_fold_faceowner(
     const mhgp::Catalogue& catalogue, int maximum_order, bool keep_partitions,
     FaceOwnerReceipt* receipt, bool enforce_event_guard = false,
-    FaceOwnerMutants mutants = {}, long long memory_budget_bytes = 0) {
+    FaceOwnerMutants mutants = {}, long long memory_budget_bytes = 0,
+    bool collect_edges = false) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   if (receipt != nullptr) *receipt = FaceOwnerReceipt{};
@@ -526,6 +531,7 @@ inline SaturatedFold build_saturated_fold_faceowner(
     std::sort(edges.begin(), edges.end());
     edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
     out.deduplicated_branches_k[(std::size_t)(k - 1)] = (long long)edges.size();
+    if (collect_edges) out.edges_k.push_back(edges);
 
     OrderState st;
     st.parent.resize(count);

@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=56e76c65c31fc877f7629ac8e87a8a8479efa8fb`. Le commit produit
+`HEAD=origin/main=17b70cf003ddfa7d6b2603b1799d9df279ad4148`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -31,7 +31,8 @@ ajoute la projection généalogique des records en `K` forêts candidates; enfin
 ensuite l'oracle `face-owner`, grave la réfutation multi-support et ferme son
 allocation quadratique; `56e76c6` traite enfin les ordres un par un, cible la
 porte de réfutation sur `k=6`, compare les records dans le pipeline et publie le
-manifeste mémoire estimé. Ces derniers
+manifeste mémoire estimé; `038bbbb` intègre ensuite le fold hybride comme
+cinquième forme et `17b70cf` nettoie son premier défaut de reporting. Ces derniers
 résultats et leurs limites sont épinglés dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
@@ -238,11 +239,20 @@ points perd une composante stricte sur six; une seconde à `q_min=4,k=6` en perd
 neuf sur dix-sept. Son tuple de sphère brut
 n'est pas non plus une clé canonique. La réfutation et la réparation sûre sont
 dans [`AUDIT_COFACES_F2E78FA.md`](audits/AUDIT_COFACES_F2E78FA.md).
-La solution produit proposée n'est pas un retour aux paires : un certificat
-exact de support principal donne au plus quatre attaches par générateur et par
-ordre; seules les coquilles multi-supports basculent vers la recherche
-`face-owner` demand-driven. Clé de boule primitive, preuve des `q` attaches,
-pseudo-algorithme de lot et portes sont dans
+**[fold hybride committé, math positive et contrat produit encore ouvert]**
+`038bbbb` n'est pas un retour aux paires globales : un certificat exact de
+support principal donne au plus quatre attaches par générateur et par ordre;
+les coquilles multi-supports basculent vers une recherche demand-driven. Cinq
+formes concordent sur les campagnes bornées, le cas `q=k+1` a été corrigé et
+les chemins principal/fallback ainsi que deux mutants sont réellement exercés.
+La fermeture la plus rentable est maintenant un `ValidatedHybridSidecar`
+post-catalogue : il lie points, catalogue final, `q_min`, complétude par ordre,
+certificats et index de boules. Le fallback peut d'abord être reçu par un noyau
+de compteurs `|M intersection N|`, plus simple que le trie et conservant un vrai
+carrier incident. Le budget hybride est encore ignoré et doit refuser jusqu'à
+sa modélisation; aucune promotion GPU n'en découle. Verdict et séquence exacte :
+[`AUDIT_LIVE_HYBRID_3147BB0.md`](audits/AUDIT_LIVE_HYBRID_3147BB0.md). Le contrat
+mathématique complet reste dans
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md).
 
 **[forêts dérivées, crédit borné]** `df984ed` transforme les records en une
