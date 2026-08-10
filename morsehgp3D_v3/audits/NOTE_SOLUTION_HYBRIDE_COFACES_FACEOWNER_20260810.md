@@ -158,7 +158,8 @@ qui fournisse au minimum :
   certificat principal, et sa `BallKey`;
 - un index injectif `BallKey -> generator_handle`, construit après validation
   que deux clés égales portent le même saturé;
-- le bit `source_complete_for_order[k]`, distinct de `smax>=n`.
+- le bit `source_complete_for_order[k]`, distinct de `smax>=n` et lié au digest
+  du catalogue final.
 
 Le lookup rapide calcule `miniball(S_u)` depuis la vue des points, canonicalise
 sa `BallKey`, retrouve le générateur, puis vérifie que ses membres contiennent
@@ -167,6 +168,14 @@ complète, le lot refuse; sous source partielle ou certificat absent, le
 dispatcher utilise le fallback par postings. Ce sidecar évite toute table
 persistante de faces : seules les boules réellement demandées sont calculées.
 
+Le raccord le moins risqué au prototype est une factory post-catalogue
+`make_validated_hybrid_sidecar(points, catalogue_final, source_receipt)`. Elle
+travaille sur les handles déjà triés, couvre aussi le chemin singleton, vérifie
+les digests et ne publie le type `ValidatedHybridSidecar` qu'après validation de
+tous ses champs. Le fold ne doit plus recevoir séparément `points`,
+`point_count` et un `Catalogue` brut : cette signature permet trop facilement
+de désynchroniser les vues ou de contourner la provenance.
+
 ## 4. Fallback `face-owner` demand-driven
 
 Sous coquille multi-support, le seul support canonique peut manquer des racines.
@@ -174,11 +183,20 @@ Le fallback ne devine pas une petite famille de facettes : il explore un trie
 canonique des combinaisons de points de `M`.
 
 Le dispatcher n'emploie le fast path que si
-`source_complete_for_order && principal_support_certified && q<=k+1`. En mode
-partiel, tous les générateurs passent par le fallback relatif. Même sous source
-complète, un générateur `q>k+1` reste présent dans les postings et le staging :
-il n'est pas un marqueur public à cet ordre, mais peut appartenir au fold relatif
-tant que la réduction complète n'est pas portée par un certificat séparé.
+`source_complete_for_order[k] && principal_support_certified && q<=k+1`. Le
+certificat principal et la validation stricte de `U` impliquent ici
+`q_min=q=|U|`; le marquage public exige toutefois un bit `q_min_certified` pour
+tous les générateurs, notamment ceux du fallback. En mode partiel, tous les
+générateurs passent par le fallback relatif. Sous
+`source_complete_for_order[k] && q_min_certified`, le cas `q>k+1` admet au
+contraire une réduction exacte à une seule attache : les `k`-faces de `M` sont
+connexes dans le graphe de Johnson; deux voisines ont une union de taille
+`k+1`, dont la miniboule est strictement sous `B`, faute de quoi `B` aurait un
+support de taille au plus `k+1`. La source complète contient donc tous leurs
+carriers stricts et une seule `k`-face canonique atteint l'unique racine
+stricte. Cette optimisation exige les deux certificats, puis un lookup qui
+vérifie `face subset members(carrier)` et `level(carrier)<level(B)`. Sans eux,
+elle repasse au fallback.
 
 À la coupe stricte du niveau `a`, créer un proxy distinct par racine ancienne,
 ajouter **tous** les générateurs admissibles du lot au DSU local, puis construire
@@ -195,7 +213,9 @@ Pour chaque nouveau générateur `M` et chaque préfixe `P` :
    sommet staging et couper si `find_local(label(N))=find_local(M)` pour tout
    `N`;
 4. sinon descendre jusqu'à la taille `k`; à une feuille, retenir un seul carrier
-   réel `N` par composante locale externe et effectuer l'union locale.
+   réel `N` par composante locale externe, publier cet identifiant comme témoin
+   d'arête et effectuer l'union locale avec `N`, jamais avec le seul numéro de
+   sa racine DSU.
 
 La coupure est une preuve : les incidents de toute extension sont inclus dans
 ceux du préfixe et ne peuvent révéler une racine absente de sa liste. Tous les
@@ -238,6 +258,15 @@ Avec de simples lookups ponctuels, une telle borne algorithmique est impossible
 à certifier : le dernier candidat non interrogé peut être l'unique racine
 nouvelle. L'intersection agrégée des postings est précisément le certificat
 d'absence qui manque à la conjecture.
+
+L'implémentation ne doit pas recopier puis trier un posting entier à chaque
+nœud. Affecter à chaque générateur un `activation_id` canonique, ordonné par
+`(niveau exact, membres, BallKey)`, rend les postings triés dès leur append.
+Chaque frame ne matérialise alors que l'intersection descendante. À une feuille,
+une table `root -> plus petit incident réel` fournit simultanément le carrier
+certifié et la déduplication. Ce choix rend aussi les compteurs du trie
+reproductibles sous permutation du catalogue; sinon ces compteurs doivent être
+explicitement qualifiés de relatifs à l'ordre d'entrée.
 
 ## 5. Unité transactionnelle du lot
 
@@ -293,8 +322,10 @@ borne incluant les capacités réelles ne l'impose pas.
    supports de la même boule; la forme primitive passe.
 6. Ex æquo avec un mélange fast/fallback, chaîne nouveau--nouveau, permutation
    du catalogue et rollback après la dernière attache.
-7. Mode partiel : aucun filtre `Sigma_k`, aucun bit principal autoritatif;
-   conserver le fold relatif ou refuser explicitement le chemin complet.
+7. Mode partiel : aucun filtre `Sigma_k`; le certificat principal reste une
+   propriété locale autoritative de `(B,M,U)`, mais l'absence de
+   `source_complete_for_order[k]` interdit le fast path et impose le fallback
+   relatif ou un refus explicite du chemin complet.
 
 ## Conclusion opérationnelle
 

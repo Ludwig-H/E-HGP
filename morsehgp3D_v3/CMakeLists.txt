@@ -716,6 +716,16 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_postings_gate_reject_unknown_faceowner "mutant face-owner inconnu" 2
   --faceowner-mutant inexistant)
+# LES MUTANTS DU FOLD HYBRIDE (portes §7 de la note hybride) : le fast path
+# force malgre le certificat meurt par une fusion perdue SUR LA COSPHERE ; la
+# cle brute base/num/den meurt par le lookup manquant sous pretention complete.
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_kill_force_principal "mutant tue" 4 --hybrid-mutant force-principal)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_kill_raw_ball_key "lookup manquant" 4 --hybrid-mutant raw-ball-key)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_reject_unknown_hybrid "mutant hybride inconnu" 2
+  --hybrid-mutant inexistant)
 # LE MODE COMPARE-JOINS : meme catalogue, deux joins, transcript et digest
 # compares in-process — le differentiel de l'audit au-dela des nuages du juge.
 add_test(NAME mhgp3v_saturated_pipeline_compare_joins COMMAND mhgp3v_saturated_pipeline
@@ -736,6 +746,12 @@ mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_budget_global "preflight" 3
   --points 32 --smax 11 --max-order 3 --seed 20260810 --join postings-global
   --memory-budget-mb 1)
+add_test(NAME mhgp3v_saturated_pipeline_compare_joins_hybrid COMMAND mhgp3v_saturated_pipeline
+         --points 10 --smax 11 --max-order 3 --seed 20260810 --join hybrid
+         --compare-joins 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
+  mhgp3v_saturated_pipeline_reject_hybrid_partial "famille complete" 2
+  --points 32 --smax 11 --max-order 3 --join hybrid)
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_budget_faceowner "preflight" 3
   --points 32 --smax 11 --max-order 3 --seed 20260810 --join faceowner

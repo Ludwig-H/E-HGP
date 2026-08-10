@@ -55,9 +55,14 @@ appartient à ce raccourci.
 
 Un certificat négatif est tout aussi compact : dès que
 `sphere_cmp_beta(D_u,B)==0`, le support de `D_u`, de taille au plus quatre et
-inclus dans `R_u`, témoigne d'un support alternatif. Le dispatcher choisit alors
-le fallback. Une comparaison positive `D_u>B` est une faute interne, puisque
-`B` couvre déjà `R_u`.
+inclus dans `R_u`, témoigne d'un support alternatif. Un vérificateur hostile ne
+se contente toutefois pas de l'égalité des niveaux : il reconstruit la boule
+depuis ce support, vérifie qu'elle couvre `R_u`, puis exige l'égalité de sa
+`BallKey` avec celle de `B`. Alors seulement l'état
+`non_principal_certified` est autorisé. Sans certificat positif ou négatif
+vérifiable, l'état reste `unknown` et le dispatcher choisit le fallback. Une
+comparaison positive `D_u>B` est une faute interne, puisque `B` couvre déjà
+`R_u`.
 
 Le séparateur rationnel reste récupérable si un consommateur le demande. En
 posant `h=center(D_u)-center(B)`, tout `x` de la coquille privé de `u` vérifie une inégalité
@@ -81,28 +86,63 @@ endroit, `points`, le saturé exact `members=M`, la coquille `shell=Q`, la sphè
 R = members sans u, trié par l'ordre géométrique canonique
 D = miniball_of(points, R)
 si D > B : faute interne
-si D = B : principal=false, conserver éventuellement le support alternatif
+si D = B : conserver obligatoirement le support alternatif pour certifier non-principal
 si D < B : conserver le support V_u de D
 après q inégalités strictes : principal=true
 ```
 
 Le certificat doit être créé avant le tri final de `kept`, puis permuté avec le
-même tableau d'ordre que les sphères. Il doit être lié au digest exact du nuage
-et de `members`; le raccourci optionnel `Q=U` lie en plus le digest de `Q`.
+même tableau d'ordre que les sphères. Il faut l'ajouter aux deux chemins qui
+publient aujourd'hui dans `kept` : l'émission générale de `try_emit_with` et le
+chemin direct des singletons indexés. Une primitive de publication commune,
+suivie d'une assertion `kept.size()==certificates.size()`, évite un décalage
+silencieux. Le certificat doit être lié au digest exact du nuage et de `members`;
+le raccourci optionnel `Q=U` lie en plus le digest de `Q`.
 
 Le fold ne peut pas produire ce certificat depuis `Catalogue` seul, car ce type
-ne transporte pas les coordonnées. Un sidecar v3 minimal porte, pour chaque
-handle de générateur :
+ne transporte pas les coordonnées. Un sidecar v3 minimal porte globalement le
+digest du nuage et du catalogue final, le profil ainsi que
+`source_complete_for_order[k]`; ce dernier n'est jamais déduit d'un argument
+CLI tel que `smax>=n`. Pour chaque handle de générateur, il porte ensuite :
 
-- l'état `unknown`, `principal` ou `non_principal`;
-- le mode `implicit_Q_eq_U` ou les supports positifs `V_u`;
-- facultativement le premier support alternatif négatif;
+- l'état `unknown`, `principal_certified` ou `non_principal_certified`;
+- le mode `implicit_Q_eq_U` ou les supports positifs `V_u`, indexés par le
+  `PointId u` et jamais par sa seule position dans le support;
+- le premier support alternatif négatif, obligatoire pour l'état
+  `non_principal_certified`, sinon l'état reste `unknown`;
 - les digests d'entrée/membres, éventuellement de coquille, et le bit
   `q_min_certified`.
 
+L'index `BallKey -> generator_handle` n'est construit qu'après la permutation
+finale de `kept` et des certificats; il ne conserve ainsi aucun handle
+pré-canonisation.
+
+Pour intégrer rapidement le prototype sans modifier les deux chemins chauds du
+producteur, une variante plus sûre est de construire le même objet **après** le
+tri canonique final :
+
+```text
+make_validated_hybrid_sidecar(points, catalogue_final, source_receipt)
+    -> Result<ValidatedHybridSidecar, Refusal>
+```
+
+Cette factory parcourt les handles finaux, couvre naturellement les singletons,
+recalcule ou vérifie les certificats ci-dessus, lie les digests et construit
+l'index seulement lorsque toutes les validations ont réussi. Elle évite tout
+risque de décalage entre `kept`, le chemin singleton et un tableau parallèle.
+Le fold hybride n'accepte ensuite qu'un `ValidatedHybridSidecar`; l'ancienne
+signature `(points, point_count, Catalogue)` reste au mieux un harnais borné.
+À l'échelle, la source peut produire directement les mêmes témoins afin
+d'éviter ce second passage, mais le vérificateur post-catalogue et son type
+validé restent la frontière de confiance.
+
 `unknown` sélectionne le fallback exact; il ne vaut jamais `false` au sens
-scientifique. Un sidecar qui prétend `principal` mais échoue à la vérification
-fait refuser le lot atomiquement.
+scientifique. Un sidecar qui prétend `principal_certified` ou
+`non_principal_certified` mais échoue à la vérification fait refuser le lot
+atomiquement. Le certificat principal et la validation stricte de `U`
+impliquent localement `q_min=|U|`; le bit `q_min_certified` reste néanmoins
+obligatoire pour le marquage public de tous les générateurs, notamment ceux du
+fallback. Le fast path exige en plus `source_complete_for_order[k]`.
 
 ## Coût et stratégie de livraison
 
@@ -147,7 +187,10 @@ n'est nécessaire.
   certificats après le tri de `kept`, ou réutiliser un digest d'une autre
   famille de membres.
 - Différentiel : bit/certificat produits par la source contre un oracle qui
-  énumère tous les supports de `Q` sur les petites coquilles.
+  énumère tous les sous-ensembles de `Q` de tailles `1..4` dont la miniboule
+  vaut `B`. Tout sous-ensemble de `M` engendrant `B` contient un tel support
+  minimal sur `Q`; cet oracle en `O(|Q|^4)` est donc exhaustif pour la
+  principalité et indépendant du critère par suppression.
 
 Diagnostic local supplémentaire, relatif aux primitives exactes partagées :
 20 000 familles aléatoires de grille, 51 571 suppressions de points de support,

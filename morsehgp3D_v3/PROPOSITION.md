@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=21d85c85c1bd6553606a0081eeb283f58699d173`, toujours sous
+`HEAD=origin/main=56e76c65c31fc877f7629ac8e87a8a8479efa8fb`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -46,7 +46,8 @@ profileur compact et sépare croissance de couverture et activation silencieuse;
 globale, `45c0b7b` les records par témoins et les saturés des boules
 marquantes, `acb9e7a` le sweep du mur de masse, `df984ed` les forêts candidates
 dérivées des records, `f2e78fa` la proposition cofaces sans paires, puis
-`21d85c8` l'oracle `face-owner` borné et sa réfutation permanente. Leurs
+`21d85c8` l'oracle `face-owner` borné et sa réfutation permanente, puis
+`56e76c6` son rejeu ordre par ordre et sa porte `k=6` ciblée. Leurs
 empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
@@ -152,13 +153,15 @@ demand-driven par intersections progressives des postings, avec coupure quand
 aucune racine extérieure nouvelle ne subsiste. Preuve, masses et mutants sont
 dans
 [`REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md`](audits/REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md).
-Le premier oracle live confirme cette sémantique sur quatre formes. Le delta
-`2eb2877` ferme son allocation quadratique (`n=20` : 19,188 s vers 0,146 s),
-mais le modèle mémoire compte encore 24 octets pour une incidence qui en vaut
-32 sur l'ABI reçue et conserve les arêtes de tous les ordres. Le correctif
-suivant est de réserver `I_k` une fois puis de traiter/rejouer/libérer un ordre
-entier; voir
-[`AUDIT_DELTA_FACEOWNER_2EB2877.md`](audits/AUDIT_DELTA_FACEOWNER_2EB2877.md).
+Le premier oracle live confirme cette sémantique sur quatre formes. `2eb2877`
+ferme son allocation quadratique (`n=20` : 19,188 s vers 0,146 s), puis
+`56e76c6` réserve `I_k` une fois et traite, rejoue et libère un ordre entier
+avant le suivant. Le refactor passe 18/18 portes ciblées et conserve les records
+Gamma. Son seuil mémoire repose encore sur une estimation non majorante : les
+capacités d'arêtes, sorties persistantes et allocations de conteneurs ne sont
+pas toutes bornées. Permutation `face-owner`, identités par ordre et allocateur
+plafonné restent les fermetures locales; voir
+[`AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md`](audits/AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md).
 Le protocole cofaces proposé à `f2e78fa` n'est pas exact avec son seul support
 canonique : le défaut apparaît déjà à `q_min=k=4`, où une coquille u16 de six
 points perd une composante stricte sur six; à `q_min=4,k=6`, neuf composantes

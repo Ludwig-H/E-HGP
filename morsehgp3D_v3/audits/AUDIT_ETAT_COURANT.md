@@ -11,30 +11,31 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
 courante est
-`HEAD=origin/main=21d85c85c1bd6553606a0081eeb283f58699d173` : `405c37b`
+`HEAD=origin/main=56e76c65c31fc877f7629ac8e87a8a8479efa8fb` : `405c37b`
 livre le join postings reçu, `651e47f` la porte des niveaux d'événement
 `q_min`, `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
 troisième voie postings globale, `45c0b7b` les records par témoins et les
 saturés des boules marquantes, `acb9e7a` le sweep de masse, `df984ed` les
-forêts candidates dérivées, `f2e78fa` la proposition cofaces, puis `21d85c8`
-l'oracle `face-owner` borné et sa réfutation permanente. Leur audit
+forêts candidates dérivées, `f2e78fa` la proposition cofaces, `21d85c8`
+l'oracle `face-owner` borné et sa réfutation permanente, puis `56e76c6` son
+rejeu ordre par ordre. Leur audit
 reproductible, avec toutes les empreintes et le correctif live immédiatement
 postérieur, est
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 
-## Autorité courante à `21d85c8`
+## Autorité courante à `56e76c6`
 
 | contrat | état reçu |
 | --- | --- |
 | théorème du join postings | **positif** : old/new, new/new, poids `|M intersection N|`, lot d'activation tardif et rejeu strict/fermé sont exacts sur tout catalogue valide |
 | différentiel du join | **positif borné** : G², par lots et global concordent; table de chaque poids reconstruite par intersections directes; six mutants de la voie par lots meurent |
 | prédicat d'événement `q_min` | **positif borné** : ensembles de niveaux 30/30 génériques et 60/60 saturés, provenance bornée sans écart dans ces campagnes |
-| transcript Gamma | **records de composante positifs bornés** : triples, témoins fermés, témoins stricts, types et saturés marquants concordent; oracle indépendant par `k`-faces; échange même-lot tué par records seuls; pipeline, canonicalité du niveau et provenance runtime encore ouverts |
+| transcript Gamma | **records de composante positifs bornés** : triples, témoins fermés, témoins stricts, types et saturés marquants concordent; oracle indépendant par `k`-faces; échange même-lot tué par records seuls; pipeline compare maintenant les records, mais digest, canonicalité du niveau et provenance runtime restent ouverts |
 | préflight par lots | **progrès positif** : `P_post` et plus gros lot exacts avant émission, manifeste observable au refus; pic encore modélisé par constantes, sans high-water contractuel |
 | voie postings globale | **troisième vérité utile, pas forme d'échelle** : déterministe à 1/2 threads et fold identique; préflight/budget raccordés et porte de refus verte, mais occurrences intégrales, double stockage transitoire, arêtes et ordre global |
 | forêts dérivées | **projection `full_pi0` plausible, non reçue sémantiquement** : zéro orphelin sur campagnes et comptages cohérents; parents, kinds, racines, niveaux et choix `full_pi0|hgp_reduced` ne sont pas comparés à une vérité indépendante |
 | masse sans paires | **théorème et diagnostic positifs** : les étoiles `face-owner` conservent chaque coupe; `n=200/K=5` passe de `385,55 M` cooccurrences à `16,38 M` incidences; oracle borné seulement tant que les faces sont énumérées |
-| oracle `face-owner` live | **sémantique positive, verrou quadratique fermé à `2eb2877`** : quatre formes concordent, 7/7 mutants meurent, `n=20` passe de 19,188 s à 0,146 s; restent `reserve(I_k)`, rejeu ordre-par-ordre et vraie borne mémoire, car le pic compte encore 24 au lieu de 32 octets par incidence et oublie les arêtes résidentes |
+| oracle `face-owner` live | **sémantique et rejeu ordre par ordre positifs à `56e76c6`** : quatre formes concordent, 7/7 mutants meurent, 18/18 portes ciblées passent; `reserve(I_k)` et libération inter-ordre sont effectifs; restent permutation propre, identités par ordre et vraie borne mémoire, car l'estimation omet capacités et sorties |
 | cofaces à support canonique | **réfuté jusque dans `q=k=4`** : une coquille u16 minimale possède six composantes strictes et le filtre n'en voit que cinq; à `q=4,k=6`, une seconde fixture en manque neuf sur dix-sept; support principal certifié ou fallback exact nécessaires |
 | solution hybride | **preuves constructives, implémentation à recevoir** : support principal certifié donne `q<=4` attaches exactes; son bit se produit sans LP par `miniball(M privé de u)<B`, avec certificat de quatre points au plus; coquilles multi-supports basculent vers le trie `face-owner` à coupures certifiées |
 | source et provenance runtime | **ouvertes** : `n_support` est lu sans bit `q_min_certified`; `smax>=n` exclut une censure de rang mais ne certifie pas la complétude de la famille |
@@ -74,7 +75,7 @@ contre une construction indépendante. Le profil public `full_pi0` contre
 `hgp_reduced`, le coût hors timer et les copies de témoins restent ouverts.
 
 La route directement implémentable issue de la réfutation est
-[`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md) : un support principal est reçu par au plus quatre séparateurs exacts, puis `q` carriers couvrent toutes les racines strictes; les coquilles à supports alternatifs utilisent un trie de signatures avec coupure seulement sur une intersection de postings vide ou déjà couverte. Cette combinaison retire `P_post` sans transformer la conjecture `O(q+arité)` en claim.
+[`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md) : un support principal est reçu par au plus quatre certificats exacts, puis `q` carriers couvrent toutes les racines strictes; les coquilles à supports alternatifs utilisent un trie de signatures. Comme le générateur courant appartient toujours à l'intersection d'un préfixe, la coupure correcte n'est pas une liste brute vide : elle exige que tous les candidats soient déjà dans la composante staging courante. Cette combinaison retire `P_post` sans transformer la conjecture `O(q+arité)` en claim.
 
 Les sections `2b4801c` et antérieures sont conservées ci-dessous comme
 historique chronologique; elles ne décrivent plus le worktree courant.

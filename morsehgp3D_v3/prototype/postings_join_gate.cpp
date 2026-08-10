@@ -38,6 +38,7 @@
 #include "prototype/saturated_fold.hpp"
 #include "prototype/saturated_fold_faceowner.hpp"
 #include "prototype/saturated_fold_global.hpp"
+#include "prototype/saturated_fold_hybrid.hpp"
 
 namespace {
 
@@ -305,7 +306,9 @@ bool independent_weights_agree(const mhgp::Catalogue& catalogue,
 bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
                       mhgp3v::PostingsMutants mutants, const ExpectedOrder* expected,
                       std::size_t expected_count, std::string* why,
-                      mhgp3v::FaceOwnerMutants faceowner_mutants = {}) {
+                      mhgp3v::FaceOwnerMutants faceowner_mutants = {},
+                      const std::vector<mhgp::P3>* points = nullptr,
+                      mhgp3v::HybridMutants hybrid_mutants = {}) {
   const mhgp3v::SaturatedFold truth = mhgp3v::build_saturated_fold(
       catalogue, maximum_order, /*keep_partitions=*/true, /*enforce_event_guard=*/true);
   if (!truth.ok) { *why = std::string("fold de verite refuse : ") + truth.refusal; return false; }
@@ -408,6 +411,26 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
       return false;
     }
   }
+
+  // LA CINQUIEME FORME : le fold HYBRIDE produit (fast path principal-support
+  // + fallback demand-driven), sur les entrees GEOMETRIQUES seulement — le
+  // certificat par miniboules supprimees et les lookups exacts exigent le
+  // nuage. Meme fold bit a bit, records compris ; identite attaches==unions.
+  if (points != nullptr) {
+    mhgp3v::HybridReceipt hybrid_receipt;
+    const mhgp3v::SaturatedFold hybrid = mhgp3v::build_saturated_fold_hybrid(
+        *points, (int)points->size(), catalogue, maximum_order,
+        /*keep_partitions=*/true, &hybrid_receipt, /*enforce_event_guard=*/true,
+        hybrid_mutants);
+    if (!hybrid.ok) {
+      *why = std::string("fold hybride refuse : ") + hybrid.refusal;
+      return false;
+    }
+    if (!folds_agree(truth, hybrid, /*ignore_representatives=*/false, why)) {
+      *why = "forme hybride : " + *why;
+      return false;
+    }
+  }
   return true;
 }
 
@@ -428,6 +451,7 @@ int main(int argc, char** argv) {
     return true;
   };
   const char* faceowner_mutant_name = nullptr;
+  const char* hybrid_mutant_name = nullptr;
   for (int i = 1; i < argc; ++i) {
     if (!strcmp(argv[i], "--mutant")) {
       if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --mutant\n"); return 2; }
@@ -437,6 +461,11 @@ int main(int argc, char** argv) {
     if (!strcmp(argv[i], "--faceowner-mutant")) {
       if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --faceowner-mutant\n"); return 2; }
       faceowner_mutant_name = argv[++i];
+      continue;
+    }
+    if (!strcmp(argv[i], "--hybrid-mutant")) {
+      if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --hybrid-mutant\n"); return 2; }
+      hybrid_mutant_name = argv[++i];
       continue;
     }
     long long value = 0;
@@ -476,6 +505,12 @@ int main(int argc, char** argv) {
     else if (!strcmp(faceowner_mutant_name, "support-facet-filter")) faceowner_mutants.support_facet_filter = true;
     else { std::printf("ECHEC : mutant face-owner inconnu %s\n", faceowner_mutant_name); return 2; }
   }
+  mhgp3v::HybridMutants hybrid_mutants{};
+  if (hybrid_mutant_name != nullptr) {
+    if (!strcmp(hybrid_mutant_name, "force-principal")) hybrid_mutants.force_principal = true;
+    else if (!strcmp(hybrid_mutant_name, "raw-ball-key")) hybrid_mutants.raw_ball_key = true;
+    else { std::printf("ECHEC : mutant hybride inconnu %s\n", hybrid_mutant_name); return 2; }
+  }
   mhgp3v::PostingsMutants mutants{};
   if (mutant_name != nullptr) {
     if (!strcmp(mutant_name, "strict-threshold")) mutants.strict_threshold = true;
@@ -494,7 +529,7 @@ int main(int argc, char** argv) {
                                         mutants, fixture.expected.data(), fixture.expected.size(),
                                         &why, faceowner_mutants);
     if (!agree) {
-      if ((mutant_name != nullptr || faceowner_mutant_name != nullptr) && why.rfind("fixture contredite", 0) != 0) {
+      if ((mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) && why.rfind("fixture contredite", 0) != 0) {
         std::printf("mutant tue par la fixture %s : %s\n", fixture.name, why.c_str());
         return 4;
       }
@@ -526,8 +561,9 @@ int main(int argc, char** argv) {
       return 1;
     }
     std::string why;
-    if (!run_differential(catalogue, 6, mutants, nullptr, 0, &why, faceowner_mutants)) {
-      if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
+    if (!run_differential(catalogue, 6, mutants, nullptr, 0, &why, faceowner_mutants,
+                          &cosphere, hybrid_mutants)) {
+      if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
         std::printf("mutant tue par la cosphere de la refutation : %s\n", why.c_str());
         return 4;
       }
@@ -580,8 +616,8 @@ int main(int argc, char** argv) {
 
     std::string why;
     if (!run_differential(catalogue, maximum_order, mutants, nullptr, 0, &why,
-                          faceowner_mutants)) {
-      if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
+                          faceowner_mutants, &pts, hybrid_mutants)) {
+      if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
         std::printf("mutant tue par la campagne, nuage %d : %s\n", c, why.c_str());
         return 4;
       }
@@ -616,7 +652,7 @@ int main(int argc, char** argv) {
           straight.old_new_occurrences == mirrored.old_new_occurrences;
       if (!invariant) {
         if (permutation_why.empty()) permutation_why = "recu non invariant";
-        if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
+        if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
           std::printf("mutant tue par la permutation : %s\n", permutation_why.c_str());
           return 4;
         }
@@ -629,7 +665,7 @@ int main(int argc, char** argv) {
     const mhgp3v::SaturatedFold fold = mhgp3v::build_saturated_fold_postings(
         catalogue, maximum_order, false, &receipt, mutants);
     if (!fold.ok) {
-      if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
+      if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
         std::printf("mutant tue par le recu, nuage %d : %s\n", c, fold.refusal);
         return 4;
       }
@@ -648,9 +684,11 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
+  if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
     std::printf("MUTANT SURVIVANT %s : la porte ne mord pas\n",
-                mutant_name != nullptr ? mutant_name : faceowner_mutant_name);
+                mutant_name != nullptr        ? mutant_name
+                : faceowner_mutant_name != nullptr ? faceowner_mutant_name
+                                                   : hybrid_mutant_name);
     return 0;
   }
 

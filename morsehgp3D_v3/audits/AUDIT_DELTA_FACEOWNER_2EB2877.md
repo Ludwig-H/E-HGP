@@ -1,5 +1,9 @@
 # Delta live `face-owner` — suppression du coût quadratique
 
+> Historique : le refactor ordre par ordre demandé ici est maintenant livré à
+> `56e76c6` et audité dans
+> [`AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md`](AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md).
+
 Date : 10 août 2026 UTC.
 
 Pins : `HEAD=21d85c85c1bd6553606a0081eeb283f58699d173`, header

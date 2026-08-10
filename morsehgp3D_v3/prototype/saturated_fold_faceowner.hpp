@@ -547,7 +547,22 @@ inline SaturatedFold build_saturated_fold_faceowner(
   // des incidences contre les binomiales le voit. Les mutants qui REDUISENT
   // l'emission par construction (omission, decalage, filtres illicites) sont
   // exemptes ici pour mourir par le DIFFERENTIEL, qui prouve la semantique.
-  out.identities_ok = out.incidences_total == out.predicted_incidences;
+  // IDENTITES PAR ORDRE (audit 56e76c6, verrou 3) : une compensation entre
+  // deux ordres ne peut plus passer par le seul total.
+  bool per_order_ok = out.incidences_total == out.predicted_incidences;
+  long long deduplicated_sum = 0;
+  for (int k = 1; k <= K; ++k) {
+    const std::size_t idx = (std::size_t)(k - 1);
+    per_order_ok = per_order_ok &&
+                   out.incidences_k[idx] == predicted_incidences_by_order[idx] &&
+                   out.star_branches_k[idx] ==
+                       out.incidences_k[idx] - out.unique_signatures_k[idx] &&
+                   out.multiplicity_one_k[idx] <= out.unique_signatures_k[idx] &&
+                   out.deduplicated_branches_k[idx] <= out.star_branches_k[idx];
+    deduplicated_sum += out.deduplicated_branches_k[idx];
+  }
+  per_order_ok = per_order_ok && deduplicated_sum == out.unions_attempted;
+  out.identities_ok = per_order_ok;
   if (!out.identities_ok && !mutants.omit_first_signature && !mutants.shift_k &&
       !mutants.qmin_filter_partial && !mutants.support_facet_filter) {
     fold.refusal = "identite de preflight violee : incidences != binomiales";
