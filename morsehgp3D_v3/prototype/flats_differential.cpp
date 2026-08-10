@@ -1139,23 +1139,38 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
 
 // Équivariance par permutation : renuméroter les points ne doit rien changer au
 // catalogue, une fois les supports ramenés aux identifiants d'origine.
-// EGALITE COMPLETE de deux catalogues : statut a part, puis support, arite, rang,
-// beta ET membres. Comparer un couple (nombre, histogramme d'arites) laisse passer
-// deux catalogues differents de meme profil — et mon message annonçait « meme
-// catalogue » pour ce seul profil.
+// EGALITE DU PAYLOAD PUBLIC ENTIER, champ a champ. L'audit a requalifie la
+// version precedente en « quotient semantique riche » : elle comparait support,
+// arite, rang, niveau rationnel et membres PAR sphere, mais ni la
+// representation exacte de la sphere, ni `beta` bit a bit, ni les offsets et le
+// pool concatene, ni les diagnostics du `Catalogue`. Deux catalogues au meme
+// quotient mais de representations ou d'offsets divergents passaient. Tout est
+// desormais exige — `sphere_cmp_beta` reste en PLUS, comme temoin que l'egalite
+// de representation implique bien l'egalite geometrique.
 static bool same_catalogue(const mhgp::Catalogue& a, const mhgp::Catalogue& b) {
   if (a.spheres.size() != b.spheres.size()) return false;
+  if (a.members.size() != b.members.size()) return false;
   for (size_t i = 0; i < a.spheres.size(); ++i) {
     const mhgp::CriticalSphere& x = a.spheres[i];
     const mhgp::CriticalSphere& y = b.spheres[i];
     if (x.n_support != y.n_support || x.rank != y.rank) return false;
+    if (x.members_begin != y.members_begin) return false;
     for (int j = 0; j < 4; ++j) if (x.support[j] != y.support[j]) return false;
+    if (x.sph.base.x != y.sph.base.x || x.sph.base.y != y.sph.base.y ||
+        x.sph.base.z != y.sph.base.z || x.sph.nx != y.sph.nx || x.sph.ny != y.sph.ny ||
+        x.sph.nz != y.sph.nz || x.sph.den != y.sph.den || x.sph.support != y.sph.support)
+      return false;
+    if (memcmp(&x.beta, &y.beta, sizeof(double)) != 0) return false;
     if (mhgp::sphere_cmp_beta(x.sph, y.sph) != 0) return false;
-    for (int j = 0; j < x.rank; ++j)
-      if (a.members[(size_t)(x.members_begin + j)] != b.members[(size_t)(y.members_begin + j)])
-        return false;
   }
-  return true;
+  if (a.members != b.members) return false;
+  return a.neighbourhood_size == b.neighbourhood_size &&
+         a.growth_rounds == b.growth_rounds && a.certified == b.certified &&
+         a.candidate_pairs == b.candidate_pairs &&
+         a.candidate_triples == b.candidate_triples &&
+         a.candidate_quads == b.candidate_quads &&
+         a.degenerate_shells == b.degenerate_shells &&
+         a.shell_anomalies == b.shell_anomalies;
 }
 
 static bool permutation_equivariant(const char* tag, const std::vector<P3>& pts, int s_max,
