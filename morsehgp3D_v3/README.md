@@ -5,12 +5,15 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état courant audité est `HEAD=origin/main=f3802bd`. Le commit produit
+L'état courant audité est `HEAD=origin/main=f102d42`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
 `same_catalogue` à tous les champs déclarés de `Catalogue`; `f3802bd` corrige le
-comptage distinct des handles stricts dans le falsificateur F0. Aucun de ces
+comptage distinct des handles stricts dans le falsificateur F0. `f102d42`
+ajoute la trace de branche réellement prise, valide source et tranche du pool,
+borne le libellé mémoire et migre toutes les portes négatives vers un code de
+sortie exact. Aucun de ces
 commits ne change `exploration_v3_hors_registre` ni le statut public. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
@@ -25,17 +28,20 @@ vérité coplanaire 19 a aussi été recertifiée par l'oracle exhaustif existan
 dans une copie temporaire. Ce sont des résultats CPU bornés, pas une promotion
 ni un reçu 50 k.
 
-Quatre réserves empêchaient de surinterpréter ce progrès ; trois sont fermées
-dans le delta courant. Le validateur de forêt reçoit désormais
-`ForestNode::source`, les tranches du pool et la profondeur maximale, avec
-leurs fixtures d'auto-test. Le juge porte un compteur de comparaisons avec
-plancher `decides × n` — la suppression du différentiel rougit, plus seulement
-l'annulation du timer. L'ordre est observé par une trace par nuage et tout
-écart au contrat est un `ECHEC`. Reste la quatrième, dite pour ce qu'elle est :
-l'égalité des diagnostics de `Catalogue` est une égalité de champs par défaut
-sans sémantique backend taguée, et la ligne `octets` se déclare partielle
-(buffers dynamiques seulement). Les deux anciennes macros CMake gardent aussi
-23 appels sans code exact.
+`f102d42` ferme réellement la dette de l'ordre : la première lambda entrée
+alimente une trace par nuage et le mutant forçant la mauvaise branche rougit.
+Le validateur détecte aussi `ForestNode::source` et les tranches du pool hors
+plage; le libellé `octets` est ramené honnêtement aux buffers dynamiques. En
+revanche, `judge_comparisons` précrédite `expected.size()` avant les recherches :
+un mutant supprimant le différentiel complet sort encore 0. `max_depth` est
+seulement mesuré; une chaîne saine de 100 000 nœuds atteint toujours la
+signature récursive et termine par `SIGSEGV`, avec un coût de concaténation
+potentiellement quadratique. Les fixtures source/pool ne reçoivent pas encore
+le passage obligatoire de la détection au refus de signature, et la cohérence
+sémantique `kind/order/source-rank/beta` reste ouverte. Enfin, l'égalité des
+diagnostics de `Catalogue` ne définit pas leur sémantique backend. Les anciennes
+macros permissives sont supprimées : toutes les portes négatives CMake passent
+désormais par le helper à code exact.
 
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
 fold et repli multi-cœurs. La
@@ -43,7 +49,11 @@ fold et repli multi-cœurs. La
 conclut notamment que le catalogue de rang borné n'est pas prouvé suffisant
 hors position générale et que l'admissibilité shallow ne forme pas en général
 un préfixe le long du pinceau. La route arité quatre reste donc un candidat de
-recherche, pas une décision d'architecture reçue.
+recherche, pas une décision d'architecture reçue. Une solution constructive
+complémentaire est détaillée dans la
+[`note Gamma et dégénérescences`](audits/NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md) :
+oracle exhaustif exact par facettes/cofaces, puis quotient local d'une coquille
+par arrangement directionnel sur $S^2$, sans mosaïque globale.
 
 **Trois des quatre P0 de cet audit sont fonctionnellement fermés sur leur domaine
 borné.** La troncature `i128` du chemin `use_owner` est réduite par
@@ -68,8 +78,9 @@ fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
 Le passage GPU est spécifié séparément dans la
 [`note des verrous mathématiques GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md) :
-largeurs exactes 64/128/384 bits, voisin terminal, sous-arbres transactionnels,
-owner/census, runs et porte 50 k/G4.
+étages exacts 64/128 bits, borne 384 bits reçue pour l'axe triangulaire u16 et
+multiprécision tant qu'une autre borne n'est pas démontrée, voisin terminal,
+sous-arbres transactionnels, owner/census, runs et porte 50 k/G4.
 
 Dans le snapshot committé `e406e1f`, le prototype `direct_source.cpp` est un résultat mathématique positif, pas une
 source produit certifiée. Des oracles indépendants valident son cover--rayon et
@@ -394,7 +405,37 @@ permutations**, avec exigence de zéro refus et de signature unique.
 
 ### Ce qui n'est PAS jugé
 
-- L'oracle M1 n'a **pas** été étendu à ce sujet. Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. L'étendre aux multiplicités est un travail à part, et il doit être audité.
+- L'oracle M1 n'a **pas** été étendu à ce sujet. Sa référence déclare hors domaine tout nuage portant un point surnuméraire sur une coquille — précisément le régime que ce parcours traite. Le juge $\Gamma_k$ (`mhgp3v_gamma_judge`, ci-dessous) fournit désormais cette autorité indépendante pour la chaîne catalogue→forêt ; il doit être audité, et il ne juge pas le parcours par flats lui-même.
+
+### Le juge $\Gamma_k$ : la définition du manuscrit contre la chaîne, et la frontière mesurée
+
+`oracle/gamma_forest_judge.cpp` calcule — en arithmétique rationnelle de
+l'oracle, avec la géométrie partagée `exact_geometry.hpp` et **aucune primitive
+de la production** — la vérité du théorème 2 du manuscrit : les composantes de
+$\Gamma_k(X,r)$, sommets = $k$-sous-ensembles présents dès $r\ge\rho(\sigma)$
+(miniboule), arêtes élémentaires dès $\rho(\sigma\cup\tau)\le r$, par le
+**protocole de lot normatif** de la réponse Q1.2 de l'auditeur — coupe stricte
+figée, toutes les activations du niveau appliquées, classification par racines
+strictes distinctes. Il confronte ensuite la chaîne sujet
+`flat_catalogue`+`build_forest` sur les **partitions d'identifiants couverts à
+chaque niveau d'événement** — une unité libre de toute convention de nœud, qui
+détermine la forêt comme quotient. La dégénérescence est celle de la
+**Def. 26** : un point surnuméraire SUR une sphère d'événement, jamais le rang
+(toute face obtuse a des points intérieurs, et l'effondrement de miniboule crée
+des niveaux égaux génériques).
+
+**[mesuré, portes permanentes]** Sur coordonnées génériques ($40^3$, 30 nuages,
+$k\le3$) : 25 nuages sans cosphéricité, **accord exact partout** — la chaîne
+rend exactement les partitions de $\Gamma_k$ à chaque niveau, aux deux coupes.
+Sur grille saturée ($4^3$, cosphéricités partout) : **36 ordres sur 60 en
+désaccord de STRUCTURE**, zéro censure de rang. La classe est identifiée par
+les diagnostics : **le sujet sous-fusionne** — une coquille cosphérique de rang
+$r>k+1$ porte au niveau de sa sphère le lot de fusion de ses $(k+1)$-faces,
+mais la forêt d'ordre $k$ ne lit que les rangs $k$ et $k+1$ : la sphère est au
+catalogue et l'événement est invisible. C'est la mesure directe du NO-GO Q1 de
+l'auditeur, et elle nomme le travail du fold v3 : une **lecture élargie** où
+toute sphère de rang $r$ porte ses événements d'ordre $k$ pour chaque $k<r$ —
+sous réserve du théorème de quotient encore manquant.
 - Les forêts ne sont pas construites, et le centre rationnel, le rayon et $\beta$ ne sont pas confrontés à une vérité distincte. Ce qui est comparé est listé au §4 ; « payload entier » serait faux.
 - Pas de forêts ni de reverse search **dans le catalogue**. Un propriétaire exact
   expérimental est calculé sur la récolte naviguée et rejoué sous permutation,
@@ -2372,7 +2413,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
 | 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` fermé sur u16; garde de type encore partielle; identité signée directement reçue dans le delta live `003ba13f...` et mutant non signé tué; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
-| 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
+| 4 | référence de l'oracle M1 tolérante aux multiplicités | **le juge $\Gamma_k$ est écrit** (`mhgp3v_gamma_judge`, §4) : accord exact exigé et vérifié hors cosphéricité, frontière mesurée dessus (36/60 ordres en sous-fusion structurelle sur grille $4^3$) ; il juge la chaîne catalogue→forêt, pas encore le parcours par flats, et doit être audité |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |
 | 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |
 | 6 bis | sémantique quotientée des observations confondues | ouverte ; le prototype les **refuse** explicitement plutôt que de publier un support dépendant de la numérotation |

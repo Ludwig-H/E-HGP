@@ -122,11 +122,11 @@ explicitement cet index après canonicalisation complète du catalogue. La
 comptabilité O5 rappelle qu'un décès dans une composante de lot peut ne pas être
 attribuable canoniquement à une hyperarête particulière.
 
-Le tri doit comparer les niveaux exacts. Les 384 bits sont une borne de stockage
-du profil u16 démontré, pas la définition abstraite : égalité de lot et ordre
-reposent sur le rationnel exact ou une représentation homogène équivalente. Une
-clef secondaire stable peut ordonner les records **dans** le lot pour la
-sérialisation, jamais scinder le lot mathématique.
+Le tri doit comparer les niveaux exacts. La borne de 384 bits est démontrée pour
+la clef de l'axe triangulaire u16, pas pour tout niveau de tout support : égalité
+de lot et ordre reposent sur le rationnel exact, une borne propre démontrée ou
+la multiprécision. Une clef secondaire stable peut ordonner les records
+**dans** le lot pour la sérialisation, jamais scinder le lot mathématique.
 
 ### Q1.3 — Les `members` suffisent-ils pour la couverture ?
 
@@ -143,10 +143,10 @@ de la spécification exige un journal `coverage_delta` et interdit de supprimer
 une hyperarête seulement parce que le DSU ne change pas.
 
 **Contrat minimal :** pour chaque lot et chaque composante, journaliser les
-facettes activées ou, au minimum, leur delta d'identifiants prouvé équivalent;
-agréger ces deltas même pour `q=0` et `q=1`; comparer aux unions de Gamma dans
-l'oracle borné aux coupes ouverte et fermée. Les `members` peuvent alimenter ce
-journal, mais ne le remplacent pas.
+facettes et incidences activées, y compris lorsque le DSU et l'union des points
+ne changent pas; en dériver ensuite le delta d'identifiants pour `q=0` et `q=1`;
+comparer état Gamma et couvertures aux coupes ouverte et fermée. Les `members`
+peuvent alimenter ce journal, mais ne le remplacent pas.
 
 ## Q2 — Porte exacte des supports quatre
 
@@ -255,12 +255,14 @@ classification et sérialisation parallèles des composantes désormais prouvée
 disjointes. Les nouveaux identifiants sont alloués par scan stable et le commit
 reste unique.
 
-Une partition plus fine est possible uniquement après construction d'un graphe
-de conflits sur les racines strictes, handles nouveaux et records. Ses
-composantes connexes sont précisément les transactions indépendantes; les
-calculer est déjà une partie de la fermeture du lot. La v3 ne doit pas annoncer
-un parallélisme inter-lots ou pré-clôture avant d'en mesurer le bénéfice et de
-tuer un mutant qui coupe `R1--N--R2` entre deux tâches.
+Une partition plus fine du **staging** est possible uniquement après
+construction d'un graphe de conflits sur les racines strictes, handles nouveaux
+et records. Ses composantes connexes peuvent être calculées indépendamment;
+elles ne deviennent pas des commits séparés, car le lot conserve son contrat
+tout-ou-rien. Calculer ce graphe est déjà une partie de la fermeture du lot. La
+v3 ne doit pas annoncer un parallélisme inter-lots ou pré-clôture avant d'en
+mesurer le bénéfice et de tuer un mutant qui coupe `R1--N--R2` entre deux
+tâches.
 
 ## Q4 — Contrat du repli CPU multi-cœurs
 
@@ -309,7 +311,7 @@ fixture owner signée qui tue le mutant non signé; cardinal coplanaire 19
 confirmé indépendamment; extension de `same_catalogue` à tous les champs
 déclarés de `Catalogue` au commit `1f0db40`.
 
-Quatre formulations restent à corriger :
+Au snapshot `f3802bd`, quatre formulations restaient à corriger :
 
 1. le validateur de forêt n'est pas « total » tant que source, tranche de pool
    et profondeur/concaténation récursive ne sont pas reçues;
@@ -325,6 +327,17 @@ La vérité coplanaire 19 a été recertifiée par `brute_catalogue` dans une co
 temporaire; la porte permanente grave encore seulement cardinalité et statut.
 Le résultat est positif, mais une substitution de sphère à cardinalité constante
 n'est pas reçue par ce témoin isolé.
+
+**Réponse ultérieure `f102d42`.** La branche réellement entrée est désormais
+observée et son mutant rougit; sources et tranches du pool hors plage sont
+détectées; le libellé d'octets est borné aux buffers dynamiques; toutes les
+portes négatives CMake exigent leur code contractuel. Deux réserves demeurent :
+`judge_comparisons` précrédite `expected.size()` avant les recherches, de sorte
+qu'un mutant sans différentiel sort encore 0; `max_depth` ne borne pas la
+signature récursive, et une chaîne saine de 100 000 nœuds termine par
+`SIGSEGV`. La solution proposée pour dépasser le simple constat multiplicitaire
+est dans
+[`NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md`](NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md).
 
 ## Ordre de travail conseillé à Claude
 

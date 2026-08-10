@@ -29,24 +29,30 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le snapshot courant est `HEAD=origin/main=f3802bd`, toujours sous
+Le snapshot courant est `HEAD=origin/main=f102d42`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
 et ajoute les fixtures forêt/owner; `1f0db40` étend `same_catalogue` à tous les
 champs déclarés; `f3802bd` ferme le doublon de handle strict du falsificateur
-F0. Ce sont des résultats CPU bornés, pas un reçu produit.
+F0; `f102d42` observe la branche réellement prise, contrôle source et tranche
+de pool, borne le libellé mémoire et migre toutes les portes négatives vers un
+code exact. Ce sont des résultats CPU bornés, pas un reçu produit.
 
-Quatre réserves empêchent de surinterpréter ce progrès : les diagnostics publics
-de `Catalogue` concordent mais restent sans sémantique backend taguée et hors
-du compteur d'octets; le validateur ne ferme ni `ForestNode::source`, ni les
-tranches du pool, ni la profondeur récursive; la garde de temps juge non nul ne
-prouve pas le travail du différentiel; la ligne d'ordre dérive encore de
-l'option et un mutant de branche reste vert. Les 23 appels historiques aux
-macros négatives ne fixent toujours pas leur code exact. Le NO-GO
+L'ordre observé et le mutant de branche sont reçus, de même que la détection des
+sources et tranches hors plage. Quatre réserves empêchent encore de
+surinterpréter ce progrès : les diagnostics publics de `Catalogue` concordent
+mais restent sans sémantique backend taguée; `judge_comparisons` précrédite la
+taille de la vérité avant les recherches et reste vert sans différentiel; la
+profondeur est seulement mesurée tandis que la signature reste récursive et
+potentiellement quadratique; la cohérence sémantique des nœuds de forêt reste
+ouverte. Le NO-GO
 50 k/GPU/replay est inchangé. La réponse mathématique aux questions de Claude
 est dans
 [`REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md`](audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md).
+La route constructive proposée ensuite — Gamma exhaustif puis arrangement
+directionnel local des coquilles, sans mosaïque globale — est dans
+[`NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md`](audits/NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
@@ -94,7 +100,8 @@ le refus/replay se ferment avant une revendication GPU ou mémoire.
 La voie GPU suit un contrat distinct, détaillé dans la
 [`note mathématique GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md). Le verdict
 parent u16 tient exactement en 64 bits; voisin, owner et census demandent 128
-bits; l'ordre exact des niveaux demande 384 bits ou un merge CPU. La
+bits; la borne 384 bits est reçue pour l'axe triangulaire u16 seulement, et les
+autres niveaux demandent une borne propre ou la multiprécision CPU. La
 reverse-search se partitionne en sous-arbres disjoints, mais chaque tâche doit
 commit ou rollback entièrement et tout refus doit rejouer le sous-arbre. Le live
 possède un `.cu`; son exécution G4 déclarée ne calcule que les masques
@@ -234,16 +241,25 @@ créditent l'intégration et l'accord sémantique borné, pas la comptabilité d
 timers. L'analyse détaillée et la commande du cas refusé sont dans
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
-### Réponse live au-dessus de `f37341d`
+### Réponses committées au-dessus de `f37341d`
 
-Le delta non committé sépare désormais les quatre horloges dans le même mode,
-alterne l'ordre demandé, canonicalise et compare le cœur sérialisé, reçoit un
-mutant d'ordre, et refuse chaque topologie de forêt invalide avant de comparer
-les digests. Il ne ferme pas encore le payload public complet, car les champs
-diagnostics du catalogue sont absents; il ne reçoit pas non plus un chrono juge
-non nul ni la branche d'ordre effectivement exécutée. Les résultats de temps de
-`e406e1f` ci-dessus restent historiques et doivent être remesurés sur un commit
-stable avec un reçu de campagne.
+`a8b5615` sépare les quatre horloges, canonicalise les buffers et compare tous
+les champs déclarés de `Catalogue`; `1f0db40` étend le comparateur flats à ces
+mêmes champs et `f3802bd` ferme le doublon de handle F0. Les diagnostics restent
+à leur valeur par défaut sans sémantique backend taguée, et la ligne d'octets du
+commit ne compte pas l'objet public entier. Le temps non nul du juge reçoit une
+horloge, pas la masse des comparaisons, et la première ligne d'ordre répétait
+encore l'option.
+
+`f102d42` ajoute positivement une trace alimentée par la branche prise, contrôle
+`ForestNode::source` et sa tranche de pool, borne honnêtement le libellé mémoire
+aux buffers dynamiques et ferme la migration des codes exacts. Deux réserves
+subsistent : `judge_comparisons` crédite `expected.size()` avant les recherches,
+donc son plancher reste vert si le différentiel est retiré; et `max_depth`
+n'empêche ni la signature récursive profonde ni sa concaténation
+potentiellement quadratique. Une sonde de chaîne saine à 100 000 nœuds termine
+par `SIGSEGV`. Les résultats de temps de `e406e1f` restent historiques et
+doivent être remesurés avec un reçu de campagne.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 
@@ -934,9 +950,10 @@ et stager des runs exacts; aucune de ces opérations n'est reçue par le live.
 Le noyau F0 matérialise volontairement Warshall et DSU pour juger un lot borné.
 Son contrat de naissance tout $N_a$ est maintenant respecté et un oracle de
 partitions contrôle indépendamment la fermeture. Le validateur régulier brut
-accepte encore un handle strict dupliqué, et les deux CTests disparaissent sans
-Python; ce noyau reste donc un falsificateur borné, pas la réduction horizontale
-de production. De même, `mhgp3v_first_incidence` emploie
+compte désormais les handles stricts distincts et la fixture
+`duplicated-strict-handle` refuse le doublon à `f3802bd`; les deux CTests
+disparaissent encore sans Python. Ce noyau reste donc un falsificateur borné,
+pas la réduction horizontale de production. De même, `mhgp3v_first_incidence` emploie
 délibérément `flat_catalogue(pts,n)`, des maps et une vérité combinatoire : c'est
 un oracle borné, pas l'étage de production décrit ci-dessous.
 
@@ -1032,9 +1049,10 @@ mais intermédiaires denses ⇒ **architecture no-go**.
 
 **État live de Gate D : NO-GO.** Le census borné des flats et le nouveau
 high-water d'entrées sont positifs sur leurs campagnes. La troncature owner et
-la naissance F0 sont corrigées dans leurs oracles bornés, mais la porte owner ne
-protège pas l'identité signée, le validateur régulier F0 n'est pas autonome et
-la gate Python est fail-open. Le census global possède une construction 4D
+la naissance F0 sont corrigées dans leurs oracles bornés. La porte owner reçoit
+désormais directement l'identité signée et tue le mutant non signé; le
+validateur F0 refuse le handle strict dupliqué. La gate Python reste fail-open
+et le noyau n'est pas une réduction de production. Le census global possède une construction 4D
 exacte, mais aucune capability terminale reçue. Les compteurs verts ne ferment
 ni le pipeline ni ces écarts.
 
@@ -1070,12 +1088,14 @@ qualifier 100 ms, **par famille sanctionnée**.
    frontières et le mutant; remplacer la garde partielle par un type de signe
    fort si le contrat veut interdire toute conversion implicite.
 2. **F0 source-agnostique — naissance fermée** : conserver le carré tout $N_a$
-   et l'oracle de partitions; rendre ses CTests obligatoires dans la gate.
-3. **Capability régulière séparée** : centraliser la validation structurelle du
-   `RawBatch`, compter des handles distincts et tuer le duplicat strict avant de
-   qualifier chaque `DirectHyperedge` brute.
-4. **Identité owner** : tester directement les deux sommets du cône signé et
-   tuer $\varepsilon=-1\mapsto+1$; graver aussi la vérité 19 du cas coplanaire.
+   et l'oracle de partitions; le doublon de handle est fermé, rendre maintenant
+   ses CTests obligatoires dans la gate.
+3. **Capability régulière séparée** : centraliser dans le futur composant de
+   production la validation structurelle du `RawBatch` déjà reçue dans le
+   falsificateur, avant de qualifier chaque `DirectHyperedge` brute.
+4. **Identité owner — fixture fermée** : conserver les deux sommets du cône
+   signé et le mutant $\varepsilon=-1\mapsto+1$; intégrer un oracle exhaustif
+   permanent du catalogue coplanaire au-delà de sa seule cardinalité 19.
 5. **Coût owner** : intégrer le réducteur `FULL/HALF/LINE/RAY/WEDGE/ZERO`, le
    comparer à l'oracle exhaustif de rayons, puis mesurer les grandes coquilles.
 6. **Census terminal** : implémenter le halfspace-report 4D exact avec statuts
@@ -1156,7 +1176,8 @@ de l'auditeur. Rien ici n'est un SLO ; chaque étape porte sa porte.
 
 ### 15.1 Le manuscrit fixe l'objet, pas encore l'extension dégénérée v3
 
-Quatre énoncés des parties I–II fixent la sortie et légitiment la chaîne :
+Quatre énoncés des parties I–II fixent l'objet visé; ils ne certifient pas à
+eux seuls la chaîne v3 :
 
 1. **Théorème 2** : les $K$-polyèdres de $\check{C}(X,r)$ sont exactement les
    amas discrets de Hartigan $C^{\mathrm{discret}}=X\cap\delta_r(C)$ — points
@@ -1167,15 +1188,15 @@ Quatre énoncés des parties I–II fixent la sortie et légitiment la chaîne :
    ($\mathring{B}_\sigma\cap(X\setminus\sigma)=\varnothing$). Il justifie la
    miniboule plutôt que la circumball dans ce domaine; il ne certifie pas le
    quotient multiplicitaire u16.
-3. **Théorèmes 5–7** : sous la même hypothèse, le $K$-MST du $K$-graphe de
-   Gabriel rend les mêmes composantes non triviales. La spécification active ne
-   les utilise toutefois plus comme base suffisante : le contre-exemple des
-   incidences silencieuses impose attaches et couverture supplémentaires.
-   Éviter la mosaïque reste l'invariant d'architecture, pas une complétude déjà
-   acquise du générateur par supports.
+3. **Théorèmes 5–7 du manuscrit** : ils motivent la réduction par le graphe de
+   Gabriel. Le registre actif classe toutefois la proposition 6 et le théorème
+   5 comme faux pour le graphe élagué brut, contre-exemple E5 compris. Ils ne
+   peuvent donc plus légitimer cette réduction sans attaches et journal
+   d'incidences supplémentaires. Éviter la mosaïque reste l'invariant
+   d'architecture, pas une complétude acquise du générateur par supports.
 4. **Position générale (Def. 26)** : le manuscrit suppose
-   $\partial B_\sigma\cap(X\setminus\sigma)=\varnothing$ ; la grille u16 la
-   viole systématiquement. Le traitement multiplicitaire du dépôt (coquilles,
+   $\partial B_\sigma\cap(X\setminus\sigma)=\varnothing$ ; la quantification
+   u16 ne la garantit pas et plusieurs fixtures la violent. Le traitement multiplicitaire du dépôt (coquilles,
    lots d'ex æquo) est donc une EXTENSION dont la sémantique normative doit être
    scellée — question posée à l'auditeur.
 
@@ -1201,9 +1222,12 @@ définir un préfixe sûr.
 **Fil A — exactitude de la chaîne (CPU, ce dépôt).** Les champs déclarés du
 catalogue et des forêts sont comparés entre les deux générateurs sur les
 campagnes reçues; le juge et les refus sont hors des deux chronos de génération.
-Restent : recevoir le travail du juge et la branche d'ordre, valider source et
-pool des forêts, sceller le lot strict--fermé, le `coverage_delta`, M.1
-multiplicitaire et la porte $s_{\max}=3$. « Validateur total » est retiré.
+`f102d42` reçoit la branche d'ordre et détecte source/tranche hors plage.
+Restent : recevoir le travail effectif du juge, rendre la signature forestière
+itérative ou bornée, valider la cohérence sémantique des nœuds, sceller le lot
+strict--fermé, le journal des facettes/incidences et son `coverage_delta`
+dérivé, M.1 multiplicitaire et la porte $s_{\max}=3$. « Validateur total » est
+retiré.
 
 **Fil B — le générateur 50 k.** Candidat à falsifier : énumération par supports
 ancrés sous borne certifiée, avec axe de pinceau pour l'arité quatre. Un appel
@@ -1212,11 +1236,14 @@ jusqu'à un certificat terminal. La coupe tangente ne s'applique qu'au porteur
 exact lié à son certificat, et un seul appel par triangle n'est pas complet.
 Manquent l'oracle d'axe borné, la fixture exacte des quatre omissions, la boucle
 de germes indexée LBVH et le contrat par famille. La réponse détaillée est dans
-la note Q1--Q5 de l'auditeur.
+la note Q1--Q5 de l'auditeur. Pour les dégénérescences, la route constructive
+séparée est Gamma exhaustif puis arrangement directionnel local sur la coquille;
+elle ne construit aucune mosaïque globale.
 
 **Fil C — forme device et repli CPU multi-cœurs.** Suivre l'ordre de la note
 GPU de l'auditeur : trois étages arithmétiques (64 bits pour le verdict parent,
-`i128` pour voisin/owner/census, 384 bits ou merge CPU pour l'ordre des rayons) ;
+`i128` pour voisin/owner/census, 384 bits seulement pour la clef d'axe u16 déjà
+bornée, et multiprécision ou preuve séparée pour les autres niveaux) ;
 un seul corps de moteur `host/device` (déjà le cas du microkernel) ; partition
 antichaîne en tâches transactionnelles avec ledger
 $N_{\mathrm{begin}}=N_{\mathrm{commit}}+N_{\mathrm{rollback}}$ et replay CPU ;
@@ -1230,9 +1257,13 @@ pas PCIe dans le budget.
 
 **Ordre des travaux, révisé après la réponse de l'auditeur**
 ([`audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md`](audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md)) :
-A0 oracle $\Gamma_k$ indépendant depuis la définition du manuscrit (le juge
-multiplicitaire qui manque — décision Q1 : NO-GO exact hors position générale
-tant que l'équivalence n'est ni prouvée ni testée aux deux coupes) → A2 contrat
+A0 oracle $\Gamma_k$ indépendant depuis la définition du manuscrit — **LIVRÉ**
+(`mhgp3v_gamma_judge`, cinq portes ; accord exact vérifié hors cosphéricité,
+frontière mesurée dessus : 36/60 ordres en sous-fusion structurelle sur grille
+$4^3$, cause identifiée = la lecture « rangs $k$ et $k{+}1$ » manque les lots
+portés par les coquilles de rang supérieur ; théorème de lecture élargie posé à
+l'auditeur dans
+[`audits/NOTE_CLAUDE_JUGE_GAMMA_20260810.md`](audits/NOTE_CLAUDE_JUGE_GAMMA_20260810.md)) → A2 contrat
 strict--fermé du lot + journal `coverage_delta` → B1 fixture exacte des quatre
 supports perdus + oracle d'axe exhaustif → B2 germes indexés LBVH → Q4 les deux
 digests du moteur de tâches (scientifique global + ledger de replay) et replay

@@ -42,6 +42,19 @@ target_include_directories(mhgp3v_oracle
 target_link_libraries(mhgp3v_oracle PRIVATE mhgp)
 target_compile_options(mhgp3v_oracle PRIVATE -Wall -Wextra -Wpedantic)
 
+# LE JUGE GAMMA_k : la definition du manuscrit (theoreme 2, protocole de lot
+# normatif de la reponse Q1.2) contre la chaine `flat_catalogue`+`build_forest`,
+# comparee par PARTITIONS PAR NIVEAU — libres de toute convention de noeud. Sur
+# les ordres sans evenement degenere ni censure de rang, l'accord est EXIGE ;
+# sur les autres il est MESURE et publie : c'est la carte de la frontiere Q1.
+# La geometrie exacte est PARTAGEE avec M1 (`exact_geometry.hpp`), jamais
+# dupliquee : deux juges dupliques peuvent etre faux d'accord.
+add_executable(mhgp3v_gamma_judge oracle/gamma_forest_judge.cpp)
+target_include_directories(mhgp3v_gamma_judge
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/oracle ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_gamma_judge PRIVATE mhgp)
+target_compile_options(mhgp3v_gamma_judge PRIVATE -Wall -Wextra -Wpedantic)
+
 # M3' — le juge differentiel du parcours MULTIPLICITAIRE. Il n'appelle ni le
 # germe, ni les predicats de pinceau, ni le transport du sujet, mais il PARTAGE
 # avec lui `mhgp::sphere_side`, `mhgp::sphere4` et `mhgp::miniball_of` : ce qu'il
@@ -501,6 +514,29 @@ mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
 mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
   mhgp3v_direct_source_reject_double_emission "en double" 3
   --clouds 2 --points 12 --coord 5 --smax 8 --seed 31337 --force-both-directions 1)
+
+# LE JUGE GAMMA_k, EN PORTES PERMANENTES. La porte generique exige l'ACCORD
+# EXACT des partitions par niveau sur les ordres sans cosphericite (Def. 26 du
+# manuscrit) ni censure de rang — c'est le domaine ou la chaine pretend
+# l'exactitude, et le juge est INDEPENDANT (arithmetique de l'oracle, protocole
+# de lot normatif de la reponse Q1.2). La porte saturee MESURE la frontiere :
+# grille 4^3, cosphericites partout ; ses planchers garantissent que le regime
+# degenere est bien exerce, sans figer le compte de divergences — une future
+# lecture elargie du fold pourrait legitimement les faire tomber a zero.
+add_test(NAME mhgp3v_gamma_judge_generic COMMAND mhgp3v_gamma_judge
+         --clouds 30 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
+         --min-decided 30 --min-nondegenerate 20 --min-levels 3000)
+add_test(NAME mhgp3v_gamma_judge_saturated COMMAND mhgp3v_gamma_judge
+         --clouds 20 --points 9 --coord 4 --smax 11 --max-order 3 --seed 31337
+         --min-decided 20 --min-degenerate 15 --min-levels 1000)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_reject_unknown "argument inconnu" 2 --sujet-inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_reject_absurd "campagne absurde" 2 --points 3)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_reject_floor "plancher" 3
+  --clouds 2 --points 6 --coord 10 --smax 6 --max-order 2 --seed 7
+  --min-decided 1000)
 
 # LE NOYAU F0 DU FOLD HORIZONTAL, EN PORTE PERMANENTE.
 #
