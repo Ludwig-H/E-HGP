@@ -463,8 +463,16 @@ std::vector<int> beta_ranks(const mhgp::Catalogue& cat) {
   return rank;
 }
 
+// LA RÉCURSION EST BORNÉE, PARCE QU'UN CYCLE EST POSSIBLE. `build_forest` ne
+// promet pas l'acyclicité au juge, et une signature récursive naïve boucle
+// jusqu'à épuiser la pile. On marque le chemin courant : un nœud déjà sur ce
+// chemin rend un jeton `CYCLE`, qui se propage et rougit l'empreinte.
 std::string forest_signature(const mhgp::Forest& forest, const mhgp::Catalogue& cat,
-                             const std::vector<int>& rank, i32 node) {
+                             const std::vector<int>& rank, i32 node,
+                             std::vector<char>* on_path) {
+  if (node < 0 || node >= (i32)forest.nodes.size()) return "(HORS_PLAGE)";
+  if ((*on_path)[(std::size_t)node]) return "(CYCLE)";
+  (*on_path)[(std::size_t)node] = 1;
   const mhgp::ForestNode& n = forest.nodes[(std::size_t)node];
   std::string out = "(";
   out += std::to_string(n.kind);
@@ -486,19 +494,61 @@ std::string forest_signature(const mhgp::Forest& forest, const mhgp::Catalogue& 
     out += "sans_source";
   }
   std::vector<std::string> children;
-  for (i32 c = n.first_child; c >= 0; c = forest.nodes[(std::size_t)c].next_sibling)
-    children.push_back(forest_signature(forest, cat, rank, c));
+  for (i32 c = n.first_child; c >= 0 && c < (i32)forest.nodes.size();
+       c = forest.nodes[(std::size_t)c].next_sibling) {
+    children.push_back(forest_signature(forest, cat, rank, c, on_path));
+    if ((*on_path)[(std::size_t)c]) break;   // frère cyclique : on s'arrête net
+  }
   std::sort(children.begin(), children.end());
   out += "[";
   for (const std::string& child : children) out += child;
   out += "])";
+  (*on_path)[(std::size_t)node] = 0;
   return out;
+}
+
+// LES NŒUDS INACCESSIBLES ET LES LIENS `parent` NE SONT PAS DANS LA SIGNATURE
+// RÉCURSIVE, et l'audit l'a dit : une signature qui part des racines ne voit
+// jamais un nœud que personne n'atteint, ni un `parent` incohérent avec la liste
+// des enfants. On les vérifie séparément, et le résultat entre dans l'empreinte.
+std::string forest_reachability(const mhgp::Forest& forest) {
+  std::vector<int> visits((std::size_t)forest.nodes.size(), 0);
+  std::vector<i32> stack(forest.roots.begin(), forest.roots.end());
+  long long parent_faults = 0, child_count_faults = 0;
+  while (!stack.empty()) {
+    const i32 node = stack.back();
+    stack.pop_back();
+    if (node < 0 || node >= (i32)forest.nodes.size()) { ++parent_faults; continue; }
+    ++visits[(std::size_t)node];
+    if (visits[(std::size_t)node] > 1) continue;   // un cycle s'arrête ici, et se compte
+    const mhgp::ForestNode& n = forest.nodes[(std::size_t)node];
+    i32 counted = 0;
+    for (i32 c = n.first_child; c >= 0; c = forest.nodes[(std::size_t)c].next_sibling) {
+      if (forest.nodes[(std::size_t)c].parent != node) ++parent_faults;
+      ++counted;
+      stack.push_back(c);
+    }
+    if (counted != n.n_children) ++child_count_faults;
+  }
+  long long unreachable = 0, multiply_reached = 0;
+  for (int v : visits) {
+    if (v == 0) ++unreachable;
+    if (v > 1) ++multiply_reached;
+  }
+  for (i32 r : forest.roots)
+    if (r >= 0 && r < (i32)forest.nodes.size() && forest.nodes[(std::size_t)r].parent != -1)
+      ++parent_faults;
+  return " inaccessibles=" + std::to_string(unreachable) +
+         " atteints_plusieurs_fois=" + std::to_string(multiply_reached) +
+         " parents_faux=" + std::to_string(parent_faults) +
+         " comptes_enfants_faux=" + std::to_string(child_count_faults);
 }
 
 std::string forest_digest(const mhgp::Forest& forest, const mhgp::Catalogue& cat) {
   const std::vector<int> rank = beta_ranks(cat);
+  std::vector<char> on_path((std::size_t)forest.nodes.size(), 0);
   std::vector<std::string> roots;
-  for (i32 r : forest.roots) roots.push_back(forest_signature(forest, cat, rank, r));
+  for (i32 r : forest.roots) roots.push_back(forest_signature(forest, cat, rank, r, &on_path));
   std::sort(roots.begin(), roots.end());
   std::string out = "ordre=" + std::to_string(forest.order) +
                     " naissances=" + std::to_string(forest.births) +
@@ -508,7 +558,8 @@ std::string forest_digest(const mhgp::Forest& forest, const mhgp::Catalogue& cat
                     " censures=" + std::to_string(forest.censored_events) +
                     " autoritaire=" + std::to_string((int)forest.authoritative) +
                     " noeuds=" + std::to_string(forest.nodes.size()) +
-                    " racines=" + std::to_string(forest.roots.size()) + " ";
+                    " racines=" + std::to_string(forest.roots.size()) +
+                    forest_reachability(forest) + " ";
   for (const std::string& r : roots) out += r;
   return out;
 }
@@ -519,7 +570,7 @@ enum class Mode { kJudge, kMeasure, kCover };
 
 int main(int argc, char** argv) {
   int n = 60, coord = 400, smax = 8, clouds = 4, leaf = 0, judge = 1, cover_only = 0;
-  int both_directions = 0, forest_orders = 0;
+  int both_directions = 0, forest_orders = 0, drop_member = 0;
   long long seed = 20260810, cell_cap = 4000000;
   long long min_clouds = 0, min_emitted = 0, min_windowed = 0, min_candidates = 0;
   long long min_forest_nodes = 0;
@@ -548,6 +599,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--cover-only")) target = &cover_only;
     else if (!strcmp(argv[i], "--force-both-directions")) target = &both_directions;
     else if (!strcmp(argv[i], "--forest")) target = &forest_orders;
+    else if (!strcmp(argv[i], "--force-drop-member")) target = &drop_member;
     else if (!strcmp(argv[i], "--cell-cap")) wide = &cell_cap;
     else if (!strcmp(argv[i], "--min-clouds")) wide = &min_clouds;
     else if (!strcmp(argv[i], "--min-emitted")) wide = &min_emitted;
@@ -566,7 +618,7 @@ int main(int argc, char** argv) {
       clouds < 1 || clouds > 2000 || leaf < 0 || leaf > 65536 || judge < 0 || judge > 1 ||
       cover_only < 0 || cover_only > 1 || both_directions < 0 || both_directions > 1 ||
       cell_cap < 1 || cell_cap > 100000000LL || forest_orders < 0 ||
-      forest_orders > mhgp::kMaxRank) {
+      forest_orders > mhgp::kMaxRank || drop_member < 0 || drop_member > 1) {
     printf("ECHEC : campagne absurde\n");
     return 2;
   }
@@ -579,8 +631,27 @@ int main(int argc, char** argv) {
     return 2;
   }
   const Mode mode = cover_only == 1 ? Mode::kCover : (judge == 1 ? Mode::kJudge : Mode::kMeasure);
+  // UNE FORET D'ORDRE k LIT LES SPHERES DE RANG k ET k+1. Demander k = s_max
+  // rendrait donc des ordres TRONQUES en les qualifiant : c'est refuse.
+  if (forest_orders > 0 && forest_orders + 1 > smax) {
+    printf("ECHEC : --forest %d exige s_max >= %d ; une foret d'ordre k lit les rangs k et"
+           " k+1\n", forest_orders, forest_orders + 1);
+    return 2;
+  }
   if (mode != Mode::kJudge && forest_orders > 0) {
     printf("ECHEC : la foret ne se juge que sous --judge 1\n");
+    return 2;
+  }
+  // LE MUTANT DE MEMBRE TRONQUE `members` SANS TOUCHER `rank`. Assembler un
+  // `mhgp::Catalogue` avec cette incohérence ferait lire `build_forest` hors des
+  // bornes du pool : la combinaison est refusée AVANT, pas diagnostiquée après.
+  if (drop_member == 1 && forest_orders > 0) {
+    printf("ECHEC : --force-drop-member rend le pool incoherent avec le rang ; il ne peut pas"
+           " etre combine a --forest\n");
+    return 2;
+  }
+  if (mode != Mode::kJudge && drop_member == 1) {
+    printf("ECHEC : le mutant --force-drop-member n'a de sens que sous --judge 1\n");
     return 2;
   }
   if (mode != Mode::kJudge && both_directions == 1) {
@@ -595,6 +666,11 @@ int main(int argc, char** argv) {
   long long decided = 0, refused_status = 0, mismatches = 0;
   long long cover_tests = 0, neighbour_tests = 0;
   long long degree_max = 0, degree_sum = 0, degree_samples = 0;
+  // CES TROIS COMPTEURS RESTENT EN 64 BITS, ET C'EST BORNE, PAS OUBLIE. Chacun
+  // est majoré par le nombre de candidats, lui-même au plus
+  // `n * C(n-1, 3) <= 2,7e16` sous le plafond CLI de 20 000 points — très en
+  // dessous de `2^63`. C'est `bound_t = somme d * C(d+, q-1)`, qui atteint
+  // 5,3e20 au même plafond, qui exigeait les 128 bits.
   long long locator_clamps = 0, duplicate_emissions = 0;
   long long forests_compared = 0, forest_faults = 0, forest_nodes = 0, forest_roots = 0;
   unsigned long long csr_bytes_high_water = 0, cover_bytes_high_water = 0;
@@ -655,6 +731,10 @@ int main(int argc, char** argv) {
     }
 
     for (int q = 2; q <= 4; ++q) {
+      // UN SUPPORT D'ARITE q A UN RANG AU MOINS q. Si q > s_max la lane est VIDE
+      // par contrat, pas en echec : `t_q = s_max - q + 1` y serait nul ou negatif
+      // et le cover echouait sur un message generique.
+      if (q > smax) continue;
       Cover cover;
       if (!build_cover(pts, q, smax, side, cell_cap, &cover)) {
         printf("ECHEC : arithmetique du cover d'arite %d hors domaine au nuage %d\n", q, c);
@@ -807,6 +887,10 @@ int main(int argc, char** argv) {
                 entry.sphere.sph = canonical.sph;
                 entry.sphere.beta = mhgp::sphere_beta(canonical.sph);
                 entry.members = members;
+                // LE MUTANT DE MEMBRE. Sans lui, rien ne prouve que le
+                // comparateur de pools est encore vivant : il pourrait ne
+                // comparer que des listes vides.
+                if (drop_member == 1 && entry.members.size() > 1) entry.members.pop_back();
                 // L'UNICITE EST RECUE, PAS SUPPOSEE. Une seconde insertion sur la
                 // meme coquille est un DOUBLON compte, jamais un ecrasement.
                 if (!produced.emplace(shell, entry).second) ++duplicate_emissions;
@@ -823,9 +907,12 @@ int main(int argc, char** argv) {
         }
       }
     }
-    source_seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - s0).count();
-
-    if (mode != Mode::kJudge) { ++decided; continue; }
+    if (mode != Mode::kJudge) {
+      source_seconds +=
+          std::chrono::duration<double>(std::chrono::steady_clock::now() - s0).count();
+      ++decided;
+      continue;
+    }
 
     // LE DIFFERENTIEL. La clef est la coquille, comme la deduplication de la
     // reference; mais le POOL DE MEMBRES est compare lui aussi, sans quoi deux
@@ -840,7 +927,12 @@ int main(int argc, char** argv) {
       }
       std::sort(key.begin(), key.end());
       std::sort(all.begin(), all.end());
-      expected[key] = {&sphere, all};
+      // L'UNICITE DE LA COQUILLE DE L'AUTORITE EST ASSERTEE, pas supposée : deux
+      // sphères de référence partageant une coquille rendraient la map muette.
+      if (!expected.emplace(key, std::make_pair(&sphere, all)).second) {
+        printf("[nuage %d] la REFERENCE porte deux spheres de meme coquille\n", c);
+        ++mismatches;
+      }
     }
     long long missing = 0, extra = 0, differing = 0, member_faults = 0;
     for (const auto& entry : expected)
@@ -859,7 +951,7 @@ int main(int argc, char** argv) {
     }
     if (missing || extra || differing || member_faults) {
       printf("[nuage %d] SOURCE != CATALOGUE : %lld manquantes, %lld surnumeraires,"
-             " %lld differentes, %lld pools de membres faux (verite %zu, source %zu)\n", c,
+             " %lld differentes, %lld listes de membres fausses (verite %zu, source %zu)\n", c,
              missing, extra, differing, member_faults, expected.size(), produced.size());
       mismatches += missing + extra + differing + member_faults;
     }
@@ -880,6 +972,8 @@ int main(int argc, char** argv) {
       }
       for (int k = 1; k <= forest_orders; ++k) {
         const mhgp::Forest a = mhgp::build_forest(pts, source_catalogue, k);
+        // Le chrono source couvre l'assemblage du catalogue et SES folds; il ne
+        // couvre pas ceux de la référence, comptés à part.
         const mhgp::Forest b = mhgp::build_forest(pts, truth, k);
         ++forests_compared;
         forest_nodes += (long long)a.nodes.size();
@@ -894,6 +988,7 @@ int main(int argc, char** argv) {
         }
       }
     }
+    source_seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - s0).count();
     ++decided;
   }
 
@@ -984,6 +1079,19 @@ int main(int argc, char** argv) {
            " boite, ce clamp masque une violation d'invariant\n", locator_clamps);
     return 3;
   }
+  // L'IDENTITE `candidats == C_q` EST EXIGEE, pas observee. Une mutation qui
+  // saute ou duplique seulement des candidats NON EMISSIBLES conserverait la
+  // sortie, les planchers et le differentiel : ce compteur est le seul temoin.
+  // Elle ne vaut que sous la regle d'ancre intacte — le mutant bidirectionnel
+  // enumere volontairement chaque support q fois.
+  if (both_directions == 0)
+    for (int q = 2; q <= 4; ++q)
+      if (q <= smax && totals[q].candidates != totals[q].bound_c) {
+        printf("ECHEC : lane q=%d a evalue %s candidats pour C_q=%s — l'enumeration"
+               " combinadique et sa masse ne coincident pas\n", q,
+               u128_text(totals[q].candidates).c_str(), u128_text(totals[q].bound_c).c_str());
+        return 3;
+      }
   if (duplicate_emissions != 0) {
     printf("ECHEC : %lld emission(s) en double — une sphere doit etre produite exactement une"
            " fois, depuis l'ancre de son support canonique\n", duplicate_emissions);
@@ -1008,11 +1116,13 @@ int main(int argc, char** argv) {
   if (mismatches != 0) return 1;
   if (forest_orders > 0)
     printf("OK : accord relatif complet, catalogue ET foret — memes coquilles, memes supports"
-           " canoniques, memes rangs, memes niveaux exacts, memes pools de membres, et memes"
+           " canoniques, memes rangs, memes niveaux exacts, memes listes de membres par"
+           " coquille, et memes"
            " %lld forets de k=1 a %d, signatures recursives comprises\n", forests_compared,
            forest_orders);
   else
     printf("OK : accord relatif complet avec le catalogue ferme — memes coquilles, memes"
-           " supports canoniques, memes rangs, memes niveaux exacts, memes pools de membres\n");
+           " supports canoniques, memes rangs, memes niveaux exacts, memes listes de membres"
+           " par coquille\n");
   return 0;
 }

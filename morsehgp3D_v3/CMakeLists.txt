@@ -326,20 +326,20 @@ add_test(NAME mhgp3v_flats_u16_owner COMMAND mhgp3v_flats_differential
 # retirant la restriction `z > p` emettait 126 fois au lieu de 56 sans qu'aucun
 # compteur ne bouge. Les emissions sont maintenant comptees a part.
 add_test(NAME mhgp3v_direct_source_generic COMMAND mhgp3v_direct_source
-         --clouds 6 --points 40 --coord 160 --smax 8 --seed 20260810
+         --clouds 6 --points 40 --coord 160 --smax 8 --seed 20260810 --judge 1
          --min-clouds 6 --min-emitted 10000 --min-candidates 500000 --min-windowed 8000)
 # La grille SATUREE : cospheries, coplanarites et alignements partout. C'est la
 # ou la convention de support canonique decide, et ou une source directe naive
 # emettrait plusieurs fois la meme sphere. Le cover y tombe en repli racine, ce
 # qui est correct et doit rester exact : aucun plancher de fenetre ici.
 add_test(NAME mhgp3v_direct_source_degenerate COMMAND mhgp3v_direct_source
-         --clouds 12 --points 12 --coord 5 --smax 8 --seed 31337
+         --clouds 12 --points 12 --coord 5 --smax 8 --seed 31337 --judge 1
          --min-clouds 12 --min-emitted 1800 --min-candidates 8000)
 # `n < t_q` : la banque ne peut jamais conclure, elle est OTEE et le voisinage
 # racine est exact. C'etait une sortie generique; c'est un statut, et il doit
 # rester juste.
 add_test(NAME mhgp3v_direct_source_small_cloud COMMAND mhgp3v_direct_source
-         --clouds 6 --points 5 --coord 10 --smax 32 --seed 7
+         --clouds 6 --points 5 --coord 10 --smax 32 --seed 7 --judge 1
          --min-clouds 6 --min-emitted 30)
 # LA FORET DES K ARBRES, BOUT EN BOUT.
 #
@@ -352,11 +352,23 @@ add_test(NAME mhgp3v_direct_source_small_cloud COMMAND mhgp3v_direct_source
 # du generateur. Une naissance est identifiee par les membres de son minimum, une
 # multifusion par le RANG EXACT de son niveau dans l'ordre `sphere_cmp_beta`.
 add_test(NAME mhgp3v_direct_source_forest COMMAND mhgp3v_direct_source
-         --clouds 6 --points 14 --coord 12 --smax 6 --seed 20260810 --forest 5
+         --clouds 6 --points 14 --coord 12 --smax 6 --seed 20260810 --judge 1 --forest 5
          --min-clouds 6 --min-emitted 1000 --min-forest-nodes 1000)
+# Une foret d'ordre k lit les rangs k et k+1 : demander k = s_max rendrait des
+# ordres tronques en les qualifiant.
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_forest_order "exige s_max"
+  --clouds 1 --points 12 --coord 5 --smax 4 --seed 31337 --judge 1 --forest 4)
 mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
   mhgp3v_direct_source_reject_forest_without_judge "ne se juge que sous"
   --clouds 1 --points 12 --coord 5 --smax 8 --seed 31337 --judge 0 --forest 3)
+# LES ORDRES BAS ETAIENT UN DOMAINE CONTRADICTOIRE : la CLI acceptait `s_max=2`
+# puis la lane q=3 echouait sur `t_q < 1` avec un message generique. Une lane
+# d'arite q > s_max est VIDE par contrat — un support d'arite q a un rang au
+# moins q — et c'est maintenant ce qui se passe.
+add_test(NAME mhgp3v_direct_source_low_order COMMAND mhgp3v_direct_source
+         --clouds 8 --points 10 --coord 8 --smax 2 --seed 5 --judge 1
+         --min-clouds 8 --min-emitted 80)
 mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
   mhgp3v_direct_source_reject_unknown "argument inconnu" --sujet-inexistant)
 mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
@@ -370,6 +382,17 @@ mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
 # LE MUTANT DE DOUBLE EMISSION DOIT ROUGIR. Il est instructif : le differentiel
 # par coquille reste vert, parce que la map ecrase; c'est le compteur d'unicite
 # qui le tue.
+# LE COMPARATEUR DE MEMBRES DOIT ETRE VIVANT. Sans ce mutant, rien ne prouve
+# qu'il compare autre chose que des listes vides : il retire un membre a chaque
+# sphere emise, et la porte doit rougir.
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_dropped_member_with_forest "ne peut pas etre combine"
+  --clouds 1 --points 14 --coord 12 --smax 6 --seed 1 --judge 1 --force-drop-member 1
+  --forest 3)
+mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_dropped_member "desaccords"
+  --clouds 2 --points 14 --coord 12 --smax 6 --seed 20260810 --judge 1
+  --force-drop-member 1)
 mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
   mhgp3v_direct_source_reject_double_emission "en double"
   --clouds 2 --points 12 --coord 5 --smax 8 --seed 31337 --force-both-directions 1)
@@ -413,7 +436,16 @@ endif()
 # Le lemme de triple doit refuter ZERO triple reel — il est necessaire, ou il est
 # faux.
 add_test(NAME mhgp3v_admissible_pair_sweep COMMAND mhgp3v_admissible_pair_probe
-         --points 30 --smax 8 --repeats 3 --seed 424242 --min-true 900 --min-admitted 1200)
+         --points 30 --smax 8 --repeats 3 --seed 424242 --min-true 900 --min-admitted 1200
+         --min-triangles 3000 --min-k4 20000 --min-triples-rejected 500 --min-true-arity4 200)
+# LE MUTANT DE SELECTIVITE. `zero triple vrai refute` etait la seule obligation
+# nouvelle : un filtre qui accepte TOUT la satisfait sans rien filtrer, et une
+# regression qui n'enumere aucun triangle aussi. Le plancher de triples REJETES
+# est ce qui les tue.
+mhgp3v_add_expected_failure_test_for(mhgp3v_admissible_pair_probe
+  mhgp3v_admissible_pair_reject_accept_all "triples rejetes"
+  --points 30 --smax 8 --repeats 3 --seed 424242 --min-triangles 3000 --min-k4 20000
+  --min-triples-rejected 500 --min-true-arity4 200 --force-triple-accept 1)
 
 # La REVERSE SEARCH est comparee au BFS dans les quatre portes positives : meme
 # ensemble de sommets, memes coquilles, memes ensembles interieurs, sans `seen`,

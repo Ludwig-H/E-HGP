@@ -162,6 +162,7 @@
 #include <random>
 #include <array>
 #include <set>
+#include <string>
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
@@ -307,7 +308,11 @@ PairMinima pair_minima(const std::vector<P3>& pts, i32 a, i32 b, bool want_live)
 
 // Le filtre de triple : deux demi-espaces, bornés par le plan de T.
 bool triple_admissible(const std::vector<P3>& pts, i32 a, i32 b, i32 c, int smax,
-                       long long* tests) {
+                       long long* tests, int always_accept) {
+  // LE MUTANT DE SELECTIVITE. `triple_missing == 0` etait la seule obligation
+  // nouvelle : un filtre qui accepte TOUT la satisfait sans rien filtrer. Le
+  // mutant vit donc dans le binaire, et un plancher de triples REJETES le tue.
+  if (always_accept == 1) return true;
   mhgp::Sphere sph{};
   if (!mhgp::sphere3(pts[(std::size_t)a], pts[(std::size_t)b], pts[(std::size_t)c], &sph))
     return true;                     // alignés : aucun plan, le lemme ne dit rien
@@ -473,9 +478,10 @@ int run_fixtures() {
 }  // namespace
 
 int main(int argc, char** argv) {
-  int n = 200, smax = 11, repeats = 1, ranks = 1, mutant = 1;
+  int n = 200, smax = 11, repeats = 1, ranks = 1, mutant = 1, triple_accept = 0;
   long long seed = 20260809;
-  long long min_true = 0, min_admitted = 0;
+  long long min_true = 0, min_admitted = 0, min_triangles = 0, min_k4 = 0;
+  long long min_triples_rejected = 0, min_true_arity4 = 0;
   const double density = 1.0e-3;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
@@ -498,8 +504,13 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--repeats")) target = &repeats;
     else if (!strcmp(argv[i], "--ranks")) target = &ranks;
     else if (!strcmp(argv[i], "--mutant")) target = &mutant;
+    else if (!strcmp(argv[i], "--force-triple-accept")) target = &triple_accept;
     else if (!strcmp(argv[i], "--min-true")) wide = &min_true;
     else if (!strcmp(argv[i], "--min-admitted")) wide = &min_admitted;
+    else if (!strcmp(argv[i], "--min-triangles")) wide = &min_triangles;
+    else if (!strcmp(argv[i], "--min-k4")) wide = &min_k4;
+    else if (!strcmp(argv[i], "--min-triples-rejected")) wide = &min_triples_rejected;
+    else if (!strcmp(argv[i], "--min-true-arity4")) wide = &min_true_arity4;
     else if (!strcmp(argv[i], "--seed")) {
       if (!has) { printf("ECHEC : --seed invalide\n"); return 2; }
       ++i; seed = value; continue;
@@ -510,7 +521,8 @@ int main(int argc, char** argv) {
     else *target = (int)value;
   }
   if (n < 8 || n > 5000 || smax < 3 || smax > mhgp::kMaxRank || repeats < 1 || repeats > 20 ||
-      ranks < 0 || ranks > 1 || mutant < 0 || mutant > 1) {
+      ranks < 0 || ranks > 1 || mutant < 0 || mutant > 1 || triple_accept < 0 ||
+      triple_accept > 1) {
     printf("ECHEC : campagne absurde\n");
     return 2;
   }
@@ -557,7 +569,8 @@ int main(int argc, char** argv) {
   long long sum_triangles = 0, sum_k4 = 0, sum_true_arity3 = 0, sum_true_arity4 = 0;
   long long sum_edges = 0, degree_g_max = 0, sum_triangle_probes = 0, sum_k4_probes = 0;
   long long sum_triples_kept = 0, sum_k4_kept = 0, sum_triple_tests = 0;
-  long long sum_triple_missing = 0;
+  long long sum_triple_missing = 0, sum_k4_four_faces = 0, sum_quad_missing = 0;
+  long long degree_plus_max = 0;
 
   for (int r = 0; r < repeats; ++r) {
     std::vector<P3> pts;
@@ -694,9 +707,11 @@ int main(int argc, char** argv) {
     const auto c0 = std::chrono::steady_clock::now();
     long long triangles = 0, k4 = 0, triangle_probes = 0, k4_probes = 0;
     long long triples_kept = 0, k4_kept = 0, triple_tests = 0, triple_missing = 0;
+    long long k4_four_faces = 0, quad_missing = 0;
     // LA VÉRITÉ DES TRIPLES : les 3-sous-ensembles d'une coquille critique. Le
     // lemme de triple doit tous les conserver, sinon il est FAUX.
     std::set<std::array<i32, 3>> truth_triples;
+    std::set<std::array<i32, 4>> truth_quads;
     for (const auto& sphere : cat.spheres) {
       std::vector<i32> shell;
       for (int i = 0; i < sphere.rank; ++i) {
@@ -706,15 +721,28 @@ int main(int argc, char** argv) {
       std::sort(shell.begin(), shell.end());
       for (std::size_t x = 0; x < shell.size(); ++x)
         for (std::size_t y = x + 1; y < shell.size(); ++y)
-          for (std::size_t w = y + 1; w < shell.size(); ++w)
+          for (std::size_t w = y + 1; w < shell.size(); ++w) {
             truth_triples.insert({shell[x], shell[y], shell[w]});
+            for (std::size_t t = w + 1; t < shell.size(); ++t)
+              truth_quads.insert({shell[x], shell[y], shell[w], shell[t]});
+          }
     }
     {
+      // LE VRAI DEGRE, non oriente. `forward_edges[p].size()` est `d+`, qui
+      // depend des PointId : une etoile centree sur le dernier identifiant
+      // afficherait un maximum de 1 au lieu de n-1.
+      std::vector<long long> undirected((std::size_t)n, 0);
+      for (i32 a = 0; a < n; ++a)
+        for (i32 b : forward_edges[(std::size_t)a]) {
+          ++undirected[(std::size_t)a];
+          ++undirected[(std::size_t)b];
+        }
+      for (long long deg : undirected) degree_g_max = std::max(degree_g_max, deg);
       std::vector<char> incident((std::size_t)n, 0);
       for (i32 p = 0; p < n; ++p) {
         const std::vector<i32>& up = forward_edges[(std::size_t)p];
         sum_edges += (long long)up.size();
-        degree_g_max = std::max(degree_g_max, (long long)up.size());
+        degree_plus_max = std::max(degree_plus_max, (long long)up.size());
         for (i32 z : up) incident[(std::size_t)z] = 1;
         for (std::size_t i = 0; i < up.size(); ++i) {
           const i32 u = up[i];
@@ -722,17 +750,35 @@ int main(int argc, char** argv) {
             ++triangle_probes;
             if (!incident[(std::size_t)v]) continue;
             ++triangles;
-            const bool keep = triple_admissible(pts, p, u, v, smax, &triple_tests);
+            const bool keep =
+                triple_admissible(pts, p, u, v, smax, &triple_tests, triple_accept);
             if (keep) ++triples_kept;
             else if (truth_triples.count({p, u, v}) != 0) ++triple_missing;
-            // K4 : un quatrième sommet w > v adjacent à p, u et v.
+            // K4 : un quatrième sommet w > v adjacent à p, u et v. On développe
+            // le K4 MEME si le triple de base est rejeté, uniquement pour publier
+            // `k4` brut; le générateur, lui, s'arrêterait ici, et c'est ce que
+            // `k4_kept` compte.
             for (i32 w : forward_edges[(std::size_t)v]) {
               ++k4_probes;
               if (!incident[(std::size_t)w]) continue;
               if (!std::binary_search(forward_edges[(std::size_t)u].begin(),
                                       forward_edges[(std::size_t)u].end(), w)) continue;
               ++k4;
-              if (keep) ++k4_kept;
+              if (!keep) continue;
+              ++k4_kept;
+              // LES QUATRE FACES, pas seulement celle des trois plus petits
+              // identifiants : les quatre triples d'un support d'arité quatre
+              // sont tous sur sa coquille, donc tous nécessaires.
+              const bool four_faces =
+                  triple_admissible(pts, p, u, w, smax, &triple_tests, triple_accept) &&
+                  triple_admissible(pts, p, v, w, smax, &triple_tests, triple_accept) &&
+                  triple_admissible(pts, u, v, w, smax, &triple_tests, triple_accept);
+              if (four_faces) ++k4_four_faces;
+              // CE CONTROLE EST IMPLIQUE, ET IL FAUT LE DIRE. Les quatre faces
+              // d'un vrai quadruple sont quatre vrais triples, que le lemme
+              // conserve tous des lors que `triple_missing == 0`. `quad_missing`
+              // est donc une garde de coherence, pas un temoin independant.
+              else if (truth_quads.count({p, u, v, w}) != 0) ++quad_missing;
             }
           }
         }
@@ -747,6 +793,8 @@ int main(int argc, char** argv) {
     sum_k4_kept += k4_kept;
     sum_triple_tests += triple_tests;
     sum_triple_missing += triple_missing;
+    sum_k4_four_faces += k4_four_faces;
+    sum_quad_missing += quad_missing;
     sum_triangle_probes += triangle_probes;
     sum_k4_probes += k4_probes;
 
@@ -791,29 +839,42 @@ int main(int argc, char** argv) {
   printf("  vraies REFUTEES : ouvert=%.0f  ferme=%.0f  (doivent etre ZERO : les deux"
          " lemmes sont necessaires)\n", sum_missing_open / d, sum_missing_closed / d);
   printf("  points de boule diametrale visites=%.0f  secondes filtre=%.2f"
-         "  secondes matrice des rangs=%.2f  secondes cliques=%.2f\n",
+         "  secondes matrice des rangs=%.2f  secondes cliques+verite+lemme=%.2f\n",
          sum_ball_points / d, sum_seconds / d, sum_rank_seconds / d, sum_clique_seconds / d);
-  printf("  GRAPHE ADMISSIBLE : aretes=%.0f  degre moyen=%.1f  degre max=%lld\n",
-         sum_edges / d, 2.0 * (double)sum_edges / d / (double)n, degree_g_max);
-  printf("  CLIQUES : triangles=%.0f pour %.0f supports d'arite 3 vrais (facteur %.1f)"
-         "   K4=%.0f pour %.0f supports d'arite 4 vrais (facteur %.1f)\n",
+  // UN DENOMINATEUR NUL N'EST PAS UN GAIN NUL. Imprimer `0.0` quand la verite
+  // est vide affirme « aucun gaspillage » là où le quotient n'est pas defini.
+  //
+  // Le tampon doit etre PROPRE A CHAQUE APPEL : un `static char[]` partage ferait
+  // pointer les deux `%s` d'un meme `printf` sur la derniere valeur ecrite, et
+  // les deux facteurs s'afficheraient identiques.
+  auto ratio = [](double numerator, double denominator) {
+    if (denominator <= 0.0) return std::string("N/A");
+    char text[64];
+    snprintf(text, sizeof text, "%.1f", numerator / denominator);
+    return std::string(text);
+  };
+  printf("  GRAPHE ADMISSIBLE : aretes=%.0f  degre moyen=%.1f  degre max NON ORIENTE=%lld"
+         "  d+ max=%lld\n", sum_edges / d, 2.0 * (double)sum_edges / d / (double)n,
+         degree_g_max, degree_plus_max);
+  printf("  CLIQUES : triangles=%.0f pour %.0f supports d'arite 3 vrais (facteur %s)"
+         "   K4=%.0f pour %.0f supports d'arite 4 vrais (facteur %s)\n",
          sum_triangles / d, sum_true_arity3 / d,
-         sum_true_arity3 ? (double)sum_triangles / (double)sum_true_arity3 : 0.0,
+         ratio((double)sum_triangles, (double)sum_true_arity3).c_str(),
          sum_k4 / d, sum_true_arity4 / d,
-         sum_true_arity4 ? (double)sum_k4 / (double)sum_true_arity4 : 0.0);
+         ratio((double)sum_k4, (double)sum_true_arity4).c_str());
   printf("  par point : triangles=%.1f  K4=%.1f  sondes triangle=%.1f  sondes K4=%.1f\n",
          sum_triangles / d / n, sum_k4 / d / n, sum_triangle_probes / d / n,
          sum_k4_probes / d / n);
-  printf("  LEMME DE TRIPLE : %.0f triangles retenus sur %.0f (%.1f%%), %.0f pour un support"
-         " d'arite 3 vrai (facteur %.1f)   K4 dont le triple survit=%.0f (facteur %.1f)\n",
-         sum_triples_kept / d, sum_triangles / d,
-         sum_triangles ? 100.0 * (double)sum_triples_kept / (double)sum_triangles : 0.0,
-         sum_true_arity3 / d,
-         sum_true_arity3 ? (double)sum_triples_kept / (double)sum_true_arity3 : 0.0,
-         sum_k4_kept / d,
-         sum_true_arity4 ? (double)sum_k4_kept / (double)sum_true_arity4 : 0.0);
-  printf("  triples VRAIS refutes par le lemme=%lld  (doit etre ZERO)  tests=%.0f\n",
-         sum_triple_missing, sum_triple_tests / d);
+  printf("  LEMME DE TRIPLE : %.0f triangles retenus et %.0f rejetes sur %.0f, %.0f supports"
+         " d'arite 3 vrais (facteur %s)\n", sum_triples_kept / d,
+         (sum_triangles - sum_triples_kept) / d, sum_triangles / d, sum_true_arity3 / d,
+         ratio((double)sum_triples_kept, (double)sum_true_arity3).c_str());
+  printf("  K4 : une face=%.0f (facteur %s)   QUATRE faces=%.0f (facteur %s)  pour %.0f"
+         " supports d'arite 4 vrais\n", sum_k4_kept / d,
+         ratio((double)sum_k4_kept, (double)sum_true_arity4).c_str(), sum_k4_four_faces / d,
+         ratio((double)sum_k4_four_faces, (double)sum_true_arity4).c_str(), sum_true_arity4 / d);
+  printf("  refutes a tort : triples=%lld  quadruples=%lld  (doivent etre ZERO)  tests=%.0f\n",
+         sum_triple_missing, sum_quad_missing, sum_triple_tests / d);
   if (ranks == 1) {
     printf("  rang k-NN maximum : admises=%d  vraies=%d  (sur %lld paires admises)\n",
            rank_max_admitted, rank_max_true, rank_samples);
@@ -847,11 +908,26 @@ int main(int argc, char** argv) {
            refused_status);
     return 3;
   }
-  if (sum_triple_missing != 0) {
-    printf("ECHEC : le lemme de triple a refute %lld triples reels — il est FAUX\n",
-           sum_triple_missing);
+  if (sum_triple_missing != 0 || sum_quad_missing != 0) {
+    printf("ECHEC : le lemme de triple a refute %lld triples et %lld quadruples reels —"
+           " il est FAUX\n", sum_triple_missing, sum_quad_missing);
     return 1;
   }
+  // LES PLANCHERS DE NON-VACUITE ET DE SELECTIVITE. `triple_missing == 0` seul
+  // laisse vert un filtre qui accepte tout, et une regression qui n'enumere
+  // aucun triangle.
+  struct CliqueFloor { const char* name; long long value; long long required; };
+  const CliqueFloor clique_floors[] = {
+      {"triangles", sum_triangles, min_triangles},
+      {"K4", sum_k4, min_k4},
+      {"triples rejetes par le lemme", sum_triangles - sum_triples_kept, min_triples_rejected},
+      {"supports d'arite 4 vrais", sum_true_arity4, min_true_arity4},
+  };
+  for (const CliqueFloor& f : clique_floors)
+    if (f.value < f.required) {
+      printf("ECHEC : plancher « %s » non atteint — %lld/%lld\n", f.name, f.value, f.required);
+      return 3;
+    }
   if (sum_missing_open != 0 || sum_missing_closed != 0) {
     printf("ECHEC : le lemme du demi-boule a refute %lld (ouvert) et %lld (ferme) paires"
            " reelles — il est FAUX\n", sum_missing_open, sum_missing_closed);
