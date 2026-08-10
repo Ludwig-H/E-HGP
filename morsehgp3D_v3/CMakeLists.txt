@@ -152,6 +152,10 @@ if(MHGP3V_ENABLE_CUDA)
     CUDA_STANDARD_REQUIRED ON
     CUDA_EXTENSIONS OFF
     CUDA_SEPARABLE_COMPILATION OFF)
+  # Meme hygiene numerique que le front d'onde : le chemin est entier, la
+  # discipline le garde reproductible face a l'oracle CPU.
+  target_compile_options(mhgp3v_faceowner_device_qualification PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false;--ftz=false;--prec-div=true;--prec-sqrt=true>)
   set_target_properties(mhgp3v_device_wavefront PROPERTIES
     CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}"
     CUDA_STANDARD 20
@@ -746,9 +750,21 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_postings_gate_reject_unknown_hybrid "mutant hybride inconnu" 2
   --hybrid-mutant inexistant)
 # Sans CUDA, la qualification device refuse proprement — jamais un chemin
-# device pretendu.
-mhgp3v_add_expected_code_test_for(mhgp3v_faceowner_device_qualification
-  mhgp3v_faceowner_device_reject_absent "kernel face-owner absent" 2 --points 10)
+# device pretendu ; SOUS CUDA ce refus serait un faux rouge : les portes
+# deviennent le nominal a masses reelles et le mutant drop-edge (label cuda,
+# rejouables en session G4).
+if(NOT MHGP3V_ENABLE_CUDA)
+  mhgp3v_add_expected_code_test_for(mhgp3v_faceowner_device_qualification
+    mhgp3v_faceowner_device_reject_absent "kernel face-owner absent" 2 --points 10)
+else()
+  add_test(NAME mhgp3v_faceowner_device_nominal COMMAND
+           mhgp3v_faceowner_device_qualification --points 64 --smax 11 --max-order 5)
+  mhgp3v_add_expected_code_test_for(mhgp3v_faceowner_device_qualification
+    mhgp3v_faceowner_device_kill_drop_edge "DIVERGENT" 1
+    --points 64 --smax 11 --max-order 3 --force-drop-edge 1)
+  set_tests_properties(mhgp3v_faceowner_device_nominal
+    mhgp3v_faceowner_device_kill_drop_edge PROPERTIES LABELS cuda)
+endif()
 # LE MODE COMPARE-JOINS : meme catalogue, deux joins, transcript et digest
 # compares in-process — le differentiel de l'audit au-dela des nuages du juge.
 add_test(NAME mhgp3v_saturated_pipeline_compare_joins COMMAND mhgp3v_saturated_pipeline

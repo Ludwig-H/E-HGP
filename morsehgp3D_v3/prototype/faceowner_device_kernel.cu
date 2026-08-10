@@ -33,13 +33,18 @@ namespace {
 struct Incidence {
   unsigned long long key_high;
   unsigned long long key_low;
+  int activation;
   int generator;
 };
 
+// LE TRI PORTE L'OWNER (reception 23379d4) : ordonner par (signature, rang
+// d'activation, generateur) place l'owner minimal EN TETE de chaque groupe —
+// candidates, reduce_by_key et leurs sorties disparaissent du pic.
 struct IncidenceLess {
   __host__ __device__ bool operator()(const Incidence& a, const Incidence& b) const {
     if (a.key_high != b.key_high) return a.key_high < b.key_high;
     if (a.key_low != b.key_low) return a.key_low < b.key_low;
+    if (a.activation != b.activation) return a.activation < b.activation;
     return a.generator < b.generator;
   }
 };
@@ -66,8 +71,8 @@ __constant__ unsigned long long kBinomial[33][7];
 
 __global__ void emit_signatures(const int* members, const long long* member_offsets,
                                 const long long* incidence_offsets, const int* ranks,
-                                int generator_count, int k, long long total,
-                                Incidence* out) {
+                                const int* activation_rank, int generator_count, int k,
+                                long long total, Incidence* out) {
   const long long t = (long long)blockIdx.x * blockDim.x + threadIdx.x;
   if (t >= total) return;
   int low = 0, high = generator_count - 1;
@@ -99,6 +104,7 @@ __global__ void emit_signatures(const int* members, const long long* member_offs
   }
   out[t].key_high = key_high;
   out[t].key_low = key_low;
+  out[t].activation = activation_rank[generator];
   out[t].generator = generator;
 }
 
@@ -111,22 +117,13 @@ __global__ void mark_heads(const Incidence* incidences, long long total, long lo
                 : 0;
 }
 
-__global__ void pack_owner_candidates(const Incidence* incidences, const int* activation_rank,
-                                      long long total, unsigned long long* packed) {
-  const long long t = (long long)blockIdx.x * blockDim.x + threadIdx.x;
-  if (t >= total) return;
-  const int generator = incidences[t].generator;
-  packed[t] = ((unsigned long long)(unsigned)activation_rank[generator] << 32) |
-              (unsigned long long)(unsigned)generator;
-}
-
 __global__ void emit_edges(const Incidence* incidences, const long long* group_of,
-                           const unsigned long long* group_owner, const int* batch_of,
+                           const long long* group_start, const int* batch_of,
                            long long total, FaceOwnerDeviceEdge* edges, int* keep) {
   const long long t = (long long)blockIdx.x * blockDim.x + threadIdx.x;
   if (t >= total) return;
   const int member = incidences[t].generator;
-  const int owner = (int)(unsigned)(group_owner[group_of[t]] & 0xffffffffULL);
+  const int owner = incidences[group_start[group_of[t]]].generator;
   if (member == owner) {
     keep[t] = 0;
     return;
@@ -139,6 +136,10 @@ __global__ void emit_edges(const Incidence* incidences, const long long* group_o
 
 struct NonZero {
   __host__ __device__ bool operator()(int flag) const { return flag != 0; }
+};
+
+struct NonZero64 {
+  __host__ __device__ bool operator()(long long flag) const { return flag != 0; }
 };
 
 bool record(const char* what, cudaError_t status, char* error, int capacity) {
@@ -164,14 +165,43 @@ bool run_faceowner_order_on_gpu(const std::vector<int>& members_csr,
                                 FaceOwnerDeviceResult* result, char* error,
                                 int error_capacity) {
   *result = FaceOwnerDeviceResult{};
+  // VALIDATION HOSTILE DE L'ENTREE (reception 23379d4, porte 2) — avant toute
+  // lecture de back() et meme a masse nulle : tailles coherentes, offsets
+  // monotones, rangs bornes, identifiants denses dans l'empaquetage.
   const int generator_count = (int)ranks.size();
-  const long long total = incidence_offsets.back();
-  result->incidences = total;
-  if (total == 0) return true;
   if (k < 1 || k > 6) {
     snprintf(error, (size_t)error_capacity, "ordre hors contrat du kernel");
     return false;
   }
+  if (generator_count <= 0 ||
+      member_offsets.size() != (std::size_t)generator_count ||
+      incidence_offsets.size() != (std::size_t)generator_count + 1 ||
+      activation_rank.size() != (std::size_t)generator_count ||
+      batch_of.size() != (std::size_t)generator_count) {
+    snprintf(error, (size_t)error_capacity, "tailles d'entree incoherentes");
+    return false;
+  }
+  for (int g = 0; g < generator_count; ++g) {
+    const long long begin = member_offsets[(std::size_t)g];
+    const long long end = g + 1 < generator_count ? member_offsets[(std::size_t)g + 1]
+                                                  : (long long)members_csr.size();
+    if (begin < 0 || end < begin || end > (long long)members_csr.size() ||
+        end - begin != (long long)ranks[(std::size_t)g] || ranks[(std::size_t)g] < 0 ||
+        ranks[(std::size_t)g] > 32 ||
+        incidence_offsets[(std::size_t)g + 1] < incidence_offsets[(std::size_t)g] ||
+        activation_rank[(std::size_t)g] < 0 || batch_of[(std::size_t)g] < 0) {
+      snprintf(error, (size_t)error_capacity, "offsets, rangs ou lots hors contrat");
+      return false;
+    }
+  }
+  for (int x : members_csr)
+    if (x < 0 || x >= (1 << 21)) {
+      snprintf(error, (size_t)error_capacity, "identifiant dense hors empaquetage");
+      return false;
+    }
+  const long long total = incidence_offsets.back();
+  result->incidences = total;
+  if (total == 0) return true;
 
   // Binomiales C(0..32, 0..6) — la meme table que le preflight hote.
   unsigned long long binomial[33][7];
@@ -206,7 +236,7 @@ bool run_faceowner_order_on_gpu(const std::vector<int>& members_csr,
     result->device_bytes =
         (long long)(members_csr.size() * 4 + member_offsets.size() * 8 +
                     incidence_offsets.size() * 8 + ranks.size() * 4 * 3 +
-                    (std::size_t)total * (sizeof(Incidence) + 8 + 8 + 8 +
+                    (std::size_t)total * (sizeof(Incidence) + 8 + 8 +
                                           sizeof(FaceOwnerDeviceEdge) + 4));
 
     const int block = 256;
@@ -216,7 +246,8 @@ bool run_faceowner_order_on_gpu(const std::vector<int>& members_csr,
         thrust::raw_pointer_cast(device_members.data()),
         thrust::raw_pointer_cast(device_member_offsets.data()),
         thrust::raw_pointer_cast(device_incidence_offsets.data()),
-        thrust::raw_pointer_cast(device_ranks.data()), generator_count, k, total,
+        thrust::raw_pointer_cast(device_ranks.data()),
+        thrust::raw_pointer_cast(device_activation.data()), generator_count, k, total,
         thrust::raw_pointer_cast(incidences.data()));
     cudaEventRecord(after_emit);
     if (!record("emission", cudaGetLastError(), error, error_capacity)) return false;
@@ -237,26 +268,20 @@ bool run_faceowner_order_on_gpu(const std::vector<int>& members_csr,
     thrust::transform(thrust::device, group_of.begin(), group_of.end(),
                       thrust::make_constant_iterator((long long)1), group_of.begin(),
                       thrust::minus<long long>());
-
-    thrust::device_vector<unsigned long long> candidates((std::size_t)total);
-    pack_owner_candidates<<<(unsigned)grid, block>>>(
-        thrust::raw_pointer_cast(incidences.data()),
-        thrust::raw_pointer_cast(device_activation.data()), total,
-        thrust::raw_pointer_cast(candidates.data()));
-    if (!record("candidats", cudaGetLastError(), error, error_capacity)) return false;
-    thrust::device_vector<long long> group_keys_out((std::size_t)group_count);
-    thrust::device_vector<unsigned long long> group_owner((std::size_t)group_count);
-    thrust::reduce_by_key(thrust::device, group_of.begin(), group_of.end(),
-                          candidates.begin(), group_keys_out.begin(), group_owner.begin(),
-                          thrust::equal_to<long long>{},
-                          thrust::minimum<unsigned long long>{});
+    // Les DEBUTS de groupe : l'owner est la tete (tri par activation) — les
+    // indices des tetes, compactes par copy_if sur le drapeau.
+    thrust::device_vector<long long> group_start((std::size_t)group_count);
+    thrust::copy_if(thrust::device,
+                    thrust::make_counting_iterator<long long>(0),
+                    thrust::make_counting_iterator<long long>(total), head.begin(),
+                    group_start.begin(), NonZero64{});
 
     thrust::device_vector<FaceOwnerDeviceEdge> raw_edges((std::size_t)total);
     thrust::device_vector<int> keep((std::size_t)total);
     emit_edges<<<(unsigned)grid, block>>>(
         thrust::raw_pointer_cast(incidences.data()),
         thrust::raw_pointer_cast(group_of.data()),
-        thrust::raw_pointer_cast(group_owner.data()),
+        thrust::raw_pointer_cast(group_start.data()),
         thrust::raw_pointer_cast(device_batch.data()), total,
         thrust::raw_pointer_cast(raw_edges.data()), thrust::raw_pointer_cast(keep.data()));
     if (!record("aretes", cudaGetLastError(), error, error_capacity)) return false;

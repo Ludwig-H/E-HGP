@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=70222980a82de418e91e6fa791382047067c22eb`, toujours sous
+`HEAD=origin/main=f6cb562680138ee37a8ef9684453af73e3dad946`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -50,7 +50,8 @@ dérivées des records, `f2e78fa` la proposition cofaces sans paires, puis
 `56e76c6` son rejeu ordre par ordre et sa porte `k=6` ciblée, `038bbbb` le
 premier fold hybride committé, `17b70cf` son nettoyage CLI, puis `7022298` la
 permutation `face-owner`, l'export de son flux d'arêtes et le premier oracle
-device de ce flux. Leurs
+device de ce flux; `23379d4` puis `f6cb562` consignent sa première session G4
+et l'audit préalable. Leurs
 empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
@@ -205,9 +206,71 @@ falsificateur borné, mais elle n'est ni le fold hybride produit ni une solution
 `56*I` n'est pas majorant. La réparation prioritaire trie directement
 `(signature,activation_rank,generator)` afin que le premier incident soit
 l'owner, puis produit les arêtes gardées sans les buffers de réduction et
-d'arêtes brutes. Le diagnostic G4 a été empêché avant démarrage par le quota;
-la cible est restée arrêtée. Détails et portes de qualification :
-[`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md).
+d'arêtes brutes. La première tentative G4 a été empêchée avant démarrage par le
+quota; une session distincte de Claude rapporte ensuite quinze accords de flux
+et tue `drop-edge`. Les masses `n=64/200` sont recertifiées localement; la ligne
+`n=400` et le périmètre temporel demandent encore le reçu brut. Les deux cibles
+sont arrêtées. Détails et portes de qualification :
+[`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md) et
+[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](audits/AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md).
+
+Le candidat GPU exact proposé pour le masque de requêtes hybride est
+`postings-count`, non une énumération de faces : le device trie les hits `(requête,candidat)`, leur run
+mesure exactement l'intersection et le seuil `k` rend un vrai carrier. Le
+chunking par intervalles d'`ActivationId` conserve chaque compte entier; le
+DSU et la transaction de lot restent hôte. Il n'est sélectionnable qu'après un
+préflight exact de `H_query(mode)` : les masses count/cover et
+dirigée/canonique restent distinctes; le `count_directed` tout-requête est mesuré entre 74,9 et
+129,9 fois plus massif que `face-owner` sur `n=64..400` et reste un oracle
+borné, pas le backend d'échelle. Si le masque est rare, un autre candidat est
+l'owner demand-driven : une tâche par `k`-signature de requête intersecte les
+postings triés et rend le minimum global en tout-requête, ou une ancre
+non-requête prioritaire sous certificat batch, sans table globale de faces ni
+flux de candidats. Son travail peut néanmoins
+dépasser le compteur en mode tout-requête; `J_query` et la borne du mode
+(`D_prefix` au minimum global, `D_preferR` sur le driver complet) doivent être
+admis séparément. Un cache borné exact transforme collision et éviction en
+miss; son diagnostic `n=400`, capacité `2^20`, atteint 85,95 à 99,95 % de hits,
+mais ce taux séquentiel doit être remesuré avec un cache GPU read-only. Sur les
+vingt graines `0..19` à `n=11`, le fallback CPU live vaut 290/13 509 passages;
+le masque sûr, élargi aux lots ex æquo actifs, vaut 597 passages avec
+`I/H_count/D_prefix/J=2 042/25 394/34 559/10 809`. Les vingt folds CPU concordent avec G2 et
+créditent la rareté du sidecar, pas le futur backend GPU; sa combinatoire est
+falsifiée séparément sur 30 000 familles. Ce résultat justifie d'instrumenter
+ces masses par lot, pas d'extrapoler. Le filtre canonique du cover doit garder
+un candidat fast omis quel que soit son ID. L'owner prend le minimum global
+seulement en tout-requête ou sous preuve d'un carrier strict; sinon il préfère
+une ancre non-requête sous certificat batch, ou réinterroge tout le lot.
+Contrats complets :
+[`NOTE_SOLUTION_GPU_OWNER_DEMAND_DRIVEN_20260810.md`](audits/NOTE_SOLUTION_GPU_OWNER_DEMAND_DRIVEN_20260810.md) et
+[`NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md`](audits/NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md).
+
+Le dispatcher v0 conseillé à Claude est transactionnel par ordre et lot. Le
+fast est d'abord une phase commune dans le scratch, pas un backend concurrent;
+le sidecar distingue « arêtes fast réelles » de « connectivité assez complète
+pour omettre cette requête ». Il gèle ensuite CSR, label canonique de composante
+et `query_mask`, puis publie avant toute mutation `I_query`, `H_query(mode)`,
+la borne `D` propre au mode d'ancre, la borne de probes et le manifeste d'arène. Un petit lot prend le
+noyau CPU exact; sinon l'owner GPU n'est admissible que si sa borne **all-miss**
+tient, puis le cover/count si sa masse et ses workspaces tiennent; à défaut,
+repli CPU ou refus. Le taux de cache ne décide jamais l'admission. `face-owner`
+reste explicitement un oracle borné et ne devient pas un fallback produit.
+
+Le certificat batch fast peut lui-même être obtenu sans graphe global, mais son
+contrat est plus fort qu'une `BallKey` injective : boule exacte et saturé fermé
+complet par handle, exactement un handle par boule, collisions résolues,
+fermeture carrier de la source par ordre, lots et scratch ancien exacts, puis
+attaches fast réelles et exhaustives vers chaque composante incidente. Deux
+handles distincts d'un lot partageant une `k`-signature ont alors nécessairement
+un carrier strict ancien; l'égalité de niveau donnerait la même miniboule puis,
+par canonicalité du catalogue, le même handle. C'est la voie propre pour lever
+`solo_batch`; le live accepte encore le premier doublon de boule. Sans ce
+contrat, le dispatcher réinterroge tout le lot actif. Le corollaire est
+positivement sondé sur vingt catalogues `smax=n=11` sous prétention de
+complétude : 213 incidences `(paire-ordre,F)` issues de 78 paires-ordre ex æquo
+rendent toutes un carrier unique strict; 47 548 tests de
+voisins sur 2 248 cas `rank=k` restent nuls. Ce corpus ne remplace pas les
+fixtures hostiles de canonicalité.
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

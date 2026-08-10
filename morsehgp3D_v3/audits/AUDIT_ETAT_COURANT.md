@@ -3,7 +3,7 @@
 Date du snapshot courant : 10 août 2026 UTC.
 
 Cadre annoncé : `phase=exploration_v3_hors_registre`,
-`backend=cpu_reference_and_bounded_oracles`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
@@ -11,7 +11,7 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
 courante est
-`HEAD=origin/main=70222980a82de418e91e6fa791382047067c22eb` : `405c37b`
+`HEAD=origin/main=f6cb562680138ee37a8ef9684453af73e3dad946` : `405c37b`
 livre le join postings reçu, `651e47f` la porte des niveaux d'événement
 `q_min`, `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
 troisième voie postings globale, `45c0b7b` les records par témoins et les
@@ -20,13 +20,14 @@ forêts candidates dérivées, `f2e78fa` la proposition cofaces, `21d85c8`
 l'oracle `face-owner` borné et sa réfutation permanente, `56e76c6` son rejeu
 ordre par ordre, `038bbbb` le premier fold hybride committé, `17b70cf` le
 nettoyage de son reporting CLI, puis `7022298` la permutation `face-owner`,
-l'export de ses arêtes et le premier oracle device de ce flux. L'audit du
+l'export de ses arêtes et le premier oracle device de ce flux, puis `23379d4`
+et `f6cb562` sa session G4 déclarée et sa documentation. L'audit du
 dernier palier, avec toutes les empreintes et les correctifs directement
 implémentables, est
 [`AUDIT_LIVE_HYBRID_3147BB0.md`](AUDIT_LIVE_HYBRID_3147BB0.md); l'audit GPU
 distinct est [`AUDIT_GPU_FACEOWNER_7022298.md`](AUDIT_GPU_FACEOWNER_7022298.md).
 
-## Autorité courante à `7022298`
+## Autorité courante à `f6cb562`
 
 | contrat | état reçu |
 | --- | --- |
@@ -43,7 +44,7 @@ distinct est [`AUDIT_GPU_FACEOWNER_7022298.md`](AUDIT_GPU_FACEOWNER_7022298.md).
 | solution hybride | **cœur mathématique et différentiel positifs bornés à `038bbbb`, contrat produit non reçu** : cinq formes concordent, les chemins principal/fallback sont exercés et deux mutants meurent; restent le sidecar lié à la source, la provenance `q_min`/complétude, les carriers vérifiables, quatre mutants structurels et le budget mémoire |
 | source et provenance runtime | **ouvertes** : `n_support` est lu sans bit `q_min_certified`; `smax>=n` exclut une censure de rang mais ne certifie pas la complétude de la famille |
 | architecture légère | **préservée géométriquement** : aucun graphe de Johnson, sous-simplexe ou mosaïque d'ordre supérieur dans le chemin candidat; masse combinatoire et source complète restent les murs |
-| 50 k / GPU | **premier oracle device écrit, qualification NO-GO** : émission `face-owner` CUDA jusqu'à `k=6` et math du flux positives; aucune exécution CUDA reçue, validation hostile, mémoire majorante, ressources transactionnelles et CTests CUDA restent ouverts; ce n'est pas le fold hybride produit |
+| 50 k / GPU | **diagnostic G4 du flux positif, qualification produit NO-GO** : quinze accords arête par arête et mutant `drop-edge` rapportés; masses `n=64/200` recertifiées, ligne `n=400` à corriger; validation hostile, mémoire majorante, ressources transactionnelles, reçu brut et CTests CUDA restent ouverts; ce n'est pas le fold hybride produit |
 
 La fermeture constructive du transcript est donnée par
 [`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md) : une racine porte sa plus petite `k`-face comme témoin, maintenue en
@@ -97,8 +98,49 @@ et workspaces, et le CTest d'absence est inconditionnel. La voie constructive
 est double : simplifier ce falsificateur en triant directement par
 `(signature,activation_rank,generator)`, puis réserver le kernel produit au
 fallback compteur/postings afin de rendre de vrais carriers sans énumérer
-toutes les faces. Voir
-[`AUDIT_GPU_FACEOWNER_7022298.md`](AUDIT_GPU_FACEOWNER_7022298.md).
+toutes les faces. La session G4 ultérieure rapporte quinze flux identiques et
+tue `drop-edge`; son état GCE final est reçu, tandis que sa ligne `n=400`, son
+high-water et son speedup de bout en bout ne le sont pas encore. Voir
+[`AUDIT_GPU_FACEOWNER_7022298.md`](AUDIT_GPU_FACEOWNER_7022298.md) et
+[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md).
+
+La route GPU exacte directement implémentable pour le `query_mask` hybride est
+le comptage des hits de postings par clé `(requête,candidat)`. Le run a pour
+longueur l'intersection exacte; son chunking par intervalles de candidats
+préserve chaque compte, rend un handle incident réel et laisse le DSU
+transactionnel à l'hôte. Elle n'est pas automatiquement une route d'échelle :
+le `count_directed` tout-requête vaut `226,8 M/1,893 G/5,747 G` hits à `n=64/200/400`, soit
+`74,9/109,5/129,9` fois la masse face-owner. Il faut donc admettre
+`H_query(mode)` exactement, en séparant count/cover et dirigé/canonique, ou conserver la recherche CPU demand-driven. Une autre
+cible device, adaptée à un masque rare, intersecte directement les `k`
+postings de chaque signature de requête : minimum global en tout-requête ou
+carrier strict, ancre non-requête prioritaire sous certificat batch. Son
+préflight porte sur `I_query` et les longueurs des drivers, sans hits ni
+table globale de faces. Le tout-requête est toutefois NO-GO en travail; le
+dispatcher doit comparer `J_query` à la borne propre au mode (`D_prefix` au
+minimum global, `D_preferR` sur le driver complet), `H_query(mode)` et la route CPU.
+Le cache owner borné est le résultat positif le plus prometteur : avec `2^20`
+cases à `n=400`, ses hits séquentiels vont de 85,95 à 99,95 %, toute collision
+restant un miss vérifié; le protocole GPU read-only doit les remesurer. Le
+fallback CPU live vaut 290/13 509 passages sur les graines `0..19`, mais le
+masque sûr doit réinterroger les lots ex æquo : 597 passages, avec
+`I/H_count/D_prefix/J=2 042/25 394/34 559/10 809`. Les 20/20 accords G2 créditent le fold
+hybride CPU et la rareté, pas encore le backend proposé; ses deux règles
+combinatoires passent séparément 30 000 familles. Le cover
+canonique peut garder une arête mixte par la règle « candidat non interrogé ou
+antérieur ». Pour l'owner, soit tout le lot actif est interrogé, soit un
+certificat batch prouve le graphe induit par `R=anciens+fast_omis` avec un
+forest d'arêtes `R--R`, et l'ancre préfère un non-requête. Sa dérivation exige
+un handle unique par boule exacte, saturés complets, fermeture carrier de la
+source, niveaux/scratch reçus et attaches fast exhaustives; le seul bit
+principal est insuffisant. Le corollaire passe néanmoins sur vingt catalogues
+`smax=n=11` sous prétention de complétude : 213 incidences
+`(paire-ordre,F)` issues de 78 paires-ordre ex æquo ont un carrier unique strict et
+47 548 tests `rank=k` ne trouvent aucun voisin distinct.
+Voir
+[`NOTE_SOLUTION_GPU_OWNER_DEMAND_DRIVEN_20260810.md`](NOTE_SOLUTION_GPU_OWNER_DEMAND_DRIVEN_20260810.md).
+Le contrat du compteur/cover est dans
+[`NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md`](NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md).
 
 Les sections `2b4801c` et antérieures sont conservées ci-dessous comme
 historique chronologique; elles ne décrivent plus le worktree courant.

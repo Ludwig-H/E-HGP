@@ -5,7 +5,7 @@ Date : 10 août 2026 UTC. Auteur : Claude. Cadre :
 aucun statut public — une QUALIFICATION de kernel par différentiel natif,
 jamais une exactitude 50 k.
 
-## Session G4 (protocole gardé, ~15 minutes de VM)
+## Session G4 (protocole gardé, génération GCE de 5 min 08 s)
 
 `ehgp-blackwell-spot-ai1a` (g4-standard-48, RTX PRO 6000 Blackwell, 95 Go
 VRAM, nvcc 12.9, sm_120) : `maxRunDuration=7200 s` recertifié, clé ED25519 de
@@ -26,7 +26,7 @@ triées par (lot, owner, membre) — l'objet exact du chemin CPU `collect_edges`
 | ---: | ---: | ---: | ---: | ---: | --- |
 | 64 | 3 030 554 | 1 319 076 | **5,95 ms** | 0,52 s | IDENTIQUES ×5 ordres |
 | 200 | 17 282 892 | 7 385 988 | **18,73 ms** | 3,18 s | IDENTIQUES ×5 ordres |
-| 400 | 44 ,5 M | 13,9 M | **49,25 ms** | 8,67 s | IDENTIQUES ×5 ordres |
+| 400 | 44 258 951 | 19 073 174 | **49,25 ms** | 8,67 s | IDENTIQUES ×5 ordres |
 
 Le mutant `--force-drop-edge` (dernière arête device retirée) rend le code 1 :
 le comparateur mord. L'admission VRAM (NO-GO au-delà de 70 % de la mémoire
@@ -35,15 +35,23 @@ contre 94,4 Go libres.
 
 ## Lecture honnête des chiffres
 
-- Le chiffre device couvre émission+tri+owner+étoiles — la partie MASSIVE du
-  join. Le rejeu DSU par lots, le marquage, les records et le catalogue
-  restent sur l'hôte et ne sont PAS dans les millisecondes device.
-- À n=400 le join device vaut ~49 ms là où le fold CPU complet vaut 8,7 s sur
-  le même hôte : le mur du join est effacé par le device À CES TAILLES ; le
-  poste dominant devient le GÉNÉRATEUR (`flat_catalogue`, 52 s à n=400 sur un
-  cœur) et le rejeu hôte — exactement la hiérarchie que la route à deux
-  étages du contrat 100 ms prévoit (construction offline, requête sur
-  certificat).
+- LES DEUX PÉRIMÈTRES DIFFÈRENT (réception `23379d4`) : le chiffre device
+  couvre émission+tri+owner+étoiles et EXCLUT allocations, H2D, D2H et rejeu ;
+  le chiffre CPU couvre le fold complet avec la copie des arêtes. Le rapport
+  produit sera mur total contre mur total, phases publiées des deux côtés —
+  la conclusion recevable aujourd'hui est : 44 M d'incidences sont une charge
+  device très favorable, pas « le mur est effacé ».
+- CORRECTIONS de la réception : la ligne n=400 publiait des totaux arrondis
+  depuis un log tronqué (`44,5 M / 13,9 M`) — les masses exactes recertifiées
+  par l'auditeur sur le même binaire CPU sont `44 258 951 / 19 073 174`
+  (coord=73). La durée de génération GCE certifiée est 5 min 08 s. L'archive
+  source de session a pour SHA-256
+  `0717c3948ce6e99e399e6a78b4740cf9034243aea417d078c1d522195a6ced60` ; les
+  fichiers de clé locaux ont été supprimés du scratchpad.
+- La hiérarchie des coûts pointe vers le GÉNÉRATEUR (`flat_catalogue`,
+  52 s à n=400 sur un cœur) et le rejeu hôte comme postes dominants — la
+  route à deux étages du contrat 100 ms — mais cette phrase ne deviendra un
+  reçu qu'avec les murs totaux des deux chemins, phases publiées.
 - Ces tailles restent `partial_refinement` (`smax=11`) : la qualification
   porte sur le KERNEL, pas sur la complétude de la source — le verrou
   50 k exact demeure la source-certificat sparse.

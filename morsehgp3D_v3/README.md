@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=70222980a82de418e91e6fa791382047067c22eb`. Le commit produit
+`HEAD=origin/main=f6cb562680138ee37a8ef9684453af73e3dad946`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -34,7 +34,8 @@ porte de réfutation sur `k=6`, compare les records dans le pipeline et publie l
 manifeste mémoire estimé; `038bbbb` intègre ensuite le fold hybride comme
 cinquième forme, `17b70cf` nettoie son premier défaut de reporting, puis
 `7022298` renforce la permutation `face-owner`, exporte son flux d'arêtes et
-écrit le premier oracle device de ce flux. Ces derniers
+écrit le premier oracle device de ce flux; `23379d4` puis `f6cb562` consignent
+sa première session G4 et l'audit préalable. Ces derniers
 résultats et leurs limites sont épinglés dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
@@ -225,18 +226,22 @@ la boule courante. Son support de quatre points au plus constitue le certificat
 compact vérifiable avec les primitives exactes existantes; voir
 [`NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md`](audits/NOTE_CERTIFICAT_SUPPORT_PRINCIPAL_PAR_MINIBOULE_20260810.md).
 
-**[le kernel face-owner est qualifié sur la G4]** L'étage device existe et
-est reçu par différentiel natif : `faceowner_device_kernel.cu` reproduit
-**arête par arête** le flux CPU `collect_edges` sur les cinq ordres à
-n=64/200/400 — **49 ms device pour 44,5 M d'incidences à n=400, contre 8,7 s
-de fold CPU complet** (RTX PRO 6000 Blackwell, sm_120). Mutant `drop-edge`
-tué, admission VRAM à 70 % avant tout lancement, session G4 SPOT gardée de
-~15 minutes, VM certifiée TERMINATED, clé révoquée. Le mur du join est effacé
-par le device à ces tailles ; le poste dominant devient le générateur et le
-rejeu hôte — la hiérarchie du contrat à deux étages. La qualification porte
-sur le kernel, pas sur la complétude : le verrou 50 k exact demeure la
-source-certificat sparse. Chiffres :
-[`NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md`](audits/NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md).
+**[diagnostic G4 positif du flux `face-owner`, qualification produit non
+reçue]** Claude rapporte que `faceowner_device_kernel.cu` reproduit arête par
+arête le flux CPU `collect_edges` sur cinq ordres et trois catalogues, avec le
+mutant `drop-edge` tué. L'audit CPU frais recertifie exactement les masses
+`3 030 554 / 1 319 076` à `n=64` et `17 282 892 / 7 385 988` à `n=200`.
+La ligne `n=400` publiée comme `44,5 M / 13,9 M` n'est toutefois pas
+reproductible avec la provenance par défaut : `coord=73` donne
+`44 258 951 / 19 073 174`; le log brut ou la commande exacte doit trancher.
+Les `49,25 ms` device excluent allocations, transferts et DSU, tandis que les
+`8,67 s` CPU couvrent le fold complet : le débit device est très encourageant,
+mais ce rapport n'est pas encore un speedup de bout en bout. L'API GCE confirme
+une session `SPOT` de 5 min 08 s et l'état final `TERMINATED`. La source reste
+partielle et le verrou 50 k exact demeure la source-certificat sparse. Note de
+Claude et réception indépendante :
+[`NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md`](audits/NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md),
+[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](audits/AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md).
 
 **[mur de masse et sortie exacte proposée]** Le sweep `n=100..400` confirme
 que le join monolithique reste un NO-GO prévisionnel à 50 k; son ajustement
@@ -273,8 +278,8 @@ sa modélisation; aucune promotion GPU n'en découle. Verdict et séquence exact
 mathématique complet reste dans
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md).
 
-**[premier oracle device `face-owner`, math positive et qualification GPU non
-reçue]** `7022298` porte sur CUDA l'émission exhaustive des incidences de
+**[audit du premier oracle device `face-owner`]** `7022298` porte sur CUDA
+l'émission exhaustive des incidences de
 `k`-faces jusqu'à `k=6`, le choix de l'owner minimal en
 `(activation_rank,generator)` et le tri-déduplication des branches d'étoile;
 le DSU et le transcript restent sur CPU. L'unranking a été vérifié
@@ -284,10 +289,66 @@ matérialise toute la masse `I_k`. Sa validation d'entrée est incomplète, son
 admission `56*I` sous-compte des buffers explicitement simultanés pouvant
 atteindre environ `92*I` avant les workspaces Thrust, et le CTest qui attend
 l'absence du kernel est encore enregistré sous CUDA. La première tentative G4
-gardée a été refusée avant démarrage par le quota régional; la cible exacte est
-restée `TERMINATED` et aucune VM concurrente n'a été touchée. Le verdict, la
-simplification de buffers et les portes G4 minimales sont dans
-[`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md).
+de l'auditeur a été refusée avant démarrage par le quota; la session distincte
+de Claude a ensuite produit le diagnostic positif ci-dessus et sa cible est
+également `TERMINATED`. Le verdict de code préalable, la réception de session,
+la simplification de buffers et les portes G4 minimales sont dans
+[`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md) et
+[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](audits/AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md).
+
+Le candidat GPU exact pour le **masque de requêtes hybride** est différent :
+pour chaque requête, il trie et réduit les hits dans les postings visibles; la longueur du
+run `(M,N)` vaut exactement `|M intersection N|`. Une requête trop lourde est
+découpée par intervalles d'`ActivationId` candidat, jamais au milieu des
+contributions d'un même `N`. Le device rend le vrai handle incident; l'hôte
+garde DSU, pruning et commit atomique. Ce n'est pas encore une solution
+d'échelle autonome : le `count_directed` tout-requête demanderait respectivement
+`226 854 316`, `1 892 861 494` et `5 747 389 371` hits à `n=64/200/400`, soit
+`74,9/109,5/129,9` fois la masse `face-owner`. Le dispatcher ne peut donc le
+choisir qu'après calcul exact de `H_query(mode)` — masse distincte pour count
+dirigé/canonique et cover dirigé/canonique; sinon il garde le fallback CPU
+demand-driven ou une autre forme admise. Une route device à petite mémoire, si
+le masque est rare, intersecte directement les `k` postings d'une signature de
+requête et rend un carrier réel : minimum global en tout-requête ou carrier
+strict, ancre non-requête prioritaire sous certificat batch. Il émet une arête réelle par signature,
+aucune clique, aucun flux de hits et aucune table globale de faces. Elle n'est
+pas automatiquement plus rapide : le préflight doit aussi admettre le nombre
+de candidats parcourus avant chaque owner. Un cache borné garde l'exactitude en
+traitant toute collision/éviction comme un miss; à `n=400`, `2^20` cases donnent
+85,95 à 99,95 % de hits selon l'ordre, diagnostic séquentiel prometteur mais à
+remesurer avec un cache GPU read-only et les clés complètes du profil 50 k/K=10.
+Le masque live est lui-même encourageant : sur les graines `0..19`, le fallback
+CPU brut représente 290 passages sur 13 509, tandis que le masque sûr qui
+réinterroge les lots ex æquo vaut 597 passages et
+`I/H_count/D_prefix/J=2 042/25 394/34 559/10 809`. Les 20 folds CPU hybrides concordent avec
+G2; ils créditent le sidecar live et la rareté, **pas** le futur backend GPU. Sa
+combinatoire est séparément falsifiée sur 30 000 familles, mais sa porte produit
+reste à écrire. Ce n'est pas une extrapolation; le prochain reçu doit publier
+le digest et ces quatre masses par ordre et lot. Le
+cover peut éviter les doublons avec le filtre exact « candidat non interrogé ou
+antérieur »; l'owner au minimum global ne peut omettre les fast ex æquo sans un
+certificat intra-lot plus fort.
+Voir
+[`NOTE_SOLUTION_GPU_OWNER_DEMAND_DRIVEN_20260810.md`](audits/NOTE_SOLUTION_GPU_OWNER_DEMAND_DRIVEN_20260810.md).
+Le contrat du compteur/cover, sa mémoire, ses reçus et ses mutants sont dans
+[`NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md`](audits/NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md).
+
+La séquence de réalisation est maintenant nette : sidecar validé et attaches
+fast dans un scratch; `query_mask` et labels canoniques gelés; préflight
+`I/H/D/probes` dépendant du mode plus arène (`D_prefix` au minimum global,
+`D_preferR` sur le driver complet); CPU exact pour les petits lots, owner GPU seulement
+si sa borne all-miss tient, puis cover/count si sa masse tient, sinon repli CPU
+ou refus. Le cache reste une optimisation read-only du lot et ne peut jamais
+faire admettre une charge refusée sans lui. Le carrier strict permet de
+certifier les lots ex æquo seulement si le sidecar valide une boule et un saturé
+fermé complets par handle, exactement un handle par boule, les collisions de
+`BallKey`, la fermeture carrier de la source par ordre, les lots exacts, le
+scratch ancien et des attaches fast exhaustives vers chaque composante
+incidente. Le live ne garantit pas encore l'unicité des handles de boule. Sans
+ce contrat, tous les actifs du lot restent requêtes. Positif borné : sur vingt
+catalogues `smax=n=11` sous prétention de complétude, les 213 incidences
+`(paire-ordre,F)` issues de 78 paires-ordre ex æquo ont toutes un carrier unique strict, et 47 548 tests de voisins `rank=k` n'en
+trouvent aucun; les fixtures hostiles restent à graver.
 
 **[forêts dérivées, crédit borné]** `df984ed` transforme les records en une
 projection généalogique candidate : les campagnes ciblées rendent zéro témoin
