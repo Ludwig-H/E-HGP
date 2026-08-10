@@ -11,16 +11,17 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
 courante est
-`HEAD=origin/main=45c0b7bfe4e908cd05c6269ae2e651e629370e6d` : `405c37b`
+`HEAD=origin/main=f2e78fadf1fa8012f2d11f35dd76392ec45683a5` : `405c37b`
 livre le join postings reçu, `651e47f` la porte des niveaux d'événement
 `q_min`, `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
-troisième voie postings globale, puis `45c0b7b` les records par témoins et les
-saturés des boules marquantes. Son audit
+troisième voie postings globale, `45c0b7b` les records par témoins et les
+saturés des boules marquantes, `acb9e7a` le sweep de masse, `df984ed` les
+forêts candidates dérivées, puis `f2e78fa` la proposition cofaces. Leur audit
 reproductible, avec toutes les empreintes et le correctif live immédiatement
 postérieur, est
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 
-## Autorité courante à `45c0b7b`
+## Autorité courante à `f2e78fa`
 
 | contrat | état reçu |
 | --- | --- |
@@ -30,6 +31,11 @@ postérieur, est
 | transcript Gamma | **records de composante positifs bornés** : triples, témoins fermés, témoins stricts, types et saturés marquants concordent; oracle indépendant par `k`-faces; échange même-lot tué par records seuls; pipeline, canonicalité du niveau et provenance runtime encore ouverts |
 | préflight par lots | **progrès positif** : `P_post` et plus gros lot exacts avant émission, manifeste observable au refus; pic encore modélisé par constantes, sans high-water contractuel |
 | voie postings globale | **troisième vérité utile, pas forme d'échelle** : déterministe à 1/2 threads et fold identique; préflight/budget raccordés et porte de refus verte, mais occurrences intégrales, double stockage transitoire, arêtes et ordre global |
+| forêts dérivées | **projection `full_pi0` plausible, non reçue sémantiquement** : zéro orphelin sur campagnes et comptages cohérents; parents, kinds, racines, niveaux et choix `full_pi0|hgp_reduced` ne sont pas comparés à une vérité indépendante |
+| masse sans paires | **théorème et diagnostic positifs** : les étoiles `face-owner` conservent chaque coupe; `n=200/K=5` passe de `385,55 M` cooccurrences à `16,38 M` incidences; oracle borné seulement tant que les faces sont énumérées |
+| oracle `face-owner` live | **sémantique positive, échelle non reçue** : quatre formes concordent et 7/7 mutants meurent; à `8d6516c`, `reserve(size+1)` rend l'émission quadratique, le pic compte 24 au lieu de 32 octets par incidence et oublie les arêtes résidentes de tous les ordres |
+| cofaces à support canonique | **réfuté jusque dans `q=k=4`** : une coquille u16 minimale possède six composantes strictes et le filtre n'en voit que cinq; à `q=4,k=6`, une seconde fixture en manque neuf sur dix-sept; support principal certifié ou fallback exact nécessaires |
+| solution hybride | **preuve constructive, implémentation à recevoir** : support principal certifié donne `q<=4` attaches exactes; coquilles multi-supports basculent vers le trie `face-owner` à coupures certifiées |
 | source et provenance runtime | **ouvertes** : `n_support` est lu sans bit `q_min_certified`; `smax>=n` exclut une censure de rang mais ne certifie pas la complétude de la famille |
 | architecture légère | **préservée géométriquement** : aucun graphe de Johnson, sous-simplexe ou mosaïque d'ordre supérieur dans le chemin candidat; masse combinatoire et source complète restent les murs |
 | 50 k / GPU | **NO-GO maintenu** : runs bornés, source certifiée, arithmétique globale vérifiée, témoins/marqueurs internés et manifeste/high-water manquent; aucun kernel GPU nouveau dans ce delta |
@@ -47,6 +53,27 @@ La réponse directe aux verrous CPU et mémoire est
 [`REPONSE_CLAUDE_JOIN_POSTINGS_Q1_Q3_20260810.md`](REPONSE_CLAUDE_JOIN_POSTINGS_Q1_Q3_20260810.md) : accumulateur sparse à propriétaire unique pour le CPU, degrés et `P_post` exacts comme autorité d'admission, puis runs triangulaires bornés et merge
 déterministe pour le global/GPU. À l'ordre un, chaque clique de posting peut
 déjà être remplacée exactement par un arbre de `d_x-1` arêtes à chaque coupe.
+
+La réponse au mur de masse est maintenant plus forte et séparée dans
+[`REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md`](REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md).
+Le graphe de seuil à l'ordre `k` est la projection des incidences entre
+générateurs et `k`-sous-ensembles. Choisir, pour chaque signature, l'incident de
+niveau minimal puis relier les autres en étoile conserve exactement toutes les
+coupes. Le diagnostic `n=200/smax=11/K=5` calcule `16 377 083` incidences
+après `Sigma_k`, contre `385 553 414` cooccurrences partagées. La réduction est
+réelle; l'énumération des faces reste réservée à l'oracle borné. La version
+produit proposée recherche les signatures à la demande dans les postings et
+coupe un sous-arbre dès qu'il ne contient plus de racine extérieure inconnue.
+
+Le statut exact des forêts de `df984ed` est consigné dans
+[`AUDIT_FORETS_DERIVEES_DF984ED.md`](AUDIT_FORETS_DERIVEES_DF984ED.md) : la
+projection des records est cohérente et sans orphelin sur les campagnes, mais
+la gate ne reçoit encore aucun parent, kind, niveau ou ensemble de racines
+contre une construction indépendante. Le profil public `full_pi0` contre
+`hgp_reduced`, le coût hors timer et les copies de témoins restent ouverts.
+
+La route directement implémentable issue de la réfutation est
+[`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md) : un support principal est reçu par au plus quatre séparateurs exacts, puis `q` carriers couvrent toutes les racines strictes; les coquilles à supports alternatifs utilisent un trie de signatures avec coupure seulement sur une intersection de postings vide ou déjà couverte. Cette combinaison retire `P_post` sans transformer la conjecture `O(q+arité)` en claim.
 
 Les sections `2b4801c` et antérieures sont conservées ci-dessous comme
 historique chronologique; elles ne décrivent plus le worktree courant.

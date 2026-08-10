@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=45c0b7bfe4e908cd05c6269ae2e651e629370e6d`, toujours sous
+`HEAD=origin/main=f2e78fadf1fa8012f2d11f35dd76392ec45683a5`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -43,8 +43,10 @@ code exact; `ac39ac7` puis `478cfe8` écrivent et durcissent le juge Gamma;
 profileur compact et sépare croissance de couverture et activation silencieuse;
 `405c37b` livre le join postings, `651e47f` la porte des niveaux `q_min`, puis
 `bc2dafa` le marquage, le préflight, l'oracle de poids et la voie postings
-globale, puis `45c0b7b` les records par témoins et les saturés des boules
-marquantes. Ses empreintes et limites sont dans
+globale, `45c0b7b` les records par témoins et les saturés des boules
+marquantes, `acb9e7a` le sweep du mur de masse, `df984ed` les forêts candidates
+dérivées des records, puis `f2e78fa` la proposition cofaces sans paires. Leurs
+empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
 bornés, pas un reçu produit. Le sujet v2 par défaut censure encore tous les
@@ -136,6 +138,37 @@ rejeu par lot. À `k=1`, remplacer chaque clique de posting par son arbre
 canonique de `d_x-1` arêtes conserve exactement toutes les composantes à chaque
 coupe. Cette séquence préserve l'invariant architectural et donne un pic borné
 indépendamment de `P_post`.
+
+La nouvelle vérité de réduction à privilégier avant ces runs est le certificat
+`face-owner`. Pour chaque ordre `k`, un générateur émet ses `k`-signatures; les
+incidents d'une signature sont reliés en étoile à celui de niveau minimal. Le
+théorème conserve la filtration entière, contrairement à une forêt maximale
+finale qui peut perdre une arête nécessaire avant l'arrivée de son futur
+centre. Le diagnostic `n=200/smax=11/K=5` donne `16,38 M` incidences après
+`Sigma_k`, contre `385,55 M` cooccurrences pleines. Cette forme est d'abord un
+oracle borné, puisqu'elle énumère des faces; le candidat produit est sa version
+demand-driven par intersections progressives des postings, avec coupure quand
+aucune racine extérieure nouvelle ne subsiste. Preuve, masses et mutants sont
+dans
+[`REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md`](audits/REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md).
+Le premier oracle live confirme cette sémantique sur quatre formes, mais ne
+constitue pas encore le backend : son `reserve(size+1)` rend l'émission
+quadratique, son modèle mémoire compte 24 octets pour une incidence qui en vaut
+32 sur l'ABI reçue et conserve les arêtes de tous les ordres. Le correctif sûr
+est de réserver `I_k` une fois puis de traiter/rejouer/libérer un ordre entier;
+voir [`AUDIT_LIVE_FACEOWNER_8D6516C.md`](audits/AUDIT_LIVE_FACEOWNER_8D6516C.md).
+Le protocole cofaces proposé à `f2e78fa` n'est pas exact avec son seul support
+canonique : le défaut apparaît déjà à `q_min=k=4`, où une coquille u16 de six
+points perd une composante stricte sur six; à `q_min=4,k=6`, neuf composantes
+sur dix-sept sont omises. Il peut redevenir une accélération de
+`face-owner` seulement avec supports alternatifs ou coupures demand-driven
+certifiées et un lookup de boule indépendant du support choisi; voir
+[`AUDIT_COFACES_F2E78FA.md`](audits/AUDIT_COFACES_F2E78FA.md).
+La forme retenue pour falsification est hybride : certificat local prouvant que
+le support canonique est obligatoire, puis au plus `q<=4` carriers; fallback
+`face-owner` demand-driven seulement sur les coquilles multi-supports. Son
+contrat complet est
+[`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

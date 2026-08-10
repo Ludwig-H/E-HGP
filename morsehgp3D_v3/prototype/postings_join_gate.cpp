@@ -36,6 +36,7 @@
 #include "mhgp/mhgp.hpp"
 #include "prototype/order_k_flats.hpp"
 #include "prototype/saturated_fold.hpp"
+#include "prototype/saturated_fold_faceowner.hpp"
 #include "prototype/saturated_fold_global.hpp"
 
 namespace {
@@ -195,6 +196,14 @@ std::vector<Fixture> named_fixtures() {
                        {2, {10, 1000, 2147483647}},
                        {3, {1000, 2147483647}}},
                       {{1, 0, 1, 1, 3}, {1, 0, 1, 1, 3}}});
+  // Le CONTRE-EXEMPLE TEMPOREL de la reponse masse (§3) : avant l'arrivee de
+  // C={0,1,2}, l'arete A--B (partage {0}) est indispensable a k=1 — une foret
+  // maximale FINALE choisirait A--C et B--C et rendrait un prefixe faux. Les
+  // etoiles owner-minimum, elles, restent prefixe-correctes : a k=1 B rejoint
+  // A par la signature {0} des son activation ; a k=2 C multifusionne A et B.
+  fixtures.push_back({"contre_exemple_temporel", 2,
+                      {{1, {0, 1}}, {2, {0, 2}}, {3, {0, 1, 2}}},
+                      {{1, 0, 1, 1, 3}, {2, 1, 0, 0, 3}}});
   return fixtures;
 }
 
@@ -295,7 +304,8 @@ bool independent_weights_agree(const mhgp::Catalogue& catalogue,
 // pour l'appelant --mutant.
 bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
                       mhgp3v::PostingsMutants mutants, const ExpectedOrder* expected,
-                      std::size_t expected_count, std::string* why) {
+                      std::size_t expected_count, std::string* why,
+                      mhgp3v::FaceOwnerMutants faceowner_mutants = {}) {
   const mhgp3v::SaturatedFold truth = mhgp3v::build_saturated_fold(
       catalogue, maximum_order, /*keep_partitions=*/true, /*enforce_event_guard=*/true);
   if (!truth.ok) { *why = std::string("fold de verite refuse : ") + truth.refusal; return false; }
@@ -336,6 +346,11 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
              " temoins stricts orphelins sous famille complete";
       return false;
     }
+    if (forest.invalid_records != 0) {
+      *why = "foret k=" + std::to_string(idx + 1) + " : " +
+             std::to_string(forest.invalid_records) + " records invalides";
+      return false;
+    }
   }
   if (!receipt_agrees(truth, receipt, catalogue_members_mass(catalogue), why)) return false;
   if (!independent_weights_agree(catalogue, receipt, why)) return false;
@@ -373,6 +388,26 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
       return false;
     }
   }
+
+  // LA QUATRIEME VERITE : le fold FACE-OWNER (theoreme de la reponse masse) —
+  // etoiles par signature de k-face, owner de niveau minimal — doit rendre le
+  // MEME fold bit a bit (compteurs, transcript, records, partitions), et son
+  // identite de preflight (incidences == binomiales) est interne. Les mutants
+  // de sa porte minimale §7.4 passent par faceowner_mutants.
+  {
+    mhgp3v::FaceOwnerReceipt faceowner_receipt;
+    const mhgp3v::SaturatedFold faceowner = mhgp3v::build_saturated_fold_faceowner(
+        catalogue, maximum_order, /*keep_partitions=*/true, &faceowner_receipt,
+        /*enforce_event_guard=*/true, faceowner_mutants);
+    if (!faceowner.ok) {
+      *why = std::string("fold face-owner refuse : ") + faceowner.refusal;
+      return false;
+    }
+    if (!folds_agree(truth, faceowner, /*ignore_representatives=*/false, why)) {
+      *why = "forme face-owner : " + *why;
+      return false;
+    }
+  }
   return true;
 }
 
@@ -392,10 +427,16 @@ int main(int argc, char** argv) {
     *value = (long long)magnitude;
     return true;
   };
+  const char* faceowner_mutant_name = nullptr;
   for (int i = 1; i < argc; ++i) {
     if (!strcmp(argv[i], "--mutant")) {
       if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --mutant\n"); return 2; }
       mutant_name = argv[++i];
+      continue;
+    }
+    if (!strcmp(argv[i], "--faceowner-mutant")) {
+      if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --faceowner-mutant\n"); return 2; }
+      faceowner_mutant_name = argv[++i];
       continue;
     }
     long long value = 0;
@@ -424,6 +465,17 @@ int main(int argc, char** argv) {
     return 2;
   }
 
+  mhgp3v::FaceOwnerMutants faceowner_mutants{};
+  if (faceowner_mutant_name != nullptr) {
+    if (!strcmp(faceowner_mutant_name, "owner-not-minimal")) faceowner_mutants.owner_not_minimal = true;
+    else if (!strcmp(faceowner_mutant_name, "publish-batch-early")) faceowner_mutants.publish_batch_early = true;
+    else if (!strcmp(faceowner_mutant_name, "omit-signature")) faceowner_mutants.omit_first_signature = true;
+    else if (!strcmp(faceowner_mutant_name, "duplicate-signature")) faceowner_mutants.duplicate_first_signature = true;
+    else if (!strcmp(faceowner_mutant_name, "shift-k")) faceowner_mutants.shift_k = true;
+    else if (!strcmp(faceowner_mutant_name, "qmin-filter-partial")) faceowner_mutants.qmin_filter_partial = true;
+    else if (!strcmp(faceowner_mutant_name, "support-facet-filter")) faceowner_mutants.support_facet_filter = true;
+    else { std::printf("ECHEC : mutant face-owner inconnu %s\n", faceowner_mutant_name); return 2; }
+  }
   mhgp3v::PostingsMutants mutants{};
   if (mutant_name != nullptr) {
     if (!strcmp(mutant_name, "strict-threshold")) mutants.strict_threshold = true;
@@ -440,9 +492,9 @@ int main(int argc, char** argv) {
     std::string why;
     const bool agree = run_differential(make_catalogue(fixture.generators), fixture.maximum_order,
                                         mutants, fixture.expected.data(), fixture.expected.size(),
-                                        &why);
+                                        &why, faceowner_mutants);
     if (!agree) {
-      if (mutant_name != nullptr && why.rfind("fixture contredite", 0) != 0) {
+      if ((mutant_name != nullptr || faceowner_mutant_name != nullptr) && why.rfind("fixture contredite", 0) != 0) {
         std::printf("mutant tue par la fixture %s : %s\n", fixture.name, why.c_str());
         return 4;
       }
@@ -450,7 +502,40 @@ int main(int argc, char** argv) {
       return 1;
     }
   }
-  std::printf("fixtures   : 7/7 en accord verite==postings, transcripts graves respectes\n");
+  std::printf("fixtures   : 8/8 en accord sur les QUATRE formes (G2, lots, global,"
+              " face-owner), transcripts graves respectes\n");
+
+  // ETAGE 1bis : LA COSPHERE DE LA REFUTATION COFACES (audit f2e78fa) — dix
+  // points u16 exactement sur la sphere de centre (2,2,2) et rayon carre 5.
+  // A l'ordre k=6, les six-faces strictes internes forment 17 composantes ;
+  // les signatures touchant un support canonique en >= q-1 points n'en
+  // atteignent que huit. Le differentiel des QUATRE formes sur ce nuage
+  // geometrique recoit la famille complete ; le mutant support-facet-filter
+  // doit y mourir.
+  {
+    const std::vector<mhgp::P3> cosphere = {
+        mhgp::P3{2, 4, 3}, mhgp::P3{1, 0, 2}, mhgp::P3{1, 2, 0}, mhgp::P3{2, 3, 4},
+        mhgp::P3{0, 2, 1}, mhgp::P3{3, 0, 2}, mhgp::P3{3, 2, 0}, mhgp::P3{4, 1, 2},
+        mhgp::P3{0, 1, 2}, mhgp::P3{4, 2, 1}};
+    mhgp3v::FlatStatistics st{};
+    mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
+    const mhgp::Catalogue catalogue =
+        mhgp3v::flat_catalogue(cosphere, 11, &st, &status, false, true);
+    if (status != mhgp3v::CloudStatus::kOk) {
+      std::printf("ECHEC cosphere : statut nuage %s\n", mhgp3v::cloud_status_name(status));
+      return 1;
+    }
+    std::string why;
+    if (!run_differential(catalogue, 6, mutants, nullptr, 0, &why, faceowner_mutants)) {
+      if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
+        std::printf("mutant tue par la cosphere de la refutation : %s\n", why.c_str());
+        return 4;
+      }
+      std::printf("ECHEC cosphere de la refutation : %s\n", why.c_str());
+      return 1;
+    }
+    std::printf("cosphere   : dix points cospheriques, K=6 — quatre formes en accord\n");
+  }
 
   // ETAGE 2 : la campagne differentielle sur nuages reels.
   long long processed = 0, skipped = 0;
@@ -478,8 +563,9 @@ int main(int argc, char** argv) {
     if (status != mhgp3v::CloudStatus::kOk) { ++skipped; continue; }
 
     std::string why;
-    if (!run_differential(catalogue, maximum_order, mutants, nullptr, 0, &why)) {
-      if (mutant_name != nullptr) {
+    if (!run_differential(catalogue, maximum_order, mutants, nullptr, 0, &why,
+                          faceowner_mutants)) {
+      if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
         std::printf("mutant tue par la campagne, nuage %d : %s\n", c, why.c_str());
         return 4;
       }
@@ -514,7 +600,7 @@ int main(int argc, char** argv) {
           straight.old_new_occurrences == mirrored.old_new_occurrences;
       if (!invariant) {
         if (permutation_why.empty()) permutation_why = "recu non invariant";
-        if (mutant_name != nullptr) {
+        if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
           std::printf("mutant tue par la permutation : %s\n", permutation_why.c_str());
           return 4;
         }
@@ -527,7 +613,7 @@ int main(int argc, char** argv) {
     const mhgp3v::SaturatedFold fold = mhgp3v::build_saturated_fold_postings(
         catalogue, maximum_order, false, &receipt, mutants);
     if (!fold.ok) {
-      if (mutant_name != nullptr) {
+      if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
         std::printf("mutant tue par le recu, nuage %d : %s\n", c, fold.refusal);
         return 4;
       }
@@ -546,8 +632,9 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (mutant_name != nullptr) {
-    std::printf("MUTANT SURVIVANT %s : la porte ne mord pas\n", mutant_name);
+  if (mutant_name != nullptr || faceowner_mutant_name != nullptr) {
+    std::printf("MUTANT SURVIVANT %s : la porte ne mord pas\n",
+                mutant_name != nullptr ? mutant_name : faceowner_mutant_name);
     return 0;
   }
 

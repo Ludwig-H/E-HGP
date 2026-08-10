@@ -28,6 +28,7 @@
 #include "mhgp/mhgp.hpp"
 #include "prototype/order_k_flats.hpp"
 #include "prototype/saturated_fold.hpp"
+#include "prototype/saturated_fold_faceowner.hpp"
 #include "prototype/saturated_fold_global.hpp"
 
 namespace {
@@ -96,6 +97,7 @@ int main(int argc, char** argv) {
       if (!strcmp(argv[i], "g2")) join_mode = 0;
       else if (!strcmp(argv[i], "postings")) join_mode = 1;
       else if (!strcmp(argv[i], "postings-global")) join_mode = 2;
+      else if (!strcmp(argv[i], "faceowner")) join_mode = 3;
       else { std::printf("ECHEC : jointure inconnue %s\n", argv[i]); return 2; }
       continue;
     }
@@ -164,8 +166,13 @@ int main(int argc, char** argv) {
   // sous famille tronquee ses violations sont comptees et publiees.
   const bool enforce_guard = smax >= n;
   mhgp3v::PostingsReceipt receipt;
+  mhgp3v::FaceOwnerReceipt faceowner_receipt;
   const mhgp3v::SaturatedFold fold =
-      join_mode == 2
+      join_mode == 3
+          ? mhgp3v::build_saturated_fold_faceowner(
+                catalogue, max_order, /*keep_partitions=*/false, &faceowner_receipt,
+                enforce_guard, {}, memory_budget_mb * 1048576)
+      : join_mode == 2
           ? mhgp3v::build_saturated_fold_postings_global(
                 catalogue, max_order, /*keep_partitions=*/false, &receipt, threads,
                 enforce_guard, /*collect_pairs=*/false, memory_budget_mb * 1048576)
@@ -246,7 +253,10 @@ int main(int argc, char** argv) {
   }
   std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
               " --join %s --threads %d\n", n, coord, smax, max_order, seed,
-              join_mode == 2 ? "postings-global" : join_mode == 1 ? "postings" : "g2",
+              join_mode == 3   ? "faceowner"
+              : join_mode == 2 ? "postings-global"
+              : join_mode == 1 ? "postings"
+                               : "g2",
               threads);
   std::printf("semantique : %s\n",
               smax >= n ? "famille saturee COMPLETE (exactitude jugee ailleurs)"
@@ -275,13 +285,28 @@ int main(int argc, char** argv) {
               smax >= n ? "  (s_max >= n : censure par s_max exclue — la completude de"
                           " famille reste un certificat separe)"
                         : "  (sous-famille NON certifiee : aucun transcript autoritatif)");
-  if (use_postings)
+  if (join_mode == 1 || join_mode == 2)
     std::printf("preflight  : P_post predit=%lld, pic conservateur=%.1f Mo, plus gros"
                 " lot=%lld occurrences%s\n",
                 receipt.predicted_p_post, (double)receipt.predicted_peak_bytes / 1048576.0,
                 receipt.max_batch_occurrences,
                 memory_budget_mb > 0 ? " (budget respecte)" : "");
-  if (use_postings)
+  if (join_mode == 3) {
+    std::printf("jointure   : face-owner (theoreme de la reponse masse) — incidences=%lld"
+                " (predites=%lld) unions %lld/%lld  identites=%s\n",
+                faceowner_receipt.incidences_total, faceowner_receipt.predicted_incidences,
+                faceowner_receipt.unions_done, faceowner_receipt.unions_attempted,
+                faceowner_receipt.identities_ok ? "respectees" : "VIOLEES");
+    for (int k = 1; k <= max_order; ++k)
+      std::printf("           : k=%d — G_k=%lld I_k=%lld signatures=%lld multiplicite_un=%lld"
+                  " branches=%lld dedupliquees=%lld\n", k,
+                  faceowner_receipt.generators_k[(std::size_t)(k - 1)],
+                  faceowner_receipt.incidences_k[(std::size_t)(k - 1)],
+                  faceowner_receipt.unique_signatures_k[(std::size_t)(k - 1)],
+                  faceowner_receipt.multiplicity_one_k[(std::size_t)(k - 1)],
+                  faceowner_receipt.star_branches_k[(std::size_t)(k - 1)],
+                  faceowner_receipt.deduplicated_branches_k[(std::size_t)(k - 1)]);
+  } else if (use_postings)
     std::printf("jointure   : postings — occurrences ancien/nouveau=%lld nouveau/nouveau=%lld"
                 " paires reduites=%lld poids=%lld P_post=%lld unions %lld/%lld"
                 " |P_x| max=%zu |S| max=%zu identites=%s\n",

@@ -696,6 +696,20 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 # LE PIPELINE REFUSE AUSSI SES ARGUMENTS ABSURDES, jointure comprise.
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_join "jointure inconnue" 2 --join magique)
+# LES MUTANTS DU FOLD FACE-OWNER (porte minimale §7.4 de la reponse masse,
+# plus le mutant de la refutation cofaces) : chacun meurt par le differentiel
+# des quatre formes, la cosphere gravee ou l'identite incidences==binomiales.
+foreach(faceowner_mutant
+        owner-not-minimal publish-batch-early omit-signature duplicate-signature
+        shift-k qmin-filter-partial support-facet-filter)
+  string(REPLACE "-" "_" faceowner_mutant_name ${faceowner_mutant})
+  mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+    mhgp3v_faceowner_kill_${faceowner_mutant_name} "mutant tue" 4
+    --faceowner-mutant ${faceowner_mutant})
+endforeach()
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_reject_unknown_faceowner "mutant face-owner inconnu" 2
+  --faceowner-mutant inexistant)
 # LE MODE COMPARE-JOINS : meme catalogue, deux joins, transcript et digest
 # compares in-process — le differentiel de l'audit au-dela des nuages du juge.
 add_test(NAME mhgp3v_saturated_pipeline_compare_joins COMMAND mhgp3v_saturated_pipeline
@@ -703,6 +717,9 @@ add_test(NAME mhgp3v_saturated_pipeline_compare_joins COMMAND mhgp3v_saturated_p
 add_test(NAME mhgp3v_saturated_pipeline_compare_joins_global COMMAND mhgp3v_saturated_pipeline
          --points 32 --smax 11 --max-order 3 --seed 20260810 --join postings-global
          --threads 2 --compare-joins 1)
+add_test(NAME mhgp3v_saturated_pipeline_compare_joins_faceowner COMMAND mhgp3v_saturated_pipeline
+         --points 32 --smax 11 --max-order 3 --seed 20260810 --join faceowner
+         --compare-joins 1)
 # LE PREFLIGHT REFUSE UN BUDGET INSUFFISANT AVANT TOUTE EMISSION, et publie le
 # manifeste du refus (P_post predit, pic conservateur, plus gros lot).
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline

@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=45c0b7bfe4e908cd05c6269ae2e651e629370e6d`. Le commit produit
+`HEAD=origin/main=f2e78fadf1fa8012f2d11f35dd76392ec45683a5`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -25,7 +25,10 @@ croissance/silencieux; `405c37b` livre ensuite le join postings reçu,
 `651e47f` la porte des niveaux d'événement `q_min`, `bc2dafa` le marquage
 Gamma, le préflight, l'oracle de chaque poids et le troisième join global, puis
 `45c0b7b` les records par témoins et les saturés des boules marquantes dans les
-trois joins. Ce dernier commit est épinglé fichier par fichier dans l'audit courant. L'autorité
+trois joins; `acb9e7a` mesure le mur de masse jusqu'à `n=400`; `df984ed`
+ajoute la projection généalogique des records en `K` forêts candidates; enfin
+`f2e78fa` formule la voie sans paires par cofaces relevées. Ces derniers
+résultats et leurs limites sont épinglés dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
@@ -180,6 +183,65 @@ un CTest; son pic reste une estimation par constantes et la mémoire demeure en
 merge déterministe, ainsi que la réduction en arbre des postings à `k=1`, sont
 dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
+
+**[la sortie du mur P_post : quatrième forme face-owner reçue sémantiquement]** La question
+de masse a été tranchée par confrontation : ma proposition cofaces à support
+canonique est **réfutée** (cosphère u16 de dix points — 9 des 17 composantes
+strictes des six-faces échappent aux facettes de support pour TOUT support
+minimal) tandis que le théorème **face-owner** de l'auditeur tient : étoiles
+par signature de k-face, owner de niveau minimal, masse
+`I = Σ_k Σ_M C(|M|,k)` mesurée 23,5× sous `P_post` à n=200.
+`build_saturated_fold_faceowner` implémente cet oracle borné (signatures u128,
+préflight par binomiales, identité `incidences == binomiales`) : **quatre
+formes en accord bit à bit** sur fixtures, campagnes et cosphère de la
+réfutation gravée à `K=6`, avec 7/7 mutants tués, dont
+`support-facet-filter` qui meurt sur la cosphère même (naissances 10 ≠ 57).
+La permutation `face-owner` n'est pas encore rejouée. Le live `8d6516c` appelle
+en outre `reserve(size+1)` à chaque incidence : le coût observé devient
+quadratique, et le pic annoncé sous-compte l'ABI (32 octets par incidence) ainsi
+que les arêtes conservées de tous les ordres. Il reste un oracle scientifique,
+pas un backend d'échelle; correctifs et portes ciblées sont dans
+[`AUDIT_LIVE_FACEOWNER_8D6516C.md`](audits/AUDIT_LIVE_FACEOWNER_8D6516C.md).
+La route produit est le **fold hybride** de
+[`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md) :
+fast path principal-support (certificat de séparateur, théorème des q
+attaches, au plus quatre lookups par générateur et par ordre via la clé
+canonique en forme quadratique primitive), fallback demand-driven sous
+coquille multi-support, jugés par cet oracle.
+
+**[mur de masse et sortie exacte proposée]** Le sweep `n=100..400` confirme
+que le join monolithique reste un NO-GO prévisionnel à 50 k; son ajustement
+`P_post ~ n^1,66` donne environ `3,7e12` occurrences, sans constituer une loi.
+Le verrou possède maintenant une factorisation exacte plus forte : à l'ordre
+`k`, grouper les générateurs par `k`-sous-ensemble commun et remplacer chaque
+clique par une étoile centrée sur l'incident de niveau minimal conserve toutes
+les composantes strictes et fermées. Sur le catalogue `n=200/smax=11/K=5`, la
+masse filtrée vaut `16 377 083` incidences contre `385 553 414`
+cooccurrences, soit `23,5` fois moins. C'est une vérité CPU bornée, pas encore
+le chemin produit full-rank : elle énumère des signatures de faces. La réponse,
+la preuve préfixe-correcte, la variante demand-driven et les portes proposées
+sont dans
+[`REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md`](audits/REPONSE_CLAUDE_MASSE_JOIN_50K_20260810.md).
+La voie cofaces de Claude converge vers cette factorisation, mais sa restriction
+au seul support canonique est réfutée dès `q_min=k=4` : une fixture u16 de six
+points perd une composante stricte sur six; une seconde à `q_min=4,k=6` en perd
+neuf sur dix-sept. Son tuple de sphère brut
+n'est pas non plus une clé canonique. La réfutation et la réparation sûre sont
+dans [`AUDIT_COFACES_F2E78FA.md`](audits/AUDIT_COFACES_F2E78FA.md).
+La solution produit proposée n'est pas un retour aux paires : un certificat
+exact de support principal donne au plus quatre attaches par générateur et par
+ordre; seules les coquilles multi-supports basculent vers la recherche
+`face-owner` demand-driven. Clé de boule primitive, preuve des `q` attaches,
+pseudo-algorithme de lot et portes sont dans
+[`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md).
+
+**[forêts dérivées, crédit borné]** `df984ed` transforme les records en une
+projection généalogique candidate : les campagnes ciblées rendent zéro témoin
+orphelin et le nombre de nœuds égale naissances plus multifusions. La porte ne
+compare toutefois ni parents, ni kinds, ni racines, ni niveaux à un oracle;
+elle ne fixe pas davantage `full_pi0` contre `hgp_reduced`. Le résultat est une
+projection plausible, pas encore le payload `K` forêts reçu. Voir
+[`AUDIT_FORETS_DERIVEES_DF984ED.md`](audits/AUDIT_FORETS_DERIVEES_DF984ED.md).
 
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
 fold et repli multi-cœurs. La

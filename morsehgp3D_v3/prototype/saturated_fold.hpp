@@ -92,12 +92,30 @@ struct GammaForest {
   std::vector<GammaForestNode> nodes;
   std::vector<int> roots;   // noeuds sans parent a la fin
   long long orphan_witnesses = 0;   // temoins stricts sans noeud (famille partielle)
+  // VALIDATION AVANT LECTURE (audit forets df984ed §1) : un record de type
+  // hors {0,1,2}, une arite stricte incompatible avec son type, ou des
+  // temoins stricts non tries/dupliques sont comptes ici — la porte exige 0.
+  long long invalid_records = 0;
 };
 
 inline GammaForest build_gamma_forest(const std::vector<GammaEventRecord>& records) {
   GammaForest forest;
   std::map<std::vector<mhgp::i32>, int> node_by_witness;
   for (const GammaEventRecord& record : records) {
+    const std::size_t arity = record.strict_witnesses.size();
+    const bool arity_ok = record.type == 0 ? arity == 0
+                          : record.type == 1 ? arity == 1
+                          : record.type == 2 ? arity >= 2
+                                             : false;
+    const bool sorted_ok = std::is_sorted(record.strict_witnesses.begin(),
+                                          record.strict_witnesses.end()) &&
+                           std::adjacent_find(record.strict_witnesses.begin(),
+                                              record.strict_witnesses.end()) ==
+                               record.strict_witnesses.end();
+    if (!arity_ok || !sorted_ok) {
+      ++forest.invalid_records;
+      continue;
+    }
     if (record.type == 0) {
       node_by_witness[record.closed_witness] = (int)forest.nodes.size();
       forest.nodes.push_back({record.level_representative, record.closed_witness, -1, 0});
