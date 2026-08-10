@@ -112,12 +112,70 @@ binaire et toolchain, ni répétitions, ni ordre alterné, ni dispersion, ni re�
 brut. Cinq répétitions exactes de la gate `n=40` ont donné des rapports de 2,71
 à 4,90, contre 5,10 publié. Un voisinage de 1 près de `n=120` exige donc au
 minimum répétitions et intervalles avant de localiser un croisement.
-Quatre répétitions `n=120` sur le même CPU ont rendu 0,90, 0,99, 1,01 et 0,97 :
-la source perd, gagne ou reste indiscernable selon l'exécution. La formulation
-« croisement étroit et solide vers 110 » n'est pas reçue.
-Ces répétitions sont des observations locales : leurs commandes et sorties
-brutes n'ont pas été conservées. Elles signalent la variabilité, mais ne
-constituent pas à leur tour un benchmark scellé.
+Quatre premières répétitions `n=120` non scellées avaient rendu 0,90, 0,99, 1,01
+et 0,97. Elles signalaient la variabilité sans constituer un reçu.
+
+### Deux campagnes CPU0/CPU1 transcrites à `n=120`
+
+Deux campagnes post-audit, exécutées le 10 août 2026 à partir du `HEAD`
+documentaire `3d5a763511530b241ae95c0c73e5915748a868cc`, conservent exactement
+le binaire Release du prototype `e406e1f`, de SHA-256
+`9f1ef706ed0a9005a8a6fa20f56f3caa813d63f267aa0031211ec4c6f6157afc`.
+La source et CMake restent épinglés à
+`d933c3aeb6314f12769f594d30af6734c696b09ce2e67de39af23dbd0ed15ed9`
+et `739d21248a5fba575974aa3e40e8a0d7d4208b4a9c6710905ec4379cffa8fed7`.
+Chaque commande a été répétée cinq fois séquentiellement :
+
+```sh
+taskset -c 0 /tmp/mhgp3v-chrono-release.fj1zEQ/mhgp3v_direct_source --clouds 4 --points 120 --coord 49 --smax 6 --seed 20260810 --judge 1 --forest 5 --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000
+taskset -c 1 /tmp/mhgp3v-chrono-release.fj1zEQ/mhgp3v_direct_source --clouds 4 --points 120 --coord 49 --smax 6 --seed 20260810 --judge 1 --forest 5 --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000
+```
+
+| CPU0 | chrono affiché référence | fold référence | chrono affiché source | fold source | rapport affiché | retour |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 4,795 s | 0,157 s | 4,624 s | 0,152 s | 1,04 | 0 |
+| 2 | 4,505 s | 0,137 s | 4,658 s | 0,138 s | 0,97 | 0 |
+| 3 | 4,874 s | 0,137 s | 4,641 s | 0,141 s | 1,05 | 0 |
+| 4 | 4,586 s | 0,145 s | 4,658 s | 0,136 s | 0,98 | 0 |
+| 5 | 4,738 s | 0,144 s | 4,502 s | 0,144 s | 1,05 | 0 |
+
+À partir des millisecondes affichées, les moyennes CPU0 valent 4,6996 s et
+4,6166 s, soit un rapport des moyennes de 1,018; les médianes valent 4,738 s et
+4,641 s. Les rapports affichés ont une médiane de 1,04 et couvrent 0,97 à 1,05;
+leur signe change quatre fois.
+
+| CPU1 | chrono affiché référence | fold référence | chrono affiché source | fold source | rapport affiché | retour |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 5,182 s | 0,149 s | 4,971 s | 0,140 s | 1,04 | 0 |
+| 2 | 4,880 s | 0,132 s | 4,685 s | 0,145 s | 1,04 | 0 |
+| 3 | 4,791 s | 0,175 s | 5,127 s | 0,171 s | 0,93 | 0 |
+| 4 | 5,049 s | 0,126 s | 4,572 s | 0,139 s | 1,10 | 0 |
+| 5 | 4,719 s | 0,137 s | 4,430 s | 0,135 s | 1,07 | 0 |
+
+Les moyennes CPU1 valent 4,924 s et 4,757 s; les médianes 4,880 s et 4,685 s.
+Les rapports affichés ont une moyenne de 1,036, une médiane de 1,04 et couvrent
+0,93 à 1,10. Sur les dix répétitions, sept rapports sont au-dessus de 1 et trois
+au-dessous; aucun n'est une mesure symétrique des deux générateurs.
+
+Les dix sorties reproduisent la **même fixture** et les mêmes compteurs imprimés
+— quatre nuages décidés, zéro refus, 20 324 émissions, 33 743 104 candidats,
+2 609 704 refus fenêtre, vingt forêts, 22 639 nœuds, trente racines — avec zéro
+forêt différente et zéro désaccord. Cela crédite la répétabilité locale des
+agrégats imprimés et du verdict sémantique quotienté sur ce cas; cela n'ajoute
+pas dix entrées indépendantes et ne compare toujours pas le payload public.
+
+Le conteneur expose deux threads du même cœur Intel Xeon Platinum 8370C : fixer
+un thread ne l'isole pas de son frère SMT. GCC 13.3 et CMake 4.3.4 étaient
+actifs; la charge relevée après CPU0 valait 0,83/0,73/1,35. Il n'y avait ni
+warmup explicite, ni alternance de l'ordre interne référence--source. Les valeurs
+temporelles affichées à la milliseconde sont transcrites ci-dessus; les sorties
+stdout verbose complètes et le binaire temporaire ne sont pas conservés comme
+sidecars.
+
+Ces campagnes documentent la variabilité temporelle locale; elles n'établissent
+ni équivalence de performance, ni supériorité, ni croisement, ni loi d'échelle.
+Elles ne corrigent ni l'asymétrie des timers ni l'absence de high-water commun.
+La formulation « croisement étroit et solide vers 110 » reste donc non reçue.
 
 Les exposants annoncés ne sont pas non plus l'ajustement des cinq lignes. Une
 régression log--log ordinaire sur toutes les valeurs publiées donne environ

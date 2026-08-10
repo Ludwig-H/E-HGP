@@ -880,8 +880,10 @@ palier `e406e1f` mesure séparément les deux folds et soustrait correctement le
 fold référence du timer source. Ce timer conserve néanmoins le différentiel
 catalogue, les deux empreintes et leur comparaison, absents du timer référence;
 les chronos ne sont donc toujours pas symétriques. Il n'existe ni high-water
-total commun, ni porte chronométrique, et les rapports répétés à $n=120$ oscillent
-entre 0,90 et 1,01. Voir
+total commun, ni porte chronométrique. Dix répétitions documentées, cinq sur
+chaque thread SMT, gardent les mêmes compteurs imprimés mais font osciller le
+rapport à $n=120$ entre 0,93 et 1,10, de part et d'autre de 1 dans les deux
+campagnes. Voir
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 Plusieurs agrégats restent en `i64` avec une justification qui oublie le facteur
 `clouds<=2000`.

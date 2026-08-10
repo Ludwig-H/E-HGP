@@ -173,8 +173,10 @@ porte directe compare vingt forêts et 5 538 nœuds sans divergence. En revanche
 le chrono source englobe encore le différentiel catalogue, les deux empreintes
 et leur comparaison, que le chrono référence ne contient pas. Le payload public
 reste différent, un refus n'est pas chronométré sur les mêmes nuages, et aucun
-high-water commun n'est publié. Les rapports 0,90, 0,99, 1,01 et 0,97 observés à
-`n=120` ne localisent aucun croisement stable. La table est un diagnostic à
+high-water commun n'est publié. Dix répétitions documentées à `n=120`, cinq sur
+chaque thread SMT, conservent les mêmes compteurs imprimés et zéro divergence
+mais donnent des rapports de 0,93 à 1,10, de part et d'autre de 1 dans les deux
+campagnes. Aucun croisement stable n'est localisé. La table est un diagnostic à
 remesurer après exclusion du juge, pas une décision d'échelle.
 Un rebuild Release frais de ce commit passe 74/74 CTests en 319,87 s; les trois
 campagnes directes ciblées passent aussi sous ASan/UBSan/LSan. Ces résultats

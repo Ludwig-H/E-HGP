@@ -1566,12 +1566,13 @@ $K=5$, quatre nuages par ligne, même binaire Release, même processus]**
 | 120 | $49^3$ | 6,401 s | 7,604 s | 0,84 |
 
 Ces cinq lignes montrent utilement que les temps deviennent du même ordre à
-$n=120$; elles ne localisent pas encore un croisement. Quatre répétitions sur le
-même CPU et le même binaire à cette taille ont donné des rapports
-référence/source de 0,90, 0,99, 1,01 et 0,97 : la source perd, gagne ou reste
-indiscernable selon l'exécution. Le fold est minoritaire dans la campagne
-initiale, mais le juge encore imputé à la source interdit d'attribuer l'écart à
-la seule construction des catalogues.
+$n=120$; elles ne localisent pas encore un croisement. Deux campagnes d'audit
+ont répété cinq fois la commande exacte sur chacun des deux threads SMT, avec le
+même binaire et la même fixture. Les dix sorties gardent les mêmes compteurs
+imprimés et le quotient des vingt forêts concorde; les rapports diagnostiques
+référence/source couvrent pourtant 0,93 à 1,10 et traversent 1 dans les deux
+campagnes. Le fold est minoritaire, tandis que le juge encore imputé à la source
+interdit d'attribuer l'écart à la seule construction des catalogues.
 
 Une régression log--log ordinaire sur les **cinq** lignes publiées donne environ
 $n^{2,71}$ pour la source et $n^{1,98}$ pour la référence. Les exposants 3,2 et

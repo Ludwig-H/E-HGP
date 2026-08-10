@@ -318,8 +318,14 @@ valide une campagne sémantique supplémentaire, pas le chrono.
 
 Le même payload reste lui aussi seulement quotienté : catalogue public, pool,
 offsets et `ForestNode::source` divergent toujours. Enfin, un nuage refusé est
-chronométré côté référence avant d'être sauté côté source. Le détail de
-l'analyse, la commande du cas refusé et la correction constructive sont dans
+chronométré côté référence avant d'être sauté côté source. Deux campagnes
+post-audit transcrivent ensuite dix répétitions de la même fixture, cinq par
+thread SMT : mêmes compteurs imprimés, zéro divergence, mais rapports affichés
+de 0,93 à 1,10 et de part et d'autre de 1 dans chaque campagne. Ce positif
+crédite la répétabilité locale des agrégats imprimés et du verdict quotienté,
+pas dix entrées ni une comparaison de performance symétrique. Le détail de
+l'analyse, les deux commandes temporelles, le cas refusé et la correction
+constructive sont dans
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
 ### Finding historique fermé à `bb31b426` : domaine `s_max`

@@ -115,10 +115,11 @@ deux folds séparément. Il ne ferme toutefois pas la comparaison : le timer
 source contient encore le différentiel catalogue, les deux empreintes de forêt
 et leur comparaison, tandis que le timer référence ne les contient pas. Le
 payload public reste différent et seuls les quotients sémantiques concordent.
-Un nuage refusé est facturé à la référence mais jamais à la source. Les rapports
-`n=120` répétés valent 0,90, 0,99, 1,01 et 0,97; aucun croisement localisé ne
-suit de cette dispersion. Le détail reproductible est dans
-[`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
+Un nuage refusé est facturé à la référence mais jamais à la source. Dix
+répétitions documentées à `n=120`, cinq sur chaque thread SMT, gardent les mêmes
+compteurs imprimés et zéro divergence mais rendent des rapports entre 0,93 et
+1,10, de part et d'autre de 1 dans les deux campagnes : aucun croisement
+localisé ne suit de cette dispersion.
 Le chrono est audité séparément dans
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
