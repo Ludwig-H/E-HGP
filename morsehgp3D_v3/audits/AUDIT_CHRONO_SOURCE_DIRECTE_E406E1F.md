@@ -84,6 +84,41 @@ comptabilité temporelle disparaissait ou réintégrait le juge. Elle renforce
 positivement l'accord sémantique sur une campagne plus grande; elle ne constitue
 pas une porte chronométrique.
 
+### Mutation-résistance : 0/3 mutants tués, plus une sonde de payload
+
+Un réaudit CPU local au `HEAD` documentaire `84adbcc`, sur les blobs produit
+inchangés de `e406e1f`, a transformé uniquement des copies temporaires hors
+dépôt. La baseline Release GCC 13.3, binaire SHA-256
+`9f1ef706ed0a9005a8a6fa20f56f3caa813d63f267aa0031211ec4c6f6157afc`,
+passe 14/14 CTests directs en 3,20 s. Aucun des trois mutants de contrat n'est
+toutefois tué, et une sonde supplémentaire observe le payload public divergent :
+
+| mutant ou sonde | observation locale hors dépôt |
+| --- | --- |
+| annuler entièrement l'accumulation du timer source | 14/14 verts; `same_payload` affiche `source=0.000 s` |
+| neutraliser le refus final des statuts non `kOk` | 14/14 verts; le cas 19 décidés / 1 refus devient retour 0 |
+| remplacer stdout par des claims de payload public et juge certifié hors timer | 14/14 verts |
+| comparer en plus le payload public de la gate `same_payload` | gate verte malgré 3 762 positions catalogue, 14 579 positions pool et 4 435 `ForestNode::source` différents |
+
+Les sources temporaires des trois mutants actifs avaient respectivement les
+SHA-256 `082af09340fba1ff753d02f816d567cc2852f6581ceb3ba13cc0fb66cf336636`,
+`eef72324eb2a08bb84db6d01e35f2eb99fe3b8a7cf49e86968921e30ed4110b3` et
+`2b6e72fc8391322f1aba0f31c2e64aa269dafd34a7d2073961dd0011573c362c`.
+La sonde de payload avait le SHA-256
+`e80a6ba88a02672c16d7bc757a8692f50057e97918fda6e8b41644d63eb0e164`.
+Les fichiers vivaient sous `/tmp` et ne constituent pas des fixtures
+permanentes; source, CMake et helper suivis sont restés bit à bit identiques.
+
+Ce 0/3, complété par la sonde, ne retire pas les garanties réelles des portes : accord sémantique par
+coquille, support, rang, niveau et membres, unicité des émissions, vingt forêts
+abstraites, rejet cover+juge et refus final live des statuts non `kOk`. Il montre
+précisément que les labels, le périmètre temporel, la symétrie des refus et les
+octets publics ne font pas encore partie de leur contrat.
+Les commentaires CMake restent eux-mêmes à corriger : lignes 320--323 ils
+annoncent encore un « même POOL DE MEMBRES », et lignes 359--362 des chronos
+couvrant exactement le même payload avec juge exclu. Les deux formulations sont
+contredites par les sondes ci-dessus.
+
 ## « Mêmes nuages » et libellés de modes
 
 `reference_seconds` est incrémenté lignes 700--703 avant le contrôle du statut
@@ -103,7 +138,9 @@ comparaison doit agréger uniquement les mêmes décisions `kOk` et publier à p
 le coût des refus. Deux autres libellés sont ambigus : en mode mesure,
 `reference=0` signifie « non exécutée », pas « chronométrée à zéro »; en mode
 cover, aucun catalogue source n'est assemblé mais stdout annonce encore
-`catalogue seul`.
+`catalogue seul`. La commande autonome `--cover-only 1 --judge 0` échoue en
+outre sur `candidats==C_q` après avoir sauté l'énumération, avant d'atteindre son
+disclaimer final. La porte permanente teste seulement le rejet cover+juge.
 
 ## Le tableau de cinq tailles ne reçoit pas encore un croisement
 
@@ -212,9 +249,10 @@ Le signe observé suit exactement la position dans cet échantillon : la seconde
 commande affiche le chrono source inférieur dans les cinq couples. Sa moyenne
 vaut 3,9726 s contre 4,1016 s pour la première, soit -0,1290 s ou environ
 -3,15 %. Lorsque le juge passe second, `juge-mesure` vaut en moyenne -0,101 s;
-lorsqu'il passe premier, la même différence vaut +0,171 s. Le quasi-zéro global
-de +0,0078 s est donc une annulation entre deux biais de position opposés dans
-un plan encore déséquilibré trois/deux, pas une preuve d'équivalence.
+lorsqu'il passe premier, la même différence vaut +0,171 s. Dans cet échantillon,
+le quasi-zéro global de +0,0078 s est donc une annulation entre deux effets de
+position observés de sens opposé dans un plan encore déséquilibré trois/deux,
+pas une preuve d'équivalence ni d'un biais stable.
 
 Ce quasi-zéro ne prouve surtout pas que le différentiel est gratuit. L'inspection
 statique établit qu'il reste dans le timer juge. Mais, dans ce mode,

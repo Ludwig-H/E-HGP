@@ -550,6 +550,35 @@ qualifier un coût.
 Ce wrap précis est fermé par les `SourceCounters` en `u128`; quelques compteurs
 de verdict restent toutefois en `long long`.
 
+### Réaudit documentaire `84adbcc` : cover local positif, mode cover rouge
+
+Le lemme accepte exactement un `Q_{q,C}` par feuille de centre et peut réduire
+le census après localisation. Le générateur courant construit toutefois son CSR
+avec `max_C Q_{q,C}` avant de former le candidat; les valeurs locales ne
+réduisent donc pas `C_q`. Une variante par ownership de la feuille du centre
+doit versionner ses voisinages, masses et caps. La construction sélective par
+anneaux n'a pas de borne `O(n+F*t_q)` sans compter cellules visitées et points
+inspectés; seule la **vérification** d'un certificat déjà fourni possède
+directement cette borne.
+
+La commande suivante, sur le binaire Release SHA-256
+`9f1ef706ed0a9005a8a6fa20f56f3caa813d63f267aa0031211ec4c6f6157afc`,
+reproduit `102900=3*343*100` tests de cover et un CSR complet de degré 99 malgré
+des `Q_4` locaux 231 / 508 / 1455 :
+
+```sh
+mhgp3v_direct_source --clouds 1 --points 100 --coord 50 --smax 11 --seed 7 --leaf 8 --judge 0 --cover-only 1
+```
+
+Elle sort aussi 3 : après avoir sauté l'énumération, le mode cover applique
+encore l'identité `candidats==C_q` et compare 0 à 4950 dès `q=2`. Il imprime
+auparavant le faux libellé `catalogue seul`, `reference=0.000` et un rapport
+inexploitable. Le juge est bien absent, mais le disclaimer final n'est jamais
+atteint. La seule porte cover permanente reçoit le conflit cover+juge; aucun CTest
+positif n'exerce le mode autonome. Ce constat rouvre donc le GO fonctionnel de
+ce mode sans retirer les progrès sur ses masses analytiques. Voir
+[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](AUDIT_COVER_ADAPTATIF_84ADBCC.md).
+
 ## Aide constructive à Claude
 
 Le palier courant a déjà appliqué une grande partie de l'aide initiale. Avant

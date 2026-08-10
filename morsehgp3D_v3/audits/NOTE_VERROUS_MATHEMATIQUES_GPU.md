@@ -8,13 +8,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=exact_gpu_wavefront_without_higher_order_mosaic`,
 `public_status=not_claimed`.
 
-Les constructions mathématiques de cette note sont indépendantes du live. Les
-constats d'implémentation sont épinglés au snapshot committé suivant; les deltas
-produit non committés sont réaudités séparément lorsqu'ils sont stables :
+Les constructions mathématiques de cette note sont indépendantes du live. La
+table suivante épingle la baseline d'implémentation de la note; les réaudits
+ultérieurs portent leurs propres pins dans leurs sous-sections et dans les
+audits liés. Le produit courant reste `e406e1f`; le ledger documentaire
+postérieur est `3d5a763`/`9b8954b`/`84adbcc`.
 
 | objet | empreinte |
 | --- | --- |
-| snapshot de code et de claims audité | `180975e4a967475067961d4f215ab2f2a4f9760a` |
+| snapshot de base de code et de claims audité | `180975e4a967475067961d4f215ab2f2a4f9760a` |
 | `prototype/order_k_flats.hpp` | `b3ba750d938e3c4fa52453730011e2f8ed06e477b40ae971562c15aed07b65f5` |
 | `prototype/flats_differential.cpp` | `6271f26ab8782fed0e46dd1200fa030d68d3036257c57f9f73320ca4f2ec1cb4` |
 | `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
@@ -805,6 +807,28 @@ d'expansions Gabriel ouvertes peut dépasser 128 bits; les compteurs de sortie
 hors porte régulière sont donc multiprécision ou saturés avec statut typé, jamais
 tronqués.
 
+**Extension adaptative distincte.** Le lemme précédent se spécialise exactement
+à un `Q_{q,C}` par feuille de centre : une fois le support formé et son centre
+localisé, ce seuil local certifie la banque puis le census dans
+`dist2<4*Q_{q,C}`. Il ne réduit pas automatiquement la génération ancrée. La
+capability ci-dessus scelle un unique `Q_q`, un CSR global par lane et les degrés de ce
+graphe; le prototype emploie bien `max_C Q_{q,C}` avant de connaître la feuille
+du centre. Employer le `Q` de la feuille de l'ancre est injustifié, et employer
+celui du centre exige déjà le candidat. Une baisse revendiquée de `C_q` demande
+donc une capability versionnée : ownership par feuille de centre ou majorant
+par ancre prouvé, voisinages conditionnels, ledger anti-duplication, masses,
+digests, caps et replay propres. Le contrat global reste le fallback exact.
+
+La construction de ce cover adaptatif n'est pas `O(n+F*t_q)` par la seule
+vertu d'une grille à deux niveaux ou d'anneaux. Si `V_C` cellules ou nœuds et
+`Z_C` points sont visités pour la feuille `C`, le reçu doit publier ces termes;
+sans borne de densité/expansion ou structure top-`t_q` exacte, ils peuvent être
+linéaires par feuille. Construire hors du timer chaud isole une phase mais ne la
+retire ni du temps ni de la mémoire bout en bout; tout amortissement scelle
+epoch, digest, durée de vie et nombre de réutilisations. Le contrat et les
+fixtures sont détaillés dans
+[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](AUDIT_COVER_ADAPTATIF_84ADBCC.md).
+
 La construction des voisinages possède elle aussi une borne simple. Prendre `a`
 égal à la plus grande puissance de deux telle que `a*a<=Q_q`, puis trier les
 points par cellule de grille de pas `a`. Deux points d'une même cellule ont une
@@ -891,6 +915,14 @@ entre -0,185 et +0,241 s côté source, et la seconde commande affiche le chrono
 source inférieur dans chaque couple. `flat_catalogue` précède le timer dans un
 seul mode : position et état initial diffèrent, donc cette soustraction est sans
 autorité. Il faut des timers séparés dans la même exécution jugée.
+
+Les portes ne reçoivent pas encore ce contrat : trois mutants temporaires qui
+annulent le timer source, neutralisent le refus final des statuts ou publient de
+faux labels laissent chacun 14/14 CTests directs verts. Une sonde publique garde
+la gate `same_payload` verte avec des milliers de positions catalogue/pool et
+d'indices `ForestNode::source` différents. Le mode cover autonome est lui-même
+rouge : il saute l'énumération puis exige encore `candidats==C_q`; seule la
+combinaison interdite cover+juge possède une porte.
 
 Plusieurs agrégats restent en `i64` avec une justification qui oublie le facteur
 `clouds<=2000`.

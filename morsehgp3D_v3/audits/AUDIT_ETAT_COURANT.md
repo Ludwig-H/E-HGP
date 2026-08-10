@@ -14,8 +14,10 @@ audité est `e406e1f`; il ajoute au palier `81f9210` une comparaison temporelle
 source--référence et une quatorzième porte directe. Au pincement, `HEAD` et
 `origin/main` pointaient sur ce commit; les sources, prototypes, CMake et claims
 audités lui correspondent exactement. Le delta documentaire du présent audit
-est hors de ce snapshot produit. Aucun artefact brut des campagnes de taille ni
-de la session G4 n'est versionné avec ces commits.
+est hors de ce snapshot produit. Son ledger comprend la réponse chrono
+`3d5a763`, les répétitions SMT `9b8954b` et l'audit inter-modes `84adbcc`.
+Aucun artefact brut des campagnes de taille ni de la session G4 n'est versionné
+avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
@@ -127,6 +129,30 @@ de -0,185 à +0,241 s et la seconde commande affiche le chrono source inférieur
 dans les cinq couples. La construction préalable de `flat_catalogue` n'existe
 que dans un mode et change l'état initial avant le timer source; seule une
 séparation interne des timers dans le même mode peut recevoir ce coût.
+
+La mutation-résistance confirme la lacune : la baseline garde 14/14 CTests
+directs verts, mais les mêmes 14 restent verts si le timer source est annulé, si
+le refus final des statuts est neutralisé ou si stdout revendique faussement un
+payload public identique et un juge certifié hors timer. La gate `same_payload`
+reste également verte en observant 3 762 positions catalogue, 14 579 positions
+pool et 4 435 indices publics `source` différents. Les portes créditent le
+quotient sémantique, pas les trois contrats mutés ni le payload public sondé.
+
+Le réaudit du cover adaptatif donne un résultat positif mais borné. Le lemme de
+rayon se spécialise exactement à `Q_{q,C}` pour la feuille du centre et autorise
+un census local une fois le candidat formé. Le prototype forme cependant ses
+tuples depuis un CSR global par lane au seuil `max_C Q_{q,C}` avant de localiser le
+centre; les `Q` par feuille restent donc diagnostiques pour `C_q`. Toute
+réduction revendiquée du nombre de candidats exige une capability versionnée
+avec ownership et voisinages conditionnels. Une recherche de témoins par
+anneaux ne prouve pas davantage `O(n+F*t_q)` sans bornes sur cellules visitées
+et points inspectés. Voir
+[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](AUDIT_COVER_ADAPTATIF_84ADBCC.md).
+La sonde `n=100`, `F=343` reproduit exactement `3*F*n=102900` tests et un graphe
+global complet malgré la dispersion locale des `Q`. Elle découvre aussi que le
+mode cover autonome retourne 3 : il n'énumère aucun candidat puis exige encore
+`candidats==C_q`. La seule porte cover teste le conflit cover+juge, pas ce chemin
+positif.
 
 Le chrono est audité séparément dans
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
@@ -787,8 +813,9 @@ high-waters omettent plusieurs buffers, la vérité et la sortie. Le target refu
 `n>20 000`. L'ordre canonique du catalogue, son pool concaténé, ses offsets et
 les indices publics de la forêt divergent malgré les digests abstraits égaux;
 les deux côtés partagent en outre `build_forest`. La validation structurelle
-ajoutée n'est pas totale sur cycles/indices, le chrono mélange les deux folds et
-certains agrégats `i64` ne sont pas bornés sur 2 000 nuages.
+ajoutée n'est pas totale sur cycles/indices; le chrono soustrait correctement le
+fold référence, mais mélange encore la source, le différentiel catalogue et les
+deux digests. Certains agrégats `i64` ne sont pas bornés sur 2 000 nuages.
 Enfin le prototype matérialise un catalogue **fermé**, pas la source Gabriel
 ouverte streamée. Ces défauts ne réfutent pas le lemme, mais interdisent toute
 promotion produit ou 50 k. Voir

@@ -29,10 +29,13 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le snapshot committé `e406e1f` reste `exploration_v3_hors_registre`, avec CPU
-de référence et
+Le snapshot produit committé `e406e1f` reste
+`exploration_v3_hors_registre`, avec CPU de référence et
 microkernel GPU candidat sous audit, sur le profil
 `quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
+Le ledger documentaire postérieur comprend l'audit chrono `3d5a763`, les
+répétitions SMT `9b8954b` et l'audit inter-modes `84adbcc`; aucun ne modifie le
+snapshot produit ni son statut public.
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
@@ -134,6 +137,20 @@ combinadiques, locator, construction, tri et sortie reçus. Le terminal
 `AboveInteriorWindow` doit être versionné explicitement, car la norme active
 demande encore un shell complet sur une fenêtre uniforme.
 
+Le réaudit adaptatif sépare deux portées. Le certificat de rayon est bien local
+à la feuille du centre et peut réduire le census après formation d'un candidat.
+Le générateur courant construit toutefois un CSR global par lane avec
+`Q_q=max_C Q_{q,C}` avant de connaître cette feuille; ses `Q` locaux ne réduisent
+donc pas `C_q`. Une source conditionnée par feuille de centre doit versionner
+ownership, voisinages, masses, caps et replay. De même, grille à deux niveaux ou
+anneaux ne donnent pas automatiquement `O(n+F*t_q)` sans borne sur cellules
+visitées et points inspectés. Voir
+[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](audits/AUDIT_COVER_ADAPTATIF_84ADBCC.md).
+La sonde associée reproduit aussi un défaut live : `--cover-only 1 --judge 0`
+saute l'énumération puis échoue sur `0!=C_q`, après le faux libellé
+`catalogue seul` et un rapport inexploitable. Le juge est bien absent; il
+n'existe aucune porte positive du mode cover autonome.
+
 Le prototype `bb31b426...`, intégré à `81f9210`, crédite ce lemme sur des
 oracles bornés, sans
 créditer le statut produit. Sa partie candidate évite arrangement et mosaïque;
@@ -185,6 +202,11 @@ commande affiche le chrono source inférieur dans les cinq couples.
 `flat_catalogue` précède le timer dans un seul mode, donc position et états
 cache/allocateur ne sont pas comparables. La correction exige des bornes de
 timer distinctes dans le même mode juge.
+La mutation-résistance est nulle sur ces claims : annuler le timer source,
+neutraliser le refus final des statuts ou publier de faux labels laisse 14/14
+CTests directs verts. La gate `same_payload` passe aussi avec des milliers de
+positions catalogue/pool et d'indices publics différents. Elle reçoit le quotient
+sémantique, pas la mesure ni la sérialisation publique.
 Un rebuild Release frais de ce commit passe 74/74 CTests en 319,87 s; les trois
 campagnes directes ciblées passent aussi sous ASan/UBSan/LSan. Ces résultats
 créditent l'intégration et l'accord sémantique borné, pas la comptabilité des

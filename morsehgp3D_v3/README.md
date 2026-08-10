@@ -5,7 +5,9 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état audité du snapshot committé `e406e1f` est scellé dans
+L'état produit audité reste le snapshot committé `e406e1f`. Le ledger
+documentaire postérieur comprend la réponse chrono `3d5a763`, les répétitions
+SMT `9b8954b` et l'audit inter-modes `84adbcc`; l'autorité courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
 **Trois des quatre P0 de cet audit sont fonctionnellement fermés sur leur domaine
@@ -1254,8 +1256,14 @@ le programme **affirmait plus que ce qu'il vérifiait**.
 `--judge 0` imprimait quand même « rend exactement le catalogue fermé ». Une
 exactitude annoncée en l'absence d'oracle est pire qu'un silence. Les trois
 modes sont maintenant exclusifs — `--cover-only 1 --judge 1` est **refusé** —, et
-seul le mode jugé a le droit de conclure; les deux autres impriment
-`AUCUNE EXACTITUDE N'EST AFFIRMÉE`.
+seul le mode jugé a le droit de conclure. Le mode mesure atteint bien
+`AUCUNE EXACTITUDE N'EST AFFIRMÉE`; le mode cover autonome a depuis régressé :
+il saute l'énumération puis exige encore `candidats==C_q`, imprime d'abord le
+faux libellé `catalogue seul`, `reference=0.000` et un rapport inexploitable,
+puis sort 3 avant son disclaimer. Le juge est bien absent de ce mode. Le
+seul CTest cover reçoit la combinaison invalide cover+juge, pas un succès du
+mode autonome. La reproduction est dans
+[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](audits/AUDIT_COVER_ADAPTATIF_84ADBCC.md).
 
 La map de sortie était indexée par la coquille et l'affectation **écrasait** les
 doublons. Un mutant retirant la restriction $z>p$ émettait 126 fois au lieu de
@@ -1403,7 +1411,8 @@ $3{,}2\cdot10^{12}$ candidats. C'est une obstruction de dimensionnement forte,
 mais encore une extrapolation conditionnelle à la densité, au cover et au degré,
 pas un reçu chronométrique 50 k ni une preuve d'impossibilité de toute variante.
 
-Un gain réel existe et il est chiffré. $Q_q$ est le **maximum** sur les feuilles :
+Un potentiel géométrique existe et il est chiffré; ce n'est pas encore un gain
+du générateur. $Q_q$ est le **maximum** sur les feuilles :
 il est fixé par la région la plus vide du nuage, pas par la région typique. Les
 $Q$ **effectifs**, sur toutes les feuilles de tous les nuages, valent
 
@@ -1412,11 +1421,17 @@ $Q$ **effectifs**, sur toutes les feuilles de tous les nuages, valent
 | 400 | 1 000 | 202 | 406 | 1 198 | 28,4 | 40,3 | 69,2 |
 | 1 600 | 3 375 | 194 | 370 | 1 231 | 27,9 | 38,5 | 70,2 |
 
-Le lemme de rayon vaut **feuille par feuille** : un cover adaptatif diviserait le
-rayon typique par 1,8, donc le degré par environ six, donc $C_4$ par $6^3$. Cela
-ramènerait $C_4$ à $1{,}4\cdot10^{10}$ — un facteur 230 gagné, et toujours deux
-ordres de grandeur au-dessus du budget. L'adaptativité est nécessaire; elle n'est
-pas suffisante.
+Le lemme de rayon vaut **feuille par feuille**. Sous le même modèle de densité,
+une source capable d'énumérer par feuille de centre diviserait le rayon typique
+par 1,8, le degré par environ six et le diagnostic $C_4$ par $6^3$. Cela
+ramènerait l'estimation à $1{,}4\cdot10^{10}$ — facteur potentiel 230, encore
+deux ordres de grandeur au-dessus du budget. Une médiane de rayon ne détermine
+ni la distribution des degrés ni la somme non linéaire des coefficients : ce
+facteur reste un scénario. Le code courant forme cependant
+les tuples dans un CSR construit avec le maximum global **avant** de localiser
+leur centre : ses `Q` locaux ne réduisent donc pas `C_q`. La variante et son
+coût sont audités dans
+[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](audits/AUDIT_COVER_ADAPTATIF_84ADBCC.md).
 
 ### Les supports sont des cliques, et le lemme de triple est exact
 
@@ -1458,7 +1473,8 @@ l'audit.** Ma première version n'appliquait le lemme qu'à **une** face de chaq
 K4 — le triple des trois plus petits identifiants — et publiait 82, 144, 162,
 donc une hausse. Les quatre faces d'un support d'arité quatre sont toutes sur sa
 coquille, donc toutes nécessaires : les tester donne 53,1, 69,5, 69,3. Le gain
-est de 2,3 fois, et la hausse **disparaît** entre $n=100$ et $n=200$.
+observé va d'environ 1,5 à 2,3 fois selon la taille, et la hausse **disparaît**
+entre $n=100$ et $n=200$.
 
 Trois tailles ne prouvent pas plus un plateau qu'elles ne prouvaient une hausse.
 La formulation recevable reste : *sur ces campagnes bornées, cette variante par
@@ -1549,6 +1565,14 @@ l'ordre canonique, le pool concaténé, les offsets et les indices publics
 `ForestNode::source` diffèrent encore. Aucun high-water total comparable des
 deux chemins n'est publié.
 
+Un réaudit par mutants confirme que ces limites ne sont pas seulement des
+libellés prudents. Les 14 CTests directs restent tous verts avec le timer source
+annulé, avec le refus final des statuts neutralisé ou avec des claims stdout
+mensongers. La porte `same_payload` reste verte tout en observant 3 762 positions
+catalogue, 14 579 positions pool et 4 435 indices publics `source` différents.
+Les portes reçoivent donc l'accord sémantique borné, pas le périmètre du chrono,
+les libellés, la symétrie des refus ou le payload public.
+
 Le temps mur reste une unité pertinente pour le budget de 100 ms, une fois les
 périmètres rendus identiques, l'ordre d'exécution alterné et la dispersion
 reçue. Les masses des deux côtés restent publiées séparément et ne sont pas
@@ -1594,37 +1618,45 @@ le budget de 100 ms et la mémoire commune restent ouverts. Les conditions de
 remesure et les observations d'audit sont consignées dans
 [`audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
-### Question ouverte à l'auditeur
+### Réponses d'audit et questions encore ouvertes
 
-Le cover et la fenêtre ferment la **complétude**, et le prototype le prouve à
-zéro désaccord y compris sur cosphéricités. Ce qu'ils ne ferment pas est le
-**générateur de candidats** : $C_q=\sum_p\binom{d_q^{+}(p)}{q-1}$ avec
+Le lemme du cover et de la fenêtre établit la **complétude** sous ses
+préconditions; les oracles bornés n'ont observé aucun désaccord, y compris sur
+cosphéricités. Ce qu'ils ne ferment pas est le **générateur de candidats** :
+$C_q=\sum_p\binom{d_q^{+}(p)}{q-1}$ avec
 $d\approx1\,450$ extrapolé sous le scénario de densité fixe, contre $D=8$ à $24$ supposé dans les
 plafonds de la note.
 
 Trois questions précises, dans l'ordre où elles bloquent :
 
-1. le cover adaptatif par feuille est-il déjà couvert par la capability
-   `center-cover + degree` telle qu'elle est écrite, ou faut-il en versionner une
-   variante ? Le lemme est local, mais le `Q_q` publié est global ;
-2. ~~quel gain apporte le test des quatre faces ?~~ **Répondu et mesuré** : 2,3
-   fois, et la hausse du facteur disparaît — 53,1, 69,5, 69,3. Le développement
+1. ~~le cover adaptatif est-il déjà couvert ?~~ **Répondu** : le lemme local
+   autorise un census avec `Q_{q,C}` une fois le centre connu, mais la capability
+   courante scelle un unique `Q_q` et un CSR global par lane. Toute baisse revendiquée de
+   `C_q` exige une variante versionnée avec ownership par feuille de centre,
+   voisinages conditionnels, masses, caps et replay propres ;
+2. ~~quel gain apporte le test des quatre faces ?~~ **Répondu et mesuré** : de
+   1,5 à 2,3 fois selon la taille, jusqu'à 2,3 fois à $n=200$, et la hausse du
+   facteur disparaît — 53,1, 69,5, 69,3. Le développement
    d'un K4 s'arrête désormais à la première face refusée. La question qui reste
    est la suivante : existe-t-il une condition nécessaire sur les **quadruples**
    qui descendrait ce facteur de 70 d'un ordre de grandeur, comme le passage
-   d'une à quatre faces l'a fait d'un facteur 2,3 ?
+   d'une à quatre faces l'a fait d'un facteur 1,5 à 2,3 ?
 3. avant d'abandonner une famille, comment comparer parcours et source avec le
    même payload, des unités de travail homogènes, les mêmes nuages et des caps
    reçus ? En parallèle, le voisin terminal borné, les tâches transactionnelles
    et la résidence device restent les priorités du parcours.
 
-Une quatrième question, plus petite mais bloquante pour le coût : la
+Une quatrième question, plus petite mais bloquante pour le coût, est elle aussi
+répondue contractuellement : la
 construction du cover est aujourd'hui $F\cdot n$ tests, $F$ étant le nombre de
-feuilles — donc quasi quadratique au côté par défaut. L'audit le note. Une
-construction par grille à deux niveaux, ou une recherche des $t_q$ témoins par
-anneaux croissants autour de chaque feuille, ramènerait ce terme à
-$O(n+F\cdot t_q)$ ; faut-il la sceller dans la capability, ou le cover
-est-il destiné à être calculé une fois hors chrono et scellé par digest ?
+feuilles — donc quasi quadratique au côté par défaut. Une grille à deux niveaux
+ou des anneaux ne prouvent pas seuls $O(n+F\cdot t_q)$ : il faut aussi borner les
+cellules visitées et les points inspectés, ou fournir une requête top-`t_q`
+exacte avec sa preuve. Seule la **vérification** d'un certificat déjà fourni a
+directement la borne $O(n+F\cdot t_q)$. Le cover peut avoir un timer séparé et être réutilisé
+sous epoch/digest, mais son temps, ses octets et son high-water restent dans le
+coût bout en bout. Le contrat complet et les fixtures conseillées sont dans
+[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](audits/AUDIT_COVER_ADAPTATIF_84ADBCC.md).
 
 ---
 
