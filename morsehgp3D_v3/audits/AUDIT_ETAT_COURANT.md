@@ -3,27 +3,51 @@
 Date du snapshot courant : 10 août 2026 UTC.
 
 Cadre annoncé : `phase=exploration_v3_hors_registre`,
-`backend=cpu_reference_oracle_and_gpu_candidate_under_audit`,
+`backend=cpu_reference_and_bounded_oracles`,
 `profile=quantized_u16_input_only`,
-`mode=math_locks_plus_gpu_differential`,
+`mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
-courante est `HEAD=origin/main=2b4801c2b2a7fed0e91dfc8aabed1d11998e8787`.
-La chaîne
-reçue est `a8b5615` pour le delta produit, `1f0db40` pour l'égalité complète des
-champs déclarés de `Catalogue`, `29c2c22` pour le ledger owner/coplanaire, puis
-`f3802bd` pour le validateur F0, `f102d42` pour l'ordre observé, les contrôles
-source/pool et la migration des codes exacts, `ac39ac7` pour le premier juge
-Gamma, `478cfe8` pour sa réponse fail-closed et ses deux coupes, `23f12af`
-pour le premier fold saturé, puis `2b4801c` pour le profileur compact et la
-séparation croissance/silencieux. Les
-sections sur `e406e1f` et les paliers live
-07:31--07:53 sont conservées plus bas comme historique daté, pas comme état du
-worktree.
+courante est
+`HEAD=origin/main=651e47f804060a864c463387d541d982f93e1554` : `405c37b`
+livre le join postings reçu, puis `651e47f` la porte des niveaux d'événement
+`q_min`. Un delta live non committé ajoute le marquage Gamma, le préflight, un
+oracle de chaque poids et une troisième voie postings globale. Son audit
+reproductible, avec toutes les empreintes et le correctif live immédiatement
+postérieur, est
+[`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 
-## Autorité courante à `2b4801c`
+## Autorité courante à `651e47f` plus delta live
+
+| contrat | état reçu |
+| --- | --- |
+| théorème du join postings | **positif** : old/new, new/new, poids `|M intersection N|`, lot d'activation tardif et rejeu strict/fermé sont exacts sur tout catalogue valide |
+| différentiel du join | **positif borné** : G², par lots et global concordent; table de chaque poids reconstruite par intersections directes; six mutants de la voie par lots meurent |
+| prédicat d'événement `q_min` | **positif borné** : ensembles de niveaux 30/30 génériques et 60/60 saturés, provenance bornée sans écart dans ces campagnes |
+| transcript Gamma | **histogrammes reçus, identités ouvertes** : triples naissance/continuation/multifusion concordants à chaque niveau; racines, témoins stricts et générateurs responsables non comparés |
+| préflight par lots | **progrès positif** : `P_post` et plus gros lot exacts avant émission, manifeste observable au refus; pic encore modélisé par constantes, sans high-water contractuel |
+| voie postings globale | **troisième vérité utile, pas forme d'échelle** : déterministe à 1/2 threads et fold identique, mais occurrences intégrales, double stockage transitoire, arêtes et ordre global; budget ajouté à l'API live mais pas encore transmis par le pipeline |
+| source et provenance runtime | **ouvertes** : `n_support` est lu sans bit `q_min_certified`; `smax>=n` exclut une censure de rang mais ne certifie pas la complétude de la famille |
+| architecture légère | **préservée géométriquement** : aucun graphe de Johnson, sous-simplexe ou mosaïque d'ordre supérieur dans le chemin candidat; masse combinatoire et source complète restent les murs |
+| 50 k / GPU | **NO-GO maintenu** : runs bornés, source certifiée, reçu de composantes, arithmétique globale vérifiée et manifeste/high-water manquent; aucun kernel GPU nouveau dans ce delta |
+
+La fermeture constructive du transcript est donnée par
+[`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md) : une racine porte sa plus petite `k`-face comme témoin, maintenue en
+`O(k)` à l'union. Deux racines ne peuvent partager ce témoin. Le record
+`(niveau,témoin fermé,témoins stricts,type,marqueurs)` ferme donc les erreurs
+compensées sans matérialiser les faces.
+
+La réponse directe aux verrous CPU et mémoire est
+[`REPONSE_CLAUDE_JOIN_POSTINGS_Q1_Q3_20260810.md`](REPONSE_CLAUDE_JOIN_POSTINGS_Q1_Q3_20260810.md) : accumulateur sparse à propriétaire unique pour le CPU, degrés et `P_post` exacts comme autorité d'admission, puis runs triangulaires bornés et merge
+déterministe pour le global/GPU. À l'ordre un, chaque clique de posting peut
+déjà être remplacée exactement par un arbre de `d_x-1` arêtes à chaque coupe.
+
+Les sections `2b4801c` et antérieures sont conservées ci-dessous comme
+historique chronologique; elles ne décrivent plus le worktree courant.
+
+## Historique : autorité à `2b4801c`
 
 | contrat | état reçu |
 | --- | --- |

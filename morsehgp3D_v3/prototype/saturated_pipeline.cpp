@@ -28,6 +28,7 @@
 #include "mhgp/mhgp.hpp"
 #include "prototype/order_k_flats.hpp"
 #include "prototype/saturated_fold.hpp"
+#include "prototype/saturated_fold_global.hpp"
 
 namespace {
 
@@ -49,9 +50,16 @@ unsigned long long fold_digest(const mhgp3v::SaturatedFold& fold) {
     feed((unsigned long long)order.fusions);
     feed((unsigned long long)order.coverage_growth_batches);
     feed((unsigned long long)order.silent_generator_batches);
+    feed((unsigned long long)order.gamma_births);
+    feed((unsigned long long)order.gamma_continuations);
+    feed((unsigned long long)order.gamma_multifusions);
+    feed((unsigned long long)order.event_guard_violations);
     feed((unsigned long long)order.level_representative.size());
     for (int representative : order.level_representative)
       feed((unsigned long long)representative);
+    for (long long value : order.gamma_birth_at_level) feed((unsigned long long)value);
+    for (long long value : order.gamma_continuation_at_level) feed((unsigned long long)value);
+    for (long long value : order.gamma_multifusion_at_level) feed((unsigned long long)value);
     for (std::size_t li = 0; li < order.closed_partitions.size(); ++li)
       for (const std::vector<mhgp::i32>& cluster : order.closed_partitions[li]) {
         unsigned long long h = 14695981039346656037ULL + li;
@@ -67,7 +75,9 @@ unsigned long long fold_digest(const mhgp3v::SaturatedFold& fold) {
 int main(int argc, char** argv) {
   int n = 200, coord = 0, smax = 11, max_order = 5;
   long long seed = 20260810;
-  bool use_postings = false;
+  long long memory_budget_mb = 0;
+  int compare_joins = 0, threads = 1;
+  int join_mode = 0;   // 0 = g2, 1 = postings par lots, 2 = postings global
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -83,8 +93,9 @@ int main(int argc, char** argv) {
     if (!strcmp(argv[i], "--join")) {
       if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --join\n"); return 2; }
       ++i;
-      if (!strcmp(argv[i], "g2")) use_postings = false;
-      else if (!strcmp(argv[i], "postings")) use_postings = true;
+      if (!strcmp(argv[i], "g2")) join_mode = 0;
+      else if (!strcmp(argv[i], "postings")) join_mode = 1;
+      else if (!strcmp(argv[i], "postings-global")) join_mode = 2;
       else { std::printf("ECHEC : jointure inconnue %s\n", argv[i]); return 2; }
       continue;
     }
@@ -97,16 +108,25 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--smax")) target = &smax;
     else if (!strcmp(argv[i], "--max-order")) target = &max_order;
     else if (!strcmp(argv[i], "--seed")) wide = &seed;
+    else if (!strcmp(argv[i], "--memory-budget-mb")) wide = &memory_budget_mb;
+    else if (!strcmp(argv[i], "--compare-joins")) target = &compare_joins;
+    else if (!strcmp(argv[i], "--threads")) target = &threads;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { std::printf("ECHEC : valeur entiere invalide pour %s\n", argv[i]); return 2; }
     ++i;
     if (wide != nullptr) *wide = value; else *target = (int)value;
   }
   if (n < 5 || n > 100000 || coord < 0 || coord > 65536 || smax < 2 ||
-      smax > mhgp::kMaxRank || max_order < 1 || max_order + 1 > smax) {
+      smax > mhgp::kMaxRank || max_order < 1 || max_order + 1 > smax ||
+      memory_budget_mb < 0 || compare_joins < 0 || compare_joins > 1 || threads < 0 ||
+      threads > 256) {
     std::printf("ECHEC : campagne absurde\n");
     return 2;
   }
+  // Le mode compare-joins rejoue le meme catalogue par les DEUX joins : le
+  // sujet mesure est une forme postings (par lots par defaut).
+  if (compare_joins == 1 && join_mode == 0) join_mode = 1;
+  const bool use_postings = join_mode != 0;
   // Emprise a DENSITE FIXE 1e-3 par defaut (protocole des profils d'echelle du
   // depot) : coord = cbrt(n / 1e-3), sauf surcharge explicite.
   if (coord == 0) {
@@ -140,19 +160,74 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : statut nuage %s\n", mhgp3v::cloud_status_name(status));
     return 3;
   }
+  // La garde d'evenement ne REFUSE que sous famille complete (s_max >= n) ;
+  // sous famille tronquee ses violations sont comptees et publiees.
+  const bool enforce_guard = smax >= n;
   mhgp3v::PostingsReceipt receipt;
   const mhgp3v::SaturatedFold fold =
-      use_postings ? mhgp3v::build_saturated_fold_postings(catalogue, max_order,
-                                                           /*keep_partitions=*/false, &receipt)
-                   : mhgp3v::build_saturated_fold(catalogue, max_order,
-                                                  /*keep_partitions=*/false);
+      join_mode == 2
+          ? mhgp3v::build_saturated_fold_postings_global(
+                catalogue, max_order, /*keep_partitions=*/false, &receipt, threads,
+                enforce_guard, /*collect_pairs=*/false, memory_budget_mb * 1048576)
+      : join_mode == 1
+          ? mhgp3v::build_saturated_fold_postings(catalogue, max_order,
+                                                  /*keep_partitions=*/false, &receipt, {},
+                                                  enforce_guard, /*collect_pairs=*/false,
+                                                  memory_budget_mb * 1048576)
+          : mhgp3v::build_saturated_fold(catalogue, max_order,
+                                         /*keep_partitions=*/false, enforce_guard);
   const auto t2 = std::chrono::steady_clock::now();
-  if (!fold.ok) { std::printf("ECHEC : fold refuse : %s\n", fold.refusal); return 3; }
+  if (!fold.ok) {
+    if (use_postings && receipt.predicted_peak_bytes > 0)
+      std::printf("preflight  : P_post predit=%lld, pic conservateur=%.1f Mo, plus gros"
+                  " lot=%lld occurrences — manifeste du refus\n",
+                  receipt.predicted_p_post, (double)receipt.predicted_peak_bytes / 1048576.0,
+                  receipt.max_batch_occurrences);
+    std::printf("ECHEC : fold refuse : %s\n", fold.refusal);
+    return 3;
+  }
+
+  // LE MODE COMPARE-JOINS : le MEME catalogue rejoue par le fold de verite
+  // O(G^2), transcript et digest compares in-process — le differentiel de
+  // l'audit a n'importe quelle taille ou G^2 reste payable.
+  if (compare_joins == 1) {
+    const auto tc0 = std::chrono::steady_clock::now();
+    const mhgp3v::SaturatedFold other = mhgp3v::build_saturated_fold(
+        catalogue, max_order, /*keep_partitions=*/false, enforce_guard);
+    const auto tc1 = std::chrono::steady_clock::now();
+    if (!other.ok) { std::printf("ECHEC : fold G2 refuse : %s\n", other.refusal); return 3; }
+    bool same = other.orders.size() == fold.orders.size();
+    for (std::size_t idx = 0; same && idx < fold.orders.size(); ++idx) {
+      const mhgp3v::SaturatedOrderFold& a = fold.orders[idx];
+      const mhgp3v::SaturatedOrderFold& b = other.orders[idx];
+      same = a.births == b.births && a.fusions == b.fusions &&
+             a.coverage_growth_batches == b.coverage_growth_batches &&
+             a.silent_generator_batches == b.silent_generator_batches &&
+             a.gamma_births == b.gamma_births &&
+             a.gamma_continuations == b.gamma_continuations &&
+             a.gamma_multifusions == b.gamma_multifusions &&
+             a.event_guard_violations == b.event_guard_violations &&
+             a.level_representative == b.level_representative &&
+             a.gamma_birth_at_level == b.gamma_birth_at_level &&
+             a.gamma_continuation_at_level == b.gamma_continuation_at_level &&
+             a.gamma_multifusion_at_level == b.gamma_multifusion_at_level;
+    }
+    std::printf("compare    : joins %s sur le meme catalogue — G2 %.3f s, digests"
+                " %llu/%llu\n", same ? "IDENTIQUES" : "DIVERGENTS",
+                std::chrono::duration<double>(tc1 - tc0).count(), fold_digest(fold),
+                fold_digest(other));
+    if (!same || fold_digest(fold) != fold_digest(other)) {
+      std::printf("ECHEC : desaccord des joins sur le meme catalogue\n");
+      return 1;
+    }
+  }
 
   const double catalogue_seconds = std::chrono::duration<double>(t1 - t0).count();
   const double fold_seconds = std::chrono::duration<double>(t2 - t1).count();
   long long total_levels = 0, total_births = 0, total_fusions = 0;
   long long total_growth = 0, total_silent = 0, total_comparisons = 0, total_unions = 0;
+  long long gamma_births = 0, gamma_continuations = 0, gamma_multifusions = 0;
+  long long guard_violations = 0;
   std::size_t max_generator = 0;
   for (const mhgp::CriticalSphere& sphere : catalogue.spheres)
     max_generator = std::max(max_generator, (std::size_t)sphere.rank);
@@ -164,10 +239,15 @@ int main(int argc, char** argv) {
     total_silent += order.silent_generator_batches;
     total_comparisons += order.join_comparisons;
     total_unions += order.join_unions;
+    gamma_births += order.gamma_births;
+    gamma_continuations += order.gamma_continuations;
+    gamma_multifusions += order.gamma_multifusions;
+    guard_violations += order.event_guard_violations;
   }
   std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
-              " --join %s\n", n, coord, smax, max_order, seed,
-              use_postings ? "postings" : "g2");
+              " --join %s --threads %d\n", n, coord, smax, max_order, seed,
+              join_mode == 2 ? "postings-global" : join_mode == 1 ? "postings" : "g2",
+              threads);
   std::printf("semantique : %s\n",
               smax >= n ? "famille saturee COMPLETE (exactitude jugee ailleurs)"
                         : "famille TRONQUEE — raffinement S.6 (partial_refinement),"
@@ -178,6 +258,18 @@ int main(int argc, char** argv) {
               " croissances=%lld lots silencieux=%lld  digest diagnostique=%llu\n",
               max_order, total_levels, total_births, total_fusions, total_growth,
               total_silent, fold_digest(fold));
+  std::printf("transcript : Gamma par marquage q_min — naissances=%lld continuations=%lld"
+              " multifusions=%lld violations de garde=%lld%s\n",
+              gamma_births, gamma_continuations, gamma_multifusions, guard_violations,
+              smax >= n ? "  (s_max >= n : censure par s_max exclue — la completude de"
+                          " famille reste un certificat separe)"
+                        : "  (sous-famille NON certifiee : aucun transcript autoritatif)");
+  if (use_postings)
+    std::printf("preflight  : P_post predit=%lld, pic conservateur=%.1f Mo, plus gros"
+                " lot=%lld occurrences%s\n",
+                receipt.predicted_p_post, (double)receipt.predicted_peak_bytes / 1048576.0,
+                receipt.max_batch_occurrences,
+                memory_budget_mb > 0 ? " (budget respecte)" : "");
   if (use_postings)
     std::printf("jointure   : postings — occurrences ancien/nouveau=%lld nouveau/nouveau=%lld"
                 " paires reduites=%lld poids=%lld P_post=%lld unions %lld/%lld"

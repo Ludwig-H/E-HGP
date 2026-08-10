@@ -94,7 +94,8 @@ inoccupée :
   paires réduites 168 176 962, poids = P_post = 385 553 414, unions 193 471
   réussies sur 372 145 225 tentées, `|P_x|` max 4 368 ;
 - débit du join : ~10,7 M occurrences émises-réduites par seconde sur un cœur
-  de codespace — la constante à retenir pour le manifeste 50 k.
+  de codespace — **diagnostic de ce run `n=200`**, à rejouer par taille; ce
+  n'est pas une constante autoritative du manifeste 50 k.
 
 ## 5. Le mur suivant est la masse elle-même, et c'est conforme à la note
 
@@ -143,7 +144,8 @@ tableau dense en `O(max id)`), reçu remis à zéro à l'entrée. Séquence §8
 adoptée telle quelle :
 
 1. Fenêtre `q_min` et transcript reçu contre Gamma sur catalogues géométriques
-   complets (juge `--check-event-predicate`, mutant `q_min+1`). **FAIT, reçu**
+   complets (juge `--check-event-predicate`, mutant `q_min+1`). **Prédicat et
+   histogrammes reçus; identité de composante encore ouverte.**
    dans le commit suivant : le juge calcule `q_min` par énumération exacte
    indépendante (miniboule rationnelle de l'oracle, tailles `<= K+1`) et
    compare les niveaux prédits `{|M| >= k, q_min <= k+1}` aux niveaux
@@ -152,15 +154,48 @@ adoptée telle quelle :
    `--require-degenerate-agreement` : **60/60 ordres en accord, 1 704 niveaux
    prédits, zéro écart y compris dégénéré**. Le mutant `q_min+1` est réfuté au
    premier nuage à chaque ordre (portes permanentes, codes contractuels). Le
-   théorème des lots est donc reçu ; reste son EMPLOI dans le transcript du
-   fold (marquage des racines par générateurs d'événement, garde `q=k+1` sans
-   racine stricte, certification de provenance `n_support == q_min`).
+   corollaire des niveaux est donc reçu. Son emploi est aussi exercé : les deux
+   folds (G² et postings)
+   marquent les racines finales atteintes par un générateur d'événement et
+   classifient par racines strictes distinctes (0/1/≥2 →
+   naissance/continuation/multifusion), avec la garde « naissance marquée sans
+   support `q<=k` » et les triples publiés PAR NIVEAU. Le juge observe **30/30
+   ordres génériques et 60/60 ordres saturés sous accord dégénéré exigé**, zéro
+   triple non nul à un niveau étranger et `n_support == q_min` sur ces
+   campagnes. Il compare seulement trois comptes par niveau : deux erreurs de
+   même type sur deux racines peuvent encore se compenser, et le mutant
+   `q_min+1` ne mute pas le marquage sujet. La fermeture par témoin canonique
+   est donnée dans
+   [`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md).
 2. Oracle indépendant de chaque poids et identités de degré dans la porte.
+   **FAIT** : la table canonique `(M,N) -> |M∩N|` est reconstruite directement
+   des listes de membres (intersections complètes, sans sortie précoce) et
+   comparée clef par clef et poids par poids au dump du reçu
+   (`collect_pairs`) ; les masses ancien/nouveau sont recalculées des degrés
+   pré-lot. Une redistribution compensée des poids ne peut plus passer. Petit
+   durcissement restant : exiger aussi `dump.size()==table.size()` après la
+   comparaison clef par clef.
 3. Rejouer les mêmes catalogues pour comparer `G²` et postings, transcript
-   Gamma et digest canonique compris.
+   Gamma et digest canonique compris. **FAIT en première forme** : le mode
+   `--compare-joins` du pipeline rejoue le même catalogue par les deux joins
+   in-process et exige transcript et digest identiques (CTest permanent) ; le
+   digest scientifique canonique reste un travail déclaré.
 4. Préflight mémoire (entier vérifié, budget, chunks, reprise) puis mesure CPU
-   avec high-water ; manifeste 50 k.
+   avec high-water ; manifeste 50 k. **Première forme positive pour le join par
+   lots** : degrés, `L_sat`, `P_post` exact et plus gros lot sont calculés avant
+   émission; le refus de budget publie son manifeste et l'identité post-hoc
+   `P_post réel == prédit` est vérifiée. Le pic fondé sur des constantes est une
+   estimation tant que capacités, allocateur, conteneurs, sorties et high-water
+   ne sont pas reçus. L'API globale vient d'ajouter un budget, mais le pipeline
+   ne le transmet pas encore et son `P_post` passe d'abord par un `long long`
+   non vérifié.
 5. Kernel GPU réel et repli CPU multi-cœurs différenciés nativement ; G4 SPOT
-   gardée seulement après.
+   gardée seulement après. Le live possède une **première vérité globale** :
+   CSR complet, buffers locaux, concaténation, tri/réduction, puis rejeu DSU.
+   Elle concorde à un/deux threads, mais ne découpe pas encore un posting lourd
+   et matérialise tout `P_post`. La forme d'échelle proposée est : intervalles
+   triangulaires bornés, runs triés/réduits scellés, merge vérifié, puis runs de
+   rejeu par lot. À l'ordre un, un arbre canonique de `d_x-1` arêtes remplace
+   exactement chaque clique de posting à toutes les coupes.
 
 GCP non utilisé pour cette note.

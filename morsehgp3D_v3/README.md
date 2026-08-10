@@ -5,7 +5,8 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-Le HEAD produit courant est `HEAD=origin/main=2b4801c`. Le commit produit
+Le HEAD produit courant est
+`HEAD=origin/main=651e47f804060a864c463387d541d982f93e1554`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -20,7 +21,10 @@ payloads non autoritatifs et borne le verdict à l'accord des couvertures sur le
 ordres effectivement jugés. `23f12af` ajoute ensuite le fold par intersections
 de saturés et remplace les censures multiplicataires sur les campagnes bornées;
 `2b4801c` ajoute son profileur, les couvertures incrémentales et la séparation
-croissance/silencieux. L'autorité
+croissance/silencieux; `405c37b` livre ensuite le join postings reçu, puis
+`651e47f` la porte des niveaux d'événement `q_min`. Un delta live non committé
+ajoute marquage Gamma, préflight, oracle de chaque poids et troisième join
+global; il est épinglé fichier par fichier dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
@@ -118,20 +122,42 @@ fold O(G²) pour un fold 4,9× plus rapide (4,84 s contre 23,6 s); le reçu publ
 la vraie masse : `P_post=46 460 941` pour 7 873 générateurs, `|P_x|` max 3 069.
 **L'ancien mur `n=200` tombe** : là où deux runs dépassaient 600 s sans reçu,
 le join postings rend fold 36,1 s et total 55,1 s pour 40 007 générateurs,
-`P_post=385 553 414`, identités respectées (~10,7 M occurrences/s sur un cœur).
+`P_post=385 553 414`, identités respectées (~10,7 M occurrences/s sur un cœur,
+**diagnostic propre à ce run**, pas constante d'un manifeste 50 k).
 Mesures, mur restant (la masse elle-même) et questions ouvertes :
 [`NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md`](audits/NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md).
 
-**[prédicat d'événement Gamma reçu]** Les théorèmes 1--2 de la
+**[prédicat d'événement et histogrammes Gamma reçus]** Le lemme de niveaux de
+la
 [`note q_min de l'auditeur`](audits/NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md)
-sont reçus contre la vérité exhaustive : un niveau du saturé est un vrai
-niveau Gamma_k ssi son lot contient un générateur avec `|M| >= k` et
+est reçu contre la vérité exhaustive : un niveau du saturé est un vrai niveau
+Gamma_k ssi son lot contient un générateur avec `|M| >= k` et
 `q_min(B) <= k+1`. Le juge calcule `q_min` par énumération rationnelle
-indépendante (jamais `n_support` du produit) : 30/30 ordres génériques et
-**60/60 ordres saturés sous accord dégénéré exigé**, zéro réfutation, mutant
-`q_min+1` tué — portes permanentes. L'emploi du prédicat dans le transcript du
-fold (marquage des racines, garde fail-closed, provenance certifiée) est le
-prochain palier.
+indépendante : 30/30 ordres génériques et **60/60 ordres saturés sous accord
+dégénéré exigé**, zéro réfutation, mutant `q_min+1` tué. L'emploi dans le fold
+est positivement sondé : les racines sont marquées, classées par 0/1/≥2 racines
+strictes et les triples naissance/continuation/multifusion sont publiés par
+niveau. Ces **histogrammes de types par niveau** concordent aussi 30/30 et
+60/60; le juge observe `n_support == q_min` sur ces campagnes.
+
+Ce payload ne compare encore ni identité des racines, ni témoins stricts, ni
+générateurs marquants. Le mutant `q_min+1` meurt par niveaux/provenance tandis
+que son sous-bilan transcript reste vert. La fermeture légère par témoin
+canonique est dans
+[`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](audits/NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md).
+`smax>=n` ne remplace ni un bit `q_min_certified` ni un certificat de source
+complète.
+
+**[troisième join global, résultat borné]** Le live reconstruit la même table
+de poids puis le même fold à un et deux threads; G², join par lots et join
+global concordent, et l'oracle vérifie chaque `(M,N)->|M intersection N|` par
+intersection directe. Cette voie est une troisième vérité utile, pas encore le
+backend 50 k annoncé : les buffers locaux contiennent tout `P_post`, sont
+concaténés, puis toutes les arêtes et leur ordre sont matérialisés. Le budget
+vient d'être ajouté à l'API globale mais n'est pas encore transmis par le
+pipeline. La route exacte par intervalles triangulaires, runs scellés et merge
+déterministe, ainsi que la réduction en arbre des postings à `k=1`, sont dans
+[`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
 fold et repli multi-cœurs. La

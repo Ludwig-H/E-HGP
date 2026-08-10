@@ -68,6 +68,24 @@ struct SaturatedOrderFold {
   // theoremes 1--2), a recevoir contre l'oracle Gamma avant d'etre publie.
   long long births = 0, fusions = 0;
   long long coverage_growth_batches = 0, silent_generator_batches = 0;
+  // LE TRANSCRIPT GAMMA PAR MARQUAGE (theoremes 1--2 de la note q_min, recus
+  // par le juge) : seules les racines finales atteintes par un GENERATEUR
+  // D'EVENEMENT (|M| >= k et q_min <= k+1, q_min lu dans n_support — une
+  // provenance CERTIFIEE par le juge sur ce chemin) produisent un evenement
+  // public, classe par le nombre de racines strictes distinctes : 0 naissance,
+  // 1 continuation (meme sans croissance de couverture), >= 2 multifusion.
+  // Ce sont des evenements PAR COMPOSANTE, pas par lot. Sous famille tronquee
+  // ils ne sont que relative_to_certified_subfamily.
+  long long gamma_births = 0, gamma_continuations = 0, gamma_multifusions = 0;
+  // GARDE FAIL-CLOSED du theoreme : une racine marquee sans racine stricte
+  // doit contenir un generateur d'evenement avec q_min <= k ; sinon la source
+  // est incomplete, q_min faux, le join incomplet ou le lot non atomique. Sous
+  // famille complete la violation REFUSE le fold ; sinon elle est comptee.
+  long long event_guard_violations = 0;
+  // Les evenements Gamma par niveau, alignes sur level_representative — le
+  // payload que le juge compare a la verite exhaustive niveau par niveau.
+  std::vector<long long> gamma_birth_at_level, gamma_continuation_at_level,
+      gamma_multifusion_at_level;
   // Masses de la jointure, publiees pour mesurer le mur avant de l'optimiser.
   long long join_comparisons = 0, join_unions = 0;
 };
@@ -99,9 +117,14 @@ inline bool sorted_intersection_reaches(const std::vector<mhgp::i32>& a,
 }
 
 inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int maximum_order,
-                                          bool keep_partitions = true) {
+                                          bool keep_partitions = true,
+                                          bool enforce_event_guard = false) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
+  if (maximum_order < 1 || maximum_order > mhgp::kMaxRank) {
+    fold.refusal = "ordre maximal hors contrat";
+    return fold;
+  }
   const std::size_t count = catalogue.spheres.size();
 
   // Les membres de chaque generateur, tries — le pool est deja trie par
@@ -251,11 +274,54 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
         }
       }
 
+      // 4bis. LE TRANSCRIPT GAMMA PAR MARQUAGE : seules les racines finales
+      // atteintes par un generateur d'evenement (|M| >= k deja garanti par
+      // l'activation, n_support <= k+1) produisent un evenement public.
+      std::map<int, int> marked_minimum_support;
+      for (std::size_t b = cursor; b < batch_end; ++b) {
+        const int s = by_level[b];
+        if (!active[(std::size_t)s]) continue;
+        const int support_size = (int)catalogue.spheres[(std::size_t)s].n_support;
+        if (support_size > k + 1) continue;
+        const int root = find(s);
+        const auto it = marked_minimum_support.find(root);
+        if (it == marked_minimum_support.end())
+          marked_minimum_support.emplace(root, support_size);
+        else
+          it->second = std::min(it->second, support_size);
+      }
+      long long births_here = 0, continuations_here = 0, multifusions_here = 0;
+      for (const auto& entry : marked_minimum_support) {
+        const auto it = strict_roots_of.find(entry.first);
+        const std::size_t strict = it == strict_roots_of.end() ? 0 : it->second.size();
+        if (strict == 0) {
+          ++births_here;
+          // GARDE DU THEOREME : une naissance marquee exige un support q <= k.
+          if (entry.second > k) {
+            ++order.event_guard_violations;
+            if (enforce_event_guard) {
+              fold.refusal = "garde d'evenement violee : naissance marquee sans support q<=k";
+              return fold;
+            }
+          }
+        } else if (strict == 1) {
+          ++continuations_here;
+        } else {
+          ++multifusions_here;
+        }
+      }
+      order.gamma_births += births_here;
+      order.gamma_continuations += continuations_here;
+      order.gamma_multifusions += multifusions_here;
+
       // 5. LA COUPE FERMEE : couverture par composante = union des satures
       // (S.4), lue dans les couvertures INCREMENTALES. Le lot entier est
       // committe d'un coup — jamais boule par boule. La materialisation par
       // niveau n'existe que pour le juge.
       order.level_representative.push_back(by_level[cursor]);
+      order.gamma_birth_at_level.push_back(births_here);
+      order.gamma_continuation_at_level.push_back(continuations_here);
+      order.gamma_multifusion_at_level.push_back(multifusions_here);
       if (keep_partitions) {
         FoldPartition partition;
         std::set<int> roots_seen;
@@ -304,6 +370,18 @@ struct PostingsReceipt {
   long long postings_mass = 0;    // somme des longueurs |P_x|
   std::size_t max_posting = 0;
   bool identities_ok = false;
+  // LE PREFLIGHT (audit 621ee80 §6) : calcule AVANT toute emission, en
+  // arithmetique verifiee — P_post predit depuis les degres finals (identite
+  // post-hoc avec p_post, independante des lots), masse du plus gros lot et
+  // pic memoire CONSERVATEUR. Le refus de budget arrive avant l'allocation.
+  long long predicted_p_post = 0;
+  long long max_batch_occurrences = 0;
+  long long predicted_peak_bytes = 0;
+  // La table complete (M, N) -> w, remplie seulement sur demande
+  // (collect_pairs) : l'oracle independant de la porte la compare clef par
+  // clef et poids par poids — une redistribution compensee des poids qui
+  // preserverait masses, unions et partitions ne peut pas la tromper.
+  std::vector<std::pair<std::pair<int, int>, long long>> pairs;
 };
 
 // LES SIX MUTANTS NOMMES PAR LA NOTE (§6) : chacun doit rougir par la porte
@@ -322,7 +400,10 @@ struct PostingsMutants {
 inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalogue,
                                                    int maximum_order, bool keep_partitions,
                                                    PostingsReceipt* receipt,
-                                                   PostingsMutants mutants = {}) {
+                                                   PostingsMutants mutants = {},
+                                                   bool enforce_event_guard = false,
+                                                   bool collect_pairs = false,
+                                                   long long memory_budget_bytes = 0) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   // LE RECU EST REMIS A ZERO A L'ENTREE : un refus ne doit jamais laisser
@@ -394,6 +475,83 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
     for (mhgp::i32& x : generator_members) x = dense_of(x);
   static_cast<void>(max_point);
 
+  // PREFLIGHT MEMOIRE (audit 621ee80 §6) : degres, L_sat, P_post et pic
+  // conservateur en arithmetique VERIFIEE (u128 plafonne a 2^62), AVANT toute
+  // emission — le refus de budget precede l'allocation dependante de la masse.
+  // Le parcours des lots est celui de la boucle (by_level, memes classes).
+  long long expected_postings_mass = 0;
+  long long preflight_p_post = 0, preflight_max_batch = 0, preflight_peak = 0;
+  {
+    using u128 = unsigned __int128;
+    const u128 ceiling = (u128)1 << 62;
+    std::vector<long long> final_degree(universe.size(), 0);
+    for (const std::vector<mhgp::i32>& generator_members : members) {
+      expected_postings_mass += (long long)generator_members.size();
+      for (mhgp::i32 x : generator_members) ++final_degree[(std::size_t)x];
+    }
+    u128 predicted = 0;
+    for (long long d : final_degree) {
+      predicted += (u128)d * (u128)(d - 1) / 2;
+      if (predicted >= ceiling) {
+        fold.refusal = "preflight : P_post deborde le contrat entier";
+        return fold;
+      }
+    }
+    std::vector<long long> pre_degree(universe.size(), 0);
+    u128 max_batch = 0;
+    std::size_t walker = 0;
+    while (walker < count) {
+      std::size_t walker_end = walker + 1;
+      if (!mutants.sequential_equal_levels)
+        while (walker_end < count &&
+               mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)by_level[walker]].sph,
+                                     catalogue.spheres[(std::size_t)by_level[walker_end]].sph) ==
+                   0)
+          ++walker_end;
+      u128 batch_occurrences = 0;
+      std::map<mhgp::i32, long long> batch_count;
+      for (std::size_t b = walker; b < walker_end; ++b)
+        for (mhgp::i32 x : members[(std::size_t)by_level[b]]) {
+          batch_occurrences += (u128)pre_degree[(std::size_t)x];
+          ++batch_count[x];
+        }
+      for (const auto& entry : batch_count) {
+        batch_occurrences += (u128)entry.second * (u128)(entry.second - 1) / 2;
+        pre_degree[entry.first] += entry.second;
+      }
+      if (batch_occurrences >= ceiling) {
+        fold.refusal = "preflight : masse d'un lot deborde le contrat entier";
+        return fold;
+      }
+      max_batch = std::max(max_batch, batch_occurrences);
+      walker = walker_end;
+    }
+    // Pic CONSERVATEUR : 32 octets par occurrence du plus gros lot (emission
+    // + reduction), 8 par posting, etats par ordre (DSU, noeuds, epoques) et
+    // couvertures small-to-large bornees par 64 octets par membre par ordre.
+    const u128 peak = max_batch * 32 + (u128)expected_postings_mass * 8 +
+                      (u128)count * 40 * (u128)K +
+                      (u128)expected_postings_mass * 64 * (u128)K;
+    if (peak >= ceiling) {
+      fold.refusal = "preflight : pic memoire predit deborde le contrat entier";
+      return fold;
+    }
+    preflight_p_post = (long long)predicted;
+    preflight_max_batch = (long long)max_batch;
+    preflight_peak = (long long)peak;
+    // La prediction est ecrite AVANT le refus de budget : elle reste
+    // observable meme sur un NO-GO — c'est le manifeste du refus.
+    if (receipt != nullptr) {
+      receipt->predicted_p_post = preflight_p_post;
+      receipt->max_batch_occurrences = preflight_max_batch;
+      receipt->predicted_peak_bytes = preflight_peak;
+    }
+    if (memory_budget_bytes > 0 && peak > (u128)memory_budget_bytes) {
+      fold.refusal = "preflight : pic memoire predit au-dessus du budget";
+      return fold;
+    }
+  }
+
   // Postings : P[x] = generateurs contenant x, dans l'ordre d'activation.
   std::vector<std::vector<int>> postings(universe.size());
 
@@ -428,6 +586,9 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
   }
   long long epoch = 0;
   PostingsReceipt out;
+  out.predicted_p_post = preflight_p_post;
+  out.max_batch_occurrences = preflight_max_batch;
+  out.predicted_peak_bytes = preflight_peak;
 
   std::size_t cursor = 0;
   while (cursor < count) {
@@ -490,15 +651,19 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
     for (const auto& entry : weights) batch_weight_sum += entry.second;
     out.reduced_pairs += (long long)weights.size();
     out.weight_sum += batch_weight_sum;
+    if (collect_pairs) out.pairs.insert(out.pairs.end(), weights.begin(), weights.end());
     if (batch_weight_sum != batch_old_new + batch_new_new) {
       fold.refusal = "identite de lot violee : occurrences != somme des poids";
       return fold;
     }
 
-    // 3. ACTIVATIONS par ordre, avec capture d'epoque des racines fraiches.
+    // 3. ACTIVATIONS par ordre, avec capture d'epoque des racines fraiches, et
+    // collecte des GENERATEURS D'EVENEMENT (n_support <= k+1) du lot.
     std::vector<std::vector<int>> batch_touched((std::size_t)K);
+    std::vector<std::vector<std::pair<int, int>>> batch_events((std::size_t)K);
     for (std::size_t b = cursor; b < batch_end; ++b) {
       const int m = by_level[b];
+      const int support_size = (int)catalogue.spheres[(std::size_t)m].n_support;
       for (int k = 1; k <= K; ++k) {
         if ((int)members[(std::size_t)m].size() < k) continue;
         OrderState& st = states[(std::size_t)(k - 1)];
@@ -507,6 +672,8 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
                                            members[(std::size_t)m].end());
         st.live_roots.insert(m);
         batch_touched[(std::size_t)(k - 1)].push_back(m);
+        if (support_size <= k + 1)
+          batch_events[(std::size_t)(k - 1)].push_back({m, support_size});
       }
     }
 
@@ -587,7 +754,45 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
           st.node_of_root[(std::size_t)root] = st.next_node++;
         }
       }
+      // LE TRANSCRIPT GAMMA PAR MARQUAGE, identique au fold de verite : les
+      // racines finales des generateurs d'evenement, classees par les racines
+      // strictes capturees a l'epoque, avec la garde q <= k des naissances.
+      std::map<int, int> marked_minimum_support;
+      for (const std::pair<int, int>& event : batch_events[(std::size_t)(k - 1)]) {
+        const int root = st.find(event.first);
+        const auto it = marked_minimum_support.find(root);
+        if (it == marked_minimum_support.end())
+          marked_minimum_support.emplace(root, event.second);
+        else
+          it->second = std::min(it->second, event.second);
+      }
+      long long births_here = 0, continuations_here = 0, multifusions_here = 0;
+      for (const auto& entry : marked_minimum_support) {
+        const auto it = strict_of.find(entry.first);
+        const std::size_t strict = it == strict_of.end() ? 0 : it->second.size();
+        if (strict == 0) {
+          ++births_here;
+          if (entry.second > k) {
+            ++order.event_guard_violations;
+            if (enforce_event_guard) {
+              fold.refusal = "garde d'evenement violee : naissance marquee sans support q<=k";
+              return fold;
+            }
+          }
+        } else if (strict == 1) {
+          ++continuations_here;
+        } else {
+          ++multifusions_here;
+        }
+      }
+      order.gamma_births += births_here;
+      order.gamma_continuations += continuations_here;
+      order.gamma_multifusions += multifusions_here;
+
       order.level_representative.push_back(by_level[cursor]);
+      order.gamma_birth_at_level.push_back(births_here);
+      order.gamma_continuation_at_level.push_back(continuations_here);
+      order.gamma_multifusion_at_level.push_back(multifusions_here);
       if (keep_partitions) {
         // Les couvertures vivent en identifiants COMPRESSES ; la partition
         // publiee est RETRADUITE en PointId bruts (l'ordre est preserve :
@@ -621,12 +826,10 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
   }
 
   // IDENTITES GLOBALES : la masse publiee somme_x |P_x| == somme des |S|
-  // (aucune posting omise ni collectee), et P_post = somme_x C(d_x, 2) ==
+  // (aucune posting omise ni collectee), P_post = somme_x C(d_x, 2) ==
   // somme des poids reduits (chaque paire intersectante reduite exactement une
-  // fois, au niveau du plus tardif). Toute violation refuse le fold ENTIER.
-  long long expected_postings_mass = 0;
-  for (const std::vector<mhgp::i32>& generator_members : members)
-    expected_postings_mass += (long long)generator_members.size();
+  // fois, au niveau du plus tardif), et P_post reel == P_post PREDIT par le
+  // preflight. Toute violation refuse le fold ENTIER.
   for (const std::vector<int>& px : postings) {
     out.postings_mass += (long long)px.size();
     out.max_posting = std::max(out.max_posting, px.size());
@@ -640,6 +843,10 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
   }
   if (out.p_post != out.weight_sum && !mutants.skip_new_new) {
     fold.refusal = "identite globale violee : P_post != somme des poids";
+    return fold;
+  }
+  if (out.p_post != out.predicted_p_post) {
+    fold.refusal = "identite de preflight violee : P_post reel != predit";
     return fold;
   }
   if (receipt != nullptr) *receipt = out;

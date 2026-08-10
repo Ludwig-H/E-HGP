@@ -36,6 +36,7 @@
 #include "mhgp/mhgp.hpp"
 #include "prototype/order_k_flats.hpp"
 #include "prototype/saturated_fold.hpp"
+#include "prototype/saturated_fold_global.hpp"
 
 namespace {
 
@@ -86,6 +87,13 @@ bool folds_agree(const mhgp3v::SaturatedFold& truth, const mhgp3v::SaturatedFold
     if (a.fusions != b.fusions) { *why = k + "fusions " + std::to_string(a.fusions) + " != " + std::to_string(b.fusions); return false; }
     if (a.coverage_growth_batches != b.coverage_growth_batches) { *why = k + "croissances " + std::to_string(a.coverage_growth_batches) + " != " + std::to_string(b.coverage_growth_batches); return false; }
     if (a.silent_generator_batches != b.silent_generator_batches) { *why = k + "lots silencieux " + std::to_string(a.silent_generator_batches) + " != " + std::to_string(b.silent_generator_batches); return false; }
+    if (a.gamma_births != b.gamma_births) { *why = k + "naissances Gamma " + std::to_string(a.gamma_births) + " != " + std::to_string(b.gamma_births); return false; }
+    if (a.gamma_continuations != b.gamma_continuations) { *why = k + "continuations Gamma " + std::to_string(a.gamma_continuations) + " != " + std::to_string(b.gamma_continuations); return false; }
+    if (a.gamma_multifusions != b.gamma_multifusions) { *why = k + "multifusions Gamma " + std::to_string(a.gamma_multifusions) + " != " + std::to_string(b.gamma_multifusions); return false; }
+    if (a.event_guard_violations != b.event_guard_violations) { *why = k + "violations de garde " + std::to_string(a.event_guard_violations) + " != " + std::to_string(b.event_guard_violations); return false; }
+    if (a.gamma_birth_at_level != b.gamma_birth_at_level ||
+        a.gamma_continuation_at_level != b.gamma_continuation_at_level ||
+        a.gamma_multifusion_at_level != b.gamma_multifusion_at_level) { *why = k + "transcript Gamma par niveau"; return false; }
     if (a.level_representative.size() != b.level_representative.size()) { *why = k + "nombre de niveaux " + std::to_string(a.level_representative.size()) + " != " + std::to_string(b.level_representative.size()); return false; }
     if (!ignore_representatives && a.level_representative != b.level_representative) { *why = k + "representants de niveau"; return false; }
     if (a.closed_partitions.size() != b.closed_partitions.size()) { *why = k + "nombre de partitions"; return false; }
@@ -173,14 +181,100 @@ long long catalogue_members_mass(const mhgp::Catalogue& catalogue) {
   return mass;
 }
 
+// L'ORACLE INDEPENDANT DES POIDS (audit 621ee80 §5) : la table canonique
+// (M, N) -> |M inter N| est reconstruite DIRECTEMENT des listes de membres —
+// jamais de l'emission — et comparee clef par clef et poids par poids au dump
+// du recu ; les masses ancien--nouveau et nouveau--nouveau sont recalculees
+// des degres pre-lot. Une redistribution compensee des poids entre paires,
+// au-dessus des memes seuils, preserverait masses, unions et partitions : elle
+// ne peut pas preserver cette table.
+bool independent_weights_agree(const mhgp::Catalogue& catalogue,
+                               const mhgp3v::PostingsReceipt& receipt, std::string* why) {
+  const std::size_t count = catalogue.spheres.size();
+  std::vector<std::vector<mhgp::i32>> members(count);
+  for (std::size_t s = 0; s < count; ++s) {
+    const mhgp::CriticalSphere& sphere = catalogue.spheres[s];
+    members[s].assign(catalogue.members.begin() + sphere.members_begin,
+                      catalogue.members.begin() + sphere.members_begin + sphere.rank);
+  }
+  std::vector<int> by_level(count);
+  for (std::size_t s = 0; s < count; ++s) by_level[s] = (int)s;
+  std::sort(by_level.begin(), by_level.end(), [&](int x, int y) {
+    const int c = mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)x].sph,
+                                        catalogue.spheres[(std::size_t)y].sph);
+    if (c != 0) return c < 0;
+    return x < y;
+  });
+  // Masses depuis les degres pre-lot, par lots de niveau exact.
+  std::map<mhgp::i32, long long> degree;
+  long long old_new = 0, new_new = 0;
+  std::size_t cursor = 0;
+  while (cursor < count) {
+    std::size_t batch_end = cursor + 1;
+    while (batch_end < count &&
+           mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)by_level[cursor]].sph,
+                                 catalogue.spheres[(std::size_t)by_level[batch_end]].sph) == 0)
+      ++batch_end;
+    std::map<mhgp::i32, long long> batch_count;
+    for (std::size_t b = cursor; b < batch_end; ++b)
+      for (mhgp::i32 x : members[(std::size_t)by_level[b]]) {
+        const auto it = degree.find(x);
+        old_new += it == degree.end() ? 0 : it->second;
+        ++batch_count[x];
+      }
+    for (const auto& entry : batch_count) {
+      new_new += entry.second * (entry.second - 1) / 2;
+      degree[entry.first] += entry.second;
+    }
+    cursor = batch_end;
+  }
+  if (old_new != receipt.old_new_occurrences || new_new != receipt.new_new_occurrences) {
+    *why = "oracle des poids : masses ancien/nouveau " + std::to_string(old_new) + "/" +
+           std::to_string(new_new) + " != recu " +
+           std::to_string(receipt.old_new_occurrences) + "/" +
+           std::to_string(receipt.new_new_occurrences);
+    return false;
+  }
+  // La table complete, par intersection de listes triees SANS sortie precoce.
+  std::map<std::pair<int, int>, long long> table;
+  for (std::size_t s = 0; s < count; ++s)
+    for (std::size_t t = s + 1; t < count; ++t) {
+      std::size_t i = 0, j = 0;
+      long long weight = 0;
+      while (i < members[s].size() && j < members[t].size()) {
+        if (members[s][i] < members[t][j]) ++i;
+        else if (members[t][j] < members[s][i]) ++j;
+        else { ++weight; ++i; ++j; }
+      }
+      if (weight > 0) table[{(int)s, (int)t}] = weight;
+    }
+  if ((long long)table.size() != receipt.reduced_pairs) {
+    *why = "oracle des poids : " + std::to_string(table.size()) + " paires != recu " +
+           std::to_string(receipt.reduced_pairs);
+    return false;
+  }
+  std::vector<std::pair<std::pair<int, int>, long long>> dump = receipt.pairs;
+  std::sort(dump.begin(), dump.end());
+  std::size_t index = 0;
+  for (const auto& entry : table) {
+    if (index >= dump.size() || dump[index].first != entry.first ||
+        dump[index].second != entry.second) {
+      *why = "oracle des poids : clef ou poids divergent a l'entree " + std::to_string(index);
+      return false;
+    }
+    ++index;
+  }
+  return true;
+}
+
 // Un tour complet sur un catalogue : verite, candidat, differentiel, recu.
 // Rend faux avec `why` au premier ecart. Sous mutant, un ecart est un SUCCES
 // pour l'appelant --mutant.
 bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
                       mhgp3v::PostingsMutants mutants, const ExpectedOrder* expected,
                       std::size_t expected_count, std::string* why) {
-  const mhgp3v::SaturatedFold truth =
-      mhgp3v::build_saturated_fold(catalogue, maximum_order, /*keep_partitions=*/true);
+  const mhgp3v::SaturatedFold truth = mhgp3v::build_saturated_fold(
+      catalogue, maximum_order, /*keep_partitions=*/true, /*enforce_event_guard=*/true);
   if (!truth.ok) { *why = std::string("fold de verite refuse : ") + truth.refusal; return false; }
   if (expected != nullptr) {
     if (truth.orders.size() != expected_count) { *why = "fixture contredite : nombre d'ordres"; return false; }
@@ -203,10 +297,46 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
   }
   mhgp3v::PostingsReceipt receipt;
   const mhgp3v::SaturatedFold candidate = mhgp3v::build_saturated_fold_postings(
-      catalogue, maximum_order, /*keep_partitions=*/true, &receipt, mutants);
+      catalogue, maximum_order, /*keep_partitions=*/true, &receipt, mutants,
+      /*enforce_event_guard=*/true, /*collect_pairs=*/true);
   if (!candidate.ok) { *why = std::string("fold candidat refuse : ") + candidate.refusal; return false; }
   if (!folds_agree(truth, candidate, /*ignore_representatives=*/false, why)) return false;
   if (!receipt_agrees(truth, receipt, catalogue_members_mass(catalogue), why)) return false;
+  if (!independent_weights_agree(catalogue, receipt, why)) return false;
+
+  // LA FORME GLOBALE (note §3, GPU-reprenable et repli multi-coeurs) : meme
+  // fold bit a bit que la verite, recu champ a champ egal a la forme par lots
+  // — y compris la table (M,N)->w — a UN thread ET a DEUX threads (contrat a
+  // deux digests du repli multi-coeurs : T n'influe pas sur le resultat).
+  for (int threads = 1; threads <= 2; ++threads) {
+    mhgp3v::PostingsReceipt global_receipt;
+    const mhgp3v::SaturatedFold global = mhgp3v::build_saturated_fold_postings_global(
+        catalogue, maximum_order, /*keep_partitions=*/true, &global_receipt, threads,
+        /*enforce_event_guard=*/true, /*collect_pairs=*/true);
+    if (!global.ok) {
+      *why = std::string("fold global refuse (threads=") + std::to_string(threads) + ") : " +
+             global.refusal;
+      return false;
+    }
+    if (!folds_agree(truth, global, /*ignore_representatives=*/false, why)) {
+      *why = "forme globale (threads=" + std::to_string(threads) + ") : " + *why;
+      return false;
+    }
+    if (global_receipt.old_new_occurrences != receipt.old_new_occurrences ||
+        global_receipt.new_new_occurrences != receipt.new_new_occurrences ||
+        global_receipt.reduced_pairs != receipt.reduced_pairs ||
+        global_receipt.weight_sum != receipt.weight_sum ||
+        global_receipt.p_post != receipt.p_post ||
+        global_receipt.postings_mass != receipt.postings_mass ||
+        global_receipt.max_posting != receipt.max_posting ||
+        global_receipt.unions_attempted != receipt.unions_attempted ||
+        global_receipt.unions_done != receipt.unions_done ||
+        global_receipt.pairs != receipt.pairs) {
+      *why = "recu de la forme globale (threads=" + std::to_string(threads) +
+             ") divergent de la forme par lots";
+      return false;
+    }
+  }
   return true;
 }
 

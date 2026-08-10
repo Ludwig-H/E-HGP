@@ -649,6 +649,23 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 # LE PIPELINE REFUSE AUSSI SES ARGUMENTS ABSURDES, jointure comprise.
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_join "jointure inconnue" 2 --join magique)
+# LE MODE COMPARE-JOINS : meme catalogue, deux joins, transcript et digest
+# compares in-process — le differentiel de l'audit au-dela des nuages du juge.
+add_test(NAME mhgp3v_saturated_pipeline_compare_joins COMMAND mhgp3v_saturated_pipeline
+         --points 32 --smax 11 --max-order 3 --seed 20260810 --compare-joins 1)
+add_test(NAME mhgp3v_saturated_pipeline_compare_joins_global COMMAND mhgp3v_saturated_pipeline
+         --points 32 --smax 11 --max-order 3 --seed 20260810 --join postings-global
+         --threads 2 --compare-joins 1)
+# LE PREFLIGHT REFUSE UN BUDGET INSUFFISANT AVANT TOUTE EMISSION, et publie le
+# manifeste du refus (P_post predit, pic conservateur, plus gros lot).
+mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
+  mhgp3v_saturated_pipeline_reject_budget "preflight" 3
+  --points 32 --smax 11 --max-order 3 --seed 20260810 --join postings
+  --memory-budget-mb 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
+  mhgp3v_saturated_pipeline_reject_budget_global "preflight" 3
+  --points 32 --smax 11 --max-order 3 --seed 20260810 --join postings-global
+  --memory-budget-mb 1)
 
 # LE NOYAU F0 DU FOLD HORIZONTAL, EN PORTE PERMANENTE.
 #

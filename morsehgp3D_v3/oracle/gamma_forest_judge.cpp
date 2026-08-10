@@ -81,6 +81,9 @@ struct GammaTruth {
   // seconde ; la premiere attend le journal d'incidences.
   std::vector<std::vector<std::vector<std::vector<int>>>> facet_partitions;
   std::vector<Partition> partitions;       // couvertures a la coupe FERMEE de chaque niveau
+  // Les types d'evenement PAR NIVEAU, alignes sur `levels` — le payload que la
+  // reception du transcript compare au fold marque par q_min.
+  std::vector<long long> births_at_level, continuations_at_level, fusions_at_level;
   bool degenerate_events = false;
   long long births = 0, fusions = 0, continuations = 0;
   long long faces = 0, cofaces = 0;
@@ -232,6 +235,7 @@ GammaTruth gamma_truth(const std::vector<mhgp::P3>& points, int k) {
     // degenerescence est la cosphericite (drapeau calcule a l'enumeration).
     std::set<int> changed_roots;
     for (std::size_t i : touched) changed_roots.insert(sets.find((int)i));
+    long long births_here = 0, continuations_here = 0, fusions_here = 0;
     for (const auto& group : groups) {
       if (changed_roots.find(group.first) == changed_roots.end()) continue;
       std::set<long long> strict_roots;
@@ -239,15 +243,21 @@ GammaTruth gamma_truth(const std::vector<mhgp::P3>& points, int k) {
         if (strict_node[i] >= 0) strict_roots.insert(strict_node[i]);
       if (strict_roots.empty()) {
         ++truth.births;
+        ++births_here;
         node_of_root[(std::size_t)group.first] = (int)next_node++;
       } else if (strict_roots.size() == 1) {
         ++truth.continuations;
+        ++continuations_here;
         node_of_root[(std::size_t)group.first] = (int)*strict_roots.begin();
       } else {
         ++truth.fusions;
+        ++fusions_here;
         node_of_root[(std::size_t)group.first] = (int)next_node++;
       }
     }
+    truth.births_at_level.push_back(births_here);
+    truth.continuations_at_level.push_back(continuations_here);
+    truth.fusions_at_level.push_back(fusions_here);
 
     // 5. LA COUPE FERMEE, sous ses deux projections : composantes de facettes
     // (canoniques, disjointes) et couvertures (theoreme 2 : l'union des
@@ -506,7 +516,9 @@ int main(int argc, char** argv) {
   long long truth_births = 0, truth_fusions = 0, truth_continuations = 0;
   long long predicate_orders_agreed = 0, predicate_mismatch_clean = 0;
   long long predicate_mismatch_degenerate = 0, predicate_event_levels = 0;
-  long long qmin_subset_failures = 0;
+  long long qmin_subset_failures = 0, provenance_mismatches = 0;
+  long long transcript_orders_agreed = 0, transcript_mismatch_clean = 0;
+  long long transcript_mismatch_degenerate = 0;
 
   for (int c = 0; c < clouds; ++c) {
     std::vector<mhgp::P3> pts;
@@ -538,7 +550,9 @@ int main(int argc, char** argv) {
 
     mhgp3v::SaturatedFold fold;
     if (subject_fold == 1) {
-      fold = mhgp3v::build_saturated_fold(catalogue, max_order);
+      // La garde d'evenement du fold ne refuse que sous famille complete.
+      fold = mhgp3v::build_saturated_fold(catalogue, max_order, true,
+                                          /*enforce_event_guard=*/smax >= n);
       if (!fold.ok) {
         std::printf("[nuage %d] fold sature refuse : %s\n", c, fold.refusal);
         ++refused_subject;
@@ -605,6 +619,22 @@ int main(int argc, char** argv) {
         // la reception (des niveaux verite perdent leur generateur d'evenement,
         // ou des generateurs q=k+2 entrent a tort).
         if (force_qmin_shift == 1 && qmin_cap[s] != INT_MAX) ++qmin_cap[s];
+        // CERTIFICATION DE PROVENANCE : le fold lit q_min dans n_support ; le
+        // juge exige que le support canonique du produit soit EXACTEMENT la
+        // cardinalite minimale enumeree — sinon le transcript marque est faux.
+        const int enumeration_cap = std::min(max_order + 1, (int)generator_members.size());
+        const bool coherent = qmin_cap[s] != INT_MAX
+                                  ? (int)sphere.n_support == qmin_cap[s]
+                                  : (int)sphere.n_support > enumeration_cap;
+        if (!coherent) {
+          ++provenance_mismatches;
+          ++failures;
+          if (provenance_mismatches <= 3)
+            std::printf("[nuage %d] PROVENANCE REFUTEE : n_support=%d mais q_min"
+                        " enumere=%d (generateur %zu, rang %d)\n", c,
+                        (int)sphere.n_support,
+                        qmin_cap[s] == INT_MAX ? -1 : qmin_cap[s], s, (int)sphere.rank);
+        }
       }
     }
 
@@ -706,6 +736,56 @@ int main(int argc, char** argv) {
         }
         return *found;
       };
+
+      // RECEPTION DU TRANSCRIPT MARQUE : les types d'evenement du fold
+      // (naissance/continuation/multifusion PAR COMPOSANTE, racines marquees
+      // par q_min) doivent egaler ceux de la verite A CHAQUE niveau, et un
+      // niveau du fold etranger a la verite doit porter un triple nul.
+      if (check_predicate == 1 && subject_fold == 1) {
+        const mhgp3v::SaturatedOrderFold& order_fold = fold.orders[(std::size_t)(k - 1)];
+        const char* transcript_witness = nullptr;
+        std::size_t witness_level = 0;
+        for (std::size_t li = 0; li < truth.levels.size() && transcript_witness == nullptr;
+             ++li) {
+          long long fold_births = 0, fold_continuations = 0, fold_multifusions = 0;
+          for (std::size_t fi = 0; fi < fold_levels.size(); ++fi)
+            if (compare(fold_levels[fi], truth.levels[li]) == 0) {
+              fold_births = order_fold.gamma_birth_at_level[fi];
+              fold_continuations = order_fold.gamma_continuation_at_level[fi];
+              fold_multifusions = order_fold.gamma_multifusion_at_level[fi];
+              break;
+            }
+          if (fold_births != truth.births_at_level[li] ||
+              fold_continuations != truth.continuations_at_level[li] ||
+              fold_multifusions != truth.fusions_at_level[li]) {
+            transcript_witness = "types divergents au niveau verite";
+            witness_level = li;
+          }
+        }
+        for (std::size_t fi = 0; fi < fold_levels.size() && transcript_witness == nullptr;
+             ++fi) {
+          bool known = false;
+          for (const Rational& truth_level : truth.levels)
+            if (compare(fold_levels[fi], truth_level) == 0) { known = true; break; }
+          if (!known && (order_fold.gamma_birth_at_level[fi] != 0 ||
+                         order_fold.gamma_continuation_at_level[fi] != 0 ||
+                         order_fold.gamma_multifusion_at_level[fi] != 0)) {
+            transcript_witness = "triple non nul a un niveau etranger a la verite";
+            witness_level = fi;
+          }
+        }
+        const bool degenerate_here = truth.degenerate_events || rank_censored;
+        if (transcript_witness == nullptr) {
+          ++transcript_orders_agreed;
+        } else if (degenerate_here && require_degenerate == 0) {
+          ++transcript_mismatch_degenerate;
+        } else {
+          ++transcript_mismatch_clean;
+          ++failures;
+          std::printf("[nuage %d ordre %d] TRANSCRIPT REFUTE : %s (indice %zu)\n", c, k,
+                      transcript_witness, witness_level);
+        }
+      }
 
       const mhgp::Forest forest =
           subject_fold == 1 ? mhgp::Forest{} : mhgp::build_forest(pts, catalogue, k);
@@ -847,13 +927,18 @@ int main(int argc, char** argv) {
   std::printf("           : la carte des degeneres MESURE la frontiere Q1 ; elle n'est"
               " pas un desaccord du sujet sur son domaine declare, et ses etiquettes"
               " compte/contenu sont descriptives\n");
-  if (check_predicate == 1)
+  if (check_predicate == 1) {
     std::printf("predicat   : ordres en accord=%lld  refutations hors degenerescence=%lld"
                 "  ecarts degeneres (carte)=%lld  niveaux d'evenement predits=%lld"
                 "  echecs miniboule de sous-ensemble=%lld\n",
                 predicate_orders_agreed, predicate_mismatch_clean,
                 predicate_mismatch_degenerate, predicate_event_levels,
                 qmin_subset_failures);
+    std::printf("transcript : ordres en accord=%lld  refutations hors degenerescence=%lld"
+                "  ecarts degeneres (carte)=%lld  provenances n_support!=q_min=%lld\n",
+                transcript_orders_agreed, transcript_mismatch_clean,
+                transcript_mismatch_degenerate, provenance_mismatches);
+  }
 
   struct Floor { const char* name; long long value; long long required; };
   const Floor floors[] = {
