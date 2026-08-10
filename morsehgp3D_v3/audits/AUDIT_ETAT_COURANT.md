@@ -10,18 +10,18 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
-courante est `HEAD=origin/main=ac39ac7cba968ead6d8b0b8fe023545801ad9505`.
-Un delta Gamma correctif est encore non committé au-dessus de cette autorité;
-il est distingué explicitement ci-dessous. La chaîne
+courante est `HEAD=origin/main=478cfe8e42303002d63594e69ce1ab2409be7d28`.
+La chaîne
 reçue est `a8b5615` pour le delta produit, `1f0db40` pour l'égalité complète des
 champs déclarés de `Catalogue`, `29c2c22` pour le ledger owner/coplanaire, puis
 `f3802bd` pour le validateur F0, `f102d42` pour l'ordre observé, les contrôles
-source/pool et la migration des codes exacts, puis `ac39ac7` pour le premier
-juge Gamma. Les sections sur `e406e1f` et les paliers live
+source/pool et la migration des codes exacts, `ac39ac7` pour le premier juge
+Gamma, puis `478cfe8` pour sa réponse fail-closed et ses deux coupes. Les
+sections sur `e406e1f` et les paliers live
 07:31--07:53 sont conservées plus bas comme historique daté, pas comme état du
 worktree.
 
-## Autorité courante à `ac39ac7` et delta Gamma correctif
+## Autorité courante à `478cfe8`
 
 | contrat | état reçu |
 | --- | --- |
@@ -92,16 +92,21 @@ Le commit `ac39ac7` livre un oracle exhaustif indépendant qui énumère toutes 
 `k`-facettes et `(k+1)`-cofaces, calcule leurs niveaux rationnels exacts et ferme
 chaque lot avant classification. Le préaudit constructif est consigné dans
 [`AUDIT_LIVE_ORACLE_GAMMA_F102D42.md`](AUDIT_LIVE_ORACLE_GAMMA_F102D42.md).
+La réception du correctif committé, ses mutants et la prochaine construction
+sont détaillés dans
+[`AUDIT_RECEPTION_GAMMA_478CFE8.md`](AUDIT_RECEPTION_GAMMA_478CFE8.md).
 
 Claude a ensuite répondu en fail-closed aux statuts, aux forêts non
-autoritatives et aux parents hors plage; le delta live pincé porte
+autoritatives et aux parents hors plage; cette réponse est committée à
+`478cfe8`. Le snapshot pincé porte
 `oracle/gamma_forest_judge.cpp` SHA-256
 `295633b76f14b5a515aeb0d60006bdadee6eb2a8a6186fac124c82334b2937ae`
 et `CMakeLists.txt` SHA-256
 `46240129e7747ef514009192ab2120d12b0612f57e818f56605967f94cb45502`.
 Il compare les **couvertures** aux coupes stricte et fermée sur l'union des
 niveaux vérité+sujet et ajoute un mutant de niveau déplacé; six portes ciblées
-passent 6/6 sur ce snapshot. Les partitions de facettes sont conservées côté
+passent 6/6 sur ce snapshot; la suite complète annoncée au commit passe 94/94,
+avec provenance détaillée dans l'audit de réception. Les partitions de facettes sont conservées côté
 vérité mais ne sont pas confrontées au sujet, qui ne publie pas encore le
 journal d'incidences correspondant.
 
@@ -113,6 +118,30 @@ de ses erreurs. Les anciennes « 36 sous-fusions » provenaient de payloads
 déclarés non autoritatifs et sont retirées. La porte saturée doit donc soit
 exiger des ordres $k\geq2$ effectivement jugés, soit rester explicitement une
 porte de censure, accompagnée d'un diagnostic non normatif séparé.
+
+La réception mutationnelle affine encore ce bilan : retirer seulement la boucle
+stricte ou seulement l'ajout des niveaux sujet laisse les six portes vertes.
+Deux fixtures comparator-only sont données dans l'audit de réception. De plus,
+une tour qui replie seulement `flat_catalogue` n'est pas la troisième vérité
+indépendante attendue : même avec `smax>=n`, la complétude de la source doit être
+comparée à une énumération exhaustive des supports de tailles un à quatre.
+
+## Delta live : premier fold saturé au-dessus de `478cfe8`
+
+Claude a branché le quotient exact S.4 sur les saturés du catalogue. Le premier
+snapshot passe de 40 censures multiplicataires à 60/60 ordres jugés et accords
+de couverture sur la grille saturée; la campagne générique rend 90/90. C'est
+une avancée positive majeure, détaillée dans
+[`AUDIT_LIVE_FOLD_SATURE_478CFE8.md`](AUDIT_LIVE_FOLD_SATURE_478CFE8.md).
+
+Le statut reste live : le fold consomme encore `flat_catalogue`, `smax>=n` ne
+certifie pas à lui seul la complétude de cette source, et ni facettes,
+incidences, verticales, persistance ni join scalable ne sont reçus. Le prochain
+palier doit comparer une tour exhaustive indépendante au catalogue puis au fold,
+avant toute qualification 50 k.
+Comme `kMaxRank=32`, la précondition live `smax>=n` est impossible à 50 k. Un
+flux de générateurs saturés à membres complets, distinct du record critique
+borné, est une obligation d'architecture et non une optimisation facultative.
 
 ## Ledger historique de la reprise au-dessus de `f37341d`
 

@@ -47,6 +47,7 @@
 
 #include "mhgp/mhgp.hpp"                    // le SUJET, jamais l'autorite
 #include "prototype/order_k_flats.hpp"      // le SUJET : flat_catalogue
+#include "prototype/saturated_fold.hpp"    // le SUJET CANDIDAT : fold sature
 
 namespace {
 
@@ -409,6 +410,8 @@ int main(int argc, char** argv) {
   long long min_judged = 0;
   long long show_degenerate = 0;
   int shift_level = 0;   // mutant : decale un noeud sujet vers un niveau etranger
+  int subject_fold = 0;  // 0 = chaine build_forest, 1 = fold sature (S.4/S.5)
+  int require_degenerate = 0;   // exiger l'accord AUSSI sur les ordres degeneres
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -438,6 +441,8 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--min-judged")) wide = &min_judged;
     else if (!strcmp(argv[i], "--show-degenerate")) wide = &show_degenerate;
     else if (!strcmp(argv[i], "--force-shift-level")) target = &shift_level;
+    else if (!strcmp(argv[i], "--subject-fold")) target = &subject_fold;
+    else if (!strcmp(argv[i], "--require-degenerate-agreement")) target = &require_degenerate;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { std::printf("ECHEC : valeur entiere invalide pour %s\n", argv[i]); return 2; }
     ++i;
@@ -447,8 +452,15 @@ int main(int argc, char** argv) {
   // miniboules rationnelles ; au-dela le juge serait un four, pas une porte.
   if (clouds < 1 || clouds > 2000 || n < 4 || n > 14 || coord < 2 || coord > 65536 ||
       smax < 2 || smax > mhgp::kMaxRank || max_order < 1 || max_order > 6 ||
-      max_order + 1 > smax || shift_level < 0 || shift_level > 1) {
+      max_order + 1 > smax || shift_level < 0 || shift_level > 1 || subject_fold < 0 ||
+      subject_fold > 1 || require_degenerate < 0 || require_degenerate > 1) {
     std::printf("ECHEC : campagne absurde\n");
+    return 2;
+  }
+  // Le mutant de niveau appartient au sujet chaine ; le fold n'a pas de noeud a
+  // decaler, la combinaison serait une porte morte.
+  if (subject_fold == 1 && shift_level == 1) {
+    std::printf("ECHEC : --force-shift-level n'a de sens que pour le sujet chaine\n");
     return 2;
   }
 
@@ -491,6 +503,16 @@ int main(int argc, char** argv) {
       continue;
     }
 
+    mhgp3v::SaturatedFold fold;
+    if (subject_fold == 1) {
+      fold = mhgp3v::build_saturated_fold(catalogue, max_order);
+      if (!fold.ok) {
+        std::printf("[nuage %d] fold sature refuse : %s\n", c, fold.refusal);
+        ++refused_subject;
+        continue;
+      }
+    }
+
     bool cloud_degenerate = false;
     for (int k = 1; k <= max_order; ++k) {
       const GammaTruth truth = gamma_truth(pts, k);
@@ -506,9 +528,39 @@ int main(int argc, char** argv) {
       const bool rank_censored = truth.maximum_relevant_rank > smax;
       if (rank_censored) ++rank_censored_orders;
 
-      const mhgp::Forest forest = mhgp::build_forest(pts, catalogue, k);
-      SubjectForest subject = read_subject(catalogue, forest);
-      if (!subject.ok) {
+      // LE SUJET DE CET ORDRE : la chaine v2 (build_forest) ou le fold sature.
+      // Le fold expose directement ses partitions par niveau ; la chaine passe
+      // par la reconstruction de foret.
+      std::vector<Rational> fold_levels;
+      std::vector<Partition> fold_partitions;
+      if (subject_fold == 1) {
+        const mhgp3v::SaturatedOrderFold& order_fold = fold.orders[(std::size_t)(k - 1)];
+        for (std::size_t li = 0; li < order_fold.level_representative.size(); ++li) {
+          fold_levels.push_back(exact_level_of(
+              catalogue.spheres[(std::size_t)order_fold.level_representative[li]].sph));
+          Partition partition;
+          for (const std::vector<mhgp::i32>& cluster : order_fold.closed_partitions[li])
+            partition.push_back(std::vector<int>(cluster.begin(), cluster.end()));
+          canonicalise(&partition);
+          fold_partitions.push_back(std::move(partition));
+        }
+      }
+      const auto fold_partition_at = [&](const Rational& level, bool strict) {
+        static const Partition empty;
+        const Partition* found = &empty;
+        for (std::size_t li = 0; li < fold_levels.size(); ++li) {
+          const int cmp = compare(fold_levels[li], level);
+          if (strict ? cmp < 0 : cmp <= 0) found = &fold_partitions[li];
+          else break;
+        }
+        return *found;
+      };
+
+      const mhgp::Forest forest =
+          subject_fold == 1 ? mhgp::Forest{} : mhgp::build_forest(pts, catalogue, k);
+      SubjectForest subject;
+      if (subject_fold == 0) subject = read_subject(catalogue, forest);
+      if (subject_fold == 0 && !subject.ok) {
         // LE SUJET A CENSURE (foret non autoritative, source ou parent hors
         // plage) : un payload censure ne se compare pas comme une foret
         // complete, il sort du denominateur AVEC sa categorie — jamais compte
@@ -535,7 +587,9 @@ int main(int argc, char** argv) {
       // L'UNION DES NIVEAUX de la verite ET du sujet : un niveau sujet
       // etranger devient une coupe TESTEE, pas un compteur diagnostique.
       std::vector<Rational> cut_levels = truth.levels;
-      for (const Rational& node_level : subject.node_level) {
+      const std::vector<Rational>& subject_levels =
+          subject_fold == 1 ? fold_levels : subject.node_level;
+      for (const Rational& node_level : subject_levels) {
         bool known = false;
         for (const Rational& level : truth.levels)
           if (compare(level, node_level) == 0) { known = true; break; }
@@ -559,7 +613,8 @@ int main(int argc, char** argv) {
         ++levels_compared;
         for (int strict = 0; strict < 2; ++strict) {
           const Partition subject_partition =
-              subject_partition_at(subject, cut_levels[li], strict != 0);
+              subject_fold == 1 ? fold_partition_at(cut_levels[li], strict != 0)
+                                : subject_partition_at(subject, cut_levels[li], strict != 0);
           const Partition* truth_partition =
               truth_partition_at(truth, cut_levels[li], strict != 0);
           const Mismatch verdict = classify(*truth_partition, subject_partition);
@@ -591,14 +646,24 @@ int main(int argc, char** argv) {
                     worst_strict ? "STRICTE" : "FERMEE", truth.maximum_relevant_rank,
                     partition_text(*truth_partition_at(truth, *first_level, worst_strict))
                         .c_str(),
-                    partition_text(
-                        subject_partition_at(subject, *first_level, worst_strict))
+                    partition_text(subject_fold == 1
+                                       ? fold_partition_at(*first_level, worst_strict)
+                                       : subject_partition_at(subject, *first_level,
+                                                              worst_strict))
                         .c_str());
       };
       if (degenerate && worst != Mismatch::kNone && show_degenerate > 0) {
         --show_degenerate;
         dump(worst == Mismatch::kCount ? "divergence de COMPTE sous degenerescence"
                                        : "divergence de CONTENU sous degenerescence");
+      }
+      // LE FOLD SATURE PRETEND L'EXACTITUDE SUR LE REGIME DEGENERE AUSSI :
+      // c'est tout son objet. Sous ce drapeau, une divergence degeneree est un
+      // DESACCORD, plus une carte.
+      if (require_degenerate == 1 && degenerate && worst != Mismatch::kNone) {
+        dump(worst == Mismatch::kCount ? "DESACCORD de COMPTE sous degenerescence"
+                                       : "DESACCORD de CONTENU sous degenerescence");
+        ++failures;
       }
       if (!degenerate && worst != Mismatch::kNone) {
         dump(worst == Mismatch::kCount ? "DESACCORD de COMPTE hors degenerescence"

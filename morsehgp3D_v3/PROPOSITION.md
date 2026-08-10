@@ -29,7 +29,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le snapshot courant est `HEAD=origin/main=f102d42`, toujours sous
+Le snapshot courant est `HEAD=origin/main=478cfe8`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -37,7 +37,12 @@ et ajoute les fixtures forêt/owner; `1f0db40` étend `same_catalogue` à tous l
 champs déclarés; `f3802bd` ferme le doublon de handle strict du falsificateur
 F0; `f102d42` observe la branche réellement prise, contrôle source et tranche
 de pool, borne le libellé mémoire et migre toutes les portes négatives vers un
-code exact. Ce sont des résultats CPU bornés, pas un reçu produit.
+code exact; `ac39ac7` puis `478cfe8` écrivent et durcissent le juge Gamma. Ce
+sont des résultats CPU bornés, pas un reçu produit. Le verdict Gamma courant
+porte sur les couvertures des ordres effectivement jugés : tous les ordres
+$k=2,3$ de la campagne saturée restent censurés. Les deux coupes et l'union des
+niveaux sont présentes dans le code, mais des mutants qui suppriment séparément
+la coupe stricte ou les niveaux sujet passent encore toutes les portes.
 
 L'ordre observé et le mutant de branche sont reçus, de même que la détection des
 sources et tranches hors plage. Quatre réserves empêchent encore de
@@ -53,6 +58,20 @@ est dans
 La route constructive proposée ensuite — Gamma exhaustif puis arrangement
 directionnel local des coquilles, sans mosaïque globale — est dans
 [`NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md`](audits/NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md).
+La réception bornée du commit courant et la route par tour saturée sont
+consignées dans
+[`AUDIT_RECEPTION_GAMMA_478CFE8.md`](audits/AUDIT_RECEPTION_GAMMA_478CFE8.md).
+
+Un delta live implémente maintenant le fold S.4 sur les saturés du catalogue et
+obtient 90/90 accords de couverture génériques, puis 60/60 sur la grille
+saturée auparavant censurée. Ce résultat reçoit le cœur du quotient sur ces
+entrées; il ne reçoit pas encore la complétude de `flat_catalogue`, le journal
+persistant ni le coût 50 k. La prochaine porte est la tour exhaustive
+indépendante décrite dans
+[`AUDIT_LIVE_FOLD_SATURE_478CFE8.md`](audits/AUDIT_LIVE_FOLD_SATURE_478CFE8.md).
+Le type produit devra séparer `SaturatedGenerator` du `CriticalSphere` borné à
+`kMaxRank=32`; sinon `smax>=n` est littéralement impossible à 50 k et le fold
+reste une sous-filtration certifiée, pas une sortie exacte.
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

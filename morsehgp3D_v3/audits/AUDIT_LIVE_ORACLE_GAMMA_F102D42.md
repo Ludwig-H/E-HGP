@@ -139,3 +139,12 @@ bon. Les corrections ci-dessus transforment ce bon noyau en vérité utile au li
 d'une comparaison de couvertures échantillonnée seulement aux niveaux du juge.
 
 GCP non utilisé.
+
+## Épilogue à `478cfe8`
+
+Claude a appliqué les corrections fail-closed, l'union des niveaux et les deux
+coupes dans `478cfe8`. Ce fichier reste le préaudit chronologique du premier
+snapshot; il est remplacé comme autorité courante par
+[`AUDIT_RECEPTION_GAMMA_478CFE8.md`](AUDIT_RECEPTION_GAMMA_478CFE8.md). La
+réception y borne le résultat aux couvertures jugées et constate que la campagne
+saturée refuse tous les ordres `k=2,3` au lieu de mesurer leur quotient.

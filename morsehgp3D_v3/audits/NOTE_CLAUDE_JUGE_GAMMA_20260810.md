@@ -8,7 +8,9 @@ première mesure. À auditer.
 
 ## Ce qui est écrit
 
-`oracle/gamma_forest_judge.cpp` (binaire `mhgp3v_gamma_judge`, cinq CTests) :
+Premier snapshot de `oracle/gamma_forest_judge.cpp` (binaire
+`mhgp3v_gamma_judge`, cinq CTests à ce palier, six après la correction en fin de
+note) :
 
 - **vérité** : Γ_k du théorème 2 du manuscrit, calculée par votre protocole de
   lot Q1.2 — coupe stricte figée, toutes les activations du niveau appliquées,
@@ -100,7 +102,8 @@ par cet oracle.
 Vos quatre autres corrections sont appliquées : partitions de facettes
 conservées comme projection séparée (le claim ne couvre que les couvertures),
 comparaison aux deux coupes sur l'union des niveaux (mutant
-`--force-shift-level` tué par sa porte), classification map<PointId,·> retirée
+`--force-shift-level` tué par sa porte, sans recevoir séparément la boucle
+stricte et l'union : leurs mutants orthogonaux restent verts), classification map<PointId,·> retirée
 (étiquettes compte/contenu descriptives), statuts non kOk et parents hors plage
 refusés avant comparaison. Six portes permanentes, dont la carte de frontière
 qui se déclare CARTE (aucun OK d'exactitude quand aucun ordre n'est jugé hors

@@ -5,7 +5,7 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état courant audité est `HEAD=origin/main=f102d42`. Le commit produit
+L'état courant audité est `HEAD=origin/main=478cfe8`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -14,7 +14,10 @@ comptage distinct des handles stricts dans le falsificateur F0. `f102d42`
 ajoute la trace de branche réellement prise, valide source et tranche du pool,
 borne le libellé mémoire et migre toutes les portes négatives vers un code de
 sortie exact. Aucun de ces
-commits ne change `exploration_v3_hors_registre` ni le statut public. L'autorité
+commits ne change `exploration_v3_hors_registre` ni le statut public. `ac39ac7`
+ajoute le premier juge Gamma; `478cfe8` applique son audit live, refuse les
+payloads non autoritatifs et borne le verdict à l'accord des couvertures sur les
+ordres effectivement jugés. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
@@ -42,6 +45,35 @@ sémantique `kind/order/source-rank/beta` reste ouverte. Enfin, l'égalité des
 diagnostics de `Catalogue` ne définit pas leur sémantique backend. Les anciennes
 macros permissives sont supprimées : toutes les portes négatives CMake passent
 désormais par le helper à code exact.
+
+À `478cfe8`, le noyau exact du juge Gamma est positif : niveaux rationnels,
+lots atomiques, coupes stricte et fermée et refus des forêts non autoritatives.
+La campagne générique observe 78 accords de couverture hors cosphéricité. La
+campagne saturée refuse cependant tous les ordres $k=2,3$ et ne juge que vingt
+ordres $k=1$; elle reçoit donc le fail-closed, pas encore le quotient
+multiplicitaire. Les partitions de facettes et les incidences restent hors du
+payload sujet. La réponse constructive suivante remplace la lecture shell-only
+par les saturés complets et leur graphe d'intersections :
+[`REPONSE_COMPLEMENT_CLAUDE_GAMMA_20260810.md`](audits/REPONSE_COMPLEMENT_CLAUDE_GAMMA_20260810.md).
+La réception reproductible et les deux fixtures encore nécessaires sont dans
+[`AUDIT_RECEPTION_GAMMA_478CFE8.md`](audits/AUDIT_RECEPTION_GAMMA_478CFE8.md).
+Les deux boucles de coupe existent, mais leurs portes ne sont pas encore
+orthogonales : supprimer seulement la coupe stricte ou seulement les niveaux
+sujet laisse 6/6 vert. Le prochain oracle de tour saturée doit en outre énumérer
+ses supports indépendamment; `smax>=n` ne transforme pas `flat_catalogue` en
+preuve de complétude de sa propre source.
+
+**[delta live positif au-dessus de `478cfe8`]** Un premier fold par
+intersections de saturés remplace déjà les 40 censures `k=2,3` : le juge Gamma
+rend 60/60 accords de couverture sur la grille saturée et 90/90 sur la campagne
+générique. C'est la bonne direction combinatoire et elle ne développe aucune
+mosaïque globale. Le fold consomme toutefois encore `flat_catalogue`; sa source
+n'est donc pas sa troisième vérité indépendante. Statut, mutants, journal
+persistant et join scalable restent ouverts dans
+[`AUDIT_LIVE_FOLD_SATURE_478CFE8.md`](audits/AUDIT_LIVE_FOLD_SATURE_478CFE8.md).
+Avec `kMaxRank=32`, le contrat actuel ne peut jamais satisfaire `smax>=n` à
+50 k : tout run G4 de ce chemin est partiel tant qu'un flux distinct de
+`SaturatedGenerator` à membres non tronqués n'est pas écrit et certifié.
 
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
 fold et repli multi-cœurs. La

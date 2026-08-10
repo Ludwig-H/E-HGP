@@ -537,6 +537,25 @@ mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   mhgp3v_gamma_judge_reject_shifted_level "desaccords hors degenerescence" 1
   --clouds 10 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
   --force-shift-level 1)
+# LE FOLD SATURE (S.4/S.5, prototype/saturated_fold.hpp), JUGE LA OU v2
+# CENSURE. Sur la grille 4^3 la chaine build_forest declarait 40/60 ordres non
+# autoritatifs ; le fold sature juge 60/60 et l'accord est EXIGE jusque SUR le
+# regime degenere (--require-degenerate-agreement) : c'est la semantique
+# industrielle multiplicitaire, demontree sur son juge. La famille d'entree est
+# complete (s_max > n) — sous famille tronquee le fold n'est qu'un raffinement
+# S.6 et ne se qualifie pas ici.
+add_test(NAME mhgp3v_gamma_judge_fold_generic COMMAND mhgp3v_gamma_judge
+         --clouds 30 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
+         --subject-fold 1 --require-degenerate-agreement 1
+         --min-decided 30 --min-nondegenerate 20 --min-levels 3000 --min-judged 85)
+add_test(NAME mhgp3v_gamma_judge_fold_saturated COMMAND mhgp3v_gamma_judge
+         --clouds 20 --points 9 --coord 4 --smax 11 --max-order 3 --seed 31337
+         --subject-fold 1 --require-degenerate-agreement 1
+         --min-decided 20 --min-degenerate 15 --min-levels 1500 --min-judged 55)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_reject_fold_mutant "sens que pour le sujet chaine" 2
+  --clouds 1 --points 8 --coord 40 --smax 11 --max-order 2 --seed 7
+  --subject-fold 1 --force-shift-level 1)
 mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   mhgp3v_gamma_judge_reject_unknown "argument inconnu" 2 --sujet-inexistant)
 mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
