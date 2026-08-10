@@ -130,7 +130,6 @@ int main(int argc, char** argv) {
   // Le mode compare-joins rejoue le meme catalogue par les DEUX joins : le
   // sujet mesure est une forme postings (par lots par defaut).
   if (compare_joins == 1 && join_mode == 0) join_mode = 1;
-  const bool use_postings = join_mode != 0;
   // Emprise a DENSITE FIXE 1e-3 par defaut (protocole des profils d'echelle du
   // depot) : coord = cbrt(n / 1e-3), sauf surcharge explicite.
   if (coord == 0) {
