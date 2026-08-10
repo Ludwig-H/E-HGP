@@ -5,7 +5,7 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état audité du snapshot committé `81f9210` est scellé dans
+L'état audité du snapshot committé `e406e1f` est scellé dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
 **Trois des quatre P0 de cet audit sont fonctionnellement fermés sur leur domaine
@@ -49,6 +49,11 @@ Un rebuild Release CPU complet du commit `81f9210` passe 73/73 CTests en
 351,62 s avec GCC 13.3, GMP et Python actifs; 69 tests appartiennent à la v3 et
 quatre sont des dépendances transitives v2. Ce reçu positif vérifie
 l'intégration du snapshot, pas le contrat de débit, de mémoire ou de replay.
+Le rebuild frais de `e406e1f` passe à son tour 74/74 CTests — 70 v3 et quatre
+transitifs v2 — en 319,87 s. Les 14/14 portes directes passent en Release, et
+les trois campagnes ciblées `generic`, `forest`, `same_payload` passent sous
+ASan/UBSan/LSan; ce crédit d'intégration ne transforme pas leur comparaison
+temporelle en reçu de coût.
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -1311,9 +1316,10 @@ Enfin la revendication est ramenée à ce qui est vérifié : **mêmes listes de
 membres par coquille**, pas « mêmes pools ». L'ordre global du catalogue, les
 offsets publics et les indices `ForestNode::source` diffèrent de la référence, et
 l'empreinte de forêt est explicitement un **quotient sémantique** invariant à la
-renumérotation — pas une égalité de sérialisation. Le chrono étiqueté source
-couvre maintenant l'assemblage et les deux folds, source **et référence**, ainsi
-que leurs empreintes; il ne sépare donc toujours pas ces coûts.
+renumérotation — pas une égalité de sérialisation. `e406e1f` soustrait désormais
+le fold référence du chrono source, mais y conserve le différentiel catalogue,
+les deux empreintes et leur comparaison; les coûts produit et juge restent donc
+mélangés.
 
 ### Un quotient sémantique de la forêt est produit et comparé
 
@@ -1526,53 +1532,58 @@ quatrièmes points admissibles forment donc un préfixe dans chaque direction �
 c'est `neighbour_along`, mot pour mot. Chercher à l'éviter revient à le
 réinventer.
 
-### Le même payload, les mêmes nuages, le même processus
+### Tentative de comparaison sur un contenu sémantique commun
 
-L'audit exige, avant toute décision d'architecture, de « comparer les générateurs
-avec un payload, des unités de travail, des nuages et des high-waters communs ».
-C'est fait, dans les limites de ce que ce fichier peut offrir.
+Le delta `e406e1f` apporte deux progrès vérifiables : les appels de fold source
+et référence ont chacun leur tranche de temps, et une nouvelle campagne compare
+vingt forêts et 5 538 nœuds sans divergence du **quotient sémantique**. La
+soustraction cumulative du fold référence est correcte et ne le double-compte
+pas.
 
-Les deux chronos de `mhgp3v_direct_source` sont désormais **symétriques** :
-chacun couvre exactement le même payload — construire le catalogue, puis les $K$
-forêts depuis **ce** catalogue —, sur les mêmes nuages, dans le même processus.
-Le juge, c'est-à-dire les empreintes et leur comparaison, est **exclu des deux** :
-il n'existe dans aucun chemin produit.
+La comparaison temporelle n'est cependant pas encore symétrique. Le timer
+source reste ouvert pendant le différentiel des catalogues, puis pendant les
+deux empreintes de forêt et leur comparaison; seul le `build_forest` de la
+référence en est soustrait. La référence ne reçoit pas ce travail de juge. En
+outre, « même contenu sémantique » ne signifie pas encore « même payload public » :
+l'ordre canonique, le pool concaténé, les offsets et les indices publics
+`ForestNode::source` diffèrent encore. Aucun high-water total comparable des
+deux chemins n'est publié.
 
-L'unité de travail commune est le temps mur. Ce n'est pas un choix par défaut :
-c'est l'unité que le budget de 100 ms mesure, et c'est la seule qui ne suppose
-pas qu'un sommet d'arrangement et un candidat de clique coûtent la même chose.
-Les masses des deux côtés restent publiées séparément et ne sont **pas**
+Le temps mur reste une unité pertinente pour le budget de 100 ms, une fois les
+périmètres rendus identiques, l'ordre d'exécution alterné et la dispersion
+reçue. Les masses des deux côtés restent publiées séparément et ne sont pas
 commensurables.
 
-**[mesuré, densité fixe $10^{-3}$, $s_{\max}=6$, $K=5$, quatre nuages par ligne,
-même binaire Release, même processus]**
+**[diagnostic ponctuel non scellé, densité fixe $10^{-3}$, $s_{\max}=6$,
+$K=5$, quatre nuages par ligne, même binaire Release, même processus]**
 
-| $n$ | emprise | référence — parcours | source — cover | rapport |
+| $n$ | emprise | référence — catalogue + fold | source — timer composite | rapport référence/source |
 | ---: | ---: | ---: | ---: | ---: |
-| 20 | $27^3$ | 0,174 s | **0,055 s** | 3,16 |
-| 40 | $34^3$ | 1,023 s | **0,201 s** | 5,10 |
-| 60 | $39^3$ | 2,077 s | **0,835 s** | 2,49 |
-| 80 | $43^3$ | 3,005 s | **1,420 s** | 2,12 |
-| 120 | $49^3$ | **6,401 s** | 7,604 s | **0,84** |
+| 20 | $27^3$ | 0,174 s | 0,055 s | 3,16 |
+| 40 | $34^3$ | 1,023 s | 0,201 s | 5,10 |
+| 60 | $39^3$ | 2,077 s | 0,835 s | 2,49 |
+| 80 | $43^3$ | 3,005 s | 1,420 s | 2,12 |
+| 120 | $49^3$ | 6,401 s | 7,604 s | 0,84 |
 
-**Le croisement est mesuré, pas extrapolé.** La source directe est deux à cinq
-fois plus rapide que le parcours jusqu'à environ quatre-vingts points, puis elle
-**perd** vers cent dix. Le fold ne pèse rien des deux côtés — 0,285 s contre
-0,306 s à $n=120$ — donc c'est bien la construction du catalogue qui décide.
+Ces cinq lignes montrent utilement que les temps deviennent du même ordre à
+$n=120$; elles ne localisent pas encore un croisement. Quatre répétitions sur le
+même CPU et le même binaire à cette taille ont donné des rapports
+référence/source de 0,90, 0,99, 1,01 et 0,97 : la source perd, gagne ou reste
+indiscernable selon l'exécution. Le fold est minoritaire dans la campagne
+initiale, mais le juge encore imputé à la source interdit d'attribuer l'écart à
+la seule construction des catalogues.
 
-Sur cette fenêtre, la source croît en gros comme $n^{3,2}$ et le parcours comme
-$n^{1,6}$. Ces exposants sont des ajustements sur cinq points, pas des théorèmes,
-et je ne les extrapole pas à 50 k. Mais le croisement, lui, est une observation
-directe, et il concorde exactement avec ce que l'énumération combinadique
-prédit : elle est quartique en degré, et le degré est déjà borné.
+Une régression log--log ordinaire sur les **cinq** lignes publiées donne environ
+$n^{2,71}$ pour la source et $n^{1,98}$ pour la référence. Les exposants 3,2 et
+1,6 venaient seulement du sous-intervalle $n=40..120$. Aucun de ces ajustements
+ne constitue une loi de coût, encore moins une extrapolation à 50 k.
 
-C'est la première comparaison du dépôt qui satisfasse la condition posée par
-l'audit — même payload, mêmes nuages, unité de travail commune, juge exclu. Sa
-conclusion est étroite et solide : **telle qu'implémentée, la source directe ne
-passe pas l'échelle au-delà d'une centaine de points sur ce profil.** Elle ne dit
-rien de ce que ferait un cover adaptatif, un générateur de candidats différent ou
-un portage device — et elle ne qualifie ni ne disqualifie le parcours à 50 k, où
-ni l'un ni l'autre n'a jamais tourné.
+La conclusion recevable est plus étroite : sur cette campagne bornée, les deux
+voies donnent le même quotient sémantique et leurs temps ponctuels deviennent
+comparables en ordre de grandeur à $n=120$. Le croisement, la limite d'échelle,
+le budget de 100 ms et la mémoire commune restent ouverts. Les conditions de
+remesure et les observations d'audit sont consignées dans
+[`audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
 ### Question ouverte à l'auditeur
 
@@ -1878,8 +1889,8 @@ Le target s'arrête à 20 000 points. Les campagnes positives ont des voisinages
 complets et ne reçoivent ni la frontière sélective, ni un digest attendu.
 L'identité `candidates==C_q` est bien exigée par lane depuis `81f9210`, sans
 valeurs attendues permanentes de $C_q/T_q/H_q$. Les chronos et high-waters
-restent incomplets : le temps nommé
-source inclut en réalité les folds source **et référence** et leurs empreintes,
+restent incomplets : le temps nommé source soustrait le fold référence mais
+inclut encore le différentiel et les empreintes des deux côtés,
 et le pire cas récursif peut recopier des chaînes quadratiquement. Le commentaire
 qui borne certains agrégats `long long` oublie jusqu'à 2 000 nuages; la borne
 cumulée dépasse `i64`. Le nouveau contrôle structurel de forêt n'est pas total :

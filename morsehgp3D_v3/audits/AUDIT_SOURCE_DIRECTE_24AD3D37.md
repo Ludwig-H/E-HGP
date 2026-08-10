@@ -1,4 +1,4 @@
-# Audit continu de la source directe `24ad3d37` à `81f9210`
+# Audit continu de la source directe `24ad3d37` à `e406e1f`
 
 Dates des snapshots : 9 et 10 août 2026 UTC.
 
@@ -12,10 +12,12 @@ prototype. Il suit chronologiquement le premier delta post-`c0df579`, sa
 dispersion `2b47247e...`, sa restauration `9edf150d...`, le palier forêt
 `1c3948c3...` committé dans `1bb82f9`, puis le correctif
 `bb31b426.../a3c40f7e...` intégré avec la réponse cliques au commit `81f9210`.
-Au pincement, `HEAD` et `origin/main` pointaient sur ce snapshot et les fichiers
-produit audités lui correspondaient exactement; le présent delta documentaire
-est postérieur. Les retraits et restaurations intermédiaires restent documentés
-comme faits historiques, pas comme état courant.
+Le commit `e406e1f` ajoute ensuite les chronos séparés et la gate dite « même
+payload ». Au pincement, `HEAD` et `origin/main` pointaient sur ce dernier
+snapshot et les fichiers produit audités lui correspondaient exactement; le
+présent delta documentaire est postérieur. Les retraits et restaurations
+intermédiaires restent documentés comme faits historiques, pas comme état
+courant.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
@@ -25,12 +27,15 @@ comme faits historiques, pas comme état courant.
 | `prototype/direct_source.cpp`, palier courant avec forêts | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
 | `prototype/direct_source.cpp`, correctif courant audité | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
 | commit intégrant le correctif | `81f921033db470bf53729a64528b02beccc8995b` |
+| `prototype/direct_source.cpp`, chrono courant audité | `d933c3aeb6314f12769f594d30af6734c696b09ce2e67de39af23dbd0ed15ed9` |
+| commit intégrant le chrono | `e406e1f646ef20eb222d50e8b2740e6d7d6f6aa3` |
 | `CMakeLists.txt`, sans CTests directs | `beeb06c0399c038b6718d0ab7d48d8d4eec2ca666f86a3fb5e221bc405912c07` |
 | `CMakeLists.txt`, palier courant avec quatre CTests | `1f06ad8b7d3f28ea4b4a89da945fe47ccf82dd05fbb9873ec633bd95a032f9b1` |
 | `CMakeLists.txt`, palier courant avec sept CTests | `4530a8c4817fbfc1e399f0dff628f374b89d2d1d2117fa964c448ce72efec431` |
 | `CMakeLists.txt`, palier courant avec neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
 | `CMakeLists.txt`, correctif courant avec treize CTests | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |
 | `CMakeLists.txt` complet intégré | `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
+| `CMakeLists.txt` avec quatorze CTests directs | `739d21248a5fba575974aa3e40e8a0d7d4208b4a9c6710905ec4379cffa8fed7` |
 | binaire Release GCC 13.3 du premier palier | `d724f33c16f676804ed381190a9e6dadc2257ba9978635667aa7191fa7bd6a4e` |
 | binaire Release GCC 13.3 du palier courant | `e33f045c26b1bf0f8ea54bdb31929b6317b4c0f55375172f2cb06b31f063de7f` |
 | binaire Release GCC 13.3 restauré | `73dd077a75467c97182ca6d273295a309dd11448d6efb098e80d25e45c279006` |
@@ -44,7 +49,8 @@ comme faits historiques, pas comme état courant.
 le payload membres, l'unicité et la forêt abstraite quotientée sur les campagnes
 reçues, ainsi que pour les corrections bas ordre/borne $K$/juge; NO-GO maintenu
 pour la forêt publique sérialisée, la validation structurelle totale, la porte
-de coût/mémoire 50 k et toute promotion en source produit ouverte ou certifiée.**
+de chrono/coût/mémoire 50 k et toute promotion en source produit ouverte ou
+certifiée.**
 
 Le progrès architectural est réel. La partie source n'énumère aucun sommet
 d'arrangement et ne construit aucune mosaïque d'ordre supérieur. Les candidats
@@ -291,6 +297,31 @@ indices `ForestNode::source` diffèrent toujours sur la sonde 24 nuages, malgré
 120/120 digests quotientés égaux. Les corrections de domaine ne ferment ni ce
 payload, ni la sérialisation.
 
+### Delta `e406e1f` : folds isolés, comparaison temporelle encore asymétrique
+
+Le delta corrige une partie précise du finding précédent. Les deux appels
+`build_forest` possèdent des tranches symétriques, et l'algèbre cumulative retire
+exactement chaque fold référence une fois. Le nouveau CTest exerce quatre
+nuages, vingt forêts et 5 538 nœuds sans divergence; 14/14 CTests directs et
+trois portes sanitizer ciblées passent. Le rebuild Release complet frais passe
+74/74 CTests en 319,87 s; le binaire direct Release a pour SHA-256
+`9f1ef706ed0a9005a8a6fa20f56f3caa813d63f267aa0031211ec4c6f6157afc`
+et le binaire sanitizer
+`33f7dc5d5b207f754fc7678363dc44e0888eff7ec5c6b0328f3bc9a2a9452436`.
+
+Le timer source reste pourtant ouvert pendant le différentiel catalogue, les
+deux `forest_digest` et leur comparaison. Seul le fold référence est soustrait.
+Le chrono référence contient `flat_catalogue` et son fold, sans ce juge. Les
+claims « chronos symétriques » et « juge exclu des deux » sont donc faux. La
+gate n'asserte aucune valeur, identité de timer, dispersion ou high-water; elle
+valide une campagne sémantique supplémentaire, pas le chrono.
+
+Le même payload reste lui aussi seulement quotienté : catalogue public, pool,
+offsets et `ForestNode::source` divergent toujours. Enfin, un nuage refusé est
+chronométré côté référence avant d'être sauté côté source. Le détail de
+l'analyse, la commande du cas refusé et la correction constructive sont dans
+[`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
+
 ### Finding historique fermé à `bb31b426` : domaine `s_max`
 
 La CLI accepte désormais `smax>=2`, mais la boucle appelle toujours les lanes
@@ -373,10 +404,11 @@ une allocation peut encore échouer sans statut de reprise.
 Les nouveaux high-waters sont utiles mais partiels. `banque+dispersion` ne
 compte ni le vecteur global `leaf_q` accumulé sur tous les nuages, ni le buffer
 `ranked`; `CSR` ne compte pas les buckets et listes transitoires; vérité,
-`produced`, maps et vecteurs de membres sont absents. Le chrono source couvre
-maintenant l'assemblage, mais aussi les folds **source et référence** et leurs
-empreintes; le chrono référence ne couvre que `flat_catalogue`. Ces labels ne
-ventilent donc toujours pas le coût. Le target refuse `n>20 000`, aucune
+`produced`, maps et vecteurs de membres sont absents. `e406e1f` soustrait bien
+le fold référence du chrono source, mais y conserve le différentiel et les deux
+empreintes; le chrono référence reçoit `flat_catalogue` et son fold, sans ce
+juge. Ces labels ne ventilent donc toujours pas le coût. Le target refuse
+`n>20 000`, aucune
 campagne ne reçoit 50 k, et aucune sortie brute/sidecar ne scelle les octets ou
 le coût.
 
@@ -521,9 +553,10 @@ toute promotion, les prochaines corrections utiles sont maintenant :
    positifs propres aux modes mesure et cover;
 4. graver des digests attendus, les masses `C_q/T_q/H_q` et une fixture réellement
    sélective aux frontières du voisinage;
-5. élargir ou borner les agrégats de campagne, séparer les chronos des deux folds,
-   ajouter caps en octets, statuts d'allocation/reprise et high-waters complets,
-   puis remplacer le cover `F*n` si sa mesure ferme la porte 50 k;
+5. élargir ou borner les agrégats de campagne, conserver les folds séparés mais
+   sortir tout différentiel et digest des deux timers produit, ajouter caps en
+   octets, statuts d'allocation/reprise et high-waters complets, puis remplacer
+   le cover `F*n` si sa mesure ferme la porte 50 k;
 6. conserver `flat_catalogue` comme juge borné seulement et développer
    séparément la source Gabriel ouverte streamée, sans arrangement, mosaïque ni
    catalogue de vérité dans le chemin produit.

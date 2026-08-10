@@ -10,18 +10,17 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot committé
-audité est `81f9210`; il intègre le diagnostic cliques/triple et les réponses
-`bb31b426...`/`a80cd2f7...` aux correctifs owner/paires/F0, au delta
-refus/replay et au prototype de source directe. Au pincement, `HEAD` et
-`origin/main` pointaient sur ce commit; les sources, prototypes et CMake audités
-lui correspondent exactement. Le delta documentaire du présent audit est hors
-de ce snapshot produit. Aucun artefact brut des campagnes de taille ni de la
-session G4 n'est versionné avec ces commits.
+audité est `e406e1f`; il ajoute au palier `81f9210` une comparaison temporelle
+source--référence et une quatorzième porte directe. Au pincement, `HEAD` et
+`origin/main` pointaient sur ce commit; les sources, prototypes, CMake et claims
+audités lui correspondent exactement. Le delta documentaire du présent audit
+est hors de ce snapshot produit. Aucun artefact brut des campagnes de taille ni
+de la session G4 n'est versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| snapshot committé de code et de claims audité | `81f921033db470bf53729a64528b02beccc8995b` |
-| commit d'audit indépendant précédant immédiatement le snapshot produit | `275db39f010d997255fd15da876bd34170f46f1f` |
+| snapshot committé de code et de claims audité | `e406e1f646ef20eb222d50e8b2740e6d7d6f6aa3` |
+| commit d'audit indépendant précédant immédiatement le snapshot produit | `2855b752c2499606e1fbebabf58e679eff04fd41` |
 | `CMakeLists.txt` avec deltas replay/source directe et neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 | `prototype/admissible_pair_probe.cpp` à `40ad152` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
@@ -42,21 +41,37 @@ session G4 n'est versionné avec ces commits.
 | `prototype/direct_source.cpp`, palier fonctionnel sans forêt | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
 | `prototype/direct_source.cpp`, palier courant avec forêt | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
 | `prototype/direct_source.cpp` à `81f9210` | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
+| `prototype/direct_source.cpp` à `e406e1f` | `d933c3aeb6314f12769f594d30af6734c696b09ce2e67de39af23dbd0ed15ed9` |
 | fragment `CMakeLists.txt`, correctif intermédiaire avec treize CTests directs | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |
 | `CMakeLists.txt` à `81f9210`, treize CTests directs et gate cliques | `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
+| `CMakeLists.txt` à `e406e1f`, quatorze CTests directs | `739d21248a5fba575974aa3e40e8a0d7d4208b4a9c6710905ec4379cffa8fed7` |
+| `README.md` de claims à `e406e1f` | `a5b558c1b7b2baaeacb7e779b83e0cc1d9f7a53a4f0961e317cd4a3f4e468ed3` |
 
-Un configure et build Release frais de ce snapshot, sous GCC 13.3 avec GMP et
-Python actifs, passe les 73/73 CTests déclarés par le build v3, dont 69 tests v3
-et quatre dépendances transitives v2 : zéro échec en 351,62 s avec `ctest -j2`.
-Les binaires directs et paires ont respectivement les SHA-256 `ab4b0ef7...` et
-`bda7ec16...`. C'est un résultat d'intégration CPU positif; le log brut reste
-temporaire et ce run ne reçoit ni coût 50 k, ni payload GPU, ni SLO.
+Le palier `81f9210` passait 73/73 CTests en 351,62 s. Un configure et build
+Release **frais de `e406e1f`**, sous GCC 13.3 avec GMP et Python actifs, passe
+désormais 74/74 CTests, dont 70 tests v3 et quatre dépendances transitives v2 :
+zéro échec en 319,87 s avec `ctest -j2`. C'est un résultat d'intégration CPU
+positif; le `LastTest.log` temporaire avait pour SHA-256 rapporté
+`9abfbe90c1b816b7bc9c8bde0bcc1fe9ecc57d07573609e178eb1822fa6d3eaf`,
+relevé immédiatement après le run puis rendu non revérifiable par un `ctest -N`
+ultérieur qui a écrasé le fichier. Ce run ne reçoit ni coût 50 k, ni payload GPU,
+ni SLO.
+
+À `e406e1f`, le binaire Release direct de SHA-256
+`9f1ef706ed0a9005a8a6fa20f56f3caa813d63f267aa0031211ec4c6f6157afc`
+passe les 14/14 CTests directs en 9,28 s. Les portes `generic`, `forest` et
+`same_payload` passent aussi sous ASan/UBSan/LSan en 19,90 s avec le binaire
+`33f7dc5d5b207f754fc7678363dc44e0888eff7ec5c6b0328f3bc9a2a9452436`.
+La nouvelle campagne compare vingt forêts et 5 538 nœuds sans divergence
+sémantique. Elle ne reçoit aucun invariant de chrono; ce positif ne valide donc
+pas les nouveaux libellés temporels.
 
 ## Verdict
 
 **GO fonctionnel borné pour owner, sweep, naissance F0 et la source directe
 fermée relative; NO-GO maintenu pour la qualification produit, GPU/replay,
-totalité bas ordre, coût/mémoire 50 k et source Gabriel ouverte.**
+totalité bas ordre, chrono source--référence, coût/mémoire 50 k et source Gabriel
+ouverte.**
 
 Le premier `.cu` est un progrès réel : il définit un lancement CUDA optionnel
 et un même corps source pour CPU/device. Le delta replay rend maintenant cinq
@@ -93,11 +108,19 @@ total : cycle de frères et enfant hors plage produisent boucle et overflow ASan
 des fautes identiques des deux côtés restent vertes. La porte forêt n'exige que
 1 000 nœuds : un mutant qui saute entièrement $k=5$ conserve 1 201 nœuds,
 annonce encore cinq ordres et laisse les treize CTests directs verts. Les
-agrégats `i64` oublient le facteur `clouds` et le chrono source englobe aussi les
-folds de référence.
-Le détail
-reproductible est dans
+agrégats `i64` oublient le facteur `clouds`.
+
+`e406e1f` retire correctement le fold référence du chrono source et mesure les
+deux folds séparément. Il ne ferme toutefois pas la comparaison : le timer
+source contient encore le différentiel catalogue, les deux empreintes de forêt
+et leur comparaison, tandis que le timer référence ne les contient pas. Le
+payload public reste différent et seuls les quotients sémantiques concordent.
+Un nuage refusé est facturé à la référence mais jamais à la source. Les rapports
+`n=120` répétés valent 0,90, 0,99, 1,01 et 0,97; aucun croisement localisé ne
+suit de cette dispersion. Le détail reproductible est dans
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
+Le chrono est audité séparément dans
+[`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
 Le commit `180975e` remplace le minimum échantillonné par le complément exact du
 maximum en demi-plan ouvert. Un oracle indépendant a comparé 74 613 multisets

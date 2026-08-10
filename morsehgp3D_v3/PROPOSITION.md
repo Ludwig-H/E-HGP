@@ -29,7 +29,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le snapshot committé `81f9210` reste `exploration_v3_hors_registre`, avec CPU
+Le snapshot committé `e406e1f` reste `exploration_v3_hors_registre`, avec CPU
 de référence et
 microkernel GPU candidat sous audit, sur le profil
 `quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
@@ -163,9 +163,24 @@ prématurés. Le contrôle structurel ajouté à l'empreinte n'est pas total : u
 cycle `next_sibling` boucle et un enfant hors plage déborde sous ASan; des fautes
 identiques des deux côtés restent compatibles avec un digest égal. La porte par
 ordre reste vacuable : supprimer entièrement $k=5$ conserve 1 201 nœuds, dépasse
-le plancher de 1 000 et laisse les treize CTests directs verts. Le chrono source
-englobe aussi les folds de référence, et la justification des agrégats `i64`
-oublie le facteur `clouds<=2000`.
+le plancher de 1 000 et laisse les treize CTests directs verts. Au palier
+`81f9210`, le chrono source englobait aussi les folds de référence, et la
+justification des agrégats `i64` oubliait le facteur `clouds<=2000`.
+
+Le commit `e406e1f` ajoute des tranches distinctes pour les deux
+`build_forest`; leur soustraction cumulative est correcte, et une quatorzième
+porte directe compare vingt forêts et 5 538 nœuds sans divergence. En revanche,
+le chrono source englobe encore le différentiel catalogue, les deux empreintes
+et leur comparaison, que le chrono référence ne contient pas. Le payload public
+reste différent, un refus n'est pas chronométré sur les mêmes nuages, et aucun
+high-water commun n'est publié. Les rapports 0,90, 0,99, 1,01 et 0,97 observés à
+`n=120` ne localisent aucun croisement stable. La table est un diagnostic à
+remesurer après exclusion du juge, pas une décision d'échelle.
+Un rebuild Release frais de ce commit passe 74/74 CTests en 319,87 s; les trois
+campagnes directes ciblées passent aussi sous ASan/UBSan/LSan. Ces résultats
+créditent l'intégration et l'accord sémantique borné, pas la comptabilité des
+timers. L'analyse détaillée et la commande du cas refusé sont dans
+[`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

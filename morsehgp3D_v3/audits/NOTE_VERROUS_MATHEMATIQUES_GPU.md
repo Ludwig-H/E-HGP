@@ -876,9 +876,15 @@ quadratique au pire et les high-waters omettent des buffers, le catalogue, le
 pool, la vérité, les $2K$ folds et les empreintes récursives. `cell_cap` borne
 les cellules, pas les octets ou le temps. Le target refuse toujours plus de
 20 000 points et aucun statut d'allocation/replay ne ferme le palier 50 k. Le
-chrono nommé source englobe désormais assemblage, fold source, fold référence et
-deux empreintes; il ne sépare pas ces coûts. Plusieurs agrégats restent en `i64`
-avec une justification qui oublie le facteur `clouds<=2000`.
+palier `e406e1f` mesure séparément les deux folds et soustrait correctement le
+fold référence du timer source. Ce timer conserve néanmoins le différentiel
+catalogue, les deux empreintes et leur comparaison, absents du timer référence;
+les chronos ne sont donc toujours pas symétriques. Il n'existe ni high-water
+total commun, ni porte chronométrique, et les rapports répétés à $n=120$ oscillent
+entre 0,90 et 1,01. Voir
+[`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
+Plusieurs agrégats restent en `i64` avec une justification qui oublie le facteur
+`clouds<=2000`.
 
 Le diagnostic cliques/triple de `ee5ee51` ajoute deux filtres exacts utiles : un
 support est une clique du graphe admissible, et chacune des faces triples d'un
