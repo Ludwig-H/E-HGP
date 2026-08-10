@@ -181,6 +181,13 @@ bool run_faceowner_order_on_gpu(const std::vector<int>& members_csr,
     snprintf(error, (size_t)error_capacity, "tailles d'entree incoherentes");
     return false;
   }
+  // L'ORIGINE NULLE et la MASSE BINOMIALE EXACTE par generateur sont exigees
+  // (audit 37139de) : des offsets seulement monotones peuvent demander au
+  // de-rangement des combinaisons qui n'existent pas et le faire boucler.
+  if (incidence_offsets[0] != 0) {
+    snprintf(error, (size_t)error_capacity, "offsets d'incidences sans origine nulle");
+    return false;
+  }
   for (int g = 0; g < generator_count; ++g) {
     const long long begin = member_offsets[(std::size_t)g];
     const long long end = g + 1 < generator_count ? member_offsets[(std::size_t)g + 1]
@@ -188,9 +195,21 @@ bool run_faceowner_order_on_gpu(const std::vector<int>& members_csr,
     if (begin < 0 || end < begin || end > (long long)members_csr.size() ||
         end - begin != (long long)ranks[(std::size_t)g] || ranks[(std::size_t)g] < 0 ||
         ranks[(std::size_t)g] > 32 ||
-        incidence_offsets[(std::size_t)g + 1] < incidence_offsets[(std::size_t)g] ||
         activation_rank[(std::size_t)g] < 0 || batch_of[(std::size_t)g] < 0) {
       snprintf(error, (size_t)error_capacity, "offsets, rangs ou lots hors contrat");
+      return false;
+    }
+    unsigned long long binomial = 0;
+    if (ranks[(std::size_t)g] >= k) {
+      binomial = 1;
+      for (int i = 0; i < k; ++i)
+        binomial = binomial * (unsigned long long)(ranks[(std::size_t)g] - i) /
+                   (unsigned long long)(i + 1);
+    }
+    if (incidence_offsets[(std::size_t)g + 1] - incidence_offsets[(std::size_t)g] !=
+        (long long)binomial) {
+      snprintf(error, (size_t)error_capacity,
+               "masse d'incidences non binomiale pour un generateur");
       return false;
     }
   }

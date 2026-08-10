@@ -134,6 +134,14 @@ target_include_directories(mhgp3v_faceowner_device_qualification
 target_link_libraries(mhgp3v_faceowner_device_qualification PRIVATE mhgp)
 target_compile_options(mhgp3v_faceowner_device_qualification PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror>)
+# LA VERIFICATION STRUCTURELLE A L'ECHELLE : k=1 == single-linkage par EMST
+# exact (Prim i128), egalite de multisets de niveaux via sphere_cmp_beta —
+# l'invariant qui tient aux tailles sans verite exhaustive, troncature comprise.
+add_executable(mhgp3v_structural_scale_check prototype/structural_scale_check.cpp)
+target_include_directories(mhgp3v_structural_scale_check PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_structural_scale_check PRIVATE mhgp)
+target_compile_options(mhgp3v_structural_scale_check PRIVATE -Wall -Wextra -Werror)
+
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)
@@ -749,6 +757,11 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_postings_gate_reject_unknown_hybrid "mutant hybride inconnu" 2
   --hybrid-mutant inexistant)
+add_test(NAME mhgp3v_structural_scale_k1_emst COMMAND mhgp3v_structural_scale_check
+         --points 200 --smax 11 --seed 20260810)
+mhgp3v_add_expected_code_test_for(mhgp3v_structural_scale_check
+  mhgp3v_structural_scale_kill_shift "REFUTATION" 1
+  --points 100 --smax 11 --seed 7 --force-shift-fusion 1)
 # Sans CUDA, la qualification device refuse proprement — jamais un chemin
 # device pretendu ; SOUS CUDA ce refus serait un faux rouge : les portes
 # deviennent le nominal a masses reelles et le mutant drop-edge (label cuda,
