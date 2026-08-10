@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=bc2dafaff96edbca6c5fff455b5071730d95437d`, toujours sous
+`HEAD=origin/main=45c0b7bfe4e908cd05c6269ae2e651e629370e6d`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -43,8 +43,8 @@ code exact; `ac39ac7` puis `478cfe8` écrivent et durcissent le juge Gamma;
 profileur compact et sépare croissance de couverture et activation silencieuse;
 `405c37b` livre le join postings, `651e47f` la porte des niveaux `q_min`, puis
 `bc2dafa` le marquage, le préflight, l'oracle de poids et la voie postings
-globale. Un delta live non committé ajoute les records par témoins et les
-saturés des boules marquantes; ses empreintes et limites sont dans
+globale, puis `45c0b7b` les records par témoins et les saturés des boules
+marquantes. Ses empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
 bornés, pas un reçu produit. Le sujet v2 par défaut censure encore tous les

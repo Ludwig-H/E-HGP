@@ -148,6 +148,12 @@ marqueurs inclus. Le mutant d'échange ne produit que
 produit que dix `boules marquantes divergentes`. La fixture permanente des
 identifiants clairsemés fait passer les trois joins, à un et deux threads.
 
+Claude a ensuite committé exactement ce snapshot sous
+`45c0b7bfe4e908cd05c6269ae2e651e629370e6d`, poussé sur `origin/main`, avec un
+worktree propre. Le commit annonce 127/127 portes; la sélection différentielle
+élargie de l'auditeur reste 27/27 et les sondes ASan/UBSan des sept fixtures,
+de la permutation et des mutants témoins ne produisent aucun diagnostic.
+
 ## Verdict constructif
 
 Le noyau mathématique du join est maintenant en bonne voie : aucune erreur de
@@ -394,5 +400,50 @@ une source complète certifiée, les runs bornés, une borne mémoire contractue
 et l'interning des témoins/marqueurs. Il n'existe aucun kernel GPU à qualifier
 dans ce delta : lancer une G4 n'apporterait pas d'information supplémentaire avant
 ces fermetures CPU.
+
+## Checklist de fermeture finale proposée à Claude
+
+Ces quatre changements sont orthogonaux et ne demandent ni mosaïque, ni graphe
+de Johnson, ni nouveau backend.
+
+1. **Une vue sémantique unique du record.** Faire recevoir à la comparaison les
+   deux catalogues, résoudre chaque `level_representative`, puis comparer les
+   niveaux par `sphere_cmp_beta==0`; comparer aussi `marking_saturations` dans
+   la branche permutation. La même fonction sert au gate et au pipeline. Un
+   simple « ignore representatives » ne reçoit pas un record déplacé vers un
+   autre niveau avec le même payload.
+2. **Raccorder le pipeline.** Ajouter `gamma_records` à `--compare-joins`. Pour
+   le digest diagnostique, remplacer l'indice catalogue brut par l'ordinal de
+   la classe de niveau exact, lié au digest du catalogue, puis alimenter avec
+   des longueurs explicites, témoin fermé, témoins stricts, saturés marquants et
+   type. Les longueurs empêchent les collisions de concaténation. Cette forme
+   reste légère et canonique sous permutation du catalogue.
+3. **Faire voyager la provenance.** Le consommateur valide
+   `1<=q_min<=min(4,rank)`, le support canonique et son inclusion dans `M`, puis
+   exige `q_min_certified` avant un transcript public. La garde de naissance
+   n'est fail-closed que si `complete_for_order[k]` est certifié; sinon le record
+   reste explicitement relatif. La fixture minimale à `k=1` est une paire
+   `M={0,1}`, `q_min=2`, seule dans la source : mode partiel, une naissance et
+   une violation diagnostique; prétention complète, refus. Le compagnon complet
+   ajoute les deux singletons au niveau strict : la paire devient multifusion,
+   sans violation.
+4. **Remplacer les copies par des handles.** Dans le DSU, un témoin peut être
+   représenté par l'identifiant du générateur qui porte le plus petit préfixe
+   de taille `k`; `staged_witness` ne copie alors qu'un entier. Interner chaque
+   saturé une fois dans l'ordre lexicographique et stocker ses handles dans un
+   pool plat de records. Jusqu'à cette migration, renommer le pic
+   `estimated_peak_bytes` et « pic estimé » : le mot « conservateur » est faux.
+   Un budget dur exige ensuite soit un calcul incluant les capacités réelles,
+   soit un allocateur plafonné qui refuse proprement tout dépassement.
+5. **Fermer quatre sorties de secours du juge.** Exiger
+   `dump.size()==table.size()` après l'oracle des poids; vérifier la plage de
+   `level_representative` avant tout accès catalogue; refuser un handle strict
+   sans témoin au lieu de l'ignorer; et faire rendre un code non nul dès que
+   `qmin_subset_failures>0`. Ce sont des gardes locales, sans changement
+   mathématique ni coût produit.
+
+Ordre conseillé : 1 puis 2 ferment la réception; 3 ferme le statut; 4 ferme le
+claim mémoire; 5 durcit le juge. Aucun passage GCP n'apporte d'information avant
+ces portes CPU.
 
 GCP non utilisé.

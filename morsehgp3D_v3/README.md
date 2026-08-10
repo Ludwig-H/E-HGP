@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=bc2dafaff96edbca6c5fff455b5071730d95437d`. Le commit produit
+`HEAD=origin/main=45c0b7bfe4e908cd05c6269ae2e651e629370e6d`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -22,10 +22,10 @@ ordres effectivement jugés. `23f12af` ajoute ensuite le fold par intersections
 de saturés et remplace les censures multiplicataires sur les campagnes bornées;
 `2b4801c` ajoute son profileur, les couvertures incrémentales et la séparation
 croissance/silencieux; `405c37b` livre ensuite le join postings reçu,
-`651e47f` la porte des niveaux d'événement `q_min`, puis `bc2dafa` le marquage
-Gamma, le préflight, l'oracle de chaque poids et le troisième join global. Un
-delta live non committé ajoute les records par témoins et les saturés des
-boules marquantes; il est épinglé fichier par fichier dans l'audit courant. L'autorité
+`651e47f` la porte des niveaux d'événement `q_min`, `bc2dafa` le marquage
+Gamma, le préflight, l'oracle de chaque poids et le troisième join global, puis
+`45c0b7b` les records par témoins et les saturés des boules marquantes dans les
+trois joins. Ce dernier commit est épinglé fichier par fichier dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 

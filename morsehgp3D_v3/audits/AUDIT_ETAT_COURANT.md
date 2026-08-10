@@ -11,16 +11,16 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
 courante est
-`HEAD=origin/main=bc2dafaff96edbca6c5fff455b5071730d95437d` : `405c37b`
+`HEAD=origin/main=45c0b7bfe4e908cd05c6269ae2e651e629370e6d` : `405c37b`
 livre le join postings reçu, `651e47f` la porte des niveaux d'événement
-`q_min`, puis `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
-troisième voie postings globale. Un delta live non committé ajoute les records
-par témoins et les saturés des boules marquantes. Son audit
+`q_min`, `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
+troisième voie postings globale, puis `45c0b7b` les records par témoins et les
+saturés des boules marquantes. Son audit
 reproductible, avec toutes les empreintes et le correctif live immédiatement
 postérieur, est
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 
-## Autorité courante à `bc2dafa` plus delta live
+## Autorité courante à `45c0b7b`
 
 | contrat | état reçu |
 | --- | --- |
