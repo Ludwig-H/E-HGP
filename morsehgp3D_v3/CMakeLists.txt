@@ -159,6 +159,21 @@ add_executable(mhgp3v_tree_median_gate prototype/tree_median_gate.cpp)
 target_include_directories(mhgp3v_tree_median_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(mhgp3v_tree_median_gate PRIVATE -Wall -Wextra -Werror)
 
+# LA PORTE ENSEMBLISTE DE L'INDEX PREFIXE--PREFIXE (note index exact) : le
+# theoreme juge contre le join quadratique pour TOUT k, fixtures des communs
+# en dernieres positions et du faux candidat, identite de masse L(r,K),
+# planchers de paires ET de faux candidats. Combinatoire pure : aucun lien.
+add_executable(mhgp3v_prefix_index_gate prototype/prefix_index_gate.cpp)
+target_include_directories(mhgp3v_prefix_index_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(mhgp3v_prefix_index_gate PRIVATE -Wall -Wextra -Werror)
+
+# LA SONDE DE MASSE de l'index prefixe--prefixe : diagnostic tout-requete sur
+# un catalogue reel (bornes hautes du fallback), jamais un verdict.
+add_executable(mhgp3v_prefix_mass_probe prototype/prefix_mass_probe.cpp)
+target_include_directories(mhgp3v_prefix_mass_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_prefix_mass_probe PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_prefix_mass_probe PRIVATE -Wall -Wextra -Werror)
+
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)
@@ -774,6 +789,43 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_postings_gate_reject_unknown_hybrid "mutant hybride inconnu" 2
   --hybrid-mutant inexistant)
+# LES MUTANTS DU FALLBACK PREFIXE--PREFIXE (note index, portes §Recu) : des
+# prefixes trop courts perdent une paire aux communs tardifs ; le dernier
+# point de prefixe non indexe perd la paire qui ne se voyait que par lui ; les
+# candidats crus sur-fusionnent ; la projection DSU avant recertification
+# certifie a tort des membres issus de plusieurs generateurs d'une racine.
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_length "mutant tue" 4
+  --hybrid-mutant prefix-length-minus-one)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_drop_last "mutant tue" 4
+  --hybrid-mutant drop-last-posting)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_skip_recert "mutant tue" 4
+  --hybrid-mutant skip-recertification)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_project_root "mutant tue" 4
+  --hybrid-mutant project-root-first)
+# LA PORTE ENSEMBLISTE de l'index : autorite combinatoire du theoreme.
+add_test(NAME mhgp3v_prefix_index_differential COMMAND mhgp3v_prefix_index_gate
+         --families 400 --sets 24 --universe 30 --max-order 8 --seed 20260810)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_length "mutant tue" 4
+  --families 50 --mutant prefix-length-minus-one)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_drop_last "mutant tue" 4
+  --families 50 --mutant drop-last-posting)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_skip_recert "mutant tue" 4
+  --families 50 --mutant skip-recertification)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
+add_test(NAME mhgp3v_prefix_mass_probe_diagnostic COMMAND mhgp3v_prefix_mass_probe
+         --points 48 --smax 11 --max-order 3 --seed 20260810)
+set_tests_properties(mhgp3v_prefix_mass_probe_diagnostic PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee")
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_mass_probe
+  mhgp3v_prefix_mass_probe_reject_unknown "argument inconnu" 2 --inexistant 1)
 add_test(NAME mhgp3v_structural_scale_k1_emst COMMAND mhgp3v_structural_scale_check
          --points 200 --smax 11 --seed 20260810)
 mhgp3v_add_expected_code_test_for(mhgp3v_structural_scale_check
@@ -868,6 +920,13 @@ add_test(NAME mhgp3v_saturated_pipeline_compare_joins_hybrid COMMAND mhgp3v_satu
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_hybrid_partial "famille complete" 2
   --points 32 --smax 11 --max-order 3 --join hybrid)
+add_test(NAME mhgp3v_saturated_pipeline_compare_joins_hybrid_prefix
+         COMMAND mhgp3v_saturated_pipeline
+         --points 10 --smax 11 --max-order 3 --seed 20260810 --join hybrid-prefix
+         --compare-joins 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
+  mhgp3v_saturated_pipeline_reject_hybrid_prefix_partial "famille complete" 2
+  --points 32 --smax 11 --max-order 3 --join hybrid-prefix)
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_budget_faceowner "preflight" 3
   --points 32 --smax 11 --max-order 3 --seed 20260810 --join faceowner

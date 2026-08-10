@@ -43,6 +43,7 @@
 #include <vector>
 
 #include "mhgp/miniball.hpp"
+#include "prototype/prefix_index.hpp"
 #include "prototype/saturated_fold.hpp"
 
 namespace mhgp3v {
@@ -55,12 +56,15 @@ struct HybridReceipt {
   long long trie_nodes = 0, trie_cut_empty = 0, trie_cut_known = 0;
   long long trie_leaves = 0, postings_scanned = 0;
   long long attaches = 0, unions_attempted = 0, unions_done = 0;
+  // Le fallback prefixe--prefixe (note index), quand il est actif.
+  PrefixIndexReceipt prefix;
   bool identities_ok = false;
 };
 
 struct HybridMutants {
   bool force_principal = false;   // court-circuiter le certificat (refute !)
   bool raw_ball_key = false;      // cle brute base/num/den (refutee !)
+  PrefixIndexMutants prefix;      // mutants du fallback prefixe--prefixe
 };
 
 // Le centre reduit : C = base*den + num, divise par pgcd(|C|, den), den > 0.
@@ -125,11 +129,17 @@ inline HybridBallKey hybrid_ball_key(const mhgp::Sphere& sphere, bool raw_mutant
   return key;
 }
 
+// `prefix_fallback` remplace le fallback demand-driven par l'index exact
+// prefixe--prefixe de la note : memes attaches semantiques (unir M a toute
+// racine d'un N partageant au moins k points), candidats par prefixes
+// r-k+1 sous l'ordre des identifiants puis recertification |M∩N| >= k —
+// aucun trie de faces, aucun scan des postings complets.
 template <class PointArray>
 inline SaturatedFold build_saturated_fold_hybrid(
     const PointArray& pts, int point_count, const mhgp::Catalogue& catalogue,
     int maximum_order, bool keep_partitions, HybridReceipt* receipt,
-    bool enforce_event_guard = false, HybridMutants mutants = {}) {
+    bool enforce_event_guard = false, HybridMutants mutants = {},
+    bool prefix_fallback = false) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   if (receipt != nullptr) *receipt = HybridReceipt{};
@@ -293,9 +303,13 @@ inline SaturatedFold build_saturated_fold_hybrid(
     st.staged_cov.assign(count, 0);
     st.witness.resize(count);
     st.staged_witness.resize(count);
-    // Postings par point pour le fallback : generateurs actifs (rang >= k),
-    // le lot courant STAGE avant toute recherche, publies a la fermeture.
-    std::vector<std::vector<int>> postings((std::size_t)point_count);
+    // Postings par point pour le fallback demand-driven, OU index
+    // prefixe--prefixe : generateurs actifs (rang >= k), le lot courant STAGE
+    // avant toute recherche, publies a la fermeture.
+    std::vector<std::vector<int>> postings;
+    PrefixIndex prefix_index;
+    if (prefix_fallback) prefix_index.reset(point_count);
+    else postings.assign((std::size_t)point_count, {});
 
     for (std::size_t batch = 0; batch < batches.size(); ++batch) {
       const long long epoch = (long long)batch + 1;
@@ -323,8 +337,13 @@ inline SaturatedFold build_saturated_fold_hybrid(
         touched.push_back(m);
         batch_generators.push_back(m);
         if (support_size <= k + 1) events.push_back({m, support_size});
-        // STAGING des postings : le lot entier est visible avant la recherche.
-        for (mhgp::i32 x : members[(std::size_t)m]) postings[(std::size_t)x].push_back(m);
+        // STAGING : le lot entier est visible avant la premiere recherche —
+        // les generateurs futurs restent invisibles (contrat de la note).
+        if (prefix_fallback)
+          out.prefix.entries +=
+              prefix_stage(&prefix_index, m, members[(std::size_t)m], k, mutants.prefix);
+        else
+          for (mhgp::i32 x : members[(std::size_t)m]) postings[(std::size_t)x].push_back(m);
       }
 
       const auto unite = [&](int a, int b) {
@@ -411,10 +430,48 @@ inline SaturatedFold build_saturated_fold_hybrid(
           }
           continue;
         }
+        ++out.fallback_generators;
+        if (prefix_fallback) {
+          // FALLBACK PREFIXE--PREFIXE (note index) : candidats par prefixes
+          // r-k+1 sous l'ordre des identifiants, recertification exacte
+          // |M∩N| >= k sur les MEMBRES DU GENERATEUR — jamais sur une
+          // projection DSU (le mutant project-root-first grave ce piege) —
+          // puis union ; les doublons de composante sont idempotents.
+          std::vector<int> candidates;
+          prefix_query(prefix_index, members[(std::size_t)m], k, &candidates, &out.prefix,
+                       mutants.prefix);
+          for (int candidate : candidates) {
+            if (candidate == m) continue;
+            bool certified;
+            if (mutants.prefix.skip_recertification) {
+              certified = true;
+            } else if (mutants.prefix.project_root_first) {
+              // MUTANT : compter l'intersection contre la COUVERTURE de la
+              // racine — des membres issus separement de plusieurs
+              // generateurs d'une meme racine certifient a tort.
+              const std::set<mhgp::i32>& cover =
+                  st.coverage[(std::size_t)st.find(candidate)];
+              int common = 0;
+              for (mhgp::i32 x : members[(std::size_t)m])
+                if (cover.count(x) != 0 && ++common >= k) break;
+              certified = common >= k;
+            } else {
+              certified = prefix_recertify(members[(std::size_t)m],
+                                           members[(std::size_t)candidate], k);
+            }
+            if (!certified) {
+              ++out.prefix.false_candidates;
+              continue;
+            }
+            ++out.prefix.recertified_true;
+            ++out.attaches;
+            unite(m, candidate);
+          }
+          continue;
+        }
         // FALLBACK demand-driven : trie canonique des combinaisons de M,
         // postings intersectees du plus rare au plus frequent, coupure par
         // certificat d'absence, un carrier par racine nouvelle aux feuilles.
-        ++out.fallback_generators;
         std::vector<mhgp::i32> ordered = members[(std::size_t)m];
         std::sort(ordered.begin(), ordered.end(), [&](mhgp::i32 a, mhgp::i32 b) {
           const std::size_t pa = postings[(std::size_t)a].size();

@@ -308,7 +308,8 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
                       std::size_t expected_count, std::string* why,
                       mhgp3v::FaceOwnerMutants faceowner_mutants = {},
                       const std::vector<mhgp::P3>* points = nullptr,
-                      mhgp3v::HybridMutants hybrid_mutants = {}) {
+                      mhgp3v::HybridMutants hybrid_mutants = {},
+                      mhgp3v::PrefixIndexReceipt* prefix_accum = nullptr) {
   const mhgp3v::SaturatedFold truth = mhgp3v::build_saturated_fold(
       catalogue, maximum_order, /*keep_partitions=*/true, /*enforce_event_guard=*/true);
   if (!truth.ok) { *why = std::string("fold de verite refuse : ") + truth.refusal; return false; }
@@ -431,6 +432,34 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
       return false;
     }
   }
+
+  // LA SIXIEME FORME : le fallback PREFIXE--PREFIXE (note index exact) — le
+  // meme fold bit a bit que la verite, sans trie de faces ni scan des
+  // postings complets ; la recertification doit etre reellement exercee
+  // (faux candidats > 0 sur la campagne, sinon la porte est vide).
+  if (points != nullptr) {
+    mhgp3v::HybridReceipt prefix_receipt;
+    const mhgp3v::SaturatedFold prefixed = mhgp3v::build_saturated_fold_hybrid(
+        *points, (int)points->size(), catalogue, maximum_order,
+        /*keep_partitions=*/true, &prefix_receipt, /*enforce_event_guard=*/true,
+        hybrid_mutants, /*prefix_fallback=*/true);
+    if (!prefixed.ok) {
+      *why = std::string("fold hybride-prefixe refuse : ") + prefixed.refusal;
+      return false;
+    }
+    if (!folds_agree(truth, prefixed, /*ignore_representatives=*/false, why)) {
+      *why = "forme hybride-prefixe : " + *why;
+      return false;
+    }
+    if (prefix_accum != nullptr) {
+      prefix_accum->entries += prefix_receipt.prefix.entries;
+      prefix_accum->queries += prefix_receipt.prefix.queries;
+      prefix_accum->hits += prefix_receipt.prefix.hits;
+      prefix_accum->unique_candidates += prefix_receipt.prefix.unique_candidates;
+      prefix_accum->recertified_true += prefix_receipt.prefix.recertified_true;
+      prefix_accum->false_candidates += prefix_receipt.prefix.false_candidates;
+    }
+  }
   return true;
 }
 
@@ -509,6 +538,14 @@ int main(int argc, char** argv) {
   if (hybrid_mutant_name != nullptr) {
     if (!strcmp(hybrid_mutant_name, "force-principal")) hybrid_mutants.force_principal = true;
     else if (!strcmp(hybrid_mutant_name, "raw-ball-key")) hybrid_mutants.raw_ball_key = true;
+    else if (!strcmp(hybrid_mutant_name, "prefix-length-minus-one"))
+      hybrid_mutants.prefix.prefix_length_minus_one = true;
+    else if (!strcmp(hybrid_mutant_name, "drop-last-posting"))
+      hybrid_mutants.prefix.drop_last_posting = true;
+    else if (!strcmp(hybrid_mutant_name, "skip-recertification"))
+      hybrid_mutants.prefix.skip_recertification = true;
+    else if (!strcmp(hybrid_mutant_name, "project-root-first"))
+      hybrid_mutants.prefix.project_root_first = true;
     else { std::printf("ECHEC : mutant hybride inconnu %s\n", hybrid_mutant_name); return 2; }
   }
   mhgp3v::PostingsMutants mutants{};
@@ -590,6 +627,7 @@ int main(int argc, char** argv) {
   }
 
   // ETAGE 2 : la campagne differentielle sur nuages reels.
+  mhgp3v::PrefixIndexReceipt prefix_campaign;
   long long processed = 0, skipped = 0;
   long long total_generators = 0, total_unions = 0, total_silent = 0, total_levels = 0;
   long long total_p_post = 0, total_weight = 0;
@@ -616,7 +654,7 @@ int main(int argc, char** argv) {
 
     std::string why;
     if (!run_differential(catalogue, maximum_order, mutants, nullptr, 0, &why,
-                          faceowner_mutants, &pts, hybrid_mutants)) {
+                          faceowner_mutants, &pts, hybrid_mutants, &prefix_campaign)) {
       if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
         std::printf("mutant tue par la campagne, nuage %d : %s\n", c, why.c_str());
         return 4;
@@ -769,11 +807,22 @@ int main(int argc, char** argv) {
     std::printf("recus      : P_post=%lld poids=%lld unions=%lld silencieux=%lld"
                 " niveaux=%lld |P_x| max=%zu\n",
                 total_p_post, total_weight, total_unions, total_silent, total_levels, max_posting);
+    std::printf("prefixe    : requetes=%lld hits=%lld candidats=%lld recertifies=%lld"
+                " faux=%lld\n", prefix_campaign.queries, prefix_campaign.hits,
+                prefix_campaign.unique_candidates, prefix_campaign.recertified_true,
+                prefix_campaign.false_candidates);
     if (total_generators < minimum_generators || total_unions < minimum_unions ||
         total_silent < minimum_silent || total_levels < minimum_levels || processed < 1) {
       std::printf("ECHEC : plancher non atteint (generateurs>=%lld unions>=%lld"
                   " silencieux>=%lld niveaux>=%lld)\n",
                   minimum_generators, minimum_unions, minimum_silent, minimum_levels);
+      return 3;
+    }
+    // PLANCHER DU FALLBACK PREFIXE : une campagne qui n'exerce ni requete ni
+    // recertification refusante rendrait la sixieme forme verte par vacuite.
+    if (prefix_campaign.queries < 1 || prefix_campaign.false_candidates < 1) {
+      std::printf("ECHEC : plancher prefixe non atteint (requetes>=1 et faux"
+                  " candidats>=1 exiges)\n");
       return 3;
     }
   }

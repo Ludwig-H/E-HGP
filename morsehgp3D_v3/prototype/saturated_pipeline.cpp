@@ -103,6 +103,7 @@ int main(int argc, char** argv) {
       else if (!strcmp(argv[i], "postings-global")) join_mode = 2;
       else if (!strcmp(argv[i], "faceowner")) join_mode = 3;
       else if (!strcmp(argv[i], "hybrid")) join_mode = 4;
+      else if (!strcmp(argv[i], "hybrid-prefix")) join_mode = 5;
       else { std::printf("ECHEC : jointure inconnue %s\n", argv[i]); return 2; }
       continue;
     }
@@ -166,7 +167,7 @@ int main(int argc, char** argv) {
   // La garde d'evenement ne REFUSE que sous famille complete (s_max >= n) ;
   // sous famille tronquee ses violations sont comptees et publiees.
   const bool enforce_guard = smax >= n;
-  if (join_mode == 4 && smax < n) {
+  if ((join_mode == 4 || join_mode == 5) && smax < n) {
     std::printf("ECHEC : le fold hybride exige la pretention de famille complete"
                 " (smax >= points)\n");
     return 2;
@@ -175,10 +176,11 @@ int main(int argc, char** argv) {
   mhgp3v::FaceOwnerReceipt faceowner_receipt;
   mhgp3v::HybridReceipt hybrid_receipt;
   const mhgp3v::SaturatedFold fold =
-      join_mode == 4
+      join_mode == 4 || join_mode == 5
           ? mhgp3v::build_saturated_fold_hybrid(pts, (int)pts.size(), catalogue, max_order,
                                                 /*keep_partitions=*/false, &hybrid_receipt,
-                                                enforce_guard)
+                                                enforce_guard, {},
+                                                /*prefix_fallback=*/join_mode == 5)
       : join_mode == 3
           ? mhgp3v::build_saturated_fold_faceowner(
                 catalogue, max_order, /*keep_partitions=*/false, &faceowner_receipt,
@@ -271,7 +273,8 @@ int main(int argc, char** argv) {
   std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
               " --family %s --join %s --threads %d --catalogue-threads %d\n", n, coord, smax,
               max_order, seed, mhgp3v::cloud_family_name(family),
-              join_mode == 4   ? "hybrid"
+              join_mode == 5   ? "hybrid-prefix"
+              : join_mode == 4 ? "hybrid"
               : join_mode == 3 ? "faceowner"
               : join_mode == 2 ? "postings-global"
               : join_mode == 1 ? "postings"
@@ -315,6 +318,20 @@ int main(int argc, char** argv) {
                 receipt.predicted_p_post, (double)receipt.predicted_peak_bytes / 1048576.0,
                 receipt.max_batch_occurrences,
                 memory_budget_mb > 0 ? " (budget respecte)" : "");
+  if (join_mode == 5)
+    std::printf("jointure   : hybride-prefixe — principaux=%lld fallback=%lld"
+                " redondants=%lld certificats %lld/%lld  lookups %lld/%lld  attaches=%lld"
+                " unions %lld/%lld  index : entrees=%lld requetes=%lld hits=%lld"
+                " candidats=%lld recertifies=%lld faux=%lld\n",
+                hybrid_receipt.principal_generators, hybrid_receipt.fallback_generators,
+                hybrid_receipt.redundant_generators, hybrid_receipt.certificates_verified,
+                hybrid_receipt.certificates_failed, hybrid_receipt.fast_lookups_found,
+                hybrid_receipt.fast_lookups_tried, hybrid_receipt.attaches,
+                hybrid_receipt.unions_done, hybrid_receipt.unions_attempted,
+                hybrid_receipt.prefix.entries, hybrid_receipt.prefix.queries,
+                hybrid_receipt.prefix.hits, hybrid_receipt.prefix.unique_candidates,
+                hybrid_receipt.prefix.recertified_true,
+                hybrid_receipt.prefix.false_candidates);
   if (join_mode == 4)
     std::printf("jointure   : hybride — principaux=%lld fallback=%lld redondants=%lld"
                 " certificats %lld/%lld  lookups %lld/%lld  attaches=%lld unions %lld/%lld"

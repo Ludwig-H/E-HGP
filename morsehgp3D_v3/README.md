@@ -476,6 +476,26 @@ et l'index exact préfixe--préfixe qui retire le mur des faces du fallback
 hybride, à juger contre les folds existants à n≤400 avant toute mesure
 ([`NOTE_SOLUTION_GPU_INDEX_PREFIX_PREFIX_20260810.md`](audits/NOTE_SOLUTION_GPU_INDEX_PREFIX_PREFIX_20260810.md)).
 
+**[palier préfixe--préfixe : le mur des faces du fallback retiré, masses
+mesurées]** Le théorème préfixe--préfixe de l'auditeur est implémenté et
+jugé : autorité combinatoire (`prefix_index.hpp`), porte ensembliste contre le
+join quadratique pour tout k (fixtures des communs tardifs et du faux
+candidat, identité de masse L(r,K), planchers de paires et de faux candidats),
+et SIXIÈME forme du fold (`--join hybrid-prefix`) — staging par lot,
+recertification sur les membres du générateur, jugée bit à bit contre les
+cinq formes existantes avec plancher de campagne (requêtes ET faux candidats
+exercés). Sept mutants tués à des sites sémantiques exacts, dont
+`project-root-first` par la cosphère (`k=4 : fusions 9 != 6`). La sonde
+`mhgp3v_prefix_mass_probe` publie les trois compteurs demandés par la note
+pour choisir le seuil t : à n=200/K=5 tout-requête, les entrées suivent
+exactement L_k mais les hits cumulés atteignent 2,7 G sur uniform (l'index ne
+vaut que dans « fast majoritaire, fallback rare », ~2 % mesuré) ; la
+sélectivité chute avec k (83 % de faux à k=5/t=1) et remonte avec t ; à t=k le
+filtre est EXACT (0 faux, la multiplicité est le certificat) — le spectre t
+interpole entre l'index court et le kernel de comptage. Masses terrain 4-6×
+sous uniform. Détail et questions :
+[`NOTE_CLAUDE_PREFIX_PREFIX_RECU_20260810.md`](audits/NOTE_CLAUDE_PREFIX_PREFIX_RECU_20260810.md).
+
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
 [`audits/`](audits/) motivent les corrections ; ils ne certifient rien.
