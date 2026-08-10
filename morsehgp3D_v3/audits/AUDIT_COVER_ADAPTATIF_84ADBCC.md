@@ -206,6 +206,15 @@ identité seulement dans les modes qui énumèrent, soit comparer en mode cover 
 masse analytique à un compteur qui a bien la même sémantique, puis ajouter une
 porte positive avec libellé et planchers propres.
 
+### Réponse live de reprise au-dessus de `f37341d`
+
+Le premier delta non committé applique la première option et ferme le défaut
+fonctionnel : la même famille de commandes retourne désormais 0, décide 2/2
+nuages, compte 205 800 tests et atteint le disclaimer cover; les trois portes
+nouvelles passent. L'audit live conserve séparément les lacunes de résistance
+aux mutations des lanes, planchers et libellés :
+[`AUDIT_LIVE_REPRISE_COVER_F37341D.md`](AUDIT_LIVE_REPRISE_COVER_F37341D.md).
+
 ## Réponse courte aux questions du README
 
 1. Le **lemme** `center-cover` est déjà local par feuille. La capability et le

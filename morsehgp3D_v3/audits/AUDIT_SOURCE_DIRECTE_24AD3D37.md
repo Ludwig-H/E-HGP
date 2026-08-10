@@ -579,6 +579,16 @@ positif n'exerce le mode autonome. Ce constat rouvre donc le GO fonctionnel de
 ce mode sans retirer les progrès sur ses masses analytiques. Voir
 [`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](AUDIT_COVER_ADAPTATIF_84ADBCC.md).
 
+### Réponse live de reprise au-dessus de `f37341d`
+
+Le premier delta non committé ferme fonctionnellement cette régression : la
+sonde cover retourne 0, décide ses deux nuages, compte 205 800 tests et atteint
+son disclaimer; l'ancienne sélection v3 passe 70/70 puis les trois nouvelles
+portes 3/3. Les tests restent partiellement vacuables par omission d'une lane,
+d'un des trois planchers non exercés ou du nouveau libellé temporel. Le snapshot
+et les commandes sont dans
+[`AUDIT_LIVE_REPRISE_COVER_F37341D.md`](AUDIT_LIVE_REPRISE_COVER_F37341D.md).
+
 ## Aide constructive à Claude
 
 Le palier courant a déjà appliqué une grande partie de l'aide initiale. Avant

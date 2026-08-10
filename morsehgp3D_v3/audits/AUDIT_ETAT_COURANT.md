@@ -19,6 +19,130 @@ est hors de ce snapshot produit. Son ledger comprend la réponse chrono
 Aucun artefact brut des campagnes de taille ni de la session G4 n'est versionné
 avec ces commits.
 
+## Delta live de reprise au-dessus de `f37341d`
+
+Le premier delta non committé corrige positivement le mode cover autonome : il
+retourne 0, décide 2/2 nuages, compte 205 800 tests et atteint désormais son
+disclaimer. L'ancienne sélection v3 passe 70/70, puis les trois nouvelles portes
+passent 3/3. Ce crédit reste borné et doit être réépinglé après commit.
+
+### Alerte live au palier chrono/payload du 10 août, 07:31 UTC
+
+Le palier suivant sépare positivement les horloges source, référence, juge et
+refus, permet d'alterner l'ordre de construction dans un même mode juge, trie le
+catalogue source dans l'ordre canonique de la référence et ajoute un mutant
+`--force-shell-order`. Le comparateur ferme désormais `spheres`, le pool, les
+offsets, les champs de forêt et `ForestNode::source`; c'est un progrès matériel
+par rapport au seul quotient sémantique.
+
+Le claim live « payload public comparé EN ENTIER » reste cependant trop large.
+`mhgp::Catalogue` expose aussi `neighbourhood_size`, `growth_rounds`,
+`certified`, les trois compteurs `candidate_*`, `degenerate_shells` et
+`shell_anomalies`. Sur la campagne courante, source et `flat_catalogue` les
+laissent toutes deux à leur valeur par défaut; ni le nouveau comparateur ni
+`catalogue_bytes` ne les lisent. Un mutant d'audit qui ne change que ces huit
+champs côté source conserve code 0, octets égaux, zéro désaccord et le claim
+« champ à champ ». Le palier peut donc revendiquer l'identité canonique du
+**cœur sérialisé**
+`{spheres, members, forests}`, pas encore celle de l'objet public complet. Deux
+issues honnêtes sont possibles : borner explicitement le contrat et les
+libellés à ce cœur, ou définir la présence et la sémantique des diagnostics par
+backend puis les comparer dans un résultat public tagué. Cette alerte est
+épinglée aux fichiers live `direct_source.cpp` SHA-256
+`edd97791981454b5f114cda3b36090dbf4493858e10f29daedeccf27eb09b841` et
+`CMakeLists.txt` SHA-256
+`d25f28d6515751c5cbe24522abadaeb329c53eb3442165786e89301dae67b002`;
+elle devra être réauditée après le prochain changement ou commit.
+
+### Alerte live au palier validateur de forêt du 10 août, 07:35 UTC
+
+Le nouveau parcours itératif ferme réellement les deux corruptions reproduites
+par l'audit précédent : une chaîne de frères cyclique est bornée et comptée,
+et un enfant hors plage est contrôlé avant déréférencement. L'auto-test ajoute
+en outre un témoin sain, ce qui évite le validateur trivialement toujours rouge.
+
+Le qualificatif « validateur de forêt total » n'est toutefois pas encore
+acquis de bout en bout. `forest_digest` transforme une structure fautive en la
+chaîne `STRUCTURE_INVALIDE`, puis le juge vérifie seulement que les deux chaînes
+sont égales. La même faute produite par les deux appels au même `build_forest`
+reste donc verte; l'auto-test reçoit la détection, pas le refus fail-closed de la
+campagne. `ForestNode::source` hors plage reste sérialisé `sans_source` au lieu
+d'être une faute structurelle, et les tranches `members_begin + rank` ne sont
+pas validées avant leur lecture. Enfin, une structure topologiquement saine
+déclenche encore `forest_signature` récursivement : une chaîne valide très
+profonde garde un risque d'épuisement de pile et la concaténation de chaînes
+reste potentiellement quadratique. Le crédit exact est donc **validateur
+topologique itératif borné pour les deux fixtures reçues**, pas encore
+validateur total du payload forêt/catalogue ni juge fail-closed. Cette alerte
+est épinglée aux fichiers live `direct_source.cpp` SHA-256
+`dd814306f55f1db4a803cba18b055f1e24d68b59a887013649ca72a90e43ccd6`
+et `CMakeLists.txt` SHA-256
+`314056b23df7a78528f01dc876365a24ec7b53260e961238bf3f40bd060dbe95`.
+
+**Réponse live de 07:39.** Le palier `direct_source.cpp` SHA-256
+`7a5d42e99814a493fd0fea872c49181301a383a32d3a24c6af0589d2e16ff652`
+exige maintenant `ForestStructure::sound()` séparément des deux côtés et
+incrémente les désaccords si l'un ou les deux sont invalides. Il ferme donc le
+défaut « même structure invalide des deux côtés ». Le mot **total** reste à
+borner : `ForestNode::source`, les tranches du pool et la profondeur récursive
+de la signature ne sont toujours pas validés par ce contrôle topologique.
+
+La réponse live de 07:39 ferme ensuite les trois réserves cover : plancher par
+lane, regex temporelle plus disclaimer et quatre branches de planchers reçues.
+Elle remplace `atoi` par `from_chars` dans le self-test arithmétique, ajoute deux
+portes négatives à code exact et fait désormais rougir la reproduction
+`SIGSEGV`. Les portes négatives de `direct_source` migrent elles aussi vers des
+codes exacts. Les 23 appels historiques aux deux anciennes macros refusent
+maintenant les signaux, mais acceptent encore tout autre entier non nul; leur
+migration reste ouverte. Voir
+[`AUDIT_LIVE_REPRISE_COVER_F37341D.md`](AUDIT_LIVE_REPRISE_COVER_F37341D.md).
+
+### Statut live consolidé au palier de 07:39 UTC
+
+Build Release réussi; 26/26 portes `mhgp3v_direct_source_*` et 16/16 portes
+ciblées cover, chrono, ordre, forêt et arithmétique passent. La campagne cover
+publie `205800 = 68600 + 68600 + 68600`; la campagne source-first décide quatre
+nuages, compare vingt forêts et 5 538 nœuds sans désaccord. Aucun P0 fonctionnel
+nouveau n'a été reproduit sur ce palier.
+
+| contrat | statut live |
+| --- | --- |
+| cover autonome, trois lanes, quatre planchers, ligne temporelle et disclaimer | **fermé sur les fixtures reçues** |
+| suffixe/zéro/argument excédentaire de `bigint_selftest` | **fermé**, code exact 2 |
+| crash assimilé à un rejet | **fermé** : `SIGSEGV` fait rougir le harnais |
+| codes exacts des nouvelles portes directes | **fermé** |
+| codes exacts des 23 appels historiques | **ouvert** |
+| timers source/référence séparés du juge et des refus | **implémenté**; garde juge non nul ajoutée au palier `5ba178e...`, mais le travail du juge reste non reçu |
+| ordre de construction alternable | **implémenté**; la ligne « ordre exécuté » dérive encore du paramètre, pas de la branche prise |
+| cœur canonique `spheres/members/forests` | **comparé champ à champ** |
+| objet public `mhgp::Catalogue` entier | **égalité des huit diagnostics ajoutée** au palier `5ba178e...`; sémantique et octets restent ouverts |
+| topologie forêt cyclique/hors plage et faute commune | **fermée sur les fixtures reçues** |
+| source/pool/profondeur de la forêt | **ouvert** |
+
+Deux réserves de campagne restent à documenter. `--build-order 1` échoue au
+premier statut non `kOk`; l'alternance ne vaut donc que sur une entrée
+pré-certifiée sans refus. La provenance stdout omet encore
+`--min-lane-cover-tests`, bien que ce plancher soit actif et testé.
+
+### Réponse live `5ba178e...` et réserves de preuve
+
+Claude compare désormais les trois vecteurs et cinq compteurs diagnostics de
+`Catalogue`; le mutant d'audit qui divergeait ces huit champs doit donc rougir.
+Le commentaire doit toutefois parler d'**égalité**, pas d'obligation de rester
+vide : deux backends identiquement non vides sont légitimement égaux. Sur le
+palier actuel, les deux restent par défaut; leur sémantique publique demeure à
+taguer. `catalogue_bytes` les omet toujours, de même que les objets de vecteur;
+la ligne `octets` mesure le cœur dynamique, pas l'objet public entier.
+
+La garde `judge_seconds>0` tue le mutant grossier qui annule l'accumulation,
+mais ne prouve pas que le différentiel a tourné. Conserver seulement
+`j0=now()` puis `now()-j0` autour d'un bloc vide produit normalement un temps
+strictement positif. Il faut recevoir une masse de comparaisons effectivement
+exécutées et tuer un mutant qui retire leur travail. De même, la nouvelle ligne
+« ordre exécuté » choisit sa chaîne depuis `build_order`; muter la branche
+d'exécution tout en gardant l'option laisse donc le claim inchangé. Une trace ou
+un compteur alimenté dans `run_source`/`run_reference` est encore nécessaire.
+
 | objet | empreinte SHA-256 |
 | --- | --- |
 | snapshot committé de code et de claims audité | `e406e1f646ef20eb222d50e8b2740e6d7d6f6aa3` |
@@ -255,6 +379,18 @@ bloquent `i128` et `long long`, mais plusieurs petits types entiers et enums
 restent convertibles vers `int`. Elles tuent le mutant exact observé, sans créer
 un type fort garantissant que l'argument appartient à `{-1,0,1}`. L'identité du
 sommet owner signé demeure par ailleurs une porte distincte non fermée.
+
+**Réponse live owner du 10 août, 07:51 UTC.** Le delta
+`prototype/flats_differential.cpp` SHA-256
+`003ba13f5cde783a8dfc58b4dbb3d4909720be3938c81cc83636b1b2b7cf623e`
+compare maintenant directement les deux sommets du segment de centres : celui
+de centre `z=0` doit posséder, celui de centre `z=4` doit refuser. C'est
+exactement l'identité que le mutant non signé échangeait tout en conservant le
+catalogue. Les portes `mhgp3v_flats_fixtures` et
+`mhgp3v_flats_u16_owner` passent 2/2 en 22,75 s sur un rebuild Release du même
+SHA. La géométrie et le tie-break signé sont cohérents à la lecture; le mutant
+de signe indépendant reste à rejouer avant de qualifier cette porte de
+mutation-résistante.
 
 ## Delta replay post-`8481b67` — anti-vacuité fermée, payload exact toujours NO-GO
 
