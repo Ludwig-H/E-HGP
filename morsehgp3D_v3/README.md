@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=f6cb562680138ee37a8ef9684453af73e3dad946`. Le commit produit
+`HEAD=origin/main=37139de2329c32797815db3fa73130a2e80aeda3`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -35,7 +35,9 @@ manifeste mémoire estimé; `038bbbb` intègre ensuite le fold hybride comme
 cinquième forme, `17b70cf` nettoie son premier défaut de reporting, puis
 `7022298` renforce la permutation `face-owner`, exporte son flux d'arêtes et
 écrit le premier oracle device de ce flux; `23379d4` puis `f6cb562` consignent
-sa première session G4 et l'audit préalable. Ces derniers
+sa première session G4 et l'audit préalable; `a6e3078` simplifie le choix
+d'owner par un tri unique, corrige le routage des CTests CUDA et commence la
+validation hostile, puis `37139de` consigne sa seconde session G4. Ces derniers
 résultats et leurs limites sont épinglés dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
@@ -231,17 +233,18 @@ reçue]** Claude rapporte que `faceowner_device_kernel.cu` reproduit arête par
 arête le flux CPU `collect_edges` sur cinq ordres et trois catalogues, avec le
 mutant `drop-edge` tué. L'audit CPU frais recertifie exactement les masses
 `3 030 554 / 1 319 076` à `n=64` et `17 282 892 / 7 385 988` à `n=200`.
-La ligne `n=400` publiée comme `44,5 M / 13,9 M` n'est toutefois pas
-reproductible avec la provenance par défaut : `coord=73` donne
-`44 258 951 / 19 073 174`; le log brut ou la commande exacte doit trancher.
-Les `49,25 ms` device excluent allocations, transferts et DSU, tandis que les
+La divergence documentaire `n=400` est maintenant fermée : la seconde session
+publie par ordre exactement `44 258 951 / 19 073 174` pour `coord=73`, identiques
+au CPU. Le tri-owner simplifié rend 46,40 ms device sur ce même flux. Ce temps
+exclut allocations, transferts et DSU, tandis que les
 `8,67 s` CPU couvrent le fold complet : le débit device est très encourageant,
 mais ce rapport n'est pas encore un speedup de bout en bout. L'API GCE confirme
-une session `SPOT` de 5 min 08 s et l'état final `TERMINATED`. La source reste
+deux sessions `SPOT` terminées; la seconde génération dure 3 min 25 s. La source reste
 partielle et le verrou 50 k exact demeure la source-certificat sparse. Note de
 Claude et réception indépendante :
 [`NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md`](audits/NOTE_CLAUDE_QUALIFICATION_G4_FACEOWNER_20260810.md),
-[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](audits/AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md).
+[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](audits/AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md) et
+[`AUDIT_REQUALIFICATION_TRI_OWNER_37139DE.md`](audits/AUDIT_REQUALIFICATION_TRI_OWNER_37139DE.md).
 
 **[mur de masse et sortie exacte proposée]** Le sweep `n=100..400` confirme
 que le join monolithique reste un NO-GO prévisionnel à 50 k; son ajustement
@@ -285,16 +288,17 @@ l'émission exhaustive des incidences de
 le DSU et le transcript restent sur CPU. L'unranking a été vérifié
 indépendamment sur 198 922 cas et la cible CPU sans CUDA compile sous `-Werror`.
 Ce kernel est une cinquième vérité bornée, pas le backend hybride produit : il
-matérialise toute la masse `I_k`. Sa validation d'entrée est incomplète, son
-admission `56*I` sous-compte des buffers explicitement simultanés pouvant
-atteindre environ `92*I` avant les workspaces Thrust, et le CTest qui attend
-l'absence du kernel est encore enregistré sous CUDA. La première tentative G4
+matérialise toute la masse `I_k`. `a6e3078` corrige le CTest CUDA inversé et le
+tri-owner retire des buffers; le plancher explicite courant reste cependant
+`68*I+8*S` avant workspaces, contre un manifeste `56*I`. La validation dite
+hostile accepte encore `k=2,rank=1,incidence_offsets=[0,1]`, entrée qui peut
+faire boucler l'unranking. La première tentative G4
 de l'auditeur a été refusée avant démarrage par le quota; la session distincte
 de Claude a ensuite produit le diagnostic positif ci-dessus et sa cible est
 également `TERMINATED`. Le verdict de code préalable, la réception de session,
 la simplification de buffers et les portes G4 minimales sont dans
 [`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md) et
-[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](audits/AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md).
+[`AUDIT_REQUALIFICATION_TRI_OWNER_37139DE.md`](audits/AUDIT_REQUALIFICATION_TRI_OWNER_37139DE.md).
 
 Le candidat GPU exact pour le **masque de requêtes hybride** est différent :
 pour chaque requête, il trie et réduit les hits dans les postings visibles; la longueur du
@@ -333,7 +337,8 @@ Voir
 Le contrat du compteur/cover, sa mémoire, ses reçus et ses mutants sont dans
 [`NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md`](audits/NOTE_SOLUTION_GPU_FALLBACK_POSTINGS_COUNT_20260810.md).
 
-La séquence de réalisation est maintenant nette : sidecar validé et attaches
+La séquence de réalisation est maintenant nette : vérité CPU combinatoire
+indépendante, sidecar validé et attaches
 fast dans un scratch; `query_mask` et labels canoniques gelés; préflight
 `I/H/D/probes` dépendant du mode plus arène (`D_prefix` au minimum global,
 `D_preferR` sur le driver complet); CPU exact pour les petits lots, owner GPU seulement
@@ -348,7 +353,11 @@ incidente. Le live ne garantit pas encore l'unicité des handles de boule. Sans
 ce contrat, tous les actifs du lot restent requêtes. Positif borné : sur vingt
 catalogues `smax=n=11` sous prétention de complétude, les 213 incidences
 `(paire-ordre,F)` issues de 78 paires-ordre ex æquo ont toutes un carrier unique strict, et 47 548 tests de voisins `rank=k` n'en
-trouvent aucun; les fixtures hostiles restent à graver.
+trouvent aucun; les fixtures hostiles restent à graver. Le noyau CPU, son
+quotient tardif et l'ordre tout-requête puis masque sparse sont spécifiés dans
+[`NOTE_SOLUTION_CPU_REFERENCE_QUERY_MASK_20260810.md`](audits/NOTE_SOLUTION_CPU_REFERENCE_QUERY_MASK_20260810.md).
+La frontière de confiance propriétaire post-tri est détaillée dans
+[`NOTE_CONTRAT_VALIDATED_HYBRID_SIDECAR_20260810.md`](audits/NOTE_CONTRAT_VALIDATED_HYBRID_SIDECAR_20260810.md).
 
 **[forêts dérivées, crédit borné]** `df984ed` transforme les records en une
 projection généalogique candidate : les campagnes ciblées rendent zéro témoin

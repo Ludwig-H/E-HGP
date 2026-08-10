@@ -11,7 +11,7 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
 courante est
-`HEAD=origin/main=f6cb562680138ee37a8ef9684453af73e3dad946` : `405c37b`
+`HEAD=origin/main=37139de2329c32797815db3fa73130a2e80aeda3` : `405c37b`
 livre le join postings reçu, `651e47f` la porte des niveaux d'événement
 `q_min`, `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
 troisième voie postings globale, `45c0b7b` les records par témoins et les
@@ -21,13 +21,15 @@ l'oracle `face-owner` borné et sa réfutation permanente, `56e76c6` son rejeu
 ordre par ordre, `038bbbb` le premier fold hybride committé, `17b70cf` le
 nettoyage de son reporting CLI, puis `7022298` la permutation `face-owner`,
 l'export de ses arêtes et le premier oracle device de ce flux, puis `23379d4`
-et `f6cb562` sa session G4 déclarée et sa documentation. L'audit du
+et `f6cb562` sa session G4 déclarée et sa documentation, `a6e3078` le tri-owner,
+la garde d'entrée et les CTests CUDA conditionnels, puis `37139de` la seconde
+qualification G4. L'audit du
 dernier palier, avec toutes les empreintes et les correctifs directement
 implémentables, est
 [`AUDIT_LIVE_HYBRID_3147BB0.md`](AUDIT_LIVE_HYBRID_3147BB0.md); l'audit GPU
 distinct est [`AUDIT_GPU_FACEOWNER_7022298.md`](AUDIT_GPU_FACEOWNER_7022298.md).
 
-## Autorité courante à `f6cb562`
+## Autorité courante à `37139de`
 
 | contrat | état reçu |
 | --- | --- |

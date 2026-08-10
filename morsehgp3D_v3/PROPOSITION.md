@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=f6cb562680138ee37a8ef9684453af73e3dad946`, toujours sous
+`HEAD=origin/main=37139de2329c32797815db3fa73130a2e80aeda3`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -51,7 +51,9 @@ dérivées des records, `f2e78fa` la proposition cofaces sans paires, puis
 premier fold hybride committé, `17b70cf` son nettoyage CLI, puis `7022298` la
 permutation `face-owner`, l'export de son flux d'arêtes et le premier oracle
 device de ce flux; `23379d4` puis `f6cb562` consignent sa première session G4
-et l'audit préalable. Leurs
+et l'audit préalable; `a6e3078` applique le tri-owner, la première validation
+hostile et les CTests CUDA conditionnels, puis `37139de` consigne la seconde
+session. Leurs
 empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
@@ -203,16 +205,19 @@ groupe les incidences de `k`-faces, choisit l'owner de niveau minimal et rend
 des branches triées à comparer au CPU. Cette forme est utile comme
 falsificateur borné, mais elle n'est ni le fold hybride produit ni une solution
 50 k : elle matérialise `I_k`, laisse le DSU sur l'hôte et son modèle VRAM
-`56*I` n'est pas majorant. La réparation prioritaire trie directement
+`56*I` n'est pas majorant. `a6e3078` trie désormais directement
 `(signature,activation_rank,generator)` afin que le premier incident soit
-l'owner, puis produit les arêtes gardées sans les buffers de réduction et
-d'arêtes brutes. La première tentative G4 a été empêchée avant démarrage par le
+l'owner et retire les buffers de réduction. Le plancher reste pourtant
+`68*I+8*S` avant workspace et une entrée `rank<k` avec préfixe d'incidences
+forgé peut faire boucler l'unranking; le validateur doit exiger chaque delta
+`C(rank,k)`. La première tentative G4 a été empêchée avant démarrage par le
 quota; une session distincte de Claude rapporte ensuite quinze accords de flux
-et tue `drop-edge`. Les masses `n=64/200` sont recertifiées localement; la ligne
-`n=400` et le périmètre temporel demandent encore le reçu brut. Les deux cibles
-sont arrêtées. Détails et portes de qualification :
+et tue `drop-edge`. La seconde session reproduit exactement à `n=400`
+44 258 951 incidences, 19 073 174 arêtes et 46,40 ms pour les phases device.
+Les cibles sont arrêtées; le mur total et la validation hostile restent ouverts.
+Détails et portes de qualification :
 [`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md) et
-[`AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md`](audits/AUDIT_RECEPTION_G4_FACEOWNER_23379D4.md).
+[`AUDIT_REQUALIFICATION_TRI_OWNER_37139DE.md`](audits/AUDIT_REQUALIFICATION_TRI_OWNER_37139DE.md).
 
 Le candidat GPU exact proposé pour le masque de requêtes hybride est
 `postings-count`, non une énumération de faces : le device trie les hits `(requête,candidat)`, leur run
@@ -255,6 +260,14 @@ noyau CPU exact; sinon l'owner GPU n'est admissible que si sa borne **all-miss**
 tient, puis le cover/count si sa masse et ses workspaces tiennent; à défaut,
 repli CPU ou refus. Le taux de cache ne décide jamais l'admission. `face-owner`
 reste explicitement un oracle borné et ne devient pas un fallback produit.
+
+Avant CUDA sparse, une vérité CPU entièrement combinatoire compare le flux
+avant quotient, le quotient tardif et le replay sans partager CSR, RLE ou
+unranking avec le device :
+[`NOTE_SOLUTION_CPU_REFERENCE_QUERY_MASK_20260810.md`](audits/NOTE_SOLUTION_CPU_REFERENCE_QUERY_MASK_20260810.md).
+Le sidecar opaque, propriétaire des points et du catalogue final puis construit
+post-tri, est spécifié dans
+[`NOTE_CONTRAT_VALIDATED_HYBRID_SIDECAR_20260810.md`](audits/NOTE_CONTRAT_VALIDATED_HYBRID_SIDECAR_20260810.md).
 
 Le certificat batch fast peut lui-même être obtenu sans graphe global, mais son
 contrat est plus fort qu'une `BallKey` injective : boule exacte et saturé fermé
