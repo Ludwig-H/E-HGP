@@ -1526,6 +1526,54 @@ quatrièmes points admissibles forment donc un préfixe dans chaque direction �
 c'est `neighbour_along`, mot pour mot. Chercher à l'éviter revient à le
 réinventer.
 
+### Le même payload, les mêmes nuages, le même processus
+
+L'audit exige, avant toute décision d'architecture, de « comparer les générateurs
+avec un payload, des unités de travail, des nuages et des high-waters communs ».
+C'est fait, dans les limites de ce que ce fichier peut offrir.
+
+Les deux chronos de `mhgp3v_direct_source` sont désormais **symétriques** :
+chacun couvre exactement le même payload — construire le catalogue, puis les $K$
+forêts depuis **ce** catalogue —, sur les mêmes nuages, dans le même processus.
+Le juge, c'est-à-dire les empreintes et leur comparaison, est **exclu des deux** :
+il n'existe dans aucun chemin produit.
+
+L'unité de travail commune est le temps mur. Ce n'est pas un choix par défaut :
+c'est l'unité que le budget de 100 ms mesure, et c'est la seule qui ne suppose
+pas qu'un sommet d'arrangement et un candidat de clique coûtent la même chose.
+Les masses des deux côtés restent publiées séparément et ne sont **pas**
+commensurables.
+
+**[mesuré, densité fixe $10^{-3}$, $s_{\max}=6$, $K=5$, quatre nuages par ligne,
+même binaire Release, même processus]**
+
+| $n$ | emprise | référence — parcours | source — cover | rapport |
+| ---: | ---: | ---: | ---: | ---: |
+| 20 | $27^3$ | 0,174 s | **0,055 s** | 3,16 |
+| 40 | $34^3$ | 1,023 s | **0,201 s** | 5,10 |
+| 60 | $39^3$ | 2,077 s | **0,835 s** | 2,49 |
+| 80 | $43^3$ | 3,005 s | **1,420 s** | 2,12 |
+| 120 | $49^3$ | **6,401 s** | 7,604 s | **0,84** |
+
+**Le croisement est mesuré, pas extrapolé.** La source directe est deux à cinq
+fois plus rapide que le parcours jusqu'à environ quatre-vingts points, puis elle
+**perd** vers cent dix. Le fold ne pèse rien des deux côtés — 0,285 s contre
+0,306 s à $n=120$ — donc c'est bien la construction du catalogue qui décide.
+
+Sur cette fenêtre, la source croît en gros comme $n^{3,2}$ et le parcours comme
+$n^{1,6}$. Ces exposants sont des ajustements sur cinq points, pas des théorèmes,
+et je ne les extrapole pas à 50 k. Mais le croisement, lui, est une observation
+directe, et il concorde exactement avec ce que l'énumération combinadique
+prédit : elle est quartique en degré, et le degré est déjà borné.
+
+C'est la première comparaison du dépôt qui satisfasse la condition posée par
+l'audit — même payload, mêmes nuages, unité de travail commune, juge exclu. Sa
+conclusion est étroite et solide : **telle qu'implémentée, la source directe ne
+passe pas l'échelle au-delà d'une centaine de points sur ce profil.** Elle ne dit
+rien de ce que ferait un cover adaptatif, un générateur de candidats différent ou
+un portage device — et elle ne qualifie ni ne disqualifie le parcours à 50 k, où
+ni l'un ni l'autre n'a jamais tourné.
+
 ### Question ouverte à l'auditeur
 
 Le cover et la fenêtre ferment la **complétude**, et le prototype le prouve à

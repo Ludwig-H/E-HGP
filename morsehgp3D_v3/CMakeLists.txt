@@ -356,6 +356,13 @@ add_test(NAME mhgp3v_direct_source_forest COMMAND mhgp3v_direct_source
          --min-clouds 6 --min-emitted 1000 --min-forest-nodes 1000)
 # Une foret d'ordre k lit les rangs k et k+1 : demander k = s_max rendrait des
 # ordres tronques en les qualifiant.
+# LA COMPARAISON A MEME PAYLOAD, en porte permanente. Les deux chronos couvrent
+# exactement la meme chose — catalogue puis K forets depuis CE catalogue — sur
+# les memes nuages et dans le meme processus, juge exclu. La porte ne fixe aucun
+# seuil de temps : elle garde l'EXACTITUDE du couple, pas sa vitesse.
+add_test(NAME mhgp3v_direct_source_same_payload COMMAND mhgp3v_direct_source
+         --clouds 4 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
+         --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
 mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
   mhgp3v_direct_source_reject_forest_order "exige s_max"
   --clouds 1 --points 12 --coord 5 --smax 4 --seed 31337 --judge 1 --forest 4)

@@ -675,6 +675,7 @@ int main(int argc, char** argv) {
   long long forests_compared = 0, forest_faults = 0, forest_nodes = 0, forest_roots = 0;
   unsigned long long csr_bytes_high_water = 0, cover_bytes_high_water = 0;
   double reference_seconds = 0, source_seconds = 0;
+  double source_fold_seconds = 0, reference_fold_seconds = 0, carried_reference_fold = 0;
   std::vector<long long> leaf_q[5];
   long long outcome_count[5][4] = {};
 
@@ -970,11 +971,18 @@ int main(int argc, char** argv) {
                                         entry.second.members.end());
         source_catalogue.spheres.push_back(sphere);
       }
+      // LES DEUX CHRONOS SONT SYMETRIQUES, ET C'EST LA CONDITION POUR COMPARER.
+      // Chacun couvre exactement le meme payload : construire le catalogue, puis
+      // les K forets depuis CE catalogue. Le juge — empreintes et comparaison —
+      // est exclu des deux : il n'existe pas dans un chemin produit.
       for (int k = 1; k <= forest_orders; ++k) {
+        const auto f0 = std::chrono::steady_clock::now();
         const mhgp::Forest a = mhgp::build_forest(pts, source_catalogue, k);
-        // Le chrono source couvre l'assemblage du catalogue et SES folds; il ne
-        // couvre pas ceux de la référence, comptés à part.
+        const auto f1 = std::chrono::steady_clock::now();
         const mhgp::Forest b = mhgp::build_forest(pts, truth, k);
+        const auto f2 = std::chrono::steady_clock::now();
+        source_fold_seconds += std::chrono::duration<double>(f1 - f0).count();
+        reference_fold_seconds += std::chrono::duration<double>(f2 - f1).count();
         ++forests_compared;
         forest_nodes += (long long)a.nodes.size();
         forest_roots += (long long)a.roots.size();
@@ -988,7 +996,9 @@ int main(int argc, char** argv) {
         }
       }
     }
-    source_seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - s0).count();
+    source_seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - s0).count() -
+                      reference_fold_seconds + carried_reference_fold;
+    carried_reference_fold = reference_fold_seconds;
     ++decided;
   }
 
@@ -1054,8 +1064,24 @@ int main(int argc, char** argv) {
     printf("foret      : %lld forets comparees (k=1..%d)  %lld noeuds  %lld racines"
            "  %lld differentes\n", forests_compared, forest_orders, forest_nodes,
            forest_roots, forest_faults);
-  printf("temps      : reference=%.3f s  source=%.3f s  (diagnostics, pas un SLO)\n",
-         reference_seconds, source_seconds);
+  // LE MEME PAYLOAD, LES MEMES NUAGES, LE MEME PROCESSUS, LA MEME MACHINE. C'est
+  // la seule unite de travail commune dont ce fichier dispose, et c'est celle que
+  // le budget de 100 ms mesure. Les masses de chaque cote, elles, ne sont PAS
+  // commensurables : un sommet d'arrangement et un candidat de clique ne coutent
+  // pas la meme chose, et leurs denominateurs ne comptent pas la meme population.
+  if (forest_orders > 0)
+    printf("temps      : MEME PAYLOAD (catalogue + %d forets) sur les MEMES nuages —"
+           " reference %.3f s (dont fold %.3f) contre source %.3f s (dont fold %.3f),"
+           " rapport %.2f\n", forest_orders, reference_seconds + reference_fold_seconds,
+           reference_fold_seconds, source_seconds, source_fold_seconds,
+           source_seconds > 0.0 ? (reference_seconds + reference_fold_seconds) / source_seconds
+                                : 0.0);
+  else
+    printf("temps      : catalogue seul — reference=%.3f s  source=%.3f s  rapport %.2f\n",
+           reference_seconds, source_seconds,
+           source_seconds > 0.0 ? reference_seconds / source_seconds : 0.0);
+  printf("           : le juge (empreintes et comparaison) est EXCLU des deux chronos;"
+         " ce rapport est un diagnostic sur ces nuages, pas un SLO\n");
 
   struct Floor { const char* name; u128 value; long long required; };
   const Floor floors[] = {
