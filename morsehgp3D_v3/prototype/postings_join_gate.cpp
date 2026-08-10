@@ -324,6 +324,19 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
       /*enforce_event_guard=*/true, /*collect_pairs=*/true);
   if (!candidate.ok) { *why = std::string("fold candidat refuse : ") + candidate.refusal; return false; }
   if (!folds_agree(truth, candidate, /*ignore_representatives=*/false, why)) return false;
+  // LA FORET DERIVEE DES RECORDS est bien formee sous famille complete : une
+  // continuation ou multifusion dont le temoin strict n'a pas de noeud serait
+  // une incoherence de la chaine de re-temoignage.
+  for (std::size_t idx = 0; idx < truth.orders.size(); ++idx) {
+    const mhgp3v::GammaForest forest =
+        mhgp3v::build_gamma_forest(truth.orders[idx].gamma_records);
+    if (forest.orphan_witnesses != 0) {
+      *why = "foret k=" + std::to_string(idx + 1) + " : " +
+             std::to_string(forest.orphan_witnesses) +
+             " temoins stricts orphelins sous famille complete";
+      return false;
+    }
+  }
   if (!receipt_agrees(truth, receipt, catalogue_members_mass(catalogue), why)) return false;
   if (!independent_weights_agree(catalogue, receipt, why)) return false;
 

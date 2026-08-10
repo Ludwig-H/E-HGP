@@ -76,6 +76,60 @@ struct GammaEventRecord {
   }
 };
 
+// LA FORET DE FUSION D'UN ORDRE, derivee des records par une fonction PURE :
+// une naissance cree une feuille, une continuation re-temoigne le noeud de son
+// unique temoin strict, une multifusion cree un noeud interne et y attache les
+// noeuds de ses temoins stricts. C'est le payload « K forets » du contrat,
+// entierement determine par les records — donc recu par la meme porte.
+struct GammaForestNode {
+  int level_representative = -1;
+  std::vector<mhgp::i32> witness;   // temoin de la composante a la creation
+  int parent = -1;
+  int kind = 0;   // 0 naissance, 1 multifusion
+};
+
+struct GammaForest {
+  std::vector<GammaForestNode> nodes;
+  std::vector<int> roots;   // noeuds sans parent a la fin
+  long long orphan_witnesses = 0;   // temoins stricts sans noeud (famille partielle)
+};
+
+inline GammaForest build_gamma_forest(const std::vector<GammaEventRecord>& records) {
+  GammaForest forest;
+  std::map<std::vector<mhgp::i32>, int> node_by_witness;
+  for (const GammaEventRecord& record : records) {
+    if (record.type == 0) {
+      node_by_witness[record.closed_witness] = (int)forest.nodes.size();
+      forest.nodes.push_back({record.level_representative, record.closed_witness, -1, 0});
+    } else if (record.type == 1) {
+      const auto it = node_by_witness.find(record.strict_witnesses.front());
+      if (it == node_by_witness.end()) {
+        ++forest.orphan_witnesses;
+        continue;
+      }
+      const int node = it->second;
+      node_by_witness.erase(it);
+      node_by_witness[record.closed_witness] = node;
+    } else {
+      const int merged = (int)forest.nodes.size();
+      forest.nodes.push_back({record.level_representative, record.closed_witness, -1, 1});
+      for (const std::vector<mhgp::i32>& strict_witness : record.strict_witnesses) {
+        const auto it = node_by_witness.find(strict_witness);
+        if (it == node_by_witness.end()) {
+          ++forest.orphan_witnesses;
+          continue;
+        }
+        forest.nodes[(std::size_t)it->second].parent = merged;
+        node_by_witness.erase(it);
+      }
+      node_by_witness[record.closed_witness] = merged;
+    }
+  }
+  for (std::size_t i = 0; i < forest.nodes.size(); ++i)
+    if (forest.nodes[i].parent < 0) forest.roots.push_back((int)i);
+  return forest;
+}
+
 // LES MUTANTS DU CHEMIN SUJET (note temoins §6) : ils vivent dans le fold de
 // verite G^2 — le sujet juge — et doivent mourir par la comparaison de RECORDS
 // de l'oracle, pas seulement par les triples par niveau ni la provenance.

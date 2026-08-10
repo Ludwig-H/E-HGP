@@ -258,6 +258,17 @@ int main(int argc, char** argv) {
               " croissances=%lld lots silencieux=%lld  digest diagnostique=%llu\n",
               max_order, total_levels, total_births, total_fusions, total_growth,
               total_silent, fold_digest(fold));
+  long long forest_nodes = 0, forest_roots = 0, forest_orphans = 0;
+  for (const mhgp3v::SaturatedOrderFold& order : fold.orders) {
+    const mhgp3v::GammaForest gamma_forest = mhgp3v::build_gamma_forest(order.gamma_records);
+    forest_nodes += (long long)gamma_forest.nodes.size();
+    forest_roots += (long long)gamma_forest.roots.size();
+    forest_orphans += gamma_forest.orphan_witnesses;
+  }
+  std::printf("forets     : K forets derivees des records — noeuds=%lld racines=%lld"
+              " temoins orphelins=%lld%s\n", forest_nodes, forest_roots, forest_orphans,
+              smax >= n ? "" : "  (sous-famille : orphelins possibles, payload non"
+                               " autoritatif)");
   std::printf("transcript : Gamma par marquage q_min — naissances=%lld continuations=%lld"
               " multifusions=%lld violations de garde=%lld%s\n",
               gamma_births, gamma_continuations, gamma_multifusions, guard_violations,
