@@ -579,6 +579,33 @@ mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   --clouds 2 --points 6 --coord 10 --smax 6 --max-order 2 --seed 7
   --min-decided 1000)
 
+# LE PREDICAT STRUCTUREL D'EVENEMENT GAMMA, EN PORTES PERMANENTES. Les
+# theoremes 1--2 de NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN sont RECUS contre la
+# verite exhaustive : un niveau du sature est un vrai niveau Gamma_k ssi son
+# lot contient un generateur avec |M| >= k et q_min(B) <= k+1. Le juge calcule
+# q_min par enumeration INDEPENDANTE (miniboule rationnelle de l'oracle),
+# jamais en lisant n_support du produit — qui coinciderait sur ce chemin et
+# ferait une porte morte ; le mutant demande par l'audit 621ee80 est le
+# decalage q_min+1, tue par la reception. La campagne saturee exige l'accord
+# JUSQUE sur le regime degenere.
+add_test(NAME mhgp3v_gamma_judge_event_predicate_generic COMMAND mhgp3v_gamma_judge
+         --clouds 10 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
+         --subject-fold 1 --check-event-predicate 1 --min-event-levels 1000)
+add_test(NAME mhgp3v_gamma_judge_event_predicate_saturated COMMAND mhgp3v_gamma_judge
+         --clouds 20 --points 9 --coord 4 --smax 11 --max-order 3 --seed 31337
+         --subject-fold 1 --require-degenerate-agreement 1 --check-event-predicate 1
+         --min-event-levels 1400)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_qmin_shift "desaccords" 1
+  --clouds 2 --points 8 --coord 40 --smax 11 --max-order 2 --seed 7
+  --subject-fold 1 --check-event-predicate 1 --force-qmin-shift 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_reject_predicate_without_fold "exige --subject-fold" 2
+  --check-event-predicate 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_reject_shift_without_predicate "exige --check-event-predicate" 2
+  --subject-fold 1 --force-qmin-shift 1)
+
 # LA PORTE DU JOIN PAR POSTINGS, EN PORTES PERMANENTES. Les fixtures nommees de
 # la note 50 k ont leur transcript GRAVE (une derive de la semantique Q1.2
 # contredit la porte elle-meme) ; les campagnes generique et saturee font le

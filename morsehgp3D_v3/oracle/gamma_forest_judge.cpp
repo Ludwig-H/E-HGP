@@ -33,8 +33,10 @@
 
 #include <algorithm>
 #include <charconv>
+#include <climits>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <map>
 #include <random>
 #include <set>
@@ -412,6 +414,17 @@ int main(int argc, char** argv) {
   int shift_level = 0;   // mutant : decale un noeud sujet vers un niveau etranger
   int subject_fold = 0;  // 0 = chaine build_forest, 1 = fold sature (S.4/S.5)
   int require_degenerate = 0;   // exiger l'accord AUSSI sur les ordres degeneres
+  // LE PREDICAT STRUCTUREL D'EVENEMENT GAMMA (theoremes 1--2 de la note
+  // NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN) : un niveau du sature est un vrai
+  // niveau Gamma_k ssi son lot contient un generateur avec |M| >= k et
+  // q_min(B) <= k+1, ou q_min est la PLUS PETITE taille d'un sous-ensemble du
+  // sature dont la miniboule est B — calculee ICI par enumeration exacte de
+  // l'oracle, jamais lue du produit (`n_support` coinciderait sur ce chemin :
+  // un tel mutant serait une porte morte, l'audit 621ee80 demande le DECALAGE
+  // q_min+1).
+  int check_predicate = 0;
+  int force_qmin_shift = 0;
+  long long min_event_levels = 0;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -443,6 +456,9 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--force-shift-level")) target = &shift_level;
     else if (!strcmp(argv[i], "--subject-fold")) target = &subject_fold;
     else if (!strcmp(argv[i], "--require-degenerate-agreement")) target = &require_degenerate;
+    else if (!strcmp(argv[i], "--check-event-predicate")) target = &check_predicate;
+    else if (!strcmp(argv[i], "--force-qmin-shift")) target = &force_qmin_shift;
+    else if (!strcmp(argv[i], "--min-event-levels")) wide = &min_event_levels;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { std::printf("ECHEC : valeur entiere invalide pour %s\n", argv[i]); return 2; }
     ++i;
@@ -463,6 +479,20 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : --force-shift-level n'a de sens que pour le sujet chaine\n");
     return 2;
   }
+  if (check_predicate < 0 || check_predicate > 1 || force_qmin_shift < 0 ||
+      force_qmin_shift > 1) {
+    std::printf("ECHEC : campagne absurde\n");
+    return 2;
+  }
+  // Le predicat lit les lots du fold sature ; sans lui il n'y a pas de lot.
+  if (check_predicate == 1 && subject_fold == 0) {
+    std::printf("ECHEC : --check-event-predicate exige --subject-fold 1\n");
+    return 2;
+  }
+  if (force_qmin_shift == 1 && check_predicate == 0) {
+    std::printf("ECHEC : --force-qmin-shift exige --check-event-predicate 1\n");
+    return 2;
+  }
 
   std::mt19937 rng((unsigned)seed);
   std::uniform_int_distribution<int> pick(0, coord - 1);
@@ -474,6 +504,9 @@ int main(int argc, char** argv) {
   long long rank_censored_orders = 0, foreign_levels = 0, refused_subject = 0;
   long long refused_orders = 0, judged_orders = 0;
   long long truth_births = 0, truth_fusions = 0, truth_continuations = 0;
+  long long predicate_orders_agreed = 0, predicate_mismatch_clean = 0;
+  long long predicate_mismatch_degenerate = 0, predicate_event_levels = 0;
+  long long qmin_subset_failures = 0;
 
   for (int c = 0; c < clouds; ++c) {
     std::vector<mhgp::P3> pts;
@@ -513,6 +546,68 @@ int main(int argc, char** argv) {
       }
     }
 
+    // q_min PAR GENERATEUR, une fois par nuage : la plus petite taille d'un
+    // sous-ensemble du sature dont la miniboule est EXACTEMENT la boule du
+    // generateur (centre et rayon rationnels), agregee sur TOUTES les
+    // provenances par enumeration bornee a max_order+1 — jamais la taille du
+    // support canonique, qu'une boule degeneree peut depasser (note §5). Le
+    // predicat n'a besoin que de q_min <= k+1 <= max_order+1.
+    std::vector<int> qmin_cap;
+    if (check_predicate == 1) {
+      qmin_cap.assign(catalogue.spheres.size(), INT_MAX);
+      for (std::size_t s = 0; s < catalogue.spheres.size(); ++s) {
+        const mhgp::CriticalSphere& sphere = catalogue.spheres[s];
+        const Rational target_radius = exact_level_of(sphere.sph);
+        const Rational target_x =
+            Rational(BigInt(static_cast<long long>(sphere.sph.base.x))) +
+            Rational(BigInt::from_i128(sphere.sph.nx), BigInt::from_i128(sphere.sph.den));
+        const Rational target_y =
+            Rational(BigInt(static_cast<long long>(sphere.sph.base.y))) +
+            Rational(BigInt::from_i128(sphere.sph.ny), BigInt::from_i128(sphere.sph.den));
+        const Rational target_z =
+            Rational(BigInt(static_cast<long long>(sphere.sph.base.z))) +
+            Rational(BigInt::from_i128(sphere.sph.nz), BigInt::from_i128(sphere.sph.den));
+        std::vector<int> generator_members;
+        for (int t = 0; t < sphere.rank; ++t)
+          generator_members.push_back(
+              (int)catalogue.members[(std::size_t)(sphere.members_begin + t)]);
+        const int cap = std::min(max_order + 1, (int)generator_members.size());
+        std::vector<int> subset;
+        bool found = false;
+        std::function<void(std::size_t, int)> descend = [&](std::size_t from, int need) {
+          if (found) return;
+          if (need == 0) {
+            RationalSphere ball;
+            std::vector<int> support;
+            if (!exact_miniball(pts, subset, &ball, &support)) {
+              ++qmin_subset_failures;
+              return;
+            }
+            if (compare(ball.squared_radius, target_radius) == 0 &&
+                compare(ball.centre.x, target_x) == 0 &&
+                compare(ball.centre.y, target_y) == 0 &&
+                compare(ball.centre.z, target_z) == 0)
+              found = true;
+            return;
+          }
+          for (std::size_t i = from; i + (std::size_t)need <= generator_members.size(); ++i) {
+            subset.push_back(generator_members[i]);
+            descend(i + 1, need - 1);
+            subset.pop_back();
+            if (found) return;
+          }
+        };
+        for (int size = 1; size <= cap && !found; ++size) {
+          descend(0, size);
+          if (found) qmin_cap[s] = size;
+        }
+        // MUTANT force_qmin_shift : decaler q_min d'une unite doit etre vu par
+        // la reception (des niveaux verite perdent leur generateur d'evenement,
+        // ou des generateurs q=k+2 entrent a tort).
+        if (force_qmin_shift == 1 && qmin_cap[s] != INT_MAX) ++qmin_cap[s];
+      }
+    }
+
     bool cloud_degenerate = false;
     for (int k = 1; k <= max_order; ++k) {
       const GammaTruth truth = gamma_truth(pts, k);
@@ -527,6 +622,62 @@ int main(int argc, char** argv) {
       if (truth.degenerate_events) cloud_degenerate = true;
       const bool rank_censored = truth.maximum_relevant_rank > smax;
       if (rank_censored) ++rank_censored_orders;
+
+      // RECEPTION DU PREDICAT STRUCTUREL : les niveaux predits — lots du
+      // catalogue contenant un generateur avec |M| >= k et q_min <= k+1 —
+      // doivent etre EXACTEMENT les niveaux d'evenement de la verite Gamma_k.
+      // Un ecart dans un sens (niveau predit etranger) ou l'autre (niveau
+      // verite sans generateur d'evenement) refute le lemme sur ce nuage.
+      if (check_predicate == 1) {
+        std::vector<Rational> predicted;
+        for (std::size_t s = 0; s < catalogue.spheres.size(); ++s) {
+          if ((int)catalogue.spheres[s].rank < k) continue;
+          if (qmin_cap[s] > k + 1) continue;
+          predicted.push_back(exact_level_of(catalogue.spheres[s].sph));
+        }
+        std::sort(predicted.begin(), predicted.end(),
+                  [](const Rational& a, const Rational& b) { return compare(a, b) < 0; });
+        predicted.erase(std::unique(predicted.begin(), predicted.end(),
+                                    [](const Rational& a, const Rational& b) {
+                                      return compare(a, b) == 0;
+                                    }),
+                        predicted.end());
+        predicate_event_levels += (long long)predicted.size();
+        const Rational* foreign_predicted = nullptr;
+        const Rational* orphan_truth = nullptr;
+        for (const Rational& level : predicted) {
+          bool known = false;
+          for (const Rational& truth_level : truth.levels)
+            if (compare(level, truth_level) == 0) { known = true; break; }
+          if (!known) { foreign_predicted = &level; break; }
+        }
+        for (const Rational& truth_level : truth.levels) {
+          bool covered = false;
+          for (const Rational& level : predicted)
+            if (compare(level, truth_level) == 0) { covered = true; break; }
+          if (!covered) { orphan_truth = &truth_level; break; }
+        }
+        const bool degenerate_here = truth.degenerate_events || rank_censored;
+        if (foreign_predicted == nullptr && orphan_truth == nullptr) {
+          ++predicate_orders_agreed;
+        } else if (degenerate_here && require_degenerate == 0) {
+          ++predicate_mismatch_degenerate;
+        } else {
+          ++predicate_mismatch_clean;
+          ++failures;
+          if (foreign_predicted != nullptr)
+            std::printf("[nuage %d ordre %d] PREDICAT REFUTE : niveau predit %s/%s sans"
+                        " evenement Gamma (%zu niveaux verite)\n", c, k,
+                        foreign_predicted->numerator().to_decimal().c_str(),
+                        foreign_predicted->denominator().to_decimal().c_str(),
+                        truth.levels.size());
+          if (orphan_truth != nullptr)
+            std::printf("[nuage %d ordre %d] PREDICAT REFUTE : niveau Gamma %s/%s sans"
+                        " generateur d'evenement (|M|>=%d, q_min<=%d)\n", c, k,
+                        orphan_truth->numerator().to_decimal().c_str(),
+                        orphan_truth->denominator().to_decimal().c_str(), k, k + 1);
+        }
+      }
 
       // LE SUJET DE CET ORDRE : la chaine v2 (build_forest) ou le fold sature.
       // Le fold expose directement ses partitions par niveau ; la chaine passe
@@ -696,6 +847,13 @@ int main(int argc, char** argv) {
   std::printf("           : la carte des degeneres MESURE la frontiere Q1 ; elle n'est"
               " pas un desaccord du sujet sur son domaine declare, et ses etiquettes"
               " compte/contenu sont descriptives\n");
+  if (check_predicate == 1)
+    std::printf("predicat   : ordres en accord=%lld  refutations hors degenerescence=%lld"
+                "  ecarts degeneres (carte)=%lld  niveaux d'evenement predits=%lld"
+                "  echecs miniboule de sous-ensemble=%lld\n",
+                predicate_orders_agreed, predicate_mismatch_clean,
+                predicate_mismatch_degenerate, predicate_event_levels,
+                qmin_subset_failures);
 
   struct Floor { const char* name; long long value; long long required; };
   const Floor floors[] = {
@@ -704,6 +862,7 @@ int main(int argc, char** argv) {
       {"nuages non degeneres", nondegenerate_clouds, min_nondegenerate},
       {"niveaux compares", levels_compared, min_levels},
       {"ordres juges", judged_orders, min_judged},
+      {"niveaux d'evenement du predicat", predicate_event_levels, min_event_levels},
   };
   for (const Floor& floor : floors)
     if (floor.value < floor.required) {

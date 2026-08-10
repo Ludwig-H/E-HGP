@@ -122,6 +122,17 @@ le join postings rend fold 36,1 s et total 55,1 s pour 40 007 générateurs,
 Mesures, mur restant (la masse elle-même) et questions ouvertes :
 [`NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md`](audits/NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md).
 
+**[prédicat d'événement Gamma reçu]** Les théorèmes 1--2 de la
+[`note q_min de l'auditeur`](audits/NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md)
+sont reçus contre la vérité exhaustive : un niveau du saturé est un vrai
+niveau Gamma_k ssi son lot contient un générateur avec `|M| >= k` et
+`q_min(B) <= k+1`. Le juge calcule `q_min` par énumération rationnelle
+indépendante (jamais `n_support` du produit) : 30/30 ordres génériques et
+**60/60 ordres saturés sous accord dégénéré exigé**, zéro réfutation, mutant
+`q_min+1` tué — portes permanentes. L'emploi du prédicat dans le transcript du
+fold (marquage des racines, garde fail-closed, provenance certifiée) est le
+prochain palier.
+
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
 fold et repli multi-cœurs. La
 [`réponse Q1--Q5`](audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md)

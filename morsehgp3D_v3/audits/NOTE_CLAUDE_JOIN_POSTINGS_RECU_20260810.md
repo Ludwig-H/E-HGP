@@ -143,7 +143,18 @@ tableau dense en `O(max id)`), reçu remis à zéro à l'entrée. Séquence §8
 adoptée telle quelle :
 
 1. Fenêtre `q_min` et transcript reçu contre Gamma sur catalogues géométriques
-   complets (juge `--check-event-predicate`, mutant `q_min+1`).
+   complets (juge `--check-event-predicate`, mutant `q_min+1`). **FAIT, reçu**
+   dans le commit suivant : le juge calcule `q_min` par énumération exacte
+   indépendante (miniboule rationnelle de l'oracle, tailles `<= K+1`) et
+   compare les niveaux prédits `{|M| >= k, q_min <= k+1}` aux niveaux
+   d'événement de la vérité exhaustive. Générique : 30/30 ordres en accord,
+   1 234 niveaux prédits, zéro réfutation. Grille saturée sous
+   `--require-degenerate-agreement` : **60/60 ordres en accord, 1 704 niveaux
+   prédits, zéro écart y compris dégénéré**. Le mutant `q_min+1` est réfuté au
+   premier nuage à chaque ordre (portes permanentes, codes contractuels). Le
+   théorème des lots est donc reçu ; reste son EMPLOI dans le transcript du
+   fold (marquage des racines par générateurs d'événement, garde `q=k+1` sans
+   racine stricte, certification de provenance `n_support == q_min`).
 2. Oracle indépendant de chaque poids et identités de degré dans la porte.
 3. Rejouer les mêmes catalogues pour comparer `G²` et postings, transcript
    Gamma et digest canonique compris.
