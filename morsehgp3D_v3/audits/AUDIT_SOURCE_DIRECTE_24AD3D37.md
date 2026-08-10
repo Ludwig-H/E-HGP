@@ -328,6 +328,12 @@ l'analyse, les deux commandes temporelles, le cas refusé et la correction
 constructive sont dans
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
+Le même audit alterne ensuite cinq couples mesure/juge sans forêt : la différence
+du timer source couvre -0,185 à +0,241 s malgré le différentiel présent seulement
+sous juge, et la seconde commande affiche le chrono source inférieur dans les
+cinq couples. Position et état cache/allocateur initial diffèrent; soustraire
+les modes n'est donc pas une estimation du coût du juge.
+
 ### Finding historique fermé à `bb31b426` : domaine `s_max`
 
 La CLI accepte désormais `smax>=2`, mais la boucle appelle toujours les lanes

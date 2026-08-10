@@ -1574,6 +1574,14 @@ référence/source couvrent pourtant 0,93 à 1,10 et traversent 1 dans les deux
 campagnes. Le fold est minoritaire, tandis que le juge encore imputé à la source
 interdit d'attribuer l'écart à la seule construction des catalogues.
 
+Une comparaison alternée des modes `judge=0` et `judge=1`, sans forêt, ne permet
+pas de soustraire ce juge : les différences pairées du chrono source vont de
+-0,185 à +0,241 s, et la seconde commande affiche le chrono source inférieur
+dans chacun des cinq couples. Sous juge, `flat_catalogue` précède le timer
+source et rend l'état cache/allocateur initial différent; il faut donc séparer
+les timers dans ce même mode, pas retrancher deux exécutions de position et
+d'état différents.
+
 Une régression log--log ordinaire sur les **cinq** lignes publiées donne environ
 $n^{2,71}$ pour la source et $n^{1,98}$ pour la référence. Les exposants 3,2 et
 1,6 venaient seulement du sous-intervalle $n=40..120$. Aucun de ces ajustements

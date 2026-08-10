@@ -177,6 +177,61 @@ ni équivalence de performance, ni supériorité, ni croisement, ni loi d'échel
 Elles ne corrigent ni l'asymétrie des timers ni l'absence de high-water commun.
 La formulation « croisement étroit et solide vers 110 » reste donc non reçue.
 
+### La différence des modes CLI n'isole pas le juge
+
+Une troisième campagne, lancée depuis le `HEAD` documentaire
+`9b8954b6141aceafa01b56c9a0e8cecf47e6fc98`, conserve `CPU0`, le même binaire
+et la même fixture, mais alterne l'ordre de cinq couples
+`mesure` / `juge --forest 0`. Les deux commandes ne diffèrent que par
+`--judge 0` contre
+`--judge 1`; toutes deux imposent `--forest 0`. Le mode mesure ne construit
+aucune vérité et affirme explicitement ne juger aucune exactitude; le mode juge
+construit d'abord `flat_catalogue`, puis chronomètre la source et son
+différentiel.
+
+```sh
+taskset -c 0 /tmp/mhgp3v-chrono-release.fj1zEQ/mhgp3v_direct_source --clouds 4 --points 120 --coord 49 --smax 6 --seed 20260810 --min-clouds 4 --min-emitted 2000 --judge 0 --forest 0
+taskset -c 0 /tmp/mhgp3v-chrono-release.fj1zEQ/mhgp3v_direct_source --clouds 4 --points 120 --coord 49 --smax 6 --seed 20260810 --min-clouds 4 --min-emitted 2000 --judge 1 --forest 0
+```
+
+| couple | ordre | source affichée, mesure | source affichée, juge | juge moins mesure | référence affichée, juge |
+| ---: | :---: | ---: | ---: | ---: | ---: |
+| 1 | M puis J | 4,164 s | 4,048 s | -0,116 s | 4,437 s |
+| 2 | J puis M | 3,909 s | 4,010 s | +0,101 s | 4,569 s |
+| 3 | M puis J | 3,951 s | 3,949 s | -0,002 s | 4,520 s |
+| 4 | J puis M | 3,889 s | 4,130 s | +0,241 s | 4,379 s |
+| 5 | M puis J | 4,253 s | 4,068 s | -0,185 s | 4,569 s |
+
+Les moyennes source affichées valent 4,0332 s en mesure et 4,0410 s sous juge;
+la différence moyenne n'est que +0,0078 s. Les différences pairées couvrent
+-0,185 à +0,241 s et leur médiane vaut -0,002 s. Toutes les exécutions rendent
+0, les mêmes compteurs communs émissions/candidats/fenêtre
+`20 324 / 33 743 104 / 2 609 704`; les cinq jugements rendent zéro désaccord.
+
+Le signe observé suit exactement la position dans cet échantillon : la seconde
+commande affiche le chrono source inférieur dans les cinq couples. Sa moyenne
+vaut 3,9726 s contre 4,1016 s pour la première, soit -0,1290 s ou environ
+-3,15 %. Lorsque le juge passe second, `juge-mesure` vaut en moyenne -0,101 s;
+lorsqu'il passe premier, la même différence vaut +0,171 s. Le quasi-zéro global
+de +0,0078 s est donc une annulation entre deux biais de position opposés dans
+un plan encore déséquilibré trois/deux, pas une preuve d'équivalence.
+
+Ce quasi-zéro ne prouve surtout pas que le différentiel est gratuit. L'inspection
+statique établit qu'il reste dans le timer juge. Mais, dans ce mode,
+`flat_catalogue` parcourt d'abord les mêmes points et primitives et rend l'état
+cache/allocateur initial différent avant le départ du timer source; en mode
+mesure, ce prélude n'existe pas. Le gain systématique de la seconde position est
+compatible avec un état plus chaud, sans en identifier la cause : fréquence,
+prédicteurs, pages, caches et ordonnancement restent confondus. Soustraire les
+deux exécutions CLI n'a donc aucune autorité pour chiffrer le juge.
+
+La correction mesurable reste donc structurelle : fermer le timer source dans
+le **même mode juge** avant tout différentiel, placer le juge dans un timer
+séparé et recevoir cette identité par une porte dédiée. Les modes CLI existants
+ne permettent pas de reconstruire a posteriori le coût pur du juge. Ce finding
+ne remet pas en cause la soustraction cumulative interne du fold référence,
+dont l'algèbre reste correcte.
+
 Les exposants annoncés ne sont pas non plus l'ajustement des cinq lignes. Une
 régression log--log ordinaire sur toutes les valeurs publiées donne environ
 2,71 pour la source et 1,98 pour la référence; 3,2 et 1,6 correspondent aux

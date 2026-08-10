@@ -885,6 +885,13 @@ chaque thread SMT, gardent les mêmes compteurs imprimés mais font osciller le
 rapport à $n=120$ entre 0,93 et 1,10, de part et d'autre de 1 dans les deux
 campagnes. Voir
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
+
+Sur cinq couples alternés sans forêt, soustraire `judge=0` de `judge=1` donne
+entre -0,185 et +0,241 s côté source, et la seconde commande affiche le chrono
+source inférieur dans chaque couple. `flat_catalogue` précède le timer dans un
+seul mode : position et état initial diffèrent, donc cette soustraction est sans
+autorité. Il faut des timers séparés dans la même exécution jugée.
+
 Plusieurs agrégats restent en `i64` avec une justification qui oublie le facteur
 `clouds<=2000`.
 

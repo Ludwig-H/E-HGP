@@ -120,6 +120,14 @@ répétitions documentées à `n=120`, cinq sur chaque thread SMT, gardent les m
 compteurs imprimés et zéro divergence mais rendent des rapports entre 0,93 et
 1,10, de part et d'autre de 1 dans les deux campagnes : aucun croisement
 localisé ne suit de cette dispersion.
+
+Une campagne alternant `judge=0` et `judge=1`, sans forêt, confirme aussi que la
+soustraction des modes n'isole pas le juge : les différences pairées source vont
+de -0,185 à +0,241 s et la seconde commande affiche le chrono source inférieur
+dans les cinq couples. La construction préalable de `flat_catalogue` n'existe
+que dans un mode et change l'état initial avant le timer source; seule une
+séparation interne des timers dans le même mode peut recevoir ce coût.
+
 Le chrono est audité séparément dans
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 

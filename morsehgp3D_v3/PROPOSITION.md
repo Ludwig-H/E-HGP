@@ -178,6 +178,13 @@ chaque thread SMT, conservent les mêmes compteurs imprimés et zéro divergence
 mais donnent des rapports de 0,93 à 1,10, de part et d'autre de 1 dans les deux
 campagnes. Aucun croisement stable n'est localisé. La table est un diagnostic à
 remesurer après exclusion du juge, pas une décision d'échelle.
+
+Même la soustraction des modes CLI ne l'exclut pas : sur cinq couples alternés
+sans forêt, `source_judge-source_mesure` couvre -0,185 à +0,241 s, et la seconde
+commande affiche le chrono source inférieur dans les cinq couples.
+`flat_catalogue` précède le timer dans un seul mode, donc position et états
+cache/allocateur ne sont pas comparables. La correction exige des bornes de
+timer distinctes dans le même mode juge.
 Un rebuild Release frais de ce commit passe 74/74 CTests en 319,87 s; les trois
 campagnes directes ciblées passent aussi sous ASan/UBSan/LSan. Ces résultats
 créditent l'intégration et l'accord sémantique borné, pas la comptabilité des
