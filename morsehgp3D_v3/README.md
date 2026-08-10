@@ -424,18 +424,28 @@ détermine la forêt comme quotient. La dégénérescence est celle de la
 (toute face obtuse a des points intérieurs, et l'effondrement de miniboule crée
 des niveaux égaux génériques).
 
-**[mesuré, portes permanentes]** Sur coordonnées génériques ($40^3$, 30 nuages,
-$k\le3$) : 25 nuages sans cosphéricité, **accord exact partout** — la chaîne
-rend exactement les partitions de $\Gamma_k$ à chaque niveau, aux deux coupes.
-Sur grille saturée ($4^3$, cosphéricités partout) : **36 ordres sur 60 en
-désaccord de STRUCTURE**, zéro censure de rang. La classe est identifiée par
-les diagnostics : **le sujet sous-fusionne** — une coquille cosphérique de rang
-$r>k+1$ porte au niveau de sa sphère le lot de fusion de ses $(k+1)$-faces,
-mais la forêt d'ordre $k$ ne lit que les rangs $k$ et $k+1$ : la sphère est au
-catalogue et l'événement est invisible. C'est la mesure directe du NO-GO Q1 de
-l'auditeur, et elle nomme le travail du fold v3 : une **lecture élargie** où
-toute sphère de rang $r$ porte ses événements d'ordre $k$ pour chaque $k<r$ —
-sous réserve du théorème de quotient encore manquant.
+**J'AI D'ABORD PUBLIÉ « 36/60 ordres en sous-fusion structurelle », ET C'ÉTAIT
+CONTAMINÉ.** Cette première mesure comparait comme complètes des forêts que le
+sujet avait LUI-MÊME censurées (`Forest::authoritative == false`, son contrat
+déclaré) — exactement la faute que l'audit live a nommée avant que je ne la
+voie. Après le fail-closed sur les autorités du sujet, la conclusion CHANGE :
+
+**[mesuré, portes permanentes, audit live appliqué]** Sur coordonnées
+génériques ($40^3$, 30 nuages, $k\le3$) : **78 ordres jugés hors cosphéricité,
+accord des couvertures à toutes les coupes testées** — couvertures de $\Gamma_k$ identiques à chaque niveau
+de l'**union** vérité+sujet, aux coupes **stricte et fermée** ; 3 ordres
+refusés par censure du sujet, 9 dégénérés jugés en accord. Sur grille saturée
+($4^3$) : **40 ordres sur 60 refusés par censure DÉCLARÉE du sujet — tous les
+ordres $k=2,3$ —, et les 20 ordres $k=1$ jugés sont en accord**. Aucune
+divergence silencieuse n'est observée dans ces deux campagnes : là où ce sujet
+ne sait pas, il censure et le dit. La frontière Q1 observée est donc une
+**censure déclarée**, pas la preuve d'une sous-fusion silencieuse ; le travail
+du fold v3 est de la REMPLACER (tour saturée, lecture élargie prouvée ou
+quotient local $\Omega_{k,c}$ de la note de l'auditeur), jugé par ce même
+oracle. Le claim est scellé au périmètre : couvertures aux deux coupes sur
+l'union des niveaux — les partitions de facettes et le journal d'incidences
+restent hors du claim, et le mutant `--force-shift-level` (fusion déplacée vers
+un niveau étranger) meurt par la porte.
 - Les forêts ne sont pas construites, et le centre rationnel, le rayon et $\beta$ ne sont pas confrontés à une vérité distincte. Ce qui est comparé est listé au §4 ; « payload entier » serait faux.
 - Pas de forêts ni de reverse search **dans le catalogue**. Un propriétaire exact
   expérimental est calculé sur la récolte naviguée et rejoué sous permutation,
@@ -2413,7 +2423,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
 | 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` fermé sur u16; garde de type encore partielle; identité signée directement reçue dans le delta live `003ba13f...` et mutant non signé tué; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
-| 4 | référence de l'oracle M1 tolérante aux multiplicités | **le juge $\Gamma_k$ est écrit** (`mhgp3v_gamma_judge`, §4) : accord exact exigé et vérifié hors cosphéricité, frontière mesurée dessus (36/60 ordres en sous-fusion structurelle sur grille $4^3$) ; il juge la chaîne catalogue→forêt, pas encore le parcours par flats, et doit être audité |
+| 4 | référence de l'oracle M1 tolérante aux multiplicités | **le noyau du juge $\Gamma_k$ est écrit** (`mhgp3v_gamma_judge`, §4) : accord des couvertures observé hors cosphéricité (78/78, deux coupes, union des niveaux) ; sur grille saturée le sujet CENSURE tous les ordres $k=2,3$ et seuls les 20 ordres $k=1$ sont jugés ; partitions de facettes, incidences et régime multiplicitaire restent hors du claim ; il juge la chaîne catalogue→forêt, pas encore le parcours par flats |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |
 | 6 | invariance topologique du support canonique quand plusieurs supports minimaux portent la même miniboule | ouverte ; la convention par coordonnées est *une* convention, pas un théorème |
 | 6 bis | sémantique quotientée des observations confondues | ouverte ; le prototype les **refuse** explicitement plutôt que de publier un support dépendant de la numérotation |

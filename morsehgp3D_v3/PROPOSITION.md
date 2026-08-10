@@ -1166,6 +1166,7 @@ campagne finie comme une preuve universelle.
 | cosphéricité = rejet de domaine | **traitée** : le sommet porte sa coquille entière (§0 ter) |
 | « le clipping de Jung débloque l'échelle » | grand facteur constant, pas un ordre ; $m_e\approx0{,}45\,n$ |
 | « telle qu'implémentée, la source directe ne passe pas l'échelle au-delà d'une centaine de points » (rapport 0,84 à $n=120$) | **artefact de périmètre** : le juge — différentiel et empreintes — était facturé au seul chrono source ; au périmètre corrigé, dix répétitions rendent 1,04–1,39, toutes au-dessus de 1 (README) |
+| « 36/60 ordres en sous-fusion structurelle sur grille $4^3$ » (première mesure du juge $\Gamma_k$) | **contaminé** : comparait comme complètes des forêts que le sujet avait lui-même censurées (`authoritative=false`) ; après fail-closed, 40/60 censures DÉCLARÉES — tous les ordres $k=2,3$ — et accord des couvertures sur les 20 ordres $k=1$ jugés (§15) |
 
 ## 15. La voie industrielle 50 k : ce que le manuscrit fixe, et la forme device
 
@@ -1257,14 +1258,19 @@ pas PCIe dans le budget.
 
 **Ordre des travaux, révisé après la réponse de l'auditeur**
 ([`audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md`](audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md)) :
-A0 oracle $\Gamma_k$ indépendant depuis la définition du manuscrit — **LIVRÉ**
-(`mhgp3v_gamma_judge`, cinq portes ; accord exact vérifié hors cosphéricité,
-frontière mesurée dessus : 36/60 ordres en sous-fusion structurelle sur grille
-$4^3$, cause identifiée = la lecture « rangs $k$ et $k{+}1$ » manque les lots
-portés par les coquilles de rang supérieur ; théorème de lecture élargie posé à
-l'auditeur dans
-[`audits/NOTE_CLAUDE_JUGE_GAMMA_20260810.md`](audits/NOTE_CLAUDE_JUGE_GAMMA_20260810.md)) → A2 contrat
-strict--fermé du lot + journal `coverage_delta` → B1 fixture exacte des quatre
+A0 noyau de l'oracle $\Gamma_k$ indépendant depuis la définition du manuscrit —
+**LIVRÉ POUR LES COUVERTURES DU DOMAINE JUGÉ, PAS POUR LE RÉGIME
+MULTIPLICITAIRE** (`mhgp3v_gamma_judge`, six portes ; accord des couvertures
+observé hors cosphéricité — 78/78, deux coupes, union des niveaux — et frontière
+mesurée : sur grille $4^3$ le sujet CENSURE tous les ordres $k=2,3$ et seuls les
+20 ordres $k=1$ sont jugés ; ma première lecture « 36/60 sous-fusions » comparait des payloads
+censurés et elle est RETIRÉE — voir la correction dans
+[`audits/NOTE_CLAUDE_JUGE_GAMMA_20260810.md`](audits/NOTE_CLAUDE_JUGE_GAMMA_20260810.md) ;
+le travail v3 = remplacer la censure par le quotient local $\Omega_{k,c}$ de
+[`audits/NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md`](audits/NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md)
+ou la tour saturée, jugé par ce même oracle; partitions de facettes et
+incidences restent à recevoir) → A2 contrat strict--fermé du lot + journal des
+facettes/incidences dont `coverage_delta` est dérivé → B1 fixture exacte des quatre
 supports perdus + oracle d'axe exhaustif → B2 germes indexés LBVH → Q4 les deux
 digests du moteur de tâches (scientifique global + ledger de replay) et replay
 1 thread contre N → C1 kernel verdict parent 64 bits + porte de refus du

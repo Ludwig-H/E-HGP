@@ -525,10 +525,18 @@ mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
 # lecture elargie du fold pourrait legitimement les faire tomber a zero.
 add_test(NAME mhgp3v_gamma_judge_generic COMMAND mhgp3v_gamma_judge
          --clouds 30 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
-         --min-decided 30 --min-nondegenerate 20 --min-levels 3000)
+         --min-decided 30 --min-nondegenerate 20 --min-levels 3000 --min-judged 80)
 add_test(NAME mhgp3v_gamma_judge_saturated COMMAND mhgp3v_gamma_judge
          --clouds 20 --points 9 --coord 4 --smax 11 --max-order 3 --seed 31337
-         --min-decided 20 --min-degenerate 15 --min-levels 1000)
+         --min-decided 20 --min-degenerate 15 --min-levels 200 --min-judged 10)
+# LE MUTANT DE NIVEAU DEPLACE : une fusion sujet poussee vers un niveau
+# ETRANGER n'est visible qu'en comparant sur l'UNION des niveaux, aux deux
+# coupes — le trou releve par l'audit live (echantillonnage aux seuls niveaux
+# de la verite, coupe fermee seule).
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_reject_shifted_level "desaccords hors degenerescence" 1
+  --clouds 10 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
+  --force-shift-level 1)
 mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   mhgp3v_gamma_judge_reject_unknown "argument inconnu" 2 --sujet-inexistant)
 mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge

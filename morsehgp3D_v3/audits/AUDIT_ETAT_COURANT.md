@@ -9,17 +9,114 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot committé
-audité est `e406e1f`; il ajoute au palier `81f9210` une comparaison temporelle
-source--référence et une quatorzième porte directe. Au pincement, `HEAD` et
-`origin/main` pointaient sur ce commit; les sources, prototypes, CMake et claims
-audités lui correspondent exactement. Le delta documentaire du présent audit
-est hors de ce snapshot produit. Son ledger comprend la réponse chrono
-`3d5a763`, les répétitions SMT `9b8954b` et l'audit inter-modes `84adbcc`.
-Aucun artefact brut des campagnes de taille ni de la session G4 n'est versionné
-avec ces commits.
+n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
+courante est `HEAD=origin/main=ac39ac7cba968ead6d8b0b8fe023545801ad9505`.
+Un delta Gamma correctif est encore non committé au-dessus de cette autorité;
+il est distingué explicitement ci-dessous. La chaîne
+reçue est `a8b5615` pour le delta produit, `1f0db40` pour l'égalité complète des
+champs déclarés de `Catalogue`, `29c2c22` pour le ledger owner/coplanaire, puis
+`f3802bd` pour le validateur F0, `f102d42` pour l'ordre observé, les contrôles
+source/pool et la migration des codes exacts, puis `ac39ac7` pour le premier
+juge Gamma. Les sections sur `e406e1f` et les paliers live
+07:31--07:53 sont conservées plus bas comme historique daté, pas comme état du
+worktree.
 
-## Delta live de reprise au-dessus de `f37341d`
+## Autorité courante à `ac39ac7` et delta Gamma correctif
+
+| contrat | état reçu |
+| --- | --- |
+| cover autonome, trois lanes, quatre planchers, ligne temporelle et disclaimer | **fermé sur les fixtures reçues** |
+| harnais signal, parseur strict et codes contractuels | **fermés sur les portes CMake**; les anciennes macros permissives sont supprimées |
+| comparaison des champs déclarés de `Catalogue` et des forêts | **positive sur les campagnes reçues**; sémantique des diagnostics et métrique d'octets restent ouvertes |
+| identité owner signée | **mutation-résistante sur la fixture directe** |
+| handle strict dupliqué dans F0 | **fermé à `f3802bd`**, fixture négative normale et `python -O` |
+| forêt topologique, source et tranche de pool | **détections positives reçues**; intégration des deux dernières fixtures, profondeur et cohérence sémantique restent ouvertes |
+| branche `build-order` | **reçue** : trace alimentée par la première lambda et mutant de branche tué |
+| travail du juge | **non reçu** : cardinal précrédité avant les recherches, mutant sans différentiel encore vert |
+| oracle Gamma exhaustif | **noyau positif, claim borné** : énumération exacte et lot atomique; le delta compare les couvertures aux coupes stricte et fermée sur l'union des niveaux, mais pas encore les partitions de facettes ni les incidences du sujet |
+| sémantique hors position générale | **NO-GO produit** : le record de coquille/support minimal n'expanse pas Gamma; sur la campagne saturée corrective, tous les ordres $k=2,3$ sont censurés et seuls les vingt ordres $k=1$ sont jugés |
+| arité quatre par préfixe d'axe | **candidat réfuté dans sa forme générale** : le niveau peut monter et descendre |
+| replay, 50 k/G4, coût et mémoire | **NO-GO inchangé** |
+
+Claude a posé cinq questions mathématiques. La
+[`réponse Q1--Q5`](REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md) fixe le lot
+strict--fermé, le journal d'incidences avec `coverage_delta` dérivé, le domaine réel des bornes tangentes, le
+contrat à deux digests du repli multi-cœurs et la correction F0. Elle conclut
+notamment que `flat_catalogue` puis le `build_forest` v2 partagé ne constituent
+pas une preuve du quotient multiplicitaire : le premier conserve un support
+minimal canonique, le second ne construit que `n_support` bras et la v3 contourne
+le fail-closed de `run` en appelant ce fold directement.
+
+La solution constructive proposée à Claude est maintenant séparée dans
+[`NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md`](NOTE_SOLUTION_GAMMA_DEGENERESCENCES_20260810.md) :
+oracle Gamma exhaustif par facettes/cofaces, puis quotient local d'une coquille
+par arrangement directionnel sur $S^2$, sans mosaïque globale.
+La question suivante de Claude reçoit une réponse plus directe dans
+[`REPONSE_COMPLEMENT_CLAUDE_GAMMA_20260810.md`](REPONSE_COMPLEMENT_CLAUDE_GAMMA_20260810.md) :
+le théorème exact utilise le saturé complet `M=I union U` et le graphe
+d'intersections des générateurs, pas la seule coquille ni une simple lecture de
+rangs élargie par le fold v2.
+
+## Réception de `f102d42`
+
+Claude a répondu positivement à quatre réserves : la
+branche réellement entrée alimente désormais un compteur d'ordre par nuage,
+`ForestNode::source` et sa tranche du pool sont contrôlés avant la signature,
+la ligne d'octets est bornée honnêtement aux buffers dynamiques et toutes les
+portes négatives passent par le helper à code exact. Le snapshot est épinglé à
+`prototype/direct_source.cpp` SHA-256
+`c59441103b327b8f93b1fad9023c74d1d6646f74b968a7b77c6d22491b81bc12` et
+`CMakeLists.txt` SHA-256
+`0920859cc21d04b35e3440e75fbec0e0628e3c161ce6d1c788345fdeb195785c`.
+Un build Release frais du commit puis les 26 portes directes passent 26/26 en
+5,29 s; le mutant de branche `build_order==1` vers `==2` sort 3 au premier
+nuage. Deux claims restent ouverts :
+
+1. `judge_comparisons += expected.size()` crédite en bloc toute la vérité
+   **avant** les recherches. Le plancher `decided*n` reste donc satisfait si les
+   recherches et comparaisons sont retirées; ce compteur ne reçoit pas encore
+   le travail effectif du juge.
+2. `max_depth` est mesuré mais n'est ni une faute ni une borne. Une chaîne saine
+   de 100 000 nœuds est déclarée `sound`, puis `forest_digest` termine par
+   `SIGSEGV` lors de la signature récursive; les concaténations ont en outre un
+   coût quadratique potentiel. Un mutant retirant source/pool de `sound()` reste
+   vert, car ces deux fixtures ne demandent pas encore leur passage par
+   `forest_digest`.
+
+Le crédit exact est donc **ordre observé, détections source/pool, libellé mémoire
+borné et codes exacts ajoutés**, pas « juge reçu » ni « validateur total ».
+
+## Réception du premier oracle Gamma et réponse corrective live
+
+Le commit `ac39ac7` livre un oracle exhaustif indépendant qui énumère toutes les
+`k`-facettes et `(k+1)`-cofaces, calcule leurs niveaux rationnels exacts et ferme
+chaque lot avant classification. Le préaudit constructif est consigné dans
+[`AUDIT_LIVE_ORACLE_GAMMA_F102D42.md`](AUDIT_LIVE_ORACLE_GAMMA_F102D42.md).
+
+Claude a ensuite répondu en fail-closed aux statuts, aux forêts non
+autoritatives et aux parents hors plage; le delta live pincé porte
+`oracle/gamma_forest_judge.cpp` SHA-256
+`295633b76f14b5a515aeb0d60006bdadee6eb2a8a6186fac124c82334b2937ae`
+et `CMakeLists.txt` SHA-256
+`46240129e7747ef514009192ab2120d12b0612f57e818f56605967f94cb45502`.
+Il compare les **couvertures** aux coupes stricte et fermée sur l'union des
+niveaux vérité+sujet et ajoute un mutant de niveau déplacé; six portes ciblées
+passent 6/6 sur ce snapshot. Les partitions de facettes sont conservées côté
+vérité mais ne sont pas confrontées au sujet, qui ne publie pas encore le
+journal d'incidences correspondant.
+
+La lecture correcte de la campagne saturée est importante : quarante ordres sur
+soixante sont refusés, exactement tous les ordres $k=2,3$; seuls les vingt
+ordres $k=1$ sont jugés, tous en accord de couverture. C'est un progrès réel du
+fail-closed, pas une fermeture du quotient multiplicitaire ni une carte mesurée
+de ses erreurs. Les anciennes « 36 sous-fusions » provenaient de payloads
+déclarés non autoritatifs et sont retirées. La porte saturée doit donc soit
+exiger des ordres $k\geq2$ effectivement jugés, soit rester explicitement une
+porte de censure, accompagnée d'un diagnostic non normatif séparé.
+
+## Ledger historique de la reprise au-dessus de `f37341d`
+
+### Premier delta cover avant commit
 
 Le premier delta non committé corrige positivement le mode cover autonome : il
 retourne 0, décide 2/2 nuages, compte 205 800 tests et atteint désormais son
@@ -141,11 +238,16 @@ strictement positif. Il faut recevoir une masse de comparaisons effectivement
 exécutées et tuer un mutant qui retire leur travail. De même, la nouvelle ligne
 « ordre exécuté » choisit sa chaîne depuis `build_order`; muter la branche
 d'exécution tout en gardant l'option laisse donc le claim inchangé. Une trace ou
-un compteur alimenté dans `run_source`/`run_reference` est encore nécessaire.
+un compteur alimenté dans `run_source`/`run_reference` était encore nécessaire;
+la trace d'ordre est fermée ensuite à `f102d42`, contrairement au compteur du
+juge précrédité.
+
+La table suivante appartient au ledger historique; les empreintes courantes de
+`f102d42` sont données dans la réception en tête de fichier.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| snapshot committé de code et de claims audité | `e406e1f646ef20eb222d50e8b2740e6d7d6f6aa3` |
+| baseline historique de code et de claims | `e406e1f646ef20eb222d50e8b2740e6d7d6f6aa3` |
 | commit d'audit indépendant précédant immédiatement le snapshot produit | `2855b752c2499606e1fbebabf58e679eff04fd41` |
 | `CMakeLists.txt` avec deltas replay/source directe et neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
@@ -165,7 +267,7 @@ un compteur alimenté dans `run_source`/`run_reference` est encore nécessaire.
 | `prototype/direct_source.cpp`, premier palier | `24ad3d37aedbf74c4b126fae30453a74d1f2a675eea572e6b92678b27c27258e` |
 | `prototype/direct_source.cpp`, palier dispersion historique | `2b47247e9d1ecd6e1a8a573f4597bab9bb19e10a4a3d2ab4295c524d2d1ee68c` |
 | `prototype/direct_source.cpp`, palier fonctionnel sans forêt | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
-| `prototype/direct_source.cpp`, palier courant avec forêt | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
+| `prototype/direct_source.cpp`, palier alors courant avec forêt | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
 | `prototype/direct_source.cpp` à `81f9210` | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
 | `prototype/direct_source.cpp` à `e406e1f` | `d933c3aeb6314f12769f594d30af6734c696b09ce2e67de39af23dbd0ed15ed9` |
 | fragment `CMakeLists.txt`, correctif intermédiaire avec treize CTests directs | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |

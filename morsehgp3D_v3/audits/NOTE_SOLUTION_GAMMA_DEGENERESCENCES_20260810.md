@@ -86,20 +86,31 @@ niveaux n'est pas écrite.
 
 ## 2. Quotient local d'une coquille : route constructive pour V2
 
-Considérons une boule exacte `B(c,r)`, son intérieur `I` et sa coquille `U`.
+Considérons une boule exacte `B(c,r)`, son intérieur `I` et sa coquille `U`,
+pour un ordre vérifiant `|I|<k<=|I|+|U|`. Posons `t=k-|I|`.
 Pour `u` dans `U`, une petite translation du centre donne exactement :
 
 $$\left\lVert u-(c+\varepsilon\nu)\right\rVert^2-r^2=\varepsilon^2\left\lVert\nu\right\rVert^2-2\varepsilon\langle u-c,\nu\rangle.$$
 
-Les points de `I` restent strictement intérieurs pour `epsilon` assez petit. La
-direction `nu` appartient donc au lien strict local de l'ensemble de niveau
-d'ordre `k` si et seulement si :
+Les points de `I` restent strictement intérieurs et les points hors de la boule
+restent extérieurs pour un rayon suffisamment petit. Si `lambda_t(nu)` désigne
+la `t`-ième plus grande valeur de `<u-c,nu>`, le rayon admissible sur cette
+direction vérifie exactement `0<epsilon<2*lambda_t(nu)` après réduction par une
+borne uniforme de stabilité. La direction `nu` appartient donc au lien strict
+local de l'ensemble de niveau d'ordre `k` si et seulement si :
 
 $$\lvert I\rvert+\#\left\lbrace u\in U:\langle u-c,\nu\rangle>0\right\rbrace\geq k.$$
 
 Cette formule suggère l'objet local exact suivant :
 
 $$\Omega_{k,c}=\left\lbrace \nu\in S^2:\lvert I\rvert+\#\left\lbrace u\in U:\langle u-c,\nu\rangle>0\right\rbrace\geq k\right\rbrace.$$
+
+Il s'agit d'un **germe à rayon variable**, pas nécessairement de l'intersection
+avec une unique petite sphère de rayon uniforme. Le changement de variable qui
+normalise chaque rayon par `min(rho_0,2*lambda_t(nu))` identifie le germe
+poncturé à `Omega times (0,1)`; ses composantes sont donc exactement celles de
+`Omega`. Le signe strict est essentiel : lorsque le produit scalaire est nul,
+le terme positif en `epsilon^2` place le point hors de la boule stricte.
 
 Les grands cercles `G_u = {nu : <u-c,nu> = 0}` découpent `S^2` en un complexe
 fini. Sur chaque cellule de toute dimension, le vecteur de signes et le nombre
@@ -168,6 +179,21 @@ Ce raccourci explique précisément pourquoi les seuls `n_support` points d'un
 support minimal ne suffisent pas en cas de coquille multiple. Il ne remplace pas
 l'arrangement général : hors position générale, un changement de `H0` peut se
 produire pour d'autres seuils `k-|I|`.
+
+### 3.1 Fixture qui décide ce point
+
+Prendre `I` vide, `k=2`, `c=0`, `r^2=1` et :
+
+$$U=\left\lbrace (1,0,0),(-1,0,0),(0,1,0),(0,-1,0)\right\rbrace.$$
+
+`Omega` possède quatre composantes, une par quadrant de signes. Leurs
+représentants sont les quatre paires adjacentes du carré, toutes nées strictement
+avant `1`. Dans `Gamma_2(<1)`, elles sont isolées; à la coupe fermée `1`, les
+triples et les deux diagonales apparaissent et les quatre composantes fusionnent.
+
+Le rang fermé vaut quatre, donc `s=k+2`. Cette fixture prouve simultanément que
+la règle « seuls les rangs `k` et `k+1` modifient `H0` » ne s'étend pas aux
+dégénérescences et que l'arrangement local détecte le lot manqué.
 
 ## 4. Complexité et route produit
 

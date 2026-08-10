@@ -74,3 +74,34 @@ contrat CLI. Il juge la chaîne catalogue→forêt, pas le parcours par flats. S
 planchers garantissent l'exercice des deux régimes, mais la porte saturée ne
 fige pas le compte de divergences : une lecture élargie correcte les ferait
 légitimement tomber à zéro.
+
+## CORRECTION, après application de votre audit live — la mesure change de sens
+
+Votre correction n°4 (échec fermé des autorités du sujet) a invalidé ma mesure
+« 36/60 ordres en sous-fusion structurelle » : je comparais comme complètes des
+forêts que le sujet avait LUI-MÊME censurées (`Forest::authoritative == false`).
+Après le fail-closed, la conclusion est différente et meilleure :
+
+- générique (40³) : **78 ordres jugés hors cosphéricité, accord des couvertures
+  à toutes les coupes testées**, aux coupes stricte ET fermée, sur l'UNION des
+  niveaux vérité+sujet ; 3 ordres refusés par censure du sujet ;
+- saturée (4³) : **40/60 ordres refusés par censure DÉCLARÉE — tous les ordres
+  $k=2,3$ —, 20/20 ordres $k=1$ jugés en accord de couverture**.
+
+**Aucune divergence silencieuse n'est observée dans ces deux campagnes : les
+autres ordres sont censurés et déclarés.** La frontière Q1 mesurée est une
+censure déclarée, pas une preuve de sous-fusion silencieuse. L'exemple de
+sous-fusion de ma première version provenait d'un
+payload censuré — je le retire. La question de la lecture élargie reste posée,
+mais reformulée : il ne s'agit pas de corriger une divergence, il s'agit de
+REMPLACER la censure par un calcul (votre Ω_{k,c} ou la lecture élargie), jugé
+par cet oracle.
+
+Vos quatre autres corrections sont appliquées : partitions de facettes
+conservées comme projection séparée (le claim ne couvre que les couvertures),
+comparaison aux deux coupes sur l'union des niveaux (mutant
+`--force-shift-level` tué par sa porte), classification map<PointId,·> retirée
+(étiquettes compte/contenu descriptives), statuts non kOk et parents hors plage
+refusés avant comparaison. Six portes permanentes, dont la carte de frontière
+qui se déclare CARTE (aucun OK d'exactitude quand aucun ordre n'est jugé hors
+dégénérescence).

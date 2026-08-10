@@ -70,7 +70,14 @@ void canonicalise(Partition* partition) {
 // ---------------------------------------------------------------------------
 struct GammaTruth {
   std::vector<Rational> levels;            // niveaux d'evenement, croissants
-  std::vector<Partition> partitions;       // partition a la coupe FERMEE de chaque niveau
+  // DEUX PROJECTIONS SEPAREES, exigees par l'audit live : la composante
+  // canonique est la liste triee de ses k-FACETTES (les facettes sont
+  // disjointes entre composantes), la couverture est l'union triee des
+  // identifiants (les couvertures PEUVENT se chevaucher pour k >= 2 — aucune
+  // map point->composante n'est licite). Le juge de la foret compare la
+  // seconde ; la premiere attend le journal d'incidences.
+  std::vector<std::vector<std::vector<std::vector<int>>>> facet_partitions;
+  std::vector<Partition> partitions;       // couvertures a la coupe FERMEE de chaque niveau
   bool degenerate_events = false;
   long long births = 0, fusions = 0, continuations = 0;
   long long faces = 0, cofaces = 0;
@@ -239,18 +246,27 @@ GammaTruth gamma_truth(const std::vector<mhgp::P3>& points, int k) {
       }
     }
 
-    // 5. LA PARTITION DE LA COUPE FERMEE : union des identifiants des faces de
-    // chaque composante (theoreme 2 : c'est deja l'amas discret couvert).
+    // 5. LA COUPE FERMEE, sous ses deux projections : composantes de facettes
+    // (canoniques, disjointes) et couvertures (theoreme 2 : l'union des
+    // identifiants est deja l'amas discret couvert).
     Partition partition;
+    std::vector<std::vector<std::vector<int>>> facet_partition;
     for (const auto& group : groups) {
       std::set<int> ids;
-      for (std::size_t i : group.second)
+      std::vector<std::vector<int>> component;
+      for (std::size_t i : group.second) {
         for (int z : faces[i]) ids.insert(z);
+        component.push_back(faces[i]);
+      }
+      std::sort(component.begin(), component.end());
+      facet_partition.push_back(std::move(component));
       partition.push_back(std::vector<int>(ids.begin(), ids.end()));
     }
     canonicalise(&partition);
+    std::sort(facet_partition.begin(), facet_partition.end());
     truth.levels.push_back(level);
     truth.partitions.push_back(std::move(partition));
+    truth.facet_partitions.push_back(std::move(facet_partition));
   }
   truth.ok = true;
   return truth;
@@ -272,6 +288,7 @@ struct SubjectForest {
   std::vector<int> node_parent;
   std::vector<std::vector<int>> subtree_ids;   // union des membres du sous-arbre
   bool ok = false;
+  const char* refusal = "";
 };
 
 SubjectForest read_subject(const mhgp::Catalogue& catalogue, const mhgp::Forest& forest) {
@@ -281,14 +298,27 @@ SubjectForest read_subject(const mhgp::Catalogue& catalogue, const mhgp::Forest&
   subject.node_parent.resize(count);
   subject.subtree_ids.resize(count);
   std::vector<std::set<int>> gather(count);
+  // FAIL-CLOSED SUR LES AUTORITES DU SUJET (audit live) : une foret non
+  // autoritative est un payload censure, jamais une foret complete ; un parent
+  // hors plage n'est pas une racine vivante, c'est un refus.
+  if (!forest.authoritative) { subject.refusal = "foret non autoritative"; return subject; }
   for (std::size_t i = 0; i < count; ++i) {
     const mhgp::ForestNode& node = forest.nodes[i];
-    if (node.source < 0 || node.source >= (int)catalogue.spheres.size()) return subject;
+    if (node.parent < -1 || node.parent >= (int)count) {
+      subject.refusal = "parent hors plage";
+      return subject;
+    }
+    if (node.source < 0 || node.source >= (int)catalogue.spheres.size()) {
+      subject.refusal = "source hors catalogue";
+      return subject;
+    }
     const mhgp::CriticalSphere& sphere = catalogue.spheres[(std::size_t)node.source];
     if (sphere.members_begin < 0 ||
         (std::size_t)sphere.members_begin + (std::size_t)sphere.rank >
-            catalogue.members.size())
+            catalogue.members.size()) {
+      subject.refusal = "tranche de pool hors catalogue";
       return subject;
+    }
     subject.node_level[i] = exact_level_of(sphere.sph);
     subject.node_parent[i] = node.parent;
     for (int t = 0; t < sphere.rank; ++t)
@@ -301,7 +331,7 @@ SubjectForest read_subject(const mhgp::Catalogue& catalogue, const mhgp::Forest&
     int a = subject.node_parent[i];
     long long steps = 0;
     while (a >= 0 && a < (int)count) {
-      if (++steps > (long long)count) return subject;   // cycle : refus
+      if (++steps > (long long)count) { subject.refusal = "cycle de parents"; return subject; }
       for (int z : ids) gather[(std::size_t)a].insert(z);
       a = subject.node_parent[(std::size_t)a];
     }
@@ -312,49 +342,48 @@ SubjectForest read_subject(const mhgp::Catalogue& catalogue, const mhgp::Forest&
   return subject;
 }
 
-Partition subject_partition_at(const SubjectForest& subject, const Rational& level) {
+Partition subject_partition_at(const SubjectForest& subject, const Rational& level,
+                               bool strict) {
   Partition partition;
   for (std::size_t i = 0; i < subject.node_level.size(); ++i) {
-    if (compare(subject.node_level[i], level) > 0) continue;
+    const int mine = compare(subject.node_level[i], level);
+    if (strict ? mine >= 0 : mine > 0) continue;
     const int parent = subject.node_parent[i];
-    const bool alive = parent < 0 || parent >= (int)subject.node_level.size() ||
-                       compare(subject.node_level[(std::size_t)parent], level) > 0;
+    bool alive = parent < 0;
+    if (!alive) {
+      const int his = compare(subject.node_level[(std::size_t)parent], level);
+      alive = strict ? his >= 0 : his > 0;
+    }
     if (alive) partition.push_back(subject.subtree_ids[i]);
   }
   canonicalise(&partition);
   return partition;
 }
 
-// Deux identifiants ensemble dans une partition, separes dans l'autre : faute
-// de STRUCTURE. Memes regroupements sur les identifiants communs mais couverture
-// differente : faute de COUVERTURE.
-enum class Mismatch { kNone, kCoverage, kStructure };
+// La verite a une coupe quelconque se lit dans ses niveaux d'evenement : la
+// coupe fermee en a est la coupe fermee du plus grand niveau <= a, la coupe
+// stricte celle du plus grand niveau < a. Rien ne change entre deux niveaux.
+const Partition* truth_partition_at(const GammaTruth& truth, const Rational& level,
+                                    bool strict) {
+  static const Partition empty;
+  const Partition* found = &empty;
+  for (std::size_t li = 0; li < truth.levels.size(); ++li) {
+    const int c = compare(truth.levels[li], level);
+    if (strict ? c < 0 : c <= 0) found = &truth.partitions[li];
+    else break;
+  }
+  return found;
+}
+
+// PAS DE map<PointId, composante> : les couvertures HGP peuvent se chevaucher
+// pour k >= 2, l'appartenance unique est une hypothese fausse (audit live). La
+// comparaison est l'egalite des collections canoniques ; la distinction
+// compte/contenu est DESCRIPTIVE, jamais une preuve de structure.
+enum class Mismatch { kNone, kCount, kContent };
 
 Mismatch classify(const Partition& truth, const Partition& subject) {
   if (truth == subject) return Mismatch::kNone;
-  std::map<int, int> truth_of, subject_of;
-  for (std::size_t c = 0; c < truth.size(); ++c)
-    for (int z : truth[c]) truth_of[z] = (int)c;
-  for (std::size_t c = 0; c < subject.size(); ++c)
-    for (int z : subject[c]) subject_of[z] = (int)c;
-  // Les identifiants communs doivent etre regroupes pareil des deux cotes.
-  std::map<std::pair<int, int>, int> pairing;
-  for (const auto& entry : truth_of) {
-    const auto it = subject_of.find(entry.first);
-    if (it == subject_of.end()) continue;
-    const std::pair<int, int> key{entry.second, it->second};
-    pairing.emplace(key, entry.first);
-  }
-  std::map<int, int> forward_seen, backward_seen;
-  for (const auto& entry : pairing) {
-    const auto forward = forward_seen.emplace(entry.first.first, entry.first.second);
-    if (!forward.second && forward.first->second != entry.first.second)
-      return Mismatch::kStructure;
-    const auto backward = backward_seen.emplace(entry.first.second, entry.first.first);
-    if (!backward.second && backward.first->second != entry.first.first)
-      return Mismatch::kStructure;
-  }
-  return Mismatch::kCoverage;
+  return truth.size() != subject.size() ? Mismatch::kCount : Mismatch::kContent;
 }
 
 std::string partition_text(const Partition& partition) {
@@ -377,7 +406,9 @@ int main(int argc, char** argv) {
   int clouds = 40, n = 8, coord = 5, smax = 11, max_order = 3;
   long long seed = 20260810;
   long long min_decided = 0, min_degenerate = 0, min_nondegenerate = 0, min_levels = 0;
+  long long min_judged = 0;
   long long show_degenerate = 0;
+  int shift_level = 0;   // mutant : decale un noeud sujet vers un niveau etranger
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -404,7 +435,9 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--min-degenerate")) wide = &min_degenerate;
     else if (!strcmp(argv[i], "--min-nondegenerate")) wide = &min_nondegenerate;
     else if (!strcmp(argv[i], "--min-levels")) wide = &min_levels;
+    else if (!strcmp(argv[i], "--min-judged")) wide = &min_judged;
     else if (!strcmp(argv[i], "--show-degenerate")) wide = &show_degenerate;
+    else if (!strcmp(argv[i], "--force-shift-level")) target = &shift_level;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { std::printf("ECHEC : valeur entiere invalide pour %s\n", argv[i]); return 2; }
     ++i;
@@ -414,7 +447,7 @@ int main(int argc, char** argv) {
   // miniboules rationnelles ; au-dela le juge serait un four, pas une porte.
   if (clouds < 1 || clouds > 2000 || n < 4 || n > 14 || coord < 2 || coord > 65536 ||
       smax < 2 || smax > mhgp::kMaxRank || max_order < 1 || max_order > 6 ||
-      max_order + 1 > smax) {
+      max_order + 1 > smax || shift_level < 0 || shift_level > 1) {
     std::printf("ECHEC : campagne absurde\n");
     return 2;
   }
@@ -426,7 +459,8 @@ int main(int argc, char** argv) {
   long long levels_compared = 0, failures = 0;
   long long clean_orders = 0, coverage_orders = 0, structure_orders = 0;
   long long degenerate_clean = 0, degenerate_coverage = 0, degenerate_structure = 0;
-  long long rank_censored_orders = 0, foreign_levels = 0;
+  long long rank_censored_orders = 0, foreign_levels = 0, refused_subject = 0;
+  long long refused_orders = 0, judged_orders = 0;
   long long truth_births = 0, truth_fusions = 0, truth_continuations = 0;
 
   for (int c = 0; c < clouds; ++c) {
@@ -448,6 +482,14 @@ int main(int argc, char** argv) {
     mhgp3v::FlatStatistics st{};
     mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
     const mhgp::Catalogue catalogue = mhgp3v::flat_catalogue(pts, smax, &st, &status, false, true);
+    // UN PAYLOAD CENSURE N'EST PAS UNE FORET COMPLETE : un statut non kOk sort
+    // le nuage du denominateur, avec sa categorie (audit live).
+    if (status != mhgp3v::CloudStatus::kOk) {
+      std::printf("  nuage %d : statut sujet %s, refuse avant comparaison\n", c,
+                  mhgp3v::cloud_status_name(status));
+      ++refused_subject;
+      continue;
+    }
 
     bool cloud_degenerate = false;
     for (int k = 1; k <= max_order; ++k) {
@@ -465,66 +507,102 @@ int main(int argc, char** argv) {
       if (rank_censored) ++rank_censored_orders;
 
       const mhgp::Forest forest = mhgp::build_forest(pts, catalogue, k);
-      const SubjectForest subject = read_subject(catalogue, forest);
+      SubjectForest subject = read_subject(catalogue, forest);
       if (!subject.ok) {
-        std::printf("[nuage %d ordre %d] foret sujet illisible (source ou tranche hors"
-                    " catalogue, ou cycle)\n", c, k);
-        ++failures;
+        // LE SUJET A CENSURE (foret non autoritative, source ou parent hors
+        // plage) : un payload censure ne se compare pas comme une foret
+        // complete, il sort du denominateur AVEC sa categorie — jamais compte
+        // comme un desaccord, jamais comme un accord.
+        std::printf("[nuage %d ordre %d] foret sujet refusee : %s\n", c, k,
+                    subject.refusal[0] ? subject.refusal : "illisible");
+        ++refused_orders;
         continue;
       }
-      // Tout niveau de noeud sujet doit etre un niveau d'evenement de la verite.
+      ++judged_orders;
+      // LE MUTANT DE NIVEAU DEPLACE : il pousse le premier noeud de niveau
+      // positif vers un niveau ETRANGER (le double du sien). Seule une
+      // comparaison sur l'UNION des niveaux, aux deux coupes, peut le voir —
+      // c'etait le trou releve par l'audit live (echantillonnage aux seuls
+      // niveaux de la verite).
+      if (shift_level == 1)
+        for (std::size_t i = 0; i < subject.node_level.size(); ++i)
+          if (subject.node_level[i].sign() > 0) {
+            subject.node_level[i] =
+                subject.node_level[i] + subject.node_level[i];
+            break;
+          }
+
+      // L'UNION DES NIVEAUX de la verite ET du sujet : un niveau sujet
+      // etranger devient une coupe TESTEE, pas un compteur diagnostique.
+      std::vector<Rational> cut_levels = truth.levels;
       for (const Rational& node_level : subject.node_level) {
         bool known = false;
         for (const Rational& level : truth.levels)
           if (compare(level, node_level) == 0) { known = true; break; }
-        if (!known) ++foreign_levels;
+        if (!known) {
+          ++foreign_levels;
+          cut_levels.push_back(node_level);
+        }
       }
+      std::sort(cut_levels.begin(), cut_levels.end(),
+                [](const Rational& a, const Rational& b) { return compare(a, b) < 0; });
+      cut_levels.erase(std::unique(cut_levels.begin(), cut_levels.end(),
+                                   [](const Rational& a, const Rational& b) {
+                                     return compare(a, b) == 0;
+                                   }),
+                       cut_levels.end());
 
       Mismatch worst = Mismatch::kNone;
+      bool worst_strict = false;
       const Rational* first_level = nullptr;
-      for (std::size_t li = 0; li < truth.levels.size(); ++li) {
+      for (std::size_t li = 0; li < cut_levels.size(); ++li) {
         ++levels_compared;
-        const Partition subject_partition = subject_partition_at(subject, truth.levels[li]);
-        const Mismatch verdict = classify(truth.partitions[li], subject_partition);
-        if (verdict != Mismatch::kNone && worst == Mismatch::kNone)
-          first_level = &truth.levels[li];
-        if (verdict == Mismatch::kStructure) worst = Mismatch::kStructure;
-        else if (verdict == Mismatch::kCoverage && worst == Mismatch::kNone)
-          worst = Mismatch::kCoverage;
+        for (int strict = 0; strict < 2; ++strict) {
+          const Partition subject_partition =
+              subject_partition_at(subject, cut_levels[li], strict != 0);
+          const Partition* truth_partition =
+              truth_partition_at(truth, cut_levels[li], strict != 0);
+          const Mismatch verdict = classify(*truth_partition, subject_partition);
+          if (verdict != Mismatch::kNone && worst == Mismatch::kNone) {
+            first_level = &cut_levels[li];
+            worst_strict = strict != 0;
+          }
+          if (verdict == Mismatch::kCount) worst = Mismatch::kCount;
+          else if (verdict == Mismatch::kContent && worst == Mismatch::kNone)
+            worst = Mismatch::kContent;
+        }
       }
 
       const bool degenerate = truth.degenerate_events || rank_censored;
       if (worst == Mismatch::kNone) {
         ++(degenerate ? degenerate_clean : clean_orders);
-      } else if (worst == Mismatch::kCoverage) {
+      } else if (worst == Mismatch::kContent) {
         ++(degenerate ? degenerate_coverage : coverage_orders);
       } else {
         ++(degenerate ? degenerate_structure : structure_orders);
       }
       // SUR LES NUAGES SANS EVENEMENT DEGENERE NI CENSURE DE RANG, L'ACCORD EST
       // EXIGE : c'est le domaine ou la position generale aurait tenu, et ou la
-      // chaine pretend l'exactitude.
+      // chaine pretend l'exactitude. Les etiquettes compte/contenu sont
+      // DESCRIPTIVES (audit live), jamais une preuve de structure.
+      const auto dump = [&](const char* label) {
+        std::printf("[nuage %d ordre %d] %s a la coupe %s du niveau montre (rang max"
+                    " pertinent %d)\n  verite : %s\n  sujet  : %s\n", c, k, label,
+                    worst_strict ? "STRICTE" : "FERMEE", truth.maximum_relevant_rank,
+                    partition_text(*truth_partition_at(truth, *first_level, worst_strict))
+                        .c_str(),
+                    partition_text(
+                        subject_partition_at(subject, *first_level, worst_strict))
+                        .c_str());
+      };
       if (degenerate && worst != Mismatch::kNone && show_degenerate > 0) {
         --show_degenerate;
-        std::size_t li = 0;
-        for (; li < truth.levels.size(); ++li)
-          if (compare(truth.levels[li], *first_level) == 0) break;
-        std::printf("[nuage %d ordre %d] divergence %s SOUS degenerescence, premier niveau"
-                    " fautif #%zu (rang max pertinent %d)\n  verite : %s\n  sujet  : %s\n",
-                    c, k, worst == Mismatch::kStructure ? "STRUCTURE" : "COUVERTURE", li,
-                    truth.maximum_relevant_rank,
-                    partition_text(truth.partitions[li]).c_str(),
-                    partition_text(subject_partition_at(subject, truth.levels[li])).c_str());
+        dump(worst == Mismatch::kCount ? "divergence de COMPTE sous degenerescence"
+                                       : "divergence de CONTENU sous degenerescence");
       }
       if (!degenerate && worst != Mismatch::kNone) {
-        std::size_t li = 0;
-        for (; li < truth.levels.size(); ++li)
-          if (compare(truth.levels[li], *first_level) == 0) break;
-        std::printf("[nuage %d ordre %d] DESACCORD %s hors degenerescence, premier niveau"
-                    " fautif #%zu\n  verite : %s\n  sujet  : %s\n", c, k,
-                    worst == Mismatch::kStructure ? "STRUCTURE" : "COUVERTURE", li,
-                    partition_text(truth.partitions[li]).c_str(),
-                    partition_text(subject_partition_at(subject, truth.levels[li])).c_str());
+        dump(worst == Mismatch::kCount ? "DESACCORD de COMPTE hors degenerescence"
+                                       : "DESACCORD de CONTENU hors degenerescence");
         ++failures;
       }
     }
@@ -539,14 +617,20 @@ int main(int argc, char** argv) {
   std::printf("verite     : naissances=%lld fusions=%lld continuations=%lld  niveaux"
               " compares=%lld\n", truth_births, truth_fusions, truth_continuations,
               levels_compared);
-  std::printf("ordres     : hors degenerescence — accord=%lld couverture=%lld"
-              " structure=%lld\n", clean_orders, coverage_orders, structure_orders);
-  std::printf("           : degeneres ou censures — accord=%lld couverture=%lld"
-              " structure=%lld  (censures de rang=%lld, niveaux etrangers=%lld)\n",
+  if (refused_subject > 0)
+    std::printf("refus      : %lld nuage(s) au statut sujet non kOk, hors du denominateur\n",
+                refused_subject);
+  std::printf("ordres     : juges=%lld  refuses par censure du sujet=%lld\n", judged_orders,
+              refused_orders);
+  std::printf("           : hors degenerescence — accord=%lld ecart de contenu=%lld"
+              " ecart de compte=%lld\n", clean_orders, coverage_orders, structure_orders);
+  std::printf("           : degeneres ou censures — accord=%lld contenu=%lld"
+              " compte=%lld  (censures de rang=%lld, niveaux etrangers testes=%lld)\n",
               degenerate_clean, degenerate_coverage, degenerate_structure,
               rank_censored_orders, foreign_levels);
   std::printf("           : la carte des degeneres MESURE la frontiere Q1 ; elle n'est"
-              " pas un desaccord du sujet sur son domaine declare\n");
+              " pas un desaccord du sujet sur son domaine declare, et ses etiquettes"
+              " compte/contenu sont descriptives\n");
 
   struct Floor { const char* name; long long value; long long required; };
   const Floor floors[] = {
@@ -554,6 +638,7 @@ int main(int argc, char** argv) {
       {"nuages degeneres", degenerate_clouds, min_degenerate},
       {"nuages non degeneres", nondegenerate_clouds, min_nondegenerate},
       {"niveaux compares", levels_compared, min_levels},
+      {"ordres juges", judged_orders, min_judged},
   };
   for (const Floor& floor : floors)
     if (floor.value < floor.required) {
@@ -565,8 +650,18 @@ int main(int argc, char** argv) {
     std::printf("\n%lld desaccords hors degenerescence\n", failures);
     return 1;
   }
-  std::printf("\nOK : sur les ordres sans evenement degenere ni censure de rang, la chaine"
-              " catalogue+foret rend EXACTEMENT les partitions de Gamma_k a chaque niveau"
-              " d'evenement, aux deux coupes\n");
+  // LES DEUX OBJECTIFS NE PARTAGENT PAS UN MEME OK (audit live) : une campagne
+  // sans aucun ordre hors degenerescence est une CARTE, pas une porte
+  // d'exactitude, et elle le dit.
+  if (clean_orders + coverage_orders + structure_orders == 0)
+    std::printf("\nCARTE DE FRONTIERE : aucun ordre hors degenerescence dans cette"
+                " campagne ; les couvertures ci-dessus decrivent le regime"
+                " multiplicitaire, AUCUNE exactitude n'est recue\n");
+  else
+    std::printf("\nOK : sur les %lld ordres sans evenement degenere ni censure de rang,"
+                " les COUVERTURES de Gamma_k coincident a chaque niveau de l'union"
+                " verite+sujet, aux coupes stricte ET fermee ; les partitions de"
+                " facettes et le journal d'incidences restent hors de ce claim\n",
+                clean_orders);
   return 0;
 }
