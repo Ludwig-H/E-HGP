@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=651e47f804060a864c463387d541d982f93e1554`, toujours sous
+`HEAD=origin/main=bc2dafaff96edbca6c5fff455b5071730d95437d`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -41,9 +41,10 @@ de pool, borne le libellé mémoire et migre toutes les portes négatives vers u
 code exact; `ac39ac7` puis `478cfe8` écrivent et durcissent le juge Gamma;
 `23f12af` ajoute son premier sujet par fold saturé; `2b4801c` ajoute le
 profileur compact et sépare croissance de couverture et activation silencieuse;
-`405c37b` livre le join postings et `651e47f` la porte des niveaux `q_min`. Un
-delta live non committé ajoute le marquage, le préflight, l'oracle de poids et
-une voie postings globale; ses empreintes et limites sont dans
+`405c37b` livre le join postings, `651e47f` la porte des niveaux `q_min`, puis
+`bc2dafa` le marquage, le préflight, l'oracle de poids et la voie postings
+globale. Un delta live non committé ajoute les records par témoins et les
+saturés des boules marquantes; ses empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
 bornés, pas un reçu produit. Le sujet v2 par défaut censure encore tous les
@@ -114,15 +115,18 @@ mur `n=200` (deux runs > 600 s sans reçu) tombe à 36,1 s de fold pour
 masse `P_post` elle-même. La note de réception
 [`NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md`](audits/NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md)
 porte les chiffres et trois questions (réduction par comptage CPU, agrégation
-`q_min`, manifeste `P_post` 50 k). Depuis, le prédicat de niveaux `q_min` et son
-emploi dans le marquage sont positifs : les **triples de types par niveau**
-concordent 30/30 en générique et 60/60 en saturé sous accord dégénéré exigé.
-Ce sont des histogrammes, pas encore les identités des composantes; provenance
-runtime et source complète ne sont pas certifiées. Le témoin canonique proposé
-dans
+`q_min`, manifeste `P_post` 50 k). Depuis, le prédicat de niveaux `q_min`, les
+triples par niveau et les **records de composante par témoins** sont positifs :
+30/30 ordres génériques et 60/60 saturés sous accord dégénéré exigé. L'oracle
+reconstruit ses témoins depuis ses propres `k`-faces; un mutant atomique échange
+deux composantes de même type au même niveau, conserve les triples et meurt par
+le record seul. Le live reçoit aussi les saturés des boules marquantes.
+Provenance runtime et source complète ne sont pas certifiées. Le témoin
+canonique proposé dans
 [`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](audits/NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md)
-ferme ce dernier écart en `O(k)` par union, sans construire de graphe de
-Johnson.
+ferme l'écart de composante en `O(k)` par union, sans construire de graphe de
+Johnson. Pour l'échelle, témoins et marqueurs doivent être internés : leurs
+copies actuelles ne sont pas couvertes par le modèle de pic.
 
 La voie globale est une troisième vérité CPU déterministe, mais sa version live
 matérialise encore `P_post`, les arêtes uniques et leur ordre. La proposition

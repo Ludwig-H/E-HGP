@@ -94,6 +94,19 @@ bool folds_agree(const mhgp3v::SaturatedFold& truth, const mhgp3v::SaturatedFold
     if (a.gamma_birth_at_level != b.gamma_birth_at_level ||
         a.gamma_continuation_at_level != b.gamma_continuation_at_level ||
         a.gamma_multifusion_at_level != b.gamma_multifusion_at_level) { *why = k + "transcript Gamma par niveau"; return false; }
+    if (ignore_representatives) {
+      // Permutation : les representants sont renumerotes — comparer les
+      // records SANS leur indice de niveau, l'ordre (niveau, temoin) restant
+      // canonique de part et d'autre.
+      if (a.gamma_records.size() != b.gamma_records.size()) { *why = k + "nombre de records Gamma"; return false; }
+      for (std::size_t ri = 0; ri < a.gamma_records.size(); ++ri)
+        if (a.gamma_records[ri].closed_witness != b.gamma_records[ri].closed_witness ||
+            a.gamma_records[ri].strict_witnesses != b.gamma_records[ri].strict_witnesses ||
+            a.gamma_records[ri].type != b.gamma_records[ri].type) { *why = k + "record Gamma " + std::to_string(ri); return false; }
+    } else if (!(a.gamma_records == b.gamma_records)) {
+      *why = k + "records Gamma par temoin";
+      return false;
+    }
     if (a.level_representative.size() != b.level_representative.size()) { *why = k + "nombre de niveaux " + std::to_string(a.level_representative.size()) + " != " + std::to_string(b.level_representative.size()); return false; }
     if (!ignore_representatives && a.level_representative != b.level_representative) { *why = k + "representants de niveau"; return false; }
     if (a.closed_partitions.size() != b.closed_partitions.size()) { *why = k + "nombre de partitions"; return false; }
@@ -172,6 +185,16 @@ std::vector<Fixture> named_fixtures() {
   fixtures.push_back({"posting_du_dernier", 2,
                       {{1, {0, 1, 2}}, {2, {0, 1, 3}}},
                       {{1, 0, 1, 0, 2}, {1, 0, 1, 0, 2}}});
+  // Les PointId clairsemes — la sonde EXACTE de l'audit live, verifiee par
+  // l'auditeur sous ASan/UBSan : la compression dense des joins postings doit
+  // RETRADUIRE partitions, temoins et satures marquants avant le payload
+  // public (temoin ferme {10,1000}, temoin strict {10,INT_MAX} a k=2) — la
+  // verite G^2, non compressee, les compare bit a bit.
+  fixtures.push_back({"identifiants_clairsemes", 2,
+                      {{1, {10, 2147483647}},
+                       {2, {10, 1000, 2147483647}},
+                       {3, {1000, 2147483647}}},
+                      {{1, 0, 1, 1, 3}, {1, 0, 1, 1, 3}}});
   return fixtures;
 }
 
@@ -414,7 +437,7 @@ int main(int argc, char** argv) {
       return 1;
     }
   }
-  std::printf("fixtures   : 6/6 en accord verite==postings, transcripts graves respectes\n");
+  std::printf("fixtures   : 7/7 en accord verite==postings, transcripts graves respectes\n");
 
   // ETAGE 2 : la campagne differentielle sur nuages reels.
   long long processed = 0, skipped = 0;

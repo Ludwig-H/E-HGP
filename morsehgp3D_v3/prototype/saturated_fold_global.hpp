@@ -266,6 +266,8 @@ inline SaturatedFold build_saturated_fold_postings_global(
     std::vector<long long> touch_epoch;
     std::vector<long long> staged_node;
     std::vector<std::size_t> staged_cov;
+    std::vector<std::vector<mhgp::i32>> witness;
+    std::vector<std::vector<mhgp::i32>> staged_witness;
     long long next_node = 0;
     int find(int a) {
       while (parent[(std::size_t)a] != a) {
@@ -284,6 +286,8 @@ inline SaturatedFold build_saturated_fold_postings_global(
     st.touch_epoch.assign(count, -1);
     st.staged_node.assign(count, -1);
     st.staged_cov.assign(count, 0);
+    st.witness.resize(count);
+    st.staged_witness.resize(count);
   }
   long long epoch = 0;
   std::size_t edge_cursor = 0;
@@ -294,6 +298,7 @@ inline SaturatedFold build_saturated_fold_postings_global(
         st.touch_epoch[(std::size_t)root] = epoch;
         st.staged_node[(std::size_t)root] = st.node_of_root[(std::size_t)root];
         st.staged_cov[(std::size_t)root] = st.coverage[(std::size_t)root].size();
+        st.staged_witness[(std::size_t)root] = st.witness[(std::size_t)root];
       }
     };
     std::vector<std::vector<int>> batch_touched((std::size_t)K);
@@ -307,6 +312,8 @@ inline SaturatedFold build_saturated_fold_postings_global(
         touch(st, m);
         st.coverage[(std::size_t)m].insert(members[(std::size_t)m].begin(),
                                            members[(std::size_t)m].end());
+        st.witness[(std::size_t)m].assign(members[(std::size_t)m].begin(),
+                                          members[(std::size_t)m].begin() + k);
         st.live_roots.insert(m);
         batch_touched[(std::size_t)(k - 1)].push_back(m);
         if (support_size <= k + 1)
@@ -341,6 +348,8 @@ inline SaturatedFold build_saturated_fold_postings_global(
                                             st.coverage[(std::size_t)rm].end());
         std::set<mhgp::i32>().swap(st.coverage[(std::size_t)rm]);
         st.parent[(std::size_t)rm] = rn;
+        if (st.witness[(std::size_t)rm] < st.witness[(std::size_t)rn])
+          st.witness[(std::size_t)rn] = st.witness[(std::size_t)rm];
         st.live_roots.erase(rm);
         batch_touched[(std::size_t)(k - 1)].push_back(rn);
         batch_touched[(std::size_t)(k - 1)].push_back(rm);
@@ -357,12 +366,14 @@ inline SaturatedFold build_saturated_fold_postings_global(
       if (touched.empty()) continue;
       std::map<int, std::set<long long>> strict_of;
       std::map<int, std::size_t> strict_cov_of;
+      std::map<int, std::vector<std::vector<mhgp::i32>>> strict_witnesses_of;
       std::set<int> finals;
       for (int r : touched) {
         const int final_root = st.find(r);
         finals.insert(final_root);
         if (st.touch_epoch[(std::size_t)r] == epoch && st.staged_node[(std::size_t)r] >= 0) {
           strict_of[final_root].insert(st.staged_node[(std::size_t)r]);
+          strict_witnesses_of[final_root].push_back(st.staged_witness[(std::size_t)r]);
           strict_cov_of.emplace(final_root, st.staged_cov[(std::size_t)r]);
         }
       }
@@ -385,6 +396,7 @@ inline SaturatedFold build_saturated_fold_postings_global(
         }
       }
       std::map<int, int> marked_minimum_support;
+      std::map<int, std::vector<int>> marked_generators;
       for (const std::pair<int, int>& event : batch_events[(std::size_t)(k - 1)]) {
         const int root = st.find(event.first);
         const auto it = marked_minimum_support.find(root);
@@ -392,13 +404,38 @@ inline SaturatedFold build_saturated_fold_postings_global(
           marked_minimum_support.emplace(root, event.second);
         else
           it->second = std::min(it->second, event.second);
+        marked_generators[root].push_back(event.first);
       }
       long long births_here = 0, continuations_here = 0, multifusions_here = 0;
+      const auto translated = [&universe](const std::vector<mhgp::i32>& dense) {
+        std::vector<mhgp::i32> raw;
+        for (mhgp::i32 d : dense) raw.push_back(universe[(std::size_t)d]);
+        return raw;
+      };
+      std::vector<GammaEventRecord> batch_records;
       for (const auto& entry : marked_minimum_support) {
         const auto it = strict_of.find(entry.first);
         const std::size_t strict = it == strict_of.end() ? 0 : it->second.size();
+        GammaEventRecord record;
+        record.level_representative = by_level[batches[batch].first];
+        record.closed_witness = translated(st.witness[(std::size_t)entry.first]);
+        for (int marker : marked_generators[entry.first])
+          record.marking_saturations.push_back(translated(members[(std::size_t)marker]));
+        std::sort(record.marking_saturations.begin(), record.marking_saturations.end());
+        record.marking_saturations.erase(
+            std::unique(record.marking_saturations.begin(), record.marking_saturations.end()),
+            record.marking_saturations.end());
+        const auto witnesses = strict_witnesses_of.find(entry.first);
+        if (witnesses != strict_witnesses_of.end())
+          for (const std::vector<mhgp::i32>& strict_witness : witnesses->second)
+            record.strict_witnesses.push_back(translated(strict_witness));
+        std::sort(record.strict_witnesses.begin(), record.strict_witnesses.end());
+        record.strict_witnesses.erase(
+            std::unique(record.strict_witnesses.begin(), record.strict_witnesses.end()),
+            record.strict_witnesses.end());
         if (strict == 0) {
           ++births_here;
+          record.type = 0;
           if (entry.second > k) {
             ++order.event_guard_violations;
             if (enforce_event_guard) {
@@ -408,10 +445,19 @@ inline SaturatedFold build_saturated_fold_postings_global(
           }
         } else if (strict == 1) {
           ++continuations_here;
+          record.type = 1;
         } else {
           ++multifusions_here;
+          record.type = 2;
         }
+        batch_records.push_back(std::move(record));
       }
+      std::sort(batch_records.begin(), batch_records.end(),
+                [](const GammaEventRecord& a, const GammaEventRecord& b) {
+                  return a.closed_witness < b.closed_witness;
+                });
+      order.gamma_records.insert(order.gamma_records.end(), batch_records.begin(),
+                                 batch_records.end());
       order.gamma_births += births_here;
       order.gamma_continuations += continuations_here;
       order.gamma_multifusions += multifusions_here;

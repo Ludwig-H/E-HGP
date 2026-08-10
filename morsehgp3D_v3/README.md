@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=651e47f804060a864c463387d541d982f93e1554`. Le commit produit
+`HEAD=origin/main=bc2dafaff96edbca6c5fff455b5071730d95437d`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -21,10 +21,11 @@ payloads non autoritatifs et borne le verdict à l'accord des couvertures sur le
 ordres effectivement jugés. `23f12af` ajoute ensuite le fold par intersections
 de saturés et remplace les censures multiplicataires sur les campagnes bornées;
 `2b4801c` ajoute son profileur, les couvertures incrémentales et la séparation
-croissance/silencieux; `405c37b` livre ensuite le join postings reçu, puis
-`651e47f` la porte des niveaux d'événement `q_min`. Un delta live non committé
-ajoute marquage Gamma, préflight, oracle de chaque poids et troisième join
-global; il est épinglé fichier par fichier dans l'audit courant. L'autorité
+croissance/silencieux; `405c37b` livre ensuite le join postings reçu,
+`651e47f` la porte des niveaux d'événement `q_min`, puis `bc2dafa` le marquage
+Gamma, le préflight, l'oracle de chaque poids et le troisième join global. Un
+delta live non committé ajoute les records par témoins et les saturés des
+boules marquantes; il est épinglé fichier par fichier dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
@@ -140,13 +141,32 @@ strictes et les triples naissance/continuation/multifusion sont publiés par
 niveau. Ces **histogrammes de types par niveau** concordent aussi 30/30 et
 60/60; le juge observe `n_support == q_min` sur ces campagnes.
 
-Ce payload ne compare encore ni identité des racines, ni témoins stricts, ni
-générateurs marquants. Le mutant `q_min+1` meurt par niveaux/provenance tandis
-que son sous-bilan transcript reste vert. La fermeture légère par témoin
-canonique est dans
-[`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](audits/NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md).
-`smax>=n` ne remplace ni un bit `q_min_certified` ni un certificat de source
-complète.
+**[records par témoin reçus]** La fermeture par témoin canonique de
+[`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](audits/NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md)
+est implémentée et reçue : `ω_k(R)` — la plus petite `k`-face lexicographique
+de la composante — est maintenue en `O(k)` par union dans LES TROIS formes du
+fold, et l'oracle construit ses témoins INDÉPENDAMMENT depuis ses propres
+`k`-faces. Les records `(niveau exact, témoin fermé, témoins stricts absorbés,
+type)` sont comparés record à record : 30/30 ordres génériques (1 309 records)
+et **60/60 ordres saturés (2 308 records) sous accord dégénéré exigé, zéro
+réfutation**. La fixture des continuations compensées — triangle `q_min=3`
+redondant et paire `q_min=2` au même niveau exact 25 (`--witness-fixture`) —
+et sept mutants du chemin sujet sont des portes permanentes. Les records
+portent aussi les **saturés des boules marquantes** (le lemme de clé compacte
+de l'auditeur : la miniboule du saturé `M` EST la boule `B`, donc `M`
+identifie la boule), que l'oracle reconstruit indépendamment des miniboules
+des faces/cofaces du lot. Le **mutant compensé exact** — échange atomique dans
+un même lot entre deux racines de même compte strict — meurt par `témoin
+fermé divergent` avec **zéro réfutation de triples**, et le **marqueur
+superflu** dans une racine déjà marquée meurt par `boules marquantes
+divergentes` seules, sur la grille saturée où les niveaux égaux multi-marquent
+les racines. La sonde à `PointId` clairsemés de l'auditeur
+(`{10,INT_MAX}/{10,1000,INT_MAX}/{1000,INT_MAX}`, vérifiée sous ASan) est
+gravée en fixture 7/7 : la retraduction des identifiants denses est reçue
+avant tout payload public. `smax>=n` ne remplace toujours ni un bit
+`q_min_certified` ni un certificat de source complète.
+Le pipeline ne hache ni ne compare encore ces records; son digest et son mode
+`--compare-joins` ne constituent donc pas leur reçu.
 
 **[troisième join global, résultat borné]** Le live reconstruit la même table
 de poids puis le même fold à un et deux threads; G², join par lots et join
@@ -154,9 +174,11 @@ global concordent, et l'oracle vérifie chaque `(M,N)->|M intersection N|` par
 intersection directe. Cette voie est une troisième vérité utile, pas encore le
 backend 50 k annoncé : les buffers locaux contiennent tout `P_post`, sont
 concaténés, puis toutes les arêtes et leur ordre sont matérialisés. Le budget
-vient d'être ajouté à l'API globale mais n'est pas encore transmis par le
-pipeline. La route exacte par intervalles triangulaires, runs scellés et merge
-déterministe, ainsi que la réduction en arbre des postings à `k=1`, sont dans
+est maintenant calculé avant le CSR, transmis par le pipeline et protégé par
+un CTest; son pic reste une estimation par constantes et la mémoire demeure en
+`O(P_post)`. La route exacte par intervalles triangulaires, runs scellés et
+merge déterministe, ainsi que la réduction en arbre des postings à `k=1`, sont
+dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,

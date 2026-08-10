@@ -44,6 +44,15 @@ racines sont donc identiques.
 est actif, puisque sa miniboule a un niveau au plus égal à celui de `M`. Le
 témoin appartient donc réellement à la composante qu'il identifie.
 
+**Lemme d'accord avec l'oracle.** Sous source complète pour l'ordre `k`, ce
+témoin est exactement la plus petite `k`-face de la composante Gamma. D'un
+côté, chaque `first_k(M)` est une face de cette composante, donc le minimum de
+l'oracle lui est inférieur ou égal. De l'autre, pour la face minimale `F`, le
+générateur saturé `Sat(F)` appartient à la source et à la même racine;
+`first_k(Sat(F))` est inférieur ou égal à `F`. Les deux minima sont égaux. Sans
+complétude certifiée, le record reste celui de la sous-famille et ne peut pas
+être comparé comme un témoin autoritatif de Gamma.
+
 À l'activation d'un générateur, initialiser son témoin par `first_k(M)`. À une
 union, conserver le minimum lexicographique des deux témoins. Le coût est
 `O(k)` par union et la mémoire `O(kG)` dans la forme simple; un interning des
@@ -74,6 +83,17 @@ La liste des générateurs marquants doit identifier chaque boule par son niveau
 exact, son centre exact, le digest de son saturé et `q_min`. Elle reçoit le
 prédicat local même lorsque l'ajout ou l'oubli d'un générateur se produit dans
 une racine déjà marquée et ne change pas le type de composante.
+
+**Lemme de clé compacte.** Sur un catalogue valide et un nuage fixé, le saturé
+`M` suffit en réalité à identifier la boule génératrice `B`. En effet, `B`
+contient `M`, donc la miniboule de `M` a un rayon au plus égal à celui de `B`;
+mais un support `U` de `B` est inclus dans `M`, donc toute boule contenant `M`
+contient `U` et a un rayon au moins égal à celui de `B`. Par unicité de la
+miniboule euclidienne, la miniboule de `M` est exactement `B`. Le payload peut
+donc transporter un handle interné ou un digest canonique de `M`, lié au digest
+du nuage, plutôt que recopier centre, rayon et tous les membres dans chaque
+record. `q_min` reste un champ de provenance à certifier, pas une partie
+nécessaire de l'identité géométrique.
 
 Le record de composante reçoit ensuite la bijection des racines. Deux erreurs
 de même type sur deux composantes ne peuvent plus se compenser dans un simple
@@ -160,6 +180,52 @@ Chaque mutant doit mourir par un message propre au transcript, pas seulement
 par la provenance de `n_support` ou le prédicat des ensembles de niveaux. Un
 plancher `transcript_records_compared>0` et un plancher par type empêchent une
 porte vide.
+
+### Réception live et mutant compensé exact
+
+Le delta live postérieur à `bc2dafa` implémente déjà le témoin fermé et les
+témoins stricts dans G², postings par lots, postings global et dans l'oracle de
+`k`-faces. Les campagnes bornées concordent, et les mutants témoin strict perdu
+et témoin périmé meurent par les records seuls. C'est un résultat positif.
+
+La combinaison actuelle `skip_first_event_marker + mark_first_redundant` n'est
+toutefois pas le mutant compensé de la section 4 : « first » sélectionne deux
+niveaux différents, et les triples divergent déjà. Le mutant décisif doit
+opérer dans le premier lot qui contient deux racines finales distinctes de même
+type, l'une portant un marqueur vrai et l'autre un générateur redondant. Il
+échange ces deux décisions dans ce lot, puis affirme avant la comparaison des
+records que les triples sont inchangés. Sur la fixture `ABC/DEF` au niveau 25,
+le triple reste une continuation; seul le témoin fermé change.
+
+Claude a maintenant introduit ce mutant atomique. La commande live
+`--force-swap-marking 1` sur la fixture rend le code 1 avec uniquement
+`RECORDS REFUTES : temoin ferme divergent` et aucun `TRANSCRIPT REFUTE` : la
+valeur ajoutée de l'identité de composante est donc positivement démontrée.
+
+Deux obligations orthogonales restent utiles : un mutant qui retire ou ajoute
+un marqueur **dans une racine déjà marquée**, reçu seulement par le digest des
+boules marquantes; et une fixture à `PointId` clairsemés, par exemple
+`{10,INT_MAX}`, qui reçoit la retraduction des identifiants denses avant le
+payload public.
+
+La sonde hors dépôt correspondante passe déjà sous ASan/UBSan sur les trois
+générateurs `{10,INT_MAX}`, `{10,1000,INT_MAX}` et
+`{1000,INT_MAX}` : les trois joins publient le même record brut, avec témoin
+fermé `{10,1000}` et témoin strict `{10,INT_MAX}` à `k=2`. Cette preuve
+positive est prête à être transformée en fixture permanente.
+
+Le mutant `extra_marker_in_marked_root` demande une autre fixture : il survit
+sur la fixture disjointe, où aucune racine marquée ne contient le redondant
+choisi. À `k=1`, prendre
+`A=(15,10,10)`, `B=(7,14,10)`, `C=(7,6,10)` et
+`D=(15,10,20)`. Le triangle `ABC`, de centre `(10,10,10)` et rayon cinq, a
+`q_min=3`; la paire `AD`, de centre `(15,10,15)` et même rayon, a `q_min=2`.
+Leurs saturés partagent `A`, donc appartiennent à la même racine au niveau 25.
+Avant ce niveau, `ABC` est déjà connecté par ses arêtes, tandis que `D` est
+isolé; `AD` porte la vraie fusion et `ABC` est redondant. Ajouter `ABC` aux
+marqueurs ne change ni triple, ni témoin fermé, ni témoins stricts : seule la
+liste `marking_saturations` diverge. Ces quatre points ont une enveloppe affine
+de dimension trois; c'est la porte minimale du nouveau champ.
 
 ## 7. Provenance et source partielle
 

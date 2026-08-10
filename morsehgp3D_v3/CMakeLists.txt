@@ -590,15 +590,62 @@ mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
 # JUSQUE sur le regime degenere.
 add_test(NAME mhgp3v_gamma_judge_event_predicate_generic COMMAND mhgp3v_gamma_judge
          --clouds 10 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
-         --subject-fold 1 --check-event-predicate 1 --min-event-levels 1000)
+         --subject-fold 1 --check-event-predicate 1 --min-event-levels 1000
+         --min-records 1000)
 add_test(NAME mhgp3v_gamma_judge_event_predicate_saturated COMMAND mhgp3v_gamma_judge
          --clouds 20 --points 9 --coord 4 --smax 11 --max-order 3 --seed 31337
          --subject-fold 1 --require-degenerate-agreement 1 --check-event-predicate 1
-         --min-event-levels 1400)
+         --min-event-levels 1400 --min-records 1800)
 mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   mhgp3v_gamma_judge_kill_qmin_shift "desaccords" 1
   --clouds 2 --points 8 --coord 40 --smax 11 --max-order 2 --seed 7
   --subject-fold 1 --check-event-predicate 1 --force-qmin-shift 1)
+# LES RECORDS PAR TEMOIN (note temoins de l'auditeur) : la bijection des
+# composantes — temoin ferme omega_k, temoins stricts absorbes, type — est
+# recue record a record contre l'oracle, qui construit ses temoins depuis ses
+# propres k-faces. La fixture des continuations compensees (triangle q_min=3
+# redondant et paire q_min=2 au MEME niveau exact 25) exerce le cas que les
+# triples par niveau ne peuvent pas voir ; les quatre mutants du chemin sujet
+# meurent, drop-strict-witness et stale-witness par les RECORDS SEULS.
+add_test(NAME mhgp3v_gamma_judge_witness_fixture COMMAND mhgp3v_gamma_judge
+         --witness-fixture 1 --max-order 3 --subject-fold 1 --check-event-predicate 1
+         --require-degenerate-agreement 1 --min-records 30)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_skip_marker "REFUTE" 1
+  --witness-fixture 1 --max-order 3 --subject-fold 1 --check-event-predicate 1
+  --require-degenerate-agreement 1 --force-skip-event-marker 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_mark_redundant "REFUTE" 1
+  --witness-fixture 1 --max-order 3 --subject-fold 1 --check-event-predicate 1
+  --require-degenerate-agreement 1 --force-mark-redundant 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_drop_strict_witness "RECORDS REFUTES" 1
+  --witness-fixture 1 --max-order 3 --subject-fold 1 --check-event-predicate 1
+  --require-degenerate-agreement 1 --force-drop-strict-witness 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_stale_witness "RECORDS REFUTES" 1
+  --witness-fixture 1 --max-order 3 --subject-fold 1 --check-event-predicate 1
+  --require-degenerate-agreement 1 --force-stale-witness 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_compensated_marking "RECORDS REFUTES" 1
+  --witness-fixture 1 --max-order 1 --subject-fold 1 --check-event-predicate 1
+  --require-degenerate-agreement 1 --force-skip-event-marker 1 --force-mark-redundant 1)
+# LE MUTANT COMPENSE EXACT (audit live) : echange atomique dans un MEME lot
+# entre une racine marquee et une racine distincte de meme compte strict
+# portant un generateur redondant — les triples restent inchanges PAR
+# CONSTRUCTION, seuls les records mordent (temoin ferme divergent).
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_swap_marking "temoin ferme divergent" 1
+  --witness-fixture 1 --max-order 1 --subject-fold 1 --check-event-predicate 1
+  --require-degenerate-agreement 1 --force-swap-marking 1)
+# LE MARQUEUR SUPERFLU dans une racine deja marquee : ni type ni temoin ne
+# bougent — seules les BOULES MARQUANTES le voient, sur la grille saturee ou
+# les niveaux egaux donnent des racines multi-marquees.
+mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
+  mhgp3v_gamma_judge_kill_extra_marker "boules marquantes divergentes" 1
+  --clouds 5 --points 9 --coord 4 --smax 11 --max-order 3 --seed 31337
+  --subject-fold 1 --check-event-predicate 1 --require-degenerate-agreement 1
+  --force-extra-marker 1)
 mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   mhgp3v_gamma_judge_reject_predicate_without_fold "exige --subject-fold" 2
   --check-event-predicate 1)

@@ -143,9 +143,38 @@ dans le même commit : `K` borné avant allocation, PointId compressés (plus de
 tableau dense en `O(max id)`), reçu remis à zéro à l'entrée. Séquence §8
 adoptée telle quelle :
 
+0. **Records par témoin (note témoins) — FAIT, reçu dans le delta suivant.**
+   `ω_k(R)` maintenu en `O(k)` par union dans les trois formes du fold,
+   records `(niveau exact, témoin fermé, témoins stricts absorbés, type,
+   saturés marquants)`
+   comparés record à record entre les trois joins ET contre l'oracle, qui
+   construit ses témoins indépendamment depuis ses propres `k`-faces : 30/30
+   ordres génériques (1 309 records) et 60/60 ordres saturés (2 308 records)
+   sous accord dégénéré exigé, zéro réfutation. Fixture des continuations
+   compensées au niveau exact 25 (`--witness-fixture`, portes permanentes) ;
+   sept configurations mutationnelles du chemin sujet tuées — notamment
+   `drop-strict-witness`, `stale-witness` et l'échange compensé atomique par les
+   records SEULS.
+   L'identité de composante n'est donc plus ouverte sur ces campagnes ;
+   restent la provenance runtime (`q_min_certified`,
+   `source_complete_for_order[k]`) et le lien au digest canonique.
+   Le delta suivant ferme aussi les trois obligations de la réception live :
+   les records portent les **saturés des boules marquantes** (lemme de clé
+   compacte : `miniball(M) == B`), reconstruits indépendamment par l'oracle
+   depuis les miniboules des faces/cofaces du lot ; le **mutant compensé
+   exact** (échange atomique dans un même lot, comptes stricts égaux) meurt
+   par `témoin fermé divergent` avec zéro réfutation de triples ; le
+   **marqueur superflu** dans une racine déjà marquée meurt par
+   `boules marquantes divergentes` seules (grille saturée, racines
+   multi-marquées par niveaux égaux) ; et la sonde clairsemée ASan de
+   l'auditeur est gravée en fixture permanente de la porte (7/7).
+   Deux raccords restent hors de ce crédit : la permutation du catalogue omet
+   encore les saturés marquants dans sa comparaison, et le pipeline ne hache ni
+   ne compare `gamma_records`. Les témoins et saturés sont en outre recopiés;
+   ils doivent être internés avant de réutiliser le préflight comme borne.
 1. Fenêtre `q_min` et transcript reçu contre Gamma sur catalogues géométriques
    complets (juge `--check-event-predicate`, mutant `q_min+1`). **Prédicat et
-   histogrammes reçus; identité de composante encore ouverte.**
+   histogrammes reçus; identité de composante fermée par le point 0.**
    dans le commit suivant : le juge calcule `q_min` par énumération exacte
    indépendante (miniboule rationnelle de l'oracle, tailles `<= K+1`) et
    compare les niveaux prédits `{|M| >= k, q_min <= k+1}` aux niveaux
@@ -186,9 +215,11 @@ adoptée telle quelle :
    émission; le refus de budget publie son manifeste et l'identité post-hoc
    `P_post réel == prédit` est vérifiée. Le pic fondé sur des constantes est une
    estimation tant que capacités, allocateur, conteneurs, sorties et high-water
-   ne sont pas reçus. L'API globale vient d'ajouter un budget, mais le pipeline
-   ne le transmet pas encore et son `P_post` passe d'abord par un `long long`
-   non vérifié.
+   ne sont pas reçus. Le delta live suivant raccorde aussi la forme globale :
+   `P_post` en `u128` avant le CSR, manifeste de refus transmis par le pipeline
+   et CTest permanent. À 1 Mio, elle refuse au code 3 avec
+   `P_post=6 889 344` et un pic estimé à 214,0 Mio. La matérialisation intégrale
+   et la qualité contractuelle de cette estimation restent ouvertes.
 5. Kernel GPU réel et repli CPU multi-cœurs différenciés nativement ; G4 SPOT
    gardée seulement après. Le live possède une **première vérité globale** :
    CSR complet, buffers locaux, concaténation, tri/réduction, puis rejeu DSU.

@@ -84,6 +84,20 @@ struct GammaTruth {
   // Les types d'evenement PAR NIVEAU, alignes sur `levels` — le payload que la
   // reception du transcript compare au fold marque par q_min.
   std::vector<long long> births_at_level, continuations_at_level, fusions_at_level;
+  // Les RECORDS PAR TEMOIN (note temoins de l'auditeur), construits ICI depuis
+  // les k-faces explicites et leur DSU — jamais depuis une convention produit.
+  // Le temoin d'une composante est sa plus petite k-face lexicographique ; un
+  // record est (temoin ferme, temoins stricts absorbes tries, type), la
+  // collection d'un niveau etant triee par temoin ferme.
+  struct Record {
+    std::vector<int> closed_witness;
+    std::vector<std::vector<int>> strict_witnesses;
+    // Les satures des boules admissibles du niveau dans cette composante —
+    // miniboules des faces et cofaces du lot, satures par balayage exact.
+    std::vector<std::vector<int>> marking_saturations;
+    int type = 0;
+  };
+  std::vector<std::vector<Record>> records_at_level;
   bool degenerate_events = false;
   long long births = 0, fusions = 0, continuations = 0;
   long long faces = 0, cofaces = 0;
@@ -177,26 +191,40 @@ GammaTruth gamma_truth(const std::vector<mhgp::P3>& points, int k) {
   // exactement un noeud (sa naissance) ; les continuations n'en creent pas.
   std::vector<int> node_of_root(faces.size(), -1);
   long long next_node = 0;
+  // Le temoin de chaque racine : la plus petite k-face de sa composante,
+  // initialisee a l'activation, propagee au minimum a chaque union.
+  std::vector<std::vector<int>> witness_of_root(faces.size());
 
   for (const Rational& level : levels) {
     // 1. FIGER LA COUPE STRICTE : le noeud de la composante stricte de chaque
-    // face deja presente, AVANT toute activation de ce niveau.
+    // face deja presente, AVANT toute activation de ce niveau — et le TEMOIN
+    // de chaque noeud strict, pour les records.
     std::vector<long long> strict_node(faces.size(), -1);
+    std::map<long long, std::vector<int>> strict_witness_of_node;
     for (std::size_t i = 0; i < faces.size(); ++i)
-      if (present[i]) strict_node[i] = node_of_root[(std::size_t)sets.find((int)i)];
+      if (present[i]) {
+        const int root = sets.find((int)i);
+        strict_node[i] = node_of_root[(std::size_t)root];
+        if (strict_node[i] >= 0)
+          strict_witness_of_node.emplace(strict_node[i], witness_of_root[(std::size_t)root]);
+      }
 
     // 2. ACTIVER toutes les faces du niveau.
     std::vector<std::size_t> touched;
+    std::vector<std::size_t> level_faces;
     for (std::size_t i = 0; i < faces.size(); ++i) {
       if (present[i] || compare(face_level[i], level) != 0) continue;
       present[i] = 1;
+      witness_of_root[i] = faces[i];
       touched.push_back(i);
+      level_faces.push_back(i);
       truth.maximum_relevant_rank = std::max(truth.maximum_relevant_rank, face_rank[i]);
     }
     // 3. APPLIQUER toutes les aretes des cofaces du niveau. Toute facette d'une
     // coface active est deja presente (rho(facette) <= rho(coface)) : une
     // absence est une violation d'invariant du juge lui-meme.
     bool coface_event = false;
+    std::vector<std::pair<std::size_t, int>> level_cofaces;   // (coface, une facette)
     for (std::size_t c = 0; c < cofaces.size(); ++c) {
       if (compare(coface_level[c], level) != 0) continue;
       coface_event = true;
@@ -213,11 +241,16 @@ GammaTruth gamma_truth(const std::vector<mhgp::P3>& points, int k) {
           return truth;   // ok=false
         }
         const int root = sets.find(it->second);
-        if (previous >= 0 && root != sets.find(previous))
-          sets.parent[(std::size_t)root] = sets.find(previous);
+        if (previous >= 0 && root != sets.find(previous)) {
+          const int survivor = sets.find(previous);
+          sets.parent[(std::size_t)root] = survivor;
+          if (witness_of_root[(std::size_t)root] < witness_of_root[(std::size_t)survivor])
+            witness_of_root[(std::size_t)survivor] = witness_of_root[(std::size_t)root];
+        }
         previous = it->second;
         touched.push_back((std::size_t)it->second);
       }
+      level_cofaces.push_back({c, previous});
     }
     (void)coface_event;
 
@@ -235,26 +268,71 @@ GammaTruth gamma_truth(const std::vector<mhgp::P3>& points, int k) {
     // degenerescence est la cosphericite (drapeau calcule a l'enumeration).
     std::set<int> changed_roots;
     for (std::size_t i : touched) changed_roots.insert(sets.find((int)i));
+    // LES SATURES DES BOULES ADMISSIBLES du niveau, par composante : miniboule
+    // exacte de chaque face et coface du lot, sature par balayage de tous les
+    // points (side <= 0), attache a la racine finale de sa composante.
+    std::map<int, std::set<std::vector<int>>> marking_saturations_of;
+    const auto ball_saturation = [&](const std::vector<int>& subset,
+                                     std::vector<int>* saturation) {
+      RationalSphere ball;
+      std::vector<int> support;
+      if (!exact_miniball(points, subset, &ball, &support)) return false;
+      saturation->clear();
+      for (int z = 0; z < n; ++z)
+        if (side_of(ball, points[(std::size_t)z]) <= 0) saturation->push_back(z);
+      return true;
+    };
+    for (std::size_t i : level_faces) {
+      std::vector<int> saturation;
+      if (ball_saturation(faces[i], &saturation))
+        marking_saturations_of[sets.find((int)i)].insert(std::move(saturation));
+    }
+    for (const auto& entry : level_cofaces) {
+      std::vector<int> saturation;
+      if (entry.second >= 0 && ball_saturation(cofaces[entry.first], &saturation))
+        marking_saturations_of[sets.find(entry.second)].insert(std::move(saturation));
+    }
     long long births_here = 0, continuations_here = 0, fusions_here = 0;
+    std::vector<GammaTruth::Record> level_records;
     for (const auto& group : groups) {
       if (changed_roots.find(group.first) == changed_roots.end()) continue;
       std::set<long long> strict_roots;
       for (std::size_t i : group.second)
         if (strict_node[i] >= 0) strict_roots.insert(strict_node[i]);
+      GammaTruth::Record record;
+      record.closed_witness = witness_of_root[(std::size_t)group.first];
+      const auto marking = marking_saturations_of.find(group.first);
+      if (marking != marking_saturations_of.end())
+        record.marking_saturations.assign(marking->second.begin(), marking->second.end());
+      for (long long node : strict_roots) {
+        const auto found = strict_witness_of_node.find(node);
+        if (found != strict_witness_of_node.end())
+          record.strict_witnesses.push_back(found->second);
+      }
+      std::sort(record.strict_witnesses.begin(), record.strict_witnesses.end());
       if (strict_roots.empty()) {
         ++truth.births;
         ++births_here;
+        record.type = 0;
         node_of_root[(std::size_t)group.first] = (int)next_node++;
       } else if (strict_roots.size() == 1) {
         ++truth.continuations;
         ++continuations_here;
+        record.type = 1;
         node_of_root[(std::size_t)group.first] = (int)*strict_roots.begin();
       } else {
         ++truth.fusions;
         ++fusions_here;
+        record.type = 2;
         node_of_root[(std::size_t)group.first] = (int)next_node++;
       }
+      level_records.push_back(std::move(record));
     }
+    std::sort(level_records.begin(), level_records.end(),
+              [](const GammaTruth::Record& a, const GammaTruth::Record& b) {
+                return a.closed_witness < b.closed_witness;
+              });
+    truth.records_at_level.push_back(std::move(level_records));
     truth.births_at_level.push_back(births_here);
     truth.continuations_at_level.push_back(continuations_here);
     truth.fusions_at_level.push_back(fusions_here);
@@ -435,6 +513,17 @@ int main(int argc, char** argv) {
   int check_predicate = 0;
   int force_qmin_shift = 0;
   long long min_event_levels = 0;
+  // LES MUTANTS DU CHEMIN SUJET (note temoins §6) : ils mutent le MARQUAGE du
+  // fold juge, pas l'oracle — et doivent mourir par la comparaison de RECORDS.
+  int force_skip_marker = 0, force_mark_redundant = 0;
+  int force_drop_witness = 0, force_stale_witness = 0;
+  int force_swap_marking = 0, force_extra_marker = 0;
+  // LA FIXTURE DES CONTINUATIONS COMPENSEES (note temoins §4) : deux
+  // composantes disjointes au MEME niveau exact 25 — le triangle q_min=3
+  // redondant et la paire q_min=2 porteuse du vrai evenement. Les triples par
+  // niveau ne les separent pas ; seuls les records le font.
+  int witness_fixture = 0;
+  long long min_records = 0;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -469,6 +558,14 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--check-event-predicate")) target = &check_predicate;
     else if (!strcmp(argv[i], "--force-qmin-shift")) target = &force_qmin_shift;
     else if (!strcmp(argv[i], "--min-event-levels")) wide = &min_event_levels;
+    else if (!strcmp(argv[i], "--force-skip-event-marker")) target = &force_skip_marker;
+    else if (!strcmp(argv[i], "--force-mark-redundant")) target = &force_mark_redundant;
+    else if (!strcmp(argv[i], "--force-drop-strict-witness")) target = &force_drop_witness;
+    else if (!strcmp(argv[i], "--force-stale-witness")) target = &force_stale_witness;
+    else if (!strcmp(argv[i], "--force-swap-marking")) target = &force_swap_marking;
+    else if (!strcmp(argv[i], "--force-extra-marker")) target = &force_extra_marker;
+    else if (!strcmp(argv[i], "--witness-fixture")) target = &witness_fixture;
+    else if (!strcmp(argv[i], "--min-records")) wide = &min_records;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { std::printf("ECHEC : valeur entiere invalide pour %s\n", argv[i]); return 2; }
     ++i;
@@ -503,6 +600,27 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : --force-qmin-shift exige --check-event-predicate 1\n");
     return 2;
   }
+  if ((force_skip_marker | force_mark_redundant | force_drop_witness | force_stale_witness |
+       force_swap_marking | force_extra_marker | witness_fixture) < 0 ||
+      force_skip_marker > 1 || force_mark_redundant > 1 || force_drop_witness > 1 ||
+      force_stale_witness > 1 || force_swap_marking > 1 || force_extra_marker > 1 ||
+      witness_fixture > 1) {
+    std::printf("ECHEC : campagne absurde\n");
+    return 2;
+  }
+  if ((force_skip_marker == 1 || force_mark_redundant == 1 || force_drop_witness == 1 ||
+       force_stale_witness == 1 || force_swap_marking == 1 || force_extra_marker == 1) &&
+      (check_predicate == 0 || subject_fold == 0)) {
+    std::printf("ECHEC : les mutants du transcript exigent --subject-fold 1 et"
+                " --check-event-predicate 1\n");
+    return 2;
+  }
+  // La fixture temoin fixe le nuage : un seul, six points, famille complete.
+  if (witness_fixture == 1) {
+    clouds = 1;
+    n = 6;
+    if (smax < 6) smax = 11;
+  }
 
   std::mt19937 rng((unsigned)seed);
   std::uniform_int_distribution<int> pick(0, coord - 1);
@@ -518,11 +636,18 @@ int main(int argc, char** argv) {
   long long predicate_mismatch_degenerate = 0, predicate_event_levels = 0;
   long long qmin_subset_failures = 0, provenance_mismatches = 0;
   long long transcript_orders_agreed = 0, transcript_mismatch_clean = 0;
-  long long transcript_mismatch_degenerate = 0;
+  long long transcript_mismatch_degenerate = 0, transcript_records_compared = 0;
 
   for (int c = 0; c < clouds; ++c) {
     std::vector<mhgp::P3> pts;
-    {
+    if (witness_fixture == 1) {
+      // Note temoins §4, translatee sur la grille positive : le cercle du
+      // triangle ABC (q_min=3, rayon 5) et la miniboule de la paire DF
+      // (q_min=2, meme rayon 5) partagent le niveau exact 25 dans deux
+      // composantes disjointes ; D et F sortent du plan (dimension affine 3).
+      pts = {mhgp::P3{15, 10, 10}, mhgp::P3{7, 14, 10},  mhgp::P3{7, 6, 10},
+             mhgp::P3{110, 10, 5}, mhgp::P3{110, 10, 10}, mhgp::P3{110, 10, 15}};
+    } else {
       std::set<long long> keys;
       for (int guard = 0; (int)pts.size() < n && guard < 200 * n; ++guard) {
         mhgp::P3 q{};
@@ -550,9 +675,17 @@ int main(int argc, char** argv) {
 
     mhgp3v::SaturatedFold fold;
     if (subject_fold == 1) {
+      mhgp3v::TranscriptMutants transcript_mutants;
+      transcript_mutants.skip_first_event_marker = force_skip_marker == 1;
+      transcript_mutants.mark_first_redundant = force_mark_redundant == 1;
+      transcript_mutants.drop_first_strict_witness = force_drop_witness == 1;
+      transcript_mutants.stale_witness_after_union = force_stale_witness == 1;
+      transcript_mutants.swap_marking_in_batch = force_swap_marking == 1;
+      transcript_mutants.extra_marker_in_marked_root = force_extra_marker == 1;
       // La garde d'evenement du fold ne refuse que sous famille complete.
       fold = mhgp3v::build_saturated_fold(catalogue, max_order, true,
-                                          /*enforce_event_guard=*/smax >= n);
+                                          /*enforce_event_guard=*/smax >= n,
+                                          transcript_mutants);
       if (!fold.ok) {
         std::printf("[nuage %d] fold sature refuse : %s\n", c, fold.refusal);
         ++refused_subject;
@@ -774,16 +907,89 @@ int main(int argc, char** argv) {
             witness_level = fi;
           }
         }
+        // RECEPTION DES RECORDS PAR TEMOIN (note temoins) : la bijection des
+        // composantes — temoin ferme, temoins stricts absorbes, type — record
+        // a record contre l'oracle. Deux erreurs compensees de meme type au
+        // meme niveau ne peuvent plus passer.
+        const auto same_ids = [](const std::vector<mhgp::i32>& mine,
+                                 const std::vector<int>& theirs) {
+          if (mine.size() != theirs.size()) return false;
+          for (std::size_t i = 0; i < mine.size(); ++i)
+            if ((int)mine[i] != theirs[i]) return false;
+          return true;
+        };
+        const char* records_witness = nullptr;
+        std::vector<std::vector<const mhgp3v::GammaEventRecord*>> fold_records_by_level(
+            truth.levels.size());
+        for (const mhgp3v::GammaEventRecord& record : order_fold.gamma_records) {
+          const Rational record_level =
+              exact_level_of(catalogue.spheres[(std::size_t)record.level_representative].sph);
+          bool located = false;
+          for (std::size_t li = 0; li < truth.levels.size(); ++li)
+            if (compare(record_level, truth.levels[li]) == 0) {
+              fold_records_by_level[li].push_back(&record);
+              located = true;
+              break;
+            }
+          if (!located && records_witness == nullptr)
+            records_witness = "record a un niveau etranger a la verite";
+        }
+        for (std::size_t li = 0;
+             li < truth.levels.size() && records_witness == nullptr; ++li) {
+          const auto& expected = truth.records_at_level[li];
+          const auto& got = fold_records_by_level[li];
+          transcript_records_compared += (long long)expected.size();
+          if (expected.size() != got.size()) {
+            records_witness = "nombre de records divergent a un niveau";
+            break;
+          }
+          for (std::size_t ri = 0; ri < expected.size(); ++ri) {
+            if (!same_ids(got[ri]->closed_witness, expected[ri].closed_witness)) {
+              records_witness = "temoin ferme divergent";
+              break;
+            }
+            if (got[ri]->type != expected[ri].type) {
+              records_witness = "type divergent sur un temoin";
+              break;
+            }
+            if (got[ri]->strict_witnesses.size() != expected[ri].strict_witnesses.size()) {
+              records_witness = "nombre de temoins stricts divergent";
+              break;
+            }
+            for (std::size_t wi = 0; wi < expected[ri].strict_witnesses.size(); ++wi)
+              if (!same_ids(got[ri]->strict_witnesses[wi],
+                            expected[ri].strict_witnesses[wi])) {
+                records_witness = "temoin strict divergent";
+                break;
+              }
+            if (got[ri]->marking_saturations.size() !=
+                expected[ri].marking_saturations.size()) {
+              records_witness = "boules marquantes divergentes";
+              break;
+            }
+            for (std::size_t mi = 0; mi < expected[ri].marking_saturations.size(); ++mi)
+              if (!same_ids(got[ri]->marking_saturations[mi],
+                            expected[ri].marking_saturations[mi])) {
+                records_witness = "boules marquantes divergentes";
+                break;
+              }
+            if (records_witness != nullptr) break;
+          }
+        }
+
         const bool degenerate_here = truth.degenerate_events || rank_censored;
-        if (transcript_witness == nullptr) {
+        if (transcript_witness == nullptr && records_witness == nullptr) {
           ++transcript_orders_agreed;
         } else if (degenerate_here && require_degenerate == 0) {
           ++transcript_mismatch_degenerate;
         } else {
           ++transcript_mismatch_clean;
           ++failures;
-          std::printf("[nuage %d ordre %d] TRANSCRIPT REFUTE : %s (indice %zu)\n", c, k,
-                      transcript_witness, witness_level);
+          if (transcript_witness != nullptr)
+            std::printf("[nuage %d ordre %d] TRANSCRIPT REFUTE : %s (indice %zu)\n", c, k,
+                        transcript_witness, witness_level);
+          if (records_witness != nullptr)
+            std::printf("[nuage %d ordre %d] RECORDS REFUTES : %s\n", c, k, records_witness);
         }
       }
 
@@ -935,9 +1141,11 @@ int main(int argc, char** argv) {
                 predicate_mismatch_degenerate, predicate_event_levels,
                 qmin_subset_failures);
     std::printf("transcript : ordres en accord=%lld  refutations hors degenerescence=%lld"
-                "  ecarts degeneres (carte)=%lld  provenances n_support!=q_min=%lld\n",
+                "  ecarts degeneres (carte)=%lld  provenances n_support!=q_min=%lld"
+                "  records compares=%lld\n",
                 transcript_orders_agreed, transcript_mismatch_clean,
-                transcript_mismatch_degenerate, provenance_mismatches);
+                transcript_mismatch_degenerate, provenance_mismatches,
+                transcript_records_compared);
   }
 
   struct Floor { const char* name; long long value; long long required; };
@@ -948,6 +1156,7 @@ int main(int argc, char** argv) {
       {"niveaux compares", levels_compared, min_levels},
       {"ordres juges", judged_orders, min_judged},
       {"niveaux d'evenement du predicat", predicate_event_levels, min_event_levels},
+      {"records du transcript compares", transcript_records_compared, min_records},
   };
   for (const Floor& floor : floors)
     if (floor.value < floor.required) {

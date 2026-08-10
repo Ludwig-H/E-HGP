@@ -14,10 +14,11 @@ avec complément sur la réception `q_min`. Cadre :
    une attribution unique de chaque paire, un ordre de sortie canonique, les
    masses indépendantes et une porte par poids. Il ne réduit pas la
    falsifiabilité si le juge ne réutilise pas son accumulateur.
-2. **Le prédicat `q_min` est mathématiquement correct et les histogrammes de
-   types par niveau sont maintenant positifs**, mais trois comptes ne reçoivent
-   pas encore l'identité des racines marquées. Un témoin canonique ferme ce
-   dernier écart sans matérialiser les faces.
+2. **Le prédicat `q_min` et les records de composante par témoins sont
+   maintenant positifs sur les campagnes bornées.** Le live compare aussi les
+   saturés des boules marquantes à un oracle de faces/cofaces. Restent la
+   provenance runtime, la canonicalité autonome du niveau, l'interning du
+   payload et son raccord au pipeline.
 3. **Seul `P_post` exact du catalogue réellement exécuté est admissible pour un
    GO mémoire.** Les extrapolations servent à planifier ou à refuser tôt; elles
    ne certifient jamais une allocation. `P_post` exact est nécessaire, pas
@@ -112,9 +113,10 @@ Le mutant global `q_min+1` rend le code 1 et provoque 14 réfutations sur les 15
 ordres d'une sonde de cinq nuages. Depuis cette première réception, le fold
 marque les racines par `q_min<=k+1` et le juge compare aussi les triples
 naissance/continuation/multifusion à chaque niveau : 30/30 génériques et 60/60
-saturés concordent dans les portes courantes. Ce payload reste un histogramme :
-il ne reçoit pas encore la bijection entre générateurs admissibles et racines
-finales marquées.
+saturés concordent dans les portes courantes. Le delta live postérieur ferme
+la bijection : témoin fermé, témoins stricts, type et saturés marquants sont
+reconstruits indépendamment par l'oracle et comparés record à record, sur 1 309
+puis 2 308 records sans écart.
 
 ### Fixture qui distingue niveau et racine
 
@@ -150,9 +152,13 @@ La porte permanente doit donc comparer, pour chaque niveau et ordre :
 Le témoin canonique proposé dans
 [`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md)
 identifie une racine par sa plus petite `k`-face portée et se maintient en
-`O(k)` à l'union. Ajouter un mutant « substituer deux racines de même type ».
-Contrairement au décalage `+1` actuel, il conserve les niveaux et les comptes et
-ne rougit que si le payload de racines est réellement comparé.
+`O(k)` à l'union. Le mutant atomique « substituer deux racines de même type »
+est maintenant implémenté : il conserve niveaux et triples et rougit seulement
+par `temoin ferme divergent`. Un second mutant ajoute un redondant à une racine
+déjà marquée; il ne rougit que par `boules marquantes divergentes` sur la grille
+saturée. Le verrou suivant n'est donc plus l'identité, mais son coût : interner
+chaque saturé et chaque petit témoin, puis stocker des handles canoniques liés au
+digest du nuage.
 
 ## Q3 — Deux chiffres, deux autorités
 
@@ -207,11 +213,12 @@ Le live calcule désormais exactement `P_post` et le plus gros lot avant
 émission pour la forme par lots, et publie ces valeurs même lors d'un refus de
 budget : c'est la bonne direction. Son `predicted_peak_bytes`, construit avec
 des constantes par conteneur, reste un modèle tant que capacités, allocateur,
-tri, maps/sets, sorties et high-water ne sont pas reçus. L'API globale expose
-depuis un premier modèle de budget, mais le pipeline ne le transmet pas :
-`--memory-budget-mb 1` y rend encore le code 0 pour `P_post=6 889 344`, alors
-que la forme par lots refuse avec manifeste. Le global doit aussi calculer
-`P_post` en entier vérifié avant tout passage par `long long` et avant le CSR.
+tri, maps/sets, sorties et high-water ne sont pas reçus. Le live raccorde
+maintenant le même budget à la forme globale, calcule `P_post` en `u128` avant
+le CSR et ajoute sa porte permanente : à 1 Mio, elle refuse avec
+`P_post=6 889 344` et un pic estimé à 214,0 Mio. C'est un coupe-circuit utile;
+ce n'est pas encore une borne contractuelle ni une suppression de l'allocation
+en `O(P_post)`.
 
 ## Décision architecturale
 

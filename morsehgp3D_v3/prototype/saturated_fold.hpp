@@ -50,6 +50,51 @@ namespace mhgp3v {
 // Une partition de couverture : collection triee d'ensembles tries.
 using FoldPartition = std::vector<std::vector<mhgp::i32>>;
 
+// LE RECORD D'EVENEMENT PAR TEMOIN (note temoins de l'auditeur) : une
+// composante a l'ordre k est identifiee par son TEMOIN canonique
+// omega_k(R) = min lexicographique des first_k(M) sur ses generateurs — deux
+// racines distinctes ne partagent jamais un temoin (lemme d'unicite : deux
+// generateurs contenant la meme k-face s'intersectent en >= k points), et
+// first_k(M) est une vraie k-face de la composante (lemme de validite). Le
+// record recoit la BIJECTION des composantes : deux erreurs de meme type sur
+// deux composantes du meme niveau ne peuvent plus se compenser — une
+// couverture d'observations n'est PAS un identifiant de composante.
+struct GammaEventRecord {
+  int level_representative = -1;                 // indice catalogue du niveau
+  std::vector<mhgp::i32> closed_witness;          // PointId bruts, tries
+  std::vector<std::vector<mhgp::i32>> strict_witnesses;   // tries, dedupliques
+  // LES SATURES DES BOULES MARQUANTES (note temoins §2), tries et dedupliques :
+  // ils recoivent le predicat local meme quand l'ajout ou l'oubli d'un
+  // marqueur dans une racine deja marquee ne change ni type ni temoin.
+  std::vector<std::vector<mhgp::i32>> marking_saturations;
+  int type = 0;   // 0 naissance, 1 continuation, 2 multifusion
+  bool operator==(const GammaEventRecord& other) const {
+    return level_representative == other.level_representative &&
+           closed_witness == other.closed_witness &&
+           strict_witnesses == other.strict_witnesses &&
+           marking_saturations == other.marking_saturations && type == other.type;
+  }
+};
+
+// LES MUTANTS DU CHEMIN SUJET (note temoins §6) : ils vivent dans le fold de
+// verite G^2 — le sujet juge — et doivent mourir par la comparaison de RECORDS
+// de l'oracle, pas seulement par les triples par niveau ni la provenance.
+struct TranscriptMutants {
+  bool skip_first_event_marker = false;    // oublier le premier marqueur vrai
+  bool mark_first_redundant = false;       // marquer un generateur q > k+1
+  bool drop_first_strict_witness = false;  // perdre un temoin strict absorbe
+  bool stale_witness_after_union = false;  // ne pas propager le temoin a l'union
+  // LE MUTANT COMPENSE EXACT (audit live 39cf76e) : dans le PREMIER lot qui
+  // contient une racine marquee et une racine distincte de MEME compte strict
+  // portant un generateur redondant q > k+1, echanger les deux decisions —
+  // les triples par niveau restent inchanges PAR CONSTRUCTION, seuls le
+  // temoin ferme et les boules marquantes bougent. Les records seuls mordent.
+  bool swap_marking_in_batch = false;
+  // Ajouter un marqueur redondant a une racine DEJA marquee : ni les triples,
+  // ni les temoins ne bougent — seul le digest des boules marquantes le voit.
+  bool extra_marker_in_marked_root = false;
+};
+
 struct SaturatedOrderFold {
   // Niveaux d'evenement croissants (indices dans le catalogue trie par niveau,
   // un representant par classe d'egalite exacte), et partition de couverture a
@@ -86,6 +131,10 @@ struct SaturatedOrderFold {
   // payload que le juge compare a la verite exhaustive niveau par niveau.
   std::vector<long long> gamma_birth_at_level, gamma_continuation_at_level,
       gamma_multifusion_at_level;
+  // LES RECORDS PAR TEMOIN, tries par (niveau, temoin ferme) : la forme forte
+  // du transcript, comparee record a record entre les trois joins et contre
+  // l'oracle Gamma.
+  std::vector<GammaEventRecord> gamma_records;
   // Masses de la jointure, publiees pour mesurer le mur avant de l'optimiser.
   long long join_comparisons = 0, join_unions = 0;
 };
@@ -118,7 +167,8 @@ inline bool sorted_intersection_reaches(const std::vector<mhgp::i32>& a,
 
 inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int maximum_order,
                                           bool keep_partitions = true,
-                                          bool enforce_event_guard = false) {
+                                          bool enforce_event_guard = false,
+                                          TranscriptMutants transcript_mutants = {}) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   if (maximum_order < 1 || maximum_order > mhgp::kMaxRank) {
@@ -179,6 +229,12 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
     std::vector<int> active_list;
     // Couverture par racine, entretenue par fusion du petit dans le grand.
     std::vector<std::set<mhgp::i32>> coverage(count);
+    // TEMOIN CANONIQUE par racine : min lexicographique des first_k(M),
+    // initialise a l'activation, propage a chaque union en O(k).
+    std::vector<std::vector<mhgp::i32>> witness(count);
+    bool mutant_marker_skipped = false, mutant_redundant_marked = false;
+    bool mutant_witness_dropped = false, mutant_swap_done = false;
+    bool mutant_extra_done = false;
 
     std::size_t cursor = 0;
     while (cursor < count) {
@@ -195,12 +251,16 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
       // croissance et lot silencieux).
       std::vector<std::pair<int, long long>> strict_nodes;   // (generateur, noeud)
       std::map<long long, std::size_t> strict_coverage_size;
+      std::map<long long, std::vector<mhgp::i32>> strict_witness_of_node;
       for (int s : active_list) {
         const int root = find(s);
         strict_nodes.push_back({s, node_of_root[(std::size_t)root]});
-        if (node_of_root[(std::size_t)root] >= 0)
+        if (node_of_root[(std::size_t)root] >= 0) {
           strict_coverage_size[node_of_root[(std::size_t)root]] =
               coverage[(std::size_t)root].size();
+          strict_witness_of_node.emplace(node_of_root[(std::size_t)root],
+                                         witness[(std::size_t)root]);
+        }
       }
 
       // 2. ACTIVER le lot entier (les generateurs de taille >= k seulement),
@@ -213,6 +273,8 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
         active[(std::size_t)s] = 1;
         coverage[(std::size_t)s].insert(members[(std::size_t)s].begin(),
                                         members[(std::size_t)s].end());
+        witness[(std::size_t)s].assign(members[(std::size_t)s].begin(),
+                                       members[(std::size_t)s].begin() + k);
         for (int t : active_list) {
           ++order.join_comparisons;
           if (sorted_intersection_reaches(members[(std::size_t)s], members[(std::size_t)t], k)) {
@@ -231,6 +293,11 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
                                               : node_of_root[(std::size_t)rs];
               parent[(std::size_t)rs] = rt;
               node_of_root[(std::size_t)rt] = keep_node;
+              // MUTANT stale_witness : ne pas propager le temoin a l'union —
+              // seule la comparaison de RECORDS peut le voir.
+              if (!transcript_mutants.stale_witness_after_union &&
+                  witness[(std::size_t)rs] < witness[(std::size_t)rt])
+                witness[(std::size_t)rt] = witness[(std::size_t)rs];
             }
           }
         }
@@ -278,24 +345,108 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
       // atteintes par un generateur d'evenement (|M| >= k deja garanti par
       // l'activation, n_support <= k+1) produisent un evenement public.
       std::map<int, int> marked_minimum_support;
+      std::map<int, std::vector<int>> marked_generators;
       for (std::size_t b = cursor; b < batch_end; ++b) {
         const int s = by_level[b];
         if (!active[(std::size_t)s]) continue;
         const int support_size = (int)catalogue.spheres[(std::size_t)s].n_support;
-        if (support_size > k + 1) continue;
+        bool marks = support_size <= k + 1;
+        // MUTANTS du chemin sujet (note temoins §6) : oublier le premier
+        // marqueur vrai / marquer le premier redondant q > k+1.
+        if (marks && transcript_mutants.skip_first_event_marker && !mutant_marker_skipped) {
+          mutant_marker_skipped = true;
+          marks = false;
+        }
+        if (!marks && support_size > k + 1 && transcript_mutants.mark_first_redundant &&
+            !mutant_redundant_marked) {
+          mutant_redundant_marked = true;
+          marks = true;
+        }
+        if (!marks) continue;
         const int root = find(s);
         const auto it = marked_minimum_support.find(root);
         if (it == marked_minimum_support.end())
           marked_minimum_support.emplace(root, support_size);
         else
           it->second = std::min(it->second, support_size);
+        marked_generators[root].push_back(s);
+      }
+      // MUTANT swap_marking_in_batch : echange atomique, DANS ce lot, entre
+      // une racine marquee et une racine distincte de MEME compte strict
+      // portant un generateur redondant — triples inchanges par construction.
+      if (transcript_mutants.swap_marking_in_batch && !mutant_swap_done) {
+        for (std::size_t b = cursor; b < batch_end && !mutant_swap_done; ++b) {
+          const int candidate = by_level[b];
+          if (!active[(std::size_t)candidate]) continue;
+          const int candidate_support =
+              (int)catalogue.spheres[(std::size_t)candidate].n_support;
+          if (candidate_support <= k + 1) continue;
+          const int candidate_root = find(candidate);
+          if (marked_minimum_support.count(candidate_root) != 0) continue;
+          const auto candidate_strict = strict_roots_of.find(candidate_root);
+          const std::size_t candidate_count =
+              candidate_strict == strict_roots_of.end() ? 0 : candidate_strict->second.size();
+          for (auto it = marked_minimum_support.begin();
+               it != marked_minimum_support.end(); ++it) {
+            const auto marked_strict = strict_roots_of.find(it->first);
+            const std::size_t marked_count =
+                marked_strict == strict_roots_of.end() ? 0 : marked_strict->second.size();
+            if (marked_count != candidate_count) continue;
+            marked_generators.erase(it->first);
+            marked_minimum_support.erase(it);
+            marked_minimum_support.emplace(candidate_root, candidate_support);
+            marked_generators[candidate_root].push_back(candidate);
+            mutant_swap_done = true;
+            break;
+          }
+        }
+      }
+      // MUTANT extra_marker_in_marked_root : un marqueur redondant s'ajoute a
+      // une racine DEJA marquee — seules les boules marquantes divergent.
+      if (transcript_mutants.extra_marker_in_marked_root && !mutant_extra_done) {
+        for (std::size_t b = cursor; b < batch_end && !mutant_extra_done; ++b) {
+          const int candidate = by_level[b];
+          if (!active[(std::size_t)candidate]) continue;
+          if ((int)catalogue.spheres[(std::size_t)candidate].n_support <= k + 1) continue;
+          const int candidate_root = find(candidate);
+          if (marked_minimum_support.count(candidate_root) == 0) continue;
+          marked_generators[candidate_root].push_back(candidate);
+          mutant_extra_done = true;
+        }
       }
       long long births_here = 0, continuations_here = 0, multifusions_here = 0;
+      std::vector<GammaEventRecord> batch_records;
       for (const auto& entry : marked_minimum_support) {
         const auto it = strict_roots_of.find(entry.first);
         const std::size_t strict = it == strict_roots_of.end() ? 0 : it->second.size();
+        GammaEventRecord record;
+        record.level_representative = by_level[cursor];
+        record.closed_witness = witness[(std::size_t)entry.first];
+        for (int marker : marked_generators[entry.first])
+          record.marking_saturations.push_back(members[(std::size_t)marker]);
+        std::sort(record.marking_saturations.begin(), record.marking_saturations.end());
+        record.marking_saturations.erase(
+            std::unique(record.marking_saturations.begin(), record.marking_saturations.end()),
+            record.marking_saturations.end());
+        if (it != strict_roots_of.end())
+          for (long long node : it->second) {
+            const auto found = strict_witness_of_node.find(node);
+            if (found != strict_witness_of_node.end())
+              record.strict_witnesses.push_back(found->second);
+          }
+        std::sort(record.strict_witnesses.begin(), record.strict_witnesses.end());
+        record.strict_witnesses.erase(
+            std::unique(record.strict_witnesses.begin(), record.strict_witnesses.end()),
+            record.strict_witnesses.end());
+        // MUTANT drop_first_strict_witness : perdre un temoin strict absorbe.
+        if (transcript_mutants.drop_first_strict_witness && !mutant_witness_dropped &&
+            !record.strict_witnesses.empty()) {
+          mutant_witness_dropped = true;
+          record.strict_witnesses.erase(record.strict_witnesses.begin());
+        }
         if (strict == 0) {
           ++births_here;
+          record.type = 0;
           // GARDE DU THEOREME : une naissance marquee exige un support q <= k.
           if (entry.second > k) {
             ++order.event_guard_violations;
@@ -306,10 +457,19 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
           }
         } else if (strict == 1) {
           ++continuations_here;
+          record.type = 1;
         } else {
           ++multifusions_here;
+          record.type = 2;
         }
+        batch_records.push_back(std::move(record));
       }
+      std::sort(batch_records.begin(), batch_records.end(),
+                [](const GammaEventRecord& a, const GammaEventRecord& b) {
+                  return a.closed_witness < b.closed_witness;
+                });
+      order.gamma_records.insert(order.gamma_records.end(), batch_records.begin(),
+                                 batch_records.end());
       order.gamma_births += births_here;
       order.gamma_continuations += continuations_here;
       order.gamma_multifusions += multifusions_here;
@@ -565,6 +725,10 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
     std::vector<long long> touch_epoch;
     std::vector<long long> staged_node;
     std::vector<std::size_t> staged_cov;
+    // Temoin canonique par racine (identifiants COMPRIMES), et sa capture
+    // d'epoque a la coupe stricte.
+    std::vector<std::vector<mhgp::i32>> witness;
+    std::vector<std::vector<mhgp::i32>> staged_witness;
     long long next_node = 0;
     int find(int a) {
       while (parent[(std::size_t)a] != a) {
@@ -583,6 +747,8 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
     st.touch_epoch.assign(count, -1);
     st.staged_node.assign(count, -1);
     st.staged_cov.assign(count, 0);
+    st.witness.resize(count);
+    st.staged_witness.resize(count);
   }
   long long epoch = 0;
   PostingsReceipt out;
@@ -608,6 +774,7 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
         st.touch_epoch[(std::size_t)root] = epoch;
         st.staged_node[(std::size_t)root] = st.node_of_root[(std::size_t)root];
         st.staged_cov[(std::size_t)root] = st.coverage[(std::size_t)root].size();
+        st.staged_witness[(std::size_t)root] = st.witness[(std::size_t)root];
       }
     };
 
@@ -670,6 +837,8 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
         touch(st, m);   // racine fraiche : noeud strict -1, couverture 0
         st.coverage[(std::size_t)m].insert(members[(std::size_t)m].begin(),
                                            members[(std::size_t)m].end());
+        st.witness[(std::size_t)m].assign(members[(std::size_t)m].begin(),
+                                          members[(std::size_t)m].begin() + k);
         st.live_roots.insert(m);
         batch_touched[(std::size_t)(k - 1)].push_back(m);
         if (support_size <= k + 1)
@@ -701,6 +870,8 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
                                             st.coverage[(std::size_t)rm].end());
         std::set<mhgp::i32>().swap(st.coverage[(std::size_t)rm]);
         st.parent[(std::size_t)rm] = rn;
+        if (st.witness[(std::size_t)rm] < st.witness[(std::size_t)rn])
+          st.witness[(std::size_t)rn] = st.witness[(std::size_t)rm];
         st.live_roots.erase(rm);
         batch_touched[(std::size_t)(k - 1)].push_back(rn);
         batch_touched[(std::size_t)(k - 1)].push_back(rm);
@@ -718,6 +889,7 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
       if (touched.empty()) continue;
       std::map<int, std::set<long long>> strict_of;
       std::map<int, std::size_t> strict_cov_of;
+      std::map<int, std::vector<std::vector<mhgp::i32>>> strict_witnesses_of;
       std::set<int> finals;
       for (int r : touched) {
         const int final_root = st.find(r);
@@ -725,6 +897,7 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
         if (st.touch_epoch[(std::size_t)r] == epoch &&
             st.staged_node[(std::size_t)r] >= 0) {
           strict_of[final_root].insert(st.staged_node[(std::size_t)r]);
+          strict_witnesses_of[final_root].push_back(st.staged_witness[(std::size_t)r]);
           // La taille pre-lot de LA composante stricte : celle capturee avec le
           // noeud. Plusieurs racines peuvent porter le meme noeud apres unions
           // anterieures du meme lot ; la premiere capture est la bonne, et
@@ -758,6 +931,7 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
       // racines finales des generateurs d'evenement, classees par les racines
       // strictes capturees a l'epoque, avec la garde q <= k des naissances.
       std::map<int, int> marked_minimum_support;
+      std::map<int, std::vector<int>> marked_generators;
       for (const std::pair<int, int>& event : batch_events[(std::size_t)(k - 1)]) {
         const int root = st.find(event.first);
         const auto it = marked_minimum_support.find(root);
@@ -765,13 +939,38 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
           marked_minimum_support.emplace(root, event.second);
         else
           it->second = std::min(it->second, event.second);
+        marked_generators[root].push_back(event.first);
       }
       long long births_here = 0, continuations_here = 0, multifusions_here = 0;
+      const auto translated = [&universe](const std::vector<mhgp::i32>& dense) {
+        std::vector<mhgp::i32> raw;
+        for (mhgp::i32 d : dense) raw.push_back(universe[(std::size_t)d]);
+        return raw;
+      };
+      std::vector<GammaEventRecord> batch_records;
       for (const auto& entry : marked_minimum_support) {
         const auto it = strict_of.find(entry.first);
         const std::size_t strict = it == strict_of.end() ? 0 : it->second.size();
+        GammaEventRecord record;
+        record.level_representative = by_level[cursor];
+        record.closed_witness = translated(st.witness[(std::size_t)entry.first]);
+        for (int marker : marked_generators[entry.first])
+          record.marking_saturations.push_back(translated(members[(std::size_t)marker]));
+        std::sort(record.marking_saturations.begin(), record.marking_saturations.end());
+        record.marking_saturations.erase(
+            std::unique(record.marking_saturations.begin(), record.marking_saturations.end()),
+            record.marking_saturations.end());
+        const auto witnesses = strict_witnesses_of.find(entry.first);
+        if (witnesses != strict_witnesses_of.end())
+          for (const std::vector<mhgp::i32>& strict_witness : witnesses->second)
+            record.strict_witnesses.push_back(translated(strict_witness));
+        std::sort(record.strict_witnesses.begin(), record.strict_witnesses.end());
+        record.strict_witnesses.erase(
+            std::unique(record.strict_witnesses.begin(), record.strict_witnesses.end()),
+            record.strict_witnesses.end());
         if (strict == 0) {
           ++births_here;
+          record.type = 0;
           if (entry.second > k) {
             ++order.event_guard_violations;
             if (enforce_event_guard) {
@@ -781,10 +980,19 @@ inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalo
           }
         } else if (strict == 1) {
           ++continuations_here;
+          record.type = 1;
         } else {
           ++multifusions_here;
+          record.type = 2;
         }
+        batch_records.push_back(std::move(record));
       }
+      std::sort(batch_records.begin(), batch_records.end(),
+                [](const GammaEventRecord& a, const GammaEventRecord& b) {
+                  return a.closed_witness < b.closed_witness;
+                });
+      order.gamma_records.insert(order.gamma_records.end(), batch_records.begin(),
+                                 batch_records.end());
       order.gamma_births += births_here;
       order.gamma_continuations += continuations_here;
       order.gamma_multifusions += multifusions_here;
