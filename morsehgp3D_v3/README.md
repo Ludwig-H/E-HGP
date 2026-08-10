@@ -54,7 +54,8 @@ le validateur régulier F0 accepte un handle strict dupliqué; ses deux CTests n
 pas enregistrés si Python est absent. Dans le snapshot committé, la fixture du
 cône signé ne protégeait pas l'identité du propriétaire; le delta live
 `003ba13f...` compare désormais directement les deux extrémités attendues et ses
-deux portes ciblées passent. Le mutant de signe indépendant reste à rejouer. Les
+deux portes ciblées passent. Le mutant de signe indépendant échange bien les
+deux verdicts et rend la porte rouge dans une copie temporaire. Les
 fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
 Le passage GPU est spécifié séparément dans la
@@ -1697,7 +1698,11 @@ absolue est large (12,8 à 24,6 s côté source) ; ce diagnostic ne localise auc
 limite d'échelle, ne borne pas 50 k, et la croissance $n^{3{,}2}$ de la source
 sur la fenêtre $n=40..120$ n'est ni confirmée ni infirmée par lui — la remesure
 propre multi-tailles est à refaire au nouveau périmètre. Aucun log brut, digest
-de binaire ou sidecar de ces onze runs n'est encore versionné.
+de binaire ou sidecar de ces onze runs n'est encore versionné. Les dix runs
+`n=120` correspondent au source SHA-256 `7a5d42e99814a493...`, mais le binaire
+exécuté n'a pas été scellé avant d'être écrasé. Le run `n=40` correspond au
+source `8e80389b43572e17...`; son `RC=0` provenait d'un pipeline sans `pipefail`
+et n'est pas un reçu autonome du binaire.
 
 ### Réponses d'audit et questions encore ouvertes
 
@@ -2342,7 +2347,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | # | question | statut |
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` fermé sur u16; garde de type encore partielle; identité signée directement reçue dans le delta live `003ba13f...`, mutant indépendant à rejouer; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` fermé sur u16; garde de type encore partielle; identité signée directement reçue dans le delta live `003ba13f...` et mutant non signé tué; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |

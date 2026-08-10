@@ -84,8 +84,9 @@ réunies dans la
    compare le catalogue sémantique. Dans le snapshot committé, elle ne protège
    pas l'identité du propriétaire signé : le mutant non signé échange les deux
    extrémités sans changer la sortie. Le delta live `003ba13f...` compare
-   désormais directement ces deux extrémités; deux portes Release passent, et
-   le mutant indépendant reste à rejouer. La table est nulle seulement pour
+   désormais directement ces deux extrémités; deux portes Release passent et
+   le mutant non signé échange les verdicts puis rougit dans une copie
+   temporaire. La table est nulle seulement pour
    owner+index+navigable et le high-water publié compte des entrées, pas des
    octets.
 4. Le census terminal de la source est une requête exacte de demi-espace après
@@ -97,7 +98,7 @@ Conséquence d'architecture : le propriétaire exact et le fold externe restent
 les directions proposées. Le défaut arithmétique owner et la naissance F0 sont
 fermés dans les oracles bornés; cela ne fournit ni garantie globale sans table,
 ni réduction horizontale de production. L'identité owner signée possède
-désormais une fixture live directe mais attend encore son mutant indépendant.
+désormais une fixture live directe qui tue le mutant non signé.
 Ces portes et
 le refus/replay se ferment avant une revendication GPU ou mémoire.
 
@@ -913,7 +914,7 @@ fixture de domaine compare désormais statut,
 support, arité, rang, niveau et membres; l'équivariance conserve membres et
 multiplicités, le cône signé et le cube sont permanents. Dans le delta live
 `003ba13f...`, le test du cône compare aussi l'identité des deux sommets owner;
-les portes ciblées sont vertes et le mutant non signé reste à rejouer.
+les portes ciblées sont vertes et le mutant non signé est tué.
 Sans index il reste $O(n)$ clefs singleton; sur la voie directe la table peut
 rester en $\Theta(\text{sortie})$. Le high-water live compte les entrées de
 `emitted`, pas les octets résidents. Le coût owner reste

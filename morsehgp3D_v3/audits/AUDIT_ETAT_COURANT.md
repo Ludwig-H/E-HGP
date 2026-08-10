@@ -388,9 +388,22 @@ de centre `z=0` doit posséder, celui de centre `z=4` doit refuser. C'est
 exactement l'identité que le mutant non signé échangeait tout en conservant le
 catalogue. Les portes `mhgp3v_flats_fixtures` et
 `mhgp3v_flats_u16_owner` passent 2/2 en 22,75 s sur un rebuild Release du même
-SHA. La géométrie et le tie-break signé sont cohérents à la lecture; le mutant
-de signe indépendant reste à rejouer avant de qualifier cette porte de
-mutation-résistante.
+SHA. La géométrie et le tie-break signé sont cohérents à la lecture. Dans une
+copie temporaire, remplacer le signe de `B_U` par le cône non signé échange
+exactement les deux verdicts et rend la porte rouge; un mutant limité à l'arité
+deux rougit aussi. Cette identité locale est donc mutation-résistante sur le
+témoin reçu.
+
+Le nouveau littéral 19 du cas coplanaire est lui aussi juste : l'oracle
+exhaustif `brute_catalogue`, appelé dans une sonde temporaire, retrouve 19
+sphères et 19 coquilles. Cette indépendance n'est toutefois pas dans la porte
+permanente, qui ne grave que cardinalité et statut puis compare les quatre
+variantes entre elles; une substitution conservant 19 records peut encore
+passer. Enfin, `same_catalogue` et la sortie « catalogue ENTIER » ne couvrent
+pas l'objet public entier : ils comparent support, arité, rang, niveau rationnel
+et membres par sphère, mais pas représentation champ à champ, `beta`, offsets,
+pool concaténé résiduel ni diagnostics. Le libellé honnête reste **quotient
+sémantique riche** jusqu'à extension du comparateur.
 
 ## Delta replay post-`8481b67` — anti-vacuité fermée, payload exact toujours NO-GO
 
