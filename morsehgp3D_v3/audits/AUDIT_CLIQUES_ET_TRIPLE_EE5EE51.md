@@ -1,4 +1,4 @@
-# Audit du générateur par cliques et du lemme de triple `ee5ee51`
+# Audit du générateur par cliques et du lemme de triple, de `ee5ee51` à `81f9210`
 
 Date du snapshot : 10 août 2026 UTC.
 
@@ -14,12 +14,13 @@ prototype, n'ouvre aucune phase et ne promeut aucun résultat public.
 | --- | --- |
 | base du delta | commit `1bb82f9b09d5cdafa1a72a668369cd7e3e62855e` |
 | cible auditée | commit `ee5ee51877eaceaa17e12f342749295f6a79f2a7` |
+| réponse intégrée | commit `81f921033db470bf53729a64528b02beccc8995b` |
 | `admissible_pair_probe.cpp`, base | SHA-256 `fa3e464c422839f0485a032016831d3727fb42cbf1a9bd5be7a9427da3fe55fd` |
 | `admissible_pair_probe.cpp`, cible | SHA-256 `5c44a7399e3a4722dfe5ff1ca115ef931a875133fcf83549636bd4ce8e09a410` |
-| `admissible_pair_probe.cpp`, réponse live | SHA-256 `5eb64c526ce78822e032653875ec34efbeca254559083b5763154cb2b05e301a` |
-| `admissible_pair_probe.cpp`, commentaire live suivant | SHA-256 `a80cd2f727fb794318df54399e249b4f6cf9d3bc623c62b5f829563b8070cbb0` |
-| `CMakeLists.txt`, réponse live | SHA-256 `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
-| binaire Release testé, réponse live | SHA-256 `bda7ec16e743bffe81e6f7bb9d80eeb9feee77428196d7f937cb61f755c5c084` |
+| `admissible_pair_probe.cpp`, réponse intermédiaire | SHA-256 `5eb64c526ce78822e032653875ec34efbeca254559083b5763154cb2b05e301a` |
+| `admissible_pair_probe.cpp` à `81f9210` | SHA-256 `a80cd2f727fb794318df54399e249b4f6cf9d3bc623c62b5f829563b8070cbb0` |
+| `CMakeLists.txt` à `81f9210` | SHA-256 `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
+| binaire Release testé à `81f9210` | SHA-256 `bda7ec16e743bffe81e6f7bb9d80eeb9feee77428196d7f937cb61f755c5c084` |
 
 ## Verdict
 
@@ -50,8 +51,8 @@ points. Il ne reçoit ni budget, ni mémoire, ni statut/replay à 50 k.
 
 ## P1 historique fermé par `5eb64c52` — facteurs nuls
 
-Quand le dénominateur est nul, le programme imprime `0.0` au lieu de `N/A`.
-Cette commande valide le reproduit :
+Au palier historique, un dénominateur nul faisait imprimer `0.0` au lieu de
+`N/A`. Cette commande valide le reproduit :
 
 ```sh
 mhgp3v_admissible_pair_probe --points 8 --smax 3 --repeats 1 --seed 7
@@ -60,7 +61,13 @@ mhgp3v_admissible_pair_probe --points 8 --smax 3 --repeats 1 --seed 7
 Elle produisait 70 K4, dont 43 retenus, mais aucun support vrai d'arité quatre car
 `s_max=3`; les deux « facteurs » K4 valaient pourtant `0.0` et l'exécution concluait
 `OK`. Le correctif imprime désormais `N/A` pour les trois facteurs concernés.
-Ce reporting n'a cependant pas encore de CTest bas ordre.
+Une exécution fraîche de `81f9210` avec
+`--points 30 --smax 3 --repeats 1 --seed 424242` sort zéro, publie bien trois
+`N/A`, 46 supports vrais d'arité trois et zéro faux rejet. Elle sépare aussi
+utilement le degré maximal non
+orienté 29 de `d+ max=24`. Ce reporting positif n'a cependant pas encore de
+CTest bas ordre; la gate courante rend 29/29 et ne tuerait pas le retour de
+l'ancien faux maximum.
 
 ## P1 historique partiellement fermé — porte de sélectivité vacuable
 
@@ -100,26 +107,36 @@ travail du générateur effectivement filtré. Ce chrono combiné doit être nom
 comme tel ou ventilé. Il est désormais honnêtement nommé
 `cliques+verite+lemme`.
 
-## Réaudit de la réponse live `5eb64c52` / `1d9be763`
+## Réaudit de la réponse intégrée à `81f9210`
 
 La réponse applique les quatre faces nécessaires d'un K4. Sur la campagne
 reçue, une seule face conserve en moyenne 20 846 K4, les quatre en conservent
 14 898, et aucun vrai triple ou quadruple n'est réfuté. Les facteurs sans
 dénominateur deviennent `N/A`, le degré non orienté est distinct de $d^+$, le
 chrono est renommé, et les nouveaux planchers plus le mutant sont fonctionnels.
-La compilation stricte et les portes CMake positive/négative passent.
+La compilation stricte et les portes CMake positive/négative passent. Un build
+Release frais du snapshot intégré passe aussi les quinze CTests ciblés directs
+et paires en 6,27 s; la suite complète est reçue dans l'audit courant.
 
-Deux trous de réception subsistent :
+Deux trous de réception subsistent et des mutants temporaires les reproduisent :
 
 1. aucune gate ne reçoit `k4_four_faces` ni l'écart entre une et quatre faces;
-   supprimer les trois tests de faces supplémentaires laisse donc CTest vert;
+   remplacer les trois tests de faces supplémentaires par `true` rend
+   `quatre faces=une face=20846` et laisse les deux CTests paires verts;
 2. `truth_triples` et `truth_quads` ne sont consultés que pour les candidats
-   visités. Un itérateur qui omet une partie des vraies cliques tout en restant
-   au-dessus des planchers peut conserver zéro faux rejet. Il faut comparer un
-   ensemble `visited` à la vérité, ou une obligation de couverture équivalente;
-   `true_arity3` n'a pas non plus de plancher.
+   visités. Un mutant qui commence la boucle d'ancre à 1 omet 202 vrais triples
+   et 97 vrais quadruples de la campagne permanente; les planchers restent
+   franchis, les faux rejets restent nuls et les deux CTests paires passent. Il
+   faut comparer un ensemble `visited` à la vérité, ou une obligation de
+   couverture équivalente; `true_arity3` n'a pas non plus de plancher.
 
-Le passage `5eb64c52...` vers `a80cd2f7...` ajoute seulement un commentaire :
+Le message de `81f9210` peut donc dire que les cinq corrections fonctionnelles
+sont présentes; sa formule « les cinq réserves formelles sont closes » est trop
+large pour les portes. Le contrôle quatre-faces reste supprimable et la
+couverture de vérité contournable sans faire rougir CTest.
+
+Le passage `5eb64c52...` vers `a80cd2f7...`, intégré à `81f9210`, ajoute
+seulement un commentaire :
 `quad_missing` est bien impliqué par la conservation de toutes les vraies faces,
 **sous précondition que la vraie clique soit visitée**. Il n'ajoute aucun
 compteur, floor, mutant ou CTest; il ne ferme donc ni cette précondition de
@@ -135,13 +152,14 @@ coûts produit.
 Les facteurs K4 divisent les K4 candidats par les seules sphères dont le support
 canonique a arité quatre. Le facteur du parcours divise des sommets
 d'arrangement par l'ensemble des sphères critiques de toutes arités. Les unités,
-les dénominateurs et le coût d'une unité diffèrent. Diviser directement 82--162
-par 4,7--6,5 ne prouve donc pas que les cliques sont 25 à 35 fois plus lentes.
+les dénominateurs et le coût d'une unité diffèrent. Diviser directement les
+82--162 de l'ancienne variante par 4,7--6,5 ne prouve donc pas que les cliques
+sont 25 à 35 fois plus lentes.
 Il faut au minimum compter le travail de toutes les lanes vers le même payload,
 puis chronométrer les primitives sur les mêmes nuages.
 
 Le palier `ee5ee51` n'appliquait le lemme qu'au triple formé par les trois plus
-petits identifiants de chaque K4; la réponse live teste désormais les quatre
+petits identifiants de chaque K4; `81f9210` teste désormais les quatre
 faces et confirme un gain fini. Les trois tailles 50/100/200 montrent des
 facteurs 82, 144 et 162 pour l'ancienne variante; elles ne prouvent ni croissance
 asymptotique, ni absence de plateau. La

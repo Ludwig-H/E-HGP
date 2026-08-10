@@ -10,25 +10,26 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot committé
-audité est `ee5ee51`; il ajoute le diagnostic cliques/triple aux correctifs
-owner/paires/F0, au delta refus/replay et au prototype de source directe. Le
-worktree v3 contient deux réponses en cours : le correctif direct
-`bb31b426.../a3c40f7e...`, désormais épinglé et testé, et un second delta du
-probe de paires encore mouvant. Aucun artefact brut des campagnes de taille ni
-de la session G4 n'est versionné avec ces commits.
+audité est `81f9210`; il intègre le diagnostic cliques/triple et les réponses
+`bb31b426...`/`a80cd2f7...` aux correctifs owner/paires/F0, au delta
+refus/replay et au prototype de source directe. Au pincement, `HEAD` et
+`origin/main` pointaient sur ce commit; les sources, prototypes et CMake audités
+lui correspondent exactement. Le delta documentaire du présent audit est hors
+de ce snapshot produit. Aucun artefact brut des campagnes de taille ni de la
+session G4 n'est versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| snapshot committé de code et de claims audité | `ee5ee51877eaceaa17e12f342749295f6a79f2a7` |
-| dernier commit d'audit indépendant antérieur sur `main` | `c0df579ca0f5a6a6330294b8aa4fd80d372fb6ce` |
+| snapshot committé de code et de claims audité | `81f921033db470bf53729a64528b02beccc8995b` |
+| commit d'audit indépendant précédant immédiatement le snapshot produit | `275db39f010d997255fd15da876bd34170f46f1f` |
 | `CMakeLists.txt` avec deltas replay/source directe et neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 | `prototype/admissible_pair_probe.cpp` à `40ad152` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
 | `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
 | `prototype/admissible_pair_probe.cpp` à `180975e` | `fa3e464c422839f0485a032016831d3727fb42cbf1a9bd5be7a9427da3fe55fd` |
 | `prototype/admissible_pair_probe.cpp` à `ee5ee51` | `5c44a7399e3a4722dfe5ff1ca115ef931a875133fcf83549636bd4ce8e09a410` |
-| `prototype/admissible_pair_probe.cpp`, réponse live auditée | `5eb64c526ce78822e032653875ec34efbeca254559083b5763154cb2b05e301a` |
-| `prototype/admissible_pair_probe.cpp`, commentaire live suivant | `a80cd2f727fb794318df54399e249b4f6cf9d3bc623c62b5f829563b8070cbb0` |
+| `prototype/admissible_pair_probe.cpp`, réponse intermédiaire auditée | `5eb64c526ce78822e032653875ec34efbeca254559083b5763154cb2b05e301a` |
+| `prototype/admissible_pair_probe.cpp` à `81f9210` | `a80cd2f727fb794318df54399e249b4f6cf9d3bc623c62b5f829563b8070cbb0` |
 | `prototype/order_k_flats.hpp` | `b3ba750d938e3c4fa52453730011e2f8ed06e477b40ae971562c15aed07b65f5` |
 | `prototype/order_k_device_core.hpp` | `8d8c34031df8a3b4108ae366c6db17074b97a8e0aab1e133f8d754fae990fd6d` |
 | `prototype/flats_differential.cpp` | `e6ee12f8e4a61fda11a8d4b26eaafde3d20deab6cfd30195b4521117c85482c9` |
@@ -40,9 +41,16 @@ de la session G4 n'est versionné avec ces commits.
 | `prototype/direct_source.cpp`, palier dispersion historique | `2b47247e9d1ecd6e1a8a573f4597bab9bb19e10a4a3d2ab4295c524d2d1ee68c` |
 | `prototype/direct_source.cpp`, palier fonctionnel sans forêt | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
 | `prototype/direct_source.cpp`, palier courant avec forêt | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
-| `prototype/direct_source.cpp`, correctif live audité | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
-| `CMakeLists.txt`, correctif live avec treize CTests directs | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |
-| `CMakeLists.txt`, réponse live complète avec gate cliques | `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
+| `prototype/direct_source.cpp` à `81f9210` | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
+| fragment `CMakeLists.txt`, correctif intermédiaire avec treize CTests directs | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |
+| `CMakeLists.txt` à `81f9210`, treize CTests directs et gate cliques | `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
+
+Un configure et build Release frais de ce snapshot, sous GCC 13.3 avec GMP et
+Python actifs, passe les 73/73 CTests déclarés par le build v3, dont 69 tests v3
+et quatre dépendances transitives v2 : zéro échec en 351,62 s avec `ctest -j2`.
+Les binaires directs et paires ont respectivement les SHA-256 `ab4b0ef7...` et
+`bda7ec16...`. C'est un résultat d'intégration CPU positif; le log brut reste
+temporaire et ce run ne reçoit ni coût 50 k, ni payload GPU, ni SLO.
 
 ## Verdict
 
@@ -70,7 +78,7 @@ listes complètes de membres, reçoit l'unicité, applique les fallbacks petit
 nuage/cap, agrège les `Q` effectifs et passe les masses en `u128`. Sept CTests
 Release et quatre ciblés ASan/UBSan sont verts. Le palier `1c3948c3...` assemble
 ensuite un catalogue source et compare 30 forêts abstraites sur six nuages :
-1 647 nœuds, zéro divergence. Le correctif `bb31b426.../a3c40f7e...` ferme les
+1 647 nœuds, zéro divergence. Le correctif intégré à `81f9210` ferme les
 lanes bas ordre, la borne $K+1\le s_{\max}$ et le juge CMake implicite; il ajoute
 obligations candidats/unicité et mutant membre. Treize CTests Release et huit
 ciblés ASan/UBSan/LSan passent. C'est un GO relatif borné réel.
@@ -82,8 +90,11 @@ Gabriel ouverte streamée du produit. La signature forêt ignore volontairement
 les indices publics : une sonde trouve 4 016 champs `ForestNode::source`
 différents malgré 120 digests égaux. Son nouveau contrôle structurel n'est pas
 total : cycle de frères et enfant hors plage produisent boucle et overflow ASan;
-des fautes identiques des deux côtés restent vertes. Les agrégats `i64` oublient
-le facteur `clouds` et le chrono source englobe aussi les folds de référence.
+des fautes identiques des deux côtés restent vertes. La porte forêt n'exige que
+1 000 nœuds : un mutant qui saute entièrement $k=5$ conserve 1 201 nœuds,
+annonce encore cinq ordres et laisse les treize CTests directs verts. Les
+agrégats `i64` oublient le facteur `clouds` et le chrono source englobe aussi les
+folds de référence.
 Le détail
 reproductible est dans
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
@@ -98,10 +109,13 @@ source Gabriel ouverte.
 Le commit `ee5ee51` étend ce probe aux triangles/K4 du graphe admissible et à un
 lemme de triple exact. Le comptage orienté et la nécessité mathématique sont
 crédités : 28/56/70 sur le graphe complet, zéro triple vrai réfuté sur les runs
-reçus. La réponse live `5eb64c52.../1d9be763...` corrige `N/A`, le vrai degré,
+reçus. La réponse intégrée à `81f9210` corrige `N/A`, le vrai degré,
 le chrono, les quatre faces et ajoute planchers plus mutant acceptant tout. La
 gate ne reçoit toutefois ni le nombre après quatre faces, ni la couverture
-exacte des vraies triples/quadruples; une omission partielle peut rester verte.
+exacte des vraies triples/quadruples. Deux mutants temporaires le confirment :
+remplacer les trois faces supplémentaires par `true`, ou omettre les cliques
+d'ancre zéro — dont 202 triples et 97 quadruples vrais sur la campagne — laisse
+les deux CTests paires verts.
 La décision d'architecture ne suit pas.
 Les ratios cliques/supports d'arité quatre et sommets/toutes sphères du parcours
 ne sont pas directement comparables; ni le facteur 25--35, ni la croissance

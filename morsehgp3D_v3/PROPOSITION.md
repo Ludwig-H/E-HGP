@@ -29,7 +29,8 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le worktree reste `exploration_v3_hors_registre`, avec CPU de référence et
+Le snapshot committé `81f9210` reste `exploration_v3_hors_registre`, avec CPU
+de référence et
 microkernel GPU candidat sous audit, sur le profil
 `quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
 
@@ -111,11 +112,14 @@ Le commit `ee5ee51` ajoute un résultat positif distinct : tout support d'arité
 trois ou quatre forme une clique du graphe admissible, et le plan d'un triple
 non aligné donne une condition nécessaire exacte à deux demi-espaces. Les
 comptages 28/56/70 sur le graphe complet et les campagnes bornées sont corrects,
-avec zéro triple vrai réfuté. La réponse live `5eb64c52...` corrige les ratios
+avec zéro triple vrai réfuté. La réponse intégrée à `81f9210` corrige les ratios
 `N/A`, le vrai degré, le chrono composite, applique les quatre faces et tue par
 plancher le mutant qui accepte tout. La gate ne reçoit toutefois ni le K4 après
 quatre faces, ni la couverture exacte de `truth_triples/truth_quads`; une
-omission partielle peut encore rester verte. Surtout, le ratio K4/supports d'arité quatre et le ratio
+omission partielle peut encore rester verte. Des mutants temporaires le
+confirment : supprimer les trois faces supplémentaires, ou omettre 202 triples
+et 97 quadruples vrais d'ancre zéro, laisse les deux CTests paires verts.
+Surtout, le ratio K4/supports d'arité quatre et le ratio
 sommets/toutes sphères du parcours n'ont ni les mêmes unités ni le même
 dénominateur. Ils ne prouvent pas un avantage de 25 à 35 ni une décision
 d'abandon. Voir
@@ -130,7 +134,8 @@ combinadiques, locator, construction, tri et sortie reçus. Le terminal
 `AboveInteriorWindow` doit être versionné explicitement, car la norme active
 demande encore un shell complet sur une fenêtre uniforme.
 
-Le prototype live `bb31b426...` crédite ce lemme sur des oracles bornés, sans
+Le prototype `bb31b426...`, intégré à `81f9210`, crédite ce lemme sur des
+oracles bornés, sans
 créditer le statut produit. Sa partie candidate évite arrangement et mosaïque;
 elle compare maintenant les listes complètes de membres par coquille, reçoit
 l'unicité, sépare les trois modes, replie petit nuage/cap, agrège les `Q`
@@ -140,6 +145,10 @@ sur six nuages, et chacun des ordres un à cinq contribue des nœuds. Les lanes
 au-dessus de `s_max`, la borne $K+1\le s_{\max}$ et le juge explicite sont
 maintenant reçus; mutants membre/double émission et identité `candidats==C_q`
 sont actifs.
+
+Un rebuild Release complet de `81f9210` passe aussi 73/73 CTests en 351,62 s
+sous GCC 13.3, avec GMP et Python actifs; 69 tests sont v3 et quatre dépendent
+transitivement de la v2. Ce crédit d'intégration ne change aucun statut public.
 
 Le cover rescane tous les points par feuille et peut être
 quasi quadratique; CSR et allocations restent non bornés en octets, les
@@ -152,9 +161,11 @@ un oracle indépendant. La source Gabriel ouverte streamée reste absente. Les
 labels « certifiée », « exacte produit » et « seule voie » restent donc
 prématurés. Le contrôle structurel ajouté à l'empreinte n'est pas total : un
 cycle `next_sibling` boucle et un enfant hors plage déborde sous ASan; des fautes
-identiques des deux côtés restent compatibles avec un digest égal. Le chrono
-source englobe aussi les folds de référence, et la justification des agrégats
-`i64` oublie le facteur `clouds<=2000`.
+identiques des deux côtés restent compatibles avec un digest égal. La porte par
+ordre reste vacuable : supprimer entièrement $k=5$ conserve 1 201 nœuds, dépasse
+le plancher de 1 000 et laisse les treize CTests directs verts. Le chrono source
+englobe aussi les folds de référence, et la justification des agrégats `i64`
+oublie le facteur `clouds<=2000`.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

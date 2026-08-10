@@ -1,4 +1,4 @@
-# Audit continu de la source directe `24ad3d37` à `bb31b426`
+# Audit continu de la source directe `24ad3d37` à `81f9210`
 
 Dates des snapshots : 9 et 10 août 2026 UTC.
 
@@ -10,10 +10,12 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit est strictement limité à `morsehgp3D_v3`. Il n'a modifié aucun
 prototype. Il suit chronologiquement le premier delta post-`c0df579`, sa
 dispersion `2b47247e...`, sa restauration `9edf150d...`, le palier forêt
-`1c3948c3...` committé dans `1bb82f9`, puis le correctif live
-`bb31b426.../a3c40f7e...` posé sur le HEAD `ee5ee51`. Les retraits et
-restaurations intermédiaires restent documentés comme faits historiques, pas
-comme état courant.
+`1c3948c3...` committé dans `1bb82f9`, puis le correctif
+`bb31b426.../a3c40f7e...` intégré avec la réponse cliques au commit `81f9210`.
+Au pincement, `HEAD` et `origin/main` pointaient sur ce snapshot et les fichiers
+produit audités lui correspondaient exactement; le présent delta documentaire
+est postérieur. Les retraits et restaurations intermédiaires restent documentés
+comme faits historiques, pas comme état courant.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
@@ -22,11 +24,13 @@ comme état courant.
 | `prototype/direct_source.cpp`, palier courant restauré | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
 | `prototype/direct_source.cpp`, palier courant avec forêts | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
 | `prototype/direct_source.cpp`, correctif courant audité | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
+| commit intégrant le correctif | `81f921033db470bf53729a64528b02beccc8995b` |
 | `CMakeLists.txt`, sans CTests directs | `beeb06c0399c038b6718d0ab7d48d8d4eec2ca666f86a3fb5e221bc405912c07` |
 | `CMakeLists.txt`, palier courant avec quatre CTests | `1f06ad8b7d3f28ea4b4a89da945fe47ccf82dd05fbb9873ec633bd95a032f9b1` |
 | `CMakeLists.txt`, palier courant avec sept CTests | `4530a8c4817fbfc1e399f0dff628f374b89d2d1d2117fa964c448ce72efec431` |
 | `CMakeLists.txt`, palier courant avec neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
 | `CMakeLists.txt`, correctif courant avec treize CTests | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |
+| `CMakeLists.txt` complet intégré | `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
 | binaire Release GCC 13.3 du premier palier | `d724f33c16f676804ed381190a9e6dadc2257ba9978635667aa7191fa7bd6a4e` |
 | binaire Release GCC 13.3 du palier courant | `e33f045c26b1bf0f8ea54bdb31929b6317b4c0f55375172f2cb06b31f063de7f` |
 | binaire Release GCC 13.3 restauré | `73dd077a75467c97182ca6d273295a309dd11448d6efb098e80d25e45c279006` |
@@ -233,7 +237,7 @@ Sa construction récursive par concaténation de chaînes peut être quadratique
 taille et profonde; c'est acceptable pour le juge borné actuel, pas un format de
 reçu ou une architecture de production.
 
-### Correctif `bb31b426` / `a3c40f7e` : domaines fermés, validateur encore ouvert
+### Correctif `bb31b426` / `a3c40f7e`, intégré à `81f9210` : domaines fermés, validateur encore ouvert
 
 Le correctif répond substantiellement aux findings du palier précédent :
 
@@ -242,14 +246,22 @@ Le correctif répond substantiellement aux findings du palier précédent :
 - les gates positives passent explicitement `--judge 1`;
 - l'unicité des coquilles de référence et `candidats==C_q` deviennent des
   obligations;
-- le mutant de membre rend 184 désaccords, et sa combinaison dangereuse avec la
-  forêt est refusée avant d'assembler un catalogue incohérent;
+- le mutant de membre de la gate rend 412 désaccords, et sa combinaison
+  dangereuse avec la forêt est refusée avant d'assembler un catalogue incohérent;
 - stdout parle de listes par coquille au lieu de pools globaux.
 
 Build Release frais : 13/13 CTests, 16,70 s. Build ASan/UBSan/LSan ciblé : 8/8,
 9,95 s, aucun diagnostic. La gate forêt conserve 30 forêts, 1 647 nœuds,
 32 racines et zéro différence quotientée. C'est un vrai GO de non-régression
 sur les objets valides exercés.
+
+La couverture permanente par ordre reste trop faible. Un mutant temporaire qui
+remplace `k <= forest_orders` par `k < forest_orders` supprime entièrement
+l'ordre maximal : la gate annonce encore `k=1..5`, ne compare plus que 24
+forêts et conserve 1 201 nœuds, donc son seul plancher de 1 000 reste satisfait.
+Les treize CTests directs passent tous. Il faut exiger exactement
+`forests_compared == decided * forest_orders` et recevoir chaque ordre, pas
+seulement une masse agrégée.
 
 La tentative de validation structurelle n'est toutefois pas totale. Un
 `next_sibling` auto-cyclique ne termine pas : la sonde a dû être tuée après deux
@@ -267,6 +279,12 @@ borne un nuage mais oublie `clouds<=2000` : la borne cumulée annoncée atteint
 `53 317 334 799 960 000 000`, au-dessus de `2^63-1`. Et le chrono nommé source
 englobe aussi le fold de référence et les deux empreintes; `reference_seconds`
 ne reçoit que `flat_catalogue`. Les labels ne séparent donc pas les coûts forêt.
+Le message du commit `81f9210` affirme pourtant la récursion bornée contre les
+cycles et un chrono source étendu à « ses folds »; ces deux fermetures sont
+réfutées par les sondes et l'encadrement temporel ci-dessus.
+Le commentaire CMake continue en outre de promettre le « même POOL DE MEMBRES »
+alors que la conclusion et le différentiel ne reçoivent que les listes par
+coquille. La provenance stdout omet `--force-drop-member`.
 
 L'ordre public reste inchangé et faux : 3 062 positions de catalogue et 4 016
 indices `ForestNode::source` diffèrent toujours sur la sonde 24 nuages, malgré

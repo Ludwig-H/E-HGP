@@ -5,7 +5,7 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état audité du worktree est scellé dans
+L'état audité du snapshot committé `81f9210` est scellé dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
 **Trois des quatre P0 de cet audit sont fonctionnellement fermés sur leur domaine
@@ -33,7 +33,8 @@ owner/census, runs et porte 50 k/G4.
 Le prototype `direct_source.cpp` est un résultat mathématique positif, pas une
 source produit certifiée. Des oracles indépendants valident son cover--rayon et
 ses voisinages bornés sans écart, et sa partie candidate évite arrangement et
-mosaïque. Le palier live `bb31b426...` conserve les membres, tue les doubles
+mosaïque. Le palier `bb31b426...`, intégré à `81f9210`, conserve les membres,
+tue les doubles
 émissions, applique les fallbacks, publie les masses en `u128` et compare un
 quotient sémantique de 30 forêts; 13 CTests Release et huit passages ciblés
 ASan/UBSan/LSan sont verts. Bas ordre, borne $K+1\le s_{\max}$ et juge explicite
@@ -43,6 +44,11 @@ structurel boucle ou sort du tableau sur certaines forêts malformées. Le
 coût/mémoire 50 k reste ouvert. Le
 verdict épinglé est dans
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](audits/AUDIT_SOURCE_DIRECTE_24AD3D37.md).
+
+Un rebuild Release CPU complet du commit `81f9210` passe 73/73 CTests en
+351,62 s avec GCC 13.3, GMP et Python actifs; 69 tests appartiennent à la v3 et
+quatre sont des dépendances transitives v2. Ce reçu positif vérifie
+l'intégration du snapshot, pas le contrat de débit, de mémoire ou de replay.
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de
@@ -1340,6 +1346,12 @@ comparées, 1 647 nœuds, 32 racines, **zéro empreinte quotient différente**. 
 cumulés $K=1..5$ valent 154, 419, 774, 1 201 et 1 647 nœuds : chaque ordre de la
 gate contribue réellement.
 
+La gate ne reçoit toutefois que la masse agrégée. Un mutant temporaire qui
+saute entièrement l'ordre maximal ne compare plus que 24 forêts, conserve les
+1 201 nœuds des ordres un à quatre, annonce encore `k=1..5` et laisse les treize
+CTests directs verts. Il faut exiger le nombre exact de forêts et la contribution
+de chaque ordre.
+
 Une sonde indépendante trouve toutefois, sur 24 nuages, 3 062 positions de
 catalogue déplacées et 4 016 champs publics `ForestNode::source` différents,
 malgré 120/120 empreintes quotient égales. La source itère une map triée par
@@ -1349,10 +1361,11 @@ l'identité du `Catalogue`, du pool, des offsets, de la `Forest` publique ou de
 leur sérialisation. Il faut trier le catalogue source selon le support canonique
 et reconstruire le pool avant de revendiquer la chaîne publique bout en bout.
 
-La qualification exige en outre $K+1\le s_{\max}$. Le live accepte pourtant
-`--smax 4 --forest 5` et même `--forest 32`, puis annonce un accord complet :
-les ordres hauts sont vides et l'ordre quatre est tronqué faute de rang cinq.
-Le plancher agrégé de nœuds ne détecte pas cette vacuité par ordre.
+La qualification exige en outre $K+1\le s_{\max}$. Le palier `1c3948c3...`
+acceptait pourtant `--smax 4 --forest 5` et même `--forest 32`, puis annonçait
+un accord complet : les ordres hauts étaient vides et l'ordre quatre tronqué
+faute de rang cinq. `81f9210` refuse maintenant ces commandes et possède une
+porte négative; cette dette de domaine est fermée.
 
 ### Le verrou candidat et le verrou de payload sont maintenant séparés
 
@@ -1406,8 +1419,7 @@ J'ai posé la question à l'auditeur, puis je l'ai mesurée moi-même.
 Le lemme s'applique à **chaque** paire d'une coquille critique. Un support d'arité
 trois a donc ses trois paires admissibles, un support d'arité quatre ses six :
 
-$$\text{support d'arité }3=\text{TRIANGLE de }G,\qquad
-  \text{support d'arité }4=\text{K4 de }G.$$
+$$\text{support d'arité }3=\text{TRIANGLE de }G,\qquad \text{support d'arité }4=\text{K4 de }G.$$
 
 C'est une réduction structurelle exacte, pas une heuristique. Et il existe en plus
 un **lemme de triple**, plus fort que celui de paire parce que le plan frontière
@@ -1415,8 +1427,7 @@ n'est plus libre. Pour un triple $T$ non aligné de plan $\pi$, de circumcentre 
 — qui est la projection orthogonale du centre critique $c_0$ sur $\pi$ — et de
 circumrayon $\rho$, en coordonnées $\pi=\{y_3=0\}$, $m=0$, $c_0=(0,0,d)$ :
 
-$$\lVert y-c_0\rVert^2=\lVert y\rVert^2-2y_3d+d^2\leq\rho^2+d^2=R^2
-  \quad\text{dès que } y\in D_T \text{ et } y_3\geq0 .$$
+$$\lVert y-c_0\rVert^2=\lVert y\rVert^2-2y_3d+d^2\leq\rho^2+d^2=R^2\quad\text{dès que } y\in D_T \text{ et } y_3\geq0 .$$
 
 Donc $A_3(T)=\min\bigl(\lvert X\cap D_T\cap H^{+}\rvert,\lvert X\cap D_T\cap H^{-}\rvert\bigr)\leq s_{\max}$,
 et il n'y a que **deux** demi-espaces à tester au lieu d'une famille continue.
@@ -1454,7 +1465,7 @@ développement du K4 s'arrête à la première face refusée.
 | générateur | ratio diagnostique publié | tendance observée |
 | --- | ---: | --- |
 | sous-ensembles du voisinage du cover | $C_4\approx3{,}2\cdot10^{12}$ à 50 k | catastrophique |
-| cliques du graphe admissible, avec lemme de triple | 82 → 144 → 162 | **dégrade** |
+| cliques du graphe admissible, quatre faces | 53,1 → 69,5 → 69,3 | environ 70 sur les deux dernières tailles; aucune tendance asymptotique reçue |
 | **parcours de l'arrangement** | environ 4,7 à 6,5 | à peu près stable |
 
 Sur ces campagnes, le ratio publié du parcours est beaucoup plus petit. Cela
@@ -1465,13 +1476,13 @@ unité diffère aussi. Son débit absolu reste de toute façon ouvert — le sc�
 vaut $V\approx5{,}5\cdot10^{7}$ sommets à 50 k pour un budget de 100 ms.
 
 C'est une alerte de direction utile : les deux voies directes essayées restent
-très surproductives sur les campagnes reçues. La division directe de 82--162 par
+très surproductives sur les campagnes reçues. Même la division directe de 53--70 par
 4,7--6,5 ne prouve toutefois pas un ralentissement de vingt-cinq à trente-cinq,
 car unités et dénominateurs diffèrent. Une décision d'architecture exige le même
 payload, les mêmes nuages, des unités de travail communes et les chronos/high-
 waters complets.
 
-**[audit `ee5ee51`, réponse live `5eb64c52`]** Le comptage 28/56/70 sur le
+**[audit `ee5ee51`, réponse intégrée à `81f9210`]** Le comptage 28/56/70 sur le
 graphe complet et le lemme de triple sont crédités. Les cinq réserves de forme
 sont closes : un mutant `--force-triple-accept` vit dans le binaire et une porte
 négative exige qu'il rougisse — c'est le **plancher de triples rejetés** qui le
@@ -1488,7 +1499,10 @@ Aucune gate ne reçoit le nombre de K4 survivant aux **quatre** faces ni le gain
 sur une seule face. Surtout, `truth_triples` et `truth_quads` ne sont consultés
 que pour les candidats visités : un itérateur qui omet une partie des vraies
 cliques tout en dépassant les planchers peut encore rendre zéro faux rejet.
-Comparer explicitement les ensembles visités à la vérité est la prochaine porte.
+Deux mutants temporaires gardent effectivement les deux CTests verts : l'un
+remplace les trois faces supplémentaires par `true`; l'autre omet 202 vrais
+triples et 97 vrais quadruples dont l'ancre vaut zéro. Comparer explicitement
+les ensembles visités à la vérité est la prochaine porte.
 Le détail reproductible est dans
 [`AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md`](audits/AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md).
 
@@ -1517,7 +1531,7 @@ réinventer.
 Le cover et la fenêtre ferment la **complétude**, et le prototype le prouve à
 zéro désaccord y compris sur cosphéricités. Ce qu'ils ne ferment pas est le
 **générateur de candidats** : $C_q=\sum_p\binom{d_q^{+}(p)}{q-1}$ avec
-$d\approx1\,450$ mesuré au profil produit, contre $D=8$ à $24$ supposé dans les
+$d\approx1\,450$ extrapolé sous le scénario de densité fixe, contre $D=8$ à $24$ supposé dans les
 plafonds de la note.
 
 Trois questions précises, dans l'ordre où elles bloquent :
@@ -1779,7 +1793,8 @@ terminal `AboveInteriorWindow` par arité doit aussi être versionné dans le
 contrat avant conformité : la norme active exige encore un shell complet sur
 une fenêtre uniforme plus large.
 
-**[audit du prototype live `bb31b426...`]** Le résultat est scindé et largement
+**[audit du prototype `bb31b426...`, intégré à `81f9210`]** Le résultat est
+scindé et largement
 positif. Le lemme, la localisation rationnelle et les `9^3` cellules passent
 des oracles indépendants : 33 914 voisinages et 15 360 supports propres, zéro
 écart. La partie candidate ne construit ni sommet d'arrangement ni mosaïque.
@@ -1812,8 +1827,10 @@ Le coût produit reste NO-GO. Le cover rescane tous les points dans chaque
 feuille, le CSR peut être dense, les high-waters omettent plusieurs buffers,
 sorties et vérité, et une allocation sous `cell-cap` n'a aucun statut de reprise.
 Le target s'arrête à 20 000 points. Les campagnes positives ont des voisinages
-complets et ne reçoivent ni la frontière sélective, ni `candidates==C_q`, ni un
-digest attendu. Les chronos et high-waters restent incomplets : le temps nommé
+complets et ne reçoivent ni la frontière sélective, ni un digest attendu.
+L'identité `candidates==C_q` est bien exigée par lane depuis `81f9210`, sans
+valeurs attendues permanentes de $C_q/T_q/H_q$. Les chronos et high-waters
+restent incomplets : le temps nommé
 source inclut en réalité les folds source **et référence** et leurs empreintes,
 et le pire cas récursif peut recopier des chaînes quadratiquement. Le commentaire
 qui borne certains agrégats `long long` oublie jusqu'à 2 000 nuages; la borne
