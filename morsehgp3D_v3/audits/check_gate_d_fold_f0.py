@@ -513,7 +513,16 @@ def validate_regular_source(raw: RawBatch) -> int:
             continue
         if any(handle not in by_handle for handle in record.handles):
             raise FoldError(f"unknown raw handle: {record.key}")
-        strict = sum(1 for handle in record.handles if by_handle[handle].activation < raw.level)
+        strict_handles = {
+            handle
+            for handle in record.handles
+            if by_handle[handle].activation < raw.level
+        }
+        if len(strict_handles) != sum(
+            1 for handle in record.handles if by_handle[handle].activation < raw.level
+        ):
+            raise FoldError(f"duplicate strict handle: {record.key}")
+        strict = len(strict_handles)
         if strict < 2:
             raise FoldError(
                 f"irregular source: {record.key} carries {strict} strict facet(s), two are required"
@@ -1271,7 +1280,23 @@ def invalid_fixtures() -> int:
         _outcome(lambda: fold_warshall(resolve_batch(smuggling)))[0] == "ok",
         "the general fold refused a batch that only the regular gate may refuse",
     )
-    return len(cases) + 2
+
+    # Deux occurrences du même handle strict ne forment jamais deux facettes
+    # strictes distinctes. Cette fixture vise directement le validateur de
+    # source : `resolve_batch` refusait déjà le doublon, mais un comptage brut
+    # des occurrences pouvait valider à tort le record avant la projection.
+    duplicate_strict = RawBatch(
+        one,
+        (Binding("strict", zero, Node("L", "strict")),),
+        (RawRecord("direct", "duplicated-strict-handle", ("strict", "strict")),),
+    )
+    try:
+        validate_regular_source(duplicate_strict)
+    except FoldError:
+        pass
+    else:
+        raise GateFailure("the regular validator counted one strict handle twice")
+    return len(cases) + 3
 
 
 def permutation_campaign(fixtures: dict[str, ProjectedBatch]) -> int:
