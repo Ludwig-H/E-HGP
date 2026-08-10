@@ -31,6 +31,12 @@ devient active au niveau maximum des deux générateurs. Par S.4, les composante
 du DSU ainsi obtenu sont celles de Gamma, sans matérialiser les `k`-facettes,
 les graphes de Johnson ni la mosaïque de Delaunay d'ordre supérieur.
 
+Une réduction plus forte est maintenant démontrée : sous une source complète
+pour l'ordre `k`, seuls les générateurs de support minimal `q_min<=k+1` sont
+nécessaires dans `DSU_k`. Les autres graphes de Johnson sont déjà présents à la
+coupe stricte. Cette fenêtre, sa preuve et le transcript exact sont dans
+[`NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md`](NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md).
+
 Le poids peut être plafonné à `K` **après** le reçu des occurrences; les listes
 de membres et postings ne peuvent jamais être tronquées à `K+1` ou `smax`.
 
@@ -63,6 +69,15 @@ $$P_{\mathrm{post}}=\sum_x\binom{d_x}{2}=\sum_{M<N}\lvert M\cap N\rvert,$$
 où `d_x=|P_x|`. Ce nombre doit être calculé en entier large avant toute
 allocation. Il peut être quadratique en `G`; l'algorithme est output-sensitive,
 pas magiquement sous-quadratique.
+
+Une seconde identité, indépendante de la réduction des paires, reçoit la
+construction même des postings :
+
+$$L_{\mathrm{sat}}=\sum_M\lvert M\rvert=\sum_x d_x=\mathrm{postings\_mass}.$$
+
+Elle doit être calculée depuis le catalogue original, en arithmétique vérifiée,
+avant toute émission. Une dernière posting omise ne peut alors plus rendre
+simultanément faux les deux côtés de son propre contrôle.
 
 ## 3. Forme GPU reprenable
 
@@ -106,29 +121,33 @@ Cette métadonnée doit être staging-local jusqu'au commit du lot. Elle conserv
 exactement la coupe stricte tout en rendant le coût proportionnel au travail du
 lot.
 
-## 5. Transcript Morse sans jeter les silencieux
+## 5. Transcript Morse : correction et solution
 
-Un générateur qui ne change ni partition ni couverture n'est pas une
-continuation Morse. Il reste pourtant obligatoire dans les postings. À l'ordre
-deux, les générateurs `A={1,2,3}`, `B={2,3,4}` sont déjà connectés;
-`S={1,3,4}` est silencieux, mais le futur `N={1,4,5}` ne rejoint la composante
-que par `S`.
+La première version de cette note assimilait absence de croissance de
+couverture et absence de continuation. C'est faux : les campagnes courantes ont
+zéro croissance mais 87 et 65 continuations Gamma. Le critère exact est la
+cardinalité minimale d'un support de la boule :
 
-Il faut donc deux couches :
+$$\lvert M\rvert\geq k\quad\text{et}\quad q_{\min}(B)\leq k+1.$$
 
-- ledger d'activation de tous les générateurs, silencieux compris, avec niveau,
-  identité, digest de membres et reçu d'overlap;
-- delta public de composante, calculé après fermeture du lot à partir des
-  racines strictes publiques, latentes et de `coverage_delta`.
+La preuve complète est désormais donnée dans
+[`NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md`](NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md).
+Elle établit aussi qu'en source complète les générateurs `q_min>k+1` sont déjà
+entièrement représentés à la coupe stricte. Ils peuvent être exclus de
+`DSU_k` et de ses postings; il n'est pas nécessaire de maintenir pour eux un
+état latent « au cas où ».
 
-Types orthogonaux recommandés : `birth`, `continuation`, `multifusion`, puis
-`silent_generator_batch`, `coverage_growth`, `latent_assimilation` et
-`structural_growth`. Un compteur nommé `*_batches` compte un niveau; s'il
-s'incrémente par composante touchée, il doit s'appeler `*_component_events`.
+Après fermeture du lot, marquer seulement les racines finales atteintes par un
+générateur admissible, puis classifier par le nombre de handles stricts
+distincts : zéro donne une naissance, un une continuation et au moins deux une
+multifusion. `coverage_delta` reste un payload orthogonal. Un compteur nommé
+`*_batches` compte un niveau; s'il s'incrémente par composante touchée, il doit
+s'appeler `*_component_events`.
 
-Dans une sous-famille, tous ces types portent le suffixe
-`relative_to_certified_subfamily`; un lot silencieux relativement à une source
-partielle peut cesser de l'être lorsque la source devient complète.
+La source partielle exige une autre sémantique. Sans certificat de complétude de
+la sous-famille `Sigma_k`, les générateurs redondants dans la tour complète
+peuvent rester nécessaires à la sous-filtration observée, et le transcript doit
+porter `relative_to_certified_subfamily` au lieu d'une autorité Gamma.
 
 ## 6. Fixtures minimales qui tuent les raccourcis
 
@@ -139,10 +158,14 @@ partielle peut cesser de l'être lorsque la source devient complète.
 `|A inter C|=1`. Oublier les paires nouveau--nouveau laisse `C` isolé;
 décaler le seuil d'une unité change aussi le verdict.
 
-### Silencieux indispensable
+### Continuation sans croissance indispensable
 
-Utiliser `A`, `B`, `S`, `N` de la section précédente. Supprimer `S` parce que
-son activation est silencieuse perd l'attache future de `N`.
+À `k=2`, utiliser `A={1,2,3}`, `B={2,3,4}`, `S={1,3,4}` puis
+`N={1,4,5}`. Supprimer la posting de `S` parce que sa couverture ne croît pas
+perd l'attache future de `N`. Si `q_min(S)<=3`, `S` porte toutefois une vraie
+continuation Gamma : la fixture tue la collecte par couverture, pas la
+réduction exacte `q_min>k+1`. Si la source est complète et `q_min(S)>3`, des
+carriers strictement antérieurs remplacent au contraire cette attache.
 
 ### Multifusion
 
@@ -151,8 +174,10 @@ son activation est silencieuse perd l'attache future de `N`.
 strictes, pas une continuation dépendante de l'ordre des unions.
 
 Ajouter les mutants permanents : dernière posting omise, `w>k` au lieu de
-`w>=k`, membership tronqué à `K+1`, générateur silencieux collecté, lot de
-niveau égal committé séquentiellement et occurrence nouveau--nouveau oubliée.
+`w>=k`, membership tronqué à `K+1`, continuation sans croissance collectée,
+lot de niveau égal committé séquentiellement et occurrence nouveau--nouveau
+oubliée. Pour le transcript Gamma, ajouter séparément `q_min+1`, inclusion
+erronée de `q_min>k+1` et naissance illégale d'une coface `q_min=k+1`.
 
 ## 7. Reçu minimal du benchmark CPU
 
@@ -196,13 +221,18 @@ du join, jamais la complétude du pipeline scientifique.
 
 ## 9. Prochaines actions ordonnées
 
-1. Graver l'oracle tiers déjà positif sur 470 nuages et 34 003 générateurs.
-2. Recevoir `Gamma == tour exhaustive == fold G^2` sur les fixtures nommées.
-3. Écrire puis différencier le join postings CPU avec ses identités de masse.
-4. Supprimer le scan global des actifs par lot et publier les high-water.
-5. Mesurer CPU par catalogue rejoué, puis produire le manifeste 50 k.
-6. Seulement alors écrire/qualifier le kernel CUDA et envisager une G4 SPOT
-   gardée.
+1. Recevoir le prédicat `q_min` et le transcript contre Gamma sur des catalogues
+   géométriques complets.
+2. Comparer chaque poids à une table brute indépendante et ajouter l'identité
+   `L_sat` calculée depuis le catalogue original.
+3. Fermer les domaines de `K` et `PointId`, puis effectuer le préflight checked
+   de masse et de mémoire.
+4. Remplacer les occurrences intégrales par des runs bornés, merger, publier les
+   high-water et mesurer sur des catalogues rejoués.
+5. Graver l'oracle tiers déjà positif sur 470 nuages et 34 003 générateurs afin
+   de lier la complétude de source aux reçus.
+6. Seulement alors écrire et qualifier un kernel CUDA, puis envisager une G4
+   SPOT gardée.
 
 Cette route conserve l'invariant d'architecture : aucune mosaïque globale,
 aucune expansion des sous-simplexes, et aucun statut exact sans preuve de

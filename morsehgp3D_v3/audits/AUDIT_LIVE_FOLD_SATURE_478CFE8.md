@@ -2,6 +2,18 @@
 
 Date : 10 août 2026 UTC.
 
+> Suite constructive prioritaire :
+> [`NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md`](NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md)
+> donne l'algorithme exact par postings, les reçus de masse, la suppression du
+> scan global par lot, les fixtures et la porte d'admission G4. Le second run
+> compact `n=200` a lui aussi dépassé 600 s : il faut passer à ce join isolé,
+> pas prolonger le balayage `G^2`.
+> Ce join possède maintenant une réception positive bornée dans
+> [`AUDIT_LIVE_JOIN_POSTINGS_621EE80.md`](AUDIT_LIVE_JOIN_POSTINGS_621EE80.md).
+> Le verrou restant du transcript est résolu mathématiquement par la fenêtre
+> `q_min<=k+1` dans
+> [`NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md`](NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN_20260810.md).
+
 Périmètre : nouveau candidat `prototype/saturated_fold.hpp` et branche
 `--subject-fold 1` du juge Gamma, committés et poussés à
 `23f12afb4f3896bfd16f8f1281d5f1a3d4f89f22`. Aucun fichier produit n'est

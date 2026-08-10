@@ -29,7 +29,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le snapshot courant est `HEAD=origin/main=23f12af`, toujours sous
+Le snapshot courant est `HEAD=origin/main=2b4801c`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -38,7 +38,9 @@ champs déclarés; `f3802bd` ferme le doublon de handle strict du falsificateur
 F0; `f102d42` observe la branche réellement prise, contrôle source et tranche
 de pool, borne le libellé mémoire et migre toutes les portes négatives vers un
 code exact; `ac39ac7` puis `478cfe8` écrivent et durcissent le juge Gamma;
-`23f12af` ajoute son premier sujet par fold saturé. Ce sont des résultats CPU
+`23f12af` ajoute son premier sujet par fold saturé; `2b4801c` ajoute le
+profileur compact et sépare croissance de couverture et activation silencieuse.
+Ce sont des résultats CPU
 bornés, pas un reçu produit. Le sujet v2 par défaut censure encore tous les
 ordres $k=2,3$ de la campagne saturée, tandis que le fold candidat rend 60/60
 accords de couverture. Les deux coupes et l'union des
@@ -79,17 +81,35 @@ concordent avec `flat_catalogue`, sans aucun manquant, extra ou écart. Ce
 résultat positif reçoit la source bornée; la prochaine action est de graver ce
 harness, pas de le remplacer par le fold qu'il juge.
 
-Le pipeline chronométré live met déjà en évidence que les batches saturés
-silencieux ne sont pas des continuations Gamma : naissances et fusions
-concordent sur deux fixtures, l'excès de « continuations » égale exactement les
-niveaux sujet étrangers. La solution conserve ces générateurs pour les joins
-futurs, mais dérive le transcript Morse par diff strict--fermé; voir
+Le pipeline chronométré committé à `2b4801c` met déjà en évidence que certains batches saturés
+sont silencieux : naissances et fusions concordent sur deux fixtures et l'excès
+des anciennes continuations égale exactement les niveaux sujet étrangers. La
+tentative de les détecter par croissance de couverture est en revanche
+insuffisante : zéro croissance et 128/103 événements dits silencieux absorbent
+aussi les 87/65 continuations Gamma. La solution conserve tous les générateurs
+pour les joins futurs, mais doit dériver le transcript d'un critère structurel
+reçu, pas du seul diff de couverture; voir
 [`AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md`](audits/AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md).
+Deux runs `n=200`, avant puis après retrait des partitions stockées, ont chacun
+dépassé 600 s sans reçu. Le dernier digest est constant parce qu'il ne voit que
+ces partitions désormais absentes. Le prochain benchmark doit donc rejouer des
+catalogues et isoler le join; aucun de ces runs ne justifie G4.
 Le verrou d'échelle a maintenant une solution falsifiable : postings
 `PointId->GeneratorId`, tri-réduction de toutes les occurrences, DSU multi-ordre
 par lots, classification des seules racines touchées et reçu terminal. Le plan,
 ses contre-exemples et la porte G4 sont dans
 [`NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md`](audits/NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md).
+Cette solution est maintenant implémentée (`build_saturated_fold_postings`),
+différenciée bit à bit contre le fold de vérité par une porte permanente
+(fixtures gravées, 50 nuages, permutation, six mutants tués, identités de lot,
+de masse et `P_post` dans le fold même), et mesurée : à `n=64/K=5` le
+transcript est identique au O(G²) pour un fold 4,9× plus rapide, et l'ancien
+mur `n=200` (deux runs > 600 s sans reçu) tombe à 36,1 s de fold pour
+40 007 générateurs et `P_post=385 553 414` — le coût du join exact est la
+masse `P_post` elle-même. La note de réception
+[`NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md`](audits/NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md)
+porte les chiffres et trois questions (réduction par comptage CPU, agrégation
+`q_min`, manifeste `P_post` 50 k).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

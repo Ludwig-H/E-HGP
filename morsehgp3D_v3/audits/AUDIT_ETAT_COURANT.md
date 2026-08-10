@@ -10,19 +10,20 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
-courante est `HEAD=origin/main=23f12afb4f3896bfd16f8f1281d5f1a3d4f89f22`.
+courante est `HEAD=origin/main=2b4801c2b2a7fed0e91dfc8aabed1d11998e8787`.
 La chaîne
 reçue est `a8b5615` pour le delta produit, `1f0db40` pour l'égalité complète des
 champs déclarés de `Catalogue`, `29c2c22` pour le ledger owner/coplanaire, puis
 `f3802bd` pour le validateur F0, `f102d42` pour l'ordre observé, les contrôles
 source/pool et la migration des codes exacts, `ac39ac7` pour le premier juge
-Gamma, `478cfe8` pour sa réponse fail-closed et ses deux coupes, puis `23f12af`
-pour le premier fold saturé. Les
+Gamma, `478cfe8` pour sa réponse fail-closed et ses deux coupes, `23f12af`
+pour le premier fold saturé, puis `2b4801c` pour le profileur compact et la
+séparation croissance/silencieux. Les
 sections sur `e406e1f` et les paliers live
 07:31--07:53 sont conservées plus bas comme historique daté, pas comme état du
 worktree.
 
-## Autorité courante à `23f12af`
+## Autorité courante à `2b4801c`
 
 | contrat | état reçu |
 | --- | --- |
@@ -36,6 +37,7 @@ worktree.
 | travail du juge | **non reçu** : cardinal précrédité avant les recherches, mutant sans différentiel encore vert |
 | oracle Gamma exhaustif | **noyau positif, claim borné** : énumération exacte et lot atomique; le delta compare les couvertures aux coupes stricte et fermée sur l'union des niveaux, mais pas encore les partitions de facettes ni les incidences du sujet |
 | fold saturé hors position générale | **cœur positif borné** : 60/60 accords de couverture sur la campagne saturée et mutant de seuil tué; source complète, transcript, statut, verticales et coût restent ouverts |
+| pipeline saturé compact | **instrument utile, transcript non reçu** : births/fusions concordent, mais la taille de couverture classe aussi les 87/65 vraies continuations comme silencieuses; deux runs `n=200` dépassent 600 s sans reçu, digest constant, scans globaux et join quadratique restent ouverts |
 | arité quatre par préfixe d'axe | **candidat réfuté dans sa forme générale** : le niveau peut monter et descendre |
 | replay, 50 k/G4, coût et mémoire | **NO-GO inchangé** |
 
@@ -152,13 +154,20 @@ de complétude bornée à graver comme porte permanente; il ne change pas
 l'impossibilité de `smax>=50000` ni le besoin d'une source certifiée
 output-sensitive.
 
-Le delta suivant ajoute un pipeline chronométré. Son premier résultat
+Le commit `2b4801c` ajoute un pipeline chronométré. Son premier résultat
 scientifique est utile : naissances et fusions concordent avec Gamma sur deux
-fixtures, tandis que les continuations excédentaires valent exactement les
-niveaux saturés étrangers. Elles doivent être renommées batches silencieux et
-conservées pour les attaches futures, pas sérialisées comme continuations du
-`MergeForest`. Reçus et plan CPU→G4 :
+fixtures, tandis que l'excès des continuations vaut exactement les niveaux
+saturés étrangers. Ces générateurs silencieux doivent être conservés pour les
+attaches futures. Le classifieur committé ne les isole cependant pas : il rend
+`croissances=0`, `silencieux=128/103` et absorbe donc aussi les 87/65
+continuations Gamma. Reçus et plan CPU→G4 :
 [`AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md`](AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md).
+Il retire positivement les partitions fermées du chemin de mesure et entretient
+les couvertures par fusion incrémentale. Le second run `n=200` dépasse pourtant
+lui aussi 600 s sans sortie. Comme le digest parcourt uniquement les partitions
+alors vides, il devient constant; et les scans de tous les actifs par lot
+subsistent. La solution reçue est maintenant le join postings isolé de
+[`NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md`](NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md).
 
 ## Ledger historique de la reprise au-dessus de `f37341d`
 

@@ -118,6 +118,13 @@ target_include_directories(mhgp3v_saturated_pipeline PRIVATE ${CMAKE_CURRENT_SOU
 target_link_libraries(mhgp3v_saturated_pipeline PRIVATE mhgp)
 target_compile_options(mhgp3v_saturated_pipeline PRIVATE -Wall -Wextra -Werror)
 
+# LA PORTE DU JOIN PAR POSTINGS : differentiel bit a bit contre le fold de
+# verite O(G^2), fixtures nommees de la note 50 k, identites de recu, mutants.
+add_executable(mhgp3v_postings_join_gate prototype/postings_join_gate.cpp)
+target_include_directories(mhgp3v_postings_join_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_postings_join_gate PRIVATE mhgp)
+target_compile_options(mhgp3v_postings_join_gate PRIVATE -Wall -Wextra -Werror)
+
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
   enable_language(CUDA)
@@ -571,6 +578,50 @@ mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   mhgp3v_gamma_judge_reject_floor "plancher" 3
   --clouds 2 --points 6 --coord 10 --smax 6 --max-order 2 --seed 7
   --min-decided 1000)
+
+# LA PORTE DU JOIN PAR POSTINGS, EN PORTES PERMANENTES. Les fixtures nommees de
+# la note 50 k ont leur transcript GRAVE (une derive de la semantique Q1.2
+# contredit la porte elle-meme) ; les campagnes generique et saturee font le
+# differentiel COMPLET (partitions comprises) contre le fold de verite O(G^2),
+# l'invariance par permutation du catalogue, et exigent par planchers que le
+# regime multiplicitaire (grille 4^3) et les lots silencieux soient exerces.
+add_test(NAME mhgp3v_postings_gate_fixtures COMMAND mhgp3v_postings_join_gate)
+# Planchers calibres sur la campagne mesuree (1950/4916/3311/4782 generique,
+# 1623/4200/1889/2386 saturee) avec marge : ils prouvent que la porte mord,
+# sans figer les comptes exacts.
+add_test(NAME mhgp3v_postings_gate_generic COMMAND mhgp3v_postings_join_gate
+         --clouds 30 --points 8 --coord 40 --smax 11 --max-order 3 --seed 7
+         --min-generators 1500 --min-unions 4000 --min-silent 2500 --min-levels 4000)
+add_test(NAME mhgp3v_postings_gate_saturated COMMAND mhgp3v_postings_join_gate
+         --clouds 20 --points 9 --coord 4 --smax 11 --max-order 3 --seed 31337
+         --min-generators 1300 --min-unions 3500 --min-silent 1500 --min-levels 2000)
+# LES SIX MUTANTS NOMMES par la note §6 : chacun doit mourir par une fixture,
+# le differentiel ou une identite de recu — code 4 exige, message « mutant tue ».
+# Un mutant survivant rend 0 et le test a code attendu rougit.
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_kill_strict_threshold "mutant tue" 4 --mutant strict-threshold)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_kill_skip_new_new "mutant tue" 4 --mutant skip-new-new)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_kill_omit_last_posting "mutant tue" 4 --mutant omit-last-posting)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_kill_truncate_membership "mutant tue" 4 --mutant truncate-membership)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_kill_collect_silent "mutant tue" 4 --mutant collect-silent)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_kill_sequential_equal_levels "mutant tue" 4
+  --mutant sequential-equal-levels)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_reject_unknown "argument inconnu" 2 --option-inexistante)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_reject_absurd "campagne absurde" 2 --points 3)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_postings_gate_reject_floor "plancher" 3
+  --clouds 2 --points 6 --coord 10 --smax 6 --max-order 2 --seed 7
+  --min-generators 100000000)
+# LE PIPELINE REFUSE AUSSI SES ARGUMENTS ABSURDES, jointure comprise.
+mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
+  mhgp3v_saturated_pipeline_reject_join "jointure inconnue" 2 --join magique)
 
 # LE NOYAU F0 DU FOLD HORIZONTAL, EN PORTE PERMANENTE.
 #

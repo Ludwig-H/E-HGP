@@ -59,10 +59,13 @@ struct SaturatedOrderFold {
   // pipeline des n=200.
   std::vector<int> level_representative;   // indice catalogue du niveau
   std::vector<FoldPartition> closed_partitions;   // vide si keep_partitions=false
-  // LE TRANSCRIPT SEPARE CE QUE L'AUDIT LIVE A SEPARE : un generateur qui
-  // s'active sans changer ni composante ni couverture est un LOT SILENCIEUX
-  // (etat interne persistant, jamais une continuation Gamma) ; une croissance
-  // de couverture sans fusion est une CROISSANCE, pas une continuation.
+  // LE TRANSCRIPT EST ENCORE UNE CLASSIFICATION INTERNE, PAS LE TRANSCRIPT
+  // GAMMA : la categorie « lot silencieux » MELANGE les continuations Gamma
+  // sans croissance de couverture et les activations redondantes (une
+  // continuation peut ne changer ni partition ni couverture — refutation de
+  // l'audit live). La separation exacte est le predicat structurel
+  // |M| >= k et q_min(B) <= k+1 (NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN,
+  // theoremes 1--2), a recevoir contre l'oracle Gamma avant d'etre publie.
   long long births = 0, fusions = 0;
   long long coverage_growth_batches = 0, silent_generator_batches = 0;
   // Masses de la jointure, publiees pour mesurer le mur avant de l'optimiser.
@@ -267,6 +270,379 @@ inline SaturatedFold build_saturated_fold(const mhgp::Catalogue& catalogue, int 
       cursor = batch_end;
     }
   }
+  fold.ok = true;
+  return fold;
+}
+
+// ---------------------------------------------------------------------------
+// LE JOIN PAR POSTINGS — la forme d'echelle, differenciee contre la verite.
+//
+// Theoreme de reduction (note de l'auditeur, §1) : pour chaque point x, soit
+// P_x la liste des generateurs qui le contiennent. Emettre une occurrence par
+// paire non ordonnee dans chaque P_x puis reduire donne exactement
+// w(M,N) = |M inter N| ; l'arete d'ordre k existe ssi w >= k, active au niveau
+// du PLUS TARDIF des deux. Identites de recu par lot :
+//   R_old_new = somme_{M in B} somme_{x in M} |P_x^-|
+//   R_new_new = somme_x C(|B_x|, 2)
+//   R_old_new + R_new_new = somme des poids reduits du lot.
+// Et sur la famille entiere : P_post = somme_x C(d_x, 2) = somme des poids.
+// Toute violation refuse le fold ENTIER — jamais un lot partiel.
+//
+// LE SCAN GLOBAL PAR LOT EST SUPPRIME (§4 de la note) : la coupe stricte —
+// noeud public ET taille de couverture pre-lot — est capturee AU PREMIER
+// CONTACT de chaque racine dans le lot (epoque), la classification ne parcourt
+// que les racines touchees, et les racines non touchees ne sont ni parcourues
+// ni triees. Seule la materialisation des partitions (juge, petits n) parcourt
+// les racines vivantes.
+// ---------------------------------------------------------------------------
+struct PostingsReceipt {
+  long long old_new_occurrences = 0, new_new_occurrences = 0;
+  long long reduced_pairs = 0;    // paires uniques ponderees
+  long long weight_sum = 0;       // somme des w reduits
+  long long p_post = 0;           // somme_x C(d_x, 2), postings finales
+  long long unions_attempted = 0, unions_done = 0;
+  long long postings_mass = 0;    // somme des longueurs |P_x|
+  std::size_t max_posting = 0;
+  bool identities_ok = false;
+};
+
+// LES SIX MUTANTS NOMMES PAR LA NOTE (§6) : chacun doit rougir par la porte
+// differentielle, les fixtures nommees ou les identites de recu — jamais
+// rester vert. Ils vivent DANS le code produit pour que la porte prouve
+// qu'elle mord, pas pour etre actives en production.
+struct PostingsMutants {
+  bool strict_threshold = false;        // w > k au lieu de w >= k
+  bool skip_new_new = false;            // oublier les paires nouveau--nouveau
+  bool omit_last_posting = false;       // derniere posting du lot jamais publiee
+  bool truncate_membership = false;     // membres tronques a K+1 (interdit §1)
+  bool collect_silent = false;          // generateur silencieux collecte (interdit §5)
+  bool sequential_equal_levels = false; // lot de niveau egal committe sequentiellement
+};
+
+inline SaturatedFold build_saturated_fold_postings(const mhgp::Catalogue& catalogue,
+                                                   int maximum_order, bool keep_partitions,
+                                                   PostingsReceipt* receipt,
+                                                   PostingsMutants mutants = {}) {
+  SaturatedFold fold;
+  fold.maximum_order = maximum_order;
+  // LE RECU EST REMIS A ZERO A L'ENTREE : un refus ne doit jamais laisser
+  // observable un ancien identities_ok=true (contrat fail-closed de l'audit).
+  if (receipt != nullptr) *receipt = PostingsReceipt{};
+  // K EST BORNE AVANT TOUTE ALLOCATION : il dimensionne les etats par ordre.
+  if (maximum_order < 1 || maximum_order > mhgp::kMaxRank) {
+    fold.refusal = "ordre maximal hors contrat";
+    return fold;
+  }
+  const std::size_t count = catalogue.spheres.size();
+
+  std::vector<std::vector<mhgp::i32>> members(count);
+  mhgp::i32 max_point = -1;
+  for (std::size_t s = 0; s < count; ++s) {
+    const mhgp::CriticalSphere& sphere = catalogue.spheres[s];
+    if (sphere.members_begin < 0 || sphere.rank < 0 ||
+        (std::size_t)sphere.members_begin + (std::size_t)sphere.rank >
+            catalogue.members.size()) {
+      fold.refusal = "tranche de pool hors catalogue";
+      return fold;
+    }
+    members[s].assign(catalogue.members.begin() + sphere.members_begin,
+                      catalogue.members.begin() + sphere.members_begin + sphere.rank);
+    for (std::size_t t = 0; t < members[s].size(); ++t) {
+      if (members[s][t] < 0) {
+        fold.refusal = "membre negatif : les postings indexent par PointId";
+        return fold;
+      }
+      if (t > 0 && members[s][t - 1] >= members[s][t]) {
+        fold.refusal = "membres non tries ou dupliques";
+        return fold;
+      }
+      max_point = std::max(max_point, members[s][t]);
+    }
+    // MUTANT truncate_membership : la note §1 l'interdit expressement — « les
+    // listes de membres et postings ne peuvent jamais etre tronquees a K+1 ».
+    if (mutants.truncate_membership &&
+        members[s].size() > (std::size_t)(maximum_order + 1))
+      members[s].resize((std::size_t)(maximum_order + 1));
+  }
+
+  std::vector<int> by_level((std::size_t)count);
+  for (std::size_t s = 0; s < count; ++s) by_level[s] = (int)s;
+  std::sort(by_level.begin(), by_level.end(), [&](int x, int y) {
+    const int c = mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)x].sph,
+                                        catalogue.spheres[(std::size_t)y].sph);
+    if (c != 0) return c < 0;
+    return x < y;
+  });
+
+  fold.orders.resize((std::size_t)maximum_order);
+  const int K = maximum_order;
+
+  // LES IDENTIFIANTS SONT COMPRESSES : le tableau de postings est indexe par
+  // le rang du PointId dans l'univers trie des membres, jamais par la valeur
+  // brute — un identifiant clairsemé (jusqu'a INT_MAX) coutait O(max(PointId))
+  // et `max_point + 1` pouvait deborder (contrat fail-closed de l'audit).
+  std::vector<mhgp::i32> universe;
+  for (const std::vector<mhgp::i32>& generator_members : members)
+    universe.insert(universe.end(), generator_members.begin(), generator_members.end());
+  std::sort(universe.begin(), universe.end());
+  universe.erase(std::unique(universe.begin(), universe.end()), universe.end());
+  const auto dense_of = [&universe](mhgp::i32 raw) {
+    return (mhgp::i32)(std::lower_bound(universe.begin(), universe.end(), raw) -
+                       universe.begin());
+  };
+  for (std::vector<mhgp::i32>& generator_members : members)
+    for (mhgp::i32& x : generator_members) x = dense_of(x);
+  static_cast<void>(max_point);
+
+  // Postings : P[x] = generateurs contenant x, dans l'ordre d'activation.
+  std::vector<std::vector<int>> postings(universe.size());
+
+  // Etat PAR ORDRE. La capture d'epoque fige, par racine et par lot, le noeud
+  // strict ET la taille de couverture pre-lot — c'est ce qui remplace le scan.
+  struct OrderState {
+    std::vector<int> parent;
+    std::vector<long long> node_of_root;
+    std::vector<std::set<mhgp::i32>> coverage;
+    std::set<int> live_roots;
+    std::vector<long long> touch_epoch;
+    std::vector<long long> staged_node;
+    std::vector<std::size_t> staged_cov;
+    long long next_node = 0;
+    int find(int a) {
+      while (parent[(std::size_t)a] != a) {
+        parent[(std::size_t)a] = parent[(std::size_t)parent[(std::size_t)a]];
+        a = parent[(std::size_t)a];
+      }
+      return a;
+    }
+  };
+  std::vector<OrderState> states((std::size_t)K);
+  for (OrderState& st : states) {
+    st.parent.resize(count);
+    for (std::size_t s = 0; s < count; ++s) st.parent[s] = (int)s;
+    st.node_of_root.assign(count, -1);
+    st.coverage.resize(count);
+    st.touch_epoch.assign(count, -1);
+    st.staged_node.assign(count, -1);
+    st.staged_cov.assign(count, 0);
+  }
+  long long epoch = 0;
+  PostingsReceipt out;
+
+  std::size_t cursor = 0;
+  while (cursor < count) {
+    std::size_t batch_end = cursor + 1;
+    // MUTANT sequential_equal_levels : committer un lot de niveau egal boule
+    // par boule casse l'atomicite Q1.2 — la fixture multifusion a deux
+    // generateurs le voit sur les niveaux ET le transcript.
+    if (!mutants.sequential_equal_levels)
+      while (batch_end < count &&
+             mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)by_level[cursor]].sph,
+                                   catalogue.spheres[(std::size_t)by_level[batch_end]].sph) == 0)
+        ++batch_end;
+    ++epoch;
+
+    const auto touch = [&](OrderState& st, int root) {
+      if (st.touch_epoch[(std::size_t)root] != epoch) {
+        st.touch_epoch[(std::size_t)root] = epoch;
+        st.staged_node[(std::size_t)root] = st.node_of_root[(std::size_t)root];
+        st.staged_cov[(std::size_t)root] = st.coverage[(std::size_t)root].size();
+      }
+    };
+
+    // 1. EMISSION : ancien--nouveau par les postings, nouveau--nouveau par B_x.
+    // La forme d'echelle du §2 de la note : emettre les clefs canoniques dans
+    // un vecteur, TRIER puis REDUIRE par plages — aucune map par occurrence.
+    std::vector<std::pair<int, int>> occurrences;
+    std::map<mhgp::i32, std::vector<int>> batch_postings;
+    long long batch_old_new = 0, batch_new_new = 0;
+    for (std::size_t b = cursor; b < batch_end; ++b) {
+      const int m = by_level[b];
+      for (mhgp::i32 x : members[(std::size_t)m]) {
+        for (int nid : postings[(std::size_t)x]) {
+          ++batch_old_new;
+          occurrences.push_back({std::min(m, nid), std::max(m, nid)});
+        }
+        batch_postings[x].push_back(m);
+      }
+    }
+    if (!mutants.skip_new_new)
+      for (const auto& entry : batch_postings) {
+        const std::vector<int>& bx = entry.second;
+        batch_new_new += (long long)bx.size() * ((long long)bx.size() - 1) / 2;
+        for (std::size_t i = 0; i < bx.size(); ++i)
+          for (std::size_t j = i + 1; j < bx.size(); ++j)
+            occurrences.push_back({std::min(bx[i], bx[j]), std::max(bx[i], bx[j])});
+      }
+    out.old_new_occurrences += batch_old_new;
+    out.new_new_occurrences += batch_new_new;
+
+    // 2. REDUCTION et IDENTITE DU LOT : occurrences emises == somme des poids.
+    std::sort(occurrences.begin(), occurrences.end());
+    std::vector<std::pair<std::pair<int, int>, long long>> weights;
+    for (std::size_t i = 0; i < occurrences.size();) {
+      std::size_t j = i;
+      while (j < occurrences.size() && occurrences[j] == occurrences[i]) ++j;
+      weights.push_back({occurrences[i], (long long)(j - i)});
+      i = j;
+    }
+    long long batch_weight_sum = 0;
+    for (const auto& entry : weights) batch_weight_sum += entry.second;
+    out.reduced_pairs += (long long)weights.size();
+    out.weight_sum += batch_weight_sum;
+    if (batch_weight_sum != batch_old_new + batch_new_new) {
+      fold.refusal = "identite de lot violee : occurrences != somme des poids";
+      return fold;
+    }
+
+    // 3. ACTIVATIONS par ordre, avec capture d'epoque des racines fraiches.
+    std::vector<std::vector<int>> batch_touched((std::size_t)K);
+    for (std::size_t b = cursor; b < batch_end; ++b) {
+      const int m = by_level[b];
+      for (int k = 1; k <= K; ++k) {
+        if ((int)members[(std::size_t)m].size() < k) continue;
+        OrderState& st = states[(std::size_t)(k - 1)];
+        touch(st, m);   // racine fraiche : noeud strict -1, couverture 0
+        st.coverage[(std::size_t)m].insert(members[(std::size_t)m].begin(),
+                                           members[(std::size_t)m].end());
+        st.live_roots.insert(m);
+        batch_touched[(std::size_t)(k - 1)].push_back(m);
+      }
+    }
+
+    // 4. UNIONS : chaque paire reduite de poids w alimente les DSU d'ordre
+    // k <= min(K, w) — le mutant de seuil exige w > k, soit k <= min(K, w-1).
+    for (const auto& entry : weights) {
+      const int m = entry.first.first, nid = entry.first.second;
+      const long long w = entry.second;
+      const long long cap =
+          std::min<long long>(K, mutants.strict_threshold ? w - 1 : w);
+      for (int k = 1; (long long)k <= cap; ++k) {
+        OrderState& st = states[(std::size_t)(k - 1)];
+        if ((int)members[(std::size_t)m].size() < k ||
+            (int)members[(std::size_t)nid].size() < k)
+          continue;
+        ++out.unions_attempted;
+        int rm = st.find(m), rn = st.find(nid);
+        touch(st, rm);
+        touch(st, rn);
+        if (rm == rn) continue;
+        ++out.unions_done;
+        if (st.coverage[(std::size_t)rm].size() > st.coverage[(std::size_t)rn].size())
+          std::swap(rm, rn);
+        st.coverage[(std::size_t)rn].insert(st.coverage[(std::size_t)rm].begin(),
+                                            st.coverage[(std::size_t)rm].end());
+        std::set<mhgp::i32>().swap(st.coverage[(std::size_t)rm]);
+        st.parent[(std::size_t)rm] = rn;
+        st.live_roots.erase(rm);
+        batch_touched[(std::size_t)(k - 1)].push_back(rn);
+        batch_touched[(std::size_t)(k - 1)].push_back(rm);
+      }
+    }
+
+    // 5. CLASSIFICATION locale aux racines touchees. Le noeud strict et la
+    // taille de couverture pre-lot sont lus dans les captures d'epoque : la
+    // composante stricte porteuse du noeud a ete capturee AVANT toute union.
+    bool batch_public_event = false;
+    for (int k = 1; k <= K; ++k) {
+      OrderState& st = states[(std::size_t)(k - 1)];
+      SaturatedOrderFold& order = fold.orders[(std::size_t)(k - 1)];
+      std::vector<int>& touched = batch_touched[(std::size_t)(k - 1)];
+      if (touched.empty()) continue;
+      std::map<int, std::set<long long>> strict_of;
+      std::map<int, std::size_t> strict_cov_of;
+      std::set<int> finals;
+      for (int r : touched) {
+        const int final_root = st.find(r);
+        finals.insert(final_root);
+        if (st.touch_epoch[(std::size_t)r] == epoch &&
+            st.staged_node[(std::size_t)r] >= 0) {
+          strict_of[final_root].insert(st.staged_node[(std::size_t)r]);
+          // La taille pre-lot de LA composante stricte : celle capturee avec le
+          // noeud. Plusieurs racines peuvent porter le meme noeud apres unions
+          // anterieures du meme lot ; la premiere capture est la bonne, et
+          // toutes portent la meme valeur pre-lot.
+          strict_cov_of.emplace(final_root, st.staged_cov[(std::size_t)r]);
+        }
+      }
+      for (int root : finals) {
+        const auto it = strict_of.find(root);
+        const std::size_t strict = it == strict_of.end() ? 0 : it->second.size();
+        if (strict == 0) {
+          ++order.births;
+          batch_public_event = true;
+          st.node_of_root[(std::size_t)root] = st.next_node++;
+        } else if (strict == 1) {
+          const std::size_t before = strict_cov_of[root];
+          if (st.coverage[(std::size_t)root].size() > before) {
+            ++order.coverage_growth_batches;
+            batch_public_event = true;
+          } else {
+            ++order.silent_generator_batches;
+          }
+          st.node_of_root[(std::size_t)root] = *it->second.begin();
+        } else {
+          ++order.fusions;
+          batch_public_event = true;
+          st.node_of_root[(std::size_t)root] = st.next_node++;
+        }
+      }
+      order.level_representative.push_back(by_level[cursor]);
+      if (keep_partitions) {
+        // Les couvertures vivent en identifiants COMPRESSES ; la partition
+        // publiee est RETRADUITE en PointId bruts (l'ordre est preserve :
+        // universe est croissant).
+        FoldPartition partition;
+        for (int root : st.live_roots) {
+          std::vector<mhgp::i32> cluster;
+          for (mhgp::i32 dense : st.coverage[(std::size_t)root])
+            cluster.push_back(universe[(std::size_t)dense]);
+          partition.push_back(std::move(cluster));
+        }
+        std::sort(partition.begin(), partition.end());
+        order.closed_partitions.push_back(std::move(partition));
+      }
+    }
+
+    // 6. PUBLIER les postings du lot — silencieux compris, jamais supprimes :
+    // un silencieux porte des connexions futures (fixture de la note, §6).
+    // MUTANT collect_silent : jeter les postings d'un lot sans evenement public
+    // perd l'attache future (fixture A,B,S,N) ET casse l'identite globale.
+    // MUTANT omit_last_posting : la derniere boule du lot n'est jamais publiee.
+    if (!mutants.collect_silent || batch_public_event) {
+      const std::size_t publish_end =
+          mutants.omit_last_posting && batch_end > cursor ? batch_end - 1 : batch_end;
+      for (std::size_t b = cursor; b < publish_end; ++b) {
+        const int m = by_level[b];
+        for (mhgp::i32 x : members[(std::size_t)m]) postings[(std::size_t)x].push_back(m);
+      }
+    }
+    cursor = batch_end;
+  }
+
+  // IDENTITES GLOBALES : la masse publiee somme_x |P_x| == somme des |S|
+  // (aucune posting omise ni collectee), et P_post = somme_x C(d_x, 2) ==
+  // somme des poids reduits (chaque paire intersectante reduite exactement une
+  // fois, au niveau du plus tardif). Toute violation refuse le fold ENTIER.
+  long long expected_postings_mass = 0;
+  for (const std::vector<mhgp::i32>& generator_members : members)
+    expected_postings_mass += (long long)generator_members.size();
+  for (const std::vector<int>& px : postings) {
+    out.postings_mass += (long long)px.size();
+    out.max_posting = std::max(out.max_posting, px.size());
+    out.p_post += (long long)px.size() * ((long long)px.size() - 1) / 2;
+  }
+  out.identities_ok =
+      out.p_post == out.weight_sum && out.postings_mass == expected_postings_mass;
+  if (out.postings_mass != expected_postings_mass) {
+    fold.refusal = "identite de masse violee : postings incompletes";
+    return fold;
+  }
+  if (out.p_post != out.weight_sum && !mutants.skip_new_new) {
+    fold.refusal = "identite globale violee : P_post != somme des poids";
+    return fold;
+  }
+  if (receipt != nullptr) *receipt = out;
   fold.ok = true;
   return fold;
 }

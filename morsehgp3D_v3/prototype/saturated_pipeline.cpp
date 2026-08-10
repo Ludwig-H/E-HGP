@@ -31,19 +31,33 @@
 
 namespace {
 
-// Digest 64 bits independant de l'ordre : XOR de hachages par cluster, par
-// niveau, par ordre. Un falsificateur compact, pas une egalite exacte.
+// Digest 64 bits DIAGNOSTIQUE, pas scientifique : hash de flux du transcript
+// (compteurs et representants de niveau par ordre) puis des partitions quand
+// elles existent. L'audit du profileur a montre que l'ancien digest, assis sur
+// les seules partitions, devenait CONSTANT sous keep_partitions=false — il ne
+// falsifiait plus rien. Celui-ci depend du transcript meme sans partitions ;
+// le digest scientifique (serialisation canonique, hash de flux, provenance)
+// reste un travail declare, pas celui-ci.
 unsigned long long fold_digest(const mhgp3v::SaturatedFold& fold) {
   unsigned long long digest = 1469598103934665603ULL;
+  const auto feed = [&digest](unsigned long long value) {
+    digest ^= value + 0x9e3779b97f4a7c15ULL + (digest << 6) + (digest >> 2);
+    digest *= 1099511628211ULL;
+  };
   for (const mhgp3v::SaturatedOrderFold& order : fold.orders) {
-    unsigned long long order_digest = 0;
+    feed((unsigned long long)order.births);
+    feed((unsigned long long)order.fusions);
+    feed((unsigned long long)order.coverage_growth_batches);
+    feed((unsigned long long)order.silent_generator_batches);
+    feed((unsigned long long)order.level_representative.size());
+    for (int representative : order.level_representative)
+      feed((unsigned long long)representative);
     for (std::size_t li = 0; li < order.closed_partitions.size(); ++li)
       for (const std::vector<mhgp::i32>& cluster : order.closed_partitions[li]) {
         unsigned long long h = 14695981039346656037ULL + li;
         for (mhgp::i32 z : cluster) { h ^= (unsigned long long)z + 0x9e3779b9; h *= 1099511628211ULL; }
-        order_digest ^= h;
+        feed(h);
       }
-    digest = (digest ^ order_digest) * 1099511628211ULL;
   }
   return digest;
 }
@@ -53,6 +67,7 @@ unsigned long long fold_digest(const mhgp3v::SaturatedFold& fold) {
 int main(int argc, char** argv) {
   int n = 200, coord = 0, smax = 11, max_order = 5;
   long long seed = 20260810;
+  bool use_postings = false;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -65,6 +80,14 @@ int main(int argc, char** argv) {
     return true;
   };
   for (int i = 1; i < argc; ++i) {
+    if (!strcmp(argv[i], "--join")) {
+      if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --join\n"); return 2; }
+      ++i;
+      if (!strcmp(argv[i], "g2")) use_postings = false;
+      else if (!strcmp(argv[i], "postings")) use_postings = true;
+      else { std::printf("ECHEC : jointure inconnue %s\n", argv[i]); return 2; }
+      continue;
+    }
     long long value = 0;
     const bool has = (i + 1 < argc) && integer(argv[i + 1], &value);
     int* target = nullptr;
@@ -117,8 +140,12 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : statut nuage %s\n", mhgp3v::cloud_status_name(status));
     return 3;
   }
+  mhgp3v::PostingsReceipt receipt;
   const mhgp3v::SaturatedFold fold =
-      mhgp3v::build_saturated_fold(catalogue, max_order, /*keep_partitions=*/false);
+      use_postings ? mhgp3v::build_saturated_fold_postings(catalogue, max_order,
+                                                           /*keep_partitions=*/false, &receipt)
+                   : mhgp3v::build_saturated_fold(catalogue, max_order,
+                                                  /*keep_partitions=*/false);
   const auto t2 = std::chrono::steady_clock::now();
   if (!fold.ok) { std::printf("ECHEC : fold refuse : %s\n", fold.refusal); return 3; }
 
@@ -138,8 +165,9 @@ int main(int argc, char** argv) {
     total_comparisons += order.join_comparisons;
     total_unions += order.join_unions;
   }
-  std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld\n",
-              n, coord, smax, max_order, seed);
+  std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
+              " --join %s\n", n, coord, smax, max_order, seed,
+              use_postings ? "postings" : "g2");
   std::printf("semantique : %s\n",
               smax >= n ? "famille saturee COMPLETE (exactitude jugee ailleurs)"
                         : "famille TRONQUEE — raffinement S.6 (partial_refinement),"
@@ -150,11 +178,22 @@ int main(int argc, char** argv) {
               " croissances=%lld lots silencieux=%lld  digest diagnostique=%llu\n",
               max_order, total_levels, total_births, total_fusions, total_growth,
               total_silent, fold_digest(fold));
-  std::printf("jointure   : comparaisons=%lld unions=%lld  |S| max=%zu  (forme de verite"
-              " O(G^2) par lot — c'est le mur mesure, le join par postings est le"
-              " prochain travail)\n", total_comparisons, total_unions, max_generator);
-  std::printf("           : les lots silencieux sont un etat interne persistant, JAMAIS des"
-              " continuations Gamma (audit live du pipeline)\n");
+  if (use_postings)
+    std::printf("jointure   : postings — occurrences ancien/nouveau=%lld nouveau/nouveau=%lld"
+                " paires reduites=%lld poids=%lld P_post=%lld unions %lld/%lld"
+                " |P_x| max=%zu |S| max=%zu identites=%s\n",
+                receipt.old_new_occurrences, receipt.new_new_occurrences, receipt.reduced_pairs,
+                receipt.weight_sum, receipt.p_post, receipt.unions_done,
+                receipt.unions_attempted, receipt.max_posting, max_generator,
+                receipt.identities_ok ? "respectees" : "VIOLEES");
+  else
+    std::printf("jointure   : comparaisons=%lld unions=%lld  |S| max=%zu  (forme de verite"
+                " O(G^2) par lot — le join par postings se demande par --join postings)\n",
+                total_comparisons, total_unions, max_generator);
+  std::printf("           : les lots dits silencieux MELANGENT encore continuations Gamma"
+              " sans croissance et activations redondantes — la separation exacte est le"
+              " predicat q_min (NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN), en cours de"
+              " reception\n");
   std::printf("temps      : catalogue %.3f s, fold %.3f s, total %.3f s\n", catalogue_seconds,
               fold_seconds, catalogue_seconds + fold_seconds);
   return 0;

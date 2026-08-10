@@ -5,7 +5,7 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état courant audité est `HEAD=origin/main=23f12af`. Le commit produit
+Le HEAD produit courant est `HEAD=origin/main=2b4801c`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -18,8 +18,9 @@ commits ne change `exploration_v3_hors_registre` ni le statut public. `ac39ac7`
 ajoute le premier juge Gamma; `478cfe8` applique son audit live, refuse les
 payloads non autoritatifs et borne le verdict à l'accord des couvertures sur les
 ordres effectivement jugés. `23f12af` ajoute ensuite le fold par intersections
-de saturés et remplace les
-censures multiplicataires sur les campagnes bornées. L'autorité
+de saturés et remplace les censures multiplicataires sur les campagnes bornées;
+`2b4801c` ajoute son profileur, les couvertures incrémentales et la séparation
+croissance/silencieux. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
@@ -83,17 +84,43 @@ nuages `n=8/9`, génériques/saturés, modes normal/owner : 34 003 générateurs
 comparés, zéro manquant, extra ou écart de niveau. Cette porte doit maintenant
 être rendue permanente.
 
-**[delta live de profilage]** Le pipeline chronométré révèle une distinction
+**[commit `2b4801c`, réception ciblée]** Le pipeline chronométré révèle une distinction
 constructive : ses naissances/fusions concordent avec Gamma sur deux fixtures,
-mais ses « continuations » excédentaires sont exactement les niveaux de
-générateurs silencieux. Ces générateurs doivent rester dans l'index pour les
-attaches futures, tout en étant séparés du transcript Morse. Le détail, les
-masses manquantes et la séquence CPU→G4 sont dans
+et les anciennes continuations contiennent bien 41/38 niveaux de générateurs
+silencieux à conserver pour les attaches futures. La réponse par taille de
+couverture ne les sépare toutefois pas : elle publie zéro croissance et classe
+128/103 événements silencieux, engloutissant aussi les 87/65 continuations
+Gamma véritables. Le détail, le critère structurel à recevoir, les masses
+manquantes et la séquence CPU→G4 sont dans
 [`AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md`](audits/AUDIT_LIVE_PIPELINE_SATURE_23F12AF.md).
+Les deux tentatives CPU `n=200`, avant puis après la compaction, dépassent
+chacune 600 s sans reçu. Le digest du chemin compact est en outre constant tant
+qu'il ne parcourt que les partitions volontairement absentes. Ces résultats
+orientent le travail vers le join postings isolé, pas vers une nouvelle mesure
+de bout en bout ni vers G4.
 La construction exacte proposée pour le prochain palier — CSR de postings,
 tri-réduction des overlaps, lots DSU atomiques, transcript local aux racines
 touchées et admission mémoire avant G4 — est spécifiée dans
 [`NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md`](audits/NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810.md).
+
+**[join postings livré et différencié]** `build_saturated_fold_postings`
+implémente cette note : émission--tri--réduction par lots, capture d'époque des
+racines touchées (le scan global par lot est supprimé), publication des
+silencieux, identités de lot, de masse et `P_post` vérifiées par le fold
+lui-même, refus entier sinon. La porte `mhgp3v_postings_join_gate` le
+différencie bit à bit (partitions comprises) contre le fold de vérité O(G²)
+sur les fixtures nommées de la note — transcripts attendus gravés — plus 50
+nuages génériques/saturés, l'invariance par permutation du catalogue et le reçu
+croisé `unions == vérité`; les six mutants nommés meurent chacun par une
+fixture ou une identité (CTests à code attendu). À `n=64/K=5`, le pipeline
+(`--join postings`) rend un transcript et un digest identiques bit à bit au
+fold O(G²) pour un fold 4,9× plus rapide (4,84 s contre 23,6 s); le reçu publie
+la vraie masse : `P_post=46 460 941` pour 7 873 générateurs, `|P_x|` max 3 069.
+**L'ancien mur `n=200` tombe** : là où deux runs dépassaient 600 s sans reçu,
+le join postings rend fold 36,1 s et total 55,1 s pour 40 007 générateurs,
+`P_post=385 553 414`, identités respectées (~10,7 M occurrences/s sur un cœur).
+Mesures, mur restant (la masse elle-même) et questions ouvertes :
+[`NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md`](audits/NOTE_CLAUDE_JOIN_POSTINGS_RECU_20260810.md).
 
 Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
 fold et repli multi-cœurs. La
