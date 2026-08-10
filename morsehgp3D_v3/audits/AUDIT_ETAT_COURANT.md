@@ -1,6 +1,6 @@
 # Audit courant de MorseHGP3D v3
 
-Date du snapshot : 9 août 2026 UTC.
+Date du snapshot courant : 10 août 2026 UTC.
 
 Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `backend=cpu_reference_oracle_and_gpu_candidate_under_audit`,
@@ -9,35 +9,40 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
-n'ouvre aucune phase et ne promeut aucun résultat public. Le dernier snapshot
-committé du produit audité est `180975e`; il comprend le correctif owner de
-`d1666f4`, puis le sweep de paires et la correction F0 de `180975e`. Deux deltas
-non committés sont maintenant épinglés séparément : refus/replay post-`8481b67`
-et première source directe post-`c0df579`. Le worktree v3 n'est donc plus propre.
-Aucun artefact brut des campagnes de taille ni de la session G4 n'est versionné
-avec ces commits.
+n'ouvre aucune phase et ne promeut aucun résultat public. Le snapshot committé
+audité est `ee5ee51`; il ajoute le diagnostic cliques/triple aux correctifs
+owner/paires/F0, au delta refus/replay et au prototype de source directe. Le
+worktree v3 contient deux réponses en cours : le correctif direct
+`bb31b426.../a3c40f7e...`, désormais épinglé et testé, et un second delta du
+probe de paires encore mouvant. Aucun artefact brut des campagnes de taille ni
+de la session G4 n'est versionné avec ces commits.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
-| snapshot committé de code et de claims audité | `180975e4a967475067961d4f215ab2f2a4f9760a` |
-| dernier commit d'audit sur `main` | `c0df579ca0f5a6a6330294b8aa4fd80d372fb6ce` |
-| `CMakeLists.txt` | `e8ddd3c21eafa361d5c37cd8a585905db2a4bf8404639b8eefc72bd9df803c9f` |
+| snapshot committé de code et de claims audité | `ee5ee51877eaceaa17e12f342749295f6a79f2a7` |
+| dernier commit d'audit indépendant antérieur sur `main` | `c0df579ca0f5a6a6330294b8aa4fd80d372fb6ce` |
 | `CMakeLists.txt` avec deltas replay/source directe et neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
 | `prototype/scale_profile.cpp` | `e6c31f544d8275b3f89affde11b52e11972dd7e76cf9b556112c96a43d96aacb` |
 | `prototype/admissible_pair_probe.cpp` à `40ad152` | `8c89ccb627d7d0d531897b95ec24f56a473578744f16299d052133dd0fba6cc8` |
 | `prototype/admissible_pair_probe.cpp` à `5d9159a` | `130e316ed956cc6a540642ded9fed21456f4c2c57b00ecb4e821f4c2cea86b8d` |
 | `prototype/admissible_pair_probe.cpp` à `180975e` | `fa3e464c422839f0485a032016831d3727fb42cbf1a9bd5be7a9427da3fe55fd` |
+| `prototype/admissible_pair_probe.cpp` à `ee5ee51` | `5c44a7399e3a4722dfe5ff1ca115ef931a875133fcf83549636bd4ce8e09a410` |
+| `prototype/admissible_pair_probe.cpp`, réponse live auditée | `5eb64c526ce78822e032653875ec34efbeca254559083b5763154cb2b05e301a` |
+| `prototype/admissible_pair_probe.cpp`, commentaire live suivant | `a80cd2f727fb794318df54399e249b4f6cf9d3bc623c62b5f829563b8070cbb0` |
 | `prototype/order_k_flats.hpp` | `b3ba750d938e3c4fa52453730011e2f8ed06e477b40ae971562c15aed07b65f5` |
-| `prototype/order_k_device_core.hpp` | `79382cf2857fb8da4efcecda8b9a164643fb4013c9a56cd6152f102daa155a3d` |
-| `prototype/flats_differential.cpp` | `6271f26ab8782fed0e46dd1200fa030d68d3036257c57f9f73320ca4f2ec1cb4` |
-| `prototype/device_wavefront_job.hpp` | `cffe45646eb46ec44f4818ce8c8f0a3e7251084d8fb05c0cb79fbfae243fa31f` |
+| `prototype/order_k_device_core.hpp` | `8d8c34031df8a3b4108ae366c6db17074b97a8e0aab1e133f8d754fae990fd6d` |
+| `prototype/flats_differential.cpp` | `e6ee12f8e4a61fda11a8d4b26eaafde3d20deab6cfd30195b4521117c85482c9` |
+| `prototype/device_wavefront_job.hpp` | `351e25957117b68cb9da729b7802ce80cc0b84f61a12643670bcb40e9b592b1e` |
 | `prototype/device_wavefront_kernel.cu` | `bebc6684ccacd763d28d2f336b9cfd17b356914addf37786afbe0c7440901ccc` |
-| `prototype/device_wavefront_qualification.cpp` | `3ae284cd1e431ec22ccfe30efa4c3afef8cc91c5b87c92d696f84c2b088cbf89` |
+| `prototype/device_wavefront_qualification.cpp` | `dfc146e841c30c151bec007dbeca6f8f307f880216d70142eb0af475a90fb401` |
 | `audits/check_gate_d_fold_f0.py` | `3c23497f0227147d35505df5275a20b000a5704a5c862527d3409e9828ebfdc2` |
 | `prototype/direct_source.cpp`, premier palier | `24ad3d37aedbf74c4b126fae30453a74d1f2a675eea572e6b92678b27c27258e` |
 | `prototype/direct_source.cpp`, palier dispersion historique | `2b47247e9d1ecd6e1a8a573f4597bab9bb19e10a4a3d2ab4295c524d2d1ee68c` |
 | `prototype/direct_source.cpp`, palier fonctionnel sans forêt | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
 | `prototype/direct_source.cpp`, palier courant avec forêt | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
+| `prototype/direct_source.cpp`, correctif live audité | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
+| `CMakeLists.txt`, correctif live avec treize CTests directs | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |
+| `CMakeLists.txt`, réponse live complète avec gate cliques | `1d9be763ffdde3ae9fd1725949fc41b4788d6465f18e7cb09b4cede337e36326` |
 
 ## Verdict
 
@@ -65,18 +70,20 @@ listes complètes de membres, reçoit l'unicité, applique les fallbacks petit
 nuage/cap, agrège les `Q` effectifs et passe les masses en `u128`. Sept CTests
 Release et quatre ciblés ASan/UBSan sont verts. Le palier `1c3948c3...` assemble
 ensuite un catalogue source et compare 30 forêts abstraites sur six nuages :
-1 647 nœuds, zéro divergence; neuf CTests Release passent. C'est un GO relatif
-borné réel.
+1 647 nœuds, zéro divergence. Le correctif `bb31b426.../a3c40f7e...` ferme les
+lanes bas ordre, la borne $K+1\le s_{\max}$ et le juge CMake implicite; il ajoute
+obligations candidats/unicité et mutant membre. Treize CTests Release et huit
+ciblés ASan/UBSan/LSan passent. C'est un GO relatif borné réel.
 
-La promotion reste interdite. Les gates positives omettent `--judge 1` : les
-mêmes planchers passent en mode mesure avec `reference=0`. La CLI accepte
-`s_max=2/3` puis échoue sur les lanes `q>s_max`. Le cover rescane tous les
-points par feuille, le CSR peut être dense, les high-waters sont partiels et le
-target refuse plus de 20 000 points. Le prototype compare un catalogue fermé
-partagé, pas la source Gabriel ouverte streamée du produit. La signature forêt
-ignore volontairement les indices publics : une sonde trouve 4 016 champs
-`ForestNode::source` différents malgré 120 digests égaux. `--forest` accepte en
-outre des ordres au-delà de `s_max-1` et proclame des forêts vides qualifiées.
+La promotion reste interdite. Le cover rescane tous les points par feuille, le
+CSR peut être dense, les high-waters sont partiels et le target refuse plus de
+20 000 points. Le prototype compare un catalogue fermé partagé, pas la source
+Gabriel ouverte streamée du produit. La signature forêt ignore volontairement
+les indices publics : une sonde trouve 4 016 champs `ForestNode::source`
+différents malgré 120 digests égaux. Son nouveau contrôle structurel n'est pas
+total : cycle de frères et enfant hors plage produisent boucle et overflow ASan;
+des fautes identiques des deux côtés restent vertes. Les agrégats `i64` oublient
+le facteur `clouds` et le chrono source englobe aussi les folds de référence.
 Le détail
 reproductible est dans
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
@@ -87,6 +94,19 @@ planaires et 9 593 paires 3D, y compris les dégénérescences et la frontière 
 sans écart. Le P0 algorithmique est fermé. Les nouvelles masses restent des
 diagnostics finis : elles ne prouvent aucun `Big-O` et ne dimensionnent pas la
 source Gabriel ouverte.
+
+Le commit `ee5ee51` étend ce probe aux triangles/K4 du graphe admissible et à un
+lemme de triple exact. Le comptage orienté et la nécessité mathématique sont
+crédités : 28/56/70 sur le graphe complet, zéro triple vrai réfuté sur les runs
+reçus. La réponse live `5eb64c52.../1d9be763...` corrige `N/A`, le vrai degré,
+le chrono, les quatre faces et ajoute planchers plus mutant acceptant tout. La
+gate ne reçoit toutefois ni le nombre après quatre faces, ni la couverture
+exacte des vraies triples/quadruples; une omission partielle peut rester verte.
+La décision d'architecture ne suit pas.
+Les ratios cliques/supports d'arité quatre et sommets/toutes sphères du parcours
+ne sont pas directement comparables; ni le facteur 25--35, ni la croissance
+asymptotique, ni l'abandon de toute source directe ne sont établis. Voir
+[`AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md`](AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md).
 
 Le commit rapporte une compilation `nvcc` et quatre exécutions sur G4 avec zéro
 écart CPU/device. C'est un résultat positif ciblé pour le préfixe borné, mais pas
@@ -706,22 +726,26 @@ seulement $q+\lvert I\rvert\leq s_{\max}$ et doit grouper tous les supports
 par `SphereKey` avant de développer l'extra-shell. Le profileur fermé et son
 ratio de 6,5 ne dimensionnent donc pas cette source.
 
-Le prototype `9edf150d...` valide positivement la banque, la localisation et le
-voisinage sur les oracles bornés. Il compare maintenant les listes complètes de
-membres par coquille, reçoit les doubles émissions, sépare jugement/mesure/cover,
-applique les replis racine et publie `C_q/T_q/H_q` en `u128`. La dispersion
-porte sur toutes les feuilles effectives. Sept CTests Release et quatre ciblés
-ASan/UBSan passent. Le résultat est un accord relatif borné crédible avec le
-catalogue fermé partagé.
+Le prototype `bb31b426...` valide positivement la banque, la localisation et le
+voisinage sur les oracles bornés. Il compare les listes complètes de membres par
+coquille, reçoit les doubles émissions, sépare jugement/mesure/cover, applique
+les replis racine et publie `C_q/T_q/H_q` en `u128`. La dispersion porte sur
+toutes les feuilles effectives. Treize CTests Release et huit ciblés sanitizers
+passent. Bas ordre, borne $K$, juge explicite, unicité, membre et masse candidats
+sont reçus. Le résultat est un accord relatif borné crédible avec les records du
+catalogue fermé partagé et un quotient forestier non vacant.
 
 La porte de coût reste ouverte. Le cover rescane `n` points dans chaque feuille,
 donc devient quasi quadratique à densité fixe; le CSR peut être dense et les
 high-waters omettent plusieurs buffers, la vérité et la sortie. Le target refuse
-`n>20 000`. Les gates positives n'imposent pas `--judge 1` et passent encore en
-mesure sans oracle; `s_max=2/3` est accepté puis échoue sur les lanes d'arité
-supérieure. Enfin le prototype matérialise un catalogue **fermé**, pas la source
-Gabriel ouverte streamée. Ces défauts ne réfutent pas le lemme, mais interdisent
-toute promotion produit ou 50 k. Voir
+`n>20 000`. L'ordre canonique du catalogue, son pool concaténé, ses offsets et
+les indices publics de la forêt divergent malgré les digests abstraits égaux;
+les deux côtés partagent en outre `build_forest`. La validation structurelle
+ajoutée n'est pas totale sur cycles/indices, le chrono mélange les deux folds et
+certains agrégats `i64` ne sont pas bornés sur 2 000 nuages.
+Enfin le prototype matérialise un catalogue **fermé**, pas la source Gabriel
+ouverte streamée. Ces défauts ne réfutent pas le lemme, mais interdisent toute
+promotion produit ou 50 k. Voir
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md).
 
 Il reste une incompatibilité contractuelle explicite à résoudre avant

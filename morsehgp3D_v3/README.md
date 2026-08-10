@@ -33,13 +33,14 @@ owner/census, runs et porte 50 k/G4.
 Le prototype `direct_source.cpp` est un résultat mathématique positif, pas une
 source produit certifiée. Des oracles indépendants valident son cover--rayon et
 ses voisinages bornés sans écart, et sa partie candidate évite arrangement et
-mosaïque. Le palier `1c3948c3...` conserve les membres, tue les doubles
+mosaïque. Le palier live `bb31b426...` conserve les membres, tue les doubles
 émissions, applique les fallbacks, publie les masses en `u128` et compare un
-quotient sémantique de 30 forêts; neuf CTests Release et un passage forêt
-ASan/UBSan sont verts. Il ne compare toutefois ni l'ordre canonique du catalogue,
-ni son pool concaténé, ni les indices publics `ForestNode::source`. Les gates
-catalogue omettent `--judge 1`, la CLI échoue encore pour `s_max=2/3`, accepte
-des ordres de forêt non qualifiables, et le coût/mémoire 50 k reste ouvert. Le
+quotient sémantique de 30 forêts; 13 CTests Release et huit passages ciblés
+ASan/UBSan/LSan sont verts. Bas ordre, borne $K+1\le s_{\max}$ et juge explicite
+sont fermés. Il ne compare toutefois ni l'ordre canonique du catalogue, ni son
+pool concaténé, ni les indices publics `ForestNode::source`; son nouveau contrôle
+structurel boucle ou sort du tableau sur certaines forêts malformées. Le
+coût/mémoire 50 k reste ouvert. Le
 verdict épinglé est dans
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](audits/AUDIT_SOURCE_DIRECTE_24AD3D37.md).
 
@@ -1270,6 +1271,44 @@ silencieusement dès $n\approx13\,500$ : les compteurs de preuve sont passés en
 d'invariant** : sur un support bien centré le centre est dans l'enveloppe convexe
 du support, donc dans la boîte, et clamper masquerait une faute.
 
+Le réaudit suivant a trouvé trois défauts de plus, tous fermés. Les ordres bas
+étaient un **domaine contradictoire** : la CLI acceptait $s_{\max}=2$ puis la lane
+$q=3$ échouait sur $t_q<1$ avec un message générique. Une lane d'arité
+$q>s_{\max}$ est vide **par contrat** — un support d'arité $q$ a un rang au moins
+$q$ — et c'est maintenant ce qu'elle rend. `s_max=2` a sa porte; `s_max=3`
+passe manuellement mais n'a pas encore de CTest dédié.
+Une forêt d'ordre $k$ lit les rangs $k$ et $k+1$, donc $K+1\le s_{\max}$ est
+exigé au lieu de qualifier des ordres tronqués. Et les portes positives passaient
+`--judge 1` **implicitement** : elles l'exigent maintenant, sinon une mutation du
+défaut CLI les ferait passer en mode mesure avec `reference=0`.
+
+L'empreinte de forêt omettait aussi les nœuds **inaccessibles**, les liens
+`parent` et `n_children` — une signature qui part des racines ne voit jamais un
+nœud que personne n'atteint. Un parcours séparé compte maintenant ces anomalies
+et son résultat entre dans l'empreinte. Ce n'est pas encore un validateur total :
+un auto-cycle `next_sibling` ne termine pas, et un `first_child` hors plage
+déclenche un heap-buffer-overflow sous ASan. Des fautes identiques des deux côtés
+restent en outre compatibles avec un digest égal. La forêt valide de la gate est
+créditée; toute promesse fail-closed sur une forêt malformée reste ouverte.
+
+Trois réserves de mutation-résistance sont fermées. L'identité
+$\text{candidats}=C_q$ est maintenant **exigée** par lane, pas observée : une
+mutation qui sauterait ou dupliquerait seulement des candidats non émissibles
+conserverait la sortie, les planchers et le différentiel, et ce compteur est le
+seul témoin. L'unicité de la coquille côté **autorité** est assertée au lieu
+d'être supposée. Et un mutant `--force-drop-member` retire un membre de chaque
+sphère émise : sans lui, rien ne prouvait que le comparateur de listes compare
+autre chose que des listes vides — il rend 412 désaccords et sa porte négative
+l'exige.
+
+Enfin la revendication est ramenée à ce qui est vérifié : **mêmes listes de
+membres par coquille**, pas « mêmes pools ». L'ordre global du catalogue, les
+offsets publics et les indices `ForestNode::source` diffèrent de la référence, et
+l'empreinte de forêt est explicitement un **quotient sémantique** invariant à la
+renumérotation — pas une égalité de sérialisation. Le chrono étiqueté source
+couvre maintenant l'assemblage et les deux folds, source **et référence**, ainsi
+que leurs empreintes; il ne sépare donc toujours pas ces coûts.
+
 ### Un quotient sémantique de la forêt est produit et comparé
 
 Le catalogue n'est que la moitié du contrat : ce que le projet doit produire est
@@ -1291,8 +1330,10 @@ l'ensemble de membres de son minimum de rang $k$, une **multifusion** par le
 **rang exact** de son niveau dans l'ordre `sphere_cmp_beta` — pas par un double,
 pas par un indice —, et un nœud par le multiensemble trié des signatures de ses
 enfants. Elle est pertinente après accord exact des records et sous précondition
-de forêts valides; elle n'authentifie pas `parent`, `n_children`, `beta`, le
-représentant public `source` des multifusions ni les nœuds inaccessibles.
+de forêts valides. Les nouveaux compteurs observent accessibilité, parents et
+nombre d'enfants, mais ne valident pas totalement la structure; l'empreinte
+n'authentifie toujours pas `beta` ni le représentant public `source` des
+multifusions.
 
 **[mesuré]** `--clouds 6 --points 14 --coord 12 --smax 6 --forest 5` : 30 forêts
 comparées, 1 647 nœuds, 32 racines, **zéro empreinte quotient différente**. Les
@@ -1358,10 +1399,9 @@ ramènerait $C_4$ à $1{,}4\cdot10^{10}$ — un facteur 230 gagné, et toujours 
 ordres de grandeur au-dessus du budget. L'adaptativité est nécessaire; elle n'est
 pas suffisante.
 
-### La question 2 est répondue, et la réponse est non
+### Les supports sont des cliques, et le lemme de triple est exact
 
-J'ai posé la question, puis je l'ai mesurée. Le résultat renverse la direction que
-la note et ce README poussaient.
+J'ai posé la question à l'auditeur, puis je l'ai mesurée moi-même.
 
 Le lemme s'applique à **chaque** paire d'une coquille critique. Un support d'arité
 trois a donc ses trois paires admissibles, un support d'arité quatre ses six :
@@ -1383,42 +1423,86 @@ et il n'y a que **deux** demi-espaces à tester au lieu d'une famille continue.
 Aucune hypothèse de bon centrage : $m$ est le circumcentre, pas la miniboule.
 
 **[mesuré, densité fixe $10^{-3}$, $s_{\max}=11$, deux nuages par ligne]** zéro
-triple vrai réfuté — le lemme est nécessaire, vérifié.
+triple vrai réfuté — le lemme est nécessaire, vérifié. Le compteur de quadruples
+réfutés est aussi à zéro, mais c'est **impliqué** : les quatre faces d'un vrai
+quadruple sont quatre vrais triples, que le lemme conserve tous. C'est une garde
+de cohérence, pas un témoin indépendant, et le code le dit.
 
-| $n$ | degré de $G$ | triangles/pt | K4/pt | facteur K4 brut | après lemme de triple |
-| ---: | ---: | ---: | ---: | ---: | ---: |
-| 50 | 47,6 | 359,6 | 3 888,7 | 99,8 | **81,6** |
-| 100 | 80,8 | 913,7 | 13 444,9 | 221,1 | **144,4** |
-| 200 | 113,1 | 1 500,5 | 23 773,0 | 266,7 | **162,2** |
+| $n$ | degré de $G$ | triangles/pt | K4/pt | facteur brut | une face | **quatre faces** |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 50 | 47,6 | 359,6 | 3 888,7 | 99,8 | 81,6 | **53,1** |
+| 100 | 80,8 | 913,7 | 13 444,9 | 221,1 | 144,4 | **69,5** |
+| 200 | 113,1 | 1 500,5 | 23 773,0 | 266,7 | 162,2 | **69,3** |
 
-Le lemme de triple retient 82 %, 63 % puis 57 % des triangles : il aide, de plus
-en plus, d'un facteur 1,2 à 1,6. Mais le facteur de gaspillage des K4 **croît
-quand même** — 82, 144, 162 — au lieu de se stabiliser.
+Le lemme de triple retient 82 %, 63 % puis 57 % des triangles.
 
-### Ce que la comparaison des trois générateurs dit vraiment
+**La colonne qui compte est la dernière, et elle répond à la question 2 de
+l'audit.** Ma première version n'appliquait le lemme qu'à **une** face de chaque
+K4 — le triple des trois plus petits identifiants — et publiait 82, 144, 162,
+donc une hausse. Les quatre faces d'un support d'arité quatre sont toutes sur sa
+coquille, donc toutes nécessaires : les tester donne 53,1, 69,5, 69,3. Le gain
+est de 2,3 fois, et la hausse **disparaît** entre $n=100$ et $n=200$.
 
-| générateur | facteur travail/sortie mesuré | tendance |
+Trois tailles ne prouvent pas plus un plateau qu'elles ne prouvaient une hausse.
+La formulation recevable reste : *sur ces campagnes bornées, cette variante par
+cliques reste très surproductive — environ soixante-dix fois — et ne ferme pas le
+budget.* Le travail évité quand un triple échoue est maintenant réel : le
+développement du K4 s'arrête à la première face refusée.
+
+### Ce que ces diagnostics permettent réellement de comparer
+
+| générateur | ratio diagnostique publié | tendance observée |
 | --- | ---: | --- |
 | sous-ensembles du voisinage du cover | $C_4\approx3{,}2\cdot10^{12}$ à 50 k | catastrophique |
 | cliques du graphe admissible, avec lemme de triple | 82 → 144 → 162 | **dégrade** |
 | **parcours de l'arrangement** | environ 4,7 à 6,5 | à peu près stable |
 
-**Le parcours de l'arrangement est, et de loin, le meilleur générateur mesuré du
-projet.** Son problème n'a jamais été la sélectivité : c'est le débit absolu —
-$V\approx5{,}5\cdot10^{7}$ sommets à 50 k pour un budget de 100 ms.
+Sur ces campagnes, le ratio publié du parcours est beaucoup plus petit. Cela
+ne suffit pas à le déclarer meilleur générateur : le ratio K4 divise des K4
+candidats par les seules sphères de support canonique quatre, tandis que le ratio
+du parcours divise des sommets par toutes les sphères critiques. Le coût d'une
+unité diffère aussi. Son débit absolu reste de toute façon ouvert — le scénario
+vaut $V\approx5{,}5\cdot10^{7}$ sommets à 50 k pour un budget de 100 ms.
 
-C'est une correction de direction, et elle vaut d'être dite : la note GPU et ce
-README poussaient « énumérer directement les sphères critiques » comme une
-obligation à démontrer. La mesure dit l'inverse. Les deux voies directes essayées
-— sous-ensembles du cover, puis cliques du graphe admissible — sont toutes deux
-plus mauvaises que le parcours, la seconde de vingt-cinq à trente-cinq fois.
+C'est une alerte de direction utile : les deux voies directes essayées restent
+très surproductives sur les campagnes reçues. La division directe de 82--162 par
+4,7--6,5 ne prouve toutefois pas un ralentissement de vingt-cinq à trente-cinq,
+car unités et dénominateurs diffèrent. Une décision d'architecture exige le même
+payload, les mêmes nuages, des unités de travail communes et les chronos/high-
+waters complets.
+
+**[audit `ee5ee51`, réponse live `5eb64c52`]** Le comptage 28/56/70 sur le
+graphe complet et le lemme de triple sont crédités. Les cinq réserves de forme
+sont closes : un mutant `--force-triple-accept` vit dans le binaire et une porte
+négative exige qu'il rougisse — c'est le **plancher de triples rejetés** qui le
+tue, pas `triple_missing == 0`, qu'un filtre acceptant tout satisfait ; quatre
+planchers reçoivent triangles, K4, rejets et supports d'arité quatre vrais ; le
+vrai degré **non orienté** est publié à côté de $d^{+}$, qu'une étoile centrée
+sur le dernier identifiant aurait fait afficher à 1 ; un dénominateur nul imprime
+`N/A` et non `0.0`, parce que zéro y signifie « quotient non défini » et non
+« aucun gaspillage » ; et le chrono composite est nommé
+`cliques+verite+lemme`.
+
+Ces corrections de forme sont réelles, mais la réception reste incomplète.
+Aucune gate ne reçoit le nombre de K4 survivant aux **quatre** faces ni le gain
+sur une seule face. Surtout, `truth_triples` et `truth_quads` ne sont consultés
+que pour les candidats visités : un itérateur qui omet une partie des vraies
+cliques tout en dépassant les planchers peut encore rendre zéro faux rejet.
+Comparer explicitement les ensembles visités à la vérité est la prochaine porte.
+Le détail reproductible est dans
+[`AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md`](audits/AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md).
+
+Une faute d'affichage a été trouvée en la corrigeant : le formateur de ratio
+employait un `static char[]`, si bien que les deux `%s` d'un même `printf`
+pointaient sur la dernière valeur écrite et affichaient deux facteurs
+**identiques**. C'est ce qui m'a d'abord fait lire « quatre faces = 81,6 ».
 
 Ce n'est pas un argument pour abandonner la source directe : son cover et sa
-fenêtre restent le seul mécanisme de complétude **sans arrangement** du dépôt, et
-la forêt en sort exactement. C'est un argument pour cesser de chercher un
-générateur qui battrait le parcours par sélectivité, et pour attaquer ce qui le
-bloque réellement : le débit du voisin terminal, la partition en tâches, et la
-résidence de la sortie.
+fenêtre restent un mécanisme de complétude **sans arrangement** du dépôt, et un
+quotient sémantique de forêt en sort sans écart sur les petits runs. Ce n'est pas
+non plus une preuve qu'aucun générateur direct peut battre le parcours. Le débit
+du voisin terminal, la partition en tâches et la résidence de la sortie restent
+des verrous utiles indépendamment de cette comparaison.
 
 La structure output-sensitive qui manque à la voie directe est d'ailleurs
 exactement celle du parcours. Fixons un triple admissible $T$ : les sphères
@@ -1441,18 +1525,16 @@ Trois questions précises, dans l'ordre où elles bloquent :
 1. le cover adaptatif par feuille est-il déjà couvert par la capability
    `center-cover + degree` telle qu'elle est écrite, ou faut-il en versionner une
    variante ? Le lemme est local, mais le `Q_q` publié est global ;
-2. ~~existe-t-il une condition nécessaire par paire permettant de filtrer avant
-   de développer les triples et les quadruples ?~~ **Répondue ci-dessus, et par
-   la négative** : les cliques du graphe admissible, même filtrées par le lemme
-   de triple, gaspillent 82 à 162 et le facteur croît. Reste à savoir si
-   l'auditeur voit une faute dans la mesure ou dans le lemme de triple ;
-3. la conséquence la plus utile me semble être d'**abandonner** la recherche d'un
-   générateur qui batte le parcours par sélectivité, et de réécrire l'objectif
-   en termes de débit : voisin terminal borné, tâches transactionnelles,
-   résidence device. Est-ce que l'auditeur voit une raison de maintenir
-   l'obligation « énumérer directement les sphères critiques » telle qu'elle est
-   écrite dans la note GPU, maintenant que les deux voies directes essayées sont
-   mesurées plus mauvaises que le parcours ?
+2. ~~quel gain apporte le test des quatre faces ?~~ **Répondu et mesuré** : 2,3
+   fois, et la hausse du facteur disparaît — 53,1, 69,5, 69,3. Le développement
+   d'un K4 s'arrête désormais à la première face refusée. La question qui reste
+   est la suivante : existe-t-il une condition nécessaire sur les **quadruples**
+   qui descendrait ce facteur de 70 d'un ordre de grandeur, comme le passage
+   d'une à quatre faces l'a fait d'un facteur 2,3 ?
+3. avant d'abandonner une famille, comment comparer parcours et source avec le
+   même payload, des unités de travail homogènes, les mêmes nuages et des caps
+   reçus ? En parallèle, le voisin terminal borné, les tâches transactionnelles
+   et la résidence device restent les priorités du parcours.
 
 Une quatrième question, plus petite mais bloquante pour le coût : la
 construction du cover est aujourd'hui $F\cdot n$ tests, $F$ étant le nombre de
@@ -1697,7 +1779,7 @@ terminal `AboveInteriorWindow` par arité doit aussi être versionné dans le
 contrat avant conformité : la norme active exige encore un shell complet sur
 une fenêtre uniforme plus large.
 
-**[audit du prototype live `1c3948c3...`]** Le résultat est scindé et largement
+**[audit du prototype live `bb31b426...`]** Le résultat est scindé et largement
 positif. Le lemme, la localisation rationnelle et les `9^3` cellules passent
 des oracles indépendants : 33 914 voisinages et 15 360 supports propres, zéro
 écart. La partie candidate ne construit ni sommet d'arrangement ni mosaïque.
@@ -1706,20 +1788,17 @@ leur identité, refuse toute double émission et tue le mutant intégré. Les mo
 jugé, mesure et cover sont exclusifs; seul le premier conclut. Petit nuage et
 cap de cellules replient exactement à la racine; la dispersion porte sur tous
 les `Q` effectifs; `C_q/T_q/H_q` sont calculés avant énumération et stockés en
-`u128`. Neuf CTests Release passent; la gate forêt passe aussi sous ASan/UBSan.
-Elle compare 30 quotients arborescents non vides, avec contribution observable
-de chacun des ordres un à cinq.
+`u128`. Treize CTests Release et huit ciblés ASan/UBSan/LSan passent. La gate
+compare 30 quotients arborescents, 1 647 nœuds et 32 racines; chacun des ordres
+un à cinq contribue à la masse.
 
-Deux gates restent immédiatement à corriger. CMake ne passe pas `--judge 1`
-explicitement : la campagne générique satisfait exactement les mêmes planchers
-avec `--judge 0`, `reference=0` et code zéro. La sortie dit honnêtement qu'elle
-n'est pas jugée, mais une mutation du défaut rendrait les CTests verts sans
-oracle. Ensuite la CLI accepte `s_max=2/3` tout en appelant toujours les lanes
-jusqu'à l'arité quatre; ces entrées sortent 3 sur un faux diagnostic
-arithmétique. Les lanes `q>s_max` doivent être sautées ou le domaine resserré.
-La même dette existe pour la forêt : une qualification jusqu'à $K$ exige
-$K+1\le s_{\max}$, mais le live accepte `K>=s_max` et compte des ordres tronqués
-ou vides comme comparés.
+Trois findings sont fermés au palier courant. CMake passe `--judge 1`
+explicitement dans les gates positives; les lanes `q>s_max` sont vides au lieu
+d'échouer; et une forêt complète est refusée sauf si $K+1\le s_{\max}$. Le
+mutant de membre rougit, sa combinaison structurellement incohérente avec la
+forêt est refusée, l'unicité des coquilles de la référence est reçue et
+`candidats==C_q` est maintenant une obligation. Une porte `s_max=3` manque
+encore, bien que le cas passe manuellement.
 
 La nouvelle comparaison forêt ne reçoit pas encore le payload public. Les deux
 catalogues sont ordonnés différemment; une sonde compte 4 016 indices publics
@@ -1734,9 +1813,13 @@ feuille, le CSR peut être dense, les high-waters omettent plusieurs buffers,
 sorties et vérité, et une allocation sous `cell-cap` n'a aucun statut de reprise.
 Le target s'arrête à 20 000 points. Les campagnes positives ont des voisinages
 complets et ne reçoivent ni la frontière sélective, ni `candidates==C_q`, ni un
-mutant de membre ou un digest attendu. Les chronos et high-waters excluent aussi
-l'assemblage du catalogue, les $2K$ folds et les empreintes récursives, dont le
-pire cas peut recopier des chaînes quadratiquement. Le label correct reste
+digest attendu. Les chronos et high-waters restent incomplets : le temps nommé
+source inclut en réalité les folds source **et référence** et leurs empreintes,
+et le pire cas récursif peut recopier des chaînes quadratiquement. Le commentaire
+qui borne certains agrégats `long long` oublie jusqu'à 2 000 nuages; la borne
+cumulée dépasse `i64`. Le nouveau contrôle structurel de forêt n'est pas total :
+cycle de frères et enfant hors plage donnent respectivement boucle et overflow
+ASan. Le label correct reste
 donc **prototype CPU candidat, accord relatif au catalogue fermé partagé**; la
 source Gabriel ouverte streamée et la porte 50 k ne sont pas implémentées.
 

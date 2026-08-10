@@ -107,6 +107,20 @@ construction u16 de 50 000 points donne une paire Gabriel vide avec `A=2` et
 rang croisé 25 000 : elle réfute tout `k<=24999` sur cette entrée, et tout filtre
 k-NN plus petit exige un complément exact certifié.
 
+Le commit `ee5ee51` ajoute un résultat positif distinct : tout support d'arité
+trois ou quatre forme une clique du graphe admissible, et le plan d'un triple
+non aligné donne une condition nécessaire exacte à deux demi-espaces. Les
+comptages 28/56/70 sur le graphe complet et les campagnes bornées sont corrects,
+avec zéro triple vrai réfuté. La réponse live `5eb64c52...` corrige les ratios
+`N/A`, le vrai degré, le chrono composite, applique les quatre faces et tue par
+plancher le mutant qui accepte tout. La gate ne reçoit toutefois ni le K4 après
+quatre faces, ni la couverture exacte de `truth_triples/truth_quads`; une
+omission partielle peut encore rester verte. Surtout, le ratio K4/supports d'arité quatre et le ratio
+sommets/toutes sphères du parcours n'ont ni les mêmes unités ni le même
+dénominateur. Ils ne prouvent pas un avantage de 25 à 35 ni une décision
+d'abandon. Voir
+[`AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md`](audits/AUDIT_CLIQUES_ET_TRIPLE_EE5EE51.md).
+
 Une voie constructive distincte est maintenant formulée sous la capability
 `center-cover + degree` : banque de témoins stricte par cellule, preuve de rayon
 avant census local, voisinages complets de rayon `4Q`, groupement cross-lane par
@@ -116,19 +130,18 @@ combinadiques, locator, construction, tri et sortie reçus. Le terminal
 `AboveInteriorWindow` doit être versionné explicitement, car la norme active
 demande encore un shell complet sur une fenêtre uniforme.
 
-Le prototype live `1c3948c3...` crédite ce lemme sur des oracles bornés, sans
+Le prototype live `bb31b426...` crédite ce lemme sur des oracles bornés, sans
 créditer le statut produit. Sa partie candidate évite arrangement et mosaïque;
 elle compare maintenant les listes complètes de membres par coquille, reçoit
 l'unicité, sépare les trois modes, replie petit nuage/cap, agrège les `Q`
-effectifs et élargit les masses en `u128`. Neuf CTests Release et la gate forêt
-sous ASan/UBSan sont verts. Trente empreintes de forêts quotientées concordent
-sur six nuages, et chacun des ordres un à cinq contribue des nœuds.
+effectifs et élargit les masses en `u128`. Treize CTests Release et huit ciblés
+ASan/UBSan/LSan sont verts. Trente empreintes de forêts quotientées concordent
+sur six nuages, et chacun des ordres un à cinq contribue des nœuds. Les lanes
+au-dessus de `s_max`, la borne $K+1\le s_{\max}$ et le juge explicite sont
+maintenant reçus; mutants membre/double émission et identité `candidats==C_q`
+sont actifs.
 
-Les gates restent néanmoins fail-open vis-à-vis d'une mutation du défaut
-`judge` : CMake n'impose pas `--judge 1` et les mêmes planchers passent en mesure
-avec `reference=0`. La CLI accepte aussi `s_max=2/3` puis appelle des lanes
-`q>s_max` et échoue; elle accepte également des forêts $K\ge s_{\max}$, donc
-tronquées ou vides, comme entièrement comparées. Le cover rescane tous les points par feuille et peut être
+Le cover rescane tous les points par feuille et peut être
 quasi quadratique; CSR et allocations restent non bornés en octets, les
 high-waters sont partiels et aucun reçu 50 k ne ferme cette route. Le payload
 par coquille concorde relativement à `flat_catalogue`, mais l'ordre canonique du
@@ -137,7 +150,11 @@ diffèrent encore. La gate prouve un quotient sémantique invariant à la
 renumérotation avec le même `build_forest`, pas l'égalité du payload public ni
 un oracle indépendant. La source Gabriel ouverte streamée reste absente. Les
 labels « certifiée », « exacte produit » et « seule voie » restent donc
-prématurés.
+prématurés. Le contrôle structurel ajouté à l'empreinte n'est pas total : un
+cycle `next_sibling` boucle et un enfant hors plage déborde sous ASan; des fautes
+identiques des deux côtés restent compatibles avec un digest égal. Le chrono
+source englobe aussi les folds de référence, et la justification des agrégats
+`i64` oublie le facteur `clouds<=2000`.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 

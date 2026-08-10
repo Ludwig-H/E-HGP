@@ -836,39 +836,56 @@ violation du cover/rayon; dix petits nuages ont donné le même verdict
 lemme de paire ouverte de la section précédente a en outre passé 59 154
 inégalités sur 200 nuages bornés.
 
-#### Réaudit du premier prototype CPU `2b47247e`
+#### Réaudit du prototype CPU courant `bb31b426`
 
 Le live crédite la partie mathématique de cette section, pas encore sa
-capability. Des oracles indépendants ont comparé 33 914 voisinages CSR au scan
-quadratique et 15 360 supports propres au cover/rayon, sans écart. Le chemin
-candidat stream les combinaisons et ne construit aucun sommet d'arrangement ni
-mosaïque. Le juge par défaut appelle néanmoins `flat_catalogue`; ce dernier
-reste une vérité exhaustive partagée, pas l'architecture produit.
+capability produit. Deux oracles indépendants du palier courant ont comparé
+65 105 voisinages, 2 349 620 paires et 20 045 supports propres sans écart de
+cover, rayon, census local ou frontière stricte. Le chemin candidat stream les
+combinaisons et ne construit aucun sommet d'arrangement ni mosaïque. Le juge
+appelle néanmoins `flat_catalogue`; ce dernier reste une vérité exhaustive
+partagée, pas l'architecture produit.
 
-Le payload `CompleteSphere` exigé ici n'existe pas encore : l'intérieur est
-calculé puis jeté, aucun pool de membres n'est produit et les maps par coquille
-écrasent les doubles émissions. Le mutant qui retire l'ancre unique émet 126
-fois au lieu de 56 et reste vert. `--judge 0` annonce l'exactitude sans oracle;
-`--cover-only` revient avant désaccords et planchers. Quatre CTests relatifs ont
-ensuite passé avec des planchers sensibles aux trois lanes, mais aucun ne force
-le juge ni ne compare le payload/multiplicité. `n<t_q` et le cap de quatre
-millions de cellules n'atteignent aucun fallback/replay typé. Après ces
-passages, le source a disparu tandis que CMake le référence encore; le live ne
-se configure plus.
+Les paliers jusqu'à `bb31b426...` ferment plusieurs défauts historiques :
+les modes sont honnêtes et exclusifs, les listes triées de membres sont
+conservées et comparées par coquille, les doubles émissions sont comptées et le
+mutant bidirectionnel rougit, les replis petit nuage/cap sont typés, les `Q`
+effectifs sont agrégés et `C_q/T_q/H_q` passent en `u128`. Bas ordre, borne
+$K+1\le s_{\max}$, juge explicite, unicité, membre et nombre de candidats sont
+reçus. Treize CTests Release et huit ciblés ASan/UBSan/LSan passent. Ces
+résultats sont positifs et non vacants sur leur domaine exercé.
 
-La capability de coût est également absente. La construction live teste chaque
-point dans chaque feuille, donc devient quasi quadratique à densité fixe; le
-CSR est quadratique au pire et aucun high-water en octets n'est publié. Les
-compteurs `T_q`/census en 64 bits débordent dès `n=13 468` dans le cas dense,
-alors que la CLI autorise 20 000 points et refuse encore le palier 50 k. Le mode
-`cover-only` saute précisément la boucle qui calcule `C_q/T_q/H_q`.
+Ils ne ferment pas le payload public. Le catalogue source itère une map triée
+par coquille, tandis que le contrat public trie les quatre slots du support puis
+reconstruit le pool. Une sonde de 24 nuages trouve 3 062 positions déplacées et
+4 016 champs `ForestNode::source` différents malgré 120/120 empreintes de forêt
+égales. L'empreinte compare un quotient sémantique invariant à la renumérotation
+avec le même `build_forest`; elle ne reçoit ni ordre canonique, ni pool global,
+ni offsets, ni indices publics, ni correction indépendante du fold. Des
+compteurs observent maintenant `parent`, `n_children` et accessibilité, mais ils
+ne forment pas un validateur total : un cycle de frères boucle, un enfant hors
+plage déborde sous ASan et une faute identique des deux côtés reste verte.
+`beta` et le représentant public `source` restent hors empreinte.
 
-La dispersion de `Q` ajoutée au palier courant est correcte pour un nuage sans
-fallback. Sur plusieurs nuages, son champ `médiane` est le maximum des médianes;
-après fallback, min/médiane sont antérieurs au repli tandis que `max` est le
-`Q_root` effectif. La reproduction `mediane=991, max=843` interdit d'en faire un
-reçu. Séparer les statistiques `Q_grid_raw`/`Q_effectif`, les agréger selon un
-contrat nommé et recevoir leur mémoire avant toute conclusion de gain adaptatif.
+La capability de coût reste absente. La construction teste chaque point dans
+chaque feuille, donc devient quasi quadratique à densité fixe; le CSR est
+quadratique au pire et les high-waters omettent des buffers, le catalogue, le
+pool, la vérité, les $2K$ folds et les empreintes récursives. `cell_cap` borne
+les cellules, pas les octets ou le temps. Le target refuse toujours plus de
+20 000 points et aucun statut d'allocation/replay ne ferme le palier 50 k. Le
+chrono nommé source englobe désormais assemblage, fold source, fold référence et
+deux empreintes; il ne sépare pas ces coûts. Plusieurs agrégats restent en `i64`
+avec une justification qui oublie le facteur `clouds<=2000`.
+
+Le diagnostic cliques/triple de `ee5ee51` ajoute deux filtres exacts utiles : un
+support est une clique du graphe admissible, et chacune des faces triples d'un
+support quatre satisfait le minimum sur les deux demi-espaces de son plan. La
+réponse `5eb64c52...` teste désormais les quatre faces, corrige les labels et tue
+le mutant qui accepte tout. Elle ne reçoit pas encore la couverture de toutes
+les vraies cliques ni la masse après quatre faces. Ses ratios K4/supports quatre
+ne sont pas comparables directement au ratio sommets/toutes sphères du parcours.
+Ce résultat ne retire donc aucune route de l'architecture : il fournit des
+conditions nécessaires et un falsificateur de sélectivité, pas une décision 50 k.
 
 La norme active doit toutefois être raffinée avant de déclarer cette voie
 conforme. Elle exige actuellement la coquille complète de tout support rencontré

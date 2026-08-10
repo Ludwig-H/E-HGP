@@ -1,6 +1,6 @@
-# Audit continu de la source directe `24ad3d37` à `1c3948c3`
+# Audit continu de la source directe `24ad3d37` à `bb31b426`
 
-Date du snapshot : 9 août 2026 UTC.
+Dates des snapshots : 9 et 10 août 2026 UTC.
 
 Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `backend=cpu_reference_oracle_and_gpu_candidate_under_audit`,
@@ -8,15 +8,12 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cet audit est strictement limité à `morsehgp3D_v3`. Il n'a modifié aucun
-prototype. Le fichier audité est un delta non committé posé sur le HEAD
-`c0df579ca0f5a6a6330294b8aa4fd80d372fb6ce`. Pendant la clôture, Claude a
-remplacé `24ad3d37...` par `2b47247e...`; ce second palier n'ajoute que la
-dispersion de `Q` par feuille et a été réaudité séparément. Il a ensuite ajouté
-quatre CTests dans `CMakeLists.txt`, puis retiré transitoirement
-`direct_source.cpp` du worktree. Le palier `9edf150d...` restaure le source,
-ferme la plupart de ces findings et porte sept CTests dans le CMake
-`4530a8c...`. Le palier courant `1c3948c3.../da5f569c...` ajoute une comparaison
-de forêts abstraites et deux portes; c'est l'état live courant de ce rapport.
+prototype. Il suit chronologiquement le premier delta post-`c0df579`, sa
+dispersion `2b47247e...`, sa restauration `9edf150d...`, le palier forêt
+`1c3948c3...` committé dans `1bb82f9`, puis le correctif live
+`bb31b426.../a3c40f7e...` posé sur le HEAD `ee5ee51`. Les retraits et
+restaurations intermédiaires restent documentés comme faits historiques, pas
+comme état courant.
 
 | objet | empreinte SHA-256 |
 | --- | --- |
@@ -24,22 +21,26 @@ de forêts abstraites et deux portes; c'est l'état live courant de ce rapport.
 | `prototype/direct_source.cpp`, palier dispersion | `2b47247e9d1ecd6e1a8a573f4597bab9bb19e10a4a3d2ab4295c524d2d1ee68c` |
 | `prototype/direct_source.cpp`, palier courant restauré | `9edf150de3f9b75cf931df405d0885f7644f05b622016b78fdb22bc3658216f0` |
 | `prototype/direct_source.cpp`, palier courant avec forêts | `1c3948c3f1e46c43311fc6e6668ea78100b0adff9af2bc8549da109ccb7bbc4e` |
+| `prototype/direct_source.cpp`, correctif courant audité | `bb31b426adbea80625046e773a008ad00cbb2780749b46fcbb02f974e5db1705` |
 | `CMakeLists.txt`, sans CTests directs | `beeb06c0399c038b6718d0ab7d48d8d4eec2ca666f86a3fb5e221bc405912c07` |
 | `CMakeLists.txt`, palier courant avec quatre CTests | `1f06ad8b7d3f28ea4b4a89da945fe47ccf82dd05fbb9873ec633bd95a032f9b1` |
 | `CMakeLists.txt`, palier courant avec sept CTests | `4530a8c4817fbfc1e399f0dff628f374b89d2d1d2117fa964c448ce72efec431` |
 | `CMakeLists.txt`, palier courant avec neuf CTests | `da5f569ce8b18a69d373e5fc9364a1ac22d50abb96d1f73bdc72dcffd3415b47` |
+| `CMakeLists.txt`, correctif courant avec treize CTests | `a3c40f7e183122fabad0e2d645c9f2f43ff3fa721625d5e6a3d8c9ced0d8254f` |
 | binaire Release GCC 13.3 du premier palier | `d724f33c16f676804ed381190a9e6dadc2257ba9978635667aa7191fa7bd6a4e` |
 | binaire Release GCC 13.3 du palier courant | `e33f045c26b1bf0f8ea54bdb31929b6317b4c0f55375172f2cb06b31f063de7f` |
 | binaire Release GCC 13.3 restauré | `73dd077a75467c97182ca6d273295a309dd11448d6efb098e80d25e45c279006` |
 | binaire Release GCC 13.3 avec forêts | `a6f957abb7ba817713169c4b0220684c2eea53f9a50c681807c4785cb2b1985d` |
+| binaire Release GCC 13.3 du correctif courant | `ab4b0ef7832b969a2a6f7e5a883e2627f9513b86e95ed25f772152688fae6fc3` |
+| binaire ASan/UBSan/LSan ciblé | `ca89a5efb8953f2e1ee6e3e2a123c12676d871828cf22183cfd7529497b2db7c` |
 
 ## Verdict
 
 **GO fonctionnel borné et relatif pour le lemme banque--rayon, les voisinages,
 le payload membres, l'unicité et la forêt abstraite quotientée sur les campagnes
-reçues; NO-GO maintenu pour la totalité CLI, la forêt publique sérialisée, la
-porte de coût/mémoire 50 k et toute promotion en source produit ouverte ou
-certifiée.**
+reçues, ainsi que pour les corrections bas ordre/borne $K$/juge; NO-GO maintenu
+pour la forêt publique sérialisée, la validation structurelle totale, la porte
+de coût/mémoire 50 k et toute promotion en source produit ouverte ou certifiée.**
 
 Le progrès architectural est réel. La partie source n'énumère aucun sommet
 d'arrangement et ne construit aucune mosaïque d'ordre supérieur. Les candidats
@@ -165,7 +166,7 @@ intermédiaire actuel est un P0 de build.
 Ce P0 transitoire est fermé par la restauration `9edf150d...`; il reste conservé
 ici pour la chronologie, pas comme verdict live.
 
-## Réaudit du palier courant `9edf150d` / `4530a8c`
+## Réaudit des paliers corrigés `9edf150d`, puis `1c3948c3`
 
 Le nouveau palier répond précisément à l'audit, et plusieurs fermetures sont
 substantielles :
@@ -201,10 +202,12 @@ candidats puisqu'il n'en évalue aucun. C'est un net GO fonctionnel borné.
 
 Le delta assemble désormais un vrai `mhgp::Catalogue` source, avec pool global
 et `members_begin`, appelle le même `build_forest` que la référence pour chaque
-ordre demandé, puis compare des signatures récursives sans collision. La gate
+ordre demandé, puis compare des chaînes récursives du quotient. La gate
 permanente rend, sur six nuages, 30 forêts `k=1..5`, 1 647 nœuds, 32 racines et
-zéro divergence. Neuf CTests Release passent. C'est une intégration positive du
-catalogue source vers la forêt abstraite; ce n'est pas un oracle indépendant de
+zéro divergence. Les cumulés $K=1..5$ valent 154, 419, 774, 1 201 et 1 647
+nœuds : chaque ordre contribue réellement. Neuf CTests Release passent, ainsi
+que la gate forêt sous ASan/UBSan. C'est une intégration positive du catalogue
+source vers la forêt abstraite; ce n'est pas un oracle indépendant de
 `build_forest`.
 
 La signature quotientte volontairement l'ordre du catalogue. Elle grave type,
@@ -221,13 +224,56 @@ offsets selon le contrat public, puis comparer les indices; sinon nommer
 explicitement le quotient.
 
 La formule « deux forêts sont identiques si et seulement si » est elle aussi à
-borner aux forêts valides et à cette sémantique : la signature ne compare pas
-les champs redondants `parent`/`n_children` ni l'identité des nœuds inaccessibles.
+borner aux forêts valides et à cette sémantique : l'empreinte ne compare pas
+`beta`, `parent`, `n_children`, le représentant exact d'une multifusion ni
+l'identité des nœuds inaccessibles. Elle ne valide pas non plus plages,
+acyclicité, accessibilité unique ou cohérence parent--enfants; un cycle peut
+entraîner une récursion non bornée.
 Sa construction récursive par concaténation de chaînes peut être quadratique en
 taille et profonde; c'est acceptable pour le juge borné actuel, pas un format de
 reçu ou une architecture de production.
 
-### Finding live P1 : domaine `s_max` contradictoire
+### Correctif `bb31b426` / `a3c40f7e` : domaines fermés, validateur encore ouvert
+
+Le correctif répond substantiellement aux findings du palier précédent :
+
+- les lanes `q>s_max` sont vides; `s_max=2` et `s_max=3` rendent zéro désaccord;
+- `forest_orders+1>s_max` est refusé avant calcul et possède une porte négative;
+- les gates positives passent explicitement `--judge 1`;
+- l'unicité des coquilles de référence et `candidats==C_q` deviennent des
+  obligations;
+- le mutant de membre rend 184 désaccords, et sa combinaison dangereuse avec la
+  forêt est refusée avant d'assembler un catalogue incohérent;
+- stdout parle de listes par coquille au lieu de pools globaux.
+
+Build Release frais : 13/13 CTests, 16,70 s. Build ASan/UBSan/LSan ciblé : 8/8,
+9,95 s, aucun diagnostic. La gate forêt conserve 30 forêts, 1 647 nœuds,
+32 racines et zéro différence quotientée. C'est un vrai GO de non-régression
+sur les objets valides exercés.
+
+La tentative de validation structurelle n'est toutefois pas totale. Un
+`next_sibling` auto-cyclique ne termine pas : la sonde a dû être tuée après deux
+secondes. Un `first_child=7` dans une forêt de deux nœuds déclenche un
+heap-buffer-overflow ASan dans `forest_reachability`. `source=-1`, interdit dans
+une forêt publiée, devient simplement `sans_source`. Enfin les compteurs de
+fautes entrent seulement dans le digest : une même faute produite des deux côtés
+par le même `build_forest` reste verte. Il faut un validateur itératif fail-closed,
+borné par `nodes.size()`, qui contrôle chaque indice avant déréférencement et
+exige explicitement zéro cycle, inaccessible, source invalide, parent faux ou
+compte d'enfants faux.
+
+Deux claims auxiliaires sont également faux. Le commentaire de sûreté `i64`
+borne un nuage mais oublie `clouds<=2000` : la borne cumulée annoncée atteint
+`53 317 334 799 960 000 000`, au-dessus de `2^63-1`. Et le chrono nommé source
+englobe aussi le fold de référence et les deux empreintes; `reference_seconds`
+ne reçoit que `flat_catalogue`. Les labels ne séparent donc pas les coûts forêt.
+
+L'ordre public reste inchangé et faux : 3 062 positions de catalogue et 4 016
+indices `ForestNode::source` diffèrent toujours sur la sonde 24 nuages, malgré
+120/120 digests quotientés égaux. Les corrections de domaine ne ferment ni ce
+payload, ni la sérialisation.
+
+### Finding historique fermé à `bb31b426` : domaine `s_max`
 
 La CLI accepte désormais `smax>=2`, mais la boucle appelle toujours les lanes
 `q=2,3,4`. `build_cover` refuse logiquement `t_q=s_max-q+1<1`. Les deux commandes
@@ -252,7 +298,11 @@ la même masse de nœuds/racines. Une qualification complète exige
 `forest_orders<=s_max-1`, ou un statut explicite d'ordres non qualifiables, avec
 CTest de refus.
 
-### Finding live P0 : gates positives jugeables comme simple mesure
+Ces deux défauts sont fermés par le correctif décrit ci-dessus. Le scénario
+`s_max=3` passe manuellement mais ne possède pas encore sa propre porte
+permanente.
+
+### Finding historique fermé à `a3c40f7e` : juge implicite
 
 Les CTests positifs reposent sur la valeur **implicite** `judge=1`. La commande
 générique avec exactement les mêmes planchers et `--judge 0` rend encore zéro,
@@ -267,20 +317,28 @@ La gate forêt résiste mieux parce que `--forest 5` est refusé hors mode jugé
 elle doit néanmoins écrire elle aussi `--judge 1` et recevoir la conclusion
 attendue plutôt que dépendre d'un défaut CLI.
 
+Les gates positives écrivent maintenant `--judge 1`. Une commande manuelle en
+mode mesure continue légitimement à sortir zéro avec ses planchers, mais elle
+annonce explicitement qu'aucun oracle n'a été consulté; la mutation de la valeur
+par défaut ne vide plus les commandes CMake.
+
 ### Réserves de payload et mutation-résistance
 
-Le chemin membres est actif et compare bien une **liste triée par coquille**,
-mais aucun `mhgp::Catalogue` source avec pool global, offsets `members_begin`,
-ordre et sérialisation n'est assemblé. Les claims « mêmes pools » doivent donc
-être ramenés à « mêmes listes de membres par coquille ». Aucun mutant permanent
-ne substitue ou supprime un membre pour prouver que le comparateur lui-même
-reste vivant; la map attendue suppose aussi l'unicité de la coquille de
-l'autorité sans l'asserter.
+Le chemin membres est actif et compare bien une **liste triée par coquille**.
+Le mode forêt assemble désormais un `mhgp::Catalogue` source et ses
+`members_begin`; une sonde ne trouve aucune faute locale d'offset. En revanche,
+l'ordre global, le pool concaténé, les offsets publics et les indices
+`ForestNode::source` diffèrent de la référence, comme le montre le finding
+précédent. Les claims « mêmes pools » doivent donc rester ramenés à « mêmes
+listes de membres par coquille ». Aucun mutant permanent ne supprimait
+initialement un membre pour prouver que le comparateur lui-même restait vivant;
+`bb31b426...` en ajoute un et sa porte rougit. L'unicité de la coquille
+de l'autorité est désormais reçue par `emplace`.
 
-L'égalité observée `candidates==C_q` n'est jamais exigée. Une mutation qui saute
-ou duplique seulement des candidats non émissibles peut conserver sortie et
-planchers. Aucun CTest n'épingle `C_q/T_q/H_q` ni n'exerce une valeur dépassant
-64 bits. Les campagnes n'ont enfin ni digest attendu ni coordonnées sidecar.
+L'égalité `candidates==C_q` est désormais exigée par lane hors mutant
+bidirectionnel. Aucun CTest n'épingle toutefois les valeurs attendues de
+`C_q/T_q/H_q` ni n'exerce une valeur dépassant 64 bits. Les campagnes n'ont
+enfin ni digest attendu ni coordonnées sidecar.
 Elles ont des voisinages complets sur leurs entrées positives : degrés 39/39 et
 11/11. Les frontières `dist2=4Q`, offsets `9^3`, centre rationnel sur split et
 voisinage réellement sélectif restent couverts seulement par les oracles
@@ -297,9 +355,12 @@ une allocation peut encore échouer sans statut de reprise.
 Les nouveaux high-waters sont utiles mais partiels. `banque+dispersion` ne
 compte ni le vecteur global `leaf_q` accumulé sur tous les nuages, ni le buffer
 `ranked`; `CSR` ne compte pas les buckets et listes transitoires; vérité,
-`produced`, maps et vecteurs de membres sont absents. Le target refuse toujours
-`n>20 000`, aucune campagne ne reçoit 50 k, et aucune sortie brute/sidecar ne
-scelle les octets ou le coût.
+`produced`, maps et vecteurs de membres sont absents. Le chrono source couvre
+maintenant l'assemblage, mais aussi les folds **source et référence** et leurs
+empreintes; le chrono référence ne couvre que `flat_catalogue`. Ces labels ne
+ventilent donc toujours pas le coût. Le target refuse `n>20 000`, aucune
+campagne ne reçoit 50 k, et aucune sortie brute/sidecar ne scelle les octets ou
+le coût.
 
 Les masses principales sont bien en `u128`, mais `duplicate_emissions`,
 `locator_clamps` et `mismatches` restent en `long long`. Leur borne cumulée sur
@@ -432,18 +493,18 @@ de verdict restent toutefois en `long long`.
 Le palier courant a déjà appliqué une grande partie de l'aide initiale. Avant
 toute promotion, les prochaines corrections utiles sont maintenant :
 
-1. fermer le domaine bas ordre en sautant `q>s_max` ou en rétablissant la
-   précondition `s_max>=4`, puis imposer `forest_orders<=s_max-1`, avec CTests
-   des deux frontières;
-2. passer `--judge 1` explicitement dans chaque gate différentielle et recevoir
-   le mode/le nombre de comparaisons, puis ajouter des CTests positifs propres
-   aux modes mesure et cover;
-3. graver un mutant de membre, l'identité `candidates==C_q`, des digests attendus
-   et une fixture réellement sélective aux frontières du voisinage;
-4. trier le catalogue source selon les slots de support du contrat, reconstruire
+1. remplacer les deux parcours forestiers par un validateur itératif total,
+   contrôlant les indices avant déréférencement et refusant toute faute même si
+   elle apparaît des deux côtés, avec mutants cycle/hors plage/source invalide;
+2. trier le catalogue source selon les slots de support du contrat, reconstruire
    pool/offsets et comparer le payload public des forêts; sinon annoncer
    explicitement une équivalence abstraite modulo renumérotation;
-5. ajouter caps en octets, statuts d'allocation/reprise et high-waters complets,
+3. ajouter la porte `s_max=3`, recevoir la conclusion jugée et ajouter des CTests
+   positifs propres aux modes mesure et cover;
+4. graver des digests attendus, les masses `C_q/T_q/H_q` et une fixture réellement
+   sélective aux frontières du voisinage;
+5. élargir ou borner les agrégats de campagne, séparer les chronos des deux folds,
+   ajouter caps en octets, statuts d'allocation/reprise et high-waters complets,
    puis remplacer le cover `F*n` si sa mesure ferme la porte 50 k;
 6. conserver `flat_catalogue` comme juge borné seulement et développer
    séparément la source Gabriel ouverte streamée, sans arrangement, mosaïque ni
