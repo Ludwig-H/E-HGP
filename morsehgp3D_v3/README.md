@@ -37,7 +37,9 @@ cinquième forme, `17b70cf` nettoie son premier défaut de reporting, puis
 écrit le premier oracle device de ce flux; `23379d4` puis `f6cb562` consignent
 sa première session G4 et l'audit préalable; `a6e3078` simplifie le choix
 d'owner par un tri unique, corrige le routage des CTests CUDA et commence la
-validation hostile, puis `37139de` consigne sa seconde session G4. Ces derniers
+validation hostile, puis `37139de` consigne sa seconde session G4 ; `3cefcd0`
+mesure les murs d'échelle CPU/GPU sur un même hôte et `852f2d5` prouve
+k=1 == single-linkage puis le gate par un EMST exact à l'échelle. Ces derniers
 résultats et leurs limites sont épinglés dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
@@ -430,6 +432,49 @@ transitifs v2 — en 319,87 s. Les 14/14 portes directes passent en Release, et
 les trois campagnes ciblées `generic`, `forest`, `same_payload` passent sous
 ASan/UBSan/LSan; ce crédit d'intégration ne transforme pas leur comparaison
 temporelle en reçu de coût.
+
+**[palier de reprise : catalogue parallèle, routeur médian, famille terrain]**
+La session interrompue est reprise et son chantier fermé. (1) Le poste
+dominant mesuré du pipeline (n=400 : parcours 40,5 s contre récolte 2,3 s) a
+maintenant son front d'onde CPU : la reverse search est sans état partagé, une
+couronne séquentielle à profondeur bornée collecte la frontière et chaque
+sous-arbre est rejoué à sa racine avec la base du germe dérivée une seule
+fois. La porte `mhgp3v_parallel_catalogue_gate` exige le différentiel
+canonique (membres triés + support canonique + rang) contre le séquentiel,
+l'invariance des compteurs de travail entre 2 et 3 threads — insensible à
+l'horloge — et tue `drop-odd-roots` (perdre le seul dernier sous-arbre se
+cachait derrière la déduplication de la récolte). (2) Le routeur médian de la
+note dendrogramme est implémenté et jugé : descente à majorité strictement
+supérieure à 1/2 en entiers exacts sans division, stay sur égalité, terminal
+le plus haut du segment ; la porte grave les fixtures 5/6/7 de la note,
+compare à l'énumération de TOUS les terminaux sur 300 arbres aléatoires et tue
+quatre mutants nommés de la note par fixtures déterministes (code 4). C'est
+l'étage combinatoire seul — aucune masse de tour réelle, aucun sidecar : le
+verrou coverage/contributions de l'auditeur demeure entier. (3) Le mode
+`--timing-only` de la qualification device omet ET déclare le fold CPU ; sa
+combinaison avec `--force-drop-edge` est refusée avant le `#ifdef` CUDA. (4)
+Une famille `terrain` type LiDAR — densité aréale fixe, relief entier par
+calottes quadratiques, sol à jitter fin donc coplanarités massives assumées,
+2 % de sursols, construction entièrement entière — est partagée entre le
+pipeline, la qualification device et la porte parallèle ; le compare-joins et
+le catalogue parallèle sont exigés sur ce régime dégénéré. Aucune densité
+LiDAR réelle n'est certifiée : régime de mesure déclaré. Première mesure un
+cœur, n=200, K=5 : 40 007 → 10 682 générateurs, incidences
+17 282 892 → 3 712 707, fold 5,5 → 1,1 s, mais parcours 15,0 → 13,8 s.
+**Les masses chutent de 4 à 5 fois, le parcours ne suit pas** : à ce stade, le
+verrou de la seconde à 50 k est la navigation, pas les masses du régime
+cible. Suite complète rejouée : 155/155 CTests Release, puis portes des
+binaires modifiés revertes. Le mandat « 50 k sous la seconde sur G4, régimes
+LiDAR » et ses six questions sont consignés dans
+[`QUESTIONS_CLAUDE_50K_SOUS_LA_SECONDE_20260810.md`](audits/QUESTIONS_CLAUDE_50K_SOUS_LA_SECONDE_20260810.md).
+Deux réponses de l'auditeur sont reçues et deviennent les paliers suivants :
+le garde-fou k=2 par wedges Delaunay `diagnostic_recall_only` — LCA sur la
+forêt de fusion, cinq classes, partitions exactes de `PointId` désormais
+exigées aussi pour la porte k=1 —
+([`REPONSE_CLAUDE_STRUCTURE_K2_DELAUNAY_20260810.md`](audits/REPONSE_CLAUDE_STRUCTURE_K2_DELAUNAY_20260810.md)),
+et l'index exact préfixe--préfixe qui retire le mur des faces du fallback
+hybride, à juger contre les folds existants à n≤400 avant toute mesure
+([`NOTE_SOLUTION_GPU_INDEX_PREFIX_PREFIX_20260810.md`](audits/NOTE_SOLUTION_GPU_INDEX_PREFIX_PREFIX_20260810.md)).
 
 L'autorité mathématique reste `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`. Les audits de

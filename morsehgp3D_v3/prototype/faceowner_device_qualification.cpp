@@ -18,14 +18,17 @@
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
+#include "prototype/cloud_families.hpp"
 #include "prototype/order_k_flats.hpp"
+#include "prototype/parallel_catalogue.hpp"
 #include "prototype/saturated_fold_faceowner.hpp"
 #include "prototype/faceowner_device.hpp"
 
 int main(int argc, char** argv) {
   int n = 64, coord = 0, smax = 11, max_order = 5;
   long long seed = 20260810;
-  int drop_edge = 0;
+  int drop_edge = 0, timing_only = 0, catalogue_threads = 0;
+  mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kUniform;
   auto integer = [](const char* text, long long* value) {
     const char* last = text + strlen(text);
     unsigned long long magnitude = 0;
@@ -36,6 +39,14 @@ int main(int argc, char** argv) {
     return true;
   };
   for (int i = 1; i < argc; ++i) {
+    if (!strcmp(argv[i], "--family")) {
+      if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --family\n"); return 2; }
+      ++i;
+      if (!strcmp(argv[i], "uniform")) family = mhgp3v::CloudFamily::kUniform;
+      else if (!strcmp(argv[i], "terrain")) family = mhgp3v::CloudFamily::kTerrain;
+      else { std::printf("ECHEC : famille inconnue %s\n", argv[i]); return 2; }
+      continue;
+    }
     long long value = 0;
     const bool has = (i + 1 < argc) && integer(argv[i + 1], &value);
     int* target = nullptr;
@@ -46,6 +57,8 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--max-order")) target = &max_order;
     else if (!strcmp(argv[i], "--seed")) wide = &seed;
     else if (!strcmp(argv[i], "--force-drop-edge")) target = &drop_edge;
+    else if (!strcmp(argv[i], "--timing-only")) target = &timing_only;
+    else if (!strcmp(argv[i], "--catalogue-threads")) target = &catalogue_threads;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { std::printf("ECHEC : valeur entiere invalide pour %s\n", argv[i]); return 2; }
     ++i;
@@ -53,51 +66,55 @@ int main(int argc, char** argv) {
   }
   if (n < 5 || n > 100000 || coord < 0 || coord > 65536 || smax < 2 ||
       smax > mhgp::kMaxRank || max_order < 1 || max_order > 6 || max_order + 1 > smax ||
-      drop_edge < 0 || drop_edge > 1) {
+      drop_edge < 0 || drop_edge > 1 || timing_only < 0 || timing_only > 1 ||
+      catalogue_threads < 0 || catalogue_threads > 256) {
     std::printf("ECHEC : campagne absurde\n");
     return 2;
   }
+  // Le mutant drop-edge n'a de sens que si le comparateur tourne : en mode
+  // chrono il survivrait par construction, donc la combinaison est refusee.
+  if (drop_edge == 1 && timing_only == 1) {
+    std::printf("ECHEC : --force-drop-edge exige le differentiel (pas --timing-only)\n");
+    return 2;
+  }
 #ifndef MHGP3V_FACEOWNER_CUDA
+  (void)family;   // la famille ne sert qu'au chemin CUDA ; le refus reste premier
   std::printf("ECHEC : kernel face-owner absent de ce binaire (MHGP3V_ENABLE_CUDA)\n");
   return 2;
 #else
-  if (coord == 0) {
-    const double c = std::cbrt((double)n * 1000.0);
-    coord = (int)std::max(4.0, std::min(65536.0, c));
-  }
-  std::mt19937 rng((unsigned)seed);
-  std::uniform_int_distribution<int> pick(0, coord - 1);
-  std::vector<mhgp::P3> pts;
-  {
-    std::set<long long> keys;
-    for (int guard = 0; (int)pts.size() < n && guard < 200 * n; ++guard) {
-      mhgp::P3 q{};
-      q.x = (mhgp::i32)pick(rng);
-      q.y = (mhgp::i32)pick(rng);
-      q.z = (mhgp::i32)pick(rng);
-      const long long key = ((long long)q.x << 34) | ((long long)q.y << 17) | (long long)q.z;
-      if (!keys.insert(key).second) continue;
-      pts.push_back(q);
-    }
-  }
+  // La MEME autorite de generation que le pipeline (cloud_families.hpp) : le
+  // meme (famille, n, coord, graine) produit le meme nuage bit a bit ici.
+  if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
+  const std::vector<mhgp::P3> pts = mhgp3v::make_family_cloud(family, n, coord, seed);
   if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
 
   mhgp3v::FlatStatistics st{};
   mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
-  const mhgp::Catalogue catalogue = mhgp3v::flat_catalogue(pts, smax, &st, &status, false, true);
+  const auto catalogue_begin = std::chrono::steady_clock::now();
+  const mhgp::Catalogue catalogue =
+      catalogue_threads > 1
+          ? mhgp3v::flat_catalogue_parallel(pts, smax, &st, &status, catalogue_threads)
+          : mhgp3v::flat_catalogue(pts, smax, &st, &status, false, true);
+  const auto catalogue_end = std::chrono::steady_clock::now();
   if (status != mhgp3v::CloudStatus::kOk) {
     std::printf("ECHEC : statut nuage %s\n", mhgp3v::cloud_status_name(status));
     return 3;
   }
 
-  // LE CHEMIN CPU DE VERITE, avec le flux d'aretes exporte.
+  // LE CHEMIN CPU DE VERITE, avec le flux d'aretes exporte. En mode chrono il
+  // est OMIS ET DECLARE : l'exactitude du kernel est portee par la
+  // qualification differentielle aux tailles ou elle est payable, jamais par
+  // le run chrono lui-meme — qui garde neanmoins la validation hostile du
+  // kernel (masse binomiale exacte par generateur) et l'admission VRAM.
   mhgp3v::FaceOwnerReceipt receipt;
-  const auto cpu_begin = std::chrono::steady_clock::now();
-  const mhgp3v::SaturatedFold fold = mhgp3v::build_saturated_fold_faceowner(
-      catalogue, max_order, /*keep_partitions=*/false, &receipt,
-      /*enforce_event_guard=*/smax >= n, {}, 0, /*collect_edges=*/true);
+  auto cpu_begin = std::chrono::steady_clock::now();
+  if (timing_only == 0) {
+    const mhgp3v::SaturatedFold fold = mhgp3v::build_saturated_fold_faceowner(
+        catalogue, max_order, /*keep_partitions=*/false, &receipt,
+        /*enforce_event_guard=*/smax >= n, {}, 0, /*collect_edges=*/true);
+    if (!fold.ok) { std::printf("ECHEC : fold CPU refuse : %s\n", fold.refusal); return 3; }
+  }
   const auto cpu_end = std::chrono::steady_clock::now();
-  if (!fold.ok) { std::printf("ECHEC : fold CPU refuse : %s\n", fold.refusal); return 3; }
 
   // LES MEMES TABLEAUX DENSES que le fold : membres compresses, lots, rang
   // d'activation canonique — toute derive est attrapee par les aretes.
@@ -163,10 +180,19 @@ int main(int argc, char** argv) {
   std::printf("device     : VRAM libre %.1f Go / totale %.1f Go\n",
               (double)free_bytes / 1073741824.0, (double)total_bytes / 1073741824.0);
 
-  std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld\n",
-              n, coord, smax, max_order, seed);
-  std::printf("catalogue  : %zu generateurs — fold CPU %.3f s (aretes exportees)\n", count,
-              std::chrono::duration<double>(cpu_end - cpu_begin).count());
+  std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
+              " --family %s --timing-only %d --catalogue-threads %d\n",
+              n, coord, smax, max_order, seed, mhgp3v::cloud_family_name(family), timing_only,
+              catalogue_threads);
+  std::printf("catalogue  : %zu generateurs en %.3f s (%s)\n", count,
+              std::chrono::duration<double>(catalogue_end - catalogue_begin).count(),
+              catalogue_threads > 1 ? "parallele" : "sequentiel");
+  if (timing_only == 0)
+    std::printf("fold CPU   : %.3f s (aretes exportees)\n",
+                std::chrono::duration<double>(cpu_end - cpu_begin).count());
+  else
+    std::printf("fold CPU   : OMIS — chrono device seulement, exactitude portee par la"
+                " qualification differentielle aux tailles payables\n");
 
   long long divergences = 0;
   double device_total_ms = 0.0;
@@ -202,22 +228,28 @@ int main(int argc, char** argv) {
       return 3;
     }
     if (drop_edge == 1 && !device_result.edges.empty()) device_result.edges.pop_back();
-    const std::vector<std::pair<std::pair<int, int>, int>>& cpu_edges =
-        receipt.edges_k[(std::size_t)(k - 1)];
-    bool same = cpu_edges.size() == device_result.edges.size() &&
-                device_result.incidences == receipt.incidences_k[(std::size_t)(k - 1)] &&
-                device_result.signatures == receipt.unique_signatures_k[(std::size_t)(k - 1)];
-    for (std::size_t e = 0; same && e < cpu_edges.size(); ++e)
-      same = cpu_edges[e].first.first == device_result.edges[e].activation_batch &&
-             cpu_edges[e].first.second == device_result.edges[e].owner &&
-             cpu_edges[e].second == device_result.edges[e].member;
-    if (!same) ++divergences;
+    bool same = true;
+    if (timing_only == 0) {
+      const std::vector<std::pair<std::pair<int, int>, int>>& cpu_edges =
+          receipt.edges_k[(std::size_t)(k - 1)];
+      same = cpu_edges.size() == device_result.edges.size() &&
+             device_result.incidences == receipt.incidences_k[(std::size_t)(k - 1)] &&
+             device_result.signatures == receipt.unique_signatures_k[(std::size_t)(k - 1)];
+      for (std::size_t e = 0; same && e < cpu_edges.size(); ++e)
+        same = cpu_edges[e].first.first == device_result.edges[e].activation_batch &&
+               cpu_edges[e].first.second == device_result.edges[e].owner &&
+               cpu_edges[e].second == device_result.edges[e].member;
+      if (!same) ++divergences;
+    }
     device_total_ms += device_result.emit_milliseconds + device_result.sort_milliseconds +
                        device_result.reduce_milliseconds;
     std::printf("k=%d        : incidences=%lld signatures=%lld aretes=%zu %s — emission"
                 " %.2f ms, tri %.2f ms, reduction %.2f ms, ~%.1f Mo device\n", k,
                 device_result.incidences, device_result.signatures,
-                device_result.edges.size(), same ? "IDENTIQUES au CPU" : "DIVERGENTES",
+                device_result.edges.size(),
+                timing_only == 1 ? "NON COMPAREES (chrono)"
+                : same           ? "IDENTIQUES au CPU"
+                                 : "DIVERGENTES",
                 device_result.emit_milliseconds, device_result.sort_milliseconds,
                 device_result.reduce_milliseconds,
                 (double)device_result.device_bytes / 1048576.0);
@@ -228,6 +260,11 @@ int main(int argc, char** argv) {
   if (divergences != 0) {
     std::printf("ECHEC : %lld ordre(s) au flux d'aretes DIVERGENT\n", divergences);
     return 1;
+  }
+  if (timing_only == 1) {
+    std::printf("OK : CHRONO SEULEMENT — differentiel d'aretes OMIS ET DECLARE ;"
+                " validation hostile du kernel et admission VRAM conservees\n");
+    return 0;
   }
   std::printf("OK : flux d'aretes device == CPU arete par arete sur les %d ordres\n",
               max_order);

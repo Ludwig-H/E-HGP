@@ -131,6 +131,7 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <unordered_set>
@@ -295,6 +296,7 @@ struct FlatStatistics {
   long long emit_duplicate_shell = 0;    // recolte redondante mesuree
   long long degenerate_flat_vertex = 0;  // coquille entierement coplanaire
   long long seed_failure_stage = 0;      // etape exacte d'un refus de germe
+  double navigate_seconds = 0.0;         // temps du parcours seul (recolte = reste)
   long long grid_points_touched = 0;     // points visites par l'index, avant tout test
   long long bootstrap_rounds = 0;        // doublements de pave a l'amorce
   // DEUX evenements distincts, longtemps confondus sous un seul compteur : une
@@ -342,8 +344,9 @@ struct FlatStatistics {
   long long reverse_decisions = 0;         // decisions de filiation, sans requete de retour
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 48 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 49 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
+    navigate_seconds += o.navigate_seconds;
     seed_scans += o.seed_scans;
     vertices_visited += o.vertices_visited;
     vertices_over_level += o.vertices_over_level;
@@ -2218,47 +2221,67 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
 template <class Sink>
 inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
                                   int level_ceiling, FlatStatistics* st, CloudStatus* status,
-                                  Sink&& sink, const CertifiedIndex* index = nullptr) {
+                                  Sink&& sink, const CertifiedIndex* index = nullptr,
+                                  const flats::Vertex* subtree_root = nullptr,
+                                  const std::vector<mhgp::i32>* forced_root_base = nullptr,
+                                  int crown_depth = 0,
+                                  std::vector<flats::Vertex>* frontier = nullptr,
+                                  std::vector<mhgp::i32>* export_root_base = nullptr) {
   using namespace flats;
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
   if (n < 4) { *status = CloudStatus::kTooFewPoints; return; }
-  if (!inside_declared_grid(points)) { *status = CloudStatus::kOutsideDeclaredGrid; return; }
-  if (has_duplicate_coordinates(points)) {
-    *status = CloudStatus::kDuplicateCoordinates;
-    return;
-  }
-  if (!affine_dimension_is_three(points)) {
-    *status = CloudStatus::kAffineDimensionBelowThree;
-    return;
-  }
   if (level_ceiling < 0) return;
 
+  // LE FRONT D'ONDE CPU : un sous-arbre demarre a son propre sommet avec le
+  // MEME root_base que le germe — la filiation d'Avis--Fukuda est une fonction
+  // du sommet seul et de cette base, donc les sous-arbres se parcourent sans
+  // aucun etat partage, chacun emettant exactement ses descendants. Quand la
+  // racine ET la base sont fournies ensemble, l'appelant certifie le nuage (la
+  // couronne a fait le preflight et derive la base UNE fois) : refaire ici le
+  // tri des doublons et la derivation du germe a chaque racine semee coutait
+  // trois fois le parcours lui-meme.
   Vertex seed;
-  const CloudStatus seeded = seed_level_zero(points, st, &seed);
-  if (seeded != CloudStatus::kOk) { *status = seeded; return; }
-
   std::vector<i32> root_base;
-  for (i32 z : seed.shell) {
-    if (root_base.size() >= 4) break;
-    const std::size_t have = root_base.size();
-    if (have == 1) {
-      const mhgp::P3& u = points[(std::size_t)root_base[0]];
-      const mhgp::P3& w = points[(std::size_t)z];
-      if (u.x == w.x && u.y == w.y && u.z == w.z) continue;
-    } else if (have == 2) {
-      const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)root_base[1]],
-                                      points[(std::size_t)root_base[0]]);
-      const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)z], points[(std::size_t)root_base[0]]);
-      const mhgp::P3 c = mhgp::p3_cross(u, w);
-      if (c.x == 0 && c.y == 0 && c.z == 0) continue;
-    } else if (have == 3) {
-      if (orient3d_exact(points[(std::size_t)root_base[0]], points[(std::size_t)root_base[1]],
-                         points[(std::size_t)root_base[2]], points[(std::size_t)z]) == 0) continue;
+  if (subtree_root != nullptr && forced_root_base != nullptr) {
+    root_base = *forced_root_base;
+    if (root_base.size() < 4) { *status = CloudStatus::kInvariantViolated; return; }
+  } else {
+    if (!inside_declared_grid(points)) { *status = CloudStatus::kOutsideDeclaredGrid; return; }
+    if (has_duplicate_coordinates(points)) {
+      *status = CloudStatus::kDuplicateCoordinates;
+      return;
     }
-    root_base.push_back(z);
+    if (!affine_dimension_is_three(points)) {
+      *status = CloudStatus::kAffineDimensionBelowThree;
+      return;
+    }
+    const CloudStatus seeded = seed_level_zero(points, st, &seed);
+    if (seeded != CloudStatus::kOk) { *status = seeded; return; }
+
+    for (i32 z : seed.shell) {
+      if (root_base.size() >= 4) break;
+      const std::size_t have = root_base.size();
+      if (have == 1) {
+        const mhgp::P3& u = points[(std::size_t)root_base[0]];
+        const mhgp::P3& w = points[(std::size_t)z];
+        if (u.x == w.x && u.y == w.y && u.z == w.z) continue;
+      } else if (have == 2) {
+        const mhgp::P3 u = mhgp::p3_sub(points[(std::size_t)root_base[1]],
+                                        points[(std::size_t)root_base[0]]);
+        const mhgp::P3 w = mhgp::p3_sub(points[(std::size_t)z], points[(std::size_t)root_base[0]]);
+        const mhgp::P3 c = mhgp::p3_cross(u, w);
+        if (c.x == 0 && c.y == 0 && c.z == 0) continue;
+      } else if (have == 3) {
+        if (orient3d_exact(points[(std::size_t)root_base[0]], points[(std::size_t)root_base[1]],
+                           points[(std::size_t)root_base[2]], points[(std::size_t)z]) == 0) continue;
+      }
+      root_base.push_back(z);
+    }
+    if (root_base.size() < 4) { *status = CloudStatus::kInvariantViolated; return; }
+    if (forced_root_base != nullptr) root_base = *forced_root_base;
   }
-  if (root_base.size() < 4) { *status = CloudStatus::kInvariantViolated; return; }
+  if (export_root_base != nullptr) *export_root_base = root_base;
 
   // Aucune requete de parent dans le parcours. La decision de filiation est
   // `decide_child`, qui enumere les couples du candidat jusqu'a la clef de retour
@@ -2288,8 +2311,9 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
   bool interrupted = false;
   // Le germe passe par le MEME contrat que les autres : un sink qui le refuse
   // interrompt le parcours, et l'interruption doit se voir dans le statut.
-  if (!sink(seed)) { *status = CloudStatus::kSinkStopped; return; }
-  push(seed);
+  const Vertex& first = subtree_root != nullptr ? *subtree_root : seed;
+  if (!sink(first)) { *status = CloudStatus::kSinkStopped; return; }
+  push(first);
 
   while (!stack.empty()) {
     st->reverse_depth_max = std::max(st->reverse_depth_max, (long long)stack.size());
@@ -2341,6 +2365,12 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
 
     if (descended) {
       top.i = next_i; top.j = next_j; top.k = next_k; top.dir = next_dir;
+      if (crown_depth > 0 && (int)stack.size() >= crown_depth && frontier != nullptr) {
+        // COURONNE : l'enfant devient la racine d'un sous-arbre distribue —
+        // ni emis ni pousse ici, son sous-parcours l'emettra.
+        frontier->push_back(child);
+        continue;
+      }
       if (!sink(child)) { interrupted = true; break; }
       push(child);
       continue;
@@ -2384,7 +2414,9 @@ inline std::vector<flats::Vertex> reverse_search_shallow(const std::vector<mhgp:
 inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s_max,
                                       FlatStatistics* st, CloudStatus* status,
                                       bool verify_census, bool use_index = false,
-                                      bool use_owner = false) {
+                                      bool use_owner = false,
+                                      const std::vector<flats::Vertex>* precomputed_vertices =
+                                          nullptr) {
   *st = FlatStatistics{};
   mhgp::Catalogue catalogue;
   const int n = (int)points.size();
@@ -2627,8 +2659,16 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
   } else {
     const int level_ceiling = s_max - 2;
     CloudStatus nav = CloudStatus::kOk;
-    const auto vertices = navigate_shallow(points, level_ceiling, st, &nav, verify_census,
-                                           indexed ? &grid : nullptr);
+    const auto navigate_begin = std::chrono::steady_clock::now();
+    std::vector<flats::Vertex> owned_vertices;
+    if (precomputed_vertices == nullptr)
+      owned_vertices = navigate_shallow(points, level_ceiling, st, &nav, verify_census,
+                                        indexed ? &grid : nullptr);
+    const std::vector<flats::Vertex>& vertices =
+        precomputed_vertices != nullptr ? *precomputed_vertices : owned_vertices;
+    st->navigate_seconds =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - navigate_begin)
+            .count();
     if (nav != CloudStatus::kOk) { *status = nav; return catalogue; }
     // ---------------------------------------------------------------------
     // RECOLTE, avec le TEST DE PROPRIETE local.

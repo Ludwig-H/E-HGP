@@ -6,8 +6,8 @@ Cadre : phase **exploration v3 hors registre**, backend **CPU de référence
 mathématique**, profil **candidat hgp_reduced**, mode **conception de projection
 ponctuelle**, statut public **non revendiqué**.
 
-Snapshot v3 final repincé après le commit concurrent de Claude :
-**HEAD = origin/main = 3cefcd0a403a99e3dd1dc2acfd34dc6653767901**.
+Snapshot v3 final repincé après les commits concurrents de Claude :
+**HEAD = origin/main = 852f2d5e202fd721ad50218833ef9db88081834f**.
 Les sources forestières et les deux références de projection citées ci-dessous
 sont inchangées depuis le pin initial 37139de.
 Empreintes utiles :
@@ -43,8 +43,9 @@ les dendrogrammes imaginables, ni d'une preuve de complétude des \(K\) forêts.
 
 Le routeur descendant glouton déjà présent dans l'ancienne implémentation reste
 un profil défendable, mais seulement sous le nom
-**lexicographic_plurality** : il privilégie la première majorité relative
-rencontrée. Il n'est pas un optimum additif global et ne doit pas être présenté
+**lexicographic_plurality** : il privilégie la sortie de masse maximale au
+premier embranchement, même sans majorité absolue. Il n'est pas un optimum
+additif global et ne doit pas être présenté
 comme « le plus représentatif » sans cette qualification.
 
 ## 1. Les \(K\) GammaForest live ne suffisent pas
@@ -100,6 +101,14 @@ topologique dans la forêt horizontale. Ces sidecars doivent être scellés
 pendant le fold ; les reconstruire après coup depuis les seuls témoins est
 impossible.
 
+Leur validation hostile doit en outre recevoir : l'unicité et la complétude
+des facettes et des atomes avec leur multiplicité ; les digests du nuage, du
+catalogue et du profil ; la validité et l'unicité du premier carrier ; des
+identifiants de composante stables pendant chaque intervalle ; une verticale
+totale et unique à chaque coupe ; l'appartenance de chaque arête à la durée de
+vie de ses deux extrémités ; enfin les carrés de naturalité. Un
+source_component_id brut ou un booléen complete ne constitue pas ce reçu.
+
 En leur absence, une sortie ponctuelle peut rester une expérimentation
 **relative_to_partial_payload**, jamais une hiérarchie HGP exacte.
 
@@ -119,8 +128,10 @@ un graphe pondéré arbitraire \(G=(V,E)\), associons à \(v\in V\) l'ensemble
 \(S_v=\{p_v\}\cup\{e_{uv}:uv\in E\}\). Deux ensembles \(S_u,S_v\) se croisent
 exactement lorsque \(uv\in E\), et aucun n'en contient un autre. La meilleure
 sous-famille laminaire pondérée résout alors l'ensemble indépendant de poids
-maximal. La recherche de la topologie optimale contient donc déjà un problème
-NP-difficile.
+maximal. Même la sous-tâche plus étroite « conserver une sous-famille de
+couvertures inchangées de poids maximal » est donc NP-difficile. Cela suffit à
+exclure un optimum canonique gratuit, sans prétendre classifier toute fonction
+de perte possible sur les dendrogrammes.
 
 La séparation saine est :
 
@@ -223,6 +234,13 @@ créer des zéros qui modifieraient artificiellement la normalisation.
 Si \(A_x\) est vide, le point est attaché au terminal de bruit de la racine
 virtuelle et aucune mesure \(\mu_x\) normalisée n'est fabriquée.
 
+Le profil uniforme est rationnel exact. Pour \(z=p/q\) général, les poids
+inverse-radius et les comparaisons de sommes sont algébriques : le backend
+exact doit employer des intervalles dirigés, les raffiner jusqu'à séparer les
+valeurs, puis refuser fermé si une comparaison ou une égalité reste
+indécidable. Les tests contre \(1/2\) suivent la même règle ; seule une égalité
+certifiée déclenche stay.
+
 ### Rayon nul dans les poids
 
 La topologie symbolique à rayon nul ne suffit pas à définir
@@ -238,16 +256,24 @@ normalisée par \(c_{k,\tau}/C_{k,x}\) ; si \(C_{k,x}=0\), utiliser le quotient
 fini certifié. Cela correspond à la limite commune du terme dominant et évite
 tout \(\infty/\infty\).
 
+Cette convention suppose que tous les rayons nuls tendent vers zéro au même
+taux symbolique. Elle n'est ni intrinsèque, ni stable si des doublons sont
+séparés suivant des vitesses différentes. Le choix appartient donc au profil
+scientifique et à son digest.
+
 L'ancienne API morsehgp3d refuse inconditionnellement tout atome de rayon nul
 dans le profil inverse_radius. La convention choisie doit donc être une
 nouvelle porte, pas un claim hérité.
 
 ## 5. Routage recommandé : médiane pondérée de l'arbre
 
-Munissons chaque arête de \(\mathcal{M}\) d'une longueur strictement positive.
-La longueur unité mesure un désaccord structurel par arête ; une longueur de
-persistance peut pondérer les échelles, à condition d'être certifiée. Notons
-\(d_{\mathcal{M}}\) la distance d'arbre.
+Construire d'abord un quotient métrique canonique : les marqueurs de degré deux
+de persistance nulle sont contractés dans la métrique, tout en conservant leur
+payload et leur provenance pour le replay. Munir ensuite chaque arête restante
+d'une longueur strictement positive, additive sous subdivision, dérivée d'une
+transformation monotone certifiée des niveaux exacts. La longueur unité n'est
+permise que sur ce quotient canonique : insérer un marqueur de présentation ne
+doit pas changer la perte. Notons \(d_{\mathcal{M}}\) cette distance d'arbre.
 
 Pour chaque point \(x\), choisir un terminal :
 
@@ -303,6 +329,11 @@ différence symétrique entre les chaînes d'ancêtres de \(t\) et de \(v\). Le
 profil est donc exactement un minimum \(L^1\) de désaccords d'appartenance
 hiérarchique.
 
+Cet objectif compare toutefois des **chaînes terminales cibles** : il pénalise
+aussi une descente sous un carrier \(v\), même lorsque l'appartenance au cluster
+\(P(v)\) reste satisfaite. Le profil coverage_l1_global de la section 7 est
+celui qui approxime directement les couvertures source.
+
 ## 6. Pourquoi le routeur glouton existant n'est pas cet optimum
 
 L'ancienne spécification et
@@ -339,9 +370,13 @@ La recommandation est donc :
 Si le contrat déclare les couvertures complètes comme cible, on peut optimiser
 directement leur fidélité au lieu de la distance entre carriers.
 
-Soit \(J\) la famille des états canoniques. L'état \(j\) possède une couverture
-\(C_j\subseteq X\), un carrier \(b_j\in\mathcal{M}\) et un poids rationnel
-\(w_j>0\). Pour un routage \(t\), posons :
+Soit \(J\) la famille canonique des intervalles maximaux sur lesquels carrier
+et couverture restent constants, ou de leurs deltas canoniques équivalents.
+L'état \(j\) possède une couverture \(C_j\subseteq X\), un carrier
+\(b_j\in\mathcal{M}\) et un poids rationnel \(w_j>0\), issu d'une mesure
+additive de persistance normalisée par ordre. Subdiviser ou dupliquer un état
+sans changer sa durée ne doit modifier ni la somme des poids, ni la perte, ni
+le digest. Pour un routage \(t\), posons :
 
 $$P_t(u)=\left\lbrace x:u\in\mathrm{Anc}(t(x))\right\rbrace.$$
 
@@ -358,10 +393,12 @@ La meilleure valeur après entrée dans \(u\) vérifie :
 
 $$F_x(u)=s_x(u)+\max\left(0,\max_{c\in\mathrm{children}(u)}F_x(c)\right).$$
 
-Le zéro est stay. Une induction depuis les feuilles prouve que cette DP
-minimise exactement \(\mathcal{L}_{\mathrm{cov}}\) sur la topologie fixée. Un
-oracle hors dépôt l'a comparée à l'énumération de tous les terminaux sur
-20 000 arbres aléatoires, sans désaccord :
+Le zéro est stay. En cas d'égalité, stay précède un enfant, puis les enfants
+sont départagés par leur clé canonique. Une induction depuis les feuilles
+prouve que cette DP minimise exactement \(\mathcal{L}_{\mathrm{cov}}\) sur la
+topologie fixée. Un diagnostic exploratoire hors dépôt, non versionné et donc
+non recevable comme porte permanente, l'a comparée à l'énumération de tous les
+terminaux sur 20 000 arbres aléatoires, sans désaccord :
 
 ~~~text
 DP_BRUTE_FORCE_OK=20000
@@ -408,23 +445,34 @@ Pour le terminal médian \(t(x)\), définir :
 
 $$\gamma_x=\frac{1}{2}-\max_{C\in\mathrm{cc}(\mathcal{M}\setminus\{t(x)\})}\mu_x(C).$$
 
-Si \(\gamma_x>0\), la médiane est unique. Une perturbation de la mesure de
-variation totale strictement inférieure à \(\gamma_x\) ne change pas le
-terminal.
+Si \(\mathcal{M}\setminus\{t(x)\}\) ne possède aucune composante, poser
+\(\gamma_x=1/2\). Si \(\gamma_x>0\), la médiane est unique. Avec la convention
+\(\mathrm{TV}(\mu,\nu)=\frac{1}{2}\sum_v\lvert\mu(v)-\nu(v)\rvert\), toute
+perturbation de variation totale strictement inférieure à \(\gamma_x\) ne
+change pas le terminal.
 
 Si l'ordre \(k\) porte la masse normalisée \(\alpha_{k,x}\), sa suppression
-puis la renormalisation modifie \(\mu_x\) d'au plus \(\alpha_{k,x}\) en
-variation totale. La condition suivante certifie donc l'invariance
-leave-one-order-out :
+puis la renormalisation, lorsque \(\alpha_{k,x}<1\), modifie \(\mu_x\) d'au
+plus \(\alpha_{k,x}\) en variation totale. La condition suivante certifie donc
+l'invariance **leave_one_weight_channel_out_on_fixed_M** :
 
 $$\gamma_x>\alpha_{k,x}.$$
+
+Ce certificat garde l'arbre maître \(\mathcal{M}\) fixé et retire seulement le
+canal de poids de l'ordre \(k\). Reconstruire la tour sans cet ordre peut
+changer les verticales et la topologie ; cette expérience \(K-1\) doit être
+rejouée et comparée séparément. Le certificat ne concerne que les points dont
+\(A_x\) est non vide. Si \(\alpha_{k,x}=1\), aucune mesure ne subsiste après
+retrait : le point devient sans évidence/bruit et aucun certificat de terminal
+leave-one-out n'est défini.
 
 Le reçu doit publier au minimum :
 
 - la perte totale et la perte par ordre ;
 - la distribution des \(\gamma_x\) ou, pour **coverage_l1_global**, la marge
   entre les deux meilleurs terminaux ;
-- la fraction de points invariants au retrait de chaque ordre ;
+- la fraction de points invariants au retrait pondéral de chaque ordre sur
+  \(\mathcal{M}\) fixé, puis séparément sous un vrai rebuild \(K-1\) ;
 - le nombre d'égalités exactes arbitrées ;
 - la conservation de masse par point ;
 - le taux de désaccord entre profils pendant la qualification ;
@@ -467,8 +515,11 @@ puis route top-down, mais :
 - chaque racine sélectionnée est traitée séparément ;
 - un point présent dans deux racines peut donc être recopié.
 
-La formule \(S/T\) est à conserver ; la sémantique des racines et des ex æquo
-ne l'est pas.
+HGP-old emploie la normalisation \(S/T\) pour son poids conservatif W_nodes ;
+ses argmax plat et whole_tree routent en revanche avec \(S\) brut. La
+normalisation est donc une inspiration à conserver dans le nouveau profil, pas
+la sémantique exacte de l'ancien étiquetage. La sémantique des racines et des
+ex æquo ne doit pas être reprise.
 
 ### morsehgp3D_v2
 
@@ -519,6 +570,26 @@ Il garantit une ultramétrique de Single-Linkage, mais hérite du chaînage et
 change l'objet scientifique. Une matrice de coévidence peut aussi coûter
 \(\Theta(n^2)\). Ce MST peut être un diagnostic, jamais la source exacte.
 
+### Consensus de clades
+
+Lorsque chaque entrée est déjà un dendrogramme **de points**, les clades
+présents dans strictement plus de la moitié des arbres sont compatibles : deux
+clades incompatibles ne peuvent pas coexister dans un même arbre. Ce théorème
+ne s'applique pas aux couvertures HGP brutes, puisqu'un seul ordre peut déjà
+porter \(\{0,1\}\) et \(\{1,2\}\). Un consensus strict ou majoritaire ne devient
+donc pertinent qu'après une première projection ponctuelle laminaire par
+ordre, et optimise alors un autre objet.
+
+### Consensus ultramétrique
+
+Si chaque ordre fournit déjà une ultramétrique ponctuelle \(u_k\), leur maximum
+ponctuel est encore une ultramétrique. Il n'exprime un consensus conservateur
+scientifique qu'après calibration des \(u_k\) sur une même échelle
+cophenétique.
+Leur minimum ou leur moyenne ne sont généralement pas ultramétriques. Projeter
+ensuite une dissimilarité moyenne par Single-Linkage restitue une ultramétrique
+sous-dominante, mais réintroduit le chaînage et change encore la sémantique HGP.
+
 ### Vote indépendant à chaque coupe
 
 Il peut donner une partition à chaque rayon, mais un point peut passer entre
@@ -537,25 +608,50 @@ montré en section 2.
 Soient :
 
 - \(H=\lvert\mathcal{M}\rvert\) ;
+- \(N_{\mathcal{G}}=\lvert V(\mathcal{G})\rvert\) ;
 - \(V\) le nombre de coutures verticales compactes ;
+- \(E_{\mathcal{G}}=\lvert E(\mathcal{G})\rvert\), verticales incluses ;
+- \(A\) le nombre d'atomes coface contribuant aux poids ;
 - \(I\) le nombre d'incidences point--facette émises ;
+- \(I_{\mathrm{cov}}=\sum_{j\in J}\lvert C_j\rvert\), ou la masse équivalente
+  de segments/deltas certifiés après compression ;
 - \(d_x\) le nombre de carriers incidents à \(x\) ;
+- \(d_{\mathrm{cov},x}=\lvert\{b_j:x\in C_j\}\rvert\) pour le profil de
+  couverture ;
 - \(B\) la taille maximale d'un chunk.
+
+Si les flux ne sont pas déjà ordonnés, la construction de l'arbre maître coûte
+\(O((N_{\mathcal{G}}+E_{\mathcal{G}})\log(N_{\mathcal{G}}+E_{\mathcal{G}}))\)
+comparaisons, puis un
+balayage DSU quasi linéaire. Des flux triés permettent un merge multi-voies.
+Le coût binaire des comparaisons exactes de niveaux et des poids algébriques
+doit être préflighté séparément ; \(A\) borne le travail de formation des
+sommes. Un prétraitement Euler/LCA de \(\mathcal{M}\) coûte \(O(H)\).
 
 Les carriers incidents à un point, leurs ancêtres et leurs plus proches
 ancêtres communs forment un arbre virtuel. Après tri Euler des carriers, la
 médiane se calcule en \(O(d_x\log d_x)\), ou presque \(O(d_x)\) si le flux est
 déjà ordonné. La somme est :
 
-$$O\left(I\log d_{\max}\right).$$
+$$O\left(I\log(1+d_{\max})\right).$$
 
-Le profil de couverture se calcule aussi sans matrice \(n\times H\).
-Pré-calculer \(B(u)=\sum_{j:b_j=u}w_j\), puis utiliser :
+Le profil de couverture se calcule aussi sans matrice \(n\times H\), mais son
+entrée est \(I_{\mathrm{cov}}\), pas \(I\). Pré-calculer
+\(B(u)=\sum_{j:b_j=u}w_j\), puis utiliser :
 
 $$s_x(u)=-B(u)+2\sum_{\substack{j:b_j=u\\x\in C_j}}w_j.$$
 
 Des sommes préfixes sur l'arbre compressent les segments sans incidence
-positive. La mémoire résidente visée est \(O(H+n+B)\), hors spool authentifié.
+positive. Le travail est
+\(O(I_{\mathrm{cov}}\log(1+d_{\mathrm{cov},\max}))\) avec les mêmes arbres
+virtuels. \(I_{\mathrm{cov}}\) peut atteindre \(nH\) malgré un petit \(I\) ;
+ce profil doit donc avoir son propre préflight et son propre budget.
+
+Sous flux de deltas compressés et spool authentifié, la mémoire résidente visée
+est \(O(H+N_{\mathcal{G}}+n+B)\). Si les arêtes du graphe ne sont pas
+streamées, il faut ajouter \(E_{\mathcal{G}}\). Cette borne n'inclut ni le
+spool, ni les index externes, ni les buffers de comparaison algébrique : leurs
+octets et high-water doivent figurer séparément dans le reçu.
 
 La projection ne construit ni mosaïque de Delaunay d'ordre supérieur, ni
 matrice point--point, ni catalogue résident de toutes les facettes. Le flux de
@@ -582,7 +678,12 @@ une structure globale permanente.
     choisie ou refus explicite ;
 13. point sans évidence, envoyé au bruit ;
 14. oracle petit énumérant tous les terminaux et vérifiant la perte minimale ;
-15. retrait de chaque ordre et vérification du certificat \(\gamma_x\).
+15. retrait pondéral de chaque ordre sur \(\mathcal{M}\) fixé et vérification
+    du certificat \(\gamma_x\), puis vrai rebuild \(K-1\) séparé ;
+16. payloads sérialisés de \(\mathcal{M}\) vides, multiracines, cycliques ou à
+    parent hors plage, masses négatives, total incohérent et overflow injecté :
+    tous refusés avant routage ; les cycles licites de \(\mathcal{G}\) restent
+    couverts séparément par le merge-tree.
 
 ### Mutants
 
@@ -596,13 +697,20 @@ une structure globale permanente.
 - normalisation par nombre brut de facettes ;
 - tie-break par index d'allocation ;
 - epsilon introduit au rayon nul ;
+- marqueur de degré deux inséré qui change la métrique ou la perte ;
+- état de couverture dupliqué qui change \(\mathcal{L}_{\mathrm{cov}}\) ;
 - terminal recalculé indépendamment à chaque coupe.
 
 ### Invariants reçus
 
+- arbre maître non vide, connexe, acyclique, à racine unique, avec NodeId,
+  carriers et PointId bornés ;
+- masses non négatives, somme exacte égale au total déclaré, arithmétique sans
+  overflow ;
 - exactement un terminal par PointId, bruit inclus ;
-- conservation de la masse \(\sum_v\mu_x(v)=1\) ;
+- conservation de la masse \(\sum_v\mu_x(v)=1\) pour tout \(A_x\) non vide ;
 - critère de médiane vérifié autour de chaque terminal ;
+- comparaisons à \(1/2\) certifiées, avec égalité formelle ou refus fermé ;
 - optimum comparé à l'énumération exhaustive sur petites fixtures ;
 - enfants, stay et bruit partitionnent leur parent ;
 - toutes les paires de nœuds sont imbriquées ou disjointes ;
@@ -655,7 +763,8 @@ Elle garantit simultanément :
 - un seul chemin et un seul terminal par point ;
 - une hiérarchie laminaire et sans chevauchement ;
 - un optimum global explicite de représentativité sur la topologie HGP fixée ;
-- une mesure de stabilité multi-ordres ;
+- une mesure de stabilité du routage sous perturbation de \(\mu_x\) sur la
+  topologie fixée ;
 - une architecture sparse compatible avec l'interdit de mosaïque globale.
 
 Le verrou immédiat n'est donc pas le GPU. Il est le contrat

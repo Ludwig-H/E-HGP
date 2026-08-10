@@ -26,7 +26,9 @@
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
+#include "prototype/cloud_families.hpp"
 #include "prototype/order_k_flats.hpp"
+#include "prototype/parallel_catalogue.hpp"
 #include "prototype/saturated_fold.hpp"
 #include "prototype/saturated_fold_faceowner.hpp"
 #include "prototype/saturated_fold_hybrid.hpp"
@@ -78,8 +80,9 @@ int main(int argc, char** argv) {
   int n = 200, coord = 0, smax = 11, max_order = 5;
   long long seed = 20260810;
   long long memory_budget_mb = 0;
-  int compare_joins = 0, threads = 1;
+  int compare_joins = 0, threads = 1, catalogue_threads = 1;
   int join_mode = 0;   // 0 = g2, 1 = postings par lots, 2 = postings global
+  mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kUniform;
   auto integer = [](const char* text, long long* value) {
     const char* first = text;
     const char* last = text + strlen(text);
@@ -103,6 +106,14 @@ int main(int argc, char** argv) {
       else { std::printf("ECHEC : jointure inconnue %s\n", argv[i]); return 2; }
       continue;
     }
+    if (!strcmp(argv[i], "--family")) {
+      if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --family\n"); return 2; }
+      ++i;
+      if (!strcmp(argv[i], "uniform")) family = mhgp3v::CloudFamily::kUniform;
+      else if (!strcmp(argv[i], "terrain")) family = mhgp3v::CloudFamily::kTerrain;
+      else { std::printf("ECHEC : famille inconnue %s\n", argv[i]); return 2; }
+      continue;
+    }
     long long value = 0;
     const bool has = (i + 1 < argc) && integer(argv[i + 1], &value);
     int* target = nullptr;
@@ -115,6 +126,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--memory-budget-mb")) wide = &memory_budget_mb;
     else if (!strcmp(argv[i], "--compare-joins")) target = &compare_joins;
     else if (!strcmp(argv[i], "--threads")) target = &threads;
+    else if (!strcmp(argv[i], "--catalogue-threads")) target = &catalogue_threads;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     if (!has) { std::printf("ECHEC : valeur entiere invalide pour %s\n", argv[i]); return 2; }
     ++i;
@@ -123,41 +135,29 @@ int main(int argc, char** argv) {
   if (n < 5 || n > 100000 || coord < 0 || coord > 65536 || smax < 2 ||
       smax > mhgp::kMaxRank || max_order < 1 || max_order + 1 > smax ||
       memory_budget_mb < 0 || compare_joins < 0 || compare_joins > 1 || threads < 0 ||
-      threads > 256) {
+      threads > 256 || catalogue_threads < 0 || catalogue_threads > 256) {
     std::printf("ECHEC : campagne absurde\n");
     return 2;
   }
   // Le mode compare-joins rejoue le meme catalogue par les DEUX joins : le
   // sujet mesure est une forme postings (par lots par defaut).
   if (compare_joins == 1 && join_mode == 0) join_mode = 1;
-  // Emprise a DENSITE FIXE 1e-3 par defaut (protocole des profils d'echelle du
-  // depot) : coord = cbrt(n / 1e-3), sauf surcharge explicite.
-  if (coord == 0) {
-    double c = std::cbrt((double)n * 1000.0);
-    coord = (int)std::max(4.0, std::min(65536.0, c));
-  }
+  // L'emprise par defaut est celle de la FAMILLE : volumique 1e-3 pour
+  // uniform (le protocole historique, inchange bit a bit), areale pour
+  // terrain — surcharge par --coord. La generation est partagee avec la
+  // qualification device (cloud_families.hpp).
+  if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
 
-  std::mt19937 rng((unsigned)seed);
-  std::uniform_int_distribution<int> pick(0, coord - 1);
-  std::vector<mhgp::P3> pts;
-  {
-    std::set<long long> keys;
-    for (int guard = 0; (int)pts.size() < n && guard < 200 * n; ++guard) {
-      mhgp::P3 q{};
-      q.x = (mhgp::i32)pick(rng);
-      q.y = (mhgp::i32)pick(rng);
-      q.z = (mhgp::i32)pick(rng);
-      const long long key = ((long long)q.x << 34) | ((long long)q.y << 17) | (long long)q.z;
-      if (!keys.insert(key).second) continue;
-      pts.push_back(q);
-    }
-  }
+  const std::vector<mhgp::P3> pts = mhgp3v::make_family_cloud(family, n, coord, seed);
   if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
 
   mhgp3v::FlatStatistics st{};
   mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
   const auto t0 = std::chrono::steady_clock::now();
-  const mhgp::Catalogue catalogue = mhgp3v::flat_catalogue(pts, smax, &st, &status, false, true);
+  const mhgp::Catalogue catalogue =
+      catalogue_threads > 1
+          ? mhgp3v::flat_catalogue_parallel(pts, smax, &st, &status, catalogue_threads)
+          : mhgp3v::flat_catalogue(pts, smax, &st, &status, false, true);
   const auto t1 = std::chrono::steady_clock::now();
   if (status != mhgp3v::CloudStatus::kOk) {
     std::printf("ECHEC : statut nuage %s\n", mhgp3v::cloud_status_name(status));
@@ -269,19 +269,25 @@ int main(int argc, char** argv) {
     guard_violations += order.event_guard_violations;
   }
   std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
-              " --join %s --threads %d\n", n, coord, smax, max_order, seed,
+              " --family %s --join %s --threads %d --catalogue-threads %d\n", n, coord, smax,
+              max_order, seed, mhgp3v::cloud_family_name(family),
               join_mode == 4   ? "hybrid"
               : join_mode == 3 ? "faceowner"
               : join_mode == 2 ? "postings-global"
               : join_mode == 1 ? "postings"
                                : "g2",
-              threads);
+              threads, catalogue_threads);
   std::printf("semantique : %s\n",
               smax >= n ? "famille saturee COMPLETE (exactitude jugee ailleurs)"
                         : "famille TRONQUEE — raffinement S.6 (partial_refinement),"
                           " AUCUNE exactitude revendiquee");
-  std::printf("catalogue  : %zu generateurs, %zu membres (pool)\n", catalogue.spheres.size(),
-              catalogue.members.size());
+  std::printf("catalogue  : %zu generateurs, %zu membres (pool) — parcours %.3f s,"
+              " recolte %.3f s\n", catalogue.spheres.size(), catalogue.members.size(),
+              st.navigate_seconds,
+              std::chrono::duration<double>(t1 - t0).count() - st.navigate_seconds);
+  std::printf("travail    : flats=%lld enfants=%lld decisions=%lld rejets_arriere=%lld\n",
+              st.reverse_flats_enumerated, st.reverse_children_tested, st.reverse_decisions,
+              st.reverse_reject_backward);
   std::printf("fold       : K=%d — niveaux=%lld naissances=%lld fusions=%lld"
               " croissances=%lld lots silencieux=%lld  digest diagnostique=%llu\n",
               max_order, total_levels, total_births, total_fusions, total_growth,

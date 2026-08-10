@@ -14,6 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+find_package(Threads REQUIRED)
 
 add_subdirectory(../morsehgp3D_v2 morsehgp3D_v2_build)
 
@@ -141,6 +142,22 @@ add_executable(mhgp3v_structural_scale_check prototype/structural_scale_check.cp
 target_include_directories(mhgp3v_structural_scale_check PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_structural_scale_check PRIVATE mhgp)
 target_compile_options(mhgp3v_structural_scale_check PRIVATE -Wall -Wextra -Werror)
+
+# LA PORTE DU CATALOGUE PARALLELE : front d'onde CPU == sequentiel par la clef
+# compacte (membres tries) + support canonique + rang, travail invariant entre
+# 2 et 3 threads (insensible a l'horloge), mutant drop-last-root tue.
+add_executable(mhgp3v_parallel_catalogue_gate prototype/parallel_catalogue_gate.cpp)
+target_include_directories(mhgp3v_parallel_catalogue_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_parallel_catalogue_gate PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_parallel_catalogue_gate PRIVATE -Wall -Wextra -Werror)
+
+# LA PORTE DU ROUTEUR MEDIAN (note dendrogramme, Th. 5.1 et §14) : la descente
+# a majorite stricte == l'enumeration de TOUS les terminaux (perte minimale ET
+# noeud le plus haut du segment de medianes), fixtures 5/6/7 de la note gravees,
+# quatre mutants nommes de la note tues. Combinatoire pure : aucun lien mhgp.
+add_executable(mhgp3v_tree_median_gate prototype/tree_median_gate.cpp)
+target_include_directories(mhgp3v_tree_median_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(mhgp3v_tree_median_gate PRIVATE -Wall -Wextra -Werror)
 
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
@@ -762,10 +779,45 @@ add_test(NAME mhgp3v_structural_scale_k1_emst COMMAND mhgp3v_structural_scale_ch
 mhgp3v_add_expected_code_test_for(mhgp3v_structural_scale_check
   mhgp3v_structural_scale_kill_shift "REFUTATION" 1
   --points 100 --smax 11 --seed 7 --force-shift-fusion 1)
+add_test(NAME mhgp3v_parallel_catalogue_differential COMMAND mhgp3v_parallel_catalogue_gate
+         --points 120 --smax 11 --clouds 3 --seed 20260810)
+mhgp3v_add_expected_code_test_for(mhgp3v_parallel_catalogue_gate
+  mhgp3v_parallel_catalogue_kill_drop_roots "mutant tue" 4
+  --points 120 --smax 11 --clouds 3 --mutant drop-odd-roots)
+mhgp3v_add_expected_code_test_for(mhgp3v_parallel_catalogue_gate
+  mhgp3v_parallel_catalogue_reject_unknown_mutant "mutant inconnu" 2
+  --mutant inexistant)
+# LE ROUTEUR MEDIAN : le differentiel contre l'enumeration, puis les quatre
+# mutants de la note (glouton renomme mediane, seuil inclusif, stay structurel
+# interdit, descente sur egalite 1/2--1/2) — chacun meurt par une fixture
+# gravee, donc de facon deterministe, code 4 exige.
+add_test(NAME mhgp3v_tree_median_differential COMMAND mhgp3v_tree_median_gate
+         --trees 300 --nodes 24 --seed 20260810)
+mhgp3v_add_expected_code_test_for(mhgp3v_tree_median_gate
+  mhgp3v_tree_median_kill_greedy_plurality "mutant tue" 4
+  --trees 50 --nodes 16 --mutant greedy-plurality)
+mhgp3v_add_expected_code_test_for(mhgp3v_tree_median_gate
+  mhgp3v_tree_median_kill_half_inclusive "mutant tue" 4
+  --trees 50 --nodes 16 --mutant half-inclusive)
+mhgp3v_add_expected_code_test_for(mhgp3v_tree_median_gate
+  mhgp3v_tree_median_kill_forbid_zero_stay "mutant tue" 4
+  --trees 50 --nodes 16 --mutant forbid-zero-stay)
+mhgp3v_add_expected_code_test_for(mhgp3v_tree_median_gate
+  mhgp3v_tree_median_kill_descend_on_tie "mutant tue" 4
+  --trees 50 --nodes 16 --mutant descend-on-tie)
+mhgp3v_add_expected_code_test_for(mhgp3v_tree_median_gate
+  mhgp3v_tree_median_reject_unknown_mutant "mutant inconnu" 2
+  --mutant inexistant)
 # Sans CUDA, la qualification device refuse proprement — jamais un chemin
 # device pretendu ; SOUS CUDA ce refus serait un faux rouge : les portes
 # deviennent le nominal a masses reelles et le mutant drop-edge (label cuda,
 # rejouables en session G4).
+# Le mode chrono ne peut pas porter le mutant drop-edge : sans differentiel il
+# survivrait par construction — la combinaison est refusee AVANT le #ifdef
+# CUDA, donc cette porte vaut pour les deux builds.
+mhgp3v_add_expected_code_test_for(mhgp3v_faceowner_device_qualification
+  mhgp3v_faceowner_device_reject_timing_drop_edge "exige le differentiel" 2
+  --points 10 --timing-only 1 --force-drop-edge 1)
 if(NOT MHGP3V_ENABLE_CUDA)
   mhgp3v_add_expected_code_test_for(mhgp3v_faceowner_device_qualification
     mhgp3v_faceowner_device_reject_absent "kernel face-owner absent" 2 --points 10)
@@ -788,6 +840,18 @@ add_test(NAME mhgp3v_saturated_pipeline_compare_joins_global COMMAND mhgp3v_satu
 add_test(NAME mhgp3v_saturated_pipeline_compare_joins_faceowner COMMAND mhgp3v_saturated_pipeline
          --points 32 --smax 11 --max-order 3 --seed 20260810 --join faceowner
          --compare-joins 1)
+# LA FAMILLE TERRAIN (regime type LiDAR : surfacique, sol a jitter fin donc
+# coplanarites massives) passe par le MEME differentiel des joins ET par le
+# differentiel du catalogue parallele — l'accord des formes est exige sur ce
+# regime degenere, pas seulement sur la famille volumique uniforme.
+add_test(NAME mhgp3v_saturated_pipeline_compare_joins_terrain COMMAND mhgp3v_saturated_pipeline
+         --points 48 --smax 11 --max-order 3 --seed 20260810 --family terrain
+         --compare-joins 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
+  mhgp3v_saturated_pipeline_reject_unknown_family "famille inconnue" 2
+  --family martienne)
+add_test(NAME mhgp3v_parallel_catalogue_terrain COMMAND mhgp3v_parallel_catalogue_gate
+         --points 100 --smax 11 --clouds 2 --family terrain --seed 20260810)
 # LE PREFLIGHT REFUSE UN BUDGET INSUFFISANT AVANT TOUTE EMISSION, et publie le
 # manifeste du refus (P_post predit, pic conservateur, plus gros lot).
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
