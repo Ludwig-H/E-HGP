@@ -37,6 +37,26 @@ Le ledger documentaire postérieur comprend l'audit chrono `3d5a763`, les
 répétitions SMT `9b8954b` et l'audit inter-modes `84adbcc`; aucun ne modifie le
 snapshot produit ni son statut public.
 
+**Delta live non committé, 10 août 07:53 UTC.** La reprise de Claude ferme le
+mode cover autonome et reçoit désormais les trois lanes, le libellé complet et
+les quatre planchers incompatibles. Elle sépare dans un même mode les horloges
+source, référence, juge et refus, ajoute l'alternance de l'ordre, canonicalise
+le cœur `{spheres, members, forests}`, refuse séparément les structures
+topologiques invalides et durcit le harnais ainsi que le self-test arithmétique.
+Elle compare aussi directement l'identité du sommet owner signé sur le segment
+de centres qui échappait au seul catalogue.
+Les 26 portes directes et 16 portes arithmétiques/ciblées du palier épinglé sont
+vertes; ce sont des résultats CPU bornés, pas un reçu produit.
+
+Quatre réserves live empêchent de surinterpréter ce progrès : les huit
+diagnostics publics de `mhgp::Catalogue` sont désormais comparés mais restent
+sans sémantique backend taguée et hors du compteur d'octets; le validateur ne
+ferme ni `ForestNode::source`, ni les tranches du pool, ni la profondeur
+récursive; la garde de temps juge non nul ne prouve pas le travail du
+différentiel et la ligne d'ordre dérive encore de l'option; 23 appels
+historiques aux macros négatives ne fixent toujours pas leur code exact. Le statut reste
+`exploration_v3_hors_registre` et le NO-GO 50 k/GPU/replay est inchangé.
+
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
 sans diagnostic, et les gardes de filiation distinguent maintenant les
@@ -61,10 +81,13 @@ réunies dans la
    Le vérificateur régulier séparé accepte encore un handle strict dupliqué, et
    ses CTests sont fail-open si Python manque.
 3. La correction `use_owner` concorde sur les campagnes bornées et sa porte
-   compare le catalogue sémantique. Elle ne protège cependant pas l'identité du
-   propriétaire signé : le mutant non signé échange les deux extrémités sans
-   changer la sortie. La table est nulle seulement pour owner+index+navigable et
-   le high-water publié compte des entrées, pas des octets.
+   compare le catalogue sémantique. Dans le snapshot committé, elle ne protège
+   pas l'identité du propriétaire signé : le mutant non signé échange les deux
+   extrémités sans changer la sortie. Le delta live `003ba13f...` compare
+   désormais directement ces deux extrémités; deux portes Release passent, et
+   le mutant indépendant reste à rejouer. La table est nulle seulement pour
+   owner+index+navigable et le high-water publié compte des entrées, pas des
+   octets.
 4. Le census terminal de la source est une requête exacte de demi-espace après
    relèvement en dimension quatre. Cette existence mathématique est fermée;
    l'index certifié, les statuts cappés, la terminalité et les constantes restent
@@ -73,7 +96,9 @@ réunies dans la
 Conséquence d'architecture : le propriétaire exact et le fold externe restent
 les directions proposées. Le défaut arithmétique owner et la naissance F0 sont
 fermés dans les oracles bornés; cela ne fournit ni garantie globale sans table,
-ni identité owner signée, ni réduction horizontale de production. Ces portes et
+ni réduction horizontale de production. L'identité owner signée possède
+désormais une fixture live directe mais attend encore son mutant indépendant.
+Ces portes et
 le refus/replay se ferment avant une revendication GPU ou mémoire.
 
 La voie GPU suit un contrat distinct, détaillé dans la
@@ -146,10 +171,16 @@ ownership, voisinages, masses, caps et replay. De même, grille à deux niveaux 
 anneaux ne donnent pas automatiquement `O(n+F*t_q)` sans borne sur cellules
 visitées et points inspectés. Voir
 [`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](audits/AUDIT_COVER_ADAPTATIF_84ADBCC.md).
-La sonde associée reproduit aussi un défaut live : `--cover-only 1 --judge 0`
-saute l'énumération puis échoue sur `0!=C_q`, après le faux libellé
-`catalogue seul` et un rapport inexploitable. Le juge est bien absent; il
-n'existe aucune porte positive du mode cover autonome.
+Le premier delta live au-dessus de `f37341d` ferme fonctionnellement le défaut
+du mode cover autonome : la sonde retourne 0, atteint son disclaimer et trois
+nouvelles portes passent. Sa réponse de 07:39 reçoit maintenant séparément les
+trois lanes, les quatre planchers incompatibles et le libellé temporel avec le
+disclaimer; elle ferme aussi le crash accepté par le harnais et le parseur
+arithmétique permissif. La migration vers des codes exacts reste partielle sur
+23 appels historiques; voir
+[`AUDIT_LIVE_REPRISE_COVER_F37341D.md`](audits/AUDIT_LIVE_REPRISE_COVER_F37341D.md).
+
+### Historique committé : `81f9210` puis `e406e1f`
 
 Le prototype `bb31b426...`, intégré à `81f9210`, crédite ce lemme sur des
 oracles bornés, sans
@@ -212,6 +243,17 @@ campagnes directes ciblées passent aussi sous ASan/UBSan/LSan. Ces résultats
 créditent l'intégration et l'accord sémantique borné, pas la comptabilité des
 timers. L'analyse détaillée et la commande du cas refusé sont dans
 [`AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
+
+### Réponse live au-dessus de `f37341d`
+
+Le delta non committé sépare désormais les quatre horloges dans le même mode,
+alterne l'ordre demandé, canonicalise et compare le cœur sérialisé, reçoit un
+mutant d'ordre, et refuse chaque topologie de forêt invalide avant de comparer
+les digests. Il ne ferme pas encore le payload public complet, car les champs
+diagnostics du catalogue sont absents; il ne reçoit pas non plus un chrono juge
+non nul ni la branche d'ordre effectivement exécutée. Les résultats de temps de
+`e406e1f` ci-dessus restent historiques et doivent être remesurés sur un commit
+stable avec un reçu de campagne.
 
 ## 0 ter. Ce que M3 a tranché, et ce qu'il a déplacé
 
@@ -869,8 +911,9 @@ table owner-indexée vide. Le P0 u16 est fermé par la réduction `sign_of` avan
 de type ne bloque toutefois pas toutes les petites conversions entières. La
 fixture de domaine compare désormais statut,
 support, arité, rang, niveau et membres; l'équivariance conserve membres et
-multiplicités, le cône signé et le cube sont permanents. Mais le test du cône ne
-compare pas l'identité du sommet owner et laisse passer le mutant non signé.
+multiplicités, le cône signé et le cube sont permanents. Dans le delta live
+`003ba13f...`, le test du cône compare aussi l'identité des deux sommets owner;
+les portes ciblées sont vertes et le mutant non signé reste à rejouer.
 Sans index il reste $O(n)$ clefs singleton; sur la voie directe la table peut
 rester en $\Theta(\text{sortie})$. Le high-water live compte les entrées de
 `emitted`, pas les octets résidents. Le coût owner reste
@@ -1112,3 +1155,90 @@ campagne finie comme une preuve universelle.
 | A1-source comme verrou du générateur | **caduc** : le générateur retenu n'a pas d'ancres (§0 ter) |
 | cosphéricité = rejet de domaine | **traitée** : le sommet porte sa coquille entière (§0 ter) |
 | « le clipping de Jung débloque l'échelle » | grand facteur constant, pas un ordre ; $m_e\approx0{,}45\,n$ |
+| « telle qu'implémentée, la source directe ne passe pas l'échelle au-delà d'une centaine de points » (rapport 0,84 à $n=120$) | **artefact de périmètre** : le juge — différentiel et empreintes — était facturé au seul chrono source ; au périmètre corrigé, dix répétitions rendent 1,04–1,39, toutes au-dessus de 1 (README) |
+
+## 15. La voie industrielle 50 k : ce que le manuscrit fixe, et la forme device
+
+Cette section est un PLAN, daté du 10 août 2026, adossé aux parties I–II du
+manuscrit de thèse (théorèmes cités ci-dessous), aux mesures du dépôt et à la
+[`note des verrous mathématiques GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md)
+de l'auditeur. Rien ici n'est un SLO ; chaque étape porte sa porte.
+
+### 15.1 L'objet est fixé par le manuscrit, et il valide l'architecture v3
+
+Quatre énoncés des parties I–II fixent la sortie et légitiment la chaîne :
+
+1. **Théorème 2** : les $K$-polyèdres de $\check{C}(X,r)$ sont exactement les
+   amas discrets de Hartigan $C^{\mathrm{discret}}=X\cap\delta_r(C)$ — points
+   COUVERTS, pas seulement les cœurs. La sortie primaire est la forêt
+   (recouvrement) ; la partition stricte est un post-traitement.
+2. **Théorème 4** : tout simplexe $K$-séparant est de **Gabriel-miniboule**
+   ($\mathring{B}_\sigma\cap(X\setminus\sigma)=\varnothing$) — c'est la
+   justification exacte du catalogue v3 par supports de miniboule, et JAMAIS la
+   circumball.
+3. **Théorèmes 5–7** : le $K$-MST du $K$-graphe de Gabriel rend les mêmes
+   composantes non triviales, et tout $K$-simplexe de Gabriel se lit par deux
+   facettes portées par des arêtes élémentaires de $\mathrm{Del}_{K-1}(X)$.
+   L'énumération par SUPPORTS sans mosaïque matérialisée est licite ; les
+   adjacences élémentaires suffisent (Prop. 5).
+4. **Position générale (Def. 26)** : le manuscrit suppose
+   $\partial B_\sigma\cap(X\setminus\sigma)=\varnothing$ ; la grille u16 la
+   viole systématiquement. Le traitement multiplicitaire du dépôt (coquilles,
+   lots d'ex æquo) est donc une EXTENSION dont la sémantique normative doit être
+   scellée — question posée à l'auditeur.
+
+### 15.2 Les faits mesurés qui contraignent le générateur
+
+| générateur | fait mesuré | verdict |
+| --- | --- | --- |
+| subdivision combinadique (cover global) | $C_4\approx3{,}2\cdot10^{12}$ à 50 k | réfuté comme balayage aveugle |
+| cliques quatre faces | $\sim$69$\times$ de surproduction, non décroissante | ne ferme pas le budget |
+| parcours de l'arrangement | $\approx5{,}5\cdot10^7$ sommets à 50 k ; 1 sommet sur 6,5 porte une sphère critique | $\sim$15$\times$ le budget de 100 ms, même en device |
+| germination certifiée (dépôt produit) | 12,02 candidats/record en arité 3 à 50 k ; paires retenues $\Theta(n)$ ; MAIS arité 4 sans porte géométrique ($\sim$2 300 candidats/record estimés) et famille amas non couverte | seule masse sous-quadratique mesurée ; incomplète en l'état |
+
+Aucun générateur mesuré ne ferme 100 ms. Le verrou nommé (γ) : pour un support
+d'arité 3–4 le centre est libre dans un compact, pas déterminé par une
+distance. La structure output-sensitive qui manque à la voie directe est celle
+du parcours — les quatrièmes points admissibles d'un triple forment un PRÉFIXE
+le long de l'axe du pinceau, dans chaque direction.
+
+### 15.3 Le plan, en trois fils
+
+**Fil A — exactitude de la chaîne (CPU, ce dépôt).** Fait dans ce commit : le
+payload public canonique est IDENTIQUE champ à champ entre les deux générateurs
+(catalogue, pool, offsets, forêts, indices `source`), le juge et les refus sont
+hors des deux chronos, le validateur de forêt est total. Reste : la sémantique
+normative des lots d'ex æquo (question 1 à l'auditeur), l'oracle M1
+multiplicitaire, et la porte $s_{\max}=3$.
+
+**Fil B — le générateur 50 k.** Route retenue : énumération par supports ancrés
+sous borne certifiée (germination), QUI EST la forme « préfixe le long de l'axe »
+pour l'arité 4 : triangle retenu $T$ fixé, balayer les quatrièmes points en
+ordre de paramètre le long de l'axe du pinceau de $T$ et s'arrêter au premier
+événement — `neighbour_along`, mot pour mot, appliqué aux seuls triangles
+retenus au lieu de tous les sommets d'arrangement. Ce qui manque et se mesure :
+la porte de quadruple exacte (question 2), la boucle de germes indexée LBVH
+(l'énumération $O(n^2)$ des paires domine à 1,92 µs/paire), et le contrat PAR
+FAMILLE (la borne tangente ne mord pas sur amas — c'est mesuré et sans appel).
+
+**Fil C — forme device et repli CPU multi-cœurs.** Suivre l'ordre de la note
+GPU de l'auditeur : trois étages arithmétiques (64 bits pour le verdict parent,
+`i128` pour voisin/owner/census, 384 bits ou merge CPU pour l'ordre des rayons) ;
+un seul corps de moteur `host/device` (déjà le cas du microkernel) ; partition
+antichaîne en tâches transactionnelles avec ledger
+$N_{\mathrm{begin}}=N_{\mathrm{commit}}+N_{\mathrm{rollback}}$ et replay CPU ;
+census asymétrique (un kernel peut certifier un REJET de rang, jamais un census
+complet) ; runs triés par clef exacte puis merge déterministe. Le repli CPU
+multi-cœurs est le MÊME moteur par tâches d'antichaîne, avec la discipline
+« digest indépendant du nombre de threads » : clef totale exacte par record,
+merge déterministe, IDs par scan stable (question 4). La sortie 50 k reste
+résidente device et consommée sur place par le fold — 1,3–4 Go bruts ne passent
+pas PCIe dans le budget.
+
+**Ordre des travaux.** B1 porte de quadruple (diagnostiquer la tentative
+réfutée) → B2 germes indexés LBVH → A2 sémantique des lots scellée → C1 kernel
+verdict parent 64 bits + porte de refus du microkernel → C2 `next(v,d)` device
+avec certificat/replay → C3 partition antichaîne + transactions → C4 owner +
+census cappé → C5 runs triés + fold par lots → mesure 50 k sur G4, par famille.
+Les questions ouvertes sont posées dans
+[`audits/QUESTIONS_CLAUDE_FORET_50K_20260810.md`](audits/QUESTIONS_CLAUDE_FORET_50K_20260810.md).

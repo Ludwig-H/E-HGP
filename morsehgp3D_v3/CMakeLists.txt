@@ -141,7 +141,28 @@ function(mhgp3v_add_expected_failure_test_for program name expected)
            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
 endfunction()
 
+# QUAND LE CONTRAT FIXE LE CODE DE SORTIE, LA PORTE L'EXIGE. 2 = campagne
+# refusee avant tout calcul, 3 = plancher ou invariant viole, 1 = desaccords du
+# juge. L'audit live a montre que le harness acceptait un crash par signal comme
+# un rejet : le harness refuse desormais tout resultat non entier, et cette
+# variante refuse en plus tout code different du contrat.
+function(mhgp3v_add_expected_code_test_for program name expected code)
+  add_test(NAME ${name} COMMAND ${CMAKE_COMMAND}
+           "-DPROGRAM=$<TARGET_FILE:${program}>"
+           "-DEXPECTED=${expected}"
+           "-DEXPECTED_CODE=${code}"
+           "-DARGUMENTS=${ARGN}"
+           -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
+endfunction()
+
 add_test(NAME mhgp3v_arith_selftest COMMAND mhgp3v_arith_selftest 20000)
+# LE PARSEUR DU SELF-TEST EST STRICT, ET C'EST GARDE. `atoi` acceptait `1junk`
+# — vingt verifications, OK imprime — et aucun argument excedentaire n'etait
+# refuse (audit live `f37341d`).
+mhgp3v_add_expected_code_test_for(mhgp3v_arith_selftest
+  mhgp3v_arith_selftest_reject_junk "tours invalide" 2 1junk)
+mhgp3v_add_expected_code_test_for(mhgp3v_arith_selftest
+  mhgp3v_arith_selftest_reject_excess "argument excedentaire" 2 20000 20000)
 # La porte par defaut tire ses coordonnees sur la GRILLE DECLAREE, et impose des
 # planchers : une campagne vide ou censuree ne peut pas rendre OK.
 add_test(NAME mhgp3v_oracle COMMAND mhgp3v_oracle
@@ -318,8 +339,10 @@ add_test(NAME mhgp3v_flats_u16_owner COMMAND mhgp3v_flats_differential
 # LA SOURCE DIRECTE, JUGEE CONTRE LE CATALOGUE FERME.
 #
 # La porte exige l'accord RELATIF complet, clef par coquille : meme ensemble de
-# spheres, meme support canonique, meme rang, meme niveau rationnel et meme POOL
-# DE MEMBRES. Sans ce dernier, deux payloads de meme rang et d'interieurs
+# spheres, meme support canonique, meme rang, meme niveau rationnel et meme
+# LISTE DE MEMBRES PAR COQUILLE. C'est un quotient semantique : le pool public
+# concatene et ses offsets ne sont PAS compares ici (audit chrono `e406e1f`).
+# Sans les listes par coquille, deux payloads de meme rang et d'interieurs
 # differents etaient indiscernables.
 #
 # Elle exige aussi l'UNICITE. La map de sortie ecrasait ses doublons : un mutant
@@ -356,18 +379,70 @@ add_test(NAME mhgp3v_direct_source_forest COMMAND mhgp3v_direct_source
          --min-clouds 6 --min-emitted 1000 --min-forest-nodes 1000)
 # Une foret d'ordre k lit les rangs k et k+1 : demander k = s_max rendrait des
 # ordres tronques en les qualifiant.
-# LA COMPARAISON A MEME PAYLOAD, en porte permanente. Les deux chronos couvrent
-# exactement la meme chose — catalogue puis K forets depuis CE catalogue — sur
-# les memes nuages et dans le meme processus, juge exclu. La porte ne fixe aucun
-# seuil de temps : elle garde l'EXACTITUDE du couple, pas sa vitesse.
+# LA COMPARAISON A PAYLOAD PUBLIC CANONIQUE, en porte permanente. Chaque cote
+# produit son payload — catalogue serialise dans l'ordre lexicographique du
+# support, pool reconstruit, puis K forets depuis CE catalogue — sous SON
+# chrono; le juge (differentiel, empreintes, comparaisons champ a champ) a une
+# horloge separee, fermee avant l'impression. Le payload public est compare EN
+# ENTIER : spheres avec representation exacte, pool, offsets, forets et indices
+# `ForestNode::source` — la sonde d'audit qui trouvait 3 762 positions
+# divergentes sous quotient vert est devenue le mutant `--force-shell-order`.
+# La porte garde l'EXACTITUDE du couple, pas sa vitesse.
 add_test(NAME mhgp3v_direct_source_same_payload COMMAND mhgp3v_direct_source
          --clouds 4 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
          --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_forest_order "exige s_max"
+# LES LIBELLES TEMPORELS SONT DU CONTRAT, PAS DU DECOR. L'audit a montre qu'un
+# mutant remplacant stdout par des claims de payload public identique et de juge
+# certifie hors timer laissait 14/14 portes vertes : cette porte exige le
+# libelle exact — payload public canonique, juge sous sa propre horloge — sur la
+# meme commande. PASS_REGULAR_EXPRESSION ignore le code de retour; la porte
+# precedente le garde.
+add_test(NAME mhgp3v_direct_source_same_payload_labels COMMAND mhgp3v_direct_source
+         --clouds 4 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
+         --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
+set_tests_properties(mhgp3v_direct_source_same_payload_labels PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "PAYLOAD PUBLIC CANONIQUE .* juge [0-9.]+ s HORS des deux chronos")
+# LE VALIDATEUR DE FORET EST TOTAL, ET SES DEUX FAUTES D'AUDIT SONT DES
+# FIXTURES : cycle de freres (l'ancien controle bouclait) et enfant hors plage
+# (il lisait hors du tableau, overflow ASan). L'auto-test exige la terminaison,
+# le compte nomme de chaque faute, l'empreinte STRUCTURE_INVALIDE sans recursion
+# et l'acceptation du temoin sain.
+add_test(NAME mhgp3v_direct_source_forest_validator COMMAND mhgp3v_direct_source
+         --selftest-forest-validator)
+# LE MUTANT D'ORDRE DE COQUILLE DOIT ROUGIR PAR LA PORTE DE PAYLOAD, PAS PAR LE
+# QUOTIENT. Il assemble le catalogue source dans l'ordre d'iteration de la map
+# par coquille — exactement la faute que la sonde d'audit observait — et le
+# quotient semantique reste vert : seul le comparateur champ a champ le voit.
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_shell_order "PAYLOAD PUBLIC DIFFERENT" 1
+  --clouds 2 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
+  --force-shell-order 1)
+# L'ORDRE DE CONSTRUCTION EST UN PARAMETRE DE CAMPAGNE : --build-order 1
+# construit la source d'abord, pour que les campagnes chrono alternent la
+# position sans soustraire deux modes CLI (l'audit a montre que cette
+# soustraction est confondue par la position et l'etat initial). La porte garde
+# l'exactitude sous cet ordre, pas la vitesse.
+add_test(NAME mhgp3v_direct_source_source_first COMMAND mhgp3v_direct_source
+         --clouds 4 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
+         --build-order 1 --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_build_order "qu'une seule construction" 2
+  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --judge 0 --build-order 1)
+# LE REFUS FINAL DES STATUTS NON kOk EST UNE PORTE, PAS UNE POLITESSE. L'audit a
+# montre qu'un mutant le neutralisant laissait 14/14 vertes. Cette commande — la
+# reproduction exacte de l'audit — porte vingt tentatives dont un refus de
+# dimension affine, et DOIT sortir en echec avec sa raison; le refus est compte
+# et chronometre A PART, hors des deux chronos.
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_refused_status "statut non kOk" 3
+  --clouds 20 --points 5 --coord 4 --smax 3 --seed 13 --judge 1 --forest 2
+  --min-clouds 19 --min-emitted 1 --min-forest-nodes 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_forest_order "exige s_max" 2
   --clouds 1 --points 12 --coord 5 --smax 4 --seed 31337 --judge 1 --forest 4)
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_forest_without_judge "ne se juge que sous"
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_forest_without_judge "ne se juge que sous" 2
   --clouds 1 --points 12 --coord 5 --smax 8 --seed 31337 --judge 0 --forest 3)
 # LES ORDRES BAS ETAIENT UN DOMAINE CONTRADICTOIRE : la CLI acceptait `s_max=2`
 # puis la lane q=3 echouait sur `t_q < 1` avec un message generique. Une lane
@@ -376,32 +451,74 @@ mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
 add_test(NAME mhgp3v_direct_source_low_order COMMAND mhgp3v_direct_source
          --clouds 8 --points 10 --coord 8 --smax 2 --seed 5 --judge 1
          --min-clouds 8 --min-emitted 80)
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_unknown "argument inconnu" --sujet-inexistant)
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_floor "plancher"
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_unknown "argument inconnu" 2 --sujet-inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_floor "plancher" 3
   --clouds 1 --points 12 --coord 5 --smax 8 --seed 31337 --min-emitted 100000000)
 # LES TROIS MODES SONT EXCLUSIFS. Demander un jugement en sautant l'enumeration
 # imprimait des spheres manquantes, ignorait les planchers et sortait zero.
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_cover_and_judge "ne peut pas juger"
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_cover_and_judge "ne peut pas juger" 2
   --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 1)
+# LE MODE COVER AUTONOME A SA PORTE POSITIVE. La regression auditee a `84adbcc` :
+# le mode sautait l'enumeration puis la garde finale exigeait quand meme
+# `candidats == C_q`, comparait 0 a C_q et sortait 3 — le disclaimer MODE COVER
+# n'etait jamais atteint, et le seul CTest cover ne testait que le conflit
+# cover+juge. Cette porte exerce le chemin positif, avec des planchers a
+# semantique cover : nuages decides et tests de cover.
+add_test(NAME mhgp3v_direct_source_cover_mode COMMAND mhgp3v_direct_source
+         --clouds 2 --points 100 --coord 50 --smax 11 --seed 7 --leaf 8
+         --judge 0 --cover-only 1 --min-clouds 2 --min-cover-tests 100000
+         --min-lane-cover-tests 60000)
+# La meme commande, jugee cette fois sur ses LIBELLES : la ligne temporelle ET
+# le disclaimer final — l'audit live a montre que viser le seul disclaimer
+# laissait revenir l'ancien libelle « catalogue seul — reference=0.000 ».
+# PASS_REGULAR_EXPRESSION ignore le code de retour, c'est pourquoi la porte
+# precedente existe a part.
+add_test(NAME mhgp3v_direct_source_cover_mode_disclaimer COMMAND mhgp3v_direct_source
+         --clouds 2 --points 100 --coord 50 --smax 11 --seed 7 --leaf 8
+         --judge 0 --cover-only 1 --min-clouds 2 --min-cover-tests 100000
+         --min-lane-cover-tests 60000)
+set_tests_properties(mhgp3v_direct_source_cover_mode_disclaimer PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "temps      : MODE COVER(.|\n)*MODE COVER : cover, voisinages et masses combinadiques seulement")
+# Un plancher d'enumeration en mode cover est STRUCTURELLEMENT inatteignable :
+# la combinaison est refusee fail-closed, jamais laissee rougir plus tard. Les
+# QUATRE branches sont gardees — l'audit live a releve que seule la premiere
+# l'etait, les trois autres pouvant regresser sans rougir.
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_cover_floor "incompatibles avec --cover-only" 2
+  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
+  --min-emitted 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_cover_floor_windowed "incompatibles avec --cover-only" 2
+  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
+  --min-windowed 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_cover_floor_candidates "incompatibles avec --cover-only" 2
+  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
+  --min-candidates 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_cover_floor_forest "incompatibles avec --cover-only" 2
+  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
+  --min-forest-nodes 1)
 # LE MUTANT DE DOUBLE EMISSION DOIT ROUGIR. Il est instructif : le differentiel
 # par coquille reste vert, parce que la map ecrase; c'est le compteur d'unicite
 # qui le tue.
 # LE COMPARATEUR DE MEMBRES DOIT ETRE VIVANT. Sans ce mutant, rien ne prouve
 # qu'il compare autre chose que des listes vides : il retire un membre a chaque
 # sphere emise, et la porte doit rougir.
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_dropped_member_with_forest "ne peut pas etre combine"
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_dropped_member_with_forest "ne peut pas etre combine" 2
   --clouds 1 --points 14 --coord 12 --smax 6 --seed 1 --judge 1 --force-drop-member 1
   --forest 3)
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_dropped_member "desaccords"
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_dropped_member "desaccords" 1
   --clouds 2 --points 14 --coord 12 --smax 6 --seed 20260810 --judge 1
   --force-drop-member 1)
-mhgp3v_add_expected_failure_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_double_emission "en double"
+mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
+  mhgp3v_direct_source_reject_double_emission "en double" 3
   --clouds 2 --points 12 --coord 5 --smax 8 --seed 31337 --force-both-directions 1)
 
 # LE NOYAU F0 DU FOLD HORIZONTAL, EN PORTE PERMANENTE.

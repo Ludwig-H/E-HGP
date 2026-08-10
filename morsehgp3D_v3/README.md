@@ -10,6 +10,34 @@ documentaire postérieur comprend la réponse chrono `3d5a763`, les répétition
 SMT `9b8954b` et l'audit inter-modes `84adbcc`; l'autorité courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
+### Delta live non committé au-dessus de `f37341d` — 10 août, 07:53 UTC
+
+Claude poursuit actuellement la source directe. Les corrections live ferment
+le mode cover autonome et reçoivent désormais ses trois lanes, son libellé et
+les quatre planchers incompatibles. Les timers source, référence, juge et refus
+sont séparés dans un même mode, l'ordre de construction peut être alterné, et
+le cœur sérialisé `{spheres, members, forests}` est remis en ordre canonique et
+comparé champ à champ. Les deux corruptions topologiques de forêt reproduites
+par l'audit terminent maintenant sous un validateur itératif. Enfin, le harnais
+rejette les morts par signal et `bigint_selftest` possède un parseur strict et
+deux portes négatives à code exact. La fixture owner compare aussi directement
+l'identité signée des deux extrémités que le mutant non signé échangeait.
+
+Ce crédit reste **live et borné**, pas une promotion. Le palier `5ba178e...`
+compare aussi les huit diagnostics publics de `mhgp::Catalogue`; ils restent
+par défaut des deux côtés, et leur sémantique publique n'est pas encore taguée.
+La ligne `octets` ne les compte pas. Les structures topologiques invalides sont
+maintenant refusées séparément des deux côtés,
+mais `ForestNode::source` hors plage et les tranches du pool ne sont pas
+validés, et l'empreinte saine reste récursive. La garde d'horloge juge non nulle
+ne reçoit pas le travail du différentiel, et « ordre exécuté » est encore dérivé
+de l'option plutôt que de la branche prise. Les deux anciennes macros CMake
+conservent 23 appels sans code exact.
+Les empreintes et commandes sont tenues dans
+[`AUDIT_LIVE_REPRISE_COVER_F37341D.md`](audits/AUDIT_LIVE_REPRISE_COVER_F37341D.md)
+et [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md); elles seront
+réépinglées après stabilisation ou commit.
+
 **Trois des quatre P0 de cet audit sont fonctionnellement fermés sur leur domaine
 borné.** La troncature `i128` du chemin `use_owner` est réduite par
 `sign_of` et les appels bruts `i128`/`long long` sont interdits; le minimum en
@@ -23,8 +51,10 @@ rejoue encore aucun payload : il crédite seulement des masses scalaires.
 L'audit conserve trois réserves de garde : les surcharges owner supprimées ne
 forment pas encore un type fort fermé à toutes les petites conversions entières;
 le validateur régulier F0 accepte un handle strict dupliqué; ses deux CTests ne
-sont pas enregistrés si Python est absent. La fixture du cône signé ne protège
-toujours pas l'identité du propriétaire. Les
+pas enregistrés si Python est absent. Dans le snapshot committé, la fixture du
+cône signé ne protégeait pas l'identité du propriétaire; le delta live
+`003ba13f...` compare désormais directement les deux extrémités attendues et ses
+deux portes ciblées passent. Le mutant de signe indépendant reste à rejouer. Les
 fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
 Le passage GPU est spécifié séparément dans la
@@ -32,7 +62,7 @@ Le passage GPU est spécifié séparément dans la
 largeurs exactes 64/128/384 bits, voisin terminal, sous-arbres transactionnels,
 owner/census, runs et porte 50 k/G4.
 
-Le prototype `direct_source.cpp` est un résultat mathématique positif, pas une
+Dans le snapshot committé `e406e1f`, le prototype `direct_source.cpp` est un résultat mathématique positif, pas une
 source produit certifiée. Des oracles indépendants valident son cover--rayon et
 ses voisinages bornés sans écart, et sa partie candidate évite arrangement et
 mosaïque. Le palier `bb31b426...`, intégré à `81f9210`, conserve les membres,
@@ -44,7 +74,7 @@ sont fermés. Il ne compare toutefois ni l'ordre canonique du catalogue, ni son
 pool concaténé, ni les indices publics `ForestNode::source`; son nouveau contrôle
 structurel boucle ou sort du tableau sur certaines forêts malformées. Le
 coût/mémoire 50 k reste ouvert. Le
-verdict épinglé est dans
+verdict historique épinglé est dans
 [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](audits/AUDIT_SOURCE_DIRECTE_24AD3D37.md).
 
 Un rebuild Release CPU complet du commit `81f9210` passe 73/73 CTests en
@@ -1257,13 +1287,16 @@ le programme **affirmait plus que ce qu'il vérifiait**.
 exactitude annoncée en l'absence d'oracle est pire qu'un silence. Les trois
 modes sont maintenant exclusifs — `--cover-only 1 --judge 1` est **refusé** —, et
 seul le mode jugé a le droit de conclure. Le mode mesure atteint bien
-`AUCUNE EXACTITUDE N'EST AFFIRMÉE`; le mode cover autonome a depuis régressé :
-il saute l'énumération puis exige encore `candidats==C_q`, imprime d'abord le
-faux libellé `catalogue seul`, `reference=0.000` et un rapport inexploitable,
-puis sort 3 avant son disclaimer. Le juge est bien absent de ce mode. Le
-seul CTest cover reçoit la combinaison invalide cover+juge, pas un succès du
-mode autonome. La reproduction est dans
-[`AUDIT_COVER_ADAPTATIF_84ADBCC.md`](audits/AUDIT_COVER_ADAPTATIF_84ADBCC.md).
+`AUCUNE EXACTITUDE N'EST AFFIRMÉE`. Le premier delta live au-dessus de
+`f37341d` corrige aussi la régression du mode cover autonome : il retourne 0,
+décide 2/2 nuages, compte 205 800 tests et atteint son disclaimer; trois portes
+nouvelles passent. Le palier live suivant répond aux réserves de mutation : il
+reçoit les trois lanes séparément, les quatre planchers incompatibles et la
+ligne temporelle avec le disclaimer. Il fait aussi rougir le crash `SIGSEGV`,
+remplace le parseur arithmétique permissif et ajoute des codes exacts aux
+nouvelles portes. Restent 23 appels historiques à migrer vers un code exact.
+Le ledger chronologique et ses empreintes sont consignés dans
+[`AUDIT_LIVE_REPRISE_COVER_F37341D.md`](audits/AUDIT_LIVE_REPRISE_COVER_F37341D.md).
 
 La map de sortie était indexée par la coquille et l'affectation **écrasait** les
 doublons. Un mutant retirant la restriction $z>p$ émettait 126 fois au lieu de
@@ -1548,7 +1581,7 @@ quatrièmes points admissibles forment donc un préfixe dans chaque direction �
 c'est `neighbour_along`, mot pour mot. Chercher à l'éviter revient à le
 réinventer.
 
-### Tentative de comparaison sur un contenu sémantique commun
+### Snapshot `e406e1f` — comparaison historique sur un contenu sémantique commun
 
 Le delta `e406e1f` apporte deux progrès vérifiables : les appels de fold source
 et référence ont chacun leur tranche de temps, et une nouvelle campagne compare
@@ -1577,6 +1610,36 @@ Le temps mur reste une unité pertinente pour le budget de 100 ms, une fois les
 périmètres rendus identiques, l'ordre d'exécution alterné et la dispersion
 reçue. Les masses des deux côtés restent publiées séparément et ne sont pas
 commensurables.
+
+**Réponse live de Claude au NO-GO chrono, delta non committé.** Les constructions
+source et référence ont leurs horloges propres **dans le même mode juge**; le
+juge (différentiel, empreintes, comparaisons champ à champ) et les refus ont des
+horloges séparées. Un chrono source, référence ou juge nul sur une campagne
+décidée est un `ECHEC`, et l'ordre demandé par nuage est imprimé.
+`--build-order` alterne la position dans le même mode ; un refus sous ordre
+source-d'abord est un échec fermé nommé, jamais une pollution silencieuse des
+compteurs. Le payload public est sérialisé canoniquement **des deux côtés** —
+ordre lexicographique sur les quatre cases du support, pool reconstruit,
+offsets — et comparé **en entier** : sphères avec leur représentation exacte,
+pool concaténé, offsets, diagnostics du `Catalogue` (actuellement par défaut
+des deux côtés et désormais comparés), forêts nœud à nœud, indices
+`ForestNode::source` compris, `beta` bit à bit. Le mutant `--force-shell-order`
+reproduit exactement la faute que la sonde d'audit observait — assemblage dans
+l'ordre de la map par coquille — et rougit par la porte de payload, pas par le
+quotient. Les diagnostics du `Catalogue` sont dans l'égalité comparée, et
+`judge_seconds>0` est exigé. Les nombres ci-dessous restent ceux de `e406e1f`;
+la remesure au périmètre corrigé suit la table.
+
+**Réponse d'audit live.** La séparation des quatre horloges et la comparaison
+du payload canonique sont des progrès réels. Deux preuves restent ouvertes.
+Une paire de lectures d'horloge autour d'un bloc juge vide rend normalement un
+temps non nul : `judge_seconds>0` tue l'accumulation annulée, pas la suppression
+du différentiel. Et la ligne d'ordre choisit encore son texte depuis
+`build_order`, pas depuis une trace des branches exécutées. Enfin, l'égalité des
+huit diagnostics ne définit ni leur présence ni leur sémantique par backend;
+`catalogue_bytes` ne les compte pas. Il faut donc recevoir une masse de travail
+du juge, une trace d'ordre effective et un contrat de diagnostics avant de dire
+ces résidus fermés.
 
 **[diagnostic ponctuel non scellé, densité fixe $10^{-3}$, $s_{\max}=6$,
 $K=5$, quatre nuages par ligne, même binaire Release, même processus]**
@@ -1617,6 +1680,24 @@ comparables en ordre de grandeur à $n=120$. Le croisement, la limite d'échelle
 le budget de 100 ms et la mémoire commune restent ouverts. Les conditions de
 remesure et les observations d'audit sont consignées dans
 [`audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
+
+**[diagnostic au périmètre corrigé — juge et refus hors des deux chronos, payload
+canonique des deux côtés, palier live antérieur aux derniers edits]** Sur la même fixture $n=120$
+(4 nuages, $s_{\max}=6$, $K=5$, graine 20260810), dix répétitions — cinq par
+ordre de construction — rendent des rapports référence/source de **1,04 à 1,39,
+médiane 1,17, les dix au-dessus de 1**, là où le périmètre `e406e1f` rendait
+0,93 à 1,10 en traversant 1 quatre fois. À $n=40$, un run distinct du sweep
+principal, mais chevauché par une fixture de refus concurrente, rend 6,88 contre
+5,10 publié. La lecture « telle qu'implémentée, la
+source directe ne passe pas l'échelle au-delà d'une centaine de points » est
+**RETIRÉE** : le rapport 0,84 de `e406e1f` mesurait le juge — différentiel et
+empreintes — facturé au seul chrono source. Réserves : les dix répétitions à
+$n=120$ ont partagé la machine avec la suite CTest complète, leur dispersion
+absolue est large (12,8 à 24,6 s côté source) ; ce diagnostic ne localise aucune
+limite d'échelle, ne borne pas 50 k, et la croissance $n^{3{,}2}$ de la source
+sur la fenêtre $n=40..120$ n'est ni confirmée ni infirmée par lui — la remesure
+propre multi-tailles est à refaire au nouveau périmètre. Aucun log brut, digest
+de binaire ou sidecar de ces onze runs n'est encore versionné.
 
 ### Réponses d'audit et questions encore ouvertes
 
@@ -1915,7 +1996,7 @@ forêt est refusée, l'unicité des coquilles de la référence est reçue et
 `candidats==C_q` est maintenant une obligation. Une porte `s_max=3` manque
 encore, bien que le cas passe manuellement.
 
-La nouvelle comparaison forêt ne reçoit pas encore le payload public. Les deux
+Dans le snapshot `e406e1f`, la comparaison forêt ne reçoit pas encore le payload public. Les deux
 catalogues sont ordonnés différemment; une sonde compte 4 016 indices publics
 `ForestNode::source` différents avec 120/120 empreintes sémantiques égales.
 L'empreinte quotientte précisément cette renumérotation et les deux côtés
@@ -1936,8 +2017,10 @@ et le pire cas récursif peut recopier des chaînes quadratiquement. Le commenta
 qui borne certains agrégats `long long` oublie jusqu'à 2 000 nuages; la borne
 cumulée dépasse `i64`. Le nouveau contrôle structurel de forêt n'est pas total :
 cycle de frères et enfant hors plage donnent respectivement boucle et overflow
-ASan. Le label correct reste
-donc **prototype CPU candidat, accord relatif au catalogue fermé partagé**; la
+ASan. Le delta live corrige l'ordre/pool/offsets, les deux corruptions reçues et
+le refus commun d'une topologie invalide, mais pas les diagnostics publics du
+catalogue, les sources/tranches hors plage ni la récursion profonde. Le label correct reste donc **prototype CPU
+candidat, accord relatif au catalogue fermé partagé**; la
 source Gabriel ouverte streamée et la porte 50 k ne sont pas implémentées.
 
 Pour la source Gabriel **ouverte**, le filtre utile emploie l'intérieur
@@ -2259,7 +2342,7 @@ entier, coordonnée hors grille, troncature de `--clouds`, troncature de
 | # | question | statut |
 | --- | --- | --- |
 | 1 | index spatial *fail-open* pour la requête de pinceau | écrit et différencié au commit `1a0a1f8`; propriété immuable de l'index, compteurs d'élagage et preuve complète du petit fast-path flottant restent ouverts |
-| 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` fermé sur u16; garde de type encore partielle et identité signée non protégée; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
+| 2 | règle de propriétaire pour les arités 2 et 3, et census local | P0 de troncature `i128` fermé sur u16; garde de type encore partielle; identité signée directement reçue dans le delta live `003ba13f...`, mutant indépendant à rejouer; table nulle seulement pour owner+index+navigable; réducteur linéaire prouvé mais non intégré, census ramené à un halfspace-report 4D exact |
 | 3 | reverse search, pour supprimer `seen` et `frontier` | parent multiplicitaire prouvé, **parcours et sink écrits et différenciés contre le BFS**; le catalogue passe encore par le BFS, et le high-water complet n'est pas mesuré |
 | 4 | référence de l'oracle M1 tolérante aux multiplicités | non écrite ; sans elle le sujet n'a pas de juge indépendant en arithmétique rationnelle |
 | 5 | source active/silencieuse, tri et lots, état horizontal, `coverage_log`, verticales et contrat d'identité | non écrits; globalités intrinsèques mais externalisables, factorisées dans la note Gate D aval |

@@ -8,8 +8,10 @@
 // Ce test n'introduit AUCUNE dependance dans l'oracle lui-meme : GMP n'apparait
 // que dans ce binaire de validation.
 
+#include <charconv>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <random>
 #include <string>
 #include <vector>
@@ -150,13 +152,33 @@ void rational_identities(unsigned long long seed, int rounds) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  const int rounds = (argc > 1) ? std::atoi(argv[1]) : 20000;
-  if (rounds <= 0) {
-    std::printf("ECHEC : nombre de tours absurde (%d)\n", rounds);
-    return 2;
+  // LE PARSEUR EST STRICT, COMME PARTOUT AILLEURS DANS LA V3. `atoi` acceptait
+  // `1junk` — vingt verifications et un OK imprime (audit live `f37341d`). Un
+  // suffixe est un refus, un argument excedentaire aussi.
+  long long rounds = 20000;
+  bool rounds_given = false;
+  bool development = false;
+  for (int i = 1; i < argc; ++i) {
+    if (std::string(argv[i]) == "--dev") { development = true; continue; }
+    if (rounds_given) {
+      std::printf("ECHEC : argument excedentaire « %s »\n", argv[i]);
+      return 2;
+    }
+    const char* first = argv[i];
+    const char* last = first + std::strlen(first);
+    unsigned long long value = 0;
+    const auto parsed = std::from_chars(first, last, value);
+    if (first == last || parsed.ec != std::errc{} || parsed.ptr != last || value == 0 ||
+        value > 100000000ULL) {
+      std::printf("ECHEC : nombre de tours invalide « %s »\n", argv[i]);
+      return 2;
+    }
+    rounds = (long long)value;
+    rounds_given = true;
   }
-  against_int128(20260808ULL, rounds);
-  rational_identities(4242ULL, rounds);
+  (void)development;
+  against_int128(20260808ULL, (int)rounds);
+  rational_identities(4242ULL, (int)rounds);
 #if defined(MHGP3V_HAVE_GMP)
   against_gmp(90210ULL, rounds / 20 + 1);
   const char* gmp = "oui";
@@ -168,9 +190,6 @@ int main(int argc, char** argv) {
   // FAIL-CLOSED : une qualification de largeur arbitraire ne peut pas devenir
   // verte sans son temoin large. `--dev` autorise explicitement le mode de
   // developpement, et il est alors dit dans la sortie.
-  bool development = false;
-  for (int i = 1; i < argc; ++i)
-    if (std::string(argv[i]) == "--dev") development = true;
   if (!development) {
     std::printf("ECHEC : temoin large absent ; la qualification exige GMP "
                 "(ou --dev pour un passage de developpement, non qualifiant)\n");

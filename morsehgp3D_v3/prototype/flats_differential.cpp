@@ -1606,6 +1606,36 @@ int main(int argc, char** argv) {
       if (a.dedup_table_high_water == 0 || b.dedup_table_high_water != 0) ++cone_faults;
     }
     {
+      // L'IDENTITE DU PROPRIETAIRE, PAS SEULEMENT L'EGALITE DES CATALOGUES. Sur
+      // le segment des centres, remplacer eps=-1 par +1 sur B_U echange le
+      // proprietaire de z=0 vers z=4 en laissant le catalogue IDENTIQUE : la
+      // porte passait sous ce mutant, et c'etait la dette relevee par l'audit.
+      // On teste donc directement les DEUX sommets candidats. Verifie a la
+      // main : G_U est constant sur le segment (axd = 0, somme des orient3d de
+      // B_U nulle), les deux verdicts tombent sur le tie-break lexicographique
+      // de d = (delta*u, 2*delta*u.a) avec u = (0,0,12) — le sommet de centre
+      // (2,1,0), coquille U + {(2,1,3)}, accepte d = (0,0,12,48) ; celui de
+      // centre (2,1,4), coquille U + {(2,1,1)}, refuse d = (0,0,-12,-48).
+      const mhgp3v::flats::OwnerContext ctx = mhgp3v::flats::owner_context(cone);
+      const i32 cone_support[3] = {0, 1, 2};
+      const std::vector<i32> b_u{3, 4};
+      mhgp3v::flats::Vertex low;         // centre (2,1,0) : (2,1,3) sur la coquille
+      low.shell = {0, 1, 2, 4};
+      low.interior = {3};
+      low.level = 1;
+      mhgp3v::flats::Vertex high;        // centre (2,1,4) : (2,1,1) sur la coquille
+      high.shell = {0, 1, 2, 3};
+      high.interior = {4};
+      high.level = 1;
+      const bool low_owns = mhgp3v::flats::is_owner(cone, ctx, low, cone_support, 3, b_u);
+      const bool high_owns = mhgp3v::flats::is_owner(cone, ctx, high, cone_support, 3, b_u);
+      if (!low_owns || high_owns) {
+        printf("[owner cone signe] identite du proprietaire fausse : z=0 possede=%d,"
+               " z=4 possede=%d (attendu 1 et 0)\n", (int)low_owns, (int)high_owns);
+        ++cone_faults;
+      }
+    }
+    {
       // Le cube : quatre supports de CARDINALITE minimale pour une seule boule, et
       // six minimaux pour l'INCLUSION. Le catalogue owner doit etre identique.
       std::vector<P3> cube;
@@ -1739,7 +1769,9 @@ int main(int argc, char** argv) {
          mhgp3v::CloudStatus::kOk},
         {"triangle", {pt(0, 0, 0), pt(4, 0, 0), pt(1, 3, 0)}, 7,
          mhgp3v::CloudStatus::kTooFewPoints},
-        {"coplanaire", {pt(0, 0, 0), pt(4, 0, 0), pt(1, 3, 0), pt(5, 3, 0), pt(2, 1, 0)}, -1,
+        // La verite 19 est GRAVEE : l'audit a releve qu'elle ne l'etait pas, et
+        // deux catalogues faux mais identiques passaient la coherence interne.
+        {"coplanaire", {pt(0, 0, 0), pt(4, 0, 0), pt(1, 3, 0), pt(5, 3, 0), pt(2, 1, 0)}, 19,
          mhgp3v::CloudStatus::kAffineDimensionBelowThree}};
     int domain_faults = 0;
     for (const auto& probe : probes) {
