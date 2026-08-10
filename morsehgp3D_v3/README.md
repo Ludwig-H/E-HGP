@@ -6,7 +6,7 @@ u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
 Le HEAD produit courant est
-`HEAD=origin/main=17b70cf003ddfa7d6b2603b1799d9df279ad4148`. Le commit produit
+`HEAD=origin/main=70222980a82de418e91e6fa791382047067c22eb`. Le commit produit
 `a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
 canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
 durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
@@ -32,7 +32,9 @@ ensuite l'oracle `face-owner`, grave la réfutation multi-support et ferme son
 allocation quadratique; `56e76c6` traite enfin les ordres un par un, cible la
 porte de réfutation sur `k=6`, compare les records dans le pipeline et publie le
 manifeste mémoire estimé; `038bbbb` intègre ensuite le fold hybride comme
-cinquième forme et `17b70cf` nettoie son premier défaut de reporting. Ces derniers
+cinquième forme, `17b70cf` nettoie son premier défaut de reporting, puis
+`7022298` renforce la permutation `face-owner`, exporte son flux d'arêtes et
+écrit le premier oracle device de ce flux. Ces derniers
 résultats et leurs limites sont épinglés dans l'audit courant. L'autorité
 courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
@@ -204,9 +206,12 @@ réfutation gravée à `K=6`, avec 7/7 mutants tués. Le cas sain exige un recor
 à 17 témoins stricts et `support-facet-filter` meurt sur ce même ordre. Le
 commit `56e76c6` réserve `I_k`, émet, rejoue puis libère un ordre entier avant le
 suivant; 18/18 portes ciblées passent et `n=32` rend 247 854 incidences en
-environ 0,09 s de fold. La permutation `face-owner` n'est pas encore une porte
-permanente et le pic de 11,1 MiB reste une estimation, pas un budget dur : les
-capacités des arêtes et les sorties ne sont pas majorées. Voir
+environ 0,09 s de fold. `7022298` ajoute une comparaison sous permutation des
+niveaux rationnels des records, témoins, saturés marquants et champs de reçu
+invariants; elle doit encore appeler le comparateur sémantique commun, comparer
+tous les niveaux et exiger les identités par ordre. Le pic de 11,1 MiB reste
+une estimation, pas un budget dur : les capacités des arêtes et les sorties ne
+sont pas majorées. Voir
 [`AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md`](audits/AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md).
 La route produit est le **fold hybride** de
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md) :
@@ -254,6 +259,22 @@ sa modélisation; aucune promotion GPU n'en découle. Verdict et séquence exact
 [`AUDIT_LIVE_HYBRID_3147BB0.md`](audits/AUDIT_LIVE_HYBRID_3147BB0.md). Le contrat
 mathématique complet reste dans
 [`NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md`](audits/NOTE_SOLUTION_HYBRIDE_COFACES_FACEOWNER_20260810.md).
+
+**[premier oracle device `face-owner`, math positive et qualification GPU non
+reçue]** `7022298` porte sur CUDA l'émission exhaustive des incidences de
+`k`-faces jusqu'à `k=6`, le choix de l'owner minimal en
+`(activation_rank,generator)` et le tri-déduplication des branches d'étoile;
+le DSU et le transcript restent sur CPU. L'unranking a été vérifié
+indépendamment sur 198 922 cas et la cible CPU sans CUDA compile sous `-Werror`.
+Ce kernel est une cinquième vérité bornée, pas le backend hybride produit : il
+matérialise toute la masse `I_k`. Sa validation d'entrée est incomplète, son
+admission `56*I` sous-compte des buffers explicitement simultanés pouvant
+atteindre environ `92*I` avant les workspaces Thrust, et le CTest qui attend
+l'absence du kernel est encore enregistré sous CUDA. La première tentative G4
+gardée a été refusée avant démarrage par le quota régional; la cible exacte est
+restée `TERMINATED` et aucune VM concurrente n'a été touchée. Le verdict, la
+simplification de buffers et les portes G4 minimales sont dans
+[`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md).
 
 **[forêts dérivées, crédit borné]** `df984ed` transforme les records en une
 projection généalogique candidate : les campagnes ciblées rendent zéro témoin

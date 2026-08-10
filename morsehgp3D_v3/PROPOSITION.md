@@ -30,7 +30,7 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 ## État courant du prototype audité
 
 Le snapshot committé courant est
-`HEAD=origin/main=17b70cf003ddfa7d6b2603b1799d9df279ad4148`, toujours sous
+`HEAD=origin/main=70222980a82de418e91e6fa791382047067c22eb`, toujours sous
 `exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
 profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
 autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
@@ -48,7 +48,9 @@ marquantes, `acb9e7a` le sweep du mur de masse, `df984ed` les forêts candidates
 dérivées des records, `f2e78fa` la proposition cofaces sans paires, puis
 `21d85c8` l'oracle `face-owner` borné et sa réfutation permanente, puis
 `56e76c6` son rejeu ordre par ordre et sa porte `k=6` ciblée, `038bbbb` le
-premier fold hybride committé, puis `17b70cf` son nettoyage CLI. Leurs
+premier fold hybride committé, `17b70cf` son nettoyage CLI, puis `7022298` la
+permutation `face-owner`, l'export de son flux d'arêtes et le premier oracle
+device de ce flux. Leurs
 empreintes et limites sont dans
 [`AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md`](audits/AUDIT_LIVE_TRANSCRIPT_POSTINGS_GLOBAL_39CF76E.md).
 Ce sont des résultats CPU
@@ -160,8 +162,10 @@ ferme son allocation quadratique (`n=20` : 19,188 s vers 0,146 s), puis
 avant le suivant. Le refactor passe 18/18 portes ciblées et conserve les records
 Gamma. Son seuil mémoire repose encore sur une estimation non majorante : les
 capacités d'arêtes, sorties persistantes et allocations de conteneurs ne sont
-pas toutes bornées. Permutation `face-owner`, identités par ordre et allocateur
-plafonné restent les fermetures locales; voir
+pas toutes bornées. La permutation `face-owner` compare désormais les records
+et plusieurs champs invariants, mais pas encore toute la sémantique commune ni
+toutes les identités par ordre. L'allocateur plafonné reste une fermeture
+locale; voir
 [`AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md`](audits/AUDIT_FACEOWNER_ORDRE_PAR_ORDRE_56E76C6.md).
 Le protocole cofaces proposé à `f2e78fa` n'est pas exact avec son seul support
 canonique : le défaut apparaît déjà à `q_min=k=4`, où une coquille u16 de six
@@ -192,6 +196,18 @@ seuil `k` exactement quand `|M intersection N|>=k`; il ne matérialise ni faces
 ni paires globales et conserve le vrai carrier. La réception détaillée et les
 mutants structurels sont dans
 [`AUDIT_LIVE_HYBRID_3147BB0.md`](audits/AUDIT_LIVE_HYBRID_3147BB0.md).
+
+`7022298` ajoute également un oracle CUDA exhaustif du flux `face-owner` : il
+groupe les incidences de `k`-faces, choisit l'owner de niveau minimal et rend
+des branches triées à comparer au CPU. Cette forme est utile comme
+falsificateur borné, mais elle n'est ni le fold hybride produit ni une solution
+50 k : elle matérialise `I_k`, laisse le DSU sur l'hôte et son modèle VRAM
+`56*I` n'est pas majorant. La réparation prioritaire trie directement
+`(signature,activation_rank,generator)` afin que le premier incident soit
+l'owner, puis produit les arêtes gardées sans les buffers de réduction et
+d'arêtes brutes. Le diagnostic G4 a été empêché avant démarrage par le quota;
+la cible est restée arrêtée. Détails et portes de qualification :
+[`AUDIT_GPU_FACEOWNER_7022298.md`](audits/AUDIT_GPU_FACEOWNER_7022298.md).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent

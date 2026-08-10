@@ -11,20 +11,22 @@ Cadre annoncé : `phase=exploration_v3_hors_registre`,
 Cet audit porte uniquement sur `morsehgp3D_v3`. Il ne modifie aucun prototype,
 n'ouvre aucune phase et ne promeut aucun résultat public. L'autorité committée
 courante est
-`HEAD=origin/main=17b70cf003ddfa7d6b2603b1799d9df279ad4148` : `405c37b`
+`HEAD=origin/main=70222980a82de418e91e6fa791382047067c22eb` : `405c37b`
 livre le join postings reçu, `651e47f` la porte des niveaux d'événement
 `q_min`, `bc2dafa` le marquage Gamma, le préflight, l'oracle de poids et la
 troisième voie postings globale, `45c0b7b` les records par témoins et les
 saturés des boules marquantes, `acb9e7a` le sweep de masse, `df984ed` les
 forêts candidates dérivées, `f2e78fa` la proposition cofaces, `21d85c8`
 l'oracle `face-owner` borné et sa réfutation permanente, `56e76c6` son rejeu
-ordre par ordre, `038bbbb` le premier fold hybride committé, puis `17b70cf` le
-nettoyage de son reporting CLI. L'audit du
+ordre par ordre, `038bbbb` le premier fold hybride committé, `17b70cf` le
+nettoyage de son reporting CLI, puis `7022298` la permutation `face-owner`,
+l'export de ses arêtes et le premier oracle device de ce flux. L'audit du
 dernier palier, avec toutes les empreintes et les correctifs directement
 implémentables, est
-[`AUDIT_LIVE_HYBRID_3147BB0.md`](AUDIT_LIVE_HYBRID_3147BB0.md).
+[`AUDIT_LIVE_HYBRID_3147BB0.md`](AUDIT_LIVE_HYBRID_3147BB0.md); l'audit GPU
+distinct est [`AUDIT_GPU_FACEOWNER_7022298.md`](AUDIT_GPU_FACEOWNER_7022298.md).
 
-## Autorité courante à `17b70cf`
+## Autorité courante à `7022298`
 
 | contrat | état reçu |
 | --- | --- |
@@ -36,12 +38,12 @@ implémentables, est
 | voie postings globale | **troisième vérité utile, pas forme d'échelle** : déterministe à 1/2 threads et fold identique; préflight/budget raccordés et porte de refus verte, mais occurrences intégrales, double stockage transitoire, arêtes et ordre global |
 | forêts dérivées | **projection `full_pi0` plausible, non reçue sémantiquement** : zéro orphelin sur campagnes et comptages cohérents; parents, kinds, racines, niveaux et choix `full_pi0|hgp_reduced` ne sont pas comparés à une vérité indépendante |
 | masse sans paires | **théorème et diagnostic positifs** : les étoiles `face-owner` conservent chaque coupe; `n=200/K=5` passe de `385,55 M` cooccurrences à `16,38 M` incidences; oracle borné seulement tant que les faces sont énumérées |
-| oracle `face-owner` live | **sémantique et rejeu ordre par ordre positifs à `56e76c6`** : quatre formes concordent, 7/7 mutants meurent, 18/18 portes ciblées passent; `reserve(I_k)` et libération inter-ordre sont effectifs; restent permutation propre, identités par ordre et vraie borne mémoire, car l'estimation omet capacités et sorties |
+| oracle `face-owner` live | **sémantique et rejeu ordre par ordre positifs** : quatre formes concordent, 7/7 mutants meurent, `reserve(I_k)` et libération inter-ordre sont effectifs; `7022298` ajoute une permutation sémantique positive et exporte les arêtes pour qualification device; restent comparaison commune complète, identités par ordre et vraie borne mémoire |
 | cofaces à support canonique | **réfuté jusque dans `q=k=4`** : une coquille u16 minimale possède six composantes strictes et le filtre n'en voit que cinq; à `q=4,k=6`, une seconde fixture en manque neuf sur dix-sept; support principal certifié ou fallback exact nécessaires |
 | solution hybride | **cœur mathématique et différentiel positifs bornés à `038bbbb`, contrat produit non reçu** : cinq formes concordent, les chemins principal/fallback sont exercés et deux mutants meurent; restent le sidecar lié à la source, la provenance `q_min`/complétude, les carriers vérifiables, quatre mutants structurels et le budget mémoire |
 | source et provenance runtime | **ouvertes** : `n_support` est lu sans bit `q_min_certified`; `smax>=n` exclut une censure de rang mais ne certifie pas la complétude de la famille |
 | architecture légère | **préservée géométriquement** : aucun graphe de Johnson, sous-simplexe ou mosaïque d'ordre supérieur dans le chemin candidat; masse combinatoire et source complète restent les murs |
-| 50 k / GPU | **NO-GO maintenu** : runs bornés, source certifiée, arithmétique globale vérifiée, témoins/marqueurs internés et manifeste/high-water manquent; aucun kernel GPU nouveau dans ce delta |
+| 50 k / GPU | **premier oracle device écrit, qualification NO-GO** : émission `face-owner` CUDA jusqu'à `k=6` et math du flux positives; aucune exécution CUDA reçue, validation hostile, mémoire majorante, ressources transactionnelles et CTests CUDA restent ouverts; ce n'est pas le fold hybride produit |
 
 La fermeture constructive du transcript est donnée par
 [`NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md`](NOTE_SOLUTION_RECU_TRANSCRIPT_PAR_TEMOIN_20260810.md) : une racine porte sa plus petite `k`-face comme témoin, maintenue en
@@ -87,6 +89,16 @@ simple que le trie : le seuil `k` certifie directement
 `|M intersection N|>=k`, sans matérialiser de face, et conserve le vrai carrier
 incident. Détails, résultats et portes dans
 [`AUDIT_LIVE_HYBRID_3147BB0.md`](AUDIT_LIVE_HYBRID_3147BB0.md).
+
+Le premier kernel CUDA de `7022298` accélère seulement l'oracle exhaustif
+`face-owner`. Son unranking et son choix d'owner sont positifs, mais le kernel
+lit encore des tailles non validées, l'admission VRAM sous-compte les buffers
+et workspaces, et le CTest d'absence est inconditionnel. La voie constructive
+est double : simplifier ce falsificateur en triant directement par
+`(signature,activation_rank,generator)`, puis réserver le kernel produit au
+fallback compteur/postings afin de rendre de vrais carriers sans énumérer
+toutes les faces. Voir
+[`AUDIT_GPU_FACEOWNER_7022298.md`](AUDIT_GPU_FACEOWNER_7022298.md).
 
 Les sections `2b4801c` et antérieures sont conservées ci-dessous comme
 historique chronologique; elles ne décrivent plus le worktree courant.
