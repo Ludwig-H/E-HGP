@@ -122,25 +122,6 @@ endif()
 
 enable_testing()
 
-function(mhgp3v_add_expected_failure_test name expected)
-  add_test(NAME ${name} COMMAND ${CMAKE_COMMAND}
-           "-DPROGRAM=$<TARGET_FILE:mhgp3v_oracle>"
-           "-DEXPECTED=${expected}"
-           "-DARGUMENTS=${ARGN}"
-           -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
-endfunction()
-
-# Meme porte, mais pour un autre binaire que l'oracle. La version precedente
-# codait la cible en dur, si bien qu'un test negatif ecrit pour un autre juge
-# interrogeait silencieusement l'oracle et passait pour la mauvaise raison.
-function(mhgp3v_add_expected_failure_test_for program name expected)
-  add_test(NAME ${name} COMMAND ${CMAKE_COMMAND}
-           "-DPROGRAM=$<TARGET_FILE:${program}>"
-           "-DEXPECTED=${expected}"
-           "-DARGUMENTS=${ARGN}"
-           -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
-endfunction()
-
 # QUAND LE CONTRAT FIXE LE CODE DE SORTIE, LA PORTE L'EXIGE. 2 = campagne
 # refusee avant tout calcul, 3 = plancher ou invariant viole, 1 = desaccords du
 # juge. L'audit live a montre que le harness acceptait un crash par signal comme
@@ -189,7 +170,7 @@ add_test(NAME mhgp3v_false_certificate_regression COMMAND mhgp3v_oracle --subjec
 
 # Bornes semantiques du CLI : une valeur syntaxiquement valide mais hors contrat
 # doit rendre 2 AVANT toute arithmetique.
-mhgp3v_add_expected_failure_test(mhgp3v_cli_order_overflow "campagne absurde"
+mhgp3v_add_expected_code_test_for(mhgp3v_oracle mhgp3v_cli_order_overflow "campagne absurde" 2
   --subject anchored --measure-only --regime exhaustive --points 1 --clouds 1
   --max-order 2147483647)
 
@@ -240,9 +221,9 @@ set_tests_properties(mhgp3v_oracle_inject_merge_source_nonminimal PROPERTIES
 # Une campagne ou aucun sujet n'est admissible ne doit jamais devenir verte par
 # les seuls echecs de plancher.
 #
-mhgp3v_add_expected_failure_test(
+mhgp3v_add_expected_code_test_for(mhgp3v_oracle 
   mhgp3v_oracle_inject_vacuity_guard
-  "campagne SUPPORT doit etre verte avant tout probe hostile"
+  "campagne SUPPORT doit etre verte avant tout probe hostile" 1
   --inject member_unsorted --clouds 1 --seed 4242 --min-points 8 --max-points 8
   --max-order 1 --coord-max 1 --min-decided 1 --min-nodes 1)
 
@@ -402,7 +383,7 @@ add_test(NAME mhgp3v_direct_source_same_payload_labels COMMAND mhgp3v_direct_sou
          --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
 set_tests_properties(mhgp3v_direct_source_same_payload_labels PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "PAYLOAD PUBLIC CANONIQUE .* juge [0-9.]+ s HORS des deux chronos")
+  "PAYLOAD PUBLIC CANONIQUE .* juge [0-9.]+ s .[0-9]+ comparaisons. HORS des deux chronos")
 # LE VALIDATEUR DE FORET EST TOTAL, ET SES DEUX FAUTES D'AUDIT SONT DES
 # FIXTURES : cycle de freres (l'ancien controle bouclait) et enfant hors plage
 # (il lisait hors du tableau, overflow ASan). L'auto-test exige la terminaison,
@@ -566,8 +547,8 @@ add_test(NAME mhgp3v_admissible_pair_sweep COMMAND mhgp3v_admissible_pair_probe
 # nouvelle : un filtre qui accepte TOUT la satisfait sans rien filtrer, et une
 # regression qui n'enumere aucun triangle aussi. Le plancher de triples REJETES
 # est ce qui les tue.
-mhgp3v_add_expected_failure_test_for(mhgp3v_admissible_pair_probe
-  mhgp3v_admissible_pair_reject_accept_all "triples rejetes"
+mhgp3v_add_expected_code_test_for(mhgp3v_admissible_pair_probe
+  mhgp3v_admissible_pair_reject_accept_all "triples rejetes" 3
   --points 30 --smax 8 --repeats 3 --seed 424242 --min-triangles 3000 --min-k4 20000
   --min-triples-rejected 500 --min-true-arity4 200 --force-triple-accept 1)
 
@@ -622,20 +603,20 @@ add_test(NAME mhgp3v_first_incidence_regular COMMAND mhgp3v_first_incidence
          --require-regular --min-attachments 15 --min-closed 400 --min-empty 200
          --min-descent 20 --min-descent-steps 3 --min-terminal-empty 5
          --min-terminal-single 10)
-mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
-  mhgp3v_first_incidence_reject_irregular "--require-regular exige zero egalite"
+mhgp3v_add_expected_code_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_irregular "--require-regular exige zero egalite" 3
   --clouds 12 --points 20 --coord 20 --k 3 --seed 11 --require-regular)
-mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
-  mhgp3v_first_incidence_reject_absurd "campagne absurde" --clouds 0)
-mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
-  mhgp3v_first_incidence_reject_unknown "argument inconnu" --sujet-inexistant)
-mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
-  mhgp3v_first_incidence_reject_suffix "valeur entiere invalide" --clouds 1junk)
-mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
-  mhgp3v_first_incidence_reject_floor "plancher de couverture non atteint"
+mhgp3v_add_expected_code_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_absurd "campagne absurde" 2 --clouds 0)
+mhgp3v_add_expected_code_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_unknown "argument inconnu" 2 --sujet-inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_suffix "valeur entiere invalide" 2 --clouds 1junk)
+mhgp3v_add_expected_code_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_floor "plancher de couverture non atteint" 3
   --clouds 2 --points 8 --coord 20 --k 3 --min-closed 1000000)
-mhgp3v_add_expected_failure_test_for(mhgp3v_first_incidence
-  mhgp3v_first_incidence_reject_descent_floor "plancher de descente non atteint"
+mhgp3v_add_expected_code_test_for(mhgp3v_first_incidence
+  mhgp3v_first_incidence_reject_descent_floor "plancher de descente non atteint" 3
   --clouds 2 --points 8 --coord 20 --k 3 --min-descent-steps 1000000)
 
 # LE LOT DU FRONT D'ONDE, qualifie sans GPU. Le corps evalue par le noyau borne doit
@@ -663,63 +644,63 @@ add_test(NAME mhgp3v_device_wavefront_refusal COMMAND mhgp3v_device_wavefront
          --clouds 4 --points 20 --coord 3 --smax 12 --seed 11
          --min-refused 10 --min-replayed 10 --min-clouds 4 --min-accepted 2000
          --min-flats 12000 --min-couples 5000 --min-kernels 4)
-mhgp3v_add_expected_failure_test_for(mhgp3v_device_wavefront
-  mhgp3v_device_wavefront_reject_absurd "campagne absurde" --points 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_device_wavefront
+  mhgp3v_device_wavefront_reject_absurd "campagne absurde" 2 --points 2)
 # LE MUTANT VIT DANS LE BINAIRE, ET IL DOIT ROUGIR. `--force-refuse-all` refuse
 # chaque sommet a l'admission : le ledger balance encore et la masse est encore
 # conservee — rejouer TOUT est correct, simplement inutile — mais les planchers
 # d'acceptation, de flats et de couples tombent a zero.
-mhgp3v_add_expected_failure_test_for(mhgp3v_device_wavefront
-  mhgp3v_device_wavefront_reject_all_refused "sommets acceptes"
+mhgp3v_add_expected_code_test_for(mhgp3v_device_wavefront
+  mhgp3v_device_wavefront_reject_all_refused "sommets acceptes" 3
   --clouds 4 --points 20 --coord 3 --smax 12 --seed 11 --force-refuse-all 1
   --min-refused 10 --min-replayed 10 --min-clouds 4 --min-accepted 2000
   --min-flats 12000 --min-couples 5000 --min-kernels 4)
 
 # Interface fail-closed du juge lui-meme.
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_unknown_argument "argument inconnu" --clouds 1 --sujet-inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_unknown_argument "argument inconnu" 2 --clouds 1 --sujet-inexistant)
 # Chaque option porte desormais sa plage semantique, verifiee AVANT le cast :
 # le diagnostic est celui de l'option fautive, pas un « campagne absurde » global.
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_smax_below_contract "valeur entiere invalide"
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_smax_below_contract "valeur entiere invalide" 2
   --clouds 1 --smax 1)
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_empty_campaign "plancher non atteint" --clouds 0 --min-cases 100000)
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_empty_campaign "plancher non atteint" 3 --clouds 0 --min-cases 100000)
 # `atoi` acceptait « 0junk » et rendait zero : la campagne devenait vide et verte.
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_integer_suffix "valeur entiere invalide" --clouds 0junk --min-cases 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_integer_suffix "valeur entiere invalide" 2 --clouds 0junk --min-cases 1)
 # La grille declaree est u16 ; hors d'elle les bornes des predicats ne tiennent plus.
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_coord_outside_grid "valeur entiere invalide"
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_coord_outside_grid "valeur entiere invalide" 2
   --clouds 1 --points 11 --coord 2147483647 --smax 2 --min-cases 1)
 # Une campagne qui ne navigue jamais ne peut pas rendre OK.
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_no_navigation "plancher de couverture non atteint"
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_no_navigation "plancher de couverture non atteint" 3
   --clouds 0 --min-cases 1 --min-navigated 100000)
 # Le token etait lu en entier, mais le `long long` etait ensuite tronque en
 # `int` sans controle de plage : `--clouds 4294967296` rendait zero nuage.
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_clouds_narrowing "valeur entiere invalide"
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_clouds_narrowing "valeur entiere invalide" 2
   --clouds 4294967296 --min-cases 1)
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_coord_narrowing "valeur entiere invalide"
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_coord_narrowing "valeur entiere invalide" 2
   --clouds 0 --coord 4295032832 --min-cases 1)
 # Neuf points DISTINCTS dans huit positions : la demande est impossible et ne
 # doit pas etre censuree en silence par le tirage.
-mhgp3v_add_expected_failure_test_for(mhgp3v_flats_differential
-  mhgp3v_flats_reject_impossible_campaign "campagne impossible"
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
+  mhgp3v_flats_reject_impossible_campaign "campagne impossible" 2
   --clouds 1 --points 9 --coord 2 --smax 2 --min-cases 1)
 
 # Interface fail-closed : token entier partiel, reçu non ecrit et option ignoree
 # doivent tous fournir un code non nul ET le diagnostic attendu.
-mhgp3v_add_expected_failure_test(mhgp3v_cli_reject_integer_suffix
-  "valeur entiere invalide" --clouds 1junk)
-mhgp3v_add_expected_failure_test(mhgp3v_receipt_write_failure
-  "ecriture du recu incomplete"
+mhgp3v_add_expected_code_test_for(mhgp3v_oracle mhgp3v_cli_reject_integer_suffix
+  "valeur entiere invalide" 2 --clouds 1junk)
+mhgp3v_add_expected_code_test_for(mhgp3v_oracle mhgp3v_receipt_write_failure
+  "ecriture du recu incomplete" 1
   --fixture foreign_source_same_level --subject v2 --clouds 1 --min-points 4
   --max-points 4 --max-order 1 --coord-max 2 --min-decided 1 --min-nodes 1
   --receipt /dev/full)
-mhgp3v_add_expected_failure_test(mhgp3v_measure_receipt_rejected
-  "measure-only ne prend encore ni --receipt ni --inject"
+mhgp3v_add_expected_code_test_for(mhgp3v_oracle mhgp3v_measure_receipt_rejected
+  "measure-only ne prend encore ni --receipt ni --inject" 2
   --subject anchored --measure-only --regime exhaustive --points 4 --clouds 1
   --max-order 1 --receipt ignored.json)

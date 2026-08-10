@@ -29,33 +29,24 @@ ce n'est pas fait, elles sont des diagnostics. C'est la première dette à payer
 
 ## État courant du prototype audité
 
-Le snapshot produit committé `e406e1f` reste
-`exploration_v3_hors_registre`, avec CPU de référence et
-microkernel GPU candidat sous audit, sur le profil
-`quantized_u16_input_only`. Il ne réalise pas encore l'architecture cible.
-Le ledger documentaire postérieur comprend l'audit chrono `3d5a763`, les
-répétitions SMT `9b8954b` et l'audit inter-modes `84adbcc`; aucun ne modifie le
-snapshot produit ni son statut public.
+Le snapshot courant est `HEAD=origin/main=f3802bd`, toujours sous
+`exploration_v3_hors_registre`, CPU de référence et microkernel GPU candidat,
+profil `quantized_u16_input_only`, sans statut public. `a8b5615` ferme le cover
+autonome, sépare les timers, canonicalise le payload comparé, durcit le harnais
+et ajoute les fixtures forêt/owner; `1f0db40` étend `same_catalogue` à tous les
+champs déclarés; `f3802bd` ferme le doublon de handle strict du falsificateur
+F0. Ce sont des résultats CPU bornés, pas un reçu produit.
 
-**Delta live non committé, 10 août 07:53 UTC.** La reprise de Claude ferme le
-mode cover autonome et reçoit désormais les trois lanes, le libellé complet et
-les quatre planchers incompatibles. Elle sépare dans un même mode les horloges
-source, référence, juge et refus, ajoute l'alternance de l'ordre, canonicalise
-le cœur `{spheres, members, forests}`, refuse séparément les structures
-topologiques invalides et durcit le harnais ainsi que le self-test arithmétique.
-Elle compare aussi directement l'identité du sommet owner signé sur le segment
-de centres qui échappait au seul catalogue.
-Les 26 portes directes et 16 portes arithmétiques/ciblées du palier épinglé sont
-vertes; ce sont des résultats CPU bornés, pas un reçu produit.
-
-Quatre réserves live empêchent de surinterpréter ce progrès : les huit
-diagnostics publics de `mhgp::Catalogue` sont désormais comparés mais restent
-sans sémantique backend taguée et hors du compteur d'octets; le validateur ne
-ferme ni `ForestNode::source`, ni les tranches du pool, ni la profondeur
-récursive; la garde de temps juge non nul ne prouve pas le travail du
-différentiel et la ligne d'ordre dérive encore de l'option; 23 appels
-historiques aux macros négatives ne fixent toujours pas leur code exact. Le statut reste
-`exploration_v3_hors_registre` et le NO-GO 50 k/GPU/replay est inchangé.
+Quatre réserves empêchent de surinterpréter ce progrès : les diagnostics publics
+de `Catalogue` concordent mais restent sans sémantique backend taguée et hors
+du compteur d'octets; le validateur ne ferme ni `ForestNode::source`, ni les
+tranches du pool, ni la profondeur récursive; la garde de temps juge non nul ne
+prouve pas le travail du différentiel; la ligne d'ordre dérive encore de
+l'option et un mutant de branche reste vert. Les 23 appels historiques aux
+macros négatives ne fixent toujours pas leur code exact. Le NO-GO
+50 k/GPU/replay est inchangé. La réponse mathématique aux questions de Claude
+est dans
+[`REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md`](audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md).
 
 Résultats positifs scellés sur leurs entrées : les cinq portes flats Release à
 petites coordonnées passent sur 4 990 cas, deux campagnes ASan/UBSan passent
@@ -78,15 +69,13 @@ réunies dans la
    `i128` exact, pas toutes les petites conversions entières.
 2. Le fold général accepte maintenant la naissance directe tout $N_a$; trois
    calculs concordent sur 2 168 hypergraphes et le refus est devenu un mutant.
-   Le vérificateur régulier séparé accepte encore un handle strict dupliqué, et
-   ses CTests sont fail-open si Python manque.
+   Depuis `f3802bd`, le vérificateur régulier compte les handles stricts
+   distincts et refuse le doublon sous fixture négative; ses CTests restent
+   fail-open si Python manque.
 3. La correction `use_owner` concorde sur les campagnes bornées et sa porte
-   compare le catalogue sémantique. Dans le snapshot committé, elle ne protège
-   pas l'identité du propriétaire signé : le mutant non signé échange les deux
-   extrémités sans changer la sortie. Le delta live `003ba13f...` compare
-   désormais directement ces deux extrémités; deux portes Release passent et
-   le mutant non signé échange les verdicts puis rougit dans une copie
-   temporaire. La table est nulle seulement pour
+   compare désormais directement l'identité du propriétaire signé. Deux portes
+   Release passent et le mutant non signé échange les verdicts puis rougit dans
+   une copie temporaire. La table est nulle seulement pour
    owner+index+navigable et le high-water publié compte des entrées, pas des
    octets.
 4. Le census terminal de la source est une requête exacte de demi-espace après
@@ -98,7 +87,7 @@ Conséquence d'architecture : le propriétaire exact et le fold externe restent
 les directions proposées. Le défaut arithmétique owner et la naissance F0 sont
 fermés dans les oracles bornés; cela ne fournit ni garantie globale sans table,
 ni réduction horizontale de production. L'identité owner signée possède
-désormais une fixture live directe qui tue le mutant non signé.
+désormais une fixture committée qui tue le mutant non signé.
 Ces portes et
 le refus/replay se ferment avant une revendication GPU ou mémoire.
 
@@ -1165,7 +1154,7 @@ manuscrit de thèse (théorèmes cités ci-dessous), aux mesures du dépôt et �
 [`note des verrous mathématiques GPU`](audits/NOTE_VERROUS_MATHEMATIQUES_GPU.md)
 de l'auditeur. Rien ici n'est un SLO ; chaque étape porte sa porte.
 
-### 15.1 L'objet est fixé par le manuscrit, et il valide l'architecture v3
+### 15.1 Le manuscrit fixe l'objet, pas encore l'extension dégénérée v3
 
 Quatre énoncés des parties I–II fixent la sortie et légitiment la chaîne :
 
@@ -1173,15 +1162,17 @@ Quatre énoncés des parties I–II fixent la sortie et légitiment la chaîne :
    amas discrets de Hartigan $C^{\mathrm{discret}}=X\cap\delta_r(C)$ — points
    COUVERTS, pas seulement les cœurs. La sortie primaire est la forêt
    (recouvrement) ; la partition stricte est un post-traitement.
-2. **Théorème 4** : tout simplexe $K$-séparant est de **Gabriel-miniboule**
-   ($\mathring{B}_\sigma\cap(X\setminus\sigma)=\varnothing$) — c'est la
-   justification exacte du catalogue v3 par supports de miniboule, et JAMAIS la
-   circumball.
-3. **Théorèmes 5–7** : le $K$-MST du $K$-graphe de Gabriel rend les mêmes
-   composantes non triviales, et tout $K$-simplexe de Gabriel se lit par deux
-   facettes portées par des arêtes élémentaires de $\mathrm{Del}_{K-1}(X)$.
-   L'énumération par SUPPORTS sans mosaïque matérialisée est licite ; les
-   adjacences élémentaires suffisent (Prop. 5).
+2. **Théorème 4** : sous la position générale de la définition 26, tout simplexe
+   $K$-séparant est de **Gabriel-miniboule**
+   ($\mathring{B}_\sigma\cap(X\setminus\sigma)=\varnothing$). Il justifie la
+   miniboule plutôt que la circumball dans ce domaine; il ne certifie pas le
+   quotient multiplicitaire u16.
+3. **Théorèmes 5–7** : sous la même hypothèse, le $K$-MST du $K$-graphe de
+   Gabriel rend les mêmes composantes non triviales. La spécification active ne
+   les utilise toutefois plus comme base suffisante : le contre-exemple des
+   incidences silencieuses impose attaches et couverture supplémentaires.
+   Éviter la mosaïque reste l'invariant d'architecture, pas une complétude déjà
+   acquise du générateur par supports.
 4. **Position générale (Def. 26)** : le manuscrit suppose
    $\partial B_\sigma\cap(X\setminus\sigma)=\varnothing$ ; la grille u16 la
    viole systématiquement. Le traitement multiplicitaire du dépôt (coquilles,
@@ -1199,28 +1190,29 @@ Quatre énoncés des parties I–II fixent la sortie et légitiment la chaîne :
 
 Aucun générateur mesuré ne ferme 100 ms. Le verrou nommé (γ) : pour un support
 d'arité 3–4 le centre est libre dans un compact, pas déterminé par une
-distance. La structure output-sensitive qui manque à la voie directe est celle
-du parcours — les quatrièmes points admissibles d'un triple forment un PRÉFIXE
-le long de l'axe du pinceau, dans chaque direction.
+distance. Un triple fixe bien un axe et un ordre exact de ses événements, mais
+le niveau peut monter et descendre lorsque des points entrent ou sortent de la
+boule. L'admissibilité shallow ne forme donc pas un préfixe général; seule une
+borne terminale additionnelle, par exemple un cap de rayon certifié, pourrait
+définir un préfixe sûr.
 
 ### 15.3 Le plan, en trois fils
 
-**Fil A — exactitude de la chaîne (CPU, ce dépôt).** Fait dans ce commit : le
-payload public canonique est IDENTIQUE champ à champ entre les deux générateurs
-(catalogue, pool, offsets, forêts, indices `source`), le juge et les refus sont
-hors des deux chronos, le validateur de forêt est total. Reste : la sémantique
-normative des lots d'ex æquo (question 1 à l'auditeur), l'oracle M1
-multiplicitaire, et la porte $s_{\max}=3$.
+**Fil A — exactitude de la chaîne (CPU, ce dépôt).** Les champs déclarés du
+catalogue et des forêts sont comparés entre les deux générateurs sur les
+campagnes reçues; le juge et les refus sont hors des deux chronos de génération.
+Restent : recevoir le travail du juge et la branche d'ordre, valider source et
+pool des forêts, sceller le lot strict--fermé, le `coverage_delta`, M.1
+multiplicitaire et la porte $s_{\max}=3$. « Validateur total » est retiré.
 
-**Fil B — le générateur 50 k.** Route retenue : énumération par supports ancrés
-sous borne certifiée (germination), QUI EST la forme « préfixe le long de l'axe »
-pour l'arité 4 : triangle retenu $T$ fixé, balayer les quatrièmes points en
-ordre de paramètre le long de l'axe du pinceau de $T$ et s'arrêter au premier
-événement — `neighbour_along`, mot pour mot, appliqué aux seuls triangles
-retenus au lieu de tous les sommets d'arrangement. Ce qui manque et se mesure :
-la porte de quadruple exacte (question 2), la boucle de germes indexée LBVH
-(l'énumération $O(n^2)$ des paires domine à 1,92 µs/paire), et le contrat PAR
-FAMILLE (la borne tangente ne mord pas sur amas — c'est mesuré et sans appel).
+**Fil B — le générateur 50 k.** Candidat à falsifier : énumération par supports
+ancrés sous borne certifiée, avec axe de pinceau pour l'arité quatre. Un appel
+depuis un état courant rend seulement le prochain lot complet; il faut répéter
+jusqu'à un certificat terminal. La coupe tangente ne s'applique qu'au porteur
+exact lié à son certificat, et un seul appel par triangle n'est pas complet.
+Manquent l'oracle d'axe borné, la fixture exacte des quatre omissions, la boucle
+de germes indexée LBVH et le contrat par famille. La réponse détaillée est dans
+la note Q1--Q5 de l'auditeur.
 
 **Fil C — forme device et repli CPU multi-cœurs.** Suivre l'ordre de la note
 GPU de l'auditeur : trois étages arithmétiques (64 bits pour le verdict parent,
@@ -1236,10 +1228,17 @@ merge déterministe, IDs par scan stable (question 4). La sortie 50 k reste
 résidente device et consommée sur place par le fold — 1,3–4 Go bruts ne passent
 pas PCIe dans le budget.
 
-**Ordre des travaux.** B1 porte de quadruple (diagnostiquer la tentative
-réfutée) → B2 germes indexés LBVH → A2 sémantique des lots scellée → C1 kernel
-verdict parent 64 bits + porte de refus du microkernel → C2 `next(v,d)` device
-avec certificat/replay → C3 partition antichaîne + transactions → C4 owner +
-census cappé → C5 runs triés + fold par lots → mesure 50 k sur G4, par famille.
-Les questions ouvertes sont posées dans
-[`audits/QUESTIONS_CLAUDE_FORET_50K_20260810.md`](audits/QUESTIONS_CLAUDE_FORET_50K_20260810.md).
+**Ordre des travaux, révisé après la réponse de l'auditeur**
+([`audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md`](audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md)) :
+A0 oracle $\Gamma_k$ indépendant depuis la définition du manuscrit (le juge
+multiplicitaire qui manque — décision Q1 : NO-GO exact hors position générale
+tant que l'équivalence n'est ni prouvée ni testée aux deux coupes) → A2 contrat
+strict--fermé du lot + journal `coverage_delta` → B1 fixture exacte des quatre
+supports perdus + oracle d'axe exhaustif → B2 germes indexés LBVH → Q4 les deux
+digests du moteur de tâches (scientifique global + ledger de replay) et replay
+1 thread contre N → C1 kernel verdict parent 64 bits + porte de refus du
+microkernel → C2 `next(v,d)` device avec certificat/replay → C3 partition
+antichaîne (elle partitionne le PRODUCTEUR, jamais les classes du DSU — lots
+séquentiels, parallélisme DANS le lot) → C4 owner + census cappé → C5 runs
+triés + fold par lots → mesure 50 k sur G4, par famille, APRÈS ces portes CPU :
+le débit GPU ne peut pas décider une sémantique encore ouverte.

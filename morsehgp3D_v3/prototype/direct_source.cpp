@@ -522,9 +522,14 @@ std::string forest_signature(const mhgp::Forest& forest, const mhgp::Catalogue& 
 struct ForestStructure {
   long long unreachable = 0, multiply_reached = 0, parent_faults = 0,
             child_count_faults = 0, out_of_range = 0, sibling_overflows = 0;
+  // Le réaudit a relevé que « total » était exagéré tant que `source` et la
+  // tranche de pool n'étaient pas reçus, ni la profondeur : ils le sont.
+  long long source_faults = 0, member_slice_faults = 0;
+  long long max_depth = 0;   // reçue, pas une faute : borne la récursion aval
   bool sound() const {
     return unreachable == 0 && multiply_reached == 0 && parent_faults == 0 &&
-           child_count_faults == 0 && out_of_range == 0 && sibling_overflows == 0;
+           child_count_faults == 0 && out_of_range == 0 && sibling_overflows == 0 &&
+           source_faults == 0 && member_slice_faults == 0;
   }
   std::string text() const {
     return " inaccessibles=" + std::to_string(unreachable) +
@@ -532,22 +537,38 @@ struct ForestStructure {
            " parents_faux=" + std::to_string(parent_faults) +
            " comptes_enfants_faux=" + std::to_string(child_count_faults) +
            " hors_plage=" + std::to_string(out_of_range) +
-           " freres_cycliques=" + std::to_string(sibling_overflows);
+           " freres_cycliques=" + std::to_string(sibling_overflows) +
+           " sources_fausses=" + std::to_string(source_faults) +
+           " tranches_pool_fausses=" + std::to_string(member_slice_faults) +
+           " profondeur_max=" + std::to_string(max_depth);
   }
 };
 
-ForestStructure forest_structure(const mhgp::Forest& forest) {
+ForestStructure forest_structure(const mhgp::Forest& forest, const mhgp::Catalogue& cat) {
   ForestStructure s;
   const i32 size = (i32)forest.nodes.size();
   std::vector<int> visits((std::size_t)size, 0);
-  std::vector<i32> stack(forest.roots.begin(), forest.roots.end());
+  std::vector<std::pair<i32, long long>> stack;
+  for (i32 r : forest.roots) stack.push_back({r, 1});
   while (!stack.empty()) {
-    const i32 node = stack.back();
+    const auto [node, depth] = stack.back();
     stack.pop_back();
     if (node < 0 || node >= size) { ++s.out_of_range; continue; }
     ++visits[(std::size_t)node];
     if (visits[(std::size_t)node] > 1) continue;   // un cycle s'arrête ici, et se compte
+    s.max_depth = std::max(s.max_depth, depth);
     const mhgp::ForestNode& n = forest.nodes[(std::size_t)node];
+    // `source` n'est jamais -1 dans une forêt publiée, et il doit désigner une
+    // sphère dont la tranche de pool tient dans le catalogue : c'est ce que la
+    // signature récursive LIT, elle ne peut pas le supposer.
+    if (n.source < 0 || n.source >= (i32)cat.spheres.size()) {
+      ++s.source_faults;
+    } else {
+      const mhgp::CriticalSphere& sphere = cat.spheres[(std::size_t)n.source];
+      if (sphere.members_begin < 0 || sphere.rank < 0 ||
+          (std::size_t)sphere.members_begin + (std::size_t)sphere.rank > cat.members.size())
+        ++s.member_slice_faults;
+    }
     i32 counted = 0;
     long long walked = 0;
     for (i32 c = n.first_child; c != -1;) {
@@ -557,7 +578,7 @@ ForestStructure forest_structure(const mhgp::Forest& forest) {
       if (++walked > (long long)size) { ++s.sibling_overflows; break; }
       if (forest.nodes[(std::size_t)c].parent != node) ++s.parent_faults;
       ++counted;
-      stack.push_back(c);
+      stack.push_back({c, depth + 1});
       c = forest.nodes[(std::size_t)c].next_sibling;
     }
     if (counted != n.n_children) ++s.child_count_faults;
@@ -578,7 +599,7 @@ std::string forest_digest(const mhgp::Forest& forest, const mhgp::Catalogue& cat
   // parcours exponentiel sur une entrée adverse. Une forêt malformée rend une
   // empreinte qui NOMME ses fautes, jamais une boucle ni une lecture hors
   // tableau.
-  const ForestStructure structure = forest_structure(forest);
+  const ForestStructure structure = forest_structure(forest, cat);
   if (!structure.sound())
     return "STRUCTURE_INVALIDE ordre=" + std::to_string(forest.order) + structure.text();
   const std::vector<int> rank = beta_ranks(cat);
@@ -609,23 +630,39 @@ enum class Mode { kJudge, kMeasure, kCover };
 // se déclare STRUCTURE_INVALIDE sans lancer la récursion, et qu'une forêt saine
 // reste saine.
 int forest_validator_selftest() {
-  const mhgp::Catalogue empty_catalogue;
+  // Un catalogue minimal d'UNE sphere valide : le validateur recoit desormais
+  // `source` et la tranche de pool, le temoin sain doit donc porter une source
+  // legitime — et les temoins fautifs une source valide AUSSI, pour que chaque
+  // fixture n'exerce QUE sa faute.
+  mhgp::Catalogue tiny_catalogue;
+  {
+    mhgp::CriticalSphere sphere{};
+    sphere.support[0] = 0;
+    for (int i = 1; i < mhgp::kMaxSupport; ++i) sphere.support[i] = -1;
+    sphere.n_support = 1;
+    sphere.rank = 1;
+    sphere.members_begin = 0;
+    tiny_catalogue.members = {0};
+    tiny_catalogue.spheres.push_back(sphere);
+  }
 
   mhgp::Forest sibling_cycle;
   sibling_cycle.order = 1;
   sibling_cycle.nodes.resize(2);
   sibling_cycle.nodes[0].first_child = 1;
   sibling_cycle.nodes[0].n_children = 1;
+  sibling_cycle.nodes[0].source = 0;
   sibling_cycle.nodes[1].parent = 0;
   sibling_cycle.nodes[1].next_sibling = 1;   // frère de lui-même : cycle
+  sibling_cycle.nodes[1].source = 0;
   sibling_cycle.roots = {0};
-  const ForestStructure cycle_structure = forest_structure(sibling_cycle);
+  const ForestStructure cycle_structure = forest_structure(sibling_cycle, tiny_catalogue);
   if (cycle_structure.sibling_overflows == 0) {
     printf("ECHEC : le cycle de freres n'est pas compte (%s)\n",
            cycle_structure.text().c_str());
     return 2;
   }
-  if (forest_digest(sibling_cycle, empty_catalogue).rfind("STRUCTURE_INVALIDE", 0) != 0) {
+  if (forest_digest(sibling_cycle, tiny_catalogue).rfind("STRUCTURE_INVALIDE", 0) != 0) {
     printf("ECHEC : l'empreinte du cycle de freres ne se declare pas invalide\n");
     return 2;
   }
@@ -635,35 +672,67 @@ int forest_validator_selftest() {
   out_of_range.nodes.resize(1);
   out_of_range.nodes[0].first_child = 7;     // enfant hors du tableau
   out_of_range.nodes[0].n_children = 1;
+  out_of_range.nodes[0].source = 0;
   out_of_range.roots = {0};
-  const ForestStructure range_structure = forest_structure(out_of_range);
+  const ForestStructure range_structure = forest_structure(out_of_range, tiny_catalogue);
   if (range_structure.out_of_range == 0) {
     printf("ECHEC : l'enfant hors plage n'est pas compte (%s)\n",
            range_structure.text().c_str());
     return 2;
   }
-  if (forest_digest(out_of_range, empty_catalogue).rfind("STRUCTURE_INVALIDE", 0) != 0) {
+  if (forest_digest(out_of_range, tiny_catalogue).rfind("STRUCTURE_INVALIDE", 0) != 0) {
     printf("ECHEC : l'empreinte de l'enfant hors plage ne se declare pas invalide\n");
     return 2;
   }
 
-  // LE TEMOIN SAIN : deux noeuds, une racine, liens coherents. Sans lui, un
-  // validateur qui compterait des fautes partout resterait vert ici.
+  // LES DEUX FAUTES QUE LE REAUDIT A NOMMEES : une source hors du catalogue
+  // (`source` n'est jamais -1 dans une foret publiee), et une tranche de pool
+  // qui sort du tableau des membres.
+  mhgp::Forest bad_source;
+  bad_source.order = 1;
+  bad_source.nodes.resize(1);
+  bad_source.roots = {0};   // source = -1 par defaut : faute
+  const ForestStructure source_structure = forest_structure(bad_source, tiny_catalogue);
+  if (source_structure.source_faults == 0) {
+    printf("ECHEC : la source hors catalogue n'est pas comptee (%s)\n",
+           source_structure.text().c_str());
+    return 2;
+  }
+  mhgp::Catalogue bad_slice_catalogue = tiny_catalogue;
+  bad_slice_catalogue.spheres[0].rank = 9;   // la tranche sort du pool
+  mhgp::Forest slice_probe;
+  slice_probe.order = 1;
+  slice_probe.nodes.resize(1);
+  slice_probe.nodes[0].source = 0;
+  slice_probe.roots = {0};
+  const ForestStructure slice_structure = forest_structure(slice_probe, bad_slice_catalogue);
+  if (slice_structure.member_slice_faults == 0) {
+    printf("ECHEC : la tranche de pool hors tableau n'est pas comptee (%s)\n",
+           slice_structure.text().c_str());
+    return 2;
+  }
+
+  // LE TEMOIN SAIN : deux noeuds, une racine, liens et sources coherents, et sa
+  // profondeur est RECUE. Sans lui, un validateur qui compterait des fautes
+  // partout resterait vert ici.
   mhgp::Forest sound;
   sound.order = 1;
   sound.nodes.resize(2);
   sound.nodes[0].first_child = 1;
   sound.nodes[0].n_children = 1;
+  sound.nodes[0].source = 0;
   sound.nodes[1].parent = 0;
+  sound.nodes[1].source = 0;
   sound.roots = {0};
-  const ForestStructure sound_structure = forest_structure(sound);
-  if (!sound_structure.sound()) {
-    printf("ECHEC : la foret saine est comptee fautive (%s)\n",
+  const ForestStructure sound_structure = forest_structure(sound, tiny_catalogue);
+  if (!sound_structure.sound() || sound_structure.max_depth != 2) {
+    printf("ECHEC : la foret saine est comptee fautive ou sa profondeur fausse (%s)\n",
            sound_structure.text().c_str());
     return 2;
   }
-  printf("OK : validateur de foret total — cycle de freres et enfant hors plage comptes,"
-         " empreintes declarees invalides, temoin sain accepte\n");
+  printf("OK : validateur de foret — cycle de freres, enfant hors plage, source hors"
+         " catalogue et tranche de pool comptes ; empreintes declarees invalides ;"
+         " temoin sain accepte, profondeur recue\n");
   return 0;
 }
 
@@ -798,6 +867,8 @@ int main(int argc, char** argv) {
   SourceCounters totals[5];
   long long decided = 0, refused_status = 0, mismatches = 0;
   long long cover_tests = 0, neighbour_tests = 0, cover_tests_lane[5] = {};
+  long long judge_comparisons = 0;
+  long long clouds_reference_first = 0, clouds_source_first = 0;
   long long degree_max = 0, degree_sum = 0, degree_samples = 0;
   // CES TROIS COMPTEURS RESTENT EN 64 BITS, ET C'EST BORNE, PAS OUBLIE. Chacun
   // est majoré par le nombre de candidats, lui-même au plus
@@ -843,12 +914,17 @@ int main(int argc, char** argv) {
     std::map<std::vector<i32>, Produced> produced;
     double cloud_reference_seconds = 0, cloud_source_seconds = 0;
     double cloud_reference_fold = 0, cloud_source_fold = 0;
+    // L'ORDRE EXECUTE EST OBSERVE, PAS DEDUIT DE L'OPTION : le reaudit a releve
+    // que la ligne imprimee repetait `--build-order`, si bien qu'un mutant
+    // forcant la mauvaise branche restait vert. Chaque bloc note son passage.
+    int executed_first = 0;   // 0 = aucun, 1 = reference, 2 = source
 
     // LA REFERENCE PRODUIT SON PAYLOAD ENTIER SOUS SON PROPRE CHRONO : catalogue
     // puis forets. Le juge n'y est plus — l'audit chrono a etabli que soustraire
     // deux modes CLI n'isole rien, seule la separation des horloges DANS LE MEME
     // MODE est recevable.
     auto run_reference = [&]() {
+      if (executed_first == 0) executed_first = 1;
       const auto r0 = std::chrono::steady_clock::now();
       truth = mhgp3v::flat_catalogue(pts, smax, &st, &status, false, true);
       if (status == mhgp3v::CloudStatus::kOk)
@@ -865,6 +941,7 @@ int main(int argc, char** argv) {
     // LA SOURCE AUSSI : enumeration, assemblage du catalogue public, forets.
     // Un echec arithmetique du cover rend false et la campagne echoue ferme.
     auto run_source = [&]() -> bool {
+    if (executed_first == 0) executed_first = 2;
     const auto s0 = std::chrono::steady_clock::now();
     long long side = leaf;
     if (side <= 0) {
@@ -1137,6 +1214,15 @@ int main(int argc, char** argv) {
       }
       if (!run_source()) return 3;
     }
+    // L'ordre observe doit etre celui du contrat, et il est compte : un mutant
+    // qui force la mauvaise branche echoue ICI, pas dans un libelle.
+    const int expected_first = build_order == 1 ? 2 : 1;
+    if (executed_first != expected_first) {
+      printf("ECHEC : ordre execute au nuage %d (%s d'abord) contraire a --build-order %d\n",
+             c, executed_first == 1 ? "reference" : "source", build_order);
+      return 3;
+    }
+    if (executed_first == 1) ++clouds_reference_first; else ++clouds_source_first;
     reference_seconds += cloud_reference_seconds;
     source_seconds += cloud_source_seconds;
     reference_fold_seconds += cloud_reference_fold;
@@ -1169,9 +1255,15 @@ int main(int argc, char** argv) {
       }
     }
     long long missing = 0, extra = 0, differing = 0, member_faults = 0;
+    // CHAQUE COMPARAISON DU JUGE EST COMPTEE : le reaudit a montre que
+    // `judge_seconds > 0` recevait l'accumulation du timer, pas l'execution des
+    // comparaisons — un mutant supprimant le differentiel en gardant l'horloge
+    // restait plausible. Le plancher porte sur ce compteur.
+    judge_comparisons += (long long)expected.size();
     for (const auto& entry : expected)
       if (produced.find(entry.first) == produced.end()) ++missing;
     for (const auto& entry : produced) {
+      ++judge_comparisons;
       const auto it = expected.find(entry.first);
       if (it == expected.end()) { ++extra; continue; }
       const mhgp::CriticalSphere& a = entry.second.sphere;
@@ -1205,8 +1297,8 @@ int main(int argc, char** argv) {
         // LA SANTE STRUCTURELLE EST EXIGEE DE CHAQUE COTE, PAS SEULEMENT LEUR
         // EGALITE : deux forets identiquement malformees comparaient egal et
         // restaient vertes (audit). Une faute d'un seul cote est un desaccord.
-        const ForestStructure sa = forest_structure(a);
-        const ForestStructure sb = forest_structure(b);
+        const ForestStructure sa = forest_structure(a, source_catalogue);
+        const ForestStructure sb = forest_structure(b, truth);
         if (!sa.sound() || !sb.sound()) {
           printf("[nuage %d] FORET k=%d STRUCTURELLEMENT INVALIDE\n  source    :%s\n"
                  "  reference :%s\n", c, k, sa.text().c_str(), sb.text().c_str());
@@ -1238,6 +1330,7 @@ int main(int argc, char** argv) {
       ++payload_faults;
     } else {
       for (std::size_t i = 0; i < truth.spheres.size(); ++i) {
+        ++judge_comparisons;
         const mhgp::CriticalSphere& a = source_catalogue.spheres[i];
         const mhgp::CriticalSphere& b = truth.spheres[i];
         bool bad = a.n_support != b.n_support || a.rank != b.rank ||
@@ -1267,6 +1360,7 @@ int main(int argc, char** argv) {
         ++payload_faults;
     }
     for (std::size_t f = 0; f < source_forests.size(); ++f) {
+      ++judge_comparisons;
       const mhgp::Forest& a = source_forests[f];
       const mhgp::Forest& b = reference_forests[f];
       bool bad = a.order != b.order || a.nodes.size() != b.nodes.size() ||
@@ -1385,26 +1479,31 @@ int main(int argc, char** argv) {
     printf("refus      : %lld nuage(s) au statut non kOk — %.3f s au compte des refus, HORS"
            " des deux chronos\n", refused_status, refusal_seconds);
   if (mode == Mode::kJudge) {
-    printf("octets     : payload par nuage (haute-eau) — reference=%llu  source=%llu\n",
+    printf("octets     : buffers dynamiques du payload par nuage, haute-eau — spheres,"
+           " pool et forets SEULEMENT, pas tout l'objet public — reference=%llu"
+           "  source=%llu\n",
            reference_payload_bytes_high_water, source_payload_bytes_high_water);
     if (forest_orders > 0)
       printf("temps      : PAYLOAD PUBLIC CANONIQUE (catalogue + %d forets), nuages"
              " DECIDES seulement — reference %.3f s (dont fold %.3f) contre source %.3f s"
-             " (dont fold %.3f), rapport %.2f ; juge %.3f s HORS des deux chronos\n",
+             " (dont fold %.3f), rapport %.2f ; juge %.3f s (%lld comparaisons) HORS des"
+             " deux chronos\n",
              forest_orders, reference_seconds, reference_fold_seconds, source_seconds,
              source_fold_seconds,
              source_seconds > 0.0 ? reference_seconds / source_seconds : 0.0,
-             judge_seconds);
+             judge_seconds, judge_comparisons);
     else
       printf("temps      : catalogue seul, nuages DECIDES seulement — reference=%.3f s"
-             "  source=%.3f s  rapport %.2f ; juge %.3f s HORS des deux chronos\n",
+             "  source=%.3f s  rapport %.2f ; juge %.3f s (%lld comparaisons) HORS des"
+             " deux chronos\n",
              reference_seconds, source_seconds,
              source_seconds > 0.0 ? reference_seconds / source_seconds : 0.0,
-             judge_seconds);
-    printf("           : ordre execute par nuage = %s ; le juge (differentiel, empreintes,"
-           " comparaisons) a sa propre horloge, fermee AVANT ces lignes; ce rapport est un"
-           " diagnostic sur ces nuages, pas un SLO\n",
-           build_order == 1 ? "source puis reference" : "reference puis source");
+             judge_seconds, judge_comparisons);
+    printf("           : ordre OBSERVE par nuage — reference d'abord sur %lld, source"
+           " d'abord sur %lld (tout ecart au contrat --build-order est un ECHEC par"
+           " nuage) ; le juge a sa propre horloge, fermee AVANT ces lignes; ce rapport"
+           " est un diagnostic sur ces nuages, pas un SLO\n",
+           clouds_reference_first, clouds_source_first);
   } else if (mode == Mode::kCover)
     // AUCUNE REFERENCE N'EXISTE DANS CE MODE : le libelle « catalogue seul —
     // reference=0.000 » etait un rapport inexploitable, releve par l'audit.
@@ -1484,12 +1583,18 @@ int main(int argc, char** argv) {
            " morte\n", decided);
     return 3;
   }
-  // LE JUGE DOIT AVOIR TOURNE, ET SON HORLOGE LE PROUVE. Un mutant qui
-  // supprimerait le differentiel en gardant le libelle « juge HORS des deux
-  // chronos » rendrait un juge a zero seconde : residu de l'audit live.
+  // LE JUGE DOIT AVOIR TOURNE, ET C'EST SON COMPTEUR DE COMPARAISONS QUI LE
+  // PROUVE — le reaudit a montre qu'une horloge non nulle ne recevait que
+  // l'accumulation du timer. Tout nuage decide porte au moins ses n singletons
+  // dans la verite : zero comparaison apres un nuage decide est une mutation.
   if (mode == Mode::kJudge && judge_seconds <= 0.0) {
     printf("ECHEC : chrono juge nul apres %lld nuage(s) decide(s) — le differentiel n'a"
            " pas tourne\n", decided);
+    return 3;
+  }
+  if (mode == Mode::kJudge && judge_comparisons < decided * (long long)n) {
+    printf("ECHEC : %lld comparaison(s) de juge pour %lld nuage(s) decide(s) de %d points —"
+           " le differentiel n'a pas couvert la verite\n", judge_comparisons, decided, n);
     return 3;
   }
   if (refused_status != 0) {

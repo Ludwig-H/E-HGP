@@ -5,38 +5,45 @@ oracles bornés et microkernel GPU candidat sous audit. Profil exercé : **entr�
 u16 quantifiée seulement**. Aucun statut public, aucun SLO et aucune phase ne
 sont ouverts au registre.
 
-L'état produit audité reste le snapshot committé `e406e1f`. Le ledger
-documentaire postérieur comprend la réponse chrono `3d5a763`, les répétitions
-SMT `9b8954b` et l'audit inter-modes `84adbcc`; l'autorité courante est
+L'état courant audité est `HEAD=origin/main=f3802bd`. Le commit produit
+`a8b5615` ferme le mode cover autonome, sépare les timers dans un même mode,
+canonicalise les catalogues et les forêts, ajoute les portes owner/forêt et
+durcit le harnais ainsi que le self-test arithmétique. `1f0db40` étend ensuite
+`same_catalogue` à tous les champs déclarés de `Catalogue`; `f3802bd` corrige le
+comptage distinct des handles stricts dans le falsificateur F0. Aucun de ces
+commits ne change `exploration_v3_hors_registre` ni le statut public. L'autorité
+courante est
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
-### Delta live non committé au-dessus de `f37341d` — 10 août, 07:53 UTC
+### Réception courante — 10 août 2026
 
-Claude poursuit actuellement la source directe. Les corrections live ferment
-le mode cover autonome et reçoivent désormais ses trois lanes, son libellé et
-les quatre planchers incompatibles. Les timers source, référence, juge et refus
-sont séparés dans un même mode, l'ordre de construction peut être alterné, et
-le cœur sérialisé `{spheres, members, forests}` est remis en ordre canonique et
-comparé champ à champ. Les deux corruptions topologiques de forêt reproduites
-par l'audit terminent maintenant sous un validateur itératif. Enfin, le harnais
-rejette les morts par signal et `bigint_selftest` possède un parseur strict et
-deux portes négatives à code exact. La fixture owner compare aussi directement
-l'identité signée des deux extrémités que le mutant non signé échangeait.
+Les progrès fonctionnels sont réels : cover par trois lanes et quatre
+planchers, disclaimer reçu, morts par signal refusées, arguments arithmétiques
+stricts, payload canonique comparé, deux corruptions topologiques refusées des
+deux côtés et identité owner signée mutation-résistante sur sa fixture. La
+vérité coplanaire 19 a aussi été recertifiée par l'oracle exhaustif existant
+dans une copie temporaire. Ce sont des résultats CPU bornés, pas une promotion
+ni un reçu 50 k.
 
-Ce crédit reste **live et borné**, pas une promotion. Le palier `5ba178e...`
-compare aussi les huit diagnostics publics de `mhgp::Catalogue`; ils restent
-par défaut des deux côtés, et leur sémantique publique n'est pas encore taguée.
-La ligne `octets` ne les compte pas. Les structures topologiques invalides sont
-maintenant refusées séparément des deux côtés,
-mais `ForestNode::source` hors plage et les tranches du pool ne sont pas
-validés, et l'empreinte saine reste récursive. La garde d'horloge juge non nulle
-ne reçoit pas le travail du différentiel, et « ordre exécuté » est encore dérivé
-de l'option plutôt que de la branche prise. Les deux anciennes macros CMake
-conservent 23 appels sans code exact.
-Les empreintes et commandes sont tenues dans
-[`AUDIT_LIVE_REPRISE_COVER_F37341D.md`](audits/AUDIT_LIVE_REPRISE_COVER_F37341D.md)
-et [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md); elles seront
-réépinglées après stabilisation ou commit.
+Quatre réserves empêchaient de surinterpréter ce progrès ; trois sont fermées
+dans le delta courant. Le validateur de forêt reçoit désormais
+`ForestNode::source`, les tranches du pool et la profondeur maximale, avec
+leurs fixtures d'auto-test. Le juge porte un compteur de comparaisons avec
+plancher `decides × n` — la suppression du différentiel rougit, plus seulement
+l'annulation du timer. L'ordre est observé par une trace par nuage et tout
+écart au contrat est un `ECHEC`. Reste la quatrième, dite pour ce qu'elle est :
+l'égalité des diagnostics de `Catalogue` est une égalité de champs par défaut
+sans sémantique backend taguée, et la ligne `octets` se déclare partielle
+(buffers dynamiques seulement). Les deux anciennes macros CMake gardent aussi
+23 appels sans code exact.
+
+Claude a demandé un avis explicite sur les verrous forêt, axe des quadruples,
+fold et repli multi-cœurs. La
+[`réponse Q1--Q5`](audits/REPONSE_QUESTIONS_CLAUDE_FORET_50K_20260810.md)
+conclut notamment que le catalogue de rang borné n'est pas prouvé suffisant
+hors position générale et que l'admissibilité shallow ne forme pas en général
+un préfixe le long du pinceau. La route arité quatre reste donc un candidat de
+recherche, pas une décision d'architecture reçue.
 
 **Trois des quatre P0 de cet audit sont fonctionnellement fermés sur leur domaine
 borné.** La troncature `i128` du chemin `use_owner` est réduite par
@@ -48,13 +55,14 @@ troisième oracle qui ne ferme rien transitivement. Pour le quatrième, le delta
 replay ferme maintenant la vacuité et tue le mutant qui refuse tout, mais ne
 rejoue encore aucun payload : il crédite seulement des masses scalaires.
 
-L'audit conserve trois réserves de garde : les surcharges owner supprimées ne
+L'audit conserve deux réserves de garde : les surcharges owner supprimées ne
 forment pas encore un type fort fermé à toutes les petites conversions entières;
-le validateur régulier F0 accepte un handle strict dupliqué; ses deux CTests ne
-pas enregistrés si Python est absent. Dans le snapshot committé, la fixture du
-cône signé ne protégeait pas l'identité du propriétaire; le delta live
-`003ba13f...` compare désormais directement les deux extrémités attendues et ses
-deux portes ciblées passent. Le mutant de signe indépendant échange bien les
+les deux CTests F0 ne sont pas enregistrés si Python est absent. Le défaut du
+handle strict dupliqué est fermé à `f3802bd` par comptage distinct et fixture
+négative. Dans le snapshot historique, la fixture du cône signé ne protégeait
+pas l'identité du propriétaire; `a8b5615` compare désormais directement les
+deux extrémités attendues et ses deux portes ciblées passent. Le mutant de signe
+indépendant échange bien les
 deux verdicts et rend la porte rouge dans une copie temporaire. Les
 fermetures constructives sont dans la
 [`note des verrous mathématiques prioritaires`](audits/NOTE_VERROUS_MATHEMATIQUES_PRIORITAIRES.md).
@@ -775,16 +783,19 @@ niveaux exacts. Le tétraèdre rend 11 sphères partout, le triangle direct 7, e
 
 La porte permanente de domaine compare maintenant statut, support, arité, rang,
 niveau et membres dans les quatre quadrants. Elle impose 11 sphères au
-tétraèdre, 7 au triangle et ajoute un nuage coplanaire de cinq points; la vérité
-de cardinalité 19 de ce dernier n'est toutefois pas gravée. La signature de
+tétraèdre, 7 au triangle et ajoute un nuage coplanaire de cinq points. Depuis
+`a8b5615`, la cardinalité 19 et le statut de ce dernier sont gravés; un audit
+temporaire avec `brute_catalogue` les confirme indépendamment, mais la porte
+permanente ne compare pas encore le catalogue coplanaire complet. La signature de
 permutation owner transporte aussi membres et multiplicités, et le cône signé
 ainsi que le cube multi-support sont devenus permanents.
 
-Une dette mathématique subsiste dans cette nouvelle fixture. Sur le segment des
-centres du cône signé, remplacer $\varepsilon=-1$ par $+1$ échange seulement le
-propriétaire de $z=0$ vers $z=4$. Le catalogue reste identique et la porte passe.
-Il faut comparer directement l'identité des deux sommets candidats ou tuer le
-mutant du signe; l'égalité de sortie ne protège pas le théorème local.
+La première version conservait une dette mathématique : sur le segment des
+centres du cône signé, remplacer $\varepsilon=-1$ par $+1$ échangeait seulement
+le propriétaire de $z=0$ vers $z=4$, sans changer le catalogue. `a8b5615`
+compare maintenant directement l'identité des deux sommets; le mutant échange
+les verdicts et rend la porte rouge. Ce résultat protège le témoin local, pas
+une preuve générale du propriétaire.
 
 La disparition de table est acquise uniquement dans le quadrant
 owner+index+navigable. Sans index il reste $O(n)$ clefs singleton; sur la voie
@@ -1306,11 +1317,12 @@ doublons. Un mutant retirant la restriction $z>p$ émettait 126 fois au lieu de
 dans le binaire sous `--force-both-directions` et une porte négative exige qu'il
 rougisse — il rend 651 doublons et sort 3.
 
-Le payload jetait `members` après en avoir pris la taille : deux sorties de même
+Au palier historique, le payload jetait `members` après en avoir pris la taille : deux sorties de même
 rang et d'intérieurs différents étaient indiscernables. Les listes ordonnées
 complètes de membres sont maintenant construites **et** comparées par coquille.
-En mode forêt, un pool global source est aussi assemblé, mais son ordre et ses
-offsets ne sont pas égaux au payload canonique de la référence.
+À `a8b5615`, le pool global, son ordre et ses offsets sont canonicalisés et
+comparés à la référence; `1f0db40` étend encore `same_catalogue` aux champs
+déclarés restants.
 
 `n<t_q` et le plafond de cellules sortaient sur un message générique. Ce sont
 maintenant des statuts typés — `petit_nuage_direct` et `plafond_cellules` — avec
@@ -1338,11 +1350,11 @@ défaut CLI les ferait passer en mode mesure avec `reference=0`.
 L'empreinte de forêt omettait aussi les nœuds **inaccessibles**, les liens
 `parent` et `n_children` — une signature qui part des racines ne voit jamais un
 nœud que personne n'atteint. Un parcours séparé compte maintenant ces anomalies
-et son résultat entre dans l'empreinte. Ce n'est pas encore un validateur total :
-un auto-cycle `next_sibling` ne termine pas, et un `first_child` hors plage
-déclenche un heap-buffer-overflow sous ASan. Des fautes identiques des deux côtés
-restent en outre compatibles avec un digest égal. La forêt valide de la gate est
-créditée; toute promesse fail-closed sur une forêt malformée reste ouverte.
+et son résultat entre dans l'empreinte. `a8b5615` borne ensuite le cycle de
+frères, contrôle l'enfant avant déréférencement et refuse séparément une faute
+commune des deux côtés. Le validateur n'est toujours pas total : source hors
+plage, tranche de membres et profondeur de la signature récursive restent à
+recevoir.
 
 Trois réserves de mutation-résistance sont fermées. L'identité
 $\text{candidats}=C_q$ est maintenant **exigée** par lane, pas observée : une
@@ -1354,16 +1366,18 @@ sphère émise : sans lui, rien ne prouvait que le comparateur de listes compare
 autre chose que des listes vides — il rend 412 désaccords et sa porte négative
 l'exige.
 
-Enfin la revendication est ramenée à ce qui est vérifié : **mêmes listes de
-membres par coquille**, pas « mêmes pools ». L'ordre global du catalogue, les
-offsets publics et les indices `ForestNode::source` diffèrent de la référence, et
-l'empreinte de forêt est explicitement un **quotient sémantique** invariant à la
-renumérotation — pas une égalité de sérialisation. `e406e1f` soustrait désormais
+Au palier `e406e1f`, la revendication était ramenée à ce qui était vérifié :
+**mêmes listes de membres par coquille**, pas « mêmes pools ». L'ordre global du
+catalogue, les offsets publics et les indices `ForestNode::source` différaient de
+la référence, et l'empreinte de forêt était explicitement un **quotient
+sémantique** invariant à la renumérotation. `e406e1f` soustrait
 le fold référence du chrono source, mais y conserve le différentiel catalogue,
 les deux empreintes et leur comparaison; les coûts produit et juge restent donc
-mélangés.
+mélangés à ce snapshot. `a8b5615` canonicalise et compare ensuite le payload;
+les réserves courantes portent sur le travail du juge, la branche d'ordre, la
+sémantique des diagnostics et le comptage d'octets.
 
-### Un quotient sémantique de la forêt est produit et comparé
+### Historique `e406e1f` — un quotient sémantique de la forêt
 
 Le catalogue n'est que la moitié du contrat : ce que le projet doit produire est
 la **forêt des arbres de niveaux de densité**, pour $k=1..K$. Le prototype la
@@ -1574,13 +1588,13 @@ non plus une preuve qu'aucun générateur direct peut battre le parcours. Le dé
 du voisin terminal, la partition en tâches et la résidence de la sortie restent
 des verrous utiles indépendamment de cette comparaison.
 
-La structure output-sensitive qui manque à la voie directe est d'ailleurs
-exactement celle du parcours. Fixons un triple admissible $T$ : les sphères
-d'arité quatre le contenant ont leur centre sur **l'axe du pinceau** de $T$, une
-droite, et le contenu de la boule varie monotonement de chaque côté du plan. Les
-quatrièmes points admissibles forment donc un préfixe dans chaque direction —
-c'est `neighbour_along`, mot pour mot. Chercher à l'éviter revient à le
-réinventer.
+Fixons un triple admissible $T$ : les sphères d'arité quatre le contenant ont
+bien leur centre sur **l'axe du pinceau** de $T$, et chaque point non coplanaire
+définit un paramètre d'événement unique. Cela n'implique pas un préfixe shallow :
+des points du côté parcouru entrent dans la boule tandis que des points du côté
+opposé peuvent en sortir, donc le niveau peut monter et descendre. Le parcours
+`neighbour_along` reste une brique pour obtenir le prochain lot depuis un état
+courant; un seul appel par triangle ne constitue pas une source complète.
 
 ### Snapshot `e406e1f` — comparaison historique sur un contenu sémantique commun
 
@@ -1612,26 +1626,23 @@ périmètres rendus identiques, l'ordre d'exécution alterné et la dispersion
 reçue. Les masses des deux côtés restent publiées séparément et ne sont pas
 commensurables.
 
-**Réponse live de Claude au NO-GO chrono, delta non committé.** Les constructions
+**Réponse committée de Claude au NO-GO chrono, `a8b5615`.** Les constructions
 source et référence ont leurs horloges propres **dans le même mode juge**; le
 juge (différentiel, empreintes, comparaisons champ à champ) et les refus ont des
 horloges séparées. Un chrono source, référence ou juge nul sur une campagne
 décidée est un `ECHEC`, et l'ordre demandé par nuage est imprimé.
-`--build-order` alterne la position dans le même mode ; un refus sous ordre
+`--build-order` alterne la position dans le même mode; un refus sous ordre
 source-d'abord est un échec fermé nommé, jamais une pollution silencieuse des
-compteurs. Le payload public est sérialisé canoniquement **des deux côtés** —
-ordre lexicographique sur les quatre cases du support, pool reconstruit,
-offsets — et comparé **en entier** : sphères avec leur représentation exacte,
-pool concaténé, offsets, diagnostics du `Catalogue` (actuellement par défaut
-des deux côtés et désormais comparés), forêts nœud à nœud, indices
-`ForestNode::source` compris, `beta` bit à bit. Le mutant `--force-shell-order`
+compteurs. Les deux côtés canonicalisent ordre, pool et offsets, puis comparent
+les champs déclarés des sphères, diagnostics du `Catalogue`, forêts nœud à
+nœud, indices `ForestNode::source` et `beta` bit à bit. Le mutant `--force-shell-order`
 reproduit exactement la faute que la sonde d'audit observait — assemblage dans
 l'ordre de la map par coquille — et rougit par la porte de payload, pas par le
 quotient. Les diagnostics du `Catalogue` sont dans l'égalité comparée, et
 `judge_seconds>0` est exigé. Les nombres ci-dessous restent ceux de `e406e1f`;
 la remesure au périmètre corrigé suit la table.
 
-**Réponse d'audit live.** La séparation des quatre horloges et la comparaison
+**Réponse d'audit après commit.** La séparation des quatre horloges et la comparaison
 du payload canonique sont des progrès réels. Deux preuves restent ouvertes.
 Une paire de lectures d'horloge autour d'un bloc juge vide rend normalement un
 temps non nul : `judge_seconds>0` tue l'accumulation annulée, pas la suppression
@@ -1641,6 +1652,23 @@ huit diagnostics ne définit ni leur présence ni leur sémantique par backend;
 `catalogue_bytes` ne les compte pas. Il faut donc recevoir une masse de travail
 du juge, une trace d'ordre effective et un contrat de diagnostics avant de dire
 ces résidus fermés.
+
+**Fermeture des deux preuves, dans le delta courant.** Le juge porte maintenant
+un COMPTEUR de comparaisons — entrées attendues, entrées produites, sphères du
+payload, forêts — imprimé sur la ligne de temps et reçu par un plancher : moins
+de `decides × n` comparaisons est un `ECHEC`, puisque chaque nuage décidé porte
+au moins ses $n$ singletons dans la vérité. Supprimer le différentiel en
+gardant l'horloge rougit donc. L'ordre est désormais OBSERVÉ : chaque bloc note
+son passage dans une trace par nuage, tout écart au contrat `--build-order` est
+un `ECHEC` par nuage, et la ligne imprimée publie les comptes observés
+référence-d'abord / source-d'abord — un mutant qui force la mauvaise branche
+échoue au premier nuage. Le validateur de forêt reçoit en plus
+`ForestNode::source` (jamais $-1$ dans une forêt publiée, borné par le
+catalogue), la tranche de pool de chaque source et la profondeur maximale,
+chacun avec sa fixture d'auto-test. La ligne `octets` se déclare pour ce
+qu'elle est : buffers dynamiques sphères+pool+forêts, pas tout l'objet public;
+et l'égalité des diagnostics reste une égalité de champs PAR DÉFAUT — leur
+sémantique backend n'est pas définie ici, seule leur divergence est refusée.
 
 **[diagnostic ponctuel non scellé, densité fixe $10^{-3}$, $s_{\max}=6$,
 $K=5$, quatre nuages par ligne, même binaire Release, même processus]**
@@ -1683,7 +1711,7 @@ remesure et les observations d'audit sont consignées dans
 [`audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md`](audits/AUDIT_CHRONO_SOURCE_DIRECTE_E406E1F.md).
 
 **[diagnostic au périmètre corrigé — juge et refus hors des deux chronos, payload
-canonique des deux côtés, palier live antérieur aux derniers edits]** Sur la même fixture $n=120$
+canonique des deux côtés, source `7a5d42e...` antérieure au commit final]** Sur la même fixture $n=120$
 (4 nuages, $s_{\max}=6$, $K=5$, graine 20260810), dix répétitions — cinq par
 ordre de construction — rendent des rapports référence/source de **1,04 à 1,39,
 médiane 1,17, les dix au-dessus de 1**, là où le périmètre `e406e1f` rendait
@@ -2016,15 +2044,11 @@ Le target s'arrête à 20 000 points. Les campagnes positives ont des voisinages
 complets et ne reçoivent ni la frontière sélective, ni un digest attendu.
 L'identité `candidates==C_q` est bien exigée par lane depuis `81f9210`, sans
 valeurs attendues permanentes de $C_q/T_q/H_q$. Les chronos et high-waters
-restent incomplets : le temps nommé source soustrait le fold référence mais
-inclut encore le différentiel et les empreintes des deux côtés,
-et le pire cas récursif peut recopier des chaînes quadratiquement. Le commentaire
-qui borne certains agrégats `long long` oublie jusqu'à 2 000 nuages; la borne
-cumulée dépasse `i64`. Le nouveau contrôle structurel de forêt n'est pas total :
-cycle de frères et enfant hors plage donnent respectivement boucle et overflow
-ASan. Le delta live corrige l'ordre/pool/offsets, les deux corruptions reçues et
-le refus commun d'une topologie invalide, mais pas les diagnostics publics du
-catalogue, les sources/tranches hors plage ni la récursion profonde. Le label correct reste donc **prototype CPU
+étaient incomplets à `e406e1f` : le temps nommé source incluait encore le juge.
+`a8b5615` sépare les quatre timers, corrige ordre/pool/offsets, reçoit les deux
+corruptions topologiques et compare les diagnostics. Restent non reçus le
+travail effectif du juge, la branche d'ordre, les sources/tranches hors plage,
+la récursion profonde et le comptage complet des octets. Le label correct reste donc **prototype CPU
 candidat, accord relatif au catalogue fermé partagé**; la
 source Gabriel ouverte streamée et la porte 50 k ne sont pas implémentées.
 
@@ -2328,11 +2352,10 @@ le DSU ferment tous deux transitivement et peuvent partager une erreur de
 fermeture, celui-ci ne ferme rien. Il juge les 2 168 hypergraphes du domaine
 exhaustif, mais partage encore la classification des composantes.
 
-Le vérificateur régulier n'est pas encore autonome : il compte les occurrences
-de handles stricts sans en vérifier l'unicité. Un record qui répète deux fois le
-même handle strict est accepté, alors que `resolve_batch` le refuse comme
-`duplicate raw endpoint`. Son contrat doit donc imposer un lot déjà validé ou
-réutiliser les contrôles structurels communs, avec une fixture négative.
+Le défaut du validateur régulier est fermé à `f3802bd` : il compte les handles
+stricts distincts et refuse un doublon sous la fixture négative
+`duplicated-strict-handle`. `resolve_batch` conserve son rejet indépendant du
+`duplicate raw endpoint`.
 
 Une campagne vide, un argument inconnu ou un plancher non atteint rendent un
 code non nul avec son diagnostic ; **neuf** tests négatifs le vérifient — argument
