@@ -100,13 +100,16 @@ mêmes compteurs. **Un compteur reste rouge** : les visites de la frontière
 ambiguë (`1,50` puis `1,93` sur `terrain`), c'est-à-dire le TRAVAIL de
 recherche et non la sortie. La gate n'est donc pas entièrement verte.
 
-Deux politiques de travail ont été mesurées puis tranchées sur les mêmes
-octets, à sorts et census identiques : un ordre best-first par majorant est
-**rejeté** (173 millions de visites contre 122, et trois fois le temps) ;
-l'exploitation ponctuelle des feuilles ambiguës est **conservée** (survivantes
-`996 438` puis `674 986`, visites `122` puis `95,5` millions à `12 500`
-terrain). Une matrice figée de cette dernière est en cours et remplacera les
-chiffres ci-dessus lorsqu'elle sera complète.
+Des essais de développement ont rapporté 173 millions de visites pour un ordre
+best-first contre 122 millions pour l'ordre précédent, puis 95,5 millions
+après exploitation ponctuelle des feuilles ambiguës à `12 500 terrain`. Ils
+ne sont accompagnés ni d'un journal brut, ni des hashes des variantes, ni d'un
+reçu mono-binaire : ils orientent l'implémentation mais ne tranchent aucune
+politique. Le mode est count-only et ne matérialise aucun sort; seules des
+valeurs agrégées de census ont été observées. En outre, le compteur des tests
+ponctuels ajouté avec la dernière variante n'entrait pas dans la sortie ni dans
+la gate. Cette variante doit donc être remesurée avec une télémétrie complète
+avant toute conclusion de travail.
 
 ## 5. Ce que cette note ne prétend pas
 

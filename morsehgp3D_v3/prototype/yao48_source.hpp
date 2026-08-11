@@ -1446,7 +1446,7 @@ struct ShardedOutcome {
 
 inline ShardedOutcome run_sharded(const MortonLbvh& tree,
                                   const SourceInjections& injections, i64 bank_pops,
-                                  i64 chamber_visits, int threads) {
+                                  i64 chamber_visits, int threads, bool dual_cut = false) {
   ShardedOutcome outcome;
   if (threads < 1) threads = 1;
   const int n = (int)tree.order.size();
@@ -1463,6 +1463,7 @@ inline ShardedOutcome run_sharded(const MortonLbvh& tree,
       source.injections = injections;
       source.bank_pop_budget = bank_pops;
       source.chamber_visits = chamber_visits;
+      source.dual_cut = dual_cut;
       source.max_work = 0;   // le chemin quasi-produit n'a pas de budget
       for (;;) {
         const int begin = next_chunk.fetch_add(kChunk);

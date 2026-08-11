@@ -52,7 +52,7 @@ double percentile(std::vector<double> values, double q) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  int n = 50000, coord = 0, leaf_size = 8, reps = 5;
+  int n = 50000, coord = 0, leaf_size = 8, reps = 5, dual = 1;
   int threads = (int)std::thread::hardware_concurrency();
   i64 seed = 20260811, bank_pops = 512, chamber_visits = 100000;
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kTerrain;
@@ -89,12 +89,13 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--threads")) threads = (int)value;
     else if (!strcmp(argv[i], "--bank-pops")) bank_pops = value;
     else if (!strcmp(argv[i], "--chamber-visits")) chamber_visits = value;
+    else if (!strcmp(argv[i], "--dual")) dual = (int)value;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     ++i;
   }
   if (n < 64 || n > 100000 || coord < 0 || coord > 65536 || leaf_size < 2 ||
       leaf_size > 256 || reps < 1 || reps > 100 || threads < 1 || threads > 256 ||
-      bank_pops < 48 || chamber_visits < 8) {
+      bank_pops < 48 || chamber_visits < 8 || dual < 0 || dual > 1) {
     std::printf("ECHEC : campagne absurde\n");
     return 2;
   }
@@ -102,9 +103,9 @@ int main(int argc, char** argv) {
 
   std::printf("contrat=DiagnosticHorizontalReceipt-v1 serie=warm_e2e_h0_v3_diagnostic\n");
   std::printf("provenance : --points %d --coord %d --seed %lld --family %s"
-              " --leaf-size %d --reps %d --threads %d --bank-pops %lld\n", n, coord,
-              seed, mhgp3v::cloud_family_name(family), leaf_size, reps, threads,
-              bank_pops);
+              " --leaf-size %d --reps %d --threads %d --bank-pops %lld --dual %d\n",
+              n, coord, seed, mhgp3v::cloud_family_name(family), leaf_size, reps,
+              threads, bank_pops, dual);
   std::printf("PORTEE : k=1 (EMST exact) + q2 (tombstones Yao48/radial + comptes"
               " census) sur LBVH partage. SANS q3/q4, census materialise, resolver,"
               " fold, payload : cette serie ne ferme AUCUN SLO officiel.\n");
@@ -157,7 +158,8 @@ int main(int argc, char** argv) {
         return 1;
       }
     const mhgp3v::yao48::ShardedOutcome q2 = mhgp3v::yao48::run_sharded(
-        tree, mhgp3v::yao48::SourceInjections{}, bank_pops, chamber_visits, threads);
+        tree, mhgp3v::yao48::SourceInjections{}, bank_pops, chamber_visits, threads,
+        dual == 1);
     const auto t3 = std::chrono::steady_clock::now();
     if (q2.per_anchor_violated) {
       std::printf("ECHEC : la fermeture par ancre a ete violee\n");

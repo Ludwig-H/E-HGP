@@ -20,9 +20,10 @@ jamais réception.
   les contre-exemples, les tests qualifiables et les portes ouvertes.
 
 Le résumé est [`../README.md`](../README.md) et l'architecture durable est
-[`../PROPOSITION.md`](../PROPOSITION.md). Ces deux documents ne doivent pas
-dupliquer un statut de commit : ils renvoient au verdict live. Les
-spécifications et le registre des preuves sous `docs/` restent supérieurs.
+[`../PROPOSITION.md`](../PROPOSITION.md). Ils peuvent conserver un résultat
+historique explicitement pincé ou une conclusion d'architecture durable, mais
+le statut logiciel du successeur appartient au verdict live. Les spécifications
+et le registre des preuves sous `docs/` restent supérieurs.
 
 ## Snapshots et preuves conservés
 
@@ -38,6 +39,7 @@ spécifications et le registre des preuves sous `docs/` restent supérieurs.
 | [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md) | spécification de la route produit q2 : Morton/LBVH, coupe Yao48 stricte fail-open, classifieur terminal, census fermé, ledger, juge indépendant et gate d'exposant; statut logiciel exclusivement dans l'audit live |
 | [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md) | spécification auditée du falsificateur P1a q4 mass-only : domaine de Jung, 64 patchs rationnels, témoins collectifs, ledger bijectif et protocole direct `n=32` vers 50 k; statut logiciel exclusivement dans l'audit live |
 | [`AUDIT_P1A_CENTER_COVER_B312638_20260811.md`](AUDIT_P1A_CENTER_COVER_B312638_20260811.md) | audit du premier probe v3 P1a : théorème q4 sûr et différentiels bornés verts, mais reçus incomplets et rescan racine pratiquement quadratique; NO-GO du port littéral avant G4 |
+| [`NOTE_CLAUDE_P1A_NOGO_20260811.md`](NOTE_CLAUDE_P1A_NOGO_20260811.md) | journal explicatif de la rampe P1a terrain 2/4/8 k et de son refus par les compteurs; le verdict scientifique et les limites du juge restent dans l'audit P1a dédié |
 | [`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md) | inventaire du prior art CUDA Yao48/LBVH et P1a dans `morsehgp3d/`, limites de qualification et propositions exactes de réemploi; différentiel, jamais autorité v3 |
 | [`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md) | théorème Yao-1 contenant l'EMST canonique, prior art LBVH/Kruskal enregistré, rejet CPU et contrat de mutualisation exacte avec q2; blueprint, jamais preuve de débit |
 | [`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md) | audit de la rampe CPU mono-binaire q2 à 12,5/25/50 k; trois familles structurées rouges, temps non qualifiables et ordonnance état--nœud du snapshot NO-GO avant G4; falsificateur unilatéral, jamais preuve de GO |
@@ -112,6 +114,14 @@ contient la rampe de la frontière duale auditée séparément :
 | --- | --- | --- |
 | `dual_scale_counters_raw.txt` | `a19ac56290e3262f9f1fc9b05e37952688f3a26db1f80fb989325a53292ce1b1` | trois triplets structurés count-only fermés et un seul cas uniforme; mode CLI faussement imprimé `exact`, provenance reconstruite, temps non qualifiables |
 | `dual_exponents_derived.txt` | `264dd91eeb96a4243558e3f84322fe1db7d004e1d3e15156ee0af5e973c8b349` | sorties/classifieur verts, mais `dual_witness_visits` rouge deux fois dans les trois familles complètes; gate globale NO-GO |
+
+Le dossier
+[`../receipts/p1a_scale_20260811/`](../receipts/p1a_scale_20260811/)
+contient la rampe P1a auditée séparément :
+
+| fichier | SHA-256 | portée |
+| --- | --- | --- |
+| `p1a_scale_counters_raw.txt` | `140320266c11ba74dc0b7f5405c89ccc6ebb166875fa9b469373da4af53ea9b0` | terrain 2/4/8 k à code nul; uniforme 2/4 k à code nul puis 8 k interrompu; même binaire selon la session, provenance externe et temps non qualifiables; les compteurs terrain refusent l'ordonnance |
 
 ## Autorités externes
 

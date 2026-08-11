@@ -132,6 +132,14 @@ top-`K`/réservoir arbitraire `K+1` et le certificat dual exact sont dans
 et
 [`AUDIT_REPONSES_G4_Q2_YAO1_20260811.md`](audits/AUDIT_REPONSES_G4_Q2_YAO1_20260811.md).
 
+Le successeur dual persistant du snapshot `c70974e` réduit fortement le
+résiduel : sur les trois familles structurées complètes, les survivantes et le
+classifieur passent sous la pente `1,35`. Il ne ferme pourtant pas la gate de
+travail : `dual_witness_visits` reste rouge sur les deux doublements de chacune
+de ces familles, et la série `uniform` est incomplète. Le reçu ne qualifie ni
+le pointwise-leaf ajouté ensuite, ni un temps, ni le payload produit. Voir
+[`AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md`](audits/AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md).
+
 La preuve locale q2 combine un supremum `U4`, un infimum `L4`, des témoins
 distincts et une partition exacte des paires. Sa réception logicielle, ses
 mutants et ses insuffisances ne sont pas dupliqués ici : voir le verdict live.
@@ -178,11 +186,13 @@ valeurs, hashes et limites exactes restent uniquement dans l'audit live.
 
 Le premier probe P1a q4 mass-only du snapshot `b312638` valide son certificat
 sur les campagnes bornées, mais il redémarre lui aussi la recherche témoin à la
-racine pour chaque bloc. Entre 2 000 et 4 000 points `terrain`, les tests
-point--patch et les évaluations de coins ont des pentes proches de deux. Le port
-littéral est donc `NO-GO` avant G4; une nouvelle ordonnance persistante et les
-bornes dirigées `L/U` doivent repasser une gate CPU. Le théorème, les trous de
-juge et les compteurs pincés sont dans
+racine pour chaque bloc. Sur les deux doublements `terrain` de 2 000 à 8 000
+points, les visites témoins ont des pentes `2,104` puis `1,896`; `uniform`
+expire à 8 000. Le port littéral est donc `NO-GO` avant G4. Une ordonnance
+persistante munie des bornes dirigées `L/U` doit d'abord subir un court
+diagnostic structurel CPU qui exclut ce régime; ce diagnostic n'ajoute aucun
+palier au protocole P1a direct. Le théorème, les trous de juge et les compteurs
+pincés sont dans
 [`AUDIT_P1A_CENTER_COVER_B312638_20260811.md`](audits/AUDIT_P1A_CENTER_COVER_B312638_20260811.md).
 
 ## Invariants industriels
@@ -225,7 +235,10 @@ préfixe comme objet complet.
    employer la coupe cône--boîte entière, puis le certificat
    collectif dual-tree `L_p(Q,W)>0` sur une antichaîne témoin disjointe de masse
    dix. La frontière témoin persiste sous raffinement, sans rescan racine ni
-   matrice cible--témoin. Le certificat à l'autre extrémité reste une
+   matrice cible--témoin. Le prototype persistant existe désormais, mais doit
+   encore authentifier ses crédits, compter tout le travail dual et réduire
+   ses deux pentes rouges avant tout port device. Le certificat à l'autre
+   extrémité reste une
    optimisation facultative si sa banque est déjà dans la tuile ou un cache
    borné. Seul le résiduel finit dans le census résident multi-ordre avec
    offsets 64 bits; la nouvelle ordonnance doit repasser la gate CPU avant

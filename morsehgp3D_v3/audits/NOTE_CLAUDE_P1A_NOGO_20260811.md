@@ -11,11 +11,13 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Verdict
 
 Le port CPU u16 de `P15-HOCUDA-P1a` **fonctionne et falsifie sa propre
-route**. Le certificat géométrique est exact — quinze mutants meurent, le juge
-déterminantal indépendant ne trouve aucun désaccord, le ledger transactionnel
-ferme — mais ses compteurs de travail croissent trop vite. C'est précisément
-la fonction d'un falsificateur de masse : il refuse tôt, avant toute session
-G4 native.
+route**. La condition géométrique auditée est sûre, quinze mutants meurent, les
+campagnes bornées n'ont trouvé aucune fausse coupe et le ledger transactionnel
+ferme. Le juge déterminantal est arithmétiquement indépendant pour les sphères
+et la positivité propre; il n'authentifie toutefois ni la bijection complète ni
+tous les champs structurels du reçu recensés par l'audit dédié. Les compteurs de travail croissent
+trop vite : le probe remplit précisément sa fonction de falsificateur de masse
+en refusant la route avant toute session G4 native.
 
 Ce verdict porte sur l'ordonnance mesurée, pas sur le théorème de
 center-cover, ni sur une future implémentation tuilée ou device. Le statut
@@ -33,7 +35,7 @@ binaire, mono-thread. L'exposant est
 | blocs prunés | 4 000 | 12 173 | 33 082 | 1,61 puis 1,44 |
 | splits | 20 473 | 54 761 | 134 065 | 1,42 puis 1,29 |
 | microtuiles | 17 024 | 43 749 | 103 265 | 1,36 puis 1,24 |
-| visites témoin--patch | 11 342 326 | 48 755 505 | 181 460 408 | 2,10 puis 1,90 |
+| états `(nœud témoin, masque de patches)` | 11 342 326 | 48 755 505 | 181 460 408 | 2,10 puis 1,90 |
 | évaluations de coins | 1 499 943 648 | 5 880 386 017 | 20 267 313 188 | 1,97 puis 1,79 |
 | tests ponctuels | 371 871 550 | 1 454 747 634 | 5 017 937 282 | 1,97 puis 1,79 |
 | part terminale | 32,0 % | 20,2 % | 12,2 % | — |
@@ -46,14 +48,15 @@ Trois faits séparés, à ne pas confondre :
    déclenchée.** La part terminale décroît de 32,0 % à 12,2 % : le
    center-cover prune bien la majorité de la masse, et de plus en plus. Le
    certificat fait ce qu'il promet.
-2. **Les compteurs de travail sont rouges.** Visites patch--nœud, évaluations
+2. **Les compteurs de travail sont rouges.** États témoin, évaluations
    de coins et tests ponctuels ont deux exposants successifs très supérieurs à
-   `1,35` — approximativement quadratiques à cubiques. Vingt milliards
+   `1,35` — quasi quadratiques sur cette rampe. Vingt milliards
    d'évaluations de coins à 8 000 points interdisent toute extrapolation à
    50 000.
-3. **Le coût est concentré dans les coins.** Chaque bloc tenté évalue jusqu'à
-   `64 patchs x 8 coins x 2 côtés` avant même de chercher un témoin, soit
-   1 024 évaluations de `clip` par bloc dans le pire cas. Le rapport
+3. **Le coût est concentré dans les coins.** Pendant la recherche, chaque état
+   `(nœud témoin,patch actif)` peut évaluer jusqu'à `8 coins x 2 côtés`; ces
+   évaluations sont répétées au fil de `collect_witnesses`, et non payées une
+   seule fois avant la recherche. Le rapport
    `coins / blocs tentés` vaut environ 61 000 à 2 000 points et 121 000 à
    8 000 : ce n'est pas la partition qui explose, c'est le travail par bloc.
 
@@ -70,9 +73,10 @@ n'est demandée pour P1a en l'état.
 - réduire le travail par bloc avant les patchs : une borne unique de bloc qui
   élimine les 64 patchs d'un coup lorsque le domaine `T0` est déjà couvert,
   ou un ordre de patchs qui s'arrête au premier survivant sans témoin ;
-- réutiliser la traversée duale `Q--W` de la lane q2, dont l'héritage exact
-  des deux verdicts supprime le rescan : le même schéma s'applique aux
-  témoins de patch, où seul le majorant change ;
+- réutiliser l'ordonnance persistante de la traversée duale `Q--W` comme guide
+  de travail. Les grilles de patches, crops et exclusions d'endpoints changent
+  au split P1a : aucun crédit parent ne devient une vérité enfant sans
+  recertification complète sur les huit coins du patch courant ;
 - mesurer d'abord `coins / blocs tentés` à budget constant, puisque c'est ce
   rapport, et non la partition, qui décide.
 

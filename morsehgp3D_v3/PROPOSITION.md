@@ -298,8 +298,8 @@ il rend l'objet exact complet ou échoue sur une ressource physique réelle.
 Les masses ferment également `pos(j)` ancre par ancre et engagent des
 intervalles disjoints ou un digest canonique; une seule égalité globale ne peut
 pas masquer une omission compensée par un doublon. Un reçu de région référence
-une banque factorisée `(ancre, chambre, version)` au lieu de recopier ses dix
-`PointId`. Les compteurs couvrent construction du LBVH, visites et pops de
+une banque factorisée `(ancre, chambre, version)` et son masque d'engagement au
+lieu de recopier ses dix ou onze candidats. Les compteurs couvrent construction du LBVH, visites et pops de
 banques, tas, parcours de prune, classification, tests ponctuels, piles,
 records et octets réels. Un cap de probe peut abandonner un prune et retomber
 fail-open; aucun `max_work` configurable ne refuse le chemin produit.
@@ -323,6 +323,16 @@ compteurs et la décision sont dans
 [`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](audits/AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md),
 et les réponses d'implémentation dans
 [`AUDIT_REPONSES_G4_Q2_YAO1_20260811.md`](audits/AUDIT_REPONSES_G4_Q2_YAO1_20260811.md).
+
+La rampe duale persistante du snapshot `c70974e` fait passer sous `1,35` les
+survivantes et le classifieur des trois familles structurées complètes, mais
+pas le travail de recherche : `dual_witness_visits` reste rouge sur leurs six
+doublements et `uniform` est incomplète. Elle falsifie donc encore
+l'ordonnance mesurée avant G4. Les optimisations postérieures doivent compter
+tests ponctuels, abandons fail-open et mémoire de frontière avant de pouvoir
+revendiquer un gain de complexité; elles ne sont pas qualifiées par ce reçu.
+Voir
+[`AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md`](audits/AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md).
 
 `smax` ne transforme pas ce pire cas en graphe de degré borné. Dans l'espace
 euclidien, pour tout `m`, un point `p` et `m` points distincts `q_i` sur une
@@ -760,8 +770,10 @@ un refus de ressource sont trois statuts distincts.
    fermé. Fermer q2 par top-`K` exact ou réservoir arbitraire `K+1`, coupe
    cône--boîte exacte et
    certificat dual-tree `L_p(Q,W)>0`; réserver la classification terminale et
-   le census fermé multi-ordre au résiduel. Conserver le self-join comme oracle
-   ou second prune selon les masses, puis repasser la gate CPU avant CUDA.
+   le census fermé multi-ordre au résiduel. Le prototype dual persistant doit
+   maintenant fermer son reçu, ses mutants et sa télémétrie complète, puis
+   réduire les pentes de frontière avant CUDA. Conserver le self-join comme
+   oracle ou second prune selon les masses.
 4. Conserver le prototype `P15-HOCUDA-P1a` mass-only q4 comme falsificateur :
    son rescan racine par bloc est déjà refusé par l'audit. Implémenter une
    wavefront témoin persistante et les bornes dirigées `L/U`, fermer les trous
