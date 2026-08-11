@@ -129,6 +129,7 @@ struct SourceReceipt {
   i64 dual_witness_visits = 0;   // noeuds temoins evalues
   i64 dual_inherited = 0;        // temoins herites sans reevaluation
   i64 dual_accepted = 0;         // sous-arbres temoins acceptes
+  i64 dual_point_tests = 0;      // tests ponctuels dans les feuilles ambigues
 };
 
 enum class PairFate : std::uint8_t {
@@ -778,7 +779,8 @@ struct YaoSource {
     int frontier_begin = 0, frontier_end = 0;   // noeuds AMBIGUS herites
     i64 mass = 0;
   };
-  std::vector<std::pair<int, int>> dual_arena_;   // (begin,end) des W acceptes
+  struct DualAccepted { int begin = 0, end = 0; i64 mass = 0; };
+  std::vector<DualAccepted> dual_arena_;   // antichaine : plages et masses
   std::vector<int> dual_frontier_;               // arene des noeuds ambigus
   std::vector<DualFrame> dual_stack_;
 
@@ -811,13 +813,34 @@ struct YaoSource {
         if (dual_max_a(q_node, w, p) <= 0) continue;   // rejete DEFINITIVEMENT
         if (dual_min_a(q_node, w, p) > 0) {
           ++receipt.dual_accepted;
-          dual_arena_.push_back({w.begin, w.end});
+          dual_arena_.push_back({w.begin, w.end, (i64)(w.end - w.begin)});
           mass += w.end - w.begin;
           continue;                                     // antichaine : jamais descendu
         }
       }
       if (w.left < 0) {
-        dual_frontier_.push_back(index);   // feuille ambigue : transmise telle quelle
+        // LA FEUILLE AMBIGUE EST EXPLOITEE AU POINT : min A <= 0 < max A
+        // signifie que CERTAINS de ses points sont temoins. Les tester
+        // credite la masse manquante et permet de pruner PLUS HAUT dans
+        // l'arbre des cibles — donc de visiter moins de noeuds au total.
+        // La feuille creditee sort de la frontiere : sa masse est heritee
+        // telle quelle par les enfants (les temoins d'un pere restent
+        // temoins d'un fils), jamais recomptee.
+        i64 credited = 0;
+        if (!holds_anchor && !overlaps_q) {
+          for (int t = w.begin; t < w.end; ++t) {
+            ++receipt.dual_point_tests;
+            const mhgp::P3& z = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
+            if (dual_min_a_point(q_node, z, p) > 0) ++credited;
+          }
+        }
+        if (credited > 0) {
+          ++receipt.dual_accepted;
+          dual_arena_.push_back({w.begin, w.end, credited});
+          mass += credited;
+          continue;                       // consommee : plus jamais visitee
+        }
+        dual_frontier_.push_back(index);   // aucun temoin : reste ambigue
         continue;
       }
       dual_work_.push_back(w.left);

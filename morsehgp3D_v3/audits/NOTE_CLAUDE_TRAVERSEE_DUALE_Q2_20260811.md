@@ -65,38 +65,45 @@ branche soit acceptée, rejetée, ou réduite à une feuille ambiguë, et seul c
 résidu est transmis. La frontière ne repart jamais de la racine.
 
 Séparabilité, minimum aux quatre coins, majorant, héritage et l'équivalence
-`A>0 \Leftrightarrow \Phi<0` ont été vérifiés hors bande en arithmétique
-exacte avant gravure.
+`A>0 \Leftrightarrow \Phi<0` découlent des arguments ci-dessus. Leur réception
+logicielle et leurs fixtures appartiennent au verdict live; une vérification
+hors bande non archivée n'est pas une autorité.
 
 Bornes u16 : `\lvert u\rvert,\lvert v\rvert\leq65535`, donc
 `\lvert uv-v^{2}\rvert<2^{33}` par axe et `\lvert A\rvert<2^{35}` — `i64`
 avec marge.
 
-## 4. Effet mesuré, à binaire et nuage identiques
+## 4. Effet diagnostique rapporté, avec provenance incomplète
 
-À `12 500` points, famille `terrain`, graine `20260810`, même binaire, même
-`leaf_size`, census de sortie **identique** (`253 129` records) et juge borné
-vert :
+À `12 500` points, famille `terrain`, graine `20260810`, les mesures de la
+session Claude rapportent le même `leaf_size` et `253 129` records de census :
 
-| ordonnance | survivantes | visites témoins | masse coupée | phase locale |
-| --- | ---: | ---: | ---: | ---: |
-| chambres Yao48 (banques 48) | 4 543 219 | — | 94,2 % | 16,5 s |
-| duale, rescan racine | 1 057 788 | 261 058 042 | 98,6 % | 22,9 s |
-| duale, frontière persistante | 996 438 | 122 022 307 | 98,7 % | 11,3 s |
+| ordonnance | snapshot logique | survivantes | visites témoins | masse coupée | phase locale |
+| --- | --- | ---: | ---: | ---: | ---: |
+| chambres Yao48 (banques 48) | mode chambres | 4 543 219 | — | 94,2 % | 16,5 s |
+| duale, rescan racine | antérieur à `9d28b42` | 1 057 788 | 261 058 042 | 98,6 % | 22,9 s |
+| duale, frontière persistante | `9d28b42` | 996 438 | 122 022 307 | 98,7 % | 11,3 s |
 
-Ces trois ordonnances rendent les **mêmes sorts** : la porte d'invariance des
-politiques compare, sur les mêmes octets, budgets minimal et ample, mode
-antichaîne et mode dual, et exige l'égalité de tous les sorts de tombstone et
-de tous les agrégats de census. Une politique de travail accélère ; elle ne
-décide jamais.
+Le rescan et la frontière persistante ne peuvent pas provenir du même binaire :
+le second remplace le premier dans `9d28b42`. Aucun journal brut, commande,
+hash source ou ELF n'est attaché à ce tableau; ses temps ne sont donc pas un
+reçu. La porte bornée d'invariance du binaire courant compare chambres,
+antichaîne et mode dual sur ses propres petits nuages. Elle ne réauthentifie ni
+le vieux rescan ni l'identité de tous les sorts du run 12 500. Le tableau
+montre un signal d'amélioration à reproduire, pas une qualification.
 
 ## 5. Ce que cette note ne prétend pas
 
-Elle ne revendique ni une pente admise, ni une architecture reçue, ni un
-temps qualifiable. La matrice `12 500/25 000/50 000` sur binaire figé est en
-cours ; seuls ses exposants peuvent décider de la gate `1,35`, et seul le
-verdict live peut les recevoir. Le classifieur terminal, le census matérialisé,
-les sources q3/q4, le resolver, le fold et le payload officiel restent hors de
-cette lane.
+Elle ne revendique ni une architecture reçue, ni un temps qualifiable. La
+rampe du commit `c70974e` contient les trois tailles pour les trois familles
+structurées, mais `uniform` est incomplète. Les compteurs de sortie et du
+classifieur passent sous `1,35`; `dual_witness_visits` reste rouge deux fois
+dans chacune des trois familles. La gate de travail globale est donc **NO-GO**,
+même si le résiduel est nettement meilleur. La portée et la provenance sont
+auditées dans
+[`AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md`](AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md).
+
+Le census matérialisé, les sources q3/q4, le resolver, le fold et le payload
+officiel restent hors de cette lane.
 
 GCP non utilisé pour cette note.
