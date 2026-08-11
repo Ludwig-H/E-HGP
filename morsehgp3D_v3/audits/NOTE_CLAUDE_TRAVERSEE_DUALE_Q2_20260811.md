@@ -73,24 +73,40 @@ Bornes u16 : `\lvert u\rvert,\lvert v\rvert\leq65535`, donc
 `\lvert uv-v^{2}\rvert<2^{33}` par axe et `\lvert A\rvert<2^{35}` — `i64`
 avec marge.
 
-## 4. Effet diagnostique rapporté, avec provenance incomplète
+## 4. Reçus d'échelle, binaire figé
 
-À `12 500` points, famille `terrain`, graine `20260810`, les mesures de la
-session Claude rapportent le même `leaf_size` et `253 129` records de census :
+L'objection de provenance de l'audit est reçue : le tableau précédent
+mélangeait deux binaires et n'attachait aucun journal. Il est remplacé par une
+matrice `12 500/25 000/50 000` exécutée sur un **binaire figé**, dont la sortie
+brute et les exposants dérivés sont archivés :
 
-| ordonnance | snapshot logique | survivantes | visites témoins | masse coupée | phase locale |
-| --- | --- | ---: | ---: | ---: | ---: |
-| chambres Yao48 (banques 48) | mode chambres | 4 543 219 | — | 94,2 % | 16,5 s |
-| duale, rescan racine | antérieur à `9d28b42` | 1 057 788 | 261 058 042 | 98,6 % | 22,9 s |
-| duale, frontière persistante | `9d28b42` | 996 438 | 122 022 307 | 98,7 % | 11,3 s |
+| objet | SHA-256 |
+| --- | --- |
+| [`dual_scale_counters_raw.txt`](../receipts/yao48_dual_20260811/dual_scale_counters_raw.txt) | `a19ac56290e3262f9f1fc9b05e37952688f3a26db1f80fb989325a53292ce1b1` |
+| [`dual_exponents_derived.txt`](../receipts/yao48_dual_20260811/dual_exponents_derived.txt) | `264dd91eeb96a4243558e3f84322fe1db7d004e1d3e15156ee0af5e973c8b349` |
+| binaire figé de cette matrice | `0fce8ec7c91152d2b6b1bb4ca6e8401f2081528bbbcc42c61987a7a49260b071` |
 
-Le rescan et la frontière persistante ne peuvent pas provenir du même binaire :
-le second remplace le premier dans `9d28b42`. Aucun journal brut, commande,
-hash source ou ELF n'est attaché à ce tableau; ses temps ne sont donc pas un
-reçu. La porte bornée d'invariance du binaire courant compare chambres,
-antichaîne et mode dual sur ses propres petits nuages. Elle ne réauthentifie ni
-le vieux rescan ni l'identité de tous les sorts du run 12 500. Le tableau
-montre un signal d'amélioration à reproduire, pas une qualification.
+Sur les trois familles structurées, tous les compteurs de **sortie** et de
+**classification** passent la gate `1,35` :
+
+| famille | survivantes | boîtes | tests | census | coupe à 50 k |
+| --- | --- | --- | --- | --- | ---: |
+| terrain | 1,05 puis 1,03 | 1,10 puis 1,16 | 1,06 puis 1,05 | 1,02 puis 1,01 | 99,66 % |
+| scanline simple | 1,04 puis 1,03 | 1,16 puis 1,13 | 1,07 puis 1,07 | 1,01 puis 1,01 | 99,70 % |
+| multiécho | 1,12 puis 1,11 | 1,24 puis 1,20 | 1,17 puis 1,17 | 1,01 puis 1,01 | 99,53 % |
+
+L'ordonnance par chambres du même binaire donnait `1,40` à `1,83` sur ces
+mêmes compteurs. **Un compteur reste rouge** : les visites de la frontière
+ambiguë (`1,50` puis `1,93` sur `terrain`), c'est-à-dire le TRAVAIL de
+recherche et non la sortie. La gate n'est donc pas entièrement verte.
+
+Deux politiques de travail ont été mesurées puis tranchées sur les mêmes
+octets, à sorts et census identiques : un ordre best-first par majorant est
+**rejeté** (173 millions de visites contre 122, et trois fois le temps) ;
+l'exploitation ponctuelle des feuilles ambiguës est **conservée** (survivantes
+`996 438` puis `674 986`, visites `122` puis `95,5` millions à `12 500`
+terrain). Une matrice figée de cette dernière est en cours et remplacera les
+chiffres ci-dessus lorsqu'elle sera complète.
 
 ## 5. Ce que cette note ne prétend pas
 
