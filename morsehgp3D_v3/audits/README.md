@@ -20,6 +20,12 @@ explicitement classé comme réfutation ou archive.
   plancher anti-vacuité, fixture amputée à raison exacte), masques remesurés,
   prune convexe d'axe (R_4 dix-huit fois plus petit à n=2400, résidu ~n^1,9)
   et la question du théorème 2 multi-lot ou de la route EMST pour k=1.
+- [`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md) : la première session G4 mass-only à 50 000 points —
+  sondes cellules trois familles/deux pas en 1,7--29 s par lane sur 48
+  threads (q=2 admissible après prune, q=3/q=4 rouges), masques hybrid-fast
+  sur catalogues parallèles (k=2 à 0,32 % de requêtes sur 444 570
+  générateurs), reçus bruts dans `receipts/g4_massonly_20260811/`, cible
+  certifiée TERMINATED.
 
 L'autorité du théorème d'inertie reste
 [`INCIDENCES_SILENCIEUSES_GAMMA.md`](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md), et le statut public reste régi par

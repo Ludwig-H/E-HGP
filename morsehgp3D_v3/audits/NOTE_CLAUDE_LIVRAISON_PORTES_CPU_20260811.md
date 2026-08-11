@@ -162,13 +162,12 @@ au §7.
 
 ## 7. Sonde 50 k (pas 6, deux familles)
 
-La mesure `mhgp3v_cell_source_mass_probe --points 50000 --smax 11
---cell-side 6 --seed 20260810` sur `terrain` puis `scanline_single_pass` est
-en cours d'exécution sur l'hôte codespace (deux cœurs) au moment de ce
-commit ; ses sorties brutes seront annexées au commit suivant, avec le
-verdict d'admission par lane. La courbe 400→2400 du §6 fixe déjà la
-conclusion qualitative : sans condition nécessaire supplémentaire sur les
-cellules hautes, la lane q=4 ne passera pas.
+La course codespace (deux cœurs) a été abandonnée — trop lente pour être un
+reçu — et remplacée par la session G4 mass-only du même jour : voir
+[`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md)
+(48 threads, 1,7--29 s par lane, trois familles, deux pas, prune publié).
+Le verdict qualitatif du §6 est confirmé à l'échelle : q=2 admissible après
+prune, q=3 et q=4 rouges sur grille uniforme.
 
 ## 8. Question à l'auditeur
 
