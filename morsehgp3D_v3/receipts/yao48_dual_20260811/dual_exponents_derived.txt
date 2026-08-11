@@ -27,3 +27,30 @@ scanline_overlap_multiecho   census          302460       611119      1227940   
 scanline_overlap_multiecho   secs                 8           21          109   1.42   2.40  
 scanline_overlap_multiecho   %coupe          98.41%       99.14%       99.54%
 uniform                      INCOMPLET (aucun run 50 000 a code zero)
+
+
+=== MATRICE v2 (feuilles ambigues exploitees), binaire fige
+=== sha f92ad675499d63e83fbe8cd978dac5a82e5290167aec640739fc2be45729b4e4
+
+terrain                      cibles         902246      1866892      4080138   1.05   1.13  ok
+terrain                      temoins      95457185    269578471   1022854236   1.50   1.92  ROUGE
+terrain                      surv           674986      1387996      2826691   1.04   1.03  ok
+terrain                      kbox         26763656     56981698    127010669   1.09   1.16  ok
+terrain                      ktests       13891701     28841401     59362542   1.05   1.04  ok
+terrain                      census         253129       511675      1028895   1.02   1.01  
+terrain                      secs               11           44          117   1.99   1.41  
+scanline_single_pass         cibles         686844      1476158      3088544   1.10   1.07  ok
+scanline_single_pass         temoins      51616579    166711065    516497562   1.69   1.63  ROUGE
+scanline_single_pass         surv           589033      1207952      2439399   1.04   1.01  ok
+scanline_single_pass         kbox         18989449     42248297     90668600   1.15   1.10  ok
+scanline_single_pass         ktests       11222330     23413458     48001790   1.06   1.04  ok
+scanline_single_pass         census         254272       513417      1030497   1.01   1.01  
+scanline_single_pass         secs                3           13           47   2.33   1.84  
+scanline_overlap_multiecho   cibles         931024      2023366      4354338   1.12   1.11  ok
+scanline_overlap_multiecho   temoins      71760187    231154996    752628008   1.69   1.70  ROUGE
+scanline_overlap_multiecho   surv           799428      1663981      3425484   1.06   1.04  ok
+scanline_overlap_multiecho   kbox         31659406     71024369    155241135   1.17   1.13  ok
+scanline_overlap_multiecho   ktests       17752697     38053313     80746877   1.10   1.09  ok
+scanline_overlap_multiecho   census         302460       611119      1227940   1.01   1.01  
+scanline_overlap_multiecho   secs                5           17           75   1.82   2.12  
+uniform                      INCOMPLET

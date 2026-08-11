@@ -133,7 +133,9 @@ Yao-1 exact, réduire le graphe sparse et montrer une baisse des compteurs.
 2. Garder dix entrées pour le top-nearest exact; employer onze avec exclusion
    de cible seulement pour un réservoir arbitraire, puis publier les compteurs
    causaux par masse cible.
-3. Prototyper le certificat dual `Q--W` et refuser toute égalité.
+3. Recevoir le prototype dual `Q--W` courant : authentifier ses reçus, borner
+   son arène, compter tout son travail et réduire les visites témoins rouges
+   avant une nouvelle rampe; toute égalité reste refusée.
 4. Construire séparément le transcript Yao-1 lorsque la lane `k=1` entre dans
    un pipeline candidat.
 5. Réserver la prochaine session G4 à une architecture dont la gate de travail

@@ -130,6 +130,8 @@ struct SourceReceipt {
   i64 dual_inherited = 0;        // temoins herites sans reevaluation
   i64 dual_accepted = 0;         // sous-arbres temoins acceptes
   i64 dual_point_tests = 0;      // tests ponctuels dans les feuilles ambigues
+  i64 dual_frontier_cleared = 0; // frontieres videes par l'elagage exact
+  i64 dual_frontier_capped = 0;  // frontieres tronquees par le plafond
 };
 
 enum class PairFate : std::uint8_t {
@@ -191,6 +193,11 @@ struct YaoSource {
   bool baseline = false;         // differentiel : classification seule
   bool antichain_banks = false;  // banques par antichaine de masse (audit §3)
   bool dual_cut = false;         // traversee duale Q--W (troisieme voie)
+  // LE PLAFOND DE FRONTIERE (politique de TRAVAIL, fail-open) : au-dela, les
+  // noeuds ambigus les moins massifs sont abandonnes. Une frontiere tronquee
+  // ne peut que PERDRE des prunes — le classifieur terminal rend alors le
+  // meme sort — donc l'exactitude et la porte d'invariance sont intactes.
+  int dual_frontier_cap = 0;     // 0 = illimite
   std::vector<PairFate>* fate = nullptr;
   int fate_points = 0;
   bool fate_violated = false;
@@ -849,7 +856,39 @@ struct YaoSource {
     // Les noeuds non examines (arret anticipe au seuil) restent ambigus.
     for (; head < dual_work_.size(); ++head)
       dual_frontier_.push_back(dual_work_[head]);
+    // LE PLAFOND (politique de travail) : garder les noeuds les plus massifs,
+    // qui sont ceux qui peuvent combler le seuil le plus vite.
+    if (dual_frontier_cap > 0 &&
+        (int)dual_frontier_.size() - *out_begin > dual_frontier_cap) {
+      std::nth_element(dual_frontier_.begin() + *out_begin,
+                       dual_frontier_.begin() + *out_begin + dual_frontier_cap,
+                       dual_frontier_.end(), [&](int a, int b) {
+                         const Node& na = tree->nodes[(std::size_t)a];
+                         const Node& nb = tree->nodes[(std::size_t)b];
+                         return (na.end - na.begin) > (nb.end - nb.begin);
+                       });
+      dual_frontier_.resize((std::size_t)(*out_begin + dual_frontier_cap));
+      ++receipt.dual_frontier_capped;
+    }
     *out_end = (int)dual_frontier_.size();
+    // L'ELAGAGE EXACT DE LA FRONTIERE : un noeud REJETE pour Q reste rejete
+    // pour tout Q' inclus dans Q (max A' <= max A <= 0). Les temoins d'un
+    // descendant quelconque sont donc contenus dans (acceptes + ambigus) de
+    // Q. Si cette masse totale est deja sous le seuil, AUCUN descendant ne
+    // pourra jamais pruner : la frontiere est videe sans perdre un seul
+    // prune, et les descendants vont droit a leurs feuilles.
+    if (mass < kOrderK) {
+      i64 reachable = mass;
+      for (int k = *out_begin; k < *out_end && reachable < kOrderK; ++k) {
+        const Node& w = tree->nodes[(std::size_t)dual_frontier_[(std::size_t)k]];
+        reachable += w.end - w.begin;
+      }
+      if (reachable < kOrderK) {
+        dual_frontier_.resize((std::size_t)*out_begin);
+        *out_end = *out_begin;
+        ++receipt.dual_frontier_cleared;
+      }
+    }
     return mass;
   }
 

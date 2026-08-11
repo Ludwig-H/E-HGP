@@ -83,19 +83,23 @@ Cela ne constitue pas encore un reçu scientifique :
 3. `merge_receipts` et `receipts_equal` omettent les six champs duals malgré
    leur commentaire d'exhaustivité; le chemin shardé ne reçoit pas cette voie;
 4. aucun CTest nommé, plancher de non-vacuité ou mutant ne vise la frontière,
-   l'héritage, un sibling témoin oublié, une borne `U` fautive ou un epoch
-   périmé;
-5. le mode reste CPU mono-thread et count-only. Il ne matérialise ni census,
+   l'héritage, l'omission d'un domaine ambigu qui chevauchait la cible parente,
+   une borne `U` fautive ou un epoch périmé;
+5. `dual_frontier_` est append-only pendant l'ancre et `dual_work_.assign`
+   recopie un segment par nœud cible. Ni capacité, octets, high-water physique,
+   allocations ni RSS ne bornent cette matérialisation potentiellement
+   quadratique; `dual_arena_` conserve aussi sa capacité de pic;
+6. le mode reste CPU mono-thread et count-only. Il ne matérialise ni census,
    ni payload officiel, et le LBVH n'est pas un Karras device résident.
 
 ## Prochaine réduction exacte
 
 Le compteur rouge mesure la réévaluation de la frontière ambiguë. Le prochain
 état doit éviter `dual_work_.assign` et le retest linéaire des mêmes segments,
-notamment les feuilles issues du domaine cible/sibling, pour les deux enfants :
-arène immuable à partage structurel, séparation des sous-domaines témoin au
-split de `Q` et ordonnance collective de plusieurs boîtes cibles contre un
-microtile de nœuds témoins.
+notamment les domaines qui chevauchaient la cible parente et deviennent
+admissibles chez un enfant : arène immuable à partage structurel, séparation
+des sous-domaines témoin au split de `Q` et ordonnance collective de plusieurs
+boîtes cibles contre un microtile de nœuds témoins.
 Les crédits positifs restent héritables; toute égalité ou frontière incomplète
 retombe au classifieur.
 

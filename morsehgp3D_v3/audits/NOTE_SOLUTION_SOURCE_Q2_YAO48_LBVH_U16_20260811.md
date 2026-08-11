@@ -207,13 +207,15 @@ positifs suivent les enfants par référence; aucun rescan de la racine témoin 
 aucune matrice `Q times W` ne sont admis. Les feuilles cibles restées sous dix
 retombent au classifieur/census exact.
 
-Le split de cible doit réintroduire le sibling comme domaine témoin. Si
+Le split de cible doit conserver le sibling comme domaine témoin. Si
 `Q=Q_L union Q_R`, les points de `Q_R` étaient exclus des témoins du parent mais
-deviennent admissibles pour `Q_L`, et réciproquement. Chaque enfant hérite donc
-les crédits et la frontière ambiguë du parent, puis ajoute son sibling à cette
-frontière. Les nœuds dont un majorant exact donne `A<=0` restent éliminés; les
+deviennent admissibles pour `Q_L`, et réciproquement. La frontière ambiguë du
+parent doit donc garder les domaines qui chevauchent `Q`; chaque enfant les
+hérite et les reclassifie. Une insertion séparée du sibling n'est nécessaire
+que si l'implémentation l'avait retiré, et exige alors une déduplication des
+plages. Les nœuds dont un majorant exact donne `A<=0` restent éliminés; les
 nœuds ambigus persistent ou se raffinent. Une arène immuable avec partage
-structurel évite les copies sans perdre ces nouveaux témoins.
+structurel évite les copies sans perdre ni doubler ces nouveaux témoins.
 
 ### Certificat aux deux extrémités
 

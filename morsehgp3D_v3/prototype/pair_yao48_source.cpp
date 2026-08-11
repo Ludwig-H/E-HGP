@@ -116,7 +116,7 @@ mhgp::P3 pt(int x, int y, int z) {
 
 int main(int argc, char** argv) {
   int n = 2400, coord = 0, leaf_size = 8, oracle = 0, differential = 0, permute = 0;
-  int policy_differential = 0, antichain = 0, dual = 0, shard_check = 0;
+  int policy_differential = 0, antichain = 0, dual = 0, shard_check = 0, dual_cap = 0;
   i64 seed = 20260810, bank_pops = 512, chamber_visits = 100000, max_work = 4000000000LL;
   i64 min_region_prunes = 0, min_point_tombstones = 0, min_census_records = 0;
   i64 min_radial_prunes = 0;
@@ -199,6 +199,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--seed")) seed = value;
     else if (!strcmp(argv[i], "--bank-pops")) bank_pops = value;
     else if (!strcmp(argv[i], "--chamber-visits")) chamber_visits = value;
+    else if (!strcmp(argv[i], "--dual-frontier-cap")) dual_cap = (int)value;
     else if (!strcmp(argv[i], "--max-work")) max_work = value;
     else if (!strcmp(argv[i], "--oracle")) oracle = (int)value;
     else if (!strcmp(argv[i], "--differential")) differential = (int)value;
@@ -367,6 +368,7 @@ int main(int argc, char** argv) {
   source.chamber_visits = chamber_visits;
   source.antichain_banks = antichain == 1;
   source.dual_cut = dual == 1;
+  source.dual_frontier_cap = dual_cap;
   source.max_work = max_work;
   if (oracle == 1 || differential == 1 || policy_differential == 1) {
     fates.assign((std::size_t)all_pairs, PairFate::kUnassigned);

@@ -231,14 +231,16 @@ préfixe comme objet complet.
    offsets 64 bits; la nouvelle ordonnance doit repasser la gate CPU avant
    tout port device. Les bornes et reçus sont spécifiés dans
    [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](audits/NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md).
-4. Auditer, recevoir puis requalifier le prototype q4 mass-only
-   `P15-HOCUDA-P1a` : partition triangulaire implicite des paires, 64 patches
-   de centres, seuil de huit témoins par antichaînes de sous-arbres,
-   range-query collective, ledger
-   `pruned_mass+microtile_mass=C(n,2)` et aucune arène globale de paires. Cette
-   tranche n'émet aucune ancre et ne prouve pas la complétude de P1. Son
-   certificat exact emploie des coins rationnels à l'échelle seize et un juge
-   bijectif indépendant; il est spécifié dans
+4. Conserver le probe q4 mass-only `P15-HOCUDA-P1a` comme falsificateur : son
+   port littéral à rescan racine est déjà refusé. Le remplacer par une
+   wavefront témoin persistante avec les bornes dirigées `L/U`, fermer les
+   trous de bijection et de rejeu recensés, puis seulement le requalifier. La
+   partition triangulaire reste implicite, les 64 patches de centres ont des
+   coins de dénominateur quatre, le prédicat quadratique exact est évalué à
+   l'échelle seize et le seuil q4 reste huit. Le ledger attendu est
+   `pruned_mass+microtile_mass=C(n,2)`, sans arène globale de paires. Cette
+   tranche n'émet aucune ancre et ne prouve pas la complétude de P1; elle est
+   spécifiée dans
    [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](audits/NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md).
 5. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
    composition cœur--profondeur et profondeur terminale. Le gain marginal doit

@@ -222,9 +222,11 @@ vues brutes ni l'ABI.
 4. Porter seulement les schémas transactionnels de la ligne enregistrée vers
    des layouts u16 neufs, puis rejouer la gate de compteurs device avant toute
    campagne de latence.
-5. Auditer puis requalifier le prototype P1a q4 séparément avec l'arithmétique
-   entière à l'échelle seize et fermer le différentiel hôte `n=32`; dans la
-   même session G4 gardée, fermer
+5. Conserver le prototype P1a q4 courant comme falsificateur : son rescan
+   racine est déjà refusé. Implémenter une wavefront persistante, les bornes
+   dirigées et les corrections de juge de l'audit dédié, puis requalifier
+   l'arithmétique entière à l'échelle seize et fermer le différentiel hôte
+   `n=32`; dans la même session G4 gardée, fermer
    ensuite la parité native, le rejeu `n=32` et Compute Sanitizer, puis lancer
    les profils 50 k sans palier de performance ni retry. Cette campagne mass-only
    ne qualifie ni P1 ni le pipeline.

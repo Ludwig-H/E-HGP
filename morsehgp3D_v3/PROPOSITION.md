@@ -256,12 +256,14 @@ intérieurs pour toute cible de `Q`. Toute égalité descend. Cette voie dual-tr
 utilise toutes les directions et ne doit pas être appelée P1a, qui reste un
 falsificateur q4-only.
 
-Au split `Q=Q_L union Q_R`, chaque enfant hérite crédits et frontière ambiguë,
-mais ajoute aussi son sibling comme nouveau domaine témoin : ces points étaient
-exclus chez le parent et deviennent admissibles chez l'enfant. Une frontière
-qui n'ajoute pas le sibling est incomplète; une machine qui repart de la racine
-reste exacte mais retrouve le coût proscrit. Les états témoins sont donc
-immuables et partagés structurellement.
+Au split `Q=Q_L union Q_R`, chaque enfant hérite crédits et frontière ambiguë.
+Cette frontière doit notamment avoir conservé les domaines qui chevauchaient
+`Q` : les points du sibling, exclus comme témoins chez le parent, deviennent
+alors admissibles chez l'enfant et sont reclassifiés. Une insertion séparée du
+sibling n'est utile que si l'implémentation l'a réellement retiré et qu'elle
+déduplique les plages; l'injecter alors qu'il est déjà représenté créerait un
+double crédit. Une machine qui repart de la racine reste exacte mais retrouve
+le coût proscrit. Les états témoins sont immuables et partagés structurellement.
 
 Si une boîte cible peut rencontrer un ensemble conservateur de chambres `S`,
 elle est encore prunable lorsque toutes les banques de `S` sont pleines et que
@@ -371,9 +373,12 @@ notamment sommes impaires et clips aux deux bords; aucune arithmétique flottant
 n'entre dans la décision.
 
 Une frontière persistante reste une antichaîne exacte sans cap. Lorsqu'un bloc
-d'extrémités est scindé, le sous-arbre du frère libéré devient admissible comme
-banque de témoins pour l'enfant et doit être réintroduit puis reclassifié par
-`L4/U4`. Hériter seulement l'ancienne frontière omettrait ces nouveaux témoins.
+d'extrémités est scindé, le domaine du frère devient admissible comme banque de
+témoins pour l'enfant. Il doit avoir été conservé parmi les domaines ambigus du
+parent, puis être reclassifié par `L4/U4`; s'il avait été retiré, il faut le
+réintroduire exactement une fois. Une frontière qui perd ces points omettrait
+de nouveaux témoins, tandis qu'une seconde insertion non dédupliquée pourrait
+les compter deux fois.
 
 Cette suppression vaut exclusivement pour q2. Une paire dont la boule
 diamétrale contient dix témoins peut rester le diamètre d'un support q3/q4 dont
@@ -413,8 +418,9 @@ doit descendre jusqu'au prédicat exact.
 Le rejet `L4>=0` de la lane q2 s'applique aussi à la recherche de témoins du
 cœur, car tout témoin Jung vérifie d'abord `g>0`, équivalent à l'intérieur
 diamétral strict. Les 9/8 témoins déjà universels peuvent être hérités sous
-raffinement. Toute frontière persistante reste lossless, sans cap, et
-réintroduit les sous-arbres d'extrémités devenus disjoints après un split.
+raffinement. Toute frontière persistante reste lossless, sans cap, conserve les
+domaines qui chevauchent le bloc parent et les reclassifie lorsqu'ils deviennent
+disjoints après un split.
 
 Une route par ancre évite le rescan d'un arbre de témoins pour chaque paire.
 Pour une ancre `p`, un témoin `w`, une cible `q`, poser `s=w-p`, `d=q-p` et
@@ -756,10 +762,12 @@ un refus de ressource sont trois statuts distincts.
    certificat dual-tree `L_p(Q,W)>0`; réserver la classification terminale et
    le census fermé multi-ordre au résiduel. Conserver le self-join comme oracle
    ou second prune selon les masses, puis repasser la gate CPU avant CUDA.
-4. Auditer, recevoir puis requalifier le prototype `P15-HOCUDA-P1a` en
-   mass-only q4 : partition triangulaire implicite, 64 patches, seuil huit,
-   range-query collective, microtuiles terminales et ledger complet. Cette
-   tranche n'émet aucune ancre.
+4. Conserver le prototype `P15-HOCUDA-P1a` mass-only q4 comme falsificateur :
+   son rescan racine par bloc est déjà refusé par l'audit. Implémenter une
+   wavefront témoin persistante et les bornes dirigées `L/U`, fermer les trous
+   du juge, puis requalifier la partition triangulaire implicite, les 64
+   patches, le seuil huit, les microtuiles terminales et le ledger complet.
+   Cette tranche n'émet aucune ancre.
    Après le différentiel hôte à `n=32`, la même session G4 ferme la parité
    native et `n=32` sous Compute Sanitizer, puis va directement au profil 50 k.
    Une masse majoritairement terminale, un rescan par bloc ou une queue lourde
