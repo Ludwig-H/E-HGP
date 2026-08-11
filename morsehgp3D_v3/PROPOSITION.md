@@ -154,7 +154,21 @@ du classifieur borné à compter de tels contacts est une robustesse de juge, pa
 une permission de publier une activation dégénérée.
 
 La source candidate reprend l'architecture exacte de
-[`CATALOGUE_PAIRES_DIAMETRALES_EXACT.md`](../docs/math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) :
+[`CATALOGUE_PAIRES_DIAMETRALES_EXACT.md`](../docs/math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md).
+
+La ligne enregistrée possède des composants CUDA séparés : une frontière
+tuilée et reprenable, puis un classifieur `count--scan` sous un ancien contrat
+de rang fermé. Ils constituent un prior art mécanique, pas une chaîne v3 : le
+prune ancien admet une égalité radiale et le classifieur peut s'arrêter sur des
+contacts, alors que v3 exige dix intérieurs stricts et le census fermé complet.
+Leurs motifs structurels et transactionnels d'ownership, de tuiles, d'epochs,
+de lease/reprise/backpressure, de ledger et de `count--scan` à offsets 64 bits
+sont à réécrire puis à requalifier en u16. Leurs décisions sémantiques,
+layouts, ABI et juges ne sont pas des autorités v3; leur périmètre et leurs
+mesures sont inventoriés dans
+[`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](audits/AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md).
+
+La cible v3 conserve les étapes suivantes :
 
 1. des tuiles d'ancres remplissent 48 banques directionnelles de témoins
    distincts sur le LBVH Morton résident;
@@ -169,11 +183,27 @@ La source candidate reprend l'architecture exacte de
 
 Le remplissage des banques ne balaie pas aveuglément tout le LBVH jusqu'à ce
 que les 48 chambres soient pleines : les chambres vides de bord rendraient ce
-schéma quadratique. Chaque requête de chambre utilise une faisabilité
-cone--AABB et une borne de distance pour arrêter exactement après ses dix plus
-proches témoins, ou prouver la chambre sous-pleine. Les survivantes sont
-classifiées par lots avec une frontière partagée; relancer la racine pour
-chaque paire n'est pas une architecture admise.
+schéma quadratique. Les dix plus proches ne sont pas requis. Une antichaîne de
+nœuds disjoints, entièrement certifiés dans une chambre et de masse totale dix,
+fournit dix témoins; le maximum de distance AABB donne un `D` sûr. Les nœuds ne
+sont raffinés que si réduire `D` promet une masse cible utile. Une banque qui
+reste sous-pleine ne coupe rien. Les survivantes sont classifiées par lots avec
+une frontière partagée; relancer la racine pour chaque paire n'est pas une
+architecture admise.
+
+Si une boîte cible peut rencontrer un ensemble conservateur de chambres `S`,
+elle est encore prunable lorsque toutes les banques de `S` sont pleines et que
+`dist^2(p,box)>3*max_{c in S} D_c`. En effet, l'échec d'au moins une des trois
+coupes Yao implique `||q-p||^2<=3D_c`. Cette enveloppe multi-chambre reste
+strictement fail-open aux égalités.
+
+Les banques de la tuile active restent résidentes dans l'enveloppe
+`O(B*48*K)`; aucune table globale `n*48*K` n'est admise. L'owner Morton d'une
+paire l'émet toujours une seule fois. Il peut présenter un certificat Yao
+centré sur l'autre extrémité seulement si la banque correspondante est déjà
+disponible dans la même tuile ou dans un cache borné et authentifié. Cette
+orientation inverse est facultative : son absence ne change ni la complétude
+ni le ledger, et son coût doit être payé par un gain mesuré avant adoption.
 
 Le ledger ferme simultanément
 `candidate+certified_pruned+unresolved=C(n,2)`, la partition terminale
@@ -328,13 +358,16 @@ support propre positif q3/q4 certifié contenant la paire. `q_min=2` ou un
 Le center-cover par 64 patches intervient plus tôt : `P15-HOCUDA-P1` est le
 candidat de complétude par blocs q3/q4, pas un filtre terminal interchangeable.
 Il partitionne implicitement toutes les paires, couvre extérieurement leur
-domaine de centres de Jung et ne supprime un bloc que si chaque patch faisable
-possède 9/8 `PointId` stricts certifiés. Un patch ou un range-query ambigu
+domaine de centres de Jung et ne supprime un bloc que si chaque patch non
+certifié infaisable possède 9/8 `PointId` stricts certifiés. Un patch ou un range-query ambigu
 force le partage du bloc. Sa première tranche `P15-HOCUDA-P1a` profile seulement
 le prune q4 au seuil huit et n'émet aucune ancre. Elle ferme uniquement
 `pruned_mass+microtile_mass=C(n,2)`; elle ne prouve pas la complétude de P1.
 Les preuves ponctuelles ci-dessous ne peuvent remplacer cette fermeture
-globale.
+globale. La spécialisation P1a q4 en arithmétique u16 exacte, avec coins
+rationnels évalués à l'échelle seize, range-query collective et juge bijectif,
+est fixée dans
+[`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](audits/NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md).
 
 Un certificat collectif borné peut précéder le sweep complet. Pour un point
 `z`, poser `V_z=2z-a-b` et `g_z=D^2-||V_z||^2`. Tout centre de sphère passant
@@ -393,9 +426,11 @@ séparément. Leur état d'implémentation appartient exclusivement à
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
 Cette preuve donne la couverture, pas la parcimonie. Le nombre d'ancres peut
-rester quadratique et une recherche naïve des témoins cubique. La source ne
-devient candidate produit qu'après fermeture du ledger de l'univers implicite
-complet et admission des masses à `12 500/25 000/50 000`. Un cap appartient
+rester quadratique et une recherche naïve des témoins cubique. Hors du
+falsificateur P1a, une source ne devient candidate produit qu'après fermeture
+du ledger de l'univers implicite complet et admission des masses à
+`12 500/25 000/50 000`. P1a suit son protocole distinct : différentiel à
+`n=32`, puis profil direct à 50 k sans palier. Un cap appartient
 seulement au falsificateur diagnostique et ne tronque jamais un résultat
 produit. Chaque reçu de prune déduplique ses
 `PointId` témoins avant d'appliquer le seuil. Le juge de couverture doit être
@@ -617,15 +652,18 @@ un refus de ressource sont trois statuts distincts.
 1. Conserver générateur, self-joins, sidecar borné, cellules et ancres comme
    portes locales ou oracles. Fermer les identités persistantes et les juges
    indépendants encore ouverts sans promouvoir ces parcours exhaustifs.
-2. Construire une disposition unique `(MortonKey, PointId)` et un LBVH exact
-   résidents. Implémenter q2 par Yao48 strict fail-open, classification
-   terminale et census fermé multi-ordre; conserver le self-join comme oracle
-   ou second prune selon les masses.
-3. Implémenter `P15-HOCUDA-P1a` en mass-only q4 : partition triangulaire
+2. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
+   enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
+   fermé. Fermer q2 par Yao48 strict fail-open, classification terminale et
+   census fermé multi-ordre; conserver le self-join comme oracle ou second
+   prune selon les masses.
+3. Porter et requalifier `P15-HOCUDA-P1a` en mass-only q4 : partition triangulaire
    implicite, 64 patches, seuil huit, range-query collective, microtuiles
    terminales et ledger complet. Cette tranche n'émet aucune ancre.
-   Deux pentes rouges, une masse majoritairement terminale ou un rescan par
-   paire arrêtent la route avant G4.
+   Après le différentiel hôte à `n=32`, la même session G4 ferme la parité
+   native et `n=32` sous Compute Sanitizer, puis va directement au profil 50 k.
+   Une masse majoritairement terminale, un rescan par bloc ou une queue lourde
+   arrêtent la route avant son extension à P1.
 4. Sur les seules ancres admises, recevoir séparément Jung--Yao, la borne AABB
    `g_min/Q_max`, Helly, la composition cœur--profondeur et la profondeur
    terminale. Mesurer le gain marginal de chacun contre son coût exact.
@@ -635,10 +673,10 @@ un refus de ressource sont trois statuts distincts.
    reconstruction des verticales contre Gamma exhaustif à petit `n`.
 7. Installer deux harnesses nommés : le diagnostic horizontal réduit et le
    `BenchmarkOutputContract-v1` officiel. Ils ne partagent aucun verdict SLO.
-8. Appliquer la gate de compteurs aux tailles contractuelles, porter seulement
-   les routes admises sur CUDA avec arènes préallouées et une synchronisation
-   terminale, puis mesurer le payload officiel complet dans un même
-   `warm_e2e`.
+8. Appliquer la gate `12 500/25 000/50 000` aux autres routes de source,
+   porter seulement les routes admises sur CUDA avec arènes préallouées et une
+   synchronisation terminale, puis mesurer le payload officiel complet dans
+   un même `warm_e2e`.
 
 ## 14. Conditions de GO
 

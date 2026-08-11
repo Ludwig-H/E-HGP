@@ -255,6 +255,26 @@ target_include_directories(mhgp3v_pair_yao48_source PRIVATE ${CMAKE_CURRENT_SOUR
 target_link_libraries(mhgp3v_pair_yao48_source PRIVATE mhgp)
 target_compile_options(mhgp3v_pair_yao48_source PRIVATE -Wall -Wextra -Werror)
 
+# LA LANE k=1 (PROPOSITION §6.1) : l'EMST exact par Boruvka sur le LBVH
+# partage — niveaux 4*niveau = d^2 exacts en i64, departage canonique
+# (d^2, min id, max id), purete par noeud recalculee a chaque ronde. Le
+# probe porte le juge Prim O(n^2) independant (multiensemble des niveaux +
+# partitions canoniques a chaque coupe stricte et fermee), quatre fixtures
+# gravees verifiees hors bande, le replay canonique multi-feuilles et
+# l'equivariance par permutation.
+add_executable(mhgp3v_emst_boruvka_probe prototype/emst_boruvka_probe.cpp)
+target_include_directories(mhgp3v_emst_boruvka_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_emst_boruvka_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_emst_boruvka_probe PRIVATE -Wall -Wextra -Werror)
+
+# LE HARNAIS DIAGNOSTIQUE NOMME warm_e2e_h0_v3_diagnostic : LBVH + EMST k=1 +
+# q2 shardee, nuage frais par repetition, ledger rejoue, p50/p95 par phase.
+# Il DIT ce qu'il ne couvre pas et ne ferme aucun SLO officiel.
+add_executable(mhgp3v_warm_e2e_h0_diagnostic prototype/warm_e2e_h0_diagnostic.cpp)
+target_include_directories(mhgp3v_warm_e2e_h0_diagnostic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_warm_e2e_h0_diagnostic PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_warm_e2e_h0_diagnostic PRIVATE -Wall -Wextra -Werror)
+
 # LE PRUNE CONVEXE CERTIFIE (reponse pont/q4 20260811 §6) : le predicat
 # partage axes + plan du barycentre, verification entiere seule decisive.
 add_executable(mhgp3v_cell_prune_gate prototype/cell_prune_gate.cpp)
@@ -1337,7 +1357,7 @@ mhgp3v_add_expected_code_test_for(mhgp3v_gabriel_degree_gate
 # equivariance par renversement, sept mutants a code exact et planchers de
 # non-vacuite. Le detail des contrats est en tete de pair_yao48_source.cpp.
 foreach(yao_fixture directional-equality region-prune underfull nonconverse
-        u16-extremes colocated)
+        u16-extremes colocated radial-straddle)
   add_test(NAME mhgp3v_yao48_fixture_${yao_fixture} COMMAND
            mhgp3v_pair_yao48_source --fixture ${yao_fixture})
   set_tests_properties(mhgp3v_yao48_fixture_${yao_fixture} PROPERTIES
@@ -1347,7 +1367,7 @@ foreach(yao_fixture directional-equality region-prune underfull nonconverse
 endforeach()
 add_test(NAME mhgp3v_yao48_oracle_terrain200 COMMAND mhgp3v_pair_yao48_source
          --points 200 --seed 20260810 --family terrain --oracle 1 --permute 1
-         --min-census-records 1 --min-underfull 1)
+         --min-census-records 1 --min-underfull 1 --min-radial-prunes 1)
 set_tests_properties(mhgp3v_yao48_oracle_terrain200 PROPERTIES
   PASS_REGULAR_EXPRESSION "aucun desaccord")
 add_test(NAME mhgp3v_yao48_oracle_terrain200_code COMMAND mhgp3v_pair_yao48_source
@@ -1388,6 +1408,9 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
   mhgp3v_yao48_kill_census_skips "mutant tue" 4 --fixture colocated
   --inject census-skips-inf-zero)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_radial_forgets "mutant tue" 4 --points 200 --seed 20260810
+  --family terrain --oracle 1 --inject radial-forgets-chamber)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
   mhgp3v_yao48_reject_unknown "argument inconnu" 2 --inexistant 1)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
   mhgp3v_yao48_reject_absurd "campagne absurde" 2 --points 2)
@@ -1396,6 +1419,66 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
   mhgp3v_yao48_floor_bites "plancher viole" 3 --fixture underfull
   --min-region-prunes 1)
+
+# Les quatre fixtures gravees de la lane k=1 (feuilles 2, oracle Prim force,
+# equivariance) ; tie-lattice arme le plancher des lots d'egalite,
+# two-clusters celui des rondes.
+add_test(NAME mhgp3v_emst_fixture_tie_lattice COMMAND mhgp3v_emst_boruvka_probe
+         --fixture tie-lattice --permute 1 --min-tie-batches 1)
+add_test(NAME mhgp3v_emst_fixture_colocated_batch COMMAND mhgp3v_emst_boruvka_probe
+         --fixture colocated-batch --permute 1)
+add_test(NAME mhgp3v_emst_fixture_u16_extremes COMMAND mhgp3v_emst_boruvka_probe
+         --fixture u16-extremes --permute 1)
+add_test(NAME mhgp3v_emst_fixture_two_clusters COMMAND mhgp3v_emst_boruvka_probe
+         --fixture two-clusters --permute 1 --min-rounds 2)
+# La campagne juge + equivariance, planchers armes contre le vert-par-vacuite
+# (mesures a cette graine : 5 rondes, 53 niveaux distincts, 40 lots).
+add_test(NAME mhgp3v_emst_oracle_campaign COMMAND mhgp3v_emst_boruvka_probe
+         --points 512 --seed 20260810 --family terrain --oracle 1 --permute 1
+         --min-rounds 3 --min-distinct-levels 40 --min-tie-batches 8)
+# Les cinq mutants meurent au code contractuel 4.
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_mutant_reconnect "mutant tue par le juge Prim" 4
+  --points 512 --seed 20260810 --family terrain --oracle 1
+  --inject reconnect-wrong-components)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_mutant_level_off_by_one "mutant tue par le juge Prim" 4
+  --points 512 --seed 20260810 --family terrain --oracle 1
+  --inject level-off-by-one)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_mutant_purity_stale "mutant tue par le juge Prim" 4
+  --points 512 --seed 20260810 --family terrain --oracle 1
+  --inject purity-stale)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_mutant_skip_last_round "arbre couvrant viole" 4
+  --fixture tie-lattice --inject skip-last-round)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_mutant_tie_nondeterministic "jeu canonique" 4
+  --fixture tie-lattice --inject tie-nondeterministic)
+# CLI hostile (2) et planchers (3).
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_cli_junk "sans valeur" 2 --points 1x2)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_cli_absurde "campagne absurde" 2 --points 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_cli_oracle_trop_grand "exige n <= 2048" 2 --points 4000 --oracle 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_floor_distinct_levels "plancher viole" 3
+  --fixture tie-lattice --min-distinct-levels 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
+  mhgp3v_emst_floor_nuage_non_genere "nuage non genere" 3
+  --points 1000 --coord 4 --family uniform)
+
+# Le harnais diagnostique : fumee bornee (n=2000, 2 reps, 2 threads) avec la
+# serie NOMMEE et le refus explicite de tout SLO ; CLI hostile a code 2.
+add_test(NAME mhgp3v_warm_e2e_smoke COMMAND mhgp3v_warm_e2e_h0_diagnostic
+         --points 2000 --reps 2 --threads 2 --seed 20260811)
+set_tests_properties(mhgp3v_warm_e2e_smoke PROPERTIES
+  PASS_REGULAR_EXPRESSION "serie diagnostique warm_e2e_h0_v3_diagnostic")
+add_test(NAME mhgp3v_warm_e2e_smoke_code COMMAND mhgp3v_warm_e2e_h0_diagnostic
+         --points 2000 --reps 2 --threads 2 --seed 20260811)
+mhgp3v_add_expected_code_test_for(mhgp3v_warm_e2e_h0_diagnostic
+  mhgp3v_warm_e2e_reject_unknown "argument inconnu" 2 --inexistant 1)
 
 # LA PORTE DU PRUNE : contact conserve, pics lointains separes en local,
 # nappe inclinee separee par le plan general ; deux mutants tues.

@@ -18,6 +18,15 @@ respécialisée au profil u16 de v3 où **toute l'arithmétique décisive tient 
 `i64`/`i128` sans cascade dyadique**. Le statut logiciel appartient à
 [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
+Cette architecture n'est pas à réimplémenter de zéro. La ligne enregistrée
+contient déjà, comme composants séparés, une frontière CUDA Morton/Yao48
+reprenable et un classifieur multi-rang `count--scan`. Leur ancien contrat de
+rang fermé accepte une égalité dans le prune et peut s'arrêter sur des contacts;
+ces décisions ne sont donc pas celles de v3. Leur portée, leurs mesures et
+leurs limites de réemploi sont détaillées dans
+[`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md).
+Ils servent de différentiels et de source de contrats, jamais d'autorité v3.
+
 ## 1. Objet calculé
 
 Pour le contrat `hgp_reduced_normalized_h0_v3` à `K=10`, la lane q2 doit
@@ -46,9 +55,11 @@ activation q2 ordinaire.
 1. **Ordre Morton** : clé 48 bits (trois axes u16 entrelacés), paires
    `(clé, PointId)` triées ; l'ordre canonique des ex æquo est le `PointId`.
 2. **LBVH radix** : arbre binaire sur l'ordre trié, coupé au bit dominant de
-   la première différence de clés (construction de type Karras, portable
-   device) ; chaque nœud porte sa boîte AABB u16 exacte et sa plage
-   `[begin,end)` de positions.
+   la première différence de clés. Lorsque toute la plage partage la même clé,
+   le fallback partage au milieu de l'ordre secondaire `PointId`, ce qui garde
+   les colocalisés déterministes. Chaque nœud porte sa boîte AABB u16 exacte et
+   sa plage `[begin,end)` de positions. Le prototype CPU matérialise ce contrat;
+   une construction device de type Karras reste à recevoir séparément.
 3. **Ownership exact une fois** : la paire `(i,j)` avec `pos(i)<pos(j)` est
    possédée par l'ancre de position haute `j`, qui ne parcourt que le préfixe
    `[0,pos(j))`. La masse totale possédée est `somme_j pos(j) = C(n,2)`.
@@ -82,6 +93,59 @@ Le témoin égal à la cible est impossible par le même argument que la variant
 fermée (`x^2>D` exclut `q` de la banque). La réception doit exercer cette
 exclusion, par un mutant dédié ou par le rejeu indépendant de tous les reçus
 positifs.
+
+### Banque compressée par antichaîne
+
+La recherche des dix plus proches n'est pas une obligation mathématique. Une
+banque peut être certifiée par une antichaîne de nœuds LBVH dont les plages de
+feuilles sont disjointes, excluent l'ancre, sont entièrement contenues dans la
+même chambre, ne contiennent que des témoins de distance strictement positive
+à l'ancre et ont une masse totale au moins dix. Le preflight de coordonnées
+distinctes garantit seulement la positivité des distances; l'antichaîne et
+son reçu doivent certifier séparément une masse totale au moins dix. Toute
+extension aux sites pondérés devra recertifier ces deux obligations. Poser :
+
+$$D_c=\max_i\max_{x\in\mathrm{box}(W_i)}\left\Vert x-p\right\Vert^{2}.$$
+
+Dix feuilles canoniques distinctes de leur union sont alors de vrais témoins
+de distance carrée au plus `D_c`. Le reçu chaud conserve plages, masses et
+majorant; le juge borné les développe en `PointId`. Raffiner une banque pour
+réduire `D_c` est une optimisation guidée par la masse cible, pas une condition
+d'exactitude.
+
+Une seconde coupe sûre évite d'exiger une chambre unique pour toute une boîte.
+Si une cible échoue à au moins une des trois inégalités Yao, sa distance carrée
+à l'ancre est au plus `3D_c`. Pour une boîte dont l'ensemble conservateur des
+chambres possibles est `S`, toutes ses feuilles sont donc prunables si toutes
+les banques de `S` sont pleines et si :
+
+$$\mathrm{dist}^{2}(p,\mathrm{box})>3\max_{c\in S}D_c.$$
+
+Toute égalité descend. Le reçu engage `S` et toutes les banques référencées;
+une fixture traversant une frontière de chambres tue l'oubli d'une chambre.
+
+### Certificat aux deux extrémités
+
+L'ownership Morton ne contraint pas le côté du certificat. L'unique owner d'une
+paire `{u,v}` peut essayer la coupe centrée en `u`, puis, si une banque
+certifiée de `v` est disponible dans la même tuile ou dans un cache borné et
+authentifié, la coupe symétrique centrée en `v`. La paire est tombstonée si
+l'un des deux certificats stricts passe; elle reste émise exactement une fois
+par son owner de position haute. Le reçu engage le `PointId` choisi comme
+centre, la version de banque et le côté utilisé. L'orientation inverse est une
+optimisation facultative, jamais une condition de complétude.
+
+Cette symétrisation est exacte même si l'autre extrémité appartient à la
+banque : alors `D` majore `||u-v||^2`, tandis que la première coupe exige
+`x^2>D` avec `x^2<=||u-v||^2`; le certificat échoue donc automatiquement. Le
+chemin produit conserve l'enveloppe cible `O(B*48*K)` pour `B` ancres
+actives et interdit une table `n*48*K` globale. À titre de diagnostic
+seulement, une telle table à 50 k occuperait 96 000 000 octets si les
+identifiants sont des positions Morton `u32` avec mapping authentifié, mais
+192 000 000 octets avec les `PointId u64` de la ligne enregistrée, hors `D_c`,
+masques et offsets. Une porte optionnelle compare les sorts mono-côté et
+bi-côté à l'oracle et exige un gain strict non vide du second côté avant d'en
+payer le cache.
 
 ## 4. Classification terminale et census fermé
 
@@ -119,9 +183,9 @@ les cibles ponctuelles et le digest canonique de leur union. Les banques sont
 factorisées par `(ancre, chambre, version)` afin qu'un reçu de région référence
 dix identifiants une seule fois au lieu de les recopier pour chaque nœud.
 
-Aucun tableau global de paires n'est matérialisé : les survivantes du mode
-mesure sont comptées et hashées, pas stockées ; le mode oracle borné
-(`n<=256`) tient les sorts par paire pour le juge.
+Aucun tableau global de paires ni de banques `n*48*K` n'est matérialisé : les
+survivantes du mode mesure sont comptées et hashées, pas stockées; le mode
+oracle borné (`n<=256`) tient les sorts par paire pour le juge.
 
 ## 6. Juge indépendant et différentiel
 
@@ -131,8 +195,8 @@ ne partage pas les prédicats décisifs du sujet ») :
 - prédicat recalculé sous la forme distincte
   `4*Phi = ||2x-u-v||^2 - ||u-v||^2` en `i128`, jamais la forme produit du
   sujet ;
-- scan quadratique complet paires × points, sans Morton, sans LBVH, sans
-  chambres ;
+- scan exhaustif de chaque paire contre tous les points (`Theta(n^3)`), sans
+  Morton, sans LBVH, sans chambres ;
 - comparaison de **tous** les sorts (tombstone/census), de toutes les
   profondeurs strictes, de tous les rangs fermés et de tous les census.
 
@@ -150,12 +214,14 @@ identiques ; il mesure le gain, il ne juge pas la vérité.
   sous-pleines fail-open, extrêmes u16 et points colocalisés diagnostiques ;
 - mutants à code 4 : `strict-to-large`, `d-understated`,
   `chamber-perm-swapped`, `ownership-doubled`, `last-region-omitted`,
-  `census-skips-inf-zero` et `threshold-minus-one` ;
+  `census-skips-inf-zero`, `threshold-minus-one`,
+  `witness-subtrees-overlap` et `chamber-mask-omitted` ;
 - politiques de travail : valeurs minimale et ample de la patience et du
-  remplissage des banques rendent les mêmes sorts et census. Un plafond de
-  travail annoncé est contrôlé avant et après chaque unité comptable, inclut
-  visites de banques, tas, tests ponctuels et piles, et ne réussit jamais après
-  l'avoir dépassé ;
+  remplissage des banques rendent les mêmes sorts et census. Dans le seul probe
+  diagnostique, un plafond de travail annoncé est contrôlé avant et après
+  chaque unité comptable, inclut visites de banques, tas, tests ponctuels et
+  piles, et ne réussit jamais après l'avoir dépassé; ce plafond n'existe pas
+  dans le chemin produit ;
 - équivariance : plusieurs permutations des `PointId` rendent le même ensemble
   canonique de sorts et les mêmes records fermés après renommage.
 

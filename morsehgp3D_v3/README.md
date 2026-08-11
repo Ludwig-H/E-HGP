@@ -92,6 +92,18 @@ points u16 + LBVH exact résidents
        -> composantes, verticales et payload officiel nommé
 ```
 
+Cette architecture possède un prior art mécanique dans la ligne enregistrée :
+LBVH Morton/Yao48 CUDA tuilé, classifieur `count--scan` multi-rang sous son
+ancien contrat fermé et falsificateur P1a q4. Les décisions q2 ne sont pas
+compatibles : l'ancien prune admet une égalité radiale et son classifieur peut
+s'arrêter sur dix contacts, tandis que v3 exige dix intérieurs stricts et un
+census fermé complet. Les motifs structurels et transactionnels d'ownership,
+de tuiles, d'epochs, de lease/reprise/backpressure, de ledger et de
+`count--scan` à offsets 64 bits sont des différentiels à réécrire puis à
+requalifier. Les décisions sémantiques, layouts, ABI et juges enregistrés ne
+sont ni une autorité v3 ni une preuve de SLO. Leur inventaire est dans
+[`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](audits/AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md).
+
 Le self-join q2 de diagnostic reste un oracle/falsificateur ou un second prune
 tant que ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2
 ne retire jamais une ancre q3/q4.
@@ -167,23 +179,35 @@ préfixe comme objet complet.
    portes locales ou oracles. Fermer les identités persistantes et les juges
    vraiment indépendants encore ouverts, sans promouvoir le rescan en route
    50 k.
-2. Construire une disposition unique `(MortonKey, PointId)` et un LBVH exact
-   résidents. Implémenter q2 par Yao48 strict fail-open, classifieur terminal et
-   census fermé multi-ordre avec offsets 64 bits.
-3. Implémenter le falsificateur q4 mass-only `P15-HOCUDA-P1a` : partition
+2. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
+   enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
+   fermé. Remplacer les recherches par ancre par des banques Yao strictes en
+   antichaînes de nœuds dans l'enveloppe tuilée `O(B*48*K)`. Le certificat à
+   l'autre extrémité reste une optimisation facultative, seulement si sa banque
+   est déjà dans la tuile ou un cache borné. Fermer ensuite q2 par un census
+   résident multi-ordre avec offsets 64 bits.
+3. Porter et requalifier le falsificateur q4 mass-only `P15-HOCUDA-P1a` : partition
    triangulaire implicite des paires, 64 patches de centres, seuil de huit
-   témoins, range-query collective, ledger
+   témoins par antichaînes de sous-arbres, range-query collective, ledger
    `pruned_mass+microtile_mass=C(n,2)` et aucune arène globale de paires. Cette
-   tranche n'émet aucune ancre et ne prouve pas la complétude de P1.
+   tranche n'émet aucune ancre et ne prouve pas la complétude de P1. Son
+   certificat exact emploie des coins rationnels à l'échelle seize et un juge
+   bijectif indépendant; il est spécifié dans
+   [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](audits/NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md).
 4. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
    composition cœur--profondeur et profondeur terminale. Le gain marginal doit
    payer collecte et tri; toute ambiguïté retombe fail-open.
 5. Recevoir `BallActivation`, census, resolver, fold et reconstruction des
    verticales contre Gamma exhaustif borné. Installer le harness du payload
    officiel avant toute optimisation GPU.
-6. Appliquer d'abord la gate de compteurs à `12 500/25 000/50 000`, puis mesurer
-   sur G4 build, transferts, source, certification, dix forêts, verticales,
-   lots, certificat minimal et retour hôte dans le même p95 `warm_e2e`.
+6. Pour P1a seulement, fermer le différentiel hôte à `n=32`, puis, dans la même
+   session G4 gardée, exécuter la parité native, `n=32` sous Compute Sanitizer
+   et le profil 50 k direct, sans taille intermédiaire ni retry. Pour les autres
+   routes de source, appliquer la gate de compteurs à
+   `12 500/25 000/50 000`. Toute route produit complète admise se mesure ensuite
+   sur G4 avec build, transferts, source, certification, dix forêts,
+   verticales, lots, certificat minimal et retour hôte dans le même p95
+   `warm_e2e`.
 
 ## Construction des juges
 
