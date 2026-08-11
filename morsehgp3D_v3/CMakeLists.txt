@@ -190,6 +190,14 @@ target_include_directories(mhgp3v_prefix_mass_probe PRIVATE ${CMAKE_CURRENT_SOUR
 target_link_libraries(mhgp3v_prefix_mass_probe PRIVATE mhgp Threads::Threads)
 target_compile_options(mhgp3v_prefix_mass_probe PRIVATE -Wall -Wextra -Werror)
 
+# LA FACTORY ValidatedHybridSidecar (contrat 20260810, porte 2 de l'etat
+# courant) : frontiere de confiance typee — la fermeture des carriers est une
+# capability construite et liee par digests, jamais un booleen CLI.
+add_executable(mhgp3v_sidecar_factory_gate prototype/sidecar_factory_gate.cpp)
+target_include_directories(mhgp3v_sidecar_factory_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_sidecar_factory_gate PRIVATE mhgp)
+target_compile_options(mhgp3v_sidecar_factory_gate PRIVATE -Wall -Wextra -Werror)
+
 # LA SONDE DE MASSE DE LA SOURCE PAR CELLULES DE CENTRES (reponse 20260811) :
 # theoreme cellule--candidat, temoins top-t_q par anneaux, dilations exactes —
 # le prealable de decision 50 k, sans former un seul tuple.
@@ -938,6 +946,18 @@ set_tests_properties(mhgp3v_cell_source_mass_scanline PROPERTIES
   PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
 mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
   mhgp3v_cell_source_mass_reject_unknown "argument inconnu" 2 --inexistant 1)
+# LA PORTE DE LA FACTORY : sept fixtures du contrat, trois mutants tues.
+add_test(NAME mhgp3v_sidecar_factory_fixtures COMMAND mhgp3v_sidecar_factory_gate)
+set_tests_properties(mhgp3v_sidecar_factory_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : factory ValidatedHybridSidecar")
+mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
+  mhgp3v_sidecar_kill_skip_last_removal "mutant tue" 4 --mutant skip-last-removal)
+mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
+  mhgp3v_sidecar_kill_strict_leq "mutant tue" 4 --mutant strict-leq)
+mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
+  mhgp3v_sidecar_kill_witness_by_position "mutant tue" 4 --mutant witness-by-position)
+mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
+  mhgp3v_sidecar_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
 add_test(NAME mhgp3v_structural_scale_k1_emst COMMAND mhgp3v_structural_scale_check
          --points 200 --smax 11 --seed 20260810)
 mhgp3v_add_expected_code_test_for(mhgp3v_structural_scale_check

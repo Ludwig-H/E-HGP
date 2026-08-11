@@ -32,6 +32,7 @@
 #include "prototype/saturated_fold.hpp"
 #include "prototype/saturated_fold_faceowner.hpp"
 #include "prototype/saturated_fold_hybrid.hpp"
+#include "prototype/validated_hybrid_sidecar.hpp"
 #include "prototype/saturated_fold_global.hpp"
 
 namespace {
@@ -172,10 +173,28 @@ int main(int argc, char** argv) {
   // La garde d'evenement ne REFUSE que sous famille complete (s_max >= n) ;
   // sous famille tronquee ses violations sont comptees et publiees.
   const bool enforce_guard = smax >= n;
-  if ((join_mode == 4 || join_mode == 5) && smax < n) {
-    std::printf("ECHEC : le fold hybride exige la pretention de famille complete"
-                " (smax >= points)\n");
-    return 2;
+  // LA FRONTIERE DE CONFIANCE TYPEE (contrat sidecar 20260810) : les modes
+  // hybrides autoritaires n'inferent plus la famille complete de `smax >= n`
+  // lu ici — le PRODUCTEUR scelle un recu (digests, borne de rang,
+  // enumeration achevee) et la factory `ValidatedHybridSidecar` certifie ou
+  // refuse. `prefix-all` reste relatif et ne l'exige pas.
+  if (join_mode == 4 || join_mode == 5) {
+    const mhgp3v::HybridSourceReceipt receipt = mhgp3v::HybridSourceReceipt::make(
+        mhgp3v::sidecar_points_digest(pts), mhgp3v::sidecar_catalogue_digest(catalogue),
+        smax, n, status == mhgp3v::CloudStatus::kOk);
+    std::string sidecar_refusal;
+    const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+        pts, catalogue, &receipt, max_order, &sidecar_refusal);
+    if (!sidecar.ok()) {
+      std::printf("ECHEC : sidecar refuse : %s\n", sidecar_refusal.c_str());
+      return 2;
+    }
+    if (!sidecar.closure_certified_all_orders()) {
+      std::printf("ECHEC : le fold hybride exige la fermeture des carriers certifiee par"
+                  " le recu de source — la pretention de famille complete n'est pas"
+                  " recue (smax < points ou enumeration non achevee)\n");
+      return 2;
+    }
   }
   mhgp3v::PostingsReceipt receipt;
   mhgp3v::FaceOwnerReceipt faceowner_receipt;
