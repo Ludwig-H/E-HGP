@@ -114,6 +114,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(mutant_name, "strict-leq")) mutants.strict_leq = true;
     else if (!strcmp(mutant_name, "witness-by-position")) mutants.witness_by_position = true;
     else if (!strcmp(mutant_name, "skip-canonical-check")) mutants.skip_canonical_check = true;
+    else if (!strcmp(mutant_name, "sha-fault")) mutants.sha_fault = true;
     else { std::printf("ECHEC : mutant inconnu %s\n", mutant_name); return 2; }
   }
   // LE SHA-256 EST JUGE AVANT DE LIER QUOI QUE CE SOIT : vecteurs FIPS 180-4.
@@ -430,6 +431,51 @@ int main(int argc, char** argv) {
     if (hostile_base.ok() || refusal.find("domaine") == std::string::npos)
       return kill("la fixture de la base hostile",
                   hostile_base.ok() ? "acceptee a tort" : refusal);
+    // BORNE HAUTE de la grille (audit etat courant) : 65536 est hors profil
+    // au meme titre que les valeurs negatives.
+    const std::vector<mhgp::P3> high_cloud = {mhgp::P3{65536, 1, 0}, mhgp::P3{2, 1, 0}};
+    const auto high_points = mhgp3v::ValidatedHybridSidecar::build(
+        high_cloud, make_catalogue({{any_sphere, {0, 1}, {0, 1}}}), nullptr, 2, &refusal,
+        mutants);
+    if (high_points.ok() || refusal.find("grille") == std::string::npos)
+      return kill("la fixture de la grille haute",
+                  high_points.ok() ? "acceptee a tort" : refusal);
+    mhgp::Sphere high_base = make_sphere(mhgp::P3{65536, 0, 0}, 1, 0, 0, 1, 2);
+    const auto high_base_build = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{high_base, {0, 1}, {0, 1}}}), nullptr, 2, &refusal, mutants);
+    if (high_base_build.ok() || refusal.find("domaine") == std::string::npos)
+      return kill("la fixture de la base haute",
+                  high_base_build.ok() ? "acceptee a tort" : refusal);
+  }
+  // FIXTURE 17 (audit etat courant, porte 3) : l'IDENTITE du producteur est
+  // exigee — un recu au mauvais contrat, profil, schema de taches ou statut
+  // terminal laisse la fermeture kUnknown, digests corrects compris.
+  {
+    const std::vector<mhgp::P3> two_triangles = {
+        mhgp::P3{6, 10, 0}, mhgp::P3{14, 10, 0}, mhgp::P3{10, 18, 0}, mhgp::P3{10, 2, 0},
+        mhgp::P3{0, 0, 20}};
+    const mhgp3v::SealedProducerMutants identity_mutants[4] = {
+        {true, false, false, false},
+        {false, true, false, false},
+        {false, false, true, false},
+        {false, false, false, true}};
+    for (const mhgp3v::SealedProducerMutants& identity : identity_mutants) {
+      const mhgp3v::SealedSourceProducer::Result sealed =
+          mhgp3v::SealedSourceProducer::run(two_triangles, 5, identity);
+      if (!sealed.ok || sealed.receipt.empty()) {
+        std::printf("ECHEC : producteur scelle refuse dans la fixture d'identite\n");
+        return 1;
+      }
+      const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+          two_triangles, sealed.catalogue, &sealed.receipt[0], 2, &refusal, mutants);
+      if (!sidecar.ok())
+        return kill("la fixture d'identite producteur",
+                    "la table est refusee au lieu de laisser kUnknown : " + refusal);
+      if (sidecar.closure_certified_all_orders())
+        return kill("la fixture d'identite producteur",
+                    "un recu au mauvais contrat, profil, schema ou statut a certifie une"
+                    " fermeture");
+    }
   }
   // FIXTURE 15 (audit delta, porte 2) : le digest final lie maximum_order et
   // les fermetures — deux decisions differentes ne partagent jamais un

@@ -180,7 +180,7 @@ class HybridSourceReceipt {
   HybridSourceReceipt(HybridSourceReceipt&& other) noexcept
       : points_digest_(other.points_digest_),
         catalogue_digest_(other.catalogue_digest_),
-        producer_code_digest_(other.producer_code_digest_),
+        producer_version_digest_(other.producer_version_digest_),
         producer_contract_(other.producer_contract_),
         profile_(other.profile_),
         task_schema_(other.task_schema_),
@@ -196,7 +196,7 @@ class HybridSourceReceipt {
 
   const Sha256Digest& points_digest() const { return points_digest_; }
   const Sha256Digest& catalogue_digest() const { return catalogue_digest_; }
-  const Sha256Digest& producer_code_digest() const { return producer_code_digest_; }
+  const Sha256Digest& producer_version_digest() const { return producer_version_digest_; }
   std::uint32_t producer_contract() const { return producer_contract_; }
   std::uint32_t profile() const { return profile_; }
   std::uint32_t task_schema() const { return task_schema_; }
@@ -211,13 +211,13 @@ class HybridSourceReceipt {
  private:
   HybridSourceReceipt(SourceProducerToken&&, const Sha256Digest& points_digest,
                       const Sha256Digest& catalogue_digest,
-                      const Sha256Digest& producer_code_digest,
+                      const Sha256Digest& producer_version_digest,
                       std::uint32_t producer_contract, std::uint32_t profile,
                       std::uint32_t task_schema, int terminal_status, int rank_bound,
                       int point_count, bool enumeration_completed)
       : points_digest_(points_digest),
         catalogue_digest_(catalogue_digest),
-        producer_code_digest_(producer_code_digest),
+        producer_version_digest_(producer_version_digest),
         producer_contract_(producer_contract),
         profile_(profile),
         task_schema_(task_schema),
@@ -229,7 +229,7 @@ class HybridSourceReceipt {
 
   Sha256Digest points_digest_;
   Sha256Digest catalogue_digest_;
-  Sha256Digest producer_code_digest_;
+  Sha256Digest producer_version_digest_;
   std::uint32_t producer_contract_ = 0;
   std::uint32_t profile_ = 0;
   std::uint32_t task_schema_ = 0;
@@ -294,12 +294,15 @@ inline Sha256Digest sidecar_members_digest(const std::vector<mhgp::i32>& members
 // « < » change en « <= », temoin indexe par la POSITION avant permutation,
 // acceptation d'une declaration de support NON canonique (le rejet du
 // tie-break etranger est la coherence exigee par l'audit etat courant,
-// defaut 2 : evidence, digests et fold consomment le meme support).
+// defaut 2 : evidence, digests et fold consomment le meme support), et
+// selftest SHA-256 saboté — la factory doit refuser par SON controle
+// interne, sans pretest externe de la porte.
 struct SidecarMutants {
   bool skip_last_removal = false;
   bool strict_leq = false;
   bool witness_by_position = false;
   bool skip_canonical_check = false;
+  bool sha_fault = false;
 };
 
 class ValidatedHybridSidecar {
@@ -421,9 +424,10 @@ inline ValidatedHybridSidecar ValidatedHybridSidecar::build(
   };
   // LE SHA-256 EST JUGE AVANT DE LIER QUOI QUE CE SOIT (audit etat courant,
   // defaut 5) : le controle est EFFECTIF dans la factory, pas seulement dans
-  // la porte CTest qui le rejoue.
+  // la porte CTest qui le rejoue. Le mutant sha-fault sabote le verdict du
+  // selftest : la factory doit refuser d'elle-meme, sans pretest externe.
   static const bool sha_selftest_ok = sidecar_sha256_selftest();
-  if (!sha_selftest_ok)
+  if (!sha_selftest_ok || mutants.sha_fault)
     return refuse("selftest SHA-256 refuse : les vecteurs FIPS ne sont pas reproduits");
   if (maximum_order < 1 || maximum_order > mhgp::kMaxRank)
     return refuse("ordre maximal hors contrat");
@@ -757,7 +761,7 @@ inline ValidatedHybridSidecar ValidatedHybridSidecar::build(
       stream.put_u32(receipt->profile());
       stream.put_u32(receipt->task_schema());
       stream.put_i64((long long)receipt->terminal_status());
-      stream.put_digest(receipt->producer_code_digest());
+      stream.put_digest(receipt->producer_version_digest());
     } else {
       stream.put_u32(0);
       stream.put_u32(0);

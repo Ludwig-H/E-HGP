@@ -64,3 +64,19 @@ sémantique du digest de version (porte 3), le filtre terminal de profondeur
 et center-cover du falsificateur d'ancres (porte 4).
 
 GCP non utilisé pour cette livraison.
+
+## Addendum — porte 3 de l'état courant (sidecar)
+
+- `producer_code_digest` renommé `producer_version_digest`, avec la
+  sémantique honnête gravée : identifiant SÉMANTIQUE de la convention du
+  producteur (chaîne de version digérée), jamais un SHA du source ou de
+  l'ELF — la provenance binaire vit dans les reçus de run.
+- Mutants d'IDENTITÉ du producteur (fixture 17) : un reçu au mauvais
+  contrat, profil, schéma de tâches ou statut terminal laisse la fermeture
+  `kUnknown`, digests corrects compris — les quatre variantes sont testées.
+- Injection `sha-fault` : la factory refuse par SON contrôle interne, sans
+  prétest externe (mutant à code 4).
+- Grille : borne HAUTE couverte (coordonnée 65536 et base 65536 refusées).
+- CAMPAGNE SANITIZERS sur l'empreinte finale : gate compilée
+  `-fsanitize=address,undefined -fno-sanitize-recover=all`, nominal 0,
+  cinq mutants à 4, AUCUNE erreur sanitizer.

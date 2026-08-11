@@ -1172,6 +1172,8 @@ mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
   mhgp3v_sidecar_kill_skip_canonical_check "mutant tue" 4 --mutant skip-canonical-check)
 mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
+  mhgp3v_sidecar_kill_sha_fault "selftest SHA-256" 4 --mutant sha-fault)
+mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
   mhgp3v_sidecar_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
 add_test(NAME mhgp3v_structural_scale_k1_emst COMMAND mhgp3v_structural_scale_check
          --points 200 --smax 11 --seed 20260810)
