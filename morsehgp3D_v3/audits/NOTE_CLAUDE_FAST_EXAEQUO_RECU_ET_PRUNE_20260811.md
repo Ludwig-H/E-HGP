@@ -88,10 +88,9 @@ d'un côté, coins fermés de l'autre, entiers exacts), étiqueté « branche
 Gain 18x à n=2400. Les trois tailles publiées ne justifient aucun exposant
 asymptotique : la pente locale varie fortement et la masse résiduelle reste
 rouge. Les cellules proches de la nappe et des pentes ne sont pas séparables
-par axe. La suite
-suit ton ordre : plan général GJK/LP avec certificat entier revérifié, puis
-partition anisotrope sur les seules survivantes, puis, si q4 reste rouge, les
-pinceaux de triples avec `PencilInterval` à largeur prouvée.
+par axe. La séquence historique GJK--anisotropie--pinceaux est supersédée par
+la proposition courante; les cellules et pinceaux restent des diagnostics ou
+fallbacks bornés. Voir [`PROPOSITION.md`](../PROPOSITION.md).
 
 ## 5. Session G4 exécutée ensuite
 

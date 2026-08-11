@@ -9,460 +9,369 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cette proposition n'est ni une spécification ni une qualification produit.
-L'autorité reste
-[`SPECIFICATION_MORSEHGP3D.md`](../docs/SPECIFICATION_MORSEHGP3D.md) et le
-registre
-[`STATUT_PREUVES_ET_HEURISTIQUES.md`](../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md).
+L'autorité existante reste
+[`SPECIFICATION_MORSEHGP3D.md`](../docs/SPECIFICATION_MORSEHGP3D.md), avec le
+registre [`STATUT_PREUVES_ET_HEURISTIQUES.md`](../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md).
+Le verdict live est
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
-## 1. Décision
+## 1. Décision d'architecture
 
-La route candidate est :
+La route 50 k ne doit matérialiser ni mosaïque de Delaunay d'ordre supérieur,
+ni catalogue Gamma global, ni tableau de toutes les paires, cellules, faces,
+cofaces ou incidences. Un oracle exhaustif borné peut recertifier la route; il
+ne devient jamais son implémentation par défaut.
 
-```text
-k=1 : EMST exact distinct
-
-k>=2 : self-join LBVH des paires
-  -> center-cover fail-open par blocs
-  -> ancres diamètre résiduelles
-  -> cordes de Jung et niveaux peu profonds
-  -> census terminal et BallActivation streamées
-  -> tombstones H0, resolver, fold sparse par lots
-```
-
-Elle ne construit ni mosaïque de Delaunay d'ordre supérieur, ni Gamma global,
-ni matrice paire--point, ni tableau global de tuples, de facettes ou de
-cofaces. Les arrangements bidimensionnels sont des scratchs éphémères par
-ancre ou par slab.
-
-Cette route reste conditionnelle : la parcimonie globale de ses ancres et de
-ses cordes n'est pas prouvée. Le prochain jalon est un falsificateur mass-only,
-pas l'implémentation anticipée d'un produit.
-
-## 2. Décisions négatives
-
-Les chemins suivants ne sont plus proposés comme architectures produit :
-
-- catalogue exhaustif `flat_catalogue`, borné en rang et déjà à 675 secondes
-  pour n=6 250 sur une famille mesurée;
-- cellules uniformes suivies de toutes les combinaisons locales;
-- pinceaux q4 qui commencent par tous les triples locaux;
-- scan de tout le nuage pour chaque ancre ou chaque triple;
-- RNG, kNN fixe ou cascade de Jung d'un nombre fixé d'étages comme autorité de
-  complétude;
-- onion peeling des formes duales, réfuté par une fixture Morse bien centrée;
-- MST de points comme substitut aux ordres `k>=2`;
-- face-owner qui matérialise toutes les incidences;
-- factory sidecar qui recertifie chaque générateur par un scan `O(G*n)` dans le
-  chemin chaud.
-
-La source par cellules et le plan séparateur restent utiles comme oracles,
-falsificateurs de masse et sources bornées. Ils ne reprennent le statut de
-candidat que si leurs préflights deviennent compatibles avec une enveloppe
-mesurée.
-
-## 3. Contrat de sortie
-
-La proposition vise le contrat distinct
+Le candidat vise un contrat distinct,
 `hgp_reduced_normalized_h0_v3` : composantes horizontales exactes, niveaux
-exacts, lots atomiques et union exacte des `PointId`, avec quotient certifié de
-blocs H0 silencieux.
+exacts, lots atomiques et unions exactes des `PointId`, après quotient certifié
+des blocs H0 inertes.
 
-Elle ne promet pas le transcript Gamma exhaustif. Ce dernier exige aussi les
-facettes, cofaces, incidences silencieuses, `coverage_delta`, identifiants de
-lots et applications verticales. Une boule silencieuse pour H0 peut porter ces
-données; une tombstone horizontale ne les supprime donc jamais d'un contrat
-Gamma.
+Il ne remplace pas Gamma/v2. Une boule H0-inerte peut encore porter des
+facettes, des incidences silencieuses ou une application verticale. Tant que
+ces informations ne sont pas reconstruites par une preuve séparée, la sortie
+ne peut revendiquer ni le transcript v2 ni la hiérarchie verticale complète.
 
-## 4. Invariants
+## 2. Invariants
 
-1. Toute décision d'émission, d'omission, d'owner ou de niveau est exacte.
-   Le flottant ou le GPU peut proposer; un certificat entier, rationnel ou
-   multiprécision décide.
-2. Une ambiguïté, une égalité non traitée ou un overflow conserve le travail ou
-   déclenche le repli exact.
-3. Tout préflight est calculé avant allocation. Une ressource insuffisante
-   refuse ou produit un token de reprise; elle ne tronque rien.
-4. Chaque niveau exact est transactionnel : snapshot strict, calcul complet,
-   contrôles d'identité, puis commit fermé unique.
-5. Count et fill ont la même partition, le même owner et la même masse.
-6. La randomisation peut modifier le temps, jamais la sortie. Sa graine et son
-   transcript sont scellés et rejouables.
-7. Les oracles exhaustifs restent bornés et structurellement indépendants du
-   chemin produit.
+1. Toute émission, omission, ownership et égalité de niveau est décidée par
+   l'arithmétique exacte u16/rationnelle reçue.
+2. Count, fill et consommation portent la même identité. Un dépassement
+   refuse atomiquement; il ne tronque jamais.
+3. Chaque niveau exact utilise un snapshot strict gelé, puis un unique commit
+   fermé. Une égalité n'est jamais séquentialisée arbitrairement.
+4. Une source se prouve par son domaine complet et ses certificats rejouables,
+   pas par un booléen, un rang maximal ou un digest de sa propre sortie.
+5. Une proposition flottante peut ordonner le travail; seul un prédicat exact
+   autorise un prune.
+6. Aucun résultat plausible, accord moyen ou microbenchmark ne promeut le
+   statut public.
 
-## 5. Pont H0 de haut rang
+## 3. Faits qui imposent le changement de source
 
-Pour une boule fermée `B`, soit `p` le nombre de points strictement intérieurs
-et soit `q` la taille d'un support propre positif. Le théorème 4.2 de
-[`INCIDENCES_SILENCIEUSES_GAMMA.md`](../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
-donne :
+La session G4 mass-only n'a formé aucun tuple. Après le prune d'axe, elle
+conserve :
 
-$$1leq kleq p+q-2Longrightarrow B	ext{ est une continuation }H_0	ext{ sans fusion ni nouveau PointId.}$$
+| lane | minimum | maximum |
+| --- | ---: | ---: |
+| q2 | 465 371 500 | 2 862 879 000 |
+| q3 | 14 667 530 000 | 131 762 100 000 |
+| q4 | 330 437 400 000 | 9 968 861 000 000 |
 
-Pour `K=10`, une preuve positive `p+q>=12` rend la boule inerte pour tous les
-ordres horizontaux demandés. Les nombres de témoins stricts qui suffisent à
-écarter une lane pertinente sont donc `10/9/8` pour q2/q3/q4.
+Les seuls top-t, dilations et comptes prennent 0,174--29,153 s sur 48 threads.
+Ces nombres réfutent l'énumération combinadique de la grille uniforme. q2
+n'est pas « admise » : elle est seulement moins massive que q3 et q4.
 
-Le support doit être affinement indépendant et son centre dans l'intérieur
-relatif de son enveloppe convexe. Un carré cosphérique redondant n'est pas un
-support propre q4. `q_min` est la plus petite arité propre d'une source complète;
-`q_cert` est la plus grande arité positive effectivement prouvée et sert à
-renforcer l'inertie. Une absence de grand support n'est jamais inférée.
+Le pinceau q4 par triples n'est pas une baseline industrielle. La masse R3
+publiée appartient à la lane q3 et ne peut pas lui être imputée. En revanche,
+la masse q4 suffit à le réfuter : même le schéma canonique des trois plus
+petits identifiants impose, au pas 6, plus de 2,74 milliards, 10,63 milliards
+et 1,02 milliard de triples selon la famille, avant range-report, census et
+fold. Il reste un fallback exhaustif borné ou un oracle, jamais la route 50 k.
 
-## 6. Lane `k=1`
+## 4. Pont de haut rang
 
-`k=1` est exactement le single-linkage aux coupes stricte et fermée. La lane
-produit doit construire un EMST exact puis rejouer ses lots de distances
-égales. Le Prim `O(n^2)` actuel reste un oracle.
+Pour une boule fermée, soit `p` le nombre de points strictement intérieurs et
+soit `q` la taille d'un support propre positif. Le théorème 4.2 de
+[`INCIDENCES_SILENCIEUSES_GAMMA.md`](../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md) prouve :
 
-La candidate device est un Borůvka sur LBVH : proposition de plus proche arête
-par composante, comparaison exacte des distances carrées u16, tie-break par
-`PointId`, union atomique par lot égal et comparaison des partitions à l'oracle.
-Ce composant doit avoir ses propres reçus; il ne passe pas par le fallback des
-générateurs q3/q4.
+$$1\leq k\leq p+q-2\Longrightarrow\text{le bloc est une continuation }H_0\text{ sans fusion ni nouveau PointId.}$$
 
-## 7. Source d'ancres par self-join LBVH
+Pour `K=10`, une preuve positive `p+q>=12` autorise une tombstone du quotient
+horizontal demandé. Le support doit être affinement indépendant et le centre
+doit appartenir à l'intérieur relatif de son enveloppe convexe. Un support
+cosphérique redondant ne suffit pas.
 
-### 7.1 Partition de toutes les paires
+La tombstone conserve une clé de boule et les témoins permettant son rejeu.
+Elle suppose un resolver des carriers silencieux. Elle ne prouve ni l'absence
+de support, ni l'absence d'incidence Gamma, ni une verticale.
 
-Pour un nœud binaire `N` de fils `L,R`, les paires internes se décomposent en
-trois ensembles disjoints : paires internes à `L`, produit croisé `L x R`,
-paires internes à `R`. Un produit croisé est ensuite divisé sur un seul côté
-selon une règle déterministe. Chaque paire non ordonnée appartient ainsi à un
-unique état ou microtuile.
+## 5. Objet streamé
 
-Pour chaque lane, le ledger doit fermer :
-
-$$P_{mathrm{prune}}+P_{mathrm{microtile}}=inom{n}{2}.$$
-
-Après consommation terminale, aucun état `pending` ne subsiste. Les plages de
-feuilles des témoins sont disjointes de celles des deux extrémités.
-
-### 7.2 Prune q2 par blocs
-
-Pour une paire `(x,y)`, un témoin `w` est strictement intérieur à sa boule
-diamétrale exactement lorsque :
-
-$$(w-x)mathbin{cdot}(w-y)<0.$$
-
-Une borne d'intervalle strictement négative pour dix témoins distincts et pour
-toutes les paires d'un bloc certifie l'inertie q2 de ce bloc. Zéro signifie
-shell et ne compte pas. Un intervalle traversant zéro conserve le bloc.
-
-### 7.3 Center-cover q3/q4
-
-Un état de paires représente aussi un sur-ensemble extérieur des centres de
-tous les supports dont l'une de ces paires est diamétrale. Ce domaine est
-découpé en patches fermés. Un patch n'est retiré que si l'équation du plan
-médiateur ou la borne de Jung y est impossible par intervalles exacts.
-
-Dans chaque patch encore faisable, un parcours témoin du LBVH construit une
-antichaîne de plages disjointes :
-
-- une borne strictement positive sur la puissance compte tout le nœud comme
-  intérieur;
-- une borne négative ou nulle l'exclut des témoins stricts;
-- sinon le parcours descend.
-
-Neuf témoins q3 ou huit témoins q4 dans chaque patch faisable ferment la lane du
-bloc. Les mêmes points peuvent servir dans des patches différents; ils ne
-peuvent être comptés deux fois dans une même antichaîne.
-
-Le contrat exact et ses bornes sont dans
-[`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md).
-Le RNG peut ordonner la file, jamais fermer un bloc.
-
-### 7.4 Porte de parcimonie
-
-Le mass-only publie au minimum : états de paires, patches faisables, visites
-témoin, paires prunées, microtuiles, ancres résiduelles `a`, files p50/p95/p99
-et max, ambiguïtés, profondeur de reprise, octets et temps chaud.
-
-Le précédent prototype `center-cover`, qui bouclait trop largement, a dépassé
-600 secondes à 50 k sans JSON. Il est rejeté. La nouvelle porte doit éviter
-toute boucle ancre--nuage et toute insertion des `n-1` plans pour chacune des
-`n` ancres.
-
-## 8. Réduction exacte par ancre diamètre
-
-### 8.1 Coordonnées du disque de Jung
-
-Fixer une paire diamètre `e=pq`, poser `d=q-p`, `D^2=d dot d` et
-`M=(p+q)/2`. Choisir deux vecteurs entiers indépendants `b1,b2` orthogonaux à
-`d`, poser `B=[b1 b2]` et écrire le centre `c=M+Bt`.
-
-Pour q4, Jung impose le disque elliptique exact :
-
-$$J_e^{(4)}=leftlbrace t:t^{mathsf{T}}(B^{mathsf{T}}B)tleqrac{D^2}{8}ightbrace.$$
-
-Chaque point `x` distinct de l'ancre définit la forme affine :
-
-$$h_x(t)=2(Bt)mathbin{cdot}(x-M)-left(leftVert x-MightVert^2-rac{D^2}{4}ight).$$
-
-L'identité exacte est `h_x(t)=r^2-dist2(x,c)`. Son signe classe intérieur
-strict, shell et extérieur. Aucune base orthonormale ni racine carrée n'est
-requise.
-
-Un range-report LBVH fournit seulement les points susceptibles d'être
-intérieurs ou sur le shell pour un centre de `J_e`. Il doit employer la borne
-extérieure de Jung et rester fail-open à l'égalité; scanner les `n` points par
-ancre est interdit.
-
-### 8.2 q2 et q3
-
-- q2 évalue directement la boule diamétrale, puis le census et l'owner.
-- q3 traite chaque forme dont la droite rencontre le domaine q3. Le
-  circumcentre du triangle est le point de cette droite qui minimise la forme
-  quadratique du rayon. Bon centrage, profondeur, shell et diamètre sont
-  vérifiés exactement.
-
-Les domaines, constantes intérieures et seuils q3/q4 sont distincts. Une passe
-q4 ne certifie pas q3.
-
-### 8.3 q4 comme niveau peu profond
-
-Sur `J_e`, classifier chaque point en intérieur constant, extérieur constant ou
-corde active. Soit `c_e` le nombre d'intérieurs constants et `m_e` le nombre de
-cordes. Une intersection de deux cordes a pour profondeur stricte le nombre de
-demi-plans actifs qui la contiennent. Son rang fermé vaut :
-
-$$mathrm{rang}_{mathrm{ferme}}=4+c_e+delta_e.$$
-
-À `smax=11`, la profondeur utile maximale est `kappa_e=7-c_e`. Le nombre de
-sommets utiles vérifie :
-
-$$Z_eleq m_e(kappa_e+1)=m_e(8-c_e)leq8m_e.$$
-
-Cette borne est le cœur de la proposition. Elle n'apporte aucun gain si le code
-forme d'abord les `C(m_e,2)` intersections. Le constructeur doit bâtir
-directement le sous-complexe des niveaux `0..kappa_e`, par une construction
-incrémentale Las Vegas avec listes de conflits ou une méthode de même
-complexité sortie-sensible.
-
-La graine est scellée, mais le résultat est canonique. Les comparaisons d'ordre
-le long d'une corde utilisent le signe du déterminant homogène `3x3`; sous les
-bases équilibrées u16 reçues, ce chirotope tient en `i128`. Parallèles et
-concurrences suivent des branches exactes, sans perturbation symbolique.
-
-### 8.4 Dégénérescences et owner
-
-Une concurrence de `t` cordes est un seul niveau avec shell multiple, pas
-`C(t,2)` sommets. Une ligne inéligible comme carrier peut rester un témoin de
-profondeur et ne doit pas être supprimée du comptage.
-
-Une même boule peut avoir plusieurs supports positifs et plusieurs paires de
-diamètre. L'ordre sûr est : census fermé, regroupement par `BallKey`, choix du
-support positif canonique, puis paire de longueur maximale et plus petite paire
-lexicographique en cas d'égalité. Un owner appliqué indépendamment aux supports
-bruts peut dupliquer ou perdre une boule.
-
-## 9. Pourquoi la route cellules--triples est rétrogradée
-
-La séparation entre une cellule `C` et `conv(A_C)` exclut seulement les
-supports de la branche `beta<Q` contenus dans `A_C`. Un support `beta>=Q` peut
-subsister hors de cette liste; il est omissible pour le quotient H0 seulement
-avec les témoins stricts, le théorème d'inertie et le resolver. Il n'existe
-aucun verdict Gamma `no_support`.
-
-Après le prune d'axe à 50 k, une cellule q4 survivante de taille `m_C` porte
-`C(m_C,4)` quadruplets. Même si le pinceau visite seulement les trois plus
-petits identifiants de chaque quadruplet, il doit visiter `C(m_C-1,3)` triples.
-Ainsi :
-
-$$P_{mathrm{triple}}geqrac{4R'_4}{m_{max}}.$$
-
-Les trois familles au pas 6 imposent respectivement plus de `2,74e9`,
-`1,063e10` et `1,020e9` triples. Le plan du barycentre certifié réduit encore
-les masses sur de petits cas, mais laisse plus d'un milliard de quadruplets q4
-à n=2 400 sur chacune des trois mesures locales. GJK, plans généraux et
-anisotropie restent donc des sondes; aucun reporter q4 n'est codé avant
-admission de son préflight.
-
-## 10. Census terminal et `BallActivation`
-
-Toute proposition survivante termine par :
-
-1. indépendance affine et barycentriques strictement positives;
-2. niveau et centre exacts, sans projection binary64;
-3. census fermé complet par range-report exact, puis vérification des feuilles
-   ambiguës;
-4. shell complet, intérieur strict, rang et `BallKey` canonique;
-5. RLE entre lanes et ancres;
-6. reconstruction de `q_min`, preuves positives de `q_cert` et certificat
-   principal;
-7. émission ou tombstone.
-
-Le relèvement en dimension quatre transforme le census point--sphère en requête
-de demi-espace; l'index propose des nœuds, tandis que l'arithmétique exacte
-rejoue toute frontière.
-
-L'objet streamé est :
+Le chemin produit ne transporte pas un `CriticalSphere(rank<=32)` global. Il
+stream des records à coquille variable, réunis par clé exacte :
 
 ```text
 BallActivation
-  BallKey et niveau exacts
-  p, shell complet et digest de census
-  q_min et preuves de q_cert
-  état principal et témoins de suppression
-  fenêtre d'ordres pertinente ou tombstone H0
-  handles stricts/fermés latents
-  provenance de source et owner
+  BallKey canonique multiprécision
+  niveau exact et owner de source
+  support propre positif et provenance rejouable
+  p exact ou témoins stricts suffisants pour une tombstone
+  q_min de provenance Morse, distinct de q_cert
+  coquille fermée complète pour toute activation conservée
+  fenêtre d'ordres H0 pertinente
+  handles strict et fermé latents
+  preuve d'émission, d'inertie ou de refus
 ```
 
-La source produit un pass count, une arène bornée, un pass fill et une identité
-de masse. Aucun catalogue global de saturés n'est requis.
+`q_min` est la plus petite arité de provenance prouvée pour la boule.
+`q_cert` est une arité de support propre positif effectivement exhibée pour
+renforcer l'inertie; l'absence d'un support plus grand n'est jamais déduite.
 
-## 11. Frontière de confiance
+Une activation non inerte exige le census fermé complet avant fold. Une
+tombstone peut éviter ce census uniquement si sa preuve H0 et son futur
+resolver n'en ont pas besoin. Plusieurs lanes réunissent leurs records par la
+même `BallKey`; les supports multiples ne créent pas plusieurs boules.
 
-La capability de complétude provient de l'achèvement rejouable du self-join et
-de ses ledgers, pas de `smax>=n`, d'un booléen ni d'un reçu public.
+## 6. Source par arité
 
-Le reçu de producteur est inconstructible hors du producteur terminal et lie :
+### 6.1 Ordre un : EMST exact
 
-- schéma, epoch, digest des points et paramètres;
-- transcript de partition des paires et états de reprise;
-- digests canoniques des activations et certificats;
-- masses count/fill, owners et RLE;
-- statut terminal sans censure.
+L'ordre un est exactement le single linkage, au niveau
+`distance_squared/4`. La route candidate calcule un EMST par Boruvka exact sur
+points u16, trie ses arêtes par niveau rationnel et rejoue chaque lot d'égalité
+atomiquement.
 
-Le fold consomme `const ValidatedHybridSidecar&` ou une capability équivalente;
-il ne reprend jamais `Catalogue + bool`. Les clés et sérialisations sont
-canoniques, multiprécision lorsque nécessaire, puis engagées par SHA-256.
+La réception compare, après chaque coupe stricte et fermée, les partitions
+canoniques de `PointId` à l'oracle EMST CPU. Elle couvre les ex æquo, plusieurs
+EMST valides et une mutation qui reconnecte les mauvaises composantes aux
+bons niveaux. Cette lane évite entièrement le catalogue Morse à `k=1`.
 
-Le juge CPU peut refaire un census `O(G*n)` à petit `n`. Cette revalidation
-exhaustive ne se trouve pas dans le chemin produit.
+### 6.2 Supports q2 : paires diamétrales peu profondes
 
-## 12. Tombstones et resolver
+La boule d'un support q2 est la boule diamétrale de sa paire `(x,y)`. Un point
+`z` est strictement intérieur si et seulement si
+`(z-x) dot (z-y)<0`. Une activation q2 non tombstonée a au plus `K-1=9`
+points strictement intérieurs.
 
-Une boule H0-inerte doit conserver un locator : une face de son bloc peut être
-le carrier d'une fusion ultérieure. Le resolver d'une face `F` avant un cutoff
-`a` :
+La source candidate est un produit dual-tree canonique de deux LBVH :
 
-1. calcule sa miniboule `D`, son intérieur et un support propre positif;
-2. retourne le handle fermé de `D` si la face est déjà au-delà de sa fenêtre
-   d'inertie;
-3. sinon remplace `F` par un carrier canonique de niveau strictement inférieur;
-4. répète jusqu'au handle antérieur.
+1. chaque produit de nœuds représente un ensemble disjoint de paires non
+   ordonnées ;
+2. une borne entière sur boîtes cherche dix `PointId` distincts qui satisfont
+   strictement le prédicat pour toutes les paires du produit ;
+3. dix témoins certifient l'inertie H0 et suppriment le produit ;
+4. sinon le produit se scinde; une feuille calcule exactement profondeur,
+   coquille, clé et preuve.
 
-Le lookup est `closed@beta(D)` avec `beta(D)<a`. Le cache porte
-`(BallKey,k)->handle`, jamais une racine DSU mutable.
+La borne peut avoir des faux négatifs, jamais des faux positifs. Les contacts
+restent aux feuilles. La complétude se prouve par la partition du self-produit
+LBVH et par le fait qu'une paire non inerte ne peut rencontrer le certificat
+de dix témoins.
 
-Pour les grandes coquilles, le quotient local peut être construit par
-l'arrangement unique des grands cercles et le seuil de demi-sphère `Omega`, au
-lieu d'énumérer tous les sous-ensembles. Il reste un fallback de dégénérescence
-dont le pire cas quadratique doit être préflighté et comparé au graphe local
-exhaustif.
+Cette route ne matérialise ni matrice ni liste globale de paires. Son pire cas
+reste quadratique. Avant CUDA, une sonde count-only doit donc publier
+produits visités/scindés/prunés, feuilles, paires exactes, tombstones, coquilles,
+octets, pile et high-water. La cible n'est admise que sur ces masses complètes.
 
-## 13. Fold sparse
+Cette suppression vaut exclusivement pour la lane q2. Une paire dont la boule
+diamétrale contient dix témoins peut rester le diamètre d'un support q3/q4 dont
+le centre est décalé et dont la sphère exclut ces témoins. La fixture u16
+explicite est consignée dans
+[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](audits/AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md). Le résiduel q2 ne devient jamais, par
+soustraction, la source d'ancres des arités supérieures.
 
-Le fast principal est actif seulement si `q<=k+1`, si le support principal et
-`CarrierClosure` sont certifiés, et si toutes les attaches se résolvent à un
-niveau strictement inférieur dans le snapshot pré-lot. Un lookup égal ou absent
-sous prétention complète refuse atomiquement.
+### 6.3 Supports q3 : ancre de diamètre
 
-Le fallback préfixe emploie un ordre global, des postings possédés par lots, un
-préflight exact des hits et la recertification réelle des intersections. Il
-reste la vérité relative à toute table fournie.
+Pour un support triangulaire propre positif, choisir canoniquement la plus
+petite paire parmi ses côtés de longueur maximale `D`. Son circumcentre
+appartient au plan médiateur de l'ancre et vérifie `h^2<=D^2/12`, où `h` est
+la distance au milieu de l'ancre.
 
-Pour chaque lot : figer les racines, construire fast et fallback, recertifier,
-comparer masses et ledger, appliquer les composantes en un commit, puis publier
-les handles fermés. La DSU ne peut pas masquer une incidence manquante dans les
-contrôles pré-commit.
+Pour une ancre reçue, chaque troisième point définit au plus un circumcentre
+q3 dans ce disque. Le candidat est conservé seulement après vérification
+exacte de l'arité positive, de l'ancre canonique, de la profondeur
+`p<=K-2=8`, de l'owner et de la `BallKey`.
 
-## 14. Architecture device
+Cette réduction remplace les triples par `ancre x troisieme_point`, mais elle
+n'est utile que si la source des ancres est elle-même sparse et complète.
+Tester toutes les paires comme ancres n'est pas admis.
+
+### 6.4 Supports q4 : sommets peu profonds dans un plan médiateur
+
+Pour un support tétraédrique propre positif et une ancre diamètre `D`, le
+théorème de Jung en dimension trois donne `h^2<=D^2/8`. Dans le disque
+médiateur ainsi borné, chaque autre point induit une droite d'égalité de
+puissance et un demi-plan où il est strictement intérieur.
+
+Un q4 pertinent est une intersection de deux droites dont la profondeur
+stricte est au plus `K-3=7`. La route candidate construit directement les
+niveaux peu profonds de cet arrangement, au lieu de former toutes les paires
+de droites. Elle valide ensuite indépendance affine, positivité, ancre
+canonique, owner, census et clé.
+
+Les parallèles, droites confondues, intersections multiples, points de
+frontière et grandes coquilles sont des lots exacts, pas une hypothèse de
+position générale. Le sweep doit les traiter ou refuser la route avant toute
+sortie.
+
+Le verrou de recherche est explicite : il manque encore un producteur sparse
+et complet des ancres de diamètre, ainsi qu'une admission globale de la somme
+des arrangements. Sans ces deux preuves, q3/q4 restent des propositions et non
+un chemin produit.
+
+## 7. Cellules de centres : oracle branch-and-bound
+
+La grille existante reste utile pour falsifier les masses et recertifier les
+petits cas. Sa formulation exacte est la suivante.
+
+Pour une cellule half-open `C`, les bornes utilisent sa fermeture. Noter
+`l_C(x)` et `u_C(x)` les distances carrées minimale et maximale de `x` à cette
+fermeture. Pour la lane `q`, poser `t_q=K+2-q`, prendre les `t_q` plus petites
+valeurs `u_C`, poser `R_q(C)` égal à leur maximum et
+`A_q(C)={x : l_C(x)<=R_q(C)}`.
+
+Si une boule owner de `C` a `beta>R_q(C)`, les `t_q` témoins sont strictement
+intérieurs et la boule est H0-inerte. Sinon `beta<=R_q(C)` et son saturé fermé
+entier appartient à `A_q(C)`. L'égalité reste toujours dans la branche
+conservée.
+
+Une séparation stricte entre la fermeture de `C` et `conv(A_q(C))` exclut un
+support de la branche conservée, car son centre devrait appartenir à
+`conv(A_q(C))`. Elle ne signifie jamais « aucun support » : la branche haute
+peut contenir de vraies sphères, omissibles seulement du quotient H0 après
+théorème 4.2 et resolver.
+
+Sous subdivision, les listes sont imbriquées : un enfant ne peut qu'augmenter
+`l`, diminuer `u` et diminuer `R`, donc son `A_q` est inclus dans celui du
+parent. La racine couvre `conv(X)`, les enfants half-open ont un owner
+rationnel unique, et une branche ne termine que par certificat, producteur
+exact alternatif ou fallback exhaustif.
+
+Cette complétude ne borne pas le travail. Une cosphère massive peut conserver
+`|A_q|=Theta(n)` à toute profondeur et provoquer `Theta(n^q)` vues pour une
+seule boule. Subdiviser jusqu'à stabilité peut aussi reconstruire implicitement
+les bisecteurs du diagramme de Voronoi d'ordre supérieur. La structure reste
+donc transitoire, sans atlas ni adjacences, et hors du chemin chaud tant
+qu'aucune borne d'admission n'existe.
+
+## 8. Resolver des blocs silencieux
+
+Omettre un bloc H0-inerte sans locator est faux : une de ses facettes peut
+devenir le carrier d'une fusion ultérieure. Pour résoudre une `k`-face `F`
+avant un cutoff futur :
+
+1. calculer sa miniboule exacte `D`, ses points strictement intérieurs et un
+   support propre positif de taille `q` ;
+2. si `k>p+q-2`, retourner le handle fermé de `D` ;
+3. si `k<=p`, remplacer `F` par les `k` intérieurs canoniques ;
+4. sinon prendre tous les intérieurs et `k-p` points canoniques du support ;
+5. recommencer au niveau strictement plus petit.
+
+Le lookup est `closed@beta(D)` après le lot propre de `D`, jamais le snapshot
+strict du même lot. Le cache stocke un handle stable, pas une racine DSU
+mutable. La terminaison, les ex æquo et les cycles apparents sont rejoués par
+un oracle exhaustif borné avant intégration.
+
+## 9. Fold sparse
+
+Le fast principal multi-lot reçu s'applique seulement si `q<=k+1`, si le
+support principal est certifié, si la source prouve la fermeture de chaque
+carrier et si chaque lookup pré-lot est strictement antérieur. `q>k+1` reste
+au fallback.
+
+Le fallback préfixe emploie un ordre global commun, une longueur
+`rank-k+1`, un préflight exact des postings puis la recertification
+`|M intersection N|>=k` sur les saturés réels. `prefix-all` demeure le juge
+relatif.
+
+Le fold produit un graphe biparti `activation--racine_stricte` par lot :
+
+1. geler racines, handles et degrés ;
+2. construire toutes les incidences fast, fallback et résolues sans mutation ;
+3. recertifier le ledger et la couverture ;
+4. contracter chaque composante du lot en un commit atomique ;
+5. publier handles fermés, tombstones et `coverage_delta`.
+
+Une fermeture de source n'est pas un champ booléen. Le fold doit consommer un
+stream ou sidecar validé jusqu'au bout; il ne revient jamais à un catalogue
+brut après la gate.
+
+## 10. Frontière de confiance
+
+Les sidecars `9483b1c` et `cbac109` ne sont pas reçus. Le second transmet bien
+le type au fold et corrige plusieurs validations, mais son token vide reste
+forgeable par `std::bit_cast`, son index manque `[r1,r2,r1]`, une entrée
+`INT128_MIN` atteint un overflow signé et son digest est incomplet. La
+réparation doit séparer deux usages :
+
+- un oracle CPU borné peut rescanner tous les points et recalculer les
+  miniboules afin de falsifier une source ;
+- le chemin produit consomme les certificats streamés du producteur, avec
+  count/fill, domaine de tâches complet et rejeu indépendant ciblé.
+
+Le constructeur du reçu et toute capacité nécessaire doivent être privés,
+non forgeables par copie binaire et possédés par le producteur terminal. La
+preuve de complétude ne se réduit pas à `rank_bound>=point_count`. Les clés utilisent une fraction
+multiprécision canonique; les digests utilisent une sérialisation champ par
+champ et SHA-256; `q_min`, support, ordre et fermeture sont reconstruits ou
+liés à une preuve rejouable.
+
+## 11. Architecture G4 candidate
 
 ```text
-points u16 + LBVH + ordre Morton résidents
-  -> file dual-tree de blocs de paires
-  -> patches center-cover et antichaînes témoins
-  -> microtuiles d'ancres
-  -> range-report de cordes par slabs
-  -> niveaux shallow et décisions exactes filtrées
-  -> RLE BallKey et BallActivation
-  -> CSR préfixe, lots et DSU
-  -> payload horizontal normalisé
+points u16 + LBVH exact résidents
+  |-> k=1 : Boruvka/EMST exact
+  |-> q2 : self-produit dual-tree peu profond
+  `-> q3/q4 : ancres diamètre + reporters médiateurs peu profonds
+       -> BallActivation/tombstones streamées
+       -> sort/RLE par BallKey exacte
+       -> carriers stricts + resolver latent
+       -> fast/fallback recertifiés par lot
+       -> composantes et payload horizontal normalisé
 ```
 
-Il n'existe aucune allocation, remise à zéro ou synchronisation globale par
-ancre, patch ou niveau. Les files lourdes sont segmentées sans couper une unité
-de certificat. Les sorties ambiguës sont compactées vers le CPU exact ou un
-kernel multiprécision reçu; elles ne sont jamais décidées en flottant.
+Aucun tableau global de tuples, paires, cellules, faces ou cofaces ne persiste.
+Chaque kernel a un count, une arène bornée, un fill et une identité de
+consommation. Les slabs ne coupent ni une `BallKey`, ni un lot exact, ni une
+unité de recertification.
 
-## 15. Gates
+Les cellules adaptatives et l'oracle exhaustif restent hors du chrono produit.
+Ils recertifient des échantillons et des fixtures, puis comparent digests,
+masses et décisions à la source device.
 
-### P0 — sidecar
+## 12. Admission et reçus
 
-- forge fraîche sur table amputée refusée;
-- clé de boule multiprécision extrême u16;
-- supports redondant, dépendant et champ `support` incohérent refusés;
-- sérialisation canonique et mutation de chaque champ;
-- fold recevant réellement la capability;
-- ASan/UBSan et campagne de permutations.
+Le manifeste engage au minimum :
 
-### P1 — prédicats source
+- commit, digests des points, paramètres et schéma de clé ;
+- tâches source prévues, remplies, consommées, scindées et refusées ;
+- produits dual-tree, ancres, arrangements, sommets shallow et faux positifs ;
+- activations, tombstones, supports par arité, profondeurs et coquilles ;
+- `BallKey` avant/après RLE et preuve des doublons ;
+- incidences fast/fallback, hits prévus/lus, resolver et ledger pré-DSU ;
+- octets de chaque arène, workspace, pile, high-water et marge ;
+- temps séparés build, source, census, resolver, fold, payload et
+  `warm_e2e`.
 
-- oracle rationnel à n=32;
-- `prune + microtile = C(n,2)` par lane;
-- seuils 10/9/8 décalés et égalité non stricte;
-- antichaîne dupliquée, chevauchante ou recouvrant une extrémité;
-- intervalles traversant zéro;
-- reprise à chaque frontière count/fill.
+Toutes les sommes et tailles sont calculées en entiers vérifiés avant cast
+vers l'ABI device. Une erreur d'identité, un cas mathématique non supporté et
+un refus de ressource sont trois statuts distincts.
 
-### P2 — parcimonie 50 k
+## 13. Jalons
 
-Publier `Q`, visites témoin, `a`, `M=sum_e m_e`, `sum_e c_e`, `sum_e Z_e`,
-queues, octets et temps. NO-GO si :
+1. Corriger la forge fraîche, le doublon concentrique, l'entrée
+   `INT128_MIN`, le support canonique et le digest complet; recevoir ensuite
+   le sidecar seulement comme oracle borné.
+2. Recevoir le prune de cellule avec sa portée exacte de branche, puis le
+   conserver comme diagnostic et oracle adaptatif.
+3. Corriger le différentiel compensable de la sonde q2 dual-tree, ajouter ses
+   CTests et l'admettre ou la réfuter sur `terrain`, scanline simple,
+   multiecho et dégénérescences. Son résiduel ne fournit jamais les ancres
+   q3/q4.
+4. Prouver une source sparse complète des ancres q3/q4; sans preuve, ne pas
+   implémenter le sweep G4.
+5. Recevoir `BallActivation`, tombstones et resolver contre Gamma exhaustif à
+   petit `n`.
+6. Porter les seules routes admises sur CUDA et mesurer source+fold+payload
+   dans un même `warm_e2e`.
+7. Spécifier séparément les verticales ou conserver explicitement le contrat
+   horizontal réduit.
 
-- `source-cover + cordes > 400 ms` chaud sur G4;
-- la majorité des paires atteint les microtuiles;
-- une queue lourde sérialise le parcours;
-- le travail contient `sum_e m_e^2`;
-- un scan ancre--nuage ou une matrice paire--point apparaît.
+## 14. Conditions de GO
 
-Le seuil 400 ms est une porte d'exploration compatible avec le jalon sous la
-seconde; ce n'est ni une prédiction ni le SLO principal de 100 ms.
+Le backend G4 devient candidat uniquement si :
 
-### P3 — shallow et terminal
+- les sources q2/q3/q4 ont une preuve de complétude sans atlas d'ordre
+  supérieur caché ;
+- toutes les identités CPU/device sont vertes sur les mêmes entrées ;
+- les familles normales et dégénérées sont admises séparément ;
+- aucun cap, timeout ou buffer plein ne publie un préfixe ;
+- le pic mémoire réel tient l'enveloppe avec marge ;
+- `warm_e2e < 1 s` inclut index, source, certification, fold et payload ;
+- le contrat de sortie et le statut des verticales sont nommés sans
+  ambiguïté.
 
-- égalité byte-à-byte au sweep dense local sur petites ancres;
-- fixture diagonale absente de l'onion;
-- parallèles, concurrences, Jung tangent, diamètre ex æquo et shell multiple;
-- `Z_e<=m_e*(8-c_e)` et plancher de sorties non vide;
-- census et `BallKey` comparés à un oracle multiprécision indépendant.
-
-### P4 — quotient et fold
-
-- tombstone, resolver et `Omega` comparés à Gamma exhaustif à petit `n`;
-- coupes stricte et fermée après chaque lot;
-- `q_min` distinct de `q_cert`;
-- lookup strict/égal/manquant et cache de handle;
-- ledger pré-DSU, couverture et records complets.
-
-### P5 — qualification
-
-Mesurer successivement count-only, source+census, fold et `warm_e2e` complet.
-La qualification emploie la sortie réelle, toutes allocations et transferts,
-des répétitions fraîches par famille, aucune limite configurée et un p95. La
-cible principale reste `<100 ms`; `<1 s` est le jalon secondaire immédiat.
-
-## 16. Reçus
-
-Le manifeste porte au minimum : commit, compilateur, machine, digests des
-binaires et entrées, paramètres, graine, compteurs de chaque gate, high-water
-des arènes, temps par étage, état de reprise et statut censuré. Une mesure
-CPU sur une machine G4 est étiquetée CPU; elle ne devient pas un benchmark GPU.
-
-Les sommes combinatoires et tailles d'arènes sont calculées en entiers vérifiés
-avant tout cast device. Une erreur d'identité est distincte d'un refus de
-ressource.
-
-## 17. Statut
-
-La source cellules--tuples est refusée comme route produit sur les masses
-actuelles. La source pair-block--shallow est mathématiquement fondée localement,
-mais sa parcimonie globale, son constructeur exact et sa performance restent à
-recevoir. Aucun résultat 50 k bout en bout n'existe.
-
-Jusqu'à fermeture de P0--P5 : `public_status=not_claimed`.
+Jusque-là : `public_status=not_claimed`.
 
 GCP non utilisé pour cette proposition.

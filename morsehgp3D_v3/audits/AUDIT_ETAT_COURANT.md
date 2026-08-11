@@ -11,14 +11,13 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Fraîcheur et périmètre
 
 `HEAD` à l'ouverture de cet audit :
-`232470cbaf2449e5e68c92f2c42c532c4df20458`.
+`cbac109a09c2575cdf875b19de1570265bd5bf08`.
 
-Le worktree est concurrent et non propre. Les changements locaux de source et
-de CMake ne sont ni reçus ni qualifiés par ce document. Le dernier snapshot de
-code sidecar audité bit à bit est le commit
-`9483b1cd5ff691bc53f51eb2776aaba77b011e43`; son verdict détaillé est
-[`AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md`](AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md).
-Toute nouvelle empreinte exige un nouveau rejeu avant réception.
+Le worktree est concurrent et non propre. Il ajoute notamment une sonde q2 et
+des mises à jour documentaires; ces changements ne sont pas confondus avec le
+commit. Le sidecar committé est réaudité dans
+[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md), avec ses empreintes exactes. Toute nouvelle
+empreinte exige un nouveau rejeu avant réception.
 
 ## Verdict
 
@@ -57,30 +56,38 @@ pour ce quotient ne peut jamais être présentée comme une source Gamma complè
   ne qualifie pas encore un producteur G4 sous la seconde.
 - Les commits `3c13cbd` et `4b9d9a1` reçoivent les mesures mass-only et leurs
   sorties brutes, pas une lane de production.
-- Le sidecar du commit `9483b1c` est une livraison déclarée, non reçue. Il
-  peut devenir un oracle CPU borné après correction; son census `O(G*n)` ne
-  doit pas devenir l'architecture produit.
+- Le commit `cbac109` ferme plusieurs défauts du sidecar `9483b1c`, mais ne le
+  rend pas recevable : le reçu reste forgeable, l'unicité des boules exactes
+  reste fausse, une entrée hostile déclenche UBSan et le digest de confiance
+  reste incomplet. Son census `O(G*n)` en fait au mieux un oracle CPU borné
+  après correction.
 
-## Réfutation du sidecar v0
+## Sidecar `cbac109` : corrections et blocages
 
-Les défauts suivants sont bloquants sur `9483b1c` :
+Les corrections suivantes sont réelles : le fold reçoit le sidecar typé,
+aucun carré de niveau n'est formé dans `i128`, le support minimal est
+revérifié et le digest ne lit plus la structure `CriticalSphere` entière.
 
-1. le constructeur public du reçu permet de sceller une table amputée avec
-   ses propres digests ;
-2. le pipeline redérive toujours la prétention depuis `smax`, `n` et le statut
-   d'énumération, puis détruit le sidecar avant le fold ;
-3. la clé de rayon carre des entiers pouvant atteindre environ 90 bits dans
-   `i128`, donc peut déborder sur des entrées u16 valides ;
-4. `q_min` et le support propre positif ne sont pas reconstruits
-   indépendamment ;
-5. le FNV de l'image mémoire brute n'est ni canonique ni une preuve exacte ;
-6. le rescan nuage--générateur et la miniboule de chaque saturé sont
-   incompatibles avec la cible 50 k.
+Les blocages d'exactitude restent :
 
-Une réparation locale en worktree n'est reçue qu'après compilation, fixtures
-hostiles, mutants et nouvel audit de ses empreintes. Il faut notamment tuer
-`fresh_receipt_on_amputated_catalogue`, les supports redondants ou dépendants,
-le champ `Sphere.support` incohérent et une clé u16 qui dépasse 128 bits.
+1. le token vide est trivialement copiable par `std::bit_cast`; le
+   constructeur public du reçu scelle alors un catalogue amputé avec ses
+   digests et certifie toutes les fermetures ;
+2. l'index trie les boules de même centre par indice, puis compare seulement
+   les niveaux voisins. `[r1,r2,r1]` accepte donc deux handles identiques ;
+3. `nx=INT128_MIN, den=1` atteint `-INT128_MIN` dans `sidecar_gcd`
+   avant tout refus ;
+4. le support minimal est valide, mais son tie-break canonique n'est pas
+   reconstruit ;
+5. les entiers sont pliés dans l'endianness native avec FNV-1a 64 bits, sans
+   schéma ni framing contractuel. Le digest catalogue lie le support déclaré,
+   mais le digest final ne lie pas séparément les preuves de suppression,
+   `maximum_order` ou les fermetures.
+
+Le pipeline hybride ne peut par ailleurs accepter que `n<=32`, car il exige
+`smax>=n` tout en refusant `smax>32`. Il énumère deux fois le catalogue et
+refuse le producteur parallèle. Ce comportement convient à un oracle borné,
+pas à la route 50 k.
 
 ## Ce que la G4 a effectivement mesuré
 
@@ -140,17 +147,19 @@ branch-and-bound, pas encore le chemin industriel.
 
 ## Direction de source à tester
 
-La source candidate commune aux lanes q2/q3/q4 est un self-join canonique du
-LBVH. Il partitionne toutes les paires non ordonnées par blocs, puis applique
-un `center-cover` fail-open avec les seuils témoins `10/9/8`. Les ancres
-résiduelles seulement alimentent les lanes terminales. Le ledger ferme
-`pruned + microtile = C(n,2)`; une paire n'est jamais omise par une heuristique.
+La sonde concurrente q2 partitionne toutes les paires non ordonnées par blocs
+d'un arbre AABB médian. Dix témoins communs stricts certifient qu'un bloc
+entier est H0-inerte pour q2; le ledger ferme
+`pruned+microtile=C(n,2)`. Ce principe est exact, mais le différentiel
+bruteforce compare seulement des comptes compensables et aucun CTest ne porte
+la cible. À `n=2400`, les runs locaux visitent 17,7 à 60,5 millions de nœuds
+témoins selon la famille; un run terrain `n=50 000, leaf=64` n'a pas terminé
+dans sa fenêtre locale mono-thread de 60 s. Ces diagnostics ne sont ni G4 ni
+`warm_e2e`. Le prune ne fournit pas la source d'ancres q3/q4.
 
 L'ancien prototype `center-cover` a dépassé 600 secondes à 50 k sans JSON. Il
-est rejeté comme implémentation. La proposition courante exige une nouvelle
-sonde par blocs, sans scan ancre--nuage, et publie le nombre d'ancres `a`,
-`M=sum_e m_e`, les files, ambiguïtés, octets et visites. Ces masses, et non la
-seule preuve locale, décideront la route.
+est rejeté comme implémentation. La grille de cellules et son plan séparateur
+restent des diagnostics mass-only.
 
 ### Ordre un
 
@@ -175,6 +184,11 @@ est donc une sonde count-only publiant produits visités, produits prunés,
 paires terminales, témoins, doublons, octets et high-water. Aucun chrono de
 microkernel ne remplace ces masses.
 
+Ce prune est strictement q2. Une paire dont la boule diamétrale contient dix
+témoins peut rester le diamètre d'un support q3 ou q4 dont la sphère décalée
+ne contient aucun de ces témoins. Retirer les paires prunées de la source
+d'ancres supérieures serait donc faux.
+
 ### Supports q3 et q4
 
 Choisir comme ancre canonique la plus petite paire parmi les diamètres du
@@ -183,28 +197,29 @@ longueur, le centre d'un support q3 positif appartient
 au disque du plan médiateur défini par `h^2<=D^2/12`; pour q4, le théorème de
 Jung en dimension trois donne `h^2<=D^2/8`. Dans ce plan, chaque autre point
 définit une droite d'égalité et un demi-plan d'intérieur. Les q4 pertinents
-sont des sommets de profondeur stricte au plus `7-c_e`, où `c_e` compte les
-points intérieurs sur tout le disque. Pour `m_e` cordes, leur nombre vérifie
-`Z_e<=m_e*(8-c_e)<=8*m_e`. Le constructeur doit bâtir ces niveaux directement;
-former d'abord toutes les `C(m_e,2)` intersections est un NO-GO.
+sont des sommets de faible profondeur. En position générale, les bornes
+d'arrangements shallow peuvent retirer le carré local si le constructeur bâtit
+directement ces niveaux. Elles ne couvrent pas encore les parallèles,
+concurrences, ex æquo et grandes coquilles; former d'abord toutes les
+`C(m_e,2)` intersections est un NO-GO.
 
-Cette piste n'est pas encore une architecture reçue. Le self-join est complet,
-mais sa parcimonie résiduelle n'est pas prouvée. Il manque aussi le constructeur
-exact des parallèles, concurrences et ex æquo, ainsi qu'une admission mesurée
-de `a`, `M` et `sum_e Z_e`.
+Cette piste n'est pas encore une architecture reçue. Il manque une source
+sparse complète des ancres, le constructeur exact des dégénérescences et une
+admission globale mesurée.
 
 ## Ordre des prochaines portes
 
-1. Stabiliser puis réauditer le sidecar comme oracle borné; le fold doit
-   consommer le type validé jusqu'au bout.
+1. Tuer la forge fraîche, `[r1,r2,r1]` et `INT128_MIN`; reconstruire le
+   tie-break du support, remplacer le digest de confiance et recevoir le
+   sidecar comme oracle borné `n<=32`, jamais comme source 50 k.
 2. Recevoir la sémantique exacte du prune de cellule : « branche
    `beta<=R` vide », jamais « aucun support », avec contact et
    contre-fixture haute.
-3. Construire la sonde commune `self-join -> center-cover` et fermer l'identité
-   de toutes les paires; refuser la route si `source-cover + cordes > 400 ms`
-   chaud sur G4 ou si la majorité de la masse atteint les microtuiles.
-4. Recevoir les lanes q2 et cordes shallow q3/q4 sur des oracles exhaustifs
-   bornés; abandonner le triple-pencil global et tout terme `sum_e m_e^2`.
+3. Recevoir la sonde q2 avec un rejeu non compensable de chaque bloc pruné,
+   puis convertir microtuiles, visites et octets en budget mesuré.
+4. Prouver une source sparse complète des ancres q3/q4 et recevoir son
+   constructeur shallow sur des oracles bornés; abandonner le triple-pencil
+   global et tout terme quadratique construit avant prune.
 5. Recevoir `BallActivation`, le resolver silencieux et le quotient H0 contre
    Gamma exhaustif à petit `n`, puis seulement mesurer source+fold+payload.
 6. Porter sur G4 uniquement les routes admises et publier `warm_e2e` complet.

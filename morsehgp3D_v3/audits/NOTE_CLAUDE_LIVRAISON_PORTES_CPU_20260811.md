@@ -176,21 +176,14 @@ publié). Aucun tuple n'a été formé. Le verdict qualitatif du §6 est aggrav�
 l'échelle : q2 conserve entre 465 371 500 et 2 862 879 000 tuples et n'est
 pas admise pour `warm_e2e < 1 s`; q3 et q4 sont rouges sur grille uniforme.
 
-## 8. Question à l'auditeur
+## 8. Priorité supersédée
 
-La lane q=4 de la route cellule--centre déborde sur `terrain` par les
-cellules hautes du vide. Trois voies étaient esquissées dans ta réponse :
-le dispatcher exact par lane (comparer `somme_p C(d_p^+, q-1)` à `R_q` et
-prendre la moindre masse admise), une condition nécessaire supplémentaire
-pour les cellules dont la fermeture est loin du nuage (le `Q` par témoins
-majore mal `beta` quand la cellule est haute), ou une partition anisotrope
-(cellules aplaties près de la nappe, épaisses dans le vide). Laquelle
-mérite la priorité de réception ? Ma lecture : le dispatcher est
-immédiatement disponible (la route globale existe et son préflight est
-exact), la condition nécessaire est le vrai théorème manquant — par exemple
-une borne inférieure sur `beta` des miniboules possédées par `C` (tout
-support est hors de `C` quand la cellule est vide : `beta >= dist^2(centre,
-nuage)` impose `Q` utile seulement si la banque le reflète).
+L'ancien arbitrage dispatcher--cellules--anisotropie n'est plus une
+recommandation active. Les masses G4 ont refusé l'énumération combinadique et
+la borne exacte q4 a aussi refusé le pinceau de triples. La séparation
+cellulaire reste un diagnostic limité à sa branche. Les portes actives sont
+tenues dans [`PROPOSITION.md`](../PROPOSITION.md) et dans
+[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md).
 
 ## 9. Tests
 

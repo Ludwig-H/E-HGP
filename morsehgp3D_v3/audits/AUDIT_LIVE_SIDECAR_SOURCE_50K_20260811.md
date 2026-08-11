@@ -1,4 +1,4 @@
-# Audit live — frontière sidecar et admission de la source 50 k
+# Audit snapshot `9483b1c` — frontière sidecar et source 50 k
 
 Date : 11 août 2026 UTC.
 
@@ -7,6 +7,11 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
+
+Cet audit conserve les réfutations du snapshot `9483b1c` et les bornes G4
+mass-only. Pour le sidecar `cbac109` et la sonde q2 concurrente, il est
+supersédé par
+[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md).
 
 ## Snapshot audité
 
@@ -31,6 +36,11 @@ exactement sur les empreintes suivantes, toutes identiques aux fichiers du commi
 Toute empreinte différente exige un nouvel audit. Les modifications concurrentes de
 la sonde `cell_prune` sont hors de ce snapshot. Aucun fichier d'implémentation n'a
 été modifié par cet auditeur.
+
+Cette partie reste la baseline de réfutation du commit `9483b1c`. Le statut du
+correctif `cbac109` est dans
+[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md); les constats S1--S4 historiques ci-dessous ne décrivent pas le code
+courant.
 
 ## Verdict
 
@@ -164,7 +174,7 @@ plus petits `PointId` d'un quadruplet doit encore visiter les
 exacte est `C(m_C,4) = m_C*C(m_C-1,3)/4`. En notant `R'_4` la masse q4 après prune et
 `m_max` le maximum publié, on obtient donc :
 
-$$P_{mathrm{triple}}geqrac{4R'_4}{m_{max}}.$$
+$$P_{\mathrm{triple}}\geq\frac{4R'_4}{m_{\max}}.$$
 
 Au pas 6, les valeurs arrondies conservatrices du reçu brut imposent déjà :
 
@@ -215,52 +225,44 @@ peut aussi être utile si l'autorité testée est l'intersection avec l'intérie
 tridimensionnel de l'enveloppe; le prédicat strict partagé actuel est plus
 conservateur et reste sûr pour q2/q3.
 
-## S10 — route de source conditionnelle recommandée
+## S10 — direction actuelle, après contre-audit
 
-La route cellules--tuples est rétrogradée en sonde de masse et fallback borné.
-La meilleure route exacte actuellement documentée est conditionnelle :
+La route cellules--tuples et le pinceau de triples restent des sondes de masse
+ou des fallbacks bornés. La proposition courante sépare les sources :
 
-```text
-self-join LBVH des paires non ordonnées
-  -> center-cover fail-open par blocs, seuils q2/q3/q4 = 10/9/8
-  -> ancres diamètre résiduelles, owner canonique après census
-  -> cordes dans le disque de Jung
-  -> construction directe des niveaux de profondeur au plus 7-c_e
-  -> décisions terminales exactes et BallActivation streamées
-```
+- `k=1` suit une lane EMST exacte;
+- q2 peut employer un produit dual-tree avec certificat de dix témoins
+  stricts;
+- q3/q4 exigent encore une source sparse et complète de paires diamètre, puis
+  des reporters exacts dans le plan médiateur;
+- toutes les lanes se rejoignent seulement après census dans des
+  `BallActivation` dédupliquées.
 
-Pour une ancre `e`, le rang q4 vaut exactement `4+c_e+profondeur_stricte` et
-le nombre de sommets utiles vérifie `Z_e<=m_e*(8-c_e)<=8*m_e`. Le gain local
-est donc démontré si le constructeur ne forme jamais d'abord les
-`C(m_e,2)` intersections. La parcimonie globale du nombre d'ancres `a` et de
-`M=sum_e m_e` reste une hypothèse à mesurer, pas un théorème.
+Le résiduel q2 n'est pas un ensemble complet d'ancres q3/q4. Des points
+strictement dans la boule diamétrale d'une paire peuvent être hors du cercle
+q3 décalé qui garde cette même paire comme diamètre. Les parallèles,
+concurrences et grandes coquilles interdisent aussi de présenter la borne
+linéaire d'arrangement en position générale comme un théorème du profil u16.
 
-L'ancien prototype `center-cover` a dépassé 600 secondes à 50 k sans JSON. Il
-est explicitement rejeté comme implémentation produit; la recommandation ne le
-réhabilite pas. Le prochain jalon est un nouveau P1a mass-only par blocs qui
-ferme l'identité `pruned + microtile = C(n,2)` et publie visites de cover,
-ancres `a`, `M`, constantes `c_e`, `sum Z_e`, files, octets et ambiguïtés. Il
-est NO-GO si `source-cover + cordes` dépasse 400 ms chaud sur G4, si la majorité
-des paires atteint les microtuiles ou si le travail contient `sum_e m_e^2`.
-
-L'ordre `k=1` doit suivre une lane EMST exacte distincte. L'EMST quadratique du
-juge actuel reste un oracle; un Borůvka/LBVH exact device est une proposition à
-recevoir. Les ordres supérieurs ne peuvent jamais être remplacés par un MST de
-points.
+La sonde q2 concurrente ferme l'identité de masse des paires, mais son
+`--verify-bruteforce` compare seulement des comptes compensables et aucun
+CTest ne l'exerce. Un run local mono-thread
+`n=50 000, terrain, leaf=64` n'a pas terminé dans sa fenêtre de 60 secondes;
+ce résultat censuré n'est ni G4 ni `warm_e2e`.
 
 ## Portes immédiates proposées à Claude
 
-1. Fermer S1--S4 et faire recevoir la factory uniquement comme juge borné.
-2. Passer réellement le sidecar typé au fold; aucun chemin autoritaire ne reçoit plus un
-   `Catalogue` brut accompagné d'un booléen ou d'un reçu constructible publiquement.
-3. Ajouter les cinq fixtures ciblées ci-dessus et leurs mutants, avec codes de sortie
-   exacts et planchers de non-vacuité.
-4. Corriger la portée du prune convexe dans l'audit courant, le README et la proposition.
-5. Retirer l'admission q2 et abandonner toute route produit qui énumère les masses
-   combinadiques mesurées. Garder le plan général comme sonde mass-only et ne pas
-   implémenter le pinceau tant que sa masse de triples reste rouge.
-6. Prototyper le P1a par blocs `center-cover -> cordes shallow`, avec identité de
-   toutes les paires, transcript rejouable à petit `n` et gates chiffrées de S10,
-   avant tout portage CUDA du constructeur.
+1. Tuer sur le sidecar `cbac109` la forge fraîche par `std::bit_cast`, le
+   doublon concentrique `[r1,r2,r1]` et `INT128_MIN` sous UBSan; fermer
+   ensuite support canonique et digest complet.
+2. Graver dans la porte de cellule la contre-fixture où un support
+   `beta>=Q` subsiste; le verdict demeure limité à la branche locale.
+3. Rendre le différentiel q2 non compensable, prouver la multiplicité un de
+   chaque paire, ajouter les CTests de contact et publier visites, octets,
+   files et p95 chaud.
+4. Ne jamais réutiliser le résiduel q2 comme source q3/q4; prouver séparément
+   la complétude et la parcimonie des ancres diamètre.
+5. Recevoir `BallActivation`, tombstones et resolver contre l'oracle
+   exhaustif borné avant tout portage CUDA.
 
 GCP non utilisé pour cet audit.

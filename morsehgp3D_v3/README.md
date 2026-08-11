@@ -19,7 +19,7 @@ secondaire et le jalon immédiat demandé. Aucun chemin actuel n'atteint l'une o
 l'autre, et aucun backend public exact n'est qualifié.
 
 Snapshot committé audité :
-`232470cbaf2449e5e68c92f2c42c532c4df20458`. Les livraisons stables utiles
+`cbac109a09c2575cdf875b19de1570265bd5bf08`. Les livraisons stables utiles
 sont :
 
 | commit | contenu | verdict |
@@ -27,13 +27,13 @@ sont :
 | `84ba459` | fast principal multi-lot sous garde `q<=k+1` | reçu relativement à la table fournie |
 | `3c13cbd`, `4b9d9a1` | session et sorties brutes G4 mass-only | reçus de diagnostic, aucune lane admise |
 | `9483b1c` | factory `ValidatedHybridSidecar` v0 | livrée, non reçue comme frontière de confiance |
-| `232470c` | index documentaire du sidecar | snapshot documentaire courant |
+| `cbac109` | reçu scellé, clé de centre, cardinal minimal recalculé, support déclaré validé et fold typé | corrections réelles, réception encore bloquée |
 
-Un worktree concurrent corrige le sidecar et ajoute un plan séparateur pour la
-sonde par cellules. Ces changements restent non reçus jusqu'à stabilisation de
-leurs empreintes et nouveau différentiel. Le détail exact est tenu dans
+Le worktree concurrent ajoute une sonde q2 dual-tree sur arbre AABB médian;
+elle reste non reçue jusqu'à stabilisation de son empreinte et nouveau
+différentiel. Le détail exact est tenu dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) et
-[`AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md`](audits/AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md).
+[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](audits/AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md).
 
 ## Deux sorties à ne pas confondre
 
@@ -101,44 +101,55 @@ et `d82e43c7f4b32a5731cfdb2bbb9edf22cd7cecef0fdc73e84d1457277d61c740`.
 
 ## Sidecar : statut exact
 
-La v0 committée est utile comme harnais CPU borné, mais ne porte pas encore la
-confiance annoncée :
+Le commit `cbac109` retire le carré de niveau `i128`, vérifie
+substantiellement le support minimal et transmet le sidecar au wrapper de fold.
+Ces corrections sont effectives, mais la réception reste bloquée :
 
-- le reçu du commit est fabricable avec les digests d'une table amputée;
-- le pipeline le reconstruit depuis `smax`, `n` et le statut de l'énumération;
-- le sidecar est détruit avant le fold, qui reçoit encore le catalogue brut;
-- la clé de rayon forme des carrés pouvant dépasser 128 bits sur u16;
-- `q_min` et le support propre positif ne sont pas reconstruits;
-- le digest FNV de l'image mémoire n'est pas canonique;
-- le census `O(G*n)` en fait un juge borné, jamais un chemin chaud 50 k.
+- `SourceProducerToken` est vide et trivialement copiable; un
+  `std::bit_cast` C++20 fabrique le token exigé par le constructeur public du
+  reçu. Une table amputée, ses digests recalculés et ce token obtiennent encore
+  `closure_certified_all_orders()==true`;
+- l'index trie les boules de même centre par indice de catalogue et ne compare
+  que les voisines. Un catalogue `[rayon 1, rayon 2, rayon 1]` fait accepter
+  deux handles pour la même boule exacte;
+- une représentation hostile `nx=INT128_MIN, den=1` déclenche
+  `-INT128_MIN` dans `sidecar_gcd` sous UBSan avant tout refus;
+- le support déclaré est validé comme support minimal, mais le tie-break
+  canonique coordonné du contrat n'est pas reconstruit;
+- la sérialisation FNV64 reste endian native, sans schéma ni framing
+  contractuel. Le digest du catalogue contient le support déclaré, mais le
+  digest final ne lie pas séparément les preuves de suppression calculées,
+  `maximum_order` ou les fermetures.
 
-Le correctif concurrent traite une partie de ces points, mais n'est pas encore
-reçu. La frontière finale doit être issue d'un producteur terminal rejouable,
-être consommée par le fold et porter une sérialisation canonique exacte.
+Le pipeline hybride est en outre structurellement borné à `n<=32` : la CLI
+impose `smax<=32` tandis que la fermeture exige `smax>=n`. Sur un run accepté,
+il construit le catalogue puis le reconstruit séquentiellement dans le
+producteur scellé. Ce chemin est un oracle CPU borné à double énumération,
+jamais la source chaude 50 k.
 
-## Architecture candidate unique
+## Architecture candidate
 
 ```text
 k=1 : EMST exact distinct
 
 k>=2 : points u16 + LBVH résidents
-  -> self-join canonique de blocs de paires
-  -> center-cover fail-open, seuils 10/9/8
-  -> ancres diamètre résiduelles
-  -> cordes dans le disque de Jung
-  -> niveaux de profondeur faible construits directement
+  |-> q2 : self-produit de paires, prune par 10 témoins communs
+  `-> q3/q4 : source sparse d'ancres diamètre encore à prouver
+        -> centres q3 et niveaux shallow q4 dans le disque de Jung
   -> census terminal et BallActivation streamées
   -> tombstones H0 + resolver latent
   -> fast principal / fallback préfixe
   -> lots atomiques et sortie horizontale normalisée
 ```
 
-Pour une ancre q4 ayant `m_e` cordes et `c_e` intérieurs constants, le rang
-vaut `4+c_e+profondeur_stricte` et le nombre de sommets utiles est au plus
-`m_e*(8-c_e)`. Cette borne retire le carré local seulement si le constructeur
-ne forme jamais d'abord toutes les intersections de cordes.
+Dans un arrangement en position générale, une borne de niveaux peu profonds
+peut retirer le carré local seulement si le constructeur ne forme jamais
+d'abord toutes les intersections de cordes. Les parallèles, concurrences et
+coquilles multiples exigent une porte exacte distincte; aucune borne linéaire
+n'est actuellement reçue dans ces cas.
 
-La parcimonie globale du nombre d'ancres et de `M=sum_e m_e` n'est pas prouvée.
+La parcimonie globale du nombre d'ancres et de la somme des formes par ancre
+n'est pas prouvée.
 L'ancien `center-cover` a dépassé 600 secondes à 50 k; il est rejeté comme
 implémentation. Le prochain prototype doit être une nouvelle sonde par blocs,
 sans boucle ancre--nuage, et non une réactivation de ce chemin.
@@ -149,18 +160,23 @@ préflights de tuples et de triples passent une enveloppe mesurée.
 
 ## Prochaines portes, dans l'ordre
 
-1. Stabiliser puis contre-auditer les correctifs sidecar : forge fraîche,
-   multiprécision, support redondant/dépendant, digest canonique et consommation
-   réelle par le fold.
+1. Tuer la forge fraîche, le doublon concentrique `[r1,r2,r1]` et
+   `INT128_MIN`; fermer le tie-break du support et remplacer FNV par un
+   engagement canonique complet avant de recevoir le sidecar comme oracle
+   borné `n<=32`.
 2. Fermer la porte locale du plan séparateur, y compris la contre-fixture où un
    support `beta>=Q` subsiste; publier les masses de triples, pas seulement le
    nombre de cellules.
-3. Construire P1a mass-only `self-join -> center-cover -> cordes`, avec
-   `pruned + microtile = C(n,2)`, transcript rationnel à petit `n`, compteurs
-   `a`, `M`, `c_e`, `sum Z_e`, files, ambiguïtés et octets.
-4. Refuser P1a si `source-cover + cordes > 400 ms` chaud sur G4, si la majorité
-   des paires atteint les microtuiles ou si le travail contient
-   `sum_e m_e^2`.
+3. Corriger puis recevoir la sonde q2 self-join avec
+   `pruned + microtile = C(n,2)`, rejeu non compensable de chaque bloc pruné,
+   multiplicité un de chaque paire, CTests et compteurs d'états, visites,
+   paires, files et octets. Le run local mono-thread
+   `n=50 000, terrain, leaf=64` n'a pas terminé dans sa fenêtre de 60 s
+   (censuré, hors G4, sans reçu de sortie); il n'établit donc aucun chemin sous
+   la seconde.
+4. Convertir ces masses en enveloppe de temps; refuser la route si les
+   microtuiles ou les visites restent quadratiques. En parallèle, prouver une
+   source sparse complète des ancres q3/q4 avant tout sweep CUDA.
 5. Recevoir `BallActivation`, le resolver décroissant et le quotient local des
    grandes coquilles contre Gamma exhaustif à petit `n`.
 6. Porter sur CUDA seulement les primitives dont les masses terminales sont

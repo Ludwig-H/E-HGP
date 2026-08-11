@@ -198,6 +198,13 @@ target_include_directories(mhgp3v_sidecar_factory_gate PRIVATE ${CMAKE_CURRENT_S
 target_link_libraries(mhgp3v_sidecar_factory_gate PRIVATE mhgp)
 target_compile_options(mhgp3v_sidecar_factory_gate PRIVATE -Wall -Wextra -Werror)
 
+# LA SONDE P1a DU SELF-JOIN DES PAIRES (PROPOSITION §7, audit S10) : machine
+# de blocs, lane q2 par temoins d'antichaine, identite du ledger fermee.
+add_executable(mhgp3v_pair_selfjoin_probe prototype/pair_selfjoin_probe.cpp)
+target_include_directories(mhgp3v_pair_selfjoin_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_pair_selfjoin_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_pair_selfjoin_probe PRIVATE -Wall -Wextra -Werror)
+
 # LE PRUNE CONVEXE CERTIFIE (reponse pont/q4 20260811 §6) : le predicat
 # partage axes + plan du barycentre, verification entiere seule decisive.
 add_executable(mhgp3v_cell_prune_gate prototype/cell_prune_gate.cpp)
@@ -953,6 +960,20 @@ set_tests_properties(mhgp3v_cell_source_mass_scanline PROPERTIES
   PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
 mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
   mhgp3v_cell_source_mass_reject_unknown "argument inconnu" 2 --inexistant 1)
+# LA SONDE P1a : identite du ledger fermee et soundness par balayage sur un
+# petit nuage de chaque famille ; CLI hostile refusee.
+add_test(NAME mhgp3v_pair_selfjoin_q2_terrain COMMAND mhgp3v_pair_selfjoin_probe
+         --points 400 --seed 20260810 --family terrain --verify-bruteforce 1)
+set_tests_properties(mhgp3v_pair_selfjoin_q2_terrain PROPERTIES
+  PASS_REGULAR_EXPRESSION "ledger C\\(n,2\\)=79800 FERME")
+add_test(NAME mhgp3v_pair_selfjoin_q2_scanline COMMAND mhgp3v_pair_selfjoin_probe
+         --points 400 --seed 20260810 --family scanline_overlap_multiecho
+         --verify-bruteforce 1)
+set_tests_properties(mhgp3v_pair_selfjoin_q2_scanline PROPERTIES
+  PASS_REGULAR_EXPRESSION "FERME")
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_reject_unknown "argument inconnu" 2 --inexistant 1)
+
 # LA PORTE DU PRUNE : contact conserve, pics lointains separes en local,
 # nappe inclinee separee par le plan general ; deux mutants tues.
 add_test(NAME mhgp3v_cell_prune_fixtures COMMAND mhgp3v_cell_prune_gate)

@@ -13,17 +13,22 @@ un reçu par son titre ou par le seul passage de ses tests.
 ## État live
 
 Le snapshot committé courant est
-`232470cbaf2449e5e68c92f2c42c532c4df20458`. Le worktree est concurrent et
-contient des correctifs sidecar ainsi qu'un plan séparateur non encore reçus.
-Toute réception live est liée à une empreinte précise; une modification exige
-un nouveau rejeu.
+`cbac109a09c2575cdf875b19de1570265bd5bf08`. Le worktree concurrent contient
+la sonde q2 `pair_selfjoin_probe.cpp`, son raccord CMake et des corrections
+documentaires; aucun de ces changements ne reçoit une lane. Toute réception
+live est liée à une empreinte précise; une modification exige un nouveau rejeu.
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict consolidé,
   distinction stable/worktree, contrat non rempli et ordre des portes.
-- [`AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md`](AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md) : audit bit à bit du sidecar committé, audit du plan séparateur
-  live, borne exacte des triples q4 et recommandation de source.
+- [`AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md`](AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md) : baseline bit à bit du sidecar `9483b1c`, plus audit du plan
+  séparateur et borne des triples q4; son statut sidecar est supplanté par le
+  delta `cbac109` ci-dessous.
+- [`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md) :
+  contre-audit du correctif sidecar `cbac109`, trois reproductions hostiles et
+  audit de la sonde q2 concurrente.
 - [`../PROPOSITION.md`](../PROPOSITION.md) : architecture candidate
-  `self-join -> center-cover -> cordes shallow`, ses invariants et gates.
+  séparant EMST, lane q2 dual-tree et recherche d'ancres q3/q4, avec ses
+  invariants et portes encore ouvertes.
 - [`REPONSE_CLAUDE_PONT_H0_FASTPATH_ET_Q4_20260811.md`](REPONSE_CLAUDE_PONT_H0_FASTPATH_ET_Q4_20260811.md) : preuve du pont H0, fast principal, resolver et
   contre-fixture du prune trop fort.
 
@@ -40,6 +45,9 @@ Le contrat et le statut public restent régis par
   sonde de masse, sans exposant asymptotique déduit de trois tailles.
 - [`NOTE_CLAUDE_SIDECAR_FACTORY_V0_20260811.md`](NOTE_CLAUDE_SIDECAR_FACTORY_V0_20260811.md) : provenance du sidecar `9483b1c`, reclassé comme harnais v0
   déclaré et non reçu.
+- [`NOTE_CLAUDE_SIDECAR_CORRECTIFS_CBAC109_20260811.md`](NOTE_CLAUDE_SIDECAR_CORRECTIFS_CBAC109_20260811.md) :
+  provenance des corrections livrées à `cbac109`; l'annonce initiale de
+  fermeture S1--S4 y est explicitement retirée après contre-audit.
 - [`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md) : session CPU 48 threads sur machine G4, trois familles et
   deux pas. Aucun kernel ni tuple; aucune lane admise. La note de session
   documente la cible comme `TERMINATED`.
@@ -81,11 +89,13 @@ Le pinceau q4 conserve lui-même, au pas 6, plus de `2,74e9`, `1,063e10` et
 - Séparer `C` de `conv(A_C)` exclut uniquement la branche locale pertinente
   contenue dans `A_C`. Un support de haut niveau peut subsister; le verdict
   n'est jamais `no_support`.
-- `k=1` suit une lane EMST exacte distincte. Les ordres supérieurs suivent la
-  source conditionnelle par paires diamètre et niveaux peu profonds.
+- `k=1` suit une lane EMST exacte distincte. Le prune diamétral q2 ne supprime
+  jamais une ancre q3/q4; les arités supérieures attendent leur propre source
+  sparse complète et leurs niveaux peu profonds.
 - L'ancien `center-cover` à plus de 600 secondes est rejeté. La nouvelle sonde
-  par blocs doit fermer toutes les paires et mesurer `a`, `M` et `sum Z_e`;
-  elle ne réutilise pas l'ordonnance rejetée.
+  q2 par blocs doit fermer toutes les paires, rejouer directement les blocs
+  prunés et publier visites, microtuiles, octets et high-water; elle ne
+  réutilise pas l'ordonnance rejetée.
 - Une mesure count-only, un accord moyen ou un digest ne qualifie ni la source,
   ni le fold complet, ni le statut public.
 

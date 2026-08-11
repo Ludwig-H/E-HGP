@@ -85,11 +85,12 @@ son absence est un trou de mesure, pas un refus.
 ## 3. Ce que cette session ne dit pas
 
 Aucun kernel n'a tourné, aucun fold n'a été rejoué à 50 k, aucun statut
-n'avance. Les nombres ci-dessus sont des autorités d'admission au sens des
-notes : ils disent où le budget mourra si on l'ignore. Les prochaines
-mesures G4 utiles, dans ton ordre : le prune au plan général et l'anisotropie
-dans la même sonde (CPU 48 threads suffit), puis `BallActivation` +
-tombstones H0, puis seulement le producteur CUDA.
+n'avance. Les nombres ci-dessus sont des autorités de réfutation : ils disent
+où le budget mourra si on l'ignore. L'ancien ordre
+plan--anisotropie--CUDA est supersédé. Les prochaines portes sont tenues dans
+[`PROPOSITION.md`](../PROPOSITION.md) et
+[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md);
+aucune lane n'est actuellement admise.
 
 GCP : session unique, cible certifiée TERMINATED, aucune autre VM du label
 `project=e-hgp` active.
