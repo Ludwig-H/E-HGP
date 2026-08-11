@@ -972,7 +972,9 @@ mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
 # LA SONDE SELF-JOIN q2 (portes 4-5 de l'audit delta cbac109) : ledger de fate par
 # paire (partition, multiplicite un, inclusion non compensable des non-inertes
 # dans les microtuiles), planchers anti vert-par-vacuite, fixtures gravees et
-# cinq mutants a code exact ; CLI hostile refusee.
+# sept mutants a code exact (partition croisee, interne, dernier bloc, seuil,
+# contact, duplication compensee, overshoot du generateur) ; CLI hostile
+# refusee.
 add_test(NAME mhgp3v_pair_selfjoin_q2_terrain COMMAND mhgp3v_pair_selfjoin_probe
          --points 400 --seed 20260810 --family terrain --verify-bruteforce 1
          --min-pruned-pairs 40000 --min-states 1000)
@@ -1031,6 +1033,17 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
   mhgp3v_pair_selfjoin_kill_count_shell "mutant tue" 4
   --fixture contact --inject count-shell)
+# LE CONTRAT DE CARDINALITE du generateur (contre-exemple multi-echo de
+# l'audit etat courant) : a n=1100 le mutant qui retablit l'ancienne garde
+# avant-pixel rend 1101 points — le driver exige l'egalite et le tue ; le
+# nominal a exactement 1100 points est la regression gravee.
+add_test(NAME mhgp3v_pair_selfjoin_cardinality_exact COMMAND
+         mhgp3v_pair_selfjoin_probe --points 1100 --seed 20260810
+         --family scanline_overlap_multiecho)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_kill_generator_overshoot "mutant tue" 4 --points 1100
+  --seed 20260810 --family scanline_overlap_multiecho
+  --inject generator-overshoot)
 # Le mutant COMPENSE : duplication d'un fils croise + omission de l'autre a
 # masses egales — l'identite agregee FERME, seul le sort par paire mord.
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe

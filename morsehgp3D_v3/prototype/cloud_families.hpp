@@ -180,10 +180,15 @@ struct ScanlineField {
 // pas double), trous markoviens (entree 1/40, sortie 1/8 — environ un sixieme
 // du lineaire perdu), jitter capteur {0,1,2}, offsets de passe (dx, dy) et
 // multi-echos optionnels (jusqu'a trois retours verticaux au meme (x,y)).
+// CONTRAT DE CARDINALITE (audit etat courant) : CHAQUE push est borne par n
+// — l'ancienne garde `size < n`, testee seulement avant un pixel, laissait un
+// ou deux echos de recouvrement depasser n (12 501 points pour 12 500 a
+// coord 707) et desynchronisait ledger, fate et oracle du driver.
+// `mutant_overshoot` retablit l'ancien comportement pour la porte qui le tue.
 inline void scanline_pass(std::mt19937* rng, const ScanlineField& field, int n, int coord,
                           long long dx, long long dy, int step_along, int pitch,
                           bool multi_echo, std::vector<mhgp::P3>* pts,
-                          std::set<long long>* keys) {
+                          std::set<long long>* keys, bool mutant_overshoot = false) {
   std::uniform_int_distribution<int> jitter(0, 2);
   std::uniform_int_distribution<int> hole_enter(0, 39);
   std::uniform_int_distribution<int> hole_exit(0, 7);
@@ -200,6 +205,7 @@ inline void scanline_pass(std::mt19937* rng, const ScanlineField& field, int n, 
       if (hole) continue;
       const long long ground = field.height(x, y) + jitter(*rng);
       const auto push = [&](long long z) {
+        if (!mutant_overshoot && (int)pts->size() >= n) return;   // MUTANT : garde retiree
         if (z > 65535) z = 65535;
         if (z < 0) z = 0;
         mhgp::P3 q{};
@@ -220,7 +226,8 @@ inline void scanline_pass(std::mt19937* rng, const ScanlineField& field, int n, 
 }
 
 inline std::vector<mhgp::P3> scanline_cloud(int n, int coord, long long seed,
-                                            bool overlap_multiecho) {
+                                            bool overlap_multiecho,
+                                            bool mutant_overshoot = false) {
   std::mt19937 rng((unsigned)seed);
   const ScanlineField field = ScanlineField::make(&rng, coord);
   const int step_along = 2;
@@ -228,26 +235,29 @@ inline std::vector<mhgp::P3> scanline_cloud(int n, int coord, long long seed,
   std::vector<mhgp::P3> pts;
   std::set<long long> keys;
   scanline_pass(&rng, field, overlap_multiecho ? (n * 3) / 5 : n, coord, 0, 1, step_along,
-                pitch, overlap_multiecho, &pts, &keys);
+                pitch, overlap_multiecho, &pts, &keys, mutant_overshoot);
   if (overlap_multiecho)
     // DEUX PASSAGES faiblement decales : la meme scene, offsets non alignes.
     scanline_pass(&rng, field, n, coord, step_along / 2 + 1, pitch / 3 + 1, step_along,
-                  pitch, true, &pts, &keys);
+                  pitch, true, &pts, &keys, mutant_overshoot);
   // Passes de complement si la capacite a manque (trous, deduplication) :
   // memes lois, offsets decales — jamais de troncature silencieuse ailleurs.
   for (int extra = 0; (int)pts.size() < n && extra < 8; ++extra)
     scanline_pass(&rng, field, n, coord, 2 * extra + 1, 3 * extra + 2, step_along, pitch,
-                  overlap_multiecho, &pts, &keys);
+                  overlap_multiecho, &pts, &keys, mutant_overshoot);
   return pts;
 }
 
 inline std::vector<mhgp::P3> make_family_cloud(CloudFamily family, int n, int coord,
-                                               long long seed) {
+                                               long long seed,
+                                               bool mutant_overshoot = false) {
   switch (family) {
     case CloudFamily::kUniform: return uniform_cloud(n, coord, seed);
     case CloudFamily::kTerrain: return terrain_cloud(n, coord, seed);
-    case CloudFamily::kScanlineSinglePass: return scanline_cloud(n, coord, seed, false);
-    case CloudFamily::kScanlineOverlapMultiecho: return scanline_cloud(n, coord, seed, true);
+    case CloudFamily::kScanlineSinglePass:
+      return scanline_cloud(n, coord, seed, false, mutant_overshoot);
+    case CloudFamily::kScanlineOverlapMultiecho:
+      return scanline_cloud(n, coord, seed, true, mutant_overshoot);
   }
   return {};
 }

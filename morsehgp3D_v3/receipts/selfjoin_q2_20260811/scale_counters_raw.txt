@@ -129,16 +129,3 @@ parcimonie : microtuiles 1.19 % des paires, profondeur max=25, pile temoin max=1
 OK : la lane q2 garde la majorite des paires hors des microtuiles
 exit=0
 CAMPAGNE_TERMINEE
-
-=== CORRECTIF n=12500 multiecho — violation d'identite FANTOME ===
-# cause : make_family_cloud rend 12501 points pour 12500 demandes (echo de
-# recouvrement) ; l'ancien ledger comparait C(12500,2) au parcours sur le
-# nuage reel de 12501 points. La machine etait exacte ; le correctif fait
-# porter le ledger sur le nuage rendu et publie les deux tailles.
-binaire corrige sha256: 388aec75d89288e995e2297a41f10a140af885f4c71f1fd992fbe8352a787328
-provenance : --points 12500 (rendus 12501) --coord 707 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8
-arbre      : 4095 noeuds, feuilles <= 8, construction 0.003 s, 312084 octets
-q2 lane    : etats=196132 (prunes=47031) visites-temoin=49930934 tests-ponctuels=100005936 — prunees=76213240 microtuiles=1918010 (52059 etats) — ledger C(n,2)=78131250 FERME
-recherche  : L4-retraits=7533747 noeuds (2005753334 points), herites=251628, sorties precoces=47031
-parcimonie : microtuiles 2.45 % des paires, profondeur max=21, pile temoin max=12 — 6.284 s de phase locale (1 thread, pas un warm_e2e)
-OK : la lane q2 garde la majorite des paires hors des microtuiles

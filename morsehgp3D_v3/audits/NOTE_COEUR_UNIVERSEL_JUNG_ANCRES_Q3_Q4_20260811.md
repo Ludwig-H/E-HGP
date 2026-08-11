@@ -19,8 +19,9 @@ l'inertie du seul quotient horizontal jusqu'à `K=10`.
 Le lemme complémentaire de profondeur fermée de demi-boule peut supprimer
 d'autres paires sans hypothèse de diamètre. Le cœur universel et la profondeur
 sont deux certificats suffisants lorsqu'ils mordent et ils sont incomparables.
-Ils ne sont pas les seuls prunes exacts : le center-cover par 64 patches est
-une troisième voie déjà documentée.
+Ils ne sont pas les seuls prunes exacts : le schéma conditionnel de
+center-cover par 64 patches est une troisième voie déjà documentée, mais son
+composant complet n'est pas reçu.
 
 Ce résultat ferme une question mathématique, pas la porte industrielle : il ne
 prouve ni que les ancres survivantes sont peu nombreuses, ni qu'on peut trouver
@@ -185,9 +186,13 @@ points. En effet, son centre s'écrit `m+t`. Si `t` est non nul, chaque point de
 `t=0`, tous les points de `P` sont intérieurs. La statistique q2 est donc le
 total `|P|`, jamais `delta`; q3/q4 peuvent employer `delta`.
 
-Les seuils `delta>=9` pour q3 et `delta>=8` pour q4 certifient l'inertie de
-toute sphère de coquille contenant la paire. Cette preuve n'exige ni que la
-paire soit diamètre ni une borne de Jung. Elle est complémentaire du cœur :
+Les seuils `delta>=9` pour q3 et `delta>=8` pour q4 excluent toute activation
+H0 non inerte dont la `BallKey` possède un support propre positif q3 ou q4
+certifié contenant la paire. `q_min=2` ou un `q_cert=2` seul n'autorise pas ces
+seuils; une même `BallKey` qui exhibe aussi un `q_cert=3/4` peut évidemment en
+bénéficier. La preuve de la borne intérieure n'exige ni que la paire soit
+diamètre ni une borne de Jung; l'inertie exige toujours le `q_cert` annoncé. Elle est
+complémentaire du cœur :
 des témoins répartis autour de l'axe peuvent donner une grande profondeur sans
 qu'aucun soit universel; des témoins proches du milieu peuvent rendre le cœur
 immédiat.
@@ -203,7 +208,7 @@ demi-plans fermés doivent être traités exactement. Le relèvement sectoriel �
 un produit AABB n'est pas encore prouvé et reste fail-open. Cette profondeur
 est donc d'abord un filtre terminal, après le cœur universel par blocs.
 
-## Contacts exacts à graver
+## Contacts exacts de référence
 
 La fixture q3 est le triangle équilatéral propre
 `a=(10,10,10)`, `b=(13,13,10)`, `z=(13,10,13)`, de centre
@@ -233,14 +238,20 @@ produit : bords, surfaces, LiDAR, amas et entrées adversariales peuvent
 conserver beaucoup plus de paires. Ils justifient une sonde falsifiable,
 jamais une extrapolation à 50 k.
 
-## Porte d'implémentation proposée
+## Portes d'implémentation
 
-1. Implémenter d'abord un falsificateur count-only sans catalogue global de
-   paires : self-join canonique, test de boule par blocs, test polynomial puis
-   profondeur fermée aux terminaux, et sortie des seules ancres survivantes.
+Le commit `1dfe07b` implémente seulement la tranche `core`; son statut logiciel
+est tenu dans l'audit courant. La profondeur fermée et le center-cover restent
+des composants séparés à construire. La réception complète suit cet ordre :
+
+1. Recevoir le falsificateur count-only du cœur sans catalogue global de
+   paires : self-join canonique, garde `D^2>0`, test de boule par blocs, test
+   polynomial terminal et sortie des seules ancres survivantes.
 2. Sur `n<=32`, tenir un sort par paire et rejouer chaque certificat; comparer
-   ensuite toutes les ancres de supports q3/q4 non inertes de l'oracle
-   exhaustif au sur-ensemble émis.
+   ensuite toutes les ancres de supports q3/q4 non inertes d'un oracle
+   indépendant au sur-ensemble émis. Les témoins sont dédupliqués comme
+   `PointId`; une position locale n'est valide que si l'arbre et son ordre sont
+   engagés par le reçu.
 3. Tuer les mutants `>` vers `>=`, seuil `9/8` diminué d'un, paire non maximale,
    witness dupliqué, plage recouvrant une extrémité, ancre ex æquo mal possédée,
    support non positif et dernier bloc omis; ajouter pour la profondeur zéro,
@@ -251,7 +262,8 @@ jamais une extrapolation à 50 k.
    de deux exposants consécutifs supérieurs à `1,35` est une règle de gate
    opérationnelle choisie pour falsifier tôt la route; ce n'est pas un
    théorème de complexité.
-5. Une seule machine de blocs peut partager l'arbre et la partition des paires,
+5. Implémenter ensuite la profondeur fermée aux terminaux et, séparément, le
+   center-cover conditionnel. Une seule machine de blocs peut partager l'arbre et la partition des paires,
    mais q2, q3 et q4 gardent trois sorts et trois ledgers indépendants. Mesurer
    d'abord `cœur seul`, `profondeur seule` et `combiné` avec compteurs séparés;
    un résiduel d'une lane ne sert jamais d'univers à une autre.

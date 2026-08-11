@@ -64,7 +64,7 @@ des supports q3/q4.
 points u16 + LBVH exact résidents
   |-> k=1 : EMST/Boruvka exact
   |-> q2 : Yao48/LBVH strict + classifieur terminal et census fermé
-  `-> q3/q4 : cœur universel de Jung + profondeur fermée de demi-boule
+  `-> q3/q4 : cœur de Jung à recevoir, profondeur et cover à construire
        -> centres q3 et niveaux shallow q4 dans le disque médiateur
        -> BallActivation/tombstones streamées et RLE par BallKey
        -> resolver latent, fast/fallback et lots atomiques
@@ -75,12 +75,30 @@ Le self-join q2 actuel reste un oracle/falsificateur ou un second prune tant que
 ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2 ne retire
 jamais une ancre q3/q4.
 
+Le commit `1dfe07b` ajoute au self-join q2 `L4`, l'héritage de témoins et une
+sortie précoce. Ces transformations ont une preuve mathématique locale, mais
+leur intégration n'est pas reçue : aucune gate ne compare encore tous les
+sorts et masses à une baseline sans optimisation. Le générateur multi-écho
+peut rendre `n+1` ou `n+2` points. Les drivers q2 et ancres remplacent
+localement `n` par la taille rendue; cela ferme leur incohérence interne, pas
+le contrat partagé de `--points`. Le journal q2 mêle en outre deux binaires et
+n'est plus un reçu immuable. Ses segments à 50 k comptent encore 53 à 724
+millions de visites `L4` et 86 millions à 1,36 milliard de tests ponctuels pour
+q2 seul. Les chronos sous charge ne qualifient aucun gain; voir
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
+
 Le cœur universel de Jung fournit une suppression supérieure exacte, distincte
-de q2 : pour une vraie arête diamètre, neuf témoins q3 ou huit q4 peuvent
-certifier toutes les sphères admissibles dans le disque de centres. La
-profondeur fermée de demi-boule est un filtre terminal exact complémentaire,
-sans hypothèse de diamètre. Leurs résiduels sont incomparables. Les preuves,
-prédicats et limites sont dans
+de q2 : pour une paire distincte certifiée arête maximale d'un support propre
+positif, neuf `PointId` q3 ou huit q4 distincts satisfaisant le prédicat strict
+certifient toutes les sphères admissibles dans le disque de centres. Le
+falsificateur `core` de `1dfe07b` est présent, mais non reçu : sa porte partage
+les primitives géométriques v2, son rejeu ne vérifie pas encore l'unicité des
+handles et sa branche q4 accepte un certificat dégénéré `D^2=U^2=0`. La
+profondeur fermée de demi-boule reste un filtre terminal exact complémentaire
+à implémenter, sans hypothèse de diamètre sous un support q3/q4 certifié; le
+cover par 64 patches reste un troisième schéma conditionnel exact. Ces
+certificats ne définissent aucune chaîne d'inclusion entre leurs résiduels. Les
+preuves, la provenance, les prédicats et les limites sont dans
 [`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](audits/NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md).
 
 La parcimonie globale des ancres et des arrangements n'est pas prouvée. Le pire
@@ -105,14 +123,17 @@ CUDA.
 
 ## Prochain ordre de travail
 
-1. Stabiliser et repincer la gate q2 `22/22`; réduire les rescans par héritage
-   d'identifiants et borne inférieure exacte, puis reprofiler les compteurs.
-2. Comparer ce self-join optimisé à la route q2 Yao/LBVH avec census fermé
-   complet.
-3. Fermer les entrées hostiles et le support canonique du sidecar, puis le
-   classer uniquement comme oracle permanent `n<=32`.
-4. Prototyper le cœur de Jung et la profondeur fermée q3/q4 comme sonde
-   count-only complète à petit `n`, avec coûts isolés, avant tout sweep device.
+1. Imposer à tous les consommateurs un contrat unique de cardinalité, de
+   préférence exactement `n` points ou un refus fermé, puis recevoir `L4` et
+   l'héritage par différentiel baseline, mutants ciblés et extrêmes u16.
+2. Mesurer seulement le delta reçu, construire le classifieur terminal et le
+   census fermé, puis comparer cette route à Yao48/LBVH sur les mêmes familles.
+3. Remplacer le tag de version du sidecar par une identité producteur vérifiée,
+   ajouter ses mutants de métadonnées et cibler l'appel du self-test dans la
+   factory; conserver ce chemin comme oracle permanent `n<=32`.
+4. Corriger et recevoir le falsificateur cœur q3/q4 par juge indépendant,
+   certificats distincts et cas dégénérés; implémenter ensuite séparément la
+   profondeur de demi-boule et le cover par patches, avec coûts isolés.
 5. Recevoir `BallActivation`, census, resolver et fold horizontal contre Gamma
    exhaustif borné.
 6. Mesurer seulement ensuite le pipeline complet sur G4 : build, source,

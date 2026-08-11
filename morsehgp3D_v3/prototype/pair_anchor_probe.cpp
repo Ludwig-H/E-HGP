@@ -684,12 +684,15 @@ int main(int argc, char** argv) {
     if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
     pts = mhgp3v::make_family_cloud(family, n, coord, seed);
     if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
-    // Le generateur peut rendre plus de points que demandes (echo de
-    // recouvrement) : le ledger porte sur le nuage REEL.
-    const int requested = n;
-    n = (int)pts.size();
-    std::printf("provenance : --points %d (rendus %d) --coord %d --seed %lld --family %s"
-                " --leaf-size %d --mode core\n", requested, n, coord, seed,
+    // CONTRAT DE CARDINALITE (audit etat courant) : le generateur borne
+    // chaque push par n ; le driver exige l'egalite avant l'arbre.
+    if ((int)pts.size() != n) {
+      std::printf("ECHEC : contrat de cardinalite viole — %zu points rendus pour %d"
+                  " demandes\n", pts.size(), n);
+      return 1;
+    }
+    std::printf("provenance : --points %d --coord %d --seed %lld --family %s"
+                " --leaf-size %d --mode core\n", n, coord, seed,
                 mhgp3v::cloud_family_name(family), leaf_size);
   }
   if (oracle == 1 && n > 32) {

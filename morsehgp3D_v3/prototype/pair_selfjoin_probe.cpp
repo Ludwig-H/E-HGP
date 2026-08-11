@@ -37,7 +37,12 @@
 //      enfant sont des sous-plages). Jamais un scalaire sans IDs, jamais une
 //      frontiere tronquee : la recherche ne cherche que les temoins
 //      MANQUANTS et exclut les herites du recomptage.
-//   3. LA PILE REUTILISEE : une seule allocation par sonde.
+//   3. LA PILE REUTILISEE : capacite reservee a la construction, plus aucune
+//      allocation en regime etabli (la premiere croissance peut reallouer).
+//
+// COMPTEURS : `L4-retraits (points)` et `herites` sont des MULTIPLICITES de
+// travail par recherche (un meme point compte a chaque bloc qui le retire ou
+// l'herite), jamais des cardinaux de PointId uniques.
 //
 // Les DECISIONS sont inchangees : un noeud L4 >= 0 ne porte aucun temoin,
 // et les herites appartiennent a l'ensemble decouvrable du fils — les
@@ -244,9 +249,14 @@ struct ProbeInjections {
   // partition) peut mordre. C'est le mutant qui prouve que le ledger de fate
   // est necessaire.
   bool duplicate_compensated = false;
+  // OVERSHOOT DU GENERATEUR (contre-exemple de cardinalite de l'audit etat
+  // courant) : l'ancienne garde `size < n` testee avant un pixel laissait un
+  // ou deux echos multi-echo depasser n — ledger, fate et oracle etaient
+  // alors dimensionnes avec le n demande. Le driver exige pts.size() == n.
+  bool generator_overshoot = false;
   bool any() const {
     return skip_half_block || drop_rr || threshold_nine || count_shell ||
-           drop_last_microtile || duplicate_compensated;
+           drop_last_microtile || duplicate_compensated || generator_overshoot;
   }
 };
 
@@ -275,7 +285,8 @@ struct Probe {
   int fate_points = 0;
   bool fate_violated = false;
   i64 last_microtile_a = -1, last_microtile_b = -1;   // pour drop-last-microtile
-  std::vector<int> stack_;   // pile REUTILISEE : une allocation par sonde
+  // Pile REUTILISEE, capacite reservee : plus d'allocation en regime etabli.
+  std::vector<int> stack_ = [] { std::vector<int> s; s.reserve(256); return s; }();
 
   // Plages disjointes : le temoin ne recouvre AUCUNE des deux extremites.
   static bool ranges_disjoint(const Node& witness, const Node& a, const Node& b) {
@@ -668,6 +679,8 @@ int main(int argc, char** argv) {
       else if (!strcmp(argv[i], "drop-last-microtile")) injections.drop_last_microtile = true;
       else if (!strcmp(argv[i], "duplicate-compensated"))
         injections.duplicate_compensated = true;
+      else if (!strcmp(argv[i], "generator-overshoot"))
+        injections.generator_overshoot = true;
       else { std::printf("ECHEC : injection inconnue %s\n", argv[i]); return 2; }
       continue;
     }
@@ -691,6 +704,14 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : campagne absurde (la sonde est calibree pour smax=11)\n");
     return 2;
   }
+  const auto fail = [&](const char* what, const char* detail) {
+    if (injections.any()) {
+      std::printf("mutant tue par %s : %s\n", what, detail);
+      return 4;
+    }
+    std::printf("ECHEC %s : %s\n", what, detail);
+    return 1;
+  };
 
   const bool is_fixture = !fixture_name.empty();
   Fixture fixture;
@@ -709,31 +730,27 @@ int main(int argc, char** argv) {
                 fixture.name, n, leaf_size);
   } else {
     if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
-    pts = mhgp3v::make_family_cloud(family, n, coord, seed);
+    pts = mhgp3v::make_family_cloud(family, n, coord, seed, injections.generator_overshoot);
     if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
-    // Le generateur multi-echo peut rendre PLUS de points que demandes (un
-    // echo de recouvrement supplementaire : 12 501 pour 12 500 a coord 707).
-    // Le ledger porte sur le nuage REEL — comparer a C(n_demande,2) etait
-    // une violation d'identite fantome, pas une erreur de la machine.
-    const int requested = n;
-    n = (int)pts.size();
-    std::printf("provenance : --points %d (rendus %d) --coord %d --smax %d --seed %lld"
-                " --family %s --leaf-size %d\n", requested, n, coord, smax, seed,
+    // CONTRAT DE CARDINALITE (audit etat courant) : chaque push du generateur
+    // est borne par n ; le driver EXIGE l'egalite avant de construire l'arbre
+    // — un nuage plus grand que n desynchroniserait ledger, fate (acces hors
+    // bornes du tableau de sorts) et oracle. Le mutant generator-overshoot
+    // retablit l'ancienne garde `size < n` avant-pixel et meurt ici.
+    if ((int)pts.size() != n) {
+      const int code = fail("le contrat de cardinalite du generateur",
+                            "le nuage rendu depasse le n demande — l'ancienne garde"
+                            " avant-pixel laissait passer des echos");
+      return code;
+    }
+    std::printf("provenance : --points %d --coord %d --smax %d --seed %lld"
+                " --family %s --leaf-size %d\n", n, coord, smax, seed,
                 mhgp3v::cloud_family_name(family), leaf_size);
   }
   if (verify_bruteforce == 1 && n > 3000) {
     std::printf("ECHEC : le ledger de fate exige n <= 3000 (n^2/2 sorts, n^3 balayage)\n");
     return 2;
   }
-  const auto fail = [&](const char* what, const char* detail) {
-    if (injections.any()) {
-      std::printf("mutant tue par %s : %s\n", what, detail);
-      return 4;
-    }
-    std::printf("ECHEC %s : %s\n", what, detail);
-    return 1;
-  };
-
   Tree tree;
   const auto t0 = std::chrono::steady_clock::now();
   tree.build(pts, leaf_size);
@@ -835,9 +852,13 @@ int main(int argc, char** argv) {
       };
       if (!(dist2(0, 1) >= dist2(0, 2) && dist2(0, 1) >= dist2(1, 2)))
         return fail("la fixture de portee", "ab n'est plus le plus long cote du support q3");
-      std::printf("portee     : ab prunee q2 ET ancre du support propre q3 {a,b,z} — les"
-                  " paires prunees q2 ne sortent JAMAIS d'une source d'ancres"
-                  " superieures\n");
+      // Le libelle dit le FAIT mathematique, jamais un sort de parcours : la
+      // granularite conservatrice des blocs peut laisser ab en microtuile
+      // (l'audit a montre prunes=0 sur cette fixture) — ab n'en est pas moins
+      // H0-inerte q2 par ses dix temoins exacts.
+      std::printf("portee     : ab a exactement dix temoins q2 (H0-inerte q2) ET reste"
+                  " l'ancre du support propre q3 {a,b,z} — les paires H0-inertes q2 ne"
+                  " sortent JAMAIS d'une source d'ancres superieures\n");
     }
   }
 
