@@ -1,14 +1,17 @@
 // MorseHGP3D v3 — L'ENTREE AUTORITAIRE DU FOLD HYBRIDE (audit S1, porte 2).
 //
-// Le chemin public ne recoit plus JAMAIS un `Catalogue` brut accompagne d'un
-// booleen ou d'un recu constructible : il recoit `const
+// PERIMETRE : ORACLE BORNE n <= 32 a jamais (audit delta cbac109) — la
+// fermeture exige `smax >= n` et l'interface borne `smax <= 32`. Ce chemin
+// n'est ni « public » ni un candidat 50 k ; c'est la voie AUTORITAIRE DU
+// JUGE BORNE. Elle ne recoit jamais un `Catalogue` brut accompagne d'un
+// booleen ou d'un recu constructible : elle recoit `const
 // ValidatedHybridSidecar&`. Les drapeaux principaux viennent des CERTIFICATS
 // de la factory (le moteur ne recalcule pas les miniboules de certificat),
 // les donnees viennent du snapshot possede par le sidecar, et toute
 // pretention de famille complete passe par la fermeture certifiee du recu de
 // producteur — sinon refus atomique avant le fold. L'API brute de
-// `build_saturated_fold_hybrid` reste le HARNAIS des juges (portes
-// differentielles), jamais le chemin public.
+// `build_saturated_fold_hybrid` reste le HARNAIS relatif des portes
+// differentielles.
 #pragma once
 
 #include "prototype/saturated_fold_hybrid.hpp"

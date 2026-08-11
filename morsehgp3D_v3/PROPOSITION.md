@@ -105,8 +105,9 @@ BallActivation
 ```
 
 `q_min` est la plus petite arité de provenance prouvée pour la boule.
-`q_cert` est une arité de support propre positif effectivement exhibée pour
-renforcer l'inertie; l'absence d'un support plus grand n'est jamais déduite.
+`q_cert` est le maximum des arités de supports propres positifs effectivement
+exhibées et rejouées pour cette boule afin de renforcer l'inertie; l'absence
+d'un support plus grand n'est jamais déduite.
 
 Une activation non inerte exige le census fermé complet avant fold. Une
 tombstone peut éviter ce census uniquement si sa preuve H0 et son futur
@@ -127,78 +128,137 @@ canoniques de `PointId` à l'oracle EMST CPU. Elle couvre les ex æquo, plusieur
 EMST valides et une mutation qui reconnecte les mauvaises composantes aux
 bons niveaux. Cette lane évite entièrement le catalogue Morse à `k=1`.
 
-### 6.2 Supports q2 : paires diamétrales peu profondes
+### 6.2 Supports q2 : Yao48, LBVH et census terminal
 
 La boule d'un support q2 est la boule diamétrale de sa paire `(x,y)`. Un point
 `z` est strictement intérieur si et seulement si
 `(z-x) dot (z-y)<0`. Une activation q2 non tombstonée a au plus `K-1=9`
 points strictement intérieurs.
 
-La source candidate est un produit dual-tree canonique de deux LBVH :
+La source candidate reprend l'architecture exacte de
+[`CATALOGUE_PAIRES_DIAMETRALES_EXACT.md`](../docs/math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) :
 
-1. chaque produit de nœuds représente un ensemble disjoint de paires non
-   ordonnées ;
-2. une borne entière sur boîtes cherche dix `PointId` distincts qui satisfont
-   strictement le prédicat pour toutes les paires du produit ;
-3. dix témoins certifient l'inertie H0 et suppriment le produit ;
-4. sinon le produit se scinde; une feuille calcule exactement profondeur,
-   coquille, clé et preuve.
+1. des tuiles d'ancres remplissent 48 banques directionnelles de témoins
+   distincts sur le LBVH Morton résident;
+2. les trois inégalités entières de Yao48, toutes strictes pour la lane H0,
+   certifient dix témoins strictement intérieurs et remplacent une région par
+   un reçu de prune; une chambre sous-pleine ou une égalité reste fail-open;
+3. le classifieur terminal parcourt le LBVH avec des bornes exactes sur
+   `(z-x) dot (z-y)` et s'arrête à dix intérieurs seulement pour une tombstone;
+4. toute paire conservée finit le census et publie la liste fermée complète
+   `C(x,y)`, sa profondeur stricte, sa coquille, son rang, son niveau et sa
+   `BallKey`, dans une seule passe multi-ordre.
 
-La borne peut avoir des faux négatifs, jamais des faux positifs. Les contacts
-restent aux feuilles. La complétude se prouve par la partition du self-produit
-LBVH et par le fait qu'une paire non inerte ne peut rencontrer le certificat
-de dix témoins.
+Le ledger ferme simultanément
+`candidate+certified_pruned+unresolved=C(n,2)`, la partition terminale
+`below+exact+above`, la multiplicité canonique un et la liste fermée de chaque
+record. Une frontière non vide ou un budget épuisé refuse la publication.
 
-Cette route ne matérialise ni matrice ni liste globale de paires. Son pire cas
-reste quadratique. Avant CUDA, une sonde count-only doit donc publier
-produits visités/scindés/prunés, feuilles, paires exactes, tombstones, coquilles,
-octets, pile et high-water. La cible n'est admise que sur ces masses complètes.
+Le self-join AABB par témoins communs est une seconde preuve exacte : chaque
+état représente un ensemble disjoint de paires et dix témoins universels
+suppriment le bloc. Il reste un oracle indépendant, un falsificateur de masses
+ou un second prune tant que ses compteurs ne battent pas Yao48/LBVH. Le juge
+borné peut tenir un sort quadratique à petit `n`; aucun chemin produit ne
+matérialise de matrice ou de liste globale de paires. Le pire cas reste
+quadratique en sortie.
 
-Cette suppression vaut exclusivement pour la lane q2. Une paire dont la boule
+Pour trois AABB `W,X,Y`, la borne supérieure actuelle doit être complétée par
+un infimum exact. Par axe, pour chaque couple d'extrémités `x,y`, poser
+`t=clip(x+y,[2*w_min,2*w_max])`; le minimum de quatre fois
+`(w-x)(w-y)` vaut `(t-2*x)(t-2*y)`. Le minimum sur les quatre couples puis la
+somme des trois axes donne `L4`, tandis que les coins donnent `U4`. `U4<0`
+accepte un nœud témoin, `L4>=0` l'écarte de la recherche d'intérieurs et le cas
+intermédiaire descend. Les décisions sont monotones sous raffinement. Un
+contact écarté de la recherche stricte reste obligatoirement rescanné pour le
+census fermé terminal.
+
+Cette suppression vaut exclusivement pour q2. Une paire dont la boule
 diamétrale contient dix témoins peut rester le diamètre d'un support q3/q4 dont
-le centre est décalé et dont la sphère exclut ces témoins. La fixture u16
-explicite est consignée dans
-[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](audits/AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md). Le résiduel q2 ne devient jamais, par
-soustraction, la source d'ancres des arités supérieures.
+le centre est décalé et dont la sphère exclut ces témoins. Le résiduel q2 ne
+devient jamais, par soustraction, la source d'ancres des arités supérieures.
 
-### 6.3 Supports q3 : ancre de diamètre
+### 6.3 Ancres q3/q4 : cœur universel de Jung
 
-Pour un support triangulaire propre positif, choisir canoniquement la plus
-petite paire parmi ses côtés de longueur maximale `D`. Son circumcentre
-appartient au plan médiateur de l'ancre et vérifie `h^2<=D^2/12`, où `h` est
-la distance au milieu de l'ancre.
+Tout support positif q3 ou q4 possède une arête de longueur maximale. Choisir
+canoniquement la plus petite paire parmi les ex æquo. Pour `d=b-a`,
+`D^2=d dot d`, `U=2w-a-b`, poser `g=D^2-||U||^2` et
+`Q=D^2||U||^2-(U dot d)^2`.
 
-Pour une ancre reçue, chaque troisième point définit au plus un circumcentre
-q3 dans ce disque. Le candidat est conservé seulement après vérification
-exacte de l'arité positive, de l'ancre canonique, de la profondeur
-`p<=K-2=8`, de l'owner et de la `BallKey`.
+La preuve reformulée dans
+[`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](audits/NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md)
+redonne les filtres P0 déjà documentés pour `JungChordCsrTile` :
 
-Cette réduction remplace les triples par `ancre x troisieme_point`, mais elle
-n'est utile que si la source des ancres est elle-même sparse et complète.
-Tester toutes les paires comme ancres n'est pas admis.
+$$\text{q3: }g>0\ \text{ et }\ 3g^2>4Q,$$
 
-### 6.4 Supports q4 : sommets peu profonds dans un plan médiateur
+$$\text{q4: }g>0\ \text{ et }\ g^2>2Q.$$
 
-Pour un support tétraédrique propre positif et une ancre diamètre `D`, le
-théorème de Jung en dimension trois donne `h^2<=D^2/8`. Dans le disque
-médiateur ainsi borné, chaque autre point induit une droite d'égalité de
-puissance et un demi-plan où il est strictement intérieur.
+Ils prouvent que `w` est strictement intérieur à toute sphère admissible ancrée
+par la paire. Neuf témoins distincts en q3 ou huit en q4 certifient
+`p+q>=12`; le bloc d'ancres est H0-inerte jusqu'à `K=10`. Toute égalité, paire
+non certifiée maximale, support non positif ou dégénérescence reste fail-open.
+
+Un self-join canonique implicite de toutes les paires peut donc émettre un
+sur-ensemble complet des ancres non inertes sans construire un tableau de
+paires et sans filtrer par q2. Le test de boule inscrit
+`3||U||^2<D^2` en q3 ou `15||U||^2<=4D^2` en q4 fournit un premier prune AABB;
+le test polynomial complet s'applique aux terminaux.
+
+La profondeur fermée de demi-boule fournit un filtre terminal complémentaire.
+Si `P={z:(z-a) dot (z-b)<0}` et `delta(a,b)` est le minimum du nombre de
+projections de `P` dans un demi-plan fermé du plan médiateur, toute sphère de
+coquille contenant `a,b` possède au moins `delta` intérieurs. Les seuils sont
+`delta>=9` en q3 et `delta>=8` en q4. La lane q2 emploie séparément le total
+`|P|`; ses survivants et ceux de q3/q4 ne sont pas emboîtés. Le center-cover
+exact par 64 patches reste une troisième preuve, dont la banque de témoins
+dépend du patch plutôt que d'être universelle pour toute la paire.
+
+Un second certificat exact, la profondeur fermée de demi-boule, est appliqué
+aux terminaux. Pour les points strictement dans la boule diamétrale, il prend le
+minimum du nombre de projections contenues dans un demi-plan fermé du plan
+médiateur. Une profondeur au moins 9 en q3 ou 8 en q4 tue toute sphère passant
+par la paire, sans hypothèse de diamètre. Les projections nulles comptent dans
+tout demi-plan. Le calcul angulaire est fail-open sur toute ambiguïté; sa borne
+de bloc sectorielle n'est pas encore reçue.
+
+Le total diamétral q2 et la profondeur q3/q4 ont des résiduels incomparables.
+Une seule machine peut partager l'arbre et la partition des paires, mais chaque
+lane conserve son propre sort, son ledger et ses compteurs. Le cœur seul, la
+profondeur seule et leur combinaison sont mesurés séparément.
+
+Cette preuve donne la couverture, pas la parcimonie. Le nombre d'ancres peut
+rester quadratique et une recherche naïve des témoins cubique. La source ne
+devient candidate produit qu'après un ledger pair-à-pair borné et une admission
+des masses à `12 500/25 000/50 000`.
+
+### 6.4 Supports q3 : un centre par troisième point
+
+Pour un support triangulaire propre positif et son ancre reçue, le circumcentre
+appartient au plan médiateur et vérifie `h^2<=D^2/12`. Chaque troisième point
+définit au plus un centre dans ce disque.
+
+Le candidat est conservé seulement après vérification exacte de l'indépendance,
+de la positivité, de l'ancre canonique, de la profondeur `p<=K-2=8`, de
+l'owner, du census fermé et de la `BallKey`. La réduction remplace les triples
+globaux par `ancre x points rapportés`; aucun scan du nuage par ancre n'est
+admis dans le chemin produit.
+
+### 6.5 Supports q4 : niveaux peu profonds du plan médiateur
+
+Pour un support tétraédrique propre positif et une ancre diamètre, Jung donne
+`h^2<=D^2/8`. Dans ce disque, chaque autre point induit une droite d'égalité de
+puissance et un demi-plan strictement intérieur.
 
 Un q4 pertinent est une intersection de deux droites dont la profondeur
-stricte est au plus `K-3=7`. La route candidate construit directement les
-niveaux peu profonds de cet arrangement, au lieu de former toutes les paires
-de droites. Elle valide ensuite indépendance affine, positivité, ancre
-canonique, owner, census et clé.
+stricte est au plus `K-3=7`. La route construit directement les premiers
+niveaux de l'arrangement, au lieu de former toutes les paires de droites. Elle
+valide ensuite indépendance affine, positivité, diamètre et owner canoniques,
+census et clé.
 
 Les parallèles, droites confondues, intersections multiples, points de
-frontière et grandes coquilles sont des lots exacts, pas une hypothèse de
-position générale. Le sweep doit les traiter ou refuser la route avant toute
-sortie.
-
-Le verrou de recherche est explicite : il manque encore un producteur sparse
-et complet des ancres de diamètre, ainsi qu'une admission globale de la somme
-des arrangements. Sans ces deux preuves, q3/q4 restent des propositions et non
-un chemin produit.
+frontière et grandes coquilles sont groupés en lots exacts. Le sweep doit les
+traiter ou refuser la route avant toute sortie. La borne locale shallow ne
+prouve ni que la somme des points rapportés par ancre est linéaire, ni que le
+range-report l'est; ces masses restent des obligations d'admission.
 
 ## 7. Cellules de centres : oracle branch-and-bound
 
@@ -279,31 +339,39 @@ brut après la gate.
 
 ## 10. Frontière de confiance
 
-Les sidecars `9483b1c` et `cbac109` ne sont pas reçus. Le second transmet bien
-le type au fold et corrige plusieurs validations, mais son token vide reste
-forgeable par `std::bit_cast`, son index manque `[r1,r2,r1]`, une entrée
-`INT128_MIN` atteint un overflow signé et son digest est incomplet. La
-réparation doit séparer deux usages :
+La frontière sépare durablement deux usages :
 
 - un oracle CPU borné peut rescanner tous les points et recalculer les
-  miniboules afin de falsifier une source ;
+  miniboules afin de falsifier une source. Le pipeline hybride exhaustif est
+  explicitement limité à `n<=32` et ne devient jamais une source 50 k;
 - le chemin produit consomme les certificats streamés du producteur, avec
   count/fill, domaine de tâches complet et rejeu indépendant ciblé.
 
-Le constructeur du reçu et toute capacité nécessaire doivent être privés,
-non forgeables par copie binaire et possédés par le producteur terminal. La
-preuve de complétude ne se réduit pas à `rank_bound>=point_count`. Les clés utilisent une fraction
-multiprécision canonique; les digests utilisent une sérialisation champ par
-champ et SHA-256; `q_min`, support, ordre et fermeture sont reconstruits ou
-liés à une preuve rejouable.
+Le constructeur du reçu et toute capacité sont privés, non forgeables par copie
+binaire et possédés par le producteur terminal. Avant toute géométrie, la gate
+valide le domaine u16 des points et de chaque représentation de sphère. Elle
+reconstruit ou normalise un unique support canonique qui devient l'autorité des
+certificats, carriers, digests et du fold.
+
+La preuve de complétude ne se réduit ni à `rank_bound>=point_count` ni au digest
+d'une table. Le reçu engage contrat et SHA du producteur, profil, schéma et
+identité des tâches, counts prévus/remplis/consommés, statut terminal sans
+censure, points, catalogue et paramètres. Les clés sont multiprécision et
+canoniques; les digests emploient une sérialisation champ par champ, taggée,
+versionnée et SHA-256. Le digest lie le reçu aux données; le ledger et les
+certificats en prouvent la portée.
+
+Les défauts précis d'une livraison n'appartiennent pas à cette proposition
+durable; ils sont tenus dans
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
 ## 11. Architecture G4 candidate
 
 ```text
 points u16 + LBVH exact résidents
   |-> k=1 : Boruvka/EMST exact
-  |-> q2 : self-produit dual-tree peu profond
-  `-> q3/q4 : ancres diamètre + reporters médiateurs peu profonds
+  |-> q2 : Yao48 strict + classification LBVH et census fermé
+  `-> q3/q4 : cœur de Jung + profondeur fermée + reporters shallow
        -> BallActivation/tombstones streamées
        -> sort/RLE par BallKey exacte
        -> carriers stricts + resolver latent
@@ -319,6 +387,21 @@ unité de recertification.
 Les cellules adaptatives et l'oracle exhaustif restent hors du chrono produit.
 Ils recertifient des échantillons et des fixtures, puis comparent digests,
 masses et décisions à la source device.
+
+Pour le jalon secondaire d'une seconde, l'enveloppe provisoire est :
+
+| tranche | enveloppe chaude |
+| --- | ---: |
+| transfert + LBVH | 40 ms |
+| source + cover | 200 ms |
+| cordes | 200 ms |
+| shallow + décision exacte | 300 ms |
+| reducer + payload | 200 ms |
+| réserve | 60 ms |
+
+Source, cover et cordes au-dessus de 400 ms chaud classent la route no-go.
+Ces enveloppes sont des seuils de falsification d'architecture, pas une
+qualification : seul le p95 du pipeline complet décide `warm_e2e`.
 
 ## 12. Admission et reçus
 
@@ -340,22 +423,23 @@ un refus de ressource sont trois statuts distincts.
 
 ## 13. Jalons
 
-1. Corriger la forge fraîche, le doublon concentrique, l'entrée
-   `INT128_MIN`, le support canonique et le digest complet; recevoir ensuite
-   le sidecar seulement comme oracle borné.
-2. Recevoir le prune de cellule avec sa portée exacte de branche, puis le
-   conserver comme diagnostic et oracle adaptatif.
-3. Corriger le différentiel compensable de la sonde q2 dual-tree, ajouter ses
-   CTests et l'admettre ou la réfuter sur `terrain`, scanline simple,
-   multiecho et dégénérescences. Son résiduel ne fournit jamais les ancres
-   q3/q4.
-4. Prouver une source sparse complète des ancres q3/q4; sans preuve, ne pas
-   implémenter le sweep G4.
-5. Recevoir `BallActivation`, tombstones et resolver contre Gamma exhaustif à
-   petit `n`.
-6. Porter les seules routes admises sur CUDA et mesurer source+fold+payload
-   dans un même `warm_e2e`.
-7. Spécifier séparément les verticales ou conserver explicitement le contrat
+1. Stabiliser et repincer le reçu local du ledger q2; ajouter la borne
+   inférieure exacte et l'héritage d'identifiants, puis publier les compteurs
+   après chaque optimisation.
+2. Implémenter et comparer la route q2 Yao48/LBVH avec census fermé; conserver
+   le self-join comme oracle ou second prune selon les masses.
+3. Fermer le domaine hostile, le support canonique et le reçu complet du
+   sidecar; recevoir ce chemin uniquement comme oracle permanent `n<=32`.
+4. Recevoir le prune de cellule avec sa portée exacte de branche et le
+   conserver comme diagnostic adaptatif, hors chemin chaud.
+5. Prototyper le self-join d'ancres q3/q4 avec le cœur universel de Jung puis la
+   profondeur fermée terminale; prouver la couverture contre l'oracle borné et
+   mesurer chaque certificat avant tout sweep G4.
+6. Recevoir `BallActivation`, census fermé, tombstones et resolver contre Gamma
+   exhaustif à petit `n`.
+7. Porter les seules routes admises sur CUDA et mesurer source, certification,
+   fold et payload dans un même `warm_e2e`.
+8. Spécifier séparément les verticales ou conserver explicitement le contrat
    horizontal réduit.
 
 ## 14. Conditions de GO
@@ -368,7 +452,9 @@ Le backend G4 devient candidat uniquement si :
 - les familles normales et dégénérées sont admises séparément ;
 - aucun cap, timeout ou buffer plein ne publie un préfixe ;
 - le pic mémoire réel tient l'enveloppe avec marge ;
-- `warm_e2e < 1 s` inclut index, source, certification, fold et payload ;
+- le gate secondaire demandé établit un p95 `warm_e2e<1 s`, puis la porte
+  produit principale établit un p95 `warm_e2e<100 ms`; tous deux incluent
+  index, source, certification, census, resolver, fold et payload ;
 - le contrat de sortie et le statut des verticales sont nommés sans
   ambiguïté.
 

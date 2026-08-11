@@ -1,4 +1,4 @@
-# Audit delta `cbac109` — sidecar et nouvelle source q2
+# Audit épinglé — sidecar `cbac109` et frontière de source
 
 Date : 11 août 2026 UTC.
 
@@ -8,251 +8,135 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Snapshot
+Périmètre immuable : commit
+`cbac109a09c2575cdf875b19de1570265bd5bf08`.
+Le statut du worktree postérieur est exclusivement dans
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
-Commit audité : `cbac109a09c2575cdf875b19de1570265bd5bf08`.
+Empreintes du snapshot :
 
-Empreintes committées décisives :
+| fichier | SHA-256 |
+| --- | --- |
+| `prototype/validated_hybrid_sidecar.hpp` | `d4611eea124d80d1c4ff20a16cd73a7a40a6bb13f22e522a30adf5d921fd819c` |
+| `prototype/sealed_source.hpp` | `74ee9f04aa87862f33137655ea0a74498970471fbe6253ef6d1c37058c9529fe` |
+| `prototype/hybrid_fold_validated.hpp` | `d01dd4f86d6db7e312be681ddefec1d0f7d88c5e4103f4a62483bc4fdeba55a6` |
+| `prototype/saturated_pipeline.cpp` | `4989a31bdb5e20fcedc04034b5fc305ec9d6c0f6fc99b3cd3bb4b9abe4488b56` |
 
-- `prototype/validated_hybrid_sidecar.hpp` :
-  `d4611eea124d80d1c4ff20a16cd73a7a40a6bb13f22e522a30adf5d921fd819c` ;
-- `prototype/sealed_source.hpp` :
-  `74ee9f04aa87862f33137655ea0a74498970471fbe6253ef6d1c37058c9529fe` ;
-- `prototype/hybrid_fold_validated.hpp` :
-  `d01dd4f86d6db7e312be681ddefec1d0f7d88c5e4103f4a62483bc4fdeba55a6` ;
-- `prototype/saturated_pipeline.cpp` :
-  `4989a31bdb5e20fcedc04034b5fc305ec9d6c0f6fc99b3cd3bb4b9abe4488b56`.
+## Verdict du snapshot
 
-Le worktree ajoute en parallèle une sonde q2 non committée. Elle est auditée
-ci-dessous par son empreinte propre et n'est pas confondue avec le commit.
+Le delta corrige plusieurs défauts de `9483b1c`, mais n'est pas reçu comme
+frontière de confiance. Quatre contre-résultats indépendants subsistent :
+reçu frais forgeable, doublon exact non adjacent accepté, comportement indéfini
+sur `INT128_MIN` et digest contractuel incomplet.
 
-## Verdict
+Le pipeline hybride est structurellement borné à `n<=32`; même corrigé, il est
+un oracle CPU et non une route 50 k.
 
-Le delta ferme plusieurs mécanismes fautifs de `9483b1c`, mais le sidecar
-n'est toujours pas recevable, même comme juge borné autoritaire. Quatre
-contre-résultats indépendants subsistent : le reçu reste forgeable en C++20,
-l'unicité des `BallKey` est fausse, une représentation hostile provoque un
-overflow signé avant refus et le digest ne lie pas la décision complète.
+## Corrections réellement présentes à `cbac109`
 
-Même après ces corrections, le pipeline hybride ne peut jamais être la route
-50 k : son interface limite `smax` à 32 alors que sa fermeture exige
-`smax>=n`. Il demeure un juge borné pour `n<=32`.
+- Le fold validé reçoit un `ValidatedHybridSidecar` au lieu de revenir au
+  catalogue brut.
+- La clé ne carre plus les numérateurs du centre en `i128`; le niveau exact est
+  comparé avec la primitive multiprécision existante.
+- Le support déclaré est vérifié sur la coquille, comparé au cardinal minimal
+  recalculé, testé comme générateur de la boule et refusé lorsqu'un sous-ensemble
+  propre engendre déjà la même boule.
+- Le digest du catalogue ne lit plus l'image mémoire complète de
+  `CriticalSphere`, donc ne dépend plus directement du padding ou du `double`
+  diagnostique.
 
-## Corrections effectivement présentes
+Ces progrès ne ferment pas les quatre portes ci-dessous.
 
-### Reçu et consommation typée
+## S1 — reçu frais forgeable
 
-`SourceProducerToken` a un constructeur privé, mais le type est vide et
-trivialement copiable. `std::bit_cast<SourceProducerToken>` permet donc de le
-fabriquer en C++20 défini, puis d'appeler le constructeur public de
-`HybridSourceReceipt`. La clôture nominale n'est pas une clôture de type.
+`SourceProducerToken` a un constructeur privé, mais le type du snapshot est
+vide et trivialement copiable. C++20 permet de le fabriquer avec
+`std::bit_cast`, puis d'appeler le constructeur public de
+`HybridSourceReceipt` sur un catalogue amputé et ses digests recalculés. La
+factory accepte alors la table et certifie les fermetures.
 
-Les modes `hybrid` et `hybrid-prefix` transmettent maintenant
-`const ValidatedHybridSidecar&` au wrapper de fold, qui consomme les points,
-le catalogue et les drapeaux principaux possédés par ce sidecar.
+La reproduction indépendante a terminé avec `sidecar.ok()==true` et
+`closure_certified_all_orders()==true`. La correction requise est un reçu à
+constructeur privé, non trivialement copiable, produit seulement après la
+terminaison de l'énumérateur autoritaire. Un digest empêche une
+désynchronisation; il ne prouve pas que l'énumération était complète.
 
-Cette fermeture de type est un progrès réel. Elle ne prouve pas à elle seule
-la complétude du producteur; le fait géométrique reste porté par
-`enumeration_completed && rank_bound>=point_count` dans le reçu scellé.
+## S2 — doublon `[r1,r2,r1]`
 
-### Débordement et support
+L'index du snapshot trie par `(centre,index_catalogue)`, puis ne compare que
+les voisins. Pour le nuage
+`{(1,2,0),(3,2,0),(0,2,0),(4,2,0)}`, les records valides « boule intérieure,
+boule extérieure, copie de la boule intérieure » sont ordonnés
+`[r1,r2,r1]`; les deux copies ne deviennent jamais voisines et la factory les
+accepte.
 
-La clé ne carre plus les numérateurs de centre dans `i128`. L'égalité de
-niveau appelle `sphere_cmp_beta`, qui utilise les largeurs multiprécision du
-prédicat exact. Le débordement du carré présent dans `9483b1c` est donc
-retiré. La factory ne borne toutefois pas les champs de `Sphere` avant la
-normalisation : `nx=INT128_MIN, den=1` atteint encore `-INT128_MIN` dans
-`sidecar_gcd` avant tout refus.
+Le tri correct ajoute le niveau exact entre centre et indice, ou emploie une
+vraie `BallKey` multiprécision. La fixture positive `[r1,r2]` doit rester
+acceptée et `[r1,r2,r1]` doit refuser.
 
-La factory compare maintenant `Sphere.support`, `n_support`, le cardinal
-minimal recalculé, la boule engendrée par le support déclaré et ses
-sous-ensembles de cardinal `q-1`. Cela rejette les supports redondants,
-non-générateurs et les champs incohérents couverts par les nouvelles fixtures.
-Elle recopie toutefois le support déclaré dans `canonical_support` sans
-reconstruire le tie-break coordonné exigé par le contrat.
+## S3 — `INT128_MIN` atteint le pgcd
 
-### Sérialisation
+Une sphère publique synthétique avec `nx=INT128_MIN, den=1` atteint la
+négation non représentable de `INT128_MIN` dans le pgcd avant tout refus.
+UBSan signale un overflow signé.
 
-Le digest ne hache plus la structure `CriticalSphere` entière; il retire le
-padding et le `double beta`. Les entiers sont néanmoins donnés à FNV par leur
-représentation native : l'ordre des octets reste dépendant de l'architecture.
-`members_digest` fait de même. Le digest du catalogue contient bien les
-supports déclarés, les membres et leur ordre. Le digest final ne sérialise
-directement que les digests points/catalogue puis les états `principal`; il ne
-lie pas séparément les `RemovalEvidence` calculées, `maximum_order` ou les
-fermetures. FNV-1a 64 bits reste collisionnable. Byte order fixé, framing,
-version de schéma, contenu complet et SHA-256 contractuel sont donc des portes
-obligatoires.
+La factory doit borner l'ABI avant toute arithmétique et le pgcd doit prendre
+les magnitudes dans un entier non signé. Les points et les champs `base`
+doivent eux aussi être validés dans le profil u16 avant `sphere_side`,
+`miniball_of` ou la construction de clé; borner seulement les numérateurs et
+le dénominateur ne suffit pas.
 
-## P0 — reçu frais encore forgeable
+## S4 — support canonique et digest
 
-Reproduction C++20 indépendante :
+Le snapshot vérifie qu'un support déclaré est minimal et engendre la boule,
+mais le recopie dans `canonical_support`. Sur une coquille avec plusieurs
+supports minimaux, cela ne reconstruit aucun tie-break public indépendant.
 
-1. construire un `SourceProducerToken` par `std::bit_cast` depuis un octet;
-2. amputer le catalogue d'un nuage tétraédrique à un singleton;
-3. recalculer les deux digests publics;
-4. construire le reçu avec `rank_bound=point_count=4` et
-   `enumeration_completed=true`;
-5. appeler la factory.
+FNV-1a 64 bits sur l'ordre natif des octets ne constitue pas le SHA-256
+contractuel. Le digest final ne lie pas séparément toutes les
+`RemovalEvidence`, `maximum_order` et fermetures. La réparation exige une
+sérialisation little-endian champ par champ, taggée, versionnée et un digest
+du certificat complet.
 
-Le binaire temporaire `/tmp/mhgp3v_fresh_receipt_attack` termine avec le code
-zéro, `sidecar.ok()==true` et
-`closure_certified_all_orders()==true`. Cette exécution prouve une forge
-fraîche, pas un simple rejeu de digest. Le constructeur du reçu doit être privé
-et possédé par le producteur; le payload scellé doit être non trivialement
-copiable et idéalement consommé par déplacement.
+Une politique de support doit aussi rester cohérente de bout en bout. Deux
+choix exacts sont possibles :
 
-## P1 — doublon non adjacent de boule concentrique
+1. le support minimal déclaré reste une provenance autoritaire, ses evidence
+   et son fold lui sont explicitement liés, tandis que le support canonique
+   est un champ distinct de déduplication;
+2. le catalogue possédé est normalisé sur le support canonique, puis evidence,
+   digests et fold sont tous recalculés sur ce même snapshot.
 
-`ball_index_` est trié par `(centre,index_catalogue)`. La factory compare
-ensuite seulement deux entrées adjacentes de même centre avec
-`sphere_cmp_beta`. L'ordre des rayons à centre commun reste donc l'ordre du
-catalogue, pas l'ordre des niveaux.
+Publier un support canonique tout en laissant le consommateur croire qu'il
+gouverne des evidence calculées sur un autre support est un contrat ambigu.
 
-Contre-fixture exacte : nuage
-`{(1,2,0),(3,2,0),(0,2,0),(4,2,0)}` et catalogue contenant, dans cet ordre,
-la boule intérieure de rayon 1, la boule extérieure de rayon 2, puis une copie
-de la boule intérieure. Les trois records sont individuellement valides et
-saturés. L'ordre `[r1,r2,r1]` sépare les deux copies exactes; la factory rend
-pourtant `ok=1` et un refus vide.
+## Oracle borné à jamais
 
-Reproduction indépendante :
+Trois conditions composent la borne :
 
-```text
-/tmp/mhgp3v_cbac109_duplicate_ball_probe
-ok=1 refusal=
-exit=0
-```
-
-Le binaire de reproduction est hors dépôt; la fixture minimale doit devenir
-un CTest permanent. Correctif : dans chaque groupe de centre, trier aussi les
-indices par `sphere_cmp_beta`, avec l'indice seulement comme dernier tie-break,
-puis rejeter deux niveaux adjacents égaux. Une vraie clé canonique
-centre+niveau multiprécision est l'autre solution. La fixture concentrique
-positive doit continuer d'accepter `[r1,r2]`, tandis que `[r1,r2,r1]` doit
-refuser.
-
-Le champ `GeneratorCertificate.exact_ball` ne contient désormais que le
-centre. Il doit être renommé `exact_center` ou complété par le niveau afin que
-son nom ne promette pas une identité qu'il ne porte plus.
-
-## P2 — représentation hostile non refusée avant arithmétique
-
-Une sphère synthétique avec `nx=INT128_MIN` et `den=1` est extérieure au
-domaine normal produit à partir de points u16, mais la factory accepte des
-`Sphere` publiques et doit la refuser sans comportement indéfini. Sous
-UBSan, `/tmp/mhgp3v_hostile_sphere_ubsan` signale à la ligne 257 la négation
-non représentable de `INT128_MIN` et termine avec le code un. La factory doit
-valider ou normaliser son ABI d'entrée avant tout PGCD; le PGCD lui-même doit
-travailler sur des magnitudes non signées.
-
-## Le pipeline hybride reste borné à 32 points
-
-Trois faits du même binaire composent le verrou :
-
-1. la CLI refuse `smax>mhgp::kMaxRank`, soit 32 ;
-2. `HybridSourceReceipt::claims_complete_family()` exige
-   `rank_bound>=point_count` ;
+1. la CLI refuse `smax>32`;
+2. le reçu de famille complète exige `rank_bound>=point_count`;
 3. le pipeline refuse le fold si cette fermeture n'est pas certifiée.
 
-Ainsi `hybrid` et `hybrid-prefix` ne peuvent accepter que `n<=32`. Pour un run
-accepté, le pipeline construit d'abord un catalogue, puis
-`SealedSourceProducer::run` rappelle séquentiellement `flat_catalogue` sur le
-même nuage : l'énumération est effectuée deux fois. Le mode parallèle est
-explicitement refusé.
+Ainsi le mode validé ne peut accepter que `n<=32`. Il énumère en outre le
+catalogue une première fois pour le pipeline puis une seconde fois dans le
+producteur scellé, et la factory rescane le nuage pour chaque générateur afin
+de vérifier la saturation. Ce coût `O(G*n)` et cette double énumération sont
+acceptables pour un oracle borné, jamais pour `warm_e2e` à 50 k.
 
-Ce design est cohérent comme oracle borné qui recalcule son autorité. Les
-commentaires et documents ne doivent plus l'appeler chemin public ou candidat
-50 k. Le futur producteur streamé aura son propre domaine complet, ses
-identités count/fill et un reçu qui ne dépend pas de `smax>=n`.
+Le futur producteur streamé doit avoir son propre domaine complet, une
+identité count/fill/consume, un statut terminal sans censure et des reçus de
+tâches rejouables. Il ne peut hériter l'autorité de la seule condition
+`smax>=n`.
 
-## Sonde q2 concurrente : périmètre d'audit
+## Critère de réception d'un successeur
 
-Fichier non committé audité : `prototype/pair_selfjoin_probe.cpp`, SHA-256
-`ee44bc469645adcdd86dd92f25698c2ea081d820148278fc83f84726138eba0c`. Cette sonde
-partitionne exactement le self-produit non ordonné d'un kd-tree médian CPU.
-Pour un bloc de
-paires `(A,B)`, elle cherche dix points distincts certifiés strictement dans
-toutes les boules diamétrales du bloc par la borne exacte
-`sup (w-x) dot (w-y)<0`. Un bloc ainsi certifié est H0-inerte pour q2; les
-autres blocs sont divisés jusqu'aux microtuiles. L'identité
-`pruned_pairs+microtile_pairs=C(n,2)` ferme la couverture combinatoire.
-
-Le fichier live a depuis divergé de cette empreinte. Les constats et mesures
-ci-dessous portent sur `ee44bc...`; le nouveau contenu reste non reçu tant
-qu'il n'est pas stabilisé, repincé et rejoué.
-
-Le principe de prune est exact et fail-closed. Il ne constitue encore ni une
-source q2 ni une admission : les microtuiles ne calculent pas profondeur,
-coquille, `BallKey` ou `BallActivation`, et la recherche de témoins peut
-reparcourir l'arbre pour chaque état.
-
-Sa portée est strictement q2. Dix points dans la boule diamétrale d'une paire
-ne prouvent pas que cette paire est une mauvaise ancre d'un support q3 ou q4 :
-ces points peuvent se trouver hors de la sphère plus grande dont le centre est
-décalé dans le plan médiateur. Les paires prunées de cette lane ne peuvent
-donc pas être retirées d'une future source d'ancres supérieures.
-
-Fixture u16 permanente proposée : `a=(50,100,100)`, `b=(150,100,100)` et
-`z=(100,160,100)`. `ab` est le diamètre du triangle aigu et son circumcentre
-est `(100,655/6,100)`. Ajouter les dix témoins
-`(51,95,100),(149,95,100),(51,94,100),(149,94,100),(51,93,100),`
-`(149,93,100),(52,92,100),(148,92,100),(51,92,100),(149,92,100)`.
-Ils sont tous strictement dans la boule diamétrale de `ab`, mais strictement
-hors du cercle q3. La lane q2 doit donc pruner `ab`, tandis que toute source q3
-doit conserver la même paire comme ancre du support propre `{a,b,z}`.
-
-Deux portes manquent déjà dans le prototype initial :
-
-- `--verify-bruteforce` compare seulement le nombre de paires non inertes au
-  nombre de paires en microtuiles. Cette inégalité ne prouve pas l'inclusion :
-  une paire non inerte prunée pourrait être compensée par une paire inerte
-  conservée. Le rejeu doit identifier chaque paire ou chaque bloc pruné et
-  certifier directement ses dix témoins.
-- aucun CTest ou mutant n'est encore enregistré pour la partition du
-  self-produit, le contact `dot==0`, le dixième témoin, le dernier bloc, les
-  coordonnées dupliquées et le budget moins un.
-
-La sonde est automatiquement NO-GO si la majorité des paires atteint les
-microtuiles, mais ce seuil de 50 % n'est pas un budget de latence. Même 1 %
-représente 12 499 750 paires à 50 k, avant census, sort et fold. L'admission
-doit convertir chaque compteur en octets et mesurer le p95 chaud avec
-répétitions; un p10 déjà hors budget ne sert que de réfutation.
-
-Les premiers runs Release locaux confirment que l'implémentation n'est pas la
-route chaude :
-
-| famille | n | visites de nœuds témoins | paires en microtuiles | part | temps sonde |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| terrain | 1 600 | 4 372 224 | 110 958 | 8,67 % | 0,450 s |
-| terrain | 2 400 | 20 855 916 | 144 986 | 5,04 % | 2,066 s |
-
-Ces reruns isolés ne sont ni G4 ni `warm_e2e`, mais la sonde dépasse déjà une
-seconde à 2 400 points. L'arbre est un kd-tree médian CPU construit par
-`nth_element`, pas un LBVH résident. Chaque état relance la recherche de
-témoins depuis la racine. `witness_visits` ne compte pas les tests ponctuels
-dans les feuilles, `frontier_max` n'est jamais renseigné et aucun compteur
-d'octets/high-water n'est calculé.
-
-Des mesures complémentaires à `n=2400`, un thread et `leaf=8`, sous charge
-concurrente, donnent 4,39 % de paires résiduelles sur scanline simple et
-14,15 % sur uniforme, pour respectivement 17 667 775 et 60 454 402 visites.
-Le run terrain `n=50 000` n'a produit aucun résultat sous un timeout de
-60 secondes. Ce timeout refuse l'ordonnanceur CPU courant pour le jalon sous
-la seconde; il ne prédit pas un futur kernel G4.
-
-## Portes demandées
-
-1. Tuer la forge fraîche, `[r1,r2,r1]` et `INT128_MIN`, puis réauditer la
-   frontière de type et l'index de boules exactes.
-2. Reconstruire le tie-break du support, remplacer FNV dans toute décision de
-   confiance et lier le certificat complet, pas seulement les états
-   principaux.
-3. Documenter le pipeline hybride comme oracle `n<=32`, avec double
-   énumération, jusqu'à l'arrivée d'une vraie source streamée.
-4. Rendre le différentiel q2 non compensable et ajouter ses fixtures/mutants.
-5. Mesurer la sonde q2 sur les trois familles avant tout CUDA. Si les
-   microtuiles ou les visites de témoins restent quadratiques, abandonner ce
-   prune comme route produit et le conserver comme oracle.
+- construction privée et anti-forge réellement exercée;
+- domaine u16 vérifié pour points, bases et représentation avant géométrie;
+- index injectif par centre et niveau exact;
+- politique unique de support, avec evidence et fold cohérents;
+- SHA-256 complet sur sérialisation canonique et vecteurs FIPS;
+- tests hostiles sous UBSan et mutants non compensables;
+- classification explicite `oracle_cpu_borne_n_le_32`, jamais source 50 k.
 
 GCP non utilisé.

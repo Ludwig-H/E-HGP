@@ -181,6 +181,11 @@ int main(int argc, char** argv) {
   // jeton) enumere lui-meme et scelle son recu, la factory certifie ou
   // refuse, et le FOLD recoit le sidecar type, jamais le Catalogue brut.
   // `prefix-all` reste relatif et ne l'exige pas.
+  //
+  // PERIMETRE A JAMAIS (audit delta cbac109) : ces modes sont un ORACLE
+  // BORNE n <= 32 — fermeture ssi smax >= n, interface bornee a smax <= 32,
+  // catalogue enumere DEUX fois, producteur parallele refuse. Jamais un
+  // « chemin public », jamais un candidat 50 k.
   std::vector<mhgp3v::ValidatedHybridSidecar> sidecar_slot;
   if (join_mode == 4 || join_mode == 5) {
     if (catalogue_threads > 1) {

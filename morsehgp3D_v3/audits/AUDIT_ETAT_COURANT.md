@@ -8,220 +8,245 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Fraîcheur et périmètre
+## Fraîcheur
 
-`HEAD` à l'ouverture de cet audit :
-`cbac109a09c2575cdf875b19de1570265bd5bf08`.
+`HEAD` audité : `1b4750c72bef65cd6515ad877bfb3eab1784d0c4`.
 
-Le worktree est concurrent et non propre. Il ajoute notamment une sonde q2 et
-des mises à jour documentaires; ces changements ne sont pas confondus avec le
-commit. Le sidecar committé est réaudité dans
-[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md), avec ses empreintes exactes. Toute nouvelle
-empreinte exige un nouveau rejeu avant réception.
+Le worktree est concurrent et non propre. La baseline self-join q2 appartient
+au commit `8a39c53f41c1964b12d38b0129d7e8a0a5cc94e7`; le delta courant modifie q2,
+le sidecar, son pipeline et CMake. Il n'est pas confondu avec `HEAD`.
+
+Empreinte du rejeu ciblé courant :
+
+| objet | SHA-256 |
+| --- | --- |
+| `prototype/pair_selfjoin_probe.cpp` | `7eaa9c34c684ad9d9dc27e0082726efb47a04274a2d9c5a2c55e30a49963dd38` |
+| `CMakeLists.txt` | `e28a8977c36d89324780b321b27ce0afed188d51c9eb1b374bc5b66bb60ebe64` |
+| binaire Release q2 local | `a447be4fc02dcd53da460eaed257cfd74b505eae83e862c4eb335032def668fe` |
+| `prototype/validated_hybrid_sidecar.hpp` | `89bd0ff17cf900550fc5493f1651290c3b92d9f4db1c3ec1a4403e7b92956242` |
+| `prototype/sidecar_factory_gate.cpp` | `79b216a41408e6c132e506ab04f4aa51060e2f2ba19107450510a2a618047899` |
+| binaire Release sidecar local | `731aa86d7eb7f6b961347b12248d68fd46e448ed138f6a5f5491049baa26866d` |
+
+Une modification de l'un de ces objets invalide le rejeu correspondant. Ce
+fichier est l'unique autorité mutable du statut live; les audits épinglés
+restent autorités de leurs seuls snapshots.
 
 ## Verdict
 
-Le contrat n'est pas rempli. La cible spécifiée principale est un p95
-`warm_e2e < 100 ms` à 50 000 points et `K=10`; la seconde est la cible
-secondaire et le jalon immédiat demandé. Aucun backend public exact n'est
-qualifié.
+Le contrat n'est pas rempli. À 50 000 points et `K=10`, la cible principale
+est un p95 `warm_e2e<100 ms`; `warm_e2e<1 s` est la cible secondaire et le
+jalon immédiat demandé. Aucun backend public exact n'est qualifié.
 
-Le verrou dominant est la source géométrique exacte. Les reçus G4 existants
-n'ont formé aucun tuple : ils mesurent seulement top-t, dilations et comptes.
-Le pipeline borné peut comparer un fold relatif à une table fournie; il ne
-prouve pas que cette table contient toutes les activations requises.
+Le delta q2 ferme localement sa porte de correction logicielle sur l'empreinte
+ci-dessus : ledger paire par paire, inclusion non compensable, fixtures,
+mutants, budgets et planchers passent `22/22` CTests ciblés. Il ne ferme pas la
+porte de parcimonie. La sortie précoce ne retire que 0,23 à 0,39 % des visites
+de nœuds mesurées; le parcours continue à rescanner presque tout l'arbre témoin
+pour chaque état.
+
+Le verrou produit demeure la source géométrique exacte et parcimonieuse. q2 ne
+produit encore ni census fermé ni `BallActivation`; q3/q4 n'ont pas de source
+mesurée à 50 k; resolver et fold bout en bout restent ouverts. Les corrections
+du sidecar sécurisent un oracle borné et n'ont aucun effet sur ces masses.
+
+## Contrats de sortie
 
 Deux contrats restent strictement distincts :
 
 1. Gamma/v2 exhaustif, avec facettes, cofaces, incidences silencieuses et
-   applications verticales ;
-2. le candidat `hgp_reduced_normalized_h0_v3`, limité aux composantes
-   horizontales et unions de `PointId`, avec quotient certifié des blocs H0
-   inertes.
+   applications verticales;
+2. `hgp_reduced_normalized_h0_v3`, candidat horizontal avec niveaux,
+   composantes et unions exactes des `PointId`, après quotient certifié des
+   blocs H0 inertes.
 
-Le second n'est encore ni spécifié comme produit ni reçu. Une omission licite
-pour ce quotient ne peut jamais être présentée comme une source Gamma complète.
+Le second n'est pas reçu comme produit. Les verticales sont hors de ce contrat
+horizontal et constituent une porte séparée. Une tombstone H0 ne prouve jamais
+l'absence d'un support ou d'une incidence Gamma.
 
-## Livraisons reçues et limites
+## État des cinq portes du delta
 
-- Le fast path principal des lots ex æquo a été reçu au commit `84ba459` sous
-  la garde `q<=k+1`, avec lookups stricts pré-lot et fallback pour `q>k+1`.
-  Cette réception est relative à une table complète fournie; elle ne crée pas
-  sa propre preuve de fermeture.
-- `prefix-all` reste un juge exact du fold relativement à la même
-  `GeneratorTable`. Il ne certifie jamais la complétude géométrique de la
-  table.
-- La porte `k=1` compare les partitions strictes et fermées au single linkage
-  porté par un EMST exact. Elle autorise l'étude d'une route EMST dédiée; elle
-  ne qualifie pas encore un producteur G4 sous la seconde.
-- Les commits `3c13cbd` et `4b9d9a1` reçoivent les mesures mass-only et leurs
-  sorties brutes, pas une lane de production.
-- Le commit `cbac109` ferme plusieurs défauts du sidecar `9483b1c`, mais ne le
-  rend pas recevable : le reçu reste forgeable, l'unicité des boules exactes
-  reste fausse, une entrée hostile déclenche UBSan et le digest de confiance
-  reste incomplet. Son census `O(G*n)` en fait au mieux un oracle CPU borné
-  après correction.
+| porte | état observé | verdict |
+| --- | --- | --- |
+| forge `bit_cast`, `[r1,r2,r1]`, ancien `INT128_MIN` | constructeur privé/non trivial, tri `(centre,niveau,index)`, pgcd sur magnitudes et garde i128 | les trois contre-exemples initiaux sont fermés; le domaine hostile complet reste ouvert sur `P3` et `Sphere.base` |
+| support canonique et SHA-256 | reconstruction canonique, SHA-256 little-endian taggé, framing et digest étendu | non reçu : evidence et fold consomment encore le support déclaré; reçu producteur incomplet |
+| pipeline hybride borné | chemin validé explicitement classé oracle `n<=32` | classement reçu, aucune lane 50 k |
+| différentiel q2 non compensable | fate ledger, quatre fixtures, six injections, duplication compensée, budgets et planchers | reçu localement sur l'empreinte ci-dessus, `22/22`; pas encore un snapshot committé |
+| compteurs q2 | quatre familles à 2 400 et terrain à 5 000 rejoués hors bruteforce | mesure locale exploitable pour les masses; route actuelle non admise sous la seconde |
 
-## Sidecar `cbac109` : corrections et blocages
+## Self-join q2 : exactitude
 
-Les corrections suivantes sont réelles : le fold reçoit le sidecar typé,
-aucun carré de niveau n'est formé dans `i128`, le support minimal est
-revérifié et le digest ne lit plus la structure `CriticalSphere` entière.
+L'audit de la baseline est
+[`AUDIT_Q2_SELFJOIN_8A39C53.md`](AUDIT_Q2_SELFJOIN_8A39C53.md).
+Le prune local est exact : le sup AABB de
+`(w-x) dot (w-y)` est calculé sur les extrêmes, les contacts descendent et dix
+`PointId` distincts hors extrémités donnent `p+q>=12`. Cela autorise seulement
+une tombstone q2 du quotient horizontal à `K=10`.
 
-Les blocages d'exactitude restent :
+Le commit `8a39c53` vérifiait seulement des comptes compensables. Le delta
+courant tient un sort triangulaire par paire à petit `n`, refuse omission et
+double affectation, et vérifie que toute paire avec moins de dix témoins arrive
+en microtuile. Les gates couvrent :
 
-1. le token vide est trivialement copiable par `std::bit_cast`; le
-   constructeur public du reçu scelle alors un catalogue amputé avec ses
-   digests et certifie toutes les fermetures ;
-2. l'index trie les boules de même centre par indice, puis compare seulement
-   les niveaux voisins. `[r1,r2,r1]` accepte donc deux handles identiques ;
-3. `nx=INT128_MIN, den=1` atteint `-INT128_MIN` dans `sidecar_gcd`
-   avant tout refus ;
-4. le support minimal est valide, mais son tie-break canonique n'est pas
-   reconstruit ;
-5. les entiers sont pliés dans l'endianness native avec FNV-1a 64 bits, sans
-   schéma ni framing contractuel. Le digest catalogue lie le support déclaré,
-   mais le digest final ne lie pas séparément les preuves de suppression,
-   `maximum_order` ou les fermetures.
+- terrain et multi-écho avec balayage indépendant;
+- contact, exactement neuf témoins, coordonnées dupliquées et portée q2/q3;
+- omissions d'un enfant croisé, de `R,R` et de la dernière microtuile;
+- seuil 9, contact compté comme strict et duplication compensée;
+- `max_states`, sa frontière exacte moins un, et planchers anti-vacuité;
+- codes de succès et de refus exacts.
 
-Le pipeline hybride ne peut par ailleurs accepter que `n<=32`, car il exige
-`smax>=n` tout en refusant `smax>32`. Il énumère deux fois le catalogue et
-refuse le producteur parallèle. Ce comportement convient à un oracle borné,
-pas à la route 50 k.
+Commande et résultat après régénération CMake :
 
-## Ce que la G4 a effectivement mesuré
+```bash
+ctest --test-dir build/v3 --output-on-failure -R '^(mhgp3v_pair_selfjoin|mhgp3v_sidecar)'
+```
 
-Sur trois familles et deux pas, les temps count-only vont de 0,174 à
-29,153 secondes. Après le prune d'axe :
+Résultat global : `28/28`; q2 `22/22`, sidecar `6/6`.
 
-| lane | masse minimale | masse maximale | admission |
-| --- | ---: | ---: | --- |
-| q2 | 465 371 500 | 2 862 879 000 | non admise |
-| q3 | 14 667 530 000 | 131 762 100 000 | rouge |
-| q4 | 330 437 400 000 | 9 968 861 000 000 | rouge |
+Le nom `P1a` persiste dans des commentaires source/CMake alors qu'il désignait
+l'ancien center-cover. La nomenclature non ambiguë à conserver est
+« self-join q2 ».
 
-Les réductions observées atteignent 136,3x sur R4 terrain et 584,3x sur R4
-multiecho au pas 6. Aucun reçu ne porte 750x sur R3. q2 est seulement la lane
-la moins rouge : sans octets, fill, census, fold et temps bout en bout, le mot
-« admissible » serait faux.
+## Self-join q2 : coût après sortie précoce
 
-Le pinceau q4 est également rouge. Dans une cellule q4 survivante de taille
-`m_C`, même le schéma canonique qui prend les trois plus petits identifiants
-doit considérer `C(m_C-1,3)` triples. Comme
-`C(m_C,4)=m_C*C(m_C-1,3)/4`, les reçus au pas 6 imposent avant toute requête
-plus de `2,74e9` triples sur `terrain`, `1,063e10` sur scanline simple et
-`1,020e9` sur multi-écho. Ces bornes utilisent la dilation q4 et non la masse
-R3 d'une autre lane.
+Mesures Release, un thread, seed `20260810`, feuilles de taille 8, sans
+`--verify-bruteforce`. Les compteurs sont les données utiles; le chrono est une
+phase locale unique, sans chauffe, répétition ni p95, et n'est pas
+`warm_e2e`.
 
-## Lemme exact de cellule, avec sa vraie portée
+| famille, n | états | visites nœuds | tests ponctuels | paires terminales | phase locale |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| terrain, 2 400 | 24 186 | 20 855 916 | 48 301 083 | 144 986 | 0,789 s |
+| scanline simple, 2 400 | 20 600 | 17 667 775 | 40 919 884 | 126 516 | 0,727 s |
+| multi-écho, 2 400 | 32 984 | 29 024 422 | 67 314 546 | 204 657 | 1,056 s |
+| uniforme, 2 400 | 67 668 | 60 454 402 | 140 290 100 | 407 313 | 2,419 s |
+| terrain, 5 000 | 52 198 | 89 691 896 | 217 489 879 | 323 749 | 3,756 s |
 
-Pour une cellule half-open `C`, utiliser sa fermeture dans les bornes. Pour un
-point `x`, noter `l_C(x)` la distance carrée minimale à cette fermeture et
-`u_C(x)` la distance carrée maximale. Pour la lane `q`, poser
-`t_q=K+2-q`, choisir canoniquement les `t_q` plus petites valeurs `u_C`, poser
-`R_q(C)` égal à leur maximum et
-`A_q(C)={x : l_C(x)<=R_q(C)}`.
+Les états et masses terminales sont inchangés, comme attendu. Par rapport au
+parcours committé, la sortie précoce réduit les visites de seulement 0,380 %,
+0,352 %, 0,379 % et 0,386 % sur les quatre familles à 2 400, puis 0,226 % sur
+terrain à 5 000. Le problème n'était donc pas principalement le travail après
+le dixième témoin : le dixième témoin est acquis tard.
 
-Pour une boule de support propre positif `q` dont le centre owner est dans
-`C` :
+À 2 400 points, chaque état visite encore environ 858 à 893 des 1 023 nœuds de
+l'arbre, soit 84 à 87 %. À 5 000, terrain visite environ 1 718 des 2 047 nœuds
+par état, soit 84 %. Les 217 millions de tests ponctuels à 5 000 confirment que
+la pile fixe seule ne changera pas l'ordre de grandeur.
 
-- si `beta>R_q(C)`, les `t_q` témoins sont strictement intérieurs et
-  `p+q>=K+2`; le théorème 4.2 rend le bloc inerte seulement pour le quotient
-  H0 normalisé ;
-- si `beta<=R_q(C)`, tout le saturé fermé, donc support, intérieur et coquille,
-  appartient à `A_q(C)`.
+Le pire cas reste `Theta(n^2)` états ou résidu fois `Theta(n)` recherche et
+census, donc `Theta(n^3)`. Le cap `--max-states` classe ce binaire comme
+falsificateur censuré, même lorsqu'il n'est pas atteint. Il ne qualifie jamais
+un temps produit.
 
-L'égalité doit rester dans la seconde branche. Une séparation stricte de la
-fermeture de `C` et de `conv(A_q(C))` exclut donc une activation non inerte de
-la seconde branche. Elle ne prouve jamais qu'aucun support n'existe : la
-contre-fixture entière de la réponse pont conserve précisément un support dans
-la branche inerte.
+### Prochaine expérience q2
 
-Une subdivision est monotone : pour un enfant `C'`,
-`A_q(C')` est inclus dans `A_q(C)`. Cela permet de réutiliser les listes, mais
-ne fournit aucune borne de travail. Une cosphère massive peut conserver
-`|A_q(C)|=Theta(n)` à toute profondeur et faire tester `Theta(n^q)` vues pour
-une seule `BallKey`. Toute profondeur maximale exige un fallback exhaustif ou
-un refus explicite; jamais un drop. La route cellule reste donc un diagnostic
-branch-and-bound, pas encore le chemin industriel.
+1. Ajouter l'infimum AABB exact `L4` décrit dans l'audit épinglé : `L4>=0`
+   retire immédiatement un nœud sans témoin strict, tandis que `U4<0` crédite
+   le nœud entier. Les deux bornes sont monotones sous raffinement; les
+   contacts restent au census fermé.
+2. Transmettre au plus neuf identifiants déjà stricts du parent. Ils restent
+   stricts et hors extrémités sous restriction; un scalaire sans IDs n'est pas
+   un reçu.
+3. Réutiliser la pile et chercher seulement les témoins manquants. Mesurer
+   séparément le gain de visites et celui d'allocation.
+4. Publier sorties précoces, IDs hérités/nouveaux, splits par type, tests
+   ponctuels, octets, allocations, high-water et travail terminal.
+5. Comparer sur les mêmes entrées à Morton/LBVH + coupe stricte Yao48 +
+   classifieur terminal exact et census fermé, architecture déjà décrite dans
+   [`CATALOGUE_PAIRES_DIAMETRALES_EXACT.md`](../../docs/math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md).
 
-## Direction de source à tester
+Le self-join reste un oracle indépendant ou un second prune. Il ne devient pas
+la source q2 produit sur la seule baisse du pourcentage de microtuiles.
 
-La sonde concurrente q2 partitionne toutes les paires non ordonnées par blocs
-d'un arbre AABB médian. Dix témoins communs stricts certifient qu'un bloc
-entier est H0-inerte pour q2; le ledger ferme
-`pruned+microtile=C(n,2)`. Ce principe est exact, mais le différentiel
-bruteforce compare seulement des comptes compensables et aucun CTest ne porte
-la cible. À `n=2400`, les runs locaux visitent 17,7 à 60,5 millions de nœuds
-témoins selon la famille; un run terrain `n=50 000, leaf=64` n'a pas terminé
-dans sa fenêtre locale mono-thread de 60 s. Ces diagnostics ne sont ni G4 ni
-`warm_e2e`. Le prune ne fournit pas la source d'ancres q3/q4.
+## Sidecar : blocages restants
 
-L'ancien prototype `center-cover` a dépassé 600 secondes à 50 k sans JSON. Il
-est rejeté comme implémentation. La grille de cellules et son plan séparateur
-restent des diagnostics mass-only.
+Les `6/6` CTests ciblés valident les fixtures présentes; ils ne couvrent pas les
+frontières suivantes :
 
-### Ordre un
+1. la garde ABI borne `nx,ny,nz,den`, mais pas chaque coordonnée `P3` ni
+   `Sphere.base`. Une coordonnée `LLONG_MIN/MAX` peut atteindre une soustraction
+   signée dans `sphere_side`; un `base` hostile atteint `base*den`. Le profil
+   exige `[0,65535]` avant toute géométrie ou clé, avec fixtures UBSan;
+2. `GeneratorCertificate` publie le support canonique reconstruit, mais les
+   `RemovalEvidence` bouclent sur `sphere.support` et le fold validé consomme le
+   catalogue brut. Il faut rejeter une déclaration non canonique, ou normaliser
+   le catalogue possédé et recalculer evidence, digests et fold sur ce seul
+   snapshot;
+3. le reçu lie points et catalogue, mais pas encore contrat/SHA du producteur,
+   profil, schéma et identité terminale complète des tâches. Un digest lie des
+   données; il ne prouve pas leur complétude;
+4. le déplacement du reçu copie son état sans invalider la source, contrairement
+   au commentaire « consommé »;
+5. le self-test SHA est appelé par la gate, pas par la factory contrairement au
+   commentaire du header.
 
-Router `k=1` vers un EMST/Boruvka exact, avec distances u16 exactes, lots
-d'égalité atomiques et différentiel par partitions à chaque niveau. Cette
-route évite le catalogue Morse et toute mosaïque d'ordre supérieur pour
-l'ordre un.
+Le pipeline exige `smax>=n` et refuse `smax>32`; il reconstruit le catalogue et
+effectue un census `O(G*n)`. Après correction, il reste un oracle CPU borné à
+`n<=32`, jamais la source chaude 50 k.
 
-### Supports q2
+## Source q3/q4
 
-Une paire `(x,y)` non inerte possède au plus `K-1=9` points dans l'intérieur
-de sa boule diamétrale. Le prédicat exact est
-`(z-x) dot (z-y)<0`. Un produit dual-tree de boîtes peut supprimer un produit
-de paires seulement lorsqu'il certifie dix témoins distincts strictement
-intérieurs pour toutes ses paires. Les feuilles restantes calculent le compte
-exact, la coquille, l'owner et la `BallKey`, une seule fois par paire non
-ordonnée.
+Deux certificats mathématiques complémentaires sont reçus :
 
-Cette lane ne construit ni cellules de centres, ni tableau global de paires.
-Elle reste output-sensitive avec un pire cas quadratique : son premier jalon
-est donc une sonde count-only publiant produits visités, produits prunés,
-paires terminales, témoins, doublons, octets et high-water. Aucun chrono de
-microkernel ne remplace ces masses.
+- le cœur universel de Jung, avec prédicats polynomiaux exacts, certifie neuf
+  témoins q3 ou huit q4 pour toutes les sphères admissibles d'une vraie arête
+  diamètre;
+- la profondeur fermée de demi-boule borne toute sphère passant par une paire,
+  sans hypothèse de diamètre, et s'applique d'abord comme filtre terminal.
 
-Ce prune est strictement q2. Une paire dont la boule diamétrale contient dix
-témoins peut rester le diamètre d'un support q3 ou q4 dont la sphère décalée
-ne contient aucun de ces témoins. Retirer les paires prunées de la source
-d'ancres supérieures serait donc faux.
+Les preuves et corrections sont dans
+[`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md) et
+[`REPONSE_AUDIT_ANCRES_PROFONDEUR_DEMIBOULE_20260811.md`](REPONSE_AUDIT_ANCRES_PROFONDEUR_DEMIBOULE_20260811.md).
+q2 utilise le total diamétral; q3/q4 peuvent utiliser la profondeur. Leurs
+résiduels sont incomparables.
 
-### Supports q3 et q4
+Une machine de blocs peut partager le LBVH et la partition des paires, mais
+q2/q3/q4 gardent trois sorts et trois ledgers indépendants. Le falsificateur
+mesure `cœur seul`, `profondeur seule` et `combiné`. Le certificat sectoriel de
+bloc pour la profondeur n'est pas reçu; toute ambiguïté descend.
 
-Choisir comme ancre canonique la plus petite paire parmi les diamètres du
-support positif canonique, après census et RLE de la boule. Si `D` est sa
-longueur, le centre d'un support q3 positif appartient
-au disque du plan médiateur défini par `h^2<=D^2/12`; pour q4, le théorème de
-Jung en dimension trois donne `h^2<=D^2/8`. Dans ce plan, chaque autre point
-définit une droite d'égalité et un demi-plan d'intérieur. Les q4 pertinents
-sont des sommets de faible profondeur. En position générale, les bornes
-d'arrangements shallow peuvent retirer le carré local si le constructeur bâtit
-directement ces niveaux. Elles ne couvrent pas encore les parallèles,
-concurrences, ex æquo et grandes coquilles; former d'abord toutes les
-`C(m_e,2)` intersections est un NO-GO.
+Après les ancres, q3 produit au plus un centre par troisième point dans
+`h^2<=D^2/12`. q4 construit directement les niveaux de profondeur au plus 7
+dans `h^2<=D^2/8`, sans former toutes les intersections. La couverture est
+conditionnellement exacte; la parcimonie globale des ancres et de la somme des
+arrangements reste à mesurer.
 
-Cette piste n'est pas encore une architecture reçue. Il manque une source
-sparse complète des ancres, le constructeur exact des dégénérescences et une
-admission globale mesurée.
+## Reçus G4
+
+Les sorties mass-only reçues sont
+[`cell_50k_raw.txt`](../receipts/g4_massonly_20260811/cell_50k_raw.txt) et
+[`mask_scale_raw.txt`](../receipts/g4_massonly_20260811/mask_scale_raw.txt).
+Après prune d'axe, elles conservent jusqu'à 2,86 milliards de tuples q2,
+131,76 milliards q3 et 9,97 billions q4. Aucun tuple, census, fold ou payload
+n'a été formé; les temps count-only ne sont pas des temps de source.
+
+Le pire cas exact peut produire `Omega(n^2)` paires q2. Le SLO est donc
+sensible au profil et à la sortie, avec refus atomique; il n'est pas une
+promesse universelle sur toute entrée u16.
 
 ## Ordre des prochaines portes
 
-1. Tuer la forge fraîche, `[r1,r2,r1]` et `INT128_MIN`; reconstruire le
-   tie-break du support, remplacer le digest de confiance et recevoir le
-   sidecar comme oracle borné `n<=32`, jamais comme source 50 k.
-2. Recevoir la sémantique exacte du prune de cellule : « branche
-   `beta<=R` vide », jamais « aucun support », avec contact et
-   contre-fixture haute.
-3. Recevoir la sonde q2 avec un rejeu non compensable de chaque bloc pruné,
-   puis convertir microtuiles, visites et octets en budget mesuré.
-4. Prouver une source sparse complète des ancres q3/q4 et recevoir son
-   constructeur shallow sur des oracles bornés; abandonner le triple-pencil
-   global et tout terme quadratique construit avant prune.
-5. Recevoir `BallActivation`, le resolver silencieux et le quotient H0 contre
-   Gamma exhaustif à petit `n`, puis seulement mesurer source+fold+payload.
-6. Porter sur G4 uniquement les routes admises et publier `warm_e2e` complet.
+1. Stabiliser le delta q2 et conserver son reçu `22/22`; remplacer la
+   nomenclature `P1a` dans les commentaires source.
+2. Implémenter l'héritage de neuf IDs ou basculer vers Yao48/LBVH; rejouer les
+   compteurs à `12 500/25 000/50 000` avant tout port CUDA.
+3. Fermer les coordonnées/base hostiles et l'unicité du support consommé par le
+   sidecar; compléter le reçu producteur et recevoir seulement l'oracle `n<=32`.
+4. Prototyper cœur de Jung et profondeur fermée q3/q4, avec fate ledger et
+   oracle exhaustif borné, sans boucle ancre--nuage matérialisée.
+5. Recevoir census fermé, `BallActivation`, resolver latent et fold horizontal
+   contre Gamma exhaustif à petit `n`.
+6. Porter sur G4 uniquement les primitives admises, puis mesurer build, source,
+   census, resolver, fold, payload et p95 `warm_e2e` à 12,5 k, 25 k et 50 k.
+
+Une insuffisance de ressource refuse atomiquement. Aucun tableau global de
+tuples, paires, cellules, faces, cofaces ou incidences n'entre dans le chemin
+produit.
+
+## Validation documentaire
+
+Les liens locaux des documents live et les règles LaTeX v3 ont été contrôlés
+séparément. `python tools/check_docs.py` passe mais ne parcourt pas
+`morsehgp3D_v3/`; `python tools/check_implementation_status.py` passe et aucun
+statut formel n'a été modifié.
 
 GCP non utilisé.

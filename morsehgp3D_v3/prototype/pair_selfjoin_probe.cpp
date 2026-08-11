@@ -1,5 +1,5 @@
 // MorseHGP3D v3 — LA SONDE P1a : SELF-JOIN LBVH DES PAIRES, LANE q2
-// (PROPOSITION §7, audit S10).
+// (PROPOSITION §7, audit S10, portes 4-5 de AUDIT_DELTA_CBAC109).
 //
 // LA MACHINE DE BLOCS : pour un noeud binaire N de fils L,R, les paires
 // internes se decomposent en trois ensembles disjoints — internes a L,
@@ -19,23 +19,43 @@
 // de A ou B peut etre une extremite de paire), certifient p >= 10 donc
 // p+q >= 12 = K+2 : le bloc entier est H0-inerte a la lane q2 (theoreme
 // 4.2). Zero signifie shell et ne compte pas ; un sup traversant zero
-// conserve le noeud et descend.
+// conserve le noeud et descend. La recherche part de la racine et s'arrete
+// des le seuil atteint — l'heritage de frontiere a ete essaye, mesure et
+// RETIRE (troncature irreversible dans le sous-arbre : 52 puis 82 % de
+// microtuiles a 2400/12000 contre 5,0 et 1,5 % depuis la racine), et le code
+// mort de frontiere (parametres confirmed/frontier, cap 96) est SUPPRIME
+// (constat de l'audit delta : `process` rappelait toujours
+// `refine_frontier(a,b,0,{0})` sans consommer la frontiere rendue).
 //
 // C'EST UN FALSIFICATEUR MASS-ONLY : aucune ancre formee, aucun census,
 // aucune BallActivation. Il publie les autorites de parcimonie de la porte
-// §7.4 : etats, visites temoin, paires prunees, microtuiles, ancres
-// residuelles, files, profondeur, temps chaud. NO-GO si la majorite des
-// paires atteint les microtuiles — la sonde le DIT, elle ne le cache pas.
-// `--verify-bruteforce 1` recompte par balayage complet que chaque paire
-// prunee est reellement inerte (soundness de l'implementation) et que le
-// ledger ferme.
+// §7.4 : etats, visites temoin, tests ponctuels, paires prunees,
+// microtuiles, profondeur, pile, octets, temps chaud. NO-GO si la majorite
+// des paires atteint les microtuiles — la sonde le DIT, elle ne le cache
+// pas.
 //
-// Codes : 0 OK ; 1 identite/soundness violee ; 2 CLI ; 3 budget/etats.
+// LE DIFFERENTIEL NON COMPENSABLE (porte 4) : `--verify-bruteforce 1` tient
+// un LEDGER DE FATE par paire — chaque paire non ordonnee recoit exactement
+// UN sort (prunee ou microtuile, multiplicite un ; l'identite agregee
+// C(n,2) est compensable, une omission et un doublon de meme masse
+// s'annulent) — puis certifie par balayage exact que TOUTE paire non inerte
+// (moins de dix temoins stricts) est en microtuile. Aucun compte agrege ne
+// remplace cette inclusion.
+//
+// PORTEE q2 SEULEMENT : dix temoins dans la boule diametrale d'une paire ne
+// prouvent RIEN sur les supports q3/q4 dont la sphere est decalee dans le
+// plan mediateur — la fixture `q2-vs-q3-scope` grave la paire prunee q2 qui
+// RESTE l'ancre du support propre q3 {a,b,z}. Les paires prunees q2 ne
+// sortent JAMAIS d'une source d'ancres superieures.
+//
+// Codes : 0 OK ; 1 identite/soundness/plancher viole ; 2 CLI ; 3
+// budget/NO-GO ; 4 mutant tue (--inject).
 #include <algorithm>
 #include <charconv>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
@@ -148,29 +168,51 @@ inline i64 point_witness_sup(const mhgp::P3& w, const Node& a, const Node& b) {
 
 struct ProbeReceipt {
   i64 states = 0;
-  i64 witness_visits = 0;
+  i64 pruned_states = 0;
+  i64 witness_visits = 0;        // noeuds visites par la recherche de temoins
+  i64 witness_point_tests = 0;   // tests ponctuels dans les feuilles (porte 5)
   i64 pruned_pairs = 0;
   i64 microtile_pairs = 0;
   i64 microtile_states = 0;
-  i64 frontier_max = 0;
-  i64 frontier_truncations = 0;
   i64 depth_max = 0;
+  i64 witness_stack_high_water = 0;   // pile de la recherche (elements)
 };
+
+// LES INJECTIONS (porte 4) : chacune doit mourir par le ledger de fate ou
+// l'identite, jamais par un compte agrege compensable.
+struct ProbeInjections {
+  bool skip_half_block = false;     // partition croisee : le fils droit est perdu
+  bool drop_rr = false;             // partition interne : (R,R) est perdu
+  bool threshold_nine = false;      // dixieme temoin : seuil 9 au lieu de 10
+  bool count_shell = false;         // contact : dot == 0 compte comme interieur
+  bool drop_last_microtile = false; // dernier bloc : la derniere microtuile est perdue
+  // DUPLICATION COMPENSEE : quand les deux fils d'un split croise ont la meme
+  // masse, l'un est traite DEUX fois et l'autre omis — l'identite agregee
+  // C(n,2) FERME quand meme ; seul le sort par paire (multiplicite un,
+  // partition) peut mordre. C'est le mutant qui prouve que le ledger de fate
+  // est necessaire.
+  bool duplicate_compensated = false;
+  bool any() const {
+    return skip_half_block || drop_rr || threshold_nine || count_shell ||
+           drop_last_microtile || duplicate_compensated;
+  }
+};
+
+// LE LEDGER DE FATE : un sort par paire non ordonnee, multiplicite un.
+enum class PairFate : std::uint8_t { kUnassigned = 0, kPruned = 1, kMicrotile = 2 };
 
 struct Probe {
   const Tree* tree = nullptr;
   ProbeReceipt receipt;
+  ProbeInjections injections;
   int witness_threshold = 10;
   i64 max_states = 0;
   bool budget_exceeded = false;
-  // L'HERITAGE DE FRONTIERE : le sup de (w-x).(w-y) est MONOTONE par
-  // restriction du bloc — un noeud temoin certifie negatif pour le parent le
-  // reste pour tout enfant. Chaque etat porte donc un compte confirme et une
-  // frontiere de noeuds indecis, herites du parent au lieu de repartir de la
-  // racine. Une frontiere pleine est TRONQUEE cote temoin seulement : cela
-  // perd des temoins potentiels (moins de prunes, plus de microtuiles),
-  // jamais l'exactitude — et c'est compte au recu.
-  static constexpr int kFrontierCap = 96;
+  // Fate : actif seulement a petit n (`--verify-bruteforce`) ; nullptr sinon.
+  std::vector<PairFate>* fate = nullptr;
+  int fate_points = 0;
+  bool fate_violated = false;
+  i64 last_microtile_a = -1, last_microtile_b = -1;   // pour drop-last-microtile
 
   // Plages disjointes : le temoin ne recouvre AUCUNE des deux extremites.
   static bool ranges_disjoint(const Node& witness, const Node& a, const Node& b) {
@@ -179,91 +221,98 @@ struct Probe {
     return !overlap_a && !overlap_b;
   }
 
-  // RAFFINEMENT DE FRONTIERE : depuis la frontiere heritee du parent,
-  // confirmer (sup < 0, noeud entier), ecarter (feuille recouvrante), tester
-  // point a point les feuilles mixtes disjointes, et descendre les noeuds
-  // indecis jusqu'au seuil ou au plafond de frontiere.
-  void park(int node_index, std::vector<int>* out) {
-    if ((int)out->size() < kFrontierCap) out->push_back(node_index);
-    else ++receipt.frontier_truncations;
-  }
-
-  i64 refine_frontier(const Node& a, const Node& b, i64 confirmed,
-                      const std::vector<int>& inherited, std::vector<int>* out) {
-    out->clear();
-    i64 total = confirmed;
-    // (noeud, transitoire) : un noeud transitoire ne PARQUE jamais — son
-    // ancetre est deja en frontiere, parquer ses descendants compterait
-    // deux fois chez les enfants.
-    std::vector<std::pair<int, bool>> stack;
-    for (auto it = inherited.rbegin(); it != inherited.rend(); ++it)
-      stack.push_back({*it, false});
+  // LA RECHERCHE DE TEMOINS, depuis la racine, a SORTIE PRECOCE : descendre
+  // les noeuds indecis, compter les noeuds entierement negatifs et les
+  // points negatifs des feuilles (en excluant les positions d'extremites),
+  // s'arreter des que le seuil est atteint. Aucune frontiere, aucun cap :
+  // le compte rendu est exact ou majore par le seuil, jamais tronque en
+  // silence.
+  i64 count_witnesses(const Node& a, const Node& b) {
+    i64 total = 0;
+    std::vector<int> stack;
+    stack.push_back(0);
     while (!stack.empty()) {
-      const int node_index = stack.back().first;
-      const bool transient = stack.back().second;
+      receipt.witness_stack_high_water =
+          std::max(receipt.witness_stack_high_water, (i64)stack.size());
+      const int node_index = stack.back();
       stack.pop_back();
       const Node& node = tree->nodes[(std::size_t)node_index];
       ++receipt.witness_visits;
       if (ranges_disjoint(node, a, b)) {
         const i64 sup = pair_witness_sup(node, a, b);
-        if (sup < 0) {
-          total += node.end - node.begin;   // temoins entiers, herites via `durable`
+        // MUTANT count-shell : un sup nul (contact possible) compterait le
+        // noeud entier — dot == 0 est SHELL, jamais interieur.
+        if (sup < 0 || (injections.count_shell && sup == 0)) {
+          total += node.end - node.begin;
+          if (total >= witness_threshold) return total;
           continue;
         }
         if (node.left < 0) {
-          // Feuille disjointe mixte : compte ponctuel, recompte par les
-          // enfants — la feuille reste en frontiere si elle n'est pas
-          // transitoire.
           for (int t = node.begin; t < node.end; ++t) {
             const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
-            if (point_witness_sup(w, a, b) < 0) ++total;
+            ++receipt.witness_point_tests;
+            const i64 sup_point = point_witness_sup(w, a, b);
+            if (sup_point < 0 || (injections.count_shell && sup_point == 0)) ++total;
           }
-          if (!transient) park(node_index, out);
+          if (total >= witness_threshold) return total;
           continue;
         }
-        if (!transient && total >= witness_threshold) {
-          // Seuil atteint : garder le noeud indecis tel quel.
-          park(node_index, out);
-          continue;
-        }
-        stack.push_back({node.right, transient});
-        stack.push_back({node.left, transient});
+        stack.push_back(node.right);
+        stack.push_back(node.left);
         continue;
       }
-      // RECOUVREMENT d'une extremite : non monotone — un recouvrant peut
-      // devenir disjoint pour un bloc enfant. Le COMPTE descend toujours (ou
-      // teste par point en excluant les positions d'extremites) ; l'HERITAGE
-      // parque les recouvrants de taille au plus celle d'un cote, et leurs
-      // descendants deviennent transitoires.
-      const int node_size = node.end - node.begin;
-      const int side_max = std::max(a.end - a.begin, b.end - b.begin);
+      // RECOUVREMENT d'une extremite : descendre, ou tester par point en
+      // excluant les positions d'extremites dans les feuilles.
       if (node.left < 0) {
         for (int t = node.begin; t < node.end; ++t) {
           const bool in_a = t >= a.begin && t < a.end;
           const bool in_b = t >= b.begin && t < b.end;
           if (in_a || in_b) continue;
           const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
-          if (point_witness_sup(w, a, b) < 0) ++total;
+          ++receipt.witness_point_tests;
+          const i64 sup_point = point_witness_sup(w, a, b);
+          if (sup_point < 0 || (injections.count_shell && sup_point == 0)) ++total;
         }
-        if (!transient) park(node_index, out);
+        if (total >= witness_threshold) return total;
         continue;
       }
-      if (node_size > side_max) {
-        stack.push_back({node.right, transient});
-        stack.push_back({node.left, transient});
-        continue;
-      }
-      if (!transient) park(node_index, out);
-      stack.push_back({node.right, true});
-      stack.push_back({node.left, true});
+      stack.push_back(node.right);
+      stack.push_back(node.left);
     }
-    receipt.frontier_max = std::max<i64>(receipt.frontier_max, (i64)out->size());
     return total;
   }
 
+  // Le sort d'une paire par identifiants ORIGINAUX (pas les positions de
+  // feuille) : multiplicite un, sinon violation — l'idempotence d'un DSU
+  // cacherait un doublon, le ledger non.
+  void assign_pair(int i, int j, PairFate value) {
+    if (fate == nullptr) return;
+    if (i > j) std::swap(i, j);
+    const i64 n = fate_points;
+    const i64 index = (i64)i * (2 * n - i - 1) / 2 + (j - i - 1);
+    if ((*fate)[(std::size_t)index] != PairFate::kUnassigned) {
+      fate_violated = true;
+      return;
+    }
+    (*fate)[(std::size_t)index] = value;
+  }
+
+  void assign_cross_block(const Node& a, const Node& b, PairFate value) {
+    if (fate == nullptr) return;
+    for (int ta = a.begin; ta < a.end; ++ta)
+      for (int tb = b.begin; tb < b.end; ++tb)
+        assign_pair(tree->order[(std::size_t)ta], tree->order[(std::size_t)tb], value);
+  }
+
+  void assign_internal_block(const Node& a, PairFate value) {
+    if (fate == nullptr) return;
+    for (int ta = a.begin; ta < a.end; ++ta)
+      for (int tb = ta + 1; tb < a.end; ++tb)
+        assign_pair(tree->order[(std::size_t)ta], tree->order[(std::size_t)tb], value);
+  }
+
   // La machine d'etats : (ia, ib) avec ia == ib pour les paires internes.
-  // `confirmed` et `frontier` sont herites du parent (monotonie du sup).
-  void process(int ia, int ib, i64 depth, i64 confirmed, const std::vector<int>& frontier) {
+  void process(int ia, int ib, i64 depth) {
     if (budget_exceeded) return;
     ++receipt.states;
     receipt.depth_max = std::max(receipt.depth_max, depth);
@@ -280,49 +329,193 @@ struct Probe {
         const i64 size = a.end - a.begin;
         receipt.microtile_pairs += size * (size - 1) / 2;
         ++receipt.microtile_states;
+        last_microtile_a = ia;
+        last_microtile_b = ib;
+        assign_internal_block(a, PairFate::kMicrotile);
         return;
       }
-      process(a.left, a.left, depth + 1, confirmed, frontier);
-      process(a.left, a.right, depth + 1, confirmed, frontier);
-      process(a.right, a.right, depth + 1, confirmed, frontier);
+      process(a.left, a.left, depth + 1);
+      process(a.left, a.right, depth + 1);
+      if (!injections.drop_rr)   // MUTANT : la partition interne perd (R,R)
+        process(a.right, a.right, depth + 1);
       return;
     }
-    // Bloc croise : recherche de temoins DEPUIS LA RACINE. L'heritage de
-    // frontiere a ete essaye et retire : un plafond de frontiere tronque
-    // IRREVERSIBLEMENT (un noeud perdu ne revient jamais dans le sous-arbre)
-    // et s'effondre a l'echelle — 52 puis 82 % de microtuiles a 2400/12000
-    // contre 5,0 et 1,5 % depuis la racine. Une frontiere sans perte (budget
-    // par noeud, ou ordonnancement dual-tree) est la question d'ingenierie
-    // ouverte ; la racine est la reference de qualite, honnete sur son cout.
-    std::vector<int> refined;
-    const i64 found = refine_frontier(a, b, 0, {0}, &refined);
-    if (found >= witness_threshold) {
+    const i64 found = count_witnesses(a, b);
+    if (found >= witness_threshold - (injections.threshold_nine ? 1 : 0)) {
+      // MUTANT threshold-nine : neuf temoins pruneraient — p+q >= 11 < K+2.
       receipt.pruned_pairs += (i64)(a.end - a.begin) * (i64)(b.end - b.begin);
+      ++receipt.pruned_states;
+      assign_cross_block(a, b, PairFate::kPruned);
       return;
     }
     const bool a_leaf = a.left < 0, b_leaf = b.left < 0;
     if (a_leaf && b_leaf) {
       receipt.microtile_pairs += (i64)(a.end - a.begin) * (i64)(b.end - b.begin);
       ++receipt.microtile_states;
+      last_microtile_a = ia;
+      last_microtile_b = ib;
+      assign_cross_block(a, b, PairFate::kMicrotile);
       return;
     }
     const bool split_a = !a_leaf && (b_leaf || (a.end - a.begin) >= (b.end - b.begin));
+    const int split_index = split_a ? ia : ib;
+    const int child_left = tree->nodes[(std::size_t)split_index].left;
+    const int child_right = tree->nodes[(std::size_t)split_index].right;
+    const Node& left_node = tree->nodes[(std::size_t)child_left];
+    const Node& right_node = tree->nodes[(std::size_t)child_right];
+    if (injections.duplicate_compensated &&
+        left_node.end - left_node.begin == right_node.end - right_node.begin) {
+      // MUTANT COMPENSE : deux fois le fils gauche, zero fois le droit —
+      // memes masses, l'agrege ferme, seul le sort par paire voit.
+      if (split_a) {
+        process(child_left, ib, depth + 1);
+        process(child_left, ib, depth + 1);
+      } else {
+        process(ia, child_left, depth + 1);
+        process(ia, child_left, depth + 1);
+      }
+      return;
+    }
     if (split_a) {
-      process(tree->nodes[(std::size_t)ia].left, ib, depth + 1, 0, {});
-      process(tree->nodes[(std::size_t)ia].right, ib, depth + 1, 0, {});
+      process(child_left, ib, depth + 1);
+      if (!injections.skip_half_block)   // MUTANT : la partition croisee perd un fils
+        process(child_right, ib, depth + 1);
     } else {
-      process(ia, tree->nodes[(std::size_t)ib].left, depth + 1, 0, {});
-      process(ia, tree->nodes[(std::size_t)ib].right, depth + 1, 0, {});
+      process(ia, child_left, depth + 1);
+      if (!injections.skip_half_block)
+        process(ia, child_right, depth + 1);
     }
   }
 };
+
+// Le compte EXACT de temoins strictement interieurs d'une paire, par
+// balayage complet — l'autorite du differentiel, independante de l'arbre.
+inline int exact_interior_count(const std::vector<mhgp::P3>& pts, int x, int y, int cap) {
+  int interior = 0;
+  const int n = (int)pts.size();
+  for (int w = 0; w < n && interior < cap; ++w) {
+    if (w == x || w == y) continue;
+    const i64 wx[3] = {(i64)pts[(std::size_t)w].x - (i64)pts[(std::size_t)x].x,
+                       (i64)pts[(std::size_t)w].y - (i64)pts[(std::size_t)x].y,
+                       (i64)pts[(std::size_t)w].z - (i64)pts[(std::size_t)x].z};
+    const i64 wy[3] = {(i64)pts[(std::size_t)w].x - (i64)pts[(std::size_t)y].x,
+                       (i64)pts[(std::size_t)w].y - (i64)pts[(std::size_t)y].y,
+                       (i64)pts[(std::size_t)w].z - (i64)pts[(std::size_t)y].z};
+    const i64 dot = wx[0] * wy[0] + wx[1] * wy[1] + wx[2] * wy[2];
+    if (dot < 0) ++interior;
+  }
+  return interior;
+}
+
+// LES FIXTURES GRAVEES (porte 4). Chacune retourne son nuage et pose ses
+// assertions specifiques apres le run via `check`.
+struct Fixture {
+  const char* name = nullptr;
+  std::vector<mhgp::P3> cloud;
+  // Paire visee (identifiants originaux) et sort exige.
+  int pair_x = -1, pair_y = -1;
+  bool require_fate = false;   // exiger expected_fate (la granularite de bloc
+                               // peut legitimement laisser une paire inerte en
+                               // microtuile : residuel conservateur, pas faux)
+  PairFate expected_fate = PairFate::kUnassigned;
+  int expected_interior = -1;   // compte exact exige (-1 : non impose)
+};
+
+Fixture make_fixture(const std::string& name) {
+  Fixture fixture;
+  if (name == "contact") {
+    // CONTACT dot == 0 : dix observations EXACTEMENT sur la sphere
+    // diametrale de (x,y) — coquille, jamais interieur. Les extremites sont
+    // ISOLEES (x en feuille singleton par position minimale, y duplique pour
+    // une boite de feuille exacte) et les temoins sont DUPLIQUES sur un meme
+    // point de grille : les noeuds temoins ont des boites de largeur nulle,
+    // le sup de bloc vaut EXACTEMENT zero — le mutant count-shell compte dix
+    // et prune la paire non inerte ; le nominal la garde en microtuile.
+    fixture.name = "contact";
+    fixture.cloud.push_back(mhgp::P3{1000, 2000, 2000});   // x, minimal en x
+    fixture.cloud.push_back(mhgp::P3{3000, 2000, 2000});   // y
+    fixture.cloud.push_back(mhgp::P3{3000, 2000, 2000});   // y duplique
+    for (int j = 0; j < 10; ++j)
+      fixture.cloud.push_back(mhgp::P3{2000, 3000, 2000});   // (w-x).(w-y) == 0
+    fixture.pair_x = 0;
+    fixture.pair_y = 1;
+    fixture.require_fate = true;
+    fixture.expected_fate = PairFate::kMicrotile;
+    fixture.expected_interior = 0;
+    return fixture;
+  }
+  if (name == "tenth-witness") {
+    // DIXIEME TEMOIN : exactement NEUF temoins stricts — p+q = 11 < K+2, la
+    // paire n'est pas inerte et doit rester en microtuile ; le mutant
+    // threshold-nine la prunerait. Les extremites sont dupliquees pour que
+    // leurs boites de feuilles soient exactes : le compte de bloc atteint
+    // EXACTEMENT neuf, jamais dix.
+    fixture.name = "tenth-witness";
+    fixture.cloud.push_back(mhgp::P3{10000, 10000, 10000});   // x
+    fixture.cloud.push_back(mhgp::P3{10000, 10000, 10000});   // x duplique
+    fixture.cloud.push_back(mhgp::P3{10400, 10000, 10000});   // y
+    fixture.cloud.push_back(mhgp::P3{10400, 10000, 10000});   // y duplique
+    for (int j = 0; j < 9; ++j)
+      fixture.cloud.push_back(mhgp::P3{(mhgp::i32)(10050 + 40 * j), 10000, 10000});
+    fixture.pair_x = 0;
+    fixture.pair_y = 2;
+    fixture.require_fate = true;
+    fixture.expected_fate = PairFate::kMicrotile;
+    fixture.expected_interior = 9;
+    return fixture;
+  }
+  if (name == "duplicate") {
+    // COORDONNEES DUPLIQUEES : deux observations sur le meme point de
+    // grille. La partition et le ledger doivent fermer exactement — une
+    // paire de doublons a une boule diametrale de rayon nul, jamais prunee.
+    fixture.name = "duplicate";
+    fixture.cloud = {mhgp::P3{100, 100, 100}, mhgp::P3{100, 100, 100},
+                     mhgp::P3{200, 100, 100}, mhgp::P3{300, 200, 100},
+                     mhgp::P3{150, 250, 300}, mhgp::P3{400, 400, 400}};
+    fixture.pair_x = 0;
+    fixture.pair_y = 1;
+    fixture.require_fate = true;
+    fixture.expected_fate = PairFate::kMicrotile;
+    fixture.expected_interior = 0;
+    return fixture;
+  }
+  if (name == "q2-vs-q3-scope") {
+    // LA FIXTURE DE PORTEE de l'audit delta, coordonnees GRAVEES par
+    // l'auditeur : ab satisfait le certificat de prune q2 (dix temoins
+    // strictement dans sa boule diametrale — compte exact impose ci-dessous),
+    // mais ab RESTE l'ancre du support propre q3 {a,b,z} dont le cercle
+    // circonscrit (centre (100, 655/6, 100)) exclut STRICTEMENT les dix
+    // temoins. Les paires prunees q2 ne sortent JAMAIS d'une source d'ancres
+    // superieures ; les assertions q3 sont posees dans `main`. Le SORT de la
+    // paire n'est pas impose : la granularite des blocs peut la laisser en
+    // microtuile (residuel conservateur) — l'inertie exacte, elle, est
+    // imposee.
+    fixture.name = "q2-vs-q3-scope";
+    fixture.cloud.push_back(mhgp::P3{50, 100, 100});    // a
+    fixture.cloud.push_back(mhgp::P3{150, 100, 100});   // b
+    fixture.cloud.push_back(mhgp::P3{100, 160, 100});   // z
+    const i64 witnesses[10][2] = {{51, 95}, {149, 95}, {51, 94}, {149, 94}, {51, 93},
+                                  {149, 93}, {52, 92}, {148, 92}, {51, 92}, {149, 92}};
+    for (const auto& w : witnesses)
+      fixture.cloud.push_back(mhgp::P3{(mhgp::i32)w[0], (mhgp::i32)w[1], 100});
+    fixture.pair_x = 0;
+    fixture.pair_y = 1;
+    fixture.require_fate = false;
+    fixture.expected_interior = 10;
+    return fixture;
+  }
+  return fixture;   // name == nullptr : fixture inconnue
+}
 
 }  // namespace
 
 int main(int argc, char** argv) {
   int n = 2400, coord = 0, smax = 11, leaf_size = 8, verify_bruteforce = 0;
   i64 seed = 20260810, max_states = 50000000;
+  i64 min_pruned_pairs = 0, min_states = 0;
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kTerrain;
+  std::string fixture_name;
+  ProbeInjections injections;
   auto integer = [](const char* text, i64* value) {
     const char* last = text + strlen(text);
     unsigned long long magnitude = 0;
@@ -345,6 +538,24 @@ int main(int argc, char** argv) {
       else { std::printf("ECHEC : famille inconnue %s\n", argv[i]); return 2; }
       continue;
     }
+    if (!strcmp(argv[i], "--fixture")) {
+      if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --fixture\n"); return 2; }
+      fixture_name = argv[++i];
+      continue;
+    }
+    if (!strcmp(argv[i], "--inject")) {
+      if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --inject\n"); return 2; }
+      ++i;
+      if (!strcmp(argv[i], "skip-half-block")) injections.skip_half_block = true;
+      else if (!strcmp(argv[i], "drop-rr")) injections.drop_rr = true;
+      else if (!strcmp(argv[i], "threshold-nine")) injections.threshold_nine = true;
+      else if (!strcmp(argv[i], "count-shell")) injections.count_shell = true;
+      else if (!strcmp(argv[i], "drop-last-microtile")) injections.drop_last_microtile = true;
+      else if (!strcmp(argv[i], "duplicate-compensated"))
+        injections.duplicate_compensated = true;
+      else { std::printf("ECHEC : injection inconnue %s\n", argv[i]); return 2; }
+      continue;
+    }
     i64 value = 0;
     const bool has = (i + 1 < argc) && integer(argv[i + 1], &value);
     if (!has) { std::printf("ECHEC : argument %s sans valeur\n", argv[i]); return 2; }
@@ -355,6 +566,8 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--seed")) seed = value;
     else if (!strcmp(argv[i], "--max-states")) max_states = value;
     else if (!strcmp(argv[i], "--verify-bruteforce")) verify_bruteforce = (int)value;
+    else if (!strcmp(argv[i], "--min-pruned-pairs")) min_pruned_pairs = value;
+    else if (!strcmp(argv[i], "--min-states")) min_states = value;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     ++i;
   }
@@ -363,89 +576,182 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : campagne absurde (la sonde est calibree pour smax=11)\n");
     return 2;
   }
-  if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
-  const std::vector<mhgp::P3> pts = mhgp3v::make_family_cloud(family, n, coord, seed);
-  if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
 
-  std::printf("provenance : --points %d --coord %d --smax %d --seed %lld --family %s"
-              " --leaf-size %d\n", n, coord, smax, seed, mhgp3v::cloud_family_name(family),
-              leaf_size);
+  const bool is_fixture = !fixture_name.empty();
+  Fixture fixture;
+  std::vector<mhgp::P3> pts;
+  if (is_fixture) {
+    fixture = make_fixture(fixture_name);
+    if (fixture.name == nullptr) {
+      std::printf("ECHEC : fixture inconnue %s\n", fixture_name.c_str());
+      return 2;
+    }
+    pts = fixture.cloud;
+    n = (int)pts.size();
+    leaf_size = 2;
+    verify_bruteforce = 1;   // le ledger de fate est la raison d'etre des fixtures
+    std::printf("provenance : --fixture %s (%d points graves, feuilles <= %d)\n",
+                fixture.name, n, leaf_size);
+  } else {
+    if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
+    pts = mhgp3v::make_family_cloud(family, n, coord, seed);
+    if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
+    std::printf("provenance : --points %d --coord %d --smax %d --seed %lld --family %s"
+                " --leaf-size %d\n", n, coord, smax, seed, mhgp3v::cloud_family_name(family),
+                leaf_size);
+  }
+  if (verify_bruteforce == 1 && n > 3000) {
+    std::printf("ECHEC : le ledger de fate exige n <= 3000 (n^2/2 sorts, n^3 balayage)\n");
+    return 2;
+  }
+  const auto fail = [&](const char* what, const char* detail) {
+    if (injections.any()) {
+      std::printf("mutant tue par %s : %s\n", what, detail);
+      return 4;
+    }
+    std::printf("ECHEC %s : %s\n", what, detail);
+    return 1;
+  };
 
   Tree tree;
   const auto t0 = std::chrono::steady_clock::now();
   tree.build(pts, leaf_size);
   const auto t1 = std::chrono::steady_clock::now();
 
+  std::vector<PairFate> fate;
   Probe probe;
   probe.tree = &tree;
+  probe.injections = injections;
   probe.witness_threshold = 10;   // q2 : p >= 10 donne p+q >= 12 = K+2
   probe.max_states = max_states;
-  probe.process(0, 0, 0, 0, {0});
+  if (verify_bruteforce == 1) {
+    fate.assign((std::size_t)((i64)n * (n - 1) / 2), PairFate::kUnassigned);
+    probe.fate = &fate;
+    probe.fate_points = n;
+  }
+  probe.process(0, 0, 0);
   const auto t2 = std::chrono::steady_clock::now();
   if (probe.budget_exceeded) {
     std::printf("ECHEC : budget d'etats depasse (%lld) — la sonde refuse, elle ne"
                 " tronque pas\n", max_states);
     return 3;
   }
+  // MUTANT drop-last-microtile : le dernier bloc microtuile perd ses paires
+  // apres coup — l'identite du ledger doit le voir.
+  if (injections.drop_last_microtile && probe.last_microtile_a >= 0) {
+    const Node& a = tree.nodes[(std::size_t)probe.last_microtile_a];
+    const Node& b = tree.nodes[(std::size_t)probe.last_microtile_b];
+    const i64 lost = probe.last_microtile_a == probe.last_microtile_b
+                         ? (i64)(a.end - a.begin) * (a.end - a.begin - 1) / 2
+                         : (i64)(a.end - a.begin) * (i64)(b.end - b.begin);
+    probe.receipt.microtile_pairs -= lost;
+  }
   const ProbeReceipt& receipt = probe.receipt;
 
   // L'IDENTITE DU LEDGER : chaque paire non ordonnee dans exactement un etat.
   const i128 all_pairs = (i128)n * (n - 1) / 2;
   const i128 covered = (i128)receipt.pruned_pairs + (i128)receipt.microtile_pairs;
-  if (covered != all_pairs) {
-    std::printf("ECHEC : identite du ledger violee — %lld prunees + %lld microtuiles"
-                " != C(n,2) = %lld\n", receipt.pruned_pairs, receipt.microtile_pairs,
-                (i64)all_pairs);
-    return 1;
-  }
+  if (covered != all_pairs)
+    return fail("l'identite du ledger",
+                "prunees + microtuiles != C(n,2) — partition du self-produit violee");
 
   if (verify_bruteforce == 1) {
-    // SOUNDNESS : toute paire prunee est reellement q2-inerte. On recompte
-    // l'inertie exacte de CHAQUE paire par balayage, puis on verifie que le
-    // nombre de paires NON inertes est <= microtuiles (les paires prunees
-    // sont un sous-ensemble des inertes ; la sonde est conservatrice, jamais
-    // l'inverse).
+    // MULTIPLICITE UN : detectee au marquage (un sort deja assigne rejoue).
+    if (probe.fate_violated)
+      return fail("le ledger de fate", "une paire a recu deux sorts — multiplicite violee");
+    // PARTITION : aucun sort manquant.
+    for (std::size_t k = 0; k < fate.size(); ++k)
+      if (fate[k] == PairFate::kUnassigned)
+        return fail("le ledger de fate", "une paire n'a recu aucun sort — partition violee");
+    // INCLUSION NON COMPENSABLE : toute paire non inerte est en microtuile.
+    // Le balayage exact est l'autorite ; aucun compte agrege ne compense.
     i64 non_inert = 0;
     for (int x = 0; x < n; ++x)
       for (int y = x + 1; y < n; ++y) {
-        int interior = 0;
-        for (int w = 0; w < n && interior < 10; ++w) {
-          if (w == x || w == y) continue;
-          i64 dot = 0;
-          const i64 wx[3] = {(i64)pts[(std::size_t)w].x - (i64)pts[(std::size_t)x].x,
-                             (i64)pts[(std::size_t)w].y - (i64)pts[(std::size_t)x].y,
-                             (i64)pts[(std::size_t)w].z - (i64)pts[(std::size_t)x].z};
-          const i64 wy[3] = {(i64)pts[(std::size_t)w].x - (i64)pts[(std::size_t)y].x,
-                             (i64)pts[(std::size_t)w].y - (i64)pts[(std::size_t)y].y,
-                             (i64)pts[(std::size_t)w].z - (i64)pts[(std::size_t)y].z};
-          dot = wx[0] * wy[0] + wx[1] * wy[1] + wx[2] * wy[2];
-          if (dot < 0) ++interior;
+        const int interior = exact_interior_count(pts, x, y, 10);
+        const i64 index = (i64)x * (2 * (i64)n - x - 1) / 2 + (y - x - 1);
+        if (interior < 10) {
+          ++non_inert;
+          if (fate[(std::size_t)index] == PairFate::kPruned)
+            return fail("la soundness par paire",
+                        "une paire NON inerte a ete prunee — le sort par paire le voit,"
+                        " un compte agrege l'aurait compense");
         }
-        if (interior < 10) ++non_inert;
       }
-    if (non_inert > receipt.microtile_pairs) {
-      std::printf("ECHEC : soundness violee — %lld paires non inertes mais seulement %lld"
-                  " microtuiles (une paire non inerte a ete prunee)\n", non_inert,
-                  receipt.microtile_pairs);
-      return 1;
+    std::printf("fate       : %lld paires non inertes, toutes en microtuile — partition,"
+                " multiplicite un et inclusion certifiees paire par paire\n", non_inert);
+  }
+
+  // LES ASSERTIONS DE FIXTURE.
+  if (is_fixture) {
+    const int x = fixture.pair_x, y = fixture.pair_y;
+    const int interior = exact_interior_count(pts, x, y, 1 << 20);
+    if (fixture.expected_interior >= 0 && interior != fixture.expected_interior)
+      return fail("la fixture", "compte interieur exact different du compte grave");
+    const i64 index = (i64)x * (2 * (i64)n - x - 1) / 2 + (y - x - 1);
+    if (fixture.require_fate && fate[(std::size_t)index] != fixture.expected_fate)
+      return fail("la fixture", "le sort de la paire visee n'est pas le sort grave");
+    if (!strcmp(fixture.name, "q2-vs-q3-scope")) {
+      // LE SUPPORT q3 SURVIT A LA PRUNE q2 : centre exact (100, 655/6, 100),
+      // r^2 = 93025/36. Chaque temoin est STRICTEMENT hors du cercle : en
+      // multipliant par 36, |6w - (600,655,600)|^2 > 93025. L'ancre ab est
+      // le plus long cote (D^2 = 10000 >= |az|^2 = |bz|^2 = 6100).
+      const i64 c6[3] = {600, 655, 600};
+      const i64 r2_36 = 93025;
+      for (int w = 3; w < n; ++w) {
+        const i64 dx = 6 * (i64)pts[(std::size_t)w].x - c6[0];
+        const i64 dy = 6 * (i64)pts[(std::size_t)w].y - c6[1];
+        const i64 dz = 6 * (i64)pts[(std::size_t)w].z - c6[2];
+        if (dx * dx + dy * dy + dz * dz <= r2_36)
+          return fail("la fixture de portee",
+                      "un temoin q2 est dans le cercle q3 — la fixture ne discrimine plus");
+      }
+      const auto dist2 = [&](int u, int v) {
+        const i64 dx = (i64)pts[(std::size_t)u].x - (i64)pts[(std::size_t)v].x;
+        const i64 dy = (i64)pts[(std::size_t)u].y - (i64)pts[(std::size_t)v].y;
+        const i64 dz = (i64)pts[(std::size_t)u].z - (i64)pts[(std::size_t)v].z;
+        return dx * dx + dy * dy + dz * dz;
+      };
+      if (!(dist2(0, 1) >= dist2(0, 2) && dist2(0, 1) >= dist2(1, 2)))
+        return fail("la fixture de portee", "ab n'est plus le plus long cote du support q3");
+      std::printf("portee     : ab prunee q2 ET ancre du support propre q3 {a,b,z} — les"
+                  " paires prunees q2 ne sortent JAMAIS d'une source d'ancres"
+                  " superieures\n");
     }
-    std::printf("soundness  : %lld paires non inertes, toutes contenues dans les %lld"
-                " microtuiles — aucune paire non inerte prunee\n", non_inert,
-                receipt.microtile_pairs);
+  }
+
+  // LES PLANCHERS (anti vert-par-vacuite) : une sonde qui ne prune rien ou
+  // ne visite rien ne passe pas une porte qui les exige.
+  if (min_pruned_pairs > 0 && receipt.pruned_pairs < min_pruned_pairs)
+    return fail("le plancher de prune", "moins de paires prunees que le plancher exige");
+  if (min_states > 0 && receipt.states < min_states)
+    return fail("le plancher d'etats", "moins d'etats que le plancher exige");
+
+  if (injections.any()) {
+    std::printf("MUTANT SURVIVANT : aucune porte n'a mordu\n");
+    return 0;
   }
 
   const double share =
       100.0 * (double)receipt.microtile_pairs / (double)(i64)all_pairs;
-  std::printf("arbre      : %zu noeuds, feuilles <= %d, construction %.3f s\n",
+  const i64 tree_bytes = (i64)(tree.nodes.size() * sizeof(Node) + tree.order.size() * sizeof(int));
+  std::printf("arbre      : %zu noeuds, feuilles <= %d, construction %.3f s, %lld octets\n",
               tree.nodes.size(), leaf_size,
-              std::chrono::duration<double>(t1 - t0).count());
-  std::printf("q2 lane    : etats=%lld visites-temoin=%lld — prunees=%lld"
-              " microtuiles=%lld (%lld etats) — ledger C(n,2)=%lld FERME\n",
-              receipt.states, receipt.witness_visits, receipt.pruned_pairs,
-              receipt.microtile_pairs, receipt.microtile_states, (i64)all_pairs);
-  std::printf("parcimonie : microtuiles %.2f %% des paires, profondeur max=%lld —"
-              " %.3f s chaud (1 thread)\n", share, receipt.depth_max,
+              std::chrono::duration<double>(t1 - t0).count(), tree_bytes);
+  std::printf("q2 lane    : etats=%lld (prunes=%lld) visites-temoin=%lld tests-ponctuels=%lld"
+              " — prunees=%lld microtuiles=%lld (%lld etats) — ledger C(n,2)=%lld FERME\n",
+              receipt.states, receipt.pruned_states, receipt.witness_visits,
+              receipt.witness_point_tests, receipt.pruned_pairs, receipt.microtile_pairs,
+              receipt.microtile_states, (i64)all_pairs);
+  std::printf("parcimonie : microtuiles %.2f %% des paires, profondeur max=%lld, pile"
+              " temoin max=%lld — %.3f s chaud (1 thread)\n", share, receipt.depth_max,
+              receipt.witness_stack_high_water,
               std::chrono::duration<double>(t2 - t1).count());
+  if (is_fixture) {
+    std::printf("OK : fixture %s recue — ledger de fate, partition, inclusion\n",
+                fixture.name);
+    return 0;
+  }
   std::printf("%s : la lane q2 %s la majorite des paires hors des microtuiles\n",
               share < 50.0 ? "OK" : "NO-GO", share < 50.0 ? "garde" : "ne garde PAS");
   return share < 50.0 ? 0 : 3;

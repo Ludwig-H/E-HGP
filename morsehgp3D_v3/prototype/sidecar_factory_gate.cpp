@@ -12,22 +12,49 @@
 //   5. paire diametrale + point de coquille -> PRINCIPAL certifie, trois
 //      temoins stricts ;
 //   6. carrier supprime mais recu conserve -> la fermeture reste kUnknown
-//      (digest desynchronise), jamais un certificat invente ;
+//      (digest desynchronise), jamais un certificat invente ; la meme table
+//      sans recu porte un digest final DISTINCT (fermetures liees) ;
 //   7. den=0, support hors coquille, pool chevauche -> refus avant index.
+//
+// Portes de l'audit delta cbac109 : forge bit_cast refusee a la COMPILATION
+// (static_assert), doublon non adjacent [r1,r2,r1] refuse, INT128_MIN et
+// den=2^100 refuses avant toute arithmetique, support canonique RECONSTRUIT
+// (identique sous les deux declarations legitimes du carre), digest final
+// liant maximum_order et fermetures, selftest SHA-256 (vecteurs FIPS).
 //
 // Mutants de la factory (code 4) : oubli du dernier u (skip-last-removal),
 // « < » change en « <= » (strict-leq), temoin indexe par POSITION au lieu du
-// PointId (witness-by-position). Codes : 0 OK ; 1 ecart ; 2 CLI ; 4 mutant
-// tue.
+// PointId (witness-by-position), support canonique RECOPIE de la declaration
+// (copy-declared-support). Codes : 0 OK ; 1 ecart ; 2 CLI ; 4 mutant tue.
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
 #include "prototype/order_k_flats.hpp"
 #include "prototype/sealed_source.hpp"
 #include "prototype/validated_hybrid_sidecar.hpp"
+
+// LA FORGE FRAICHE EST UNE ERREUR DE COMPILATION (audit delta P0) : le jeton
+// et le recu ne sont pas trivialement copiables — `std::bit_cast` est
+// ill-forme — et le recu n'a AUCUN constructeur public de fabrication. Ces
+// static_assert sont la porte permanente : les affaiblir romprait le build.
+static_assert(!std::is_trivially_copyable_v<mhgp3v::SourceProducerToken>,
+              "le jeton de producteur doit refuser std::bit_cast");
+static_assert(!std::is_trivially_copyable_v<mhgp3v::HybridSourceReceipt>,
+              "le recu scelle doit refuser std::bit_cast");
+static_assert(!std::is_default_constructible_v<mhgp3v::SourceProducerToken>,
+              "le jeton de producteur ne se fabrique pas hors du producteur");
+static_assert(!std::is_copy_constructible_v<mhgp3v::HybridSourceReceipt>,
+              "le recu scelle ne se recopie pas");
+static_assert(!std::is_constructible_v<
+                  mhgp3v::HybridSourceReceipt, mhgp3v::SourceProducerToken&&,
+                  const mhgp3v::Sha256Digest&, const mhgp3v::Sha256Digest&,
+                  const mhgp3v::Sha256Digest&, std::uint32_t, std::uint32_t,
+                  std::uint32_t, int, int, int, bool>,
+              "le constructeur du recu est prive et possede par le producteur");
 
 namespace {
 
@@ -86,7 +113,13 @@ int main(int argc, char** argv) {
     if (!strcmp(mutant_name, "skip-last-removal")) mutants.skip_last_removal = true;
     else if (!strcmp(mutant_name, "strict-leq")) mutants.strict_leq = true;
     else if (!strcmp(mutant_name, "witness-by-position")) mutants.witness_by_position = true;
+    else if (!strcmp(mutant_name, "skip-canonical-check")) mutants.skip_canonical_check = true;
     else { std::printf("ECHEC : mutant inconnu %s\n", mutant_name); return 2; }
+  }
+  // LE SHA-256 EST JUGE AVANT DE LIER QUOI QUE CE SOIT : vecteurs FIPS 180-4.
+  if (!mhgp3v::sidecar_sha256_selftest()) {
+    std::printf("ECHEC : selftest SHA-256 — les vecteurs FIPS ne sont pas reproduits\n");
+    return 1;
   }
   const auto kill = [&](const std::string& where, const std::string& why) {
     if (mutant_name != nullptr) {
@@ -192,7 +225,7 @@ int main(int argc, char** argv) {
     const std::vector<mhgp::P3> two_triangles = {
         mhgp::P3{6, 10, 0}, mhgp::P3{14, 10, 0}, mhgp::P3{10, 18, 0}, mhgp::P3{10, 2, 0},
         mhgp::P3{0, 0, 20}};
-    const mhgp3v::SealedSourceProducer::Result sealed =
+    mhgp3v::SealedSourceProducer::Result sealed =
         mhgp3v::SealedSourceProducer::run(two_triangles, 5);
     if (!sealed.ok || sealed.receipt.empty()) {
       std::printf("ECHEC : producteur scelle refuse sur les deux triangles\n");
@@ -204,6 +237,15 @@ int main(int argc, char** argv) {
     if (!certified.ok() || !certified.closure_certified_all_orders())
       return kill("la fixture du recu", "la fermeture scellee n'a pas ete certifiee : " +
                                             refusal);
+    // Le digest final lie les FERMETURES (audit delta, porte 2) : la meme
+    // table sans recu a des fermetures kUnknown, donc un digest distinct.
+    const auto uncertified = mhgp3v::ValidatedHybridSidecar::build(
+        two_triangles, sealed.catalogue, nullptr, 2, &refusal, mutants);
+    if (!uncertified.ok())
+      return kill("la fixture du recu", "la table sans recu a ete refusee : " + refusal);
+    if (uncertified.sidecar_digest() == certified.sidecar_digest())
+      return kill("la fixture du recu",
+                  "les fermetures ne sont pas liees par le digest final");
     // Table AMPUTEE du carrier AB + le MEME recu : digest desynchronise, la
     // fermeture reste kUnknown — jamais inventee.
     mhgp::Catalogue doctored;
@@ -228,6 +270,19 @@ int main(int argc, char** argv) {
     if (amputated.closure_certified_all_orders())
       return kill("la fixture du recu",
                   "la fermeture a ete certifiee sur une table desynchronisee");
+    // LE DEPLACEMENT INVALIDE LA SOURCE (audit etat courant, defaut 4) : un
+    // pointeur retenu sur le recu deplace ne certifie plus jamais ; le recu
+    // vivant, lui, certifie encore.
+    mhgp3v::HybridSourceReceipt moved_receipt = std::move(sealed.receipt[0]);
+    const auto stale = mhgp3v::ValidatedHybridSidecar::build(
+        two_triangles, sealed.catalogue, &sealed.receipt[0], 2, &refusal, mutants);
+    if (!stale.ok() || stale.closure_certified_all_orders())
+      return kill("la fixture du recu", "le recu DEPLACE certifie encore une fermeture");
+    const auto alive = mhgp3v::ValidatedHybridSidecar::build(
+        two_triangles, sealed.catalogue, &moved_receipt, 2, &refusal, mutants);
+    if (!alive.ok() || !alive.closure_certified_all_orders())
+      return kill("la fixture du recu",
+                  "le recu vivant apres deplacement ne certifie plus : " + refusal);
   }
   // FIXTURE 8 (audit S3) : support REDONDANT cospherique — les quatre points
   // du carre declares support q=4 : le support canonique recalcule est la
@@ -284,6 +339,116 @@ int main(int argc, char** argv) {
       return kill("la fixture des numerateurs geants",
                   "la refutation u16 a ete refusee : " + refusal);
   }
+  // FIXTURE 12 (audit delta P1) : doublon de boule NON ADJACENT [r1,r2,r1].
+  // L'ancien index triait par (centre, indice) et ne comparait que les
+  // voisins : l'ordre du catalogue separait les deux copies. L'index par
+  // (centre, NIVEAU, indice) les rend adjacentes — refus « deux handles ».
+  // La paire [r1,r2] du meme nuage reste acceptee (fixture 3).
+  {
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{1, 2, 0}, mhgp::P3{3, 2, 0},
+                                         mhgp::P3{0, 2, 0}, mhgp::P3{4, 2, 0}};
+    const mhgp::Sphere inner = make_sphere(cloud[0], 1, 0, 0, 1, 2);
+    const mhgp::Sphere outer = make_sphere(cloud[2], 2, 0, 0, 1, 2);
+    const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+        cloud,
+        make_catalogue({{inner, {0, 1}, {0, 1}},
+                        {outer, {0, 1, 2, 3}, {2, 3}},
+                        {inner, {0, 1}, {0, 1}}}),
+        nullptr, 3, &refusal, mutants);
+    if (sidecar.ok() || refusal.find("deux handles") == std::string::npos)
+      return kill("la fixture du doublon non adjacent",
+                  sidecar.ok() ? "[r1,r2,r1] acceptee a tort" : refusal);
+  }
+  // FIXTURE 13 (audit delta P2) : representations HOSTILES hors du domaine
+  // u16 — nx=INT128_MIN (sa negation est UB) et den=2^100 (produits i128
+  // debordants). Refus par comparaisons AVANT toute arithmetique ; la
+  // campagne sanitizers juge l'absence d'UB.
+  {
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0}};
+    const mhgp::i128 int128_min = (mhgp::i128)((unsigned __int128)1 << 127);
+    mhgp::Sphere hostile = make_sphere(cloud[0], 1, 0, 0, 1, 2);
+    hostile.nx = int128_min;
+    const auto min_forge = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{hostile, {0, 1}, {0, 1}}}), nullptr, 2, &refusal, mutants);
+    if (min_forge.ok() || refusal.find("domaine") == std::string::npos)
+      return kill("la fixture INT128_MIN", min_forge.ok() ? "acceptee a tort" : refusal);
+    mhgp::Sphere wide_den = make_sphere(cloud[0], 1, 0, 0, 1, 2);
+    wide_den.den = (mhgp::i128)1 << 100;
+    const auto den_forge = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{wide_den, {0, 1}, {0, 1}}}), nullptr, 2, &refusal, mutants);
+    if (den_forge.ok() || refusal.find("domaine") == std::string::npos)
+      return kill("la fixture du denominateur hors domaine",
+                  den_forge.ok() ? "acceptee a tort" : refusal);
+  }
+  // FIXTURE 14 (audit delta porte 2 + audit etat courant defaut 2) : le
+  // support canonique est RECONSTRUIT (coquille triee par coordonnees) et
+  // toute declaration d'un AUTRE tie-break est REFUSEE — evidence, digest et
+  // fold consomment ainsi un seul support. Le carre cocirculaire a deux
+  // supports minimaux ({0,1} et {2,3}) ; le canonique est {0,1} : {0,1} est
+  // acceptee avec un certificat canonique egal, {2,3} est refusee. Le mutant
+  // qui saute le controle accepte {2,3} et meurt ici.
+  {
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
+                                         mhgp::P3{1, 2, 0}, mhgp::P3{1, 0, 0}};
+    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1, 2);
+    const auto declared_x = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{circle, {0, 1, 2, 3}, {0, 1}}}), nullptr, 3, &refusal,
+        mutants);
+    if (!declared_x.ok())
+      return kill("la fixture du tie-break", "declaration canonique {0,1} refusee : " +
+                                                 refusal);
+    const mhgp3v::SidecarSmallSupport& canon_x = declared_x.generators()[0].canonical_support;
+    if (canon_x.size != 2 || canon_x.ids[0] != 0 || canon_x.ids[1] != 1)
+      return kill("la fixture du tie-break",
+                  "le certificat ne porte pas le support canonique reconstruit");
+    const auto declared_y = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{circle, {0, 1, 2, 3}, {2, 3}}}), nullptr, 3, &refusal,
+        mutants);
+    if (declared_y.ok() || refusal.find("canonique") == std::string::npos)
+      return kill("la fixture du tie-break",
+                  declared_y.ok() ? "declaration {2,3} acceptee : tie-break etranger"
+                                  : refusal);
+  }
+  // FIXTURE 16 (audit etat courant, defaut 1) : coordonnees et base HORS de
+  // la grille u16 declaree — refus par comparaisons AVANT toute geometrie
+  // (p3_sub sur i32 extremes serait un debordement signe).
+  {
+    const mhgp::i32 hostile_coord = (mhgp::i32)0x80000000;   // INT32_MIN
+    const std::vector<mhgp::P3> bad_cloud = {mhgp::P3{hostile_coord, 1, 0},
+                                             mhgp::P3{2, 1, 0}};
+    const mhgp::Sphere any_sphere = make_sphere(mhgp::P3{0, 1, 0}, 1, 0, 0, 1, 2);
+    const auto bad_points = mhgp3v::ValidatedHybridSidecar::build(
+        bad_cloud, make_catalogue({{any_sphere, {0, 1}, {0, 1}}}), nullptr, 2, &refusal,
+        mutants);
+    if (bad_points.ok() || refusal.find("grille") == std::string::npos)
+      return kill("la fixture de la grille", bad_points.ok() ? "acceptee a tort" : refusal);
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0}};
+    mhgp::Sphere bad_base = make_sphere(mhgp::P3{hostile_coord, hostile_coord, 0}, 1, 0, 0,
+                                        1, 2);
+    const auto hostile_base = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{bad_base, {0, 1}, {0, 1}}}), nullptr, 2, &refusal, mutants);
+    if (hostile_base.ok() || refusal.find("domaine") == std::string::npos)
+      return kill("la fixture de la base hostile",
+                  hostile_base.ok() ? "acceptee a tort" : refusal);
+  }
+  // FIXTURE 15 (audit delta, porte 2) : le digest final lie maximum_order et
+  // les fermetures — deux decisions differentes ne partagent jamais un
+  // digest.
+  {
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
+                                         mhgp::P3{1, 2, 0}};
+    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1, 2);
+    const mhgp::Catalogue catalogue = make_catalogue({{circle, {0, 1, 2}, {0, 1}}});
+    const auto order_two = mhgp3v::ValidatedHybridSidecar::build(cloud, catalogue, nullptr, 2,
+                                                                 &refusal, mutants);
+    const auto order_three = mhgp3v::ValidatedHybridSidecar::build(cloud, catalogue, nullptr,
+                                                                   3, &refusal, mutants);
+    if (!order_two.ok() || !order_three.ok())
+      return kill("la fixture du digest", "construction refusee : " + refusal);
+    if (order_two.sidecar_digest() == order_three.sidecar_digest())
+      return kill("la fixture du digest",
+                  "maximum_order n'est pas lie par le digest final");
+  }
   // FIXTURE 7 : den=0, support hors coquille, pool chevauche — refus.
   {
     const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0}};
@@ -318,7 +483,9 @@ int main(int argc, char** argv) {
     std::printf("MUTANT SURVIVANT %s : la porte ne mord pas\n", mutant_name);
     return 0;
   }
-  std::printf("OK : factory ValidatedHybridSidecar — sept fixtures du contrat recues,"
-              " fermeture liee par digests, certificats principaux par temoins\n");
+  std::printf("OK : factory ValidatedHybridSidecar — fixtures du contrat et de l'audit"
+              " delta recues : forge refusee a la compilation, doublon non adjacent"
+              " refuse, ABI hostile refusee avant arithmetique, support canonique"
+              " reconstruit, digests SHA-256 lies au certificat complet\n");
   return 0;
 }

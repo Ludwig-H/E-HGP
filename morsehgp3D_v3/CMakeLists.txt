@@ -960,10 +960,13 @@ set_tests_properties(mhgp3v_cell_source_mass_scanline PROPERTIES
   PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
 mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
   mhgp3v_cell_source_mass_reject_unknown "argument inconnu" 2 --inexistant 1)
-# LA SONDE P1a : identite du ledger fermee et soundness par balayage sur un
-# petit nuage de chaque famille ; CLI hostile refusee.
+# LA SONDE P1a (portes 4-5 de l'audit delta cbac109) : ledger de fate par
+# paire (partition, multiplicite un, inclusion non compensable des non-inertes
+# dans les microtuiles), planchers anti vert-par-vacuite, fixtures gravees et
+# cinq mutants a code exact ; CLI hostile refusee.
 add_test(NAME mhgp3v_pair_selfjoin_q2_terrain COMMAND mhgp3v_pair_selfjoin_probe
-         --points 400 --seed 20260810 --family terrain --verify-bruteforce 1)
+         --points 400 --seed 20260810 --family terrain --verify-bruteforce 1
+         --min-pruned-pairs 40000 --min-states 1000)
 set_tests_properties(mhgp3v_pair_selfjoin_q2_terrain PROPERTIES
   PASS_REGULAR_EXPRESSION "ledger C\\(n,2\\)=79800 FERME")
 add_test(NAME mhgp3v_pair_selfjoin_q2_scanline COMMAND mhgp3v_pair_selfjoin_probe
@@ -971,6 +974,75 @@ add_test(NAME mhgp3v_pair_selfjoin_q2_scanline COMMAND mhgp3v_pair_selfjoin_prob
          --verify-bruteforce 1)
 set_tests_properties(mhgp3v_pair_selfjoin_q2_scanline PROPERTIES
   PASS_REGULAR_EXPRESSION "FERME")
+# Doubles a code exact des regex : un add_test SANS regex exige le code 0
+# nativement (expect_failure.cmake refuse par construction les codes nuls).
+add_test(NAME mhgp3v_pair_selfjoin_terrain_code COMMAND mhgp3v_pair_selfjoin_probe
+         --points 400 --seed 20260810 --family terrain --verify-bruteforce 1
+         --min-pruned-pairs 40000 --min-states 1000)
+# Les fixtures gravees : regex sur la ligne OK + double a code 0.
+add_test(NAME mhgp3v_pair_selfjoin_fixture_contact COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture contact)
+set_tests_properties(mhgp3v_pair_selfjoin_fixture_contact PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : fixture contact recue")
+add_test(NAME mhgp3v_pair_selfjoin_fixture_contact_code COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture contact)
+add_test(NAME mhgp3v_pair_selfjoin_fixture_tenth COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture tenth-witness)
+set_tests_properties(mhgp3v_pair_selfjoin_fixture_tenth PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : fixture tenth-witness recue")
+add_test(NAME mhgp3v_pair_selfjoin_fixture_tenth_code COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture tenth-witness)
+add_test(NAME mhgp3v_pair_selfjoin_fixture_duplicate COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture duplicate)
+set_tests_properties(mhgp3v_pair_selfjoin_fixture_duplicate PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : fixture duplicate recue")
+add_test(NAME mhgp3v_pair_selfjoin_fixture_duplicate_code COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture duplicate)
+add_test(NAME mhgp3v_pair_selfjoin_fixture_scope COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture q2-vs-q3-scope)
+set_tests_properties(mhgp3v_pair_selfjoin_fixture_scope PROPERTIES
+  PASS_REGULAR_EXPRESSION "ancres superieures")
+add_test(NAME mhgp3v_pair_selfjoin_fixture_scope_code COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture q2-vs-q3-scope)
+# Les mutants : partition croisee, partition interne, dernier bloc (identite
+# du ledger), dixieme temoin et contact (ledger de fate par paire — un compte
+# agrege les aurait compenses).
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_kill_skip_half_block "mutant tue" 4 --points 400
+  --seed 20260810 --family terrain --inject skip-half-block)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_kill_drop_rr "mutant tue" 4 --points 400
+  --seed 20260810 --family terrain --inject drop-rr)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_kill_drop_last_microtile "mutant tue" 4 --points 400
+  --seed 20260810 --family terrain --inject drop-last-microtile)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_kill_threshold_nine "mutant tue" 4
+  --fixture tenth-witness --inject threshold-nine)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_kill_count_shell "mutant tue" 4
+  --fixture contact --inject count-shell)
+# Le mutant COMPENSE : duplication d'un fils croise + omission de l'autre a
+# masses egales — l'identite agregee FERME, seul le sort par paire mord.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_kill_duplicate_compensated "mutant tue" 4 --points 400
+  --seed 20260810 --family terrain --verify-bruteforce 1
+  --inject duplicate-compensated)
+# Budget-1 : la sonde refuse (code 3), elle ne tronque pas — et la frontiere
+# exacte du budget est gravee : 1846 etats passent, 1845 refusent.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_budget_refuses "budget d'etats depasse" 3 --points 400
+  --seed 20260810 --family terrain --max-states 1)
+add_test(NAME mhgp3v_pair_selfjoin_budget_exact_pass COMMAND
+         mhgp3v_pair_selfjoin_probe --points 400 --seed 20260810 --family terrain
+         --max-states 1846)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_budget_minus_one "budget d'etats depasse" 3 --points 400
+  --seed 20260810 --family terrain --max-states 1845)
+# Plancher viole : une sonde sous le plancher echoue a code 1.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+  mhgp3v_pair_selfjoin_floor_bites "plancher" 1 --points 400
+  --seed 20260810 --family terrain --min-pruned-pairs 79800)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
   mhgp3v_pair_selfjoin_reject_unknown "argument inconnu" 2 --inexistant 1)
 
@@ -996,6 +1068,8 @@ mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
   mhgp3v_sidecar_kill_strict_leq "mutant tue" 4 --mutant strict-leq)
 mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
   mhgp3v_sidecar_kill_witness_by_position "mutant tue" 4 --mutant witness-by-position)
+mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
+  mhgp3v_sidecar_kill_skip_canonical_check "mutant tue" 4 --mutant skip-canonical-check)
 mhgp3v_add_expected_code_test_for(mhgp3v_sidecar_factory_gate
   mhgp3v_sidecar_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
 add_test(NAME mhgp3v_structural_scale_k1_emst COMMAND mhgp3v_structural_scale_check
