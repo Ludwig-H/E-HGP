@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 Ce dossier est volontairement réduit aux autorités encore utiles. Les anciennes
 notes de livraison, réponses, benchmarks sans reçu et snapshots remplacés ont
-été supprimés du worktree; leur historique reste consultable dans Git. Un titre,
+été supprimés du dépôt actif; leur historique reste consultable dans Git. Un titre,
 un message de commit ou un CTest vert ne vaut jamais réception.
 
 ## Verdict live
@@ -32,6 +32,23 @@ preuves sous `docs/` restent supérieurs.
 | [`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md) | preuve des certificats cœur/profondeur q3/q4, hypothèses, égalités fail-open et limites industrielles |
 | [`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md) | provenance de la session G4 mass-only et arrêt de la cible; déclaration de session, pas verdict produit |
 
+## Preuves statiques citées par les prototypes
+
+Ces fichiers ne décrivent pas le `HEAD`; ils conservent un théorème, une
+contre-fixture ou le contrat d'une gate encore citée par le code :
+
+| objet | portée |
+| --- | --- |
+| [`AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md`](AUDIT_CONNECTIVITE_ORDER_K_A8111F0.md) | connectivité shallow conditionnelle de l'arrangement |
+| [`AUDIT_ORDER_K_FLATS_9C587E6.md`](AUDIT_ORDER_K_FLATS_9C587E6.md) | contre-fixtures permanentes de `order_k_flats` |
+| [`AUDIT_SOURCE_DIRECTE_24AD3D37.md`](AUDIT_SOURCE_DIRECTE_24AD3D37.md) | invariants et contre-exemples de la source directe |
+| [`AUDIT_VOIE_MULTIPLICITES_ORDER_K.md`](AUDIT_VOIE_MULTIPLICITES_ORDER_K.md) | propriétaire shallow avec multiplicités |
+| [`NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md`](NOTE_GATE_D_PREMIERES_INCIDENCES_DU_COEUR.md) | dichotomie des premières incidences du cœur |
+| [`NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md`](NOTE_GATE_D_UNE_ATTACHE_PAR_FACETTE_COEUR.md) | attache canonique conditionnelle par facette cœur |
+| [`NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md`](NOTE_PARENT_LOCAL_REVERSE_SEARCH_GATE_D.md) | parent local conditionnel de reverse search |
+| [`NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md`](NOTE_POSITIVE_INDEX_KD_EXACT_ET_CERTIFICAT_PINCEAU.md) | prédicats d'index spatial exact et contre-fixture flottante |
+| [`check_gate_d_fold_f0.py`](check_gate_d_fold_f0.py) | gate Python F0 enregistrée par CMake; son succès reste local à ses fixtures |
+
 ## Reçus
 
 Les reçus G4 mass-only sont dans
@@ -44,12 +61,16 @@ Les reçus G4 mass-only sont dans
 
 Le dossier
 [`../receipts/selfjoin_q2_20260811/`](../receipts/selfjoin_q2_20260811/)
-contient des journaux CPU diagnostiques. `scale_counters_raw.txt` mêle deux
-binaires après un append postérieur au marqueur de fin : ce n'est plus un reçu
-mono-snapshot immuable. `anchor_core_counters_raw.txt` ne devient qualifiable
-qu'après fin d'écriture, empreintes complètes et réception des portes du
-falsificateur. Leurs compteurs peuvent falsifier une route; leurs temps sous
-charge ne sont ni un benchmark reçu ni `warm_e2e`.
+contient trois journaux CPU diagnostiques :
+
+| fichier | SHA-256 | portée |
+| --- | --- | --- |
+| `scale_counters_raw.txt` | `2685ceb387f46cb0be2f0a04f7b1ad8afbcaa41c521dad20328c7a4cb5332bc5` | snapshot de l'ancien binaire, 15 runs nuls et le contre-exemple 12 500 rouge |
+| `scale_counters_correctif_12500_raw.txt` | `3ade1bc74dd2f129a9c26079fe8c52195946e8ccd479c587e462e2d40144149d` | autre binaire et autre contrat local; diagnostic correctif séparé, pas réécriture du reçu rouge |
+| `anchor_core_counters_raw.txt` | `6f7938c53da21a55e8e8072d66dc2cea400a2bea2628845f578b1dcf5dfc70a7` | campagne terminée 400/1 200/2 400; en-tête source incomplet et portes core non reçues |
+
+Leurs compteurs peuvent falsifier une route; leurs temps sous charge ne sont
+ni un benchmark reçu ni `warm_e2e`.
 
 ## Autorités externes
 

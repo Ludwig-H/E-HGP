@@ -147,11 +147,15 @@ $$\text{q4: }15\lVert U\rVert^2\leq4D^2.$$
 
 Le second utilise le rayon rationnel sûr `D/sqrt(15)`, strictement inférieur à
 `D sin(15 degrés)`; son égalité reste donc strictement dans le vrai spindle.
+Il exige néanmoins `D^2>0`. Sur une paire de `PointId` distincts mais
+colocalisés, `D^2=||U||^2=0` rendrait la comparaison large `0<=0` vraie alors
+que le prédicat exact refuse `g=0`.
 Pour un produit de boîtes d'extrémités et une boîte témoin,
 on peut borner par intervalles `max ||U||^2` et `min D^2`. Si l'une des
-inégalités reste stricte avec ces bornes, tous les identifiants de la boîte
-témoin sont universels pour toutes les paires du produit. Sinon on descend;
-aucune paire n'est supprimée.
+inégalités est certifiée avec ces bornes, tous les identifiants de la boîte
+témoin sont universels pour toutes les paires du produit. Pour q4, la gate de
+bloc exige en plus `min D^2>0`; sinon on descend. Aucune paire n'est supprimée
+sur un cas indécis.
 
 Aux blocs terminaux, le prédicat polynomial complet est plus fort. Dans les
 deux cas, le reçu de prune conserve les deux plages d'extrémités et neuf ou
@@ -200,7 +204,8 @@ immédiat.
 Les résiduels des lanes ne sont pas emboîtés. La fixture q2 contre q3 possède
 dix intérieurs diamétraux d'un seul côté : q2 supprime et `delta=0` conserve
 q3. Inversement, neuf `PointId` distincts sur le segment ouvert `(a,b)` donnent
-`|P|=9` et `delta=9` : q2 conserve et q3 supprime.
+`|P|=9` et `delta=9` : q2 conserve, tandis qu'une activation munie d'un
+`q_cert=3` peut être supprimée par la profondeur q3.
 
 Le calcul ponctuel exact de `delta` est un balayage angulaire. Les projections
 nulles sont créditées dans une banque `always`; rayons confondus, antipodes et
@@ -220,6 +225,22 @@ La fixture q4 est le tétraèdre régulier propre
 `a=(13,13,13)`, `b=(13,7,7)`, `z=(7,13,7)`, `t=(7,7,13)`, de centre
 `(10,10,10)` et rayon carré 27. Le point extra-shell `w=(15,11,11)` satisfait
 `g^2=2Q`. Là encore, l'égalité doit rester fail-open.
+
+Trois autres fixtures séparent des gardes que les contacts précédents ne
+couvrent pas :
+
+- égalité sûre du sous-test rationnel q4 : `a=(20,20,20)`, `b=(30,24,22)`,
+  `w=(27,24,21)` donnent `D^2=120`, `||U||^2=32`, donc
+  `15||U||^2=4D^2=480`, mais `g=88`, `Q=704` et
+  `g^2=7744>2Q=1408`; l'égalité rationnelle doit être acceptée lorsque
+  `D^2>0`;
+- dégénérescence q4 : dix `PointId` à la même coordonnée donnent, pour toute
+  paire et tout autre identifiant, `D^2=||U||^2=g=0`; aucun témoin ni
+  certificat de bloc Jung n'est permis malgré `15||U||^2<=4D^2`;
+- garde `q_cert` de la profondeur : `a=(0,0,0)`, `b=(20,0,0)` et
+  `z_i=(i,0,0)` pour `1<=i<=9` donnent `delta=9`, mais seulement un support
+  q2, donc `p+q=11`; le seuil q3 est interdit sans support propre positif q3
+  certifié pour la même `BallKey`.
 
 ## Coût : ce qui reste à prouver
 
@@ -245,28 +266,42 @@ est tenu dans l'audit courant. La profondeur fermée et le center-cover restent
 des composants séparés à construire. La réception complète suit cet ordre :
 
 1. Recevoir le falsificateur count-only du cœur sans catalogue global de
-   paires : self-join canonique, garde `D^2>0`, test de boule par blocs, test
-   polynomial terminal et sortie des seules ancres survivantes.
+   paires : self-join canonique, garde ponctuelle `D^2>0`, garde de bloc q4
+   `min D^2>0`, test de boule par blocs, test polynomial terminal et sortie des
+   seules ancres survivantes.
 2. Sur `n<=32`, tenir un sort par paire et rejouer chaque certificat; comparer
-   ensuite toutes les ancres de supports q3/q4 non inertes d'un oracle
-   indépendant au sur-ensemble émis. Les témoins sont dédupliqués comme
-   `PointId`; une position locale n'est valide que si l'arbre et son ordre sont
-   engagés par le reçu.
-3. Tuer les mutants `>` vers `>=`, seuil `9/8` diminué d'un, paire non maximale,
-   witness dupliqué, plage recouvrant une extrémité, ancre ex æquo mal possédée,
-   support non positif et dernier bloc omis; ajouter pour la profondeur zéro,
-   rayons confondus, antipodes, permutation et demi-plan ouvert à la place du
-   fermé.
+   ensuite toutes les ancres de supports q3/q4 non inertes au sur-ensemble
+   émis avec un juge mathématique indépendant du sujet. Le rejeu courant qui
+   partage `universal_witness`, `miniball_of` et `sphere_side` reste un
+   différentiel utile, pas cette autorité indépendante. Les témoins sont
+   dédupliqués comme `PointId`; une position locale n'est valide que si l'arbre
+   et son ordre sont engagés par le reçu. La campagne minimale non vacue est
+   `--points 32 --seed 13 --family terrain --leaf-size 2 --oracle 1` : elle
+   doit conserver au moins un prune de bloc dans chaque lane.
+3. Tuer dans le cœur les mutants mordants `>` vers `>=`, seuil `9/8` diminué
+   d'un, paire non maximale, témoin dupliqué, partition compensée et dernier
+   bloc omis. Trois mutations ne constituent pas des gates de ce count-only :
+   une plage recouvrant une extrémité est déjà refusée par `g=0`; accepter un
+   tuple non positif est observationnellement équivalent car toute paire
+   prunée place déjà ses 9/8 témoins dans sa miniboule; choisir un autre
+   diamètre maximal ex æquo ne change pas l'ensemble résiduel. Positivité et
+   ownership restent obligatoires et sont testés dans le constructeur aval.
+   Pour la profondeur, ajouter profondeur zéro, rayons confondus, antipodes,
+   permutation et demi-plan ouvert à la place du fermé.
 4. Publier par famille les états, visites, certificats boule/spindle, ancres
    survivantes, octets et high-water à `12 500/25 000/50 000` points. Le seuil
    de deux exposants consécutifs supérieurs à `1,35` est une règle de gate
    opérationnelle choisie pour falsifier tôt la route; ce n'est pas un
    théorème de complexité.
-5. Implémenter ensuite la profondeur fermée aux terminaux et, séparément, le
-   center-cover conditionnel. Une seule machine de blocs peut partager l'arbre et la partition des paires,
-   mais q2, q3 et q4 gardent trois sorts et trois ledgers indépendants. Mesurer
-   d'abord `cœur seul`, `profondeur seule` et `combiné` avec compteurs séparés;
-   un résiduel d'une lane ne sert jamais d'univers à une autre.
+5. Avant la profondeur, ajouter au cœur le rejet `L4` q2, l'héritage lossless
+   des 9/8 témoins et une frontière exacte sans cap; réintroduire les
+   sous-arbres d'extrémités libérés par chaque split. Si deux exposants
+   consécutifs restent au-dessus de 1,35, classer ce self-join `NO-GO` produit.
+   Implémenter ensuite la profondeur fermée aux terminaux et, séparément, le
+   center-cover conditionnel. Une seule machine de blocs peut partager l'arbre
+   et la partition des paires, mais q2, q3 et q4 gardent trois sorts et trois
+   ledgers indépendants. Mesurer au futur `cœur seul`, `profondeur seule` et
+   `combiné`; un résiduel d'une lane ne sert jamais d'univers à une autre.
 6. Ne porter sur G4 que si les masses passent, puis mesurer le pipeline complet
    avec q3/q4 shallow, census, resolver, fold et payload.
 

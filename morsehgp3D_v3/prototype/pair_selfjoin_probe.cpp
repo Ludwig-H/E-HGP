@@ -85,6 +85,7 @@
 
 #include "mhgp/mhgp.hpp"
 #include "prototype/cloud_families.hpp"
+#include "prototype/sidecar_sha256.hpp"
 
 namespace {
 
@@ -230,9 +231,11 @@ struct ProbeReceipt {
   i64 depth_max = 0;
   i64 witness_stack_high_water = 0;   // pile de la recherche (elements)
   i64 l4_skipped_nodes = 0;      // noeuds retires par l'infimum L4 >= 0
-  i64 l4_skipped_points = 0;     // points couverts par ces retraits
-  i64 inherited_credits = 0;     // temoins herites credites sans recherche
+  i64 l4_skipped_points = 0;     // points couverts par ces retraits (multiplicite)
+  i64 u4_credited_nodes = 0;     // noeuds entiers credites (sup < 0)
+  i64 inherited_credits = 0;     // temoins herites credites (multiplicite)
   i64 early_exits = 0;           // recherches arretees au seuil
+  i64 nine_plus_one = 0;         // seuil atteint avec neuf herites + du neuf
 };
 
 // LES INJECTIONS (porte 4) : chacune doit mourir par le ledger de fate ou
@@ -254,9 +257,19 @@ struct ProbeInjections {
   // ou deux echos multi-echo depasser n — ledger, fate et oracle etaient
   // alors dimensionnes avec le n demande. Le driver exige pts.size() == n.
   bool generator_overshoot = false;
+  // LES MUTANTS DE LA RECEPTION L4/HERITAGE (audit etat courant) — chacun
+  // doit mourir par le DIFFERENTIEL bi-mode (egalite de tous les sorts et
+  // masses contre la baseline sans L4 ni heritage) :
+  bool l4_sign = false;             // borne superieure prise pour l'infimum
+  bool inherit_shift = false;       // handle herite decale d'une position
+  bool inherit_double_count = false;// herite recompte dans un credit de noeud
+  bool inherit_stale_sibling = false;// recolte d'un bloc transmise a un bloc etranger
+  bool stop_at_inherited = false;   // neuf herites : la recherche du dixieme sautee
   bool any() const {
     return skip_half_block || drop_rr || threshold_nine || count_shell ||
-           drop_last_microtile || duplicate_compensated || generator_overshoot;
+           drop_last_microtile || duplicate_compensated || generator_overshoot ||
+           l4_sign || inherit_shift || inherit_double_count || inherit_stale_sibling ||
+           stop_at_inherited;
   }
 };
 
@@ -285,6 +298,10 @@ struct Probe {
   int fate_points = 0;
   bool fate_violated = false;
   i64 last_microtile_a = -1, last_microtile_b = -1;   // pour drop-last-microtile
+  // BASELINE DE RECEPTION : ni L4, ni heritage — le comportement recu du
+  // commit 40050c4, la reference du differentiel bi-mode.
+  bool baseline = false;
+  InheritedWitnesses last_harvest_;   // pour le mutant inherit-stale-sibling
   // Pile REUTILISEE, capacite reservee : plus d'allocation en regime etabli.
   std::vector<int> stack_ = [] { std::vector<int> s; s.reserve(256); return s; }();
 
@@ -305,9 +322,15 @@ struct Probe {
   // silence.
   i64 count_witnesses(const Node& a, const Node& b, const InheritedWitnesses& inherited,
                       InheritedWitnesses* harvested) {
+    // BASELINE : aucun heritage credite, aucune position transmise, aucun
+    // retrait L4 — le comportement recu de 40050c4, reference du
+    // differentiel. Toutes les lambdas lisent `credited`, jamais
+    // `inherited`, pour que la baseline soit reellement vierge.
+    const InheritedWitnesses empty{};
+    const InheritedWitnesses& credited = baseline ? empty : inherited;
     const auto is_inherited = [&](int position) {
-      for (int i = 0; i < inherited.count; ++i)
-        if (inherited.positions[(std::size_t)i] == position) return true;
+      for (int i = 0; i < credited.count; ++i)
+        if (credited.positions[(std::size_t)i] == position) return true;
       return false;
     };
     const auto harvest = [&](int position) {
@@ -315,9 +338,12 @@ struct Probe {
         harvested->positions[(std::size_t)harvested->count++] = position;
     };
     harvested->count = 0;
-    i64 total = inherited.count;
-    receipt.inherited_credits += inherited.count;
-    for (int i = 0; i < inherited.count; ++i) harvest(inherited.positions[(std::size_t)i]);
+    i64 total = credited.count;
+    receipt.inherited_credits += credited.count;
+    for (int i = 0; i < credited.count; ++i) harvest(credited.positions[(std::size_t)i]);
+    // MUTANT stop-at-inherited : neuf herites suffiraient — la recherche du
+    // dixieme est sautee et le prune est perdu la ou il etait du.
+    if (injections.stop_at_inherited && credited.count >= 9) return total;
     stack_.clear();
     stack_.push_back(0);
     while (!stack_.empty()) {
@@ -327,31 +353,41 @@ struct Probe {
       stack_.pop_back();
       const Node& node = tree->nodes[(std::size_t)node_index];
       ++receipt.witness_visits;
-      // L4 D'ABORD : aucun temoin strict dans la boite — retire, plages
-      // d'extremites comprises. Le MUTANT count-shell confond coquille et
-      // interieur PARTOUT : il ne retire que `L4 > 0`, sinon le contact
-      // qu'il doit compter a tort serait retire avant de mordre.
-      const i64 inf4 = pair_witness_inf4(node, a, b);
-      if (injections.count_shell ? inf4 > 0 : inf4 >= 0) {
-        ++receipt.l4_skipped_nodes;
-        receipt.l4_skipped_points += node.end - node.begin;
-        continue;
+      // L4 D'ABORD (jamais en baseline) : aucun temoin strict dans la boite
+      // — retire, plages d'extremites comprises. Le MUTANT count-shell
+      // confond coquille et interieur PARTOUT : il ne retire que `L4 > 0`,
+      // sinon le contact qu'il doit compter a tort serait retire avant de
+      // mordre. Le MUTANT l4-sign prend la borne SUPERIEURE pour l'infimum :
+      // il retire des noeuds porteurs de temoins et le differentiel le voit.
+      if (!baseline) {
+        const i64 inf4 = injections.l4_sign ? pair_witness_sup(node, a, b)
+                                            : pair_witness_inf4(node, a, b);
+        if (injections.count_shell ? inf4 > 0 : inf4 >= 0) {
+          ++receipt.l4_skipped_nodes;
+          receipt.l4_skipped_points += node.end - node.begin;
+          continue;
+        }
       }
       if (ranges_disjoint(node, a, b)) {
         const i64 sup = pair_witness_sup(node, a, b);
         // MUTANT count-shell : un sup nul (contact possible) compterait le
         // noeud entier — dot == 0 est SHELL, jamais interieur.
         if (sup < 0 || (injections.count_shell && sup == 0)) {
+          ++receipt.u4_credited_nodes;
           i64 fresh = node.end - node.begin;
-          for (int i = 0; i < inherited.count; ++i)
-            if (inherited.positions[(std::size_t)i] >= node.begin &&
-                inherited.positions[(std::size_t)i] < node.end)
-              --fresh;   // deja credite par l'heritage
+          // MUTANT inherit-double-count : l'herite present dans le noeud
+          // serait recompte — le total gonfle et prune a tort.
+          if (!injections.inherit_double_count)
+            for (int i = 0; i < credited.count; ++i)
+              if (credited.positions[(std::size_t)i] >= node.begin &&
+                  credited.positions[(std::size_t)i] < node.end)
+                --fresh;   // deja credite par l'heritage
           total += fresh;
           for (int t = node.begin; t < node.end && harvested->count < 9; ++t)
             if (!is_inherited(t)) harvest(t);
           if (total >= witness_threshold) {
             ++receipt.early_exits;
+            if (credited.count == 9) ++receipt.nine_plus_one;
             return total;
           }
           continue;
@@ -369,6 +405,7 @@ struct Probe {
           }
           if (total >= witness_threshold) {
             ++receipt.early_exits;
+            if (credited.count == 9) ++receipt.nine_plus_one;
             return total;
           }
           continue;
@@ -395,6 +432,7 @@ struct Probe {
         }
         if (total >= witness_threshold) {
           ++receipt.early_exits;
+          if (credited.count == 9) ++receipt.nine_plus_one;
           return total;
         }
         continue;
@@ -459,14 +497,28 @@ struct Probe {
         assign_internal_block(a, PairFate::kMicrotile);
         return;
       }
-      process(a.left, a.left, depth + 1, {});
-      process(a.left, a.right, depth + 1, {});
+      // MUTANT inherit-stale-sibling : la recolte du DERNIER bloc croise est
+      // transmise a des blocs qui ne l'ont jamais validee — ses temoins
+      // peuvent recouvrir les nouvelles extremites ou ne pas etre stricts.
+      InheritedWitnesses internal_inherit{};
+      if (injections.inherit_stale_sibling) internal_inherit = last_harvest_;
+      process(a.left, a.left, depth + 1, internal_inherit);
+      process(a.left, a.right, depth + 1, internal_inherit);
       if (!injections.drop_rr)   // MUTANT : la partition interne perd (R,R)
-        process(a.right, a.right, depth + 1, {});
+        process(a.right, a.right, depth + 1, internal_inherit);
       return;
     }
     InheritedWitnesses harvested;
     const i64 found = count_witnesses(a, b, inherited, &harvested);
+    last_harvest_ = harvested;
+    // MUTANT inherit-shift : chaque handle transmis est decale d'une
+    // position — le fils credite d'autres points que les temoins certifies.
+    if (injections.inherit_shift) {
+      const int size = (int)tree->order.size();
+      for (int i = 0; i < harvested.count; ++i)
+        harvested.positions[(std::size_t)i] =
+            (harvested.positions[(std::size_t)i] + 1) % size;
+    }
     if (found >= witness_threshold - (injections.threshold_nine ? 1 : 0)) {
       // MUTANT threshold-nine : neuf temoins pruneraient — p+q >= 11 < K+2.
       receipt.pruned_pairs += (i64)(a.end - a.begin) * (i64)(b.end - b.begin);
@@ -605,6 +657,27 @@ Fixture make_fixture(const std::string& name) {
     fixture.expected_interior = 0;
     return fixture;
   }
+  if (name == "u16-extremes") {
+    // LES EXTREMES u16 (reception L4) : la paire diagonale (0,0,0)-(65535,
+    // 65535,65535), quatre coins EXACTEMENT sur sa sphere diametrale (angle
+    // droit : dot nul, contact), douze temoins stricts au centre. Toute
+    // l'arithmetique L4/U4/sup travaille aux magnitudes maximales du profil
+    // — la campagne sanitizers rejoue cette fixture.
+    fixture.name = "u16-extremes";
+    fixture.cloud.push_back(mhgp::P3{0, 0, 0});
+    fixture.cloud.push_back(mhgp::P3{65535, 65535, 65535});
+    fixture.cloud.push_back(mhgp::P3{0, 65535, 0});
+    fixture.cloud.push_back(mhgp::P3{65535, 0, 0});
+    fixture.cloud.push_back(mhgp::P3{0, 0, 65535});
+    fixture.cloud.push_back(mhgp::P3{65535, 65535, 0});
+    for (int j = 0; j < 12; ++j)
+      fixture.cloud.push_back(mhgp::P3{(mhgp::i32)(32760 + j), 32768, 32768});
+    fixture.pair_x = 0;
+    fixture.pair_y = 1;
+    fixture.require_fate = false;   // granularite de bloc libre
+    fixture.expected_interior = 12;
+    return fixture;
+  }
   if (name == "q2-vs-q3-scope") {
     // LA FIXTURE DE PORTEE de l'audit delta, coordonnees GRAVEES par
     // l'auditeur : ab satisfait le certificat de prune q2 (dix temoins
@@ -637,8 +710,9 @@ Fixture make_fixture(const std::string& name) {
 
 int main(int argc, char** argv) {
   int n = 2400, coord = 0, smax = 11, leaf_size = 8, verify_bruteforce = 0;
+  int differential = 0;
   i64 seed = 20260810, max_states = 50000000;
-  i64 min_pruned_pairs = 0, min_states = 0;
+  i64 min_pruned_pairs = 0, min_states = 0, min_nine_plus_one = 0;
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kTerrain;
   std::string fixture_name;
   ProbeInjections injections;
@@ -681,6 +755,13 @@ int main(int argc, char** argv) {
         injections.duplicate_compensated = true;
       else if (!strcmp(argv[i], "generator-overshoot"))
         injections.generator_overshoot = true;
+      else if (!strcmp(argv[i], "l4-sign")) injections.l4_sign = true;
+      else if (!strcmp(argv[i], "inherit-shift")) injections.inherit_shift = true;
+      else if (!strcmp(argv[i], "inherit-double-count"))
+        injections.inherit_double_count = true;
+      else if (!strcmp(argv[i], "inherit-stale-sibling"))
+        injections.inherit_stale_sibling = true;
+      else if (!strcmp(argv[i], "stop-at-inherited")) injections.stop_at_inherited = true;
       else { std::printf("ECHEC : injection inconnue %s\n", argv[i]); return 2; }
       continue;
     }
@@ -696,13 +777,24 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--verify-bruteforce")) verify_bruteforce = (int)value;
     else if (!strcmp(argv[i], "--min-pruned-pairs")) min_pruned_pairs = value;
     else if (!strcmp(argv[i], "--min-states")) min_states = value;
+    else if (!strcmp(argv[i], "--differential")) differential = (int)value;
+    else if (!strcmp(argv[i], "--min-nine-plus-one")) min_nine_plus_one = value;
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     ++i;
   }
   if (n < 4 || n > 100000 || coord < 0 || coord > 65536 || smax != 11 || leaf_size < 2 ||
-      leaf_size > 256 || max_states < 1 || verify_bruteforce < 0 || verify_bruteforce > 1) {
+      leaf_size > 256 || max_states < 1 || verify_bruteforce < 0 || verify_bruteforce > 1 ||
+      differential < 0 || differential > 1) {
     std::printf("ECHEC : campagne absurde (la sonde est calibree pour smax=11)\n");
     return 2;
+  }
+  if (differential == 1) {
+    if (n > 3000) {
+      std::printf("ECHEC : le differentiel bi-mode exige n <= 3000 (deux tableaux de"
+                  " sorts)\n");
+      return 2;
+    }
+    verify_bruteforce = 1;   // les sorts sont la matiere comparee
   }
   const auto fail = [&](const char* what, const char* detail) {
     if (injections.any()) {
@@ -755,6 +847,39 @@ int main(int argc, char** argv) {
   const auto t0 = std::chrono::steady_clock::now();
   tree.build(pts, leaf_size);
   const auto t1 = std::chrono::steady_clock::now();
+  // LE RECU ENGAGE L'ORDRE (audit etat courant) : les positions heritees
+  // sont des handles locaux dans `tree.order`, pas des PointId persistants —
+  // le digest de l'ordre rend tout reçu de recherche interpretable.
+  mhgp3v::Sha256Stream order_stream;
+  order_stream.put_length(tree.order.size());
+  for (int position : tree.order) order_stream.put_i64((long long)position);
+  const std::string order_digest_hex = mhgp3v::sha256_hex(order_stream.finalize());
+
+  // LA BASELINE DU DIFFERENTIEL BI-MODE (reception L4/heritage, audit etat
+  // courant) : le comportement recu de 40050c4 — ni L4, ni heritage — SANS
+  // les injections du sujet (le juge n'herite jamais du mutant). Elle
+  // s'execute d'abord ; l'egalite de TOUS les sorts et masses est exigee
+  // apres le run optimise.
+  ProbeReceipt baseline_receipt{};
+  std::vector<PairFate> baseline_fate;
+  if (differential == 1) {
+    baseline_fate.assign((std::size_t)((i64)n * (n - 1) / 2), PairFate::kUnassigned);
+    Probe reference;
+    reference.tree = &tree;
+    reference.witness_threshold = 10;
+    reference.max_states = max_states;
+    reference.baseline = true;
+    reference.fate = &baseline_fate;
+    reference.fate_points = n;
+    reference.process(0, 0, 0, {});
+    if (reference.budget_exceeded) {
+      std::printf("ECHEC : budget d'etats depasse dans la baseline\n");
+      return 3;
+    }
+    if (reference.fate_violated)
+      return fail("la baseline du differentiel", "sort double dans la reference");
+    baseline_receipt = reference.receipt;
+  }
 
   std::vector<PairFate> fate;
   Probe probe;
@@ -818,6 +943,34 @@ int main(int argc, char** argv) {
       }
     std::printf("fate       : %lld paires non inertes, toutes en microtuile — partition,"
                 " multiplicite un et inclusion certifiees paire par paire\n", non_inert);
+  }
+
+  // LE DIFFERENTIEL BI-MODE (reception L4/heritage) : l'egalite de TOUS les
+  // sorts et de toutes les masses contre la baseline — un budget ou une
+  // inclusion unilaterale survivrait a une perte de prune, l'egalite non.
+  if (differential == 1) {
+    if (baseline_receipt.states != receipt.states ||
+        baseline_receipt.pruned_pairs != receipt.pruned_pairs ||
+        baseline_receipt.microtile_pairs != receipt.microtile_pairs ||
+        baseline_receipt.pruned_states != receipt.pruned_states ||
+        baseline_receipt.microtile_states != receipt.microtile_states)
+      return fail("le differentiel bi-mode",
+                  "les masses du mode optimise different de la baseline recue");
+    for (std::size_t k = 0; k < fate.size(); ++k)
+      if (fate[k] != baseline_fate[k])
+        return fail("le differentiel bi-mode",
+                    "un sort de paire differe entre baseline et optimise");
+    std::printf("differentiel : sorts et masses IDENTIQUES — baseline visites=%lld"
+                " tests=%lld ; optimise visites=%lld tests=%lld (L4=%lld noeuds,"
+                " U4=%lld, herites=%lld, 9+1=%lld)\n",
+                baseline_receipt.witness_visits, baseline_receipt.witness_point_tests,
+                receipt.witness_visits, receipt.witness_point_tests,
+                receipt.l4_skipped_nodes, receipt.u4_credited_nodes,
+                receipt.inherited_credits, receipt.nine_plus_one);
+    if (min_nine_plus_one > 0 && receipt.nine_plus_one < min_nine_plus_one)
+      return fail("le plancher nine-plus-one",
+                  "le cas neuf-herites-plus-un-nouveau n'apparait pas assez pour armer"
+                  " son mutant");
   }
 
   // LES ASSERTIONS DE FIXTURE.
@@ -885,9 +1038,12 @@ int main(int argc, char** argv) {
               receipt.states, receipt.pruned_states, receipt.witness_visits,
               receipt.witness_point_tests, receipt.pruned_pairs, receipt.microtile_pairs,
               receipt.microtile_states, (i64)all_pairs);
-  std::printf("recherche  : L4-retraits=%lld noeuds (%lld points), herites=%lld,"
-              " sorties precoces=%lld\n", receipt.l4_skipped_nodes,
-              receipt.l4_skipped_points, receipt.inherited_credits, receipt.early_exits);
+  std::printf("recherche  : L4-retraits=%lld noeuds (%lld points, multiplicite),"
+              " U4-credits=%lld, herites=%lld (multiplicite), sorties precoces=%lld,"
+              " 9+1=%lld — order-digest=%.16s\n", receipt.l4_skipped_nodes,
+              receipt.l4_skipped_points, receipt.u4_credited_nodes,
+              receipt.inherited_credits, receipt.early_exits, receipt.nine_plus_one,
+              order_digest_hex.c_str());
   std::printf("parcimonie : microtuiles %.2f %% des paires, profondeur max=%lld, pile"
               " temoin max=%lld — %.3f s de phase locale (1 thread, pas un warm_e2e)\n",
               share, receipt.depth_max, receipt.witness_stack_high_water,

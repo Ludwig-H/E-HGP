@@ -220,7 +220,15 @@ Un self-join canonique implicite de toutes les paires peut donc émettre un
 sur-ensemble complet des ancres non inertes sans construire un tableau de
 paires et sans filtrer par q2. Le test de boule inscrit
 `3||U||^2<D^2` en q3 ou `15||U||^2<=4D^2` en q4 fournit un premier prune AABB;
-le test polynomial complet s'applique aux terminaux.
+la comparaison large q4 exige toutefois `min D^2>0` sur tout le bloc. Sinon le
+cas `D^2=U^2=0` fabriquerait un faux certificat malgré `g=0`, et la machine
+doit descendre jusqu'au prédicat exact.
+
+Le rejet `L4>=0` de la lane q2 s'applique aussi à la recherche de témoins du
+cœur, car tout témoin Jung vérifie d'abord `g>0`, équivalent à l'intérieur
+diamétral strict. Les 9/8 témoins déjà universels peuvent être hérités sous
+raffinement. Toute frontière persistante reste lossless, sans cap, et
+réintroduit les sous-arbres d'extrémités devenus disjoints après un split.
 
 La profondeur fermée de demi-boule fournit un filtre terminal complémentaire.
 Si `P={z:(z-a) dot (z-b)<0}` et `delta(a,b)` est le minimum du nombre de
@@ -238,15 +246,17 @@ pour toute la paire.
 Le total diamétral q2 et la profondeur q3/q4 ont des résiduels incomparables.
 Une seule machine peut partager l'arbre et la partition des paires, mais chaque
 lane conserve son propre sort, son ledger et ses compteurs. Le cœur seul, la
-profondeur seule et leur combinaison sont mesurés séparément.
+profondeur seule et leur combinaison devront être mesurés séparément; seul le
+cœur possède aujourd'hui un falsificateur.
 
 Cette preuve donne la couverture, pas la parcimonie. Le nombre d'ancres peut
 rester quadratique et une recherche naïve des témoins cubique. La source ne
 devient candidate produit qu'après un ledger pair-à-pair borné et une admission
 des masses à `12 500/25 000/50 000`. Chaque reçu de prune déduplique ses
-`PointId` témoins avant d'appliquer le seuil. Le juge de couverture est
-indépendant des primitives du sujet; une dépendance v2 commune peut servir de
-différentiel supplémentaire, jamais d'autorité unique.
+`PointId` témoins avant d'appliquer le seuil. Le juge de couverture doit être
+indépendant des primitives du sujet; c'est une exigence d'admission. Une
+dépendance v2 commune peut servir de différentiel supplémentaire, jamais
+d'autorité unique.
 
 ### 6.4 Supports q3 : un centre par troisième point
 
@@ -441,10 +451,10 @@ un refus de ressource sont trois statuts distincts.
 
 ## 13. Jalons
 
-1. Fermer le contrat de cardinalité des générateurs, puis recevoir la borne
-   inférieure q2 et l'héritage de témoins par différentiel baseline, mutants
-   ciblés et égalité de tous les sorts et masses; publier les compteurs
-   seulement après cette gate.
+1. Étendre la porte de cardinalité reçue dans q2 au générateur partagé et à
+   tous ses consommateurs, imposer le code zéro à chaque CTest nominal, puis
+   recevoir la borne inférieure q2 et l'héritage de témoins par différentiel
+   baseline, mutants ciblés et égalité de tous les sorts et masses.
 2. Implémenter et comparer la route q2 Yao48/LBVH avec census fermé; conserver
    le self-join comme oracle ou second prune selon les masses.
 3. Lier le reçu sidecar à une identité producteur vérifiée, tuer les mauvaises
@@ -452,14 +462,18 @@ un refus de ressource sont trois statuts distincts.
    uniquement comme oracle permanent `n<=32`.
 4. Recevoir le prune de cellule avec sa portée exacte de branche et le
    conserver comme diagnostic adaptatif, hors chemin chaud.
-5. Recevoir le self-join cœur q3/q4 après garde `D^2>0`, déduplication des
-   certificats et oracle indépendant; prototyper ensuite la profondeur fermée
-   terminale et mesurer chaque certificat avant tout sweep G4.
-6. Recevoir `BallActivation`, census fermé, tombstones et resolver contre Gamma
+5. Corriger la garde de bloc q4 `min D^2>0`, rendre le rejeu de blocs non
+   vacu, puis recevoir le self-join cœur q3/q4 avec certificats dédupliqués et
+   juge indépendant. Ajouter `L4`, héritage et frontière lossless; abandonner
+   cette route produit si sa gate d'exposant mord avant tout sweep G4.
+6. Prototyper ensuite la profondeur fermée terminale et le center-cover
+   séparément, avec positivité et owner canonique reçus dans le constructeur
+   aval.
+7. Recevoir `BallActivation`, census fermé, tombstones et resolver contre Gamma
    exhaustif à petit `n`.
-7. Porter les seules routes admises sur CUDA et mesurer source, certification,
+8. Porter les seules routes admises sur CUDA et mesurer source, certification,
    fold et payload dans un même `warm_e2e`.
-8. Spécifier séparément les verticales ou conserver explicitement le contrat
+9. Spécifier séparément les verticales ou conserver explicitement le contrat
    horizontal réduit.
 
 ## 14. Conditions de GO

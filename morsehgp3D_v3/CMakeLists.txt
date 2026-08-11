@@ -1033,6 +1033,36 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
   mhgp3v_pair_selfjoin_kill_count_shell "mutant tue" 4
   --fixture contact --inject count-shell)
+# LA RECEPTION L4/HERITAGE (porte 1 de l'audit etat courant) : differentiel
+# bi-mode — la baseline recue de 40050c4 (ni L4 ni heritage, sans les
+# injections du sujet) contre le mode optimise, egalite de TOUS les sorts et
+# masses exigee ; plancher 9+1 pour armer le mutant du dixieme recherche ;
+# cinq mutants cibles ; fixture aux extremes u16 (magnitudes maximales).
+add_test(NAME mhgp3v_pair_selfjoin_differential_terrain COMMAND
+         mhgp3v_pair_selfjoin_probe --points 400 --seed 20260810 --family terrain
+         --differential 1 --min-nine-plus-one 10)
+set_tests_properties(mhgp3v_pair_selfjoin_differential_terrain PROPERTIES
+  PASS_REGULAR_EXPRESSION "sorts et masses IDENTIQUES")
+add_test(NAME mhgp3v_pair_selfjoin_differential_terrain_code COMMAND
+         mhgp3v_pair_selfjoin_probe --points 400 --seed 20260810 --family terrain
+         --differential 1 --min-nine-plus-one 10)
+# uniform a n=1000 : a 400 la part de microtuiles (62 %) declenche le NO-GO
+# de parcimonie, orthogonal au differentiel — 1000 reste sous les 50 %.
+add_test(NAME mhgp3v_pair_selfjoin_differential_uniform_code COMMAND
+         mhgp3v_pair_selfjoin_probe --points 1000 --seed 20260810 --family uniform
+         --differential 1 --min-nine-plus-one 10)
+foreach(l4_mutant l4-sign inherit-shift inherit-double-count inherit-stale-sibling
+        stop-at-inherited)
+  mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
+    mhgp3v_pair_selfjoin_kill_${l4_mutant} "mutant tue" 4 --points 400
+    --seed 20260810 --family terrain --differential 1 --inject ${l4_mutant})
+endforeach()
+add_test(NAME mhgp3v_pair_selfjoin_fixture_u16_extremes COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture u16-extremes)
+set_tests_properties(mhgp3v_pair_selfjoin_fixture_u16_extremes PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : fixture u16-extremes recue")
+add_test(NAME mhgp3v_pair_selfjoin_fixture_u16_extremes_code COMMAND
+         mhgp3v_pair_selfjoin_probe --fixture u16-extremes)
 # LE CONTRAT DE CARDINALITE du generateur (contre-exemple multi-echo de
 # l'audit etat courant) : a n=1100 le mutant qui retablit l'ancienne garde
 # avant-pixel rend 1101 points — le driver exige l'egalite et le tue ; le
