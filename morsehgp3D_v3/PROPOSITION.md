@@ -153,7 +153,7 @@ bornes plus petites et de tous les ex æquo canoniques, ou publie `empty` après
 épuisement de tous les nœuds compatibles. Un budget interrompu ou une banque
 q2 sous-pleine ne certifie jamais le vide. Après déduplication, Kruskal ou
 Borůvka s'exécute sur le graphe sparse; les `n-1` arêtes finales sont triées
-par `(distance_squared,PointId,PointId)` et chaque lot d'égalité est rejoué
+par `(distance_squared,min_PointId,max_PointId)` et chaque lot d'égalité est rejoué
 atomiquement.
 
 Le Borůvka point--LBVH reste un diagnostic exact borné, pas la route
@@ -226,15 +226,28 @@ architecture admise.
 Pour une cible ponctuelle, la banque conserve `K+1=11` candidats distincts :
 si la cible appartient aux onze, elle est exclue, puis `D` est recalculé sur
 les dix témoins engagés. Dix candidats seulement peuvent contenir la cible et
-créer un faux négatif évitable. Pour une boîte de cibles `Q`, une antichaîne de
-nœuds témoins `W` disjointe de `Q` peut remplacer la chambre lorsque la borne
-inférieure exacte suivante est strictement positive pour toute la boîte :
+créer un faux négatif évitable. La table factorisée de onze candidats reste
+immuable. Chaque reçu Yao porte son masque de dix slots engagés; chaque entrée
+d'un reçu radial porte de même `(bank_index,engagement_mask)`. Le juge exige dix
+bits, recalcule `D`, l'identité des témoins et les inégalités strictes. Un état
+`engaged` mutable partagé par plusieurs cibles est interdit.
+
+Pour une boîte de cibles `Q`, une antichaîne de nœuds témoins `W` peut remplacer
+la chambre. La fonction à minorer est :
 
 $$A(p;q,w)=(q-p)\mathbin{\cdot}(w-p)-\left\Vert w-p\right\Vert^{2}.$$
 
-Dix feuilles distinctes ainsi certifiées tombstonent collectivement `Q`;
-toute égalité descend. Cette voie dual-tree utilise toutes les directions et
-ne doit pas être appelée P1a, qui reste un falsificateur q4-only.
+Pour l'axe `i`, soient `E_i^Q` et `E_i^W` les deux extrémités des intervalles
+de `Q-p` et `W-p`. La borne AABB exacte est :
+
+$$L_p(Q,W)=\sum_{i=1}^{3}\min_{\alpha\in E_i^Q,\,\beta\in E_i^W}\left(\alpha\beta-\beta^{2}\right).$$
+
+Les plages témoins créditées sont deux à deux disjointes, hors de la plage
+cible `Q` et hors de l'ancre `p`; leurs masses exactes totalisent au moins dix.
+Si chaque crédit vérifie `L_p(Q,W)>0`, tous ses vrais `PointId` sont strictement
+intérieurs pour toute cible de `Q`. Toute égalité descend. Cette voie dual-tree
+utilise toutes les directions et ne doit pas être appelée P1a, qui reste un
+falsificateur q4-only.
 
 Si une boîte cible peut rencontrer un ensemble conservateur de chambres `S`,
 elle est encore prunable lorsque toutes les banques de `S` sont pleines et que
@@ -282,12 +295,13 @@ borné peut tenir un sort quadratique à petit `n`; aucun chemin produit ne
 matérialise de matrice ou de liste globale de paires. Le pire cas reste
 quadratique en sortie.
 
-La rampe CPU pincée du producteur Yao48/LBVH actuel ferme ses ledgers mais est
+La rampe CPU pincée du snapshot `2e49dcf` ferme ses ledgers mais est
 `NO-GO` avant G4 sur trois familles structurées : les survivantes et le
 classifieur gardent deux pentes chargées supérieures à `1,35`. Cette
-falsification vise l'ordonnance état--nœud courante, pas les certificats
-ci-dessus. Une nouvelle route doit d'abord réduire les tombstones tardives et
-les tests par survivante avant tout port CUDA ou benchmark de latence. Les
+falsification vise l'ordonnance état--nœud mesurée, pas les certificats
+ci-dessus ni un successeur non remesuré. Une nouvelle route doit d'abord
+réduire les tombstones tardives et les tests par survivante avant tout port
+CUDA ou benchmark de latence. Les
 compteurs et la décision sont dans
 [`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](audits/AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md),
 et les réponses d'implémentation dans
@@ -726,9 +740,10 @@ un refus de ressource sont trois statuts distincts.
    certificat dual-tree `L_p(Q,W)>0`; réserver la classification terminale et
    le census fermé multi-ordre au résiduel. Conserver le self-join comme oracle
    ou second prune selon les masses, puis repasser la gate CPU avant CUDA.
-4. Porter et requalifier `P15-HOCUDA-P1a` en mass-only q4 : partition triangulaire
-   implicite, 64 patches, seuil huit, range-query collective, microtuiles
-   terminales et ledger complet. Cette tranche n'émet aucune ancre.
+4. Auditer, recevoir puis requalifier le prototype `P15-HOCUDA-P1a` en
+   mass-only q4 : partition triangulaire implicite, 64 patches, seuil huit,
+   range-query collective, microtuiles terminales et ledger complet. Cette
+   tranche n'émet aucune ancre.
    Après le différentiel hôte à `n=32`, la même session G4 ferme la parité
    native et `n=32` sous Compute Sanitizer, puis va directement au profil 50 k.
    Une masse majoritairement terminale, un rescan par bloc ou une queue lourde

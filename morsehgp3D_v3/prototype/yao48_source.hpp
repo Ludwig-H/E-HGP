@@ -30,6 +30,18 @@ using i128 = __int128;
 using Node = mhgp3v::LbvhNode;
 using Lbvh = mhgp3v::MortonLbvh;
 
+inline constexpr int kOrderK = 10;   // contrat H0 : K = 10, seuil de tombstone
+// LA BANQUE DE ONZE (audit des reponses G4/q2, reponse 2) : une banque fixe de
+// dix peut contenir LA CIBLE elle-meme ; le cutoff strict x^2 > D echoue alors
+// NECESSAIREMENT (D >= dist^2(p,q) >= x^2), meme si dix autres temoins de la
+// chambre existent. Conserver onze identifiants distincts, exclure la cible si
+// elle en fait partie, engager les dix restants et RECALCULER D sur eux seuls
+// ferme cette source exacte de faux negatifs, sans reconstruire une banque par
+// cible. Pour une chambre de cardinalite t hors ancre : t = 0 ne porte aucune
+// cible ; 1 <= t <= 10 rend le certificat q2 impossible de toute facon ; t >= 11
+// est exactement le cas ou onze suffisent.
+inline constexpr int kBankSize = 11;
+
 // ---------------------------------------------------------------------------
 // CHAMBRES YAO48 : signes (d >= 0 -> +) puis permutation par magnitudes
 // DECROISSANTES, ex aequo par indice d'axe croissant — une regle TOTALE,
@@ -110,6 +122,13 @@ struct SourceReceipt {
   i64 census_contact_total = 0;
   i64 stack_high_water = 0;
   i64 heap_high_water = 0;
+  // LA TRAVERSEE DUALE Q--W (audit des reponses G4/q2, troisieme voie).
+  i64 dual_prunes = 0;           // noeuds de cibles prunes en bloc
+  i64 dual_pruned_mass = 0;      // paires couvertes (DANS region_pruned_mass)
+  i64 dual_node_visits = 0;      // noeuds de cibles visites
+  i64 dual_witness_visits = 0;   // noeuds temoins evalues
+  i64 dual_inherited = 0;        // temoins herites sans reevaluation
+  i64 dual_accepted = 0;         // sous-arbres temoins acceptes
 };
 
 enum class PairFate : std::uint8_t {
@@ -130,7 +149,9 @@ inline bool fate_is_tombstone(PairFate fate) {
 struct BankTableEntry {
   int anchor_pos = -1;
   int chamber = -1;
-  std::array<int, 10> ids{};
+  std::array<int, kBankSize> ids{};
+  std::array<int, kBankSize> pos{};
+  int engaged[kOrderK] = {};   // les DIX effectivement engages par le reçu
 };
 
 // Reçu de prune Yao48 pour le rejeu : la plage possedee de cibles (ou une
@@ -157,7 +178,6 @@ struct CensusRecord {
   std::vector<int> closed_ids;       // mode oracle : liste fermee triee
 };
 
-inline constexpr int kOrderK = 10;   // contrat H0 : K = 10, seuil de tombstone
 
 struct YaoSource {
   const Lbvh* tree = nullptr;
@@ -169,6 +189,7 @@ struct YaoSource {
   bool oracle_mode = false;
   bool baseline = false;         // differentiel : classification seule
   bool antichain_banks = false;  // banques par antichaine de masse (audit §3)
+  bool dual_cut = false;         // traversee duale Q--W (troisieme voie)
   std::vector<PairFate>* fate = nullptr;
   int fate_points = 0;
   bool fate_violated = false;
@@ -178,11 +199,12 @@ struct YaoSource {
 
   // Les banques de l'ancre courante : 48 chambres x (10 ids, D).
   struct Bank {
-    std::array<int, 10> ids{};
-    std::array<i64, 10> dist2{};
+    std::array<int, kBankSize> ids{};    // PointId
+    std::array<int, kBankSize> pos{};    // positions Morton (exclusion de cible)
+    std::array<i64, kBankSize> dist2{};
     int count = 0;
-    i64 d_max = 0;
-    int table_index = -1;   // entree factorisee (mode oracle)
+    i64 d_max = 0;                       // majorant des dix ENGAGES par defaut
+    int table_index = -1;                // entree factorisee (mode oracle)
   };
   std::array<Bank, 48> banks_;
   std::vector<int> stack_;
@@ -230,6 +252,8 @@ struct YaoSource {
   }
 
   void complete_bank(Bank* bank, int chamber, int anchor_pos) {
+    // D par defaut : le majorant des DIX PREMIERS (les plus proches). La
+    // selection reelle depend de la cible et recalcule D sur les dix engages.
     i64 d_max = 0;
     const int upto = injections.d_understated ? kOrderK - 1 : kOrderK;
     for (int i = 0; i < upto; ++i) d_max = std::max(d_max, bank->dist2[(std::size_t)i]);
@@ -239,9 +263,37 @@ struct YaoSource {
       entry.anchor_pos = anchor_pos;
       entry.chamber = chamber;
       entry.ids = bank->ids;
+      entry.pos = bank->pos;
       bank->table_index = (int)bank_table->size();
       bank_table->push_back(entry);
     }
+  }
+
+  // LA SELECTION DES DIX ENGAGES (audit, reponse 2) : parmi les onze, ecarter
+  // ceux dont la POSITION appartient a la plage de cibles, prendre les dix
+  // premiers restants et RECALCULER D sur eux seuls. Rend faux si moins de dix
+  // subsistent (fail-open). `engaged` reçoit les indices de banque retenus.
+  bool engage_ten(const Bank& bank, int target_begin, int target_end, i64* d_out,
+                  int engaged[kOrderK]) const {
+    if (bank.count < kBankSize) return false;
+    int taken = 0;
+    i64 d_max = 0;
+    for (int i = 0; i < kBankSize && taken < kOrderK; ++i) {
+      if (bank.pos[(std::size_t)i] >= target_begin && bank.pos[(std::size_t)i] < target_end)
+        continue;
+      engaged[taken] = i;
+      d_max = std::max(d_max, bank.dist2[(std::size_t)i]);
+      ++taken;
+    }
+    if (taken < kOrderK) return false;
+    // MUTANT d-understated : D omet la contribution du dernier engage.
+    if (injections.d_understated) {
+      d_max = 0;
+      for (int k = 0; k < kOrderK - 1; ++k)
+        d_max = std::max(d_max, bank.dist2[(std::size_t)engaged[k]]);
+    }
+    *d_out = d_max;
+    return true;
   }
 
   static i64 dist2_max_to_box(const Node& node, const mhgp::P3& p) {
@@ -280,16 +332,21 @@ struct YaoSource {
     int full = 0;
     const auto credit = [&](Bank& bank, int chamber, int first_pos, int point_count,
                             i64 boxmax_d2) {
-      const bool was_full = bank.count >= kOrderK;
+      const bool was_full = bank.count >= kBankSize;
       if (was_full) return;
-      // Les identifiants canoniques du reçu : les dix premiers rencontres
-      // dans l'ordre deterministe du parcours.
-      if (bank_table != nullptr) {
+      // Les identifiants canoniques du reçu : les ONZE premiers rencontres
+      // dans l'ordre deterministe du parcours (la selection des dix engages
+      // exclut ensuite la cible eventuelle).
+      {
         int slot = bank.count;
-        for (int t = first_pos; t < first_pos + point_count && slot < kOrderK; ++t, ++slot)
+        for (int t = first_pos; t < first_pos + point_count && slot < kBankSize;
+             ++t, ++slot) {
           bank.ids[(std::size_t)slot] = tree->order[(std::size_t)t];
+          bank.pos[(std::size_t)slot] = t;
+          bank.dist2[(std::size_t)slot] = boxmax_d2;
+        }
       }
-      const bool completes = bank.count + point_count >= kOrderK;
+      const bool completes = bank.count + point_count >= kBankSize;
       // MUTANT d-understated (mode antichaine) : la contribution du credit
       // qui COMPLETE la banque est omise du majorant — D_c trop petit, faux
       // prunes possibles, le juge tue.
@@ -319,7 +376,7 @@ struct YaoSource {
       i64 mins[3];
       if (!holds_anchor && box_chamber(node, p, &chamber, mins) && chamber >= 6) {
         Bank& bank = banks_[(std::size_t)chamber];
-        if (bank.count >= kOrderK) continue;   // chambre pleine : saut entier
+        if (bank.count >= kBankSize) continue;   // chambre pleine : saut entier
         ++receipt.antichain_nodes;
         credit(bank, chamber, node.begin, node.end - node.begin,
                dist2_max_to_box(node, p));
@@ -336,7 +393,7 @@ struct YaoSource {
           i64 canon[3];
           const int point_chamber = chamber_of(dx, dy, dz, canon, false);
           Bank& bank = banks_[(std::size_t)point_chamber];
-          if (bank.count >= kOrderK) continue;
+          if (bank.count >= kBankSize) continue;
           credit(bank, point_chamber, t, 1, d2);
         }
         continue;
@@ -430,11 +487,12 @@ struct YaoSource {
         // mutant perm-swapped ne desynchronise que la cible.
         const int chamber = chamber_of(dx, dy, dz, canon, false);
         Bank& bank = banks_[(std::size_t)chamber];
-        if (bank.count >= kOrderK) continue;
+        if (bank.count >= kBankSize) continue;
         bank.ids[(std::size_t)bank.count] = tree->order[(std::size_t)t];
+        bank.pos[(std::size_t)bank.count] = t;
         bank.dist2[(std::size_t)bank.count] = top.first;
         ++bank.count;
-        if (bank.count == kOrderK) {
+        if (bank.count == kBankSize) {
           complete_bank(&bank, chamber, anchor_pos);
           ++full;
         }
@@ -481,7 +539,7 @@ struct YaoSource {
       // budget `chamber_visits` reste un garde-fou fail-open, compte.
       const auto any_underfull_compatible = [&](const Node& node) {
         for (int chamber = 0; chamber < 48; ++chamber)
-          if (banks_[(std::size_t)chamber].count < kOrderK &&
+          if (banks_[(std::size_t)chamber].count < kBankSize &&
               box_may_touch_chamber(node, p, chamber))
             return true;
         return false;
@@ -501,15 +559,16 @@ struct YaoSource {
           i64 canon[3];
           const int chamber = chamber_of(dx, dy, dz, canon, false);
           Bank& bank = banks_[(std::size_t)chamber];
-          if (bank.count >= kOrderK) continue;
+          if (bank.count >= kBankSize) continue;
           bool already = false;
           for (int i = 0; i < bank.count; ++i)
             if (bank.ids[(std::size_t)i] == tree->order[(std::size_t)t]) already = true;
           if (already) continue;   // la phase A a pu le classer ici
           bank.ids[(std::size_t)bank.count] = tree->order[(std::size_t)t];
+          bank.pos[(std::size_t)bank.count] = t;
           bank.dist2[(std::size_t)bank.count] = top.first;
           ++bank.count;
-          if (bank.count == kOrderK) {
+          if (bank.count == kBankSize) {
             complete_bank(&bank, chamber, anchor_pos);
             ++full;
           }
@@ -532,7 +591,7 @@ struct YaoSource {
           const i64 d2 = dx * dx + dy * dy + dz * dz;
           if (d2 == 0) continue;
           i64 canon[3];
-          if (banks_[(std::size_t)chamber_of(dx, dy, dz, canon, false)].count >= kOrderK)
+          if (banks_[(std::size_t)chamber_of(dx, dy, dz, canon, false)].count >= kBankSize)
             continue;   // sa chambre est deja pleine : inutile de le porter
           cone_heap.push({d2, -t - 1});
         }
@@ -543,14 +602,20 @@ struct YaoSource {
   }
 
   // LA COUPE STRICTE sur des minima canoniques (point : ses coordonnees).
-  bool directional_cut(const Bank& bank, i64 x, i64 y, i64 z) const {
-    if (bank.count < kOrderK) return false;   // fail-open
-    const i64 d_max = bank.d_max;
+  bool directional_cut_with(i64 d_max, i64 x, i64 y, i64 z) const {
     if (injections.strict_to_large)
       return x * x >= d_max && (x + y) * (x + y) >= 2 * d_max &&
              (x + y + z) * (x + y + z) >= 3 * d_max;
     return x * x > d_max && (x + y) * (x + y) > 2 * d_max &&
            (x + y + z) * (x + y + z) > 3 * d_max;
+  }
+
+  // La forme d'usage : selection des dix engages PUIS coupe.
+  bool directional_cut(const Bank& bank, i64 x, i64 y, i64 z, int target_begin,
+                       int target_end, int engaged[kOrderK]) const {
+    i64 d_max = 0;
+    if (!engage_ten(bank, target_begin, target_end, &d_max, engaged)) return false;
+    return directional_cut_with(d_max, x, y, z);
   }
 
   // Certification de chambre d'une BOITE relative a p : octant fixe (boite
@@ -599,8 +664,12 @@ struct YaoSource {
     return true;
   }
 
-  void record_yao_region(int anchor_pos, const Node& node, const Bank& bank) {
+  void record_yao_region(int anchor_pos, const Node& node, const Bank& bank,
+                         const int engaged[kOrderK]) {
     if (yao_receipts == nullptr) return;
+    if (bank.table_index >= 0 && bank_table != nullptr)
+      for (int k = 0; k < kOrderK; ++k)
+        (*bank_table)[(std::size_t)bank.table_index].engaged[k] = engaged[k];
     YaoReceipt r;
     r.anchor_pos = anchor_pos;
     r.target_begin = node.begin;
@@ -609,13 +678,214 @@ struct YaoSource {
     yao_receipts->push_back(r);
   }
 
-  void record_yao_point(int anchor_pos, int target_pos, const Bank& bank) {
+  void record_yao_point(int anchor_pos, int target_pos, const Bank& bank,
+                        const int engaged[kOrderK]) {
     if (yao_receipts == nullptr) return;
+    if (bank.table_index >= 0 && bank_table != nullptr)
+      for (int k = 0; k < kOrderK; ++k)
+        (*bank_table)[(std::size_t)bank.table_index].engaged[k] = engaged[k];
     YaoReceipt r;
     r.anchor_pos = anchor_pos;
     r.target_pos = target_pos;
     r.bank_index = bank.table_index;
     yao_receipts->push_back(r);
+  }
+
+  // ---------------------------------------------------------------------
+  // LA TRAVERSEE DUALE Q--W (audit des reponses G4/q2, troisieme voie) :
+  //
+  //     A(p; q, w) = (q-p).(w-p) - ||w-p||^2
+  //
+  // verifie A > 0 <=> (w-p).(w-q) < 0, c'est-a-dire w STRICTEMENT interieur a
+  // la boule diametrale de (p,q). En posant u = q-p et v = w-p,
+  // A = somme_d (u_d v_d - v_d^2) est SEPARABLE par axe ; sur un rectangle
+  // [ulo,uhi] x [vlo,vhi] la fonction est lineaire en u et CONCAVE en v, donc
+  // son minimum est atteint a l'un des QUATRE coins. Si min A > 0 sur une
+  // boite de cibles Q et un noeud temoin W, TOUTE feuille de W est
+  // strictement interieure a la boule diametrale de TOUTE cible de Q : une
+  // antichaine de noeuds W disjoints, de masse totale dix, tombstone Q entier
+  // sans aucune chambre ni banque.
+  //
+  // L'HERITAGE EST EXACT : Q' inclus dans Q donne U' inclus dans U, donc
+  // min A' >= min A > 0. Un temoin certifie pour le parent reste certifie
+  // pour l'enfant et n'est JAMAIS reevalue — c'est ce qui evite de repayer la
+  // recherche a chaque niveau. L'egalite descend (A = 0 refuse).
+  //
+  // Bornes u16 : |u|,|v| <= 65535, donc |u v - v^2| < 2^33 par axe et
+  // |A| < 2^35 : i64 avec marge.
+  // ---------------------------------------------------------------------
+  static i64 dual_min_a(const Node& q_node, const Node& w_node, const mhgp::P3& p) {
+    i64 total = 0;
+    const i64 pc[3] = {(i64)p.x, (i64)p.y, (i64)p.z};
+    for (int d = 0; d < 3; ++d) {
+      const i64 ulo = q_node.lo[d] - pc[d], uhi = q_node.hi[d] - pc[d];
+      const i64 vlo = w_node.lo[d] - pc[d], vhi = w_node.hi[d] - pc[d];
+      i64 best = (i64)1 << 62;
+      for (int iu = 0; iu < 2; ++iu)
+        for (int iv = 0; iv < 2; ++iv) {
+          const i64 u = iu == 0 ? ulo : uhi;
+          const i64 v = iv == 0 ? vlo : vhi;
+          const i64 value = u * v - v * v;
+          if (value < best) best = value;
+        }
+      total += best;
+    }
+    return total;
+  }
+
+  // LE MAJORANT de A sur les deux boites : si max A <= 0, AUCUN point de W
+  // n'est temoin pour AUCUNE cible de Q et le sous-arbre entier est ecarte.
+  // Sur [ulo,uhi] x [vlo,vhi], le sommet de u v - v^2 est en v = u/2 et vaut
+  // u^2/4 ; hors de l'intervalle le maximum est aux bords. Le majorant entier
+  // prend ceil(u^2/4) au sommet — verifie hors bande sur 20 000 rectangles.
+  static i64 dual_max_a(const Node& q_node, const Node& w_node, const mhgp::P3& p) {
+    i64 total = 0;
+    const i64 pc[3] = {(i64)p.x, (i64)p.y, (i64)p.z};
+    for (int d = 0; d < 3; ++d) {
+      const i64 ulo = q_node.lo[d] - pc[d], uhi = q_node.hi[d] - pc[d];
+      const i64 vlo = w_node.lo[d] - pc[d], vhi = w_node.hi[d] - pc[d];
+      i64 best = -((i64)1 << 62);
+      for (int iu = 0; iu < 2; ++iu)
+        for (int iv = 0; iv < 2; ++iv) {
+          const i64 u = iu == 0 ? ulo : uhi;
+          const i64 v = iv == 0 ? vlo : vhi;
+          const i64 value = u * v - v * v;
+          if (value > best) best = value;
+        }
+      for (int iu = 0; iu < 2; ++iu) {
+        const i64 u = iu == 0 ? ulo : uhi;
+        if (2 * vlo <= u && u <= 2 * vhi) best = std::max(best, (u * u + 3) / 4);
+      }
+      total += best;
+    }
+    return total;
+  }
+
+  // Un temoin PONCTUEL contre une boite de cibles : meme forme, w degenere.
+  static i64 dual_min_a_point(const Node& q_node, const mhgp::P3& w, const mhgp::P3& p) {
+    Node degenerate{};
+    for (int d = 0; d < 3; ++d) {
+      const i64 c = d == 0 ? (i64)w.x : (d == 1 ? (i64)w.y : (i64)w.z);
+      degenerate.lo[d] = c;
+      degenerate.hi[d] = c;
+    }
+    return dual_min_a(q_node, degenerate, p);
+  }
+
+  struct DualFrame {
+    int node = 0;
+    int arena_begin = 0, arena_end = 0;   // temoins herites (plages acceptees)
+    i64 mass = 0;
+  };
+  std::vector<std::pair<int, int>> dual_arena_;   // (begin,end) des W acceptes
+  std::vector<DualFrame> dual_stack_;
+  std::vector<int> dual_search_;
+
+  // Cherche des temoins supplementaires pour la boite Q, en ignorant les
+  // plages deja acceptees (l'antichaine reste disjointe). Rend la masse
+  // totale atteinte.
+  i64 dual_collect(const Node& q_node, const mhgp::P3& p, int anchor_pos,
+                   int arena_begin, i64 mass) {
+    dual_search_.clear();
+    dual_search_.push_back(0);
+    while (!dual_search_.empty() && mass < kOrderK) {
+      const int index = dual_search_.back();
+      dual_search_.pop_back();
+      const Node& w = tree->nodes[(std::size_t)index];
+      ++receipt.dual_witness_visits;
+      // Jamais l'ancre, jamais une cible du bloc, jamais un sous-arbre deja
+      // accepte (les plages restent disjointes).
+      if (anchor_pos >= w.begin && anchor_pos < w.end) {
+        if (w.left >= 0) { dual_search_.push_back(w.right); dual_search_.push_back(w.left); }
+        continue;
+      }
+      if (w.begin < q_node.end && q_node.begin < w.end) {
+        if (w.left >= 0) { dual_search_.push_back(w.right); dual_search_.push_back(w.left); }
+        continue;
+      }
+      bool overlaps_accepted = false;
+      for (std::size_t k = (std::size_t)arena_begin; k < dual_arena_.size(); ++k)
+        if (w.begin < dual_arena_[k].second && dual_arena_[k].first < w.end)
+          overlaps_accepted = true;
+      if (overlaps_accepted) {
+        if (w.left >= 0) { dual_search_.push_back(w.right); dual_search_.push_back(w.left); }
+        continue;
+      }
+      if (dual_max_a(q_node, w, p) <= 0) continue;   // aucun temoin possible
+      if (dual_min_a(q_node, w, p) > 0) {
+        ++receipt.dual_accepted;
+        dual_arena_.push_back({w.begin, w.end});
+        mass += w.end - w.begin;
+        continue;                       // antichaine : jamais descendu
+      }
+      if (w.left < 0) continue;         // feuille indecise : rien a tirer
+      dual_search_.push_back(w.right);
+      dual_search_.push_back(w.left);
+    }
+    return mass;
+  }
+
+  // La traversee duale d'une ancre : descente sur les boites de cibles avec
+  // heritage exact des temoins.
+  void dual_traverse(int anchor_pos) {
+    const int anchor_id = tree->order[(std::size_t)anchor_pos];
+    const mhgp::P3& p = (*tree->points)[(std::size_t)anchor_id];
+    batch_.clear();
+    anchor_regions_.clear();
+    dual_arena_.clear();
+    dual_stack_.clear();
+    dual_stack_.push_back({0, 0, 0, 0});
+    while (!dual_stack_.empty()) {
+      receipt.stack_high_water =
+          std::max(receipt.stack_high_water, (i64)dual_stack_.size());
+      const DualFrame frame = dual_stack_.back();
+      dual_stack_.pop_back();
+      const Node& q_node = tree->nodes[(std::size_t)frame.node];
+      ++receipt.dual_node_visits;
+      if (q_node.begin >= anchor_pos) continue;          // rien de possede
+      const bool fully_owned = q_node.end <= anchor_pos;
+      i64 mass = frame.mass;
+      receipt.dual_inherited += frame.arena_end - frame.arena_begin;
+      int arena_begin = frame.arena_begin;
+      if (fully_owned) {
+        // Les temoins herites restent valides (Q' inclus dans Q) : on ne
+        // reevalue que le complement.
+        dual_arena_.resize((std::size_t)frame.arena_end);
+        if (mass < kOrderK) mass = dual_collect(q_node, p, anchor_pos, arena_begin, mass);
+        if (mass >= kOrderK) {
+          ++receipt.dual_prunes;
+          const i64 covered = q_node.end - q_node.begin;
+          receipt.dual_pruned_mass += covered;
+          receipt.region_pruned_mass += covered;
+          ++receipt.region_prunes;
+          anchor_regions_.push_back({q_node.begin, q_node.end});
+          if (fate != nullptr)
+            for (int t = q_node.begin; t < q_node.end; ++t)
+              assign_pair(anchor_id, tree->order[(std::size_t)t], PairFate::kYaoRegion);
+          continue;
+        }
+      }
+      if (q_node.left < 0) {
+        const int end = std::min(q_node.end, anchor_pos);
+        for (int t = q_node.begin; t < end; ++t) {
+          if (t == anchor_pos) continue;
+          ++receipt.survivors;
+          SurvivorState state;
+          state.target_pos = t;
+          batch_.push_back(std::move(state));
+        }
+        continue;
+      }
+      const int arena_end = (int)dual_arena_.size();
+      dual_stack_.push_back({q_node.right, arena_begin, arena_end, mass});
+      dual_stack_.push_back({q_node.left, arena_begin, arena_end, mass});
+    }
+    if (oracle_mode && anchor_regions_.size() > 1) {
+      std::sort(anchor_regions_.begin(), anchor_regions_.end());
+      for (std::size_t k = 1; k < anchor_regions_.size(); ++k)
+        if (anchor_regions_[k].first < anchor_regions_[k - 1].second)
+          region_overlap_violated = true;
+    }
   }
 
   // LE PARCOURS DE COUPE : prefixe possede [0, anchor_pos), reçus de masse
@@ -654,14 +924,16 @@ struct YaoSource {
           for (int c = 0; c < 48; ++c) {
             if (!box_may_touch_chamber(node, p, c)) continue;
             const Bank& bank = banks_[(std::size_t)c];
-            if (bank.count < kOrderK) {
-              // MUTANT radial-forgets-chamber : une chambre compatible
-              // sous-pleine serait ignoree au lieu d'interdire l'enveloppe.
+            i64 d_engaged = 0;
+            int engaged_radial[kOrderK];
+            if (!engage_ten(bank, node.begin, node.end, &d_engaged, engaged_radial)) {
+              // MUTANT radial-forgets-chamber : une chambre compatible sans
+              // dix engages serait ignoree au lieu d'interdire l'enveloppe.
               if (injections.radial_forgets_chamber) continue;
               all_full = false;
               break;
             }
-            if (bank.d_max > dmax) dmax = bank.d_max;
+            if (d_engaged > dmax) dmax = d_engaged;
             if (radial_receipts != nullptr) radial_scratch_.push_back(bank.table_index);
           }
           if (all_full && dmax >= 0 && dist2_to_box(node, p) > 3 * dmax) {
@@ -688,15 +960,17 @@ struct YaoSource {
           // POINT : la certification de boite reste nominale, le desync se
           // voit au niveau feuille (fixture region-prune, plancher arme).
           const Bank& bank = banks_[(std::size_t)chamber];
+          int engaged[kOrderK];
           if (!injections.chamber_perm_swapped &&
-              directional_cut(bank, mins[0], mins[1], mins[2])) {
+              directional_cut(bank, mins[0], mins[1], mins[2], node.begin, node.end,
+                              engaged)) {
             ++receipt.region_prunes;
             receipt.region_pruned_mass += node.end - node.begin;
             anchor_regions_.push_back({node.begin, node.end});
             // MUTANT last-region-omitted : le reçu ET sa masse du DERNIER
             // noeud prune sont perdus — le ledger global ne ferme plus.
             if (injections.last_region_omitted) last_region_mass_ = node.end - node.begin;
-            record_yao_region(anchor_pos, node, bank);
+            record_yao_region(anchor_pos, node, bank, engaged);
             if (fate != nullptr)
               for (int t = node.begin; t < node.end; ++t)
                 assign_pair(anchor_id, tree->order[(std::size_t)t], PairFate::kYaoRegion);
@@ -715,9 +989,11 @@ struct YaoSource {
           const int chamber =
               chamber_of(dx, dy, dz, canon, injections.chamber_perm_swapped);
           const Bank& bank = banks_[(std::size_t)chamber];
-          if (!baseline && directional_cut(bank, canon[0], canon[1], canon[2])) {
+          int engaged[kOrderK];
+          if (!baseline &&
+              directional_cut(bank, canon[0], canon[1], canon[2], t, t + 1, engaged)) {
             ++receipt.point_tombstones;
-            record_yao_point(anchor_pos, t, bank);
+            record_yao_point(anchor_pos, t, bank, engaged);
             assign_pair(anchor_id, tree->order[(std::size_t)t], PairFate::kYaoPoint);
             continue;
           }
@@ -979,11 +1255,15 @@ struct YaoSource {
     const i64 mass_before = receipt.region_pruned_mass + receipt.point_tombstones +
                             receipt.survivors;
     near_complete_d2_ = -1;   // la liste de voisins appartient a UNE ancre
-    if (!baseline) {
-      if (antichain_banks) fill_banks_antichain(j);
-      else fill_banks(j);
+    if (dual_cut && !baseline) {
+      dual_traverse(j);
+    } else {
+      if (!baseline) {
+        if (antichain_banks) fill_banks_antichain(j);
+        else fill_banks(j);
+      }
+      prune_traverse(j);
     }
-    prune_traverse(j);
     classify_batch(j);
     // FERMETURE PAR ANCRE : la masse traitee de l'ancre j est exactement
     // pos(j) — l'egalite globale seule pourrait masquer une omission

@@ -78,6 +78,7 @@ using i128 = __int128;
 using Node = mhgp3v::LbvhNode;
 using Lbvh = mhgp3v::MortonLbvh;
 using mhgp3v::yao48::kOrderK;
+using mhgp3v::yao48::kBankSize;
 using mhgp3v::yao48::PairFate;
 using mhgp3v::yao48::fate_is_tombstone;
 using mhgp3v::yao48::SourceInjections;
@@ -115,7 +116,7 @@ mhgp::P3 pt(int x, int y, int z) {
 
 int main(int argc, char** argv) {
   int n = 2400, coord = 0, leaf_size = 8, oracle = 0, differential = 0, permute = 0;
-  int policy_differential = 0, antichain = 0, shard_check = 0;
+  int policy_differential = 0, antichain = 0, dual = 0, shard_check = 0;
   i64 seed = 20260810, bank_pops = 512, chamber_visits = 100000, max_work = 4000000000LL;
   i64 min_region_prunes = 0, min_point_tombstones = 0, min_census_records = 0;
   i64 min_radial_prunes = 0;
@@ -153,8 +154,9 @@ int main(int argc, char** argv) {
     if (!strcmp(argv[i], "--bank-mode")) {
       if (i + 1 >= argc) { std::printf("ECHEC : valeur manquante pour --bank-mode\n"); return 2; }
       ++i;
-      if (!strcmp(argv[i], "exact")) antichain = 0;
-      else if (!strcmp(argv[i], "antichain")) antichain = 1;
+      if (!strcmp(argv[i], "exact")) { antichain = 0; dual = 0; }
+      else if (!strcmp(argv[i], "antichain")) { antichain = 1; dual = 0; }
+      else if (!strcmp(argv[i], "dual")) { antichain = 0; dual = 1; }
       else { std::printf("ECHEC : bank-mode inconnu %s\n", argv[i]); return 2; }
       continue;
     }
@@ -364,6 +366,7 @@ int main(int argc, char** argv) {
   source.bank_pop_budget = bank_pops;
   source.chamber_visits = chamber_visits;
   source.antichain_banks = antichain == 1;
+  source.dual_cut = dual == 1;
   source.max_work = max_work;
   if (oracle == 1 || differential == 1 || policy_differential == 1) {
     fates.assign((std::size_t)all_pairs, PairFate::kUnassigned);
@@ -459,9 +462,18 @@ int main(int argc, char** argv) {
       if (bank_entry.anchor_pos != receipt_item.anchor_pos)
         return fail("le rejeu des reçus Yao48",
                     "un reçu reference la banque d'une autre ancre");
-      std::array<int, 10> ids = bank_entry.ids;
+      // LES DIX ENGAGES (banque de onze, exclusion de la cible) : le juge
+      // rejoue exactement les identifiants que le reçu revendique, pas les
+      // onze de la banque.
+      std::array<int, mhgp3v::yao48::kOrderK> ids{};
+      for (int k = 0; k < mhgp3v::yao48::kOrderK; ++k) {
+        const int slot = bank_entry.engaged[k];
+        if (slot < 0 || slot >= mhgp3v::yao48::kBankSize)
+          return fail("le rejeu des reçus Yao48", "un engagement designe un slot absent");
+        ids[(std::size_t)k] = bank_entry.ids[(std::size_t)slot];
+      }
       std::sort(ids.begin(), ids.end());
-      for (int i = 1; i < 10; ++i)
+      for (int i = 1; i < mhgp3v::yao48::kOrderK; ++i)
         if (ids[(std::size_t)i] == ids[(std::size_t)(i - 1)])
           return fail("le rejeu des reçus Yao48", "temoin duplique dans un reçu");
       for (int target_pos : targets) {
@@ -503,7 +515,10 @@ int main(int argc, char** argv) {
           return fail("le rejeu des reçus radiaux",
                       "une cible n'a aucune banque pour sa chambre — l'enveloppe a"
                       " oublie une chambre possible");
-        for (int witness_id : found->ids) {
+        std::array<int, mhgp3v::yao48::kOrderK> radial_ids{};
+        for (int k = 0; k < mhgp3v::yao48::kOrderK; ++k)
+          radial_ids[(std::size_t)k] = found->ids[(std::size_t)found->engaged[k]];
+        for (int witness_id : radial_ids) {
           if (witness_id == anchor_id || witness_id == target_id)
             return fail("le rejeu des reçus radiaux", "temoin egal a une extremite");
           if (judge_phi_sign(pts[(std::size_t)witness_id], pts[(std::size_t)anchor_id],
@@ -600,6 +615,7 @@ int main(int argc, char** argv) {
         source2.bank_pop_budget = bank_pops;
         source2.chamber_visits = chamber_visits;
         source2.antichain_banks = antichain == 1;
+        source2.dual_cut = dual == 1;
         source2.max_work = max_work;
         source2.fate = &fates2;
         source2.fate_points = n;
@@ -676,9 +692,33 @@ int main(int argc, char** argv) {
       if (fate_is_tombstone(fates_anti[k]) != fate_is_tombstone(fates[k]))
         return fail("l'invariance des politiques",
                     "un sort depend du mode de banque (exact contre antichaine)");
+    std::vector<PairFate> fates_dual((std::size_t)all_pairs, PairFate::kUnassigned);
+    YaoSource source_dual;
+    source_dual.tree = &tree;
+    source_dual.injections = injections;
+    source_dual.bank_pop_budget = bank_pops;
+    source_dual.chamber_visits = chamber_visits;
+    source_dual.dual_cut = true;
+    source_dual.max_work = max_work;
+    source_dual.fate = &fates_dual;
+    source_dual.fate_points = n;
+    if (!source_dual.run()) {
+      std::printf("ECHEC : budget depasse dans la politique duale\n");
+      return 3;
+    }
+    if (source_dual.receipt.census_records != r.census_records ||
+        source_dual.receipt.census_closed_total != r.census_closed_total ||
+        source_dual.receipt.census_strict_total != r.census_strict_total ||
+        source_dual.receipt.census_contact_total != r.census_contact_total)
+      return fail("l'invariance des politiques",
+                  "les agregats de census dependent de la traversee duale");
+    for (std::size_t k = 0; k < fates_dual.size(); ++k)
+      if (fate_is_tombstone(fates_dual[k]) != fate_is_tombstone(fates[k]))
+        return fail("l'invariance des politiques",
+                    "un sort depend de la traversee duale (chambres contre Q--W)");
     std::printf("politiques : sorts et census IDENTIQUES entre budgets minimal"
-                " (48/8), ample (%lld/%lld) et mode antichaine\n", bank_pops,
-                chamber_visits);
+                " (48/8), ample (%lld/%lld), mode antichaine et traversee duale\n",
+                bank_pops, chamber_visits);
   }
 
   // L'INVARIANCE PAR SHARDS (audit) : les reçus fusionnes de 1, 2 et 4
@@ -828,6 +868,11 @@ int main(int argc, char** argv) {
               " radiale %lld en %lld reçus) tombstones-point=%lld\n",
               r.prune_node_visits, r.region_prunes, r.region_pruned_mass,
               r.radial_pruned_mass, r.radial_prunes, r.point_tombstones);
+  if (r.dual_node_visits > 0)
+    std::printf("duale      : cibles=%lld temoins=%lld acceptes=%lld herites=%lld"
+                " prunes=%lld (masse %lld)\n", r.dual_node_visits,
+                r.dual_witness_visits, r.dual_accepted, r.dual_inherited,
+                r.dual_prunes, r.dual_pruned_mass);
   std::printf("classifieur: survivantes=%lld visites-lot=%lld boites=%lld tests=%lld"
               " liste=%lld (paires=%lld) tombstones=%lld census=%lld\n", r.survivors,
               r.classify_node_visits, r.classify_box_tests, r.classify_point_tests,

@@ -21,7 +21,8 @@ ni P1a, ni CUDA, ni le `warm_e2e` officiel et ne remplace pas la session native
 P1a décrite dans la note dédiée.
 
 Elle n'est toutefois **pas le prochain travail recommandé**. La rampe
-mono-binaire déjà reçue ferme la question préalable : l'ordonnance q2 CPU
+mono-binaire diagnostique, pincée et auditée, suffit à fermer la question
+préalable : l'ordonnance q2 CPU
 littérale est NO-GO sur trois familles structurées. Quarante-huit vCPU peuvent
 réduire un temps mural sans changer les exposants de travail, les milliards de
 tests du classifieur ni le fait que le pipeline officiel est absent. Une G4 ne
@@ -73,6 +74,13 @@ existent. Il n'est pas nécessaire de reconstruire une banque par cible :
 - sinon prendre les dix premiers;
 - recalculer `D` sur les dix effectivement engagés dans le reçu.
 
+La banque factorisée de onze entrées est immuable. La sélection dépend de la
+cible : chaque reçu Yao doit donc porter son masque de dix slots, et chaque
+référence de banque d'un reçu radial doit porter son propre masque. Un champ
+`engaged` mutable dans l'entrée partagée permettrait à un reçu tardif de
+réécrire rétroactivement tous les précédents. Le juge recalcule `D` depuis le
+masque, vérifie exactement dix slots distincts et exclut ancre et plage cible.
+
 Pour une chambre de cardinalité `t` hors ancre, `t=0` ne porte aucune cible;
 si `1<=t<=10`, chaque cible possède au plus neuf autres témoins de cette
 chambre et le certificat Yao q2 y est impossible; si `t>=11`, une banque de
@@ -88,12 +96,14 @@ feuilles par une borne inférieure exacte de :
 
 $$A(p;q,w)=(q-p)\mathbin{\cdot}(w-p)-\left\Vert w-p\right\Vert^{2}.$$
 
-Si `min A>0` sur `q` dans `Q` et `w` dans `W`, toute feuille de `W` est
-strictement intérieure à la boule diamétrale de `(p,q)`. Une antichaîne de
-nœuds `W` disjoints, de masse totale dix, certifie donc toute la boîte `Q`
-sans chambre unique. L'égalité descend. Cette traversée duale persistante est
-la troisième voie recommandée; elle mutualise cible et témoins sans recréer
-une banque par paire.
+Pour chaque axe, le minimum exact de `A` sur les deux intervalles est le
+minimum des quatre couples d'extrémités; la somme de ces trois minima est
+`L_p(Q,W)`. Si `L_p(Q,W)>0`, toute feuille de `W` est strictement intérieure à
+la boule diamétrale de `(p,q)` pour toute cible. Une antichaîne de plages `W`
+deux à deux disjointes, hors de `Q` et de l'ancre, et de masse exacte totale au
+moins dix certifie donc toute la boîte sans chambre unique. L'égalité descend.
+Cette traversée duale persistante est la troisième voie recommandée; elle
+mutualise cible et témoins sans recréer une banque par paire.
 
 P1a n'est pas cette voie : P1a est q4-only, avec seuil huit et une géométrie
 de centres de sphères. Le transposer à q2 sous le même nom serait faux.
@@ -109,10 +119,9 @@ explicitement, mais il ne devient pas une architecture industrielle parce
 qu'il tourne sur une G4.
 
 La phrase « 1,07 s mono-thread, donc environ 4 % d'une seconde une fois
-parallélisé » est rejetée : elle ne repose sur aucun reçu pincé, suppose un
-speedup linéaire non démontré et son calcul brut donnerait environ 22 ms, soit
-`2,2 %` d'une seconde, pas `4 %`. Aucun de ces nombres ne justifie une
-campagne. Pour progresser vers la seconde, il faut d'abord produire le ledger
+parallélisé » est rejetée : elle ne repose sur aucun reçu pincé et suppose un
+speedup linéaire non démontré. Aucun de ces nombres ne justifie une campagne.
+Pour progresser vers la seconde, il faut d'abord produire le ledger
 Yao-1 exact, réduire le graphe sparse et montrer une baisse des compteurs.
 
 ## Décision immédiate

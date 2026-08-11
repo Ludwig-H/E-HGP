@@ -134,8 +134,9 @@ Cette enveloppe radiale est seulement un premier filtre. Une coupe plus forte
 résout exactement, pour chaque chambre compatible `c`, l'intersection entre la
 boîte cible et le cône signé/permuté. Dans les magnitudes canoniques
 `x>=y>=z>=0`, après clipping signé de la boîte en intervalles
-`[lx,ux]`, `[ly,uy]`, `[lz,uz]`, poser `z0=lz`, `y0=max(ly,z0)` puis
-`x0=max(lx,y0)`. L'intersection du cône fermé est vide si `z0>uz`, `y0>uy` ou
+`[lx,ux]`, `[ly,uy]`, `[lz,uz]`, poser `z0=max(lz,0)`,
+`y0=max(ly,z0)` puis `x0=max(lx,y0)`. L'intersection du cône fermé est vide si
+`z0>uz`, `y0>uy` ou
 `x0>ux`; sinon les minima simultanés de `x`, `x+y` et `x+y+z` sont exactement
 `x0`, `x0+y0` et `x0+y0+z0`. Employer le cône fermé sur les frontières ne peut
 qu'ajouter des points fantômes et reste donc fail-open pour les chambres

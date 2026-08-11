@@ -120,8 +120,9 @@ Le self-join q2 de diagnostic reste un oracle/falsificateur ou un second prune
 tant que ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2
 ne retire jamais une ancre q3/q4.
 
-La rampe CPU Yao48/LBVH pincée à `12 500/25 000/50 000` ferme douze ledgers,
-mais classe l'ordonnance courante `NO-GO` avant G4 : `terrain` et les deux
+La rampe CPU Yao48/LBVH du snapshot `2e49dcf`, pincée à
+`12 500/25 000/50 000`, ferme douze ledgers, mais classe l'ordonnance
+état--nœud mesurée `NO-GO` avant G4 : `terrain` et les deux
 familles scanline ont deux pentes chargées successives supérieures à `1,35`.
 `uniform` seul passe. Les temps étaient contaminés et ne sont pas un
 benchmark; le verdict porte sur les compteurs. L'audit et les pistes exactes
@@ -219,9 +220,10 @@ préfixe comme objet complet.
    offsets 64 bits; la nouvelle ordonnance doit repasser la gate CPU avant
    tout port device. Les bornes et reçus sont spécifiés dans
    [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](audits/NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md).
-4. Porter et requalifier le falsificateur q4 mass-only `P15-HOCUDA-P1a` : partition
-   triangulaire implicite des paires, 64 patches de centres, seuil de huit
-   témoins par antichaînes de sous-arbres, range-query collective, ledger
+4. Auditer, recevoir puis requalifier le prototype q4 mass-only
+   `P15-HOCUDA-P1a` : partition triangulaire implicite des paires, 64 patches
+   de centres, seuil de huit témoins par antichaînes de sous-arbres,
+   range-query collective, ledger
    `pruned_mass+microtile_mass=C(n,2)` et aucune arène globale de paires. Cette
    tranche n'émet aucune ancre et ne prouve pas la complétude de P1. Son
    certificat exact emploie des coins rationnels à l'échelle seize et un juge

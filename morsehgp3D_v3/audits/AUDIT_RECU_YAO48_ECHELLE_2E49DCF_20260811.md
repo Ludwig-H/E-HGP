@@ -13,12 +13,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 Le snapshot CPU q2 de la campagne est **NO-GO avant G4**. Sur les familles
 `terrain`, `scanline_single_pass` et `scanline_overlap_multiecho`, plusieurs
 compteurs de travail ont deux exposants successifs strictement supérieurs à
-`1,35`. Seule la famille `uniform` passe cette gate. Ce résultat refuse
-l'ordonnance CPU courante, qui associe encore trop de survivantes à trop de
+`1,35`. Seule la famille `uniform` n'a aucun compteur publié rouge. Ce résultat
+refuse l'ordonnance CPU de ce snapshot, qui associe encore trop de survivantes à trop de
 nœuds du classifieur; il ne réfute ni le théorème Yao48 ni une future
 implémentation tuilée ou dual-tree.
 
 Les douze ledgers ferment et les compteurs sont utiles comme falsificateurs.
+La télémétrie ne couvre cependant pas toutes les opérations, tous les octets et
+tous les high-water exigés par la gate d'admission. Les compteurs rouges
+suffisent au NO-GO; cette campagne n'aurait pas pu établir un GO.
 Les temps ne sont pas qualifiables : la machine a compilé et exécuté d'autres
 contrôles pendant la rampe. Cette campagne n'est ni un benchmark exclusif, ni
 une exécution G4, ni un `warm_e2e`, ni un reçu de payload.
