@@ -45,9 +45,11 @@ même sous une seconde, elle ne ferme pas ce SLO.
 ## Faits établis
 
 - À `k=1`, les partitions strictes et fermées sont celles du single linkage.
-  Les plus proches voisins exacts dans les 48 chambres Yao forment un graphe
-  de taille au plus `48n` qui contient un EMST; la réduction sparse évite tout
-  catalogue Morse d'ordre supérieur.
+  Sur le profil initial à positions 3D deux à deux distinctes, les plus proches voisins
+  exacts dans les 48 chambres Yao forment un graphe de taille au plus `48n`
+  qui contient un EMST; la réduction sparse évite tout catalogue Morse d'ordre
+  supérieur. Une extension aux `PointId` colocalisés doit traiter séparément
+  les arêtes de poids nul avant d'appliquer le théorème directionnel.
 - Pour une boule avec `p` points strictement intérieurs et un support propre
   positif de taille `q`, les ordres `1<=k<=p+q-2` sont des continuations H0
   sans fusion ni nouveau `PointId`.

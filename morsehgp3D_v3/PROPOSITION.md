@@ -130,11 +130,21 @@ même `BallKey`; les supports multiples ne créent pas plusieurs boules.
 ### 6.1 Ordre un : EMST exact
 
 L'ordre un est exactement le single linkage, au niveau
-`distance_squared/4`. La route candidate extrait, pour chaque point, le plus
-proche voisin exact selon la clé canonique dans chacune des 48 chambres Yao.
+`distance_squared/4`. Sur le profil initial à positions 3D deux à deux distinctes, la route
+candidate extrait, pour chaque point, le plus proche voisin exact selon la clé
+canonique dans chacune des 48 chambres Yao.
 Le diamètre angulaire de chaque chambre est strictement inférieur à 60 degrés :
 l'union non orientée de ces arêtes contient l'EMST canonique du graphe complet
 et possède au plus `48n` candidats dirigés.
+
+Le vecteur nul n'appartient pas à ce raisonnement directionnel. Une extension
+qui autoriserait plusieurs `PointId` à la même position devrait d'abord former
+une étoile de poids nul depuis le plus petit `PointId` de chaque classe et la
+pré-unir. Le quotient étiquette chaque classe par ce représentant minimal;
+Yao-1 s'applique ensuite aux positions de classes distinctes et chaque arête
+positive choisit les représentants minimaux. Sans ce contrat supplémentaire,
+le preflight refuse les doublons au lieu de les ranger arbitrairement dans une
+chambre.
 
 Le parcours peut être mutualisé avec les banques q2, mais son reçu est plus
 fort : une chambre publie un candidat seulement après fermeture de toutes les

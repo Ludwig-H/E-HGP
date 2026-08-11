@@ -5,8 +5,9 @@
 // residente partagee, lane k=1 (EMST Boruvka exact, niveaux 4*niveau=d^2),
 // lane q2 (coupe Yao48 stricte fail-open, enveloppe radiale, classification
 // terminale par lots, comptes census) executee par shards d'ancres sur N
-// threads. Chaque repetition regenere un nuage frais (graine+rep), rejoue le
-// ledger complet et publie p50/p95 par phase.
+// threads. Chaque repetition regenere un nuage frais (graine+rep), ferme les
+// identites de masse disponibles (C(n,2), par-ancre, survivantes, n-1 aretes
+// triees) et publie p50/p95 par phase — ce ne sont PAS des reçus rejoues.
 //
 // CE QUE CETTE SERIE N'EST PAS (PROPOSITION, audit etat courant) : elle ne
 // ferme NI le p95 principal de 100 ms NI le p95 secondaire d'une seconde du
@@ -19,6 +20,7 @@
 // Codes : 0 OK ; 1 violation (ledger/fermeture par ancre) ; 2 CLI ;
 // 3 nuage non genere.
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <chrono>
 #include <cstdio>
@@ -98,7 +100,7 @@ int main(int argc, char** argv) {
   }
   if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
 
-  std::printf("serie=warm_e2e_h0_v3_diagnostic\n");
+  std::printf("contrat=DiagnosticHorizontalReceipt-v1 serie=warm_e2e_h0_v3_diagnostic\n");
   std::printf("provenance : --points %d --coord %d --seed %lld --family %s"
               " --leaf-size %d --reps %d --threads %d --bank-pops %lld\n", n, coord,
               seed, mhgp3v::cloud_family_name(family), leaf_size, reps, threads,
@@ -122,12 +124,38 @@ int main(int argc, char** argv) {
     mhgp3v::MortonLbvh tree;
     tree.build(pts, leaf_size);
     const auto t1 = std::chrono::steady_clock::now();
-    const mhgp3v::EmstResult emst = mhgp3v::emst_boruvka(tree);
+    mhgp3v::EmstResult emst = mhgp3v::emst_boruvka(tree);
+    // Le single linkage consomme des LOTS d'egalite tries par niveau : le
+    // tri appartient au chemin chaud, pas au post-traitement.
+    {
+      std::vector<int> order_edges((std::size_t)emst.edges.size());
+      for (int e = 0; e < (int)order_edges.size(); ++e) order_edges[(std::size_t)e] = e;
+      std::sort(order_edges.begin(), order_edges.end(), [&](int a, int b) {
+        if (emst.levels4[(std::size_t)a] != emst.levels4[(std::size_t)b])
+          return emst.levels4[(std::size_t)a] < emst.levels4[(std::size_t)b];
+        return emst.edges[(std::size_t)a] < emst.edges[(std::size_t)b];
+      });
+      std::vector<std::array<int, 2>> sorted_edges;
+      std::vector<long long> sorted_levels;
+      sorted_edges.reserve(order_edges.size());
+      sorted_levels.reserve(order_edges.size());
+      for (int e : order_edges) {
+        sorted_edges.push_back(emst.edges[(std::size_t)e]);
+        sorted_levels.push_back(emst.levels4[(std::size_t)e]);
+      }
+      emst.edges = std::move(sorted_edges);
+      emst.levels4 = std::move(sorted_levels);
+    }
     const auto t2 = std::chrono::steady_clock::now();
     if (!emst.ok || (int)emst.edges.size() != n - 1) {
       std::printf("ECHEC : EMST refuse ou arbre couvrant incomplet\n");
       return 1;
     }
+    for (std::size_t e = 1; e < emst.levels4.size(); ++e)
+      if (emst.levels4[e] < emst.levels4[e - 1]) {
+        std::printf("ECHEC : les niveaux EMST ne sont pas tries\n");
+        return 1;
+      }
     const mhgp3v::yao48::ShardedOutcome q2 = mhgp3v::yao48::run_sharded(
         tree, mhgp3v::yao48::SourceInjections{}, bank_pops, chamber_visits, threads);
     const auto t3 = std::chrono::steady_clock::now();
@@ -140,6 +168,14 @@ int main(int argc, char** argv) {
       std::printf("ECHEC : ledger q2 non ferme\n");
       return 1;
     }
+    if (r.classifier_tombstones + r.census_records != r.survivors) {
+      std::printf("ECHEC : survivantes != tombstones + census\n");
+      return 1;
+    }
+    if (r.anchors != n) {
+      std::printf("ECHEC : le nombre d'ancres traitees differe de n\n");
+      return 1;
+    }
     const double build_s = std::chrono::duration<double>(t1 - t0).count();
     const double emst_s = std::chrono::duration<double>(t2 - t1).count();
     const double q2_s = std::chrono::duration<double>(t3 - t2).count();
@@ -147,22 +183,25 @@ int main(int argc, char** argv) {
     t_emst.push_back(emst_s);
     t_q2.push_back(q2_s);
     t_warm.push_back(build_s + emst_s + q2_s);
-    std::printf("rep %d : graine=%lld build=%.3f s emst=%.3f s (%d rondes)"
-                " q2=%.3f s warm=%.3f s — q2 : coupe=%lld+%lld, survivantes=%lld,"
-                " tombstones=%lld, census=%lld (fermes=%lld stricts=%lld"
-                " contacts=%lld), ledger FERME\n", rep, rep_seed, build_s, emst_s,
+    std::printf("rep %d : graine=%lld build=%.3f s emst_trie=%.3f s (%d rondes)"
+                " q2=%.3f s partial_h0_wall=%.3f s — q2 : coupe=%lld+%lld,"
+                " survivantes=%lld, tombstones=%lld, census=%lld (fermes=%lld"
+                " stricts=%lld contacts=%lld), identites de masse FERMEES\n", rep,
+                rep_seed, build_s, emst_s,
                 (int)emst.rounds, q2_s, build_s + emst_s + q2_s,
                 r.region_pruned_mass, r.point_tombstones, r.survivors,
                 r.classifier_tombstones, r.census_records, r.census_closed_total,
                 r.census_strict_total, r.census_contact_total);
   }
-  std::printf("p50 : build=%.3f s emst=%.3f s q2=%.3f s warm=%.3f s\n",
+  std::printf("p50 : build=%.3f s emst=%.3f s q2=%.3f s partial_h0_wall=%.3f s\n",
               percentile(t_build, 0.50), percentile(t_emst, 0.50),
               percentile(t_q2, 0.50), percentile(t_warm, 0.50));
-  std::printf("p95 : build=%.3f s emst=%.3f s q2=%.3f s warm=%.3f s\n",
+  std::printf("p95 : build=%.3f s emst=%.3f s q2=%.3f s partial_h0_wall=%.3f s\n",
               percentile(t_build, 0.95), percentile(t_emst, 0.95),
               percentile(t_q2, 0.95), percentile(t_warm, 0.95));
-  std::printf("OK : serie diagnostique %s — aucune revendication de SLO officiel\n",
+  std::printf("OK : serie diagnostique %s (temps partial_h0_wall) — aucune"
+              " revendication de SLO officiel, le nom warm_e2e reste reserve au"
+              " payload officiel\n",
               "warm_e2e_h0_v3_diagnostic");
   return 0;
 }

@@ -1016,7 +1016,10 @@ struct YaoSource {
 // 4*Phi = ||2x-u-v||^2 - ||u-v||^2 en i128, scan quadratique complet.
 // ---------------------------------------------------------------------------
 
-// LA FUSION DES REÇUS DE SHARDS : sommes partout, maxima pour les high-waters.
+// LA FUSION DES REÇUS DE SHARDS : sommes partout, maxima pour les
+// high-waters. EXHAUSTIVE champ par champ (l'audit a refuse une fusion qui
+// omettait radial, antichaine et voie liste) ; la porte d'invariance
+// 1/2/N threads la scelle.
 inline void merge_receipts(SourceReceipt* into, const SourceReceipt& from) {
   into->anchors += from.anchors;
   into->bank_pops += from.bank_pops;
@@ -1027,11 +1030,16 @@ inline void merge_receipts(SourceReceipt* into, const SourceReceipt& from) {
   into->prune_node_visits += from.prune_node_visits;
   into->region_prunes += from.region_prunes;
   into->region_pruned_mass += from.region_pruned_mass;
+  into->radial_prunes += from.radial_prunes;
+  into->radial_pruned_mass += from.radial_pruned_mass;
+  into->antichain_nodes += from.antichain_nodes;
   into->point_tombstones += from.point_tombstones;
   into->survivors += from.survivors;
   into->classify_node_visits += from.classify_node_visits;
   into->classify_box_tests += from.classify_box_tests;
   into->classify_point_tests += from.classify_point_tests;
+  into->classify_list_tests += from.classify_list_tests;
+  into->classify_list_pairs += from.classify_list_pairs;
   into->classifier_tombstones += from.classifier_tombstones;
   into->census_records += from.census_records;
   into->census_closed_total += from.census_closed_total;
@@ -1039,6 +1047,34 @@ inline void merge_receipts(SourceReceipt* into, const SourceReceipt& from) {
   into->census_contact_total += from.census_contact_total;
   into->stack_high_water = std::max(into->stack_high_water, from.stack_high_water);
   into->heap_high_water = std::max(into->heap_high_water, from.heap_high_water);
+}
+
+// L'EGALITE CHAMP PAR CHAMP de deux reçus (porte d'invariance par shards).
+inline bool receipts_equal(const SourceReceipt& a, const SourceReceipt& b) {
+  return a.anchors == b.anchors && a.bank_pops == b.bank_pops &&
+         a.bank_node_visits == b.bank_node_visits &&
+         a.bank_cone_visits == b.bank_cone_visits &&
+         a.full_chambers == b.full_chambers &&
+         a.underfull_chambers == b.underfull_chambers &&
+         a.prune_node_visits == b.prune_node_visits &&
+         a.region_prunes == b.region_prunes &&
+         a.region_pruned_mass == b.region_pruned_mass &&
+         a.radial_prunes == b.radial_prunes &&
+         a.radial_pruned_mass == b.radial_pruned_mass &&
+         a.antichain_nodes == b.antichain_nodes &&
+         a.point_tombstones == b.point_tombstones && a.survivors == b.survivors &&
+         a.classify_node_visits == b.classify_node_visits &&
+         a.classify_box_tests == b.classify_box_tests &&
+         a.classify_point_tests == b.classify_point_tests &&
+         a.classify_list_tests == b.classify_list_tests &&
+         a.classify_list_pairs == b.classify_list_pairs &&
+         a.classifier_tombstones == b.classifier_tombstones &&
+         a.census_records == b.census_records &&
+         a.census_closed_total == b.census_closed_total &&
+         a.census_strict_total == b.census_strict_total &&
+         a.census_contact_total == b.census_contact_total &&
+         a.stack_high_water == b.stack_high_water &&
+         a.heap_high_water == b.heap_high_water;
 }
 
 // L'EXECUTION PAR SHARDS D'ANCRES (diagnostic warm_e2e) : chaque thread

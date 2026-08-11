@@ -8,361 +8,294 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Fraîcheur
+## Fraîcheur et portée
 
-`HEAD` audité : `8c21b7a056c947af2c0aa4c1fd9d5848447a1ba4`. Le
-worktree audité contient un delta non committé : les sources ci-dessous et la
-documentation v3 ont été lues telles quelles, sans modifier le code de
-prototype. `prototype/cloud_family_gate.cpp` et
-`prototype/exact_ray_sweep.hpp` sont encore non suivis par Git.
+`HEAD` audité : `2e49dcf45d5136bbeb1e3c345f84fa5739b2f961`. Les
+modifications locales de l'auditeur sont exclusivement documentaires dans
+`README.md`, `PROPOSITION.md` et `audits/`; aucun octet de prototype, d'oracle,
+de CMake ou de reçu n'a été modifié par l'auditeur.
 
-| objet | SHA-256 |
+| objet décisif | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` | `4e102d8cb64555ddbae997a884fbe5285b99fce5af4bfeefaed17791d74e67c2` |
+| `CMakeLists.txt` | `c98e08be22a45c7430a2cd6d19da4acc3580a6117ec873e51c9b68e67decd480` |
 | `prototype/cloud_families.hpp` | `1a3e3027c2e0880e6ff381fc80b707b9ec88dbf573579aac535cfc80bb307b54` |
-| `prototype/cloud_family_gate.cpp` | `183be43bb65804ce311ddad3a5d2235dfdfa068cdd79e7942b3bc699ae051a36` |
-| `prototype/pair_selfjoin_probe.cpp` | `510c8306c7c99aa65b01506f7d2d3eac7317ff4e6f7de2f94f3ad60b19e583ac` |
-| `prototype/pair_anchor_probe.cpp` | `8ae41d20dffcc3cbb1fc6d85d088fd4e74e9303681afba02727af6968e9e2733` |
-| `prototype/exact_ray_sweep.hpp` | `ed07335f49993e883ced53d9d9489d674249e6d036478966281afaa7df209443` |
-| `prototype/admissible_pair_probe.cpp` | `f58f7e46801cebb58498a2de7c5746a2fdf171d2c354c8cc7f8eef4ea4c460a3` |
-| `oracle/gamma_forest_judge.cpp` | `6a500b219e8cd946e1edecd6c80c854ba4a10882936d1f47a2792a9fd2bc3520` |
-| `prototype/cell_source_mass_probe.cpp` | `7442af487265033849c97d0ade7c9810fd6b7e5acf506580779d76b4d0139bde` |
-| `prototype/direct_source.cpp` | `7acb7a9c01d0ca4a18491203f0558b07c0b828354bddd187d7a297f1143302dc` |
-| `prototype/faceowner_device_qualification.cpp` | `20b2eb2e8e01d839ba413ca5b52b054f4cdf0decd7a99a484d169e3d70bcccc3` |
-| `prototype/parallel_catalogue_gate.cpp` | `da34a6f3a8736eae9116935f3e66c5ac2067463373c45d9db4b910d25f4ecafb` |
-| `prototype/postings_join_gate.cpp` | `f9b0bc4485315c1e39331c902c6acc5746ac95700696aefa12269a419dc68c3c` |
-| `prototype/prefix_mass_probe.cpp` | `c5381b1d3569f8d9391021fa0b4f85c58a18dfb537687ff92837404fa96ef0b9` |
-| `prototype/saturated_fold.hpp` | `1fc70e9644a7394e7a14758b61916723ddeaf87455f230694515fe018cdbab58` |
-| `prototype/saturated_pipeline.cpp` | `dd54c231c4ecfef182136f1564f14cc924dc935d8d2cd803dccd28f3dfc6d8a6` |
-| `audits/check_gate_d_fold_f0.py` | `192f272ef2f88fa8925522736d05cebf480d99f9f2076bef3f81b73ee89d40fb` |
-| binaire Release q2 | `719b1ce1e628814807f72110de2ab3bae44da9f93f613329415db0b14f03c9b7` |
-| binaire Release ancres | `bdc50ea335bc03419d988c2453af800ad31554cbde175ba16fa23279e0c5181e` |
-| binaire ASan/UBSan ancres | `fc672abc3ad1054e8b083ba8983c9c0aa69eb66c3bbf3df05f6c0c4001f8988a` |
-| binaire Release cardinalité | `a9dc601794fb9a669818df2d1faf9c7c6443536667248d86ee24740a9591cee0` |
+| `prototype/morton_lbvh.hpp` | `23ffc797c35e24823cf346be934643b0447f8d69a5c0843b4fd090ddc548b267` |
+| `prototype/pair_yao48_source.cpp` | `68d7435f36af85987885a2b55702282728afaa879c214ebf54814506e8ef861b` |
+| `prototype/yao48_source.hpp` | `59720b420052aeb889cc05afdf557a8006a606ef2129c3751114ce3bc51068bd` |
+| `prototype/emst_boruvka.hpp` | `0e2ca1276fb5b53f9e43c7186021fca9258bf91ceee4c85679179a6d5f9e68f4` |
+| `prototype/emst_boruvka_probe.cpp` | `caa0cacd3c9ec2a25688673e005d823be4cb809c5c8ac34e690086c397cc1467` |
+| `prototype/warm_e2e_h0_diagnostic.cpp` | `24243f88c60e9383b6e9f718f17f6b63048a8f976d60975b7ee0f6aa80e79d64` |
+| binaire Release q2 | `31f3a9a17a06aaf5f2d78ec84d6c49f1cfff526a3178a00ac607729f2c8d8334` |
+| binaire Release EMST | `2cab9d52d74c700014cd9e6238347f5ab6b704f69c15646522a8efe1a621a605` |
+| binaire Release horizontal partiel | `b968ac76a61e284936e4907768e722e3823b0b360c91d1b0b2a840de1496fa21` |
+| reçu brut q2 12,5/25/50 k | `acf8e89248131cc7fdce3246f559d380acbee4ce67548ac9fb5e26efdd67d889` |
+| dérivation des exposants q2 | `f2d9783211d884fef821a45961d428ee645bad656685d1520337957f54d2776f` |
 
-Toute modification d'un de ces octets rend les résultats locaux ci-dessous
-historiques et exige un nouveau pincement. Cet audit est l'unique autorité
-mutable du statut v3; les autres notes sont des preuves durables ou des reçus
-explicitement datés.
+Les sources q2 et le binaire sont restés identiques avant, pendant et après les
+douze profils. Le reçu versionné est identique octet pour octet à la sortie
+originale. Une modification d'un SHA de code ou de binaire rend les tests et
+profils correspondants historiques; le présent fichier doit alors être
+repincé avant tout verdict live.
 
 ## Verdict
 
-Le contrat n'est pas rempli. À 50 000 points et `K=10`, le plan de tests fixe
-un p95 `warm_e2e<100 ms` principal et `warm_e2e<1 s` secondaire. Les deux
-seuils portent sur `BenchmarkOutputContract-v1`, qui comprend dix forêts, les
-applications verticales, les lots et le certificat minimal copiés côté hôte.
-Le payload horizontal `hgp_reduced_normalized_h0_v3` est une série distincte :
-même mesuré sous une seconde, il ne fermerait pas ce SLO officiel.
+Le contrat n'est pas rempli. Le SLO officiel à 50 000 points et `K=10` porte
+sur `BenchmarkOutputContract-v1` : dix forêts, applications verticales, lots
+atomiques, certificat minimal et copie hôte dans le même p95 `warm_e2e`. Aucun
+exécutable v3 ne produit ce payload.
 
-Aucun exécutable v3 ne mesure aujourd'hui ce pipeline complet. Le seul
-pipeline assemblé construit un catalogue CPU exhaustif; son chrono catalogue
-et fold s'arrête avant la construction des forêts. Les composants CUDA
-qualifient des briques isolées et effectuent encore allocations, transferts ou
-synchronisations par appel ou par ordre. Il n'existe ni LBVH Morton/Yao48
-produit, ni source q3/q4 complète et parcimonieuse, ni payload officiel
-résident de bout en bout.
+Trois décisions sont désormais nettes :
 
-La directive normative de la spécification §1.1, datée du 7 août, impose un
-chemin industriel sans budget configurable : objet complet ou échec sur une
-ressource physique réelle. Le vocabulaire plus ancien de budgets configurés et
-`budget_exhausted` dans le plan de tests §14.6 ne peut être lu que comme contrat
-de probes diagnostiques tant que cette contradiction externe n'est pas
-réparée; il ne peut ni tronquer ni censurer une sortie produit.
+- la source q2 CPU ferme ses ledgers sur les douze profils sanctionnés, mais sa
+  gate de compteurs est **NO-GO** sur `terrain` et les deux familles scanline;
+  un port CUDA littéral est interdit;
+- le nouveau Borůvka/LBVH est un candidat exact et prometteur pour `k=1`, mais
+  il ne publie encore que l'EMST brut et son juge laisse passer une classe de
+  fausses incidences métriques;
+- `P15-HOCUDA-P1a` possède maintenant une spécification q4 entière auditée,
+  mais toujours aucune implémentation v3 reçue.
 
-Le verrou est algorithmique avant d'être CUDA. Le cœur exact q3/q4 courant
-laisse un résiduel bien plus mince que son travail, mais il repart encore de la
-racine pour chaque recherche de témoins. Sur les tailles diagnostiques
-800/1 600/2 400, les huit couples lane/famille ont deux pentes successives de
-visites supérieures à 1,35. Ce n'est pas la porte formelle, qui exige
-12 500/25 000/50 000, mais c'est une alerte structurelle suffisante pour
-interdire le port de ce rescan. Même l'extrapolation la plus favorable reste à
-plusieurs milliards de visites à 50 k.
+Le harnais nommé `warm_e2e_h0_v3_diagnostic` relie LBVH, EMST brut et q2
+count-only. Son nom de série et son avertissement de portée sont corrects; sa
+sortie n'est ni un warmup sanctionné, ni un payload horizontal matérialisé, ni
+un SLO officiel.
 
-## État des tests du worktree pincé
+## État des tests locaux
 
-La configuration Release CPU enregistre 321 CTests, dont 75 tests préfixés
-`mhgp3v_pair_anchor_`, 4 `mhgp3v_cloud_family_` et les 2 doubles q2 scanline.
-La reconstruction Release complète passe, y compris la cible ASan/UBSan des
-ancres. Le dernier rejeu ciblé suivant passe `81/81` en 10,81 s :
+La configuration Release CPU enregistre 376 CTests. Sur les octets pincés :
 
-```bash
-cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v3 --target mhgp3v_pair_anchor_probe \
-  mhgp3v_pair_anchor_probe_san mhgp3v_cloud_family_gate \
-  mhgp3v_pair_selfjoin_probe --parallel 4
-ctest --test-dir build/v3 --output-on-failure \
-  -R '^mhgp3v_(pair_anchor_|cloud_family_|pair_selfjoin_q2_scanline)'
-```
+- les 15 tests `^mhgp3v_emst_` passent;
+- les 3 tests `^mhgp3v_warm_e2e_` passent;
+- les matrices indépendantes supplémentaires EMST passent 120/120 : quatre
+  familles, dix graines, trois tailles de feuilles, `n=257`, oracle Prim et
+  permutation actifs.
 
-Une matrice supplémentaire passe `320/320` : quatre familles, graines 1 à 20,
-lanes q3/q4, modes `depth` et `combined`, `n=24`, feuilles 2 et oracle actif.
-La porte Python modifiée `mhgp3v_gate_d_fold_f0` passe aussi `2/2` en 4,15 s,
-avec et sans `python3 -O`.
-Ces verts qualifient seulement les propriétés locales exercées sur les octets
-pincés. Ils ne qualifient ni la complétude d'une source 50 k, ni la complexité,
-ni le pipeline, ni le statut public. Aucun passage global `321/321` n'est
-revendiqué.
+Ces verts qualifient uniquement les propriétés exercées. Ils ne ferment ni les
+bords EMST `n=1,2,3`, ni un sanitizer CMake de cette lane, ni la gate 50 k, ni
+CUDA/G4, ni le payload produit. La suite globale n'est pas revendiquée dans ce
+pincement tant qu'elle n'a pas été rejouée après la dernière configuration.
 
-## Résultats mathématiques et logiciels locaux
+## Source q2 Yao48/LBVH
 
-### Cardinalité du générateur
+### Réception exacte locale
 
-Le contre-exemple permanent
-`scanline_overlap_multiecho, n=12500, coord=707, seed=20260810` révélait une
-émission de 12 501 points. La porte directe du générateur exerce désormais les
-quatre familles, plusieurs tailles et graines, ce contre-exemple, un mutant
-d'overshoot et une insuffisance explicite. Sur le worktree pincé, le contrat
-« exactement `n`, ou refus avant construction » est fermé localement. Le
-fichier de porte reste non suivi et doit accompagner le code au commit.
+Le prédicat terminal et les coupes Yao restent stricts et fail-open aux
+égalités. Le probe possède un oracle exhaustif borné, un ledger par ancre, des
+sorts par paire dans les modes bornés, des banques exactes ou par antichaîne,
+une enveloppe radiale multi-chambre et un classifieur partagé par ancre. Les
+douze profils à `12 500/25 000/50 000` finissent avec `rc=0` et ferment
+`region_pruned_mass+point_tombstones+survivors=C(n,2)`.
 
-### Self-join q2
+Le reçu brut et sa dérivation sont dans
+[`../receipts/yao48_scale_20260811/`](../receipts/yao48_scale_20260811/).
+Les exposants sont `log2(C(2n)/C(n))`; les chronos sont ceux de la phase locale
+mono-thread, hors génération et LBVH, donc jamais un `warm_e2e`.
 
-Le prédicat ponctuel reste exact : `w` est strictement intérieur à la boule
-diamétrale de `x,y` si et seulement si
-`(w-x) dot (w-y)<0`. Les bornes AABB `U4` et `L4`, les témoins distincts et la
-partition triangulaire fournissent des prunes sûrs et un ledger pair-à-pair.
-Cette preuve ne rend pas le parcours industriel.
+| famille | phase locale 50 k | visites de coupe, pentes | survivantes, pentes | tests `Phi` totaux, pentes | tests boîte classifieur, pentes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| terrain | 72,536 s | 1,388 / 1,381 | 1,398 / 1,426 | 1,403 / 1,457 | 1,559 / 1,642 |
+| scanline simple | 105,141 s | 1,455 / 1,549 | 1,513 / 1,686 | 1,575 / 1,593 | 1,724 / 1,834 |
+| multiecho | 69,811 s | 1,452 / 1,421 | 1,453 / 1,476 | 1,461 / 1,488 | 1,694 / 1,650 |
+| uniforme | 75,702 s | 1,220 / 1,147 | 1,105 / 1,076 | 1,111 / 1,106 | 1,279 / 1,094 |
 
-Les reçus 50 k déjà pincés suffisent à refuser le self-join courant comme
-source produit : selon la famille, 53 à 724 millions de visites `L4`, 86
-millions à 1,365 milliard de tests ponctuels et 3,60 à 14,85 millions de paires
-terminales, pour 6,672 à 120,303 s en count-only CPU avant census q3/q4 et
-fold. La route à construire reste Yao48 fail-open sur un vrai LBVH Morton,
-suivi d'un classifieur terminal et d'un census fermé multi-ordre. Le self-join
-reste oracle, falsificateur de masse ou second prune.
+Les tests `Phi` totaux additionnent la voie liste et la voie arbre. À 50 k, le
+classifieur exécute selon la famille 634 à 786 millions de tests ponctuels et
+992 millions à 1,562 milliard de tests de boîtes. Les banques croissent près du
+linéaire et la famille uniforme reste sous 1,35 sur les compteurs de travail;
+le verrou est l'aval de coupe/classification sur les trois familles structurées.
+Deux pentes de travail successives au-dessus de 1,35 suffisent à refuser la
+route entière avant GPU. La masse prunée, naturellement proche de `Theta(n^2)`,
+n'est pas utilisée comme compteur de travail.
 
-### Degré Gabriel
+L'enveloppe radiale est un progrès substantiel : avec les tombstones
+ponctuelles, la coupe ferme 96 à 98 % de la masse selon le reçu dérivé. Mais les
+2 à 4 % restants représentent encore 23 à 50 millions de paires; leur
+classifieur domine. Sharder ce même travail change la latence, pas ces
+exposants.
 
-Le kissing number 12 ne borne pas le degré q2. Dans l'espace euclidien, pour
-`p=0` et autant de points distincts `q_i=R u_i` que souhaité sur une sphère
-centrée en `p`, tout tiers vérifie l'inégalité stricte suivante :
+### Défauts de réception et de télémétrie
 
-$$\Phi_{p,q_i}(q_j)=R^{2}\left(1-\cos\theta_{ij}\right)>0.$$
+1. Dans `pair_yao48_source.cpp`, deux branches successives portent le même test
+   `fixture_name == "radial-straddle"`. La première reconstruit le nuage après
+   l'exécution; la seconde, qui exige un reçu radial et vérifie les six paires,
+   est inatteignable. Le CTest dédié peut donc être vert sans ses assertions.
+2. `merge_receipts` omet `radial_prunes`, `radial_pruned_mass`,
+   `antichain_nodes`, `classify_list_tests` et `classify_list_pairs`. Le ledger
+   de masse reste juste parce que la masse radiale est déjà incluse dans
+   `region_pruned_mass`, mais la télémétrie shardée est fausse.
+3. `work_done()` omet les tests de la voie liste, les opérations de tas et
+   jusqu'à 48 tests de chambres cachés derrière une seule
+   `bank_cone_visits`; il additionne en outre des maxima de pile/tas comme du
+   travail. Le contrôle n'a lieu qu'avant et après une ancre. `max_work` reste
+   donc un coupe-circuit imparfait de probe, jamais une borne produit.
+4. Le mode shardé ne porte ni sorts ni reçus. Il vérifie la masse par ancre,
+   mais pas une omission compensée par un doublon de même masse dans cette
+   ancre. Le reçu de profil ne scelle pas à lui seul commit, ELF, options,
+   environnement ou mémoire; le tableau de fraîcheur ci-dessus complète cette
+   provenance pour ce seul audit.
 
-Le degré reste arbitraire dans le bucket exact de rang fermé 11 en ajoutant
-neuf témoins communs strictement intérieurs. Sur la grille u16 finie, les caps
-triviaux sont `n-1` et `2^48-1`; deux constructions à treize voisins suffisent
-à réfuter le cap 12 aux rangs exacts 2 et 11. `smax=11` borne seulement le
-contenu d'un record fermé, pas le nombre de records incidents. La preuve est
-dans
-[`AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md`](AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md).
-Le calcul indépendant de leurs produits scalaires confirme les rangs fermés 2
-et 11 annoncés, mais aucune gate exécutable ne grave encore ces constructions.
-La baseline de Poisson de degré moyen 80 reste une moyenne de modèle, jamais un
-cap, une queue ou une garantie de temps.
+Le statut exact est donc : source CPU count-only utile comme différentiel et
+falsificateur d'architecture; route produit/GPU refusée en l'état.
 
-### Cœur de Jung q3/q4
+## Lane `k=1` : EMST
 
-Pour une paire distincte certifiée arête maximale d'un support propre positif,
-`g>0` puis `3g^2>4Q` en q3 ou `g^2>2Q` en q4 certifient un témoin strict pour
-tout le disque de Jung. Neuf ou huit `PointId` distincts autorisent seulement
-la tombstone H0 correspondante. Les égalités restent fail-open, sauf
-l'inégalité large q4 explicitement prouvée sûre sous la garde `D^2>0`.
+### Ce qui est prouvé
 
-Le worktree ajoute `L4` et hérite au plus neuf identifiants déjà universels.
-Il ne maintient pas une frontière persistante de nœuds ambigus : la correction
-des frères d'extrémités libérés est obtenue par un nouveau parcours depuis la
-racine. Les campagnes différentielles, mutants, planchers de non-vacuité,
-contacts, paire colocalisée et égalité rationnelle passent dans la série
-ciblée. Les certificats transportent encore des positions dans la permutation
-de l'arbre; tout reçu exporté doit publier des `PointId` stables ou engager
-cette permutation. Le rejeu partage certaines primitives avec le sujet et ne
-remplace donc pas un juge mathématique entièrement indépendant.
+Sous les préconditions d'un nuage u16 et d'un `MortonLbvh` intact construit sur
+ce même nuage, le cœur Borůvka nominal est exact. Pour chaque composante figée,
+le parcours trouve l'unique minimum de la clé totale
+`(distance_squared,min_PointId,max_PointId)` : la borne AABB est un minorant,
+le prune est strict, les égalités descendent et seuls les sous-arbres purs de
+la composante sont sautés. La propriété de coupe rend chaque choix sûr; les
+fusions de fin de ronde produisent un EMST en au plus `ceil(log2(n))` rondes.
+Les quatre fixtures gravées et leurs constantes ont été recalculées
+indépendamment.
 
-Un coût caché reste dans le chemin accepté en bloc. Après avoir crédité un
-nœud en `O(1)` par sa cardinalité, `count_universal_block` et
-`count_universal_pair` réénumèrent toutes ses positions dans `harvest_`, même
-hors génération de certificats. Ce travail `O(|node|)` n'apparaît ni dans
-`node_visits` ni dans `point_tests`; l'héritage et le reçu n'ont besoin que des
-9/8 identifiants distincts du seuil. Il faut plafonner cette matérialisation au
-seuil effectif, publier un compteur propre et ne jamais remplir le vecteur de
-rejeu lorsqu'aucun certificat n'est demandé. Cette correction réduit une
-constante et répare la télémétrie; elle ne change pas le verdict d'exposant.
+Les compteurs déterministes 50 k sont favorables :
 
-### Profondeur fermée
+| famille | rondes | visites LBVH | tests de distance |
+| --- | ---: | ---: | ---: |
+| terrain | 8 | 15 357 840 | 1 663 166 |
+| uniforme | 8 | 16 847 730 | 3 515 480 |
+| scanline simple | 7 | 11 007 750 | 1 500 995 |
+| multiecho | 7 | 13 583 290 | 1 592 139 |
 
-Le noyau partagé implémente exactement
-`delta=always+m-max_open`. Il trie les rayons par angle entier, inclut les
-rayons confondus dans l'arc semi-ouvert et exclut l'antipode. Le juge borné
-collecte directement depuis les points, choisit une autre base et minimise la
-demi-boule fermée en temps quadratique. La fixture u16 extrême non colinéaire,
-les grands produits, ASan/UBSan, les comparaisons de tri et tous les octets de
-scratch sont maintenant exercés ou comptés.
+Les deux pentes de visites et de tests restent sous 1,35 dans les quatre
+familles. Les chronos locaux ont coexisté avec une campagne q2 lourde et ne
+sont donc pas publiés comme reçu de latence.
 
-Le contrat de l'API partagée doit toutefois être explicite. Elle reçoit des
-rayons sans leurs `PointId` et ne peut donc empêcher qu'un même identifiant soit
-injecté deux fois; ses produits `i128` ne sont sûrs que sous les bornes des
-adaptateurs u16 reçus, pas pour des `int64` arbitraires. Chaque adaptateur doit
-garantir un rayon par `PointId` distinct, accepter des directions confondues
-portées par des identifiants différents et engager sa borne d'amplitude.
+### Ce qui manque avant de dire « lane reçue »
 
-Ce durcissement ne corrige pas le coût dominant : chaque paire survivante
-collecte encore ses témoins depuis la racine et le noyau alloue `rays`, `dir`
-et `count` par appel. Le pire cas reste `O(sum m_ab log m_ab)`, donc
-`O(n^3 log n)`.
+1. `check_spanning` ne vérifie jamais que le niveau d'une arête est sa vraie
+   distance carrée. Sur le carré `(0,0),(1,0),(0,1),(1,1)`, le faux arbre
+   `{(0,3),(0,1),(0,2)}` étiqueté trois fois `1` passe cardinalité, connexité,
+   multiensemble et partitions, alors que `(0,3)` a une distance carrée `2`.
+   Il faut rejouer chaque incidence en `i128`; un Kruskal canonique indépendant
+   borné est requis pour revendiquer le transcript canonique.
+2. Le cœur pousse les arêtes dans l'ordre des racines et des rondes; il ne trie
+   ni ne rejoue les lots produits. Avec les abscisses
+   `{0,1,3,4,1000,1100}`, une arête de niveau 10 000 est publiée à la première
+   ronde avant une arête de niveau 4 de la seconde. Tri lié des triplets,
+   groupement par niveau, partitions strictes/fermées et payload restent à
+   construire.
+3. Le terme `best-first` est faux : la machine emploie une pile LIFO, donc un
+   DFS branch-and-bound proche-d'abord. Le LBVH ne porte aucun token
+   d'identité/immutabilité validé par l'API.
+4. Le parseur accepte jusqu'à `10^12`, caste ensuite en `int`, puis valide.
+   `--points 4294967300` devient 4 et sort avec le code 0; le même défaut existe
+   pour `--coord` et dans le harnais horizontal.
+5. Les bords `n=1,2,3`, la contraction d'au moins moitié par ronde, un mutant
+   `bd>=best`, un mutant d'incidence métrique et une cible sanitizer CMake
+   manquent. Avec 50 k `PointId` colocalisés, l'égalité empêche tout prune et la
+   première ronde effectue `n(n-1)` tests; le profil produit distinct doit le
+   refuser, ou une extension doit pré-unir les classes nulles.
 
-Une composition exacte encore absente peut améliorer le résiduel sans changer
-ce verdict. Si `C` contient `c` témoins Jung universels distincts et si la
-profondeur est calculée sur les témoins diamétraux `P` privés de `C`, toute
-sphère admissible contient au moins `c+delta(P minus C)` points stricts. La
-porte doit retirer réellement `C`, dédupliquer les `PointId` et tuer les
-mutants de double comptage. Ce prune peut gagner des cas où ni le cœur ni la
-profondeur seuls n'atteignent 9/8; il ne supprime pas la collecte par paire.
+Le probe est un excellent différentiel borné, pas encore le producteur
+normalisé `k=1`.
 
-### Directions exactes sans rescan par paire
+### Réemploi Yao-1
 
-Deux certificats méritent un prototype séparé du self-join actuel :
+Sur le profil à coordonnées distinctes, le voisin canonique le plus proche de
+chaque point dans chacune des 48 chambres Yao forme un graphe dirigé d'au plus
+`48n` arêtes dont l'union contient l'EMST canonique. Le théorème, le prior art
+enregistré et le contrat de mutualisation sont dans
+[`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md).
 
-- pour une ancre `p`, un témoin `w` et un nœud AABB de cibles `q`, poser
-  `s=w-p`, `d=q-p` et `A=d dot s-||s||^2`. Le minimum de `A` est linéaire et le
-  maximum de `||d cross s||^2`, fonction convexe, est atteint à l'un des huit
-  coins. Les tests `A_min>0` puis `3*A_min^2>cross_max` en q3 ou
-  `2*A_min^2>cross_max` en q4 certifient donc le témoin pour tout le nœud. Une
-  banque Jung--Yao de 9/8 identifiants peut remplacer des rescans par une preuve
-  de range; une boîte indécise descend;
-- pour une paire exacte, chaque point définit le demi-plan fermé des centres du
-  disque de Jung où sa marge est négative ou nulle. Si l'intersection du disque
-  et des mauvais demi-plans d'un groupe est vide, le groupe garantit un témoin
-  intérieur. Helly réduit chaque groupe à trois `PointId` au plus; neuf ou huit
-  groupes disjoints ferment la lane. Le packing greedy est sûr mais incomplet
-  et son échec conserve la paire.
+Cette voie ne peut consommer une banque q2 comme preuve de minimum que si elle
+ferme toutes les bornes plus petites, les ex æquo canoniques et les chambres
+vides. Une patience ou un budget épuisé ne certifie jamais `empty`. Le
+prototype CPU enregistré est rejeté à 50 k; seuls le théorème, le transcript et
+les motifs de réduction sparse sont réutilisables.
 
-La preuve, le solveur rationnel et la borne de 180 bits sont dans
-[`NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md`](NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md).
-Ces certificats sont ponctuels ou par nœud cible; ils ne remplacent pas la
-fermeture globale de l'univers implicite. Le center-cover 64 patches de
-`P15-HOCUDA-P1` reste le candidat de complétude par blocs pour q3/q4. Sa première
-tranche `P15-HOCUDA-P1a` est plus étroite : elle profile seulement le prune q4,
-n'émet aucune ancre et ne peut établir la complétude de P1. Les approches
-doivent être comparées par compteurs, sans partager leurs sorts.
+## Harnais horizontal partiel
 
-## Mesure de complexité du cœur pincé
+`warm_e2e_h0_v3_diagnostic` ne montre aucune data race manifeste par inspection,
+mais sa réception reste insuffisante :
 
-Les compteurs ci-dessous proviennent du binaire Release pincé, en mode `core`,
-feuilles 8, graine 20260810 et oracle désactivé. Les deux exposants sont
-`log(V2/V1)/log(n2/n1)`. Les chronos sous charge ne sont pas rapportés; les
-masses et ledgers sont déterministes.
+- il vérifie `region_pruned_mass+point_tombstones+survivors=C(n,2)`, pas
+  `classifier_tombstones+census_records=survivors`, ni `anchors=n`;
+- il hérite de la fusion incomplète des cinq compteurs q2 et ne porte aucun
+  sort/digest permettant de rejouer le ledger;
+- son « p95 » est une interpolation type 7 sur cinq répétitions par défaut,
+  sans warmup; le protocole final exige un nearest-rank sur 30 nuages avec
+  bruts, maximum et MAD;
+- la provenance omet `chamber_visits`, commit, ELF, options, environnement,
+  RSS et capacités; la génération précède le chrono et l'affichage arrondit à
+  la milliseconde;
+- l'arène append-only du classifieur peut atteindre un pic
+  `O(survivantes*noeuds)` par worker, chaque worker dupliquant ses buffers, et
+  aucun high-water physique n'est publié;
+- il n'existe ni test d'invariance 1-vs-N, ni TSAN, ni mutant de ledger final.
 
-| famille | lane | exp. 800→1 600 | exp. 1 600→2 400 | visites projetées à 50 k |
-| --- | --- | ---: | ---: | ---: |
-| uniform | q3 | 2,186 | 2,294 | `1,73e11 [1,54e11;2,13e11]` |
-| uniform | q4 | 2,278 | 2,412 | `2,81e11 [2,42e11;3,63e11]` |
-| terrain | q3 | 1,567 | 1,839 | `5,19e9 [3,83e9;8,73e9]` |
-| terrain | q4 | 1,626 | 1,915 | `7,89e9 [5,71e9;1,37e10]` |
-| scanline simple | q3 | 1,556 | 1,527 | `2,65e9 [2,51e9;2,74e9]` |
-| scanline simple | q4 | 1,647 | 1,538 | `3,87e9 [3,14e9;4,37e9]` |
-| multiecho | q3 | 1,931 | 2,255 | `2,29e10 [1,59e10;4,26e10]` |
-| multiecho | q4 | 1,979 | 2,292 | `3,10e10 [2,18e10;5,64e10]` |
+Les deux CTests smoke rejouent la même commande et leur regex ne vérifie que le
+nom de série. Cette série doit rester explicitement inéligible au SLO.
 
-La projection part des visites à 2 400 et emploie la pente sécante 800→2 400;
-la fourchette emploie les deux pentes locales. Ce n'est ni une preuve, ni un
-intervalle de confiance, ni la gate formelle aux tailles contractuelles. Elle
-suffit à montrer que même le scénario le plus favorable conserve des milliards
-de visites par lane. Le problème est la répétition du parcours de témoins, pas
-seulement le nombre d'ancres finalement conservées.
+## q3/q4 et P1a
 
-## Gain marginal de la profondeur
+Les self-joins et le cœur de Jung restent des oracles/falsificateurs : leurs
+rescans par paire sont déjà refusés avant CUDA. Les certificats Jung--Yao et
+Helly sont sûrs mais incomplets; ils ne ferment pas seuls l'univers implicite.
 
-Sur `n=800`, même graine et mêmes feuilles, le mode `combined` produit :
+La note
+[`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md)
+spécifie désormais exactement la tranche q4-only, seuil huit : coins
+rationnels à l'échelle seize, cover de Jung, range-query collective,
+microtuile avant patches, ledger bijectif et juge indépendant. Aucun code P1a
+v3 ni différentiel `n=32` n'est reçu. La prochaine session G4 P1a ne devient
+justifiée qu'après fermeture locale Release, sanitizer et oracle; son protocole
+va alors directement de `n=32` au profil 50 k et ne qualifie aucun SLO.
 
-| famille | lane | paires soumises au sweep | prunes de profondeur | taux marginal | visites de collecte | comparaisons de tri |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| uniform | q3 | 59 011 | 6 583 | 11,16 % | 2 661 219 | 3 875 650 |
-| uniform | q4 | 64 250 | 12 971 | 20,19 % | 3 026 026 | 4 972 539 |
-| terrain | q3 | 25 570 | 28 | 0,11 % | 676 454 | 831 942 |
-| terrain | q4 | 26 370 | 130 | 0,49 % | 711 278 | 1 029 239 |
-| scanline simple | q3 | 25 410 | 243 | 0,96 % | 680 324 | 844 012 |
-| scanline simple | q4 | 25 992 | 683 | 2,63 % | 711 724 | 1 005 333 |
-| multiecho | q3 | 29 201 | 142 | 0,49 % | 843 371 | 1 172 360 |
-| multiecho | q4 | 30 106 | 407 | 1,35 % | 886 256 | 1 396 701 |
+## Conseils mathématiques et d'implémentation
 
-La profondeur est mathématiquement utile sur `uniform`, mais son rendement est
-faible sur les trois familles structurées. Elle doit rester un filtre terminal
-adaptatif ou un repli exact, avec une porte de gain marginal; la porter avant
-la source par blocs ferait payer le tri sur une mauvaise architecture.
+1. Fermer d'abord les trous de réception à coût faible : métrique des arêtes
+   EMST, tri/lots, branches radiales réellement mordantes, identités finales du
+   ledger shardé, casts CLI et compteurs fusionnés. Aucun de ces correctifs ne
+   transforme à lui seul la complexité.
+2. Pour q2, remplacer l'enveloppe radiale seule par une coupe multi-chambre
+   exacte. Pour chaque intersection `AABB`--chambre non vide, borner en entiers
+   les trois sommes canoniques `x`, `x+y`, `x+y+z` et exiger strictement les
+   trois inégalités Yao contre la banque correspondante. Un masque 48 bits et
+   les versions de banques forment un reçu compact; toute égalité descend.
+3. Ne plus développer les dizaines de millions de survivantes dans le
+   classifieur actuel. Pour une boîte cible `Q` et un nœud témoin `W`, le
+   minimum de `(q-p) dot (w-p)-||w-p||^2` sur `Q times W` est séparable et se
+   calcule aux quatre coins par axe. Une antichaîne disjointe de masse dix dont
+   chaque minimum est strictement positif certifie tout `Q`; l'égalité descend.
+   La prochaine expérience doit transmettre ces crédits sous raffinement dans
+   une traversée duale persistante, sans rescan racine ni matrice de couples.
+   Un reçu logique factorisé remplace une arène par région ou paire.
+4. Extraire Yao-1 avec q2 seulement si le transcript de minimum/`empty` est
+   complet; comparer son coût marginal au Borůvka actuel. Le bottleneck global
+   reste q2, pas la réduction sparse de `k=1`.
+5. Rejouer la même gate de compteurs sur toute nouvelle architecture device
+   avant une latence G4. Aucun résultat GPU n'est utile tant que deux pentes de
+   travail restent rouges ou que le payload officiel n'a pas de producteur.
+6. Implémenter P1a q4 séparément et conserver sa décision mass-only séparée de
+   q2, de P1 complet et du SLO.
 
-## Reçu G4 existant
+## Commentaires de code périmés ou trop forts
 
-L'unique reçu G4/50 k reste une session CPU mass-only sur une machine G4; le
-GPU n'a pas été utilisé. Après le prune de cellules, les masses vont de 465
-millions à 2,86 milliards en q2, de 14,7 à 132 milliards en q3 et de
-`3,30e11` à `9,97e12` en q4. Le catalogue exhaustif atteint 675,4 s à seulement
-6 250 points. Ces mesures réfutent l'énumération combinadique; elles ne
-mesurent ni la nouvelle source, ni un kernel, ni un payload.
+L'auditeur ne modifie pas le code de Claude. Les commentaires suivants doivent
+être corrigés côté code sans recréer d'anciennes autorités :
 
-Le détail et la certification `TERMINATED` sont dans
-[`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md).
-Aucune nouvelle session G4 n'est justifiée aujourd'hui : le code P1a et son
-différentiel rationnel `n<=32` manquent. Une fois ces portes locales, Release et
-sanitizer fermées, le protocole P1a autorise directement un unique profil G4
-q4 à 50 k, sans palier intermédiaire; ce profil mass-only ne qualifie aucun SLO.
-Toute campagne de pipeline exige en plus un harness `warm_e2e` au payload nommé.
+- `CMakeLists.txt:4` dit « uniquement M1 » malgré les nombreux prototypes;
+- `CMakeLists.txt:90-95` et `prototype/scale_profile.cpp:1-7` présentent un
+  ancien compte de sommets comme l'unique mesure décisive pour 100 ms;
+- `CMakeLists.txt:201-203` dit que « l'ancien nom P1a » désignait un
+  center-cover retiré, alors que P1a est précisément le center-cover actif;
+- `prototype/morton_lbvh.hpp:1-10` parle d'une disposition résidente et d'une
+  construction Karras portable device, tandis que cette classe CPU trie avec
+  `std::sort`, construit récursivement et rescane chaque plage pour son AABB;
+- `prototype/emst_boruvka.hpp` et son probe disent `best-first`, « lane du
+  contrat » et « trie/rejoue », alors que le composant actuel est le cœur brut
+  DFS décrit ci-dessus;
+- `CMakeLists.txt:261-264` et le probe EMST citent des fixtures « vérifiées hors
+  bande » dans un rapport de session non identifié;
+- `CMakeLists.txt:270-272` dit que le ledger horizontal est rejoué; seules deux
+  égalités de masse partielles sont aujourd'hui contrôlées;
+- `mhgp3v_structural_scale_k1_emst` exécute l'ancien
+  `mhgp3v_structural_scale_check`, pas le nouveau Borůvka.
 
-## Commentaires de code encore périmés
+## GCP
 
-Le nettoyage des anciennes notes est effectif, mais plusieurs commentaires du
-code pincé ne désignent toujours pas une autorité vivante :
-
-- `CMakeLists.txt:4` annonce « uniquement M1 » alors que le projet construit de
-  nombreux prototypes;
-- `CMakeLists.txt:90-95` et `prototype/scale_profile.cpp:1-7` présentent le
-  nombre de sommets d'arrangement comme l'unique mesure qui décide 100 ms. Ce
-  probe n'émet pas `BenchmarkOutputContract-v1`, ne mesure pas `warm_e2e` et
-  emploie l'ancien `flat_catalogue`;
-- `prototype/cloud_families.hpp:3` annonce deux familles alors que l'enum et la
-  porte en exercent quatre;
-- `prototype/pair_anchor_probe.cpp:155` cite `REPONSE_AUDIT_ANCRES`, et les
-  commentaires des cellules citent « réponse pont/q4 §6 » : ces autorités
-  n'existent pas dans l'arbre;
-- `prototype/order_k_flats.hpp:62,461,633,929` cite des numéros de sections qui
-  n'existent plus dans les audits condensés associés.
-
-L'auditeur ne modifie pas le code de Claude. Ces commentaires doivent être
-remplacés côté code par un invariant intemporel ou un lien exact vers une
-autorité conservée; recréer les anciennes notes serait une régression.
-
-## Ordre d'implémentation recommandé
-
-1. Conserver les self-joins et la profondeur comme oracles/falsificateurs. Dans
-   le probe, plafonner `harvest_` au seuil, compter `root_restarts` et rendre le
-   contrat `PointId`/amplitude du sweep explicite. Ce sont des corrections de
-   télémétrie et de frontière, pas une promotion du rescan.
-2. Construire une unique disposition `(MortonKey, PointId)` et un LBVH exact
-   résidents, partagés par toutes les lanes. Aucun `cudaMalloc`, upload, D2H ou
-   `synchronize` n'est admis par paire, tuile, vague ou ordre.
-3. Pour q2, implémenter Yao48 en banques `48x10`, strict et fail-open, puis le
-   classifieur terminal et le census fermé en une passe multi-ordre
-   `count--scan--fill` avec offsets 64 bits. Fermer le ledger sur
-   `candidate+certified_pruned+unresolved=C(n,2)`. Le contrat complet est dans
-   [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md).
-4. Pour q4, implémenter d'abord le falsificateur de masse local
-   `P15-HOCUDA-P1a` déjà spécifié : partition canonique
-   `T(N)=T(L) dot-union (L cross R) dot-union T(R)`, couverture du domaine de
-   centres de Jung par 64 patches, range-query témoin collective et prune d'un
-   bloc seulement lorsque chaque patch faisable possède huit `PointId`
-   stricts certifiés. Sinon partager le bloc; une microtuile terminale compte
-   sans arène globale de paires. L'identité minimale est
-   `pruned_mass+microtile_mass=C(n,2)`.
-5. Après le différentiel `n<=32`, exécuter le protocole P1a gardé directement à
-   50 k et mesurer `Q`, visites patch--nœud, masse microtuile, queue et équilibre
-   CTA. Une majorité de masse aux feuilles, un rescan par paire ou la tranche
-   source--cover hors de son enveloppe classe P1 no-go; le P1 complet rejettera
-   en plus source--cover plus cordes au-dessus de 400 ms. Les portes
-   12 500/25 000/50 000 restent requises pour les autres routes de source.
-6. Sur les ancres admises seulement, comparer banque Jung--Yao, groupes de
-   Helly, composition cœur--profondeur et profondeur seule. Chaque gain est
-   rapporté net de collecte, tri et allocation; tout greedy reste incomplet et
-   retombe fail-open. Construire ensuite range-report q3 et niveaux shallow q4.
-7. Construire `BallActivation`, census, resolver, fold et reconstruction des
-   verticales, un composant à la fois contre Gamma exhaustif borné. Installer
-   le mélange équilibré de huit amas du benchmark officiel et les deux harnesses
-   nommés, horizontal diagnostique et `BenchmarkOutputContract-v1`.
-8. Appliquer la gate 12 500/25 000/50 000, puis porter seulement les routes
-   admises avec arènes device et mémoire hôte épinglée préallouées. Mesurer 30
-   répétitions du pipeline officiel complet; une insuffisance physique refuse
-   atomiquement et aucun cap ne tronque une frontière ou une sortie.
-
-Aucun tableau global de paires, tuples, cellules, faces, cofaces ou incidences
-n'entre dans le chemin produit.
-
-GCP non utilisé.
+GCP non utilisé pour cet audit. Aucun état de VM n'a été modifié.

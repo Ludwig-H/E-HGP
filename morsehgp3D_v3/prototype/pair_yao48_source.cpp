@@ -115,7 +115,7 @@ mhgp::P3 pt(int x, int y, int z) {
 
 int main(int argc, char** argv) {
   int n = 2400, coord = 0, leaf_size = 8, oracle = 0, differential = 0, permute = 0;
-  int policy_differential = 0, antichain = 0;
+  int policy_differential = 0, antichain = 0, shard_check = 0;
   i64 seed = 20260810, bank_pops = 512, chamber_visits = 100000, max_work = 4000000000LL;
   i64 min_region_prunes = 0, min_point_tombstones = 0, min_census_records = 0;
   i64 min_radial_prunes = 0;
@@ -180,6 +180,17 @@ int main(int argc, char** argv) {
     i64 value = 0;
     const bool has = (i + 1 < argc) && integer(argv[i + 1], &value);
     if (!has) { std::printf("ECHEC : argument %s sans valeur\n", argv[i]); return 2; }
+    // BORNAGE AVANT CAST (audit) : un grand entier ne doit jamais se replier
+    // dans un int avant le controle de campagne.
+    const bool fits_int = value <= 2147483647LL;
+    if (!fits_int && (!strcmp(argv[i], "--points") || !strcmp(argv[i], "--coord") ||
+                      !strcmp(argv[i], "--leaf-size") || !strcmp(argv[i], "--seed") ||
+                      !strcmp(argv[i], "--oracle") || !strcmp(argv[i], "--differential") ||
+                      !strcmp(argv[i], "--policy-differential") ||
+                      !strcmp(argv[i], "--permute"))) {
+      std::printf("ECHEC : campagne absurde\n");
+      return 2;
+    }
     if (!strcmp(argv[i], "--points")) n = (int)value;
     else if (!strcmp(argv[i], "--coord")) coord = (int)value;
     else if (!strcmp(argv[i], "--leaf-size")) leaf_size = (int)value;
@@ -190,6 +201,7 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--oracle")) oracle = (int)value;
     else if (!strcmp(argv[i], "--differential")) differential = (int)value;
     else if (!strcmp(argv[i], "--policy-differential")) policy_differential = (int)value;
+    else if (!strcmp(argv[i], "--shard-check")) shard_check = (int)value;
     else if (!strcmp(argv[i], "--permute")) permute = (int)value;
     else if (!strcmp(argv[i], "--min-region-prunes")) min_region_prunes = value;
     else if (!strcmp(argv[i], "--min-radial-prunes")) min_radial_prunes = value;
@@ -204,7 +216,8 @@ int main(int argc, char** argv) {
   if (n < 4 || n > 100000 || coord < 0 || coord > 65536 || leaf_size < 2 ||
       leaf_size > 256 || bank_pops < 48 || chamber_visits < 8 || max_work < 1 ||
       oracle < 0 || oracle > 1 || policy_differential < 0 || policy_differential > 1 ||
-      differential < 0 || differential > 1 || permute < 0 || permute > 1) {
+      differential < 0 || differential > 1 || permute < 0 || permute > 1 ||
+      shard_check < 0 || shard_check > 1) {
     std::printf("ECHEC : campagne absurde\n");
     return 2;
   }
@@ -298,9 +311,22 @@ int main(int argc, char** argv) {
                   " demandes\n", pts.size(), n);
       return 1;
     }
+    unsigned long long digest = 1469598103934665603ULL;
+    for (const mhgp::P3& q : pts)
+      for (int c3 = 0; c3 < 3; ++c3) {
+        const unsigned long long v3 =
+            (unsigned long long)(c3 == 0 ? q.x : (c3 == 1 ? q.y : q.z));
+        for (int byte = 0; byte < 4; ++byte) {
+          digest ^= (v3 >> (8 * byte)) & 0xFFULL;
+          digest *= 1099511628211ULL;
+        }
+      }
     std::printf("provenance : --points %d --coord %d --seed %lld --family %s"
-                " --leaf-size %d --bank-pops %lld\n", n, coord, seed,
-                mhgp3v::cloud_family_name(family), leaf_size, bank_pops);
+                " --leaf-size %d --bank-pops %lld --chamber-visits %lld"
+                " --bank-mode %s --max-work %lld digest=%016llx\n", n, coord, seed,
+                mhgp3v::cloud_family_name(family), leaf_size, bank_pops,
+                chamber_visits, antichain == 1 ? "antichain" : "exact", max_work,
+                digest);
   }
   if (oracle == 1 && n > 256) {
     std::printf("ECHEC : l'oracle exhaustif exige n <= 256\n");
@@ -503,13 +529,17 @@ int main(int argc, char** argv) {
               });
     for (int i = 0; i < n; ++i)
       for (int j = i + 1; j < n; ++j) {
-        i64 strict = 0, closed = 0;
+        i64 strict = 0, closed = 0, judge_contacts = 0;
         std::vector<int> judge_closed;
         for (int x = 0; x < n; ++x) {
           const int sign =
               judge_phi_sign(pts[(std::size_t)x], pts[(std::size_t)i], pts[(std::size_t)j]);
           if (sign < 0) { ++strict; ++closed; judge_closed.push_back(x); }
-          else if (sign == 0) { ++closed; judge_closed.push_back(x); }
+          else if (sign == 0) {
+            ++closed;
+            judge_closed.push_back(x);
+            if (x != i && x != j) ++judge_contacts;   // extra-shell seul
+          }
         }
         const i64 index = (i64)i * (2 * (i64)n - i - 1) / 2 + (j - i - 1);
         const PairFate fate_value = fates[(std::size_t)index];
@@ -530,9 +560,10 @@ int main(int argc, char** argv) {
           if (lo != i || hi != j)
             return fail("le juge exhaustif", "l'ordre canonique des census diverge");
           if (record.strict != strict || record.closed != (i64)judge_closed.size() ||
-              record.closed_ids != judge_closed)
+              record.contacts != judge_contacts || record.closed_ids != judge_closed)
             return fail("le juge exhaustif",
-                        "un census ferme differe de la liste du juge");
+                        "un census ferme differe de la liste du juge (stricts,"
+                        " fermes, CONTACTS ou identifiants)");
         }
       }
     if (census_cursor != census_sorted.size())
@@ -650,6 +681,23 @@ int main(int argc, char** argv) {
                 chamber_visits);
   }
 
+  // L'INVARIANCE PAR SHARDS (audit) : les reçus fusionnes de 1, 2 et 4
+  // threads sont identiques CHAMP PAR CHAMP — les sommes se recomposent et
+  // les high-waters par ancre sont invariants a la partition.
+  if (shard_check == 1) {
+    const auto sharded1 = mhgp3v::yao48::run_sharded(
+        tree, injections, bank_pops, chamber_visits, 1);
+    for (int nthreads : {2, 4}) {
+      const auto shardedN = mhgp3v::yao48::run_sharded(
+          tree, injections, bank_pops, chamber_visits, nthreads);
+      if (!mhgp3v::yao48::receipts_equal(sharded1.receipt, shardedN.receipt))
+        return fail("l'invariance par shards",
+                    "un champ du reçu fusionne depend du nombre de threads");
+    }
+    std::printf("shards     : reçus fusionnes IDENTIQUES champ par champ (1/2/4"
+                " threads)\n");
+  }
+
   // LES PLANCHERS ANTI VERT-PAR-VACUITE.
   const auto floor_violated = [&](const char* what, i64 got, i64 want) {
     std::printf("ECHEC : plancher viole — %s=%lld < %lld\n", what, got, want);
@@ -704,20 +752,9 @@ int main(int argc, char** argv) {
         return fail("la fixture region-prune",
                     "les huit paires du cluster ne sont pas toutes tombstonees");
     } else if (fixture_name == "radial-straddle") {
-      // LA BOITE A CHEVAL (audit de reemploi §4) : deux chambres denses
-      // adjacentes (x>=y>=z et x>=z>=y, octant ---), pleines a D ~ 1526, et
-      // un cluster lointain a cheval sur leur frontiere y=z a dist^2 ~
-      // 160000 > 3*D — l'enveloppe radiale prune la boite entiere en UN
-      // reçu, sans developper ses feuilles. Verite : les temoins des deux
-      // banques sont profondement stricts pour ces paires alignees.
-      pts = {pt(60000, 60000, 60000)};
-      for (int k = 0; k < 10; ++k) pts.push_back(pt(60000 - (30 + k), 60000 - 2, 60000 - 1));
-      for (int k = 0; k < 10; ++k) pts.push_back(pt(60000 - (30 + k), 60000 - 1, 60000 - 2));
-      const int straddle[6][3] = {{400, 3, 2}, {400, 2, 3}, {401, 3, 2},
-                                  {401, 2, 3}, {402, 3, 2}, {402, 2, 3}};
-      for (const auto& o : straddle)
-        pts.push_back(pt(60000 - o[0], 60000 - o[1], 60000 - o[2]));
-    } else if (fixture_name == "radial-straddle") {
+      // L'assertion etait INATTEIGNABLE dans la livraison precedente : une
+      // branche de gravure dupliquee la masquait (defaut attrape par
+      // l'audit). Elle est desormais la seule branche de ce nom ici.
       if (r.radial_prunes < 1)
         return fail("la fixture radial-straddle",
                     "aucun reçu radial — la boite a cheval n'a pas ete prunee par"
@@ -762,6 +799,15 @@ int main(int argc, char** argv) {
       if (r.census_records != all_pairs)
         return fail("la fixture colocated", "chaque paire colocalisee doit etre un"
                                             " record de rang n");
+      if (r.census_contact_total != (i64)all_pairs * 18)
+        return fail("la fixture colocated",
+                    "le total des contacts n'est pas 190*18=3420 — l'extra-shell"
+                    " colocalise n'est plus scelle");
+      for (const CensusRecord& record : census)
+        if (record.contacts != 18 || record.closed != 20 || record.strict != 0)
+          return fail("la fixture colocated",
+                      "un record ne porte pas exactement 18 contacts, 20 fermes,"
+                      " 0 strict");
     }
   }
 

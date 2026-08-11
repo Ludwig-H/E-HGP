@@ -124,6 +124,64 @@ $$\mathrm{dist}^{2}(p,\mathrm{box})>3\max_{c\in S}D_c.$$
 Toute égalité descend. Le reçu engage `S` et toutes les banques référencées;
 une fixture traversant une frontière de chambres tue l'oubli d'une chambre.
 
+Cette enveloppe radiale est seulement un premier filtre. Une coupe plus forte
+résout exactement, pour chaque chambre compatible `c`, l'intersection entre la
+boîte cible et le cône signé/permuté. Dans les magnitudes canoniques
+`x>=y>=z>=0`, un petit programme linéaire rationnel de dimension trois donne
+les minima de `x`, `x+y` et `x+y+z`. Si l'intersection est vide, la chambre est
+ignorée; sinon sa banque doit être pleine et les trois comparaisons strictes
+`x_min^2>D_c`, `(x+y)_min^2>2D_c` et
+`(x+y+z)_min^2>3D_c` doivent toutes passer. Si cette condition tient pour
+chaque chambre non vide, toute cible de la boîte satisfait sa coupe Yao et le
+nœud entier est prunable. Un masque 48 bits, les versions de banques et les
+bornes rationnelles forment le reçu; toute égalité descend.
+
+### Certificat collectif boîte cible--nœud témoin
+
+Les banques directionnelles ne sont pas la seule manière d'exploiter les
+témoins déjà trouvés. Fixer une ancre `p`, une boîte cible `Q` et un nœud témoin
+`W`. Pour `d=q-p` et `s=w-p`, poser
+`A(d,s)=d\mathbin{\cdot}s-\left\Vert s\right\Vert^2`. Alors
+`A(d,s)>0` est exactement le prédicat `Phi_{p,q}(w)<0`.
+
+Pour chaque axe `i`, soit `D_i=[d_i^-,d_i^+]` la projection de `Q-p` et
+`S_i=[s_i^-,s_i^+]` celle de `W-p`. Le minimum continu exact sur le produit des
+deux boîtes est :
+
+$$L_p(Q,W)=\sum_{i=1}^{3}\min_{d_i\in\left\lbrace d_i^-,d_i^+\right\rbrace,\ s_i\in\left\lbrace s_i^-,s_i^+\right\rbrace}\left(d_i s_i-s_i^2\right).$$
+
+En effet, pour `d_i` fixé la fonction est concave en `s_i`, donc son minimum
+est à une extrémité; pour `s_i` fixé elle est linéaire en `d_i`, donc encore à
+une extrémité. Quatre couples de coins par axe suffisent. Ce minimum de boîtes
+est un minorant conservateur pour les feuilles réelles; ses coins fantômes ne
+peuvent créer qu'un échec fail-open.
+
+Si une antichaîne authentifiée de nœuds `W_j` possède des plages de feuilles
+deux à deux disjointes, vérifie `L_p(Q,W_j)>0` pour chaque nœud et totalise au
+moins dix `PointId`, chaque cible réelle de `Q` possède dix témoins stricts
+distincts. Le nœud `Q` est donc tombstone sans classifieur ponctuel. `L=0`
+descend. Un parent et son descendant ne sont jamais crédités ensemble; une
+masse de boîte ne remplace pas la cardinalité de sa plage. Sous raffinement
+`Q' subset Q` et `W' subset W`, le minimum ne peut qu'augmenter, de sorte qu'un
+crédit positif peut être transmis avec les mêmes identités et versions, mais
+jamais après fusion, changement d'ancre ou mutation du LBVH.
+
+Le profil u16 donne `|A|<=3*65535^2<2^34`; les soustractions et produits sont
+élargis avant calcul en `i64`, puis rejoués en `i128` par le juge. Le reçu lie
+digest du nuage, epoch du LBVH, ancre, plage cible possédée et, pour chaque
+`W_j`, plage, AABB, masse et valeur de `L`. Le juge borné développe les feuilles,
+recalcule indépendamment `4*Phi` et exige dix identifiants distincts pour chaque
+cible. Les mutants minimaux omettent un coin croisé, changent `>` en `>=`,
+créditent parent et enfant, emploient la taille de boîte au lieu de la plage ou
+réutilisent un epoch périmé.
+
+L'architecture de test est une traversée duale persistante : un état
+`(target_node,witness_frontier,credited_antichain)` raffine d'abord les nœuds
+témoins ambigus, puis partage la cible si le même doute persiste. Les crédits
+positifs suivent les enfants par référence; aucun rescan de la racine témoin et
+aucune matrice `Q times W` ne sont admis. Les feuilles cibles restées sous dix
+retombent au classifieur/census exact.
+
 ### Certificat aux deux extrémités
 
 L'ownership Morton ne contraint pas le côté du certificat. L'unique owner d'une
@@ -229,10 +287,14 @@ identiques ; il mesure le gain, il ne juge pas la vérité.
 
 Publier par famille (`uniform`, `terrain`, `scanline_single_pass`,
 `scanline_overlap_multiecho`) à `12 500/25 000/50 000` : visites de nœuds,
-tests `Phi` ponctuels, masses prunées par région, banques sous-pleines,
-survivantes, tailles de census, octets et high-water. Deux exposants
-consécutifs au-dessus de `1,35` classent la route `NO-GO` avant tout port ou
-toute campagne de latence ; la comparaison de référence est le self-join q2
+tests de chambres, opérations de tas, tests `Phi` ponctuels des voies arbre et
+liste, banques sous-pleines, survivantes, tailles de census, octets réels et
+high-water. Les masses logiques prunées et terminales sont publiées comme
+diagnostic de sélectivité, mais leur croissance proche de `n^2` n'est pas du
+travail lorsqu'un reçu compact les représente. Deux exposants consécutifs d'un
+même compteur de travail ou de stockage au-dessus de `1,35` classent la route
+`NO-GO` avant tout port ou toute campagne de latence. Publier au moins six
+décimales lorsqu'une pente est proche du seuil; la comparaison de référence est le self-join q2
 historique (53 à 724 millions de visites `L4`, 86 millions à 1,365 milliard de
 tests ponctuels à 50 k).
 

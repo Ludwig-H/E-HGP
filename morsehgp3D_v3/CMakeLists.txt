@@ -1386,6 +1386,14 @@ add_test(NAME mhgp3v_yao48_differential_terrain400_code COMMAND mhgp3v_pair_yao4
 add_test(NAME mhgp3v_yao48_policy_differential_code COMMAND mhgp3v_pair_yao48_source
          --points 400 --seed 20260810 --family scanline_overlap_multiecho
          --policy-differential 1)
+# L'INVARIANCE PAR SHARDS (exigence d'audit) : les reçus fusionnes de 1, 2 et
+# 4 threads sont identiques champ par champ, fusion EXHAUSTIVE comprise.
+add_test(NAME mhgp3v_yao48_shard_invariance COMMAND mhgp3v_pair_yao48_source
+         --points 400 --seed 20260810 --family terrain --shard-check 1)
+set_tests_properties(mhgp3v_yao48_shard_invariance PROPERTIES
+  PASS_REGULAR_EXPRESSION "reçus fusionnes IDENTIQUES champ par champ")
+add_test(NAME mhgp3v_yao48_shard_invariance_code COMMAND mhgp3v_pair_yao48_source
+         --points 400 --seed 20260810 --family terrain --shard-check 1)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
   mhgp3v_yao48_kill_strict_to_large "mutant tue" 4 --fixture directional-equality
   --inject strict-to-large)

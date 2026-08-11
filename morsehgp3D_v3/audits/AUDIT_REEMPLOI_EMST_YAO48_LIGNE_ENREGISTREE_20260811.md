@@ -30,10 +30,11 @@ chambre est isométrique au cône `x>=y>=z>=0`. Son diamètre sphérique vaut :
 
 $$\arccos\left(\frac{1}{\sqrt{3}}\right)<\frac{\pi}{3}.$$
 
-Pour chaque point `u` et chambre non vide, choisir l'arête `uw` minimale selon
-la clé totale `(distance_squared,min_PointId,max_PointId)`. Soit `G_Y` l'union
-non orientée de ces arêtes. L'EMST obtenu par Kruskal canonique sur le graphe
-complet est contenu dans `G_Y`.
+Sous le preflight du profil initial qui impose des positions 3D deux à deux distinctes, pour
+chaque point `u` et chambre non vide, choisir l'arête `uw` minimale selon la clé
+totale `(distance_squared,min_PointId,max_PointId)`. Soit `G_Y` l'union non
+orientée de ces arêtes. L'EMST obtenu par Kruskal canonique sur le graphe complet
+est contenu dans `G_Y`.
 
 En effet, si une arête canonique `uv` absente de `G_Y` était choisie par
 Kruskal, la chambre de `v` en `u` contiendrait un `w` tel que `uw` précède ou
@@ -46,6 +47,15 @@ La stricte inégalité angulaire est essentielle. Les frontières de chambres
 peuvent être semi-ouvertes, mais les égalités de distance doivent être fermées
 par la clé canonique : un premier point rencontré par hasard ne certifie pas
 l'EMST canonique.
+
+Le vecteur nul entre `PointId` colocalisés n'a pas de chambre directionnelle.
+Une extension hors profil doit donc former les classes de positions, émettre
+l'étoile nulle canonique depuis le plus petit `PointId` de chaque classe et la
+pré-unir. Le quotient porte ce représentant minimal; entre deux classes,
+l'arête positive canonique joint leurs représentants minimaux, puis Yao-1
+s'applique aux positions distinctes. Affecter arbitrairement chaque doublon à
+une chambre ne prouve pas le transcript canonique et peut perdre des liaisons
+nulles.
 
 ## 2. Prior art réellement présent
 
@@ -91,11 +101,15 @@ prouve jamais `empty`. Cette obligation est indépendante du cutoff strict
 q2 : les mêmes tuiles, masques de chambres et parcours peuvent être partagés,
 mais les reçus et les décisions restent séparés.
 
-Le ledger ferme `48n=exact_nonempty+certified_empty` avec `incomplete=0`.
-Pour un candidat, le minimum de toute frontière compatible restante doit être
+Le ledger ne se réduit pas à une somme globale. Il exige exactement un statut
+par clé `(source_PointId,chambre)`, sans doublon ni omission, puis ferme
+`nonempty_slots+empty_slots=48n` avec `incomplete=0`. Pour un candidat, le minimum de toute frontière compatible restante doit être
 strictement supérieur à sa distance; l'égalité descend pour fermer le
-tie-break `PointId`. Un tas qui départage les ex æquo par position Morton ne
-fournit donc pas encore le transcript canonique.
+tie-break `PointId`. Le reçu authentifie source, cible, chambre, distance et clé
+d'arête; `empty` exige l'épuisement de toute la frontière compatible. Après
+déduplication, `unique_edges<=nonempty_slots`, puis l'arbre possède exactement
+`n-1` arêtes, est acyclique et connexe. Un tas qui départage les ex æquo par
+position Morton ne fournit donc pas encore le transcript canonique.
 
 ## 4. Route v3 proposée
 

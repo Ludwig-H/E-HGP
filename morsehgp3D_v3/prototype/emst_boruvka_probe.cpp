@@ -349,6 +349,16 @@ int main(int argc, char** argv) {
     i64 value = 0;
     const bool has = (i + 1 < argc) && integer(argv[i + 1], &value);
     if (!has) { std::printf("ECHEC : argument %s sans valeur\n", argv[i]); return 2; }
+    // BORNAGE AVANT CAST (audit) : un grand entier ne se replie jamais
+    // dans un int avant le controle de campagne.
+    if (value > 2147483647LL && (!strcmp(argv[i], "--points") ||
+                                 !strcmp(argv[i], "--coord") ||
+                                 !strcmp(argv[i], "--leaf-size") ||
+                                 !strcmp(argv[i], "--oracle") ||
+                                 !strcmp(argv[i], "--permute"))) {
+      std::printf("ECHEC : campagne absurde\n");
+      return 2;
+    }
     if (!strcmp(argv[i], "--points")) n = (int)value;
     else if (!strcmp(argv[i], "--coord")) coord = (int)value;
     else if (!strcmp(argv[i], "--seed")) seed = value;
