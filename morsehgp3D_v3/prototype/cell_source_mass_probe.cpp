@@ -248,7 +248,14 @@ int main(int argc, char** argv) {
     struct Slice {
       std::vector<i64> masses;
       i128 sum_m = 0, sum_r = 0, sum_t = 0;
-      i64 heavy = 0, empty = 0, rings_max = 0;
+      // LE PRUNE CONVEXE (reponse pont/q4 20260811 §6) : closure(C) et
+      // conv(A_C) strictement separes => la cellule ne possede aucun support
+      // propre de la BRANCHE beta<Q ; l'autre branche (tous temoins
+      // interieurs) est normalized_h0_inert — jamais un « no_support ». Le
+      // separateur d'axe est le certificat entier v1 : tous les points de
+      // A_C STRICTEMENT d'un cote, les huit coins fermes de l'autre.
+      i128 sum_r_pruned = 0, sum_t_pruned = 0;
+      i64 pruned = 0, heavy = 0, empty = 0, rings_max = 0;
     };
     std::vector<Slice> slices((std::size_t)threads);
     std::atomic<i64> next_x{0};
@@ -303,14 +310,28 @@ int main(int argc, char** argv) {
             // 2. LA DILATION : m = |{x : dist^2(x, fermeture) < Q}| par
             // anneaux, coupure exacte quand l'anneau ne peut plus toucher.
             i64 m = 0;
+            i64 a_lo[3] = {65536, 65536, 65536}, a_hi[3] = {-1, -1, -1};
             for (i64 ring = 0; ring <= ring_limit; ++ring) {
               const i64 floor_gap = (ring - 1) * side;
               if (ring >= 1 && floor_gap * floor_gap >= q_cell) break;
               for_ring(cx, cy, cz, ring, [&](i64 ux, i64 uy, i64 uz) {
                 for (int p : bucket[(std::size_t)((ux * grid[1] + uy) * grid[2] + uz)])
-                  if (point_gap(pts[(std::size_t)p], box_lo, box_hi) < q_cell) ++m;
+                  if (point_gap(pts[(std::size_t)p], box_lo, box_hi) < q_cell) {
+                    ++m;
+                    const i64 c[3] = {(i64)pts[(std::size_t)p].x, (i64)pts[(std::size_t)p].y,
+                                      (i64)pts[(std::size_t)p].z};
+                    for (int d = 0; d < 3; ++d) {
+                      a_lo[d] = std::min(a_lo[d], c[d]);
+                      a_hi[d] = std::max(a_hi[d], c[d]);
+                    }
+                  }
               });
             }
+            // SEPARATION D'AXE stricte : tout A_C d'un cote STRICT du plan,
+            // les coins fermes de C de l'autre — certificat entier exact.
+            bool separated = false;
+            for (int d = 0; d < 3 && !separated; ++d)
+              if (a_hi[d] < box_lo[d] || a_lo[d] > box_hi[d]) separated = true;
             if (verify_bruteforce == 1) {
               i64 check = 0;
               for (const mhgp::P3& p : pts)
@@ -328,6 +349,12 @@ int main(int argc, char** argv) {
             const i128 r_cell = binomial(m, q);
             slice.sum_r += r_cell;
             slice.sum_t += (i128)m * r_cell;
+            if (separated) {
+              ++slice.pruned;
+            } else {
+              slice.sum_r_pruned += r_cell;
+              slice.sum_t_pruned += (i128)m * r_cell;
+            }
             if (r_cell > (i128)heavy_r) ++slice.heavy;
           }
     };
@@ -341,13 +368,16 @@ int main(int argc, char** argv) {
       return failure_code;
     }
     std::vector<i64> masses;
-    i128 sum_m = 0, sum_r = 0, sum_t = 0;
-    i64 heavy_cells = 0, empty_cells = 0, witness_rings_max = 0;
+    i128 sum_m = 0, sum_r = 0, sum_t = 0, sum_r_pruned = 0, sum_t_pruned = 0;
+    i64 heavy_cells = 0, empty_cells = 0, witness_rings_max = 0, pruned_cells = 0;
     for (Slice& slice : slices) {
       masses.insert(masses.end(), slice.masses.begin(), slice.masses.end());
       sum_m += slice.sum_m;
       sum_r += slice.sum_r;
       sum_t += slice.sum_t;
+      sum_r_pruned += slice.sum_r_pruned;
+      sum_t_pruned += slice.sum_t_pruned;
+      pruned_cells += slice.pruned;
       heavy_cells += slice.heavy;
       empty_cells += slice.empty;
       witness_rings_max = std::max(witness_rings_max, slice.rings_max);
@@ -361,6 +391,9 @@ int main(int argc, char** argv) {
                 " (R>%lld)=%lld — %.3f s (%d threads)\n", to_double(sum_m), to_double(sum_r),
                 to_double(sum_t), heavy_r, heavy_cells,
                 std::chrono::duration<double>(s1 - s0).count(), threads);
+    std::printf("           : prune convexe (axe) = %lld cellules separees — branche"
+                " beta<Q vide, l'autre branche normalized_h0_inert — R'=%.6e T'=%.6e\n",
+                pruned_cells, to_double(sum_r_pruned), to_double(sum_t_pruned));
   }
   std::printf("OK : sonde de masse de la source par cellules terminee (aucun tuple forme —"
               " l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)\n");

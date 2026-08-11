@@ -309,7 +309,8 @@ bool independent_weights_agree(const mhgp::Catalogue& catalogue,
 bool prefix_ledger_agrees(const std::vector<mhgp::P3>& points, const mhgp::Catalogue& catalogue,
                           int maximum_order, mhgp3v::HybridMutants hybrid_mutants,
                           const mhgp3v::HybridPairLedger& got, std::string* why,
-                          bool prefix_all = false, bool factorise_exaequo = false) {
+                          bool prefix_all = false, bool factorise_exaequo = false,
+                          bool fast_exaequo = false) {
   const std::size_t count = catalogue.spheres.size();
   std::vector<std::vector<mhgp::i32>> members(count);
   for (std::size_t s = 0; s < count; ++s) {
@@ -345,7 +346,8 @@ bool prefix_ledger_agrees(const std::vector<mhgp::P3>& points, const mhgp::Catal
               ? ((int)members[s].size() > k ? 1 : 0)
               : (mhgp3v::hybrid_is_fallback_query(
                      (int)members[s].size(), k, (int)catalogue.spheres[s].n_support,
-                     principal[s] != 0, solo_of[s] != 0, hybrid_mutants.force_principal)
+                     principal[s] != 0, solo_of[s] != 0, hybrid_mutants.force_principal,
+                     fast_exaequo)
                      ? 1
                      : 0);
     }
@@ -395,7 +397,8 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
                       mhgp3v::FaceOwnerMutants faceowner_mutants = {},
                       const std::vector<mhgp::P3>* points = nullptr,
                       mhgp3v::HybridMutants hybrid_mutants = {},
-                      mhgp3v::PrefixIndexReceipt* prefix_accum = nullptr) {
+                      mhgp3v::PrefixIndexReceipt* prefix_accum = nullptr,
+                      long long* fast_multi_accum = nullptr) {
   const mhgp3v::SaturatedFold truth = mhgp3v::build_saturated_fold(
       catalogue, maximum_order, /*keep_partitions=*/true, /*enforce_event_guard=*/true);
   if (!truth.ok) { *why = std::string("fold de verite refuse : ") + truth.refusal; return false; }
@@ -586,6 +589,35 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
                               factorised_ledger, why, /*prefix_all=*/false,
                               /*factorise_exaequo=*/true))
       return false;
+    // LA NEUVIEME FORME : le fast path principal en lot MULTIPLE sous la
+    // garde stricte pre-lot (reponse fast path 20260811 §5) — beta(S_u) <
+    // beta(M) est un theoreme du certificat principal, tout carrier est
+    // resolu strictement avant le lot, les paires du lot passent par les
+    // carriers stricts (factorisation). Meme fold bit a bit ; son ledger
+    // possede sous is_query reduit aux seuls non-principaux.
+    mhgp3v::HybridReceipt fast_receipt;
+    mhgp3v::HybridPairLedger fast_ledger;
+    const mhgp3v::SaturatedFold fast = mhgp3v::build_saturated_fold_hybrid(
+        *points, (int)points->size(), catalogue, maximum_order,
+        /*keep_partitions=*/true, &fast_receipt, /*enforce_event_guard=*/true,
+        hybrid_mutants, /*prefix_fallback=*/true, &fast_ledger,
+        /*prefix_all=*/false, /*factorise_exaequo=*/true, /*fast_exaequo=*/true);
+    if (!fast.ok) {
+      *why = std::string("fold fast-exaequo refuse : ") + fast.refusal;
+      return false;
+    }
+    if (!folds_agree(truth, fast, /*ignore_representatives=*/false, why)) {
+      *why = "forme fast-exaequo : " + *why;
+      return false;
+    }
+    if (!prefix_ledger_agrees(*points, catalogue, maximum_order, hybrid_mutants,
+                              fast_ledger, why, /*prefix_all=*/false,
+                              /*factorise_exaequo=*/true, /*fast_exaequo=*/true))
+      return false;
+    // PLANCHER ANTI-VACUITE (reception fast ex aequo) : la neuvieme forme ne
+    // juge la garde que si des principaux passent REELLEMENT en fast dans des
+    // lots multiples.
+    if (fast_multi_accum != nullptr) *fast_multi_accum += fast_receipt.fast_multi_lot;
     if (prefix_accum != nullptr) {
       prefix_accum->entries += prefix_receipt.prefix.entries;
       prefix_accum->queries += prefix_receipt.prefix.queries;
@@ -695,6 +727,10 @@ int main(int argc, char** argv) {
       hybrid_mutants.prefix.double_query_pair = true;
     else if (!strcmp(hybrid_mutant_name, "duplicate-posting"))
       hybrid_mutants.prefix.duplicate_posting = true;
+    else if (!strcmp(hybrid_mutant_name, "equal-level-lookup"))
+      hybrid_mutants.equal_level_lookup = true;
+    else if (!strcmp(hybrid_mutant_name, "fast-window-off"))
+      hybrid_mutants.fast_window_off = true;
     else { std::printf("ECHEC : mutant hybride inconnu %s\n", hybrid_mutant_name); return 2; }
   }
   mhgp3v::PostingsMutants mutants{};
@@ -707,6 +743,10 @@ int main(int argc, char** argv) {
     else if (!strcmp(mutant_name, "sequential-equal-levels")) mutants.sequential_equal_levels = true;
     else { std::printf("ECHEC : mutant inconnu %s\n", mutant_name); return 2; }
   }
+
+  // Le PLANCHER du fast multi-lot : la neuvieme forme ne juge la garde que si
+  // des principaux passent reellement en fast dans des lots multiples.
+  long long fast_multi_total = 0;
 
   // ETAGE 1 : les fixtures nommees. Sous mutant, le premier ecart TUE.
   for (const Fixture& fixture : named_fixtures()) {
@@ -748,7 +788,7 @@ int main(int argc, char** argv) {
     }
     std::string why;
     if (!run_differential(catalogue, 6, mutants, nullptr, 0, &why, faceowner_mutants,
-                          &cosphere, hybrid_mutants)) {
+                          &cosphere, hybrid_mutants, nullptr, &fast_multi_total)) {
       if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
         std::printf("mutant tue par la cosphere de la refutation : %s\n", why.c_str());
         return 4;
@@ -798,7 +838,7 @@ int main(int argc, char** argv) {
     }
     std::string why;
     if (!run_differential(full, 2, mutants, nullptr, 0, &why, faceowner_mutants,
-                          &two_triangles, hybrid_mutants)) {
+                          &two_triangles, hybrid_mutants, nullptr, &fast_multi_total)) {
       if (mutant_name != nullptr || faceowner_mutant_name != nullptr ||
           hybrid_mutant_name != nullptr) {
         std::printf("mutant tue par les deux triangles : %s\n", why.c_str());
@@ -861,6 +901,22 @@ int main(int argc, char** argv) {
                     " a concorde silencieusement\n");
         return 1;
       }
+      // Le FAST PATH en lot multiple sur la table amputee : le lookup du
+      // carrier S_C = {A,B} MANQUE — sous pretention complete, l'exigence de
+      // reception est le REFUS ATOMIQUE avec la raison exacte du lookup
+      // manquant, jamais une simple divergence ni un accord silencieux.
+      mhgp3v::HybridReceipt fast_receipt;
+      const mhgp3v::SaturatedFold fast_amputated = mhgp3v::build_saturated_fold_hybrid(
+          two_triangles, 5, doctored, 2, /*keep_partitions=*/true, &fast_receipt,
+          /*enforce_event_guard=*/false, {}, /*prefix_fallback=*/true, nullptr,
+          /*prefix_all=*/false, /*factorise_exaequo=*/true, /*fast_exaequo=*/true);
+      if (fast_amputated.ok ||
+          std::string(fast_amputated.refusal).find("lookup manquant") == std::string::npos) {
+        std::printf("ECHEC deux triangles : le fast path ampute devait refuser par"
+                    " lookup manquant (recu : %s)\n",
+                    fast_amputated.ok ? "ok" : fast_amputated.refusal);
+        return 1;
+      }
     }
     std::printf("triangles  : lot ex aequo rayon carre 25 recu — factorisation exacte avec"
                 " le carrier AB, refus/divergence prouves sans lui, chemin partiel intact\n");
@@ -894,7 +950,8 @@ int main(int argc, char** argv) {
 
     std::string why;
     if (!run_differential(catalogue, maximum_order, mutants, nullptr, 0, &why,
-                          faceowner_mutants, &pts, hybrid_mutants, &prefix_campaign)) {
+                          faceowner_mutants, &pts, hybrid_mutants, &prefix_campaign,
+                          &fast_multi_total)) {
       if (mutant_name != nullptr || faceowner_mutant_name != nullptr || hybrid_mutant_name != nullptr) {
         std::printf("mutant tue par la campagne, nuage %d : %s\n", c, why.c_str());
         return 4;
@@ -1068,6 +1125,12 @@ int main(int argc, char** argv) {
       return 3;
     }
   }
-  std::printf("OK : join postings == fold de verite, identites de recu respectees\n");
+  if (fast_multi_total < 1) {
+    std::printf("ECHEC : plancher du fast multi-lot non atteint (%lld) — la neuvieme"
+                " forme est verte par vacuite\n", fast_multi_total);
+    return 3;
+  }
+  std::printf("OK : join postings == fold de verite, identites de recu respectees"
+              " (fast multi-lot exerce %lld fois)\n", fast_multi_total);
   return 0;
 }

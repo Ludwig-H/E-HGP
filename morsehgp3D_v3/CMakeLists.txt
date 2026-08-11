@@ -850,6 +850,17 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_hybrid_prefix_kill_duplicate_posting "mutant tue" 4
   --hybrid-mutant duplicate-posting)
+# LA GARDE STRICTE PRE-LOT du fast path (reponse 20260811 §5) : un carrier au
+# niveau egal est une contradiction de sidecar — le mutant qui force le
+# niveau egal doit mourir par le refus atomique, jamais etre route.
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_kill_equal_level_lookup "mutant tue" 4
+  --hybrid-mutant equal-level-lookup)
+# LA FENETRE D'EVENEMENT q <= k+1 du fast multi-lot : le defaut du premier
+# delta live (q=k+2 attache zero face), grave en mutant permanent.
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_kill_fast_window_off "mutant tue" 4
+  --hybrid-mutant fast-window-off)
 # LA PORTE MULTIENSEMBLISTE de l'index : autorite combinatoire du theoreme,
 # possession canonique par lots, preflight fige, permutation globale commune.
 add_test(NAME mhgp3v_prefix_index_differential COMMAND mhgp3v_prefix_index_gate

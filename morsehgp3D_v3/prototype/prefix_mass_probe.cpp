@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
   // lots anterieurs — le lot est stage a sa cloture. La masse mesuree est
   // celle du chemin autoritatif sous fermeture des carriers.
   bool factorise = false;
+  bool fast_exaequo = false;
   auto integer = [](const char* text, long long* value) {
     const char* last = text + strlen(text);
     unsigned long long magnitude = 0;
@@ -94,6 +95,13 @@ int main(int argc, char** argv) {
       else if (!strcmp(argv[i], "hybrid-factorised")) {
         hybrid_mask = true;
         factorise = true;
+      } else if (!strcmp(argv[i], "hybrid-fast")) {
+        // FAST PRINCIPAL EN LOT MULTIPLE (reponse fast path 20260811 §5) :
+        // les principaux quittent le masque fallback partout, la garde
+        // stricte pre-lot vit dans le fold — ici on mesure la masse.
+        hybrid_mask = true;
+        factorise = true;
+        fast_exaequo = true;
       } else { std::printf("ECHEC : masque inconnu %s\n", argv[i]); return 2; }
       continue;
     }
@@ -141,7 +149,10 @@ int main(int argc, char** argv) {
   std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
               " --family %s --catalogue-threads %d --mask %s --threshold %d\n", n, coord, smax,
               max_order, seed, mhgp3v::cloud_family_name(family), catalogue_threads,
-              factorise ? "hybrid-factorised" : (hybrid_mask ? "hybrid" : "all"), threshold);
+              fast_exaequo ? "hybrid-fast"
+                           : (factorise ? "hybrid-factorised"
+                                        : (hybrid_mask ? "hybrid" : "all")),
+              threshold);
   std::printf("catalogue  : %zu generateurs en %.3f s — DIAGNOSTIC DE MASSE (%s),"
               " aucune semantique de fold\n", count,
               std::chrono::duration<double>(t1 - t0).count(),
@@ -282,7 +293,7 @@ int main(int argc, char** argv) {
             mhgp3v::hybrid_is_fallback_query(
                 (int)members[(std::size_t)m].size(), k,
                 (int)catalogue.spheres[(std::size_t)m].n_support,
-                principal[(std::size_t)m] != 0, solo_batch, false)
+                principal[(std::size_t)m] != 0, solo_batch, false, fast_exaequo)
                 ? 1
                 : 0;
         if (!factorise)

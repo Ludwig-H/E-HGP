@@ -52,6 +52,9 @@ namespace mhgp3v {
 struct HybridReceipt {
   long long principal_generators = 0, fallback_generators = 0;
   long long redundant_generators = 0;   // q > k+1, une attache (somme sur k)
+  long long fast_multi_lot = 0;         // principaux passes en fast dans un lot
+                                        // MULTIPLE (plancher anti-vacuite de la
+                                        // reception fast ex aequo)
   long long certificates_verified = 0, certificates_failed = 0;
   long long fast_lookups_tried = 0, fast_lookups_found = 0;
   long long trie_nodes = 0, trie_cut_empty = 0, trie_cut_known = 0;
@@ -65,6 +68,16 @@ struct HybridReceipt {
 struct HybridMutants {
   bool force_principal = false;   // court-circuiter le certificat (refute !)
   bool raw_ball_key = false;      // cle brute base/num/den (refutee !)
+  bool equal_level_lookup = false; // le fast path d'un principal en lot
+                                   // MULTIPLE recoit un carrier au niveau
+                                   // EGAL — la garde stricte pre-lot doit
+                                   // refuser (contradiction de sidecar) ;
+                                   // l'injection est limitee au multi-lot
+                                   // pour que la neuvieme forme soit le juge
+  bool fast_window_off = false;    // la fenetre q <= k+1 du fast multi-lot est
+                                   // ignoree — q=k+2 attache zero face et la
+                                   // partition diverge (le defaut du premier
+                                   // delta live, grave en mutant)
   PrefixIndexMutants prefix;      // mutants du fallback prefixe--prefixe
 };
 
@@ -204,13 +217,35 @@ inline void hybrid_principal_certificates(const PointArray& pts, const mhgp::Cat
 
 // LA DECISION DE REQUETE du fold hybride, partagee avec la sonde : un
 // generateur est une requete fallback ssi il n'est ni redondant (q > k+1 en
-// lot solo), ni une naissance rang k, ni un fast principal en lot solo. La
-// meme chaine, dans le meme ordre, que le corps du fold.
+// lot solo), ni une naissance rang k, ni un fast principal. La meme chaine,
+// dans le meme ordre, que le corps du fold.
+//
+// `fast_exaequo` (analyse de Claude en reponse a sa propre question du
+// 11/8) : le fast path principal est licite dans TOUT lot, pas seulement en
+// solo. Preuve de vacuite des carriers du lot : si une k-face F ⊆ M a sa
+// miniboule au niveau α de B_M, alors B_M couvre F au rayon exactement
+// minimal, donc B_M EST la miniboule de F par unicite — le carrier est M
+// lui-meme. Tout carrier non-self est donc STRICT ; le theoreme des q
+// attaches (toutes les composantes strictes touchees) et la factorisation
+// (paires du lot routees par un carrier strict commun) ferment le lot sans
+// aucune arete nouveau--nouveau directe. Fail-closed inchange : un lookup
+// manquant refuse. Les redondants q > k+1 restent sous prudence solo.
 inline bool hybrid_is_fallback_query(int rank, int k, int support_size, bool is_principal,
-                                     bool solo_batch, bool force_principal) {
+                                     bool solo_batch, bool force_principal,
+                                     bool fast_exaequo = false,
+                                     bool fast_window_off_mutant = false) {
   if (support_size > k + 1 && (solo_batch || force_principal)) return false;
   if (rank == k) return false;
-  if ((is_principal && solo_batch) || force_principal) return false;
+  // Le fast multi-lot ne vaut que dans la FENETRE D'EVENEMENT q <= k+1 : les
+  // faces S_u ont taille q-1+max(0,k-q+1) — hors fenetre elles ne font pas k
+  // et n'attachent rien (le defaut du premier delta live, grave par le mutant
+  // fast-window-off). Les redondants q > k+1 d'un lot multiple restent au
+  // fallback (la prudence de theoreme 2 ne vaut recue qu'en solo).
+  if ((is_principal &&
+       (solo_batch ||
+        (fast_exaequo && (support_size <= k + 1 || fast_window_off_mutant)))) ||
+      force_principal)
+    return false;
   return true;
 }
 
@@ -254,7 +289,7 @@ inline SaturatedFold build_saturated_fold_hybrid(
     int maximum_order, bool keep_partitions, HybridReceipt* receipt,
     bool enforce_event_guard = false, HybridMutants mutants = {},
     bool prefix_fallback = false, HybridPairLedger* prefix_pair_ledger = nullptr,
-    bool prefix_all = false, bool factorise_exaequo = false) {
+    bool prefix_all = false, bool factorise_exaequo = false, bool fast_exaequo = false) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   if (receipt != nullptr) *receipt = HybridReceipt{};
@@ -269,6 +304,11 @@ inline SaturatedFold build_saturated_fold_hybrid(
   if (factorise_exaequo && (!prefix_fallback || prefix_all)) {
     fold.refusal = "la factorisation des ex aequo exige le fallback prefixe sous"
                    " pretention de famille complete";
+    return fold;
+  }
+  if (fast_exaequo && !factorise_exaequo) {
+    fold.refusal = "le fast path en lot multiple exige la factorisation (les paires du"
+                   " lot passent par les carriers stricts)";
     return fold;
   }
   const std::size_t count = catalogue.spheres.size();
@@ -449,7 +489,8 @@ inline SaturatedFold build_saturated_fold_hybrid(
                   ? ((int)members[(std::size_t)m].size() > k ? 1 : 0)
                   : (hybrid_is_fallback_query((int)members[(std::size_t)m].size(), k,
                                               support_size, principal[(std::size_t)m] != 0,
-                                              solo_batch, mutants.force_principal)
+                                              solo_batch, mutants.force_principal,
+                                              fast_exaequo, mutants.fast_window_off)
                          ? 1
                          : 0);
           // FACTORISATION DES EX AEQUO : le lot est stage a sa CLOTURE — les
@@ -529,9 +570,13 @@ inline SaturatedFold build_saturated_fold_hybrid(
           continue;
         }
         if (!prefix_all &&
-            ((principal[(std::size_t)m] != 0 && solo_batch) || mutants.force_principal)) {
+            ((principal[(std::size_t)m] != 0 &&
+              (solo_batch ||
+               (fast_exaequo && (q <= k + 1 || mutants.fast_window_off)))) ||
+             mutants.force_principal)) {
           // FAST PATH : les q attaches S_u = (U \ {u}) ∪ T.
           ++out.principal_generators;
+          if (!solo_batch) ++out.fast_multi_lot;
           // T = les k-q+1 plus petits identifiants de M \ U — VIDE pour la
           // coface q = k+1 (le test de taille se fait AVANT de pousser : la
           // cible zero ne doit collecter personne).
@@ -552,9 +597,24 @@ inline SaturatedFold build_saturated_fold_hybrid(
             std::sort(face.begin(), face.end());
             const mhgp::MiniballResult carrier_ball =
                 mhgp::miniball_of(pts, face.data(), (int)face.size());
-            const int carrier = carrier_ball.ok ? lookup_ball(carrier_ball.sph) : -1;
+            int carrier = carrier_ball.ok ? lookup_ball(carrier_ball.sph) : -1;
             if (carrier < 0) {
               fold.refusal = "lookup manquant sous pretention de famille complete";
+              return fold;
+            }
+            // MUTANT limite au principal MULTI-LOT (exigence de reception) :
+            // un mutant global mourrait sur un fast solo avant la neuvieme
+            // forme et ne jugerait pas la garde la ou elle est neuve.
+            if (mutants.equal_level_lookup && !solo_batch) carrier = m;
+            // LA GARDE STRICTE PRE-LOT (reponse fast path 20260811 §5) : pour
+            // un principal, beta(S_u) < beta(M) est un THEOREME du certificat
+            // — l'egalite imposerait la meme boule dont tout support contient
+            // U, alors que S_u exclut u. Un carrier au niveau egal n'est pas
+            // un cas a router : cle de boule fausse, handle duplique ou
+            // certificat invalide — refus atomique, jamais une chaine du lot.
+            if (mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)carrier].sph,
+                                      sphere.sph) >= 0) {
+              fold.refusal = "carrier non strict au fast path : contradiction de sidecar";
               return fold;
             }
             ++out.attaches;
