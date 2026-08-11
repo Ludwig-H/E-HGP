@@ -1,5 +1,7 @@
-// MorseHGP3D v3 — LA SONDE P1a : SELF-JOIN LBVH DES PAIRES, LANE q2
-// (PROPOSITION §7, audit S10, portes 4-5 de AUDIT_DELTA_CBAC109).
+// MorseHGP3D v3 — LA SONDE SELF-JOIN q2 DES PAIRES (PROPOSITION §6.2,
+// AUDIT_Q2_SELFJOIN_8A39C53, portes 1-2 de l'etat courant). L'ancien nom de
+// travail « P1a » designait le center-cover retire ; la nomenclature est
+// « self-join q2 ».
 //
 // LA MACHINE DE BLOCS : pour un noeud binaire N de fils L,R, les paires
 // internes se decomposent en trois ensembles disjoints — internes a L,
@@ -20,12 +22,30 @@
 // p+q >= 12 = K+2 : le bloc entier est H0-inerte a la lane q2 (theoreme
 // 4.2). Zero signifie shell et ne compte pas ; un sup traversant zero
 // conserve le noeud et descend. La recherche part de la racine et s'arrete
-// des le seuil atteint — l'heritage de frontiere a ete essaye, mesure et
-// RETIRE (troncature irreversible dans le sous-arbre : 52 puis 82 % de
-// microtuiles a 2400/12000 contre 5,0 et 1,5 % depuis la racine), et le code
-// mort de frontiere (parametres confirmed/frontier, cap 96) est SUPPRIME
-// (constat de l'audit delta : `process` rappelait toujours
-// `refine_frontier(a,b,0,{0})` sans consommer la frontiere rendue).
+// des le seuil atteint ; la mesure des auditeurs a montre que la sortie
+// precoce seule ne retire que 0,23-0,39 % des visites (le dixieme temoin
+// est acquis TARD), d'ou les trois accelerateurs EXACTS de l'audit epingle :
+//
+//   1. L'INFIMUM SEPARABLE L4 : par axe, t = clip(x+y, [2wl, 2wh]) et
+//      min*4 = (t-2x)(t-2y) sur les quatre couples d'extremites ; somme des
+//      axes. `L4 >= 0` certifie qu'un noeud ne contient AUCUN temoin strict
+//      et le retire immediatement — decision monotone sous raffinement. Les
+//      contacts restent au census ferme.
+//   2. L'HERITAGE DE TEMOINS PAR IDENTIFIANTS : au plus neuf positions deja
+//      certifiees strictes pour le bloc parent (elles restent strictes et
+//      hors extremites sous restriction a un enfant — les plages d'un
+//      enfant sont des sous-plages). Jamais un scalaire sans IDs, jamais une
+//      frontiere tronquee : la recherche ne cherche que les temoins
+//      MANQUANTS et exclut les herites du recomptage.
+//   3. LA PILE REUTILISEE : une seule allocation par sonde.
+//
+// Les DECISIONS sont inchangees : un noeud L4 >= 0 ne porte aucun temoin,
+// et les herites appartiennent a l'ensemble decouvrable du fils — les
+// masses (etats, prunees, microtuiles) restent identiques au triplet pres,
+// la porte terrain 400 le verifie. L'ancien heritage de frontiere PLAFONNEE
+// reste retire (troncature irreversible : 52 puis 82 % de microtuiles a
+// 2400/12000) ; le code mort confirmed/frontier/cap96 est supprime (constat
+// de l'audit delta).
 //
 // C'EST UN FALSIFICATEUR MASS-ONLY : aucune ancre formee, aucun census,
 // aucune BallActivation. Il publie les autorites de parcimonie de la porte
@@ -148,6 +168,34 @@ inline i64 pair_witness_sup(const Node& witness, const Node& a, const Node& b) {
   return total;
 }
 
+// L'INFIMUM SEPARABLE EXACT (x4) du meme triple de boites (audit epingle
+// AUDIT_Q2_SELFJOIN) : par axe, pour chaque couple d'extremites (x,y), le
+// minimum en w de 4(w-x)(w-y) = (2w-x-y)^2 - (x-y)^2 est atteint au point
+// t = clip(x+y, [2wl, 2wh]) et vaut (t-2x)(t-2y) ; minimum sur les quatre
+// couples puis somme des axes. `L4 >= 0` certifie que la boite temoin ne
+// contient AUCUN temoin strict — le noeud est retire, plages comprises, et
+// la decision est monotone sous raffinement. Bornes : |t-2x| < 3*2^17,
+// produits < 2^38, somme < 2^40 (i64).
+inline i64 pair_witness_inf4(const Node& witness, const Node& a, const Node& b) {
+  i64 total = 0;
+  for (int d = 0; d < 3; ++d) {
+    i64 best = (i64)1 << 62;
+    const i64 twice_low = 2 * witness.lo[d], twice_high = 2 * witness.hi[d];
+    const i64 a_ext[2] = {a.lo[d], a.hi[d]};
+    const i64 b_ext[2] = {b.lo[d], b.hi[d]};
+    for (int ai = 0; ai < 2; ++ai)
+      for (int bi = 0; bi < 2; ++bi) {
+        i64 t = a_ext[ai] + b_ext[bi];
+        if (t < twice_low) t = twice_low;
+        if (t > twice_high) t = twice_high;
+        const i64 value = (t - 2 * a_ext[ai]) * (t - 2 * b_ext[bi]);
+        if (value < best) best = value;
+      }
+    total += best;
+  }
+  return total;
+}
+
 // Le meme sup pour un TEMOIN PONCTUEL w contre le bloc (A,B).
 inline i64 point_witness_sup(const mhgp::P3& w, const Node& a, const Node& b) {
   i64 total = 0;
@@ -176,6 +224,10 @@ struct ProbeReceipt {
   i64 microtile_states = 0;
   i64 depth_max = 0;
   i64 witness_stack_high_water = 0;   // pile de la recherche (elements)
+  i64 l4_skipped_nodes = 0;      // noeuds retires par l'infimum L4 >= 0
+  i64 l4_skipped_points = 0;     // points couverts par ces retraits
+  i64 inherited_credits = 0;     // temoins herites credites sans recherche
+  i64 early_exits = 0;           // recherches arretees au seuil
 };
 
 // LES INJECTIONS (porte 4) : chacune doit mourir par le ledger de fate ou
@@ -201,6 +253,16 @@ struct ProbeInjections {
 // LE LEDGER DE FATE : un sort par paire non ordonnee, multiplicite un.
 enum class PairFate : std::uint8_t { kUnassigned = 0, kPruned = 1, kMicrotile = 2 };
 
+// LES TEMOINS HERITES : au plus neuf POSITIONS de feuille deja certifiees
+// strictes pour le bloc parent — jamais un scalaire sans identifiants. Les
+// plages d'un enfant sont des sous-plages du parent, donc un temoin hors des
+// extremites du parent reste hors de celles de l'enfant, et strict pour
+// toutes les paires de l'enfant (sous-ensemble des paires du parent).
+struct InheritedWitnesses {
+  std::array<int, 9> positions{};
+  int count = 0;
+};
+
 struct Probe {
   const Tree* tree = nullptr;
   ProbeReceipt receipt;
@@ -213,6 +275,7 @@ struct Probe {
   int fate_points = 0;
   bool fate_violated = false;
   i64 last_microtile_a = -1, last_microtile_b = -1;   // pour drop-last-microtile
+  std::vector<int> stack_;   // pile REUTILISEE : une allocation par sonde
 
   // Plages disjointes : le temoin ne recouvre AUCUNE des deux extremites.
   static bool ranges_disjoint(const Node& witness, const Node& a, const Node& b) {
@@ -221,44 +284,86 @@ struct Probe {
     return !overlap_a && !overlap_b;
   }
 
-  // LA RECHERCHE DE TEMOINS, depuis la racine, a SORTIE PRECOCE : descendre
-  // les noeuds indecis, compter les noeuds entierement negatifs et les
-  // points negatifs des feuilles (en excluant les positions d'extremites),
-  // s'arreter des que le seuil est atteint. Aucune frontiere, aucun cap :
-  // le compte rendu est exact ou majore par le seuil, jamais tronque en
+  // LA RECHERCHE DE TEMOINS a sortie precoce, infimum L4 et heritage par
+  // identifiants : crediter les herites (exclus du recomptage), retirer tout
+  // noeud `L4 >= 0` (aucun temoin strict possible), compter les noeuds
+  // entierement negatifs et les points negatifs des feuilles (hors positions
+  // d'extremites), s'arreter au seuil, et RECOLTER jusqu'a neuf positions
+  // strictes pour les enfants. Aucune frontiere plafonnee, aucun cap : le
+  // compte rendu est exact ou majore par le seuil, jamais tronque en
   // silence.
-  i64 count_witnesses(const Node& a, const Node& b) {
-    i64 total = 0;
-    std::vector<int> stack;
-    stack.push_back(0);
-    while (!stack.empty()) {
+  i64 count_witnesses(const Node& a, const Node& b, const InheritedWitnesses& inherited,
+                      InheritedWitnesses* harvested) {
+    const auto is_inherited = [&](int position) {
+      for (int i = 0; i < inherited.count; ++i)
+        if (inherited.positions[(std::size_t)i] == position) return true;
+      return false;
+    };
+    const auto harvest = [&](int position) {
+      if (harvested->count < 9)
+        harvested->positions[(std::size_t)harvested->count++] = position;
+    };
+    harvested->count = 0;
+    i64 total = inherited.count;
+    receipt.inherited_credits += inherited.count;
+    for (int i = 0; i < inherited.count; ++i) harvest(inherited.positions[(std::size_t)i]);
+    stack_.clear();
+    stack_.push_back(0);
+    while (!stack_.empty()) {
       receipt.witness_stack_high_water =
-          std::max(receipt.witness_stack_high_water, (i64)stack.size());
-      const int node_index = stack.back();
-      stack.pop_back();
+          std::max(receipt.witness_stack_high_water, (i64)stack_.size());
+      const int node_index = stack_.back();
+      stack_.pop_back();
       const Node& node = tree->nodes[(std::size_t)node_index];
       ++receipt.witness_visits;
+      // L4 D'ABORD : aucun temoin strict dans la boite — retire, plages
+      // d'extremites comprises. Le MUTANT count-shell confond coquille et
+      // interieur PARTOUT : il ne retire que `L4 > 0`, sinon le contact
+      // qu'il doit compter a tort serait retire avant de mordre.
+      const i64 inf4 = pair_witness_inf4(node, a, b);
+      if (injections.count_shell ? inf4 > 0 : inf4 >= 0) {
+        ++receipt.l4_skipped_nodes;
+        receipt.l4_skipped_points += node.end - node.begin;
+        continue;
+      }
       if (ranges_disjoint(node, a, b)) {
         const i64 sup = pair_witness_sup(node, a, b);
         // MUTANT count-shell : un sup nul (contact possible) compterait le
         // noeud entier — dot == 0 est SHELL, jamais interieur.
         if (sup < 0 || (injections.count_shell && sup == 0)) {
-          total += node.end - node.begin;
-          if (total >= witness_threshold) return total;
+          i64 fresh = node.end - node.begin;
+          for (int i = 0; i < inherited.count; ++i)
+            if (inherited.positions[(std::size_t)i] >= node.begin &&
+                inherited.positions[(std::size_t)i] < node.end)
+              --fresh;   // deja credite par l'heritage
+          total += fresh;
+          for (int t = node.begin; t < node.end && harvested->count < 9; ++t)
+            if (!is_inherited(t)) harvest(t);
+          if (total >= witness_threshold) {
+            ++receipt.early_exits;
+            return total;
+          }
           continue;
         }
         if (node.left < 0) {
           for (int t = node.begin; t < node.end; ++t) {
+            if (is_inherited(t)) continue;
             const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
             ++receipt.witness_point_tests;
             const i64 sup_point = point_witness_sup(w, a, b);
-            if (sup_point < 0 || (injections.count_shell && sup_point == 0)) ++total;
+            if (sup_point < 0 || (injections.count_shell && sup_point == 0)) {
+              ++total;
+              harvest(t);
+            }
           }
-          if (total >= witness_threshold) return total;
+          if (total >= witness_threshold) {
+            ++receipt.early_exits;
+            return total;
+          }
           continue;
         }
-        stack.push_back(node.right);
-        stack.push_back(node.left);
+        stack_.push_back(node.right);
+        stack_.push_back(node.left);
         continue;
       }
       // RECOUVREMENT d'une extremite : descendre, ou tester par point en
@@ -268,16 +373,23 @@ struct Probe {
           const bool in_a = t >= a.begin && t < a.end;
           const bool in_b = t >= b.begin && t < b.end;
           if (in_a || in_b) continue;
+          if (is_inherited(t)) continue;
           const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
           ++receipt.witness_point_tests;
           const i64 sup_point = point_witness_sup(w, a, b);
-          if (sup_point < 0 || (injections.count_shell && sup_point == 0)) ++total;
+          if (sup_point < 0 || (injections.count_shell && sup_point == 0)) {
+            ++total;
+            harvest(t);
+          }
         }
-        if (total >= witness_threshold) return total;
+        if (total >= witness_threshold) {
+          ++receipt.early_exits;
+          return total;
+        }
         continue;
       }
-      stack.push_back(node.right);
-      stack.push_back(node.left);
+      stack_.push_back(node.right);
+      stack_.push_back(node.left);
     }
     return total;
   }
@@ -312,7 +424,8 @@ struct Probe {
   }
 
   // La machine d'etats : (ia, ib) avec ia == ib pour les paires internes.
-  void process(int ia, int ib, i64 depth) {
+  // Les temoins recoltes d'un bloc croise sont herites par ses deux enfants.
+  void process(int ia, int ib, i64 depth, const InheritedWitnesses& inherited) {
     if (budget_exceeded) return;
     ++receipt.states;
     receipt.depth_max = std::max(receipt.depth_max, depth);
@@ -324,7 +437,8 @@ struct Probe {
     const Node& b = tree->nodes[(std::size_t)ib];
     if (ia == ib) {
       // Paires internes : decomposition L,L / L,R / R,R — une feuille interne
-      // est une microtuile (ses C(taille,2) paires sont residuelles).
+      // est une microtuile (ses C(taille,2) paires sont residuelles). Aucun
+      // heritage : le parent interne n'a pas de recherche de temoins.
       if (a.left < 0) {
         const i64 size = a.end - a.begin;
         receipt.microtile_pairs += size * (size - 1) / 2;
@@ -334,13 +448,14 @@ struct Probe {
         assign_internal_block(a, PairFate::kMicrotile);
         return;
       }
-      process(a.left, a.left, depth + 1);
-      process(a.left, a.right, depth + 1);
+      process(a.left, a.left, depth + 1, {});
+      process(a.left, a.right, depth + 1, {});
       if (!injections.drop_rr)   // MUTANT : la partition interne perd (R,R)
-        process(a.right, a.right, depth + 1);
+        process(a.right, a.right, depth + 1, {});
       return;
     }
-    const i64 found = count_witnesses(a, b);
+    InheritedWitnesses harvested;
+    const i64 found = count_witnesses(a, b, inherited, &harvested);
     if (found >= witness_threshold - (injections.threshold_nine ? 1 : 0)) {
       // MUTANT threshold-nine : neuf temoins pruneraient — p+q >= 11 < K+2.
       receipt.pruned_pairs += (i64)(a.end - a.begin) * (i64)(b.end - b.begin);
@@ -368,22 +483,22 @@ struct Probe {
       // MUTANT COMPENSE : deux fois le fils gauche, zero fois le droit —
       // memes masses, l'agrege ferme, seul le sort par paire voit.
       if (split_a) {
-        process(child_left, ib, depth + 1);
-        process(child_left, ib, depth + 1);
+        process(child_left, ib, depth + 1, harvested);
+        process(child_left, ib, depth + 1, harvested);
       } else {
-        process(ia, child_left, depth + 1);
-        process(ia, child_left, depth + 1);
+        process(ia, child_left, depth + 1, harvested);
+        process(ia, child_left, depth + 1, harvested);
       }
       return;
     }
     if (split_a) {
-      process(child_left, ib, depth + 1);
+      process(child_left, ib, depth + 1, harvested);
       if (!injections.skip_half_block)   // MUTANT : la partition croisee perd un fils
-        process(child_right, ib, depth + 1);
+        process(child_right, ib, depth + 1, harvested);
     } else {
-      process(ia, child_left, depth + 1);
+      process(ia, child_left, depth + 1, harvested);
       if (!injections.skip_half_block)
-        process(ia, child_right, depth + 1);
+        process(ia, child_right, depth + 1, harvested);
     }
   }
 };
@@ -596,9 +711,15 @@ int main(int argc, char** argv) {
     if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
     pts = mhgp3v::make_family_cloud(family, n, coord, seed);
     if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
-    std::printf("provenance : --points %d --coord %d --smax %d --seed %lld --family %s"
-                " --leaf-size %d\n", n, coord, smax, seed, mhgp3v::cloud_family_name(family),
-                leaf_size);
+    // Le generateur multi-echo peut rendre PLUS de points que demandes (un
+    // echo de recouvrement supplementaire : 12 501 pour 12 500 a coord 707).
+    // Le ledger porte sur le nuage REEL — comparer a C(n_demande,2) etait
+    // une violation d'identite fantome, pas une erreur de la machine.
+    const int requested = n;
+    n = (int)pts.size();
+    std::printf("provenance : --points %d (rendus %d) --coord %d --smax %d --seed %lld"
+                " --family %s --leaf-size %d\n", requested, n, coord, smax, seed,
+                mhgp3v::cloud_family_name(family), leaf_size);
   }
   if (verify_bruteforce == 1 && n > 3000) {
     std::printf("ECHEC : le ledger de fate exige n <= 3000 (n^2/2 sorts, n^3 balayage)\n");
@@ -629,7 +750,7 @@ int main(int argc, char** argv) {
     probe.fate = &fate;
     probe.fate_points = n;
   }
-  probe.process(0, 0, 0);
+  probe.process(0, 0, 0, {});
   const auto t2 = std::chrono::steady_clock::now();
   if (probe.budget_exceeded) {
     std::printf("ECHEC : budget d'etats depasse (%lld) — la sonde refuse, elle ne"
@@ -743,9 +864,12 @@ int main(int argc, char** argv) {
               receipt.states, receipt.pruned_states, receipt.witness_visits,
               receipt.witness_point_tests, receipt.pruned_pairs, receipt.microtile_pairs,
               receipt.microtile_states, (i64)all_pairs);
+  std::printf("recherche  : L4-retraits=%lld noeuds (%lld points), herites=%lld,"
+              " sorties precoces=%lld\n", receipt.l4_skipped_nodes,
+              receipt.l4_skipped_points, receipt.inherited_credits, receipt.early_exits);
   std::printf("parcimonie : microtuiles %.2f %% des paires, profondeur max=%lld, pile"
-              " temoin max=%lld — %.3f s chaud (1 thread)\n", share, receipt.depth_max,
-              receipt.witness_stack_high_water,
+              " temoin max=%lld — %.3f s de phase locale (1 thread, pas un warm_e2e)\n",
+              share, receipt.depth_max, receipt.witness_stack_high_water,
               std::chrono::duration<double>(t2 - t1).count());
   if (is_fixture) {
     std::printf("OK : fixture %s recue — ledger de fate, partition, inclusion\n",

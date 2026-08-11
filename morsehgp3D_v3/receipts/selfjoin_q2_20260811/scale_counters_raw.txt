@@ -1,0 +1,144 @@
+# self-join q2, campagne d'echelle (L4 + heritage 9 IDs + pile reutilisee)
+# hote: codespace 2 vCPU, Release, 1 thread, seed 20260810, feuilles 8
+# les compteurs sont deterministes ; les temps sont une phase locale sous charge, PAS un warm_e2e
+binaire sha256: 23098dc6dbe739b5b5ae213aaebf926190efc2c1b020d5b7182a0afa96469c1b
+commit: 40050c4309f624655ab32ac8bd4687f35f364d65
+Tue Aug 11 17:37:08 UTC 2026
+=== n=5000 family=terrain ===
+provenance : --points 5000 --coord 353 --smax 11 --seed 20260810 --family terrain --leaf-size 8
+arbre      : 2047 noeuds, feuilles <= 8, construction 0.001 s, 151008 octets
+q2 lane    : etats=52198 (prunes=12459) visites-temoin=6083408 tests-ponctuels=8003191 — prunees=12173751 microtuiles=323749 (14152 etats) — ledger C(n,2)=12497500 FERME
+recherche  : L4-retraits=1098603 noeuds (208885817 points), herites=90914, sorties precoces=12459
+parcimonie : microtuiles 2.59 % des paires, profondeur max=19, pile temoin max=11 — 0.751 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=5000 family=scanline_single_pass ===
+provenance : --points 5000 --coord 447 --smax 11 --seed 20260810 --family scanline_single_pass --leaf-size 8
+arbre      : 2047 noeuds, feuilles <= 8, construction 0.001 s, 151008 octets
+q2 lane    : etats=44334 (prunes=9847) visites-temoin=4321783 tests-ponctuels=5285510 — prunees=12204700 microtuiles=292800 (12832 etats) — ledger C(n,2)=12497500 FERME
+recherche  : L4-retraits=832036 noeuds (179100069 points), herites=83370, sorties precoces=9847
+parcimonie : microtuiles 2.34 % des paires, profondeur max=19, pile temoin max=11 — 0.634 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=5000 family=scanline_overlap_multiecho ===
+provenance : --points 5000 --coord 447 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8
+arbre      : 2047 noeuds, feuilles <= 8, construction 0.001 s, 151008 octets
+q2 lane    : etats=83550 (prunes=19294) visites-temoin=15345218 tests-ponctuels=23684997 — prunees=11958856 microtuiles=538644 (22993 etats) — ledger C(n,2)=12497500 FERME
+recherche  : L4-retraits=2409907 noeuds (334314559 points), herites=115280, sorties precoces=19294
+parcimonie : microtuiles 4.31 % des paires, profondeur max=19, pile temoin max=11 — 1.987 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=5000 family=uniform ===
+provenance : --points 5000 --coord 170 --smax 11 --seed 20260810 --family uniform --leaf-size 8
+arbre      : 2047 noeuds, feuilles <= 8, construction 0.004 s, 151008 octets
+q2 lane    : etats=156140 (prunes=36220) visites-temoin=48046719 tests-ponctuels=72667378 — prunees=11497580 microtuiles=999920 (42362 etats) — ledger C(n,2)=12497500 FERME
+recherche  : L4-retraits=8395270 noeuds (599469274 points), herites=287186, sorties precoces=36220
+parcimonie : microtuiles 8.00 % des paires, profondeur max=19, pile temoin max=11 — 5.685 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=12500 family=terrain ===
+provenance : --points 12500 --coord 559 --smax 11 --seed 20260810 --family terrain --leaf-size 8
+arbre      : 4095 noeuds, feuilles <= 8, construction 0.003 s, 312080 octets
+q2 lane    : etats=126938 (prunes=32016) visites-temoin=21538176 tests-ponctuels=39513734 — prunees=76937764 microtuiles=1180986 (32477 etats) — ledger C(n,2)=78118750 FERME
+recherche  : L4-retraits=3483598 noeuds (1279810935 points), herites=176132, sorties precoces=32016
+parcimonie : microtuiles 1.51 % des paires, profondeur max=21, pile temoin max=12 — 2.614 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=12500 family=scanline_single_pass ===
+provenance : --points 12500 --coord 707 --smax 11 --seed 20260810 --family scanline_single_pass --leaf-size 8
+arbre      : 4095 noeuds, feuilles <= 8, construction 0.003 s, 312080 octets
+q2 lane    : etats=87310 (prunes=20401) visites-temoin=9848147 tests-ponctuels=15440600 — prunees=77256803 microtuiles=861947 (24278 etats) — ledger C(n,2)=78118750 FERME
+recherche  : L4-retraits=1849051 noeuds (886807486 points), herites=148458, sorties precoces=20401
+parcimonie : microtuiles 1.10 % des paires, profondeur max=21, pile temoin max=12 — 1.296 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=12500 family=scanline_overlap_multiecho ===
+provenance : --points 12500 --coord 707 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8
+ECHEC l'identite du ledger : prunees + microtuiles != C(n,2) — partition du self-produit violee
+exit=1
+=== n=12500 family=uniform ===
+provenance : --points 12500 --coord 232 --smax 11 --seed 20260810 --family uniform --leaf-size 8
+arbre      : 4095 noeuds, feuilles <= 8, construction 0.003 s, 312080 octets
+q2 lane    : etats=345392 (prunes=82681) visites-temoin=125368345 tests-ponctuels=238876139 — prunees=74767243 microtuiles=3351507 (91039 etats) — ledger C(n,2)=78118750 FERME
+recherche  : L4-retraits=21712825 noeuds (3476808391 points), herites=629150, sorties precoces=82681
+parcimonie : microtuiles 4.29 % des paires, profondeur max=21, pile temoin max=12 — 19.279 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=25000 family=terrain ===
+provenance : --points 25000 --coord 790 --smax 11 --seed 20260810 --family terrain --leaf-size 8
+arbre      : 8191 noeuds, feuilles <= 8, construction 0.011 s, 624224 octets
+q2 lane    : etats=311478 (prunes=82601) visites-temoin=75555633 tests-ponctuels=148510327 — prunees=309724313 microtuiles=2763187 (75186 etats) — ledger C(n,2)=312487500 FERME
+recherche  : L4-retraits=11291569 noeuds (6364368160 points), herites=412722, sorties precoces=82601
+parcimonie : microtuiles 0.88 % des paires, profondeur max=23, pile temoin max=13 — 12.946 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=25000 family=scanline_single_pass ===
+provenance : --points 25000 --coord 1000 --smax 11 --seed 20260810 --family scanline_single_pass --leaf-size 8
+arbre      : 8191 noeuds, feuilles <= 8, construction 0.009 s, 624224 octets
+q2 lane    : etats=177320 (prunes=41052) visites-temoin=22098064 tests-ponctuels=34771971 — prunees=310725433 microtuiles=1762067 (49656 etats) — ledger C(n,2)=312487500 FERME
+recherche  : L4-retraits=4129608 noeuds (3646444811 points), herites=319630, sorties precoces=41052
+parcimonie : microtuiles 0.56 % des paires, profondeur max=23, pile temoin max=13 — 3.173 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=25000 family=scanline_overlap_multiecho ===
+provenance : --points 25000 --coord 1000 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8
+arbre      : 8191 noeuds, feuilles <= 8, construction 0.016 s, 624224 octets
+q2 lane    : etats=446516 (prunes=115613) visites-temoin=149758940 tests-ponctuels=301300081 — prunees=308460739 microtuiles=4026761 (109693 etats) — ledger C(n,2)=312487500 FERME
+recherche  : L4-retraits=22919454 noeuds (9225162547 points), herites=620816, sorties precoces=115613
+parcimonie : microtuiles 1.29 % des paires, profondeur max=23, pile temoin max=13 — 24.323 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=25000 family=uniform ===
+provenance : --points 25000 --coord 292 --smax 11 --seed 20260810 --family uniform --leaf-size 8
+arbre      : 8191 noeuds, feuilles <= 8, construction 0.048 s, 624224 octets
+q2 lane    : etats=755362 (prunes=191220) visites-temoin=310493604 tests-ponctuels=583214843 — prunees=305540308 microtuiles=6947192 (188509 etats) — ledger C(n,2)=312487500 FERME
+recherche  : L4-retraits=55318357 noeuds (15612653424 points), herites=1408440, sorties precoces=191220
+parcimonie : microtuiles 2.22 % des paires, profondeur max=23, pile temoin max=13 — 49.317 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=50000 family=terrain ===
+provenance : --points 50000 --coord 1118 --smax 11 --seed 20260810 --family terrain --leaf-size 8
+arbre      : 16383 noeuds, feuilles <= 8, construction 0.044 s, 1248512 octets
+q2 lane    : etats=710396 (prunes=190780) visites-temoin=240347699 tests-ponctuels=495522203 — prunees=1243769029 microtuiles=6205971 (168514 etats) — ledger C(n,2)=1249975000 FERME
+recherche  : L4-retraits=33709447 noeuds (29499635944 points), herites=885324, sorties precoces=190780
+parcimonie : microtuiles 0.50 % des paires, profondeur max=25, pile temoin max=14 — 47.978 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=50000 family=scanline_single_pass ===
+provenance : --points 50000 --coord 1414 --smax 11 --seed 20260810 --family scanline_single_pass --leaf-size 8
+arbre      : 16383 noeuds, feuilles <= 8, construction 0.013 s, 1248512 octets
+q2 lane    : etats=367890 (prunes=86772) visites-temoin=53240637 tests-ponctuels=86172879 — prunees=1246376324 microtuiles=3598676 (101269 etats) — ledger C(n,2)=1249975000 FERME
+recherche  : L4-retraits=9756474 noeuds (15194022297 points), herites=637786, sorties precoces=86772
+parcimonie : microtuiles 0.29 % des paires, profondeur max=25, pile temoin max=14 — 6.672 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=50000 family=scanline_overlap_multiecho ===
+provenance : --points 50000 --coord 1414 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8
+arbre      : 16383 noeuds, feuilles <= 8, construction 0.054 s, 1248512 octets
+q2 lane    : etats=950500 (prunes=257814) visites-temoin=393107357 tests-ponctuels=801949159 — prunees=1241865656 microtuiles=8109344 (221532 etats) — ledger C(n,2)=1249975000 FERME
+recherche  : L4-retraits=59045102 noeuds (39582005994 points), herites=1440528, sorties precoces=257814
+parcimonie : microtuiles 0.65 % des paires, profondeur max=25, pile temoin max=14 — 80.735 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+=== n=50000 family=uniform ===
+provenance : --points 50000 --coord 368 --smax 11 --seed 20260810 --family uniform --leaf-size 8
+arbre      : 16383 noeuds, feuilles <= 8, construction 0.044 s, 1248512 octets
+q2 lane    : etats=1580440 (prunes=391733) visites-temoin=723579105 tests-ponctuels=1364858170 — prunees=1235123627 microtuiles=14851373 (402583 etats) — ledger C(n,2)=1249975000 FERME
+recherche  : L4-retraits=128146503 noeuds (66766876108 points), herites=2961226, sorties precoces=391733
+parcimonie : microtuiles 1.19 % des paires, profondeur max=25, pile temoin max=14 — 120.303 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles
+exit=0
+CAMPAGNE_TERMINEE
+
+=== CORRECTIF n=12500 multiecho — violation d'identite FANTOME ===
+# cause : make_family_cloud rend 12501 points pour 12500 demandes (echo de
+# recouvrement) ; l'ancien ledger comparait C(12500,2) au parcours sur le
+# nuage reel de 12501 points. La machine etait exacte ; le correctif fait
+# porter le ledger sur le nuage rendu et publie les deux tailles.
+binaire corrige sha256: 388aec75d89288e995e2297a41f10a140af885f4c71f1fd992fbe8352a787328
+provenance : --points 12500 (rendus 12501) --coord 707 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8
+arbre      : 4095 noeuds, feuilles <= 8, construction 0.003 s, 312084 octets
+q2 lane    : etats=196132 (prunes=47031) visites-temoin=49930934 tests-ponctuels=100005936 — prunees=76213240 microtuiles=1918010 (52059 etats) — ledger C(n,2)=78131250 FERME
+recherche  : L4-retraits=7533747 noeuds (2005753334 points), herites=251628, sorties precoces=47031
+parcimonie : microtuiles 2.45 % des paires, profondeur max=21, pile temoin max=12 — 6.284 s de phase locale (1 thread, pas un warm_e2e)
+OK : la lane q2 garde la majorite des paires hors des microtuiles

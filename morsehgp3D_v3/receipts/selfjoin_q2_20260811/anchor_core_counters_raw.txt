@@ -1,0 +1,96 @@
+# falsificateur d'ancres q3/q4 (coeur universel, mode core), compteurs deterministes
+# hote: codespace 2 vCPU, Release, 1 thread, seed 20260810, feuilles 8 — temps = phase locale, PAS warm_e2e
+binaire sha256: dbdf8aaef6ff8ec9e1463139fb8a12cd2365e702d6aceef112ed91b4d4be7e19
+commit: 40050c4309f624655ab32ac8bd4687f35f364d65+delta
+Tue Aug 11 17:51:32 UTC 2026
+=== n=400 family=terrain ===
+provenance : --points 400 (rendus 400) --coord 100 --seed 20260810 --family terrain --leaf-size 8 --mode core
+arbre      : 127 noeuds, feuilles <= 8, 9728 octets
+lane q3    : etats=3802 blocs-prunes=412 — prunees=67707 residuelles=12093 (15.15 % de C(n,2)=79800) — terminales=57996 — ledger FERME
+  travail  : visites=4604025 coins=3697767 points=13873171 inscrites=93 pile-max=7 profondeur=11 — 0.307 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=3916 blocs-prunes=342 — prunees=67469 residuelles=12331 (15.45 % de C(n,2)=79800) — terminales=62919 — ledger FERME
+  travail  : visites=4858697 coins=3901103 points=14650154 inscrites=38 pile-max=7 profondeur=11 — 0.364 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=400 family=scanline_single_pass ===
+provenance : --points 400 (rendus 400) --coord 126 --seed 20260810 --family scanline_single_pass --leaf-size 8 --mode core
+arbre      : 127 noeuds, feuilles <= 8, 9728 octets
+lane q3    : etats=3398 blocs-prunes=352 — prunees=67933 residuelles=11867 (14.87 % de C(n,2)=79800) — terminales=52317 — ledger FERME
+  travail  : visites=4322893 coins=3504079 points=13069700 inscrites=63 pile-max=7 profondeur=11 — 0.236 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=3544 blocs-prunes=323 — prunees=67805 residuelles=11995 (15.03 % de C(n,2)=79800) — terminales=56350 — ledger FERME
+  travail  : visites=4563818 coins=3696990 points=13805149 inscrites=39 pile-max=7 profondeur=11 — 0.209 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=400 family=scanline_overlap_multiecho ===
+provenance : --points 400 (rendus 400) --coord 126 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8 --mode core
+arbre      : 127 noeuds, feuilles <= 8, 9728 octets
+lane q3    : etats=2928 blocs-prunes=260 — prunees=67460 residuelles=12340 (15.46 % de C(n,2)=79800) — terminales=46849 — ledger FERME
+  travail  : visites=3932848 coins=3207317 points=11919940 inscrites=33 pile-max=7 profondeur=11 — 0.174 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=3108 blocs-prunes=264 — prunees=67213 residuelles=12587 (15.77 % de C(n,2)=79800) — terminales=50159 — ledger FERME
+  travail  : visites=4137047 coins=3364058 points=12542524 inscrites=17 pile-max=7 profondeur=11 — 0.315 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=400 family=uniform ===
+provenance : --points 400 (rendus 400) --coord 73 --seed 20260810 --family uniform --leaf-size 8 --mode core
+arbre      : 127 noeuds, feuilles <= 8, 9728 octets
+lane q3    : etats=4096 blocs-prunes=8 — prunees=54468 residuelles=25332 (31.74 % de C(n,2)=79800) — terminales=79506 — ledger FERME
+  travail  : visites=6759344 coins=5583863 points=20641065 inscrites=0 pile-max=7 profondeur=11 — 0.501 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=4096 blocs-prunes=3 — prunees=52548 residuelles=27252 (34.15 % de C(n,2)=79800) — terminales=79692 — ledger FERME
+  travail  : visites=6975662 coins=5781381 points=21342918 inscrites=0 pile-max=7 profondeur=11 — 0.755 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=1200 family=terrain ===
+provenance : --points 1200 (rendus 1200) --coord 173 --seed 20260810 --family terrain --leaf-size 8 --mode core
+arbre      : 511 noeuds, feuilles <= 8, 37504 octets
+lane q3    : etats=31912 blocs-prunes=6282 — prunees=679510 residuelles=39890 (5.54 % de C(n,2)=719400) — terminales=213659 — ledger FERME
+  travail  : visites=76506542 coins=59891316 points=176825425 inscrites=2709 pile-max=9 profondeur=15 — 4.022 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=35538 blocs-prunes=6770 — prunees=678342 residuelles=41058 (5.71 % de C(n,2)=719400) — terminales=243034 — ledger FERME
+  travail  : visites=84870684 coins=66293239 points=196181651 inscrites=2243 pile-max=9 profondeur=15 — 3.544 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=1200 family=scanline_single_pass ===
+provenance : --points 1200 (rendus 1200) --coord 219 --seed 20260810 --family scanline_single_pass --leaf-size 8 --mode core
+arbre      : 511 noeuds, feuilles <= 8, 37504 octets
+lane q3    : etats=28860 blocs-prunes=5298 — prunees=678586 residuelles=40814 (5.67 % de C(n,2)=719400) — terminales=201961 — ledger FERME
+  travail  : visites=70525533 coins=55395570 points=162911459 inscrites=3003 pile-max=9 profondeur=15 — 2.538 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=31972 blocs-prunes=5617 — prunees=677488 residuelles=41912 (5.83 % de C(n,2)=719400) — terminales=229190 — ledger FERME
+  travail  : visites=77231826 coins=60331218 points=178378119 inscrites=2540 pile-max=9 profondeur=15 — 2.573 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=1200 family=scanline_overlap_multiecho ===
+provenance : --points 1200 (rendus 1200) --coord 219 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8 --mode core
+arbre      : 511 noeuds, feuilles <= 8, 37504 octets
+lane q3    : etats=30772 blocs-prunes=4591 — prunees=671638 residuelles=47762 (6.64 % de C(n,2)=719400) — terminales=239391 — ledger FERME
+  travail  : visites=85127516 coins=68506129 points=196981216 inscrites=1245 pile-max=9 profondeur=15 — 3.946 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=33714 blocs-prunes=4848 — prunees=669562 residuelles=49838 (6.93 % de C(n,2)=719400) — terminales=266349 — ledger FERME
+  travail  : visites=92159610 coins=73850473 points=213236661 inscrites=1025 pile-max=9 profondeur=15 — 2.934 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=1200 family=uniform ===
+provenance : --points 1200 (rendus 1200) --coord 106 --seed 20260810 --family uniform --leaf-size 8 --mode core
+arbre      : 511 noeuds, feuilles <= 8, 37504 octets
+lane q3    : etats=62618 blocs-prunes=5133 — prunees=623855 residuelles=95545 (13.28 % de C(n,2)=719400) — terminales=576818 — ledger FERME
+  travail  : visites=174989509 coins=139055186 points=404760156 inscrites=404 pile-max=9 profondeur=15 — 8.108 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=64098 blocs-prunes=3659 — prunees=614879 residuelles=104521 (14.53 % de C(n,2)=719400) — terminales=625055 — ledger FERME
+  travail  : visites=187875871 coins=150395364 points=434711674 inscrites=180 pile-max=9 profondeur=15 — 5.664 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=2400 family=terrain ===
+provenance : --points 2400 (rendus 2400) --coord 244 --seed 20260810 --family terrain --leaf-size 8 --mode core
+arbre      : 1023 noeuds, feuilles <= 8, 75072 octets
+lane q3    : etats=83080 blocs-prunes=17909 — prunees=2795728 residuelles=83072 (2.89 % de C(n,2)=2878800) — terminales=523020 — ledger FERME
+  travail  : visites=369116357 coins=288732356 points=858224930 inscrites=6705 pile-max=10 profondeur=17 — 12.150 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=95246 blocs-prunes=19976 — prunees=2793174 residuelles=85626 (2.97 % de C(n,2)=2878800) — terminales=612568 — ledger FERME
+  travail  : visites=420255467 coins=327610514 points=977126292 inscrites=5534 pile-max=10 profondeur=17 — 12.715 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=2400 family=scanline_single_pass ===
+provenance : --points 2400 (rendus 2400) --coord 309 --seed 20260810 --family scanline_single_pass --leaf-size 8 --mode core
+arbre      : 1023 noeuds, feuilles <= 8, 75072 octets
+lane q3    : etats=68396 blocs-prunes=14657 — prunees=2792219 residuelles=86581 (3.01 % de C(n,2)=2878800) — terminales=430892 — ledger FERME
+  travail  : visites=308904258 coins=242839174 points=718185795 inscrites=9281 pile-max=10 profondeur=17 — 10.027 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=77986 blocs-prunes=16532 — prunees=2789462 residuelles=89338 (3.10 % de C(n,2)=2878800) — terminales=495662 — ledger FERME
+  travail  : visites=343959082 coins=268564337 points=799611402 inscrites=8117 pile-max=10 profondeur=17 — 12.444 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=2400 family=scanline_overlap_multiecho ===

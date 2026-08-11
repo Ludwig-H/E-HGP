@@ -198,12 +198,21 @@ target_include_directories(mhgp3v_sidecar_factory_gate PRIVATE ${CMAKE_CURRENT_S
 target_link_libraries(mhgp3v_sidecar_factory_gate PRIVATE mhgp)
 target_compile_options(mhgp3v_sidecar_factory_gate PRIVATE -Wall -Wextra -Werror)
 
-# LA SONDE P1a DU SELF-JOIN DES PAIRES (PROPOSITION §7, audit S10) : machine
+# LA SONDE SELF-JOIN q2 DES PAIRES (PROPOSITION §6.2 ; l'ancien nom « P1a »
+# designait le center-cover retire) : machine
 # de blocs, lane q2 par temoins d'antichaine, identite du ledger fermee.
 add_executable(mhgp3v_pair_selfjoin_probe prototype/pair_selfjoin_probe.cpp)
 target_include_directories(mhgp3v_pair_selfjoin_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_pair_selfjoin_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_pair_selfjoin_probe PRIVATE -Wall -Wextra -Werror)
+
+# LE FALSIFICATEUR D'ANCRES q3/q4 par coeur universel de Jung (porte en cinq
+# points de NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4) : count-only, oracle
+# exhaustif n<=32, fate par lane.
+add_executable(mhgp3v_pair_anchor_probe prototype/pair_anchor_probe.cpp)
+target_include_directories(mhgp3v_pair_anchor_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_pair_anchor_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_pair_anchor_probe PRIVATE -Wall -Wextra -Werror)
 
 # LE PRUNE CONVEXE CERTIFIE (reponse pont/q4 20260811 §6) : le predicat
 # partage axes + plan du barycentre, verification entiere seule decisive.
@@ -960,7 +969,7 @@ set_tests_properties(mhgp3v_cell_source_mass_scanline PROPERTIES
   PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
 mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
   mhgp3v_cell_source_mass_reject_unknown "argument inconnu" 2 --inexistant 1)
-# LA SONDE P1a (portes 4-5 de l'audit delta cbac109) : ledger de fate par
+# LA SONDE SELF-JOIN q2 (portes 4-5 de l'audit delta cbac109) : ledger de fate par
 # paire (partition, multiplicite un, inclusion non compensable des non-inertes
 # dans les microtuiles), planchers anti vert-par-vacuite, fixtures gravees et
 # cinq mutants a code exact ; CLI hostile refusee.
@@ -1045,6 +1054,55 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
   --seed 20260810 --family terrain --min-pruned-pairs 79800)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
   mhgp3v_pair_selfjoin_reject_unknown "argument inconnu" 2 --inexistant 1)
+
+# LE FALSIFICATEUR D'ANCRES q3/q4 : fixtures gravees (code 0 + regex), oracle
+# exhaustif sur un petit nuage, mutants a code exact. Le mutant « plage
+# recouvrant une extremite » est mort-ne (g = 0 a l'extremite, le prédicat
+# strict la refuse deja) et documente dans le source ; la fixture tueuse
+# d'oracle-accept-nonpositive est un travail restant note dans la livraison.
+foreach(anchor_fixture thin-acute contact-q3 contact-q4 nine-axial eight-axial
+        seven-axial q4-tetra)
+  add_test(NAME mhgp3v_pair_anchor_fixture_${anchor_fixture} COMMAND
+           mhgp3v_pair_anchor_probe --fixture ${anchor_fixture})
+  set_tests_properties(mhgp3v_pair_anchor_fixture_${anchor_fixture} PROPERTIES
+    PASS_REGULAR_EXPRESSION "OK : fixture ${anchor_fixture} recue")
+  add_test(NAME mhgp3v_pair_anchor_fixture_${anchor_fixture}_code COMMAND
+           mhgp3v_pair_anchor_probe --fixture ${anchor_fixture})
+endforeach()
+add_test(NAME mhgp3v_pair_anchor_oracle_uniform COMMAND mhgp3v_pair_anchor_probe
+         --points 24 --seed 20260810 --family uniform --oracle 1)
+set_tests_properties(mhgp3v_pair_anchor_oracle_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION "aucun desaccord")
+add_test(NAME mhgp3v_pair_anchor_oracle_uniform_code COMMAND mhgp3v_pair_anchor_probe
+         --points 24 --seed 20260810 --family uniform --oracle 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_gt_to_ge "mutant tue" 4 --fixture contact-q3
+  --inject gt-to-ge)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_gt_to_ge_q4 "mutant tue" 4 --fixture contact-q4
+  --inject gt-to-ge)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_threshold_q3 "mutant tue" 4 --fixture eight-axial
+  --inject threshold-minus-one)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_threshold_q4 "mutant tue" 4 --fixture seven-axial
+  --inject threshold-minus-one)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_witness_duplicated "mutant tue" 4 --fixture eight-axial
+  --inject witness-duplicated)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_last_block "mutant tue" 4 --points 400
+  --seed 20260810 --family terrain --inject last-block-omitted)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_duplicate_compensated "mutant tue" 4 --points 28
+  --seed 20260810 --family uniform --oracle 1 --inject duplicate-compensated)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_anchor_non_maximal "mutant tue" 4 --fixture thin-acute
+  --inject anchor-non-maximal)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_reject_depth_mode "non implemente" 2 --mode depth)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_reject_unknown "argument inconnu" 2 --inexistant 1)
 
 # LA PORTE DU PRUNE : contact conserve, pics lointains separes en local,
 # nappe inclinee separee par le plan general ; deux mutants tues.
