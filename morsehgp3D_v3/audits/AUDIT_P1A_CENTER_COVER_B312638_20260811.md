@@ -108,33 +108,46 @@ témoins rejoués.
 
 ## Falsification de l'ordonnance courante
 
-Les deux commandes suivantes ont été exécutées sur le même ELF :
+La campagne Claude a exécuté séquentiellement le même ELF pour `terrain` puis
+`uniform`, à `n=2000/4000/8000` :
 
 ```bash
-timeout 900 build/v3/mhgp3v_center_cover_mass_probe --points 2000 --seed 20260811 --family terrain --leaf-size 8 --microtile 64 --max-states 900000000
-timeout 900 build/v3/mhgp3v_center_cover_mass_probe --points 4000 --seed 20260811 --family terrain --leaf-size 8 --microtile 64 --max-states 900000000
+timeout 900 build/v3/mhgp3v_center_cover_mass_probe --points N --seed 20260811 --family FAMILY --leaf-size 8 --microtile 64 --max-states 900000000
 ```
 
-Le préfixe brut de 1 692 octets contenant exactement ces deux sorties a le
-SHA-256 `fbd28e66fa9f4b21f1554aba53cf25eaa14f2765a41ae23406891eb4a2e6088a`.
-Il provenait d'un fichier temporaire Claude encore alimenté; ce hash et les
-valeurs recopiées ci-dessous constituent la provenance de l'audit, pas un reçu
-produit ni un benchmark sanctionné.
+Le fichier temporaire final possède 48 lignes et le SHA-256
+`140320266c11ba74dc0b7f5405c89ccc6ebb166875fa9b469373da4af53ea9b0`.
+L'ELF `9c130163...` et la source `fc4001b3...` ont été observés inchangés avant,
+pendant et après la boucle. Le brut n'embarque toutefois ni ces hashes, ni le
+commit, ni `max_states`; sa provenance est externe et ce n'est pas un reçu
+auto-authentifié.
 
-| compteur | 2 000 | 4 000 | pente `log2(C_4000/C_2000)` |
-| --- | ---: | ---: | ---: |
-| phase locale CPU, un thread | 24,862 s | 99,192 s | 1,996 |
-| blocs tentés | 24 473 | 66 934 | 1,451 |
-| visites nœud--témoin | 11 342 326 | 48 755 505 | 2,104 |
-| tests point--patch | 371 871 550 | 1 454 747 634 | 1,968 |
-| évaluations de coins | 1 499 943 648 | 5 880 386 017 | 1,971 |
-| masse terminale | 639 273, soit 31,98 % | 1 618 860, soit 20,24 % | diagnostic |
+Les trois runs `terrain` rendent `rc=0` et ferment leurs ledgers :
 
-Le signal le plus robuste est le coût par paire logique : 186,0 puis 181,9
-tests point--patch, et 750,3 puis 735,2 évaluations de coins. L'extrapolation à
-deux points des lois de puissance observées vers 50 k donne environ `2,10e11`
-tests et `8,54e11` coins. C'est une estimation de diagnostic, ni un intervalle
-de confiance ni un chrono G4.
+| compteur | 2 000 | 4 000 | 8 000 | pentes successives |
+| --- | ---: | ---: | ---: | ---: |
+| blocs tentés | 24 473 | 66 934 | 167 147 | 1,452 / 1,320 |
+| visites nœud--témoin | 11 342 326 | 48 755 505 | 181 460 408 | 2,104 / 1,896 |
+| feuilles ambiguës | 5 125 367 | 21 868 814 | 81 854 581 | 2,093 / 1,904 |
+| tests point--patch | 371 871 550 | 1 454 747 634 | 5 017 937 282 | 1,968 / 1,786 |
+| évaluations de coins | 1 499 943 648 | 5 880 386 017 | 20 267 313 188 | 1,971 / 1,785 |
+| part terminale | 31,98 % | 20,24 % | 12,22 % | diagnostic de masse |
+
+Le coût augmente aussi par bloc tenté : les visites témoins par bloc passent
+de `463,46` à `728,41`, puis `1085,63`. Le motif du refus n'est donc pas une
+masse terminale majoritaire, mais la recherche témoin répétée.
+
+Pour `uniform`, seuls `n=2000/4000` rendent `rc=0`; `n=8000` expire avec
+`rc=124` sans stdout exploitable, puis la boucle termine. La matrice uniforme
+est incomplète. Sa seule pente disponible est déjà `2,096` pour les visites,
+`1,856` pour les tests point--patch et `1,842` pour les coins, mais elle ne
+forme pas une paire de pentes.
+
+Les secondes sont exclues : la machine exécutait simultanément d'autres
+benchmarks, builds et sanitizers. P1a ne partage pas non plus la gate formelle
+q2 « deux pentes au-dessus de 1,35 »; son protocole sanctionné reste le passage
+direct de `n=32` à G4. Ces compteurs constituent un diagnostic d'architecture,
+pas un palier de performance ajouté au protocole.
 
 La cause est directe : `cover_block` appelle le collecteur pour chaque bloc;
 le collecteur vide sa pile puis pousse systématiquement le nœud racine zéro. Le
@@ -143,6 +156,11 @@ masque mutualise les 64 patches d'un seul bloc, jamais plusieurs blocs. Le cap
 témoins, ni les tests point--patch, ni les coins. Les bornes dirigées `L/U`
 rendues obligatoires par la note pour le profil sanctionné sont absentes. Le
 résultat est donc un NO-GO du probe courant, pas une réfutation de tout P1a.
+
+Dans chacun des cinq runs terminés, `prefilter_skips=1` et
+`patch_slots-(mediateur+Jung+milieux+couverts+survivants)=64`; le trou de
+télémétrie est reproduit exactement. Le motif « milieux » reste nul dans les
+cinq cas et ne possède aucun gain observé dans cette campagne.
 
 ## Conseil d'implémentation avant toute G4
 

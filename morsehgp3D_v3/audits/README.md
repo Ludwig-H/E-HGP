@@ -41,6 +41,8 @@ spécifications et le registre des preuves sous `docs/` restent supérieurs.
 | [`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md) | inventaire du prior art CUDA Yao48/LBVH et P1a dans `morsehgp3d/`, limites de qualification et propositions exactes de réemploi; différentiel, jamais autorité v3 |
 | [`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md) | théorème Yao-1 contenant l'EMST canonique, prior art LBVH/Kruskal enregistré, rejet CPU et contrat de mutualisation exacte avec q2; blueprint, jamais preuve de débit |
 | [`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md) | audit de la rampe CPU mono-binaire q2 à 12,5/25/50 k; trois familles structurées rouges, temps non qualifiables et ordonnance état--nœud du snapshot NO-GO avant G4; falsificateur unilatéral, jamais preuve de GO |
+| [`NOTE_CLAUDE_TRAVERSEE_DUALE_Q2_20260811.md`](NOTE_CLAUDE_TRAVERSEE_DUALE_Q2_20260811.md) | preuve et description de la première frontière duale persistante; tableau initial corrigé par l'audit, statut logiciel exclusivement live |
+| [`AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md`](AUDIT_RECU_YAO48_DUAL_C70974E_20260811.md) | audit de la rampe duale : résiduel et classifieur sous `1,35`, mais visites témoins rouges deux fois sur trois familles et uniforme incomplète; gate globale NO-GO avant G4 |
 | [`AUDIT_REPONSES_G4_Q2_YAO1_20260811.md`](AUDIT_REPONSES_G4_Q2_YAO1_20260811.md) | réponses closes à Claude : diagnostic CPU G4 admissible mais non pertinent maintenant, causalité q2 non prouvée, top-`K` exact contre réservoir arbitraire `K+1`, certificat dual `Q--W` et ordre de réception Yao-1 |
 
 ## Lemmes conditionnels, contre-fixtures et portes citées
@@ -101,6 +103,15 @@ contient la rampe q2 CPU auditée séparément :
 | --- | --- | --- |
 | `scale_counters_raw.txt` | `acf8e89248131cc7fdce3246f559d380acbee4ce67548ac9fb5e26efdd67d889` | douze ledgers count-only fermés sur un binaire dont la provenance a été reconstruite; aucun payload ni temps qualifiable |
 | `exponents_derived.txt` | `f2d9783211d884fef821a45961d428ee645bad656685d1520337957f54d2776f` | exposants arithmétiquement justes; masses de couverture et secondes exclues de la gate de travail, arrondi `1,35` ambigu pour une valeur brute strictement rouge |
+
+Le dossier
+[`../receipts/yao48_dual_20260811/`](../receipts/yao48_dual_20260811/)
+contient la rampe de la frontière duale auditée séparément :
+
+| fichier | SHA-256 | portée |
+| --- | --- | --- |
+| `dual_scale_counters_raw.txt` | `a19ac56290e3262f9f1fc9b05e37952688f3a26db1f80fb989325a53292ce1b1` | trois triplets structurés count-only fermés et un seul cas uniforme; mode CLI faussement imprimé `exact`, provenance reconstruite, temps non qualifiables |
+| `dual_exponents_derived.txt` | `264dd91eeb96a4243558e3f84322fe1db7d004e1d3e15156ee0af5e973c8b349` | sorties/classifieur verts, mais `dual_witness_visits` rouge deux fois dans les trois familles complètes; gate globale NO-GO |
 
 ## Autorités externes
 

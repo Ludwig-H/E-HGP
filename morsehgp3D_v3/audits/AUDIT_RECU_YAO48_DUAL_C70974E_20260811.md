@@ -41,8 +41,9 @@ uniforme n'est recevable.
 
 La provenance n'est pas intrinsèque. Chaque ligne imprime faussement
 `--bank-mode exact`, alors que les compteurs de banques sont nuls et les
-compteurs duals non nuls; le mode dual et le hash ELF proviennent du transcript
-de session et du commit, pas du reçu lui-même. Les fichiers n'embarquent ni
+compteurs duals non nuls; le mode dual provient du transcript de session et le
+hash du frozen ELF a été mesuré extérieurement, pas embarqué dans le reçu. Les
+fichiers n'embarquent ni
 `HEAD`, ni hashes source, compilateur, hôte, intervalle de temps ou identifiant
 de run. Les secondes sont exclues : cette rampe a coexisté avec une campagne
 P1a CPU lourde, des builds et des tests concurrents.
@@ -90,10 +91,11 @@ Cela ne constitue pas encore un reçu scientifique :
 ## Prochaine réduction exacte
 
 Le compteur rouge mesure la réévaluation de la frontière ambiguë. Le prochain
-état doit éviter de recopier et retester linéairement le même segment pour les
-deux enfants : arène immuable à partage structurel, séparation des sous-domaines
-témoin au split de `Q`, mémorisation des verdicts `U<=0`, et ordonnance
-collective de plusieurs boîtes cibles contre un microtile de nœuds témoins.
+état doit éviter `dual_work_.assign` et le retest linéaire des mêmes segments,
+notamment les feuilles issues du domaine cible/sibling, pour les deux enfants :
+arène immuable à partage structurel, séparation des sous-domaines témoin au
+split de `Q` et ordonnance collective de plusieurs boîtes cibles contre un
+microtile de nœuds témoins.
 Les crédits positifs restent héritables; toute égalité ou frontière incomplète
 retombe au classifieur.
 

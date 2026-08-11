@@ -1,0 +1,48 @@
+### family=terrain n=2000
+provenance : --points 2000 --coord 223 --seed 20260811 --family terrain --leaf-size 8 --microtile 64 digest=a58a6ae021dda6da
+arbre      : 805 noeuds, feuilles <= 8, microtuile 64
+partition  : blocs tentes=24473 prunes=4000 splits=20473 (self=285) microtuiles=17024 masse-max-bloc=1999000
+patchs     : slots=1566272 infaisables mediateur=197998 Jung=13155 milieux=0 — couverts=1082327 survivants=272728
+temoins    : visites=11342326 noeuds-acceptes=762462 feuilles-ambigues=5125367 tests-ponctuels=371871550 coins=1499943648 prefiltre=1 pile=21
+ledger     : prunee=1359727 + terminale=639273 = 1999000 = C(n,2) — FERME (part terminale 31.98 %, 24.862 s de phase locale, 1 thread)
+OK : falsificateur de masse P1a q4 mass-only — le ledger est la sortie, aucune ancre n'est emise et aucune admission prononcee
+rc=0
+### family=terrain n=4000
+provenance : --points 4000 --coord 316 --seed 20260811 --family terrain --leaf-size 8 --microtile 64 digest=b093143ff6cd606a
+arbre      : 1635 noeuds, feuilles <= 8, microtuile 64
+partition  : blocs tentes=66934 prunes=12173 splits=54761 (self=601) microtuiles=43749 masse-max-bloc=7998000
+patchs     : slots=4283776 infaisables mediateur=633419 Jung=44804 milieux=0 — couverts=2979310 survivants=626179
+temoins    : visites=48755505 noeuds-acceptes=2179217 feuilles-ambigues=21868814 tests-ponctuels=1454747634 coins=5880386017 prefiltre=1 pile=25
+ledger     : prunee=6379140 + terminale=1618860 = 7998000 = C(n,2) — FERME (part terminale 20.24 %, 99.192 s de phase locale, 1 thread)
+OK : falsificateur de masse P1a q4 mass-only — le ledger est la sortie, aucune ancre n'est emise et aucune admission prononcee
+rc=0
+### family=terrain n=8000
+provenance : --points 8000 --coord 447 --seed 20260811 --family terrain --leaf-size 8 --microtile 64 digest=e778a8b0bc06a481
+arbre      : 3215 noeuds, feuilles <= 8, microtuile 64
+partition  : blocs tentes=167147 prunes=33082 splits=134065 (self=1184) microtuiles=103265 masse-max-bloc=31996000
+patchs     : slots=10697408 infaisables mediateur=1741647 Jung=129682 milieux=0 — couverts=7449227 survivants=1376788
+temoins    : visites=181460408 noeuds-acceptes=4895125 feuilles-ambigues=81854581 tests-ponctuels=5017937282 coins=20267313188 prefiltre=1 pile=27
+ledger     : prunee=28087602 + terminale=3908398 = 31996000 = C(n,2) — FERME (part terminale 12.22 %, 273.673 s de phase locale, 1 thread)
+OK : falsificateur de masse P1a q4 mass-only — le ledger est la sortie, aucune ancre n'est emise et aucune admission prononcee
+rc=0
+### family=uniform n=2000
+provenance : --points 2000 --coord 125 --seed 20260811 --family uniform --leaf-size 8 --microtile 64 digest=e921ce164ba53b6d
+arbre      : 731 noeuds, feuilles <= 8, microtuile 64
+partition  : blocs tentes=30294 prunes=4541 splits=25753 (self=261) microtuiles=21734 masse-max-bloc=1999000
+patchs     : slots=1938816 infaisables mediateur=48791 Jung=3074 milieux=0 — couverts=1520199 survivants=366688
+temoins    : visites=19412077 noeuds-acceptes=386827 feuilles-ambigues=9270964 tests-ponctuels=900266615 coins=3262847246 prefiltre=1 pile=17
+ledger     : prunee=1070066 + terminale=928934 = 1999000 = C(n,2) — FERME (part terminale 46.47 %, 34.226 s de phase locale, 1 thread)
+OK : falsificateur de masse P1a q4 mass-only — le ledger est la sortie, aucune ancre n'est emise et aucune admission prononcee
+rc=0
+### family=uniform n=4000
+provenance : --points 4000 --coord 158 --seed 20260811 --family uniform --leaf-size 8 --microtile 64 digest=c366c8d7831526a5
+arbre      : 1429 noeuds, feuilles <= 8, microtuile 64
+partition  : blocs tentes=79633 prunes=14013 splits=65620 (self=522) microtuiles=52650 masse-max-bloc=7998000
+patchs     : slots=5096512 infaisables mediateur=138927 Jung=7771 milieux=0 — couverts=4128427 survivants=821323
+temoins    : visites=82993102 noeuds-acceptes=783335 feuilles-ambigues=38305607 tests-ponctuels=3258158106 coins=11695003382 prefiltre=1 pile=23
+ledger     : prunee=5731749 + terminale=2266251 = 7998000 = C(n,2) — FERME (part terminale 28.34 %, 196.454 s de phase locale, 1 thread)
+OK : falsificateur de masse P1a q4 mass-only — le ledger est la sortie, aucune ancre n'est emise et aucune admission prononcee
+rc=0
+### family=uniform n=8000
+rc=124
+DONE
