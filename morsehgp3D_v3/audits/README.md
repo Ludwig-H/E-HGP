@@ -20,6 +20,13 @@ explicitement classé comme réfutation ou archive.
   plancher anti-vacuité, fixture amputée à raison exacte), masques remesurés,
   prune convexe d'axe (R_4 dix-huit fois plus petit à n=2400, résidu ~n^1,9)
   et la question du théorème 2 multi-lot ou de la route EMST pour k=1.
+- [`NOTE_CLAUDE_SIDECAR_FACTORY_V0_20260811.md`](NOTE_CLAUDE_SIDECAR_FACTORY_V0_20260811.md) : la frontière de confiance typée v0 — factory opaque
+  propriétaire aux dix validations atomiques, `ExactBallKey` centre+rayon,
+  certificats principaux par témoins de suppression, fermeture des carriers
+  dérivée d'un reçu de producteur lié par digests (fixture de la table
+  amputée au reçu conservé), trois mutants tués, pipeline sans inférence
+  `smax>=n` ; limites v0 déclarées (digest FNV, census O(G·n),
+  `BallActivation` à venir).
 - [`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md) : la première session G4 mass-only à 50 000 points —
   sondes cellules trois familles/deux pas en 1,7--29 s par lane sur 48
   threads (q=2 admissible après prune, q=3/q=4 rouges), masques hybrid-fast
