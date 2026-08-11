@@ -31,8 +31,15 @@ partitionner exactement les `C(n,2)` paires :
   et son niveau `beta=D^2/4` sont publiés en une passe.
 
 Le prédicat est `Phi_{u,v}(x)=(x-u) dot (x-v)` ; sur u16, `|Phi|<3*2^34` tient
-en `i64` avec marge. Aucune position générale n'est supposée : les égalités
-`Phi=0` sont des contacts de coquille, comptés fermés et jamais intérieurs.
+en `i64` avec marge. Le classifieur ponctuel ne suppose aucune position
+générale : les égalités `Phi=0` sont des contacts de coquille, comptés fermés
+et jamais intérieurs.
+Cette robustesse du classifieur ne change pas le domaine produit initial de la
+spécification : les coordonnées doivent être deux à deux distinctes et la
+politique `RelevantGP` doit accepter le shell utile. Une paire de `PointId`
+colocalisés a `D^2=0` et n'est pas un support propre positif q2; elle relève
+d'un rejet d'entrée ou d'une future agrégation pondérée, jamais d'une
+activation q2 ordinaire.
 
 ## 2. Structures résidentes
 
@@ -44,8 +51,10 @@ en `i64` avec marge. Aucune position générale n'est supposée : les égalités
    `[begin,end)` de positions.
 3. **Ownership exact une fois** : la paire `(i,j)` avec `pos(i)<pos(j)` est
    possédée par l'ancre de position haute `j`, qui ne parcourt que le préfixe
-   `[0,pos(j))`. La masse totale possédée est `somme_j pos(j) = C(n,2)` :
-   c'est l'univers comptable du ledger, jamais une énumération.
+   `[0,pos(j))`. La masse totale possédée est `somme_j pos(j) = C(n,2)`.
+   Cette identité permet des reçus de régions sans tableau global; elle ne
+   prouve toutefois ni une complexité sous-quadratique, ni l'absence d'un
+   traitement ponctuel de tout l'univers.
 
 ## 3. Coupe Yao48 stricte fail-open
 
@@ -70,8 +79,9 @@ par un **reçu de masse**. Toute égalité descend ; l'échec du certificat ne
 classe rien (non-converse gravé en fixture).
 
 Le témoin égal à la cible est impossible par le même argument que la variante
-fermée (`x^2>D` exclut `q` de la banque) ; le mutant qui l'admettrait est
-gravé.
+fermée (`x^2>D` exclut `q` de la banque). La réception doit exercer cette
+exclusion, par un mutant dédié ou par le rejeu indépendant de tous les reçus
+positifs.
 
 ## 4. Classification terminale et census fermé
 
@@ -102,6 +112,13 @@ Le ledger ferme simultanément, par lane et par run :
 4. l'identité du nuage (digest), du `leaf_size`, de l'ordre Morton et du
    seuil.
 
+L'égalité globale des masses ne suffit pas : une omission et une duplication
+de même cardinal pourraient se compenser. Le reçu produit ferme aussi, pour
+chaque ancre, la masse attendue `pos(j)`, les intervalles de régions disjoints,
+les cibles ponctuelles et le digest canonique de leur union. Les banques sont
+factorisées par `(ancre, chambre, version)` afin qu'un reçu de région référence
+dix identifiants une seule fois au lieu de les recopier pour chaque nœud.
+
 Aucun tableau global de paires n'est matérialisé : les survivantes du mode
 mesure sont comptées et hashées, pas stockées ; le mode oracle borné
 (`n<=256`) tient les sorts par paire pour le juge.
@@ -125,20 +142,22 @@ identiques ; il mesure le gain, il ne juge pas la vérité.
 
 ## 7. Portes exigées (planchers, fixtures, mutants)
 
-- planchers : `--min-tombstones`, `--min-census-records`,
-  `--min-region-prunes`, `--min-underfull-chambers` (le fail-open doit être
-  EXERCÉ, pas absent), chacun à code 3 en cas de violation ;
-- fixtures gravées : le non-converse `p=(0,0,0)`, `q=(2,0,0)`, `w=(1,1,0)` ;
-  une égalité directionnelle exacte `x^2=D` qui doit descendre ; une chambre
-  sous-pleine qui doit rester fail-open ; un contact de coquille compté fermé
-  et jamais strict ; les extrêmes u16 ;
-- mutants à code 4 : `strict-to-large` (l'égalité prune à tort),
-  `d-understated` (banque de `K-1` témoins), `witness-is-target`,
-  `ownership-doubled` (multiplicité deux), `last-region-omitted`,
-  `census-skips-l4-zero` (le rescan des contacts sauté),
-  `threshold-minus-one` ;
-- équivariance : une permutation des `PointId` d'entrée rend le même ensemble
-  canonique de sorts.
+- planchers : reçus de région, tombstones ponctuelles, tombstones du
+  classifieur, census, chambres sous-pleines et survivantes doivent tous être
+  exercés par au moins une campagne qui échoue au code 3 si le plancher mord ;
+- fixtures : non-converse avec contact exact, égalité
+  `(x+y+z)^2=3D` qui doit descendre, prune positif d'une région, chambres
+  sous-pleines fail-open, extrêmes u16 et points colocalisés diagnostiques ;
+- mutants à code 4 : `strict-to-large`, `d-understated`,
+  `chamber-perm-swapped`, `ownership-doubled`, `last-region-omitted`,
+  `census-skips-inf-zero` et `threshold-minus-one` ;
+- politiques de travail : valeurs minimale et ample de la patience et du
+  remplissage des banques rendent les mêmes sorts et census. Un plafond de
+  travail annoncé est contrôlé avant et après chaque unité comptable, inclut
+  visites de banques, tas, tests ponctuels et piles, et ne réussit jamais après
+  l'avoir dépassé ;
+- équivariance : plusieurs permutations des `PointId` rendent le même ensemble
+  canonique de sorts et les mêmes records fermés après renommage.
 
 ## 8. Exposants avant toute latence
 

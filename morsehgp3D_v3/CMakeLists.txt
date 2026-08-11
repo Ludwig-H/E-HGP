@@ -1360,6 +1360,12 @@ add_test(NAME mhgp3v_yao48_oracle_multiecho256_code COMMAND mhgp3v_pair_yao48_so
          --permute 1)
 add_test(NAME mhgp3v_yao48_differential_terrain400_code COMMAND mhgp3v_pair_yao48_source
          --points 400 --seed 20260810 --family terrain --differential 1)
+# L'INVARIANCE DES POLITIQUES DE TRAVAIL (exigence d'audit) : budgets minimal
+# et ample rendent les memes sorts et census — la coupe accelere, elle ne
+# decide jamais.
+add_test(NAME mhgp3v_yao48_policy_differential_code COMMAND mhgp3v_pair_yao48_source
+         --points 400 --seed 20260810 --family scanline_overlap_multiecho
+         --policy-differential 1)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
   mhgp3v_yao48_kill_strict_to_large "mutant tue" 4 --fixture directional-equality
   --inject strict-to-large)

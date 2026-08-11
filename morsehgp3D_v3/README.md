@@ -71,8 +71,9 @@ Gabriel incidentes à un point. Le kissing number 12 ne s'applique pas : dans
 l'espace euclidien, le degré est arbitraire même dans un bucket de rang fermé
 fixé. Sur la grille u16 finie, seuls les caps triviaux `n-1` et `2^48-1`
 subsistent; deux constructions à treize voisins réfutent déjà le cap 12 aux
-rangs exacts 2 et 11. Elles sont démontrées mais leur gate exécutable reste à
-construire. Sous un modèle de Poisson homogène 3D sans bord, le degré moyen
+rangs exacts 2 et 11. Leur preuve est durable; le statut de leur porte
+exécutable appartient exclusivement à l'audit live. Sous un modèle de Poisson
+homogène 3D sans bord, le degré moyen
 jusqu'à `smax=11` vaut 80; c'est une baseline, pas un cap ni une garantie de
 temps. La preuve est dans
 [`AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md`](audits/AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md).

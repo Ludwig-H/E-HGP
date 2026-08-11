@@ -146,6 +146,13 @@ La boule d'un support q2 est la boule diamétrale de sa paire `(x,y)`. Un point
 `(z-x) dot (z-y)<0`. Une activation q2 non tombstonée a au plus `K-1=9`
 points strictement intérieurs.
 
+Le profil produit initial prévalant suppose des coordonnées distinctes. Une
+paire de `PointId` colocalisés a un diamètre nul et ne constitue pas un support
+propre positif q2 : le préflight la refuse avec l'entrée dupliquée, ou une
+future extension l'agrège en site pondéré avant la construction. La capacité
+du classifieur borné à compter de tels contacts est une robustesse de juge, pas
+une permission de publier une activation dégénérée.
+
 La source candidate reprend l'architecture exacte de
 [`CATALOGUE_PAIRES_DIAMETRALES_EXACT.md`](../docs/math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md) :
 
@@ -160,12 +167,29 @@ La source candidate reprend l'architecture exacte de
    `C(x,y)`, sa profondeur stricte, sa coquille, son rang, son niveau et sa
    `BallKey`, dans une seule passe multi-ordre.
 
+Le remplissage des banques ne balaie pas aveuglément tout le LBVH jusqu'à ce
+que les 48 chambres soient pleines : les chambres vides de bord rendraient ce
+schéma quadratique. Chaque requête de chambre utilise une faisabilité
+cone--AABB et une borne de distance pour arrêter exactement après ses dix plus
+proches témoins, ou prouver la chambre sous-pleine. Les survivantes sont
+classifiées par lots avec une frontière partagée; relancer la racine pour
+chaque paire n'est pas une architecture admise.
+
 Le ledger ferme simultanément
 `candidate+certified_pruned+unresolved=C(n,2)`, la partition terminale
 `below+exact+above`, la multiplicité canonique un et la liste fermée de chaque
 record. Une frontière non vide refuse toute revendication d'exactitude. Le
 chemin industriel sans budget la reprend avec backpressure jusqu'à fermeture;
 il rend l'objet exact complet ou échoue sur une ressource physique réelle.
+
+Les masses ferment également `pos(j)` ancre par ancre et engagent des
+intervalles disjoints ou un digest canonique; une seule égalité globale ne peut
+pas masquer une omission compensée par un doublon. Un reçu de région référence
+une banque factorisée `(ancre, chambre, version)` au lieu de recopier ses dix
+`PointId`. Les compteurs couvrent construction du LBVH, visites et pops de
+banques, tas, parcours de prune, classification, tests ponctuels, piles,
+records et octets réels. Un cap de probe peut abandonner un prune et retomber
+fail-open; aucun `max_work` configurable ne refuse le chemin produit.
 
 Le self-join AABB par témoins communs est une seconde preuve exacte : chaque
 état représente un ensemble disjoint de paires et dix témoins universels

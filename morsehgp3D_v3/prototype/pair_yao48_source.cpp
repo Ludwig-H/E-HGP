@@ -65,109 +65,17 @@
 
 #include "mhgp/mhgp.hpp"
 #include "prototype/cloud_families.hpp"
+#include "prototype/morton_lbvh.hpp"
 
 namespace {
 
 using i64 = long long;
 using i128 = __int128;
-using u64 = unsigned long long;
 
-// ---------------------------------------------------------------------------
-// MORTON 48 BITS : trois axes u16 entrelaces (x bit 0, y bit 1, z bit 2).
-// ---------------------------------------------------------------------------
-inline u64 spread3(u64 v) {
-  v &= 0xFFFFULL;
-  v = (v | (v << 32)) & 0x1F00000000FFFFULL;
-  v = (v | (v << 16)) & 0x1F0000FF0000FFULL;
-  v = (v | (v << 8)) & 0x100F00F00F00F00FULL;
-  v = (v | (v << 4)) & 0x10C30C30C30C30C3ULL;
-  v = (v | (v << 2)) & 0x1249249249249249ULL;
-  return v;
-}
-
-inline u64 morton_key(const mhgp::P3& p) {
-  return spread3((u64)(unsigned)p.x) | (spread3((u64)(unsigned)p.y) << 1) |
-         (spread3((u64)(unsigned)p.z) << 2);
-}
-
-// ---------------------------------------------------------------------------
-// LBVH RADIX : arbre binaire sur l'ordre Morton trie, coupe au premier bit
-// dominant qui change (construction portable device) ; midpoint en secours
-// pour un bloc de cles egales. Chaque noeud porte sa boite AABB exacte.
-// ---------------------------------------------------------------------------
-struct Node {
-  i64 lo[3] = {0, 0, 0};
-  i64 hi[3] = {0, 0, 0};
-  int begin = 0, end = 0;
-  int left = -1, right = -1;
-};
-
-struct Lbvh {
-  std::vector<Node> nodes;
-  std::vector<int> order;    // order[position] = PointId
-  std::vector<u64> keys;     // cles triees, parallele a order
-  const std::vector<mhgp::P3>* points = nullptr;
-
-  void build(const std::vector<mhgp::P3>& cloud, int leaf_size) {
-    points = &cloud;
-    const int n = (int)cloud.size();
-    std::vector<std::pair<u64, int>> slots((std::size_t)n);
-    for (int i = 0; i < n; ++i)
-      slots[(std::size_t)i] = {morton_key(cloud[(std::size_t)i]), i};
-    // L'ordre canonique : (cle, PointId) — l'ownership des colocalises est
-    // total et rejouable.
-    std::sort(slots.begin(), slots.end());
-    order.resize((std::size_t)n);
-    keys.resize((std::size_t)n);
-    for (int t = 0; t < n; ++t) {
-      keys[(std::size_t)t] = slots[(std::size_t)t].first;
-      order[(std::size_t)t] = slots[(std::size_t)t].second;
-    }
-    nodes.clear();
-    nodes.reserve(2 * (std::size_t)(n / leaf_size + 2));
-    build_range(0, n, leaf_size);
-  }
-
-  int build_range(int begin, int end, int leaf_size) {
-    const int self = (int)nodes.size();
-    nodes.push_back(Node{});
-    Node node{};
-    node.begin = begin;
-    node.end = end;
-    for (int d = 0; d < 3; ++d) {
-      node.lo[d] = (i64)1 << 40;
-      node.hi[d] = -((i64)1 << 40);
-    }
-    for (int t = begin; t < end; ++t) {
-      const mhgp::P3& p = (*points)[(std::size_t)order[(std::size_t)t]];
-      const i64 c[3] = {(i64)p.x, (i64)p.y, (i64)p.z};
-      for (int d = 0; d < 3; ++d) {
-        node.lo[d] = std::min(node.lo[d], c[d]);
-        node.hi[d] = std::max(node.hi[d], c[d]);
-      }
-    }
-    if (end - begin > leaf_size) {
-      const u64 first = keys[(std::size_t)begin];
-      const u64 last = keys[(std::size_t)(end - 1)];
-      int mid;
-      if (first == last) {
-        mid = begin + (end - begin) / 2;   // bloc colocalise : midpoint
-      } else {
-        // LA COUPE RADIX : bit dominant de la premiere difference ; mid est
-        // la premiere position dont la cle a ce bit — recherche binaire sur
-        // le prefixe commun (LBVH de Karras, forme recursive).
-        const int split_bit = 63 - __builtin_clzll(first ^ last);
-        const u64 pivot = (last >> split_bit) << split_bit;
-        mid = (int)(std::lower_bound(keys.begin() + begin, keys.begin() + end, pivot) -
-                    keys.begin());
-      }
-      node.left = build_range(begin, mid, leaf_size);
-      node.right = build_range(mid, end, leaf_size);
-    }
-    nodes[(std::size_t)self] = node;
-    return self;
-  }
-};
+// LA DISPOSITION PARTAGEE (PROPOSITION, jalon 2) : Morton 48 bits et LBVH
+// radix viennent de l'en-tete commun ; aucune lane ne garde sa propre copie.
+using Node = mhgp3v::LbvhNode;
+using Lbvh = mhgp3v::MortonLbvh;
 
 // ---------------------------------------------------------------------------
 // CHAMBRES YAO48 : signes (d >= 0 -> +) puis permutation par magnitudes
@@ -225,6 +133,7 @@ struct SourceReceipt {
   i64 anchors = 0;
   i64 bank_pops = 0;             // points extraits par le remplissage best-first
   i64 bank_node_visits = 0;      // noeuds pousses dans le tas du remplissage
+  i64 bank_cone_visits = 0;      // noeuds visites par la phase B dirigee
   i64 full_chambers = 0;         // banques pleines (multiplicite par ancre)
   i64 underfull_chambers = 0;    // banques sous-pleines APRES remplissage
   i64 prune_node_visits = 0;     // noeuds visites par le parcours de coupe
@@ -232,7 +141,8 @@ struct SourceReceipt {
   i64 region_pruned_mass = 0;    // paires couvertes par ces reçus
   i64 point_tombstones = 0;      // cibles tombstonees au point par la coupe
   i64 survivors = 0;             // paires passees au classifieur
-  i64 classify_node_visits = 0;
+  i64 classify_node_visits = 0;  // noeuds visites par les parcours DE LOT
+  i64 classify_box_tests = 0;    // evaluations de bornes par survivante
   i64 classify_point_tests = 0;
   i64 classifier_tombstones = 0; // dix stricts atteints au classifieur
   i64 census_records = 0;        // records fermes publies
@@ -256,13 +166,21 @@ inline bool fate_is_tombstone(PairFate fate) {
          fate == PairFate::kClassifierTomb;
 }
 
+// LA BANQUE FACTORISEE (exigence d'audit) : un reçu de region reference une
+// banque `(ancre, chambre, version)` au lieu de recopier ses dix PointId.
+struct BankTableEntry {
+  int anchor_pos = -1;
+  int chamber = -1;
+  std::array<int, 10> ids{};
+};
+
 // Reçu de prune Yao48 pour le rejeu : la plage possedee de cibles (ou une
-// cible exacte) et les dix PointId temoins de la banque.
+// cible exacte) et l'index de banque factorisee.
 struct YaoReceipt {
   int anchor_pos = -1;
   int target_begin = -1, target_end = -1;   // plage de positions (region)
   int target_pos = -1;                      // ou cible exacte (point)
-  std::array<int, 10> witness_ids{};
+  int bank_index = -1;                      // entree de la table des banques
 };
 
 struct CensusRecord {
@@ -294,9 +212,27 @@ struct YaoSource {
     std::array<i64, 10> dist2{};
     int count = 0;
     i64 d_max = 0;
+    int table_index = -1;   // entree factorisee (mode oracle)
   };
   std::array<Bank, 48> banks_;
   std::vector<int> stack_;
+  i64 chamber_visits = 100000;   // garde-fou fail-open de la phase dirigee
+  std::vector<BankTableEntry>* bank_table = nullptr;
+  // Le lot de survivantes de l'ancre courante (classification par lots a
+  // frontiere partagee — relancer la racine par paire est proscrit).
+  struct SurvivorState {
+    int target_pos = -1;
+    i64 strict = 0, closed = 0, contacts = 0;
+    bool done = false;
+    std::vector<int> closed_ids;
+  };
+  std::vector<SurvivorState> batch_;
+  std::vector<int> arena_;
+  // Fermeture PAR ANCRE du ledger (l'egalite globale seule peut masquer une
+  // omission compensee par un doublon).
+  bool per_anchor_violated = false;
+  bool region_overlap_violated = false;
+  std::vector<std::pair<int, int>> anchor_regions_;
 
   int threshold() const { return kOrderK - (injections.threshold_minus_one ? 1 : 0); }
 
@@ -309,6 +245,21 @@ struct YaoSource {
       return;
     }
     (*fate)[(std::size_t)index] = value;
+  }
+
+  void complete_bank(Bank* bank, int chamber, int anchor_pos) {
+    i64 d_max = 0;
+    const int upto = injections.d_understated ? kOrderK - 1 : kOrderK;
+    for (int i = 0; i < upto; ++i) d_max = std::max(d_max, bank->dist2[(std::size_t)i]);
+    bank->d_max = d_max;
+    if (bank_table != nullptr) {
+      BankTableEntry entry;
+      entry.anchor_pos = anchor_pos;
+      entry.chamber = chamber;
+      entry.ids = bank->ids;
+      bank->table_index = (int)bank_table->size();
+      bank_table->push_back(entry);
+    }
   }
 
   static i64 dist2_to_box(const Node& node, const mhgp::P3& p) {
@@ -341,6 +292,12 @@ struct YaoSource {
     heap.push({0, 0});
     i64 pops = 0;
     int full = 0;
+    // PHASE A (politique de travail fail-open) : best-first global budgete —
+    // remplit vite les chambres denses. Les chambres lentes (cones presque
+    // tangents a une nappe) sont remplies par la PHASE B dirigee ci-dessous;
+    // les mesures a 12 500 ont montre qu'une patience globale les declarait
+    // sous-pleines a tort et faisait exploser les survivantes (6,16M contre
+    // 4,54M), tandis que le best-first sans borne coutait n pops par ancre.
     while (!heap.empty() && full < 48 && pops < bank_pop_budget) {
       receipt.heap_high_water = std::max(receipt.heap_high_water, (i64)heap.size());
       const HeapItem top = heap.top();
@@ -362,10 +319,7 @@ struct YaoSource {
         bank.dist2[(std::size_t)bank.count] = top.first;
         ++bank.count;
         if (bank.count == kOrderK) {
-          i64 d_max = 0;
-          const int upto = injections.d_understated ? kOrderK - 1 : kOrderK;
-          for (int i = 0; i < upto; ++i) d_max = std::max(d_max, bank.dist2[(std::size_t)i]);
-          bank.d_max = d_max;
+          complete_bank(&bank, chamber, anchor_pos);
           ++full;
         }
         continue;
@@ -384,6 +338,104 @@ struct YaoSource {
         const i64 d2 = dx * dx + dy * dy + dz * dz;
         if (d2 == 0) continue;   // strictement > 0 exige (voir en-tete)
         heap.push({d2, -t - 1});
+      }
+    }
+    // PHASE B : remplissage DIRIGE par cone des chambres encore sous-pleines.
+    // La mesure a 12 500 (terrain) : ~21 chambres seulement sont remplissables
+    // par ancre — les cones hors nappe sont vides — et le best-first global
+    // sans borne coute n pops par ancre. La descente dirigee rejette un
+    // sous-arbre par un certificat exact : signe incompatible sur un axe, ou
+    // ordre de magnitudes impossible (max|d_i| < min|d_j| la ou la chambre
+    // exige |d_i| >= |d_j|). Les cones vides s'epuisent sur la frontiere de
+    // la nappe ; un budget de visites par cone reste une politique fail-open.
+    static constexpr int kPerms[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2},
+                                         {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+    if (full < 48) {
+      // UNE SEULE passe best-first pour TOUTES les chambres sous-pleines
+      // (le champ proche n'est paye qu'une fois) ; terminaison EXACTE : tas
+      // epuise = toutes les chambres restantes prouvees sous-pleines. Le
+      // budget `chamber_visits` reste un garde-fou fail-open, compte.
+      const i64 pc[3] = {(i64)p.x, (i64)p.y, (i64)p.z};
+      // Compatibilite d'une boite avec le cone d'une chambre : intervalles
+      // de magnitudes restreints au bon cote de p ; rejet exact si un axe
+      // n'a aucun point du bon cote ou si l'ordre des magnitudes exige
+      // l'impossible. Le doute descend.
+      const auto box_compatible = [&](const Node& node, int chamber) {
+        const int octant = chamber / 6;
+        const int* perm = kPerms[chamber % 6];
+        i64 mag_lo[3], mag_hi[3];
+        for (int k = 0; k < 3; ++k) {
+          if (((octant >> k) & 1) == 0) {   // d >= 0
+            if (node.hi[k] < pc[k]) return false;
+            mag_lo[k] = std::max<i64>(0, node.lo[k] - pc[k]);
+            mag_hi[k] = node.hi[k] - pc[k];
+          } else {                          // d < 0 strict
+            if (node.lo[k] >= pc[k]) return false;
+            mag_lo[k] = std::max<i64>(1, pc[k] - node.hi[k]);
+            mag_hi[k] = pc[k] - node.lo[k];
+          }
+        }
+        if (mag_hi[perm[0]] < mag_lo[perm[1]]) return false;
+        if (mag_hi[perm[1]] < mag_lo[perm[2]]) return false;
+        return true;
+      };
+      const auto any_underfull_compatible = [&](const Node& node) {
+        for (int chamber = 0; chamber < 48; ++chamber)
+          if (banks_[(std::size_t)chamber].count < kOrderK &&
+              box_compatible(node, chamber))
+            return true;
+        return false;
+      };
+      std::priority_queue<HeapItem, std::vector<HeapItem>, std::greater<HeapItem>>
+          cone_heap;
+      cone_heap.push({0, 0});
+      i64 visits = 0;
+      while (!cone_heap.empty() && full < 48 && visits < chamber_visits) {
+        const HeapItem top = cone_heap.top();
+        cone_heap.pop();
+        if (top.second < 0) {
+          const int t = -top.second - 1;
+          ++receipt.bank_pops;
+          const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
+          const i64 dx = (i64)w.x - p.x, dy = (i64)w.y - p.y, dz = (i64)w.z - p.z;
+          i64 canon[3];
+          const int chamber = chamber_of(dx, dy, dz, canon, false);
+          Bank& bank = banks_[(std::size_t)chamber];
+          if (bank.count >= kOrderK) continue;
+          bool already = false;
+          for (int i = 0; i < bank.count; ++i)
+            if (bank.ids[(std::size_t)i] == tree->order[(std::size_t)t]) already = true;
+          if (already) continue;   // la phase A a pu le classer ici
+          bank.ids[(std::size_t)bank.count] = tree->order[(std::size_t)t];
+          bank.dist2[(std::size_t)bank.count] = top.first;
+          ++bank.count;
+          if (bank.count == kOrderK) {
+            complete_bank(&bank, chamber, anchor_pos);
+            ++full;
+          }
+          continue;
+        }
+        const Node& node = tree->nodes[(std::size_t)top.second];
+        ++visits;
+        ++receipt.bank_cone_visits;
+        if (!any_underfull_compatible(node)) continue;
+        if (node.left >= 0) {
+          cone_heap.push({dist2_to_box(tree->nodes[(std::size_t)node.left], p), node.left});
+          cone_heap.push(
+              {dist2_to_box(tree->nodes[(std::size_t)node.right], p), node.right});
+          continue;
+        }
+        for (int t = node.begin; t < node.end; ++t) {
+          if (t == anchor_pos) continue;
+          const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
+          const i64 dx = (i64)w.x - p.x, dy = (i64)w.y - p.y, dz = (i64)w.z - p.z;
+          const i64 d2 = dx * dx + dy * dy + dz * dz;
+          if (d2 == 0) continue;
+          i64 canon[3];
+          if (banks_[(std::size_t)chamber_of(dx, dy, dz, canon, false)].count >= kOrderK)
+            continue;   // sa chambre est deja pleine : inutile de le porter
+          cone_heap.push({d2, -t - 1});
+        }
       }
     }
     receipt.full_chambers += full;
@@ -453,7 +505,7 @@ struct YaoSource {
     r.anchor_pos = anchor_pos;
     r.target_begin = node.begin;
     r.target_end = node.end;
-    r.witness_ids = bank.ids;
+    r.bank_index = bank.table_index;
     yao_receipts->push_back(r);
   }
 
@@ -462,16 +514,19 @@ struct YaoSource {
     YaoReceipt r;
     r.anchor_pos = anchor_pos;
     r.target_pos = target_pos;
-    r.witness_ids = bank.ids;
+    r.bank_index = bank.table_index;
     yao_receipts->push_back(r);
   }
 
   // LE PARCOURS DE COUPE : prefixe possede [0, anchor_pos), reçus de masse
-  // sur les noeuds entierement possedes et certifies, classification des
-  // survivantes aux feuilles.
+  // sur les noeuds entierement possedes et certifies ; les survivantes sont
+  // COLLECTEES puis classifiees PAR LOT a frontiere partagee (relancer la
+  // racine par paire n'est pas une architecture admise — PROPOSITION).
   void prune_traverse(int anchor_pos) {
     const int anchor_id = tree->order[(std::size_t)anchor_pos];
     const mhgp::P3& p = (*tree->points)[(std::size_t)anchor_id];
+    batch_.clear();
+    anchor_regions_.clear();
     stack_.clear();
     stack_.push_back(0);
     while (!stack_.empty()) {
@@ -494,6 +549,7 @@ struct YaoSource {
               directional_cut(bank, mins[0], mins[1], mins[2])) {
             ++receipt.region_prunes;
             receipt.region_pruned_mass += node.end - node.begin;
+            anchor_regions_.push_back({node.begin, node.end});
             // MUTANT last-region-omitted : le reçu ET sa masse du DERNIER
             // noeud prune sont perdus — le ledger global ne ferme plus.
             if (injections.last_region_omitted) last_region_mass_ = node.end - node.begin;
@@ -523,12 +579,22 @@ struct YaoSource {
             continue;
           }
           ++receipt.survivors;
-          classify_pair(t, anchor_pos);
+          SurvivorState state;
+          state.target_pos = t;
+          batch_.push_back(std::move(state));
         }
         continue;
       }
       stack_.push_back(node.right);
       stack_.push_back(node.left);
+    }
+    // Les intervalles de regions d'une ancre sont DISJOINTS (exigence de
+    // reçu) : verification en mode oracle.
+    if (oracle_mode && anchor_regions_.size() > 1) {
+      std::sort(anchor_regions_.begin(), anchor_regions_.end());
+      for (std::size_t k = 1; k < anchor_regions_.size(); ++k)
+        if (anchor_regions_[k].first < anchor_regions_[k - 1].second)
+          region_overlap_violated = true;
     }
   }
 
@@ -555,89 +621,132 @@ struct YaoSource {
     *sup4 = hi_total;
   }
 
-  // LE CLASSIFIEUR TERMINAL + CENSUS FERME d'une survivante.
-  void classify_pair(int pos_low, int pos_high) {
-    const int id_u = tree->order[(std::size_t)pos_low];
-    const int id_v = tree->order[(std::size_t)pos_high];
-    const mhgp::P3& u = (*tree->points)[(std::size_t)id_u];
-    const mhgp::P3& v = (*tree->points)[(std::size_t)id_v];
-    i64 strict = 0, closed = 0, contacts = 0;
-    std::vector<int> closed_ids;
-    std::vector<int> local_stack;
-    local_stack.push_back(0);
+  void mark_tombstone(SurvivorState* state, int anchor_id) {
+    state->done = true;
+    ++receipt.classifier_tombstones;
+    assign_pair(tree->order[(std::size_t)state->target_pos], anchor_id,
+                PairFate::kClassifierTomb);
+  }
+
+  // LE CLASSIFIEUR TERMINAL PAR LOT : toutes les survivantes d'une ancre
+  // partagent UN parcours (frontiere partagee — chaque noeud n'est visite
+  // qu'une fois, chaque survivante encore indecise y evalue ses bornes).
+  // inf4 > 0 la retire du sous-arbre ; inf4 = 0 n'a aucun interieur strict
+  // mais peut porter des CONTACTS que le census ferme doit compter (mutant
+  // grave) ; sup4 < 0 credite le noeud entier (les extremites, a Phi = 0,
+  // ne peuvent pas y etre) ; l'arret a dix stricts marque la tombstone.
+  void classify_batch(int anchor_pos) {
+    if (batch_.empty()) return;
+    const int anchor_id = tree->order[(std::size_t)anchor_pos];
+    const mhgp::P3& v = (*tree->points)[(std::size_t)anchor_id];
     const int limit = threshold();
-    bool tombstoned = false;
-    while (!local_stack.empty()) {
-      const int node_index = local_stack.back();
-      local_stack.pop_back();
-      const Node& node = tree->nodes[(std::size_t)node_index];
+    arena_.clear();
+    for (int i = 0; i < (int)batch_.size(); ++i) arena_.push_back(i);
+    struct Frame {
+      int node;
+      int begin, end;   // plage active dans l'arene (append-only, partagee
+                        // entre les deux enfants — jamais recopiee)
+    };
+    std::vector<Frame> frames;
+    frames.push_back({0, 0, (int)arena_.size()});
+    while (!frames.empty()) {
+      const Frame frame = frames.back();
+      frames.pop_back();
+      receipt.stack_high_water =
+          std::max(receipt.stack_high_water, (i64)frames.size() + 1);
+      const Node& node = tree->nodes[(std::size_t)frame.node];
       ++receipt.classify_node_visits;
-      i64 inf4, sup4;
-      bounds4(node, u, v, &inf4, &sup4);
-      if (inf4 > 0) continue;
-      if (inf4 == 0 && injections.census_skips_inf_zero) continue;
-      if (sup4 < 0 && node.left >= 0) {
-        // Tout le noeud est strictement interieur (les extremites, a
-        // Phi = 0, ne peuvent pas y etre).
-        strict += node.end - node.begin;
-        closed += node.end - node.begin;
-        if (oracle_mode)
-          for (int t = node.begin; t < node.end; ++t)
-            closed_ids.push_back(tree->order[(std::size_t)t]);
-        if (strict >= limit) { tombstoned = true; break; }
-        continue;
+      const int next_begin = (int)arena_.size();
+      for (int k = frame.begin; k < frame.end; ++k) {
+        const int state_index = arena_[(std::size_t)k];
+        SurvivorState& state = batch_[(std::size_t)state_index];
+        if (state.done) continue;
+        const mhgp::P3& u =
+            (*tree->points)[(std::size_t)tree->order[(std::size_t)state.target_pos]];
+        i64 inf4, sup4;
+        bounds4(node, u, v, &inf4, &sup4);
+        ++receipt.classify_box_tests;
+        if (inf4 > 0) continue;
+        if (inf4 == 0 && injections.census_skips_inf_zero) continue;
+        if (sup4 < 0 && node.left >= 0) {
+          state.strict += node.end - node.begin;
+          state.closed += node.end - node.begin;
+          if (oracle_mode)
+            for (int t = node.begin; t < node.end; ++t)
+              state.closed_ids.push_back(tree->order[(std::size_t)t]);
+          if (state.strict >= limit) mark_tombstone(&state, anchor_id);
+          continue;
+        }
+        arena_.push_back(state_index);
       }
+      const int next_end = (int)arena_.size();
+      if (next_begin == next_end) continue;
       if (node.left < 0) {
         for (int t = node.begin; t < node.end; ++t) {
           const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
-          ++receipt.classify_point_tests;
-          i64 phi = 0;
-          for (int d = 0; d < 3; ++d) {
-            const i64 c = d == 0 ? (i64)w.x : (d == 1 ? (i64)w.y : (i64)w.z);
-            const i64 a = d == 0 ? (i64)u.x : (d == 1 ? (i64)u.y : (i64)u.z);
-            const i64 b = d == 0 ? (i64)v.x : (d == 1 ? (i64)v.y : (i64)v.z);
-            phi += (c - a) * (c - b);
-          }
-          if (phi < 0) {
-            ++strict;
-            ++closed;
-            if (oracle_mode) closed_ids.push_back(tree->order[(std::size_t)t]);
-            if (strict >= limit) { tombstoned = true; break; }
-          } else if (phi == 0) {
-            ++closed;
-            // Les extremites sont fermees par definition ; les CONTACTS
-            // publies sont l'extra-shell seul.
-            if (t != pos_low && t != pos_high) ++contacts;
-            if (oracle_mode) closed_ids.push_back(tree->order[(std::size_t)t]);
+          const i64 wc[3] = {(i64)w.x, (i64)w.y, (i64)w.z};
+          for (int k = next_begin; k < next_end; ++k) {
+            SurvivorState& state = batch_[(std::size_t)arena_[(std::size_t)k]];
+            if (state.done) continue;
+            const mhgp::P3& u =
+                (*tree->points)[(std::size_t)tree->order[(std::size_t)state.target_pos]];
+            ++receipt.classify_point_tests;
+            i64 phi = 0;
+            for (int d = 0; d < 3; ++d) {
+              const i64 a = d == 0 ? (i64)u.x : (d == 1 ? (i64)u.y : (i64)u.z);
+              const i64 b = d == 0 ? (i64)v.x : (d == 1 ? (i64)v.y : (i64)v.z);
+              phi += (wc[d] - a) * (wc[d] - b);
+            }
+            if (phi < 0) {
+              ++state.strict;
+              ++state.closed;
+              if (oracle_mode) state.closed_ids.push_back(tree->order[(std::size_t)t]);
+              if (state.strict >= limit) mark_tombstone(&state, anchor_id);
+            } else if (phi == 0) {
+              ++state.closed;
+              // Les extremites sont fermees par definition ; les CONTACTS
+              // publies sont l'extra-shell seul.
+              if (t != state.target_pos && t != anchor_pos) ++state.contacts;
+              if (oracle_mode) state.closed_ids.push_back(tree->order[(std::size_t)t]);
+            }
           }
         }
-        if (tombstoned) break;
         continue;
       }
-      local_stack.push_back(node.right);
-      local_stack.push_back(node.left);
+      frames.push_back({node.right, next_begin, next_end});
+      frames.push_back({node.left, next_begin, next_end});
     }
-    if (tombstoned) {
-      ++receipt.classifier_tombstones;
-      assign_pair(id_u, id_v, PairFate::kClassifierTomb);
-      return;
+    for (SurvivorState& state : batch_) {
+      if (state.done) continue;
+      ++receipt.census_records;
+      receipt.census_closed_total += state.closed;
+      receipt.census_strict_total += state.strict;
+      receipt.census_contact_total += state.contacts;
+      assign_pair(tree->order[(std::size_t)state.target_pos], anchor_id,
+                  PairFate::kCensus);
+      if (census_records != nullptr) {
+        CensusRecord record;
+        record.pos_low = state.target_pos;
+        record.pos_high = anchor_pos;
+        record.closed = state.closed;
+        record.strict = state.strict;
+        record.contacts = state.contacts;
+        std::sort(state.closed_ids.begin(), state.closed_ids.end());
+        record.closed_ids = std::move(state.closed_ids);
+        census_records->push_back(std::move(record));
+      }
     }
-    ++receipt.census_records;
-    receipt.census_closed_total += closed;
-    receipt.census_strict_total += strict;
-    receipt.census_contact_total += contacts;
-    assign_pair(id_u, id_v, PairFate::kCensus);
-    if (census_records != nullptr) {
-      CensusRecord record;
-      record.pos_low = pos_low;
-      record.pos_high = pos_high;
-      record.closed = closed;
-      record.strict = strict;
-      record.contacts = contacts;
-      std::sort(closed_ids.begin(), closed_ids.end());
-      record.closed_ids = std::move(closed_ids);
-      census_records->push_back(std::move(record));
-    }
+    batch_.clear();
+  }
+
+  // Le travail TOTAL comptabilise — le plafond est controle avant et apres
+  // chaque unite (l'ancre) et couvre banques, tas, parcours, bornes, tests
+  // et piles (exigence d'audit : jamais un OK apres depassement).
+  i64 work_done() const {
+    return receipt.bank_pops + receipt.bank_node_visits + receipt.bank_cone_visits +
+           receipt.prune_node_visits + receipt.classify_node_visits +
+           receipt.classify_box_tests + receipt.classify_point_tests +
+           receipt.stack_high_water + receipt.heap_high_water;
   }
 
   // LE RUN COMPLET. Rend faux sur budget global depasse (refus atomique).
@@ -645,14 +754,25 @@ struct YaoSource {
     const int n = (int)tree->order.size();
     for (int j = 0; j < n; ++j) {
       ++receipt.anchors;
-      if (max_work > 0 &&
-          receipt.prune_node_visits + receipt.classify_node_visits +
-                  receipt.bank_pops > max_work) {
+      if (max_work > 0 && work_done() > max_work) {
         budget_exceeded = true;
         return false;
       }
+      const i64 mass_before = receipt.region_pruned_mass + receipt.point_tombstones +
+                              receipt.survivors;
       if (!baseline) fill_banks(j);
       prune_traverse(j);
+      classify_batch(j);
+      // FERMETURE PAR ANCRE : la masse traitee de l'ancre j est exactement
+      // pos(j) — l'egalite globale seule pourrait masquer une omission
+      // compensee par un doublon (exigence d'audit).
+      const i64 mass_after = receipt.region_pruned_mass + receipt.point_tombstones +
+                             receipt.survivors;
+      if (mass_after - mass_before != j) per_anchor_violated = true;
+      if (max_work > 0 && work_done() > max_work) {
+        budget_exceeded = true;
+        return false;
+      }
     }
     if (injections.last_region_omitted && receipt.region_prunes > 0) {
       --receipt.region_prunes;
@@ -694,7 +814,8 @@ mhgp::P3 pt(int x, int y, int z) {
 
 int main(int argc, char** argv) {
   int n = 2400, coord = 0, leaf_size = 8, oracle = 0, differential = 0, permute = 0;
-  i64 seed = 20260810, bank_pops = 4096, max_work = 4000000000LL;
+  int policy_differential = 0;
+  i64 seed = 20260810, bank_pops = 4096, chamber_visits = 100000, max_work = 4000000000LL;
   i64 min_region_prunes = 0, min_point_tombstones = 0, min_census_records = 0;
   i64 min_underfull = 0, min_survivors = 0, min_classifier_tombs = 0;
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kTerrain;
@@ -752,9 +873,11 @@ int main(int argc, char** argv) {
     else if (!strcmp(argv[i], "--leaf-size")) leaf_size = (int)value;
     else if (!strcmp(argv[i], "--seed")) seed = value;
     else if (!strcmp(argv[i], "--bank-pops")) bank_pops = value;
+    else if (!strcmp(argv[i], "--chamber-visits")) chamber_visits = value;
     else if (!strcmp(argv[i], "--max-work")) max_work = value;
     else if (!strcmp(argv[i], "--oracle")) oracle = (int)value;
     else if (!strcmp(argv[i], "--differential")) differential = (int)value;
+    else if (!strcmp(argv[i], "--policy-differential")) policy_differential = (int)value;
     else if (!strcmp(argv[i], "--permute")) permute = (int)value;
     else if (!strcmp(argv[i], "--min-region-prunes")) min_region_prunes = value;
     else if (!strcmp(argv[i], "--min-point-tombstones")) min_point_tombstones = value;
@@ -766,7 +889,8 @@ int main(int argc, char** argv) {
     ++i;
   }
   if (n < 4 || n > 100000 || coord < 0 || coord > 65536 || leaf_size < 2 ||
-      leaf_size > 256 || bank_pops < 48 || max_work < 1 || oracle < 0 || oracle > 1 ||
+      leaf_size > 256 || bank_pops < 48 || chamber_visits < 8 || max_work < 1 ||
+      oracle < 0 || oracle > 1 || policy_differential < 0 || policy_differential > 1 ||
       differential < 0 || differential > 1 || permute < 0 || permute > 1) {
     std::printf("ECHEC : campagne absurde\n");
     return 2;
@@ -859,6 +983,10 @@ int main(int argc, char** argv) {
     std::printf("ECHEC : le differentiel bi-mode exige n <= 3000\n");
     return 2;
   }
+  if (policy_differential == 1 && n > 3000) {
+    std::printf("ECHEC : le differentiel de politiques exige n <= 3000\n");
+    return 2;
+  }
   const auto fail = [&](const char* what, const char* detail) {
     if (injections.any()) {
       std::printf("mutant tue par %s : %s\n", what, detail);
@@ -874,19 +1002,22 @@ int main(int argc, char** argv) {
 
   std::vector<PairFate> fates;
   std::vector<YaoReceipt> receipts;
+  std::vector<BankTableEntry> bank_table;
   std::vector<CensusRecord> census;
   YaoSource source;
   source.tree = &tree;
   source.injections = injections;
   source.bank_pop_budget = bank_pops;
+  source.chamber_visits = chamber_visits;
   source.max_work = max_work;
-  if (oracle == 1 || differential == 1) {
+  if (oracle == 1 || differential == 1 || policy_differential == 1) {
     fates.assign((std::size_t)all_pairs, PairFate::kUnassigned);
     source.fate = &fates;
     source.fate_points = n;
     if (oracle == 1) {
       source.oracle_mode = true;
       source.yao_receipts = &receipts;
+      source.bank_table = &bank_table;
       source.census_records = &census;
     }
   }
@@ -901,6 +1032,12 @@ int main(int argc, char** argv) {
   const SourceReceipt& r = source.receipt;
   if (source.fate_violated)
     return fail("le ledger de sorts", "une paire a recu deux sorts — multiplicite violee");
+  if (source.per_anchor_violated)
+    return fail("le ledger par ancre",
+                "la masse traitee d'une ancre differe de pos(j) — une omission"
+                " compensee par un doublon devient visible ici");
+  if (source.region_overlap_violated)
+    return fail("les reçus de region", "deux intervalles d'une meme ancre se recouvrent");
 
   // LE LEDGER GLOBAL : reçus de region + tombstones ponctuelles +
   // survivantes = C(n,2), et survivantes = tombstones classifieur + census.
@@ -957,7 +1094,16 @@ int main(int argc, char** argv) {
       else
         for (int t = receipt_item.target_begin; t < receipt_item.target_end; ++t)
           targets.push_back(t);
-      std::array<int, 10> ids = receipt_item.witness_ids;
+      // La banque FACTORISEE du reçu : (ancre, chambre, version) — dix
+      // identifiants references une seule fois, jamais recopies par noeud.
+      if (receipt_item.bank_index < 0 ||
+          receipt_item.bank_index >= (int)bank_table.size())
+        return fail("le rejeu des reçus Yao48", "un reçu ne reference aucune banque");
+      const BankTableEntry& bank_entry = bank_table[(std::size_t)receipt_item.bank_index];
+      if (bank_entry.anchor_pos != receipt_item.anchor_pos)
+        return fail("le rejeu des reçus Yao48",
+                    "un reçu reference la banque d'une autre ancre");
+      std::array<int, 10> ids = bank_entry.ids;
       std::sort(ids.begin(), ids.end());
       for (int i = 1; i < 10; ++i)
         if (ids[(std::size_t)i] == ids[(std::size_t)(i - 1)])
@@ -1024,36 +1170,90 @@ int main(int argc, char** argv) {
       }
     if (census_cursor != census_sorted.size())
       return fail("le juge exhaustif", "des records census surnumeraires existent");
-    // 3. L'EQUIVARIANCE PAR PERMUTATION : le nuage renverse donne les memes
-    // sorts après renommage.
+    // 3. L'EQUIVARIANCE PAR PERMUTATIONS (l'audit exige PLUSIEURS ordres) :
+    // le renversement ET un melange LCG grave rendent les memes sorts apres
+    // renommage.
     if (permute == 1) {
-      std::vector<mhgp::P3> reversed(pts.rbegin(), pts.rend());
-      Lbvh tree2;
-      tree2.build(reversed, leaf_size);
-      std::vector<PairFate> fates2((std::size_t)all_pairs, PairFate::kUnassigned);
-      YaoSource source2;
-      source2.tree = &tree2;
-      source2.injections = injections;
-      source2.bank_pop_budget = bank_pops;
-      source2.max_work = max_work;
-      source2.fate = &fates2;
-      source2.fate_points = n;
-      if (!source2.run()) {
-        std::printf("ECHEC : budget depasse dans la permutation\n");
-        return 3;
-      }
-      for (int i = 0; i < n; ++i)
-        for (int j = i + 1; j < n; ++j) {
-          const i64 index = (i64)i * (2 * (i64)n - i - 1) / 2 + (j - i - 1);
-          int ri = n - 1 - i, rj = n - 1 - j;
-          if (ri > rj) std::swap(ri, rj);
-          const i64 rindex = (i64)ri * (2 * (i64)n - ri - 1) / 2 + (rj - ri - 1);
-          if (fate_is_tombstone(fates[(std::size_t)index]) !=
-              fate_is_tombstone(fates2[(std::size_t)rindex]))
-            return fail("l'equivariance par permutation",
-                        "un sort depend de la numerotation des PointId");
+      std::vector<std::vector<int>> sigmas;
+      {
+        std::vector<int> reversed_sigma((std::size_t)n);
+        for (int i = 0; i < n; ++i) reversed_sigma[(std::size_t)i] = n - 1 - i;
+        sigmas.push_back(std::move(reversed_sigma));
+        std::vector<int> shuffled((std::size_t)n);
+        for (int i = 0; i < n; ++i) shuffled[(std::size_t)i] = i;
+        unsigned long long lcg = 0x9E3779B97F4A7C15ULL ^ (unsigned long long)seed;
+        for (int i = n - 1; i > 0; --i) {
+          lcg = lcg * 6364136223846793005ULL + 1442695040888963407ULL;
+          const int j = (int)(lcg % (unsigned long long)(i + 1));
+          std::swap(shuffled[(std::size_t)i], shuffled[(std::size_t)j]);
         }
+        sigmas.push_back(std::move(shuffled));
+      }
+      for (const std::vector<int>& sigma : sigmas) {
+        std::vector<mhgp::P3> permuted((std::size_t)n);
+        for (int i = 0; i < n; ++i)
+          permuted[(std::size_t)i] = pts[(std::size_t)sigma[(std::size_t)i]];
+        Lbvh tree2;
+        tree2.build(permuted, leaf_size);
+        std::vector<PairFate> fates2((std::size_t)all_pairs, PairFate::kUnassigned);
+        YaoSource source2;
+        source2.tree = &tree2;
+        source2.injections = injections;
+        source2.bank_pop_budget = bank_pops;
+        source2.chamber_visits = chamber_visits;
+        source2.max_work = max_work;
+        source2.fate = &fates2;
+        source2.fate_points = n;
+        if (!source2.run()) {
+          std::printf("ECHEC : budget depasse dans la permutation\n");
+          return 3;
+        }
+        for (int i = 0; i < n; ++i)
+          for (int j = i + 1; j < n; ++j) {
+            const i64 index2 = (i64)i * (2 * (i64)n - i - 1) / 2 + (j - i - 1);
+            int oi = sigma[(std::size_t)i], oj = sigma[(std::size_t)j];
+            if (oi > oj) std::swap(oi, oj);
+            const i64 oindex = (i64)oi * (2 * (i64)n - oi - 1) / 2 + (oj - oi - 1);
+            if (fate_is_tombstone(fates2[(std::size_t)index2]) !=
+                fate_is_tombstone(fates[(std::size_t)oindex]))
+              return fail("l'equivariance par permutation",
+                          "un sort depend de la numerotation des PointId");
+          }
+      }
     }
+  }
+
+  // L'INVARIANCE DES POLITIQUES DE TRAVAIL (exigence d'audit) : les budgets
+  // minimal et ample rendent les MEMES sorts et les memes agregats de census
+  // — la coupe est une acceleration, jamais une autorite. Les sorts sont
+  // objectifs (dix stricts existent ou non) et le classifieur exact rattrape
+  // toute coupe manquee : toute divergence est un defaut.
+  if (policy_differential == 1) {
+    std::vector<PairFate> fates_min((std::size_t)all_pairs, PairFate::kUnassigned);
+    YaoSource source_min;
+    source_min.tree = &tree;
+    source_min.injections = injections;
+    source_min.bank_pop_budget = 48;
+    source_min.chamber_visits = 8;
+    source_min.max_work = max_work;
+    source_min.fate = &fates_min;
+    source_min.fate_points = n;
+    if (!source_min.run()) {
+      std::printf("ECHEC : budget depasse dans la politique minimale\n");
+      return 3;
+    }
+    if (source_min.receipt.census_records != r.census_records ||
+        source_min.receipt.census_closed_total != r.census_closed_total ||
+        source_min.receipt.census_strict_total != r.census_strict_total ||
+        source_min.receipt.census_contact_total != r.census_contact_total)
+      return fail("l'invariance des politiques",
+                  "les agregats de census dependent du budget des banques");
+    for (std::size_t k = 0; k < fates_min.size(); ++k)
+      if (fate_is_tombstone(fates_min[k]) != fate_is_tombstone(fates[k]))
+        return fail("l'invariance des politiques",
+                    "un sort depend du budget des banques");
+    std::printf("politiques : sorts et census IDENTIQUES entre budgets minimal"
+                " (48/8) et ample (%lld/%lld)\n", bank_pops, chamber_visits);
   }
 
   // LES PLANCHERS ANTI VERT-PAR-VACUITE.
@@ -1155,16 +1355,17 @@ int main(int argc, char** argv) {
       (i64)(tree.nodes.size() * sizeof(Node) + tree.order.size() * (sizeof(int) + 8));
   std::printf("arbre      : %zu noeuds, feuilles <= %d, %lld octets (cles Morton"
               " comprises)\n", tree.nodes.size(), leaf_size, tree_bytes);
-  std::printf("banques    : pops=%lld visites=%lld pleines=%lld sous-pleines=%lld"
-              " (budget %lld par ancre, tas max=%lld)\n", r.bank_pops,
-              r.bank_node_visits, r.full_chambers, r.underfull_chambers, bank_pops,
-              r.heap_high_water);
+  std::printf("banques    : pops=%lld visites=%lld cone-visites=%lld pleines=%lld"
+              " sous-pleines=%lld (budget %lld par ancre, tas max=%lld)\n", r.bank_pops,
+              r.bank_node_visits, r.bank_cone_visits, r.full_chambers,
+              r.underfull_chambers, bank_pops, r.heap_high_water);
   std::printf("coupe      : visites=%lld reçus-region=%lld (masse %lld)"
               " tombstones-point=%lld\n", r.prune_node_visits, r.region_prunes,
               r.region_pruned_mass, r.point_tombstones);
-  std::printf("classifieur: survivantes=%lld visites=%lld tests=%lld"
+  std::printf("classifieur: survivantes=%lld visites-lot=%lld boites=%lld tests=%lld"
               " tombstones=%lld census=%lld\n", r.survivors, r.classify_node_visits,
-              r.classify_point_tests, r.classifier_tombstones, r.census_records);
+              r.classify_box_tests, r.classify_point_tests, r.classifier_tombstones,
+              r.census_records);
   std::printf("census     : fermes=%lld stricts=%lld contacts=%lld — pile max=%lld\n",
               r.census_closed_total, r.census_strict_total, r.census_contact_total,
               r.stack_high_water);

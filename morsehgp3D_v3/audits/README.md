@@ -33,9 +33,9 @@ spécifications et le registre des preuves sous `docs/` restent supérieurs.
 | [`AUDIT_JUNG_ANCHOR_389A742.md`](AUDIT_JUNG_ANCHOR_389A742.md) | contre-fixture permanente à une ancre de Jung insuffisamment certifiée |
 | [`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md) | preuve des certificats cœur/profondeur q3/q4, hypothèses, égalités fail-open et limites industrielles |
 | [`NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md`](NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md) | preuve du certificat de couverture du disque par groupes disjoints de trois témoins au plus, décision exacte et limites de complexité |
-| [`AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md`](AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md) | réfutation exacte de toute borne de degré Gabriel par le kissing number ou `smax`; deux constructions u16 aux rangs 2 et 11, baseline de Poisson et conséquences industrielles; leur gate exécutable reste à construire |
+| [`AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md`](AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md) | réfutation exacte de toute borne de degré Gabriel par le kissing number ou `smax`; deux constructions u16 aux rangs 2 et 11, baseline de Poisson et conséquences industrielles; statut logiciel exclusivement dans l'audit live |
 | [`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md) | provenance de la session G4 mass-only et arrêt de la cible; déclaration de session, pas verdict produit |
-| [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md) | spécification de la route produit q2 : Morton/LBVH, coupe Yao48 stricte fail-open, classifieur terminal, census fermé, ledger, juge indépendant et gate d'exposant; aucune réception |
+| [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md) | spécification de la route produit q2 : Morton/LBVH, coupe Yao48 stricte fail-open, classifieur terminal, census fermé, ledger, juge indépendant et gate d'exposant; statut logiciel exclusivement dans l'audit live |
 
 ## Lemmes conditionnels, contre-fixtures et portes citées
 
