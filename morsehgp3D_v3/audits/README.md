@@ -39,6 +39,8 @@ spécifications et le registre des preuves sous `docs/` restent supérieurs.
 | [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md) | spécification auditée du falsificateur P1a q4 mass-only : domaine de Jung, 64 patchs rationnels, témoins collectifs, ledger bijectif et protocole direct `n=32` vers 50 k; statut logiciel exclusivement dans l'audit live |
 | [`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md) | inventaire du prior art CUDA Yao48/LBVH et P1a dans `morsehgp3d/`, limites de qualification et propositions exactes de réemploi; différentiel, jamais autorité v3 |
 | [`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md) | théorème Yao-1 contenant l'EMST canonique, prior art LBVH/Kruskal enregistré, rejet CPU et contrat de mutualisation exacte avec q2; blueprint, jamais preuve de débit |
+| [`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md) | audit de la rampe CPU mono-binaire q2 à 12,5/25/50 k; trois familles structurées rouges, temps non qualifiables et ordonnance courante NO-GO avant G4 |
+| [`AUDIT_REPONSES_G4_Q2_YAO1_20260811.md`](AUDIT_REPONSES_G4_Q2_YAO1_20260811.md) | réponses closes à Claude : diagnostic CPU G4 admissible mais non pertinent maintenant, causalité q2 non prouvée, banque exacte de onze, certificat dual `Q--W` et ordre de réception Yao-1 |
 
 ## Lemmes conditionnels, contre-fixtures et portes citées
 
@@ -89,6 +91,15 @@ contient trois journaux CPU diagnostiques :
 
 Leurs compteurs peuvent falsifier une route; leurs temps sous charge ne sont
 ni un benchmark reçu ni `warm_e2e`.
+
+Le dossier
+[`../receipts/yao48_scale_20260811/`](../receipts/yao48_scale_20260811/)
+contient la rampe q2 CPU auditée séparément :
+
+| fichier | SHA-256 | portée |
+| --- | --- | --- |
+| `scale_counters_raw.txt` | `acf8e89248131cc7fdce3246f559d380acbee4ce67548ac9fb5e26efdd67d889` | douze ledgers count-only fermés sur un binaire dont la provenance a été reconstruite; aucun payload ni temps qualifiable |
+| `exponents_derived.txt` | `f2d9783211d884fef821a45961d428ee645bad656685d1520337957f54d2776f` | exposants arithmétiquement justes; masses de couverture et secondes exclues de la gate de travail, arrondi `1,35` ambigu pour une valeur brute strictement rouge |
 
 ## Autorités externes
 

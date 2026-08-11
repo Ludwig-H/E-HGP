@@ -44,7 +44,7 @@ en `i64` avec marge. Le classifieur ponctuel ne suppose aucune position
 générale : les égalités `Phi=0` sont des contacts de coquille, comptés fermés
 et jamais intérieurs.
 Cette robustesse du classifieur ne change pas le domaine produit initial de la
-spécification : les coordonnées doivent être deux à deux distinctes et la
+spécification : les positions 3D doivent être deux à deux distinctes et la
 politique `RelevantGP` doit accepter le shell utile. Une paire de `PointId`
 colocalisés a `D^2=0` et n'est pas un support propre positif q2; elle relève
 d'un rejet d'entrée ou d'une future agrégation pondérée, jamais d'une
@@ -72,9 +72,9 @@ activation q2 ordinaire.
 Par ancre `p`, 48 chambres semi-ouvertes (8 octants × 6 permutations par
 magnitudes décroissantes ; les égalités de magnitudes sont routées par une
 règle totale documentée — la chambre est un choix de TRAVAIL, seule la preuve
-compte). Une banque par chambre retient `K=10` témoins de `PointId` distincts
-de `p`, avec `D` = maximum de leurs distances carrées à `p` (les plus proches
-donnent le meilleur `D`, l'optimalité n'est pas requise). Une banque
+compte). Le certificat engage `K=10` témoins de `PointId` distincts de `p` et
+de la cible, avec `D` = maximum de leurs distances carrées à `p` (les plus
+proches donnent le meilleur `D`, l'optimalité n'est pas requise). Une banque
 sous-pleine n'autorise **aucun** cutoff : fail-open.
 
 Pour une cible `q` de coordonnées canoniques `(x,y,z)` dans la chambre, les
@@ -89,10 +89,16 @@ axe donnent le même certificat pour toutes ses feuilles : le nœud est remplac�
 par un **reçu de masse**. Toute égalité descend ; l'échec du certificat ne
 classe rien (non-converse gravé en fixture).
 
-Le témoin égal à la cible est impossible par le même argument que la variante
-fermée (`x^2>D` exclut `q` de la banque). La réception doit exercer cette
-exclusion, par un mutant dédié ou par le rejeu indépendant de tous les reçus
-positifs.
+Si la cible appartient aux dix candidats conservés, `x^2>D` échoue
+automatiquement : il n'y a pas de fausse tombstone, mais il peut y avoir un
+faux négatif alors que dix autres témoins existent. Pour une cible ponctuelle,
+la banque chaude conserve donc `K+1=11` candidats distincts. Elle exclut `q`,
+choisit les dix premiers restants et recalcule `D` sur ces dix. Si une chambre
+contient `t<=10` points hors ancre, chaque cible y possède au plus neuf autres
+témoins et ce certificat précis est impossible; `t=0` ne porte aucune cible.
+Le reçu engage les dix identifiants effectivement choisis. Pour une boîte de
+cibles, préférer une antichaîne témoin disjointe de la boîte à une banque de
+taille `K+|Q|`.
 
 ### Banque compressée par antichaîne
 
@@ -100,7 +106,7 @@ La recherche des dix plus proches n'est pas une obligation mathématique. Une
 banque peut être certifiée par une antichaîne de nœuds LBVH dont les plages de
 feuilles sont disjointes, excluent l'ancre, sont entièrement contenues dans la
 même chambre, ne contiennent que des témoins de distance strictement positive
-à l'ancre et ont une masse totale au moins dix. Le preflight de coordonnées
+à l'ancre et ont une masse totale au moins dix. Le preflight de positions 3D
 distinctes garantit seulement la positivité des distances; l'antichaîne et
 son reçu doivent certifier séparément une masse totale au moins dix. Toute
 extension aux sites pondérés devra recertifier ces deux obligations. Poser :
@@ -127,14 +133,22 @@ une fixture traversant une frontière de chambres tue l'oubli d'une chambre.
 Cette enveloppe radiale est seulement un premier filtre. Une coupe plus forte
 résout exactement, pour chaque chambre compatible `c`, l'intersection entre la
 boîte cible et le cône signé/permuté. Dans les magnitudes canoniques
-`x>=y>=z>=0`, un petit programme linéaire rationnel de dimension trois donne
-les minima de `x`, `x+y` et `x+y+z`. Si l'intersection est vide, la chambre est
-ignorée; sinon sa banque doit être pleine et les trois comparaisons strictes
-`x_min^2>D_c`, `(x+y)_min^2>2D_c` et
-`(x+y+z)_min^2>3D_c` doivent toutes passer. Si cette condition tient pour
+`x>=y>=z>=0`, après clipping signé de la boîte en intervalles
+`[lx,ux]`, `[ly,uy]`, `[lz,uz]`, poser `z0=lz`, `y0=max(ly,z0)` puis
+`x0=max(lx,y0)`. L'intersection du cône fermé est vide si `z0>uz`, `y0>uy` ou
+`x0>ux`; sinon les minima simultanés de `x`, `x+y` et `x+y+z` sont exactement
+`x0`, `x0+y0` et `x0+y0+z0`. Employer le cône fermé sur les frontières ne peut
+qu'ajouter des points fantômes et reste donc fail-open pour les chambres
+semi-ouvertes du routage ponctuel.
+
+Pour chaque intersection non vide, la banque doit être pleine et les trois
+comparaisons strictes `x0^2>D_c`, `(x0+y0)^2>2D_c` et
+`(x0+y0+z0)^2>3D_c` doivent toutes passer. Si cette condition tient pour
 chaque chambre non vide, toute cible de la boîte satisfait sa coupe Yao et le
-nœud entier est prunable. Un masque 48 bits, les versions de banques et les
-bornes rationnelles forment le reçu; toute égalité descend.
+nœud entier est prunable. Un masque 48 bits propagé sous raffinement, les
+versions de banques et les bornes entières forment le reçu; toute égalité
+descend. Aucun solveur flottant ni 48 résolutions génériques par enfant n'est
+nécessaire.
 
 ### Certificat collectif boîte cible--nœud témoin
 
@@ -162,9 +176,12 @@ moins dix `PointId`, chaque cible réelle de `Q` possède dix témoins stricts
 distincts. Le nœud `Q` est donc tombstone sans classifieur ponctuel. `L=0`
 descend. Un parent et son descendant ne sont jamais crédités ensemble; une
 masse de boîte ne remplace pas la cardinalité de sa plage. Sous raffinement
-`Q' subset Q` et `W' subset W`, le minimum ne peut qu'augmenter, de sorte qu'un
-crédit positif peut être transmis avec les mêmes identités et versions, mais
-jamais après fusion, changement d'ancre ou mutation du LBVH.
+`Q' subset Q` et `W' subset W`, le minimum ne peut qu'augmenter. Un enfant
+cible `Q'` peut donc hériter par référence du **même** nœud témoin `W`, avec les
+mêmes identité, plage, masse et version. Si `W` est remplacé par un descendant
+`W'`, son identité, sa plage et sa masse changent et le crédit doit être
+reconstruit; aucun crédit ne survit non plus à une fusion, un changement
+d'ancre ou une mutation du LBVH.
 
 Le profil u16 donne `|A|<=3*65535^2<2^34`; les soustractions et produits sont
 élargis avant calcul en `i64`, puis rejoués en `i128` par le juge. Le reçu lie
@@ -195,15 +212,15 @@ optimisation facultative, jamais une condition de complétude.
 
 Cette symétrisation est exacte même si l'autre extrémité appartient à la
 banque : alors `D` majore `||u-v||^2`, tandis que la première coupe exige
-`x^2>D` avec `x^2<=||u-v||^2`; le certificat échoue donc automatiquement. Le
-chemin produit conserve l'enveloppe cible `O(B*48*K)` pour `B` ancres
-actives et interdit une table `n*48*K` globale. À titre de diagnostic
-seulement, une telle table à 50 k occuperait 96 000 000 octets si les
-identifiants sont des positions Morton `u32` avec mapping authentifié, mais
-192 000 000 octets avec les `PointId u64` de la ligne enregistrée, hors `D_c`,
-masques et offsets. Une porte optionnelle compare les sorts mono-côté et
-bi-côté à l'oracle et exige un gain strict non vide du second côté avant d'en
-payer le cache.
+`x^2>D` avec `x^2<=||u-v||^2`; le certificat échoue donc automatiquement. La
+banque ponctuelle chaude conserve l'enveloppe `O(B*48*(K+1))` pour `B` ancres
+actives et interdit une table globale `n*48*(K+1)`. À titre de diagnostic
+seulement, une telle table de onze candidats à 50 k occuperait 105 600 000
+octets si les identifiants sont des positions Morton `u32` avec mapping
+authentifié, mais 211 200 000 octets avec les `PointId u64` de la ligne
+enregistrée, hors `D_c`, masques et offsets. Une porte optionnelle compare les
+sorts mono-côté et bi-côté à l'oracle et exige un gain strict non vide du
+second côté avant d'en payer le cache.
 
 ## 4. Classification terminale et census fermé
 
@@ -241,7 +258,8 @@ les cibles ponctuelles et le digest canonique de leur union. Les banques sont
 factorisées par `(ancre, chambre, version)` afin qu'un reçu de région référence
 dix identifiants une seule fois au lieu de les recopier pour chaque nœud.
 
-Aucun tableau global de paires ni de banques `n*48*K` n'est matérialisé : les
+Aucun tableau global de paires ni de banques ponctuelles `n*48*(K+1)` n'est
+matérialisé : les
 survivantes du mode mesure sont comptées et hashées, pas stockées; le mode
 oracle borné (`n<=256`) tient les sorts par paire pour le juge.
 

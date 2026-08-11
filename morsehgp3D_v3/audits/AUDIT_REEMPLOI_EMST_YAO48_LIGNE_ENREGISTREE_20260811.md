@@ -30,11 +30,12 @@ chambre est isométrique au cône `x>=y>=z>=0`. Son diamètre sphérique vaut :
 
 $$\arccos\left(\frac{1}{\sqrt{3}}\right)<\frac{\pi}{3}.$$
 
-Sous le preflight du profil initial qui impose des positions 3D deux à deux distinctes, pour
-chaque point `u` et chambre non vide, choisir l'arête `uw` minimale selon la clé
-totale `(distance_squared,min_PointId,max_PointId)`. Soit `G_Y` l'union non
-orientée de ces arêtes. L'EMST obtenu par Kruskal canonique sur le graphe complet
-est contenu dans `G_Y`.
+Sous le preflight du profil initial qui impose des positions 3D deux à deux
+distinctes, pour chaque point `u` et chambre non vide, choisir l'arête `uw`
+minimale selon la clé totale
+`(distance_squared,min_PointId,max_PointId)`. Soit `G_Y` l'union non orientée
+de ces arêtes. L'EMST obtenu par Kruskal canonique sur le graphe complet est
+contenu dans `G_Y`.
 
 En effet, si une arête canonique `uv` absente de `G_Y` était choisie par
 Kruskal, la chambre de `v` en `u` contiendrait un `w` tel que `uw` précède ou
@@ -48,14 +49,32 @@ peuvent être semi-ouvertes, mais les égalités de distance doivent être ferm�
 par la clé canonique : un premier point rencontré par hasard ne certifie pas
 l'EMST canonique.
 
-Le vecteur nul entre `PointId` colocalisés n'a pas de chambre directionnelle.
-Une extension hors profil doit donc former les classes de positions, émettre
-l'étoile nulle canonique depuis le plus petit `PointId` de chaque classe et la
-pré-unir. Le quotient porte ce représentant minimal; entre deux classes,
-l'arête positive canonique joint leurs représentants minimaux, puis Yao-1
-s'applique aux positions distinctes. Affecter arbitrairement chaque doublon à
-une chambre ne prouve pas le transcript canonique et peut perdre des liaisons
-nulles.
+Le vecteur nul n'a pas de chambre directionnelle. Le contrat courant rejette
+les positions dupliquées; sous une future politique
+`duplicate_policy=aggregate`, chaque position devient un site canonique portant
+une multiplicité. Yao-1 s'applique alors aux sites distincts et aucune étoile
+nulle de `PointId` n'existe dans ce graphe. Les effets des multiplicités sur les
+rangs constituent un contrat séparé.
+
+Le lemme suivant concerne seulement une éventuelle sémantique hors contrat qui
+conserverait un `PointId` par occurrence. Soient `C` les classes de même
+position, `r(C)=min C`, `m` leur nombre et
+`kappa=(distance_squared,min_PointId,max_PointId)` la clé canonique. À poids
+nul, Kruskal accepte exactement les arêtes `{r(C),v}` pour
+`v in C\{r(C)}` : elles ajoutent chacune un sommet, puis toute autre arête
+nulle ferme un cycle. Entre deux classes `C,D`, toutes les arêtes ont la même
+longueur et `{r(C),r(D)}` est leur minimum unique selon `kappa`; après sa
+décision, les autres relient les mêmes composantes quotient et sont
+redondantes.
+
+Le suffixe positif est donc exactement le Kruskal canonique sur les
+représentants minimaux. Leurs positions sont distinctes, donc Yao-1 contient
+cet EMST quotient. L'arbre occurrence-preserving est l'union des étoiles
+nulles, publiées dans le lot de niveau zéro et triées par `kappa`, et de l'arbre
+quotient. Avec `n` occurrences, il contient au plus
+`(n-m)+48m<=48n` candidats avant réduction; le ledger directionnel porte
+`48m` slots, pas `48n`. Affecter arbitrairement un vecteur nul à une chambre ne
+prouve aucun de ces faits.
 
 ## 2. Prior art réellement présent
 
@@ -101,9 +120,10 @@ prouve jamais `empty`. Cette obligation est indépendante du cutoff strict
 q2 : les mêmes tuiles, masques de chambres et parcours peuvent être partagés,
 mais les reçus et les décisions restent séparés.
 
-Le ledger ne se réduit pas à une somme globale. Il exige exactement un statut
-par clé `(source_PointId,chambre)`, sans doublon ni omission, puis ferme
-`nonempty_slots+empty_slots=48n` avec `incomplete=0`. Pour un candidat, le minimum de toute frontière compatible restante doit être
+Le ledger ne se réduit pas à une somme globale. Sur le profil courant distinct,
+il exige exactement un statut par clé `(source_PointId,chambre)`, sans doublon
+ni omission, puis ferme `nonempty_slots+empty_slots=48n` avec `incomplete=0`.
+Pour un candidat, le minimum de toute frontière compatible restante doit être
 strictement supérieur à sa distance; l'égalité descend pour fermer le
 tie-break `PointId`. Le reçu authentifie source, cible, chambre, distance et clé
 d'arête; `empty` exige l'épuisement de toute la frontière compatible. Après

@@ -120,7 +120,7 @@ chambre `c`, une banque peut être une antichaîne de nœuds LBVH `W_i` telle qu
 - chaque boîte est entièrement certifiée dans la chambre;
 - la somme des masses atteint dix.
 
-Le preflight v3 de coordonnées distinctes fournit la stricte positivité. Une
+Le preflight v3 de positions 3D distinctes fournit la stricte positivité. Une
 extension qui autoriserait plusieurs `PointId` colocalisés devrait descendre et
 exclure toutes les feuilles `w` telles que `||w-p||^2=0`.
 
@@ -139,13 +139,15 @@ $$\mathrm{dist}^2(p,\mathrm{box})>3\max_{c\in S}D_c.$$
 Toute égalité descend. Le reçu engage `S`, la version et le digest de chaque
 banque; omettre une chambre possible doit mourir sur une fixture dédiée.
 
-Cette proposition ne justifie pas une table globale `n*48*10`. Les documents
-d'architecture v3 courants conservent `O(B*48*K)` pour une tuile de `B` ancres
-et rendent l'orientation inverse facultative. Une banque de l'autre extrémité n'est
-essayée que si elle est déjà disponible dans la même tuile ou un cache borné
-et authentifié. Les 96 MB parfois cités supposent des positions Morton `u32`;
-avec les `PointId u64` enregistrés, les identifiants seuls occupent 192 MB,
-hors rayons, masques et offsets.
+Cette proposition ne justifie pas une table globale `n*48*10`. La banque
+ponctuelle v3 corrigée conserve onze candidats afin d'exclure la cible avant
+d'engager dix témoins; les documents d'architecture courants imposent donc
+`O(B*48*(K+1))` pour une tuile de `B` ancres et rendent l'orientation inverse
+facultative. Une banque de l'autre extrémité n'est essayée que si elle est déjà
+disponible dans la même tuile ou un cache borné et authentifié. Les 96 MB
+historiques supposent dix positions Morton `u32` par slot; onze candidats
+occupent 105,6 MB en `u32` ou 211,2 MB avec les `PointId u64` enregistrés, hors
+rayons, masques et offsets.
 
 ## 4. P1a : mathématique réutilisable et machine à remplacer
 

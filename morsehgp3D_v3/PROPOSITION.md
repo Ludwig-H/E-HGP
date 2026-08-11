@@ -137,14 +137,15 @@ Le diamètre angulaire de chaque chambre est strictement inférieur à 60 degré
 l'union non orientée de ces arêtes contient l'EMST canonique du graphe complet
 et possède au plus `48n` candidats dirigés.
 
-Le vecteur nul n'appartient pas à ce raisonnement directionnel. Une extension
-qui autoriserait plusieurs `PointId` à la même position devrait d'abord former
-une étoile de poids nul depuis le plus petit `PointId` de chaque classe et la
-pré-unir. Le quotient étiquette chaque classe par ce représentant minimal;
-Yao-1 s'applique ensuite aux positions de classes distinctes et chaque arête
-positive choisit les représentants minimaux. Sans ce contrat supplémentaire,
-le preflight refuse les doublons au lieu de les ranger arbitrairement dans une
-chambre.
+Le vecteur nul n'appartient pas à ce raisonnement directionnel. Le contrat
+courant refuse les positions dupliquées; une future politique
+`duplicate_policy=aggregate` forme un site canonique pondéré par position, puis
+applique Yao-1 aux sites distincts. Elle ne conserve donc pas plusieurs
+`PointId` colocalisés dans le graphe. Une sémantique hors contrat qui voudrait
+conserver chaque occurrence devrait publier au niveau zéro l'étoile canonique
+depuis le plus petit `PointId`, contracter chaque classe, puis appliquer Yao-1
+aux représentants minimaux. Sa borne serait `(n-m)+48m<=48n` pour `m` classes,
+et son ledger directionnel porterait `48m` slots.
 
 Le parcours peut être mutualisé avec les banques q2, mais son reçu est plus
 fort : une chambre publie un candidat seulement après fermeture de toutes les
@@ -172,7 +173,7 @@ La boule d'un support q2 est la boule diamétrale de sa paire `(x,y)`. Un point
 `(z-x) dot (z-y)<0`. Une activation q2 non tombstonée a au plus `K-1=9`
 points strictement intérieurs.
 
-Le profil produit initial prévalant suppose des coordonnées distinctes. Une
+Le profil produit initial prévalant suppose des positions 3D deux à deux distinctes. Une
 paire de `PointId` colocalisés a un diamètre nul et ne constitue pas un support
 propre positif q2 : le préflight la refuse avec l'entrée dupliquée, ou une
 future extension l'agrège en site pondéré avant la construction. La capacité
@@ -196,14 +197,19 @@ mesures sont inventoriés dans
 
 La cible v3 conserve les étapes suivantes :
 
-1. des tuiles d'ancres remplissent 48 banques directionnelles de témoins
-   distincts sur le LBVH Morton résident;
+1. des tuiles d'ancres remplissent 48 banques directionnelles de `K+1=11`
+   candidats distincts sur le LBVH Morton résident; une cible ponctuelle est
+   exclue avant d'engager les dix témoins du reçu;
 2. les trois inégalités entières de Yao48, toutes strictes pour la lane H0,
-   certifient dix témoins strictement intérieurs et remplacent une région par
-   un reçu de prune; une chambre sous-pleine ou une égalité reste fail-open;
-3. le classifieur terminal parcourt le LBVH avec des bornes exactes sur
+   certifient dix témoins strictement intérieurs; une coupe cône--boîte exacte
+   traite collectivement un masque de chambres, toute sous-plénitude ou égalité
+   restant fail-open;
+3. un parcours dual-tree persistant cherche une antichaîne de nœuds témoins
+   disjoints dont le minorant `L_p(Q,W)` est strictement positif et la masse au
+   moins dix; aucun rescan racine ni matrice cible--témoin n'est admis;
+4. le classifieur terminal résiduel parcourt le LBVH avec des bornes exactes sur
    `(z-x) dot (z-y)` et s'arrête à dix intérieurs seulement pour une tombstone;
-4. toute paire conservée finit le census et publie la liste fermée complète
+5. toute paire conservée finit le census et publie la liste fermée complète
    `C(x,y)`, sa profondeur stricte, sa coquille, son rang, son niveau et sa
    `BallKey`, dans une seule passe multi-ordre.
 
@@ -217,14 +223,35 @@ reste sous-pleine ne coupe rien. Les survivantes sont classifiées par lots avec
 une frontière partagée; relancer la racine pour chaque paire n'est pas une
 architecture admise.
 
+Pour une cible ponctuelle, la banque conserve `K+1=11` candidats distincts :
+si la cible appartient aux onze, elle est exclue, puis `D` est recalculé sur
+les dix témoins engagés. Dix candidats seulement peuvent contenir la cible et
+créer un faux négatif évitable. Pour une boîte de cibles `Q`, une antichaîne de
+nœuds témoins `W` disjointe de `Q` peut remplacer la chambre lorsque la borne
+inférieure exacte suivante est strictement positive pour toute la boîte :
+
+$$A(p;q,w)=(q-p)\mathbin{\cdot}(w-p)-\left\Vert w-p\right\Vert^{2}.$$
+
+Dix feuilles distinctes ainsi certifiées tombstonent collectivement `Q`;
+toute égalité descend. Cette voie dual-tree utilise toutes les directions et
+ne doit pas être appelée P1a, qui reste un falsificateur q4-only.
+
 Si une boîte cible peut rencontrer un ensemble conservateur de chambres `S`,
 elle est encore prunable lorsque toutes les banques de `S` sont pleines et que
 `dist^2(p,box)>3*max_{c in S} D_c`. En effet, l'échec d'au moins une des trois
 coupes Yao implique `||q-p||^2<=3D_c`. Cette enveloppe multi-chambre reste
 strictement fail-open aux égalités.
 
-Les banques de la tuile active restent résidentes dans l'enveloppe
-`O(B*48*K)`; aucune table globale `n*48*K` n'est admise. L'owner Morton d'une
+Le filtre suivant ne se contente pas de cette enveloppe radiale. Pour chaque
+chambre du masque, il intersecte exactement la boîte avec le cône fermé
+`x>=y>=z>=0` après transformation signée/permutée et obtient en entiers les
+minima de `x`, `x+y` et `x+y+z`. Il exige les trois inégalités strictes contre
+la banque de cette chambre; une intersection vide retire seulement le bit
+correspondant. Le cône fermé est un sur-ensemble conservateur des frontières
+semi-ouvertes, et toute égalité descend.
+
+Les banques ponctuelles de la tuile active restent résidentes dans l'enveloppe
+`O(B*48*(K+1))`; aucune table globale `n*48*(K+1)` n'est admise. L'owner Morton d'une
 paire l'émet toujours une seule fois. Il peut présenter un certificat Yao
 centré sur l'autre extrémité seulement si la banque correspondante est déjà
 disponible dans la même tuile ou dans un cache borné et authentifié. Cette
@@ -254,6 +281,17 @@ ou un second prune tant que ses compteurs ne battent pas Yao48/LBVH. Le juge
 borné peut tenir un sort quadratique à petit `n`; aucun chemin produit ne
 matérialise de matrice ou de liste globale de paires. Le pire cas reste
 quadratique en sortie.
+
+La rampe CPU pincée du producteur Yao48/LBVH actuel ferme ses ledgers mais est
+`NO-GO` avant G4 sur trois familles structurées : les survivantes et le
+classifieur gardent deux pentes chargées supérieures à `1,35`. Cette
+falsification vise l'ordonnance état--nœud courante, pas les certificats
+ci-dessus. Une nouvelle route doit d'abord réduire les tombstones tardives et
+les tests par survivante avant tout port CUDA ou benchmark de latence. Les
+compteurs et la décision sont dans
+[`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](audits/AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md),
+et les réponses d'implémentation dans
+[`AUDIT_REPONSES_G4_Q2_YAO1_20260811.md`](audits/AUDIT_REPONSES_G4_Q2_YAO1_20260811.md).
 
 `smax` ne transforme pas ce pire cas en graphe de degré borné. Dans l'espace
 euclidien, pour tout `m`, un point `p` et `m` points distincts `q_i` sur une
@@ -684,9 +722,10 @@ un refus de ressource sont trois statuts distincts.
    arêtes finales par niveau.
 3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
-   fermé. Fermer q2 par Yao48 strict fail-open, classification terminale et
-   census fermé multi-ordre; conserver le self-join comme oracle ou second
-   prune selon les masses.
+   fermé. Fermer q2 par banque ponctuelle `K+1`, coupe cône--boîte exacte et
+   certificat dual-tree `L_p(Q,W)>0`; réserver la classification terminale et
+   le census fermé multi-ordre au résiduel. Conserver le self-join comme oracle
+   ou second prune selon les masses, puis repasser la gate CPU avant CUDA.
 4. Porter et requalifier `P15-HOCUDA-P1a` en mass-only q4 : partition triangulaire
    implicite, 64 patches, seuil huit, range-query collective, microtuiles
    terminales et ledger complet. Cette tranche n'émet aucune ancre.

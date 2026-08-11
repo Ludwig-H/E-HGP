@@ -267,6 +267,15 @@ target_include_directories(mhgp3v_emst_boruvka_probe PRIVATE ${CMAKE_CURRENT_SOU
 target_link_libraries(mhgp3v_emst_boruvka_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_emst_boruvka_probe PRIVATE -Wall -Wextra -Werror)
 
+# LE FALSIFICATEUR DE MASSE P1a (NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY,
+# note AUDITEE) : center-cover q4 au seuil huit, 64 patchs rationnels a
+# l'echelle seize, microtuile AVANT cover, ledger transactionnel et juge
+# determinantal independant.
+add_executable(mhgp3v_center_cover_mass_probe prototype/center_cover_mass_probe.cpp)
+target_include_directories(mhgp3v_center_cover_mass_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_center_cover_mass_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_center_cover_mass_probe PRIVATE -Wall -Wextra -Werror)
+
 # LE HARNAIS DIAGNOSTIQUE NOMME warm_e2e_h0_v3_diagnostic : LBVH + EMST k=1 +
 # q2 shardee, nuage frais par repetition, ledger rejoue, p50/p95 par phase.
 # Il DIT ce qu'il ne couvre pas et ne ferme aucun SLO officiel.
@@ -1476,6 +1485,79 @@ mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_emst_boruvka_probe
   mhgp3v_emst_floor_nuage_non_genere "nuage non genere" 3
   --points 1000 --coord 4 --family uniform)
+
+# LES CINQ FIXTURES GRAVEES DE P1a (verifiees hors bande en arithmetique
+# exacte) : la racine entiere et l'egalite de Jung de la note §2, un bloc
+# reellement prunable, la politique microtuile-avant-cover et les extremes u16.
+foreach(p1a_fixture jung-root jung-equality prunable-block microtile-first
+        u16-extremes)
+  add_test(NAME mhgp3v_p1a_fixture_${p1a_fixture} COMMAND
+           mhgp3v_center_cover_mass_probe --fixture ${p1a_fixture})
+  set_tests_properties(mhgp3v_p1a_fixture_${p1a_fixture} PROPERTIES
+    PASS_REGULAR_EXPRESSION "OK : fixture ${p1a_fixture} recue")
+  add_test(NAME mhgp3v_p1a_fixture_${p1a_fixture}_code COMMAND
+           mhgp3v_center_cover_mass_probe --fixture ${p1a_fixture})
+endforeach()
+# LES CAMPAGNES DU JUGE DETERMINANTAL (n <= 32) : reçus rejoues temoin par
+# temoin contre CHAQUE point reel du cote engage, bijection des sorts et
+# enumeration exhaustive des supports q4 propres positifs. Les planchers
+# refusent le vert-par-vacuite.
+add_test(NAME mhgp3v_p1a_oracle_terrain32 COMMAND mhgp3v_center_cover_mass_probe
+         --points 32 --seed 13 --family terrain --leaf-size 2 --microtile 4
+         --oracle 1 --permute 1 --min-block-prunes 1 --min-microtiles 1
+         --min-splits 1 --min-patch-surviving 1 --min-accepted-nodes 1
+         --min-witness-point-tests 1)
+set_tests_properties(mhgp3v_p1a_oracle_terrain32 PROPERTIES
+  PASS_REGULAR_EXPRESSION "aucun desaccord")
+add_test(NAME mhgp3v_p1a_oracle_terrain32_code COMMAND mhgp3v_center_cover_mass_probe
+         --points 32 --seed 13 --family terrain --leaf-size 2 --microtile 4
+         --oracle 1 --permute 1 --min-block-prunes 1 --min-microtiles 1
+         --min-splits 1 --min-patch-surviving 1 --min-accepted-nodes 1
+         --min-witness-point-tests 1)
+add_test(NAME mhgp3v_p1a_oracle_scanline32_code COMMAND mhgp3v_center_cover_mass_probe
+         --points 32 --seed 3 --family scanline_single_pass --leaf-size 2
+         --microtile 4 --oracle 1 --permute 1)
+add_test(NAME mhgp3v_p1a_oracle_uniform28_code COMMAND mhgp3v_center_cover_mass_probe
+         --points 28 --seed 7 --family uniform --leaf-size 2 --microtile 4
+         --oracle 1 --permute 1)
+add_test(NAME mhgp3v_p1a_oracle_multiecho32_code COMMAND mhgp3v_center_cover_mass_probe
+         --points 32 --seed 5 --family scanline_overlap_multiecho --leaf-size 2
+         --microtile 4 --oracle 1 --permute 1)
+# LES QUINZE MUTANTS DE LA NOTE §8, chacun a code 4 exact sur la fixture ou la
+# campagne qui le tue.
+foreach(p1a_mutant clip-scale-4 ceil-root-truncated patch-omitted
+        feasible-declared-infeasible witness-duplicated witness-subtrees-overlap
+        endpoint-overlap-subtracted stale-inherited-credit
+        q4-radius-replaced-by-q3 microtile-truncated terminal-compensated)
+  string(REPLACE "-" "_" p1a_mutant_id "${p1a_mutant}")
+  mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+    mhgp3v_p1a_kill_${p1a_mutant_id} "mutant tue" 4 --fixture prunable-block
+    --inject ${p1a_mutant})
+endforeach()
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_kill_strict_to_large "mutant tue" 4 --fixture jung-equality
+  --inject strict-to-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_kill_cover_before_terminal "mutant tue" 4 --fixture microtile-first
+  --inject cover-before-terminal)
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_kill_corner_skipped "mutant tue" 4 --points 32 --seed 13
+  --family terrain --leaf-size 2 --microtile 4 --oracle 1 --inject corner-skipped)
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_kill_witness_strict_to_large "mutant tue" 4 --points 32 --seed 3
+  --family scanline_single_pass --leaf-size 2 --microtile 4 --oracle 1
+  --inject witness-strict-to-large)
+# CLI hostile (2), preflight du seuil (2) et plancher (3).
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_reject_unknown "argument inconnu" 2 --inexistant 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_reject_preflight "preflight viole" 2 --points 64 --leaf-size 8
+  --microtile 16)
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_reject_oracle_large "juge exhaustif exige" 2 --points 64 --oracle 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_center_cover_mass_probe
+  mhgp3v_p1a_floor_bites "plancher viole" 3 --fixture microtile-first
+  --min-block-prunes 1)
 
 # Le harnais diagnostique : fumee bornee (n=2000, 2 reps, 2 threads) avec la
 # serie NOMMEE et le refus explicite de tout SLO ; CLI hostile a code 2.

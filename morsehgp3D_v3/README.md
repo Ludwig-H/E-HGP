@@ -45,11 +45,12 @@ même sous une seconde, elle ne ferme pas ce SLO.
 ## Faits établis
 
 - À `k=1`, les partitions strictes et fermées sont celles du single linkage.
-  Sur le profil initial à positions 3D deux à deux distinctes, les plus proches voisins
-  exacts dans les 48 chambres Yao forment un graphe de taille au plus `48n`
-  qui contient un EMST; la réduction sparse évite tout catalogue Morse d'ordre
-  supérieur. Une extension aux `PointId` colocalisés doit traiter séparément
-  les arêtes de poids nul avant d'appliquer le théorème directionnel.
+  Sur le profil initial à positions 3D deux à deux distinctes, les plus proches
+  voisins exacts dans les 48 chambres Yao forment un graphe de taille au plus
+  `48n` qui contient un EMST; la réduction sparse évite tout catalogue Morse
+  d'ordre supérieur. Une future politique `duplicate_policy=aggregate`
+  applique Yao-1 aux sites agrégés distincts; elle ne conserve pas une étoile
+  nulle de `PointId` dans ce graphe.
 - Pour une boule avec `p` points strictement intérieurs et un support propre
   positif de taille `q`, les ordres `1<=k<=p+q-2` sont des continuations H0
   sans fusion ni nouveau `PointId`.
@@ -118,6 +119,16 @@ chambre vide. Le contrat est détaillé dans
 Le self-join q2 de diagnostic reste un oracle/falsificateur ou un second prune
 tant que ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2
 ne retire jamais une ancre q3/q4.
+
+La rampe CPU Yao48/LBVH pincée à `12 500/25 000/50 000` ferme douze ledgers,
+mais classe l'ordonnance courante `NO-GO` avant G4 : `terrain` et les deux
+familles scanline ont deux pentes chargées successives supérieures à `1,35`.
+`uniform` seul passe. Les temps étaient contaminés et ne sont pas un
+benchmark; le verdict porte sur les compteurs. L'audit et les pistes exactes
+de banque à onze et de certificat dual sont dans
+[`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](audits/AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md)
+et
+[`AUDIT_REPONSES_G4_Q2_YAO1_20260811.md`](audits/AUDIT_REPONSES_G4_Q2_YAO1_20260811.md).
 
 La preuve locale q2 combine un supremum `U4`, un infimum `L4`, des témoins
 distincts et une partition exacte des paires. Sa réception logicielle, ses
@@ -197,11 +208,17 @@ préfixe comme objet complet.
    niveau avant les lots atomiques.
 3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
-   fermé. Remplacer les recherches par ancre par des banques Yao strictes en
-   antichaînes de nœuds dans l'enveloppe tuilée `O(B*48*K)`. Le certificat à
-   l'autre extrémité reste une optimisation facultative, seulement si sa banque
-   est déjà dans la tuile ou un cache borné. Fermer ensuite q2 par un census
-   résident multi-ordre avec offsets 64 bits.
+   fermé. Pour une cible ponctuelle, conserver `K+1=11` candidats par chambre,
+   exclure la cible et engager dix témoins. Pour une boîte, propager un masque
+   de chambres, employer la coupe cône--boîte entière, puis le certificat
+   collectif dual-tree `L_p(Q,W)>0` sur une antichaîne témoin disjointe de masse
+   dix. La frontière témoin persiste sous raffinement, sans rescan racine ni
+   matrice cible--témoin. Le certificat à l'autre extrémité reste une
+   optimisation facultative si sa banque est déjà dans la tuile ou un cache
+   borné. Seul le résiduel finit dans le census résident multi-ordre avec
+   offsets 64 bits; la nouvelle ordonnance doit repasser la gate CPU avant
+   tout port device. Les bornes et reçus sont spécifiés dans
+   [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](audits/NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md).
 4. Porter et requalifier le falsificateur q4 mass-only `P15-HOCUDA-P1a` : partition
    triangulaire implicite des paires, 64 patches de centres, seuil de huit
    témoins par antichaînes de sous-arbres, range-query collective, ledger
