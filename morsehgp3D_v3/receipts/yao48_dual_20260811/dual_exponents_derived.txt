@@ -1,0 +1,29 @@
+Exposants derives de dual_scale_counters_raw.txt (binaire fige, mode dual).
+Gate : deux exposants successifs > 1,35 = ROUGE.
+
+famille                      metrique         12500        25000        50000     e1     e2  gate
+terrain                      temoins      122022307    344733574   1312614530   1.50   1.93  ROUGE
+terrain                      acceptes        704473      1454810      3249741   1.05   1.16  ok
+terrain                      surv            996438      2064856      4223193   1.05   1.03  ok
+terrain                      kbox          38024354     81479467    182535891   1.10   1.16  ok
+terrain                      ktests        20422839     42587606     88144082   1.06   1.05  ok
+terrain                      census          253129       511675      1028895   1.02   1.01  
+terrain                      secs                 9           24           89   1.39   1.92  
+terrain                      %coupe          98.72%       99.34%       99.66%
+scanline_single_pass         temoins       66988581    205682770    656009769   1.62   1.67  ROUGE
+scanline_single_pass         acceptes        440660       966831      2044235   1.13   1.08  ok
+scanline_single_pass         surv            839754      1726561      3530428   1.04   1.03  ok
+scanline_single_pass         kbox          26225490     58570797    128606761   1.16   1.13  ok
+scanline_single_pass         ktests        15913171     33370345     70089478   1.07   1.07  ok
+scanline_single_pass         census          254272       513417      1030497   1.01   1.01  
+scanline_single_pass         secs                 6           14           40   1.32   1.52  
+scanline_single_pass         %coupe          98.93%       99.45%       99.72%
+scanline_overlap_multiecho   temoins      101055157    333444048   1112715133   1.72   1.74  ROUGE
+scanline_overlap_multiecho   acceptes        698309      1624375      3662081   1.22   1.17  ok
+scanline_overlap_multiecho   surv           1240638      2688941      5790756   1.12   1.11  ok
+scanline_overlap_multiecho   kbox          47511758    112585766    258180803   1.24   1.20  ok
+scanline_overlap_multiecho   ktests        27635967     62371878    140253573   1.17   1.17  ok
+scanline_overlap_multiecho   census          302460       611119      1227940   1.01   1.01  
+scanline_overlap_multiecho   secs                 8           21          109   1.42   2.40  
+scanline_overlap_multiecho   %coupe          98.41%       99.14%       99.54%
+uniform                      INCOMPLET (aucun run 50 000 a code zero)

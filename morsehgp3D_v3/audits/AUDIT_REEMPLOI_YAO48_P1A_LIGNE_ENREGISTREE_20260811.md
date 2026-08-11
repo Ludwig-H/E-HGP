@@ -139,15 +139,17 @@ $$\mathrm{dist}^2(p,\mathrm{box})>3\max_{c\in S}D_c.$$
 Toute égalité descend. Le reçu engage `S`, la version et le digest de chaque
 banque; omettre une chambre possible doit mourir sur une fixture dédiée.
 
-Cette proposition ne justifie pas une table globale `n*48*10`. La banque
-ponctuelle v3 corrigée conserve onze candidats afin d'exclure la cible avant
-d'engager dix témoins; les documents d'architecture courants imposent donc
-`O(B*48*(K+1))` pour une tuile de `B` ancres et rendent l'orientation inverse
-facultative. Une banque de l'autre extrémité n'est essayée que si elle est déjà
-disponible dans la même tuile ou un cache borné et authentifié. Les 96 MB
-historiques supposent dix positions Morton `u32` par slot; onze candidats
-occupent 105,6 MB en `u32` ou 211,2 MB avec les `PointId u64` enregistrés, hors
-rayons, masques et offsets.
+Cette proposition ne justifie pas une table globale `n*48*10`. Une banque des
+dix plus proches certifiés reste à `K=10` : si la cible appartient au top-10,
+le onzième ne peut pas devenir un dixième témoin strict. Seul un réservoir
+arbitraire, notamment par antichaîne, conserve `K+1=11` afin d'exclure la cible
+avant d'engager dix témoins. Les documents d'architecture courants bornent
+donc la tuile de `B` ancres par `O(B*48*K)` ou `O(B*48*(K+1))` selon la
+politique et rendent l'orientation inverse facultative. Une banque de l'autre
+extrémité n'est essayée que si elle est déjà disponible dans la même tuile ou
+un cache borné et authentifié. Les 96 MB historiques supposent dix positions
+Morton `u32` par slot; onze candidats occupent 105,6 MB en `u32` ou 211,2 MB
+avec les `PointId u64` enregistrés, hors rayons, masques et offsets.
 
 ## 4. P1a : mathématique réutilisable et machine à remplacer
 

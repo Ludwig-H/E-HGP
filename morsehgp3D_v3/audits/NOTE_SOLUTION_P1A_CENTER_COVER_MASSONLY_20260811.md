@@ -24,8 +24,12 @@ complétude de P1 ou un SLO. Le statut logiciel et les octets effectivement
 testés appartiennent exclusivement à
 [AUDIT_ETAT_COURANT.md](AUDIT_ETAT_COURANT.md).
 
-Aucune implémentation v3 de ce contrat n'est reçue. Un prior art q4/binary64
-existe au commit `95dd8036a2fcb36c8a7b6aeb7c44197d9c9f7e03`, mais sa cible
+Cette note ne reçoit par elle-même aucune implémentation. Un premier probe v3
+a été livré après sa rédaction; son audit sépare le théorème sûr, la réception
+bornée et le NO-GO de son ordonnance dans
+[AUDIT_P1A_CENTER_COVER_B312638_20260811.md](AUDIT_P1A_CENTER_COVER_B312638_20260811.md).
+Un prior art q4/binary64 existe au commit
+`95dd8036a2fcb36c8a7b6aeb7c44197d9c9f7e03`, mais sa cible
 CUDA native n'a jamais été compilée ni exécutée et aucun reçu G4 ne lui est
 attaché. Il sert de comparateur d'architecture, selon
 [AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md](AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md), jamais d'autorité v3.

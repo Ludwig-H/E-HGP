@@ -89,18 +89,21 @@ axe donnent le même certificat pour toutes ses feuilles : le nœud est remplac�
 par un **reçu de masse**. Toute égalité descend ; l'échec du certificat ne
 classe rien (non-converse gravé en fixture).
 
-Si la cible appartient aux dix candidats conservés, `x^2>D` échoue
-automatiquement : il n'y a pas de fausse tombstone, mais il peut y avoir un
-faux négatif alors que dix autres témoins existent. Pour une cible ponctuelle,
-la banque chaude conserve donc `K+1=11` candidats distincts. Elle exclut `q`,
-choisit les dix premiers restants et recalcule `D` sur ces dix. Si une chambre
-contient `t<=10` points hors ancre, chaque cible y possède au plus neuf autres
-témoins et ce certificat précis est impossible; `t=0` ne porte aucune cible.
-La table factorisée des onze candidats est immuable. Le reçu engage un masque
-de onze bits dont exactement dix sont levés; `D` est recalculé depuis ces dix
-slots. Une enveloppe radiale engage un couple `(bank_index,mask)` distinct pour
-chaque chambre référencée. La sélection ne peut pas être stockée comme état
-mutable de la banque, car deux cibles peuvent exclure des slots différents.
+Si la cible appartient aux dix candidats certifiés comme les plus proches,
+`x^2>D` échoue automatiquement, et cet échec n'est pas un faux négatif
+évitable par le onzième. En effet, `A(p;q,w)>0` implique
+`||w-p||<||q-p||`; une cible du top-10 possède moins de dix témoins stricts
+possibles dans la chambre. Le mode top-nearest exact conserve donc `K=10`.
+
+Pour un réservoir arbitraire, notamment une banque issue d'antichaînes, la
+cible peut occuper un des dix slots alors que dix autres témoins utiles
+existent. Ce mode conserve `K+1=11` candidats, exclut `q` et recalcule `D` sur
+les dix engagés. Si une chambre contient `t<=10` points hors ancre, chaque
+cible y possède au plus neuf autres témoins et ce certificat précis est
+impossible; `t=0` ne porte aucune cible. La table factorisée des onze candidats
+est immuable. Le reçu engage un masque de onze bits dont exactement dix sont
+levés; une enveloppe radiale engage un couple `(bank_index,mask)` distinct pour
+chaque chambre. La sélection ne peut pas être un état mutable de la banque.
 Pour une boîte de cibles, préférer une antichaîne témoin disjointe de la boîte
 à une banque de taille `K+|Q|`.
 
@@ -204,6 +207,14 @@ positifs suivent les enfants par référence; aucun rescan de la racine témoin 
 aucune matrice `Q times W` ne sont admis. Les feuilles cibles restées sous dix
 retombent au classifieur/census exact.
 
+Le split de cible doit réintroduire le sibling comme domaine témoin. Si
+`Q=Q_L union Q_R`, les points de `Q_R` étaient exclus des témoins du parent mais
+deviennent admissibles pour `Q_L`, et réciproquement. Chaque enfant hérite donc
+les crédits et la frontière ambiguë du parent, puis ajoute son sibling à cette
+frontière. Les nœuds dont un majorant exact donne `A<=0` restent éliminés; les
+nœuds ambigus persistent ou se raffinent. Une arène immuable avec partage
+structurel évite les copies sans perdre ces nouveaux témoins.
+
 ### Certificat aux deux extrémités
 
 L'ownership Morton ne contraint pas le côté du certificat. L'unique owner d'une
@@ -218,9 +229,10 @@ optimisation facultative, jamais une condition de complétude.
 Cette symétrisation est exacte même si l'autre extrémité appartient à la
 banque : alors `D` majore `||u-v||^2`, tandis que la première coupe exige
 `x^2>D` avec `x^2<=||u-v||^2`; le certificat échoue donc automatiquement. La
-banque ponctuelle chaude conserve l'enveloppe `O(B*48*(K+1))` pour `B` ancres
-actives et interdit une table globale `n*48*(K+1)`. À titre de diagnostic
-seulement, une telle table de onze candidats à 50 k occuperait 105 600 000
+banque ponctuelle chaude conserve l'enveloppe `O(B*48*K)` pour le top-nearest
+ou `O(B*48*(K+1))` pour un réservoir arbitraire de `B` ancres actives; toute
+table globale correspondante est interdite. À titre de diagnostic seulement,
+une table de onze candidats à 50 k occuperait 105 600 000
 octets si les identifiants sont des positions Morton `u32` avec mapping
 authentifié, mais 211 200 000 octets avec les `PointId u64` de la ligne
 enregistrée, hors `D_c`, masques et offsets. Une porte optionnelle compare les
@@ -265,8 +277,8 @@ recopient pas leurs onze identifiants. Chaque reçu référence en plus son masq
 d'engagement propre; le juge en recalcule les dix `PointId`, `D`, l'exclusion de
 la plage cible et les inégalités strictes.
 
-Aucun tableau global de paires ni de banques ponctuelles `n*48*(K+1)` n'est
-matérialisé : les
+Aucun tableau global de paires ni de banques ponctuelles `n*48*K` ou
+`n*48*(K+1)` n'est matérialisé : les
 survivantes du mode mesure sont comptées et hashées, pas stockées; le mode
 oracle borné (`n<=256`) tient les sorts par paire pour le juge.
 

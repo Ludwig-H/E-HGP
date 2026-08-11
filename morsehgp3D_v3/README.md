@@ -124,9 +124,10 @@ La rampe CPU Yao48/LBVH du snapshot `2e49dcf`, pincée à
 `12 500/25 000/50 000`, ferme douze ledgers, mais classe l'ordonnance
 état--nœud mesurée `NO-GO` avant G4 : `terrain` et les deux
 familles scanline ont deux pentes chargées successives supérieures à `1,35`.
-`uniform` seul passe. Les temps étaient contaminés et ne sont pas un
-benchmark; le verdict porte sur les compteurs. L'audit et les pistes exactes
-de banque à onze et de certificat dual sont dans
+`uniform` seul n'a aucun compteur de travail publié rouge; la télémétrie
+incomplète interdit d'en déduire un `GO`. Les temps étaient contaminés et ne
+sont pas un benchmark; le verdict porte sur les compteurs. L'audit, la distinction
+top-`K`/réservoir arbitraire `K+1` et le certificat dual exact sont dans
 [`AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md`](audits/AUDIT_RECU_YAO48_ECHELLE_2E49DCF_20260811.md)
 et
 [`AUDIT_REPONSES_G4_Q2_YAO1_20260811.md`](audits/AUDIT_REPONSES_G4_Q2_YAO1_20260811.md).
@@ -175,6 +176,15 @@ l'extrapolation la plus favorable reste en milliards à 50 k. Ce diagnostic ne
 remplace pas la porte contractuelle aux tailles `12 500/25 000/50 000`; les
 valeurs, hashes et limites exactes restent uniquement dans l'audit live.
 
+Le premier probe P1a q4 mass-only du snapshot `b312638` valide son certificat
+sur les campagnes bornées, mais il redémarre lui aussi la recherche témoin à la
+racine pour chaque bloc. Entre 2 000 et 4 000 points `terrain`, les tests
+point--patch et les évaluations de coins ont des pentes proches de deux. Le port
+littéral est donc `NO-GO` avant G4; une nouvelle ordonnance persistante et les
+bornes dirigées `L/U` doivent repasser une gate CPU. Le théorème, les trous de
+juge et les compteurs pincés sont dans
+[`AUDIT_P1A_CENTER_COVER_B312638_20260811.md`](audits/AUDIT_P1A_CENTER_COVER_B312638_20260811.md).
+
 ## Invariants industriels
 
 - Aucun tableau global de paires, tuples, cellules, faces, cofaces ou
@@ -209,9 +219,10 @@ préfixe comme objet complet.
    niveau avant les lots atomiques.
 3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
-   fermé. Pour une cible ponctuelle, conserver `K+1=11` candidats par chambre,
-   exclure la cible et engager dix témoins. Pour une boîte, propager un masque
-   de chambres, employer la coupe cône--boîte entière, puis le certificat
+   fermé. Garder `K=10` pour une banque certifiée des plus proches; réserver
+   `K+1=11` aux réservoirs arbitraires/antichaînes qui doivent exclure la cible
+   avant d'engager dix témoins. Pour une boîte, propager un masque de chambres,
+   employer la coupe cône--boîte entière, puis le certificat
    collectif dual-tree `L_p(Q,W)>0` sur une antichaîne témoin disjointe de masse
    dix. La frontière témoin persiste sous raffinement, sans rescan racine ni
    matrice cible--témoin. Le certificat à l'autre extrémité reste une

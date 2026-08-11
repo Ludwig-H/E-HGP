@@ -1,0 +1,111 @@
+### family=terrain n=12500
+provenance : --points 12500 --coord 559 --seed 20260810 --family terrain --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=79d2da96958d3562
+arbre      : 5023 noeuds, feuilles <= 8, 471472 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=263297 (masse 77122312 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=1131062 temoins=122022307 acceptes=704473 herites=5355717 prunes=263297 (masse 77122312)
+classifieur: survivantes=996438 visites-lot=1461541 boites=38024354 tests=20422839 liste=0 (paires=0) tombstones=743309 census=253129
+census     : fermes=1658814 stricts=1116419 contacts=36137 — pile max=18
+ledger     : 77122312 + 0 + 996438 = 78118750 = C(n,2) — FERME (8.957 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=terrain n=25000
+provenance : --points 25000 --coord 790 --seed 20260810 --family terrain --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=361b9b272d361798
+arbre      : 10001 noeuds, feuilles <= 8, 940064 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=553521 (masse 310422644 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=2340388 temoins=344733574 acceptes=1454810 herites=11916590 prunes=553521 (masse 310422644)
+classifieur: survivantes=2064856 visites-lot=3560402 boites=81479467 tests=42587606 liste=0 (paires=0) tombstones=1553181 census=511675
+census     : fermes=3359523 stricts=2261548 contacts=74625 — pile max=18
+ledger     : 310422644 + 0 + 2064856 = 312487500 = C(n,2) — FERME (23.555 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=terrain n=50000
+provenance : --points 50000 --coord 1118 --seed 20260810 --family terrain --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=a8b33841f61d7ef8
+arbre      : 19881 noeuds, feuilles <= 8, 1872384 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=1215578 (masse 1245751807 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=5081674 temoins=1312614530 acceptes=3249741 herites=29427850 prunes=1215578 (masse 1245751807)
+classifieur: survivantes=4223193 visites-lot=7944627 boites=182535891 tests=88144082 liste=0 (paires=0) tombstones=3194298 census=1028895
+census     : fermes=6760119 stricts=4556464 contacts=145865 — pile max=22
+ledger     : 1245751807 + 0 + 4223193 = 1249975000 = C(n,2) — FERME (88.920 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=scanline_single_pass n=12500
+provenance : --points 12500 --coord 707 --seed 20260810 --family scanline_single_pass --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=d4f140636ed3b994
+arbre      : 4355 noeuds, feuilles <= 8, 428720 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=198443 (masse 77278996 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=846562 temoins=66988581 acceptes=440660 herites=2942814 prunes=198443 (masse 77278996)
+classifieur: survivantes=839754 visites-lot=960394 boites=26225490 tests=15913171 liste=0 (paires=0) tombstones=585482 census=254272
+census     : fermes=1705979 stricts=1078762 contacts=118673 — pile max=17
+ledger     : 77278996 + 0 + 839754 = 78118750 = C(n,2) — FERME (5.544 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=scanline_single_pass n=25000
+provenance : --points 25000 --coord 1000 --seed 20260810 --family scanline_single_pass --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=76ba2f5b3f72a0a3
+arbre      : 8717 noeuds, feuilles <= 8, 857888 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=435103 (masse 310760939 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=1808726 temoins=205682770 acceptes=966831 herites=7357345 prunes=435103 (masse 310760939)
+classifieur: survivantes=1726561 visites-lot=2038684 boites=58570797 tests=33370345 liste=0 (paires=0) tombstones=1213144 census=513417
+census     : fermes=3453328 stricts=2185248 contacts=241246 — pile max=18
+ledger     : 310760939 + 0 + 1726561 = 312487500 = C(n,2) — FERME (13.821 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=scanline_single_pass n=50000
+provenance : --points 50000 --coord 1414 --seed 20260810 --family scanline_single_pass --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=d279925835f1f88a
+arbre      : 17471 noeuds, feuilles <= 8, 1718144 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=923311 (masse 1246444572 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=3805278 temoins=656009769 acceptes=2044235 herites=17111388 prunes=923311 (masse 1246444572)
+classifieur: survivantes=3530428 visites-lot=4275175 boites=128606761 tests=70089478 liste=0 (paires=0) tombstones=2499931 census=1030497
+census     : fermes=6933007 stricts=4385168 contacts=486845 — pile max=20
+ledger     : 1246444572 + 0 + 3530428 = 1249975000 = C(n,2) — FERME (39.645 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=scanline_overlap_multiecho n=12500
+provenance : --points 12500 --coord 707 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=a4318c372825a36d
+arbre      : 4617 noeuds, feuilles <= 8, 445488 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=258569 (masse 76878112 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=1176886 temoins=101055157 acceptes=698309 herites=4179079 prunes=258569 (masse 76878112)
+classifieur: survivantes=1240638 visites-lot=1926750 boites=47511758 tests=27635967 liste=0 (paires=0) tombstones=938178 census=302460
+census     : fermes=2099666 stricts=1309502 contacts=185244 — pile max=18
+ledger     : 76878112 + 0 + 1240638 = 78118750 = C(n,2) — FERME (7.668 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=scanline_overlap_multiecho n=25000
+provenance : --points 25000 --coord 1000 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=5f705a3ae3c4141f
+arbre      : 9139 noeuds, feuilles <= 8, 884896 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=618342 (masse 309798559 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=2652796 temoins=333444048 acceptes=1624375 herites=10701343 prunes=618342 (masse 309798559)
+classifieur: survivantes=2688941 visites-lot=4165323 boites=112585766 tests=62371878 liste=0 (paires=0) tombstones=2077822 census=611119
+census     : fermes=4227888 stricts=2652297 contacts=353353 — pile max=19
+ledger     : 309798559 + 0 + 2688941 = 312487500 = C(n,2) — FERME (20.588 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=scanline_overlap_multiecho n=50000
+provenance : --points 50000 --coord 1414 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=8e690512b23d0c80
+arbre      : 18033 noeuds, feuilles <= 8, 1754112 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=1401308 (masse 1244184244 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=5867736 temoins=1112715133 acceptes=3662081 herites=26596314 prunes=1401308 (masse 1244184244)
+classifieur: survivantes=5790756 visites-lot=9263857 boites=258180803 tests=140253573 liste=0 (paires=0) tombstones=4562816 census=1227940
+census     : fermes=8488760 stricts=5339962 contacts=692918 — pile max=20
+ledger     : 1244184244 + 0 + 5790756 = 1249975000 = C(n,2) — FERME (108.783 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=uniform n=12500
+provenance : --points 12500 --coord 232 --seed 20260810 --family uniform --leaf-size 8 --bank-pops 512 --chamber-visits 100000 --bank-mode exact --max-work 300000000000 digest=832632ff47a75681
+arbre      : 4497 noeuds, feuilles <= 8, 437808 octets (cles Morton comprises)
+banques    : pops=0 visites=0 cone-visites=0 pleines=0 sous-pleines=0 (budget 512 par ancre, tas max=0)
+coupe      : visites=0 reçus-region=653909 (masse 74086518 dont radiale 0 en 0 reçus) tombstones-point=0
+duale      : cibles=2868530 temoins=469480718 acceptes=1453594 herites=8722708 prunes=653909 (masse 74086518)
+classifieur: survivantes=4032232 visites-lot=3665345 boites=183888968 tests=139873100 liste=0 (paires=0) tombstones=3582292 census=449940
+census     : fermes=2922519 stricts=1985605 contacts=37034 — pile max=13
+ledger     : 74086518 + 0 + 4032232 = 78118750 = C(n,2) — FERME (64.864 s de phase locale, 1 thread, pas un warm_e2e)
+OK : source q2 Yao48/LBVH count-only — le ledger est la sortie, aucune admission n'est prononcee
+rc=0
+### family=uniform n=25000

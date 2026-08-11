@@ -197,9 +197,10 @@ mesures sont inventoriés dans
 
 La cible v3 conserve les étapes suivantes :
 
-1. des tuiles d'ancres remplissent 48 banques directionnelles de `K+1=11`
-   candidats distincts sur le LBVH Morton résident; une cible ponctuelle est
-   exclue avant d'engager les dix témoins du reçu;
+1. des tuiles d'ancres remplissent 48 banques directionnelles sur le LBVH
+   Morton résident : `K=10` pour les dix plus proches certifiés, ou
+   `K+1=11` pour un réservoir arbitraire dont une cible ponctuelle doit être
+   exclue avant d'engager dix témoins;
 2. les trois inégalités entières de Yao48, toutes strictes pour la lane H0,
    certifient dix témoins strictement intérieurs; une coupe cône--boîte exacte
    traite collectivement un masque de chambres, toute sous-plénitude ou égalité
@@ -223,14 +224,20 @@ reste sous-pleine ne coupe rien. Les survivantes sont classifiées par lots avec
 une frontière partagée; relancer la racine pour chaque paire n'est pas une
 architecture admise.
 
-Pour une cible ponctuelle, la banque conserve `K+1=11` candidats distincts :
-si la cible appartient aux onze, elle est exclue, puis `D` est recalculé sur
-les dix témoins engagés. Dix candidats seulement peuvent contenir la cible et
-créer un faux négatif évitable. La table factorisée de onze candidats reste
-immuable. Chaque reçu Yao porte son masque de dix slots engagés; chaque entrée
-d'un reçu radial porte de même `(bank_index,engagement_mask)`. Le juge exige dix
-bits, recalcule `D`, l'identité des témoins et les inégalités strictes. Un état
-`engaged` mutable partagé par plusieurs cibles est interdit.
+Une banque certifiée des `K=10` plus proches de l'ancre dans la chambre n'a pas
+besoin d'un onzième candidat. Si la cible `q` appartient à ce top-10, tout
+témoin strict `w` vérifie `||w-p||<||q-p||`; il ne peut donc pas en exister dix
+dans cette chambre. Remplacer `q` par le onzième, encore plus loin, ne sauve
+aucun prune. Passer ce mode exact à onze ne fait qu'augmenter le remplissage.
+
+Un réservoir arbitraire, notamment issu d'une antichaîne, peut en revanche
+contenir `q` sans contenir les dix autres témoins disponibles. Il conserve
+alors `K+1=11` candidats, exclut la cible et recalcule `D` sur les dix engagés.
+La table factorisée de onze candidats reste immuable. Chaque reçu Yao porte son
+masque de dix slots; chaque entrée d'un reçu radial porte de même
+`(bank_index,engagement_mask)`. Le juge exige dix bits, recalcule `D`, l'identité
+des témoins et les inégalités strictes. Un état `engaged` mutable partagé par
+plusieurs cibles est interdit.
 
 Pour une boîte de cibles `Q`, une antichaîne de nœuds témoins `W` peut remplacer
 la chambre. La fonction à minorer est :
@@ -249,6 +256,13 @@ intérieurs pour toute cible de `Q`. Toute égalité descend. Cette voie dual-tr
 utilise toutes les directions et ne doit pas être appelée P1a, qui reste un
 falsificateur q4-only.
 
+Au split `Q=Q_L union Q_R`, chaque enfant hérite crédits et frontière ambiguë,
+mais ajoute aussi son sibling comme nouveau domaine témoin : ces points étaient
+exclus chez le parent et deviennent admissibles chez l'enfant. Une frontière
+qui n'ajoute pas le sibling est incomplète; une machine qui repart de la racine
+reste exacte mais retrouve le coût proscrit. Les états témoins sont donc
+immuables et partagés structurellement.
+
 Si une boîte cible peut rencontrer un ensemble conservateur de chambres `S`,
 elle est encore prunable lorsque toutes les banques de `S` sont pleines et que
 `dist^2(p,box)>3*max_{c in S} D_c`. En effet, l'échec d'au moins une des trois
@@ -264,7 +278,8 @@ correspondant. Le cône fermé est un sur-ensemble conservateur des frontières
 semi-ouvertes, et toute égalité descend.
 
 Les banques ponctuelles de la tuile active restent résidentes dans l'enveloppe
-`O(B*48*(K+1))`; aucune table globale `n*48*(K+1)` n'est admise. L'owner Morton d'une
+`O(B*48*K)` pour le top-nearest ou `O(B*48*(K+1))` pour un réservoir
+arbitraire; aucune table globale correspondante n'est admise. L'owner Morton d'une
 paire l'émet toujours une seule fois. Il peut présenter un certificat Yao
 centré sur l'autre extrémité seulement si la banque correspondante est déjà
 disponible dans la même tuile ou dans un cache borné et authentifié. Cette
@@ -736,7 +751,8 @@ un refus de ressource sont trois statuts distincts.
    arêtes finales par niveau.
 3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
-   fermé. Fermer q2 par banque ponctuelle `K+1`, coupe cône--boîte exacte et
+   fermé. Fermer q2 par top-`K` exact ou réservoir arbitraire `K+1`, coupe
+   cône--boîte exacte et
    certificat dual-tree `L_p(Q,W)>0`; réserver la classification terminale et
    le census fermé multi-ordre au résiduel. Conserver le self-join comme oracle
    ou second prune selon les masses, puis repasser la gate CPU avant CUDA.

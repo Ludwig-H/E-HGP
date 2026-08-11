@@ -63,11 +63,11 @@ Une future politique non exhaustive doit publier séparément
 `policy_exhausted`; elle ne doit jamais être confondue avec `t<10`. L'identité
 `sum(target_mass)=C(n,2)` ferme la ventilation.
 
-### Correctif ponctuel exact : conserver onze témoins
+### Réservoir arbitraire : conserver onze témoins
 
-Une banque fixe de dix témoins peut contenir la cible elle-même. Le cutoff
-strict échoue alors nécessairement, même si dix autres témoins de la chambre
-existent. Il n'est pas nécessaire de reconstruire une banque par cible :
+Une banque arbitraire de dix témoins peut contenir la cible elle-même alors que
+dix autres témoins utiles existent. Il n'est pas nécessaire de reconstruire
+un tel réservoir par cible :
 
 - conserver onze `PointId` distincts par `(p,c)`;
 - si `q` appartient aux onze, l'exclure et prendre les dix autres;
@@ -83,11 +83,14 @@ masque, vérifie exactement dix slots distincts et exclut ancre et plage cible.
 
 Pour une chambre de cardinalité `t` hors ancre, `t=0` ne porte aucune cible;
 si `1<=t<=10`, chaque cible possède au plus neuf autres témoins de cette
-chambre et le certificat Yao q2 y est impossible; si `t>=11`, une banque de
-onze suffit pour toute cible ponctuelle. Prendre les onze plus proches rend les
-dix restants minimaux après exclusion éventuelle de la cible; cela ne promet
-pas un `D` inférieur à celui de l'ancien ensemble chevauchant. Seules la
-distinctivité et la borne certifiée sont nécessaires à l'exactitude.
+chambre et le certificat Yao q2 y est impossible; si `t>=11`, un réservoir
+arbitraire de onze suffit pour exclure toute cible ponctuelle.
+
+Cette extension est inutile pour une banque certifiée des dix plus proches.
+En effet, `A(p;q,w)>0` implique par Cauchy `||w-p||<||q-p||`. Si `q` appartient
+au top-10, il existe donc moins de dix témoins stricts possibles dans la
+chambre; le onzième, plus éloigné, ne peut pas sauver la coupe. Le mode exact
+top-nearest doit rester à dix, sauf mesure démontrant un autre usage des onze.
 
 Ce changement ferme une source précise de faux négatifs. Il ne résout pas les
 boîtes de plusieurs cibles : `K+|Q|` serait coûteux. Pour une boîte cible `Q`,
@@ -127,8 +130,9 @@ Yao-1 exact, réduire le graphe sparse et montrer une baisse des compteurs.
 ## Décision immédiate
 
 1. Ne pas lancer de G4 pour chronométrer l'ordonnance Borůvka/q2 actuelle.
-2. Ajouter au prototype suivant la banque q2 de onze avec exclusion de cible,
-   puis les compteurs causaux par masse cible.
+2. Garder dix entrées pour le top-nearest exact; employer onze avec exclusion
+   de cible seulement pour un réservoir arbitraire, puis publier les compteurs
+   causaux par masse cible.
 3. Prototyper le certificat dual `Q--W` et refuser toute égalité.
 4. Construire séparément le transcript Yao-1 lorsque la lane `k=1` entre dans
    un pipeline candidat.
